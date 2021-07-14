@@ -23,6 +23,7 @@
 #include <aspect/global.h>
 #include <aspect/mesh_deformation/free_surface.h>
 #include <aspect/volume_of_fluid/handler.h>
+#include <aspect/elasticity.h>
 #include <aspect/newton.h>
 #include <aspect/melt.h>
 
@@ -381,6 +382,10 @@ namespace aspect
         current_linearization_point.block(fluid_pressure_block) = solution.block(fluid_pressure_block);
       }
 
+    // Update deviatoric stress field if elasticity is enabled.
+    if (parameters.enable_elasticity)
+      elasticity_handler->assemble_and_solve_deviatoric_stress();
+
     if ((initial_nonlinear_residual != nullptr) && (*initial_nonlinear_residual > 0))
       return current_nonlinear_residual / *initial_nonlinear_residual;
     else
@@ -714,6 +719,10 @@ namespace aspect
 
     if (nonlinear_iteration != 0)
       last_pressure_normalization_adjustment = normalize_pressure(current_linearization_point);
+
+    // Update deviatoric stress field if elasticity is enabled.
+    if (parameters.enable_elasticity)
+      elasticity_handler->assemble_and_solve_deviatoric_stress();
   }
 
 

@@ -98,6 +98,9 @@ namespace aspect
   template <int dim>
   class VolumeOfFluidHandler;
 
+  template <int dim>
+  class ElasticityHandler;
+
   namespace internal
   {
     namespace Assembly
@@ -1825,6 +1828,13 @@ namespace aspect
        */
       std::unique_ptr<VolumeOfFluidHandler<dim> > volume_of_fluid_handler;
 
+      /**
+       * Unique pointer for an instance of the ElasticityHandler. This way,
+       * if we do not need the machinery for doing elasticity stuff, we do
+       * not even allocate it.
+       */
+      std::unique_ptr<ElasticityHandler<dim> > elasticity_handler;
+
       Introspection<dim>                  introspection;
 
 
@@ -2104,6 +2114,7 @@ namespace aspect
       template <int dimension, int velocity_degree>
       friend class StokesMatrixFreeHandlerImplementation;
       friend struct Parameters<dim>;
+      friend class ElasticityHandler<dim>;
   };
 }
 

@@ -31,7 +31,6 @@
 #include <aspect/material_model/rheology/peierls_creep.h>
 #include <aspect/material_model/rheology/constant_viscosity_prefactors.h>
 #include <aspect/material_model/rheology/drucker_prager.h>
-#include <aspect/material_model/rheology/elasticity.h>
 #include <aspect/simulator_access.h>
 
 #include<deal.II/fe/component_mask.h>
@@ -158,6 +157,12 @@ namespace aspect
                               std::shared_ptr<std::vector<unsigned int>>());
 
           /**
+           * Create the additional material model inputs object for elastic behavior.
+           */
+          void
+          create_elastic_inputs (MaterialModel::MaterialModelInputs<dim> &in) const;
+
+          /**
            * Create the additional material model outputs object that contains the
            * plastic outputs.
            */
@@ -194,17 +199,6 @@ namespace aspect
            * Object for computing the strain dependence of the rheology model.
            */
           Rheology::StrainDependent<dim> strain_rheology;
-
-          /**
-           * Object for computing viscoelastic viscosities and stresses.
-           */
-          Rheology::Elasticity<dim> elastic_rheology;
-
-          /**
-           * Whether to include viscoelasticity in the constitutive formulation.
-           */
-          bool use_elasticity;
-
 
         private:
 

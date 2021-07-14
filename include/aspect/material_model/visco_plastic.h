@@ -207,6 +207,9 @@ namespace aspect
         parse_parameters (ParameterHandler &prm) override;
 
         void
+        create_additional_inputs (MaterialModel::MaterialModelInputs<dim> &in) const override;
+
+        void
         create_additional_named_outputs (MaterialModel::MaterialModelOutputs<dim> &out) const override;
 
         double get_min_strain_rate() const;

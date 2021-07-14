@@ -757,6 +757,15 @@ namespace aspect
                                                          neighbor,
                                                          true,
                                                          scratch.neighbor_face_material_model_inputs);
+
+              this->get_material_model().create_additional_inputs (scratch.neighbor_face_material_model_inputs);
+              this->get_material_model().fill_additional_material_model_inputs (scratch.neighbor_face_material_model_inputs,
+                                                                                this->get_current_linearization_point(),
+                                                                                this->get_old_solution(),
+                                                                                this->get_old_old_solution(),
+                                                                                *scratch.neighbor_face_finite_element_values,
+                                                                                this->introspection());
+
               this->get_material_model().evaluate(scratch.neighbor_face_material_model_inputs,
                                                   scratch.neighbor_face_material_model_outputs);
 
@@ -1089,6 +1098,15 @@ namespace aspect
                                                          cell,
                                                          true,
                                                          scratch.face_material_model_inputs);
+
+              this->get_material_model().create_additional_inputs (scratch.face_material_model_inputs);
+              this->get_material_model().fill_additional_material_model_inputs (scratch.face_material_model_inputs,
+                                                                                this->get_current_linearization_point(),
+                                                                                this->get_old_solution(),
+                                                                                this->get_old_old_solution(),
+                                                                                *scratch.subface_finite_element_values,
+                                                                                this->introspection());
+
               this->get_material_model().evaluate(scratch.face_material_model_inputs,
                                                   scratch.face_material_model_outputs);
 
@@ -1113,6 +1131,15 @@ namespace aspect
                                                          neighbor_child,
                                                          true,
                                                          scratch.neighbor_face_material_model_inputs);
+
+              this->get_material_model().create_additional_inputs (scratch.neighbor_face_material_model_inputs);
+              this->get_material_model().fill_additional_material_model_inputs (scratch.neighbor_face_material_model_inputs,
+                                                                                this->get_current_linearization_point(),
+                                                                                this->get_old_solution(),
+                                                                                this->get_old_old_solution(),
+                                                                                *scratch.neighbor_face_finite_element_values,
+                                                                                this->introspection());
+
               this->get_material_model().evaluate(scratch.neighbor_face_material_model_inputs,
                                                   scratch.neighbor_face_material_model_outputs);
 

@@ -96,6 +96,18 @@ namespace aspect
             for (unsigned int c=0; c<this->n_compositional_fields(); ++c)
               solution_names.push_back (this->introspection().name_for_compositional_index(c));
 
+            if (this->get_parameters().enable_elasticity)
+            {
+              for (unsigned int c = 0; c < SymmetricTensor<2,dim>::n_independent_components; ++c)
+              {
+                const TableIndices<2> indices = SymmetricTensor<2,dim>::unrolled_to_component_indices(c);
+                std::string name = "tau_";
+                name.push_back(static_cast<char>('x' + indices[0]));
+                name.push_back(static_cast<char>('x' + indices[1]));
+                solution_names.emplace_back(name);
+              }
+            }
+
             return solution_names;
           }
 
@@ -117,6 +129,12 @@ namespace aspect
             interpretation.push_back (DataComponentInterpretation::component_is_scalar); // T
             for (unsigned int c=0; c<this->n_compositional_fields(); ++c)
               interpretation.push_back (DataComponentInterpretation::component_is_scalar);
+
+            if (this->get_parameters().enable_elasticity)
+            {
+              for (unsigned int c = 0; c < SymmetricTensor<2,dim>::n_independent_components; ++c)
+                interpretation.push_back (DataComponentInterpretation::component_is_scalar);
+            }
 
             return interpretation;
           }

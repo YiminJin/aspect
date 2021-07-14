@@ -764,6 +764,8 @@ namespace aspect
          */
         virtual void
         fill (const LinearAlgebra::BlockVector &solution,
+              const LinearAlgebra::BlockVector &old_solution,
+              const LinearAlgebra::BlockVector &old_old_solution,
               const FEValuesBase<dim>          &fe_values,
               const Introspection<dim>         &introspection) = 0;
     };
@@ -1116,41 +1118,6 @@ namespace aspect
 
 
     /**
-     * A class for an elastic force term to be added to the RHS of the
-     * Stokes system, which can be attached to the
-     * MaterialModel::MaterialModelOutputs structure and filled in the
-     * MaterialModel::Interface::evaluate() function.
-     */
-    template <int dim>
-    class ElasticOutputs: public AdditionalMaterialOutputs<dim>
-    {
-      public:
-        ElasticOutputs(const unsigned int n_points)
-          : elastic_force(n_points, numbers::signaling_nan<Tensor<2,dim> >() )
-        {}
-
-        ~ElasticOutputs() override
-        {}
-
-        void average (const MaterialAveraging::AveragingOperation operation,
-                      const FullMatrix<double>  &/*projection_matrix*/,
-                      const FullMatrix<double>  &/*expansion_matrix*/) override
-        {
-          AssertThrow(operation == MaterialAveraging::AveragingOperation::none,ExcNotImplemented());
-          return;
-        }
-
-        /**
-         * Force tensor (elastic terms) on the right-hand side for the conservation of
-         * momentum equation (first part of the Stokes equation) in each
-         * quadrature point.
-         */
-        std::vector<Tensor<2,dim> > elastic_force;
-    };
-
-
-
-    /**
      * A base class for parameterizations of material models. Classes derived
      * from this class will need to implement functions that provide material
      * parameters such as the viscosity, density, etc, typically as a function
@@ -1296,6 +1263,15 @@ namespace aspect
          */
 
         /**
+         * If this material model needs additional inputs that are derived
+         * frm AdditionalMaterialInputs, create them in here. By default,
+         * this does nothing.
+         */
+        virtual
+        void
+        create_additional_inputs (MaterialModelInputs &inputs) const;
+
+        /**
          * If this material model can produce additional named outputs
          * that are derived from NamedAdditionalOutputs, create them in here.
          * By default, this does nothing.
@@ -1316,6 +1292,8 @@ namespace aspect
         void
         fill_additional_material_model_inputs(MaterialModel::MaterialModelInputs<dim> &input,
                                               const LinearAlgebra::BlockVector        &solution,
+                                              const LinearAlgebra::BlockVector        &old_solution,
+                                              const LinearAlgebra::BlockVector        &old_old_solution,
                                               const FEValuesBase<dim>                 &fe_values,
                                               const Introspection<dim>                &introspection) const;
 

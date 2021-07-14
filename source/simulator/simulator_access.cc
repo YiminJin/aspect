@@ -611,6 +611,15 @@ namespace aspect
   }
 
   template <int dim>
+  const ElasticityHandler<dim> &
+  SimulatorAccess<dim>::get_elasticity_handler () const
+  {
+    Assert (simulator->elasticity_handler.get() != nullptr,
+            ExcMessage("You can not call this function if elasticity is not enabled."));
+    return *(simulator->elasticity_handler);
+  }
+
+  template <int dim>
   const NewtonHandler<dim> &
   SimulatorAccess<dim>::get_newton_handler () const
   {

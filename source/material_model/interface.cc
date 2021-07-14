@@ -184,6 +184,16 @@ namespace aspect
     template <int dim>
     void
     Interface<dim>::
+    create_additional_inputs (MaterialModelInputs &/*inputs*/) const
+    {
+      // by default we do nothing!
+    }
+
+
+
+    template <int dim>
+    void
+    Interface<dim>::
     create_additional_named_outputs (MaterialModelOutputs &/*outputs*/) const
     {
       // by default we do nothing!
@@ -196,12 +206,14 @@ namespace aspect
     Interface<dim>::
     fill_additional_material_model_inputs(MaterialModel::MaterialModelInputs<dim> &input,
                                           const LinearAlgebra::BlockVector        &solution,
+                                          const LinearAlgebra::BlockVector        &old_solution,
+                                          const LinearAlgebra::BlockVector        &old_old_solution,
                                           const FEValuesBase<dim>                 &fe_values,
                                           const Introspection<dim>                &introspection) const
     {
       // go through the list of additional inputs and fill them
       for (unsigned int i=0; i<input.additional_inputs.size(); ++i)
-        input.additional_inputs[i]->fill(solution, fe_values, introspection);
+        input.additional_inputs[i]->fill(solution, old_solution, old_old_solution, fe_values, introspection);
     }
 
 

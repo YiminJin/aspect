@@ -127,6 +127,7 @@ namespace aspect
 
   template <int dim> class MeltHandler;
   template <int dim> class VolumeOfFluidHandler;
+  template <int dim> class ElasticityHandler;
 
   namespace MeshDeformation
   {
@@ -736,6 +737,9 @@ namespace aspect
        */
       const VolumeOfFluidHandler<dim> &
       get_volume_of_fluid_handler () const;
+
+      const ElasticityHandler<dim> &
+      get_elasticity_handler () const;
 
       /**
        * Return a reference to the Newton handler that controls the Newton

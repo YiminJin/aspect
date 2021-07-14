@@ -36,15 +36,12 @@ namespace aspect
     {
       EquationOfStateOutputs<dim> eos_outputs (this->n_compositional_fields()+1);
 
-      // Store which components to exclude during volume fraction computation.
       ComponentMask composition_mask(this->n_compositional_fields(), true);
-      // assign compositional fields associated with viscoelastic stress a value of 0
-      // assume these fields are listed first
-      for (unsigned int i=0; i < SymmetricTensor<2,dim>::n_independent_components; ++i)
-        composition_mask.set(i,false);
 
       std::vector<double> average_elastic_shear_moduli (in.n_evaluation_points());
-      std::vector<double> elastic_shear_moduli(elastic_rheology.get_elastic_shear_moduli());
+      const double dte = (this->get_timestep_number() == 0
+                          ? this->get_elasticity_handler().get_initial_time_step()
+                          : this->get_timestep());
 
       for (unsigned int i=0; i < in.n_evaluation_points(); ++i)
         {
@@ -73,23 +70,20 @@ namespace aspect
 
           // Average viscosity and shear modulus
           const double average_viscosity = MaterialUtilities::average_value(volume_fractions, viscosities, viscosity_averaging);
-          average_elastic_shear_moduli[i] = MaterialUtilities::average_value(volume_fractions, elastic_shear_moduli, viscosity_averaging);
+          average_elastic_shear_moduli[i] = MaterialUtilities::average_value(volume_fractions, 
+                                                                             this->get_elasticity_handler().get_elastic_shear_moduli(), 
+                                                                             viscosity_averaging);
 
-          // Average viscoelastic (e.g., effective) viscosity (equation 28 in Moresi et al., 2003, J. Comp. Phys.)
-          out.viscosities[i] = elastic_rheology.calculate_viscoelastic_viscosity(average_viscosity,
-                                                                                 average_elastic_shear_moduli[i]);
+          // Calculate effective viscosity
+          const double mu_dte = average_elastic_shear_moduli[i] * dte;
+          out.viscosities[i] = mu_dte * average_viscosity / (mu_dte + average_viscosity);
 
           // Fill the material properties that are part of the elastic additional outputs
-          if (ElasticAdditionalOutputs<dim> *elastic_out = out.template get_additional_output<ElasticAdditionalOutputs<dim> >())
-            {
-              elastic_out->elastic_shear_moduli[i] = average_elastic_shear_moduli[i];
-            }
+          if (ElasticOutputs<dim> *elastic_out = out.template get_additional_output<ElasticOutputs<dim> >())
+            elastic_out->elastic_shear_moduli[i] = average_elastic_shear_moduli[i];
         }
-
-      elastic_rheology.fill_elastic_force_outputs(in, average_elastic_shear_moduli, out);
-      elastic_rheology.fill_reaction_outputs(in, average_elastic_shear_moduli, out);
-
     }
+
 
     template <int dim>
     double
@@ -99,6 +93,7 @@ namespace aspect
       return viscosities[0]; //background
     }
 
+
     template <int dim>
     bool
     Viscoelastic<dim>::
@@ -106,6 +101,7 @@ namespace aspect
     {
       return equation_of_state.is_compressible();
     }
+
 
     template <int dim>
     void
@@ -116,7 +112,6 @@ namespace aspect
         prm.enter_subsection("Viscoelastic");
         {
           EquationOfState::MulticomponentIncompressible<dim>::declare_parameters (prm);
-          Rheology::Elasticity<dim>::declare_parameters (prm);
 
           prm.declare_entry ("Viscosities", "1.e21",
                              Patterns::List(Patterns::Double (0.)),
@@ -161,9 +156,6 @@ namespace aspect
           equation_of_state.initialize_simulator (this->get_simulator());
           equation_of_state.parse_parameters (prm);
 
-          elastic_rheology.initialize_simulator (this->get_simulator());
-          elastic_rheology.parse_parameters(prm);
-
           viscosity_averaging = MaterialUtilities::parse_compositional_averaging_operation ("Viscosity averaging scheme",
                                 prm);
 
@@ -187,15 +179,6 @@ namespace aspect
       this->model_dependence.compressibility = NonlinearDependence::none;
       this->model_dependence.specific_heat = NonlinearDependence::compositional_fields;
       this->model_dependence.thermal_conductivity = NonlinearDependence::compositional_fields;
-    }
-
-
-
-    template <int dim>
-    void
-    Viscoelastic<dim>::create_additional_named_outputs (MaterialModel::MaterialModelOutputs<dim> &out) const
-    {
-      elastic_rheology.create_elastic_outputs(out);
     }
   }
 }

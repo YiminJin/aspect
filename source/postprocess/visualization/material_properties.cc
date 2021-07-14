@@ -110,6 +110,29 @@ namespace aspect
         MaterialModel::MaterialModelOutputs<dim> out(n_quadrature_points,
                                                      this->n_compositional_fields());
 
+        in.current_cell = input_data.template get_cell<DoFHandler<dim> > ();
+
+        std::vector<Point<dim> > quadrature_points(n_quadrature_points);
+        for (unsigned int q=0; q<n_quadrature_points; ++q)
+          quadrature_points[q] = this->get_mapping().transform_real_to_unit_cell(in.current_cell,
+                                                                                 input_data.evaluation_points[q]);
+        const Quadrature<dim> quadrature_formula (quadrature_points);
+        FEValues<dim> fe_values (this->get_mapping(),
+                                 this->get_fe(),
+                                 quadrature_formula,
+                                 update_values |
+                                 update_gradients |
+                                 update_quadrature_points);
+        fe_values.reinit (in.current_cell);
+
+        this->get_material_model().create_additional_inputs (in);
+        this->get_material_model().fill_additional_material_model_inputs (in, 
+                                                                          this->get_solution(),
+                                                                          this->get_old_solution(),
+                                                                          this->get_old_old_solution(),
+                                                                          fe_values,
+                                                                          this->introspection());
+
         this->get_material_model().evaluate(in, out);
 
         // We want to output material properties as they are used in the

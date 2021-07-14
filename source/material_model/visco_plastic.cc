@@ -19,6 +19,7 @@
 */
 
 #include <aspect/material_model/visco_plastic.h>
+#include <aspect/elasticity.h>
 #include <aspect/utilities.h>
 #include <deal.II/fe/fe_values.h>
 #include <deal.II/base/signaling_nan.h>
@@ -139,8 +140,6 @@ namespace aspect
       EquationOfStateOutputs<dim> eos_outputs (this->n_compositional_fields()+1);
       EquationOfStateOutputs<dim> eos_outputs_all_phases (this->n_compositional_fields()+1+phase_function.n_phase_transitions());
 
-      std::vector<double> average_elastic_shear_moduli (in.n_evaluation_points());
-
       // Store value of phase function for each phase and composition
       // While the number of phases is fixed, the value of the phase function is updated for every point
       std::vector<double> phase_function_values(phase_function.n_phase_transitions(), 0.0);
@@ -257,29 +256,16 @@ namespace aspect
           // Fill plastic outputs if they exist.
           rheology->fill_plastic_outputs(i,volume_fractions,plastic_yielding,in,out);
 
-          if (rheology->use_elasticity)
-            {
-              // Compute average elastic shear modulus
-              average_elastic_shear_moduli[i] = MaterialUtilities::average_value(volume_fractions,
-                                                                                 rheology->elastic_rheology.get_elastic_shear_moduli(),
-                                                                                 rheology->viscosity_averaging);
-
-              // Fill the material properties that are part of the elastic additional outputs
-              if (ElasticAdditionalOutputs<dim> *elastic_out = out.template get_additional_output<ElasticAdditionalOutputs<dim> >())
-                {
-                  elastic_out->elastic_shear_moduli[i] = average_elastic_shear_moduli[i];
-                }
-            }
+          // Fill the material properties that are part of the elastic additional outputs
+          if (ElasticOutputs<dim> *elastic_out = out.template get_additional_output<ElasticOutputs<dim> >())
+          {
+            elastic_out->elastic_shear_moduli[i] =
+              MaterialUtilities::average_value (volume_fractions, this->get_elasticity_handler().get_elastic_shear_moduli(), rheology->viscosity_averaging);
+          }
         }
 
       // If we use the full strain tensor, compute the change in the individual tensor components.
       rheology->strain_rheology.compute_finite_strain_reaction_terms(in, out);
-
-      if (rheology->use_elasticity)
-        {
-          rheology->elastic_rheology.fill_elastic_force_outputs(in, average_elastic_shear_moduli, out);
-          rheology->elastic_rheology.fill_reaction_outputs(in, average_elastic_shear_moduli, out);
-        }
     }
 
 
@@ -410,15 +396,21 @@ namespace aspect
     }
 
 
+    
+    template <int dim>
+    void
+    ViscoPlastic<dim>::create_additional_inputs (MaterialModel::MaterialModelInputs<dim> &in) const
+    {
+      rheology->create_elastic_inputs(in);
+    }
+
+
 
     template <int dim>
     void
     ViscoPlastic<dim>::create_additional_named_outputs (MaterialModel::MaterialModelOutputs<dim> &out) const
     {
       rheology->create_plastic_outputs(out);
-
-      if (rheology->use_elasticity)
-        rheology->elastic_rheology.create_elastic_outputs(out);
     }
 
   }

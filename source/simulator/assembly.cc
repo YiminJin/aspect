@@ -333,6 +333,14 @@ namespace aspect
                                          true,
                                          scratch.material_model_inputs);
 
+    material_model->create_additional_inputs (scratch.material_model_inputs);
+    material_model->fill_additional_material_model_inputs (scratch.material_model_inputs,
+                                                           current_linearization_point,
+                                                           old_solution,
+                                                           old_old_solution,
+                                                           scratch.finite_element_values,
+                                                           introspection);
+
     for (unsigned int i=0; i<assemblers->stokes_preconditioner.size(); ++i)
       assemblers->stokes_preconditioner[i]->create_additional_material_model_outputs(scratch.material_model_outputs);
 
@@ -576,6 +584,14 @@ namespace aspect
                                          update_strain_rate,
                                          scratch.material_model_inputs);
 
+    material_model->create_additional_inputs (scratch.material_model_inputs);
+    material_model->fill_additional_material_model_inputs (scratch.material_model_inputs,
+                                                           current_linearization_point,
+                                                           old_solution,
+                                                           old_old_solution,
+                                                           scratch.finite_element_values,
+                                                           introspection);
+
     for (unsigned int i=0; i<assemblers->stokes_system.size(); ++i)
       assemblers->stokes_system[i]->create_additional_material_model_outputs(scratch.material_model_outputs);
 
@@ -631,6 +647,14 @@ namespace aspect
                                                        cell,
                                                        need_viscosity,
                                                        scratch.face_material_model_inputs);
+
+                  material_model->create_additional_inputs (scratch.face_material_model_inputs);
+                  material_model->fill_additional_material_model_inputs (scratch.face_material_model_inputs,
+                                                                         current_linearization_point,
+                                                                         old_solution,
+                                                                         old_old_solution,
+                                                                         scratch.face_finite_element_values,
+                                                                         introspection);
 
                   for (unsigned int i=0; i<assemblers->stokes_system_on_boundary_face.size(); ++i)
                     assemblers->stokes_system_on_boundary_face[i]->create_additional_material_model_outputs(scratch.face_material_model_outputs);
@@ -919,6 +943,7 @@ namespace aspect
                                          true,
                                          scratch.material_model_inputs);
 
+    material_model->create_additional_inputs (scratch.material_model_inputs);
     for (unsigned int i=0; i<assemblers->advection_system.size(); ++i)
       assemblers->advection_system[i]->create_additional_material_model_outputs(scratch.material_model_outputs);
 
@@ -926,6 +951,8 @@ namespace aspect
                                                                               scratch.material_model_outputs);
     material_model->fill_additional_material_model_inputs(scratch.material_model_inputs,
                                                           current_linearization_point,
+                                                          old_solution,
+                                                          old_old_solution,
                                                           scratch.finite_element_values,
                                                           introspection);
 
@@ -1030,7 +1057,8 @@ namespace aspect
                                                      cell,
                                                      true,
                                                      scratch.face_material_model_inputs);
-
+                
+                material_model->create_additional_inputs (scratch.face_material_model_inputs);
                 for (unsigned int i=0; i<assemblers->advection_system_on_boundary_face.size(); ++i)
                   assemblers->advection_system_on_boundary_face[i]->create_additional_material_model_outputs(scratch.face_material_model_outputs);
 
@@ -1041,6 +1069,8 @@ namespace aspect
                                                                                           scratch.face_material_model_outputs);
                 material_model->fill_additional_material_model_inputs(scratch.face_material_model_inputs,
                                                                       current_linearization_point,
+                                                                      old_solution,
+                                                                      old_old_solution,
                                                                       *scratch.face_finite_element_values,
                                                                       introspection);
 

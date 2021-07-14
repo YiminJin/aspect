@@ -24,6 +24,7 @@
 #include <aspect/utilities.h>
 #include <aspect/melt.h>
 #include <aspect/volume_of_fluid/handler.h>
+#include <aspect/elasticity.h>
 #include <aspect/stokes_matrix_free.h>
 #include <aspect/newton.h>
 #include <aspect/mesh_deformation/free_surface.h>
@@ -2111,6 +2112,7 @@ namespace aspect
     TimeStepping::Manager<dim>::declare_parameters (prm);
     MaterialModel::declare_parameters<dim> (prm);
     HeatingModel::Manager<dim>::declare_parameters (prm);
+    ElasticityHandler<dim>::Parameters::declare_parameters (prm);
     GeometryModel::declare_parameters <dim>(prm);
     InitialTopographyModel::declare_parameters <dim>(prm);
     GravityModel::declare_parameters<dim> (prm);

@@ -22,7 +22,7 @@
 #define _aspect_material_model_viscoelastic_h
 
 #include <aspect/material_model/interface.h>
-#include <aspect/material_model/rheology/elasticity.h>
+#include <aspect/elasticity.h>
 #include <aspect/simulator_access.h>
 #include <aspect/material_model/equation_of_state/multicomponent_incompressible.h>
 
@@ -199,10 +199,6 @@ namespace aspect
          * @}
          */
 
-        void
-        create_additional_named_outputs (MaterialModel::MaterialModelOutputs<dim> &out) const override;
-
-
       private:
         /**
          * Enumeration for selecting which viscosity averaging scheme to use.
@@ -220,8 +216,6 @@ namespace aspect
          * Vector for field thermal conductivities, read from parameter file.
          */
         std::vector<double> thermal_conductivities;
-
-        Rheology::Elasticity<dim> elastic_rheology;
     };
 
   }

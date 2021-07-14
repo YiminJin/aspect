@@ -1405,7 +1405,12 @@ namespace aspect
         in.reinit(fe_values, FEQ_cell, sim.introspection, sim.current_linearization_point);
 
         // Query the material model for the active level viscosities
-        sim.material_model->fill_additional_material_model_inputs(in, sim.current_linearization_point, fe_values, sim.introspection);
+        sim.material_model->fill_additional_material_model_inputs(in, 
+                                                                  sim.current_linearization_point, 
+                                                                  sim.old_solution, 
+                                                                  sim.old_old_solution, 
+                                                                  fe_values, 
+                                                                  sim.introspection);
         sim.material_model->evaluate(in, out);
 
         // If using a cellwise average for viscosity, average the values here.

@@ -24,6 +24,7 @@
 #include <aspect/utilities.h>
 #include <aspect/melt.h>
 #include <aspect/volume_of_fluid/handler.h>
+#include <aspect/elasticity.h>
 #include <aspect/newton.h>
 #include <aspect/stokes_matrix_free.h>
 #include <aspect/mesh_deformation/interface.h>
@@ -152,6 +153,9 @@ namespace aspect
     volume_of_fluid_handler (parameters.volume_of_fluid_tracking_enabled ?
                              std_cxx14::make_unique<VolumeOfFluidHandler<dim>> (*this, prm) :
                              nullptr),
+    elasticity_handler (parameters.enable_elasticity ?
+                        std_cxx14::make_unique<ElasticityHandler<dim> > (*this, prm):
+                        nullptr),
     introspection (construct_variables<dim>(parameters, signals, melt_handler), parameters),
     mpi_communicator (Utilities::MPI::duplicate_communicator (mpi_communicator_)),
     iostream_tee_device(std::cout, log_file_stream),
@@ -427,6 +431,9 @@ namespace aspect
       {
         volume_of_fluid_handler->initialize (prm);
       }
+
+    if (parameters.enable_elasticity)
+      elasticity_handler->initialize (prm);
 
     time_stepping_manager.initialize_simulator (*this);
     time_stepping_manager.parse_parameters (prm);
@@ -722,6 +729,9 @@ namespace aspect
     if (parameters.include_melt_transport)
       melt_handler->add_current_constraints (new_current_constraints);
 
+    if (parameters.enable_elasticity)
+      elasticity_handler->add_current_constraints (new_current_constraints);
+
     // let plugins add more constraints if they so choose, then close the
     // constraints object
     signals.post_constraints_creation(*this, new_current_constraints);
@@ -982,6 +992,15 @@ namespace aspect
         coupling[volume_of_fluid_block][volume_of_fluid_block] = DoFTools::always;
       }
 
+    // If elasticity is taken into account, create a matrix block for deviatoric stress.
+    if (parameters.enable_elasticity)
+    {
+      const unsigned int stress_comp = introspection.variable("deviatoric stress").first_component_index;
+      for (unsigned int i = 0; i < SymmetricTensor<2,dim>::n_independent_components; ++i)
+        for (unsigned int j = 0; j < SymmetricTensor<2,dim>::n_independent_components; ++j)
+          coupling[stress_comp+i][stress_comp+j] = DoFTools::always;
+    }
+
     return coupling;
   }
 
@@ -1004,7 +1023,8 @@ namespace aspect
 
     if ((parameters.use_discontinuous_temperature_discretization) ||
         (parameters.use_discontinuous_composition_discretization) ||
-        (parameters.volume_of_fluid_tracking_enabled))
+        (parameters.volume_of_fluid_tracking_enabled) ||
+        (parameters.enable_elasticity && elasticity_handler->use_discontinuous_stress_discretization()))
       {
         Table<2,DoFTools::Coupling> face_coupling (introspection.n_components,
                                                    introspection.n_components);
@@ -1028,6 +1048,13 @@ namespace aspect
                                                        .volume_fraction.first_component_index;
             face_coupling[volume_of_fluid_block][volume_of_fluid_block] = DoFTools::always;
           }
+
+        if (parameters.enable_elasticity && elasticity_handler->use_discontinuous_stress_discretization())
+        {
+          const unsigned int stress_comp = introspection.variable("deviatoric stress").first_component_index;
+          for (unsigned int i = 0; i < SymmetricTensor<2,dim>::n_independent_components; ++i)
+            face_coupling[stress_comp+i][stress_comp+i] = DoFTools::always;
+        }
 
         DoFTools::make_flux_sparsity_pattern (dof_handler,
                                               sp,

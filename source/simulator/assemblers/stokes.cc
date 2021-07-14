@@ -269,9 +269,6 @@ namespace aspect
       const MaterialModel::AdditionalMaterialOutputsStokesRHS<dim>
       *force = scratch.material_model_outputs.template get_additional_output<MaterialModel::AdditionalMaterialOutputsStokesRHS<dim> >();
 
-      const MaterialModel::ElasticOutputs<dim>
-      *elastic_outputs = scratch.material_model_outputs.template get_additional_output<MaterialModel::ElasticOutputs<dim> >();
-
       const MaterialModel::PrescribedPlasticDilation<dim>
       *prescribed_dilation =
         (this->get_parameters().enable_prescribed_dilation)
@@ -380,10 +377,6 @@ namespace aspect
                                       + pressure_scaling * force->rhs_p[q] * scratch.phi_p[i])
                                      * JxW;
 
-              if (elastic_outputs != nullptr && this->get_parameters().enable_elasticity)
-                data.local_rhs(i) += (scalar_product(elastic_outputs->elastic_force[q],Tensor<2,dim>(scratch.grads_phi_u[i])))
-                                     * JxW;
-
               if (prescribed_dilation != nullptr)
                 data.local_rhs(i) += (
                                        // RHS of - (div u,q) = - (R,q)
@@ -469,19 +462,6 @@ namespace aspect
       Assert(!this->get_parameters().enable_prescribed_dilation
              ||
              outputs.template get_additional_output<MaterialModel::PrescribedPlasticDilation<dim> >()->dilation.size()
-             == n_points, ExcInternalError());
-
-      // Elasticity:
-      if ((this->get_parameters().enable_elasticity) &&
-          outputs.template get_additional_output<MaterialModel::ElasticOutputs<dim> >() == nullptr)
-        {
-          outputs.additional_outputs.push_back(
-            std_cxx14::make_unique<MaterialModel::ElasticOutputs<dim>> (n_points));
-        }
-
-      Assert(!this->get_parameters().enable_elasticity
-             ||
-             outputs.template get_additional_output<MaterialModel::ElasticOutputs<dim> >()->elastic_force.size()
              == n_points, ExcInternalError());
     }
 

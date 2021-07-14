@@ -276,13 +276,6 @@ namespace aspect
                                                                             :
                                                                             nullptr;
 
-      const bool enable_elasticity = this->get_parameters().enable_elasticity;
-
-      const MaterialModel::ElasticOutputs<dim> *elastic_outputs = enable_elasticity ?
-                                                                  scratch.material_model_outputs.template get_additional_output<MaterialModel::ElasticOutputs<dim> >()
-                                                                  :
-                                                                  nullptr;
-
       const MaterialModel::PrescribedPlasticDilation<dim>
       *prescribed_dilation =
         (this->get_parameters().enable_prescribed_dilation)
@@ -340,10 +333,6 @@ namespace aspect
               if (enable_additional_stokes_rhs)
                 data.local_rhs(i) += (force->rhs_u[q] * scratch.phi_u[i]
                                       + pressure_scaling * force->rhs_p[q] * scratch.phi_p[i])
-                                     * JxW;
-
-              if (enable_elasticity)
-                data.local_rhs(i) += (scalar_product(elastic_outputs->elastic_force[q],Tensor<2,dim>(scratch.grads_phi_u[i])))
                                      * JxW;
 
               if (enable_additional_stokes_rhs)
@@ -511,18 +500,6 @@ namespace aspect
       Assert(!this->get_parameters().enable_additional_stokes_rhs
              ||
              outputs.template get_additional_output<MaterialModel::AdditionalMaterialOutputsStokesRHS<dim> >()->rhs_u.size()
-             == n_points, ExcInternalError());
-
-      if ((this->get_parameters().enable_elasticity) &&
-          outputs.template get_additional_output<MaterialModel::ElasticOutputs<dim> >() == nullptr)
-        {
-          outputs.additional_outputs.push_back(
-            std_cxx14::make_unique<MaterialModel::ElasticOutputs<dim>> (n_points));
-        }
-
-      Assert(!this->get_parameters().enable_elasticity
-             ||
-             outputs.template get_additional_output<MaterialModel::ElasticOutputs<dim> >()->elastic_force.size()
              == n_points, ExcInternalError());
 
       // prescribed dilation:

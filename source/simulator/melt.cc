@@ -56,6 +56,8 @@ namespace aspect
 
     template <int dim>
     void MeltInputs<dim>::fill (const LinearAlgebra::BlockVector &solution,
+                                const LinearAlgebra::BlockVector &/*old_solution*/,
+                                const LinearAlgebra::BlockVector &/*old_old_solution*/,
                                 const FEValuesBase<dim>          &fe_values,
                                 const Introspection<dim>         &introspection)
     {

@@ -441,6 +441,13 @@ namespace aspect
 
           // We do not call the cell-wise average function of the
           // material model, because we average globally below
+          material_model->create_additional_inputs(in);
+          material_model->fill_additional_material_model_inputs(in,
+                                                                solution,
+                                                                old_solution,
+                                                                old_old_solution,
+                                                                fe_values,
+                                                                introspection);
           material_model->evaluate(in, out);
 
           // Evaluate viscosity at the mid-point of each cell and
@@ -1674,7 +1681,7 @@ namespace aspect
           for (unsigned int i=0; i<number_of_reaction_steps; ++i)
             {
               // Loop over composition element
-              material_model->fill_additional_material_model_inputs(in_C, solution, fe_values_C, introspection);
+              material_model->fill_additional_material_model_inputs(in_C, solution, old_solution, old_old_solution, fe_values_C, introspection);
 
               material_model->evaluate(in_C, out_C);
               heating_model_manager.evaluate(in_C, out_C, heating_model_outputs_C);
@@ -1698,7 +1705,7 @@ namespace aspect
               if (!temperature_and_composition_use_same_fe)
                 {
                   // loop over temperature element
-                  material_model->fill_additional_material_model_inputs(in_T, solution, fe_values_T, introspection);
+                  material_model->fill_additional_material_model_inputs(in_T, solution, old_solution, old_old_solution, fe_values_T, introspection);
 
                   material_model->evaluate(in_T, out_T);
                   heating_model_manager.evaluate(in_T, out_T, heating_model_outputs_T);
@@ -1836,6 +1843,8 @@ namespace aspect
     std::vector<types::global_dof_index> local_dof_indices (dof_handler.get_fe().dofs_per_cell);
     MaterialModel::MaterialModelInputs<dim> in(quadrature.size(), introspection.n_compositional_fields);
     MaterialModel::MaterialModelOutputs<dim> out(quadrature.size(), introspection.n_compositional_fields);
+
+    material_model->create_additional_inputs(in);
 
     // add the prescribed field outputs that will be used for interpolating
     material_model->create_additional_named_outputs(out);

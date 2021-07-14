@@ -68,6 +68,8 @@ namespace aspect
          * Fill the compaction pressures and fluid velocities.
          */
         void fill (const LinearAlgebra::BlockVector &solution,
+                   const LinearAlgebra::BlockVector &old_solution,
+                   const LinearAlgebra::BlockVector &old_old_solution,
                    const FEValuesBase<dim>          &fe_values,
                    const Introspection<dim>         &introspection) override;
     };
