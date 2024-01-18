@@ -89,6 +89,16 @@ namespace aspect
                 internal::Assembly::CopyData::CopyDataBase<dim> &data_base) const override;
     };
 
+    template <int dim>
+    class StokesCompressibleMassConservationTerm : public Assemblers::Interface<dim>,
+      public SimulatorAccess<dim>
+    {
+      public:
+        void
+        execute(internal::Assembly::Scratch::ScratchBase<dim>   &scratch_base,
+                internal::Assembly::CopyData::CopyDataBase<dim> &data_base) const override;
+    };
+
     /**
      * This class assembles the compressibility term of the Stokes equation
      * that is caused by the compressibility in the mass conservation equation.

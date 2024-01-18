@@ -987,7 +987,10 @@ namespace aspect
             // For equal-order interpolation, we need a stabilization term
             // in the bottom right of Stokes matrix. Make sure we have the
             // necessary entries.
-            if (parameters.use_equal_order_interpolation_for_stokes == true)
+            if (parameters.use_equal_order_interpolation_for_stokes == true 
+                ||
+                parameters.formulation_mass_conservation == 
+                Parameters<dim>::Formulation::MassConservation::fully_compressible)
               coupling[x.pressure][x.pressure] = DoFTools::always;
           }
       }

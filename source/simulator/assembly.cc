@@ -122,9 +122,15 @@ namespace aspect
         assemblers->stokes_system.push_back(
           std::make_unique<aspect::Assemblers::StokesProjectedDensityFieldTerm<dim>>());
       }
+    else if (parameters.formulation_mass_conservation ==
+             Parameters<dim>::Formulation::MassConservation::fully_compressible)
+    {
+      assemblers->stokes_system.push_back(
+        std::make_unique<aspect::Assemblers::StokesCompressibleMassConservationTerm<dim>>());
+    }
     else
       AssertThrow(false,
-                  ExcMessage("Unknown mass conservation equation approximation. There is no assembler"
+                  ExcMessage("Unknown mass conservation equation approximation. There is no assembler "
                              " defined that handles this formulation."));
 
     // add the terms for traction boundary conditions
@@ -572,7 +578,10 @@ namespace aspect
         scratch.velocity_values);
     if (assemble_newton_stokes_system)
       scratch.finite_element_values[introspection.extractors.velocities].get_function_divergences(current_linearization_point,scratch.velocity_divergence);
-    if (parameters.formulation_mass_conservation == Parameters<dim>::Formulation::MassConservation::hydrostatic_compression)
+    if (parameters.formulation_mass_conservation == Parameters<dim>::Formulation::MassConservation::fully_compressible)
+      scratch.finite_element_values[introspection.extractors.pressure].get_function_values(old_solution, scratch.old_pressure);
+    if (parameters.formulation_mass_conservation == Parameters<dim>::Formulation::MassConservation::fully_compressible ||
+        parameters.formulation_mass_conservation == Parameters<dim>::Formulation::MassConservation::hydrostatic_compression)
       scratch.finite_element_values[introspection.extractors.temperature].get_function_gradients(current_linearization_point,
           scratch.temperature_gradients);
 
