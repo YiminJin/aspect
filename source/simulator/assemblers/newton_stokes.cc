@@ -136,22 +136,34 @@ namespace aspect
                           ExcMessage ("Error: The newton method requires derivatives from the material model."));
 
               const SymmetricTensor<2,dim> viscosity_derivative_wrt_strain_rate = derivatives->viscosity_derivative_wrt_strain_rate[q];
-              const SymmetricTensor<2,dim> strain_rate = scratch.material_model_inputs.strain_rate[q];
+
+              SymmetricTensor<2,dim> effective_strain_rate = deviator(scratch.material_model_inputs.strain_rate[q]);
+              if (this->get_parameters().enable_elasticity
+                  && this->get_timestep_number() > 0)
+              {
+                const double G = 1e11;
+
+                SymmetricTensor<2,dim> stress;
+                for (unsigned int c = 0; c < SymmetricTensor<2,dim>::n_independent_components; ++c)
+                  stress.access_raw_entry(c) = scratch.material_model_inputs.composition[q][c];
+
+                effective_strain_rate += deviator(stress) / (2. * G * this->get_timestep());
+              }
 
               const typename Newton::Parameters::Stabilization
               preconditioner_stabilization = this->get_newton_handler().parameters.preconditioner_stabilization;
 
               // use the spd factor when the stabilization is PD or SPD
               const double alpha = (preconditioner_stabilization & Newton::Parameters::Stabilization::PD) != Newton::Parameters::Stabilization::none ?
-                                   Utilities::compute_spd_factor<dim>(eta, strain_rate, viscosity_derivative_wrt_strain_rate,
+                                   Utilities::compute_spd_factor<dim>(eta, effective_strain_rate, viscosity_derivative_wrt_strain_rate,
                                                                       this->get_newton_handler().parameters.SPD_safety_factor)
                                    :
-                                   1;
+                                   0.8;
 
               // pre-compute the tensor contractions
               std::vector<SymmetricTensor<2,dim>> deta_deps_times_eps_times_phi(stokes_dofs_per_cell);
               for (unsigned int i = 0; i < stokes_dofs_per_cell; ++i)
-                deta_deps_times_eps_times_phi[i] = (viscosity_derivative_wrt_strain_rate * scratch.grads_phi_u[i]) * strain_rate;
+                deta_deps_times_eps_times_phi[i] = (viscosity_derivative_wrt_strain_rate * scratch.grads_phi_u[i]) * effective_strain_rate;
 
               // symmetrize when the stabilization is symmetric or SPD
               if ((preconditioner_stabilization & Newton::Parameters::Stabilization::symmetric) != Newton::Parameters::Stabilization::none)
@@ -313,9 +325,21 @@ namespace aspect
 
           // Viscosity scalar
           const double eta = scratch.material_model_outputs.viscosities[q];
-          const SymmetricTensor<2,dim> strain_rate = scratch.material_model_inputs.strain_rate[q];
           const double pressure = scratch.material_model_inputs.pressure[q];
           const double velocity_divergence = scratch.velocity_divergence[q];
+
+          SymmetricTensor<2,dim> effective_strain_rate = deviator(scratch.material_model_inputs.strain_rate[q]);
+          if (this->get_parameters().enable_elasticity
+              && this->get_timestep_number() > 0)
+          {
+            const double G = 1e11;
+
+            SymmetricTensor<2,dim> stress;
+            for (unsigned int c = 0; c < SymmetricTensor<2,dim>::n_independent_components; ++c)
+              stress.access_raw_entry(c) = scratch.material_model_inputs.composition[q][c];
+
+            effective_strain_rate += deviator(stress) / (2. * G * this->get_timestep());
+          }
 
           const Tensor<1,dim>
           gravity = this->get_gravity_model().gravity_vector (scratch.finite_element_values.quadrature_point(q));
@@ -328,7 +352,7 @@ namespace aspect
           // first assemble the rhs
           for (unsigned int i=0; i<stokes_dofs_per_cell; ++i)
             {
-              data.local_rhs(i) -= (eta * 2.0 * (scratch.grads_phi_u[i] * strain_rate)
+              data.local_rhs(i) -= (eta * 2.0 * (scratch.grads_phi_u[i] * effective_strain_rate)
                                     - (scratch.div_phi_u[i] * pressure)
                                     - (pressure_scaling * scratch.phi_p[i] * velocity_divergence)
                                     -(density * gravity * scratch.phi_u[i]))
@@ -338,10 +362,10 @@ namespace aspect
                 data.local_rhs(i) += (force->rhs_u[q] * scratch.phi_u[i]
                                       + pressure_scaling * force->rhs_p[q] * scratch.phi_p[i])
                                      * JxW;
-
+/*
               if (enable_elasticity)
                 data.local_rhs(i) += (scalar_product(elastic_outputs->elastic_force[q],Tensor<2,dim>(scratch.grads_phi_u[i])))
-                                     * JxW;
+                                     * JxW;*/
 
               if (enable_prescribed_dilation)
                 data.local_rhs(i) += (
@@ -405,15 +429,15 @@ namespace aspect
                   const double alpha =  (velocity_block_stabilization & Newton::Parameters::Stabilization::PD)
                                         != Newton::Parameters::Stabilization::none
                                         ?
-                                        Utilities::compute_spd_factor<dim>(eta, strain_rate, viscosity_derivative_wrt_strain_rate,
+                                        Utilities::compute_spd_factor<dim>(eta, effective_strain_rate, viscosity_derivative_wrt_strain_rate,
                                                                            this->get_newton_handler().parameters.SPD_safety_factor)
                                         :
-                                        1;
+                                        0.8;
 
                   // pre-compute the tensor contractions
                   std::vector<SymmetricTensor<2,dim>> deta_deps_times_eps_times_phi(stokes_dofs_per_cell);
                   for (unsigned int i = 0; i < stokes_dofs_per_cell; ++i)
-                    deta_deps_times_eps_times_phi[i] = (viscosity_derivative_wrt_strain_rate * scratch.grads_phi_u[i]) * strain_rate;
+                    deta_deps_times_eps_times_phi[i] = (viscosity_derivative_wrt_strain_rate * scratch.grads_phi_u[i]) * effective_strain_rate;
 
 
                   // symmetrize when the stabilization is symmetric or SPD
@@ -424,7 +448,7 @@ namespace aspect
                           {
                             data.local_matrix(i,j) += ( derivative_scaling_factor * alpha * (scratch.grads_phi_u[i] * deta_deps_times_eps_times_phi[j]
                                                                                              + (scratch.grads_phi_u[j] * deta_deps_times_eps_times_phi[i]))
-                                                        + derivative_scaling_factor * pressure_scaling * 2.0 * viscosity_derivative_wrt_pressure * scratch.phi_p[j] * (scratch.grads_phi_u[i] * strain_rate) )
+                                                        + derivative_scaling_factor * pressure_scaling * 2.0 * viscosity_derivative_wrt_pressure * scratch.phi_p[j] * (scratch.grads_phi_u[i] * effective_strain_rate) )
                                                       * JxW;
 
                             Assert(dealii::numbers::is_finite(data.local_matrix(i,j)),
@@ -439,7 +463,7 @@ namespace aspect
                         for (unsigned int j=0; j<stokes_dofs_per_cell; ++j)
                           {
                             data.local_matrix(i,j) += ( derivative_scaling_factor * alpha * 2.0 * (scratch.grads_phi_u[i] * deta_deps_times_eps_times_phi[j])
-                                                        + derivative_scaling_factor * pressure_scaling * 2.0 * viscosity_derivative_wrt_pressure * scratch.phi_p[j] * (scratch.grads_phi_u[i] * strain_rate) )
+                                                        + derivative_scaling_factor * pressure_scaling * 2.0 * viscosity_derivative_wrt_pressure * scratch.phi_p[j] * (scratch.grads_phi_u[i] * effective_strain_rate) )
                                                       * JxW;
 
                             Assert(dealii::numbers::is_finite(data.local_matrix(i,j)),

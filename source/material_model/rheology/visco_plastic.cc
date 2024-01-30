@@ -341,6 +341,7 @@ namespace aspect
                                                                                         effective_edot_ii,
                                                                                         drucker_prager_parameters.max_yield_stress,
                                                                                         non_yielding_viscosity);
+
                       output_parameters.composition_yielding[j] = true;
                     }
                   break;
@@ -403,6 +404,8 @@ namespace aspect
                    ExcMessage("Invalid strain_rate in the MaterialModelInputs. This is likely because it was "
                               "not filled by the caller."));
 
+            const SymmetricTensor<2,dim> deviatoric_strain_rate = deviator(in.strain_rate[i]);
+
             // For each independent component, compute the derivative.
             for (unsigned int component = 0; component < SymmetricTensor<2,dim>::n_independent_components; ++component)
               {
@@ -411,9 +414,9 @@ namespace aspect
                 // components that are not on the diagonal are multiplied by 0.5, because the symmetric tensor
                 // is modified by 0.5 in both symmetric directions (xy/yx) simultaneously and we compute the combined
                 // derivative
-                const SymmetricTensor<2,dim> strain_rate_difference = in.strain_rate[i]
-                                                                      + std::max(std::fabs(in.strain_rate[i][strain_rate_indices]), min_strain_rate)
-                                                                      * (component > dim-1 ? 0.5 : 1 )
+                const SymmetricTensor<2,dim> strain_rate_difference = deviatoric_strain_rate
+                                                                      + std::max(std::fabs(deviatoric_strain_rate[strain_rate_indices]), min_strain_rate)
+                                                                      /** (component > dim-1 ? 0.5 : 1 )*/
                                                                       * finite_difference_accuracy
                                                                       * Utilities::nth_basis_for_symmetric_tensors<dim>(component);
 
@@ -437,6 +440,30 @@ namespace aspect
                     composition_viscosities_derivatives[composition_index][strain_rate_indices] = viscosity_derivative;
                   }
               }
+
+            if (Utilities::MPI::this_mpi_process(this->get_mpi_communicator()) == 0
+                && composition_viscosities_derivatives[0].norm() > 0)
+            {
+              SymmetricTensor<2,dim> effective_strain_rate = deviatoric_strain_rate;
+              if (this->get_timestep_number() > 0)
+              {
+                const double G = 3333;
+
+                SymmetricTensor<2,dim> stress;
+                for (unsigned int c = 0; c < SymmetricTensor<2,dim>::n_independent_components; ++c)
+                  stress.access_raw_entry(c) = in.composition[i][c];
+                
+                effective_strain_rate += deviator(stress) / (2. * G * this->get_timestep());
+              }
+/*
+              std::cout << "deta_depsilon = [" << composition_viscosities_derivatives[0] << "]" << std::endl
+                        << "epsilon       = [" << effective_strain_rate << "]" << std::endl
+                        << "ratio         = [" << composition_viscosities_derivatives[0][0][0] / effective_strain_rate[0][0] << ' '
+                                               << composition_viscosities_derivatives[0][0][1] / effective_strain_rate[0][1] << ' '
+                                               << composition_viscosities_derivatives[0][1][0] / effective_strain_rate[1][0] << ' '
+                                               << composition_viscosities_derivatives[0][1][1] / effective_strain_rate[1][1] << "]"
+                        << std::endl;*/
+            }
 
             // Now compute the derivative of the viscosity to the pressure
             const double pressure_difference = in.pressure[i] + (std::fabs(in.pressure[i]) * finite_difference_accuracy);
