@@ -34,7 +34,7 @@ end
 
 # Material model
 subsection Material model
-  set Material averaging = harmonic average only viscosity
+#  set Material averaging = harmonic average only viscosity
   set Model name = visco plastic
 
   subsection Visco Plastic

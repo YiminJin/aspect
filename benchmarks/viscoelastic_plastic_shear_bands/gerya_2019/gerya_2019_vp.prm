@@ -30,7 +30,7 @@ set End time                               = 0
 set Use years in output instead of seconds = true
 set Nonlinear solver scheme                = single Advection, iterated Newton Stokes
 set Nonlinear solver tolerance             = 1e-5
-set Max nonlinear iterations               = 500
+set Max nonlinear iterations               = 100
 set CFL number                             = 0.5
 set Maximum time step                      = 20
 set Output directory                       = output_gerya_2019_vp
@@ -46,13 +46,13 @@ subsection Solver parameters
   end
 
   subsection Newton solver parameters
-    set Max Newton line search iterations        = 0
-    set Max pre-Newton nonlinear iterations      = 500 # Ensures only defect-correction Picard method is used
+    set Max Newton line search iterations        = 3
+    set Max pre-Newton nonlinear iterations      = 3 # Ensures only defect-correction Picard method is used
     set Maximum linear Stokes solver tolerance   = 1e-2
     set Nonlinear Newton solver switch tolerance = 1e-5
     set SPD safety factor                        = 0.9
-    set Stabilization preconditioner             = SPD
-    set Stabilization velocity block             = SPD
+    set Stabilization preconditioner             = none
+    set Stabilization velocity block             = none
     set Use Newton failsafe                      = false
     set Use Newton residual scaling method       = false
     set Use Eisenstat Walker method for Picard iterations = true
@@ -150,7 +150,7 @@ end
 
 # Material model
 subsection Material model
-  set Material averaging = harmonic average
+#  set Material averaging = harmonic average
   set Model name = visco plastic
 
   subsection Visco Plastic
