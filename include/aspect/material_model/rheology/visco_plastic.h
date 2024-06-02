@@ -32,6 +32,7 @@
 #include <aspect/material_model/rheology/peierls_creep.h>
 #include <aspect/material_model/rheology/constant_viscosity_prefactors.h>
 #include <aspect/material_model/rheology/drucker_prager.h>
+#include <aspect/material_model/rheology/pariseau.h>
 #include <aspect/material_model/rheology/elasticity.h>
 #include <aspect/simulator_access.h>
 
@@ -226,8 +227,6 @@ namespace aspect
           Rheology::Elasticity<dim> elastic_rheology;
 
 
-        private:
-
           /**
            * Reference strain rate for the first non-linear iteration
            * in the first time step.
@@ -261,7 +260,8 @@ namespace aspect
           enum YieldScheme
           {
             stress_limiter,
-            drucker_prager
+            drucker_prager,
+            pariseau
           } yield_mechanism;
 
           /**
@@ -316,8 +316,9 @@ namespace aspect
            */
           Rheology::ConstantViscosityPrefactors<dim> constant_viscosity_prefactors;
 
-          /*
+          /**
            * Object for computing plastic stresses, viscosities, and additional outputs
+           * with the Drucker-Prager criterion.
            */
           Rheology::DruckerPrager<dim> drucker_prager_plasticity;
 
@@ -326,6 +327,10 @@ namespace aspect
            */
           Rheology::DruckerPragerParameters drucker_prager_parameters;
 
+          /**
+           * Object for computing the effective viscosity with the Pariseau criterion.
+           */
+          Rheology::Pariseau<dim> pariseau_plasticity;
       };
     }
   }

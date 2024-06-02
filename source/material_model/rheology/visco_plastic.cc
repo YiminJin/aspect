@@ -135,6 +135,16 @@ namespace aspect
           edot_ii = std::max(std::sqrt(std::max(-second_invariant(deviator(in.strain_rate[i])), 0.)),
                              min_strain_rate);
 
+        // Get the normal vector if the Pariseau criterion is selected
+        Tensor<1,dim> normal_vector;
+        if (yield_mechanism == pariseau)
+          {
+            normal_vector[0] = in.composition[i][this->introspection().compositional_index_for_name("n_x")];
+            normal_vector[1] = in.composition[i][this->introspection().compositional_index_for_name("n_y")];
+            if (dim > 2)
+              normal_vector[2] = in.composition[i][this->introspection().compositional_index_for_name("n_z")];
+          }
+
         // Calculate viscosities for each of the individual compositional phases
         for (unsigned int j=0; j < volume_fractions.size(); ++j)
           {
@@ -240,8 +250,10 @@ namespace aspect
             non_yielding_viscosity *= weakening_factors[2];
 
 
-            // Step 3: calculate the viscous stress magnitude
-            // and strain rate. If requested compute visco-elastic contributions.
+            // Step 3: preparation work for plastic yielding: calculate the viscous stress,
+            // the effective strain rate and the pressure for plasticity. If requested 
+            // compute visco-elastic contributions.
+            SymmetricTensor<2,dim> effective_strain_rate = deviator(in.strain_rate[i]);
             double effective_edot_ii = edot_ii;
 
             if (this->get_parameters().enable_elasticity)
@@ -261,10 +273,9 @@ namespace aspect
                     Assert(std::isfinite(in.strain_rate[i].norm()),
                            ExcMessage("Invalid strain_rate in the MaterialModelInputs. This is likely because it was "
                                       "not filled by the caller."));
-                    const SymmetricTensor<2,dim> effective_strain_rate =
-                      elastic_rheology.calculate_viscoelastic_strain_rate(in.strain_rate[i],
-                                                                          stress_old,
-                                                                          elastic_shear_moduli[j]);
+                    effective_strain_rate = elastic_rheology.calculate_viscoelastic_strain_rate(in.strain_rate[i],
+                                                                                                stress_old,
+                                                                                                elastic_shear_moduli[j]);
 
                     effective_edot_ii = std::max(std::sqrt(std::max(-second_invariant(effective_strain_rate), 0.)),
                                                  min_strain_rate);
@@ -278,82 +289,91 @@ namespace aspect
             // Step 3b: calculate non yielding (viscous or viscous + elastic) stress magnitude
             double non_yielding_stress = 2. * non_yielding_viscosity * effective_edot_ii;
 
-            // Step 4a: calculate the strain-weakened friction and cohesion
-            const DruckerPragerParameters drucker_prager_parameters = drucker_prager_plasticity.compute_drucker_prager_parameters(j,
-                                                                      phase_function_values,
-                                                                      n_phase_transitions_per_composition);
-            const double current_cohesion = drucker_prager_parameters.cohesion * weakening_factors[0];
-            double current_friction = drucker_prager_parameters.angle_internal_friction * weakening_factors[1];
-
-            // Step 4b: calculate the friction angle dependent on strain rate if specified
-            // apply the strain rate dependence to the friction angle (including strain weakening if present)
-            // Note: Maybe this should also be turned around to first apply strain rate dependence and then
-            // the strain weakening to the dynamic friction angle. Didn't come up with a clear argument for
-            // one order or the other.
-            current_friction = friction_models.compute_friction_angle(effective_edot_ii,
-                                                                      j,
-                                                                      current_friction,
-                                                                      in.position[i]);
-            output_parameters.current_friction_angles[j] = current_friction;
-            output_parameters.current_cohesions[j] = current_cohesion;
-
-            // Step 5: plastic yielding
-
-            // Determine if the pressure used in Drucker Prager plasticity will be capped at 0 (default).
-            // This may be necessary in models without gravity and when the dynamic stresses are much higher
-            // than the lithostatic pressure.
-
+            // Determine if the pressure used in plastic yielding will be capped at 0 (default).
+            // This may be necessary in models without gravity and when the dynamic stresses are 
+            // much higher than the lithostatic pressure.
             double pressure_for_plasticity = in.pressure[i];
             if (allow_negative_pressures_in_plasticity == false)
               pressure_for_plasticity = std::max(in.pressure[i],0.0);
 
-            // Step 5a: calculate the Drucker-Prager yield stress
-            const double yield_stress = drucker_prager_plasticity.compute_yield_stress(current_cohesion,
-                                                                                       current_friction,
-                                                                                       pressure_for_plasticity,
-                                                                                       drucker_prager_parameters.max_yield_stress);
-
-            // Step 5b: select if the yield viscosity is based on Drucker Prager or a stress limiter rheology
+            // Step 4: plastic yielding
             double effective_viscosity = non_yielding_viscosity;
-            switch (yield_mechanism)
+            if (yield_mechanism == stress_limiter || yield_mechanism == drucker_prager)
               {
-                case stress_limiter:
-                {
-                  //Step 5b-1: always rescale the viscosity back to the yield surface
-                  const double viscosity_limiter = yield_stress / (2.0 * ref_strain_rate)
-                                                   * std::pow((edot_ii/ref_strain_rate),
-                                                              1./exponents_stress_limiter[j] - 1.0);
-                  effective_viscosity = 1. / ( 1./viscosity_limiter + 1./non_yielding_viscosity);
-                  break;
-                }
-                case drucker_prager:
-                {
-                  // Step 5b-2: if the non-yielding stress is greater than the yield stress,
-                  // rescale the viscosity back to yield surface
-                  if (non_yielding_stress >= yield_stress)
-                    {
-                      // The following uses the effective_edot_ii
-                      // (which has been modified for elastic effects, above),
-                      // and calculates the effective viscosity over all active rheological elements
-                      // assuming that the non-yielding viscosity is not strain rate dependent
-                      effective_viscosity = drucker_prager_plasticity.compute_viscosity(current_cohesion,
-                                                                                        current_friction,
-                                                                                        pressure_for_plasticity,
-                                                                                        effective_edot_ii,
-                                                                                        drucker_prager_parameters.max_yield_stress,
-                                                                                        non_yielding_viscosity);
-                      output_parameters.composition_yielding[j] = true;
-                    }
-                  break;
-                }
-                default:
-                {
-                  AssertThrow(false, ExcNotImplemented());
-                  break;
-                }
-              }
+                // Step 4a-1: calculate the strain-weakened friction and cohesion
+                const DruckerPragerParameters drucker_prager_parameters = drucker_prager_plasticity.compute_drucker_prager_parameters(j,
+                                                                          phase_function_values,
+                                                                          n_phase_transitions_per_composition);
+                const double current_cohesion = drucker_prager_parameters.cohesion * weakening_factors[0];
+                double current_friction = drucker_prager_parameters.angle_internal_friction * weakening_factors[1];
 
-            // Step 6: limit the viscosity with specified minimum and maximum bounds
+                // Step 4a-2: calculate the friction angle dependent on strain rate if specified
+                // apply the strain rate dependence to the friction angle (including strain weakening if present)
+                // Note: Maybe this should also be turned around to first apply strain rate dependence and then
+                // the strain weakening to the dynamic friction angle. Didn't come up with a clear argument for
+                // one order or the other.
+                current_friction = friction_models.compute_friction_angle(effective_edot_ii,
+                                                                          j,
+                                                                          current_friction,
+                                                                          in.position[i]);
+                output_parameters.current_friction_angles[j] = current_friction;
+                output_parameters.current_cohesions[j] = current_cohesion;
+
+                // Step 4a-3: calculate the Drucker-Prager yield stress
+                const double yield_stress = drucker_prager_plasticity.compute_yield_stress(current_cohesion,
+                                                                                           current_friction,
+                                                                                           pressure_for_plasticity,
+                                                                                           drucker_prager_parameters.max_yield_stress);
+
+                // Step 4a-4: calculate the effective viscosity
+                if (yield_mechanism == stress_limiter)
+                  {
+                    // always rescale the viscosity back to the yield surface
+                    const double viscosity_limiter = yield_stress / (2.0 * ref_strain_rate)
+                                                     * std::pow((edot_ii/ref_strain_rate),
+                                                                1./exponents_stress_limiter[j] - 1.0);
+                    effective_viscosity = 1. / ( 1./viscosity_limiter + 1./non_yielding_viscosity);
+                  }
+                else
+                  {
+                    // if the non-yielding stress is greater than the yield stress,
+                    // rescale the viscosity back to yield surface
+                    if (non_yielding_stress >= yield_stress)
+                      {
+                        // The following uses the effective_edot_ii
+                        // (which has been modified for elastic effects, above),
+                        // and calculates the effective viscosity over all active rheological elements
+                        // assuming that the non-yielding viscosity is not strain rate dependent
+                        effective_viscosity = drucker_prager_plasticity.compute_viscosity(current_cohesion,
+                                                                                          current_friction,
+                                                                                          pressure_for_plasticity,
+                                                                                          effective_edot_ii,
+                                                                                          drucker_prager_parameters.max_yield_stress,
+                                                                                          non_yielding_viscosity);
+                        output_parameters.composition_yielding[j] = true;
+                      }
+                  }
+              }
+            else if (yield_mechanism == pariseau)
+              {
+                // Step 4b: let pariseau_plasticity compute the effective viscosity
+                std::pair<double,bool> viscosity_and_yielding
+                  = pariseau_plasticity.compute_viscosity(effective_strain_rate,
+                                                          normal_vector,
+                                                          pressure_for_plasticity,
+                                                          non_yielding_viscosity,
+                                                          j,
+                                                          weakening_factors,
+                                                          phase_function_values,
+                                                          n_phase_transitions_per_composition);
+
+                effective_viscosity = viscosity_and_yielding.first;
+                output_parameters.composition_yielding[j] = viscosity_and_yielding.second;
+              }
+            else
+              AssertThrow(false, ExcNotImplemented());
+
+            // Step 5: limit the viscosity with specified minimum and maximum bounds
             const double maximum_viscosity_for_composition = MaterialModel::MaterialUtilities::phase_average_value(
                                                                phase_function_values,
                                                                n_phase_transitions_per_composition,
@@ -505,6 +525,14 @@ namespace aspect
               composition_mask.set(i,false);
           }
 
+        if (yield_mechanism == pariseau)
+          {
+            composition_mask.set(this->introspection().compositional_index_for_name("n_x"), false);
+            composition_mask.set(this->introspection().compositional_index_for_name("n_y"), false);
+            if (dim > 2)
+              composition_mask.set(this->introspection().compositional_index_for_name("n_z"), false);
+          }
+
         return composition_mask;
       }
 
@@ -549,9 +577,9 @@ namespace aspect
                            "dislocation, frank kamenetskii, and composite options. Soon there will be an option "
                            "to select a specific flow law for each assigned composition ");
         prm.declare_entry ("Yield mechanism", "drucker",
-                           Patterns::Selection("drucker|limiter"),
-                           "Select what type of yield mechanism to use between Drucker Prager "
-                           "and stress limiter options.");
+                           Patterns::Selection("drucker|limiter|pariseau"),
+                           "Select what type of yield mechanism to use between Drucker Prager, "
+                           "Pariseau and stress limiter options.");
         prm.declare_entry ("Allow negative pressures in plasticity", "false",
                            Patterns::Bool (),
                            "Whether to allow negative pressures to be used in the computation "
@@ -590,6 +618,9 @@ namespace aspect
 
         // Drucker Prager plasticity parameters
         Rheology::DruckerPrager<dim>::declare_parameters(prm);
+
+        // Pariseau plasticity parameters
+        Rheology::Pariseau<dim>::declare_parameters(prm);
 
         // Stress limiter parameters
         prm.declare_entry ("Stress limiter exponents", "1.0",
@@ -689,12 +720,14 @@ namespace aspect
           yield_mechanism = drucker_prager;
         else if (prm.get ("Yield mechanism") == "limiter")
           yield_mechanism = stress_limiter;
+        else if (prm.get ("Yield mechanism") == "pariseau")
+          yield_mechanism = pariseau;
         else
           AssertThrow(false, ExcMessage("Not a valid yield mechanism."));
 
-        AssertThrow(this->get_parameters().enable_elasticity == false || yield_mechanism == drucker_prager,
-                    ExcMessage("Elastic behavior is only tested with the "
-                               "'drucker prager' plasticity option."));
+        AssertThrow(!(this->get_parameters().enable_elasticity == true && yield_mechanism == stress_limiter),
+                    ExcMessage("Elastic behavior has not been tested with the "
+                               "'stress limiter' plasticity option."));
 
         allow_negative_pressures_in_plasticity = prm.get_bool ("Allow negative pressures in plasticity");
         use_adiabatic_pressure_in_creep = prm.get_bool("Use adiabatic pressure in creep viscosity");
@@ -729,8 +762,16 @@ namespace aspect
         constant_viscosity_prefactors.parse_parameters(prm);
 
         // Plasticity parameters
-        drucker_prager_plasticity.initialize_simulator (this->get_simulator());
-        drucker_prager_plasticity.parse_parameters(prm, expected_n_phases_per_composition);
+        if (yield_mechanism == drucker_prager || yield_mechanism == stress_limiter)
+          {
+            drucker_prager_plasticity.initialize_simulator (this->get_simulator());
+            drucker_prager_plasticity.parse_parameters(prm, expected_n_phases_per_composition);
+          }
+        else if (yield_mechanism == pariseau)
+          {
+            pariseau_plasticity.initialize_simulator (this->get_simulator());
+            pariseau_plasticity.parse_parameters(prm, expected_n_phases_per_composition);
+          }
 
         // Stress limiter parameter (does not allow for phases per composition)
         options.property_name = "Stress limiter exponents";
