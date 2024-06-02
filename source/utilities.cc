@@ -2522,14 +2522,25 @@ namespace aspect
       // the exact choice of alpha factor does not matter because the
       // factor that it multiplies is zero -- so return the best value
       // (i.e., one)
-      if ((strain_rate.norm() == 0) || (dviscosities_dstrain_rate.norm() == 0))
+      const double norm_eps       = strain_rate.norm();
+      const double norm_deta_deps = dviscosities_dstrain_rate.norm();
+      if ((norm_deta_deps == 0) || (norm_eps == 0))
         return 1;
 
-      const double E = strain_rate * dviscosities_dstrain_rate;
-      if (E >= -eta * SPD_safety_factor)
+      // Compute the normalized tensors n = eps / norm_eps and
+      // n_hat = deta_deps / norm_deta_deps. Assume that the "angle"
+      // between n and n_hat is phi, then cos(phi) = n : n_hat.
+      // It can be proved that the eigenvalues of the fourth-order
+      // tensor E is in the range of (cos(2*theta - phi) + cos(phi)) / 2,
+      // where theta is in the range of [0, pi]. Therefore, the minimum 
+      // eigenvalue of E is (-1 + cos(phi)) / 2.
+      const SymmetricTensor<2,dim> n     = strain_rate / norm_eps;
+      const SymmetricTensor<2,dim> n_hat = dviscosities_dstrain_rate / norm_deta_deps;
+      const double lambda_min = 0.5 * norm_eps * norm_deta_deps * (-1. + n * n_hat);
+      if (lambda_min >= -eta * SPD_safety_factor)
         return 1.0;
       else
-        return SPD_safety_factor * std::abs(eta / E);
+        return SPD_safety_factor * std::abs(eta / lambda_min);
     }
 
 
