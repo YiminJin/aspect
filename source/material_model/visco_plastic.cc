@@ -306,6 +306,9 @@ namespace aspect
           rheology->elastic_rheology.fill_elastic_outputs(in, average_elastic_shear_moduli, out);
           rheology->elastic_rheology.fill_reaction_outputs(in, average_elastic_shear_moduli, out);
         }
+
+      if (rheology->yield_mechanism == Rheology::ViscoPlastic<dim>::pariseau)
+        rheology->pariseau_plasticity.fill_reaction_outputs(in, out);
     }
 
 
