@@ -1879,6 +1879,10 @@ namespace aspect
             else if ((names_of_compositional_fields[i].find("strain") != std::string::npos)
                      || (std::regex_match(names_of_compositional_fields[i],std::regex("s[1-3][1-3]"))))
               x_compositional_field_types[i] = "strain";
+            else if ((names_of_compositional_fields[i] == "n_x") ||
+                     (names_of_compositional_fields[i] == "n_y") ||
+                     (names_of_compositional_fields[i] == "n_z"))
+              x_compositional_field_types[i] = "material orientation";
             else if (names_of_compositional_fields[i].find("grain_size") != std::string::npos)
               x_compositional_field_types[i] = "grain size";
             else if (names_of_compositional_fields[i].find("entropy") != std::string::npos)
