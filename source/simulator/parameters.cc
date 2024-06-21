@@ -1194,7 +1194,7 @@ namespace aspect
                          Patterns::List(Patterns::Anything()),
                          "A user-defined name for each of the compositional fields requested.");
       prm.declare_entry ("Types of fields", "unspecified",
-                         Patterns::List (Patterns::Selection("chemical composition|stress|strain|grain size|porosity|density|entropy|generic|unspecified")),
+                         Patterns::List (Patterns::Selection("chemical composition|stress|strain|material orientation|grain size|porosity|density|entropy|generic|unspecified")),
                          "A type for each of the compositional fields requested. "
                          "Each entry of the list must be "
                          "one of several recognized types: chemical composition, "
@@ -1879,9 +1879,9 @@ namespace aspect
             else if ((names_of_compositional_fields[i].find("strain") != std::string::npos)
                      || (std::regex_match(names_of_compositional_fields[i],std::regex("s[1-3][1-3]"))))
               x_compositional_field_types[i] = "strain";
-            else if ((names_of_compositional_fields[i] == "n_x") ||
-                     (names_of_compositional_fields[i] == "n_y") ||
-                     (names_of_compositional_fields[i] == "n_z"))
+            else if ((names_of_compositional_fields[i].find("n_x") != std::string::npos) ||
+                     (names_of_compositional_fields[i].find("n_y") != std::string::npos) ||
+                     (names_of_compositional_fields[i].find("n_z") != std::string::npos))
               x_compositional_field_types[i] = "material orientation";
             else if (names_of_compositional_fields[i].find("grain_size") != std::string::npos)
               x_compositional_field_types[i] = "grain size";
