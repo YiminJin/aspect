@@ -162,12 +162,6 @@ namespace aspect
     void
     World<dim>::connect_to_signals(aspect::SimulatorSignals<dim> &signals)
     {
-      signals.post_set_initial_state.connect(
-        [&] (const SimulatorAccess<dim> &)
-      {
-        this->setup_initial_state();
-      });
-
       connect_particle_handler_signals(signals,*particle_handler);
       // Particle handler backup will not be stored for checkpointing
       connect_particle_handler_signals(signals, particle_handler_backup, false);

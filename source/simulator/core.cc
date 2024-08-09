@@ -2016,6 +2016,8 @@ namespace aspect
             set_initial_temperature_and_compositional_fields ();
             compute_initial_pressure_field ();
 
+            particle_world->setup_initial_state();
+
             signals.post_set_initial_state (*this);
           }
       }
