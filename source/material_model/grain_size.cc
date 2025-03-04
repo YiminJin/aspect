@@ -443,10 +443,9 @@ namespace aspect
           // get the pressures and temperatures at the vertices of the cell
           const QTrapezoid<dim> quadrature_formula;
 
-          std::vector<double> solution_values(this->get_fe().dofs_per_cell);
-          in.current_cell->get_dof_values(this->get_current_linearization_point(),
-                                          solution_values.begin(),
-                                          solution_values.end());
+          Vector<double> solution_values(this->get_fe().dofs_per_cell);
+          in.current_cell->get_interpolated_dof_values(this->get_current_linearization_point(),
+                                                       solution_values);
 
           // Only create the evaluator the first time we get here
           if (!temperature_evaluator)

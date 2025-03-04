@@ -633,9 +633,23 @@ namespace aspect
       /**
        * Evaluate the MaterialModel to query information like the viscosity and
        * project this viscosity to the multigrid hierarchy. Also queries
-       * other parameters like pressure scaling.
+       * other parameters like pressure scaling. This function is called only
+       * when the Newton method is NOT applied.
        */
       void evaluate_material_model();
+
+      /**
+       * Evaluate the MaterialModel to query information like the viscosity on
+       * each mesh level. Also queries other parameters like pressure scaling.
+       * This function is called only when the Newton method is applied.
+       */
+      void evaluate_material_model_newton();
+
+      /**
+       * Evaluate the MaterialModel to query information for the free surface
+       * stabilization.
+       */
+      void evaluate_material_model_free_surface();
 
       /**
        * Add correction to system RHS for non-zero boundary condition. See description in

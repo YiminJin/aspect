@@ -283,7 +283,7 @@ namespace aspect
          * reinit to populate the newly created arrays.
          *
          * @param fe_values An FEValuesBase object used to evaluate the finite elements.
-         * @param cell The currently active cell for the fe_values object.
+         * @param cell The current cell for the fe_values object.
          * @param introspection A reference to the simulator introspection object.
          * @param solution_vector The finite element vector from which to construct the inputs.
          * @param compute_strain_rate If set to `true`, then the object that
@@ -296,7 +296,7 @@ namespace aspect
          *   viscosities.
          */
         MaterialModelInputs(const FEValuesBase<dim,dim> &fe_values,
-                            const typename DoFHandler<dim>::active_cell_iterator &cell,
+                            const typename DoFHandler<dim>::cell_iterator &cell,
                             const Introspection<dim> &introspection,
                             const LinearAlgebra::BlockVector &solution_vector,
                             const bool compute_strain_rate = true);
@@ -337,11 +337,11 @@ namespace aspect
          * created by the constructor MaterialModelInputs. The arguments here
          * have the same meaning as in the constructor of this class.
          */
-        void reinit(const FEValuesBase<dim,dim>                          &fe_values,
-                    const typename DoFHandler<dim>::active_cell_iterator &cell,
-                    const Introspection<dim>                             &introspection,
-                    const LinearAlgebra::BlockVector                     &solution_vector,
-                    const bool                                            compute_strain_rate = true);
+        void reinit(const FEValuesBase<dim,dim>                   &fe_values,
+                    const typename DoFHandler<dim>::cell_iterator &cell,
+                    const Introspection<dim>                      &introspection,
+                    const LinearAlgebra::BlockVector              &solution_vector,
+                    const bool                                     compute_strain_rate = true);
 
         /**
          * Function that returns the number of points at which
@@ -424,7 +424,7 @@ namespace aspect
          * if (in.current_cell.state() == IteratorState::valid)
          * @endcode
          */
-        typename DoFHandler<dim>::active_cell_iterator current_cell;
+        typename DoFHandler<dim>::cell_iterator current_cell;
 
         /**
          * A member variable that stores which properties the material model
@@ -737,7 +737,7 @@ namespace aspect
        */
       template <int dim>
       void average (const AveragingOperation operation,
-                    const typename DoFHandler<dim>::active_cell_iterator &cell,
+                    const typename DoFHandler<dim>::cell_iterator &cell,
                     const Quadrature<dim>         &quadrature_formula,
                     const Mapping<dim>            &mapping,
                     const MaterialProperties::Property &requested_properties,

@@ -279,7 +279,7 @@ namespace aspect
 
     template <int dim>
     MaterialModelInputs<dim>::MaterialModelInputs(const FEValuesBase<dim,dim> &fe_values,
-                                                  const typename DoFHandler<dim>::active_cell_iterator &cell_x,
+                                                  const typename DoFHandler<dim>::cell_iterator &cell_x,
                                                   const Introspection<dim> &introspection,
                                                   const LinearAlgebra::BlockVector &solution_vector,
                                                   const bool compute_strain_rate)
@@ -323,7 +323,7 @@ namespace aspect
     template <int dim>
     void
     MaterialModelInputs<dim>::reinit(const FEValuesBase<dim,dim> &fe_values,
-                                     const typename DoFHandler<dim>::active_cell_iterator &cell_x,
+                                     const typename DoFHandler<dim>::cell_iterator &cell_x,
                                      const Introspection<dim> &introspection,
                                      const LinearAlgebra::BlockVector &solution_vector,
                                      const bool compute_strain_rate)
@@ -723,7 +723,7 @@ namespace aspect
        * This function computes the matrices $E$ and $M^{-1}F$.
        */
       template <int dim>
-      void compute_projection_matrix (const typename DoFHandler<dim>::active_cell_iterator &cell,
+      void compute_projection_matrix (const typename DoFHandler<dim>::cell_iterator &cell,
                                       const Quadrature<dim>   &quadrature_formula,
                                       const Mapping<dim>      &mapping,
                                       FullMatrix<double>      &projection_matrix,
@@ -746,7 +746,7 @@ namespace aspect
         // DoFHandler cell, but we are not going to use it with the
         // finite element associated with that DoFHandler, so cast it back
         // to just a tria iterator (all we need anyway is the geometry)
-        fe_values.reinit (typename Triangulation<dim>::active_cell_iterator(cell));
+        fe_values.reinit (typename Triangulation<dim>::cell_iterator(cell));
 
         // compute the matrices F, M, E
         for (unsigned int i=0; i<P; ++i)
@@ -817,7 +817,7 @@ namespace aspect
 
       template <int dim>
       void average (const AveragingOperation operation,
-                    const typename DoFHandler<dim>::active_cell_iterator &cell,
+                    const typename DoFHandler<dim>::cell_iterator &cell,
                     const Quadrature<dim>         &quadrature_formula,
                     const Mapping<dim>            &mapping,
                     const MaterialProperties::Property &requested_properties,
@@ -1251,7 +1251,7 @@ namespace aspect
   { \
     template                \
     void average (const AveragingOperation operation, \
-                  const DoFHandler<dim>::active_cell_iterator &cell, \
+                  const DoFHandler<dim>::cell_iterator &cell, \
                   const Quadrature<dim>     &quadrature_formula, \
                   const Mapping<dim>        &mapping, \
                   const MaterialProperties::Property &requested_properties, \

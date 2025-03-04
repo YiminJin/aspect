@@ -666,11 +666,9 @@ namespace aspect
             // Prepare the field function and extract the old solution values at the current cell.
             std::vector<Point<dim>> quadrature_positions(1,this->get_mapping().transform_real_to_unit_cell(in.current_cell, in.position[i]));
 
-            // Use a small_vector to avoid memory allocation if possible.
-            small_vector<double> old_solution_values(this->get_fe().dofs_per_cell);
-            in.current_cell->get_dof_values(this->get_old_solution(),
-                                            old_solution_values.begin(),
-                                            old_solution_values.end());
+            Vector<double> old_solution_values(this->get_fe().dofs_per_cell);
+            in.current_cell->get_interpolated_dof_values(this->get_old_solution(),
+                                                         old_solution_values);
 
             // If we have not been here before, create one evaluator for each compositional field
             if (composition_evaluators.size() == 0)
@@ -800,10 +798,9 @@ namespace aspect
             for (unsigned int i = 0; i < in.n_evaluation_points(); ++i)
               quadrature_positions[i] = this->get_mapping().transform_real_to_unit_cell(in.current_cell, in.position[i]);
 
-            std::vector<double> solution_values(this->get_fe().dofs_per_cell);
-            in.current_cell->get_dof_values(this->get_solution(),
-                                            solution_values.begin(),
-                                            solution_values.end());
+            Vector<double> solution_values(this->get_fe().dofs_per_cell);
+            in.current_cell->get_interpolated_dof_values(this->get_solution(),
+                                                         solution_values);
 
             // Only create the evaluator the first time we get here
             if (!evaluator)
