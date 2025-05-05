@@ -1718,6 +1718,19 @@ namespace aspect
           assemblers.advection_system[i].push_back(
             std::make_unique<Assemblers::MeltAdvectionSystem<dim>> ());
 
+        if (i>0 && this->get_parameters().use_discontinuous_composition_discretization[i-1]
+            && this->get_parameters().compositional_field_methods[i-1] == Parameters<dim>::AdvectionFieldMethod::fem_field)
+          {
+            assemblers.advection_system_on_boundary_face[i].push_back(
+              std::make_unique<aspect::Assemblers::AdvectionSystemBoundaryFace<dim>>());
+
+            assemblers.advection_system_on_interior_face[i].push_back(
+              std::make_unique<aspect::Assemblers::AdvectionSystemInteriorFace<dim>>());
+
+            assemblers.advection_system_assembler_on_face_properties[i].need_face_material_model_data = true;
+            assemblers.advection_system_assembler_on_face_properties[i].need_face_finite_element_evaluation = true;
+          }
+
         if (this->get_parameters().fixed_heat_flux_boundary_indicators.size() != 0)
           {
             assemblers.advection_system_on_boundary_face[i].push_back(
