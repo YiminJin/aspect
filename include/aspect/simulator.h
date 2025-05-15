@@ -1372,7 +1372,35 @@ namespace aspect
        * This function is implemented in
        * <code>source/simulator/helper_functions.cc</code>.
        */
-      void apply_limiter_to_dg_solutions (const AdvectionField &advection_field);
+      void apply_BP_limiter_to_dg_solutions (const AdvectionField &advection_field);
+
+      /**
+       * Apply the WENO limiter to the discontinuous Galerkin solutions.
+       * WENO is short for Weighted Essentially Non-Oscillatory, which is
+       * a class of high-resolution schemes used in the numerical solution
+       * of hyperbolic conservation laws. The basic idea of WENO limiter is
+       * to replace the solution in troubled cells (cells with oscillation)
+       * by a polynomial reconstruction that takes the neighbor cells into
+       * account. The WENO scheme implemented in the program is a simple
+       * variant proposed by Zhong and Shu, 2013.
+       *
+       * This function is implemented in
+       * <code>source/simulator/limiters.cc</code>.
+       */
+      void apply_WENO_limiter_to_dg_solutions (const AdvectionField &advection_field);
+
+      /**
+       * Fills a vector with the KXRCF indicator for a given advection field
+       * on each local cell. The KXRCF indicator is a metric of discontinuity
+       * for hyperbolic conservation laws. Cells with high KXRCF values are
+       * identified as "troubled cells" and will be smoothed by the WENO limiter.
+       *
+       * This function is implemented in
+       * <code>source/simulator/limiters.cc</code>.
+       */
+      template <typename T>
+      void compute_KXRCF_indicators(Vector<T> &KXRCF_indicators,
+                                    const AdvectionField &advection_field) const;
 
       /**
        * Compute the unique support points for the advection fields @p advection_fields.
