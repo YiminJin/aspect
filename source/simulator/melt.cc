@@ -803,7 +803,7 @@ namespace aspect
           if (this->get_parameters().mesh_deformation_enabled)
             current_u -= scratch.mesh_velocity_values[q];
 
-          const double melt_transport_LHS =
+          const double melt_transport_LHS = 0.;/*
             (this->get_melt_handler().is_porosity(*scratch.advection_field)
              && this->get_melt_handler().is_melt_cell(scratch.material_model_inputs.current_cell)
              ?
@@ -817,7 +817,7 @@ namespace aspect
                 :
                 0.0)
              :
-             0.0);
+             0.0);*/
 
           const double factor = (use_bdf2_scheme)? ((2*time_step + old_time_step) /
                                                     (time_step + old_time_step)) : 1.0;
@@ -854,7 +854,7 @@ namespace aspect
               += (field_term_for_rhs * scratch.phi_field[i]
                   + time_step *
                   scratch.phi_field[i]
-                  * (gamma + melt_transport_RHS)
+                  * (gamma + /*melt_transport_RHS*/scratch.current_velocity_divergences[q])
                   + scratch.phi_field[i]
                   * reaction_term)
                  * JxW;
@@ -865,7 +865,7 @@ namespace aspect
                   += (
                        (time_step * (conductivity + scratch.artificial_viscosity)
                         * (scratch.grad_phi_field[i] * scratch.grad_phi_field[j]))
-                       + ((time_step * (scratch.phi_field[i] * (current_u * scratch.grad_phi_field[j])))
+                       + ((time_step * (-scratch.phi_field[j] * (current_u * scratch.grad_phi_field[i])))
                           + (factor * scratch.phi_field[i] * scratch.phi_field[j])) *
                        (density_c_P_solid + latent_heat_LHS)
                        + ((time_step * (scratch.phi_field[i] * (current_u_f * scratch.grad_phi_field[j])))
