@@ -119,6 +119,12 @@ namespace aspect
       bool symmetrize_newton_system;
 
       /**
+       * If true, the Newton factors are averaged according to the
+       * material averaging scheme.
+       */
+      bool average_newton_factors;
+
+      /**
        * If true, apply the stabilization on free surface faces.
        */
       bool apply_stabilization_free_surface_faces;
