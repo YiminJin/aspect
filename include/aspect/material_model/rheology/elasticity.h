@@ -32,6 +32,40 @@ namespace aspect
   namespace MaterialModel
   {
     /**
+     * Additional inputs for elastic rheology. This class provides 
+     * the velocity gradient tensor at each evaluation point, which
+     * is used for computing the rotation terms in the objective
+     * stress rate.
+     */
+    template <int dim>
+    class ElasticAdditionalInputs : public AdditionalMaterialInputs<dim>
+    {
+      public:
+        /**
+         * Constructor. Resize the array of velocity gradient tensors
+         * with the given number of evaluation points, and initialize 
+         * each entry with signaling NaN.
+         */
+        ElasticAdditionalInputs (const unsigned int n_points);
+
+        /**
+         * Velocity gradient tensors at the given positions.
+         */
+        std::vector<Tensor<2,dim>> velocity_gradients;
+
+        /**
+         * Fill the velocity gradient tensors.
+         */
+        void fill (const LinearAlgebra::BlockVector &solution,
+                   const FEValuesBase<dim>          &fe_values,
+                   const Introspection<dim>         &introspection) override;
+
+        void fill (const DataPostprocessorInputs::Vector<dim> &data,
+                   const Introspection<dim> &introspection) override;
+    };
+
+
+    /**
      * Additional output fields for the elastic shear modulus and other
      * elastic outputs to be added to the MaterialModel::MaterialModelOutputs
      * structure and filled in the MaterialModel::Interface::evaluate() function.
@@ -52,18 +86,8 @@ namespace aspect
         std::vector<double> elastic_shear_moduli;
 
         /**
-        * Elastic viscosity at the evaluation points passed to
-        * the instance of MaterialModel::Interface::evaluate() that fills
-        * the current object.
-        */
-        std::vector<double> elastic_viscosity;
-
-        /**
-        * The deviatoric stress of the current timestep, so including
-        * the rotation, advection and stress update, at the evaluation points
-        * passed to the instance of MaterialModel::Interface::evaluate()
-        * that fills the current object.
-        */
+         * The deviatoric stress of the current timestep.
+         */
         std::vector<SymmetricTensor<2,dim>> deviatoric_stress;
     };
 
@@ -88,6 +112,9 @@ namespace aspect
           void
           parse_parameters (ParameterHandler &prm);
 
+          void
+          create_elastic_additional_inputs (MaterialModel::MaterialModelInputs<dim> &in) const;
+
           /**
            * Create the two additional material model output objects that contain the
            * elastic shear moduli, elastic viscosity, ratio of computational to elastic timestep,
@@ -98,93 +125,39 @@ namespace aspect
 
           /**
            * Given the stress of the previous time step in the material model inputs @p in,
-           * the elastic shear moduli @p average_elastic_shear_moduli at each point,
-           * and the (viscous) viscosities given in the material model outputs object @p out,
-           * fill a material model outputs objects with the elastic force terms, viscoelastic
-           * strain rate and viscous dissipation.
-           *
-           * Two sets of stresses are available from @p in:
-           * 1) the stress tensor components stress_0_advected, which represent the stress from the previous
-           * timestep $t$ rotated and advected into the current timestep $t+\Delta t_c$; and
-           * 2) the stress tensor components stress_old, which represent the stress from the previous
-           * timestep $t$ advected into the current timestep $t+\Delta t_c$.
-           * Rotation of the stresses has been applied through the reaction_terms filled in the function
-           * fill_reaction_outputs that are used in the right hand side of the respective compositional
-           * field advection equations or to update the particles after they have been advected.
-           * Advection of the stresses occurs through solving the respective field advection equations,
-           * or by advecting the particles carrrying the stresses.
-           * By the time the elastic force terms and the viscoelastic strain rate are required to assemble
-           * the Stokes system, the stresses in @p in have thus been rotated and/or advected.
+           * the elastic shear moduli @p elastic_shear_moduli, the creep viscosities
+           * @p creep_viscosities, the yield stresses @p yield_stresses, and the 
+           * effective viscosities given in the material model outputs object @p out, fill a 
+           * material model outputs object with the elastic force terms, viscoelastic strain 
+           * rate and viscous dissipation.
            */
           void
           fill_elastic_outputs (const MaterialModel::MaterialModelInputs<dim> &in,
-                                const std::vector<double> &average_elastic_shear_moduli,
+                                const std::vector<std::vector<double>> &volume_fractions,
+                                const std::vector<std::vector<double>> &creep_viscosities,
+                                const std::vector<std::vector<double>> &yield_stresses,
                                 MaterialModel::MaterialModelOutputs<dim> &out) const;
 
-          /**
-           * Given the stress of the previous time step in the material model inputs @p in,
-           * the elastic shear moduli @p average_elastic_shear_moduli at each point,
-           * and the (viscous) viscosities given in the material model outputs object @p out,
-           * fill the additional material model outputs (ElasticAdditionalOutputs) in @p out with the
-           * average shear modulus, elastic viscosity, and the deviatoric stress of the current timestep.
-           *
-           * Two sets of stresses are available from @p in:
-           * 1) the stress tensor components stress_0_advected, which represent the stress from the previous
-           * timestep $t$ rotated and advected into the current timestep $t+\Delta t_c$; and
-           * 2) the stress tensor components stress_old, which represent the stress from the previous
-           * timestep $t$ advected into the current timestep $t+\Delta t_c$.
-           * The stress update to the total deviatoric stress of timestep $t+\Delta t_c$ only occurs
-           * at the beginning of the next timestep through an operator splitting procedure if the
-           * stresses are tracked on compositional fields or through a direct update of the stresses
-           * stored on particles. In both cases, this is done through the reaction_rates computed in
-           * the function fill_reaction_rates. In case the full deviatoric stress is needed earlier, e.g.
-           * during postprocessing of timestep $t+\Delta t_c$, this function computes it.
-           */
           void
           fill_elastic_additional_outputs (const MaterialModel::MaterialModelInputs<dim> &in,
-                                           const std::vector<double> &average_elastic_shear_moduli,
+                                           const std::vector<std::vector<double>> &volume_fractions,
+                                           const std::vector<std::vector<double>> &creep_viscosities,
+                                           const std::vector<std::vector<double>> &yield_stresses,
                                            MaterialModel::MaterialModelOutputs<dim> &out) const;
 
           /**
            * Given the stress of the previous time step in the material model inputs @p in,
-           * the elastic shear moduli @p average_elastic_shear_moduli at each point,
-           * and the (viscous) viscosities given in the material model outputs object @p out,
-           * compute an update to the elastic stresses and use it to fill the reaction terms
-           * material model output property.
-           *
-           * The reaction terms are used to applied the rotation of the stresses from the previous
-           * timestep $t$ to the current timestep $t+\Delta t_c$. As such, the reaction_terms are
-           * only non-zero for the first set of stresses that are tracked on compositional fields
-           * or particles.
-           * The reaction terms are an update to the stresses, requiring subtracting the old stresses.
-           * In case of compositional fields, this requires evaluating the solution of the previous
-           * timestep, which has been updated to the full deviatoric stress at the beginning of the
-           * current timestep through operator splitting, instead of the first set of stresses in @p in
-           * (which are the current linearization point).
-           * When using particles, however, the first set of stresses in @p in represents the
-           * full deviatoric stress of the last timestep.
-           */
-          void
-          fill_reaction_outputs (const MaterialModel::MaterialModelInputs<dim> &in,
-                                 const std::vector<double> &average_elastic_shear_moduli,
-                                 MaterialModel::MaterialModelOutputs<dim> &out) const;
-
-          /**
-           * Given the stress of the previous time step in the material model inputs @p in,
-           * the elastic shear moduli @p average_elastic_shear_moduli at each point,
-           * and the (viscous) viscosities given in the material model outputs object @p out,
-           * compute the update to the elastic stresses of the previous timestep and use it
-           * to fill the reaction rates material model output property in @p out.
-           *
-           * Both sets of stresses tracked on compositional fields or particles are updated
-           * through the reaction rates. They are updated to the same total deviatoric stress.
-           * Later in the timestep, however, the first set will be rotated and advected,
-           * the second only advected. The stresses in @p in are based on 'solution' or
-           * 'old_solution', which at the time of operator splitting are the same.
+           * the elastic shear moduli @p elastic_shear_moduli, the creep viscosities
+           * @p creep_viscosities, the yield stresses @p yield_stresses, and the 
+           * effective viscosities given in the material model outputs object &p out, compute
+           * the update to the elastic stresses of the previous timestep and use it to fill 
+           * the reaction rates material model output property in @p out.
            */
           void
           fill_reaction_rates (const MaterialModel::MaterialModelInputs<dim> &in,
-                               const std::vector<double> &average_elastic_shear_moduli,
+                               const std::vector<std::vector<double>> &volume_fractions,
+                               const std::vector<std::vector<double>> &creep_viscosities,
+                               const std::vector<std::vector<double>> &yield_stresses,
                                MaterialModel::MaterialModelOutputs<dim> &out) const;
 
           /**
@@ -193,13 +166,6 @@ namespace aspect
            */
           const std::vector<double> &
           get_elastic_shear_moduli () const;
-
-          /**
-           * Calculate the effective elastic viscosity (this is the equivalent viscosity of
-           * a material which was unstressed at the end of the previous timestep).
-           */
-          double
-          calculate_elastic_viscosity (const double shear_modulus) const;
 
           /**
            * Given the (viscous or visco-plastic) viscosity and the shear modulus, compute the viscoelastic
@@ -227,11 +193,11 @@ namespace aspect
            * the Stokes system, the stresses have already been rotated and/or advected.
            */
           SymmetricTensor<2,dim>
-          calculate_viscoelastic_strain_rate (const SymmetricTensor<2,dim> &strain_rate,
-                                              const SymmetricTensor<2, dim> &stress_0_advected,
-                                              const SymmetricTensor<2, dim> &stress_old,
-                                              const double viscosity_pre_yield,
-                                              const double shear_modulus) const;
+          calculate_viscoelastic_strain_rate (const unsigned int i,
+                                              const MaterialModel::MaterialModelInputs<dim> &in,
+                                              const double creep_viscosity,
+                                              const double shear_modulus,
+                                              const double elastic_timestep) const;
 
           /**
            * Compute the elastic time step.
@@ -239,26 +205,7 @@ namespace aspect
           double
           elastic_timestep () const;
 
-          /**
-           * Calculate the ratio between the computational timestep and
-           * the elastic timestep.
-           */
-          double
-          calculate_timestep_ratio() const;
-
         private:
-          /**
-           * Get the stored stress of the previous timestep. For fields, use a
-           * composition evaluator of the old solution. For particles, get the
-           * stress directly from the particles, which is available from in.composition
-           * by default. However, it can be specified from the input file that the
-           * particle property plugin is to use the stress field solution at the
-           * particle location instead.
-           */
-          std::vector<SymmetricTensor<2, dim>>
-          retrieve_stress_previous_timestep (const MaterialModel::MaterialModelInputs<dim> &in,
-                                             const std::vector<Point<dim>> &quadrature_positions) const;
-
           /**
            * Viscosity of a damper used to stabilize elasticity.
            * A value of 0 Pas is equivalent to not using a damper.
@@ -292,16 +239,7 @@ namespace aspect
            */
           double stabilization_time_scale_factor;
 
-          /**
-           * We cache the evaluators that are necessary to evaluate the velocity
-           * gradients and the old compositions. They are required to compute the elastic stresses,
-           * but are not provided by the material model.
-           * By caching the evaluators, we can avoid recreating them every time we need them.
-           */
-          mutable std::unique_ptr<FEPointEvaluation<dim, dim>> evaluator;
           static constexpr unsigned int n_independent_components = SymmetricTensor<2, dim>::n_independent_components;
-          mutable std::unique_ptr<FEPointEvaluation<n_independent_components, dim>> evaluator_composition;
-
       };
     }
   }

@@ -64,6 +64,9 @@ namespace aspect
         MaterialModel::MaterialModelOutputs<dim> out(n_quadrature_points,
                                                      this->n_compositional_fields());
 
+        this->get_material_model().create_additional_material_model_inputs(in);
+        this->get_material_model().fill_additional_material_model_inputs(in, input_data, this->introspection());
+
         this->get_material_model().create_additional_named_outputs(out);
 
         this->get_material_model().evaluate(in, out);

@@ -1675,6 +1675,9 @@ namespace aspect
     // some heating models require the additional outputs
     heating_model_manager.create_additional_material_model_inputs_and_outputs(in, out);
 
+    // some material models require additional inputs
+    material_model->create_additional_material_model_inputs(in);
+
     // We use SUNDIALs ARKode to compute the reactions. Set up the required parameters.
     // TODO: Should we change some of these based on the Reaction time step input parameter?
     using VectorType = Vector<double>;

@@ -60,6 +60,9 @@ namespace aspect
         // We do not need to compute anything but the viscosity and ElasticAdditionalOutputs
         in.requested_properties = MaterialModel::MaterialProperties::viscosity | MaterialModel::MaterialProperties::additional_outputs;
 
+        this->get_material_model().create_additional_material_model_inputs(in);
+        this->get_material_model().fill_additional_material_model_inputs(in, input_data, this->introspection());
+
         this->get_material_model().create_additional_named_outputs(out);
 
         // Compute the viscosity and additional outputs

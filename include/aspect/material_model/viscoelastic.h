@@ -195,6 +195,9 @@ namespace aspect
          */
 
         void
+        create_additional_material_model_inputs(MaterialModel::MaterialModelInputs<dim> &in) const override;
+
+        void
         create_additional_named_outputs(MaterialModel::MaterialModelOutputs<dim> &out) const override;
 
       private:

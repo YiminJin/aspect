@@ -873,6 +873,10 @@ namespace aspect
         fill (const LinearAlgebra::BlockVector &solution,
               const FEValuesBase<dim>          &fe_values,
               const Introspection<dim>         &introspection) = 0;
+
+        virtual void
+        fill (const DataPostprocessorInputs::Vector<dim> &input_data,
+              const Introspection<dim> &introspection) = 0;
     };
 
 
@@ -1408,6 +1412,15 @@ namespace aspect
                        MaterialModel::MaterialModelOutputs<dim> &out) const = 0;
 
         /**
+         * If this material model requires additional inputs that are
+         * derived from AdditionalMaterialInputs, create them in here.
+         * By default, this does nothing.
+         */
+        virtual
+        void
+        create_additional_material_model_inputs (MaterialModelInputs &inputs) const;
+
+        /**
          * If this material model can produce additional named outputs
          * that are derived from NamedAdditionalOutputs, create them in here.
          * By default, this does nothing.
@@ -1430,6 +1443,12 @@ namespace aspect
                                               const LinearAlgebra::BlockVector        &solution,
                                               const FEValuesBase<dim>                 &fe_values,
                                               const Introspection<dim>                &introspection) const;
+
+        virtual
+        void
+        fill_additional_material_model_inputs(MaterialModel::MaterialModelInputs<dim>    &input,
+                                              const DataPostprocessorInputs::Vector<dim> &data,
+                                              const Introspection<dim>                   &introspection) const;
 
       protected:
         /**

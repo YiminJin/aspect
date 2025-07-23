@@ -68,6 +68,9 @@ namespace aspect
         void fill (const LinearAlgebra::BlockVector &solution,
                    const FEValuesBase<dim>          &fe_values,
                    const Introspection<dim>         &introspection) override;
+
+        void fill (const DataPostprocessorInputs::Vector<dim> &data,
+                   const Introspection<dim> &introspection) override;
     };
 
     template <int dim>

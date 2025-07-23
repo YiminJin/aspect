@@ -116,6 +116,18 @@ namespace aspect
        * MaterialModel::PrescribedDilation::dilation_rhs_term.
        */
       std::vector<double> dilation_rhs_terms;
+
+      /**
+       * The creep viscosity of each composition, which is required when 
+       * elasticity is enabled.
+       */
+      std::vector<double> composition_creep_viscosities;
+
+      /**
+       * The yield stress of each composition, which is required when 
+       * elasticity is enabled.
+       */
+      std::vector<double> composition_yield_stresses;
     };
 
     namespace Rheology

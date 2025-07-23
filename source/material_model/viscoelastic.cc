@@ -36,8 +36,9 @@ namespace aspect
     {
       EquationOfStateOutputs<dim> eos_outputs (this->introspection().get_number_of_fields_of_type(CompositionalFieldDescription::chemical_composition)+1);
 
-      std::vector<double> average_elastic_shear_moduli (in.n_evaluation_points());
-      std::vector<double> elastic_shear_moduli(elastic_rheology.get_elastic_shear_moduli());
+      const std::vector<double> elastic_shear_moduli(elastic_rheology.get_elastic_shear_moduli());
+
+      std::vector<std::vector<double>> volume_fractions_backup(in.n_evaluation_points());
 
       for (unsigned int i=0; i < in.n_evaluation_points(); ++i)
         {
@@ -45,6 +46,7 @@ namespace aspect
 
           const std::vector<double> volume_fractions = MaterialUtilities::compute_only_composition_fractions(composition,
                                                        this->introspection().chemical_composition_field_indices());
+          volume_fractions_backup[i] = volume_fractions;
 
           equation_of_state.evaluate(in, i, eos_outputs);
 
@@ -66,11 +68,8 @@ namespace aspect
           for (unsigned int c=0; c<in.composition[i].size(); ++c)
             out.reaction_terms[i][c] = 0.0;
 
-          // Average the viscous viscosity and the shear modulus over the compositions
-          average_elastic_shear_moduli[i] = MaterialUtilities::average_value(volume_fractions, elastic_shear_moduli, viscosity_averaging);
-
           // If we have multiple compositions, we need to first compute their respective viscoelastic viscosities,
-          // based on their respective viscous viscosities and the averaged shear modulus, before averaging them
+          // based on their respective viscous viscosities and the shear modulus, before averaging them
           // into the final effective viscosity.
           std::vector<double> viscoelastic_viscosities(volume_fractions.size());
           for (unsigned int j=0; j < volume_fractions.size(); ++j)
@@ -78,27 +77,29 @@ namespace aspect
               // The viscoelastic viscosity is scaled with the timestep ratio $\frac{\Delta t_c}{\Delta t_{el}}$ in the
               // calculate_viscoelastic_viscosity function.
               viscoelastic_viscosities[j] = elastic_rheology.calculate_viscoelastic_viscosity(viscosities[j],
-                                                                                              average_elastic_shear_moduli[i]);
+                                                                                              elastic_shear_moduli[j]);
             }
 
           // Average viscoelastic (e.g., effective) viscosity (equation 28 in Moresi et al., 2003, J. Comp. Phys.).
-          out.viscosities[i] =  MaterialUtilities::average_value(volume_fractions, viscoelastic_viscosities, viscosity_averaging);
+          out.viscosities[i] = MaterialUtilities::average_value(volume_fractions, viscoelastic_viscosities, viscosity_averaging);
         }
 
+      // Input arguments of functions Rheology::Elasticity::fill_elastic_outputs() 
+      // and Rheology::Elasticity::fill_reaction_rates()
+      std::vector<std::vector<double>> composition_viscosities(in.n_evaluation_points());
+      for (unsigned int i = 0; i < in.n_evaluation_points(); ++i)
+        composition_viscosities[i] = viscosities;
+
+      std::vector<std::vector<double>> dummy_yield_stresses;
+
       // Fill the body force term, viscoelastic strain rate and viscous dissipation.
-      elastic_rheology.fill_elastic_outputs(in, average_elastic_shear_moduli, out);
-      // Fill the elastic additional outputs with the shear modulus, elastic viscosity
-      // and deviatoric stress of the current timestep.
-      // TODO requests_property is already checked in the fill_ function,
-      // but we can also do it here
-      //if (in.requests_property(MaterialProperties::additional_outputs))
-      elastic_rheology.fill_elastic_additional_outputs(in, average_elastic_shear_moduli, out);
-      // Fill the reaction terms to apply the rotation of the stresses into the current timestep.
-      elastic_rheology.fill_reaction_outputs(in, average_elastic_shear_moduli, out);
-      // Fill the reaction_rates that during operator splitting apply the stress update of the previous
-      // timestep to the advected and rotated stress computed in the previous timestep ($\tau^{0adv}$)
-      // to obtain $\tau^{t}$.
-      elastic_rheology.fill_reaction_rates(in, average_elastic_shear_moduli, out);
+      elastic_rheology.fill_elastic_outputs(in, volume_fractions_backup, composition_viscosities, dummy_yield_stresses, out);
+      // Fill the elastic additional outputs with the shear modulus and deviatoric stress
+      // of the current timestep.
+      elastic_rheology.fill_elastic_additional_outputs(in, volume_fractions_backup, composition_viscosities, dummy_yield_stresses, out);
+      // Fill the reaction_rates that during operator splitting step that updates the stored stress
+      // from $\tau_t$ to $\tau_{t+dtc}$.
+      elastic_rheology.fill_reaction_rates(in, volume_fractions_backup, composition_viscosities, dummy_yield_stresses, out);
     }
 
 
@@ -194,6 +195,16 @@ namespace aspect
       this->model_dependence.compressibility = NonlinearDependence::none;
       this->model_dependence.specific_heat = NonlinearDependence::compositional_fields;
       this->model_dependence.thermal_conductivity = NonlinearDependence::compositional_fields;
+    }
+
+
+    
+    template <int dim>
+    void
+    Viscoelastic<dim>::
+    create_additional_material_model_inputs (MaterialModel::MaterialModelInputs<dim> &in) const
+    {
+      elastic_rheology.create_elastic_additional_inputs(in);
     }
 
 

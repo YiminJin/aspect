@@ -107,8 +107,6 @@ namespace aspect
       EquationOfStateOutputs<dim> eos_outputs (this->introspection().get_number_of_fields_of_type(CompositionalFieldDescription::chemical_composition)+1);
       EquationOfStateOutputs<dim> eos_outputs_all_phases (n_phases);
 
-      std::vector<double> average_elastic_shear_moduli (in.n_evaluation_points());
-
       // Store value of phase function for each phase and composition
       // While the number of phases is fixed, the value of the phase function is updated for every point
       std::vector<double> phase_function_values(phase_function.n_phase_transitions(), 0.0);
@@ -117,6 +115,9 @@ namespace aspect
                                                             std::vector<double>(phase_function_discrete->n_phase_transitions(), 0.0): std::vector<double>());
 
 
+      std::vector<std::vector<double>> volume_fractions_backup(in.n_evaluation_points());
+      std::vector<std::vector<double>> creep_viscosities(in.n_evaluation_points());
+      std::vector<std::vector<double>> yield_stresses(in.n_evaluation_points());
       // Loop through all requested points
       for (unsigned int i=0; i < in.n_evaluation_points(); ++i)
         {
@@ -243,6 +244,13 @@ namespace aspect
                                                         isostrain_viscosities,
                                                         in, out, phase_function_values,
                                                         n_phase_transitions_for_each_chemical_composition);
+
+              if (this->get_parameters().enable_elasticity)
+                {
+                  volume_fractions_backup[i] = volume_fractions;
+                  creep_viscosities[i] = isostrain_viscosities.composition_creep_viscosities;
+                  yield_stresses[i]    = isostrain_viscosities.composition_yield_stresses;
+                }
             }
           else
             {
@@ -279,9 +287,6 @@ namespace aspect
           if (this->get_parameters().enable_elasticity)
             {
               // Compute average elastic shear modulus
-              average_elastic_shear_moduli[i] = MaterialUtilities::average_value(volume_fractions,
-                                                                                 rheology->elastic_rheology.get_elastic_shear_moduli(),
-                                                                                 rheology->viscosity_averaging);
             }
 
           if (const std::shared_ptr<PrescribedPlasticDilation<dim>> plastic_dilation =
@@ -309,19 +314,15 @@ namespace aspect
         {
           // Fill the elastic outputs with the body force term for the RHS, the viscoelastic strain rate
           // and the viscous dissipation.
-          rheology->elastic_rheology.fill_elastic_outputs(in, average_elastic_shear_moduli, out);
-          // Fill the elastic additional outputs with the shear modulus, elastic viscosity
-          // and deviatoric stress of the current timestep.
-          // TODO requests_property is already checked in the fill_ function,
-          // but we can also do it here
-          //if (in.requests_property(MaterialProperties::additional_outputs))
-          rheology->elastic_rheology.fill_elastic_additional_outputs(in, average_elastic_shear_moduli, out);
-          // Fill the reaction terms that account for the rotation of the stresses.
-          rheology->elastic_rheology.fill_reaction_outputs(in, average_elastic_shear_moduli, out);
-          // Fill the reaction_rates that apply the stress update of the previous
-          // timestep to the advected and rotated stress computed in the previous timestep ($\tau^{0}$)
-          // to obtain $\tau^{t}$.
-          rheology->elastic_rheology.fill_reaction_rates(in, average_elastic_shear_moduli, out);
+          rheology->elastic_rheology.fill_elastic_outputs(in, volume_fractions_backup, creep_viscosities, yield_stresses, out);
+
+          // Fill the elastic additional outputs with the shear modulus and deviatoric stress
+          // of the current timestep.
+          rheology->elastic_rheology.fill_elastic_additional_outputs(in, volume_fractions_backup, creep_viscosities, yield_stresses, out);
+
+          // Fill the reaction rates for the operator splitting step that updates the stored stress
+          // from $\tau_t$ to $\tau_{t+dtc}$
+          rheology->elastic_rheology.fill_reaction_rates(in, volume_fractions_backup, creep_viscosities, yield_stresses, out);
         }
     }
 
@@ -464,6 +465,17 @@ namespace aspect
       this->model_dependence.compressibility = NonlinearDependence::none;
       this->model_dependence.specific_heat = NonlinearDependence::none;
       this->model_dependence.thermal_conductivity = NonlinearDependence::temperature | NonlinearDependence::pressure | NonlinearDependence::compositional_fields;
+    }
+
+
+
+    template <int dim>
+    void
+    ViscoPlastic<dim>::
+    create_additional_material_model_inputs (MaterialModel::MaterialModelInputs<dim> &in) const
+    {
+      if (this->get_parameters().enable_elasticity)
+        rheology->elastic_rheology.create_elastic_additional_inputs(in);
     }
 
 

@@ -108,27 +108,12 @@ namespace aspect
         output_parameters.composition_yielding.resize(volume_fractions.size(), false);
         output_parameters.composition_viscosities.resize(volume_fractions.size(), numbers::signaling_nan<double>());
         output_parameters.drucker_prager_parameters.resize(volume_fractions.size());
-        output_parameters.dilation_lhs_terms.resize(volume_fractions.size(), numbers::signaling_nan<double>());
-        output_parameters.dilation_rhs_terms.resize(volume_fractions.size(), numbers::signaling_nan<double>());
 
-        // Assemble current and old stress tensor if elastic behavior is enabled
-        SymmetricTensor<2, dim> stress_0_advected = numbers::signaling_nan<SymmetricTensor<2, dim>>();
-        SymmetricTensor<2, dim> stress_old = numbers::signaling_nan<SymmetricTensor<2, dim>>();
         double elastic_shear_modulus = numbers::signaling_nan<double>();
         if (this->get_parameters().enable_elasticity)
           {
-            // The first set of stresses in in.composition holds $\tau^{0adv}$
-            // after the first advection nonlinear iteration,
-            // which is when the viscosity matters for the Stokes system.
-            const std::vector<unsigned int> &stress_field_indices = this->introspection().get_indices_for_fields_of_type(CompositionalFieldDescription::stress);
-            stress_0_advected = (Utilities::Tensors::to_symmetric_tensor<dim>(&in.composition[i][stress_field_indices[0]],
-                                                                              &in.composition[i][stress_field_indices[0]]+SymmetricTensor<2, dim>::n_independent_components));
-
-            // The old stresses are only changed in the operator splitting step and have been advected into
-            // the current timestep. They are stored in the second set of n_independent_components.
-            stress_old = (Utilities::Tensors::to_symmetric_tensor<dim>(&in.composition[i][stress_field_indices[SymmetricTensor<2, dim>::n_independent_components]],
-                                                                       &in.composition[i][stress_field_indices[SymmetricTensor<2, dim>::n_independent_components]]+SymmetricTensor<2, dim>::n_independent_components));
-
+            output_parameters.composition_creep_viscosities.resize(volume_fractions.size(), numbers::signaling_nan<double>());
+            output_parameters.composition_yield_stresses.resize(volume_fractions.size(), numbers::signaling_nan<double>());
 
             // Average the compositional contributions to elastic_shear_moduli here and use
             // a volume-averaged shear modulus in the loop over the compositions below.
@@ -137,6 +122,12 @@ namespace aspect
             // The averaging used is the same as for the viscosity.
             const std::vector<double> &elastic_shear_moduli = elastic_rheology.get_elastic_shear_moduli();
             elastic_shear_modulus = MaterialUtilities::average_value(volume_fractions, elastic_shear_moduli, viscosity_averaging);
+          }
+
+        if (this->get_parameters().enable_prescribed_dilation)
+          {
+            output_parameters.dilation_lhs_terms.resize(volume_fractions.size(), numbers::signaling_nan<double>());
+            output_parameters.dilation_rhs_terms.resize(volume_fractions.size(), numbers::signaling_nan<double>());
           }
 
         // Use a specified "reference" strain rate if the strain rate is not yet available
@@ -292,6 +283,7 @@ namespace aspect
             if (this->get_parameters().enable_elasticity)
               {
                 // Step 3a: calculate viscoelastic (effective) viscosity
+                output_parameters.composition_creep_viscosities[j] = non_yielding_viscosity;
                 non_yielding_viscosity = elastic_rheology.calculate_viscoelastic_viscosity(non_yielding_viscosity, elastic_shear_modulus);
 
                 if (use_reference_strainrate == false)
@@ -307,12 +299,14 @@ namespace aspect
                                       "not filled by the caller."));
 
                     const SymmetricTensor<2, dim> effective_strain_rate =
-                      elastic_rheology.calculate_viscoelastic_strain_rate(Utilities::Tensors::consistent_deviator(in.strain_rate[i]),
-                                                                          stress_0_advected,
-                                                                          stress_old,
-                                                                          non_yielding_viscosity,
-                                                                          elastic_shear_modulus);
+                      elastic_rheology.calculate_viscoelastic_strain_rate(i, in,
+                                                                          output_parameters.composition_creep_viscosities[j],
+                                                                          elastic_shear_modulus,
+                                                                          elastic_rheology.elastic_timestep());
 
+                    // Function Rheology::Elasticity::calculate_viscoelastic_strain_rate() has applied
+                    // Utilities::Tensors::consistent_deviator() to the strain rate, so we can use function
+                    // Utilities::Tensors::consistent_second_invariant_of_deviatoric_tensor() directly
                     effective_edot_ii = std::max(std::sqrt(std::max(-Utilities::Tensors::consistent_second_invariant_of_deviatoric_tensor(effective_strain_rate), 0.)),
                                                  min_strain_rate);
                   }
@@ -355,6 +349,9 @@ namespace aspect
             // Step 5a: calculate the Drucker-Prager yield stress
             const double yield_stress = drucker_prager_plasticity.compute_yield_stress(pressure_for_plasticity,
                                                                                        output_parameters.drucker_prager_parameters[j]);
+
+            if (this->get_parameters().enable_elasticity)
+              output_parameters.composition_yield_stresses[j] = yield_stress;
 
             // Step 5b: select if the yield viscosity is based on Drucker Prager or a stress limiter rheology
             double effective_viscosity = non_yielding_viscosity;

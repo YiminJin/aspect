@@ -73,6 +73,26 @@ namespace aspect
 
 
     template <int dim>
+    void MeltInputs<dim>::fill (const DataPostprocessorInputs::Vector<dim> &data,
+                                const Introspection<dim> &introspection)
+    {
+      const unsigned int n_points = data.solution_values.size();
+      compaction_pressures.resize(n_points);
+      fluid_velocities.resize(n_points);
+
+      const unsigned int index_p_c = introspection.variable("compaction pressure").first_component_index;
+      const unsigned int index_u_f = introspection.variable("fluid velocity").first_component_index;
+      for (unsigned int q = 0; q < n_points; ++q)
+        {
+          compaction_pressures[q] = data.solution_values[q][index_p_c];
+          for (unsigned int d = 0; d < dim; ++d)
+            fluid_velocities[q][d] = data.solution_values[q][index_u_f + d];
+        }
+    }
+
+
+
+    template <int dim>
     MeltOutputs<dim>::MeltOutputs  (const unsigned int n_points,
                                     const unsigned int /*n_comp*/)
       :
