@@ -32,11 +32,6 @@ namespace aspect
     {
       template <int dim>
       ElasticStress<dim>::ElasticStress ()
-        :
-        material_inputs(1,0),
-        material_outputs(1,0),
-        material_inputs_cell(1,0),
-        material_outputs_cell(1,0)
       {}
 
 
@@ -57,16 +52,10 @@ namespace aspect
         AssertThrow(!manager.plugin_name_exists("composition"),
                     ExcMessage("The 'elastic stress' plugin cannot be used in combination with the 'composition' plugin."));
 
-        material_inputs = MaterialModel::MaterialModelInputs<dim>(1, this->n_compositional_fields());
-
-        material_outputs = MaterialModel::MaterialModelOutputs<dim>(1, this->n_compositional_fields());
-
-        material_inputs.requested_properties = MaterialModel::MaterialProperties::reaction_terms;
-
         // Get the indices of those compositions that correspond to stress tensor elements.
         stress_field_indices = this->introspection().get_indices_for_fields_of_type(CompositionalFieldDescription::stress);
-        AssertThrow((stress_field_indices.size() == 2*SymmetricTensor<2,dim>::n_independent_components),
-                    ExcMessage("The number of stress tensor element fields in the 'elastic stress' plugin does not equal twice the number of independent components."));
+        AssertThrow((stress_field_indices.size() == SymmetricTensor<2,dim>::n_independent_components),
+                    ExcMessage("The number of stress tensor element fields in the 'elastic stress' plugin does not equal the number of independent components."));
 
         // Get the indices of all compositions that do not correspond to stress tensor elements.
         std::vector<unsigned int> all_field_indices(this->n_compositional_fields());
@@ -156,16 +145,20 @@ namespace aspect
                       ++p;
                     }
 
-                  // Resize the material model inputs to the number of particles in the current cell
-                  material_inputs_cell  = MaterialModel::MaterialModelInputs<dim>(n_particles_in_cell, this->n_compositional_fields());
-                  material_inputs_cell.current_cell = cell;
-                  material_inputs_cell.requested_properties = MaterialModel::MaterialProperties::reaction_rates;
-                  material_outputs_cell = MaterialModel::MaterialModelOutputs<dim>(n_particles_in_cell, this->n_compositional_fields());
+                  MaterialModel::MaterialModelInputs<dim> material_inputs(n_particles_in_cell, this->n_compositional_fields());
+                  material_inputs.current_cell = cell;
+                  material_inputs.requested_properties = MaterialModel::MaterialProperties::reaction_rates;
+                  // We need additional inputs to store the velocity gradients
+                  this->get_material_model().create_additional_material_model_inputs(material_inputs);
+                  std::shared_ptr<MaterialModel::ElasticAdditionalInputs<dim>> additional_inputs
+                    = material_inputs.template get_additional_input_object<MaterialModel::ElasticAdditionalInputs<dim>>();
+
+                  MaterialModel::MaterialModelOutputs<dim> material_outputs(n_particles_in_cell, this->n_compositional_fields());
                   // The reaction rates are stored in additional outputs
-                  this->get_material_model().create_additional_named_outputs(material_outputs_cell);
+                  this->get_material_model().create_additional_named_outputs(material_outputs);
 
                   const std::shared_ptr<MaterialModel::ReactionRateOutputs<dim>> reaction_rate_outputs
-                    = material_outputs_cell.template get_additional_output_object<MaterialModel::ReactionRateOutputs<dim>>();
+                    = material_outputs.template get_additional_output_object<MaterialModel::ReactionRateOutputs<dim>>();
 
                   // Collect the values of the old solution restricted to the current cell's DOFs
                   small_vector<double> old_solution_values(this->get_fe().dofs_per_cell);
@@ -188,10 +181,14 @@ namespace aspect
                     }
 
                   // To store the old solutions
-                  std::vector<small_vector<double,50>> old_solution(n_particles_in_cell,small_vector<double,50>(evaluators->n_components(), numbers::signaling_nan<double>()));
+                  std::vector<small_vector<double,50>> old_solution(n_particles_in_cell,
+                                                                    small_vector<double,50>(evaluators->n_components(), 
+                                                                                            numbers::signaling_nan<double>()));
 
                   // To store the old gradients
-                  std::vector<small_vector<Tensor<1,dim>,50>> old_gradients(n_particles_in_cell,small_vector<Tensor<1,dim>,50>(evaluators->n_components(), numbers::signaling_nan<Tensor<1,dim>>()));
+                  std::vector<small_vector<Tensor<1,dim>,50>> old_gradients(n_particles_in_cell,
+                                                                            small_vector<Tensor<1,dim>,50>(evaluators->n_components(), 
+                                                                                                           numbers::signaling_nan<Tensor<1,dim>>()));
 
                   // Loop over all particles in the cell
                   auto particle = particles_in_cell.begin();
@@ -207,40 +204,41 @@ namespace aspect
 
                       // Fill material model input
                       // Get the real location of the particle
-                      material_inputs_cell.position[i] = particle->get_location();
+                      material_inputs.position[i] = particle->get_location();
 
-                      material_inputs_cell.temperature[i] = old_solution[i][this->introspection().component_indices.temperature];
+                      material_inputs.temperature[i] = old_solution[i][this->introspection().component_indices.temperature];
 
-                      material_inputs_cell.pressure[i] = old_solution[i][this->introspection().component_indices.pressure];
+                      material_inputs.pressure[i] = old_solution[i][this->introspection().component_indices.pressure];
 
                       for (unsigned int d = 0; d < dim; ++d)
-                        material_inputs_cell.velocity[i][d] = old_solution[i][this->introspection().component_indices.velocities[d]];
+                        material_inputs.velocity[i][d] = old_solution[i][this->introspection().component_indices.velocities[d]];
 
                       // Fill the non-stress composition inputs with the old_solution.
                       for (const unsigned int &n : non_stress_field_indices)
-                        material_inputs_cell.composition[i][n] = old_solution[i][this->introspection().component_indices.compositional_fields[n]];
+                        material_inputs.composition[i][n] = old_solution[i][this->introspection().component_indices.compositional_fields[n]];
 
                       // Retrieve the ve_stress_* values from the particles and fields and
                       // fill the material model inputs with a weighted average of the two.
                       // In some cases, using the field value leads to more stable results.
                       // After the particles have been restored, their properties have the values of the previous timestep.
-                      for (unsigned int n = 0; n < 2*SymmetricTensor<2,dim>::n_independent_components; ++n)
+                      for (unsigned int n = 0; n < SymmetricTensor<2,dim>::n_independent_components; ++n)
                         {
                           const double particle_stress_value = particle->get_properties()[data_position + n];
                           const double field_stress_value = old_solution[i][this->introspection().component_indices.compositional_fields[stress_field_indices[n]]];
-                          const double stress_value = particle_weight * particle_stress_value + (1-particle_weight) * field_stress_value;
-                          material_inputs_cell.composition[i][stress_field_indices[n]] = stress_value;
+                          const double stress_value = particle_weight * particle_stress_value + (1.0 - particle_weight) * field_stress_value;
+                          material_inputs.composition[i][stress_field_indices[n]] = stress_value;
                         }
 
                       Tensor<2,dim> grad_u;
                       for (unsigned int d=0; d<dim; ++d)
                         grad_u[d] = old_gradients[i][d];
-                      material_inputs_cell.strain_rate[i] = symmetrize (grad_u);
+                      additional_inputs->velocity_gradients[i] = grad_u;
+                      material_inputs.strain_rate[i] = symmetrize (grad_u);
                     }
 
                   // Evaluate the material model to get the reaction rates
                   // for all the particles in the current cell.
-                  this->get_material_model().evaluate (material_inputs_cell,material_outputs_cell);
+                  this->get_material_model().evaluate (material_inputs, material_outputs);
 
                   // Update all particles in the current cell.
                   particle = particles_in_cell.begin();
@@ -248,8 +246,10 @@ namespace aspect
                     {
                       // Add the reaction_rates * timestep = update to the corresponding stress
                       // tensor components
-                      for (unsigned int p = 0; p < 2*SymmetricTensor<2,dim>::n_independent_components ; ++p)
-                        particle->get_properties()[data_position + p] = material_inputs_cell.composition[i][stress_field_indices[p]] + reaction_rate_outputs->reaction_rates[i][stress_field_indices[p]] * this->get_timestep();
+                      for (unsigned int p = 0; p < SymmetricTensor<2,dim>::n_independent_components ; ++p)
+                        particle->get_properties()[data_position + p] 
+                          = material_inputs.composition[i][stress_field_indices[p]] + 
+                            reaction_rate_outputs->reaction_rates[i][stress_field_indices[p]] * this->get_timestep();
                     }
                 }
             }
@@ -282,69 +282,16 @@ namespace aspect
 
             data.push_back(this->get_initial_composition_manager().initial_composition(position,this->introspection().compositional_index_for_name("ve_stress_yz")));
           }
-
-        data.push_back(this->get_initial_composition_manager().initial_composition(position,this->introspection().compositional_index_for_name("ve_stress_xx_old")));
-
-        data.push_back(this->get_initial_composition_manager().initial_composition(position,this->introspection().compositional_index_for_name("ve_stress_yy_old")));
-
-        if (dim == 2)
-          {
-            data.push_back(this->get_initial_composition_manager().initial_composition(position,this->introspection().compositional_index_for_name("ve_stress_xy_old")));
-          }
-        else if (dim == 3)
-          {
-            data.push_back(this->get_initial_composition_manager().initial_composition(position,this->introspection().compositional_index_for_name("ve_stress_zz_old")));
-
-            data.push_back(this->get_initial_composition_manager().initial_composition(position,this->introspection().compositional_index_for_name("ve_stress_xy_old")));
-
-            data.push_back(this->get_initial_composition_manager().initial_composition(position,this->introspection().compositional_index_for_name("ve_stress_xz_old")));
-
-            data.push_back(this->get_initial_composition_manager().initial_composition(position,this->introspection().compositional_index_for_name("ve_stress_yz_old")));
-          }
       }
 
 
 
       template <int dim>
       void
-      ElasticStress<dim>::update_particle_properties(const ParticleUpdateInputs<dim> &inputs,
-                                                     typename ParticleHandler<dim>::particle_iterator_range &particles) const
+      ElasticStress<dim>::update_particle_properties(const ParticleUpdateInputs<dim> &/*inputs*/,
+                                                     typename ParticleHandler<dim>::particle_iterator_range &/*particles*/) const
       {
-        unsigned int p = 0;
-        for (auto &particle: particles)
-          {
-            material_inputs.position[0] = particle.get_location();
-
-
-            material_inputs.current_cell = inputs.current_cell;
-
-            material_inputs.temperature[0] = inputs.solution[p][this->introspection().component_indices.temperature];
-
-            material_inputs.pressure[0] = inputs.solution[p][this->introspection().component_indices.pressure];
-
-            for (unsigned int d = 0; d < dim; ++d)
-              material_inputs.velocity[0][d] = inputs.solution[p][this->introspection().component_indices.velocities[d]];
-
-            // Fill the non-stress composition inputs with the solution.
-            for (const unsigned int &n : non_stress_field_indices)
-              material_inputs.composition[0][n] = inputs.solution[p][this->introspection().component_indices.compositional_fields[n]];
-            // For the stress composition we use the ve_stress_* stored on the particles.
-            for (unsigned int n = 0; n < 2*SymmetricTensor<2,dim>::n_independent_components; ++n)
-              material_inputs.composition[0][stress_field_indices[n]] = particle.get_properties()[this->data_position + n];
-
-            Tensor<2,dim> grad_u;
-            for (unsigned int d=0; d<dim; ++d)
-              grad_u[d] = inputs.gradients[p][d];
-            material_inputs.strain_rate[0] = symmetrize (grad_u);
-
-            this->get_material_model().evaluate (material_inputs,material_outputs);
-
-            // Apply the stress rotation to the ve_stress_* fields, not the ve_stress_*_old fields.
-            for (unsigned int i = 0; i < SymmetricTensor<2,dim>::n_independent_components ; ++i)
-              particle.get_properties()[this->data_position + i] += material_outputs.reaction_terms[0][stress_field_indices[i]];
-
-            ++p;
-          }
+        // do nothing
       }
 
 
@@ -389,21 +336,6 @@ namespace aspect
             property_information.emplace_back("ve_stress_xy",1);
             property_information.emplace_back("ve_stress_xz",1);
             property_information.emplace_back("ve_stress_yz",1);
-          }
-
-        property_information.emplace_back("ve_stress_xx_old",1);
-        property_information.emplace_back("ve_stress_yy_old",1);
-
-        if (dim == 2)
-          {
-            property_information.emplace_back("ve_stress_xy_old",1);
-          }
-        else if (dim == 3)
-          {
-            property_information.emplace_back("ve_stress_zz_old",1);
-            property_information.emplace_back("ve_stress_xy_old",1);
-            property_information.emplace_back("ve_stress_xz_old",1);
-            property_information.emplace_back("ve_stress_yz_old",1);
           }
 
         return property_information;

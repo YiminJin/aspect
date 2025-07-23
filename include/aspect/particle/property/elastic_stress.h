@@ -106,24 +106,6 @@ namespace aspect
 
         private:
           /**
-           * Objects that are used to compute the particle property. Since the
-           * object is expensive to create and is needed often it is kept as a
-           * member variable. Because it is changed inside a const member function
-           * (update_particle_property) it has to be mutable, but since it is
-           * only used inside that function and always set before being used
-           * that is not a problem. This implementation is not thread safe,
-           * but it is currently not used in a threaded context.
-           *
-           * The first two objects provide material model in- and outputs for
-           * one particle at a time; the second set for all the particles
-           * in a cell at the same time. TODO use one set for both?
-           */
-          mutable MaterialModel::MaterialModelInputs<dim> material_inputs;
-          mutable MaterialModel::MaterialModelOutputs<dim> material_outputs;
-          mutable MaterialModel::MaterialModelInputs<dim> material_inputs_cell;
-          mutable MaterialModel::MaterialModelOutputs<dim> material_outputs_cell;
-
-          /**
            * The indices of the compositional fields that represent components of the
            * viscoelastic stress tensors.
            */
