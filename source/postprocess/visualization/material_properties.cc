@@ -160,6 +160,9 @@ namespace aspect
               in.requested_properties = MaterialModel::MaterialProperties::all_properties;
           }
 
+        this->get_material_model().create_additional_material_model_inputs(in);
+        this->get_material_model().fill_additional_material_model_inputs(in, input_data, this->introspection());
+
         this->get_material_model().evaluate(in, out);
 
         // We want to output material properties as they are used in the

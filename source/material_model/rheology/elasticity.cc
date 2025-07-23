@@ -308,7 +308,8 @@ namespace aspect
       Elasticity<dim>::create_elastic_additional_inputs (MaterialModel::MaterialModelInputs<dim> &in) const
       {
         if (in.requests_property(MaterialProperties::additional_outputs) ||
-            in.requests_property(MaterialProperties::reaction_rates))
+            in.requests_property(MaterialProperties::reaction_rates) ||
+            in.requests_property(MaterialProperties::viscosity))
           {
             const unsigned int n_points = in.n_evaluation_points();
             if (in.template has_additional_input_object<ElasticAdditionalInputs<dim>>() == false)
@@ -695,22 +696,8 @@ namespace aspect
         // Get the elastic time step $dte$ and the computational time step $dtc$.
         // Note that the time step has been updated before calling this function,
         // so we need to request for the old time step.
-        double dte = 0.0, dtc = 0.0;
-        if (this->get_timestep_number() > 1)
-          {
-            dtc = this->get_old_timestep();
-            if (use_fixed_elastic_time_step)
-              dte = fixed_elastic_time_step;
-            else
-              dte = dtc;
-          }
-        else
-          {
-            // At $t=0$, the computational time step always equals to
-            // the elastic time step.
-            dte = fixed_elastic_time_step;
-            dtc = dte;
-          }
+        const double dte = elastic_timestep();
+        const double dtc = (this->get_timestep_number() > 0 ? this->get_timestep() : dte);
 
         std::vector<SymmetricTensor<2,dim>> stress_updates(volume_fractions[0].size());
         for (unsigned int i = 0; i < in.n_evaluation_points(); ++i)

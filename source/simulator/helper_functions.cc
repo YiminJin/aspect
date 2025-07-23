@@ -302,6 +302,9 @@ namespace aspect
 
     // We do not need to compute anything but the viscosity
     in.requested_properties = MaterialModel::MaterialProperties::viscosity;
+    // Some material models require additional inputs to compute
+    // the viscosity
+    material_model->create_additional_material_model_inputs(in);
 
     for (const auto &cell : dof_handler.active_cell_iterators())
       if (cell->is_locally_owned())
@@ -311,6 +314,8 @@ namespace aspect
                     cell,
                     introspection,
                     solution);
+
+          material_model->fill_additional_material_model_inputs(in, solution, fe_values, introspection);
 
           // We do not call the cell-wise average function of the
           // material model, because we average globally below

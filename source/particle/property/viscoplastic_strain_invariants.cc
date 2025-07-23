@@ -50,6 +50,7 @@ namespace aspect
 
         n_components = 0;
         material_inputs = MaterialModel::MaterialModelInputs<dim>(1,this->n_compositional_fields());
+        this->get_material_model().create_additional_material_model_inputs(material_inputs);
 
         // Find out which fields are used.
         if (this->introspection().compositional_name_exists("plastic_strain"))
@@ -123,6 +124,16 @@ namespace aspect
 
             // Calculate strain rate from velocity gradients
             material_inputs.strain_rate[0] = symmetrize (grad_u);
+
+            // If elasticity is enabled, fill the additional inputs
+            if (this->get_parameters().enable_elasticity)
+              {
+                std::shared_ptr<MaterialModel::ElasticAdditionalInputs<dim>> additional_inputs
+                  = material_inputs.template get_additional_input_object<MaterialModel::ElasticAdditionalInputs<dim>>();
+                AssertThrow(additional_inputs != nullptr, ExcInternalError());
+
+                additional_inputs->velocity_gradients[0] = grad_u;
+              }
 
             // Put compositional fields into single variable
             for (unsigned int i = 0; i < this->n_compositional_fields(); ++i)
