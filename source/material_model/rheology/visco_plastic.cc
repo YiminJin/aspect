@@ -427,6 +427,35 @@ namespace aspect
 
 
 
+      namespace
+      {
+        // Copy a MaterialModelInputs object with additional inputs.
+        // It is assumed that ElasticAdditionalInputs is the only 
+        // AdditionalMaterialInputs object to be copied.
+        template <int dim>
+        void
+        copy_material_model_inputs(MaterialModel::MaterialModelInputs<dim>       &dst,
+                                   const MaterialModel::MaterialModelInputs<dim> &src)
+        {
+          dst.position             = src.position;
+          dst.temperature          = src.temperature;
+          dst.pressure             = src.pressure;
+          dst.pressure_gradient    = src.pressure_gradient;
+          dst.velocity             = src.velocity;
+          dst.composition          = src.composition;
+          dst.strain_rate          = src.strain_rate;
+          dst.current_cell         = src.current_cell;
+          dst.requested_properties = src.requested_properties;
+
+          const std::shared_ptr<const MaterialModel::ElasticAdditionalInputs<dim>>
+          elastic_additional_inputs = src.template get_additional_input_object<MaterialModel::ElasticAdditionalInputs<dim>>();
+          if (elastic_additional_inputs != nullptr)
+            dst.additional_inputs.push_back(std::make_unique<MaterialModel::ElasticAdditionalInputs<dim>>(*elastic_additional_inputs));
+        }
+      }
+
+
+
       template <int dim>
       void
       ViscoPlastic<dim>::
@@ -457,7 +486,10 @@ namespace aspect
             const double finite_difference_accuracy = 1e-7;
 
             // A new material model inputs variable that uses the strain rate and pressure difference.
-            MaterialModel::MaterialModelInputs<dim> in_derivatives = in;
+            // Here we cannot use the copy constructor because the MaterialModelInputs object has
+            // additional inputs when elasticity is enabled. We use a helper function to do the copy.
+            MaterialModel::MaterialModelInputs<dim> in_derivatives(0,0);
+            copy_material_model_inputs(in_derivatives, in);
 
             Assert(std::isfinite(in.strain_rate[i].norm()),
                    ExcMessage("Invalid strain_rate in the MaterialModelInputs. This is likely because it was "
