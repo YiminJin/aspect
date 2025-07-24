@@ -995,13 +995,9 @@ namespace aspect
       scratch.material_model_inputs.requested_properties
         = MaterialModel::MaterialProperties::equation_of_state_properties |
           MaterialModel::MaterialProperties::thermal_conductivity;
-
-    // TODO 
-    if (advection_field.is_temperature() == false &&
-        introspection.composition_type_exists(CompositionalFieldDescription::stress) &&
-        advection_field.field_index() <= SymmetricTensor<2,dim>::n_independent_components)
+    else
       scratch.material_model_inputs.requested_properties
-        = MaterialModel::MaterialProperties::uninitialized;
+        = MaterialModel::MaterialProperties::reaction_terms;
 
     if (parameters.include_melt_transport)
       scratch.material_model_inputs.requested_properties
@@ -1027,18 +1023,22 @@ namespace aspect
 
 #ifdef DEBUG
     // make sure that the material model outputs do not fill the reaction_rates (because the reaction_terms are used instead)
-    material_model->create_additional_named_outputs(scratch.material_model_outputs);
-    const std::shared_ptr<MaterialModel::ReactionRateOutputs<dim>> reaction_rate_outputs
-      = scratch.material_model_outputs.template get_additional_output_object<MaterialModel::ReactionRateOutputs<dim>>();
+    if (!parameters.use_operator_splitting &&
+        !(introspection.compositional_name_exists("ve_stress_xx") && parameters.mapped_particle_properties.count(introspection.compositional_index_for_name("ve_stress_xx"))))
+      {
+        material_model->create_additional_named_outputs(scratch.material_model_outputs);
+        const std::shared_ptr<MaterialModel::ReactionRateOutputs<dim>> reaction_rate_outputs
+          = scratch.material_model_outputs.template get_additional_output_object<MaterialModel::ReactionRateOutputs<dim>>();
 
-    Assert(reaction_rate_outputs == nullptr,
-           ExcMessage("You are using a material model where the reaction rate outputs "
-                      "are created even though the operator splitting solver option is "
-                      "not used in the model, this is not supported! "
-                      "If operator splitting is disabled, the reaction_rates should not "
-                      "be created at all. If you want to run a model where reactions are "
-                      "much faster than the advection, which is what the reaction rate "
-                      "outputs are designed for, you should enable operator splitting."));
+        Assert(reaction_rate_outputs == nullptr,
+               ExcMessage("You are using a material model where the reaction rate outputs "
+                          "are created even though the operator splitting solver option is "
+                          "not used in the model, this is not supported! "
+                          "If operator splitting is disabled, the reaction_rates should not "
+                          "be created at all. If you want to run a model where reactions are "
+                          "much faster than the advection, which is what the reaction rate "
+                          "outputs are designed for, you should enable operator splitting."));
+      }
 #endif
 
     MaterialModel::MaterialAveraging::average (parameters.material_averaging,
@@ -1128,19 +1128,20 @@ namespace aspect
                                                                       introspection);
 
                 if (advection_field.is_temperature())
-                  scratch.face_material_model_inputs.requested_properties
-                    = MaterialModel::MaterialProperties::equation_of_state_properties |
-                      MaterialModel::MaterialProperties::thermal_conductivity;
-
-                // TODO 
-                if (advection_field.is_temperature() == false &&
-                    introspection.composition_type_exists(CompositionalFieldDescription::stress) &&
-                    advection_field.field_index() <= SymmetricTensor<2,dim>::n_independent_components)
                   {
                     scratch.face_material_model_inputs.requested_properties
-                      = MaterialModel::MaterialProperties::uninitialized;
+                      = MaterialModel::MaterialProperties::equation_of_state_properties |
+                        MaterialModel::MaterialProperties::thermal_conductivity;
                     scratch.neighbor_face_material_model_inputs.requested_properties
-                      = MaterialModel::MaterialProperties::uninitialized;
+                      = MaterialModel::MaterialProperties::equation_of_state_properties |
+                        MaterialModel::MaterialProperties::thermal_conductivity;
+                  }
+                else
+                  {
+                    scratch.face_material_model_inputs.requested_properties
+                      = MaterialModel::MaterialProperties::reaction_terms;
+                    scratch.neighbor_face_material_model_inputs.requested_properties
+                      = MaterialModel::MaterialProperties::reaction_terms;
                   }
 
                 for (const auto &heating_model : heating_model_manager.get_active_plugins())
