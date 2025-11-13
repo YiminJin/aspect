@@ -762,6 +762,12 @@ namespace aspect
       void interpolate_particle_properties (const std::vector<AdvectionField> &advection_fields);
 
       /**
+       * Perform convected particle domain interpolation (CPDI) to the given
+       * @p advection_fields solution fields.
+       */
+      void perform_convected_particle_domain_interpolation (const std::vector<AdvectionField> &advection_fields);
+
+      /**
        * Solve the Stokes linear system.
        *
        * The function returns two pieces of information as a pair of doubles:

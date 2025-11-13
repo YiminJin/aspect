@@ -249,6 +249,7 @@ namespace aspect
       Assert(residual->size() == introspection.n_compositional_fields, ExcInternalError());
 
     std::vector<AdvectionField> fields_advected_by_particles;
+    std::vector<AdvectionField> fields_interpolated_through_cpdi;
     std::vector<AdvectionField> fields_interpolated_from_material_output;
 
     for (unsigned int c=0; c < introspection.n_compositional_fields; ++c)
@@ -336,6 +337,13 @@ namespace aspect
               break;
             }
 
+            case Parameters<dim>::AdvectionFieldMethod::cpdi:
+            {
+              // handle all cpdi fields together to increase efficiency
+              fields_interpolated_through_cpdi.push_back(adv_field);
+              break;
+            }
+
             case Parameters<dim>::AdvectionFieldMethod::prescribed_field:
             {
               // handle all prescribed fields together to increase efficiency
@@ -387,6 +395,9 @@ namespace aspect
 
     if (fields_advected_by_particles.size() > 0)
       interpolate_particle_properties(fields_advected_by_particles);
+
+    if (fields_interpolated_through_cpdi.size() > 0)
+      perform_convected_particle_domain_interpolation(fields_interpolated_through_cpdi);
 
     // If elasticity is switched on, the stress tensor can have components
     // with very large values and components that are and stay practically zero.

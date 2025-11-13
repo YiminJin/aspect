@@ -409,6 +409,23 @@ endif()
 message(STATUS "")
 
 
+# voro++
+set(ASPECT_WITH_VORO ON CACHE BOOL "Check if the user wants to compile ASPECT with the voro++ library")
+
+if(ASPECT_WITH_VORO)
+  message(STATUS "Using ASPECT_WITH_VORO = '${ASPECT_WITH_VORO}'")
+  find_package(VORO)
+  if(${VORO_FOUND})
+    message(STATUS "  VORO_INCLUDE_DIR: ${VORO_INCLUDE_DIR}")
+    message(STATUS "  VORO_LIBRARY: ${VORO_LIBRARY}")
+    list(APPEND ASPECT_INCLUDE_DIRS ${VORO_INCLUDE_DIR})
+  else()
+    message(STATUS "Voro++ not found. Disabling ASPECT_WITH_VORO. You can specify a hint to your installation directory with VORO_DIR.")
+    set(ASPECT_WITH_VORO OFF CACHE BOOL "" FORCE)
+  endif()
+endif()
+
+
 #
 # Other stuff about external tools and how we interact with the system:
 #
