@@ -418,7 +418,6 @@ if(ASPECT_WITH_VORO)
   if(${VORO_FOUND})
     message(STATUS "  VORO_INCLUDE_DIR: ${VORO_INCLUDE_DIR}")
     message(STATUS "  VORO_LIBRARY: ${VORO_LIBRARY}")
-    list(APPEND ASPECT_INCLUDE_DIRS ${VORO_INCLUDE_DIR})
   else()
     message(STATUS "Voro++ not found. Disabling ASPECT_WITH_VORO. You can specify a hint to your installation directory with VORO_DIR.")
     set(ASPECT_WITH_VORO OFF CACHE BOOL "" FORCE)
@@ -821,6 +820,17 @@ if(WORLD_BUILDER_VERSION VERSION_GREATER_EQUAL 0.6.0 AND ASPECT_WITH_WORLD_BUILD
     target_include_directories(${TARGET_EXE_RELEASE} PRIVATE "${CMAKE_BINARY_DIR}/world_builder_release/include/")
     target_link_libraries(${TARGET_EXE_RELEASE} WorldBuilderRelease)
   endif()
+endif()
+
+# voro++
+if (${VORO_FOUND})
+  message(STATUS "Linking ASPECT against voro++")
+  foreach(_T ${TARGET_EXECUTABLES})
+    # Treat the voro++ include directory as system header directory 
+    # in order to suppress the warnings
+    target_include_directories(${_T} SYSTEM PRIVATE ${VORO_INCLUDE_DIR})
+    target_link_libraries(${_T} ${VORO_LIBRARY})
+  endforeach()
 endif()
 
 # Some systems need to explicitly link to some libraries to use dlopen

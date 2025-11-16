@@ -315,10 +315,6 @@ namespace aspect
               }
             else
               {
-                Assert(particle_managers.size() == 1,
-                       ExcMessage("Automatically mapping particle properties to compositional fields is only supported if there is exactly one set of particles. "
-                                  "Please specify the particle properties manually in the parameter file using the parameter 'Compositional Fields/Mapped particle properties'."));
-
                 const unsigned int particle_property_index = std::count(introspection.compositional_field_methods.begin(),
                                                                         introspection.compositional_field_methods.begin() + advection_fields[advection_field].compositional_variable,
                                                                         Parameters<dim>::AdvectionFieldMethod::particles);

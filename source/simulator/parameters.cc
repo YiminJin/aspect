@@ -2207,7 +2207,13 @@ namespace aspect
           else if (x_compositional_field_methods[i] == "particles")
             compositional_field_methods[i] = AdvectionFieldMethod::particles;
           else if (x_compositional_field_methods[i] == "cpdi")
-            compositional_field_methods[i] = AdvectionFieldMethod::cpdi;
+            {
+              AssertThrow(composition_degrees[i] == 1 && 
+                          use_discontinuous_composition_discretization[i] == false,
+                          ExcMessage("The 'cpdi' method can only be applied to compositional fields "
+                                     "discretized by Q1 elements."));
+              compositional_field_methods[i] = AdvectionFieldMethod::cpdi;
+            }
           else if (x_compositional_field_methods[i] == "volume of fluid")
             {
               AssertThrow (dim==2,
@@ -2345,6 +2351,11 @@ namespace aspect
                                                            std::make_pair(particle_property,
                                                                           std::atoi(component.c_str()))));
         }
+
+
+        AssertThrow((mapped_particle_properties.size() != 0) || (n_particle_managers == 1),
+               ExcMessage("Automatically mapping particle properties to compositional fields is only supported if there is exactly one set of particles. "
+                          "Please specify the particle properties manually in the parameter file using the parameter 'Compositional Fields/Mapped particle properties'."));
 
       // Check that the names inside compositional_fields_with_disabled_boundary_entropy_viscosity
       // are actually fields. We parse and store this value above, but only here do we know the
