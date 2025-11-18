@@ -168,7 +168,6 @@ namespace aspect
       {
         fem_field,
         particles,
-        cpdi,
         volume_of_fluid,
         static_field,
         fem_melt_field,

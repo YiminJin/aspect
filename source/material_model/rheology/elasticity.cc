@@ -210,14 +210,6 @@ namespace aspect
         std::vector<std::string> stress_field_names = this->introspection().get_names_for_fields_of_type(CompositionalFieldDescription::stress);
         std::vector<unsigned int> stress_field_indices = this->introspection().get_indices_for_fields_of_type(CompositionalFieldDescription::stress);
 
-        // The discontinuous element is required to accommodate discontinuous
-        // strain rates that feed into the stored stresses.
-        const std::vector<bool> use_discontinuous_composition_discretization = this->get_parameters().use_discontinuous_composition_discretization;
-        for (auto stress_field : stress_field_indices)
-          AssertThrow(use_discontinuous_composition_discretization[stress_field],
-                      ExcMessage("The viscoelastic material model and the visco-plastic material model with elasticity enabled require "
-                                 "the use of discontinuous elements for compositions that represent stress tensor components."));
-
         // We require a consecutive range of indices (for example for FEPointEvaluation)
         // to extract the fields representing the viscoelastic stress tensor components,
         // so check that they are listed without interruption by other fields.

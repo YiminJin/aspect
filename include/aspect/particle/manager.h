@@ -185,6 +185,13 @@ namespace aspect
         void setup_initial_state ();
 
         /**
+         * Return a boolean indicating whether the particle properties are 
+         * interpolated onto FE support points using the convected particle
+         * domain interpolation (CPDI) method or the traditional interpolator.
+         */
+        bool use_cpdi_method() const;
+
+        /**
          * Get the particle interpolator for this particle manager.
          *
          * @return The interpolator for this particle manager.
@@ -351,6 +358,13 @@ namespace aspect
          * The bandwidth to scale the kernel function by when managing particle populations.
          */
         double bandwidth;
+
+        /**
+         * If true, then the particle properties are interpolated onto FE 
+         * support points using the convected particle domain interpolation
+         * (CPDI) method.
+         */
+        bool use_cpdi;
 
         /**
          * Generation scheme for creating particles in this manager

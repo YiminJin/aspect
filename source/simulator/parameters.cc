@@ -1390,7 +1390,7 @@ namespace aspect
                          "the user's responsibility to check that the chosen material model "
                          "and other plugins interpret the compositional fields as intended.");
       prm.declare_entry ("Compositional field methods", "",
-                         Patterns::List (Patterns::Selection("field|particles|cpdi|volume of fluid|static|melt field|darcy field|prescribed field|prescribed field with diffusion")),
+                         Patterns::List (Patterns::Selection("field|particles|volume of fluid|static|melt field|darcy field|prescribed field|prescribed field with diffusion")),
                          "A comma separated list denoting the solution method of each "
                          "compositional field. Each entry of the list must be "
                          "one of the currently implemented field methods."
@@ -2206,14 +2206,6 @@ namespace aspect
             compositional_field_methods[i] = AdvectionFieldMethod::fem_field;
           else if (x_compositional_field_methods[i] == "particles")
             compositional_field_methods[i] = AdvectionFieldMethod::particles;
-          else if (x_compositional_field_methods[i] == "cpdi")
-            {
-              AssertThrow(composition_degrees[i] == 1 && 
-                          use_discontinuous_composition_discretization[i] == false,
-                          ExcMessage("The 'cpdi' method can only be applied to compositional fields "
-                                     "discretized by Q1 elements."));
-              compositional_field_methods[i] = AdvectionFieldMethod::cpdi;
-            }
           else if (x_compositional_field_methods[i] == "volume of fluid")
             {
               AssertThrow (dim==2,

@@ -30,16 +30,51 @@ namespace aspect
     namespace CPDI
     {
       template <int dim>
-      struct VoronoiCellInformation
+      bool
+      face_is_at_boundary(const Point<3>         &p,
+                          const Tensor<1, 3>     &n,
+                          const BoundingBox<dim> &box)
       {
-        VoronoiCellInformation() = default;
+        const double n_norm = n.norm();
+        Assert(n_norm > 0, ExcInternalError());
 
-        void clear()
-        {
-          vertices.clear();
-          faces.clear();
-          neighbors.clear();
-        }
+        const Tensor<1, 3> n_unit = n / n_norm;
+        const double tol1 = 1.e-3;
+        const double tol2 = std::sqrt(n_norm) * 1.e-3;
+
+        if (1.0 - std::abs(n_unit[0]) < tol1)
+          {
+            return (std::abs(p[0] - box.get_boundary_points().first[0]) < tol2 ||
+                    std::abs(p[0] - box.get_boundary_points().second[0]) < tol2);
+          }
+        else if (1.0 - std::abs(n_unit[1]) < tol1)
+          {
+            return (std::abs(p[1] - box.get_boundary_points().first[1]) < tol2 ||
+                    std::abs(p[1] - box.get_boundary_points().second[1]) < tol2);
+          }
+        else if (1.0 - std::abs(n_unit[2]) < tol1)
+          {
+            AssertThrow(dim == 3, ExcInternalError());
+            return (std::abs(p[2] - box.get_boundary_points().first[2]) < tol2 ||
+                    std::abs(p[2] - box.get_boundary_points().second[2]) < tol2);
+          }
+        else
+          {
+            AssertThrow(false, ExcInternalError());
+          }
+
+        return false;
+      }
+
+
+
+      template <int dim>
+      struct VoronoiCell
+      {
+        VoronoiCell(const std::vector<double> &voro_vertices,
+                    const std::vector<int>    &voro_faces,
+                    const std::vector<int>    &voro_neighbors,
+                    const BoundingBox<dim>    &box);
 
         std::vector<Point<dim>> vertices;
 
@@ -47,6 +82,272 @@ namespace aspect
 
         std::vector<typename Particles::ParticleHandler<dim>::particle_iterator> neighbors;
       };
+
+
+
+      template <>
+      VoronoiCell<2>::
+      VoronoiCell(const std::vector<double> &voro_vertices,
+                  const std::vector<int>    &voro_faces,
+                  const std::vector<int>    &voro_neighbors,
+                  const BoundingBox<2>      &box)
+      {
+        unsigned int target_face = numbers::invalid_unsigned_int;
+        for (unsigned int i = 0, j = 0; i < voro_neighbors.size(); ++i)
+          {
+            if (voro_neighbors[i] >= 0)
+              {
+                j += voro_faces[j] + 1;
+                continue;
+              }
+
+            // Check if the face is parallel to the 2D plane: pick the first three
+            // vertices and calculate the normal vector
+            Point<3> v[3];
+            for (unsigned int k = 0; k < 3; ++k)
+              {
+                unsigned int l = 3 * voro_faces[j + k + 1];
+                for (unsigned int d = 0; d < 3; ++d)
+                  v[k][d] = voro_vertices[l + d];
+              }
+
+            const Tensor<1, 3> n = cross_product_3d(v[1] - v[0], v[2] - v[1]);
+
+            // If the normal vector is parallel to z-axis, then we have found the
+            // target face; otherwise, check if the face is at the boundary of the
+            // geometry model
+            if (n[2] * n[2] > (n[0] * n[0] + n[1] * n[1]) * 1.e2)
+              target_face = j;
+            else
+              AssertThrow(face_is_at_boundary(v[0], n, box),
+                          ExcMessage("One of the particle domains crosses the boundary of "
+                                     "the bounding box of its surrounding cells. In this case, "
+                                     "it is impossible to get all the vertices of the particle "
+                                     "domain. Please increase the lower limit of particles per cell."));
+
+            j += voro_faces[j] + 1;
+          }
+
+        // Collect the vertices of the target face
+        vertices.clear();
+        for (int k = 0; k < voro_faces[target_face]; ++k)
+          {
+            unsigned int l = 3 * voro_faces[target_face + k + 1];
+            AssertIndexRange(l + 2, voro_vertices.size());
+
+            vertices.emplace_back(Point<2>(voro_vertices[l], voro_vertices[l + 1]));
+          }
+
+        // TODO: collect the neighbors
+      }
+
+
+
+      template <>
+      VoronoiCell<3>::
+      VoronoiCell(const std::vector<double> &voro_vertices,
+                  const std::vector<int>    &voro_faces,
+                  const std::vector<int>    &voro_neighbors,
+                  const BoundingBox<3>      &box)
+      {
+        // Collect the vertices
+        for (unsigned int l = 0; l < voro_vertices.size(); l += 3)
+          vertices.push_back(Point<3>(voro_vertices[l],
+                                      voro_vertices[l + 1],
+                                      voro_vertices[l + 2]));
+
+        // Collect the faces
+        for (unsigned int i = 0, j = 0; i < voro_neighbors.size(); ++i)
+          {
+            const unsigned int n_vertices = voro_faces[j];
+            std::vector<unsigned int> face(n_vertices);
+            for (unsigned int k = 0; k < n_vertices; ++k)
+              face[k] = voro_faces[j + k + 1];
+
+            // If the face is at the boundary of the container, check if it is at
+            // the boundary of the geometry model
+            if (voro_neighbors[i] < 0)
+              {
+                Point<3> v[3];
+                for (unsigned int k = 0; k < 3; ++k)
+                  v[k] = vertices[face[k]];
+
+                const Tensor<1, 3> n = cross_product_3d(v[1] - v[0], v[2] - v[1]);
+
+                AssertThrow(face_is_at_boundary(v[0], n, box),
+                            ExcMessage("One of the particle domains crosses the boundary of "
+                                       "the bounding box of its surrounding cells. In this case, "
+                                       "it is impossible to get all the vertices of the particle "
+                                       "domain. Please increase the lower limit of particles per cell."));
+              }
+
+            faces.emplace_back(face);
+            j += voro_faces[j] + 1;
+          }
+
+        // TODO: collect the neighbors
+      }
+
+
+
+      template <int dim>
+      class GeneralizedBasisData
+      {
+        public:
+          GeneralizedBasisData(const unsigned int dofs_per_cell,
+                               const bool evaluate_gradients);
+
+          void resize(const unsigned int n_particles);
+
+          bool evaluate_gradients() const;
+
+          double get_volume(const unsigned int p) const;
+
+          double get_value(const unsigned int i,
+                           const unsigned int p) const;
+
+          const Tensor<1, dim> &
+          get_gradient(const unsigned int i,
+                       const unsigned int p) const;
+
+          void set_volume(const unsigned int p,
+                          const double       vol);
+
+          void set_value(const unsigned int i,
+                         const unsigned int p,
+                         const double       val);
+
+          void set_gradient(const unsigned int    i,
+                            const unsigned int    p,
+                            const Tensor<1, dim> &grad);
+
+        private:
+          std::vector<std::vector<double>>         values;
+
+          std::vector<std::vector<Tensor<1, dim>>> gradients;
+
+          std::vector<double>                      volumes;
+      };
+
+
+
+      template <int dim>
+      GeneralizedBasisData<dim>::
+      GeneralizedBasisData(const unsigned int dofs_per_cell,
+                           const bool evaluate_gradients)
+        : values(dofs_per_cell)
+        , gradients(evaluate_gradients ? dofs_per_cell : 0)
+      {}
+
+
+
+      template <int dim>
+      void
+      GeneralizedBasisData<dim>::resize(const unsigned int n_particles)
+      {
+        volumes.resize(n_particles);
+        std::fill(volumes.begin(), volumes.end(), 0.0);
+
+        for (unsigned int i = 0; i < values.size(); ++i)
+          {
+            values[i].resize(n_particles);
+            std::fill(values[i].begin(), values[i].end(), 0.0);
+
+            if (gradients.size() > 0)
+              {
+                gradients[i].resize(n_particles);
+                std::fill(gradients[i].begin(), gradients[i].end(), Tensor<1, dim>());
+              }
+          }
+      }
+
+
+
+      template <int dim>
+      bool
+      GeneralizedBasisData<dim>::evaluate_gradients() const
+      {
+        return (gradients.size() > 0);
+      }
+
+
+
+      template <int dim>
+      double
+      GeneralizedBasisData<dim>::get_volume(const unsigned int p) const
+      {
+        AssertIndexRange(p, volumes.size());
+        return volumes[p];
+      }
+
+
+
+      template <int dim>
+      double
+      GeneralizedBasisData<dim>::get_value(const unsigned int i,
+                                           const unsigned int p) const
+      {
+        AssertIndexRange(i, values.size());
+        AssertIndexRange(p, values[i].size());
+        return values[i][p];
+      }
+
+
+
+      template <int dim>
+      const Tensor<1, dim> &
+      GeneralizedBasisData<dim>::get_gradient(const unsigned int i,
+                                              const unsigned int p) const
+      {
+        AssertThrow(gradients.size() > 0,
+                    ExcMessage("Cannot get basis gradient because gradients are not requested "
+                               "when initializing the GeneralizedBasisData object."));
+
+        AssertIndexRange(i, gradients.size());
+        AssertIndexRange(p, gradients[i].size());
+        return gradients[i][p];
+      }
+
+
+
+      template <int dim>
+      void
+      GeneralizedBasisData<dim>::set_volume(const unsigned int p,
+                                            const double       vol)
+      {
+        AssertIndexRange(p, volumes.size());
+        volumes[p] = vol;
+      }
+
+
+
+      template <int dim>
+      void
+      GeneralizedBasisData<dim>::set_value(const unsigned int i,
+                                           const unsigned int p,
+                                           const double       val)
+      {
+        AssertIndexRange(i, values.size());
+        AssertIndexRange(p, values[i].size());
+        values[i][p] = val;
+      }
+
+
+
+      template <int dim>
+      void
+      GeneralizedBasisData<dim>::set_gradient(const unsigned int    i,
+                                              const unsigned int    p,
+                                              const Tensor<1, dim> &grad)
+      {
+        AssertThrow(gradients.size() > 0,
+                    ExcMessage("Cannot set basis gradient because gradients are not requested "
+                               "when initializing the GeneralizedBasisData object."));
+
+        AssertIndexRange(i, gradients.size());
+        AssertIndexRange(p, gradients[i].size());
+        gradients[i][p] = grad;
+      }
 
 
 
@@ -72,160 +373,239 @@ namespace aspect
       }
 
 
+
       template <int dim>
-      bool
-      face_is_at_boundary(const Point<3>         &p,
-                          const Tensor<1, 3>     &n,
-                          const BoundingBox<dim> &box)
+      double
+      simplex_measure(const std::array<Point<dim>, dim + 1> &vertices)
       {
-        const double n_norm = n.norm();
-        Assert(n_norm > 0, ExcInternalError());
+        static constexpr double dim_factorial = (dim == 2 ? 2.0 : 6.0);
 
-        const Tensor<1, 3> n_unit = n / n_norm;
-        const double tol1 = 1.e-3;
-        const double tol2 = std::sqrt(n_norm) * 1.e-3;
+        Tensor<2, dim> T;
+        for (unsigned int d = 0; d < dim; ++d)
+          T[d] = vertices[d] - vertices[dim];
 
-        if (1.0 - std::abs(n_unit[0]) < tol1)
-          {
-            if (n_unit[0] < 0)
-              return (std::abs(p[0] - box.get_boundary_points().first[0]) < tol2);
-            else
-              return (std::abs(p[0] - box.get_boundary_points().second[0]) < tol2);
-          }
-        else if (1.0 - std::abs(n_unit[1]) < tol1)
-          {
-            if (n_unit[1] < 0)
-              return (std::abs(p[1] - box.get_boundary_points().first[1]) < tol2);
-            else
-              return (std::abs(p[1] - box.get_boundary_points().second[1]) < tol2);
-          }
-        else if (1.0 - std::abs(n_unit[2]) < tol1)
-          {
-            AssertThrow(dim == 3, ExcInternalError());
-            if (n_unit[2] < 0)
-              return (std::abs(p[2] - box.get_boundary_points().first[2]) < tol2);
-            else
-              return (std::abs(p[2] - box.get_boundary_points().second[2]) < tol2);
-          }
-        else
-          {
-            AssertThrow(false, ExcInternalError());
-          }
+        return std::abs(determinant(T)) / dim_factorial;
+      }
 
-        return false;
+
+
+      Tensor<1, 2>
+      compute_generalized_basis_gradient(const std::array<Point<2>, 3> &v,
+                                         const std::array<double,   3> &N)
+      {
+        Tensor<1, 2> t;
+        t[0] = (N[0] * (v[1][1] - v[2][1]) + N[1] * (v[2][1] - v[0][1]) + N[2] * (v[0][1] - v[1][1])) * 0.5;
+        t[1] = (N[0] * (v[2][0] - v[1][0]) + N[1] * (v[0][0] - v[2][0]) + N[2] * (v[1][0] - v[0][0])) * 0.5;
+
+        return t;
+      }
+
+
+
+      Tensor<1, 3>
+      compute_generalized_basis_gradient(const std::array<Point<3>, 4> &v,
+                                         const std::array<double,   4> &N)
+      {
+        Tensor<1, 3> t;
+
       }
 
 
 
       template <int dim>
       void
-      collect_voronoi_cell_information(const std::vector<double>   &vertices,
-                                       const std::vector<int>      &face_info,
-                                       const std::vector<int>      &neighbors,
-                                       const BoundingBox<dim>      &box,
-                                       VoronoiCellInformation<dim> &vorocell_info);
+      do_evaluation(const typename Triangulation<dim>::active_cell_iterator &cell,
+                    const std::vector<VoronoiCell<dim>>                     &voronoi_cells,
+                    const FiniteElement<dim>                                &fe,
+                    const Mapping<dim>                                      &mapping,
+                    GeneralizedBasisData<dim>                               &data);
 
 
 
       template <>
       void
-      collect_voronoi_cell_information(const std::vector<double> &vertices,
-                                       const std::vector<int>    &face_info,
-                                       const std::vector<int>    &neighbors,
-                                       const BoundingBox<2>      &box,
-                                       VoronoiCellInformation<2> &vorocell_info)
+      do_evaluation<2>(const Triangulation<2>::active_cell_iterator &cell,
+                       const std::vector<VoronoiCell<2>>            &voronoi_cells,
+                       const FiniteElement<2>                       &fe,
+                       const Mapping<2>                             &mapping,
+                       GeneralizedBasisData<2>                      &data)
       {
-        vorocell_info.clear();
+        const unsigned int n_particles = voronoi_cells.size();
+        const unsigned int dofs_per_cell = fe.dofs_per_cell;
 
-        unsigned int target_face = numbers::invalid_unsigned_int;
-        for (unsigned int i = 0, j = 0; i < neighbors.size(); ++i)
+        data.resize(n_particles);
+        std::vector<std::vector<double>> N_v(dofs_per_cell);
+        for (unsigned int p = 0; p < n_particles; ++p)
           {
-            if (neighbors[i] >= 0)
-              continue;
+            double area  = 0.0;
+            std::vector<double> values(dofs_per_cell);
+            std::vector<Tensor<1, 2>> gradients(dofs_per_cell);
 
-            // Check if the face is parallel to the 2D plane: pick the first three
-            // vertices and calculate the normal vector
-            Point<3> v[3];
-            for (unsigned int k = 0; k < 3; ++k)
+            const VoronoiCell<2> &voronoi_cell = voronoi_cells[p];
+            const unsigned int n_vertices = voronoi_cell.vertices.size();
+
+            // Evaluate the values of the shape functions at the vertices
+            for (unsigned int i = 0; i < dofs_per_cell; ++i)
               {
-                unsigned int l = 3 * face_info[j + k + 1];
-                for (unsigned int d = 0; d < 3; ++d)
-                  v[k][d] = vertices[l + d];
+                N_v[i].resize(n_vertices);
+                std::fill(N_v[i].begin(), N_v[i].end(), 0.0);
               }
 
-            const Tensor<1, 3> n = cross_product_3d(v[1] - v[0], v[2] - v[1]);
+            for (unsigned int v = 0; v < n_vertices; ++v)
+              {
+                const Point<2> vertex_unit = mapping.transform_real_to_unit_cell(cell, voronoi_cell.vertices[v]);
+                if (GeometryInfo<2>::is_inside_unit_cell(vertex_unit))
+                  for (unsigned int i = 0; i < dofs_per_cell; ++i)
+                    N_v[i][v] = fe.shape_value(i, vertex_unit);
+              }
 
-            // If the normal vector is parallel to z-axis, then we have found the
-            // target face; otherwise, check if the face is at the boundary of the
-            // geometry model
-            if (n[2] * n[2] > (n[0] * n[0] + n[1] * n[1]) * 1.e2)
-              target_face = j;
+            if (n_vertices > 3)
+              {
+                // Divide the voronoi cell into n_vertices triangles, each triangle
+                // composed of two adjacent vertices and the barycenter of the Voronoi
+                // cell
+                Point<2> center;
+                for (unsigned int v = 0; v < n_vertices; ++v)
+                  center += voronoi_cell.vertices[v];
+                center /= n_vertices;
+
+                std::vector<double> N_c(dofs_per_cell);
+                const Point<2> center_unit = mapping.transform_real_to_unit_cell(cell, center);
+                if (GeometryInfo<2>::is_inside_unit_cell(center_unit))
+                  for (unsigned int i = 0; i < dofs_per_cell; ++i)
+                    N_c[i] = fe.shape_value(i, center_unit);
+
+                for (unsigned int v = 0; v < n_vertices; ++v)
+                  {
+                    const unsigned int v1 = v;
+                    const unsigned int v2 = (v + 1) % n_vertices;
+
+                    // Calculate the area of the triangle
+                    std::array<Point<2>, 3> verts;
+                    verts[0] = voronoi_cell.vertices[v1];
+                    verts[1] = voronoi_cell.vertices[v2];
+                    verts[2] = center;
+                    const double triangle_area = simplex_measure(verts);
+                    area += triangle_area;
+
+                    for (unsigned int i = 0; i < dofs_per_cell; ++i)
+                      {
+                        values[i] += (N_v[i][v1] + N_v[i][v2] + N_c[i]) * (triangle_area / 3.0);
+                        if (data.evaluate_gradients())
+                        {
+                          std::array<double, 3> vals;
+                          vals[0] = N_v[i][v1];
+                          vals[1] = N_v[i][v2];
+                          vals[2] = N_c[i];
+
+                          gradients[i] += compute_generalized_basis_gradient(verts, vals);
+                        }
+                      }
+                  }
+
+                data.set_volume(p, area);
+                for (unsigned int i = 0; i < dofs_per_cell; ++i)
+                  {
+                    data.set_value(i, p, values[i] / area);
+                    if (data.evaluate_gradients())
+                      data.set_gradient(i, p, gradients[i] / area);
+                  }
+              }
             else
-              AssertThrow(face_is_at_boundary(v[0], n, box),
-                          ExcMessage("One of the particle domains crosses the boundary of "
-                                     "the bounding box of its surrounding cells. In this case, "
-                                     "it is impossible to get all the vertices of the particle "
-                                     "domain. Please increase the lower limit of particles per cell."));
+              {
+                std::array<Point<2>, 3> verts;
+                verts[0] = voronoi_cell.vertices[0];
+                verts[1] = voronoi_cell.vertices[1];
+                verts[2] = voronoi_cell.vertices[2];
+                data.set_volume(p, simplex_measure(verts));
+
+                for (unsigned int i = 0; i < dofs_per_cell; ++i)
+                  {
+                    data.set_value(i, p, (N_v[i][0] + N_v[i][1] + N_v[i][2]) / 3.0);
+                    if (data.evaluate_gradients())
+                    {
+                      std::array<double, 3> vals;
+                      vals[0] = N_v[i][0];
+                      vals[1] = N_v[i][1];
+                      vals[2] = N_v[i][2];
+
+                      data.set_gradient(i, p, compute_generalized_basis_gradient(verts, vals) / data.get_volume(p));
+                    }
+                  }
+              }
           }
-
-        // Collect the vertices of the target face
-        vorocell_info.vertices.clear();
-        for (int k = 0; k < face_info[target_face]; ++k)
-          {
-            unsigned int l = 3 * face_info[target_face + k + 1];
-            AssertIndexRange(l + 2, vertices.size());
-
-            vorocell_info.vertices.push_back(Point<2>(vertices[l], vertices[l + 1]));
-          }
-
-        // TODO: collect the neighbors
       }
 
 
 
       template <>
       void
-      collect_voronoi_cell_information(const std::vector<double> &vertices,
-                                       const std::vector<int>    &face_info,
-                                       const std::vector<int>    &neighbors,
-                                       const BoundingBox<3>      &box,
-                                       VoronoiCellInformation<3> &vorocell_info)
+      do_evaluation(const Triangulation<3>::active_cell_iterator &cell,
+                    const std::vector<VoronoiCell<3>>            &voronoi_cells,
+                    const FiniteElement<3>                       &fe,
+                    const Mapping<3>                             &mapping,
+                    GeneralizedBasisData<3>                      &data)
       {
-        vorocell_info.clear();
+        const unsigned int n_particles = voronoi_cells.size();
+        const unsigned int dofs_per_cell = fe.dofs_per_cell;
 
-        // Collect the vertices
-        for (unsigned int l = 0; l < vertices.size(); l += 3)
-          vorocell_info.vertices.push_back(Point<3>(vertices[l], vertices[l + 1], vertices[l + 2]));
-
-        // Collect the faces
-        for (unsigned int i = 0, j = 0; i < neighbors.size(); ++i)
+        data.resize(n_particles);
+        std::vector<std::vector<double>> N(dofs_per_cell);
+        for (unsigned int p = 0; p < n_particles; ++p)
           {
-            const unsigned int n_vertices = face_info[j];
-            std::vector<unsigned int> face(n_vertices);
-            for (unsigned int k = 0; k < n_vertices; ++k)
-              face[k] = face_info[j + k + 1];
+            double volume = 0.0;
+            double value  = 0.0;
+            Tensor<1, 2> gradient;
 
-            // If the face is at the boundary of the container, check if it is at
-            // the boundary of the geometry model
-            if (neighbors[i] < 0)
+            const VoronoiCell<3> &voronoi_cell = voronoi_cells[p];
+            const unsigned int n_vertices = voronoi_cell.vertices.size();
+            const unsigned int n_faces    = voronoi_cell.faces.size();
+
+            // Calculate the barycenter of the Voronoi cell
+            Point<3> volume_barycenter;
+            for (unsigned int v = 0; v < n_vertices; ++v)
+              volume_barycenter += voronoi_cell.vertices[v];
+            volume_barycenter /= n_vertices;
+
+            // Calculate the barycenters of the faces of the Voronoi cell
+            std::vector<Point<3>> face_barycenters;
+            for (unsigned int f = 0; f < n_faces; ++f)
               {
-                Point<3> v[3];
-                for (unsigned int k = 0; k < 3; ++k)
-                  v[k] = vorocell_info.vertices[face[k]];
-
-                const Tensor<1, 3> n = cross_product_3d(v[1] - v[0], v[2] - v[1]);
-
-                AssertThrow(face_is_at_boundary(v[0], n, box),
-                            ExcMessage("One of the particle domains crosses the boundary of "
-                                       "the bounding box of its surrounding cells. In this case, "
-                                       "it is impossible to get all the vertices of the particle "
-                                       "domain. Please increase the lower limit of particles per cell."));
+                Point<3> face_barycenter;
+                for (unsigned int v = 0; v < voronoi_cell.faces[f].size(); ++v)
+                  face_barycenter += voronoi_cell.vertices[voronoi_cell.faces[f][v]];
+                face_barycenter /= voronoi_cell.faces[f].size();
+                face_barycenters.emplace_back(face_barycenter);
               }
 
-            vorocell_info.faces.emplace_back(face);
-            j += face_info[j] + 1;
+            // Evaluate the values of the shape functions at the vertices and the barycenters
+            for (unsigned int i = 0; i < dofs_per_cell; ++i)
+              {
+                N[i].resize(n_vertices + n_faces + 1);
+                std::fill(N[i].begin(), N[i].end(), 0.0);
+              }
 
-            // TODO: collect the neighbors
+            for (unsigned int v = 0; v < n_vertices; ++v)
+              {
+                const Point<3> vertex_unit = mapping.transform_real_to_unit_cell(cell, voronoi_cell.vertices[v]);
+                if (GeometryInfo<3>::is_inside_unit_cell(vertex_unit))
+                  for (unsigned int i = 0; i < dofs_per_cell; ++i)
+                    N[i][v] = fe.shape_value(i, vertex_unit);
+              }
+
+            for (unsigned int f = 0; f < n_faces; ++f)
+              {
+                const Point<3> fc_unit = mapping.transform_real_to_unit_cell(cell, face_barycenters[f]);
+                if (GeometryInfo<3>::is_inside_unit_cell(fc_unit))
+                  for (unsigned int i = 0; i < dofs_per_cell; ++i)
+                    N[i][n_vertices + f] = fe.shape_value(i, fc_unit);
+              }
+
+            const Point<3> vc_unit = mapping.transform_real_to_unit_cell(cell, volume_barycenter);
+            if (GeometryInfo<3>::is_inside_unit_cell(vc_unit))
+              for (unsigned int i = 0; i < dofs_per_cell; ++i)
+                N[i][n_vertices + n_faces] = fe.shape_value(i, vc_unit);
+
           }
       }
 
@@ -233,18 +613,18 @@ namespace aspect
 
       template <int dim>
       void
-      compute_generalized_basis_function_values(const typename Triangulation<dim>::active_cell_iterator           &cell,
-                                                const std::set<typename Triangulation<dim>::active_cell_iterator> &neighbors,
-                                                const Particles::ParticleHandler<dim>                             &particle_handler,
-                                                const FiniteElement<dim>                                          &fe,
-                                                const Mapping<dim>                                                &mapping,
-                                                const BoundingBox<dim>                                            &box,
-                                                std::vector<std::vector<double>>                                  &phi)
+      evaluate(const typename Triangulation<dim>::active_cell_iterator           &cell,
+               const std::set<typename Triangulation<dim>::active_cell_iterator> &neighbors,
+               const Particles::ParticleHandler<dim>                             &particle_handler,
+               const FiniteElement<dim>                                          &fe,
+               const Mapping<dim>                                                &mapping,
+               const BoundingBox<dim>                                            &box,
+               GeneralizedBasisData<dim>                                         &data)
       {
         // Create the voro container, which is the bounding box of the current cell and
         // its neighbors
         Point<dim> corner1 = cell->vertex(0);
-        Point<dim> corner2 = cell->vertex((1<<dim) - 1);
+        Point<dim> corner2 = cell->vertex(GeometryInfo<dim>::vertices_per_cell - 1);
         unsigned int n_particles = 0;
         for (const auto &neighbor : neighbors)
           {
@@ -298,7 +678,8 @@ namespace aspect
         std::vector<double> voro_vertices;
         std::vector<int> voro_face_vertices;
         std::vector<int> voro_neighbors;
-        VoronoiCellInformation<dim> vorocell_info;
+
+        std::vector<VoronoiCell<dim>> voronoi_cells;
 
         voro::c_loop_all loop(container);
         AssertThrow(loop.start(), ExcMessage("An error occurs when calling voro::c_loop_all::start()."));
@@ -317,32 +698,17 @@ namespace aspect
             voro_cell.vertices(x, y, z, voro_vertices);
             voro_cell.face_vertices(voro_face_vertices);
             voro_cell.neighbors(voro_neighbors);
-            collect_voronoi_cell_information(voro_vertices,
-                                             voro_face_vertices,
-                                             voro_neighbors,
-                                             box,
-                                             vorocell_info);
+
+            voronoi_cells.emplace_back(VoronoiCell<dim>(voro_vertices,
+                                                        voro_face_vertices,
+                                                        voro_neighbors,
+                                                        box));
           }
         while (loop.inc());
 
-        // Compute phi_Ip for each dof I and particle p
-        const unsigned int dofs_per_cell = fe.dofs_per_cell;
-        const unsigned int n_vertices = vorocell_info.vertices.size();
-        AssertDimension(phi.size(), dofs_per_cell);
-
-        std::vector<std::vector<double>> shape_values(dofs_per_cell);
-
-        for (unsigned int i = 0; i < fe.dofs_per_cell; ++i)
-          {
-            // Compute the values of the shape function at the vertices
-            // of the particle domain
-            shape_values[i].resize(n_vertices);
-            for (unsigned int v = 0; v < n_vertices; ++v)
-              {
-                const Point<dim> p_unit = mapping.transform_real_to_unit_cell(cell, vorocell_info.vertices[v]);
-                shape_values[i][v] = fe.shape_value(i, p_unit);
-              }
-          }
+        // Compute the volume and the values (and gradients) of the generalized basis functions
+        // for each particle domain
+        do_evaluation(cell, voronoi_cells, fe, mapping, data);
       }
     }
   }
@@ -362,15 +728,18 @@ namespace aspect
                 ExcMessage("Compositional field method ``cpdi'' only works when the geometry model is ``box''."));
     AssertThrow(Plugins::plugin_type_matches<InitialTopographyModel::ZeroTopography<dim>>(*initial_topography_model),
                 ExcMessage("Compositional field method ``cpdi'' only works when the initial topography model is ``zero topography''."));
-    AssertThrow(mesh_deformation->get_active_mesh_deformation_models().size() == 0,
-                ExcMessage("Compositional field method ``cpdi'' only works when mesh deformation is inactive."));
+    AssertThrow(mesh_deformation == nullptr,
+                ExcMessage("Compositional field method ``cpdi'' only works when mesh deformation is not enabled."));
 
-    // If the fields to be interpolated with CPDI method are handled by different particle managers,
-    // then we will need more than one matrix block to perform the projection. Currently we do not
-    // allow such settings.
-    Particle::Manager<dim> *cpdi_particle_manager = nullptr;
+    for (const auto &field : advection_fields)
+      {
+        AssertThrow(field.polynomial_degree(introspection) == 1 && field.is_discontinuous(introspection) == false,
+                    ExcMessage("The CPDI method can only be applied to compositional fields discretized by standard Q1 elements."));
+      }
 
-    if (parameters.mapped_particle_properties.size() != 0)
+    // Find the particle manager handling the input fields
+    const Particle::Manager<dim> *cpdi_particle_manager = nullptr;
+    if (parameters.mapped_particle_properties.size() == 0)
       {
         cpdi_particle_manager = &particle_managers[0];
       }
@@ -396,13 +765,12 @@ namespace aspect
         for (const auto &field : advection_fields)
           {
             const std::string &field_name = parameters.mapped_particle_properties[field.compositional_variable].first;
-            AssertThrow(cpdi_particle_manager->get_property_manager().get_data_info().fieldname_exists(field_name),
-                        ExcMessage("All the compositional fields advected by the CPDI method must be handled by the same particle manager."));
+            AssertThrow(cpdi_particle_manager->get_property_manager().get_data_info().fieldname_exists(field_name), ExcInternalError());
           }
       }
 
-    // We have checked in source/simulator/parameters.cc that all the CPDI fields are
-    // discretized by Q1 element. So all the input fields share the same sparsity block.
+    // We have checked that all the input fields are discretized by Q1 element,
+    // so all the input fields share the same sparsity block.
     const unsigned int sparsity_block_idx = advection_fields[0].sparsity_pattern_block_index(introspection);
     system_matrix.block(sparsity_block_idx, sparsity_block_idx) = 0;
     for (const auto &field : advection_fields)
@@ -424,7 +792,7 @@ namespace aspect
     const Particles::ParticleHandler<dim> &particle_handler = cpdi_particle_manager->get_particle_handler();
     const FiniteElement<dim> &fe = finite_element.base_element(advection_fields[0].base_element(introspection));
 
-    std::vector<std::vector<double>> phi;
+    internal::CPDI::GeneralizedBasisData<dim> data(fe.dofs_per_cell, false);
 
     // Now loop over the locally owned active cells and assemble the CPDI systems
     for (const auto &cell : dof_handler.active_cell_iterators())
@@ -439,13 +807,13 @@ namespace aspect
                                        vertex_to_cell_map[vertex_index].end());
             }
 
-          internal::CPDI::compute_generalized_basis_function_values(cell,
-                                                                    neighboring_cells,
-                                                                    particle_handler,
-                                                                    fe,
-                                                                    *mapping,
-                                                                    bounding_box,
-                                                                    phi);
+          internal::CPDI::evaluate(cell,
+                                   neighboring_cells,
+                                   particle_handler,
+                                   fe,
+                                   *mapping,
+                                   bounding_box,
+                                   data);
         }
   }
 }

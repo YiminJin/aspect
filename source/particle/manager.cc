@@ -158,6 +158,15 @@ namespace aspect
 
 
     template <int dim>
+    bool 
+    Manager<dim>::use_cpdi_method() const
+    {
+      return use_cpdi;
+    }
+
+
+
+    template <int dim>
     const Interpolator::Interface<dim> &
     Manager<dim>::get_interpolator() const
     {
@@ -1165,6 +1174,10 @@ namespace aspect
                                "whether this transport is happening. This parameter is "
                                "deprecated and will be removed in the future. Ghost particle "
                                "updates are always performed. Please set the parameter to `true'.");
+            prm.declare_entry ("Use CPDI method", "false",
+                               Patterns::Bool(),
+                               "Whether to interpolate particle properties onto FE support points "
+                               "using the convected particle domain interpolation (CPDI) method.");
 
             Generator::declare_parameters<dim>(prm);
             Integrator::declare_parameters<dim>(prm);
@@ -1323,6 +1336,8 @@ namespace aspect
           {
             AssertThrow(false, ExcNotImplemented());
           }
+
+        use_cpdi = prm.get_bool("Use CPDI method");
 
 
         this->get_computing_timer().enter_subsection("Particles: Initialization");
