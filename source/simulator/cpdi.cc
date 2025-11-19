@@ -29,6 +29,17 @@ namespace aspect
   {
     namespace CPDI
     {
+      /**
+       * This function determines whether a planar face (defined by a point and
+       * a normal vector) is at the boundary of the bounding box of the
+       * geometry model.
+       *
+       * @param[in] p A point at the face.
+       * @param[in] n The normal vector (not necessarily unit) of the face. If
+       *  @p dim equals 2, then n is supposed to be in the x-y plane, or the
+       *  function will throw an error.
+       * @param[in] box The bounding box of the geometry model.
+       */
       template <int dim>
       bool
       face_is_at_boundary(const Point<3>         &p,
@@ -68,9 +79,31 @@ namespace aspect
 
 
 
+      /**
+       * Structure for holding information about a Voronoi cell.
+       */
       template <int dim>
       struct VoronoiCell
       {
+        /**
+         * Constructor.
+         *
+         * @param[in] voro_vertices An array of float numbers representing the
+         *  coordinates of the vertices of the Voronoi cell. It is supposed to
+         *  be the output of function voro::voronoicell_neighbor::vertices().
+         *
+         * @param[in] voro_faces An array of integers containing the vertices
+         *  of each face. It is supposed to be the output of function
+         *  voro::voronoicell_neighbor::face_vertices().
+         *
+         * @param[in] voro_neighbors An array of integers representing the
+         *  neighbor ids of the Voronoi cell. It is supposed to be the output of
+         *  function voro::voronoicell_neighbor::neighbors().
+         *
+         * @param[in] box The bounding box of the geometry model. It is used to
+         *  check if the Voronoi cell crosses the boundary of the surrounding
+         *  FE cells, in which case the CPDI algorithm fails.
+         */
         VoronoiCell(const std::vector<double> &voro_vertices,
                     const std::vector<int>    &voro_faces,
                     const std::vector<int>    &voro_neighbors,
@@ -190,16 +223,19 @@ namespace aspect
 
 
 
+      /**
+       * Class for holding information of the generalized basis functions.
+       */
       template <int dim>
       class GeneralizedBasisData
       {
         public:
-          GeneralizedBasisData(const unsigned int dofs_per_cell,
-                               const bool evaluate_gradients);
+          GeneralizedBasisData(const unsigned int                     dofs_per_cell,
+                               const EvaluationFlags::EvaluationFlags integration_flags);
 
           void resize(const unsigned int n_particles);
 
-          bool evaluate_gradients() const;
+          EvaluationFlags::EvaluationFlags get_integration_flags() const;
 
           double get_volume(const unsigned int p) const;
 
@@ -227,16 +263,22 @@ namespace aspect
           std::vector<std::vector<Tensor<1, dim>>> gradients;
 
           std::vector<double>                      volumes;
+
+          const unsigned int                       dofs_per_cell;
+
+          const EvaluationFlags::EvaluationFlags   integration_flags;
       };
 
 
 
       template <int dim>
       GeneralizedBasisData<dim>::
-      GeneralizedBasisData(const unsigned int dofs_per_cell,
-                           const bool evaluate_gradients)
-        : values(dofs_per_cell)
-        , gradients(evaluate_gradients ? dofs_per_cell : 0)
+      GeneralizedBasisData(const unsigned int                     dofs,
+                           const EvaluationFlags::EvaluationFlags flags)
+        : values(flags & EvaluationFlags::values ? dofs : 0)
+        , gradients(flags & EvaluationFlags::gradients ? dofs : 0)
+        , dofs_per_cell(dofs)
+        , integration_flags(flags)
       {}
 
 
@@ -246,28 +288,23 @@ namespace aspect
       GeneralizedBasisData<dim>::resize(const unsigned int n_particles)
       {
         volumes.resize(n_particles);
-        std::fill(volumes.begin(), volumes.end(), 0.0);
-
-        for (unsigned int i = 0; i < values.size(); ++i)
+        for (unsigned int i = 0; i < dofs_per_cell; ++i)
           {
-            values[i].resize(n_particles);
-            std::fill(values[i].begin(), values[i].end(), 0.0);
+            if (integration_flags & EvaluationFlags::values)
+              values[i].resize(n_particles);
 
-            if (gradients.size() > 0)
-              {
-                gradients[i].resize(n_particles);
-                std::fill(gradients[i].begin(), gradients[i].end(), Tensor<1, dim>());
-              }
+            if (integration_flags & EvaluationFlags::gradients)
+              gradients[i].resize(n_particles);
           }
       }
 
 
 
       template <int dim>
-      bool
-      GeneralizedBasisData<dim>::evaluate_gradients() const
+      EvaluationFlags::EvaluationFlags
+      GeneralizedBasisData<dim>::get_integration_flags() const
       {
-        return (gradients.size() > 0);
+        return integration_flags;
       }
 
 
@@ -287,8 +324,11 @@ namespace aspect
       GeneralizedBasisData<dim>::get_value(const unsigned int i,
                                            const unsigned int p) const
       {
-        AssertIndexRange(i, values.size());
+        Assert(integration_flags & EvaluationFlags::values,
+               ExcInternalError());
+        AssertIndexRange(i, dofs_per_cell);
         AssertIndexRange(p, values[i].size());
+
         return values[i][p];
       }
 
@@ -299,12 +339,11 @@ namespace aspect
       GeneralizedBasisData<dim>::get_gradient(const unsigned int i,
                                               const unsigned int p) const
       {
-        AssertThrow(gradients.size() > 0,
-                    ExcMessage("Cannot get basis gradient because gradients are not requested "
-                               "when initializing the GeneralizedBasisData object."));
-
-        AssertIndexRange(i, gradients.size());
+        Assert(integration_flags & EvaluationFlags::gradients,
+               ExcInternalError());
+        AssertIndexRange(i, dofs_per_cell);
         AssertIndexRange(p, gradients[i].size());
+
         return gradients[i][p];
       }
 
@@ -327,8 +366,11 @@ namespace aspect
                                            const unsigned int p,
                                            const double       val)
       {
-        AssertIndexRange(i, values.size());
+        Assert(integration_flags & EvaluationFlags::values,
+               ExcInternalError());
+        AssertIndexRange(i, dofs_per_cell);
         AssertIndexRange(p, values[i].size());
+
         values[i][p] = val;
       }
 
@@ -340,13 +382,131 @@ namespace aspect
                                               const unsigned int    p,
                                               const Tensor<1, dim> &grad)
       {
-        AssertThrow(gradients.size() > 0,
-                    ExcMessage("Cannot set basis gradient because gradients are not requested "
-                               "when initializing the GeneralizedBasisData object."));
-
-        AssertIndexRange(i, gradients.size());
+        Assert(integration_flags & EvaluationFlags::gradients,
+               ExcInternalError());
+        AssertIndexRange(i, dofs_per_cell);
         AssertIndexRange(p, gradients[i].size());
+
         gradients[i][p] = grad;
+      }
+
+
+
+      /**
+       * Class handling the integration of linear functions on simplex.
+       */
+      template <int dim>
+      class SimplexIntegrator
+      {
+        public:
+          static constexpr unsigned int n_vertices = dim + 1;
+          static constexpr double normalization_factor = 1.0 / (dim * (dim - 1));
+
+          /**
+           * Constructor.
+           *
+           * @param[in] vertices Vertices of the simplex.
+           * @param[in] integration_flag Quantities required to be integrated.
+           */
+          SimplexIntegrator(const std::array<Point<dim>, n_vertices> &vertices,
+                            const EvaluationFlags::EvaluationFlags    integration_flags);
+
+          /**
+           * Returns the integration of the value and gradient of the input
+           * linear function.
+           *
+           * @param[in] values Values of the linear function at the vertices.
+           */
+          std::pair<double, Tensor<1, dim> >
+          integrate_linear_function(const std::array<double, n_vertices> &values) const;
+
+          /**
+           * Return the volume of the simplex.
+           */
+          double get_volume() const;
+
+        private:
+          std::array<Point<dim>, n_vertices> vertices;
+
+          std::array<Tensor<1, dim>, n_vertices> faces;
+
+          double signed_volume;
+
+          EvaluationFlags::EvaluationFlags integration_flags;
+      };
+
+
+
+
+      template <int dim>
+      SimplexIntegrator<dim>::
+      SimplexIntegrator(const std::array<Point<dim>, n_vertices> &verts,
+                        const EvaluationFlags::EvaluationFlags    flags)
+        : vertices(verts)
+        , integration_flags(flags)
+      {
+        // If the integration of gradients are required, then calculate the
+        //normal vectors of faces, and then calculate the volume based on them
+        if (integration_flags & EvaluationFlags::gradients)
+          {
+            for (unsigned int f = 0; f < n_vertices; ++f)
+              {
+                if constexpr (dim == 2)
+                  faces[f] = cross_product_2d(vertices[(2 + f) % 3] - vertices[(1 + f) % 3]);
+                else
+                  faces[f] = cross_product_3d((vertices[(3 - f) % 4] - vertices[(1 - f) % 4]),
+                                              (vertices[(2 + f) % 4] - vertices[(1 + f) % 4]));
+              }
+
+            signed_volume = (faces[0] * (vertices[0] - vertices[1])) * normalization_factor;
+          }
+        else
+          {
+            Tensor<2, dim> T;
+            for (unsigned int d = 0; d < dim; ++d)
+              T[d] = vertices[d] - vertices[dim];
+
+            signed_volume = determinant(T) * normalization_factor;
+          }
+      }
+
+
+
+      template <int dim>
+      std::pair<double, Tensor<1, dim> >
+      SimplexIntegrator<dim>::
+      integrate_linear_function(const std::array<double, n_vertices> &N) const
+      {
+        double value            = numbers::signaling_nan<double>();
+        Tensor<1, dim> gradient = numbers::signaling_nan<Tensor<1, dim>>();
+
+        if (integration_flags & EvaluationFlags::values)
+          {
+            value = 0;
+            for (unsigned int v = 0; v < n_vertices; ++v)
+              value += N[v];
+
+            value *= std::abs(signed_volume) / n_vertices;
+          }
+
+        if (integration_flags & EvaluationFlags::gradients)
+          {
+            gradient = 0;
+            for (unsigned int v = 0; v < n_vertices; ++v)
+              gradient += N[v] * faces[v];
+
+            gradient *= normalization_factor;
+          }
+
+        return std::make_pair(value, gradient);
+      }
+
+
+
+      template <int dim>
+      double SimplexIntegrator<dim>::get_volume() const
+      {
+        return std::abs(signed_volume);
       }
 
 
@@ -375,44 +535,6 @@ namespace aspect
 
 
       template <int dim>
-      double
-      simplex_measure(const std::array<Point<dim>, dim + 1> &vertices)
-      {
-        static constexpr double dim_factorial = (dim == 2 ? 2.0 : 6.0);
-
-        Tensor<2, dim> T;
-        for (unsigned int d = 0; d < dim; ++d)
-          T[d] = vertices[d] - vertices[dim];
-
-        return std::abs(determinant(T)) / dim_factorial;
-      }
-
-
-
-      Tensor<1, 2>
-      compute_generalized_basis_gradient(const std::array<Point<2>, 3> &v,
-                                         const std::array<double,   3> &N)
-      {
-        Tensor<1, 2> t;
-        t[0] = (N[0] * (v[1][1] - v[2][1]) + N[1] * (v[2][1] - v[0][1]) + N[2] * (v[0][1] - v[1][1])) * 0.5;
-        t[1] = (N[0] * (v[2][0] - v[1][0]) + N[1] * (v[0][0] - v[2][0]) + N[2] * (v[1][0] - v[0][0])) * 0.5;
-
-        return t;
-      }
-
-
-
-      Tensor<1, 3>
-      compute_generalized_basis_gradient(const std::array<Point<3>, 4> &v,
-                                         const std::array<double,   4> &N)
-      {
-        Tensor<1, 3> t;
-
-      }
-
-
-
-      template <int dim>
       void
       do_evaluation(const typename Triangulation<dim>::active_cell_iterator &cell,
                     const std::vector<VoronoiCell<dim>>                     &voronoi_cells,
@@ -432,13 +554,14 @@ namespace aspect
       {
         const unsigned int n_particles = voronoi_cells.size();
         const unsigned int dofs_per_cell = fe.dofs_per_cell;
+        const EvaluationFlags::EvaluationFlags flags = data.get_integration_flags();
 
         data.resize(n_particles);
         std::vector<std::vector<double>> N_v(dofs_per_cell);
         for (unsigned int p = 0; p < n_particles; ++p)
           {
-            double area  = 0.0;
-            std::vector<double> values(dofs_per_cell);
+            double area = 0.0;
+            std::vector<double> values(dofs_per_cell, 0.0);
             std::vector<Tensor<1, 2>> gradients(dofs_per_cell);
 
             const VoronoiCell<2> &voronoi_cell = voronoi_cells[p];
@@ -461,9 +584,8 @@ namespace aspect
 
             if (n_vertices > 3)
               {
-                // Divide the voronoi cell into n_vertices triangles, each triangle
-                // composed of two adjacent vertices and the barycenter of the Voronoi
-                // cell
+                // Divide the voronoi cell into n_vertices triangles. Each triangle
+                // consists of two adjacent vertices and the barycenter of the polygon
                 Point<2> center;
                 for (unsigned int v = 0; v < n_vertices; ++v)
                   center += voronoi_cell.vertices[v];
@@ -480,57 +602,60 @@ namespace aspect
                     const unsigned int v1 = v;
                     const unsigned int v2 = (v + 1) % n_vertices;
 
-                    // Calculate the area of the triangle
+                    // Create a simplex integrator
                     std::array<Point<2>, 3> verts;
                     verts[0] = voronoi_cell.vertices[v1];
                     verts[1] = voronoi_cell.vertices[v2];
                     verts[2] = center;
-                    const double triangle_area = simplex_measure(verts);
-                    area += triangle_area;
+                    SimplexIntegrator<2> simplex_integrator(verts, flags);
+                    area += simplex_integrator.get_volume();
 
                     for (unsigned int i = 0; i < dofs_per_cell; ++i)
                       {
-                        values[i] += (N_v[i][v1] + N_v[i][v2] + N_c[i]) * (triangle_area / 3.0);
-                        if (data.evaluate_gradients())
-                        {
-                          std::array<double, 3> vals;
-                          vals[0] = N_v[i][v1];
-                          vals[1] = N_v[i][v2];
-                          vals[2] = N_c[i];
+                        std::array<double, 3> N;
+                        N[0] = N_v[i][v1];
+                        N[1] = N_v[i][v2];
+                        N[2] = N_c[i];
 
-                          gradients[i] += compute_generalized_basis_gradient(verts, vals);
-                        }
+                        const auto value_and_gradient = simplex_integrator.integrate_linear_function(N);
+
+                        if (flags & EvaluationFlags::values)
+                          values[i] += value_and_gradient.first;
+                        if (flags & EvaluationFlags::gradients)
+                          gradients[i] += value_and_gradient.second;
                       }
                   }
 
                 data.set_volume(p, area);
                 for (unsigned int i = 0; i < dofs_per_cell; ++i)
                   {
-                    data.set_value(i, p, values[i] / area);
-                    if (data.evaluate_gradients())
+                    if (flags & EvaluationFlags::values)
+                      data.set_value(i,p, values[i] / area);
+                    if (flags & EvaluationFlags::gradients)
                       data.set_gradient(i, p, gradients[i] / area);
                   }
               }
             else
               {
+                // No need to divide the Voronoi cell
                 std::array<Point<2>, 3> verts;
-                verts[0] = voronoi_cell.vertices[0];
-                verts[1] = voronoi_cell.vertices[1];
-                verts[2] = voronoi_cell.vertices[2];
-                data.set_volume(p, simplex_measure(verts));
+                for (unsigned int v = 0; v < 3; ++v)
+                  verts[v] = voronoi_cell.vertices[v];
 
+                SimplexIntegrator<2> simplex_integrator(verts, flags);
+
+                const double area = simplex_integrator.get_volume();
+                data.set_volume(p, area);
                 for (unsigned int i = 0; i < dofs_per_cell; ++i)
                   {
-                    data.set_value(i, p, (N_v[i][0] + N_v[i][1] + N_v[i][2]) / 3.0);
-                    if (data.evaluate_gradients())
-                    {
-                      std::array<double, 3> vals;
-                      vals[0] = N_v[i][0];
-                      vals[1] = N_v[i][1];
-                      vals[2] = N_v[i][2];
-
-                      data.set_gradient(i, p, compute_generalized_basis_gradient(verts, vals) / data.get_volume(p));
-                    }
+                    std::array<double, 3> N;
+                    for (unsigned int v = 0; v < 3; ++v)
+                      N[v] = N_v[i][v];
+                    const auto value_and_gradient = simplex_integrator.integrate_linear_function(N);
+                    if (flags & EvaluationFlags::values)
+                      data.set_value(i, p, value_and_gradient.first / area);
+                    if (flags & EvaluationFlags::gradients)
+                      data.set_gradient(i, p, value_and_gradient.second / area);
                   }
               }
           }
@@ -548,41 +673,25 @@ namespace aspect
       {
         const unsigned int n_particles = voronoi_cells.size();
         const unsigned int dofs_per_cell = fe.dofs_per_cell;
+        const EvaluationFlags::EvaluationFlags flags = data.get_integration_flags();
 
         data.resize(n_particles);
-        std::vector<std::vector<double>> N(dofs_per_cell);
+        std::vector<std::vector<double>> N_v(dofs_per_cell);
         for (unsigned int p = 0; p < n_particles; ++p)
           {
             double volume = 0.0;
-            double value  = 0.0;
-            Tensor<1, 2> gradient;
+            std::vector<double> values(dofs_per_cell, 0.0);
+            std::vector<Tensor<1, 3>> gradients(dofs_per_cell);
 
             const VoronoiCell<3> &voronoi_cell = voronoi_cells[p];
             const unsigned int n_vertices = voronoi_cell.vertices.size();
             const unsigned int n_faces    = voronoi_cell.faces.size();
 
-            // Calculate the barycenter of the Voronoi cell
-            Point<3> volume_barycenter;
-            for (unsigned int v = 0; v < n_vertices; ++v)
-              volume_barycenter += voronoi_cell.vertices[v];
-            volume_barycenter /= n_vertices;
-
-            // Calculate the barycenters of the faces of the Voronoi cell
-            std::vector<Point<3>> face_barycenters;
-            for (unsigned int f = 0; f < n_faces; ++f)
-              {
-                Point<3> face_barycenter;
-                for (unsigned int v = 0; v < voronoi_cell.faces[f].size(); ++v)
-                  face_barycenter += voronoi_cell.vertices[voronoi_cell.faces[f][v]];
-                face_barycenter /= voronoi_cell.faces[f].size();
-                face_barycenters.emplace_back(face_barycenter);
-              }
-
-            // Evaluate the values of the shape functions at the vertices and the barycenters
+            // Evaluate the values of the shape functions at the vertices
             for (unsigned int i = 0; i < dofs_per_cell; ++i)
               {
-                N[i].resize(n_vertices + n_faces + 1);
-                std::fill(N[i].begin(), N[i].end(), 0.0);
+                N_v[i].resize(n_vertices);
+                std::fill(N_v[i].begin(), N_v[i].end(), 0.0);
               }
 
             for (unsigned int v = 0; v < n_vertices; ++v)
@@ -590,22 +699,131 @@ namespace aspect
                 const Point<3> vertex_unit = mapping.transform_real_to_unit_cell(cell, voronoi_cell.vertices[v]);
                 if (GeometryInfo<3>::is_inside_unit_cell(vertex_unit))
                   for (unsigned int i = 0; i < dofs_per_cell; ++i)
-                    N[i][v] = fe.shape_value(i, vertex_unit);
+                    N_v[i][v] = fe.shape_value(i, vertex_unit);
               }
 
-            for (unsigned int f = 0; f < n_faces; ++f)
+            if (n_vertices > 4)
               {
-                const Point<3> fc_unit = mapping.transform_real_to_unit_cell(cell, face_barycenters[f]);
-                if (GeometryInfo<3>::is_inside_unit_cell(fc_unit))
+                // Divide the voronoi cell into n_faces prisms. The apex of the prisms
+                // is the barycenter of the polyhedron
+                Point<3> volume_center;
+                for (unsigned int v = 0; v < n_vertices; ++v)
+                  volume_center += voronoi_cell.vertices[v];
+                volume_center /= n_vertices;
+
+                std::vector<double> N_c(dofs_per_cell);
+                const Point<3> vc_unit = mapping.transform_real_to_unit_cell(cell, volume_center);
+                if (GeometryInfo<3>::is_inside_unit_cell(vc_unit))
                   for (unsigned int i = 0; i < dofs_per_cell; ++i)
-                    N[i][n_vertices + f] = fe.shape_value(i, fc_unit);
+                    N_c[i] = fe.shape_value(i, vc_unit);
+
+                for (unsigned int f = 0; f < n_faces; ++f)
+                  {
+                    const unsigned int n_face_vertices = voronoi_cell.faces[f].size();
+                    if (n_face_vertices > 3)
+                      {
+                        // Divide the face into n_face_vertices triangles. Each triangle
+                        // consists of two adjacent vertices and the barycenter of the polygon
+                        Point<3> face_center;
+                        for (unsigned int v = 0; v < n_face_vertices; ++v)
+                          face_center += voronoi_cell.vertices[voronoi_cell.faces[f][v]];
+                        face_center /= n_face_vertices;
+
+                        std::vector<double> N_f(dofs_per_cell);
+                        const Point<3> fc_unit = mapping.transform_real_to_unit_cell(cell, face_center);
+                        if (GeometryInfo<3>::is_inside_unit_cell(fc_unit))
+                          for (unsigned int i = 0; i < dofs_per_cell; ++i)
+                            N_f[i] = fe.shape_value(i, fc_unit);
+
+                        for (unsigned int v = 0; v < n_face_vertices; ++v)
+                          {
+                            const unsigned int v1 = v;
+                            const unsigned int v2 = (v + 1) % n_face_vertices;
+
+                            // Create a simplex integrator
+                            std::array<Point<3>, 4> verts;
+                            verts[0] = voronoi_cell.vertices[voronoi_cell.faces[f][v1]];
+                            verts[1] = voronoi_cell.vertices[voronoi_cell.faces[f][v2]];
+                            verts[2] = face_center;
+                            verts[3] = volume_center;
+                            SimplexIntegrator<3> simplex_integrator(verts, flags);
+                            volume += simplex_integrator.get_volume();
+
+                            for (unsigned int i = 0; i < dofs_per_cell; ++i)
+                              {
+                                std::array<double, 4> N;
+                                N[0] = N_v[i][voronoi_cell.faces[f][v1]];
+                                N[1] = N_v[i][voronoi_cell.faces[f][v2]];
+                                N[2] = N_f[i];
+                                N[3] = N_c[i];
+
+                                const auto value_and_gradient = simplex_integrator.integrate_linear_function(N);
+
+                                if (flags & EvaluationFlags::values)
+                                  values[i] += value_and_gradient.first;
+                                if (flags & EvaluationFlags::gradients)
+                                  gradients[i] += value_and_gradient.second;
+                              }
+                          }
+                      }
+                    else
+                      {
+                        // No need to divide the face
+                        std::array<Point<3>, 4> verts;
+                        for (unsigned int fv = 0; fv < 3; ++fv)
+                          verts[fv] = voronoi_cell.vertices[voronoi_cell.faces[f][fv]];
+                        verts[3] = volume_center;
+
+                        SimplexIntegrator<3> simplex_integrator(verts, flags);
+                        volume += simplex_integrator.get_volume();
+
+                        for (unsigned int i = 0; i < dofs_per_cell; ++i)
+                          {
+                            std::array<double, 4> N;
+                            for (unsigned int fv = 0; fv < 3; ++fv)
+                              N[fv] = N_v[i][voronoi_cell.faces[f][fv]];
+                            N[3] = N_c[i];
+                            const auto value_and_gradient = simplex_integrator.integrate_linear_function(N);
+                            if (flags & EvaluationFlags::values)
+                              values[i] += value_and_gradient.first;
+                            if (flags & EvaluationFlags::gradients)
+                              gradients[i] += value_and_gradient.second;
+                          }
+                      }
+                  }
+
+                data.set_volume(p, volume);
+                for (unsigned int i = 0; i < dofs_per_cell; ++i)
+                  {
+                    if (flags & EvaluationFlags::values)
+                      data.set_value(i, p, values[i] / volume);
+                    if (flags & EvaluationFlags::gradients)
+                      data.set_gradient(i, p, gradients[i] / volume);
+                  }
               }
+            else
+              {
+                // No need to divide the Voronoi cell
+                std::array<Point<3>, 4> verts;
+                for (unsigned int v = 0; v < 4; ++v)
+                  verts[v] = voronoi_cell.vertices[v];
 
-            const Point<3> vc_unit = mapping.transform_real_to_unit_cell(cell, volume_barycenter);
-            if (GeometryInfo<3>::is_inside_unit_cell(vc_unit))
-              for (unsigned int i = 0; i < dofs_per_cell; ++i)
-                N[i][n_vertices + n_faces] = fe.shape_value(i, vc_unit);
+                SimplexIntegrator<3> simplex_integrator(verts, flags);
 
+                const double volume = simplex_integrator.get_volume();
+                data.set_volume(p, volume);
+                for (unsigned int i = 0; i < dofs_per_cell; ++i)
+                  {
+                    std::array<double, 4> N;
+                    for (unsigned int v = 0; v < 4; ++v)
+                      N[v] = N_v[i][v];
+                    const auto value_and_gradient = simplex_integrator.integrate_linear_function(N);
+                    if (flags & EvaluationFlags::values)
+                      data.set_value(i, p, value_and_gradient.first / volume);
+                    if (flags & EvaluationFlags::gradients)
+                      data.set_gradient(i, p, value_and_gradient.second / volume);
+                  }
+              }
           }
       }
 
@@ -792,7 +1010,7 @@ namespace aspect
     const Particles::ParticleHandler<dim> &particle_handler = cpdi_particle_manager->get_particle_handler();
     const FiniteElement<dim> &fe = finite_element.base_element(advection_fields[0].base_element(introspection));
 
-    internal::CPDI::GeneralizedBasisData<dim> data(fe.dofs_per_cell, false);
+    internal::CPDI::GeneralizedBasisData<dim> data(fe.dofs_per_cell, EvaluationFlags::values);
 
     // Now loop over the locally owned active cells and assemble the CPDI systems
     for (const auto &cell : dof_handler.active_cell_iterators())
@@ -815,6 +1033,7 @@ namespace aspect
                                    bounding_box,
                                    data);
         }
+    AssertThrow(false, ExcInternalError());
   }
 }
 
