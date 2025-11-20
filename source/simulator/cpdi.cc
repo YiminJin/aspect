@@ -829,6 +829,23 @@ namespace aspect
 
 
 
+      /**
+       * Calculate the volume and the values/gradients of the generalized basis
+       * functions for each particle domain.
+       *
+       * @param[in] cell The target cell
+       * @param[in] neighbors Collection of the surrounding cells of all the
+       *  vertices of the target cell (including itself).
+       * @param[in] particle_handler The ParticleHandler object that handles
+       *  the particles.
+       * @param[in] fe The finite element that defines the basis functions of
+       *  the fields to be interpolated.
+       * @param[in] mapping Used for transforming a point from real cell to
+       *  reference cell.
+       * @param[in] box Bounding box of the geometry model. It is used for
+       *  checking if a particle domain is out of reach.
+       * @param[in,out] data Holding the calculated quantities.
+       */
       template <int dim>
       void
       evaluate(const typename Triangulation<dim>::active_cell_iterator           &cell,
@@ -864,19 +881,19 @@ namespace aspect
                                                                           corner2,
                                                                           n_particles);
 
-        voro::container container(/*ax=*/corner1[0],
-                                         /*bx=*/corner2[0],
-                                         /*ay=*/corner1[1],
-                                         /*by=*/corner2[1],
-                                         /*az=*/(dim > 2 ? corner1[2] : -diameter * 0.01),
-                                         /*bz=*/(dim > 2 ? corner2[2] :  diameter * 0.01),
-                                         /*nx=*/n_blocks[0],
-                                         /*ny=*/n_blocks[1],
-                                         /*nz=*/n_blocks[2],
-                                         /*xperiodic=*/false,
-                                         /*yperiodic=*/false,
-                                         /*zperiodic=*/false,
-                                         /*init_mem=*/8);
+        voro::container container(corner1[0],                                // ax
+                                  corner2[0],                                // bx
+                                  corner1[1],                                // ay
+                                  corner2[1],                                // by
+                                  (dim > 2 ? corner1[2] : -diameter * 0.01), // az
+                                  (dim > 2 ? corner2[2] :  diameter * 0.01), // bz
+                                  n_blocks[0],                               // nx
+                                  n_blocks[1],                               // ny
+                                  n_blocks[2],                               // nz
+                                  false,                                     // xperiodic
+                                  false,                                     // yperiodic
+                                  false,                                     // zperiodic
+                                  8);                                        // init_mem
 
         // Put all the particles in the current cell and its neighbors into the container
         for (const auto &neighbor : neighbors)
@@ -924,9 +941,33 @@ namespace aspect
           }
         while (loop.inc());
 
-        // Compute the volume and the values (and gradients) of the generalized basis functions
-        // for each particle domain
+        // Do the actual evaluation
         do_evaluation(cell, voronoi_cells, fe, mapping, data);
+
+#if DEBUG
+        // Check if the volumes of the Voronoi cells are correct.
+        const auto particles_in_cell = particle_handler.particles_in_cell(cell);
+        for (auto particle = particles_in_cell.begin();
+             particle != particles_in_cell.end(); ++particle)
+          {
+            const unsigned int p = std::distance(particles_in_cell.begin(), particle);
+            const double volume = data.get_volume(p) * (dim > 2 ? 1. : diameter * 0.02);
+            const double voro_volume = voro_cell.volume();
+
+            if (std::abs(volume - voro_volume) > volume * 1.e-6)
+              {
+                std::stringstream error_message;
+                error_message << "The volume of the Voronoi cell at ("
+                              << particle->get_location()
+                              << ") should be "
+                              << voro_volume
+                              << ", but the value we get is "
+                              << volume;
+
+                Assert(false, ExcMessage(error_message.str()));
+              }
+          }
+#endif
       }
     }
   }
@@ -938,6 +979,9 @@ namespace aspect
   Simulator<dim>::
   perform_convected_particle_domain_interpolation(const std::vector<AdvectionField> &advection_fields)
   {
+    if (advection_fields.size() == 0)
+      return;
+
     computing_timer.enter_subsection("Particles: CPDI");
 
     // The container of voro++ is a box, so we can only use the box model without initial topography
@@ -948,12 +992,6 @@ namespace aspect
                 ExcMessage("Compositional field method ``cpdi'' only works when the initial topography model is ``zero topography''."));
     AssertThrow(mesh_deformation == nullptr,
                 ExcMessage("Compositional field method ``cpdi'' only works when mesh deformation is not enabled."));
-
-    for (const auto &field : advection_fields)
-      {
-        AssertThrow(field.polynomial_degree(introspection) == 1 && field.is_discontinuous(introspection) == false,
-                    ExcMessage("The CPDI method can only be applied to compositional fields discretized by standard Q1 elements."));
-      }
 
     // Find the particle manager handling the input fields
     const Particle::Manager<dim> *cpdi_particle_manager = nullptr;
@@ -977,18 +1015,50 @@ namespace aspect
 
     AssertThrow(cpdi_particle_manager != nullptr, ExcInternalError());
 
-    // Check if all the input fields are handled by the same particle manager
+    // Create a map from field index to particle property index
+    std::map<unsigned int, unsigned int> field_to_property_map;
     if (parameters.mapped_particle_properties.size() != 0)
       {
+        const Particle::Property::ParticlePropertyInformation &property_info
+          = cpdi_particle_manager->get_property_manager().get_data_info();
+
         for (const auto &field : advection_fields)
           {
-            const std::string &field_name = parameters.mapped_particle_properties[field.compositional_variable].first;
-            AssertThrow(cpdi_particle_manager->get_property_manager().get_data_info().fieldname_exists(field_name), ExcInternalError());
+            unsigned int property_index = numbers::invalid_unsigned_int;
+
+            if (parameters.mapped_particle_properties.size() != 0)
+              {
+                const std::string &field_name = parameters.mapped_particle_properties[field.compositional_variable].first;
+                AssertThrow(property_info.fieldname_exists(field_name),
+                            ExcMessage("The particle properties to be interpolated by the CPDI method are not handled by "
+                                       "the same particle manager. Currently this is not supported."));
+
+                const std::pair<std::string, unsigned int> property_and_component
+                  = parameters.mapped_particle_properties[field.compositional_variable];
+
+                property_index = property_info.get_position_by_field_name(property_and_component.first) + property_and_component.second;
+              }
+            else
+              {
+                property_index = std::count(introspection.compositional_field_methods.begin(),
+                                            introspection.compositional_field_methods.begin() + field.compositional_variable,
+                                            Parameters<dim>::AdvectionFieldMethod::particles)
+                                 +
+                                 std::count(introspection.compositional_field_methods.begin(),
+                                            introspection.compositional_field_methods.begin() + field.compositional_variable,
+                                            Parameters<dim>::AdvectionFieldMethod::cpdi);
+
+                AssertThrow(property_index < property_info.n_components(),
+                            ExcMessage("Can not automatically match particle properties to fields, because there are "
+                                       "more fields that are marked as particle/cpdi than particle properties."));
+              }
+
+            field_to_property_map.insert(std::make_pair(field.compositional_variable, property_index));
           }
       }
 
-    // We have checked that all the input fields are discretized by Q1 element,
-    // so all the input fields share the same sparsity block.
+    // We have checked that all the input fields are discretized by Q1 element in
+    // source/simulator/parameters.cc, so all the input fields share the same sparsity block.
     const unsigned int sparsity_block_idx = advection_fields[0].sparsity_pattern_block_index(introspection);
     system_matrix.block(sparsity_block_idx, sparsity_block_idx) = 0;
     for (const auto &field : advection_fields)
@@ -1003,14 +1073,22 @@ namespace aspect
 
     // Get the bounding box of the computational domain
     const GeometryModel::Box<dim> &box = Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(*geometry_model);
-    const Point<dim> corner1 = box.get_origin();
-    const Point<dim> corner2 = corner1 + box.get_extents();
-    const BoundingBox<dim> bounding_box(std::make_pair(corner1, corner2));
+    const BoundingBox<dim> bounding_box(std::make_pair(box.get_origin(), box.get_origin() + box.get_extents()));
 
     const Particles::ParticleHandler<dim> &particle_handler = cpdi_particle_manager->get_particle_handler();
-    const FiniteElement<dim> &fe = finite_element.base_element(advection_fields[0].base_element(introspection));
+    const FiniteElement<dim> &field_fe = finite_element.base_element(advection_fields[0].base_element(introspection));
 
-    internal::CPDI::GeneralizedBasisData<dim> data(fe.dofs_per_cell, EvaluationFlags::values);
+    const unsigned int field_dofs_per_cell = field_fe.dofs_per_cell;
+    const unsigned int n_fields            = advection_fields.size();
+
+    // stuff for assembling the CPDI system
+    FullMatrix<double> cell_matrix(field_dofs_per_cell, field_dofs_per_cell);
+    std::vector<Vector<double>> cell_rhs(n_fields, Vector<double>(field_dofs_per_cell));
+
+    std::vector<types::global_dof_index> cell_dof_indices(finite_element.dofs_per_cell);
+    std::vector<std::vector<types::global_dof_index>> field_dof_indices(n_fields, std::vector<types::global_dof_index>(field_dofs_per_cell));
+
+    internal::CPDI::GeneralizedBasisData<dim> data(field_dofs_per_cell, EvaluationFlags::values);
 
     // Now loop over the locally owned active cells and assemble the CPDI systems
     for (const auto &cell : dof_handler.active_cell_iterators())
@@ -1028,11 +1106,141 @@ namespace aspect
           internal::CPDI::evaluate(cell,
                                    neighboring_cells,
                                    particle_handler,
-                                   fe,
+                                   field_fe,
                                    *mapping,
                                    bounding_box,
                                    data);
+
+          const auto particles_in_cell = particle_handler.particles_in_cell(cell);
+
+          // Assemble the cell matrix and cell vectors
+          cell_matrix = 0;
+          for (unsigned int field_index = 0; field_index < n_fields; ++field_index)
+            cell_rhs[field_index] = 0;
+
+          for (auto particle = particles_in_cell.begin(); particle != particles_in_cell.end(); ++particle)
+            {
+              const unsigned int p = std::distance(particles_in_cell.begin(), particle);
+              const double Vp = data.get_volume(p);
+
+              const ArrayView<const double> particle_properties = particle->get_properties();
+
+              for (unsigned int i = 0; i < field_dofs_per_cell; ++i)
+                {
+                  for (unsigned int field_index = 0; field_index < n_fields; ++field_index)
+                    {
+                      const double property_value = particle_properties[field_to_property_map[field_index]];
+                      cell_rhs[field_index](i) += Vp * data.get_value(i, p) * property_value;
+                    }
+
+                  for (unsigned int j = 0; j < field_dofs_per_cell; ++j)
+                    cell_matrix(i, j) += Vp * data.get_value(i, p) * data.get_value(j, p);
+                }
+            }
+
+          // Collect the dof indices for each field
+          cell->get_dof_indices(cell_dof_indices);
+          for (unsigned int field_index = 0; field_index < n_fields; ++field_index)
+            {
+              const unsigned int field_component = advection_fields[field_index].component_index(introspection);
+              for (unsigned int i = 0, i_field = 0; i_field < field_dofs_per_cell; /*increment at end of loop*/)
+                {
+                  if (finite_element.system_to_component_index(i).first == field_component)
+                    {
+                      field_dof_indices[field_index][i_field] = cell_dof_indices[i];
+                      ++i_field;
+                    }
+                  ++i;
+                }
+            }
+
+          // Copy cell matrix and vectors to the corresponding entries of system matrix and vectors
+          current_constraints.distribute_local_to_global(cell_matrix,
+                                                         field_dof_indices[0],
+                                                         system_matrix);
+
+          for (unsigned int field_index = 0; field_index < n_fields; ++field_index)
+            current_constraints.distribute_local_to_global(cell_rhs[field_index],
+                                                           field_dof_indices[field_index],
+                                                           system_rhs);
         }
+
+    system_matrix.compress(VectorOperation::add);
+    system_rhs.compress(VectorOperation::add);
+
+    // Solve for each field
+    SolverControl solver_control(1000, 1.e-8);
+    SolverCG<LinearAlgebra::Vector> solver(solver_control);
+
+    // Set the preconditioner
+    LinearAlgebra::PreconditionAMG preconditioner;
+    LinearAlgebra::PreconditionAMG::AdditionalData amg_data;
+
+#if DEAL_II_VERSION_GTE(9,7,0)
+    amg_data.constant_modes = DoFTools::extract_constant_modes(
+                                dof_handler,
+                                introspection.component_masks.compositional_fields[advection_fields[0].compositional_variable]);
+#else
+    std::vector<std::vector<bool>> constant_modes;
+    DoFTools::extract_constant_modes(
+      dof_handler,
+      introspection.component_masks.compositional_fields[advection_fields[0].compositional_variable],
+      constant_modes);
+    amg_data.constant_modes = constant_modes;
+#endif
+
+    amg_data.elliptic = true;
+    amg_data.higher_order_elements = false;
+    amg_data.smoother_sweeps = 2;
+    amg_data.aggregation_threshold = 0.02;
+
+    preconditioner.initialize(system_matrix.block(sparsity_block_idx,
+                                                  sparsity_block_idx),
+                              amg_data);
+
+    // Create a distributed vector
+    LinearAlgebra::BlockVector distributed_solution(introspection.index_sets.system_partitioning,
+                                                    mpi_communicator);
+
+    for (const auto &field : advection_fields)
+      {
+        pcout << "   Solving CPDI system for " << field.name(introspection)
+              << "... " << std::flush;
+
+        const unsigned int block_idx = field.block_index(introspection);
+        distributed_solution.block(block_idx) = current_linearization_point.block(block_idx);
+        current_constraints.set_zero(distributed_solution);
+
+        try
+          {
+            solver.solve(system_matrix.block(sparsity_block_idx, sparsity_block_idx),
+                         distributed_solution.block(block_idx),
+                         system_rhs.block(block_idx),
+                         preconditioner);
+          }
+        catch (const std::exception &exc)
+          {
+            // if the solver fails, report the error from processor 0 with some additional
+            // information about its location, and throw a quiet exception on all other
+            // processors
+            Utilities::throw_linear_solver_failure_exception("iterative CPDI solver",
+                                                             "perform_convected_particle_domain_interpolation()",
+                                                             std::vector<SolverControl> {solver_control},
+                                                             exc,
+                                                             mpi_communicator);
+          }
+
+        pcout << solver_control.last_step() << " iterations." << std::endl;
+      }
+
+    current_constraints.distribute(distributed_solution);
+    for (const auto &field : advection_fields)
+      {
+        const unsigned int block_idx = field.block_index(introspection);
+        solution.block(block_idx) = distributed_solution.block(block_idx);
+      }
+
+    computing_timer.leave_subsection("Particles: CPDI");
     AssertThrow(false, ExcInternalError());
   }
 }

@@ -1390,7 +1390,7 @@ namespace aspect
                          "the user's responsibility to check that the chosen material model "
                          "and other plugins interpret the compositional fields as intended.");
       prm.declare_entry ("Compositional field methods", "",
-                         Patterns::List (Patterns::Selection("field|particles|volume of fluid|static|melt field|darcy field|prescribed field|prescribed field with diffusion")),
+                         Patterns::List (Patterns::Selection("field|particles|cpdi|volume of fluid|static|melt field|darcy field|prescribed field|prescribed field with diffusion")),
                          "A comma separated list denoting the solution method of each "
                          "compositional field. Each entry of the list must be "
                          "one of the currently implemented field methods."
@@ -1412,6 +1412,14 @@ namespace aspect
                          "and particle properties can react with each other as well. "
                          "See Section~\\ref{sec:methods:particles} for more information about "
                          "how particles behave."
+                         "\n"
+                         "* ``cpdi'': If a compositional field is marked with this "
+                         "method, then its values are obtained in each time step "
+                         "by the convected particle domain interpolation (CPDI) method. "
+                         "The field should be: (a) mapped to a particle property, and "
+                         "(b) discretized by the standard $Q_1$ element. Moreover, the "
+                         "corresponding particle properties of CPDI fields should be "
+                         "handled by the same particle manager."
                          "\n"
                          "* ``volume of fluid``: If a compositional field "
                          "is marked with this method, then its values are "
@@ -2206,6 +2214,14 @@ namespace aspect
             compositional_field_methods[i] = AdvectionFieldMethod::fem_field;
           else if (x_compositional_field_methods[i] == "particles")
             compositional_field_methods[i] = AdvectionFieldMethod::particles;
+          else if (x_compositional_field_methods[i] == "cpdi")
+          {
+            AssertThrow (composition_degrees[i] == 1 &&
+                         use_discontinuous_composition_discretization[i] == false,
+                         ExcMessage("Compositional fields marked with ``cpdi'' method "
+                                    "should be discretized by the standard Q1 element."));
+            compositional_field_methods[i] = AdvectionFieldMethod::cpdi;
+          }
           else if (x_compositional_field_methods[i] == "volume of fluid")
             {
               AssertThrow (dim==2,
