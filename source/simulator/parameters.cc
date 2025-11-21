@@ -2216,11 +2216,18 @@ namespace aspect
             compositional_field_methods[i] = AdvectionFieldMethod::particles;
           else if (x_compositional_field_methods[i] == "cpdi")
           {
+#ifdef ASPECT_WITH_VORO
             AssertThrow (composition_degrees[i] == 1 &&
                          use_discontinuous_composition_discretization[i] == false,
                          ExcMessage("Compositional fields marked with ``cpdi'' method "
                                     "should be discretized by the standard Q1 element."));
             compositional_field_methods[i] = AdvectionFieldMethod::cpdi;
+#else
+            AssertThrow (false,
+                         ExcMessage("Compositional field method ``cpdi'' can only be selected "
+                                    "when ASPECT is compiled with voro++. Please install voro++ "
+                                    "and rebuild ASPECT with cmake command -DASPECT_WITH_VORO=ON."));
+#endif
           }
           else if (x_compositional_field_methods[i] == "volume of fluid")
             {
@@ -2260,7 +2267,8 @@ namespace aspect
           (prm.get ("Mapped particle properties"));
 
       const unsigned int number_of_particle_fields =
-        std::count(compositional_field_methods.begin(),compositional_field_methods.end(),AdvectionFieldMethod::particles);
+        std::count(compositional_field_methods.begin(), compositional_field_methods.end(), AdvectionFieldMethod::particles) +
+        std::count(compositional_field_methods.begin(), compositional_field_methods.end(), AdvectionFieldMethod::cpdi);
 
       AssertThrow ((x_mapped_particle_properties.size() == number_of_particle_fields)
                    || (x_mapped_particle_properties.size() == 0),
@@ -2311,10 +2319,12 @@ namespace aspect
                                                                        field_name_iterator);
 
           AssertThrow (compositional_field_methods[compositional_field_index]
-                       == AdvectionFieldMethod::particles,
+                       == AdvectionFieldMethod::particles ||
+                       compositional_field_methods[compositional_field_index]
+                       == AdvectionFieldMethod::cpdi,
                        ExcMessage ("The field <" + key +
                                    "> appears in the parameter <Compositional fields/Mapped particle properties>, but "
-                                   "is not advected by a particle method."));
+                                   "is not advected by particle method or cpdi method."));
 
           AssertThrow (std::count(names_of_compositional_fields.begin(),
                                   names_of_compositional_fields.end(), key) == 1,

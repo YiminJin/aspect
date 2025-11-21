@@ -21,10 +21,14 @@
 #include <aspect/simulator.h>
 #include <aspect/geometry_model/box.h>
 
+#ifdef ASPECT_WITH_VORO
 #include <voro++.hh>
+#endif
 
 namespace aspect
 {
+#ifdef ASPECT_WITH_VORO
+
   namespace internal
   {
     namespace CPDI
@@ -967,10 +971,11 @@ namespace aspect
                 Assert(false, ExcMessage(error_message.str()));
               }
           }
-#endif
+#endif /*DEBUG*/
       }
     }
   }
+#endif /*ASPECT_WITH_VORO*/
 
 
 
@@ -982,6 +987,7 @@ namespace aspect
     if (advection_fields.size() == 0)
       return;
 
+#ifdef ASPECT_WITH_VORO
     computing_timer.enter_subsection("Particles: CPDI");
 
     // The container of voro++ is a box, so we can only use the box model without initial topography
@@ -1241,7 +1247,8 @@ namespace aspect
       }
 
     computing_timer.leave_subsection("Particles: CPDI");
-    AssertThrow(false, ExcInternalError());
+
+#endif /*ASPECT_WITH_VORO*/
   }
 }
 
