@@ -92,6 +92,8 @@ namespace aspect
         /**
          * Constructor.
          *
+         * @param[in] particle_index The local particle ID.
+         *
          * @param[in] voro_vertices An array of float numbers representing the
          *  coordinates of the vertices of the Voronoi cell. It is supposed to
          *  be the output of function voro::voronoicell_neighbor::vertices().
@@ -108,10 +110,13 @@ namespace aspect
          *  check if the Voronoi cell crosses the boundary of the surrounding
          *  FE cells, in which case the CPDI algorithm fails.
          */
-        VoronoiCell(const std::vector<double> &voro_vertices,
-                    const std::vector<int>    &voro_faces,
-                    const std::vector<int>    &voro_neighbors,
-                    const BoundingBox<dim>    &box);
+        VoronoiCell(const types::particle_index  particle_index,
+                    const std::vector<double>   &voro_vertices,
+                    const std::vector<int>      &voro_faces,
+                    const std::vector<int>      &voro_neighbors,
+                    const BoundingBox<dim>      &box);
+
+        const types::particle_index particle_index;
 
         std::vector<Point<dim>> vertices;
 
@@ -124,10 +129,12 @@ namespace aspect
 
       template <>
       VoronoiCell<2>::
-      VoronoiCell(const std::vector<double> &voro_vertices,
-                  const std::vector<int>    &voro_faces,
-                  const std::vector<int>    &voro_neighbors,
-                  const BoundingBox<2>      &box)
+      VoronoiCell(const types::particle_index  particle_index,
+                  const std::vector<double>   &voro_vertices,
+                  const std::vector<int>      &voro_faces,
+                  const std::vector<int>      &voro_neighbors,
+                  const BoundingBox<2>        &box)
+        : particle_index(particle_index)
       {
         unsigned int target_face = numbers::invalid_unsigned_int;
         for (unsigned int i = 0, j = 0; i < voro_neighbors.size(); ++i)
@@ -182,10 +189,12 @@ namespace aspect
 
       template <>
       VoronoiCell<3>::
-      VoronoiCell(const std::vector<double> &voro_vertices,
-                  const std::vector<int>    &voro_faces,
-                  const std::vector<int>    &voro_neighbors,
-                  const BoundingBox<3>      &box)
+      VoronoiCell(const types::particle_index  particle_index,
+                  const std::vector<double>   &voro_vertices,
+                  const std::vector<int>      &voro_faces,
+                  const std::vector<int>      &voro_neighbors,
+                  const BoundingBox<3>        &box)
+        : particle_index(particle_index)
       {
         // Collect the vertices
         for (unsigned int l = 0; l < voro_vertices.size(); l += 3)
@@ -227,6 +236,41 @@ namespace aspect
 
 
 
+      void write_vtk(const std::vector<VoronoiCell<2>> &voronoi_cells,
+                     std::ofstream        &out)
+      {
+        unsigned int total_points = 0;
+        unsigned int total_ints_in_polygons = 0;
+
+        for (const auto &poly : voronoi_cells)
+        {
+          total_points += poly.vertices.size();
+          total_ints_in_polygons += poly.vertices.size() + 1;
+        }
+
+        out << "# vtk DataFile Version 3.0\n";
+        out << "Voronoi polygons\n";
+        out << "ASCII\n";
+        out << "DATASET POLYDATA\n";
+
+        out << "POINTS " << total_points <<" float\n";
+        for (const auto &poly : voronoi_cells)
+          for (const auto &p : poly.vertices)
+            out << p[0] << ' ' << p[1] << " 0.0\n";
+
+        out << "POLYGONS " << voronoi_cells.size() << " " << total_ints_in_polygons << "\n";
+        int index = 0;
+        for (const auto &poly : voronoi_cells)
+        {
+          out << poly.vertices.size();
+          for (unsigned int i = 0; i < poly.vertices.size(); ++i)
+            out << ' ' << index++;
+          out << "\n";
+        }
+      }
+
+
+
       /**
        * Class for holding information of the generalized basis functions.
        */
@@ -262,15 +306,15 @@ namespace aspect
                             const Tensor<1, dim> &grad);
 
         private:
-          std::vector<std::vector<double>>         values;
+          std::vector<std::vector<double>>              values;
 
-          std::vector<std::vector<Tensor<1, dim>>> gradients;
+          std::vector<std::vector<Tensor<1, dim>>>      gradients;
 
-          std::vector<double>                      volumes;
+          std::vector<double>                           volumes;
 
-          const unsigned int                       dofs_per_cell;
+          const unsigned int                            dofs_per_cell;
 
-          const EvaluationFlags::EvaluationFlags   integration_flags;
+          const EvaluationFlags::EvaluationFlags        integration_flags;
       };
 
 
@@ -289,7 +333,8 @@ namespace aspect
 
       template <int dim>
       void
-      GeneralizedBasisData<dim>::resize(const unsigned int n_particles)
+      GeneralizedBasisData<dim>::
+      resize(const unsigned int n_particles)
       {
         volumes.resize(n_particles);
         for (unsigned int i = 0; i < dofs_per_cell; ++i)
@@ -538,23 +583,13 @@ namespace aspect
 
 
 
-      template <int dim>
       void
-      do_evaluation(const typename Triangulation<dim>::active_cell_iterator &cell,
-                    const std::vector<VoronoiCell<dim>>                     &voronoi_cells,
-                    const FiniteElement<dim>                                &fe,
-                    const Mapping<dim>                                      &mapping,
-                    GeneralizedBasisData<dim>                               &data);
-
-
-
-      template <>
-      void
-      do_evaluation<2>(const Triangulation<2>::active_cell_iterator &cell,
-                       const std::vector<VoronoiCell<2>>            &voronoi_cells,
-                       const FiniteElement<2>                       &fe,
-                       const Mapping<2>                             &mapping,
-                       GeneralizedBasisData<2>                      &data)
+      do_evaluation(const Triangulation<2>::active_cell_iterator        &cell,
+                    const std::vector<VoronoiCell<2>>                   &voronoi_cells,
+                    const std::map<types::particle_index, unsigned int> &local_index_map,
+                    const FiniteElement<2>                              &fe,
+                    const Mapping<2>                                    &mapping,
+                    GeneralizedBasisData<2>                             &data)
       {
         const unsigned int n_particles = voronoi_cells.size();
         const unsigned int dofs_per_cell = fe.dofs_per_cell;
@@ -562,6 +597,7 @@ namespace aspect
 
         data.resize(n_particles);
         std::vector<std::vector<double>> N_v(dofs_per_cell);
+
         for (unsigned int p = 0; p < n_particles; ++p)
           {
             double area = 0.0;
@@ -630,13 +666,14 @@ namespace aspect
                       }
                   }
 
-                data.set_volume(p, area);
+                const unsigned int local_index = local_index_map.find(voronoi_cell.particle_index)->second;
+                data.set_volume(local_index, area);
                 for (unsigned int i = 0; i < dofs_per_cell; ++i)
                   {
                     if (flags & EvaluationFlags::values)
-                      data.set_value(i,p, values[i] / area);
+                      data.set_value(i, local_index, values[i] / area);
                     if (flags & EvaluationFlags::gradients)
-                      data.set_gradient(i, p, gradients[i] / area);
+                      data.set_gradient(i, local_index, gradients[i] / area);
                   }
               }
             else
@@ -649,7 +686,9 @@ namespace aspect
                 SimplexIntegrator<2> simplex_integrator(verts, flags);
 
                 const double area = simplex_integrator.get_volume();
-                data.set_volume(p, area);
+
+                const unsigned int local_index = local_index_map.find(voronoi_cell.particle_index)->second;
+                data.set_volume(local_index, area);
                 for (unsigned int i = 0; i < dofs_per_cell; ++i)
                   {
                     std::array<double, 3> N;
@@ -657,9 +696,9 @@ namespace aspect
                       N[v] = N_v[i][v];
                     const auto value_and_gradient = simplex_integrator.integrate_linear_function(N);
                     if (flags & EvaluationFlags::values)
-                      data.set_value(i, p, value_and_gradient.first / area);
+                      data.set_value(i, local_index, value_and_gradient.first / area);
                     if (flags & EvaluationFlags::gradients)
-                      data.set_gradient(i, p, value_and_gradient.second / area);
+                      data.set_gradient(i, local_index, value_and_gradient.second / area);
                   }
               }
           }
@@ -667,13 +706,13 @@ namespace aspect
 
 
 
-      template <>
       void
-      do_evaluation(const Triangulation<3>::active_cell_iterator &cell,
-                    const std::vector<VoronoiCell<3>>            &voronoi_cells,
-                    const FiniteElement<3>                       &fe,
-                    const Mapping<3>                             &mapping,
-                    GeneralizedBasisData<3>                      &data)
+      do_evaluation(const Triangulation<3>::active_cell_iterator        &cell,
+                    const std::vector<VoronoiCell<3>>                   &voronoi_cells,
+                    const std::map<types::particle_index, unsigned int> &local_index_map,
+                    const FiniteElement<3>                              &fe,
+                    const Mapping<3>                                    &mapping,
+                    GeneralizedBasisData<3>                             &data)
       {
         const unsigned int n_particles = voronoi_cells.size();
         const unsigned int dofs_per_cell = fe.dofs_per_cell;
@@ -681,6 +720,7 @@ namespace aspect
 
         data.resize(n_particles);
         std::vector<std::vector<double>> N_v(dofs_per_cell);
+
         for (unsigned int p = 0; p < n_particles; ++p)
           {
             double volume = 0.0;
@@ -796,13 +836,14 @@ namespace aspect
                       }
                   }
 
-                data.set_volume(p, volume);
+                const unsigned int local_index = local_index_map.find(voronoi_cell.particle_index)->second;
+                data.set_volume(local_index, volume);
                 for (unsigned int i = 0; i < dofs_per_cell; ++i)
                   {
                     if (flags & EvaluationFlags::values)
-                      data.set_value(i, p, values[i] / volume);
+                      data.set_value(i, local_index, values[i] / volume);
                     if (flags & EvaluationFlags::gradients)
-                      data.set_gradient(i, p, gradients[i] / volume);
+                      data.set_gradient(i, local_index, gradients[i] / volume);
                   }
               }
             else
@@ -815,7 +856,9 @@ namespace aspect
                 SimplexIntegrator<3> simplex_integrator(verts, flags);
 
                 const double volume = simplex_integrator.get_volume();
-                data.set_volume(p, volume);
+
+                const unsigned int local_index = local_index_map.find(voronoi_cell.particle_index)->second;
+                data.set_volume(local_index, volume);
                 for (unsigned int i = 0; i < dofs_per_cell; ++i)
                   {
                     std::array<double, 4> N;
@@ -823,9 +866,9 @@ namespace aspect
                       N[v] = N_v[i][v];
                     const auto value_and_gradient = simplex_integrator.integrate_linear_function(N);
                     if (flags & EvaluationFlags::values)
-                      data.set_value(i, p, value_and_gradient.first / volume);
+                      data.set_value(i, local_index, value_and_gradient.first / volume);
                     if (flags & EvaluationFlags::gradients)
-                      data.set_gradient(i, p, value_and_gradient.second / volume);
+                      data.set_gradient(i, local_index, value_and_gradient.second / volume);
                   }
               }
           }
@@ -908,15 +951,16 @@ namespace aspect
             }
 
         // Collect the local indices of the particles in the current cell
-        std::set<int> local_indices;
+        std::set<types::particle_index> particle_indices;
         for (const auto &particle : particle_handler.particles_in_cell(cell))
-          local_indices.insert(static_cast<int>(particle.get_local_index()));
+          particle_indices.insert(particle.get_local_index());
 
         // Loop over the particles in the current cell and compute each Voronoi cell
         voro::voronoicell_neighbor voro_cell;
         std::vector<double> voro_vertices;
         std::vector<int> voro_face_vertices;
         std::vector<int> voro_neighbors;
+        std::vector<double> voro_volumes;
 
         std::vector<VoronoiCell<dim>> voronoi_cells;
 
@@ -925,8 +969,8 @@ namespace aspect
 
         do
           {
-            const int vorocell_id = loop.pid();
-            if (local_indices.find(vorocell_id) == local_indices.end())
+            const types::particle_index particle_index = static_cast<types::particle_index>(loop.pid());
+            if (particle_indices.find(particle_index) == particle_indices.end())
               continue;
 
             AssertThrow(container.compute_cell(voro_cell, loop),
@@ -938,40 +982,26 @@ namespace aspect
             voro_cell.face_vertices(voro_face_vertices);
             voro_cell.neighbors(voro_neighbors);
 
-            voronoi_cells.emplace_back(VoronoiCell<dim>(voro_vertices,
+            voronoi_cells.emplace_back(VoronoiCell<dim>(particle_index,
+                                                        voro_vertices,
                                                         voro_face_vertices,
                                                         voro_neighbors,
                                                         box));
+
           }
         while (loop.inc());
 
-        // Do the actual evaluation
-        do_evaluation(cell, voronoi_cells, fe, mapping, data);
-
-#if DEBUG
-        // Check if the volumes of the Voronoi cells are correct.
+        std::map<types::particle_index, unsigned int> local_index_map;
         const auto particles_in_cell = particle_handler.particles_in_cell(cell);
-        for (auto particle = particles_in_cell.begin();
-             particle != particles_in_cell.end(); ++particle)
+        for (auto pit = particles_in_cell.begin(); pit != particles_in_cell.end(); ++pit)
           {
-            const unsigned int p = std::distance(particles_in_cell.begin(), particle);
-            const double volume = data.get_volume(p) * (dim > 2 ? 1. : diameter * 0.02);
-            const double voro_volume = voro_cell.volume();
-
-            if (std::abs(volume - voro_volume) > volume * 1.e-6)
-              {
-                std::stringstream error_message;
-                error_message << "The volume of the Voronoi cell at ("
-                              << particle->get_location()
-                              << ") should be "
-                              << voro_volume
-                              << ", but the value we get is "
-                              << volume;
-
-                Assert(false, ExcMessage(error_message.str()));
-              }
+            const types::particle_index particle_index = pit->get_local_index();
+            local_index_map.insert(std::make_pair(
+                particle_index, std::distance(particles_in_cell.begin(), pit)));
           }
-#endif /*DEBUG*/
+
+        // Do the actual evaluation
+        do_evaluation(cell, voronoi_cells, local_index_map, fe, mapping, data);
       }
     }
   }
@@ -1096,6 +1126,8 @@ namespace aspect
 
     internal::CPDI::GeneralizedBasisData<dim> data(field_dofs_per_cell, EvaluationFlags::values);
 
+    double local_volume = 0.0;
+
     // Now loop over the locally owned active cells and assemble the CPDI systems
     for (const auto &cell : dof_handler.active_cell_iterators())
       if (cell->is_locally_owned())
@@ -1117,19 +1149,23 @@ namespace aspect
                                    bounding_box,
                                    data);
 
-          const auto particles_in_cell = particle_handler.particles_in_cell(cell);
+#if DEBUG
+          for (unsigned int p = 0; p < particle_handler.n_particles_in_cell(cell); ++p)
+            local_volume += data.get_volume(p);
+#endif
 
           // Assemble the cell matrix and cell vectors
           cell_matrix = 0;
           for (unsigned int field_index = 0; field_index < n_fields; ++field_index)
             cell_rhs[field_index] = 0;
 
-          for (auto particle = particles_in_cell.begin(); particle != particles_in_cell.end(); ++particle)
+          const auto particles_in_cell = particle_handler.particles_in_cell(cell);
+          for (auto pit = particles_in_cell.begin(); pit != particles_in_cell.end(); ++pit)
             {
-              const unsigned int p = std::distance(particles_in_cell.begin(), particle);
+              const unsigned int p = std::distance(particles_in_cell.begin(), pit);
               const double Vp = data.get_volume(p);
 
-              const ArrayView<const double> particle_properties = particle->get_properties();
+              const ArrayView<const double> particle_properties = pit->get_properties();
 
               for (unsigned int i = 0; i < field_dofs_per_cell; ++i)
                 {
@@ -1247,6 +1283,19 @@ namespace aspect
       }
 
     computing_timer.leave_subsection("Particles: CPDI");
+
+#if DEBUG
+    const double total_volume = Utilities::MPI::sum(local_volume, mpi_communicator);
+    const double tria_volume  = GridTools::volume(triangulation, *mapping);
+    Assert(std::abs(total_volume - tria_volume) / tria_volume < 1.e-6,
+           ExcMessage("The total volume of particle domains ("
+                      + Utilities::to_string(total_volume)
+                      + ") does not match the volume of the triangulation ("
+                      + Utilities::to_string(tria_volume)
+                      + ")."));
+#else
+    (void)local_volume;
+#endif /*DEBUG*/
 
 #endif /*ASPECT_WITH_VORO*/
   }
