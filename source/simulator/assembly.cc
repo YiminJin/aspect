@@ -931,6 +931,8 @@ namespace aspect
                                    internal::Assembly::Scratch::AdvectionSystem<dim> &scratch,
                                    internal::Assembly::CopyData::AdvectionSystem<dim> &data)
   {
+    if (!advection_field.is_temperature())
+      std::cout << "cell (" << cell->center() << "):" << std::endl;
     // also have the number of dofs that correspond just to the element for
     // the system we are currently trying to assemble
     const unsigned int advection_dofs_per_cell = data.local_dof_indices.size();
@@ -1181,6 +1183,13 @@ namespace aspect
   copy_local_to_global_advection_system (const AdvectionField &advection_field,
                                          const internal::Assembly::CopyData::AdvectionSystem<dim> &data)
   {
+    if (!advection_field.is_temperature())
+    {
+      std::cout << "cell_matrix: " << std::endl;
+      data.local_matrix.print_formatted(std::cout);
+      std::cout << "cell_rhs: " << std::endl;
+      data.local_rhs.print(std::cout);
+    }
     // copy entries into the global matrix. note that these local contributions
     // only correspond to the advection dofs, as assembled above
     current_constraints.distribute_local_to_global (data.local_matrix,
@@ -1331,6 +1340,14 @@ namespace aspect
 
     system_matrix.compress(VectorOperation::add);
     system_rhs.compress(VectorOperation::add);
+
+    if (!advection_field.is_temperature())
+    {
+      std::cout << "system_matrix: " << std::endl;
+      system_matrix.block(block_idx, block_idx).print(std::cout);
+      std::cout << "system_rhs: " << std::endl;
+      system_rhs.block(block_idx).print(std::cout);
+    }
 
     computing_timer.leave_subsection(advection_field.is_temperature() ?
                                      "Assemble temperature system" :

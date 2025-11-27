@@ -194,6 +194,7 @@ namespace aspect
           // shape functions because these are the only contributions we compute here
           for (unsigned int i=0; i<advection_dofs_per_cell; ++i)
             {
+              double rhs_old = data.local_rhs(i);
               data.local_rhs(i)
               += (field_term_for_rhs * scratch.phi_field[i]
                   + time_step *
@@ -203,6 +204,8 @@ namespace aspect
                   * reaction_term)
                  *
                  JxW;
+              if (!advection_field_is_temperature)
+                std::cout << "   cell_rhs(" << i << ") += " << data.local_rhs(i) - rhs_old << " (" << field_term_for_rhs << " x " << scratch.phi_field[i] << " x " << JxW << ")" << std::endl;
 
               if (use_supg)
                 data.local_rhs(i)

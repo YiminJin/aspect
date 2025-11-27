@@ -2217,10 +2217,9 @@ namespace aspect
           else if (x_compositional_field_methods[i] == "cpdi")
           {
 #ifdef ASPECT_WITH_VORO
-            AssertThrow (composition_degrees[i] == 1 &&
-                         use_discontinuous_composition_discretization[i] == false,
+            AssertThrow (composition_degrees[i] == 1,
                          ExcMessage("Compositional fields marked with ``cpdi'' method "
-                                    "should be discretized by the standard Q1 element."));
+                                    "should be discretized by Q1 element."));
             compositional_field_methods[i] = AdvectionFieldMethod::cpdi;
 #else
             AssertThrow (false,
