@@ -1226,6 +1226,16 @@ namespace aspect
                                              Utilities::MPI::
                                              this_mpi_process(mpi_communicator));
           }
+
+        // The CPDI method couples more DoFs. If it is applied to one or more
+        // compositional fields, we need to modify the sparsity pattern of the
+        // corresponding block
+        for (const auto &method : parameters.compositional_field_methods)
+          if (method == Parameters<dim>::AdvectionFieldMethod::cpdi)
+            {
+              make_cpdi_sparsity_pattern(sp, current_constraints);
+              break;
+            }
       }
 
     sp.compress();

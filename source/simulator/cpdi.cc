@@ -241,127 +241,98 @@ namespace aspect
 
 
       /**
-       * Class holding the CPDI data for each particle. The data includes the
-       * values and gradients of the generalized basis functions corresponding
-       * to related DoFs (vertices), and the volume of the particle domain.
+       * Class holding the data for generalized interpolation in each Voronoi
+       * cell.
        */
       template <int dim>
-      class CPDIData
+      class VoronoiData
       {
         public:
           /**
-           * Constructor.
-           *
-           * @param[in] max_local_particle_index The maximum local particle
-           *  index, which is used for initializing the vectors.
+           * Default constructor.
            */
-          CPDIData(const types::particle_index max_local_particle_index);
+          VoronoiData() = default;
 
           /**
-           * Add the value and gradient of the generalized basis function
-           * corresponding to the given @param particle_index and
-           * @param vertex_index.
+           * Add the value and gradient of the GIMP weighting function
+           * corresponding to the given @param vertex_index.
            */
           void
-          add(const types::particle_index  particle_index,
-              const unsigned int           vertex_index,
+          add(const unsigned int           vertex_index,
               const double                 value,
               const Tensor<1, dim>        &gradient);
 
           /**
-           * Set the volume of particle domain corresponding to the given
-           * @param particle_index.
+           * Set the volume of the Voronoi cell.
            */
           void
-          set_volume(const types::particle_index particle_index,
-                     const double                volume);
+          set_volume(const double volume);
 
           /**
-           * Get the values and gradients of the generalized basis functions
-           * corresponding to the given @param particle_index. Each pair of
-           * value and gradient is related to a vertex.
+           * Get the values and gradients of the GIMP weighting functions
+           * corresponding to related DoFs (vertices).
            */
           const std::vector<std::pair<unsigned int, std::pair<double, Tensor<1, dim>>>> &
-          get_data(const types::particle_index particle_index) const;
+          get_weighting_function_values_and_gradients() const;
 
           /**
            * Get the volume of particle domain corresponding to the given
            * @param particle_index.
            */
-          double
-          get_volume(const types::particle_index particle_index) const;
+          double get_volume() const;
 
         private:
-          std::vector<double> volumes;
+          double volume;
 
-          std::vector<std::vector<std::pair<unsigned int, std::pair<double, Tensor<1, dim>>>>> data;
+          std::vector<std::pair<unsigned int, std::pair<double, Tensor<1, dim>>>>
+          weighting_function_values_and_gradients;
       };
 
 
 
       template <int dim>
-      CPDIData<dim>::
-      CPDIData(const types::particle_index max_local_particle_index)
-        : volumes(max_local_particle_index, numbers::signaling_nan<double>())
-        , data(max_local_particle_index)
-      {}
-
-
-
-      template <int dim>
       void
-      CPDIData<dim>::
-      add(const types::particle_index  particle_index,
-          const unsigned int           vertex_index,
-          const double                 value,
-          const Tensor<1, dim>        &gradient)
+      VoronoiData<dim>::add(const unsigned int    vertex_index,
+                            const double          value,
+                            const Tensor<1, dim> &gradient)
       {
-        AssertIndexRange(particle_index, data.size());
-        std::vector<std::pair<unsigned int, std::pair<double, Tensor<1, dim>>>> &
-        particle_data = data[particle_index];
-        for (unsigned int i = 0; i < particle_data.size(); ++i)
-          if (particle_data[i].first == vertex_index)
+        for (auto &function : weighting_function_values_and_gradients)
+          if (function.first == vertex_index)
             {
-              particle_data[i].second.first  += value;
-              particle_data[i].second.second += gradient;
+              function.second.first  += value;
+              function.second.second += gradient;
               return;
             }
 
-        particle_data.emplace_back(std::make_pair(vertex_index, std::make_pair(value, gradient)));
+        weighting_function_values_and_gradients.emplace_back(
+          std::make_pair(vertex_index, std::make_pair(value, gradient)));
       }
 
 
 
       template <int dim>
       void
-      CPDIData<dim>::
-      set_volume(const types::particle_index particle_index,
-                 const double                volume)
+      VoronoiData<dim>::set_volume(const double vol)
       {
-        AssertIndexRange(particle_index, volumes.size());
-        volumes[particle_index] = volume;
+        volume = vol;
       }
 
 
 
       template <int dim>
       const std::vector<std::pair<unsigned int, std::pair<double, Tensor<1, dim>>>> &
-      CPDIData<dim>::
-      get_data(const types::particle_index particle_index) const
+      VoronoiData<dim>::get_weighting_function_values_and_gradients() const
       {
-        AssertIndexRange(particle_index, data.size());
-        return data[particle_index];
+        return weighting_function_values_and_gradients;
       }
 
 
 
       template <int dim>
       double
-      CPDIData<dim>::
-      get_volume(const types::particle_index particle_index) const
+      VoronoiData<dim>::get_volume() const
       {
-        AssertIndexRange(particle_index, volumes.size());
-        return volumes[particle_index];
+        return volume;
       }
 
 
@@ -640,18 +611,43 @@ namespace aspect
 
 
 
+      template <int dim>
+      bool
+      is_inside_unit_cell(const typename Triangulation<dim>::active_cell_iterator &cell,
+                          const Point<dim>                                        &p,
+                          const double                                             eps)
+      {
+        for (const unsigned int f : cell->face_indices())
+          {
+            if (f % 2 == 0)
+              {
+                if (p[f / 2] < 0.0 - (cell->at_boundary(f) ? eps : 0.0))
+                  return false;
+              }
+            else
+              {
+                if (p[f / 2] >= 1.0 + (cell->at_boundary(f) ? eps : 0.0))
+                  return false;
+              }
+          }
+        return true;
+      }
+
+
+
       void
       do_evaluation(const std::vector<Triangulation<2>::active_cell_iterator> &cells,
                     const VoronoiCell<2>                                      &voronoi_cell,
                     const FE_Q<2>                                             &fe,
                     const Mapping<2>                                          &mapping,
                     const EvaluationFlags::EvaluationFlags                     flags,
-                    CPDIData<2>                                               &data)
+                    VoronoiData<2>                                            &data)
       {
+        // Tolerance parameter for function is_inside_unit_cell()
+        constexpr double eps = 1.e-12;
         constexpr unsigned int dofs_per_cell = 4;
         const unsigned int n_cells = cells.size();
 
-        const types::particle_index particle_index = voronoi_cell.particle_index;
         const std::vector<Point<2>> &voro_vertices = voronoi_cell.vertices;
         const unsigned int n_voro_vertices = voro_vertices.size();
 
@@ -659,16 +655,11 @@ namespace aspect
         const double area = std::abs(A_and_C.first);
         const Point<2> center = A_and_C.second;
 
-        data.set_volume(particle_index, area);
+        data.set_volume(area);
 
         // Arrays storing the values of shape functions at the Voronoi vertices
         std::vector<std::array<double, dofs_per_cell>> N_v(n_voro_vertices);
         std::array<double, dofs_per_cell> N_c;
-
-        // Arrays storing the values and gradients of the generalized basis functions
-        // for each cell
-        std::vector<double>       values(dofs_per_cell);
-        std::vector<Tensor<1, 2>> gradients(dofs_per_cell);
 
         // Create a simplex integrator for each triangle
         std::vector<SimplexIntegrator<2>> simplex_integrators;
@@ -698,14 +689,11 @@ namespace aspect
           {
             const auto &cell = cells[c];
 
-            std::fill(values.begin(), values.end(), 0.0);
-            std::fill(gradients.begin(), gradients.end(), Tensor<1,2>());
-
             // Evaluate the shape functions at the vertices
             for (unsigned int v = 0; v < n_voro_vertices; ++v)
               {
                 const Point<2> vertex_unit = mapping.transform_real_to_unit_cell(cell, voro_vertices[v]);
-                if (GeometryInfo<2>::is_inside_unit_cell(vertex_unit))
+                if (is_inside_unit_cell(cell, vertex_unit, eps))
                   for (unsigned int i = 0; i < dofs_per_cell; ++i)
                     N_v[v][i] = fe.shape_value(i, vertex_unit);
                 else
@@ -716,7 +704,7 @@ namespace aspect
               {
                 // Evaluate the shape functions at the centroid
                 const Point<2> center_unit = mapping.transform_real_to_unit_cell(cell, center);
-                if (GeometryInfo<2>::is_inside_unit_cell(center_unit))
+                if (is_inside_unit_cell(cell, center_unit, eps))
                   for (unsigned int i = 0; i < dofs_per_cell; ++i)
                     N_c[i] = fe.shape_value(i, center_unit);
                 else
@@ -736,18 +724,11 @@ namespace aspect
                         if (N[0] != 0.0 || N[1] != 0.0 || N[2] != 0.0)
                           {
                             const auto value_and_gradient = simplex_integrators[v].integrate_linear_function(N);
-                            if (flags & EvaluationFlags::values)
-                              values[i] += value_and_gradient.first;
-                            if (flags & EvaluationFlags::gradients)
-                              gradients[i] += value_and_gradient.second;
+                            data.add(cell->vertex_index(i),
+                                     flags & EvaluationFlags::values ? value_and_gradient.first / area : numbers::signaling_nan<double>(),
+                                     flags & EvaluationFlags::gradients ? value_and_gradient.second / area : numbers::signaling_nan<Tensor<1, 2>>());
                           }
                       }
-                  }
-
-                for (unsigned int i = 0; i < dofs_per_cell; ++i)
-                  {
-                    const unsigned int vertex_index = cell->vertex_index(i);
-                    data.add(particle_index, vertex_index, values[i] / area, gradients[i] / area);
                   }
               }
             else // n_voro_vertices == 3
@@ -763,10 +744,9 @@ namespace aspect
                     if (N[0] != 0.0 || N[1] != 0.0 || N[2] != 0.0)
                       {
                         const auto value_and_gradient = simplex_integrators[0].integrate_linear_function(N);
-                        const unsigned int vertex_index = cell->vertex_index(i);
-                        data.add(particle_index, vertex_index,
-                                 value_and_gradient.first / area,
-                                 value_and_gradient.second / area);
+                        data.add(cell->vertex_index(i),
+                                 flags & EvaluationFlags::values ? value_and_gradient.first / area : numbers::signaling_nan<double>(),
+                                 flags & EvaluationFlags::gradients ? value_and_gradient.second / area : numbers::signaling_nan<Tensor<1, 2>>());
                       }
                   }
               }
@@ -781,12 +761,13 @@ namespace aspect
                     const FE_Q<3>                                             &fe,
                     const Mapping<3>                                          &mapping,
                     const EvaluationFlags::EvaluationFlags                     flags,
-                    CPDIData<3>                                               &data)
+                    VoronoiData<3>                                            &data)
       {
+        // Tolerance parameter for function is_inside_unit_cell()
+        constexpr double eps = 1.e-12;
         constexpr unsigned int dofs_per_cell = 8;
         const unsigned int n_cells = cells.size();
 
-        const types::particle_index particle_index = voronoi_cell.particle_index;
         const std::vector<Point<3>> &voro_vertices = voronoi_cell.vertices;
         const std::vector<std::vector<unsigned int>> &voro_faces = voronoi_cell.faces;
         const unsigned int n_voro_vertices = voro_vertices.size();
@@ -796,17 +777,12 @@ namespace aspect
         const double volume = std::abs(V_and_C.first);
         const Point<3> voro_center = V_and_C.second;
 
-        data.set_volume(particle_index, volume);
+        data.set_volume(volume);
 
         // Arrays storing the values of shape functions at the Voronoi vertices
         std::vector<std::array<double, dofs_per_cell>> N_v(n_voro_vertices);
         std::vector<std::array<double, dofs_per_cell>> N_fc(n_voro_faces);
         std::array<double, dofs_per_cell> N_vc;
-
-        // Arrays storing the values and gradients of the generalized basis functions
-        // for each cell
-        std::vector<double>       values(dofs_per_cell);
-        std::vector<Tensor<1, 3>> gradients(dofs_per_cell);
 
         // Create a simplex integrator for each tetrahedron
         std::vector<SimplexIntegrator<3>> simplex_integrators;
@@ -857,15 +833,12 @@ namespace aspect
           {
             const auto &cell = cells[c];
 
-            std::fill(values.begin(), values.end(), 0.0);
-            std::fill(gradients.begin(), gradients.end(), Tensor<1,3>());
-
             // Evaluate the values of shape functions at the vertices
             unsigned int integrator = 0;
             for (unsigned int v = 0; v < n_voro_vertices; ++v)
               {
                 const Point<3> vertex_unit = mapping.transform_real_to_unit_cell(cell, voro_vertices[v]);
-                if (GeometryInfo<3>::is_inside_unit_cell(vertex_unit))
+                if (is_inside_unit_cell(cell, vertex_unit, eps))
                   for (unsigned int i = 0; i < dofs_per_cell; ++i)
                     N_v[v][i] = fe.shape_value(i, vertex_unit);
                 else
@@ -876,7 +849,7 @@ namespace aspect
               {
                 // Evaluate the shape functions at the centroid of the cell
                 const Point<3> voro_center_unit = mapping.transform_real_to_unit_cell(cell, voro_center);
-                if (GeometryInfo<3>::is_inside_unit_cell(voro_center_unit))
+                if (is_inside_unit_cell(cell, voro_center_unit, eps))
                   for (unsigned int i = 0; i < dofs_per_cell; ++i)
                     N_vc[i] = fe.shape_value(i, voro_center_unit);
                 else
@@ -889,7 +862,7 @@ namespace aspect
                       {
                         // Evaluate the shape functions at the centroid of the face
                         const Point<3> face_center_unit = mapping.transform_real_to_unit_cell(cell, face_centers[f]);
-                        if (GeometryInfo<3>::is_inside_unit_cell(face_center_unit))
+                        if (is_inside_unit_cell(cell, face_center_unit, eps))
                           for (unsigned int i = 0; i < dofs_per_cell; ++i)
                             N_fc[f][i] = fe.shape_value(i, face_center_unit);
                         else
@@ -910,10 +883,9 @@ namespace aspect
                                 if (N[0] != 0.0 || N[1] != 0.0 || N[2] != 0.0 || N[3] != 0.0)
                                   {
                                     const auto value_and_gradient = simplex_integrators[integrator++].integrate_linear_function(N);
-                                    if (flags & EvaluationFlags::values)
-                                      values[i] += value_and_gradient.first;
-                                    if (flags & EvaluationFlags::gradients)
-                                      gradients[i] += value_and_gradient.second;
+                                    data.add(cell->vertex_index(i),
+                                             flags & EvaluationFlags::values ? value_and_gradient.first / volume : numbers::signaling_nan<double>(),
+                                             flags & EvaluationFlags::gradients ? value_and_gradient.second / volume : numbers::signaling_nan<Tensor<1, 3>>());
                                   }
                               }
                           }
@@ -932,21 +904,15 @@ namespace aspect
                             if (N[0] != 0.0 || N[1] != 0.0 || N[2] != 0.0 || N[3] != 0.0)
                               {
                                 const auto value_and_gradient = simplex_integrators[integrator++].integrate_linear_function(N);
-                                if (flags & EvaluationFlags::values)
-                                  values[i] += value_and_gradient.first;
-                                if (flags & EvaluationFlags::gradients)
-                                  gradients[i] += value_and_gradient.second;
+                                data.add(cell->vertex_index(i),
+                                         flags & EvaluationFlags::values ? value_and_gradient.first / volume : numbers::signaling_nan<double>(),
+                                         flags & EvaluationFlags::gradients ? value_and_gradient.second / volume : numbers::signaling_nan<Tensor<1, 3>>());
                               }
                           }
                       }
                   }
-                AssertDimension(integrator, simplex_integrators.size());
 
-                for (unsigned int i = 0; i < dofs_per_cell; ++i)
-                  {
-                    const unsigned int vertex_index = cell->vertex_index(i);
-                    data.add(particle_index, vertex_index, values[i] / volume, gradients[i] / volume);
-                  }
+                AssertDimension(integrator, simplex_integrators.size());
               }
             else // n_voro_vertices == 4
               {
@@ -961,10 +927,9 @@ namespace aspect
                     if (N[0] != 0.0 || N[1] != 0.0 || N[2] != 0.0 || N[3] != 0.0)
                       {
                         const auto value_and_gradient = simplex_integrators[0].integrate_linear_function(N);
-                        const unsigned int vertex_index = cell->vertex_index(i);
-                        data.add(particle_index, vertex_index,
-                                 value_and_gradient.first / volume,
-                                 value_and_gradient.second / volume);
+                        data.add(cell->vertex_index(i),
+                                 flags & EvaluationFlags::values ? value_and_gradient.first / volume : numbers::signaling_nan<double>(),
+                                 flags & EvaluationFlags::gradients ? value_and_gradient.second / volume : numbers::signaling_nan<Tensor<1, 3>>());
                       }
                   }
               }
@@ -991,14 +956,14 @@ namespace aspect
        * @param[in,out] data Holding the calculated quantities.
        */
       template <int dim>
-      void
+      std::vector<std::vector<Point<dim>>>
       evaluate(const typename Triangulation<dim>::active_cell_iterator              &cell,
                const std::vector<typename Triangulation<dim>::active_cell_iterator> &neighbors,
                const Particles::ParticleHandler<dim>                                &particle_handler,
                const FE_Q<dim>                                                      &fe,
                const Mapping<dim>                                                   &mapping,
                const BoundingBox<dim>                                               &box,
-               CPDIData<dim>                                                        &data)
+               std::vector<VoronoiData<dim>>                                        &data)
       {
         // Create the voro container, which is the bounding box of the current cell and
         // its neighbors
@@ -1106,8 +1071,13 @@ namespace aspect
 
         // Do the actual evaluation
         const EvaluationFlags::EvaluationFlags flags(EvaluationFlags::values);
-        for (unsigned int i = 0; i < voronoi_cells.size(); ++i)
-          do_evaluation(neighbors, voronoi_cells[i], fe, mapping, flags, data);
+        for (const auto &voronoi_cell : voronoi_cells)
+          do_evaluation(neighbors, voronoi_cell, fe, mapping, flags, data[voronoi_cell.particle_index]);
+
+        std::vector<std::vector<Point<dim>>> vorocells;
+        for (const auto &vorocell : voronoi_cells)
+          vorocells.push_back(vorocell.vertices);
+        return vorocells;
       }
     }
   }
@@ -1228,15 +1198,16 @@ namespace aspect
 
     // Now loop over the locally owned active cells, collect the CPDI data, and
     // build a map from vertex indices to the corresponding DoF indices
-    internal::CPDI::CPDIData<dim> data(particle_handler.get_max_local_particle_index());
+    std::vector<internal::CPDI::VoronoiData<dim>> data(particle_handler.get_max_local_particle_index());
     std::vector<std::vector<types::global_dof_index>> vertex_to_dof_indices(triangulation.n_vertices());
     double local_volume = 0.0;
+    std::vector<std::vector<Point<dim>>> vorocells;
     for (const auto &cell : dof_handler.active_cell_iterators())
       if (cell->is_locally_owned())
         {
           // Find the cells neighboring the current cell
           std::set<typename Triangulation<dim>::active_cell_iterator> neighboring_cell_set;
-          for (const auto v : cell->vertex_indices())
+          for (const unsigned int v : cell->vertex_indices())
             {
               const unsigned int vertex_index = cell->vertex_index(v);
               neighboring_cell_set.insert(vertex_to_cell_map[vertex_index].begin(),
@@ -1253,6 +1224,7 @@ namespace aspect
           std::vector<typename Triangulation<dim>::active_cell_iterator>
           neighboring_cells(neighboring_cell_set.begin(), neighboring_cell_set.end());
 
+          const std::vector<std::vector<Point<dim>>> local_vorocells =
           internal::CPDI::evaluate(cell,
                                    neighboring_cells,
                                    particle_handler,
@@ -1260,10 +1232,11 @@ namespace aspect
                                    *mapping,
                                    bounding_box,
                                    data);
+          vorocells.insert(vorocells.end(), local_vorocells.begin(), local_vorocells.end());
 
 #if DEBUG
           for (const auto &particle : particle_handler.particles_in_cell(cell))
-            local_volume += data.get_volume(particle.get_local_index());
+            local_volume += data[particle.get_local_index()].get_volume();
 #endif
         }
 
@@ -1274,35 +1247,36 @@ namespace aspect
           for (const auto &particle : particle_handler.particles_in_cell(cell))
             {
               const types::particle_index particle_index = particle.get_local_index();
-              const double V_p = data.get_volume(particle_index);
+              const auto &particle_data = data[particle_index];
+              const double V_p = particle_data.get_volume();
               const std::vector<std::pair<unsigned int, std::pair<double, Tensor<1, dim>>>> &
-              particle_data = data.get_data(particle_index);
+              weighting_functions = particle_data.get_weighting_function_values_and_gradients();
               const ArrayView<const double> particle_properties = particle.get_properties();
 
-              const unsigned int n_dofs_per_field = particle_data.size();
+              const unsigned int n_dofs_per_field = weighting_functions.size();
               FullMatrix<double> particle_matrix(n_dofs_per_field, n_dofs_per_field);
               std::vector<Vector<double>> particle_rhs(n_fields, Vector<double>(n_dofs_per_field));
-              std::vector<std::vector<types::global_dof_index>> 
-              particle_dofs(n_fields, std::vector<types::global_dof_index>(n_dofs_per_field));
+              std::vector<std::vector<types::global_dof_index>>
+                                                             particle_dofs(n_fields, std::vector<types::global_dof_index>(n_dofs_per_field));
 
               for (unsigned int i = 0; i < n_dofs_per_field; ++i)
                 {
-                  const unsigned int vertex_index = particle_data[i].first;
+                  const unsigned int vertex_index = weighting_functions[i].first;
                   AssertDimension(vertex_to_dof_indices[vertex_index].size(), n_fields);
 
-                  const double phi_ip = particle_data[i].second.first;
+                  const double phi_ip = weighting_functions[i].second.first;
 
                   for (unsigned int field_index = 0; field_index < n_fields; ++field_index)
                     {
+                      particle_dofs[field_index][i] = vertex_to_dof_indices[vertex_index][field_index];
+
                       const double property = particle_properties[field_to_property_map[field_index]];
                       particle_rhs[field_index](i) = V_p * phi_ip * property;
-
-                      particle_dofs[field_index][i] = vertex_to_dof_indices[vertex_index][field_index];
                     }
 
                   for (unsigned int j = 0; j < n_dofs_per_field; ++j)
                     {
-                      const double phi_jp = particle_data[j].second.first;
+                      const double phi_jp = weighting_functions[j].second.first;
                       particle_matrix(i, j) = V_p * phi_ip * phi_jp;
                     }
                 }
@@ -1310,7 +1284,7 @@ namespace aspect
               current_constraints.distribute_local_to_global(particle_matrix,
                                                              particle_dofs[0],
                                                              system_matrix);
-              
+
               for (unsigned int field_index = 0; field_index < n_fields; ++field_index)
                 current_constraints.distribute_local_to_global(particle_rhs[field_index],
                                                                particle_dofs[field_index],
@@ -1324,7 +1298,6 @@ namespace aspect
 #if DEBUG
     const double total_volume = Utilities::MPI::sum(local_volume, mpi_communicator);
     const double tria_volume  = GridTools::volume(triangulation, *mapping);
-    std::cout << "total_volume = " << total_volume << ", tria_volume = " << tria_volume << std::endl;
     Assert(std::abs(total_volume - tria_volume) / tria_volume < 1.e-3,
            ExcMessage("The total volume of particle domains ("
                       + Utilities::to_string(total_volume)
@@ -1407,15 +1380,77 @@ namespace aspect
       }
 
     computing_timer.leave_subsection("Particles: CPDI");
-  }
+
 #endif /*ASPECT_WITH_VORO*/
+  }
+
+
+
+  template <int dim>
+  void
+  Simulator<dim>::
+  make_cpdi_sparsity_pattern(LinearAlgebra::BlockDynamicSparsityPattern &sp,
+                             const AffineConstraints<double> &constraints) const
+  {
+    // Find the first compositional field advected by the CPDI method
+    unsigned int first_cpdi_field_component = numbers::invalid_unsigned_int;
+    for (unsigned int c = 0; c < introspection.n_compositional_fields; ++c)
+      if (introspection.compositional_field_methods[c] == Parameters<dim>::AdvectionFieldMethod::cpdi)
+        {
+          first_cpdi_field_component = introspection.component_indices.compositional_fields[c];
+          break;
+        }
+    AssertThrow(first_cpdi_field_component != numbers::invalid_unsigned_int, ExcInternalError());
+
+    // Create the vertex-to-cell map
+    GridTools::Cache<dim> grid_cache(triangulation, *mapping);
+    const auto &vertex_to_cell_map = grid_cache.get_vertex_to_cell_map();
+
+    std::vector<types::global_dof_index> coupled_dofs;
+
+    // Loop over the locally owned cells and add the nonzero entries of CPDI system
+    for (const auto &cell : dof_handler.active_cell_iterators())
+      if (cell->is_locally_owned())
+        {
+          // All the DoFs in the neighborhood of a cell corresponding to the CPDI field
+          // are possible to be coupled
+          std::set<typename Triangulation<dim>::active_cell_iterator> neighboring_cells;
+          for (const unsigned int v : cell->vertex_indices())
+            {
+              const unsigned int vertex_index = cell->vertex_index(v);
+              neighboring_cells.insert(vertex_to_cell_map[vertex_index].begin(),
+                                       vertex_to_cell_map[vertex_index].end());
+            }
+
+          // Since the CPDI method requires the fields to be discretized by FE_Q(1) element,
+          // we only need to loop over the vertices and extract the DoFs corresponding to
+          // the first CPDI field
+          std::set<types::global_dof_index> coupled_dofs;
+          for (const auto &neighbor : neighboring_cells)
+            {
+              typename DoFHandler<dim>::active_cell_iterator dof_cell(&triangulation,
+                                                                      neighbor->level(),
+                                                                      neighbor->index(),
+                                                                      &dof_handler);
+
+              for (const unsigned int v : dof_cell->vertex_indices())
+                coupled_dofs.insert(dof_cell->vertex_dof_index(v, first_cpdi_field_component));
+
+              constraints.add_entries_local_to_global(std::vector<types::global_dof_index>(coupled_dofs.begin(),
+                                                                                           coupled_dofs.end()),
+                                                      sp, true);
+            }
+        }
+  }
 }
 
 // explicit instantiations
 namespace aspect
 {
 #define INSTANTIATE(dim) \
-  template void Simulator<dim>::perform_convected_particle_domain_interpolation(const std::vector<AdvectionField> &);
+  template void Simulator<dim>::perform_convected_particle_domain_interpolation(const std::vector<AdvectionField> &); \
+  template void Simulator<dim>::make_cpdi_sparsity_pattern(LinearAlgebra::BlockDynamicSparsityPattern &, \
+                                                           const AffineConstraints<double> &) const;
 
   ASPECT_INSTANTIATE(INSTANTIATE)
 

@@ -950,6 +950,17 @@ namespace aspect
       setup_system_matrix_coupling () const;
 
       /**
+       * Set up the sparsity pattern of the matrix block corresponding to
+       * compositional fields advected by the CPDI method.
+       *
+       * This function is implemented in
+       * <code>source/simulator/cpdi.cc</code>.
+       */
+      void
+      make_cpdi_sparsity_pattern (LinearAlgebra::BlockDynamicSparsityPattern &sp,
+                                  const AffineConstraints<double> &constraints) const;
+
+      /**
        * Set up the size and structure of the matrix used to store the
        * elements of the linear system.
        *
