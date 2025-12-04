@@ -211,6 +211,14 @@ namespace aspect
         void advance_timestep();
 
         /**
+         * Apply the bounds for the maximum and minimum number of particles
+         * per cell, if the appropriate @p particle_load_balancing strategy
+         * has been selected.
+         */
+        void
+        apply_particle_per_cell_bounds();
+
+        /**
          * Return the total number of particles in the simulation. This
          * function is useful for monitoring how many particles have been
          * lost by falling out of the domain. Note that this function does
@@ -453,14 +461,6 @@ namespace aspect
          */
         std::map<types::subdomain_id, unsigned int>
         get_subdomain_id_to_neighbor_map() const;
-
-        /**
-         * Apply the bounds for the maximum and minimum number of particles
-         * per cell, if the appropriate @p particle_load_balancing strategy
-         * has been selected.
-         */
-        void
-        apply_particle_per_cell_bounds();
 
         /**
          * Advect the particle positions by one integration step. Needs to be

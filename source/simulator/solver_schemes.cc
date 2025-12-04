@@ -238,6 +238,10 @@ namespace aspect
         if (!in_initial_refinement)
           // Advance the particles in the manager to the current time
           particle_manager.advance_timestep();
+        else
+          // Apply the bounds for the maximum and minimum number of particles
+          // per cell
+          particle_manager.apply_particle_per_cell_bounds();
 
         if (particle_manager.get_property_manager().need_update() == Particle::Property::update_output_step)
           particle_manager.update_particles();

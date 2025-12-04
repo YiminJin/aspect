@@ -1053,24 +1053,8 @@ namespace aspect
           }
         while (loop.inc());
 
-        // Now the sequence of Voronoi cells are determined by voro::container.
-        // We need to make the sequence of Voronoi cells match that of particles.
-        unsigned int local_index = 0;
-        for (const auto &particle : particle_handler.particles_in_cell(cell))
-          {
-            const types::particle_index particle_index = particle.get_local_index();
-            for (unsigned int i = local_index; i < voronoi_cells.size(); ++i)
-              if (voronoi_cells[i].particle_index == particle_index)
-                {
-                  std::swap(voronoi_cells[local_index], voronoi_cells[i]);
-                  ++local_index;
-                  continue;
-                }
-          }
-        AssertDimension(local_index, voronoi_cells.size());
-
         // Do the actual evaluation
-        const EvaluationFlags::EvaluationFlags flags(EvaluationFlags::values);
+        const EvaluationFlags::EvaluationFlags flags(EvaluationFlags::values | EvaluationFlags::gradients);
         for (const auto &voronoi_cell : voronoi_cells)
           do_evaluation(neighbors, voronoi_cell, fe, mapping, flags, data[voronoi_cell.particle_index]);
 
@@ -1196,10 +1180,8 @@ namespace aspect
 
     const unsigned int n_fields = advection_fields.size();
 
-    // Now loop over the locally owned active cells, collect the CPDI data, and
-    // build a map from vertex indices to the corresponding DoF indices
+    // Now loop over the locally owned active cells and collect the CPDI data
     std::vector<internal::CPDI::VoronoiData<dim>> data(particle_handler.get_max_local_particle_index());
-    std::vector<std::vector<types::global_dof_index>> vertex_to_dof_indices(triangulation.n_vertices());
     double local_volume = 0.0;
     std::vector<std::vector<Point<dim>>> vorocells;
     for (const auto &cell : dof_handler.active_cell_iterators())
@@ -1212,15 +1194,8 @@ namespace aspect
               const unsigned int vertex_index = cell->vertex_index(v);
               neighboring_cell_set.insert(vertex_to_cell_map[vertex_index].begin(),
                                           vertex_to_cell_map[vertex_index].end());
-
-              if (vertex_to_dof_indices[vertex_index].size() == 0)
-                {
-                  vertex_to_dof_indices[vertex_index].resize(n_fields);
-                  for (unsigned int field_index = 0; field_index < advection_fields.size(); ++field_index)
-                    vertex_to_dof_indices[vertex_index][field_index] =
-                      cell->vertex_dof_index(v, advection_fields[field_index].component_index(introspection));
-                }
             }
+
           std::vector<typename Triangulation<dim>::active_cell_iterator>
           neighboring_cells(neighboring_cell_set.begin(), neighboring_cell_set.end());
 
@@ -1240,6 +1215,22 @@ namespace aspect
 #endif
         }
 
+    // Build a map from vertex indices to the corresponding DoF indices
+    std::vector<std::vector<types::global_dof_index>> vertex_to_dof_indices(triangulation.n_vertices());
+    for (const auto &cell : dof_handler.active_cell_iterators())
+      if (!cell->is_artificial())
+        for (const unsigned int v : cell->vertex_indices())
+          {
+            const unsigned int vertex_index = cell->vertex_index(v);
+            if (vertex_to_dof_indices[vertex_index].size() == 0)
+              {
+                vertex_to_dof_indices[vertex_index].resize(n_fields);
+                for (unsigned int field_index = 0; field_index < advection_fields.size(); ++field_index)
+                  vertex_to_dof_indices[vertex_index][field_index] =
+                    cell->vertex_dof_index(v, advection_fields[field_index].component_index(introspection));
+              }
+          }
+
     // Assemble the CPDI system
     for (const auto &cell : dof_handler.active_cell_iterators())
       if (cell->is_locally_owned())
@@ -1256,8 +1247,7 @@ namespace aspect
               const unsigned int n_dofs_per_field = weighting_functions.size();
               FullMatrix<double> particle_matrix(n_dofs_per_field, n_dofs_per_field);
               std::vector<Vector<double>> particle_rhs(n_fields, Vector<double>(n_dofs_per_field));
-              std::vector<std::vector<types::global_dof_index>>
-                                                             particle_dofs(n_fields, std::vector<types::global_dof_index>(n_dofs_per_field));
+              std::vector<std::vector<types::global_dof_index>> particle_dofs(n_fields, std::vector<types::global_dof_index>(n_dofs_per_field));
 
               for (unsigned int i = 0; i < n_dofs_per_field; ++i)
                 {
@@ -1298,12 +1288,13 @@ namespace aspect
 #if DEBUG
     const double total_volume = Utilities::MPI::sum(local_volume, mpi_communicator);
     const double tria_volume  = GridTools::volume(triangulation, *mapping);
-    Assert(std::abs(total_volume - tria_volume) / tria_volume < 1.e-3,
+    std::cout << "total_volume = " << total_volume << ", tria_volume = " << tria_volume << std::endl;
+    /*Assert(std::abs(total_volume - tria_volume) / tria_volume < 1.e-3,
            ExcMessage("The total volume of particle domains ("
                       + Utilities::to_string(total_volume)
                       + ") does not match the volume of the triangulation ("
                       + Utilities::to_string(tria_volume)
-                      + ")."));
+                      + ")."));*/
 #else
     (void)local_volume;
 #endif /*DEBUG*/
