@@ -89,10 +89,14 @@ namespace aspect
       template <int dim>
       struct VoronoiCell
       {
+        using particle_iterator = typename Particles::ParticleHandler<dim>::particle_iterator;
         /**
          * Constructor.
          *
          * @param[in] particle_index The local particle ID.
+         *
+         * @param[in] particle_map Map from particle indices to particle
+         *  iterators.
          *
          * @param[in] voro_vertices An array of float numbers representing the
          *  coordinates of the vertices of the Voronoi cell. It is supposed to
@@ -106,45 +110,52 @@ namespace aspect
          *  neighbor ids of the Voronoi cell. It is supposed to be the output of
          *  function voro::voronoicell_neighbor::neighbors().
          *
-         * @param[in] box The bounding box of the geometry model. It is used to
-         *  check if the Voronoi cell crosses the boundary of the surrounding
+         * @param[in] box The bounding box of the geometry model. It is used for
+         *  checking if the Voronoi cell crosses the boundary of the surrounding
          *  FE cells, in which case the CPDI algorithm fails.
          */
-        VoronoiCell(const types::particle_index  particle_index,
-                    const std::vector<double>   &voro_vertices,
-                    const std::vector<int>      &voro_faces,
-                    const std::vector<int>      &voro_neighbors,
-                    const BoundingBox<dim>      &box);
+        VoronoiCell(const types::particle_index                               particle_index,
+                    const std::map<types::particle_index, particle_iterator> &particle_map,
+                    const std::vector<double>                                &voro_vertices,
+                    const std::vector<int>                                   &voro_faces,
+                    const std::vector<int>                                   &voro_neighbors,
+                    const BoundingBox<dim>                                   &box);
 
-        VoronoiCell(VoronoiCell &&) noexcept = default;
+        particle_iterator particle;
 
-        VoronoiCell &operator=(VoronoiCell &&) = default;
-
-        types::particle_index particle_index;
+        std::vector<particle_iterator> neighbor_particles;
 
         std::vector<Point<dim>> vertices;
 
         std::vector<std::vector<unsigned int>> faces;
 
-        std::vector<typename Particles::ParticleHandler<dim>::particle_iterator> neighbors;
       };
 
 
 
       template <>
       VoronoiCell<2>::
-      VoronoiCell(const types::particle_index  particle_index,
-                  const std::vector<double>   &voro_vertices,
-                  const std::vector<int>      &voro_faces,
-                  const std::vector<int>      &voro_neighbors,
-                  const BoundingBox<2>        &box)
-        : particle_index(particle_index)
+      VoronoiCell(const types::particle_index                               particle_index,
+                  const std::map<types::particle_index, particle_iterator> &particle_map,
+                  const std::vector<double>                                &voro_vertices,
+                  const std::vector<int>                                   &voro_faces,
+                  const std::vector<int>                                   &voro_neighbors,
+                  const BoundingBox<2>                                     &box)
       {
+        neighbor_particles.clear();
+        vertices.clear();
+        faces.clear();
+
         unsigned int target_face = numbers::invalid_unsigned_int;
         for (unsigned int i = 0, j = 0; i < voro_neighbors.size(); ++i)
           {
             if (voro_neighbors[i] >= 0)
               {
+                // We find a neighboring Voronoi cell
+                const auto mit = particle_map.find(voro_neighbors[i]);
+                AssertThrow(mit != particle_map.end(), ExcInternalError());
+                neighbor_particles.push_back(mit->second);
+
                 j += voro_faces[j] + 1;
                 continue;
               }
@@ -177,7 +188,6 @@ namespace aspect
           }
 
         // Collect the vertices of the target face
-        vertices.clear();
         for (int k = 0; k < voro_faces[target_face]; ++k)
           {
             unsigned int l = 3 * voro_faces[target_face + k + 1];
@@ -186,20 +196,27 @@ namespace aspect
             vertices.emplace_back(Point<2>(voro_vertices[l], voro_vertices[l + 1]));
           }
 
-        // TODO: collect the neighbors
+        // Finally, find the particle owned by the Voronoi cell
+        const auto mit = particle_map.find(particle_index);
+        AssertThrow(mit != particle_map.end(), ExcInternalError());
+        particle = mit->second;
       }
 
 
 
       template <>
       VoronoiCell<3>::
-      VoronoiCell(const types::particle_index  particle_index,
-                  const std::vector<double>   &voro_vertices,
-                  const std::vector<int>      &voro_faces,
-                  const std::vector<int>      &voro_neighbors,
-                  const BoundingBox<3>        &box)
-        : particle_index(particle_index)
+      VoronoiCell(const types::particle_index                               particle_index,
+                  const std::map<types::particle_index, particle_iterator> &particle_map,
+                  const std::vector<double>                                &voro_vertices,
+                  const std::vector<int>                                   &voro_faces,
+                  const std::vector<int>                                   &voro_neighbors,
+                  const BoundingBox<3>                                     &box)
       {
+        neighbor_particles.clear();
+        vertices.clear();
+        faces.clear();
+
         // Collect the vertices
         for (unsigned int l = 0; l < voro_vertices.size(); l += 3)
           vertices.push_back(Point<3>(voro_vertices[l],
@@ -233,9 +250,17 @@ namespace aspect
 
             faces.emplace_back(face);
             j += voro_faces[j] + 1;
+
+            // Store the neighbor particle
+            const auto mit = particle_map.find(voro_neighbors[i]);
+            AssertThrow(mit != particle_map.end(), ExcInternalError());
+            neighbor_particles.push_back(mit->second);
           }
 
-        // TODO: collect the neighbors
+        // Finally, find the particle owned by the Voronoi cell
+        const auto mit = particle_map.find(particle_index);
+        AssertThrow(mit != particle_map.end(), ExcInternalError());
+        particle = mit->second;
       }
 
 
@@ -351,10 +376,8 @@ namespace aspect
            * Constructor.
            *
            * @param[in] vertices Vertices of the simplex.
-           * @param[in] integration_flag Quantities required to be integrated.
            */
-          SimplexIntegrator(const std::array<Point<dim>, n_vertices> &vertices,
-                            const EvaluationFlags::EvaluationFlags    integration_flags);
+          SimplexIntegrator(const std::array<Point<dim>, n_vertices> &vertices);
 
           /**
            * Returns the integration of the value and gradient of the input
@@ -376,8 +399,6 @@ namespace aspect
           std::array<Tensor<1, dim>, n_vertices> faces;
 
           double signed_volume;
-
-          EvaluationFlags::EvaluationFlags integration_flags;
       };
 
 
@@ -385,34 +406,19 @@ namespace aspect
 
       template <int dim>
       SimplexIntegrator<dim>::
-      SimplexIntegrator(const std::array<Point<dim>, n_vertices> &verts,
-                        const EvaluationFlags::EvaluationFlags    flags)
+      SimplexIntegrator(const std::array<Point<dim>, n_vertices> &verts)
         : vertices(verts)
-        , integration_flags(flags)
       {
-        // If the integration of gradients are required, then calculate the
-        //normal vectors of faces, and then calculate the volume based on them
-        if (integration_flags & EvaluationFlags::gradients)
+        for (unsigned int f = 0; f < n_vertices; ++f)
           {
-            for (unsigned int f = 0; f < n_vertices; ++f)
-              {
-                if constexpr (dim == 2)
-                  faces[f] = cross_product_2d(vertices[(2 + f) % 3] - vertices[(1 + f) % 3]);
-                else
-                  faces[f] = cross_product_3d((vertices[(3 - f) % 4] - vertices[(1 - f) % 4]),
-                                              (vertices[(2 + f) % 4] - vertices[(1 + f) % 4]));
-              }
-
-            signed_volume = (faces[0] * (vertices[0] - vertices[1])) * normalization_factor;
+            if constexpr (dim == 2)
+              faces[f] = cross_product_2d(vertices[(2 + f) % 3] - vertices[(1 + f) % 3]);
+            else
+              faces[f] = cross_product_3d((vertices[(3 - f) % 4] - vertices[(1 - f) % 4]),
+                                          (vertices[(2 + f) % 4] - vertices[(1 + f) % 4]));
           }
-        else
-          {
-            Tensor<2, dim> T;
-            for (unsigned int d = 0; d < dim; ++d)
-              T[d] = vertices[d] - vertices[dim];
 
-            signed_volume = determinant(T) * normalization_factor;
-          }
+        signed_volume = (faces[0] * (vertices[0] - vertices[1])) * normalization_factor;
       }
 
 
@@ -422,26 +428,17 @@ namespace aspect
       SimplexIntegrator<dim>::
       integrate_linear_function(const std::array<double, n_vertices> &N) const
       {
-        double value            = numbers::signaling_nan<double>();
-        Tensor<1, dim> gradient = numbers::signaling_nan<Tensor<1, dim>>();
+        double value = 0;
+        for (unsigned int v = 0; v < n_vertices; ++v)
+          value += N[v];
 
-        if (integration_flags & EvaluationFlags::values)
-          {
-            value = 0;
-            for (unsigned int v = 0; v < n_vertices; ++v)
-              value += N[v];
+        value *= std::abs(signed_volume) / n_vertices;
 
-            value *= std::abs(signed_volume) / n_vertices;
-          }
+        Tensor<1, dim> gradient;
+        for (unsigned int v = 0; v < n_vertices; ++v)
+          gradient += N[v] * faces[v];
 
-        if (integration_flags & EvaluationFlags::gradients)
-          {
-            gradient = 0;
-            for (unsigned int v = 0; v < n_vertices; ++v)
-              gradient += N[v] * faces[v];
-
-            gradient *= normalization_factor;
-          }
+        gradient *= normalization_factor;
 
         return std::make_pair(value, gradient);
       }
@@ -640,7 +637,6 @@ namespace aspect
                     const VoronoiCell<2>                                      &voronoi_cell,
                     const FE_Q<2>                                             &fe,
                     const Mapping<2>                                          &mapping,
-                    const EvaluationFlags::EvaluationFlags                     flags,
                     VoronoiData<2>                                            &data)
       {
         // Tolerance parameter for function is_inside_unit_cell()
@@ -674,7 +670,7 @@ namespace aspect
                 vertices[0] = voro_vertices[v];
                 vertices[1] = voro_vertices[(v + 1) % n_voro_vertices];
                 vertices[2] = center;
-                simplex_integrators.emplace_back(SimplexIntegrator(vertices, flags));
+                simplex_integrators.emplace_back(SimplexIntegrator(vertices));
               }
           }
         else
@@ -682,7 +678,7 @@ namespace aspect
             std::array<Point<2>, 3> vertices;
             for (unsigned int v = 0; v < 3; ++v)
               vertices[v] = voro_vertices[v];
-            simplex_integrators.emplace_back(SimplexIntegrator(vertices, flags));
+            simplex_integrators.emplace_back(SimplexIntegrator(vertices));
           }
 
         for (unsigned int c = 0; c < n_cells; ++c)
@@ -725,8 +721,8 @@ namespace aspect
                           {
                             const auto value_and_gradient = simplex_integrators[v].integrate_linear_function(N);
                             data.add(cell->vertex_index(i),
-                                     flags & EvaluationFlags::values ? value_and_gradient.first / area : numbers::signaling_nan<double>(),
-                                     flags & EvaluationFlags::gradients ? value_and_gradient.second / area : numbers::signaling_nan<Tensor<1, 2>>());
+                                     value_and_gradient.first / area,
+                                     value_and_gradient.second / area);
                           }
                       }
                   }
@@ -745,8 +741,8 @@ namespace aspect
                       {
                         const auto value_and_gradient = simplex_integrators[0].integrate_linear_function(N);
                         data.add(cell->vertex_index(i),
-                                 flags & EvaluationFlags::values ? value_and_gradient.first / area : numbers::signaling_nan<double>(),
-                                 flags & EvaluationFlags::gradients ? value_and_gradient.second / area : numbers::signaling_nan<Tensor<1, 2>>());
+                                 value_and_gradient.first / area,
+                                 value_and_gradient.second / area);
                       }
                   }
               }
@@ -760,7 +756,6 @@ namespace aspect
                     const VoronoiCell<3>                                      &voronoi_cell,
                     const FE_Q<3>                                             &fe,
                     const Mapping<3>                                          &mapping,
-                    const EvaluationFlags::EvaluationFlags                     flags,
                     VoronoiData<3>                                            &data)
       {
         // Tolerance parameter for function is_inside_unit_cell()
@@ -808,7 +803,7 @@ namespace aspect
                         vertices[1] = voro_vertices[voro_faces[f][(fv + 1) % n_face_vertices]];
                         vertices[2] = face_centers[f];
                         vertices[3] = voro_center;
-                        simplex_integrators.emplace_back(SimplexIntegrator(vertices, flags));
+                        simplex_integrators.emplace_back(SimplexIntegrator(vertices));
                       }
                   }
                 else // n_face_vertices == 3
@@ -817,7 +812,7 @@ namespace aspect
                     for (unsigned int fv = 0; fv < 3; ++fv)
                       vertices[fv] = voro_vertices[voro_faces[f][fv]];
                     vertices[3] = voro_center;
-                    simplex_integrators.emplace_back(SimplexIntegrator(vertices, flags));
+                    simplex_integrators.emplace_back(SimplexIntegrator(vertices));
                   }
               }
           }
@@ -826,7 +821,7 @@ namespace aspect
             std::array<Point<3>, 4> vertices;
             for (unsigned int v = 0; v < 4; ++v)
               vertices[v] = voro_vertices[v];
-            simplex_integrators.emplace_back(SimplexIntegrator(vertices, flags));
+            simplex_integrators.emplace_back(SimplexIntegrator(vertices));
           }
 
         for (unsigned int c = 0; c < n_cells; ++c)
@@ -884,8 +879,8 @@ namespace aspect
                                   {
                                     const auto value_and_gradient = simplex_integrators[integrator++].integrate_linear_function(N);
                                     data.add(cell->vertex_index(i),
-                                             flags & EvaluationFlags::values ? value_and_gradient.first / volume : numbers::signaling_nan<double>(),
-                                             flags & EvaluationFlags::gradients ? value_and_gradient.second / volume : numbers::signaling_nan<Tensor<1, 3>>());
+                                             value_and_gradient.first / volume,
+                                             value_and_gradient.second / volume);
                                   }
                               }
                           }
@@ -905,8 +900,8 @@ namespace aspect
                               {
                                 const auto value_and_gradient = simplex_integrators[integrator++].integrate_linear_function(N);
                                 data.add(cell->vertex_index(i),
-                                         flags & EvaluationFlags::values ? value_and_gradient.first / volume : numbers::signaling_nan<double>(),
-                                         flags & EvaluationFlags::gradients ? value_and_gradient.second / volume : numbers::signaling_nan<Tensor<1, 3>>());
+                                         value_and_gradient.first / volume,
+                                         value_and_gradient.second / volume);
                               }
                           }
                       }
@@ -928,8 +923,8 @@ namespace aspect
                       {
                         const auto value_and_gradient = simplex_integrators[0].integrate_linear_function(N);
                         data.add(cell->vertex_index(i),
-                                 flags & EvaluationFlags::values ? value_and_gradient.first / volume : numbers::signaling_nan<double>(),
-                                 flags & EvaluationFlags::gradients ? value_and_gradient.second / volume : numbers::signaling_nan<Tensor<1, 3>>());
+                                 value_and_gradient.first / volume,
+                                 value_and_gradient.second / volume);
                       }
                   }
               }
@@ -1004,18 +999,24 @@ namespace aspect
                                   false,                                     // zperiodic
                                   8);                                        // init_mem
 
-        // Put all the particles in the current cell and its neighbors into the container
+        // Put all the particles in the current cell and its neighbors into the container,
+        // and build a map from particle indices to particle iterators
+        std::map<types::particle_index, typename Particles::ParticleHandler<dim>::particle_iterator> particle_map;
         for (const auto &neighbor : neighbors)
-          for (const auto &particle : particle_handler.particles_in_cell(neighbor))
-            {
-              const Point<dim> &location = particle.get_location();
-              container.put(particle.get_local_index(), location[0], location[1], (dim > 2 ? location[2] : 0.0));
-            }
+          {
+            const auto &particles_in_cell = particle_handler.particles_in_cell(neighbor);
+            for (auto particle = particles_in_cell.begin(); particle != particles_in_cell.end(); ++particle)
+              {
+                const Point<dim> &location = particle->get_location();
+                container.put(particle->get_local_index(), location[0], location[1], (dim > 2 ? location[2] : 0.0));
+                particle_map.insert(std::make_pair(particle->get_local_index(), particle));
+              }
+          }
 
         // Collect the local indices of the particles in the current cell
-        std::set<types::particle_index> particle_indices;
+        std::set<types::particle_index> particles_in_this_cell;
         for (const auto &particle : particle_handler.particles_in_cell(cell))
-          particle_indices.insert(particle.get_local_index());
+          particles_in_this_cell.insert(particle.get_local_index());
 
         // Loop over the particles in the current cell and compute each Voronoi cell
         voro::voronoicell_neighbor voro_cell;
@@ -1032,7 +1033,7 @@ namespace aspect
         do
           {
             const types::particle_index particle_index = static_cast<types::particle_index>(loop.pid());
-            if (particle_indices.find(particle_index) == particle_indices.end())
+            if (particles_in_this_cell.find(particle_index) == particles_in_this_cell.end())
               continue;
 
             AssertThrow(container.compute_cell(voro_cell, loop),
@@ -1043,8 +1044,9 @@ namespace aspect
             voro_cell.vertices(x, y, z, voro_vertices);
             voro_cell.face_vertices(voro_face_vertices);
             voro_cell.neighbors(voro_neighbors);
-
+                                                        
             voronoi_cells.emplace_back(VoronoiCell<dim>(particle_index,
+                                                        particle_map,
                                                         voro_vertices,
                                                         voro_face_vertices,
                                                         voro_neighbors,
@@ -1054,9 +1056,8 @@ namespace aspect
         while (loop.inc());
 
         // Do the actual evaluation
-        const EvaluationFlags::EvaluationFlags flags(EvaluationFlags::values | EvaluationFlags::gradients);
         for (const auto &voronoi_cell : voronoi_cells)
-          do_evaluation(neighbors, voronoi_cell, fe, mapping, flags, data[voronoi_cell.particle_index]);
+          do_evaluation(neighbors, voronoi_cell, fe, mapping, data[voronoi_cell.particle->get_local_index()]);
 
         std::vector<std::vector<Point<dim>>> vorocells;
         for (const auto &vorocell : voronoi_cells)
@@ -1215,6 +1216,34 @@ namespace aspect
 #endif
         }
 
+    if (pre_refinement_step == 0)
+    {
+      std::ofstream out("voronoi-" + Utilities::int_to_string(Utilities::MPI::this_mpi_process(mpi_communicator)) + ".vtk");
+      out << "# vtk DataFile Version 3.0\n";
+      out << "Voro++ Voronoi diagram\n";
+      out << "ASCII\n";
+      out << "DATASET POLYDATA\n";
+
+      unsigned int n_points = 0;
+      for (const auto &vorocell : vorocells)
+        n_points += vorocell.size();
+      out << "POINTS " << n_points << " float\n";
+      for (const auto &vorocell : vorocells)
+        for (const auto &vertex : vorocell)
+          out << vertex[0] << ' ' << vertex[1] << " 0.0\n";
+
+      out << "POLYGONS " << vorocells.size() << ' ' << vorocells.size() + n_points << "\n";
+      unsigned int point_index = 0;
+      for (const auto &vorocell : vorocells)
+      {
+        out << vorocell.size();
+        for (unsigned int v = 0; v < vorocell.size(); ++v)
+          out << ' ' << point_index++;
+        out << "\n";
+      }
+
+    }
+
     // Build a map from vertex indices to the corresponding DoF indices
     std::vector<std::vector<types::global_dof_index>> vertex_to_dof_indices(triangulation.n_vertices());
     for (const auto &cell : dof_handler.active_cell_iterators())
@@ -1288,13 +1317,12 @@ namespace aspect
 #if DEBUG
     const double total_volume = Utilities::MPI::sum(local_volume, mpi_communicator);
     const double tria_volume  = GridTools::volume(triangulation, *mapping);
-    std::cout << "total_volume = " << total_volume << ", tria_volume = " << tria_volume << std::endl;
-    /*Assert(std::abs(total_volume - tria_volume) / tria_volume < 1.e-3,
+    Assert(std::abs(total_volume - tria_volume) / tria_volume < 1.e-4,
            ExcMessage("The total volume of particle domains ("
                       + Utilities::to_string(total_volume)
                       + ") does not match the volume of the triangulation ("
                       + Utilities::to_string(tria_volume)
-                      + ")."));*/
+                      + ")."));
 #else
     (void)local_volume;
 #endif /*DEBUG*/

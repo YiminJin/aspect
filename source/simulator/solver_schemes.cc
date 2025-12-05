@@ -239,9 +239,19 @@ namespace aspect
           // Advance the particles in the manager to the current time
           particle_manager.advance_timestep();
         else
-          // Apply the bounds for the maximum and minimum number of particles
-          // per cell
-          particle_manager.apply_particle_per_cell_bounds();
+          {
+            // Apply the bounds for the maximum and minimum number of particles
+            // per cell
+            particle_manager.apply_particle_per_cell_bounds();
+
+            // Exchange ghost particles if necessary
+            if (Utilities::MPI::n_mpi_processes(mpi_communicator) > 1)
+              {
+                computing_timer.enter_subsection("Particles:: Exchange ghosts");
+                particle_manager.get_particle_handler().exchange_ghost_particles();
+                computing_timer.leave_subsection("Particles:: Exchange ghosts");
+              }
+          }
 
         if (particle_manager.get_property_manager().need_update() == Particle::Property::update_output_step)
           particle_manager.update_particles();
