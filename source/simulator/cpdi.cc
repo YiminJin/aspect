@@ -1168,6 +1168,8 @@ namespace aspect
         system_rhs.block(block_idx) = 0;
       }
 
+    LinearAlgebra::BlockVector lumped_mass_matrix(introspection.index_sets.system_partitioning, mpi_communicator);
+
     // Create the vertex-to-cell map
     GridTools::Cache<dim> grid_cache(triangulation, *mapping);
     const auto &vertex_to_cell_map = grid_cache.get_vertex_to_cell_map();
@@ -1275,6 +1277,7 @@ namespace aspect
 
               const unsigned int n_dofs_per_field = weighting_functions.size();
               FullMatrix<double> particle_matrix(n_dofs_per_field, n_dofs_per_field);
+              Vector<double> particle_lumped_mass_matrix(n_dofs_per_field);
               std::vector<Vector<double>> particle_rhs(n_fields, Vector<double>(n_dofs_per_field));
               std::vector<std::vector<types::global_dof_index>> particle_dofs(n_fields, std::vector<types::global_dof_index>(n_dofs_per_field));
 
@@ -1284,6 +1287,7 @@ namespace aspect
                   AssertDimension(vertex_to_dof_indices[vertex_index].size(), n_fields);
 
                   const double phi_ip = weighting_functions[i].second.first;
+                  particle_lumped_mass_matrix(i) = V_p * phi_ip;
 
                   for (unsigned int field_index = 0; field_index < n_fields; ++field_index)
                     {
@@ -1304,6 +1308,10 @@ namespace aspect
                                                              particle_dofs[0],
                                                              system_matrix);
 
+              current_constraints.distribute_local_to_global(particle_lumped_mass_matrix,
+                                                             particle_dofs[0],
+                                                             lumped_mass_matrix);
+
               for (unsigned int field_index = 0; field_index < n_fields; ++field_index)
                 current_constraints.distribute_local_to_global(particle_rhs[field_index],
                                                                particle_dofs[field_index],
@@ -1312,6 +1320,7 @@ namespace aspect
         }
 
     system_matrix.compress(VectorOperation::add);
+    lumped_mass_matrix.compress(VectorOperation::add);
     system_rhs.compress(VectorOperation::add);
 
 #if DEBUG
@@ -1359,6 +1368,13 @@ namespace aspect
 
     for (const auto &field : advection_fields)
       {
+        const IndexSet locally_owned_field_dofs =
+          dof_handler.locally_owned_dofs() &                                        
+          Utilities::extract_locally_active_dofs_with_component(dof_handler, introspection.component_masks.compositional_fields[field.compositional_variable]);
+        for (auto eit = locally_owned_field_dofs.begin(); eit != locally_owned_field_dofs.end(); ++eit)
+          if (!current_constraints.is_constrained(*eit))
+            distributed_solution[*eit] = system_rhs[*eit] / lumped_mass_matrix[*eit];
+        /*
         pcout << "   Solving CPDI system for " << field.name(introspection)
               << "... " << std::flush;
 
@@ -1388,7 +1404,7 @@ namespace aspect
                                                              mpi_communicator);
           }
 
-        pcout << solver_control.last_step() << " iterations." << std::endl;
+        pcout << solver_control.last_step() << " iterations." << std::endl;*/
       }
 
     current_constraints.distribute(distributed_solution);

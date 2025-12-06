@@ -753,6 +753,9 @@ namespace aspect
                          "Whether to include additional terms on the right-hand side of "
                          "the Stokes equation to set a given compression term specified in the "
                          "MaterialModel output PrescribedPlasticDilation.");
+      prm.declare_entry ("Enable phase field damage", "false",
+                         Patterns::Bool (),
+                         "Whether to include phase field damage model for fracture propagation.");
     }
     prm.leave_subsection();
 
@@ -1374,6 +1377,10 @@ namespace aspect
                          "which is coupled to the entropy advection equation "
                          "as described in the paper \\cite{dannberg:etal:2022}."
                          "\n"
+                         "* ``phase field'': This type of field represents a phase field. "
+                         "This field type is valid only when ``Enable phase field damage'' "
+                         "is set to true."
+                         "\n"
                          "* ``generic'': The generic type is intended to be a placeholder type "
                          "that is not used by any component of ASPECT unless in user-"
                          "provided source code."
@@ -1844,6 +1851,7 @@ namespace aspect
       enable_additional_stokes_rhs = prm.get_bool ("Enable additional Stokes RHS");
       enable_elasticity = prm.get_bool("Enable elasticity");
       enable_prescribed_dilation = prm.get_bool("Enable prescribed dilation");
+      enable_phase_field_damage = prm.get_bool("Enable phase field damage");
     }
     prm.leave_subsection ();
 
@@ -2167,6 +2175,18 @@ namespace aspect
               x_compositional_field_types[i] = "porosity";
             else if (names_of_compositional_fields[i] == "density_field")
               x_compositional_field_types[i] = "density";
+            else if (names_of_compositional_fields[i].find("phase_field") != std::string::npos)
+              {
+                x_compositional_field_types[i] = "phase field";
+                // Force the user to set a field type for fields with 'phase_field' in their names
+                // if phase field damage is not enabled.
+                AssertThrow(enable_phase_field_damage,
+                            ExcMessage("Even though phase field damage is not enabled, ASPECT deduced "
+                                       "a phase field type from the name of a compositional field. "
+                                       "Please specify the compositional field types explicitly. "
+                                       "At the moment the type of field " 
+                                       + names_of_compositional_fields[i] + "is unspecified."));
+              }
             else
               x_compositional_field_types[i] = "chemical composition";
           }
