@@ -939,8 +939,15 @@ namespace aspect
           case Parameters<dim>::AdvectionFieldMethod::fem_melt_field:
           case Parameters<dim>::AdvectionFieldMethod::fem_darcy_field:
           case Parameters<dim>::AdvectionFieldMethod::prescribed_field_with_diffusion:
-          case Parameters<dim>::AdvectionFieldMethod::cpdi:
             return true;
+          case Parameters<dim>::AdvectionFieldMethod::cpdi:
+          {
+            const std::vector<CompositionalFieldDescription> &
+            descriptions = introspection.get_composition_descriptions();
+            if (descriptions[composition_index].type == CompositionalFieldDescription::phase_field)
+              return true;
+            break;
+          }
           case Parameters<dim>::AdvectionFieldMethod::particles:
           case Parameters<dim>::AdvectionFieldMethod::volume_of_fluid:
           case Parameters<dim>::AdvectionFieldMethod::static_field:

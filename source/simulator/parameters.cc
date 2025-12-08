@@ -2203,6 +2203,20 @@ namespace aspect
       for (unsigned int i=0; i<n_compositional_fields; ++i)
         composition_descriptions[i].type = aspect::CompositionalFieldDescription::parse_type(x_compositional_field_types[i]);
 
+      if (enable_phase_field_damage)
+        {
+          bool phase_field_exists = false;
+          for (unsigned int composition_index = 0; composition_index < n_compositional_fields; ++composition_index)
+            if (composition_descriptions[composition_index].type == aspect::CompositionalFieldDescription::phase_field)
+              {
+                phase_field_exists = true;
+                break;
+              }
+          AssertThrow(phase_field_exists,
+                      ExcMessage("The phase field damage model is enabled, but there is no compositional field "
+                                 "with type ``phase field'' declared in the prameter file."));
+        }
+
       std::vector<std::string> x_compositional_field_methods
         = Utilities::split_string_list
           (prm.get ("Compositional field methods"));
@@ -2281,6 +2295,12 @@ namespace aspect
         AssertThrow (this->include_melt_transport,
                      ExcMessage ("The advection method 'melt field' can only be selected if melt "
                                  "transport is used in the simulation."));
+
+      // Make sure that the phase fields (if exist) are advected by CPDI method
+      for (unsigned int composition_index = 0; composition_index < n_compositional_fields; ++composition_index)
+        if (composition_descriptions[composition_index].type == aspect::CompositionalFieldDescription::phase_field)
+          AssertThrow(compositional_field_methods[composition_index] == AdvectionFieldMethod::cpdi,
+                      ExcMessage("Currently, ASPECT only support CPDI method for advecting phase fields."));
 
       const std::vector<std::string> x_mapped_particle_properties
         = Utilities::split_string_list

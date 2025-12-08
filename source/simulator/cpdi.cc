@@ -267,25 +267,34 @@ namespace aspect
 
       /**
        * Class holding the data for generalized interpolation in each Voronoi
-       * cell.
+       * cell. The data includes the value and gradient of the GIMP weighting
+       * function related to each DoF (vertex) affected by the Voronoi cell,
+       * as well as the volume of the Voronoi cell.
        */
       template <int dim>
-      class VoronoiData
+      class GeneralizedInterpolationData
       {
         public:
           /**
+           * The maximum number of DoFs (vertices) affected by the Voronoi cell.
+           * It is used as the inline capacity of the small_vector storing the
+           * values and gradients.
+           */
+          static constexpr unsigned int inline_capacity = (dim == 2 ? 9 : 27);
+
+          /**
            * Default constructor.
            */
-          VoronoiData() = default;
+          GeneralizedInterpolationData() = default;
 
           /**
            * Add the value and gradient of the GIMP weighting function
            * corresponding to the given @param vertex_index.
            */
           void
-          add(const unsigned int           vertex_index,
-              const double                 value,
-              const Tensor<1, dim>        &gradient);
+          add_weighting_function_data(const unsigned int    vertex_index,
+                                      const double          value,
+                                      const Tensor<1, dim> &gradient);
 
           /**
            * Set the volume of the Voronoi cell.
@@ -297,8 +306,8 @@ namespace aspect
            * Get the values and gradients of the GIMP weighting functions
            * corresponding to related DoFs (vertices).
            */
-          const std::vector<std::pair<unsigned int, std::pair<double, Tensor<1, dim>>>> &
-          get_weighting_function_values_and_gradients() const;
+          const small_vector<std::pair<unsigned int, std::pair<double, Tensor<1, dim>>>, inline_capacity> &
+          get_weighting_function_data() const;
 
           /**
            * Get the volume of particle domain corresponding to the given
@@ -309,19 +318,20 @@ namespace aspect
         private:
           double volume;
 
-          std::vector<std::pair<unsigned int, std::pair<double, Tensor<1, dim>>>>
-          weighting_function_values_and_gradients;
+          small_vector<std::pair<unsigned int, std::pair<double, Tensor<1, dim>>>, inline_capacity>
+          weighting_function_data;
       };
 
 
 
       template <int dim>
       void
-      VoronoiData<dim>::add(const unsigned int    vertex_index,
-                            const double          value,
-                            const Tensor<1, dim> &gradient)
+      GeneralizedInterpolationData<dim>::
+      add_weighting_function_data(const unsigned int    vertex_index,
+                                  const double          value,
+                                  const Tensor<1, dim> &gradient)
       {
-        for (auto &function : weighting_function_values_and_gradients)
+        for (auto &function : weighting_function_data)
           if (function.first == vertex_index)
             {
               function.second.first  += value;
@@ -329,7 +339,7 @@ namespace aspect
               return;
             }
 
-        weighting_function_values_and_gradients.emplace_back(
+        weighting_function_data.emplace_back(
           std::make_pair(vertex_index, std::make_pair(value, gradient)));
       }
 
@@ -337,7 +347,7 @@ namespace aspect
 
       template <int dim>
       void
-      VoronoiData<dim>::set_volume(const double vol)
+      GeneralizedInterpolationData<dim>::set_volume(const double vol)
       {
         volume = vol;
       }
@@ -345,17 +355,18 @@ namespace aspect
 
 
       template <int dim>
-      const std::vector<std::pair<unsigned int, std::pair<double, Tensor<1, dim>>>> &
-      VoronoiData<dim>::get_weighting_function_values_and_gradients() const
+      const small_vector<std::pair<unsigned int, std::pair<double, Tensor<1, dim>>>,
+            GeneralizedInterpolationData<dim>::inline_capacity> &
+            GeneralizedInterpolationData<dim>::get_weighting_function_data() const
       {
-        return weighting_function_values_and_gradients;
+        return weighting_function_data;
       }
 
 
 
       template <int dim>
       double
-      VoronoiData<dim>::get_volume() const
+      GeneralizedInterpolationData<dim>::get_volume() const
       {
         return volume;
       }
@@ -637,7 +648,7 @@ namespace aspect
                     const VoronoiCell<2>                                      &voronoi_cell,
                     const FE_Q<2>                                             &fe,
                     const Mapping<2>                                          &mapping,
-                    VoronoiData<2>                                            &data)
+                    GeneralizedInterpolationData<2>                                            &data)
       {
         // Tolerance parameter for function is_inside_unit_cell()
         constexpr double eps = 1.e-12;
@@ -720,9 +731,9 @@ namespace aspect
                         if (N[0] != 0.0 || N[1] != 0.0 || N[2] != 0.0)
                           {
                             const auto value_and_gradient = simplex_integrators[v].integrate_linear_function(N);
-                            data.add(cell->vertex_index(i),
-                                     value_and_gradient.first / area,
-                                     value_and_gradient.second / area);
+                            data.add_weighting_function_data(cell->vertex_index(i),
+                                                             value_and_gradient.first / area,
+                                                             value_and_gradient.second / area);
                           }
                       }
                   }
@@ -740,9 +751,9 @@ namespace aspect
                     if (N[0] != 0.0 || N[1] != 0.0 || N[2] != 0.0)
                       {
                         const auto value_and_gradient = simplex_integrators[0].integrate_linear_function(N);
-                        data.add(cell->vertex_index(i),
-                                 value_and_gradient.first / area,
-                                 value_and_gradient.second / area);
+                        data.add_weighting_function_data(cell->vertex_index(i),
+                                                         value_and_gradient.first / area,
+                                                         value_and_gradient.second / area);
                       }
                   }
               }
@@ -756,7 +767,7 @@ namespace aspect
                     const VoronoiCell<3>                                      &voronoi_cell,
                     const FE_Q<3>                                             &fe,
                     const Mapping<3>                                          &mapping,
-                    VoronoiData<3>                                            &data)
+                    GeneralizedInterpolationData<3>                                            &data)
       {
         // Tolerance parameter for function is_inside_unit_cell()
         constexpr double eps = 1.e-12;
@@ -878,9 +889,9 @@ namespace aspect
                                 if (N[0] != 0.0 || N[1] != 0.0 || N[2] != 0.0 || N[3] != 0.0)
                                   {
                                     const auto value_and_gradient = simplex_integrators[integrator++].integrate_linear_function(N);
-                                    data.add(cell->vertex_index(i),
-                                             value_and_gradient.first / volume,
-                                             value_and_gradient.second / volume);
+                                    data.add_weighting_function_data(cell->vertex_index(i),
+                                                                     value_and_gradient.first / volume,
+                                                                     value_and_gradient.second / volume);
                                   }
                               }
                           }
@@ -899,9 +910,9 @@ namespace aspect
                             if (N[0] != 0.0 || N[1] != 0.0 || N[2] != 0.0 || N[3] != 0.0)
                               {
                                 const auto value_and_gradient = simplex_integrators[integrator++].integrate_linear_function(N);
-                                data.add(cell->vertex_index(i),
-                                         value_and_gradient.first / volume,
-                                         value_and_gradient.second / volume);
+                                data.add_weighting_function_data(cell->vertex_index(i),
+                                                                 value_and_gradient.first / volume,
+                                                                 value_and_gradient.second / volume);
                               }
                           }
                       }
@@ -922,9 +933,9 @@ namespace aspect
                     if (N[0] != 0.0 || N[1] != 0.0 || N[2] != 0.0 || N[3] != 0.0)
                       {
                         const auto value_and_gradient = simplex_integrators[0].integrate_linear_function(N);
-                        data.add(cell->vertex_index(i),
-                                 value_and_gradient.first / volume,
-                                 value_and_gradient.second / volume);
+                        data.add_weighting_function_data(cell->vertex_index(i),
+                                                         value_and_gradient.first / volume,
+                                                         value_and_gradient.second / volume);
                       }
                   }
               }
@@ -958,7 +969,7 @@ namespace aspect
                const FE_Q<dim>                                                      &fe,
                const Mapping<dim>                                                   &mapping,
                const BoundingBox<dim>                                               &box,
-               std::vector<VoronoiData<dim>>                                        &data)
+               std::vector<GeneralizedInterpolationData<dim>>                       &data)
       {
         // Create the voro container, which is the bounding box of the current cell and
         // its neighbors
@@ -1044,7 +1055,7 @@ namespace aspect
             voro_cell.vertices(x, y, z, voro_vertices);
             voro_cell.face_vertices(voro_face_vertices);
             voro_cell.neighbors(voro_neighbors);
-                                                        
+
             voronoi_cells.emplace_back(VoronoiCell<dim>(particle_index,
                                                         particle_map,
                                                         voro_vertices,
@@ -1154,21 +1165,38 @@ namespace aspect
           }
       }
 
-    // We have checked that all the input fields are discretized by Q1 element in
-    // source/simulator/parameters.cc, so all the input fields share the same sparsity block.
-    const unsigned int sparsity_block_idx = advection_fields[0].sparsity_pattern_block_index(introspection);
-    const unsigned int block0_idx         = advection_fields[0].block_index(introspection);
-    if (sparsity_block_idx != block0_idx)
-      system_matrix.block(block0_idx, block0_idx).reinit(system_matrix.block(sparsity_block_idx, sparsity_block_idx));
-
-    system_matrix.block(block0_idx, block0_idx) = 0;
+    // For the phase field(s), we need to assemble the corresponding block of system matrix
+    // to solve the governing equation; for other fields, we only need to assemble a lumped
+    // mass matrix. For convenience, we separate the phase fields from the other compositional
+    // fields.
+    std::vector<AdvectionField> phase_fields, ordinary_fields;
+    const std::vector<unsigned int> &phase_field_indices
+      = introspection.get_indices_for_fields_of_type(CompositionalFieldDescription::phase_field);
     for (const auto &field : advection_fields)
       {
-        const unsigned int block_idx = field.block_index(introspection);
-        system_rhs.block(block_idx) = 0;
+        if (std::find(phase_field_indices.begin(), phase_field_indices.end(), field.compositional_variable) != phase_field_indices.end())
+          phase_fields.push_back(field);
+        else
+          ordinary_fields.push_back(field);
+      }
+    AssertThrow(phase_fields.size() == phase_field_indices.size(), ExcInternalError());
+
+    // Initialize the system matrix block for phase fields if necessary
+    unsigned int phase_field_sp_block_idx = numbers::invalid_unsigned_int;
+    if (phase_fields.size() > 0)
+      {
+        phase_field_sp_block_idx = phase_fields[0].sparsity_pattern_block_index(introspection);
+        system_matrix.block(phase_field_sp_block_idx, phase_field_sp_block_idx) = 0;
       }
 
-    LinearAlgebra::BlockVector lumped_mass_matrix(introspection.index_sets.system_partitioning, mpi_communicator);
+    // Initialize the lumped mass matrix if necessary
+    LinearAlgebra::BlockVector lumped_mass_matrix;
+    if (ordinary_fields.size() > 0)
+      lumped_mass_matrix.reinit(introspection.index_sets.system_partitioning, mpi_communicator);
+
+    // Initialize the system rhs for each field
+    for (const auto &field : advection_fields)
+      system_rhs.block(field.block_index(introspection)) = 0;
 
     // Create the vertex-to-cell map
     GridTools::Cache<dim> grid_cache(triangulation, *mapping);
@@ -1184,7 +1212,7 @@ namespace aspect
     const unsigned int n_fields = advection_fields.size();
 
     // Now loop over the locally owned active cells and collect the CPDI data
-    std::vector<internal::CPDI::VoronoiData<dim>> data(particle_handler.get_max_local_particle_index());
+    std::vector<internal::CPDI::GeneralizedInterpolationData<dim>> data(particle_handler.get_max_local_particle_index());
     double local_volume = 0.0;
     std::vector<std::vector<Point<dim>>> vorocells;
     for (const auto &cell : dof_handler.active_cell_iterators())
@@ -1203,13 +1231,13 @@ namespace aspect
           neighboring_cells(neighboring_cell_set.begin(), neighboring_cell_set.end());
 
           const std::vector<std::vector<Point<dim>>> local_vorocells =
-          internal::CPDI::evaluate(cell,
-                                   neighboring_cells,
-                                   particle_handler,
-                                   field_fe,
-                                   *mapping,
-                                   bounding_box,
-                                   data);
+            internal::CPDI::evaluate(cell,
+                                     neighboring_cells,
+                                     particle_handler,
+                                     field_fe,
+                                     *mapping,
+                                     bounding_box,
+                                     data);
           vorocells.insert(vorocells.end(), local_vorocells.begin(), local_vorocells.end());
 
 #if DEBUG
@@ -1219,35 +1247,35 @@ namespace aspect
         }
 
     if (pre_refinement_step == 0)
-    {
-      std::ofstream out("voronoi-" + Utilities::int_to_string(Utilities::MPI::this_mpi_process(mpi_communicator)) + ".vtk");
-      out << "# vtk DataFile Version 3.0\n";
-      out << "Voro++ Voronoi diagram\n";
-      out << "ASCII\n";
-      out << "DATASET POLYDATA\n";
-
-      unsigned int n_points = 0;
-      for (const auto &vorocell : vorocells)
-        n_points += vorocell.size();
-      out << "POINTS " << n_points << " float\n";
-      for (const auto &vorocell : vorocells)
-        for (const auto &vertex : vorocell)
-          out << vertex[0] << ' ' << vertex[1] << " 0.0\n";
-
-      out << "POLYGONS " << vorocells.size() << ' ' << vorocells.size() + n_points << "\n";
-      unsigned int point_index = 0;
-      for (const auto &vorocell : vorocells)
       {
-        out << vorocell.size();
-        for (unsigned int v = 0; v < vorocell.size(); ++v)
-          out << ' ' << point_index++;
-        out << "\n";
+        std::ofstream out("voronoi-" + Utilities::int_to_string(Utilities::MPI::this_mpi_process(mpi_communicator)) + ".vtk");
+        out << "# vtk DataFile Version 3.0\n";
+        out << "Voro++ Voronoi diagram\n";
+        out << "ASCII\n";
+        out << "DATASET POLYDATA\n";
+
+        unsigned int n_points = 0;
+        for (const auto &vorocell : vorocells)
+          n_points += vorocell.size();
+        out << "POINTS " << n_points << " float\n";
+        for (const auto &vorocell : vorocells)
+          for (const auto &vertex : vorocell)
+            out << vertex[0] << ' ' << vertex[1] << " 0.0\n";
+
+        out << "POLYGONS " << vorocells.size() << ' ' << vorocells.size() + n_points << "\n";
+        unsigned int point_index = 0;
+        for (const auto &vorocell : vorocells)
+          {
+            out << vorocell.size();
+            for (unsigned int v = 0; v < vorocell.size(); ++v)
+              out << ' ' << point_index++;
+            out << "\n";
+          }
+
       }
 
-    }
-
     // Build a map from vertex indices to the corresponding DoF indices
-    std::vector<std::vector<types::global_dof_index>> vertex_to_dof_indices(triangulation.n_vertices());
+    std::vector<small_vector<types::global_dof_index>, 16> vertex_to_dof_indices(triangulation.n_vertices());
     for (const auto &cell : dof_handler.active_cell_iterators())
       if (!cell->is_artificial())
         for (const unsigned int v : cell->vertex_indices())
@@ -1262,7 +1290,20 @@ namespace aspect
               }
           }
 
-    // Assemble the CPDI system
+    // Assemble the phase-field systems one by one
+    for (const auto &field : phase_fields)
+      {
+        for (const auto &cell : dof_handler.active_cell_iterators())
+          if (cell->is_locally_owned())
+            {
+              for (const auto &particle : particle_handler.particles_in_cell(cell))
+                {
+                  
+                }
+            }
+      }
+
+    // Assemble the other compositional fields within one loop
     for (const auto &cell : dof_handler.active_cell_iterators())
       if (cell->is_locally_owned())
         {
@@ -1271,48 +1312,35 @@ namespace aspect
               const types::particle_index particle_index = particle.get_local_index();
               const auto &particle_data = data[particle_index];
               const double V_p = particle_data.get_volume();
-              const std::vector<std::pair<unsigned int, std::pair<double, Tensor<1, dim>>>> &
-              weighting_functions = particle_data.get_weighting_function_values_and_gradients();
+              const auto &weighting_function_data = particle_data.get_weighting_function_data();
               const ArrayView<const double> particle_properties = particle.get_properties();
 
-              const unsigned int n_dofs_per_field = weighting_functions.size();
-              FullMatrix<double> particle_matrix(n_dofs_per_field, n_dofs_per_field);
+              const unsigned int n_dofs_per_field = weighting_function_data.size();
               Vector<double> particle_lumped_mass_matrix(n_dofs_per_field);
-              std::vector<Vector<double>> particle_rhs(n_fields, Vector<double>(n_dofs_per_field));
-              std::vector<std::vector<types::global_dof_index>> particle_dofs(n_fields, std::vector<types::global_dof_index>(n_dofs_per_field));
+              std::vector<Vector<double>> particle_rhs(ordinary_fields.size(), Vector<double>(n_dofs_per_field));
+              std::vector<std::vector<types::global_dof_index>> particle_dofs(ordinary_fields.size(), std::vector<types::global_dof_index>(n_dofs_per_field));
 
               for (unsigned int i = 0; i < n_dofs_per_field; ++i)
                 {
-                  const unsigned int vertex_index = weighting_functions[i].first;
-                  AssertDimension(vertex_to_dof_indices[vertex_index].size(), n_fields);
-
-                  const double phi_ip = weighting_functions[i].second.first;
+                  const double phi_ip = weighting_function_data[i].second.first;
                   particle_lumped_mass_matrix(i) = V_p * phi_ip;
 
-                  for (unsigned int field_index = 0; field_index < n_fields; ++field_index)
+                  const unsigned int vertex_index = weighting_function_data[i].first;
+                  for (unsigned int field_index = 0; field_index < ordinary_fields.size(); ++field_index)
                     {
+                      // TODO
                       particle_dofs[field_index][i] = vertex_to_dof_indices[vertex_index][field_index];
 
                       const double property = particle_properties[field_to_property_map[field_index]];
                       particle_rhs[field_index](i) = V_p * phi_ip * property;
                     }
-
-                  for (unsigned int j = 0; j < n_dofs_per_field; ++j)
-                    {
-                      const double phi_jp = weighting_functions[j].second.first;
-                      particle_matrix(i, j) = V_p * phi_ip * phi_jp;
-                    }
                 }
-
-              current_constraints.distribute_local_to_global(particle_matrix,
-                                                             particle_dofs[0],
-                                                             system_matrix);
 
               current_constraints.distribute_local_to_global(particle_lumped_mass_matrix,
                                                              particle_dofs[0],
                                                              lumped_mass_matrix);
 
-              for (unsigned int field_index = 0; field_index < n_fields; ++field_index)
+              for (unsigned int field_index = 0; field_index < ordinary_fields.size(); ++field_index)
                 current_constraints.distribute_local_to_global(particle_rhs[field_index],
                                                                particle_dofs[field_index],
                                                                system_rhs);
@@ -1369,7 +1397,7 @@ namespace aspect
     for (const auto &field : advection_fields)
       {
         const IndexSet locally_owned_field_dofs =
-          dof_handler.locally_owned_dofs() &                                        
+          dof_handler.locally_owned_dofs() &
           Utilities::extract_locally_active_dofs_with_component(dof_handler, introspection.component_masks.compositional_fields[field.compositional_variable]);
         for (auto eit = locally_owned_field_dofs.begin(); eit != locally_owned_field_dofs.end(); ++eit)
           if (!current_constraints.is_constrained(*eit))
