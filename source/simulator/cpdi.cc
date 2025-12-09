@@ -89,14 +89,10 @@ namespace aspect
       template <int dim>
       struct VoronoiCell
       {
-        using particle_iterator = typename Particles::ParticleHandler<dim>::particle_iterator;
         /**
          * Constructor.
          *
          * @param[in] particle_index The local particle ID.
-         *
-         * @param[in] particle_map Map from particle indices to particle
-         *  iterators.
          *
          * @param[in] voro_vertices An array of float numbers representing the
          *  coordinates of the vertices of the Voronoi cell. It is supposed to
@@ -114,16 +110,13 @@ namespace aspect
          *  checking if the Voronoi cell crosses the boundary of the surrounding
          *  FE cells, in which case the CPDI algorithm fails.
          */
-        VoronoiCell(const types::particle_index                               particle_index,
-                    const std::map<types::particle_index, particle_iterator> &particle_map,
-                    const std::vector<double>                                &voro_vertices,
-                    const std::vector<int>                                   &voro_faces,
-                    const std::vector<int>                                   &voro_neighbors,
-                    const BoundingBox<dim>                                   &box);
+        VoronoiCell(const types::particle_index  particle_index,
+                    const std::vector<double>   &voro_vertices,
+                    const std::vector<int>      &voro_faces,
+                    const std::vector<int>      &voro_neighbors,
+                    const BoundingBox<dim>      &box);
 
-        particle_iterator particle;
-
-        std::vector<particle_iterator> neighbor_particles;
+        types::particle_index particle_index;
 
         std::vector<Point<dim>> vertices;
 
@@ -135,14 +128,13 @@ namespace aspect
 
       template <>
       VoronoiCell<2>::
-      VoronoiCell(const types::particle_index                               particle_index,
-                  const std::map<types::particle_index, particle_iterator> &particle_map,
-                  const std::vector<double>                                &voro_vertices,
-                  const std::vector<int>                                   &voro_faces,
-                  const std::vector<int>                                   &voro_neighbors,
-                  const BoundingBox<2>                                     &box)
+      VoronoiCell(const types::particle_index  particle_index,
+                  const std::vector<double>   &voro_vertices,
+                  const std::vector<int>      &voro_faces,
+                  const std::vector<int>      &voro_neighbors,
+                  const BoundingBox<2>        &box)
+        : particle_index(particle_index)
       {
-        neighbor_particles.clear();
         vertices.clear();
         faces.clear();
 
@@ -151,11 +143,6 @@ namespace aspect
           {
             if (voro_neighbors[i] >= 0)
               {
-                // We find a neighboring Voronoi cell
-                const auto mit = particle_map.find(voro_neighbors[i]);
-                AssertThrow(mit != particle_map.end(), ExcInternalError());
-                neighbor_particles.push_back(mit->second);
-
                 j += voro_faces[j] + 1;
                 continue;
               }
@@ -195,25 +182,19 @@ namespace aspect
 
             vertices.emplace_back(Point<2>(voro_vertices[l], voro_vertices[l + 1]));
           }
-
-        // Finally, find the particle owned by the Voronoi cell
-        const auto mit = particle_map.find(particle_index);
-        AssertThrow(mit != particle_map.end(), ExcInternalError());
-        particle = mit->second;
       }
 
 
 
       template <>
       VoronoiCell<3>::
-      VoronoiCell(const types::particle_index                               particle_index,
-                  const std::map<types::particle_index, particle_iterator> &particle_map,
-                  const std::vector<double>                                &voro_vertices,
-                  const std::vector<int>                                   &voro_faces,
-                  const std::vector<int>                                   &voro_neighbors,
-                  const BoundingBox<3>                                     &box)
+      VoronoiCell(const types::particle_index  particle_index,
+                  const std::vector<double>   &voro_vertices,
+                  const std::vector<int>      &voro_faces,
+                  const std::vector<int>      &voro_neighbors,
+                  const BoundingBox<3>        &box)
+        : particle_index(particle_index)
       {
-        neighbor_particles.clear();
         vertices.clear();
         faces.clear();
 
@@ -248,19 +229,9 @@ namespace aspect
                                        "domain. Please increase the lower limit of particles per cell."));
               }
 
-            faces.emplace_back(face);
+            faces.push_back(face);
             j += voro_faces[j] + 1;
-
-            // Store the neighbor particle
-            const auto mit = particle_map.find(voro_neighbors[i]);
-            AssertThrow(mit != particle_map.end(), ExcInternalError());
-            neighbor_particles.push_back(mit->second);
           }
-
-        // Finally, find the particle owned by the Voronoi cell
-        const auto mit = particle_map.find(particle_index);
-        AssertThrow(mit != particle_map.end(), ExcInternalError());
-        particle = mit->second;
       }
 
 
@@ -891,12 +862,13 @@ namespace aspect
                                 // if the basis function is nonzero in this tetrahedron
                                 if (N[0] != 0.0 || N[1] != 0.0 || N[2] != 0.0 || N[3] != 0.0)
                                   {
-                                    const auto value_and_gradient = simplex_integrators[integrator++].integrate_linear_function(N);
+                                    const auto value_and_gradient = simplex_integrators[integrator].integrate_linear_function(N);
                                     data.add_weighting_function_data(cell->vertex_index(i),
                                                                      value_and_gradient.first / volume,
                                                                      value_and_gradient.second / volume);
                                   }
                               }
+                            ++integrator;
                           }
                       }
                     else // n_face_vertices == 3
@@ -912,12 +884,13 @@ namespace aspect
                             // if the basis function is nonzero in this tetrahedron
                             if (N[0] != 0.0 || N[1] != 0.0 || N[2] != 0.0 || N[3] != 0.0)
                               {
-                                const auto value_and_gradient = simplex_integrators[integrator++].integrate_linear_function(N);
+                                const auto value_and_gradient = simplex_integrators[integrator].integrate_linear_function(N);
                                 data.add_weighting_function_data(cell->vertex_index(i),
                                                                  value_and_gradient.first / volume,
                                                                  value_and_gradient.second / volume);
                               }
                           }
+                        ++integrator;
                       }
                   }
 
@@ -965,7 +938,7 @@ namespace aspect
        * @param[in,out] data Holding the calculated quantities.
        */
       template <int dim>
-      std::vector<std::vector<Point<dim>>>
+      void
       evaluate(const typename Triangulation<dim>::active_cell_iterator              &cell,
                const std::vector<typename Triangulation<dim>::active_cell_iterator> &neighbors,
                const Particles::ParticleHandler<dim>                                &particle_handler,
@@ -1013,9 +986,7 @@ namespace aspect
                                   false,                                     // zperiodic
                                   8);                                        // init_mem
 
-        // Put all the particles in the current cell and its neighbors into the container,
-        // and build a map from particle indices to particle iterators
-        std::map<types::particle_index, typename Particles::ParticleHandler<dim>::particle_iterator> particle_map;
+        // Put all the particles in the current cell and its neighbors into the container
         for (const auto &neighbor : neighbors)
           {
             const auto &particles_in_cell = particle_handler.particles_in_cell(neighbor);
@@ -1023,7 +994,6 @@ namespace aspect
               {
                 const Point<dim> &location = particle->get_location();
                 container.put(particle->get_local_index(), location[0], location[1], (dim > 2 ? location[2] : 0.0));
-                particle_map.insert(std::make_pair(particle->get_local_index(), particle));
               }
           }
 
@@ -1060,7 +1030,6 @@ namespace aspect
             voro_cell.neighbors(voro_neighbors);
 
             voronoi_cells.emplace_back(VoronoiCell<dim>(particle_index,
-                                                        particle_map,
                                                         voro_vertices,
                                                         voro_face_vertices,
                                                         voro_neighbors,
@@ -1071,12 +1040,7 @@ namespace aspect
 
         // Do the actual evaluation
         for (const auto &voronoi_cell : voronoi_cells)
-          do_evaluation(neighbors, voronoi_cell, fe, mapping, data[voronoi_cell.particle->get_local_index()]);
-
-        std::vector<std::vector<Point<dim>>> vorocells;
-        for (const auto &vorocell : voronoi_cells)
-          vorocells.push_back(vorocell.vertices);
-        return vorocells;
+          do_evaluation(neighbors, voronoi_cell, fe, mapping, data[voronoi_cell.particle_index]);
       }
     }
   }
@@ -1142,7 +1106,6 @@ namespace aspect
     // Now loop over the locally owned active cells and collect the CPDI data
     std::vector<internal::CPDI::GeneralizedInterpolationData<dim>> data(particle_handler.get_max_local_particle_index());
     double local_volume = 0.0;
-    std::vector<std::vector<Point<dim>>> vorocells;
     for (const auto &cell : dof_handler.active_cell_iterators())
       if (cell->is_locally_owned())
         {
@@ -1158,15 +1121,13 @@ namespace aspect
           std::vector<typename Triangulation<dim>::active_cell_iterator>
           neighboring_cells(neighboring_cell_set.begin(), neighboring_cell_set.end());
 
-          const std::vector<std::vector<Point<dim>>> local_vorocells =
-            internal::CPDI::evaluate(cell,
-                                     neighboring_cells,
-                                     particle_handler,
-                                     field_fe,
-                                     *mapping,
-                                     bounding_box,
-                                     data);
-          vorocells.insert(vorocells.end(), local_vorocells.begin(), local_vorocells.end());
+          internal::CPDI::evaluate(cell,
+                                   neighboring_cells,
+                                   particle_handler,
+                                   field_fe,
+                                   *mapping,
+                                   bounding_box,
+                                   data);
 
 #if DEBUG
           for (const auto &particle : particle_handler.particles_in_cell(cell))
