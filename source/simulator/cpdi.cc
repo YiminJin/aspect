@@ -498,27 +498,31 @@ namespace aspect
         const unsigned int n_vertices = vertices.size();
         AssertThrow(n_vertices >= 3, ExcInternalError());
 
-        double A  = 0.0; // signed area
-        double Cx = 0.0;
-        double Cy = 0.0;
+        double A = 0.0;
+        Point<2> C;
+
+        // Compute the reference point
+        Point<2> ref;
+        for (const auto &vertex : vertices)
+          ref += vertex;
+        ref /= n_vertices;
 
         for (unsigned int i = 0, j = n_vertices - 1; i < n_vertices; j = i++)
           {
-            const double xi = vertices[i][0], yi = vertices[i][1],
-                         xj = vertices[j][0], yj = vertices[j][1];
+            const double ax = vertices[i][0] - ref[0], 
+                         ay = vertices[i][1] - ref[1],
+                         bx = vertices[j][0] - ref[0], 
+                         by = vertices[j][1] - ref[1];
 
-            const double cross_product = xj * yi - xi * yj;
-            A  += cross_product;
-            Cx += (xj + xi) * cross_product;
-            Cy += (yj + yi) * cross_product;
+            const double cross_product = bx * ay - ax * by;
+            A += cross_product;
+            C += (ref + vertices[i] + vertices[j]) * cross_product;
           }
+
+        C *= 1.0 / (3.0 * A);
         A *= 0.5;
 
-        const double one_over_6A = 1.0 / (6.0 * A);
-        Cx *= one_over_6A;
-        Cy *= one_over_6A;
-
-        return std::make_pair(A, Point<2>(Cx, Cy));
+        return std::make_pair(A, C);
       }
 
 
@@ -539,31 +543,32 @@ namespace aspect
         Assert(n_vertices >= 3 && n_vertices <= points.size(),
                ExcInternalError());
 
-        const Point<3> ref = points[vertices[0]];
-        Point<3> centroid_sum;
-        double area_sum = 0.0;
+        double A = 0.0;
+        Point<3> C;
 
-        for (unsigned int i = 1; i < n_vertices - 1; ++i)
+        // Compute the reference point
+        Point<3> ref;
+        for (const unsigned int vertex : vertices)
+          ref += points[vertex];
+        ref /= n_vertices;
+
+        for (unsigned int i = 0, j = n_vertices - 1; i < n_vertices; j = i++)
           {
-            const Point<3> &v1 = points[vertices[i]];
-            const Point<3> &v2 = points[vertices[i + 1]];
+            const Point<3> &vi = points[vertices[i]];
+            const Point<3> &vj = points[vertices[j]];
 
-            // Triangle (ref, v1, v2)
-            const Tensor<1, 3> a = v1 - ref;
-            const Tensor<1, 3> b = v2 - ref;
+            const Tensor<1, 3> a = vi - ref;
+            const Tensor<1, 3> b = vj - ref;
 
-            // Triangle area = 0.5 * |a x b|
-            const double A = 0.5 * cross_product_3d(a, b).norm();
-            area_sum += A;
-
-            // Triangle centroid
-            Point<3> C = (ref + v1 + v2) * (1.0 / 3.0);
-
-            // Weighted sum
-            centroid_sum += C * A;
+            const double cross_product = cross_product_3d(a, b).norm();
+            A += cross_product;
+            C += (ref + vi + vj) * cross_product;
           }
 
-        return std::make_pair(area_sum, centroid_sum / area_sum);
+        C *= 1.0 / (3.0 * A);
+        A *= 0.5;
+
+        return std::make_pair(A, C);
       }
 
 
@@ -587,8 +592,8 @@ namespace aspect
           ref += vertex;
         ref /= vertices.size();
 
-        Point<3> centroid_sum;
-        double volume_sum = 0.0;
+        Point<3> C;
+        double V = 0.0;
 
         for (const auto &face : faces)
           {
@@ -603,18 +608,16 @@ namespace aspect
                 const Tensor<1, 3> b = v1 - ref;
                 const Tensor<1, 3> c = v2 - ref;
 
-                // Volume of tetrahedron (ref, v0, v1, v2)
-                const double V = a * cross_product_3d(b, c) / 6.0;
-
-                // Barycenter of tetrahedron (ref, v0, v1, v2)
-                const Point<3> C = (ref + v0 + v1 + v2) * 0.25;
-
-                centroid_sum += C * V;
-                volume_sum   += V;
+                const double cross_product = a * cross_product_3d(b, c);
+                V += cross_product;
+                C += (ref + v0 + v1 + v2) * cross_product;
               }
           }
 
-        return std::make_pair(volume_sum, centroid_sum / volume_sum);
+        C /= 4.0 * V;
+        V /= 6.0;
+
+        return std::make_pair(V, C);
       }
 
 
@@ -648,7 +651,7 @@ namespace aspect
                     const VoronoiCell<2>                                      &voronoi_cell,
                     const FE_Q<2>                                             &fe,
                     const Mapping<2>                                          &mapping,
-                    GeneralizedInterpolationData<2>                                            &data)
+                    GeneralizedInterpolationData<2>                           &data)
       {
         // Tolerance parameter for function is_inside_unit_cell()
         constexpr double eps = 1.e-12;
@@ -767,7 +770,7 @@ namespace aspect
                     const VoronoiCell<3>                                      &voronoi_cell,
                     const FE_Q<3>                                             &fe,
                     const Mapping<3>                                          &mapping,
-                    GeneralizedInterpolationData<3>                                            &data)
+                    GeneralizedInterpolationData<3>                           &data)
       {
         // Tolerance parameter for function is_inside_unit_cell()
         constexpr double eps = 1.e-12;
@@ -1123,81 +1126,6 @@ namespace aspect
 
     AssertThrow(cpdi_particle_manager != nullptr, ExcInternalError());
 
-    // Create a map from field index to particle property index
-    std::map<unsigned int, unsigned int> field_to_property_map;
-    if (parameters.mapped_particle_properties.size() != 0)
-      {
-        const Particle::Property::ParticlePropertyInformation &property_info
-          = cpdi_particle_manager->get_property_manager().get_data_info();
-
-        for (const auto &field : advection_fields)
-          {
-            unsigned int property_index = numbers::invalid_unsigned_int;
-
-            if (parameters.mapped_particle_properties.size() != 0)
-              {
-                const std::string &field_name = parameters.mapped_particle_properties[field.compositional_variable].first;
-                AssertThrow(property_info.fieldname_exists(field_name),
-                            ExcMessage("The particle properties to be interpolated by the CPDI method are not handled by "
-                                       "the same particle manager. Currently this is not supported."));
-
-                const std::pair<std::string, unsigned int> property_and_component
-                  = parameters.mapped_particle_properties[field.compositional_variable];
-
-                property_index = property_info.get_position_by_field_name(property_and_component.first) + property_and_component.second;
-              }
-            else
-              {
-                property_index = std::count(introspection.compositional_field_methods.begin(),
-                                            introspection.compositional_field_methods.begin() + field.compositional_variable,
-                                            Parameters<dim>::AdvectionFieldMethod::particles)
-                                 +
-                                 std::count(introspection.compositional_field_methods.begin(),
-                                            introspection.compositional_field_methods.begin() + field.compositional_variable,
-                                            Parameters<dim>::AdvectionFieldMethod::cpdi);
-
-                AssertThrow(property_index < property_info.n_components(),
-                            ExcMessage("Can not automatically match particle properties to fields, because there are "
-                                       "more fields that are marked as particle/cpdi than particle properties."));
-              }
-
-            field_to_property_map.insert(std::make_pair(field.compositional_variable, property_index));
-          }
-      }
-
-    // For the phase field(s), we need to assemble the corresponding block of system matrix
-    // to solve the governing equation; for other fields, we only need to assemble a lumped
-    // mass matrix. For convenience, we separate the phase fields from the other compositional
-    // fields.
-    std::vector<AdvectionField> phase_fields, ordinary_fields;
-    const std::vector<unsigned int> &phase_field_indices
-      = introspection.get_indices_for_fields_of_type(CompositionalFieldDescription::phase_field);
-    for (const auto &field : advection_fields)
-      {
-        if (std::find(phase_field_indices.begin(), phase_field_indices.end(), field.compositional_variable) != phase_field_indices.end())
-          phase_fields.push_back(field);
-        else
-          ordinary_fields.push_back(field);
-      }
-    AssertThrow(phase_fields.size() == phase_field_indices.size(), ExcInternalError());
-
-    // Initialize the system matrix block for phase fields if necessary
-    unsigned int phase_field_sp_block_idx = numbers::invalid_unsigned_int;
-    if (phase_fields.size() > 0)
-      {
-        phase_field_sp_block_idx = phase_fields[0].sparsity_pattern_block_index(introspection);
-        system_matrix.block(phase_field_sp_block_idx, phase_field_sp_block_idx) = 0;
-      }
-
-    // Initialize the lumped mass matrix if necessary
-    LinearAlgebra::BlockVector lumped_mass_matrix;
-    if (ordinary_fields.size() > 0)
-      lumped_mass_matrix.reinit(introspection.index_sets.system_partitioning, mpi_communicator);
-
-    // Initialize the system rhs for each field
-    for (const auto &field : advection_fields)
-      system_rhs.block(field.block_index(introspection)) = 0;
-
     // Create the vertex-to-cell map
     GridTools::Cache<dim> grid_cache(triangulation, *mapping);
     const auto &vertex_to_cell_map = grid_cache.get_vertex_to_cell_map();
@@ -1246,36 +1174,21 @@ namespace aspect
 #endif
         }
 
-    if (pre_refinement_step == 0)
-      {
-        std::ofstream out("voronoi-" + Utilities::int_to_string(Utilities::MPI::this_mpi_process(mpi_communicator)) + ".vtk");
-        out << "# vtk DataFile Version 3.0\n";
-        out << "Voro++ Voronoi diagram\n";
-        out << "ASCII\n";
-        out << "DATASET POLYDATA\n";
-
-        unsigned int n_points = 0;
-        for (const auto &vorocell : vorocells)
-          n_points += vorocell.size();
-        out << "POINTS " << n_points << " float\n";
-        for (const auto &vorocell : vorocells)
-          for (const auto &vertex : vorocell)
-            out << vertex[0] << ' ' << vertex[1] << " 0.0\n";
-
-        out << "POLYGONS " << vorocells.size() << ' ' << vorocells.size() + n_points << "\n";
-        unsigned int point_index = 0;
-        for (const auto &vorocell : vorocells)
-          {
-            out << vorocell.size();
-            for (unsigned int v = 0; v < vorocell.size(); ++v)
-              out << ' ' << point_index++;
-            out << "\n";
-          }
-
-      }
+#if DEBUG
+    const double total_volume = Utilities::MPI::sum(local_volume, mpi_communicator);
+    const double tria_volume  = GridTools::volume(triangulation, *mapping);
+    Assert(std::abs(total_volume - tria_volume) / tria_volume < 1.e-4,
+           ExcMessage("The total volume of particle domains ("
+                      + Utilities::to_string(total_volume)
+                      + ") does not match the volume of the triangulation ("
+                      + Utilities::to_string(tria_volume)
+                      + ")."));
+#else
+    (void)local_volume;
+#endif /*DEBUG*/
 
     // Build a map from vertex indices to the corresponding DoF indices
-    std::vector<small_vector<types::global_dof_index>, 16> vertex_to_dof_indices(triangulation.n_vertices());
+    std::vector<small_vector<types::global_dof_index, 16>> vertex_to_dof_indices(triangulation.n_vertices());
     for (const auto &cell : dof_handler.active_cell_iterators())
       if (!cell->is_artificial())
         for (const unsigned int v : cell->vertex_indices())
@@ -1290,132 +1203,128 @@ namespace aspect
               }
           }
 
-    // Assemble the phase-field systems one by one
-    for (const auto &field : phase_fields)
+    // Create a map from field index to particle property index
+    std::map<unsigned int, unsigned int> field_to_property_map;
+    if (parameters.mapped_particle_properties.size() != 0)
       {
-        for (const auto &cell : dof_handler.active_cell_iterators())
-          if (cell->is_locally_owned())
-            {
-              for (const auto &particle : particle_handler.particles_in_cell(cell))
-                {
-                  
-                }
-            }
+        const Particle::Property::ParticlePropertyInformation &property_info
+          = cpdi_particle_manager->get_property_manager().get_data_info();
+
+        for (const auto &field : advection_fields)
+          {
+            unsigned int property_index = numbers::invalid_unsigned_int;
+
+            if (parameters.mapped_particle_properties.size() != 0)
+              {
+                const std::string &field_name = parameters.mapped_particle_properties[field.compositional_variable].first;
+                AssertThrow(property_info.fieldname_exists(field_name),
+                            ExcMessage("The particle properties to be interpolated by the CPDI method are not handled by "
+                                       "the same particle manager. Currently this is not supported."));
+
+                const std::pair<std::string, unsigned int> property_and_component
+                  = parameters.mapped_particle_properties[field.compositional_variable];
+
+                property_index = property_info.get_position_by_field_name(property_and_component.first) + property_and_component.second;
+              }
+            else
+              {
+                property_index = std::count(introspection.compositional_field_methods.begin(),
+                                            introspection.compositional_field_methods.begin() + field.compositional_variable,
+                                            Parameters<dim>::AdvectionFieldMethod::particles)
+                                 +
+                                 std::count(introspection.compositional_field_methods.begin(),
+                                            introspection.compositional_field_methods.begin() + field.compositional_variable,
+                                            Parameters<dim>::AdvectionFieldMethod::cpdi);
+
+                AssertThrow(property_index < property_info.n_components(),
+                            ExcMessage("Can not automatically match particle properties to fields, because there are "
+                                       "more fields that are marked as particle/cpdi than particle properties."));
+              }
+
+            field_to_property_map.insert(std::make_pair(field.compositional_variable, property_index));
+          }
       }
 
-    // Assemble the other compositional fields within one loop
-    for (const auto &cell : dof_handler.active_cell_iterators())
-      if (cell->is_locally_owned())
-        {
-          for (const auto &particle : particle_handler.particles_in_cell(cell))
-            {
-              const types::particle_index particle_index = particle.get_local_index();
-              const auto &particle_data = data[particle_index];
-              const double V_p = particle_data.get_volume();
-              const auto &weighting_function_data = particle_data.get_weighting_function_data();
-              const ArrayView<const double> particle_properties = particle.get_properties();
+    // For the phase field(s), we need to assemble the corresponding block of system matrix
+    // to solve the governing equation; for other fields, we only need to assemble a lumped
+    // mass matrix. For convenience, we separate the phase fields from the other compositional
+    // fields.
+    const std::vector<unsigned int> &phase_field_indices
+      = introspection.get_indices_for_fields_of_type(CompositionalFieldDescription::phase_field);
+    std::vector<unsigned int> ordinary_field_indices;
+    for (unsigned int field_index = 0; field_index < advection_fields.size(); ++field_index)
+      if (std::find(phase_field_indices.begin(), phase_field_indices.end(), 
+                    advection_fields[field_index].compositional_variable) 
+          == phase_field_indices.end())
+        ordinary_field_indices.push_back(field_index);
 
-              const unsigned int n_dofs_per_field = weighting_function_data.size();
-              Vector<double> particle_lumped_mass_matrix(n_dofs_per_field);
-              std::vector<Vector<double>> particle_rhs(ordinary_fields.size(), Vector<double>(n_dofs_per_field));
-              std::vector<std::vector<types::global_dof_index>> particle_dofs(ordinary_fields.size(), std::vector<types::global_dof_index>(n_dofs_per_field));
+    AssertThrow(phase_field_indices.size() + ordinary_field_indices.size() == advection_fields.size(), 
+                ExcInternalError());
 
-              for (unsigned int i = 0; i < n_dofs_per_field; ++i)
-                {
-                  const double phi_ip = weighting_function_data[i].second.first;
-                  particle_lumped_mass_matrix(i) = V_p * phi_ip;
+    // Initialize the lumped mass matrix if necessary
+    LinearAlgebra::BlockVector lumped_mass_matrix;
+    if (ordinary_field_indices.size() > 0)
+      lumped_mass_matrix.reinit(introspection.index_sets.system_partitioning, mpi_communicator);
 
-                  const unsigned int vertex_index = weighting_function_data[i].first;
-                  for (unsigned int field_index = 0; field_index < ordinary_fields.size(); ++field_index)
-                    {
-                      // TODO
-                      particle_dofs[field_index][i] = vertex_to_dof_indices[vertex_index][field_index];
+    // Initialize the system rhs for each field
+    for (const auto &field : advection_fields)
+      system_rhs.block(field.block_index(introspection)) = 0;
 
-                      const double property = particle_properties[field_to_property_map[field_index]];
-                      particle_rhs[field_index](i) = V_p * phi_ip * property;
-                    }
-                }
+    // Assemble the phase-field systems one-by-one
+    for (const unsigned int field_index : phase_field_indices)
+      {
+        // Initialize the corresponding block of the system matrix and the system rhs
+        const AdvectionField &field = advection_fields[field_index];
+        const unsigned int sp_block_idx = field.sparsity_pattern_block_index(introspection);
+        const unsigned int block_idx    = field.block_index(introspection);
+        if (block_idx != sp_block_idx)
+          system_matrix.block(block_idx, block_idx).reinit(system_matrix.block(sp_block_idx, sp_block_idx));
 
-              current_constraints.distribute_local_to_global(particle_lumped_mass_matrix,
-                                                             particle_dofs[0],
-                                                             lumped_mass_matrix);
+        system_matrix.block(block_idx, block_idx) = 0;
+        system_rhs.block(block_idx) = 0;
 
-              for (unsigned int field_index = 0; field_index < ordinary_fields.size(); ++field_index)
-                current_constraints.distribute_local_to_global(particle_rhs[field_index],
-                                                               particle_dofs[field_index],
-                                                               system_rhs);
-            }
-        }
+        // TODO: assemble the phase-field system
 
-    system_matrix.compress(VectorOperation::add);
-    lumped_mass_matrix.compress(VectorOperation::add);
-    system_rhs.compress(VectorOperation::add);
-
-#if DEBUG
-    const double total_volume = Utilities::MPI::sum(local_volume, mpi_communicator);
-    const double tria_volume  = GridTools::volume(triangulation, *mapping);
-    Assert(std::abs(total_volume - tria_volume) / tria_volume < 1.e-4,
-           ExcMessage("The total volume of particle domains ("
-                      + Utilities::to_string(total_volume)
-                      + ") does not match the volume of the triangulation ("
-                      + Utilities::to_string(tria_volume)
-                      + ")."));
-#else
-    (void)local_volume;
-#endif /*DEBUG*/
-
-    // Set the preconditioner
-    LinearAlgebra::PreconditionAMG preconditioner;
-    LinearAlgebra::PreconditionAMG::AdditionalData amg_data;
+        // Set the preconditioner
+        LinearAlgebra::PreconditionAMG preconditioner;
+        LinearAlgebra::PreconditionAMG::AdditionalData amg_data;
 
 #if DEAL_II_VERSION_GTE(9,7,0)
-    amg_data.constant_modes = DoFTools::extract_constant_modes(
-                                dof_handler,
-                                introspection.component_masks.compositional_fields[advection_fields[0].compositional_variable]);
+        amg_data.constant_modes = DoFTools::extract_constant_modes(
+                                    dof_handler,
+                                    introspection.component_masks.compositional_fields[field.compositional_variable]);
 #else
-    std::vector<std::vector<bool>> constant_modes;
-    DoFTools::extract_constant_modes(
-      dof_handler,
-      introspection.component_masks.compositional_fields[advection_fields[0].compositional_variable],
-      constant_modes);
-    amg_data.constant_modes = constant_modes;
+        std::vector<std::vector<bool>> constant_modes;
+        DoFTools::extract_constant_modes(
+          dof_handler,
+          introspection.component_masks.compositional_fields[field.compositional_variable],
+          constant_modes);
+        amg_data.constant_modes = constant_modes;
 #endif
 
-    amg_data.elliptic = true;
-    amg_data.higher_order_elements = false;
-    amg_data.smoother_sweeps = 2;
-    amg_data.aggregation_threshold = 0.02;
+        amg_data.elliptic = true;
+        amg_data.higher_order_elements = false;
+        amg_data.smoother_sweeps = 2;
+        amg_data.aggregation_threshold = 0.02;
 
-    preconditioner.initialize(system_matrix.block(sparsity_block_idx,
-                                                  sparsity_block_idx),
-                              amg_data);
+        preconditioner.initialize(system_matrix.block(block_idx, block_idx), amg_data);
 
-    // Create a distributed vector
-    LinearAlgebra::BlockVector distributed_solution(introspection.index_sets.system_partitioning,
-                                                    mpi_communicator);
+        // Create a distributed vector
+        LinearAlgebra::BlockVector distributed_solution(introspection.index_sets.system_partitioning,
+                                                        mpi_communicator);
 
-    for (const auto &field : advection_fields)
-      {
-        const IndexSet locally_owned_field_dofs =
-          dof_handler.locally_owned_dofs() &
-          Utilities::extract_locally_active_dofs_with_component(dof_handler, introspection.component_masks.compositional_fields[field.compositional_variable]);
-        for (auto eit = locally_owned_field_dofs.begin(); eit != locally_owned_field_dofs.end(); ++eit)
-          if (!current_constraints.is_constrained(*eit))
-            distributed_solution[*eit] = system_rhs[*eit] / lumped_mass_matrix[*eit];
-        /*
         pcout << "   Solving CPDI system for " << field.name(introspection)
-              << "... " << std::flush;
+              << "..." << std::flush;
 
-        const unsigned int block_idx = field.block_index(introspection);
         distributed_solution.block(block_idx) = current_linearization_point.block(block_idx);
         current_constraints.set_zero(distributed_solution);
 
-        SolverControl solver_control(1000, 1.e-12 * system_rhs.block(block_idx).l2_norm());
+        SolverControl solver_control(1000, 1.e-8 * system_rhs.block(block_idx).l2_norm());
         SolverCG<LinearAlgebra::Vector> solver(solver_control);
 
         try
           {
-            solver.solve(system_matrix.block(sparsity_block_idx, sparsity_block_idx),
+            solver.solve(system_matrix.block(block_idx, block_idx),
                          distributed_solution.block(block_idx),
                          system_rhs.block(block_idx),
                          preconditioner);
@@ -1432,14 +1341,84 @@ namespace aspect
                                                              mpi_communicator);
           }
 
-        pcout << solver_control.last_step() << " iterations." << std::endl;*/
+        pcout << solver_control.last_step() << " iterations." << std::endl;
       }
 
-    current_constraints.distribute(distributed_solution);
-    for (const auto &field : advection_fields)
+    // Assemble the other compositional fields with one loop
+    if (ordinary_field_indices.size() > 0)
       {
-        const unsigned int block_idx = field.block_index(introspection);
-        solution.block(block_idx) = distributed_solution.block(block_idx);
+        LinearAlgebra::BlockVector lumped_mass_matrix(introspection.index_sets.system_partitioning, mpi_communicator);
+        LinearAlgebra::BlockVector distributed_solution(introspection.index_sets.system_partitioning, mpi_communicator);
+
+        for (const auto &cell : dof_handler.active_cell_iterators())
+          if (cell->is_locally_owned())
+            {
+              for (const auto &particle : particle_handler.particles_in_cell(cell))
+                {
+                  const types::particle_index particle_index = particle.get_local_index();
+                  const auto &particle_data = data[particle_index];
+                  const double V_p = particle_data.get_volume();
+                  const auto &weighting_function_data = particle_data.get_weighting_function_data();
+                  const ArrayView<const double> particle_properties = particle.get_properties();
+
+                  const unsigned int n_dofs_per_field = weighting_function_data.size();
+                  Vector<double> particle_lumped_mass_matrix(n_dofs_per_field);
+                  std::vector<Vector<double>> particle_rhs(ordinary_field_indices.size(), Vector<double>(n_dofs_per_field));
+                  std::vector<std::vector<types::global_dof_index>> particle_dofs(
+                    ordinary_field_indices.size(), std::vector<types::global_dof_index>(n_dofs_per_field));
+
+                  for (unsigned int i = 0; i < n_dofs_per_field; ++i)
+                    {
+                      const double phi_ip = weighting_function_data[i].second.first;
+                      particle_lumped_mass_matrix(i) = V_p * phi_ip;
+
+                      const unsigned int vertex_index = weighting_function_data[i].first;
+                      for (unsigned int ordinary_field = 0; ordinary_field < ordinary_field_indices.size(); ++ordinary_field)
+                        {
+                          const unsigned int field_index = ordinary_field_indices[ordinary_field];
+                          particle_dofs[ordinary_field][i] = vertex_to_dof_indices[vertex_index][field_index];
+
+                          const double property = particle_properties[field_to_property_map[field_index]];
+                          particle_rhs[ordinary_field](i) = V_p * phi_ip * property;
+                        }
+                    }
+
+                  current_constraints.distribute_local_to_global(particle_lumped_mass_matrix,
+                                                                 particle_dofs[0],
+                                                                 lumped_mass_matrix);
+
+                  for (unsigned int ordinary_field = 0; ordinary_field < ordinary_field_indices.size(); ++ordinary_field)
+                    current_constraints.distribute_local_to_global(particle_rhs[ordinary_field],
+                                                                   particle_dofs[ordinary_field],
+                                                                   system_rhs);
+                }
+            }
+
+        lumped_mass_matrix.compress(VectorOperation::add);
+        system_rhs.compress(VectorOperation::add);
+
+        for (const unsigned int field_index : ordinary_field_indices)
+          {
+            const auto &field = advection_fields[field_index];
+            const unsigned int composition_index = field.compositional_variable;
+            const unsigned int block_index = field.block_index(introspection);
+            const IndexSet locally_owned_dofs = dof_handler.locally_owned_dofs() &
+                                                Utilities::extract_locally_active_dofs_with_component(
+                                                  dof_handler, introspection.component_masks.compositional_fields[composition_index]);
+
+            if (field_index != ordinary_field_indices[0])
+              {
+                const unsigned int block0_index = advection_fields[ordinary_field_indices[0]].block_index(introspection);
+                lumped_mass_matrix.block(block_index) = lumped_mass_matrix.block(block0_index);
+              }
+
+            for (auto eit = locally_owned_dofs.begin(); eit != locally_owned_dofs.end(); ++eit)
+              if (!current_constraints.is_constrained(*eit))
+                distributed_solution[*eit] = system_rhs[*eit] / lumped_mass_matrix[*eit];
+
+            current_constraints.distribute(distributed_solution);
+            solution.block(block_index) = distributed_solution.block(block_index);
+          }
       }
 
     computing_timer.leave_subsection("Particles: CPDI");
