@@ -416,6 +416,11 @@ namespace aspect
        * be averaged cell-wise.
        */
       bool average_melt_velocity;
+
+      /**
+       * Whether to cell-wise average the velocity divergence.
+       */
+      bool average_velocity_divergence;
     };
   }
 

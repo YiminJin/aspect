@@ -642,7 +642,8 @@ namespace aspect
       double
       compute_melting_RHS(const SimulatorAccess<dim> *simulator_access,
                           const internal::Assembly::Scratch::AdvectionSystem<dim>  &scratch,
-                          const unsigned int q_point)
+                          const unsigned int q_point,
+                          const double divergence_u)
       {
         Assert (scratch.material_model_outputs.densities[q_point] > 0,
                 ExcMessage ("The density needs to be a positive quantity "
@@ -663,8 +664,7 @@ namespace aspect
         // Note that the full advection term would be (1 - phi) * (div u + kappa rho u g),
         // but we expanded the term and move the part (- phi) * (div u + kappa rho u g) over to the LHS.
         double melt_transport_RHS = melting_rate / density
-                                    + scratch.current_velocity_divergences[q_point] 
-                                    + compressibility * density * (current_u * gravity);
+                                    + divergence_u + compressibility * density * (current_u * gravity);
 
         if (!simulator_access->get_melt_handler().is_melt_cell(scratch.material_model_inputs.current_cell))
           melt_transport_RHS = melting_rate / density;
@@ -707,6 +707,12 @@ namespace aspect
       std::vector<Tensor<1,dim>> fluid_velocity_values(n_q_points);
       const FEValuesExtractors::Vector ex_u_f = introspection.variable("fluid velocity").extractor_vector();
       scratch.finite_element_values[ex_u_f].get_function_values (this->get_solution(),fluid_velocity_values);
+
+      // average divergence u over the cell (needed for porosity advection)
+      double div_u_avg = 0.0;
+      if (this->get_melt_handler().is_porosity(*scratch.advection_field))
+        for (unsigned int q=0; q<n_q_points; ++q)
+          div_u_avg += scratch.current_velocity_divergences[q] * 1./n_q_points;
 
       for (unsigned int q=0; q<n_q_points; ++q)
         {
@@ -771,9 +777,13 @@ namespace aspect
              :
              scratch.material_model_outputs.reaction_terms[q][scratch.advection_field->compositional_variable]);
 
-          const double melt_transport_RHS = (this->get_melt_handler().is_porosity(*scratch.advection_field) 
-                                             ?
-                                             compute_melting_RHS (this, scratch, q)
+          const double melt_transport_RHS = (this->get_melt_handler().is_porosity(*scratch.advection_field) ?
+                                             compute_melting_RHS (this,
+                                                                  scratch,
+                                                                  q,
+                                                                  (this->get_melt_handler().melt_parameters.average_velocity_divergence ?
+                                                                   div_u_avg : 
+                                                                   scratch.current_velocity_divergences[q]))
                                              :
                                              0.0);
 
@@ -799,14 +809,17 @@ namespace aspect
             (this->get_melt_handler().is_porosity(*scratch.advection_field)
              && this->get_melt_handler().is_melt_cell(scratch.material_model_inputs.current_cell)
              ?
-             (this->get_material_model().is_compressible()
-              ?
-              scratch.material_model_outputs.compressibilities[q]
-              * scratch.material_model_outputs.densities[q]
-              * current_u
-              * this->get_gravity_model().gravity_vector (scratch.finite_element_values.quadrature_point(q))
-              :
-              0.0)
+             (this->get_melt_handler().melt_parameters.average_velocity_divergence ? 
+              div_u_avg :
+              scratch.current_velocity_divergences[q])
+             + (this->get_material_model().is_compressible()
+                ?
+                scratch.material_model_outputs.compressibilities[q]
+                * scratch.material_model_outputs.densities[q]
+                * current_u
+                * this->get_gravity_model().gravity_vector (scratch.finite_element_values.quadrature_point(q))
+                :
+                0.0)
              :
              0.0);
 
@@ -856,9 +869,7 @@ namespace aspect
                   += (
                        (time_step * (conductivity + scratch.artificial_viscosity)
                         * (scratch.grad_phi_field[i] * scratch.grad_phi_field[j]))
-                       + ((time_step * (scratch.advection_field->is_temperature() ?
-                                        scratch.phi_field[i] * (current_u * scratch.grad_phi_field[j]) :
-                                        -scratch.phi_field[j] * (current_u * scratch.grad_phi_field[i])))
+                       + ((time_step * (scratch.phi_field[i] * (current_u * scratch.grad_phi_field[j])))
                           + (factor * scratch.phi_field[i] * scratch.phi_field[j])) *
                        (density_c_P_solid + latent_heat_LHS)
                        + ((time_step * (scratch.phi_field[i] * (current_u_f * scratch.grad_phi_field[j])))
@@ -885,6 +896,12 @@ namespace aspect
       this->get_heating_model_manager().evaluate(scratch.material_model_inputs,
                                                  scratch.material_model_outputs,
                                                  scratch.heating_model_outputs);
+
+      // average divergence u over the cell (needed for porosity advection)
+      double div_u_avg = 0.0;
+      if (this->get_melt_handler().is_porosity(*scratch.advection_field))
+        for (unsigned int q=0; q<n_q_points; ++q)
+          div_u_avg += scratch.current_velocity_divergences[q] * 1./n_q_points;
 
       for (unsigned int q=0; q < n_q_points; ++q)
         {
@@ -925,9 +942,13 @@ namespace aspect
                  / this->get_old_timestep());
 
 
-              const double melt_transport_RHS = (this->get_melt_handler().is_porosity(*scratch.advection_field) 
-                                                 ?
-                                                 compute_melting_RHS (this, scratch, q)
+              const double melt_transport_RHS = (this->get_melt_handler().is_porosity(*scratch.advection_field) ?
+                                                 compute_melting_RHS (this,
+                                                                      scratch,
+                                                                      q,
+                                                                      (this->get_melt_handler().melt_parameters.average_velocity_divergence ?
+                                                                       div_u_avg :
+                                                                       scratch.current_velocity_divergences[q]))
                                                  :
                                                  0.0);
 
@@ -1774,6 +1795,9 @@ namespace aspect
                            "accuracy and convergence behavior of the melt velocity is important "
                            "(like in benchmark cases with an analytical solution), this parameter "
                            "should probably be set to 'false'.");
+        prm.declare_entry ("Average velocity divergence", "true",
+                           Patterns::Bool(),
+                           "");
       }
       prm.leave_subsection();
 
@@ -1791,6 +1815,7 @@ namespace aspect
         heat_advection_by_melt = prm.get_bool("Heat advection by melt");
         use_discontinuous_p_c = prm.get_bool("Use discontinuous compaction pressure");
         average_melt_velocity = prm.get_bool("Average melt velocity");
+        average_velocity_divergence = prm.get_bool("Average velocity divergence");
       }
       prm.leave_subsection();
     }

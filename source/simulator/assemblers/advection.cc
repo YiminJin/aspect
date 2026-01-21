@@ -220,7 +220,7 @@ namespace aspect
                   += (
                        (time_step * diffusion_constant
                         * (scratch.grad_phi_field[i] * scratch.grad_phi_field[j]))
-                       + ((time_step * (-scratch.phi_field[j] * (current_u * scratch.grad_phi_field[i])))
+                       + ((time_step * (scratch.phi_field[i] * (current_u * scratch.grad_phi_field[j])))
                           + (bdf2_factor * scratch.phi_field[i] * scratch.phi_field[j])) *
                        (density_c_P + latent_heat_LHS)
                      )
