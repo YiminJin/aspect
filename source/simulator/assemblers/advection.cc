@@ -862,9 +862,9 @@ namespace aspect
                           * scratch.face_phi_field[i]
                           * scratch.face_phi_field[j]
 
-                          + (!inflow
+                          + (inflow
                              ?
-                             + (density_c_P + latent_heat_LHS)
+                             - (density_c_P + latent_heat_LHS)
                              * time_step
                              * (current_u
                                 * scratch.face_finite_element_values->normal_vector(q))
@@ -1148,7 +1148,7 @@ namespace aspect
                               * scratch.face_phi_field[i]
                               * scratch.face_phi_field[j]
 
-                              + (!inflow
+                              - (inflow
                                  ?
                                  (density_c_P + latent_heat_LHS)
                                  * time_step
@@ -1238,7 +1238,7 @@ namespace aspect
                               * scratch.neighbor_face_phi_field[i]
                               * scratch.neighbor_face_phi_field[j]
 
-                              - (inflow
+                              + (!inflow
                                  ?
                                  (neighbor_density_c_P + neighbor_latent_heat_LHS)
                                  * time_step
@@ -1502,7 +1502,7 @@ namespace aspect
                               * scratch.face_phi_field[i]
                               * scratch.face_phi_field[j]
 
-                              + (!inflow
+                              - (inflow
                                  ?
                                  (density_c_P + latent_heat_LHS)
                                  * time_step
@@ -1592,7 +1592,7 @@ namespace aspect
                               * scratch.neighbor_face_phi_field[i]
                               * scratch.neighbor_face_phi_field[j]
 
-                              - (inflow
+                              + (!inflow
                                  ?
                                  (neighbor_density_c_P + neighbor_latent_heat_LHS)
                                  * time_step
