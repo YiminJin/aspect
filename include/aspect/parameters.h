@@ -173,7 +173,8 @@ namespace aspect
         fem_melt_field,
         fem_darcy_field,
         prescribed_field,
-        prescribed_field_with_diffusion
+        prescribed_field_with_diffusion,
+        phase_field
       };
     };
 
@@ -571,6 +572,7 @@ namespace aspect
     bool                           use_operator_splitting;
     std::string                    world_builder_file;
     unsigned int                   n_particle_managers;
+    bool                           create_particle_domains;
 
     /**
      * @}
@@ -657,6 +659,11 @@ namespace aspect
      * are added to the Stokes equation.
      */
     bool                           enable_elasticity;
+
+    /**
+     * Determines whether the phase field method is enabled in the model.
+     */
+    bool                           enable_phase_field;
 
     /**
      * @}

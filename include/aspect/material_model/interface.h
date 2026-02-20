@@ -1337,6 +1337,64 @@ namespace aspect
 
 
     /**
+     * Additional outputs for assembling the Stokes system with implicit 
+     * constitutive relation, which can be attached to the 
+     * MaterialModel::MaterialModelOutputs structure and filled in the 
+     * MaterialModel::Interface::evaluate() function.
+     */
+    template <int dim>
+    class ImplicitConstitutiveOutputs : public AdditionalMaterialOutputs<dim>
+    {
+      public:
+        ImplicitConstitutiveOutputs(const unsigned int n_points)
+          : tangent_operators_wrt_strain_rate(n_points, numbers::signaling_nan<SymmetricTensor<4, dim>>())
+          , tangent_operators_wrt_pressure(n_points, numbers::signaling_nan<SymmetricTensor<2, dim>>())
+          , consistent_deviatoric_stresses(n_points, numbers::signaling_nan<SymmetricTensor<2, dim>>())
+          , equivalent_viscosities(n_points, numbers::signaling_nan<double>())
+        {}
+
+        ~ImplicitConstitutiveOutputs() override
+          = default;
+
+        void average(const MaterialAveraging::AveragingOperation operation,
+                     const FullMatrix<double> &/*projection_matrix*/,
+                     const FullMatrix<double> &/*expansion_matrix*/) override
+        {
+          AssertThrow(operation == MaterialAveraging::AveragingOperation::none, 
+                      ExcNotImplemented());
+          return;
+        }
+
+        /**
+         * The derivative of deviatoric stress with respect to strain rate.
+         */
+        std::vector<SymmetricTensor<4, dim>> tangent_operators_wrt_strain_rate;
+
+        /**
+         * The derivative of deviatoric stress with respect to pressure.
+         */
+        std::vector<SymmetricTensor<2, dim>> tangent_operators_wrt_pressure;
+
+        /**
+         * The deviatoric stress consistent to the constitutive relation
+         * at the current linearized state. Note that it does not have a
+         * ``real'' physical meaning, but belongs to an intermediate state
+         * resulting from return mapping.
+         */
+        std::vector<SymmetricTensor<2, dim>> consistent_deviatoric_stresses;
+
+        /**
+         * The equivalent scalar viscosity required by thee Schur complement 
+         * matrix. This quantity cannot be used in other places (for example,
+         * when computing the pressure scaling factor), for it can only be
+         * obtained through the return-mapping algorithm.
+         */
+        std::vector<double> equivalent_viscosities;
+    };
+
+
+
+    /**
      * A base class for parameterizations of material models. Classes derived
      * from this class will need to implement functions that provide material
      * parameters such as the viscosity, density, etc, typically as a function

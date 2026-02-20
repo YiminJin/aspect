@@ -748,6 +748,10 @@ namespace aspect
                          Patterns::Bool (),
                          "Whether to include the additional elastic terms on the right-hand side of "
                          "the Stokes equation.");
+      prm.declare_entry ("Enable phase field", "false",
+                         Patterns::Bool (),
+                         "Whether to enable the phase field method to describe crack nucleation and "
+                         "propagation.");
       prm.declare_entry ("Enable prescribed dilation", "false",
                          Patterns::Bool (),
                          "Whether to include additional terms on the right-hand side of "
@@ -1835,6 +1839,7 @@ namespace aspect
 
       enable_additional_stokes_rhs = prm.get_bool ("Enable additional Stokes RHS");
       enable_elasticity = prm.get_bool("Enable elasticity");
+      enable_phase_field = prm.get_bool("Enable phase field");
       enable_prescribed_dilation = prm.get_bool("Enable prescribed dilation");
     }
     prm.leave_subsection ();
@@ -2224,6 +2229,8 @@ namespace aspect
             compositional_field_methods[i] = AdvectionFieldMethod::prescribed_field;
           else if (x_compositional_field_methods[i] == "prescribed field with diffusion")
             compositional_field_methods[i] = AdvectionFieldMethod::prescribed_field_with_diffusion;
+          else if (x_compositional_field_methods[i] == "phase field")
+            compositional_field_methods[i] = AdvectionFieldMethod::phase_field;
           else
             AssertThrow(false,ExcNotImplemented());
         }

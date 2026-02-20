@@ -19,6 +19,7 @@
 */
 
 #include <aspect/particle/manager.h>
+#include <aspect/particle/particle_domain.h>
 #include <aspect/global.h>
 #include <aspect/utilities.h>
 #include <aspect/simulator.h>
@@ -121,6 +122,25 @@ namespace aspect
     Manager<dim>::get_particle_handler()
     {
       return *particle_handler.get();
+    }
+
+
+
+    template <int dim>
+    bool Manager<dim>::particle_domains_requested() const
+    {
+      return (particle_domain_handler != nullptr);
+    }
+
+
+
+    template <int dim>
+    const ParticleDomainHandler<dim> &
+    Manager<dim>::get_particle_domain_handler() const
+    {
+      AssertThrow(particle_domain_handler != nullptr,
+                  ExcMessage("The particle domain handler has not been created."));
+      return *particle_domain_handler.get();
     }
 
 
@@ -994,6 +1014,10 @@ namespace aspect
       if (property_manager->need_update() == Property::update_time_step)
         update_particles();
 
+      // Generate particle domains if requested
+      if (particle_domain_handler != nullptr)
+        particle_domain_handler->generate_particle_domains();
+
       // Now that all particle information was updated, exchange the new
       // ghost particles.
       if (dealii::Utilities::MPI::n_mpi_processes(this->get_mpi_communicator()) > 1)
@@ -1165,6 +1189,26 @@ namespace aspect
                                "whether this transport is happening. This parameter is "
                                "deprecated and will be removed in the future. Ghost particle "
                                "updates are always performed. Please set the parameter to `true'.");
+            prm.declare_entry ("Generate particle domains", "false",
+                               Patterns::Bool(),
+                               "Whether to create particle domains, which are defined as the "
+                               "centroidal Voronoi tessellation with particles as generating "
+                               "seeds. ASPECT employs the open source code voro++ to generate "
+                               "the Voronoi tessellation. Please make sure that ASPECT is "
+                               "built with voro++ if you set this parameter to `true'.");
+            prm.declare_entry ("Generate face data for particle domains", "true",
+                               Patterns::Bool(),
+                               "Whether to generate the face data for particle domains. "
+                               "The face data includes the face measures and the neighbor "
+                               "particles of each Voronoi cell. This parameter is active "
+                               "only when `Generate particle domains' is set to true.");
+            prm.declare_entry ("Generate CPDI data for particle domains", "true",
+                               Patterns::Bool(),
+                               "Whether to generate the CPDI data for particle domains. "
+                               "The CPDI data includes the values and gradients of the "
+                               "CPDI weighting functions corresponding to relevant vertices "
+                               "of each Voronoi cell. This parameter is active only when "
+                               "`Generate particle domains' is set to true.");
 
             Generator::declare_parameters<dim>(prm);
             Integrator::declare_parameters<dim>(prm);
@@ -1324,6 +1368,27 @@ namespace aspect
             AssertThrow(false, ExcNotImplemented());
           }
 
+        const bool generate_particle_domains = prm.get_bool("Generate particle domains");
+#ifndef ASPECT_WITH_VORO
+        AssertThrow(create_particle_domains == false,
+                    ExcMessage("Particle domains can only be created when ASPECT is built with voro++."));
+#endif
+        if (generate_particle_domains)
+          {
+            const bool generate_face_data = prm.get_bool("Generate face data for particle domains");
+            const bool generate_cpdi_data = prm.get_bool("Generate CPDI data for particle doamins");
+#if DEAL_II_VERSION_GTE(9,8,0)
+            particle_domain_handler = std::make_unique<ParticleDomainHandler<dim>>(*particle_handler.get(),
+                                                                                   generate_face_data,
+                                                                                   generate_cpdi_data);
+#else
+            particle_domain_handler = std::make_unique<ParticleDomainHandler<dim>>(*particle_handler.get(),
+                                                                                   this->get_triangulation(),
+                                                                                   this->get_mapping(),
+                                                                                   generate_face_data,
+                                                                                   generate_cpdi_data);
+#endif
+          }
 
         this->get_computing_timer().enter_subsection("Particles: Initialization");
 

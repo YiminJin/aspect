@@ -87,6 +87,9 @@ namespace aspect
   class MeltHandler;
 
   template <int dim>
+  class PhaseFieldHandler;
+
+  template <int dim>
   class NewtonHandler;
 
   template <int dim>
@@ -1738,6 +1741,13 @@ namespace aspect
        * not even allocate it.
        */
       std::unique_ptr<MeltHandler<dim>> melt_handler;
+
+      /**
+       * Unique pointer for an instance of the PhaseFieldHandler. This way,
+       * if we do not need the machinery for doing phase-field stuff, we do
+       * not even allocate it.
+       */
+      std::unique_ptr<PhaseFieldHandler<dim>> phase_field_handler;
 
       /**
        * Unique pointer for an instance of the NewtonHandler. This way,

@@ -131,6 +131,7 @@ namespace aspect
   }
 
   template <int dim> class MeltHandler;
+  template <int dim> class PhaseFieldHandler;
   template <int dim> class VolumeOfFluidHandler;
 
   namespace MeshDeformation
@@ -536,6 +537,12 @@ namespace aspect
       const LinearAlgebra::BlockSparseMatrix &
       get_system_preconditioner_matrix () const;
 
+      /**
+       * Return a reference to the system right-hand side vector.
+       */
+      const LinearAlgebra::BlockVector &
+      get_system_rhs () const;
+
       /** @} */
 
 
@@ -804,6 +811,12 @@ namespace aspect
        */
       const MeltHandler<dim> &
       get_melt_handler () const;
+
+      /**
+       * Return a reference to the phase field handler.
+       */
+      const PhaseFieldHandler<dim> &
+      get_phase_field_handler () const;
 
       /**
        * Return a reference to the VolumeOfFluid handler.

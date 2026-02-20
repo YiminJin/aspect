@@ -58,6 +58,9 @@ namespace aspect
   {
     using namespace dealii::Particles;
 
+    template <int dim>
+    class ParticleDomainHandler;
+
     namespace Generator
     {
       template <int dim>
@@ -141,6 +144,18 @@ namespace aspect
          */
         Particles::ParticleHandler<dim> &
         get_particle_handler();
+
+        /**
+         * Whether the particle manager is requested to generate
+         * particle domains.
+         */
+        bool particle_domains_requested() const;
+
+        /**
+         * Get the particle domain handler for this particle manager.
+         */
+        const ParticleDomainHandler<dim> &
+        get_particle_domain_handler() const;
 
         /**
          * Copy the state of particle handler @p from_particle_handler into the
@@ -385,6 +400,12 @@ namespace aspect
          * each outer advection iteration.
          */
         Particles::ParticleHandler<dim> particle_handler_backup;
+
+        /**
+         * The particle domain handler generates a centroidal Voronoi
+         * tessellation based on the particles.
+         */
+        std::unique_ptr<ParticleDomainHandler<dim>> particle_domain_handler;
 
         /**
          * The property manager stores information about the additional

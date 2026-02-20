@@ -707,6 +707,15 @@ namespace aspect
   }
 
   template <int dim>
+  const PhaseFieldHandler<dim> &
+  SimulatorAccess<dim>::get_phase_field_handler () const
+  {
+    Assert (simulator->phase_field_handler.get() != nullptr,
+            ExcMessage("You can not call this function if phase field method is not enabled."));
+    return *(simulator->phase_field_handler);
+  }
+
+  template <int dim>
   const VolumeOfFluidHandler<dim> &
   SimulatorAccess<dim>::get_volume_of_fluid_handler () const
   {

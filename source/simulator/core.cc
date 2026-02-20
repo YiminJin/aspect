@@ -23,6 +23,7 @@
 #include <aspect/global.h>
 #include <aspect/utilities.h>
 #include <aspect/melt.h>
+#include <aspect/phase_field.h>
 #include <aspect/advection_field.h>
 #include <aspect/volume_of_fluid/handler.h>
 #include <aspect/newton.h>
@@ -182,6 +183,9 @@ namespace aspect
     melt_handler (parameters.include_melt_transport ?
                   std::make_unique<MeltHandler<dim>>(prm) :
                   nullptr),
+    phase_field_handler (parameters.enable_phase_field ?
+                         std::make_unique<PhaseFieldHandler<dim>>() :
+                         nullptr),
     newton_handler (Parameters<dim>::is_defect_correction(parameters.nonlinear_solver) ?
                     std::make_unique<NewtonHandler<dim>>() :
                     nullptr),
@@ -437,6 +441,14 @@ namespace aspect
 
         melt_handler->initialize_simulator (*this);
         melt_handler->initialize();
+      }
+
+    // Initialize the phase field handler
+    if (parameters.enable_phase_field)
+      {
+        phase_field_handler->initialize_simulator(*this);
+        phase_field_handler->parse_parameters(prm);
+        phase_field_handler->initialize();
       }
 
     // If the solver type is a Newton or defect correction type of solver, we need to set make sure
@@ -1225,6 +1237,12 @@ namespace aspect
                                              this_mpi_process(mpi_communicator));
           }
       }
+
+    // If the phase field method is enabled, we need to solve the phase field system
+    // with CPDI method, which couples more DoFs. So we let the phase field handler
+    // make its own sparsity pattern.
+    if (parameters.enable_phase_field)
+      phase_field_handler->make_sparsity_pattern(sp);
 
     sp.compress();
 
