@@ -82,8 +82,21 @@ namespace aspect
           parse_parameters(ParameterHandler &prm) override;
 
         private:
-      };
+          struct CompositionalIndices
+          {
+            unsigned int slip_rate;
+            std::vector<unsigned int> normal;
+            std::vector<unsigned int> stress;
 
+            CompositionalIndices()
+              : slip_rate(numbers::invalid_unsigned_int)
+              , normal(dim, numbers::invalid_unsigned_int)
+              , stress(SymmetricTensor<2, dim>::n_independent_components, numbers::invalid_unsigned_int)
+            {}
+          };
+
+          CompositionalIndices compositional_indices;
+      };
     }
   }
 }

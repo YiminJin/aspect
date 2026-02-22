@@ -247,6 +247,15 @@ namespace aspect
                                          ParameterHandler &)>  parse_additional_parameters;
 
     /**
+     * A signal that is called before assembling the Stokes system. This signal 
+     * allows for updating implicit constitutive variables to make them consistent
+     * with the current linearization point in nonlinear iterations. For example,
+     * the return-mapping procedure for plastic materials can be connected to this 
+     * signal.
+     */
+    boost::signals2::signal<void (const SimulatorAccess<dim> &)> pre_assemble_stokes_system;
+
+    /**
      * A signal that is triggered when the iterative Stokes solver (either
      * matrix-based or matrix-free) is done. The signal is not called when
      * using a direct solver because the kind of information passed on by this
