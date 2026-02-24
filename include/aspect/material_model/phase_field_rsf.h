@@ -52,6 +52,11 @@ namespace aspect
         bool
         is_compressible() const override;
 
+        SymmetricTensor<2, dim>
+        calculate_bulk_stress(const SymmetricTensor<2, dim> &strain_rate,
+                              const SymmetricTensor<2, dim> &stress_old,
+                              const std::vector<double> &volume_fractions) const;
+
         const Rheology::RateStateFriction<dim> &
         get_rate_state_friction_model() const;
         
@@ -65,6 +70,8 @@ namespace aspect
       private:
         void perform_return_mapping();
 
+        void update_history_states();
+
         double 
         calculate_creep_viscosity(const double               temperature,
                                   const std::vector<double> &volume_fractions) const;
@@ -72,12 +79,6 @@ namespace aspect
         double
         calculate_viscoelastic_viscosity(const double creep_viscosity,
                                          const double shear_modulus) const;
-
-        SymmetricTensor<2, dim>
-        calculate_bulk_stress(const SymmetricTensor<2, dim> &strain_rate,
-                              const SymmetricTensor<2, dim> &stress_old,
-                              const double                   creep_viscosity,
-                              const double                   shear_modulus) const;
 
         EquationOfState::MulticomponentIncompressible<dim> equation_of_state;
 
@@ -89,6 +90,7 @@ namespace aspect
           unsigned int slip_rate;
           unsigned int slip_state;
           unsigned int normal;
+          unsigned int slip_direction;
           unsigned int stress;
           std::vector<unsigned int> chemical_fields;
         };

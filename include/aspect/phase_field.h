@@ -201,6 +201,8 @@ namespace aspect
       energetic_degradation(const double               phase_field_value,
                             const std::vector<double> &volume_fractions) const;
 
+      const Particle::Manager<dim> &get_associated_particle_manager() const;
+
       static void declare_parameters(ParameterHandler &prm);
 
       void parse_parameters(ParameterHandler &prm);

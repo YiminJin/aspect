@@ -267,20 +267,16 @@ namespace aspect
                 ExcMessage("The phase field method requires particles to be included in the model. "
                            "Please add 'particles' to the list of postprocessors."));
 
-    if (this->get_parameters().mapped_particle_properties.size() == 0)
+    AssertThrow(this->get_parameters().mapped_particle_properties.size() > 0,
+                ExcMessage("The phase field method requires a map between compositional fields and particle properties"));
+
+    for (unsigned int i = 0; i < this->n_particle_managers(); ++i)
       {
-        particle_manager = &this->get_particle_manager(0);
-      }
-    else
-      {
-        for (unsigned int i = 0; i < this->n_particle_managers(); ++i)
+        const Particle::Manager<dim> &manager = this->get_particle_manager(i);
+        if (manager.get_property_manager().get_data_info().fieldname_exists("crack_driving_force"))
           {
-            const Particle::Manager<dim> &manager = this->get_particle_manager(i);
-            if (manager.get_property_manager().get_data_info().fieldname_exists("crack_driving_force"))
-              {
-                particle_manager = &manager;
-                break;
-              }
+            particle_manager = &manager;
+            break;
           }
       }
     AssertThrow(particle_manager != nullptr, 
@@ -331,27 +327,18 @@ namespace aspect
     const auto &particle_data_info = particle_manager.get_property_manager().get_data_info();
     particle_data_positions.crack_driving_force = particle_data_info.get_position_by_field_name("crack_driving_force");
 
-    const std::vector<unsigned int> &chemical_field_indices = introspection.chemical_composition_field_indices();
     particle_data_positions.chemical_fields.clear();
-    if (parameters.mapped_particle_properties.size() > 0)
+    for (const unsigned int index : introspection.chemical_composition_field_indices())
       {
-        for (const auto &property : parameters.mapped_particle_properties)
-          if (std::find(chemical_field_indices.begin(), chemical_field_indices.end(), property.first) 
-              != chemical_field_indices.end())
-            particle_data_positions.chemical_fields.push_back(particle_data_info.get_position_by_field_name(property.second.first));
+        AssertThrow(parameters.compositional_field_methods[index] == Parameters<dim>::AdvectionFieldMethod::particles,
+                    ExcMessage("The phase field method requires all the chemical composition fields to be advected "
+                               "by particles."));
+        const std::string &property_name = parameters.mapped_particle_properties.find(index)->second.first;
+        AssertThrow(particle_data_info.fieldname_exists(property_name),
+                    ExcMessage("The phase field method requires all the chemical composition fields to be in the "
+                               "same particle set as the crack driving force."));
+        particle_data_positions.chemical_fields.push_back(particle_data_info.get_position_by_field_name(property_name));
       }
-    else
-      {
-        for (unsigned int i = 0; i < chemical_field_indices.size(); ++i)
-          {
-            const unsigned int property_index = std::count(introspection.compositional_field_methods.begin(),
-                                                           introspection.compositional_field_methods.begin() + chemical_field_indices[i],
-                                                           Parameters<dim>::AdvectionFieldMethod::particles);
-            particle_data_positions.chemical_fields.push_back(particle_data_info.get_position_by_field_index(property_index));
-          }
-      }
-    AssertThrow(particle_data_positions.chemical_fields.size() == chemical_field_indices.size(),
-                ExcMessage("The phase field method requires all the chemical composition fields to be advected by particles."));
   }
 
 

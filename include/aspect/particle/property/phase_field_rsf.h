@@ -96,6 +96,19 @@ namespace aspect
           };
 
           CompositionalIndices compositional_indices;
+
+          struct DataPositionCache
+          {
+            unsigned int crack_driving_force;
+            unsigned int slip_rate;
+            unsigned int slip_state;
+            unsigned int normal;
+            unsigned int slip_direction;
+            unsigned int stress;
+            std::vector<unsigned int> chemical_fields;
+          };
+
+          DataPositionCache data_position_cache;
       };
     }
   }

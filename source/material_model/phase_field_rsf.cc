@@ -44,34 +44,34 @@ namespace aspect
                              "the elasticity is not handled by MaterialModel::Rheology::Elasticity. Please set "
                              "<Formulation/Enable elasticity> to false."));
 
-      // Find the particle manager handling the crack driving force
-      // The existance of the map from compositional index to particle property 
-      // is checked by Particle::Property::PhaseFieldRSF
-      for (unsigned int i = 0; i < this->n_particle_managers(); ++i)
-        {
-          Particle::Manager<dim> &manager = this->get_particle_manager(i);
-          if (manager.get_property_manager().get_data_info().fieldname_exists("crack_driving_force"))
-            {
-              particle_manager = &manager;
-              break;
-            }
-        }
-      AssertThrow(particle_manager != nullptr, ExcInternalError());
-
       // Initialize the particle data positions
-      const auto &particle_data_info = particle_manager->get_property_manager().get_data_info();
+      const auto &particle_data_info = this->get_phase_field_handler().get_associated_particle_manager().get_property_manager().get_data_info();
 
       particle_data_positions.crack_driving_force = particle_data_info.get_position_by_field_name("crack_driving_force");
       particle_data_positions.slip_rate           = particle_data_info.get_position_by_field_name("slip_rate");
       particle_data_positions.slip_state          = particle_data_info.get_position_by_field_name("slip_state");
       particle_data_positions.normal              = particle_data_info.get_position_by_field_name("normal");
+      particle_data_positions.slip_direction      = particle_data_info.get_position_by_field_name("slip_direction");
       particle_data_positions.stress              = particle_data_info.get_position_by_field_name("stress");
 
-      // TODO
+      particle_data_positions.chemical_fields.clear();
+      for (const unsigned int index : this->introspection().chemical_composition_field_indices())
+        particle_data_positions.chemical_fields.push_back(
+          particle_data_info.get_position_by_field_name(this->get_parameters().mapped_particle_properties.find(index)->second.first));
+
+      // Perform return mapping before assembling the Stokes system
       this->get_signals().pre_assemble_stokes_system.connect(
         [&](const SimulatorAccess<dim> &)
       {
         this->perform_return_mapping();
+      });
+
+      // Update the history states (slip state, fault normal and stress) after the
+      // nonlinear iterations
+      this->get_signals().post_nonlinear_solver.connect(
+        [&](const SolverControl &)
+      {
+        this->update_history_states();
       });
     }
 
@@ -114,6 +114,7 @@ namespace aspect
           out.entropy_derivative_pressure[i] = MaterialUtilities::average_value(volume_fractions, eos_outputs.entropy_derivative_pressure, MaterialUtilities::arithmetic);
           out.entropy_derivative_temperature[i] = MaterialUtilities::average_value(volume_fractions, eos_outputs.entropy_derivative_temperature, MaterialUtilities::arithmetic);
 
+          
         }
     }
   }
