@@ -53,7 +53,8 @@ namespace aspect
         is_compressible() const override;
 
         SymmetricTensor<2, dim>
-        calculate_bulk_stress(const SymmetricTensor<2, dim> &strain_rate,
+        calculate_bulk_stress(const double                   temperature,
+                              const SymmetricTensor<2, dim> &strain_rate,
                               const SymmetricTensor<2, dim> &stress_old,
                               const std::vector<double> &volume_fractions) const;
 
@@ -79,6 +80,22 @@ namespace aspect
         double
         calculate_viscoelastic_viscosity(const double creep_viscosity,
                                          const double shear_modulus) const;
+
+        SymmetricTensor<2, dim>
+        calculate_bulk_stress(const double                   creep_viscosity,
+                              const double                   shear_modulus,
+                              const SymmetricTensor<2, dim> &strain_rate,
+                              const SymmetricTensor<2, dim> &stress_old) const;
+
+        double 
+        calculate_friction_coefficient(const double               slip_rate,
+                                       const double               slip_state,
+                                       const std::vector<double> &volume_fractions) const;
+
+        double
+        calculate_friction_coefficient_derivative(const double               slip_rate,
+                                                  const double               slip_state,
+                                                  const std::vector<double> &volume_fractions) const;
 
         EquationOfState::MulticomponentIncompressible<dim> equation_of_state;
 

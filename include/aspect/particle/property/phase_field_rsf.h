@@ -35,11 +35,6 @@ namespace aspect
         public SimulatorAccess<dim>
       {
         public:
-          /**
-           * Constructor.
-           */
-          PhaseFieldRSF();
-
           void initialize() override;
 
           /**
@@ -73,13 +68,6 @@ namespace aspect
            */
           std::vector<std::pair<std::string, unsigned int>>
           get_property_information() const override;
-
-          static
-          void
-          declare_parameters(ParameterHandler &prm);
-
-          void
-          parse_parameters(ParameterHandler &prm) override;
 
         private:
           struct CompositionalIndices

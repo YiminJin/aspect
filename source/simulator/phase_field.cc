@@ -663,6 +663,18 @@ namespace aspect
             }
         }
   }
+
+
+
+  template <int dim>
+  const Particle::Manager<dim> &
+  PhaseFieldHandler<dim>::get_associated_particle_manager() const
+  {
+    Assert(particle_manager != nullptr, 
+           ExcMessage("The pointer to the associated particle manager has not been initiated."));
+
+    return *particle_manager;
+  }
 }
 
 // explicit instantiations

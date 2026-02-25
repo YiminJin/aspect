@@ -169,7 +169,8 @@ namespace aspect
               &particle_properties[data_position_cache.stress],
               &particle_properties[data_position_cache.stress] + SymmetricTensor<2, dim>::n_independent_components);
 
-            const SymmetricTensor<2, dim> tau_b = material_model.calculate_bulk_stress(symmetrize(L), tau_old, volume_fractions);
+            const double T = inputs.solution[p][this->introspection().component_indices.temperature];
+            const SymmetricTensor<2, dim> tau_b = material_model.calculate_bulk_stress(T, symmetrize(L), tau_old, volume_fractions);
 
             // Compute the normal and shear stress on the fault plane
             const Tensor<1, dim> t = tau_b * n;
