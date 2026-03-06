@@ -56,12 +56,49 @@ namespace aspect
                                const ComponentMask &selected_properties,
                                const typename parallel::distributed::Triangulation<dim>::active_cell_iterator &cell) const override;
 
+          /**
+           * Declare the parameters this class takes through input files.
+           */
+          static void declare_parameters(ParameterHandler &prm);
+
+          /**
+           * Read the parameters this class declares from the parameter file.
+           */
+          void parse_parameters(ParameterHandler &prm) override;
+
         private:
+          /**
+           * Compute the weight according to the distance between the particle
+           * and the target point, the interpolation range and the
+           * regularization parameter.
+           */
+          double compute_weight(const double distance,
+                                const double interpolation_range,
+                                const double regularization_parameter) const;
+
           /**
            * Cached information that stores information about the grid so that we
            * do not need to recompute it every time properties_at_points() is called.
            */
           std::unique_ptr<GridTools::Cache<dim>> grid_cache;
+
+          /**
+           * The type of weight in the distance weighted average interpolation.
+           */
+          enum WeightType
+          {
+            linear,
+            reciprocal,
+            squared_reciprocal,
+            modified_shephard
+          };
+
+          WeightType weight_type;
+
+          /**
+           * The regularization factor that prevents one-point dominance.
+           */
+          double regularization_factor;
       };
     }
   }

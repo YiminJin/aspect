@@ -33,9 +33,17 @@ namespace aspect
       slip_state (const double V,
                   const double theta_old) const
       {
-        const double dt = this->get_timestep();
-        const double tmp = std::exp(-V * dt / Dc);
-        return Dc / V * (1.0 - tmp) + theta_old * tmp;
+        AssertThrow(V >= 0, ExcMessage("The slip rate is negative."));
+        AssertThrow(theta_old > 0, ExcMessage("The slip state is non-positive."));
+
+        if (this->get_timestep_number() == 0)
+          return theta_old;
+
+        const double V_eff = std::max(V, V_min);
+        const double dt    = this->get_timestep();
+        const double ratio = std::exp(-V * dt / Dc);
+
+        return Dc / V_eff * (1.0 - ratio) + theta_old * ratio;
       }
 
 
@@ -49,10 +57,10 @@ namespace aspect
                             const bool regularized) const
       {
         AssertIndexRange(j, mu0.size());
-        AssertThrow(theta > 0, ExcMessage("The slip state is non-positive."));
         AssertThrow(V >= 0, ExcMessage("The slip rate is negative."));
+        AssertThrow(theta > 0, ExcMessage("The slip state is non-positive."));
 
-        const double V_eff = std::sqrt(V * V + V_min * V_min);
+        const double V_eff = std::max(V, V_min);
         double mu = numbers::signaling_nan<double>();
         if (regularized)
           mu = a[j] * std::asinh(V_eff / (2.0 * V0) * std::exp((mu0[j] + b[j] * std::log(theta * V0 / Dc)) / a[j]));
@@ -105,8 +113,9 @@ namespace aspect
       RateStateFriction<dim>::
       parse_parameters (ParameterHandler &prm)
       {
-        V0 = prm.get_double("Reference slip rate");
-        Dc = prm.get_double("Characteristic slip distance");
+        V0    = prm.get_double("Reference slip rate");
+        V_min = prm.get_double("Minimum slip rate");
+        Dc    = prm.get_double("Characteristic slip distance");
 
         // Retrieve the list of composition names
         std::vector<std::string> compositional_field_names = this->introspection().get_composition_names();

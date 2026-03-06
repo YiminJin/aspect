@@ -1346,11 +1346,13 @@ namespace aspect
     class ImplicitConstitutiveOutputs : public AdditionalMaterialOutputs<dim>
     {
       public:
-        ImplicitConstitutiveOutputs(const unsigned int n_points)
-          : tangent_operators_wrt_strain_rate(n_points, numbers::signaling_nan<SymmetricTensor<4, dim>>())
-          , tangent_operators_wrt_pressure(n_points, numbers::signaling_nan<SymmetricTensor<2, dim>>())
-          , consistent_deviatoric_stresses(n_points, numbers::signaling_nan<SymmetricTensor<2, dim>>())
-          , equivalent_viscosities(n_points, numbers::signaling_nan<double>())
+        ImplicitConstitutiveOutputs(const unsigned int n_points,
+                                    const unsigned int n_stokes_dofs,
+                                    const bool require_equivalent_viscosity)
+          : linearized_stress_terms(n_points, std::vector<SymmetricTensor<2, dim>>(
+              n_stokes_dofs, numbers::signaling_nan<SymmetricTensor<2, dim>>()))
+          , deviatoric_stresses(n_points, numbers::signaling_nan<SymmetricTensor<2, dim>>())
+          , equivalent_viscosities(require_equivalent_viscosity? n_points : 0, numbers::signaling_nan<double>())
         {}
 
         ~ImplicitConstitutiveOutputs() override
@@ -1366,14 +1368,26 @@ namespace aspect
         }
 
         /**
-         * The derivative of deviatoric stress with respect to strain rate.
+         * A table storing the linearized stress terms to be tested by the 
+         * symmetric gradients of the velocity shape functions. Technically, it
+         * can be expressed by
+         * @f[
+         *   \frac{\partial\boldsymbol{\tau}}{\partial\boldsymbol{\varepsilon}}
+         *   : \nabla_S\boldsymbol{\varphi}_I^v +
+         *   \frac{\partial\boldsymbol{\tau}}{\partial p}\varphi_I^p,
+         * @f]
+         * where $\nabla_S\boldsymbol{\varphi}_I^v$ and $\varphi_I^p$ denote
+         * the symmetric gradient of the velocity shape function and the value
+         * of the pressure shape function, respectively.
+         *
+         * The reason for the multiplication between the tangent operator and
+         * the shape function to be performed by the material model rather than
+         * the assembler is that: if the return-mapping is performed on
+         * particles, then the multiplication should also be evaluated at 
+         * particles, not quadrature points. We let the material model decide 
+         * how to map this quantity from particles to quadrature points.
          */
-        std::vector<SymmetricTensor<4, dim>> tangent_operators_wrt_strain_rate;
-
-        /**
-         * The derivative of deviatoric stress with respect to pressure.
-         */
-        std::vector<SymmetricTensor<2, dim>> tangent_operators_wrt_pressure;
+        std::vector<std::vector<SymmetricTensor<2, dim>>> linearized_stress_terms;
 
         /**
          * The deviatoric stress consistent to the constitutive relation
@@ -1381,7 +1395,7 @@ namespace aspect
          * ``real'' physical meaning, but belongs to an intermediate state
          * resulting from return mapping.
          */
-        std::vector<SymmetricTensor<2, dim>> consistent_deviatoric_stresses;
+        std::vector<SymmetricTensor<2, dim>> deviatoric_stresses;
 
         /**
          * The equivalent scalar viscosity required by thee Schur complement 

@@ -443,14 +443,6 @@ namespace aspect
         melt_handler->initialize();
       }
 
-    // Initialize the phase field handler
-    if (parameters.enable_phase_field)
-      {
-        phase_field_handler->initialize_simulator(*this);
-        phase_field_handler->parse_parameters(prm);
-        phase_field_handler->initialize();
-      }
-
     // If the solver type is a Newton or defect correction type of solver, we need to set make sure
     // assemble_newton_stokes_system set to true.
     if (Parameters<dim>::is_defect_correction(parameters.nonlinear_solver))
@@ -501,6 +493,14 @@ namespace aspect
             particle_managers[particle_manager_index].parse_parameters(prm,particle_manager_index);
             particle_managers[particle_manager_index].initialize();
           }
+      }
+
+    // Initialize the phase field handler
+    if (parameters.enable_phase_field)
+      {
+        phase_field_handler->initialize_simulator(*this);
+        phase_field_handler->parse_parameters(prm);
+        phase_field_handler->initialize();
       }
 
     mesh_refinement_manager.initialize_simulator (*this);
@@ -602,6 +602,8 @@ namespace aspect
     // now that all member variables have been set up, also
     // connect the functions that will actually do the assembly
     set_assemblers();
+
+    signals.post_simulator_initialization(*this);
 
     computing_timer.leave_subsection("Initialization");
   }
@@ -950,6 +952,7 @@ namespace aspect
           case Parameters<dim>::AdvectionFieldMethod::fem_melt_field:
           case Parameters<dim>::AdvectionFieldMethod::fem_darcy_field:
           case Parameters<dim>::AdvectionFieldMethod::prescribed_field_with_diffusion:
+          case Parameters<dim>::AdvectionFieldMethod::phase_field:
             return true;
           case Parameters<dim>::AdvectionFieldMethod::particles:
           case Parameters<dim>::AdvectionFieldMethod::volume_of_fluid:

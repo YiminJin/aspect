@@ -68,8 +68,6 @@ namespace aspect
               ++i;
             }
 
-          const SymmetricTensor<4, dim> &tangent_operator_wrt_strain_rate 
-            = implicit_constitutive_outputs->tangent_operators_wrt_strain_rate[q];
           const double one_over_eta = 1. / implicit_constitutive_outputs->equivalent_viscosities[q];
 
           const double JxW = scratch.finite_element_values.JxW(q);
@@ -79,8 +77,7 @@ namespace aspect
               if (scratch.dof_component_indices[i] ==
                   scratch.dof_component_indices[j])
                 data.local_matrix(i, j) += ( scratch.grads_phi_u[i]
-                                             * tangent_operator_wrt_strain_rate 
-                                             * scratch.grads_phi_u[j]
+                                             * implicit_constitutive_outputs->linearized_stress_terms[q][j]
                                              // bottom right block: approximate the
                                              // pressure Schur complement by the
                                              // pressure mass matrix.
@@ -100,8 +97,10 @@ namespace aspect
     create_additional_material_model_outputs(MaterialModel::MaterialModelOutputs<dim> &outputs) const
     {
       const unsigned int n_points = outputs.densities.size();
+      const unsigned int n_stokes_dofs = this->get_fe().base_element(this->introspection().base_elements.velocities).dofs_per_cell * dim +
+                                         this->get_fe().base_element(this->introspection().base_elements.pressure).dofs_per_cell;
       if (outputs.template has_additional_output_object<MaterialModel::ImplicitConstitutiveOutputs<dim>>() == false)
-        outputs.additional_outputs.push_back(std::make_unique<MaterialModel::ImplicitConstitutiveOutputs<dim>>(n_points));
+        outputs.additional_outputs.push_back(std::make_unique<MaterialModel::ImplicitConstitutiveOutputs<dim>>(n_points, n_stokes_dofs, true));
     }
 
 
@@ -130,14 +129,9 @@ namespace aspect
       const std::shared_ptr<const MaterialModel::AdditionalMaterialOutputsStokesRHS<dim>> force
         = scratch.material_model_outputs.template get_additional_output_object<MaterialModel::AdditionalMaterialOutputsStokesRHS<dim>>();
 
-      // An array of symmetric tensors storing linearized stress terms, i.e.
-      // D_eps : symgrad(phi^u_j) + D_p phi^p_j
-      std::vector<SymmetricTensor<2, dim>> linearized_stress_terms(scratch.rebuild_stokes_matrix ? stokes_dofs_per_cell : 0);
-
       for (unsigned int q = 0; q < n_q_points; ++q)
         {
-          // Get the values and gradients of the shape functions, and pre-compute the
-          // linearized stress terms
+          // Get the values and gradients of the shape functions
           for (unsigned int i = 0, i_stokes = 0; i_stokes < stokes_dofs_per_cell; /*increment at end of loop*/)
             {
               if (introspection.is_stokes_component(fe.system_to_component_index(i).first))
@@ -149,16 +143,13 @@ namespace aspect
                     {
                       scratch.grads_phi_u[i_stokes] = scratch.finite_element_values[introspection.extractors.velocities].symmetric_gradient(i, q);
                       scratch.div_phi_u[i_stokes]   = scratch.finite_element_values[introspection.extractors.velocities].divergence(i, q);
-
-                      linearized_stress_terms[i_stokes] = implicit_constitutive_outputs->tangent_operators_wrt_strain_rate[q] * scratch.grads_phi_u[i_stokes]
-                                                          + implicit_constitutive_outputs->tangent_operators_wrt_pressure[q] * scratch.phi_p[i_stokes];
                     }
                   ++i_stokes;
                 }
               ++i;
             }
 
-          const SymmetricTensor<2, dim> &consistent_deviatoric_stress = implicit_constitutive_outputs->consistent_deviatoric_stresses[q];
+          const SymmetricTensor<2, dim> &deviatoric_stress = implicit_constitutive_outputs->deviatoric_stresses[q];
 
           const Tensor<1, dim> gravity = gravity_model.gravity_vector(scratch.finite_element_values.quadrature_point(q));
           const double density = scratch.material_model_outputs.densities[q];
@@ -169,7 +160,7 @@ namespace aspect
 
           for (unsigned int i = 0; i < stokes_dofs_per_cell; ++i)
             {
-              data.local_rhs(i) -= ( scratch.grads_phi_u[i] * consistent_deviatoric_stress
+              data.local_rhs(i) -= ( scratch.grads_phi_u[i] * deviatoric_stress
                                      - scratch.div_phi_u[i] * pressure
                                      - scratch.phi_p[i] * pressure_scaling * velocity_divergence
                                      - (scratch.phi_u[i] * gravity) * density
@@ -183,7 +174,8 @@ namespace aspect
               if (scratch.rebuild_stokes_matrix)
                 for (unsigned int j = 0; j < stokes_dofs_per_cell; ++j)
                   {
-                    data.local_matrix(i, j) += ( scratch.grads_phi_u[i] * linearized_stress_terms[j]
+                    data.local_matrix(i, j) += ( scratch.grads_phi_u[i] 
+                                                 * implicit_constitutive_outputs->linearized_stress_terms[q][j]
                                                  // assemble \nabla p as -(p, div v):
                                                  - (pressure_scaling *
                                                     scratch.div_phi_u[i] * scratch.phi_p[j])
@@ -208,7 +200,11 @@ namespace aspect
       const unsigned int n_points = outputs.densities.size();
 
       if (outputs.template has_additional_output_object<MaterialModel::ImplicitConstitutiveOutputs<dim>>() == false)
-        outputs.additional_outputs.push_back(std::make_unique<MaterialModel::ImplicitConstitutiveOutputs<dim>>(n_points));
+        {
+          const unsigned int n_stokes_dofs = this->get_fe().base_element(this->introspection().base_elements.velocities).dofs_per_cell +
+                                             this->get_fe().base_element(this->introspection().base_elements.pressure).dofs_per_cell;
+          outputs.additional_outputs.push_back(std::make_unique<MaterialModel::ImplicitConstitutiveOutputs<dim>>(n_points, n_stokes_dofs, false));
+        }
 
       if (this->get_parameters().enable_additional_stokes_rhs &&
           outputs.template has_additional_output_object<MaterialModel::AdditionalMaterialOutputsStokesRHS<dim>>() == false)

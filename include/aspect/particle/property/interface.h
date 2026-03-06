@@ -330,7 +330,14 @@ namespace aspect
          * updated over time its update function is called as usual, if not
          * the property will remain zero throughout the model run.
          */
-        initialize_to_zero
+        initialize_to_zero,
+
+        /**
+         * Use the custom function of the particle property plugin to
+         * initialize the properties. Plugins using this method must
+         * override the virtual function initialize_late_particle.
+         */
+        custom
       };
 
       /**
@@ -360,6 +367,16 @@ namespace aspect
           void
           initialize_one_particle_property (const Point<dim> &position,
                                             std::vector<double> &particle_properties) const;
+
+          /**
+           * Initialize the properties of particles that are added later than
+           * the initial particle creation, e.g. to improve the loacd balance
+           * or to prevent empty cells.
+           */
+          virtual
+          std::vector<double>
+          initialize_late_particle(const Point<dim> &particle_location,
+                                   const typename Triangulation<dim>::active_cell_iterator &cell = typename Triangulation<dim>::active_cell_iterator()) const;
 
           /**
            * Update function. This function is called every time an update is

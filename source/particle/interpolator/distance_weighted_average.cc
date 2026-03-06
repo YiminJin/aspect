@@ -29,17 +29,6 @@ namespace aspect
   {
     namespace Interpolator
     {
-      namespace internal
-      {
-        double weight (const double distance, const double interpolation_range)
-        {
-          // linear weight function (hat function)
-          return std::max(1.0 - (distance/interpolation_range),0.0);
-        }
-      }
-
-
-
       template <int dim>
       void
       DistanceWeightedAverage<dim>::initialize()
@@ -91,6 +80,7 @@ namespace aspect
         // TODO: This could be made dependent on the number of particles per cell, the more
         // particles, the smaller the interpolation range to increase accuracy.
         const double interpolation_range = 0.5 * cell->diameter();
+        const double epsilon = regularization_factor * interpolation_range;
 
         std::vector<double> integrated_weight(n_interpolate_positions,0.0);
 
@@ -107,7 +97,7 @@ namespace aspect
                 for (const auto &interpolation_point: positions)
                   {
                     const double distance = particle.get_location().distance(interpolation_point);
-                    const double weight = internal::weight(distance, interpolation_range);
+                    const double weight = compute_weight(distance, interpolation_range, epsilon);
 
                     for (unsigned int index_properties = 0; index_properties < particle_properties.size(); ++index_properties)
                       if (selected_properties[index_properties])
@@ -129,6 +119,98 @@ namespace aspect
           }
 
         return cell_properties;
+      }
+
+
+
+        template <int dim>
+        double
+        DistanceWeightedAverage<dim>::compute_weight(const double distance, 
+                                                     const double interpolation_range,
+                                                     const double epsilon) const
+        {
+          switch (weight_type)
+            {
+              case DistanceWeightedAverage<dim>::linear:
+                return std::max(1.0 - (distance / interpolation_range), 0.0);
+              case DistanceWeightedAverage<dim>::reciprocal:
+                return (distance < interpolation_range ? 1.0 / (distance + epsilon) : 0.0);
+              case DistanceWeightedAverage<dim>::squared_reciprocal:
+                return (distance < interpolation_range ? 1.0 / (distance * distance + epsilon * epsilon) : 0.0);
+              case DistanceWeightedAverage<dim>::modified_shephard:
+                return (distance < interpolation_range ? 
+                        Utilities::fixed_power<2, double>((1.0 - (distance * distance / (interpolation_range * interpolation_range)))) 
+                        / (distance * distance + epsilon * epsilon) : 
+                        0.0);
+              default:
+                Assert(false, ExcNotImplemented());
+            }
+
+          return numbers::signaling_nan<double>();
+        }
+
+
+
+      template <int dim>
+      void
+      DistanceWeightedAverage<dim>::declare_parameters(ParameterHandler &prm)
+      {
+        prm.enter_subsection("Interpolator");
+        {
+          prm.enter_subsection("Distance weighted average");
+          {
+            prm.declare_entry("Weight type", "linear",
+                              Patterns::Selection("linear|reciprocal|squared reciprocal|modified shephard"),
+                              "Weight type in the distance weighted average interpolation. "
+                              "The options are:\n"
+                              "`linear': $w = 1 - (d / r)$;\n"
+                              "`reciprocal': $w = \\frac{1}{(1 + e)r}$;\n"
+                              "`squared reciprocal': $w = \\frac{1}{(1 + e^2)r^2}$;\n"
+                              "`modified shephard': $w = \\frac{(1 - (d / r)^2)^2}{(1 + e^2)r^2}$.\n"
+                              "In the above expressions, $d$ is the distance between the particle and the "
+                              "target point, $r$ is half of the diameter of the host cell, and $e$ is "
+                              "the distance regularization factor. If $r > h$, then the weight is zero.");
+            prm.declare_entry("Distance regularization factor", "0.1",
+                              Patterns::Double(0),
+                              "If `reciprocal', `squared reciprocal' or `modified shephard' is selected as "
+                              "the weight type, then we need to regularize the denominator to prevent "
+                              "one-point dominance. This parameter is the ratio between the regularization "
+                              "parameter and the interpolation range (half of the diameter of the host cell). "
+                              "The larger this parameter is, the smoother (and more diffusive) the interpolation "
+                              "will be.");
+          }
+          prm.leave_subsection();
+        }
+        prm.leave_subsection();
+      }
+
+
+
+      template <int dim>
+      void
+      DistanceWeightedAverage<dim>::parse_parameters(ParameterHandler &prm)
+      {
+        prm.enter_subsection("Interpolator");
+        {
+          prm.enter_subsection("Distance weighted average");
+          {
+            const std::string type = prm.get("Weight type");
+            if (type == "linear")
+              weight_type = linear;
+            else if (type == "reciprocal")
+              weight_type = reciprocal;
+            else if (type == "squared reciprocal")
+              weight_type = squared_reciprocal;
+            else if (type == "modified shephard")
+              weight_type = modified_shephard;
+            else
+              AssertThrow(false, ExcNotImplemented());
+
+            regularization_factor = prm.get_double("Distance regularization factor");
+          }
+          prm.leave_subsection();
+        }
+        prm.leave_subsection();
       }
     }
   }

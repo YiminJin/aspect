@@ -77,6 +77,15 @@ namespace aspect
     edit_finite_element_variables;
 
     /**
+     * A signal that is called at the end of the constructor of the Simulator
+     * class.
+     *
+     * The functions (slots) that can attach to this signal need to take one
+     * argument: A SimulatorAccess object that describes the simulator.
+     */
+    boost::signals2::signal<void (const SimulatorAccess<dim> &)> post_simulator_initialization;
+
+    /**
      * A signal that is called before setting up the initial conditions.
      *
      * The functions (slots) that can attach to this signal need to take one

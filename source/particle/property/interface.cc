@@ -216,6 +216,21 @@ namespace aspect
 
 
 
+      template <int dim>
+      std::vector<double>
+      Interface<dim>::initialize_late_particle(const Point<dim> &/*position*/,
+                                               const typename Triangulation<dim>::active_cell_iterator &/*cell*/) const
+      {
+        AssertThrow(false,
+                    ExcMessage("Particle property plugins using 'custom' method for "
+                               "initializing late particles must override the virtual "
+                               "function initialize_late_particle."));
+
+        return {};
+      }
+
+
+
       DEAL_II_DISABLE_EXTRA_DIAGNOSTICS
       template <int dim>
       void
@@ -635,6 +650,12 @@ namespace aspect
                         }
                     }
 
+                  break;
+                }
+
+                case custom:
+                {
+                  particle_properties = p->initialize_late_particle(particle_location, cell);
                   break;
                 }
 

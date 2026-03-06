@@ -23,6 +23,7 @@
 
 #include <aspect/simulator_access.h>
 #include <aspect/phase_field.h>
+#include <aspect/solution_evaluator.h>
 #include <aspect/material_model/interface.h>
 #include <aspect/material_model/equation_of_state/multicomponent_incompressible.h>
 #include <aspect/material_model/rheology/rate_state_friction.h>
@@ -52,14 +53,17 @@ namespace aspect
         bool
         is_compressible() const override;
 
-        SymmetricTensor<2, dim>
-        calculate_bulk_stress(const double                   temperature,
-                              const SymmetricTensor<2, dim> &strain_rate,
-                              const SymmetricTensor<2, dim> &stress_old,
-                              const std::vector<double> &volume_fractions) const;
-
         const Rheology::RateStateFriction<dim> &
         get_rate_state_friction_model() const;
+
+        bool
+        is_inside_fault_band(const double phase_field) const;
+
+        double
+        calculate_friction_strength(const Point<dim>          &position,
+                                    const double               slip_rate,
+                                    const double               slip_state,
+                                    const std::vector<double> &volume_fractions) const;
         
         static
         void
@@ -69,6 +73,8 @@ namespace aspect
         parse_parameters(ParameterHandler &prm) override;
 
       private:
+        void initialize_particle_data_info();
+
         void perform_return_mapping();
 
         void update_history_states();
@@ -82,10 +88,10 @@ namespace aspect
                                          const double shear_modulus) const;
 
         SymmetricTensor<2, dim>
-        calculate_bulk_stress(const double                   creep_viscosity,
-                              const double                   shear_modulus,
-                              const SymmetricTensor<2, dim> &strain_rate,
-                              const SymmetricTensor<2, dim> &stress_old) const;
+        calculate_deviatoric_stress(const SymmetricTensor<2, dim> &strain_rate,
+                                    const SymmetricTensor<2, dim> &old_stress,
+                                    const double                   creep_viscosity,
+                                    const double                   shear_modulus) const;
 
         double 
         calculate_friction_coefficient(const double               slip_rate,
@@ -106,9 +112,10 @@ namespace aspect
           unsigned int crack_driving_force;
           unsigned int slip_rate;
           unsigned int slip_state;
-          unsigned int normal;
+          unsigned int normal_direction;
           unsigned int slip_direction;
-          unsigned int stress;
+          unsigned int bulk_stress;
+          unsigned int interface_stress;
           std::vector<unsigned int> chemical_fields;
         };
 
@@ -145,6 +152,12 @@ namespace aspect
         std::vector<double> radiation_damping_coefficients;
 
         Particle::Manager<dim> *particle_manager;
+
+        std::unique_ptr<SolutionEvaluator<dim>> evaluator;
+
+        std::vector<EvaluationFlags::EvaluationFlags> evaluation_flags;
+
+        unsigned int phase_field_component_index;
     };
   }
 }

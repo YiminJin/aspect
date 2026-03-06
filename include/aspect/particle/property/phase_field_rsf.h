@@ -52,6 +52,13 @@ namespace aspect
                                      typename ParticleHandler<dim>::particle_iterator_range &particles) const override;
 
           /**
+           * @copydoc aspect::Particle::Property::Interface::initialize_late_particle()
+           */
+          std::vector<double>
+          initialize_late_particle(const Point<dim> &particle_location,
+                                   const typename Triangulation<dim>::active_cell_iterator &cell) const override;
+
+          /**
            * @copydoc aspect::Particle::Property::Interface::need_update()
            */
           UpdateTimeFlags
@@ -64,23 +71,47 @@ namespace aspect
           get_update_flags(const unsigned int component) const override;
 
           /**
+           * @copydoc aspect::Particle::Property::Interface::late_initialization_mode()
+           */
+          InitializationModeForLateParticles
+          late_initialization_mode() const override;
+
+          /**
            * @copydoc aspect::Particle::Property::Interface::get_property_information()
            */
           std::vector<std::pair<std::string, unsigned int>>
           get_property_information() const override;
 
+          /**
+           * Declare the parameters this class takes through input files.
+           */
+          static void declare_parameters(ParameterHandler &prm);
+
+          /**
+           * Read the parameters this class declares from the parameter file.
+           */
+          void parse_parameters(ParameterHandler &prm) override;
+
         private:
+          double
+          get_phase_field_value(const LinearAlgebra::BlockVector &solution,
+                                const typename DoFHandler<dim>::active_cell_iterator &cell,
+                                const Point<dim> &reference_location) const;
+
           struct CompositionalIndices
           {
             unsigned int slip_rate;
-            std::vector<unsigned int> normal;
-            std::vector<unsigned int> stress;
+            unsigned int slip_state;
+            std::array<unsigned int, dim> normal_direction;
+            std::array<unsigned int, dim> slip_direction;
 
             CompositionalIndices()
               : slip_rate(numbers::invalid_unsigned_int)
-              , normal(dim, numbers::invalid_unsigned_int)
-              , stress(SymmetricTensor<2, dim>::n_independent_components, numbers::invalid_unsigned_int)
-            {}
+              , slip_state(numbers::invalid_unsigned_int)
+            {
+              normal_direction.fill(numbers::invalid_unsigned_int);
+              slip_direction.fill(numbers::invalid_unsigned_int);
+            }
           };
 
           CompositionalIndices compositional_indices;
@@ -90,13 +121,22 @@ namespace aspect
             unsigned int crack_driving_force;
             unsigned int slip_rate;
             unsigned int slip_state;
-            unsigned int normal;
+            unsigned int normal_direction;
             unsigned int slip_direction;
-            unsigned int stress;
+            unsigned int bulk_stress;
+            unsigned int interface_stress;
             std::vector<unsigned int> chemical_fields;
           };
 
           DataPositionCache data_position_cache;
+
+          unsigned int phase_field_component_index;
+
+          unsigned int phase_field_base_index;
+
+          bool start_with_slip;
+
+          bool start_with_steady_state;
       };
     }
   }
