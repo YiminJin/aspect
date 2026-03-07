@@ -56,7 +56,7 @@ namespace aspect
       evaluation_flags[this->introspection().component_indices.temperature] = EvaluationFlags::values;
       evaluation_flags[phase_field_component_index] = EvaluationFlags::values | EvaluationFlags::gradients;
 
-      // Initialize the particle data information when the particle manager is surely initialized.
+      // Initialize the particle data information when it is sure that the phase field handler is initialized
       this->get_signals().post_simulator_initialization.connect(
         [&](const SimulatorAccess<dim> &)
       {
@@ -658,7 +658,7 @@ namespace aspect
 
     template <int dim>
     bool
-    PhaseFieldRSF<dim>::is_inside_fault_band(const double phase_field) const
+    PhaseFieldRSF<dim>::is_fractured(const double phase_field) const
     {
       return phase_field > phase_field_kinetic_threshold;
     }

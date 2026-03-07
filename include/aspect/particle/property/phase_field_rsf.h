@@ -93,9 +93,11 @@ namespace aspect
           void parse_parameters(ParameterHandler &prm) override;
 
         private:
+          void initialize_data_position_cache();
+
           double
           get_phase_field_value(const LinearAlgebra::BlockVector &solution,
-                                const typename DoFHandler<dim>::active_cell_iterator &cell,
+                                const typename Triangulation<dim>::active_cell_iterator &cell,
                                 const Point<dim> &reference_location) const;
 
           struct CompositionalIndices
@@ -137,6 +139,8 @@ namespace aspect
           bool start_with_slip;
 
           bool start_with_steady_state;
+
+          std::unique_ptr<GridTools::Cache<dim>> grid_cache;
       };
     }
   }

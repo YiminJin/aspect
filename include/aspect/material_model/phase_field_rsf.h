@@ -57,7 +57,7 @@ namespace aspect
         get_rate_state_friction_model() const;
 
         bool
-        is_inside_fault_band(const double phase_field) const;
+        is_fractured(const double phase_field) const;
 
         double
         calculate_friction_strength(const Point<dim>          &position,

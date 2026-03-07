@@ -655,7 +655,9 @@ namespace aspect
 
                 case custom:
                 {
-                  particle_properties = p->initialize_late_particle(particle_location, cell);
+                  std::vector<double> plugin_properties = p->initialize_late_particle(particle_location, cell);
+                  for (unsigned int property_component = 0; property_component < property_information.get_components_by_plugin_index(property_index); ++property_component)
+                    particle_properties.push_back(plugin_properties[property_information.get_position_by_plugin_index(property_index) + property_component]);
                   break;
                 }
 
