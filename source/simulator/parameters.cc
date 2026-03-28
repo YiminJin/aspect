@@ -426,7 +426,6 @@ namespace aspect
       }
       prm.leave_subsection();
 
-
       prm.enter_subsection ("Stokes solver parameters");
       {
         prm.declare_entry ("Stokes solver type", "default solver",
@@ -757,6 +756,13 @@ namespace aspect
                          "Whether to include additional terms on the right-hand side of "
                          "the Stokes equation to set a given compression term specified in the "
                          "MaterialModel output PrescribedPlasticDilation.");
+      prm.declare_entry ("Use implicit constitutive model", "false",
+                         Patterns::Bool(),
+                         "Whether to use a fully-implicit constitutive model, i.e. the relationship "
+                         "between stress and strain cannot be expressed in a closed-form. In this case, "
+                         "the nonlinear solver must be set to 'single Advection, iterated Newton Stokes' "
+                         "or 'iterated Advection and Newton Stokes', and the material model must evaluate "
+                         "the additional outputs held by class MaterialModel::ImplicitConstitutiveOutputs.");
     }
     prm.leave_subsection();
 
@@ -1394,7 +1400,7 @@ namespace aspect
                          "the user's responsibility to check that the chosen material model "
                          "and other plugins interpret the compositional fields as intended.");
       prm.declare_entry ("Compositional field methods", "",
-                         Patterns::List (Patterns::Selection("field|particles|volume of fluid|static|melt field|darcy field|prescribed field|prescribed field with diffusion")),
+                         Patterns::List (Patterns::Selection("field|particles|volume of fluid|static|melt field|darcy field|prescribed field|prescribed field with diffusion|phase field")),
                          "A comma separated list denoting the solution method of each "
                          "compositional field. Each entry of the list must be "
                          "one of the currently implemented field methods."
@@ -1466,7 +1472,12 @@ namespace aspect
                          "$(I-l^2 \\Delta) C_\\text{smoothed} = C_\\text{prescribed}$, "
                          "where $l$ is the diffusion length scale. Note that this means that the amount "
                          "of diffusion is independent of the time step size, and that the field is not "
-                         "advected with the flow.");
+                         "advected with the flow."
+                         "\n"
+                         "* ``phase field'': This method is applicable only when "
+                         "<Formulation::Enable phase field> is set to true. If a compositional field "
+                         "is marked with this method, then it will be regarded as the phase field "
+                         "and evolved with the convected particle domain interpolation (CPDI) method.");
       prm.declare_entry ("Mapped particle properties", "",
                          Patterns::Map (Patterns::Anything(),
                                         Patterns::Anything()),
@@ -1841,6 +1852,18 @@ namespace aspect
       enable_elasticity = prm.get_bool("Enable elasticity");
       enable_phase_field = prm.get_bool("Enable phase field");
       enable_prescribed_dilation = prm.get_bool("Enable prescribed dilation");
+
+      use_implicit_constitutive_model = prm.get_bool("Use implicit constitutive model");
+      if (use_implicit_constitutive_model == true)
+        {
+          AssertThrow(stokes_solver_type == StokesSolverType::block_amg,
+                      ExcMessage("Currently, only the block AMG solver supports implicit constitutive model."));
+
+          AssertThrow(nonlinear_solver == NonlinearSolver::single_Advection_iterated_Newton_Stokes
+                      || nonlinear_solver == NonlinearSolver::iterated_Advection_and_Newton_Stokes,
+                      ExcMessage("When using implicit constitutive model, the nonlinear solver must be set to "
+                                 "'single Advection, iterated Newton Stokes' or 'iterated Advection and Newton Stokes'."));
+        }
     }
     prm.leave_subsection ();
 
@@ -2229,8 +2252,6 @@ namespace aspect
             compositional_field_methods[i] = AdvectionFieldMethod::prescribed_field;
           else if (x_compositional_field_methods[i] == "prescribed field with diffusion")
             compositional_field_methods[i] = AdvectionFieldMethod::prescribed_field_with_diffusion;
-          else if (x_compositional_field_methods[i] == "phase field")
-            compositional_field_methods[i] = AdvectionFieldMethod::phase_field;
           else
             AssertThrow(false,ExcNotImplemented());
         }
@@ -2439,6 +2460,7 @@ namespace aspect
     Parameters<dim>::declare_parameters (prm, mpi_rank);
     VolumeOfFluidHandler<dim>::declare_parameters(prm);
     Melt::Parameters<dim>::declare_parameters (prm);
+    PhaseFieldHandler<dim>::declare_parameters (prm);
     Newton::Parameters::declare_parameters (prm);
     StokesMatrixFreeHandler<dim>::declare_parameters (prm);
     MeshDeformation::MeshDeformationHandler<dim>::declare_parameters (prm);

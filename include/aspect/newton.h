@@ -203,6 +203,14 @@ namespace aspect
   {
     public:
       /**
+       * Initialize function. This is mainly to check that the Newton solver
+       * parameters chosen in the input file are consistent with the rest of
+       * the options. We can not do this in the parse_parameters function,
+       * as we do not have simulator access at that point.
+       */
+      void initialize();
+
+      /**
        * Determine, based on the run-time parameters of the current simulation,
        * which functions need to be called in order to assemble linear systems,
        * matrices, and right hand side vectors.

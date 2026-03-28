@@ -88,10 +88,10 @@ namespace aspect
                                          const double shear_modulus) const;
 
         SymmetricTensor<2, dim>
-        calculate_deviatoric_stress(const SymmetricTensor<2, dim> &strain_rate,
-                                    const SymmetricTensor<2, dim> &old_stress,
-                                    const double                   creep_viscosity,
-                                    const double                   shear_modulus) const;
+        calculate_viscoelastic_stress(const SymmetricTensor<2, dim> &strain_rate,
+                                      const SymmetricTensor<2, dim> &old_stress,
+                                      const double                   creep_viscosity,
+                                      const double                   shear_modulus) const;
 
         double 
         calculate_friction_coefficient(const double               slip_rate,
@@ -121,8 +121,6 @@ namespace aspect
 
         ParticleDataPositions particle_data_positions;
 
-        ComponentMask particle_data_mask;
-
         MaterialUtilities::CompositionalAveragingOperation viscosity_averaging;
 
         double reference_temperature;
@@ -131,9 +129,9 @@ namespace aspect
         
         double minimum_viscosity;
 
-        double phase_field_kinetic_threshold;
+        double phase_field_activation_threshold;
 
-        double phase_field_geometric_threshold;
+        double phase_field_normal_lock_threshold;
 
         double initial_time_step;
 
@@ -150,8 +148,6 @@ namespace aspect
         std::vector<double> critical_energy_release_rates;
 
         std::vector<double> radiation_damping_coefficients;
-
-        Particle::Manager<dim> *particle_manager;
 
         std::unique_ptr<SolutionEvaluator<dim>> evaluator;
 

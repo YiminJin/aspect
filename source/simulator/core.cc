@@ -183,9 +183,6 @@ namespace aspect
     melt_handler (parameters.include_melt_transport ?
                   std::make_unique<MeltHandler<dim>>(prm) :
                   nullptr),
-    phase_field_handler (parameters.enable_phase_field ?
-                         std::make_unique<PhaseFieldHandler<dim>>() :
-                         nullptr),
     newton_handler (Parameters<dim>::is_defect_correction(parameters.nonlinear_solver) ?
                     std::make_unique<NewtonHandler<dim>>() :
                     nullptr),
@@ -195,6 +192,9 @@ namespace aspect
     volume_of_fluid_handler (parameters.volume_of_fluid_tracking_enabled ?
                              std::make_unique<VolumeOfFluidHandler<dim>> (*this, prm) :
                              nullptr),
+    phase_field_handler (parameters.enable_phase_field ?
+                         std::make_unique<PhaseFieldHandler<dim>>(*this) :
+                         nullptr),
     introspection (construct_variables<dim>(parameters, signals, melt_handler), parameters),
     mpi_communicator (Utilities::MPI::duplicate_communicator (mpi_communicator_)),
     iostream_tee_device(std::cout, log_file_stream),
@@ -450,6 +450,7 @@ namespace aspect
         assemble_newton_stokes_system = true;
         newton_handler->initialize_simulator(*this);
         newton_handler->parameters.parse_parameters(prm);
+        newton_handler->initialize();
       }
 
     // choose the default solver and averaging scheme
@@ -498,7 +499,6 @@ namespace aspect
     // Initialize the phase field handler
     if (parameters.enable_phase_field)
       {
-        phase_field_handler->initialize_simulator(*this);
         phase_field_handler->parse_parameters(prm);
         phase_field_handler->initialize();
       }
@@ -952,7 +952,6 @@ namespace aspect
           case Parameters<dim>::AdvectionFieldMethod::fem_melt_field:
           case Parameters<dim>::AdvectionFieldMethod::fem_darcy_field:
           case Parameters<dim>::AdvectionFieldMethod::prescribed_field_with_diffusion:
-          case Parameters<dim>::AdvectionFieldMethod::phase_field:
             return true;
           case Parameters<dim>::AdvectionFieldMethod::particles:
           case Parameters<dim>::AdvectionFieldMethod::volume_of_fluid:
@@ -1110,6 +1109,13 @@ namespace aspect
         coupling[volume_of_fluid_block][volume_of_fluid_block] = DoFTools::always;
       }
 
+    // If the phase field method is enabled, create a matrix block for the phase field system
+    if (parameters.enable_phase_field)
+      {
+        const unsigned int phase_field_block = introspection.variable("phase_field").first_component_index;
+        coupling[phase_field_block][phase_field_block] = DoFTools::always;
+      }
+
     return coupling;
   }
 
@@ -1241,9 +1247,8 @@ namespace aspect
           }
       }
 
-    // If the phase field method is enabled, we need to solve the phase field system
-    // with CPDI method, which couples more DoFs. So we let the phase field handler
-    // make its own sparsity pattern.
+    // The phase field system is solved with CPDI method, which couples more
+    // DoFs. So we let the phase field handler make its own sparsity pattern.
     if (parameters.enable_phase_field)
       phase_field_handler->make_sparsity_pattern(sp);
 
@@ -1356,7 +1361,6 @@ namespace aspect
                                      current_constraints, false,
                                      Utilities::MPI::
                                      this_mpi_process(mpi_communicator));
-
 
     sp.compress();
 

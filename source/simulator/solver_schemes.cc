@@ -25,6 +25,7 @@
 #include <aspect/volume_of_fluid/handler.h>
 #include <aspect/newton.h>
 #include <aspect/melt.h>
+#include <aspect/phase_field.h>
 
 #include <deal.II/numerics/vector_tools.h>
 
@@ -434,7 +435,6 @@ namespace aspect
             old_stress_indices.push_back(introspection.compositional_index_for_name("ve_stress_yz_old"));
           }
 
-
         if (residual)
           {
             const double n_stress_fields = stress_indices.size();
@@ -448,7 +448,6 @@ namespace aspect
               (*residual)[c] = 0.;
           }
       }
-
 
     // for consistency we update the current linearization point only after we have solved
     // all fields, so that we use the same point in time for every field when solving
@@ -1006,6 +1005,12 @@ namespace aspect
   {
     assemble_and_solve_temperature();
     assemble_and_solve_composition();
+
+    if (parameters.enable_phase_field)
+      phase_field_handler->solve_timestep(system_matrix, 
+                                          system_rhs, 
+                                          solution);
+
     assemble_and_solve_stokes();
 
     if (parameters.run_postprocessors_on_nonlinear_iterations)

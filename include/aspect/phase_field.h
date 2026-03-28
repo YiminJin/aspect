@@ -23,44 +23,13 @@
 
 #include <aspect/global.h>
 #include <aspect/simulator_access.h>
+#include <aspect/fe_variable_collection.h>
 #include <aspect/material_model/interface.h>
 
 namespace aspect
 {
   namespace MaterialModel
   {
-    /**
-     * Class holding the values and gradients of the phase field, 
-     * so that they can be used as additional inputs in material models.
-     */
-    template <int dim>
-    class PhaseFieldInputs : public AdditionalMaterialInputs<dim>
-    {
-      public:
-        /**
-         * Constructor. Initialize the phase field values and gradients
-         * with signaling NaNs.
-         */
-        PhaseFieldInputs(const unsigned int n_points);
-
-        /**
-         * Fill the phase field values and gradients.
-         */
-        void fill(const LinearAlgebra::BlockVector &solution,
-                  const FEValuesBase<dim>          &fe_values,
-                  const Introspection<dim>         &introspection) override;
-
-        /**
-         * The phase field value at each evaluation point.
-         */
-        std::vector<double> phase_field_values;
-
-        /**
-         * The phase field gradient at each evaluation point.
-         */
-        std::vector<Tensor<1, dim>> phase_field_gradients;
-    };
-
     /**
      * Base class for material models to be used with phase field method.
      */
@@ -161,6 +130,7 @@ namespace aspect
         double m;
     };
 
+    template <int dim>
     struct Parameters
     {
       double length_scale;
@@ -169,7 +139,15 @@ namespace aspect
 
       double degradation_curvature_parameter;
 
-      std::vector<double> critical_energy_densities;
+      double linear_solver_tolerance;
+
+      unsigned int max_linear_solver_iterations;
+
+      double nonlinear_solver_tolerance;
+
+      unsigned int max_nonlinear_iterations;
+
+      unsigned int max_newton_line_search_iterations;
     };
   }
 
@@ -177,22 +155,23 @@ namespace aspect
   class PhaseFieldHandler : public SimulatorAccess<dim>
   {
     public:
+      PhaseFieldHandler(const Simulator<dim> &sim);
+
       /**
        * Add the phase fields to the list of variables, which will be used later
        * to set up the introspection object.
        */
-      void edit_finite_element_variables(const Parameters<dim> &parameters,
-                                         std::vector<VariableDeclaration<dim>> &variables);
+      void edit_finite_element_variables(std::vector<VariableDeclaration<dim>> &variables);
 
       void initialize();
 
-      void 
-      assemble_and_solve(LinearAlgebra::BlockSparseMatrix &system_matrix,
-                         LinearAlgebra::BlockVector       &system_rhs,
-                         LinearAlgebra::BlockVector       &solution_vector) const;
-
       void
-      make_sparsity_pattern(LinearAlgebra::BlockDynamicSparsityPattern &sp) const;
+      make_sparsity_pattern(LinearAlgebra::BlockDynamicSparsityPattern &sp);
+
+      double
+      solve_timestep(LinearAlgebra::BlockSparseMatrix &system_matrix,
+                     LinearAlgebra::BlockVector       &system_rhs,
+                     LinearAlgebra::BlockVector       &solution);
 
       double crack_surface_density(const double          phase_field_value,
                                    const Tensor<1, dim> &phase_field_gradient) const;
@@ -218,6 +197,20 @@ namespace aspect
 
       double compute_microstress_prefactor(const std::vector<double> &volume_fractions) const;
 
+      void
+      assemble_linearized_system(LinearAlgebra::BlockSparseMatrix &system_matrix,
+                                 LinearAlgebra::BlockVector       &system_rhs,
+                                 const LinearAlgebra::BlockVector &current_solution,
+                                 const bool assemble_system_jacobian) const;
+
+      unsigned int
+      solve_linearized_system(const LinearAlgebra::BlockSparseMatrix &system_matrix,
+                              const LinearAlgebra::BlockVector       &system_rhs,
+                              LinearAlgebra::BlockVector             &solution_vector) const;
+
+      double 
+      evaluate_merit_function(const LinearAlgebra::BlockVector &test_solution) const;
+
       struct SystemInformation
       {
         void initialize(const Introspection<dim>     &introspection,
@@ -226,22 +219,9 @@ namespace aspect
 
         unsigned int phase_field_component_index;
 
-        struct BlockIndices
-        {
-          unsigned int velocities;
-          unsigned int pressure;
-          unsigned int phase_field;
-        };
+        unsigned int phase_field_block_index;
 
         BlockIndices block_indices;
-
-        struct IndexSets
-        {
-          std::vector<IndexSet> coupled_system_partitioning;
-          std::vector<IndexSet> coupled_system_relevant_partitioning;
-        };
-
-        IndexSets index_sets;
 
         struct ParticleDataPositions
         {
@@ -254,13 +234,17 @@ namespace aspect
 
       SystemInformation system_info;
 
-      PhaseField::Parameters parameters;
+      PhaseField::Parameters<dim> parameters;
 
       std::unique_ptr<PhaseField::GeometricFunction> geometric_function;
 
       std::vector<std::unique_ptr<PhaseField::DegradationFunction>> degradation_functions;
 
+      std::vector<double> critical_energy_densities;
+
       const Particle::Manager<dim> *particle_manager;
+
+      std::vector<types::global_dof_index> vertex_to_dof_indices;
   };
 }
 

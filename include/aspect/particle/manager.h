@@ -402,17 +402,34 @@ namespace aspect
         Particles::ParticleHandler<dim> particle_handler_backup;
 
         /**
+         * The property manager stores information about the additional
+         * particle properties and handles the initialization and update of
+         * these properties.
+         */
+        std::unique_ptr<Property::Manager<dim>> property_manager;
+
+        /**
          * The particle domain handler generates a centroidal Voronoi
          * tessellation based on the particles.
          */
         std::unique_ptr<ParticleDomainHandler<dim>> particle_domain_handler;
 
         /**
-         * The property manager stores information about the additional
-         * particle properties and handles the initialization and update of
-         * these properties.
+         * Whether the particle domains are requested by the user.
          */
-        std::unique_ptr<Property::Manager<dim>> property_manager;
+        bool generate_particle_domains;
+
+        /**
+         * Whether the face data (face measures and neighbor particle iterators)
+         * of particle domains are requested by the user.
+         */
+        bool generate_face_data_for_particle_domains;
+
+        /**
+         * Whether the CPDI data (weighting function values and gradients) of
+         * particle domains are requested by the user.
+         */
+        bool generate_cpdi_data_for_particle_domains;
 
         /**
          * Strategy for particle load balancing.

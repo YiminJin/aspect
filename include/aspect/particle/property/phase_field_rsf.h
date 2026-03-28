@@ -45,13 +45,6 @@ namespace aspect
                                            std::vector<double> &particle_properties) const override;
 
           /**
-           * @copydoc aspect::Particle::Property::Interface::update_particle_properties()
-           */
-          void
-          update_particle_properties(const ParticleUpdateInputs<dim> &inputs,
-                                     typename ParticleHandler<dim>::particle_iterator_range &particles) const override;
-
-          /**
            * @copydoc aspect::Particle::Property::Interface::initialize_late_particle()
            */
           std::vector<double>
@@ -82,16 +75,6 @@ namespace aspect
           std::vector<std::pair<std::string, unsigned int>>
           get_property_information() const override;
 
-          /**
-           * Declare the parameters this class takes through input files.
-           */
-          static void declare_parameters(ParameterHandler &prm);
-
-          /**
-           * Read the parameters this class declares from the parameter file.
-           */
-          void parse_parameters(ParameterHandler &prm) override;
-
         private:
           void initialize_data_position_cache();
 
@@ -102,17 +85,21 @@ namespace aspect
 
           struct CompositionalIndices
           {
+            unsigned int crack_driving_force;
             unsigned int slip_rate;
             unsigned int slip_state;
             std::array<unsigned int, dim> normal_direction;
             std::array<unsigned int, dim> slip_direction;
+            std::array<unsigned int, SymmetricTensor<2, dim>::n_independent_components> bulk_stress;
 
             CompositionalIndices()
-              : slip_rate(numbers::invalid_unsigned_int)
+              : crack_driving_force(numbers::invalid_unsigned_int)
+              , slip_rate(numbers::invalid_unsigned_int)
               , slip_state(numbers::invalid_unsigned_int)
             {
               normal_direction.fill(numbers::invalid_unsigned_int);
               slip_direction.fill(numbers::invalid_unsigned_int);
+              bulk_stress.fill(numbers::invalid_unsigned_int);
             }
           };
 

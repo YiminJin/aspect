@@ -1348,11 +1348,11 @@ namespace aspect
       public:
         ImplicitConstitutiveOutputs(const unsigned int n_points,
                                     const unsigned int n_stokes_dofs,
-                                    const bool require_equivalent_viscosity)
+                                    const bool assemble_preconditioner)
           : linearized_stress_terms(n_points, std::vector<SymmetricTensor<2, dim>>(
               n_stokes_dofs, numbers::signaling_nan<SymmetricTensor<2, dim>>()))
-          , deviatoric_stresses(n_points, numbers::signaling_nan<SymmetricTensor<2, dim>>())
-          , equivalent_viscosities(require_equivalent_viscosity? n_points : 0, numbers::signaling_nan<double>())
+          , deviatoric_stresses(assemble_preconditioner ? 0 : n_points, numbers::signaling_nan<SymmetricTensor<2, dim>>())
+          , equivalent_viscosities(assemble_preconditioner ? n_points : 0, numbers::signaling_nan<double>())
         {}
 
         ~ImplicitConstitutiveOutputs() override

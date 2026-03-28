@@ -22,6 +22,7 @@
 #include <aspect/newton.h>
 #include <aspect/simulator/assemblers/advection.h>
 #include <aspect/simulator/assemblers/stokes.h>
+#include <aspect/simulator/assemblers/implicit_constitutive_stokes.h>
 
 #include <aspect/simulator.h>
 
@@ -44,23 +45,49 @@ namespace aspect
 
 
   template <int dim>
+  void NewtonHandler<dim>::initialize()
+  {
+    // Check parameter consistency
+    if (this->get_parameters().use_implicit_constitutive_model)
+      {
+        AssertThrow(parameters.max_pre_newton_nonlinear_iterations == 0,
+                    ExcMessage("When using implicit constitutive model, the Newton solver parameter "
+                               "'Max pre-Newton nonlinear iterations' must be set to 0."));
+
+        AssertThrow(parameters.use_newton_residual_scaling_method == false,
+                    ExcMessage("When using implicit constitutive model, the Newton residual scaling "
+                               "method is inapplicable."));
+      }
+  }
+
+
+
+  template <int dim>
   void
   NewtonHandler<dim>::
   set_assemblers (Assemblers::Manager<dim> &assemblers) const
   {
-    assemblers.stokes_preconditioner.push_back(std::make_unique<aspect::Assemblers::NewtonStokesPreconditioner<dim>>());
-    assemblers.stokes_system.push_back(std::make_unique<aspect::Assemblers::NewtonStokesIncompressibleTerms<dim>>());
-
-    if (this->get_material_model().is_compressible() ||
-        this->get_parameters().enable_prescribed_dilation)
+    if (this->get_parameters().use_implicit_constitutive_model)
       {
-        // The compressible part of the preconditioner is only necessary if we use the simplified A block
-        if (this->get_parameters().use_full_A_block_preconditioner == false)
-          assemblers.stokes_preconditioner.push_back(
-            std::make_unique<aspect::Assemblers::NewtonStokesCompressiblePreconditioner<dim>>());
+        assemblers.stokes_preconditioner.push_back(std::make_unique<aspect::Assemblers::ImplicitConstitutiveStokesPreconditioner<dim>>());
+        assemblers.stokes_system.push_back(std::make_unique<aspect::Assemblers::ImplicitConstitutiveStokesSystem<dim>>());
 
-        assemblers.stokes_system.push_back(
-          std::make_unique<aspect::Assemblers::NewtonStokesCompressibleStrainRateViscosityTerm<dim>>());
+        if (this->get_material_model().is_compressible() ||
+            this->get_parameters().enable_prescribed_dilation)
+          {
+            // The compressible part of the preconditioner is only necessary if we use the simplified A block
+            if (this->get_parameters().use_full_A_block_preconditioner == false)
+              assemblers.stokes_preconditioner.push_back(
+                std::make_unique<aspect::Assemblers::NewtonStokesCompressiblePreconditioner<dim>>());
+
+            assemblers.stokes_system.push_back(
+              std::make_unique<aspect::Assemblers::NewtonStokesCompressibleStrainRateViscosityTerm<dim>>());
+          }
+      }
+    else
+      {
+        assemblers.stokes_preconditioner.push_back(std::make_unique<aspect::Assemblers::NewtonStokesPreconditioner<dim>>());
+        assemblers.stokes_system.push_back(std::make_unique<aspect::Assemblers::NewtonStokesIncompressibleTerms<dim>>());
       }
 
     if (this->get_parameters().formulation_mass_conservation ==

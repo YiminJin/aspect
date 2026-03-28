@@ -173,8 +173,7 @@ namespace aspect
         fem_melt_field,
         fem_darcy_field,
         prescribed_field,
-        prescribed_field_with_diffusion,
-        phase_field
+        prescribed_field_with_diffusion
       };
     };
 
@@ -664,6 +663,16 @@ namespace aspect
      * Determines whether the phase field method is enabled in the model.
      */
     bool                           enable_phase_field;
+
+    /**
+     * Determines whether to use a fully-implicit constitutive model, i.e.
+     * the relationship between stress and strain cannot be expressed in a
+     * closed-form. In this case, the nonlinear solver for Stokes system
+     * must be set to 'iterated Newton Stokes', and the material model must
+     * evaluate the additional outputs held by class
+     * <tt>MaterialModel::ImplicitConstitutiveOutputs</tt>.
+     */
+    bool                           use_implicit_constitutive_model;
 
     /**
      * @}
