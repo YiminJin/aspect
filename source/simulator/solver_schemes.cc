@@ -1088,6 +1088,11 @@ namespace aspect
     assemble_and_solve_temperature();
     assemble_and_solve_composition();
 
+    if (parameters.enable_phase_field)
+      phase_field_handler->solve_timestep(system_matrix,
+                                          system_rhs,
+                                          solution);
+
     // Now store the linear_tolerance we started out with, because we might change
     // it within this timestep.
     double begin_linear_tolerance = parameters.linear_stokes_solver_tolerance;
