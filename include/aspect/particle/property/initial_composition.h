@@ -88,6 +88,25 @@ namespace aspect
            */
           std::vector<std::pair<std::string, unsigned int>>
           get_property_information() const override;
+
+          /**
+           * Declare the parameters this class takes through input files.
+           */
+          static
+          void
+          declare_parameters (ParameterHandler &prm);
+
+          /**
+           * Read the parameters this class declares from the parameter file.
+           */
+          void
+          parse_parameters (ParameterHandler &prm) override;
+
+        private:
+          /**
+           * Indices of the compositional fields to be handled by this plugin.
+           */
+          std::vector<unsigned int> compositional_field_indices;
       };
     }
   }

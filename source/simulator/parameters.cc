@@ -759,10 +759,14 @@ namespace aspect
       prm.declare_entry ("Use implicit constitutive model", "false",
                          Patterns::Bool(),
                          "Whether to use a fully-implicit constitutive model, i.e. the relationship "
-                         "between stress and strain cannot be expressed in a closed-form. In this case, "
-                         "the nonlinear solver must be set to 'single Advection, iterated Newton Stokes' "
-                         "or 'iterated Advection and Newton Stokes', and the material model must evaluate "
-                         "the additional outputs held by class MaterialModel::ImplicitConstitutiveOutputs.");
+                         "between stress and strain cannot be expressed in a closed-form. When this "
+                         "parameter is set to true, the following requirements must be satisfied:\n"
+                         "1. The nonlinear solver is set to 'single Advection, iterated Newton Stokes' "
+                         "or 'iterated Advection and Newton Stokes';\n"
+                         "2. The material model evaluates the additional outputs held by class "
+                         "MaterialModel::ImplicitConstitutiveOutputs;\n"
+                         "3. The particle system is enabled in order to store and update the implicit "
+                         "vaiables.");
     }
     prm.leave_subsection();
 
@@ -1863,6 +1867,10 @@ namespace aspect
                       || nonlinear_solver == NonlinearSolver::iterated_Advection_and_Newton_Stokes,
                       ExcMessage("When using implicit constitutive model, the nonlinear solver must be set to "
                                  "'single Advection, iterated Newton Stokes' or 'iterated Advection and Newton Stokes'."));
+
+          AssertThrow(n_particle_managers > 0,
+                      ExcMessage("When using implicit constitutive model, the particle system must be enabled "
+                                 "to store the implicit variables."));
         }
     }
     prm.leave_subsection ();

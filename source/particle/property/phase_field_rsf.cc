@@ -44,9 +44,6 @@ namespace aspect
             if (key_and_value.second.first == "slip_rate")
               compositional_indices.slip_rate = key_and_value.first;
 
-            if (key_and_value.second.first == "slip_state")
-              compositional_indices.slip_state = key_and_value.first;
-
             if (key_and_value.second.first == "normal_direction")
               {
                 AssertThrow(key_and_value.second.second < dim,
@@ -81,21 +78,13 @@ namespace aspect
                                  "associated with a compositional field."));
 
         // If the slip rate is associated with a compositional field, then the initial slip rate,
-        // crack driving force and slip direction will be determined by the initial composition model,
-        // and the initial interface stress will be computed accordingly; otherwise, the initial slip 
-        // rate will set to the lower limit (stick mode), the initial crack driving force will be set
-        // to the threshold crack driving force (representing material cohesion), and the initial slip 
-        // direction and interface stress will be set to invalid numbers
+        // and slip direction will be determined by the initial composition model, and the initial 
+        // interface stress will be computed accordingly; otherwise, the initial slip rate will be
+        // set to the lower limit (stick mode), and the initial slip direction and interface stress
+        // will be set to invalid numbers
         start_with_slip = (compositional_indices.slip_rate != numbers::invalid_unsigned_int);
         if (start_with_slip == true)
           {
-            AssertThrow(compositional_indices.crack_driving_force != numbers::invalid_unsigned_int,
-                        ExcMessage("The particle property 'slip_rate' is associated with a compositional field, "
-                                   "which means that the initial slip rate is prescribed by the initial composition "
-                                   "model. In this case, the particle property 'crack_driving_force' must be "
-                                   "associated with a compositional field to be initialized too, otherwise "
-                                   "the initial conditions are incomplete."));
-
             for (unsigned int d = 0; d < dim; ++d)
               AssertThrow(compositional_indices.slip_direction[d] != numbers::invalid_unsigned_int,
                           ExcMessage("The particle property 'slip_rate' is associated with a compositional field, "
@@ -104,11 +93,6 @@ namespace aspect
                                      "must be associated with a compositional field to be initialized too, otherwise "
                                      "the initial conditions are incomplete."));
           }
-
-        // If the slip state is associated with a compositional field, then the initial slip state
-        // will be determined by the initial compositional model; otherwise, it will be computed
-        // according to the initial slip rate under the steady state assumption
-        start_with_steady_state = (compositional_indices.slip_state == numbers::invalid_unsigned_int);
 
         const auto &variable = this->introspection().variable("phase_field");
         phase_field_component_index = variable.first_component_index;
@@ -122,6 +106,15 @@ namespace aspect
           [&](const SimulatorAccess<dim> &)
         {
           this->initialize_data_position_cache();
+        });
+
+        // When initializing the particle properties, the slip-related properties at intact regions
+        // need special treatment, but the phase field has not been initialized at that stage.
+        // We shall catch up on the cleanup work after solving the phase field system
+        this->get_signals().post_restore_particles.connect(
+          [&](Particle::Manager<dim> &)
+        {
+          this->do_cleanup_after_initialization();
         });
       }
 
@@ -157,15 +150,9 @@ namespace aspect
       PhaseFieldRSF<dim>::initialize_one_particle_property(const Point<dim> &position,
                                                            std::vector<double> &data) const
       {
-        const MaterialModel::PhaseFieldRSF<dim> &material_model = dynamic_cast<const MaterialModel::PhaseFieldRSF<dim>&>(this->get_material_model());
+        const MaterialModel::PhaseFieldRSF<dim> &material_model = 
+          Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldRSF<dim>>(this->get_material_model());
         const MaterialModel::Rheology::RateStateFriction<dim> &rsf_model = material_model.get_rate_state_friction_model();
-
-        // Function Particle::Manager::setup_initial_state is connected to signal post_setup_initial_state,
-        // so we can get phase field values from the solution vector
-        const std::pair<typename Triangulation<dim>::active_cell_iterator, Point<dim>>
-        cell_and_point = GridTools::find_active_cell_around_point(this->get_mapping(), this->get_triangulation(), position);
-        const double pf = get_phase_field_value(this->get_solution(), cell_and_point.first, cell_and_point.second);
-        const bool is_fractured = material_model.is_fractured(pf);
 
         // If the user chooses to start with slip, then the initial crack driving force is determined by the
         // initial composition; otherwise, the initial crack driving force is set to $H_t$
@@ -185,29 +172,23 @@ namespace aspect
         data.push_back(H);
 
         // If the user chooses to start with slip, then the initial slip rate is determined by the initial composition;
-        // otherwise, the initial slip rate is set to the lower bound
+        // otherwise, the initialslip rate is set to the lower bound
         const double V = std::max(rsf_model.get_minimum_slip_rate(),
-                                  ((start_with_slip && is_fractured) ?
-                                   this->get_initial_composition_manager().initial_composition(position, compositional_indices.slip_rate) :
-                                   0.));
+                                  (start_with_slip ? this->get_initial_composition_manager().initial_composition(position, compositional_indices.slip_rate) : 0.));
         data.push_back(V);
 
-        // If the user chooses to start with steady state, then the initial slip state is calculated by $D_c / V_init$;
-        // otherwise, the initial slip state is determined by the initial composition
-        const double theta = (start_with_steady_state ?
-                              rsf_model.get_characteristic_slip_distance() / V :
-                              this->get_initial_composition_manager().initial_composition(position, compositional_indices.slip_state));
+        // The initial slip state is calculated by $D_c / V_init$, which is consistent with a steady state
+        const double theta = rsf_model.get_characteristic_slip_distance() / V;
         data.push_back(theta);
 
         // The initial normal direction is determined by the initial composition
-        Tensor<1, dim> n = numbers::signaling_nan<Tensor<1, dim>>();
-        if (is_fractured)
-          {
-            for (unsigned int d = 0; d < dim; ++d)
-              n[d] = this->get_initial_composition_manager().initial_composition(position, compositional_indices.normal_direction[d]);
+        Tensor<1, dim> n;
+        for (unsigned int d = 0; d < dim; ++d)
+          n[d] = this->get_initial_composition_manager().initial_composition(position, compositional_indices.normal_direction[d]);
 
-            n /= n.norm();
-          }
+        const double n_norm = n.norm();
+        if (n_norm > std::numeric_limits<double>::epsilon())
+          n /= n_norm;
 
         for (unsigned int d = 0; d < dim; ++d)
           data.push_back(n[d]);
@@ -215,13 +196,24 @@ namespace aspect
         // If the user chooses to start with slip, then the initial slip direction is determined by the initial composition;
         // otherwise, the initial slip direction is set to an invalid value
         Tensor<1, dim> s = numbers::signaling_nan<Tensor<1, dim>>();
-        if (start_with_slip && is_fractured)
+        if (start_with_slip)
           {
             for (unsigned int d = 0; d < dim; ++d)
               s[d] = this->get_initial_composition_manager().initial_composition(position, compositional_indices.slip_direction[d]);
 
             s -= (s * n) * n;
-            s /= s.norm();
+
+            const double s_norm = s.norm();
+            if (s_norm <= std::numeric_limits<double>::epsilon())
+              {
+                std::stringstream ss;
+                ss << position;
+                AssertThrow(false, 
+                            ExcMessage("The initial slip direction at point (" + ss.str() + ") is invalid. "
+                                       "The reason is either (a) it is a zero vector, or (b) it is parallel "
+                                       "with the initial normal direction."));
+              }
+            s /= s_norm;
           }
 
         for (unsigned int d = 0; d < dim; ++d)
@@ -233,7 +225,7 @@ namespace aspect
 
         // Finally, initialize the interface stress
         SymmetricTensor<2, dim> tau_f = numbers::signaling_nan<SymmetricTensor<2, dim>>();
-        if (start_with_slip && is_fractured)
+        if (start_with_slip)
           {
             // If the user chooses to start with slip, then make the interface stress consistent with
             // the prescribed slip rate, i.e.
@@ -250,6 +242,71 @@ namespace aspect
 
 
       template <int dim>
+      void PhaseFieldRSF<dim>::do_cleanup_after_initialization()
+      {
+        // Only do the cleanup in the first time step
+        if (this->get_timestep_number() > 0)
+          return;
+
+        const MaterialModel::PhaseFieldRSF<dim> &material_model = 
+          Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldRSF<dim>>(this->get_material_model());
+
+        Particles::ParticleHandler<dim> &particle_handler = const_cast<Particles::ParticleHandler<dim>&>(
+          this->get_phase_field_handler().get_associated_particle_manager().get_particle_handler());
+
+        // We need a point evaluator to calculate the phase field values at particle locations
+        FEPointEvaluation<1, dim> evaluator(this->get_mapping(), 
+                                            this->get_fe(), 
+                                            update_values,
+                                            phase_field_component_index);
+
+        for (const auto &cell : this->get_dof_handler().active_cell_iterators())
+          if (cell->is_locally_owned())
+            {
+              const auto particles_in_cell = particle_handler.particles_in_cell(cell);
+
+              // Collect the particle locations
+              small_vector<Point<dim>> reference_locations;
+              for (auto particle = particles_in_cell.begin(); particle != particles_in_cell.end(); ++particle)
+                reference_locations.push_back(particle->get_reference_location());
+
+              // Collect the DoF values
+              small_vector<double, 500> dof_values(this->get_fe().dofs_per_cell);
+              cell->get_dof_values(this->get_solution(), dof_values.begin(), dof_values.end());
+
+              // Update the point evaluator and evaluate the phase field values at particle locations
+              evaluator.reinit(cell, {reference_locations.data(), reference_locations.size()});
+              evaluator.evaluate({dof_values.data(), dof_values.size()}, EvaluationFlags::values);
+
+              small_vector<double> particle_solution_values(this->introspection().n_components);
+
+              for (auto particle = particles_in_cell.begin(); particle != particles_in_cell.end(); ++particle)
+                {
+                  const ArrayView<double> particle_properties = particle->get_properties();
+                  const unsigned int p = std::distance(particles_in_cell.begin(), particle);
+
+                  const double pf = evaluator.get_value(p);
+
+                  // If the particle is intact, then set the normal direction, slip direction and 
+                  // interface stress components to invalid numbers
+                  if (material_model.is_fractured(pf) == false)
+                    {
+                      for (unsigned int d = 0; d < dim; ++d)
+                        {
+                          particle_properties[data_position_cache.normal_direction + d] = numbers::signaling_nan<double>();
+                          particle_properties[data_position_cache.slip_direction + d]   = numbers::signaling_nan<double>();
+                        }
+
+                      for (unsigned int c = 0; c < SymmetricTensor<2, dim>::n_independent_components; ++c)
+                        particle_properties[data_position_cache.interface_stress + c] = numbers::signaling_nan<double>();
+                    }
+                }
+            }
+      }
+
+
+
+      template <int dim>
       std::vector<double>
       PhaseFieldRSF<dim>::
       initialize_late_particle(const Point<dim> &particle_location,
@@ -257,7 +314,8 @@ namespace aspect
       {
         const Particle::Manager<dim> &particle_manager = this->get_phase_field_handler().get_associated_particle_manager();
         const Particles::ParticleHandler<dim> &particle_handler = particle_manager.get_particle_handler();
-        const MaterialModel::PhaseFieldRSF<dim> &material_model = dynamic_cast<const MaterialModel::PhaseFieldRSF<dim>&>(this->get_material_model());
+        const MaterialModel::PhaseFieldRSF<dim> &material_model = 
+          Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldRSF<dim>>(this->get_material_model());
 
         const auto &data_info = particle_manager.get_property_manager().get_data_info();
         std::vector<double> particle_properties(data_info.n_components(), numbers::signaling_nan<double>());
@@ -373,7 +431,7 @@ namespace aspect
 
             const std::vector<std::vector<double>> interpolated_properties
               = particle_manager.get_interpolator().properties_at_points(particle_handler,
-                                                                         std::vector<Point<dim>>(1, particle_location),
+                                     std::vector<Point<dim>>(1, particle_location),
                                                                          ComponentMask(component_mask),
                                                                          host_cell);
 

@@ -40,6 +40,8 @@ namespace aspect
       public:
         void initialize() override;
 
+        void update() override;
+
         void 
         evaluate(const MaterialModel::MaterialModelInputs<dim> &in,
                  MaterialModel::MaterialModelOutputs<dim> &out) const override;
@@ -77,7 +79,7 @@ namespace aspect
 
         void perform_return_mapping();
 
-        void update_history_states();
+        void update_history_states(const SolverControl &nonlinear_solver_control);
 
         double 
         calculate_creep_viscosity(const double               temperature,
@@ -95,12 +97,14 @@ namespace aspect
 
         double 
         calculate_friction_coefficient(const double               slip_rate,
-                                       const double               slip_state,
+                                       const double               old_slip_state,
+                                       const double               time_step,
                                        const std::vector<double> &volume_fractions) const;
 
         double
         calculate_friction_coefficient_derivative(const double               slip_rate,
-                                                  const double               slip_state,
+                                                  const double               old_slip_state,
+                                                  const double               time_step,
                                                   const std::vector<double> &volume_fractions) const;
 
         EquationOfState::MulticomponentIncompressible<dim> equation_of_state;
@@ -149,7 +153,7 @@ namespace aspect
 
         std::vector<double> radiation_damping_coefficients;
 
-        std::unique_ptr<SolutionEvaluator<dim>> evaluator;
+        std::unique_ptr<SolutionEvaluator<dim>> solution_evaluator;
 
         std::vector<EvaluationFlags::EvaluationFlags> evaluation_flags;
 

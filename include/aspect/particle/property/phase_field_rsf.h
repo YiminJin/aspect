@@ -78,6 +78,8 @@ namespace aspect
         private:
           void initialize_data_position_cache();
 
+          void do_cleanup_after_initialization();
+
           double
           get_phase_field_value(const LinearAlgebra::BlockVector &solution,
                                 const typename Triangulation<dim>::active_cell_iterator &cell,
@@ -124,8 +126,6 @@ namespace aspect
           unsigned int phase_field_base_index;
 
           bool start_with_slip;
-
-          bool start_with_steady_state;
 
           std::unique_ptr<GridTools::Cache<dim>> grid_cache;
       };

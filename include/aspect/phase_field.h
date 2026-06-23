@@ -169,9 +169,9 @@ namespace aspect
       make_sparsity_pattern(LinearAlgebra::BlockDynamicSparsityPattern &sp);
 
       double
-      solve_timestep(LinearAlgebra::BlockSparseMatrix &system_matrix,
-                     LinearAlgebra::BlockVector       &system_rhs,
-                     LinearAlgebra::BlockVector       &solution);
+      solve(LinearAlgebra::BlockSparseMatrix &system_matrix,
+            LinearAlgebra::BlockVector       &system_rhs,
+            LinearAlgebra::BlockVector       &solution);
 
       double crack_surface_density(const double          phase_field_value,
                                    const Tensor<1, dim> &phase_field_gradient) const;
@@ -210,29 +210,6 @@ namespace aspect
 
       double 
       evaluate_merit_function(const LinearAlgebra::BlockVector &test_solution) const;
-
-      struct SystemInformation
-      {
-        void initialize(const Introspection<dim>     &introspection,
-                        const Parameters<dim>        &parameters,
-                        const Particle::Manager<dim> &particle_manager);
-
-        unsigned int phase_field_component_index;
-
-        unsigned int phase_field_block_index;
-
-        BlockIndices block_indices;
-
-        struct ParticleDataPositions
-        {
-          unsigned int              crack_driving_force;
-          std::vector<unsigned int> chemical_fields;
-        };
-
-        ParticleDataPositions particle_data_positions;
-      };
-
-      SystemInformation system_info;
 
       PhaseField::Parameters<dim> parameters;
 

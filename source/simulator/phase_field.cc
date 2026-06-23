@@ -293,9 +293,6 @@ namespace aspect
                 ExcMessage("The phase field method requires the particle domain handler to "
                            "generate CPDI data."));
 
-    // Initialize the system information
-    system_info.initialize(this->introspection(), this->get_parameters(), *particle_manager);
-
     // Get the critical energy release rate and the threshold crack driving force
     // from the material model
     const MaterialModel::PhaseFieldModel<dim> *phase_field_model 
@@ -348,37 +345,6 @@ namespace aspect
                              "the parameters (for example, the critical energy release rate, the "
                              "threshold driving force, the length scale, etc) to ensure that the "
                              "second derivative of the energetic degradation function is positive."));
-  }
-
-
-
-  template <int dim>
-  void
-  PhaseFieldHandler<dim>::SystemInformation::
-  initialize(const Introspection<dim>     &introspection,
-             const Parameters<dim>        &parameters,
-             const Particle::Manager<dim> &particle_manager)
-  {
-    const auto &variable = introspection.variable("phase_field");
-    phase_field_component_index = variable.first_component_index;
-    phase_field_block_index     = variable.block_index;
-
-    // Get the positions of the particle properties required by the coupled system
-    const auto &particle_data_info = particle_manager.get_property_manager().get_data_info();
-    particle_data_positions.crack_driving_force = particle_data_info.get_position_by_field_name("crack_driving_force");
-
-    particle_data_positions.chemical_fields.clear();
-    for (const unsigned int index : introspection.chemical_composition_field_indices())
-      {
-        AssertThrow(parameters.compositional_field_methods[index] == Parameters<dim>::AdvectionFieldMethod::particles,
-                    ExcMessage("The phase field method requires all the chemical composition fields to be advected "
-                               "by particles."));
-        const std::string &property_name = parameters.mapped_particle_properties.find(index)->second.first;
-        AssertThrow(particle_data_info.fieldname_exists(property_name),
-                    ExcMessage("The phase field method requires all the chemical composition fields to be in the "
-                               "same particle set as the crack driving force."));
-        particle_data_positions.chemical_fields.push_back(particle_data_info.get_position_by_field_name(property_name));
-      }
   }
 
 
@@ -492,12 +458,21 @@ namespace aspect
     const Particle::ParticleDomainHandler<dim> &particle_domain_handler = particle_manager->get_particle_domain_handler();
 
     // Initialize the corresponding block of the system matrix and the system rhs
-    const unsigned int block_index = system_info.phase_field_block_index;
+    const unsigned int block_index = this->introspection().variable("phase_field").block_index;
     system_matrix.block(block_index, block_index) = 0;
     system_rhs.block(block_index) = 0;
 
-    // Vector storing the chemical field values, which is required for computing volume fractions
-    std::vector<double> chemical_field_values(system_info.particle_data_positions.chemical_fields.size());
+    // We need to retrieve the crack driving force and chemical composition values
+    // from particle properties
+    const auto &particle_data_info = particle_manager->get_property_manager().get_data_info();
+    const unsigned int H_property_index = particle_data_info.get_position_by_field_name("crack_driving_force");
+
+    std::vector<unsigned int> C_property_indices;
+    for (unsigned int index : this->introspection().chemical_composition_field_indices())
+      C_property_indices.push_back(particle_data_info.get_position_by_field_name(
+        this->get_parameters().mapped_particle_properties.find(index)->second.first));
+
+    std::vector<double> chemical_composition_values(C_property_indices.size());
 
     // Vector storing the phase field DoF indices associated with a particle domain
     std::vector<types::global_dof_index> particle_dof_indices;
@@ -540,12 +515,12 @@ namespace aspect
 
             // Get the crack driving force
             const ArrayView<const double> particle_properties = particle.get_properties();
-            const double crack_driving_force = particle_properties[system_info.particle_data_positions.crack_driving_force];
+            const double crack_driving_force = particle_properties[H_property_index];
 
             // Compute the volume fractions
-            for (unsigned int c = 0; c < chemical_field_values.size(); ++c)
-              chemical_field_values[c] = particle_properties[system_info.particle_data_positions.chemical_fields[c]];
-            const std::vector<double> volume_fractions = MaterialModel::MaterialUtilities::compute_composition_fractions(chemical_field_values);
+            for (unsigned int c = 0; c < chemical_composition_values.size(); ++c)
+              chemical_composition_values[c] = particle_properties[C_property_indices[c]];
+            const std::vector<double> volume_fractions = MaterialModel::MaterialUtilities::compute_composition_fractions(chemical_composition_values);
 
             const double microforce            = compute_microforce(phase_field_value, crack_driving_force, volume_fractions);
             const double microstress_prefactor = compute_microstress_prefactor(volume_fractions);
@@ -605,14 +580,16 @@ namespace aspect
                           const LinearAlgebra::BlockVector       &system_rhs,
                           LinearAlgebra::BlockVector             &solution_vector) const
   {
-    const unsigned int block_index = system_info.phase_field_block_index;
+    const auto &variable = this->introspection().variable("phase_field");
+    const unsigned int component_index = variable.first_component_index;
+    const unsigned int block_index     = variable.block_index;
 
     // Set the preconditioner
     LinearAlgebra::PreconditionAMG preconditioner;
     LinearAlgebra::PreconditionAMG::AdditionalData amg_data;
 
     std::vector<bool> phase_field_component_mask(this->introspection().n_components, false);
-    phase_field_component_mask[system_info.phase_field_component_index] = true;
+    phase_field_component_mask[component_index] = true;
 #if DEAL_II_VERSION_GTE(9,7,0)
     amg_data.constant_modes = DoFTools::extract_constant_modes(
                                 this->get_dof_handler(),
@@ -668,12 +645,11 @@ namespace aspect
 
   template <int dim>
   double
-  PhaseFieldHandler<dim>::
-  solve_timestep(LinearAlgebra::BlockSparseMatrix &system_matrix,
-                 LinearAlgebra::BlockVector       &system_rhs,
-                 LinearAlgebra::BlockVector       &solution)
+  PhaseFieldHandler<dim>::solve(LinearAlgebra::BlockSparseMatrix &system_matrix,
+                                LinearAlgebra::BlockVector       &system_rhs,
+                                LinearAlgebra::BlockVector       &solution)
   {
-    const unsigned int block_index = system_info.phase_field_block_index;
+    const unsigned int block_index = this->introspection().variable("phase_field").block_index;
 
     // Compute the initial residual
     assemble_linearized_system(system_matrix, system_rhs, solution, false);
@@ -767,6 +743,8 @@ namespace aspect
 
     const AffineConstraints<double> &current_constraints = this->get_current_constraints();
 
+    const unsigned int component_index = this->introspection().variable("phase_field").first_component_index;
+
     // Loop over the locally owned cells and add the nonzero entries of CPDI system
     for (const auto &cell : this->get_dof_handler().active_cell_iterators())
       if (cell->is_locally_owned())
@@ -793,7 +771,7 @@ namespace aspect
                                                                       &this->get_dof_handler());
 
               for (const unsigned int v : dof_cell->vertex_indices())
-                coupled_dofs.insert(dof_cell->vertex_dof_index(v, system_info.phase_field_component_index));
+                coupled_dofs.insert(dof_cell->vertex_dof_index(v, component_index));
             }
 
           current_constraints.add_entries_local_to_global(std::vector<types::global_dof_index>(coupled_dofs.begin(),
@@ -810,7 +788,7 @@ namespace aspect
           {
             const unsigned int vertex_index = cell->vertex_index(v);
             if (vertex_to_dof_indices[vertex_index] == numbers::invalid_dof_index)
-              vertex_to_dof_indices[vertex_index] = cell->vertex_dof_index(v, system_info.phase_field_component_index);
+              vertex_to_dof_indices[vertex_index] = cell->vertex_dof_index(v, component_index);
           }
   }
 

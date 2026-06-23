@@ -592,6 +592,8 @@ namespace aspect
       pcout << std::endl;
     };
 
+    signals.pre_assemble_stokes_system(*this);
+
     // build the preconditioner
     auto build_preconditioner = [&]()
     {
@@ -610,7 +612,11 @@ namespace aspect
         dcr.switch_initial_residual = dcr.initial_residual;
         dcr.residual_old = dcr.initial_residual;
         dcr.residual = dcr.initial_residual;
-        assemble_newton_stokes_system = assemble_newton_stokes_matrix = false;
+
+        if (parameters.use_implicit_constitutive_model)
+          assemble_newton_stokes_system = assemble_newton_stokes_matrix = true;
+        else
+          assemble_newton_stokes_system = assemble_newton_stokes_matrix = false;
       }
     else
       assemble_newton_stokes_system = assemble_newton_stokes_matrix = true;
@@ -877,8 +883,9 @@ namespace aspect
       }
     while (nonlinear_solver_control.check(nonlinear_iteration, relative_residual) == SolverControl::iterate);
 
-    AssertThrow(nonlinear_solver_control.last_check() != SolverControl::failure, ExcNonlinearSolverNoConvergence());
     signals.post_nonlinear_solver(nonlinear_solver_control);
+
+    AssertThrow(nonlinear_solver_control.last_check() != SolverControl::failure, ExcNonlinearSolverNoConvergence());
   }
 
 
@@ -936,12 +943,12 @@ namespace aspect
       }
     while (nonlinear_solver_control.check(nonlinear_iteration, relative_residual) == SolverControl::iterate);
 
-    AssertThrow(nonlinear_solver_control.last_check() != SolverControl::failure, ExcNonlinearSolverNoConvergence());
+    signals.post_nonlinear_solver(nonlinear_solver_control);
 
     // Reset the linear tolerance to what it was at the beginning of the time step.
     parameters.linear_stokes_solver_tolerance = begin_linear_tolerance;
 
-    signals.post_nonlinear_solver(nonlinear_solver_control);
+    AssertThrow(nonlinear_solver_control.last_check() != SolverControl::failure, ExcNonlinearSolverNoConvergence());
   }
 
 
@@ -1003,13 +1010,11 @@ namespace aspect
   template <int dim>
   void Simulator<dim>::solve_single_advection_single_stokes ()
   {
+    if (parameters.enable_phase_field)
+      phase_field_handler->solve(system_matrix, system_rhs, solution);
+
     assemble_and_solve_temperature();
     assemble_and_solve_composition();
-
-    if (parameters.enable_phase_field)
-      phase_field_handler->solve_timestep(system_matrix, 
-                                          system_rhs, 
-                                          solution);
 
     assemble_and_solve_stokes();
 
@@ -1066,8 +1071,9 @@ namespace aspect
       }
     while (nonlinear_solver_control.check(nonlinear_iteration, relative_residual) == SolverControl::iterate);
 
-    AssertThrow(nonlinear_solver_control.last_check() != SolverControl::failure, ExcNonlinearSolverNoConvergence());
     signals.post_nonlinear_solver(nonlinear_solver_control);
+
+    AssertThrow(nonlinear_solver_control.last_check() != SolverControl::failure, ExcNonlinearSolverNoConvergence());
   }
 
 
@@ -1084,14 +1090,15 @@ namespace aspect
   template <int dim>
   void Simulator<dim>::solve_single_advection_iterated_newton_stokes (const bool use_newton_iterations)
   {
-    // First assemble and solve the temperature and compositional fields
+    // If the phase field method is enabled, we need to solve the phase field 
+    // system first, since the evolution of compositional fields may depend on 
+    // the phase field
+    if (parameters.enable_phase_field)
+      phase_field_handler->solve(system_matrix, system_rhs, solution);
+
+    // Assemble and solve the temperature and compositional fields
     assemble_and_solve_temperature();
     assemble_and_solve_composition();
-
-    if (parameters.enable_phase_field)
-      phase_field_handler->solve_timestep(system_matrix,
-                                          system_rhs,
-                                          solution);
 
     // Now store the linear_tolerance we started out with, because we might change
     // it within this timestep.
@@ -1141,7 +1148,8 @@ namespace aspect
             nonlinear_solver_control_picard.check(nonlinear_iteration, relative_residual) != SolverControl::iterate)
           {
             use_picard = false;
-            pcout << "   Switching from defect correction form of Picard to the Newton solver scheme." << std::endl;
+            if (!parameters.use_implicit_constitutive_model)
+              pcout << "   Switching from defect correction form of Picard to the Newton solver scheme." << std::endl;
 
             /**
              * This method allows to slowly introduce the derivatives based
@@ -1180,9 +1188,9 @@ namespace aspect
     // Reset the linear tolerance to what it was at the beginning of the time step.
     parameters.linear_stokes_solver_tolerance = begin_linear_tolerance;
 
-    AssertThrow(nonlinear_solver_control.last_check() != SolverControl::failure, ExcNonlinearSolverNoConvergence());
-
     signals.post_nonlinear_solver(nonlinear_solver_control);
+
+    AssertThrow(nonlinear_solver_control.last_check() != SolverControl::failure, ExcNonlinearSolverNoConvergence());
   }
 
 
@@ -1279,8 +1287,9 @@ namespace aspect
 
     }
 
-    AssertThrow(nonlinear_solver_control.last_check() != SolverControl::failure, ExcNonlinearSolverNoConvergence());
     signals.post_nonlinear_solver(nonlinear_solver_control);
+
+    AssertThrow(nonlinear_solver_control.last_check() != SolverControl::failure, ExcNonlinearSolverNoConvergence());
   }
 
 
@@ -1360,8 +1369,9 @@ namespace aspect
       }
     while (nonlinear_solver_control.check(nonlinear_iteration, relative_residual) == SolverControl::iterate);
 
-    AssertThrow(nonlinear_solver_control.last_check() != SolverControl::failure, ExcNonlinearSolverNoConvergence());
     signals.post_nonlinear_solver(nonlinear_solver_control);
+
+    AssertThrow(nonlinear_solver_control.last_check() != SolverControl::failure, ExcNonlinearSolverNoConvergence());
   }
 
 
@@ -1498,9 +1508,9 @@ namespace aspect
     // Reset the linear tolerance to what it was at the beginning of the time step.
     parameters.linear_stokes_solver_tolerance = begin_linear_tolerance;
 
-    AssertThrow(nonlinear_solver_control.last_check() != SolverControl::failure, ExcNonlinearSolverNoConvergence());
-
     signals.post_nonlinear_solver(nonlinear_solver_control);
+
+    AssertThrow(nonlinear_solver_control.last_check() != SolverControl::failure, ExcNonlinearSolverNoConvergence());
   }
 }
 

@@ -71,6 +71,11 @@ namespace aspect
       {
         assemblers.stokes_preconditioner.push_back(std::make_unique<aspect::Assemblers::ImplicitConstitutiveStokesPreconditioner<dim>>());
         assemblers.stokes_system.push_back(std::make_unique<aspect::Assemblers::ImplicitConstitutiveStokesSystem<dim>>());
+      }
+    else
+      {
+        assemblers.stokes_preconditioner.push_back(std::make_unique<aspect::Assemblers::NewtonStokesPreconditioner<dim>>());
+        assemblers.stokes_system.push_back(std::make_unique<aspect::Assemblers::NewtonStokesIncompressibleTerms<dim>>());
 
         if (this->get_material_model().is_compressible() ||
             this->get_parameters().enable_prescribed_dilation)
@@ -83,11 +88,6 @@ namespace aspect
             assemblers.stokes_system.push_back(
               std::make_unique<aspect::Assemblers::NewtonStokesCompressibleStrainRateViscosityTerm<dim>>());
           }
-      }
-    else
-      {
-        assemblers.stokes_preconditioner.push_back(std::make_unique<aspect::Assemblers::NewtonStokesPreconditioner<dim>>());
-        assemblers.stokes_system.push_back(std::make_unique<aspect::Assemblers::NewtonStokesIncompressibleTerms<dim>>());
       }
 
     if (this->get_parameters().formulation_mass_conservation ==
