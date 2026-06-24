@@ -30,19 +30,16 @@ namespace aspect
       template <int dim>
       double
       RateStateFriction<dim>::
-      slip_state (const double V_raw,
-                  const double theta_k,
-                  const double dt) const
+      slip_state(const double V_raw,
+                 const double theta_k,
+                 const double dt) const
       {
         AssertThrow(theta_k > 0, ExcMessage("The slip state is non-positive."));
         AssertThrow(dt >= 0, ExcMessage("Time step is negative."));
 
-        if (dt == 0)
-          return theta_k;
-
         const double V = std::clamp(V_raw, Vmin, Vmax);
         const double x = V * dt / Dc;
-        return theta_k * std::exp(-x) - dt / x * std::expm1(-x);
+        return -Dc / V * std::expm1(-x) + theta_k * std::exp(-x);
       }
 
 
@@ -50,11 +47,10 @@ namespace aspect
       template <int dim>
       double
       RateStateFriction<dim>::
-      friction_coefficient (const std::vector<double> &volume_fractions,
-                            const double V_raw,
-                            const double theta_k,
-                            const double dt,
-                            const bool regularized) const
+      friction_coefficient(const std::vector<double> &volume_fractions,
+                           const double V_raw,
+                           const double theta_k,
+                           const double dt) const
       {
         AssertDimension(volume_fractions.size(), mu0.size());
 
@@ -68,14 +64,13 @@ namespace aspect
             }
 
         const double V = std::clamp(V_raw, Vmin, Vmax);
-        const double x = V * dt / Dc;
-        const double theta_bar = ((dt / x - theta_k) * std::expm1(-x) + dt) / x;
+        const double theta = slip_state(V, theta_k, dt);
 
         return (regularized
                 ?
-                a_eff * std::asinh(V / (2. * V0) * std::exp((mu0_eff + b_eff * std::log(theta_bar * V0 / Dc)) / a_eff))
+                a_eff * std::asinh(V / (2. * V0) * std::exp((mu0_eff + b_eff * std::log(theta * V0 / Dc)) / a_eff))
                 :
-                mu0_eff + a_eff * std::log(V / V0) + b_eff * std::log(theta_bar * V0 / Dc));
+                mu0_eff + a_eff * std::log(V / V0) + b_eff * std::log(theta * V0 / Dc));
       }
 
 
@@ -85,12 +80,11 @@ namespace aspect
       RateStateFriction<dim>::
       friction_coefficient_derivative(const std::vector<double> &volume_fractions,
                                       const double               V_raw,
-                                      const double               theta_old,
-                                      const double               dt,
-                                      const bool                 regularized) const
+                                      const double               theta_k,
+                                      const double               dt) const
       {
         AssertIndexRange(volume_fractions.size(), mu0.size());
-        AssertThrow(theta_old > 0, ExcMessage("The slip state is non-positive."));
+        AssertThrow(theta_k > 0, ExcMessage("The slip state is non-positive."));
         AssertThrow(dt > 0, ExcMessage("Time step is non-positive."));
 
         double mu0_eff = 0, a_eff = 0, b_eff = 0;
@@ -104,67 +98,20 @@ namespace aspect
 
         const double V = std::clamp(V_raw, Vmin, Vmax);
         const double x = V * dt / Dc;
+        const double E = std::exp(-x);
+        const double Em1 = std::expm1(-x);
+        const double theta = -Dc / V * Em1 + theta_k * E;
+        const double dtheta_dV = Dc / (V * V) * Em1 + (dt / V - theta_k * dt / Dc) * E;
 
-        // Auxiliary variables:
-        // phi1 = (1 - exp(-x)) / x,
-        // phi2 = (exp(-x) - 1 + x) / x^2.
-        double phi1, phi2, dphi1, dphi2;
-
-        if (x < 1.e-4)
-          {
-            // Horner form for efficiency.
-            phi1 =
-              1.0 + x * (-0.5 + x * (1.0 / 6.0 + x * (-1.0 / 24.0
-              + x * (1.0 / 120.0 + x * (-1.0 / 720.0
-              + x * (1.0 / 5040.0))))));
-
-            phi2 =
-              0.5 + x * (-1.0 / 6.0 + x * (1.0 / 24.0 + x * (-1.0 / 120.0
-              + x * (1.0 / 720.0 + x * (-1.0 / 5040.0
-              + x * (1.0 / 40320.0))))));
-
-            dphi1 =
-              -0.5 + x * (1.0 / 3.0 + x * (-1.0 / 8.0 + x * (1.0 / 30.0
-              + x * (-1.0 / 144.0 + x * (1.0 / 840.0
-              + x * (-1.0 / 5760.0))))));
-
-            dphi2 =
-              -1.0 / 6.0 + x * (1.0 / 12.0 + x * (-1.0 / 40.0
-              + x * (1.0 / 180.0 + x * (-1.0 / 1008.0
-              + x * (1.0 / 6720.0 + x * (-1.0 / 51840.0))))));
-          }
-        else
-          {
-            const double Em1 = std::expm1(-x); // exp(-x) - 1
-            const double E   = Em1 + 1.;       // exp(-x)
-
-            const double inv_x  = 1. / x;
-            const double inv_x2 = inv_x * inv_x;
-            const double inv_x3 = inv_x2 * inv_x;
-
-            phi1 = -Em1 * inv_x;
-            phi2 = (Em1 + x) * inv_x2;
-
-            dphi1 = ((x + 1.) * E - 1.) * inv_x2;
-            dphi2 = (-Em1 * x - 2. * (Em1 + x)) * inv_x3;
-          }
-
-        const double q  = theta_k / dt;
-        const double h  = q * phi1 + phi2;
-        const double dh = q * dphi1 + dphi2;
-
-        const double ratio = x * dh / h;
-
-        double dmu = (a + b * ratio) / V;
+        double dmu_dV = a_eff / V + b_eff / theta * dtheta_dV;
         if (regularized)
           {
-            const double theta_bar = dt * h;
-            const double Z = V / (2. * V0) * std::exp((mu0 + b * std::log(V0 * theta_bar / Dc)) / a);
+            const double Z = V / (2. * V0) * std::exp((mu0_eff + b_eff * std::log(V0 * theta / Dc)) / a_eff);
             if (Z < 1.e6)
-              dmu *= Z / (std::sqrt(1. + Z * Z));
+              dmu_dV *= Z / (std::sqrt(1. + Z * Z));
           }
 
-        return dmu;
+        return dmu_dV;
       }
 
 
@@ -177,9 +124,12 @@ namespace aspect
         prm.declare_entry ("Reference slip rate", "1.e-6",
                            Patterns::Double(0.),
                            "The reference slip rate, $V_0$. Units: \\si{\\meter\\per\\second}.");
-        prm.declare_entry ("Minimum slip rate", "1.e-9",
+        prm.declare_entry ("Minimum slip rate", "1.e-20",
                            Patterns::Double(0.),
                            "The lower bound of slip rate. Units: \\si{\\miter\\per\\second}.");
+        prm.declare_entry ("Maximum slip rate", "100",
+                           Patterns::Double(0.),
+                           "The upper bound of slip rate. Units: \\si{\\miter\\per\\second}.");
         prm.declare_entry ("Characteristic slip distance", "0.04",
                            Patterns::Double(0.),
                            "The characteristic slip distance, $D_c$. Units: \\si{\\meter}.");
@@ -210,9 +160,10 @@ namespace aspect
       RateStateFriction<dim>::
       parse_parameters (ParameterHandler &prm)
       {
-        V0    = prm.get_double("Reference slip rate");
-        V_min = prm.get_double("Minimum slip rate");
-        Dc    = prm.get_double("Characteristic slip distance");
+        V0   = prm.get_double("Reference slip rate");
+        Vmin = prm.get_double("Minimum slip rate");
+        Vmax = prm.get_double("Maximum slip rate");
+        Dc   = prm.get_double("Characteristic slip distance");
 
         // Retrieve the list of composition names
         std::vector<std::string> compositional_field_names = this->introspection().get_composition_names();

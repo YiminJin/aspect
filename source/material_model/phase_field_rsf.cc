@@ -39,10 +39,9 @@ namespace aspect
                   ExcMessage("The phase field PSF model requires phase field to be included in "
                              "the system formulation. Please set <Formulation/Include phase field> to true."));
 
-      AssertThrow(this->get_parameters().enable_elasticity == false,
-                  ExcMessage("The phase field RSF model assumes viscoelastic rheology for intact regions, but "
-                             "the elasticity is not handled by MaterialModel::Rheology::Elasticity. Please set "
-                             "<Formulation/Enable elasticity> to false."));
+      AssertThrow(this->get_parameters().enable_elasticity == true,
+                  ExcMessage("The phase field RSF model requires elasticity to be enabled. Please set "
+                             "<Formulation/Enable elasticity> to true."));
 
       AssertThrow(this->get_parameters().use_implicit_constitutive_model == true,
                   ExcMessage("The phase field RSF model requires the Stokes assemblers to support implicit "
@@ -242,7 +241,7 @@ namespace aspect
                   // Compute the softening factor
                   const double V         = particle_properties[particle_data_positions.slip_rate];
                   const double theta_old = particle_properties[particle_data_positions.slip_state];
-                  const double dmu_dV    = calculate_friction_coefficient_derivative(V, theta_old, dt, volume_fractions);
+                  const double dmu_dV    = rsf_rheology.friction_coefficient_derivative(volume_fractions, V, theta_old, dt);
 
                   const Tensor<1, dim> &grad_pf = particle_solution_gradients[phase_field_component_index];
                   const double gamma = this->get_phase_field_handler().crack_surface_density(pf, grad_pf);
@@ -265,7 +264,7 @@ namespace aspect
                   double softening_factor = 0;
                   if (this->get_nonlinear_iteration() > 0)
                     {
-                      softening_factor = (1. - g) * gamma * eta_ve / (gamma * eta_ve + dmu_dV * p_bar + eta_d);
+                      softening_factor = gamma * eta_ve / (gamma * eta_ve / (1. - g) + dmu_dV * p_bar + eta_d);
                       if (softening_factor <= 0)
                         {
                           std::stringstream error_message;
@@ -599,13 +598,13 @@ namespace aspect
                     {
                       const SymmetricTensor<2, dim> epsilon_eff = epsilon - (V_current * gamma) * S;
                       const SymmetricTensor<2, dim> tau_f = calculate_viscoelastic_stress(epsilon_eff, tau_f_old, eta, G);
-                      const double mu = calculate_friction_coefficient(V_current, theta_old, dt, volume_fractions);
+                      const double mu = rsf_rheology.friction_coefficient(volume_fractions, V_current, theta_old, dt);
                       return tau_f * S - mu * p_bar - eta_d * V_current;
                     };
 
                     auto F_derivative = [&](const double V_current)
                     {
-                      const double dmu_dV = calculate_friction_coefficient_derivative(V_current, theta_old, dt, volume_fractions);
+                      const double dmu_dV = rsf_rheology.friction_coefficient_derivative(volume_fractions, V_current, theta_old, dt);
                       return -(gamma * eta_ve + p_bar * dmu_dV + eta_d);
                     };
 
@@ -614,7 +613,7 @@ namespace aspect
                     const double V_init = particle_properties[particle_data_positions.slip_rate];
                     const double F_init = F_value(V_init);
 
-                    const double mu_init = calculate_friction_coefficient(V_init, theta_old, dt, volume_fractions);
+                    const double mu_init = rsf_rheology.friction_coefficient(volume_fractions, V_init, theta_old, dt);
                     if (std::abs(F_init) > (mu_init * p_bar + eta_d * V_init) * 1.e-6)
                       {
                         const double V = solve_RSF_consistent_equation(F_value, F_derivative, V_init, F_init, convergence_history);
@@ -906,7 +905,7 @@ convergence_check:
                         for (unsigned int d = 0; d < dim; ++d)
                           n_old[d] = particle_properties[particle_data_positions.normal_direction + d];
 
-                        const double mu = calculate_friction_coefficient(V, theta_old, dt, volume_fractions);
+                        const double mu = rsf_rheology.friction_coefficient(volume_fractions, V, theta_old, dt);
                         const double phi = (numbers::PI - 2. * std::atan(mu)) * 0.25;
                         const Tensor<1, dim> n_new = calculate_fault_normal(tau_b, grad_u, phi);
 
@@ -938,7 +937,7 @@ convergence_check:
                     
                     // First, compute the frictional strength s_f and the peak shear strength s_p
                     const double theta_old = particle_properties[particle_data_positions.slip_state];
-                    const double mu    = calculate_friction_coefficient(0, theta_old, dt, volume_fractions);
+                    const double mu    = rsf_rheology.friction_coefficient(volume_fractions, 0, theta_old, dt);
                     const double p_bar = this->get_adiabatic_conditions().pressure(particle->get_location());
                     const double c     = MaterialUtilities::average_value(volume_fractions, cohesions, MaterialUtilities::arithmetic);
 
@@ -981,13 +980,13 @@ convergence_check:
 
                         auto F_value = [&](const double V_current)
                         {
-                          const double mu = calculate_friction_coefficient(V_current, theta_old, dt, volume_fractions);
+                          const double mu = rsf_rheology.friction_coefficient(volume_fractions, V_current, theta_old, dt);
                           return s_f - mu * p_bar - eta_d * V_current;
                         };
 
                         auto F_derivative = [&](const double V_current)
                         {
-                          const double dmu_dV = calculate_friction_coefficient_derivative(V_current, theta_old, dt, volume_fractions);
+                          const double dmu_dV = rsf_rheology.friction_coefficient_derivative(volume_fractions, V_current, theta_old, dt);
                           return -(p_bar * dmu_dV + eta_d);
                         };
 
@@ -1124,52 +1123,13 @@ convergence_check:
     template <int dim>
     double
     PhaseFieldRSF<dim>::
-    calculate_friction_coefficient(const double V,
-                                   const double theta_old,
-                                   const double dt,
-                                   const std::vector<double> &volume_fractions) const
-    {
-      double mu = 0;
-      for (unsigned int j = 0; j < volume_fractions.size(); ++j)
-        if (volume_fractions[j] > 0)
-          mu += volume_fractions[j] * rsf_rheology.friction_coefficient(j, V, theta_old, dt, true);
-
-      return mu;
-    }
-
-
-
-    template <int dim>
-    double
-    PhaseFieldRSF<dim>::
-    calculate_friction_coefficient_derivative(const double V,
-                                              const double theta_old,
-                                              const double dt,
-                                              const std::vector<double> &volume_fractions) const
-    {
-      if (V < std::numeric_limits<double>::epsilon())
-        return 0.0;
-
-      double dmu_dV = 0;
-      for (unsigned int j = 0; j < volume_fractions.size(); ++j)
-        if (volume_fractions[j] > 0)
-          dmu_dV += volume_fractions[j] * rsf_rheology.friction_coefficient_derivative(j, V, theta_old, dt, true);
-
-      return dmu_dV;
-    }
-
-
-
-    template <int dim>
-    double
-    PhaseFieldRSF<dim>::
     calculate_friction_strength(const Point<dim>          &position,
                                 const double               slip_rate,
                                 const double               slip_state,
                                 const std::vector<double> &volume_fractions) const
     {
       const double dt = (this->get_timestep_number() > 0 ? this->get_timestep() : initial_time_step);
-      const double mu = calculate_friction_coefficient(slip_rate, slip_state, dt, volume_fractions);
+      const double mu = rsf_rheology.friction_coefficient(volume_fractions, slip_rate, slip_state, dt);
       const double p_bar = this->get_adiabatic_conditions().pressure(position);
       const double eta_d = MaterialUtilities::average_value(volume_fractions, radiation_damping_coefficients, MaterialUtilities::arithmetic);
       return mu * p_bar + eta_d * slip_rate;
@@ -1336,6 +1296,10 @@ convergence_check:
           // Equation of state parameters
           equation_of_state.initialize_simulator(this->get_simulator());
           equation_of_state.parse_parameters(prm);
+
+          // Elasticity parameters
+          elastic_rheology.initialize_simulator(this->get_simulator());
+          elastic_rheology.parse_parameters(prm);
 
           // RSF parameters
           rsf_rheology.initialize_simulator(this->get_simulator());

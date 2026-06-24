@@ -26,6 +26,7 @@
 #include <aspect/solution_evaluator.h>
 #include <aspect/material_model/interface.h>
 #include <aspect/material_model/equation_of_state/multicomponent_incompressible.h>
+#include <aspect/material_model/rheology/elasticity.h>
 #include <aspect/material_model/rheology/rate_state_friction.h>
 
 namespace aspect
@@ -95,19 +96,9 @@ namespace aspect
                                       const double                   creep_viscosity,
                                       const double                   shear_modulus) const;
 
-        double 
-        calculate_friction_coefficient(const double               slip_rate,
-                                       const double               old_slip_state,
-                                       const double               time_step,
-                                       const std::vector<double> &volume_fractions) const;
-
-        double
-        calculate_friction_coefficient_derivative(const double               slip_rate,
-                                                  const double               old_slip_state,
-                                                  const double               time_step,
-                                                  const std::vector<double> &volume_fractions) const;
-
         EquationOfState::MulticomponentIncompressible<dim> equation_of_state;
+
+        Rheology::Elasticity<dim> elastic_rheology;
 
         Rheology::RateStateFriction<dim> rsf_rheology;
 
