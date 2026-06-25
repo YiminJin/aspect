@@ -89,7 +89,6 @@ namespace aspect
           std::vector<double> mu0;
           std::vector<double> a;
           std::vector<double> b;
-          std::vector<double> eta_d;
       };
 
       // Inline functions

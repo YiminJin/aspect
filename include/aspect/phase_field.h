@@ -40,15 +40,15 @@ namespace aspect
         virtual ~PhaseFieldModel() = default;
 
         /**
-         * Returns the threshold crack driving force ($H_t$) for background
+         * Returns the critical crack driving forces for background
          * material and compositional fields.
          */
         virtual
         std::vector<double>
-        get_threshold_crack_driving_forces() const = 0;
+        get_critical_crack_driving_forces() const = 0;
 
         /**
-         * Returns the critical energy release rate ($G_c$) for background
+         * Returns the critical energy release rates for background
          * material and compositional fields.
          */
         virtual

@@ -31,15 +31,15 @@ namespace aspect
       double
       RateStateFriction<dim>::
       slip_state(const double V_raw,
-                 const double theta_k,
+                 const double theta_old,
                  const double dt) const
       {
-        AssertThrow(theta_k > 0, ExcMessage("The slip state is non-positive."));
+        AssertThrow(theta_old > 0, ExcMessage("The slip state is non-positive."));
         AssertThrow(dt >= 0, ExcMessage("Time step is negative."));
 
         const double V = std::clamp(V_raw, Vmin, Vmax);
         const double x = V * dt / Dc;
-        return -Dc / V * std::expm1(-x) + theta_k * std::exp(-x);
+        return -Dc / V * std::expm1(-x) + theta_old * std::exp(-x);
       }
 
 
@@ -49,7 +49,7 @@ namespace aspect
       RateStateFriction<dim>::
       friction_coefficient(const std::vector<double> &volume_fractions,
                            const double V_raw,
-                           const double theta_k,
+                           const double theta_old,
                            const double dt) const
       {
         AssertDimension(volume_fractions.size(), mu0.size());
@@ -64,7 +64,7 @@ namespace aspect
             }
 
         const double V = std::clamp(V_raw, Vmin, Vmax);
-        const double theta = slip_state(V, theta_k, dt);
+        const double theta = slip_state(V, theta_old, dt);
 
         return (regularized
                 ?
@@ -80,11 +80,11 @@ namespace aspect
       RateStateFriction<dim>::
       friction_coefficient_derivative(const std::vector<double> &volume_fractions,
                                       const double               V_raw,
-                                      const double               theta_k,
+                                      const double               theta_old,
                                       const double               dt) const
       {
         AssertIndexRange(volume_fractions.size(), mu0.size());
-        AssertThrow(theta_k > 0, ExcMessage("The slip state is non-positive."));
+        AssertThrow(theta_old > 0, ExcMessage("The slip state is non-positive."));
         AssertThrow(dt > 0, ExcMessage("Time step is non-positive."));
 
         double mu0_eff = 0, a_eff = 0, b_eff = 0;
@@ -100,8 +100,8 @@ namespace aspect
         const double x = V * dt / Dc;
         const double E = std::exp(-x);
         const double Em1 = std::expm1(-x);
-        const double theta = -Dc / V * Em1 + theta_k * E;
-        const double dtheta_dV = Dc / (V * V) * Em1 + (dt / V - theta_k * dt / Dc) * E;
+        const double theta = -Dc / V * Em1 + theta_old * E;
+        const double dtheta_dV = Dc / (V * V) * Em1 + (dt / V - theta_old * dt / Dc) * E;
 
         double dmu_dV = a_eff / V + b_eff / theta * dtheta_dV;
         if (regularized)

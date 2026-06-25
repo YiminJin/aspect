@@ -26,7 +26,6 @@
 #include <aspect/solution_evaluator.h>
 #include <aspect/material_model/interface.h>
 #include <aspect/material_model/equation_of_state/multicomponent_incompressible.h>
-#include <aspect/material_model/rheology/elasticity.h>
 #include <aspect/material_model/rheology/rate_state_friction.h>
 
 namespace aspect
@@ -48,7 +47,7 @@ namespace aspect
                  MaterialModel::MaterialModelOutputs<dim> &out) const override;
 
         std::vector<double>
-        get_threshold_crack_driving_forces() const override;
+        get_critical_crack_driving_forces() const override;
 
         std::vector<double>
         get_critical_energy_release_rates() const override;
@@ -87,18 +86,10 @@ namespace aspect
                                   const std::vector<double> &volume_fractions) const;
 
         double
-        calculate_viscoelastic_viscosity(const double creep_viscosity,
-                                         const double shear_modulus) const;
-
-        SymmetricTensor<2, dim>
-        calculate_viscoelastic_stress(const SymmetricTensor<2, dim> &strain_rate,
-                                      const SymmetricTensor<2, dim> &old_stress,
-                                      const double                   creep_viscosity,
-                                      const double                   shear_modulus) const;
+        calculate_stress_relaxation_factor(const double creep_viscosity,
+                                           const double shear_modulus) const;
 
         EquationOfState::MulticomponentIncompressible<dim> equation_of_state;
-
-        Rheology::Elasticity<dim> elastic_rheology;
 
         Rheology::RateStateFriction<dim> rsf_rheology;
 
@@ -109,8 +100,8 @@ namespace aspect
           unsigned int slip_state;
           unsigned int normal_direction;
           unsigned int slip_direction;
-          unsigned int bulk_stress;
-          unsigned int interface_stress;
+          unsigned int ve_stress;
+          unsigned int cohesive_force;
           std::vector<unsigned int> chemical_fields;
         };
 
