@@ -92,7 +92,7 @@ namespace aspect
             unsigned int slip_state;
             std::array<unsigned int, dim> normal_direction;
             std::array<unsigned int, dim> slip_direction;
-            std::array<unsigned int, SymmetricTensor<2, dim>::n_independent_components> bulk_stress;
+            std::array<unsigned int, SymmetricTensor<2, dim>::n_independent_components> ve_stress;
 
             CompositionalIndices()
               : crack_driving_force(numbers::invalid_unsigned_int)
@@ -101,7 +101,7 @@ namespace aspect
             {
               normal_direction.fill(numbers::invalid_unsigned_int);
               slip_direction.fill(numbers::invalid_unsigned_int);
-              bulk_stress.fill(numbers::invalid_unsigned_int);
+              ve_stress.fill(numbers::invalid_unsigned_int);
             }
           };
 
@@ -110,12 +110,12 @@ namespace aspect
           struct DataPositionCache
           {
             unsigned int crack_driving_force;
+            unsigned int cohesive_force;
             unsigned int slip_rate;
             unsigned int slip_state;
             unsigned int normal_direction;
             unsigned int slip_direction;
-            unsigned int bulk_stress;
-            unsigned int interface_stress;
+            unsigned int ve_stress;
             std::vector<unsigned int> chemical_fields;
           };
 

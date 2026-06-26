@@ -97,12 +97,12 @@ namespace aspect
       const auto &particle_data_info = particle_manager.get_property_manager().get_data_info();
 
       particle_data_positions.crack_driving_force = particle_data_info.get_position_by_field_name("crack_driving_force");
+      particle_data_positions.cohesive_force      = particle_data_info.get_position_by_field_name("cohesive_force");
       particle_data_positions.slip_rate           = particle_data_info.get_position_by_field_name("slip_rate");
       particle_data_positions.slip_state          = particle_data_info.get_position_by_field_name("slip_state");
       particle_data_positions.normal_direction    = particle_data_info.get_position_by_field_name("normal_direction");
       particle_data_positions.slip_direction      = particle_data_info.get_position_by_field_name("slip_direction");
       particle_data_positions.ve_stress           = particle_data_info.get_position_by_field_name("ve_stress");
-      particle_data_positions.cohesive_force      = particle_data_info.get_position_by_field_name("cohesive force");
 
       particle_data_positions.chemical_fields.clear();
       for (const unsigned int index : this->introspection().chemical_composition_field_indices())
@@ -593,7 +593,7 @@ namespace aspect
                     auto F_value = [&](const double V_current)
                     {
                       const double v = V_current * gamma;
-                      const double tau = eta_ve * (2. * (epsilon * S) - v) + beta * (tau_old * S);
+                      const double tau_S = eta_ve * (2. * (epsilon * S) - v) + beta * (tau_old * S);
 
                       const double mu = rsf_rheology.friction_coefficient(volume_fractions, V_current, theta_old, dt);
                       const double tau_fric = mu * p_bar;
@@ -603,7 +603,7 @@ namespace aspect
 
                       const double tau_dpr = eta_d * V_current;
 
-                      return tau - tau_fric - tau_coh - tau_dpr;
+                      return tau_S - tau_fric - tau_coh - tau_dpr;
                     };
 
                     auto F_derivative = [&](const double V_current)
@@ -924,7 +924,7 @@ convergence_check:
                         Tensor<1, dim> n = eigenvalues_and_vectors[0].second;
                         n /= n.norm();
 
-                        const Tensor<1, dim> t = tau_b * n;
+                        const Tensor<1, dim> t = tau * n;
                         Tensor<1, dim> s = t - (t * n) * n;
                         s /= s.norm();
 
@@ -937,110 +937,44 @@ convergence_check:
                   }
                 else
                   {
-                    // The particle is intact. Check if it reaches the peak strength
-                    
-                    // First, compute the frictional strength s_f and the peak shear strength s_p
+                    // The particle is intact. Update the viscoelastic stress
+                    const SymmetricTensor<2, dim> tau = 2. * eta_ve * epsilon + beta * tau_old;
+                    Utilities::Tensors::unroll_symmetric_tensor_into_array<dim>(
+                      tau,
+                      &particle_properties[particle_data_positions.ve_stress],
+                      &particle_properties[particle_data_positions.ve_stress] + SymmetricTensor<2, dim>::n_independent_components);
+
+                    // Update the slip state
                     const double theta_old = particle_properties[particle_data_positions.slip_state];
+                    particle_properties[particle_data_positions.slip_state] = rsf_rheology.slip_state(0., theta_old, dt);
+
+                    // Check if the particle reaches the peak strength
                     const double mu    = rsf_rheology.friction_coefficient(volume_fractions, 0, theta_old, dt);
                     const double p_bar = this->get_adiabatic_conditions().pressure(particle->get_location());
                     const double c     = MaterialUtilities::average_value(volume_fractions, cohesions, MaterialUtilities::arithmetic);
 
-                    const double s_f = p_bar * mu;
-                    const double s_p = s_f + c;
-
-                    // Next, determine the potential fault plane, which maximizes the stress drop
                     const double phi = (numbers::PI - 2. * std::atan(mu)) * 0.25;
-                    const Tensor<1, dim> n = calculate_fault_normal(tau_b, grad_u, phi);
+                    const Tensor<1, dim> n = calculate_fault_normal(tau, grad_u, phi);
 
-                    const Tensor<1, dim> t = tau_b * n;
+                    const Tensor<1, dim> t = tau * n;
                     const Tensor<1, dim> t_s = t - (t * n) * n;
-                    if (t_s.norm() > s_p)
+                    const double tau_diff = t_s.norm() - mu * p_bar;
+                    if (tau_diff > c)
                       {
-                        // The particle is being fractured. Initialize the normal direction and slip direction
+                        // The particle is being fractured. Update the crack driving force
+                        particle_properties[particle_data_positions.crack_driving_force] = (tau_diff * tau_diff) / (2. * G);
+
+                        // Initialize the normal direction and slip direction
                         const Tensor<1, dim> s = t_s / t_s.norm();
                         for (unsigned int d = 0; d < dim; ++d)
                           {
                             particle_properties[particle_data_positions.normal_direction + d] = n[d];
                             particle_properties[particle_data_positions.slip_direction + d] = s[d];
                           }
-
-                        // Update the interface stress
-                        const SymmetricTensor<2, dim> S = symmetrize(outer_product(n, s));
-                        const SymmetricTensor<2, dim> tau_f = tau_b - 2. * (t_s.norm() - s_f) * S;
-                        Utilities::Tensors::unroll_symmetric_tensor_into_array<dim>(
-                          tau_f,
-                          &particle_properties[particle_data_positions.interface_stress],
-                          &particle_properties[particle_data_positions.interface_stress] + SymmetricTensor<2, dim>::n_independent_components);
-
-                        // Update the crack driving force
-                        const SymmetricTensor<2, dim> epsilon_e = epsilon - tau_b / (2. * eta);
-                        particle_properties[particle_data_positions.crack_driving_force] += ((tau_b - tau_f) * epsilon_e) * dt;
-
-                        // Update the slip rate and slip state. The slip rate is obtained by solving
-                        // the consistent equation (F = 0)
-                        const double eta_d = MaterialUtilities::average_value(volume_fractions, 
-                                                                              radiation_damping_coefficients, 
-                                                                              MaterialUtilities::arithmetic);
-
-                        auto F_value = [&](const double V_current)
-                        {
-                          const double mu = rsf_rheology.friction_coefficient(volume_fractions, V_current, theta_old, dt);
-                          return s_f - mu * p_bar - eta_d * V_current;
-                        };
-
-                        auto F_derivative = [&](const double V_current)
-                        {
-                          const double dmu_dV = rsf_rheology.friction_coefficient_derivative(volume_fractions, V_current, theta_old, dt);
-                          return -(p_bar * dmu_dV + eta_d);
-                        };
-
-                        // Initial guess: 0
-                        const double F_init = F_value(0);
-                        const double V = solve_RSF_consistent_equation(F_value, F_derivative, 0, F_init, convergence_history);
-
-                        // If solution failed, then exit all loops at once
-                        if (convergence_history.success == false)
-                          goto convergence_check;
-
-                        // Update the slip rate and slip state
-                        particle_properties[particle_data_positions.slip_rate] = V;
-                        particle_properties[particle_data_positions.slip_state] = rsf_rheology.slip_state(V, theta_old, dt);
-                      }
-                    else
-                      {
-                        // The particle stays intact. Update the slip state
-                        particle_properties[particle_data_positions.slip_state] = rsf_rheology.slip_state(0., theta_old, dt);
                       }
                   }
               }
           }
-
-convergence_check:
-      const int local_fail_flag = (convergence_history.success ? 0 : 1);
-      const int global_fail_flag = Utilities::MPI::max(local_fail_flag, this->get_mpi_communicator());
-
-      if (global_fail_flag)
-        {
-          // Report the error message for the first faling rank
-          const int my_fail_rank = (convergence_history.success ? 
-                                    std::numeric_limits<int>::max() :
-                                    Utilities::MPI::this_mpi_process(this->get_mpi_communicator()));
-          const int first_fail_rank = Utilities::MPI::min(my_fail_rank, this->get_mpi_communicator());
-
-          if (my_fail_rank == first_fail_rank)
-            {
-              const std::string output_filename =
-                this->get_parameters().output_directory + "convergence_history.txt";
-
-              output_convergence_history(output_filename, convergence_history);
-
-              AssertThrow(false,
-                          ExcMessage("The nonlinear solver failed to find a root for the RSF "
-                                     "consistent equation when initializing the slip state for "
-                                     "an intact particle. See <" + output_filename + 
-                                     "> for the convergence history."));
-            }
-        }
     }
 
 

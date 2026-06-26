@@ -58,30 +58,29 @@ namespace aspect
                 compositional_indices.slip_direction[key_and_value.second.second] = key_and_value.first;
               }
 
-            if (key_and_value.second.first == "bulk_stress")
+            if (key_and_value.second.first == "ve_stress")
               {
                 AssertThrow((key_and_value.second.second < SymmetricTensor<2, dim>::n_independent_components),
-                            ExcMessage("The component indices of bulk stress exceed the range of [0, dim(dim+1)/2-1]."));
-                compositional_indices.bulk_stress[key_and_value.second.second] = key_and_value.first;
+                            ExcMessage("The component indices of viscoelastic stress exceed the range of [0, dim(dim+1)/2-1]."));
+                compositional_indices.ve_stress[key_and_value.second.second] = key_and_value.first;
               }
           }
 
-        // The normal direction and bulk stress must be associated with compositional fields
+        // The normal direction and viscoelastic stress must be associated with compositional fields
         for (unsigned int d = 0; d < dim; ++d)
           AssertThrow(compositional_indices.normal_direction[d] != numbers::invalid_unsigned_int,
                       ExcMessage("Particle property 'normal_direction[d]' (d = 0, ..., dim-1) needs to be "
                                  "associated with a compositional field."));
 
         for (unsigned int c = 0; c < SymmetricTensor<2, dim>::n_independent_components; ++c)
-          AssertThrow(compositional_indices.bulk_stress[c] != numbers::invalid_unsigned_int,
-                      ExcMessage("Particle property 'bulk_stress[c]' (c = 0, ..., dim(dim+1)/2-1) needs to be "
+          AssertThrow(compositional_indices.ve_stress[c] != numbers::invalid_unsigned_int,
+                      ExcMessage("Particle property 've_stress[c]' (c = 0, ..., dim(dim+1)/2-1) needs to be "
                                  "associated with a compositional field."));
 
-        // If the slip rate is associated with a compositional field, then the initial slip rate,
-        // and slip direction will be determined by the initial composition model, and the initial 
-        // interface stress will be computed accordingly; otherwise, the initial slip rate will be
-        // set to the lower limit (stick mode), and the initial slip direction and interface stress
-        // will be set to invalid numbers
+        // If the slip rate is associated with a compositional field, then the initial slip rate
+        // and slip direction will be determined by the initial composition model; otherwise, the 
+        // initial slip rate will be set to the lower limit (stick mode), and the initial slip direction
+        // will be set to NaN
         start_with_slip = (compositional_indices.slip_rate != numbers::invalid_unsigned_int);
         if (start_with_slip == true)
           {
@@ -126,15 +125,14 @@ namespace aspect
       {
         unsigned int position = this->data_position;
         data_position_cache.crack_driving_force = position++;
+        data_position_cache.cohesive_force      = position++;
         data_position_cache.slip_rate           = position++;
         data_position_cache.slip_state          = position++;
         data_position_cache.normal_direction    = position;
         position += dim;
         data_position_cache.slip_direction      = position;
         position += dim;
-        data_position_cache.bulk_stress         = position;
-        position += SymmetricTensor<2, dim>::n_independent_components;
-        data_position_cache.interface_stress    = position;
+        data_position_cache.ve_stress           = position;
 
         const auto &particle_data_info = this->get_phase_field_handler().get_associated_particle_manager().get_property_manager().get_data_info();
         data_position_cache.chemical_fields.clear();
@@ -161,15 +159,18 @@ namespace aspect
           initial_composition[j] = this->get_initial_composition_manager().initial_composition(position, j);
         const std::vector<double> volume_fractions = MaterialModel::MaterialUtilities::compute_only_composition_fractions(
           initial_composition, this->introspection().chemical_composition_field_indices());
-        const double Ht = MaterialModel::MaterialUtilities::average_value(volume_fractions,
-                                                                          material_model.get_threshold_crack_driving_forces(),
+        const double Hc = MaterialModel::MaterialUtilities::average_value(volume_fractions,
+                                                                          material_model.get_critical_crack_driving_forces(),
                                                                           MaterialModel::MaterialUtilities::arithmetic);
 
-        double H = Ht;
+        double H = Hc;
         if (start_with_slip)
-          H = std::max(Ht, this->get_initial_composition_manager().initial_composition(position, compositional_indices.crack_driving_force));
+          H = std::max(Hc, this->get_initial_composition_manager().initial_composition(position, compositional_indices.crack_driving_force));
 
         data.push_back(H);
+
+        // Initialize the cohesive force by 0
+        data.push_back(0.);
 
         // If the user chooses to start with slip, then the initial slip rate is determined by the initial composition;
         // otherwise, the initialslip rate is set to the lower bound
@@ -219,24 +220,9 @@ namespace aspect
         for (unsigned int d = 0; d < dim; ++d)
           data.push_back(s[d]);
 
-        //The initial bulk stress is determined by the initial composition
+        //The initial viscoelastic stress is determined by the initial composition
         for (unsigned int c = 0; c < SymmetricTensor<2, dim>::n_independent_components; ++c)
-          data.push_back(this->get_initial_composition_manager().initial_composition(position, compositional_indices.bulk_stress[c]));
-
-        // Finally, initialize the interface stress
-        SymmetricTensor<2, dim> tau_f = numbers::signaling_nan<SymmetricTensor<2, dim>>();
-        if (start_with_slip)
-          {
-            // If the user chooses to start with slip, then make the interface stress consistent with
-            // the prescribed slip rate, i.e.
-            // $\boldsymbol{\tau}_f^0 = 2(\mu\bar{p} + \eta_d V)\boldsymbol S$
-            const SymmetricTensor<2, dim> S = symmetrize(outer_product(n, s));
-            const double friction_strength = material_model.calculate_friction_strength(position, V, theta, volume_fractions);
-            tau_f = (2. * friction_strength) * S;
-          }
-
-        for (unsigned int c = 0; c < SymmetricTensor<2, dim>::n_independent_components; ++c)
-          data.push_back(tau_f.access_raw_entry(c));
+          data.push_back(this->get_initial_composition_manager().initial_composition(position, compositional_indices.ve_stress[c]));
       }
 
 
@@ -296,9 +282,6 @@ namespace aspect
                           particle_properties[data_position_cache.normal_direction + d] = numbers::signaling_nan<double>();
                           particle_properties[data_position_cache.slip_direction + d]   = numbers::signaling_nan<double>();
                         }
-
-                      for (unsigned int c = 0; c < SymmetricTensor<2, dim>::n_independent_components; ++c)
-                        particle_properties[data_position_cache.interface_stress + c] = numbers::signaling_nan<double>();
                     }
                 }
             }
@@ -324,12 +307,14 @@ namespace aspect
         if (host_cell->state() != IteratorState::valid)
           host_cell = GridTools::find_active_cell_around_point(this->get_mapping(), this->get_triangulation(), particle_location).first;
 
-        // The crack driving force, slip state and bulk stress are interpolated by the user-specified interpolator
+        // The crack driving force, cohesive force, slip state and viscoelastic stress are interpolated 
+        // by the user-specified interpolator
         std::vector<bool> component_mask(data_info.n_components(), false);
         component_mask[data_position_cache.crack_driving_force] = true;
+        component_mask[data_position_cache.cohesive_force] = true;
         component_mask[data_position_cache.slip_state] = true;
         for (unsigned int c = 0; c < SymmetricTensor<2, dim>::n_independent_components; ++c)
-          component_mask[data_position_cache.bulk_stress + c] = true;
+          component_mask[data_position_cache.ve_stress + c] = true;
 
         const std::vector<std::vector<double>> interpolated_properties
           = particle_manager.get_interpolator().properties_at_points(particle_handler,
@@ -338,16 +323,16 @@ namespace aspect
                                                                      host_cell);
 
         particle_properties[data_position_cache.crack_driving_force] = interpolated_properties[0][data_position_cache.crack_driving_force];
+        particle_properties[data_position_cache.cohesive_force] = interpolated_properties[0][data_position_cache.cohesive_force];
         particle_properties[data_position_cache.slip_state] = interpolated_properties[0][data_position_cache.slip_state];
         for (unsigned int c = 0; c < SymmetricTensor<2, dim>::n_independent_components; ++c)
-          particle_properties[data_position_cache.bulk_stress + c] = interpolated_properties[0][data_position_cache.bulk_stress + c];
+          particle_properties[data_position_cache.ve_stress + c] = interpolated_properties[0][data_position_cache.ve_stress + c];
 
         const double my_pf = get_phase_field_value(this->get_solution(), host_cell, this->get_mapping().transform_real_to_unit_cell(host_cell, particle_location));
         if (material_model.is_fractured(my_pf))
           {
-            // The particle is fractured. Interpolate the slip rate, normal direction, slip direction
-            // and interface stress from the fractured neighbor particles with distance-weighted averaging
-            // method
+            // The particle is fractured. Interpolate the slip rate, normal direction and slip direction
+            // from the fractured neighbor particles with distance-weighted averaging method
             const double interpolation_range = 0.5 * host_cell->diameter();
             const double epsilon = interpolation_range * 0.1;
 
@@ -365,7 +350,6 @@ namespace aspect
  
             double slip_rate = 0.;
             Tensor<1, dim> normal_direction, slip_direction;
-            SymmetricTensor<2, dim> interface_stress;
             double integrated_weight = 0.;
             for (const auto &cell : cell_patch)
               {
@@ -389,8 +373,6 @@ namespace aspect
                             normal_direction[d] += weight * neighbor_properties[data_position_cache.normal_direction + d];
                             slip_direction[d]   += weight * neighbor_properties[data_position_cache.slip_direction + d];
                           }
-                        for (unsigned int c = 0; c < SymmetricTensor<2, dim>::n_independent_components; ++c)
-                          interface_stress.access_raw_entry(c) += weight * neighbor_properties[data_position_cache.interface_stress + c];
 
                         integrated_weight += weight;
                       }
@@ -401,7 +383,6 @@ namespace aspect
             slip_rate        /= integrated_weight;
             normal_direction /= integrated_weight;
             slip_direction   /= integrated_weight;
-            interface_stress /= integrated_weight;
 
             normal_direction /= normal_direction.norm();
             slip_direction -= (slip_direction * normal_direction) * normal_direction;
@@ -413,45 +394,19 @@ namespace aspect
                 particle_properties[data_position_cache.normal_direction + d] = normal_direction[d];
                 particle_properties[data_position_cache.slip_direction + d] = slip_direction[d];
               }
-            for (unsigned int c = 0; c < SymmetricTensor<2, dim>::n_independent_components; ++c)
-              particle_properties[data_position_cache.interface_stress + c] = interface_stress.access_raw_entry(c);
           }
         else
           {
-            // The particle is intact. Interpolate the slip state, bulk stress and chemical fields
-            // with the user-specified interpolator
-            std::vector<bool> component_mask(data_info.n_components(), false);
-            component_mask[data_position_cache.slip_state] = true;
-            for (unsigned int c = 0; c < SymmetricTensor<2, dim>::n_independent_components; ++c)
-              component_mask[data_position_cache.bulk_stress + c] = true;
-
-            const unsigned int n_chemical_fields = data_position_cache.chemical_fields.size();
-            for (unsigned int j = 0; j < n_chemical_fields; ++j)
-              component_mask[data_position_cache.chemical_fields[j]] = true;
-
-            const std::vector<std::vector<double>> interpolated_properties
-              = particle_manager.get_interpolator().properties_at_points(particle_handler,
-                                     std::vector<Point<dim>>(1, particle_location),
-                                                                         ComponentMask(component_mask),
-                                                                         host_cell);
-
-            particle_properties[data_position_cache.slip_state] = interpolated_properties[0][data_position_cache.slip_state];
-            for (unsigned int c = 0; c < SymmetricTensor<2, dim>::n_independent_components; ++c)
-              particle_properties[data_position_cache.bulk_stress + c] = interpolated_properties[0][data_position_cache.bulk_stress + c];
-
-            // The crack drving force is initialized to Ht
-            std::vector<double> chemical_field_values(n_chemical_fields);
-            for (unsigned int j = 0; j < n_chemical_fields; ++j)
-              chemical_field_values[j] = interpolated_properties[0][data_position_cache.chemical_fields[j]];
-            const std::vector<double> volume_fractions = MaterialModel::MaterialUtilities::compute_composition_fractions(chemical_field_values);
-
-            const std::vector<double> Ht = material_model.get_threshold_crack_driving_forces();
-            particle_properties[data_position_cache.crack_driving_force] 
-              = MaterialModel::MaterialUtilities::average_value(volume_fractions, Ht, MaterialModel::MaterialUtilities::arithmetic);
-
-            // The slip rate is initialized to the lower bound
+            // The particle is intact. Initialize the slip rate to the lower bound
             const MaterialModel::Rheology::RateStateFriction<dim> &rsf_model = material_model.get_rate_state_friction_model();
             particle_properties[data_position_cache.slip_rate] = rsf_model.get_minimum_slip_rate();
+
+            // Initialize the normal direction and slip direction to NaN
+            for (unsigned int d = 0; d < dim; ++d)
+              {
+                particle_properties[data_position_cache.normal_direction + d] = numbers::signaling_nan<double>();
+                particle_properties[data_position_cache.slip_direction + d] = numbers::signaling_nan<double>();
+              }
           }
 
         return particle_properties;
@@ -521,12 +476,12 @@ namespace aspect
         std::vector<std::pair<std::string, unsigned int>> property_information;
 
         property_information.emplace_back("crack_driving_force", 1);
+        property_information.emplace_back("cohesive_force", 1);
         property_information.emplace_back("slip_rate", 1);
         property_information.emplace_back("slip_state", 1);
         property_information.emplace_back("normal_direction", dim);
         property_information.emplace_back("slip_direction", dim);
-        property_information.emplace_back("bulk_stress", SymmetricTensor<2, dim>::n_independent_components);
-        property_information.emplace_back("interface_stress", SymmetricTensor<2, dim>::n_independent_components);
+        property_information.emplace_back("ve_stress", SymmetricTensor<2, dim>::n_independent_components);
 
         return property_information;
       }

@@ -301,7 +301,7 @@ namespace aspect
                 ExcMessage("The phase field method requires the material model to be derived from "
                            "MaterialModel::PhaseFieldModel."));
     const std::vector<double> &Gc = phase_field_model->get_critical_energy_release_rates();
-    const std::vector<double> &Ht = phase_field_model->get_threshold_crack_driving_forces();
+    const std::vector<double> &Hc = phase_field_model->get_critical_crack_driving_forces();
 
     // Compute the critical energy densities
     const unsigned int n_comp = Gc.size();
@@ -313,7 +313,8 @@ namespace aspect
     degradation_functions.clear();
     for (unsigned int j = 0; j < n_comp; ++j)
       {
-        const double m = Gc[j] / (parameters.geometric_normalization_parameter * parameters.length_scale * Ht[j]);
+        const double m = Gc[j] * geometric_function->first_derivative(0.) 
+                         / (parameters.geometric_normalization_parameter * parameters.length_scale * Hc[j]);
         degradation_functions.push_back(std::make_unique<PhaseField::DegradationFunction>(parameters.degradation_curvature_parameter, m));
       }
 

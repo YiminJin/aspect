@@ -96,12 +96,12 @@ namespace aspect
         struct ParticleDataPositions
         {
           unsigned int crack_driving_force;
+          unsigned int cohesive_force;
           unsigned int slip_rate;
           unsigned int slip_state;
           unsigned int normal_direction;
           unsigned int slip_direction;
           unsigned int ve_stress;
-          unsigned int cohesive_force;
           std::vector<unsigned int> chemical_fields;
         };
 
