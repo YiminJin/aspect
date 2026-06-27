@@ -28,6 +28,18 @@ namespace aspect
 {
   namespace MaterialModel
   {
+    template <int dim>
+    class RSFAdditionalOutputs : public NamedAdditionalMaterialOutputs<dim>
+    {
+      public:
+        RSFAdditionalOutputs(const unsigned int n_points);
+
+        std::vector<double> get_nth_output(const unsigned int idx) const override;
+
+        std::vector<double> friction_coefficients;
+    };
+
+
     namespace Rheology
     {
       template <int dim>

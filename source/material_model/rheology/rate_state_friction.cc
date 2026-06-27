@@ -25,6 +25,25 @@ namespace aspect
 {
   namespace MaterialModel
   {
+    template <int dim>
+    RSFAdditionalOutputs<dim>::RSFAdditionalOutputs(const unsigned int n_points)
+      : NamedAdditionalMaterialOutputs<dim>(std::vector<std::string>(1, "friction_coefficient"))
+      , friction_coefficients(n_points, numbers::signaling_nan<double>())
+    {}
+
+
+
+    template <int dim>
+    std::vector<double>
+    RSFAdditionalOutputs<dim>::get_nth_output(const unsigned int idx) const
+    {
+      AssertIndexRange(idx, 1);
+      (void)idx;
+      return friction_coefficients;
+    }
+
+
+
     namespace Rheology
     {
       template <int dim>
@@ -198,14 +217,16 @@ namespace aspect
 {
   namespace MaterialModel
   {
-    namespace Rheology
-    {
 #define INSTANTIATE(dim) \
-      template class RateStateFriction<dim>;
+    template class RSFAdditionalOutputs<dim>; \
+    \
+    namespace Rheology \
+    { \
+      template class RateStateFriction<dim>; \
+    }
 
-      ASPECT_INSTANTIATE(INSTANTIATE)
+    ASPECT_INSTANTIATE(INSTANTIATE)
 
 #undef INSTANTIATE
-    }
   }
 }

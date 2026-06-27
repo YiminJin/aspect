@@ -60,11 +60,11 @@ namespace aspect
       evaluation_flags[this->introspection().component_indices.temperature] = EvaluationFlags::values;
       evaluation_flags[phase_field_component_index] = EvaluationFlags::values | EvaluationFlags::gradients;
 
-      // Initialize the particle data information when it is sure that the phase field handler is initialized
+      // Initialize the index cache when it is sure that the phase field handler is initialized
       this->get_signals().post_simulator_initialization.connect(
         [&](const SimulatorAccess<dim> &)
       {
-        this->initialize_particle_data_info();
+        this->initialize_index_cache();
       });
 
       // Perform return mapping before assembling the Stokes system
@@ -87,7 +87,7 @@ namespace aspect
 
     template <int dim>
     void
-    PhaseFieldRSF<dim>::initialize_particle_data_info()
+    PhaseFieldRSF<dim>::initialize_index_cache()
     {
       const Particle::Manager<dim> &particle_manager = this->get_phase_field_handler().get_associated_particle_manager();
       AssertThrow(&particle_manager == &this->get_particle_manager(0),
@@ -96,6 +96,7 @@ namespace aspect
 
       const auto &particle_data_info = particle_manager.get_property_manager().get_data_info();
 
+      // Initialize the particle data positions
       particle_data_positions.crack_driving_force = particle_data_info.get_position_by_field_name("crack_driving_force");
       particle_data_positions.cohesive_force      = particle_data_info.get_position_by_field_name("cohesive_force");
       particle_data_positions.slip_rate           = particle_data_info.get_position_by_field_name("slip_rate");
@@ -108,6 +109,22 @@ namespace aspect
       for (const unsigned int index : this->introspection().chemical_composition_field_indices())
         particle_data_positions.chemical_fields.push_back(
           particle_data_info.get_position_by_field_name(this->get_parameters().mapped_particle_properties.find(index)->second.first));
+
+      // Initialize the compositional indices of slip rate and slip state
+      compositional_indices.slip_rate  = numbers::invalid_unsigned_int;
+      compositional_indices.slip_state = numbers::invalid_unsigned_int;
+      for (const auto &key_and_value : this->get_parameters().mapped_particle_properties)
+        {
+          if (key_and_value.second.first == "slip_rate")
+            compositional_indices.slip_rate = key_and_value.first;
+
+          if (key_and_value.second.first == "slip_state")
+            compositional_indices.slip_state = key_and_value.first;
+        }
+
+        AssertThrow(compositional_indices.slip_rate != numbers::invalid_unsigned_int &&
+                    compositional_indices.slip_state != numbers::invalid_unsigned_int,
+                    ExcMessage("Particle properties 'slip_rate' and 'slip_state' must be associated with compositional fields."));
     }
 
 
@@ -134,6 +151,9 @@ namespace aspect
 
       const double dt = (this->get_timestep_number() > 0 ? this->get_timestep() : initial_time_step);
 
+      const std::shared_ptr<RSFAdditionalOutputs<dim>> rsf_outputs
+        = out.template get_additional_output_object<RSFAdditionalOutputs<dim>>();
+
       for (unsigned int i = 0; i < in.n_evaluation_points(); ++i)
         {
           const std::vector<double> volume_fractions = MaterialUtilities::compute_only_composition_fractions(
@@ -158,6 +178,16 @@ namespace aspect
               const double eta = calculate_creep_viscosity(in.temperature[i], volume_fractions);
               const double one_minus_beta = calculate_stress_relaxation_factor(eta, G);
               out.viscosities[i] = eta * one_minus_beta;
+            }
+
+          if (rsf_outputs != nullptr)
+            {
+              // Named additional outputs are only computed for postprocessing, at which point
+              // the slip state has been updated. So we set time_step = 0 for the input arguments
+              // of Rheology::RateStateFriction::friction_coefficient
+              const double V     = in.composition[i][compositional_indices.slip_rate];
+              const double theta = in.composition[i][compositional_indices.slip_state];
+              rsf_outputs->friction_coefficients[i] = rsf_rheology.friction_coefficient(volume_fractions, V, theta, 0);
             }
         }
 
@@ -988,6 +1018,17 @@ convergence_check:
 
 
     template <int dim>
+    void
+    PhaseFieldRSF<dim>::
+    create_additional_named_outputs(MaterialModel::MaterialModelOutputs<dim> &out) const
+    {
+      if (out.template has_additional_output_object<RSFAdditionalOutputs<dim>>() == false)
+        out.additional_outputs.push_back(std::make_unique<RSFAdditionalOutputs<dim>>(out.n_evaluation_points()));
+    }
+
+
+
+    template <int dim>
     std::vector<double>
     PhaseFieldRSF<dim>::get_critical_crack_driving_forces() const
     {
@@ -1039,23 +1080,6 @@ convergence_check:
     {
       const double time_step = (this->get_timestep_number() > 0 ? this->get_timestep() : initial_time_step);
       return -std::expm1(-time_step * shear_modulus / creep_viscosity);
-    }
-
-
-
-    template <int dim>
-    double
-    PhaseFieldRSF<dim>::
-    calculate_friction_strength(const Point<dim>          &position,
-                                const double               slip_rate,
-                                const double               slip_state,
-                                const std::vector<double> &volume_fractions) const
-    {
-      const double dt = (this->get_timestep_number() > 0 ? this->get_timestep() : initial_time_step);
-      const double mu = rsf_rheology.friction_coefficient(volume_fractions, slip_rate, slip_state, dt);
-      const double p_bar = this->get_adiabatic_conditions().pressure(position);
-      const double eta_d = MaterialUtilities::average_value(volume_fractions, radiation_damping_coefficients, MaterialUtilities::arithmetic);
-      return mu * p_bar + eta_d * slip_rate;
     }
 
 

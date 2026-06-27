@@ -44,6 +44,9 @@ namespace aspect
             if (key_and_value.second.first == "slip_rate")
               compositional_indices.slip_rate = key_and_value.first;
 
+            if (key_and_value.second.first == "slip_state")
+              compositional_indices.slip_state = key_and_value.first;
+
             if (key_and_value.second.first == "normal_direction")
               {
                 AssertThrow(key_and_value.second.second < dim,
@@ -57,40 +60,28 @@ namespace aspect
                             ExcMessage("The component indices of slip direction exceed the range of [0, dim-1]."));
                 compositional_indices.slip_direction[key_and_value.second.second] = key_and_value.first;
               }
-
-            if (key_and_value.second.first == "ve_stress")
-              {
-                AssertThrow((key_and_value.second.second < SymmetricTensor<2, dim>::n_independent_components),
-                            ExcMessage("The component indices of viscoelastic stress exceed the range of [0, dim(dim+1)/2-1]."));
-                compositional_indices.ve_stress[key_and_value.second.second] = key_and_value.first;
-              }
           }
 
-        // The normal direction and viscoelastic stress must be associated with compositional fields
-        for (unsigned int d = 0; d < dim; ++d)
-          AssertThrow(compositional_indices.normal_direction[d] != numbers::invalid_unsigned_int,
-                      ExcMessage("Particle property 'normal_direction[d]' (d = 0, ..., dim-1) needs to be "
-                                 "associated with a compositional field."));
+        // The slip rate and slip state must be associated with compositional fields
+        AssertThrow(compositional_indices.slip_rate != numbers::invalid_unsigned_int &&
+                    compositional_indices.slip_state != numbers::invalid_unsigned_int,
+                    ExcMessage("Particle properties 'slip_rate' and 'slip_state' must be associated with compositional fields."));
 
-        for (unsigned int c = 0; c < SymmetricTensor<2, dim>::n_independent_components; ++c)
-          AssertThrow(compositional_indices.ve_stress[c] != numbers::invalid_unsigned_int,
-                      ExcMessage("Particle property 've_stress[c]' (c = 0, ..., dim(dim+1)/2-1) needs to be "
-                                 "associated with a compositional field."));
-
-        // If the slip rate is associated with a compositional field, then the initial slip rate
-        // and slip direction will be determined by the initial composition model; otherwise, the 
-        // initial slip rate will be set to the lower limit (stick mode), and the initial slip direction
-        // will be set to NaN
-        start_with_slip = (compositional_indices.slip_rate != numbers::invalid_unsigned_int);
-        if (start_with_slip == true)
+        // If there are pre-existing cracks (i.e. crack_driving_force is associated with a compositional field),
+        // then the normal direction and slip direction must be associated with compositional fields too
+        has_preexisting_crack = (compositional_indices.crack_driving_force != numbers::invalid_unsigned_int);
+        if (has_preexisting_crack == true)
           {
             for (unsigned int d = 0; d < dim; ++d)
-              AssertThrow(compositional_indices.slip_direction[d] != numbers::invalid_unsigned_int,
-                          ExcMessage("The particle property 'slip_rate' is associated with a compositional field, "
-                                     "which means that the initial slip rate is prescribed by the initial composition "
-                                     "model. In this case, the particle properties 'slip_direction[d]' (d = 0, ..., dim-1) "
-                                     "must be associated with a compositional field to be initialized too, otherwise "
-                                     "the initial conditions are incomplete."));
+              {
+                AssertThrow(compositional_indices.normal_direction[d] != numbers::invalid_unsigned_int
+                            && compositional_indices.slip_direction[d] != numbers::invalid_unsigned_int,
+                            ExcMessage("The particle property 'crack_driving_force' is associated with a compositional field, "
+                                       "which means that there are pre-existing cracks in the model. In this case, the "
+                                       "particle properties 'normal_direction[d]' and 'slip_direction[d]' (d = 0, ..., dim-1) "
+                                       "must be associated with compositional fields to be initialized too, otherwise the "
+                                       "initial conditions are incomplete."));
+              }
           }
 
         const auto &variable = this->introspection().variable("phase_field");
@@ -152,8 +143,9 @@ namespace aspect
           Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldRSF<dim>>(this->get_material_model());
         const MaterialModel::Rheology::RateStateFriction<dim> &rsf_model = material_model.get_rate_state_friction_model();
 
-        // If the user chooses to start with slip, then the initial crack driving force is determined by the
-        // initial composition; otherwise, the initial crack driving force is set to $H_t$
+        // If there are pre-existing cracks, the initial crack driving force is determined by the initial value
+        // of the corresponding compositional field; otherwise, the crack driving force is initialized to its
+        // lower limit (critical crack driving force)
         std::vector<double> initial_composition(this->introspection().n_compositional_fields);
         for (unsigned int j = 0; j < initial_composition.size(); ++j)
           initial_composition[j] = this->get_initial_composition_manager().initial_composition(position, j);
@@ -164,7 +156,7 @@ namespace aspect
                                                                           MaterialModel::MaterialUtilities::arithmetic);
 
         double H = Hc;
-        if (start_with_slip)
+        if (has_preexisting_crack)
           H = std::max(Hc, this->get_initial_composition_manager().initial_composition(position, compositional_indices.crack_driving_force));
 
         data.push_back(H);
@@ -172,57 +164,61 @@ namespace aspect
         // Initialize the cohesive force by 0
         data.push_back(0.);
 
-        // If the user chooses to start with slip, then the initial slip rate is determined by the initial composition;
-        // otherwise, the initialslip rate is set to the lower bound
+        // Initialize the slip rate by the initial value of the corresponding compositional field
         const double V = std::max(rsf_model.get_minimum_slip_rate(),
-                                  (start_with_slip ? this->get_initial_composition_manager().initial_composition(position, compositional_indices.slip_rate) : 0.));
+                                  (this->get_initial_composition_manager().initial_composition(position, compositional_indices.slip_rate)));
         data.push_back(V);
 
-        // The initial slip state is calculated by $D_c / V_init$, which is consistent with a steady state
-        const double theta = rsf_model.get_characteristic_slip_distance() / V;
-        data.push_back(theta);
+        // If the slip state is associated with a compositional field, then initialize it by the initial
+        // composition model; otherwise, initialize it by $D_c / V_init$, which implies a steady state
+        if (compositional_indices.slip_state != numbers::invalid_unsigned_int)
+          data.push_back(this->get_initial_composition_manager().initial_composition(position, compositional_indices.slip_state));
+        else
+          data.push_back(rsf_model.get_characteristic_slip_distance() / V);
 
-        // The initial normal direction is determined by the initial composition
-        Tensor<1, dim> n;
-        for (unsigned int d = 0; d < dim; ++d)
-          n[d] = this->get_initial_composition_manager().initial_composition(position, compositional_indices.normal_direction[d]);
-
-        const double n_norm = n.norm();
-        if (n_norm > std::numeric_limits<double>::epsilon())
-          n /= n_norm;
-
-        for (unsigned int d = 0; d < dim; ++d)
-          data.push_back(n[d]);
-
-        // If the user chooses to start with slip, then the initial slip direction is determined by the initial composition;
-        // otherwise, the initial slip direction is set to an invalid value
+        // If there are pre-existing cracks, then the normal direction and the slip direction are initialized by
+        // the initial values of the corresponding compositional fields; otherwise, they are initialized to NaN
+        Tensor<1, dim> n = numbers::signaling_nan<Tensor<1, dim>>();
         Tensor<1, dim> s = numbers::signaling_nan<Tensor<1, dim>>();
-        if (start_with_slip)
+        if (has_preexisting_crack)
           {
             for (unsigned int d = 0; d < dim; ++d)
-              s[d] = this->get_initial_composition_manager().initial_composition(position, compositional_indices.slip_direction[d]);
-
-            s -= (s * n) * n;
-
-            const double s_norm = s.norm();
-            if (s_norm <= std::numeric_limits<double>::epsilon())
               {
-                std::stringstream ss;
-                ss << position;
-                AssertThrow(false, 
-                            ExcMessage("The initial slip direction at point (" + ss.str() + ") is invalid. "
-                                       "The reason is either (a) it is a zero vector, or (b) it is parallel "
-                                       "with the initial normal direction."));
+                n[d] = this->get_initial_composition_manager().initial_composition(position, compositional_indices.normal_direction[d]);
+                s[d] = this->get_initial_composition_manager().initial_composition(position, compositional_indices.slip_direction[d]);
               }
-            s /= s_norm;
+
+            const double n_norm = n.norm();
+            const double s_norm = s.norm();
+            if (n_norm < std::numeric_limits<double>::epsilon() ||
+                s_norm < std::numeric_limits<double>::epsilon() ||
+                n * s > n_norm * s_norm * 0.5)
+              {
+                std::stringstream position_as_string;
+                position_as_string << position;
+
+                AssertThrow(n_norm < std::numeric_limits<double>::epsilon(),
+                            ExcMessage("The norm of normal direction at point (" + position_as_string.str() + ") is zero."));
+                AssertThrow(s_norm < std::numeric_limits<double>::epsilon(),
+                            ExcMessage("The norm of slip direction at point (" + position_as_string.str() + ") is zero."));
+                AssertThrow(n_norm < std::numeric_limits<double>::epsilon(),
+                            ExcMessage("The normal direction and slip direction at point (" + position_as_string.str() 
+                                       + ") are far from perpendicular."));
+              }
+
+            n /= n_norm;
+            s -= (s * n) * n;
+            s /= s.norm();
           }
 
         for (unsigned int d = 0; d < dim; ++d)
+          data.push_back(n[d]);
+        for (unsigned int d = 0; d < dim; ++d)
           data.push_back(s[d]);
 
-        //The initial viscoelastic stress is determined by the initial composition
+        // Initialize the viscoelastic stress to zero
         for (unsigned int c = 0; c < SymmetricTensor<2, dim>::n_independent_components; ++c)
-          data.push_back(this->get_initial_composition_manager().initial_composition(position, compositional_indices.ve_stress[c]));
+          data.push_back(0);
       }
 
 
@@ -273,10 +269,10 @@ namespace aspect
 
                   const double pf = evaluator.get_value(p);
 
-                  // If the particle is intact, then set the normal direction, slip direction and 
-                  // interface stress components to invalid numbers
                   if (material_model.is_fractured(pf) == false)
                     {
+                      // Set the cohesive force, normal direction and slip direction to NaN
+                      particle_properties[data_position_cache.cohesive_force] = numbers::signaling_nan<double>();
                       for (unsigned int d = 0; d < dim; ++d)
                         {
                           particle_properties[data_position_cache.normal_direction + d] = numbers::signaling_nan<double>();

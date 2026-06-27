@@ -55,17 +55,14 @@ namespace aspect
         bool
         is_compressible() const override;
 
+        void
+        create_additional_named_outputs(MaterialModel::MaterialModelOutputs<dim> &out) const override;
+
         const Rheology::RateStateFriction<dim> &
         get_rate_state_friction_model() const;
 
         bool
         is_fractured(const double phase_field) const;
-
-        double
-        calculate_friction_strength(const Point<dim>          &position,
-                                    const double               slip_rate,
-                                    const double               slip_state,
-                                    const std::vector<double> &volume_fractions) const;
         
         static
         void
@@ -75,7 +72,7 @@ namespace aspect
         parse_parameters(ParameterHandler &prm) override;
 
       private:
-        void initialize_particle_data_info();
+        void initialize_index_cache();
 
         void perform_return_mapping();
 
@@ -106,6 +103,14 @@ namespace aspect
         };
 
         ParticleDataPositions particle_data_positions;
+
+        struct CompositionalIndices
+        {
+          unsigned int slip_rate;
+          unsigned int slip_state;
+        };
+
+        CompositionalIndices compositional_indices;
 
         MaterialUtilities::CompositionalAveragingOperation viscosity_averaging;
 
