@@ -88,18 +88,22 @@ namespace aspect
           struct CompositionalIndices
           {
             unsigned int crack_driving_force;
+            unsigned int cohesive_force;
             unsigned int slip_rate;
             unsigned int slip_state;
             std::array<unsigned int, dim> normal_direction;
             std::array<unsigned int, dim> slip_direction;
+            std::array<unsigned int, SymmetricTensor<2, dim>::n_independent_components> ve_stress;
 
             CompositionalIndices()
               : crack_driving_force(numbers::invalid_unsigned_int)
+              , cohesive_force(numbers::invalid_unsigned_int)
               , slip_rate(numbers::invalid_unsigned_int)
               , slip_state(numbers::invalid_unsigned_int)
             {
               normal_direction.fill(numbers::invalid_unsigned_int);
               slip_direction.fill(numbers::invalid_unsigned_int);
+              ve_stress.fill(numbers::invalid_unsigned_int);
             }
           };
 

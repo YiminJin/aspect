@@ -41,6 +41,9 @@ namespace aspect
             if (key_and_value.second.first == "crack_driving_force")
               compositional_indices.crack_driving_force = key_and_value.first;
 
+            if (key_and_value.second.first == "cohesive_force")
+              compositional_indices.cohesive_force = key_and_value.first;
+
             if (key_and_value.second.first == "slip_rate")
               compositional_indices.slip_rate = key_and_value.first;
 
@@ -50,22 +53,37 @@ namespace aspect
             if (key_and_value.second.first == "normal_direction")
               {
                 AssertThrow(key_and_value.second.second < dim,
-                            ExcMessage("The component indices of normal direction exceed the range of [0, dim-1]."));
+                            ExcMessage("The component indices of normal_direction exceed the range of [0, dim)."));
                 compositional_indices.normal_direction[key_and_value.second.second] = key_and_value.first;
               }
 
             if (key_and_value.second.first == "slip_direction")
               {
                 AssertThrow(key_and_value.second.second < dim,
-                            ExcMessage("The component indices of slip direction exceed the range of [0, dim-1]."));
+                            ExcMessage("The component indices of slip_direction exceed the range of [0, dim)."));
                 compositional_indices.slip_direction[key_and_value.second.second] = key_and_value.first;
+              }
+
+            if (key_and_value.second.first == "ve_stress")
+              {
+                AssertThrow((key_and_value.second.second < SymmetricTensor<2, dim>::n_independent_components),
+                            ExcMessage("The component indices of ve_stress exceed the range of [0, dim(dim+1)/2)."));
+                compositional_indices.ve_stress[key_and_value.second.second] = key_and_value.first;
               }
           }
 
-        // The slip rate and slip state must be associated with compositional fields
-        AssertThrow(compositional_indices.slip_rate != numbers::invalid_unsigned_int &&
-                    compositional_indices.slip_state != numbers::invalid_unsigned_int,
-                    ExcMessage("Particle properties 'slip_rate' and 'slip_state' must be associated with compositional fields."));
+        // The slip rate, slip state, cohesive force and viscoelastic stress must be associated with
+        // compositional fields
+        AssertThrow(compositional_indices.slip_rate != numbers::invalid_unsigned_int,
+                    ExcMessage("Particle property 'slip_rate' must be associated with a compositional field."));
+        AssertThrow(compositional_indices.slip_state != numbers::invalid_unsigned_int,
+                    ExcMessage("Particle property 'slip_state' must be associated with a compositional field."));
+        AssertThrow(compositional_indices.cohesive_force != numbers::invalid_unsigned_int,
+                    ExcMessage("Particle property 'cohesive_force' must be associated with a compositional field."));
+        for (unsigned int c = 0; c < SymmetricTensor<2, dim>::n_independent_components; ++c)
+          AssertThrow(compositional_indices.ve_stress[c] != numbers::invalid_unsigned_int,
+                      ExcMessage("Particle property 've_stress[" + Utilities::int_to_string(c)
+                                 + "] must be associated with a compositional field."));
 
         // If there are pre-existing cracks (i.e. crack_driving_force is associated with a compositional field),
         // then the normal direction and slip direction must be associated with compositional fields too

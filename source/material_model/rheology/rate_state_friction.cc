@@ -170,6 +170,10 @@ namespace aspect
                            "for background material and compositional fields, "
                            "for a total of N+1 values, where N is the number of all compositional fields or only "
                            "those corresponding to chemical compositions. Units: None.");
+        prm.declare_entry ("Use regularized formulation", "true",
+                           Patterns::Bool(),
+                           "Whether to use the regularized formulation for the rate-and-state "
+                           "friction coefficient.");
       }
 
 
@@ -207,6 +211,8 @@ namespace aspect
         options.property_name = "Evolution effect parameters";
         b = Utilities::MapParsing::parse_map_to_double_array(prm.get("Evolution effect parameters"),
                                                              options);
+
+        regularized = prm.get_bool("Use regularized formulation");
       }
     }
   }
