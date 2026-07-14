@@ -1114,6 +1114,13 @@ namespace aspect
       {
         const unsigned int phase_field_block = introspection.variable("phase_field").first_component_index;
         coupling[phase_field_block][phase_field_block] = DoFTools::always;
+
+        // If the slip rate is required, also create a matrix block for the obstacle problem
+        if (parameters.need_slip_rate)
+          {
+            const unsigned int peak_phase_field_block = introspection.variable("peak_phase_field").first_component_index;
+            coupling[peak_phase_field_block][peak_phase_field_block] = DoFTools::always;
+          }
       }
 
     return coupling;

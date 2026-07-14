@@ -66,18 +66,19 @@ namespace aspect
                              const double time_step) const;
 
           /**
-           * Compute the friction coefficient $mu$.
+           * Compute the friction coefficient $mu$ at the end of the current 
+           * time step.
            */
-          double friction_coefficient (const std::vector<double> &volume_fractions,
-                                       const double               slip_rate,
-                                       const double               old_slip_state,
-                                       const double               time_step) const;
+          double friction_coefficient(const std::vector<double> &volume_fractions,
+                                      const double               slip_rate,
+                                      const double               slip_state) const;
 
+          /**Compute the partial derivative of $\mu$ with respect to $V$.
+           */
           double 
-          friction_coefficient_derivative(const std::vector<double> &volume_fractions,
-                                          const double               slip_rate,
-                                          const double               old_slip_state,
-                                          const double               time_step) const;
+          friction_coefficient_derivative_wrt_slip_rate(const std::vector<double> &volume_fractions,
+                                                        const double               slip_rate,
+                                                        const double               slip_state) const;
 
           double get_reference_slip_rate() const;
 

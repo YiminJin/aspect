@@ -33,11 +33,54 @@ namespace aspect
   namespace MaterialModel
   {
     template <int dim>
+    void PhaseFieldRSF<dim>::IndexCache::
+    initialize(const Introspection<dim>     &introspection,
+               const Parameters<dim>        &parameters,
+               const PhaseFieldHandler<dim> &phase_field_handler)
+    {
+      // Initialize the particle property indices
+      const Particle::Manager<dim> &particle_manager = phase_field_handler.get_associated_particle_manager();
+      const auto &particle_data_info = particle_manager.get_property_manager().get_data_info();
+
+      particle_property_indices.crack_driving_force = particle_data_info.get_position_by_field_name("crack_driving_force");
+      particle_property_indices.cohesive_force      = particle_data_info.get_position_by_field_name("cohesive_force");
+      particle_property_indices.slip_rate           = particle_data_info.get_position_by_field_name("slip_rate");
+      particle_property_indices.slip_state          = particle_data_info.get_position_by_field_name("slip_state");
+      particle_property_indices.normal_direction    = particle_data_info.get_position_by_field_name("normal_direction");
+      particle_property_indices.slip_direction      = particle_data_info.get_position_by_field_name("slip_direction");
+      particle_property_indices.ve_stress           = particle_data_info.get_position_by_field_name("ve_stress");
+
+      // Initialize the compositional indices
+      for (const auto &key_and_value : parameters.mapped_particle_properties)
+        {
+          if (key_and_value.second.first == "slip_rate")
+            compositional_indices.slip_rate = key_and_value.first;
+
+          if (key_and_value.second.first == "slip_state")
+            compositional_indices.slip_state = key_and_value.first;
+        }
+
+      AssertThrow(compositional_indices.slip_rate != numbers::invalid_unsigned_int &&
+                  compositional_indices.slip_state != numbers::invalid_unsigned_int,
+                  ExcMessage("Particle properties 'slip_rate' and 'slip_state' must be associated with compositional fields."));
+
+      // Initialize the component indices
+      component_indices.phase_field      = introspection.variable("phase_field").first_component_index;
+      component_indices.peak_phase_field = introspection.variable("peak_phase_field").first_component_index;
+    }
+
+
+
+    template <int dim>
     void PhaseFieldRSF<dim>::initialize()
     {
       AssertThrow(this->get_parameters().enable_phase_field == true,
                   ExcMessage("The phase field PSF model requires phase field to be included in "
                              "the system formulation. Please set <Formulation/Include phase field> to true."));
+
+      AssertThrow(this->get_parameters().need_slip_rate == true,
+                  ExcMessage("The phase field RSF model requires the slip rate to calculate the "
+                             "friction coefficient. Please set <Formulation/Need slip rate> to true."));
 
       AssertThrow(this->get_parameters().enable_elasticity == false,
                   ExcMessage("In the phase field RSF model, the elastic rheology is not handled by "
@@ -49,22 +92,23 @@ namespace aspect
                              "constitutive model. Please set <Formulation/Use implicit constitutive model> "
                              "to true."));
 
-      phase_field_component_index = this->introspection().variable("phase_field").first_component_index;
-
       // Initialize the evaluation flags
-      // We need the velocity gradients, temperature values, phase field values and phase field gradients 
+      // We need the velocity gradients, temperature values, phase field values and peak phase field values
       // at particle locations
       evaluation_flags.resize(this->introspection().n_components, EvaluationFlags::nothing);
       for (unsigned int d = 0; d < dim; ++d)
         evaluation_flags[d] = EvaluationFlags::gradients;
       evaluation_flags[this->introspection().component_indices.temperature] = EvaluationFlags::values;
-      evaluation_flags[phase_field_component_index] = EvaluationFlags::values | EvaluationFlags::gradients;
+      evaluation_flags[index_cache.component_indices.phase_field] = EvaluationFlags::values;
+      evaluation_flags[index_cache.component_indices.peak_phase_field] = EvaluationFlags::values;
 
-      // Initialize the index cache when it is sure that the phase field handler is initialized
+      // Initialize the index cache when it is sure that the phase field handler has been initialized
       this->get_signals().post_simulator_initialization.connect(
         [&](const SimulatorAccess<dim> &)
       {
-        this->initialize_index_cache();
+        index_cache.initialize(this->introspection(), 
+                               this->get_parameters(), 
+                               this->get_phase_field_handler());
       });
 
       // Perform return mapping before assembling the Stokes system
@@ -81,50 +125,6 @@ namespace aspect
       {
         this->update_history_states(nonlinear_solver_control);
       });
-    }
-
-
-
-    template <int dim>
-    void
-    PhaseFieldRSF<dim>::initialize_index_cache()
-    {
-      const Particle::Manager<dim> &particle_manager = this->get_phase_field_handler().get_associated_particle_manager();
-      AssertThrow(&particle_manager == &this->get_particle_manager(0),
-                  ExcMessage("The phase field RSF model requires the associated particle properties to be handled by the "
-                             "first particle manager."));
-
-      const auto &particle_data_info = particle_manager.get_property_manager().get_data_info();
-
-      // Initialize the particle data positions
-      particle_data_positions.crack_driving_force = particle_data_info.get_position_by_field_name("crack_driving_force");
-      particle_data_positions.cohesive_force      = particle_data_info.get_position_by_field_name("cohesive_force");
-      particle_data_positions.slip_rate           = particle_data_info.get_position_by_field_name("slip_rate");
-      particle_data_positions.slip_state          = particle_data_info.get_position_by_field_name("slip_state");
-      particle_data_positions.normal_direction    = particle_data_info.get_position_by_field_name("normal_direction");
-      particle_data_positions.slip_direction      = particle_data_info.get_position_by_field_name("slip_direction");
-      particle_data_positions.ve_stress           = particle_data_info.get_position_by_field_name("ve_stress");
-
-      particle_data_positions.chemical_fields.clear();
-      for (const unsigned int index : this->introspection().chemical_composition_field_indices())
-        particle_data_positions.chemical_fields.push_back(
-          particle_data_info.get_position_by_field_name(this->get_parameters().mapped_particle_properties.find(index)->second.first));
-
-      // Initialize the compositional indices of slip rate and slip state
-      compositional_indices.slip_rate  = numbers::invalid_unsigned_int;
-      compositional_indices.slip_state = numbers::invalid_unsigned_int;
-      for (const auto &key_and_value : this->get_parameters().mapped_particle_properties)
-        {
-          if (key_and_value.second.first == "slip_rate")
-            compositional_indices.slip_rate = key_and_value.first;
-
-          if (key_and_value.second.first == "slip_state")
-            compositional_indices.slip_state = key_and_value.first;
-        }
-
-        AssertThrow(compositional_indices.slip_rate != numbers::invalid_unsigned_int &&
-                    compositional_indices.slip_state != numbers::invalid_unsigned_int,
-                    ExcMessage("Particle properties 'slip_rate' and 'slip_state' must be associated with compositional fields."));
     }
 
 
@@ -183,11 +183,10 @@ namespace aspect
           if (rsf_outputs != nullptr)
             {
               // Named additional outputs are only computed for postprocessing, at which point
-              // the slip state has been updated. So we set time_step = 0 for the input arguments
-              // of Rheology::RateStateFriction::friction_coefficient
-              const double V     = in.composition[i][compositional_indices.slip_rate];
-              const double theta = in.composition[i][compositional_indices.slip_state];
-              rsf_outputs->friction_coefficients[i] = rsf_rheology.friction_coefficient(volume_fractions, V, theta, 0);
+              // the slip state has been updated.
+              const double V     = in.composition[i][index_cache.compositional_indices.slip_rate];
+              const double theta = in.composition[i][index_cache.compositional_indices.slip_state];
+              rsf_outputs->friction_coefficients[i] = rsf_rheology.friction_coefficient(volume_fractions, V, theta);
             }
         }
 
@@ -246,7 +245,7 @@ namespace aspect
 
               // Compute the volume fractions
               for (unsigned int j = 0; j < chemical_field_values.size(); ++j)
-                chemical_field_values[j] = particle_properties[particle_data_positions.chemical_fields[j]];
+                chemical_field_values[j] = particle_properties[index_cache.particle_property_indices.chemical_fields[j]];
               const std::vector<double> volume_fractions = MaterialUtilities::compute_composition_fractions(chemical_field_values);
 
               // Compute the bulk viscosity
@@ -260,46 +259,44 @@ namespace aspect
 
               // Compute the trial stress
               const SymmetricTensor<2, dim> tau_old = Utilities::Tensors::to_symmetric_tensor<dim>(
-                &particle_properties[particle_data_positions.ve_stress],
-                &particle_properties[particle_data_positions.ve_stress] + SymmetricTensor<2, dim>::n_independent_components);
+                &particle_properties[index_cache.particle_property_indices.ve_stress],
+                &particle_properties[index_cache.particle_property_indices.ve_stress] + SymmetricTensor<2, dim>::n_independent_components);
 
               // Check if the point is fractured
-              const double pf = particle_solution_values[phase_field_component_index];
+              const double pf = particle_solution_values[index_cache.component_indices.phase_field];
               if (pf > phase_field_activation_threshold)
                 {
                   // Compute the slip direction tensor
-                  const Tensor<1, dim> n(ArrayView<const double>(&particle_properties[particle_data_positions.normal_direction], dim));
-                  const Tensor<1, dim> s(ArrayView<const double>(&particle_properties[particle_data_positions.slip_direction], dim));
+                  const Tensor<1, dim> n(ArrayView<const double>(&particle_properties[index_cache.particle_property_indices.normal_direction], dim));
+                  const Tensor<1, dim> s(ArrayView<const double>(&particle_properties[index_cache.particle_property_indices.slip_direction], dim));
                   const SymmetricTensor<2, dim> S = symmetrize(outer_product(n, s));
 
                   // Compute the softening factor
-                  const double V         = particle_properties[particle_data_positions.slip_rate];
-                  const double theta_old = particle_properties[particle_data_positions.slip_state];
-                  const double dmu_dV    = rsf_rheology.friction_coefficient_derivative(volume_fractions, V, theta_old, dt);
+                  const double V = particle_properties[index_cache.particle_property_indices.slip_rate];
+                  const double theta_old = particle_properties[index_cache.particle_property_indices.slip_state];
+                  const double theta  = rsf_rheology.slip_state(V, theta_old, dt);
+                  const double dmu_dV = rsf_rheology.friction_coefficient_derivative_wrt_slip_rate(volume_fractions, V, theta);
 
-                  const Tensor<1, dim> &grad_pf = particle_solution_gradients[phase_field_component_index];
-                  const double gamma = this->get_phase_field_handler().crack_surface_density(pf, grad_pf);
-                  const double g = this->get_phase_field_handler().energetic_degradation(pf, volume_fractions);
+                  const double pf_hat = particle_solution_values[index_cache.component_indices.peak_phase_field];
+                  const double g   = this->get_phase_field_handler().energetic_degradation(volume_fractions, pf);
+                  const double chi = this->get_phase_field_handler().slip_rate_localization_factor(volume_fractions, g, pf_hat);
 
                   const double p_bar = std::max(0., this->get_adiabatic_conditions().pressure(particle->get_location()));
                   const double eta_d = MaterialUtilities::average_value(volume_fractions, radiation_damping_coefficients, MaterialUtilities::arithmetic);
 
-                  // At the beginning of the nonlinear iteration, we need to provide a good initial guess for velocity and pressure.
-                  // It is important for the convergence of local return-mapping. While it is convenient to take the solution of the
-                  // previous time step as initial guess, we still have to determine an initial guess for the first time step. 
-                  // Another choice is to set the softening factor to 0 in the first nonlinear iteration. Then the governing equation
-                  // becomes
-                  //   (symgrad(phi), 2*eta_ve*depsilon - 2*eta_ve(1-g)*gamma*V*S + exp(-dt/lambda)*tau_old) = 0
-                  //   => 2*eta_ve*depsilon + exp(-dt/lambda)*tau_old = 2*eta_ve*(1-g)*gamma*V*S
-                  // Noticing that epsilon = 0 + depsilon = depsilon, the quasi-static equilibrium is restored. Thus, the softening 
-                  // factor is only computed when the nonlinear iteration number is greater than 0.
+                  // At the beginning of the nonlinear iteration, the softening factor is set to 0. So the governing equation
+                  // is given by (noticing that epsilon=0 in the initial guess)
+                  //    (symgrad(phi), 2*eta_ve*depsilon) = <phi, b> + (symgrad(phi), 2*eta_ve*chi*V*S - beta*tau_old)
+                  //    => (symgrad(phi), tau) = <phi, b>.
+                  // For the rest of the nonlinear iterations, the softening factor is included in the system matrix, so the
+                  // tangent modulus equals to dtau/depsilon, and the governing equation becomes
+                  //    (symgrad(phi), dtau/depsilon*depsilon) = <phi, b> + (symgrad(phi), 2*eta_ve*(chi*V*S - epsilon) - beta*tau_old)
+                  //    => (symgrad(phi), tau+dtau) = <phi, b>.
                   double softening_factor = 0;
                   implicit_constitutive_outputs->tangent_operators[p] = (2. * eta_ve) * identity_tensor<dim>();
                   if (this->get_nonlinear_iteration() > 0)
                     {
-                      const double denominator = std::max(gamma * eta_ve,
-                                                          gamma * eta_ve / (1. - g) + dmu_dV * p_bar + eta_d);
-                      softening_factor = gamma * eta_ve / denominator;
+                      softening_factor = (2. * chi * eta_ve) / (chi * eta_ve / (1. - g) + dmu_dV * p_bar + eta_d);
 
                       // Check if the PD stabilization is required
                       if ((implicit_constitutive_outputs->assemble_preconditioner && 
@@ -309,7 +306,7 @@ namespace aspect
                            this->get_newton_handler().parameters.velocity_block_stabilization & Newton::Parameters::PD))
                         softening_factor = std::min(this->get_newton_handler().parameters.SPD_safety_factor, softening_factor);
 
-                      implicit_constitutive_outputs->tangent_operators[p] -= (4. * eta_ve * softening_factor) * outer_product(S, S);
+                      implicit_constitutive_outputs->tangent_operators[p] -= (2. * eta_ve * softening_factor) * outer_product(S, S);
                     }
 
                   if (implicit_constitutive_outputs->assemble_preconditioner)
@@ -326,7 +323,7 @@ namespace aspect
                   else
                     {
                       // Compute the RHS
-                      const SymmetricTensor<2, dim> epsilon_ve = epsilon - (gamma * V) * S;
+                      const SymmetricTensor<2, dim> epsilon_ve = epsilon - (chi * V) * S;
                       implicit_constitutive_outputs->deviatoric_stresses[p] = 2. * eta_ve * epsilon_ve + beta * tau_old;
                     }
                 }
@@ -344,7 +341,7 @@ namespace aspect
 
 
 
-    namespace
+        namespace
     {
       struct ConvergenceHistory
       {
@@ -352,17 +349,9 @@ namespace aspect
         std::vector<double> F;
         std::vector<double> dF_dV;
         bool success;
-        bool fallback_to_toms748;
-        std::pair<double, double> toms748_result;
 
         ConvergenceHistory()
-          : V(0)
-          , F(0)
-          , dF_dV(0)
-          , success(false)
-          , fallback_to_toms748(false)
-          , toms748_result({numbers::signaling_nan<double>(),
-                            numbers::signaling_nan<double>()})
+          : success(false)
         {}
 
         void clear()
@@ -371,138 +360,15 @@ namespace aspect
           F.clear();
           dF_dV.clear();
           success = false;
-          fallback_to_toms748 = false;
-          toms748_result.first  = numbers::signaling_nan<double>();
-          toms748_result.second = numbers::signaling_nan<double>();
         }
       };
 
 
 
-      template <class Value, class Derivative>
-      double
-      solve_RSF_consistent_equation(Value               F_value,
-                                    Derivative          F_derivative,
-                                    const double        V_init,
-                                    const double        F_init,
-                                    ConvergenceHistory &history)
-      {
-        // Reinit the convergence history
-        history.clear();
-
-        history.V.push_back(V_init);
-        history.F.push_back(F_init);
-
-        // Try Newton-Raphson method
-        static constexpr unsigned int max_newton_iterations = 20;
-
-        const double tol = std::abs(F_init) * 1.e-8;
-        
-        double V = V_init;
-        double F = F_init;
-
-        unsigned int n_iter = 0;
-
-        while (std::abs(F) > tol)
-          {
-            const double dF_dV = F_derivative(V);
-            history.dF_dV.push_back(dF_dV);
-            if (std::abs(dF_dV) < std::numeric_limits<double>::epsilon())
-              break;
-
-            V -= F / dF_dV;
-            F = F_value(V);
-
-            history.V.push_back(V);
-            history.F.push_back(F);
-
-            ++n_iter;
-            if (n_iter > max_newton_iterations)
-              break;
-          }
-
-        if (std::abs(F) <= tol)
-          {
-            history.success = true;
-          }
-        else
-          {
-            // Try to find a bracket from the convergence history
-            double F_pos = 0, F_neg = 0;
-            double V_pos = 0, V_neg = 0;
-
-            bool pos_found = false;
-            bool neg_found = false;
-
-            for (unsigned int n = 0; n < history.F.size(); ++n)
-              {
-                if (history.F[n] > 0)
-                  {
-                    if (!pos_found || history.F[n] < F_pos)
-                      {
-                        pos_found = true;
-                        F_pos = history.F[n];
-                        V_pos = history.V[n];
-                      }
-                  }
-                else
-                  {
-                    if (!neg_found || history.F[n] > F_neg)
-                      {
-                        neg_found = true;
-                        F_neg = history.F[n];
-                        V_neg = history.V[n];
-                      }
-                  }
-              }
-            
-            if (pos_found && neg_found)
-              {
-                // Fallback to TOMS 748 algorithm
-                history.fallback_to_toms748 = true;
-
-                double a  = V_neg, b  = V_pos;
-                double fa = F_neg, fb = F_pos;
-
-                if (a > b)
-                  {
-                    std::swap(a, b);
-                    std::swap(fa, fb);
-                  }
-
-                auto termination_condition = [=](const double ax,
-                                                 const double bx)
-                {
-                  return (std::abs(bx - ax) <= 1.e-6 * (b - a));
-                };
-
-                boost::uintmax_t max_toms748_iterations = 200;
-
-                history.toms748_result =
-                  boost::math::tools::toms748_solve(F_value, a, b, fa, fb,
-                                                    termination_condition,
-                                                    max_toms748_iterations);
-
-                V = (history.toms748_result.first + history.toms748_result.second) * 0.5;
-                F = F_value(V);
-
-                // Always trust the solution of TOMS 748 algorithm
-                history.success = true;
-              }
-          }
-        
-        return V;
-      }
-
-
-
-      void 
+      void
       output_convergence_history(const std::string        &filename,
                                  const ConvergenceHistory &history)
       {
-        if (history.success)
-          return;
-
         std::ofstream f(filename);
         AssertThrow(f.is_open(), ExcMessage("Cannot open file <" + filename + ">."));
 
@@ -538,7 +404,10 @@ namespace aspect
       // Vector storing the chemical field values, which is required for computing volume fractions
       std::vector<double> chemical_field_values(introspection.n_chemical_composition_fields());
 
-      // Record the convergence behavoir for fallback and error report
+      // The upper limit of Newton iterations for solving the nonlinear equation for V
+      constexpr unsigned int max_newton_iterations = 20;
+
+      // Record of the convergence behavoir
       ConvergenceHistory convergence_history;
 
       const double dt = (this->get_timestep_number() > 0 ? this->get_timestep() : initial_time_step);
@@ -577,7 +446,7 @@ namespace aspect
                 solution_evaluator->get_gradients(p, {particle_solution_gradients.data(), particle_solution_gradients.size()}, evaluation_flags);
 
                 // Check if the particle is fractured
-                const double pf = particle_solution_values[phase_field_component_index];
+                const double pf = particle_solution_values[index_cache.component_indices.phase_field];
                 if (pf > phase_field_activation_threshold)
                   {
                     // Compute the strain rate
@@ -588,44 +457,47 @@ namespace aspect
 
                     // Compute the volume fractions
                     for (unsigned int j = 0; j < chemical_field_values.size(); ++j)
-                      chemical_field_values[j] = particle_properties[particle_data_positions.chemical_fields[j]];
+                      chemical_field_values[j] = particle_properties[index_cache.particle_property_indices.chemical_fields[j]];
                     const std::vector<double> volume_fractions = MaterialUtilities::compute_composition_fractions(chemical_field_values);
 
-                    // Compute the trial state (predictor)
-                    const double T      = particle_solution_values[introspection.component_indices.temperature];
-                    const double eta    = calculate_creep_viscosity(T, volume_fractions);
-                    const double G      = MaterialUtilities::average_value(volume_fractions, elastic_shear_moduli, viscosity_averaging);
+                    // Get the ingredients for computing the slip rate
+                    const double T   = particle_solution_values[introspection.component_indices.temperature];
+                    const double eta = calculate_creep_viscosity(T, volume_fractions);
+                    const double G   = MaterialUtilities::average_value(volume_fractions, elastic_shear_moduli, viscosity_averaging);
 
                     const double one_minus_beta = calculate_stress_relaxation_factor(eta, G);
                     const double beta = 1. - one_minus_beta;
                     const double eta_ve = eta * one_minus_beta;
 
-                    const Tensor<1, dim> &grad_pf = particle_solution_gradients[phase_field_component_index];
-                    const double gamma = phase_field_handler.crack_surface_density(pf, grad_pf);
-                    const double g = this->get_phase_field_handler().energetic_degradation(pf, volume_fractions);
+                    const double pf_hat = particle_solution_values[index_cache.component_indices.peak_phase_field];
+                    const double g   = phase_field_handler.energetic_degradation(volume_fractions, pf);
+                    const double chi = phase_field_handler.slip_rate_localization_factor(volume_fractions, g, pf_hat);
 
-                    const Tensor<1, dim> n(ArrayView<double>({&particle_properties[particle_data_positions.normal_direction], dim}));
-                    const Tensor<1, dim> s(ArrayView<double>({&particle_properties[particle_data_positions.slip_direction], dim}));
+                    const Tensor<1, dim> n(ArrayView<double>({&particle_properties[index_cache.particle_property_indices.normal_direction], dim}));
+                    const Tensor<1, dim> s(ArrayView<double>({&particle_properties[index_cache.particle_property_indices.slip_direction], dim}));
                     const SymmetricTensor<2, dim> S = symmetrize(outer_product(n, s));
 
                     const SymmetricTensor<2, dim> tau_old = Utilities::Tensors::to_symmetric_tensor<dim>(
-                      &particle_properties[particle_data_positions.ve_stress],
-                      &particle_properties[particle_data_positions.ve_stress] + SymmetricTensor<2, dim>::n_independent_components);
-                    const double h_tau_coh_old = particle_properties[particle_data_positions.cohesive_force];
+                      &particle_properties[index_cache.particle_property_indices.ve_stress],
+                      &particle_properties[index_cache.particle_property_indices.ve_stress] + SymmetricTensor<2, dim>::n_independent_components);
+                    const double h_tau_coh_old = particle_properties[index_cache.particle_property_indices.cohesive_force];
 
-                    const double theta_old = particle_properties[particle_data_positions.slip_state];
                     const double p_bar = this->get_adiabatic_conditions().pressure(particle->get_location());
                     const double eta_d = MaterialUtilities::average_value(volume_fractions,
                                                                           radiation_damping_coefficients,
                                                                           MaterialUtilities::arithmetic);
 
-                    // Lambda functions evaluating the value and derivative of the RSF yield function
+                    const double V_prev = particle_properties[index_cache.particle_property_indices.slip_rate];
+                    const double theta_old = particle_properties[index_cache.particle_property_indices.slip_state];
+                    const double theta = rsf_rheology.slip_state(V_prev, theta_old, dt);
+
+                    // Lambda functions that evaluate the value and derivative of the RSF yield function
                     auto F_value = [&](const double V_current)
                     {
-                      const double v = V_current * gamma;
+                      const double v = V_current * chi;
                       const double tau_S = eta_ve * (2. * (epsilon * S) - v) + beta * (tau_old * S);
 
-                      const double mu = rsf_rheology.friction_coefficient(volume_fractions, V_current, theta_old, dt);
+                      const double mu = rsf_rheology.friction_coefficient(volume_fractions, V_current, theta);
                       const double tau_fric = mu * p_bar;
 
                       const double h = 1. / g - 1.;
@@ -638,26 +510,58 @@ namespace aspect
 
                     auto F_derivative = [&](const double V_current)
                     {
-                      const double dmu_dV = rsf_rheology.friction_coefficient_derivative(volume_fractions, V_current, theta_old, dt);
-                      return -(gamma * eta_ve / (1. - g) + dmu_dV * p_bar + eta_d);
+                      const double dmu_dV = rsf_rheology.friction_coefficient_derivative_wrt_slip_rate(volume_fractions, V_current, theta);
+                      return -(chi * eta_ve / (1. - g) + dmu_dV * p_bar + eta_d);
                     };
 
-                    // Use the slip rate from the previous nonlinear iteration step (or
-                    // time step) as an initial guess
-                    const double V_init = particle_properties[particle_data_positions.slip_rate];
+                    // Use Newton-Raphson method to solve the nonlinear equation for V.
+                    // For the first global iteration, the initial guess is the result from the previous time step; 
+                    // for the rest of global iterations, the initinal guess is the result from the previous global iteration.
+                    const double V_init = V_prev;
                     const double F_init = F_value(V_init);
 
-                    const double mu_init = rsf_rheology.friction_coefficient(volume_fractions, V_init, theta_old, dt);
-                    if (std::abs(F_init) > (mu_init * p_bar + eta_d * V_init) * 1.e-6)
+                    // Check if F > -res, where res = (mu * p_bar + eta_d * V) * 1e-6
+                    const double mu_init = rsf_rheology.friction_coefficient(volume_fractions, V_init, theta);
+                    if (F_init > -(mu_init * p_bar + eta_d * V_init) * 1.e-6)
                       {
-                        const double V = solve_RSF_consistent_equation(F_value, F_derivative, V_init, F_init, convergence_history);
+                        convergence_history.clear();
+
+                        convergence_history.V.push_back(V_init);
+                        convergence_history.F.push_back(F_init);
+
+                        const double tol = std::abs(F_init) * 1.e-8;
+                        
+                        double V = V_init;
+                        double F = F_init;
+
+                        unsigned int n_iter = 0;
+
+                        while (std::abs(F) > tol)
+                          {
+                            const double dF_dV = F_derivative(V);
+                            convergence_history.dF_dV.push_back(dF_dV);
+                            if (std::abs(dF_dV) < std::numeric_limits<double>::epsilon())
+                              break;
+
+                            V -= F / dF_dV;
+                            F = F_value(V);
+
+                            convergence_history.V.push_back(V);
+                            convergence_history.F.push_back(F);
+
+                            ++n_iter;
+                            if (n_iter > max_newton_iterations)
+                              break;
+                          }
 
                         // If solution failed, then exit all loops at once
-                        if (convergence_history.success == false)
+                        if (std::abs(F) <= tol)
+                          convergence_history.success = true;
+                        else
                           goto convergence_check;
 
                         // Update the slip rate
-                        particle_properties[particle_data_positions.slip_rate] = std::max(rsf_rheology.get_minimum_slip_rate(), V);
+                        particle_properties[index_cache.particle_property_indices.slip_rate] = std::max(rsf_rheology.get_minimum_slip_rate(), V);
                       }
                   }
               }
@@ -687,7 +591,7 @@ convergence_check:
                                      "consistent equation when performing local return-mapping. "
                                      "See <" + output_filename + "> for the convergence history."));
             }
-        }
+        }      
     }
 
 
@@ -873,10 +777,9 @@ convergence_check:
 
                 // Compute the volume fractions
                 for (unsigned int j = 0; j < chemical_field_values.size(); ++j)
-                  chemical_field_values[j] = particle_properties[particle_data_positions.chemical_fields[j]];
+                  chemical_field_values[j] = particle_properties[index_cache.particle_property_indices.chemical_fields[j]];
                 const std::vector<double> volume_fractions = MaterialUtilities::compute_composition_fractions(chemical_field_values);
 
-                // Update the viscoelastic stress
                 const double T = particle_solution_values[introspection.component_indices.temperature];
                 const double eta = calculate_creep_viscosity(T, volume_fractions);
                 const double G   = MaterialUtilities::average_value(volume_fractions, elastic_shear_moduli, viscosity_averaging);
@@ -886,60 +789,58 @@ convergence_check:
                 const double eta_ve = eta * one_minus_beta;
 
                 const SymmetricTensor<2, dim> tau_old = Utilities::Tensors::to_symmetric_tensor<dim>(
-                  &particle_properties[particle_data_positions.ve_stress],
-                  &particle_properties[particle_data_positions.ve_stress] + SymmetricTensor<2, dim>::n_independent_components);
+                  &particle_properties[index_cache.particle_property_indices.ve_stress],
+                  &particle_properties[index_cache.particle_property_indices.ve_stress] + SymmetricTensor<2, dim>::n_independent_components);
+
+                // Update the slip state
+                const double V         = particle_properties[index_cache.particle_property_indices.slip_rate];
+                const double theta_old = particle_properties[index_cache.particle_property_indices.slip_state];
+                const double theta = rsf_rheology.slip_state(V, theta_old, dt);
+                particle_properties[index_cache.particle_property_indices.slip_state] = theta;
 
                 // Check if the material point is fractured
-                const double pf = particle_solution_values[phase_field_component_index];
+                const double pf = particle_solution_values[index_cache.component_indices.phase_field];
                 if (pf > phase_field_activation_threshold)
                   {
-                    // The particle is fractured. Update the slip state
-                    const double V         = particle_properties[particle_data_positions.slip_rate];
-                    const double theta_old = particle_properties[particle_data_positions.slip_state];
-                    particle_properties[particle_data_positions.slip_state] = rsf_rheology.slip_state(V, theta_old, dt);
-
-                    // Update the viscoelastic stress
-                    const Tensor<1, dim> &grad_pf = particle_solution_gradients[phase_field_component_index];
-                    const double gamma = phase_field_handler.crack_surface_density(pf, grad_pf);
-                    const SymmetricTensor<2, dim> tau_old = Utilities::Tensors::to_symmetric_tensor<dim>(
-                      &particle_properties[particle_data_positions.ve_stress],
-                      &particle_properties[particle_data_positions.ve_stress] + SymmetricTensor<2, dim>::n_independent_components);
+                    // The particle is fractured. Update the viscoelastic stress
+                    const double pf_hat = particle_solution_values[index_cache.component_indices.peak_phase_field];
+                    const double g   = phase_field_handler.energetic_degradation(volume_fractions, pf);
+                    const double chi = phase_field_handler.slip_rate_localization_factor(volume_fractions, g, pf_hat);
 
                     Tensor<1, dim> n, s;
                     for (unsigned int d = 0; d < dim; ++d)
                       {
-                        n[d] = particle_properties[particle_data_positions.normal_direction + d];
-                        s[d] = particle_properties[particle_data_positions.slip_direction + d];
+                        n[d] = particle_properties[index_cache.particle_property_indices.normal_direction + d];
+                        s[d] = particle_properties[index_cache.particle_property_indices.slip_direction + d];
                       }
                     const SymmetricTensor<2, dim> S = symmetrize(outer_product(n, s));
-                    const SymmetricTensor<2, dim> epsilon_ve = epsilon - (gamma * V) * S;
+                    const SymmetricTensor<2, dim> epsilon_ve = epsilon - (chi * V) * S;
                     const SymmetricTensor<2, dim> tau = 2. * eta_ve * epsilon_ve + beta * tau_old;
 
                     Utilities::Tensors::unroll_symmetric_tensor_into_array<dim>(
                       tau,
-                      &particle_properties[particle_data_positions.ve_stress],
-                      &particle_properties[particle_data_positions.ve_stress] + SymmetricTensor<2, dim>::n_independent_components);
+                      &particle_properties[index_cache.particle_property_indices.ve_stress],
+                      &particle_properties[index_cache.particle_property_indices.ve_stress] + SymmetricTensor<2, dim>::n_independent_components);
 
                     // Update the cohesive force
-                    const double h_tau_coh_old = particle_properties[particle_data_positions.cohesive_force];
-                    const double g = phase_field_handler.energetic_degradation(pf, volume_fractions);
-                    const double v = gamma * V;
+                    const double h_tau_coh_old = particle_properties[index_cache.particle_property_indices.cohesive_force];
+                    const double v = chi * V;
                     const double h_tau_coh = eta_ve * v + beta * h_tau_coh_old;
-                    particle_properties[particle_data_positions.cohesive_force] = h_tau_coh;
+                    particle_properties[index_cache.particle_property_indices.cohesive_force] = h_tau_coh;
 
                     // Update the crack driving force
-                    const double H_old = particle_properties[particle_data_positions.crack_driving_force];
+                    const double H_old = particle_properties[index_cache.particle_property_indices.crack_driving_force];
                     const double H_new = (h_tau_coh * h_tau_coh - h_tau_coh_old * h_tau_coh_old) / (2. * G * (1. - g) * (1. - g));
-                    particle_properties[particle_data_positions.crack_driving_force] = std::max(H_old, H_new);
+                    particle_properties[index_cache.particle_property_indices.crack_driving_force] = std::max(H_old, H_new);
 
                     // Check if the normal direction and slip direction need to update
                     if (pf < phase_field_normal_lock_threshold)
                       {
                         Tensor<1, dim> n_old;
                         for (unsigned int d = 0; d < dim; ++d)
-                          n_old[d] = particle_properties[particle_data_positions.normal_direction + d];
+                          n_old[d] = particle_properties[index_cache.particle_property_indices.normal_direction + d];
 
-                        const double mu = rsf_rheology.friction_coefficient(volume_fractions, V, theta_old, dt);
+                        const double mu = rsf_rheology.friction_coefficient(volume_fractions, V, theta);
                         const double phi = (numbers::PI - 2. * std::atan(mu)) * 0.25;
                         const Tensor<1, dim> n_new = calculate_fault_normal(tau, grad_u, phi);
 
@@ -960,8 +861,8 @@ convergence_check:
 
                         for (unsigned int d = 0; d < dim; ++d)
                           {
-                            particle_properties[particle_data_positions.normal_direction + d] = n[d];
-                            particle_properties[particle_data_positions.slip_direction + d] = s[d];
+                            particle_properties[index_cache.particle_property_indices.normal_direction + d] = n[d];
+                            particle_properties[index_cache.particle_property_indices.slip_direction + d] = s[d];
                           }
                       }
                   }
@@ -971,15 +872,11 @@ convergence_check:
                     const SymmetricTensor<2, dim> tau = 2. * eta_ve * epsilon + beta * tau_old;
                     Utilities::Tensors::unroll_symmetric_tensor_into_array<dim>(
                       tau,
-                      &particle_properties[particle_data_positions.ve_stress],
-                      &particle_properties[particle_data_positions.ve_stress] + SymmetricTensor<2, dim>::n_independent_components);
-
-                    // Update the slip state
-                    const double theta_old = particle_properties[particle_data_positions.slip_state];
-                    particle_properties[particle_data_positions.slip_state] = rsf_rheology.slip_state(0., theta_old, dt);
+                      &particle_properties[index_cache.particle_property_indices.ve_stress],
+                      &particle_properties[index_cache.particle_property_indices.ve_stress] + SymmetricTensor<2, dim>::n_independent_components);
 
                     // Check if the particle reaches the peak strength
-                    const double mu    = rsf_rheology.friction_coefficient(volume_fractions, 0, theta_old, dt);
+                    const double mu    = rsf_rheology.friction_coefficient(volume_fractions, V, theta);
                     const double p_bar = this->get_adiabatic_conditions().pressure(particle->get_location());
                     const double c     = MaterialUtilities::average_value(volume_fractions, cohesions, MaterialUtilities::arithmetic);
 
@@ -992,14 +889,14 @@ convergence_check:
                     if (tau_diff > c)
                       {
                         // The particle is being fractured. Update the crack driving force
-                        particle_properties[particle_data_positions.crack_driving_force] = (tau_diff * tau_diff) / (2. * G);
+                        particle_properties[index_cache.particle_property_indices.crack_driving_force] = (tau_diff * tau_diff) / (2. * G);
 
                         // Initialize the normal direction and slip direction
                         const Tensor<1, dim> s = t_s / t_s.norm();
                         for (unsigned int d = 0; d < dim; ++d)
                           {
-                            particle_properties[particle_data_positions.normal_direction + d] = n[d];
-                            particle_properties[particle_data_positions.slip_direction + d] = s[d];
+                            particle_properties[index_cache.particle_property_indices.normal_direction + d] = n[d];
+                            particle_properties[index_cache.particle_property_indices.slip_direction + d] = s[d];
                           }
                       }
                   }

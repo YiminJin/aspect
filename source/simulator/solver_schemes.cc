@@ -1011,7 +1011,11 @@ namespace aspect
   void Simulator<dim>::solve_single_advection_single_stokes ()
   {
     if (parameters.enable_phase_field)
-      phase_field_handler->solve(system_matrix, system_rhs, solution);
+      {
+        phase_field_handler->evolve_phase_field(system_matrix, system_rhs, solution);
+        if (parameters.need_slip_rate)
+          phase_field_handler->extend_phase_field(system_matrix, system_rhs, solution, current_constraints);
+      }
 
     assemble_and_solve_temperature();
     assemble_and_solve_composition();
@@ -1094,7 +1098,11 @@ namespace aspect
     // system first, since the evolution of compositional fields may depend on 
     // the phase field
     if (parameters.enable_phase_field)
-      phase_field_handler->solve(system_matrix, system_rhs, solution);
+      {
+        phase_field_handler->evolve_phase_field(system_matrix, system_rhs, solution);
+        if (parameters.need_slip_rate)
+          phase_field_handler->extend_phase_field(system_matrix, system_rhs, solution, current_constraints);
+      }
 
     // Assemble and solve the temperature and compositional fields
     assemble_and_solve_temperature();

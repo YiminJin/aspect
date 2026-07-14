@@ -67,11 +67,11 @@ namespace aspect
       double
       RateStateFriction<dim>::
       friction_coefficient(const std::vector<double> &volume_fractions,
-                           const double V_raw,
-                           const double theta_old,
-                           const double dt) const
+                           const double               V_raw,
+                           const double               theta) const
       {
         AssertDimension(volume_fractions.size(), mu0.size());
+        AssertThrow(theta > 0, ExcMessage("The slip state is non-positive."));
 
         double mu0_eff = 0, a_eff = 0, b_eff = 0;
         for (unsigned int j = 0; j < volume_fractions.size(); ++j)
@@ -83,7 +83,6 @@ namespace aspect
             }
 
         const double V = std::clamp(V_raw, Vmin, Vmax);
-        const double theta = slip_state(V, theta_old, dt);
 
         return (regularized
                 ?
@@ -97,14 +96,12 @@ namespace aspect
       template <int dim>
       double
       RateStateFriction<dim>::
-      friction_coefficient_derivative(const std::vector<double> &volume_fractions,
-                                      const double               V_raw,
-                                      const double               theta_old,
-                                      const double               dt) const
+      friction_coefficient_derivative_wrt_slip_rate(const std::vector<double> &volume_fractions,
+                                                    const double               V_raw,
+                                                    const double               theta) const
       {
-        AssertIndexRange(volume_fractions.size(), mu0.size());
-        AssertThrow(theta_old > 0, ExcMessage("The slip state is non-positive."));
-        AssertThrow(dt > 0, ExcMessage("Time step is non-positive."));
+        AssertDimension(volume_fractions.size(), mu0.size());
+        AssertThrow(theta > 0, ExcMessage("The slip state is non-positive."));
 
         double mu0_eff = 0, a_eff = 0, b_eff = 0;
         for (unsigned int j = 0; j < volume_fractions.size(); ++j)
@@ -116,13 +113,8 @@ namespace aspect
             }
 
         const double V = std::clamp(V_raw, Vmin, Vmax);
-        const double x = V * dt / Dc;
-        const double E = std::exp(-x);
-        const double Em1 = std::expm1(-x);
-        const double theta = -Dc / V * Em1 + theta_old * E;
-        const double dtheta_dV = Dc / (V * V) * Em1 + (dt / V - theta_old * dt / Dc) * E;
 
-        double dmu_dV = a_eff / V + b_eff / theta * dtheta_dV;
+        double dmu_dV = a_eff / V;
         if (regularized)
           {
             const double Z = V / (2. * V0) * std::exp((mu0_eff + b_eff * std::log(V0 * theta / Dc)) / a_eff);

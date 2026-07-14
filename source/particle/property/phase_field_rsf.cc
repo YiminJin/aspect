@@ -41,9 +41,6 @@ namespace aspect
             if (key_and_value.second.first == "crack_driving_force")
               compositional_indices.crack_driving_force = key_and_value.first;
 
-            if (key_and_value.second.first == "cohesive_force")
-              compositional_indices.cohesive_force = key_and_value.first;
-
             if (key_and_value.second.first == "slip_rate")
               compositional_indices.slip_rate = key_and_value.first;
 
@@ -72,14 +69,11 @@ namespace aspect
               }
           }
 
-        // The slip rate, slip state, cohesive force and viscoelastic stress must be associated with
-        // compositional fields
+        // The slip rate, slip state and viscoelastic stress must be associated with compositional fields
         AssertThrow(compositional_indices.slip_rate != numbers::invalid_unsigned_int,
                     ExcMessage("Particle property 'slip_rate' must be associated with a compositional field."));
         AssertThrow(compositional_indices.slip_state != numbers::invalid_unsigned_int,
                     ExcMessage("Particle property 'slip_state' must be associated with a compositional field."));
-        AssertThrow(compositional_indices.cohesive_force != numbers::invalid_unsigned_int,
-                    ExcMessage("Particle property 'cohesive_force' must be associated with a compositional field."));
         for (unsigned int c = 0; c < SymmetricTensor<2, dim>::n_independent_components; ++c)
           AssertThrow(compositional_indices.ve_stress[c] != numbers::invalid_unsigned_int,
                       ExcMessage("Particle property 've_stress[" + Utilities::int_to_string(c)

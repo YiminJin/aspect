@@ -749,8 +749,14 @@ namespace aspect
                          "the Stokes equation.");
       prm.declare_entry ("Enable phase field", "false",
                          Patterns::Bool (),
-                         "Whether to enable the phase field method to describe crack nucleation and "
+                         "Whether to enable the phase-field method to describe crack nucleation and "
                          "propagation.");
+      prm.declare_entry ("Need slip rate", "false",
+                         Patterns::Bool (),
+                         "Whether the slip rate is required in the computation, in which case the "
+                         "phase-field values at the crack center should be extended to the whole "
+                         "crack zone. This parameter is active only when `Enable phase field' is "
+                         "set to `true'.");
       prm.declare_entry ("Enable prescribed dilation", "false",
                          Patterns::Bool (),
                          "Whether to include additional terms on the right-hand side of "
@@ -1855,6 +1861,7 @@ namespace aspect
       enable_additional_stokes_rhs = prm.get_bool ("Enable additional Stokes RHS");
       enable_elasticity = prm.get_bool("Enable elasticity");
       enable_phase_field = prm.get_bool("Enable phase field");
+      need_slip_rate = prm.get_bool("Need slip rate");
       enable_prescribed_dilation = prm.get_bool("Enable prescribed dilation");
 
       use_implicit_constitutive_model = prm.get_bool("Use implicit constitutive model");

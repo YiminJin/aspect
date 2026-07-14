@@ -90,27 +90,91 @@ namespace aspect
 
         Rheology::RateStateFriction<dim> rsf_rheology;
 
-        struct ParticleDataPositions
+        struct IndexCache
         {
-          unsigned int crack_driving_force;
-          unsigned int cohesive_force;
-          unsigned int slip_rate;
-          unsigned int slip_state;
-          unsigned int normal_direction;
-          unsigned int slip_direction;
-          unsigned int ve_stress;
-          std::vector<unsigned int> chemical_fields;
+          /**
+           * Structure caching the indices of the particle properties that are
+           * frequently requested by this material model.
+           */
+          struct ParticlePropertyIndices
+          {
+            unsigned int crack_driving_force;
+            unsigned int cohesive_force;
+            unsigned int slip_rate;
+            unsigned int slip_state;
+            unsigned int normal_direction;
+            unsigned int slip_direction;
+            unsigned int ve_stress;
+            std::vector<unsigned int> chemical_fields;
+
+            /**
+             * Default constructor. Initialize all the indices to 
+             * <tt>numbers::invalid_unsigned_int</tt>.
+             */
+            ParticlePropertyIndices()
+              : crack_driving_force(numbers::invalid_unsigned_int)
+              , cohesive_force(numbers::invalid_unsigned_int)
+              , slip_rate(numbers::invalid_unsigned_int)
+              , slip_state(numbers::invalid_unsigned_int)
+              , normal_direction(numbers::invalid_unsigned_int)
+              , slip_direction(numbers::invalid_unsigned_int)
+              , ve_stress(numbers::invalid_unsigned_int)
+            {}
+          };
+
+          ParticlePropertyIndices particle_property_indices;
+
+          /**
+           * Structure caching the indices of the compositional fields that
+           * are frequently requested by this material model.
+           */
+          struct CompositionalIndices
+          {
+            unsigned int slip_rate;
+            unsigned int slip_state;
+
+            /**
+             * Default constructor. Initialize all the indices to
+             * <tt>numbers::invalid_unsigned_int</tt>.
+             */
+            CompositionalIndices()
+              : slip_rate(numbers::invalid_unsigned_int)
+              , slip_state(numbers::invalid_unsigned_int)
+            {}
+          };
+
+          CompositionalIndices compositional_indices;
+
+          /**
+           * Structure caching the indices of the variable components that
+           * are frequently requested by this material model.
+           */
+          struct ComponentIndices
+          {
+            unsigned int phase_field;
+            unsigned int peak_phase_field;
+
+            /**
+             * Default constructor. Initialize all the indices to
+             * <tt>numbers::invalid_unsigned_int</tt>.
+             */
+            ComponentIndices()
+              : phase_field(numbers::invalid_unsigned_int)
+              , peak_phase_field(numbers::invalid_unsigned_int)
+            {}
+          };
+
+          ComponentIndices component_indices;
+
+          /**
+           * Initialize the index cache.
+           */
+          void initialize(const Introspection<dim>     &introspection,
+                          const Parameters<dim>        &parameters,
+                          const PhaseFieldHandler<dim> &phase_field_handler);
         };
 
-        ParticleDataPositions particle_data_positions;
-
-        struct CompositionalIndices
-        {
-          unsigned int slip_rate;
-          unsigned int slip_state;
-        };
-
-        CompositionalIndices compositional_indices;
+        IndexCache index_cache;
 
         MaterialUtilities::CompositionalAveragingOperation viscosity_averaging;
 
@@ -143,8 +207,6 @@ namespace aspect
         std::unique_ptr<SolutionEvaluator<dim>> solution_evaluator;
 
         std::vector<EvaluationFlags::EvaluationFlags> evaluation_flags;
-
-        unsigned int phase_field_component_index;
     };
   }
 }

@@ -660,9 +660,17 @@ namespace aspect
     bool                           enable_elasticity;
 
     /**
-     * Determines whether the phase field method is enabled in the model.
+     * Determines whether the phase-field method is enabled in the model.
      */
     bool                           enable_phase_field;
+
+    /**
+     * Determines whether the slip rate is required in the computation, in
+     * which case the phase field values at the crack center need to be 
+     * extended to the whole crack zone. This parameter is active only when
+     * the phase-field method is enabled.
+     */
+    bool                           need_slip_rate;
 
     /**
      * Determines whether to use a fully-implicit constitutive model, i.e.

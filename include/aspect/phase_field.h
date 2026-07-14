@@ -54,6 +54,13 @@ namespace aspect
         virtual
         std::vector<double>
         get_critical_energy_release_rates() const = 0;
+
+        /**
+         * Returns the lower and upper bounds of the phase-field.
+         */
+        virtual
+        std::pair<double, double>
+        get_phase_field_range() const;
     };
   }
 
@@ -71,7 +78,9 @@ namespace aspect
          * $\xi\phi + (1-\xi)phi^2$, where the parameter $\xi$ is in the range
          * of [0,2].
          */
-        GeometricFunction(const double xi);
+        GeometricFunction(const double l,
+                          const double xi,
+                          const double c0);
 
         /**
          * Given the phase-field $\phi$, return the value of the geometric 
@@ -91,9 +100,34 @@ namespace aspect
          */
         double second_derivative(const double phase_field) const;
 
+        /**
+         * Return the length scale $l$.
+         */
+        double get_length_scale() const;
+
+      /**
+       * Return the normalization factor $c_0$.
+       */
+      double get_normalization_factor() const;
+
       private:
-        double xi;
+        const double l;
+        const double xi;
+        const double c0;
     };
+
+    inline double 
+    GeometricFunction::get_length_scale() const
+    {
+      return l;
+    }
+
+    inline double
+    GeometricFunction::get_normalization_factor() const
+    {
+      return c0;
+    }
+
 
     /**
      * The energetic degradation function $g(\phi)$.
@@ -126,19 +160,86 @@ namespace aspect
         double second_derivative(const double phase_field) const;
 
       private:
-        double p;
-        double m;
+        const double p;
+        const double m;
+    };
+
+    class PhaseFieldProfile
+    {
+      public:
+        /**
+         * Constructor.
+         */
+        PhaseFieldProfile(const GeometricFunction   &a_func,
+                          const DegradationFunction &g_func,
+                          const double               d_peak,
+                          const unsigned int         n_points = 5000);
+
+        /**
+         * Given the distance from the crack center, return the phase-field
+         * value.
+         */
+        double value(const double zeta) const;
+
+        const std::vector<double> &get_coordinate_values() const;
+
+        const std::vector<double> &get_phase_field_values() const;
+
+      private:
+        const unsigned int N;
+        std::vector<double> coordinate_values;
+        std::vector<double> phase_field_values;
+    };
+
+    inline const std::vector<double> &
+    PhaseFieldProfile::get_coordinate_values() const
+    {
+      return coordinate_values;
+    }
+
+    inline const std::vector<double> &
+    PhaseFieldProfile::get_phase_field_values() const
+    {
+      return phase_field_values;
+    }
+
+
+    class SlipRateNormalizer
+    {
+      public:
+        /**
+         * Number of sample points.
+         */
+        static constexpr unsigned int M = 100;
+        
+        /**
+         * Number of subdivisions for the trapezoidal rule.
+         */
+        static constexpr unsigned int N = 1000;
+
+        /**
+         * Constructor.
+         */
+        SlipRateNormalizer(const GeometricFunction   &a_func,
+                           const DegradationFunction &g_func,
+                           const double               d_max,
+                           const double               d_min);
+
+        /**
+         * Given the peak phase-field value, returns the normalization factor.
+         */
+        double normalization_factor(const double peak_value) const;
+
+      private:
+        const double d_min;
+        const double d_max;
+        std::array<double, M> logit_d_hat;
+        std::array<double, M> log_Ih;
     };
 
     template <int dim>
-    struct Parameters
+    struct SolverParameters
     {
-      double length_scale;
-
-      double geometric_normalization_parameter;
-
-      double degradation_curvature_parameter;
-
       double linear_solver_tolerance;
 
       unsigned int max_linear_solver_iterations;
@@ -168,17 +269,31 @@ namespace aspect
       void
       make_sparsity_pattern(LinearAlgebra::BlockDynamicSparsityPattern &sp);
 
-      double
-      solve(LinearAlgebra::BlockSparseMatrix &system_matrix,
-            LinearAlgebra::BlockVector       &system_rhs,
-            LinearAlgebra::BlockVector       &solution);
+      void
+      evolve_phase_field(LinearAlgebra::BlockSparseMatrix &system_matrix,
+                         LinearAlgebra::BlockVector       &system_rhs,
+                         LinearAlgebra::BlockVector       &solution);
+
+      void
+      extend_phase_field(LinearAlgebra::BlockSparseMatrix &system_matrix,
+                         LinearAlgebra::BlockVector       &system_rhs,
+                         LinearAlgebra::BlockVector       &solution,
+                         AffineConstraints<double>        &constraints);
 
       double crack_surface_density(const double          phase_field_value,
                                    const Tensor<1, dim> &phase_field_gradient) const;
 
       double
-      energetic_degradation(const double               phase_field_value,
-                            const std::vector<double> &volume_fractions) const;
+      energetic_degradation(const std::vector<double> &volume_fractions,
+                            const double               phase_field_value) const;
+
+      double
+      slip_rate_localization_factor(const std::vector<double> &volume_fractions,
+                                    const double degradation_function,
+                                    const double peak_phase_field) const;
+
+      std::vector<std::unique_ptr<PhaseField::PhaseFieldProfile>>
+      get_phase_field_profiles(const double peak_value) const;
 
       const Particle::Manager<dim> &get_associated_particle_manager() const;
 
@@ -187,35 +302,36 @@ namespace aspect
       void parse_parameters(ParameterHandler &prm);
 
     private:
-      double compute_microforce(const double               phase_field_value,
-                                const double               driving_force,
-                                const std::vector<double> &volume_fractions) const;
-
-      double compute_microforce_derivative(const double               phase_field_value,
-                                           const double               driving_force,
-                                           const std::vector<double> &volume_fractions) const;
-
-      double compute_microstress_prefactor(const std::vector<double> &volume_fractions) const;
-
       void
-      assemble_linearized_system(LinearAlgebra::BlockSparseMatrix &system_matrix,
-                                 LinearAlgebra::BlockVector       &system_rhs,
-                                 const LinearAlgebra::BlockVector &current_solution,
-                                 const bool assemble_system_jacobian) const;
+      assemble_phase_field_system(LinearAlgebra::BlockSparseMatrix &system_matrix,
+                                  LinearAlgebra::BlockVector       &system_rhs,
+                                  const LinearAlgebra::BlockVector &current_solution,
+                                  const bool assemble_system_jacobian) const;
 
       unsigned int
-      solve_linearized_system(const LinearAlgebra::BlockSparseMatrix &system_matrix,
-                              const LinearAlgebra::BlockVector       &system_rhs,
-                              LinearAlgebra::BlockVector             &solution_vector) const;
+      solve_phase_field_system(const LinearAlgebra::BlockSparseMatrix &system_matrix,
+                               const LinearAlgebra::BlockVector       &system_rhs,
+                               LinearAlgebra::BlockVector             &solution_vector) const;
 
-      double 
-      evaluate_merit_function(const LinearAlgebra::BlockVector &test_solution) const;
+      void
+      assemble_obstacle_system(LinearAlgebra::BlockSparseMatrix &system_matrix,
+                               LinearAlgebra::BlockVector       &system_rhs,
+                               const LinearAlgebra::BlockVector &current_solution,
+                               const AffineConstraints<double>  &constraints) const;
 
-      PhaseField::Parameters<dim> parameters;
+      unsigned int
+      solve_obstacle_system(const LinearAlgebra::BlockSparseMatrix &system_matrix,
+                            const LinearAlgebra::BlockVector       &system_rhs,
+                            LinearAlgebra::BlockVector             &solution_vector,
+                            AffineConstraints<double>              &constraints) const;
+
+      PhaseField::SolverParameters<dim> solver_parameters;
 
       std::unique_ptr<PhaseField::GeometricFunction> geometric_function;
 
       std::vector<std::unique_ptr<PhaseField::DegradationFunction>> degradation_functions;
+
+      std::vector<std::unique_ptr<PhaseField::SlipRateNormalizer>> slip_rate_normalizers;
 
       std::vector<double> critical_energy_densities;
 
