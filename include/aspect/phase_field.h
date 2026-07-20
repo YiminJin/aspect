@@ -172,7 +172,7 @@ namespace aspect
          */
         PhaseFieldProfile(const GeometricFunction   &a_func,
                           const DegradationFunction &g_func,
-                          const double               d_peak,
+                          const double               phi_hat,
                           const unsigned int         n_points = 5000);
 
         /**
@@ -222,8 +222,8 @@ namespace aspect
          */
         SlipRateNormalizer(const GeometricFunction   &a_func,
                            const DegradationFunction &g_func,
-                           const double               d_max,
-                           const double               d_min);
+                           const double               phi_max,
+                           const double               phi_min);
 
         /**
          * Given the peak phase-field value, returns the normalization factor.
@@ -231,24 +231,26 @@ namespace aspect
         double normalization_factor(const double peak_value) const;
 
       private:
-        const double d_min;
-        const double d_max;
-        std::array<double, M> logit_d_hat;
+        const double phi_min;
+        const double phi_max;
+        std::array<double, M> logit_phi_hat;
         std::array<double, M> log_Ih;
     };
 
-    template <int dim>
     struct SolverParameters
     {
       double linear_solver_tolerance;
-
       unsigned int max_linear_solver_iterations;
-
       double nonlinear_solver_tolerance;
-
       unsigned int max_nonlinear_iterations;
-
       unsigned int max_newton_line_search_iterations;
+    };
+
+    struct CoreExtenderParameters
+    {
+      double tangential_diffusion_coefficient;
+      double pseudo_force_coefficient;
+      double penalty_parameter_scaling_factor;
     };
   }
 
@@ -275,10 +277,9 @@ namespace aspect
                          LinearAlgebra::BlockVector       &solution);
 
       void
-      extend_phase_field(LinearAlgebra::BlockSparseMatrix &system_matrix,
-                         LinearAlgebra::BlockVector       &system_rhs,
-                         LinearAlgebra::BlockVector       &solution,
-                         AffineConstraints<double>        &constraints);
+      extend_core_phase_field(LinearAlgebra::BlockSparseMatrix &system_matrix,
+                              LinearAlgebra::BlockVector       &system_rhs,
+                              LinearAlgebra::BlockVector       &solution);
 
       double crack_surface_density(const double          phase_field_value,
                                    const Tensor<1, dim> &phase_field_gradient) const;
@@ -291,6 +292,11 @@ namespace aspect
       slip_rate_localization_factor(const std::vector<double> &volume_fractions,
                                     const double degradation_function,
                                     const double peak_phase_field) const;
+
+      double 
+      crack_driving_force_of_stationary_profile(const std::vector<double> &volume_fractions,
+                                                const double               phase_field,
+                                                const double               peak_phase_field) const;
 
       std::vector<std::unique_ptr<PhaseField::PhaseFieldProfile>>
       get_phase_field_profiles(const double peak_value) const;
@@ -314,18 +320,27 @@ namespace aspect
                                LinearAlgebra::BlockVector             &solution_vector) const;
 
       void
-      assemble_obstacle_system(LinearAlgebra::BlockSparseMatrix &system_matrix,
-                               LinearAlgebra::BlockVector       &system_rhs,
-                               const LinearAlgebra::BlockVector &current_solution,
-                               const AffineConstraints<double>  &constraints) const;
+      assemble_saddle_point_system(LinearAlgebra::BlockSparseMatrix &system_matrix,
+                                   LinearAlgebra::BlockVector       &system_rhs,
+                                   const AffineConstraints<double>  &constraints) const;
 
       unsigned int
-      solve_obstacle_system(const LinearAlgebra::BlockSparseMatrix &system_matrix,
-                            const LinearAlgebra::BlockVector       &system_rhs,
-                            LinearAlgebra::BlockVector             &solution_vector,
-                            AffineConstraints<double>              &constraints) const;
+      solve_saddle_point_system(const LinearAlgebra::BlockSparseMatrix &system_matrix,
+                                const LinearAlgebra::BlockVector       &system_rhs,
+                                LinearAlgebra::BlockVector             &solution_vector,
+                                const AffineConstraints<double>        &constraints) const;
 
-      PhaseField::SolverParameters<dim> solver_parameters;
+      void
+      update_active_set(const LinearAlgebra::BlockSparseMatrix &system_matrix,
+                        const LinearAlgebra::BlockSparseMatrix &complete_system_matrix,
+                        LinearAlgebra::BlockVector             &lagrange_multiplier,
+                        LinearAlgebra::BlockVector             &solution,
+                        AffineConstraints<double>              &constraints,
+                        IndexSet                               &active_set) const;
+
+      PhaseField::SolverParameters solver_parameters;
+
+      PhaseField::CoreExtenderParameters core_extender_parameters;
 
       std::unique_ptr<PhaseField::GeometricFunction> geometric_function;
 

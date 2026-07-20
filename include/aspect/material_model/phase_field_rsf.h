@@ -51,6 +51,9 @@ namespace aspect
 
         std::vector<double>
         get_critical_energy_release_rates() const override;
+        
+        std::pair<double, double>
+        get_phase_field_range() const override;
 
         bool
         is_compressible() const override;
@@ -72,7 +75,7 @@ namespace aspect
         parse_parameters(ParameterHandler &prm) override;
 
       private:
-        void initialize_index_cache();
+        void do_initialization();
 
         void perform_return_mapping();
 
@@ -152,7 +155,7 @@ namespace aspect
           struct ComponentIndices
           {
             unsigned int phase_field;
-            unsigned int peak_phase_field;
+            unsigned int core_phase_field;
 
             /**
              * Default constructor. Initialize all the indices to
@@ -160,7 +163,7 @@ namespace aspect
              */
             ComponentIndices()
               : phase_field(numbers::invalid_unsigned_int)
-              , peak_phase_field(numbers::invalid_unsigned_int)
+              , core_phase_field(numbers::invalid_unsigned_int)
             {}
           };
 

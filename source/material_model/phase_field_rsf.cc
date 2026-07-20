@@ -66,7 +66,7 @@ namespace aspect
 
       // Initialize the component indices
       component_indices.phase_field      = introspection.variable("phase_field").first_component_index;
-      component_indices.peak_phase_field = introspection.variable("peak_phase_field").first_component_index;
+      component_indices.core_phase_field = introspection.variable("core_phase_field").first_component_index;
     }
 
 
@@ -92,23 +92,11 @@ namespace aspect
                              "constitutive model. Please set <Formulation/Use implicit constitutive model> "
                              "to true."));
 
-      // Initialize the evaluation flags
-      // We need the velocity gradients, temperature values, phase field values and peak phase field values
-      // at particle locations
-      evaluation_flags.resize(this->introspection().n_components, EvaluationFlags::nothing);
-      for (unsigned int d = 0; d < dim; ++d)
-        evaluation_flags[d] = EvaluationFlags::gradients;
-      evaluation_flags[this->introspection().component_indices.temperature] = EvaluationFlags::values;
-      evaluation_flags[index_cache.component_indices.phase_field] = EvaluationFlags::values;
-      evaluation_flags[index_cache.component_indices.peak_phase_field] = EvaluationFlags::values;
-
-      // Initialize the index cache when it is sure that the phase field handler has been initialized
+      // Do the actual initialization when it is sure that the phase field handler has been initialized
       this->get_signals().post_simulator_initialization.connect(
         [&](const SimulatorAccess<dim> &)
       {
-        index_cache.initialize(this->introspection(), 
-                               this->get_parameters(), 
-                               this->get_phase_field_handler());
+        this->do_initialization();
       });
 
       // Perform return mapping before assembling the Stokes system
@@ -125,6 +113,25 @@ namespace aspect
       {
         this->update_history_states(nonlinear_solver_control);
       });
+    }
+
+
+
+    template <int dim>
+    void PhaseFieldRSF<dim>::do_initialization()
+    {
+      // Initialize the index cache
+      index_cache.initialize(this->introspection(), this->get_parameters(), this->get_phase_field_handler());
+
+      // Initialize the evaluation flags.
+      // We need the velocity gradients, temperature values, phase field values and peak phase field values
+      // at particle locations
+      evaluation_flags.resize(this->introspection().n_components, EvaluationFlags::nothing);
+      for (unsigned int d = 0; d < dim; ++d)
+        evaluation_flags[d] = EvaluationFlags::gradients;
+      evaluation_flags[this->introspection().component_indices.temperature] = EvaluationFlags::values;
+      evaluation_flags[index_cache.component_indices.phase_field] = EvaluationFlags::values;
+      evaluation_flags[index_cache.component_indices.core_phase_field] = EvaluationFlags::values;
     }
 
 
@@ -263,8 +270,8 @@ namespace aspect
                 &particle_properties[index_cache.particle_property_indices.ve_stress] + SymmetricTensor<2, dim>::n_independent_components);
 
               // Check if the point is fractured
-              const double pf = particle_solution_values[index_cache.component_indices.phase_field];
-              if (pf > phase_field_activation_threshold)
+              const double phi = particle_solution_values[index_cache.component_indices.phase_field];
+              if (phi > phase_field_activation_threshold)
                 {
                   // Compute the slip direction tensor
                   const Tensor<1, dim> n(ArrayView<const double>(&particle_properties[index_cache.particle_property_indices.normal_direction], dim));
@@ -277,9 +284,9 @@ namespace aspect
                   const double theta  = rsf_rheology.slip_state(V, theta_old, dt);
                   const double dmu_dV = rsf_rheology.friction_coefficient_derivative_wrt_slip_rate(volume_fractions, V, theta);
 
-                  const double pf_hat = particle_solution_values[index_cache.component_indices.peak_phase_field];
-                  const double g   = this->get_phase_field_handler().energetic_degradation(volume_fractions, pf);
-                  const double chi = this->get_phase_field_handler().slip_rate_localization_factor(volume_fractions, g, pf_hat);
+                  const double phi_hat = particle_solution_values[index_cache.component_indices.core_phase_field];
+                  const double g   = this->get_phase_field_handler().energetic_degradation(volume_fractions, phi);
+                  const double chi = this->get_phase_field_handler().slip_rate_localization_factor(volume_fractions, g, phi_hat);
 
                   const double p_bar = std::max(0., this->get_adiabatic_conditions().pressure(particle->get_location()));
                   const double eta_d = MaterialUtilities::average_value(volume_fractions, radiation_damping_coefficients, MaterialUtilities::arithmetic);
@@ -327,7 +334,7 @@ namespace aspect
                       implicit_constitutive_outputs->deviatoric_stresses[p] = 2. * eta_ve * epsilon_ve + beta * tau_old;
                     }
                 }
-              else // pf <= phase_field_activation_threshold
+              else // phi <= phase_field_activation_threshold
                 {
                   implicit_constitutive_outputs->tangent_operators[p] = (2. * eta_ve) * identity_tensor<dim>();
                   if (implicit_constitutive_outputs->assemble_preconditioner)
@@ -446,8 +453,8 @@ namespace aspect
                 solution_evaluator->get_gradients(p, {particle_solution_gradients.data(), particle_solution_gradients.size()}, evaluation_flags);
 
                 // Check if the particle is fractured
-                const double pf = particle_solution_values[index_cache.component_indices.phase_field];
-                if (pf > phase_field_activation_threshold)
+                const double phi = particle_solution_values[index_cache.component_indices.phase_field];
+                if (phi > phase_field_activation_threshold)
                   {
                     // Compute the strain rate
                     Tensor<2, dim> grad_u;
@@ -469,9 +476,9 @@ namespace aspect
                     const double beta = 1. - one_minus_beta;
                     const double eta_ve = eta * one_minus_beta;
 
-                    const double pf_hat = particle_solution_values[index_cache.component_indices.peak_phase_field];
-                    const double g   = phase_field_handler.energetic_degradation(volume_fractions, pf);
-                    const double chi = phase_field_handler.slip_rate_localization_factor(volume_fractions, g, pf_hat);
+                    const double phi_hat = particle_solution_values[index_cache.component_indices.core_phase_field];
+                    const double g   = phase_field_handler.energetic_degradation(volume_fractions, phi);
+                    const double chi = phase_field_handler.slip_rate_localization_factor(volume_fractions, g, phi_hat);
 
                     const Tensor<1, dim> n(ArrayView<double>({&particle_properties[index_cache.particle_property_indices.normal_direction], dim}));
                     const Tensor<1, dim> s(ArrayView<double>({&particle_properties[index_cache.particle_property_indices.slip_direction], dim}));
@@ -799,13 +806,13 @@ convergence_check:
                 particle_properties[index_cache.particle_property_indices.slip_state] = theta;
 
                 // Check if the material point is fractured
-                const double pf = particle_solution_values[index_cache.component_indices.phase_field];
-                if (pf > phase_field_activation_threshold)
+                const double phi = particle_solution_values[index_cache.component_indices.phase_field];
+                if (phi > phase_field_activation_threshold)
                   {
                     // The particle is fractured. Update the viscoelastic stress
-                    const double pf_hat = particle_solution_values[index_cache.component_indices.peak_phase_field];
-                    const double g   = phase_field_handler.energetic_degradation(volume_fractions, pf);
-                    const double chi = phase_field_handler.slip_rate_localization_factor(volume_fractions, g, pf_hat);
+                    const double phi_hat = particle_solution_values[index_cache.component_indices.core_phase_field];
+                    const double g   = phase_field_handler.energetic_degradation(volume_fractions, phi);
+                    const double chi = phase_field_handler.slip_rate_localization_factor(volume_fractions, g, phi_hat);
 
                     Tensor<1, dim> n, s;
                     for (unsigned int d = 0; d < dim; ++d)
@@ -834,7 +841,7 @@ convergence_check:
                     particle_properties[index_cache.particle_property_indices.crack_driving_force] = std::max(H_old, H_new);
 
                     // Check if the normal direction and slip direction need to update
-                    if (pf < phase_field_normal_lock_threshold)
+                    if (phi < phase_field_normal_lock_threshold)
                       {
                         Tensor<1, dim> n_old;
                         for (unsigned int d = 0; d < dim; ++d)
@@ -848,7 +855,7 @@ convergence_check:
                         const SymmetricTensor<2, dim> projector_old = symmetrize(outer_product(n_old, n_old));
                         const SymmetricTensor<2, dim> projector_new = symmetrize(outer_product(n_new, n_new));
 
-                        const double fraction = (pf - phase_field_activation_threshold) / (phase_field_normal_lock_threshold - phase_field_activation_threshold);
+                        const double fraction = (phi - phase_field_activation_threshold) / (phase_field_normal_lock_threshold - phase_field_activation_threshold);
                         const SymmetricTensor<2, dim> projector_avg = fraction * projector_old + (1. - fraction) * projector_new;
 
                         const std::array<std::pair<double, Tensor<1, dim>>, dim> eigenvalues_and_vectors = eigenvectors(projector_avg);
@@ -880,8 +887,8 @@ convergence_check:
                     const double p_bar = this->get_adiabatic_conditions().pressure(particle->get_location());
                     const double c     = MaterialUtilities::average_value(volume_fractions, cohesions, MaterialUtilities::arithmetic);
 
-                    const double phi = (numbers::PI - 2. * std::atan(mu)) * 0.25;
-                    const Tensor<1, dim> n = calculate_fault_normal(tau, grad_u, phi);
+                    const double angle = (numbers::PI - 2. * std::atan(mu)) * 0.25;
+                    const Tensor<1, dim> n = calculate_fault_normal(tau, grad_u, angle);
 
                     const Tensor<1, dim> t = tau * n;
                     const Tensor<1, dim> t_s = t - (t * n) * n;
@@ -944,6 +951,15 @@ convergence_check:
     PhaseFieldRSF<dim>::get_critical_energy_release_rates() const
     {
       return critical_energy_release_rates;
+    }
+
+
+
+    template <int dim>
+    std::pair<double, double>
+    PhaseFieldRSF<dim>::get_phase_field_range() const
+    {
+      return std::make_pair(phase_field_activation_threshold, 0.99);
     }
 
 

@@ -64,23 +64,23 @@ namespace aspect
 
     
     double
-    GeometricFunction::value(const double d) const
+    GeometricFunction::value(const double phi) const
     {
-      return d * (xi + (1.0 - xi) * d);
+      return phi * (xi + (1.0 - xi) * phi);
     }
 
 
 
     double
-    GeometricFunction::first_derivative(const double d) const
+    GeometricFunction::first_derivative(const double phi) const
     {
-      return xi + 2.0 * (1.0 - xi) * d;
+      return xi + 2.0 * (1.0 - xi) * phi;
     }
 
 
 
     double
-    GeometricFunction::second_derivative(const double /*d*/) const
+    GeometricFunction::second_derivative(const double /*phi*/) const
     {
       return 2.0 * (1.0 - xi);
     }
@@ -102,33 +102,33 @@ namespace aspect
 
 
     double
-    DegradationFunction::value(const double d) const
+    DegradationFunction::value(const double phi) const
     {
-      const double numerator   = (1. - d) * (1. - d);
-      const double denominator = numerator + m * d * (1. + p * d);
+      const double numerator   = (1. - phi) * (1. - phi);
+      const double denominator = numerator + m * phi * (1. + p * phi);
       return numerator / denominator;
     }
 
 
 
     double
-    DegradationFunction::first_derivative(const double d) const
+    DegradationFunction::first_derivative(const double phi) const
     {
-      const double numerator   = -m * (1. - d) * (1. + d + 2. * p * d);
-      const double denominator = Utilities::fixed_power<2, double>((1. - d) * (1. - d) + m * d * (1. + p * d));
+      const double numerator   = -m * (1. - phi) * (1. + phi + 2. * p * phi);
+      const double denominator = Utilities::fixed_power<2, double>((1. - phi) * (1. - phi) + m * phi * (1. + p * phi));
       return numerator / denominator;
     }
 
 
 
     double
-    DegradationFunction::second_derivative(const double d) const
+    DegradationFunction::second_derivative(const double phi) const
     {
-      const double A     = (1. - d) * (1. - d) + m * d * (1. + p * d);
-      const double dA_dd = 2. * (d - 1.) + m * (1. + 2. * p * d);
-      const double B     = (1. - d) * (1. + d + 2. * p * d);
-      const double dB_dd = 2. * (p - d - 2. * p * d);
-      const double numerator   = m * (2. * B * dA_dd - dB_dd * A);
+      const double A       = (1. - phi) * (1. - phi) + m * phi * (1. + p * phi);
+      const double dA_dphi = 2. * (phi - 1.) + m * (1. + 2. * p * phi);
+      const double B       = (1. - phi) * (1. + phi + 2. * p * phi);
+      const double dB_dphi = 2. * (p - phi - 2. * p * phi);
+      const double numerator   = m * (2. * B * dA_dphi - dB_dphi * A);
       const double denominator = A * A * A;
       return numerator / denominator;
     }
@@ -140,61 +140,61 @@ namespace aspect
     PhaseFieldProfile::
     PhaseFieldProfile(const GeometricFunction   &a_func,
                       const DegradationFunction &g_func,
-                      const double               d_hat,
+                      const double               phi_hat,
                       const unsigned int         n_points)
       : N(n_points)
       , coordinate_values(N)
       , phase_field_values(N)
     {
-      AssertThrow(d_hat > 0 && d_hat < 1,
+      AssertThrow(phi_hat > 0 && phi_hat < 1,
                   ExcMessage("The peak value of the phase-field must be "
                              "greater than 0 and smaller than 1."));
 
-      const double a_hat = a_func.value(d_hat);
-      const double g_hat = g_func.value(d_hat);
+      const double a_hat = a_func.value(phi_hat);
+      const double g_hat = g_func.value(phi_hat);
       const double h_hat = 1. / g_hat - 1.;
 
       const double l = a_func.get_length_scale();
 
-      std::vector<double> integrand;
+      std::vector<double> integrand(N);
 
       // Use the change of variables:
-      //    d = d_hat cos^2(theta), theta in [0, pi/2]
+      //    d = phi_hat cos^2(theta), theta in [0, pi/2]
       const double dtheta = numbers::PI_2 / (N - 1);
       for (unsigned int i = 0; i < N; ++i)
         {
           const double theta = i * dtheta;
           const double cos_theta = std::cos(theta);
-          const double d = d_hat * cos_theta * cos_theta;
+          const double phi = phi_hat * cos_theta * cos_theta;
 
-          phase_field_values[i] = d;
+          phase_field_values[i] = phi;
           if (i == 0 || i == N - 1)
             continue;
 
-          const double a = a_func.value(d);
-          const double g = g_func.value(d);
+          const double a = a_func.value(phi);
+          const double g = g_func.value(phi);
           const double h = 1. / g - 1.;
           
           const double D = h_hat * a - a_hat * h;
           Assert(D > 0, ExcInternalError());
 
-          // dzeta / dtheta = 2l * d_hat * sin(theta) * cos(theta) * sqrt(h_hat / D)
+          // dzeta / dtheta = 2l * phi_hat * sin(theta) * cos(theta) * sqrt(h_hat / D)
           const double sin_theta = std::sin(theta);
-          integrand[i] = 2. * l * d_hat * sin_theta * cos_theta * std::sqrt(h_hat / D);
+          integrand[i] = 2. * l * phi_hat * sin_theta * cos_theta * std::sqrt(h_hat / D);
         }
 
       // Endpoint limits:
-      // At theta = 0, dzeta/dtheta ~ 2l * sqrt(d_hat * h_hat / -D'(d_hat))
-      const double a_hat_prime = a_func.first_derivative(d_hat);
-      const double g_hat_prime = g_func.first_derivative(d_hat);
-      const double D_hat_prime = h_hat * a_hat_prime + a_hat * g_hat_prime / (g_hat * g_hat);
-      integrand[0] = 2. * l * std::sqrt(d_hat * h_hat / -D_hat_prime);
+      // At theta = 0, dzeta/dtheta ~ 2l * sqrt(phi_hat * h_hat / -D'(phi_hat))
+      const double a_hat_prime = a_func.first_derivative(phi_hat);
+      const double g_hat_prime = g_func.first_derivative(phi_hat);
+      const double phi_hat_prime = h_hat * a_hat_prime + a_hat * g_hat_prime / (g_hat * g_hat);
+      integrand[0] = 2. * l * std::sqrt(phi_hat * h_hat / -phi_hat_prime);
 
-      // At theta = pi/2, dzeta/dtheta ~ 2l * sqrt(d_hat * h_hat / D'(0))
+      // At theta = pi/2, dzeta/dtheta ~ 2l * sqrt(phi_hat * h_hat / D'(0))
       const double a0_prime = a_func.first_derivative(0);
       const double g0_prime = g_func.first_derivative(0);
       const double D0_prime = h_hat * a0_prime + a_hat * g0_prime; // g(0) = 1
-      integrand[N-1] = 2. * l * std::sqrt(d_hat * h_hat / D0_prime);
+      integrand[N-1] = 2. * l * std::sqrt(phi_hat * h_hat / D0_prime);
 
       // Cumulatively integrate dzeta/dtheta using the composite trapezoidal rule
       coordinate_values[0] = 0;
@@ -235,34 +235,34 @@ namespace aspect
     SlipRateNormalizer::
     SlipRateNormalizer(const GeometricFunction   &a_func,
                        const DegradationFunction &g_func,
-                       const double               d_min_,
-                       const double               d_max_)
-      : d_min(d_min_)
-      , d_max(d_max_)
+                       const double               phi_min_,
+                       const double               phi_max_)
+      : phi_min(phi_min_)
+      , phi_max(phi_max_)
     {
       // Distribute the sample points on a uniform logit grid
-      logit_d_hat[0]   = std::log(d_min / (1. - d_min));
-      logit_d_hat[M-1] = std::log(d_max / (1. - d_max));
+      logit_phi_hat[0]   = std::log(phi_min / (1. - phi_min));
+      logit_phi_hat[M-1] = std::log(phi_max / (1. - phi_max));
 
-      const double dx = (logit_d_hat[M-1] - logit_d_hat[0]) / (M - 1);
+      const double dx = (logit_phi_hat[M-1] - logit_phi_hat[0]) / (M - 1);
       for (unsigned int i = 1; i < M - 1; ++i)
-        logit_d_hat[i] = logit_d_hat[0] + i * dx;
+        logit_phi_hat[i] = logit_phi_hat[0] + i * dx;
 
       for (unsigned int i = 0; i < M; ++i)
         {
-          const double d_hat = 1. / (1. + std::exp(-logit_d_hat[i]));
+          const double phi_hat = 1. / (1. + std::exp(-logit_phi_hat[i]));
 
-          // Compute the phase-field profile with d_hat
-          const PhaseFieldProfile profile(a_func, g_func, d_hat, N);
+          // Compute the phase-field profile with phi_hat
+          const PhaseFieldProfile profile(a_func, g_func, phi_hat, N);
 
           const std::vector<double> &zeta = profile.get_coordinate_values();
-          const std::vector<double> &d    = profile.get_phase_field_values();
+          const std::vector<double> &phi  = profile.get_phase_field_values();
 
           // Integrate h(d) over the profile using the trapezoidal rule
           std::vector<double> h(N);
           for (unsigned int j = 0; j < N; ++j)
             {
-              const double g = g_func.value(d[j]);
+              const double g = g_func.value(phi[j]);
               h[j] = 1. / g - 1.;
             }
           
@@ -279,24 +279,24 @@ namespace aspect
 
 
     double 
-    SlipRateNormalizer::normalization_factor(const double d_hat) const
+    SlipRateNormalizer::normalization_factor(const double phi_hat) const
     {
-      AssertThrow(d_hat >= d_min && d_hat <= d_max,
+      AssertThrow(phi_hat >= phi_min && phi_hat <= phi_max,
                   ExcMessage("The peak value of the phase-field exceeds the range "
                              "that can be handled by SlipRateNormalizer."));
 
-      const double x = std::log(d_hat / (1. - d_hat));
+      const double x = std::log(phi_hat / (1. - phi_hat));
 
       // Get the index of the first element of the coordinate array that is
       // greater than or equal to x
-      const unsigned int idx = std::lower_bound(logit_d_hat.begin(), logit_d_hat.end(), x)
-                               - logit_d_hat.begin();
+      const unsigned int idx = std::lower_bound(logit_phi_hat.begin(), logit_phi_hat.end(), x)
+                               - logit_phi_hat.begin();
 
       if (idx == 0)
         return std::exp(log_Ih[0]);
 
-      const double xi = std::max(std::min((x - logit_d_hat[idx-1]) /
-                                          (logit_d_hat[idx] - logit_d_hat[idx-1]),
+      const double xi = std::max(std::min((x - logit_phi_hat[idx-1]) /
+                                          (logit_phi_hat[idx] - logit_phi_hat[idx-1]),
                                           1.),
                                  0.);
 
@@ -320,15 +320,55 @@ namespace aspect
 
       prm.declare_entry("Geometric function type", "AT1",
                         Patterns::Selection("AT1|AT2|CZM"),
-                        "Type of the geometric function $\\alpha(d)$. The options are:\n"
-                        "AT1: $\\alpha(d) = d$;\n"
-                        "AT2: $\\alpha(d) = d^2;\n$"
-                        "CZM: $\\alpha(d) = 2d - d^2$.");
+                        "Type of the geometric function $\\alpha(\\phi)$. The options are:\n"
+                        "AT1: $\\alpha(\\phi) = \\phi$;\n"
+                        "AT2: $\\alpha(\\phi) = \\phi^2;\n$"
+                        "CZM: $\\alpha(\\phi) = 2\\phi - \\phi^2$.");
 
       prm.declare_entry("Degradation curvature parameter", "1",
                         Patterns::Double(0),
                         "The curvature parameter $p$ for the Lorentz-type degradation function.\n"
                         "Units: none.");
+
+      prm.enter_subsection("Core phase field extender");
+      {
+        prm.declare_entry("Tangential diffusion coefficient", "1.e-3",
+                          Patterns::Double(0., 1.),
+                          "The core phase field is extended by solving an obstacle problem with "
+                          "anisotropic diffusion. Specifically, the phase field $\\phi$ is regarded "
+                          "as an obstacle, and the unknown field $\\psi$ satisfies the KKT conditions"
+                          "\\[\\nabla\\cdot(\\boldsymbol{\\kappa}\\cdot\\psi) - r\\psi \\leq 0,\\]"
+                          "\\[\\psi - \\phi \\geq 0,\\]"
+                          "\\[[\\nabla\\cdot(\\boldsymbol{\\kappa}\\cdot\\psi) - r\\psi](\\psi - \\phi) = 0.\\]"
+                          "In the above equation/inequalities, $\\boldsymbol{\\kappa}$ is an anisotropic "
+                          "diffusion coefficient, defined by"
+                          "\\[\\boldsymbol{\\kappa} = \\kappa_n\\boldsymbol{n}\\otimes\\boldsymbol{n} "
+                          "+ \\kappa_t(\\boldsymbol{I} - \\boldsymbol{n}\\otimes\\boldsymbol{n}),\\]"
+                          "where $\\boldsymbol{n}$ is the normal vector of the crack surface. By setting "
+                          "$\\kappa_n \\gg \\kappa_t$, we can make $\\psi$ nearly uniform along the "
+                          "profiles perpendicular to the crack surface. In practice, we set $\\kappa_n=1$, "
+                          "and the value of $\\kappa_t$ is determined by this parameter.");
+
+        prm.declare_entry("Pseudo force coefficient", "1.e-3",
+                          Patterns::Double(0.),
+                          "In the KKT conditions of the obstacle problem (see the description of "
+                          "parameter <Tangential diffusion coefficient> for details), the term "
+                          "$-r\\psi$ represents a pseudo force that drags the field $\\psi$ downward. "
+                          "To ensure that $\\psi$ is nearly uniform along the profiles perpendicular to "
+                          "the crack surface, the value of $rL^2$ should far smaller than $\\kappa_n$, "
+                          "where $l$ is the characteristic length scale. In pracice, we set $\\kappa_n=1$, "
+                          "and the value of $rL^2$ is determined by this parameter.");
+
+        prm.declare_entry("Penalty parameter scaling factor", "1.",
+                          Patterns::Double(0.),
+                          "The obstacle problem is solved by the primal-dual active set method. When "
+                          "updating the active set, we need to penalize $\\psi-\\phi$ by a parameter $c$, "
+                          "which is calculated by"
+                          "\\[c_i = \\gamma_c\\frac{A_{ii}}{B_{ii}}.\\]"
+                          "In the above equation, $A$ and $B$ are the matrix blocks of the saddle-point "
+                          "problem, and the scaling factor $\\gamma_c$ is determined by this parameter.");
+      }
+      prm.leave_subsection();
     }
     prm.leave_subsection();
 
@@ -336,35 +376,35 @@ namespace aspect
     {
       prm.enter_subsection("Phase field solver parameters");
       {
-        prm.declare_entry ("Linear solver tolerance", "1e-8",
-                           Patterns::Double(0., 1.),
-                           "A relative tolerance up to which the linearized phase field system "
-                           "in each nonlinear step should be solved.");
+        prm.declare_entry("Linear solver tolerance", "1e-8",
+                          Patterns::Double(0., 1.),
+                          "A relative tolerance up to which the linearized phase field system "
+                          "in each nonlinear step should be solved.");
 
-        prm.declare_entry ("Max linear solver iterations", "1000",
-                           Patterns::Integer(0),
-                           "The maximum number of iteration steps for solving the linearized "
-                           "phase field system. If the linear solver fails to converge to the "
-                           "relative tolerance when reaching the maximum step number, the "
-                           "program will be terminated with an error message.");
+        prm.declare_entry("Max linear solver iterations", "1000",
+                          Patterns::Integer(0),
+                          "The maximum number of iteration steps for solving the linearized "
+                          "phase field system. If the linear solver fails to converge to the "
+                          "relative tolerance when reaching the maximum step number, the "
+                          "program will be terminated with an error message.");
 
-        prm.declare_entry ("Nonlinear solver tolerance", "1e-5",
-                           Patterns::Double(0., 1.),
-                           "A relative tolerance up to which the Nonlinear solver for the "
-                           "phase field system will iterate.");
+        prm.declare_entry("Nonlinear solver tolerance", "1e-5",
+                          Patterns::Double(0., 1.),
+                          "A relative tolerance up to which the Nonlinear solver for the "
+                          "phase field system will iterate.");
 
-        prm.declare_entry ("Max nonlinear iterations", "10",
-                           Patterns::Integer(1),
-                           "The maximal number of nonlinear iterations to be performed "
-                           "for solving the phase field system.");
+        prm.declare_entry("Max nonlinear iterations", "10",
+                          Patterns::Integer(1),
+                          "The maximal number of nonlinear iterations to be performed "
+                          "for solving the phase field system.");
 
-        prm.declare_entry ("Max Newton line search iterations", "3",
-                           Patterns::Integer(0),
-                           "The maximum number of line search iterations allowed for the "
-                           "phase field system. If the criterion is not reached after "
-                           "this number of iterations, we apply the increment even though "
-                           "it does not satisfy the necessary criteria and simply continue "
-                           "with the next Newton iteration.");
+        prm.declare_entry("Max Newton line search iterations", "3",
+                          Patterns::Integer(0),
+                          "The maximum number of line search iterations allowed for the "
+                          "phase field system. If the criterion is not reached after "
+                          "this number of iterations, we apply the increment even though "
+                          "it does not satisfy the necessary criteria and simply continue "
+                          "with the next Newton iteration.");
       }
       prm.leave_subsection();
     }
@@ -439,9 +479,17 @@ namespace aspect
           critical_energy_densities.push_back(Gc[j] / (c0 * l));
         }
 
+      prm.enter_subsection("Core phase field extender");
+      {
+        core_extender_parameters.tangential_diffusion_coefficient = prm.get_double("Tangential diffusion coefficient");
+        core_extender_parameters.pseudo_force_coefficient         = prm.get_double("Pseudo force coefficient");
+        core_extender_parameters.penalty_parameter_scaling_factor = prm.get_double("Penalty parameter scaling factor");
+      }
+      prm.leave_subsection();
     }
     prm.leave_subsection();
 
+    // Parse the solver parameters
     prm.enter_subsection("Solver parameters");
     {
       prm.enter_subsection("Phase field solver parameters");
@@ -485,7 +533,7 @@ namespace aspect
                                                  1));
 
     if (this->get_parameters().need_slip_rate)
-      variables.push_back(VariableDeclaration<dim>("peak_phase_field",
+      variables.push_back(VariableDeclaration<dim>("core_phase_field",
                                                    std::make_shared<FE_Q<dim>>(1),
                                                    1,
                                                    1));
@@ -568,13 +616,13 @@ namespace aspect
   template <int dim>
   double
   PhaseFieldHandler<dim>::
-  crack_surface_density(const double          d,
-                        const Tensor<1, dim> &grad_d) const
+  crack_surface_density(const double          phi,
+                        const Tensor<1, dim> &grad_phi) const
   {
-    const double a  = geometric_function->value(d);
+    const double a  = geometric_function->value(phi);
     const double l  = geometric_function->get_length_scale();
     const double c0 = geometric_function->get_normalization_factor();
-    return (a / l + (grad_d * grad_d) * l) / c0;
+    return (a / l + (grad_phi * grad_phi) * l) / c0;
   }
 
 
@@ -583,14 +631,14 @@ namespace aspect
   double
   PhaseFieldHandler<dim>::
   energetic_degradation(const std::vector<double> &volume_fractions,
-                        const double               d) const
+                        const double               phi) const
   {
     AssertDimension(volume_fractions.size(), degradation_functions.size());
 
     double g = 0.0;
     for (unsigned int j = 0; j < volume_fractions.size(); ++j)
       if (volume_fractions[j] > 0.0)
-        g += degradation_functions[j]->value(d) * volume_fractions[j];
+        g += degradation_functions[j]->value(phi) * volume_fractions[j];
 
     return g;
   }
@@ -602,7 +650,7 @@ namespace aspect
   PhaseFieldHandler<dim>::
   slip_rate_localization_factor(const std::vector<double> &volume_fractions,
                                 const double               g,
-                                const double               d_hat) const
+                                const double               phi_hat) const
   {
     AssertDimension(volume_fractions.size(), slip_rate_normalizers.size());
     AssertThrow(g > 0, ExcMessage("The degradation function must be positive."));
@@ -612,7 +660,7 @@ namespace aspect
     double Ih = 0;
     for (unsigned int i = 0; i < volume_fractions.size(); ++i)
       if (volume_fractions[i] > 0)
-        Ih += volume_fractions[i] * slip_rate_normalizers[i]->normalization_factor(d_hat);
+        Ih += volume_fractions[i] * slip_rate_normalizers[i]->normalization_factor(phi_hat);
 
     return h / Ih;
   }
@@ -620,14 +668,44 @@ namespace aspect
 
 
   template <int dim>
+  double
+  PhaseFieldHandler<dim>::
+  crack_driving_force_of_stationary_profile(const std::vector<double> &volume_fractions,
+                                            const double               phi,
+                                            const double               phi_hat) const
+  {
+    AssertDimension(volume_fractions.size(), degradation_functions.size());
+    AssertThrow(phi <= phi_hat && phi_hat < 1, 
+                ExcMessage("Invalid input parameters for function PhaseFieldHandler::crack_driving_force_of_stationary_profile: "
+                           "phase_field = " + Utilities::to_string(phi) + "; peak_phase_field = " + Utilities::to_string(phi_hat)));
+
+    double g = 0, g_hat = 0;
+    double Gc_over_c0l = 0;
+    for (unsigned int i = 0; i < volume_fractions.size(); ++i)
+      if (volume_fractions[i] > 0)
+        {
+          g           += volume_fractions[i] * degradation_functions[i]->value(phi);
+          g_hat       += volume_fractions[i] * degradation_functions[i]->value(phi_hat);
+          Gc_over_c0l += volume_fractions[i] * critical_energy_densities[i];
+        }
+
+    const double h_hat = 1. / g_hat - 1.;
+    const double a_hat = geometric_function->value(phi_hat);
+
+    return Gc_over_c0l * a_hat / (h_hat * g * g);
+  }
+
+
+
+  template <int dim>
   std::vector<std::unique_ptr<PhaseField::PhaseFieldProfile>>
-  PhaseFieldHandler<dim>::get_phase_field_profiles(const double d_hat) const
+  PhaseFieldHandler<dim>::get_phase_field_profiles(const double phi_hat) const
   {
     std::vector<std::unique_ptr<PhaseField::PhaseFieldProfile>> profiles;
     for (const auto &degradation_function : degradation_functions)
       profiles.push_back(std::make_unique<PhaseField::PhaseFieldProfile>(*geometric_function, 
                                                                          *degradation_function,
-                                                                         d_hat));
+                                                                         phi_hat));
 
     return profiles;
   }
@@ -681,8 +759,8 @@ namespace aspect
             small_vector<double>         weighting_function_values(n_dofs);
             small_vector<Tensor<1, dim>> weighting_function_gradients(n_dofs);
 
-            double d = 0;
-            Tensor<1, dim> grad_d;
+            double phi = 0;
+            Tensor<1, dim> grad_phi;
 
             for (unsigned int i = 0; i < n_dofs; ++i)
               {
@@ -697,8 +775,8 @@ namespace aspect
 
                 // Compute the value and gradient of the phase field in this particle domain
                 const double dof_value = current_solution[dof_index];
-                d      += dof_value * weighting_function_values[i];
-                grad_d += dof_value * weighting_function_gradients[i];
+                phi      += dof_value * weighting_function_values[i];
+                grad_phi += dof_value * weighting_function_gradients[i];
               }
 
             // Get the crack driving force
@@ -710,41 +788,41 @@ namespace aspect
               chemical_composition_values[c] = particle_properties[C_property_indices[c]];
             const std::vector<double> volume_fractions = MaterialModel::MaterialUtilities::compute_composition_fractions(chemical_composition_values);
 
-            const double da_dd   = geometric_function->first_derivative(d);
-            const double d2a_dd2 = geometric_function->second_derivative(d);
-            const double l       = geometric_function->get_length_scale();
+            const double da_dphi   = geometric_function->first_derivative(phi);
+            const double d2a_dphi2 = geometric_function->second_derivative(phi);
+            const double l         = geometric_function->get_length_scale();
 
             double F = 0;
             double K = 0;
-            double dK_dd = 0;
+            double dK_dphi = 0;
             for (unsigned int j = 0; j < volume_fractions.size(); ++j)
               if (volume_fractions[j] > 0)
                 {
                   const double Gc_over_c0l = critical_energy_densities[j];
-                  const double dg_dd   = degradation_functions[j]->first_derivative(d);
-                  const double d2g_dd2 = degradation_functions[j]->second_derivative(d);
+                  const double dg_dphi   = degradation_functions[j]->first_derivative(phi);
+                  const double d2g_dphi2 = degradation_functions[j]->second_derivative(phi);
 
                   F += volume_fractions[j] * (2. * Gc_over_c0l * l * l);
-                  K += volume_fractions[j] * (H * dg_dd + Gc_over_c0l * da_dd);
+                  K += volume_fractions[j] * (H * dg_dphi + Gc_over_c0l * da_dphi);
                   if (assemble_system_jacobian)
-                    dK_dd += volume_fractions[j] * (H * d2g_dd2 + Gc_over_c0l * d2a_dd2);
+                    dK_dphi += volume_fractions[j] * (H * d2g_dphi2 + Gc_over_c0l * d2a_dphi2);
                 }
 
             const double V_p = particle_domain.volume();
 
             for (unsigned int i = 0; i < n_dofs; ++i)
               {
-                const double phi_ip               = weighting_function_values[i];
-                const Tensor<1, dim> &grad_phi_ip = weighting_function_gradients[i];
-                particle_rhs(i) -= (phi_ip * K + F * (grad_phi_ip * grad_d)) * V_p;
+                const double w_ip               = weighting_function_values[i];
+                const Tensor<1, dim> &grad_w_ip = weighting_function_gradients[i];
+                particle_rhs(i) -= (w_ip * K + F * (grad_w_ip * grad_phi)) * V_p;
 
                 if (assemble_system_jacobian)
                   {
                     for (unsigned int j = 0; j < n_dofs; ++j)
                       {
-                        const double phi_jp               = weighting_function_values[j];
-                        const Tensor<1, dim> &grad_phi_jp = weighting_function_gradients[j];
-                        particle_matrix(i, j) += (dK_dd * (phi_ip * phi_jp) + F * (grad_phi_ip * grad_phi_jp)) * V_p;
+                        const double w_jp               = weighting_function_values[j];
+                        const Tensor<1, dim> &grad_w_jp = weighting_function_gradients[j];
+                        particle_matrix(i, j) += (dK_dphi * (w_ip * w_jp) + F * (grad_w_ip * grad_w_jp)) * V_p;
                       }
                   }
               }
@@ -783,17 +861,17 @@ namespace aspect
     LinearAlgebra::PreconditionAMG preconditioner;
     LinearAlgebra::PreconditionAMG::AdditionalData amg_data;
 
-    std::vector<bool> phase_field_component_mask(this->introspection().n_components, false);
-    phase_field_component_mask[component_index] = true;
+    std::vector<bool> component_mask_initializer(this->introspection().n_components, false);
+    component_mask_initializer[component_index] = true;
 #if DEAL_II_VERSION_GTE(9,7,0)
     amg_data.constant_modes = DoFTools::extract_constant_modes(
                                 this->get_dof_handler(),
-                                ComponentMask(phase_field_component_mask));
+                                ComponentMask(component_mask_initializer));
 #else
     std::vector<std::vector<bool>> constant_modes;
     DoFTools::extract_constant_modes(
       this->get_dof_handler(),
-      ComponentMask(phase_field_component_mask),
+      ComponentMask(component_mask_initializer),
       constant_modes);
     amg_data.constant_modes = constant_modes;
 #endif
@@ -912,7 +990,7 @@ namespace aspect
 
         relative_residual = residual / initial_residual;
 
-        this->get_pcout() << "      Nonlinear iteration " 
+        this->get_pcout() << "      Iteration " 
                           << std::setw(Utilities::int_to_string(solver_parameters.max_nonlinear_iterations).size()) 
                           << nonlinear_iteration
                           << ": linear solver iterations = " 
@@ -995,6 +1073,348 @@ namespace aspect
 
 
   template <int dim>
+  void
+  PhaseFieldHandler<dim>::
+  assemble_saddle_point_system(LinearAlgebra::BlockSparseMatrix &system_matrix,
+                               LinearAlgebra::BlockVector       &system_rhs,
+                               const AffineConstraints<double>  &constraints) const
+  {
+    const auto &variable = this->introspection().variable("core_phase_field");
+    const unsigned int component_index = variable.first_component_index;
+    const unsigned int block_index     = variable.block_index;
+
+    // Initialize the corresponding blocks of the matrices and the rhs vector
+    system_matrix.block(block_index, block_index) = 0;
+    system_rhs.block(block_index) = 0;
+
+    // Stuff for cellwise assembly
+    const FiniteElement<dim> &base_fe = this->get_fe().base_element(variable.base_index);
+    FEValues<dim> fe_values(base_fe,
+                            QGauss<dim>(base_fe.degree + 1),
+                            update_values | update_gradients |
+                            update_quadrature_points | update_JxW_values);
+
+    const unsigned int dofs_per_cell = base_fe.dofs_per_cell;
+    const unsigned int n_q_points = fe_values.n_quadrature_points;
+
+    FullMatrix<double> cell_matrix(dofs_per_cell, dofs_per_cell);
+    Vector<double> cell_rhs(dofs_per_cell);
+
+    std::vector<types::global_dof_index> cell_dof_indices(dofs_per_cell);
+    std::vector<types::global_dof_index> system_dof_indices(this->get_fe().dofs_per_cell);
+
+    std::vector<double>         shape_values(dofs_per_cell);
+    std::vector<Tensor<1, dim>> shape_gradients(dofs_per_cell);
+
+    // Stuff for interpolating the normal vector from particles to quadrature points
+    const auto &particle_data_info = particle_manager->get_property_manager().get_data_info();
+    const unsigned int first_property_index = particle_data_info.get_field_index_by_name("normal_direction");
+
+    std::vector<bool> component_mask_intializer(this->introspection().n_components, false);
+    for (unsigned int d = 0; d < dim; ++d)
+      component_mask_intializer[first_property_index + d] = true;
+    const ComponentMask component_mask(component_mask_intializer);
+
+    // Uniform parameters
+    const double kappa_n = 1;
+    const double kappa_t = core_extender_parameters.tangential_diffusion_coefficient;
+    const double l = geometric_function->get_length_scale();
+    const double r = core_extender_parameters.pseudo_force_coefficient / (l * l);
+
+    for (const auto &cell : this->get_dof_handler().active_cell_iterators())
+      if (cell->is_locally_owned())
+        {
+          fe_values.reinit(cell);
+          cell_matrix = 0;
+
+          // Interpolate the normal vector to the quadrature points
+          // TODO: interpolate the structure tensor instead of the vector
+          const std::vector<std::vector<double>> interpolated_values =
+            particle_manager->get_interpolator().properties_at_points(particle_manager->get_particle_handler(),
+                                                                      fe_values.get_quadrature_points(),
+                                                                      component_mask, cell);
+
+          for (unsigned int q = 0; q < n_q_points; ++q)
+            {
+              for (unsigned int i = 0; i < dofs_per_cell; ++i)
+                {
+                  shape_values[i]    = fe_values.shape_value(i, q);
+                  shape_gradients[i] = fe_values.shape_grad(i, q);
+                }
+
+              Tensor<1, dim> n;
+              for (unsigned int d = 0; d < dim; ++d)
+                n[d] = interpolated_values[q][d];
+
+              for (unsigned int i = 0; i < dofs_per_cell; ++i)
+                for (unsigned int j = 0; j < dofs_per_cell; ++j)
+                  cell_matrix(i, j) += ( kappa_t * (shape_gradients[i] * shape_gradients[j])
+                                         + (kappa_n - kappa_t) * (n * shape_gradients[i]) 
+                                                               * (n * shape_gradients[j])
+                                         + r * shape_values[i] * shape_values[j]
+                                       ) 
+                                       * fe_values.JxW(q);
+            }
+
+          // Sort out the DoF indices belonging to the core phase field
+          cell->get_dof_indices(system_dof_indices);
+          for (unsigned int i = 0, i_psi = 0; i_psi < dofs_per_cell; /*increment at end of loop*/)
+            {
+              if (this->get_fe().system_to_component_index(i).first == component_index)
+                {
+                  cell_dof_indices[i_psi] = system_dof_indices[i];
+                  ++i_psi;
+                }
+              ++i;
+            }
+
+          constraints.distribute_local_to_global(cell_matrix,
+                                                 cell_rhs,
+                                                 cell_dof_indices,
+                                                 system_matrix,
+                                                 system_rhs,
+                                                 true);
+        }
+
+    system_matrix.compress(VectorOperation::add);
+    system_rhs.compress(VectorOperation::add);
+  }
+
+
+
+  template <int dim>
+  unsigned int
+  PhaseFieldHandler<dim>::
+  solve_saddle_point_system(const LinearAlgebra::BlockSparseMatrix &system_matrix,
+                            const LinearAlgebra::BlockVector       &system_rhs,
+                            LinearAlgebra::BlockVector             &solution,
+                            const AffineConstraints<double>        &constraints) const
+  {
+    const auto &variable = this->introspection().variable("core_phase_field");
+    const unsigned int component_index = variable.first_component_index;
+    const unsigned int block_index     = variable.block_index;
+
+    // Set the preconditioner
+    LinearAlgebra::PreconditionAMG preconditioner;
+    LinearAlgebra::PreconditionAMG::AdditionalData amg_data;
+
+    std::vector<bool> component_mask_initializer(this->introspection().n_components, false);
+    component_mask_initializer[component_index] = true;
+#if DEAL_II_VERSION_GTE(9,7,0)
+    amg_data.constant_modes = DoFTools::extract_constant_modes(
+                                this->get_dof_handler(),
+                                ComponentMask(component_mask_initializer));
+#else
+    std::vector<std::vector<bool>> constant_modes;
+    DoFTools::extract_constant_modes(
+      this->get_dof_handler(),
+      ComponentMask(component_mask_initializer),
+      constant_modes);
+    amg_data.constant_modes = constant_modes;   
+#endif
+
+    amg_data.elliptic = true;
+    amg_data.higher_order_elements = false;
+    amg_data.smoother_sweeps = 2;
+    amg_data.aggregation_threshold = 0.02;
+
+    preconditioner.initialize(system_matrix.block(block_index, block_index), amg_data);
+
+    ReductionControl reduction_control(1000, 1.e-12, 1.e-6);
+
+    SolverCG<LinearAlgebra::Vector> solver(reduction_control);
+
+    LinearAlgebra::BlockVector dist_solution(this->introspection().index_sets.system_partitioning,
+                                             this->get_mpi_communicator());
+    dist_solution.block(block_index) = solution.block(block_index);
+
+    try
+      {
+        solver.solve(system_matrix.block(block_index, block_index),
+                     dist_solution.block(block_index),
+                     system_rhs.block(block_index),
+                     preconditioner);
+      }
+    catch (const std::exception &exc)
+      {
+        // if the solver fails, report the error from processor 0 with some additional
+        // information about its location, and throw a quiet exception on all other
+        // processors
+        Utilities::throw_linear_solver_failure_exception("iterative solver for phase field",
+                                                         "PhaseFieldHandler::solve_saddle_point_system",
+                                                         std::vector<SolverControl> {reduction_control},
+                                                         exc,
+                                                         this->get_mpi_communicator());       
+      }
+
+    constraints.distribute(dist_solution);
+    solution.block(block_index) = dist_solution.block(block_index);
+
+    return reduction_control.last_step();
+  }
+
+
+
+  template <int dim>
+  void
+  PhaseFieldHandler<dim>::
+  update_active_set(const LinearAlgebra::BlockSparseMatrix &system_matrix,
+                    const LinearAlgebra::BlockSparseMatrix &complete_system_matrix,
+                    LinearAlgebra::BlockVector             &lambda,
+                    LinearAlgebra::BlockVector             &solution,
+                    AffineConstraints<double>              &constraints,
+                    IndexSet                               &active_set) const
+  {
+    const auto &var_phi = this->introspection().variable("phase_field");
+    const unsigned int comp_phi = var_phi.first_component_index;
+
+    const auto &var_psi = this->introspection().variable("core_phase_field");
+    const unsigned int comp_psi = var_psi.first_component_index;
+    const unsigned int blk_psi  = var_psi.block_index;
+
+    const MaterialModel::PhaseFieldModel<dim> *material_model
+      = dynamic_cast<const MaterialModel::PhaseFieldModel<dim>*>(&this->get_material_model());
+    const double phi_min = material_model->get_phase_field_range().first;
+
+    const IndexSet &locally_owned_dofs = this->get_dof_handler().locally_owned_dofs();
+    const IndexSet locally_relevant_dofs = DoFTools::extract_locally_relevant_dofs(this->get_dof_handler());
+
+    const AffineConstraints<double> &hanging_node_constraints = this->get_current_constraints();
+
+    // Compute the Lagrange multiplier
+    LinearAlgebra::BlockVector dist_solution(this->introspection().index_sets.system_partitioning, this->get_mpi_communicator());
+    LinearAlgebra::BlockVector complete_system_rhs(this->introspection().index_sets.system_partitioning, this->get_mpi_communicator());
+
+    // The right-hand side is zero (the pseudo-force is on the left-hand side).
+    complete_system_rhs.block(blk_psi) = 0;
+    dist_solution.block(blk_psi) = solution.block(blk_psi);
+    complete_system_matrix.block(blk_psi, blk_psi).residual(lambda.block(blk_psi), 
+                                                            dist_solution.block(blk_psi),
+                                                            complete_system_rhs.block(blk_psi));
+    hanging_node_constraints.distribute(lambda);
+
+    active_set.clear();
+    constraints.clear();
+
+    // To avoid duplicate computation, we make a record of the touched dofs
+    IndexSet local_touched_dofs(this->get_dof_handler().n_dofs());
+    for (const auto &cell : this->get_dof_handler().active_cell_iterators())
+      if (cell->is_locally_owned())
+        for (const unsigned int v : cell->vertex_indices())
+          {
+            const types::global_dof_index 
+            dof_phi = cell->vertex_dof_index(v, comp_phi),
+            dof_psi = cell->vertex_dof_index(v, comp_psi);
+
+            const double phi = solution(dof_phi);
+            const double psi = solution(dof_psi);
+
+            // Jump over the current node if:
+            // (a) the phase-field is smaller than the lower bound;
+            // (b) it is not locally-owned;
+            // (c) it is a hanging node;
+            // (d) it has been touched.
+            if (phi < phi_min
+                || !locally_owned_dofs.is_element(dof_psi)
+                || hanging_node_constraints.is_constrained(dof_psi)
+                || local_touched_dofs.is_element(dof_psi))
+              continue;
+
+            local_touched_dofs.add_index(dof_psi);
+
+            // Compute the penalty parameter c
+            const double A = system_matrix(dof_psi, dof_psi);
+            const double c = core_extender_parameters.penalty_parameter_scaling_factor * A;
+            
+            if (lambda(dof_psi) + c * (psi - phi) < 0)
+              {
+                active_set.add_index(dof_psi);
+                constraints.add_constraint(dof_psi, {}, phi);
+
+                dist_solution(dof_psi) = phi;
+
+                lambda(dof_psi) = 0;
+              }
+          }
+
+    constraints.make_consistent_in_parallel(locally_owned_dofs,
+                                            locally_relevant_dofs,
+                                            this->get_mpi_communicator());
+    constraints.merge(hanging_node_constraints);
+    constraints.close();
+
+    constraints.distribute(dist_solution);
+    solution.block(blk_psi) = dist_solution.block(blk_psi);
+  }
+
+
+
+  template <int dim>
+  void
+  PhaseFieldHandler<dim>::
+  extend_core_phase_field(LinearAlgebra::BlockSparseMatrix &system_matrix,
+                          LinearAlgebra::BlockVector       &system_rhs,
+                          LinearAlgebra::BlockVector       &solution)
+  {
+    const unsigned int blk_phi = this->introspection().variable("phase_field").block_index;
+    const unsigned int blk_psi = this->introspection().variable("core_phase_field").block_index;
+
+    // Check if we need to extend the core phase field
+    const MaterialModel::PhaseFieldModel<dim> *material_model
+      = dynamic_cast<const MaterialModel::PhaseFieldModel<dim>*>(&this->get_material_model());
+    const double phi_min = material_model->get_phase_field_range().first;
+
+    if (solution.block(blk_phi).max() < phi_min)
+      return;
+
+    this->get_pcout() << "   Extending core phase field:" << std::endl;
+
+    // Create an object of AffineConstraints that includes both the hanging-node constraints
+    // and the active set constraints
+    AffineConstraints<double> comprehensive_constraints(this->get_dof_handler().locally_owned_dofs(), 
+                                                        this->introspection().index_sets.system_relevant_set);
+    comprehensive_constraints.merge(this->get_current_constraints());
+    comprehensive_constraints.close();
+
+    IndexSet active_set(this->get_dof_handler().n_dofs());
+    IndexSet active_set_old(this->get_dof_handler().n_dofs());
+
+    // Make a copy of the system matrix for computing the Lagrange multiplier
+    LinearAlgebra::BlockSparseMatrix complete_system_matrix;
+    complete_system_matrix.reinit(this->introspection().n_blocks, this->introspection().n_blocks);
+    complete_system_matrix.block(blk_psi, blk_psi).reinit(system_matrix.block(blk_psi, blk_psi));
+
+    // Create a distributed vector for the Lagrange multiplier (lambda)
+    LinearAlgebra::BlockVector lambda(this->introspection().index_sets.system_partitioning, this->get_mpi_communicator());
+
+    for (unsigned int iteration = 0; iteration < 100; ++iteration)
+      {
+        assemble_saddle_point_system(system_matrix, system_rhs, comprehensive_constraints);
+        if (iteration == 0)
+          complete_system_matrix.block(blk_psi, blk_psi).copy_from(system_matrix.block(blk_psi, blk_psi));
+
+        const unsigned int cg_iterations = solve_saddle_point_system(system_matrix, system_rhs, solution, comprehensive_constraints);
+        update_active_set(system_matrix, complete_system_matrix, lambda, solution, comprehensive_constraints, active_set);
+
+        this->get_pcout() << "      Iteration " << std::setw(3) << iteration
+                          << ": size of active set = " << std::setw(Utilities::int_to_string(this->get_dof_handler().n_dofs()).size())
+                          << Utilities::MPI::sum(active_set.n_elements(), this->get_mpi_communicator())
+                          << ", residual of non-contact part = " << std::scientific << std::setprecision(3) << lambda.block(blk_psi).l2_norm()
+                          << " (in " << std::setw(4) << cg_iterations << " CG iterations)"
+                          << std::endl;
+
+        // Check if the active set algorithm is converged
+        const int local_active_set_changed = (active_set == active_set_old ? 0 : 1);
+        if (Utilities::MPI::max(local_active_set_changed, this->get_mpi_communicator()) == 0)
+          break;
+
+        active_set_old = active_set;
+      }
+  }
+
+
+
+  template <int dim>
   const Particle::Manager<dim> &
   PhaseFieldHandler<dim>::get_associated_particle_manager() const
   {
@@ -1012,10 +1432,6 @@ namespace aspect
   namespace MaterialModel \
   { \
     template class PhaseFieldModel<dim>; \
-  } \
-  namespace PhaseField \
-  { \
-    template struct SolverParameters<dim>; \
   } \
   template class PhaseFieldHandler<dim>;
 
