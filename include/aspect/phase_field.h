@@ -248,8 +248,8 @@ namespace aspect
 
     struct CoreExtenderParameters
     {
+      double normal_diffusion_coefficient;
       double tangential_diffusion_coefficient;
-      double pseudo_force_coefficient;
       double penalty_parameter_scaling_factor;
     };
   }
@@ -331,12 +331,12 @@ namespace aspect
                                 const AffineConstraints<double>        &constraints) const;
 
       void
-      update_active_set(const LinearAlgebra::BlockSparseMatrix &system_matrix,
-                        const LinearAlgebra::BlockSparseMatrix &complete_system_matrix,
-                        LinearAlgebra::BlockVector             &lagrange_multiplier,
-                        LinearAlgebra::BlockVector             &solution,
-                        AffineConstraints<double>              &constraints,
-                        IndexSet                               &active_set) const;
+      update_active_set(const LinearAlgebra::SparseMatrix &system_matrix,
+                        const BlockIndices                &block_indices,
+                        LinearAlgebra::BlockVector        &lagrange_multiplier,
+                        LinearAlgebra::BlockVector        &solution,
+                        AffineConstraints<double>         &constraints,
+                        IndexSet                          &active_set) const;
 
       PhaseField::SolverParameters solver_parameters;
 

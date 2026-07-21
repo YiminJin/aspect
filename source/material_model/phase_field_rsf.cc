@@ -50,6 +50,11 @@ namespace aspect
       particle_property_indices.slip_direction      = particle_data_info.get_position_by_field_name("slip_direction");
       particle_property_indices.ve_stress           = particle_data_info.get_position_by_field_name("ve_stress");
 
+      particle_property_indices.chemical_fields.clear();
+      for (const unsigned int index : introspection.chemical_composition_field_indices())
+        particle_property_indices.chemical_fields.push_back(
+          particle_data_info.get_position_by_field_name(parameters.mapped_particle_properties.find(index)->second.first));
+
       // Initialize the compositional indices
       for (const auto &key_and_value : parameters.mapped_particle_properties)
         {

@@ -37,7 +37,13 @@ namespace aspect
           if (data_info.fieldname_exists("slip_rate"))
             {
               particle_handler = &particle_manager.get_particle_handler();
-              slip_rate_property_index = data_info.get_field_index_by_name("slip_rate");
+
+              particle_property_indices.slip_rate = data_info.get_field_index_by_name("slip_rate");
+
+              particle_property_indices.chemical_fields.clear();
+              for (const unsigned int index : this->introspection().chemical_composition_field_indices())
+                particle_property_indices.chemical_fields.push_back(
+                  data_info.get_position_by_field_name(this->get_parameters().mapped_particle_properties.find(index)->second.first));
             }
         }
 
@@ -46,14 +52,13 @@ namespace aspect
                              "with the name 'slip_rate'."));
 
       // Get the characteristic slip distance from the RSF rheological model
-      const MaterialModel::PhaseFieldRSF<dim>* material_model =
+      const MaterialModel::PhaseFieldRSF<dim> *material_model =
         dynamic_cast<const MaterialModel::PhaseFieldRSF<dim>*>(&this->get_material_model());
       AssertThrow(material_model != nullptr, 
                   ExcMessage("Time stepping model 'rsf time step' requires to get access to an object of "
                              "MaterialModel::Rheology::RateStateFriction through the material model. "
                              "Currently, 'phase field rsf' is the only material model that provides the "
                              "access."));
-      characteristic_slip_distance = material_model->get_rate_state_friction_model().get_characteristic_slip_distance();
     }
 
 
@@ -61,23 +66,31 @@ namespace aspect
     template <int dim>
     double RSFTimeStep<dim>::execute()
     {
-      // Loop over the particles and find the maximum slip rate
-      double local_maximum_slip_rate = 0;
+      const MaterialModel::Rheology::RateStateFriction<dim> &rsf_model =
+        dynamic_cast<const MaterialModel::PhaseFieldRSF<dim>*>(&this->get_material_model())->get_rate_state_friction_model();
+
+      std::vector<double> chemical_field_values(this->introspection().n_chemical_composition_fields());
+
+      // Loop over the particles and find the minimum of a/b * D_c/V
+      double local_dt_rsf = this->get_parameters().end_time - this->get_parameters().start_time;
+
       for (const auto &cell : this->get_triangulation().active_cell_iterators())
         if (cell->is_locally_owned())
           for (const auto &particle : particle_handler->particles_in_cell(cell))
             {
-              const double slip_rate = particle.get_properties()[slip_rate_property_index];
-              local_maximum_slip_rate = std::max(local_maximum_slip_rate, slip_rate);
+              const ArrayView<const double> particle_properties = particle.get_properties();
+              const double V = particle_properties[particle_property_indices.slip_rate];
+              for (unsigned int j = 0; j < chemical_field_values.size(); ++j)
+                chemical_field_values[j] = particle_properties[particle_property_indices.chemical_fields[j]];
+              const std::vector<double> volume_fractions = 
+                MaterialModel::MaterialUtilities::compute_composition_fractions(chemical_field_values);
+
+              local_dt_rsf = std::min(local_dt_rsf, 
+                                      rsf_model.compute_time_step(volume_fractions,
+                                                                  V, CFL_number, true));
             }
 
-      const double global_maximum_slip_rate = Utilities::MPI::max(local_maximum_slip_rate, 
-                                                                  this->get_mpi_communicator());
-
-      AssertThrow(global_maximum_slip_rate > std::numeric_limits<double>::epsilon(),
-                  ExcMessage("Slip rate has not been initialized when calculating the RSF time step."));
-
-      return safety_factor * characteristic_slip_distance / global_maximum_slip_rate;
+      return Utilities::MPI::min(local_dt_rsf, this->get_mpi_communicator());
     }
 
 
@@ -89,13 +102,10 @@ namespace aspect
       {
         prm.enter_subsection("RSF time step");
         {
-          prm.declare_entry("Safety factor", "0.1",
+          prm.declare_entry("CFL number", "0.5",
                             Patterns::Double(0),
-                            "A safety factor, $C_{\\delta}$, in the RSF time step limit. "
-                            "The time step is computed by $\\Delta t_{RSF} = C_{\\delta}"
-                            "\\frac{D_c}{V_{\\text{max}}}$, where $D_c$ and $V_{\\text{max}}$"
-                            "denote the characteristic slip distance and the slip rate, "
-                            "respectively.");
+                            "The CFL number that determines the stability of time evolution "
+                            "controlled by fault slip.");
         }
         prm.leave_subsection();
       }
@@ -111,7 +121,7 @@ namespace aspect
       {
         prm.enter_subsection("RSF time step");
         {
-          safety_factor = prm.get_double("Safety factor");
+          CFL_number = prm.get_double("CFL number");
         }
         prm.leave_subsection();
       }
@@ -128,8 +138,9 @@ namespace aspect
     ASPECT_REGISTER_TIME_STEPPING_MODEL(RSFTimeStep,
                                         "rsf time step",
                                         "This model computes the rate-state-friction time step as "
-                                        "$C_{\\delta} * D_c / V_{\\text{max}}$ over all particles, "
-                                        "where $D_c$ is the characteristic slip distance, $V$ is the "
-                                        "slip rate, and $C_{\\delta}$ is a safety factor.")
+                                        "$C_{\\text{RSF}}\\min\\frac{a}{b}\\frac{D_c}{V}$ over all particles, "
+                                        "where $D_c$ denotes the characteristic slip distance, $V$ is the "
+                                        "slip rate, $a$ and $b$ are the direct effect and evolution effect "
+                                        "parameters, respectively, and $C_{\\text{RSF}}$ serves as the CFL number.")
   }
 }

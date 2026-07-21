@@ -1118,8 +1118,8 @@ namespace aspect
         // If the slip rate is required, also create a matrix block for the obstacle problem
         if (parameters.need_slip_rate)
           {
-            const unsigned int peak_phase_field_block = introspection.variable("peak_phase_field").first_component_index;
-            coupling[peak_phase_field_block][peak_phase_field_block] = DoFTools::always;
+            const unsigned int core_phase_field_block = introspection.variable("core_phase_field").first_component_index;
+            coupling[core_phase_field_block][core_phase_field_block] = DoFTools::always;
           }
       }
 

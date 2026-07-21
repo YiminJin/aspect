@@ -332,32 +332,33 @@ namespace aspect
 
       prm.enter_subsection("Core phase field extender");
       {
-        prm.declare_entry("Tangential diffusion coefficient", "1.e-3",
-                          Patterns::Double(0., 1.),
+        prm.declare_entry("Ratio between normal and tangential diffusion coefficients", "1.e6",
+                          Patterns::Double(0.),
                           "The core phase field is extended by solving an obstacle problem with "
-                          "anisotropic diffusion. Specifically, the phase field $\\phi$ is regarded "
+                          "anisotropic diffusion. Specifically, the phase field $\\phi$ is considered "
                           "as an obstacle, and the unknown field $\\psi$ satisfies the KKT conditions"
                           "\\[\\nabla\\cdot(\\boldsymbol{\\kappa}\\cdot\\psi) - r\\psi \\leq 0,\\]"
                           "\\[\\psi - \\phi \\geq 0,\\]"
                           "\\[[\\nabla\\cdot(\\boldsymbol{\\kappa}\\cdot\\psi) - r\\psi](\\psi - \\phi) = 0.\\]"
-                          "In the above equation/inequalities, $\\boldsymbol{\\kappa}$ is an anisotropic "
-                          "diffusion coefficient, defined by"
+                          "In the KKT conditions, $\\boldsymbol{\\kappa}$ is an anisotropic diffusion "
+                          "coefficient, defined by"
                           "\\[\\boldsymbol{\\kappa} = \\kappa_n\\boldsymbol{n}\\otimes\\boldsymbol{n} "
                           "+ \\kappa_t(\\boldsymbol{I} - \\boldsymbol{n}\\otimes\\boldsymbol{n}),\\]"
-                          "where $\\boldsymbol{n}$ is the normal vector of the crack surface. By setting "
-                          "$\\kappa_n \\gg \\kappa_t$, we can make $\\psi$ nearly uniform along the "
-                          "profiles perpendicular to the crack surface. In practice, we set $\\kappa_n=1$, "
-                          "and the value of $\\kappa_t$ is determined by this parameter.");
-
-        prm.declare_entry("Pseudo force coefficient", "1.e-3",
-                          Patterns::Double(0.),
-                          "In the KKT conditions of the obstacle problem (see the description of "
-                          "parameter <Tangential diffusion coefficient> for details), the term "
-                          "$-r\\psi$ represents a pseudo force that drags the field $\\psi$ downward. "
-                          "To ensure that $\\psi$ is nearly uniform along the profiles perpendicular to "
-                          "the crack surface, the value of $rL^2$ should far smaller than $\\kappa_n$, "
-                          "where $l$ is the characteristic length scale. In pracice, we set $\\kappa_n=1$, "
-                          "and the value of $rL^2$ is determined by this parameter.");
+                          "where $\\boldsymbol{n}$ is the normal vector of the crack surface; the term "
+                          "$r\\psi$ represents a pseudo force that drags the field downward. Define the "
+                          "normal and tangential length scales by "
+                          "\\["
+                          "L_n = \\sqrt{\\frac{\\kappa_n}{r}}\\quad\\text{and}\\quad"
+                          "L_t = \\sqrt{\\frac{\\kappa_t}{r}},"
+                          "\\]"
+                          "respectively. To ensure that $\\psi$ is nearly uniform in the normal direction "
+                          "but is hardly diffusive in the tangential direction, it should be satisfied that "
+                          "$L_n \\gg l$ and $L_n \\gg L_t$, where $l$ is the characteristice length scale. "
+                          "On the other hand, to suppress grid-scale oscillations, we require $\\kappa_t\\simeq h$, "
+                          "where $h$ is the grid size. Thus, it is proper to set $\\r = 1$, $\\kappa_t = 2h^2$ and "
+                          "$\\kappa_n = L_n^2$, where $L_n \\gg l$. This parameter determines the ratio between "
+                          "$\\kappa_n/\\kappa_t$, which should be greater than $10^2$, because $l$ is an order "
+                          "of magnitude greater than $h$ in common cases.");
 
         prm.declare_entry("Penalty parameter scaling factor", "1.",
                           Patterns::Double(0.),
@@ -481,8 +482,16 @@ namespace aspect
 
       prm.enter_subsection("Core phase field extender");
       {
-        core_extender_parameters.tangential_diffusion_coefficient = prm.get_double("Tangential diffusion coefficient");
-        core_extender_parameters.pseudo_force_coefficient         = prm.get_double("Pseudo force coefficient");
+        // Estimate the grid size by the diameter of the triangulation and the maximum refinement level
+        const unsigned int max_refinement_level = this->get_parameters().initial_global_refinement +
+                                                  this->get_parameters().initial_adaptive_refinement;
+        const double h = GridTools::diameter(this->get_triangulation()) / (1 << max_refinement_level);
+        const double kappa_t = 2. * h * h;
+        core_extender_parameters.tangential_diffusion_coefficient = kappa_t;
+
+        const double ratio = prm.get_double("Ratio between normal and tangential diffusion coefficients");
+        core_extender_parameters.normal_diffusion_coefficient = kappa_t * ratio;
+
         core_extender_parameters.penalty_parameter_scaling_factor = prm.get_double("Penalty parameter scaling factor");
       }
       prm.leave_subsection();
@@ -1108,7 +1117,7 @@ namespace aspect
 
     // Stuff for interpolating the normal vector from particles to quadrature points
     const auto &particle_data_info = particle_manager->get_property_manager().get_data_info();
-    const unsigned int first_property_index = particle_data_info.get_field_index_by_name("normal_direction");
+    const unsigned int first_property_index = particle_data_info.get_position_by_field_name("normal_direction");
 
     std::vector<bool> component_mask_intializer(this->introspection().n_components, false);
     for (unsigned int d = 0; d < dim; ++d)
@@ -1116,10 +1125,8 @@ namespace aspect
     const ComponentMask component_mask(component_mask_intializer);
 
     // Uniform parameters
-    const double kappa_n = 1;
+    const double kappa_n = core_extender_parameters.normal_diffusion_coefficient;
     const double kappa_t = core_extender_parameters.tangential_diffusion_coefficient;
-    const double l = geometric_function->get_length_scale();
-    const double r = core_extender_parameters.pseudo_force_coefficient / (l * l);
 
     for (const auto &cell : this->get_dof_handler().active_cell_iterators())
       if (cell->is_locally_owned())
@@ -1145,13 +1152,14 @@ namespace aspect
               Tensor<1, dim> n;
               for (unsigned int d = 0; d < dim; ++d)
                 n[d] = interpolated_values[q][d];
+              std::cout << "n = [" << n << "]" << std::endl;
 
               for (unsigned int i = 0; i < dofs_per_cell; ++i)
                 for (unsigned int j = 0; j < dofs_per_cell; ++j)
                   cell_matrix(i, j) += ( kappa_t * (shape_gradients[i] * shape_gradients[j])
                                          + (kappa_n - kappa_t) * (n * shape_gradients[i]) 
                                                                * (n * shape_gradients[j])
-                                         + r * shape_values[i] * shape_values[j]
+                                         + shape_values[i] * shape_values[j]
                                        ) 
                                        * fe_values.JxW(q);
             }
@@ -1193,6 +1201,9 @@ namespace aspect
     const auto &variable = this->introspection().variable("core_phase_field");
     const unsigned int component_index = variable.first_component_index;
     const unsigned int block_index     = variable.block_index;
+
+    if (system_rhs.block(block_index).l2_norm() < 1e-50)
+      return 0;
 
     // Set the preconditioner
     LinearAlgebra::PreconditionAMG preconditioner;
@@ -1258,12 +1269,12 @@ namespace aspect
   template <int dim>
   void
   PhaseFieldHandler<dim>::
-  update_active_set(const LinearAlgebra::BlockSparseMatrix &system_matrix,
-                    const LinearAlgebra::BlockSparseMatrix &complete_system_matrix,
-                    LinearAlgebra::BlockVector             &lambda,
-                    LinearAlgebra::BlockVector             &solution,
-                    AffineConstraints<double>              &constraints,
-                    IndexSet                               &active_set) const
+  update_active_set(const LinearAlgebra::SparseMatrix &complete_system_matrix,
+                    const BlockIndices                &block_indices,
+                    LinearAlgebra::BlockVector        &lambda,
+                    LinearAlgebra::BlockVector        &solution,
+                    AffineConstraints<double>         &constraints,
+                    IndexSet                          &active_set) const
   {
     const auto &var_phi = this->introspection().variable("phase_field");
     const unsigned int comp_phi = var_phi.first_component_index;
@@ -1288,9 +1299,9 @@ namespace aspect
     // The right-hand side is zero (the pseudo-force is on the left-hand side).
     complete_system_rhs.block(blk_psi) = 0;
     dist_solution.block(blk_psi) = solution.block(blk_psi);
-    complete_system_matrix.block(blk_psi, blk_psi).residual(lambda.block(blk_psi), 
-                                                            dist_solution.block(blk_psi),
-                                                            complete_system_rhs.block(blk_psi));
+    complete_system_matrix.residual(lambda.block(blk_psi), 
+                                    dist_solution.block(blk_psi),
+                                    complete_system_rhs.block(blk_psi));
     hanging_node_constraints.distribute(lambda);
 
     active_set.clear();
@@ -1315,15 +1326,16 @@ namespace aspect
             // (c) it is a hanging node;
             // (d) it has been touched.
             if (phi < phi_min
-                || !locally_owned_dofs.is_element(dof_psi)
                 || hanging_node_constraints.is_constrained(dof_psi)
+                || !locally_owned_dofs.is_element(dof_psi)
                 || local_touched_dofs.is_element(dof_psi))
               continue;
 
             local_touched_dofs.add_index(dof_psi);
 
-            // Compute the penalty parameter c
-            const double A = system_matrix(dof_psi, dof_psi);
+            // The penalty parameter is proportional to the diagonal of the stiffness matrix
+            const auto block_and_index = block_indices.global_to_local(dof_psi);
+            const double A = complete_system_matrix.diag_element(block_and_index.second);
             const double c = core_extender_parameters.penalty_parameter_scaling_factor * A;
             
             if (lambda(dof_psi) + c * (psi - phi) < 0)
@@ -1375,26 +1387,28 @@ namespace aspect
                                                         this->introspection().index_sets.system_relevant_set);
     comprehensive_constraints.merge(this->get_current_constraints());
     comprehensive_constraints.close();
+    std::cout << "P" << Utilities::MPI::this_mpi_process(MPI_COMM_WORLD) << ": comprehensive_constraints initialized" << std::endl;
 
     IndexSet active_set(this->get_dof_handler().n_dofs());
     IndexSet active_set_old(this->get_dof_handler().n_dofs());
 
     // Make a copy of the system matrix for computing the Lagrange multiplier
-    LinearAlgebra::BlockSparseMatrix complete_system_matrix;
-    complete_system_matrix.reinit(this->introspection().n_blocks, this->introspection().n_blocks);
-    complete_system_matrix.block(blk_psi, blk_psi).reinit(system_matrix.block(blk_psi, blk_psi));
+    LinearAlgebra::SparseMatrix complete_system_matrix;
+    complete_system_matrix.reinit(system_matrix.block(blk_psi, blk_psi));
 
     // Create a distributed vector for the Lagrange multiplier (lambda)
     LinearAlgebra::BlockVector lambda(this->introspection().index_sets.system_partitioning, this->get_mpi_communicator());
 
     for (unsigned int iteration = 0; iteration < 100; ++iteration)
       {
+        this->get_pcout() << "before assembly: " << system_rhs.block(blk_psi).l2_norm() << std::endl;
         assemble_saddle_point_system(system_matrix, system_rhs, comprehensive_constraints);
+        this->get_pcout() << "after assembly: " << system_rhs.block(blk_psi).l2_norm() << std::endl;
         if (iteration == 0)
-          complete_system_matrix.block(blk_psi, blk_psi).copy_from(system_matrix.block(blk_psi, blk_psi));
+          complete_system_matrix.copy_from(system_matrix.block(blk_psi, blk_psi));
 
         const unsigned int cg_iterations = solve_saddle_point_system(system_matrix, system_rhs, solution, comprehensive_constraints);
-        update_active_set(system_matrix, complete_system_matrix, lambda, solution, comprehensive_constraints, active_set);
+        update_active_set(complete_system_matrix, system_matrix.get_row_indices(), lambda, solution, comprehensive_constraints, active_set);
 
         this->get_pcout() << "      Iteration " << std::setw(3) << iteration
                           << ": size of active set = " << std::setw(Utilities::int_to_string(this->get_dof_handler().n_dofs()).size())

@@ -80,6 +80,28 @@ namespace aspect
                                                         const double               slip_rate,
                                                         const double               slip_state) const;
 
+          /**
+           * Compute the time step controlled by fault slip. The time step is
+           * commonly given by
+           * @f[
+           *  \Delta t_{\text{RSF}}=C_{\text{RSF}}\min\frac{D_c}{V},
+           * @f]
+           * where $C_{\text{RSF}}\in(0, 1]$ serves as the CFL number. In
+           * practice, if the slip state is updated in an operator-splitting
+           * manner, then the time step should be scaled by $a/b$, i.e.
+           * @f[
+           *  \Delta t_{\text{RSF,OS}}=C_{\text{RSF}}\min\frac{a}{b}
+           *    \frac{D_c}{V}.
+           * @f]
+           * The above expression implies that the time step should be reduced
+           * to improve the stability if the material is slip-weakening.
+           */
+          double
+          compute_time_step(const std::vector<double> &volume_fractions,
+                            const double               slip_rate,
+                            const double               cfl_number,
+                            const bool                 use_operator_splitting) const;
+
           double get_reference_slip_rate() const;
 
           double get_minimum_slip_rate() const;

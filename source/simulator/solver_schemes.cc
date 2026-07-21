@@ -1102,6 +1102,7 @@ namespace aspect
         phase_field_handler->evolve_phase_field(system_matrix, system_rhs, solution);
         if (parameters.need_slip_rate)
           phase_field_handler->extend_core_phase_field(system_matrix, system_rhs, solution);
+        postprocess();
       }
 
     // Assemble and solve the temperature and compositional fields

@@ -128,6 +128,33 @@ namespace aspect
 
 
       template <int dim>
+      double
+      RateStateFriction<dim>::
+      compute_time_step(const std::vector<double> &volume_fractions,
+                        const double               V_raw,
+                        const double               cfl_number,
+                        const bool                 use_operator_splitting) const
+      {
+        AssertDimension(volume_fractions.size(), mu0.size());
+
+        const double V = std::clamp(V_raw, Vmin, Vmax);
+        if (use_operator_splitting == false)
+          return cfl_number * Dc / V;
+
+        double a_eff = 0, b_eff = 0;
+        for (unsigned int j = 0; j < volume_fractions.size(); ++j)
+          if (volume_fractions[j] > 0)
+            {
+              a_eff += volume_fractions[j] * a[j];
+              b_eff += volume_fractions[j] * b[j];
+            }
+
+        return cfl_number * (a_eff * Dc) / (b_eff * V);
+      }
+
+
+
+      template <int dim>
       void
       RateStateFriction<dim>::
       declare_parameters(ParameterHandler &prm)

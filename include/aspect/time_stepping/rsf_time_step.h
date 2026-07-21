@@ -44,11 +44,15 @@ template <int dim>
         parse_parameters(ParameterHandler &prm) override;
 
       private:
-        double safety_factor;
+        double CFL_number;
 
-        double characteristic_slip_distance;
+        struct ParticlePropertyIndices
+        {
+          unsigned int slip_rate;
+          std::vector<unsigned int> chemical_fields;
+        };
 
-        unsigned int slip_rate_property_index;
+        ParticlePropertyIndices particle_property_indices;
 
         const Particles::ParticleHandler<dim> *particle_handler;
     };
