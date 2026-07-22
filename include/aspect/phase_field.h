@@ -248,8 +248,7 @@ namespace aspect
 
     struct CoreExtenderParameters
     {
-      double normal_diffusion_coefficient;
-      double tangential_diffusion_coefficient;
+      double normal_to_tangential_diffusion;
       double penalty_parameter_scaling_factor;
     };
   }
@@ -351,6 +350,8 @@ namespace aspect
       std::vector<double> critical_energy_densities;
 
       const Particle::Manager<dim> *particle_manager;
+
+      std::unique_ptr<GridTools::Cache<dim>> grid_cache;
 
       std::vector<types::global_dof_index> vertex_to_dof_indices;
   };

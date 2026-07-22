@@ -90,7 +90,7 @@ namespace aspect
             linear,
             reciprocal,
             squared_reciprocal,
-            modified_shephard
+            modified_shepard
           };
 
           WeightType weight_type;

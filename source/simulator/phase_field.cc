@@ -355,7 +355,7 @@ namespace aspect
                           "but is hardly diffusive in the tangential direction, it should be satisfied that "
                           "$L_n \\gg l$ and $L_n \\gg L_t$, where $l$ is the characteristice length scale. "
                           "On the other hand, to suppress grid-scale oscillations, we require $\\kappa_t\\simeq h$, "
-                          "where $h$ is the grid size. Thus, it is proper to set $\\r = 1$, $\\kappa_t = 2h^2$ and "
+                          "where $h$ is the grid size. Thus, it is proper to set $\\r = 1$, $\\kappa_t = h^2$ and "
                           "$\\kappa_n = L_n^2$, where $L_n \\gg l$. This parameter determines the ratio between "
                           "$\\kappa_n/\\kappa_t$, which should be greater than $10^2$, because $l$ is an order "
                           "of magnitude greater than $h$ in common cases.");
@@ -482,16 +482,7 @@ namespace aspect
 
       prm.enter_subsection("Core phase field extender");
       {
-        // Estimate the grid size by the diameter of the triangulation and the maximum refinement level
-        const unsigned int max_refinement_level = this->get_parameters().initial_global_refinement +
-                                                  this->get_parameters().initial_adaptive_refinement;
-        const double h = GridTools::diameter(this->get_triangulation()) / (1 << max_refinement_level);
-        const double kappa_t = 2. * h * h;
-        core_extender_parameters.tangential_diffusion_coefficient = kappa_t;
-
-        const double ratio = prm.get_double("Ratio between normal and tangential diffusion coefficients");
-        core_extender_parameters.normal_diffusion_coefficient = kappa_t * ratio;
-
+        core_extender_parameters.normal_to_tangential_diffusion = prm.get_double("Ratio between normal and tangential diffusion coefficients");
         core_extender_parameters.penalty_parameter_scaling_factor = prm.get_double("Penalty parameter scaling factor");
       }
       prm.leave_subsection();
@@ -618,6 +609,9 @@ namespace aspect
                              "the parameters (for example, the critical energy release rate, the "
                              "threshold driving force, the length scale, etc) to ensure that the "
                              "second derivative of the energetic degradation function is positive."));
+
+    // Initialize the grid cache
+    grid_cache = std::make_unique<GridTools::Cache<dim>>(this->get_triangulation(), this->get_mapping());
   }
 
 
@@ -1025,8 +1019,7 @@ namespace aspect
   make_sparsity_pattern(LinearAlgebra::BlockDynamicSparsityPattern &sp)
   {
     // Create the vertex-to-cell map
-    GridTools::Cache<dim> grid_cache(this->get_triangulation(), this->get_mapping());
-    const auto &vertex_to_cell_map = grid_cache.get_vertex_to_cell_map();
+    const auto &vertex_to_cell_map = grid_cache->get_vertex_to_cell_map();
 
     const AffineConstraints<double> &current_constraints = this->get_current_constraints();
 
@@ -1081,6 +1074,111 @@ namespace aspect
 
 
 
+  namespace
+  {
+    /**
+     * A helper function that interpolates the normal vectors from particles to
+     * quadrature points with the distance weighted averaging method. It returns
+     * a float number and a vector for each quadrature point, the former of
+     * which is the proportion of active particles among its neighbor particles.
+     */
+    template <int dim>
+    std::vector<std::pair<double, Tensor<1, dim>>>
+    interpolate_normal_vectors_onto_quadrature_points(const std::vector<Point<dim>>          &quadrature_points,
+                                                      const Particles::ParticleHandler<dim>  &particle_handler,
+                                                      const GridTools::Cache<dim>            &grid_cache,
+                                                      const unsigned int                      first_property_index,
+                                                      const typename Triangulation<dim>::active_cell_iterator &target_cell)
+    {
+      AssertThrow(target_cell->is_locally_owned(), ExcInternalError());
+
+      // Find the one-layer patch of the given cell
+      std::set<typename Triangulation<dim>::active_cell_iterator> patch;
+
+      const auto &vertex_to_cell_map = grid_cache.get_vertex_to_cell_map();
+
+      for (const auto v : target_cell->vertex_indices())
+        {
+          const unsigned int vertex_index = target_cell->vertex_index(v);
+          patch.insert(vertex_to_cell_map[vertex_index].begin(),
+                       vertex_to_cell_map[vertex_index].end());
+        }
+
+      // Average over the particles that
+      // (a) have valid normal vectors;
+      // (b) are within half a cell diameter.
+      const double interpolation_range = 0.5 * target_cell->diameter();
+      const double epsilon = 0.1 * interpolation_range;
+
+      const unsigned int n_q_points = quadrature_points.size();
+
+      std::vector<unsigned int> n_active_particles(n_q_points, 0);
+      std::vector<unsigned int> n_inactive_particles(n_q_points, 0);
+
+      std::vector<double>       integrated_weights(n_q_points, 0.);
+      std::vector<SymmetricTensor<2, dim>> integrated_projectors(n_q_points);
+      
+      for (const auto &cell : patch)
+        for (const auto &particle : particle_handler.particles_in_cell(cell))
+          {
+            const ArrayView<const double> particle_properties = particle.get_properties();
+
+            for (unsigned int q = 0; q < n_q_points; ++q)
+              {
+                const double distance = particle.get_location().distance(quadrature_points[q]);
+
+                if (distance > interpolation_range)
+                  continue;
+
+                // If the normal vector stored in this particle is invalid, then 
+                // count it as inactive particle
+                if (!numbers::is_finite(particle_properties[first_property_index]))
+                  {
+                    n_inactive_particles[q] += 1;
+                    continue;
+                  }
+
+                n_active_particles[q] += 1;
+
+                // Use the modified Shephard's method
+                const double weight = std::pow(1. - (distance * distance / (interpolation_range * interpolation_range)), 2)
+                                      / (distance * distance + epsilon * epsilon);
+                integrated_weights[q] += weight;
+
+                Tensor<1, dim> normal_vector;
+                for (unsigned int d = 0; d < dim; ++d)
+                  normal_vector[d] = particle_properties[first_property_index + d];
+
+                integrated_projectors[q] += symmetrize(outer_product(normal_vector, normal_vector)) * weight;
+              }
+          }
+
+      std::vector<std::pair<double, Tensor<1, dim>>> proportions_and_vectors(n_q_points);
+      for (unsigned int q = 0; q < n_q_points; ++q)
+        {
+          if (n_active_particles[q] > 0)
+            {
+              const double n_neighbor_particles = n_active_particles[q] + n_inactive_particles[q];
+              proportions_and_vectors[q].first = n_active_particles[q] / n_neighbor_particles;
+
+              const SymmetricTensor<2, dim> projector = integrated_projectors[q] / integrated_weights[q];
+              const std::array<std::pair<double, Tensor<1, dim>>, dim> eigenvalues_and_vectors = eigenvectors(projector);
+              const Tensor<1, dim> &n = eigenvalues_and_vectors[0].second;
+              proportions_and_vectors[q].second = n / n.norm();
+            }
+          else
+            {
+              proportions_and_vectors[q].first = 0;
+              proportions_and_vectors[q].second = 0;
+            }
+        }
+
+      return proportions_and_vectors;
+    }
+  }
+
+
+
   template <int dim>
   void
   PhaseFieldHandler<dim>::
@@ -1119,28 +1217,23 @@ namespace aspect
     const auto &particle_data_info = particle_manager->get_property_manager().get_data_info();
     const unsigned int first_property_index = particle_data_info.get_position_by_field_name("normal_direction");
 
-    std::vector<bool> component_mask_intializer(this->introspection().n_components, false);
-    for (unsigned int d = 0; d < dim; ++d)
-      component_mask_intializer[first_property_index + d] = true;
-    const ComponentMask component_mask(component_mask_intializer);
-
-    // Uniform parameters
-    const double kappa_n = core_extender_parameters.normal_diffusion_coefficient;
-    const double kappa_t = core_extender_parameters.tangential_diffusion_coefficient;
-
     for (const auto &cell : this->get_dof_handler().active_cell_iterators())
       if (cell->is_locally_owned())
         {
           fe_values.reinit(cell);
           cell_matrix = 0;
 
-          // Interpolate the normal vector to the quadrature points
-          // TODO: interpolate the structure tensor instead of the vector
-          const std::vector<std::vector<double>> interpolated_values =
-            particle_manager->get_interpolator().properties_at_points(particle_manager->get_particle_handler(),
-                                                                      fe_values.get_quadrature_points(),
-                                                                      component_mask, cell);
+          // Interpolate the normal vector from particles to the quadrature points
+          const std::vector<std::pair<double, Tensor<1, dim>>> proportions_and_vectors
+            = interpolate_normal_vectors_onto_quadrature_points(fe_values.get_quadrature_points(),
+                                                                particle_manager->get_particle_handler(),
+                                                                *grid_cache,
+                                                                first_property_index, 
+                                                                cell);
 
+          const double kappa_t = std::pow(cell->diameter(), 2);
+          const double kappa_n = kappa_t * core_extender_parameters.normal_to_tangential_diffusion;
+            
           for (unsigned int q = 0; q < n_q_points; ++q)
             {
               for (unsigned int i = 0; i < dofs_per_cell; ++i)
@@ -1149,16 +1242,18 @@ namespace aspect
                   shape_gradients[i] = fe_values.shape_grad(i, q);
                 }
 
-              Tensor<1, dim> n;
-              for (unsigned int d = 0; d < dim; ++d)
-                n[d] = interpolated_values[q][d];
-              std::cout << "n = [" << n << "]" << std::endl;
+              const double proportion = proportions_and_vectors[q].first;
+              const Tensor<1, dim> &n = proportions_and_vectors[q].second;
+
+              const double kappa_iso   = kappa_n * kappa_t / 
+                                         (proportion * kappa_n + (1. - proportion) / kappa_t);
+              const double kappa_aniso = kappa_n - kappa_iso;
 
               for (unsigned int i = 0; i < dofs_per_cell; ++i)
                 for (unsigned int j = 0; j < dofs_per_cell; ++j)
-                  cell_matrix(i, j) += ( kappa_t * (shape_gradients[i] * shape_gradients[j])
-                                         + (kappa_n - kappa_t) * (n * shape_gradients[i]) 
-                                                               * (n * shape_gradients[j])
+                  cell_matrix(i, j) += ( kappa_iso * (shape_gradients[i] * shape_gradients[j])
+                                         + kappa_aniso * (n * shape_gradients[i]) 
+                                                       * (n * shape_gradients[j])
                                          + shape_values[i] * shape_values[j]
                                        ) 
                                        * fe_values.JxW(q);
@@ -1387,7 +1482,6 @@ namespace aspect
                                                         this->introspection().index_sets.system_relevant_set);
     comprehensive_constraints.merge(this->get_current_constraints());
     comprehensive_constraints.close();
-    std::cout << "P" << Utilities::MPI::this_mpi_process(MPI_COMM_WORLD) << ": comprehensive_constraints initialized" << std::endl;
 
     IndexSet active_set(this->get_dof_handler().n_dofs());
     IndexSet active_set_old(this->get_dof_handler().n_dofs());
@@ -1401,9 +1495,7 @@ namespace aspect
 
     for (unsigned int iteration = 0; iteration < 100; ++iteration)
       {
-        this->get_pcout() << "before assembly: " << system_rhs.block(blk_psi).l2_norm() << std::endl;
         assemble_saddle_point_system(system_matrix, system_rhs, comprehensive_constraints);
-        this->get_pcout() << "after assembly: " << system_rhs.block(blk_psi).l2_norm() << std::endl;
         if (iteration == 0)
           complete_system_matrix.copy_from(system_matrix.block(blk_psi, blk_psi));
 

@@ -137,9 +137,9 @@ namespace aspect
                 return (distance < interpolation_range ? 1.0 / (distance + epsilon) : 0.0);
               case DistanceWeightedAverage<dim>::squared_reciprocal:
                 return (distance < interpolation_range ? 1.0 / (distance * distance + epsilon * epsilon) : 0.0);
-              case DistanceWeightedAverage<dim>::modified_shephard:
+              case DistanceWeightedAverage<dim>::modified_shepard:
                 return (distance < interpolation_range ? 
-                        Utilities::fixed_power<2, double>((1.0 - (distance * distance / (interpolation_range * interpolation_range)))) 
+                        std::pow(1.0 - (distance * distance / (interpolation_range * interpolation_range)), 2)
                         / (distance * distance + epsilon * epsilon) : 
                         0.0);
               default:
@@ -160,19 +160,19 @@ namespace aspect
           prm.enter_subsection("Distance weighted average");
           {
             prm.declare_entry("Weight type", "linear",
-                              Patterns::Selection("linear|reciprocal|squared reciprocal|modified shephard"),
+                              Patterns::Selection("linear|reciprocal|squared reciprocal|modified shepard"),
                               "Weight type in the distance weighted average interpolation. "
                               "The options are:\n"
                               "`linear': $w = 1 - (d / r)$;\n"
-                              "`reciprocal': $w = \\frac{1}{(1 + e)r}$;\n"
-                              "`squared reciprocal': $w = \\frac{1}{(1 + e^2)r^2}$;\n"
-                              "`modified shephard': $w = \\frac{(1 - (d / r)^2)^2}{(1 + e^2)r^2}$.\n"
+                              "`reciprocal': $w = \\frac{1}{(d + e}$;\n"
+                              "`squared reciprocal': $w = \\frac{1}{d^2 + e^2}$;\n"
+                              "`modified shepard': $w = \\frac{(1 - (d / r)^2)^2}{d^2 + e^2}$.\n"
                               "In the above expressions, $d$ is the distance between the particle and the "
                               "target point, $r$ is half of the diameter of the host cell, and $e$ is "
-                              "the distance regularization factor. If $r > h$, then the weight is zero.");
+                              "the distance regularization term. If $d > r$, then the weight is zero.");
             prm.declare_entry("Distance regularization factor", "0.1",
                               Patterns::Double(0),
-                              "If `reciprocal', `squared reciprocal' or `modified shephard' is selected as "
+                              "If `reciprocal', `squared reciprocal' or `modified shepard' is selected as "
                               "the weight type, then we need to regularize the denominator to prevent "
                               "one-point dominance. This parameter is the ratio between the regularization "
                               "parameter and the interpolation range (half of the diameter of the host cell). "
@@ -201,8 +201,8 @@ namespace aspect
               weight_type = reciprocal;
             else if (type == "squared reciprocal")
               weight_type = squared_reciprocal;
-            else if (type == "modified shephard")
-              weight_type = modified_shephard;
+            else if (type == "modified shepard")
+              weight_type = modified_shepard;
             else
               AssertThrow(false, ExcNotImplemented());
 
