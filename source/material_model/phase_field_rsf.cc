@@ -129,7 +129,7 @@ namespace aspect
       index_cache.initialize(this->introspection(), this->get_parameters(), this->get_phase_field_handler());
 
       // Initialize the evaluation flags.
-      // We need the velocity gradients, temperature values, phase field values and peak phase field values
+      // We need the velocity gradients, temperature values, phase field values and core phase field values
       // at particle locations
       evaluation_flags.resize(this->introspection().n_components, EvaluationFlags::nothing);
       for (unsigned int d = 0; d < dim; ++d)
@@ -532,9 +532,9 @@ namespace aspect
                     const double V_init = V_prev;
                     const double F_init = F_value(V_init);
 
-                    // Check if F > -res, where res = (mu * p_bar + eta_d * V) * 1e-6
+                    // Check if |F| > (mu * p_bar + eta_d * V) * 1e-6
                     const double mu_init = rsf_rheology.friction_coefficient(volume_fractions, V_init, theta);
-                    if (F_init > -(mu_init * p_bar + eta_d * V_init) * 1.e-6)
+                    if (std::abs(F_init) > (mu_init * p_bar + eta_d * V_init) * 1.e-6)
                       {
                         convergence_history.clear();
 

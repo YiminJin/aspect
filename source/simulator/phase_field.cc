@@ -147,8 +147,7 @@ namespace aspect
       , phase_field_values(N)
     {
       AssertThrow(phi_hat > 0 && phi_hat < 1,
-                  ExcMessage("The peak value of the phase-field must be "
-                             "greater than 0 and smaller than 1."));
+                  ExcMessage("The core phase-field must be in the range of (0, 1)."));
 
       const double a_hat = a_func.value(phi_hat);
       const double g_hat = g_func.value(phi_hat);
@@ -279,11 +278,12 @@ namespace aspect
 
 
     double 
-    SlipRateNormalizer::normalization_factor(const double phi_hat) const
+    SlipRateNormalizer::normalization_factor(const double phi_hat_raw) const
     {
-      AssertThrow(phi_hat >= phi_min && phi_hat <= phi_max,
-                  ExcMessage("The peak value of the phase-field exceeds the range "
-                             "that can be handled by SlipRateNormalizer."));
+      AssertThrow(phi_hat_raw > 0 && phi_hat_raw < 1,
+                  ExcMessage("The core phase-field must be in the range of (0, 1)."));
+
+      const double phi_hat = std::clamp(phi_hat_raw, phi_min, phi_max);
 
       const double x = std::log(phi_hat / (1. - phi_hat));
 
