@@ -26,6 +26,9 @@
 #include <aspect/fe_variable_collection.h>
 #include <aspect/material_model/interface.h>
 
+#include <deal.II/grid/grid_tools.h>
+#include <deal.II/particles/particle_handler.h>
+
 namespace aspect
 {
   namespace MaterialModel
@@ -253,6 +256,19 @@ namespace aspect
     };
   }
 
+  namespace PhaseFieldUtilities
+  {
+    template <int dim>
+    std::vector<std::pair<double, std::vector<double>>>
+    interpolate_from_particles_in_crack_zone(const Particles::ParticleHandler<dim> &particle_handler,
+                                             const std::vector<Point<dim>>         &positions,
+                                             const ComponentMask                   &selected_properties,
+                                             const typename Triangulation<dim>::active_cell_iterator &target_cell,
+                                             const GridTools::Cache<dim>           &grid_cache,
+                                             const std::function<bool(const ArrayView<const double>&)> &is_in_crack_zone);
+
+  }
+
   template <int dim>
   class PhaseFieldHandler : public SimulatorAccess<dim>
   {
@@ -290,17 +306,19 @@ namespace aspect
       double
       slip_rate_localization_factor(const std::vector<double> &volume_fractions,
                                     const double degradation_function,
-                                    const double peak_phase_field) const;
+                                    const double core_phase_field) const;
 
       double 
-      crack_driving_force_of_stationary_profile(const std::vector<double> &volume_fractions,
-                                                const double               phase_field,
-                                                const double               peak_phase_field) const;
+      stationary_crack_driving_force(const std::vector<double> &volume_fractions,
+                                     const double               phase_field,
+                                     const double               core_phase_field) const;
 
       std::vector<std::unique_ptr<PhaseField::PhaseFieldProfile>>
-      get_phase_field_profiles(const double peak_value) const;
+      get_phase_field_profiles(const double core_phase_field) const;
 
       const Particle::Manager<dim> &get_associated_particle_manager() const;
+
+      const GridTools::Cache<dim> &get_grid_cache() const;
 
       static void declare_parameters(ParameterHandler &prm);
 

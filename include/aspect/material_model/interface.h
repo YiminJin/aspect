@@ -1381,7 +1381,7 @@ namespace aspect
         std::vector<SymmetricTensor<2, dim>> deviatoric_stresses;
 
         /**
-         * The equivalent scalar viscosity required by thee Schur complement 
+         * The equivalent scalar viscosity required by the Schur complement 
          * matrix. This quantity cannot be used in other places (for example,
          * when computing the pressure scaling factor), for it can only be
          * obtained through the return-mapping algorithm.

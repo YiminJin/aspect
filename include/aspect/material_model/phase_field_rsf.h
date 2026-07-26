@@ -38,6 +38,99 @@ namespace aspect
       public SimulatorAccess<dim>
     {
       public:
+        struct IndexCache
+        {
+          /**
+           * Structure caching the indices of the particle properties that are
+           * frequently requested by this material model.
+           */
+          struct ParticleProperties
+          {
+            unsigned int crack_driving_force;
+            unsigned int cohesive_force;
+            unsigned int slip_rate;
+            unsigned int slip_state;
+            unsigned int normal_direction;
+            unsigned int slip_direction;
+            unsigned int ve_stress;
+            std::vector<unsigned int> chemical_fields;
+
+            /**
+             * Default constructor. Initialize all the indices to 
+             * <tt>numbers::invalid_unsigned_int</tt>.
+             */
+            ParticleProperties()
+              : crack_driving_force(numbers::invalid_unsigned_int)
+              , cohesive_force(numbers::invalid_unsigned_int)
+              , slip_rate(numbers::invalid_unsigned_int)
+              , slip_state(numbers::invalid_unsigned_int)
+              , normal_direction(numbers::invalid_unsigned_int)
+              , slip_direction(numbers::invalid_unsigned_int)
+              , ve_stress(numbers::invalid_unsigned_int)
+            {}
+          };
+
+          ParticleProperties particle_properties;
+
+          /**
+           * Structure caching the indices of the compositional fields that
+           * are frequently requested by this material model.
+           */
+          struct CompositionalFields
+          {
+            unsigned int crack_driving_force;
+            unsigned int slip_rate;
+            unsigned int slip_state;
+            std::array<unsigned int, dim> normal_direction;
+            std::array<unsigned int, dim> slip_direction;
+            std::array<unsigned int, SymmetricTensor<2, dim>::n_independent_components> ve_stress;
+
+            /**
+             * Default constructor. Initialize all the indices to
+             * <tt>numbers::invalid_unsigned_int</tt>.
+             */
+            CompositionalFields()
+              : crack_driving_force(numbers::invalid_unsigned_int)
+              , slip_rate(numbers::invalid_unsigned_int)
+              , slip_state(numbers::invalid_unsigned_int)
+            {
+              normal_direction.fill(numbers::invalid_unsigned_int);
+              slip_direction.fill(numbers::invalid_unsigned_int);
+              ve_stress.fill(numbers::invalid_unsigned_int);
+            }
+          };
+
+          CompositionalFields compositional_fields;
+
+          /**
+           * Structure caching the indices of the variable components that
+           * are frequently requested by this material model.
+           */
+          struct Components
+          {
+            unsigned int phase_field;
+            unsigned int core_phase_field;
+
+            /**
+             * Default constructor. Initialize all the indices to
+             * <tt>numbers::invalid_unsigned_int</tt>.
+             */
+            Components()
+              : phase_field(numbers::invalid_unsigned_int)
+              , core_phase_field(numbers::invalid_unsigned_int)
+            {}
+          };
+
+          Components components;
+
+          /**
+           * Initialize the index cache.
+           */
+          void initialize(const Introspection<dim>     &introspection,
+                          const Parameters<dim>        &parameters,
+                          const PhaseFieldHandler<dim> &phase_field_handler);
+        };
+
         void initialize() override;
 
         void update() override;
@@ -64,8 +157,10 @@ namespace aspect
         const Rheology::RateStateFriction<dim> &
         get_rate_state_friction_model() const;
 
+        const IndexCache &get_index_cache() const;
+
         bool
-        is_fractured(const double phase_field) const;
+        is_intact(const double phase_field) const;
         
         static
         void
@@ -76,6 +171,8 @@ namespace aspect
 
       private:
         void do_initialization();
+
+        void complete_particle_property_initialization();
 
         void perform_return_mapping();
 
@@ -92,90 +189,6 @@ namespace aspect
         EquationOfState::MulticomponentIncompressible<dim> equation_of_state;
 
         Rheology::RateStateFriction<dim> rsf_rheology;
-
-        struct IndexCache
-        {
-          /**
-           * Structure caching the indices of the particle properties that are
-           * frequently requested by this material model.
-           */
-          struct ParticlePropertyIndices
-          {
-            unsigned int crack_driving_force;
-            unsigned int cohesive_force;
-            unsigned int slip_rate;
-            unsigned int slip_state;
-            unsigned int normal_direction;
-            unsigned int slip_direction;
-            unsigned int ve_stress;
-            std::vector<unsigned int> chemical_fields;
-
-            /**
-             * Default constructor. Initialize all the indices to 
-             * <tt>numbers::invalid_unsigned_int</tt>.
-             */
-            ParticlePropertyIndices()
-              : crack_driving_force(numbers::invalid_unsigned_int)
-              , cohesive_force(numbers::invalid_unsigned_int)
-              , slip_rate(numbers::invalid_unsigned_int)
-              , slip_state(numbers::invalid_unsigned_int)
-              , normal_direction(numbers::invalid_unsigned_int)
-              , slip_direction(numbers::invalid_unsigned_int)
-              , ve_stress(numbers::invalid_unsigned_int)
-            {}
-          };
-
-          ParticlePropertyIndices particle_property_indices;
-
-          /**
-           * Structure caching the indices of the compositional fields that
-           * are frequently requested by this material model.
-           */
-          struct CompositionalIndices
-          {
-            unsigned int slip_rate;
-            unsigned int slip_state;
-
-            /**
-             * Default constructor. Initialize all the indices to
-             * <tt>numbers::invalid_unsigned_int</tt>.
-             */
-            CompositionalIndices()
-              : slip_rate(numbers::invalid_unsigned_int)
-              , slip_state(numbers::invalid_unsigned_int)
-            {}
-          };
-
-          CompositionalIndices compositional_indices;
-
-          /**
-           * Structure caching the indices of the variable components that
-           * are frequently requested by this material model.
-           */
-          struct ComponentIndices
-          {
-            unsigned int phase_field;
-            unsigned int core_phase_field;
-
-            /**
-             * Default constructor. Initialize all the indices to
-             * <tt>numbers::invalid_unsigned_int</tt>.
-             */
-            ComponentIndices()
-              : phase_field(numbers::invalid_unsigned_int)
-              , core_phase_field(numbers::invalid_unsigned_int)
-            {}
-          };
-
-          ComponentIndices component_indices;
-
-          /**
-           * Initialize the index cache.
-           */
-          void initialize(const Introspection<dim>     &introspection,
-                          const Parameters<dim>        &parameters,
-                          const PhaseFieldHandler<dim> &phase_field_handler);
-        };
 
         IndexCache index_cache;
 

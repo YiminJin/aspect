@@ -305,6 +305,112 @@ namespace aspect
   }
 
 
+
+  namespace PhaseFieldUtilities
+  {
+    template <int dim>
+    std::vector<std::pair<double, std::vector<double>>>
+    interpolate_from_particles_in_crack_zone(const Particles::ParticleHandler<dim> &particle_handler,
+                                             const std::vector<Point<dim>>         &positions,
+                                             const ComponentMask                   &selected_properties,
+                                             const typename Triangulation<dim>::active_cell_iterator &target_cell,
+                                             const GridTools::Cache<dim>           &grid_cache,
+                                             const std::function<bool(const ArrayView<const double>&)> &is_in_crack_zone)
+    {
+      AssertThrow(target_cell->is_locally_owned(), ExcMessage("The target cell is not locally-owned."));
+
+      // Find the one-layer patch of the given cell
+      std::set<typename Triangulation<dim>::active_cell_iterator> cell_patch;
+
+      const auto &vertex_to_cell_map = grid_cache.get_vertex_to_cell_map();
+
+      for (const auto v : target_cell->vertex_indices())
+        {
+          const unsigned int vertex_index = target_cell->vertex_index(v);
+          cell_patch.insert(vertex_to_cell_map[vertex_index].begin(),
+                            vertex_to_cell_map[vertex_index].end());
+        }
+
+      const double interpolation_range = 0.5 * target_cell->diameter();
+      const double epsilon = 0.1 * interpolation_range;
+
+      const unsigned int n_points     = positions.size();
+      const unsigned int n_properties = particle_handler.n_properties_per_particle();
+
+      std::vector<unsigned int> n_active_particles(n_points, 0);
+      std::vector<unsigned int> n_inactive_particles(n_points, 0);
+
+      std::vector<double> integrated_weights(n_points, 0.);
+      std::vector<std::vector<double>> integrated_properties(n_points);
+
+      for (const auto &cell : cell_patch)
+        for (const auto &particle : particle_handler.particles_in_cell(cell))
+          {
+            const ArrayView<const double> particle_properties = particle.get_properties();
+
+            // Average over the particles that are
+            // (a) within the crack zone;
+            // (b) within half a cell diameter.
+            for (unsigned int p = 0; p < n_points; ++p)
+              {
+                const double distance = particle.get_location().distance(positions[p]);
+                
+                if (distance > interpolation_range)
+                  continue;
+
+                if (is_in_crack_zone(particle_properties) == false)
+                  {
+                    n_inactive_particles[p] += 1;
+                    continue;
+                  }
+
+                n_active_particles[p] += 1;
+
+                // Use the modified Shepard's method
+                const double weight = std::pow(1. - (distance * distance / (interpolation_range * interpolation_range)), 2)
+                                      / (distance * distance + epsilon * epsilon);
+                integrated_weights[p] += weight;
+
+                integrated_properties[p].resize(n_properties, 0.0);
+                for (unsigned int i = 0; i < n_properties; ++i)
+                  {
+                    if (selected_properties[i])
+                      integrated_properties[p][i] += particle_properties[i] * weight;
+                  }
+              }
+          }
+
+      std::vector<std::pair<double, std::vector<double>>> proportions_and_values(n_points);
+
+      for (unsigned int p = 0; p < n_points; ++p)
+        {
+          if (n_active_particles[p] > 0)
+            {
+              const double n_surrounding_particles = n_active_particles[p] + n_inactive_particles[p];
+              proportions_and_values[p].first = n_active_particles[p] / n_surrounding_particles;
+
+              proportions_and_values[p].second.resize(n_properties);
+              for (unsigned int i = 0; i < n_properties; ++i)
+                {
+                  if (selected_properties[i])
+                    proportions_and_values[p].second[i] = integrated_properties[p][i] / integrated_weights[p];
+                  else
+                    proportions_and_values[p].second[i] = numbers::signaling_nan<double>();
+                }
+            }
+          else
+            {
+              proportions_and_values[p].first = 0;
+              proportions_and_values[p].second.clear();
+            }
+        }
+
+      return proportions_and_values;
+    }
+  }
+
+
+
   /*--------------------------- PhaseFieldHandler ---------------------------*/
 
   template <int dim>
@@ -673,14 +779,14 @@ namespace aspect
   template <int dim>
   double
   PhaseFieldHandler<dim>::
-  crack_driving_force_of_stationary_profile(const std::vector<double> &volume_fractions,
-                                            const double               phi,
-                                            const double               phi_hat) const
+  stationary_crack_driving_force(const std::vector<double> &volume_fractions,
+                                 const double               phi,
+                                 const double               phi_hat) const
   {
     AssertDimension(volume_fractions.size(), degradation_functions.size());
     AssertThrow(phi <= phi_hat && phi_hat < 1, 
                 ExcMessage("Invalid input parameters for function PhaseFieldHandler::crack_driving_force_of_stationary_profile: "
-                           "phase_field = " + Utilities::to_string(phi) + "; peak_phase_field = " + Utilities::to_string(phi_hat)));
+                           "phase_field = " + Utilities::to_string(phi) + "; core_phase_field = " + Utilities::to_string(phi_hat)));
 
     double g = 0, g_hat = 0;
     double Gc_over_c0l = 0;
@@ -1031,19 +1137,19 @@ namespace aspect
         {
           // All the phase-field DoFs in the one-layer-patch around a cell are
           // possible to be coupled
-          std::set<typename Triangulation<dim>::active_cell_iterator> neighboring_cells;
+          std::set<typename Triangulation<dim>::active_cell_iterator> cell_patch;
           for (const unsigned int v : cell->vertex_indices())
             {
               const unsigned int vertex_index = cell->vertex_index(v);
-              neighboring_cells.insert(vertex_to_cell_map[vertex_index].begin(),
-                                       vertex_to_cell_map[vertex_index].end());
+              cell_patch.insert(vertex_to_cell_map[vertex_index].begin(),
+                                vertex_to_cell_map[vertex_index].end());
             }
 
           // Since the CPDI method requires the fields to be discretized by FE_Q(1) element,
           // we only need to loop over the vertices and extract the DoFs corresponding to
           // the first CPDI field
           std::set<types::global_dof_index> coupled_dofs;
-          for (const auto &neighbor : neighboring_cells)
+          for (const auto &neighbor : cell_patch)
             {
               typename DoFHandler<dim>::active_cell_iterator dof_cell(&this->get_triangulation(),
                                                                       neighbor->level(),
@@ -1070,111 +1176,6 @@ namespace aspect
             if (vertex_to_dof_indices[vertex_index] == numbers::invalid_dof_index)
               vertex_to_dof_indices[vertex_index] = cell->vertex_dof_index(v, component_index);
           }
-  }
-
-
-
-  namespace
-  {
-    /**
-     * A helper function that interpolates the normal vectors from particles to
-     * quadrature points with the distance weighted averaging method. It returns
-     * a float number and a vector for each quadrature point, the former of
-     * which is the proportion of active particles among its neighbor particles.
-     */
-    template <int dim>
-    std::vector<std::pair<double, Tensor<1, dim>>>
-    interpolate_normal_vectors_onto_quadrature_points(const std::vector<Point<dim>>          &quadrature_points,
-                                                      const Particles::ParticleHandler<dim>  &particle_handler,
-                                                      const GridTools::Cache<dim>            &grid_cache,
-                                                      const unsigned int                      first_property_index,
-                                                      const typename Triangulation<dim>::active_cell_iterator &target_cell)
-    {
-      AssertThrow(target_cell->is_locally_owned(), ExcInternalError());
-
-      // Find the one-layer patch of the given cell
-      std::set<typename Triangulation<dim>::active_cell_iterator> patch;
-
-      const auto &vertex_to_cell_map = grid_cache.get_vertex_to_cell_map();
-
-      for (const auto v : target_cell->vertex_indices())
-        {
-          const unsigned int vertex_index = target_cell->vertex_index(v);
-          patch.insert(vertex_to_cell_map[vertex_index].begin(),
-                       vertex_to_cell_map[vertex_index].end());
-        }
-
-      // Average over the particles that
-      // (a) have valid normal vectors;
-      // (b) are within half a cell diameter.
-      const double interpolation_range = 0.5 * target_cell->diameter();
-      const double epsilon = 0.1 * interpolation_range;
-
-      const unsigned int n_q_points = quadrature_points.size();
-
-      std::vector<unsigned int> n_active_particles(n_q_points, 0);
-      std::vector<unsigned int> n_inactive_particles(n_q_points, 0);
-
-      std::vector<double>       integrated_weights(n_q_points, 0.);
-      std::vector<SymmetricTensor<2, dim>> integrated_projectors(n_q_points);
-      
-      for (const auto &cell : patch)
-        for (const auto &particle : particle_handler.particles_in_cell(cell))
-          {
-            const ArrayView<const double> particle_properties = particle.get_properties();
-
-            for (unsigned int q = 0; q < n_q_points; ++q)
-              {
-                const double distance = particle.get_location().distance(quadrature_points[q]);
-
-                if (distance > interpolation_range)
-                  continue;
-
-                // If the normal vector stored in this particle is invalid, then 
-                // count it as inactive particle
-                if (!numbers::is_finite(particle_properties[first_property_index]))
-                  {
-                    n_inactive_particles[q] += 1;
-                    continue;
-                  }
-
-                n_active_particles[q] += 1;
-
-                // Use the modified Shephard's method
-                const double weight = std::pow(1. - (distance * distance / (interpolation_range * interpolation_range)), 2)
-                                      / (distance * distance + epsilon * epsilon);
-                integrated_weights[q] += weight;
-
-                Tensor<1, dim> normal_vector;
-                for (unsigned int d = 0; d < dim; ++d)
-                  normal_vector[d] = particle_properties[first_property_index + d];
-
-                integrated_projectors[q] += symmetrize(outer_product(normal_vector, normal_vector)) * weight;
-              }
-          }
-
-      std::vector<std::pair<double, Tensor<1, dim>>> proportions_and_vectors(n_q_points);
-      for (unsigned int q = 0; q < n_q_points; ++q)
-        {
-          if (n_active_particles[q] > 0)
-            {
-              const double n_neighbor_particles = n_active_particles[q] + n_inactive_particles[q];
-              proportions_and_vectors[q].first = n_active_particles[q] / n_neighbor_particles;
-
-              const SymmetricTensor<2, dim> projector = integrated_projectors[q] / integrated_weights[q];
-              const std::array<std::pair<double, Tensor<1, dim>>, dim> eigenvalues_and_vectors = eigenvectors(projector);
-              const Tensor<1, dim> &n = eigenvalues_and_vectors[0].second;
-              proportions_and_vectors[q].second = n / n.norm();
-            }
-          else
-            {
-              proportions_and_vectors[q].first = 0;
-              proportions_and_vectors[q].second = 0;
-            }
-        }
-
-      return proportions_and_vectors;
-    }
   }
 
 
@@ -1215,7 +1216,12 @@ namespace aspect
 
     // Stuff for interpolating the normal vector from particles to quadrature points
     const auto &particle_data_info = particle_manager->get_property_manager().get_data_info();
-    const unsigned int first_property_index = particle_data_info.get_position_by_field_name("normal_direction");
+    const Particles::ParticleHandler<dim> &particle_handler = particle_manager->get_particle_handler();
+
+    const unsigned int first_normal_component = particle_data_info.get_position_by_field_name("normal_direction");
+    std::vector<bool> normal_components(particle_handler.n_properties_per_particle(), false);
+    for (unsigned int d = 0; d < dim; ++d)
+      normal_components[first_normal_component + d] = true;
 
     for (const auto &cell : this->get_dof_handler().active_cell_iterators())
       if (cell->is_locally_owned())
@@ -1224,12 +1230,16 @@ namespace aspect
           cell_matrix = 0;
 
           // Interpolate the normal vector from particles to the quadrature points
-          const std::vector<std::pair<double, Tensor<1, dim>>> proportions_and_vectors
-            = interpolate_normal_vectors_onto_quadrature_points(fe_values.get_quadrature_points(),
-                                                                particle_manager->get_particle_handler(),
-                                                                *grid_cache,
-                                                                first_property_index, 
-                                                                cell);
+          const std::vector<std::pair<double, std::vector<double>>> proportions_and_values
+            = PhaseFieldUtilities::interpolate_from_particles_in_crack_zone(
+                particle_manager->get_particle_handler(),
+                fe_values.get_quadrature_points(),
+                ComponentMask(normal_components),
+                cell, *grid_cache,
+                [&] (const ArrayView<const double> &properties) -> bool
+                {
+                  return !numbers::is_nan(properties[first_normal_component]);
+                });
 
           const double kappa_t = std::pow(cell->diameter(), 2);
           const double kappa_n = kappa_t * core_extender_parameters.normal_to_tangential_diffusion;
@@ -1242,12 +1252,14 @@ namespace aspect
                   shape_gradients[i] = fe_values.shape_grad(i, q);
                 }
 
-              const double proportion = proportions_and_vectors[q].first;
-              const Tensor<1, dim> &n = proportions_and_vectors[q].second;
+              const double proportion = proportions_and_values[q].first;
 
-              const double kappa_iso   = kappa_n * kappa_t / 
-                                         (proportion * kappa_n + (1. - proportion) / kappa_t);
+              const double kappa_iso = kappa_n * kappa_t / (proportion * kappa_n + (1. - proportion) / kappa_t);
               const double kappa_aniso = kappa_n - kappa_iso;
+
+              Tensor<1, dim> n;
+              for (unsigned int d = 0; d < dim; ++d)
+                n[d] = proportions_and_values[q].second[first_normal_component + d];
 
               for (unsigned int i = 0; i < dofs_per_cell; ++i)
                 for (unsigned int j = 0; j < dofs_per_cell; ++j)
@@ -1529,6 +1541,18 @@ namespace aspect
 
     return *particle_manager;
   }
+
+
+
+  template <int dim>
+  const GridTools::Cache<dim> &
+  PhaseFieldHandler<dim>::get_grid_cache() const
+  {
+    Assert(grid_cache != nullptr,
+           ExcMessage("The pointer to the grid cache has not been initiated."));
+
+    return *grid_cache;
+  }
 }
 
 // explicit instantiations
@@ -1538,6 +1562,16 @@ namespace aspect
   namespace MaterialModel \
   { \
     template class PhaseFieldModel<dim>; \
+  } \
+  namespace PhaseFieldUtilities \
+  { \
+    template std::vector<std::pair<double, std::vector<double>>> \
+    interpolate_from_particles_in_crack_zone(const Particles::ParticleHandler<dim> &, \
+                                             const std::vector<Point<dim>> &, \
+                                             const ComponentMask &, \
+                                             const typename Triangulation<dim>::active_cell_iterator &, \
+                                             const GridTools::Cache<dim> &, \
+                                             const std::function<bool(const ArrayView<const double>&)> &); \
   } \
   template class PhaseFieldHandler<dim>;
 

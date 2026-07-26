@@ -58,12 +58,6 @@ namespace aspect
           need_update () const override;
 
           /**
-           * @copydoc aspect::Particle::Property::Interface::get_update_flags()
-           */
-          UpdateFlags
-          get_update_flags(const unsigned int component) const override;
-
-          /**
            * @copydoc aspect::Particle::Property::Interface::late_initialization_mode()
            */
           InitializationModeForLateParticles
@@ -76,58 +70,7 @@ namespace aspect
           get_property_information() const override;
 
         private:
-          void initialize_data_position_cache();
-
-          void do_cleanup_after_initialization();
-
-          double
-          get_phase_field_value(const LinearAlgebra::BlockVector &solution,
-                                const typename Triangulation<dim>::active_cell_iterator &cell,
-                                const Point<dim> &reference_location) const;
-
-          struct CompositionalIndices
-          {
-            unsigned int crack_driving_force;
-            unsigned int slip_rate;
-            unsigned int slip_state;
-            std::array<unsigned int, dim> normal_direction;
-            std::array<unsigned int, dim> slip_direction;
-            std::array<unsigned int, SymmetricTensor<2, dim>::n_independent_components> ve_stress;
-
-            CompositionalIndices()
-              : crack_driving_force(numbers::invalid_unsigned_int)
-              , slip_rate(numbers::invalid_unsigned_int)
-              , slip_state(numbers::invalid_unsigned_int)
-            {
-              normal_direction.fill(numbers::invalid_unsigned_int);
-              slip_direction.fill(numbers::invalid_unsigned_int);
-              ve_stress.fill(numbers::invalid_unsigned_int);
-            }
-          };
-
-          CompositionalIndices compositional_indices;
-
-          struct DataPositionCache
-          {
-            unsigned int crack_driving_force;
-            unsigned int cohesive_force;
-            unsigned int slip_rate;
-            unsigned int slip_state;
-            unsigned int normal_direction;
-            unsigned int slip_direction;
-            unsigned int ve_stress;
-            std::vector<unsigned int> chemical_fields;
-          };
-
-          DataPositionCache data_position_cache;
-
-          unsigned int phase_field_component_index;
-
-          unsigned int phase_field_base_index;
-
-          bool has_preexisting_crack;
-
-          std::unique_ptr<GridTools::Cache<dim>> grid_cache;
+          unsigned int phase_field_base_element;
       };
     }
   }
