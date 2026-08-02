@@ -324,6 +324,8 @@ namespace aspect
 
       void parse_parameters(ParameterHandler &prm);
 
+      mutable boost::signals2::signal<void (const SimulatorAccess<dim> &)> pre_extend_core_phase_field;
+
     private:
       void
       assemble_phase_field_system(LinearAlgebra::BlockSparseMatrix &system_matrix,

@@ -172,11 +172,11 @@ namespace aspect
       private:
         void do_initialization();
 
-        void complete_particle_property_initialization();
-
         void perform_return_mapping();
 
         void update_history_states(const SolverControl &nonlinear_solver_control);
+
+        void update_direction_vectors();
 
         double 
         calculate_creep_viscosity(const double               temperature,
@@ -215,6 +215,8 @@ namespace aspect
         std::vector<double> elastic_shear_moduli;
 
         std::vector<double> cohesions;
+
+        std::vector<double> initial_friction_coefficients;
 
         std::vector<double> critical_energy_release_rates;
 

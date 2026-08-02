@@ -1187,32 +1187,38 @@ namespace aspect
                                LinearAlgebra::BlockVector       &system_rhs,
                                const AffineConstraints<double>  &constraints) const
   {
-    const auto &variable = this->introspection().variable("core_phase_field");
-    const unsigned int component_index = variable.first_component_index;
-    const unsigned int block_index     = variable.block_index;
+    const auto &var_phi = this->introspection().variable("phase_field");
+    const unsigned int comp_phi = var_phi.first_component_index;
+
+    const auto &var_psi = this->introspection().variable("core_phase_field");
+    const unsigned int comp_psi = var_psi.first_component_index;
+    const unsigned int blk_psi  = var_psi.block_index;
 
     // Initialize the corresponding blocks of the matrices and the rhs vector
-    system_matrix.block(block_index, block_index) = 0;
-    system_rhs.block(block_index) = 0;
+    system_matrix.block(blk_psi, blk_psi) = 0;
+    system_rhs.block(blk_psi) = 0;
 
     // Stuff for cellwise assembly
-    const FiniteElement<dim> &base_fe = this->get_fe().base_element(variable.base_index);
-    FEValues<dim> fe_values(base_fe,
-                            QGauss<dim>(base_fe.degree + 1),
+    FEValues<dim> fe_values(this->get_fe(),
+                            QGauss<dim>(2),
                             update_values | update_gradients |
                             update_quadrature_points | update_JxW_values);
 
-    const unsigned int dofs_per_cell = base_fe.dofs_per_cell;
+    const FEValuesExtractors::Scalar phi_extractor(comp_phi);
+    const FEValuesExtractors::Scalar psi_extractor(comp_psi);
+
     const unsigned int n_q_points = fe_values.n_quadrature_points;
+    const unsigned int dofs_per_cell = this->get_fe().dofs_per_cell;
+    const unsigned int psi_dofs_per_cell = this->get_fe().base_element(var_psi.base_index).dofs_per_cell;
 
-    FullMatrix<double> cell_matrix(dofs_per_cell, dofs_per_cell);
-    Vector<double> cell_rhs(dofs_per_cell);
+    FullMatrix<double> cell_matrix(psi_dofs_per_cell, psi_dofs_per_cell);
+    Vector<double> cell_rhs(psi_dofs_per_cell);
 
-    std::vector<types::global_dof_index> cell_dof_indices(dofs_per_cell);
-    std::vector<types::global_dof_index> system_dof_indices(this->get_fe().dofs_per_cell);
+    std::vector<types::global_dof_index> system_dof_indices(dofs_per_cell);
+    std::vector<types::global_dof_index> cell_dof_indices(psi_dofs_per_cell);
 
-    std::vector<double>         shape_values(dofs_per_cell);
-    std::vector<Tensor<1, dim>> shape_gradients(dofs_per_cell);
+    std::vector<double>         shape_values(psi_dofs_per_cell);
+    std::vector<Tensor<1, dim>> shape_gradients(psi_dofs_per_cell);
 
     // Stuff for interpolating the normal vector from particles to quadrature points
     const auto &particle_data_info = particle_manager->get_property_manager().get_data_info();
@@ -1222,6 +1228,12 @@ namespace aspect
     std::vector<bool> normal_components(particle_handler.n_properties_per_particle(), false);
     for (unsigned int d = 0; d < dim; ++d)
       normal_components[first_normal_component + d] = true;
+
+    std::vector<double> phi_values(n_q_points);
+
+    const MaterialModel::PhaseFieldModel<dim> *material_model
+      = dynamic_cast<const MaterialModel::PhaseFieldModel<dim>*>(&this->get_material_model());
+    const double phi_min = material_model->get_phase_field_range().first;
 
     for (const auto &cell : this->get_dof_handler().active_cell_iterators())
       if (cell->is_locally_owned())
@@ -1241,28 +1253,42 @@ namespace aspect
                   return !numbers::is_nan(properties[first_normal_component]);
                 });
 
+          fe_values[phi_extractor].get_function_values(this->get_solution(), phi_values);
+
           const double kappa_t = std::pow(cell->diameter(), 2);
           const double kappa_n = kappa_t * core_extender_parameters.normal_to_tangential_diffusion;
             
           for (unsigned int q = 0; q < n_q_points; ++q)
             {
-              for (unsigned int i = 0; i < dofs_per_cell; ++i)
+              for (unsigned int i = 0, i_psi = 0; i_psi < psi_dofs_per_cell; /*increment at end of loop*/)
                 {
-                  shape_values[i]    = fe_values.shape_value(i, q);
-                  shape_gradients[i] = fe_values.shape_grad(i, q);
+                  if (this->get_fe().system_to_component_index(i).first == comp_psi)
+                    {
+                      shape_values[i_psi]    = fe_values[psi_extractor].value(i, q);
+                      shape_gradients[i_psi] = fe_values[psi_extractor].gradient(i, q);
+                      ++i_psi;
+                    }
+                  ++i;
                 }
 
-              const double proportion = proportions_and_values[q].first;
-
-              const double kappa_iso = kappa_n * kappa_t / (proportion * kappa_n + (1. - proportion) / kappa_t);
+              const double weight = proportions_and_values[q].first;
+              const double kappa_iso = kappa_n * kappa_t / (weight * kappa_n + (1. - weight) * kappa_t);
               const double kappa_aniso = kappa_n - kappa_iso;
 
               Tensor<1, dim> n;
-              for (unsigned int d = 0; d < dim; ++d)
-                n[d] = proportions_and_values[q].second[first_normal_component + d];
+              if (proportions_and_values[q].second.size() > 0)
+                {
+                  for (unsigned int d = 0; d < dim; ++d)
+                    n[d] = proportions_and_values[q].second[first_normal_component + d];
+                }
+              else
+                {
+                  AssertThrow(phi_values[q] <= phi_min,
+                              ExcMessage("The normal vector of emerging crack zone is uninitialized!"));
+                }
 
-              for (unsigned int i = 0; i < dofs_per_cell; ++i)
-                for (unsigned int j = 0; j < dofs_per_cell; ++j)
+              for (unsigned int i = 0; i < psi_dofs_per_cell; ++i)
+                for (unsigned int j = 0; j < psi_dofs_per_cell; ++j)
                   cell_matrix(i, j) += ( kappa_iso * (shape_gradients[i] * shape_gradients[j])
                                          + kappa_aniso * (n * shape_gradients[i]) 
                                                        * (n * shape_gradients[j])
@@ -1273,9 +1299,9 @@ namespace aspect
 
           // Sort out the DoF indices belonging to the core phase field
           cell->get_dof_indices(system_dof_indices);
-          for (unsigned int i = 0, i_psi = 0; i_psi < dofs_per_cell; /*increment at end of loop*/)
+          for (unsigned int i = 0, i_psi = 0; i_psi < psi_dofs_per_cell; /*increment at end of loop*/)
             {
-              if (this->get_fe().system_to_component_index(i).first == component_index)
+              if (this->get_fe().system_to_component_index(i).first == comp_psi)
                 {
                   cell_dof_indices[i_psi] = system_dof_indices[i];
                   ++i_psi;
@@ -1475,6 +1501,9 @@ namespace aspect
                           LinearAlgebra::BlockVector       &system_rhs,
                           LinearAlgebra::BlockVector       &solution)
   {
+    // Update the normal vector for the emerging crack zone
+    pre_extend_core_phase_field(*this);
+
     const unsigned int blk_phi = this->introspection().variable("phase_field").block_index;
     const unsigned int blk_psi = this->introspection().variable("core_phase_field").block_index;
 

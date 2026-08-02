@@ -70,17 +70,17 @@ namespace aspect
 
         data.push_back(H);
 
-        // Initialize the cohesive force to NaN
-        data.push_back(std::numeric_limits<double>::quiet_NaN());
+        // Initialize the cohesive force to 0
+        data.push_back(0);
 
-        // If there are pre-existing cracks, then the initial values of the slip rate, slip state, normal direction 
-        // and slip direction are provided by the initial composition model
+        // The initial values of slip rate and slip state are determined by the initial composition model
+        data.push_back(std::max(rsf_model.get_minimum_slip_rate(),
+                                this->get_initial_composition_manager().initial_composition(position, index_cache.compositional_fields.slip_rate)));
+        data.push_back(this->get_initial_composition_manager().initial_composition(position, index_cache.compositional_fields.slip_state));
+
+        // If there are pre-existing cracks, then the initial values of the direction vectors are determined by the initial composition model
         if (has_preexisting_crack)
           {
-            data.push_back(std::max(rsf_model.get_minimum_slip_rate(),
-                                      this->get_initial_composition_manager().initial_composition(position, index_cache.compositional_fields.slip_rate)));
-            data.push_back(this->get_initial_composition_manager().initial_composition(position, index_cache.compositional_fields.slip_state));
-
             Tensor<1, dim> n, s;
             for (unsigned int d = 0; d < dim; ++d)
               {
@@ -117,14 +117,7 @@ namespace aspect
           }
         else
           {
-            // There is no pre-existing crack. Initialize the slip rate to the lower limit,
-            // and compute the stationary slip state accordingly
-            const double V_min = rsf_model.get_minimum_slip_rate();
-            const double theta = rsf_model.get_characteristic_slip_distance() / V_min;
-            data.push_back(V_min);
-            data.push_back(theta);
-
-            // Initialize the normal direction and slip direction to NaN
+            // There is no pre-existing crack. Initialize the direction vectors to NaN
             for (unsigned d = 0; d < 2 * dim; ++d)
               data.push_back(std::numeric_limits<double>::quiet_NaN());
           }
@@ -149,7 +142,6 @@ namespace aspect
         const MaterialModel::PhaseFieldRSF<dim> &material_model = 
           Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldRSF<dim>>(this->get_material_model());
         const typename MaterialModel::PhaseFieldRSF<dim>::IndexCache &index_cache = material_model.get_index_cache();
-        const MaterialModel::Rheology::RateStateFriction<dim> &rsf_model = material_model.get_rate_state_friction_model();
 
         const auto &data_info = particle_manager.get_property_manager().get_data_info();
         std::vector<double> particle_properties(data_info.n_components(), numbers::signaling_nan<double>());
@@ -205,20 +197,10 @@ namespace aspect
         
         if (material_model.is_intact(phi))
           {
-            // The particle is intact. Initialize the cohesive force, the normal direction and
-            // slip direction to NaN
-            particle_properties[index_cache.particle_properties.cohesive_force] = std::numeric_limits<double>::quiet_NaN();
-            for (unsigned int d = 0; d < dim; ++d)
-              {
-                particle_properties[index_cache.particle_properties.normal_direction + d] = std::numeric_limits<double>::quiet_NaN();
-                particle_properties[index_cache.particle_properties.slip_direction + d]   = std::numeric_limits<double>::quiet_NaN();
-              }
-
-            // Set the slip rate to the lower limit, and compute the stationary slip state accordingly
-            const double V_min = rsf_model.get_minimum_slip_rate();
-            const double theta = rsf_model.get_characteristic_slip_distance() / V_min;
-            particle_properties[index_cache.particle_properties.slip_rate] = V_min;
-            particle_properties[index_cache.particle_properties.slip_state] = theta;
+            // The particle is intact. Initialize the crack properties to NaN
+            for (unsigned int i = 0; i < data_info.n_components(); ++i)
+              if (is_crack_property[i])
+                particle_properties[i] = std::numeric_limits<double>::quiet_NaN();
           }
         else
           {
