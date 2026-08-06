@@ -152,7 +152,9 @@ namespace aspect
       this->get_signals().post_simulator_initialization.connect(
         [&](const SimulatorAccess<dim> &)
       {
-        this->do_initialization();
+        this->index_cache.initialize(this->introspection(),
+                                     this->get_parameters(),
+                                     this->get_phase_field_handler());
       });
 
       // Perform return mapping before assembling the Stokes system
@@ -176,25 +178,6 @@ namespace aspect
       {
         this->update_direction_vectors();
       });
-    }
-
-
-
-    template <int dim>
-    void PhaseFieldRSF<dim>::do_initialization()
-    {
-      // Initialize the index cache
-      index_cache.initialize(this->introspection(), this->get_parameters(), this->get_phase_field_handler());
-
-      // Initialize the evaluation flags.
-      // We need the velocity gradients, temperature values, phase field values and core phase field values
-      // at particle locations
-      evaluation_flags.resize(this->introspection().n_components, EvaluationFlags::nothing);
-      for (unsigned int d = 0; d < dim; ++d)
-        evaluation_flags[d] = EvaluationFlags::gradients;
-      evaluation_flags[this->introspection().component_indices.temperature] = EvaluationFlags::values;
-      evaluation_flags[index_cache.components.phase_field] = EvaluationFlags::values;
-      evaluation_flags[index_cache.components.core_phase_field] = EvaluationFlags::values;
     }
 
 
@@ -272,11 +255,7 @@ namespace aspect
           const unsigned int n_particles_in_cell = particle_handler.n_particles_in_cell(in.current_cell);
           const auto particles_in_cell = particle_handler.particles_in_cell(in.current_cell);
 
-          implicit_constitutive_outputs->tangent_operators.resize(n_particles_in_cell, numbers::signaling_nan<SymmetricTensor<4, dim>>());
-          implicit_constitutive_outputs->deviatoric_stresses.resize(implicit_constitutive_outputs->assemble_preconditioner ? 0 : n_particles_in_cell,
-                                                                    numbers::signaling_nan<SymmetricTensor<2, dim>>());
-          implicit_constitutive_outputs->equivalent_viscosities.resize(implicit_constitutive_outputs->assemble_preconditioner ? n_particles_in_cell : 0,
-                                                                       numbers::signaling_nan<double>());
+          implicit_constitutive_outputs->resize(n_particles_in_cell);
 
           // Collect the particle locations
           small_vector<Point<dim>> reference_locations;
@@ -287,13 +266,17 @@ namespace aspect
           small_vector<double, 500> dof_values(this->get_fe().dofs_per_cell);
           in.current_cell->get_dof_values(this->get_solution(), dof_values.begin(), dof_values.end());
 
-          // Update the solution evaluator and evaluate the solution values and gradients
-          // at particle locations
+          // We need the values of temperature, phase-field and core phase-field at particle locations
+          std::vector<EvaluationFlags::EvaluationFlags> evaluation_flags(this->introspection().n_components, 
+                                                                         EvaluationFlags::nothing);
+          evaluation_flags[this->introspection().component_indices.temperature] = EvaluationFlags::values;
+          evaluation_flags[index_cache.components.phase_field] = EvaluationFlags::values;
+          evaluation_flags[index_cache.components.core_phase_field] = EvaluationFlags::values;
+
           solution_evaluator->reinit(in.current_cell, {reference_locations.data(), reference_locations.size()});
           solution_evaluator->evaluate({dof_values.data(), dof_values.size()}, evaluation_flags);
 
-          small_vector<double>         particle_solution_values(this->introspection().n_components);
-          small_vector<Tensor<1, dim>> particle_solution_gradients(this->introspection().n_components);
+          small_vector<double> particle_solution_values(this->introspection().n_components);
 
           // Vector storing the chemical field values, which is required for computing volume fractions
           std::vector<double> chemical_field_values(this->introspection().n_chemical_composition_fields());
@@ -303,22 +286,14 @@ namespace aspect
               const ArrayView<const double> particle_properties = particle->get_properties();
               const unsigned int p = std::distance(particles_in_cell.begin(), particle);
 
-              // Get the solution values and gradients
               solution_evaluator->get_solution(p, {particle_solution_values.data(), particle_solution_values.size()}, evaluation_flags);
-              solution_evaluator->get_gradients(p, {particle_solution_gradients.data(), particle_solution_gradients.size()}, evaluation_flags);
-
-              // Compute the strain rate
-              Tensor<2, dim> grad_u;
-              for (unsigned int d = 0; d < dim; ++d)
-                grad_u[d] = particle_solution_gradients[d];
-              const SymmetricTensor<2, dim> epsilon = Utilities::Tensors::consistent_deviator(symmetrize(grad_u));
 
               // Compute the volume fractions
               for (unsigned int j = 0; j < chemical_field_values.size(); ++j)
                 chemical_field_values[j] = particle_properties[index_cache.particle_properties.chemical_fields[j]];
               const std::vector<double> volume_fractions = MaterialUtilities::compute_composition_fractions(chemical_field_values);
 
-              // Compute the bulk viscosity
+              // Compute the reference viscosity
               const double T   = particle_solution_values[this->introspection().component_indices.temperature];
               const double eta = calculate_creep_viscosity(T, volume_fractions);
               const double G   = MaterialUtilities::average_value(volume_fractions, elastic_shear_moduli, viscosity_averaging);
@@ -326,6 +301,8 @@ namespace aspect
               const double one_minus_beta = calculate_stress_relaxation_factor(eta, G);
               const double beta = 1. - one_minus_beta;
               const double eta_ve = eta * one_minus_beta;
+
+              implicit_constitutive_outputs->newtonian_viscosities[p] = eta_ve;
 
               // Compute the trial stress
               const SymmetricTensor<2, dim> tau_old = Utilities::Tensors::to_symmetric_tensor<dim>(
@@ -356,56 +333,15 @@ namespace aspect
                   const double p_bar = std::max(0., this->get_adiabatic_conditions().pressure(particle->get_location()));
                   const double eta_d = MaterialUtilities::average_value(volume_fractions, radiation_damping_coefficients, MaterialUtilities::arithmetic);
 
-                  // At the beginning of the nonlinear iteration, the softening factor is set to 0. So the governing equation
-                  // is given by (noticing that epsilon=0 in the initial guess)
-                  //    (symgrad(phi), 2*eta_ve*depsilon) = <phi, b> + (symgrad(phi), 2*eta_ve*chi*V*S - beta*tau_old)
-                  //    => (symgrad(phi), tau) = <phi, b>.
-                  // For the rest of the nonlinear iterations, the softening factor is included in the system matrix, so the
-                  // tangent modulus equals to dtau/depsilon, and the governing equation becomes
-                  //    (symgrad(phi), dtau/depsilon*depsilon) = <phi, b> + (symgrad(phi), 2*eta_ve*(chi*V*S - epsilon) - beta*tau_old)
-                  //    => (symgrad(phi), tau+dtau) = <phi, b>.
-                  double softening_factor = 0;
-                  implicit_constitutive_outputs->tangent_operators[p] = (2. * eta_ve) * identity_tensor<dim>();
-                  if (this->get_nonlinear_iteration() > 0)
-                    {
-                      softening_factor = (2. * chi * eta_ve) / (chi * eta_ve / (1. - g) + dmu_dV * p_bar + eta_d);
+                  const double softening_factor = (2. * chi * eta_ve) / (chi * eta_ve / (1. - g) + dmu_dV * p_bar + eta_d);
 
-                      // Check if the PD stabilization is required
-                      if ((implicit_constitutive_outputs->assemble_preconditioner && 
-                           this->get_newton_handler().parameters.preconditioner_stabilization & Newton::Parameters::PD)
-                          ||
-                          (!implicit_constitutive_outputs->assemble_preconditioner && 
-                           this->get_newton_handler().parameters.velocity_block_stabilization & Newton::Parameters::PD))
-                        softening_factor = std::min(this->get_newton_handler().parameters.SPD_safety_factor, softening_factor);
-
-                      implicit_constitutive_outputs->tangent_operators[p] -= (2. * eta_ve * softening_factor) * outer_product(S, S);
-                    }
-
-                  if (implicit_constitutive_outputs->assemble_preconditioner)
-                    {
-                      // Compute the equivalent viscosity, which is the harmonic average of the maximum and minimum
-                      // eigenvalues of the tangent operator
-                      implicit_constitutive_outputs->equivalent_viscosities[p] = eta_ve;
-                      if (softening_factor > 0)
-                        {
-                          constexpr unsigned int N = (dim == 2 ? 3 : 5);
-                          implicit_constitutive_outputs->equivalent_viscosities[p] -= eta_ve * softening_factor / (2. * N - (N - 1.) * softening_factor);
-                        }
-                    }
-                  else
-                    {
-                      // Compute the RHS
-                      const SymmetricTensor<2, dim> epsilon_ve = epsilon - (chi * V) * S;
-                      implicit_constitutive_outputs->deviatoric_stresses[p] = (2. * eta_ve) * epsilon_ve + beta * tau_old;
-                    }
+                  implicit_constitutive_outputs->nonnewtonian_stress_derivatives[p] = (2. * eta_ve * softening_factor) * outer_product(S, S);
+                  implicit_constitutive_outputs->nonnewtonian_stresses[p] = -(2. * eta_ve * chi * V) * S + beta * tau_old;
                 }
               else // phi <= phase_field_activation_threshold
                 {
-                  implicit_constitutive_outputs->tangent_operators[p] = (2. * eta_ve) * identity_tensor<dim>();
-                  if (implicit_constitutive_outputs->assemble_preconditioner)
-                    implicit_constitutive_outputs->equivalent_viscosities[p] = eta_ve;
-                  else
-                    implicit_constitutive_outputs->deviatoric_stresses[p] = (2. * eta_ve) * epsilon + beta * tau_old;
+                  implicit_constitutive_outputs->nonnewtonian_stress_derivatives[p] = 0;
+                  implicit_constitutive_outputs->nonnewtonian_stresses[p] = beta * tau_old;
                 }
             }
         }
@@ -472,6 +408,16 @@ namespace aspect
 
       // Vector storing the chemical field values, which is required for computing volume fractions
       std::vector<double> chemical_field_values(introspection.n_chemical_composition_fields());
+
+      // We need the velocity gradients, temperature values, phase-field values and core phase-field values
+      // at particle locations
+      std::vector<EvaluationFlags::EvaluationFlags> evaluation_flags(introspection.n_components,
+                                                                     EvaluationFlags::nothing);
+      for (unsigned int d = 0; d < dim; ++d)
+        evaluation_flags[d] = EvaluationFlags::gradients;
+      evaluation_flags[introspection.component_indices.temperature] = EvaluationFlags::values;
+      evaluation_flags[index_cache.components.phase_field] = EvaluationFlags::values;
+      evaluation_flags[index_cache.components.core_phase_field] = EvaluationFlags::values;
 
       // The upper limit of Newton iterations for solving the nonlinear equation for V
       constexpr unsigned int max_newton_iterations = 20;
@@ -830,6 +776,16 @@ convergence_check:
       // Vector storing the chemical field values, which is required for computing volume fractions
       std::vector<double> chemical_field_values(introspection.n_chemical_composition_fields());
 
+      // We need the velocity gradients, temperature values, phase-field values and core phase-field values
+      // at particle locations
+      std::vector<EvaluationFlags::EvaluationFlags> evaluation_flags(introspection.n_components,
+                                                                     EvaluationFlags::nothing);
+      for (unsigned int d = 0; d < dim; ++d)
+        evaluation_flags[d] = EvaluationFlags::gradients;
+      evaluation_flags[introspection.component_indices.temperature] = EvaluationFlags::values;
+      evaluation_flags[index_cache.components.phase_field] = EvaluationFlags::values;
+      evaluation_flags[index_cache.components.core_phase_field] = EvaluationFlags::values;
+
       const double dt = (this->get_timestep_number() > 0 ? this->get_timestep() : 0);
 
       for (const auto &cell : this->get_dof_handler().active_cell_iterators())
@@ -973,6 +929,14 @@ convergence_check:
 
       // Vector storing the chemical field values, which is required for computing volume fractions
       std::vector<double> chemical_field_values(introspection.n_chemical_composition_fields());
+
+      // We need the velocity gradients, phase-field values and core phase-field values at particle locations
+      std::vector<EvaluationFlags::EvaluationFlags> evaluation_flags(introspection.n_components,
+                                                                     EvaluationFlags::nothing);
+      for (unsigned int d = 0; d < dim; ++d)
+        evaluation_flags[d] = EvaluationFlags::gradients;
+      evaluation_flags[index_cache.components.phase_field] = EvaluationFlags::values;
+      evaluation_flags[index_cache.components.core_phase_field] = EvaluationFlags::values;
 
       for (const auto &cell : this->get_dof_handler().active_cell_iterators())
         if (cell->is_locally_owned())

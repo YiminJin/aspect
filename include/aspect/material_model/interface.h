@@ -1346,12 +1346,17 @@ namespace aspect
     class ImplicitConstitutiveOutputs : public AdditionalMaterialOutputs<dim>
     {
       public:
-        ImplicitConstitutiveOutputs(const bool assemble_preconditioner_)
-          : assemble_preconditioner(assemble_preconditioner_)
-        {}
+        ImplicitConstitutiveOutputs() = default;
 
         ~ImplicitConstitutiveOutputs() override
           = default;
+
+        void resize(const unsigned int n_points)
+        {
+          newtonian_viscosities.resize(n_points, numbers::signaling_nan<double>());
+          nonnewtonian_stresses.resize(n_points, numbers::signaling_nan<SymmetricTensor<2, dim>>());
+          nonnewtonian_stress_derivatives.resize(n_points, numbers::signaling_nan<SymmetricTensor<4, dim>>());
+        }
 
         void average(const MaterialAveraging::AveragingOperation operation,
                      const FullMatrix<double> &/*projection_matrix*/,
@@ -1363,38 +1368,22 @@ namespace aspect
         }
 
         /**
-         * The tangent operators $\mathbb E$ on particles, which are defined as
-         * @f[
-         *   \mathbb E = \frac{\mathrm{d}\boldsymbol{\tau}}
-         *   {\mathrm{d}\boldsymbol{\varepsilon}}.
-         * @f]
-         *
+         * Viscosities representing the Newtonian part of the rheology.
          */
-        std::vector<SymmetricTensor<4, dim>> tangent_operators;
+        std::vector<double> newtonian_viscosities;
 
         /**
-         * The deviatoric stress consistent to the constitutive relation
-         * at the current linearized state. Note that it does not have a
-         * ``real'' physical meaning, but belongs to an intermediate state
-         * resulting from return mapping.
+         * Deviatoric stress tensors representing the non-Newtonian part of the
+         * rheology, i.e., the total deviatoric stress minus two times of the 
+         * product of the Newtonian viscosity and the strain rate.
          */
-        std::vector<SymmetricTensor<2, dim>> deviatoric_stresses;
+        std::vector<SymmetricTensor<2, dim>> nonnewtonian_stresses;
 
         /**
-         * The equivalent scalar viscosity required by the Schur complement 
-         * matrix. This quantity cannot be used in other places (for example,
-         * when computing the pressure scaling factor), for it can only be
-         * obtained through the return-mapping algorithm.
+         * Derivatives of the non-Newtonian stress tensors with respect to the
+         * strain rate.
          */
-        std::vector<double> equivalent_viscosities;
-
-        /**
-         * Whether the additional outputs are used for assembling the Stokes
-         * preconditioner or the Stokes system. In the former case, the
-         * deviatoric stresses are not required; in the latter case, the
-         * equivalent viscosities are not required.
-         */
-        bool assemble_preconditioner;
+        std::vector<SymmetricTensor<4, dim>> nonnewtonian_stress_derivatives;
     };
 
 

@@ -613,10 +613,7 @@ namespace aspect
         dcr.residual_old = dcr.initial_residual;
         dcr.residual = dcr.initial_residual;
 
-        if (parameters.use_implicit_constitutive_model)
-          assemble_newton_stokes_system = assemble_newton_stokes_matrix = true;
-        else
-          assemble_newton_stokes_system = assemble_newton_stokes_matrix = false;
+        assemble_newton_stokes_system = assemble_newton_stokes_matrix = false;
       }
     else
       assemble_newton_stokes_system = assemble_newton_stokes_matrix = true;
@@ -1156,8 +1153,7 @@ namespace aspect
             nonlinear_solver_control_picard.check(nonlinear_iteration, relative_residual) != SolverControl::iterate)
           {
             use_picard = false;
-            if (!parameters.use_implicit_constitutive_model)
-              pcout << "   Switching from defect correction form of Picard to the Newton solver scheme." << std::endl;
+            pcout << "   Switching from defect correction form of Picard to the Newton solver scheme." << std::endl;
 
             /**
              * This method allows to slowly introduce the derivatives based

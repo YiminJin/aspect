@@ -70,8 +70,16 @@ namespace aspect
   Simulator<dim>::
   set_stokes_assemblers()
   {
-    assemblers->stokes_preconditioner.push_back(std::make_unique<aspect::Assemblers::StokesPreconditioner<dim>>());
-    assemblers->stokes_system.push_back(std::make_unique<aspect::Assemblers::StokesIncompressibleTerms<dim>>());
+    if (parameters.use_implicit_constitutive_model)
+      {
+        assemblers->stokes_preconditioner.push_back(std::make_unique<aspect::Assemblers::ImplicitConstitutiveStokesPreconditioner<dim>>());
+        assemblers->stokes_system.push_back(std::make_unique<aspect::Assemblers::ImplicitConstitutiveStokesSystem<dim>>());
+      }
+    else
+      {
+        assemblers->stokes_preconditioner.push_back(std::make_unique<aspect::Assemblers::StokesPreconditioner<dim>>());
+        assemblers->stokes_system.push_back(std::make_unique<aspect::Assemblers::StokesIncompressibleTerms<dim>>());
+      }
 
     if (material_model->is_compressible() || parameters.enable_prescribed_dilation)
       {

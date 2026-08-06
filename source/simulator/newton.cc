@@ -45,24 +45,6 @@ namespace aspect
 
 
   template <int dim>
-  void NewtonHandler<dim>::initialize()
-  {
-    // Check parameter consistency
-    if (this->get_parameters().use_implicit_constitutive_model)
-      {
-        AssertThrow(parameters.max_pre_newton_nonlinear_iterations == 0,
-                    ExcMessage("When using implicit constitutive model, the Newton solver parameter "
-                               "'Max pre-Newton nonlinear iterations' must be set to 0."));
-
-        AssertThrow(parameters.use_newton_residual_scaling_method == false,
-                    ExcMessage("When using implicit constitutive model, the Newton residual scaling "
-                               "method is inapplicable."));
-      }
-  }
-
-
-
-  template <int dim>
   void
   NewtonHandler<dim>::
   set_assemblers (Assemblers::Manager<dim> &assemblers) const

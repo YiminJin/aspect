@@ -450,7 +450,6 @@ namespace aspect
         assemble_newton_stokes_system = true;
         newton_handler->initialize_simulator(*this);
         newton_handler->parameters.parse_parameters(prm);
-        newton_handler->initialize();
       }
 
     // choose the default solver and averaging scheme

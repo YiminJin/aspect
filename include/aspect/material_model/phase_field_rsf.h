@@ -170,8 +170,6 @@ namespace aspect
         parse_parameters(ParameterHandler &prm) override;
 
       private:
-        void do_initialization();
-
         void perform_return_mapping();
 
         void update_history_states(const SolverControl &nonlinear_solver_control);
@@ -223,8 +221,6 @@ namespace aspect
         std::vector<double> radiation_damping_coefficients;
 
         std::unique_ptr<SolutionEvaluator<dim>> solution_evaluator;
-
-        std::vector<EvaluationFlags::EvaluationFlags> evaluation_flags;
     };
   }
 }

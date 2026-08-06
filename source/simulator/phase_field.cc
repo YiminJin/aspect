@@ -1438,7 +1438,10 @@ namespace aspect
     hanging_node_constraints.distribute(lambda);
 
     active_set.clear();
+
     constraints.clear();
+    constraints.reinit(this->get_dof_handler().locally_owned_dofs(),
+                       this->introspection().index_sets.system_relevant_set);
 
     // To avoid duplicate computation, we make a record of the touched dofs
     IndexSet local_touched_dofs(this->get_dof_handler().n_dofs());

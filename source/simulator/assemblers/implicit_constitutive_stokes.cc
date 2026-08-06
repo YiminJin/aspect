@@ -123,7 +123,8 @@ namespace aspect
       const unsigned int stokes_dofs_per_cell = data.local_dof_indices.size();
       const unsigned int n_q_points = scratch.finite_element_values.n_quadrature_points;
       const double pressure_scaling = this->get_pressure_scaling();
-      const typename Newton::Parameters::Stabilization stabilization = this->get_newton_handler().parameters.preconditioner_stabilization;
+
+      const Newton::Parameters &newton_parameters = this->get_newton_handler().parameters;
 
       const std::shared_ptr<const MaterialModel::ImplicitConstitutiveOutputs<dim>> implicit_constitutive_outputs
         = scratch.material_model_outputs.template get_additional_output_object<MaterialModel::ImplicitConstitutiveOutputs<dim>>();
@@ -135,14 +136,15 @@ namespace aspect
       const Particles::ParticleHandler<dim> &particle_handler = this->get_particle_manager(0).get_particle_handler();
       const auto particles_in_cell = particle_handler.particles_in_cell(cell);
       const unsigned int n_particles = particle_handler.n_particles_in_cell(cell);
-      AssertDimension(implicit_constitutive_outputs->tangent_operators.size(), n_particles);
-      AssertDimension(implicit_constitutive_outputs->equivalent_viscosities.size(), n_particles);
+      AssertDimension(implicit_constitutive_outputs->newtonian_viscosities.size(), n_particles);
 
-      std::vector<Point<dim>> particle_points(n_particles);
-      auto particle = particles_in_cell.begin();
-      for (unsigned int p = 0; p < n_particles; ++p, ++particle)
-        particle_points[p] = particle->get_location();
+      // Collect the coordinates of particles
+      std::vector<Point<dim>> particle_points;
+      particle_points.reserve(n_particles);
+      for (const auto &particle : particles_in_cell)
+        particle_points.push_back(particle.get_location());
 
+      // Collect the DoF indices belonging to the Stokes system
       for (unsigned int i = 0, i_stokes = 0; i_stokes < stokes_dofs_per_cell; /*increment at end of loop*/)
         {
           if (introspection.is_stokes_component(fe.system_to_component_index(i).first))
@@ -155,6 +157,7 @@ namespace aspect
 
       for (unsigned int q = 0; q < n_q_points; ++q)
         {
+          // Pre-compute the shape values/gradients
           for (unsigned int i = 0, i_stokes = 0; i_stokes < stokes_dofs_per_cell; /*increment at end of loop*/)
             {
               if (introspection.is_stokes_component(fe.system_to_component_index(i).first))
@@ -167,22 +170,43 @@ namespace aspect
               ++i;
             }
 
+          // Interpolate the implicit constitutive outputs onto quadrature points
           const std::vector<double> alpha = compute_MLS_coefficients(particle_points,
                                                                      scratch.finite_element_values.quadrature_point(q),
                                                                      cell_diameter);
 
-          small_vector<SymmetricTensor<2, dim>> linearized_stresses(stokes_dofs_per_cell);
-          double equivalent_viscosity = 0;
+          double newtonian_viscosity = 0;
+          SymmetricTensor<4, dim> nonnewtonian_stress_derivative;
 
-          particle = particles_in_cell.begin();
-          for (unsigned int p = 0; p < n_particles; ++p, ++particle)
+          for (unsigned int p = 0; p < n_particles; ++p)
             {
-              equivalent_viscosity += alpha[p] * implicit_constitutive_outputs->equivalent_viscosities[p];
-              for (unsigned int i = 0; i < stokes_dofs_per_cell; ++i)
-                linearized_stresses[i] += alpha[p] * (implicit_constitutive_outputs->tangent_operators[p] * scratch.grads_phi_u[i]);
+              newtonian_viscosity            += alpha[p] * implicit_constitutive_outputs->newtonian_viscosities[p];
+              nonnewtonian_stress_derivative += alpha[p] * implicit_constitutive_outputs->nonnewtonian_stress_derivatives[p];
             }
 
-          const double one_over_eta = 1. / equivalent_viscosity;
+          // Pre-compute the product of the symmetric gradient of shape function and
+          // the tangent modulus
+          SymmetricTensor<4, dim> E = (2. * newtonian_viscosity) * identity_tensor<dim>();
+
+          if (newton_parameters.newton_derivative_scaling_factor > 0)
+            {
+              SymmetricTensor<4, dim> E_corr = nonnewtonian_stress_derivative * newton_parameters.newton_derivative_scaling_factor;
+
+              if (newton_parameters.preconditioner_stabilization & Newton::Parameters::Stabilization::PD)
+                {
+                  const double E_corr_norm = E_corr.norm();
+                  if (E_corr_norm > 0)
+                    E_corr *= std::min(1., 2. * newtonian_viscosity * newton_parameters.SPD_safety_factor / E_corr_norm);
+                }
+
+              E -= E_corr;
+            }
+
+          small_vector<SymmetricTensor<2, dim>> linearized_stresses(stokes_dofs_per_cell);
+          for (unsigned int i = 0; i < stokes_dofs_per_cell; ++i)
+            linearized_stresses[i] = E * scratch.grads_phi_u[i];
+
+          const double one_over_eta = 1. / newtonian_viscosity;
 
           const double JxW = scratch.finite_element_values.JxW(q);
         
@@ -190,7 +214,8 @@ namespace aspect
             for (unsigned int j = 0; j < stokes_dofs_per_cell; ++j)
               if (scratch.dof_component_indices[i] ==
                   scratch.dof_component_indices[j])
-                data.local_matrix(i, j) += ( (stabilization & Newton::Parameters::Stabilization::symmetric 
+                data.local_matrix(i, j) += ( (newton_parameters.preconditioner_stabilization
+                                              & Newton::Parameters::Stabilization::symmetric 
                                               ?
                                               (scratch.grads_phi_u[i] * linearized_stresses[j] +
                                                scratch.grads_phi_u[j] * linearized_stresses[i]) * 0.5
@@ -215,7 +240,7 @@ namespace aspect
     create_additional_material_model_outputs(MaterialModel::MaterialModelOutputs<dim> &outputs) const
     {
       if (outputs.template has_additional_output_object<MaterialModel::ImplicitConstitutiveOutputs<dim>>() == false)
-        outputs.additional_outputs.push_back(std::make_unique<MaterialModel::ImplicitConstitutiveOutputs<dim>>(true));
+        outputs.additional_outputs.push_back(std::make_unique<MaterialModel::ImplicitConstitutiveOutputs<dim>>());
     }
 
 
@@ -234,7 +259,8 @@ namespace aspect
       const unsigned int stokes_dofs_per_cell = data.local_dof_indices.size();
       const unsigned int n_q_points = scratch.finite_element_values.n_quadrature_points;
       const double pressure_scaling = this->get_pressure_scaling();
-      const typename Newton::Parameters::Stabilization stabilization = this->get_newton_handler().parameters.velocity_block_stabilization;
+
+      const Newton::Parameters &newton_parameters = this->get_newton_handler().parameters;
 
       const GravityModel::Interface<dim> &gravity_model = this->get_gravity_model();
 
@@ -251,46 +277,76 @@ namespace aspect
       const Particles::ParticleHandler<dim> &particle_handler = this->get_particle_manager(0).get_particle_handler();
       const auto particles_in_cell = particle_handler.particles_in_cell(cell);
       const unsigned int n_particles = particle_handler.n_particles_in_cell(cell);
-      AssertDimension(implicit_constitutive_outputs->tangent_operators.size(), n_particles);
-      AssertDimension(implicit_constitutive_outputs->deviatoric_stresses.size(), n_particles);
+      AssertDimension(implicit_constitutive_outputs->newtonian_viscosities.size(), n_particles);
 
-      std::vector<Point<dim>> particle_points(n_particles);
-      auto particle = particles_in_cell.begin();
-      for (unsigned int p = 0; p < n_particles; ++p, ++particle)
-        particle_points[p] = particle->get_location();
+      const bool use_picard = (this->get_nonlinear_iteration() == 0);
+
+      // Collect the coordinates of particles
+      std::vector<Point<dim>> particle_points;
+      particle_points.reserve(n_particles);
+      for (const auto &particle : particles_in_cell)
+        particle_points.push_back(particle.get_location());
 
       for (unsigned int q = 0; q < n_q_points; ++q)
         {
+          // Pre-compute the shape values/gradients
           for (unsigned int i = 0, i_stokes = 0; i_stokes < stokes_dofs_per_cell; /*increment at end of loop*/)
             {
               if (introspection.is_stokes_component(fe.system_to_component_index(i).first))
                 {
-                  scratch.phi_u[i_stokes] = scratch.finite_element_values[introspection.extractors.velocities].value(i, q);
-                  scratch.phi_p[i_stokes] = scratch.finite_element_values[introspection.extractors.pressure].value(i, q);
+                  scratch.phi_u[i_stokes]       = scratch.finite_element_values[introspection.extractors.velocities].value(i, q);
+                  scratch.phi_p[i_stokes]       = scratch.finite_element_values[introspection.extractors.pressure].value(i, q);
+                  scratch.grads_phi_u[i_stokes] = scratch.finite_element_values[introspection.extractors.velocities].symmetric_gradient(i, q);
 
                   if (scratch.rebuild_stokes_matrix)
-                    {
-                      scratch.grads_phi_u[i_stokes] = scratch.finite_element_values[introspection.extractors.velocities].symmetric_gradient(i, q);
-                      scratch.div_phi_u[i_stokes]   = scratch.finite_element_values[introspection.extractors.velocities].divergence(i, q);
-                    }
+                    scratch.div_phi_u[i_stokes] = scratch.finite_element_values[introspection.extractors.velocities].divergence(i, q);
+
                   ++i_stokes;
                 }
               ++i;
             }
 
+          // Interpolate the implicit constitutive outputs onto quadrature points
           const std::vector<double> alpha = compute_MLS_coefficients(particle_points,
                                                                      scratch.finite_element_values.quadrature_point(q),
                                                                      cell_diameter);
 
-          small_vector<SymmetricTensor<2, dim>> linearized_stresses(stokes_dofs_per_cell);
-          SymmetricTensor<2, dim> deviatoric_stress;
+          double newtonian_viscosity = 0;
+          SymmetricTensor<2, dim> nonnewtonian_stress;
+          SymmetricTensor<4, dim> nonnewtonian_stress_derivative;
 
-          particle = particles_in_cell.begin();
-          for (unsigned int p = 0; p < n_particles; ++p, ++particle)
+          for (unsigned int p = 0; p < n_particles; ++p)
             {
-              deviatoric_stress += alpha[p] * implicit_constitutive_outputs->deviatoric_stresses[p];
+              newtonian_viscosity += alpha[p] * implicit_constitutive_outputs->newtonian_viscosities[p];
+              nonnewtonian_stress += alpha[p] * implicit_constitutive_outputs->nonnewtonian_stresses[p];
+
+              if (scratch.rebuild_newton_stokes_matrix)
+                nonnewtonian_stress_derivative += alpha[p] * implicit_constitutive_outputs->nonnewtonian_stress_derivatives[p];
+            }
+
+          // Pre-compute the product of the symmetric gradient of shape function and
+          // the tangent modulus
+          small_vector<SymmetricTensor<2, dim>> linearized_stresses(stokes_dofs_per_cell);
+          if (scratch.rebuild_stokes_matrix)
+            {
+              SymmetricTensor<4, dim> E = (2. * newtonian_viscosity) * identity_tensor<dim>();
+
+              if (scratch.rebuild_newton_stokes_matrix && newton_parameters.newton_derivative_scaling_factor > 0)
+                {
+                  SymmetricTensor<4, dim> E_corr = nonnewtonian_stress_derivative * newton_parameters.newton_derivative_scaling_factor;
+
+                  if (newton_parameters.velocity_block_stabilization & Newton::Parameters::Stabilization::PD)
+                    {
+                      const double E_corr_norm = E_corr.norm();
+                      if (E_corr_norm > 0)
+                        E_corr *= std::min(1., 2. * newtonian_viscosity * newton_parameters.SPD_safety_factor / E_corr_norm);
+                    }
+
+                  E -= E_corr;
+                }
+
               for (unsigned int i = 0; i < stokes_dofs_per_cell; ++i)
-                linearized_stresses[i] += alpha[p] * (implicit_constitutive_outputs->tangent_operators[p] * scratch.grads_phi_u[i]);
+                linearized_stresses[i] = E * scratch.grads_phi_u[i];
             }
 
           const Tensor<1, dim> gravity = gravity_model.gravity_vector(scratch.finite_element_values.quadrature_point(q));
@@ -302,21 +358,27 @@ namespace aspect
 
           for (unsigned int i = 0; i < stokes_dofs_per_cell; ++i)
             {
-              data.local_rhs(i) -= ( scratch.grads_phi_u[i] * deviatoric_stress
-                                     - scratch.div_phi_u[i] * pressure
-                                     - scratch.phi_p[i] * pressure_scaling * velocity_divergence
+              data.local_rhs(i) -= ( scratch.grads_phi_u[i] * nonnewtonian_stress
                                      - (scratch.phi_u[i] * gravity) * density
                                    ) * JxW;
+
+              if (!use_picard)
+                data.local_rhs(i) -= ( 2. * newtonian_viscosity * (scratch.grads_phi_u[i] * 
+                                                                   scratch.material_model_inputs.strain_rate[q])
+                                       - scratch.div_phi_u[i] * pressure
+                                       - scratch.phi_p[i] * pressure_scaling * velocity_divergence
+                                     ) * JxW;
                 
               if (force != nullptr)
                 data.local_rhs(i) += ( scratch.phi_u[i] * force->rhs_u[q]
                                        + scratch.phi_p[i] * pressure_scaling * force->rhs_p[q] 
                                      ) * JxW;
-              
+
               if (scratch.rebuild_stokes_matrix)
                 for (unsigned int j = 0; j < stokes_dofs_per_cell; ++j)
                   {
-                    data.local_matrix(i, j) += ( (stabilization & Newton::Parameters::Stabilization::symmetric
+                    data.local_matrix(i, j) += ( (newton_parameters.velocity_block_stabilization 
+                                                  & Newton::Parameters::Stabilization::symmetric
                                                   ?
                                                   (scratch.grads_phi_u[i] * linearized_stresses[j] +
                                                    scratch.grads_phi_u[j] * linearized_stresses[i]) * 0.5
@@ -344,7 +406,7 @@ namespace aspect
     create_additional_material_model_outputs(MaterialModel::MaterialModelOutputs<dim> &outputs) const
     {
       if (outputs.template has_additional_output_object<MaterialModel::ImplicitConstitutiveOutputs<dim>>() == false)
-        outputs.additional_outputs.push_back(std::make_unique<MaterialModel::ImplicitConstitutiveOutputs<dim>>(false));
+        outputs.additional_outputs.push_back(std::make_unique<MaterialModel::ImplicitConstitutiveOutputs<dim>>());
 
       if (this->get_parameters().enable_additional_stokes_rhs &&
           outputs.template has_additional_output_object<MaterialModel::AdditionalMaterialOutputsStokesRHS<dim>>() == false)
