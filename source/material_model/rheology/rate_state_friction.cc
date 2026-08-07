@@ -149,7 +149,10 @@ namespace aspect
               b_eff += volume_fractions[j] * b[j];
             }
 
-        return cfl_number * (a_eff * Dc) / (b_eff * V);
+        // Limit the time step only for rate-softening regions
+        return (a_eff > b_eff ? 
+                std::numeric_limits<double>::max() :
+                cfl_number * (a_eff * Dc) / (b_eff * V));
       }
 
 

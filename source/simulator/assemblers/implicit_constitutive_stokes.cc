@@ -21,6 +21,8 @@
 #include <aspect/simulator/assemblers/implicit_constitutive_stokes.h>
 #include <aspect/newton.h>
 #include <aspect/utilities.h>
+#include <aspect/particle/manager.h>
+#include <aspect/gravity_model/interface.h>
 
 namespace aspect
 {

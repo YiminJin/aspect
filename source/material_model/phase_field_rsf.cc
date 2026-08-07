@@ -583,12 +583,12 @@ namespace aspect
                             V -= F / dF_dV;
                             F = F_value(V);
 
-                            convergence_history.V.push_back(V);
-                            convergence_history.F.push_back(F);
-
                             ++n_iter;
                             if (n_iter > max_newton_iterations)
                               break;
+
+                            convergence_history.V.push_back(V);
+                            convergence_history.F.push_back(F);
                           }
 
                         // If solution failed, then exit all loops at once
