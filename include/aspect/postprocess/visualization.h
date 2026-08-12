@@ -297,6 +297,11 @@ namespace aspect
         update () override;
 
         /**
+         * A function that accepts external request for graphical output.
+         */
+        void request_output () const;
+
+        /**
          * A function that is used to register visualization postprocessor
          * objects in such a way that the Manager can deal with all of them
          * without having to know them by name. This allows the files in which
@@ -416,6 +421,11 @@ namespace aspect
          * Used to check for the next necessary output time.
          */
         unsigned int last_output_timestep;
+
+        /**
+         * A boolean indicating external request for graphical output.
+         */
+        mutable bool output_requested;
 
         /**
          * Consecutively counted number indicating the how-manyth time we will

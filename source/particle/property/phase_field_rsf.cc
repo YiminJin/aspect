@@ -20,6 +20,8 @@
 
 #include <aspect/particle/property/phase_field_rsf.h>
 #include <aspect/material_model/phase_field_rsf.h>
+#include <aspect/postprocess/visualization.h>
+#include <aspect/postprocess/particles.h>
 
 namespace aspect
 {
@@ -36,6 +38,54 @@ namespace aspect
                                "'phase field rsf'."));
 
         phase_field_base_element = this->introspection().variable("phase_field").base_index;
+      }
+
+
+
+      template <int dim>
+      void PhaseFieldRSF<dim>::update()
+      {
+        if (maximum_slip_distance_between_outputs == 0)
+          return;
+
+        // Check if the maximum slip increment reaches the threshold
+        Particles::ParticleHandler<dim> &particle_handler = const_cast<Particles::ParticleHandler<dim>&>(
+          this->get_phase_field_handler().get_associated_particle_manager().get_particle_handler());
+
+        const unsigned int slip_increment_index =
+          Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldRSF<dim>>(this->get_material_model())
+            .get_index_cache().particle_properties.slip_increment;
+
+        double local_max_slip_increment = 0;
+
+        for (const auto &cell : this->get_triangulation().active_cell_iterators())
+          if (cell->is_locally_owned())
+            for (const auto &particle : particle_handler.particles_in_cell(cell))
+              {
+                const double V_inc = particle.get_properties()[slip_increment_index];
+                if (!numbers::is_nan(V_inc))
+                  local_max_slip_increment = std::max(local_max_slip_increment, V_inc);
+              }
+
+        const double max_slip_increment = Utilities::MPI::max(local_max_slip_increment, this->get_mpi_communicator());
+        
+        if (max_slip_increment >= maximum_slip_distance_between_outputs)
+          {
+            // Send output request to the solution-based and particle-based visualizers
+            this->get_postprocess_manager().template get_matching_active_plugin<Postprocess::Visualization<dim>>().request_output();
+            this->get_postprocess_manager().template get_matching_active_plugin<Postprocess::Particles<dim>>().request_output();
+
+            // Reset the slip increments
+            for (const auto &cell : this->get_triangulation().active_cell_iterators())
+              if (cell->is_locally_owned())
+                for (auto &particle : particle_handler.particles_in_cell(cell))
+                  {
+                    const ArrayView<double> particle_properties = particle.get_properties();
+                    const double V_inc = particle_properties[slip_increment_index];
+                    if (!numbers::is_nan(V_inc))
+                      particle_properties[slip_increment_index] = 0;
+                  }
+          }
       }
 
 
@@ -73,10 +123,16 @@ namespace aspect
         // Initialize the cohesive force to 0
         data.push_back(0);
 
-        // The initial values of slip rate and slip state are determined by the initial composition model
-        data.push_back(std::max(rsf_model.get_minimum_slip_rate(),
-                                this->get_initial_composition_manager().initial_composition(position, index_cache.compositional_fields.slip_rate)));
-        data.push_back(this->get_initial_composition_manager().initial_composition(position, index_cache.compositional_fields.slip_state));
+        // If there are pre-existing cracks, then the initial slip rate is determined by the initial compositional model; otherwise,
+        // the slip rate is initialized to Vmin
+        double V = rsf_model.get_minimum_slip_rate();
+        if (has_preexisting_crack)
+          V = std::max(V, this->get_initial_composition_manager().initial_composition(position, index_cache.compositional_fields.slip_rate));
+        data.push_back(V);
+
+        // The initial slip state is determined by the initial composition model
+        const double theta = this->get_initial_composition_manager().initial_composition(position, index_cache.compositional_fields.slip_state);
+        data.push_back(theta);
 
         // If there are pre-existing cracks, then the initial values of the direction vectors are determined by the initial composition model
         if (has_preexisting_crack)
@@ -125,6 +181,18 @@ namespace aspect
         // The initial viscoelastic stress is determined by the initial composition model
         for (unsigned int c = 0; c < SymmetricTensor<2, dim>::n_independent_components; ++c)
           data.push_back(this->get_initial_composition_manager().initial_composition(position, index_cache.compositional_fields.ve_stress[c]));
+
+        // Initialize the friction coefficient if requested
+        if (output_friction_coefficient)
+          data.push_back(rsf_model.friction_coefficient(volume_fractions, V, theta));
+
+        // Initialize the slip distance if requested
+        if (output_slip_distance)
+          data.push_back(0);
+
+        // Initialize the slip increment if requested
+        if (output_slip_increment)
+          data.push_back(0);
       }
 
 
@@ -152,35 +220,47 @@ namespace aspect
                                                                this->get_triangulation(), 
                                                                particle_location).first;
 
-        // The crack driving force and viscoelastic stress are defined in the entire domain, 
-        // while the rest are only defined in the crack zone
-        std::vector<bool> is_generic_property(data_info.n_components(), false);
-        is_generic_property[index_cache.particle_properties.crack_driving_force] = true;
+        // The crack driving force, cohesive force, slip state and viscoelastic stress are 
+        // defined in the entire domain, while the rest are restricted in the crack zone
+        // TODO: the slip state is discontinuous at the edge of crack zone, so it is better
+        // to treat it separately
+        std::vector<bool> is_unrestricted(data_info.n_components(), false);
+        is_unrestricted[index_cache.particle_properties.crack_driving_force] = true;
+        is_unrestricted[index_cache.particle_properties.cohesive_force] = true;
+        is_unrestricted[index_cache.particle_properties.slip_state] = true;
         for (unsigned int c = 0; c < SymmetricTensor<2, dim>::n_independent_components; ++c)
-          is_generic_property[index_cache.particle_properties.ve_stress + c] = true;
+          is_unrestricted[index_cache.particle_properties.ve_stress + c] = true;
 
-        std::vector<bool> is_crack_property(data_info.n_components(), false);
-        is_crack_property[index_cache.particle_properties.cohesive_force] = true;
-        is_crack_property[index_cache.particle_properties.slip_rate]      = true;
-        is_crack_property[index_cache.particle_properties.slip_state]     = true;
+        std::vector<bool> is_restricted(data_info.n_components(), false);
+        is_restricted[index_cache.particle_properties.slip_rate] = true;
         for (unsigned int d = 0; d < dim; ++d)
           {
-            is_crack_property[index_cache.particle_properties.normal_direction + d] = true;
-            is_crack_property[index_cache.particle_properties.slip_direction + d]   = true;
+            is_restricted[index_cache.particle_properties.normal_direction + d] = true;
+            is_restricted[index_cache.particle_properties.slip_direction + d]   = true;
           }
+        if (output_friction_coefficient)
+          is_restricted[index_cache.particle_properties.friction_coefficient] = true;
+        if (output_slip_distance)
+          is_restricted[index_cache.particle_properties.slip_distance] = true;
+        if (output_slip_increment)
+          is_restricted[index_cache.particle_properties.slip_increment] = true;
 
-        // Interpolate the generic properties by the user-defined interpolator
-        const std::vector<std::vector<double>> interpolated_generic_properties
+        // Interpolate the unrestricted properties by the user-defined interpolator
+        const std::vector<std::vector<double>> unrestricted_properties
           = particle_manager.get_interpolator().properties_at_points(particle_handler,
                                                                      std::vector<Point<dim>>(1, particle_location),
-                                                                     ComponentMask(is_generic_property),
+                                                                     ComponentMask(is_unrestricted),
                                                                      host_cell);
 
         particle_properties[index_cache.particle_properties.crack_driving_force] = 
-          interpolated_generic_properties[0][index_cache.particle_properties.crack_driving_force];
+          unrestricted_properties[0][index_cache.particle_properties.crack_driving_force];
+        particle_properties[index_cache.particle_properties.cohesive_force] =
+          unrestricted_properties[0][index_cache.particle_properties.cohesive_force];
+        particle_properties[index_cache.particle_properties.slip_state] =
+          unrestricted_properties[0][index_cache.particle_properties.slip_state];
         for (unsigned int c = 0; c < SymmetricTensor<2, dim>::n_independent_components; ++c)
           particle_properties[index_cache.particle_properties.ve_stress + c] = 
-            interpolated_generic_properties[0][index_cache.particle_properties.ve_stress + c];
+            unrestricted_properties[0][index_cache.particle_properties.ve_stress + c];
 
         // Check if the particle is in the crack zone. Instead of using FEValues or FEPointEvaluation,
         // we evaluate the phase-field value at the particle location manually for efficiency
@@ -197,38 +277,38 @@ namespace aspect
         
         if (material_model.is_intact(phi))
           {
-            // The particle is intact. Initialize the crack properties to NaN
+            // The particle is intact. Initialize the restricted properties to NaN
             for (unsigned int i = 0; i < data_info.n_components(); ++i)
-              if (is_crack_property[i])
+              if (is_restricted[i])
                 particle_properties[i] = std::numeric_limits<double>::quiet_NaN();
           }
         else
           {
-            // The particle is damaged. Interpolate the crack properties from the surrounding particles
-            // in the crack zone
+            // The particle is damaged. Interpolate the restricted properties from the part of
+            // surrounding particles that are inside the crack zone
             std::vector<std::pair<double, std::vector<double>>> proportions_and_values =
               PhaseFieldUtilities::interpolate_from_particles_in_crack_zone(particle_handler,
                                                                             std::vector<Point<dim>>(1, particle_location),
-                                                                            ComponentMask(is_crack_property),
+                                                                            ComponentMask(is_restricted),
                                                                             host_cell,
                                                                             phase_field_handler.get_grid_cache(),
                                                                             [&] (const ArrayView<const double> &properties) -> bool
                                                                             {
                                                                               return !numbers::is_nan(properties[
-                                                                                index_cache.particle_properties.cohesive_force]);
+                                                                                index_cache.particle_properties.normal_direction]);
                                                                             });
 
             AssertThrow(proportions_and_values[0].first > 0,
                         ExcMessage("None of the surrounding particles are inside the crack zone!"));
 
-            std::vector<double> &interpolated_crack_properties = proportions_and_values[0].second;
+            std::vector<double> &restricted_properties = proportions_and_values[0].second;
 
             // Orthogonalize and normalize the slip direction and the normal direction
             Tensor<1, dim> n, s;
             for (unsigned int d = 0; d < dim; ++d)
               {
-                n[d] = interpolated_crack_properties[index_cache.particle_properties.normal_direction + d];
-                s[d] = interpolated_crack_properties[index_cache.particle_properties.slip_direction + d];
+                n[d] = restricted_properties[index_cache.particle_properties.normal_direction + d];
+                s[d] = restricted_properties[index_cache.particle_properties.slip_direction + d];
               }
 
             n /= n.norm();
@@ -237,13 +317,13 @@ namespace aspect
 
             for (unsigned int d = 0; d < dim; ++d)
               {
-                interpolated_crack_properties[index_cache.particle_properties.normal_direction + d] = n[d];
-                interpolated_crack_properties[index_cache.particle_properties.slip_direction + d]   = s[d];
+                restricted_properties[index_cache.particle_properties.normal_direction + d] = n[d];
+                restricted_properties[index_cache.particle_properties.slip_direction + d]   = s[d];
               }
 
             for (unsigned int i = 0; i < data_info.n_components(); ++i)
-              if (is_crack_property[i])
-                particle_properties[i] = interpolated_crack_properties[i];
+              if (is_restricted[i])
+                particle_properties[i] = restricted_properties[i];
           }
 
         return particle_properties;
@@ -284,7 +364,68 @@ namespace aspect
         property_information.emplace_back("slip_direction", dim);
         property_information.emplace_back("ve_stress", SymmetricTensor<2, dim>::n_independent_components);
 
+        if (output_friction_coefficient)
+          property_information.emplace_back("friction_coefficient", 1);
+
+        if (output_slip_distance)
+          property_information.emplace_back("slip_distance", 1);
+
+        if (output_slip_increment)
+          property_information.emplace_back("slip_increment", 1);
+
         return property_information;
+      }
+
+
+
+      template <int dim>
+      void
+      PhaseFieldRSF<dim>::declare_parameters(ParameterHandler &prm)
+      {
+        prm.enter_subsection("Phase field RSF");
+        {
+          prm.declare_entry("Output friction coefficient", "false",
+                            Patterns::Bool(),
+                            "Whether to output the friction coefficient. If set to true, "
+                            "then the friction coefficient will be stored in particles as "
+                            "a passive particle property.");
+          prm.declare_entry("Output slip distance", "false",
+                            Patterns::Bool(),
+                            "Whether to output the slip distance. If set to true, "
+                            "then the slip distance will be stored in particles as "
+                            "a passive particle property.");
+          prm.declare_entry("Slip distance between graphical output", "0",
+                            Patterns::Double(0.),
+                            "The maximum slip distance between each generation of output "
+                            "files. The default value is 0, which indicates that the output "
+                            "is not controlled by the slip distance. If a positive value "
+                            "is set, then a property named 'slip_increment' will be stored "
+                            "in particles. Once the maximum slip increment reaches the "
+                            "specified value, then an output request will be sent to both "
+                            "the solution-based and particle-based visualizers, and the slip "
+                            "increment will be reset to 0.");
+        }
+        prm.leave_subsection();
+      }
+
+
+
+      template <int dim>
+      void
+      PhaseFieldRSF<dim>::parse_parameters(ParameterHandler &prm)
+      {
+        prm.enter_subsection("Phase field RSF");
+        {
+          output_friction_coefficient           = prm.get_bool("Output friction coefficient");
+          output_slip_distance                  = prm.get_bool("Output slip distance");
+          maximum_slip_distance_between_outputs = prm.get_double("Slip distance between graphical output");
+
+          if (maximum_slip_distance_between_outputs > 0)
+            output_slip_increment = true;
+          else
+            output_slip_increment = false;
+        }
+        prm.leave_subsection();
       }
     }
   }

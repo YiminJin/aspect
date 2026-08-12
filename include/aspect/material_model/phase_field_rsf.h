@@ -53,6 +53,9 @@ namespace aspect
             unsigned int normal_direction;
             unsigned int slip_direction;
             unsigned int ve_stress;
+            unsigned int friction_coefficient;
+            unsigned int slip_distance;
+            unsigned int slip_increment;
             std::vector<unsigned int> chemical_fields;
 
             /**
@@ -67,6 +70,9 @@ namespace aspect
               , normal_direction(numbers::invalid_unsigned_int)
               , slip_direction(numbers::invalid_unsigned_int)
               , ve_stress(numbers::invalid_unsigned_int)
+              , friction_coefficient(numbers::invalid_unsigned_int)
+              , slip_distance(numbers::invalid_unsigned_int)
+              , slip_increment(numbers::invalid_unsigned_int)
             {}
           };
 
@@ -151,9 +157,6 @@ namespace aspect
         bool
         is_compressible() const override;
 
-        void
-        create_additional_named_outputs(MaterialModel::MaterialModelOutputs<dim> &out) const override;
-
         const Rheology::RateStateFriction<dim> &
         get_rate_state_friction_model() const;
 
@@ -174,7 +177,7 @@ namespace aspect
 
         void update_history_states(const SolverControl &nonlinear_solver_control);
 
-        void update_direction_vectors();
+        void update_particles_in_emerging_crack_zone();
 
         double 
         calculate_creep_viscosity(const double               temperature,

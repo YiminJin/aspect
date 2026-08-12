@@ -49,6 +49,15 @@ namespace aspect
       particle_properties.slip_direction      = particle_data_info.get_position_by_field_name("slip_direction");
       particle_properties.ve_stress           = particle_data_info.get_position_by_field_name("ve_stress");
 
+      if (particle_data_info.fieldname_exists("friction_coefficient"))
+        particle_properties.friction_coefficient = particle_data_info.get_position_by_field_name("friction_coefficient");
+
+      if (particle_data_info.fieldname_exists("slip_distance"))
+        particle_properties.slip_distance = particle_data_info.get_position_by_field_name("slip_distance");
+
+      if (particle_data_info.fieldname_exists("slip_increment"))
+        particle_properties.slip_increment = particle_data_info.get_position_by_field_name("slip_increment");
+
       particle_properties.chemical_fields.clear();
       for (const unsigned int index : introspection.chemical_composition_field_indices())
         particle_properties.chemical_fields.push_back(
@@ -88,9 +97,7 @@ namespace aspect
             }
         }
 
-      // The slip rate, slip state and viscoelastic stress must be associated with compositional fields
-      AssertThrow(compositional_fields.slip_rate != numbers::invalid_unsigned_int,
-                  ExcMessage("Particle property 'slip_rate' must be associated with a compositional field."));
+      // The slip state and components of viscoelastic stress must be associated with compositional fields
       AssertThrow(compositional_fields.slip_state != numbers::invalid_unsigned_int,
                   ExcMessage("Particle property 'slip_state' must be associated with a compositional field."));
       for (unsigned int c = 0; c < SymmetricTensor<2, dim>::n_independent_components; ++c)
@@ -99,10 +106,10 @@ namespace aspect
                                + "] must be associated with a compositional field."));
 
       // If there are pre-existing cracks (i.e. crack_driving_force is associated with a compositional field),
-      // then the direction vectors must be associated with compositional fields too
+      // then the slip rate and the direction vectors must be associated with compositional fields too
       if (compositional_fields.crack_driving_force != numbers::invalid_unsigned_int)
         {
-          bool is_consistent = true;
+          bool is_consistent = (compositional_fields.slip_rate != numbers::invalid_unsigned_int);
           for (unsigned int d = 0; d < dim; ++d)
             if (compositional_fields.normal_direction[d] == numbers::invalid_unsigned_int
                 || compositional_fields.slip_direction[d] == numbers::invalid_unsigned_int)
@@ -114,9 +121,9 @@ namespace aspect
           AssertThrow(is_consistent,
                       ExcMessage("The particle property 'crack_driving_force' is associated with a compositional fields, "
                                  "which means that there are pre-existing cracks in the model. In this case, the particle "
-                                 "properties 'normal_direction[d]' and 'slip_direction[d]' (d = 0, ..., dim-1) should also "
-                                 "be associated with compositional fields to get initial values from the initial composition "
-                                 "model, otherwise the initial conditions are incomplete."));
+                                 "properties 'slip_rate', 'normal_direction[d]' and 'slip_direction[d]' (d = 0, ..., dim-1) "
+                                 "should also be associated with compositional fields to get initial values from the "
+                                 "initial composition model, otherwise the initial conditions are incomplete."));
         }
 
 
@@ -172,11 +179,12 @@ namespace aspect
         this->update_history_states(nonlinear_solver_control);
       });
 
-      // Update the direction vectors before extending the core phase-field
+      // Update particles in the emerging crack zone before extending the 
+      // core phase-field
       this->get_phase_field_handler().pre_extend_core_phase_field.connect(
         [&](const SimulatorAccess<dim> &)
       {
-        this->update_direction_vectors();
+        this->update_particles_in_emerging_crack_zone();
       });
     }
 
@@ -204,9 +212,6 @@ namespace aspect
 
       const double dt = (this->get_timestep_number() > 0 ? this->get_timestep() : 0);
 
-      const std::shared_ptr<RSFAdditionalOutputs<dim>> rsf_outputs
-        = out.template get_additional_output_object<RSFAdditionalOutputs<dim>>();
-
       for (unsigned int i = 0; i < in.n_evaluation_points(); ++i)
         {
           const std::vector<double> volume_fractions = MaterialUtilities::compute_only_composition_fractions(
@@ -231,15 +236,6 @@ namespace aspect
               const double eta = calculate_creep_viscosity(in.temperature[i], volume_fractions);
               const double one_minus_beta = calculate_stress_relaxation_factor(eta, G);
               out.viscosities[i] = eta * one_minus_beta;
-            }
-
-          if (rsf_outputs != nullptr)
-            {
-              // Named additional outputs are only computed for postprocessing, at which point
-              // the slip state has been updated.
-              const double V     = in.composition[i][index_cache.compositional_fields.slip_rate];
-              const double theta = in.composition[i][index_cache.compositional_fields.slip_state];
-              rsf_outputs->friction_coefficients[i] = rsf_rheology.friction_coefficient(volume_fractions, V, theta);
             }
         }
 
@@ -602,13 +598,6 @@ namespace aspect
                         particle_properties[index_cache.particle_properties.slip_rate] = std::max(rsf_rheology.get_minimum_slip_rate(), V);
                       }
                   }
-                else
-                  {
-                    // The particle is intact. If it is the first nonlinear iteration of the first time step,
-                    // set the slip rate to NaN
-                    if (this->get_timestep_number() == 0 && this->get_nonlinear_iteration() == 0)
-                      particle_properties[index_cache.particle_properties.slip_rate] = std::numeric_limits<double>::quiet_NaN();
-                  }
               }
           }
 
@@ -886,6 +875,18 @@ convergence_check:
                     const double H_old = particle_properties[index_cache.particle_properties.crack_driving_force];
                     const double H_new = (h_tau_coh * h_tau_coh - h_tau_coh_old * h_tau_coh_old) / (2. * G * (1. - g) * (1. - g));
                     particle_properties[index_cache.particle_properties.crack_driving_force] = std::max(H_old, H_new);
+
+                    // Update the friction coefficient if requested
+                    if (index_cache.particle_properties.friction_coefficient != numbers::invalid_unsigned_int)
+                      particle_properties[index_cache.particle_properties.friction_coefficient] = rsf_rheology.friction_coefficient(volume_fractions, V, theta);
+
+                    // Update the slip distance if requested
+                    if (index_cache.particle_properties.slip_distance != numbers::invalid_unsigned_int)
+                      particle_properties[index_cache.particle_properties.slip_distance] += V * dt;
+
+                    // Update the slip increment if requested
+                    if (index_cache.particle_properties.slip_increment != numbers::invalid_unsigned_int)
+                      particle_properties[index_cache.particle_properties.slip_increment] += V * dt;
                   }
                 else
                   {
@@ -920,7 +921,7 @@ convergence_check:
 
 
     template <int dim>
-    void PhaseFieldRSF<dim>::update_direction_vectors()
+    void PhaseFieldRSF<dim>::update_particles_in_emerging_crack_zone()
     {
       const Introspection<dim> &introspection = this->introspection();
       const PhaseFieldHandler<dim> &phase_field_handler = this->get_phase_field_handler();
@@ -1047,18 +1048,37 @@ convergence_check:
                             particle_properties[index_cache.particle_properties.normal_direction + d] = n[d];
                             particle_properties[index_cache.particle_properties.slip_direction + d]   = s[d];
                           }
+
+                        // Initialize the slip distance and/or slip increment if requested
+                        if (index_cache.particle_properties.slip_distance != numbers::invalid_unsigned_int)
+                          particle_properties[index_cache.particle_properties.slip_distance] = 0;
+
+                        if (index_cache.particle_properties.slip_increment != numbers::invalid_unsigned_int)
+                          particle_properties[index_cache.particle_properties.slip_increment] = 0;
                       }
                   }
                 else
                   {
-                    // The particle is intact. If it is the first time step, set the direction vectors to NaN
+                    // The particle is intact. If it is the first time step, set the slip rate, direction vectors,
+                    // friction coefficient, slip distance and slip increment to NaN
                     if (this->get_timestep_number() == 0)
                       {
+                        particle_properties[index_cache.particle_properties.slip_rate] = std::numeric_limits<double>::quiet_NaN();
+
                         for (unsigned int d = 0; d < dim; ++d)
                           {
                             particle_properties[index_cache.particle_properties.normal_direction + d] = std::numeric_limits<double>::quiet_NaN();
                             particle_properties[index_cache.particle_properties.slip_direction + d]   = std::numeric_limits<double>::quiet_NaN();
                           }
+
+                        if (index_cache.particle_properties.friction_coefficient != numbers::invalid_unsigned_int)
+                          particle_properties[index_cache.particle_properties.friction_coefficient] = std::numeric_limits<double>::quiet_NaN();
+
+                        if (index_cache.particle_properties.slip_distance != numbers::invalid_unsigned_int)
+                          particle_properties[index_cache.particle_properties.slip_distance] = std::numeric_limits<double>::quiet_NaN();
+
+                        if (index_cache.particle_properties.slip_increment != numbers::invalid_unsigned_int)
+                          particle_properties[index_cache.particle_properties.slip_increment] = std::numeric_limits<double>::quiet_NaN();
                       }
                   }
               }
@@ -1071,17 +1091,6 @@ convergence_check:
     bool PhaseFieldRSF<dim>::is_compressible() const
     {
       return equation_of_state.is_compressible();
-    }
-
-
-
-    template <int dim>
-    void
-    PhaseFieldRSF<dim>::
-    create_additional_named_outputs(MaterialModel::MaterialModelOutputs<dim> &out) const
-    {
-      if (out.template has_additional_output_object<RSFAdditionalOutputs<dim>>() == false)
-        out.additional_outputs.push_back(std::make_unique<RSFAdditionalOutputs<dim>>(out.n_evaluation_points()));
     }
 
 

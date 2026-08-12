@@ -57,6 +57,10 @@ namespace aspect
               particle_handler(std::move(other.particle_handler)),
               particle_handler_backup(), // can not move
               property_manager(std::move(other.property_manager)),
+              particle_domain_handler(std::move(other.particle_domain_handler)),
+              generate_particle_domains(other.generate_particle_domains),
+              generate_face_data_for_particle_domains(other.generate_face_data_for_particle_domains),
+              generate_cpdi_data_for_particle_domains(other.generate_cpdi_data_for_particle_domains),
               particle_load_balancing(other.particle_load_balancing),
               min_particles_per_cell(other.min_particles_per_cell),
               max_particles_per_cell(other.max_particles_per_cell),
@@ -235,6 +239,8 @@ namespace aspect
         [&] (typename parallel::distributed::Triangulation<dim> &)
       {
         this->apply_particle_per_cell_bounds();
+        if (this->particle_domain_handler != nullptr)
+          this->particle_domain_handler->generate_particle_domains();
       });
     }
 

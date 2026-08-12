@@ -170,8 +170,9 @@ namespace aspect
       output_interval (0),
       // initialize this to a nonsensical value; set it to the actual time
       // the first time around we get to check it
-      last_output_time (std::numeric_limits<double>::quiet_NaN())
-      ,output_file_number (numbers::invalid_unsigned_int),
+      last_output_time (std::numeric_limits<double>::quiet_NaN()),
+      output_requested (false),
+      output_file_number (numbers::invalid_unsigned_int),
       group_files(0),
       write_in_background_thread(false)
     {}
@@ -185,6 +186,14 @@ namespace aspect
       // writing data, finishes
       if (background_thread.joinable())
         background_thread.join ();
+    }
+
+
+
+    template <int dim>
+    void Particles<dim>::request_output() const
+    {
+      output_requested = true;
     }
 
 
@@ -347,7 +356,8 @@ namespace aspect
 
       // If it's not time to generate an output file
       // return early with the number of particles that were advected
-      if (this->get_time() < last_output_time + output_interval)
+      if (!output_requested &&
+          (this->get_time() < last_output_time + output_interval))
         {
           write_output = false;
         }
@@ -360,6 +370,7 @@ namespace aspect
           // write output after a restart if the format is changed.
           set_last_output_time (this->get_time());
 
+          output_requested = false;
           write_output = false;
         }
 
@@ -548,6 +559,8 @@ namespace aspect
 
           // up the next time we need output
           set_last_output_time (this->get_time());
+
+          output_requested = false;
 
           const std::string particle_output = this->get_output_directory() + particles_output_base_name + "/" + particle_file_prefix;
 

@@ -37,6 +37,8 @@ namespace aspect
         public:
           void initialize() override;
 
+          void update() override;
+
           /**
            * @copydoc aspect::Particle::Property::Interface::initialize_one_particle_property()
            */
@@ -69,8 +71,29 @@ namespace aspect
           std::vector<std::pair<std::string, unsigned int>>
           get_property_information() const override;
 
+          /**
+           * Declare the parameters this class takes through input files.
+           */
+          static
+          void
+          declare_parameters(ParameterHandler &prm);
+
+          /**
+           * Read the parameters this class declares from the parameter file.
+           */
+          void
+          parse_parameters(ParameterHandler &prm) override;
+
         private:
           unsigned int phase_field_base_element;
+
+          bool output_friction_coefficient;
+
+          bool output_slip_distance;
+
+          bool output_slip_increment;
+
+          double maximum_slip_distance_between_outputs;
       };
     }
   }

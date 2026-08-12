@@ -150,6 +150,11 @@ namespace aspect
         std::pair<std::string,std::string> execute (TableHandler &statistics) override;
 
         /**
+         * A function that accepts external request for graphical output.
+         */
+        void request_output () const;
+
+        /**
          * Save the state of this object.
          */
         void save (std::map<std::string, std::string> &status_strings) const override;
@@ -200,6 +205,11 @@ namespace aspect
          * the time step becomes larger. This is done after every output.
          */
         void set_last_output_time (const double current_time);
+
+        /**
+         * A boolean indicating external request for graphical output.
+         */
+        mutable bool output_requested;
 
         /**
          * Consecutively counted number indicating the how-manyth time we will

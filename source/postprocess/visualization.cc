@@ -349,6 +349,7 @@ namespace aspect
       last_output_time (std::numeric_limits<double>::quiet_NaN()),
       maximum_timesteps_between_outputs (std::numeric_limits<int>::max()),
       last_output_timestep (numbers::invalid_unsigned_int),
+      output_requested (false),
       output_file_number (numbers::invalid_unsigned_int)
     {}
 
@@ -359,6 +360,14 @@ namespace aspect
     {
       cell_output_history.mesh_changed = true;
       face_output_history.mesh_changed = true;
+    }
+
+
+
+    template <int dim>
+    void Visualization<dim>::request_output() const
+    {
+      output_requested = true;
     }
 
 
@@ -766,7 +775,8 @@ namespace aspect
       // be ever reached (both values are unsigned int,
       // and the default value of maximum_timesteps_between_outputs is
       // set to numeric_limits<int>::max())
-      if ((this->get_time() < last_output_time + output_interval)
+      if (!output_requested
+          && (this->get_time() < last_output_time + output_interval)
           && (this->get_timestep_number() < last_output_timestep + maximum_timesteps_between_outputs)
           && (this->get_timestep_number() != 0))
         return {"", ""};
@@ -1042,6 +1052,8 @@ namespace aspect
       // Increment the next time we need output:
       set_last_output_time (this->get_time());
       last_output_timestep = this->get_timestep_number();
+
+      output_requested = false;
 
       // Return what should be printed to the screen. This is a bit
       // late (the output has already been written, and this probably took
