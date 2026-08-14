@@ -43,7 +43,8 @@ namespace aspect
                               const unsigned int        stokes_dofs_per_cell,
                               const bool                add_compaction_pressure,
                               const bool                rebuild_matrix,
-                              const bool                use_bfbt)
+                              const bool                use_bfbt,
+                              const bool                use_implicit_constitutive_model)
           :
           ScratchBase<dim>(),
 
@@ -59,7 +60,10 @@ namespace aspect
           grad_phi_p ((add_compaction_pressure || use_bfbt) ? stokes_dofs_per_cell : 0, numbers::signaling_nan<Tensor<1,dim>>()),
           material_model_inputs(quadrature.size(), n_compositional_fields),
           material_model_outputs(quadrature.size(), n_compositional_fields),
-          rebuild_stokes_matrix(rebuild_matrix)
+          rebuild_stokes_matrix(rebuild_matrix),
+          point_evaluator(use_implicit_constitutive_model ? 
+                          std::make_unique<FEPointEvaluation<1, dim>>(mapping, finite_element, update_inverse_jacobians) : 
+                          nullptr)
         {}
 
 
@@ -85,7 +89,14 @@ namespace aspect
           grad_phi_p(scratch.grad_phi_p),
           material_model_inputs(scratch.material_model_inputs),
           material_model_outputs(scratch.material_model_outputs),
-          rebuild_stokes_matrix(scratch.rebuild_stokes_matrix)
+          rebuild_stokes_matrix(scratch.rebuild_stokes_matrix),
+          point_evaluator(scratch.point_evaluator.get()
+                          ?
+                          std::make_unique<FEPointEvaluation<1, dim>>(scratch.finite_element_values.get_mapping(),
+                                                                      scratch.finite_element_values.get_fe(),
+                                                                      update_inverse_jacobians)
+                          :
+                          nullptr)
         {}
 
 
@@ -120,7 +131,8 @@ namespace aspect
                       const bool                use_reference_density_profile,
                       const bool                rebuild_stokes_matrix,
                       const bool                rebuild_newton_stokes_matrix,
-                      const bool                use_bfbt)
+                      const bool                use_bfbt,
+                      const bool                use_implicit_constitutive_model)
           :
           StokesPreconditioner<dim> (finite_element, quadrature,
                                      mapping,
@@ -129,7 +141,8 @@ namespace aspect
                                      stokes_dofs_per_cell,
                                      add_compaction_pressure,
                                      rebuild_stokes_matrix,
-                                     use_bfbt),
+                                     use_bfbt,
+                                     use_implicit_constitutive_model),
 
           face_finite_element_values (mapping,
                                       finite_element,

@@ -52,9 +52,6 @@ namespace aspect
       if (particle_data_info.fieldname_exists("friction_coefficient"))
         particle_properties.friction_coefficient = particle_data_info.get_position_by_field_name("friction_coefficient");
 
-      if (particle_data_info.fieldname_exists("slip_distance"))
-        particle_properties.slip_distance = particle_data_info.get_position_by_field_name("slip_distance");
-
       if (particle_data_info.fieldname_exists("slip_increment"))
         particle_properties.slip_increment = particle_data_info.get_position_by_field_name("slip_increment");
 
@@ -262,17 +259,30 @@ namespace aspect
           small_vector<double, 500> dof_values(this->get_fe().dofs_per_cell);
           in.current_cell->get_dof_values(this->get_solution(), dof_values.begin(), dof_values.end());
 
-          // We need the values of temperature, phase-field and core phase-field at particle locations
+          // Solution values/gradients to be evaluated at particle locations:
+          // phase-field value;
+          // core phase-field value;
+          // temperature value;
+          // velocity gradient (if tangent modulus is requested);
+          // pressure value (if tangent modulus is requested and not using adiabatic pressure)
           std::vector<EvaluationFlags::EvaluationFlags> evaluation_flags(this->introspection().n_components, 
                                                                          EvaluationFlags::nothing);
-          evaluation_flags[this->introspection().component_indices.temperature] = EvaluationFlags::values;
           evaluation_flags[index_cache.components.phase_field] = EvaluationFlags::values;
           evaluation_flags[index_cache.components.core_phase_field] = EvaluationFlags::values;
+          evaluation_flags[this->introspection().component_indices.temperature] = EvaluationFlags::values;
+          if (in.requests_property(MaterialProperties::tangent_modulus))
+            {
+              for (unsigned int d = 0; d < dim; ++d)
+                evaluation_flags[d] = EvaluationFlags::gradients;
+              if (!use_adiabatic_pressure_in_friction)
+                evaluation_flags[this->introspection().component_indices.pressure] = EvaluationFlags::values;
+            }
 
           solution_evaluator->reinit(in.current_cell, {reference_locations.data(), reference_locations.size()});
           solution_evaluator->evaluate({dof_values.data(), dof_values.size()}, evaluation_flags);
 
-          small_vector<double> particle_solution_values(this->introspection().n_components);
+          small_vector<double>         particle_solution_values(this->introspection().n_components);
+          small_vector<Tensor<1, dim>> particle_solution_gradients(this->introspection().n_components);
 
           // Vector storing the chemical field values, which is required for computing volume fractions
           std::vector<double> chemical_field_values(this->introspection().n_chemical_composition_fields());
@@ -298,8 +308,6 @@ namespace aspect
               const double beta = 1. - one_minus_beta;
               const double eta_ve = eta * one_minus_beta;
 
-              implicit_constitutive_outputs->newtonian_viscosities[p] = eta_ve;
-
               // Compute the trial stress
               const SymmetricTensor<2, dim> tau_old = Utilities::Tensors::to_symmetric_tensor<dim>(
                 &particle_properties[index_cache.particle_properties.ve_stress],
@@ -314,30 +322,55 @@ namespace aspect
                   const Tensor<1, dim> s(ArrayView<const double>(&particle_properties[index_cache.particle_properties.slip_direction], dim));
                   const SymmetricTensor<2, dim> S = symmetrize(outer_product(n, s));
 
-                  // Compute the softening factor
+                  // Compute the nonlinear stress
                   const double V = particle_properties[index_cache.particle_properties.slip_rate];
                   AssertThrow(numbers::is_finite(V), ExcInternalError());
-
-                  const double theta_old = particle_properties[index_cache.particle_properties.slip_state];
-                  const double theta  = rsf_rheology.slip_state(V, theta_old, dt);
-                  const double dmu_dV = rsf_rheology.friction_coefficient_derivative_wrt_slip_rate(volume_fractions, V, theta);
 
                   const double phi_hat = particle_solution_values[index_cache.components.core_phase_field];
                   const double g   = this->get_phase_field_handler().energetic_degradation(volume_fractions, phi);
                   const double chi = this->get_phase_field_handler().slip_rate_localization_factor(volume_fractions, g, phi_hat);
 
-                  const double p_bar = std::max(0., this->get_adiabatic_conditions().pressure(particle->get_location()));
-                  const double eta_d = MaterialUtilities::average_value(volume_fractions, radiation_damping_coefficients, MaterialUtilities::arithmetic);
+                  implicit_constitutive_outputs->nonlinear_stresses[p] = -(2. * eta_ve * chi * V) * S + beta * tau_old;
 
-                  const double softening_factor = (2. * chi * eta_ve) / (chi * eta_ve / (1. - g) + dmu_dV * p_bar + eta_d);
+                  // Compute the nonlinear tangent modulus if requested
+                  if (in.requests_property(MaterialProperties::tangent_modulus))
+                    {
+                      // Compute the trial stress (because the non-trial part does not contribute to the normal stress)
+                      solution_evaluator->get_gradients(p, {particle_solution_gradients.data(), particle_solution_gradients.size()}, evaluation_flags);
 
-                  implicit_constitutive_outputs->nonnewtonian_stress_derivatives[p] = (2. * eta_ve * softening_factor) * outer_product(S, S);
-                  implicit_constitutive_outputs->nonnewtonian_stresses[p] = -(2. * eta_ve * chi * V) * S + beta * tau_old;
+                      Tensor<2, dim> grad_u;
+                      for (unsigned int d = 0; d < dim; ++d)
+                        grad_u[d] = particle_solution_gradients[d];
+
+                      const SymmetricTensor<2, dim> epsilon = Utilities::Tensors::consistent_deviator(symmetrize(grad_u));
+
+                      const SymmetricTensor<2, dim> tau_trial = (2. * eta_ve) * epsilon + beta * tau_old;
+
+                      // Compute the normal stress
+                      const double pressure = (use_adiabatic_pressure_in_friction 
+                                               ?
+                                               this->get_adiabatic_conditions().pressure(particle->get_location()) 
+                                               :
+                                               particle_solution_values[this->introspection().component_indices.pressure] + confining_pressure);
+
+                      const double sigma_n = pressure - (tau_trial * n) * n;
+
+                      // Compute the derivative of friction coefficient
+                      const double theta_old = particle_properties[index_cache.particle_properties.slip_state];
+                      const double theta  = rsf_rheology.slip_state(V, theta_old, dt);
+                      const double dmu_dV = rsf_rheology.friction_coefficient_derivative_wrt_slip_rate(volume_fractions, V, theta);
+
+                      const double eta_d = MaterialUtilities::average_value(volume_fractions, radiation_damping_coefficients, MaterialUtilities::arithmetic);
+
+                      const double softening_factor = (2. * chi * eta_ve) / (chi * eta_ve / (1. - g) + dmu_dV * sigma_n + eta_d);
+                      implicit_constitutive_outputs->nonlinear_tangent_moduli[p] = -(2. * eta_ve * softening_factor) * outer_product(S, S);
+                    }
                 }
               else // phi <= phase_field_activation_threshold
                 {
-                  implicit_constitutive_outputs->nonnewtonian_stress_derivatives[p] = 0;
-                  implicit_constitutive_outputs->nonnewtonian_stresses[p] = beta * tau_old;
+                  implicit_constitutive_outputs->nonlinear_stresses[p] = beta * tau_old;
+                  if (in.requests_property(MaterialProperties::tangent_modulus))
+                    implicit_constitutive_outputs->nonlinear_tangent_moduli[p] = 0;
                 }
             }
         }
@@ -405,15 +438,21 @@ namespace aspect
       // Vector storing the chemical field values, which is required for computing volume fractions
       std::vector<double> chemical_field_values(introspection.n_chemical_composition_fields());
 
-      // We need the velocity gradients, temperature values, phase-field values and core phase-field values
-      // at particle locations
+      // Solution values/gradients to be evaluated at particle locations:
+      // velocity gradient;
+      // phase-field value;
+      // core phase-field value;
+      // temperature value;
+      // pressure value if not using adiabatic pressure
       std::vector<EvaluationFlags::EvaluationFlags> evaluation_flags(introspection.n_components,
                                                                      EvaluationFlags::nothing);
       for (unsigned int d = 0; d < dim; ++d)
         evaluation_flags[d] = EvaluationFlags::gradients;
-      evaluation_flags[introspection.component_indices.temperature] = EvaluationFlags::values;
       evaluation_flags[index_cache.components.phase_field] = EvaluationFlags::values;
       evaluation_flags[index_cache.components.core_phase_field] = EvaluationFlags::values;
+      evaluation_flags[introspection.component_indices.temperature] = EvaluationFlags::values;
+      if (!use_adiabatic_pressure_in_friction)
+        evaluation_flags[introspection.component_indices.pressure] = EvaluationFlags::values;
 
       // The upper limit of Newton iterations for solving the nonlinear equation for V
       constexpr unsigned int max_newton_iterations = 20;
@@ -481,13 +520,12 @@ namespace aspect
                         continue;
                       }
 
-                    // Compute the strain rate
+                    // Get the ingredients for return-mapping
                     Tensor<2, dim> grad_u;
                     for (unsigned int d = 0; d < dim; ++d)
                       grad_u[d] = particle_solution_gradients[d];
                     const SymmetricTensor<2, dim> epsilon = Utilities::Tensors::consistent_deviator(symmetrize(grad_u));
 
-                    // Get the ingredients for computing the slip rate
                     const double T   = particle_solution_values[introspection.component_indices.temperature];
                     const double eta = calculate_creep_viscosity(T, volume_fractions);
                     const double G   = MaterialUtilities::average_value(volume_fractions, elastic_shear_moduli, viscosity_averaging);
@@ -500,16 +538,27 @@ namespace aspect
                     const double g   = phase_field_handler.energetic_degradation(volume_fractions, phi);
                     const double chi = phase_field_handler.slip_rate_localization_factor(volume_fractions, g, phi_hat);
 
-                    const Tensor<1, dim> n(ArrayView<double>({&particle_properties[index_cache.particle_properties.normal_direction], dim}));
-                    const Tensor<1, dim> s(ArrayView<double>({&particle_properties[index_cache.particle_properties.slip_direction], dim}));
+                    const Tensor<1, dim> n(ArrayView<const double>(&particle_properties[index_cache.particle_properties.normal_direction], dim));
+                    const Tensor<1, dim> s(ArrayView<const double>(&particle_properties[index_cache.particle_properties.slip_direction], dim));
+
                     const SymmetricTensor<2, dim> S = symmetrize(outer_product(n, s));
 
                     const SymmetricTensor<2, dim> tau_old = Utilities::Tensors::to_symmetric_tensor<dim>(
                       &particle_properties[index_cache.particle_properties.ve_stress],
                       &particle_properties[index_cache.particle_properties.ve_stress] + SymmetricTensor<2, dim>::n_independent_components);
+
                     const double h_tau_coh_old = particle_properties[index_cache.particle_properties.cohesive_force];
 
-                    const double p_bar = this->get_adiabatic_conditions().pressure(particle->get_location());
+                    const double pressure = (use_adiabatic_pressure_in_friction 
+                                             ? 
+                                             this->get_adiabatic_conditions().pressure(particle->get_location()) 
+                                             :
+                                             particle_solution_values[this->introspection().component_indices.pressure] + confining_pressure);
+
+                    const SymmetricTensor<2, dim> tau_trial = (2. * eta_ve) * epsilon + beta * tau_old;
+
+                    const double sigma_n = pressure - (tau_trial * n) * n;
+
                     const double eta_d = MaterialUtilities::average_value(volume_fractions,
                                                                           radiation_damping_coefficients,
                                                                           MaterialUtilities::arithmetic);
@@ -533,7 +582,7 @@ namespace aspect
                       const double tau_S = eta_ve * (2. * (epsilon * S) - v) + beta * (tau_old * S);
 
                       const double mu = rsf_rheology.friction_coefficient(volume_fractions, V_current, theta);
-                      const double tau_fric = mu * p_bar;
+                      const double tau_fric = mu * sigma_n;
 
                       const double h = 1. / g - 1.;
                       const double tau_coh = (eta_ve * v + beta * h_tau_coh_old) / h;
@@ -546,16 +595,16 @@ namespace aspect
                     auto F_derivative = [&](const double V_current)
                     {
                       const double dmu_dV = rsf_rheology.friction_coefficient_derivative_wrt_slip_rate(volume_fractions, V_current, theta);
-                      return -(chi * eta_ve / (1. - g) + dmu_dV * p_bar + eta_d);
+                      return -(chi * eta_ve / (1. - g) + dmu_dV * sigma_n + eta_d);
                     };
 
                     // Use Newton-Raphson method to solve the nonlinear equation for V.
                     const double V_init = rsf_rheology.get_minimum_slip_rate();
                     const double F_init = F_value(V_init);
 
-                    // Check if |F| > (mu * p_bar + eta_d * V) * 1e-6
+                    // Check if |F| > (mu * sigma_n + eta_d * V) * 1e-6
                     const double mu_init = rsf_rheology.friction_coefficient(volume_fractions, V_init, theta);
-                    if (std::abs(F_init) > (mu_init * p_bar + eta_d * V_init) * 1.e-6)
+                    if (std::abs(F_init) > (mu_init * sigma_n + eta_d * V_init) * 1.e-6)
                       {
                         convergence_history.clear();
 
@@ -765,15 +814,21 @@ convergence_check:
       // Vector storing the chemical field values, which is required for computing volume fractions
       std::vector<double> chemical_field_values(introspection.n_chemical_composition_fields());
 
-      // We need the velocity gradients, temperature values, phase-field values and core phase-field values
-      // at particle locations
+      // Solution values/gradients to be evaluated at particle locations:
+      // velocity gradient;
+      // phase-field value;
+      // core phase-field value;
+      // temperature value;
+      // pressure value if not using adiabatic pressure
       std::vector<EvaluationFlags::EvaluationFlags> evaluation_flags(introspection.n_components,
                                                                      EvaluationFlags::nothing);
       for (unsigned int d = 0; d < dim; ++d)
         evaluation_flags[d] = EvaluationFlags::gradients;
-      evaluation_flags[introspection.component_indices.temperature] = EvaluationFlags::values;
       evaluation_flags[index_cache.components.phase_field] = EvaluationFlags::values;
       evaluation_flags[index_cache.components.core_phase_field] = EvaluationFlags::values;
+      evaluation_flags[introspection.component_indices.temperature] = EvaluationFlags::values;
+      if (!use_adiabatic_pressure_in_friction)
+        evaluation_flags[introspection.component_indices.pressure] = EvaluationFlags::values;
 
       const double dt = (this->get_timestep_number() > 0 ? this->get_timestep() : 0);
 
@@ -850,13 +905,10 @@ convergence_check:
                     const double g   = phase_field_handler.energetic_degradation(volume_fractions, phi);
                     const double chi = phase_field_handler.slip_rate_localization_factor(volume_fractions, g, phi_hat);
 
-                    Tensor<1, dim> n, s;
-                    for (unsigned int d = 0; d < dim; ++d)
-                      {
-                        n[d] = particle_properties[index_cache.particle_properties.normal_direction + d];
-                        s[d] = particle_properties[index_cache.particle_properties.slip_direction + d];
-                      }
+                    const Tensor<1, dim> n(ArrayView<const double>(&particle_properties[index_cache.particle_properties.normal_direction], dim));
+                    const Tensor<1, dim> s(ArrayView<const double>(&particle_properties[index_cache.particle_properties.slip_direction], dim));
                     const SymmetricTensor<2, dim> S = symmetrize(outer_product(n, s));
+
                     const SymmetricTensor<2, dim> epsilon_ve = epsilon - (chi * V) * S;
                     const SymmetricTensor<2, dim> tau = 2. * eta_ve * epsilon_ve + beta * tau_old;
 
@@ -871,18 +923,17 @@ convergence_check:
                     const double h_tau_coh = eta_ve * v + beta * h_tau_coh_old;
                     particle_properties[index_cache.particle_properties.cohesive_force] = h_tau_coh;
 
-                    // Update the crack driving force
-                    const double H_old = particle_properties[index_cache.particle_properties.crack_driving_force];
-                    const double H_new = (h_tau_coh * h_tau_coh - h_tau_coh_old * h_tau_coh_old) / (2. * G * (1. - g) * (1. - g));
-                    particle_properties[index_cache.particle_properties.crack_driving_force] = std::max(H_old, H_new);
+                    // Update the crack driving force if the phase-field is to be evolved
+                    if (evolve_phase_field)
+                      {
+                        const double H_old = particle_properties[index_cache.particle_properties.crack_driving_force];
+                        const double H_new = (h_tau_coh * h_tau_coh - h_tau_coh_old * h_tau_coh_old) / (2. * G * (1. - g) * (1. - g));
+                        particle_properties[index_cache.particle_properties.crack_driving_force] = std::max(H_old, H_new);
+                      }
 
                     // Update the friction coefficient if requested
                     if (index_cache.particle_properties.friction_coefficient != numbers::invalid_unsigned_int)
                       particle_properties[index_cache.particle_properties.friction_coefficient] = rsf_rheology.friction_coefficient(volume_fractions, V, theta);
-
-                    // Update the slip distance if requested
-                    if (index_cache.particle_properties.slip_distance != numbers::invalid_unsigned_int)
-                      particle_properties[index_cache.particle_properties.slip_distance] += V * dt;
 
                     // Update the slip increment if requested
                     if (index_cache.particle_properties.slip_increment != numbers::invalid_unsigned_int)
@@ -898,16 +949,23 @@ convergence_check:
                       &particle_properties[index_cache.particle_properties.ve_stress] + SymmetricTensor<2, dim>::n_independent_components);
 
                     // Check if the particle reaches the material strength
-                    const double p_bar = this->get_adiabatic_conditions().pressure(particle->get_location());
-                    const double mu    = MaterialUtilities::average_value(volume_fractions, initial_friction_coefficients, MaterialUtilities::arithmetic);
-                    const double c     = MaterialUtilities::average_value(volume_fractions, cohesions, MaterialUtilities::arithmetic);
+                    const double mu = MaterialUtilities::average_value(volume_fractions, initial_friction_coefficients, MaterialUtilities::arithmetic);
+                    const double c  = MaterialUtilities::average_value(volume_fractions, cohesions, MaterialUtilities::arithmetic);
 
                     const double angle = (numbers::PI - 2. * std::atan(mu)) * 0.25;
                     const Tensor<1, dim> n = crack_surface_normal(tau, grad_u, angle);
 
+                    const double pressure = (use_adiabatic_pressure_in_friction 
+                                             ? 
+                                             this->get_adiabatic_conditions().pressure(particle->get_location()) 
+                                             :
+                                             particle_solution_values[this->introspection().component_indices.pressure] + confining_pressure);
+
+                    const double sigma_n = pressure - (tau * n) * n;
+
                     const Tensor<1, dim> t = tau * n;
                     const Tensor<1, dim> t_s = t - (t * n) * n;
-                    const double tau_diff = t_s.norm() - mu * p_bar;
+                    const double tau_diff = t_s.norm() - mu * sigma_n;
                     if (tau_diff > c)
                       {
                         // The particle is at the turning point. Update the crack driving force
@@ -1049,10 +1107,7 @@ convergence_check:
                             particle_properties[index_cache.particle_properties.slip_direction + d]   = s[d];
                           }
 
-                        // Initialize the slip distance and/or slip increment if requested
-                        if (index_cache.particle_properties.slip_distance != numbers::invalid_unsigned_int)
-                          particle_properties[index_cache.particle_properties.slip_distance] = 0;
-
+                        // Initialize the slip increment if requested
                         if (index_cache.particle_properties.slip_increment != numbers::invalid_unsigned_int)
                           particle_properties[index_cache.particle_properties.slip_increment] = 0;
                       }
@@ -1060,7 +1115,7 @@ convergence_check:
                 else
                   {
                     // The particle is intact. If it is the first time step, set the slip rate, direction vectors,
-                    // friction coefficient, slip distance and slip increment to NaN
+                    // friction coefficient and slip increment to NaN
                     if (this->get_timestep_number() == 0)
                       {
                         particle_properties[index_cache.particle_properties.slip_rate] = std::numeric_limits<double>::quiet_NaN();
@@ -1073,9 +1128,6 @@ convergence_check:
 
                         if (index_cache.particle_properties.friction_coefficient != numbers::invalid_unsigned_int)
                           particle_properties[index_cache.particle_properties.friction_coefficient] = std::numeric_limits<double>::quiet_NaN();
-
-                        if (index_cache.particle_properties.slip_distance != numbers::invalid_unsigned_int)
-                          particle_properties[index_cache.particle_properties.slip_distance] = std::numeric_limits<double>::quiet_NaN();
 
                         if (index_cache.particle_properties.slip_increment != numbers::invalid_unsigned_int)
                           particle_properties[index_cache.particle_properties.slip_increment] = std::numeric_limits<double>::quiet_NaN();
@@ -1237,16 +1289,6 @@ convergence_check:
                             "phase-field variable is small and the fracture is not yet fully developed. "
                             "The value of this parameter should be between 0 and 1.");
 
-          prm.declare_entry("Phase field normal lock threshold", "0.5",
-                            Patterns::Double(0, 1),
-                            "Value of the phase-field damage variable above which the fault normal "
-                            "vector is considered fully developed and its orientation is frozen. "
-                            "Below this threshold the fault normal may still evolve according to the "
-                            "local stress state, while above this value the stored normal direction "
-                            "is used to define the slip plane. This parameter helps stabilize the "
-                            "fault geometry once the fracture is sufficiently developed. The value "
-                            "should be between 0 and 1.");
-
           prm.declare_entry("Initial time step", "1.",
                             Patterns::Double(0),
                             "The initial time step size. It is used for evolving the stress at the "
@@ -1318,6 +1360,37 @@ convergence_check:
                             "those corresponding to chemical compositions. "
                             "If only one value is given, then all use the same value. "
                             "Units: \\si{\\pascal\\second\\per\\meter}.");
+
+          prm.declare_entry("Phase field normal lock threshold", "0.5",
+                            Patterns::Double(0, 1),
+                            "Value of the phase-field damage variable above which the fault normal "
+                            "vector is considered fully developed and its orientation is frozen. "
+                            "Below this threshold the fault normal may still evolve according to the "
+                            "local stress state, while above this value the stored normal direction "
+                            "is used to define the slip plane. This parameter helps stabilize the "
+                            "fault geometry once the fracture is sufficiently developed. The value "
+                            "should be between 0 and 1.");
+
+          prm.declare_entry("Use adiabatic pressure in friction", "false",
+                            Patterns::Bool(),
+                            "Whether to use the adiabatic pressure instead of the full pressure "
+                            "when calculating the frictional stress.");
+
+          prm.declare_entry("Confining pressure", "0",
+                            Patterns::Double(0.),
+                            "In some benchmark problems (for example, the BP3 benchmark in the "
+                            "SCEC SEAS Project), the lithostatic pressure is represented by a "
+                            "confining pressure that is uniform across the model. If a nonzero "
+                            "confining pressure is given, and the frictional stress is to be "
+                            "calculated with the full pressure (parameter <Use adiabatic pressure "
+                            "in friction> is set to 'false'), then the parameter <Pressure normalization> "
+                            "should be set to 'volume' for mechanical consistency.");
+
+          prm.declare_entry("Evolve phase field", "true",
+                            Patterns::Bool(),
+                            "Whether to evolve the phase field during the simulation. If set to "
+                            "false, then the crack driving force will be frozen after initialization. "
+                            "This is useful when conducting benchmarks with pre-existing faults.");
         }
         prm.leave_subsection();
       }
@@ -1356,6 +1429,16 @@ convergence_check:
                                  "the phase field activation threshold."));
 
           initial_time_step = prm.get_double("Initial time step");
+          use_adiabatic_pressure_in_friction = prm.get_bool("Use adiabatic pressure in friction");
+          confining_pressure = prm.get_double("Confining pressure");
+          if (confining_pressure > 0 && use_adiabatic_pressure_in_friction == false)
+            AssertThrow(this->get_parameters().pressure_normalization == "volume",
+                        ExcMessage("In material model 'phase field rsf', if the frictional stress is to be "
+                                   "calculated with the full pressure and the confining pressure is nonzero, "
+                                   "then the parameter <Pressure normalization> should be set to 'volume' "
+                                   "for mechanical consistency."));
+
+          evolve_phase_field = prm.get_bool("Evolve phase field");
 
           // Make options file for parsing maps to double arrays
           std::vector<std::string> compositional_field_names = this->introspection().get_composition_names();

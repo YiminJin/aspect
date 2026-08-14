@@ -215,20 +215,16 @@ namespace aspect
     std::pair<std::string, std::string>
     CumulativeSlipProfile<dim>::execute(TableHandler &)
     {
-      // Prepare to interpolate the cumulative slip from particles onto sample points
+      // Prepare to interpolate the slip rate from particles onto sample points
       const MaterialModel::PhaseFieldRSF<dim> &material_model = 
         Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldRSF<dim>>(this->get_material_model());
-      const unsigned int cumulative_slip_index = material_model.get_index_cache().particle_properties.slip_distance;
+      const unsigned int V_property_index = material_model.get_index_cache().particle_properties.slip_rate;
 
-      AssertThrow(cumulative_slip_index != numbers::invalid_unsigned_int,
-                  ExcMessage("Postprocess plugin 'cumulative slip profile' requires the parameter "
-                             "<Particles/Phase field RSF/Store slip distance> to be 'true'."));
-      
       const Particles::ParticleHandler<dim> &particle_handler = 
         this->get_phase_field_handler().get_associated_particle_manager().get_particle_handler();
 
       std::vector<bool> selected_properties(particle_handler.n_properties_per_particle(), false);
-      selected_properties[cumulative_slip_index] = true;
+      selected_properties[V_property_index] = true;
 
       const GridTools::Cache<dim> &grid_cache = this->get_phase_field_handler().get_grid_cache();
 
@@ -255,7 +251,7 @@ namespace aspect
               cell, grid_cache,
               [&] (const ArrayView<const double> &properties) -> bool
               {
-                return !numbers::is_nan(properties[cumulative_slip_index]);
+                return !numbers::is_nan(properties[V_property_index]);
               });
 
           for (unsigned int p = 0; p < sample_points_in_cell.size(); ++p)
@@ -265,18 +261,18 @@ namespace aspect
               // If none of the particles around the sample point are inside the crack zone,
               // then leave the cumulative slip as 0
               if (proportions_and_values[p].second.size() > 0)
-                local_values[global_index] = proportions_and_values[p].second[cumulative_slip_index];
+                local_values[global_index] = proportions_and_values[p].second[V_property_index];
 
               local_counts[global_index] += 1;
             }
         }
 
       // Gather the data to process 0
-      std::vector<double> cumulative_slip(n_sample_points, 0.);
+      std::vector<double> global_values(n_sample_points, 0.);
       std::vector<unsigned int> counts(n_sample_points, 0);
 
       MPI_Reduce(local_values.data(),
-                 cumulative_slip.data(),
+                 global_values.data(),
                  n_sample_points,
                  MPI_DOUBLE,
                  MPI_SUM,
@@ -294,6 +290,27 @@ namespace aspect
       // Append the data to the output file
       if (my_rank == 0)
         {
+          if (this->get_timestep_number() == 0)
+            {
+              cumulative_slip.resize(n_sample_points, 0.);
+            }
+          else
+            {
+              const double dt = (this->get_timestep_number() > 0 ? this->get_timestep() : 0);
+
+              for (unsigned int i = 0; i < n_sample_points; ++i)
+                {
+                  AssertThrow(counts[i] == 1,
+                              ExcMessage("Expected exactly one value for cumulative-slip sample point "
+                                         + Utilities::int_to_string(i)
+                                         + ", but received "
+                                         + Utilities::int_to_string(counts[i])
+                                         + "."));
+
+                  cumulative_slip[i] += global_values[i] * dt;
+                }
+            }
+
           std::ofstream output(filename, std::ios::out | std::ios::app);
 
           AssertThrow(output, 
@@ -305,15 +322,7 @@ namespace aspect
           output << this->get_time() << ' ' << this->get_timestep_number();
 
           for (unsigned int i = 0; i < n_sample_points; ++i)
-            {
-              AssertThrow(counts[i] == 1,
-                          ExcMessage("Expected exactly one value for cumulative-slip sample point "
-                                     + Utilities::int_to_string(i)
-                                     + ", but received "
-                                     + Utilities::int_to_string(counts[i])
-                                     + "."));
-              output << ' ' << cumulative_slip[i];
-            }
+            output << ' ' << cumulative_slip[i];
 
           output << '\n';
         }

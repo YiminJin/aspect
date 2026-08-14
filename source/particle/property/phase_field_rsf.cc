@@ -186,10 +186,6 @@ namespace aspect
         if (output_friction_coefficient)
           data.push_back(rsf_model.friction_coefficient(volume_fractions, V, theta));
 
-        // Initialize the slip distance if requested
-        if (output_slip_distance)
-          data.push_back(0);
-
         // Initialize the slip increment if requested
         if (output_slip_increment)
           data.push_back(0);
@@ -240,8 +236,6 @@ namespace aspect
           }
         if (output_friction_coefficient)
           is_restricted[index_cache.particle_properties.friction_coefficient] = true;
-        if (output_slip_distance)
-          is_restricted[index_cache.particle_properties.slip_distance] = true;
         if (output_slip_increment)
           is_restricted[index_cache.particle_properties.slip_increment] = true;
 
@@ -367,9 +361,6 @@ namespace aspect
         if (output_friction_coefficient)
           property_information.emplace_back("friction_coefficient", 1);
 
-        if (output_slip_distance)
-          property_information.emplace_back("slip_distance", 1);
-
         if (output_slip_increment)
           property_information.emplace_back("slip_increment", 1);
 
@@ -417,7 +408,6 @@ namespace aspect
         prm.enter_subsection("Phase field RSF");
         {
           output_friction_coefficient           = prm.get_bool("Output friction coefficient");
-          output_slip_distance                  = prm.get_bool("Output slip distance");
           maximum_slip_distance_between_outputs = prm.get_double("Slip distance between graphical output");
 
           if (maximum_slip_distance_between_outputs > 0)

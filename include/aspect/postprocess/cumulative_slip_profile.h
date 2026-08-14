@@ -56,6 +56,8 @@ namespace aspect
         std::vector<std::vector<unsigned int>> locally_owned_sample_point_indices;
 
         std::vector<typename Triangulation<dim>::active_cell_iterator> host_cells;
+
+        std::vector<double> cumulative_slip;
     };
   }
 }

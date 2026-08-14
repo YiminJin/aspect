@@ -89,8 +89,6 @@ namespace aspect
 
           bool output_friction_coefficient;
 
-          bool output_slip_distance;
-
           bool output_slip_increment;
 
           double maximum_slip_distance_between_outputs;

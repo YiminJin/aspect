@@ -26,6 +26,7 @@
 #include <aspect/material_model/interface.h>
 
 #include <deal.II/fe/fe_values.h>
+#include <deal.II/matrix_free/fe_point_evaluation.h>
 
 namespace aspect
 {
@@ -99,7 +100,8 @@ namespace aspect
                                 const unsigned int        stokes_dofs_per_cell,
                                 const bool                add_compaction_pressure,
                                 const bool                rebuild_matrix,
-                                const bool                use_bfbt);
+                                const bool                use_bfbt,
+                                const bool                use_implicit_constitutive_model);
           StokesPreconditioner (const StokesPreconditioner &scratch);
 
           ~StokesPreconditioner () override;
@@ -130,6 +132,14 @@ namespace aspect
            * hand side is sufficient.
            */
           const bool rebuild_stokes_matrix;
+
+          /**
+           * A point evaluator for computing the inverse Jacobians at arbitrary
+           * points. It is useful when assembling the Stokes matrix with
+           * implicit constitutive model, in which case we need the symmetric
+           * gradients of shape functions at particle locations.
+           */
+          std::unique_ptr<FEPointEvaluation<1, dim>> point_evaluator;
         };
 
 
@@ -159,7 +169,8 @@ namespace aspect
                         const bool                use_reference_density_profile,
                         const bool                rebuild_stokes_matrix,
                         const bool                rebuild_newton_stokes_matrix,
-                        const bool                use_bfbt);
+                        const bool                use_bfbt,
+                        const bool                use_implicit_constitutive_model);
 
           StokesSystem (const StokesSystem<dim> &scratch);
 

@@ -351,6 +351,10 @@ namespace aspect
          :
          MaterialModel::MaterialProperties::uninitialized);
 
+    if (parameters.use_implicit_constitutive_model)
+      scratch.material_model_inputs.requested_properties 
+        |= MaterialModel::MaterialProperties::tangent_modulus;
+
     material_model->evaluate(scratch.material_model_inputs,
                              scratch.material_model_outputs);
     MaterialModel::MaterialAveraging::average (parameters.material_averaging,
@@ -435,7 +439,8 @@ namespace aspect
                                     stokes_dofs_per_cell,
                                     parameters.include_melt_transport,
                                     rebuild_stokes_matrix,
-                                    parameters.use_bfbt),
+                                    parameters.use_bfbt,
+                                    parameters.use_implicit_constitutive_model),
          internal::Assembly::CopyData::
          StokesPreconditioner<dim> (stokes_dofs_per_cell));
 
@@ -642,6 +647,10 @@ namespace aspect
         MaterialModel::MaterialProperties::additional_outputs
         |
         (need_viscosity ? MaterialModel::MaterialProperties::viscosity : MaterialModel::MaterialProperties::uninitialized);
+
+    if (parameters.use_implicit_constitutive_model && assemble_newton_stokes_matrix)
+      scratch.material_model_inputs.requested_properties
+        |= MaterialModel::MaterialProperties::tangent_modulus;
 
     for (unsigned int i=0; i<assemblers->stokes_system.size(); ++i)
       assemblers->stokes_system[i]->create_additional_material_model_outputs(scratch.material_model_outputs);
@@ -877,7 +886,8 @@ namespace aspect
                             use_reference_density_profile,
                             rebuild_stokes_matrix,
                             assemble_newton_stokes_matrix,
-                            parameters.use_bfbt),
+                            parameters.use_bfbt,
+                            parameters.use_implicit_constitutive_model),
          internal::Assembly::CopyData::
          StokesSystem<dim> (stokes_dofs_per_cell,
                             do_pressure_rhs_compatibility_modification));

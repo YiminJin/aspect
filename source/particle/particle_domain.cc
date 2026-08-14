@@ -151,8 +151,8 @@ namespace aspect
           return typename ParticleHandler<dim>::particle_iterator();
 
         typename Triangulation<dim>::cell_iterator cell(&triangulation,
-                                                        particle_indicator.cell_index,
-                                                        particle_indicator.cell_level);
+                                                        particle_indicator.cell_level,
+                                                        particle_indicator.cell_index);
 
         AssertIndexRange(particle_indicator.particle_index_within_cell,
                          particle_handler.n_particles_in_cell(cell));

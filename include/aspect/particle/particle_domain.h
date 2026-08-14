@@ -143,7 +143,7 @@ namespace aspect
        * interpolation (CPDI).
        */
       template <int dim>
-      struct CPDIData
+      class CPDIData
       {
         public:
           /**

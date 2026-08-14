@@ -54,7 +54,6 @@ namespace aspect
             unsigned int slip_direction;
             unsigned int ve_stress;
             unsigned int friction_coefficient;
-            unsigned int slip_distance;
             unsigned int slip_increment;
             std::vector<unsigned int> chemical_fields;
 
@@ -71,7 +70,6 @@ namespace aspect
               , slip_direction(numbers::invalid_unsigned_int)
               , ve_stress(numbers::invalid_unsigned_int)
               , friction_coefficient(numbers::invalid_unsigned_int)
-              , slip_distance(numbers::invalid_unsigned_int)
               , slip_increment(numbers::invalid_unsigned_int)
             {}
           };
@@ -205,8 +203,6 @@ namespace aspect
 
         double phase_field_normal_lock_threshold;
 
-        double initial_time_step;
-
         std::vector<double> thermal_conductivities;
 
         std::vector<double> reference_viscosities;
@@ -222,6 +218,14 @@ namespace aspect
         std::vector<double> critical_energy_release_rates;
 
         std::vector<double> radiation_damping_coefficients;
+
+        double initial_time_step;
+
+        double confining_pressure;
+
+        bool use_adiabatic_pressure_in_friction;
+
+        bool evolve_phase_field;
 
         std::unique_ptr<SolutionEvaluator<dim>> solution_evaluator;
     };

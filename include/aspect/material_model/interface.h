@@ -196,6 +196,7 @@ namespace aspect
         reaction_terms                 = 512,
         reaction_rates                 = 1024,
         additional_outputs             = 2048,
+        tangent_modulus                = 4096,
 
         equation_of_state_properties   = density |
                                          thermal_expansion_coefficient |
@@ -208,7 +209,8 @@ namespace aspect
                                          thermal_conductivity |
                                          reaction_terms |
                                          reaction_rates |
-                                         additional_outputs
+                                         additional_outputs |
+                                         tangent_modulus
       };
 
       /**
@@ -224,7 +226,8 @@ namespace aspect
       inline Property operator |= (Property &d1,
                                    const Property d2)
       {
-        return (d1 | d2);
+        d1 = (d1 | d2);
+        return d1;
       }
     }
 
@@ -1353,9 +1356,8 @@ namespace aspect
 
         void resize(const unsigned int n_points)
         {
-          newtonian_viscosities.resize(n_points, numbers::signaling_nan<double>());
-          nonnewtonian_stresses.resize(n_points, numbers::signaling_nan<SymmetricTensor<2, dim>>());
-          nonnewtonian_stress_derivatives.resize(n_points, numbers::signaling_nan<SymmetricTensor<4, dim>>());
+          nonlinear_stresses.resize(n_points, numbers::signaling_nan<SymmetricTensor<2, dim>>());
+          nonlinear_tangent_moduli.resize(n_points, numbers::signaling_nan<SymmetricTensor<4, dim>>());
         }
 
         void average(const MaterialAveraging::AveragingOperation operation,
@@ -1368,22 +1370,18 @@ namespace aspect
         }
 
         /**
-         * Viscosities representing the Newtonian part of the rheology.
+         * Deviatoric stress tensors representing the nonlinear part of the
+         * rheology, i.e. the total deviatoric stress minus two times of the 
+         * product of the linear viscosity and the strain rate.
          */
-        std::vector<double> newtonian_viscosities;
+        std::vector<SymmetricTensor<2, dim>> nonlinear_stresses;
 
         /**
-         * Deviatoric stress tensors representing the non-Newtonian part of the
-         * rheology, i.e., the total deviatoric stress minus two times of the 
-         * product of the Newtonian viscosity and the strain rate.
+         * The nonlinear parts of the tangent moduli, i.e. the total tangent
+         * modulus minus two times of the product of the linear viscosity and
+         * the fourth-order identity tensor.
          */
-        std::vector<SymmetricTensor<2, dim>> nonnewtonian_stresses;
-
-        /**
-         * Derivatives of the non-Newtonian stress tensors with respect to the
-         * strain rate.
-         */
-        std::vector<SymmetricTensor<4, dim>> nonnewtonian_stress_derivatives;
+        std::vector<SymmetricTensor<4, dim>> nonlinear_tangent_moduli;
     };
 
 
