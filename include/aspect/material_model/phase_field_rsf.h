@@ -221,8 +221,6 @@ namespace aspect
 
         double initial_time_step;
 
-        double confining_pressure;
-
         bool use_adiabatic_pressure_in_friction;
 
         bool evolve_phase_field;
