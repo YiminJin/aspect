@@ -134,53 +134,61 @@ namespace aspect
         const double theta = this->get_initial_composition_manager().initial_composition(position, index_cache.compositional_fields.slip_state);
         data.push_back(theta);
 
-        // If there are pre-existing cracks, then the initial values of the direction vectors are determined by the initial composition model
+        // Initialize the direction vectors and the stress tensor
         if (has_preexisting_crack)
           {
-            Tensor<1, dim> n, s;
+            // If there are pre-existing cracks, then the normal vector is determined by the initial composition model
+            Tensor<1, dim> n;
             for (unsigned int d = 0; d < dim; ++d)
-              {
-                n[d] = this->get_initial_composition_manager().initial_composition(position, index_cache.compositional_fields.normal_direction[d]);
-                s[d] = this->get_initial_composition_manager().initial_composition(position, index_cache.compositional_fields.slip_direction[d]);
-              }
+              n[d] = this->get_initial_composition_manager().initial_composition(position, index_cache.compositional_fields.normal_direction[d]);
 
             const double n_norm = n.norm();
-            const double s_norm = s.norm();
-            if (n_norm < std::numeric_limits<double>::epsilon() ||
-                s_norm < std::numeric_limits<double>::epsilon() ||
-                n * s > n_norm * s_norm * 0.5)
+            if (n_norm < std::numeric_limits<double>::epsilon())
               {
-                std::stringstream position_as_string;
-                position_as_string << position;
-
-                AssertThrow(n_norm < std::numeric_limits<double>::epsilon(),
-                            ExcMessage("The norm of normal direction at point (" + position_as_string.str() + ") is zero."));
-                AssertThrow(s_norm < std::numeric_limits<double>::epsilon(),
-                            ExcMessage("The norm of slip direction at point (" + position_as_string.str() + ") is zero."));
-                AssertThrow(n_norm < std::numeric_limits<double>::epsilon(),
-                            ExcMessage("The normal direction and slip direction at point (" + position_as_string.str() 
-                                       + ") are far from perpendicular."));
+                std::stringstream error_message;
+                error_message << "The norm of the prescribed normal direction at point (" << position << ") is zero.";
+                AssertThrow(false, ExcMessage(error_message.str()));
               }
 
             n /= n_norm;
-            s -= (s * n) * n;
-            s /= s.norm();
-
             for (unsigned int d = 0; d < dim; ++d)
               data.push_back(n[d]);
+
+            // The slip direction is determined by the projection of the stress tensor on the crack surface
+            SymmetricTensor<2, dim> tau;
+            for (unsigned int c = 0; c < SymmetricTensor<2, dim>::n_independent_components; ++c)
+              tau.access_raw_entry(c) = this->get_initial_composition_manager()
+                .initial_composition(position, index_cache.compositional_fields.ve_stress[c]);
+
+            const Tensor<1, dim> t = tau * n;
+            Tensor<1, dim> s = t - (t * n) * n;
+            const double s_norm = s.norm();
+            if (s_norm / t.norm() < std::numeric_limits<double>::epsilon())
+              {
+                std::stringstream error_message;
+                error_message << "The prescribed viscoelastic stress has no shear component on the crack surface at point ("
+                              << position << "), which requires zero friction to satisfy the RSF consistent condition. "
+                              << "Currently this is not allowed.";
+                AssertThrow(false, ExcMessage(error_message.str()));
+              }
+
+            s /= s.norm();
             for (unsigned int d = 0; d < dim; ++d)
               data.push_back(s[d]);
+
+            for (unsigned int c = 0; c < SymmetricTensor<2, dim>::n_independent_components; ++c)
+              data.push_back(tau.access_raw_entry(c));
           }
         else
           {
             // There is no pre-existing crack. Initialize the direction vectors to NaN
             for (unsigned d = 0; d < 2 * dim; ++d)
               data.push_back(std::numeric_limits<double>::quiet_NaN());
-          }
 
-        // The initial viscoelastic stress is determined by the initial composition model
-        for (unsigned int c = 0; c < SymmetricTensor<2, dim>::n_independent_components; ++c)
-          data.push_back(this->get_initial_composition_manager().initial_composition(position, index_cache.compositional_fields.ve_stress[c]));
+            // The initial viscoelastic stress is determined by the initial composition model
+            for (unsigned int c = 0; c < SymmetricTensor<2, dim>::n_independent_components; ++c)
+              data.push_back(this->get_initial_composition_manager().initial_composition(position, index_cache.compositional_fields.ve_stress[c]));
+          }
 
         // Initialize the friction coefficient if requested
         if (output_friction_coefficient)

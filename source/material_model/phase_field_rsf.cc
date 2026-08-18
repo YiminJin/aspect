@@ -79,13 +79,6 @@ namespace aspect
               compositional_fields.normal_direction[key_and_value.second.second] = key_and_value.first;
             }
 
-          if (key_and_value.second.first == "slip_direction")
-            {
-              AssertThrow(key_and_value.second.second < dim,
-                          ExcMessage("The component indices of slip_direction exceed the range of [0, dim)."));
-              compositional_fields.slip_direction[key_and_value.second.second] = key_and_value.first;
-            }
-
           if (key_and_value.second.first == "ve_stress")
             {
               AssertThrow((key_and_value.second.second < SymmetricTensor<2, dim>::n_independent_components),
@@ -103,13 +96,12 @@ namespace aspect
                                + "] must be associated with a compositional field."));
 
       // If there are pre-existing cracks (i.e. crack_driving_force is associated with a compositional field),
-      // then the slip rate and the direction vectors must be associated with compositional fields too
+      // then the slip rate and the normal direction must be associated with compositional fields too
       if (compositional_fields.crack_driving_force != numbers::invalid_unsigned_int)
         {
           bool is_consistent = (compositional_fields.slip_rate != numbers::invalid_unsigned_int);
           for (unsigned int d = 0; d < dim; ++d)
-            if (compositional_fields.normal_direction[d] == numbers::invalid_unsigned_int
-                || compositional_fields.slip_direction[d] == numbers::invalid_unsigned_int)
+            if (compositional_fields.normal_direction[d] == numbers::invalid_unsigned_int)
               {
                 is_consistent = false;
                 break;
@@ -118,11 +110,10 @@ namespace aspect
           AssertThrow(is_consistent,
                       ExcMessage("The particle property 'crack_driving_force' is associated with a compositional fields, "
                                  "which means that there are pre-existing cracks in the model. In this case, the particle "
-                                 "properties 'slip_rate', 'normal_direction[d]' and 'slip_direction[d]' (d = 0, ..., dim-1) "
-                                 "should also be associated with compositional fields to get initial values from the "
-                                 "initial composition model, otherwise the initial conditions are incomplete."));
+                                 "properties 'slip_rate' and 'normal_direction[d]' (d = 0, ..., dim-1) should also be "
+                                 "associated with compositional fields to get initial values from the initial composition "
+                                 "model, otherwise the initial conditions are incomplete."));
         }
-
 
       // Initialize the component indices
       components.phase_field      = introspection.variable("phase_field").first_component_index;
@@ -524,7 +515,7 @@ namespace aspect
                         const double g = phase_field_handler.energetic_degradation(volume_fractions, phi);
                         const double G = MaterialUtilities::average_value(volume_fractions, elastic_shear_moduli, viscosity_averaging);
 
-                        particle_properties[index_cache.particle_properties.cohesive_force] = (1. - g) * std::sqrt(2. * G * H);
+                        particle_properties[index_cache.particle_properties.cohesive_force] = g * std::sqrt(2. * G * H);
 
                         continue;
                       }
@@ -562,12 +553,36 @@ namespace aspect
                     if (use_adiabatic_pressure_in_friction)
                       {
                         sigma_n = this->get_adiabatic_conditions().pressure(particle->get_location());
+
+                        if (sigma_n <= 0)
+                          {
+                            std::stringstream error_message;
+                            error_message << "The fault is non-compressive at point ("
+                                          << particle->get_location()
+                                          << "). The adiabatic pressure is "
+                                          << sigma_n
+                                          << ".";
+                            AssertThrow(false, ExcMessage(error_message.str()));
+                          }
                       }
                     else
                       {
                         const double pressure = particle_solution_values[this->introspection().component_indices.pressure];
                         const SymmetricTensor<2, dim> tau_trial = (2. * eta_ve) * epsilon + beta * tau_old;
                         sigma_n = pressure - (tau_trial * n) * n;
+
+                        if (sigma_n <= 0)
+                          {
+                            std::stringstream error_message;
+                            error_message << "The fault is non-compressive at point ("
+                                          << particle->get_location()
+                                          << "). Stress state: p = "
+                                          << pressure
+                                          << ", tau_nn = "
+                                          << (tau_trial * n) * n
+                                          << ".";
+                            AssertThrow(false, ExcMessage(error_message.str()));
+                          }
                       }
 
                     const double eta_d = MaterialUtilities::average_value(volume_fractions,
@@ -934,6 +949,17 @@ convergence_check:
                     const double h_tau_coh = eta_ve * v + beta * h_tau_coh_old;
                     particle_properties[index_cache.particle_properties.cohesive_force] = h_tau_coh;
 
+                    // Update the slip direction
+                    Tensor<1, dim> t = tau * n;
+                    Tensor<1, dim> s_new = t - (t * n) * n;
+                    const double s_norm = s_new.norm();
+                    if (s_norm / t.norm() >= std::numeric_limits<double>::epsilon())
+                      {
+                        s_new /= s_norm;
+                        for (unsigned int d = 0; d < dim; ++d)
+                          particle_properties[index_cache.particle_properties.slip_direction + d] = s_new[d];
+                      }
+
                     // Update the crack driving force if the phase-field is to be evolved
                     if (evolve_phase_field)
                       {
@@ -983,8 +1009,10 @@ convergence_check:
                     const double tau_diff = t_s.norm() - mu * sigma_n;
                     if (tau_diff > c)
                       {
-                        // The particle is at the turning point. Update the crack driving force
-                        particle_properties[index_cache.particle_properties.crack_driving_force] = (tau_diff * tau_diff) / (2. * G);
+                        // The particle is at the turning point. Update the crack driving force if 
+                        // the phase-field is to be evolved
+                        if (evolve_phase_field)
+                          particle_properties[index_cache.particle_properties.crack_driving_force] = (tau_diff * tau_diff) / (2. * G);
                       }
                   }
               }
