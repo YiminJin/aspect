@@ -37,8 +37,6 @@ namespace aspect
         public:
           void initialize() override;
 
-          void update() override;
-
           /**
            * @copydoc aspect::Particle::Property::Interface::initialize_one_particle_property()
            */
@@ -90,8 +88,6 @@ namespace aspect
           bool output_friction_coefficient;
 
           bool output_slip_increment;
-
-          double maximum_slip_distance_between_outputs;
       };
     }
   }

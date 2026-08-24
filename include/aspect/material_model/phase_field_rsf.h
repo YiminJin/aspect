@@ -219,9 +219,9 @@ namespace aspect
 
         double initial_time_step;
 
-        bool use_adiabatic_pressure_in_friction;
-
         bool evolve_phase_field;
+
+        double maximum_slip_increment_between_outputs;
 
         std::unique_ptr<SolutionEvaluator<dim>> solution_evaluator;
     };

@@ -20,8 +20,6 @@
 
 #include <aspect/particle/property/phase_field_rsf.h>
 #include <aspect/material_model/phase_field_rsf.h>
-#include <aspect/postprocess/visualization.h>
-#include <aspect/postprocess/particles.h>
 
 namespace aspect
 {
@@ -40,53 +38,6 @@ namespace aspect
         phase_field_base_element = this->introspection().variable("phase_field").base_index;
       }
 
-
-
-      template <int dim>
-      void PhaseFieldRSF<dim>::update()
-      {
-        if (maximum_slip_distance_between_outputs == 0)
-          return;
-
-        // Check if the maximum slip increment reaches the threshold
-        Particles::ParticleHandler<dim> &particle_handler = const_cast<Particles::ParticleHandler<dim>&>(
-          this->get_phase_field_handler().get_associated_particle_manager().get_particle_handler());
-
-        const unsigned int slip_increment_index =
-          Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldRSF<dim>>(this->get_material_model())
-            .get_index_cache().particle_properties.slip_increment;
-
-        double local_max_slip_increment = 0;
-
-        for (const auto &cell : this->get_triangulation().active_cell_iterators())
-          if (cell->is_locally_owned())
-            for (const auto &particle : particle_handler.particles_in_cell(cell))
-              {
-                const double V_inc = particle.get_properties()[slip_increment_index];
-                if (!numbers::is_nan(V_inc))
-                  local_max_slip_increment = std::max(local_max_slip_increment, V_inc);
-              }
-
-        const double max_slip_increment = Utilities::MPI::max(local_max_slip_increment, this->get_mpi_communicator());
-        
-        if (max_slip_increment >= maximum_slip_distance_between_outputs)
-          {
-            // Send output request to the solution-based and particle-based visualizers
-            this->get_postprocess_manager().template get_matching_active_plugin<Postprocess::Visualization<dim>>().request_output();
-            this->get_postprocess_manager().template get_matching_active_plugin<Postprocess::Particles<dim>>().request_output();
-
-            // Reset the slip increments
-            for (const auto &cell : this->get_triangulation().active_cell_iterators())
-              if (cell->is_locally_owned())
-                for (auto &particle : particle_handler.particles_in_cell(cell))
-                  {
-                    const ArrayView<double> particle_properties = particle.get_properties();
-                    const double V_inc = particle_properties[slip_increment_index];
-                    if (!numbers::is_nan(V_inc))
-                      particle_properties[slip_increment_index] = 0;
-                  }
-          }
-      }
 
 
 
@@ -297,7 +248,7 @@ namespace aspect
                                                                             [&] (const ArrayView<const double> &properties) -> bool
                                                                             {
                                                                               return !numbers::is_nan(properties[
-                                                                                index_cache.particle_properties.normal_direction]);
+                                                                                index_cache.particle_properties.slip_rate]);
                                                                             });
 
             AssertThrow(proportions_and_values[0].first > 0,
@@ -385,24 +336,18 @@ namespace aspect
         {
           prm.declare_entry("Output friction coefficient", "false",
                             Patterns::Bool(),
-                            "Whether to output the friction coefficient. If set to true, "
-                            "then the friction coefficient will be stored in particles as "
-                            "a passive particle property.");
-          prm.declare_entry("Output slip distance", "false",
-                            Patterns::Bool(),
-                            "Whether to output the slip distance. If set to true, "
-                            "then the slip distance will be stored in particles as "
-                            "a passive particle property.");
+                            "Whether to output the friction coefficient. If set to true, then "
+                            "then the particles will carry a property named 'friction_coefficient'.");
           prm.declare_entry("Slip distance between graphical output", "0",
                             Patterns::Double(0.),
                             "The maximum slip distance between each generation of output "
                             "files. The default value is 0, which indicates that the output "
                             "is not controlled by the slip distance. If a positive value "
-                            "is set, then a property named 'slip_increment' will be stored "
-                            "in particles. Once the maximum slip increment reaches the "
-                            "specified value, then an output request will be sent to both "
-                            "the solution-based and particle-based visualizers, and the slip "
-                            "increment will be reset to 0.");
+                            "is set, then the particles will carry a property named 'slip_increment'. "
+                            "Once the maximum slip increment reaches the specified value, then "
+                            "an output request will be sent to both the solution-based and "
+                            "particle-based visualizers, and the slip increment will be reset "
+                            "to 0.");
         }
         prm.leave_subsection();
       }
@@ -415,10 +360,9 @@ namespace aspect
       {
         prm.enter_subsection("Phase field RSF");
         {
-          output_friction_coefficient           = prm.get_bool("Output friction coefficient");
-          maximum_slip_distance_between_outputs = prm.get_double("Slip distance between graphical output");
-
-          if (maximum_slip_distance_between_outputs > 0)
+          output_friction_coefficient = prm.get_bool("Output friction coefficient");
+          
+          if (prm.get_double("Slip distance between graphical output") > 0)
             output_slip_increment = true;
           else
             output_slip_increment = false;
