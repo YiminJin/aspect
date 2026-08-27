@@ -100,12 +100,7 @@ namespace aspect
               solution_names.push_back (this->introspection().name_for_compositional_index(c));
 
             if (this->get_parameters().enable_phase_field)
-              {
-                solution_names.emplace_back("phase_field");
-
-                if (this->get_parameters().need_slip_rate)
-                  solution_names.emplace_back("core_phase_field");
-              }
+              solution_names.emplace_back("phase_field");
 
             return solution_names;
           }
@@ -130,12 +125,7 @@ namespace aspect
               interpretation.push_back (DataComponentInterpretation::component_is_scalar);
 
             if (this->get_parameters().enable_phase_field)
-              {
-                interpretation.push_back(DataComponentInterpretation::component_is_scalar);
-
-                if (this->get_parameters().need_slip_rate)
-                  interpretation.push_back(DataComponentInterpretation::component_is_scalar);
-              }
+              interpretation.push_back(DataComponentInterpretation::component_is_scalar);
 
             return interpretation;
           }
@@ -174,12 +164,7 @@ namespace aspect
               solution_units.emplace_back(""); // we don't know here
 
             if (this->get_parameters().enable_phase_field)
-              {
-                solution_units.emplace_back(""); // phase field is dimensionless
-
-                if (this->get_parameters().need_slip_rate)
-                  solution_units.emplace_back("");
-              }
+              solution_units.emplace_back(""); // phase field is dimensionless
 
             return solution_units;
           }

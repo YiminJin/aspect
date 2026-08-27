@@ -1,0 +1,105 @@
+set Dimension                    = 2
+set Use years instead of seconds = false
+set End time                     = 0
+set Output directory             = output-reconstructed-fault
+set Nonlinear solver scheme      = single Advection, no Stokes
+
+subsection Formulation
+  set Enable phase field                  = true
+  set Reconstruct faults from phase field = true
+end
+
+subsection Geometry model
+  set Model name = box
+  subsection Box
+    set X extent = 100000
+    set Y extent = 100000
+  end
+end
+
+subsection Mesh refinement
+  set Initial global refinement          = 5
+  set Initial adaptive refinement        = 0
+  set Time steps between mesh refinement = 0
+end
+
+subsection Prescribed Stokes solution
+  set Model name = function
+  subsection Velocity function
+    set Variable names      = x,y
+    set Function expression = 0; 0
+  end
+  subsection Pressure function
+    set Variable names      = x,y
+    set Function expression = 0
+  end
+end
+
+subsection Gravity model
+  set Model name = vertical
+  subsection Vertical
+    set Magnitude = 0
+  end
+end
+
+subsection Initial temperature model
+  set Model name = function
+  subsection Function
+    set Variable names      = x,y
+    set Function expression = 293
+  end
+end
+
+subsection Boundary temperature model
+  set Fixed temperature boundary indicators =
+end
+
+subsection Material model
+  set Model name = phase field rsf
+  subsection Phase field RSF
+    set Evolve phase field             = false
+    set Reference viscosities          = 1e21
+    set Elastic shear moduli           = 1e10
+    set Cohesions                      = 1e5
+    set Critical energy release rates  = 1e5
+    set Radiation damping coefficients = 1e7
+  end
+end
+
+subsection Phase field model
+  set Length scale                    = 5000
+  set Geometric function type         = AT1
+  set Degradation curvature parameter = 1
+end
+
+subsection Fault reconstruction
+  set Structural point spacing = 2500
+  set Ridge coefficient        = 1
+  set Prescribed faults file   = $ASPECT_SOURCE_DIR/cookbooks/reconstructed_fault/prescribed_fault.txt
+end
+
+subsection Particles
+  set Particle generator name                 = reference cell
+  set List of particle properties             = crack driving force
+  set Interpolation scheme                    = distance weighted average
+  set Generate particle domains               = true
+  set Generate CPDI data for particle domains = true
+  set Maximum particles per cell              = 100
+  set Load balancing strategy                 = none
+  subsection Generator
+    subsection Reference cell
+      set Number of particles per cell per direction = 3
+    end
+  end
+end
+
+subsection Postprocess
+  set List of postprocessors = visualization, particles, reconstructed faults
+  subsection Visualization
+    set Time between graphical output = 0
+    set Output format                 = vtu
+  end
+  subsection Particles
+    set Time between data output = 0
+  end
+end

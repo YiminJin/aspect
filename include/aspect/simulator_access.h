@@ -132,6 +132,7 @@ namespace aspect
 
   template <int dim> class MeltHandler;
   template <int dim> class PhaseFieldHandler;
+  template <int dim> class ReconstructedFaultManager;
   template <int dim> class VolumeOfFluidHandler;
 
   namespace MeshDeformation
@@ -817,6 +818,13 @@ namespace aspect
        */
       const PhaseFieldHandler<dim> &
       get_phase_field_handler () const;
+
+      PhaseFieldHandler<dim> &
+      get_phase_field_handler ();
+
+      /** Return the simulator-owned reconstructed-fault manager. */
+      ReconstructedFaultManager<dim> &
+      get_reconstructed_fault_manager () const;
 
       /**
        * Return a reference to the VolumeOfFluid handler.

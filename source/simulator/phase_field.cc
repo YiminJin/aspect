@@ -435,47 +435,6 @@ namespace aspect
                         Patterns::Double(0),
                         "The curvature parameter $p$ for the Lorentz-type degradation function.\n"
                         "Units: none.");
-
-      prm.enter_subsection("Core phase field extender");
-      {
-        prm.declare_entry("Ratio between normal and tangential diffusion coefficients", "1.e6",
-                          Patterns::Double(0.),
-                          "The core phase field is extended by solving an obstacle problem with "
-                          "anisotropic diffusion. Specifically, the phase field $\\phi$ is considered "
-                          "as an obstacle, and the unknown field $\\psi$ satisfies the KKT conditions"
-                          "\\[\\nabla\\cdot(\\boldsymbol{\\kappa}\\cdot\\psi) - r\\psi \\leq 0,\\]"
-                          "\\[\\psi - \\phi \\geq 0,\\]"
-                          "\\[[\\nabla\\cdot(\\boldsymbol{\\kappa}\\cdot\\psi) - r\\psi](\\psi - \\phi) = 0.\\]"
-                          "In the KKT conditions, $\\boldsymbol{\\kappa}$ is an anisotropic diffusion "
-                          "coefficient, defined by"
-                          "\\[\\boldsymbol{\\kappa} = \\kappa_n\\boldsymbol{n}\\otimes\\boldsymbol{n} "
-                          "+ \\kappa_t(\\boldsymbol{I} - \\boldsymbol{n}\\otimes\\boldsymbol{n}),\\]"
-                          "where $\\boldsymbol{n}$ is the normal vector of the crack surface; the term "
-                          "$r\\psi$ represents a pseudo force that drags the field downward. Define the "
-                          "normal and tangential length scales by "
-                          "\\["
-                          "L_n = \\sqrt{\\frac{\\kappa_n}{r}}\\quad\\text{and}\\quad"
-                          "L_t = \\sqrt{\\frac{\\kappa_t}{r}},"
-                          "\\]"
-                          "respectively. To ensure that $\\psi$ is nearly uniform in the normal direction "
-                          "but is hardly diffusive in the tangential direction, it should be satisfied that "
-                          "$L_n \\gg l$ and $L_n \\gg L_t$, where $l$ is the characteristice length scale. "
-                          "On the other hand, to suppress grid-scale oscillations, we require $\\kappa_t\\simeq h$, "
-                          "where $h$ is the grid size. Thus, it is proper to set $\\r = 1$, $\\kappa_t = h^2$ and "
-                          "$\\kappa_n = L_n^2$, where $L_n \\gg l$. This parameter determines the ratio between "
-                          "$\\kappa_n/\\kappa_t$, which should be greater than $10^2$, because $l$ is an order "
-                          "of magnitude greater than $h$ in common cases.");
-
-        prm.declare_entry("Penalty parameter scaling factor", "1.",
-                          Patterns::Double(0.),
-                          "The obstacle problem is solved by the primal-dual active set method. When "
-                          "updating the active set, we need to penalize $\\psi-\\phi$ by a parameter $c$, "
-                          "which is calculated by"
-                          "\\[c_i = \\gamma_c\\frac{A_{ii}}{B_{ii}}.\\]"
-                          "In the above equation, $A$ and $B$ are the matrix blocks of the saddle-point "
-                          "problem, and the scaling factor $\\gamma_c$ is determined by this parameter.");
-      }
-      prm.leave_subsection();
     }
     prm.leave_subsection();
 
@@ -585,13 +544,6 @@ namespace aspect
           // Compute the critical energy density
           critical_energy_densities.push_back(Gc[j] / (c0 * l));
         }
-
-      prm.enter_subsection("Core phase field extender");
-      {
-        core_extender_parameters.normal_to_tangential_diffusion = prm.get_double("Ratio between normal and tangential diffusion coefficients");
-        core_extender_parameters.penalty_parameter_scaling_factor = prm.get_double("Penalty parameter scaling factor");
-      }
-      prm.leave_subsection();
     }
     prm.leave_subsection();
 
@@ -637,12 +589,6 @@ namespace aspect
                                                  std::make_shared<FE_Q<dim>>(1), 
                                                  1, 
                                                  1));
-
-    if (this->get_parameters().need_slip_rate)
-      variables.push_back(VariableDeclaration<dim>("core_phase_field",
-                                                   std::make_shared<FE_Q<dim>>(1),
-                                                   1,
-                                                   1));
   }
 
 
@@ -657,7 +603,7 @@ namespace aspect
 
     for (unsigned int i = 0; i < this->n_particle_managers(); ++i)
       {
-        const Particle::Manager<dim> &manager = this->get_particle_manager(i);
+        Particle::Manager<dim> &manager = this->get_particle_manager(i);
         if (manager.get_property_manager().get_data_info().fieldname_exists("crack_driving_force"))
           {
             particle_manager = &manager;
@@ -676,16 +622,6 @@ namespace aspect
     AssertThrow(particle_manager->get_particle_domain_handler().cpdi_data_requested(),
                 ExcMessage("The phase field method requires the particle domain handler to "
                            "generate CPDI data."));
-
-    if (this->get_parameters().need_slip_rate)
-      {
-        const auto &particle_data_info = particle_manager->get_property_manager().get_data_info();
-        AssertThrow(particle_data_info.fieldname_exists("normal_direction") &&
-                    particle_data_info.get_components_by_field_name("normal_direction") == dim,
-                    ExcMessage("The phase field method requires a particle property named "
-                               "'normal_direction', which should have " 
-                               + Utilities::int_to_string(dim) + " components."));
-      }
 
     const auto &advection_methods = this->get_parameters().compositional_field_methods;
     if (std::find(advection_methods.begin(), advection_methods.end(), 
@@ -1181,394 +1117,21 @@ namespace aspect
 
 
   template <int dim>
-  void
-  PhaseFieldHandler<dim>::
-  assemble_saddle_point_system(LinearAlgebra::BlockSparseMatrix &system_matrix,
-                               LinearAlgebra::BlockVector       &system_rhs,
-                               const AffineConstraints<double>  &constraints) const
-  {
-    const auto &var_phi = this->introspection().variable("phase_field");
-    const unsigned int comp_phi = var_phi.first_component_index;
-
-    const auto &var_psi = this->introspection().variable("core_phase_field");
-    const unsigned int comp_psi = var_psi.first_component_index;
-    const unsigned int blk_psi  = var_psi.block_index;
-
-    // Initialize the corresponding blocks of the matrices and the rhs vector
-    system_matrix.block(blk_psi, blk_psi) = 0;
-    system_rhs.block(blk_psi) = 0;
-
-    // Stuff for cellwise assembly
-    FEValues<dim> fe_values(this->get_fe(),
-                            QGauss<dim>(2),
-                            update_values | update_gradients |
-                            update_quadrature_points | update_JxW_values);
-
-    const FEValuesExtractors::Scalar phi_extractor(comp_phi);
-    const FEValuesExtractors::Scalar psi_extractor(comp_psi);
-
-    const unsigned int n_q_points = fe_values.n_quadrature_points;
-    const unsigned int dofs_per_cell = this->get_fe().dofs_per_cell;
-    const unsigned int psi_dofs_per_cell = this->get_fe().base_element(var_psi.base_index).dofs_per_cell;
-
-    FullMatrix<double> cell_matrix(psi_dofs_per_cell, psi_dofs_per_cell);
-    Vector<double> cell_rhs(psi_dofs_per_cell);
-
-    std::vector<types::global_dof_index> system_dof_indices(dofs_per_cell);
-    std::vector<types::global_dof_index> cell_dof_indices(psi_dofs_per_cell);
-
-    std::vector<double>         shape_values(psi_dofs_per_cell);
-    std::vector<Tensor<1, dim>> shape_gradients(psi_dofs_per_cell);
-
-    // Stuff for interpolating the normal vector from particles to quadrature points
-    const auto &particle_data_info = particle_manager->get_property_manager().get_data_info();
-    const Particles::ParticleHandler<dim> &particle_handler = particle_manager->get_particle_handler();
-
-    const unsigned int first_normal_component = particle_data_info.get_position_by_field_name("normal_direction");
-    std::vector<bool> normal_components(particle_handler.n_properties_per_particle(), false);
-    for (unsigned int d = 0; d < dim; ++d)
-      normal_components[first_normal_component + d] = true;
-
-    std::vector<double> phi_values(n_q_points);
-
-    const MaterialModel::PhaseFieldModel<dim> *material_model
-      = dynamic_cast<const MaterialModel::PhaseFieldModel<dim>*>(&this->get_material_model());
-    const double phi_min = material_model->get_phase_field_range().first;
-
-    for (const auto &cell : this->get_dof_handler().active_cell_iterators())
-      if (cell->is_locally_owned())
-        {
-          fe_values.reinit(cell);
-          cell_matrix = 0;
-
-          // Interpolate the normal vector from particles to the quadrature points
-          const std::vector<std::pair<double, std::vector<double>>> proportions_and_values
-            = PhaseFieldUtilities::interpolate_from_particles_in_crack_zone(
-                particle_manager->get_particle_handler(),
-                fe_values.get_quadrature_points(),
-                ComponentMask(normal_components),
-                cell, *grid_cache,
-                [&] (const ArrayView<const double> &properties) -> bool
-                {
-                  return !numbers::is_nan(properties[first_normal_component]);
-                });
-
-          fe_values[phi_extractor].get_function_values(this->get_solution(), phi_values);
-
-          const double kappa_t = std::pow(cell->diameter(), 2);
-          const double kappa_n = kappa_t * core_extender_parameters.normal_to_tangential_diffusion;
-            
-          for (unsigned int q = 0; q < n_q_points; ++q)
-            {
-              for (unsigned int i = 0, i_psi = 0; i_psi < psi_dofs_per_cell; /*increment at end of loop*/)
-                {
-                  if (this->get_fe().system_to_component_index(i).first == comp_psi)
-                    {
-                      shape_values[i_psi]    = fe_values[psi_extractor].value(i, q);
-                      shape_gradients[i_psi] = fe_values[psi_extractor].gradient(i, q);
-                      ++i_psi;
-                    }
-                  ++i;
-                }
-
-              const double weight = proportions_and_values[q].first;
-              const double kappa_iso = kappa_n * kappa_t / (weight * kappa_n + (1. - weight) * kappa_t);
-              const double kappa_aniso = kappa_n - kappa_iso;
-
-              Tensor<1, dim> n;
-              if (proportions_and_values[q].second.size() > 0)
-                {
-                  for (unsigned int d = 0; d < dim; ++d)
-                    n[d] = proportions_and_values[q].second[first_normal_component + d];
-                }
-              else
-                {
-                  AssertThrow(phi_values[q] <= phi_min,
-                              ExcMessage("The normal vector of emerging crack zone is uninitialized!"));
-                }
-
-              for (unsigned int i = 0; i < psi_dofs_per_cell; ++i)
-                for (unsigned int j = 0; j < psi_dofs_per_cell; ++j)
-                  cell_matrix(i, j) += ( kappa_iso * (shape_gradients[i] * shape_gradients[j])
-                                         + kappa_aniso * (n * shape_gradients[i]) 
-                                                       * (n * shape_gradients[j])
-                                         + shape_values[i] * shape_values[j]
-                                       ) 
-                                       * fe_values.JxW(q);
-            }
-
-          // Sort out the DoF indices belonging to the core phase field
-          cell->get_dof_indices(system_dof_indices);
-          for (unsigned int i = 0, i_psi = 0; i_psi < psi_dofs_per_cell; /*increment at end of loop*/)
-            {
-              if (this->get_fe().system_to_component_index(i).first == comp_psi)
-                {
-                  cell_dof_indices[i_psi] = system_dof_indices[i];
-                  ++i_psi;
-                }
-              ++i;
-            }
-
-          constraints.distribute_local_to_global(cell_matrix,
-                                                 cell_rhs,
-                                                 cell_dof_indices,
-                                                 system_matrix,
-                                                 system_rhs,
-                                                 true);
-        }
-
-    system_matrix.compress(VectorOperation::add);
-    system_rhs.compress(VectorOperation::add);
-  }
-
-
-
-  template <int dim>
-  unsigned int
-  PhaseFieldHandler<dim>::
-  solve_saddle_point_system(const LinearAlgebra::BlockSparseMatrix &system_matrix,
-                            const LinearAlgebra::BlockVector       &system_rhs,
-                            LinearAlgebra::BlockVector             &solution,
-                            const AffineConstraints<double>        &constraints) const
-  {
-    const auto &variable = this->introspection().variable("core_phase_field");
-    const unsigned int component_index = variable.first_component_index;
-    const unsigned int block_index     = variable.block_index;
-
-    if (system_rhs.block(block_index).l2_norm() < 1e-50)
-      return 0;
-
-    // Set the preconditioner
-    LinearAlgebra::PreconditionAMG preconditioner;
-    LinearAlgebra::PreconditionAMG::AdditionalData amg_data;
-
-    std::vector<bool> component_mask_initializer(this->introspection().n_components, false);
-    component_mask_initializer[component_index] = true;
-#if DEAL_II_VERSION_GTE(9,7,0)
-    amg_data.constant_modes = DoFTools::extract_constant_modes(
-                                this->get_dof_handler(),
-                                ComponentMask(component_mask_initializer));
-#else
-    std::vector<std::vector<bool>> constant_modes;
-    DoFTools::extract_constant_modes(
-      this->get_dof_handler(),
-      ComponentMask(component_mask_initializer),
-      constant_modes);
-    amg_data.constant_modes = constant_modes;   
-#endif
-
-    amg_data.elliptic = true;
-    amg_data.higher_order_elements = false;
-    amg_data.smoother_sweeps = 2;
-    amg_data.aggregation_threshold = 0.02;
-
-    preconditioner.initialize(system_matrix.block(block_index, block_index), amg_data);
-
-    ReductionControl reduction_control(1000, 1.e-12, 1.e-6);
-
-    SolverCG<LinearAlgebra::Vector> solver(reduction_control);
-
-    LinearAlgebra::BlockVector dist_solution(this->introspection().index_sets.system_partitioning,
-                                             this->get_mpi_communicator());
-    dist_solution.block(block_index) = solution.block(block_index);
-
-    try
-      {
-        solver.solve(system_matrix.block(block_index, block_index),
-                     dist_solution.block(block_index),
-                     system_rhs.block(block_index),
-                     preconditioner);
-      }
-    catch (const std::exception &exc)
-      {
-        // if the solver fails, report the error from processor 0 with some additional
-        // information about its location, and throw a quiet exception on all other
-        // processors
-        Utilities::throw_linear_solver_failure_exception("iterative solver for phase field",
-                                                         "PhaseFieldHandler::solve_saddle_point_system",
-                                                         std::vector<SolverControl> {reduction_control},
-                                                         exc,
-                                                         this->get_mpi_communicator());       
-      }
-
-    constraints.distribute(dist_solution);
-    solution.block(block_index) = dist_solution.block(block_index);
-
-    return reduction_control.last_step();
-  }
-
-
-
-  template <int dim>
-  void
-  PhaseFieldHandler<dim>::
-  update_active_set(const LinearAlgebra::SparseMatrix &complete_system_matrix,
-                    const BlockIndices                &block_indices,
-                    LinearAlgebra::BlockVector        &lambda,
-                    LinearAlgebra::BlockVector        &solution,
-                    AffineConstraints<double>         &constraints,
-                    IndexSet                          &active_set) const
-  {
-    const auto &var_phi = this->introspection().variable("phase_field");
-    const unsigned int comp_phi = var_phi.first_component_index;
-
-    const auto &var_psi = this->introspection().variable("core_phase_field");
-    const unsigned int comp_psi = var_psi.first_component_index;
-    const unsigned int blk_psi  = var_psi.block_index;
-
-    const MaterialModel::PhaseFieldModel<dim> *material_model
-      = dynamic_cast<const MaterialModel::PhaseFieldModel<dim>*>(&this->get_material_model());
-    const double phi_min = material_model->get_phase_field_range().first;
-
-    const IndexSet &locally_owned_dofs = this->get_dof_handler().locally_owned_dofs();
-    const IndexSet locally_relevant_dofs = DoFTools::extract_locally_relevant_dofs(this->get_dof_handler());
-
-    const AffineConstraints<double> &hanging_node_constraints = this->get_current_constraints();
-
-    // Compute the Lagrange multiplier
-    LinearAlgebra::BlockVector dist_solution(this->introspection().index_sets.system_partitioning, this->get_mpi_communicator());
-    LinearAlgebra::BlockVector complete_system_rhs(this->introspection().index_sets.system_partitioning, this->get_mpi_communicator());
-
-    // The right-hand side is zero (the pseudo-force is on the left-hand side).
-    complete_system_rhs.block(blk_psi) = 0;
-    dist_solution.block(blk_psi) = solution.block(blk_psi);
-    complete_system_matrix.residual(lambda.block(blk_psi), 
-                                    dist_solution.block(blk_psi),
-                                    complete_system_rhs.block(blk_psi));
-    hanging_node_constraints.distribute(lambda);
-
-    active_set.clear();
-
-    constraints.clear();
-    constraints.reinit(this->get_dof_handler().locally_owned_dofs(),
-                       this->introspection().index_sets.system_relevant_set);
-
-    // To avoid duplicate computation, we make a record of the touched dofs
-    IndexSet local_touched_dofs(this->get_dof_handler().n_dofs());
-    for (const auto &cell : this->get_dof_handler().active_cell_iterators())
-      if (cell->is_locally_owned())
-        for (const unsigned int v : cell->vertex_indices())
-          {
-            const types::global_dof_index 
-            dof_phi = cell->vertex_dof_index(v, comp_phi),
-            dof_psi = cell->vertex_dof_index(v, comp_psi);
-
-            const double phi = solution(dof_phi);
-            const double psi = solution(dof_psi);
-
-            // Jump over the current node if:
-            // (a) the phase-field is smaller than the lower bound;
-            // (b) it is not locally-owned;
-            // (c) it is a hanging node;
-            // (d) it has been touched.
-            if (phi < phi_min
-                || hanging_node_constraints.is_constrained(dof_psi)
-                || !locally_owned_dofs.is_element(dof_psi)
-                || local_touched_dofs.is_element(dof_psi))
-              continue;
-
-            local_touched_dofs.add_index(dof_psi);
-
-            // The penalty parameter is proportional to the diagonal of the stiffness matrix
-            const auto block_and_index = block_indices.global_to_local(dof_psi);
-            const double A = complete_system_matrix.diag_element(block_and_index.second);
-            const double c = core_extender_parameters.penalty_parameter_scaling_factor * A;
-            
-            if (lambda(dof_psi) + c * (psi - phi) < 0)
-              {
-                active_set.add_index(dof_psi);
-                constraints.add_constraint(dof_psi, {}, phi);
-
-                dist_solution(dof_psi) = phi;
-
-                lambda(dof_psi) = 0;
-              }
-          }
-
-    constraints.make_consistent_in_parallel(locally_owned_dofs,
-                                            locally_relevant_dofs,
-                                            this->get_mpi_communicator());
-    constraints.merge(hanging_node_constraints);
-    constraints.close();
-
-    constraints.distribute(dist_solution);
-    solution.block(blk_psi) = dist_solution.block(blk_psi);
-  }
-
-
-
-  template <int dim>
-  void
-  PhaseFieldHandler<dim>::
-  extend_core_phase_field(LinearAlgebra::BlockSparseMatrix &system_matrix,
-                          LinearAlgebra::BlockVector       &system_rhs,
-                          LinearAlgebra::BlockVector       &solution)
-  {
-    // Update the normal vector for the emerging crack zone
-    pre_extend_core_phase_field(*this);
-
-    const unsigned int blk_phi = this->introspection().variable("phase_field").block_index;
-    const unsigned int blk_psi = this->introspection().variable("core_phase_field").block_index;
-
-    // Check if we need to extend the core phase field
-    const MaterialModel::PhaseFieldModel<dim> *material_model
-      = dynamic_cast<const MaterialModel::PhaseFieldModel<dim>*>(&this->get_material_model());
-    const double phi_min = material_model->get_phase_field_range().first;
-
-    if (solution.block(blk_phi).max() < phi_min)
-      return;
-
-    this->get_pcout() << "   Extending core phase field:" << std::endl;
-
-    // Create an object of AffineConstraints that includes both the hanging-node constraints
-    // and the active set constraints
-    AffineConstraints<double> comprehensive_constraints(this->get_dof_handler().locally_owned_dofs(), 
-                                                        this->introspection().index_sets.system_relevant_set);
-    comprehensive_constraints.merge(this->get_current_constraints());
-    comprehensive_constraints.close();
-
-    IndexSet active_set(this->get_dof_handler().n_dofs());
-    IndexSet active_set_old(this->get_dof_handler().n_dofs());
-
-    // Make a copy of the system matrix for computing the Lagrange multiplier
-    LinearAlgebra::SparseMatrix complete_system_matrix;
-    complete_system_matrix.reinit(system_matrix.block(blk_psi, blk_psi));
-
-    // Create a distributed vector for the Lagrange multiplier (lambda)
-    LinearAlgebra::BlockVector lambda(this->introspection().index_sets.system_partitioning, this->get_mpi_communicator());
-
-    for (unsigned int iteration = 0; iteration < 100; ++iteration)
-      {
-        assemble_saddle_point_system(system_matrix, system_rhs, comprehensive_constraints);
-        if (iteration == 0)
-          complete_system_matrix.copy_from(system_matrix.block(blk_psi, blk_psi));
-
-        const unsigned int cg_iterations = solve_saddle_point_system(system_matrix, system_rhs, solution, comprehensive_constraints);
-        update_active_set(complete_system_matrix, system_matrix.get_row_indices(), lambda, solution, comprehensive_constraints, active_set);
-
-        this->get_pcout() << "      Iteration " << std::setw(3) << iteration
-                          << ": size of active set = " << std::setw(Utilities::int_to_string(this->get_dof_handler().n_dofs()).size())
-                          << Utilities::MPI::sum(active_set.n_elements(), this->get_mpi_communicator())
-                          << ", residual of non-contact part = " << std::scientific << std::setprecision(3) << lambda.block(blk_psi).l2_norm()
-                          << " (in " << std::setw(4) << cg_iterations << " CG iterations)"
-                          << std::endl;
-
-        // Check if the active set algorithm is converged
-        const int local_active_set_changed = (active_set == active_set_old ? 0 : 1);
-        if (Utilities::MPI::max(local_active_set_changed, this->get_mpi_communicator()) == 0)
-          break;
-
-        active_set_old = active_set;
-      }
-  }
-
-
-
-  template <int dim>
   const Particle::Manager<dim> &
   PhaseFieldHandler<dim>::get_associated_particle_manager() const
   {
     Assert(particle_manager != nullptr, 
+           ExcMessage("The pointer to the associated particle manager has not been initiated."));
+
+    return *particle_manager;
+  }
+
+
+  template <int dim>
+  Particle::Manager<dim> &
+  PhaseFieldHandler<dim>::get_associated_particle_manager()
+  {
+    Assert(particle_manager != nullptr,
            ExcMessage("The pointer to the associated particle manager has not been initiated."));
 
     return *particle_manager;

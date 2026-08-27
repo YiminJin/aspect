@@ -28,6 +28,7 @@
 #include <aspect/newton.h>
 #include <aspect/mesh_deformation/interface.h>
 #include <aspect/simulator/assemblers/stokes.h>
+#include <aspect/simulator/assemblers/implicit_constitutive_stokes.h>
 #include <aspect/simulator/assemblers/advection.h>
 #include <aspect/simulator/assemblers/entropy_advection.h>
 

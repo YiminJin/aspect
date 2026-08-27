@@ -28,6 +28,7 @@
 #include <aspect/newton.h>
 #include <aspect/mesh_deformation/free_surface.h>
 #include <aspect/phase_field.h>
+#include <aspect/reconstructed_fault.h>
 
 #include <deal.II/base/parameter_handler.h>
 
@@ -752,12 +753,11 @@ namespace aspect
                          Patterns::Bool (),
                          "Whether to enable the phase-field method to describe crack nucleation and "
                          "propagation.");
-      prm.declare_entry ("Need slip rate", "false",
+      prm.declare_entry ("Reconstruct faults from phase field", "false",
                          Patterns::Bool (),
-                         "Whether the slip rate is required in the computation, in which case the "
-                         "phase-field values at the crack center should be extended to the whole "
-                         "crack zone. This parameter is active only when `Enable phase field' is "
-                         "set to `true'.");
+                         "Whether to reconstruct initial sharp faults from the converged Q1 "
+                         "phase-field solution. This parameter requires `Enable phase field' to "
+                         "be set to `true'.");
       prm.declare_entry ("Enable prescribed dilation", "false",
                          Patterns::Bool (),
                          "Whether to include additional terms on the right-hand side of "
@@ -1862,7 +1862,9 @@ namespace aspect
       enable_additional_stokes_rhs = prm.get_bool ("Enable additional Stokes RHS");
       enable_elasticity = prm.get_bool("Enable elasticity");
       enable_phase_field = prm.get_bool("Enable phase field");
-      need_slip_rate = prm.get_bool("Need slip rate");
+      reconstruct_faults = prm.get_bool("Reconstruct faults from phase field");
+      AssertThrow(!reconstruct_faults || enable_phase_field,
+                  ExcMessage("`Reconstruct faults from phase field' requires `Enable phase field'."));
       enable_prescribed_dilation = prm.get_bool("Enable prescribed dilation");
 
       use_implicit_constitutive_model = prm.get_bool("Use implicit constitutive model");
@@ -2477,6 +2479,7 @@ namespace aspect
     VolumeOfFluidHandler<dim>::declare_parameters(prm);
     Melt::Parameters<dim>::declare_parameters (prm);
     PhaseFieldHandler<dim>::declare_parameters (prm);
+    ReconstructedFaultManager<dim>::declare_parameters(prm);
     Newton::Parameters::declare_parameters (prm);
     StokesMatrixFreeHandler<dim>::declare_parameters (prm);
     MeshDeformation::MeshDeformationHandler<dim>::declare_parameters (prm);

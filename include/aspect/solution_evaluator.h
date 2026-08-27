@@ -251,13 +251,11 @@ namespace aspect
       std::unique_ptr<FEPointEvaluation<1, dim>> fluid_pressure;
 
       /**
-       * Pointers to FEPointEvaluation objects for the phase-field and the core
-       * phase-field. The former only points to a valid object in case that the
-       * phase-field method is enabled, while the latter only points to a valid
-       * object in case that the slip rate is needed in the phase-field model.
+       * Pointers to FEPointEvaluation objects for the phase-field, which only 
+       * points to a valid object in case that the phase-field method is 
+       * enabled.
        */
       std::unique_ptr<FEPointEvaluation<1, dim>> phase_field;
-      std::unique_ptr<FEPointEvaluation<1, dim>> core_phase_field;
 
       /**
        * The component indices for the three melt formulation
@@ -268,11 +266,10 @@ namespace aspect
       std::array<unsigned int, 3> melt_component_indices;
 
       /**
-       * The component indices for the phase-field and the core phase-field. 
-       * They are cached to avoid repeated expensive lookups.
+       * The component indices for the phase-field, which is cached to avoid 
+       * repeated expensive lookups.
        */
       unsigned int phase_field_component_index;
-      unsigned int core_phase_field_component_index;
 
       /**
        * Reference to the active simulator access object. Provides

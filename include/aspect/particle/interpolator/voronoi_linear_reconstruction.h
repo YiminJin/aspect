@@ -22,6 +22,7 @@
 #define _aspect_particle_interpolator_voronoi_linear_reconstruction_h
 
 #include <aspect/particle/interpolator/interface.h>
+#include <aspect/particle/particle_domain.h>
 #include <aspect/simulator_access.h>
 
 namespace aspect

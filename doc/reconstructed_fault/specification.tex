@@ -1,0 +1,972 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{listings}
+
+\setlist[itemize]{nosep,leftmargin=2em}
+\setlist[enumerate]{nosep,leftmargin=2em}
+\lstset{basicstyle=\ttfamily\small,breaklines=true,frame=single}
+
+\newcommand{\faultdim}{d_\Gamma}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Gammah}{\Gamma_h}
+\newcommand{\wh}{\omega}
+
+\title{Phase-Field-Aware Reconstructed Fault\\Technical Specification for ASPECT/deal.II}
+\author{}
+\date{Revision 3}
+
+\begin{document}
+\maketitle
+
+\section*{Status of this document}
+This document is the implementation source of truth for the reconstructed-fault framework.  Scientific and architectural decisions belong here.  Codex should implement only what is specified here and should report ambiguities or conflicts instead of silently choosing a different algorithm.
+
+\section*{Reader map}
+The framework has four layers:
+\begin{enumerate}
+  \item \textbf{Persistent fault registry}: stable IDs, persistent geometry records, connectivity, creation times, and constitutive history.
+  \item \textbf{Runtime fault mesh}: a replicated \texttt{dealii::Triangulation<dim-1,dim>} rebuilt from the registry whenever the persistent geometry changes.  It provides tested deal.II connectivity and neighbor traversal, which is especially useful for a future 3-D implementation.
+  \item \textbf{Coupling operators and caches}: cached particle-to-fault and fault-to-quadrature-point mappings, plus the reduced projection operators used inside nonlinear iterations.
+  \item \textbf{Distributed bulk fields}: the ASPECT mesh, phase field, particles, and Stokes quadrature points remain distributed over MPI ranks.
+\end{enumerate}
+
+The central data-flow pattern is
+\[
+\boxed{
+\text{distributed bulk data}
+\;\longrightarrow\;
+\text{local assembly/evaluation}
+\;\longrightarrow\;
+\text{MPI reduction when needed}
+\;\longrightarrow\;
+\text{small replicated fault problem}
+}
+\]
+not ``gather all bulk data on rank 0.''
+
+
+\section{Existing implementation interface}
+\label{sec:existing-interface}
+
+\subsection{Reference policy}
+The existing code is divided below into three categories:
+\begin{itemize}
+  \item \textbf{MUST reuse}: an existing API or data structure is authoritative and a duplicate implementation/parameter shall not be introduced;
+  \item \textbf{MAY reuse/refactor}: an isolated implementation is useful, but the surrounding old algorithm is not authoritative;
+  \item \textbf{MUST NOT depend on}: the implementation belongs to the abandoned core-phase-field/original phase-field-RSF algorithm and shall not become a dependency of the reconstructed-fault framework.
+\end{itemize}
+
+\subsection{Phase-field module}
+The authoritative implementation is
+\begin{center}
+\texttt{include/aspect/phase\_field.h},\qquad
+\texttt{source/simulator/phase\_field.cc}.
+\end{center}
+The existing \texttt{PhaseFieldHandler<dim>} already declares the bulk \texttt{phase\_field} variable with \texttt{FE\_Q<dim>(1)} and owns the machinery used to evolve the distributed phase field.  The reconstructed-fault implementation shall use this existing FE variable; it shall not introduce a second phase-field representation.
+
+\paragraph{Phase-field range.}
+The authoritative phase-field bounds are provided by
+\begin{center}
+\texttt{MaterialModel::PhaseFieldModel<dim>::get\_phase\_field\_range()}.
+\end{center}
+The current default implementation returns the lower and upper bounds $(0.01,0.99)$.  \textbf{MUST reuse:} reconstruction shall obtain the admissible/active phase-field range through this existing virtual interface and shall not introduce an independent parameter representing the same lower or upper threshold.  The existing \texttt{PhaseFieldHandler<dim>::parse\_parameters()} already obtains these bounds from the material model through \texttt{MaterialModel::PhaseFieldModel<dim>}.
+
+If repeated access from the new reconstruction code would otherwise duplicate the dynamic cast, it is acceptable to add a thin public forwarding accessor to \texttt{PhaseFieldHandler<dim>}, but the source of truth remains \texttt{PhaseFieldModel<dim>::get\_phase\_field\_range()}.
+
+\paragraph{Length scale.}
+The phase-field length scale $\ell$ is already parsed by \texttt{PhaseFieldHandler<dim>} and stored in its \texttt{PhaseField::GeometricFunction}; \texttt{GeometricFunction::get\_length\_scale()} already returns it.  \textbf{MUST reuse:} the reconstructed-fault module shall not define a duplicate fracture length scale.  Because \texttt{PhaseFieldHandler<dim>} currently does not expose $\ell$ directly, the preferred change is to add a thin const accessor such as
+\begin{center}
+\texttt{PhaseFieldHandler<dim>::get\_length\_scale() const}
+\end{center}
+that forwards to \texttt{geometric\_function->get\_length\_scale()}.
+
+\paragraph{Associated particle infrastructure.}
+\texttt{PhaseFieldHandler<dim>} already exposes
+\begin{center}
+\texttt{get\_associated\_particle\_manager()},\qquad
+\texttt{get\_grid\_cache()}.
+\end{center}
+These existing access points should be reused where appropriate.  In particular, the reconstructed-fault coupling should obtain the particle manager associated with the phase-field calculation through the existing handler instead of discovering a second particle set independently.
+
+\paragraph{Core-phase-field functionality.}
+\textbf{MUST NOT depend on:} the reconstructed-fault framework shall not call or require the old core-phase-field machinery, including \texttt{PhaseFieldHandler<dim>::extend\_core\_phase\_field()}, the \texttt{pre\_extend\_core\_phase\_field} signal, or algorithms whose inputs fundamentally require \texttt{core\_phase\_field}.  This includes the old uses of \texttt{slip\_rate\_localization\_factor(..., core\_phase\_field)} and \texttt{stationary\_crack\_driving\_force(..., core\_phase\_field)} in the failed RSF localization algorithm.  The existing core-phase-field FE variable may remain temporarily for backward compatibility with old plugins, but the new reconstructed-fault implementation shall neither read it nor require it.
+
+\paragraph{Old particle interpolation helper.}
+\texttt{PhaseFieldUtilities::interpolate\_from\_particles\_in\_crack\_zone()} is tied to interpolation of particle properties in the old diffuse crack-zone representation.  It shall not be used as the particle-to-sharp-fault projection operator defined in this specification.  Isolated implementation techniques from it may be consulted, but the new operator must assemble directly onto the codimension-one fault FE space.
+
+\subsection{Particle-domain module}
+The authoritative implementation is
+\begin{center}
+\texttt{include/aspect/particle/particle\_domain.h},\qquad
+\texttt{source/particle/particle\_domain.cc}.
+\end{center}
+The existing \texttt{Particle::ParticleDomainHandler<dim>} and \texttt{ParticleDomainAccessor<dim>} provide particle-domain geometry and CPDI information.  In particular,
+\begin{center}
+\texttt{get\_particle\_domain(particle\_index).volume()}
+\end{center}
+returns the physical measure of the particle domain.
+
+\textbf{MUST reuse:} this particle-domain volume is the preferred sampling measure $m_p$ for particle-to-fault projection.  Do not approximate it by $|K|/N_{p,K}$ when the particle-domain volume is available.
+
+The module also provides particle-domain face/neighbour data and CPDI relevant-vertex weighting functions.  These may be reused for tasks for which they were designed, but the CPDI weighting functions are bulk-grid transfer weights and are \emph{not} the shape functions of the reconstructed fault.  Therefore \texttt{weighting\_function\_value()} and \texttt{weighting\_function\_gradient()} shall not replace the fault Q1 basis $N_a(\boldsymbol\xi_\Gamma)$ in the particle-to-fault projection.
+
+\subsection{Rate-and-state friction rheology}
+The authoritative implementation is
+\begin{center}
+\texttt{include/aspect/material\_model/rheology/rate\_state\_friction.h},\qquad
+\texttt{source/material\_model/rheology/rate\_state\_friction.cc}.
+\end{center}
+The class is
+\begin{center}
+\texttt{MaterialModel::Rheology::RateStateFriction<dim>}.
+\end{center}
+(Notice that the repository filename is \texttt{rate\_state\_friction.cc}; the earlier spelling \texttt{friciton} is a typo.)
+
+\textbf{MUST reuse:} the reconstructed-fault constitutive model shall use the existing RSF implementation for at least
+\begin{itemize}
+  \item \texttt{slip\_state(V, theta\_old, dt)};
+  \item \texttt{friction\_coefficient(volume\_fractions, V, theta)};
+  \item \texttt{friction\_coefficient\_derivative\_wrt\_slip\_rate(...)};
+  \item \texttt{compute\_time\_step(...)};
+  \item existing getters for $V_0$, $V_{\min}$, and $D_c$ where required;
+  \item the existing parameter declaration/parsing for $V_0$, $V_{\min}$, $V_{\max}$, $D_c$, $\mu_0$, $a$, $b$, and the regularization option.
+\end{itemize}
+The new reconstructed-fault model shall not duplicate these formulas or define an independent set of RSF parameters.
+
+\subsection{Original phase-field-RSF material model: reference only}
+The file
+\begin{center}
+\texttt{source/material\_model/phase\_field\_rsf.cc}
+\end{center}
+implements the abandoned diffuse/core-phase-field RSF architecture.  \textbf{MUST NOT use as an architectural base class or data-ownership model.}  In particular, the new implementation shall not copy its dependencies on the core phase field, particle-stored normal/slip directions, or the old diffuse slip-localization factor.
+
+\textbf{MAY reuse/refactor:} selected isolated numerical procedures may be extracted after verifying that their inputs remain valid in the sharp-fault formulation.  The most important example is the local nonlinear return-mapping/root-solving procedure currently contained in \texttt{PhaseFieldRSF<dim>::perform\_return\_mapping()}.  Its scalar RSF root equation, derivative evaluation, convergence checks, failure reporting, and use of \texttt{RateStateFriction<dim>} are useful references.  They should be refactored into a geometry-independent helper operating on explicit local inputs rather than copying the complete particle loop.
+
+The current signal timing is also a useful reference: the old model performs return mapping from the \texttt{pre\_assemble\_stokes\_system} signal and updates history after the nonlinear solver.  The new implementation may preserve compatible timing where appropriate, but it shall not reuse the \texttt{pre\_extend\_core\_phase\_field} path or \texttt{update\_particles\_in\_emerging\_crack\_zone()}.
+
+\subsection{Original phase-field-RSF particle property: do not use as state layout}
+The file
+\begin{center}
+\texttt{source/particle/property/phase\_field\_rsf.cc}
+\end{center}
+is specific to the failed diffuse-fault algorithm.  It currently defines particle properties including \texttt{slip\_rate}, \texttt{slip\_state}, \texttt{normal\_direction}, and \texttt{slip\_direction}.  \textbf{MUST NOT use this layout as the authoritative state layout for the reconstructed fault.}  In the new formulation, fault state and fault geometry live on the reconstructed codimension-one fault according to this specification.
+
+Individual utility code may be consulted or refactored when it is independent of the abandoned geometry/state assumptions, but no function from this plugin is reused merely because it already has a similar name.  In particular, its old crack-zone particle interpolation and emerging-crack normal/slip-direction initialization are not part of the reconstructed-fault algorithm.
+
+\subsection{Rule for future interface additions}
+When the reconstructed-fault code needs information that already exists privately in one of the reusable modules, prefer adding a narrow const accessor to the authoritative module over duplicating the parameter or recomputing the quantity elsewhere.  Such additions must expose existing state, not create a second source of truth.
+
+\section{Scope and non-goals}
+
+The public interface shall be dimension-independent:
+\[
+\faultdim = \texttt{dim}-1.
+\]
+Thus \texttt{dim=2} corresponds to a one-dimensional fault curve embedded in two dimensions, and a future \texttt{dim=3} instantiation corresponds to a two-dimensional fault surface embedded in three dimensions.
+
+The current implementation only needs a complete propagation algorithm for \texttt{dim=2}.  When the 2-D and 3-D implementations differ substantially, only the 2-D implementation is required now.  The generic interface must nevertheless avoid assumptions that would prevent a future 3-D implementation.
+
+The current implementation shall not attempt:
+\begin{itemize}
+  \item 3-D crack-front propagation or 3-D surface remeshing;
+  \item branching or nucleation away from an existing fault;
+  \item merging of independent faults;
+  \item topology changes;
+  \item a global Cartesian graph representation such as $y=f(x)$ or $z=f(x,y)$;
+  \item a global $p_1\times p_2$ structural parameterization;
+  \item distributed ownership of the fault mesh.
+\end{itemize}
+
+\section{Fundamental invariants}
+
+\subsection{Codimension-one manifold}
+The fault is represented as a codimension-one manifold embedded in the bulk domain.  The public interface shall operate on fault cells, physical points, reference coordinates on fault cells, and fault normals.  It shall not expose structured-grid indices such as \texttt{i}, \texttt{j}, \texttt{p1}, or \texttt{p2}.
+
+\subsection{Append-only persistent geometry}
+Once a fault vertex is committed to the persistent fault, its physical location never changes.  Geometry correction and smoothing are performed only on temporary candidate geometry before it is committed.
+
+This rule prevents repeated remapping of rate-and-state history variables.
+
+\subsection{Replicated fault, distributed bulk}
+Every MPI rank stores the complete persistent fault registry and the complete runtime fault mesh.  The ASPECT bulk triangulation, FE fields, and particles remain distributed.
+
+\subsection{No abuse of triangulation user data}
+Persistent fault IDs, creation times, and constitutive state shall \emph{not} be stored in \texttt{user\_data}, \texttt{user\_index}, or \texttt{user\_flag}.  These deal.II mechanisms may be used only for short-lived algorithmic bookkeeping when appropriate.
+
+\section{Geometry and state representation}
+
+\subsection{Persistent registry}
+The persistent application-owned registry is the lifetime-stable representation of fault identity and state.  Conceptually,
+\begin{lstlisting}[language=C++]
+template <int dim>
+struct FaultVertexRecord
+{
+  std::uint64_t persistent_id;
+  dealii::Point<dim> position;
+  double creation_time;
+  FaultState state;
+};
+
+struct FaultCellRecord
+{
+  std::uint64_t persistent_id;
+  std::array<std::uint64_t, vertices_per_fault_cell> vertex_ids;
+};
+\end{lstlisting}
+
+The exact containers may differ, but persistent identity must never depend on deal.II vertex indices, active-cell indices, or DoF indices.
+
+\subsection{Runtime fault triangulation}
+\texttt{ReconstructedFault<dim>} shall own a replicated
+\begin{center}
+\texttt{dealii::Triangulation<dim-1,dim>}.
+\end{center}
+
+This triangulation is the runtime geometric/connectivity representation used for deal.II algorithms, cell traversal, and neighbor relations.  It is rebuilt from the persistent registry whenever new geometry is committed.
+
+This choice deliberately trades a small amount of duplicated memory and rebuild time for the robustness of deal.II's tested mesh-connectivity infrastructure.  In the intended 2-D calculations the fault is tiny compared with the bulk mesh, so this overhead is acceptable.  The neighbor structure is also directly useful for a future 3-D surface implementation.
+
+\subsection{Surface finite element space}
+The runtime fault object should also own a Q1 surface finite-element space, conceptually
+\begin{lstlisting}[language=C++]
+static constexpr int fault_dim = dim - 1;
+
+dealii::Triangulation<fault_dim, dim> triangulation;
+dealii::FE_Q<fault_dim, dim>          fe_fault{1};
+dealii::DoFHandler<fault_dim, dim>    dof_handler{triangulation};
+\end{lstlisting}
+
+The Q1 space provides a standard and verified interpolation structure for nodal surface quantities.  DoF numbering is a runtime indexing scheme, not persistent identity.
+
+After every triangulation rebuild, explicit maps between persistent vertex IDs, triangulation vertex indices, and surface DoF indices shall be reconstructed.
+
+\subsection{Surface location}
+A generic surface location is
+\[
+\boxed{
+\text{SurfaceLocation}
+=
+(\text{fault-cell identifier},\,\boldsymbol\xi_\Gamma)
+}
+\]
+with
+\[
+\boldsymbol\xi_\Gamma\in[0,1]^{\faultdim}.
+\]
+For \texttt{dim=2}, $\boldsymbol\xi_\Gamma=(\xi)$.  A future \texttt{dim=3} implementation would use $(\xi,\eta)$.
+
+The public fault interface should provide operations conceptually equivalent to
+\begin{lstlisting}
+closest_point(x)
+position(surface_location)
+normal(surface_location)
+interpolate_surface_field(surface_location, field)
+geometry_version()
+\end{lstlisting}
+
+\section{Phase-field-aware reconstruction core}
+
+Define a normalized crack variable
+\[
+d_h(\mathbf{x})\in[0,1],
+\]
+with $d_h=0$ in intact material and $d_h=1$ at the crack core.  If the FE phase-field convention is opposite, convert it before reconstruction.
+
+Let
+\[
+(\phi_{\min},\phi_{\max})
+=
+\texttt{MaterialModel::PhaseFieldModel<dim>::get\_phase\_field\_range()}.
+\]
+These existing bounds define the support and clipping range used by reconstruction.  No independent active threshold is introduced.  Use
+\[
+\wh(d)
+=
+\begin{cases}
+0, & d\le \phi_{\min},\\[1mm]
+\left[
+\dfrac{\min(d,\phi_{\max})-\phi_{\min}}
+{\phi_{\max}-\phi_{\min}}
+\right]^p,
+& d>\phi_{\min},
+\end{cases}
+\]
+with initial exponent $p=2$.
+
+For a provisional fault point $\mathbf{R}$ with unit normal $\mathbf{n}$, sample
+\[
+\mathbf{x}(\eta)=\mathbf{R}+\eta\mathbf{n},
+\qquad
+-R_n\le\eta\le R_n.
+\]
+At sample points $\eta_k$, evaluate
+\[
+d_k=d_h(\mathbf{R}+\eta_k\mathbf{n}),
+\qquad
+w_k=q_k\wh(d_k).
+\]
+Then compute
+\[
+M=\sum_k w_k,
+\]
+\[
+\boxed{
+\delta=\frac{\sum_k w_k\eta_k}{\sum_k w_k}
+},
+\]
+\[
+\boxed{
+\sigma^2
+=
+\frac{\sum_k w_k(\eta_k-\delta)^2}{M}
+},
+\]
+and
+\[
+d_{\max}=\max_k d_k.
+\]
+
+The phase-field-centered point is
+\[
+\boxed{
+\mathbf{Q}=\mathbf{R}+\delta\mathbf{n}.
+}
+\]
+
+A suitable initial transverse radius and sampling spacing are
+\[
+R_n=\max(2\ell,2h_{\mathrm{pf}}),
+\qquad
+\Delta\eta\lesssim0.5h_{\mathrm{pf}}.
+\]
+
+For mature fault locations define
+\[
+M_{\mathrm{ref}}=\operatorname{median}_{i\in\mathcal I_{\mathrm{mature}}}M_i,
+\qquad
+\rho_i=\frac{M_i}{M_{\mathrm{ref}}}.
+\]
+
+\section{Main reconstruction does not need a bulk-node-to-fault map}
+
+The normal-line samples and 2-D forward-PCA samples are arbitrary physical points generated from the current reconstructed fault.  Their phase-field values are obtained directly from the distributed FE solution.
+
+Therefore the main propagation algorithm shall \emph{not} build or maintain a mapping
+\[
+\text{bulk FE node}\longrightarrow\text{fault cell}.
+\]
+
+A Xu-style bulk-node point-cloud regression is retained only as an optional initialization/fallback algorithm for a future case in which no initial sharp fault geometry is prescribed.  It is not part of the normal propagation path.
+
+\section{2-D propagation algorithm}
+
+This section is specific to \texttt{dim=2}.
+
+The persistent fault is an ordered chain
+\[
+\mathbf{X}_0,\mathbf{X}_1,\ldots,\mathbf{X}_{N-1}.
+\]
+For an interior vertex,
+\[
+\mathbf{t}_i
+=
+\frac{\mathbf{X}_{i+1}-\mathbf{X}_{i-1}}
+{|\mathbf{X}_{i+1}-\mathbf{X}_{i-1}|},
+\qquad
+\mathbf{n}_i=(-t_{i,y},t_{i,x}).
+\]
+At an endpoint, use the adjacent segment.
+
+Let the nominal structural spacing satisfy approximately
+\[
+0.5h_{\mathrm{pf}}\lesssim h_\Gamma\lesssim h_{\mathrm{pf}}.
+\]
+
+For a propagating tip $\mathbf{X}_T$ with tangent $\mathbf{t}_T$ and normal $\mathbf{n}_T$, define a forward search patch
+\[
+\Omega_T
+=
+\left\{
+\mathbf{x}:0<(\mathbf{x}-\mathbf{X}_T)\cdot\mathbf{t}_T<R_T,
+\quad
+|(\mathbf{x}-\mathbf{X}_T)\cdot\mathbf{n}_T|<R_N
+\right\},
+\]
+with initial scales $R_T\sim2\ell$--$3\ell$ and $R_N\sim2\ell$.
+
+At sample points $\mathbf{x}_a$ use weights
+\[
+w_a=q_a\wh(d_h(\mathbf{x}_a)).
+\]
+Compute the weighted centroid and covariance
+\[
+\boldsymbol\mu
+=
+\frac{\sum_a w_a\mathbf{x}_a}{\sum_a w_a},
+\]
+\[
+\mathbf{C}_T
+=
+\frac{
+\sum_a w_a(\mathbf{x}_a-\boldsymbol\mu)\otimes(\mathbf{x}_a-\boldsymbol\mu)
+}{\sum_a w_a}.
+\]
+If $\lambda_1\ge\lambda_2$ are its eigenvalues and $\mathbf{v}_1$ corresponds to $\lambda_1$, orient
+\[
+\mathbf{t}_{\mathrm{PCA}}
+=
+\operatorname{sign}(\mathbf{v}_1\cdot\mathbf{t}_T)\mathbf{v}_1.
+\]
+Define
+\[
+A_T
+=
+\frac{\lambda_1-\lambda_2}{\lambda_1+\lambda_2+\varepsilon},
+\qquad
+\gamma=\min\left(1,\frac{A_T}{A_0}\right),
+\]
+and
+\[
+\mathbf{t}_{\mathrm{pred}}
+=
+\operatorname{normalize}
+\left[(1-\gamma)\mathbf{t}_T+\gamma\mathbf{t}_{\mathrm{PCA}}\right].
+\]
+Enforce a configurable maximum turning angle, initially about $45^\circ$.
+
+Predict
+\[
+\mathbf{R}_{\mathrm{new}}
+=
+\mathbf{X}_T+h_\Gamma\mathbf{t}_{\mathrm{pred}},
+\]
+then apply the transverse phase-field centering operation to obtain
+\[
+\mathbf{Q}_{\mathrm{new}}
+=
+\mathbf{R}_{\mathrm{new}}+\delta_{\mathrm{new}}\mathbf{n}_{\mathrm{pred}}.
+\]
+
+A candidate must satisfy configurable criteria based on
+\[
+\rho_{\mathrm{new}},\qquad d_{\max,\mathrm{new}},\qquad
+|\delta_{\mathrm{new}}|,\qquad\sigma_{\mathrm{new}},\qquad
+\Delta\theta.
+\]
+It must also avoid intersection with nonadjacent persistent fault cells.
+
+Accepted candidates first form a temporary extension.  Only after geometric regularization and a final quality check are they committed to the persistent registry.
+
+\section{Temporary-geometry regularization}
+
+Only temporary candidate vertices may move.  Write
+\[
+\mathbf{X}_i^{\mathrm{new}}
+=
+\mathbf{X}_i+u_i\mathbf{n}_i.
+\]
+The phase-field profile suggests $u_i\approx\delta_i$.
+
+Use the generic objective
+\[
+J(\mathbf{u})
+=
+\frac12(\mathbf{u}-\boldsymbol\delta)^T\mathbf{C}
+(\mathbf{u}-\boldsymbol\delta)
++
+\frac{\lambda_s}{2}\|L_\Gamma\mathbf{u}\|^2,
+\]
+where $\mathbf{C}=\operatorname{diag}(c_i)$ contains confidence weights.
+
+For the current 2-D implementation,
+\[
+(L_\Gamma\mathbf{u})_i
+=u_{i-1}-2u_i+u_{i+1}.
+\]
+Persistent anchor vertices satisfy $u_i=0$.  Solve
+\[
+\boxed{
+(\mathbf{C}+\lambda_sL_\Gamma^TL_\Gamma)\mathbf{u}
+=
+\mathbf{C}\boldsymbol\delta.
+}
+\]
+
+This problem contains only temporary fault unknowns and is therefore a small replicated/serial problem.  It is \emph{not} assembled from millions of bulk nodes and does not require a distributed linear solver.
+
+Repeat normal evaluation, phase-field sampling, and this correction for at most a few geometry iterations, initially $N_{\mathrm{geom,max}}=3$.
+
+\section{Parallel coupling operators}
+
+There are three distinct mappings in the coupled model:
+\[
+P_{\Gamma\leftarrow h}:
+\text{distributed FE phase field}\rightarrow\text{fault geometry},
+\]
+\[
+P_{\Gamma\leftarrow p}:
+\text{distributed particles}\rightarrow\text{fault surface fields},
+\]
+\[
+P_{q\leftarrow\Gamma}:
+\text{replicated fault fields}\rightarrow\text{local Stokes quadrature points}.
+\]
+
+They have different MPI patterns:
+
+\begin{center}
+\begin{tabular}{llll}
+\toprule
+Operator & Source & Destination & Parallel pattern \\
+\midrule
+$P_{\Gamma\leftarrow h}$ & distributed FE field & replicated geometry & distributed point evaluation \\
+$P_{\Gamma\leftarrow p}$ & distributed particles & replicated surface field & local assembly + MPI reduction + replicated solve \\
+$P_{q\leftarrow\Gamma}$ & replicated surface field & local QPs & cached local interpolation only \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Distributed phase-field evaluation}
+
+The normal profiles and forward-PCA patches contain arbitrary physical sample points.  These values shall be obtained with deal.II distributed point-evaluation infrastructure, conceptually \texttt{Utilities::MPI::RemotePointEvaluation} or the corresponding ASPECT wrapper.
+
+All sample points needed for one reconstruction iteration shall be batched into as few collective point-evaluation calls as practical.  The coordinator generates the sampling geometry and metadata; all MPI ranks participate in the distributed evaluation; the returned values are used to make geometry decisions.
+
+No rank shall gather the complete bulk FE field or a complete bulk-node point cloud.
+
+\section{Particle-to-fault projection}
+
+\subsection{Purpose}
+Particle values such as stress-like quantities may need to be represented as Q1 fields on the reconstructed fault.  Particles remain distributed, while every rank owns the complete fault.
+
+\subsection{Geometric projection cache}
+For every locally owned particle that lies within a configurable fault influence distance, cache its projection onto the closest fault cell.  For \texttt{dim=2}, a cache entry should conceptually contain
+\begin{lstlisting}[language=C++]
+struct ParticleFaultProjection
+{
+  ParticleId particle_id;
+  unsigned int fault_active_cell_index; // valid only for this geometry version
+  double xi;
+  double shape_0;
+  double shape_1;
+  double signed_normal_distance;
+  double geometric_weight;
+  std::uint64_t geometry_version;
+};
+\end{lstlisting}
+
+The exact particle-ID type shall follow ASPECT's existing particle infrastructure.
+
+The cache shall be rebuilt when the fault geometry changes or when particle positions/ownership change sufficiently to invalidate the projections.
+
+\subsection{Weights and AMR correction}
+Particles are samples, not automatically equal-volume quadrature points.  The existing particle-domain module already computes the physical measure of every particle domain.  For a locally owned particle $p$, obtain
+\[
+\boxed{
+m_p
+=
+\texttt{particle\_domain\_handler.get\_particle\_domain(}
+\texttt{particle.get\_local\_index()).volume()}.
+}
+\]
+This particle-domain measure is the authoritative AMR-aware sampling measure for the particle-to-fault projection.  Do not replace it by the approximation $|K|/N_{p,K}$ unless a future configuration explicitly runs without valid particle-domain data.
+
+Let $r_p$ be the signed normal distance from the particle to its projected fault point.  Use a configurable symmetric compact-support kernel $K$ and define
+\[
+w_p=m_p\,K\!\left(\frac{|r_p|}{R_p}\right).
+\]
+The initial implementation should keep $w_p$ purely geometric so that it remains constant throughout nonlinear iterations.  Dynamic phase-field or constitutive values shall not be included in this cached weight unless the cache invalidation rules are updated accordingly.
+
+The CPDI weighting functions provided by \texttt{ParticleDomainAccessor} remain bulk-grid transfer functions.  They shall not be substituted for the reconstructed-fault Q1 shape functions in the least-squares surface projection.
+
+\subsection{Consistent weighted least-squares projection}
+Let $z_p$ be a scalar particle quantity.  Let $N_a(\boldsymbol\xi_p)$ denote the Q1 shape functions of the projected fault cell.  Determine the fault nodal field $\mathbf{z}_\Gamma$ by
+\[
+\boxed{
+\min_{\mathbf{z}_\Gamma}
+\sum_p
+w_p
+\left(
+ z_p-\sum_aN_a(\boldsymbol\xi_p)z_{\Gamma,a}
+\right)^2.
+}
+\]
+The normal equations are
+\[
+\boxed{
+\mathbf{M}_\Gamma\mathbf{z}_\Gamma=\mathbf{b}_\Gamma,
+}
+\]
+with
+\[
+(\mathbf{M}_\Gamma)_{ab}
+=
+\sum_p w_pN_a(\boldsymbol\xi_p)N_b(\boldsymbol\xi_p),
+\]
+\[
+(\mathbf{b}_\Gamma)_a
+=
+\sum_p w_pN_a(\boldsymbol\xi_p)z_p.
+\]
+The same matrix is reused for all projected scalar components that use the same particle set and geometric weights.
+
+\subsection{MPI assembly}
+Each rank assembles only contributions from its locally owned particles:
+\[
+\mathbf{M}_{\Gamma,r},\qquad
+\mathbf{b}_{\Gamma,r}.
+\]
+Then
+\[
+\boxed{
+\mathbf{M}_\Gamma=\sum_r\mathbf{M}_{\Gamma,r},
+\qquad
+\mathbf{b}_\Gamma=\sum_r\mathbf{b}_{\Gamma,r}.
+}
+\]
+The sums shall be formed by MPI collective reduction.  No particle positions or particle values are gathered to a coordinator.
+
+All ranks use the same fault DoFHandler and identical sparsity pattern.  Matrix nonzero values may therefore be packed in deterministic sparsity-pattern order for the collective reduction.
+
+\subsection{Cache the matrix, not the nonlinear values}
+As long as particle positions, the fault geometry, and the geometric weights remain unchanged,
+\[
+\mathbf{M}_\Gamma
+\]
+is constant throughout all nonlinear iterations.
+
+Therefore:
+\begin{enumerate}
+  \item build the particle projection cache once;
+  \item assemble and MPI-reduce $\mathbf{M}_\Gamma$ once;
+  \item build a reusable solver/preconditioner/factorization once;
+  \item in every nonlinear iteration, assemble only the changing right-hand side $\mathbf{b}_\Gamma$;
+  \item MPI-reduce the right-hand side;
+  \item solve the small replicated fault system on every rank.
+\end{enumerate}
+
+When several particle quantities are projected in the same iteration, their right-hand sides shall be packed into one or a small number of collective reductions.
+
+A coverage diagnostic shall verify that every active fault DoF has sufficient weighted particle support.  Insufficient coverage is an error during the initial implementation rather than a reason to silently invent missing data.
+
+\section{Fault-to-quadrature-point interpolation}
+
+Fault-to-QP interpolation is in the nonlinear hot loop and must be communication-free.
+
+For every relevant local Stokes quadrature point, build a cache containing its closest fault cell, fault reference coordinate, Q1 shape values, signed distance, and geometry version.  For \texttt{dim=2}, conceptually:
+\begin{lstlisting}[language=C++]
+struct QPFaultProjection
+{
+  unsigned int fault_active_cell_index;
+  double xi;
+  double shape_0;
+  double shape_1;
+  double signed_normal_distance;
+  dealii::Tensor<1,dim> tangent;
+  dealii::Tensor<1,dim> normal;
+  std::uint64_t geometry_version;
+};
+\end{lstlisting}
+
+If a fault surface field has nodal values $z_a$, evaluate
+\[
+\boxed{
+z_q=\sum_aN_a(\boldsymbol\xi_q)z_a.
+}
+\]
+For a 2-D segment,
+\[
+z_q=(1-\xi_q)z_i+\xi_qz_{i+1}.
+\]
+
+Because every rank stores the complete surface field, this operation requires no MPI communication.  During nonlinear iterations there shall be no R-tree search, no point-location search, and no fault-matrix rebuild for cached QPs.
+
+Only QPs inside the configured fault influence band need full projection entries; all others may be marked inactive.
+
+\section{Spatial-search strategy}
+
+The runtime \texttt{Triangulation<dim-1,dim>} provides connectivity and neighbor relations but is not by itself an optimal nearest-embedded-cell search structure.
+
+The implementation should reuse deal.II \texttt{GridTools::Cache} and related geometry utilities where they directly support the required operation.  If an explicit nearest-fault-cell acceleration structure is still needed, build an application-owned R-tree/AABB index from fault-cell bounding boxes.
+
+For the current 2-D implementation, the final closest-point projection onto a candidate segment is analytic.  A future 3-D closest-point implementation may use the triangulation neighbor structure and standard mapping machinery, but it is outside the present scope.
+
+All spatial-search caches are reconstructible and are invalidated when the fault geometry version changes.
+
+\section{Cache lifetimes}
+
+Three lifetimes shall be distinguished explicitly.
+
+\subsection{Geometry-lifetime caches}
+Valid until persistent fault geometry changes:
+\begin{itemize}
+  \item runtime fault triangulation and DoFHandler;
+  \item persistent-ID to runtime-index maps;
+  \item fault-cell bounding boxes and spatial index;
+  \item cell tangents/normals where cached.
+\end{itemize}
+
+\subsection{Mesh/particle-lifetime coupling caches}
+Valid while the relevant bulk geometry remains unchanged relative to the fault:
+\begin{itemize}
+  \item particle-to-fault projection entries;
+  \item QP-to-fault projection entries;
+  \item particle-to-fault projection matrix $\mathbf{M}_\Gamma$;
+  \item reusable solver/preconditioner/factorization for $\mathbf{M}_\Gamma$.
+\end{itemize}
+
+They are invalidated by events such as fault growth, AMR/repartitioning that changes QPs, or particle movement/migration that changes particle projections.
+
+\subsection{Nonlinear-iteration data}
+These values are never treated as geometric caches:
+\[
+\tau,\qquad\sigma_n,\qquad V,\qquad
+\text{other current constitutive quantities}.
+\]
+They are propagated through the cached operators every nonlinear iteration.
+
+\section{Nonlinear-iteration pipeline}
+
+With geometry and projection caches already valid, the high-frequency nonlinear loop is
+\[
+\boxed{
+\mathbf{z}_p
+\xrightarrow{\;P_{\Gamma\leftarrow p}\;}
+\mathbf{z}_\Gamma
+\xrightarrow{\;\text{fault constitutive model}\;}
+\mathbf{V}_\Gamma
+\xrightarrow{\;P_{q\leftarrow\Gamma}\;}
+\mathbf{V}_q.
+}
+\]
+
+The intended hot-loop operations are:
+\begin{enumerate}
+  \item local accumulation of particle-to-fault right-hand sides;
+  \item one packed MPI reduction for the changing surface right-hand sides;
+  \item small replicated fault solves using a cached operator;
+  \item fault constitutive update;
+  \item local cached interpolation from fault to QPs.
+\end{enumerate}
+
+There shall be no repeated nearest-fault-cell search or particle-projection-matrix assembly inside the nonlinear iteration.
+
+\section{Optional Xu-style initialization}
+
+If the initial sharp fault is prescribed, Xu's global regression is not used.
+
+If a future application requires reconstruction of an initial sharp fault from a phase-field point cloud, a weighted form of Xu et al.'s Eq. (18) may be used:
+\[
+(\mathbf{A}^T\mathbf{W}\mathbf{A}+\lambda\mathbf{D}^T\mathbf{D})\boldsymbol\beta
+=
+\mathbf{A}^T\mathbf{W}\mathbf{Y}.
+\]
+
+Even if millions of bulk nodes are active, the point cloud shall not be gathered.  Each MPI rank processes only uniquely owned FE nodes and assembles local sufficient statistics
+\[
+\mathbf{H}_r
+=
+\sum_{i\in\mathcal P_r}w_i\mathbf{A}_i^T\mathbf{A}_i,
+\qquad
+\mathbf{g}_r
+=
+\sum_{i\in\mathcal P_r}w_i\mathbf{A}_i^TY_i.
+\]
+Then
+\[
+\mathbf{H}=\sum_r\mathbf{H}_r+\lambda\mathbf{D}^T\mathbf{D},
+\qquad
+\mathbf{g}=\sum_r\mathbf{g}_r
+\]
+are formed by MPI reduction and the reduced fault problem is solved on the replicated fault.
+
+For \texttt{dim=2}, each interpolation row $\mathbf{A}_i$ has only two nonzero entries, so the reduced matrix is sparse/banded.  A bulk-node-to-fault cache is unnecessary because this initialization is performed rarely and is not in the nonlinear hot loop.
+
+\section{AMR, particle migration, and cache invalidation}
+
+The persistent fault registry is independent of the bulk triangulation.  Bulk AMR or repartitioning does not transfer or modify fault state.
+
+After AMR/repartitioning:
+\begin{itemize}
+  \item persistent fault geometry/state remain unchanged;
+  \item distributed phase-field point-evaluation structures are rebuilt as required;
+  \item QP-to-fault caches are invalidated because the local cells/QPs may have changed;
+  \item particle-to-fault caches are rebuilt if particle positions/ownership changed;
+  \item the fault triangulation itself is rebuilt only if fault geometry changed.
+\end{itemize}
+
+\section{Geometry versioning}
+Maintain
+\begin{lstlisting}[language=C++]
+std::uint64_t geometry_version;
+\end{lstlisting}
+and increment it whenever new persistent geometry is committed.
+
+Every geometry-dependent cache stores the version from which it was built.  A version mismatch makes the cache invalid.
+
+Additional bulk-mesh and particle-position/update counters may be used for QP and particle caches.
+
+\section{Checkpoint/restart}
+
+Checkpoint persistent data:
+\begin{itemize}
+  \item persistent fault vertex records;
+  \item persistent fault cell connectivity;
+  \item persistent IDs;
+  \item creation times;
+  \item fault constitutive state;
+  \item next persistent ID;
+  \item geometry version.
+\end{itemize}
+
+Do not checkpoint reconstructible runtime data:
+\begin{itemize}
+  \item triangulation/DoF numbering caches if they can be rebuilt from the registry;
+  \item R-trees/AABB structures;
+  \item tangents/normals;
+  \item particle/QP projection caches;
+  \item distributed point-evaluation caches;
+  \item factorization/preconditioner objects.
+\end{itemize}
+
+After restart, rebuild the runtime triangulation, DoFHandler, index maps, and all required caches.
+
+\section{Timestep ordering}
+
+For the initial implementation use
+\[
+\boxed{
+\text{solve bulk fields}
+\rightarrow
+\text{update phase field}
+\rightarrow
+\text{reconstruct/extend fault}
+\rightarrow
+\text{initialize state on new fault vertices}.
+}
+\]
+
+New persistent geometry becomes active in the constitutive calculation of the next timestep.  Fault topology shall not change in the middle of a nonlinear Stokes solve.
+
+Within a nonlinear solve, the fault geometry is therefore fixed and all geometry-dependent coupling caches can be reused.
+
+\section{Diagnostics and assertions}
+
+Required reconstruction diagnostics include
+\[
+\rho,\qquad d_{\max},\qquad\delta,\qquad\sigma,
+\]
+and for a 2-D propagating tip,
+\[
+A_T,\qquad\Delta\theta.
+\]
+
+Required coupling diagnostics include
+\begin{itemize}
+  \item particle support/coverage per active fault DoF;
+  \item minimum and maximum diagonal entries of $\mathbf{M}_\Gamma$;
+  \item solver convergence for particle-to-fault projections;
+  \item number of cached relevant particles and QPs;
+  \item cache rebuild counters;
+  \item MPI consistency checks of replicated surface vectors.
+\end{itemize}
+
+After every fault synchronization, all ranks shall have identical persistent geometry, connectivity, and surface state.
+
+\section{Initial parameter scales}
+
+Initial reconstruction scales (with $\phi_{\min}$ and $\phi_{\max}$ obtained from the existing phase-field material-model interface):
+\[
+R_n=\max(2\ell,2h_{\mathrm{pf}}),
+\qquad
+\Delta\eta\approx0.5h_{\mathrm{pf}},
+\qquad
+h_\Gamma\approx0.5h_{\mathrm{pf}},
+\]
+\[
+p=2,
+\qquad
+R_T\approx2\ell\text{--}3\ell,
+\qquad
+R_N\approx2\ell,
+\]
+\[
+\theta_{\max}\approx45^\circ,
+\qquad
+N_{\mathrm{geom,max}}=3.
+\]
+
+The following remain configurable and require calibration:
+\[
+\rho_{\mathrm{tip}},\quad
+d_{\mathrm{tip}},\quad
+\lambda_s,\quad
+A_0,\quad
+\sigma_{\max},\quad
+\delta_{\max},\quad
+R_p,
+\]
+and the particle normal-distance kernel $K$.
+
+\section{Implementation stages}
+
+\subsection*{Stage 1: persistent registry and runtime fault mesh}
+Implement stable IDs, persistent registry, replicated \texttt{Triangulation<dim-1,dim>}, Q1 fault DoFHandler, rebuild logic, and explicit persistent-ID/runtime-index maps.  No propagation.
+
+\subsection*{Stage 2: surface geometry queries}
+Implement fault-cell traversal, 2-D closest-point projection, tangents/normals, surface locations, and a geometry-versioned spatial-search cache.
+
+\subsection*{Stage 3: distributed phase-field sampling}
+Implement batched arbitrary-point evaluation of the distributed phase field.  Validate on known analytic/Q1 fields.
+
+\subsection*{Stage 4: transverse phase-field measurements}
+Implement $M$, $\delta$, $\sigma$, and $d_{\max}$ and validate on straight and curved prescribed diffuse profiles.
+
+\subsection*{Stage 5: particle-to-fault coupling cache and projection operator}
+Implement relevant-particle selection, projection caches, AMR-aware particle sampling measures, the weighted least-squares matrix, MPI reduction, solver reuse, and coverage diagnostics.
+
+\subsection*{Stage 6: fault-to-QP cache}
+Implement cached QP-to-fault surface locations and Q1 interpolation with no MPI communication in the nonlinear hot loop.
+
+\subsection*{Stage 7: 2-D temporary-geometry regularization}
+Implement the normal-displacement smoothing problem independently of propagation.
+
+\subsection*{Stage 8: 2-D tip direction and propagation}
+Implement weighted forward PCA, candidate prediction, candidate acceptance, temporary extension, regularization, and persistent commit.
+
+\subsection*{Stage 9: constitutive integration}
+Connect particle-to-fault projected quantities, fault state/slip-rate updates, and cached fault-to-QP interpolation inside the nonlinear solver.
+
+\subsection*{Stage 10: checkpoint/restart and AMR tests}
+Verify persistent IDs/state across restart and verify cache invalidation/rebuild behavior after bulk AMR and particle migration.
+
+\section{Rules for Codex}
+
+When implementing this specification, Codex shall:
+\begin{enumerate}
+  \item treat this document as authoritative for scientific and architectural decisions;
+  \item implement only the requested stage;
+  \item use the persistent registry plus replicated \texttt{dealii::Triangulation<dim-1,dim>} architecture specified here;
+  \item not replace it with an unrelated custom mesh representation unless the document is first revised;
+  \item not store persistent state in triangulation user data/flags;
+  \item reuse existing deal.II/ASPECT geometry, connectivity, FE, and MPI infrastructure whenever it satisfies the stated requirement;
+  \item obey Section~\ref{sec:existing-interface}: reuse the authoritative phase-field, particle-domain, and RSF APIs and do not make the reconstructed-fault code depend on the old core-phase-field/phase-field-RSF architecture;
+  \item use application-owned caches for hot-loop projections and interpolation weights;
+  \item not gather distributed bulk nodes or particles when a local-assembly plus MPI-reduction formulation exists;
+  \item not change formulas, parameter meanings, ownership rules, or cache lifetimes silently;
+  \item stop and report any implementation-critical ambiguity or conflict with existing ASPECT/deal.II code before inventing a new scientific or architectural choice;
+  \item after each stage, list changed files and map each implementation change back to the corresponding requirement in this document.
+\end{enumerate}
+
+\section*{Reference}
+Y. Xu, T. You, and Q. Zhu, ``Reconstruct lower-dimensional crack paths from phase-field point cloud,'' \emph{International Journal for Numerical Methods in Engineering}, 124 (2023), 3329--3351, DOI: 10.1002/nme.7249.
+
+\end{document}

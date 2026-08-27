@@ -38,105 +38,6 @@ namespace aspect
       public SimulatorAccess<dim>
     {
       public:
-        struct IndexCache
-        {
-          /**
-           * Structure caching the indices of the particle properties that are
-           * frequently requested by this material model.
-           */
-          struct ParticleProperties
-          {
-            unsigned int crack_driving_force;
-            unsigned int cohesive_force;
-            unsigned int slip_rate;
-            unsigned int slip_state;
-            unsigned int normal_direction;
-            unsigned int slip_direction;
-            unsigned int ve_stress;
-            unsigned int friction_coefficient;
-            unsigned int slip_increment;
-            std::vector<unsigned int> chemical_fields;
-
-            /**
-             * Default constructor. Initialize all the indices to 
-             * <tt>numbers::invalid_unsigned_int</tt>.
-             */
-            ParticleProperties()
-              : crack_driving_force(numbers::invalid_unsigned_int)
-              , cohesive_force(numbers::invalid_unsigned_int)
-              , slip_rate(numbers::invalid_unsigned_int)
-              , slip_state(numbers::invalid_unsigned_int)
-              , normal_direction(numbers::invalid_unsigned_int)
-              , slip_direction(numbers::invalid_unsigned_int)
-              , ve_stress(numbers::invalid_unsigned_int)
-              , friction_coefficient(numbers::invalid_unsigned_int)
-              , slip_increment(numbers::invalid_unsigned_int)
-            {}
-          };
-
-          ParticleProperties particle_properties;
-
-          /**
-           * Structure caching the indices of the compositional fields that
-           * are frequently requested by this material model.
-           */
-          struct CompositionalFields
-          {
-            unsigned int crack_driving_force;
-            unsigned int slip_rate;
-            unsigned int slip_state;
-            std::array<unsigned int, dim> normal_direction;
-            std::array<unsigned int, SymmetricTensor<2, dim>::n_independent_components> ve_stress;
-
-            /**
-             * Default constructor. Initialize all the indices to
-             * <tt>numbers::invalid_unsigned_int</tt>.
-             */
-            CompositionalFields()
-              : crack_driving_force(numbers::invalid_unsigned_int)
-              , slip_rate(numbers::invalid_unsigned_int)
-              , slip_state(numbers::invalid_unsigned_int)
-            {
-              normal_direction.fill(numbers::invalid_unsigned_int);
-              ve_stress.fill(numbers::invalid_unsigned_int);
-            }
-          };
-
-          CompositionalFields compositional_fields;
-
-          /**
-           * Structure caching the indices of the variable components that
-           * are frequently requested by this material model.
-           */
-          struct Components
-          {
-            unsigned int phase_field;
-            unsigned int core_phase_field;
-
-            /**
-             * Default constructor. Initialize all the indices to
-             * <tt>numbers::invalid_unsigned_int</tt>.
-             */
-            Components()
-              : phase_field(numbers::invalid_unsigned_int)
-              , core_phase_field(numbers::invalid_unsigned_int)
-            {}
-          };
-
-          Components components;
-
-          /**
-           * Initialize the index cache.
-           */
-          void initialize(const Introspection<dim>     &introspection,
-                          const Parameters<dim>        &parameters,
-                          const PhaseFieldHandler<dim> &phase_field_handler);
-        };
-
-        void initialize() override;
-
-        void update() override;
-
         void 
         evaluate(const MaterialModel::MaterialModelInputs<dim> &in,
                  MaterialModel::MaterialModelOutputs<dim> &out) const override;
@@ -153,14 +54,6 @@ namespace aspect
         bool
         is_compressible() const override;
 
-        const Rheology::RateStateFriction<dim> &
-        get_rate_state_friction_model() const;
-
-        const IndexCache &get_index_cache() const;
-
-        bool
-        is_intact(const double phase_field) const;
-        
         static
         void
         declare_parameters(ParameterHandler &prm);
@@ -169,15 +62,9 @@ namespace aspect
         parse_parameters(ParameterHandler &prm) override;
 
       private:
-        void perform_return_mapping();
-
-        void update_history_states(const SolverControl &nonlinear_solver_control);
-
-        void update_particles_in_emerging_crack_zone();
-
         double 
-        calculate_creep_viscosity(const double               temperature,
-                                  const std::vector<double> &volume_fractions) const;
+        calculate_creep_viscosity(const std::vector<double> &volume_fractions,
+                                  const double               temperature) const;
 
         double
         calculate_stress_relaxation_factor(const double creep_viscosity,
@@ -186,8 +73,6 @@ namespace aspect
         EquationOfState::MulticomponentIncompressible<dim> equation_of_state;
 
         Rheology::RateStateFriction<dim> rsf_rheology;
-
-        IndexCache index_cache;
 
         MaterialUtilities::CompositionalAveragingOperation viscosity_averaging;
 
@@ -220,8 +105,6 @@ namespace aspect
         double initial_time_step;
 
         bool evolve_phase_field;
-
-        double maximum_slip_increment_between_outputs;
 
         std::unique_ptr<SolutionEvaluator<dim>> solution_evaluator;
     };

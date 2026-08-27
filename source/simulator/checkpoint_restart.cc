@@ -74,7 +74,7 @@ namespace aspect
       oa << parameters.mesh_deformation_enabled;
       oa << parameters.n_particle_managers;
       oa << parameters.enable_phase_field;
-      oa << parameters.need_slip_rate;
+      oa << parameters.reconstruct_faults;
     }
 
 
@@ -256,10 +256,10 @@ namespace aspect
                                "These need to be the same during restarting "
                                "from a checkpoint."));
 
-      bool need_slip_rate;
-      ia >> need_slip_rate;
-      AssertThrow (need_slip_rate == parameters.need_slip_rate,
-                   ExcMessage ("The slip rate mode that was stored "
+      bool reconstruct_faults;
+      ia >> reconstruct_faults;
+      AssertThrow (reconstruct_faults == parameters.reconstruct_faults,
+                   ExcMessage ("The fault reconstruction mode that was stored "
                                "in the checkpoint file is not the same as the one "
                                "you currently set in your input file. "
                                "These need to be the same during restarting "

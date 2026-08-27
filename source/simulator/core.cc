@@ -24,6 +24,7 @@
 #include <aspect/utilities.h>
 #include <aspect/melt.h>
 #include <aspect/phase_field.h>
+#include <aspect/reconstructed_fault.h>
 #include <aspect/advection_field.h>
 #include <aspect/volume_of_fluid/handler.h>
 #include <aspect/newton.h>
@@ -195,6 +196,9 @@ namespace aspect
     phase_field_handler (parameters.enable_phase_field ?
                          std::make_unique<PhaseFieldHandler<dim>>(*this) :
                          nullptr),
+    reconstructed_fault_manager (parameters.reconstruct_faults ?
+                                 std::make_unique<ReconstructedFaultManager<dim>>(*this) :
+                                 nullptr),
     introspection (construct_variables<dim>(parameters, signals, melt_handler), parameters),
     mpi_communicator (Utilities::MPI::duplicate_communicator (mpi_communicator_)),
     iostream_tee_device(std::cout, log_file_stream),
@@ -501,6 +505,9 @@ namespace aspect
         phase_field_handler->parse_parameters(prm);
         phase_field_handler->initialize();
       }
+
+    if (parameters.reconstruct_faults)
+      reconstructed_fault_manager->parse_parameters(prm);
 
     mesh_refinement_manager.initialize_simulator (*this);
     mesh_refinement_manager.parse_parameters (prm);
@@ -1113,13 +1120,6 @@ namespace aspect
       {
         const unsigned int phase_field_block = introspection.variable("phase_field").first_component_index;
         coupling[phase_field_block][phase_field_block] = DoFTools::always;
-
-        // If the slip rate is required, also create a matrix block for the obstacle problem
-        if (parameters.need_slip_rate)
-          {
-            const unsigned int core_phase_field_block = introspection.variable("core_phase_field").first_component_index;
-            coupling[core_phase_field_block][core_phase_field_block] = DoFTools::always;
-          }
       }
 
     return coupling;

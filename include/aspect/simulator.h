@@ -90,6 +90,9 @@ namespace aspect
   class PhaseFieldHandler;
 
   template <int dim>
+  class ReconstructedFaultManager;
+
+  template <int dim>
   class NewtonHandler;
 
   template <int dim>
@@ -1768,6 +1771,9 @@ namespace aspect
        * not even allocate it.
        */
       std::unique_ptr<PhaseFieldHandler<dim>> phase_field_handler;
+
+      /** Owns prescribed and reconstructed sharp faults when requested. */
+      std::unique_ptr<ReconstructedFaultManager<dim>> reconstructed_fault_manager;
 
       Introspection<dim>                  introspection;
 

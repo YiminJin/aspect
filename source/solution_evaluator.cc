@@ -281,22 +281,11 @@ namespace aspect
         phase_field = std::make_unique<FEPointEvaluation<1, dim>>(mapping_info,
                                                                   simulator_access.get_fe(),
                                                                   phase_field_component_index);
-
-        if (simulator_access.get_parameters().need_slip_rate)
-          {
-            core_phase_field_component_index = simulator_access.introspection().variable("core_phase_field").first_component_index;
-            core_phase_field = std::make_unique<FEPointEvaluation<1, dim>>(mapping_info,
-                                                                           simulator_access.get_fe(),
-                                                                           core_phase_field_component_index);
-          }
       }
     else
       {
-        phase_field_component_index      = numbers::invalid_unsigned_int;
-        core_phase_field_component_index = numbers::invalid_unsigned_int;
-
-        phase_field      = nullptr;
-        core_phase_field = nullptr;
+        phase_field_component_index = numbers::invalid_unsigned_int;
+        phase_field                 = nullptr;
       }
   }
 
@@ -376,17 +365,10 @@ namespace aspect
           compaction_pressure->evaluate (solution_values, evaluation_flags[melt_component_indices[2]]);
       }
 
-    if (simulator_access.get_parameters().enable_phase_field)
-      {
-        if (evaluation_flags[phase_field_component_index] & EvaluationFlags::values ||
-            evaluation_flags[phase_field_component_index] & EvaluationFlags::gradients)
-          phase_field->evaluate(solution_values, evaluation_flags[phase_field_component_index]);
-
-        if (simulator_access.get_parameters().need_slip_rate &&
-            (evaluation_flags[core_phase_field_component_index] & EvaluationFlags::values ||
-             evaluation_flags[core_phase_field_component_index] & EvaluationFlags::gradients))
-          core_phase_field->evaluate(solution_values, evaluation_flags[core_phase_field_component_index]);
-      }
+    if (simulator_access.get_parameters().enable_phase_field &&
+        (evaluation_flags[phase_field_component_index] & EvaluationFlags::values ||
+         evaluation_flags[phase_field_component_index] & EvaluationFlags::gradients))
+      phase_field->evaluate(solution_values, evaluation_flags[phase_field_component_index]);
   }
 
 
@@ -487,15 +469,9 @@ namespace aspect
           solution[melt_component_indices[2]] = compaction_pressure->get_value(evaluation_point);
       }
 
-    if (simulator_access.get_parameters().enable_phase_field)
-      {
-        if (evaluation_flags[phase_field_component_index] & EvaluationFlags::values)
-          solution[phase_field_component_index] = phase_field->get_value(evaluation_point);
-
-        if (simulator_access.get_parameters().need_slip_rate &&
-            evaluation_flags[core_phase_field_component_index] & EvaluationFlags::values)
-          solution[core_phase_field_component_index] = core_phase_field->get_value(evaluation_point);
-      }
+    if (simulator_access.get_parameters().enable_phase_field &&
+        (evaluation_flags[phase_field_component_index] & EvaluationFlags::values))
+      solution[phase_field_component_index] = phase_field->get_value(evaluation_point);
   }
 
 
@@ -550,15 +526,9 @@ namespace aspect
           gradients[melt_component_indices[2]] = compaction_pressure->get_gradient(evaluation_point);
       }
 
-    if (simulator_access.get_parameters().enable_phase_field)
-      {
-        if (evaluation_flags[phase_field_component_index] & EvaluationFlags::gradients)
+    if (simulator_access.get_parameters().enable_phase_field &&
+        (evaluation_flags[phase_field_component_index] & EvaluationFlags::gradients))
           gradients[phase_field_component_index] = phase_field->get_gradient(evaluation_point);
-
-        if (simulator_access.get_parameters().need_slip_rate &&
-            evaluation_flags[core_phase_field_component_index] & EvaluationFlags::gradients)
-          gradients[core_phase_field_component_index] = core_phase_field->get_gradient(evaluation_point);
-      }
   }
 
 

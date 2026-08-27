@@ -724,6 +724,26 @@ namespace aspect
     return *(simulator->phase_field_handler);
   }
 
+
+  template <int dim>
+  PhaseFieldHandler<dim> &
+  SimulatorAccess<dim>::get_phase_field_handler ()
+  {
+    Assert (simulator->phase_field_handler.get() != nullptr,
+            ExcMessage("You can not call this function if phase field method is not enabled."));
+    return *(simulator->phase_field_handler);
+  }
+
+
+  template <int dim>
+  ReconstructedFaultManager<dim> &
+  SimulatorAccess<dim>::get_reconstructed_fault_manager () const
+  {
+    Assert (simulator->reconstructed_fault_manager.get() != nullptr,
+            ExcMessage("You can not call this function if fault reconstruction is not enabled."));
+    return *(simulator->reconstructed_fault_manager);
+  }
+
   template <int dim>
   const VolumeOfFluidHandler<dim> &
   SimulatorAccess<dim>::get_volume_of_fluid_handler () const

@@ -1,0 +1,231 @@
+/*
+  Copyright (C) 2025 - by the authors of the ASPECT code.
+
+  This file is part of ASPECT.
+
+  ASPECT is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2, or (at your option)
+  any later version.
+
+  ASPECT is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with ASPECT; see the file LICENSE.  If not see
+  <http://www.gnu.org/licenses/>.
+*/
+
+#ifndef _aspect_material_model_phase_field_rsf_h
+#define _aspect_material_model_phase_field_rsf_h
+
+#include <aspect/simulator_access.h>
+#include <aspect/phase_field.h>
+#include <aspect/solution_evaluator.h>
+#include <aspect/material_model/interface.h>
+#include <aspect/material_model/equation_of_state/multicomponent_incompressible.h>
+#include <aspect/material_model/rheology/rate_state_friction.h>
+
+namespace aspect
+{
+  namespace MaterialModel
+  {
+    template <int dim>
+    class PhaseFieldRSF : public Interface<dim>,
+      public PhaseFieldModel<dim>,
+      public SimulatorAccess<dim>
+    {
+      public:
+        struct IndexCache
+        {
+          /**
+           * Structure caching the indices of the particle properties that are
+           * frequently requested by this material model.
+           */
+          struct ParticleProperties
+          {
+            unsigned int crack_driving_force;
+            unsigned int cohesive_force;
+            unsigned int slip_rate;
+            unsigned int slip_state;
+            unsigned int normal_direction;
+            unsigned int slip_direction;
+            unsigned int ve_stress;
+            unsigned int friction_coefficient;
+            unsigned int slip_increment;
+            std::vector<unsigned int> chemical_fields;
+
+            /**
+             * Default constructor. Initialize all the indices to 
+             * <tt>numbers::invalid_unsigned_int</tt>.
+             */
+            ParticleProperties()
+              : crack_driving_force(numbers::invalid_unsigned_int)
+              , cohesive_force(numbers::invalid_unsigned_int)
+              , slip_rate(numbers::invalid_unsigned_int)
+              , slip_state(numbers::invalid_unsigned_int)
+              , normal_direction(numbers::invalid_unsigned_int)
+              , slip_direction(numbers::invalid_unsigned_int)
+              , ve_stress(numbers::invalid_unsigned_int)
+              , friction_coefficient(numbers::invalid_unsigned_int)
+              , slip_increment(numbers::invalid_unsigned_int)
+            {}
+          };
+
+          ParticleProperties particle_properties;
+
+          /**
+           * Structure caching the indices of the compositional fields that
+           * are frequently requested by this material model.
+           */
+          struct CompositionalFields
+          {
+            unsigned int crack_driving_force;
+            unsigned int slip_rate;
+            unsigned int slip_state;
+            std::array<unsigned int, dim> normal_direction;
+            std::array<unsigned int, SymmetricTensor<2, dim>::n_independent_components> ve_stress;
+
+            /**
+             * Default constructor. Initialize all the indices to
+             * <tt>numbers::invalid_unsigned_int</tt>.
+             */
+            CompositionalFields()
+              : crack_driving_force(numbers::invalid_unsigned_int)
+              , slip_rate(numbers::invalid_unsigned_int)
+              , slip_state(numbers::invalid_unsigned_int)
+            {
+              normal_direction.fill(numbers::invalid_unsigned_int);
+              ve_stress.fill(numbers::invalid_unsigned_int);
+            }
+          };
+
+          CompositionalFields compositional_fields;
+
+          /**
+           * Structure caching the indices of the variable components that
+           * are frequently requested by this material model.
+           */
+          struct Components
+          {
+            unsigned int phase_field;
+            unsigned int core_phase_field;
+
+            /**
+             * Default constructor. Initialize all the indices to
+             * <tt>numbers::invalid_unsigned_int</tt>.
+             */
+            Components()
+              : phase_field(numbers::invalid_unsigned_int)
+              , core_phase_field(numbers::invalid_unsigned_int)
+            {}
+          };
+
+          Components components;
+
+          /**
+           * Initialize the index cache.
+           */
+          void initialize(const Introspection<dim>     &introspection,
+                          const Parameters<dim>        &parameters,
+                          const PhaseFieldHandler<dim> &phase_field_handler);
+        };
+
+        void initialize() override;
+
+        void update() override;
+
+        void 
+        evaluate(const MaterialModel::MaterialModelInputs<dim> &in,
+                 MaterialModel::MaterialModelOutputs<dim> &out) const override;
+
+        std::vector<double>
+        get_critical_crack_driving_forces() const override;
+
+        std::vector<double>
+        get_critical_energy_release_rates() const override;
+        
+        std::pair<double, double>
+        get_phase_field_range() const override;
+
+        bool
+        is_compressible() const override;
+
+        const Rheology::RateStateFriction<dim> &
+        get_rate_state_friction_model() const;
+
+        const IndexCache &get_index_cache() const;
+
+        bool
+        is_intact(const double phase_field) const;
+        
+        static
+        void
+        declare_parameters(ParameterHandler &prm);
+
+        void
+        parse_parameters(ParameterHandler &prm) override;
+
+      private:
+        void perform_return_mapping();
+
+        void update_history_states(const SolverControl &nonlinear_solver_control);
+
+        void update_particles_in_emerging_crack_zone();
+
+        double 
+        calculate_creep_viscosity(const double               temperature,
+                                  const std::vector<double> &volume_fractions) const;
+
+        double
+        calculate_stress_relaxation_factor(const double creep_viscosity,
+                                           const double shear_modulus) const;
+
+        EquationOfState::MulticomponentIncompressible<dim> equation_of_state;
+
+        Rheology::RateStateFriction<dim> rsf_rheology;
+
+        IndexCache index_cache;
+
+        MaterialUtilities::CompositionalAveragingOperation viscosity_averaging;
+
+        double reference_temperature;
+
+        double maximum_viscosity;
+        
+        double minimum_viscosity;
+
+        double phase_field_activation_threshold;
+
+        double phase_field_normal_lock_threshold;
+
+        std::vector<double> thermal_conductivities;
+
+        std::vector<double> reference_viscosities;
+
+        std::vector<double> thermal_viscosity_exponents;
+
+        std::vector<double> elastic_shear_moduli;
+
+        std::vector<double> cohesions;
+
+        std::vector<double> initial_friction_coefficients;
+
+        std::vector<double> critical_energy_release_rates;
+
+        std::vector<double> radiation_damping_coefficients;
+
+        double initial_time_step;
+
+        bool evolve_phase_field;
+
+        double maximum_slip_increment_between_outputs;
+
+        std::unique_ptr<SolutionEvaluator<dim>> solution_evaluator;
+    };
+  }
+}
+
+#endif

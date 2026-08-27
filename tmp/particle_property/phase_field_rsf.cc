@@ -19,6 +19,7 @@
 */
 
 #include <aspect/particle/property/phase_field_rsf.h>
+#include <aspect/particle/manager.h>
 #include <aspect/material_model/phase_field_rsf.h>
 
 namespace aspect

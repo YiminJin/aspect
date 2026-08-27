@@ -248,12 +248,6 @@ namespace aspect
       unsigned int max_nonlinear_iterations;
       unsigned int max_newton_line_search_iterations;
     };
-
-    struct CoreExtenderParameters
-    {
-      double normal_to_tangential_diffusion;
-      double penalty_parameter_scaling_factor;
-    };
   }
 
   namespace PhaseFieldUtilities
@@ -291,11 +285,6 @@ namespace aspect
                          LinearAlgebra::BlockVector       &system_rhs,
                          LinearAlgebra::BlockVector       &solution);
 
-      void
-      extend_core_phase_field(LinearAlgebra::BlockSparseMatrix &system_matrix,
-                              LinearAlgebra::BlockVector       &system_rhs,
-                              LinearAlgebra::BlockVector       &solution);
-
       double crack_surface_density(const double          phase_field_value,
                                    const Tensor<1, dim> &phase_field_gradient) const;
 
@@ -318,6 +307,8 @@ namespace aspect
 
       const Particle::Manager<dim> &get_associated_particle_manager() const;
 
+      Particle::Manager<dim> &get_associated_particle_manager();
+
       const GridTools::Cache<dim> &get_grid_cache() const;
 
       static void declare_parameters(ParameterHandler &prm);
@@ -338,28 +329,7 @@ namespace aspect
                                const LinearAlgebra::BlockVector       &system_rhs,
                                LinearAlgebra::BlockVector             &solution_vector) const;
 
-      void
-      assemble_saddle_point_system(LinearAlgebra::BlockSparseMatrix &system_matrix,
-                                   LinearAlgebra::BlockVector       &system_rhs,
-                                   const AffineConstraints<double>  &constraints) const;
-
-      unsigned int
-      solve_saddle_point_system(const LinearAlgebra::BlockSparseMatrix &system_matrix,
-                                const LinearAlgebra::BlockVector       &system_rhs,
-                                LinearAlgebra::BlockVector             &solution_vector,
-                                const AffineConstraints<double>        &constraints) const;
-
-      void
-      update_active_set(const LinearAlgebra::SparseMatrix &system_matrix,
-                        const BlockIndices                &block_indices,
-                        LinearAlgebra::BlockVector        &lagrange_multiplier,
-                        LinearAlgebra::BlockVector        &solution,
-                        AffineConstraints<double>         &constraints,
-                        IndexSet                          &active_set) const;
-
       PhaseField::SolverParameters solver_parameters;
-
-      PhaseField::CoreExtenderParameters core_extender_parameters;
 
       std::unique_ptr<PhaseField::GeometricFunction> geometric_function;
 
@@ -369,7 +339,7 @@ namespace aspect
 
       std::vector<double> critical_energy_densities;
 
-      const Particle::Manager<dim> *particle_manager;
+      Particle::Manager<dim> *particle_manager;
 
       std::unique_ptr<GridTools::Cache<dim>> grid_cache;
 

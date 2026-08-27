@@ -26,6 +26,7 @@
 #include <aspect/newton.h>
 #include <aspect/melt.h>
 #include <aspect/phase_field.h>
+#include <aspect/reconstructed_fault.h>
 
 #include <deal.II/numerics/vector_tools.h>
 
@@ -953,6 +954,13 @@ namespace aspect
   template <int dim>
   void Simulator<dim>::solve_single_advection_no_stokes ()
   {
+    if (parameters.enable_phase_field)
+      {
+        phase_field_handler->evolve_phase_field(system_matrix, system_rhs, solution);
+        if (parameters.reconstruct_faults && timestep_number == 0)
+          reconstructed_fault_manager->reconstruct_initial_faults(*phase_field_handler);
+      }
+
     assemble_and_solve_temperature();
     assemble_and_solve_composition();
 
@@ -1010,8 +1018,8 @@ namespace aspect
     if (parameters.enable_phase_field)
       {
         phase_field_handler->evolve_phase_field(system_matrix, system_rhs, solution);
-        if (parameters.need_slip_rate)
-          phase_field_handler->extend_core_phase_field(system_matrix, system_rhs, solution);
+        if (parameters.reconstruct_faults && timestep_number == 0)
+          reconstructed_fault_manager->reconstruct_initial_faults(*phase_field_handler);
       }
 
     assemble_and_solve_temperature();
@@ -1097,8 +1105,8 @@ namespace aspect
     if (parameters.enable_phase_field)
       {
         phase_field_handler->evolve_phase_field(system_matrix, system_rhs, solution);
-        if (parameters.need_slip_rate)
-          phase_field_handler->extend_core_phase_field(system_matrix, system_rhs, solution);
+        if (parameters.reconstruct_faults && timestep_number == 0)
+          reconstructed_fault_manager->reconstruct_initial_faults(*phase_field_handler);
       }
 
     // Assemble and solve the temperature and compositional fields
