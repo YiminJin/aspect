@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2025 - 2024 by the authors of the ASPECT code.
+  Copyright (C) 2025 - by the authors of the ASPECT code.
 
  This file is part of ASPECT.
 
@@ -30,8 +30,8 @@ namespace aspect
       template <int dim>
       void CrackDrivingForce<dim>::initialize()
       {
-        // Check if the material model is PhaseFieldRSF
-        AssertThrow(dynamic_cast<const MaterialModel::PhaseFieldModel<dim>*>(&this->get_material_model()),
+        AssertThrow(dynamic_cast<const MaterialModel::PhaseFieldModel<dim> *>(
+                      &this->get_material_model()) != nullptr,
                     ExcMessage("Particle property 'crack driving force' only works when the material model is derived from "
                                "'MaterialModel::PhaseFieldModel'."));
       }
@@ -44,8 +44,8 @@ namespace aspect
       initialize_one_particle_property(const Point<dim> &position,
                                        std::vector<double> &data) const
       {
-        // Initialize the crack driving force to the steady state with zero phase-field
-        const auto &material_model = dynamic_cast<const MaterialModel::PhaseFieldModel<dim>&>(this->get_material_model());
+        const auto &material_model =
+          dynamic_cast<const MaterialModel::PhaseFieldModel<dim> &>(this->get_material_model());
 
         std::vector<double> initial_composition(this->introspection().n_compositional_fields);
         for (unsigned int j = 0; j < initial_composition.size(); ++j)
@@ -66,10 +66,7 @@ namespace aspect
       std::vector<std::pair<std::string, unsigned int>>
       CrackDrivingForce<dim>::get_property_information() const
       {
-        const std::vector<std::pair<std::string,unsigned int>> 
-        property_information(1, std::make_pair("crack_driving_force", 1));
-
-        return property_information;
+        return {{"crack_driving_force", 1}};
       }
     }
   }
@@ -84,9 +81,9 @@ namespace aspect
     {
       ASPECT_REGISTER_PARTICLE_PROPERTY(CrackDrivingForce,
                                         "crack driving force",
-                                        "Implementation of a plugin in which the particle "
-                                        "property is defined as the crack driving force at "
-                                        "this position.")
+                                        "Store the crack-driving force used by the phase-field "
+                                        "system. The initial value is the material's critical "
+                                        "crack-driving force.")
     }
   }
 }

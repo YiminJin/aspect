@@ -15,9 +15,11 @@
 #include <aspect/global.h>
 #include <aspect/simulator_access.h>
 
+#include <deal.II/base/array_view.h>
 #include <deal.II/base/point.h>
 
 #include <cstdint>
+#include <map>
 #include <vector>
 
 namespace aspect
@@ -27,6 +29,9 @@ namespace aspect
 
   template <int dim>
   class Simulator;
+
+  template <int dim>
+  class ReconstructedFaultManager;
 
   /**
    * Prescribed geometry and core phase-field values for one initial fault.
@@ -87,13 +92,21 @@ namespace aspect
    * @p i and @p i+1. Committed vertices are append-only and can only be
    * accessed through const interfaces.
    *
-   * This geometry-only container is intentionally independent of the bulk
-   * mesh, particles, phase-field reconstruction, and constitutive data.
+   * The container is independent of the bulk mesh, particles, phase-field
+   * reconstruction, and particular constitutive models. Runtime-defined
+   * vertex properties can store material-independent fault data.
    */
   template <int dim>
   class ReconstructedFault
   {
     public:
+      /** Metadata for one runtime-defined vertex property. */
+      struct VertexPropertyInformation
+      {
+        std::string name;
+        unsigned int n_components;
+      };
+
       /** Construct an empty reconstructed fault. */
       ReconstructedFault() = default;
 
@@ -120,6 +133,28 @@ namespace aspect
       const std::vector<Point<dim>> &
       get_vertices() const;
 
+      /** Return metadata for all vertex properties in registration order. */
+      const std::vector<VertexPropertyInformation> &
+      get_vertex_property_information() const;
+
+      /** Return all contiguous values of property @p property_index. */
+      ArrayView<double>
+      get_vertex_property_values(const unsigned int property_index);
+
+      /** Return all contiguous values of property @p property_index. */
+      ArrayView<const double>
+      get_vertex_property_values(const unsigned int property_index) const;
+
+      /** Return the component values of a property at one vertex. */
+      ArrayView<double>
+      get_vertex_property_values_at_vertex(const unsigned int property_index,
+                                           const unsigned int vertex_index);
+
+      /** Return the component values of a property at one vertex. */
+      ArrayView<const double>
+      get_vertex_property_values_at_vertex(const unsigned int property_index,
+                                           const unsigned int vertex_index) const;
+
       /** Append one committed vertex to the fault. */
       void
       append_vertex(const Point<dim> &vertex);
@@ -139,7 +174,15 @@ namespace aspect
       geometry_version() const;
 
     private:
+      friend class ReconstructedFaultManager<dim>;
+
+      unsigned int
+      register_vertex_property(const std::string &name,
+                               const unsigned int n_components);
+
       std::vector<Point<dim>> vertices;
+      std::vector<VertexPropertyInformation> vertex_property_information;
+      std::vector<std::vector<double>> vertex_property_values;
       std::uint64_t current_geometry_version = 0;
   };
 
@@ -158,6 +201,7 @@ namespace aspect
   class ReconstructedFaultManager : public SimulatorAccess<dim>
   {
     public:
+      ReconstructedFaultManager() = default;
       explicit ReconstructedFaultManager(const Simulator<dim> &simulator);
 
       static void declare_parameters(ParameterHandler &prm);
@@ -169,7 +213,21 @@ namespace aspect
 
       void reconstruct_initial_faults(PhaseFieldHandler<dim> &phase_field_handler);
 
+      /**
+       * Register a property shared by every reconstructed fault. Properties
+       * must be registered before reconstructed geometry exists.
+       */
+      unsigned int register_vertex_property(const std::string &name,
+                                            const unsigned int n_components);
+
+      bool has_vertex_property(const std::string &name) const;
+      unsigned int get_vertex_property_index(const std::string &name) const;
+      const std::vector<typename ReconstructedFault<dim>::VertexPropertyInformation> &
+      get_vertex_property_information() const;
+
       const std::vector<ReconstructedFault<dim>> &get_faults() const;
+      ReconstructedFault<dim> &get_fault(const unsigned int fault_index);
+      const ReconstructedFault<dim> &get_fault(const unsigned int fault_index) const;
       const std::vector<FaultReconstructionDiagnostics> &get_diagnostics() const;
 
     private:
@@ -179,6 +237,9 @@ namespace aspect
       bool initial_reconstruction_complete = false;
       std::vector<PrescribedInitialFault<dim>> prescribed_faults;
       std::vector<ReconstructedFault<dim>> reconstructed_faults;
+      std::vector<typename ReconstructedFault<dim>::VertexPropertyInformation>
+      vertex_property_information;
+      std::map<std::string, unsigned int> vertex_property_indices;
       std::vector<FaultReconstructionDiagnostics> diagnostics;
   };
 }

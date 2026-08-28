@@ -91,3 +91,27 @@ TEST_CASE("ReconstructedFault append-only updates")
   REQUIRE(fault.n_vertices() == 3);
   REQUIRE(fault.geometry_version() == 2);
 }
+
+
+TEST_CASE("ReconstructedFaultManager owns the shared vertex property schema")
+{
+  aspect::ReconstructedFaultManager<2> manager;
+
+  const unsigned int scalar = manager.register_vertex_property("scalar", 1);
+  const unsigned int vector = manager.register_vertex_property("vector", 2);
+
+  REQUIRE(scalar == 0);
+  REQUIRE(vector == 1);
+  REQUIRE(manager.has_vertex_property("scalar"));
+  REQUIRE_FALSE(manager.has_vertex_property("missing"));
+  REQUIRE(manager.get_vertex_property_index("vector") == vector);
+  REQUIRE(manager.get_vertex_property_information().size() == 2);
+  REQUIRE(manager.get_vertex_property_information()[1].name == "vector");
+  REQUIRE(manager.get_vertex_property_information()[1].n_components == 2);
+
+  const ThrowOnDealIIException throw_on_dealii_exception;
+  REQUIRE_THROWS(manager.register_vertex_property("", 1));
+  REQUIRE_THROWS(manager.register_vertex_property("zero components", 0));
+  REQUIRE_THROWS(manager.register_vertex_property("scalar", 1));
+  REQUIRE_THROWS(manager.get_vertex_property_index("missing"));
+}

@@ -270,8 +270,29 @@ caller runs after the converged timestep-zero phase-field solve.
 
 The `reconstructed faults` postprocessor writes the replicated reconstructed
 geometry once from MPI rank zero as VTK unstructured-grid line cells. Each VTU
-contains only built-in identifiers: `fault_id` and per-fault `vertex_id` on
-points, and `fault_id` and per-fault `cell_id` on cells. A PVD file records the
-time series. No material-model or generic fault properties are part of this
-output stage. Point-data and cell-data emission are isolated so a future generic
-property mechanism can attach fields without changing geometry flattening.
+contains built-in identifiers: `fault_id` and per-fault `vertex_id` on points,
+and `fault_id` and per-fault `cell_id` on cells. A PVD file records the time
+series. Runtime-registered generic vertex properties are written automatically
+as point data. All faults use the same manager-owned property schema and common
+property indices. Cell properties and material-model-specific output remain
+outside the current scope.
+
+## 16. Generic reconstructed-fault vertex properties
+
+`ReconstructedFaultManager<dim>` owns a minimal material-independent registry
+for vertex properties. A property is identified by a runtime name and a
+component count. Registration returns a stable property index and must be
+completed before reconstructed faults exist. Every fault receives the same
+schema and indices. Each fault owns one contiguous vertex-major value array per
+property with layout
+
+```
+vertex 0 component 0, ..., vertex 0 component n,
+vertex 1 component 0, ..., vertex 1 component n, ...
+```
+
+Registering a property allocates signaling-NaN values for all existing fault
+vertices. Appending geometry preserves existing property values and extends
+every property array with signaling-NaN entries. This storage has no particle
+ownership, migration, cell association, constitutive-law assumptions, or MPI
+communication of its own; it follows the replicated ownership of the fault.

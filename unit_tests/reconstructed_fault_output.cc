@@ -22,7 +22,7 @@ TEST_CASE("Reconstructed fault output writes line geometry and identifiers")
                                    dealii::Point<2>(5,2)})
   };
 
-  const aspect::Postprocess::internal::ReconstructedFaultOutput<2> data_out(faults);
+  const aspect::Postprocess::internal::ReconstructedFaultOutput<2> data_out(faults, {});
   std::ostringstream output;
   data_out.write_vtu(output, 2.5, 7);
   const std::string vtu = output.str();

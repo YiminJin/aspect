@@ -14,9 +14,9 @@ Run from the ASPECT source directory:
 The model uses a prescribed zero Stokes solution and ends at time zero. It
 does not evolve RSF state, propagate the fault, or solve the Stokes equations.
 
-In ParaView, open `output-reconstructed-fault/solution/solution.pvd` and color
-the bulk mesh by `phase_field`. Then open
-`output-reconstructed-fault/reconstructed_faults/reconstructed_faults.pvd`.
+In ParaView, open `output-reconstructed-fault/solution.pvd` and color the bulk
+mesh by `phase_field`. Then open
+`output-reconstructed-fault/reconstructed_faults.pvd`.
 The reconstructed line should follow the centerline of the diffuse band and
 approximately overlay the prescribed segment from `(35 km, 24 km)` to
 `(65 km, 76 km)`. Mesh-scale endpoint offsets are expected. The line output

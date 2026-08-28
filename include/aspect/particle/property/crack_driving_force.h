@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2025 - 2024 by the authors of the ASPECT code.
+ Copyright (C) 2025 - by the authors of the ASPECT code.
 
  This file is part of ASPECT.
 
@@ -31,7 +31,9 @@ namespace aspect
     namespace Property
     {
       /**
-       * A class that sets particle properties to the current velocity.
+       * A particle property that stores the crack-driving force used by the
+       * phase-field system. New particles are initialized to the material's
+       * critical crack-driving force.
        *
        * @ingroup ParticleProperties
        */
@@ -39,6 +41,10 @@ namespace aspect
       class CrackDrivingForce : public Interface<dim>, public SimulatorAccess<dim>
       {
         public:
+          /**
+           * Verify that the selected material model supplies phase-field
+           * material parameters.
+           */
           void initialize() override;
 
           /**

@@ -20,11 +20,29 @@ namespace aspect
     {
       template <int dim>
       ReconstructedFaultOutput<dim>::ReconstructedFaultOutput(
-        const std::vector<ReconstructedFault<dim>> &faults)
+        const std::vector<ReconstructedFault<dim>> &faults,
+        const std::vector<typename ReconstructedFault<dim>::VertexPropertyInformation>
+        &property_information)
       {
+        for (const auto &property : property_information)
+          vertex_properties.push_back({property.name, property.n_components, {}});
+
         for (unsigned int fault_id = 0; fault_id < faults.size(); ++fault_id)
           {
             const ReconstructedFault<dim> &fault = faults[fault_id];
+            const auto &fault_property_information = fault.get_vertex_property_information();
+            AssertThrow(fault_property_information.size() == property_information.size(),
+                        ExcMessage("A reconstructed fault does not use the manager's "
+                                   "vertex-property schema."));
+            for (unsigned int property_index = 0;
+                 property_index < property_information.size(); ++property_index)
+              AssertThrow(fault_property_information[property_index].name
+                          == property_information[property_index].name
+                          && fault_property_information[property_index].n_components
+                          == property_information[property_index].n_components,
+                          ExcMessage("A reconstructed fault does not use the manager's "
+                                     "vertex-property schema."));
+
             const unsigned int first_point = points.size();
             for (unsigned int vertex_id = 0; vertex_id < fault.n_vertices(); ++vertex_id)
               {
@@ -37,6 +55,15 @@ namespace aspect
                 cells.push_back({{first_point + cell_id, first_point + cell_id + 1}});
                 cell_fault_ids.push_back(fault_id);
                 cell_ids.push_back(cell_id);
+              }
+
+            for (unsigned int property_index = 0;
+                 property_index < vertex_properties.size(); ++property_index)
+              {
+                const ArrayView<const double> values =
+                  fault.get_vertex_property_values(property_index);
+                vertex_properties[property_index].values.insert(
+                  vertex_properties[property_index].values.end(), values.begin(), values.end());
               }
           }
       }
@@ -95,9 +122,38 @@ namespace aspect
           output << "\n        </DataArray>\n";
         };
 
+        const auto escape_xml_attribute = [](const std::string &text)
+        {
+          std::string escaped;
+          for (const char character : text)
+            switch (character)
+              {
+                case '&': escaped += "&amp;"; break;
+                case '<': escaped += "&lt;"; break;
+                case '>': escaped += "&gt;"; break;
+                case '\"': escaped += "&quot;"; break;
+                case '\'': escaped += "&apos;"; break;
+                default: escaped += character;
+              }
+          return escaped;
+        };
+
         output << "      <PointData>\n";
         write_identifier_array("fault_id", point_fault_ids);
         write_identifier_array("vertex_id", vertex_ids);
+        for (const VertexPropertyOutput &property : vertex_properties)
+          {
+            AssertThrow(property.name != "fault_id" && property.name != "vertex_id",
+                        ExcMessage("The reconstructed-fault vertex property <" + property.name
+                                   + "> conflicts with a built-in VTU point-data identifier."));
+            output << "        <DataArray type=\"Float64\" Name=\""
+                   << escape_xml_attribute(property.name)
+                   << "\" NumberOfComponents=\"" << property.n_components
+                   << "\" format=\"ascii\">\n          ";
+            for (const double value : property.values)
+              output << value << ' ';
+            output << "\n        </DataArray>\n";
+          }
         output << "      </PointData>\n"
                << "      <CellData>\n";
         write_identifier_array("fault_id", cell_fault_ids);
@@ -127,7 +183,8 @@ namespace aspect
     std::pair<std::string,std::string>
     ReconstructedFaults<dim>::execute(TableHandler &)
     {
-      const auto &faults = this->get_reconstructed_fault_manager().get_faults();
+      const auto &fault_manager = this->get_reconstructed_fault_manager();
+      const auto &faults = fault_manager.get_faults();
       if (faults.empty())
         return {"Writing reconstructed faults:", "no reconstructed geometry available"};
 
@@ -136,7 +193,8 @@ namespace aspect
                                    + ".vtu";
       if (Utilities::MPI::this_mpi_process(this->get_mpi_communicator()) == 0)
         {
-          const internal::ReconstructedFaultOutput<dim> data_out(faults);
+          const internal::ReconstructedFaultOutput<dim> data_out(
+            faults, fault_manager.get_vertex_property_information());
           std::ofstream output(this->get_output_directory() + filename);
           AssertThrow(output, ExcMessage("Could not open reconstructed-fault output file <"
                                          + this->get_output_directory() + filename + ">."));
@@ -175,7 +233,8 @@ namespace aspect
 
     ASPECT_REGISTER_POSTPROCESSOR(ReconstructedFaults,
                                   "reconstructed faults",
-                                  "Write reconstructed sharp-fault line geometry and built-in "
-                                  "fault, vertex, and cell identifiers in VTU format.")
+                                  "Write reconstructed sharp-fault line geometry, built-in "
+                                  "identifiers, and registered generic vertex properties in "
+                                  "VTU format.")
   }
 }

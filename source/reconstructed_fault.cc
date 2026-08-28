@@ -681,7 +681,11 @@ namespace aspect
             fitted_points[i] = reference_points[i] + offsets[i] * normals[i];
             fault_diagnostics.offsets[i] = offsets[i];
           }
-        reconstructed_faults.emplace_back(fitted_points);
+        ReconstructedFault<dim> reconstructed_fault(fitted_points);
+        for (const auto &property : vertex_property_information)
+          reconstructed_fault.register_vertex_property(property.name,
+                                                        property.n_components);
+        reconstructed_faults.push_back(std::move(reconstructed_fault));
         diagnostics.push_back(std::move(fault_diagnostics));
       }
 
@@ -692,10 +696,80 @@ namespace aspect
 
 
   template <int dim>
+  unsigned int
+  ReconstructedFaultManager<dim>::register_vertex_property(
+    const std::string &name,
+    const unsigned int n_components)
+  {
+    AssertThrow(reconstructed_faults.empty(),
+                ExcMessage("Reconstructed-fault vertex properties must be registered "
+                           "before reconstructed geometry exists."));
+    AssertThrow(!name.empty(),
+                ExcMessage("Reconstructed-fault vertex property names must not be empty."));
+    AssertThrow(n_components > 0,
+                ExcMessage("Reconstructed-fault vertex properties must have at least one component."));
+    AssertThrow(!has_vertex_property(name),
+                ExcMessage("A reconstructed-fault vertex property named <" + name
+                           + "> is already registered."));
+
+    const unsigned int property_index = vertex_property_information.size();
+    vertex_property_information.push_back({name, n_components});
+    vertex_property_indices.emplace(name, property_index);
+    return property_index;
+  }
+
+
+  template <int dim>
+  bool
+  ReconstructedFaultManager<dim>::has_vertex_property(const std::string &name) const
+  {
+    return vertex_property_indices.find(name) != vertex_property_indices.end();
+  }
+
+
+  template <int dim>
+  unsigned int
+  ReconstructedFaultManager<dim>::get_vertex_property_index(const std::string &name) const
+  {
+    const auto property = vertex_property_indices.find(name);
+    AssertThrow(property != vertex_property_indices.end(),
+                ExcMessage("No reconstructed-fault vertex property named <" + name
+                           + "> is registered."));
+    return property->second;
+  }
+
+
+  template <int dim>
+  const std::vector<typename ReconstructedFault<dim>::VertexPropertyInformation> &
+  ReconstructedFaultManager<dim>::get_vertex_property_information() const
+  {
+    return vertex_property_information;
+  }
+
+
+  template <int dim>
   const std::vector<ReconstructedFault<dim>> &
   ReconstructedFaultManager<dim>::get_faults() const
   {
     return reconstructed_faults;
+  }
+
+
+  template <int dim>
+  ReconstructedFault<dim> &
+  ReconstructedFaultManager<dim>::get_fault(const unsigned int fault_index)
+  {
+    AssertIndexRange(fault_index, reconstructed_faults.size());
+    return reconstructed_faults[fault_index];
+  }
+
+
+  template <int dim>
+  const ReconstructedFault<dim> &
+  ReconstructedFaultManager<dim>::get_fault(const unsigned int fault_index) const
+  {
+    AssertIndexRange(fault_index, reconstructed_faults.size());
+    return reconstructed_faults[fault_index];
   }
 
 
@@ -755,10 +829,84 @@ namespace aspect
 
 
   template <int dim>
+  unsigned int
+  ReconstructedFault<dim>::register_vertex_property(const std::string &name,
+                                                     const unsigned int n_components)
+  {
+    const unsigned int property_index = vertex_property_information.size();
+    vertex_property_information.push_back({name, n_components});
+    vertex_property_values.emplace_back(vertices.size() * n_components,
+                                        numbers::signaling_nan<double>());
+    return property_index;
+  }
+
+
+  template <int dim>
+  const std::vector<typename ReconstructedFault<dim>::VertexPropertyInformation> &
+  ReconstructedFault<dim>::get_vertex_property_information() const
+  {
+    return vertex_property_information;
+  }
+
+
+  template <int dim>
+  ArrayView<double>
+  ReconstructedFault<dim>::get_vertex_property_values(const unsigned int property_index)
+  {
+    AssertIndexRange(property_index, vertex_property_values.size());
+    return make_array_view(vertex_property_values[property_index]);
+  }
+
+
+  template <int dim>
+  ArrayView<const double>
+  ReconstructedFault<dim>::get_vertex_property_values(const unsigned int property_index) const
+  {
+    AssertIndexRange(property_index, vertex_property_values.size());
+    return make_array_view(vertex_property_values[property_index]);
+  }
+
+
+  template <int dim>
+  ArrayView<double>
+  ReconstructedFault<dim>::get_vertex_property_values_at_vertex(
+    const unsigned int property_index,
+    const unsigned int vertex_index)
+  {
+    AssertIndexRange(property_index, vertex_property_values.size());
+    AssertIndexRange(vertex_index, vertices.size());
+    const unsigned int n_components = vertex_property_information[property_index].n_components;
+    auto &values = vertex_property_values[property_index];
+    return make_array_view(values.begin() + vertex_index * n_components,
+                           values.begin() + (vertex_index + 1) * n_components);
+  }
+
+
+  template <int dim>
+  ArrayView<const double>
+  ReconstructedFault<dim>::get_vertex_property_values_at_vertex(
+    const unsigned int property_index,
+    const unsigned int vertex_index) const
+  {
+    AssertIndexRange(property_index, vertex_property_values.size());
+    AssertIndexRange(vertex_index, vertices.size());
+    const unsigned int n_components = vertex_property_information[property_index].n_components;
+    const auto &values = vertex_property_values[property_index];
+    return make_array_view(values.cbegin() + vertex_index * n_components,
+                           values.cbegin() + (vertex_index + 1) * n_components);
+  }
+
+
+  template <int dim>
   void
   ReconstructedFault<dim>::append_vertex(const Point<dim> &new_vertex)
   {
     vertices.push_back(new_vertex);
+    for (unsigned int property_index = 0;
+         property_index < vertex_property_values.size(); ++property_index)
+      vertex_property_values[property_index].resize(
+        vertices.size() * vertex_property_information[property_index].n_components,
+        numbers::signaling_nan<double>());
     ++current_geometry_version;
   }
 
@@ -771,6 +919,11 @@ namespace aspect
       return;
 
     vertices.insert(vertices.end(), new_vertices.begin(), new_vertices.end());
+    for (unsigned int property_index = 0;
+         property_index < vertex_property_values.size(); ++property_index)
+      vertex_property_values[property_index].resize(
+        vertices.size() * vertex_property_information[property_index].n_components,
+        numbers::signaling_nan<double>());
     ++current_geometry_version;
   }
 

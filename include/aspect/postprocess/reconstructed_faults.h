@@ -22,19 +22,29 @@ namespace aspect
       {
         public:
           explicit ReconstructedFaultOutput(
-            const std::vector<ReconstructedFault<dim>> &faults);
+            const std::vector<ReconstructedFault<dim>> &faults,
+            const std::vector<typename ReconstructedFault<dim>::VertexPropertyInformation>
+            &vertex_property_information);
 
           void write_vtu(std::ostream &output,
                          const double time,
                          const unsigned int timestep_number) const;
 
         private:
+          struct VertexPropertyOutput
+          {
+            std::string name;
+            unsigned int n_components;
+            std::vector<double> values;
+          };
+
           std::vector<Point<dim>> points;
           std::vector<unsigned int> point_fault_ids;
           std::vector<unsigned int> vertex_ids;
           std::vector<std::array<unsigned int,2>> cells;
           std::vector<unsigned int> cell_fault_ids;
           std::vector<unsigned int> cell_ids;
+          std::vector<VertexPropertyOutput> vertex_properties;
       };
     }
 
