@@ -33,6 +33,9 @@ namespace aspect
   template <int dim>
   class ReconstructedFaultManager;
 
+  template <int dim>
+  class ReconstructedFault;
+
   /**
    * Prescribed geometry and core phase-field values for one initial fault.
    * Core values are specified at the polyline vertices and interpolated
@@ -100,13 +103,6 @@ namespace aspect
   class ReconstructedFault
   {
     public:
-      /** Metadata for one runtime-defined vertex property. */
-      struct VertexPropertyInformation
-      {
-        std::string name;
-        unsigned int n_components;
-      };
-
       /** Construct an empty reconstructed fault. */
       ReconstructedFault() = default;
 
@@ -133,27 +129,13 @@ namespace aspect
       const std::vector<Point<dim>> &
       get_vertices() const;
 
-      /** Return metadata for all vertex properties in registration order. */
-      const std::vector<VertexPropertyInformation> &
-      get_vertex_property_information() const;
-
-      /** Return all contiguous values of property @p property_index. */
+      /** Return all property components stored at vertex @p vertex_index. */
       ArrayView<double>
-      get_vertex_property_values(const unsigned int property_index);
+      get_properties(const unsigned int vertex_index);
 
-      /** Return all contiguous values of property @p property_index. */
+      /** Return all property components stored at vertex @p vertex_index. */
       ArrayView<const double>
-      get_vertex_property_values(const unsigned int property_index) const;
-
-      /** Return the component values of a property at one vertex. */
-      ArrayView<double>
-      get_vertex_property_values_at_vertex(const unsigned int property_index,
-                                           const unsigned int vertex_index);
-
-      /** Return the component values of a property at one vertex. */
-      ArrayView<const double>
-      get_vertex_property_values_at_vertex(const unsigned int property_index,
-                                           const unsigned int vertex_index) const;
+      get_properties(const unsigned int vertex_index) const;
 
       /** Append one committed vertex to the fault. */
       void
@@ -176,15 +158,41 @@ namespace aspect
     private:
       friend class ReconstructedFaultManager<dim>;
 
-      unsigned int
-      register_vertex_property(const std::string &name,
-                               const unsigned int n_components);
+      void initialize_properties(const unsigned int n_components);
 
       std::vector<Point<dim>> vertices;
-      std::vector<VertexPropertyInformation> vertex_property_information;
-      std::vector<std::vector<double>> vertex_property_values;
+      unsigned int n_property_components = 0;
+      std::vector<double> property_values;
       std::uint64_t current_geometry_version = 0;
   };
+
+
+  namespace ReconstructedFaultUtilities
+  {
+    /** Result of projecting a point into the normal-profile strips. */
+    struct NormalProfileProjection
+    {
+      bool active = false;
+      unsigned int fault_index = numbers::invalid_unsigned_int;
+      unsigned int segment_index = numbers::invalid_unsigned_int;
+      double xi = numbers::signaling_nan<double>();
+      double signed_distance = numbers::signaling_nan<double>();
+    };
+
+    /** Associate a point with at most one open 2-D fault normal profile. */
+    template <int dim>
+    NormalProfileProjection
+    project_to_normal_profiles(
+      const std::vector<ReconstructedFault<dim>> &faults,
+      const std::vector<std::vector<double>> &half_widths,
+      const Point<dim> &position);
+
+    /** Solve a symmetric positive-definite tridiagonal system. */
+    std::vector<double>
+    solve_tridiagonal_system(const std::vector<double> &diagonal,
+                             const std::vector<double> &off_diagonal,
+                             const std::vector<double> &rhs);
+  }
 
 
   /** Diagnostics produced by the direct phase-field ridge reconstruction. */
@@ -201,6 +209,31 @@ namespace aspect
   class ReconstructedFaultManager : public SimulatorAccess<dim>
   {
     public:
+      /** Metadata for one runtime-defined property. */
+      struct PropertyInformation
+      {
+        std::string name;
+        unsigned int n_components;
+        unsigned int position;
+      };
+
+      /** Map particle-property components to a registered fault property. */
+      struct ParticlePropertyProjection
+      {
+        std::string particle_property_name;
+        unsigned int first_particle_component = 0;
+        std::string fault_property_name;
+        unsigned int first_fault_component = 0;
+        unsigned int n_components = 1;
+      };
+
+      /** Coverage information for one reconstructed fault. */
+      struct ParticleProjectionDiagnostics
+      {
+        std::vector<double> weighted_support;
+        unsigned int n_contributing_particles = 0;
+      };
+
       ReconstructedFaultManager() = default;
       explicit ReconstructedFaultManager(const Simulator<dim> &simulator);
 
@@ -217,13 +250,18 @@ namespace aspect
        * Register a property shared by every reconstructed fault. Properties
        * must be registered before reconstructed geometry exists.
        */
-      unsigned int register_vertex_property(const std::string &name,
-                                            const unsigned int n_components);
+      unsigned int register_property(const std::string &name,
+                                     const unsigned int n_components);
 
-      bool has_vertex_property(const std::string &name) const;
-      unsigned int get_vertex_property_index(const std::string &name) const;
-      const std::vector<typename ReconstructedFault<dim>::VertexPropertyInformation> &
-      get_vertex_property_information() const;
+      bool has_property(const std::string &name) const;
+      unsigned int get_property_index(const std::string &name) const;
+      const std::vector<PropertyInformation> &get_property_information() const;
+
+      void project_particle_properties(
+        const std::vector<ParticlePropertyProjection> &projections);
+      void invalidate_particle_projection_cache();
+      const std::vector<ParticleProjectionDiagnostics> &
+      get_particle_projection_diagnostics() const;
 
       const std::vector<ReconstructedFault<dim>> &get_faults() const;
       ReconstructedFault<dim> &get_fault(const unsigned int fault_index);
@@ -231,16 +269,49 @@ namespace aspect
       const std::vector<FaultReconstructionDiagnostics> &get_diagnostics() const;
 
     private:
+      struct ParticleProjectionCacheEntry
+      {
+        types::particle_index particle_id = numbers::invalid_unsigned_int;
+        Point<dim> position;
+        double particle_domain_volume = numbers::signaling_nan<double>();
+        bool active = false;
+        unsigned int fault_index = numbers::invalid_unsigned_int;
+        unsigned int segment_index = numbers::invalid_unsigned_int;
+        double xi = numbers::signaling_nan<double>();
+      };
+
+      struct ProjectionSystem
+      {
+        std::vector<double> diagonal;
+        std::vector<double> off_diagonal;
+        std::vector<double> factor_diagonal;
+        std::vector<double> factor_lower;
+      };
+
+      bool particle_projection_cache_is_valid() const;
+      void rebuild_particle_projection_cache();
+      std::vector<double> solve_projection_system(
+        const unsigned int fault_index,
+        const ArrayView<const double> &rhs) const;
+
       double structural_spacing = numbers::signaling_nan<double>();
       double ridge_coefficient = 1.0;
       std::string prescribed_faults_filename;
       bool initial_reconstruction_complete = false;
       std::vector<PrescribedInitialFault<dim>> prescribed_faults;
       std::vector<ReconstructedFault<dim>> reconstructed_faults;
-      std::vector<typename ReconstructedFault<dim>::VertexPropertyInformation>
-      vertex_property_information;
-      std::map<std::string, unsigned int> vertex_property_indices;
+      std::vector<std::vector<double>> projection_half_widths;
+      std::uint64_t projection_metadata_version = 0;
+      std::vector<PropertyInformation> property_information;
+      std::map<std::string, unsigned int> property_indices;
+      unsigned int n_property_components = 0;
       std::vector<FaultReconstructionDiagnostics> diagnostics;
+      bool particle_projection_cache_valid = false;
+      std::uint64_t cached_projection_metadata_version = 0;
+      std::vector<std::uint64_t> cached_fault_geometry_versions;
+      std::vector<ParticleProjectionCacheEntry> particle_projection_cache;
+      std::vector<ProjectionSystem> projection_systems;
+      std::vector<ParticleProjectionDiagnostics> particle_projection_diagnostics;
   };
 }
 

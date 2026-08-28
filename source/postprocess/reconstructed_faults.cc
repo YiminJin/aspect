@@ -21,28 +21,15 @@ namespace aspect
       template <int dim>
       ReconstructedFaultOutput<dim>::ReconstructedFaultOutput(
         const std::vector<ReconstructedFault<dim>> &faults,
-        const std::vector<typename ReconstructedFault<dim>::VertexPropertyInformation>
+        const std::vector<typename ReconstructedFaultManager<dim>::PropertyInformation>
         &property_information)
       {
         for (const auto &property : property_information)
-          vertex_properties.push_back({property.name, property.n_components, {}});
+          properties.push_back({property.name, property.n_components, {}});
 
         for (unsigned int fault_id = 0; fault_id < faults.size(); ++fault_id)
           {
             const ReconstructedFault<dim> &fault = faults[fault_id];
-            const auto &fault_property_information = fault.get_vertex_property_information();
-            AssertThrow(fault_property_information.size() == property_information.size(),
-                        ExcMessage("A reconstructed fault does not use the manager's "
-                                   "vertex-property schema."));
-            for (unsigned int property_index = 0;
-                 property_index < property_information.size(); ++property_index)
-              AssertThrow(fault_property_information[property_index].name
-                          == property_information[property_index].name
-                          && fault_property_information[property_index].n_components
-                          == property_information[property_index].n_components,
-                          ExcMessage("A reconstructed fault does not use the manager's "
-                                     "vertex-property schema."));
-
             const unsigned int first_point = points.size();
             for (unsigned int vertex_id = 0; vertex_id < fault.n_vertices(); ++vertex_id)
               {
@@ -58,13 +45,20 @@ namespace aspect
               }
 
             for (unsigned int property_index = 0;
-                 property_index < vertex_properties.size(); ++property_index)
-              {
-                const ArrayView<const double> values =
-                  fault.get_vertex_property_values(property_index);
-                vertex_properties[property_index].values.insert(
-                  vertex_properties[property_index].values.end(), values.begin(), values.end());
-              }
+                 property_index < properties.size(); ++property_index)
+              for (unsigned int vertex_index = 0;
+                   vertex_index < fault.n_vertices(); ++vertex_index)
+                {
+                  const ArrayView<const double> values = fault.get_properties(vertex_index);
+                  const auto &information = property_information[property_index];
+                  AssertThrow(information.position + information.n_components <= values.size(),
+                              ExcMessage("A reconstructed fault does not use the manager's "
+                                         "property layout."));
+                  properties[property_index].values.insert(
+                    properties[property_index].values.end(),
+                    values.begin() + information.position,
+                    values.begin() + information.position + information.n_components);
+                }
           }
       }
 
@@ -110,8 +104,6 @@ namespace aspect
         output << "\n        </DataArray>\n"
                << "      </Cells>\n";
 
-        // Future generic properties can be attached locally in these two XML
-        // sections without changing geometry construction.
         const auto write_identifier_array = [&output](const std::string &name,
                                                       const std::vector<unsigned int> &values)
         {
@@ -141,7 +133,7 @@ namespace aspect
         output << "      <PointData>\n";
         write_identifier_array("fault_id", point_fault_ids);
         write_identifier_array("vertex_id", vertex_ids);
-        for (const VertexPropertyOutput &property : vertex_properties)
+        for (const PropertyOutput &property : properties)
           {
             AssertThrow(property.name != "fault_id" && property.name != "vertex_id",
                         ExcMessage("The reconstructed-fault vertex property <" + property.name
@@ -194,7 +186,7 @@ namespace aspect
       if (Utilities::MPI::this_mpi_process(this->get_mpi_communicator()) == 0)
         {
           const internal::ReconstructedFaultOutput<dim> data_out(
-            faults, fault_manager.get_vertex_property_information());
+            faults, fault_manager.get_property_information());
           std::ofstream output(this->get_output_directory() + filename);
           AssertThrow(output, ExcMessage("Could not open reconstructed-fault output file <"
                                          + this->get_output_directory() + filename + ">."));

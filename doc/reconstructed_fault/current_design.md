@@ -283,16 +283,56 @@ outside the current scope.
 for vertex properties. A property is identified by a runtime name and a
 component count. Registration returns a stable property index and must be
 completed before reconstructed faults exist. Every fault receives the same
-schema and indices. Each fault owns one contiguous vertex-major value array per
-property with layout
+schema and component offsets. Each fault owns one contiguous vertex-major value
+array with layout
 
 ```
-vertex 0 component 0, ..., vertex 0 component n,
-vertex 1 component 0, ..., vertex 1 component n, ...
+vertex 0 property component 0, ..., vertex 0 property component Np-1,
+vertex 1 property component 0, ..., vertex 1 property component Np-1, ...
 ```
 
-Registering a property allocates signaling-NaN values for all existing fault
-vertices. Appending geometry preserves existing property values and extends
-every property array with signaling-NaN entries. This storage has no particle
+The manager supplies only the total component count when it creates a fault;
+individual faults do not duplicate property names, component counts, or
+offsets. Appending geometry preserves existing property values and extends the
+array with signaling-NaN entries. This storage has no particle
 ownership, migration, cell association, constitutive-law assumptions, or MPI
 communication of its own; it follows the replicated ownership of the fault.
+
+## 17. Particle-to-fault property projection
+
+Stage 5 projects generic components from the phase-field-associated particle
+manager to registered reconstructed-fault properties by a consistent weighted
+Q1 least-squares solve. Only locally owned particles contribute. The sampling
+weight is the existing particle-domain volume; within the admitted influence
+region the geometric kernel is one. Fault-sized tridiagonal matrices and packed
+right-hand sides are summed over MPI, and every rank solves the identical
+replicated systems.
+
+Influence half-width is generic per-vertex projection geometry metadata owned
+by `ReconstructedFaultManager<dim>`. The current initialization obtains it from
+stationary-profile support, caches support for repeated prescribed core values,
+and interpolates prescribed endpoint widths onto the resampled fault. The
+projection operator itself consumes only the resulting half-width values and
+does not depend on stationary-profile formulas or core phase-field values.
+
+Particle association uses finite segment-normal profiles. A segment contributes
+only when its unconstrained orthogonal coordinate satisfies `0 <= xi <= 1` and
+the normal distance is within the Q1-interpolated half-width. This excludes
+tangent extensions beyond the two true open tips. At internal vertices both
+incident segments remain candidates, and the candidate with the smallest
+absolute normal distance is selected. The current implementation assumes small
+enough turning angles that no separate corner construction is needed.
+
+A particle may contribute to at most one fault. Admission to more than one
+fault is an error, but the implementation does not attempt exhaustive geometric
+detection of overlapping influence regions. Non-overlapping fault influence
+regions are a current model assumption. Closed loops, intersections, branching,
+joining, coalescence, and 3-D projection are unsupported.
+
+The projection cache stores every locally owned particle's ID, position,
+particle-domain volume, and optional fault segment/coordinate association. It
+also stores geometry versions and reusable tridiagonal LDL-transpose factors.
+Cache reuse is primarily intended within a timestep or nonlinear solve.
+Particle advection normally invalidates it; changes in particle IDs, iteration
+order, positions, domain volumes, fault geometry versions, or projection
+metadata cause a rebuild. Particle property-value changes alone do not.
