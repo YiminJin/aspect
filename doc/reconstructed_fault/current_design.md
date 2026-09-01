@@ -275,7 +275,9 @@ and `fault_id` and per-fault `cell_id` on cells. A PVD file records the time
 series. Runtime-registered generic vertex properties are written automatically
 as point data. All faults use the same manager-owned property schema and common
 property indices. Cell properties and material-model-specific output remain
-outside the current scope.
+outside the current scope. When the distinguished slip-rate field is
+initialized, its committed value is additionally written as the built-in
+`slip_rate` point-data array.
 
 ## 16. Generic reconstructed-fault vertex properties
 
@@ -336,3 +338,26 @@ Cache reuse is primarily intended within a timestep or nonlinear solve.
 Particle advection normally invalidates it; changes in particle IDs, iteration
 order, positions, domain volumes, fault geometry versions, or projection
 metadata cause a rebuild. Particle property-value changes alone do not.
+
+## 18. Distinguished fault slip-rate field
+
+`ReconstructedFaultManager<dim>` owns the replicated nodal slip-rate field
+`V` separately from the generic property array. `ReconstructedFault<dim>`
+therefore remains a geometry/property container and does not acquire
+constitutive state. The generic property name `slip_rate` is reserved for this
+built-in kinematic field.
+
+New reconstructed geometry has no implicit physical slip-rate value. A caller
+must initialize one finite value per fault vertex. The manager provides Q1
+segment interpolation and a line-search lifecycle with committed, saved, and
+current trial vectors. Every trial candidate is formed from the saved base,
+so evaluating multiple step lengths cannot accumulate prior rejected updates.
+Accepting a trial replaces the committed values; rolling it back restores the
+saved values. Physical initialization and positivity limiting belong to later
+constitutive and coupled-Newton stages.
+
+Checkpoint/restart stores reconstructed geometry, projection half-widths, the
+generic property schema and values, initialization flags, and committed `V`.
+Current and saved trial values and all projection/factorization caches are
+reconstructed: after load, current `V` equals committed `V` and no trial is
+active.

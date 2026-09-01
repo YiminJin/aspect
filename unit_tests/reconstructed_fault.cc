@@ -14,6 +14,9 @@
 #include <aspect/reconstructed_fault.h>
 #include <aspect/utilities.h>
 
+#include <limits>
+#include <sstream>
+
 namespace
 {
   class ThrowOnDealIIException
@@ -116,7 +119,100 @@ TEST_CASE("ReconstructedFaultManager owns the shared vertex property schema")
   REQUIRE_THROWS(manager.register_property("", 1));
   REQUIRE_THROWS(manager.register_property("zero components", 0));
   REQUIRE_THROWS(manager.register_property("scalar", 1));
+  REQUIRE_THROWS(manager.register_property("slip_rate", 1));
   REQUIRE_THROWS(manager.get_property_index("missing"));
+}
+
+
+TEST_CASE("ReconstructedFaultManager slip-rate lifecycle and interpolation")
+{
+  aspect::ReconstructedFaultManager<2> manager;
+  manager.add_reconstructed_fault({dealii::Point<2>(0,0),
+                                   dealii::Point<2>(2,0),
+                                   dealii::Point<2>(4,0)},
+                                  {1.0, 1.0, 1.0});
+
+  REQUIRE_FALSE(manager.slip_rates_are_initialized());
+  manager.initialize_slip_rate(0, {1.0, 2.0, 4.0});
+  REQUIRE(manager.slip_rates_are_initialized());
+  REQUIRE(manager.interpolate_slip_rate(0, 1, 0.25) == Approx(2.5));
+
+  manager.begin_slip_rate_trial();
+  manager.set_slip_rate_trial({{2.0, -2.0, 4.0}}, 0.5);
+  REQUIRE(manager.get_slip_rate(0)[0] == Approx(2.0));
+  REQUIRE(manager.get_slip_rate(0)[1] == Approx(1.0));
+  REQUIRE(manager.get_committed_slip_rates()[0][0] == Approx(1.0));
+
+  // A second candidate is formed from the saved base, not the first candidate.
+  manager.set_slip_rate_trial({{2.0, -2.0, 4.0}}, 0.25);
+  REQUIRE(manager.get_slip_rate(0)[0] == Approx(1.5));
+  REQUIRE(manager.get_slip_rate(0)[1] == Approx(1.5));
+  manager.rollback_slip_rate_trial();
+  REQUIRE(manager.get_slip_rate(0)[0] == Approx(1.0));
+
+  manager.begin_slip_rate_trial();
+  manager.set_slip_rate_trial({{2.0, -2.0, 4.0}}, 0.25);
+  manager.accept_slip_rate_trial();
+  REQUIRE(manager.get_committed_slip_rates()[0][2] == Approx(5.0));
+
+  const ThrowOnDealIIException throw_on_dealii_exception;
+  REQUIRE_THROWS(manager.initialize_slip_rate(0, {1.0, 2.0, 3.0}));
+  REQUIRE_THROWS(manager.interpolate_slip_rate(0, 0, 1.1));
+  REQUIRE_THROWS(manager.set_slip_rate_trial({{0.0, 0.0, 0.0}}, 1.0));
+}
+
+
+TEST_CASE("ReconstructedFaultManager validates slip-rate initialization")
+{
+  aspect::ReconstructedFaultManager<2> manager;
+  manager.add_reconstructed_fault({dealii::Point<2>(0,0), dealii::Point<2>(1,0)},
+                                  {0.5, 0.5});
+  const ThrowOnDealIIException throw_on_dealii_exception;
+  REQUIRE_THROWS(manager.initialize_slip_rate(0, {1.0}));
+  REQUIRE_THROWS(manager.initialize_slip_rate(
+    0, {1.0, std::numeric_limits<double>::quiet_NaN()}));
+  REQUIRE_THROWS(manager.begin_slip_rate_trial());
+
+  manager.initialize_slip_rate(0, {1.0, 2.0});
+  manager.begin_slip_rate_trial();
+  REQUIRE_THROWS(manager.set_slip_rate_trial({}, 1.0));
+  REQUIRE_THROWS(manager.set_slip_rate_trial({{1.0}}, 1.0));
+  REQUIRE_THROWS(manager.set_slip_rate_trial(
+    {{0.0, std::numeric_limits<double>::infinity()}}, 1.0));
+  manager.rollback_slip_rate_trial();
+}
+
+
+TEST_CASE("ReconstructedFaultManager checkpoint restores committed slip rate")
+{
+  aspect::ReconstructedFaultManager<2> manager;
+  manager.register_property("state", 1);
+  manager.add_reconstructed_fault({dealii::Point<2>(0,0), dealii::Point<2>(1,0)},
+                                  {0.5, 0.75});
+  manager.initialize_slip_rate(0, {2.0, 3.0});
+  manager.get_fault(0).get_properties(0)[0] = 7.0;
+  manager.begin_slip_rate_trial();
+  manager.set_slip_rate_trial({{10.0, 10.0}}, 1.0);
+
+  std::stringstream storage;
+  {
+    aspect::oarchive archive(storage);
+    archive << manager;
+  }
+
+  aspect::ReconstructedFaultManager<2> restored;
+  {
+    aspect::iarchive archive(storage);
+    archive >> restored;
+  }
+
+  REQUIRE(restored.get_faults().size() == 1);
+  REQUIRE(restored.get_fault(0).vertex(1) == dealii::Point<2>(1,0));
+  REQUIRE(restored.get_fault(0).get_properties(0)[0] == Approx(7.0));
+  // Checkpoints contain the committed values, not an unaccepted candidate.
+  REQUIRE(restored.get_slip_rate(0)[0] == Approx(2.0));
+  REQUIRE(restored.interpolate_slip_rate(0, 0, 0.5) == Approx(2.5));
+  REQUIRE(restored.has_property("state"));
 }
 
 

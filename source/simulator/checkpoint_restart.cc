@@ -23,6 +23,7 @@
 #include <aspect/utilities.h>
 #include <aspect/mesh_deformation/interface.h>
 #include <aspect/melt.h>
+#include <aspect/reconstructed_fault.h>
 
 #include <deal.II/base/mpi.h>
 #include <deal.II/base/utilities.h>
@@ -642,6 +643,9 @@ namespace aspect
     ar &prescribed_solution_manager;
     ar &boundary_velocity_manager;
     ar &boundary_traction_manager;
+
+    if (parameters.reconstruct_faults)
+      ar &(*reconstructed_fault_manager);
 
 // The following are not manager classes but straight up plugins and so don't
 // currently have the ability to serialize themselves. We should add those later.

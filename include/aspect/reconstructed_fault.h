@@ -18,6 +18,10 @@
 #include <deal.II/base/array_view.h>
 #include <deal.II/base/point.h>
 
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/split_member.hpp>
+#include <boost/serialization/vector.hpp>
+
 #include <cstdint>
 #include <map>
 #include <vector>
@@ -157,6 +161,16 @@ namespace aspect
 
     private:
       friend class ReconstructedFaultManager<dim>;
+      friend class boost::serialization::access;
+
+      template <class Archive>
+      void serialize(Archive &ar, const unsigned int)
+      {
+        ar & vertices;
+        ar & n_property_components;
+        ar & property_values;
+        ar & current_geometry_version;
+      }
 
       void initialize_properties(const unsigned int n_components);
 
@@ -215,6 +229,14 @@ namespace aspect
         std::string name;
         unsigned int n_components;
         unsigned int position;
+
+        template <class Archive>
+        void serialize(Archive &ar, const unsigned int)
+        {
+          ar & name;
+          ar & n_components;
+          ar & position;
+        }
       };
 
       /** Map particle-property components to a registered fault property. */
@@ -246,6 +268,11 @@ namespace aspect
 
       void reconstruct_initial_faults(PhaseFieldHandler<dim> &phase_field_handler);
 
+      /** Add one complete reconstructed fault and its normal-profile half widths. */
+      unsigned int add_reconstructed_fault(
+        const std::vector<Point<dim>> &vertices,
+        const std::vector<double> &projection_half_widths);
+
       /**
        * Register a property shared by every reconstructed fault. Properties
        * must be registered before reconstructed geometry exists.
@@ -256,6 +283,40 @@ namespace aspect
       bool has_property(const std::string &name) const;
       unsigned int get_property_index(const std::string &name) const;
       const std::vector<PropertyInformation> &get_property_information() const;
+
+      /** Return whether every reconstructed fault has an initialized slip rate. */
+      bool slip_rates_are_initialized() const;
+
+      /** Initialize the nodal slip rate of one reconstructed fault. */
+      void initialize_slip_rate(const unsigned int fault_index,
+                                const std::vector<double> &values);
+
+      /** Return the current (possibly trial) nodal slip rate of one fault. */
+      const std::vector<double> &get_slip_rate(const unsigned int fault_index) const;
+
+      /** Return all current (possibly trial) nodal slip rates. */
+      const std::vector<std::vector<double>> &get_slip_rates() const;
+
+      /** Return the committed nodal slip rates used for checkpoint and output. */
+      const std::vector<std::vector<double>> &get_committed_slip_rates() const;
+
+      /** Q1-interpolate the current slip rate on one fault segment. */
+      double interpolate_slip_rate(const unsigned int fault_index,
+                                   const unsigned int segment_index,
+                                   const double xi) const;
+
+      /** Save the committed slip rate as the base of a line-search trial. */
+      void begin_slip_rate_trial();
+
+      /** Set V = saved V + step_length * delta_V without accumulating trials. */
+      void set_slip_rate_trial(const std::vector<std::vector<double>> &delta_V,
+                               const double step_length);
+
+      /** Accept the current trial as the new committed slip rate. */
+      void accept_slip_rate_trial();
+
+      /** Restore the saved slip rate and discard the active trial. */
+      void rollback_slip_rate_trial();
 
       void project_particle_properties(
         const std::vector<ParticlePropertyProjection> &projections);
@@ -269,6 +330,36 @@ namespace aspect
       const std::vector<FaultReconstructionDiagnostics> &get_diagnostics() const;
 
     private:
+      friend class boost::serialization::access;
+
+      template <class Archive>
+      void save(Archive &ar, const unsigned int) const
+      {
+        ar & initial_reconstruction_complete;
+        ar & reconstructed_faults;
+        ar & projection_half_widths;
+        ar & property_information;
+        ar & n_property_components;
+        ar & committed_slip_rates;
+        ar & slip_rate_initialized;
+      }
+
+      template <class Archive>
+      void load(Archive &ar, const unsigned int)
+      {
+        ar & initial_reconstruction_complete;
+        ar & reconstructed_faults;
+        ar & projection_half_widths;
+        ar & property_information;
+        ar & n_property_components;
+        ar & committed_slip_rates;
+        ar & slip_rate_initialized;
+
+        rebuild_after_deserialization();
+      }
+
+      BOOST_SERIALIZATION_SPLIT_MEMBER()
+
       struct ParticleProjectionCacheEntry
       {
         types::particle_index particle_id = numbers::invalid_unsigned_int;
@@ -312,6 +403,16 @@ namespace aspect
       std::vector<ParticleProjectionCacheEntry> particle_projection_cache;
       std::vector<ProjectionSystem> projection_systems;
       std::vector<ParticleProjectionDiagnostics> particle_projection_diagnostics;
+      std::vector<std::vector<double>> committed_slip_rates;
+      std::vector<std::vector<double>> current_slip_rates;
+      std::vector<std::vector<double>> saved_slip_rates;
+      std::vector<bool> slip_rate_initialized;
+      bool slip_rate_trial_active = false;
+
+      void rebuild_after_deserialization();
+      void assert_valid_slip_rate_layout(
+        const std::vector<std::vector<double>> &values,
+        const bool require_initialized) const;
   };
 }
 

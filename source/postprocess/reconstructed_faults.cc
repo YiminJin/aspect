@@ -22,8 +22,12 @@ namespace aspect
       ReconstructedFaultOutput<dim>::ReconstructedFaultOutput(
         const std::vector<ReconstructedFault<dim>> &faults,
         const std::vector<typename ReconstructedFaultManager<dim>::PropertyInformation>
-        &property_information)
+        &property_information,
+        const std::vector<std::vector<double>> *fault_slip_rates)
       {
+        if (fault_slip_rates != nullptr)
+          AssertThrow(fault_slip_rates->size() == faults.size(),
+                      ExcMessage("Reconstructed-fault output requires one slip-rate vector per fault."));
         for (const auto &property : property_information)
           properties.push_back({property.name, property.n_components, {}});
 
@@ -36,6 +40,15 @@ namespace aspect
                 points.push_back(fault.vertex(vertex_id));
                 point_fault_ids.push_back(fault_id);
                 vertex_ids.push_back(vertex_id);
+                if (fault_slip_rates != nullptr)
+                  {
+                    AssertThrow((*fault_slip_rates)[fault_id].size() == fault.n_vertices(),
+                                ExcMessage("Reconstructed-fault output requires one slip rate per vertex."));
+                    const double value = (*fault_slip_rates)[fault_id][vertex_id];
+                    AssertThrow(std::isfinite(value),
+                                ExcMessage("A reconstructed-fault output slip rate is non-finite."));
+                    slip_rates.push_back(value);
+                  }
               }
             for (unsigned int cell_id = 0; cell_id < fault.n_cells(); ++cell_id)
               {
@@ -133,6 +146,14 @@ namespace aspect
         output << "      <PointData>\n";
         write_identifier_array("fault_id", point_fault_ids);
         write_identifier_array("vertex_id", vertex_ids);
+        if (!slip_rates.empty())
+          {
+            output << "        <DataArray type=\"Float64\" Name=\"slip_rate\" "
+                   << "NumberOfComponents=\"1\" format=\"ascii\">\n          ";
+            for (const double value : slip_rates)
+              output << value << ' ';
+            output << "\n        </DataArray>\n";
+          }
         for (const PropertyOutput &property : properties)
           {
             AssertThrow(property.name != "fault_id" && property.name != "vertex_id",
@@ -186,7 +207,11 @@ namespace aspect
       if (Utilities::MPI::this_mpi_process(this->get_mpi_communicator()) == 0)
         {
           const internal::ReconstructedFaultOutput<dim> data_out(
-            faults, fault_manager.get_property_information());
+            faults,
+            fault_manager.get_property_information(),
+            fault_manager.slip_rates_are_initialized()
+            ? &fault_manager.get_committed_slip_rates()
+            : nullptr);
           std::ofstream output(this->get_output_directory() + filename);
           AssertThrow(output, ExcMessage("Could not open reconstructed-fault output file <"
                                          + this->get_output_directory() + filename + ">."));

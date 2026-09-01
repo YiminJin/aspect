@@ -689,6 +689,11 @@ namespace aspect
 
     reconstructed_faults.clear();
     projection_half_widths.clear();
+    committed_slip_rates.clear();
+    current_slip_rates.clear();
+    saved_slip_rates.clear();
+    slip_rate_initialized.clear();
+    slip_rate_trial_active = false;
     invalidate_particle_projection_cache();
     diagnostics.clear();
     std::vector<double> reconstruction_radii(prescribed_faults.size(), cell_margin);
@@ -841,10 +846,7 @@ namespace aspect
             fitted_points[i] = reference_points[i] + offsets[i] * normals[i];
             fault_diagnostics.offsets[i] = offsets[i];
           }
-        ReconstructedFault<dim> reconstructed_fault(fitted_points);
-        reconstructed_fault.initialize_properties(n_property_components);
-        reconstructed_faults.push_back(std::move(reconstructed_fault));
-        projection_half_widths.push_back(std::move(reference_half_widths));
+        add_reconstructed_fault(fitted_points, reference_half_widths);
         diagnostics.push_back(std::move(fault_diagnostics));
       }
 
@@ -853,6 +855,35 @@ namespace aspect
     initial_reconstruction_complete = true;
 
     this->get_pcout() << "done." << std::endl << std::endl;
+  }
+
+
+  template <int dim>
+  unsigned int
+  ReconstructedFaultManager<dim>::add_reconstructed_fault(
+    const std::vector<Point<dim>> &vertices,
+    const std::vector<double> &half_widths)
+  {
+    AssertThrow(!slip_rate_trial_active,
+                ExcMessage("Reconstructed-fault geometry cannot change during a slip-rate trial."));
+    AssertThrow(vertices.size() >= 2,
+                ExcMessage("A reconstructed fault must contain at least two vertices."));
+    AssertThrow(half_widths.size() == vertices.size(),
+                ExcMessage("A reconstructed fault requires one projection half width per vertex."));
+    for (const double half_width : half_widths)
+      AssertThrow(std::isfinite(half_width) && half_width > 0.0,
+                  ExcMessage("Reconstructed-fault projection half widths must be positive and finite."));
+
+    ReconstructedFault<dim> fault(vertices);
+    fault.initialize_properties(n_property_components);
+    reconstructed_faults.push_back(std::move(fault));
+    projection_half_widths.push_back(half_widths);
+    committed_slip_rates.emplace_back();
+    current_slip_rates.emplace_back();
+    slip_rate_initialized.push_back(false);
+    ++projection_metadata_version;
+    invalidate_particle_projection_cache();
+    return reconstructed_faults.size() - 1;
   }
 
 
@@ -867,6 +898,9 @@ namespace aspect
                            "before reconstructed geometry exists."));
     AssertThrow(!name.empty(),
                 ExcMessage("Reconstructed-fault vertex property names must not be empty."));
+    AssertThrow(name != "slip_rate",
+                ExcMessage("The reconstructed-fault vertex property name <slip_rate> is reserved "
+                           "for the distinguished kinematic field."));
     AssertThrow(n_components > 0,
                 ExcMessage("Reconstructed-fault vertex properties must have at least one component."));
     AssertThrow(!has_property(name),
@@ -906,6 +940,241 @@ namespace aspect
   ReconstructedFaultManager<dim>::get_property_information() const
   {
     return property_information;
+  }
+
+
+  template <int dim>
+  bool
+  ReconstructedFaultManager<dim>::slip_rates_are_initialized() const
+  {
+    return !reconstructed_faults.empty()
+           && slip_rate_initialized.size() == reconstructed_faults.size()
+           && std::all_of(slip_rate_initialized.begin(), slip_rate_initialized.end(),
+                          [](const bool initialized) { return initialized; });
+  }
+
+
+  template <int dim>
+  void
+  ReconstructedFaultManager<dim>::initialize_slip_rate(
+    const unsigned int fault_index,
+    const std::vector<double> &values)
+  {
+    AssertThrow(fault_index < reconstructed_faults.size(),
+                ExcMessage("Invalid reconstructed-fault index for slip-rate initialization."));
+    AssertThrow(!slip_rate_trial_active,
+                ExcMessage("Slip rates cannot be initialized during an active trial."));
+    AssertThrow(slip_rate_initialized.size() == reconstructed_faults.size(),
+                ExcInternalError());
+    AssertThrow(!slip_rate_initialized[fault_index],
+                ExcMessage("The reconstructed-fault slip rate is already initialized."));
+    AssertThrow(values.size() == reconstructed_faults[fault_index].n_vertices(),
+                ExcMessage("Slip-rate initialization requires one value per fault vertex."));
+    for (const double value : values)
+      AssertThrow(std::isfinite(value),
+                  ExcMessage("Reconstructed-fault slip rates must be finite."));
+
+    committed_slip_rates[fault_index] = values;
+    current_slip_rates[fault_index] = values;
+    slip_rate_initialized[fault_index] = true;
+  }
+
+
+  template <int dim>
+  const std::vector<double> &
+  ReconstructedFaultManager<dim>::get_slip_rate(const unsigned int fault_index) const
+  {
+    AssertThrow(fault_index < reconstructed_faults.size(),
+                ExcMessage("Invalid reconstructed-fault index for slip-rate access."));
+    AssertThrow(slip_rate_initialized.size() == reconstructed_faults.size()
+                && slip_rate_initialized[fault_index],
+                ExcMessage("The reconstructed-fault slip rate has not been initialized."));
+    AssertDimension(current_slip_rates[fault_index].size(),
+                    reconstructed_faults[fault_index].n_vertices());
+    return current_slip_rates[fault_index];
+  }
+
+
+  template <int dim>
+  const std::vector<std::vector<double>> &
+  ReconstructedFaultManager<dim>::get_slip_rates() const
+  {
+    AssertThrow(slip_rates_are_initialized(),
+                ExcMessage("Not all reconstructed-fault slip rates have been initialized."));
+    return current_slip_rates;
+  }
+
+
+  template <int dim>
+  const std::vector<std::vector<double>> &
+  ReconstructedFaultManager<dim>::get_committed_slip_rates() const
+  {
+    AssertThrow(slip_rates_are_initialized(),
+                ExcMessage("Not all reconstructed-fault slip rates have been initialized."));
+    return committed_slip_rates;
+  }
+
+
+  template <int dim>
+  double
+  ReconstructedFaultManager<dim>::interpolate_slip_rate(
+    const unsigned int fault_index,
+    const unsigned int segment_index,
+    const double xi) const
+  {
+    AssertThrow(fault_index < reconstructed_faults.size(),
+                ExcMessage("Invalid reconstructed-fault index for slip-rate interpolation."));
+    AssertThrow(segment_index < reconstructed_faults[fault_index].n_cells(),
+                ExcMessage("Invalid reconstructed-fault segment index for slip-rate interpolation."));
+    AssertThrow(std::isfinite(xi) && xi >= 0.0 && xi <= 1.0,
+                ExcMessage("The reconstructed-fault segment coordinate must lie in [0,1]."));
+    const std::vector<double> &values = get_slip_rate(fault_index);
+    return (1.0-xi) * values[segment_index] + xi * values[segment_index+1];
+  }
+
+
+  template <int dim>
+  void
+  ReconstructedFaultManager<dim>::begin_slip_rate_trial()
+  {
+    AssertThrow(slip_rates_are_initialized(),
+                ExcMessage("Slip-rate trials require initialized slip rates on every fault."));
+    AssertThrow(!slip_rate_trial_active,
+                ExcMessage("A reconstructed-fault slip-rate trial is already active."));
+    saved_slip_rates = committed_slip_rates;
+    current_slip_rates = committed_slip_rates;
+    slip_rate_trial_active = true;
+  }
+
+
+  template <int dim>
+  void
+  ReconstructedFaultManager<dim>::set_slip_rate_trial(
+    const std::vector<std::vector<double>> &delta_V,
+    const double step_length)
+  {
+    AssertThrow(slip_rate_trial_active,
+                ExcMessage("No reconstructed-fault slip-rate trial is active."));
+    AssertThrow(std::isfinite(step_length),
+                ExcMessage("The slip-rate trial step length must be finite."));
+    assert_valid_slip_rate_layout(delta_V, true);
+
+    current_slip_rates = saved_slip_rates;
+    for (unsigned int fault = 0; fault < current_slip_rates.size(); ++fault)
+      for (unsigned int vertex = 0; vertex < current_slip_rates[fault].size(); ++vertex)
+        {
+          const double value = saved_slip_rates[fault][vertex]
+                               + step_length * delta_V[fault][vertex];
+          AssertThrow(std::isfinite(value),
+                      ExcMessage("A reconstructed-fault slip-rate trial value is non-finite."));
+          current_slip_rates[fault][vertex] = value;
+        }
+  }
+
+
+  template <int dim>
+  void
+  ReconstructedFaultManager<dim>::accept_slip_rate_trial()
+  {
+    AssertThrow(slip_rate_trial_active,
+                ExcMessage("No reconstructed-fault slip-rate trial is active."));
+    committed_slip_rates = current_slip_rates;
+    saved_slip_rates.clear();
+    slip_rate_trial_active = false;
+  }
+
+
+  template <int dim>
+  void
+  ReconstructedFaultManager<dim>::rollback_slip_rate_trial()
+  {
+    AssertThrow(slip_rate_trial_active,
+                ExcMessage("No reconstructed-fault slip-rate trial is active."));
+    current_slip_rates = saved_slip_rates;
+    saved_slip_rates.clear();
+    slip_rate_trial_active = false;
+  }
+
+
+  template <int dim>
+  void
+  ReconstructedFaultManager<dim>::assert_valid_slip_rate_layout(
+    const std::vector<std::vector<double>> &values,
+    const bool require_initialized) const
+  {
+    AssertThrow(values.size() == reconstructed_faults.size(),
+                ExcMessage("A slip-rate update requires one vector per reconstructed fault."));
+    for (unsigned int fault = 0; fault < reconstructed_faults.size(); ++fault)
+      {
+        if (require_initialized)
+          AssertThrow(slip_rate_initialized[fault],
+                      ExcMessage("A reconstructed-fault slip rate has not been initialized."));
+        AssertThrow(values[fault].size() == reconstructed_faults[fault].n_vertices(),
+                    ExcMessage("A slip-rate update requires one value per fault vertex."));
+        for (const double value : values[fault])
+          AssertThrow(std::isfinite(value),
+                      ExcMessage("Reconstructed-fault slip-rate values must be finite."));
+      }
+  }
+
+
+  template <int dim>
+  void
+  ReconstructedFaultManager<dim>::rebuild_after_deserialization()
+  {
+    AssertThrow(projection_half_widths.size() == reconstructed_faults.size()
+                && committed_slip_rates.size() == reconstructed_faults.size()
+                && slip_rate_initialized.size() == reconstructed_faults.size(),
+                ExcMessage("Invalid reconstructed-fault vector layout in checkpoint."));
+
+    property_indices.clear();
+    unsigned int expected_position = 0;
+    for (unsigned int property = 0; property < property_information.size(); ++property)
+      {
+        const PropertyInformation &information = property_information[property];
+        AssertThrow(!information.name.empty() && information.name != "slip_rate",
+                    ExcMessage("Invalid reconstructed-fault property schema in checkpoint."));
+        AssertThrow(information.n_components > 0
+                    && information.position == expected_position
+                    && property_indices.emplace(information.name, property).second,
+                    ExcMessage("Invalid reconstructed-fault property schema in checkpoint."));
+        expected_position += information.n_components;
+      }
+    AssertThrow(expected_position == n_property_components,
+                ExcMessage("Invalid reconstructed-fault property component count in checkpoint."));
+
+    for (unsigned int fault = 0; fault < reconstructed_faults.size(); ++fault)
+      {
+        AssertThrow(projection_half_widths[fault].size()
+                    == reconstructed_faults[fault].n_vertices(),
+                    ExcMessage("Invalid reconstructed-fault half-width layout in checkpoint."));
+        for (const double half_width : projection_half_widths[fault])
+          AssertThrow(std::isfinite(half_width) && half_width > 0.0,
+                      ExcMessage("Invalid reconstructed-fault half width in checkpoint."));
+        AssertThrow(reconstructed_faults[fault].n_property_components == n_property_components
+                    && reconstructed_faults[fault].property_values.size()
+                       == reconstructed_faults[fault].n_vertices() * n_property_components,
+                    ExcMessage("Invalid reconstructed-fault property layout in checkpoint."));
+        if (slip_rate_initialized[fault])
+          {
+            AssertThrow(committed_slip_rates[fault].size()
+                        == reconstructed_faults[fault].n_vertices(),
+                        ExcMessage("Invalid reconstructed-fault slip-rate layout in checkpoint."));
+            for (const double value : committed_slip_rates[fault])
+              AssertThrow(std::isfinite(value),
+                          ExcMessage("Invalid reconstructed-fault slip rate in checkpoint."));
+          }
+        else
+          AssertThrow(committed_slip_rates[fault].empty(),
+                      ExcMessage("Uninitialized slip-rate checkpoint data must be empty."));
+      }
+
+    current_slip_rates = committed_slip_rates;
+    saved_slip_rates.clear();
+    slip_rate_trial_active = false;
+    diagnostics.clear();
+    ++projection_metadata_version;
+    invalidate_particle_projection_cache();
   }
 
 
