@@ -689,10 +689,11 @@ namespace aspect
 
     reconstructed_faults.clear();
     projection_half_widths.clear();
-    committed_slip_rates.clear();
-    current_slip_rates.clear();
-    saved_slip_rates.clear();
+    timestep_committed_slip_rates.clear();
+    current_newton_slip_rates.clear();
+    trial_slip_rates.clear();
     slip_rate_initialized.clear();
+    slip_rate_nonlinear_solve_active = false;
     slip_rate_trial_active = false;
     invalidate_particle_projection_cache();
     diagnostics.clear();
@@ -864,12 +865,11 @@ namespace aspect
     const std::vector<Point<dim>> &vertices,
     const std::vector<double> &half_widths)
   {
-    AssertThrow(!slip_rate_trial_active,
-                ExcMessage("Reconstructed-fault geometry cannot change during a slip-rate trial."));
+    Assert(!slip_rate_nonlinear_solve_active && !slip_rate_trial_active,
+           ExcMessage("Reconstructed-fault geometry cannot change during a nonlinear solve."));
     AssertThrow(vertices.size() >= 2,
                 ExcMessage("A reconstructed fault must contain at least two vertices."));
-    AssertThrow(half_widths.size() == vertices.size(),
-                ExcMessage("A reconstructed fault requires one projection half width per vertex."));
+    Assert(half_widths.size() == vertices.size(), ExcInternalError());
     for (const double half_width : half_widths)
       AssertThrow(std::isfinite(half_width) && half_width > 0.0,
                   ExcMessage("Reconstructed-fault projection half widths must be positive and finite."));
@@ -878,8 +878,9 @@ namespace aspect
     fault.initialize_properties(n_property_components);
     reconstructed_faults.push_back(std::move(fault));
     projection_half_widths.push_back(half_widths);
-    committed_slip_rates.emplace_back();
-    current_slip_rates.emplace_back();
+    timestep_committed_slip_rates.emplace_back();
+    current_newton_slip_rates.emplace_back();
+    trial_slip_rates.emplace_back();
     slip_rate_initialized.push_back(false);
     ++projection_metadata_version;
     invalidate_particle_projection_cache();
@@ -960,22 +961,19 @@ namespace aspect
     const unsigned int fault_index,
     const std::vector<double> &values)
   {
-    AssertThrow(fault_index < reconstructed_faults.size(),
-                ExcMessage("Invalid reconstructed-fault index for slip-rate initialization."));
-    AssertThrow(!slip_rate_trial_active,
-                ExcMessage("Slip rates cannot be initialized during an active trial."));
-    AssertThrow(slip_rate_initialized.size() == reconstructed_faults.size(),
-                ExcInternalError());
-    AssertThrow(!slip_rate_initialized[fault_index],
-                ExcMessage("The reconstructed-fault slip rate is already initialized."));
-    AssertThrow(values.size() == reconstructed_faults[fault_index].n_vertices(),
-                ExcMessage("Slip-rate initialization requires one value per fault vertex."));
+    AssertIndexRange(fault_index, reconstructed_faults.size());
+    Assert(!slip_rate_nonlinear_solve_active && !slip_rate_trial_active,
+           ExcMessage("Slip rates cannot be initialized during a nonlinear solve."));
+    Assert(slip_rate_initialized.size() == reconstructed_faults.size(), ExcInternalError());
+    Assert(!slip_rate_initialized[fault_index], ExcInternalError());
+    Assert(values.size() == reconstructed_faults[fault_index].n_vertices(),
+           ExcInternalError());
     for (const double value : values)
-      AssertThrow(std::isfinite(value),
-                  ExcMessage("Reconstructed-fault slip rates must be finite."));
+      AssertThrow(std::isfinite(value) && value >= 0.0,
+                  ExcMessage("Reconstructed-fault slip rates must be finite and nonnegative."));
 
-    committed_slip_rates[fault_index] = values;
-    current_slip_rates[fault_index] = values;
+    timestep_committed_slip_rates[fault_index] = values;
+    current_newton_slip_rates[fault_index] = values;
     slip_rate_initialized[fault_index] = true;
   }
 
@@ -984,34 +982,30 @@ namespace aspect
   const std::vector<double> &
   ReconstructedFaultManager<dim>::get_slip_rate(const unsigned int fault_index) const
   {
-    AssertThrow(fault_index < reconstructed_faults.size(),
-                ExcMessage("Invalid reconstructed-fault index for slip-rate access."));
-    AssertThrow(slip_rate_initialized.size() == reconstructed_faults.size()
-                && slip_rate_initialized[fault_index],
-                ExcMessage("The reconstructed-fault slip rate has not been initialized."));
-    AssertDimension(current_slip_rates[fault_index].size(),
+    AssertIndexRange(fault_index, reconstructed_faults.size());
+    Assert(slip_rate_initialized.size() == reconstructed_faults.size()
+           && slip_rate_initialized[fault_index],
+           ExcMessage("The reconstructed-fault slip rate has not been initialized."));
+    const std::vector<double> &values = slip_rate_trial_active
+                                        ? trial_slip_rates[fault_index]
+                                        : current_newton_slip_rates[fault_index];
+    AssertDimension(values.size(), reconstructed_faults[fault_index].n_vertices());
+    return values;
+  }
+
+
+  template <int dim>
+  const std::vector<double> &
+  ReconstructedFaultManager<dim>::get_timestep_committed_slip_rate(
+    const unsigned int fault_index) const
+  {
+    AssertIndexRange(fault_index, reconstructed_faults.size());
+    Assert(slip_rate_initialized.size() == reconstructed_faults.size()
+           && slip_rate_initialized[fault_index],
+           ExcMessage("The reconstructed-fault slip rate has not been initialized."));
+    AssertDimension(timestep_committed_slip_rates[fault_index].size(),
                     reconstructed_faults[fault_index].n_vertices());
-    return current_slip_rates[fault_index];
-  }
-
-
-  template <int dim>
-  const std::vector<std::vector<double>> &
-  ReconstructedFaultManager<dim>::get_slip_rates() const
-  {
-    AssertThrow(slip_rates_are_initialized(),
-                ExcMessage("Not all reconstructed-fault slip rates have been initialized."));
-    return current_slip_rates;
-  }
-
-
-  template <int dim>
-  const std::vector<std::vector<double>> &
-  ReconstructedFaultManager<dim>::get_committed_slip_rates() const
-  {
-    AssertThrow(slip_rates_are_initialized(),
-                ExcMessage("Not all reconstructed-fault slip rates have been initialized."));
-    return committed_slip_rates;
+    return timestep_committed_slip_rates[fault_index];
   }
 
 
@@ -1022,12 +1016,9 @@ namespace aspect
     const unsigned int segment_index,
     const double xi) const
   {
-    AssertThrow(fault_index < reconstructed_faults.size(),
-                ExcMessage("Invalid reconstructed-fault index for slip-rate interpolation."));
-    AssertThrow(segment_index < reconstructed_faults[fault_index].n_cells(),
-                ExcMessage("Invalid reconstructed-fault segment index for slip-rate interpolation."));
-    AssertThrow(std::isfinite(xi) && xi >= 0.0 && xi <= 1.0,
-                ExcMessage("The reconstructed-fault segment coordinate must lie in [0,1]."));
+    AssertIndexRange(fault_index, reconstructed_faults.size());
+    AssertIndexRange(segment_index, reconstructed_faults[fault_index].n_cells());
+    Assert(std::isfinite(xi) && xi >= 0.0 && xi <= 1.0, ExcInternalError());
     const std::vector<double> &values = get_slip_rate(fault_index);
     return (1.0-xi) * values[segment_index] + xi * values[segment_index+1];
   }
@@ -1035,14 +1026,48 @@ namespace aspect
 
   template <int dim>
   void
+  ReconstructedFaultManager<dim>::begin_slip_rate_nonlinear_solve()
+  {
+    Assert(slip_rates_are_initialized(),
+           ExcMessage("A slip-rate nonlinear solve requires initialized slip rates."));
+    Assert(!slip_rate_nonlinear_solve_active && !slip_rate_trial_active,
+           ExcInternalError());
+    current_newton_slip_rates = timestep_committed_slip_rates;
+    trial_slip_rates.assign(reconstructed_faults.size(), {});
+    slip_rate_nonlinear_solve_active = true;
+  }
+
+
+  template <int dim>
+  void
+  ReconstructedFaultManager<dim>::commit_slip_rate_nonlinear_solve()
+  {
+    Assert(slip_rate_nonlinear_solve_active && !slip_rate_trial_active,
+           ExcInternalError());
+    timestep_committed_slip_rates = current_newton_slip_rates;
+    slip_rate_nonlinear_solve_active = false;
+  }
+
+
+  template <int dim>
+  void
+  ReconstructedFaultManager<dim>::rollback_slip_rate_nonlinear_solve()
+  {
+    Assert(slip_rate_nonlinear_solve_active, ExcInternalError());
+    current_newton_slip_rates = timestep_committed_slip_rates;
+    trial_slip_rates.assign(reconstructed_faults.size(), {});
+    slip_rate_trial_active = false;
+    slip_rate_nonlinear_solve_active = false;
+  }
+
+
+  template <int dim>
+  void
   ReconstructedFaultManager<dim>::begin_slip_rate_trial()
   {
-    AssertThrow(slip_rates_are_initialized(),
-                ExcMessage("Slip-rate trials require initialized slip rates on every fault."));
-    AssertThrow(!slip_rate_trial_active,
-                ExcMessage("A reconstructed-fault slip-rate trial is already active."));
-    saved_slip_rates = committed_slip_rates;
-    current_slip_rates = committed_slip_rates;
+    Assert(slip_rate_nonlinear_solve_active && !slip_rate_trial_active,
+           ExcInternalError());
+    trial_slip_rates = current_newton_slip_rates;
     slip_rate_trial_active = true;
   }
 
@@ -1053,21 +1078,31 @@ namespace aspect
     const std::vector<std::vector<double>> &delta_V,
     const double step_length)
   {
-    AssertThrow(slip_rate_trial_active,
-                ExcMessage("No reconstructed-fault slip-rate trial is active."));
+    Assert(slip_rate_nonlinear_solve_active && slip_rate_trial_active,
+           ExcInternalError());
     AssertThrow(std::isfinite(step_length),
                 ExcMessage("The slip-rate trial step length must be finite."));
-    assert_valid_slip_rate_layout(delta_V, true);
-
-    current_slip_rates = saved_slip_rates;
-    for (unsigned int fault = 0; fault < current_slip_rates.size(); ++fault)
-      for (unsigned int vertex = 0; vertex < current_slip_rates[fault].size(); ++vertex)
-        {
-          const double value = saved_slip_rates[fault][vertex]
-                               + step_length * delta_V[fault][vertex];
+    Assert(delta_V.size() == reconstructed_faults.size(), ExcInternalError());
+    for (unsigned int fault = 0; fault < reconstructed_faults.size(); ++fault)
+      {
+        Assert(slip_rate_initialized[fault], ExcInternalError());
+        Assert(delta_V[fault].size() == reconstructed_faults[fault].n_vertices(),
+               ExcInternalError());
+        for (const double value : delta_V[fault])
           AssertThrow(std::isfinite(value),
-                      ExcMessage("A reconstructed-fault slip-rate trial value is non-finite."));
-          current_slip_rates[fault][vertex] = value;
+                      ExcMessage("Reconstructed-fault slip-rate updates must be finite."));
+      }
+
+    trial_slip_rates = current_newton_slip_rates;
+    for (unsigned int fault = 0; fault < trial_slip_rates.size(); ++fault)
+      for (unsigned int vertex = 0; vertex < trial_slip_rates[fault].size(); ++vertex)
+        {
+          const double value = current_newton_slip_rates[fault][vertex]
+                               + step_length * delta_V[fault][vertex];
+          AssertThrow(std::isfinite(value) && value >= 0.0,
+                      ExcMessage("A reconstructed-fault slip-rate trial value must be finite "
+                                 "and nonnegative."));
+          trial_slip_rates[fault][vertex] = value;
         }
   }
 
@@ -1076,10 +1111,10 @@ namespace aspect
   void
   ReconstructedFaultManager<dim>::accept_slip_rate_trial()
   {
-    AssertThrow(slip_rate_trial_active,
-                ExcMessage("No reconstructed-fault slip-rate trial is active."));
-    committed_slip_rates = current_slip_rates;
-    saved_slip_rates.clear();
+    Assert(slip_rate_nonlinear_solve_active && slip_rate_trial_active,
+           ExcInternalError());
+    current_newton_slip_rates = trial_slip_rates;
+    trial_slip_rates.assign(reconstructed_faults.size(), {});
     slip_rate_trial_active = false;
   }
 
@@ -1088,33 +1123,10 @@ namespace aspect
   void
   ReconstructedFaultManager<dim>::rollback_slip_rate_trial()
   {
-    AssertThrow(slip_rate_trial_active,
-                ExcMessage("No reconstructed-fault slip-rate trial is active."));
-    current_slip_rates = saved_slip_rates;
-    saved_slip_rates.clear();
+    Assert(slip_rate_nonlinear_solve_active && slip_rate_trial_active,
+           ExcInternalError());
+    trial_slip_rates.assign(reconstructed_faults.size(), {});
     slip_rate_trial_active = false;
-  }
-
-
-  template <int dim>
-  void
-  ReconstructedFaultManager<dim>::assert_valid_slip_rate_layout(
-    const std::vector<std::vector<double>> &values,
-    const bool require_initialized) const
-  {
-    AssertThrow(values.size() == reconstructed_faults.size(),
-                ExcMessage("A slip-rate update requires one vector per reconstructed fault."));
-    for (unsigned int fault = 0; fault < reconstructed_faults.size(); ++fault)
-      {
-        if (require_initialized)
-          AssertThrow(slip_rate_initialized[fault],
-                      ExcMessage("A reconstructed-fault slip rate has not been initialized."));
-        AssertThrow(values[fault].size() == reconstructed_faults[fault].n_vertices(),
-                    ExcMessage("A slip-rate update requires one value per fault vertex."));
-        for (const double value : values[fault])
-          AssertThrow(std::isfinite(value),
-                      ExcMessage("Reconstructed-fault slip-rate values must be finite."));
-      }
   }
 
 
@@ -1123,7 +1135,7 @@ namespace aspect
   ReconstructedFaultManager<dim>::rebuild_after_deserialization()
   {
     AssertThrow(projection_half_widths.size() == reconstructed_faults.size()
-                && committed_slip_rates.size() == reconstructed_faults.size()
+                && timestep_committed_slip_rates.size() == reconstructed_faults.size()
                 && slip_rate_initialized.size() == reconstructed_faults.size(),
                 ExcMessage("Invalid reconstructed-fault vector layout in checkpoint."));
 
@@ -1157,20 +1169,22 @@ namespace aspect
                     ExcMessage("Invalid reconstructed-fault property layout in checkpoint."));
         if (slip_rate_initialized[fault])
           {
-            AssertThrow(committed_slip_rates[fault].size()
+            AssertThrow(timestep_committed_slip_rates[fault].size()
                         == reconstructed_faults[fault].n_vertices(),
                         ExcMessage("Invalid reconstructed-fault slip-rate layout in checkpoint."));
-            for (const double value : committed_slip_rates[fault])
-              AssertThrow(std::isfinite(value),
-                          ExcMessage("Invalid reconstructed-fault slip rate in checkpoint."));
+            for (const double value : timestep_committed_slip_rates[fault])
+              AssertThrow(std::isfinite(value) && value >= 0.0,
+                          ExcMessage("Invalid reconstructed-fault slip rate in checkpoint: "
+                                     "values must be finite and nonnegative."));
           }
         else
-          AssertThrow(committed_slip_rates[fault].empty(),
+          AssertThrow(timestep_committed_slip_rates[fault].empty(),
                       ExcMessage("Uninitialized slip-rate checkpoint data must be empty."));
       }
 
-    current_slip_rates = committed_slip_rates;
-    saved_slip_rates.clear();
+    current_newton_slip_rates = timestep_committed_slip_rates;
+    trial_slip_rates.assign(reconstructed_faults.size(), {});
+    slip_rate_nonlinear_solve_active = false;
     slip_rate_trial_active = false;
     diagnostics.clear();
     ++projection_metadata_version;

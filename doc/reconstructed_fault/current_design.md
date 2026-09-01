@@ -300,6 +300,14 @@ array with signaling-NaN entries. This storage has no particle
 ownership, migration, cell association, constitutive-law assumptions, or MPI
 communication of its own; it follows the replicated ownership of the fault.
 
+The generic property pool stores committed physical/material state only.
+Temporary Newton quantities, trial constitutive state, friction coefficients,
+derivatives, residual coefficients, and similar working data do not belong in
+this pool. In particular, future committed values such as `Theta`, `T_coh`,
+and `I_h` may use generic property storage, while their trial values and other
+temporary constitutive data remain owned by the material model. The generic
+property pool does not provide trial or rollback machinery.
+
 ## 17. Particle-to-fault property projection
 
 Stage 5 projects generic components from the phase-field-associated particle
@@ -348,16 +356,33 @@ constitutive state. The generic property name `slip_rate` is reserved for this
 built-in kinematic field.
 
 New reconstructed geometry has no implicit physical slip-rate value. A caller
-must initialize one finite value per fault vertex. The manager provides Q1
-segment interpolation and a line-search lifecycle with committed, saved, and
-current trial vectors. Every trial candidate is formed from the saved base,
-so evaluating multiple step lengths cannot accumulate prior rejected updates.
-Accepting a trial replaces the committed values; rolling it back restores the
-saved values. Physical initialization and positivity limiting belong to later
-constitutive and coupled-Newton stages.
+must initialize one finite nonnegative value per fault vertex. The manager
+provides Q1 segment interpolation and three distinct lifecycle states:
+timestep-committed `V_k`, current accepted Newton iterate `V_current`, and
+line-search candidate `V_trial`. A nonlinear solve begins by copying `V_k` to
+`V_current`. Every candidate is formed from `V_current`, so rejected step
+lengths cannot accumulate. Accepting a candidate changes only `V_current`;
+only successful nonlinear convergence commits it to `V_k`. Rejecting the
+nonlinear solve restores `V_current` from `V_k`. The manager enforces `V >= 0`
+but does not know the stronger constitutive/numerical bound `V_min`.
 
 Checkpoint/restart stores reconstructed geometry, projection half-widths, the
-generic property schema and values, initialization flags, and committed `V`.
-Current and saved trial values and all projection/factorization caches are
-reconstructed: after load, current `V` equals committed `V` and no trial is
-active.
+generic property schema and values, initialization flags, and timestep-
+committed `V_k`. Newton iterates, trial values, and all projection/factorization
+caches are reconstructed: after load, current `V` equals `V_k` and no nonlinear
+solve or trial is active. Reconstructed-fault checkpoints created before this
+serialized manager state was introduced are not guaranteed to be compatible;
+no backward archive migration is provided.
+
+The existing mutable `get_fault()` and public `ReconstructedFault::append_*()`
+interfaces can temporarily bypass manager ownership and make the number of
+slip-rate values differ from the number of vertices. Fixed-geometry stages may
+continue using the current API. Before fault propagation or any other topology
+change is implemented, geometry mutation must be routed through
+`ReconstructedFaultManager` so that all manager-owned nodal fields remain
+aligned. No appended-vertex physical state rule is inferred here.
+
+The manager archive round-trip is the current restart test. A full Simulator
+filesystem checkpoint/restart test remains mandatory before reconstructed-
+fault restart support is considered complete, but it does not block the next
+fixed-geometry development stage.

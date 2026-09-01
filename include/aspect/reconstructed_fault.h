@@ -291,31 +291,38 @@ namespace aspect
       void initialize_slip_rate(const unsigned int fault_index,
                                 const std::vector<double> &values);
 
-      /** Return the current (possibly trial) nodal slip rate of one fault. */
+      /** Return the active nodal slip rate: trial if active, otherwise current Newton. */
       const std::vector<double> &get_slip_rate(const unsigned int fault_index) const;
 
-      /** Return all current (possibly trial) nodal slip rates. */
-      const std::vector<std::vector<double>> &get_slip_rates() const;
-
-      /** Return the committed nodal slip rates used for checkpoint and output. */
-      const std::vector<std::vector<double>> &get_committed_slip_rates() const;
+      /** Return the timestep-committed nodal slip rate used for persistent output. */
+      const std::vector<double> &
+      get_timestep_committed_slip_rate(const unsigned int fault_index) const;
 
       /** Q1-interpolate the current slip rate on one fault segment. */
       double interpolate_slip_rate(const unsigned int fault_index,
                                    const unsigned int segment_index,
                                    const double xi) const;
 
-      /** Save the committed slip rate as the base of a line-search trial. */
+      /** Initialize the current Newton iterate from the timestep-committed state. */
+      void begin_slip_rate_nonlinear_solve();
+
+      /** Commit the converged current Newton iterate to the timestep state. */
+      void commit_slip_rate_nonlinear_solve();
+
+      /** Discard all nonlinear work and restore the timestep-committed state. */
+      void rollback_slip_rate_nonlinear_solve();
+
+      /** Begin a line-search trial from the current accepted Newton iterate. */
       void begin_slip_rate_trial();
 
-      /** Set V = saved V + step_length * delta_V without accumulating trials. */
+      /** Set V_trial = V_current + step_length * delta_V without accumulation. */
       void set_slip_rate_trial(const std::vector<std::vector<double>> &delta_V,
                                const double step_length);
 
-      /** Accept the current trial as the new committed slip rate. */
+      /** Accept the trial as the current Newton iterate, without timestep commit. */
       void accept_slip_rate_trial();
 
-      /** Restore the saved slip rate and discard the active trial. */
+      /** Discard the trial and retain the current accepted Newton iterate. */
       void rollback_slip_rate_trial();
 
       void project_particle_properties(
@@ -340,7 +347,7 @@ namespace aspect
         ar & projection_half_widths;
         ar & property_information;
         ar & n_property_components;
-        ar & committed_slip_rates;
+        ar & timestep_committed_slip_rates;
         ar & slip_rate_initialized;
       }
 
@@ -352,7 +359,7 @@ namespace aspect
         ar & projection_half_widths;
         ar & property_information;
         ar & n_property_components;
-        ar & committed_slip_rates;
+        ar & timestep_committed_slip_rates;
         ar & slip_rate_initialized;
 
         rebuild_after_deserialization();
@@ -403,16 +410,14 @@ namespace aspect
       std::vector<ParticleProjectionCacheEntry> particle_projection_cache;
       std::vector<ProjectionSystem> projection_systems;
       std::vector<ParticleProjectionDiagnostics> particle_projection_diagnostics;
-      std::vector<std::vector<double>> committed_slip_rates;
-      std::vector<std::vector<double>> current_slip_rates;
-      std::vector<std::vector<double>> saved_slip_rates;
+      std::vector<std::vector<double>> timestep_committed_slip_rates;
+      std::vector<std::vector<double>> current_newton_slip_rates;
+      std::vector<std::vector<double>> trial_slip_rates;
       std::vector<bool> slip_rate_initialized;
+      bool slip_rate_nonlinear_solve_active = false;
       bool slip_rate_trial_active = false;
 
       void rebuild_after_deserialization();
-      void assert_valid_slip_rate_layout(
-        const std::vector<std::vector<double>> &values,
-        const bool require_initialized) const;
   };
 }
 

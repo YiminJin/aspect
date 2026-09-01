@@ -26,8 +26,7 @@ namespace aspect
         const std::vector<std::vector<double>> *fault_slip_rates)
       {
         if (fault_slip_rates != nullptr)
-          AssertThrow(fault_slip_rates->size() == faults.size(),
-                      ExcMessage("Reconstructed-fault output requires one slip-rate vector per fault."));
+          Assert(fault_slip_rates->size() == faults.size(), ExcInternalError());
         for (const auto &property : property_information)
           properties.push_back({property.name, property.n_components, {}});
 
@@ -42,11 +41,12 @@ namespace aspect
                 vertex_ids.push_back(vertex_id);
                 if (fault_slip_rates != nullptr)
                   {
-                    AssertThrow((*fault_slip_rates)[fault_id].size() == fault.n_vertices(),
-                                ExcMessage("Reconstructed-fault output requires one slip rate per vertex."));
+                    Assert((*fault_slip_rates)[fault_id].size() == fault.n_vertices(),
+                           ExcInternalError());
                     const double value = (*fault_slip_rates)[fault_id][vertex_id];
-                    AssertThrow(std::isfinite(value),
-                                ExcMessage("A reconstructed-fault output slip rate is non-finite."));
+                    AssertThrow(std::isfinite(value) && value >= 0.0,
+                                ExcMessage("A reconstructed-fault output slip rate must be "
+                                           "finite and nonnegative."));
                     slip_rates.push_back(value);
                   }
               }
@@ -206,11 +206,19 @@ namespace aspect
                                    + ".vtu";
       if (Utilities::MPI::this_mpi_process(this->get_mpi_communicator()) == 0)
         {
+          std::vector<std::vector<double>> timestep_committed_slip_rates;
+          if (fault_manager.slip_rates_are_initialized())
+            {
+              timestep_committed_slip_rates.reserve(faults.size());
+              for (unsigned int fault = 0; fault < faults.size(); ++fault)
+                timestep_committed_slip_rates.push_back(
+                  fault_manager.get_timestep_committed_slip_rate(fault));
+            }
           const internal::ReconstructedFaultOutput<dim> data_out(
             faults,
             fault_manager.get_property_information(),
             fault_manager.slip_rates_are_initialized()
-            ? &fault_manager.get_committed_slip_rates()
+            ? &timestep_committed_slip_rates
             : nullptr);
           std::ofstream output(this->get_output_directory() + filename);
           AssertThrow(output, ExcMessage("Could not open reconstructed-fault output file <"

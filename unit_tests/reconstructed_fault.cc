@@ -137,13 +137,14 @@ TEST_CASE("ReconstructedFaultManager slip-rate lifecycle and interpolation")
   REQUIRE(manager.slip_rates_are_initialized());
   REQUIRE(manager.interpolate_slip_rate(0, 1, 0.25) == Approx(2.5));
 
+  manager.begin_slip_rate_nonlinear_solve();
   manager.begin_slip_rate_trial();
   manager.set_slip_rate_trial({{2.0, -2.0, 4.0}}, 0.5);
   REQUIRE(manager.get_slip_rate(0)[0] == Approx(2.0));
   REQUIRE(manager.get_slip_rate(0)[1] == Approx(1.0));
-  REQUIRE(manager.get_committed_slip_rates()[0][0] == Approx(1.0));
+  REQUIRE(manager.get_timestep_committed_slip_rate(0)[0] == Approx(1.0));
 
-  // A second candidate is formed from the saved base, not the first candidate.
+  // A second candidate is formed from the current Newton iterate, not the first candidate.
   manager.set_slip_rate_trial({{2.0, -2.0, 4.0}}, 0.25);
   REQUIRE(manager.get_slip_rate(0)[0] == Approx(1.5));
   REQUIRE(manager.get_slip_rate(0)[1] == Approx(1.5));
@@ -153,7 +154,28 @@ TEST_CASE("ReconstructedFaultManager slip-rate lifecycle and interpolation")
   manager.begin_slip_rate_trial();
   manager.set_slip_rate_trial({{2.0, -2.0, 4.0}}, 0.25);
   manager.accept_slip_rate_trial();
-  REQUIRE(manager.get_committed_slip_rates()[0][2] == Approx(5.0));
+  REQUIRE(manager.get_slip_rate(0)[2] == Approx(5.0));
+  REQUIRE(manager.get_timestep_committed_slip_rate(0)[2] == Approx(4.0));
+
+  // A new line-search trial starts from the accepted Newton iterate.
+  manager.begin_slip_rate_trial();
+  manager.set_slip_rate_trial({{2.0, -2.0, 4.0}}, 0.25);
+  REQUIRE(manager.get_slip_rate(0)[0] == Approx(2.0));
+  manager.rollback_slip_rate_trial();
+  REQUIRE(manager.get_slip_rate(0)[0] == Approx(1.5));
+
+  manager.commit_slip_rate_nonlinear_solve();
+  REQUIRE(manager.get_timestep_committed_slip_rate(0)[2] == Approx(5.0));
+
+  // Rejecting a later nonlinear solve restores and preserves timestep state.
+  manager.begin_slip_rate_nonlinear_solve();
+  manager.begin_slip_rate_trial();
+  manager.set_slip_rate_trial({{1.0, 1.0, 1.0}}, 1.0);
+  manager.accept_slip_rate_trial();
+  REQUIRE(manager.get_slip_rate(0)[0] == Approx(2.5));
+  manager.rollback_slip_rate_nonlinear_solve();
+  REQUIRE(manager.get_slip_rate(0)[0] == Approx(1.5));
+  REQUIRE(manager.get_timestep_committed_slip_rate(0)[0] == Approx(1.5));
 
   const ThrowOnDealIIException throw_on_dealii_exception;
   REQUIRE_THROWS(manager.initialize_slip_rate(0, {1.0, 2.0, 3.0}));
@@ -171,15 +193,19 @@ TEST_CASE("ReconstructedFaultManager validates slip-rate initialization")
   REQUIRE_THROWS(manager.initialize_slip_rate(0, {1.0}));
   REQUIRE_THROWS(manager.initialize_slip_rate(
     0, {1.0, std::numeric_limits<double>::quiet_NaN()}));
+  REQUIRE_THROWS(manager.initialize_slip_rate(0, {-1.0, 2.0}));
   REQUIRE_THROWS(manager.begin_slip_rate_trial());
 
-  manager.initialize_slip_rate(0, {1.0, 2.0});
+  manager.initialize_slip_rate(0, {0.0, 2.0});
+  manager.begin_slip_rate_nonlinear_solve();
   manager.begin_slip_rate_trial();
   REQUIRE_THROWS(manager.set_slip_rate_trial({}, 1.0));
   REQUIRE_THROWS(manager.set_slip_rate_trial({{1.0}}, 1.0));
   REQUIRE_THROWS(manager.set_slip_rate_trial(
     {{0.0, std::numeric_limits<double>::infinity()}}, 1.0));
+  REQUIRE_THROWS(manager.set_slip_rate_trial({{-2.0, 0.0}}, 1.0));
   manager.rollback_slip_rate_trial();
+  manager.rollback_slip_rate_nonlinear_solve();
 }
 
 
@@ -191,6 +217,10 @@ TEST_CASE("ReconstructedFaultManager checkpoint restores committed slip rate")
                                   {0.5, 0.75});
   manager.initialize_slip_rate(0, {2.0, 3.0});
   manager.get_fault(0).get_properties(0)[0] = 7.0;
+  manager.begin_slip_rate_nonlinear_solve();
+  manager.begin_slip_rate_trial();
+  manager.set_slip_rate_trial({{10.0, 10.0}}, 1.0);
+  manager.accept_slip_rate_trial();
   manager.begin_slip_rate_trial();
   manager.set_slip_rate_trial({{10.0, 10.0}}, 1.0);
 
@@ -209,7 +239,7 @@ TEST_CASE("ReconstructedFaultManager checkpoint restores committed slip rate")
   REQUIRE(restored.get_faults().size() == 1);
   REQUIRE(restored.get_fault(0).vertex(1) == dealii::Point<2>(1,0));
   REQUIRE(restored.get_fault(0).get_properties(0)[0] == Approx(7.0));
-  // Checkpoints contain the committed values, not an unaccepted candidate.
+  // Checkpoints contain timestep state, not an accepted Newton iterate or trial candidate.
   REQUIRE(restored.get_slip_rate(0)[0] == Approx(2.0));
   REQUIRE(restored.interpolate_slip_rate(0, 0, 0.5) == Approx(2.5));
   REQUIRE(restored.has_property("state"));
