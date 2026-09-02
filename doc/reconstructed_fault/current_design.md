@@ -399,7 +399,9 @@ no objective rotation.
 Every independent tensor component is initialized explicitly from one
 particle-advected compositional field of type `stress`. The normal mapped-
 particle-property component syntax associates those fields with the components
-of the single `maxwell stress` property. The plugin evaluates the active
+of the single `maxwell stress` property. The mapped-particle-property parameter
+must be nonempty; the implicit one-to-one fallback is not accepted for this
+constitutive history. The plugin evaluates the active
 initial-composition model at particle creation; missing, duplicate, or
 out-of-range component mappings are errors. Late particles interpolate the
 current particle history. Particle migration and checkpoint/restart use the
@@ -421,10 +423,10 @@ The effective bulk strain rate will later include the reconstructed-fault slip
 correction. Stage 2 only provides the constitutive operation and does not add a
 Stokes or surface coupling.
 
-Pending particle stresses are held outside the particle properties. Staging
-therefore leaves \(\boldsymbol\tau_{k-1}\) frozen. Commit first verifies across
-MPI that every locally owned particle has exactly one valid pending tensor and
-only then writes the complete local update; rollback discards the pending
-values without restoring or changing particles. The transaction is not yet
-connected to a Simulator lifecycle signal because the converged slip-corrected
-strain rate is introduced by later coupling stages.
+There is no separate Maxwell-stress transaction. Particle stress remains
+unchanged throughout the nonlinear solve, including rejected Newton and line-
+search trials. A failed solve therefore has no particle stress to restore.
+After mechanical convergence, one pass over locally owned particles evaluates
+and writes \(\boldsymbol\tau_k\). This post-convergence pass will be connected
+when the later coupling stage provides the converged slip-corrected strain
+rate.

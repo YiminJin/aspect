@@ -28,72 +28,10 @@
 #include <aspect/material_model/equation_of_state/multicomponent_incompressible.h>
 #include <aspect/material_model/rheology/rate_state_friction.h>
 
-#include <deal.II/particles/particle_handler.h>
-
-#include <map>
-
 namespace aspect
 {
   namespace MaterialModel
   {
-    namespace internal
-    {
-      /** Time-discrete coefficients of the Maxwell law. */
-      struct MaxwellCoefficients
-      {
-        double beta;
-        double kappa;
-      };
-
-      /** Compute beta and kappa for positive viscosity and shear modulus. */
-      MaxwellCoefficients
-      compute_maxwell_coefficients(const double viscosity,
-                                   const double shear_modulus,
-                                   const double time_step);
-
-      /**
-       * Apply the non-rotational time-discrete Maxwell law to an effective
-       * bulk strain rate.
-       */
-      template <int dim>
-      SymmetricTensor<2,dim>
-      compute_maxwell_stress(const MaxwellCoefficients &coefficients,
-                             const SymmetricTensor<2,dim> &effective_bulk_strain_rate,
-                             const SymmetricTensor<2,dim> &previous_stress);
-
-      /**
-       * Hold a complete pending particle-stress update without changing the
-       * committed particle properties. Commit validates every rank before any
-       * rank writes, while rollback only discards pending values.
-       */
-      template <int dim>
-      class MaxwellStressUpdateTransaction
-      {
-        public:
-          void begin();
-
-          void
-          stage(const types::particle_index particle_id,
-                const SymmetricTensor<2,dim> &stress);
-
-          void
-          commit(dealii::Particles::ParticleHandler<dim> &particle_handler,
-                 const unsigned int property_data_position,
-                 const MPI_Comm mpi_communicator);
-
-          void rollback();
-
-          bool is_active() const;
-
-        private:
-          bool active = false;
-          bool pending_update_is_valid = true;
-          std::map<types::particle_index, SymmetricTensor<2,dim>> pending_stresses;
-      };
-    }
-
-
-
     template <int dim>
     class PhaseFieldRSF : public Interface<dim>,
       public PhaseFieldModel<dim>,
@@ -124,6 +62,28 @@ namespace aspect
         parse_parameters(ParameterHandler &prm) override;
 
       private:
+        /** Time-discrete coefficients of the Maxwell law. */
+        struct MaxwellCoefficients
+        {
+          double beta;
+          double kappa;
+        };
+
+        /** Compute beta and kappa for positive viscosity and shear modulus. */
+        static MaxwellCoefficients
+        compute_maxwell_coefficients(const double viscosity,
+                                     const double shear_modulus,
+                                     const double time_step);
+
+        /**
+         * Apply the non-rotational time-discrete Maxwell law to an effective
+         * bulk strain rate.
+         */
+        static SymmetricTensor<2,dim>
+        compute_maxwell_stress(const MaxwellCoefficients &coefficients,
+                               const SymmetricTensor<2,dim> &effective_bulk_strain_rate,
+                               const SymmetricTensor<2,dim> &previous_stress);
+
         double 
         calculate_creep_viscosity(const std::vector<double> &volume_fractions,
                                   const double               temperature) const;
@@ -163,8 +123,6 @@ namespace aspect
         double initial_time_step;
 
         bool evolve_phase_field;
-
-        internal::MaxwellStressUpdateTransaction<dim> maxwell_stress_update;
 
         std::unique_ptr<SolutionEvaluator<dim>> solution_evaluator;
     };

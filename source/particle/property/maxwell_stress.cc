@@ -21,13 +21,6 @@ namespace aspect
   {
     namespace Property
     {
-      namespace
-      {
-        const std::string maxwell_stress_property_name = "maxwell stress";
-      }
-
-
-
       template <int dim>
       void
       MaxwellStress<dim>::initialize()
@@ -36,6 +29,10 @@ namespace aspect
                       &this->get_material_model()) != nullptr,
                     ExcMessage("Particle property 'maxwell stress' can only be used with "
                                "the 'phase field rsf' material model."));
+        AssertThrow(this->get_parameters().mapped_particle_properties.size() > 0,
+                    ExcMessage("Particle property 'maxwell stress' requires an explicit map "
+                               "between particle-advected compositional fields and particle "
+                               "property components."));
 
         initial_stress_field_indices.fill(numbers::invalid_unsigned_int);
         const std::vector<unsigned int> &stress_field_indices =
@@ -44,7 +41,7 @@ namespace aspect
 
         for (const auto &field_and_property :
              this->get_parameters().mapped_particle_properties)
-          if (field_and_property.second.first == maxwell_stress_property_name)
+          if (field_and_property.second.first == "maxwell stress")
             {
               const unsigned int field_index = field_and_property.first;
               const unsigned int component = field_and_property.second.second;
@@ -103,7 +100,7 @@ namespace aspect
       std::vector<std::pair<std::string, unsigned int>>
       MaxwellStress<dim>::get_property_information() const
       {
-        return {{maxwell_stress_property_name,
+        return {{"maxwell stress",
                  SymmetricTensor<2,dim>::n_independent_components}};
       }
     }

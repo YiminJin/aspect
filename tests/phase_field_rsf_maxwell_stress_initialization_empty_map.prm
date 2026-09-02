@@ -1,0 +1,9 @@
+# Verify that MaxwellStress rejects ASPECT's implicit one-to-one particle
+# property mapping because tensor components require an explicit map.
+# EXPECT FAILURE
+
+include $ASPECT_SOURCE_DIR/tests/phase_field_rsf_maxwell_stress_initialization.prm
+
+subsection Compositional fields
+  set Mapped particle properties =
+end

@@ -54,8 +54,10 @@ end
 subsection Material model
   set Model name = phase field rsf
   subsection Phase field RSF
-    set Reference viscosities          = 1e21
+    set Maximum viscosity              = 1e31
+    set Reference viscosities          = 1e30
     set Elastic shear moduli           = 1e10
+    set Initial time step              = 1e-6
     set Radiation damping coefficients = 1e7
   end
 end

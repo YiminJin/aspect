@@ -33,153 +33,47 @@ namespace aspect
 {
   namespace MaterialModel
   {
-    namespace internal
+    template <int dim>
+    typename PhaseFieldRSF<dim>::MaxwellCoefficients
+    PhaseFieldRSF<dim>::
+    compute_maxwell_coefficients(const double viscosity,
+                                 const double shear_modulus,
+                                 const double time_step)
     {
-      MaxwellCoefficients
-      compute_maxwell_coefficients(const double viscosity,
-                                   const double shear_modulus,
-                                   const double time_step)
-      {
-        AssertThrow(numbers::is_finite(viscosity) && viscosity > 0.0,
-                    ExcMessage("The Maxwell viscosity must be finite and positive."));
-        AssertThrow(numbers::is_finite(shear_modulus) && shear_modulus > 0.0,
-                    ExcMessage("The Maxwell shear modulus must be finite and positive."));
-        AssertThrow(numbers::is_finite(time_step) && time_step >= 0.0,
-                    ExcMessage("The Maxwell time step must be finite and nonnegative."));
+      AssertThrow(numbers::is_finite(viscosity) && viscosity > 0.0,
+                  ExcMessage("The Maxwell viscosity must be finite and positive."));
+      AssertThrow(numbers::is_finite(shear_modulus) && shear_modulus > 0.0,
+                  ExcMessage("The Maxwell shear modulus must be finite and positive."));
+      AssertThrow(numbers::is_finite(time_step) && time_step >= 0.0,
+                  ExcMessage("The Maxwell time step must be finite and nonnegative."));
 
-        const double exponent = -time_step * shear_modulus / viscosity;
-        const double beta = std::exp(exponent);
-        const double kappa = -viscosity * std::expm1(exponent);
+      const double exponent = -time_step * shear_modulus / viscosity;
+      const double beta = std::exp(exponent);
+      const double kappa = -viscosity * std::expm1(exponent);
 
-        AssertThrow(numbers::is_finite(beta) && beta >= 0.0 && beta <= 1.0,
-                    ExcMessage("The Maxwell relaxation factor is not finite or lies outside [0,1]."));
-        AssertThrow(numbers::is_finite(kappa) && kappa >= 0.0,
-                    ExcMessage("The Maxwell effective viscosity is not finite or is negative."));
+      AssertThrow(numbers::is_finite(beta) && beta >= 0.0 && beta <= 1.0,
+                  ExcMessage("The Maxwell relaxation factor is not finite or lies outside [0,1]."));
+      AssertThrow(numbers::is_finite(kappa) && kappa >= 0.0,
+                  ExcMessage("The Maxwell effective viscosity is not finite or is negative."));
 
-        return {beta, kappa};
-      }
+      return {beta, kappa};
+    }
 
 
 
-      template <int dim>
-      SymmetricTensor<2,dim>
-      compute_maxwell_stress(
-        const MaxwellCoefficients &coefficients,
-        const SymmetricTensor<2,dim> &effective_bulk_strain_rate,
-        const SymmetricTensor<2,dim> &previous_stress)
-      {
-        Assert(numbers::is_finite(coefficients.beta)
-               && numbers::is_finite(coefficients.kappa),
-               ExcInternalError());
-        return 2.0 * coefficients.kappa * effective_bulk_strain_rate
-               + coefficients.beta * previous_stress;
-      }
-
-
-
-      template <int dim>
-      void
-      MaxwellStressUpdateTransaction<dim>::begin()
-      {
-        Assert(active == false, ExcInternalError());
-        pending_stresses.clear();
-        pending_update_is_valid = true;
-        active = true;
-      }
-
-
-
-      template <int dim>
-      void
-      MaxwellStressUpdateTransaction<dim>::stage(
-        const types::particle_index particle_id,
-        const SymmetricTensor<2,dim> &stress)
-      {
-        Assert(active, ExcInternalError());
-
-        for (unsigned int component = 0;
-             component < SymmetricTensor<2,dim>::n_independent_components;
-             ++component)
-          pending_update_is_valid =
-            pending_update_is_valid
-            && numbers::is_finite(
-              stress[SymmetricTensor<2,dim>::unrolled_to_component_indices(component)]);
-
-        const bool inserted = pending_stresses.emplace(particle_id, stress).second;
-        pending_update_is_valid = pending_update_is_valid && inserted;
-      }
-
-
-
-      template <int dim>
-      void
-      MaxwellStressUpdateTransaction<dim>::commit(
-        dealii::Particles::ParticleHandler<dim> &particle_handler,
-        const unsigned int property_data_position,
-        const MPI_Comm mpi_communicator)
-      {
-        Assert(active, ExcInternalError());
-
-        bool local_update_is_complete =
-          pending_update_is_valid
-          && pending_stresses.size() == particle_handler.n_locally_owned_particles();
-
-        for (const auto &particle : particle_handler)
-          {
-            local_update_is_complete =
-              local_update_is_complete
-              && pending_stresses.find(particle.get_id()) != pending_stresses.end();
-            local_update_is_complete =
-              local_update_is_complete
-              && property_data_position
-                   + SymmetricTensor<2,dim>::n_independent_components
-                   <= particle.get_properties().size();
-          }
-
-        const unsigned int globally_complete = Utilities::MPI::min(
-          local_update_is_complete ? 1u : 0u,
-          mpi_communicator);
-        AssertThrow(globally_complete == 1u,
-                    ExcMessage("The pending Maxwell stress update does not contain exactly one "
-                               "valid entry for every locally owned particle on every MPI rank. "
-                               "No particle stress was committed."));
-
-        for (auto &particle : particle_handler)
-          {
-            const auto pending = pending_stresses.find(particle.get_id());
-            Assert(pending != pending_stresses.end(), ExcInternalError());
-            Utilities::Tensors::unroll_symmetric_tensor_into_array<dim>(
-              pending->second,
-              particle.get_properties().begin() + property_data_position,
-              particle.get_properties().begin() + property_data_position
-              + SymmetricTensor<2,dim>::n_independent_components);
-          }
-
-        pending_stresses.clear();
-        pending_update_is_valid = true;
-        active = false;
-      }
-
-
-
-      template <int dim>
-      void
-      MaxwellStressUpdateTransaction<dim>::rollback()
-      {
-        Assert(active, ExcInternalError());
-        pending_stresses.clear();
-        pending_update_is_valid = true;
-        active = false;
-      }
-
-
-
-      template <int dim>
-      bool
-      MaxwellStressUpdateTransaction<dim>::is_active() const
-      {
-        return active;
-      }
+    template <int dim>
+    SymmetricTensor<2,dim>
+    PhaseFieldRSF<dim>::
+    compute_maxwell_stress(
+      const MaxwellCoefficients &coefficients,
+      const SymmetricTensor<2,dim> &effective_bulk_strain_rate,
+      const SymmetricTensor<2,dim> &previous_stress)
+    {
+      Assert(numbers::is_finite(coefficients.beta)
+             && numbers::is_finite(coefficients.kappa),
+             ExcInternalError());
+      return 2.0 * coefficients.kappa * effective_bulk_strain_rate
+             + coefficients.beta * previous_stress;
     }
 
 
@@ -217,8 +111,8 @@ namespace aspect
               const double time_step = (this->get_timestep_number() > 0
                                         ? this->get_timestep()
                                         : initial_time_step);
-              const internal::MaxwellCoefficients coefficients =
-                internal::compute_maxwell_coefficients(eta, G, time_step);
+              const MaxwellCoefficients coefficients =
+                compute_maxwell_coefficients(eta, G, time_step);
               out.viscosities[i] = coefficients.kappa;
             }
         }
@@ -524,21 +418,6 @@ namespace aspect
     }
   }
 }
-
-template dealii::SymmetricTensor<2,2>
-aspect::MaterialModel::internal::compute_maxwell_stress<2>(
-  const aspect::MaterialModel::internal::MaxwellCoefficients &,
-  const dealii::SymmetricTensor<2,2> &,
-  const dealii::SymmetricTensor<2,2> &);
-
-template dealii::SymmetricTensor<2,3>
-aspect::MaterialModel::internal::compute_maxwell_stress<3>(
-  const aspect::MaterialModel::internal::MaxwellCoefficients &,
-  const dealii::SymmetricTensor<2,3> &,
-  const dealii::SymmetricTensor<2,3> &);
-
-template class aspect::MaterialModel::internal::MaxwellStressUpdateTransaction<2>;
-template class aspect::MaterialModel::internal::MaxwellStressUpdateTransaction<3>;
 
 // explicit instantiation
 namespace aspect

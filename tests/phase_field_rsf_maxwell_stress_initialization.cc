@@ -12,6 +12,7 @@
 #include <aspect/postprocess/interface.h>
 #include <aspect/simulator_access.h>
 #include <aspect/particle/manager.h>
+#include <aspect/material_model/interface.h>
 
 namespace aspect
 {
@@ -55,6 +56,17 @@ namespace aspect
           AssertThrow(maximum_error < 1.e-12,
                       ExcMessage("Maxwell stress particle initialization does not match "
                                  "the mapped initial composition fields."));
+
+          MaterialModel::MaterialModelInputs<dim> in(
+            1, this->introspection().n_compositional_fields);
+          MaterialModel::MaterialModelOutputs<dim> out(
+            1, this->introspection().n_compositional_fields);
+          in.requested_properties = MaterialModel::MaterialProperties::viscosity;
+          in.temperature[0] = 293.0;
+          this->get_material_model().evaluate(in, out);
+          AssertThrow(std::abs(out.viscosities[0] - 1.e4) < 1.e-8,
+                      ExcMessage("The PhaseFieldRSF effective Maxwell viscosity does not "
+                                 "preserve the small-exponent limit G*dt."));
 
           return {"Maxwell stress initialization:", "verified"};
         }

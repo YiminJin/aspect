@@ -1,0 +1,23 @@
+
+Loading shared library <./libphase_field_rsf_maxwell_stress_initialization_empty_map.debug.so>
+
+TimerOutput objects finalize timed values printed to the
+screen by communicating over MPI in their destructors.
+Since an exception is currently uncaught, this
+synchronization (and subsequent output) will be skipped
+to avoid a possible deadlock.
+
+
+Exception 'ExcMessage("Particle property 'maxwell stress' requires an explicit map " "between particle-advected compositional fields and particle " "property components.")' on rank 0 on processing: 
+
+An error occurred in file <maxwell_stress.cc> in function
+(line in output replaced by default.sh script)
+The violated condition was: 
+    this->get_parameters().mapped_particle_properties.size() > 0
+Additional information: 
+    Particle property 'maxwell stress' requires an explicit map between
+    particle-advected compositional fields and particle property
+    components.
+
+Stacktrace:
+(rest of the output replaced by default.sh script)
