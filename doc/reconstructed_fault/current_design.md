@@ -386,3 +386,45 @@ The manager archive round-trip is the current restart test. A full Simulator
 filesystem checkpoint/restart test remains mandatory before reconstructed-
 fault restart support is considered complete, but it does not block the next
 fixed-geometry development stage.
+
+## 19. Maxwell particle stress history
+
+The reconstructed-fault material model uses the particle property plugin
+`maxwell stress` to store exactly one committed symmetric tensor
+\(\boldsymbol\tau_{k-1}\) per bulk particle. It stores no current slip rate,
+surface state, cohesive traction, fault direction, second old-stress tensor, or
+Newton working value. The plugin has no automatic particle update and applies
+no objective rotation.
+
+Every independent tensor component is initialized explicitly from one
+particle-advected compositional field of type `stress`. The normal mapped-
+particle-property component syntax associates those fields with the components
+of the single `maxwell stress` property. The plugin evaluates the active
+initial-composition model at particle creation; missing, duplicate, or
+out-of-range component mappings are errors. Late particles interpolate the
+current particle history. Particle migration and checkpoint/restart use the
+existing particle infrastructure.
+
+`MaterialModel::PhaseFieldRSF` owns the non-rotational time-discrete Maxwell
+law
+
+\[
+\beta=\exp(-\Delta tG/\eta),\qquad
+\kappa=-\eta\,\operatorname{expm1}(-\Delta tG/\eta),\qquad
+\boldsymbol\tau_k=2\kappa\dot{\boldsymbol\epsilon}^{b}_k
+                  +\beta\boldsymbol\tau_{k-1}.
+\]
+
+The `expm1` expression is the authoritative evaluation of
+\(\eta(1-\beta)\); code must not recover it by subtracting `beta` from one.
+The effective bulk strain rate will later include the reconstructed-fault slip
+correction. Stage 2 only provides the constitutive operation and does not add a
+Stokes or surface coupling.
+
+Pending particle stresses are held outside the particle properties. Staging
+therefore leaves \(\boldsymbol\tau_{k-1}\) frozen. Commit first verifies across
+MPI that every locally owned particle has exactly one valid pending tensor and
+only then writes the complete local update; rollback discards the pending
+values without restoring or changing particles. The transaction is not yet
+connected to a Simulator lifecycle signal because the converged slip-corrected
+strain rate is introduced by later coupling stages.

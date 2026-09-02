@@ -1,0 +1,85 @@
+# Verify that MaxwellStress initializes every independent tensor component
+# from its explicitly mapped initial compositional field.
+# MPI: 2
+
+set Dimension                    = 2
+set End time                     = 0
+set Use years instead of seconds = false
+set Nonlinear solver scheme      = single Advection, no Stokes
+
+subsection Geometry model
+  set Model name = box
+end
+
+subsection Prescribed Stokes solution
+  set Model name = function
+  subsection Velocity function
+    set Function expression = 0; 0
+  end
+  subsection Pressure function
+    set Function expression = 0
+  end
+end
+
+subsection Gravity model
+  set Model name = vertical
+  subsection Vertical
+    set Magnitude = 0
+  end
+end
+
+subsection Initial temperature model
+  set Model name = function
+  subsection Function
+    set Function expression = 293
+  end
+end
+
+subsection Compositional fields
+  set Number of fields               = 3
+  set Names of fields                = tau_xx, tau_yy, tau_xy
+  set Types of fields                = stress, stress, stress
+  set Compositional field methods    = particles, particles, particles
+  set Mapped particle properties     = tau_xx:maxwell stress[0], tau_yy:maxwell stress[1], tau_xy:maxwell stress[2]
+end
+
+subsection Initial composition model
+  set Model name = function
+  subsection Function
+    set Variable names      = x,y
+    set Function expression = x+2*y; 3*x-y; 5
+  end
+end
+
+subsection Material model
+  set Model name = phase field rsf
+  subsection Phase field RSF
+    set Reference viscosities          = 1e21
+    set Elastic shear moduli           = 1e10
+    set Radiation damping coefficients = 1e7
+  end
+end
+
+subsection Mesh refinement
+  set Initial global refinement          = 0
+  set Initial adaptive refinement        = 0
+  set Time steps between mesh refinement = 0
+end
+
+subsection Particles
+  set Particle generator name     = reference cell
+  set List of particle properties = maxwell stress, position
+  set Load balancing strategy     = none
+  subsection Generator
+    subsection Reference cell
+      set Number of particles per cell per direction = 2
+    end
+  end
+end
+
+subsection Postprocess
+  set List of postprocessors = particles, verify maxwell stress initialization
+  subsection Particles
+    set Data output format = none
+  end
+end

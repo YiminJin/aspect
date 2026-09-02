@@ -1,0 +1,23 @@
+
+Loading shared library <./libphase_field_rsf_maxwell_stress_initialization_fail.debug.so>
+
+TimerOutput objects finalize timed values printed to the
+screen by communicating over MPI in their destructors.
+Since an exception is currently uncaught, this
+synchronization (and subsequent output) will be skipped
+to avoid a possible deadlock.
+
+
+Exception 'ExcMessage("No particle-advected compositional field maps to component " + Utilities::int_to_string(component) + " of particle property 'maxwell stress'. Every independent " "stress component must be mapped explicitly.")' on rank 0 on processing: 
+
+An error occurred in file <maxwell_stress.cc> in function
+(line in output replaced by default.sh script)
+The violated condition was: 
+    initial_stress_field_indices[component] != numbers::invalid_unsigned_int
+Additional information: 
+    No particle-advected compositional field maps to component 2 of
+    particle property 'maxwell stress'. Every independent stress component
+    must be mapped explicitly.
+
+Stacktrace:
+(rest of the output replaced by default.sh script)
