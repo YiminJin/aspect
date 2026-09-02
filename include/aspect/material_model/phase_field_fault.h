@@ -32,6 +32,12 @@ namespace aspect
 {
   namespace MaterialModel
   {
+    namespace internal
+    {
+      template <int dim>
+      class PhaseFieldFaultTestAccess;
+    }
+
     template <int dim>
     class PhaseFieldFault : public Interface<dim>,
       public PhaseFieldModel<dim>,
@@ -48,11 +54,17 @@ namespace aspect
         std::vector<double>
         get_critical_energy_release_rates() const override;
         
-        std::pair<double, double>
-        get_phase_field_range() const override;
+        double
+        get_phase_field_activation_threshold() const override;
+
+        double
+        get_phase_field_upper_admissibility_threshold() const override;
 
         bool
         is_compressible() const override;
+
+        void
+        initialize() override;
 
         static
         void
@@ -62,6 +74,8 @@ namespace aspect
         parse_parameters(ParameterHandler &prm) override;
 
       private:
+        friend class internal::PhaseFieldFaultTestAccess<dim>;
+
         /** Time-discrete coefficients of the Maxwell law. */
         struct MaxwellCoefficients
         {
@@ -83,6 +97,16 @@ namespace aspect
         compute_maxwell_stress(const MaxwellCoefficients &coefficients,
                                const SymmetricTensor<2,dim> &effective_bulk_strain_rate,
                                const SymmetricTensor<2,dim> &previous_stress);
+
+        /** Recompute transient nodal I_h from the current distributed phase field. */
+        void
+        compute_normalization_integrals();
+
+        /** Validate one sampled phase field/degradation pair and return h. */
+        static double
+        normalization_integrand(const double phase_field,
+                                const double degradation,
+                                const std::string &context);
 
         double 
         calculate_creep_viscosity(const std::vector<double> &volume_fractions,
@@ -124,8 +148,41 @@ namespace aspect
 
         bool evolve_phase_field;
 
+        double normalization_quadrature_tolerance;
+
+        double normalization_tail_tolerance;
+
+        unsigned int fault_composition_property_index = numbers::invalid_unsigned_int;
+
+        std::vector<std::vector<double>> current_normalization_integrals;
+
         std::unique_ptr<SolutionEvaluator<dim>> solution_evaluator;
     };
+
+    namespace internal
+    {
+      /** Narrow test seam for private PhaseFieldFault Stage B/C operations. */
+      template <int dim>
+      class PhaseFieldFaultTestAccess
+      {
+        public:
+          static const std::vector<std::vector<double>> &
+          compute_normalization_integrals(PhaseFieldFault<dim> &model)
+          {
+            model.compute_normalization_integrals();
+            return model.current_normalization_integrals;
+          }
+
+          static double
+          normalization_integrand(const double phase_field,
+                                  const double degradation,
+                                  const std::string &context = "test profile")
+          {
+            return PhaseFieldFault<dim>::normalization_integrand(
+              phase_field, degradation, context);
+          }
+      };
+    }
   }
 }
 

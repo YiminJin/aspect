@@ -459,15 +459,18 @@ namespace aspect
           &phase_field_handler.get_material_model());
       AssertThrow(phase_field_model != nullptr,
                   ExcMessage("Prescribed initial faults require a phase-field material model."));
-      const std::pair<double, double> phase_field_range = phase_field_model->get_phase_field_range();
+      const double activation_threshold =
+        phase_field_model->get_phase_field_activation_threshold();
+      const double upper_admissibility_threshold =
+        phase_field_model->get_phase_field_upper_admissibility_threshold();
 
       for (unsigned int fault_index = 0; fault_index < faults.size(); ++fault_index)
         {
           const PrescribedInitialFault<dim> &fault = faults[fault_index];
           closest_point_distance_and_core_phase_field(fault, Point<dim>());
           for (unsigned int vertex = 0; vertex < fault.core_phase_field_values.size(); ++vertex)
-            AssertThrow(fault.core_phase_field_values[vertex] >= phase_field_range.first
-                        && fault.core_phase_field_values[vertex] <= phase_field_range.second,
+            AssertThrow(fault.core_phase_field_values[vertex] >= activation_threshold
+                        && fault.core_phase_field_values[vertex] <= upper_admissibility_threshold,
                         ExcMessage("Core phase-field value " + Utilities::int_to_string(vertex)
                                    + " of prescribed fault " + Utilities::int_to_string(fault_index)
                                    + " is outside the acceptable phase-field range."));
@@ -541,7 +544,7 @@ namespace aspect
                 material_phase_fields,
                 MaterialModel::MaterialUtilities::arithmetic);
 
-              if (phase_field > phase_field_range.first)
+              if (phase_field > activation_threshold)
                 {
                   ++contributing_faults;
                   if (contributing_faults == 1)
@@ -678,7 +681,7 @@ namespace aspect
       &phase_field_handler.get_material_model());
     AssertThrow(phase_field_model != nullptr,
                 ExcMessage("Fault reconstruction requires a phase-field material model."));
-    const double phi_min = phase_field_model->get_phase_field_range().first;
+    const double phi_min = phase_field_model->get_phase_field_activation_threshold();
 
     double local_cell_margin = 0.0;
     for (const auto &cell : phase_field_handler.get_dof_handler().active_cell_iterators())
@@ -1515,6 +1518,17 @@ namespace aspect
   ReconstructedFaultManager<dim>::get_particle_projection_diagnostics() const
   {
     return particle_projection_diagnostics;
+  }
+
+
+
+  template <int dim>
+  ReconstructedFaultUtilities::NormalProfileProjection
+  ReconstructedFaultManager<dim>::project_to_normal_profiles(
+    const Point<dim> &position) const
+  {
+    return ReconstructedFaultUtilities::project_to_normal_profiles(
+      reconstructed_faults, projection_half_widths, position);
   }
 
 

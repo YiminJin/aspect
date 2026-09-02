@@ -1,0 +1,106 @@
+# Verify the private Stage C distributed I_h evaluator in serial.
+# Enable if: ASPECT_WITH_VORO
+
+set Dimension                    = 2
+set End time                     = 0
+set Use years instead of seconds = false
+set Nonlinear solver scheme      = single Advection, no Stokes
+
+subsection Formulation
+  set Enable phase field                  = true
+  set Reconstruct faults from phase field = true
+end
+
+subsection Geometry model
+  set Model name = box
+end
+
+subsection Prescribed Stokes solution
+  set Model name = function
+  subsection Velocity function
+    set Function expression = 0; 0
+  end
+  subsection Pressure function
+    set Function expression = 0
+  end
+end
+
+subsection Gravity model
+  set Model name = vertical
+  subsection Vertical
+    set Magnitude = 0
+  end
+end
+
+subsection Initial temperature model
+  set Model name = function
+  subsection Function
+    set Function expression = 293
+  end
+end
+
+subsection Compositional fields
+  set Number of fields            = 1
+  set Names of fields             = rock
+  set Types of fields             = chemical composition
+  set Compositional field methods = particles
+  set Mapped particle properties  = rock:initial composition[0]
+end
+
+subsection Initial composition model
+  set Model name = function
+  subsection Function
+    set Variable names      = x,y
+    set Function expression = 0.2+0.5*x
+  end
+end
+
+subsection Material model
+  set Model name = phase field fault
+  subsection Phase field fault
+    set Evolve phase field             = false
+    set Reference viscosities          = 1e21, 1e21
+    set Elastic shear moduli           = 1e10, 1e10
+    set Cohesions                      = 1e5, 2e5
+    set Critical energy release rates  = 1e5, 1e5
+    set Radiation damping coefficients = 1e7, 1e7
+  end
+end
+
+subsection Phase field model
+  set Length scale                    = 0.05
+  set Geometric function type         = AT1
+  set Degradation curvature parameter = 1
+end
+
+subsection Fault reconstruction
+  set Structural point spacing = 0.1
+  set Ridge coefficient        = 1
+  set Prescribed faults file   = $ASPECT_SOURCE_DIR/tests/phase_field_fault_ih.txt
+end
+
+subsection Mesh refinement
+  set Initial global refinement          = 4
+  set Initial adaptive refinement        = 0
+  set Time steps between mesh refinement = 0
+end
+
+subsection Particles
+  set Particle generator name                 = reference cell
+  set List of particle properties             = crack driving force, initial composition
+  set Generate particle domains               = true
+  set Generate CPDI data for particle domains = true
+  set Load balancing strategy                 = none
+  subsection Generator
+    subsection Reference cell
+      set Number of particles per cell per direction = 3
+    end
+  end
+end
+
+subsection Postprocess
+  set List of postprocessors = particles, verify phase field fault I h
+  subsection Particles
+    set Data output format = none
+  end
+end

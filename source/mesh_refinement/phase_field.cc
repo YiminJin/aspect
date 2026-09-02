@@ -42,7 +42,7 @@ namespace aspect
     {
       // Get the phase field activation threshold
       const double phi0 = dynamic_cast<const MaterialModel::PhaseFieldModel<dim>&>(
-        this->get_material_model()).get_phase_field_range().first;
+        this->get_material_model()).get_phase_field_activation_threshold();
 
       // Get the local dof indices of phase field
       const auto &variable = this->introspection().variable("phase_field");

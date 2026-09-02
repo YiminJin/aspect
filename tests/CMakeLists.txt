@@ -101,7 +101,8 @@ endfunction()
 # 1. "Enable if: ASPECT_WITH_WORLD_BUILDER"
 # 2. "Enable if: ASPECT_WITH_FASTSCAPE"
 # 3. "Enable if: ASPECT_WITH_PYTHON"
-# 4. "Enable if: QUICK_TEST" - enable the test even if RUN_ALL_TESTS is false
+# 4. "Enable if: ASPECT_WITH_VORO"
+# 5. "Enable if: QUICK_TEST" - enable the test even if RUN_ALL_TESTS is false
 function(SHOULD_ENABLE_TEST _filename)
 
   file(STRINGS ${_filename} _input_lines
@@ -118,6 +119,15 @@ function(SHOULD_ENABLE_TEST _filename)
   if(NOT "${_input_lines}" STREQUAL "")
     if (${_input_lines} MATCHES "Enable if: ASPECT_WITH_FASTSCAPE"
         AND NOT ASPECT_WITH_FASTSCAPE)
+      set(_use_test OFF PARENT_SCOPE)
+    endif()
+  endif()
+
+  file(STRINGS ${_filename} _input_lines
+       REGEX "Enable if: ASPECT_WITH_VORO")
+  if(NOT "${_input_lines}" STREQUAL "")
+    if (${_input_lines} MATCHES "Enable if: ASPECT_WITH_VORO"
+        AND NOT ASPECT_WITH_VORO)
       set(_use_test OFF PARENT_SCOPE)
     endif()
   endif()

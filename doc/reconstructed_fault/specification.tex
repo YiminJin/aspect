@@ -72,14 +72,20 @@ The authoritative implementation is
 \end{center}
 The existing \texttt{PhaseFieldHandler<dim>} already declares the bulk \texttt{phase\_field} variable with \texttt{FE\_Q<dim>(1)} and owns the machinery used to evolve the distributed phase field.  The reconstructed-fault implementation shall use this existing FE variable; it shall not introduce a second phase-field representation.
 
-\paragraph{Phase-field range.}
-The authoritative phase-field bounds are provided by
+\paragraph{Phase-field ranges and thresholds.}
+The authoritative physical phase-field bounds are provided by
 \begin{center}
 \texttt{MaterialModel::PhaseFieldModel<dim>::get\_phase\_field\_range()}.
 \end{center}
-The current default implementation returns the lower and upper bounds $(0.01,0.99)$.  \textbf{MUST reuse:} reconstruction shall obtain the admissible/active phase-field range through this existing virtual interface and shall not introduce an independent parameter representing the same lower or upper threshold.  The existing \texttt{PhaseFieldHandler<dim>::parse\_parameters()} already obtains these bounds from the material model through \texttt{MaterialModel::PhaseFieldModel<dim>}.
-
-If repeated access from the new reconstruction code would otherwise duplicate the dynamic cast, it is acceptable to add a thin public forwarding accessor to \texttt{PhaseFieldHandler<dim>}, but the source of truth remains \texttt{PhaseFieldModel<dim>::get\_phase\_field\_range()}.
+This range is exactly $[0,1]$. The reconstruction
+activation threshold and the fault-model upper admissibility threshold are
+separate quantities supplied by
+\texttt{get\_phase\_field\_activation\_threshold()} and
+\texttt{get\_phase\_field\_upper\_admissibility\_threshold()}.
+Reconstruction and phase-field mesh refinement shall continue to use the
+activation threshold. Prescribed fault-core validation and legacy slip-rate
+normalization shall continue to use both model-specific admissibility
+thresholds. No independent duplicate threshold shall be introduced.
 
 \paragraph{Length scale.}
 The phase-field length scale $\ell$ is already parsed by \texttt{PhaseFieldHandler<dim>} and stored in its \texttt{PhaseField::GeometricFunction}; \texttt{GeometricFunction::get\_length\_scale()} already returns it.  \textbf{MUST reuse:} the reconstructed-fault module shall not define a duplicate fracture length scale.  Because \texttt{PhaseFieldHandler<dim>} currently does not expose $\ell$ directly, the preferred change is to add a thin const accessor such as
@@ -540,9 +546,34 @@ $P_{q\leftarrow\Gamma}$ & replicated surface field & local QPs & cached local in
 
 The normal profiles and forward-PCA patches contain arbitrary physical sample points.  These values shall be obtained with deal.II distributed point-evaluation infrastructure, conceptually \texttt{Utilities::MPI::RemotePointEvaluation} or the corresponding ASPECT wrapper.
 
-All sample points needed for one reconstruction iteration shall be batched into as few collective point-evaluation calls as practical.  The coordinator generates the sampling geometry and metadata; all MPI ranks participate in the distributed evaluation; the returned values are used to make geometry decisions.
+For adaptive normalization profiles, deterministic fault-major, segment-major,
+quadrature-point IDs shall be divided into balanced contiguous owner ranges.
+Each owner generates and updates only its profiles, while all ranks participate
+in every batched point-evaluation collective. There is no rank-zero profile
+coordinator.
 
 No rank shall gather the complete bulk FE field or a complete bulk-node point cloud.
+
+\subsection{Normalization-profile material mixture}
+For every reconstructed-fault quadrature point determine one surface material
+mixture $\mathbf f_\Gamma$ by projecting chemical compositional fields from
+particles to the Q1 fault surface and converting the interpolated surface
+composition to material fractions. Hold this mixture fixed for the complete
+$+\mathbf n/-\mathbf n$ profile and evaluate
+\[
+\bar g(\phi,\mathbf f_\Gamma)=\sum_m f_{\Gamma,m}g_m(\phi),\qquad
+I_h=\int\left(1/\bar g-1\right)d\zeta.
+\]
+Do not evaluate a different composition mixture at individual normal-profile
+samples. This model requires material transitions to have characteristic width
+$L_{\rm mat}\gg\ell$; transitions on the diffuse-fault scale or narrower are
+outside its applicability.
+
+The physical phase field at every sample must be finite and lie in $[0,1]$.
+A tail value $\phi=0$ is admissible. The independent constitutive condition is
+$\bar g>0$; $\bar g=0$, including a possible $\phi=1$ singularity, shall be
+reported explicitly as an $I_h$ singularity and shall not be classified as a
+phase-field range violation.
 
 \section{Particle-to-fault projection}
 

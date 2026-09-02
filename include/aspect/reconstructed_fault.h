@@ -331,6 +331,10 @@ namespace aspect
       const std::vector<ParticleProjectionDiagnostics> &
       get_particle_projection_diagnostics() const;
 
+      /** Associate a point with the manager-owned fault normal profiles. */
+      ReconstructedFaultUtilities::NormalProfileProjection
+      project_to_normal_profiles(const Point<dim> &position) const;
+
       const std::vector<ReconstructedFault<dim>> &get_faults() const;
       ReconstructedFault<dim> &get_fault(const unsigned int fault_index);
       const ReconstructedFault<dim> &get_fault(const unsigned int fault_index) const;

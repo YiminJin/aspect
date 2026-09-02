@@ -123,7 +123,14 @@ The following modules contain existing functionality that should be inspected an
 
 The current reconstructed-fault implementation should reuse existing authoritative APIs rather than introduce duplicate physical/numerical parameters.
 
-In particular, inspect the existing phase-field interfaces for quantities such as the acceptable phase-field range and length scale before adding new parameters.
+The physical phase-field range, reconstruction activation threshold, and
+fault-model upper admissibility threshold are distinct invariants. The
+physical range is `[0,1]`. Reconstruction and refinement use the activation
+threshold, while prescribed fault-core values and legacy slip-rate
+normalization use the activation and upper-admissibility thresholds. These
+quantities are obtained through separate `PhaseFieldModel` accessors; none is
+duplicated in reconstructed-fault parameters. The existing phase-field length
+scale is likewise reused through `PhaseFieldHandler`.
 
 ## 7. Existing code that must not define the new architecture
 
@@ -228,7 +235,7 @@ that averaged phase field, the interpolated core value, and particle-derived
 composition fractions.
 
 A fault contributes where the prescribed stationary profile exceeds the
-existing lower acceptable phase-field bound. No contribution leaves the
+material model's phase-field activation threshold. No contribution leaves the
 particle's baseline `H` unchanged; more than one contribution is an error.
 This profile initializes particle `H` only. Sharp-fault reconstruction uses the
 subsequently solved Q1 phase field and belongs to a later stage.
@@ -432,3 +439,45 @@ After mechanical convergence, one pass over locally owned particles evaluates
 and writes \(\boldsymbol\tau_k\). This post-convergence pass will be connected
 when the later coupling stage provides the converged slip-corrected strain
 rate.
+
+## 20. Distributed adaptive normalization integral
+
+`MaterialModel::PhaseFieldFault` owns the transient, recomputable current
+normalization integral
+
+\[
+I_h=\int (1/\bar g-1)\,d\zeta.
+\]
+
+Every `QGauss<1>(3)` point on a reconstructed-fault segment has one
+fault-surface material mixture \(\mathbf f_\Gamma\). Chemical compositional
+fields are projected from particles to the generic fault-property storage,
+Q1-interpolated at the surface quadrature point, and converted to material
+fractions there. That mixture is fixed for the complete two-sided normal
+profile. Thus every phase-field sample uses
+
+\[
+\bar g(\phi,\mathbf f_\Gamma)=\sum_m f_{\Gamma,m}g_m(\phi).
+\]
+
+Composition is never resampled along the normal. This approximation is
+applicable only when every material/composition transition has characteristic
+width \(L_{\rm mat}\gg\ell\). Models with transitions comparable to or narrower
+than the diffuse-fault width are outside the formulation's validity.
+
+Profiles have deterministic fault-major, segment-major, quadrature-point IDs
+and balanced contiguous MPI ownership. Owners retain adaptive state; all ranks
+participate in batched distributed Q1 phase-field evaluation. Initial panel
+width is one half the smaller of \(\ell\) and the local bulk-cell diameter.
+Four- and eight-point Gauss estimates control bisection. Each side terminates
+after two independent outer integral windows are negligible; the activation
+threshold does not truncate the profile and no monotonic tail is required.
+The completed quadrature-point integrals are projected to replicated fault
+vertices with the consistent Q1 mass matrix.
+
+Every sampled phase field must be finite and in the physical range `[0,1]`.
+The tail may reach exactly zero. Positivity of \(\bar g\) is a separate
+constitutive requirement: \(\bar g=0\), including a possible \(\phi=1\) case,
+is reported explicitly as an `I_h` singularity rather than a phase-field range
+violation. Current \(I_h\) is private transient material-model data in this
+stage and is not connected to the mechanical solve.

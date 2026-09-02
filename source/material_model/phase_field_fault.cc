@@ -19,8 +19,10 @@
 */
 
 #include <aspect/material_model/phase_field_fault.h>
+#include <aspect/material_model/utilities.h>
 #include <aspect/phase_field.h>
 #include <aspect/particle/manager.h>
+#include <aspect/reconstructed_fault.h>
 #include <aspect/newton.h>
 #include <aspect/simulator.h>
 #include <aspect/postprocess/visualization.h>
@@ -28,6 +30,9 @@
 
 #include <deal.II/fe/fe_values.h>
 #include <deal.II/fe/mapping_cartesian.h>
+#include <deal.II/base/mpi_remote_point_evaluation.h>
+#include <deal.II/base/quadrature_lib.h>
+#include <deal.II/numerics/vector_tools_evaluate.h>
 
 namespace aspect
 {
@@ -152,10 +157,609 @@ namespace aspect
 
 
     template <int dim>
-    std::pair<double, double>
-    PhaseFieldFault<dim>::get_phase_field_range() const
+    double
+    PhaseFieldFault<dim>::get_phase_field_activation_threshold() const
     {
-      return std::make_pair(phase_field_activation_threshold, 0.99);
+      return phase_field_activation_threshold;
+    }
+
+
+
+    template <int dim>
+    double
+    PhaseFieldFault<dim>::get_phase_field_upper_admissibility_threshold() const
+    {
+      return 0.99;
+    }
+
+
+
+    template <int dim>
+    void
+    PhaseFieldFault<dim>::initialize()
+    {
+      if (!this->get_parameters().reconstruct_faults)
+        return;
+
+      const unsigned int n_chemical_fields =
+        this->introspection().n_chemical_composition_fields();
+      if (n_chemical_fields > 0)
+        fault_composition_property_index =
+          this->get_reconstructed_fault_manager().register_property(
+            "phase field fault chemical compositions", n_chemical_fields);
+    }
+
+
+
+    template <int dim>
+    double
+    PhaseFieldFault<dim>::normalization_integrand(
+      const double phase_field,
+      const double degradation,
+      const std::string &context)
+    {
+      AssertThrow(std::isfinite(phase_field)
+                  && phase_field >= 0.0
+                  && phase_field <= 1.0,
+                  ExcMessage("Internal phase-field invariant violation during I_h evaluation: "
+                             "the physical phase field must be finite and in [0,1], but phi="
+                             + Utilities::to_string(phase_field) + " at " + context + "."));
+      AssertThrow(std::isfinite(degradation) && degradation > 0.0,
+                  ExcMessage("I_h singularity at " + context + ": phi="
+                             + Utilities::to_string(phase_field) + ", g="
+                             + Utilities::to_string(degradation)
+                             + ". I_h requires a finite, strictly positive "
+                               "degradation function."));
+      Assert(degradation <= 1.0 + 64.0 * std::numeric_limits<double>::epsilon(),
+             ExcInternalError());
+      const double value = 1.0 / degradation - 1.0;
+      AssertThrow(std::isfinite(value) && value >= 0.0,
+                  ExcMessage("I_h singularity at " + context + ": phi="
+                             + Utilities::to_string(phase_field) + ", g="
+                             + Utilities::to_string(degradation)
+                             + ". The value 1/g-1 is negative or non-finite."));
+      return value;
+    }
+
+
+
+    template <int dim>
+    void
+    PhaseFieldFault<dim>::compute_normalization_integrals()
+    {
+      AssertThrow(dim == 2, ExcNotImplemented());
+
+      ReconstructedFaultManager<dim> &fault_manager =
+        this->get_reconstructed_fault_manager();
+      const std::vector<ReconstructedFault<dim>> &faults = fault_manager.get_faults();
+      current_normalization_integrals.clear();
+      current_normalization_integrals.resize(faults.size());
+      if (faults.empty())
+        return;
+
+      const std::vector<unsigned int> chemical_field_indices =
+        this->introspection().chemical_composition_field_indices();
+      unsigned int fault_composition_position = numbers::invalid_unsigned_int;
+      if (!chemical_field_indices.empty())
+        {
+          AssertIndexRange(fault_composition_property_index,
+                           fault_manager.get_property_information().size());
+          const auto &property_information =
+            fault_manager.get_property_information()[fault_composition_property_index];
+          AssertDimension(property_information.n_components,
+                          chemical_field_indices.size());
+          fault_composition_position = property_information.position;
+
+          std::vector<typename ReconstructedFaultManager<dim>::ParticlePropertyProjection>
+            projections;
+          projections.reserve(chemical_field_indices.size());
+          for (unsigned int c = 0; c < chemical_field_indices.size(); ++c)
+            {
+              const unsigned int field_index = chemical_field_indices[c];
+              AssertThrow(this->get_parameters().compositional_field_methods[field_index]
+                          == Parameters<dim>::AdvectionFieldMethod::particles,
+                          ExcMessage("Distributed I_h evaluation requires every chemical "
+                                     "composition field to be advected by particles."));
+              const auto mapped_property =
+                this->get_parameters().mapped_particle_properties.find(field_index);
+              AssertThrow(mapped_property
+                          != this->get_parameters().mapped_particle_properties.end(),
+                          ExcMessage("Distributed I_h evaluation requires every chemical "
+                                     "composition field to be mapped to a particle property."));
+
+              typename ReconstructedFaultManager<dim>::ParticlePropertyProjection projection;
+              projection.particle_property_name = mapped_property->second.first;
+              projection.first_particle_component = mapped_property->second.second;
+              projection.fault_property_name = property_information.name;
+              projection.first_fault_component = c;
+              projection.n_components = 1;
+              projections.push_back(projection);
+            }
+          fault_manager.project_particle_properties(projections);
+        }
+
+      struct PointSample
+      {
+        bool found = false;
+        double phase_field = numbers::signaling_nan<double>();
+        double cell_diameter = numbers::signaling_nan<double>();
+      };
+
+      const PhaseFieldHandler<dim> &phase_field_handler =
+        this->get_phase_field_handler();
+      const unsigned int phase_field_component =
+        this->introspection().variable("phase_field").first_component_index;
+
+      const auto evaluate_points =
+        [&](const std::vector<Point<dim>> &points)
+        {
+          Utilities::MPI::RemotePointEvaluation<dim> cache;
+          cache.reinit(phase_field_handler.get_grid_cache(), points);
+          const std::vector<double> phase_field_values =
+            VectorTools::point_values<1>(cache,
+                                         this->get_dof_handler(),
+                                         this->get_solution(),
+                                         VectorTools::EvaluationFlags::avg,
+                                         phase_field_component);
+
+          const std::vector<double> cell_diameters =
+            cache.template evaluate_and_process<double>(
+              [](const ArrayView<double> &values,
+                 const typename Utilities::MPI::RemotePointEvaluation<dim>::CellData &cell_data)
+              {
+                for (const unsigned int cell_index : cell_data.cell_indices())
+                  {
+                    const double diameter =
+                      cell_data.get_active_cell_iterator(cell_index)->diameter();
+                    ArrayView<double> cell_values =
+                      cell_data.get_data_view(cell_index, values);
+                    std::fill(cell_values.begin(), cell_values.end(), diameter);
+                  }
+              });
+
+          const std::vector<unsigned int> &point_ptrs = cache.get_point_ptrs();
+          std::vector<PointSample> samples(points.size());
+          AssertDimension(phase_field_values.size(), points.size());
+          AssertDimension(point_ptrs.size(), points.size() + 1);
+          for (unsigned int i = 0; i < points.size(); ++i)
+            if (cache.point_found(i))
+              {
+                samples[i].found = true;
+                samples[i].phase_field = phase_field_values[i];
+                samples[i].cell_diameter = std::numeric_limits<double>::max();
+                for (unsigned int j = point_ptrs[i]; j < point_ptrs[i+1]; ++j)
+                  samples[i].cell_diameter =
+                    std::min(samples[i].cell_diameter, cell_diameters[j]);
+                Assert(samples[i].cell_diameter < std::numeric_limits<double>::max(),
+                       ExcInternalError());
+              }
+          return samples;
+        };
+
+      struct SideState
+      {
+        double panel_start = 0.0;
+        double panel_width = 0.0;
+        double integral = 0.0;
+        double window_span = 0.0;
+        double window_integral = 0.0;
+        unsigned int successive_small_windows = 0;
+        unsigned int refinement_depth = 0;
+        unsigned int accepted_extensions = 0;
+        bool boundary_search = false;
+        bool boundary_final_panel = false;
+        double boundary_low = 0.0;
+        double boundary_high = 0.0;
+        unsigned int boundary_bisections = 0;
+        bool complete = false;
+      };
+
+      struct ProfileState
+      {
+        unsigned int id = numbers::invalid_unsigned_int;
+        unsigned int fault_index = numbers::invalid_unsigned_int;
+        unsigned int segment_index = numbers::invalid_unsigned_int;
+        double xi = numbers::signaling_nan<double>();
+        double surface_weight = numbers::signaling_nan<double>();
+        Point<dim> origin;
+        Tensor<1,dim> normal;
+        std::vector<double> material_fractions;
+        SideState sides[2];
+      };
+
+      const QGauss<1> surface_quadrature(3);
+      unsigned int n_profiles = 0;
+      for (const ReconstructedFault<dim> &fault : faults)
+        n_profiles += fault.n_cells() * surface_quadrature.size();
+
+      const unsigned int mpi_rank =
+        Utilities::MPI::this_mpi_process(this->get_mpi_communicator());
+      const unsigned int n_mpi_processes =
+        Utilities::MPI::n_mpi_processes(this->get_mpi_communicator());
+      const unsigned int first_owned_profile = n_profiles * mpi_rank / n_mpi_processes;
+      const unsigned int end_owned_profile = n_profiles * (mpi_rank + 1) / n_mpi_processes;
+
+      std::vector<ProfileState> profiles;
+      profiles.reserve(end_owned_profile - first_owned_profile);
+      unsigned int profile_id = 0;
+      for (unsigned int fault_index = 0; fault_index < faults.size(); ++fault_index)
+        {
+          const ReconstructedFault<dim> &fault = faults[fault_index];
+          for (unsigned int segment = 0; segment < fault.n_cells(); ++segment)
+            {
+              const Tensor<1,dim> tangent = fault.vertex(segment+1) - fault.vertex(segment);
+              const double segment_length = tangent.norm();
+              AssertThrow(std::isfinite(segment_length) && segment_length > 0.0,
+                          ExcMessage("I_h evaluation encountered a degenerate fault segment."));
+              Tensor<1,dim> normal;
+              normal[0] = -tangent[1] / segment_length;
+              normal[1] = tangent[0] / segment_length;
+
+              for (unsigned int q = 0; q < surface_quadrature.size(); ++q, ++profile_id)
+                if (profile_id >= first_owned_profile && profile_id < end_owned_profile)
+                  {
+                    ProfileState profile;
+                    profile.id = profile_id;
+                    profile.fault_index = fault_index;
+                    profile.segment_index = segment;
+                    profile.xi = surface_quadrature.point(q)[0];
+                    profile.surface_weight = surface_quadrature.weight(q) * segment_length;
+                    profile.origin = (1.0-profile.xi) * fault.vertex(segment)
+                                     + profile.xi * fault.vertex(segment+1);
+                    profile.normal = normal;
+
+                    std::vector<double> chemical_compositions(chemical_field_indices.size());
+                    for (unsigned int c = 0; c < chemical_field_indices.size(); ++c)
+                      chemical_compositions[c] =
+                        (1.0-profile.xi)
+                        * fault.get_properties(segment)[fault_composition_position+c]
+                        + profile.xi
+                        * fault.get_properties(segment+1)[fault_composition_position+c];
+                    profile.material_fractions =
+                      MaterialUtilities::compute_composition_fractions(chemical_compositions);
+
+                    double fraction_sum = 0.0;
+                    for (const double fraction : profile.material_fractions)
+                      {
+                        AssertThrow(std::isfinite(fraction) && fraction >= 0.0,
+                                    ExcMessage("I_h evaluation produced an invalid fault-surface "
+                                               "material fraction."));
+                        fraction_sum += fraction;
+                      }
+                    AssertThrow(std::abs(fraction_sum-1.0) <= 1.e-12,
+                                ExcMessage("I_h fault-surface material fractions do not sum to one."));
+                    profiles.push_back(std::move(profile));
+                  }
+            }
+        }
+      AssertDimension(profile_id, n_profiles);
+
+      std::vector<Point<dim>> origin_points;
+      origin_points.reserve(profiles.size());
+      for (const ProfileState &profile : profiles)
+        origin_points.push_back(profile.origin);
+      const std::vector<PointSample> origin_samples = evaluate_points(origin_points);
+      const double length_scale = phase_field_handler.get_length_scale();
+      AssertThrow(std::isfinite(length_scale) && length_scale > 0.0,
+                  ExcMessage("I_h evaluation requires a positive finite phase-field length scale."));
+      for (unsigned int i = 0; i < profiles.size(); ++i)
+        {
+          AssertThrow(origin_samples[i].found,
+                      ExcMessage("The origin of reconstructed-fault I_h profile "
+                                 + Utilities::int_to_string(profiles[i].id)
+                                 + " was not found in the bulk mesh."));
+          const double initial_width =
+            0.5 * std::min(length_scale, origin_samples[i].cell_diameter);
+          profiles[i].sides[0].panel_width = initial_width;
+          profiles[i].sides[1].panel_width = initial_width;
+        }
+
+      const QGauss<1> quadrature_4(4);
+      const QGauss<1> quadrature_8(8);
+      struct Request
+      {
+        unsigned int profile;
+        unsigned int side;
+        bool boundary_probe;
+        unsigned int first_point;
+        std::vector<double> zeta;
+      };
+
+      const auto point_at = [](const ProfileState &profile,
+                               const unsigned int side,
+                               const double zeta)
+      {
+        return profile.origin
+               + (side == 0 ? 1.0 : -1.0) * zeta * profile.normal;
+      };
+
+      const auto integrand =
+        [&](const ProfileState &profile,
+            const unsigned int side,
+            const double zeta,
+            const Point<dim> &point,
+            const PointSample &sample)
+        {
+          const auto projection = fault_manager.project_to_normal_profiles(point);
+          AssertThrow(!projection.active
+                      || projection.fault_index == profile.fault_index,
+                      ExcMessage("Unsupported reconstructed-fault overlap during I_h evaluation: "
+                                 "profile " + Utilities::int_to_string(profile.id)
+                                 + " encountered fault "
+                                 + Utilities::int_to_string(projection.fault_index)
+                                 + " before its local tail terminated."));
+
+          const double degradation = phase_field_handler.energetic_degradation(
+            profile.material_fractions, sample.phase_field);
+          const std::string context =
+            "fault " + Utilities::int_to_string(profile.fault_index)
+            + ", segment " + Utilities::int_to_string(profile.segment_index)
+            + ", profile " + Utilities::int_to_string(profile.id)
+            + ", side " + (side == 0 ? std::string("+n") : std::string("-n"))
+            + ", zeta=" + Utilities::to_string(zeta)
+            + ", point=(" + Utilities::to_string(point[0])
+            + "," + Utilities::to_string(point[1]) + ")";
+          return this->normalization_integrand(sample.phase_field, degradation, context);
+        };
+
+      while (true)
+        {
+          unsigned int local_incomplete_sides = 0;
+          std::vector<Point<dim>> points;
+          std::vector<Request> requests;
+          for (unsigned int p = 0; p < profiles.size(); ++p)
+            for (unsigned int side = 0; side < 2; ++side)
+              {
+                SideState &state = profiles[p].sides[side];
+                if (state.complete)
+                  continue;
+                ++local_incomplete_sides;
+
+                Request request;
+                request.profile = p;
+                request.side = side;
+                request.boundary_probe = state.boundary_search;
+                request.first_point = points.size();
+                if (state.boundary_search)
+                  {
+                    const double midpoint =
+                      0.5 * (state.boundary_low + state.boundary_high);
+                    request.zeta.push_back(midpoint);
+                    points.push_back(point_at(profiles[p], side, midpoint));
+                  }
+                else
+                  {
+                    for (unsigned int q = 0; q < quadrature_4.size(); ++q)
+                      request.zeta.push_back(
+                        state.panel_start
+                        + state.panel_width * quadrature_4.point(q)[0]);
+                    for (unsigned int q = 0; q < quadrature_8.size(); ++q)
+                      request.zeta.push_back(
+                        state.panel_start
+                        + state.panel_width * quadrature_8.point(q)[0]);
+                    request.zeta.push_back(state.panel_start + state.panel_width);
+                    for (const double zeta : request.zeta)
+                      points.push_back(point_at(profiles[p], side, zeta));
+                  }
+                requests.push_back(std::move(request));
+              }
+
+          const unsigned int global_incomplete_sides =
+            Utilities::MPI::sum(local_incomplete_sides,
+                                this->get_mpi_communicator());
+          if (global_incomplete_sides == 0)
+            break;
+
+          const std::vector<PointSample> samples = evaluate_points(points);
+          for (const Request &request : requests)
+            {
+              ProfileState &profile = profiles[request.profile];
+              SideState &state = profile.sides[request.side];
+              if (request.boundary_probe)
+                {
+                  const double midpoint = request.zeta[0];
+                  if (samples[request.first_point].found)
+                    state.boundary_low = midpoint;
+                  else
+                    state.boundary_high = midpoint;
+                  ++state.boundary_bisections;
+                  AssertThrow(state.boundary_bisections <= 64,
+                              ExcMessage("I_h domain-boundary bisection exceeded 64 iterations "
+                                         "for profile " + Utilities::int_to_string(profile.id) + "."));
+
+                  const double coordinate_scale =
+                    std::max(1.0, point_at(profile, request.side,
+                                           state.boundary_high).norm());
+                  if (std::nextafter(state.boundary_low, state.boundary_high)
+                      == state.boundary_high
+                      || state.boundary_high-state.boundary_low
+                         <= 16.0 * std::numeric_limits<double>::epsilon()
+                            * coordinate_scale)
+                    {
+                      state.boundary_search = false;
+                      if (state.boundary_low > state.panel_start)
+                        {
+                          state.panel_width = state.boundary_low-state.panel_start;
+                          state.boundary_final_panel = true;
+                        }
+                      else
+                        state.complete = true;
+                    }
+                  continue;
+                }
+
+              double first_missing = std::numeric_limits<double>::max();
+              double last_found_before_missing = state.panel_start;
+              std::vector<unsigned int> order(request.zeta.size());
+              std::iota(order.begin(), order.end(), 0);
+              std::sort(order.begin(), order.end(),
+                        [&](const unsigned int a, const unsigned int b)
+                        { return request.zeta[a] < request.zeta[b]; });
+              for (const unsigned int i : order)
+                if (!samples[request.first_point+i].found)
+                  {
+                    first_missing = request.zeta[i];
+                    break;
+                  }
+                else
+                  last_found_before_missing = request.zeta[i];
+
+              if (first_missing < std::numeric_limits<double>::max())
+                {
+                  state.boundary_search = true;
+                  state.boundary_low = last_found_before_missing;
+                  state.boundary_high = first_missing;
+                  state.boundary_bisections = 0;
+                  continue;
+                }
+
+              double integral_4 = 0.0;
+              double integral_8 = 0.0;
+              double panel_cell_diameter = std::numeric_limits<double>::max();
+              for (unsigned int q = 0; q < quadrature_4.size(); ++q)
+                {
+                  const unsigned int i = request.first_point + q;
+                  integral_4 += quadrature_4.weight(q)
+                                * integrand(profile, request.side, request.zeta[q],
+                                            points[i], samples[i]);
+                  panel_cell_diameter =
+                    std::min(panel_cell_diameter, samples[i].cell_diameter);
+                }
+              for (unsigned int q = 0; q < quadrature_8.size(); ++q)
+                {
+                  const unsigned int local_i = quadrature_4.size() + q;
+                  const unsigned int i = request.first_point + local_i;
+                  integral_8 += quadrature_8.weight(q)
+                                * integrand(profile, request.side,
+                                            request.zeta[local_i], points[i], samples[i]);
+                  panel_cell_diameter =
+                    std::min(panel_cell_diameter, samples[i].cell_diameter);
+                }
+              integral_4 *= state.panel_width;
+              integral_8 *= state.panel_width;
+
+              if (std::abs(integral_8-integral_4)
+                  > normalization_quadrature_tolerance
+                    * std::max(std::abs(integral_8), length_scale))
+                {
+                  ++state.refinement_depth;
+                  AssertThrow(state.refinement_depth <= 64,
+                              ExcMessage("I_h panel refinement exceeded depth 64 for profile "
+                                         + Utilities::int_to_string(profile.id) + "."));
+                  state.panel_width *= 0.5;
+                  continue;
+                }
+
+              AssertThrow(std::isfinite(integral_8) && integral_8 >= 0.0,
+                          ExcMessage("I_h panel quadrature produced an unusable integral."));
+              state.integral += integral_8;
+              state.window_span += state.panel_width;
+              state.window_integral += integral_8;
+              ++state.accepted_extensions;
+              AssertThrow(state.accepted_extensions <= 256,
+                          ExcMessage("I_h tail extension exceeded 256 accepted panels for profile "
+                                     + Utilities::int_to_string(profile.id) + "."));
+
+              if (state.boundary_final_panel)
+                state.complete = true;
+              else if (state.window_span >= length_scale)
+                {
+                  if (state.window_integral
+                      <= normalization_tail_tolerance
+                         * std::max(state.integral, length_scale))
+                    ++state.successive_small_windows;
+                  else
+                    state.successive_small_windows = 0;
+                  state.window_span = 0.0;
+                  state.window_integral = 0.0;
+                  if (state.successive_small_windows >= 2)
+                    state.complete = true;
+                }
+
+              if (!state.complete)
+                {
+                  state.panel_start += state.panel_width;
+                  state.panel_width =
+                    std::min({2.0*state.panel_width,
+                              0.5*length_scale,
+                              0.5*panel_cell_diameter});
+                  state.refinement_depth = 0;
+                }
+            }
+        }
+
+      struct FaultSystem
+      {
+        std::vector<double> diagonal;
+        std::vector<double> off_diagonal;
+        std::vector<double> rhs;
+      };
+      std::vector<FaultSystem> local_systems(faults.size());
+      for (unsigned int fault = 0; fault < faults.size(); ++fault)
+        {
+          local_systems[fault].diagonal.assign(faults[fault].n_vertices(), 0.0);
+          local_systems[fault].off_diagonal.assign(faults[fault].n_cells(), 0.0);
+          local_systems[fault].rhs.assign(faults[fault].n_vertices(), 0.0);
+        }
+      for (const ProfileState &profile : profiles)
+        {
+          const double normalization =
+            profile.sides[0].integral + profile.sides[1].integral;
+          AssertThrow(std::isfinite(normalization) && normalization > 0.0,
+                      ExcMessage("I_h profile " + Utilities::int_to_string(profile.id)
+                                 + " produced a non-positive or non-finite integral."));
+          FaultSystem &system = local_systems[profile.fault_index];
+          const double shape[2] = {1.0-profile.xi, profile.xi};
+          const unsigned int vertex = profile.segment_index;
+          system.diagonal[vertex] += profile.surface_weight * shape[0] * shape[0];
+          system.diagonal[vertex+1] += profile.surface_weight * shape[1] * shape[1];
+          system.off_diagonal[vertex] += profile.surface_weight * shape[0] * shape[1];
+          system.rhs[vertex] += profile.surface_weight * shape[0] * normalization;
+          system.rhs[vertex+1] += profile.surface_weight * shape[1] * normalization;
+        }
+
+      unsigned int packed_size = 0;
+      for (const ReconstructedFault<dim> &fault : faults)
+        packed_size += 3 * fault.n_vertices() - 1;
+      std::vector<double> local_values(packed_size, 0.0);
+      unsigned int position = 0;
+      for (const FaultSystem &system : local_systems)
+        {
+          std::copy(system.diagonal.begin(), system.diagonal.end(),
+                    local_values.begin()+position);
+          position += system.diagonal.size();
+          std::copy(system.off_diagonal.begin(), system.off_diagonal.end(),
+                    local_values.begin()+position);
+          position += system.off_diagonal.size();
+          std::copy(system.rhs.begin(), system.rhs.end(),
+                    local_values.begin()+position);
+          position += system.rhs.size();
+        }
+      AssertDimension(position, packed_size);
+      std::vector<double> global_values(packed_size);
+      Utilities::MPI::sum(local_values, this->get_mpi_communicator(), global_values);
+
+      position = 0;
+      for (unsigned int fault = 0; fault < faults.size(); ++fault)
+        {
+          const unsigned int n_vertices = faults[fault].n_vertices();
+          std::vector<double> diagonal(global_values.begin()+position,
+                                       global_values.begin()+position+n_vertices);
+          position += n_vertices;
+          std::vector<double> off_diagonal(global_values.begin()+position,
+                                           global_values.begin()+position+n_vertices-1);
+          position += n_vertices-1;
+          std::vector<double> rhs(global_values.begin()+position,
+                                  global_values.begin()+position+n_vertices);
+          position += n_vertices;
+          current_normalization_integrals[fault] =
+            ReconstructedFaultUtilities::solve_tridiagonal_system(
+              diagonal, off_diagonal, rhs);
+          for (const double normalization : current_normalization_integrals[fault])
+            AssertThrow(std::isfinite(normalization) && normalization > 0.0,
+                        ExcMessage("The Q1 fault projection produced an unusable nodal I_h."));
+        }
+      AssertDimension(position, packed_size);
     }
 
 
@@ -317,6 +921,15 @@ namespace aspect
                             "false, then the crack driving force and the direction vectors will be "
                             "frozen after initialization. This is useful when conducting benchmarks "
                             "with pre-existing faults.");
+
+          prm.declare_entry("I h quadrature tolerance", "1e-8",
+                            Patterns::Double(0),
+                            "Relative tolerance used to compare the four- and eight-point "
+                            "normal-profile quadrature rules.");
+
+          prm.declare_entry("I h tail tolerance", "1e-8",
+                            Patterns::Double(0),
+                            "Relative integral tolerance used to terminate each normal-profile tail.");
         }
         prm.leave_subsection();
       }
@@ -359,6 +972,11 @@ namespace aspect
             initial_time_step *= year_in_seconds;
 
           evolve_phase_field = prm.get_bool("Evolve phase field");
+          normalization_quadrature_tolerance = prm.get_double("I h quadrature tolerance");
+          normalization_tail_tolerance = prm.get_double("I h tail tolerance");
+          AssertThrow(normalization_quadrature_tolerance > 0.0
+                      && normalization_tail_tolerance > 0.0,
+                      ExcMessage("The I_h quadrature and tail tolerances must be positive."));
 
           // Make options file for parsing maps to double arrays
           std::vector<std::string> compositional_field_names = this->introspection().get_composition_names();

@@ -39,7 +39,25 @@ namespace aspect
     std::pair<double, double>
     PhaseFieldModel<dim>::get_phase_field_range() const
     {
-      return std::make_pair(0.01, 0.99);
+      return std::make_pair(0.0, 1.0);
+    }
+
+
+
+    template <int dim>
+    double
+    PhaseFieldModel<dim>::get_phase_field_activation_threshold() const
+    {
+      return 0.01;
+    }
+
+
+
+    template <int dim>
+    double
+    PhaseFieldModel<dim>::get_phase_field_upper_admissibility_threshold() const
+    {
+      return 0.99;
     }
   }
 
@@ -534,12 +552,15 @@ namespace aspect
           degradation_functions.push_back(std::make_unique<PhaseField::DegradationFunction>(p, m));
 
           // Initialize the slip rate normalizer
-          const std::pair<double, double> min_max = phase_field_model->get_phase_field_range();
+          const double minimum_phase_field =
+            phase_field_model->get_phase_field_activation_threshold();
+          const double maximum_phase_field =
+            phase_field_model->get_phase_field_upper_admissibility_threshold();
           slip_rate_normalizers.push_back(
             std::make_unique<PhaseField::SlipRateNormalizer>(*geometric_function, 
                                                              *degradation_functions.back(), 
-                                                             min_max.first,
-                                                             min_max.second));
+                                                             minimum_phase_field,
+                                                             maximum_phase_field));
 
           // Compute the critical energy density
           critical_energy_densities.push_back(Gc[j] / (c0 * l));
@@ -1147,6 +1168,16 @@ namespace aspect
            ExcMessage("The pointer to the grid cache has not been initiated."));
 
     return *grid_cache;
+  }
+
+
+
+  template <int dim>
+  double
+  PhaseFieldHandler<dim>::get_length_scale() const
+  {
+    Assert(geometric_function != nullptr, ExcInternalError());
+    return geometric_function->get_length_scale();
   }
 }
 

@@ -1,0 +1,5 @@
+# Verify balanced distributed profile ownership and replicated I_h.
+# MPI: 2
+# Enable if: ASPECT_WITH_VORO
+
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_ih.prm

@@ -58,12 +58,20 @@ namespace aspect
         std::vector<double>
         get_critical_energy_release_rates() const = 0;
 
-        /**
-         * Returns the lower and upper bounds of the phase-field.
-         */
+        /** Return the physical phase-field range. */
         virtual
         std::pair<double, double>
         get_phase_field_range() const;
+
+        /** Return the threshold above which the phase field is active. */
+        virtual
+        double
+        get_phase_field_activation_threshold() const;
+
+        /** Return the model-specific upper admissibility threshold. */
+        virtual
+        double
+        get_phase_field_upper_admissibility_threshold() const;
     };
   }
 
@@ -310,6 +318,9 @@ namespace aspect
       Particle::Manager<dim> &get_associated_particle_manager();
 
       const GridTools::Cache<dim> &get_grid_cache() const;
+
+      /** Return the configured phase-field regularization length scale. */
+      double get_length_scale() const;
 
       static void declare_parameters(ParameterHandler &prm);
 

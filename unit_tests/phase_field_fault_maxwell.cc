@@ -12,7 +12,52 @@
 #include "common.h"
 
 #include <aspect/material_model/rheology/fault_friction.h>
+#include <aspect/material_model/phase_field_fault.h>
 #include <aspect/particle/property/maxwell_stress.h>
+#include <aspect/phase_field.h>
+
+namespace
+{
+  class TestPhaseFieldModel : public aspect::MaterialModel::PhaseFieldModel<2>
+  {
+    public:
+      std::vector<double> get_critical_crack_driving_forces() const override
+      {
+        return {1.0};
+      }
+
+      std::vector<double> get_critical_energy_release_rates() const override
+      {
+        return {1.0};
+      }
+  };
+}
+
+
+
+TEST_CASE("Phase-field physical and activation ranges are distinct")
+{
+  const TestPhaseFieldModel model;
+  REQUIRE(model.get_phase_field_range() == std::make_pair(0.0, 1.0));
+  REQUIRE(model.get_phase_field_activation_threshold() == 0.01);
+  REQUIRE(model.get_phase_field_upper_admissibility_threshold() == 0.99);
+}
+
+
+
+TEST_CASE("I_h distinguishes physical phase-field range from singular degradation")
+{
+  using TestAccess =
+    aspect::MaterialModel::internal::PhaseFieldFaultTestAccess<2>;
+
+  REQUIRE(TestAccess::normalization_integrand(0.0, 1.0) == 0.0);
+  REQUIRE_THROWS_WITH(TestAccess::normalization_integrand(1.0, 0.0),
+                      Catch::Matchers::Contains("I_h singularity"));
+  REQUIRE_THROWS_WITH(TestAccess::normalization_integrand(-1.e-6, 1.0),
+                      Catch::Matchers::Contains("phase-field invariant"));
+  REQUIRE_THROWS_WITH(TestAccess::normalization_integrand(1.0+1.e-6, 1.0),
+                      Catch::Matchers::Contains("phase-field invariant"));
+}
 
 
 
