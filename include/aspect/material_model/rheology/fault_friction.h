@@ -18,8 +18,8 @@
   <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _aspect_material_model_rheology_rate_state_friction_h
-#define _aspect_material_model_rheology_rate_state_friction_h
+#ifndef _aspect_material_model_rheology_fault_friction_h
+#define _aspect_material_model_rheology_fault_friction_h
 
 #include <aspect/global.h>
 #include <aspect/simulator_access.h>
@@ -31,9 +31,12 @@ namespace aspect
     namespace Rheology
     {
       template <int dim>
-      class RateStateFriction : public SimulatorAccess<dim>
+      class FaultFriction : public SimulatorAccess<dim>
       {
         public:
+          /** Return whether the selected fault-friction law owns state. */
+          bool has_state_variable() const;
+
           /**
            * Update the slip state $\theta$ using the aging law:
            * @f[
@@ -49,9 +52,9 @@ namespace aspect
            * $\theta^{\text{old}}$ is the slip state at the beginning of
            * the current time step.
            */
-          double slip_state (const double slip_rate,
-                             const double old_slip_state,
-                             const double time_step) const;
+          double update_state (const double slip_rate,
+                               const double old_state,
+                               const double time_step) const;
 
           /**
            * Compute the friction coefficient $mu$ at the end of the current 
@@ -104,6 +107,15 @@ namespace aspect
           parse_parameters (ParameterHandler &prm);
 
         private:
+          /** Fault-friction laws supported by the common selector. */
+          enum class FrictionLaw
+          {
+            rate_state,
+            rate_dependent
+          };
+
+          FrictionLaw friction_law = FrictionLaw::rate_state;
+
           double V0;
           double Vmin;
           double Vmax;
@@ -116,22 +128,31 @@ namespace aspect
 
       // Inline functions
       template <int dim>
+      inline bool
+      FaultFriction<dim>::has_state_variable() const
+      {
+        return friction_law == FrictionLaw::rate_state;
+      }
+
+
+
+      template <int dim>
       inline double 
-      RateStateFriction<dim>::get_reference_slip_rate() const
+      FaultFriction<dim>::get_reference_slip_rate() const
       {
         return V0;
       }
 
       template <int dim>
       inline double 
-      RateStateFriction<dim>::get_minimum_slip_rate() const
+      FaultFriction<dim>::get_minimum_slip_rate() const
       {
         return Vmin;
       }
 
       template <int dim>
       inline double
-      RateStateFriction<dim>::get_characteristic_slip_distance() const
+      FaultFriction<dim>::get_characteristic_slip_distance() const
       {
         return Dc;
       }

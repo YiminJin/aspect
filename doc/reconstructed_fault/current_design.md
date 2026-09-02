@@ -5,10 +5,12 @@
 
 ## Authority
 
-For reconstructed-fault development:
+For reconstructed-fault development, use this authority order:
 
-- This file takes precedence over `doc/reconstructed_fault/specification.tex` wherever the two conflict.
-- The LaTeX specification remains useful background material, but it is not authoritative until it is synchronized with this file.
+- `doc/reconstructed_fault/pf_rsf.tex` is authoritative for the continuum constitutive model.
+- `doc/reconstructed_fault/phase_field_fault_redesign.md` is authoritative for architecture, discretization, lifecycle, MPI design, and staged implementation.
+- This file records settled implementation decisions and is subordinate to those two authorities where they overlap.
+- `doc/reconstructed_fault/specification.tex` and older redesign notes remain useful background, but are superseded where they conflict with the authorities above.
 - The current source tree is authoritative for existing class names, APIs, and reusable ASPECT/deal.II infrastructure.
 - If this file conflicts with the current implementation in a way that affects architecture or scientific behavior, report the conflict rather than silently redesigning the method.
 
@@ -117,7 +119,7 @@ The following modules contain existing functionality that should be inspected an
 
 - `source/simulator/phase_field.cc`
 - `source/particle/particle_domain.cc`
-- `source/material_model/rheology/rate_state_friction.cc`
+- `source/material_model/rheology/fault_friction.cc`
 
 The current reconstructed-fault implementation should reuse existing authoritative APIs rather than introduce duplicate physical/numerical parameters.
 
@@ -128,8 +130,8 @@ In particular, inspect the existing phase-field interfaces for quantities such a
 Do not base the reconstructed-fault architecture on:
 
 - core-phase-field extension/reconstruction functions such as `PhaseField::extend_core_phase_field`;
-- `source/material_model/phase_field_rsf.cc`;
-- `source/particle/property/phase_field_rsf.cc`.
+- the deprecated `tmp/material_model/phase_field_rsf.cc` snapshot;
+- the deprecated `tmp/particle_property/phase_field_rsf.cc` snapshot.
 
 These belong to the previous phase-field RSF algorithm.
 
@@ -407,7 +409,7 @@ out-of-range component mappings are errors. Late particles interpolate the
 current particle history. Particle migration and checkpoint/restart use the
 existing particle infrastructure.
 
-`MaterialModel::PhaseFieldRSF` owns the non-rotational time-discrete Maxwell
+`MaterialModel::PhaseFieldFault` owns the non-rotational time-discrete Maxwell
 law
 
 \[

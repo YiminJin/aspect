@@ -10,7 +10,7 @@
 */
 
 #include <aspect/particle/property/maxwell_stress.h>
-#include <aspect/material_model/phase_field_rsf.h>
+#include <aspect/material_model/phase_field_fault.h>
 #include <aspect/initial_composition/interface.h>
 
 #include <algorithm>
@@ -25,10 +25,10 @@ namespace aspect
       void
       MaxwellStress<dim>::initialize()
       {
-        AssertThrow(dynamic_cast<const MaterialModel::PhaseFieldRSF<dim> *>(
+        AssertThrow(dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(
                       &this->get_material_model()) != nullptr,
                     ExcMessage("Particle property 'maxwell stress' can only be used with "
-                               "the 'phase field rsf' material model."));
+                               "the 'phase field fault' material model."));
         AssertThrow(this->get_parameters().mapped_particle_properties.size() > 0,
                     ExcMessage("Particle property 'maxwell stress' requires an explicit map "
                                "between particle-advected compositional fields and particle "

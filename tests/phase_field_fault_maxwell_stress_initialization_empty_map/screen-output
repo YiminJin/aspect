@@ -1,5 +1,5 @@
 
-Loading shared library <./libphase_field_rsf_maxwell_stress_initialization_empty_map.debug.so>
+Loading shared library <./libphase_field_fault_maxwell_stress_initialization_empty_map.debug.so>
 
 TimerOutput objects finalize timed values printed to the
 screen by communicating over MPI in their destructors.

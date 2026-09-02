@@ -52,8 +52,9 @@ subsection Initial composition model
 end
 
 subsection Material model
-  set Model name = phase field rsf
-  subsection Phase field RSF
+  set Model name = phase field fault
+  subsection Phase field fault
+    set Friction law                  = rate state
     set Maximum viscosity              = 1e31
     set Reference viscosities          = 1e30
     set Elastic shear moduli           = 1e10

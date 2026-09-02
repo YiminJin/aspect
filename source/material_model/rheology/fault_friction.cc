@@ -18,7 +18,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   <http://www.gnu.org/licenses/>.
 */
 
-#include <aspect/material_model/rheology/rate_state_friction.h>
+#include <aspect/material_model/rheology/fault_friction.h>
 #include <aspect/utilities.h>
 
 namespace aspect
@@ -29,10 +29,10 @@ namespace aspect
     {
       template <int dim>
       double
-      RateStateFriction<dim>::
-      slip_state(const double V_raw,
-                 const double theta_old,
-                 const double dt) const
+      FaultFriction<dim>::
+      update_state(const double V_raw,
+                   const double theta_old,
+                   const double dt) const
       {
         AssertThrow(theta_old > 0, ExcMessage("The slip state is non-positive."));
         AssertThrow(dt >= 0, ExcMessage("Time step is negative."));
@@ -46,7 +46,7 @@ namespace aspect
 
       template <int dim>
       double
-      RateStateFriction<dim>::
+      FaultFriction<dim>::
       friction_coefficient(const std::vector<double> &volume_fractions,
                            const double               V_raw,
                            const double               theta) const
@@ -76,7 +76,7 @@ namespace aspect
 
       template <int dim>
       double
-      RateStateFriction<dim>::
+      FaultFriction<dim>::
       friction_coefficient_derivative_wrt_slip_rate(const std::vector<double> &volume_fractions,
                                                     const double               V_raw,
                                                     const double               theta) const
@@ -110,7 +110,7 @@ namespace aspect
 
       template <int dim>
       double
-      RateStateFriction<dim>::
+      FaultFriction<dim>::
       compute_time_step(const std::vector<double> &volume_fractions,
                         const double               V_raw,
                         const double               cfl_number,
@@ -140,9 +140,13 @@ namespace aspect
 
       template <int dim>
       void
-      RateStateFriction<dim>::
+      FaultFriction<dim>::
       declare_parameters(ParameterHandler &prm)
       {
+        prm.declare_entry ("Friction law", "rate state",
+                           Patterns::Selection("rate state|rate dependent"),
+                           "Select the slip-rate-based fault friction law. The "
+                           "rate-dependent law is reserved for a later implementation stage.");
         prm.declare_entry ("Reference slip rate", "1.e-6",
                            Patterns::Double(0.),
                            "The reference slip rate, $V_0$. Units: \\si{\\meter\\per\\second}.");
@@ -183,9 +187,18 @@ namespace aspect
 
       template <int dim>
       void
-      RateStateFriction<dim>::
+      FaultFriction<dim>::
       parse_parameters (ParameterHandler &prm)
       {
+        const std::string friction_law_name = prm.get("Friction law");
+        friction_law = (friction_law_name == "rate state"
+                        ? FrictionLaw::rate_state
+                        : FrictionLaw::rate_dependent);
+
+        AssertThrow(friction_law == FrictionLaw::rate_state,
+                    ExcMessage("The 'rate dependent' fault friction law is reserved "
+                               "for Stage E and is not implemented yet."));
+
         V0   = prm.get_double("Reference slip rate");
         Vmin = prm.get_double("Minimum slip rate");
         Vmax = prm.get_double("Maximum slip rate");
@@ -229,7 +242,7 @@ namespace aspect
     namespace Rheology
     {
 #define INSTANTIATE(dim) \
-      template class RateStateFriction<dim>;
+      template class FaultFriction<dim>;
 
       ASPECT_INSTANTIATE(INSTANTIATE)
         

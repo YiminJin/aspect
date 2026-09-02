@@ -65,7 +65,7 @@ namespace aspect
           in.temperature[0] = 293.0;
           this->get_material_model().evaluate(in, out);
           AssertThrow(std::abs(out.viscosities[0] - 1.e4) < 1.e-8,
-                      ExcMessage("The PhaseFieldRSF effective Maxwell viscosity does not "
+                      ExcMessage("The PhaseFieldFault effective Maxwell viscosity does not "
                                  "preserve the small-exponent limit G*dt."));
 
           return {"Maxwell stress initialization:", "verified"};

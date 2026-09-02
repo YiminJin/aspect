@@ -11,6 +11,7 @@
 
 #include "common.h"
 
+#include <aspect/material_model/rheology/fault_friction.h>
 #include <aspect/particle/property/maxwell_stress.h>
 
 
@@ -30,4 +31,16 @@ TEST_CASE("MaxwellStress particle property has one symmetric tensor")
   REQUIRE(information_3d[0].first == "maxwell stress");
   REQUIRE(information_3d[0].second
           == dealii::SymmetricTensor<2,3>::n_independent_components);
+}
+
+
+
+TEST_CASE("FaultFriction defaults to the implemented rate-state law")
+{
+  aspect::MaterialModel::Rheology::FaultFriction<2> friction;
+  REQUIRE(friction.has_state_variable());
+
+  dealii::ParameterHandler parameters;
+  aspect::MaterialModel::Rheology::FaultFriction<2>::declare_parameters(parameters);
+  REQUIRE(parameters.get("Friction law") == "rate state");
 }

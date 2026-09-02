@@ -118,21 +118,23 @@ returns the physical measure of the particle domain.
 
 The module also provides particle-domain face/neighbour data and CPDI relevant-vertex weighting functions.  These may be reused for tasks for which they were designed, but the CPDI weighting functions are bulk-grid transfer weights and are \emph{not} the shape functions of the reconstructed fault.  Therefore \texttt{weighting\_function\_value()} and \texttt{weighting\_function\_gradient()} shall not replace the fault Q1 basis $N_a(\boldsymbol\xi_\Gamma)$ in the particle-to-fault projection.
 
-\subsection{Rate-and-state friction rheology}
+\subsection{Fault friction rheology}
 The authoritative implementation is
 \begin{center}
-\texttt{include/aspect/material\_model/rheology/rate\_state\_friction.h},\qquad
-\texttt{source/material\_model/rheology/rate\_state\_friction.cc}.
+\texttt{include/aspect/material\_model/rheology/fault\_friction.h},\qquad
+\texttt{source/material\_model/rheology/fault\_friction.cc}.
 \end{center}
 The class is
 \begin{center}
-\texttt{MaterialModel::Rheology::RateStateFriction<dim>}.
+\texttt{MaterialModel::Rheology::FaultFriction<dim>}.
 \end{center}
-(Notice that the repository filename is \texttt{rate\_state\_friction.cc}; the earlier spelling \texttt{friciton} is a typo.)
+It selects a reconstructed-fault slip-rate-based friction law.  The current
+implemented branch is rate-and-state friction; the rate-dependent branch is
+reserved for a later stage.
 
 \textbf{MUST reuse:} the reconstructed-fault constitutive model shall use the existing RSF implementation for at least
 \begin{itemize}
-  \item \texttt{slip\_state(V, theta\_old, dt)};
+  \item \texttt{update\_state(V, theta\_old, dt)};
   \item \texttt{friction\_coefficient(volume\_fractions, V, theta)};
   \item \texttt{friction\_coefficient\_derivative\_wrt\_slip\_rate(...)};
   \item \texttt{compute\_time\_step(...)};
@@ -144,7 +146,7 @@ The new reconstructed-fault model shall not duplicate these formulas or define a
 \subsection{Original phase-field-RSF material model: reference only}
 The file
 \begin{center}
-\texttt{source/material\_model/phase\_field\_rsf.cc}
+\texttt{tmp/material\_model/phase\_field\_rsf.cc}
 \end{center}
 implements the abandoned diffuse/core-phase-field RSF architecture.  \textbf{MUST NOT use as an architectural base class or data-ownership model.}  In particular, the new implementation shall not copy its dependencies on the core phase field, particle-stored normal/slip directions, or the old diffuse slip-localization factor.
 
@@ -155,7 +157,7 @@ The current signal timing is also a useful reference: the old model performs ret
 \subsection{Original phase-field-RSF particle property: do not use as state layout}
 The file
 \begin{center}
-\texttt{source/particle/property/phase\_field\_rsf.cc}
+\texttt{tmp/particle\_property/phase\_field\_rsf.cc}
 \end{center}
 is specific to the failed diffuse-fault algorithm.  It currently defines particle properties including \texttt{slip\_rate}, \texttt{slip\_state}, \texttt{normal\_direction}, and \texttt{slip\_direction}.  \textbf{MUST NOT use this layout as the authoritative state layout for the reconstructed fault.}  In the new formulation, fault state and fault geometry live on the reconstructed codimension-one fault according to this specification.
 

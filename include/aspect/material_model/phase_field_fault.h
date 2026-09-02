@@ -18,22 +18,22 @@
   <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _aspect_material_model_phase_field_rsf_h
-#define _aspect_material_model_phase_field_rsf_h
+#ifndef _aspect_material_model_phase_field_fault_h
+#define _aspect_material_model_phase_field_fault_h
 
 #include <aspect/simulator_access.h>
 #include <aspect/phase_field.h>
 #include <aspect/solution_evaluator.h>
 #include <aspect/material_model/interface.h>
 #include <aspect/material_model/equation_of_state/multicomponent_incompressible.h>
-#include <aspect/material_model/rheology/rate_state_friction.h>
+#include <aspect/material_model/rheology/fault_friction.h>
 
 namespace aspect
 {
   namespace MaterialModel
   {
     template <int dim>
-    class PhaseFieldRSF : public Interface<dim>,
+    class PhaseFieldFault : public Interface<dim>,
       public PhaseFieldModel<dim>,
       public SimulatorAccess<dim>
     {
@@ -90,7 +90,7 @@ namespace aspect
 
         EquationOfState::MulticomponentIncompressible<dim> equation_of_state;
 
-        Rheology::RateStateFriction<dim> rsf_rheology;
+        Rheology::FaultFriction<dim> fault_friction;
 
         MaterialUtilities::CompositionalAveragingOperation viscosity_averaging;
 

@@ -55,8 +55,9 @@ subsection Boundary temperature model
 end
 
 subsection Material model
-  set Model name = phase field rsf
-  subsection Phase field RSF
+  set Model name = phase field fault
+  subsection Phase field fault
+    set Friction law                  = rate state
     set Evolve phase field             = false
     set Reference viscosities          = 1e21
     set Elastic shear moduli           = 1e10

@@ -1,1 +1,0 @@
-#include "phase_field_rsf_maxwell_stress_initialization.cc"

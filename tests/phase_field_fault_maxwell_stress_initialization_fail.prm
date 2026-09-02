@@ -1,7 +1,7 @@
 # Verify the diagnostic for an incomplete MaxwellStress component mapping.
 # EXPECT FAILURE
 
-include $ASPECT_SOURCE_DIR/tests/phase_field_rsf_maxwell_stress_initialization.prm
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_maxwell_stress_initialization.prm
 
 subsection Compositional fields
   set Mapped particle properties = tau_xx:maxwell stress[0], tau_yy:maxwell stress[1], tau_xy:position[0]

@@ -18,7 +18,7 @@
   <http://www.gnu.org/licenses/>.
 */
 
-#include <aspect/material_model/phase_field_rsf.h>
+#include <aspect/material_model/phase_field_fault.h>
 #include <aspect/phase_field.h>
 #include <aspect/particle/manager.h>
 #include <aspect/newton.h>
@@ -34,8 +34,8 @@ namespace aspect
   namespace MaterialModel
   {
     template <int dim>
-    typename PhaseFieldRSF<dim>::MaxwellCoefficients
-    PhaseFieldRSF<dim>::
+    typename PhaseFieldFault<dim>::MaxwellCoefficients
+    PhaseFieldFault<dim>::
     compute_maxwell_coefficients(const double viscosity,
                                  const double shear_modulus,
                                  const double time_step)
@@ -63,7 +63,7 @@ namespace aspect
 
     template <int dim>
     SymmetricTensor<2,dim>
-    PhaseFieldRSF<dim>::
+    PhaseFieldFault<dim>::
     compute_maxwell_stress(
       const MaxwellCoefficients &coefficients,
       const SymmetricTensor<2,dim> &effective_bulk_strain_rate,
@@ -80,7 +80,7 @@ namespace aspect
 
     template <int dim>
     void
-    PhaseFieldRSF<dim>::
+    PhaseFieldFault<dim>::
     evaluate(const MaterialModel::MaterialModelInputs<dim> &in,
              MaterialModel::MaterialModelOutputs<dim> &out) const
     {
@@ -121,7 +121,7 @@ namespace aspect
 
 
     template <int dim>
-    bool PhaseFieldRSF<dim>::is_compressible() const
+    bool PhaseFieldFault<dim>::is_compressible() const
     {
       return equation_of_state.is_compressible();
     }
@@ -130,7 +130,7 @@ namespace aspect
 
     template <int dim>
     std::vector<double>
-    PhaseFieldRSF<dim>::get_critical_crack_driving_forces() const
+    PhaseFieldFault<dim>::get_critical_crack_driving_forces() const
     {
       const unsigned int n_comp = elastic_shear_moduli.size();
       std::vector<double> critical_crack_driving_forces(n_comp);
@@ -144,7 +144,7 @@ namespace aspect
     
     template <int dim>
     std::vector<double>
-    PhaseFieldRSF<dim>::get_critical_energy_release_rates() const
+    PhaseFieldFault<dim>::get_critical_energy_release_rates() const
     {
       return critical_energy_release_rates;
     }
@@ -153,7 +153,7 @@ namespace aspect
 
     template <int dim>
     std::pair<double, double>
-    PhaseFieldRSF<dim>::get_phase_field_range() const
+    PhaseFieldFault<dim>::get_phase_field_range() const
     {
       return std::make_pair(phase_field_activation_threshold, 0.99);
     }
@@ -162,7 +162,7 @@ namespace aspect
 
     template <int dim>
     double
-    PhaseFieldRSF<dim>::
+    PhaseFieldFault<dim>::
     calculate_creep_viscosity(const std::vector<double> &volume_fractions,
                               const double               temperature) const
     {
@@ -181,14 +181,14 @@ namespace aspect
 
     template <int dim>
     void
-    PhaseFieldRSF<dim>::declare_parameters(ParameterHandler &prm)
+    PhaseFieldFault<dim>::declare_parameters(ParameterHandler &prm)
     {
       prm.enter_subsection("Material model");
       {
-        prm.enter_subsection("Phase field RSF");
+        prm.enter_subsection("Phase field fault");
         {
           EquationOfState::MulticomponentIncompressible<dim>::declare_parameters(prm);
-          Rheology::RateStateFriction<dim>::declare_parameters(prm);
+          Rheology::FaultFriction<dim>::declare_parameters(prm);
 
           // Equation of state parameters
           prm.declare_entry("Thermal conductivities", "3.0",
@@ -327,19 +327,19 @@ namespace aspect
 
     template <int dim>
     void
-    PhaseFieldRSF<dim>::parse_parameters(ParameterHandler &prm)
+    PhaseFieldFault<dim>::parse_parameters(ParameterHandler &prm)
     {
       prm.enter_subsection("Material model");
       {
-        prm.enter_subsection("Phase field RSF");
+        prm.enter_subsection("Phase field fault");
         {
           // Equation of state parameters
           equation_of_state.initialize_simulator(this->get_simulator());
           equation_of_state.parse_parameters(prm);
 
-          // RSF parameters
-          rsf_rheology.initialize_simulator(this->get_simulator());
-          rsf_rheology.parse_parameters(prm);
+          // Fault-friction parameters
+          fault_friction.initialize_simulator(this->get_simulator());
+          fault_friction.parse_parameters(prm);
 
           // Reference and minimum/maximum values
           reference_temperature = prm.get_double("Reference temperature");
@@ -382,22 +382,22 @@ namespace aspect
           elastic_shear_moduli = Utilities::MapParsing::parse_map_to_double_array(prm.get("Elastic shear moduli"), options);
 
           AssertThrow(numbers::is_finite(minimum_viscosity) && minimum_viscosity > 0.0,
-                      ExcMessage("The minimum viscosity of the phase field RSF material model "
+                      ExcMessage("The minimum viscosity of the phase field fault material model "
                                  "must be finite and positive."));
           AssertThrow(numbers::is_finite(maximum_viscosity)
                       && maximum_viscosity >= minimum_viscosity,
-                      ExcMessage("The maximum viscosity of the phase field RSF material model "
+                      ExcMessage("The maximum viscosity of the phase field fault material model "
                                  "must be finite and no smaller than the minimum viscosity."));
           AssertThrow(numbers::is_finite(initial_time_step) && initial_time_step > 0.0,
-                      ExcMessage("The initial time step of the phase field RSF material model "
+                      ExcMessage("The initial time step of the phase field fault material model "
                                  "must be finite and positive."));
           for (const double viscosity : reference_viscosities)
             AssertThrow(numbers::is_finite(viscosity) && viscosity > 0.0,
-                        ExcMessage("Every reference viscosity of the phase field RSF material "
+                        ExcMessage("Every reference viscosity of the phase field fault material "
                                    "model must be finite and positive."));
           for (const double shear_modulus : elastic_shear_moduli)
             AssertThrow(numbers::is_finite(shear_modulus) && shear_modulus > 0.0,
-                        ExcMessage("Every elastic shear modulus of the phase field RSF material "
+                        ExcMessage("Every elastic shear modulus of the phase field fault material "
                                    "model must be finite and positive."));
 
           options.property_name = "Cohesions";
@@ -424,8 +424,8 @@ namespace aspect
 {
 namespace MaterialModel
   {
-    ASPECT_REGISTER_MATERIAL_MODEL(PhaseFieldRSF,
-                                   "phase field rsf",
+    ASPECT_REGISTER_MATERIAL_MODEL(PhaseFieldFault,
+                                   "phase field fault",
                                    "")
   }
 }

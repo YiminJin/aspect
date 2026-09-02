@@ -1,5 +1,5 @@
 
-Loading shared library <./libphase_field_rsf_maxwell_stress_initialization.debug.so>
+Loading shared library <./libphase_field_fault_maxwell_stress_initialization.debug.so>
 
 Number of active cells: 1 (on 1 levels)
 Number of degrees of freedom: 58 (18+4+9+9+9+9)
@@ -16,3 +16,4 @@ Termination requested by criterion: end time
 
 
 
+-- preserve trailing blank line during patch application

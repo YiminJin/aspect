@@ -1,0 +1,11 @@
+# Verify that selecting the Stage E rate-dependent friction law fails rather
+# than silently using rate-and-state behavior.
+# EXPECT FAILURE
+
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_maxwell_stress_initialization.prm
+
+subsection Material model
+  subsection Phase field fault
+    set Friction law = rate dependent
+  end
+end
