@@ -193,6 +193,44 @@ namespace aspect
 
     template <int dim>
     double
+    PhaseFieldFault<dim>::normalization_effective_phase_field(
+      const double raw_phase_field,
+      const std::string &context)
+    {
+      AssertThrow(std::isfinite(raw_phase_field) && raw_phase_field <= 1.0,
+                  ExcMessage("Internal phase-field invariant violation during I_h evaluation: "
+                             "the raw physical phase field must be finite and no greater than "
+                             "one, but phi_h=" + Utilities::to_string(raw_phase_field)
+                             + " at " + context + ". The upper phase-field bound is not clipped."));
+      return std::max(raw_phase_field, 0.0);
+    }
+
+
+
+    template <int dim>
+    void
+    PhaseFieldFault<dim>::validate_normalization_phase_field_minimum(
+      const double minimum_raw_phase_field,
+      const std::string &context)
+    {
+      AssertThrow(std::isfinite(minimum_raw_phase_field)
+                  && minimum_raw_phase_field
+                     >= -normalization_phase_field_undershoot_tolerance,
+                  ExcMessage("I_h phase-field undershoot exceeds the numerical tolerance: "
+                             "minimum raw phi_h="
+                             + Utilities::to_string(minimum_raw_phase_field)
+                             + ", tolerance="
+                             + Utilities::to_string(
+                                 normalization_phase_field_undershoot_tolerance)
+                             + " at " + context
+                             + ". Bounded negative samples are evaluated with "
+                               "phi_eff=max(phi_h,0); the activation threshold is not used."));
+    }
+
+
+
+    template <int dim>
+    double
     PhaseFieldFault<dim>::normalization_integrand(
       const double phase_field,
       const double degradation,
@@ -202,7 +240,7 @@ namespace aspect
                   && phase_field >= 0.0
                   && phase_field <= 1.0,
                   ExcMessage("Internal phase-field invariant violation during I_h evaluation: "
-                             "the physical phase field must be finite and in [0,1], but phi="
+                             "the effective phase field must be finite and in [0,1], but phi_eff="
                              + Utilities::to_string(phase_field) + " at " + context + "."));
       AssertThrow(std::isfinite(degradation) && degradation > 0.0,
                   ExcMessage("I_h singularity at " + context + ": phi="
@@ -234,6 +272,8 @@ namespace aspect
       const std::vector<ReconstructedFault<dim>> &faults = fault_manager.get_faults();
       current_normalization_integrals.clear();
       current_normalization_integrals.resize(faults.size());
+      current_minimum_raw_normalization_phase_field =
+        numbers::signaling_nan<double>();
       if (faults.empty())
         return;
 
@@ -473,6 +513,8 @@ namespace aspect
                + (side == 0 ? 1.0 : -1.0) * zeta * profile.normal;
       };
 
+      double local_minimum_raw_phase_field = std::numeric_limits<double>::max();
+      std::string local_minimum_raw_phase_field_context;
       const auto integrand =
         [&](const ProfileState &profile,
             const unsigned int side,
@@ -489,8 +531,6 @@ namespace aspect
                                  + Utilities::int_to_string(projection.fault_index)
                                  + " before its local tail terminated."));
 
-          const double degradation = phase_field_handler.energetic_degradation(
-            profile.material_fractions, sample.phase_field);
           const std::string context =
             "fault " + Utilities::int_to_string(profile.fault_index)
             + ", segment " + Utilities::int_to_string(profile.segment_index)
@@ -499,7 +539,16 @@ namespace aspect
             + ", zeta=" + Utilities::to_string(zeta)
             + ", point=(" + Utilities::to_string(point[0])
             + "," + Utilities::to_string(point[1]) + ")";
-          return this->normalization_integrand(sample.phase_field, degradation, context);
+          if (sample.phase_field < local_minimum_raw_phase_field)
+            {
+              local_minimum_raw_phase_field = sample.phase_field;
+              local_minimum_raw_phase_field_context = context;
+            }
+          const double effective_phase_field =
+            this->normalization_effective_phase_field(sample.phase_field, context);
+          const double degradation = phase_field_handler.energetic_degradation(
+            profile.material_fractions, effective_phase_field);
+          return this->normalization_integrand(effective_phase_field, degradation, context);
         };
 
       while (true)
@@ -687,6 +736,21 @@ namespace aspect
                 }
             }
         }
+
+      current_minimum_raw_normalization_phase_field = Utilities::MPI::min(
+        local_minimum_raw_phase_field, this->get_mpi_communicator());
+      const unsigned int minimum_rank = Utilities::MPI::min(
+        local_minimum_raw_phase_field
+          == current_minimum_raw_normalization_phase_field
+        ? mpi_rank
+        : n_mpi_processes,
+        this->get_mpi_communicator());
+      AssertIndexRange(minimum_rank, n_mpi_processes);
+      const std::string minimum_context = Utilities::MPI::broadcast(
+        this->get_mpi_communicator(), local_minimum_raw_phase_field_context,
+        minimum_rank);
+      validate_normalization_phase_field_minimum(
+        current_minimum_raw_normalization_phase_field, minimum_context);
 
       struct FaultSystem
       {

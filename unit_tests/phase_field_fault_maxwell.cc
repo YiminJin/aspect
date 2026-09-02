@@ -50,12 +50,19 @@ TEST_CASE("I_h distinguishes physical phase-field range from singular degradatio
   using TestAccess =
     aspect::MaterialModel::internal::PhaseFieldFaultTestAccess<2>;
 
+  const double tolerance =
+    TestAccess::normalization_phase_field_undershoot_tolerance();
+  REQUIRE(TestAccess::normalization_effective_phase_field(-0.5*tolerance) == 0.0);
+  REQUIRE(TestAccess::normalization_effective_phase_field(0.25) == 0.25);
+  REQUIRE(TestAccess::normalization_effective_phase_field(1.0) == 1.0);
+  REQUIRE_NOTHROW(TestAccess::validate_normalization_phase_field_minimum(-tolerance));
+  REQUIRE_THROWS_WITH(
+    TestAccess::validate_normalization_phase_field_minimum(-2.0*tolerance),
+    Catch::Matchers::Contains("undershoot exceeds the numerical tolerance"));
   REQUIRE(TestAccess::normalization_integrand(0.0, 1.0) == 0.0);
   REQUIRE_THROWS_WITH(TestAccess::normalization_integrand(1.0, 0.0),
                       Catch::Matchers::Contains("I_h singularity"));
-  REQUIRE_THROWS_WITH(TestAccess::normalization_integrand(-1.e-6, 1.0),
-                      Catch::Matchers::Contains("phase-field invariant"));
-  REQUIRE_THROWS_WITH(TestAccess::normalization_integrand(1.0+1.e-6, 1.0),
+  REQUIRE_THROWS_WITH(TestAccess::normalization_effective_phase_field(1.0+1.e-6),
                       Catch::Matchers::Contains("phase-field invariant"));
 }
 

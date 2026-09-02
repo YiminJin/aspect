@@ -102,11 +102,27 @@ namespace aspect
         void
         compute_normalization_integrals();
 
-        /** Validate one sampled phase field/degradation pair and return h. */
+        /**
+         * Return the phase field used to evaluate degradation for I_h.
+         * Negative numerical undershoots are mapped to zero. Finite values
+         * above the physical upper bound are rejected without clipping.
+         */
+        static double
+        normalization_effective_phase_field(const double raw_phase_field,
+                                            const std::string &context);
+
+        /** Validate the global minimum raw I_h sample against its tolerance. */
+        static void
+        validate_normalization_phase_field_minimum(const double minimum_raw_phase_field,
+                                                   const std::string &context);
+
+        /** Validate one effective phase field/degradation pair and return h. */
         static double
         normalization_integrand(const double phase_field,
                                 const double degradation,
                                 const std::string &context);
+
+        static constexpr double normalization_phase_field_undershoot_tolerance = 1.e-4;
 
         double 
         calculate_creep_viscosity(const std::vector<double> &volume_fractions,
@@ -156,6 +172,9 @@ namespace aspect
 
         std::vector<std::vector<double>> current_normalization_integrals;
 
+        double current_minimum_raw_normalization_phase_field =
+          numbers::signaling_nan<double>();
+
         std::unique_ptr<SolutionEvaluator<dim>> solution_evaluator;
     };
 
@@ -171,6 +190,37 @@ namespace aspect
           {
             model.compute_normalization_integrals();
             return model.current_normalization_integrals;
+          }
+
+          static double
+          current_minimum_raw_normalization_phase_field(
+            const PhaseFieldFault<dim> &model)
+          {
+            return model.current_minimum_raw_normalization_phase_field;
+          }
+
+          static double
+          normalization_effective_phase_field(
+            const double raw_phase_field,
+            const std::string &context = "test profile")
+          {
+            return PhaseFieldFault<dim>::normalization_effective_phase_field(
+              raw_phase_field, context);
+          }
+
+          static void
+          validate_normalization_phase_field_minimum(
+            const double minimum_raw_phase_field,
+            const std::string &context = "test profile")
+          {
+            PhaseFieldFault<dim>::validate_normalization_phase_field_minimum(
+              minimum_raw_phase_field, context);
+          }
+
+          static constexpr double
+          normalization_phase_field_undershoot_tolerance()
+          {
+            return PhaseFieldFault<dim>::normalization_phase_field_undershoot_tolerance;
           }
 
           static double

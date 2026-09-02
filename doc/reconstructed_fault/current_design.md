@@ -475,9 +475,21 @@ threshold does not truncate the profile and no monotonic tail is required.
 The completed quadrature-point integrals are projected to replicated fault
 vertices with the consistent Q1 mass matrix.
 
-Every sampled phase field must be finite and in the physical range `[0,1]`.
-The tail may reach exactly zero. Positivity of \(\bar g\) is a separate
-constitutive requirement: \(\bar g=0\), including a possible \(\phi=1\) case,
-is reported explicitly as an `I_h` singularity rather than a phase-field range
-violation. Current \(I_h\) is private transient material-model data in this
-stage and is not connected to the mechanical solve.
+The physical lower bound is zero, but the unconstrained Q1 solve may produce a
+small negative numerical undershoot. For `I_h` only, degradation is evaluated
+at
+
+\[
+\phi_{\mathrm{eff}}=\max(\phi_h,0).
+\]
+
+The activation threshold is not used for this clamp. The minimum raw sampled
+phase field is tracked across all profiles and MPI ranks. The initial
+conservative dimensionless undershoot tolerance is \(10^{-4}\); a global
+minimum below \(-10^{-4}\) is an invariant failure that reports the raw value,
+tolerance, and sample location. All raw samples must be finite. No analogous
+upper clipping is permitted: a raw value above one is an invariant failure,
+while \(\bar g=0\), including a possible \(\phi=1\) case, is reported explicitly
+as an `I_h` singularity rather than a phase-field range violation. A tail value
+\(\phi_h=0\) is admissible. Current \(I_h\) is private transient material-model
+data in this stage and is not connected to the mechanical solve.

@@ -569,11 +569,23 @@ samples. This model requires material transitions to have characteristic width
 $L_{\rm mat}\gg\ell$; transitions on the diffuse-fault scale or narrower are
 outside its applicability.
 
-The physical phase field at every sample must be finite and lie in $[0,1]$.
-A tail value $\phi=0$ is admissible. The independent constitutive condition is
-$\bar g>0$; $\bar g=0$, including a possible $\phi=1$ singularity, shall be
-reported explicitly as an $I_h$ singularity and shall not be classified as a
-phase-field range violation.
+The physical lower bound is zero, but the unconstrained Q1 phase-field solve
+may produce a small negative numerical undershoot. For $I_h$ only, the
+degradation function shall therefore be evaluated using
+\[
+\phi_{\mathrm{eff}}=\max(\phi_h,0).
+\]
+The activation threshold shall not be used as this clamp. The minimum raw
+sampled phase field shall be tracked across all profiles and MPI ranks. The
+initial conservative dimensionless undershoot tolerance is $10^{-4}$; a
+global minimum below $-10^{-4}$ shall fail with diagnostics giving the raw
+minimum, the tolerance, and the sample location. Every raw sample must be
+finite. The upper end shall not be clipped: a raw value above one is an
+invariant failure, while the independent constitutive condition $\bar g>0$
+remains authoritative. Thus $\bar g=0$, including a possible $\phi=1$
+singularity, shall be reported explicitly as an $I_h$ singularity and shall
+not be classified as a phase-field range violation. A tail value $\phi_h=0$
+is admissible.
 
 \section{Particle-to-fault projection}
 

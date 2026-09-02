@@ -32,6 +32,12 @@ namespace aspect
           const auto &normalizations =
             MaterialModel::internal::PhaseFieldFaultTestAccess<dim>
               ::compute_normalization_integrals(model);
+          const double minimum_raw_phase_field =
+            MaterialModel::internal::PhaseFieldFaultTestAccess<dim>
+              ::current_minimum_raw_normalization_phase_field(model);
+          AssertThrow(std::isfinite(minimum_raw_phase_field)
+                      && minimum_raw_phase_field < 0.0,
+                      ExcMessage("Stage C did not exercise a negative raw phase-field sample."));
 
           unsigned int n_values = 0;
           double minimum = std::numeric_limits<double>::max();

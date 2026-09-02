@@ -59,6 +59,7 @@ subsection Material model
   set Model name = phase field fault
   subsection Phase field fault
     set Evolve phase field             = false
+    set Phase field activation threshold = 1e-6
     set Reference viscosities          = 1e21, 1e21
     set Elastic shear moduli           = 1e10, 1e10
     set Cohesions                      = 1e5, 2e5
@@ -68,7 +69,7 @@ subsection Material model
 end
 
 subsection Phase field model
-  set Length scale                    = 0.05
+  set Length scale                    = 0.15625
   set Geometric function type         = AT1
   set Degradation curvature parameter = 1
 end
@@ -80,7 +81,7 @@ subsection Fault reconstruction
 end
 
 subsection Mesh refinement
-  set Initial global refinement          = 4
+  set Initial global refinement          = 6
   set Initial adaptive refinement        = 0
   set Time steps between mesh refinement = 0
 end
