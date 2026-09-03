@@ -16,6 +16,8 @@
 #include <aspect/particle/property/maxwell_stress.h>
 #include <aspect/phase_field.h>
 
+#include "../tests/phase_field_fault_test_access.h"
+
 namespace
 {
   class TestPhaseFieldModel : public aspect::MaterialModel::PhaseFieldModel<2>

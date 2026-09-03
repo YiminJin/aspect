@@ -10,6 +10,8 @@
 */
 
 #include <aspect/material_model/phase_field_fault.h>
+
+#include "phase_field_fault_test_access.h"
 #include <aspect/material_model/utilities.h>
 #include <aspect/particle/manager.h>
 #include <aspect/postprocess/interface.h>
@@ -34,6 +36,51 @@ namespace aspect
             &this->get_material_model());
           AssertThrow(const_model != nullptr, ExcInternalError());
           auto &model = const_cast<MaterialModel::PhaseFieldFault<dim> &>(*const_model);
+          auto &fault_manager = this->get_reconstructed_fault_manager();
+          const unsigned int cohesive_property = fault_manager.get_property_index(
+            "phase field fault cohesive traction");
+          const unsigned int cohesive_position =
+            fault_manager.get_property_information()[cohesive_property].position;
+
+          std::vector<std::vector<double>> stored_cohesive_values(
+            fault_manager.get_faults().size());
+          for (unsigned int fault = 0; fault < fault_manager.get_faults().size(); ++fault)
+            {
+              stored_cohesive_values[fault].resize(
+                fault_manager.get_fault(fault).n_vertices());
+              for (unsigned int vertex = 0;
+                   vertex < fault_manager.get_fault(fault).n_vertices(); ++vertex)
+                {
+                  stored_cohesive_values[fault][vertex] =
+                    fault_manager.get_fault(fault).get_properties(vertex)[cohesive_position];
+                  fault_manager.get_fault(fault).get_properties(vertex)[cohesive_position] =
+                    numbers::signaling_nan<double>();
+                }
+            }
+
+          std::string uninitialized_interpolation_error;
+          try
+            {
+              fault_manager.interpolate_property_at_particle_projections(
+                cohesive_property);
+            }
+          catch (const std::exception &exception)
+            {
+              uninitialized_interpolation_error = exception.what();
+            }
+          for (unsigned int fault = 0; fault < fault_manager.get_faults().size(); ++fault)
+            for (unsigned int vertex = 0;
+                 vertex < fault_manager.get_fault(fault).n_vertices(); ++vertex)
+              fault_manager.get_fault(fault).get_properties(vertex)[cohesive_position] =
+                stored_cohesive_values[fault][vertex];
+          AssertThrow(uninitialized_interpolation_error.find(
+                        "is uninitialized") != std::string::npos
+                      && uninitialized_interpolation_error.find(
+                           "phase field fault cohesive traction") != std::string::npos,
+                      ExcMessage("Generic fault-property interpolation did not reject its "
+                                 "uninitialized sentinel before arithmetic. Observed error: "
+                                 + uninitialized_interpolation_error));
+
           MaterialModel::internal::PhaseFieldFaultTestAccess<dim>
             ::initialize_cohesive_state_from_initial_fields(model);
           const auto &normalizations =
@@ -64,13 +111,8 @@ namespace aspect
               }
           AssertThrow(n_values > 0, ExcMessage("Stage C produced no nodal I_h values."));
 
-          auto &fault_manager = this->get_reconstructed_fault_manager();
-          const unsigned int cohesive_property = fault_manager.get_property_index(
-            "phase field fault cohesive traction");
           const unsigned int previous_I_h_property = fault_manager.get_property_index(
             "phase field fault previous I h");
-          const unsigned int cohesive_position =
-            fault_manager.get_property_information()[cohesive_property].position;
           const unsigned int previous_I_h_position =
             fault_manager.get_property_information()[previous_I_h_property].position;
           for (unsigned int fault = 0; fault < fault_manager.get_faults().size(); ++fault)
@@ -272,7 +314,8 @@ namespace aspect
                                   "verify phase field fault I h",
                                   "Run a lifecycle smoke test of the private Stage C distributed "
                                   "I_h evaluator, Stage D cohesive initialization, and the "
-                                  "profile-uniform surface-mixture invariant for initial q. "
+                                  "profile-uniform surface-mixture invariant for initial q. It "
+                                  "also verifies sentinel-safe generic-property interpolation. "
                                   "Fault reconstruction accuracy is not tested.")
   }
 }

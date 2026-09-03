@@ -28,3 +28,10 @@ For every task related to reconstructed-fault development:
     existing interface.
 12. Run relevant non-destructive tests after implementation and report
     what was and was not tested.
+13. Follow:
+`       doc/reconstructed_fault/refactoring.md`
+    for code-quality, assertion/validation, readability, and
+    responsibility-boundary guidelines. Prefer straightforward scientific
+    C++ whose structure follows the mathematical algorithm. Do not
+    introduce additional abstraction merely to reduce line count or
+    eliminate small amounts of duplication.

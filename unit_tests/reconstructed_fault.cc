@@ -44,8 +44,10 @@ TEST_CASE("ReconstructedFault empty geometry")
   REQUIRE(fault.n_cells() == 0);
   REQUIRE(fault.get_vertices().empty());
   REQUIRE(fault.geometry_version() == 0);
+#ifndef NDEBUG
   const ThrowOnDealIIException throw_on_dealii_exception;
   REQUIRE_THROWS(fault.vertex(0));
+#endif
 }
 
 
@@ -66,8 +68,10 @@ TEST_CASE("ReconstructedFault construction and ordered access")
   REQUIRE(fault.get_vertices() == vertices);
   REQUIRE(fault.vertex(0) == vertices[0]);
   REQUIRE(fault.vertex(2) == vertices[2]);
+#ifndef NDEBUG
   const ThrowOnDealIIException throw_on_dealii_exception;
   REQUIRE_THROWS(fault.vertex(3));
+#endif
 }
 
 
@@ -92,6 +96,15 @@ TEST_CASE("ReconstructedFault append-only updates")
   REQUIRE(fault.vertex(2) == third);
 
   fault.append_vertices({});
+  REQUIRE(fault.n_vertices() == 3);
+  REQUIRE(fault.geometry_version() == 2);
+
+  const ThrowOnDealIIException throw_on_dealii_exception;
+  REQUIRE_THROWS(fault.append_vertex(third));
+  REQUIRE_THROWS(fault.append_vertex(
+    dealii::Point<2>(std::numeric_limits<double>::infinity(), 0.0)));
+  REQUIRE_THROWS(fault.append_vertices(
+    {dealii::Point<2>(4,0), dealii::Point<2>(4,0)}));
   REQUIRE(fault.n_vertices() == 3);
   REQUIRE(fault.geometry_version() == 2);
 }
@@ -121,6 +134,17 @@ TEST_CASE("ReconstructedFaultManager owns the shared vertex property schema")
   REQUIRE_THROWS(manager.register_property("scalar", 1));
   REQUIRE_THROWS(manager.register_property("slip_rate", 1));
   REQUIRE_THROWS(manager.get_property_index("missing"));
+
+  manager.add_reconstructed_fault({dealii::Point<2>(0,0), dealii::Point<2>(1,0)},
+                                  {0.5, 0.5});
+  REQUIRE_THROWS(manager.add_reconstructed_fault(
+    {dealii::Point<2>(0,0), dealii::Point<2>(0,0)}, {0.5, 0.5}));
+  REQUIRE_THROWS(manager.add_reconstructed_fault(
+    {dealii::Point<2>(0,0), dealii::Point<2>(1,0)}, {0.5}));
+  const unsigned int scalar_position = manager.get_property_information()[scalar].position;
+  REQUIRE_FALSE(manager.get_fault(0).property_value_is_initialized(0, scalar_position));
+  manager.get_fault(0).get_properties(0)[scalar_position] = 3.0;
+  REQUIRE(manager.get_fault(0).property_value_is_initialized(0, scalar_position));
 }
 
 
@@ -177,10 +201,12 @@ TEST_CASE("ReconstructedFaultManager slip-rate lifecycle and interpolation")
   REQUIRE(manager.get_slip_rate(0)[0] == Approx(1.5));
   REQUIRE(manager.get_timestep_committed_slip_rate(0)[0] == Approx(1.5));
 
+#ifndef NDEBUG
   const ThrowOnDealIIException throw_on_dealii_exception;
   REQUIRE_THROWS(manager.initialize_slip_rate(0, {1.0, 2.0, 3.0}));
   REQUIRE_THROWS(manager.interpolate_slip_rate(0, 0, 1.1));
   REQUIRE_THROWS(manager.set_slip_rate_trial({{0.0, 0.0, 0.0}}, 1.0));
+#endif
 }
 
 
@@ -190,17 +216,23 @@ TEST_CASE("ReconstructedFaultManager validates slip-rate initialization")
   manager.add_reconstructed_fault({dealii::Point<2>(0,0), dealii::Point<2>(1,0)},
                                   {0.5, 0.5});
   const ThrowOnDealIIException throw_on_dealii_exception;
+#ifndef NDEBUG
   REQUIRE_THROWS(manager.initialize_slip_rate(0, {1.0}));
+#endif
   REQUIRE_THROWS(manager.initialize_slip_rate(
     0, {1.0, std::numeric_limits<double>::quiet_NaN()}));
   REQUIRE_THROWS(manager.initialize_slip_rate(0, {-1.0, 2.0}));
+#ifndef NDEBUG
   REQUIRE_THROWS(manager.begin_slip_rate_trial());
+#endif
 
   manager.initialize_slip_rate(0, {0.0, 2.0});
   manager.begin_slip_rate_nonlinear_solve();
   manager.begin_slip_rate_trial();
+#ifndef NDEBUG
   REQUIRE_THROWS(manager.set_slip_rate_trial({}, 1.0));
   REQUIRE_THROWS(manager.set_slip_rate_trial({{1.0}}, 1.0));
+#endif
   REQUIRE_THROWS(manager.set_slip_rate_trial(
     {{0.0, std::numeric_limits<double>::infinity()}}, 1.0));
   REQUIRE_THROWS(manager.set_slip_rate_trial({{-2.0, 0.0}}, 1.0));
@@ -222,6 +254,10 @@ TEST_CASE("ReconstructedFaultManager checkpoint restores committed slip rate")
   const auto &property_information = manager.get_property_information();
   manager.get_fault(0).get_properties(0)[property_information[cohesive].position] = 7.0;
   manager.get_fault(0).get_properties(0)[property_information[previous_I_h].position] = 2.5;
+  REQUIRE(manager.get_fault(0).property_value_is_initialized(
+    0, property_information[cohesive].position));
+  REQUIRE_FALSE(manager.get_fault(0).property_value_is_initialized(
+    1, property_information[cohesive].position));
   manager.begin_slip_rate_nonlinear_solve();
   manager.begin_slip_rate_trial();
   manager.set_slip_rate_trial({{10.0, 10.0}}, 1.0);
@@ -250,6 +286,12 @@ TEST_CASE("ReconstructedFaultManager checkpoint restores committed slip rate")
   REQUIRE(restored.get_fault(0).get_properties(0)[restored_information[
             restored.get_property_index("phase field fault previous I h")].position]
           == Approx(2.5));
+  REQUIRE(restored.get_fault(0).property_value_is_initialized(
+    0, restored_information[restored.get_property_index(
+      "phase field fault cohesive traction")].position));
+  REQUIRE_FALSE(restored.get_fault(0).property_value_is_initialized(
+    1, restored_information[restored.get_property_index(
+      "phase field fault cohesive traction")].position));
   // Checkpoints contain timestep state, not an accepted Newton iterate or trial candidate.
   REQUIRE(restored.get_slip_rate(0)[0] == Approx(2.0));
   REQUIRE(restored.interpolate_slip_rate(0, 0, 0.5) == Approx(2.5));
@@ -325,6 +367,11 @@ TEST_CASE("Fault normal-profile projection rejects unsupported topology and over
   };
   REQUIRE_THROWS(aspect::ReconstructedFaultUtilities::project_to_normal_profiles(
     closed_fault, {{0.2, 0.2, 0.2}}, dealii::Point<2>(0.5,0.1)));
+  REQUIRE_THROWS(aspect::ReconstructedFaultUtilities::project_to_normal_profiles(
+    overlapping_faults, {{0.2, 0.2}}, dealii::Point<2>(1,0.05)));
+  REQUIRE_THROWS(aspect::ReconstructedFaultUtilities::project_to_normal_profiles(
+    {overlapping_faults.front()}, {{0.2, 0.2}},
+    dealii::Point<2>(std::numeric_limits<double>::infinity(), 0.05)));
 }
 
 
@@ -339,6 +386,10 @@ TEST_CASE("Fault projection tridiagonal solve")
   const ThrowOnDealIIException throw_on_dealii_exception;
   REQUIRE_THROWS(aspect::ReconstructedFaultUtilities::solve_tridiagonal_system(
     {1.0, 1.0}, {1.0}, {1.0, 1.0}));
+  REQUIRE_THROWS(aspect::ReconstructedFaultUtilities::solve_tridiagonal_system(
+    {2.0, 2.0}, {1.0}, {3.0}));
+  REQUIRE_THROWS(aspect::ReconstructedFaultUtilities::solve_tridiagonal_system(
+    {2.0, 2.0}, {1.0}, {3.0, std::numeric_limits<double>::infinity()}));
 }
 
 

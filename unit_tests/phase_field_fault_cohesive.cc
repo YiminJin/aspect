@@ -11,6 +11,8 @@
 
 #include "common.h"
 
+#include "../tests/phase_field_fault_test_access.h"
+
 #include <aspect/material_model/phase_field_fault.h>
 
 #include <deal.II/base/quadrature_lib.h>
@@ -105,15 +107,17 @@ TEST_CASE("Common cohesive law rejects inadmissible persistent state",
           "[phase_field_fault_cohesive]")
 {
   CHECK_THROWS(TestAccess::compute_cohesive_response(
-    1.1, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0));
-  CHECK_THROWS(TestAccess::compute_cohesive_response(
     0.5, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0));
   CHECK_THROWS(TestAccess::compute_cohesive_response(
     0.5, 1.0, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0));
+  CHECK_THROWS(TestAccess::compute_cohesive_response(
+    0.5, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0));
   CHECK_THROWS(TestAccess::compute_cohesive_response(
     0.5, 1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0));
   CHECK_THROWS(TestAccess::compute_cohesive_response(
     0.5, 1.0, 1.0, 1.0, 0.0, -1.0, 1.0, 1.0));
   CHECK_THROWS(TestAccess::compute_cohesive_response(
     0.5, 1.0, 1.0, 1.0, 0.0, 1.0, -1.0, 1.0));
+  CHECK_THROWS(TestAccess::compute_cohesive_response(
+    0.5, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, -1.0));
 }

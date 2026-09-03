@@ -11,6 +11,8 @@
 
 #include "common.h"
 
+#include "../tests/phase_field_fault_test_access.h"
+
 #include <aspect/material_model/phase_field_fault.h>
 
 #include <deal.II/base/function.h>
