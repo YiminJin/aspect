@@ -56,7 +56,10 @@ subsection Initial composition model
   set Model name = function
   subsection Function
     set Variable names      = x,y
-    set Function expression = 0.2+0.5*x
+    # Deliberately vary composition normal to the horizontal fault. The Stage D
+    # regression verifies that initial q uses the projected surface mixture,
+    # rather than these particle-local off-surface values.
+    set Function expression = 0.1+0.8*y
   end
 end
 
@@ -65,8 +68,9 @@ subsection Material model
   subsection Phase field fault
     set Evolve phase field             = false
     set Phase field activation threshold = 1e-6
+    set Viscosity averaging scheme     = arithmetic
     set Reference viscosities          = 1e21, 1e21
-    set Elastic shear moduli           = 1e10, 1e10
+    set Elastic shear moduli           = 1e10, 4e10
     set Cohesions                      = 1e5, 2e5
     set Critical energy release rates  = 1e5, 1e5
     set Radiation damping coefficients = 1e7, 1e7

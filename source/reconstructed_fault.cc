@@ -1502,6 +1502,46 @@ namespace aspect
 
 
   template <int dim>
+  std::map<types::particle_index, std::vector<double>>
+  ReconstructedFaultManager<dim>::interpolate_property_at_particle_projections(
+    const unsigned int property_index)
+  {
+    AssertThrow(dim == 2, ExcNotImplemented());
+    AssertIndexRange(property_index, property_information.size());
+    AssertThrow(!reconstructed_faults.empty(),
+                ExcMessage("Fault-property interpolation requires reconstructed fault geometry."));
+
+    if (!particle_projection_cache_is_valid())
+      rebuild_particle_projection_cache();
+
+    const PropertyInformation &property = property_information[property_index];
+    std::map<types::particle_index, std::vector<double>> values;
+    for (const ParticleProjectionCacheEntry &entry : particle_projection_cache)
+      if (entry.active)
+        {
+          const ReconstructedFault<dim> &fault = reconstructed_faults[entry.fault_index];
+          const ArrayView<const double> first = fault.get_properties(entry.segment_index);
+          const ArrayView<const double> second = fault.get_properties(entry.segment_index+1);
+          std::vector<double> interpolated(property.n_components);
+          for (unsigned int component = 0; component < property.n_components; ++component)
+            {
+              interpolated[component] =
+                (1.0-entry.xi) * first[property.position+component]
+                + entry.xi * second[property.position+component];
+              AssertThrow(std::isfinite(interpolated[component]),
+                          ExcMessage("Fault property <" + property.name
+                                     + "> is not finite at the cached projection of particle "
+                                     + Utilities::int_to_string(entry.particle_id) + "."));
+            }
+          AssertThrow(values.emplace(entry.particle_id, std::move(interpolated)).second,
+                      ExcMessage("Duplicate locally owned particle ID in the fault-projection cache."));
+        }
+
+    return values;
+  }
+
+
+  template <int dim>
   typename ReconstructedFaultManager<dim>::ParticleScalarProjectionResult
   ReconstructedFaultManager<dim>::project_particle_scalar(
     const std::map<types::particle_index, double> &locally_owned_values)

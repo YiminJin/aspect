@@ -445,30 +445,12 @@ namespace aspect
 
       const std::vector<unsigned int> chemical_field_indices =
         this->introspection().chemical_composition_field_indices();
-      std::vector<unsigned int> chemical_property_positions;
-      chemical_property_positions.reserve(chemical_field_indices.size());
-      for (const unsigned int field_index : chemical_field_indices)
-        {
-          AssertThrow(this->get_parameters().compositional_field_methods[field_index]
-                      == Parameters<dim>::AdvectionFieldMethod::particles,
-                      ExcMessage("Initial cohesive state requires every chemical composition "
-                                 "field to be advected by particles."));
-          const auto mapped_property =
-            this->get_parameters().mapped_particle_properties.find(field_index);
-          AssertThrow(mapped_property
-                      != this->get_parameters().mapped_particle_properties.end(),
-                      ExcMessage("Initial cohesive state requires every chemical composition "
-                                 "field to be mapped to a particle property."));
-          AssertThrow(particle_data.fieldname_exists(mapped_property->second.first),
-                      ExcMessage("A mapped chemical particle property is not registered."));
-          const unsigned int n_components =
-            particle_data.get_components_by_field_name(mapped_property->second.first);
-          AssertThrow(mapped_property->second.second < n_components,
-                      ExcMessage("A mapped chemical particle-property component is out of range."));
-          chemical_property_positions.push_back(
-            particle_data.get_position_by_field_name(mapped_property->second.first)
-            + mapped_property->second.second);
-        }
+      const std::map<types::particle_index, std::vector<double>>
+        surface_chemical_compositions =
+          chemical_field_indices.empty()
+          ? std::map<types::particle_index, std::vector<double>>()
+          : fault_manager.interpolate_property_at_particle_projections(
+              fault_composition_property_index);
 
       std::map<types::particle_index, double> particle_q_values;
       std::string local_error;
@@ -476,9 +458,19 @@ namespace aspect
       for (const auto &particle : particle_handler)
         {
           const ArrayView<const double> properties = particle.get_properties();
-          std::vector<double> chemical_compositions(chemical_property_positions.size());
-          for (unsigned int c = 0; c < chemical_property_positions.size(); ++c)
-            chemical_compositions[c] = properties[chemical_property_positions[c]];
+          const auto surface_composition =
+            surface_chemical_compositions.find(particle.get_id());
+          if (!chemical_field_indices.empty()
+              && surface_composition == surface_chemical_compositions.end())
+            {
+              ++particle_index;
+              continue;
+            }
+          const std::vector<double> chemical_compositions =
+            chemical_field_indices.empty()
+            ? std::vector<double>()
+            : surface_composition->second;
+          AssertDimension(chemical_compositions.size(), chemical_field_indices.size());
           const std::vector<double> volume_fractions =
             MaterialUtilities::compute_composition_fractions(chemical_compositions);
           const double shear_modulus = MaterialUtilities::average_value(

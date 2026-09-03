@@ -373,6 +373,10 @@ values without storing them. Active associated particles must have one finite
 input value; inactive particles may be omitted. The result includes
 volume-weighted RMS and maximum projection residuals so a material model can
 diagnose assumptions such as profile-uniform initial cohesive traction.
+The reverse local operation Q1-interpolates a registered fault property at
+every active locally owned particle's cached fault coordinate and returns the
+values keyed by stable particle ID. It performs neither a new geometry search
+nor MPI communication.
 
 ## 18. Distinguished fault slip-rate field
 
@@ -562,13 +566,18 @@ For an initially reconstructed pre-existing fault, the committed state is not
 zeroed. At each associated particle, form
 
 \[
-q=g(\phi_{\rm eff})\sqrt{2GH},\qquad
-\phi_{\rm eff}=\max(\phi_h,0),
+q_p=\bar g(\phi_{\rm eff,p},\mathbf f_\Gamma(s_p))
+\sqrt{2\bar G(\mathbf f_\Gamma(s_p))H_p},\qquad
+\phi_{\rm eff,p}=\max(\phi_p,0),
 \]
 
-using the prescribed initial particle crack-driving force, existing material
-mixture and shear modulus, and the Stage C bounded-negative rule. Consistently
-project $q$ to the replicated Q1 fault to obtain nodal
+using the prescribed initial particle crack-driving force and the Stage C
+bounded-negative rule. The particle's $H_p$ and $\phi_p$ remain local, but
+both $\bar G$ and $\bar g$ use the same surface mixture
+$\mathbf f_\Gamma(s_p)$ obtained by interpolating the already projected Q1
+chemical-composition fields at the particle's cached fault coordinate. A
+particle-local composition must not be used for either constitutive mixture.
+Consistently project $q$ to the replicated Q1 fault to obtain nodal
 $T^{\rm coh}_0$, and commit current $I_{h,0}$ in the same initialization
 operation. Volume-weighted RMS and maximum projection residuals diagnose the
 profile-uniform-$q$ assumption but do not introduce a rejection threshold.

@@ -345,6 +345,15 @@ namespace aspect
         const std::vector<ParticlePropertyProjection> &projections);
 
       /**
+       * Interpolate one registered Q1 fault property at every active locally
+       * owned particle's cached fault coordinate. The returned values are
+       * addressed by stable particle ID; inactive particles are omitted.
+       */
+      std::map<types::particle_index, std::vector<double>>
+      interpolate_property_at_particle_projections(
+        const unsigned int property_index);
+
+      /**
        * Project one caller-computed scalar per active locally owned particle
        * to the replicated fault Q1 spaces. Values are addressed by stable
        * particle ID; inactive particles may be omitted.

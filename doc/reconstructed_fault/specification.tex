@@ -657,19 +657,21 @@ phase-field solution. It is not duplicated as fault history.
 
 \subsection{Initial committed cohesive state}
 
-For an initially reconstructed pre-existing fault, form at each associated
-particle
+For an initially reconstructed pre-existing fault, \(H_p\) and \(\phi_p\) are
+particle-local quantities. Interpolate the
+already projected Q1 chemical-composition fields at particle \(p\)'s cached
+fault coordinate \(s_p\), convert them to the same surface material mixture
+\(\mathbf f_\Gamma(s_p)\) used by the Stage-C normalization profiles, and
+evaluate
 \[
-q=g(\phi_{\rm eff})\sqrt{2GH},
+q_p=\bar g(\phi_{\rm eff,p},\mathbf f_\Gamma(s_p))
+\sqrt{2\bar G(\mathbf f_\Gamma(s_p))H_p},
 \qquad
-\phi_{\rm eff}=\max(\phi_h,0).
+\phi_{\rm eff,p}=\max(\phi_p,0).
 \]
-Here \(H\) is the existing prescribed initial
-\texttt{crack\_driving\_force} particle property, \(G\) uses the existing
-material mixture and shear-modulus averaging rule, and \(g\) is the existing
-phase-field degradation function. The same \(10^{-4}\) empirical
-bounded-negative guard used by \(I_h\) applies; values above one are not
-clipped.
+Do not use the particle-local composition for either \(\bar G\) or \(\bar g\).
+The same \(10^{-4}\) empirical bounded-negative guard used by \(I_h\) applies;
+values above one are not clipped.
 
 Under the profile-uniform cohesive assumption, \(q\) is constant through each
 normal profile. Use the cached particle-domain-volume weighted consistent Q1
@@ -772,6 +774,12 @@ meaning. This path shall reuse the same cached mass operator and MPI reduction.
 Active associated particles require one value; inactive particles may be
 omitted. Volume-weighted RMS and maximum residuals against the projected Q1
 field shall be returned as generic diagnostics.
+
+The manager shall also support the reverse local operation needed to evaluate
+surface constitutive inputs at particles: Q1-interpolate a registered fault
+property at every active locally owned particle's cached fault coordinate and
+return the values keyed by stable particle ID. This operation performs no new
+geometric search and no MPI communication.
 
 \subsection{MPI assembly}
 Each rank assembles only contributions from its locally owned particles:
