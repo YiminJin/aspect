@@ -27,6 +27,7 @@
 #include <aspect/material_model/interface.h>
 #include <aspect/material_model/equation_of_state/multicomponent_incompressible.h>
 #include <aspect/material_model/rheology/fault_friction.h>
+#include <aspect/reconstructed_fault.h>
 
 #include <functional>
 
@@ -99,6 +100,34 @@ namespace aspect
         compute_maxwell_stress(const MaxwellCoefficients &coefficients,
                                const SymmetricTensor<2,dim> &effective_bulk_strain_rate,
                                const SymmetricTensor<2,dim> &previous_stress);
+
+        /** Non-committing result of the common cohesive constitutive law. */
+        struct CohesiveResponse
+        {
+          double cohesive_traction;
+          double localization_factor;
+          double history_correction;
+          double crack_strain_rate;
+        };
+
+        /** Evaluate T_coh(V), chi, and the exact history-corrected upsilon. */
+        static CohesiveResponse
+        compute_cohesive_response(const MaxwellCoefficients &coefficients,
+                                  const double current_normalization_integral,
+                                  const double previous_normalization_integral,
+                                  const double previous_cohesive_traction,
+                                  const double slip_rate,
+                                  const double current_h,
+                                  const double previous_h);
+
+        /** Build and commit the initial cohesive state from H and the initial phase field. */
+        void
+        initialize_cohesive_state_from_initial_fields();
+
+        /** Explicitly commit already accepted cohesive history. Not wired in Stage D. */
+        void
+        commit_cohesive_state(
+          const std::vector<std::vector<double>> &cohesive_tractions);
 
         /** Recompute transient nodal I_h from the current distributed phase field. */
         void
@@ -222,22 +251,32 @@ namespace aspect
 
         unsigned int fault_composition_property_index = numbers::invalid_unsigned_int;
 
+        unsigned int cohesive_traction_property_index = numbers::invalid_unsigned_int;
+
+        unsigned int previous_normalization_integral_property_index =
+          numbers::invalid_unsigned_int;
+
         std::vector<std::vector<double>> current_normalization_integrals;
 
         double current_minimum_raw_normalization_phase_field =
           numbers::signaling_nan<double>();
+
+        std::vector<typename ReconstructedFaultManager<dim>::
+                    ParticleScalarProjectionDiagnostics>
+          initial_cohesive_projection_diagnostics;
 
         std::unique_ptr<SolutionEvaluator<dim>> solution_evaluator;
     };
 
     namespace internal
     {
-      /** Narrow test seam for private PhaseFieldFault Stage B/C operations. */
+      /** Narrow test seam for private PhaseFieldFault Stage B-D operations. */
       template <int dim>
       class PhaseFieldFaultTestAccess
       {
         public:
           using PointSample = typename PhaseFieldFault<dim>::NormalizationPointSample;
+          using CohesiveResponse = typename PhaseFieldFault<dim>::CohesiveResponse;
 
           static const std::vector<std::vector<double>> &
           compute_normalization_integrals(PhaseFieldFault<dim> &model)
@@ -328,6 +367,43 @@ namespace aspect
             return PhaseFieldFault<dim>::integrate_normalization_profiles(
               profiles, length_scale, quadrature_tolerance, tail_tolerance,
               communicator, evaluate_points, integrand);
+          }
+
+          static CohesiveResponse
+          compute_cohesive_response(const double beta,
+                                    const double kappa,
+                                    const double current_normalization_integral,
+                                    const double previous_normalization_integral,
+                                    const double previous_cohesive_traction,
+                                    const double slip_rate,
+                                    const double current_h,
+                                    const double previous_h)
+          {
+            return PhaseFieldFault<dim>::compute_cohesive_response(
+              {beta, kappa}, current_normalization_integral,
+              previous_normalization_integral, previous_cohesive_traction,
+              slip_rate, current_h, previous_h);
+          }
+
+          static void
+          initialize_cohesive_state_from_initial_fields(PhaseFieldFault<dim> &model)
+          {
+            model.initialize_cohesive_state_from_initial_fields();
+          }
+
+          static void
+          commit_cohesive_state(
+            PhaseFieldFault<dim> &model,
+            const std::vector<std::vector<double>> &cohesive_tractions)
+          {
+            model.commit_cohesive_state(cohesive_tractions);
+          }
+
+          static const std::vector<typename ReconstructedFaultManager<dim>::
+                                   ParticleScalarProjectionDiagnostics> &
+          initial_cohesive_projection_diagnostics(const PhaseFieldFault<dim> &model)
+          {
+            return model.initial_cohesive_projection_diagnostics;
           }
       };
     }

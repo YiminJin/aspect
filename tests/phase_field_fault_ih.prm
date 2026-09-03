@@ -1,8 +1,9 @@
-# Lifecycle smoke test for the private Stage C distributed I_h evaluator.
+# Lifecycle smoke test for the private Stage C distributed I_h evaluator and
+# Stage D initial cohesive-state construction.
 # The low activation threshold below is only a fixture that makes a fault
-# geometry available to the I_h path. Fault reconstruction behavior, location,
-# and accuracy are deliberately not tested here; quantitative I_h accuracy is
-# covered by the controlled analytic/Q1 tests.
+# geometry available to the I_h/cohesive paths. Fault reconstruction behavior,
+# location, and accuracy are deliberately not tested here; quantitative I_h
+# accuracy is covered by the controlled analytic/Q1 tests.
 # Enable if: ASPECT_WITH_VORO
 
 set Dimension                    = 2

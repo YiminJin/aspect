@@ -256,6 +256,22 @@ namespace aspect
         unsigned int n_contributing_particles = 0;
       };
 
+      /** Residual diagnostics for projecting one particle scalar to a fault. */
+      struct ParticleScalarProjectionDiagnostics
+      {
+        double weighted_rms_residual = numbers::signaling_nan<double>();
+        double maximum_absolute_residual = numbers::signaling_nan<double>();
+        double normalized_weighted_rms_residual = numbers::signaling_nan<double>();
+        double normalized_maximum_absolute_residual = numbers::signaling_nan<double>();
+      };
+
+      /** Result of a constitutively neutral particle-scalar projection. */
+      struct ParticleScalarProjectionResult
+      {
+        std::vector<std::vector<double>> nodal_values;
+        std::vector<ParticleScalarProjectionDiagnostics> diagnostics;
+      };
+
       ReconstructedFaultManager() = default;
       explicit ReconstructedFaultManager(const Simulator<dim> &simulator);
 
@@ -327,6 +343,16 @@ namespace aspect
 
       void project_particle_properties(
         const std::vector<ParticlePropertyProjection> &projections);
+
+      /**
+       * Project one caller-computed scalar per active locally owned particle
+       * to the replicated fault Q1 spaces. Values are addressed by stable
+       * particle ID; inactive particles may be omitted.
+       */
+      ParticleScalarProjectionResult
+      project_particle_scalar(
+        const std::map<types::particle_index, double> &locally_owned_values);
+
       void invalidate_particle_projection_cache();
       const std::vector<ParticleProjectionDiagnostics> &
       get_particle_projection_diagnostics() const;

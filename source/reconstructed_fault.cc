@@ -1502,6 +1502,150 @@ namespace aspect
 
 
   template <int dim>
+  typename ReconstructedFaultManager<dim>::ParticleScalarProjectionResult
+  ReconstructedFaultManager<dim>::project_particle_scalar(
+    const std::map<types::particle_index, double> &locally_owned_values)
+  {
+    AssertThrow(dim == 2, ExcNotImplemented());
+    AssertThrow(!reconstructed_faults.empty(),
+                ExcMessage("Particle projection requires reconstructed fault geometry."));
+
+    if (!particle_projection_cache_is_valid())
+      rebuild_particle_projection_cache();
+
+    std::vector<unsigned int> fault_vertex_offsets(reconstructed_faults.size() + 1, 0);
+    for (unsigned int fault = 0; fault < reconstructed_faults.size(); ++fault)
+      fault_vertex_offsets[fault+1] = fault_vertex_offsets[fault]
+                                      + reconstructed_faults[fault].n_vertices();
+    const unsigned int n_fault_vertices = fault_vertex_offsets.back();
+    std::vector<double> local_rhs(n_fault_vertices, 0.0);
+
+    const auto &particle_handler = this->get_phase_field_handler()
+                                   .get_associated_particle_manager()
+                                   .get_particle_handler();
+    std::string local_error;
+    unsigned int cache_index = 0;
+    for (const auto &particle : particle_handler)
+      {
+        const ParticleProjectionCacheEntry &entry = particle_projection_cache[cache_index++];
+        if (!entry.active)
+          continue;
+
+        const auto value = locally_owned_values.find(particle.get_id());
+        if (value == locally_owned_values.end())
+          {
+            if (local_error.empty())
+              local_error = "No scalar projection value was supplied for active particle "
+                            + Utilities::int_to_string(particle.get_id()) + ".";
+            continue;
+          }
+        if (!std::isfinite(value->second))
+          {
+            if (local_error.empty())
+              local_error = "A non-finite scalar projection value was supplied for particle "
+                            + Utilities::int_to_string(particle.get_id()) + ".";
+            continue;
+          }
+
+        const double shape[2] = {1.0-entry.xi, entry.xi};
+        const unsigned int first_vertex = fault_vertex_offsets[entry.fault_index]
+                                          + entry.segment_index;
+        local_rhs[first_vertex] += entry.particle_domain_volume * shape[0] * value->second;
+        local_rhs[first_vertex+1] += entry.particle_domain_volume * shape[1] * value->second;
+      }
+    AssertDimension(cache_index, particle_projection_cache.size());
+
+    const unsigned int rank =
+      Utilities::MPI::this_mpi_process(this->get_mpi_communicator());
+    const unsigned int n_processes =
+      Utilities::MPI::n_mpi_processes(this->get_mpi_communicator());
+    const unsigned int error_rank = Utilities::MPI::min(
+      local_error.empty() ? n_processes : rank, this->get_mpi_communicator());
+    const std::string error = error_rank < n_processes
+                              ? Utilities::MPI::broadcast(
+                                  this->get_mpi_communicator(), local_error, error_rank)
+                              : std::string();
+    AssertThrow(error_rank == n_processes, ExcMessage(error));
+
+    std::vector<double> global_rhs(local_rhs.size());
+    Utilities::MPI::sum(local_rhs, this->get_mpi_communicator(), global_rhs);
+
+    ParticleScalarProjectionResult result;
+    result.nodal_values.resize(reconstructed_faults.size());
+    result.diagnostics.resize(reconstructed_faults.size());
+    for (unsigned int fault = 0; fault < reconstructed_faults.size(); ++fault)
+      {
+        const ArrayView<const double> rhs = make_array_view(
+          global_rhs.cbegin() + fault_vertex_offsets[fault],
+          global_rhs.cbegin() + fault_vertex_offsets[fault+1]);
+        result.nodal_values[fault] = solve_projection_system(fault, rhs);
+        for (const double value : result.nodal_values[fault])
+          AssertThrow(std::isfinite(value),
+                      ExcMessage("Particle scalar projection produced a non-finite nodal value."));
+      }
+
+    std::vector<double> local_squared_residual(reconstructed_faults.size(), 0.0);
+    std::vector<double> local_weight(reconstructed_faults.size(), 0.0);
+    std::vector<double> local_maximum_residual(reconstructed_faults.size(), 0.0);
+    std::vector<double> local_maximum_value(reconstructed_faults.size(), 0.0);
+    cache_index = 0;
+    for (const auto &particle : particle_handler)
+      {
+        const ParticleProjectionCacheEntry &entry = particle_projection_cache[cache_index++];
+        if (!entry.active)
+          continue;
+        const double value = locally_owned_values.find(particle.get_id())->second;
+        const double projected =
+          (1.0-entry.xi) * result.nodal_values[entry.fault_index][entry.segment_index]
+          + entry.xi * result.nodal_values[entry.fault_index][entry.segment_index+1];
+        const double residual = std::abs(value-projected);
+        local_squared_residual[entry.fault_index] +=
+          entry.particle_domain_volume * residual * residual;
+        local_weight[entry.fault_index] += entry.particle_domain_volume;
+        local_maximum_residual[entry.fault_index] =
+          std::max(local_maximum_residual[entry.fault_index], residual);
+        local_maximum_value[entry.fault_index] =
+          std::max(local_maximum_value[entry.fault_index], std::abs(value));
+      }
+
+    for (unsigned int fault = 0; fault < reconstructed_faults.size(); ++fault)
+      {
+        const double squared_residual = Utilities::MPI::sum(
+          local_squared_residual[fault], this->get_mpi_communicator());
+        const double weight = Utilities::MPI::sum(
+          local_weight[fault], this->get_mpi_communicator());
+        const double maximum_residual = Utilities::MPI::max(
+          local_maximum_residual[fault], this->get_mpi_communicator());
+        const double maximum_value = Utilities::MPI::max(
+          local_maximum_value[fault], this->get_mpi_communicator());
+        AssertThrow(std::isfinite(weight) && weight > 0.0,
+                    ExcMessage("Particle scalar projection has no positive fault support."));
+
+        ParticleScalarProjectionDiagnostics &diagnostic = result.diagnostics[fault];
+        diagnostic.weighted_rms_residual = std::sqrt(squared_residual/weight);
+        diagnostic.maximum_absolute_residual = maximum_residual;
+        if (maximum_value > 0.0)
+          {
+            diagnostic.normalized_weighted_rms_residual =
+              diagnostic.weighted_rms_residual/maximum_value;
+            diagnostic.normalized_maximum_absolute_residual =
+              diagnostic.maximum_absolute_residual/maximum_value;
+          }
+        else
+          {
+            Assert(diagnostic.weighted_rms_residual == 0.0
+                   && diagnostic.maximum_absolute_residual == 0.0,
+                   ExcInternalError());
+            diagnostic.normalized_weighted_rms_residual = 0.0;
+            diagnostic.normalized_maximum_absolute_residual = 0.0;
+          }
+      }
+
+    return result;
+  }
+
+
+  template <int dim>
   void
   ReconstructedFaultManager<dim>::invalidate_particle_projection_cache()
   {

@@ -5,12 +5,16 @@
 
 ## Authority
 
-For reconstructed-fault development, use this authority order:
+For reconstructed-fault development, this file and
+`doc/reconstructed_fault/specification.tex` are authoritative for scientific
+algorithms, architecture, ownership, and MPI design. They are maintained as a
+consistent pair: this file records the concise settled decisions and the
+specification gives their detailed contract.
 
-- `doc/reconstructed_fault/pf_rsf.tex` is authoritative for the continuum constitutive model.
-- `doc/reconstructed_fault/phase_field_fault_redesign.md` is authoritative for architecture, discretization, lifecycle, MPI design, and staged implementation.
-- This file records settled implementation decisions and is subordinate to those two authorities where they overlap.
-- `doc/reconstructed_fault/specification.tex` and older redesign notes remain useful background, but are superseded where they conflict with the authorities above.
+Older reconstructed-fault redesign notes and `pf_rsf.tex` remain useful
+derivation history but are not architectural authorities. An isolated
+continuum equation may be promoted from them only by recording the approved
+equation in both authoritative documents before implementation.
 - The current source tree is authoritative for existing class names, APIs, and reusable ASPECT/deal.II infrastructure.
 - If this file conflicts with the current implementation in a way that affects architecture or scientific behavior, report the conflict rather than silently redesigning the method.
 
@@ -362,6 +366,14 @@ Particle advection normally invalidates it; changes in particle IDs, iteration
 order, positions, domain volumes, fault geometry versions, or projection
 metadata cause a rebuild. Particle property-value changes alone do not.
 
+The manager also exposes one constitutively neutral scalar projection for
+caller-computed values keyed by stable locally owned particle ID. It reuses
+the same cached mass operator and MPI reduction and returns replicated nodal
+values without storing them. Active associated particles must have one finite
+input value; inactive particles may be omitted. The result includes
+volume-weighted RMS and maximum projection residuals so a material model can
+diagnose assumptions such as profile-uniform initial cohesive traction.
+
 ## 18. Distinguished fault slip-rate field
 
 `ReconstructedFaultManager<dim>` owns the replicated nodal slip-rate field
@@ -514,3 +526,54 @@ independently integrated Q1 reference under bulk-mesh refinement. The Voro
 lifecycle smoke fixture retains a low activation threshold only to bootstrap
 geometry; reconstruction behavior, location, and accuracy are not under test
 in that fixture.
+
+## 21. Common cohesive state
+
+`MaterialModel::PhaseFieldFault` owns the common cohesive law independently of
+the selected fault-friction law. It registers two scalar generic fault
+properties: committed cohesive traction $T^{\rm coh}_{k-1}$ and committed
+previous normalization $I_{h,k-1}$. The manager stores and checkpoints these
+values but does not interpret them. Current $I_{h,k}$ and all non-committed
+cohesive responses remain private transient material-model data.
+
+For fixed current phase field and history, the non-committing update is
+
+\[
+T^{\rm coh}_k=
+\frac{\kappa_k V_k+\beta_k I_{h,k-1}T^{\rm coh}_{k-1}}{I_{h,k}},
+\]
+
+and the exact diffuse crack-strain-rate magnitude is
+
+\[
+\upsilon_k=
+\frac{h_k}{I_{h,k}}V_k+
+\frac{\beta_kT^{\rm coh}_{k-1}}{\kappa_k}
+\left(h_k\frac{I_{h,k-1}}{I_{h,k}}-h_{k-1}\right).
+\]
+
+Consequently the history correction integrates to zero and
+$\int\upsilon_k\,d\zeta=V_k$. At fixed history,
+$\partial\upsilon_k/\partial V_k=h_k/I_{h,k}$. The previous pointwise
+$h_{k-1}$ is derived from the previous FE phase-field solution; it is not an
+additional persistent fault property.
+
+For an initially reconstructed pre-existing fault, the committed state is not
+zeroed. At each associated particle, form
+
+\[
+q=g(\phi_{\rm eff})\sqrt{2GH},\qquad
+\phi_{\rm eff}=\max(\phi_h,0),
+\]
+
+using the prescribed initial particle crack-driving force, existing material
+mixture and shear modulus, and the Stage C bounded-negative rule. Consistently
+project $q$ to the replicated Q1 fault to obtain nodal
+$T^{\rm coh}_0$, and commit current $I_{h,0}$ in the same initialization
+operation. Volume-weighted RMS and maximum projection residuals diagnose the
+profile-uniform-$q$ assumption but do not introduce a rejection threshold.
+
+Stage D provides an explicit, unwired commit operation for testing and future
+coupling. No timestep or nonlinear-solver signal commits cohesive history;
+that can occur only after a later coupled slip-rate solve accepts a mechanical
+timestep.

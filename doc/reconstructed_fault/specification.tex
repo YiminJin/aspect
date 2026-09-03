@@ -27,13 +27,23 @@
 \maketitle
 
 \section*{Status of this document}
-This document is the implementation source of truth for the reconstructed-fault framework.  Scientific and architectural decisions belong here.  Codex should implement only what is specified here and should report ambiguities or conflicts instead of silently choosing a different algorithm.
+This document and \texttt{current\_design.md} are the implementation sources of
+truth for the reconstructed-fault framework. They are maintained as a
+consistent pair. Older redesign documents and derivation notes are background
+only unless an approved equation is first promoted into both authoritative
+documents. Codex should implement only what is specified here and should
+report ambiguities or conflicts instead of silently choosing a different
+algorithm.
 
 \section*{Reader map}
 The framework has four layers:
 \begin{enumerate}
-  \item \textbf{Persistent fault registry}: stable IDs, persistent geometry records, connectivity, creation times, and constitutive history.
-  \item \textbf{Runtime fault mesh}: a replicated \texttt{dealii::Triangulation<dim-1,dim>} rebuilt from the registry whenever the persistent geometry changes.  It provides tested deal.II connectivity and neighbor traversal, which is especially useful for a future 3-D implementation.
+  \item \textbf{Replicated fault registry}: ordered 2-D polyline geometry,
+        connectivity, generic committed constitutive properties, and the
+        distinguished slip-rate field.
+  \item \textbf{Fault Q1 operations}: segment-local interpolation and
+        fault-sized mass/projection systems on the ordered polyline, without a
+        duplicate runtime triangulation.
   \item \textbf{Coupling operators and caches}: cached particle-to-fault and fault-to-quadrature-point mappings, plus the reduced projection operators used inside nonlinear iterations.
   \item \textbf{Distributed bulk fields}: the ASPECT mesh, phase field, particles, and Stokes quadrature points remain distributed over MPI ranks.
 \end{enumerate}
@@ -110,7 +120,7 @@ These existing access points should be reused where appropriate.  In particular,
 \textbf{MUST NOT depend on:} the reconstructed-fault framework shall not call or require the old core-phase-field machinery, including \texttt{PhaseFieldHandler<dim>::extend\_core\_phase\_field()}, the \texttt{pre\_extend\_core\_phase\_field} signal, or algorithms whose inputs fundamentally require \texttt{core\_phase\_field}.  This includes the old uses of \texttt{slip\_rate\_localization\_factor(..., core\_phase\_field)} and \texttt{stationary\_crack\_driving\_force(..., core\_phase\_field)} in the failed RSF localization algorithm.  The existing core-phase-field FE variable may remain temporarily for backward compatibility with old plugins, but the new reconstructed-fault implementation shall neither read it nor require it.
 
 \paragraph{Old particle interpolation helper.}
-\texttt{PhaseFieldUtilities::interpolate\_from\_particles\_in\_crack\_zone()} is tied to interpolation of particle properties in the old diffuse crack-zone representation.  It shall not be used as the particle-to-sharp-fault projection operator defined in this specification.  Isolated implementation techniques from it may be consulted, but the new operator must assemble directly onto the codimension-one fault FE space.
+\texttt{PhaseFieldUtilities::interpolate\_from\_particles\_in\_crack\_zone()} is tied to interpolation of particle properties in the old diffuse crack-zone representation.  It shall not be used as the particle-to-sharp-fault projection operator defined in this specification.  Isolated implementation techniques from it may be consulted, but the new operator must assemble directly onto the reconstructed ordered-polyline Q1 space.
 
 \subsection{Particle-domain module}
 The authoritative implementation is
@@ -208,57 +218,45 @@ Once a fault vertex is committed to the persistent fault, its physical location 
 This rule prevents repeated remapping of rate-and-state history variables.
 
 \subsection{Replicated fault, distributed bulk}
-Every MPI rank stores the complete persistent fault registry and the complete runtime fault mesh.  The ASPECT bulk triangulation, FE fields, and particles remain distributed.
+Every MPI rank stores the complete persistent fault registry. The ASPECT bulk
+triangulation, FE fields, and particles remain distributed. No second runtime
+fault mesh duplicates the ordered-polyline geometry in the current 2-D
+implementation.
 
 \subsection{No abuse of triangulation user data}
-Persistent fault IDs, creation times, and constitutive state shall \emph{not} be stored in \texttt{user\_data}, \texttt{user\_index}, or \texttt{user\_flag}.  These deal.II mechanisms may be used only for short-lived algorithmic bookkeeping when appropriate.
+Persistent fault geometry and constitutive state shall \emph{not} be stored in
+\texttt{user\_data}, \texttt{user\_index}, or \texttt{user\_flag}. These
+deal.II mechanisms may be used only for short-lived algorithmic bookkeeping
+when appropriate.
 
 \section{Geometry and state representation}
 
 \subsection{Persistent registry}
-The persistent application-owned registry is the lifetime-stable representation of fault identity and state.  Conceptually,
+The persistent application-owned registry is the lifetime-stable
+representation of fault geometry and state. In the current fixed-geometry 2-D
+implementation, one fault is an ordered sequence of points, consecutive points
+define segments implicitly, and a geometry-version counter invalidates
+reconstructible caches.
 \begin{lstlisting}[language=C++]
 template <int dim>
-struct FaultVertexRecord
+class ReconstructedFault
 {
-  std::uint64_t persistent_id;
-  dealii::Point<dim> position;
-  double creation_time;
-  FaultState state;
-};
-
-struct FaultCellRecord
-{
-  std::uint64_t persistent_id;
-  std::array<std::uint64_t, vertices_per_fault_cell> vertex_ids;
+  std::vector<dealii::Point<dim>> vertices;
+  std::vector<double> generic_vertex_properties;
+  std::uint64_t geometry_version;
 };
 \end{lstlisting}
 
-The exact containers may differ, but persistent identity must never depend on deal.II vertex indices, active-cell indices, or DoF indices.
+The manager defines one shared runtime property schema before geometry exists.
+Every fault stores one contiguous vertex-major property array. This pool
+contains committed physical/material state only. Constitutive meaning belongs
+to the material model; temporary and trial data do not belong in the pool.
 
-\subsection{Runtime fault triangulation}
-\texttt{ReconstructedFault<dim>} shall own a replicated
-\begin{center}
-\texttt{dealii::Triangulation<dim-1,dim>}.
-\end{center}
-
-This triangulation is the runtime geometric/connectivity representation used for deal.II algorithms, cell traversal, and neighbor relations.  It is rebuilt from the persistent registry whenever new geometry is committed.
-
-This choice deliberately trades a small amount of duplicated memory and rebuild time for the robustness of deal.II's tested mesh-connectivity infrastructure.  In the intended 2-D calculations the fault is tiny compared with the bulk mesh, so this overhead is acceptable.  The neighbor structure is also directly useful for a future 3-D surface implementation.
-
-\subsection{Surface finite element space}
-The runtime fault object should also own a Q1 surface finite-element space, conceptually
-\begin{lstlisting}[language=C++]
-static constexpr int fault_dim = dim - 1;
-
-dealii::Triangulation<fault_dim, dim> triangulation;
-dealii::FE_Q<fault_dim, dim>          fe_fault{1};
-dealii::DoFHandler<fault_dim, dim>    dof_handler{triangulation};
-\end{lstlisting}
-
-The Q1 space provides a standard and verified interpolation structure for nodal surface quantities.  DoF numbering is a runtime indexing scheme, not persistent identity.
-
-After every triangulation rebuild, explicit maps between persistent vertex IDs, triangulation vertex indices, and surface DoF indices shall be reconstructed.
+\subsection{Surface Q1 representation}
+The ordered segment endpoints are the Q1 nodes. Segment interpolation uses
+\(N_0=1-\xi\), \(N_1=\xi\). Fault-sized consistent mass matrices and their
+tridiagonal factors provide projection. A future 3-D surface representation is
+deferred and must not force duplicate geometry into the current implementation.
 
 \subsection{Surface location}
 A generic surface location is
@@ -292,23 +290,24 @@ d_h(\mathbf{x})\in[0,1],
 \]
 with $d_h=0$ in intact material and $d_h=1$ at the crack core.  If the FE phase-field convention is opposite, convert it before reconstruction.
 
-Let
-\[
-(\phi_{\min},\phi_{\max})
-=
-\texttt{MaterialModel::PhaseFieldModel<dim>::get\_phase\_field\_range()}.
-\]
-These existing bounds define the support and clipping range used by reconstruction.  No independent active threshold is introduced.  Use
+Let \(\phi_{\rm act}\) be supplied by
+\texttt{get\_phase\_field\_activation\_threshold()} and let
+\(\phi_{\rm adm}\) be supplied by
+\texttt{get\_phase\_field\_upper\_admissibility\_threshold()}.
+The physical range returned by
+\texttt{get\_phase\_field\_range()} remains exactly \([0,1]\).
+Reconstruction support uses \(\phi_{\rm act}\), not the physical lower bound.
+Use
 \[
 \wh(d)
 =
 \begin{cases}
-0, & d\le \phi_{\min},\\[1mm]
+0, & d\le \phi_{\rm act},\\[1mm]
 \left[
-\dfrac{\min(d,\phi_{\max})-\phi_{\min}}
-{\phi_{\max}-\phi_{\min}}
+\dfrac{\min(d,\phi_{\rm adm})-\phi_{\rm act}}
+{\phi_{\rm adm}-\phi_{\rm act}}
 \right]^p,
-& d>\phi_{\min},
+& d>\phi_{\rm act},
 \end{cases}
 \]
 with initial exponent $p=2$.
@@ -605,24 +604,107 @@ may use an artificially low reconstruction activation threshold solely to
 provide geometry, but in that fixture reconstruction behavior is explicitly
 outside the test's purpose.
 
+\section{Common cohesive state}
+
+\texttt{MaterialModel::PhaseFieldFault} owns the cohesive constitutive law.
+The generic fault-property pool stores exactly the committed scalar traction
+\(T^{\rm coh}_{k-1}\) and committed previous normalization
+\(I_{h,k-1}\). The reconstructed-fault manager provides storage and
+checkpointing only. Current \(I_{h,k}\), trial responses, and diagnostics
+remain private material-model data.
+
+With the Maxwell coefficients
+\[
+\beta_k=\exp(-\Delta tG/\eta),
+\qquad
+\kappa_k=-\eta\,\operatorname{expm1}(-\Delta tG/\eta),
+\]
+the non-committing surface update is
+\[
+\boxed{
+T^{\rm coh}_k
+=
+\frac{\kappa_kV_k+
+\beta_k I_{h,k-1}T^{\rm coh}_{k-1}}{I_{h,k}}.
+}
+\]
+The exact pointwise diffuse crack-strain-rate magnitude is
+\[
+\boxed{
+\upsilon_k
+=
+\frac{h_k}{I_{h,k}}V_k
++
+\frac{\beta_kT^{\rm coh}_{k-1}}{\kappa_k}
+\left[
+h_k\frac{I_{h,k-1}}{I_{h,k}}-h_{k-1}
+\right].
+}
+\]
+The bracketed contribution is the history correction. It integrates to zero,
+so
+\[
+\int\upsilon_k\,d\zeta=V_k.
+\]
+For current phase field and committed history frozen during a nonlinear
+linearization,
+\[
+\frac{\partial\upsilon_k}{\partial V_k}
+=\frac{h_k}{I_{h,k}}.
+\]
+The previous pointwise \(h_{k-1}\) is evaluated from ASPECT's previous FE
+phase-field solution. It is not duplicated as fault history.
+
+\subsection{Initial committed cohesive state}
+
+For an initially reconstructed pre-existing fault, form at each associated
+particle
+\[
+q=g(\phi_{\rm eff})\sqrt{2GH},
+\qquad
+\phi_{\rm eff}=\max(\phi_h,0).
+\]
+Here \(H\) is the existing prescribed initial
+\texttt{crack\_driving\_force} particle property, \(G\) uses the existing
+material mixture and shear-modulus averaging rule, and \(g\) is the existing
+phase-field degradation function. The same \(10^{-4}\) empirical
+bounded-negative guard used by \(I_h\) applies; values above one are not
+clipped.
+
+Under the profile-uniform cohesive assumption, \(q\) is constant through each
+normal profile. Use the cached particle-domain-volume weighted consistent Q1
+projection to collapse particle \(q\) values to nodal \(T^{\rm coh}_0\).
+Commit this field and the simultaneously computed current \(I_{h,0}\) as one
+validated initialization operation. Report volume-weighted RMS and maximum
+absolute projection residuals, and their normalization by the maximum
+profile \(\lvert q\rvert\), as diagnostics. No rejection threshold is inferred.
+
+\subsection{Stage-D lifecycle boundary}
+
+Stage D supplies pure response evaluation and an explicit commit operation for
+tests and future solver integration. It does not connect timestep or nonlinear
+solver signals. Committed history remains frozen until a later coupled
+slip-rate stage has accepted a mechanical timestep.
+
 \section{Particle-to-fault projection}
 
 \subsection{Purpose}
 Particle values such as stress-like quantities may need to be represented as Q1 fields on the reconstructed fault.  Particles remain distributed, while every rank owns the complete fault.
 
 \subsection{Geometric projection cache}
-For every locally owned particle that lies within a configurable fault influence distance, cache its projection onto the closest fault cell.  For \texttt{dim=2}, a cache entry should conceptually contain
+For every locally owned particle, cache its optional association with one
+finite segment-normal influence strip. The strip half-width is Q1-interpolated
+from manager-owned per-vertex projection metadata. For \texttt{dim=2}, a
+cache entry should conceptually contain
 \begin{lstlisting}[language=C++]
 struct ParticleFaultProjection
 {
   ParticleId particle_id;
-  unsigned int fault_active_cell_index; // valid only for this geometry version
+  unsigned int fault_index;
+  unsigned int segment_index;
   double xi;
-  double shape_0;
-  double shape_1;
-  double signed_normal_distance;
-  double geometric_weight;
-  std::uint64_t geometry_version;
+  double particle_domain_volume;
+  bool active;
 };
 \end{lstlisting}
 
@@ -642,11 +724,13 @@ m_p
 \]
 This particle-domain measure is the authoritative AMR-aware sampling measure for the particle-to-fault projection.  Do not replace it by the approximation $|K|/N_{p,K}$ unless a future configuration explicitly runs without valid particle-domain data.
 
-Let $r_p$ be the signed normal distance from the particle to its projected fault point.  Use a configurable symmetric compact-support kernel $K$ and define
+Within the admitted influence strip, the current geometric kernel is one, so
 \[
-w_p=m_p\,K\!\left(\frac{|r_p|}{R_p}\right).
+w_p=m_p.
 \]
-The initial implementation should keep $w_p$ purely geometric so that it remains constant throughout nonlinear iterations.  Dynamic phase-field or constitutive values shall not be included in this cached weight unless the cache invalidation rules are updated accordingly.
+No second user-facing influence-distance or kernel parameter is introduced.
+Dynamic phase-field or constitutive values shall not enter this cached weight
+unless the cache invalidation rules and authoritative design are first revised.
 
 The CPDI weighting functions provided by \texttt{ParticleDomainAccessor} remain bulk-grid transfer functions.  They shall not be substituted for the reconstructed-fault Q1 shape functions in the least-squares surface projection.
 
@@ -681,6 +765,14 @@ with
 \]
 The same matrix is reused for all projected scalar components that use the same particle set and geometric weights.
 
+For a derived scalar that is not itself a particle property, the manager may
+accept finite caller-computed values keyed by stable locally owned particle ID
+and return the replicated nodal projection without storing constitutive
+meaning. This path shall reuse the same cached mass operator and MPI reduction.
+Active associated particles require one value; inactive particles may be
+omitted. Volume-weighted RMS and maximum residuals against the projected Q1
+field shall be returned as generic diagnostics.
+
 \subsection{MPI assembly}
 Each rank assembles only contributions from its locally owned particles:
 \[
@@ -697,7 +789,9 @@ Then
 \]
 The sums shall be formed by MPI collective reduction.  No particle positions or particle values are gathered to a coordinator.
 
-All ranks use the same fault DoFHandler and identical sparsity pattern.  Matrix nonzero values may therefore be packed in deterministic sparsity-pattern order for the collective reduction.
+All ranks use the same ordered fault vertices and identical tridiagonal Q1
+layout. Matrix entries may therefore be packed in deterministic
+fault-major/vertex-major order for collective reduction.
 
 \subsection{Cache the matrix, not the nonlinear values}
 As long as particle positions, the fault geometry, and the geometric weights remain unchanged,
@@ -728,7 +822,8 @@ For every relevant local Stokes quadrature point, build a cache containing its c
 \begin{lstlisting}[language=C++]
 struct QPFaultProjection
 {
-  unsigned int fault_active_cell_index;
+  unsigned int fault_index;
+  unsigned int segment_index;
   double xi;
   double shape_0;
   double shape_1;
@@ -756,7 +851,8 @@ Only QPs inside the configured fault influence band need full projection entries
 
 \section{Spatial-search strategy}
 
-The runtime \texttt{Triangulation<dim-1,dim>} provides connectivity and neighbor relations but is not by itself an optimal nearest-embedded-cell search structure.
+The ordered-polyline registry provides current 2-D connectivity but is not by
+itself an optimal nearest-segment search structure.
 
 The implementation should reuse deal.II \texttt{GridTools::Cache} and related geometry utilities where they directly support the required operation.  If an explicit nearest-fault-cell acceleration structure is still needed, build an application-owned R-tree/AABB index from fault-cell bounding boxes.
 
@@ -771,8 +867,7 @@ Three lifetimes shall be distinguished explicitly.
 \subsection{Geometry-lifetime caches}
 Valid until persistent fault geometry changes:
 \begin{itemize}
-  \item runtime fault triangulation and DoFHandler;
-  \item persistent-ID to runtime-index maps;
+  \item ordered-segment adjacency and any future acceleration structure;
   \item fault-cell bounding boxes and spatial index;
   \item cell tangents/normals where cached.
 \end{itemize}
@@ -881,12 +976,11 @@ Additional bulk-mesh and particle-position/update counters may be used for QP an
 
 Checkpoint persistent data:
 \begin{itemize}
-  \item persistent fault vertex records;
-  \item persistent fault cell connectivity;
-  \item persistent IDs;
-  \item creation times;
+  \item ordered fault vertices and implicit segment connectivity;
+  \item projection half-width metadata;
+  \item the generic fault-property schema and committed values;
+  \item timestep-committed slip rate;
   \item fault constitutive state;
-  \item next persistent ID;
   \item geometry version.
 \end{itemize}
 
@@ -900,7 +994,8 @@ Do not checkpoint reconstructible runtime data:
   \item factorization/preconditioner objects.
 \end{itemize}
 
-After restart, rebuild the runtime triangulation, DoFHandler, index maps, and all required caches.
+After restart, rebuild property-name indices, current slip-rate state, and all
+projection/search caches from the serialized registry.
 
 \section{Timestep ordering}
 
@@ -974,42 +1069,42 @@ d_{\mathrm{tip}},\quad
 \lambda_s,\quad
 A_0,\quad
 \sigma_{\max},\quad
-\delta_{\max},\quad
-R_p,
+\delta_{\max},
 \]
-and the particle normal-distance kernel $K$.
+for future propagation geometry. The current particle influence half-widths
+come from stationary-profile support and the admitted-strip kernel is one.
 
 \section{Implementation stages}
 
-\subsection*{Stage 1: persistent registry and runtime fault mesh}
-Implement stable IDs, persistent registry, replicated \texttt{Triangulation<dim-1,dim>}, Q1 fault DoFHandler, rebuild logic, and explicit persistent-ID/runtime-index maps.  No propagation.
+\subsection*{Stage A: ownership and naming}
+Establish the generic manager/material ownership split and generic friction-law
+name without changing mechanics.
 
-\subsection*{Stage 2: surface geometry queries}
-Implement fault-cell traversal, 2-D closest-point projection, tangents/normals, surface locations, and a geometry-versioned spatial-search cache.
+\subsection*{Stage B: Maxwell stress history}
+Add the particle Maxwell-stress property and private non-rotational
+time-discrete Maxwell operations. Keep particle history frozen until a future
+post-convergence update.
 
-\subsection*{Stage 3: distributed phase-field sampling}
-Implement batched arbitrary-point evaluation of the distributed phase field.  Validate on known analytic/Q1 fields.
+\subsection*{Stage C: distributed adaptive \(I_h\)}
+Compute transient current \(I_h\) from distributed Q1 phase field, fixed
+surface mixtures, adaptive two-sided profiles, and consistent Q1 projection.
 
-\subsection*{Stage 4: transverse phase-field measurements}
-Implement $M$, $\delta$, $\sigma$, and $d_{\max}$ and validate on straight and curved prescribed diffuse profiles.
+\subsection*{Stage D: common cohesive state}
+Register committed \(T^{\rm coh}\) and previous \(I_h\), initialize them from
+the prescribed initial \(H\), and implement the exact non-committing cohesive
+and history-corrected \(\upsilon\) operations.
 
-\subsection*{Stage 5: particle-to-fault coupling cache and projection operator}
-Implement relevant-particle selection, projection caches, AMR-aware particle sampling measures, the weighted least-squares matrix, MPI reduction, solver reuse, and coverage diagnostics.
+\subsection*{Stage E: generic fault friction}
+Preserve rate-and-state friction and add the approved rate-dependent law.
 
-\subsection*{Stage 6: fault-to-QP cache}
-Implement cached QP-to-fault surface locations and Q1 interpolation with no MPI communication in the nonlinear hot loop.
+\subsection*{Stages F--I: mechanical coupling and lifecycle}
+Implement the surface residual and \(K_V\), then \(B/G\), the exact condensed
+operator, and finally the coupled nonlinear solve/commit/rollback lifecycle.
 
-\subsection*{Stage 7: 2-D temporary-geometry regularization}
-Implement the normal-displacement smoothing problem independently of propagation.
-
-\subsection*{Stage 8: 2-D tip direction and propagation}
-Implement weighted forward PCA, candidate prediction, candidate acceptance, temporary extension, regularization, and persistent commit.
-
-\subsection*{Stage 9: constitutive integration}
-Connect particle-to-fault projected quantities, fault state/slip-rate updates, and cached fault-to-QP interpolation inside the nonlinear solver.
-
-\subsection*{Stage 10: checkpoint/restart and AMR tests}
-Verify persistent IDs/state across restart and verify cache invalidation/rebuild behavior after bulk AMR and particle migration.
+\subsection*{Stages J--K: history feedback and benchmarks}
+Connect accepted constitutive history to phase-field feedback, then verify
+fixed-fault benchmarks. Propagation, 3-D surfaces, and overlapping faults
+remain deferred.
 
 \section{Rules for Codex}
 
@@ -1017,8 +1112,10 @@ When implementing this specification, Codex shall:
 \begin{enumerate}
   \item treat this document as authoritative for scientific and architectural decisions;
   \item implement only the requested stage;
-  \item use the persistent registry plus replicated \texttt{dealii::Triangulation<dim-1,dim>} architecture specified here;
-  \item not replace it with an unrelated custom mesh representation unless the document is first revised;
+  \item use the replicated ordered-polyline registry and generic property
+        storage specified here for the current 2-D implementation;
+  \item not add a duplicate runtime fault mesh without first revising the
+        authoritative documents;
   \item not store persistent state in triangulation user data/flags;
   \item reuse existing deal.II/ASPECT geometry, connectivity, FE, and MPI infrastructure whenever it satisfies the stated requirement;
   \item obey Section~\ref{sec:existing-interface}: reuse the authoritative phase-field, particle-domain, and RSF APIs and do not make the reconstructed-fault code depend on the old core-phase-field/phase-field-RSF architecture;

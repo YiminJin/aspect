@@ -34,8 +34,35 @@
 #include <deal.II/base/quadrature_lib.h>
 #include <deal.II/numerics/vector_tools_evaluate.h>
 
+#include <cstdint>
+#include <cstring>
+
 namespace aspect
 {
+  namespace
+  {
+    /**
+     * Compare a double's representation with the generic-property sentinel
+     * without executing a floating-point classification instruction. Generic
+     * reconstructed-fault properties start as signaling NaNs, which intentionally
+     * trip ASPECT's debug floating-point trap if passed to std::isfinite().
+     */
+    bool
+    is_uninitialized_property_sentinel(const double value)
+    {
+      static_assert(sizeof(double) == sizeof(std::uint64_t),
+                    "The cohesive-state sentinel check requires a 64-bit double.");
+      static_assert(std::numeric_limits<double>::is_iec559,
+                    "The cohesive-state sentinel check requires IEEE-754 doubles.");
+      std::uint64_t bits;
+      const double sentinel = numbers::signaling_nan<double>();
+      std::uint64_t sentinel_bits;
+      std::memcpy(&bits, &value, sizeof(bits));
+      std::memcpy(&sentinel_bits, &sentinel, sizeof(sentinel_bits));
+      return bits == sentinel_bits;
+    }
+  }
+
   namespace MaterialModel
   {
     template <int dim>
@@ -79,6 +106,64 @@ namespace aspect
              ExcInternalError());
       return 2.0 * coefficients.kappa * effective_bulk_strain_rate
              + coefficients.beta * previous_stress;
+    }
+
+
+
+    template <int dim>
+    typename PhaseFieldFault<dim>::CohesiveResponse
+    PhaseFieldFault<dim>::compute_cohesive_response(
+      const MaxwellCoefficients &coefficients,
+      const double current_normalization_integral,
+      const double previous_normalization_integral,
+      const double previous_cohesive_traction,
+      const double slip_rate,
+      const double current_h,
+      const double previous_h)
+    {
+      AssertThrow(std::isfinite(coefficients.beta)
+                  && coefficients.beta >= 0.0 && coefficients.beta <= 1.0,
+                  ExcMessage("The cohesive relaxation factor beta must lie in [0,1]."));
+      AssertThrow(std::isfinite(coefficients.kappa) && coefficients.kappa > 0.0,
+                  ExcMessage("The cohesive effective viscosity kappa must be finite and positive."));
+      AssertThrow(std::isfinite(current_normalization_integral)
+                  && current_normalization_integral > 0.0,
+                  ExcMessage("The current cohesive normalization integral must be finite and positive."));
+      AssertThrow(std::isfinite(previous_normalization_integral)
+                  && previous_normalization_integral > 0.0,
+                  ExcMessage("The previous cohesive normalization integral must be finite and positive."));
+      AssertThrow(std::isfinite(previous_cohesive_traction)
+                  && previous_cohesive_traction >= 0.0,
+                  ExcMessage("The previous cohesive traction must be finite and nonnegative."));
+      AssertThrow(std::isfinite(slip_rate) && slip_rate >= 0.0,
+                  ExcMessage("The cohesive slip rate must be finite and nonnegative."));
+      AssertThrow(std::isfinite(current_h) && current_h >= 0.0
+                  && std::isfinite(previous_h) && previous_h >= 0.0,
+                  ExcMessage("The current and previous cohesive degradation functions h "
+                             "must be finite and nonnegative."));
+
+      CohesiveResponse response;
+      response.cohesive_traction =
+        (coefficients.kappa * slip_rate
+         + coefficients.beta * previous_normalization_integral
+           * previous_cohesive_traction)
+        / current_normalization_integral;
+      response.localization_factor = current_h/current_normalization_integral;
+      response.history_correction =
+        coefficients.beta * previous_cohesive_traction/coefficients.kappa
+        * (current_h * previous_normalization_integral
+           / current_normalization_integral - previous_h);
+      response.crack_strain_rate =
+        response.localization_factor * slip_rate + response.history_correction;
+
+      AssertThrow(std::isfinite(response.cohesive_traction)
+                  && response.cohesive_traction >= 0.0
+                  && std::isfinite(response.localization_factor)
+                  && response.localization_factor >= 0.0
+                  && std::isfinite(response.history_correction)
+                  && std::isfinite(response.crack_strain_rate),
+                  ExcMessage("The common cohesive law produced a non-finite or inadmissible response."));
+      return response;
     }
 
 
@@ -181,12 +266,284 @@ namespace aspect
       if (!this->get_parameters().reconstruct_faults)
         return;
 
+      ReconstructedFaultManager<dim> &fault_manager =
+        this->get_reconstructed_fault_manager();
       const unsigned int n_chemical_fields =
         this->introspection().n_chemical_composition_fields();
       if (n_chemical_fields > 0)
         fault_composition_property_index =
-          this->get_reconstructed_fault_manager().register_property(
+          fault_manager.register_property(
             "phase field fault chemical compositions", n_chemical_fields);
+
+      cohesive_traction_property_index = fault_manager.register_property(
+        "phase field fault cohesive traction", 1);
+      previous_normalization_integral_property_index = fault_manager.register_property(
+        "phase field fault previous I h", 1);
+    }
+
+
+
+    template <int dim>
+    void
+    PhaseFieldFault<dim>::commit_cohesive_state(
+      const std::vector<std::vector<double>> &cohesive_tractions)
+    {
+      ReconstructedFaultManager<dim> &fault_manager =
+        this->get_reconstructed_fault_manager();
+      const auto &faults = fault_manager.get_faults();
+      AssertDimension(cohesive_tractions.size(), faults.size());
+      AssertDimension(current_normalization_integrals.size(), faults.size());
+      AssertIndexRange(cohesive_traction_property_index,
+                       fault_manager.get_property_information().size());
+      AssertIndexRange(previous_normalization_integral_property_index,
+                       fault_manager.get_property_information().size());
+      const unsigned int cohesive_position =
+        fault_manager.get_property_information()[cohesive_traction_property_index].position;
+      const unsigned int normalization_position =
+        fault_manager.get_property_information()[previous_normalization_integral_property_index].position;
+
+      for (unsigned int fault = 0; fault < faults.size(); ++fault)
+        {
+          AssertDimension(cohesive_tractions[fault].size(), faults[fault].n_vertices());
+          AssertDimension(current_normalization_integrals[fault].size(),
+                          faults[fault].n_vertices());
+          for (unsigned int vertex = 0; vertex < faults[fault].n_vertices(); ++vertex)
+            {
+              AssertThrow(std::isfinite(cohesive_tractions[fault][vertex])
+                          && cohesive_tractions[fault][vertex] >= 0.0,
+                          ExcMessage("Committed cohesive traction must be finite and nonnegative."));
+              AssertThrow(std::isfinite(current_normalization_integrals[fault][vertex])
+                          && current_normalization_integrals[fault][vertex] > 0.0,
+                          ExcMessage("Committed previous I_h must be finite and positive."));
+            }
+        }
+
+      // Validation above makes the following update atomic with respect to
+      // constitutive input errors.
+      for (unsigned int fault = 0; fault < faults.size(); ++fault)
+        for (unsigned int vertex = 0; vertex < faults[fault].n_vertices(); ++vertex)
+          {
+            ArrayView<double> properties =
+              fault_manager.get_fault(fault).get_properties(vertex);
+            properties[cohesive_position] = cohesive_tractions[fault][vertex];
+            properties[normalization_position] =
+              current_normalization_integrals[fault][vertex];
+          }
+    }
+
+
+
+    template <int dim>
+    void
+    PhaseFieldFault<dim>::initialize_cohesive_state_from_initial_fields()
+    {
+      AssertThrow(dim == 2, ExcNotImplemented());
+      ReconstructedFaultManager<dim> &fault_manager =
+        this->get_reconstructed_fault_manager();
+      const auto &faults = fault_manager.get_faults();
+      AssertThrow(!faults.empty(),
+                  ExcMessage("Initial cohesive state requires reconstructed fault geometry."));
+      AssertIndexRange(cohesive_traction_property_index,
+                       fault_manager.get_property_information().size());
+      AssertIndexRange(previous_normalization_integral_property_index,
+                       fault_manager.get_property_information().size());
+      const unsigned int cohesive_position =
+        fault_manager.get_property_information()[cohesive_traction_property_index].position;
+      const unsigned int normalization_position =
+        fault_manager.get_property_information()[previous_normalization_integral_property_index].position;
+
+      bool any_initialized = false;
+      bool any_uninitialized = false;
+      for (const auto &fault : faults)
+        for (unsigned int vertex = 0; vertex < fault.n_vertices(); ++vertex)
+          {
+            const ArrayView<const double> properties = fault.get_properties(vertex);
+            const bool cohesive_is_uninitialized =
+              is_uninitialized_property_sentinel(properties[cohesive_position]);
+            const bool normalization_is_uninitialized =
+              is_uninitialized_property_sentinel(properties[normalization_position]);
+            AssertThrow(cohesive_is_uninitialized == normalization_is_uninitialized,
+                        ExcMessage("A reconstructed fault contains partially initialized "
+                                   "cohesive history."));
+            if (!cohesive_is_uninitialized)
+              {
+                AssertThrow(std::isfinite(properties[cohesive_position])
+                            && std::isfinite(properties[normalization_position])
+                            && properties[cohesive_position] >= 0.0
+                            && properties[normalization_position] > 0.0,
+                            ExcMessage("Stored cohesive history is physically inadmissible."));
+                any_initialized = true;
+              }
+            else
+              any_uninitialized = true;
+          }
+      AssertThrow(!(any_initialized && any_uninitialized),
+                  ExcMessage("A reconstructed-fault collection contains a mixture of initialized "
+                             "and uninitialized cohesive history."));
+      if (any_initialized)
+        return;
+
+      compute_normalization_integrals();
+
+      const PhaseFieldHandler<dim> &phase_field_handler =
+        this->get_phase_field_handler();
+      const Particle::Manager<dim> &particle_manager =
+        phase_field_handler.get_associated_particle_manager();
+      const auto &particle_handler = particle_manager.get_particle_handler();
+      const auto &particle_data = particle_manager.get_property_manager().get_data_info();
+      AssertThrow(particle_data.fieldname_exists("crack_driving_force"),
+                  ExcMessage("Initial cohesive state requires the particle property "
+                             "'crack_driving_force'."));
+      const unsigned int crack_driving_force_position =
+        particle_data.get_position_by_field_name("crack_driving_force");
+
+      const unsigned int phase_field_component =
+        this->introspection().variable("phase_field").first_component_index;
+      std::vector<Point<dim>> particle_positions;
+      particle_positions.reserve(particle_handler.n_locally_owned_particles());
+      for (const auto &particle : particle_handler)
+        particle_positions.push_back(particle.get_location());
+
+      Utilities::MPI::RemotePointEvaluation<dim> point_cache;
+      point_cache.reinit(phase_field_handler.get_grid_cache(), particle_positions);
+      const std::vector<double> phase_field_values =
+        VectorTools::point_values<1>(point_cache,
+                                     this->get_dof_handler(),
+                                     this->get_solution(),
+                                     VectorTools::EvaluationFlags::avg,
+                                     phase_field_component);
+      AssertDimension(phase_field_values.size(), particle_positions.size());
+
+      double local_minimum_phase_field = std::numeric_limits<double>::max();
+      double local_maximum_phase_field = -std::numeric_limits<double>::max();
+      bool local_nonfinite_phase_field = false;
+      for (const double phase_field : phase_field_values)
+        {
+          local_nonfinite_phase_field = local_nonfinite_phase_field
+                                        || !std::isfinite(phase_field);
+          if (std::isfinite(phase_field))
+            {
+              local_minimum_phase_field = std::min(local_minimum_phase_field, phase_field);
+              local_maximum_phase_field = std::max(local_maximum_phase_field, phase_field);
+            }
+        }
+      const unsigned int any_nonfinite_phase_field = Utilities::MPI::max(
+        local_nonfinite_phase_field ? 1u : 0u, this->get_mpi_communicator());
+      AssertThrow(any_nonfinite_phase_field == 0,
+                  ExcMessage("Initial cohesive state encountered a non-finite phase field."));
+      const double minimum_phase_field = Utilities::MPI::min(
+        local_minimum_phase_field, this->get_mpi_communicator());
+      const double maximum_phase_field = Utilities::MPI::max(
+        local_maximum_phase_field, this->get_mpi_communicator());
+      validate_normalization_phase_field_minimum(
+        minimum_phase_field, "initial cohesive q projection");
+      AssertThrow(maximum_phase_field <= 1.0,
+                  ExcMessage("Initial cohesive state violates the physical upper phase-field "
+                             "bound: maximum phi_h="
+                             + Utilities::to_string(maximum_phase_field)
+                             + ". The upper phase-field bound is not clipped."));
+
+      const std::vector<unsigned int> chemical_field_indices =
+        this->introspection().chemical_composition_field_indices();
+      std::vector<unsigned int> chemical_property_positions;
+      chemical_property_positions.reserve(chemical_field_indices.size());
+      for (const unsigned int field_index : chemical_field_indices)
+        {
+          AssertThrow(this->get_parameters().compositional_field_methods[field_index]
+                      == Parameters<dim>::AdvectionFieldMethod::particles,
+                      ExcMessage("Initial cohesive state requires every chemical composition "
+                                 "field to be advected by particles."));
+          const auto mapped_property =
+            this->get_parameters().mapped_particle_properties.find(field_index);
+          AssertThrow(mapped_property
+                      != this->get_parameters().mapped_particle_properties.end(),
+                      ExcMessage("Initial cohesive state requires every chemical composition "
+                                 "field to be mapped to a particle property."));
+          AssertThrow(particle_data.fieldname_exists(mapped_property->second.first),
+                      ExcMessage("A mapped chemical particle property is not registered."));
+          const unsigned int n_components =
+            particle_data.get_components_by_field_name(mapped_property->second.first);
+          AssertThrow(mapped_property->second.second < n_components,
+                      ExcMessage("A mapped chemical particle-property component is out of range."));
+          chemical_property_positions.push_back(
+            particle_data.get_position_by_field_name(mapped_property->second.first)
+            + mapped_property->second.second);
+        }
+
+      std::map<types::particle_index, double> particle_q_values;
+      std::string local_error;
+      unsigned int particle_index = 0;
+      for (const auto &particle : particle_handler)
+        {
+          const ArrayView<const double> properties = particle.get_properties();
+          std::vector<double> chemical_compositions(chemical_property_positions.size());
+          for (unsigned int c = 0; c < chemical_property_positions.size(); ++c)
+            chemical_compositions[c] = properties[chemical_property_positions[c]];
+          const std::vector<double> volume_fractions =
+            MaterialUtilities::compute_composition_fractions(chemical_compositions);
+          const double shear_modulus = MaterialUtilities::average_value(
+            volume_fractions, elastic_shear_moduli, viscosity_averaging);
+          const double H = properties[crack_driving_force_position];
+          const double phi = std::max(phase_field_values[particle_index++], 0.0);
+          double q = 0.0;
+          if (!std::isfinite(shear_modulus) || shear_modulus <= 0.0
+              || !std::isfinite(H) || H < 0.0)
+            {
+              if (local_error.empty())
+                local_error = "Initial cohesive q has inadmissible G or H at particle "
+                              + Utilities::int_to_string(particle.get_id()) + ".";
+            }
+          else
+            {
+              const double degradation = phase_field_handler.energetic_degradation(
+                volume_fractions, phi);
+              if (!std::isfinite(degradation) || degradation < 0.0)
+                {
+                  if (local_error.empty())
+                    local_error = "Initial cohesive q has an inadmissible degradation "
+                                  "factor at particle "
+                                  + Utilities::int_to_string(particle.get_id()) + ".";
+                }
+              else
+                {
+                  q = degradation * std::sqrt(2.0*shear_modulus*H);
+                  if ((!std::isfinite(q) || q < 0.0) && local_error.empty())
+                    local_error = "Initial cohesive q is inadmissible at particle "
+                                  + Utilities::int_to_string(particle.get_id()) + ".";
+                }
+            }
+          particle_q_values.emplace(particle.get_id(), q);
+        }
+      AssertDimension(particle_index, phase_field_values.size());
+
+      const unsigned int rank =
+        Utilities::MPI::this_mpi_process(this->get_mpi_communicator());
+      const unsigned int n_processes =
+        Utilities::MPI::n_mpi_processes(this->get_mpi_communicator());
+      const unsigned int error_rank = Utilities::MPI::min(
+        local_error.empty() ? n_processes : rank, this->get_mpi_communicator());
+      const std::string error = error_rank < n_processes
+                                ? Utilities::MPI::broadcast(
+                                    this->get_mpi_communicator(), local_error, error_rank)
+                                : std::string();
+      AssertThrow(error_rank == n_processes, ExcMessage(error));
+
+      const auto projection = fault_manager.project_particle_scalar(particle_q_values);
+      initial_cohesive_projection_diagnostics = projection.diagnostics;
+      commit_cohesive_state(projection.nodal_values);
+
+      for (unsigned int fault = 0; fault < projection.diagnostics.size(); ++fault)
+        {
+          const auto &diagnostic = projection.diagnostics[fault];
+          this->get_pcout()
+            << "   Initial cohesive q profile variation for fault " << fault
+            << ": weighted RMS=" << diagnostic.weighted_rms_residual
+            << " Pa, maximum=" << diagnostic.maximum_absolute_residual
+            << " Pa, normalized RMS="
+            << diagnostic.normalized_weighted_rms_residual
+            << ", normalized maximum="
+            << diagnostic.normalized_maximum_absolute_residual << std::endl;
+        }
     }
 
 

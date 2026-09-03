@@ -212,11 +212,16 @@ TEST_CASE("ReconstructedFaultManager validates slip-rate initialization")
 TEST_CASE("ReconstructedFaultManager checkpoint restores committed slip rate")
 {
   aspect::ReconstructedFaultManager<2> manager;
-  manager.register_property("state", 1);
+  const unsigned int cohesive =
+    manager.register_property("phase field fault cohesive traction", 1);
+  const unsigned int previous_I_h =
+    manager.register_property("phase field fault previous I h", 1);
   manager.add_reconstructed_fault({dealii::Point<2>(0,0), dealii::Point<2>(1,0)},
                                   {0.5, 0.75});
   manager.initialize_slip_rate(0, {2.0, 3.0});
-  manager.get_fault(0).get_properties(0)[0] = 7.0;
+  const auto &property_information = manager.get_property_information();
+  manager.get_fault(0).get_properties(0)[property_information[cohesive].position] = 7.0;
+  manager.get_fault(0).get_properties(0)[property_information[previous_I_h].position] = 2.5;
   manager.begin_slip_rate_nonlinear_solve();
   manager.begin_slip_rate_trial();
   manager.set_slip_rate_trial({{10.0, 10.0}}, 1.0);
@@ -238,11 +243,18 @@ TEST_CASE("ReconstructedFaultManager checkpoint restores committed slip rate")
 
   REQUIRE(restored.get_faults().size() == 1);
   REQUIRE(restored.get_fault(0).vertex(1) == dealii::Point<2>(1,0));
-  REQUIRE(restored.get_fault(0).get_properties(0)[0] == Approx(7.0));
+  const auto &restored_information = restored.get_property_information();
+  REQUIRE(restored.get_fault(0).get_properties(0)[restored_information[
+            restored.get_property_index("phase field fault cohesive traction")].position]
+          == Approx(7.0));
+  REQUIRE(restored.get_fault(0).get_properties(0)[restored_information[
+            restored.get_property_index("phase field fault previous I h")].position]
+          == Approx(2.5));
   // Checkpoints contain timestep state, not an accepted Newton iterate or trial candidate.
   REQUIRE(restored.get_slip_rate(0)[0] == Approx(2.0));
   REQUIRE(restored.interpolate_slip_rate(0, 0, 0.5) == Approx(2.5));
-  REQUIRE(restored.has_property("state"));
+  REQUIRE(restored.has_property("phase field fault cohesive traction"));
+  REQUIRE(restored.has_property("phase field fault previous I h"));
 }
 
 
