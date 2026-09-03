@@ -132,6 +132,12 @@ quantities are obtained through separate `PhaseFieldModel` accessors; none is
 duplicated in reconstructed-fault parameters. The existing phase-field length
 scale is likewise reused through `PhaseFieldHandler`.
 
+The generic upper-admissibility accessor defaults to the physical upper bound
+`1.0`; this does not impose the fault model's interior cutoff on future phase-
+field models. Algorithms that require a strict interior endpoint validate that
+contract explicitly. `PhaseFieldFault` overrides the default with `0.99` for
+the legacy slip-rate normalizer.
+
 ## 7. Existing code that must not define the new architecture
 
 Do not base the reconstructed-fault architecture on:
@@ -485,11 +491,26 @@ at
 
 The activation threshold is not used for this clamp. The minimum raw sampled
 phase field is tracked across all profiles and MPI ranks. The initial
-conservative dimensionless undershoot tolerance is \(10^{-4}\); a global
-minimum below \(-10^{-4}\) is an invariant failure that reports the raw value,
-tolerance, and sample location. All raw samples must be finite. No analogous
+empirical dimensionless error-detection threshold is \(10^{-4}\). It is an
+internal invariant guard, not a physical parameter, solver tolerance,
+convergence criterion, or user-adjustable numerical convergence parameter. A
+global minimum below \(-10^{-4}\) is an invariant failure that reports the raw
+value, threshold, and sample location. All raw samples must be finite. No analogous
 upper clipping is permitted: a raw value above one is an invariant failure,
 while \(\bar g=0\), including a possible \(\phi=1\) case, is reported explicitly
 as an `I_h` singularity rather than a phase-field range violation. A tail value
 \(\phi_h=0\) is admissible. Current \(I_h\) is private transient material-model
 data in this stage and is not connected to the mechanical solve.
+
+The consistent Q1 projection of positive quadrature-point normalization
+integrals is retained. Because consistent projection is not positivity
+preserving in general, positive nodal coefficients are a tested property of
+the smooth intended profiles, not a generic mathematical guarantee.
+
+Stage C accuracy is checked separately from fault reconstruction: the adaptive
+kernel is compared with an analytic profile integral under quadrature- and
+tail-tolerance refinement, and the distributed Q1 path is compared with an
+independently integrated Q1 reference under bulk-mesh refinement. The Voro
+lifecycle smoke fixture retains a low activation threshold only to bootstrap
+geometry; reconstruction behavior, location, and accuracy are not under test
+in that fixture.

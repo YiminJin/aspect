@@ -57,7 +57,7 @@ namespace aspect
     double
     PhaseFieldModel<dim>::get_phase_field_upper_admissibility_threshold() const
     {
-      return 0.99;
+      return 1.0;
     }
   }
 
@@ -257,6 +257,13 @@ namespace aspect
       : phi_min(phi_min_)
       , phi_max(phi_max_)
     {
+      AssertThrow(std::isfinite(phi_min) && std::isfinite(phi_max)
+                  && phi_min > 0.0 && phi_min < phi_max && phi_max < 1.0,
+                  ExcMessage("The legacy phase-field slip-rate normalizer requires "
+                             "finite bounds satisfying 0 < phi_min < phi_max < 1. "
+                             "A phase-field material model that uses this normalizer "
+                             "must provide a strict interior upper admissibility threshold."));
+
       // Distribute the sample points on a uniform logit grid
       logit_phi_hat[0]   = std::log(phi_min / (1. - phi_min));
       logit_phi_hat[M-1] = std::log(phi_max / (1. - phi_max));

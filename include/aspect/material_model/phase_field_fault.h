@@ -28,6 +28,8 @@
 #include <aspect/material_model/equation_of_state/multicomponent_incompressible.h>
 #include <aspect/material_model/rheology/fault_friction.h>
 
+#include <functional>
+
 namespace aspect
 {
   namespace MaterialModel
@@ -122,6 +124,56 @@ namespace aspect
                                 const double degradation,
                                 const std::string &context);
 
+        /** One distributed bulk phase-field sample used by the profile integrator. */
+        struct NormalizationPointSample
+        {
+          bool found = false;
+          double phase_field = numbers::signaling_nan<double>();
+          double cell_diameter = numbers::signaling_nan<double>();
+        };
+
+        /** Geometry and identity held fixed while integrating one normal profile. */
+        struct NormalizationProfile
+        {
+          unsigned int id = numbers::invalid_unsigned_int;
+          unsigned int fault_index = numbers::invalid_unsigned_int;
+          unsigned int segment_index = numbers::invalid_unsigned_int;
+          double xi = numbers::signaling_nan<double>();
+          double surface_weight = numbers::signaling_nan<double>();
+          Point<dim> origin;
+          Tensor<1,dim> normal;
+          std::vector<double> material_fractions;
+        };
+
+        using NormalizationPointEvaluator =
+          std::function<std::vector<NormalizationPointSample>(const std::vector<Point<dim>> &)>;
+
+        using NormalizationIntegrandEvaluator =
+          std::function<double(const NormalizationProfile &,
+                               unsigned int,
+                               double,
+                               const Point<dim> &,
+                               const NormalizationPointSample &)>;
+
+        /**
+         * Integrate locally owned profiles while all ranks participate in
+         * every distributed point-evaluation collective.
+         */
+        static std::vector<double>
+        integrate_normalization_profiles(
+          const std::vector<NormalizationProfile> &profiles,
+          const double length_scale,
+          const double quadrature_tolerance,
+          const double tail_tolerance,
+          const MPI_Comm communicator,
+          const NormalizationPointEvaluator &evaluate_points,
+          const NormalizationIntegrandEvaluator &integrand);
+
+        /**
+         * Internal empirical error-detection threshold for excessive raw
+         * phase-field undershoot. This is not a physical parameter, a solver
+         * tolerance, or a numerical convergence-control parameter.
+         */
         static constexpr double normalization_phase_field_undershoot_tolerance = 1.e-4;
 
         double 
@@ -185,6 +237,8 @@ namespace aspect
       class PhaseFieldFaultTestAccess
       {
         public:
+          using PointSample = typename PhaseFieldFault<dim>::NormalizationPointSample;
+
           static const std::vector<std::vector<double>> &
           compute_normalization_integrals(PhaseFieldFault<dim> &model)
           {
@@ -230,6 +284,50 @@ namespace aspect
           {
             return PhaseFieldFault<dim>::normalization_integrand(
               phase_field, degradation, context);
+          }
+
+          static std::vector<double>
+          integrate_normalization_profiles(
+            const std::vector<Point<dim>> &origins,
+            const std::vector<Tensor<1,dim>> &normals,
+            const double length_scale,
+            const double quadrature_tolerance,
+            const double tail_tolerance,
+            const MPI_Comm communicator,
+            const typename PhaseFieldFault<dim>::NormalizationPointEvaluator &evaluate_points,
+            const std::function<double(double)> &degradation)
+          {
+            AssertDimension(origins.size(), normals.size());
+            std::vector<typename PhaseFieldFault<dim>::NormalizationProfile> profiles(origins.size());
+            for (unsigned int i = 0; i < profiles.size(); ++i)
+              {
+                profiles[i].id = i;
+                profiles[i].fault_index = 0;
+                profiles[i].segment_index = 0;
+                profiles[i].origin = origins[i];
+                profiles[i].normal = normals[i];
+              }
+
+            const auto integrand =
+              [&degradation](const typename PhaseFieldFault<dim>::NormalizationProfile &profile,
+                             const unsigned int side,
+                             const double zeta,
+                             const Point<dim> &,
+                             const typename PhaseFieldFault<dim>::NormalizationPointSample &sample)
+              {
+                const std::string context =
+                  "test profile " + Utilities::int_to_string(profile.id)
+                  + ", side " + Utilities::int_to_string(side)
+                  + ", zeta=" + Utilities::to_string(zeta);
+                const double phi = PhaseFieldFault<dim>::normalization_effective_phase_field(
+                  sample.phase_field, context);
+                return PhaseFieldFault<dim>::normalization_integrand(
+                  phi, degradation(phi), context);
+              };
+
+            return PhaseFieldFault<dim>::integrate_normalization_profiles(
+              profiles, length_scale, quadrature_tolerance, tail_tolerance,
+              communicator, evaluate_points, integrand);
           }
       };
     }

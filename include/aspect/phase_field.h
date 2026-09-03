@@ -68,7 +68,13 @@ namespace aspect
         double
         get_phase_field_activation_threshold() const;
 
-        /** Return the model-specific upper admissibility threshold. */
+        /**
+         * Return the model-specific upper admissibility threshold.
+         *
+         * The generic default is the physical upper bound one. Models that
+         * use algorithms requiring a strict interior bound, such as the
+         * legacy slip-rate normalizer, must override this value.
+         */
         virtual
         double
         get_phase_field_upper_admissibility_threshold() const;

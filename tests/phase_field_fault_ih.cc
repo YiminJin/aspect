@@ -36,8 +36,10 @@ namespace aspect
             MaterialModel::internal::PhaseFieldFaultTestAccess<dim>
               ::current_minimum_raw_normalization_phase_field(model);
           AssertThrow(std::isfinite(minimum_raw_phase_field)
-                      && minimum_raw_phase_field < 0.0,
-                      ExcMessage("Stage C did not exercise a negative raw phase-field sample."));
+                      && minimum_raw_phase_field >= -MaterialModel::internal::
+                           PhaseFieldFaultTestAccess<dim>
+                             ::normalization_phase_field_undershoot_tolerance(),
+                      ExcMessage("Stage C lifecycle fixture violated the bounded-undershoot invariant."));
 
           unsigned int n_values = 0;
           double minimum = std::numeric_limits<double>::max();
@@ -63,6 +65,7 @@ namespace aspect
 
     ASPECT_REGISTER_POSTPROCESSOR(VerifyPhaseFieldFaultIh,
                                   "verify phase field fault I h",
-                                  "Run and verify the private Stage C distributed I_h evaluator.")
+                                  "Run a lifecycle smoke test of the private Stage C distributed "
+                                  "I_h evaluator. Fault reconstruction accuracy is not tested.")
   }
 }

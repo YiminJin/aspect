@@ -40,7 +40,10 @@ TEST_CASE("Phase-field physical and activation ranges are distinct")
   const TestPhaseFieldModel model;
   REQUIRE(model.get_phase_field_range() == std::make_pair(0.0, 1.0));
   REQUIRE(model.get_phase_field_activation_threshold() == 0.01);
-  REQUIRE(model.get_phase_field_upper_admissibility_threshold() == 0.99);
+  REQUIRE(model.get_phase_field_upper_admissibility_threshold() == 1.0);
+
+  aspect::MaterialModel::PhaseFieldFault<2> fault_model;
+  REQUIRE(fault_model.get_phase_field_upper_admissibility_threshold() == 0.99);
 }
 
 
@@ -58,12 +61,26 @@ TEST_CASE("I_h distinguishes physical phase-field range from singular degradatio
   REQUIRE_NOTHROW(TestAccess::validate_normalization_phase_field_minimum(-tolerance));
   REQUIRE_THROWS_WITH(
     TestAccess::validate_normalization_phase_field_minimum(-2.0*tolerance),
-    Catch::Matchers::Contains("undershoot exceeds the numerical tolerance"));
+    Catch::Matchers::Contains("error-detection"));
   REQUIRE(TestAccess::normalization_integrand(0.0, 1.0) == 0.0);
   REQUIRE_THROWS_WITH(TestAccess::normalization_integrand(1.0, 0.0),
                       Catch::Matchers::Contains("I_h singularity"));
   REQUIRE_THROWS_WITH(TestAccess::normalization_effective_phase_field(1.0+1.e-6),
                       Catch::Matchers::Contains("phase-field invariant"));
+}
+
+
+
+TEST_CASE("Legacy slip-rate normalization requires an interior phase-field interval")
+{
+  const aspect::PhaseField::GeometricFunction geometric_function(0.1, 1.0, 8.0/3.0);
+  const aspect::PhaseField::DegradationFunction degradation_function(0.0, 1.0);
+  REQUIRE_THROWS_WITH(
+    aspect::PhaseField::SlipRateNormalizer(geometric_function,
+                                           degradation_function,
+                                           0.01,
+                                           1.0),
+    Catch::Matchers::Contains("strict interior"));
 }
 
 

@@ -86,6 +86,10 @@ Reconstruction and phase-field mesh refinement shall continue to use the
 activation threshold. Prescribed fault-core validation and legacy slip-rate
 normalization shall continue to use both model-specific admissibility
 thresholds. No independent duplicate threshold shall be introduced.
+The generic upper-admissibility default is the physical upper bound $1$. A
+model that uses an algorithm requiring a strict interior endpoint must
+override it; in particular, \texttt{PhaseFieldFault} supplies $0.99$ for the
+legacy slip-rate normalizer.
 
 \paragraph{Length scale.}
 The phase-field length scale $\ell$ is already parsed by \texttt{PhaseFieldHandler<dim>} and stored in its \texttt{PhaseField::GeometricFunction}; \texttt{GeometricFunction::get\_length\_scale()} already returns it.  \textbf{MUST reuse:} the reconstructed-fault module shall not define a duplicate fracture length scale.  Because \texttt{PhaseFieldHandler<dim>} currently does not expose $\ell$ directly, the preferred change is to add a thin const accessor such as
@@ -577,15 +581,29 @@ degradation function shall therefore be evaluated using
 \]
 The activation threshold shall not be used as this clamp. The minimum raw
 sampled phase field shall be tracked across all profiles and MPI ranks. The
-initial conservative dimensionless undershoot tolerance is $10^{-4}$; a
-global minimum below $-10^{-4}$ shall fail with diagnostics giving the raw
-minimum, the tolerance, and the sample location. Every raw sample must be
-finite. The upper end shall not be clipped: a raw value above one is an
+internal empirical dimensionless error-detection threshold is $10^{-4}$; it
+is not a physical parameter, solver tolerance, convergence criterion, or
+user-adjustable numerical convergence parameter. A global minimum below
+$-10^{-4}$ shall fail with diagnostics giving the raw minimum, the threshold,
+and the sample location. Every raw sample must be finite. The upper end shall
+not be clipped: a raw value above one is an
 invariant failure, while the independent constitutive condition $\bar g>0$
 remains authoritative. Thus $\bar g=0$, including a possible $\phi=1$
 singularity, shall be reported explicitly as an $I_h$ singularity and shall
 not be classified as a phase-field range violation. A tail value $\phi_h=0$
 is admissible.
+
+The consistent Q1 projection of positive quadrature-point normalization
+integrals is retained. Consistent projection is not positivity preserving in
+general, so positivity of its nodal coefficients is a tested property of the
+smooth intended fault profiles rather than a generic mathematical invariant.
+
+Verification shall include an analytic profile integral, quadrature- and
+tail-tolerance convergence, and a distributed Q1 bulk-mesh refinement study
+against an independently evaluated reference integral. A lifecycle smoke test
+may use an artificially low reconstruction activation threshold solely to
+provide geometry, but in that fixture reconstruction behavior is explicitly
+outside the test's purpose.
 
 \section{Particle-to-fault projection}
 
