@@ -30,6 +30,7 @@
 #include <aspect/reconstructed_fault.h>
 
 #include <functional>
+#include <map>
 
 namespace aspect
 {
@@ -47,6 +48,10 @@ namespace aspect
       public SimulatorAccess<dim>
     {
       public:
+        /**
+         * @name Material-model interface
+         * @{
+         */
         void 
         evaluate(const MaterialModel::MaterialModelInputs<dim> &in,
                  MaterialModel::MaterialModelOutputs<dim> &out) const override;
@@ -75,10 +80,17 @@ namespace aspect
 
         void
         parse_parameters(ParameterHandler &prm) override;
+        /**
+         * @}
+         */
 
       private:
         friend class internal::PhaseFieldFaultTestAccess<dim>;
 
+        /**
+         * @name Maxwell constitutive helpers
+         * @{
+         */
         /** Time-discrete coefficients of the Maxwell law. */
         struct MaxwellCoefficients
         {
@@ -100,7 +112,14 @@ namespace aspect
         compute_maxwell_stress(const MaxwellCoefficients &coefficients,
                                const SymmetricTensor<2,dim> &effective_bulk_strain_rate,
                                const SymmetricTensor<2,dim> &previous_stress);
+        /**
+         * @}
+         */
 
+        /**
+         * @name Cohesive constitutive helpers
+         * @{
+         */
         /** Non-committing result of the common cohesive constitutive law. */
         struct CohesiveResponse
         {
@@ -119,40 +138,34 @@ namespace aspect
                                   const double slip_rate,
                                   const double current_h,
                                   const double previous_h);
+        /**
+         * @}
+         */
 
+        /**
+         * @name Initial cohesive-state setup
+         * @{
+         */
         /** Build and commit the initial cohesive state from H and the initial phase field. */
         void
         initialize_cohesive_state_from_initial_fields();
+
+        /** Evaluate initial q for locally owned particles associated with a fault. */
+        std::map<types::particle_index, double>
+        evaluate_initial_cohesive_particle_values();
 
         /** Explicitly commit already accepted cohesive history. Not wired in Stage D. */
         void
         commit_cohesive_state(
           const std::vector<std::vector<double>> &cohesive_tractions);
-
-        /** Recompute transient nodal I_h from the current distributed phase field. */
-        void
-        compute_normalization_integrals();
+        /**
+         * @}
+         */
 
         /**
-         * Return the phase field used to evaluate degradation for I_h.
-         * Negative numerical undershoots are mapped to zero. Finite values
-         * above the physical upper bound are rejected without clipping.
+         * @name Adaptive normalization-profile integration
+         * @{
          */
-        static double
-        normalization_effective_phase_field(const double raw_phase_field,
-                                            const std::string &context);
-
-        /** Validate the global minimum raw I_h sample against its tolerance. */
-        static void
-        validate_normalization_phase_field_minimum(const double minimum_raw_phase_field,
-                                                   const std::string &context);
-
-        /** Validate one effective phase field/degradation pair and return h. */
-        static double
-        normalization_integrand(const double phase_field,
-                                const double degradation,
-                                const std::string &context);
-
         /** One distributed bulk phase-field sample used by the profile integrator. */
         struct NormalizationPointSample
         {
@@ -197,6 +210,56 @@ namespace aspect
           const MPI_Comm communicator,
           const NormalizationPointEvaluator &evaluate_points,
           const NormalizationIntegrandEvaluator &integrand);
+        /**
+         * @}
+         */
+
+        /**
+         * @name Normalization-integral evaluation
+         * @{
+         */
+        /** Recompute transient nodal I_h from the current distributed phase field. */
+        void
+        compute_normalization_integrals();
+
+        /**
+         * Return the phase field used to evaluate degradation for I_h.
+         * Negative numerical undershoots are mapped to zero. Finite values
+         * above the physical upper bound are rejected without clipping.
+         */
+        static double
+        normalization_effective_phase_field(const double raw_phase_field,
+                                            const std::string &context);
+
+        /** Validate the global minimum raw I_h sample against its tolerance. */
+        static void
+        validate_normalization_phase_field_minimum(const double minimum_raw_phase_field,
+                                                   const std::string &context);
+
+        /** Validate one effective phase field/degradation pair and return h. */
+        static double
+        normalization_integrand(const double phase_field,
+                                const double degradation,
+                                const std::string &context);
+
+        /** Project chemical particle properties to the fault and return their component offset. */
+        unsigned int
+        project_surface_chemical_compositions();
+
+        /** Construct the balanced rank-owned set of normal profiles. */
+        std::vector<NormalizationProfile>
+        build_owned_normalization_profiles(
+          const unsigned int fault_composition_position) const;
+
+        /** Evaluate the distributed Q1 phase field and local cell size at arbitrary points. */
+        std::vector<NormalizationPointSample>
+        evaluate_normalization_points(const std::vector<Point<dim>> &points) const;
+
+        /** Consistently project owned profile integrals to replicated fault vertices. */
+        void
+        project_normalization_integrals_to_fault(
+          const std::vector<NormalizationProfile> &profiles,
+          const std::vector<double> &profile_integrals);
 
         /**
          * Internal empirical error-detection threshold for excessive raw
@@ -204,7 +267,14 @@ namespace aspect
          * tolerance, or a numerical convergence-control parameter.
          */
         static constexpr double normalization_phase_field_undershoot_tolerance = 1.e-4;
+        /**
+         * @}
+         */
 
+        /**
+         * @name Material parameters and state
+         * @{
+         */
         double 
         calculate_creep_viscosity(const std::vector<double> &volume_fractions,
                                   const double               temperature) const;
@@ -266,147 +336,11 @@ namespace aspect
           initial_cohesive_projection_diagnostics;
 
         std::unique_ptr<SolutionEvaluator<dim>> solution_evaluator;
+        /**
+         * @}
+         */
     };
 
-    namespace internal
-    {
-      /** Narrow test seam for private PhaseFieldFault Stage B-D operations. */
-      template <int dim>
-      class PhaseFieldFaultTestAccess
-      {
-        public:
-          using PointSample = typename PhaseFieldFault<dim>::NormalizationPointSample;
-          using CohesiveResponse = typename PhaseFieldFault<dim>::CohesiveResponse;
-
-          static const std::vector<std::vector<double>> &
-          compute_normalization_integrals(PhaseFieldFault<dim> &model)
-          {
-            model.compute_normalization_integrals();
-            return model.current_normalization_integrals;
-          }
-
-          static double
-          current_minimum_raw_normalization_phase_field(
-            const PhaseFieldFault<dim> &model)
-          {
-            return model.current_minimum_raw_normalization_phase_field;
-          }
-
-          static double
-          normalization_effective_phase_field(
-            const double raw_phase_field,
-            const std::string &context = "test profile")
-          {
-            return PhaseFieldFault<dim>::normalization_effective_phase_field(
-              raw_phase_field, context);
-          }
-
-          static void
-          validate_normalization_phase_field_minimum(
-            const double minimum_raw_phase_field,
-            const std::string &context = "test profile")
-          {
-            PhaseFieldFault<dim>::validate_normalization_phase_field_minimum(
-              minimum_raw_phase_field, context);
-          }
-
-          static constexpr double
-          normalization_phase_field_undershoot_tolerance()
-          {
-            return PhaseFieldFault<dim>::normalization_phase_field_undershoot_tolerance;
-          }
-
-          static double
-          normalization_integrand(const double phase_field,
-                                  const double degradation,
-                                  const std::string &context = "test profile")
-          {
-            return PhaseFieldFault<dim>::normalization_integrand(
-              phase_field, degradation, context);
-          }
-
-          static std::vector<double>
-          integrate_normalization_profiles(
-            const std::vector<Point<dim>> &origins,
-            const std::vector<Tensor<1,dim>> &normals,
-            const double length_scale,
-            const double quadrature_tolerance,
-            const double tail_tolerance,
-            const MPI_Comm communicator,
-            const typename PhaseFieldFault<dim>::NormalizationPointEvaluator &evaluate_points,
-            const std::function<double(double)> &degradation)
-          {
-            AssertDimension(origins.size(), normals.size());
-            std::vector<typename PhaseFieldFault<dim>::NormalizationProfile> profiles(origins.size());
-            for (unsigned int i = 0; i < profiles.size(); ++i)
-              {
-                profiles[i].id = i;
-                profiles[i].fault_index = 0;
-                profiles[i].segment_index = 0;
-                profiles[i].origin = origins[i];
-                profiles[i].normal = normals[i];
-              }
-
-            const auto integrand =
-              [&degradation](const typename PhaseFieldFault<dim>::NormalizationProfile &profile,
-                             const unsigned int side,
-                             const double zeta,
-                             const Point<dim> &,
-                             const typename PhaseFieldFault<dim>::NormalizationPointSample &sample)
-              {
-                const std::string context =
-                  "test profile " + Utilities::int_to_string(profile.id)
-                  + ", side " + Utilities::int_to_string(side)
-                  + ", zeta=" + Utilities::to_string(zeta);
-                const double phi = PhaseFieldFault<dim>::normalization_effective_phase_field(
-                  sample.phase_field, context);
-                return PhaseFieldFault<dim>::normalization_integrand(
-                  phi, degradation(phi), context);
-              };
-
-            return PhaseFieldFault<dim>::integrate_normalization_profiles(
-              profiles, length_scale, quadrature_tolerance, tail_tolerance,
-              communicator, evaluate_points, integrand);
-          }
-
-          static CohesiveResponse
-          compute_cohesive_response(const double beta,
-                                    const double kappa,
-                                    const double current_normalization_integral,
-                                    const double previous_normalization_integral,
-                                    const double previous_cohesive_traction,
-                                    const double slip_rate,
-                                    const double current_h,
-                                    const double previous_h)
-          {
-            return PhaseFieldFault<dim>::compute_cohesive_response(
-              {beta, kappa}, current_normalization_integral,
-              previous_normalization_integral, previous_cohesive_traction,
-              slip_rate, current_h, previous_h);
-          }
-
-          static void
-          initialize_cohesive_state_from_initial_fields(PhaseFieldFault<dim> &model)
-          {
-            model.initialize_cohesive_state_from_initial_fields();
-          }
-
-          static void
-          commit_cohesive_state(
-            PhaseFieldFault<dim> &model,
-            const std::vector<std::vector<double>> &cohesive_tractions)
-          {
-            model.commit_cohesive_state(cohesive_tractions);
-          }
-
-          static const std::vector<typename ReconstructedFaultManager<dim>::
-                                   ParticleScalarProjectionDiagnostics> &
-          initial_cohesive_projection_diagnostics(const PhaseFieldFault<dim> &model)
-          {
-            return model.initial_cohesive_projection_diagnostics;
-          }
-      };
-    }
   }
 }
 

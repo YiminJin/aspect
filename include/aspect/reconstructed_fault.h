@@ -141,6 +141,14 @@ namespace aspect
       ArrayView<const double>
       get_properties(const unsigned int vertex_index) const;
 
+      /**
+       * Return whether one generic property component has been assigned a
+       * value rather than retaining the container's initialization sentinel.
+       */
+      bool
+      property_value_is_initialized(const unsigned int vertex_index,
+                                    const unsigned int component_index) const;
+
       /** Append one committed vertex to the fault. */
       void
       append_vertex(const Point<dim> &vertex);
@@ -223,6 +231,41 @@ namespace aspect
   class ReconstructedFaultManager : public SimulatorAccess<dim>
   {
     public:
+      /**
+       * @name Construction and parameter handling
+       * @{
+       */
+      ReconstructedFaultManager() = default;
+      explicit ReconstructedFaultManager(const Simulator<dim> &simulator);
+
+      static void declare_parameters(ParameterHandler &prm);
+      void parse_parameters(ParameterHandler &prm);
+      /**
+       * @}
+       */
+
+      /**
+       * @name Fault initialization and reconstruction
+       * @{
+       */
+      void initialize_crack_driving_force(
+        PhaseFieldHandler<dim> &phase_field_handler,
+        const std::vector<PrescribedInitialFault<dim>> &faults);
+
+      void reconstruct_initial_faults(PhaseFieldHandler<dim> &phase_field_handler);
+
+      /** Add one complete reconstructed fault and its normal-profile half widths. */
+      unsigned int add_reconstructed_fault(
+        const std::vector<Point<dim>> &vertices,
+        const std::vector<double> &projection_half_widths);
+      /**
+       * @}
+       */
+
+      /**
+       * @name Generic reconstructed-fault properties
+       * @{
+       */
       /** Metadata for one runtime-defined property. */
       struct PropertyInformation
       {
@@ -239,56 +282,6 @@ namespace aspect
         }
       };
 
-      /** Map particle-property components to a registered fault property. */
-      struct ParticlePropertyProjection
-      {
-        std::string particle_property_name;
-        unsigned int first_particle_component = 0;
-        std::string fault_property_name;
-        unsigned int first_fault_component = 0;
-        unsigned int n_components = 1;
-      };
-
-      /** Coverage information for one reconstructed fault. */
-      struct ParticleProjectionDiagnostics
-      {
-        std::vector<double> weighted_support;
-        unsigned int n_contributing_particles = 0;
-      };
-
-      /** Residual diagnostics for projecting one particle scalar to a fault. */
-      struct ParticleScalarProjectionDiagnostics
-      {
-        double weighted_rms_residual = numbers::signaling_nan<double>();
-        double maximum_absolute_residual = numbers::signaling_nan<double>();
-        double normalized_weighted_rms_residual = numbers::signaling_nan<double>();
-        double normalized_maximum_absolute_residual = numbers::signaling_nan<double>();
-      };
-
-      /** Result of a constitutively neutral particle-scalar projection. */
-      struct ParticleScalarProjectionResult
-      {
-        std::vector<std::vector<double>> nodal_values;
-        std::vector<ParticleScalarProjectionDiagnostics> diagnostics;
-      };
-
-      ReconstructedFaultManager() = default;
-      explicit ReconstructedFaultManager(const Simulator<dim> &simulator);
-
-      static void declare_parameters(ParameterHandler &prm);
-      void parse_parameters(ParameterHandler &prm);
-
-      void initialize_crack_driving_force(
-        PhaseFieldHandler<dim> &phase_field_handler,
-        const std::vector<PrescribedInitialFault<dim>> &faults);
-
-      void reconstruct_initial_faults(PhaseFieldHandler<dim> &phase_field_handler);
-
-      /** Add one complete reconstructed fault and its normal-profile half widths. */
-      unsigned int add_reconstructed_fault(
-        const std::vector<Point<dim>> &vertices,
-        const std::vector<double> &projection_half_widths);
-
       /**
        * Register a property shared by every reconstructed fault. Properties
        * must be registered before reconstructed geometry exists.
@@ -299,7 +292,14 @@ namespace aspect
       bool has_property(const std::string &name) const;
       unsigned int get_property_index(const std::string &name) const;
       const std::vector<PropertyInformation> &get_property_information() const;
+      /**
+       * @}
+       */
 
+      /**
+       * @name Slip-rate nonlinear state
+       * @{
+       */
       /** Return whether every reconstructed fault has an initialized slip rate. */
       bool slip_rates_are_initialized() const;
 
@@ -340,6 +340,46 @@ namespace aspect
 
       /** Discard the trial and retain the current accepted Newton iterate. */
       void rollback_slip_rate_trial();
+      /**
+       * @}
+       */
+
+      /**
+       * @name Particle-to-fault projection
+       * @{
+       */
+      /** Map particle-property components to a registered fault property. */
+      struct ParticlePropertyProjection
+      {
+        std::string particle_property_name;
+        unsigned int first_particle_component = 0;
+        std::string fault_property_name;
+        unsigned int first_fault_component = 0;
+        unsigned int n_components = 1;
+      };
+
+      /** Coverage information for one reconstructed fault. */
+      struct ParticleProjectionDiagnostics
+      {
+        std::vector<double> weighted_support;
+        unsigned int n_contributing_particles = 0;
+      };
+
+      /** Residual diagnostics for projecting one particle scalar to a fault. */
+      struct ParticleScalarProjectionDiagnostics
+      {
+        double weighted_rms_residual = numbers::signaling_nan<double>();
+        double maximum_absolute_residual = numbers::signaling_nan<double>();
+        double normalized_weighted_rms_residual = numbers::signaling_nan<double>();
+        double normalized_maximum_absolute_residual = numbers::signaling_nan<double>();
+      };
+
+      /** Result of a constitutively neutral particle-scalar projection. */
+      struct ParticleScalarProjectionResult
+      {
+        std::vector<std::vector<double>> nodal_values;
+        std::vector<ParticleScalarProjectionDiagnostics> diagnostics;
+      };
 
       void project_particle_properties(
         const std::vector<ParticlePropertyProjection> &projections);
@@ -369,15 +409,29 @@ namespace aspect
       /** Associate a point with the manager-owned fault normal profiles. */
       ReconstructedFaultUtilities::NormalProfileProjection
       project_to_normal_profiles(const Point<dim> &position) const;
+      /**
+       * @}
+       */
 
+      /**
+       * @name Fault access and diagnostics
+       * @{
+       */
       const std::vector<ReconstructedFault<dim>> &get_faults() const;
       ReconstructedFault<dim> &get_fault(const unsigned int fault_index);
       const ReconstructedFault<dim> &get_fault(const unsigned int fault_index) const;
       const std::vector<FaultReconstructionDiagnostics> &get_diagnostics() const;
+      /**
+       * @}
+       */
 
     private:
       friend class boost::serialization::access;
 
+      /**
+       * @name Serialization and restart
+       * @{
+       */
       template <class Archive>
       void save(Archive &ar, const unsigned int) const
       {
@@ -406,6 +460,15 @@ namespace aspect
 
       BOOST_SERIALIZATION_SPLIT_MEMBER()
 
+      void rebuild_after_deserialization();
+      /**
+       * @}
+       */
+
+      /**
+       * @name Particle-projection cache
+       * @{
+       */
       struct ParticleProjectionCacheEntry
       {
         types::particle_index particle_id = numbers::invalid_unsigned_int;
@@ -425,12 +488,20 @@ namespace aspect
         std::vector<double> factor_lower;
       };
 
+      using FaultNodalValues = std::vector<std::vector<double>>;
+
       bool particle_projection_cache_is_valid() const;
       void rebuild_particle_projection_cache();
-      std::vector<double> solve_projection_system(
-        const unsigned int fault_index,
-        const ArrayView<const double> &rhs) const;
+      std::vector<unsigned int> fault_vertex_offsets() const;
+      std::vector<FaultNodalValues>
+      reduce_and_solve_projection_rhs(
+        const std::vector<double> &local_rhs,
+        const unsigned int n_components) const;
+      /**
+       * @}
+       */
 
+      // Persistent prescribed-fault and reconstruction state.
       double structural_spacing = numbers::signaling_nan<double>();
       double ridge_coefficient = 1.0;
       std::string prescribed_faults_filename;
@@ -439,24 +510,28 @@ namespace aspect
       std::vector<ReconstructedFault<dim>> reconstructed_faults;
       std::vector<std::vector<double>> projection_half_widths;
       std::uint64_t projection_metadata_version = 0;
+
+      // Generic vertex-property registry.
       std::vector<PropertyInformation> property_information;
       std::map<std::string, unsigned int> property_indices;
       unsigned int n_property_components = 0;
       std::vector<FaultReconstructionDiagnostics> diagnostics;
+
+      // Particle/fault projection cache. These members are reconstructible.
       bool particle_projection_cache_valid = false;
       std::uint64_t cached_projection_metadata_version = 0;
       std::vector<std::uint64_t> cached_fault_geometry_versions;
       std::vector<ParticleProjectionCacheEntry> particle_projection_cache;
       std::vector<ProjectionSystem> projection_systems;
       std::vector<ParticleProjectionDiagnostics> particle_projection_diagnostics;
+
+      // Distinguished slip-rate nonlinear state.
       std::vector<std::vector<double>> timestep_committed_slip_rates;
       std::vector<std::vector<double>> current_newton_slip_rates;
       std::vector<std::vector<double>> trial_slip_rates;
       std::vector<bool> slip_rate_initialized;
       bool slip_rate_nonlinear_solve_active = false;
       bool slip_rate_trial_active = false;
-
-      void rebuild_after_deserialization();
   };
 }
 
