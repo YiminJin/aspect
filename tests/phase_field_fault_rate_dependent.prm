@@ -1,0 +1,31 @@
+# Verify the stateless rate-dependent fault-friction law, material mixing,
+# analytic derivative, API dispatch, and absence of a timestep restriction.
+
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_maxwell_stress_initialization.prm
+
+subsection Compositional fields
+  set Number of fields            = 5
+  set Names of fields             = tau_xx, tau_yy, tau_xy, weak, strong
+  set Types of fields             = stress, stress, stress, chemical composition, chemical composition
+  set Compositional field methods = particles, particles, particles, static, static
+end
+
+subsection Initial composition model
+  subsection Function
+    set Function expression = x+2*y; 3*x-y; 5; 0.3; 0.5
+  end
+end
+
+subsection Material model
+  subsection Phase field fault
+    set Friction law                       = rate dependent
+    set Minimum slip rate                  = 1e-12
+    set Reference friction coefficients    = background:0.6, weak:0.7, strong:0.8
+    set Dynamic friction coefficients      = background:0.6, weak:0.4, strong:0.5
+    set Characteristic weakening slip rates = background:1e-6, weak:2e-6, strong:4e-6
+  end
+end
+
+subsection Postprocess
+  set List of postprocessors = particles, verify fault friction
+end

@@ -106,7 +106,7 @@ TEST_CASE("MaxwellStress particle property has one symmetric tensor")
 
 
 
-TEST_CASE("FaultFriction defaults to the implemented rate-state law")
+TEST_CASE("FaultFriction declares the Stage E friction-law defaults")
 {
   aspect::MaterialModel::Rheology::FaultFriction<2> friction;
   REQUIRE(friction.has_state_variable());
@@ -114,4 +114,6 @@ TEST_CASE("FaultFriction defaults to the implemented rate-state law")
   dealii::ParameterHandler parameters;
   aspect::MaterialModel::Rheology::FaultFriction<2>::declare_parameters(parameters);
   REQUIRE(parameters.get("Friction law") == "rate state");
+  REQUIRE(parameters.get("Dynamic friction coefficients") == "0.4");
+  REQUIRE(parameters.get("Characteristic weakening slip rates") == "1.e-6");
 }

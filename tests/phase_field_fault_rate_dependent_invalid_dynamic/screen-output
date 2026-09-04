@@ -1,0 +1,22 @@
+
+Loading shared library <./libphase_field_fault_rate_dependent_invalid_dynamic.debug.so>
+
+TimerOutput objects finalize timed values printed to the
+screen by communicating over MPI in their destructors.
+Since an exception is currently uncaught, this
+synchronization (and subsequent output) will be skipped
+to avoid a possible deadlock.
+
+
+Exception 'ExcMessage("Dynamic friction coefficients must be finite, nonnegative, " "and no greater than the corresponding static coefficient.")' on rank 0 on processing:
+
+An error occurred in file <fault_friction.cc> in function
+(line in output replaced by default.sh script)
+The violated condition was:
+    numbers::is_finite(dynamic_friction_coefficients[j]) && dynamic_friction_coefficients[j] >= 0.0 && dynamic_friction_coefficients[j] <= mu0[j]
+Additional information:
+    Dynamic friction coefficients must be finite, nonnegative, and no
+    greater than the corresponding static coefficient.
+
+Stacktrace:
+(rest of the output replaced by default.sh script)

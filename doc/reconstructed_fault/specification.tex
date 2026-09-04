@@ -148,9 +148,22 @@ The class is
 \begin{center}
 \texttt{MaterialModel::Rheology::FaultFriction<dim>}.
 \end{center}
-It selects a reconstructed-fault slip-rate-based friction law.  The current
-implemented branch is rate-and-state friction; the rate-dependent branch is
-reserved for a later stage.
+It selects either the existing stateful rate-and-state law or the stateless
+rate-dependent law
+\begin{equation}
+  \mu(V)=\mu_d+\frac{\mu_s-\mu_d}{1+V/V_c},
+  \qquad
+  \frac{\partial\mu}{\partial V}
+  =-\frac{(\mu_s-\mu_d)V_c}{(V_c+V)^2}.
+\end{equation}
+For a material mixture, first arithmetic-average each parameter,
+\begin{equation}
+  \bar\mu_s=\sum_m f_{\Gamma,m}\mu_{s,m},\qquad
+  \bar\mu_d=\sum_m f_{\Gamma,m}\mu_{d,m},\qquad
+  \bar V_c=\sum_m f_{\Gamma,m}V_{c,m},
+\end{equation}
+and then evaluate one rate-dependent law with the averaged parameters.  Do not
+average separately evaluated nonlinear friction responses.
 
 \textbf{MUST reuse:} the reconstructed-fault constitutive model shall use the existing RSF implementation for at least
 \begin{itemize}
@@ -162,6 +175,23 @@ reserved for a later stage.
   \item the existing parameter declaration/parsing for $V_0$, $V_{\min}$, $V_{\max}$, $D_c$, $\mu_0$, $a$, $b$, and the regularization option.
 \end{itemize}
 The new reconstructed-fault model shall not duplicate these formulas or define an independent set of RSF parameters.
+
+The existing \texttt{Reference friction coefficients} parameter represents
+$\mu_0$ for rate-and-state friction and $\mu_s$ for rate-dependent friction.
+Rate-dependent friction additionally declares composition-aware
+\texttt{Dynamic friction coefficients}, $\mu_d$, with default $0.4$, and
+\texttt{Characteristic weakening slip rates}, $V_c$, with default
+$10^{-6}\,\si{\meter\per\second}$.  Componentwise admissibility requires
+$V_c>0$ and $0\leq\mu_d\leq\mu_s$.
+
+The stateful coefficient and derivative interfaces take $\theta$.  Separate
+stateless overloads omit $\theta$; using an overload that does not match the
+selected law is an API error.  Both laws use the common $V_{\min}$ and
+$V_{\max}$ bounds.  The rate-dependent law owns no state and imposes no
+friction timestep restriction, so \texttt{compute\_time\_step(...)} returns
+the largest finite \texttt{double}.  Stage E is constitutive-only: it does not
+add persistent $\Theta$, a surface residual, mechanical coupling, or nonlinear
+commit/rollback hooks.
 
 \subsection{Original phase-field-RSF material model: reference only}
 The file

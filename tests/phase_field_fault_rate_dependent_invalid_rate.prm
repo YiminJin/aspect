@@ -1,0 +1,10 @@
+# Verify that characteristic weakening slip rates are strictly positive.
+# EXPECT FAILURE
+
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_rate_dependent.prm
+
+subsection Material model
+  subsection Phase field fault
+    set Characteristic weakening slip rates = background:1e-6, weak:0, strong:4e-6
+  end
+end

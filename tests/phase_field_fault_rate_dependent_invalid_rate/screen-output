@@ -1,5 +1,5 @@
 
-Loading shared library <./libphase_field_fault_unsupported_friction_law.debug.so>
+Loading shared library <./libphase_field_fault_rate_dependent_invalid_rate.debug.so>
 
 TimerOutput objects finalize timed values printed to the
 screen by communicating over MPI in their destructors.
@@ -8,15 +8,14 @@ synchronization (and subsequent output) will be skipped
 to avoid a possible deadlock.
 
 
-Exception 'ExcMessage("The 'rate dependent' fault friction law is reserved " "for Stage E and is not implemented yet.")' on rank 0 on processing:
+Exception 'ExcMessage("Characteristic weakening slip rates must be finite and positive.")' on rank 0 on processing:
 
 An error occurred in file <fault_friction.cc> in function
 (line in output replaced by default.sh script)
 The violated condition was:
-    friction_law == FrictionLaw::rate_state
+    numbers::is_finite(characteristic_weakening_slip_rates[j]) && characteristic_weakening_slip_rates[j] > 0.0
 Additional information:
-    The 'rate dependent' fault friction law is reserved for Stage E and is
-    not implemented yet.
+    Characteristic weakening slip rates must be finite and positive.
 
 Stacktrace:
 (rest of the output replaced by default.sh script)

@@ -593,3 +593,46 @@ Stage D provides an explicit, unwired commit operation for testing and future
 coupling. No timestep or nonlinear-solver signal commits cohesive history;
 that can occur only after a later coupled slip-rate solve accepts a mechanical
 timestep.
+
+## 22. Generic fault friction
+
+`MaterialModel::Rheology::FaultFriction` selects either the existing stateful
+rate-and-state law or a stateless rate-dependent weakening law. The
+rate-and-state equations, regularization, exact aging update, parameter
+averaging, slip-rate bounds, and timestep restriction are unchanged.
+
+The rate-dependent law is
+
+\[
+\mu(V)=\mu_d+\frac{\mu_s-\mu_d}{1+V/V_c},
+\qquad
+\frac{\partial\mu}{\partial V}
+=-\frac{(\mu_s-\mu_d)V_c}{(V_c+V)^2}.
+\]
+
+Before evaluating this nonlinear law, the surface material fractions
+arithmetic-average each parameter independently:
+
+\[
+\bar\mu_s=\sum_m f_{\Gamma,m}\mu_{s,m},\qquad
+\bar\mu_d=\sum_m f_{\Gamma,m}\mu_{d,m},\qquad
+\bar V_c=\sum_m f_{\Gamma,m}V_{c,m}.
+\]
+
+The existing `Reference friction coefficients` parameter supplies \(\mu_0\)
+for rate-and-state friction and \(\mu_s\) for rate-dependent friction. The new
+`Dynamic friction coefficients` and `Characteristic weakening slip rates`
+parameters supply \(\mu_d\) and \(V_c\), with defaults `0.4` and `1e-6` m/s.
+Rate-dependent inputs require \(V_c>0\) and
+\(0\leq\mu_d\leq\mu_s\) componentwise.
+
+Stateful friction is evaluated through overloads that include `theta`; the
+stateless overloads omit it. Calling an overload that does not match the
+selected law is an API error. `has_state_variable()` is the solver-facing
+dispatch operation. Both laws use the common minimum and maximum slip-rate
+bounds. The stateless law evolves no constitutive state and therefore imposes
+no fault-friction timestep restriction: `compute_time_step()` returns the
+largest finite `double`.
+
+Stage E remains constitutive-only. It does not register `Theta`, evaluate a
+surface residual, couple slip rate to Stokes, or add commit/rollback hooks.

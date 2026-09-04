@@ -1,0 +1,10 @@
+# Verify componentwise rate-dependent friction-coefficient admissibility.
+# EXPECT FAILURE
+
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_rate_dependent.prm
+
+subsection Material model
+  subsection Phase field fault
+    set Dynamic friction coefficients = background:0.6, weak:0.9, strong:0.5
+  end
+end

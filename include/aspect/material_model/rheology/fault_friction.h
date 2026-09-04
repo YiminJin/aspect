@@ -64,12 +64,26 @@ namespace aspect
                                       const double               slip_rate,
                                       const double               slip_state) const;
 
+          /**
+           * Compute the friction coefficient for a stateless friction law.
+           */
+          double friction_coefficient(const std::vector<double> &volume_fractions,
+                                      const double               slip_rate) const;
+
           /**Compute the partial derivative of $\mu$ with respect to $V$.
            */
           double 
           friction_coefficient_derivative_wrt_slip_rate(const std::vector<double> &volume_fractions,
                                                         const double               slip_rate,
                                                         const double               slip_state) const;
+
+          /**
+           * Compute the partial derivative of $\mu$ with respect to $V$ for a
+           * stateless friction law.
+           */
+          double
+          friction_coefficient_derivative_wrt_slip_rate(const std::vector<double> &volume_fractions,
+                                                        const double               slip_rate) const;
 
           /**
            * Compute the time step controlled by fault slip. The time step is
@@ -124,6 +138,8 @@ namespace aspect
           std::vector<double> mu0;
           std::vector<double> a;
           std::vector<double> b;
+          std::vector<double> dynamic_friction_coefficients;
+          std::vector<double> characteristic_weakening_slip_rates;
       };
 
       // Inline functions
@@ -140,6 +156,9 @@ namespace aspect
       inline double 
       FaultFriction<dim>::get_reference_slip_rate() const
       {
+        AssertThrow(friction_law == FrictionLaw::rate_state,
+                    ExcMessage("The reference slip rate is only defined for "
+                               "rate-and-state fault friction."));
         return V0;
       }
 
@@ -154,6 +173,9 @@ namespace aspect
       inline double
       FaultFriction<dim>::get_characteristic_slip_distance() const
       {
+        AssertThrow(friction_law == FrictionLaw::rate_state,
+                    ExcMessage("The characteristic slip distance is only defined for "
+                               "rate-and-state fault friction."));
         return Dc;
       }
     }

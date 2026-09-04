@@ -20,7 +20,7 @@ namespace aspect
   {
     namespace internal
     {
-      /** Narrow test seam for private PhaseFieldFault Stage B-D operations. */
+      /** Narrow test seam for private PhaseFieldFault Stage B-E operations. */
       template <int dim>
       class PhaseFieldFaultTestAccess
       {
@@ -154,6 +154,12 @@ namespace aspect
           initial_cohesive_projection_diagnostics(const PhaseFieldFault<dim> &model)
           {
             return model.initial_cohesive_projection_diagnostics;
+          }
+
+          static const Rheology::FaultFriction<dim> &
+          fault_friction(const PhaseFieldFault<dim> &model)
+          {
+            return model.fault_friction;
           }
       };
     }

@@ -1,0 +1,19 @@
+
+Loading shared library <./libphase_field_fault_rate_dependent.debug.so>
+
+Number of active cells: 1 (on 1 levels)
+Number of degrees of freedom: 76 (18+4+9+9+9+9+9+9)
+
+*** Timestep 0:  t=0 seconds, dt=0 seconds
+   Solving temperature system... 0 iterations.
+   Advecting particles...  done.
+
+   Postprocessing:
+     Number of advected particles: 4
+     Fault friction:               verified
+
+Termination requested by criterion: end time
+
+
+
+-- preserve trailing blank line during patch application
