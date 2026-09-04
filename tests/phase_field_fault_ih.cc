@@ -143,12 +143,30 @@ namespace aspect
                         && diagnostic.normalized_maximum_absolute_residual >= 0.0,
                         ExcMessage("Stage D produced invalid cohesive-profile diagnostics."));
 
+          const std::vector<unsigned int> &chemical_fields =
+            this->introspection().chemical_composition_field_indices();
+          if (chemical_fields.empty())
+            {
+              for (const auto &property : fault_manager.get_property_information())
+                AssertThrow(property.name.find(
+                              "phase field fault chemical composition ") != 0,
+                            ExcMessage("The background-only fault registered an "
+                                       "unexpected chemical-composition property."));
+              AssertThrow(std::isfinite(minimum) && std::isfinite(maximum)
+                          && std::isfinite(sum), ExcInternalError());
+              return {"Distributed I_h:", "verified"};
+            }
+          AssertDimension(chemical_fields.size(), 1);
+
           // The fixture composition varies only normal to the horizontal fault.
           // Verify that the committed initial traction uses the projected surface
           // mixture, and that the particle-local mixture would give a measurably
           // different result.
           const unsigned int composition_property = fault_manager.get_property_index(
-            "phase field fault chemical compositions");
+            "phase field fault chemical composition rock");
+          const auto &composition_information =
+            fault_manager.get_property_information()[composition_property];
+          AssertDimension(composition_information.n_components, 1);
           const auto surface_compositions =
             fault_manager.interpolate_property_at_particle_projections(
               composition_property);
@@ -159,8 +177,7 @@ namespace aspect
             particle_manager.get_property_manager().get_data_info();
           const unsigned int H_position =
             particle_data.get_position_by_field_name("crack_driving_force");
-          const unsigned int chemical_field =
-            this->introspection().chemical_composition_field_indices().at(0);
+          const unsigned int chemical_field = chemical_fields[0];
           const auto mapped_property =
             this->get_parameters().mapped_particle_properties.find(chemical_field);
           AssertThrow(mapped_property

@@ -487,6 +487,13 @@ applicable only when every material/composition transition has characteristic
 width \(L_{\rm mat}\gg\ell\). Models with transitions comparable to or narrower
 than the diffuse-fault width are outside the formulation's validity.
 
+Each chemical compositional field is stored as a separate scalar generic
+fault property named `phase field fault chemical composition <field-name>`, in
+the chemical-field introspection order. This keeps the corresponding output
+arrays individually named. If there are no chemical compositional fields, no
+chemical fault property is registered and an empty composition vector denotes
+the background-only material mixture.
+
 Profiles have deterministic fault-major, segment-major, quadrature-point IDs
 and balanced contiguous MPI ownership. Owners retain adaptive state; all ranks
 participate in batched distributed Q1 phase-field evaluation. Initial panel

@@ -59,3 +59,35 @@ TEST_CASE("Reconstructed fault output writes distinguished slip rate")
   REQUIRE(vtu.find("Name=\"slip_rate\"") != std::string::npos);
   REQUIRE(vtu.find("1.25 2.5 5 ") != std::string::npos);
 }
+
+
+TEST_CASE("Reconstructed fault output preserves individual chemical field names")
+{
+  aspect::ReconstructedFaultManager<2> manager;
+  const unsigned int rock = manager.register_property(
+    "phase field fault chemical composition rock", 1);
+  const unsigned int mantle = manager.register_property(
+    "phase field fault chemical composition mantle", 1);
+  manager.add_reconstructed_fault({dealii::Point<2>(0,0),
+                                   dealii::Point<2>(1,0)},
+                                  {0.5, 0.5});
+
+  const auto &property_information = manager.get_property_information();
+  manager.get_fault(0).get_properties(0)[property_information[rock].position] = 0.25;
+  manager.get_fault(0).get_properties(1)[property_information[rock].position] = 0.5;
+  manager.get_fault(0).get_properties(0)[property_information[mantle].position] = 0.75;
+  manager.get_fault(0).get_properties(1)[property_information[mantle].position] = 0.5;
+
+  const aspect::Postprocess::internal::ReconstructedFaultOutput<2> data_out(
+    manager.get_faults(), property_information);
+  std::ostringstream output;
+  data_out.write_vtu(output, 0.0, 0);
+  const std::string vtu = output.str();
+
+  REQUIRE(vtu.find("Name=\"phase field fault chemical composition rock\" "
+                   "NumberOfComponents=\"1\"") != std::string::npos);
+  REQUIRE(vtu.find("Name=\"phase field fault chemical composition mantle\" "
+                   "NumberOfComponents=\"1\"") != std::string::npos);
+  REQUIRE(vtu.find("0.25 0.5 ") != std::string::npos);
+  REQUIRE(vtu.find("0.75 0.5 ") != std::string::npos);
+}

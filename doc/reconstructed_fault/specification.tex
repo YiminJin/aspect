@@ -572,6 +572,14 @@ samples. This model requires material transitions to have characteristic width
 $L_{\rm mat}\gg\ell$; transitions on the diffuse-fault scale or narrower are
 outside its applicability.
 
+Register every chemical compositional field as a separate scalar generic fault
+property named
+\texttt{phase field fault chemical composition <field-name>}, preserving the
+chemical-field introspection order. This keeps the corresponding visualization
+arrays individually named. If no chemical compositional fields exist, register
+no chemical fault property and interpret an empty composition vector as the
+background-only material mixture.
+
 The physical lower bound is zero, but the unconstrained Q1 phase-field solve
 may produce a small negative numerical undershoot. For $I_h$ only, the
 degradation function shall therefore be evaluated using

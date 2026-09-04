@@ -123,6 +123,40 @@ namespace aspect
       return profile.origin
              + (side == 0 ? 1.0 : -1.0) * zeta * profile.normal;
     }
+
+
+    template <int dim>
+    std::map<types::particle_index, std::vector<double>>
+    interpolate_surface_chemical_compositions(
+      ReconstructedFaultManager<dim> &fault_manager,
+      const std::vector<unsigned int> &property_indices)
+    {
+      std::map<types::particle_index, std::vector<double>> compositions;
+      for (unsigned int c = 0; c < property_indices.size(); ++c)
+        {
+          const std::map<types::particle_index, std::vector<double>> values =
+            fault_manager.interpolate_property_at_particle_projections(
+              property_indices[c]);
+
+          if (c == 0)
+            for (const auto &particle : values)
+              compositions.emplace(
+                particle.first,
+                std::vector<double>(property_indices.size(),
+                                    numbers::signaling_nan<double>()));
+          else
+            AssertDimension(values.size(), compositions.size());
+
+          for (const auto &particle : values)
+            {
+              AssertDimension(particle.second.size(), 1);
+              const auto composition = compositions.find(particle.first);
+              Assert(composition != compositions.end(), ExcInternalError());
+              composition->second[c] = particle.second[0];
+            }
+        }
+      return compositions;
+    }
   }
 
   namespace MaterialModel
@@ -152,10 +186,10 @@ namespace aspect
     compute_maxwell_stress(
       const MaxwellCoefficients &coefficients,
       const SymmetricTensor<2,dim> &effective_bulk_strain_rate,
-      const SymmetricTensor<2,dim> &previous_stress)
+      const SymmetricTensor<2,dim> &old_stress)
     {
       return 2.0 * coefficients.kappa * effective_bulk_strain_rate
-             + coefficients.beta * previous_stress;
+             + coefficients.beta * old_stress;
     }
 
 
@@ -170,30 +204,46 @@ namespace aspect
     evaluate(const MaterialModel::MaterialModelInputs<dim> &in,
              MaterialModel::MaterialModelOutputs<dim> &out) const
     {
-      EquationOfStateOutputs<dim> eos_outputs(this->introspection().n_chemical_composition_fields() + 1);
+      EquationOfStateOutputs<dim> eos_outputs(
+        this->introspection().n_chemical_composition_fields() + 1);
 
       for (unsigned int i = 0; i < in.n_evaluation_points(); ++i)
         {
-          const std::vector<double> volume_fractions = MaterialUtilities::compute_only_composition_fractions(
-            in.composition[i], this->introspection().chemical_composition_field_indices());
+          const std::vector<double> volume_fractions =
+            MaterialUtilities::compute_only_composition_fractions(
+              in.composition[i],
+              this->introspection().chemical_composition_field_indices());
 
           // Fill in the equation-of-state outputs
           equation_of_state.evaluate(in, i, eos_outputs);
 
-          out.densities[i] = MaterialUtilities::average_value(volume_fractions, eos_outputs.densities, MaterialUtilities::arithmetic);
-          out.thermal_expansion_coefficients[i] = MaterialUtilities::average_value(volume_fractions, eos_outputs.thermal_expansion_coefficients, MaterialUtilities::arithmetic);
-          out.specific_heat[i] = MaterialUtilities::average_value(volume_fractions, eos_outputs.specific_heat_capacities, MaterialUtilities::arithmetic);
-          out.thermal_conductivities[i] = MaterialUtilities::average_value(volume_fractions, thermal_conductivities, MaterialUtilities::arithmetic);
-          out.compressibilities[i] = MaterialUtilities::average_value(volume_fractions, eos_outputs.compressibilities, MaterialUtilities::arithmetic);
-          out.entropy_derivative_pressure[i] = MaterialUtilities::average_value(volume_fractions, eos_outputs.entropy_derivative_pressure, MaterialUtilities::arithmetic);
-          out.entropy_derivative_temperature[i] = MaterialUtilities::average_value(volume_fractions, eos_outputs.entropy_derivative_temperature, MaterialUtilities::arithmetic);
+          out.densities[i] = MaterialUtilities::average_value(
+            volume_fractions, eos_outputs.densities, MaterialUtilities::arithmetic);
+          out.thermal_expansion_coefficients[i] = MaterialUtilities::average_value(
+            volume_fractions, eos_outputs.thermal_expansion_coefficients,
+            MaterialUtilities::arithmetic);
+          out.specific_heat[i] = MaterialUtilities::average_value(
+            volume_fractions, eos_outputs.specific_heat_capacities,
+            MaterialUtilities::arithmetic);
+          out.thermal_conductivities[i] = MaterialUtilities::average_value(
+            volume_fractions, thermal_conductivities, MaterialUtilities::arithmetic);
+          out.compressibilities[i] = MaterialUtilities::average_value(
+            volume_fractions, eos_outputs.compressibilities,
+            MaterialUtilities::arithmetic);
+          out.entropy_derivative_pressure[i] = MaterialUtilities::average_value(
+            volume_fractions, eos_outputs.entropy_derivative_pressure,
+            MaterialUtilities::arithmetic);
+          out.entropy_derivative_temperature[i] = MaterialUtilities::average_value(
+            volume_fractions, eos_outputs.entropy_derivative_temperature,
+            MaterialUtilities::arithmetic);
 
           if (in.requests_property(MaterialProperties::viscosity))
             {
               // Set the output viscosity to be the viscoelastic viscosity (It will not be used in the assemblers,
               // but might be requested by some other functions, like Simulator::compute_pressure_scaling_factor()).
-              const double G = MaterialUtilities::average_value(volume_fractions, elastic_shear_moduli, viscosity_averaging);
-              const double eta = calculate_creep_viscosity(volume_fractions, in.temperature[i]);
+              const double G = MaterialUtilities::average_value(
+                volume_fractions, elastic_shear_moduli, viscosity_averaging);
+              const double eta = compute_creep_viscosity(volume_fractions, in.temperature[i]);
               const double time_step = (this->get_timestep_number() > 0
                                         ? this->get_timestep()
                                         : initial_time_step);
@@ -262,19 +312,38 @@ namespace aspect
       if (!this->get_parameters().reconstruct_faults)
         return;
 
+      const std::vector<unsigned int> &chemical_field_indices =
+        this->introspection().chemical_composition_field_indices();
+      const std::vector<std::string> &chemical_field_names =
+        this->introspection().chemical_composition_field_names();
+      AssertDimension(chemical_field_names.size(), chemical_field_indices.size());
+      for (unsigned int c = 0; c < chemical_field_indices.size(); ++c)
+        {
+          const unsigned int field_index = chemical_field_indices[c];
+          AssertThrow(this->get_parameters().compositional_field_methods[field_index]
+                      == Parameters<dim>::AdvectionFieldMethod::particles,
+                      ExcMessage("Distributed I_h evaluation requires every chemical "
+                                 "composition field to be advected by particles."));
+          AssertThrow(this->get_parameters().mapped_particle_properties.find(field_index)
+                      != this->get_parameters().mapped_particle_properties.end(),
+                      ExcMessage("Distributed I_h evaluation requires every chemical "
+                                 "composition field to be mapped to a particle property."));
+        }
+
       ReconstructedFaultManager<dim> &fault_manager =
         this->get_reconstructed_fault_manager();
-      const unsigned int n_chemical_fields =
-        this->introspection().n_chemical_composition_fields();
-      if (n_chemical_fields > 0)
-        fault_composition_property_index =
-          fault_manager.register_property(
-            "phase field fault chemical compositions", n_chemical_fields);
-
-      cohesive_traction_property_index = fault_manager.register_property(
+      fault_property_indices.cohesive_traction = fault_manager.register_property(
         "phase field fault cohesive traction", 1);
-      previous_normalization_integral_property_index = fault_manager.register_property(
-        "phase field fault previous I h", 1);
+      fault_property_indices.previous_normalization_integral =
+        fault_manager.register_property("phase field fault previous I h", 1);
+
+      fault_property_indices.chemical_compositions.clear();
+      fault_property_indices.chemical_compositions.reserve(
+        chemical_field_indices.size());
+      for (unsigned int c = 0; c < chemical_field_indices.size(); ++c)
+        fault_property_indices.chemical_compositions.push_back(
+          fault_manager.register_property(
+            "phase field fault chemical composition " + chemical_field_names[c], 1));
     }
 
 
@@ -286,8 +355,8 @@ namespace aspect
     typename PhaseFieldFault<dim>::CohesiveResponse
     PhaseFieldFault<dim>::compute_cohesive_response(
       const MaxwellCoefficients &coefficients,
-      const double current_normalization_integral,
-      const double previous_normalization_integral,
+      const double current_I_h,
+      const double previous_I_h,
       const double previous_cohesive_traction,
       const double slip_rate,
       const double current_h,
@@ -295,11 +364,9 @@ namespace aspect
     {
       AssertThrow(coefficients.kappa > 0.0,
                   ExcMessage("The cohesive effective viscosity kappa must be positive."));
-      AssertThrow(std::isfinite(current_normalization_integral)
-                  && current_normalization_integral > 0.0,
+      AssertThrow(std::isfinite(current_I_h) && current_I_h > 0.0,
                   ExcMessage("The current cohesive normalization integral must be finite and positive."));
-      AssertThrow(std::isfinite(previous_normalization_integral)
-                  && previous_normalization_integral > 0.0,
+      AssertThrow(std::isfinite(previous_I_h) && previous_I_h > 0.0,
                   ExcMessage("The previous cohesive normalization integral must be finite and positive."));
       AssertThrow(std::isfinite(previous_cohesive_traction)
                   && previous_cohesive_traction >= 0.0,
@@ -314,14 +381,12 @@ namespace aspect
       CohesiveResponse response;
       response.cohesive_traction =
         (coefficients.kappa * slip_rate
-         + coefficients.beta * previous_normalization_integral
-           * previous_cohesive_traction)
-        / current_normalization_integral;
-      response.localization_factor = current_h/current_normalization_integral;
+         + coefficients.beta * previous_I_h * previous_cohesive_traction)
+        / current_I_h;
+      response.localization_factor = current_h/current_I_h;
       response.history_correction =
         coefficients.beta * previous_cohesive_traction/coefficients.kappa
-        * (current_h * previous_normalization_integral
-           / current_normalization_integral - previous_h);
+        * (current_h * previous_I_h/current_I_h - previous_h);
       response.crack_strain_rate =
         response.localization_factor * slip_rate + response.history_correction;
 
@@ -348,9 +413,11 @@ namespace aspect
         this->get_reconstructed_fault_manager();
       const auto &faults = fault_manager.get_faults();
       const unsigned int cohesive_position =
-        fault_manager.get_property_information()[cohesive_traction_property_index].position;
+        fault_manager.get_property_information()[
+          fault_property_indices.cohesive_traction].position;
       const unsigned int normalization_position =
-        fault_manager.get_property_information()[previous_normalization_integral_property_index].position;
+        fault_manager.get_property_information()[
+          fault_property_indices.previous_normalization_integral].position;
 
       for (unsigned int fault = 0; fault < faults.size(); ++fault)
         {
@@ -391,9 +458,11 @@ namespace aspect
       AssertThrow(!faults.empty(),
                   ExcMessage("Initial cohesive state requires reconstructed fault geometry."));
       const unsigned int cohesive_position =
-        fault_manager.get_property_information()[cohesive_traction_property_index].position;
+        fault_manager.get_property_information()[
+          fault_property_indices.cohesive_traction].position;
       const unsigned int normalization_position =
-        fault_manager.get_property_information()[previous_normalization_integral_property_index].position;
+        fault_manager.get_property_information()[
+          fault_property_indices.previous_normalization_integral].position;
 
       if (cohesive_history_is_initialized(faults,
                                           cohesive_position,
@@ -482,11 +551,12 @@ namespace aspect
 
       const std::vector<unsigned int> chemical_field_indices =
         this->introspection().chemical_composition_field_indices();
+      AssertDimension(fault_property_indices.chemical_compositions.size(),
+                      chemical_field_indices.size());
       const std::map<types::particle_index, std::vector<double>> surface_compositions =
-        chemical_field_indices.empty()
-        ? std::map<types::particle_index, std::vector<double>>()
-        : this->get_reconstructed_fault_manager()
-          .interpolate_property_at_particle_projections(fault_composition_property_index);
+        interpolate_surface_chemical_compositions(
+          this->get_reconstructed_fault_manager(),
+          fault_property_indices.chemical_compositions);
 
       std::map<types::particle_index, double> particle_q;
       std::string local_error;
@@ -560,22 +630,17 @@ namespace aspect
       const std::vector<ReconstructedFault<dim>> &faults = fault_manager.get_faults();
       current_normalization_integrals.clear();
       current_normalization_integrals.resize(faults.size());
-      current_minimum_raw_normalization_phase_field =
-        numbers::signaling_nan<double>();
+      current_minimum_raw_normalization_phase_field = numbers::signaling_nan<double>();
       if (faults.empty())
         return;
 
       const PhaseFieldHandler<dim> &phase_field_handler =
         this->get_phase_field_handler();
-      const unsigned int fault_composition_position =
-        project_surface_chemical_compositions();
+
+      project_surface_chemical_compositions();
+
       const std::vector<NormalizationProfile> profiles =
-        build_owned_normalization_profiles(fault_composition_position);
-      const auto evaluate_points =
-        [this](const std::vector<Point<dim>> &points)
-        {
-          return evaluate_normalization_points(points);
-        };
+        build_owned_normalization_profiles();
 
       const unsigned int mpi_rank =
         Utilities::MPI::this_mpi_process(this->get_mpi_communicator());
@@ -585,6 +650,13 @@ namespace aspect
       const double length_scale = phase_field_handler.get_length_scale();
       double local_minimum_raw_phase_field = std::numeric_limits<double>::max();
       std::string local_minimum_raw_phase_field_context;
+
+      const auto evaluate_points =
+        [this](const std::vector<Point<dim>> &points)
+        {
+          return evaluate_normalization_points(points);
+        };
+
       const auto integrand =
         [&](const NormalizationProfile &profile,
             const unsigned int side,
@@ -958,47 +1030,42 @@ namespace aspect
 
 
     template <int dim>
-    unsigned int
+    void
     PhaseFieldFault<dim>::project_surface_chemical_compositions()
     {
-      const std::vector<unsigned int> chemical_field_indices =
+      const std::vector<unsigned int> &chemical_field_indices =
         this->introspection().chemical_composition_field_indices();
+      AssertDimension(fault_property_indices.chemical_compositions.size(),
+                      chemical_field_indices.size());
       if (chemical_field_indices.empty())
-        return numbers::invalid_unsigned_int;
+        return;
 
       ReconstructedFaultManager<dim> &fault_manager =
         this->get_reconstructed_fault_manager();
-      const auto &property =
-        fault_manager.get_property_information()[fault_composition_property_index];
 
       std::vector<typename ReconstructedFaultManager<dim>::ParticlePropertyProjection>
         projections;
       projections.reserve(chemical_field_indices.size());
-      for (unsigned int component = 0;
-           component < chemical_field_indices.size(); ++component)
+      for (unsigned int c = 0; c < chemical_field_indices.size(); ++c)
         {
-          const unsigned int field_index = chemical_field_indices[component];
-          AssertThrow(this->get_parameters().compositional_field_methods[field_index]
-                      == Parameters<dim>::AdvectionFieldMethod::particles,
-                      ExcMessage("Distributed I_h evaluation requires every chemical "
-                                 "composition field to be advected by particles."));
-          const auto mapped_property =
-            this->get_parameters().mapped_particle_properties.find(field_index);
-          AssertThrow(mapped_property
-                      != this->get_parameters().mapped_particle_properties.end(),
-                      ExcMessage("Distributed I_h evaluation requires every chemical "
-                                 "composition field to be mapped to a particle property."));
+          const auto &particle_property =
+            this->get_parameters().mapped_particle_properties.at(
+              chemical_field_indices[c]);
+          const auto &fault_property =
+            fault_manager.get_property_information()[
+              fault_property_indices.chemical_compositions[c]];
 
           typename ReconstructedFaultManager<dim>::ParticlePropertyProjection projection;
-          projection.particle_property_name = mapped_property->second.first;
-          projection.first_particle_component = mapped_property->second.second;
-          projection.fault_property_name = property.name;
-          projection.first_fault_component = component;
+          projection.particle_property_name = particle_property.first;
+          projection.first_particle_component = particle_property.second;
+          projection.fault_property_name = fault_property.name;
+          projection.first_fault_component = 0;
           projection.n_components = 1;
+
           projections.push_back(std::move(projection));
         }
+
       fault_manager.project_particle_properties(projections);
-      return property.position;
     }
 
 
@@ -1056,23 +1123,36 @@ namespace aspect
 
     template <int dim>
     std::vector<typename PhaseFieldFault<dim>::NormalizationProfile>
-    PhaseFieldFault<dim>::build_owned_normalization_profiles(
-      const unsigned int fault_composition_position) const
+    PhaseFieldFault<dim>::build_owned_normalization_profiles() const
     {
-      const auto &faults = this->get_reconstructed_fault_manager().get_faults();
-      const std::vector<unsigned int> chemical_field_indices =
-        this->introspection().chemical_composition_field_indices();
+      const ReconstructedFaultManager<dim> &fault_manager =
+        this->get_reconstructed_fault_manager();
+      const auto &fault_property_info = fault_manager.get_property_information();
+      const auto &faults = fault_manager.get_faults();
+
       const QGauss<1> surface_quadrature(3);
 
       unsigned int n_profiles = 0;
       for (const ReconstructedFault<dim> &fault : faults)
         n_profiles += fault.n_cells() * surface_quadrature.size();
+
       const unsigned int rank =
         Utilities::MPI::this_mpi_process(this->get_mpi_communicator());
       const unsigned int n_processes =
         Utilities::MPI::n_mpi_processes(this->get_mpi_communicator());
       const unsigned int first_owned_profile = n_profiles * rank / n_processes;
       const unsigned int end_owned_profile = n_profiles * (rank + 1) / n_processes;
+
+      std::vector<unsigned int> chemical_composition_positions;
+      chemical_composition_positions.reserve(
+        fault_property_indices.chemical_compositions.size());
+      for (const unsigned int property_index :
+           fault_property_indices.chemical_compositions)
+        {
+          AssertDimension(fault_property_info[property_index].n_components, 1);
+          chemical_composition_positions.push_back(
+            fault_property_info[property_index].position);
+        }
 
       std::vector<NormalizationProfile> profiles;
       profiles.reserve(end_owned_profile - first_owned_profile);
@@ -1082,7 +1162,8 @@ namespace aspect
           const ReconstructedFault<dim> &fault = faults[fault_index];
           for (unsigned int segment = 0; segment < fault.n_cells(); ++segment)
             {
-              const Tensor<1,dim> tangent = fault.vertex(segment+1) - fault.vertex(segment);
+              const Tensor<1,dim> tangent =
+                fault.vertex(segment + 1) - fault.vertex(segment);
               const double segment_length = tangent.norm();
               Tensor<1,dim> normal;
               normal[0] = -tangent[1] / segment_length;
@@ -1097,25 +1178,30 @@ namespace aspect
                     profile.segment_index = segment;
                     profile.xi = surface_quadrature.point(q)[0];
                     profile.surface_weight = surface_quadrature.weight(q) * segment_length;
-                    profile.origin = (1.0-profile.xi) * fault.vertex(segment)
-                                     + profile.xi * fault.vertex(segment+1);
+                    profile.origin = (1.0 - profile.xi) * fault.vertex(segment)
+                                     + profile.xi * fault.vertex(segment + 1);
                     profile.normal = normal;
 
-                    std::vector<double> chemical_compositions(chemical_field_indices.size());
-                    for (unsigned int component = 0;
-                         component < chemical_field_indices.size(); ++component)
-                      chemical_compositions[component] =
-                        (1.0-profile.xi)
-                        * fault.get_properties(segment)[fault_composition_position+component]
+                    std::vector<double> chemical_compositions(
+                      chemical_composition_positions.size());
+                    for (unsigned int c = 0;
+                         c < chemical_composition_positions.size(); ++c)
+                      chemical_compositions[c] =
+                        (1.0 - profile.xi)
+                        * fault.get_properties(segment)[
+                          chemical_composition_positions[c]]
                         + profile.xi
-                        * fault.get_properties(segment+1)[fault_composition_position+component];
+                        * fault.get_properties(segment + 1)[
+                          chemical_composition_positions[c]];
                     profile.material_fractions =
                       MaterialUtilities::compute_composition_fractions(
                         chemical_compositions);
+
                     profiles.push_back(std::move(profile));
                   }
             }
         }
+
       return profiles;
     }
 
@@ -1211,19 +1297,24 @@ namespace aspect
     template <int dim>
     double
     PhaseFieldFault<dim>::
-    calculate_creep_viscosity(const std::vector<double> &volume_fractions,
-                              const double               temperature) const
+    compute_creep_viscosity(const std::vector<double> &volume_fractions,
+                            const double               temperature) const
     {
       const unsigned int n_compositions = volume_fractions.size();
 
-      const double dT_over_Tref = (temperature - reference_temperature) / reference_temperature;
+      const double dT_over_Tref =
+        (temperature - reference_temperature) / reference_temperature;
       std::vector<double> composition_viscosities(n_compositions);
       for (unsigned int j = 0; j < n_compositions; ++j)
         composition_viscosities[j] = std::max(minimum_viscosity,
                                               std::min(maximum_viscosity,
-                                                       reference_viscosities[j] * std::exp(-thermal_viscosity_exponents[j] * dT_over_Tref)));
+                                                       reference_viscosities[j]
+                                                       * std::exp(-thermal_viscosity_exponents[j]
+                                                                  * dT_over_Tref)));
 
-      return MaterialUtilities::average_value(volume_fractions, composition_viscosities, viscosity_averaging);
+      return MaterialUtilities::average_value(volume_fractions,
+                                              composition_viscosities,
+                                              viscosity_averaging);
     }
 
     template <int dim>
@@ -1415,8 +1506,10 @@ namespace aspect
             initial_time_step *= year_in_seconds;
 
           evolve_phase_field = prm.get_bool("Evolve phase field");
-          normalization_quadrature_tolerance = prm.get_double("I h quadrature tolerance");
-          normalization_tail_tolerance = prm.get_double("I h tail tolerance");
+          normalization_quadrature_tolerance =
+            prm.get_double("I h quadrature tolerance");
+          normalization_tail_tolerance =
+            prm.get_double("I h tail tolerance");
           AssertThrow(numbers::is_finite(normalization_quadrature_tolerance)
                       && normalization_quadrature_tolerance > 0.0
                       && numbers::is_finite(normalization_tail_tolerance)

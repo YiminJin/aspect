@@ -1,0 +1,94 @@
+# Lifecycle smoke test for the background-only Stage C and D paths. The low
+# activation threshold only makes fault geometry available; reconstruction
+# behavior, location, and accuracy are not tested here.
+# Enable if: ASPECT_WITH_VORO
+
+set Dimension                    = 2
+set End time                     = 0
+set Use years instead of seconds = false
+set Nonlinear solver scheme      = single Advection, no Stokes
+
+subsection Formulation
+  set Enable phase field                  = true
+  set Reconstruct faults from phase field = true
+end
+
+subsection Geometry model
+  set Model name = box
+end
+
+subsection Prescribed Stokes solution
+  set Model name = function
+  subsection Velocity function
+    set Function expression = 0; 0
+  end
+  subsection Pressure function
+    set Function expression = 0
+  end
+end
+
+subsection Gravity model
+  set Model name = vertical
+  subsection Vertical
+    set Magnitude = 0
+  end
+end
+
+subsection Initial temperature model
+  set Model name = function
+  subsection Function
+    set Function expression = 293
+  end
+end
+
+subsection Material model
+  set Model name = phase field fault
+  subsection Phase field fault
+    set Evolve phase field               = false
+    set Phase field activation threshold = 1e-6
+    set Viscosity averaging scheme       = arithmetic
+    set Reference viscosities            = 1e21
+    set Elastic shear moduli             = 1e10
+    set Cohesions                        = 1e5
+    set Critical energy release rates    = 1e5
+    set Radiation damping coefficients   = 1e7
+  end
+end
+
+subsection Phase field model
+  set Length scale                    = 0.15625
+  set Geometric function type         = AT1
+  set Degradation curvature parameter = 1
+end
+
+subsection Fault reconstruction
+  set Structural point spacing = 0.1
+  set Ridge coefficient        = 1
+  set Prescribed faults file   = $ASPECT_SOURCE_DIR/tests/phase_field_fault_ih.txt
+end
+
+subsection Mesh refinement
+  set Initial global refinement          = 6
+  set Initial adaptive refinement        = 0
+  set Time steps between mesh refinement = 0
+end
+
+subsection Particles
+  set Particle generator name                 = reference cell
+  set List of particle properties             = crack driving force
+  set Generate particle domains               = true
+  set Generate CPDI data for particle domains = true
+  set Load balancing strategy                 = none
+  subsection Generator
+    subsection Reference cell
+      set Number of particles per cell per direction = 3
+    end
+  end
+end
+
+subsection Postprocess
+  set List of postprocessors = particles, verify phase field fault I h
+  subsection Particles
+    set Data output format = none
+  end
+end

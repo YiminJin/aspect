@@ -111,7 +111,7 @@ namespace aspect
         static SymmetricTensor<2,dim>
         compute_maxwell_stress(const MaxwellCoefficients &coefficients,
                                const SymmetricTensor<2,dim> &effective_bulk_strain_rate,
-                               const SymmetricTensor<2,dim> &previous_stress);
+                               const SymmetricTensor<2,dim> &old_stress);
         /**
          * @}
          */
@@ -129,11 +129,13 @@ namespace aspect
           double crack_strain_rate;
         };
 
-        /** Evaluate T_coh(V), chi, and the exact history-corrected upsilon. */
+        /**
+         * Evaluate T_coh(V), chi, and the exact history-corrected upsilon.
+         */
         static CohesiveResponse
         compute_cohesive_response(const MaxwellCoefficients &coefficients,
-                                  const double current_normalization_integral,
-                                  const double previous_normalization_integral,
+                                  const double current_I_h,
+                                  const double previous_I_h,
                                   const double previous_cohesive_traction,
                                   const double slip_rate,
                                   const double current_h,
@@ -242,14 +244,13 @@ namespace aspect
                                 const double degradation,
                                 const std::string &context);
 
-        /** Project chemical particle properties to the fault and return their component offset. */
-        unsigned int
+        /** Project every chemical particle property to its scalar fault property. */
+        void
         project_surface_chemical_compositions();
 
         /** Construct the balanced rank-owned set of normal profiles. */
         std::vector<NormalizationProfile>
-        build_owned_normalization_profiles(
-          const unsigned int fault_composition_position) const;
+        build_owned_normalization_profiles() const;
 
         /** Evaluate the distributed Q1 phase field and local cell size at arbitrary points. */
         std::vector<NormalizationPointSample>
@@ -275,9 +276,9 @@ namespace aspect
          * @name Material parameters and state
          * @{
          */
-        double 
-        calculate_creep_viscosity(const std::vector<double> &volume_fractions,
-                                  const double               temperature) const;
+        double
+        compute_creep_viscosity(const std::vector<double> &volume_fractions,
+                                const double               temperature) const;
 
         EquationOfState::MulticomponentIncompressible<dim> equation_of_state;
 
@@ -288,7 +289,7 @@ namespace aspect
         double reference_temperature;
 
         double maximum_viscosity;
-        
+
         double minimum_viscosity;
 
         double phase_field_activation_threshold;
@@ -319,12 +320,15 @@ namespace aspect
 
         double normalization_tail_tolerance;
 
-        unsigned int fault_composition_property_index = numbers::invalid_unsigned_int;
+        struct FaultPropertyIndices
+        {
+          unsigned int cohesive_traction = numbers::invalid_unsigned_int;
+          unsigned int previous_normalization_integral =
+            numbers::invalid_unsigned_int;
+          std::vector<unsigned int> chemical_compositions;
+        };
 
-        unsigned int cohesive_traction_property_index = numbers::invalid_unsigned_int;
-
-        unsigned int previous_normalization_integral_property_index =
-          numbers::invalid_unsigned_int;
+        FaultPropertyIndices fault_property_indices;
 
         std::vector<std::vector<double>> current_normalization_integrals;
 
