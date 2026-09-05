@@ -1,9 +1,17 @@
-# Stage-F surface residual and K_V finite-difference test using
+# Stage-F/G surface and bulk coupling finite-difference test using
 # sigma_n = p - tau:N. The inherited low phase-field activation threshold only
 # bootstraps a reconstructed fault; reconstruction behavior is not under test.
 # Enable if: ASPECT_WITH_VORO
 
 include $ASPECT_SOURCE_DIR/tests/phase_field_fault_ih.prm
+
+# The phase-field solve only prepares the surface-coupling fixture. Its linear
+# solver convergence is not under test here.
+subsection Solver parameters
+  subsection Phase field solver parameters
+    set Linear solver tolerance = 2e-7
+  end
+end
 
 subsection Compositional fields
   set Number of fields            = 4

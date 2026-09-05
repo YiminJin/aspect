@@ -9,14 +9,15 @@
   any later version.
 */
 
-#ifndef _aspect_reconstructed_fault_h
-#define _aspect_reconstructed_fault_h
+#ifndef _aspect_reconstructed_fault_manager_h
+#define _aspect_reconstructed_fault_manager_h
 
-#include <aspect/global.h>
+#include <aspect/reconstructed_fault/fault.h>
+#include <aspect/reconstructed_fault/utilities.h>
 #include <aspect/simulator_access.h>
 
-#include <deal.II/base/array_view.h>
-#include <deal.II/base/point.h>
+#include <deal.II/base/quadrature.h>
+#include <deal.II/grid/cell_id.h>
 
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/split_member.hpp>
@@ -24,198 +25,13 @@
 
 #include <cstdint>
 #include <map>
+#include <string>
 #include <vector>
 
 namespace aspect
 {
   template <int dim>
-  class PhaseFieldHandler;
-
-  template <int dim>
   class Simulator;
-
-  template <int dim>
-  class ReconstructedFaultManager;
-
-  template <int dim>
-  class ReconstructedFault;
-
-  /**
-   * Prescribed geometry and core phase-field values for one initial fault.
-   * Core values are specified at the polyline vertices and interpolated
-   * linearly along each segment.
-   */
-  template <int dim>
-  struct PrescribedInitialFault
-  {
-    std::vector<Point<dim>> vertices;
-    std::vector<double> core_phase_field_values;
-  };
-
-
-  namespace ReconstructedFaultUtilities
-  {
-    /** Resample an ordered polyline at approximately uniform arc length. */
-    template <int dim>
-    std::vector<Point<dim>>
-    resample_reference_fault(const std::vector<Point<dim>> &vertices,
-                             const double structural_spacing);
-
-    /** Solve the globally assembled, total-weight-normalized ridge system. */
-    std::vector<double>
-    solve_normal_offsets(const std::vector<double> &matrix,
-                         const std::vector<double> &rhs,
-                         const double total_weight,
-                         const double ridge_coefficient);
-
-    /** Parse prescribed faults from the documented ASCII representation. */
-    template <int dim>
-    std::vector<PrescribedInitialFault<dim>>
-    parse_prescribed_faults(const std::string &file_contents,
-                            const std::string &filename);
-
-    /** Distance and interpolated core value at the closest point on a fault. */
-    template <int dim>
-    std::pair<double, double>
-    closest_point_distance_and_core_phase_field(const PrescribedInitialFault<dim> &fault,
-                                                 const Point<dim> &position);
-
-    /**
-     * Initialize the crack-driving-force particle property from prescribed
-     * initial faults. This function updates locally owned particles and is
-     * currently implemented only in 2D.
-     */
-    template <int dim>
-    void
-    initialize_crack_driving_force(PhaseFieldHandler<dim> &phase_field_handler,
-                                   const std::vector<PrescribedInitialFault<dim>> &faults);
-  }
-
-  /**
-   * An application-owned representation of a reconstructed fault.
-   *
-   * In two dimensions, the fault is an ordered polyline. Consecutive
-   * vertices define the fault cells implicitly: cell @p i connects vertices
-   * @p i and @p i+1. Committed vertices are append-only and can only be
-   * accessed through const interfaces.
-   *
-   * The container is independent of the bulk mesh, particles, phase-field
-   * reconstruction, and particular constitutive models. Runtime-defined
-   * vertex properties can store material-independent fault data.
-   */
-  template <int dim>
-  class ReconstructedFault
-  {
-    public:
-      /** Construct an empty reconstructed fault. */
-      ReconstructedFault() = default;
-
-      /** Construct a fault from an ordered sequence of committed vertices. */
-      explicit ReconstructedFault(const std::vector<Point<dim>> &vertices);
-
-      /** Return whether the fault contains no vertices. */
-      bool
-      empty() const;
-
-      /** Return the number of fault vertices. */
-      unsigned int
-      n_vertices() const;
-
-      /** Return the number of fault cells. */
-      unsigned int
-      n_cells() const;
-
-      /** Return vertex @p index. */
-      const Point<dim> &
-      vertex(const unsigned int index) const;
-
-      /** Return the complete ordered sequence of fault vertices. */
-      const std::vector<Point<dim>> &
-      get_vertices() const;
-
-      /** Return all property components stored at vertex @p vertex_index. */
-      ArrayView<double>
-      get_properties(const unsigned int vertex_index);
-
-      /** Return all property components stored at vertex @p vertex_index. */
-      ArrayView<const double>
-      get_properties(const unsigned int vertex_index) const;
-
-      /**
-       * Return whether one generic property component has been assigned a
-       * value rather than retaining the container's initialization sentinel.
-       */
-      bool
-      property_value_is_initialized(const unsigned int vertex_index,
-                                    const unsigned int component_index) const;
-
-      /** Append one committed vertex to the fault. */
-      void
-      append_vertex(const Point<dim> &vertex);
-
-      /**
-       * Append an ordered sequence of committed vertices to the fault.
-       * Appending an empty sequence does not change the geometry version.
-       */
-      void
-      append_vertices(const std::vector<Point<dim>> &new_vertices);
-
-      /**
-       * Return the geometry version. Each non-empty append operation advances
-       * this counter once.
-       */
-      std::uint64_t
-      geometry_version() const;
-
-    private:
-      friend class ReconstructedFaultManager<dim>;
-      friend class boost::serialization::access;
-
-      template <class Archive>
-      void serialize(Archive &ar, const unsigned int)
-      {
-        ar & vertices;
-        ar & n_property_components;
-        ar & property_values;
-        ar & current_geometry_version;
-      }
-
-      void initialize_properties(const unsigned int n_components);
-
-      std::vector<Point<dim>> vertices;
-      unsigned int n_property_components = 0;
-      std::vector<double> property_values;
-      std::uint64_t current_geometry_version = 0;
-  };
-
-
-  namespace ReconstructedFaultUtilities
-  {
-    /** Result of projecting a point into the normal-profile strips. */
-    struct NormalProfileProjection
-    {
-      bool active = false;
-      unsigned int fault_index = numbers::invalid_unsigned_int;
-      unsigned int segment_index = numbers::invalid_unsigned_int;
-      double xi = numbers::signaling_nan<double>();
-      double signed_distance = numbers::signaling_nan<double>();
-    };
-
-    /** Associate a point with at most one open 2-D fault normal profile. */
-    template <int dim>
-    NormalProfileProjection
-    project_to_normal_profiles(
-      const std::vector<ReconstructedFault<dim>> &faults,
-      const std::vector<std::vector<double>> &half_widths,
-      const Point<dim> &position);
-
-    /** Solve a symmetric positive-definite tridiagonal system. */
-    std::vector<double>
-    solve_tridiagonal_system(const std::vector<double> &diagonal,
-                             const std::vector<double> &off_diagonal,
-                             const std::vector<double> &rhs);
-  }
-
 
   /** Diagnostics produced by the direct phase-field ridge reconstruction. */
   struct FaultReconstructionDiagnostics
@@ -249,10 +65,9 @@ namespace aspect
        * @{
        */
       void initialize_crack_driving_force(
-        PhaseFieldHandler<dim> &phase_field_handler,
         const std::vector<PrescribedInitialFault<dim>> &faults);
 
-      void reconstruct_initial_faults(PhaseFieldHandler<dim> &phase_field_handler);
+      void reconstruct_initial_faults();
 
       /** Add one complete reconstructed fault and its normal-profile half widths. */
       unsigned int add_reconstructed_fault(
@@ -276,9 +91,9 @@ namespace aspect
         template <class Archive>
         void serialize(Archive &ar, const unsigned int)
         {
-          ar & name;
-          ar & n_components;
-          ar & position;
+          ar &name;
+          ar &n_components;
+          ar &position;
         }
       };
 
@@ -434,6 +249,51 @@ namespace aspect
        */
 
       /**
+       * @name Stokes quadrature-point geometry cache
+       * @{
+       */
+      struct StokesQPFaultAssociation
+      {
+        bool active = false;
+        unsigned int fault_index = numbers::invalid_unsigned_int;
+        unsigned int segment_index = numbers::invalid_unsigned_int;
+        double xi = numbers::signaling_nan<double>();
+        double shape_0 = numbers::signaling_nan<double>();
+        double shape_1 = numbers::signaling_nan<double>();
+        double signed_distance = numbers::signaling_nan<double>();
+        Point<dim> position;
+        Tensor<1,dim> tangent;
+        Tensor<1,dim> normal;
+      };
+
+      struct StokesQPCacheDiagnostics
+      {
+        unsigned int n_active_q_points = 0;
+        unsigned int rebuild_count = 0;
+      };
+
+      /** Build the cache with the production Stokes velocity quadrature. */
+      void prepare_stokes_qp_projection_cache();
+
+      /**
+       * Return one cell's QP associations and verify the exact quadrature
+       * identity and QP ordering in debug mode.
+       */
+      const std::vector<StokesQPFaultAssociation> &
+      get_stokes_qp_fault_associations(
+        const CellId &cell_id,
+        const Quadrature<dim> &quadrature,
+        const std::vector<Point<dim>> &quadrature_points) const;
+
+      void invalidate_stokes_qp_projection_cache();
+
+      const StokesQPCacheDiagnostics &
+      get_stokes_qp_cache_diagnostics() const;
+      /**
+       * @}
+       */
+
+      /**
        * @name Fault access and diagnostics
        * @{
        */
@@ -455,25 +315,25 @@ namespace aspect
       template <class Archive>
       void save(Archive &ar, const unsigned int) const
       {
-        ar & initial_reconstruction_complete;
-        ar & reconstructed_faults;
-        ar & projection_half_widths;
-        ar & property_information;
-        ar & n_property_components;
-        ar & timestep_committed_slip_rates;
-        ar & slip_rate_initialized;
+        ar &initial_reconstruction_complete;
+        ar &reconstructed_faults;
+        ar &projection_half_widths;
+        ar &property_information;
+        ar &n_property_components;
+        ar &timestep_committed_slip_rates;
+        ar &slip_rate_initialized;
       }
 
       template <class Archive>
       void load(Archive &ar, const unsigned int)
       {
-        ar & initial_reconstruction_complete;
-        ar & reconstructed_faults;
-        ar & projection_half_widths;
-        ar & property_information;
-        ar & n_property_components;
-        ar & timestep_committed_slip_rates;
-        ar & slip_rate_initialized;
+        ar &initial_reconstruction_complete;
+        ar &reconstructed_faults;
+        ar &projection_half_widths;
+        ar &property_information;
+        ar &n_property_components;
+        ar &timestep_committed_slip_rates;
+        ar &slip_rate_initialized;
 
         rebuild_after_deserialization();
       }
@@ -481,6 +341,13 @@ namespace aspect
       BOOST_SERIALIZATION_SPLIT_MEMBER()
 
       void rebuild_after_deserialization();
+
+      void reconstruct_initial_fault(
+        const unsigned int fault_index,
+        const double reconstruction_radius,
+        const std::vector<double> &all_reconstruction_radii,
+        const std::vector<double> &prescribed_half_widths,
+        const double phase_field_activation_threshold);
       /**
        * @}
        */
@@ -510,6 +377,9 @@ namespace aspect
        * @}
        */
 
+      bool stokes_qp_projection_cache_is_valid() const;
+      void rebuild_stokes_qp_projection_cache();
+
       // Persistent prescribed-fault and reconstruction state.
       double structural_spacing = numbers::signaling_nan<double>();
       double ridge_coefficient = 1.0;
@@ -534,6 +404,16 @@ namespace aspect
       std::vector<ProjectionSystem> projection_systems;
       std::vector<ParticleProjectionDiagnostics> particle_projection_diagnostics;
 
+      // Bulk-cell/QP geometry cache. Constitutive coefficients are not stored here.
+      bool stokes_qp_projection_cache_valid = false;
+      std::uint64_t cached_stokes_qp_projection_metadata_version = 0;
+      std::vector<std::uint64_t> cached_stokes_qp_fault_geometry_versions;
+      std::vector<Point<dim>> cached_stokes_quadrature_points;
+      std::vector<double> cached_stokes_quadrature_weights;
+      std::map<CellId, std::vector<StokesQPFaultAssociation>>
+      stokes_qp_projection_cache;
+      StokesQPCacheDiagnostics stokes_qp_cache_diagnostics;
+
       // Distinguished slip-rate nonlinear state.
       std::vector<std::vector<double>> timestep_committed_slip_rates;
       std::vector<std::vector<double>> current_newton_slip_rates;
@@ -542,6 +422,7 @@ namespace aspect
       bool slip_rate_nonlinear_solve_active = false;
       bool slip_rate_trial_active = false;
   };
+
 }
 
 #endif

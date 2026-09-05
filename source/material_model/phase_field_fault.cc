@@ -22,7 +22,8 @@
 #include <aspect/material_model/utilities.h>
 #include <aspect/phase_field.h>
 #include <aspect/particle/manager.h>
-#include <aspect/reconstructed_fault.h>
+#include <aspect/reconstructed_fault/manager.h>
+#include <aspect/reconstructed_fault/utilities.h>
 #include <aspect/newton.h>
 #include <aspect/simulator.h>
 #include <aspect/postprocess/visualization.h>
@@ -384,61 +385,11 @@ namespace aspect
         fault_manager.get_fault(inputs.fault_index);
       AssertIndexRange(inputs.segment_index, fault.n_cells());
       Assert(inputs.xi >= 0.0 && inputs.xi <= 1.0, ExcInternalError());
-      AssertDimension(current_normalization_integrals.size(),
-                      fault_manager.get_faults().size());
-
-      std::vector<double> surface_compositions(
-        fault_property_indices.chemical_compositions.size());
-      for (unsigned int c = 0; c < surface_compositions.size(); ++c)
-        {
-          const unsigned int property =
-            fault_property_indices.chemical_compositions[c];
-          const unsigned int position =
-            fault_manager.get_property_information()[property].position;
-          surface_compositions[c] = interpolate_fault_scalar(
-            fault,
-            inputs.segment_index, inputs.xi, position,
-            fault_manager.get_property_information()[property].name);
-        }
-      const std::vector<double> surface_material_fractions =
-        MaterialUtilities::compute_composition_fractions(surface_compositions);
-
-      const unsigned int previous_I_h_position =
-        fault_manager.get_property_information()[
-          fault_property_indices.previous_normalization_integral].position;
-      const unsigned int cohesive_position =
-        fault_manager.get_property_information()[
-          fault_property_indices.cohesive_traction].position;
-      const double current_I_h =
-        (1.0-inputs.xi)
-        * current_normalization_integrals[inputs.fault_index][inputs.segment_index]
-        + inputs.xi
-        * current_normalization_integrals[inputs.fault_index][inputs.segment_index+1];
-      const double previous_I_h = interpolate_fault_scalar(
-        fault,
-        inputs.segment_index, inputs.xi, previous_I_h_position,
-        "phase field fault previous I h");
-      const double previous_cohesive_traction = interpolate_fault_scalar(
-        fault,
-        inputs.segment_index, inputs.xi, cohesive_position,
-        "phase field fault cohesive traction");
-
-      const double current_phi = normalization_effective_phase_field(
-        inputs.phase_field, "surface residual");
-      const double previous_phi = normalization_effective_phase_field(
-        inputs.previous_phase_field, "surface residual history");
-      const PhaseFieldHandler<dim> &phase_field_handler =
-        this->get_phase_field_handler();
-      const double current_degradation =
-        phase_field_handler.energetic_degradation(surface_material_fractions,
-                                                  current_phi);
-      const double previous_degradation =
-        phase_field_handler.energetic_degradation(surface_material_fractions,
-                                                  previous_phi);
-      const double current_h = normalization_integrand(
-        current_phi, current_degradation, "surface residual");
-      const double previous_h = normalization_integrand(
-        previous_phi, previous_degradation, "surface residual history");
+      const LocalizationResponse localization =
+        evaluate_reconstructed_fault_localization(
+          inputs.fault_index, inputs.segment_index, inputs.xi,
+          inputs.phase_field, inputs.previous_phase_field,
+          "surface residual");
 
       const double eta = compute_creep_viscosity(inputs.bulk_material_fractions,
                                                  inputs.temperature);
@@ -450,9 +401,9 @@ namespace aspect
       const MaxwellCoefficients coefficients =
         compute_maxwell_coefficients(eta, G, time_step);
       const CohesiveResponse cohesive = compute_cohesive_response(
-        coefficients, current_I_h, previous_I_h,
-        previous_cohesive_traction, inputs.slip_rate,
-        current_h, previous_h);
+        coefficients, localization.current_I_h, localization.previous_I_h,
+        localization.previous_cohesive_traction, inputs.slip_rate,
+        localization.current_h, localization.previous_h);
 
       const SymmetricTensor<2,dim> trial_stress = compute_maxwell_stress(
         coefficients, inputs.strain_rate, inputs.old_maxwell_stress);
@@ -475,20 +426,24 @@ namespace aspect
                            : 0.0;
       const double mu = fault_friction.has_state_variable()
                         ? fault_friction.friction_coefficient(
-                            surface_material_fractions, inputs.slip_rate, theta)
+                            localization.surface_material_fractions,
+                            inputs.slip_rate, theta)
                         : fault_friction.friction_coefficient(
-                            surface_material_fractions, inputs.slip_rate);
+                            localization.surface_material_fractions,
+                            inputs.slip_rate);
       const double dmu_dV = fault_friction.has_state_variable()
                             ? fault_friction.friction_coefficient_derivative_wrt_slip_rate(
-                                surface_material_fractions, inputs.slip_rate, theta)
+                                localization.surface_material_fractions,
+                                inputs.slip_rate, theta)
                             : fault_friction.friction_coefficient_derivative_wrt_slip_rate(
-                                surface_material_fractions, inputs.slip_rate);
+                                localization.surface_material_fractions,
+                                inputs.slip_rate);
       const double sigma_n = use_adiabatic_pressure_in_fault_friction
                              ? this->get_adiabatic_conditions().pressure(inputs.position)
                              : inputs.dynamic_pressure
                                - stress * inputs.normal_tensor;
       const double damping = MaterialUtilities::average_value(
-        surface_material_fractions, radiation_damping_coefficients,
+        localization.surface_material_fractions, radiation_damping_coefficients,
         MaterialUtilities::arithmetic);
 
       ReconstructedFaultPointResponse response;
@@ -499,7 +454,7 @@ namespace aspect
       response.minus_derivative_wrt_slip_rate =
         2.0 * coefficients.kappa * cohesive.localization_factor
         * (inputs.slip_tensor * inputs.slip_tensor)
-        + coefficients.kappa/current_I_h
+        + coefficients.kappa/localization.current_I_h
         + sigma_n*dmu_dV
         + damping;
       response.kappa = coefficients.kappa;
@@ -507,6 +462,39 @@ namespace aspect
       response.friction_coefficient = mu;
       response.uses_adiabatic_friction_pressure =
         use_adiabatic_pressure_in_fault_friction;
+      return response;
+    }
+
+
+    template <int dim>
+    typename PhaseFieldFault<dim>::ReconstructedFaultBulkPointResponse
+    PhaseFieldFault<dim>::evaluate_reconstructed_fault_bulk_point(
+      const ReconstructedFaultBulkPointInputs &inputs) const
+    {
+      const LocalizationResponse localization =
+        evaluate_reconstructed_fault_localization(
+          inputs.fault_index, inputs.segment_index, inputs.xi,
+          inputs.phase_field, inputs.previous_phase_field,
+          "bulk residual");
+
+      const double eta = compute_creep_viscosity(inputs.bulk_material_fractions,
+                                                 inputs.temperature);
+      const double G = MaterialUtilities::average_value(
+        inputs.bulk_material_fractions, elastic_shear_moduli, viscosity_averaging);
+      const double time_step = (this->get_timestep_number() > 0
+                                ? this->get_timestep()
+                                : initial_time_step);
+      const MaxwellCoefficients coefficients =
+        compute_maxwell_coefficients(eta, G, time_step);
+      const CohesiveResponse cohesive = compute_cohesive_response(
+        coefficients, localization.current_I_h, localization.previous_I_h,
+        localization.previous_cohesive_traction, 0.0,
+        localization.current_h, localization.previous_h);
+
+      ReconstructedFaultBulkPointResponse response;
+      response.kappa = coefficients.kappa;
+      response.localization_factor = cohesive.localization_factor;
+      response.history_correction = cohesive.history_correction;
       return response;
     }
 
@@ -596,6 +584,76 @@ namespace aspect
     // -----------------------------------------------------------------------------
     // Cohesive constitutive law
     // -----------------------------------------------------------------------------
+
+    template <int dim>
+    typename PhaseFieldFault<dim>::LocalizationResponse
+    PhaseFieldFault<dim>::evaluate_reconstructed_fault_localization(
+      const unsigned int fault_index,
+      const unsigned int segment_index,
+      const double xi,
+      const double phase_field,
+      const double previous_phase_field,
+      const std::string &context) const
+    {
+      const ReconstructedFaultManager<dim> &fault_manager =
+        this->get_reconstructed_fault_manager();
+      const ReconstructedFault<dim> &fault = fault_manager.get_fault(fault_index);
+      AssertIndexRange(segment_index, fault.n_cells());
+      Assert(xi >= 0.0 && xi <= 1.0, ExcInternalError());
+      AssertDimension(current_normalization_integrals.size(),
+                      fault_manager.get_faults().size());
+
+      std::vector<double> surface_compositions(
+        fault_property_indices.chemical_compositions.size());
+      for (unsigned int c = 0; c < surface_compositions.size(); ++c)
+        {
+          const unsigned int property =
+            fault_property_indices.chemical_compositions[c];
+          const unsigned int position =
+            fault_manager.get_property_information()[property].position;
+          surface_compositions[c] = interpolate_fault_scalar(
+            fault, segment_index, xi, position,
+            fault_manager.get_property_information()[property].name);
+        }
+
+      LocalizationResponse response;
+      response.surface_material_fractions =
+        MaterialUtilities::compute_composition_fractions(surface_compositions);
+      const unsigned int previous_I_h_position =
+        fault_manager.get_property_information()[
+          fault_property_indices.previous_normalization_integral].position;
+      const unsigned int cohesive_position =
+        fault_manager.get_property_information()[
+          fault_property_indices.cohesive_traction].position;
+      response.current_I_h =
+        (1.0-xi) * current_normalization_integrals[fault_index][segment_index]
+        + xi * current_normalization_integrals[fault_index][segment_index+1];
+      response.previous_I_h = interpolate_fault_scalar(
+        fault, segment_index, xi, previous_I_h_position,
+        "phase field fault previous I h");
+      response.previous_cohesive_traction = interpolate_fault_scalar(
+        fault, segment_index, xi, cohesive_position,
+        "phase field fault cohesive traction");
+
+      const double current_phi = normalization_effective_phase_field(
+        phase_field, context);
+      const double previous_phi = normalization_effective_phase_field(
+        previous_phase_field, context + " history");
+      const PhaseFieldHandler<dim> &phase_field_handler =
+        this->get_phase_field_handler();
+      const double current_degradation =
+        phase_field_handler.energetic_degradation(
+          response.surface_material_fractions, current_phi);
+      const double previous_degradation =
+        phase_field_handler.energetic_degradation(
+          response.surface_material_fractions, previous_phi);
+      response.current_h = normalization_integrand(
+        current_phi, current_degradation, context);
+      response.previous_h = normalization_integrand(
+        previous_phi, previous_degradation, context + " history");
+      return response;
+    }
+
 
     template <int dim>
     typename PhaseFieldFault<dim>::CohesiveResponse

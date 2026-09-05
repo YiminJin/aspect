@@ -11,7 +11,7 @@
 
 #include "common.h"
 
-#include <aspect/reconstructed_fault.h>
+#include <aspect/reconstructed_fault/utilities.h>
 
 namespace
 {

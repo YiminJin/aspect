@@ -24,7 +24,7 @@
 #include <aspect/utilities.h>
 #include <aspect/melt.h>
 #include <aspect/phase_field.h>
-#include <aspect/reconstructed_fault.h>
+#include <aspect/reconstructed_fault/manager.h>
 #include <aspect/advection_field.h>
 #include <aspect/volume_of_fluid/handler.h>
 #include <aspect/newton.h>

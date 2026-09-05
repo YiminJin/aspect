@@ -743,11 +743,22 @@ orchestrates these independent actions while leaving condensation and
 nonlinear lifecycle absent. The known actions are
 
 \[
+R_{\rm fault}(\boldsymbol w;V)
+=-\int_\Omega 2\kappa(\chi V+\upsilon^{\rm hist})
+\boldsymbol S:\dot{\boldsymbol\epsilon}(\boldsymbol w)\,d\Omega,
+\]
+
+\[
 \delta\boldsymbol\tau=-2\kappa\chi\boldsymbol S\,\delta V_\Gamma
 \quad\text{for }B,
 \]
 
-and, when dynamic pressure is used,
+so the standalone residual operation overwrites its destination with
+\(R_{\rm fault}\), `apply_B()` overwrites its destination with
+\(+B\,\delta V\), and the ordinary assembler adds \(-R_{\rm fault}\) to the
+cell/global Stokes right-hand side. In particular, the frozen
+\(-2\kappa\upsilon^{\rm hist}\boldsymbol S\) term remains in the absolute bulk
+residual even though it has no \(B\) derivative. When dynamic pressure is used,
 
 \[
 G\delta x=
@@ -767,6 +778,39 @@ Both pressure modes require finite-difference tests of the non-committing
 residual and their corresponding block actions. The Stokes assembler performs
 no fault-vector MPI reduction and the surface helper performs no cell-local
 bulk weak-form assembly.
+
+Two caches have different invariants. The manager-owned geometry cache maps
+each locally owned cell and each point of the exact production Stokes velocity
+quadrature, in its original order, to the fault/segment, Q1 coordinate and
+weights, signed distance, position, tangent, and normal. It persists while the
+mesh, mapping-relevant geometry, fault geometry, projection widths, and
+quadrature identity are unchanged. Mesh refinement, restart loading, mesh
+deformation, or fault/projection mutation invalidates it. Debug builds verify
+the exact reference points, weights, number, and physical QP order at every
+consumer boundary. The assembler-owned linearization cache stores
+\(2\kappa\chi\boldsymbol S\) at those associated QPs. It is rebuilt once from
+an explicit physical bulk linearization state and thereafter `apply_B()` uses
+only frozen coefficients and cached geometry; Krylov applications do not
+reevaluate the material model or reconstruct fault associations. A geometry
+cache change makes that linearization unusable.
+
+ASPECT stores pressures in the full solution, old solution, and nonlinear
+linearization vectors in physical units. Its Stokes solver vector instead uses
+the scaled unknown
+
+\[
+\widehat p=p_{\rm physical}/s_p,
+\qquad s_p=\texttt{get\_pressure\_scaling()}.
+\]
+
+The Stage-G non-committing residual and `apply_G()` interfaces accept physical
+full-system vectors. Stage H must therefore convert a solver direction by
+\(\delta p_{\rm physical}=s_p\delta\widehat p\) before applying \(G\), or
+equivalently use
+\(G_{\rm solver}=G_{\rm physical}\operatorname{diag}(I_u,s_p I_p)\). Thus the
+dynamic-pressure contribution for a solver pressure direction is
+\(-\mu s_p\delta\widehat p\); adiabatic-pressure mode still has no pressure
+contribution. Stage G does not implement this Stage-H solver-vector adapter.
 
 Stage H adds the solver-side exact condensation only. With
 

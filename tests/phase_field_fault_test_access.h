@@ -20,7 +20,7 @@ namespace aspect
   {
     namespace internal
     {
-      /** Narrow test seam for private PhaseFieldFault Stage B-E operations. */
+      /** Narrow test seam for private PhaseFieldFault Stage B-G operations. */
       template <int dim>
       class PhaseFieldFaultTestAccess
       {
@@ -147,6 +147,15 @@ namespace aspect
             const std::vector<std::vector<double>> &cohesive_tractions)
           {
             model.commit_cohesive_state(cohesive_tractions);
+          }
+
+          static void
+          scale_current_normalization_integrals(PhaseFieldFault<dim> &model,
+                                                const double factor)
+          {
+            for (auto &fault_values : model.current_normalization_integrals)
+              for (double &value : fault_values)
+                value *= factor;
           }
 
           static const std::vector<typename ReconstructedFaultManager<dim>::

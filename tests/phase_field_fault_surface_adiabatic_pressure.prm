@@ -1,4 +1,4 @@
-# Stage-F surface residual and K_V finite-difference test using the adiabatic
+# Stage-F/G surface and bulk coupling finite-difference test using the adiabatic
 # model pressure as the complete friction normal pressure. The inherited low
 # phase-field activation threshold only bootstraps a reconstructed fault;
 # reconstruction behavior is not under test.

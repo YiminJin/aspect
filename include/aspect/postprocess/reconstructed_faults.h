@@ -8,7 +8,7 @@
 #define _aspect_postprocess_reconstructed_faults_h
 
 #include <aspect/postprocess/interface.h>
-#include <aspect/reconstructed_fault.h>
+#include <aspect/reconstructed_fault/manager.h>
 
 namespace aspect
 {

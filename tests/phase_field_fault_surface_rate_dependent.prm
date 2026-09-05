@@ -1,4 +1,4 @@
-# Stage-F surface residual and nonsingular sign-indefinite K_V test for the
+# Stage-F/G surface, bulk coupling, and nonsingular sign-indefinite K_V test for the
 # stateless rate-dependent friction law. Maxwell history, the normally varying
 # composition, and the low activation threshold are inherited test fixtures;
 # reconstruction behavior is not under test.

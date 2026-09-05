@@ -27,7 +27,7 @@
 #include <aspect/material_model/interface.h>
 #include <aspect/material_model/equation_of_state/multicomponent_incompressible.h>
 #include <aspect/material_model/rheology/fault_friction.h>
-#include <aspect/reconstructed_fault.h>
+#include <aspect/reconstructed_fault/manager.h>
 
 #include <functional>
 #include <map>
@@ -120,9 +120,33 @@ namespace aspect
           bool uses_adiabatic_friction_pressure = false;
         };
 
+        /** Inputs required by the reconstructed-fault bulk weak form. */
+        struct ReconstructedFaultBulkPointInputs
+        {
+          unsigned int fault_index = numbers::invalid_unsigned_int;
+          unsigned int segment_index = numbers::invalid_unsigned_int;
+          double xi = numbers::signaling_nan<double>();
+          double phase_field = numbers::signaling_nan<double>();
+          double previous_phase_field = numbers::signaling_nan<double>();
+          double temperature = numbers::signaling_nan<double>();
+          std::vector<double> bulk_material_fractions;
+        };
+
+        /** Constitutive scalars required by the fault bulk weak form. */
+        struct ReconstructedFaultBulkPointResponse
+        {
+          double kappa = numbers::signaling_nan<double>();
+          double localization_factor = numbers::signaling_nan<double>();
+          double history_correction = numbers::signaling_nan<double>();
+        };
+
         ReconstructedFaultPointResponse
         evaluate_reconstructed_fault_point(
           const ReconstructedFaultPointInputs &inputs) const;
+
+        ReconstructedFaultBulkPointResponse
+        evaluate_reconstructed_fault_bulk_point(
+          const ReconstructedFaultBulkPointInputs &inputs) const;
 
         double minimum_fault_slip_rate() const;
 
@@ -187,6 +211,26 @@ namespace aspect
                                   const double slip_rate,
                                   const double current_h,
                                   const double previous_h);
+
+        /** Surface mixture and cohesive-profile values shared by surface and bulk points. */
+        struct LocalizationResponse
+        {
+          std::vector<double> surface_material_fractions;
+          double current_I_h;
+          double previous_I_h;
+          double previous_cohesive_traction;
+          double current_h;
+          double previous_h;
+        };
+
+        LocalizationResponse
+        evaluate_reconstructed_fault_localization(
+          const unsigned int fault_index,
+          const unsigned int segment_index,
+          const double xi,
+          const double phase_field,
+          const double previous_phase_field,
+          const std::string &context) const;
         /**
          * @}
          */

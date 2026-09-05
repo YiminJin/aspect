@@ -11,7 +11,9 @@
 
 #include "common.h"
 
-#include <aspect/reconstructed_fault.h>
+#include <aspect/reconstructed_fault/fault.h>
+#include <aspect/reconstructed_fault/manager.h>
+#include <aspect/reconstructed_fault/utilities.h>
 #include <aspect/utilities.h>
 
 #include <limits>

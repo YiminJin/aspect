@@ -9,10 +9,15 @@
   any later version.
 */
 
-#ifndef _aspect_simulator_reconstructed_fault_surface_system_h
-#define _aspect_simulator_reconstructed_fault_surface_system_h
+#ifndef _aspect_reconstructed_fault_surface_system_h
+#define _aspect_reconstructed_fault_surface_system_h
 
 #include <aspect/simulator_access.h>
+
+#include <deal.II/grid/grid_tools_cache.h>
+
+#include <memory>
+#include <vector>
 
 namespace aspect
 {
@@ -58,9 +63,25 @@ namespace aspect
       solve_surface_jacobian(const FaultVector &rhs,
                              FaultVector &solution) const;
 
+      /**
+       * Overwrite @p result with G applied to a full-system direction whose
+       * pressure component is in physical units.
+       */
+      void
+      apply_G(const LinearAlgebra::BlockVector &physical_bulk_direction,
+              FaultVector &result) const;
+
     private:
+      struct SurfaceAssembly;
       struct SurfaceLinearization;
+
+      SurfaceAssembly
+      assemble_surface_system(const LinearAlgebra::BlockVector &bulk_state,
+                              const FaultVector &slip_rate,
+                              const bool assemble_jacobian) const;
+
       const MaterialModel::PhaseFieldFault<dim> &phase_field_fault;
+      GridTools::Cache<dim> grid_cache;
       std::unique_ptr<SurfaceLinearization> surface_linearization;
   };
 }

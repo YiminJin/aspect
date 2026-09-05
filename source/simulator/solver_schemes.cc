@@ -26,7 +26,7 @@
 #include <aspect/newton.h>
 #include <aspect/melt.h>
 #include <aspect/phase_field.h>
-#include <aspect/reconstructed_fault.h>
+#include <aspect/reconstructed_fault/manager.h>
 
 #include <deal.II/numerics/vector_tools.h>
 
@@ -958,7 +958,7 @@ namespace aspect
       {
         phase_field_handler->evolve_phase_field(system_matrix, system_rhs, solution);
         if (parameters.reconstruct_faults && timestep_number == 0)
-          reconstructed_fault_manager->reconstruct_initial_faults(*phase_field_handler);
+          reconstructed_fault_manager->reconstruct_initial_faults();
       }
 
     assemble_and_solve_temperature();
@@ -1019,7 +1019,7 @@ namespace aspect
       {
         phase_field_handler->evolve_phase_field(system_matrix, system_rhs, solution);
         if (parameters.reconstruct_faults && timestep_number == 0)
-          reconstructed_fault_manager->reconstruct_initial_faults(*phase_field_handler);
+          reconstructed_fault_manager->reconstruct_initial_faults();
       }
 
     assemble_and_solve_temperature();
@@ -1106,7 +1106,7 @@ namespace aspect
       {
         phase_field_handler->evolve_phase_field(system_matrix, system_rhs, solution);
         if (parameters.reconstruct_faults && timestep_number == 0)
-          reconstructed_fault_manager->reconstruct_initial_faults(*phase_field_handler);
+          reconstructed_fault_manager->reconstruct_initial_faults();
       }
 
     // Assemble and solve the temperature and compositional fields

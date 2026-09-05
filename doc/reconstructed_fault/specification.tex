@@ -1197,7 +1197,20 @@ particle-based bulk-to-surface $G$ action instead extends
 \texttt{ReconstructedFaultSurfaceSystem}, where it reuses the Stage-F point
 response values $\kappa$, $\chi$, and $\mu$, particle associations, and the
 replicated fault-vector reduction.  The solver orchestrates these independent
-actions.  A fault-slip increment changes stress by
+actions.  The fault-induced bulk residual is
+\begin{equation}
+ R_{\rm fault}(\boldsymbol w;V)
+ =-\int_\Omega 2\kappa(\chi V+\upsilon^{\rm hist})
+   \boldsymbol S:\dot{\boldsymbol\epsilon}(\boldsymbol w)\,d\Omega.
+\end{equation}
+Consequently the standalone residual operation overwrites its output with
+$R_{\rm fault}$, the standalone $B$ operation overwrites its output with
+$+B\,\delta V$, and the ordinary assembler adds $-R_{\rm fault}$ into the
+Stokes right-hand side.  The frozen
+$-2\kappa\upsilon^{\rm hist}\boldsymbol S$ contribution is part of the
+absolute residual even though it does not contribute to $B$.
+
+A fault-slip increment changes stress by
 \begin{equation}
  \delta\boldsymbol\tau
  =-2\kappa\chi\boldsymbol S\,\delta V_\Gamma,
@@ -1222,6 +1235,35 @@ this mode.  The Stokes assembler performs no fault-vector MPI reduction and
 the surface helper performs no cell-local bulk weak-form assembly.  Stage G
 shall include finite-difference tests of both modes, but it shall not implement
 condensation or nonlinear lifecycle.
+
+Maintain two caches with distinct lifetimes.  The manager-owned geometry cache
+maps every locally owned cell and every quadrature point of the exact
+production Stokes velocity quadrature, in its original order, to the fault,
+segment, Q1 coordinate and weights, signed distance, position, tangent, and
+normal.  It persists only while mesh and mapping-relevant geometry, fault
+geometry, projection widths, and quadrature identity are unchanged.  Relevant
+mesh, restart, deformation, and fault/projection mutations invalidate it.
+Debug builds shall verify the exact reference points, weights, count, and
+physical point ordering at consumer boundaries.  The assembler-owned
+linearization cache stores $2\kappa\chi\boldsymbol S$ at each associated QP.
+Rebuild it once from an explicit physical bulk linearization state.  Repeated
+$B$ applications shall use only this frozen cache and the geometry cache; they
+shall not reevaluate the material model or repeat fault reconstruction.  A
+geometry-cache change invalidates use of the linearization cache.
+
+ASPECT full solution, old-solution, and nonlinear-linearization vectors store
+physical pressure.  The Stokes solver vector uses
+\begin{equation}
+ \widehat p=\frac{p_{\rm physical}}{s_p},
+ \qquad s_p=\texttt{get\_pressure\_scaling()}.
+\end{equation}
+Stage-G residual and $G$ interfaces accept physical full-system vectors.
+Stage H shall convert a solver direction according to
+$\delta p_{\rm physical}=s_p\delta\widehat p$, equivalently
+$G_{\rm solver}=G_{\rm physical}\operatorname{diag}(I_u,s_pI_p)$.
+The dynamic-pressure term for a solver direction is therefore
+$-\mu s_p\delta\widehat p$.  Adiabatic-pressure mode has no pressure term.
+Do not implement this solver-vector adapter in Stage G.
 
 \subsection{Stage-H exact condensation}
 

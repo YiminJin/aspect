@@ -23,7 +23,7 @@
 #include <aspect/utilities.h>
 #include <aspect/mesh_deformation/interface.h>
 #include <aspect/melt.h>
-#include <aspect/reconstructed_fault.h>
+#include <aspect/reconstructed_fault/manager.h>
 
 #include <deal.II/base/mpi.h>
 #include <deal.II/base/utilities.h>

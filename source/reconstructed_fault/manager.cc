@@ -9,7 +9,7 @@
   any later version.
 */
 
-#include <aspect/reconstructed_fault.h>
+#include <aspect/reconstructed_fault/manager.h>
 #include <aspect/phase_field.h>
 #include <aspect/particle/manager.h>
 #include <aspect/particle/particle_domain.h>
@@ -17,100 +17,17 @@
 #include <aspect/utilities.h>
 
 #include <deal.II/fe/fe_values.h>
-#include <deal.II/lac/full_matrix.h>
-#include <deal.II/lac/vector.h>
 
 #include <algorithm>
 #include <cmath>
-#include <cstring>
 #include <limits>
 #include <map>
 #include <set>
 
 namespace aspect
 {
-  // -----------------------------------------------------------------------------
-  // File-local helpers
-  // -----------------------------------------------------------------------------
-
   namespace
   {
-    bool
-    is_uninitialized_property_sentinel(const double value)
-    {
-      static_assert(sizeof(double) == sizeof(std::uint64_t));
-      static_assert(std::numeric_limits<double>::is_iec559);
-
-      std::uint64_t bits;
-      std::uint64_t sentinel_bits;
-      const double sentinel = numbers::signaling_nan<double>();
-      std::memcpy(&bits, &value, sizeof(bits));
-      std::memcpy(&sentinel_bits, &sentinel, sizeof(sentinel_bits));
-      return bits == sentinel_bits;
-    }
-
-
-    template <int dim>
-    void
-    validate_fault_vertex(const Point<dim> &vertex)
-    {
-      for (unsigned int d = 0; d < dim; ++d)
-        AssertThrow(std::isfinite(vertex[d]),
-                    ExcMessage("Reconstructed-fault vertices must be finite."));
-    }
-
-
-    template <int dim>
-    void
-    validate_fault_segment(const Point<dim> &first,
-                           const Point<dim> &second)
-    {
-      const double length_squared = (second-first).norm_square();
-      AssertThrow(std::isfinite(length_squared) && length_squared > 0.0,
-                  ExcMessage("A reconstructed fault contains a degenerate segment."));
-    }
-
-
-    template <int dim>
-    std::vector<Point<dim>>
-    resample_polyline(const std::vector<Point<dim>> &vertices,
-                      const double spacing)
-    {
-      AssertThrow(dim == 2, ExcNotImplemented());
-      AssertThrow(vertices.size() >= 2, ExcMessage("A reference fault requires at least two vertices."));
-      AssertThrow(std::isfinite(spacing) && spacing > 0.0,
-                  ExcMessage("The fault structural point spacing must be positive and finite."));
-
-      std::vector<double> cumulative_length(vertices.size(), 0.0);
-      for (unsigned int i = 1; i < vertices.size(); ++i)
-        {
-          const double segment_length = vertices[i].distance(vertices[i-1]);
-          AssertThrow(std::isfinite(segment_length) && segment_length > 0.0,
-                      ExcMessage("The reference fault contains a degenerate segment."));
-          cumulative_length[i] = cumulative_length[i-1] + segment_length;
-        }
-
-      const double length = cumulative_length.back();
-      const unsigned int n_segments = std::max(1U, static_cast<unsigned int>(std::ceil(length / spacing)));
-      const double structural_spacing = length / n_segments;
-      std::vector<Point<dim>> points(n_segments + 1);
-      unsigned int input_segment = 0;
-      for (unsigned int i = 0; i <= n_segments; ++i)
-        {
-          const double s = (i == n_segments ? length : i * structural_spacing);
-          while (input_segment + 1 < cumulative_length.size() - 1
-                 && s > cumulative_length[input_segment+1])
-            ++input_segment;
-          const double local_coordinate =
-            (s - cumulative_length[input_segment])
-            / (cumulative_length[input_segment+1] - cumulative_length[input_segment]);
-          points[i] = vertices[input_segment]
-                      + local_coordinate * (vertices[input_segment+1] - vertices[input_segment]);
-        }
-      return points;
-    }
-
-
     template <int dim>
     std::vector<Tensor<1,dim>>
     reference_normals(const std::vector<Point<dim>> &points)
@@ -119,8 +36,8 @@ namespace aspect
       for (unsigned int i = 0; i < points.size(); ++i)
         {
           Tensor<1,dim> tangent = (i == 0 ? points[1] - points[0]
-                                     : (i + 1 == points.size() ? points[i] - points[i-1]
-                                                                : points[i+1] - points[i-1]));
+                                   : (i + 1 == points.size() ? points[i] - points[i-1]
+                                      : points[i+1] - points[i-1]));
           const double norm = tangent.norm();
           AssertThrow(std::isfinite(norm) && norm > 0.0,
                       ExcMessage("The prescribed fault geometry does not define a finite "
@@ -185,15 +102,17 @@ namespace aspect
     template <int dim>
     std::vector<InitialFaultSupport>
     determine_initial_fault_support(
-      PhaseFieldHandler<dim> &phase_field_handler,
+      const PhaseFieldHandler<dim> &phase_field_handler,
+      const DoFHandler<dim> &dof_handler,
+      const MPI_Comm mpi_communicator,
       const std::vector<PrescribedInitialFault<dim>> &prescribed_faults)
     {
       double local_cell_margin = 0.0;
-      for (const auto &cell : phase_field_handler.get_dof_handler().active_cell_iterators())
+      for (const auto &cell : dof_handler.active_cell_iterators())
         if (cell->is_locally_owned())
           local_cell_margin = std::max(local_cell_margin, cell->diameter());
       const double cell_margin = Utilities::MPI::max(
-        local_cell_margin, phase_field_handler.get_mpi_communicator());
+                                   local_cell_margin, mpi_communicator);
 
       std::vector<InitialFaultSupport> support(prescribed_faults.size());
       std::map<double, double> profile_support_by_core_value;
@@ -215,15 +134,15 @@ namespace aspect
                   for (const auto &profile :
                        phase_field_handler.get_phase_field_profiles(phi_hat))
                     half_width = std::max(
-                      half_width, profile->get_coordinate_values().back());
+                                   half_width, profile->get_coordinate_values().back());
                   profile_support = profile_support_by_core_value.emplace(
-                    phi_hat, half_width).first;
+                                      phi_hat, half_width).first;
                 }
 
               support[fault].prescribed_half_widths[vertex] = profile_support->second;
               support[fault].reconstruction_radius = std::max(
-                support[fault].reconstruction_radius,
-                profile_support->second + cell_margin);
+                                                       support[fault].reconstruction_radius,
+                                                       profile_support->second + cell_margin);
             }
         }
       return support;
@@ -248,10 +167,16 @@ namespace aspect
                   ExcMessage("A tridiagonal projection system requires one fewer "
                              "off-diagonal entry than diagonal entries."));
       AssertThrow(std::all_of(diagonal.begin(), diagonal.end(),
-                             [](const double value) { return std::isfinite(value); })
-                  && std::all_of(off_diagonal.begin(), off_diagonal.end(),
-                                 [](const double value) { return std::isfinite(value); }),
-                  ExcMessage("The particle-to-fault projection matrix is non-finite."));
+                              [](const double value)
+      {
+        return std::isfinite(value);
+      })
+      && std::all_of(off_diagonal.begin(), off_diagonal.end(),
+                     [](const double value)
+      {
+        return std::isfinite(value);
+      }),
+      ExcMessage("The particle-to-fault projection matrix is non-finite."));
       const double scale = *std::max_element(diagonal.begin(), diagonal.end());
       AssertThrow(scale > 0.0,
                   ExcMessage("The particle-to-fault projection matrix has no positive diagonal."));
@@ -288,769 +213,14 @@ namespace aspect
       for (unsigned int i = solution.size() - 1; i > 0; --i)
         solution[i-1] -= factor_lower[i-1] * solution[i];
       AssertThrow(std::all_of(solution.begin(), solution.end(),
-                             [](const double value) { return std::isfinite(value); }),
-                  ExcMessage("The tridiagonal projection solve produced a non-finite result."));
+                              [](const double value)
+      {
+        return std::isfinite(value);
+      }),
+      ExcMessage("The tridiagonal projection solve produced a non-finite result."));
       return solution;
     }
-
-
-    template <int dim>
-    InitialFaultReconstruction<dim>
-    reconstruct_initial_fault(
-      PhaseFieldHandler<dim> &phase_field_handler,
-      const std::vector<PrescribedInitialFault<dim>> &prescribed_faults,
-      const std::vector<InitialFaultSupport> &fault_support,
-      const unsigned int fault_index,
-      const double structural_spacing,
-      const double phase_field_activation_threshold,
-      const double ridge_coefficient)
-    {
-      const PrescribedInitialFault<dim> &prescribed_fault =
-        prescribed_faults[fault_index];
-      const std::vector<Point<dim>> reference_points =
-        resample_polyline(prescribed_fault.vertices, structural_spacing);
-      const std::vector<Tensor<1,dim>> normals = reference_normals(reference_points);
-      const unsigned int n_points = reference_points.size();
-
-      InitialFaultReconstruction<dim> result;
-      result.projection_half_widths.resize(n_points);
-      for (unsigned int vertex = 0; vertex < n_points; ++vertex)
-        {
-          const StructuralCoordinates coordinates =
-            structural_coordinates(prescribed_fault.vertices, reference_points[vertex]);
-          result.projection_half_widths[vertex] =
-            (1.0-coordinates.xi)
-            * fault_support[fault_index].prescribed_half_widths[coordinates.segment]
-            + coordinates.xi
-            * fault_support[fault_index].prescribed_half_widths[coordinates.segment+1];
-        }
-
-      std::vector<double> local_matrix(n_points*n_points, 0.0);
-      std::vector<double> local_rhs(n_points, 0.0);
-      std::vector<double> local_support(n_points, 0.0);
-      double local_weight = 0.0;
-
-      const QGauss<dim> quadrature(phase_field_handler.get_fe().degree + 1);
-      FEValues<dim> fe_values(phase_field_handler.get_mapping(),
-                              phase_field_handler.get_fe(), quadrature,
-                              update_values | update_quadrature_points | update_JxW_values);
-      const FEValuesExtractors::Scalar phase_field_component(
-        phase_field_handler.introspection().variable("phase_field").first_component_index);
-      std::vector<double> phase_field_values(quadrature.size());
-
-      for (const auto &cell : phase_field_handler.get_dof_handler().active_cell_iterators())
-        if (cell->is_locally_owned())
-          {
-            fe_values.reinit(cell);
-            fe_values[phase_field_component].get_function_values(
-              phase_field_handler.get_solution(), phase_field_values);
-            for (unsigned int q = 0; q < quadrature.size(); ++q)
-              {
-                AssertThrow(std::isfinite(phase_field_values[q]),
-                            ExcMessage("A non-finite Q1 phase-field value was encountered."));
-                const double weight = std::max(
-                  phase_field_values[q] - phase_field_activation_threshold, 0.0);
-                if (weight == 0.0)
-                  continue;
-
-                const StructuralCoordinates coordinates = structural_coordinates(
-                  reference_points, fe_values.quadrature_point(q));
-                if (coordinates.distance > fault_support[fault_index].reconstruction_radius)
-                  continue;
-
-                for (unsigned int other_fault = fault_index + 1;
-                     other_fault < prescribed_faults.size(); ++other_fault)
-                  {
-                    const double other_distance =
-                      ReconstructedFaultUtilities::closest_point_distance_and_core_phase_field(
-                        prescribed_faults[other_fault], fe_values.quadrature_point(q)).first;
-                    AssertThrow(other_distance > fault_support[other_fault].reconstruction_radius,
-                                ExcMessage("The active reconstruction regions of prescribed faults "
-                                           + Utilities::int_to_string(fault_index) + " and "
-                                           + Utilities::int_to_string(other_fault) + " overlap."));
-                  }
-
-                const double factor = fe_values.JxW(q) * weight;
-                const double shape_values[2] = {1.0-coordinates.xi, coordinates.xi};
-                local_weight += factor;
-                for (unsigned int a = 0; a < 2; ++a)
-                  {
-                    const unsigned int row = coordinates.segment + a;
-                    local_rhs[row] += factor * shape_values[a] * coordinates.signed_distance;
-                    local_support[row] += factor * shape_values[a];
-                    for (unsigned int b = 0; b < 2; ++b)
-                      local_matrix[row*n_points + coordinates.segment+b] +=
-                        factor * shape_values[a] * shape_values[b];
-                  }
-              }
-          }
-
-      std::vector<double> matrix(local_matrix.size());
-      std::vector<double> rhs(local_rhs.size());
-      result.diagnostics.structural_support.resize(local_support.size());
-      Utilities::MPI::sum(local_matrix, phase_field_handler.get_mpi_communicator(), matrix);
-      Utilities::MPI::sum(local_rhs, phase_field_handler.get_mpi_communicator(), rhs);
-      Utilities::MPI::sum(local_support, phase_field_handler.get_mpi_communicator(),
-                          result.diagnostics.structural_support);
-      result.diagnostics.total_weight = Utilities::MPI::sum(
-        local_weight, phase_field_handler.get_mpi_communicator());
-      AssertThrow(std::isfinite(result.diagnostics.total_weight)
-                  && result.diagnostics.total_weight > 0.0,
-                  ExcMessage("Fault " + Utilities::int_to_string(fault_index)
-                             + " has no phase-field reconstruction weight."));
-
-      for (unsigned int vertex = 0; vertex < n_points; ++vertex)
-        AssertThrow(std::isfinite(result.diagnostics.structural_support[vertex])
-                    && result.diagnostics.structural_support[vertex] > 0.0,
-                    ExcMessage("A structural vertex of fault "
-                               + Utilities::int_to_string(fault_index)
-                               + " has no phase-field support."));
-
-      result.diagnostics.offsets = ReconstructedFaultUtilities::solve_normal_offsets(
-        matrix, rhs, result.diagnostics.total_weight, ridge_coefficient);
-      result.vertices.resize(n_points);
-      for (unsigned int vertex = 0; vertex < n_points; ++vertex)
-        {
-          AssertThrow(std::abs(result.diagnostics.offsets[vertex])
-                      <= fault_support[fault_index].reconstruction_radius,
-                      ExcMessage("The fitted offset of fault "
-                                 + Utilities::int_to_string(fault_index)
-                                 + " leaves its tubular reconstruction region."));
-          result.vertices[vertex] = reference_points[vertex]
-                                    + result.diagnostics.offsets[vertex] * normals[vertex];
-        }
-      return result;
-    }
-
-
-    template <int dim>
-    void
-    validate_normal_profile_projection_geometry(
-      const std::vector<ReconstructedFault<dim>> &faults,
-      const std::vector<std::vector<double>> &half_widths)
-    {
-      AssertThrow(dim == 2, ExcNotImplemented());
-      AssertThrow(half_widths.size() == faults.size(),
-                  ExcMessage("Particle projection requires one half-width vector per fault."));
-
-      for (unsigned int fault_index = 0; fault_index < faults.size(); ++fault_index)
-        {
-          const ReconstructedFault<dim> &fault = faults[fault_index];
-          AssertThrow(fault.n_vertices() >= 2,
-                      ExcMessage("Particle projection requires faults with at least two vertices."));
-          AssertThrow(fault.vertex(0) != fault.vertex(fault.n_vertices()-1),
-                      ExcMessage("Closed-loop faults are unsupported by particle projection."));
-          AssertThrow(half_widths[fault_index].size() == fault.n_vertices(),
-                      ExcMessage("Particle projection requires one influence half-width "
-                                 "per fault vertex."));
-          AssertThrow(std::all_of(half_widths[fault_index].begin(),
-                                  half_widths[fault_index].end(),
-                                  [](const double width)
-                                  { return std::isfinite(width) && width > 0.0; }),
-                      ExcMessage("Particle projection requires positive finite influence half-widths."));
-        }
-    }
-
-
-    template <int dim>
-    void
-    validate_normal_profile_projection_position(const Point<dim> &position)
-    {
-      for (unsigned int d = 0; d < dim; ++d)
-        AssertThrow(std::isfinite(position[d]),
-                    ExcMessage("Particle projection requires a finite position."));
-    }
-
-
-    template <int dim>
-    ReconstructedFaultUtilities::NormalProfileProjection
-    project_to_normal_profiles_unchecked(
-      const std::vector<ReconstructedFault<dim>> &faults,
-      const std::vector<std::vector<double>> &half_widths,
-      const Point<dim> &position)
-    {
-      ReconstructedFaultUtilities::NormalProfileProjection result;
-      unsigned int admitted_faults = 0;
-
-      for (unsigned int fault_index = 0; fault_index < faults.size(); ++fault_index)
-        {
-          const ReconstructedFault<dim> &fault = faults[fault_index];
-          bool admitted_to_fault = false;
-          double smallest_distance = std::numeric_limits<double>::infinity();
-          ReconstructedFaultUtilities::NormalProfileProjection candidate;
-          for (unsigned int segment = 0; segment < fault.n_cells(); ++segment)
-            {
-              const Tensor<1,dim> segment_vector = fault.vertex(segment+1) - fault.vertex(segment);
-              const double length_squared = segment_vector.norm_square();
-              const double xi = ((position - fault.vertex(segment)) * segment_vector) / length_squared;
-              if (xi < 0.0 || xi > 1.0)
-                continue;
-
-              const double width = (1.0-xi) * half_widths[fault_index][segment]
-                                   + xi * half_widths[fault_index][segment+1];
-              Tensor<1,dim> tangent = segment_vector / std::sqrt(length_squared);
-              const Tensor<1,dim> normal({-tangent[1], tangent[0]});
-              const Point<dim> projected_point = fault.vertex(segment) + xi * segment_vector;
-              const double signed_distance = (position - projected_point) * normal;
-              const double distance = std::abs(signed_distance);
-              if (distance <= width && distance < smallest_distance)
-                {
-                  admitted_to_fault = true;
-                  smallest_distance = distance;
-                  candidate = {true, fault_index, segment, xi, signed_distance};
-                }
-            }
-
-          if (admitted_to_fault)
-            {
-              ++admitted_faults;
-              result = candidate;
-            }
-        }
-
-      AssertThrow(admitted_faults <= 1,
-                  ExcMessage("A particle lies in the influence regions of multiple reconstructed faults. "
-                             "Overlapping fault influence regions are unsupported."));
-      return result;
-    }
   }
-
-
-  namespace ReconstructedFaultUtilities
-  {
-    // -----------------------------------------------------------------------------
-    // Particle-to-fault projection utilities
-    // -----------------------------------------------------------------------------
-
-    template <int dim>
-    NormalProfileProjection
-    project_to_normal_profiles(
-      const std::vector<ReconstructedFault<dim>> &faults,
-      const std::vector<std::vector<double>> &half_widths,
-      const Point<dim> &position)
-    {
-      validate_normal_profile_projection_geometry(faults, half_widths);
-      validate_normal_profile_projection_position(position);
-      return project_to_normal_profiles_unchecked(faults, half_widths, position);
-    }
-
-
-    std::vector<double>
-    solve_tridiagonal_system(const std::vector<double> &diagonal,
-                             const std::vector<double> &off_diagonal,
-                             const std::vector<double> &rhs)
-    {
-      AssertThrow(rhs.size() == diagonal.size(),
-                  ExcMessage("A tridiagonal projection right-hand side must match "
-                             "the system dimension."));
-      AssertThrow(std::all_of(rhs.begin(), rhs.end(),
-                             [](const double value) { return std::isfinite(value); }),
-                  ExcMessage("The projection right-hand side is non-finite."));
-      const auto factors = factor_tridiagonal(diagonal, off_diagonal);
-      return solve_tridiagonal_factors(factors.first, factors.second, make_array_view(rhs));
-    }
-
-
-    // -----------------------------------------------------------------------------
-    // Fault reconstruction utilities
-    // -----------------------------------------------------------------------------
-
-    template <int dim>
-    std::vector<Point<dim>>
-    resample_reference_fault(const std::vector<Point<dim>> &vertices,
-                             const double structural_spacing)
-    {
-      return resample_polyline(vertices, structural_spacing);
-    }
-
-
-    std::vector<double>
-    solve_normal_offsets(const std::vector<double> &matrix_values,
-                         const std::vector<double> &rhs_values,
-                         const double total_weight,
-                         const double ridge_coefficient)
-    {
-      const unsigned int n_points = rhs_values.size();
-      AssertThrow(n_points > 0 && matrix_values.size() == n_points*n_points,
-                  ExcMessage("The normal-offset matrix and right-hand side dimensions do not match."));
-      AssertThrow(std::isfinite(total_weight) && total_weight > 0.0,
-                  ExcMessage("The total phase-field reconstruction weight must be positive."));
-      AssertThrow(std::isfinite(ridge_coefficient) && ridge_coefficient >= 0.0,
-                  ExcMessage("The fault reconstruction ridge coefficient must be nonnegative."));
-      AssertThrow(std::all_of(matrix_values.begin(), matrix_values.end(),
-                             [](const double value) { return std::isfinite(value); })
-                  && std::all_of(rhs_values.begin(), rhs_values.end(),
-                                 [](const double value) { return std::isfinite(value); }),
-                  ExcMessage("The normal-offset system contains a non-finite value."));
-
-      FullMatrix<double> system(n_points, n_points);
-      Vector<double> rhs(n_points), offsets(n_points);
-      for (unsigned int i = 0; i < n_points; ++i)
-        {
-          rhs[i] = rhs_values[i] / total_weight;
-          for (unsigned int j = 0; j < n_points; ++j)
-            system(i,j) = matrix_values[i*n_points+j] / total_weight;
-        }
-      for (unsigned int j = 1; j + 1 < n_points; ++j)
-        for (unsigned int a = 0; a < 3; ++a)
-          for (unsigned int b = 0; b < 3; ++b)
-            {
-              const double d[3] = {1.0, -2.0, 1.0};
-              system(j-1+a,j-1+b) += ridge_coefficient * d[a] * d[b];
-            }
-
-      system.gauss_jordan();
-      system.vmult(offsets, rhs);
-      std::vector<double> result(offsets.begin(), offsets.end());
-      AssertThrow(std::all_of(result.begin(), result.end(),
-                             [](const double value) { return std::isfinite(value); }),
-                  ExcMessage("The normal-offset solve produced a non-finite result."));
-      return result;
-    }
-
-
-    // -----------------------------------------------------------------------------
-    // Prescribed-fault parsing and initialization
-    // -----------------------------------------------------------------------------
-
-
-    template <int dim>
-    std::vector<PrescribedInitialFault<dim>>
-    parse_prescribed_faults(const std::string &file_contents,
-                            const std::string &filename)
-    {
-      std::vector<PrescribedInitialFault<dim>> faults;
-      PrescribedInitialFault<dim> fault;
-      std::istringstream input(file_contents);
-      std::string line;
-      unsigned int line_number = 0;
-
-      const auto finish_fault = [&]()
-      {
-        AssertThrow(fault.vertices.size() >= 2,
-                    ExcMessage("Prescribed-fault file <" + filename
-                               + "> contains a fault with fewer than two vertices near line "
-                               + Utilities::int_to_string(line_number) + "."));
-        faults.push_back(std::move(fault));
-        fault = PrescribedInitialFault<dim>();
-      };
-
-      while (std::getline(input, line))
-        {
-          ++line_number;
-          const std::size_t comment_position = line.find('#');
-          if (comment_position != std::string::npos)
-            line.erase(comment_position);
-
-          std::istringstream line_stream(line);
-          std::string first_entry;
-          if (!(line_stream >> first_entry))
-            continue;
-
-          if (first_entry == "---")
-            {
-              std::string extra_entry;
-              AssertThrow(!(line_stream >> extra_entry),
-                          ExcMessage("Fault separator on line "
-                                     + Utilities::int_to_string(line_number)
-                                     + " of <" + filename + "> must contain only `---'."));
-              AssertThrow(!fault.vertices.empty(),
-                          ExcMessage("Empty fault before separator on line "
-                                     + Utilities::int_to_string(line_number)
-                                     + " of <" + filename + ">."));
-              finish_fault();
-              continue;
-            }
-
-          Point<dim> point;
-          try
-            {
-              point[0] = Utilities::string_to_double(first_entry);
-            }
-          catch (const std::exception &)
-            {
-              AssertThrow(false,
-                          ExcMessage("Could not read the first coordinate on line "
-                                     + Utilities::int_to_string(line_number)
-                                     + " of prescribed-fault file <" + filename + ">."));
-            }
-          for (unsigned int d = 1; d < dim; ++d)
-            AssertThrow(line_stream >> point[d],
-                        ExcMessage("Line " + Utilities::int_to_string(line_number)
-                                   + " of prescribed-fault file <" + filename
-                                   + "> contains fewer than "
-                                   + Utilities::int_to_string(dim) + " coordinates."));
-          double phi_hat;
-          AssertThrow(line_stream >> phi_hat,
-                      ExcMessage("Line " + Utilities::int_to_string(line_number)
-                                 + " of prescribed-fault file <" + filename
-                                 + "> is missing the core phase-field value."));
-          std::string extra_entry;
-          AssertThrow(!(line_stream >> extra_entry),
-                      ExcMessage("Line " + Utilities::int_to_string(line_number)
-                                 + " of prescribed-fault file <" + filename
-                                 + "> contains too many entries."));
-          for (unsigned int d = 0; d < dim; ++d)
-            AssertThrow(std::isfinite(point[d]),
-                        ExcMessage("A coordinate on line "
-                                   + Utilities::int_to_string(line_number)
-                                   + " of prescribed-fault file <" + filename
-                                   + "> is not finite."));
-          AssertThrow(std::isfinite(phi_hat),
-                      ExcMessage("The core phase-field value on line "
-                                 + Utilities::int_to_string(line_number)
-                                 + " of prescribed-fault file <" + filename
-                                 + "> is not finite."));
-          fault.vertices.push_back(point);
-          fault.core_phase_field_values.push_back(phi_hat);
-        }
-
-      if (!fault.vertices.empty())
-        finish_fault();
-      AssertThrow(!faults.empty(),
-                  ExcMessage("Prescribed-fault file <" + filename
-                             + "> does not contain any faults."));
-      return faults;
-    }
-
-
-    template <int dim>
-    std::pair<double, double>
-    closest_point_distance_and_core_phase_field(const PrescribedInitialFault<dim> &fault,
-                                                 const Point<dim> &position)
-    {
-      AssertThrow(dim == 2,
-                  ExcMessage("Prescribed initial fault geometry is currently implemented only in 2D."));
-      AssertThrow(fault.vertices.size() >= 2,
-                  ExcMessage("A prescribed initial fault requires at least two vertices."));
-      AssertThrow(fault.core_phase_field_values.size() == fault.vertices.size(),
-                  ExcMessage("A prescribed initial fault requires one core phase-field value per vertex."));
-      for (unsigned int d = 0; d < dim; ++d)
-        AssertThrow(std::isfinite(position[d]),
-                    ExcMessage("Closest-point evaluation requires a finite position."));
-      AssertThrow(std::all_of(fault.core_phase_field_values.begin(),
-                              fault.core_phase_field_values.end(),
-                              [](const double value) { return std::isfinite(value); }),
-                  ExcMessage("A prescribed initial fault contains a non-finite core phase-field value."));
-
-      double min_r_squared = std::numeric_limits<double>::infinity();
-      double phi_hat = numbers::signaling_nan<double>();
-
-      for (unsigned int segment = 0; segment < fault.vertices.size() - 1; ++segment)
-        {
-          const Tensor<1,dim> segment_vector =
-            fault.vertices[segment+1] - fault.vertices[segment];
-          const double squared_segment_length = segment_vector.norm_square();
-          AssertThrow(std::isfinite(squared_segment_length) && squared_segment_length > 0.0,
-                      ExcMessage("Prescribed initial fault segment "
-                                 + Utilities::int_to_string(segment) + " is degenerate."));
-
-          const double segment_coordinate =
-            std::clamp(((position - fault.vertices[segment]) * segment_vector)
-                       / squared_segment_length,
-                       0.0,
-                       1.0);
-          const Point<dim> closest_point = fault.vertices[segment]
-                                           + segment_coordinate * segment_vector;
-          const double r_squared = position.distance_square(closest_point);
-
-          if (r_squared < min_r_squared)
-            {
-              min_r_squared = r_squared;
-              phi_hat =
-                (1.0 - segment_coordinate) * fault.core_phase_field_values[segment]
-                + segment_coordinate * fault.core_phase_field_values[segment+1];
-            }
-        }
-
-      return {std::sqrt(min_r_squared), phi_hat};
-    }
-
-
-    template <int dim>
-    void
-    initialize_crack_driving_force(
-      PhaseFieldHandler<dim> &phase_field_handler,
-      const std::vector<PrescribedInitialFault<dim>> &faults)
-    {
-      if (faults.empty())
-        return;
-
-      AssertThrow(dim == 2,
-                  ExcMessage("Prescribed initial fault initialization is currently implemented only in 2D."));
-
-      const auto *phase_field_model =
-        dynamic_cast<const MaterialModel::PhaseFieldModel<dim> *>(
-          &phase_field_handler.get_material_model());
-      AssertThrow(phase_field_model != nullptr,
-                  ExcMessage("Prescribed initial faults require a phase-field material model."));
-      const double activation_threshold =
-        phase_field_model->get_phase_field_activation_threshold();
-      const double upper_admissibility_threshold =
-        phase_field_model->get_phase_field_upper_admissibility_threshold();
-
-      for (unsigned int fault_index = 0; fault_index < faults.size(); ++fault_index)
-        {
-          const PrescribedInitialFault<dim> &fault = faults[fault_index];
-          closest_point_distance_and_core_phase_field(fault, Point<dim>());
-          for (unsigned int vertex = 0; vertex < fault.core_phase_field_values.size(); ++vertex)
-            AssertThrow(fault.core_phase_field_values[vertex] >= activation_threshold
-                        && fault.core_phase_field_values[vertex] <= upper_admissibility_threshold,
-                        ExcMessage("Core phase-field value " + Utilities::int_to_string(vertex)
-                                   + " of prescribed fault " + Utilities::int_to_string(fault_index)
-                                   + " is outside the acceptable phase-field range."));
-        }
-
-      Particle::Manager<dim> &particle_manager =
-        phase_field_handler.get_associated_particle_manager();
-      const auto &particle_data_info = particle_manager.get_property_manager().get_data_info();
-      const unsigned int crack_driving_force_index =
-        particle_data_info.get_position_by_field_name("crack_driving_force");
-
-      std::vector<unsigned int> chemical_property_indices;
-      for (const unsigned int field_index :
-           phase_field_handler.introspection().chemical_composition_field_indices())
-        {
-          AssertThrow(phase_field_handler.get_parameters().compositional_field_methods[field_index]
-                      == Parameters<dim>::AdvectionFieldMethod::particles,
-                      ExcMessage("Prescribed initial faults require every chemical composition field "
-                                 "to be advected by particles."));
-          const auto mapped_property =
-            phase_field_handler.get_parameters().mapped_particle_properties.find(field_index);
-          AssertThrow(mapped_property
-                      != phase_field_handler.get_parameters().mapped_particle_properties.end(),
-                      ExcMessage("A chemical composition field is not mapped to a particle property."));
-          chemical_property_indices.push_back(
-            particle_data_info.get_position_by_field_name(mapped_property->second.first)
-            + mapped_property->second.second);
-        }
-
-      std::map<double, std::vector<std::unique_ptr<PhaseField::PhaseFieldProfile>>> profile_cache;
-      Particles::ParticleHandler<dim> &particle_handler = particle_manager.get_particle_handler();
-      std::vector<double> chemical_compositions(chemical_property_indices.size());
-      std::map<types::particle_index, double> particle_updates;
-
-      for (auto &particle : particle_handler)
-        {
-          const ArrayView<double> properties = particle.get_properties();
-          for (unsigned int c = 0; c < chemical_property_indices.size(); ++c)
-            chemical_compositions[c] = properties[chemical_property_indices[c]];
-          const std::vector<double> volume_fractions =
-            MaterialModel::MaterialUtilities::compute_composition_fractions(chemical_compositions);
-
-          unsigned int contributing_faults = 0;
-          double prescribed_crack_driving_force = numbers::signaling_nan<double>();
-          unsigned int first_contributing_fault = numbers::invalid_unsigned_int;
-          unsigned int second_contributing_fault = numbers::invalid_unsigned_int;
-
-          for (unsigned int fault_index = 0; fault_index < faults.size(); ++fault_index)
-            {
-              const auto r_and_phi_hat =
-                closest_point_distance_and_core_phase_field(faults[fault_index],
-                                                             particle.get_location());
-              const double r = r_and_phi_hat.first;
-              const double phi_hat = r_and_phi_hat.second;
-
-              auto profiles = profile_cache.find(phi_hat);
-              if (profiles == profile_cache.end())
-                profiles = profile_cache.emplace(
-                  phi_hat,
-                  phase_field_handler.get_phase_field_profiles(phi_hat)).first;
-
-              std::vector<double> material_phase_fields(profiles->second.size());
-              for (unsigned int material = 0; material < profiles->second.size(); ++material)
-                material_phase_fields[material] = profiles->second[material]->value(r);
-
-              const double phase_field = MaterialModel::MaterialUtilities::average_value(
-                volume_fractions,
-                material_phase_fields,
-                MaterialModel::MaterialUtilities::arithmetic);
-
-              if (phase_field > activation_threshold)
-                {
-                  ++contributing_faults;
-                  if (contributing_faults == 1)
-                    {
-                      first_contributing_fault = fault_index;
-                      prescribed_crack_driving_force =
-                        phase_field_handler.stationary_crack_driving_force(volume_fractions,
-                                                                           phase_field,
-                                                                           phi_hat);
-                    }
-                  else if (contributing_faults == 2)
-                    second_contributing_fault = fault_index;
-                }
-            }
-
-          AssertThrow(contributing_faults <= 1,
-                      ExcMessage("Prescribed initial faults "
-                                 + Utilities::int_to_string(first_contributing_fault) + " and "
-                                 + Utilities::int_to_string(second_contributing_fault) + " "
-                                 "both contribute at particle "
-                                 + Utilities::int_to_string(particle.get_id()) + " located at "
-                                 + Utilities::to_string(particle.get_location()[0]) + ", "
-                                 + Utilities::to_string(particle.get_location()[1]) + "."));
-
-          if (contributing_faults == 1)
-            particle_updates.emplace(particle.get_local_index(), prescribed_crack_driving_force);
-        }
-
-      for (auto &particle : particle_handler)
-        {
-          const auto update = particle_updates.find(particle.get_local_index());
-          if (update != particle_updates.end())
-            particle.get_properties()[crack_driving_force_index] = update->second;
-        }
-
-    }
-  }
-
-
-  // -----------------------------------------------------------------------------
-  // ReconstructedFault implementation
-  // -----------------------------------------------------------------------------
-
-  template <int dim>
-  ReconstructedFault<dim>::ReconstructedFault(const std::vector<Point<dim>> &initial_vertices)
-    : vertices(initial_vertices)
-  {
-    for (const Point<dim> &vertex : vertices)
-      validate_fault_vertex(vertex);
-    for (unsigned int segment = 0; segment + 1 < vertices.size(); ++segment)
-      validate_fault_segment(vertices[segment], vertices[segment+1]);
-  }
-
-
-  template <int dim>
-  bool
-  ReconstructedFault<dim>::empty() const
-  {
-    return vertices.empty();
-  }
-
-
-  template <int dim>
-  unsigned int
-  ReconstructedFault<dim>::n_vertices() const
-  {
-    return vertices.size();
-  }
-
-
-  template <int dim>
-  unsigned int
-  ReconstructedFault<dim>::n_cells() const
-  {
-    return vertices.empty() ? 0 : vertices.size() - 1;
-  }
-
-
-  template <int dim>
-  const Point<dim> &
-  ReconstructedFault<dim>::vertex(const unsigned int index) const
-  {
-    AssertIndexRange(index, vertices.size());
-    return vertices[index];
-  }
-
-
-  template <int dim>
-  const std::vector<Point<dim>> &
-  ReconstructedFault<dim>::get_vertices() const
-  {
-    return vertices;
-  }
-
-
-  template <int dim>
-  void
-  ReconstructedFault<dim>::initialize_properties(const unsigned int n_components)
-  {
-    n_property_components = n_components;
-    property_values.resize(vertices.size() * n_property_components,
-                           numbers::signaling_nan<double>());
-  }
-
-
-  template <int dim>
-  ArrayView<double>
-  ReconstructedFault<dim>::get_properties(const unsigned int vertex_index)
-  {
-    AssertIndexRange(vertex_index, vertices.size());
-    return make_array_view(property_values.begin() + vertex_index * n_property_components,
-                           property_values.begin() + (vertex_index + 1) * n_property_components);
-  }
-
-
-  template <int dim>
-  ArrayView<const double>
-  ReconstructedFault<dim>::get_properties(const unsigned int vertex_index) const
-  {
-    AssertIndexRange(vertex_index, vertices.size());
-    return make_array_view(property_values.cbegin() + vertex_index * n_property_components,
-                           property_values.cbegin() + (vertex_index + 1) * n_property_components);
-  }
-
-
-  template <int dim>
-  bool
-  ReconstructedFault<dim>::property_value_is_initialized(
-    const unsigned int vertex_index,
-    const unsigned int component_index) const
-  {
-    AssertIndexRange(component_index, n_property_components);
-    return !is_uninitialized_property_sentinel(
-      get_properties(vertex_index)[component_index]);
-  }
-
-
-  template <int dim>
-  void
-  ReconstructedFault<dim>::append_vertex(const Point<dim> &new_vertex)
-  {
-    validate_fault_vertex(new_vertex);
-    if (!vertices.empty())
-      validate_fault_segment(vertices.back(), new_vertex);
-
-    vertices.push_back(new_vertex);
-    property_values.resize(vertices.size() * n_property_components,
-                           numbers::signaling_nan<double>());
-    ++current_geometry_version;
-  }
-
-
-  template <int dim>
-  void
-  ReconstructedFault<dim>::append_vertices(const std::vector<Point<dim>> &new_vertices)
-  {
-    if (new_vertices.empty())
-      return;
-
-    for (const Point<dim> &vertex : new_vertices)
-      validate_fault_vertex(vertex);
-    if (!vertices.empty())
-      validate_fault_segment(vertices.back(), new_vertices.front());
-    for (unsigned int segment = 0; segment + 1 < new_vertices.size(); ++segment)
-      validate_fault_segment(new_vertices[segment], new_vertices[segment+1]);
-
-    vertices.insert(vertices.end(), new_vertices.begin(), new_vertices.end());
-    property_values.resize(vertices.size() * n_property_components,
-                           numbers::signaling_nan<double>());
-    ++current_geometry_version;
-  }
-
-
-  template <int dim>
-  std::uint64_t
-  ReconstructedFault<dim>::geometry_version() const
-  {
-    return current_geometry_version;
-  }
-
-
-  // -----------------------------------------------------------------------------
-  // Manager construction and parameter handling
-  // -----------------------------------------------------------------------------
 
   template <int dim>
   ReconstructedFaultManager<dim>::ReconstructedFaultManager(const Simulator<dim> &simulator)
@@ -1104,9 +274,25 @@ namespace aspect
     prescribed_faults_filename =
       Utilities::expand_ASPECT_SOURCE_DIR(prescribed_faults_filename);
     const std::string file_contents = Utilities::read_and_distribute_file_content(
-      prescribed_faults_filename, this->get_mpi_communicator());
+                                        prescribed_faults_filename, this->get_mpi_communicator());
     prescribed_faults = ReconstructedFaultUtilities::parse_prescribed_faults<dim>(
-      file_contents, prescribed_faults_filename);
+                          file_contents, prescribed_faults_filename);
+
+    this->get_signals().post_refinement_load_user_data.connect(
+      [this] (parallel::distributed::Triangulation<dim> &)
+    {
+      invalidate_stokes_qp_projection_cache();
+    });
+    this->get_signals().post_resume_load_user_data.connect(
+      [this] (parallel::distributed::Triangulation<dim> &)
+    {
+      invalidate_stokes_qp_projection_cache();
+    });
+    this->get_signals().post_mesh_deformation.connect(
+      [this] (const SimulatorAccess<dim> &)
+    {
+      invalidate_stokes_qp_projection_cache();
+    });
 
     // Particle managers connect to this signal before the reconstructed-fault
     // manager is parsed. Consequently, their slots generate and initialize
@@ -1117,8 +303,7 @@ namespace aspect
       [this] (const SimulatorAccess<dim> &)
     {
       initial_reconstruction_complete = false;
-      ReconstructedFaultUtilities::initialize_crack_driving_force(
-        this->get_phase_field_handler(), prescribed_faults);
+      initialize_crack_driving_force(prescribed_faults);
     });
   }
 
@@ -1130,18 +315,146 @@ namespace aspect
   template <int dim>
   void
   ReconstructedFaultManager<dim>::initialize_crack_driving_force(
-    PhaseFieldHandler<dim> &phase_field_handler,
     const std::vector<PrescribedInitialFault<dim>> &faults)
   {
     prescribed_faults = faults;
-    ReconstructedFaultUtilities::initialize_crack_driving_force(phase_field_handler, faults);
+    if (faults.empty())
+      return;
+
+    AssertThrow(dim == 2,
+                ExcMessage("Prescribed initial fault initialization is currently implemented only in 2D."));
+
+    PhaseFieldHandler<dim> &phase_field_handler = this->get_phase_field_handler();
+
+    const auto *phase_field_model =
+      dynamic_cast<const MaterialModel::PhaseFieldModel<dim> *>(
+        &this->get_material_model());
+    AssertThrow(phase_field_model != nullptr,
+                ExcMessage("Prescribed initial faults require a phase-field material model."));
+    const double activation_threshold =
+      phase_field_model->get_phase_field_activation_threshold();
+    const double upper_admissibility_threshold =
+      phase_field_model->get_phase_field_upper_admissibility_threshold();
+
+    for (unsigned int fault_index = 0; fault_index < faults.size(); ++fault_index)
+      {
+        const PrescribedInitialFault<dim> &fault = faults[fault_index];
+        ReconstructedFaultUtilities::closest_point_distance_and_core_phase_field(fault, Point<dim>());
+        for (unsigned int vertex = 0; vertex < fault.core_phase_field_values.size(); ++vertex)
+          AssertThrow(fault.core_phase_field_values[vertex] >= activation_threshold
+                      && fault.core_phase_field_values[vertex] <= upper_admissibility_threshold,
+                      ExcMessage("Core phase-field value " + Utilities::int_to_string(vertex)
+                                 + " of prescribed fault " + Utilities::int_to_string(fault_index)
+                                 + " is outside the acceptable phase-field range."));
+      }
+
+    Particle::Manager<dim> &particle_manager =
+      phase_field_handler.get_associated_particle_manager();
+    const auto &particle_data_info = particle_manager.get_property_manager().get_data_info();
+    const unsigned int crack_driving_force_index =
+      particle_data_info.get_position_by_field_name("crack_driving_force");
+
+    std::vector<unsigned int> chemical_property_indices;
+    for (const unsigned int field_index :
+         this->introspection().chemical_composition_field_indices())
+      {
+        AssertThrow(this->get_parameters().compositional_field_methods[field_index]
+                    == Parameters<dim>::AdvectionFieldMethod::particles,
+                    ExcMessage("Prescribed initial faults require every chemical composition field "
+                               "to be advected by particles."));
+        const auto mapped_property =
+          this->get_parameters().mapped_particle_properties.find(field_index);
+        AssertThrow(mapped_property
+                    != this->get_parameters().mapped_particle_properties.end(),
+                    ExcMessage("A chemical composition field is not mapped to a particle property."));
+        chemical_property_indices.push_back(
+          particle_data_info.get_position_by_field_name(mapped_property->second.first)
+          + mapped_property->second.second);
+      }
+
+    std::map<double, std::vector<std::unique_ptr<PhaseField::PhaseFieldProfile>>> profile_cache;
+    Particles::ParticleHandler<dim> &particle_handler = particle_manager.get_particle_handler();
+    std::vector<double> chemical_compositions(chemical_property_indices.size());
+    std::map<types::particle_index, double> particle_updates;
+
+    for (auto &particle : particle_handler)
+      {
+        const ArrayView<double> properties = particle.get_properties();
+        for (unsigned int c = 0; c < chemical_property_indices.size(); ++c)
+          chemical_compositions[c] = properties[chemical_property_indices[c]];
+        const std::vector<double> volume_fractions =
+          MaterialModel::MaterialUtilities::compute_composition_fractions(chemical_compositions);
+
+        unsigned int contributing_faults = 0;
+        double prescribed_crack_driving_force = numbers::signaling_nan<double>();
+        unsigned int first_contributing_fault = numbers::invalid_unsigned_int;
+        unsigned int second_contributing_fault = numbers::invalid_unsigned_int;
+
+        for (unsigned int fault_index = 0; fault_index < faults.size(); ++fault_index)
+          {
+            const auto r_and_phi_hat =
+              ReconstructedFaultUtilities::closest_point_distance_and_core_phase_field(faults[fault_index],
+                                                                                       particle.get_location());
+            const double r = r_and_phi_hat.first;
+            const double phi_hat = r_and_phi_hat.second;
+
+            auto profiles = profile_cache.find(phi_hat);
+            if (profiles == profile_cache.end())
+              profiles = profile_cache.emplace(
+                           phi_hat,
+                           phase_field_handler.get_phase_field_profiles(phi_hat)).first;
+
+            std::vector<double> material_phase_fields(profiles->second.size());
+            for (unsigned int material = 0; material < profiles->second.size(); ++material)
+              material_phase_fields[material] = profiles->second[material]->value(r);
+
+            const double phase_field = MaterialModel::MaterialUtilities::average_value(
+                                         volume_fractions,
+                                         material_phase_fields,
+                                         MaterialModel::MaterialUtilities::arithmetic);
+
+            if (phase_field > activation_threshold)
+              {
+                ++contributing_faults;
+                if (contributing_faults == 1)
+                  {
+                    first_contributing_fault = fault_index;
+                    prescribed_crack_driving_force =
+                      phase_field_handler.stationary_crack_driving_force(volume_fractions,
+                                                                         phase_field,
+                                                                         phi_hat);
+                  }
+                else if (contributing_faults == 2)
+                  second_contributing_fault = fault_index;
+              }
+          }
+
+        AssertThrow(contributing_faults <= 1,
+                    ExcMessage("Prescribed initial faults "
+                               + Utilities::int_to_string(first_contributing_fault) + " and "
+                               + Utilities::int_to_string(second_contributing_fault) + " "
+                               "both contribute at particle "
+                               + Utilities::int_to_string(particle.get_id()) + " located at "
+                               + Utilities::to_string(particle.get_location()[0]) + ", "
+                               + Utilities::to_string(particle.get_location()[1]) + "."));
+
+        if (contributing_faults == 1)
+          particle_updates.emplace(particle.get_local_index(), prescribed_crack_driving_force);
+      }
+
+    for (auto &particle : particle_handler)
+      {
+        const auto update = particle_updates.find(particle.get_local_index());
+        if (update != particle_updates.end())
+          particle.get_properties()[crack_driving_force_index] = update->second;
+      }
+
   }
 
 
   template <int dim>
   void
-  ReconstructedFaultManager<dim>::reconstruct_initial_faults(
-    PhaseFieldHandler<dim> &phase_field_handler)
+  ReconstructedFaultManager<dim>::reconstruct_initial_faults()
   {
     if (initial_reconstruction_complete || prescribed_faults.empty())
       return;
@@ -1149,14 +462,26 @@ namespace aspect
     this->get_pcout() << "   Reconstruction initial faults... " << std::flush;
 
     AssertThrow(dim == 2, ExcNotImplemented());
-    const auto *phase_field_model = dynamic_cast<const MaterialModel::PhaseFieldModel<dim> *>(
-      &phase_field_handler.get_material_model());
+    const auto *phase_field_model =
+      dynamic_cast<const MaterialModel::PhaseFieldModel<dim> *>(
+        &this->get_material_model());
     AssertThrow(phase_field_model != nullptr,
                 ExcMessage("Fault reconstruction requires a phase-field material model."));
     const double activation_threshold =
       phase_field_model->get_phase_field_activation_threshold();
+
+    const PhaseFieldHandler<dim> &phase_field_handler =
+      this->get_phase_field_handler();
     const std::vector<InitialFaultSupport> fault_support =
-      determine_initial_fault_support(phase_field_handler, prescribed_faults);
+      determine_initial_fault_support(phase_field_handler,
+                                      this->get_dof_handler(),
+                                      this->get_mpi_communicator(),
+                                      prescribed_faults);
+    std::vector<double> reconstruction_radii(fault_support.size());
+    for (unsigned int fault_index = 0;
+         fault_index < fault_support.size(); ++fault_index)
+      reconstruction_radii[fault_index] =
+        fault_support[fault_index].reconstruction_radius;
 
     reconstructed_faults.clear();
     projection_half_widths.clear();
@@ -1167,17 +492,17 @@ namespace aspect
     slip_rate_nonlinear_solve_active = false;
     slip_rate_trial_active = false;
     invalidate_particle_projection_cache();
+    invalidate_stokes_qp_projection_cache();
     diagnostics.clear();
 
-    for (unsigned int fault_index = 0; fault_index < prescribed_faults.size(); ++fault_index)
-      {
-        InitialFaultReconstruction<dim> reconstruction = reconstruct_initial_fault(
-          phase_field_handler, prescribed_faults, fault_support, fault_index,
-          structural_spacing, activation_threshold, ridge_coefficient);
-        add_reconstructed_fault(reconstruction.vertices,
-                                reconstruction.projection_half_widths);
-        diagnostics.push_back(std::move(reconstruction.diagnostics));
-      }
+    for (unsigned int fault_index = 0;
+         fault_index < prescribed_faults.size(); ++fault_index)
+      reconstruct_initial_fault(
+        fault_index,
+        fault_support[fault_index].reconstruction_radius,
+        reconstruction_radii,
+        fault_support[fault_index].prescribed_half_widths,
+        activation_threshold);
 
     ++projection_metadata_version;
     invalidate_particle_projection_cache();
@@ -1185,6 +510,136 @@ namespace aspect
 
     this->get_pcout() << "done." << std::endl << std::endl;
   }
+
+
+  template <int dim>
+  void
+  ReconstructedFaultManager<dim>::reconstruct_initial_fault(
+    const unsigned int fault_index,
+    const double reconstruction_radius,
+    const std::vector<double> &all_reconstruction_radii,
+    const std::vector<double> &prescribed_half_widths,
+    const double phase_field_activation_threshold)
+  {
+    const PrescribedInitialFault<dim> &prescribed_fault =
+      prescribed_faults[fault_index];
+    const std::vector<Point<dim>> reference_points =
+      ReconstructedFaultUtilities::resample_reference_fault(
+        prescribed_fault.vertices, structural_spacing);
+    const std::vector<Tensor<1,dim>> normals = reference_normals(reference_points);
+    const unsigned int n_points = reference_points.size();
+
+    InitialFaultReconstruction<dim> result;
+    result.projection_half_widths.resize(n_points);
+    for (unsigned int vertex = 0; vertex < n_points; ++vertex)
+      {
+        const StructuralCoordinates coordinates =
+          structural_coordinates(prescribed_fault.vertices, reference_points[vertex]);
+        result.projection_half_widths[vertex] =
+          (1.0-coordinates.xi)
+          * prescribed_half_widths[coordinates.segment]
+          + coordinates.xi
+          * prescribed_half_widths[coordinates.segment+1];
+      }
+
+    std::vector<double> local_matrix(n_points*n_points, 0.0);
+    std::vector<double> local_rhs(n_points, 0.0);
+    std::vector<double> local_support(n_points, 0.0);
+    double local_weight = 0.0;
+
+    const QGauss<dim> quadrature(this->get_fe().degree + 1);
+    FEValues<dim> fe_values(this->get_mapping(),
+                            this->get_fe(), quadrature,
+                            update_values | update_quadrature_points | update_JxW_values);
+    const FEValuesExtractors::Scalar phase_field_component(
+      this->introspection().variable("phase_field").first_component_index);
+    std::vector<double> phase_field_values(quadrature.size());
+
+    for (const auto &cell : this->get_dof_handler().active_cell_iterators())
+      if (cell->is_locally_owned())
+        {
+          fe_values.reinit(cell);
+          fe_values[phase_field_component].get_function_values(
+            this->get_solution(), phase_field_values);
+          for (unsigned int q = 0; q < quadrature.size(); ++q)
+            {
+              AssertThrow(std::isfinite(phase_field_values[q]),
+                          ExcMessage("A non-finite Q1 phase-field value was encountered."));
+              const double weight = std::max(
+                                      phase_field_values[q] - phase_field_activation_threshold, 0.0);
+              if (weight == 0.0)
+                continue;
+
+              const StructuralCoordinates coordinates = structural_coordinates(
+                                                          reference_points, fe_values.quadrature_point(q));
+              if (coordinates.distance > reconstruction_radius)
+                continue;
+
+              for (unsigned int other_fault = fault_index + 1;
+                   other_fault < prescribed_faults.size(); ++other_fault)
+                {
+                  const double other_distance =
+                    ReconstructedFaultUtilities::closest_point_distance_and_core_phase_field(
+                      prescribed_faults[other_fault], fe_values.quadrature_point(q)).first;
+                  AssertThrow(other_distance > all_reconstruction_radii[other_fault],
+                              ExcMessage("The active reconstruction regions of prescribed faults "
+                                         + Utilities::int_to_string(fault_index) + " and "
+                                         + Utilities::int_to_string(other_fault) + " overlap."));
+                }
+
+              const double factor = fe_values.JxW(q) * weight;
+              const double shape_values[2] = {1.0-coordinates.xi, coordinates.xi};
+              local_weight += factor;
+              for (unsigned int a = 0; a < 2; ++a)
+                {
+                  const unsigned int row = coordinates.segment + a;
+                  local_rhs[row] += factor * shape_values[a] * coordinates.signed_distance;
+                  local_support[row] += factor * shape_values[a];
+                  for (unsigned int b = 0; b < 2; ++b)
+                    local_matrix[row*n_points + coordinates.segment+b] +=
+                      factor * shape_values[a] * shape_values[b];
+                }
+            }
+        }
+
+    std::vector<double> matrix(local_matrix.size());
+    std::vector<double> rhs(local_rhs.size());
+    result.diagnostics.structural_support.resize(local_support.size());
+    Utilities::MPI::sum(local_matrix, this->get_mpi_communicator(), matrix);
+    Utilities::MPI::sum(local_rhs, this->get_mpi_communicator(), rhs);
+    Utilities::MPI::sum(local_support, this->get_mpi_communicator(),
+                        result.diagnostics.structural_support);
+    result.diagnostics.total_weight = Utilities::MPI::sum(
+                                        local_weight, this->get_mpi_communicator());
+    AssertThrow(std::isfinite(result.diagnostics.total_weight)
+                && result.diagnostics.total_weight > 0.0,
+                ExcMessage("Fault " + Utilities::int_to_string(fault_index)
+                           + " has no phase-field reconstruction weight."));
+
+    for (unsigned int vertex = 0; vertex < n_points; ++vertex)
+      AssertThrow(std::isfinite(result.diagnostics.structural_support[vertex])
+                  && result.diagnostics.structural_support[vertex] > 0.0,
+                  ExcMessage("A structural vertex of fault "
+                             + Utilities::int_to_string(fault_index)
+                             + " has no phase-field support."));
+
+    result.diagnostics.offsets = ReconstructedFaultUtilities::solve_normal_offsets(
+                                   matrix, rhs, result.diagnostics.total_weight, ridge_coefficient);
+    result.vertices.resize(n_points);
+    for (unsigned int vertex = 0; vertex < n_points; ++vertex)
+      {
+        AssertThrow(std::abs(result.diagnostics.offsets[vertex])
+                    <= reconstruction_radius,
+                    ExcMessage("The fitted offset of fault "
+                               + Utilities::int_to_string(fault_index)
+                               + " leaves its tubular reconstruction region."));
+        result.vertices[vertex] = reference_points[vertex]
+                                  + result.diagnostics.offsets[vertex] * normals[vertex];
+      }
+    add_reconstructed_fault(result.vertices, result.projection_half_widths);
+    diagnostics.push_back(std::move(result.diagnostics));
+  }
+
 
 
   template <int dim>
@@ -1215,6 +670,7 @@ namespace aspect
     slip_rate_initialized.push_back(false);
     ++projection_metadata_version;
     invalidate_particle_projection_cache();
+    invalidate_stokes_qp_projection_cache();
     return reconstructed_faults.size() - 1;
   }
 
@@ -1290,7 +746,10 @@ namespace aspect
     return !reconstructed_faults.empty()
            && slip_rate_initialized.size() == reconstructed_faults.size()
            && std::all_of(slip_rate_initialized.begin(), slip_rate_initialized.end(),
-                          [](const bool initialized) { return initialized; });
+                          [](const bool initialized)
+    {
+      return initialized;
+    });
   }
 
 
@@ -1494,8 +953,8 @@ namespace aspect
       {
         AssertThrow(reconstructed_faults[fault].n_vertices() >= 2
                     && reconstructed_faults[fault].vertex(0)
-                       != reconstructed_faults[fault].vertex(
-                            reconstructed_faults[fault].n_vertices()-1),
+                    != reconstructed_faults[fault].vertex(
+                      reconstructed_faults[fault].n_vertices()-1),
                     ExcMessage("Invalid reconstructed-fault geometry in checkpoint."));
         for (unsigned int vertex = 0;
              vertex < reconstructed_faults[fault].n_vertices(); ++vertex)
@@ -1518,11 +977,17 @@ namespace aspect
                       ExcMessage("Invalid reconstructed-fault half width in checkpoint."));
         AssertThrow(reconstructed_faults[fault].n_property_components == n_property_components
                     && reconstructed_faults[fault].property_values.size()
-                       == reconstructed_faults[fault].n_vertices() * n_property_components,
+                    == reconstructed_faults[fault].n_vertices() * n_property_components,
                     ExcMessage("Invalid reconstructed-fault property layout in checkpoint."));
-        for (const double value : reconstructed_faults[fault].property_values)
-          AssertThrow(is_uninitialized_property_sentinel(value) || std::isfinite(value),
-                      ExcMessage("Invalid reconstructed-fault property value in checkpoint."));
+        for (unsigned int vertex = 0;
+             vertex < reconstructed_faults[fault].n_vertices(); ++vertex)
+          for (unsigned int component = 0;
+               component < n_property_components; ++component)
+            if (reconstructed_faults[fault].property_value_is_initialized(vertex,
+                                                                          component))
+              AssertThrow(std::isfinite(
+                            reconstructed_faults[fault].get_properties(vertex)[component]),
+                          ExcMessage("Invalid reconstructed-fault property value in checkpoint."));
         if (slip_rate_initialized[fault])
           {
             AssertThrow(timestep_committed_slip_rates[fault].size()
@@ -1545,6 +1010,7 @@ namespace aspect
     diagnostics.clear();
     ++projection_metadata_version;
     invalidate_particle_projection_cache();
+    invalidate_stokes_qp_projection_cache();
   }
 
 
@@ -1602,6 +1068,7 @@ namespace aspect
     const auto &particle_domain_handler = particle_manager.get_particle_domain_handler();
 
     // Geometry and influence widths are stable for the lifetime of this cache.
+    ReconstructedFaultUtilities::internal::
     validate_normal_profile_projection_geometry(reconstructed_faults,
                                                 projection_half_widths);
 
@@ -1632,10 +1099,11 @@ namespace aspect
         AssertThrow(std::isfinite(volume) && volume > 0.0,
                     ExcMessage("Particle-to-fault projection encountered a non-positive "
                                "or non-finite particle-domain volume."));
+        ReconstructedFaultUtilities::internal::
         validate_normal_profile_projection_position(particle.get_location());
 
         const ReconstructedFaultUtilities::NormalProfileProjection projection =
-          project_to_normal_profiles_unchecked(
+          ReconstructedFaultUtilities::internal::project_to_normal_profiles_unchecked(
             reconstructed_faults, projection_half_widths, particle.get_location());
         ParticleFaultAssociation entry;
         entry.particle_id = particle.get_id();
@@ -1761,8 +1229,8 @@ namespace aspect
         {
           const unsigned int begin = component * offsets.back() + offsets[fault];
           const ArrayView<const double> rhs = make_array_view(
-            global_rhs.cbegin() + begin,
-            global_rhs.cbegin() + begin + reconstructed_faults[fault].n_vertices());
+                                                global_rhs.cbegin() + begin,
+                                                global_rhs.cbegin() + begin + reconstructed_faults[fault].n_vertices());
           nodal_values[component][fault] =
             solve_tridiagonal_factors(projection_systems[fault].factor_diagonal,
                                       projection_systems[fault].factor_lower,
@@ -1845,7 +1313,8 @@ namespace aspect
                                   fault_position + component,
                                   projection.particle_property_name + " component "
                                   + Utilities::int_to_string(projection.first_particle_component
-                                                             + component)});
+                                                             + component)
+                                 });
           }
       }
 
@@ -1875,9 +1344,9 @@ namespace aspect
                                    + " has a non-finite value for "
                                    + components[component].description + "."));
             local_rhs[component*n_fault_vertices + first_vertex]
-              += entry.particle_domain_volume * shape[0] * value;
+            += entry.particle_domain_volume * shape[0] * value;
             local_rhs[component*n_fault_vertices + first_vertex+1]
-              += entry.particle_domain_volume * shape[1] * value;
+            += entry.particle_domain_volume * shape[1] * value;
           }
       }
 
@@ -1913,9 +1382,9 @@ namespace aspect
           for (unsigned int component = 0; component < property.n_components; ++component)
             {
               const bool first_is_initialized = fault.property_value_is_initialized(
-                entry.segment_index, property.position+component);
+                                                  entry.segment_index, property.position+component);
               const bool second_is_initialized = fault.property_value_is_initialized(
-                entry.segment_index+1, property.position+component);
+                                                   entry.segment_index+1, property.position+component);
               AssertThrow(first_is_initialized && second_is_initialized,
                           ExcMessage("Fault property <" + property.name
                                      + "> is uninitialized at the cached projection of particle "
@@ -1990,10 +1459,10 @@ namespace aspect
     const unsigned int n_processes =
       Utilities::MPI::n_mpi_processes(this->get_mpi_communicator());
     const unsigned int error_rank = Utilities::MPI::min(
-      local_error.empty() ? n_processes : rank, this->get_mpi_communicator());
+                                      local_error.empty() ? n_processes : rank, this->get_mpi_communicator());
     const std::string error = error_rank < n_processes
                               ? Utilities::MPI::broadcast(
-                                  this->get_mpi_communicator(), local_error, error_rank)
+                                this->get_mpi_communicator(), local_error, error_rank)
                               : std::string();
     AssertThrow(error_rank == n_processes, ExcMessage(error));
 
@@ -2029,13 +1498,13 @@ namespace aspect
     for (unsigned int fault = 0; fault < reconstructed_faults.size(); ++fault)
       {
         const double squared_residual = Utilities::MPI::sum(
-          local_squared_residual[fault], this->get_mpi_communicator());
+                                          local_squared_residual[fault], this->get_mpi_communicator());
         const double weight = Utilities::MPI::sum(
-          local_weight[fault], this->get_mpi_communicator());
+                                local_weight[fault], this->get_mpi_communicator());
         const double maximum_residual = Utilities::MPI::max(
-          local_maximum_residual[fault], this->get_mpi_communicator());
+                                          local_maximum_residual[fault], this->get_mpi_communicator());
         const double maximum_value = Utilities::MPI::max(
-          local_maximum_value[fault], this->get_mpi_communicator());
+                                       local_maximum_value[fault], this->get_mpi_communicator());
         ParticleScalarProjectionDiagnostics &diagnostic = result.diagnostics[fault];
         diagnostic.weighted_rms_residual = std::sqrt(squared_residual/weight);
         diagnostic.maximum_absolute_residual = maximum_residual;
@@ -2081,9 +1550,160 @@ namespace aspect
   ReconstructedFaultManager<dim>::project_to_normal_profiles(
     const Point<dim> &position) const
   {
+    ReconstructedFaultUtilities::internal::
     validate_normal_profile_projection_position(position);
-    return project_to_normal_profiles_unchecked(
-      reconstructed_faults, projection_half_widths, position);
+    return ReconstructedFaultUtilities::internal::project_to_normal_profiles_unchecked(
+             reconstructed_faults, projection_half_widths, position);
+  }
+
+
+  // -----------------------------------------------------------------------------
+  // Stokes quadrature-point geometry cache
+  // -----------------------------------------------------------------------------
+
+  template <int dim>
+  bool
+  ReconstructedFaultManager<dim>::stokes_qp_projection_cache_is_valid() const
+  {
+    if (!stokes_qp_projection_cache_valid
+        || cached_stokes_qp_projection_metadata_version
+        != projection_metadata_version
+        || cached_stokes_qp_fault_geometry_versions.size()
+        != reconstructed_faults.size())
+      return false;
+
+    for (unsigned int fault = 0; fault < reconstructed_faults.size(); ++fault)
+      if (cached_stokes_qp_fault_geometry_versions[fault]
+          != reconstructed_faults[fault].geometry_version())
+        return false;
+    return true;
+  }
+
+
+  template <int dim>
+  void
+  ReconstructedFaultManager<dim>::rebuild_stokes_qp_projection_cache()
+  {
+    AssertThrow(dim == 2, ExcNotImplemented());
+    AssertThrow(!reconstructed_faults.empty(),
+                ExcMessage("The Stokes QP projection cache requires reconstructed "
+                           "fault geometry."));
+    ReconstructedFaultUtilities::internal::
+    validate_normal_profile_projection_geometry(reconstructed_faults,
+                                                projection_half_widths);
+
+    const Quadrature<dim> &quadrature =
+      this->introspection().quadratures.velocities;
+    FEValues<dim> fe_values(this->get_mapping(), this->get_fe(), quadrature,
+                            update_quadrature_points);
+    std::map<CellId, std::vector<StokesQPFaultAssociation>> candidate;
+    unsigned int n_active_q_points = 0;
+
+    for (const auto &cell : this->get_dof_handler().active_cell_iterators())
+      if (cell->is_locally_owned())
+        {
+          fe_values.reinit(cell);
+          std::vector<StokesQPFaultAssociation> entries(quadrature.size());
+          for (unsigned int q = 0; q < quadrature.size(); ++q)
+            {
+              StokesQPFaultAssociation &entry = entries[q];
+              entry.position = fe_values.quadrature_point(q);
+              const ReconstructedFaultUtilities::NormalProfileProjection projection =
+                ReconstructedFaultUtilities::internal::project_to_normal_profiles_unchecked(
+                  reconstructed_faults, projection_half_widths, entry.position);
+              if (!projection.active)
+                continue;
+
+              entry.active = true;
+              entry.fault_index = projection.fault_index;
+              entry.segment_index = projection.segment_index;
+              entry.xi = projection.xi;
+              entry.shape_0 = 1.0-projection.xi;
+              entry.shape_1 = projection.xi;
+              entry.signed_distance = projection.signed_distance;
+              const ReconstructedFault<dim> &fault =
+                reconstructed_faults[projection.fault_index];
+              entry.tangent = fault.vertex(projection.segment_index+1)
+                              - fault.vertex(projection.segment_index);
+              entry.tangent /= entry.tangent.norm();
+              entry.normal[0] = -entry.tangent[1];
+              entry.normal[1] = entry.tangent[0];
+              ++n_active_q_points;
+            }
+          candidate.emplace(cell->id(), std::move(entries));
+        }
+
+    stokes_qp_projection_cache = std::move(candidate);
+    cached_stokes_quadrature_points = quadrature.get_points();
+    cached_stokes_quadrature_weights = quadrature.get_weights();
+    cached_stokes_qp_fault_geometry_versions.resize(reconstructed_faults.size());
+    for (unsigned int fault = 0; fault < reconstructed_faults.size(); ++fault)
+      cached_stokes_qp_fault_geometry_versions[fault] =
+        reconstructed_faults[fault].geometry_version();
+    cached_stokes_qp_projection_metadata_version = projection_metadata_version;
+    stokes_qp_cache_diagnostics.n_active_q_points = n_active_q_points;
+    ++stokes_qp_cache_diagnostics.rebuild_count;
+    stokes_qp_projection_cache_valid = true;
+  }
+
+
+  template <int dim>
+  void
+  ReconstructedFaultManager<dim>::prepare_stokes_qp_projection_cache()
+  {
+    if (!stokes_qp_projection_cache_is_valid())
+      rebuild_stokes_qp_projection_cache();
+  }
+
+
+  template <int dim>
+  const std::vector<typename ReconstructedFaultManager<dim>::
+  StokesQPFaultAssociation> &
+  ReconstructedFaultManager<dim>::get_stokes_qp_fault_associations(
+    const CellId &cell_id,
+    const Quadrature<dim> &quadrature,
+    const std::vector<Point<dim>> &quadrature_points) const
+  {
+    (void)quadrature;
+    AssertThrow(stokes_qp_projection_cache_is_valid(),
+                ExcMessage("The reconstructed-fault Stokes QP projection cache "
+                           "is stale. Rebuild it before bulk assembly."));
+    Assert(quadrature.get_points() == cached_stokes_quadrature_points,
+           ExcMessage("The reconstructed-fault QP cache reference-point order "
+                      "does not match the Stokes assembler quadrature."));
+    Assert(quadrature.get_weights() == cached_stokes_quadrature_weights,
+           ExcMessage("The reconstructed-fault QP cache weights do not match "
+                      "the Stokes assembler quadrature."));
+    const auto cell = stokes_qp_projection_cache.find(cell_id);
+    Assert(cell != stokes_qp_projection_cache.end(), ExcInternalError());
+    AssertDimension(cell->second.size(), quadrature.size());
+    AssertDimension(quadrature_points.size(), cell->second.size());
+    for (unsigned int q = 0; q < quadrature_points.size(); ++q)
+      Assert(cell->second[q].position == quadrature_points[q],
+             ExcMessage("The reconstructed-fault QP cache order does not match "
+                        "the Stokes FEValues quadrature-point order."));
+    return cell->second;
+  }
+
+
+  template <int dim>
+  void
+  ReconstructedFaultManager<dim>::invalidate_stokes_qp_projection_cache()
+  {
+    stokes_qp_projection_cache_valid = false;
+    stokes_qp_projection_cache.clear();
+    cached_stokes_qp_fault_geometry_versions.clear();
+    cached_stokes_quadrature_points.clear();
+    cached_stokes_quadrature_weights.clear();
+    stokes_qp_cache_diagnostics.n_active_q_points = 0;
+  }
+
+
+  template <int dim>
+  const typename ReconstructedFaultManager<dim>::StokesQPCacheDiagnostics &
+  ReconstructedFaultManager<dim>::get_stokes_qp_cache_diagnostics() const
+  {
+    return stokes_qp_cache_diagnostics;
   }
 
 
@@ -2130,32 +1750,10 @@ namespace aspect
 
 // -----------------------------------------------------------------------------
 // Explicit instantiations
-// -----------------------------------------------------------------------------
 
 namespace aspect
 {
-#define INSTANTIATE(dim) \
-  namespace ReconstructedFaultUtilities \
-  { \
-    template std::pair<double, double> \
-    closest_point_distance_and_core_phase_field( \
-      const PrescribedInitialFault<dim> &, const Point<dim> &); \
-    template std::vector<Point<dim>> \
-    resample_reference_fault( \
-      const std::vector<Point<dim>> &, const double); \
-    template std::vector<PrescribedInitialFault<dim>> \
-    parse_prescribed_faults( \
-      const std::string &, const std::string &); \
-    template void \
-    initialize_crack_driving_force( \
-      PhaseFieldHandler<dim> &, const std::vector<PrescribedInitialFault<dim>> &); \
-    template NormalProfileProjection \
-    project_to_normal_profiles( \
-      const std::vector<ReconstructedFault<dim>> &, \
-      const std::vector<std::vector<double>> &, const Point<dim> &); \
-  } \
-  template class ReconstructedFault<dim>; \
-  template class ReconstructedFaultManager<dim>;
+#define INSTANTIATE(dim) template class ReconstructedFaultManager<dim>;
 
   ASPECT_INSTANTIATE(INSTANTIATE)
 

@@ -28,7 +28,7 @@
 #include <aspect/newton.h>
 #include <aspect/mesh_deformation/free_surface.h>
 #include <aspect/phase_field.h>
-#include <aspect/reconstructed_fault.h>
+#include <aspect/reconstructed_fault/manager.h>
 
 #include <deal.II/base/parameter_handler.h>
 

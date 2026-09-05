@@ -13,8 +13,8 @@
 
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/postprocess/interface.h>
-#include <aspect/reconstructed_fault.h>
-#include <aspect/simulator/reconstructed_fault_surface_system.h>
+#include <aspect/reconstructed_fault/manager.h>
+#include <aspect/reconstructed_fault/surface_system.h>
 #include <aspect/simulator_access.h>
 
 namespace aspect
