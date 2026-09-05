@@ -629,10 +629,180 @@ Rate-dependent inputs require \(V_c>0\) and
 Stateful friction is evaluated through overloads that include `theta`; the
 stateless overloads omit it. Calling an overload that does not match the
 selected law is an API error. `has_state_variable()` is the solver-facing
-dispatch operation. Both laws use the common minimum and maximum slip-rate
-bounds. The stateless law evolves no constitutive state and therefore imposes
-no fault-friction timestep restriction: `compute_time_step()` returns the
-largest finite `double`.
+dispatch operation. Both laws require the physical/numerical lower bound
+(V\geq V_{\min}>0). There is no constitutive upper slip-rate clamp: nonlinear
+trial values above the lower bound are evaluated as supplied. The stateless
+law evolves no constitutive state and therefore imposes no fault-friction
+timestep restriction: `compute_time_step()` returns the largest finite
+`double`.
 
 Stage E remains constitutive-only. It does not register `Theta`, evaluate a
 surface residual, couple slip rate to Stokes, or add commit/rollback hooks.
+
+## 23. Coupled-solver architecture and Stage-F surface system
+
+The coupled implementation separates material mechanics from finite-element
+assembly. `MaterialModel::PhaseFieldFault` directly exposes the narrow input,
+response, and three semantic operations needed to evaluate one particle-point
+surface response without committing history. There is no abstract
+reconstructed-fault constitutive base class. A solver-local simulator helper,
+`ReconstructedFaultSurfaceSystem`, checks that the selected material model is
+`PhaseFieldFault` once when the helper is constructed and retains that concrete
+reference for its lifetime. The helper owns particle/Q1 surface assembly, MPI
+reduction, and the surface factorization. It is not an ordinary ASPECT
+assembler because this workflow does not use cell-local Scratch/CopyData.
+The material-model interface does not expose `apply_B()` or `apply_G()`
+operations. The condensed operator remains solver-owned.
+
+At an associated particle \(p\), with the surface Q1 slip rate \(V_p\), the
+non-committing constitutive response is
+
+\[
+F_p=t_p-T^{\rm coh}_p-\mu_p\sigma_{n,p}-\eta^d_pV_p,
+\qquad
+t_p=\boldsymbol\tau_p:\boldsymbol S_p.
+\]
+
+The response uses the committed particle Maxwell stress, committed fault
+history, current transient \(I_h\), and fixed rate-and-state `Theta`. None of
+these values is changed by residual or Jacobian evaluation. For timestep zero,
+the configured positive `Initial time step` supplies the Maxwell interval;
+later timesteps use the current simulator timestep. Surface evaluation is
+admissible only after current \(I_h\), cohesive history, slip rate, and, for
+rate-and-state friction, a positive committed `Theta` have been initialized.
+Stage F diagnoses missing state but does not invent a `Theta` initialization or
+commit rule; that lifecycle belongs to Stage I.
+
+The parameter `Use adiabatic pressure in fault friction` belongs to
+`PhaseFieldFault` and defaults to false. Its two meanings are:
+
+\[
+\begin{aligned}
+\text{false:}\quad &\sigma_n=p-\boldsymbol\tau:\boldsymbol N,\\
+\text{true:}\quad  &\sigma_n=p_{\rm ad}(\boldsymbol x).
+\end{aligned}
+\]
+
+The second mode uses the adiabatic pressure as the complete normal pressure in
+the friction term; it does not add dynamic pressure or deviatoric normal
+traction.
+
+Only locally owned associated particles contribute to the projection-
+consistent weak residual and Jacobian,
+
+\[
+(R_\Gamma)_i=\sum_p m_pN_i(\xi_p)F_p,
+\]
+
+\[
+(K_V)_{ij}
+=\sum_p m_pN_i(\xi_p)N_j(\xi_p)
+\left[
+2\kappa_p\chi_p\boldsymbol S_p:\boldsymbol S_p
++\frac{\kappa_p}{I_{h,p}}
++\sigma_{n,p}\left.\frac{\partial\mu}{\partial V}\right|_{\Theta}
++\eta^d_p
+\right],
+\qquad K_V=-\frac{\partial R_\Gamma}{\partial V},
+\]
+
+where \(\chi=h/I_h\). The rate-and-state derivative holds `Theta` fixed;
+the rate-dependent law uses its exact signed derivative. The replicated
+ordered Q1 polyline and single-segment particle association make each
+per-fault block symmetric tridiagonal, but the friction term means it is not
+assumed positive definite. Fault-sized vectors and tridiagonal coefficients
+are reduced over MPI and replicated. Each fault block is represented as a
+deal.II sparse matrix and factorized with the tested UMFPACK direct solver,
+which supports nonsingular indefinite systems. Factorization failure and an
+excessive scaled solve backward error are explicit numerical failures.
+
+`R_\Gamma` is a nested fault-major vector with one entry per reconstructed-
+fault vertex. It is accompanied by volume-weighted per-fault and global RMS
+diagnostics. `linearize_surface_system()` invalidates the previous
+linearization, builds and factors a complete candidate, and publishes it only
+after every fault block succeeds. `solve_surface_jacobian()` applies the
+stored replicated \(K_V^{-1}\). The residual evaluator is non-committing and
+accepts explicit bulk and slip-rate trial states, so line searches can
+evaluate trial \(V\) without changing manager-owned current or committed slip
+rate. The helper is owned for the duration of the coupled solve; it is not a
+Simulator member and introduces no checkpointed or global lifecycle state.
+
+Stage F ends at this surface system. It does not assemble the slip-dependent
+bulk residual, implement \(B\) or \(G\), alter the Stokes operator, run a
+coupled nonlinear solve, or commit/rollback constitutive state.
+
+## 24. Reviewed boundaries for Stages G--I
+
+Stage G introduces `Assemblers::ReconstructedFaultStokes` as a genuine
+cell/QP `Assemblers::Interface` implementation. It owns the slip-dependent
+bulk Stokes residual and the fault-to-bulk \(B\) action. The particle-based
+bulk-to-surface \(G\) action instead extends
+`ReconstructedFaultSurfaceSystem`, where it reuses the Stage-F point response,
+particle associations, and replicated fault-vector reduction. The solver
+orchestrates these independent actions while leaving condensation and
+nonlinear lifecycle absent. The known actions are
+
+\[
+\delta\boldsymbol\tau=-2\kappa\chi\boldsymbol S\,\delta V_\Gamma
+\quad\text{for }B,
+\]
+
+and, when dynamic pressure is used,
+
+\[
+G\delta x=
+2\kappa(\boldsymbol S+\mu\boldsymbol N):\delta\dot{\boldsymbol\epsilon}
+-\mu\,\delta p.
+\]
+
+When adiabatic pressure is used, the prescribed \(p_{\rm ad}\) has no bulk
+variation and
+
+\[
+G\delta x=2\kappa\boldsymbol S:\delta\dot{\boldsymbol\epsilon};
+\]
+
+there is no \(\mu\boldsymbol N\) contribution and no \(-\mu\delta p\) term.
+Both pressure modes require finite-difference tests of the non-committing
+residual and their corresponding block actions. The Stokes assembler performs
+no fault-vector MPI reduction and the surface helper performs no cell-local
+bulk weak-form assembly.
+
+Stage H adds the solver-side exact condensation only. With
+
+\[
+\begin{bmatrix}A&-B\\G&-K_V\end{bmatrix}
+\begin{bmatrix}\delta x\\\delta V\end{bmatrix}
+=-
+\begin{bmatrix}R_{\rm bulk}\\R_\Gamma\end{bmatrix},
+\]
+
+the condensed equation and recovery are
+
+\[
+(A-BK_V^{-1}G)\delta x
+=-R_{\rm bulk}+BK_V^{-1}R_\Gamma,
+\qquad
+\delta V=K_V^{-1}(R_\Gamma+G\delta x).
+\]
+
+The condensed Krylov operator owns a solver-local surface helper and calls its
+Stage-F \(K_V^{-1}\) operation, but
+owns no constitutive state. Block-action, condensed-action, right-hand-side,
+and recovery signs must be verified against centered finite differences of a
+single non-committing coupled residual evaluator. Tests cover velocity-only,
+pressure-only, slip-only, and mixed directions; both pressure modes; nonzero
+cohesive/profile history; one and two MPI ranks; and step sizes showing the
+expected truncation-error regime followed by roundoff saturation.
+
+Stage I alone connects nonlinear trial evaluation and lifecycle. At the lower
+bound, it first forms a projected Newton direction: a degree of freedom at
+\(V_{\min}\) whose Newton direction points below the bound is held active,
+while the remaining free direction is solved consistently. Fraction-to-
+boundary limiting is then applied only to the free direction. Thus a bound-
+active outward direction does not force a zero step. Trial values are evaluated
+through the non-committing residual interface and manager-owned trial slip
+rate; only accepted line-search trials replace the current iterate, and only
+nonlinear convergence commits timestep state. Rejected trials and failed
+timesteps leave committed `Theta`, cohesive history, particle Maxwell stress,
+and committed \(V\) unchanged.

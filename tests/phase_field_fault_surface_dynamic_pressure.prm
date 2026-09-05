@@ -1,0 +1,34 @@
+# Stage-F surface residual and K_V finite-difference test using
+# sigma_n = p - tau:N. The inherited low phase-field activation threshold only
+# bootstraps a reconstructed fault; reconstruction behavior is not under test.
+# Enable if: ASPECT_WITH_VORO
+
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_ih.prm
+
+subsection Compositional fields
+  set Number of fields            = 4
+  set Names of fields             = tau_xx, tau_yy, tau_xy, rock
+  set Types of fields             = stress, stress, stress, chemical composition
+  set Compositional field methods = particles, particles, particles, particles
+  set Mapped particle properties  = tau_xx:maxwell stress[0], tau_yy:maxwell stress[1], tau_xy:maxwell stress[2], rock:initial composition[0]
+end
+
+subsection Initial composition model
+  subsection Function
+    set Function expression = 4e6; -2e6; 1e6; 0.1+0.8*y
+  end
+end
+
+subsection Material model
+  subsection Phase field fault
+    set Use adiabatic pressure in fault friction = false
+  end
+end
+
+subsection Postprocess
+  set List of postprocessors = particles, verify phase field fault surface system
+end
+
+subsection Particles
+  set List of particle properties = crack driving force, initial composition, maxwell stress
+end

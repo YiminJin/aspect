@@ -84,6 +84,53 @@ namespace aspect
          * @}
          */
 
+        /**
+         * @name Reconstructed-fault pointwise constitutive operations
+         * @{
+         */
+        /** Inputs for one non-committing constitutive evaluation. */
+        struct ReconstructedFaultPointInputs
+        {
+          unsigned int fault_index = numbers::invalid_unsigned_int;
+          unsigned int segment_index = numbers::invalid_unsigned_int;
+          double xi = numbers::signaling_nan<double>();
+          Point<dim> position;
+
+          double slip_rate = numbers::signaling_nan<double>();
+          double phase_field = numbers::signaling_nan<double>();
+          double previous_phase_field = numbers::signaling_nan<double>();
+          double temperature = numbers::signaling_nan<double>();
+          double dynamic_pressure = numbers::signaling_nan<double>();
+
+          std::vector<double> bulk_material_fractions;
+          SymmetricTensor<2,dim> strain_rate;
+          SymmetricTensor<2,dim> old_maxwell_stress;
+          SymmetricTensor<2,dim> slip_tensor;
+          SymmetricTensor<2,dim> normal_tensor;
+        };
+
+        /** Constitutive values required by the surface weak form. */
+        struct ReconstructedFaultPointResponse
+        {
+          double residual_density = numbers::signaling_nan<double>();
+          double minus_derivative_wrt_slip_rate = numbers::signaling_nan<double>();
+          double kappa = numbers::signaling_nan<double>();
+          double localization_factor = numbers::signaling_nan<double>();
+          double friction_coefficient = numbers::signaling_nan<double>();
+          bool uses_adiabatic_friction_pressure = false;
+        };
+
+        ReconstructedFaultPointResponse
+        evaluate_reconstructed_fault_point(
+          const ReconstructedFaultPointInputs &inputs) const;
+
+        double minimum_fault_slip_rate() const;
+
+        void validate_reconstructed_fault_constitutive_state() const;
+        /**
+         * @}
+         */
+
       private:
         friend class internal::PhaseFieldFaultTestAccess<dim>;
 
@@ -322,6 +369,7 @@ namespace aspect
 
         struct FaultPropertyIndices
         {
+          unsigned int state = numbers::invalid_unsigned_int;
           unsigned int cohesive_traction = numbers::invalid_unsigned_int;
           unsigned int previous_normalization_integral =
             numbers::invalid_unsigned_int;
@@ -334,6 +382,8 @@ namespace aspect
 
         double current_minimum_raw_normalization_phase_field =
           numbers::signaling_nan<double>();
+
+        bool use_adiabatic_pressure_in_fault_friction = false;
 
         std::vector<typename ReconstructedFaultManager<dim>::
                     ParticleScalarProjectionDiagnostics>

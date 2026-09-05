@@ -1,0 +1,20 @@
+# Stage-F surface residual and K_V finite-difference test using the adiabatic
+# model pressure as the complete friction normal pressure. The inherited low
+# phase-field activation threshold only bootstraps a reconstructed fault;
+# reconstruction behavior is not under test.
+# Enable if: ASPECT_WITH_VORO
+# MPI: 2
+
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_surface_dynamic_pressure.prm
+
+set Surface pressure = 2e6
+
+subsection Material model
+  subsection Phase field fault
+    set Use adiabatic pressure in fault friction = true
+  end
+end
+
+subsection Postprocess
+  set List of postprocessors = particles, verify phase field fault surface system
+end

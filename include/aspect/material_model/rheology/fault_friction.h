@@ -132,7 +132,6 @@ namespace aspect
 
           double V0;
           double Vmin;
-          double Vmax;
           double Dc;
           bool   regularized;
           std::vector<double> mu0;

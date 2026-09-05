@@ -1,0 +1,23 @@
+# Stage-F surface residual and nonsingular sign-indefinite K_V test for the
+# stateless rate-dependent friction law. Maxwell history, the normally varying
+# composition, and the low activation threshold are inherited test fixtures;
+# reconstruction behavior is not under test.
+# Enable if: ASPECT_WITH_VORO
+
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_surface_dynamic_pressure.prm
+
+subsection Initial composition model
+  subsection Function
+    set Function expression = 4e6; -4e6+8e6*x; 1e6; 0.1+0.8*y
+  end
+end
+
+subsection Material model
+  subsection Phase field fault
+    set Friction law                        = rate dependent
+    set Reference friction coefficients    = 0.8, 0.8
+    set Dynamic friction coefficients      = 0.0, 0.0
+    set Characteristic weakening slip rates = 2e-6, 2e-6
+    set Radiation damping coefficients     = 0.0, 0.0
+  end
+end

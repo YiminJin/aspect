@@ -157,6 +157,23 @@ namespace aspect
         }
       return compositions;
     }
+
+
+    template <int dim>
+    double
+    interpolate_fault_scalar(const ReconstructedFault<dim> &fault,
+                             const unsigned int segment,
+                             const double xi,
+                             const unsigned int position,
+                             const std::string &property_name)
+    {
+      AssertThrow(fault.property_value_is_initialized(segment, position)
+                  && fault.property_value_is_initialized(segment+1, position),
+                  ExcMessage("Reconstructed-fault property <" + property_name
+                             + "> is uninitialized at a constitutive evaluation point."));
+      return (1.0-xi) * fault.get_properties(segment)[position]
+             + xi * fault.get_properties(segment+1)[position];
+    }
   }
 
   namespace MaterialModel
@@ -332,6 +349,9 @@ namespace aspect
 
       ReconstructedFaultManager<dim> &fault_manager =
         this->get_reconstructed_fault_manager();
+      if (fault_friction.has_state_variable())
+        fault_property_indices.state = fault_manager.register_property(
+          "phase field fault state", 1);
       fault_property_indices.cohesive_traction = fault_manager.register_property(
         "phase field fault cohesive traction", 1);
       fault_property_indices.previous_normalization_integral =
@@ -344,6 +364,232 @@ namespace aspect
         fault_property_indices.chemical_compositions.push_back(
           fault_manager.register_property(
             "phase field fault chemical composition " + chemical_field_names[c], 1));
+    }
+
+
+    template <int dim>
+    typename PhaseFieldFault<dim>::ReconstructedFaultPointResponse
+    PhaseFieldFault<dim>::evaluate_reconstructed_fault_point(
+      const ReconstructedFaultPointInputs &inputs) const
+    {
+      AssertThrow(dim == 2, ExcNotImplemented());
+      AssertThrow(std::isfinite(inputs.slip_rate)
+                  && inputs.slip_rate >= fault_friction.get_minimum_slip_rate(),
+                  ExcMessage("A reconstructed-fault constitutive evaluation requires "
+                             "V >= V_min."));
+
+      const ReconstructedFaultManager<dim> &fault_manager =
+        this->get_reconstructed_fault_manager();
+      const ReconstructedFault<dim> &fault =
+        fault_manager.get_fault(inputs.fault_index);
+      AssertIndexRange(inputs.segment_index, fault.n_cells());
+      Assert(inputs.xi >= 0.0 && inputs.xi <= 1.0, ExcInternalError());
+      AssertDimension(current_normalization_integrals.size(),
+                      fault_manager.get_faults().size());
+
+      std::vector<double> surface_compositions(
+        fault_property_indices.chemical_compositions.size());
+      for (unsigned int c = 0; c < surface_compositions.size(); ++c)
+        {
+          const unsigned int property =
+            fault_property_indices.chemical_compositions[c];
+          const unsigned int position =
+            fault_manager.get_property_information()[property].position;
+          surface_compositions[c] = interpolate_fault_scalar(
+            fault,
+            inputs.segment_index, inputs.xi, position,
+            fault_manager.get_property_information()[property].name);
+        }
+      const std::vector<double> surface_material_fractions =
+        MaterialUtilities::compute_composition_fractions(surface_compositions);
+
+      const unsigned int previous_I_h_position =
+        fault_manager.get_property_information()[
+          fault_property_indices.previous_normalization_integral].position;
+      const unsigned int cohesive_position =
+        fault_manager.get_property_information()[
+          fault_property_indices.cohesive_traction].position;
+      const double current_I_h =
+        (1.0-inputs.xi)
+        * current_normalization_integrals[inputs.fault_index][inputs.segment_index]
+        + inputs.xi
+        * current_normalization_integrals[inputs.fault_index][inputs.segment_index+1];
+      const double previous_I_h = interpolate_fault_scalar(
+        fault,
+        inputs.segment_index, inputs.xi, previous_I_h_position,
+        "phase field fault previous I h");
+      const double previous_cohesive_traction = interpolate_fault_scalar(
+        fault,
+        inputs.segment_index, inputs.xi, cohesive_position,
+        "phase field fault cohesive traction");
+
+      const double current_phi = normalization_effective_phase_field(
+        inputs.phase_field, "surface residual");
+      const double previous_phi = normalization_effective_phase_field(
+        inputs.previous_phase_field, "surface residual history");
+      const PhaseFieldHandler<dim> &phase_field_handler =
+        this->get_phase_field_handler();
+      const double current_degradation =
+        phase_field_handler.energetic_degradation(surface_material_fractions,
+                                                  current_phi);
+      const double previous_degradation =
+        phase_field_handler.energetic_degradation(surface_material_fractions,
+                                                  previous_phi);
+      const double current_h = normalization_integrand(
+        current_phi, current_degradation, "surface residual");
+      const double previous_h = normalization_integrand(
+        previous_phi, previous_degradation, "surface residual history");
+
+      const double eta = compute_creep_viscosity(inputs.bulk_material_fractions,
+                                                 inputs.temperature);
+      const double G = MaterialUtilities::average_value(
+        inputs.bulk_material_fractions, elastic_shear_moduli, viscosity_averaging);
+      const double time_step = (this->get_timestep_number() > 0
+                                ? this->get_timestep()
+                                : initial_time_step);
+      const MaxwellCoefficients coefficients =
+        compute_maxwell_coefficients(eta, G, time_step);
+      const CohesiveResponse cohesive = compute_cohesive_response(
+        coefficients, current_I_h, previous_I_h,
+        previous_cohesive_traction, inputs.slip_rate,
+        current_h, previous_h);
+
+      const SymmetricTensor<2,dim> trial_stress = compute_maxwell_stress(
+        coefficients, inputs.strain_rate, inputs.old_maxwell_stress);
+      const SymmetricTensor<2,dim> stress_without_current_slip =
+        trial_stress
+        - 2.0 * coefficients.kappa * cohesive.history_correction
+          * inputs.slip_tensor;
+      const SymmetricTensor<2,dim> stress =
+        stress_without_current_slip
+        - 2.0 * coefficients.kappa * cohesive.localization_factor
+          * inputs.slip_rate * inputs.slip_tensor;
+
+      const double theta = fault_friction.has_state_variable()
+                           ? interpolate_fault_scalar(
+                               fault,
+                               inputs.segment_index, inputs.xi,
+                               fault_manager.get_property_information()[
+                                 fault_property_indices.state].position,
+                               "phase field fault state")
+                           : 0.0;
+      const double mu = fault_friction.has_state_variable()
+                        ? fault_friction.friction_coefficient(
+                            surface_material_fractions, inputs.slip_rate, theta)
+                        : fault_friction.friction_coefficient(
+                            surface_material_fractions, inputs.slip_rate);
+      const double dmu_dV = fault_friction.has_state_variable()
+                            ? fault_friction.friction_coefficient_derivative_wrt_slip_rate(
+                                surface_material_fractions, inputs.slip_rate, theta)
+                            : fault_friction.friction_coefficient_derivative_wrt_slip_rate(
+                                surface_material_fractions, inputs.slip_rate);
+      const double sigma_n = use_adiabatic_pressure_in_fault_friction
+                             ? this->get_adiabatic_conditions().pressure(inputs.position)
+                             : inputs.dynamic_pressure
+                               - stress * inputs.normal_tensor;
+      const double damping = MaterialUtilities::average_value(
+        surface_material_fractions, radiation_damping_coefficients,
+        MaterialUtilities::arithmetic);
+
+      ReconstructedFaultPointResponse response;
+      response.residual_density = stress * inputs.slip_tensor
+                                  - cohesive.cohesive_traction
+                                  - mu * sigma_n
+                                  - damping * inputs.slip_rate;
+      response.minus_derivative_wrt_slip_rate =
+        2.0 * coefficients.kappa * cohesive.localization_factor
+        * (inputs.slip_tensor * inputs.slip_tensor)
+        + coefficients.kappa/current_I_h
+        + sigma_n*dmu_dV
+        + damping;
+      response.kappa = coefficients.kappa;
+      response.localization_factor = cohesive.localization_factor;
+      response.friction_coefficient = mu;
+      response.uses_adiabatic_friction_pressure =
+        use_adiabatic_pressure_in_fault_friction;
+      return response;
+    }
+
+
+    template <int dim>
+    double
+    PhaseFieldFault<dim>::minimum_fault_slip_rate() const
+    {
+      return fault_friction.get_minimum_slip_rate();
+    }
+
+
+    template <int dim>
+    void
+    PhaseFieldFault<dim>::validate_reconstructed_fault_constitutive_state() const
+    {
+      const ReconstructedFaultManager<dim> &fault_manager =
+        this->get_reconstructed_fault_manager();
+      const auto &faults = fault_manager.get_faults();
+      AssertThrow(!faults.empty(),
+                  ExcMessage("Reconstructed-fault constitutive evaluation requires "
+                             "fault geometry."));
+      AssertThrow(!use_adiabatic_pressure_in_fault_friction
+                  || this->get_adiabatic_conditions().is_initialized(),
+                  ExcMessage("Adiabatic fault-friction pressure requires initialized "
+                             "adiabatic conditions."));
+      AssertThrow(fault_property_indices.cohesive_traction
+                    != numbers::invalid_unsigned_int
+                  && fault_property_indices.previous_normalization_integral
+                    != numbers::invalid_unsigned_int,
+                  ExcMessage("Reconstructed-fault cohesive properties have not been "
+                             "registered."));
+      const unsigned int cohesive_position =
+        fault_manager.get_property_information()[
+          fault_property_indices.cohesive_traction].position;
+      const unsigned int normalization_position =
+        fault_manager.get_property_information()[
+          fault_property_indices.previous_normalization_integral].position;
+      AssertThrow(cohesive_history_is_initialized(
+                    faults, cohesive_position, normalization_position),
+                  ExcMessage("Reconstructed-fault cohesive history has not been initialized."));
+
+      AssertThrow(current_normalization_integrals.size() == faults.size(),
+                  ExcMessage("Current reconstructed-fault I_h has not been computed."));
+      for (unsigned int fault_index = 0;
+           fault_index < faults.size(); ++fault_index)
+        {
+          const ReconstructedFault<dim> &fault = faults[fault_index];
+          AssertThrow(current_normalization_integrals[fault_index].size()
+                      == fault.n_vertices(),
+                      ExcMessage("Current reconstructed-fault I_h has the wrong number "
+                                 "of vertices for fault "
+                                 + Utilities::int_to_string(fault_index) + "."));
+          for (unsigned int vertex = 0; vertex < fault.n_vertices(); ++vertex)
+            AssertThrow(std::isfinite(
+                          current_normalization_integrals[fault_index][vertex])
+                        && current_normalization_integrals[fault_index][vertex] > 0.0,
+                        ExcMessage("Current reconstructed-fault I_h must be finite and "
+                                   "positive at fault "
+                                   + Utilities::int_to_string(fault_index)
+                                   + " vertex " + Utilities::int_to_string(vertex) + "."));
+        }
+
+      if (fault_friction.has_state_variable())
+        {
+          AssertThrow(fault_property_indices.state != numbers::invalid_unsigned_int,
+                      ExcMessage("The reconstructed-fault rate-and-state property has "
+                                 "not been registered."));
+          const unsigned int state_position =
+            fault_manager.get_property_information()[fault_property_indices.state].position;
+          for (unsigned int fault_index = 0; fault_index < faults.size(); ++fault_index)
+            for (unsigned int vertex = 0;
+                 vertex < faults[fault_index].n_vertices(); ++vertex)
+              AssertThrow(faults[fault_index].property_value_is_initialized(
+                            vertex, state_position)
+                          && std::isfinite(
+                            faults[fault_index].get_properties(vertex)[state_position])
+                          && faults[fault_index].get_properties(vertex)[state_position] > 0.0,
+                          ExcMessage("Rate-and-state fault friction requires a positive "
+                                     "initialized Theta at fault "
+                                     + Utilities::int_to_string(fault_index)
+                                     + " vertex " + Utilities::int_to_string(vertex) + "."));
+        }
     }
 
 
@@ -1449,6 +1695,12 @@ namespace aspect
                             "fault geometry once the fracture is sufficiently developed. The value "
                             "should be between 0 and 1.");
 
+          prm.declare_entry("Use adiabatic pressure in fault friction", "false",
+                            Patterns::Bool(),
+                            "Use the adiabatic-model pressure as the complete normal pressure "
+                            "in the reconstructed-fault friction term. If false, use the dynamic "
+                            "pressure minus the deviatoric normal traction.");
+
           prm.declare_entry("Evolve phase field", "true",
                             Patterns::Bool(),
                             "Whether to evolve the phase field during the simulation. If set to "
@@ -1506,6 +1758,8 @@ namespace aspect
             initial_time_step *= year_in_seconds;
 
           evolve_phase_field = prm.get_bool("Evolve phase field");
+          use_adiabatic_pressure_in_fault_friction =
+            prm.get_bool("Use adiabatic pressure in fault friction");
           normalization_quadrature_tolerance =
             prm.get_double("I h quadrature tolerance");
           normalization_tail_tolerance =

@@ -1,0 +1,15 @@
+# Verify that adiabatic fault pressure rejects unavailable adiabatic state.
+# EXPECT FAILURE
+# Enable if: ASPECT_WITH_VORO
+
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_surface_rate_dependent.prm
+
+subsection Material model
+  subsection Phase field fault
+    set Use adiabatic pressure in fault friction = true
+  end
+end
+
+subsection Adiabatic conditions model
+  set Model name = uninitialized fault pressure test
+end

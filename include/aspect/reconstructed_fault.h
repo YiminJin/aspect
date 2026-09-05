@@ -381,6 +381,18 @@ namespace aspect
         std::vector<ParticleScalarProjectionDiagnostics> diagnostics;
       };
 
+      /** Geometry and weight of one locally owned particle/fault association. */
+      struct ParticleFaultAssociation
+      {
+        types::particle_index particle_id = numbers::invalid_unsigned_int;
+        Point<dim> position;
+        double particle_domain_volume = numbers::signaling_nan<double>();
+        bool active = false;
+        unsigned int fault_index = numbers::invalid_unsigned_int;
+        unsigned int segment_index = numbers::invalid_unsigned_int;
+        double xi = numbers::signaling_nan<double>();
+      };
+
       void project_particle_properties(
         const std::vector<ParticlePropertyProjection> &projections);
 
@@ -401,6 +413,14 @@ namespace aspect
       ParticleScalarProjectionResult
       project_particle_scalar(
         const std::map<types::particle_index, double> &locally_owned_values);
+
+      /**
+       * Return cached associations in locally owned particle iteration order.
+       * The reference remains valid only until the projection cache is
+       * invalidated or rebuilt.
+       */
+      const std::vector<ParticleFaultAssociation> &
+      get_locally_owned_particle_fault_associations();
 
       void invalidate_particle_projection_cache();
       const std::vector<ParticleProjectionDiagnostics> &
@@ -469,17 +489,6 @@ namespace aspect
        * @name Particle-projection cache
        * @{
        */
-      struct ParticleProjectionCacheEntry
-      {
-        types::particle_index particle_id = numbers::invalid_unsigned_int;
-        Point<dim> position;
-        double particle_domain_volume = numbers::signaling_nan<double>();
-        bool active = false;
-        unsigned int fault_index = numbers::invalid_unsigned_int;
-        unsigned int segment_index = numbers::invalid_unsigned_int;
-        double xi = numbers::signaling_nan<double>();
-      };
-
       struct ProjectionSystem
       {
         std::vector<double> diagonal;
@@ -521,7 +530,7 @@ namespace aspect
       bool particle_projection_cache_valid = false;
       std::uint64_t cached_projection_metadata_version = 0;
       std::vector<std::uint64_t> cached_fault_geometry_versions;
-      std::vector<ParticleProjectionCacheEntry> particle_projection_cache;
+      std::vector<ParticleFaultAssociation> particle_projection_cache;
       std::vector<ProjectionSystem> projection_systems;
       std::vector<ParticleProjectionDiagnostics> particle_projection_diagnostics;
 

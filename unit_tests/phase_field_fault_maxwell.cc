@@ -18,6 +18,8 @@
 
 #include "../tests/phase_field_fault_test_access.h"
 
+#include <sstream>
+
 namespace
 {
   class TestPhaseFieldModel : public aspect::MaterialModel::PhaseFieldModel<2>
@@ -116,4 +118,19 @@ TEST_CASE("FaultFriction declares the Stage E friction-law defaults")
   REQUIRE(parameters.get("Friction law") == "rate state");
   REQUIRE(parameters.get("Dynamic friction coefficients") == "0.4");
   REQUIRE(parameters.get("Characteristic weakening slip rates") == "1.e-6");
+  std::ostringstream parameter_text;
+  parameters.print_parameters(parameter_text,
+                              dealii::ParameterHandler::OutputStyle::Text);
+  REQUIRE(parameter_text.str().find("Maximum slip rate") == std::string::npos);
+}
+
+
+
+TEST_CASE("PhaseFieldFault declares dynamic fault pressure by default")
+{
+  dealii::ParameterHandler parameters;
+  aspect::MaterialModel::PhaseFieldFault<2>::declare_parameters(parameters);
+  parameters.enter_subsection("Material model");
+  parameters.enter_subsection("Phase field fault");
+  REQUIRE_FALSE(parameters.get_bool("Use adiabatic pressure in fault friction"));
 }

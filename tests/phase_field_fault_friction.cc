@@ -79,7 +79,7 @@ namespace aspect
             return -(mu_s - mu_d) * Vc / ((Vc + V) * (Vc + V));
           };
 
-          for (const double V : {1.e-10, Vc, 1.e-2})
+          for (const double V : {1.e-10, Vc, 1.e-2, 1.e4})
             assert_close(friction.friction_coefficient(fractions, V),
                          coefficient(V), 1.e-13,
                          "Rate-dependent friction coefficient");
@@ -188,6 +188,17 @@ namespace aspect
                          fractions, V, theta),
                        expected_derivative, 1.e-13,
                        "Rate-and-state analytic derivative");
+
+          const double large_V = 1.e3;
+          const double large_Z = large_V / (2.0 * V0)
+                                 * std::exp((mu0 + b * std::log(theta * V0 / Dc)) / a);
+          assert_close(friction.friction_coefficient(fractions, large_V, theta),
+                       a * std::asinh(large_Z), 1.e-13,
+                       "Rate-and-state unclamped high-slip coefficient");
+          assert_close(friction.friction_coefficient_derivative_wrt_slip_rate(
+                         fractions, large_V, theta),
+                       a/large_V, 1.e-13,
+                       "Rate-and-state unclamped high-slip derivative");
 
           const double dV = 1.e-5 * V;
           const double finite_difference =

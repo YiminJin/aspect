@@ -1,0 +1,11 @@
+# Verify the explicit diagnostic for a singular Stage-F K_V factorization.
+# The postprocessor deliberately invalidates test-only particle associations;
+# this is algebraic fault injection, not a supported manager lifecycle.
+# EXPECT FAILURE
+# Enable if: ASPECT_WITH_VORO
+
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_surface_rate_dependent.prm
+
+subsection Postprocess
+  set List of postprocessors = particles, verify singular phase field fault surface system
+end

@@ -39,7 +39,9 @@ namespace aspect
         AssertThrow(theta_old > 0, ExcMessage("The slip state is non-positive."));
         AssertThrow(dt >= 0, ExcMessage("Time step is negative."));
 
-        const double V = std::clamp(V_raw, Vmin, Vmax);
+        AssertThrow(std::isfinite(V_raw) && V_raw >= Vmin,
+                    ExcMessage("The slip rate is below the minimum admissible slip rate."));
+        const double V = V_raw;
         const double x = V * dt / Dc;
         return -Dc / V * std::expm1(-x) + theta_old * std::exp(-x);
       }
@@ -68,7 +70,9 @@ namespace aspect
               b_eff   += volume_fractions[j] * b[j];
             }
 
-        const double V = std::clamp(V_raw, Vmin, Vmax);
+        AssertThrow(std::isfinite(V_raw) && V_raw >= Vmin,
+                    ExcMessage("The slip rate is below the minimum admissible slip rate."));
+        const double V = V_raw;
 
         return (regularized
                 ?
@@ -99,7 +103,9 @@ namespace aspect
               Vc   += volume_fractions[j] * characteristic_weakening_slip_rates[j];
             }
 
-        const double V = std::clamp(V_raw, Vmin, Vmax);
+        AssertThrow(std::isfinite(V_raw) && V_raw >= Vmin,
+                    ExcMessage("The slip rate is below the minimum admissible slip rate."));
+        const double V = V_raw;
         return mu_d + (mu_s - mu_d) * Vc / (Vc + V);
       }
 
@@ -127,7 +133,9 @@ namespace aspect
               b_eff   += volume_fractions[j] * b[j];
             }
 
-        const double V = std::clamp(V_raw, Vmin, Vmax);
+        AssertThrow(std::isfinite(V_raw) && V_raw >= Vmin,
+                    ExcMessage("The slip rate is below the minimum admissible slip rate."));
+        const double V = V_raw;
 
         double dmu_dV = a_eff / V;
         if (regularized)
@@ -163,7 +171,9 @@ namespace aspect
               Vc   += volume_fractions[j] * characteristic_weakening_slip_rates[j];
             }
 
-        const double V = std::clamp(V_raw, Vmin, Vmax);
+        AssertThrow(std::isfinite(V_raw) && V_raw >= Vmin,
+                    ExcMessage("The slip rate is below the minimum admissible slip rate."));
+        const double V = V_raw;
         return -(mu_s - mu_d) * Vc / ((Vc + V) * (Vc + V));
       }
 
@@ -182,7 +192,9 @@ namespace aspect
         if (friction_law == FrictionLaw::rate_dependent)
           return std::numeric_limits<double>::max();
 
-        const double V = std::clamp(V_raw, Vmin, Vmax);
+        AssertThrow(std::isfinite(V_raw) && V_raw >= Vmin,
+                    ExcMessage("The slip rate is below the minimum admissible slip rate."));
+        const double V = V_raw;
         if (use_operator_splitting == false)
           return cfl_number * Dc / V;
 
@@ -216,9 +228,6 @@ namespace aspect
         prm.declare_entry ("Minimum slip rate", "1.e-20",
                            Patterns::Double(0.),
                            "The lower bound of slip rate. Units: \\si{\\miter\\per\\second}.");
-        prm.declare_entry ("Maximum slip rate", "100",
-                           Patterns::Double(0.),
-                           "The upper bound of slip rate. Units: \\si{\\miter\\per\\second}.");
         prm.declare_entry ("Characteristic slip distance", "0.04",
                            Patterns::Double(0.),
                            "The characteristic slip distance, $D_c$. Units: \\si{\\meter}.");
@@ -272,14 +281,10 @@ namespace aspect
 
         V0   = prm.get_double("Reference slip rate");
         Vmin = prm.get_double("Minimum slip rate");
-        Vmax = prm.get_double("Maximum slip rate");
         Dc   = prm.get_double("Characteristic slip distance");
 
         AssertThrow(numbers::is_finite(Vmin) && Vmin > 0.0,
                     ExcMessage("The minimum slip rate must be finite and positive."));
-        AssertThrow(numbers::is_finite(Vmax) && Vmax >= Vmin,
-                    ExcMessage("The maximum slip rate must be finite and greater than or "
-                               "equal to the minimum slip rate."));
 
         // Retrieve the list of composition names
         std::vector<std::string> compositional_field_names = this->introspection().get_composition_names();

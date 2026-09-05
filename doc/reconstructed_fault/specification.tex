@@ -172,7 +172,7 @@ average separately evaluated nonlinear friction responses.
   \item \texttt{friction\_coefficient\_derivative\_wrt\_slip\_rate(...)};
   \item \texttt{compute\_time\_step(...)};
   \item existing getters for $V_0$, $V_{\min}$, and $D_c$ where required;
-  \item the existing parameter declaration/parsing for $V_0$, $V_{\min}$, $V_{\max}$, $D_c$, $\mu_0$, $a$, $b$, and the regularization option.
+  \item the existing parameter declaration/parsing for $V_0$, $V_{\min}$, $D_c$, $\mu_0$, $a$, $b$, and the regularization option.
 \end{itemize}
 The new reconstructed-fault model shall not duplicate these formulas or define an independent set of RSF parameters.
 
@@ -186,11 +186,12 @@ $V_c>0$ and $0\leq\mu_d\leq\mu_s$.
 
 The stateful coefficient and derivative interfaces take $\theta$.  Separate
 stateless overloads omit $\theta$; using an overload that does not match the
-selected law is an API error.  Both laws use the common $V_{\min}$ and
-$V_{\max}$ bounds.  The rate-dependent law owns no state and imposes no
-friction timestep restriction, so \texttt{compute\_time\_step(...)} returns
-the largest finite \texttt{double}.  Stage E is constitutive-only: it does not
-add persistent $\Theta$, a surface residual, mechanical coupling, or nonlinear
+selected law is an API error.  Both laws require $V\geq V_{\min}>0$.  There is
+no constitutive upper slip-rate clamp; an admissible trial value is evaluated
+as supplied.  The rate-dependent law owns no state and imposes no friction
+timestep restriction, so \texttt{compute\_time\_step(...)} returns the largest
+finite \texttt{double}.  Stage E is constitutive-only: it does not add
+persistent $\Theta$, a surface residual, mechanical coupling, or nonlinear
 commit/rollback hooks.
 
 \subsection{Original phase-field-RSF material model: reference only}
@@ -942,26 +943,30 @@ They are propagated through the cached operators every nonlinear iteration.
 With geometry and projection caches already valid, the high-frequency nonlinear loop is
 \[
 \boxed{
-\mathbf{z}_p
-\xrightarrow{\;P_{\Gamma\leftarrow p}\;}
-\mathbf{z}_\Gamma
-\xrightarrow{\;\text{fault constitutive model}\;}
-\mathbf{V}_\Gamma
-\xrightarrow{\;P_{q\leftarrow\Gamma}\;}
-\mathbf{V}_q.
+(\mathbf{x},\mathbf{V}_\Gamma)
+\xrightarrow{\;\text{bulk evaluation and cached fault interpolation}\;}
+\{F_p,(K_V)_p\}
+\xrightarrow{\;\text{local Q1 assembly and MPI reduction}\;}
+(\mathbf{R}_\Gamma,\mathbf{K}_V).
 }
 \]
 
 The intended hot-loop operations are:
 \begin{enumerate}
-  \item local accumulation of particle-to-fault right-hand sides;
-  \item one packed MPI reduction for the changing surface right-hand sides;
-  \item small replicated fault solves using a cached operator;
-  \item fault constitutive update;
-  \item local cached interpolation from fault to QPs.
+  \item evaluate current bulk trial fields at locally owned associated
+        particle points;
+  \item interpolate the explicit replicated trial slip-rate vector through
+        cached particle/fault coordinates;
+  \item evaluate non-committing pointwise constitutive responses;
+  \item locally assemble fault-sized Q1 residual and Jacobian coefficients;
+  \item perform one packed MPI reduction and factor each replicated $K_V$
+        block when a new linearization is requested.
 \end{enumerate}
 
-There shall be no repeated nearest-fault-cell search or particle-projection-matrix assembly inside the nonlinear iteration.
+Current trial stress shall not be projected to a frozen fault field because
+that would discard its dependence on the Stokes unknowns.  There shall be no
+repeated nearest-fault-cell search or particle-projection-matrix assembly
+inside the nonlinear iteration.
 
 \section{Optional Xu-style initialization}
 
@@ -1004,7 +1009,8 @@ After AMR/repartitioning:
   \item distributed phase-field point-evaluation structures are rebuilt as required;
   \item QP-to-fault caches are invalidated because the local cells/QPs may have changed;
   \item particle-to-fault caches are rebuilt if particle positions/ownership changed;
-  \item the fault triangulation itself is rebuilt only if fault geometry changed.
+  \item fault geometry-dependent search/connectivity caches are rebuilt only
+        if fault geometry changed.
 \end{itemize}
 
 \section{Geometry versioning}
@@ -1061,6 +1067,227 @@ For the initial implementation use
 New persistent geometry becomes active in the constitutive calculation of the next timestep.  Fault topology shall not change in the middle of a nonlinear Stokes solve.
 
 Within a nonlinear solve, the fault geometry is therefore fixed and all geometry-dependent coupling caches can be reused.
+
+\section{Coupled bulk--surface solver architecture}
+
+The coupled implementation shall preserve a strict responsibility boundary.
+\texttt{MaterialModel::PhaseFieldFault} directly exposes the narrow pointwise
+input, response, and semantic operations needed by reconstructed-fault
+coupling; no abstract reconstructed-fault constitutive base class is used.  It
+shall not assemble finite element weak forms and shall not expose
+\texttt{apply\_B()} or \texttt{apply\_G()} through the material-model
+interface.  A solver-local simulator helper named
+\texttt{ReconstructedFaultSurfaceSystem} checks for the concrete
+\texttt{PhaseFieldFault} material model once at construction and retains that
+reference for its lifetime.  It owns the particle/Q1 surface assembly,
+replicated fault-vector MPI reductions, and the surface factorization.  This
+particle workflow is not an ordinary ASPECT cell-local Scratch/CopyData
+assembler.  The condensed operator remains solver-owned.
+
+\subsection{Non-committing point response}
+
+At an associated locally owned particle, let
+\begin{equation}
+ F=t-T^{\rm coh}-\mu(V,\text{state})\sigma_n-\eta^d V,
+ \qquad
+ t=\boldsymbol\tau:\boldsymbol S.
+\end{equation}
+The pointwise material capability evaluates $F$, its negative derivative with
+respect to $V$, and the constitutive coefficients required by the later $B$
+and $G$ actions.  The input carries the explicit bulk and slip-rate trial
+state.  Evaluation shall not change the manager's current or committed slip
+rate, committed fault properties, particle Maxwell stress, or any other
+history.  This same non-committing path is used for Newton linearization and
+line-search residual evaluation.
+
+At timestep zero, the positive parsed \texttt{Initial time step} supplies the
+Maxwell interval; after timestep zero, use the current simulator timestep.
+Surface evaluation requires current $I_h$, committed cohesive history, and
+initialized slip rate.  Stateful rate-and-state friction additionally
+requires a finite positive committed $\Theta$ at every fault vertex.  Stage F
+registers and validates that state but does not invent its initial value or
+commit rule; the coupled lifecycle in Stage I must define and connect those
+operations before the production solve may use rate-and-state friction.
+
+\subsection{Normal-pressure modes}
+
+\texttt{PhaseFieldFault}, not \texttt{FaultFriction}, owns the boolean
+parameter \texttt{Use adiabatic pressure in fault friction}, whose default is
+false.  The two modes are
+\begin{equation}
+ \begin{aligned}
+  \text{false:}\quad &\sigma_n=p-\boldsymbol\tau:\boldsymbol N,\\
+  \text{true:}\quad  &\sigma_n=p_{\rm ad}(\boldsymbol x).
+ \end{aligned}
+\end{equation}
+In adiabatic-pressure mode the adiabatic model pressure is the complete normal
+pressure in the friction term.  Dynamic pressure and deviatoric normal
+traction are not added to it.  An enabled adiabatic-pressure mode requires
+initialized adiabatic conditions.
+
+\subsection{Stage-F surface residual and Jacobian}
+
+The replicated surface residual has one nested vector per reconstructed fault
+and one entry per Q1 fault vertex.  Only locally owned associated particles
+assemble
+\begin{equation}
+ (R_\Gamma)_i=\sum_p m_pN_i(\xi_p)F_p.
+\end{equation}
+Fault-sized local vectors are summed over MPI so every rank obtains the same
+replicated residual.  Report volume-weighted RMS residuals per fault and over
+all faults; these are diagnostics rather than additional equations.
+
+With fixed geometry, phase field, particle history, and committed $\Theta$,
+define
+\begin{equation}
+ K_V=-\frac{\partial R_\Gamma}{\partial V}.
+\end{equation}
+For the current constitutive law its Q1 entries are
+\begin{equation}
+ (K_V)_{ij}
+ =\sum_p m_pN_i(\xi_p)N_j(\xi_p)
+ \left[
+  2\kappa_p\chi_p\boldsymbol S_p:\boldsymbol S_p
+  +\frac{\kappa_p}{I_{h,p}}
+  +\sigma_{n,p}
+    \left.\frac{\partial\mu}{\partial V}\right|_{\Theta}
+  +\eta^d_p
+ \right],
+ \qquad \chi_p=\frac{h_p}{I_{h,p}}.
+\end{equation}
+The rate-and-state derivative is the exact partial derivative at fixed
+$\Theta$; the rate-dependent law supplies its exact signed derivative.  The
+current ordered Q1 polyline and single-segment association make every fault
+block symmetric tridiagonal.  The signed friction contribution means that
+$K_V$ is not assumed positive definite.
+
+Store the reduced diagonal and off-diagonal coefficients as replicated
+per-fault data.  For the initial implementation, materialize each block as a
+deal.II sparse matrix and factor it with the tested
+\texttt{SparseDirectUMFPACK} implementation, which supports nonsingular
+indefinite matrices.  Do not add a bespoke tridiagonal factorization or
+condition estimator.  Factorization failure is a numerical failure.  Every
+application of the stored inverse shall also check a scaled backward error and
+diagnose a singular or excessively ill-conditioned block explicitly.
+
+The surface-system helper exposes a non-committing residual evaluation, an
+operation that assembles/replaces the current $K_V$ linearization and factors,
+and an operation that applies the stored replicated $K_V^{-1}$ to a
+fault-major vector.  This is the only inverse interface required by later
+condensation.  A caller can evaluate arbitrary trial $V$ values through the
+explicit input without changing manager-owned nonlinear state.
+
+Starting a new linearization invalidates the previous one.  Assemble and
+factor a complete candidate and publish it only after every fault block
+succeeds.  A failed factorization shall therefore leave no stale or partially
+factorized $K_V$ available.  The coupled solver owns the helper for the
+duration of its solve.  It is not a persistent \texttt{Simulator} member and
+introduces no checkpoint or additional simulator lifecycle hook.
+
+Stage F ends at this surface system.  It shall not assemble the
+slip-dependent bulk residual, implement either coupling action, modify the
+Stokes operator, connect a nonlinear solver lifecycle, or commit history.
+
+\subsection{Stage-G weak-form coupling}
+
+Stage G introduces \texttt{Assemblers::ReconstructedFaultStokes} as a genuine
+cell/QP \texttt{Assemblers::Interface} implementation.  It owns the
+slip-dependent bulk Stokes residual and the fault-to-bulk $B$ action.  The
+particle-based bulk-to-surface $G$ action instead extends
+\texttt{ReconstructedFaultSurfaceSystem}, where it reuses the Stage-F point
+response values $\kappa$, $\chi$, and $\mu$, particle associations, and the
+replicated fault-vector reduction.  The solver orchestrates these independent
+actions.  A fault-slip increment changes stress by
+\begin{equation}
+ \delta\boldsymbol\tau
+ =-2\kappa\chi\boldsymbol S\,\delta V_\Gamma,
+\end{equation}
+which defines $B$ after weak-form insertion.
+
+For dynamic fault pressure, the bulk perturbation of the surface equation is
+\begin{equation}
+ G\delta x
+ =2\kappa(\boldsymbol S+\mu\boldsymbol N):
+   \delta\dot{\boldsymbol\epsilon}
+  -\mu\,\delta p.
+\end{equation}
+For adiabatic fault pressure, $p_{\rm ad}$ is prescribed and has no variation
+with the Stokes unknowns, so
+\begin{equation}
+ G\delta x
+ =2\kappa\boldsymbol S:\delta\dot{\boldsymbol\epsilon}.
+\end{equation}
+There is no $\mu\boldsymbol N$ contribution and no $-\mu\delta p$ term in
+this mode.  The Stokes assembler performs no fault-vector MPI reduction and
+the surface helper performs no cell-local bulk weak-form assembly.  Stage G
+shall include finite-difference tests of both modes, but it shall not implement
+condensation or nonlinear lifecycle.
+
+\subsection{Stage-H exact condensation}
+
+The Newton block equation and its right-hand side are
+\begin{equation}
+ \boxed{
+ \begin{bmatrix}
+  A & -B\\
+  G & -K_V
+ \end{bmatrix}
+ \begin{bmatrix}
+  \delta x\\
+  \delta V
+ \end{bmatrix}
+ =-
+ \begin{bmatrix}
+  R_{\rm bulk}\\
+  R_\Gamma
+ \end{bmatrix}.}
+\end{equation}
+Therefore the solver-owned condensed equation and recovery are
+\begin{equation}
+ \boxed{
+ (A-BK_V^{-1}G)\delta x
+ =-R_{\rm bulk}+BK_V^{-1}R_\Gamma,}
+\end{equation}
+\begin{equation}
+ \boxed{
+ \delta V=K_V^{-1}(R_\Gamma+G\delta x).}
+\end{equation}
+Stage H adds only this exact condensed operator, right-hand side, and recovery,
+using a solver-local surface helper and its Stage-F inverse operation.  It does
+not own constitutive state or connect nonlinear commit/rollback.
+
+\subsection{Stage-I lower bound and nonlinear lifecycle}
+
+The coupled solver works directly with $V\geq V_{\min}$.  Before applying a
+fraction-to-boundary limit, form a lower-bound active set and projected Newton
+direction.  If a degree of freedom is at $V_{\min}$ and its Newton direction
+points below the bound, hold that degree of freedom active and solve/project
+the remaining free direction consistently.  Apply fraction-to-boundary only
+to the free direction.  Fraction-to-boundary alone is insufficient because an
+outward direction at an active node would otherwise force
+$\alpha_{\max}=0$.
+
+Every line-search candidate uses the non-committing coupled residual path.
+Rejected candidates do not accumulate.  Only an accepted trial replaces the
+current Newton iterate, and only nonlinear convergence commits timestep state.
+A failed solve or rejected timestep restores current $V$ from committed $V$
+and leaves committed $\Theta$, $T^{\rm coh}$, previous $I_h$, and particle
+Maxwell stress unchanged.
+
+\subsection{Mandatory block-Jacobian verification}
+
+Before the coupled API is considered complete, evaluate a single
+non-committing coupled residual
+\begin{equation}
+ R(x,V)=\begin{bmatrix}R_{\rm bulk}(x,V)\\R_\Gamma(x,V)\end{bmatrix}
+\end{equation}
+and compare centered finite differences with the uncondensed block action.
+Tests shall cover velocity-only, pressure-only, slip-only, and mixed
+directions; both normal-pressure modes; nonzero cohesive and evolving-profile
+history; one and two MPI ranks; and states near but not crossing $V_{\min}$.
+Step-size sweeps shall exhibit the expected truncation-error regime followed
+by roundoff saturation.  Independently verify the condensed action, condensed
+right-hand-side sign, and recovered fault row.
 
 \section{Diagnostics and assertions}
 
@@ -1143,9 +1370,24 @@ and history-corrected \(\upsilon\) operations.
 \subsection*{Stage E: generic fault friction}
 Preserve rate-and-state friction and add the approved rate-dependent law.
 
-\subsection*{Stages F--I: mechanical coupling and lifecycle}
-Implement the surface residual and \(K_V\), then \(B/G\), the exact condensed
-operator, and finally the coupled nonlinear solve/commit/rollback lifecycle.
+\subsection*{Stage F: surface residual and \(K_V\)}
+Add only the pointwise non-committing constitutive capability, replicated
+surface-system helper, indefinite-capable \(K_V\) factorization, and inverse
+application described above.
+
+\subsection*{Stage G: reconstructed-fault Stokes coupling}
+Add the dedicated cell/QP assembler's slip-dependent bulk residual and
+fault-to-bulk $B$ action, and add the particle-based $G$ action to the surface
+helper, including both pressure modes.
+
+\subsection*{Stage H: exact condensed solve}
+Add the solver-side \(A-BK_V^{-1}G\) action, the correctly signed condensed
+right-hand side, and recovery of \(\delta V\).
+
+\subsection*{Stage I: coupled nonlinear lifecycle}
+Add lower-bound active-set/projected directions before fraction-to-boundary,
+line search, separate residual convergence, and accepted-state
+commit/rollback.
 
 \subsection*{Stages J--K: history feedback and benchmarks}
 Connect accepted constitutive history to phase-field feedback, then verify

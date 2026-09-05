@@ -1580,7 +1580,7 @@ namespace aspect
       {
         const double volume = particle_domain_handler
                               .get_particle_domain(particle.get_local_index()).volume();
-        const ParticleProjectionCacheEntry &entry = particle_projection_cache[particle_index++];
+        const ParticleFaultAssociation &entry = particle_projection_cache[particle_index++];
         if (entry.particle_id != particle.get_id()
             || entry.position != particle.get_location()
             || entry.particle_domain_volume != volume)
@@ -1637,7 +1637,7 @@ namespace aspect
         const ReconstructedFaultUtilities::NormalProfileProjection projection =
           project_to_normal_profiles_unchecked(
             reconstructed_faults, projection_half_widths, particle.get_location());
-        ParticleProjectionCacheEntry entry;
+        ParticleFaultAssociation entry;
         entry.particle_id = particle.get_id();
         entry.position = particle.get_location();
         entry.particle_domain_volume = volume;
@@ -1860,7 +1860,7 @@ namespace aspect
     unsigned int cache_index = 0;
     for (const auto &particle : particle_handler)
       {
-        const ParticleProjectionCacheEntry &entry = particle_projection_cache[cache_index++];
+        const ParticleFaultAssociation &entry = particle_projection_cache[cache_index++];
         if (!entry.active)
           continue;
         const ArrayView<const double> particle_properties = particle.get_properties();
@@ -1906,7 +1906,7 @@ namespace aspect
 
     const PropertyInformation &property = property_information[property_index];
     std::map<types::particle_index, std::vector<double>> values;
-    for (const ParticleProjectionCacheEntry &entry : particle_projection_cache)
+    for (const ParticleFaultAssociation &entry : particle_projection_cache)
       if (entry.active)
         {
           const ReconstructedFault<dim> &fault = reconstructed_faults[entry.fault_index];
@@ -1959,7 +1959,7 @@ namespace aspect
     unsigned int cache_index = 0;
     for (const auto &particle : particle_handler)
       {
-        const ParticleProjectionCacheEntry &entry = particle_projection_cache[cache_index++];
+        const ParticleFaultAssociation &entry = particle_projection_cache[cache_index++];
         if (!entry.active)
           continue;
 
@@ -2009,7 +2009,7 @@ namespace aspect
     cache_index = 0;
     for (const auto &particle : particle_handler)
       {
-        const ParticleProjectionCacheEntry &entry = particle_projection_cache[cache_index++];
+        const ParticleFaultAssociation &entry = particle_projection_cache[cache_index++];
         if (!entry.active)
           continue;
         const double value = locally_owned_values.find(particle.get_id())->second;
@@ -2054,6 +2054,16 @@ namespace aspect
       }
 
     return result;
+  }
+
+
+  template <int dim>
+  const std::vector<typename ReconstructedFaultManager<dim>::ParticleFaultAssociation> &
+  ReconstructedFaultManager<dim>::get_locally_owned_particle_fault_associations()
+  {
+    if (!particle_projection_cache_is_valid())
+      rebuild_particle_projection_cache();
+    return particle_projection_cache;
   }
 
 
