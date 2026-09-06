@@ -13,6 +13,7 @@
 
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/material_model/utilities.h>
+#include <aspect/plugins.h>
 #include <aspect/reconstructed_fault/manager.h>
 
 #include <deal.II/fe/fe_values.h>
@@ -23,20 +24,6 @@ namespace aspect
 {
   namespace
   {
-    template <int dim>
-    const MaterialModel::PhaseFieldFault<dim> &
-    checked_phase_field_fault(const SimulatorAccess<dim> &simulator)
-    {
-      const auto *phase_field_fault =
-        dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(
-          &simulator.get_material_model());
-      AssertThrow(phase_field_fault != nullptr,
-                  ExcMessage("The reconstructed-fault Stokes assembler requires the "
-                             "'Phase field fault' material model."));
-      return *phase_field_fault;
-    }
-
-
     template <int dim>
     void
     validate_fault_vector(const ReconstructedFaultManager<dim> &fault_manager,
@@ -145,7 +132,9 @@ namespace aspect
       const Simulator<dim> &simulator)
       :
       SimulatorAccess<dim>(simulator),
-      phase_field_fault(checked_phase_field_fault<dim>(*this))
+      phase_field_fault(
+        Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(
+          this->get_material_model()))
     {}
 
 

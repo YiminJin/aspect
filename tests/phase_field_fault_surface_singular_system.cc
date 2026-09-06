@@ -13,6 +13,7 @@
 
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/postprocess/interface.h>
+#include <aspect/plugins.h>
 #include <aspect/reconstructed_fault/manager.h>
 #include <aspect/reconstructed_fault/surface_system.h>
 #include <aspect/simulator_access.h>
@@ -30,12 +31,11 @@ namespace aspect
         execute(TableHandler &) override
         {
           AssertThrow(dim == 2, ExcNotImplemented());
-          const auto *const_model =
-            dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(
-              &this->get_material_model());
-          AssertThrow(const_model != nullptr, ExcInternalError());
+          const auto &const_model =
+            Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(
+              this->get_material_model());
           auto &model =
-            const_cast<MaterialModel::PhaseFieldFault<dim> &>(*const_model);
+            const_cast<MaterialModel::PhaseFieldFault<dim> &>(const_model);
           MaterialModel::internal::PhaseFieldFaultTestAccess<dim>
             ::initialize_cohesive_state_from_initial_fields(model);
 
@@ -48,8 +48,11 @@ namespace aspect
             slip_rate[fault].assign(
               fault_manager.get_fault(fault).n_vertices(), 2.e-6);
 
-          SurfaceSystem surface_system(this->get_simulator());
+          SurfaceSystem &surface_system =
+            this->get_reconstructed_fault_surface_system();
           surface_system.linearize_surface_system(this->get_solution(), slip_rate);
+          const unsigned int valid_generation =
+            surface_system.get_linearization_generation();
 
           const auto &cached_associations =
             fault_manager.get_locally_owned_particle_fault_associations();
@@ -70,11 +73,15 @@ namespace aspect
                           != std::string::npos,
                           ExcMessage("A singular K_V did not produce the expected "
                                      "factorization diagnostic."));
+              AssertThrow(surface_system.get_linearization_generation()
+                          == valid_generation+1,
+                          ExcMessage("A failed K_V factorization did not invalidate "
+                                     "the previous surface-system generation."));
               std::string invalidated_error;
               try
                 {
                   typename SurfaceSystem::FaultVector result;
-                  surface_system.solve_surface_jacobian(slip_rate, result);
+                  surface_system.solve(slip_rate, result);
                 }
               catch (const std::exception &solve_exception)
                 {

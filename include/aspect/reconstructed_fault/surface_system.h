@@ -36,15 +36,33 @@ namespace aspect
   };
 
 
+  using ReconstructedFaultVector = std::vector<std::vector<double>>;
+
+
+  /** Semantic solve used by reconstructed-fault condensation. */
+  template <int dim>
+  class ReconstructedFaultSurfaceLinearSolve
+  {
+    public:
+      virtual ~ReconstructedFaultSurfaceLinearSolve() = default;
+
+      /** Overwrite @p solution with the solution of the current surface system. */
+      virtual void
+      solve(const ReconstructedFaultVector &rhs,
+            ReconstructedFaultVector &solution) const = 0;
+  };
+
+
   /**
    * Assemble and solve the particle/Q1 reconstructed-fault surface system.
    * Bulk cell weak-form assembly is intentionally outside this class.
    */
   template <int dim>
-  class ReconstructedFaultSurfaceSystem : public SimulatorAccess<dim>
+  class ReconstructedFaultSurfaceSystem : public SimulatorAccess<dim>,
+    public ReconstructedFaultSurfaceLinearSolve<dim>
   {
     public:
-      using FaultVector = std::vector<std::vector<double>>;
+      using FaultVector = ReconstructedFaultVector;
 
       explicit ReconstructedFaultSurfaceSystem(const Simulator<dim> &simulator);
       ~ReconstructedFaultSurfaceSystem();
@@ -60,8 +78,13 @@ namespace aspect
 
       /** Apply the inverse of the K_V most recently assembled above. */
       void
-      solve_surface_jacobian(const FaultVector &rhs,
-                             FaultVector &solution) const;
+      solve(const FaultVector &rhs,
+            FaultVector &solution) const override;
+
+      /** Overwrite @p result with the current K_V applied to @p direction. */
+      void
+      apply_surface_jacobian(const FaultVector &direction,
+                             FaultVector &result) const;
 
       /**
        * Overwrite @p result with G applied to a full-system direction whose
@@ -70,6 +93,10 @@ namespace aspect
       void
       apply_G(const LinearAlgebra::BlockVector &physical_bulk_direction,
               FaultVector &result) const;
+
+      /** Generation of the current surface-system state. */
+      unsigned int
+      get_linearization_generation() const;
 
     private:
       struct SurfaceAssembly;
@@ -83,6 +110,7 @@ namespace aspect
       const MaterialModel::PhaseFieldFault<dim> &phase_field_fault;
       GridTools::Cache<dim> grid_cache;
       std::unique_ptr<SurfaceLinearization> surface_linearization;
+      unsigned int linearization_generation = 0;
   };
 }
 

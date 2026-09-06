@@ -14,6 +14,7 @@
 #include "phase_field_fault_test_access.h"
 #include <aspect/material_model/utilities.h>
 #include <aspect/particle/manager.h>
+#include <aspect/plugins.h>
 #include <aspect/postprocess/interface.h>
 #include <aspect/simulator_access.h>
 
@@ -32,10 +33,11 @@ namespace aspect
         std::pair<std::string,std::string>
         execute(TableHandler &) override
         {
-          const auto *const_model = dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(
-            &this->get_material_model());
-          AssertThrow(const_model != nullptr, ExcInternalError());
-          auto &model = const_cast<MaterialModel::PhaseFieldFault<dim> &>(*const_model);
+          const auto &const_model =
+            Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(
+              this->get_material_model());
+          auto &model =
+            const_cast<MaterialModel::PhaseFieldFault<dim> &>(const_model);
           auto &fault_manager = this->get_reconstructed_fault_manager();
           const unsigned int cohesive_property = fault_manager.get_property_index(
             "phase field fault cohesive traction");

@@ -133,7 +133,13 @@ namespace aspect
   template <int dim> class MeltHandler;
   template <int dim> class PhaseFieldHandler;
   template <int dim> class ReconstructedFaultManager;
+  template <int dim> class ReconstructedFaultSurfaceSystem;
   template <int dim> class VolumeOfFluidHandler;
+
+  namespace Assemblers
+  {
+    template <int dim> class ReconstructedFaultStokes;
+  }
 
   namespace MeshDeformation
   {
@@ -825,6 +831,14 @@ namespace aspect
       /** Return the simulator-owned reconstructed-fault manager. */
       ReconstructedFaultManager<dim> &
       get_reconstructed_fault_manager () const;
+
+      /** Return the canonical reconstructed-fault surface system. */
+      ReconstructedFaultSurfaceSystem<dim> &
+      get_reconstructed_fault_surface_system () const;
+
+      /** Return the canonical reconstructed-fault Stokes coupling component. */
+      Assemblers::ReconstructedFaultStokes<dim> &
+      get_reconstructed_fault_stokes_coupling () const;
 
       /**
        * Return a reference to the VolumeOfFluid handler.

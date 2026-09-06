@@ -15,6 +15,7 @@
 #include <aspect/material_model/utilities.h>
 #include <aspect/particle/manager.h>
 #include <aspect/phase_field.h>
+#include <aspect/plugins.h>
 #include <aspect/reconstructed_fault/manager.h>
 
 #include <deal.II/base/mpi_remote_point_evaluation.h>
@@ -29,25 +30,6 @@
 
 namespace aspect
 {
-  namespace
-  {
-    template <int dim>
-    const MaterialModel::PhaseFieldFault<dim> &
-    checked_phase_field_fault(const MaterialModel::Interface<dim> &material_model)
-    {
-      const auto *phase_field_fault =
-        dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(
-          &material_model);
-      AssertThrow(phase_field_fault != nullptr,
-                  ExcMessage("The reconstructed-fault surface system requires the "
-                             "'Phase field fault' material model."));
-      return *phase_field_fault;
-    }
-
-
-  }
-
-
   template <int dim>
   struct ReconstructedFaultSurfaceSystem<dim>::SurfaceAssembly
   {
@@ -106,11 +88,11 @@ namespace aspect
     Utilities::MPI::RemotePointEvaluation<dim> point_cache;
     point_cache.reinit(grid_cache, points);
     const unsigned int velocity_component =
-      this->introspection().variable("velocity").first_component_index;
+      this->introspection().component_indices.velocities[0];
     const unsigned int pressure_component =
-      this->introspection().variable("pressure").first_component_index;
+      this->introspection().component_indices.pressure;
     const unsigned int temperature_component =
-      this->introspection().variable("temperature").first_component_index;
+      this->introspection().component_indices.temperature;
     const unsigned int phase_field_component =
       this->introspection().variable("phase_field").first_component_index;
 
@@ -303,11 +285,14 @@ namespace aspect
         const double squared_residual = global_values[position++];
         const double weight = global_values[position++];
         local.residual.per_fault_weighted_rms[fault] =
-          std::sqrt(squared_residual/weight);
+          (weight > 0.0 ? std::sqrt(squared_residual/weight) : 0.0);
         total_squared_residual += squared_residual;
         total_weight += weight;
       }
-    local.residual.weighted_rms = std::sqrt(total_squared_residual/total_weight);
+    local.residual.weighted_rms =
+      (total_weight > 0.0
+       ? std::sqrt(total_squared_residual/total_weight)
+       : 0.0);
     return local;
   }
 
@@ -352,7 +337,9 @@ namespace aspect
     const Simulator<dim> &simulator)
     :
     SimulatorAccess<dim>(simulator),
-    phase_field_fault(checked_phase_field_fault<dim>(this->get_material_model())),
+    phase_field_fault(
+      Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(
+        this->get_material_model())),
     grid_cache(this->get_triangulation(), this->get_mapping())
   {}
 
@@ -378,6 +365,7 @@ namespace aspect
     const FaultVector &slip_rate)
   {
     surface_linearization.reset();
+    ++linearization_generation;
 #ifndef DEAL_II_WITH_UMFPACK
     AssertThrow(false,
                 ExcMessage("The coupled reconstructed-fault solver requires deal.II "
@@ -461,7 +449,7 @@ namespace aspect
 
   template <int dim>
   void
-  ReconstructedFaultSurfaceSystem<dim>::solve_surface_jacobian(
+  ReconstructedFaultSurfaceSystem<dim>::solve(
     const FaultVector &rhs,
     FaultVector &solution) const
   {
@@ -529,6 +517,42 @@ namespace aspect
 
   template <int dim>
   void
+  ReconstructedFaultSurfaceSystem<dim>::apply_surface_jacobian(
+    const FaultVector &direction,
+    FaultVector &result) const
+  {
+    AssertThrow(surface_linearization != nullptr,
+                ExcMessage("K_V must be assembled before applying it."));
+    AssertThrow(direction.size() == surface_linearization->diagonal.size(),
+                ExcMessage("The K_V direction has the wrong number of faults."));
+
+    result.resize(direction.size());
+    for (unsigned int fault = 0; fault < direction.size(); ++fault)
+      {
+        AssertThrow(direction[fault].size()
+                    == surface_linearization->diagonal[fault].size(),
+                    ExcMessage("The K_V direction has the wrong number of vertices "
+                               "for reconstructed fault "
+                               + Utilities::int_to_string(fault) + "."));
+        result[fault].resize(direction[fault].size());
+        for (unsigned int i = 0; i < direction[fault].size(); ++i)
+          {
+            double value = surface_linearization->diagonal[fault][i]
+                           * direction[fault][i];
+            if (i > 0)
+              value += surface_linearization->off_diagonal[fault][i-1]
+                       * direction[fault][i-1];
+            if (i+1 < direction[fault].size())
+              value += surface_linearization->off_diagonal[fault][i]
+                       * direction[fault][i+1];
+            result[fault][i] = value;
+          }
+      }
+  }
+
+
+  template <int dim>
+  void
   ReconstructedFaultSurfaceSystem<dim>::apply_G(
     const LinearAlgebra::BlockVector &physical_bulk_direction,
     FaultVector &result) const
@@ -548,9 +572,9 @@ namespace aspect
       }
 
     const unsigned int velocity_component =
-      this->introspection().variable("velocity").first_component_index;
+      this->introspection().component_indices.velocities[0];
     const unsigned int pressure_component =
-      this->introspection().variable("pressure").first_component_index;
+      this->introspection().component_indices.pressure;
     const auto velocity_gradients = VectorTools::point_gradients<dim>(
                                       *surface_linearization->point_cache, this->get_dof_handler(),
                                       physical_bulk_direction, VectorTools::EvaluationFlags::avg,
@@ -598,6 +622,14 @@ namespace aspect
     for (auto &fault_values : result)
       for (double &value : fault_values)
         value = global_values[position++];
+  }
+
+
+  template <int dim>
+  unsigned int
+  ReconstructedFaultSurfaceSystem<dim>::get_linearization_generation() const
+  {
+    return linearization_generation;
   }
 
 

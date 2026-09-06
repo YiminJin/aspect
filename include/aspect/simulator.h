@@ -93,6 +93,9 @@ namespace aspect
   class ReconstructedFaultManager;
 
   template <int dim>
+  class ReconstructedFaultSurfaceSystem;
+
+  template <int dim>
   class NewtonHandler;
 
   template <int dim>
@@ -140,6 +143,7 @@ namespace aspect
   {
     template <int dim>      class Interface;
     template <int dim>      class Manager;
+    template <int dim>      class ReconstructedFaultStokes;
   }
 
   struct DefectCorrectionResiduals
@@ -1776,6 +1780,10 @@ namespace aspect
       std::unique_ptr<ReconstructedFaultManager<dim>> reconstructed_fault_manager;
 
       Introspection<dim>                  introspection;
+
+      /** Canonical non-checkpointed reconstructed-fault coupling components. */
+      std::unique_ptr<ReconstructedFaultSurfaceSystem<dim>> reconstructed_fault_surface_system;
+      std::unique_ptr<Assemblers::ReconstructedFaultStokes<dim>> reconstructed_fault_stokes_coupling;
 
 
       MPI_Comm                            mpi_communicator;

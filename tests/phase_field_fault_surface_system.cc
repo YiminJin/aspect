@@ -13,9 +13,11 @@
 
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/postprocess/interface.h>
+#include <aspect/plugins.h>
 #include <aspect/reconstructed_fault/manager.h>
 #include <aspect/simulator/assemblers/reconstructed_fault_stokes.h>
 #include <aspect/reconstructed_fault/surface_system.h>
+#include <aspect/simulator/solver/reconstructed_fault_condensed_system.h>
 #include <aspect/simulator_access.h>
 
 #include <deal.II/numerics/vector_tools.h>
@@ -33,12 +35,11 @@ namespace aspect
         execute(TableHandler &) override
         {
           AssertThrow(dim == 2, ExcNotImplemented());
-          const auto *const_model =
-            dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(
-              &this->get_material_model());
-          AssertThrow(const_model != nullptr, ExcInternalError());
+          const auto &const_model =
+            Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(
+              this->get_material_model());
           auto &model =
-            const_cast<MaterialModel::PhaseFieldFault<dim> &>(*const_model);
+            const_cast<MaterialModel::PhaseFieldFault<dim> &>(const_model);
           MaterialModel::internal::PhaseFieldFaultTestAccess<dim>
             ::initialize_cohesive_state_from_initial_fields(model);
 
@@ -51,8 +52,8 @@ namespace aspect
             initialize_and_validate_state(model, fault_manager);
 
           using FaultVector = typename ReconstructedFaultSurfaceSystem<dim>::FaultVector;
-          ReconstructedFaultSurfaceSystem<dim> surface_system(
-            this->get_simulator());
+          ReconstructedFaultSurfaceSystem<dim> &surface_system =
+            this->get_reconstructed_fault_surface_system();
 
           FaultVector V(fault_manager.get_faults().size());
           FaultVector direction(fault_manager.get_faults().size());
@@ -104,8 +105,8 @@ namespace aspect
                 }
 
               FaultVector recovered_direction;
-              surface_system.solve_surface_jacobian(minus_finite_difference,
-                                                    recovered_direction);
+              surface_system.solve(minus_finite_difference,
+                                   recovered_direction);
               assert_replicated(recovered_direction,
                                 this->get_mpi_communicator());
               const double error = relative_maximum_error(recovered_direction,
@@ -128,6 +129,9 @@ namespace aspect
 
           verify_stage_G(model, fault_manager, surface_system, V, direction,
                          uses_adiabatic_pressure);
+
+          if (!this->model_has_prescribed_stokes_solution())
+            verify_stage_H(surface_system, V, direction);
 
           return {"Reconstructed-fault surface and bulk coupling:", "verified"};
         }
@@ -256,8 +260,8 @@ namespace aspect
             this->get_mpi_communicator());
           const BulkDirectionFunction function(
             this->get_fe().n_components(),
-            this->introspection().variable("velocity").first_component_index,
-            this->introspection().variable("pressure").first_component_index,
+            this->introspection().component_indices.velocities[0],
+            this->introspection().component_indices.pressure,
             strain_rate, pressure);
           VectorTools::interpolate(this->get_mapping(), this->get_dof_handler(),
                                    function, owned);
@@ -436,8 +440,8 @@ namespace aspect
           assert_fault_vectors_close(scaled_action, unit_action, 2.e-12,
                                      "physical-to-solver pressure scaling");
 
-          Assemblers::ReconstructedFaultStokes<dim> bulk_assembler(
-            this->get_simulator());
+          Assemblers::ReconstructedFaultStokes<dim> &bulk_assembler =
+            this->get_reconstructed_fault_stokes_coupling();
           const unsigned int geometry_rebuilds_before =
             fault_manager.get_stokes_qp_cache_diagnostics().rebuild_count;
           bulk_assembler.linearize_B(this->get_solution());
@@ -519,6 +523,169 @@ namespace aspect
                                  "centered derivative of the bulk residual."));
 
           verify_additive_execute(fault_manager, bulk_assembler, V);
+        }
+
+
+        LinearAlgebra::BlockVector
+        make_solver_direction(const LinearAlgebra::BlockVector &physical_direction) const
+        {
+          LinearAlgebra::BlockVector result(
+            this->introspection().index_sets.stokes_partitioning,
+            this->get_mpi_communicator());
+          result.block(0) = physical_direction.block(0);
+          result.block(1) = physical_direction.block(1);
+          result.block(1) /= this->get_pressure_scaling();
+          this->get_current_constraints().set_zero(result);
+          result.compress(VectorOperation::insert);
+          return result;
+        }
+
+
+        LinearAlgebra::BlockVector
+        make_owned_stokes_vector() const
+        {
+          return LinearAlgebra::BlockVector(
+            this->introspection().index_sets.stokes_partitioning,
+            this->get_mpi_communicator());
+        }
+
+
+        void
+        apply_stokes_matrix(const LinearAlgebra::BlockVector &direction,
+                            LinearAlgebra::BlockVector &result) const
+        {
+          const LinearAlgebra::BlockSparseMatrix &matrix = this->get_system_matrix();
+          matrix.block(0,0).vmult(result.block(0), direction.block(0));
+          matrix.block(0,1).vmult_add(result.block(0), direction.block(1));
+          matrix.block(1,0).vmult(result.block(1), direction.block(0));
+          matrix.block(1,1).vmult_add(result.block(1), direction.block(1));
+        }
+
+
+        static void
+        assert_bulk_vectors_close(const LinearAlgebra::BlockVector &values,
+                                  const LinearAlgebra::BlockVector &reference,
+                                  const std::string &description)
+        {
+          LinearAlgebra::BlockVector error(values);
+          error.add(-1.0, reference);
+          AssertThrow(error.l2_norm()
+                      <= 2.e-11*std::max(reference.l2_norm(), 1.e-30),
+                      ExcMessage("The Stage-H " + description
+                                 + " check failed: error="
+                                 + Utilities::to_string(error.l2_norm())
+                                 + ", scale="
+                                 + Utilities::to_string(reference.l2_norm()) + "."));
+        }
+
+
+        void
+        verify_stage_H(
+          ReconstructedFaultSurfaceSystem<dim> &surface_system,
+          const typename ReconstructedFaultSurfaceSystem<dim>::FaultVector &V,
+          const typename ReconstructedFaultSurfaceSystem<dim>::FaultVector &fault_direction) const
+        {
+          using CondensedSystem =
+            StokesSolver::ReconstructedFaultCondensedSystem<dim>;
+          CondensedSystem condensed_system(this->get_simulator());
+          const auto linearization = condensed_system.linearize(
+            this->get_system_matrix(), this->get_solution(), V);
+
+          SymmetricTensor<2,dim> strain_rate;
+          strain_rate[0][0] = 1.25e-5;
+          strain_rate[1][1] = -0.25e-5;
+          strain_rate[0][1] = 0.5e-5;
+          const LinearAlgebra::BlockVector physical_direction =
+            make_bulk_direction(strain_rate, 1.75e8);
+          const LinearAlgebra::BlockVector solver_direction =
+            make_solver_direction(physical_direction);
+
+          LinearAlgebra::BlockVector condensed_action = make_owned_stokes_vector();
+          linearization.vmult(condensed_action, solver_direction);
+
+          LinearAlgebra::BlockVector expected_action = make_owned_stokes_vector();
+          apply_stokes_matrix(solver_direction, expected_action);
+          typename CondensedSystem::FaultVector G_direction;
+          surface_system.apply_G(physical_direction, G_direction);
+          typename CondensedSystem::FaultVector K_inverse_G;
+          surface_system.solve(G_direction, K_inverse_G);
+          LinearAlgebra::BlockVector B_K_inverse_G = make_owned_system_vector();
+          this->get_reconstructed_fault_stokes_coupling().apply_B(
+            K_inverse_G, B_K_inverse_G);
+          expected_action.block(0).add(-1.0, B_K_inverse_G.block(0));
+          expected_action.block(1).add(-1.0, B_K_inverse_G.block(1));
+          this->get_current_constraints().set_zero(expected_action);
+          assert_bulk_vectors_close(condensed_action, expected_action,
+                                    "condensed operator");
+
+          LinearAlgebra::BlockVector bulk_rhs = solver_direction;
+          bulk_rhs *= -0.375;
+          LinearAlgebra::BlockVector condensed_rhs = make_owned_stokes_vector();
+          linearization.build_condensed_rhs(bulk_rhs, condensed_rhs);
+          LinearAlgebra::BlockVector expected_rhs = bulk_rhs;
+          typename CondensedSystem::FaultVector K_inverse_residual;
+          surface_system.solve(linearization.surface_residual().values,
+                               K_inverse_residual);
+          LinearAlgebra::BlockVector B_K_inverse_residual =
+            make_owned_system_vector();
+          this->get_reconstructed_fault_stokes_coupling().apply_B(
+            K_inverse_residual, B_K_inverse_residual);
+          expected_rhs.block(0).add(1.0, B_K_inverse_residual.block(0));
+          expected_rhs.block(1).add(1.0, B_K_inverse_residual.block(1));
+          this->get_current_constraints().set_zero(expected_rhs);
+          assert_bulk_vectors_close(condensed_rhs, expected_rhs,
+                                    "condensed right-hand side sign");
+
+          typename CondensedSystem::FaultVector recovered;
+          linearization.recover_slip_rate_increment(solver_direction, recovered);
+          typename CondensedSystem::FaultVector recovery_rhs = G_direction;
+          for (unsigned int fault = 0; fault < recovery_rhs.size(); ++fault)
+            for (unsigned int vertex = 0;
+                 vertex < recovery_rhs[fault].size(); ++vertex)
+              recovery_rhs[fault][vertex] +=
+                linearization.surface_residual().values[fault][vertex];
+          typename CondensedSystem::FaultVector expected_recovered;
+          surface_system.solve(recovery_rhs, expected_recovered);
+          assert_fault_vectors_close(recovered, expected_recovered, 2.e-12,
+                                     "recovered slip-rate increment");
+
+          LinearAlgebra::BlockVector block_bulk = make_owned_stokes_vector();
+          typename CondensedSystem::FaultVector block_surface;
+          linearization.apply_uncondensed_jacobian(
+            solver_direction, fault_direction, block_bulk, block_surface);
+          LinearAlgebra::BlockVector expected_bulk = make_owned_stokes_vector();
+          apply_stokes_matrix(solver_direction, expected_bulk);
+          LinearAlgebra::BlockVector B_direction = make_owned_system_vector();
+          this->get_reconstructed_fault_stokes_coupling().apply_B(
+            fault_direction, B_direction);
+          expected_bulk.block(0).add(-1.0, B_direction.block(0));
+          expected_bulk.block(1).add(-1.0, B_direction.block(1));
+          this->get_current_constraints().set_zero(expected_bulk);
+          assert_bulk_vectors_close(block_bulk, expected_bulk,
+                                    "uncondensed bulk block");
+
+          typename CondensedSystem::FaultVector K_direction;
+          surface_system.apply_surface_jacobian(fault_direction, K_direction);
+          for (unsigned int fault = 0; fault < G_direction.size(); ++fault)
+            for (unsigned int vertex = 0; vertex < G_direction[fault].size(); ++vertex)
+              G_direction[fault][vertex] -= K_direction[fault][vertex];
+          assert_fault_vectors_close(block_surface, G_direction, 2.e-12,
+                                     "uncondensed surface block");
+
+          const auto superseded = condensed_system.linearize(
+            this->get_system_matrix(), this->get_solution(), V);
+          (void) superseded;
+          bool rejected_stale_linearization = false;
+          try
+            {
+              linearization.surface_residual();
+            }
+          catch (const ExceptionBase &)
+            {
+              rejected_stale_linearization = true;
+            }
+          AssertThrow(rejected_stale_linearization,
+                      ExcMessage("Stage H accepted a superseded coupled linearization."));
         }
 
 

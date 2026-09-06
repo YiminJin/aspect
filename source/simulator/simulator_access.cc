@@ -24,6 +24,8 @@
 #include <aspect/mesh_deformation/free_surface.h>
 #include <aspect/mesh_deformation/interface.h>
 #include <aspect/particle/manager.h>
+#include <aspect/reconstructed_fault/surface_system.h>
+#include <aspect/simulator/assemblers/reconstructed_fault_stokes.h>
 
 namespace WorldBuilder
 {
@@ -742,6 +744,26 @@ namespace aspect
     Assert (simulator->reconstructed_fault_manager.get() != nullptr,
             ExcMessage("You can not call this function if fault reconstruction is not enabled."));
     return *(simulator->reconstructed_fault_manager);
+  }
+
+
+  template <int dim>
+  ReconstructedFaultSurfaceSystem<dim> &
+  SimulatorAccess<dim>::get_reconstructed_fault_surface_system () const
+  {
+    Assert (simulator->reconstructed_fault_surface_system != nullptr,
+            ExcMessage("The reconstructed-fault surface system is unavailable."));
+    return *(simulator->reconstructed_fault_surface_system);
+  }
+
+
+  template <int dim>
+  Assemblers::ReconstructedFaultStokes<dim> &
+  SimulatorAccess<dim>::get_reconstructed_fault_stokes_coupling () const
+  {
+    Assert (simulator->reconstructed_fault_stokes_coupling != nullptr,
+            ExcMessage("The reconstructed-fault Stokes coupling is unavailable."));
+    return *(simulator->reconstructed_fault_stokes_coupling);
   }
 
   template <int dim>

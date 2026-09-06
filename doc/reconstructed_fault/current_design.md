@@ -648,7 +648,11 @@ surface response without committing history. There is no abstract
 reconstructed-fault constitutive base class. A solver-local simulator helper,
 `ReconstructedFaultSurfaceSystem`, checks that the selected material model is
 `PhaseFieldFault` once when the helper is constructed and retains that concrete
-reference for its lifetime. The helper owns particle/Q1 surface assembly, MPI
+reference for its lifetime. The simulator owns one canonical surface-system
+instance and one canonical reconstructed-fault Stokes-coupling instance when
+this coupling is available. Solver helpers retain references to these objects;
+they do not construct duplicate stateful instances. The surface helper owns
+particle/Q1 surface assembly, MPI
 reduction, and the surface factorization. It is not an ordinary ASPECT
 assembler because this workflow does not use cell-local Scratch/CopyData.
 The material-model interface does not expose `apply_B()` or `apply_G()`
@@ -720,12 +724,14 @@ excessive scaled solve backward error are explicit numerical failures.
 fault vertex. It is accompanied by volume-weighted per-fault and global RMS
 diagnostics. `linearize_surface_system()` invalidates the previous
 linearization, builds and factors a complete candidate, and publishes it only
-after every fault block succeeds. `solve_surface_jacobian()` applies the
+after every fault block succeeds. The semantic surface `solve()` operation applies the
 stored replicated \(K_V^{-1}\). The residual evaluator is non-committing and
 accepts explicit bulk and slip-rate trial states, so line searches can
 evaluate trial \(V\) without changing manager-owned current or committed slip
-rate. The helper is owned for the duration of the coupled solve; it is not a
-Simulator member and introduces no checkpointed or global lifecycle state.
+rate. The helper is a simulator-owned, non-checkpointed computational
+component. Its surface linearization is valid only as part of one coupled
+linearization and introduces no constitutive state or additional timestep
+lifecycle.
 
 Stage F ends at this surface system. It does not assemble the slip-dependent
 bulk residual, implement \(B\) or \(G\), alter the Stokes operator, run a
@@ -812,7 +818,11 @@ dynamic-pressure contribution for a solver pressure direction is
 \(-\mu s_p\delta\widehat p\); adiabatic-pressure mode still has no pressure
 contribution. Stage G does not implement this Stage-H solver-vector adapter.
 
-Stage H adds the solver-side exact condensation only. With
+Stage H adds the solver-side exact condensation only. The assembled bulk
+operator (A), the frozen (B) coefficients, and the surface (G/K_V)
+linearization have the lifetime of one coupled linearization, independently of
+the lifetime of the simulator-owned components or the condensed-system helper.
+Starting another linearization invalidates every earlier view. With
 
 \[
 \begin{bmatrix}A&-B\\G&-K_V\end{bmatrix}
@@ -830,14 +840,29 @@ the condensed equation and recovery are
 \delta V=K_V^{-1}(R_\Gamma+G\delta x).
 \]
 
-The condensed Krylov operator owns a solver-local surface helper and calls its
-Stage-F \(K_V^{-1}\) operation, but
-owns no constitutive state. Block-action, condensed-action, right-hand-side,
+The condensed Krylov operator references the canonical simulator-owned surface
+and coupling components and owns no constitutive state. It depends on a
+semantic surface solve operation rather than the unrestricted factorization
+itself. Stage H supplies the unrestricted implementation; Stage I may replace
+it with an active/free-set solve without changing the condensation algorithm.
+
+Bulk Krylov vectors represent homogeneous perturbations. Constrained algebraic
+entries are zero for the \(A\) action. Before the physical \(G\) action,
+homogeneous hanging-node and periodic constraints are distributed and all
+inhomogeneous boundary values remain zero. The \(B\) action is assembled with
+the same homogeneous constraint semantics, and condensed results have zero
+constrained algebraic entries.
+
+The assembled iterative path uses FGMRES. This is required because the
+condensed operator is generally nonsymmetric: no identity \(B=G^T\) is
+assumed. Block-action, condensed-action, right-hand-side,
 and recovery signs must be verified against centered finite differences of a
 single non-committing coupled residual evaluator. Tests cover velocity-only,
 pressure-only, slip-only, and mixed directions; both pressure modes; nonzero
 cohesive/profile history; one and two MPI ranks; and step sizes showing the
-expected truncation-error regime followed by roundoff saturation.
+expected truncation-error regime followed by roundoff saturation. A small
+explicit full two-block solve is compared with condensation and recovery, and
+a separate fixture covers more than one reconstructed fault.
 
 Stage I alone connects nonlinear trial evaluation and lifecycle. At the lower
 bound, it first forms a projected Newton direction: a degree of freedom at

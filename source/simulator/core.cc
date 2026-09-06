@@ -24,7 +24,10 @@
 #include <aspect/utilities.h>
 #include <aspect/melt.h>
 #include <aspect/phase_field.h>
+#include <aspect/plugins.h>
 #include <aspect/reconstructed_fault/manager.h>
+#include <aspect/reconstructed_fault/surface_system.h>
+#include <aspect/simulator/assemblers/reconstructed_fault_stokes.h>
 #include <aspect/advection_field.h>
 #include <aspect/volume_of_fluid/handler.h>
 #include <aspect/newton.h>
@@ -40,6 +43,7 @@
 #include <aspect/simulator/assemblers/interface.h>
 #include <aspect/geometry_model/initial_topography_model/zero_topography.h>
 #include <aspect/material_model/rheology/elasticity.h>
+#include <aspect/material_model/phase_field_fault.h>
 #include <aspect/time_stepping/repeat_on_nonlinear_fail.h>
 
 #include <deal.II/base/index_set.h>
@@ -507,7 +511,17 @@ namespace aspect
       }
 
     if (parameters.reconstruct_faults)
-      reconstructed_fault_manager->parse_parameters(prm);
+      {
+        reconstructed_fault_manager->parse_parameters(prm);
+        if (Plugins::plugin_type_matches<MaterialModel::PhaseFieldFault<dim>>(
+              *material_model))
+          {
+            reconstructed_fault_surface_system =
+              std::make_unique<ReconstructedFaultSurfaceSystem<dim>>(*this);
+            reconstructed_fault_stokes_coupling =
+              std::make_unique<Assemblers::ReconstructedFaultStokes<dim>>(*this);
+          }
+      }
 
     mesh_refinement_manager.initialize_simulator (*this);
     mesh_refinement_manager.parse_parameters (prm);

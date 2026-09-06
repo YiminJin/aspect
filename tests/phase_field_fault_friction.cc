@@ -11,6 +11,7 @@
 
 #include "phase_field_fault_test_access.h"
 
+#include <aspect/plugins.h>
 #include <aspect/postprocess/interface.h>
 #include <aspect/simulator_access.h>
 
@@ -42,15 +43,13 @@ namespace aspect
         std::pair<std::string,std::string>
         execute(TableHandler &) override
         {
-          const auto *phase_field_fault =
-            dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(
-              &this->get_material_model());
-          AssertThrow(phase_field_fault != nullptr,
-                      ExcMessage("The fault-friction test requires the phase field fault material model."));
+          const auto &phase_field_fault =
+            Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(
+              this->get_material_model());
 
           const auto &friction =
             MaterialModel::internal::PhaseFieldFaultTestAccess<dim>::
-            fault_friction(*phase_field_fault);
+            fault_friction(phase_field_fault);
 
           if (friction.has_state_variable())
             verify_rate_state(friction);

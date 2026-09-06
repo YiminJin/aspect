@@ -1,0 +1,57 @@
+# Stage-H exact condensation with prescribed adiabatic fault pressure.
+# Enable if: ASPECT_WITH_VORO
+# MPI: 2
+
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_ih.prm
+
+set Nonlinear solver scheme = single Advection, single Stokes
+
+subsection Solver parameters
+  subsection Stokes solver parameters
+    set Stokes solver type = block AMG
+  end
+  subsection Phase field solver parameters
+    set Linear solver tolerance = 2e-7
+  end
+end
+
+subsection Prescribed Stokes solution
+  set Model name = unspecified
+end
+
+subsection Boundary velocity model
+  set Prescribed velocity boundary indicators = left:function, right:function, bottom:function, top:function
+  subsection Function
+    set Function expression = 0; 0
+  end
+end
+
+subsection Compositional fields
+  set Number of fields            = 4
+  set Names of fields             = tau_xx, tau_yy, tau_xy, rock
+  set Types of fields             = stress, stress, stress, chemical composition
+  set Compositional field methods = particles, particles, particles, particles
+  set Mapped particle properties  = tau_xx:maxwell stress[0], tau_yy:maxwell stress[1], tau_xy:maxwell stress[2], rock:initial composition[0]
+end
+
+subsection Initial composition model
+  subsection Function
+    set Function expression = 4e6; -2e6; 1e6; 0.1+0.8*y
+  end
+end
+
+set Surface pressure = 2e6
+
+subsection Material model
+  subsection Phase field fault
+    set Use adiabatic pressure in fault friction = true
+  end
+end
+
+subsection Particles
+  set List of particle properties = crack driving force, initial composition, maxwell stress
+end
+
+subsection Postprocess
+  set List of postprocessors = particles, verify phase field fault surface system
+end

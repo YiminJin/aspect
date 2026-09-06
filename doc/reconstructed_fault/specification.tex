@@ -1076,10 +1076,14 @@ input, response, and semantic operations needed by reconstructed-fault
 coupling; no abstract reconstructed-fault constitutive base class is used.  It
 shall not assemble finite element weak forms and shall not expose
 \texttt{apply\_B()} or \texttt{apply\_G()} through the material-model
-interface.  A solver-local simulator helper named
+interface.  A simulator-owned computational helper named
 \texttt{ReconstructedFaultSurfaceSystem} checks for the concrete
 \texttt{PhaseFieldFault} material model once at construction and retains that
-reference for its lifetime.  It owns the particle/Q1 surface assembly,
+reference for its lifetime.  The simulator owns one canonical surface-system
+instance and one canonical reconstructed-fault Stokes-coupling instance when
+the coupled model is available.  Solver objects retain references to these
+components and shall not construct duplicate stateful instances.  The surface
+helper owns the particle/Q1 surface assembly,
 replicated fault-vector MPI reductions, and the surface factorization.  This
 particle workflow is not an ordinary ASPECT cell-local Scratch/CopyData
 assembler.  The condensed operator remains solver-owned.
@@ -1180,9 +1184,10 @@ explicit input without changing manager-owned nonlinear state.
 Starting a new linearization invalidates the previous one.  Assemble and
 factor a complete candidate and publish it only after every fault block
 succeeds.  A failed factorization shall therefore leave no stale or partially
-factorized $K_V$ available.  The coupled solver owns the helper for the
-duration of its solve.  It is not a persistent \texttt{Simulator} member and
-introduces no checkpoint or additional simulator lifecycle hook.
+factorized $K_V$ available.  The helper is a simulator-owned, non-checkpointed
+computational component.  Its surface linearization is valid only as part of
+one coupled linearization and introduces no constitutive state or additional
+timestep lifecycle hook.
 
 Stage F ends at this surface system.  It shall not assemble the
 slip-dependent bulk residual, implement either coupling action, modify the
@@ -1294,9 +1299,34 @@ Therefore the solver-owned condensed equation and recovery are
  \boxed{
  \delta V=K_V^{-1}(R_\Gamma+G\delta x).}
 \end{equation}
-Stage H adds only this exact condensed operator, right-hand side, and recovery,
-using a solver-local surface helper and its Stage-F inverse operation.  It does
-not own constitutive state or connect nonlinear commit/rollback.
+Stage H adds only this exact condensed operator, right-hand side, and recovery.
+It references the canonical simulator-owned surface and Stokes-coupling
+components and owns no constitutive state.  The assembled $A$, frozen $B$, and
+surface $G/K_V$ data form one coupled linearization: their validity begins only
+after all components have been built successfully and ends when any component
+is rebuilt or invalidated.  This lifetime is independent of the lifetime of
+the helper object.
+
+The condensed implementation shall depend only on semantic $B$ and $G$ actions
+and a semantic surface linear solve.  Stage H provides an unrestricted
+$K_V^{-1}$ implementation.  Stage I may substitute a solve on the active/free
+partition, projecting its right-hand side and returning zero active
+components, without changing the condensation implementation.
+
+Bulk solver directions are homogeneous perturbations.  Constrained algebraic
+entries are zero when applying $A$.  Before evaluating the physical finite
+element field for $G$, distribute homogeneous hanging-node and periodic
+constraints while keeping every prescribed-boundary inhomogeneity zero.  The
+$B$ action uses the same homogeneous constraints, and constrained entries of
+the returned algebraic vector are zero.  Inhomogeneous solution values shall
+never enter a Jacobian direction.
+
+The supported assembled iterative path shall use FGMRES.  The condensed
+operator is generally nonsymmetric because $B$ and $G$ are not assumed to be
+transposes, so CG and MINRES are not valid outer solvers.  Verification shall
+include a small explicit solve of the complete two-block system compared with
+the condensed solve and recovery, and a multiple-fault case.  Stage H does not
+connect nonlinear commit/rollback.
 
 \subsection{Stage-I lower bound and nonlinear lifecycle}
 
