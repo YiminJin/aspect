@@ -150,7 +150,27 @@ namespace aspect
 
         double minimum_fault_slip_rate() const;
 
+        /**
+         * Prepare frozen reconstructed-fault constitutive state for the
+         * Stage-I mechanical solve. Missing persistent state may be
+         * initialized only for a fresh timestep-zero model.
+         */
+        void prepare_reconstructed_fault_mechanical_solve();
+
         void validate_reconstructed_fault_constitutive_state() const;
+
+        /**
+         * Commit constitutive histories for an accepted mechanical state.
+         * Timestep zero retains the explicitly initialized histories.
+         */
+        void
+        commit_reconstructed_fault_mechanical_history(
+          const LinearAlgebra::BlockVector &accepted_bulk_state);
+
+        /** Return the law-specific restriction based on committed fault state. */
+        double
+        compute_reconstructed_fault_time_step(const double cfl_number) const;
+
         /**
          * @}
          */
@@ -216,9 +236,11 @@ namespace aspect
         struct LocalizationResponse
         {
           std::vector<double> surface_material_fractions;
+          double surface_temperature;
           double current_I_h;
           double previous_I_h;
           double previous_cohesive_traction;
+          double current_degradation;
           double current_h;
           double previous_h;
         };
@@ -247,10 +269,28 @@ namespace aspect
         std::map<types::particle_index, double>
         evaluate_initial_cohesive_particle_values();
 
-        /** Explicitly commit already accepted cohesive history. Not wired in Stage D. */
+        /** Validate cohesive history before entering a terminal commit. */
+        void
+        validate_cohesive_state_commit(
+          const std::vector<std::vector<double>> &cohesive_tractions) const;
+
+        /** Commit cohesive history after validation without allocating or throwing. */
         void
         commit_cohesive_state(
-          const std::vector<std::vector<double>> &cohesive_tractions);
+          const std::vector<std::vector<double>> &cohesive_tractions) noexcept;
+
+        /** Sample the frozen FE temperature at the reconstructed-fault vertices. */
+        void compute_fault_surface_temperatures();
+
+        /** Exact finite-step cohesive-work candidate before irreversibility. */
+        static double
+        compute_crack_driving_force_candidate(
+          const double time_step,
+          const MaxwellCoefficients &surface_coefficients,
+          const double current_degradation,
+          const double previous_h,
+          const double current_cohesive_traction,
+          const double previous_cohesive_traction);
         /**
          * @}
          */
@@ -423,6 +463,8 @@ namespace aspect
         FaultPropertyIndices fault_property_indices;
 
         std::vector<std::vector<double>> current_normalization_integrals;
+
+        std::vector<std::vector<double>> current_fault_surface_temperatures;
 
         double current_minimum_raw_normalization_phase_field =
           numbers::signaling_nan<double>();

@@ -1,0 +1,34 @@
+
+Loading shared library <./libphase_field_fault_stage_i.debug.so>
+
+Number of active cells: 4,096 (on 7 levels)
+Number of degrees of freedom: 124,937 (33,282+4,225+16,641+16,641+16,641+16,641+16,641+4,225)
+
+*** Timestep 0:  t=0 seconds, dt=0 seconds
+   Solving phase field system:
+      Iteration  0: linear solver iterations =    5, line search iterations = 0, relative residual = 4.444e-01
+      Iteration  1: linear solver iterations =    5, line search iterations = 0, relative residual = 1.975e-01
+      Iteration  2: linear solver iterations =    5, line search iterations = 0, relative residual = 8.779e-02
+      Iteration  3: linear solver iterations =    5, line search iterations = 0, relative residual = 3.902e-02
+      Iteration  4: linear solver iterations =    5, line search iterations = 0, relative residual = 1.734e-02
+      Iteration  5: linear solver iterations =    5, line search iterations = 0, relative residual = 7.707e-03
+      Iteration  6: linear solver iterations =    5, line search iterations = 0, relative residual = 3.425e-03
+      Iteration  7: linear solver iterations =   13, line search iterations = 0, relative residual = 1.522e-03
+      Iteration  8: linear solver iterations =   14, line search iterations = 0, relative residual = 6.766e-04
+      Iteration  9: linear solver iterations =   36, line search iterations = 0, relative residual = 3.007e-04
+   Reconstruction initial faults... done.
+
+   Solving temperature system... 0 iterations.
+   Advecting particles...  done.
+   Initial cohesive q profile variation for fault 0: weighted RMS=1.710e+09 Pa, maximum=6.119e+09 Pa, normalized RMS=2.438e-01, normalized maximum=8.725e-01
+   Rebuilding Stokes preconditioner...
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 0: 1.000e+00, 0.000e+00
+      Reconstructed-fault line search accepted after 0 rejected candidates.
+   Rebuilding Stokes preconditioner...
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 1: 7.076e-08, 0.000e+00
+
+   Postprocessing:
+     Number of advected particles:      36864
+     Reconstructed-fault Stage-I solve: verified
+
+Termination requested by criterion: end time

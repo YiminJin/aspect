@@ -1,0 +1,129 @@
+# Stage-I coupled nonlinear lifecycle with the rate-dependent friction branch.
+# The inherited low activation threshold only bootstraps a prescribed fault;
+# reconstruction behavior is not under test.
+# Enable if: ASPECT_WITH_VORO
+
+set Dimension                    = 2
+set End time                     = 0
+set Use years instead of seconds = false
+set Nonlinear solver scheme = single Advection, iterated Newton Stokes
+set Max nonlinear iterations = 12
+set Nonlinear solver tolerance = 1e-6
+
+subsection Formulation
+  set Enable phase field                  = true
+  set Reconstruct faults from phase field = true
+end
+
+subsection Geometry model
+  set Model name = box
+end
+
+subsection Gravity model
+  set Model name = vertical
+  subsection Vertical
+    set Magnitude = 0
+  end
+end
+
+subsection Initial temperature model
+  set Model name = function
+  subsection Function
+    set Function expression = 293
+  end
+end
+
+subsection Compositional fields
+  set Number of fields            = 4
+  set Names of fields             = tau_xx, tau_yy, tau_xy, rock
+  set Types of fields             = stress, stress, stress, chemical composition
+  set Compositional field methods = particles, particles, particles, particles
+  set Mapped particle properties  = tau_xx:maxwell stress[0], tau_yy:maxwell stress[1], tau_xy:maxwell stress[2], rock:initial composition[0]
+end
+
+subsection Initial composition model
+  set Model name = function
+  subsection Function
+    set Variable names      = x,y
+    set Function expression = 4e6; -4e6+8e6*x; 1e6; 0.1+0.8*y
+  end
+end
+
+subsection Material model
+  set Model name = phase field fault
+  subsection Phase field fault
+    set Evolve phase field                    = false
+    set Phase field activation threshold      = 1e-6
+    set Viscosity averaging scheme            = arithmetic
+    set Reference viscosities                 = 1e21, 1e21
+    set Elastic shear moduli                  = 1e10, 4e10
+    set Cohesions                             = 1e5, 2e5
+    set Critical energy release rates         = 1e5, 1e5
+    set Friction law                         = rate dependent
+    set Reference friction coefficients     = 0.1, 0.1
+    set Dynamic friction coefficients       = 0.1, 0.1
+    set Characteristic weakening slip rates = 2e-6, 2e-6
+    set Radiation damping coefficients      = 1e7, 1e7
+    set Use adiabatic pressure in fault friction = false
+  end
+end
+
+subsection Phase field model
+  set Length scale                    = 0.15625
+  set Geometric function type         = AT1
+  set Degradation curvature parameter = 1
+end
+
+subsection Fault reconstruction
+  set Structural point spacing = 0.1
+  set Ridge coefficient        = 1
+  set Prescribed faults file   = $ASPECT_SOURCE_DIR/tests/phase_field_fault_ih.txt
+end
+
+subsection Mesh refinement
+  set Initial global refinement          = 6
+  set Initial adaptive refinement        = 0
+  set Time steps between mesh refinement = 0
+end
+
+subsection Solver parameters
+  subsection Stokes solver parameters
+    set Stokes solver type = block AMG
+  end
+  subsection Phase field solver parameters
+    set Linear solver tolerance = 2e-7
+    # Converge initialization at the original accuracy instead of silently
+    # exhausting the old ten-iteration budget.
+    set Max nonlinear iterations = 50
+  end
+end
+
+subsection Boundary velocity model
+  set Prescribed velocity boundary indicators = left:function, right:function, bottom:function, top:function
+  subsection Function
+    set Function expression = 0; 0
+  end
+end
+
+subsection Particles
+  set Particle generator name                 = reference cell
+  set List of particle properties             = crack driving force, initial composition, maxwell stress
+  set Generate particle domains               = true
+  set Generate CPDI data for particle domains = true
+  set Load balancing strategy                 = none
+  subsection Generator
+    subsection Reference cell
+      set Number of particles per cell per direction = 3
+    end
+  end
+  subsection Initial composition
+    set List of field names = rock
+  end
+end
+
+subsection Postprocess
+  set List of postprocessors = particles, verify phase field fault stage i
+  subsection Particles
+    set Data output format = none
+  end
+end

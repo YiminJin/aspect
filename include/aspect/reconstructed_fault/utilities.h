@@ -14,6 +14,7 @@
 
 #include <aspect/reconstructed_fault/fault.h>
 
+#include <deal.II/base/numbers.h>
 #include <deal.II/base/point.h>
 
 #include <string>

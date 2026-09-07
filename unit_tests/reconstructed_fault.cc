@@ -14,6 +14,7 @@
 #include <aspect/reconstructed_fault/fault.h>
 #include <aspect/reconstructed_fault/manager.h>
 #include <aspect/reconstructed_fault/utilities.h>
+#include <aspect/simulator/solver/reconstructed_fault_nonlinear.h>
 #include <aspect/utilities.h>
 
 #include <limits>
@@ -240,6 +241,151 @@ TEST_CASE("ReconstructedFaultManager validates slip-rate initialization")
   REQUIRE_THROWS(manager.set_slip_rate_trial({{-2.0, 0.0}}, 1.0));
   manager.rollback_slip_rate_trial();
   manager.rollback_slip_rate_nonlinear_solve();
+}
+
+
+TEST_CASE("Stage-I lower-bound tolerance is local")
+{
+  constexpr double minimum = 1e-12;
+  const double epsilon = std::numeric_limits<double>::epsilon();
+  REQUIRE(aspect::internal::reconstructed_fault_locally_at_lower_bound(
+            minimum, minimum));
+  REQUIRE(aspect::internal::reconstructed_fault_locally_at_lower_bound(
+            minimum*(1.0+50.0*epsilon), minimum));
+  REQUIRE_FALSE(aspect::internal::reconstructed_fault_locally_at_lower_bound(
+                  minimum*(1.0+200.0*epsilon), minimum));
+}
+
+
+TEST_CASE("Stage-I active set releases on a later Newton iteration")
+{
+  constexpr double minimum = 1e-12;
+  const double epsilon = std::numeric_limits<double>::epsilon();
+  const aspect::ReconstructedFaultVector slip_rate =
+  {
+    {minimum*(1.0+50.0*epsilon), 1e8}
+  };
+  const aspect::ReconstructedFaultVector outward_direction =
+  {
+    {-1.0, -1.0}
+  };
+  aspect::ReconstructedFaultActiveSet active_set =
+    aspect::internal::make_reconstructed_fault_inactive_set(slip_rate);
+
+  REQUIRE(aspect::internal::update_reconstructed_fault_active_set(
+            slip_rate, outward_direction, minimum, active_set) == 1);
+  REQUIRE(active_set[0][0]);
+  REQUIRE_FALSE(active_set[0][1]);
+
+  // A new outer Newton iteration starts from an empty set. An inward
+  // direction releases the vertex that was active in the previous iteration.
+  active_set = aspect::internal::make_reconstructed_fault_inactive_set(slip_rate);
+  const aspect::ReconstructedFaultVector inward_direction =
+  {
+    {1.0, -1.0}
+  };
+  REQUIRE(aspect::internal::update_reconstructed_fault_active_set(
+            slip_rate, inward_direction, minimum, active_set) == 0);
+  REQUIRE_FALSE(active_set[0][0]);
+}
+
+
+TEST_CASE("Stage-I fraction-to-boundary permits exact contact")
+{
+  const aspect::ReconstructedFaultVector slip_rate = {{1.0, 1.5}};
+  const aspect::ReconstructedFaultVector direction = {{-100.0, -2.0}};
+  const aspect::ReconstructedFaultActiveSet active_set = {{true, false}};
+
+  const double step =
+    aspect::internal::reconstructed_fault_maximum_step_length(
+      slip_rate, direction, active_set, 1.0);
+  REQUIRE(step == Approx(0.25));
+  REQUIRE(slip_rate[0][1] + step*direction[0][1] == Approx(1.0));
+  REQUIRE(step != Approx(0.99*0.25));
+}
+
+
+TEST_CASE("Stage-I Armijo search rejects twice before acceptance")
+{
+  std::vector<double> evaluated_steps;
+  bool accept_called = false;
+  double accepted_step = 0.0;
+  const auto result = aspect::internal::reconstructed_fault_armijo_line_search(
+    1.0,
+    4,
+    1.0,
+    [&](const double step)
+    {
+      evaluated_steps.push_back(step);
+      return evaluated_steps.size() <= 2 ? 1.0 : 0.5;
+    },
+    [&](const double step)
+    {
+      accept_called = true;
+      accepted_step = step;
+    });
+
+  REQUIRE(result.accepted);
+  REQUIRE(result.rejected_candidates == 2);
+  REQUIRE(accept_called);
+  REQUIRE(evaluated_steps.size() == 3);
+  REQUIRE(evaluated_steps[0] == Approx(1.0));
+  REQUIRE(evaluated_steps[1] == Approx(2.0/3.0));
+  REQUIRE(evaluated_steps[2] == Approx(4.0/9.0));
+  REQUIRE(accepted_step == Approx(4.0/9.0));
+}
+
+
+TEST_CASE("Stage-I Armijo exhaustion never accepts the last candidate")
+{
+  unsigned int evaluations = 0;
+  double accepted_state = 7.0;
+  const auto result = aspect::internal::reconstructed_fault_armijo_line_search(
+    1.0,
+    2,
+    1.0,
+    [&](const double)
+    {
+      ++evaluations;
+      return 1.0;
+    },
+    [&](const double step)
+    {
+      accepted_state = step;
+    });
+
+  REQUIRE_FALSE(result.accepted);
+  REQUIRE(result.rejected_candidates == 3);
+  REQUIRE(evaluations == 3);
+  REQUIRE(accepted_state == Approx(7.0));
+}
+
+
+TEST_CASE("Stage-I bulk residual scale handles a zero initial block")
+{
+  const double scale = aspect::internal::reconstructed_fault_residual_scale(
+    0.0, 1e-280, 1e-8);
+  REQUIRE(std::isfinite(scale));
+  REQUIRE(scale/1e-288 == Approx(1.0));
+  REQUIRE(aspect::internal::normalized_reconstructed_fault_residual(
+            0.0, scale, "bulk") == Approx(0.0));
+}
+
+
+TEST_CASE("Stage-I surface residual scale handles a tiny initial block")
+{
+  const double scale = aspect::internal::reconstructed_fault_residual_scale(
+    1e-300, 1e-290, 1e-8);
+  REQUIRE(std::isfinite(scale));
+  REQUIRE(scale/1e-298 == Approx(1.0));
+  REQUIRE(aspect::internal::normalized_reconstructed_fault_residual(
+            1e-300, scale, "surface") == Approx(1e-2));
+
+  const ThrowOnDealIIException throw_on_dealii_exception;
+  REQUIRE(aspect::internal::normalized_reconstructed_fault_residual(
+            0.0, 0.0, "surface") == Approx(0.0));
+  REQUIRE_THROWS(aspect::internal::normalized_reconstructed_fault_residual(
+    1e-300, 0.0, "surface"));
 }
 
 

@@ -18,6 +18,7 @@
 
 #include <deal.II/base/quadrature.h>
 #include <deal.II/grid/cell_id.h>
+#include <deal.II/particles/property_pool.h>
 
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/split_member.hpp>
@@ -138,7 +139,10 @@ namespace aspect
       void begin_slip_rate_nonlinear_solve();
 
       /** Commit the converged current Newton iterate to the timestep state. */
-      void commit_slip_rate_nonlinear_solve();
+      void validate_slip_rate_nonlinear_commit() const;
+
+      /** Commit after successful validation without allocation or failure. */
+      void commit_slip_rate_nonlinear_solve() noexcept;
 
       /** Discard all nonlinear work and restore the timestep-committed state. */
       void rollback_slip_rate_nonlinear_solve();

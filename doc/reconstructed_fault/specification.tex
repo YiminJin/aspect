@@ -1346,6 +1346,121 @@ A failed solve or rejected timestep restores current $V$ from committed $V$
 and leaves committed $\Theta$, $T^{\rm coh}$, previous $I_h$, and particle
 Maxwell stress unchanged.
 
+Use the local bound test
+\begin{equation}
+ V_i-V_{\min}\leq 100\epsilon_{\rm mach}\max(V_{\min},|V_i|).
+\end{equation}
+For each Newton iteration, start from an empty active set and add an at-bound
+vertex only when its recovered direction is negative. The restricted inverse
+is the principal free-block solve $K_{\mathcal F\mathcal F}^{-1}$; active rows
+and columns are disconnected, the right-hand side is projected to the free
+set, and active increments are exactly zero. Recompute the active set from
+empty only after an accepted step.
+
+For free vertices with negative direction use the exact fraction-to-boundary
+ratio $(V_i-V_{\min})/(-\delta V_i)$, without a strict-interior factor. Project
+roundoff-level contacts exactly to $V_{\min}$, but do not clamp constitutive
+inputs. Hold the active set fixed during the line search and accept a trial
+only if
+\begin{equation}
+ \Phi_{\rm trial}\leq (1-10^{-4}\alpha)\Phi_k,
+ \qquad \Phi=\frac12(r_b^2+r_\Gamma^2).
+\end{equation}
+Start from the admissible maximum step and reduce by $2/3$. Exhaustion is a
+nonlinear failure and shall not accept the last unsuccessful candidate.
+
+Bulk and projected-free surface residuals use separate, fixed normalization
+scales during a mechanical solve and must independently satisfy the nonlinear
+tolerance. Their scale floors are based on the existing initial Stokes
+residual convention and the current surface-Jacobian action, using
+$\max(\epsilon_{\rm linear},\sqrt{\epsilon_{\rm mach}})$ rather than a new
+dimensional parameter. If a block and its reference scale are exactly zero,
+its normalized residual is zero only while that block remains exactly zero.
+
+The surface residual is a weak Q1 nodal vector. Let $M_\Gamma$ be the
+consistent Q1 mass matrix assembled with the same particle-domain quadrature
+as $R_\Gamma$. For the current free set, use the strong-residual RMS norm
+\begin{equation}
+ \left\|P_{\mathcal F}R_\Gamma\right\|_\Gamma
+ =\left[
+ \frac{(P_{\mathcal F}R_\Gamma)^T
+ M_{\mathcal F\mathcal F}^{-1}
+ (P_{\mathcal F}R_\Gamma)}
+ {{\boldsymbol 1}_{\mathcal F}^T
+ M_{\mathcal F\mathcal F}{\boldsymbol 1}_{\mathcal F}}
+ \right]^{1/2}.
+\end{equation}
+Both the residual and mass matrix are restricted to the same active/free
+partition. Define the norm as zero when all vertices are active. The mass
+matrix is geometry/quadrature data and remains fixed for one coupled
+linearization.
+
+Mechanical preparation may initialize missing state only in a fresh
+timestep-zero model. It recomputes current $I_h$, initializes missing cohesive
+history, sets $V=V_{\min}$, and obtains a positive $\Theta_0$ by projecting
+exactly one generic particle-advected compositional field mapped to component
+zero of particle property \texttt{phase field fault state}. Restarted or
+later-time models require complete committed state. Stage I commits only $V$.
+
+\subsection{Stage-J history feedback}
+
+The authoritative fixed-fault ordering is
+\begin{equation}
+ H_{k-1}\longrightarrow\phi_k\longrightarrow(u_k,p_k,V_k)
+ \longrightarrow\{\Theta_k,T_k^{\rm coh},\tau_k,H_k,I_{h,k}\}
+ \longrightarrow\phi_{k+1}.
+\end{equation}
+The phase field, reconstructed geometry, and all committed histories remain
+fixed throughout one coupled mechanical solve. All candidate construction,
+MPI communication, allocation, and validation shall finish before a terminal
+non-throwing mutation phase commits histories, $V$, and the accepted bulk
+solution.
+
+Timestep zero commits the solved initial kinematic state $V_0$ but does not
+physically evolve $\Theta_0$ or $H_0$ with the artificial
+\texttt{Initial time step}. It retains the supplied $\Theta_0$, initialized
+irreversible $H_0$, initialization-specific $T_0^{\rm coh}$, and initialized
+particle Maxwell stress. It shall store $I_{h,0}$ as the previous-normalization
+snapshot required by the first real timestep.
+
+For $k>0$, distinguish bulk and surface Maxwell coefficients. Bulk
+coefficients use particle-local material fractions and temperature. Surface
+cohesive coefficients use the projected Q1 surface mixture and a transient Q1
+fault-surface temperature obtained by sampling the frozen FE temperature at
+fault vertices. The surface coefficients govern cohesive traction, cohesive
+history correction, and $\partial T^{\rm coh}/\partial V=\kappa_\Gamma/I_h$;
+bulk coefficients govern Maxwell stress and the stress parts of $B$ and $G$.
+
+Consistently project accepted particle samples of $T_k^{\rm coh}$ to the
+replicated fault Q1 space. Interpolate this projected traction back to each
+associated particle before computing its driving force. For $g_k<1$, use the
+algebraically exact form
+\begin{equation}
+ a=\frac{T_k^{\rm coh}}{g_k},\qquad
+ b=\frac{\beta_{\Gamma,k}h_{k-1}T_{k-1}^{\rm coh}}{1-g_k},\qquad
+ \mathcal H_k=\frac{\Delta t_k}{2\kappa_{\Gamma,k}}(a-b)(a+b),
+ \qquad H_k=\max(H_{k-1},\mathcal H_k).
+\end{equation}
+A negative $\mathcal H_k$ shall not be independently clipped. For the intact
+case $g_k=1$, $h_k=h_{k-1}=0$, use
+\begin{equation}
+ \mathcal H_k=\frac{\Delta t_k}{2\kappa_{\Gamma,k}}(T_k^{\rm coh})^2.
+\end{equation}
+The case $g_k=1$ with $h_{k-1}>0$ is inadmissible healing.
+
+Rate-and-state $\Theta$ is updated at the fault Q1 vertices with the accepted
+$V_k$ through the existing exact aging law and the same projected surface
+mixture used by friction. The present law has one global $D_c$; no duplicate
+or composition-dependent parameter is added. Rate-dependent friction has no
+state update.
+
+Expose the existing law-specific RSF restriction through an opt-in ASPECT
+time-stepping plugin named \texttt{reconstructed fault time step}. It uses
+timestep-committed Q1 $V$, Q1 surface fractions, the global ASPECT CFL number,
+and \texttt{use\_operator\_splitting=true}. Standard ASPECT model-list
+selection is unchanged: the plugin is never activated implicitly. Stage J
+does not add a post-solve cutback or repeat operation.
+
 \subsection{Mandatory block-Jacobian verification}
 
 Before the coupled API is considered complete, evaluate a single
@@ -1461,10 +1576,13 @@ Add lower-bound active-set/projected directions before fraction-to-boundary,
 line search, separate residual convergence, and accepted-state
 commit/rollback.
 
-\subsection*{Stages J--K: history feedback and benchmarks}
-Connect accepted constitutive history to phase-field feedback, then verify
-fixed-fault benchmarks. Propagation, 3-D surfaces, and overlapping faults
-remain deferred.
+\subsection*{Stage J: history feedback}
+Atomically commit the accepted cohesive, rate-and-state, Maxwell, and
+crack-driving histories using the ordering and timestep-zero semantics above.
+
+\subsection*{Stage K: fixed-fault benchmarks}
+Verify fixed-fault benchmarks. Propagation, 3-D surfaces, and overlapping
+faults remain deferred.
 
 \section{Rules for Codex}
 

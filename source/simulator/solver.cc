@@ -26,6 +26,12 @@
 #include <aspect/simulator/solver/stokes_matrix_free.h>
 #include <aspect/simulator/solver/stokes_direct.h>
 #include <aspect/mesh_deformation/interface.h>
+#include <aspect/material_model/phase_field_fault.h>
+#include <aspect/plugins.h>
+#include <aspect/reconstructed_fault/manager.h>
+#include <aspect/reconstructed_fault/surface_system.h>
+#include <aspect/simulator/solver/reconstructed_fault_condensed_system.h>
+#include <aspect/simulator/solver/reconstructed_fault_nonlinear.h>
 
 #include <deal.II/base/signaling_nan.h>
 #include <deal.II/lac/solver_gmres.h>
@@ -390,6 +396,35 @@ namespace aspect
     {
       return n_iterations_;
     }
+
+  }
+
+
+  namespace
+  {
+    using FaultVector = ReconstructedFaultVector;
+
+
+    template <int dim>
+    FaultVector
+    current_slip_rate(const ReconstructedFaultManager<dim> &fault_manager)
+    {
+      FaultVector values(fault_manager.get_faults().size());
+      for (unsigned int fault = 0; fault < values.size(); ++fault)
+        values[fault] = fault_manager.get_slip_rate(fault);
+      return values;
+    }
+
+
+    bool
+    within_lower_bound_roundoff(const double value, const double minimum)
+    {
+      constexpr double tolerance_factor = 100.0;
+      return std::abs(value-minimum)
+             <= tolerance_factor*std::numeric_limits<double>::epsilon()
+                * std::max(minimum, std::abs(value));
+    }
+
 
   }
 
@@ -958,6 +993,515 @@ namespace aspect
            };
   }
 
+
+  template <int dim>
+  void
+  Simulator<dim>::solve_reconstructed_fault_stokes ()
+  {
+    AssertThrow(dim == 2, ExcNotImplemented());
+    AssertThrow(newton_handler != nullptr,
+                ExcMessage("The coupled reconstructed-fault solver requires "
+                           "the Newton solver handler."));
+
+    auto &phase_field_fault =
+      Plugins::get_plugin_as_type<MaterialModel::PhaseFieldFault<dim>>(
+        *material_model);
+
+    // Complete all frozen constitutive histories before opening the nonlinear
+    // V lifecycle. Only a fresh timestep-zero model may initialize missing state.
+    phase_field_fault.prepare_reconstructed_fault_mechanical_solve();
+
+    ReconstructedFaultManager<dim> &fault_manager =
+      *reconstructed_fault_manager;
+    ReconstructedFaultSurfaceSystem<dim> &surface_system =
+      *reconstructed_fault_surface_system;
+    StokesSolver::ReconstructedFaultCondensedSystem<dim> condensed_system(*this);
+
+    // Keep the production solution immutable during Newton. working_x is the
+    // last accepted bulk iterate; only convergence publishes it to solution.
+    const LinearAlgebra::BlockVector production_solution(solution);
+    const LinearAlgebra::BlockVector saved_linearization_point(
+      current_linearization_point);
+    LinearAlgebra::BlockVector working_x(current_linearization_point);
+    working_x = solution;
+
+    // Coupled residual evaluation temporarily changes ASPECT assembly controls.
+    // Snapshot them once so both success and every exception restore the caller.
+    const bool saved_assemble_fault_terms =
+      assemble_reconstructed_fault_stokes_terms;
+    const bool saved_assemble_newton_system = assemble_newton_stokes_system;
+    const bool saved_assemble_newton_matrix = assemble_newton_stokes_matrix;
+    const bool saved_rebuild_matrix = rebuild_stokes_matrix;
+    const bool saved_rebuild_preconditioner = rebuild_stokes_preconditioner;
+    const double saved_derivative_scaling =
+      newton_handler->parameters.newton_derivative_scaling_factor;
+
+    const unsigned int max_nonlinear_iterations =
+      (pre_refinement_step < parameters.initial_adaptive_refinement)
+      ? std::min(parameters.max_nonlinear_iterations,
+                 parameters.max_nonlinear_iterations_in_prerefinement)
+      : parameters.max_nonlinear_iterations;
+    SolverControl nonlinear_solver_control(max_nonlinear_iterations,
+                                           parameters.nonlinear_tolerance);
+
+    struct CoupledResidual
+    {
+      double bulk_norm;
+      ReconstructedFaultSurfaceResidual surface;
+    };
+
+    bool nonlinear_state_is_active = false;
+    bool terminal_commit_complete = false;
+    auto restore_simulator_state = [&]()
+    {
+      assemble_reconstructed_fault_stokes_terms = saved_assemble_fault_terms;
+      assemble_newton_stokes_system = saved_assemble_newton_system;
+      assemble_newton_stokes_matrix = saved_assemble_newton_matrix;
+      rebuild_stokes_matrix = saved_rebuild_matrix;
+      rebuild_stokes_preconditioner = saved_rebuild_preconditioner;
+      newton_handler->parameters.newton_derivative_scaling_factor =
+        saved_derivative_scaling;
+    };
+
+    try
+      {
+        // Open manager-owned current/trial V state and freeze the fault-to-QP
+        // geometry used throughout this mechanical solve.
+        fault_manager.begin_slip_rate_nonlinear_solve();
+        nonlinear_state_is_active = true;
+        fault_manager.prepare_stokes_qp_projection_cache();
+
+        assemble_reconstructed_fault_stokes_terms = true;
+        assemble_newton_stokes_system = true;
+        // The PhaseFieldFault bulk Maxwell law is linear in the current
+        // strain rate. Its nonlinear fault derivative is represented by the
+        // explicit B/K_V/G blocks, not by ASPECT's viscosity-derivative output.
+        newton_handler->parameters.newton_derivative_scaling_factor = 0.0;
+        set_assemblers();
+        compute_current_constraints();
+        pressure_scaling = compute_pressure_scaling_factor();
+
+        auto evaluate_coupled_residual =
+          [&](const LinearAlgebra::BlockVector &bulk_state,
+              const FaultVector &slip_rate) -> CoupledResidual
+        {
+          // Represent explicit V as a temporary displacement from manager current
+          // state, assemble both residual blocks, and unconditionally roll it back.
+          const FaultVector base_slip_rate = current_slip_rate(fault_manager);
+          FaultVector delta_slip_rate = slip_rate;
+          AssertDimension(delta_slip_rate.size(), base_slip_rate.size());
+          for (unsigned int fault = 0; fault < delta_slip_rate.size(); ++fault)
+            {
+              AssertDimension(delta_slip_rate[fault].size(),
+                              base_slip_rate[fault].size());
+              for (unsigned int vertex = 0;
+                   vertex < delta_slip_rate[fault].size(); ++vertex)
+                delta_slip_rate[fault][vertex] -= base_slip_rate[fault][vertex];
+            }
+
+          fault_manager.begin_slip_rate_trial();
+          bool trial_is_active = true;
+          try
+            {
+              fault_manager.set_slip_rate_trial(delta_slip_rate, 1.0);
+              current_linearization_point = bulk_state;
+              assemble_newton_stokes_matrix = false;
+              rebuild_stokes_preconditioner = false;
+              rebuild_stokes_matrix =
+                !boundary_velocity_manager
+                   .get_prescribed_boundary_velocity_indicators().empty();
+              assemble_stokes_system();
+
+              const double velocity_residual =
+                system_rhs.block(introspection.block_indices.velocities).l2_norm();
+              const double pressure_residual =
+                system_rhs.block(introspection.block_indices.pressure).l2_norm();
+              CoupledResidual result;
+              result.bulk_norm = std::sqrt(
+                velocity_residual*velocity_residual
+                + pressure_residual*pressure_residual);
+              result.surface = surface_system.evaluate_surface_residual(
+                bulk_state, slip_rate);
+              fault_manager.rollback_slip_rate_trial();
+              trial_is_active = false;
+              return result;
+            }
+          catch (...)
+            {
+              if (trial_is_active)
+                fault_manager.rollback_slip_rate_trial();
+              throw;
+            }
+        };
+
+        // Freeze separate dimensional normalization scales for the entire solve.
+        // Their floors reuse existing bulk and K_V action scales rather than a
+        // reconstructed-fault tuning parameter.
+        const FaultVector initial_slip_rate = current_slip_rate(fault_manager);
+        const CoupledResidual initial_residual =
+          evaluate_coupled_residual(working_x, initial_slip_rate);
+
+        LinearAlgebra::BlockVector bulk_reference(working_x);
+        bulk_reference.block(introspection.block_indices.velocities) = 0.0;
+        const double aspect_bulk_reference =
+          evaluate_coupled_residual(bulk_reference, initial_slip_rate).bulk_norm;
+
+        const double scale_floor_factor = std::max(
+          parameters.linear_stokes_solver_tolerance,
+          std::sqrt(std::numeric_limits<double>::epsilon()));
+        const double bulk_scale =
+          internal::reconstructed_fault_residual_scale(
+          initial_residual.bulk_norm,
+          aspect_bulk_reference,
+          scale_floor_factor);
+        double surface_scale = numbers::signaling_nan<double>();
+
+        auto solve_condensed_system =
+          [&](const typename StokesSolver::ReconstructedFaultCondensedSystem<dim>
+                      ::Linearization &linearization,
+              const LinearAlgebra::BlockVector &rhs,
+              LinearAlgebra::BlockVector &direction)
+        {
+          direction = 0.0;
+          const double rhs_norm = rhs.l2_norm();
+          if (rhs_norm == 0.0)
+            return;
+
+          const double tolerance =
+            parameters.linear_stokes_solver_tolerance*rhs_norm;
+          SolverControl solver_control(
+            std::max(1U, parameters.n_cheap_stokes_solver_steps
+                         + parameters.n_expensive_stokes_solver_steps),
+            tolerance);
+          solver_control.enable_history_data();
+          PrimitiveVectorMemory<LinearAlgebra::BlockVector> memory;
+
+          std::unique_ptr<internal::SchurComplementOperator> schur;
+          if (parameters.use_bfbt)
+            schur = std::make_unique<
+              internal::WeightedBFBT<LinearAlgebra::PreconditionBase>>(
+                system_preconditioner_matrix.block(1,1),
+                *Mp_preconditioner,
+                parameters.linear_solver_S_block_tolerance,
+                inverse_lumped_mass_matrix.block(0),
+                system_matrix);
+          else
+            schur = std::make_unique<
+              internal::InverseWeightedMassMatrix<LinearAlgebra::PreconditionBase>>(
+                system_preconditioner_matrix.block(1,1),
+                *Mp_preconditioner,
+                parameters.linear_solver_S_block_tolerance);
+
+          internal::InverseVelocityBlock<
+            LinearAlgebra::PreconditionAMG,
+            LinearAlgebra::Vector,
+            LinearAlgebra::SparseMatrix> inverse_velocity(
+              system_matrix.block(0,0),
+              *Amg_preconditioner,
+              true,
+              stokes_A_block_is_symmetric(),
+              parameters.linear_solver_A_block_tolerance);
+          const internal::BlockSchurPreconditioner<
+            decltype(inverse_velocity),
+            internal::SchurComplementOperator,
+            LinearAlgebra::SparseMatrix,
+            LinearAlgebra::BlockVector> preconditioner(
+              inverse_velocity, *schur, system_matrix.block(0,1));
+
+          // B and G are not assumed adjoints, so the condensed operator is
+          // generally nonsymmetric and requires FGMRES rather than CG/MINRES.
+          SolverFGMRES<LinearAlgebra::BlockVector> solver(
+            solver_control,
+            memory,
+            typename SolverFGMRES<LinearAlgebra::BlockVector>::AdditionalData(
+              parameters.stokes_gmres_restart_length));
+          solver.solve(linearization, direction, rhs, preconditioner);
+        };
+
+        for (nonlinear_iteration = 0;
+             nonlinear_iteration < max_nonlinear_iterations;
+             ++nonlinear_iteration)
+          {
+            // Assemble mutually consistent A, R_bulk, frozen B, G, K_V, and
+            // R_Gamma at the current accepted pair (working_x,current V).
+            current_linearization_point = working_x;
+            assemble_newton_stokes_matrix = true;
+            rebuild_stokes_matrix = true;
+            rebuild_stokes_preconditioner = true;
+            assemble_stokes_system();
+            build_stokes_preconditioner();
+
+            const FaultVector slip_rate = current_slip_rate(fault_manager);
+            using CondensedLinearization =
+              typename StokesSolver::ReconstructedFaultCondensedSystem<dim>
+                ::Linearization;
+            auto linearization = std::make_unique<CondensedLinearization>(
+              condensed_system.linearize(system_matrix, working_x, slip_rate));
+
+            ReconstructedFaultActiveSet active_set =
+              internal::make_reconstructed_fault_inactive_set(slip_rate);
+            std::unique_ptr<ReconstructedFaultSurfaceLinearSolve<dim>>
+              restricted_surface_solve;
+            LinearAlgebra::BlockVector bulk_rhs(
+              introspection.index_sets.stokes_partitioning, mpi_communicator);
+            LinearAlgebra::BlockVector bulk_direction(
+              introspection.index_sets.stokes_partitioning, mpi_communicator);
+            FaultVector slip_rate_direction;
+
+            // Projected Newton solve: start free, add only at-bound vertices
+            // whose direction is outward, and rebuild only K_FF^{-1} until stable.
+            while (true)
+              {
+                linearization->build_condensed_rhs(system_rhs, bulk_rhs);
+                solve_condensed_system(*linearization, bulk_rhs, bulk_direction);
+                linearization->recover_slip_rate_increment(
+                  bulk_direction, slip_rate_direction);
+
+                const unsigned int n_new_active_vertices =
+                  internal::update_reconstructed_fault_active_set(
+                    slip_rate,
+                    slip_rate_direction,
+                    phase_field_fault.minimum_fault_slip_rate(),
+                    active_set);
+                if (n_new_active_vertices == 0)
+                  break;
+
+                auto new_surface_solve =
+                  surface_system.create_restricted_linear_solve(active_set);
+                auto new_linearization =
+                  std::make_unique<CondensedLinearization>(
+                    linearization->with_surface_solve(*new_surface_solve));
+                linearization = std::move(new_linearization);
+                restricted_surface_solve = std::move(new_surface_solve);
+              }
+
+            // Active residual entries do not participate in convergence or the
+            // merit function; the bulk and free-surface blocks remain separate.
+            const double current_velocity_norm =
+              system_rhs.block(introspection.block_indices.velocities).l2_norm();
+            const double current_pressure_norm =
+              system_rhs.block(introspection.block_indices.pressure).l2_norm();
+            const double current_bulk_norm = std::sqrt(
+              current_velocity_norm*current_velocity_norm
+              + current_pressure_norm*current_pressure_norm);
+            const double current_surface_norm =
+              surface_system.surface_residual_rms(
+                linearization->surface_residual(), active_set);
+
+            if (nonlinear_iteration == 0)
+              {
+                // The surface scale is fixed from the first stabilized free set;
+                // a characteristic K_V action supplies a meaningful zero floor.
+                FaultVector characteristic_slip_rate = slip_rate;
+                for (auto &fault_values : characteristic_slip_rate)
+                  for (double &value : fault_values)
+                    value = std::max(phase_field_fault.minimum_fault_slip_rate(),
+                                     std::abs(value));
+                FaultVector characteristic_surface_action;
+                surface_system.apply_surface_jacobian(
+                  characteristic_slip_rate, characteristic_surface_action);
+                ReconstructedFaultSurfaceResidual characteristic_residual;
+                characteristic_residual.values =
+                  std::move(characteristic_surface_action);
+                const ReconstructedFaultActiveSet no_active_vertices =
+                  internal::make_reconstructed_fault_inactive_set(slip_rate);
+                const double surface_reference = std::max(
+                  surface_system.surface_residual_rms(
+                    linearization->surface_residual(), no_active_vertices),
+                  surface_system.surface_residual_rms(
+                    characteristic_residual, no_active_vertices));
+                surface_scale =
+                  internal::reconstructed_fault_residual_scale(
+                  current_surface_norm,
+                  surface_reference,
+                  scale_floor_factor);
+              }
+
+            const double relative_bulk_residual =
+              internal::normalized_reconstructed_fault_residual(
+                current_bulk_norm, bulk_scale, "bulk");
+            const double relative_surface_residual =
+              internal::normalized_reconstructed_fault_residual(
+                current_surface_norm, surface_scale, "surface");
+            pcout << "      Relative nonlinear residuals (bulk, fault) after "
+                  << "nonlinear iteration " << nonlinear_iteration << ": "
+                  << relative_bulk_residual << ", "
+                  << relative_surface_residual << std::endl;
+
+            if (relative_bulk_residual < parameters.nonlinear_tolerance
+                && relative_surface_residual < parameters.nonlinear_tolerance)
+              {
+                // Allocate and validate the complete accepted publication
+                // state before the first constitutive or kinematic write.
+                LinearAlgebra::BlockVector accepted_solution(solution);
+                accepted_solution.block(introspection.block_indices.velocities) =
+                  working_x.block(introspection.block_indices.velocities);
+                accepted_solution.block(introspection.block_indices.pressure) =
+                  working_x.block(introspection.block_indices.pressure);
+                LinearAlgebra::BlockVector accepted_linearization(working_x);
+                fault_manager.validate_slip_rate_nonlinear_commit();
+                nonlinear_solver_control.check(
+                  nonlinear_iteration,
+                  std::max(relative_bulk_residual,
+                           relative_surface_residual));
+                restore_simulator_state();
+
+                // The history operation performs all failure-capable work
+                // before its writes. Everything that follows is a fixed-size,
+                // non-allocating terminal mutation of one accepted state.
+                phase_field_fault.commit_reconstructed_fault_mechanical_history(
+                  accepted_solution);
+                fault_manager.commit_slip_rate_nonlinear_solve();
+                solution.swap(accepted_solution);
+                current_linearization_point.swap(accepted_linearization);
+                nonlinear_state_is_active = false;
+                terminal_commit_complete = true;
+                signals.post_nonlinear_solver(nonlinear_solver_control);
+                return;
+              }
+
+            const double current_merit = 0.5*(
+              relative_bulk_residual*relative_bulk_residual
+              + relative_surface_residual*relative_surface_residual);
+
+            // Limit only free downward directions and allow exact arrival at
+            // V_min; active outward directions were already removed by K_FF.
+            const double maximum_step_length =
+              internal::reconstructed_fault_maximum_step_length(
+                slip_rate,
+                slip_rate_direction,
+                active_set,
+                phase_field_fault.minimum_fault_slip_rate());
+
+            const LinearAlgebra::BlockVector physical_bulk_direction =
+              linearization->make_physical_bulk_direction(bulk_direction);
+
+            // Trial arithmetic uses owned vectors; residual point evaluation
+            // receives a ghosted physical-pressure vector after the update.
+            LinearAlgebra::BlockVector owned_physical_bulk_direction(
+              introspection.index_sets.system_partitioning,
+              mpi_communicator);
+            owned_physical_bulk_direction = physical_bulk_direction;
+
+            LinearAlgebra::BlockVector accepted_trial_x(working_x);
+            FaultVector accepted_trial_slip_rate;
+            const auto line_search_result =
+              internal::reconstructed_fault_armijo_line_search(
+                maximum_step_length,
+                newton_handler->parameters.max_newton_line_search_iterations,
+                current_merit,
+                [&](const double step_length)
+                {
+                  // Every candidate is reconstructed from the same accepted base,
+                  // and the stabilized active set remains fixed across the search.
+                  LinearAlgebra::BlockVector owned_trial_x(
+                    introspection.index_sets.system_partitioning,
+                    mpi_communicator);
+                  owned_trial_x = working_x;
+                  owned_trial_x.block(introspection.block_indices.velocities).add(
+                    step_length,
+                    owned_physical_bulk_direction.block(
+                      introspection.block_indices.velocities));
+                  owned_trial_x.block(introspection.block_indices.pressure).add(
+                    step_length,
+                    owned_physical_bulk_direction.block(
+                      introspection.block_indices.pressure));
+                  owned_trial_x.compress(VectorOperation::insert);
+                  LinearAlgebra::BlockVector trial_x(
+                    introspection.index_sets.system_partitioning,
+                    introspection.index_sets.system_relevant_partitioning,
+                    mpi_communicator);
+                  trial_x = owned_trial_x;
+
+                  FaultVector trial_slip_rate = slip_rate;
+                  for (unsigned int fault = 0; fault < slip_rate.size(); ++fault)
+                    for (unsigned int vertex = 0;
+                         vertex < slip_rate[fault].size(); ++vertex)
+                      {
+                        const double minimum =
+                          phase_field_fault.minimum_fault_slip_rate();
+                        double value = slip_rate[fault][vertex]
+                                       + step_length
+                                         * slip_rate_direction[fault][vertex];
+
+                        // Snap roundoff-level contact exactly to V_min, but never
+                        // clamp a genuinely inadmissible constitutive trial.
+                        if (within_lower_bound_roundoff(value, minimum))
+                          value = minimum;
+                        AssertThrow(std::isfinite(value) && value >= minimum,
+                                    ExcMessage("A reconstructed-fault line-search "
+                                               "candidate violates V >= V_min."));
+                        trial_slip_rate[fault][vertex] = value;
+                      }
+
+                  const CoupledResidual trial_residual =
+                    evaluate_coupled_residual(trial_x, trial_slip_rate);
+                  const double trial_relative_bulk =
+                    internal::normalized_reconstructed_fault_residual(
+                      trial_residual.bulk_norm, bulk_scale, "bulk");
+                  const double trial_relative_surface =
+                    internal::normalized_reconstructed_fault_residual(
+                      surface_system.surface_residual_rms(
+                        trial_residual.surface, active_set),
+                      surface_scale,
+                      "surface");
+                  const double trial_merit = 0.5*(
+                    trial_relative_bulk*trial_relative_bulk
+                    + trial_relative_surface*trial_relative_surface);
+                  accepted_trial_x = trial_x;
+                  accepted_trial_slip_rate = std::move(trial_slip_rate);
+                  return trial_merit;
+                },
+                [&](const double)
+                {
+                  // Accepting replaces manager current V and working_x; the
+                  // timestep-committed V still changes only at convergence.
+                  FaultVector accepted_increment = accepted_trial_slip_rate;
+                  for (unsigned int fault = 0;
+                       fault < accepted_increment.size(); ++fault)
+                    for (unsigned int vertex = 0;
+                         vertex < accepted_increment[fault].size(); ++vertex)
+                      accepted_increment[fault][vertex] -=
+                        slip_rate[fault][vertex];
+                  fault_manager.begin_slip_rate_trial();
+                  fault_manager.set_slip_rate_trial(accepted_increment, 1.0);
+                  fault_manager.accept_slip_rate_trial();
+                  working_x = accepted_trial_x;
+                });
+
+            if (!line_search_result.accepted)
+              {
+                pcout << "   Coupled reconstructed-fault Newton line search "
+                      << "exhausted all admissible candidates." << std::endl;
+                throw ExcNonlinearSolverNoConvergence();
+              }
+            pcout << "      Reconstructed-fault line search accepted after "
+                  << line_search_result.rejected_candidates
+                  << " rejected candidates." << std::endl;
+          }
+
+        nonlinear_solver_control.check(max_nonlinear_iterations,
+                                       std::numeric_limits<double>::max());
+        AssertThrow(false, ExcNonlinearSolverNoConvergence());
+      }
+    catch (...)
+      {
+        if (terminal_commit_complete)
+          throw;
+        // Any failure restores both externally visible bulk state and committed
+        // manager V; constitutive histories were not yet made mutable.
+        if (nonlinear_state_is_active)
+          fault_manager.rollback_slip_rate_nonlinear_solve();
+        solution = production_solution;
+        current_linearization_point = saved_linearization_point;
+        restore_simulator_state();
+        nonlinear_solver_control.check(max_nonlinear_iterations,
+                                       std::numeric_limits<double>::max());
+        signals.post_nonlinear_solver(nonlinear_solver_control);
+        throw;
+      }
+  }
+
 }
 
 
@@ -967,7 +1511,8 @@ namespace aspect
 {
 #define INSTANTIATE(dim) \
   template double Simulator<dim>::solve_advection (const AdvectionField &); \
-  template std::pair<double,double> Simulator<dim>::solve_stokes (LinearAlgebra::BlockVector &solution_vector);
+  template std::pair<double,double> Simulator<dim>::solve_stokes (LinearAlgebra::BlockVector &solution_vector); \
+  template void Simulator<dim>::solve_reconstructed_fault_stokes ();
 
   ASPECT_INSTANTIATE(INSTANTIATE)
 

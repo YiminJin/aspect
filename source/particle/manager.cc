@@ -1040,10 +1040,6 @@ namespace aspect
       if (property_manager->need_update() == Property::update_time_step)
         update_particles();
 
-      // Generate particle domains if requested
-      if (particle_domain_handler != nullptr)
-        particle_domain_handler->generate_particle_domains();
-
       // Now that all particle information was updated, exchange the new
       // ghost particles.
       if (dealii::Utilities::MPI::n_mpi_processes(this->get_mpi_communicator()) > 1)
@@ -1052,6 +1048,13 @@ namespace aspect
           particle_handler->exchange_ghost_particles();
           this->get_computing_timer().leave_subsection("Particles: Exchange ghosts");
         }
+
+      // Voronoi/CPDI construction uses neighboring ghost positions as well as
+      // owned particles. Build only after both describe the accepted advection;
+      // otherwise restart's fresh ghost exchange changes the discrete operator.
+      if (particle_domain_handler != nullptr)
+        particle_domain_handler->generate_particle_domains();
+
       this->get_pcout() << " done." << std::endl;
     }
 

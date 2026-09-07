@@ -1,0 +1,11 @@
+# Enable if: ASPECT_WITH_VORO
+# MPI: 2
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_stage_j.prm
+subsection Checkpointing
+  # The counter advances before checkpointing: save after physical step one,
+  # then continue through step two to supply the uninterrupted reference.
+  set Steps between checkpoint = 2
+end
+subsection Postprocess
+  set List of postprocessors = particles, verify phase field fault stage i, verify phase field fault stage j history feedback, verify stage j restart
+end

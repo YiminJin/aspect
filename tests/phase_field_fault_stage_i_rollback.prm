@@ -1,0 +1,20 @@
+# Stage-I failure after accepted Newton updates. The script verifies acceptance;
+# the signal plugin verifies restored production bulk state and current/committed V.
+# Enable if: ASPECT_WITH_VORO
+
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_stage_i.prm
+
+set Max nonlinear iterations = 2
+set Nonlinear solver tolerance = 1e-12
+
+subsection Postprocess
+  set List of postprocessors = particles
+end
+
+subsection Phase field model
+  set Length scale = 0.3125
+end
+
+subsection Mesh refinement
+  set Initial global refinement = 5
+end

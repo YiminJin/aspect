@@ -31,6 +31,7 @@
 #include <aspect/simulator/assemblers/implicit_constitutive_stokes.h>
 #include <aspect/simulator/assemblers/advection.h>
 #include <aspect/simulator/assemblers/entropy_advection.h>
+#include <aspect/simulator/assemblers/reconstructed_fault_stokes.h>
 
 #include <aspect/simulator/solver/stokes_matrix_free.h>
 
@@ -690,6 +691,9 @@ namespace aspect
     // all of the assembling
     for (unsigned int i=0; i<assemblers->stokes_system.size(); ++i)
       assemblers->stokes_system[i]->execute(scratch,data);
+
+    if (assemble_reconstructed_fault_stokes_terms)
+      reconstructed_fault_stokes_coupling->execute(scratch, data);
 
     if (!assemblers->stokes_system_on_boundary_face.empty())
       {

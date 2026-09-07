@@ -1,0 +1,21 @@
+# Stage-I configuration must provide the user-controlled initial Theta field.
+# EXPECT FAILURE
+# Enable if: ASPECT_WITH_VORO
+
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_stage_i.prm
+
+subsection Material model
+  subsection Phase field fault
+    set Friction law                    = rate state
+    set Reference slip rate             = 1e-6
+    set Minimum slip rate               = 1e-12
+    set Characteristic slip distance    = 0.04
+    set Reference friction coefficients = 0, 0
+    set Direct effect parameters        = 0.02, 0.02
+    set Evolution effect parameters     = 0.04, 0.04
+  end
+end
+
+subsection Postprocess
+  set List of postprocessors = particles
+end

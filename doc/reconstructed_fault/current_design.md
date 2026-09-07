@@ -875,3 +875,106 @@ rate; only accepted line-search trials replace the current iterate, and only
 nonlinear convergence commits timestep state. Rejected trials and failed
 timesteps leave committed `Theta`, cohesive history, particle Maxwell stress,
 and committed \(V\) unchanged.
+
+The bound test is local to each vertex:
+\(V_i-V_{\min}\leq 100\epsilon_{\rm mach}\max(V_{\min},|V_i|)\).
+Within one Newton iteration the active set starts empty and can only grow; it
+is rebuilt from empty at the next Newton iteration. The restricted semantic
+surface solve uses the principal free block \(K_{\mathcal F\mathcal F}\),
+projects its right-hand side, and returns exact zero on active vertices. The
+line search holds this active set fixed, starts from the exact free-set
+fraction-to-boundary step, and accepts only when
+\(\Phi_{\rm trial}\leq(1-10^{-4}\alpha)\Phi_k\), where
+\(\Phi=(r_b^2+r_\Gamma^2)/2\). An exhausted line search is a nonlinear
+failure; its last candidate is not accepted.
+
+The bulk and free-surface residuals have separate fixed normalization scales
+and must both satisfy the configured nonlinear tolerance. Floors use the
+existing initial Stokes residual convention and current surface Jacobian
+scale, multiplied by the larger of the linear Stokes tolerance and
+\(\sqrt{\epsilon_{\rm mach}}\); no dimensional tuning parameter is added.
+The surface norm is the RMS norm of the consistent-Q1 strong residual: for the
+weak nodal vector \(r_{\mathcal F}=P_{\mathcal F}R_\Gamma\) and the particle-
+quadrature mass matrix, it is
+\([r_{\mathcal F}^T M_{\mathcal F\mathcal F}^{-1}r_{\mathcal F}/
+({\boldsymbol 1}_{\mathcal F}^T M_{\mathcal F\mathcal F}
+{\boldsymbol 1}_{\mathcal F})]^{1/2}\). Both operands use the stabilized free
+set, and the all-active norm is zero.
+The simulator keeps a separate accepted bulk iterate, and every trial is
+evaluated from that same base state through the non-committing coupled
+residual path.
+
+At a fresh timestep zero, mechanical preparation recomputes transient
+\(I_h\), initializes missing cohesive history, projects a user-supplied
+positive \(\Theta_0\) from exactly one generic particle-advected
+compositional field mapped to particle property `phase field fault state`
+component zero, and initializes \(V=V_{\min}\). Restart and later-time paths
+must already contain complete committed state and never reconstruct it from
+initial fields.
+
+## 25. Stage-J constitutive history feedback
+
+The fixed-fault timestep cycle is indexed as
+
+\[
+H_{k-1}\longrightarrow\phi_k\longrightarrow (u_k,p_k,V_k)
+\longrightarrow\{\Theta_k,T_k^{\rm coh},\tau_k,H_k,I_{h,k}\}
+\longrightarrow\phi_{k+1}.
+\]
+
+Thus the phase field and fault geometry are fixed during the complete coupled
+mechanical solve. Residual, Jacobian, Krylov, and line-search evaluations do
+not modify history. Only a converged mechanical state may enter a terminal
+commit, and all failure-capable calculations and MPI validation precede the
+first persistent write.
+
+Timestep zero has initialization semantics rather than physical history
+evolution. Its mechanical solve commits the initial kinematic solution
+$V_0$, but retains the user-supplied $\Theta_0$, initialized irreversible
+$H_0$, initialization-specific $T_0^{\rm coh}$, and user-initialized Maxwell
+stress. The current $I_{h,0}$ is stored as the previous-normalization snapshot
+needed by the first real step. In particular, neither `Theta` nor $H$ is
+advanced through the artificial positive `Initial time step`.
+
+For $k>0$, bulk Maxwell coefficients use particle-local bulk composition and
+temperature. Surface cohesive coefficients use the projected Q1 surface
+composition and a fault-surface temperature obtained by sampling the frozen
+FE temperature at fault vertices and interpolating it in the fault Q1 space.
+Consequently all particles with the same fault coordinate share surface
+coefficients even if their transverse bulk temperatures differ. Surface
+coefficients are used consistently in cohesive mechanics and history, while
+bulk Maxwell, $B$, and $G$ retain bulk coefficients.
+
+The accepted particle cohesive-traction samples are consistently projected to
+the replicated fault Q1 space. This projected traction, interpolated back to a
+particle's cached fault coordinate, enters the exact finite-step driving-force
+candidate. For $g_k<1$, evaluate it deliberately as
+
+\[
+a=\frac{T_k^{\rm coh}}{g_k},\qquad
+b=\frac{\beta_{\Gamma,k}h_{k-1}T_{k-1}^{\rm coh}}{1-g_k},\qquad
+\mathcal H_k=\frac{\Delta t_k}{2\kappa_{\Gamma,k}}(a-b)(a+b),
+\]
+
+and commit $H_k=\max(H_{k-1},\mathcal H_k)$. A negative candidate is not
+independently clipped to zero. At an exactly intact current point with
+$g_k=1$ and $h_k=h_{k-1}=0$, use the removable limit
+
+\[
+\mathcal H_k=\frac{\Delta t_k}{2\kappa_{\Gamma,k}}
+(T_k^{\rm coh})^2.
+\]
+
+The case $g_k=1$ with $h_{k-1}>0$ is inadmissible healing and is diagnosed.
+Rate-and-state `Theta` is updated at Q1 vertices from accepted $V_k$ through
+the existing exact aging law and the same surface-state path used by friction.
+The current law has one global $D_c$, so no composition-dependent $D_c$ or
+duplicate parameter is introduced. Rate-dependent friction has no state
+update.
+
+The existing law-specific RSF timestep restriction is exposed as an ordinary
+ASPECT time-stepping plugin named `reconstructed fault time step`. It uses
+timestep-committed Q1 $V$ and the Q1 surface mixture, ASPECT's global CFL
+number, and operator-splitting semantics. It is opt-in: the time-stepping
+manager does not add it implicitly and preserves standard explicit model-list
+selection. Stage J adds no post-solve cutback or repeat operation.

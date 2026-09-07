@@ -1099,9 +1099,15 @@ namespace aspect
   template <int dim>
   void Simulator<dim>::solve_single_advection_iterated_newton_stokes (const bool use_newton_iterations)
   {
-    // If the phase field method is enabled, we need to solve the phase field 
-    // system first, since the evolution of compositional fields may depend on 
-    // the phase field
+    if (parameters.reconstruct_faults)
+      {
+        AssertThrow(use_newton_iterations,
+                    ExcMessage("Reconstructed-fault mechanics requires the "
+                               "'single Advection, iterated Newton Stokes' scheme."));
+      }
+
+    // The phase field consumes the previously committed H before this
+    // timestep's mechanics and constitutive history update.
     if (parameters.enable_phase_field)
       {
         phase_field_handler->evolve_phase_field(system_matrix, system_rhs, solution);
@@ -1112,6 +1118,12 @@ namespace aspect
     // Assemble and solve the temperature and compositional fields
     assemble_and_solve_temperature();
     assemble_and_solve_composition();
+
+    if (parameters.reconstruct_faults)
+      {
+        solve_reconstructed_fault_stokes();
+        return;
+      }
 
     // Now store the linear_tolerance we started out with, because we might change
     // it within this timestep.

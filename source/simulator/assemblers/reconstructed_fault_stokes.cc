@@ -56,6 +56,8 @@ namespace aspect
       const unsigned int n_q_points = fe_values.n_quadrature_points;
       const Introspection<dim> &introspection = simulator.introspection();
 
+      // Sample the phase-field, thermal, and composition data on the exact
+      // Stokes quadrature used by the geometry-association cache.
       std::vector<double> temperature(n_q_points);
       std::vector<double> phase_field(n_q_points);
       std::vector<double> previous_phase_field(n_q_points);
@@ -81,6 +83,9 @@ namespace aspect
 
       std::vector<typename MaterialModel::PhaseFieldFault<dim>::
                   ReconstructedFaultBulkPointResponse> responses(n_q_points);
+
+      // Evaluate only associated quadrature points. Composition fractions are
+      // bulk-QP data here; surface-profile mixtures remain owned by PhaseFieldFault.
       for (unsigned int q = 0; q < n_q_points; ++q)
         if (associations[q].active)
           {
@@ -165,6 +170,8 @@ namespace aspect
       FEValues<dim> fe_values(this->get_mapping(), this->get_fe(), quadrature,
                               update_values | update_quadrature_points);
 
+      // Freeze 2*kappa*chi*S once per nonlinear linearization. Krylov B actions
+      // then reuse these coefficients without reevaluating constitutive data.
       for (const auto &cell : this->get_dof_handler().active_cell_iterators())
         if (cell->is_locally_owned())
           {
@@ -215,6 +222,8 @@ namespace aspect
                               | update_quadrature_points | update_JxW_values);
       std::vector<types::global_dof_index> dof_indices(this->get_fe().dofs_per_cell);
 
+      // Assemble stress from chi*V+upsilon_history. The history term stays
+      // frozen, while the V-dependent residual follows the -B*V sign convention.
       for (const auto &cell : this->get_dof_handler().active_cell_iterators())
         if (cell->is_locally_owned())
           {
@@ -256,6 +265,9 @@ namespace aspect
             this->get_current_constraints().distribute_local_to_global(
               local_residual, dof_indices, result);
           }
+
+      // Cell contributions are owned locally; compress(add) completes the
+      // distributed Stokes residual while preserving overwrite semantics.
       result.compress(VectorOperation::add);
     }
 
@@ -280,6 +292,8 @@ namespace aspect
                   ExcMessage("The reconstructed-fault geometry cache changed after B "
                              "was linearized."));
 
+      // The geometry generation is fixed with the coefficient cache. This
+      // prevents applying a frozen B linearization to reordered quadrature data.
       const Quadrature<dim> &quadrature =
         this->introspection().quadratures.velocities;
       FEValues<dim> fe_values(this->get_mapping(), this->get_fe(), quadrature,
@@ -287,6 +301,8 @@ namespace aspect
                               | update_JxW_values);
       std::vector<types::global_dof_index> dof_indices(this->get_fe().dofs_per_cell);
 
+      // Interpolate the fault direction to associated QPs and assemble +B*dV
+      // using the coefficients frozen at the current coupled linearization.
       for (const auto &cell : this->get_dof_handler().active_cell_iterators())
         if (cell->is_locally_owned())
           {
@@ -324,6 +340,9 @@ namespace aspect
             this->get_current_constraints().distribute_local_to_global(
               local_result, dof_indices, result);
           }
+
+      // B is an overwrite operation, so the only accumulation here is the
+      // distributed sum of locally owned cell contributions.
       result.compress(VectorOperation::add);
     }
 
@@ -349,6 +368,9 @@ namespace aspect
         *this, phase_field_fault, scratch.finite_element_values,
         this->get_current_linearization_point(), associations);
 
+      // This assembler is additive into the ordinary Stokes CopyData. It uses
+      // current manager V and the frozen constitutive history to add -R_fault
+      // to ASPECT's right-hand-side convention.
       const FiniteElement<dim> &fe = this->get_fe();
       for (unsigned int q = 0; q < quadrature.size(); ++q)
         if (associations[q].active)

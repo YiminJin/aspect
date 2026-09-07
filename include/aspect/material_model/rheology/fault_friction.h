@@ -57,6 +57,17 @@ namespace aspect
                                const double time_step) const;
 
           /**
+           * Update the state on the material-mixture path used by surface
+           * friction. The present aging law has a single global $D_c$, but
+           * accepting the mixture keeps the constitutive state update tied to
+           * the same surface state as the friction coefficient.
+           */
+          double update_state (const std::vector<double> &volume_fractions,
+                               const double               slip_rate,
+                               const double               old_state,
+                               const double               time_step) const;
+
+          /**
            * Compute the friction coefficient $mu$ at the end of the current 
            * time step.
            */

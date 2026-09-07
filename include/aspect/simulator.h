@@ -589,6 +589,9 @@ namespace aspect
        */
       void solve_single_advection_iterated_newton_stokes (bool use_newton_iterations);
 
+      /** Solve the Stage-I coupled bulk/reconstructed-fault mechanical system. */
+      void solve_reconstructed_fault_stokes ();
+
       /**
        * This function implements one scheme for the various
        * steps necessary to assemble and solve the nonlinear problem.
@@ -2082,6 +2085,9 @@ namespace aspect
       bool                                                      assemble_newton_stokes_matrix;
       bool                                                      assemble_newton_stokes_system;
       bool                                                      rebuild_stokes_preconditioner;
+
+      /** Add the canonical reconstructed-fault bulk residual during assembly. */
+      bool                                                      assemble_reconstructed_fault_stokes_terms = false;
 
       /**
        * @}

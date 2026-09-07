@@ -30,9 +30,11 @@ namespace aspect
 
           const Particle::Manager<dim> &particle_manager =
             this->get_particle_manager(0);
+          const auto &property_manager =
+            particle_manager.get_property_manager();
           const unsigned int stress_position =
-            particle_manager.get_property_manager().get_data_info()
-            .get_position_by_field_name("maxwell stress");
+            property_manager.get_data_info().get_position_by_plugin_index(
+              property_manager.get_plugin_index_by_name("maxwell stress"));
 
           double local_maximum_error = 0.0;
           for (const auto &particle : particle_manager.get_particle_handler())

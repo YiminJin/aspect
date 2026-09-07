@@ -27,6 +27,23 @@
 #include <deal.II/numerics/vector_tools.h>
 #include <deal.II/numerics/vector_tools_evaluate.h>
 
+TEST_CASE("Phase-field Newton trials stay on the nonsingular degradation branch",
+          "[phase_field_domain]")
+{
+  const aspect::PhaseField::DegradationFunction degradation(1.0, 480000.0);
+  REQUIRE(degradation.is_in_domain(0.0));
+  REQUIRE(degradation.is_in_domain(1.0));
+  REQUIRE(degradation.is_in_domain(-1.e-7));
+  REQUIRE_FALSE(degradation.is_in_domain(-3.e-6));
+  REQUIRE_FALSE(degradation.is_in_domain(-2.0));
+  REQUIRE_FALSE(degradation.is_in_domain(1.01));
+  REQUIRE_FALSE(degradation.is_in_domain(std::numeric_limits<double>::infinity()));
+  REQUIRE_FALSE(degradation.is_in_domain(std::numeric_limits<double>::quiet_NaN()));
+  // No real denominator roots: the lower mathematical branch is unbounded.
+  const aspect::PhaseField::DegradationFunction no_pole(1.0, 4.0);
+  REQUIRE(no_pole.is_in_domain(-0.5));
+}
+
 namespace
 {
   using TestAccess =

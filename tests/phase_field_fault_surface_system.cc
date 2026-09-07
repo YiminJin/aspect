@@ -591,6 +591,22 @@ namespace aspect
           const auto linearization = condensed_system.linearize(
             this->get_system_matrix(), this->get_solution(), V);
 
+          ReconstructedFaultActiveSet no_active_vertices(V.size());
+          ReconstructedFaultActiveSet all_active_vertices(V.size());
+          for (unsigned int fault = 0; fault < V.size(); ++fault)
+            {
+              no_active_vertices[fault].assign(V[fault].size(), false);
+              all_active_vertices[fault].assign(V[fault].size(), true);
+            }
+          const double surface_rms = surface_system.surface_residual_rms(
+            linearization.surface_residual(), no_active_vertices);
+          AssertThrow(std::isfinite(surface_rms),
+                      ExcMessage("The consistent-Q1 surface residual RMS is invalid."));
+          AssertThrow(surface_system.surface_residual_rms(
+                        linearization.surface_residual(), all_active_vertices)
+                      == 0.0,
+                      ExcMessage("An all-active surface residual must have zero RMS."));
+
           SymmetricTensor<2,dim> strain_rate;
           strain_rate[0][0] = 1.25e-5;
           strain_rate[1][1] = -0.25e-5;
@@ -671,6 +687,45 @@ namespace aspect
               G_direction[fault][vertex] -= K_direction[fault][vertex];
           assert_fault_vectors_close(block_surface, G_direction, 2.e-12,
                                      "uncondensed surface block");
+
+          ReconstructedFaultActiveSet active_set(V.size());
+          typename CondensedSystem::FaultVector restricted_rhs = fault_direction;
+          for (unsigned int fault = 0; fault < V.size(); ++fault)
+            {
+              active_set[fault].assign(V[fault].size(), false);
+              active_set[fault][V[fault].size()/2] = true;
+              restricted_rhs[fault][V[fault].size()/2] = 1.e30;
+            }
+          const auto restricted_solve =
+            surface_system.create_restricted_linear_solve(active_set);
+          typename CondensedSystem::FaultVector restricted_solution;
+          restricted_solve->solve(restricted_rhs, restricted_solution);
+          typename CondensedSystem::FaultVector restricted_action;
+          surface_system.apply_surface_jacobian(restricted_solution,
+                                                restricted_action);
+          for (unsigned int fault = 0; fault < V.size(); ++fault)
+            for (unsigned int vertex = 0; vertex < V[fault].size(); ++vertex)
+              if (active_set[fault][vertex])
+                AssertThrow(restricted_solution[fault][vertex] == 0.0,
+                            ExcMessage("The restricted Stage-I K_V solve did not "
+                                       "return an exact zero active increment."));
+              else
+                AssertThrow(std::abs(restricted_action[fault][vertex]
+                                     - restricted_rhs[fault][vertex])
+                            <= 2.e-11*std::max(
+                              std::abs(restricted_rhs[fault][vertex]), 1.e-30),
+                            ExcMessage("The restricted Stage-I K_V solve does not "
+                                       "solve the principal free block."));
+
+          const auto restricted_linearization =
+            linearization.with_surface_solve(*restricted_solve);
+          typename CondensedSystem::FaultVector restricted_recovery;
+          restricted_linearization.recover_slip_rate_increment(
+            solver_direction, restricted_recovery);
+          for (unsigned int fault = 0; fault < V.size(); ++fault)
+            AssertThrow(restricted_recovery[fault][V[fault].size()/2] == 0.0,
+                        ExcMessage("The condensed Stage-I recovery did not use "
+                                   "the semantic restricted surface solve."));
 
           const auto superseded = condensed_system.linearize(
             this->get_system_matrix(), this->get_solution(), V);

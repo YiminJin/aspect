@@ -39,6 +39,10 @@ namespace aspect
   using ReconstructedFaultVector = std::vector<std::vector<double>>;
 
 
+  /** Bound-active reconstructed-fault vertices, indexed by fault and vertex. */
+  using ReconstructedFaultActiveSet = std::vector<std::vector<bool>>;
+
+
   /** Semantic solve used by reconstructed-fault condensation. */
   template <int dim>
   class ReconstructedFaultSurfaceLinearSolve
@@ -81,10 +85,28 @@ namespace aspect
       solve(const FaultVector &rhs,
             FaultVector &solution) const override;
 
+      /**
+       * Build a semantic inverse of the principal free block of the current
+       * K_V. Active rows and columns are disconnected, active right-hand-side
+       * entries are ignored, and active solution entries are exactly zero.
+       */
+      std::unique_ptr<ReconstructedFaultSurfaceLinearSolve<dim>>
+      create_restricted_linear_solve(
+        const ReconstructedFaultActiveSet &active_set) const;
+
       /** Overwrite @p result with the current K_V applied to @p direction. */
       void
       apply_surface_jacobian(const FaultVector &direction,
                              FaultVector &result) const;
+
+      /**
+       * Return the consistent-Q1 RMS norm of a weak surface residual after
+       * projecting out active vertices.
+       */
+      double
+      surface_residual_rms(
+        const ReconstructedFaultSurfaceResidual &residual,
+        const ReconstructedFaultActiveSet &active_set) const;
 
       /**
        * Overwrite @p result with G applied to a full-system direction whose

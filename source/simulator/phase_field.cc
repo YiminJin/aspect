@@ -153,6 +153,21 @@ namespace aspect
 
 
 
+    bool
+    DegradationFunction::is_in_domain(const double phi) const
+    {
+      // Newton undershoots may be evaluated without clipping, but never across
+      // a pole. For negative phi, exclude the second branch beyond both roots
+      // of A=(1+m*p)phi^2+(m-2)phi+1, even when A is positive there again.
+      const double A = (1.0-phi)*(1.0-phi) + m*phi*(1.0+p*phi);
+      const double dA = 2.0*(1.0+m*p)*phi + m-2.0;
+      const double discriminant = m*(m-4.0*(1.0+p));
+      return std::isfinite(phi) && phi <= 1.0 && A > 0.0
+             && (phi >= 0.0 || dA >= 0.0 || discriminant < 0.0);
+    }
+
+
+
     /*------------------------ PhaseFieldProfile ---------------------------*/
 
     PhaseFieldProfile::
@@ -786,7 +801,7 @@ namespace aspect
 
 
   template <int dim>
-  void
+  bool
   PhaseFieldHandler<dim>::
   assemble_phase_field_system(LinearAlgebra::BlockSparseMatrix &system_matrix,
                               LinearAlgebra::BlockVector       &system_rhs,
@@ -812,6 +827,7 @@ namespace aspect
         this->get_parameters().mapped_particle_properties.find(index)->second.first));
 
     std::vector<double> chemical_composition_values(C_property_indices.size());
+    bool locally_admissible = true;
 
     // Vector storing the phase field DoF indices associated with a particle domain
     std::vector<types::global_dof_index> particle_dof_indices;
@@ -860,6 +876,19 @@ namespace aspect
             for (unsigned int c = 0; c < chemical_composition_values.size(); ++c)
               chemical_composition_values[c] = particle_properties[C_property_indices[c]];
             const std::vector<double> volume_fractions = MaterialModel::MaterialUtilities::compute_composition_fractions(chemical_composition_values);
+
+            // A trial can leave the rational degradation's physical branch.
+            // Do not evaluate its singular derivatives or publish it as a new
+            // iterate. Every rank still completes assembly and the reduction.
+            bool admissible = true;
+            for (unsigned int j = 0; j < volume_fractions.size(); ++j)
+              if (volume_fractions[j] > 0.0)
+                admissible = admissible && degradation_functions[j]->is_in_domain(phi);
+            if (!admissible)
+              {
+                locally_admissible = false;
+                continue;
+              }
 
             const double da_dphi   = geometric_function->first_derivative(phi);
             const double d2a_dphi2 = geometric_function->second_derivative(phi);
@@ -915,6 +944,8 @@ namespace aspect
     system_rhs.compress(VectorOperation::add);
     if (assemble_system_jacobian)
       system_matrix.compress(VectorOperation::add);
+    return Utilities::MPI::min(static_cast<unsigned int>(locally_admissible),
+                               this->get_mpi_communicator()) == 1;
   }
 
 
@@ -960,6 +991,7 @@ namespace aspect
 
     SolverControl solver_control(solver_parameters.max_linear_solver_iterations,
                                  solver_parameters.linear_solver_tolerance * system_rhs.block(block_index).l2_norm());
+    solver_control.enable_history_data();
 
     SolverCG<LinearAlgebra::Vector> solver(solver_control);
 
@@ -979,7 +1011,8 @@ namespace aspect
                                                          "PhaseFieldHandler::solve_phase_field_system",
                                                          std::vector<SolverControl> {solver_control},
                                                          exc,
-                                                         this->get_mpi_communicator());
+                                                         this->get_mpi_communicator(),
+                                                         this->get_output_directory()+"phase_field_solver_history.txt");
       }
 
     this->get_current_constraints().distribute(solution_vector);
@@ -998,7 +1031,9 @@ namespace aspect
     const unsigned int block_index = this->introspection().variable("phase_field").block_index;
 
     // Compute the initial residual
-    assemble_phase_field_system(system_matrix, system_rhs, solution, false);
+    AssertThrow(assemble_phase_field_system(system_matrix, system_rhs, solution, false),
+                ExcMessage("The phase-field iterate lies outside the nonsingular "
+                           "degradation branch containing [0,1]."));
     const double initial_residual = system_rhs.block(block_index).l2_norm();
 
     // Skip solving the phase field system if the initial residual is too small
@@ -1027,7 +1062,10 @@ namespace aspect
     do
       {
         // Assemble and solve for the Newton update
-        assemble_phase_field_system(system_matrix, system_rhs, solution, true);
+        const bool admissible_iterate =
+          assemble_phase_field_system(system_matrix, system_rhs, solution, true);
+        Assert(admissible_iterate, ExcInternalError());
+        (void)admissible_iterate;
 
         newton_update.block(block_index) = 0;
         const unsigned int linear_solver_iterations = solve_phase_field_system(system_matrix,
@@ -1041,6 +1079,7 @@ namespace aspect
         double step_length = 1;
         double residual = numbers::signaling_nan<double>();
         unsigned int line_search_iteration = 0;
+        bool admissible_trial = false;
 
         while (line_search_iteration <= solver_parameters.max_newton_line_search_iterations)
           {
@@ -1050,13 +1089,19 @@ namespace aspect
 
             ++line_search_iteration;
 
-            assemble_phase_field_system(system_matrix, system_rhs, test_solution, false);
-            residual = system_rhs.block(block_index).l2_norm();
+            admissible_trial = assemble_phase_field_system(
+              system_matrix, system_rhs, test_solution, false);
+            residual = admissible_trial ? system_rhs.block(block_index).l2_norm()
+                       : std::numeric_limits<double>::infinity();
             if (residual < (1. - alpha * step_length) * residual_old)
               break;
 
             step_length *= 0.5;
           }
+
+        // The documented last-candidate fallback applies only to a defined
+        // residual. A singular trial must never become the next linearization.
+        AssertThrow(admissible_trial, ExcNonlinearSolverNoConvergence());
 
         // Update the solution vector
         solution.block(block_index) = test_solution.block(block_index);
@@ -1079,6 +1124,15 @@ namespace aspect
         ++nonlinear_iteration;
       }
     while (nonlinear_solver_control.check(nonlinear_iteration, relative_residual) == SolverControl::iterate);
+
+    // SolverControl also stops on iteration exhaustion. Report that failure
+    // collectively through the simulator's configured nonlinear-failure path.
+    if (nonlinear_solver_control.last_check() == SolverControl::failure)
+      this->get_pcout() << "   Phase-field nonlinear iteration budget exhausted: residual="
+                       << relative_residual << ", tolerance="
+                       << solver_parameters.nonlinear_solver_tolerance << std::endl;
+    AssertThrow(nonlinear_solver_control.last_check() == SolverControl::success,
+                ExcNonlinearSolverNoConvergence());
   }
 
 

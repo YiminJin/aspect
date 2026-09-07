@@ -1,0 +1,5 @@
+# Enable if: ASPECT_WITH_VORO
+# MPI: 2
+# DEPENDS-ON: phase_field_fault_stage_j_restart_create
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_stage_j_restart_create.prm
+set Resume computation = true

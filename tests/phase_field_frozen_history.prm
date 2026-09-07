@@ -1,0 +1,31 @@
+# Enable if: ASPECT_WITH_VORO
+# MPI: 2
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_stage_i.prm
+set End time = 0.02
+set Maximum time step = 0.01
+set Nonlinear solver scheme = single Advection, no Stokes
+set Nonlinear solver failure strategy = abort program
+subsection Boundary velocity model
+  set Prescribed velocity boundary indicators =
+end
+subsection Prescribed Stokes solution
+  set Model name = function
+end
+subsection Initial composition model
+  subsection Function
+    set Function expression = 4e6; -4e6+8e6*x; 1e6; 0.5
+  end
+end
+subsection Material model
+  subsection Phase field fault
+    set Evolve phase field = true
+  end
+end
+subsection Solver parameters
+  subsection Phase field solver parameters
+    set Max nonlinear iterations = 50
+  end
+end
+subsection Postprocess
+  set List of postprocessors = particles, verify frozen phase field
+end

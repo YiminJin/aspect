@@ -1,0 +1,35 @@
+# Controlled evaluation points; reconstruction accuracy is not under test.
+# Enable if: ASPECT_WITH_VORO
+# MPI: 1
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_stage_i.prm
+set Nonlinear solver scheme = single Advection, no Stokes
+set Nonlinear solver failure strategy = abort program
+subsection Boundary velocity model
+  set Prescribed velocity boundary indicators =
+end
+subsection Prescribed Stokes solution
+  set Model name = function
+end
+subsection Initial temperature model
+  subsection Function
+    set Function expression = 293+100*y
+  end
+end
+subsection Material model
+  subsection Phase field fault
+    set Evolve phase field = true
+    set Initial time step = 1e11
+    set Thermal viscosity exponents = 1, 1
+    set Reference friction coefficients = 0, 0
+    set Dynamic friction coefficients = 0, 0
+    set Radiation damping coefficients = 0, 0
+  end
+end
+subsection Solver parameters
+  subsection Phase field solver parameters
+    set Max nonlinear iterations = 50
+  end
+end
+subsection Postprocess
+  set List of postprocessors = particles, verify stage j surface temperature
+end

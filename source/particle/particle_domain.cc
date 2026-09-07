@@ -295,13 +295,13 @@ namespace aspect
             , voro_index(numbers::invalid_unsigned_int)
           {}
 
-          VertexEntry(const std::array<int, 3> &grid_indices_,
+          VertexEntry(const std::array<std::int64_t, 3> &grid_indices_,
                       const unsigned int        voro_index_)
             : grid_indices(grid_indices_)
             , voro_index(voro_index_)
           {}
 
-          std::array<int, 3> grid_indices;
+          std::array<std::int64_t, 3> grid_indices;
           unsigned int       voro_index;
         };
 
@@ -325,13 +325,13 @@ namespace aspect
          * Given the point coordinates and the grid size, return the 
          * grid indices of the point
          */
-        std::array<int, 3>
+        std::array<std::int64_t, 3>
         point_to_grid(const Point<3> &p,
                       const double grid_size)
         {
-          std::array<int, 3> grid_indices;
+          std::array<std::int64_t, 3> grid_indices;
           for (unsigned int d = 0; d < 3; ++d)
-            grid_indices[d] = static_cast<int>(std::floor(p[d] / grid_size));
+            grid_indices[d] = static_cast<std::int64_t>(std::floor(p[d] / grid_size));
           return grid_indices;
         }
 
@@ -610,8 +610,12 @@ namespace aspect
       {
         particle_index = particle_index_;
 
-        const double tol = 1.e-6 * (bounding_box.vertex(0) -
-                                    bounding_box.vertex(3)).norm();
+        // Merge roundoff duplicates, not the short real edges created by
+        // particle advection. Geometric coarsening performed independently
+        // in adjacent Voronoi cells opens gaps and destroys volume conservation.
+        const double coordinate_scale = std::max(
+          bounding_box.vertex(0).norm(), bounding_box.vertex(3).norm());
+        const double tol = 64.0*std::numeric_limits<double>::epsilon()*coordinate_scale;
 
         small_vector<Point<3>, SmallVectorSizes::cell_vertices> vertices_3d;
         small_vector<VoroFace, SmallVectorSizes::cell_faces>    faces_3d;

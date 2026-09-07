@@ -46,6 +46,14 @@ namespace aspect
             const ReconstructedFaultSurfaceResidual &
             surface_residual() const;
 
+            /**
+             * Return a view of this same A/B/G/K_V linearization using a
+             * different semantic K_V inverse. This invalidates this view.
+             */
+            Linearization
+            with_surface_solve(
+              const ReconstructedFaultSurfaceLinearSolve<dim> &new_surface_solve) const;
+
             /** Overwrite @p result with (A-B K_V^{-1} G) @p direction. */
             void
             vmult(LinearAlgebra::BlockVector &result,
@@ -70,11 +78,17 @@ namespace aspect
               LinearAlgebra::BlockVector &bulk_result,
               FaultVector &surface_result) const;
 
+            /** Convert a homogeneous solver-scaled Stokes direction to a
+             * constrained full-system direction with physical pressure. */
+            LinearAlgebra::BlockVector
+            make_physical_bulk_direction(
+              const LinearAlgebra::BlockVector &solver_direction) const;
+
           private:
             friend class ReconstructedFaultCondensedSystem<dim>;
 
             Linearization(
-              const ReconstructedFaultCondensedSystem<dim> &owner,
+              ReconstructedFaultCondensedSystem<dim> &owner,
               const LinearAlgebra::BlockSparseMatrix &bulk_matrix,
               const ReconstructedFaultSurfaceLinearSolve<dim> &surface_solve,
               const ReconstructedFaultSurfaceResidual &surface_residual,
@@ -90,11 +104,7 @@ namespace aspect
             make_constrained_solver_direction(
               const LinearAlgebra::BlockVector &direction) const;
 
-            LinearAlgebra::BlockVector
-            make_physical_bulk_direction(
-              const LinearAlgebra::BlockVector &solver_direction) const;
-
-            const ReconstructedFaultCondensedSystem<dim> &owner;
+            ReconstructedFaultCondensedSystem<dim> &owner;
             const LinearAlgebra::BlockSparseMatrix &bulk_matrix;
             const ReconstructedFaultSurfaceLinearSolve<dim> &surface_solve;
             const ReconstructedFaultSurfaceResidual &residual;
@@ -121,6 +131,11 @@ namespace aspect
           const ReconstructedFaultSurfaceLinearSolve<dim> *surface_solve = nullptr);
 
       private:
+        Linearization
+        rebind_surface_solve(
+          const Linearization &linearization,
+          const ReconstructedFaultSurfaceLinearSolve<dim> &surface_solve);
+
         ReconstructedFaultSurfaceSystem<dim> &surface_system;
         Assemblers::ReconstructedFaultStokes<dim> &stokes_coupling;
         unsigned int active_generation = 0;

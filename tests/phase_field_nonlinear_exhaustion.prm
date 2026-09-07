@@ -1,0 +1,20 @@
+# Deliberately exhaust the phase-field Newton budget before reconstruction.
+# EXPECT FAILURE
+# Enable if: ASPECT_WITH_VORO
+# MPI: 1
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_stage_i.prm
+
+set Nonlinear solver failure strategy = abort program
+subsection Solver parameters
+  subsection Phase field solver parameters
+    set Max nonlinear iterations = 1
+  end
+end
+subsection Material model
+  subsection Phase field fault
+    set Evolve phase field = true
+  end
+end
+subsection Postprocess
+  set List of postprocessors = particles
+end

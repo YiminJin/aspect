@@ -1,0 +1,13 @@
+# Enable if: ASPECT_WITH_VORO
+# MPI: 2
+include $ASPECT_SOURCE_DIR/tests/phase_field_frozen_history.prm
+set End time = 0.01
+subsection Prescribed Stokes solution
+  subsection Velocity function
+    # Small, interior-preserving displacements exercise the MPI ghost boundary.
+    set Function expression = 0.0001*x*(1-x); 0.0001*y*(1-y)
+  end
+end
+subsection Postprocess
+  set List of postprocessors = particles, verify particle domain regeneration
+end

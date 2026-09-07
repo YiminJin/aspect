@@ -79,6 +79,8 @@ namespace aspect
       const FaultVector &slip_rate,
       const ReconstructedFaultSurfaceLinearSolve<dim> *surface_solve)
     {
+      // Publish A, frozen B, G, and K_V as one generation. Rebuilding either
+      // simulator-owned coupling component invalidates the returned view.
       ++active_generation;
 
       const ReconstructedFaultSurfaceResidual &residual =
@@ -89,6 +91,8 @@ namespace aspect
         std::make_shared<const AffineConstraints<double>>(
           make_homogeneous_constraints(this->get_current_constraints()));
 
+      // Jacobian vectors are perturbations: retain hanging-node/periodic
+      // relations but remove every inhomogeneous boundary value.
 #if DEAL_II_VERSION_GTE(9,6,0)
       IndexSet stokes_dofs(this->get_dof_handler().n_dofs());
       stokes_dofs.add_range(
@@ -116,7 +120,7 @@ namespace aspect
 
     template <int dim>
     ReconstructedFaultCondensedSystem<dim>::Linearization::Linearization(
-      const ReconstructedFaultCondensedSystem<dim> &owner,
+      ReconstructedFaultCondensedSystem<dim> &owner,
       const LinearAlgebra::BlockSparseMatrix &bulk_matrix,
       const ReconstructedFaultSurfaceLinearSolve<dim> &surface_solve,
       const ReconstructedFaultSurfaceResidual &surface_residual,
@@ -136,6 +140,39 @@ namespace aspect
       homogeneous_system_constraints(system_constraints),
       homogeneous_stokes_constraints(stokes_constraints)
     {}
+
+
+    template <int dim>
+    typename ReconstructedFaultCondensedSystem<dim>::Linearization
+    ReconstructedFaultCondensedSystem<dim>::Linearization::with_surface_solve(
+      const ReconstructedFaultSurfaceLinearSolve<dim> &new_surface_solve) const
+    {
+      assert_is_current();
+      return owner.rebind_surface_solve(*this, new_surface_solve);
+    }
+
+
+    template <int dim>
+    typename ReconstructedFaultCondensedSystem<dim>::Linearization
+    ReconstructedFaultCondensedSystem<dim>::rebind_surface_solve(
+      const Linearization &linearization,
+      const ReconstructedFaultSurfaceLinearSolve<dim> &new_surface_solve)
+    {
+      linearization.assert_is_current();
+
+      // An active-set update changes only the semantic K_V inverse. Preserve
+      // A/B/G/residual data and supersede the unrestricted linearization view.
+      ++active_generation;
+      return Linearization(*this,
+                           linearization.bulk_matrix,
+                           new_surface_solve,
+                           linearization.residual,
+                           active_generation,
+                           linearization.surface_generation,
+                           linearization.B_generation,
+                           linearization.homogeneous_system_constraints,
+                           linearization.homogeneous_stokes_constraints);
+    }
 
 
     template <int dim>
@@ -162,6 +199,9 @@ namespace aspect
       const LinearAlgebra::BlockVector &direction) const
     {
       AssertDimension(direction.n_blocks(), 2);
+
+      // Krylov vectors use solver-scaled pressure and homogeneous constraints;
+      // constrained algebraic entries must not contribute to A or B/G actions.
       LinearAlgebra::BlockVector constrained(
         owner.introspection().index_sets.stokes_partitioning,
         owner.get_mpi_communicator());
@@ -178,6 +218,8 @@ namespace aspect
     make_physical_bulk_direction(
       const LinearAlgebra::BlockVector &solver_direction) const
     {
+      // G differentiates the physical constitutive law. Convert solver pressure
+      // exactly once, then distribute only homogeneous perturbation constraints.
       LinearAlgebra::BlockVector owned(
         owner.introspection().index_sets.system_partitioning,
         owner.get_mpi_communicator());
@@ -187,6 +229,8 @@ namespace aspect
       homogeneous_system_constraints->distribute(owned);
       owned.compress(VectorOperation::insert);
 
+      // Remote point evaluation of G needs locally relevant ghost values, while
+      // the scaling and constraint operations above act on the owned vector.
       LinearAlgebra::BlockVector ghosted(
         owner.introspection().index_sets.system_partitioning,
         owner.introspection().index_sets.system_relevant_partitioning,
@@ -212,6 +256,9 @@ namespace aspect
       const LinearAlgebra::BlockVector &direction) const
     {
       assert_is_current();
+
+      // Apply the condensed Jacobian A-B*K_V^{-1}*G. The signs follow the
+      // uncondensed fault row G*dx-K_V*dV=-R_Gamma.
       const LinearAlgebra::BlockVector constrained =
         make_constrained_solver_direction(direction);
       apply_stokes_matrix<dim>(bulk_matrix, constrained, result);
@@ -240,6 +287,8 @@ namespace aspect
     {
       assert_is_current();
       Assert(bulk_newton_rhs.n_blocks() >= 2, ExcInternalError());
+
+      // ASPECT supplies -R_bulk. Condensation adds +B*K_V^{-1}*R_Gamma.
       result.block(0) = bulk_newton_rhs.block(0);
       result.block(1) = bulk_newton_rhs.block(1);
 
@@ -264,6 +313,9 @@ namespace aspect
       FaultVector &slip_rate_increment) const
     {
       assert_is_current();
+
+      // Recover dV=K_V^{-1}(R_Gamma+G*dx); a restricted semantic solve
+      // automatically returns exact zero on bound-active vertices.
       const LinearAlgebra::BlockVector constrained =
         make_constrained_solver_direction(bulk_increment);
       FaultVector rhs;
@@ -290,6 +342,9 @@ namespace aspect
       FaultVector &surface_result) const
     {
       assert_is_current();
+
+      // Verification uses the original block signs [A,-B; G,-K_V] without
+      // condensation, but with the same homogeneous/scaling conversions.
       const LinearAlgebra::BlockVector constrained =
         make_constrained_solver_direction(bulk_direction);
       apply_stokes_matrix<dim>(bulk_matrix, constrained, bulk_result);

@@ -121,3 +121,49 @@ TEST_CASE("Common cohesive law rejects inadmissible persistent state",
   CHECK_THROWS(TestAccess::compute_cohesive_response(
     0.5, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, -1.0));
 }
+
+
+
+TEST_CASE("Finite-step cohesive work uses the stable exact form",
+          "[phase_field_fault_cohesive]")
+{
+  const double dt = 0.25;
+  const double beta = 0.8;
+  const double kappa = 4.5;
+  const double g = 0.7;
+  const double previous_h = 0.2;
+  const double traction = 6.0;
+  const double previous_traction = 3.0;
+  const double a = traction/g;
+  const double b = beta*previous_h*previous_traction/(1.0-g);
+
+  CHECK(TestAccess::compute_crack_driving_force_candidate(
+          dt, beta, kappa, g, previous_h, traction, previous_traction)
+        == Approx(dt*(a-b)*(a+b)/(2.0*kappa)));
+}
+
+
+
+TEST_CASE("Finite-step cohesive work preserves negative candidates",
+          "[phase_field_fault_cohesive]")
+{
+  const double candidate =
+    TestAccess::compute_crack_driving_force_candidate(
+      1.0, 0.95, 2.0, 0.8, 1.0, 0.1, 4.0);
+  CHECK(candidate < 0.0);
+  CHECK(std::max(3.0, candidate) == 3.0);
+}
+
+
+
+TEST_CASE("Finite-step cohesive work has an intact removable limit",
+          "[phase_field_fault_cohesive]")
+{
+  CHECK(TestAccess::compute_crack_driving_force_candidate(
+          0.5, 0.9, 2.0, 1.0, 0.0, 4.0, 3.0)
+        == Approx(0.5*16.0/4.0));
+  CHECK_THROWS_WITH(
+    TestAccess::compute_crack_driving_force_candidate(
+      0.5, 0.9, 2.0, 1.0, 1.e-8, 4.0, 3.0),
+    Catch::Matchers::Contains("inadmissible healing"));
+}

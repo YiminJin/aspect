@@ -31,6 +31,11 @@
 
 namespace aspect
 {
+  namespace internal
+  {
+    template <int dim> class PhaseFieldTestAccess;
+  }
+
   namespace MaterialModel
   {
     /**
@@ -175,6 +180,9 @@ namespace aspect
          * degradation function, $g''(\phi)$.
          */
         double second_derivative(const double phase_field) const;
+
+        /** Whether phi lies on the nonsingular branch containing [0,1]. */
+        bool is_in_domain(const double phase_field) const;
 
       private:
         const double p;
@@ -335,7 +343,9 @@ namespace aspect
       mutable boost::signals2::signal<void (const SimulatorAccess<dim> &)> pre_extend_core_phase_field;
 
     private:
-      void
+      friend class internal::PhaseFieldTestAccess<dim>;
+
+      bool
       assemble_phase_field_system(LinearAlgebra::BlockSparseMatrix &system_matrix,
                                   LinearAlgebra::BlockVector       &system_rhs,
                                   const LinearAlgebra::BlockVector &current_solution,

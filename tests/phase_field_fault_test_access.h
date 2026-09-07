@@ -42,6 +42,12 @@ namespace aspect
             return model.current_minimum_raw_normalization_phase_field;
           }
 
+          static const std::vector<std::vector<double>> &
+          current_normalization_integrals(const PhaseFieldFault<dim> &model)
+          {
+            return model.current_normalization_integrals;
+          }
+
           static double
           normalization_effective_phase_field(
             const double raw_phase_field,
@@ -135,10 +141,26 @@ namespace aspect
               slip_rate, current_h, previous_h);
           }
 
+          static double
+          compute_crack_driving_force_candidate(
+            const double time_step,
+            const double beta,
+            const double kappa,
+            const double current_degradation,
+            const double previous_h,
+            const double current_cohesive_traction,
+            const double previous_cohesive_traction)
+          {
+            return PhaseFieldFault<dim>::compute_crack_driving_force_candidate(
+              time_step, {beta, kappa}, current_degradation, previous_h,
+              current_cohesive_traction, previous_cohesive_traction);
+          }
+
           static void
           initialize_cohesive_state_from_initial_fields(PhaseFieldFault<dim> &model)
           {
             model.initialize_cohesive_state_from_initial_fields();
+            model.compute_fault_surface_temperatures();
           }
 
           static void
@@ -146,6 +168,7 @@ namespace aspect
             PhaseFieldFault<dim> &model,
             const std::vector<std::vector<double>> &cohesive_tractions)
           {
+            model.validate_cohesive_state_commit(cohesive_tractions);
             model.commit_cohesive_state(cohesive_tractions);
           }
 
@@ -170,6 +193,41 @@ namespace aspect
           {
             return model.fault_friction;
           }
+
+          static std::vector<double>
+          surface_material_fractions_at_vertex(
+            const PhaseFieldFault<dim> &model,
+            const ReconstructedFaultManager<dim> &fault_manager,
+            const unsigned int fault_index,
+            const unsigned int vertex)
+          {
+            const ReconstructedFault<dim> &fault =
+              fault_manager.get_fault(fault_index);
+            std::vector<double> compositions(
+              model.fault_property_indices.chemical_compositions.size());
+            for (unsigned int c = 0; c < compositions.size(); ++c)
+              {
+                const auto &property = fault_manager.get_property_information()[
+                  model.fault_property_indices.chemical_compositions[c]];
+                compositions[c] = fault.get_properties(vertex)[property.position];
+              }
+            return MaterialUtilities::compute_composition_fractions(compositions);
+          }
+
+          static std::pair<std::vector<double>, double>
+          surface_material_state_at_projection(
+            const PhaseFieldFault<dim> &model,
+            const unsigned int fault_index,
+            const unsigned int segment_index,
+            const double xi)
+          {
+            const typename PhaseFieldFault<dim>::LocalizationResponse state =
+              model.evaluate_reconstructed_fault_localization(
+                fault_index, segment_index, xi, 0.5, 0.4,
+                "transverse-temperature test");
+            return {state.surface_material_fractions, state.surface_temperature};
+          }
+
       };
     }
   }

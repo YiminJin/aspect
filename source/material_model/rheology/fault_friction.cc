@@ -51,6 +51,20 @@ namespace aspect
       template <int dim>
       double
       FaultFriction<dim>::
+      update_state(const std::vector<double> &volume_fractions,
+                   const double               slip_rate,
+                   const double               old_state,
+                   const double               time_step) const
+      {
+        AssertDimension(volume_fractions.size(), mu0.size());
+        return update_state(slip_rate, old_state, time_step);
+      }
+
+
+
+      template <int dim>
+      double
+      FaultFriction<dim>::
       friction_coefficient(const std::vector<double> &volume_fractions,
                            const double               V_raw,
                            const double               theta) const

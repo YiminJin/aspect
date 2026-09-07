@@ -1,0 +1,53 @@
+# Stage-J timestep-zero preservation followed by two real feedback updates.
+# The low activation threshold only bootstraps prescribed geometry.
+# Enable if: ASPECT_WITH_VORO
+# MPI: 2
+
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_stage_i_rate_state.prm
+
+set End time = 0.02
+set Maximum time step = 0.01
+set Nonlinear solver failure strategy = abort program
+set CFL number = 0.5
+
+subsection Termination criteria
+  # The selected timestep models may shorten the second real step. Terminate by
+  # accepted step count so this remains initialization plus exactly two steps.
+  set Termination criteria = end step
+  set End step = 2
+end
+
+subsection Initial temperature model
+  subsection Function
+    set Function expression = 293+100*y
+  end
+end
+
+subsection Initial composition model
+  subsection Function
+    set Function expression = 4e6; -4e6+8e6*x; 1e6; 0.5; 2e4+1e4*x
+  end
+end
+
+subsection Material model
+  subsection Phase field fault
+    set Evolve phase field = true
+    set Thermal viscosity exponents = 1, 1
+  end
+end
+
+subsection Time stepping
+  set List of model names = convection time step, reconstructed fault time step
+end
+
+subsection Solver parameters
+  subsection Phase field solver parameters
+    # The original accuracy is unchanged; the domain-safe solve needs 20
+    # initial Newton iterations rather than silently returning after ten.
+    set Max nonlinear iterations = 50
+  end
+end
+
+subsection Postprocess
+  set List of postprocessors = particles, verify phase field fault stage i, verify phase field fault stage j history feedback
+end

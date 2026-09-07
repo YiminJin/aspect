@@ -17,6 +17,7 @@
 #include <aspect/phase_field.h>
 #include <aspect/plugins.h>
 #include <aspect/reconstructed_fault/manager.h>
+#include <aspect/reconstructed_fault/utilities.h>
 
 #include <deal.II/base/mpi_remote_point_evaluation.h>
 #include <deal.II/lac/dynamic_sparsity_pattern.h>
@@ -30,6 +31,176 @@
 
 namespace aspect
 {
+  namespace
+  {
+    template <int dim>
+    class RestrictedSurfaceLinearSolve final
+      : public ReconstructedFaultSurfaceLinearSolve<dim>
+    {
+      public:
+        RestrictedSurfaceLinearSolve(
+          const ReconstructedFaultSurfaceSystem<dim> &owner,
+          const unsigned int generation,
+          const std::vector<std::vector<double>> &diagonal,
+          const std::vector<std::vector<double>> &off_diagonal,
+          const ReconstructedFaultActiveSet &active_set)
+          : owner(owner), generation(generation), active_set(active_set)
+        {
+#ifndef DEAL_II_WITH_UMFPACK
+          AssertThrow(false, ExcNotImplemented());
+#else
+          // Materialize K_FF direct-sum I_AA at full fault-vector size. Omitting
+          // every free/active edge removes active columns from the free equations.
+          factorizations.resize(diagonal.size());
+          for (unsigned int fault = 0; fault < diagonal.size(); ++fault)
+            {
+              AssertDimension(active_set[fault].size(), diagonal[fault].size());
+              AssertDimension(off_diagonal[fault].size(),
+                              diagonal[fault].empty()
+                              ? 0
+                              : diagonal[fault].size()-1);
+              auto factorization = std::make_unique<FaultFactorization>();
+              const unsigned int n = diagonal[fault].size();
+              DynamicSparsityPattern dynamic_sparsity(n, n);
+              for (unsigned int i = 0; i < n; ++i)
+                {
+                  dynamic_sparsity.add(i, i);
+                  if (i+1 < n && !active_set[fault][i]
+                      && !active_set[fault][i+1])
+                    {
+                      dynamic_sparsity.add(i, i+1);
+                      dynamic_sparsity.add(i+1, i);
+                    }
+                }
+              factorization->sparsity_pattern.copy_from(dynamic_sparsity);
+              factorization->matrix.reinit(factorization->sparsity_pattern);
+              for (unsigned int i = 0; i < n; ++i)
+                {
+                  factorization->matrix.set(
+                    i, i, active_set[fault][i] ? 1.0 : diagonal[fault][i]);
+                  if (i+1 < n && !active_set[fault][i]
+                      && !active_set[fault][i+1])
+                    {
+                      factorization->matrix.set(i, i+1, off_diagonal[fault][i]);
+                      factorization->matrix.set(i+1, i, off_diagonal[fault][i]);
+                    }
+                }
+              factorization->inverse = std::make_unique<SparseDirectUMFPACK>();
+              try
+                {
+                  factorization->inverse->initialize(factorization->matrix);
+                }
+              catch (const ExceptionBase &exception)
+                {
+                  AssertThrow(false,
+                              ExcMessage("Failed to factor the free K_V block for "
+                                         "reconstructed fault "
+                                         + Utilities::int_to_string(fault) + ": "
+                                         + exception.what()));
+                }
+              factorizations[fault] = std::move(factorization);
+            }
+#endif
+        }
+
+        void
+        solve(const ReconstructedFaultVector &rhs,
+              ReconstructedFaultVector &solution) const override
+        {
+          AssertThrow(generation == owner.get_linearization_generation(),
+                      ExcMessage("This restricted reconstructed-fault surface "
+                                 "solve has been superseded."));
+          AssertThrow(rhs.size() == factorizations.size(),
+                      ExcMessage("The restricted K_V right-hand side has the "
+                                 "wrong number of faults."));
+          solution.resize(rhs.size());
+          for (unsigned int fault = 0; fault < rhs.size(); ++fault)
+            {
+              // Project the right-hand side before solving and overwrite active
+              // entries afterward so the semantic inverse returns exact zeros.
+              AssertDimension(rhs[fault].size(), active_set[fault].size());
+              Vector<double> source(rhs[fault].size());
+              for (unsigned int i = 0; i < source.size(); ++i)
+                source[i] = active_set[fault][i] ? 0.0 : rhs[fault][i];
+              Vector<double> result(source.size());
+#ifdef DEAL_II_WITH_UMFPACK
+              factorizations[fault]->inverse->vmult(result, source);
+#else
+              AssertThrow(false, ExcNotImplemented());
+#endif
+              solution[fault].resize(result.size());
+              for (unsigned int i = 0; i < result.size(); ++i)
+                solution[fault][i] = active_set[fault][i] ? 0.0 : result[i];
+
+              // A scaled backward error is the numerical admissibility guard
+              // for a nonsingular, potentially indefinite principal free block.
+              double residual_norm = 0.0;
+              double matrix_norm = 0.0;
+              double solution_norm = 0.0;
+              double rhs_norm = 0.0;
+              for (unsigned int i = 0; i < result.size(); ++i)
+                {
+                  double value = active_set[fault][i]
+                                 ? solution[fault][i]
+                                 : factorizations[fault]->matrix.el(i, i)
+                                   * solution[fault][i];
+                  double row_sum = std::abs(
+                                     factorizations[fault]->matrix.el(i, i));
+                  if (i > 0)
+                    {
+                      value += factorizations[fault]->matrix.el(i, i-1)
+                               * solution[fault][i-1];
+                      row_sum += std::abs(
+                                   factorizations[fault]->matrix.el(i, i-1));
+                    }
+                  if (i+1 < result.size())
+                    {
+                      value += factorizations[fault]->matrix.el(i, i+1)
+                               * solution[fault][i+1];
+                      row_sum += std::abs(
+                                   factorizations[fault]->matrix.el(i, i+1));
+                    }
+                  residual_norm = std::max(residual_norm,
+                                           std::abs(value-source[i]));
+                  matrix_norm = std::max(matrix_norm, row_sum);
+                  solution_norm = std::max(solution_norm,
+                                            std::abs(solution[fault][i]));
+                  rhs_norm = std::max(rhs_norm, std::abs(source[i]));
+                }
+              const double scale = matrix_norm*solution_norm + rhs_norm;
+              const double backward_error = residual_norm/std::max(
+                                              scale,
+                                              std::numeric_limits<double>::min());
+              AssertThrow(std::isfinite(backward_error)
+                          && backward_error
+                          <= 100.0*std::numeric_limits<double>::epsilon()
+                          * std::max(1.0, static_cast<double>(result.size())),
+                          ExcMessage("The free K_V solve for reconstructed fault "
+                                     + Utilities::int_to_string(fault)
+                                     + " has excessive scaled backward error "
+                                     + Utilities::to_string(backward_error)
+                                     + "; the free block is singular or ill-conditioned."));
+            }
+        }
+
+      private:
+        struct FaultFactorization
+        {
+          SparsityPattern sparsity_pattern;
+          SparseMatrix<double> matrix;
+#ifdef DEAL_II_WITH_UMFPACK
+          std::unique_ptr<SparseDirectUMFPACK> inverse;
+#endif
+        };
+
+        const ReconstructedFaultSurfaceSystem<dim> &owner;
+        const unsigned int generation;
+        const ReconstructedFaultActiveSet active_set;
+        std::vector<std::unique_ptr<FaultFactorization>> factorizations;
+    };
+  }
+
+
   template <int dim>
   struct ReconstructedFaultSurfaceSystem<dim>::SurfaceAssembly
   {
@@ -50,6 +221,8 @@ namespace aspect
     ReconstructedFaultSurfaceResidual residual;
     std::vector<std::vector<double>> diagonal;
     std::vector<std::vector<double>> off_diagonal;
+    std::vector<std::vector<double>> mass_diagonal;
+    std::vector<std::vector<double>> mass_off_diagonal;
     std::vector<CouplingPoint> coupling_points;
   };
 
@@ -77,6 +250,9 @@ namespace aspect
                              "vertices for reconstructed fault "
                              + Utilities::int_to_string(fault) + "."));
 
+    // Particle/fault associations are locally owned, whereas the bulk FE
+    // samples may live remotely. Evaluate all active particle positions in one
+    // collective point-evaluation operation and preserve association order.
     const auto &associations =
       fault_manager.get_locally_owned_particle_fault_associations();
     std::vector<Point<dim>> points;
@@ -115,12 +291,14 @@ namespace aspect
     const Particle::Manager<dim> &particle_manager =
       this->get_phase_field_handler().get_associated_particle_manager();
     const auto &particle_handler = particle_manager.get_particle_handler();
-    const auto &particle_data = particle_manager.get_property_manager().get_data_info();
-    AssertThrow(particle_data.fieldname_exists("maxwell stress"),
+    const auto &property_manager = particle_manager.get_property_manager();
+    const auto &particle_data = property_manager.get_data_info();
+    AssertThrow(property_manager.plugin_name_exists("maxwell stress"),
                 ExcMessage("Reconstructed-fault surface assembly requires particle "
-                           "property 'maxwell stress'."));
+                           "property plugin 'maxwell stress'."));
     const unsigned int stress_position =
-      particle_data.get_position_by_field_name("maxwell stress");
+      particle_data.get_position_by_plugin_index(
+        property_manager.get_plugin_index_by_name("maxwell stress"));
 
     std::vector<unsigned int> chemical_positions;
     for (const unsigned int field :
@@ -135,11 +313,15 @@ namespace aspect
           + property->second.second);
       }
 
+    // Accumulate each rank's particle-domain quadrature into the replicated Q1
+    // surface residual and, when requested, K_V=-dR_Gamma/dV.
     SurfaceAssembly local;
     local.residual.values.resize(faults.size());
     local.residual.per_fault_weighted_rms.assign(faults.size(), 0.0);
     local.diagonal.resize(faults.size());
     local.off_diagonal.resize(faults.size());
+    local.mass_diagonal.resize(faults.size());
+    local.mass_off_diagonal.resize(faults.size());
     std::vector<double> local_squared_residual(faults.size(), 0.0);
     std::vector<double> local_weight(faults.size(), 0.0);
     for (unsigned int fault = 0; fault < faults.size(); ++fault)
@@ -147,6 +329,8 @@ namespace aspect
         local.residual.values[fault].assign(faults[fault].n_vertices(), 0.0);
         local.diagonal[fault].assign(faults[fault].n_vertices(), 0.0);
         local.off_diagonal[fault].assign(faults[fault].n_cells(), 0.0);
+        local.mass_diagonal[fault].assign(faults[fault].n_vertices(), 0.0);
+        local.mass_off_diagonal[fault].assign(faults[fault].n_cells(), 0.0);
       }
 
     unsigned int association_index = 0;
@@ -172,10 +356,13 @@ namespace aspect
         inputs.segment_index = association.segment_index;
         inputs.xi = association.xi;
         inputs.position = association.position;
-        inputs.slip_rate = (1.0-association.xi)
-                           * slip_rate[association.fault_index][association.segment_index]
+        const double left_slip_rate =
+          slip_rate[association.fault_index][association.segment_index];
+        inputs.slip_rate = left_slip_rate
                            + association.xi
-                           * slip_rate[association.fault_index][association.segment_index+1];
+                             * (slip_rate[association.fault_index]
+                                          [association.segment_index+1]
+                                - left_slip_rate);
         inputs.phase_field = phase_fields[point_index];
         inputs.previous_phase_field = previous_phase_fields[point_index];
         inputs.temperature = temperatures[point_index];
@@ -215,6 +402,13 @@ namespace aspect
         += weight*response.residual_density*response.residual_density;
         local_weight[association.fault_index] += weight;
 
+        auto &mass_diagonal = local.mass_diagonal[association.fault_index];
+        auto &mass_off_diagonal =
+          local.mass_off_diagonal[association.fault_index];
+        mass_diagonal[vertex] += weight*shape[0]*shape[0];
+        mass_diagonal[vertex+1] += weight*shape[1]*shape[1];
+        mass_off_diagonal[vertex] += weight*shape[0]*shape[1];
+
         if (assemble_jacobian)
           {
             auto &diagonal = local.diagonal[association.fault_index];
@@ -244,9 +438,12 @@ namespace aspect
     AssertDimension(association_index, associations.size());
     AssertDimension(point_index, points.size());
 
+    // Faults are replicated but particles are distributed. Pack the small
+    // surface systems into one collective sum so every rank receives identical
+    // residuals, Jacobian coefficients, and diagnostics.
     unsigned int packed_size = 2*faults.size();
     for (const auto &fault : faults)
-      packed_size += 2*fault.n_vertices() + fault.n_cells();
+      packed_size += 4*fault.n_vertices() + 2*fault.n_cells();
     std::vector<double> local_values(packed_size, 0.0);
     unsigned int position = 0;
     for (unsigned int fault = 0; fault < faults.size(); ++fault)
@@ -260,6 +457,12 @@ namespace aspect
         std::copy(local.off_diagonal[fault].begin(), local.off_diagonal[fault].end(),
                   local_values.begin()+position);
         position += local.off_diagonal[fault].size();
+        std::copy(local.mass_diagonal[fault].begin(),
+                  local.mass_diagonal[fault].end(), local_values.begin()+position);
+        position += local.mass_diagonal[fault].size();
+        std::copy(local.mass_off_diagonal[fault].begin(),
+                  local.mass_off_diagonal[fault].end(), local_values.begin()+position);
+        position += local.mass_off_diagonal[fault].size();
         local_values[position++] = local_squared_residual[fault];
         local_values[position++] = local_weight[fault];
       }
@@ -282,6 +485,14 @@ namespace aspect
                     local.off_diagonal[fault].size(),
                     local.off_diagonal[fault].begin());
         position += local.off_diagonal[fault].size();
+        std::copy_n(global_values.begin()+position,
+                    local.mass_diagonal[fault].size(),
+                    local.mass_diagonal[fault].begin());
+        position += local.mass_diagonal[fault].size();
+        std::copy_n(global_values.begin()+position,
+                    local.mass_off_diagonal[fault].size(),
+                    local.mass_off_diagonal[fault].begin());
+        position += local.mass_off_diagonal[fault].size();
         const double squared_residual = global_values[position++];
         const double weight = global_values[position++];
         local.residual.per_fault_weighted_rms[fault] =
@@ -326,6 +537,8 @@ namespace aspect
     ReconstructedFaultSurfaceResidual residual;
     std::vector<std::vector<double>> diagonal;
     std::vector<std::vector<double>> off_diagonal;
+    std::vector<std::vector<double>> mass_diagonal;
+    std::vector<std::vector<double>> mass_off_diagonal;
     std::vector<std::unique_ptr<FaultFactorization>> factorizations;
     std::vector<CouplingPoint> coupling_points;
     std::unique_ptr<Utilities::MPI::RemotePointEvaluation<dim>> point_cache;
@@ -364,6 +577,7 @@ namespace aspect
     const LinearAlgebra::BlockVector &bulk_state,
     const FaultVector &slip_rate)
   {
+    // Invalidate all previous semantic solves before building any new K_V data.
     surface_linearization.reset();
     ++linearization_generation;
 #ifndef DEAL_II_WITH_UMFPACK
@@ -377,6 +591,8 @@ namespace aspect
     candidate->residual = assembled.residual;
     candidate->diagonal = assembled.diagonal;
     candidate->off_diagonal = assembled.off_diagonal;
+    candidate->mass_diagonal = assembled.mass_diagonal;
+    candidate->mass_off_diagonal = assembled.mass_off_diagonal;
     candidate->coupling_points.reserve(assembled.coupling_points.size());
     for (const auto &point : assembled.coupling_points)
       candidate->coupling_points.push_back(
@@ -394,6 +610,8 @@ namespace aspect
       });
     candidate->factorizations.resize(assembled.diagonal.size());
 
+    // Each reconstructed fault is an independent replicated Q1 block. Factor
+    // the full nonsingular block once for this coupled linearization.
     for (unsigned int fault = 0; fault < assembled.diagonal.size(); ++fault)
       {
         auto factorization =
@@ -434,6 +652,9 @@ namespace aspect
           }
         candidate->factorizations[fault] = std::move(factorization);
       }
+
+    // G reuses the same particle points and constitutive coefficients as K_V;
+    // cache their remote bulk-field lookup for the lifetime of this linearization.
     std::vector<Point<dim>> points;
     points.reserve(candidate->coupling_points.size());
     for (const auto &point : candidate->coupling_points)
@@ -460,6 +681,8 @@ namespace aspect
     solution.resize(rhs.size());
     for (unsigned int fault = 0; fault < rhs.size(); ++fault)
       {
+        // Solve each replicated fault block independently; no MPI exchange is
+        // needed because assembly already made K_V and the right-hand side global.
         AssertThrow(rhs[fault].size()
                     == surface_linearization->diagonal[fault].size(),
                     ExcMessage("The K_V right-hand side has the wrong number of "
@@ -476,6 +699,8 @@ namespace aspect
 #endif
         solution[fault].assign(result.begin(), result.end());
 
+        // Detect singular or ill-conditioned surface blocks by scaled backward
+        // error rather than assuming definiteness of K_V.
         double residual_norm = 0.0;
         double matrix_norm = 0.0;
         double solution_norm = 0.0;
@@ -516,6 +741,32 @@ namespace aspect
 
 
   template <int dim>
+  std::unique_ptr<ReconstructedFaultSurfaceLinearSolve<dim>>
+  ReconstructedFaultSurfaceSystem<dim>::create_restricted_linear_solve(
+    const ReconstructedFaultActiveSet &active_set) const
+  {
+    AssertThrow(surface_linearization != nullptr,
+                ExcMessage("K_V must be assembled before restricting its inverse."));
+    AssertThrow(active_set.size() == surface_linearization->diagonal.size(),
+                ExcMessage("The reconstructed-fault active set has the wrong "
+                           "number of faults."));
+    for (unsigned int fault = 0; fault < active_set.size(); ++fault)
+      AssertThrow(active_set[fault].size()
+                  == surface_linearization->diagonal[fault].size(),
+                  ExcMessage("The reconstructed-fault active set has the wrong "
+                             "number of vertices for fault "
+                             + Utilities::int_to_string(fault) + "."));
+
+    return std::make_unique<RestrictedSurfaceLinearSolve<dim>>(
+             *this,
+             linearization_generation,
+             surface_linearization->diagonal,
+             surface_linearization->off_diagonal,
+             active_set);
+  }
+
+
+  template <int dim>
   void
   ReconstructedFaultSurfaceSystem<dim>::apply_surface_jacobian(
     const FaultVector &direction,
@@ -552,6 +803,69 @@ namespace aspect
 
 
   template <int dim>
+  double
+  ReconstructedFaultSurfaceSystem<dim>::surface_residual_rms(
+    const ReconstructedFaultSurfaceResidual &residual,
+    const ReconstructedFaultActiveSet &active_set) const
+  {
+    AssertThrow(surface_linearization != nullptr,
+                ExcMessage("The surface system must be linearized before "
+                           "measuring its residual."));
+    AssertDimension(residual.values.size(),
+                    surface_linearization->mass_diagonal.size());
+    AssertDimension(active_set.size(), residual.values.size());
+
+    // For weak nodal residual r, sqrt(r^T M^-1 r) is the L2 norm of
+    // its consistent-Q1 strong representation. Restrict both r and M to
+    // the same free set used by the projected Newton solve.
+    double squared_norm = 0.0;
+    double measure = 0.0;
+    for (unsigned int fault = 0; fault < residual.values.size(); ++fault)
+      {
+        const auto &mass_diagonal = surface_linearization->mass_diagonal[fault];
+        const auto &mass_off_diagonal =
+          surface_linearization->mass_off_diagonal[fault];
+        AssertDimension(residual.values[fault].size(), mass_diagonal.size());
+        AssertDimension(active_set[fault].size(), mass_diagonal.size());
+
+        std::vector<double> restricted_diagonal = mass_diagonal;
+        std::vector<double> restricted_off_diagonal = mass_off_diagonal;
+        std::vector<double> restricted_rhs = residual.values[fault];
+        for (unsigned int vertex = 0; vertex < restricted_rhs.size(); ++vertex)
+          if (active_set[fault][vertex])
+            {
+              restricted_diagonal[vertex] = 1.0;
+              restricted_rhs[vertex] = 0.0;
+              if (vertex > 0)
+                restricted_off_diagonal[vertex-1] = 0.0;
+              if (vertex < restricted_off_diagonal.size())
+                restricted_off_diagonal[vertex] = 0.0;
+            }
+
+        const std::vector<double> strong_residual =
+          ReconstructedFaultUtilities::solve_tridiagonal_system(
+            restricted_diagonal, restricted_off_diagonal, restricted_rhs);
+        for (unsigned int vertex = 0; vertex < restricted_rhs.size(); ++vertex)
+          if (!active_set[fault][vertex])
+            {
+              squared_norm += restricted_rhs[vertex]*strong_residual[vertex];
+              measure += mass_diagonal[vertex];
+            }
+        for (unsigned int segment = 0;
+             segment < mass_off_diagonal.size(); ++segment)
+          if (!active_set[fault][segment] && !active_set[fault][segment+1])
+            measure += 2.0*mass_off_diagonal[segment];
+      }
+
+    AssertThrow(std::isfinite(squared_norm) && std::isfinite(measure)
+                && squared_norm >= 0.0 && measure >= 0.0,
+                ExcMessage("The consistent reconstructed-fault surface residual "
+                           "norm is not finite and nonnegative."));
+    return measure > 0.0 ? std::sqrt(squared_norm/measure) : 0.0;
+  }
+
+
+  template <int dim>
   void
   ReconstructedFaultSurfaceSystem<dim>::apply_G(
     const LinearAlgebra::BlockVector &physical_bulk_direction,
@@ -571,6 +885,8 @@ namespace aspect
         n_fault_dofs += faults[fault].n_vertices();
       }
 
+    // The input is a homogeneous bulk perturbation with pressure already
+    // converted from solver scaling to physical units by the condensed system.
     const unsigned int velocity_component =
       this->introspection().component_indices.velocities[0];
     const unsigned int pressure_component =
@@ -588,6 +904,8 @@ namespace aspect
     AssertDimension(pressures.size(),
                     surface_linearization->coupling_points.size());
 
+    // Apply the pointwise G action with its pressure-mode sign convention. The
+    // adiabatic branch has neither the mu*N strain term nor the -mu*delta-p term.
     for (unsigned int p = 0;
          p < surface_linearization->coupling_points.size(); ++p)
       {
@@ -611,6 +929,8 @@ namespace aspect
           point.particle_domain_volume * shape[1] * value;
       }
 
+    // Contributions originate on locally owned particles; sum them so the
+    // returned fault vector is replicated identically on all ranks.
     std::vector<double> local_values(n_fault_dofs);
     unsigned int position = 0;
     for (const auto &fault_values : result)

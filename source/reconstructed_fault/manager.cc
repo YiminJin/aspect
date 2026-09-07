@@ -472,6 +472,9 @@ namespace aspect
 
     const PhaseFieldHandler<dim> &phase_field_handler =
       this->get_phase_field_handler();
+
+    // Determine mesh-aware reconstruction support before changing any manager
+    // state; all faults use these radii when checking tubular-region overlap.
     const std::vector<InitialFaultSupport> fault_support =
       determine_initial_fault_support(phase_field_handler,
                                       this->get_dof_handler(),
@@ -483,6 +486,8 @@ namespace aspect
       reconstruction_radii[fault_index] =
         fault_support[fault_index].reconstruction_radius;
 
+    // Replacing geometry invalidates every property/slip-rate association and
+    // both particle and Stokes-QP caches as one lifecycle transition.
     reconstructed_faults.clear();
     projection_half_widths.clear();
     timestep_committed_slip_rates.clear();
@@ -495,6 +500,8 @@ namespace aspect
     invalidate_stokes_qp_projection_cache();
     diagnostics.clear();
 
+    // Fit each prescribed polyline independently using the shared support data,
+    // then store its reconstructed geometry and diagnostics in fault order.
     for (unsigned int fault_index = 0;
          fault_index < prescribed_faults.size(); ++fault_index)
       reconstruct_initial_fault(
@@ -504,6 +511,8 @@ namespace aspect
         fault_support[fault_index].prescribed_half_widths,
         activation_threshold);
 
+    // Mark reconstruction complete only after every fault has been fitted;
+    // subsequent projections rebuild against the final metadata generation.
     ++projection_metadata_version;
     invalidate_particle_projection_cache();
     initial_reconstruction_complete = true;
@@ -523,6 +532,9 @@ namespace aspect
   {
     const PrescribedInitialFault<dim> &prescribed_fault =
       prescribed_faults[fault_index];
+
+    // Resample the prescribed geometry into structural Q1 nodes and interpolate
+    // the projection widths onto that common parameterization.
     const std::vector<Point<dim>> reference_points =
       ReconstructedFaultUtilities::resample_reference_fault(
         prescribed_fault.vertices, structural_spacing);
@@ -547,6 +559,8 @@ namespace aspect
     std::vector<double> local_support(n_points, 0.0);
     double local_weight = 0.0;
 
+    // Assemble this rank's phase-field-weighted least-squares fit for normal
+    // offsets, excluding inactive QPs and rejecting overlapping fault supports.
     const QGauss<dim> quadrature(this->get_fe().degree + 1);
     FEValues<dim> fe_values(this->get_mapping(),
                             this->get_fe(), quadrature,
@@ -602,6 +616,8 @@ namespace aspect
             }
         }
 
+    // The fault geometry is replicated, so collectively sum the small dense
+    // fit and coverage diagnostics before solving identically on every rank.
     std::vector<double> matrix(local_matrix.size());
     std::vector<double> rhs(local_rhs.size());
     result.diagnostics.structural_support.resize(local_support.size());
@@ -623,6 +639,8 @@ namespace aspect
                              + Utilities::int_to_string(fault_index)
                              + " has no phase-field support."));
 
+    // Ridge-regularized offsets move only along prescribed normals. The fitted
+    // fault must remain inside the tubular region used to construct the fit.
     result.diagnostics.offsets = ReconstructedFaultUtilities::solve_normal_offsets(
                                    matrix, rhs, result.diagnostics.total_weight, ridge_coefficient);
     result.vertices.resize(n_points);
@@ -811,7 +829,8 @@ namespace aspect
     const std::vector<double> &values = get_slip_rate(fault_index);
     AssertIndexRange(segment_index, reconstructed_faults[fault_index].n_cells());
     Assert(std::isfinite(xi) && xi >= 0.0 && xi <= 1.0, ExcInternalError());
-    return (1.0-xi) * values[segment_index] + xi * values[segment_index+1];
+    return values[segment_index]
+           + xi * (values[segment_index+1]-values[segment_index]);
   }
 
 
@@ -831,11 +850,33 @@ namespace aspect
 
   template <int dim>
   void
-  ReconstructedFaultManager<dim>::commit_slip_rate_nonlinear_solve()
+  ReconstructedFaultManager<dim>::validate_slip_rate_nonlinear_commit() const
   {
-    Assert(slip_rate_nonlinear_solve_active && !slip_rate_trial_active,
-           ExcInternalError());
-    timestep_committed_slip_rates = current_newton_slip_rates;
+    AssertThrow(slip_rate_nonlinear_solve_active && !slip_rate_trial_active,
+                ExcMessage("A slip-rate commit requires an active nonlinear "
+                           "solve and no active trial."));
+    AssertDimension(current_newton_slip_rates.size(),
+                    timestep_committed_slip_rates.size());
+    for (unsigned int fault = 0; fault < current_newton_slip_rates.size(); ++fault)
+      {
+        AssertDimension(current_newton_slip_rates[fault].size(),
+                        timestep_committed_slip_rates[fault].size());
+        for (const double value : current_newton_slip_rates[fault])
+          AssertThrow(std::isfinite(value) && value >= 0.0,
+                      ExcMessage("A committed slip rate must be finite and nonnegative."));
+      }
+  }
+
+
+
+  template <int dim>
+  void
+  ReconstructedFaultManager<dim>::commit_slip_rate_nonlinear_solve() noexcept
+  {
+    for (unsigned int fault = 0; fault < current_newton_slip_rates.size(); ++fault)
+      std::copy(current_newton_slip_rates[fault].begin(),
+                current_newton_slip_rates[fault].end(),
+                timestep_committed_slip_rates[fault].begin());
     slip_rate_nonlinear_solve_active = false;
   }
 
@@ -1592,6 +1633,8 @@ namespace aspect
     validate_normal_profile_projection_geometry(reconstructed_faults,
                                                 projection_half_widths);
 
+    // Build associations from the exact velocity quadrature used by the Stokes
+    // assembler; cell id and QP order are part of the cache identity.
     const Quadrature<dim> &quadrature =
       this->introspection().quadratures.velocities;
     FEValues<dim> fe_values(this->get_mapping(), this->get_fe(), quadrature,
@@ -1633,6 +1676,8 @@ namespace aspect
           candidate.emplace(cell->id(), std::move(entries));
         }
 
+    // Publish only a complete cache, together with the geometry/quadrature
+    // generations that later B and residual actions validate before reuse.
     stokes_qp_projection_cache = std::move(candidate);
     cached_stokes_quadrature_points = quadrature.get_points();
     cached_stokes_quadrature_weights = quadrature.get_weights();

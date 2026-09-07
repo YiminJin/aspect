@@ -22,6 +22,47 @@
 #include <aspect/particle/property/interface.h>
 #include <aspect/particle/manager.h>
 #include <deal.II/base/parameter_handler.h>
+#include <aspect/particle/particle_domain.h>
+#include <deal.II/grid/grid_generator.h>
+#include <deal.II/fe/mapping_q1.h>
+#include <deal.II/distributed/tria.h>
+
+#ifdef ASPECT_WITH_VORO
+TEST_CASE("Advected Voronoi domains conserve area", "[particle_domain_area]")
+{
+  using namespace dealii;
+  parallel::distributed::Triangulation<2> triangulation(MPI_COMM_WORLD);
+  GridGenerator::hyper_cube(triangulation);
+  triangulation.refine_global(4);
+  MappingQ1<2> mapping;
+  Particles::ParticleHandler<2> particles(triangulation, mapping, 0);
+  for (const auto &cell : triangulation.active_cell_iterators())
+    if (cell->is_locally_owned())
+      for (unsigned int i=0; i<3; ++i)
+        for (unsigned int j=0; j<3; ++j)
+          {
+            Point<2> reference((i+0.5)/3, (j+0.5)/3);
+            Point<2> position = mapping.transform_unit_to_real_cell(cell, reference);
+            position[0] += 1.e-6*std::sin(17*position[0]+13*position[1]);
+            position[1] += 1.e-6*std::cos(11*position[0]-7*position[1]);
+            reference = mapping.transform_real_to_unit_cell(cell, position);
+            const types::particle_index id = cell->global_active_cell_index()*9+i*3+j;
+            particles.insert_particle(Particles::Particle<2>(position, reference, id), cell);
+          }
+  particles.update_cached_numbers();
+  particles.exchange_ghost_particles();
+#if DEAL_II_VERSION_GTE(9,8,0)
+  aspect::Particle::ParticleDomainHandler<2> domains(particles, false, true);
+#else
+  aspect::Particle::ParticleDomainHandler<2> domains(particles, triangulation, mapping, false, true);
+#endif
+  domains.generate_particle_domains();
+  double area = 0;
+  for (const auto &particle : particles)
+    area += domains.get_particle_domain(particle.get_local_index()).volume();
+  REQUIRE(Utilities::MPI::sum(area, MPI_COMM_WORLD) == Approx(1.0).margin(1.e-10));
+}
+#endif
 
 TEST_CASE("Particle Manager plugin names")
 {

@@ -45,6 +45,21 @@ namespace aspect
 
   namespace
   {
+    void
+    throw_if_history_error(const std::string &local_error, const MPI_Comm communicator)
+    {
+      const unsigned int n_ranks = Utilities::MPI::n_mpi_processes(communicator);
+      const unsigned int rank = Utilities::MPI::this_mpi_process(communicator);
+      const unsigned int error_rank = Utilities::MPI::min(
+        local_error.empty() ? n_ranks : rank, communicator);
+      if (error_rank < n_ranks)
+        {
+          const std::string error = Utilities::MPI::broadcast(communicator, local_error, error_rank);
+          AssertThrow(false, ExcMessage(error));
+        }
+    }
+
+
     template <int dim>
     bool
     cohesive_history_is_initialized(
@@ -83,6 +98,69 @@ namespace aspect
                   ExcMessage("A reconstructed-fault collection contains a mixture of initialized "
                              "and uninitialized cohesive history."));
       return any_initialized;
+    }
+
+
+    template <int dim>
+    bool
+    fault_scalar_property_is_initialized(
+      const std::vector<ReconstructedFault<dim>> &faults,
+      const unsigned int position,
+      const std::string &name)
+    {
+      bool any_initialized = false;
+      bool any_uninitialized = false;
+      for (const ReconstructedFault<dim> &fault : faults)
+        for (unsigned int vertex = 0; vertex < fault.n_vertices(); ++vertex)
+          if (fault.property_value_is_initialized(vertex, position))
+            {
+              const double value = fault.get_properties(vertex)[position];
+              AssertThrow(std::isfinite(value) && value > 0.0,
+                          ExcMessage("Stored reconstructed-fault property <" + name
+                                     + "> must be finite and positive."));
+              any_initialized = true;
+            }
+          else
+            any_uninitialized = true;
+
+      AssertThrow(!(any_initialized && any_uninitialized),
+                  ExcMessage("Reconstructed-fault property <" + name
+                             + "> is only partially initialized."));
+      return any_initialized;
+    }
+
+
+    template <int dim>
+    void
+    validate_initial_fault_state_mapping(
+      const Introspection<dim> &introspection,
+      const Parameters<dim> &parameters)
+    {
+      const auto &generic_fields = introspection.get_indices_for_fields_of_type(
+        CompositionalFieldDescription::generic);
+      unsigned int matching_fields = 0;
+      for (const unsigned int field : generic_fields)
+        {
+          const auto mapping = parameters.mapped_particle_properties.find(field);
+          if (mapping != parameters.mapped_particle_properties.end()
+              && mapping->second.first == "phase field fault state")
+            {
+              AssertThrow(mapping->second.second == 0,
+                          ExcMessage("The generic compositional field supplying "
+                                     "initial fault state Theta must map to component "
+                                     "zero of particle property 'phase field fault state'."));
+              AssertThrow(parameters.compositional_field_methods[field]
+                          == Parameters<dim>::AdvectionFieldMethod::particles,
+                          ExcMessage("The generic compositional field supplying initial "
+                                     "fault state Theta must be advected by particles."));
+              ++matching_fields;
+            }
+        }
+      AssertThrow(matching_fields == 1,
+                  ExcMessage("Rate-and-state reconstructed-fault friction requires "
+                             "exactly one generic particle-advected compositional "
+                             "field mapped to particle property 'phase field fault "
+                             "state', component zero."));
     }
 
 
@@ -351,8 +429,14 @@ namespace aspect
       ReconstructedFaultManager<dim> &fault_manager =
         this->get_reconstructed_fault_manager();
       if (fault_friction.has_state_variable())
-        fault_property_indices.state = fault_manager.register_property(
-          "phase field fault state", 1);
+        {
+          fault_property_indices.state = fault_manager.register_property(
+            "phase field fault state", 1);
+          if (this->get_parameters().nonlinear_solver
+              == Parameters<dim>::NonlinearSolver::single_Advection_iterated_Newton_Stokes)
+            validate_initial_fault_state_mapping(
+              this->introspection(), this->get_parameters());
+        }
       fault_property_indices.cohesive_traction = fault_manager.register_property(
         "phase field fault cohesive traction", 1);
       fault_property_indices.previous_normalization_integral =
@@ -398,22 +482,30 @@ namespace aspect
       const double time_step = (this->get_timestep_number() > 0
                                 ? this->get_timestep()
                                 : initial_time_step);
-      const MaxwellCoefficients coefficients =
+      const MaxwellCoefficients bulk_coefficients =
         compute_maxwell_coefficients(eta, G, time_step);
+      const double surface_eta = compute_creep_viscosity(
+        localization.surface_material_fractions,
+        localization.surface_temperature);
+      const double surface_G = MaterialUtilities::average_value(
+        localization.surface_material_fractions, elastic_shear_moduli,
+        viscosity_averaging);
+      const MaxwellCoefficients surface_coefficients =
+        compute_maxwell_coefficients(surface_eta, surface_G, time_step);
       const CohesiveResponse cohesive = compute_cohesive_response(
-        coefficients, localization.current_I_h, localization.previous_I_h,
+        surface_coefficients, localization.current_I_h, localization.previous_I_h,
         localization.previous_cohesive_traction, inputs.slip_rate,
         localization.current_h, localization.previous_h);
 
       const SymmetricTensor<2,dim> trial_stress = compute_maxwell_stress(
-        coefficients, inputs.strain_rate, inputs.old_maxwell_stress);
+        bulk_coefficients, inputs.strain_rate, inputs.old_maxwell_stress);
       const SymmetricTensor<2,dim> stress_without_current_slip =
         trial_stress
-        - 2.0 * coefficients.kappa * cohesive.history_correction
+        - 2.0 * bulk_coefficients.kappa * cohesive.history_correction
           * inputs.slip_tensor;
       const SymmetricTensor<2,dim> stress =
         stress_without_current_slip
-        - 2.0 * coefficients.kappa * cohesive.localization_factor
+        - 2.0 * bulk_coefficients.kappa * cohesive.localization_factor
           * inputs.slip_rate * inputs.slip_tensor;
 
       const double theta = fault_friction.has_state_variable()
@@ -452,12 +544,12 @@ namespace aspect
                                   - mu * sigma_n
                                   - damping * inputs.slip_rate;
       response.minus_derivative_wrt_slip_rate =
-        2.0 * coefficients.kappa * cohesive.localization_factor
+        2.0 * bulk_coefficients.kappa * cohesive.localization_factor
         * (inputs.slip_tensor * inputs.slip_tensor)
-        + coefficients.kappa/localization.current_I_h
+        + surface_coefficients.kappa/localization.current_I_h
         + sigma_n*dmu_dV
         + damping;
-      response.kappa = coefficients.kappa;
+      response.kappa = bulk_coefficients.kappa;
       response.localization_factor = cohesive.localization_factor;
       response.friction_coefficient = mu;
       response.uses_adiabatic_friction_pressure =
@@ -484,15 +576,23 @@ namespace aspect
       const double time_step = (this->get_timestep_number() > 0
                                 ? this->get_timestep()
                                 : initial_time_step);
-      const MaxwellCoefficients coefficients =
+      const MaxwellCoefficients bulk_coefficients =
         compute_maxwell_coefficients(eta, G, time_step);
+      const double surface_eta = compute_creep_viscosity(
+        localization.surface_material_fractions,
+        localization.surface_temperature);
+      const double surface_G = MaterialUtilities::average_value(
+        localization.surface_material_fractions, elastic_shear_moduli,
+        viscosity_averaging);
+      const MaxwellCoefficients surface_coefficients =
+        compute_maxwell_coefficients(surface_eta, surface_G, time_step);
       const CohesiveResponse cohesive = compute_cohesive_response(
-        coefficients, localization.current_I_h, localization.previous_I_h,
+        surface_coefficients, localization.current_I_h, localization.previous_I_h,
         localization.previous_cohesive_traction, 0.0,
         localization.current_h, localization.previous_h);
 
       ReconstructedFaultBulkPointResponse response;
-      response.kappa = coefficients.kappa;
+      response.kappa = bulk_coefficients.kappa;
       response.localization_factor = cohesive.localization_factor;
       response.history_correction = cohesive.history_correction;
       return response;
@@ -504,6 +604,123 @@ namespace aspect
     PhaseFieldFault<dim>::minimum_fault_slip_rate() const
     {
       return fault_friction.get_minimum_slip_rate();
+    }
+
+
+    template <int dim>
+    void
+    PhaseFieldFault<dim>::prepare_reconstructed_fault_mechanical_solve()
+    {
+      AssertThrow(dim == 2, ExcNotImplemented());
+      ReconstructedFaultManager<dim> &fault_manager =
+        this->get_reconstructed_fault_manager();
+      const auto &faults = fault_manager.get_faults();
+      AssertThrow(!faults.empty(),
+                  ExcMessage("A reconstructed-fault mechanical solve requires fault geometry."));
+
+      const bool fresh_timestep_zero =
+        this->get_timestep_number() == 0
+        && !this->get_parameters().resume_computation;
+
+      // Recompute the transient normalization profile for every solve. Missing
+      // cohesive history may be constructed only for a genuinely fresh model.
+      const unsigned int cohesive_position =
+        fault_manager.get_property_information()[
+          fault_property_indices.cohesive_traction].position;
+      const unsigned int normalization_position =
+        fault_manager.get_property_information()[
+          fault_property_indices.previous_normalization_integral].position;
+      const bool cohesive_is_initialized = cohesive_history_is_initialized(
+        faults, cohesive_position, normalization_position);
+      AssertThrow(cohesive_is_initialized || fresh_timestep_zero,
+                  ExcMessage("Restarted or later-time reconstructed-fault mechanics "
+                             "requires complete committed cohesive history."));
+      if (!cohesive_is_initialized)
+        initialize_cohesive_state_from_initial_fields();
+      else
+        compute_normalization_integrals();
+      compute_fault_surface_temperatures();
+
+      // Rate-and-state friction needs one complete positive Theta field. On a
+      // fresh model it is projected from the user-mapped particle field;
+      // restart and later-time paths must retain the committed history.
+      if (fault_friction.has_state_variable())
+        {
+          const unsigned int state_position =
+            fault_manager.get_property_information()[fault_property_indices.state].position;
+          const bool state_is_initialized = fault_scalar_property_is_initialized(
+            faults, state_position, "phase field fault state");
+          AssertThrow(state_is_initialized || fresh_timestep_zero,
+                      ExcMessage("Restarted or later-time rate-and-state fault mechanics "
+                                 "requires complete committed Theta history."));
+          if (!state_is_initialized)
+            {
+              validate_initial_fault_state_mapping(
+                this->introspection(), this->get_parameters());
+              fault_manager.project_particle_properties(
+              {
+                {"phase field fault state", 0,
+                 "phase field fault state", 0, 1}
+              });
+            }
+          fault_scalar_property_is_initialized(
+            faults, state_position, "phase field fault state");
+        }
+
+      // V is the only Stage-I nonlinear constitutive variable. Initialize its
+      // committed/current state at the admissible lower bound only at fresh t=0.
+      if (!fault_manager.slip_rates_are_initialized())
+        {
+          AssertThrow(fresh_timestep_zero,
+                      ExcMessage("Restarted or later-time reconstructed-fault mechanics "
+                                 "requires committed slip-rate state."));
+          for (unsigned int fault = 0; fault < faults.size(); ++fault)
+            fault_manager.initialize_slip_rate(
+              fault,
+              std::vector<double>(faults[fault].n_vertices(),
+                                  minimum_fault_slip_rate()));
+        }
+
+      // Newton may start only after all pointwise constitutive inputs form one
+      // complete frozen state.
+      validate_reconstructed_fault_constitutive_state();
+    }
+
+
+
+    template <int dim>
+    void
+    PhaseFieldFault<dim>::compute_fault_surface_temperatures()
+    {
+      const auto &faults = this->get_reconstructed_fault_manager().get_faults();
+      std::vector<Point<dim>> points;
+      for (const auto &fault : faults)
+        for (unsigned int vertex = 0; vertex < fault.n_vertices(); ++vertex)
+          points.push_back(fault.vertex(vertex));
+
+      Utilities::MPI::RemotePointEvaluation<dim> point_cache;
+      point_cache.reinit(this->get_phase_field_handler().get_grid_cache(), points);
+      const std::vector<double> temperatures = VectorTools::point_values<1>(
+        point_cache,
+        this->get_dof_handler(),
+        this->get_solution(),
+        VectorTools::EvaluationFlags::avg,
+        this->introspection().component_indices.temperature);
+
+      current_fault_surface_temperatures.clear();
+      current_fault_surface_temperatures.resize(faults.size());
+      unsigned int point = 0;
+      for (unsigned int fault = 0; fault < faults.size(); ++fault)
+        {
+          current_fault_surface_temperatures[fault].resize(
+            faults[fault].n_vertices());
+          for (double &temperature : current_fault_surface_temperatures[fault])
+            {
+              temperature = temperatures[point++];
+              AssertThrow(std::isfinite(temperature),
+                          ExcMessage("Fault-surface temperature is non-finite."));
+            }
+        }
     }
 
 
@@ -539,6 +756,9 @@ namespace aspect
 
       AssertThrow(current_normalization_integrals.size() == faults.size(),
                   ExcMessage("Current reconstructed-fault I_h has not been computed."));
+      AssertThrow(current_fault_surface_temperatures.size() == faults.size(),
+                  ExcMessage("Current reconstructed-fault surface temperature has not "
+                             "been computed."));
       for (unsigned int fault_index = 0;
            fault_index < faults.size(); ++fault_index)
         {
@@ -548,14 +768,25 @@ namespace aspect
                       ExcMessage("Current reconstructed-fault I_h has the wrong number "
                                  "of vertices for fault "
                                  + Utilities::int_to_string(fault_index) + "."));
+          AssertThrow(current_fault_surface_temperatures[fault_index].size()
+                      == fault.n_vertices(),
+                      ExcMessage("Current reconstructed-fault surface temperature has "
+                                 "the wrong number of vertices for fault "
+                                 + Utilities::int_to_string(fault_index) + "."));
           for (unsigned int vertex = 0; vertex < fault.n_vertices(); ++vertex)
-            AssertThrow(std::isfinite(
-                          current_normalization_integrals[fault_index][vertex])
-                        && current_normalization_integrals[fault_index][vertex] > 0.0,
-                        ExcMessage("Current reconstructed-fault I_h must be finite and "
-                                   "positive at fault "
-                                   + Utilities::int_to_string(fault_index)
-                                   + " vertex " + Utilities::int_to_string(vertex) + "."));
+            {
+              AssertThrow(std::isfinite(
+                            current_normalization_integrals[fault_index][vertex])
+                          && current_normalization_integrals[fault_index][vertex] > 0.0,
+                          ExcMessage("Current reconstructed-fault I_h must be finite and "
+                                     "positive at fault "
+                                     + Utilities::int_to_string(fault_index)
+                                     + " vertex " + Utilities::int_to_string(vertex) + "."));
+              AssertThrow(std::isfinite(
+                            current_fault_surface_temperatures[fault_index][vertex]),
+                          ExcMessage("Current reconstructed-fault surface temperature "
+                                     "is non-finite."));
+            }
         }
 
       if (fault_friction.has_state_variable())
@@ -581,6 +812,436 @@ namespace aspect
     }
 
 
+
+    template <int dim>
+    double
+    PhaseFieldFault<dim>::compute_crack_driving_force_candidate(
+      const double time_step,
+      const MaxwellCoefficients &surface_coefficients,
+      const double current_degradation,
+      const double previous_h,
+      const double current_cohesive_traction,
+      const double previous_cohesive_traction)
+    {
+      AssertThrow(time_step > 0.0 && surface_coefficients.kappa > 0.0,
+                  ExcMessage("The cohesive-work update requires positive dt and kappa."));
+      AssertThrow(std::isfinite(current_degradation)
+                  && current_degradation > 0.0
+                  && current_degradation <= 1.0,
+                  ExcMessage("The cohesive-work update requires 0 < g <= 1."));
+
+      if (current_degradation == 1.0)
+        {
+          AssertThrow(previous_h == 0.0,
+                      ExcMessage("An exactly intact current fault point with nonzero "
+                                 "previous h is inadmissible healing."));
+          return time_step * current_cohesive_traction
+                 * current_cohesive_traction
+                 / (2.0*surface_coefficients.kappa);
+        }
+
+      // This factorization is algebraically the finite-step cohesive-work
+      // expression and avoids squaring two nearly equal large terms directly.
+      const double a = current_cohesive_traction/current_degradation;
+      const double b = surface_coefficients.beta * previous_h
+                       * previous_cohesive_traction
+                       / (1.0-current_degradation);
+      const double candidate = time_step*(a-b)*(a+b)
+                               / (2.0*surface_coefficients.kappa);
+      AssertThrow(std::isfinite(candidate),
+                  ExcMessage("The finite-step cohesive-work update is non-finite."));
+      return candidate;
+    }
+
+
+
+    template <int dim>
+    void
+    PhaseFieldFault<dim>::commit_reconstructed_fault_mechanical_history(
+      const LinearAlgebra::BlockVector &accepted_bulk_state)
+    {
+      validate_reconstructed_fault_constitutive_state();
+      ReconstructedFaultManager<dim> &fault_manager =
+        this->get_reconstructed_fault_manager();
+      const auto &faults = fault_manager.get_faults();
+
+      // Timestep zero supplies the initial kinematic solution only. Its
+      // constitutive histories were initialized explicitly during preparation.
+      if (this->get_timestep_number() == 0)
+        return;
+
+      const double time_step = this->get_timestep();
+      AssertThrow(std::isfinite(time_step) && time_step > 0.0,
+                  ExcMessage("Later-time reconstructed-fault history requires a "
+                             "positive timestep."));
+
+      Particle::Manager<dim> &particle_manager =
+        this->get_phase_field_handler().get_associated_particle_manager();
+      auto &particle_handler = particle_manager.get_particle_handler();
+      const auto &property_manager = particle_manager.get_property_manager();
+      const auto &particle_data = property_manager.get_data_info();
+      AssertThrow(property_manager.plugin_name_exists("maxwell stress")
+                  && particle_data.fieldname_exists("crack_driving_force"),
+                  ExcMessage("Stage-J history commit requires particle properties "
+                             "'maxwell stress' and 'crack_driving_force'."));
+      const unsigned int stress_position =
+        particle_data.get_position_by_plugin_index(
+          property_manager.get_plugin_index_by_name("maxwell stress"));
+      const unsigned int H_position =
+        particle_data.get_position_by_field_name("crack_driving_force");
+
+      std::vector<unsigned int> chemical_positions;
+      for (const unsigned int field :
+           this->introspection().chemical_composition_field_indices())
+        {
+          const auto property =
+            this->get_parameters().mapped_particle_properties.find(field);
+          AssertThrow(property !=
+                      this->get_parameters().mapped_particle_properties.end(),
+                      ExcMessage("Stage-J history commit requires mapped particle "
+                                 "chemical compositions."));
+          chemical_positions.push_back(
+            particle_data.get_position_by_field_name(property->second.first)
+            + property->second.second);
+        }
+
+      const auto &associations =
+        fault_manager.get_locally_owned_particle_fault_associations();
+      std::vector<Point<dim>> points;
+      points.reserve(associations.size());
+      for (const auto &association : associations)
+        points.push_back(association.position);
+
+      // Bulk samples use the accepted solution, whereas the surface state is
+      // interpolated from the frozen reconstructed-fault Q1 fields.
+      Utilities::MPI::RemotePointEvaluation<dim> point_cache;
+      point_cache.reinit(this->get_phase_field_handler().get_grid_cache(), points);
+      const auto velocity_gradients = VectorTools::point_gradients<dim>(
+        point_cache, this->get_dof_handler(), accepted_bulk_state,
+        VectorTools::EvaluationFlags::avg,
+        this->introspection().component_indices.velocities[0]);
+      const std::vector<double> temperatures = VectorTools::point_values<1>(
+        point_cache, this->get_dof_handler(), accepted_bulk_state,
+        VectorTools::EvaluationFlags::avg,
+        this->introspection().component_indices.temperature);
+      const unsigned int phase_field_component =
+        this->introspection().variable("phase_field").first_component_index;
+      const std::vector<double> phase_fields = VectorTools::point_values<1>(
+        point_cache, this->get_dof_handler(), accepted_bulk_state,
+        VectorTools::EvaluationFlags::avg, phase_field_component);
+      const std::vector<double> previous_phase_fields = VectorTools::point_values<1>(
+        point_cache, this->get_dof_handler(), this->get_old_solution(),
+        VectorTools::EvaluationFlags::avg, phase_field_component);
+
+      struct ParticleCandidate
+      {
+        SymmetricTensor<2,dim> stress;
+        double crack_driving_force;
+      };
+      std::map<types::particle_index, double> cohesive_samples;
+      std::map<types::particle_index, ParticleCandidate> particle_candidates;
+
+      // First evaluate the accepted cohesive traction samples. Projection is
+      // completed before any particle history candidate uses the new traction.
+      unsigned int particle_index = 0;
+      // A particle-local numerical failure must reach every rank before the
+      // next projection collective. No persistent histories have been written.
+      std::string local_error;
+      try
+        {
+          for (const auto &particle : particle_handler)
+            {
+              const auto &association = associations[particle_index];
+              Assert(particle.get_id() == association.particle_id, ExcInternalError());
+              if (association.active)
+                {
+                  const LocalizationResponse localization =
+                    evaluate_reconstructed_fault_localization(
+                      association.fault_index, association.segment_index,
+                      association.xi, phase_fields[particle_index],
+                      previous_phase_fields[particle_index], "history commit");
+                  const MaxwellCoefficients surface_coefficients =
+                    compute_maxwell_coefficients(
+                      compute_creep_viscosity(
+                        localization.surface_material_fractions,
+                        localization.surface_temperature),
+                      MaterialUtilities::average_value(
+                        localization.surface_material_fractions,
+                        elastic_shear_moduli, viscosity_averaging),
+                      time_step);
+                  const double slip_rate = fault_manager.interpolate_slip_rate(
+                    association.fault_index, association.segment_index,
+                    association.xi);
+                  cohesive_samples.emplace(
+                    particle.get_id(),
+                    compute_cohesive_response(
+                      surface_coefficients, localization.current_I_h,
+                      localization.previous_I_h,
+                      localization.previous_cohesive_traction, slip_rate,
+                      localization.current_h,
+                      localization.previous_h).cohesive_traction);
+                }
+              ++particle_index;
+            }
+        }
+      catch (const std::exception &exception)
+        {
+          local_error = exception.what();
+        }
+      throw_if_history_error(local_error, this->get_mpi_communicator());
+
+      const auto cohesive_projection =
+        fault_manager.project_particle_scalar(cohesive_samples);
+
+      std::vector<std::vector<double>> state_candidates;
+      try
+        {
+          if (fault_friction.has_state_variable())
+            {
+              state_candidates.resize(faults.size());
+              const unsigned int state_position =
+                fault_manager.get_property_information()[
+                  fault_property_indices.state].position;
+              for (unsigned int fault = 0; fault < faults.size(); ++fault)
+                {
+                  state_candidates[fault].resize(faults[fault].n_vertices());
+                  for (unsigned int vertex = 0;
+                       vertex < faults[fault].n_vertices(); ++vertex)
+                    {
+                      // Construct the surface mixture at the same Q1 vertex used
+                      // by friction. Dc is global in the current aging law.
+                      std::vector<double> surface_compositions(
+                        fault_property_indices.chemical_compositions.size());
+                      for (unsigned int c = 0; c < surface_compositions.size(); ++c)
+                        {
+                          const auto &property = fault_manager.get_property_information()[
+                            fault_property_indices.chemical_compositions[c]];
+                          surface_compositions[c] =
+                            faults[fault].get_properties(vertex)[property.position];
+                        }
+                      const std::vector<double> surface_fractions =
+                        MaterialUtilities::compute_composition_fractions(
+                          surface_compositions);
+                      state_candidates[fault][vertex] = fault_friction.update_state(
+                        surface_fractions,
+                        fault_manager.get_slip_rate(fault)[vertex],
+                        faults[fault].get_properties(vertex)[state_position],
+                        time_step);
+                      AssertThrow(std::isfinite(state_candidates[fault][vertex])
+                                  && state_candidates[fault][vertex] > 0.0,
+                                  ExcMessage("The accepted rate-and-state history is "
+                                             "inadmissible."));
+                    }
+                }
+            }
+
+          // Re-evaluate the accepted local strain decomposition with projected
+          // Q1 traction for H. Bulk and surface coefficients deliberately use
+          // different temperatures and material mixtures.
+          particle_index = 0;
+          for (const auto &particle : particle_handler)
+            {
+              const auto &association = associations[particle_index];
+              const ArrayView<const double> properties = particle.get_properties();
+              SymmetricTensor<2,dim> old_stress;
+              for (unsigned int component = 0;
+                   component < SymmetricTensor<2,dim>::n_independent_components;
+                   ++component)
+                old_stress[SymmetricTensor<2,dim>::unrolled_to_component_indices(
+                  component)] = properties[stress_position+component];
+
+              std::vector<double> bulk_compositions(chemical_positions.size());
+              for (unsigned int c = 0; c < chemical_positions.size(); ++c)
+                bulk_compositions[c] = properties[chemical_positions[c]];
+              const std::vector<double> bulk_fractions =
+                MaterialUtilities::compute_composition_fractions(bulk_compositions);
+              const MaxwellCoefficients bulk_coefficients =
+                compute_maxwell_coefficients(
+                  compute_creep_viscosity(bulk_fractions,
+                                          temperatures[particle_index]),
+                  MaterialUtilities::average_value(
+                    bulk_fractions, elastic_shear_moduli, viscosity_averaging),
+                  time_step);
+
+              SymmetricTensor<2,dim> effective_strain_rate =
+                symmetrize(velocity_gradients[particle_index]);
+              double new_H = properties[H_position];
+              if (association.active)
+                {
+                  const ReconstructedFault<dim> &fault =
+                    faults[association.fault_index];
+                  Tensor<1,dim> tangent =
+                    fault.vertex(association.segment_index+1)
+                    - fault.vertex(association.segment_index);
+                  tangent /= tangent.norm();
+                  Tensor<1,dim> normal;
+                  normal[0] = -tangent[1];
+                  normal[1] = tangent[0];
+                  const SymmetricTensor<2,dim> slip_tensor =
+                    symmetrize(outer_product(tangent, normal));
+
+                  const LocalizationResponse localization =
+                    evaluate_reconstructed_fault_localization(
+                      association.fault_index, association.segment_index,
+                      association.xi, phase_fields[particle_index],
+                      previous_phase_fields[particle_index], "history commit");
+                  const MaxwellCoefficients surface_coefficients =
+                    compute_maxwell_coefficients(
+                      compute_creep_viscosity(
+                        localization.surface_material_fractions,
+                        localization.surface_temperature),
+                      MaterialUtilities::average_value(
+                        localization.surface_material_fractions,
+                        elastic_shear_moduli, viscosity_averaging),
+                      time_step);
+                  const double slip_rate = fault_manager.interpolate_slip_rate(
+                    association.fault_index, association.segment_index,
+                    association.xi);
+                  const CohesiveResponse cohesive = compute_cohesive_response(
+                    surface_coefficients, localization.current_I_h,
+                    localization.previous_I_h,
+                    localization.previous_cohesive_traction, slip_rate,
+                    localization.current_h, localization.previous_h);
+                  effective_strain_rate -= cohesive.crack_strain_rate*slip_tensor;
+
+                  AssertThrow(std::isfinite(new_H) && new_H >= 0.0,
+                              ExcMessage("Stored crack-driving history is inadmissible."));
+                  // This parameter freezes the driving history, not the phase-field
+                  // solve. Maxwell and surface histories still follow mechanics.
+                  if (evolve_phase_field)
+                    {
+                      const double xi = association.xi;
+                      const double projected_traction =
+                        (1.0-xi) * cohesive_projection.nodal_values[
+                          association.fault_index][association.segment_index]
+                        + xi * cohesive_projection.nodal_values[
+                          association.fault_index][association.segment_index+1];
+                      const double H_candidate =
+                        compute_crack_driving_force_candidate(
+                          time_step, surface_coefficients,
+                          localization.current_degradation,
+                          localization.previous_h, projected_traction,
+                          localization.previous_cohesive_traction);
+                      new_H = std::max(new_H, H_candidate);
+                    }
+                }
+
+              ParticleCandidate candidate;
+              candidate.stress = compute_maxwell_stress(
+                bulk_coefficients, effective_strain_rate, old_stress);
+              candidate.crack_driving_force = new_H;
+              AssertThrow(std::isfinite(candidate.stress.norm())
+                          && std::isfinite(candidate.crack_driving_force)
+                          && candidate.crack_driving_force >= 0.0,
+                          ExcMessage("Stage-J particle history candidate is inadmissible."));
+              particle_candidates.emplace(particle.get_id(), candidate);
+              ++particle_index;
+            }
+        }
+      catch (const std::exception &exception)
+        {
+          local_error = exception.what();
+        }
+      throw_if_history_error(local_error, this->get_mpi_communicator());
+
+      // Every rank validates before the first persistent write. The terminal
+      // block below performs only fixed-size scalar assignments.
+      const unsigned int local_valid =
+        particle_candidates.size() == particle_handler.n_locally_owned_particles()
+        ? 1u : 0u;
+      AssertThrow(Utilities::MPI::min(local_valid, this->get_mpi_communicator()) == 1,
+                  ExcMessage("Stage-J history candidates are incomplete."));
+
+      validate_cohesive_state_commit(cohesive_projection.nodal_values);
+      for (const auto &particle : particle_handler)
+        AssertThrow(particle_candidates.find(particle.get_id())
+                    != particle_candidates.end(),
+                    ExcMessage("Stage-J history candidates do not match the locally "
+                               "owned particle IDs."));
+
+      for (unsigned int fault = 0;
+           fault < cohesive_projection.diagnostics.size(); ++fault)
+        this->get_pcout()
+          << "   Cohesive traction profile variation for fault " << fault
+          << ": weighted RMS="
+          << cohesive_projection.diagnostics[fault].weighted_rms_residual
+          << " Pa, maximum="
+          << cohesive_projection.diagnostics[fault].maximum_absolute_residual
+          << " Pa" << std::endl;
+
+      commit_cohesive_state(cohesive_projection.nodal_values);
+
+      if (fault_friction.has_state_variable())
+        {
+          const unsigned int state_position =
+            fault_manager.get_property_information()[
+              fault_property_indices.state].position;
+          for (unsigned int fault = 0; fault < faults.size(); ++fault)
+            for (unsigned int vertex = 0;
+                 vertex < faults[fault].n_vertices(); ++vertex)
+              fault_manager.get_fault(fault).get_properties(vertex)[state_position]
+                = state_candidates[fault][vertex];
+        }
+
+      for (auto &particle : particle_handler)
+        {
+          const ParticleCandidate &candidate =
+            particle_candidates.find(particle.get_id())->second;
+          ArrayView<double> properties = particle.get_properties();
+          for (unsigned int component = 0;
+               component < SymmetricTensor<2,dim>::n_independent_components;
+               ++component)
+            properties[stress_position+component] =
+              candidate.stress[
+                SymmetricTensor<2,dim>::unrolled_to_component_indices(component)];
+          properties[H_position] = candidate.crack_driving_force;
+        }
+    }
+
+
+
+    template <int dim>
+    double
+    PhaseFieldFault<dim>::compute_reconstructed_fault_time_step(
+      const double cfl_number) const
+    {
+      AssertThrow(std::isfinite(cfl_number) && cfl_number > 0.0,
+                  ExcMessage("The reconstructed-fault timestep requires a positive CFL number."));
+      const ReconstructedFaultManager<dim> &fault_manager =
+        this->get_reconstructed_fault_manager();
+      AssertThrow(fault_manager.slip_rates_are_initialized(),
+                  ExcMessage("The reconstructed-fault timestep requires committed V."));
+
+      double time_step = std::numeric_limits<double>::max();
+      for (unsigned int fault = 0;
+           fault < fault_manager.get_faults().size(); ++fault)
+        for (unsigned int vertex = 0;
+             vertex < fault_manager.get_fault(fault).n_vertices(); ++vertex)
+          {
+            std::vector<double> surface_compositions(
+              fault_property_indices.chemical_compositions.size());
+            for (unsigned int c = 0; c < surface_compositions.size(); ++c)
+              {
+                const auto &property = fault_manager.get_property_information()[
+                  fault_property_indices.chemical_compositions[c]];
+                surface_compositions[c] = fault_manager.get_fault(fault)
+                                          .get_properties(vertex)[property.position];
+              }
+            const std::vector<double> surface_fractions =
+              MaterialUtilities::compute_composition_fractions(
+                surface_compositions);
+            time_step = std::min(
+              time_step,
+              fault_friction.compute_time_step(
+                surface_fractions,
+                fault_manager.get_timestep_committed_slip_rate(fault)[vertex],
+                cfl_number, true));
+          }
+      return time_step;
+    }
+
+
+
     // -----------------------------------------------------------------------------
     // Cohesive constitutive law
     // -----------------------------------------------------------------------------
@@ -602,6 +1263,8 @@ namespace aspect
       Assert(xi >= 0.0 && xi <= 1.0, ExcInternalError());
       AssertDimension(current_normalization_integrals.size(),
                       fault_manager.get_faults().size());
+      AssertDimension(current_fault_surface_temperatures.size(),
+                      fault_manager.get_faults().size());
 
       std::vector<double> surface_compositions(
         fault_property_indices.chemical_compositions.size());
@@ -619,6 +1282,11 @@ namespace aspect
       LocalizationResponse response;
       response.surface_material_fractions =
         MaterialUtilities::compute_composition_fractions(surface_compositions);
+      AssertDimension(current_fault_surface_temperatures[fault_index].size(),
+                      fault.n_vertices());
+      response.surface_temperature =
+        (1.0-xi) * current_fault_surface_temperatures[fault_index][segment_index]
+        + xi * current_fault_surface_temperatures[fault_index][segment_index+1];
       const unsigned int previous_I_h_position =
         fault_manager.get_property_information()[
           fault_property_indices.previous_normalization_integral].position;
@@ -647,6 +1315,7 @@ namespace aspect
       const double previous_degradation =
         phase_field_handler.energetic_degradation(
           response.surface_material_fractions, previous_phi);
+      response.current_degradation = current_degradation;
       response.current_h = normalization_integrand(
         current_phi, current_degradation, context);
       response.previous_h = normalization_integrand(
@@ -710,8 +1379,45 @@ namespace aspect
 
     template <int dim>
     void
+    PhaseFieldFault<dim>::validate_cohesive_state_commit(
+      const std::vector<std::vector<double>> &cohesive_tractions) const
+    {
+      const ReconstructedFaultManager<dim> &fault_manager =
+        this->get_reconstructed_fault_manager();
+      const auto &faults = fault_manager.get_faults();
+      AssertThrow(cohesive_tractions.size() == faults.size(),
+                  ExcMessage("Committed cohesive traction has the wrong number of faults."));
+      AssertThrow(current_normalization_integrals.size() == faults.size(),
+                  ExcMessage("Committed previous I_h has the wrong number of faults."));
+
+      for (unsigned int fault = 0; fault < faults.size(); ++fault)
+        {
+          AssertThrow(cohesive_tractions[fault].size()
+                      == faults[fault].n_vertices(),
+                      ExcMessage("Committed cohesive traction has the wrong number "
+                                 "of fault vertices."));
+          AssertThrow(current_normalization_integrals[fault].size()
+                      == faults[fault].n_vertices(),
+                      ExcMessage("Committed previous I_h has the wrong number of "
+                                 "fault vertices."));
+          for (unsigned int vertex = 0; vertex < faults[fault].n_vertices(); ++vertex)
+            {
+              AssertThrow(std::isfinite(cohesive_tractions[fault][vertex])
+                          && cohesive_tractions[fault][vertex] >= 0.0,
+                          ExcMessage("Committed cohesive traction must be finite and nonnegative."));
+              AssertThrow(std::isfinite(current_normalization_integrals[fault][vertex])
+                          && current_normalization_integrals[fault][vertex] > 0.0,
+                          ExcMessage("Committed previous I_h must be finite and positive."));
+            }
+        }
+    }
+
+
+
+    template <int dim>
+    void
     PhaseFieldFault<dim>::commit_cohesive_state(
-      const std::vector<std::vector<double>> &cohesive_tractions)
+      const std::vector<std::vector<double>> &cohesive_tractions) noexcept
     {
       ReconstructedFaultManager<dim> &fault_manager =
         this->get_reconstructed_fault_manager();
@@ -723,21 +1429,6 @@ namespace aspect
         fault_manager.get_property_information()[
           fault_property_indices.previous_normalization_integral].position;
 
-      for (unsigned int fault = 0; fault < faults.size(); ++fault)
-        {
-          for (unsigned int vertex = 0; vertex < faults[fault].n_vertices(); ++vertex)
-            {
-              AssertThrow(std::isfinite(cohesive_tractions[fault][vertex])
-                          && cohesive_tractions[fault][vertex] >= 0.0,
-                          ExcMessage("Committed cohesive traction must be finite and nonnegative."));
-              AssertThrow(std::isfinite(current_normalization_integrals[fault][vertex])
-                          && current_normalization_integrals[fault][vertex] > 0.0,
-                          ExcMessage("Committed previous I_h must be finite and positive."));
-            }
-        }
-
-      // Validation above makes the following update atomic with respect to
-      // constitutive input errors.
       for (unsigned int fault = 0; fault < faults.size(); ++fault)
         for (unsigned int vertex = 0; vertex < faults[fault].n_vertices(); ++vertex)
           {
@@ -768,15 +1459,15 @@ namespace aspect
         fault_manager.get_property_information()[
           fault_property_indices.previous_normalization_integral].position;
 
+      compute_normalization_integrals();
       if (cohesive_history_is_initialized(faults,
                                           cohesive_position,
                                           normalization_position))
         return;
-
-      compute_normalization_integrals();
       const auto projection = fault_manager.project_particle_scalar(
         evaluate_initial_cohesive_particle_values());
       initial_cohesive_projection_diagnostics = projection.diagnostics;
+      validate_cohesive_state_commit(projection.nodal_values);
       commit_cohesive_state(projection.nodal_values);
 
       for (unsigned int fault = 0; fault < projection.diagnostics.size(); ++fault)
@@ -941,8 +1632,12 @@ namespace aspect
       const PhaseFieldHandler<dim> &phase_field_handler =
         this->get_phase_field_handler();
 
+      // First project each named chemical field to the fault. Every normal
+      // profile then keeps its surface mixture fixed along both +/-n sides.
       project_surface_chemical_compositions();
 
+      // Surface quadrature profiles are distributed by deterministic global
+      // profile id; each profile is integrated by exactly one rank.
       const std::vector<NormalizationProfile> profiles =
         build_owned_normalization_profiles();
 
@@ -968,6 +1663,9 @@ namespace aspect
             const Point<dim> &point,
             const NormalizationPointSample &sample)
         {
+          // Profile overlap is unsupported. Small negative FE undershoot is
+          // diagnosed globally and evaluated at phi_eff=max(phi_h,0), whereas
+          // the upper singular limit is deliberately never clipped.
           const auto projection = fault_manager.project_to_normal_profiles(point);
           AssertThrow(!projection.active
                       || projection.fault_index == profile.fault_index,
@@ -1006,6 +1704,8 @@ namespace aspect
                                          evaluate_points,
                                          integrand);
 
+      // Reduce the raw minimum and its owning-rank context before applying the
+      // empirical excessive-undershoot guard, so every rank reports one diagnosis.
       current_minimum_raw_normalization_phase_field = Utilities::MPI::min(
         local_minimum_raw_phase_field, this->get_mpi_communicator());
       const unsigned int minimum_rank = Utilities::MPI::min(
@@ -1020,6 +1720,8 @@ namespace aspect
       validate_normalization_phase_field_minimum(
         current_minimum_raw_normalization_phase_field, minimum_context);
 
+      // Project distributed profile integrals through one consistent Q1 mass
+      // solve, producing the replicated vertex field used by constitutive calls.
       project_normalization_integrals_to_fault(profiles, profile_integrals);
     }
 
@@ -1112,6 +1814,9 @@ namespace aspect
       // the same batched point-evaluation collectives until every side has
       // satisfied either the domain-boundary or two-window tail criterion.
       std::vector<std::array<NormalizationSideState,2>> states(profiles.size());
+
+      // Seed both sides with a mesh-aware panel no wider than ell/2 or half the
+      // origin-cell diameter; this prevents under-resolving the near-fault peak.
       std::vector<Point<dim>> origin_points;
       origin_points.reserve(profiles.size());
       for (const NormalizationProfile &profile : profiles)
@@ -1135,6 +1840,8 @@ namespace aspect
 
       while (true)
         {
+          // Batch one request for every locally incomplete side. Ranks with no
+          // local work still enter evaluation until the global count reaches zero.
           unsigned int local_incomplete_sides = 0;
           std::vector<Point<dim>> points;
           std::vector<NormalizationEvaluationRequest> requests;
@@ -1190,6 +1897,8 @@ namespace aspect
               NormalizationSideState &state = states[request.profile][request.side];
               if (request.boundary_probe)
                 {
+                  // A missing quadrature sample brackets the domain boundary;
+                  // bisect it until a representable final in-domain panel remains.
                   const double midpoint = request.zeta[0];
                   if (samples[request.first_point].found)
                     state.boundary_low = midpoint;
@@ -1221,6 +1930,8 @@ namespace aspect
                   continue;
                 }
 
+              // Locate the first out-of-domain sample in physical profile order,
+              // independent of the order in which the two quadrature rules sample.
               double first_missing = std::numeric_limits<double>::max();
               double last_found_before_missing = state.panel_start;
               const std::vector<double> &zeta = request.zeta;
@@ -1247,6 +1958,8 @@ namespace aspect
                   continue;
                 }
 
+              // Use the embedded four/eight-point difference as the local panel
+              // error estimate; reject by halving without advancing the profile.
               double integral_4 = 0.0;
               double integral_8 = 0.0;
               double panel_cell_diameter = std::numeric_limits<double>::max();
@@ -1284,6 +1997,9 @@ namespace aspect
                   continue;
                 }
 
+              // Accepted panels accumulate into ell-wide tail windows. Two
+              // successive small windows terminate a tail without assuming it
+              // is monotone; reaching the domain boundary terminates immediately.
               AssertThrow(std::isfinite(integral_8),
                           ExcMessage("I_h panel quadrature produced an unusable integral."));
               state.integral += integral_8;
@@ -1311,6 +2027,8 @@ namespace aspect
 
               if (!state.complete)
                 {
+                  // Grow accepted panels conservatively, capped by both ell and
+                  // the smallest sampled bulk-cell diameter.
                   state.panel_start += state.panel_width;
                   state.panel_width =
                     std::min({2.0*state.panel_width,
@@ -1321,6 +2039,8 @@ namespace aspect
             }
         }
 
+      // The normalization integral is the sum of the independently advanced
+      // +n and -n sides for each owned surface quadrature point.
       std::vector<double> integrals(profiles.size());
       for (unsigned int p = 0; p < profiles.size(); ++p)
         integrals[p] = states[p][0].integral + states[p][1].integral;
@@ -1460,6 +2180,9 @@ namespace aspect
 
       std::vector<NormalizationProfile> profiles;
       profiles.reserve(end_owned_profile - first_owned_profile);
+
+      // Global profile ids define a rank-independent contiguous ownership
+      // partition over fault segments and surface quadrature points.
       unsigned int profile_id = 0;
       for (unsigned int fault_index = 0; fault_index < faults.size(); ++fault_index)
         {
@@ -1486,6 +2209,9 @@ namespace aspect
                                      + profile.xi * fault.vertex(segment + 1);
                     profile.normal = normal;
 
+                    // Interpolate the already projected surface compositions
+                    // once. This material mixture is invariant along the entire
+                    // two-sided normal profile used to evaluate I_h.
                     std::vector<double> chemical_compositions(
                       chemical_composition_positions.size());
                     for (unsigned int c = 0;
@@ -1536,6 +2262,9 @@ namespace aspect
           local_systems[fault].rhs.assign(faults[fault].n_vertices(), 0.0);
         }
 
+      // Assemble the consistent Q1 surface mass projection from profiles owned
+      // by this rank; positivity of the resulting nodal field is tested for the
+      // intended profiles but is not assumed for arbitrary input data.
       for (unsigned int profile_index = 0;
            profile_index < profiles.size(); ++profile_index)
         {
@@ -1554,6 +2283,8 @@ namespace aspect
           system.rhs[vertex+1] += profile.surface_weight * shape[1] * normalization;
         }
 
+      // The faults are replicated and profile ownership is distributed. One
+      // packed sum gives every rank the same global mass systems.
       unsigned int packed_size = 0;
       for (const ReconstructedFault<dim> &fault : faults)
         packed_size += 3 * fault.n_vertices() - 1;
@@ -1573,6 +2304,9 @@ namespace aspect
         }
       std::vector<double> global_values(packed_size);
       Utilities::MPI::sum(local_values, this->get_mpi_communicator(), global_values);
+
+      // Solve one replicated tridiagonal Q1 projection per fault and publish
+      // the resulting vertex values as the current constitutive I_h field.
       position = 0;
       for (unsigned int fault = 0; fault < faults.size(); ++fault)
         {
