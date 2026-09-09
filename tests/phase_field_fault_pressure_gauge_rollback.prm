@@ -1,0 +1,10 @@
+# Enable if: ASPECT_WITH_VORO
+# Failure after one accepted update; original shifted bulk state must survive.
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_stage_i_rollback.prm
+set Max nonlinear iterations = 1
+set Pressure normalization = volume
+subsection Material model
+  subsection Phase field fault
+    set Use adiabatic pressure in fault friction = true
+  end
+end

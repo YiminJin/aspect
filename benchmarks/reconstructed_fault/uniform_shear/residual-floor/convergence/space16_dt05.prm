@@ -1,0 +1,5 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/convergence/space16_dt05.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/residual-floor/convergence/space16_dt05
+subsection Checkpointing
+  set Steps between checkpoint = 9
+end

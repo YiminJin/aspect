@@ -15,6 +15,8 @@
 #include <aspect/simulator/assemblers/interface.h>
 #include <aspect/simulator_access.h>
 
+#include <array>
+
 namespace aspect
 {
   namespace MaterialModel
@@ -25,7 +27,7 @@ namespace aspect
 
   namespace Assemblers
   {
-    /** Bulk weak-form terms produced by reconstructed-fault slip. */
+    /** Bulk weak-form terms from frozen Maxwell history and fault slip. */
     template <int dim>
     class ReconstructedFaultStokes : public Interface<dim>,
       public SimulatorAccess<dim>
@@ -36,7 +38,7 @@ namespace aspect
         explicit ReconstructedFaultStokes(const Simulator<dim> &simulator);
         ~ReconstructedFaultStokes() override;
 
-        /** Add the active fault residual contribution to the Stokes RHS. */
+        /** Add -R from frozen bulk stress and active fault slip to the Stokes RHS. */
         void execute(internal::Assembly::Scratch::ScratchBase<dim> &scratch,
                      internal::Assembly::CopyData::CopyDataBase<dim> &data) const override;
 
@@ -58,6 +60,8 @@ namespace aspect
       private:
         struct BLinearization;
         const MaterialModel::PhaseFieldFault<dim> &phase_field_fault;
+        std::array<unsigned int, SymmetricTensor<2,dim>::n_independent_components>
+          stress_composition_indices;
         std::unique_ptr<BLinearization> B_linearization;
         unsigned int B_linearization_rebuild_count = 0;
     };

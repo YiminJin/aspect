@@ -1,0 +1,3 @@
+# Diagnostic replay: physical/numerical inputs unchanged; output-only override.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/convergence/space16_dt05.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/linearization-diagnosis/replay

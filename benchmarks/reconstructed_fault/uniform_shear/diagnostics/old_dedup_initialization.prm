@@ -1,0 +1,3 @@
+# Only the output destination differs from the unchanged initialization fixture.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/diagnostics/initialization.prm
+set Output directory = output-old-dedup

@@ -1,0 +1,89 @@
+{
+  "passed": true,
+  "steps": [
+    {
+      "step": 9,
+      "time_s": 4.5,
+      "bulk": {
+        "ux": 0.0,
+        "uy": 0.0,
+        "p": 0.0,
+        "phi": 0.0,
+        "old_tau_xy": 0.0
+      },
+      "surface": {
+        "V": 0.0,
+        "Theta": 0.0,
+        "C": 0.0,
+        "Ih": 0.0
+      },
+      "particles": {
+        "H": 0.0,
+        "tau_xy": 0.0
+      }
+    },
+    {
+      "step": 10,
+      "time_s": 5.0,
+      "bulk": {
+        "ux": 0.0,
+        "uy": 0.0,
+        "p": 0.0,
+        "phi": 0.0,
+        "old_tau_xy": 0.0
+      },
+      "surface": {
+        "V": 0.0,
+        "Theta": 0.0,
+        "C": 0.0,
+        "Ih": 0.0
+      },
+      "particles": {
+        "H": 0.0,
+        "tau_xy": 0.0
+      }
+    },
+    {
+      "step": 11,
+      "time_s": 5.5,
+      "bulk": {
+        "ux": 0.0,
+        "uy": 0.0,
+        "p": 0.0,
+        "phi": 0.0,
+        "old_tau_xy": 0.0
+      },
+      "surface": {
+        "V": 0.0,
+        "Theta": 0.0,
+        "C": 0.0,
+        "Ih": 0.0
+      },
+      "particles": {
+        "H": 0.0,
+        "tau_xy": 0.0
+      }
+    },
+    {
+      "step": 12,
+      "time_s": 6.0,
+      "bulk": {
+        "ux": 0.0,
+        "uy": 0.0,
+        "p": 0.0,
+        "phi": 0.0,
+        "old_tau_xy": 0.0
+      },
+      "surface": {
+        "V": 0.0,
+        "Theta": 0.0,
+        "C": 0.0,
+        "Ih": 0.0
+      },
+      "particles": {
+        "H": 0.0,
+        "tau_xy": 0.0
+      }
+    }
+  ]
+}

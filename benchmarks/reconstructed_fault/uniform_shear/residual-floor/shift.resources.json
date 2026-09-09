@@ -1,0 +1,16 @@
+{
+  "command": [
+    "/home/ein/repository/aspect/build-pf-cpdi/aspect-debug",
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/residual-floor/shift.prm"
+  ],
+  "cwd": "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/diagnostics/pilot-build",
+  "executable_sha256": "a5be287e70bd67f5ea9414aa3b9e48b773be1c87bfa5f8f29e79126878ba9040",
+  "parameter_sha256": "d6d4b287fb4078a9e642591e9157adf8f52fc708c0af62648d26baf121dc1cca",
+  "configuration": "Debug",
+  "plugin_sha256": "a64acf00057e61440cd369f5c5ca21e6d0f23c882ea2b90f83bbfa546f10d86d",
+  "git_head": "f4032b1824ef4892020af8c58ef981aca03dc0ec",
+  "ranks": 1,
+  "exit_status": 1,
+  "wall_seconds": 804.936542685,
+  "peak_rss_KiB": 477044
+}

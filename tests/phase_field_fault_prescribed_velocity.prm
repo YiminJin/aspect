@@ -1,0 +1,30 @@
+# Initial nonzero loading followed by changed loading; no tolerance relaxation.
+# Enable if: ASPECT_WITH_VORO
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_stage_i.prm
+set End time = 0.01
+set Maximum time step = 0.01
+set Nonlinear solver failure strategy = abort program
+set CFL number = 1e-6
+subsection Termination criteria
+  set Termination criteria = end step
+  set End step = 1
+end
+subsection Phase field model
+  set Length scale = 0.3125
+end
+subsection Mesh refinement
+  set Initial global refinement = 5
+end
+subsection Initial composition model
+  subsection Function
+    set Function expression = 0; 0; 0; 0.5
+  end
+end
+subsection Boundary velocity model
+  subsection Function
+    set Function expression = if(t>0,2e-4,1e-4); 0
+  end
+end
+subsection Postprocess
+  set List of postprocessors = particles, verify phase field fault stage i
+end

@@ -290,6 +290,31 @@ namespace aspect
 
 
 
+    template <int dim>
+    SymmetricTensor<2,dim>
+    PhaseFieldFault<dim>::evaluate_frozen_maxwell_stress(
+      const double temperature,
+      const std::vector<double> &composition,
+      const SymmetricTensor<2,dim> &old_stress) const
+    {
+      const auto fractions = MaterialUtilities::compute_only_composition_fractions(
+        composition, this->introspection().chemical_composition_field_indices());
+      const double eta = compute_creep_viscosity(fractions, temperature);
+      const double G = MaterialUtilities::average_value(
+        fractions, elastic_shear_moduli, viscosity_averaging);
+      const double dt = this->get_timestep_number() > 0
+                        ? this->get_timestep() : initial_time_step;
+      return compute_maxwell_coefficients(eta, G, dt).beta * old_stress;
+    }
+
+
+    template <int dim>
+    bool PhaseFieldFault<dim>::uses_adiabatic_friction_pressure() const
+    {
+      return use_adiabatic_pressure_in_fault_friction;
+    }
+
+
     // -----------------------------------------------------------------------------
     // Material-model interface
     // -----------------------------------------------------------------------------
@@ -335,8 +360,8 @@ namespace aspect
 
           if (in.requests_property(MaterialProperties::viscosity))
             {
-              // Set the output viscosity to be the viscoelastic viscosity (It will not be used in the assemblers,
-              // but might be requested by some other functions, like Simulator::compute_pressure_scaling_factor()).
+              // The ordinary Stokes assembler uses kappa for the current strain
+              // rate; the reconstructed-fault assembler supplies the frozen stress.
               const double G = MaterialUtilities::average_value(
                 volume_fractions, elastic_shear_moduli, viscosity_averaging);
               const double eta = compute_creep_viscosity(volume_fractions, in.temperature[i]);
@@ -1305,8 +1330,13 @@ namespace aspect
 
       const double current_phi = normalization_effective_phase_field(
         phase_field, context);
-      const double previous_phi = normalization_effective_phase_field(
-        previous_phase_field, context + " history");
+      // The initial mechanical solve has no earlier physical profile. Use
+      // the converged phi_0 with its initialized I_h snapshot, not the zero
+      // old_solution placeholder. This changes evaluation, not retained history.
+      const double previous_phi = this->get_timestep_number() == 0
+                                  ? current_phi
+                                  : normalization_effective_phase_field(
+                                      previous_phase_field, context + " history");
       const PhaseFieldHandler<dim> &phase_field_handler =
         this->get_phase_field_handler();
       const double current_degradation =

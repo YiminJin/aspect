@@ -1,0 +1,3 @@
+# Output-only override: the accepted K1 physics, support and tolerances are unchanged.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/pilot.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/diagnostics/coupled-pilot

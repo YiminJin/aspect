@@ -1,0 +1,3 @@
+# Diagnostic destination only: all solver/physical settings are the K1 pilot's.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/pilot.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/diagnostics/line-search-output

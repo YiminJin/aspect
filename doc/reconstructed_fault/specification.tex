@@ -1215,6 +1215,20 @@ Stokes right-hand side.  The frozen
 $-2\kappa\upsilon^{\rm hist}\boldsymbol S$ contribution is part of the
 absolute residual even though it does not contribute to $B$.
 
+The same ordinary cell assembler supplies the frozen Maxwell-history load
+\[
+ -\int_\Omega \beta\boldsymbol\tau_{\rm old}:
+       \dot{\boldsymbol\epsilon}(\boldsymbol w)\,d\Omega
+\]
+to the Newton right-hand side exactly once, over the entire bulk, not just
+fault-associated QPs. Its positive counterpart is part of the bulk residual.
+Evaluate $\beta\boldsymbol\tau_{\rm old}$ pointwise using the local bulk
+composition and temperature. The explicitly mapped stress compositional
+fields in the current working FE vector represent the frozen particle
+history; do not read an older FE timestep or evolve that history in a trial.
+The slip-only residual and $B$ actions remain unchanged. Timestep-zero history
+retention and terminal history publication retain their established semantics.
+
 A fault-slip increment changes stress by
 \begin{equation}
  \delta\boldsymbol\tau
@@ -1321,9 +1335,47 @@ $B$ action uses the same homogeneous constraints, and constrained entries of
 the returned algebraic vector are zero.  Inhomogeneous solution values shall
 never enter a Jacobian direction.
 
+Before the first coupled residual at each timestep, distribute the current
+physical inhomogeneous constraints into a private bulk base iterate. This
+includes initial nonzero and later changed prescribed velocities. Subsequent
+Newton residual and matrix assembly uses homogeneous Stokes constraints: the
+lift is already present in the physical iterate and shall not be subtracted
+again by local-to-global elimination. Preserve auxiliary-field constraints and
+restore the caller's constraints on exit. A failed solve shall discard this
+private lift along with all accepted nonlinear updates, without changing the
+production bulk solution or timestep-committed $V$.
+
+For prescribed adiabatic friction pressure, apply the existing ASPECT
+\texttt{Pressure normalization} rule to the private physical base and every
+physical trial before residual and merit evaluation. The modes
+\texttt{volume}, \texttt{surface}, and \texttt{no} retain their standard
+mean-pressure semantics. Do not normalize a homogeneous direction to an
+inhomogeneous surface-pressure target or change solver pressure scaling.
+Both published bulk vectors shall inherit the same normalized accepted
+iterate. Its pressure-normalization adjustment remains private until the
+terminal commit; rejection or failure leaves published bookkeeping unchanged.
+Every normalization allocation and MPI collective precedes all history and
+$V$ writes. This gauge-only correction shall not shift pressure in the
+true-normal-stress friction mode, where it would change the surface equation.
+
 The supported assembled iterative path shall use FGMRES.  The condensed
 operator is generally nonsymmetric because $B$ and $G$ are not assumed to be
 transposes, so CG and MINRES are not valid outer solvers.  Verification shall
+also check a freshly computed residual of every returned linear direction;
+the Arnoldi residual estimate alone is insufficient. Residual replacement and
+restart share the existing total iteration budget. In incompressible,
+prescribed-friction-pressure closed/periodic configurations only, a verified
+constant-pressure null mode may be removed algebraically. Verify both null
+identities for the full homogeneous constrained condensed operator; $B$ has
+no pressure rows, while the right-null test includes $G$ and the current
+surface inverse. Project operator and preconditioner consistently. Reject
+RHS or residual incompatibility larger than either $100\epsilon_{\rm mach}$
+times the maximum of the initial bulk residual, zero-velocity reference,
+and current condensed RHS norm, or the unchanged absolute nonlinear bulk
+target. Retain and report raw and projected residuals. This numerical
+backward-error check introduces no physical parameter and does not alter
+physical pressure normalization, homogeneous Newton constraints, or true-
+normal-stress/absolute-pressure configurations. Verification shall
 include a small explicit solve of the complete two-block system compared with
 the condensed solve and recovery, and a multiple-fault case.  Stage H does not
 connect nonlinear commit/rollback.
@@ -1371,10 +1423,40 @@ nonlinear failure and shall not accept the last unsuccessful candidate.
 
 Bulk and projected-free surface residuals use separate, fixed normalization
 scales during a mechanical solve and must independently satisfy the nonlinear
-tolerance. Their scale floors are based on the existing initial Stokes
-residual convention and the current surface-Jacobian action, using
-$\max(\epsilon_{\rm linear},\sqrt{\epsilon_{\rm mach}})$ rather than a new
-dimensional parameter. If a block and its reference scale are exactly zero,
+tolerance. The bulk scale floor retains the initial Stokes residual convention
+using $\max(\epsilon_{\rm linear},\sqrt{\epsilon_{\rm mach}})$.
+Include the independently calculated absolute bulk precision scale
+\[
+ d_i=\sum_{c\in\{u,p\}}\sum_{j\in c}|(A_0)_{ij}|\,
+                  \|(x_0)_c\|_\infty,
+ \qquad \rho_b=\epsilon_{\rm mach}\|d\|_2,
+ \qquad x_0=(u_0,p_0/s_p).
+\]
+Here $A_0$ and $x_0$ are the first homogeneous-constraint bulk matrix and
+physical iterate in solver coordinates. Absolute row sums bound the response
+to machine-precision bulk perturbations at those block magnitudes; MPI sums
+count owned rows once. This is not a fitted stagnation floor or a physical
+error estimate. The mixed bulk criterion is
+$\|R_b\|<\epsilon_{\rm nl}s_b+\rho_b$. Use
+$s_b^{\rm mixed}=s_b+\rho_b/\epsilon_{\rm nl}$ in both convergence and merit,
+fixed throughout the solve. Pressure-compatibility projection retains its
+original relative-target cap; fresh linear verification and the independent
+surface criterion are unchanged. Bulk FE gradients are evaluated after
+removing a cellwise constant velocity, whose gradient is exactly zero, to
+reduce assembly cancellation. This cannot remove rounding of the represented
+iterate. Stagnation above the mixed target remains failure.
+The surface scale is fixed at the first stabilized linearization as
+\[
+s_\Gamma=\max\bigl(\|P_{\mathcal F}R_{\Gamma,0}\|_\Gamma,
+                     \|R_{\Gamma,0}\|_\Gamma,
+                     \|K_V V_{\rm char}\|_\Gamma\bigr),\qquad
+V_{{\rm char},i}=\max(V_{\min},|V_i|),
+\]
+with both reference norms evaluated on all vertices. This characteristic
+traction scale is not suppressed by a roundoff multiplier, and is used
+unchanged for both convergence and the Armijo merit throughout the solve.
+No dimensional parameter is added; configured tolerances and the line-search
+budget are unchanged. If a block and its reference scale are exactly zero,
 its normalized residual is zero only while that block remains exactly zero.
 
 The surface residual is a weak Q1 nodal vector. Let $M_\Gamma$ be the
@@ -1422,6 +1504,15 @@ physically evolve $\Theta_0$ or $H_0$ with the artificial
 irreversible $H_0$, initialization-specific $T_0^{\rm coh}$, and initialized
 particle Maxwell stress. It shall store $I_{h,0}$ as the previous-normalization
 snapshot required by the first real timestep.
+
+For the initial mechanical evaluation, use the converged $\phi_0$ as both
+current and previous phase profile, consistently with this initialized
+previous-$I_h$ snapshot. The initially zero phase block in
+\texttt{old\_solution} is not an earlier physical profile. The shared pointwise
+localization evaluation used by surface and bulk coupling shall apply this
+rule without overwriting the old finite-element vector or advancing any
+retained history. At $k>0$, including after restart, continue to use the actual
+previous finite-element phase field.
 
 For $k>0$, distinguish bulk and surface Maxwell coefficients. Bulk
 coefficients use particle-local material fractions and temperature. Surface

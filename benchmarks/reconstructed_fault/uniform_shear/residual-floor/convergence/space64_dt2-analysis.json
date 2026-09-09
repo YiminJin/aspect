@@ -1,0 +1,204 @@
+{
+  "geometry": {
+    "length_m": 0.25,
+    "vertices": 33,
+    "max_abs_y_m": 1.770600123379099e-15,
+    "max_angle_rad": 4.811107254430554e-16,
+    "endpoints": [
+      [
+        0.0,
+        1.7441498182647498e-15
+      ],
+      [
+        0.25,
+        1.7501200984330088e-15
+      ]
+    ],
+    "normal_half_widths_m": [
+      0.3088215939070757,
+      0.3088215939070757
+    ]
+  },
+  "profile": {
+    "raw_min": 4.093234285060004e-09,
+    "raw_max": 0.5997640169067923,
+    "max_along_fault_phi_range": 3.3306690738754696e-15,
+    "independent_Ih_m": 108.14483384352549,
+    "independent_Ih_range_m": [
+      108.14483384352471,
+      108.14483384352633
+    ],
+    "max_Ih_quadrature_change_m": 0.0,
+    "max_midpoint_Ih_relative_error": 3.4562344536962176e-12,
+    "max_projected_Ih_relative_error": 3.45636585946208e-12,
+    "max_omitted_strip_fraction": 5.913959442005252e-05
+  },
+  "initialization": {
+    "C_mean_Pa": 317.51376268478646,
+    "C_projection_max_error_Pa": 1.7053025658242404e-13,
+    "H": {
+      "max_relative_error": 2.914124091815548e-07,
+      "max_along_fault_range_Pa": 2.8703652787953615e-09
+    },
+    "endpoint_projection_mass_m2": [
+      0.001596097592954247,
+      0.0015960975929542225
+    ]
+  },
+  "steps": [
+    {
+      "step": 0,
+      "time_s": 0.0,
+      "dt_s": 2.0,
+      "U_m_s": 0.0001,
+      "V_mean_m_s": 0.00031539921266708555,
+      "V_reference_m_s": 0.0003153740828437764,
+      "V_error_m_s": 2.512982330918085e-08,
+      "V_along_fault_range_over_scale": 1.0598076236045806e-12,
+      "C_mean_Pa": 317.51376268478646,
+      "C_reference_Pa": 317.51376268478646,
+      "C_along_fault_range_over_scale": 1.4438228390645236e-14,
+      "Theta_mean_s": 200.00000000000267,
+      "Theta_reference_s": 200.00000000000267,
+      "Theta_reference_increment_s": 0.0,
+      "Theta_along_fault_range_over_scale": 3.126388037344441e-14,
+      "Theta_vertex_update_error_s": 0.0,
+      "prescribed_velocity_max_error_m_s": 2.0328790734103208e-20,
+      "evaluated_stress_mean_Pa": 1043.8165040885492,
+      "evaluated_stress_reference_Pa": 1043.8287523953766,
+      "evaluated_stress_range_Pa": 1.0627996837858973,
+      "retained_particle_stress_mean_Pa": 1500.0,
+      "integrated_slip_normalization": 0.9999399357275288,
+      "particle_volume_sum_m2": 0.249999999999999,
+      "particle_volume_relative_extrema": [
+        0.999999999999929,
+        1.000000000000057
+      ],
+      "max_transverse_velocity_m_s": 2.1534686084564253e-18,
+      "transverse_velocity_rms_m_s": 4.036421253130982e-19,
+      "divergence_rms_s_inv": 4.7292242874110254e-18,
+      "accumulated_slip_m": 0.0,
+      "accumulated_reference_slip_m": 0.0
+    },
+    {
+      "step": 1,
+      "time_s": 2.0,
+      "dt_s": 2.0,
+      "U_m_s": 0.00011000000000000002,
+      "V_mean_m_s": 0.00032449736422524754,
+      "V_reference_m_s": 0.0003244714830551828,
+      "V_error_m_s": 2.5881170064717685e-08,
+      "V_along_fault_range_over_scale": 6.957865295205423e-07,
+      "C_mean_Pa": 317.1681179645978,
+      "C_reference_Pa": 317.16764408021305,
+      "C_along_fault_range_over_scale": 8.493405706152165e-10,
+      "Theta_mean_s": 105.98545593728097,
+      "Theta_reference_s": 105.99089996422693,
+      "Theta_reference_increment_s": -94.00910003577575,
+      "Theta_along_fault_range_over_scale": 7.317642555904058e-08,
+      "Theta_vertex_update_error_s": 0.0,
+      "prescribed_velocity_max_error_m_s": 2.710505431213761e-20,
+      "evaluated_stress_mean_Pa": 1045.6033657417427,
+      "evaluated_stress_reference_Pa": 1045.616019724096,
+      "evaluated_stress_range_Pa": 1.09346033923498,
+      "retained_particle_stress_mean_Pa": 1045.6142961375422,
+      "integrated_slip_normalization": 0.9999399357276162,
+      "particle_volume_sum_m2": 0.24999999796446482,
+      "particle_volume_relative_extrema": [
+        0.817461335296974,
+        1.1825364970587042
+      ],
+      "max_transverse_velocity_m_s": 6.964788142513051e-13,
+      "transverse_velocity_rms_m_s": 4.4188738697714786e-14,
+      "divergence_rms_s_inv": 5.6588137465945625e-14,
+      "accumulated_slip_m": 0.0006489947284504951,
+      "accumulated_reference_slip_m": 0.0006489429661103657
+    },
+    {
+      "step": 2,
+      "time_s": 4.0,
+      "dt_s": 2.0,
+      "U_m_s": 0.00012,
+      "V_mean_m_s": 0.0001361164912159645,
+      "V_reference_m_s": 0.00013610679336197563,
+      "V_error_m_s": 9.69785398887606e-09,
+      "V_along_fault_range_over_scale": 9.527373684360858e-07,
+      "C_mean_Pa": 313.3800623569046,
+      "C_reference_Pa": 313.3794202882936,
+      "C_along_fault_range_over_scale": 1.9954998530617254e-09,
+      "Theta_mean_s": 82.47753801026978,
+      "Theta_reference_s": 82.48326665595044,
+      "Theta_reference_increment_s": -23.507633308276482,
+      "Theta_along_fault_range_over_scale": 1.3344435338069615e-07,
+      "Theta_vertex_update_error_s": 1.4210854715202004e-14,
+      "prescribed_velocity_max_error_m_s": 2.710505431213761e-20,
+      "evaluated_stress_mean_Pa": 993.0131441389336,
+      "evaluated_stress_reference_Pa": 993.0178475877426,
+      "evaluated_stress_range_Pa": 0.45891489861276114,
+      "retained_particle_stress_mean_Pa": 993.0177290977825,
+      "integrated_slip_normalization": 0.9999399357275499,
+      "particle_volume_sum_m2": 0.2499999932196743,
+      "particle_volume_relative_extrema": [
+        0.6247435205814535,
+        1.3752474675390565
+      ],
+      "max_transverse_velocity_m_s": 9.441821970257063e-13,
+      "transverse_velocity_rms_m_s": 5.4867885190380686e-14,
+      "divergence_rms_s_inv": 1.2507360824554625e-13,
+      "accumulated_slip_m": 0.000921227710882424,
+      "accumulated_reference_slip_m": 0.000921156552834317
+    },
+    {
+      "step": 3,
+      "time_s": 6.0,
+      "dt_s": 2.0,
+      "U_m_s": 0.00012,
+      "V_mean_m_s": 0.00011670289147356536,
+      "V_reference_m_s": 0.00011669406757273643,
+      "V_error_m_s": 8.823900828926461e-09,
+      "V_along_fault_range_over_scale": 1.2541958477904711e-06,
+      "C_mean_Pa": 309.3115521278228,
+      "C_reference_Pa": 309.31076120734286,
+      "C_along_fault_range_over_scale": 3.486939969358597e-09,
+      "Theta_mean_s": 67.09211168116575,
+      "Theta_reference_s": 67.09781557455938,
+      "Theta_reference_increment_s": -15.385451081391068,
+      "Theta_along_fault_range_over_scale": 1.8865011981006318e-07,
+      "Theta_vertex_update_error_s": 1.4210854715202004e-14,
+      "prescribed_velocity_max_error_m_s": 3.3881317890172014e-20,
+      "evaluated_stress_mean_Pa": 979.8972530244505,
+      "evaluated_stress_reference_Pa": 979.9009615772387,
+      "evaluated_stress_range_Pa": 0.39331683145564966,
+      "retained_particle_stress_mean_Pa": 979.9011840537744,
+      "integrated_slip_normalization": 0.9999399357275972,
+      "particle_volume_sum_m2": 0.2499999954526848,
+      "particle_volume_relative_extrema": [
+        0.5754613130818399,
+        1.424530618450558
+      ],
+      "max_transverse_velocity_m_s": 1.2599303214024585e-12,
+      "transverse_velocity_rms_m_s": 7.765426687404048e-14,
+      "divergence_rms_s_inv": 2.2852726316277647e-13,
+      "accumulated_slip_m": 0.0011546334938295547,
+      "accumulated_reference_slip_m": 0.0011545446879797899
+    }
+  ],
+  "completed_to_6_seconds": true,
+  "containment_allowance": {
+    "value": 0.0001,
+    "scope": "provisional K1 only",
+    "full_Ih_reference_unchanged": true,
+    "completed_refinement_campaign": false
+  },
+  "assumption_checks": {
+    "straight_centered_fault": true,
+    "contained_profiles": true,
+    "projected_Ih": true,
+    "integrated_slip": true,
+    "along_fault_uniformity": true,
+    "transverse_velocity": true,
+    "divergence": true,
+    "prescribed_velocities": true
+  },
+  "trajectory_comparison_valid": true
+}

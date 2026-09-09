@@ -1,0 +1,3 @@
+# Unchanged half-second fixture; the solver advances past 4.5 only on convergence.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/convergence/space16_dt05.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/linear-correction/one

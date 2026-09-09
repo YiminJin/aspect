@@ -1,0 +1,140 @@
+# Run from the benchmark plugin build directory; exports support MPI ranks.
+set Additional shared libraries = ./libuniform_shear.so
+set Output directory = output-pilot
+set Dimension = 2
+set Use years instead of seconds = false
+set End time = 6
+set Maximum time step = 2
+set CFL number = 0.5
+set Nonlinear solver scheme = single Advection, iterated Newton Stokes
+set Nonlinear solver tolerance = 1e-8
+set Max nonlinear iterations = 30
+set Nonlinear solver failure strategy = abort program
+set Surface pressure = 1000
+set Pressure normalization = volume
+subsection Formulation
+  set Enable phase field = true
+  set Reconstruct faults from phase field = true
+end
+subsection Geometry model
+  set Model name = box
+  subsection Box
+    set Box origin Y coordinate = -0.5
+    set X extent = 0.25
+    set Y extent = 1
+    set X repetitions = 1
+    set Y repetitions = 4
+    set X periodic = true
+  end
+end
+subsection Gravity model
+  set Model name = vertical
+  subsection Vertical
+    set Magnitude = 0
+  end
+end
+subsection Initial temperature model
+  set Model name = function
+  subsection Function
+    set Function expression = 293
+  end
+end
+subsection Compositional fields
+  set Number of fields = 4
+  set Names of fields = tau_xx, tau_yy, tau_xy, theta_initial
+  set Types of fields = stress, stress, stress, generic
+  set Compositional field methods = particles, particles, particles, particles
+  set Mapped particle properties = tau_xx:maxwell stress[0], tau_yy:maxwell stress[1], tau_xy:maxwell stress[2], theta_initial:phase field fault state[0]
+end
+subsection Initial composition model
+  set Model name = function
+  subsection Function
+    set Function expression = 0; 0; 1500; 200
+  end
+end
+subsection Material model
+  set Model name = phase field fault
+  subsection Phase field fault
+    # This freezes H only. The plugin constrains phi after converged initialization.
+    set Evolve phase field = false
+    set Reference viscosities = 1e8
+    set Minimum viscosity = 1e6
+    set Maximum viscosity = 1e10
+    set Elastic shear moduli = 1e6
+    set Cohesions = 1000
+    set Critical energy release rates = 26.666666666666667
+    set Initial time step = 2
+    set Friction law = rate state
+    set Reference friction coefficients = 0.6
+    set Direct effect parameters = 0.025
+    set Evolution effect parameters = 0.013
+    set Characteristic slip distance = 0.001
+    set Reference slip rate = 1e-5
+    set Minimum slip rate = 1e-12
+    set Radiation damping coefficients = 1e5
+    set Use regularized formulation = true
+    set Use adiabatic pressure in fault friction = true
+    set I h quadrature tolerance = 1e-10
+    set I h tail tolerance = 1e-10
+  end
+end
+subsection Phase field model
+  set Length scale = 0.15625
+  set Geometric function type = AT1
+  set Degradation curvature parameter = 1
+end
+subsection Fault reconstruction
+  set Structural point spacing = 0.03125
+  set Ridge coefficient = 1
+  set Prescribed faults file = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/fault.txt
+end
+subsection Mesh refinement
+  set Initial global refinement = 4
+  set Initial adaptive refinement = 0
+  set Time steps between mesh refinement = 0
+end
+subsection Temperature field
+  set Temperature method = static
+end
+subsection Solver parameters
+  subsection Stokes solver parameters
+    set Stokes solver type = block AMG
+    set Linear solver tolerance = 1e-9
+  end
+  subsection Phase field solver parameters
+    set Linear solver tolerance = 2e-7
+    set Nonlinear solver tolerance = 1e-8
+    set Max nonlinear iterations = 50
+  end
+end
+subsection Boundary velocity model
+  set Prescribed velocity boundary indicators = bottom:function, top:function
+  subsection Function
+    set Function expression = y*1e-4*(1+0.2*min(t/4,1)); 0
+  end
+end
+subsection Time stepping
+  set List of model names = convection time step, reconstructed fault time step
+end
+subsection Particles
+  set Particle generator name = reference cell
+  set Integration scheme = rk2
+  set List of particle properties = crack driving force, initial composition, maxwell stress
+  set Generate particle domains = true
+  set Generate CPDI data for particle domains = true
+  set Load balancing strategy = none
+  subsection Generator
+    subsection Reference cell
+      set Number of particles per cell per direction = 3
+    end
+  end
+  subsection Initial composition
+    set List of field names = theta_initial
+  end
+end
+subsection Postprocess
+  set List of postprocessors = particles, uniform shear pilot
+  subsection Particles
+    set Data output format = none
+  end
+end

@@ -12,6 +12,10 @@
 #include <aspect/simulator/solver/reconstructed_fault_condensed_system.h>
 
 #include <aspect/simulator/assemblers/reconstructed_fault_stokes.h>
+#include <aspect/material_model/phase_field_fault.h>
+#include <aspect/boundary_velocity/interface.h>
+#include <aspect/geometry_model/interface.h>
+#include <aspect/plugins.h>
 
 namespace aspect
 {
@@ -68,6 +72,32 @@ namespace aspect
                   && this->introspection().block_indices.pressure == 1,
                   ExcMessage("The coupled reconstructed-fault solver requires "
                              "separate velocity and pressure blocks in positions 0 and 1."));
+
+      // Open/traction boundaries or pressure-dependent equations may fix p.
+      // Partial component masks are conservatively excluded from eligibility.
+      const auto &material = Plugins::get_plugin_as_type<
+        const MaterialModel::PhaseFieldFault<dim>>(this->get_material_model());
+      pressure_gauge_candidate = material.uses_adiabatic_friction_pressure()
+                                 && !material.is_compressible()
+                                 && !this->get_parameters().mesh_deformation_enabled;
+      auto open = this->get_geometry_model().get_used_boundary_indicators();
+      const auto &velocity = this->get_boundary_velocity_manager();
+      for (const auto id : velocity.get_zero_boundary_velocity_indicators()) open.erase(id);
+      for (const auto id : velocity.get_tangential_boundary_velocity_indicators()) open.erase(id);
+      for (const auto id : velocity.get_prescribed_boundary_velocity_indicators())
+        {
+          const auto mask = velocity.get_component_mask(id);
+          bool all_velocity_components = true;
+          for (unsigned int c=0; c<dim; ++c)
+            all_velocity_components &= mask[this->introspection().component_indices.velocities[c]];
+          if (all_velocity_components) open.erase(id);
+        }
+      for (const auto &pair : this->get_geometry_model().get_periodic_boundary_pairs())
+        {
+          open.erase(pair.first.first);
+          open.erase(pair.first.second);
+        }
+      pressure_gauge_candidate &= open.empty();
     }
 
 
@@ -209,6 +239,68 @@ namespace aspect
       homogeneous_stokes_constraints->set_zero(constrained);
       constrained.compress(VectorOperation::insert);
       return constrained;
+    }
+
+
+    template <int dim>
+    LinearAlgebra::BlockVector
+    ReconstructedFaultCondensedSystem<dim>::Linearization::
+    verified_pressure_nullspace(double &right_error, double &left_error) const
+    {
+      assert_is_current();
+      LinearAlgebra::BlockVector q(owner.introspection().index_sets.stokes_partitioning,
+                                   owner.get_mpi_communicator());
+      right_error = left_error = 0.;
+      if (!owner.pressure_gauge_candidate)
+        return q;
+
+      // A prescribed pressure DoF fixes the gauge, unlike hanging/periodic
+      // relations. Never overwrite such a physical/algebraic constraint.
+      bool pressure_is_fixed = false;
+      for (const auto &line : homogeneous_stokes_constraints->get_lines())
+        if (line.index >= q.block(0).size() && line.entries.empty())
+          pressure_is_fixed = true;
+      if (Utilities::MPI::max(static_cast<unsigned int>(pressure_is_fixed),
+                             owner.get_mpi_communicator()) != 0)
+        return q;
+
+      if (!owner.get_parameters().use_locally_conservative_discretization)
+        q.block(1) = 1.;
+      else
+        {
+          // FE_DGP's first local basis function is the constant, as in
+          // ASPECT's existing pressure-normalization implementation.
+          const auto &fe = owner.get_fe();
+          std::vector<types::global_dof_index> indices(fe.dofs_per_cell);
+          const auto constant = fe.component_to_system_index(
+            owner.introspection().component_indices.pressure, 0);
+          for (const auto &cell : owner.get_dof_handler().active_cell_iterators())
+            if (cell->is_locally_owned())
+              {
+                cell->get_dof_indices(indices);
+                q[indices[constant]] = 1.;
+              }
+          q.compress(VectorOperation::insert);
+        }
+      homogeneous_stokes_constraints->set_zero(q);
+      q /= q.l2_norm();
+
+      LinearAlgebra::BlockVector right(q), left(q);
+      vmult(right, q); // Includes G, the current free-set K_V solve, and B.
+      right_error = right.l2_norm();
+
+      // B has only velocity rows, so q^T B=0 identically. Thus these are
+      // exactly the left-null tests for C=A-B K_V^{-1} G, not merely for A.
+      bulk_matrix.block(1,0).Tvmult(left.block(0), q.block(1));
+      bulk_matrix.block(1,1).Tvmult(left.block(1), q.block(1));
+      homogeneous_stokes_constraints->set_zero(left);
+      left_error = left.l2_norm();
+      const double roundoff = 100.*std::numeric_limits<double>::epsilon();
+      const double diagonal = bulk_matrix.block(1,1).frobenius_norm();
+      if (right_error > roundoff*(bulk_matrix.block(0,1).frobenius_norm()+diagonal)
+          || left_error > roundoff*(bulk_matrix.block(1,0).frobenius_norm()+diagonal))
+        q = 0.;
+      return q;
     }
 
 

@@ -1,0 +1,3 @@
+# Enable if: ASPECT_WITH_VORO
+# MPI: 2
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_frozen_stress.prm

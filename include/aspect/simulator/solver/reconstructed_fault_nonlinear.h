@@ -48,6 +48,18 @@ namespace aspect
                                        const double reference_norm,
                                        const double floor_factor);
 
+    /**
+     * Bulk residual scale of a machine-precision perturbation of the first
+     * physical iterate, expressed in solver coordinates (p/pressure_scaling).
+     * Uses absolute row sums and block maxima, not an observed residual floor.
+     * The vector must be owned, not ghosted; all ranks participate.
+     */
+    double
+    reconstructed_fault_bulk_precision_scale(
+      const LinearAlgebra::BlockSparseMatrix &matrix,
+      const LinearAlgebra::BlockVector &solver_state,
+      const MPI_Comm communicator);
+
     double
     normalized_reconstructed_fault_residual(const double residual_norm,
                                             const double scale,

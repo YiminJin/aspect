@@ -1,0 +1,313 @@
+{
+  "initialization": {
+    "mesh": [
+      64,
+      256
+    ],
+    "phi_center": 0.5997640169067917,
+    "phi_raw_min": 4.09323428509018e-09,
+    "Ih_m": 108.14483384352549,
+    "C0_Pa": 317.51376268478646,
+    "Theta0_s": 200.00000000000267,
+    "q0_retained_Pa": 1500.0
+  },
+  "completed_to_6_seconds": true,
+  "containment": {
+    "value": 0.0001,
+    "scope": "provisional K1 only",
+    "full_Ih_reference_unchanged": true,
+    "completed_refinement_campaign": false
+  },
+  "omitted_fraction": 5.913959442005252e-05,
+  "assumption_checks": {
+    "straight_centered_fault": true,
+    "contained_profiles": true,
+    "projected_Ih": true,
+    "integrated_slip": true,
+    "along_fault_uniformity": true,
+    "transverse_velocity": true,
+    "divergence": true,
+    "prescribed_velocities": true
+  },
+  "steps": [
+    {
+      "time_s": 0.0,
+      "dt_s": 2.0,
+      "raw_q_rms_error_Pa": 0.17429875403738154,
+      "raw_q_max_error_Pa": 0.5781959619316694,
+      "raw_q_min_Pa": 1043.344148673522,
+      "raw_q_max_Pa": 1044.4069483573082,
+      "velocity_rms_error_m_s": 7.89223768742751e-09,
+      "velocity_max_error_m_s": 1.1213527791650163e-08,
+      "pressure_min_Pa": -1.097230501250816e-10,
+      "pressure_max_Pa": 1.0732574044296715e-10,
+      "pressure_mean_Pa": -1.3631516442219084e-27,
+      "raw_q_along_fault_range_Pa": 2.4419932742603123e-10,
+      "normalization_ratio": 0.9999399357275288,
+      "normalization_rate_error_m_s": 1.894422424683244e-08,
+      "V": {
+        "min": 0.0003153992126670102,
+        "max": 0.0003153992126671162,
+        "mean": 0.00031539921266708555,
+        "reference": 0.0003153740828437764,
+        "max_error": 2.512982333980956e-08,
+        "endpoint_values": [
+          0.00031539921266703205,
+          0.0003153992126670102
+        ]
+      },
+      "Theta": {
+        "min": 199.99999999999974,
+        "max": 200.000000000006,
+        "mean": 200.00000000000267,
+        "reference": 200.00000000000267,
+        "max_error": 3.325340003357269e-12,
+        "endpoint_values": [
+          200.00000000000085,
+          200.00000000000193
+        ]
+      },
+      "C": {
+        "min": 317.51376268478,
+        "max": 317.51376268480163,
+        "mean": 317.51376268478646,
+        "reference": 317.51376268478646,
+        "max_error": 1.517719283583574e-11,
+        "endpoint_values": [
+          317.51376268479754,
+          317.51376268480163
+        ]
+      },
+      "log10_V_ratio_max": 3.460432992686086e-05,
+      "resolved_conditional_checks": {
+        "raw_q": true,
+        "velocity_max": true,
+        "velocity_rms": true,
+        "V": true,
+        "Theta": true,
+        "C": true,
+        "slip": true
+      },
+      "accumulated_slip_m": 0.0,
+      "reference_slip_m": 0.0
+    },
+    {
+      "time_s": 2.0,
+      "dt_s": 2.0,
+      "raw_q_rms_error_Pa": 0.179330343213679,
+      "raw_q_max_error_Pa": 0.5948241144924395,
+      "raw_q_min_Pa": 1045.1173834993535,
+      "raw_q_max_Pa": 1046.2108438385885,
+      "velocity_rms_error_m_s": 8.125621209489498e-09,
+      "velocity_max_error_m_s": 1.1545136387931831e-08,
+      "pressure_min_Pa": -3.349288490286208e-05,
+      "pressure_max_Pa": 3.349289104554604e-05,
+      "pressure_mean_Pa": 4.1661145421689306e-23,
+      "raw_q_along_fault_range_Pa": 1.7494714256827137e-05,
+      "normalization_ratio": 0.9999399357276162,
+      "normalization_rate_error_m_s": 1.9490698072653188e-08,
+      "V": {
+        "min": 0.00032449733718071714,
+        "max": 0.0003244974067593701,
+        "mean": 0.00032449736422524754,
+        "reference": 0.0003244714830551828,
+        "max_error": 2.5923704187263367e-08,
+        "endpoint_values": [
+          0.00032449740675852257,
+          0.0003244974067593701
+        ]
+      },
+      "Theta": {
+        "min": 105.98544699058611,
+        "max": 105.98546162587122,
+        "mean": 105.98545593728097,
+        "reference": 105.99089996422693,
+        "max_error": 0.005452973640814207,
+        "endpoint_values": [
+          105.98544699076382,
+          105.98544699058611
+        ]
+      },
+      "C": {
+        "min": 317.1681174694065,
+        "max": 317.1681187434174,
+        "mean": 317.1681179645978,
+        "reference": 317.16764408021305,
+        "max_error": 0.0004746632043293175,
+        "endpoint_values": [
+          317.16811874339413,
+          317.1681187434174
+        ]
+      },
+      "log10_V_ratio_max": 3.469664528365155e-05,
+      "resolved_conditional_checks": {
+        "raw_q": true,
+        "velocity_max": true,
+        "velocity_rms": true,
+        "V": true,
+        "Theta": true,
+        "C": true,
+        "slip": true
+      },
+      "accumulated_slip_m": 0.0006489947284504951,
+      "reference_slip_m": 0.0006489429661103657
+    },
+    {
+      "time_s": 4.0,
+      "dt_s": 2.0,
+      "raw_q_rms_error_Pa": 0.07520020427497709,
+      "raw_q_max_error_Pa": 0.2502494092756251,
+      "raw_q_min_Pa": 992.8091820984055,
+      "raw_q_max_Pa": 993.2680969970182,
+      "velocity_rms_error_m_s": 2.107945811249335e-09,
+      "velocity_max_error_m_s": 3.341560730064073e-09,
+      "pressure_min_Pa": -7.111926019530166e-05,
+      "pressure_max_Pa": 7.227099454264444e-05,
+      "pressure_mean_Pa": -2.335492760755189e-23,
+      "raw_q_along_fault_range_Pa": 3.893191376391769e-05,
+      "normalization_ratio": 0.9999399357275499,
+      "normalization_rate_error_m_s": 8.175738013345815e-09,
+      "V": {
+        "min": 0.00013611645442637685,
+        "max": 0.0001361165497001137,
+        "mean": 0.0001361164912159645,
+        "reference": 0.00013610679336197563,
+        "max_error": 9.75633813806733e-09,
+        "endpoint_values": [
+          0.00013611653740439793,
+          0.0001361165497001137
+        ]
+      },
+      "Theta": {
+        "min": 82.4775216555629,
+        "max": 82.47754834443357,
+        "mean": 82.47753801026978,
+        "reference": 82.48326665595044,
+        "max_error": 0.005745000387548771,
+        "endpoint_values": [
+          82.47752366143474,
+          82.4775216555629
+        ]
+      },
+      "C": {
+        "min": 313.38006119789884,
+        "max": 313.3800641911486,
+        "mean": 313.3800623569046,
+        "reference": 313.3794202882936,
+        "max_error": 0.0006439028550175863,
+        "endpoint_values": [
+          313.38006396599076,
+          313.3800641911486
+        ]
+      },
+      "log10_V_ratio_max": 3.112976110789803e-05,
+      "resolved_conditional_checks": {
+        "raw_q": true,
+        "velocity_max": true,
+        "velocity_rms": true,
+        "V": true,
+        "Theta": true,
+        "C": true,
+        "slip": true
+      },
+      "accumulated_slip_m": 0.000921227710882424,
+      "reference_slip_m": 0.000921156552834317
+    },
+    {
+      "time_s": 6.0,
+      "dt_s": 2.0,
+      "raw_q_rms_error_Pa": 0.06444257988172117,
+      "raw_q_max_error_Pa": 0.2148009459943978,
+      "raw_q_min_Pa": 979.7224456917775,
+      "raw_q_max_Pa": 980.1157625232331,
+      "velocity_rms_error_m_s": 2.3684858117159495e-09,
+      "velocity_max_error_m_s": 3.41720162218707e-09,
+      "pressure_min_Pa": -0.00011763900579344704,
+      "pressure_max_Pa": 0.00012147474177672489,
+      "pressure_mean_Pa": -1.5849556018340279e-22,
+      "raw_q_along_fault_range_Pa": 6.813039999542525e-05,
+      "normalization_ratio": 0.9999399357275972,
+      "normalization_rate_error_m_s": 7.009674263661856e-09,
+      "V": {
+        "min": 0.00011670284315985473,
+        "max": 0.00011670296857943951,
+        "mean": 0.00011670289147356536,
+        "reference": 0.00011669406757273643,
+        "max_error": 8.901006703075122e-09,
+        "endpoint_values": [
+          0.00011670296303289146,
+          0.00011670296857943951
+        ]
+      },
+      "Theta": {
+        "min": 67.0920885274755,
+        "max": 67.09212625749946,
+        "mean": 67.09211168116575,
+        "reference": 67.09781557455938,
+        "max_error": 0.005727047083880166,
+        "endpoint_values": [
+          67.09209084977003,
+          67.0920885274755
+        ]
+      },
+      "C": {
+        "min": 309.3115501071435,
+        "max": 309.31155533755344,
+        "mean": 309.3115521278228,
+        "reference": 309.31076120734286,
+        "max_error": 0.0007941302105791692,
+        "endpoint_values": [
+          309.3115550152974,
+          309.31155533755344
+        ]
+      },
+      "log10_V_ratio_max": 3.312516868363778e-05,
+      "resolved_conditional_checks": {
+        "raw_q": true,
+        "velocity_max": true,
+        "velocity_rms": true,
+        "V": true,
+        "Theta": true,
+        "C": true,
+        "slip": true
+      },
+      "accumulated_slip_m": 0.0011546334938295547,
+      "reference_slip_m": 0.0011545446879797899
+    }
+  ],
+  "resolved_conditional_pass": true,
+  "temporal_reference_dt_s": 0.001953125,
+  "temporal_reference": [
+    {
+      "time_s": 2.0,
+      "V": 0.00010289061169194287,
+      "Theta": 100.75929349623031,
+      "C": 317.6250509170788,
+      "q": 986.2918405836525,
+      "slip": 0.0007031258390694162
+    },
+    {
+      "time_s": 4.0,
+      "V": 0.0001119409368483995,
+      "Theta": 83.13403321037421,
+      "C": 313.2963899140997,
+      "q": 982.4763694067254,
+      "slip": 0.0009172655620705856
+    },
+    {
+      "time_s": 6.0,
+      "V": 0.00011356273545644613,
+      "Theta": 68.06593849922702,
+      "C": 309.16740970339026,
+      "q": 976.2694393782592,
+      "slip": 0.0011438816953720163
+    }
+  ],
+  "temporal_reference_self_difference": {
+    "V": 2.4493652039939075e-08,
+    "Theta": 0.0012646041131318952,
+    "C": 0.00015410851028718753,
+    "q": 0.010785002958186851,
+    "slip": 1.0650167889952877e-08
+  }
+}

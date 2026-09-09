@@ -1,0 +1,9 @@
+# Isolate a changed physical loading after a homogeneous timestep-zero solve.
+# Enable if: ASPECT_WITH_VORO
+# MPI: 2
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_prescribed_velocity.prm
+subsection Boundary velocity model
+  subsection Function
+    set Function expression = if(t>0,1e-4,0); 0
+  end
+end

@@ -1,0 +1,17 @@
+# Bounded K2.1: reuse the resolved K1 discretization and physical initializer.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/convergence/space64_dt05.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/nonuniform/output
+set End time = 2
+subsection Initial composition model
+  subsection Function
+    # Compact C3 bump; exactly unperturbed near the periodic boundaries.
+    set Function expression = 0; 0; 1500; 200*(1+0.05*if(abs(x-0.125)<0.0625,(1+cos(pi*(x-0.125)/0.0625))^2/4,0))
+  end
+end
+subsection Postprocess
+  set List of postprocessors = particles, uniform shear pilot, visualization, reconstructed faults
+  subsection Visualization
+    set Time between graphical output = 0
+    set Output format = vtu
+  end
+end

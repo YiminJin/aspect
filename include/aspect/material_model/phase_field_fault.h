@@ -148,7 +148,19 @@ namespace aspect
         evaluate_reconstructed_fault_bulk_point(
           const ReconstructedFaultBulkPointInputs &inputs) const;
 
+        /** Frozen beta*tau_old at any bulk point, independent of fault support.
+         * Composition contains all compositional fields in introspection order. */
+        SymmetricTensor<2,dim>
+        evaluate_frozen_maxwell_stress(const double temperature,
+                                      const std::vector<double> &composition,
+                                      const SymmetricTensor<2,dim> &old_stress) const;
+
         double minimum_fault_slip_rate() const;
+
+        /** Whether friction uses prescribed adiabatic rather than bulk pressure.
+         * Only in this mode can a constant bulk-pressure shift be treated as
+         * a gauge operation without changing the surface equation. */
+        bool uses_adiabatic_friction_pressure() const;
 
         /**
          * Prepare frozen reconstructed-fault constitutive state for the

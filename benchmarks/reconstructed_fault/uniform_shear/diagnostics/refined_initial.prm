@@ -1,0 +1,7 @@
+# One fixed-ell uniform spatial refinement; accepted t=0 mechanics only.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/pilot.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/diagnostics/refined-initial
+set End time = 0
+subsection Mesh refinement
+  set Initial global refinement = 5
+end

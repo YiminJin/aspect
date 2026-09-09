@@ -15,6 +15,11 @@
 #include <aspect/reconstructed_fault/manager.h>
 #include <aspect/reconstructed_fault/utilities.h>
 #include <aspect/simulator/solver/reconstructed_fault_nonlinear.h>
+#include <aspect/simulator/solver/reconstructed_fault_linear.h>
+#include <deal.II/lac/full_matrix.h>
+#include <deal.II/lac/solver_gmres.h>
+#include <deal.II/lac/precondition.h>
+#include <deal.II/lac/block_sparsity_pattern.h>
 #include <aspect/utilities.h>
 
 #include <limits>
@@ -361,6 +366,74 @@ TEST_CASE("Stage-I Armijo exhaustion never accepts the last candidate")
 }
 
 
+TEST_CASE("Stage-I pressure complement agrees with an explicit full coupled solve")
+{
+  using namespace dealii;
+  using namespace aspect::internal;
+  FullMatrix<double> full(6), C(4);
+  const double A[4][4] = {{4,1,1,-1}, {1,3,2,-2}, {1,2,0,0}, {-1,-2,0,0}};
+  const double B[4] = {1,.5,0,0}, G[4] = {2,-1,0,0};
+  Vector<double> q(4), expected(6), rhs(6), reference(6), b(4), x(4), residual(4);
+  q[2] = q[3] = 1./std::sqrt(2.);
+  expected[0]=1e-12; expected[1]=-2e-12;
+  expected[2]=3e-12; expected[3]=-3e-12; expected[4]=4e-12;
+  for (unsigned int i=0; i<4; ++i)
+    {
+      for (unsigned int j=0; j<4; ++j)
+        {
+          full(i,j)=A[i][j];
+          C(i,j)=A[i][j]-B[i]*G[j]/3.;
+        }
+      full(i,4)=-B[i]; full(4,i)=G[i];
+      full(i,5)=full(5,i)=q[i];
+    }
+  full(4,4)=-3.;
+  full.vmult(rhs,expected);
+  for (unsigned int i=0; i<4; ++i) b[i]=rhs[i]-B[i]*rhs[4]/3.;
+  full.gauss_jordan();
+  full.vmult(reference,rhs);
+
+  Vector<double> check(4);
+  C.vmult(check,q); REQUIRE(check.l2_norm()<1e-15);
+  C.Tvmult(check,q); REQUIRE(check.l2_norm()<1e-15);
+  const PreconditionIdentity identity;
+  const FaultPressureComplementOperator<FullMatrix<double>,Vector<double>> op{C,q};
+  const FaultPressureComplementOperator<PreconditionIdentity,Vector<double>> preconditioner{identity,q};
+  SolverControl control(30,1e-9*b.l2_norm());
+  SolverFGMRES<Vector<double>> solver(control);
+  solver.solve(op,x,b,preconditioner);
+  project_fault_pressure(q,x);
+  for (unsigned int i=0; i<4; ++i) REQUIRE(std::abs(x[i]-reference[i])<1e-24);
+  double V=-rhs[4]/3.;
+  for (unsigned int i=0; i<4; ++i) V+=G[i]*x[i]/3.;
+  REQUIRE(std::abs(V-reference[4])<1e-24);
+
+  double raw, component;
+  REQUIRE(fault_true_linear_residual(C,q,x,b,residual,raw,component)<control.tolerance());
+  // An optimistic estimated residual must not certify a bad returned vector.
+  x[0]+=1e-6;
+  REQUIRE(fault_true_linear_residual(C,q,x,b,residual,raw,component)>control.tolerance());
+}
+
+TEST_CASE("Stage-I pressure compatibility rejects a significant RHS before projection")
+{
+  using namespace dealii;
+  using namespace aspect::internal;
+  const ThrowOnDealIIException throw_on_dealii_exception;
+  Vector<double> q(3), rhs(3);
+  q[1]=q[2]=1./std::sqrt(2.);
+  rhs[0]=1.; rhs.add(1e-6,q);
+  const Vector<double> saved(rhs);
+  REQUIRE_THROWS(project_compatible_fault_rhs(q,1e-14,rhs));
+  rhs-=saved; REQUIRE(rhs.l2_norm()==0.);
+  rhs[0]=1.; rhs.add(1e-16,q);
+  REQUIRE(project_compatible_fault_rhs(q,1e-14,rhs)==Approx(1e-16));
+  REQUIRE(std::abs(q*rhs)<1e-30);
+  rhs.add(147.,q);
+  project_fault_pressure(q,rhs);
+  REQUIRE(std::abs(q*rhs)<1e-25);
+}
+
 TEST_CASE("Stage-I bulk residual scale handles a zero initial block")
 {
   const double scale = aspect::internal::reconstructed_fault_residual_scale(
@@ -372,7 +445,67 @@ TEST_CASE("Stage-I bulk residual scale handles a zero initial block")
 }
 
 
-TEST_CASE("Stage-I surface residual scale handles a tiny initial block")
+TEST_CASE("Stage-I bulk precision scale is independent of the stalled residual")
+{
+  using namespace dealii;
+  using namespace aspect::internal;
+  const MPI_Comm comm = MPI_COMM_WORLD;
+  const std::vector<IndexSet> partition = {
+    Utilities::MPI::create_evenly_distributed_partitioning(comm,2),
+    Utilities::MPI::create_evenly_distributed_partitioning(comm,1)};
+  BlockDynamicSparsityPattern sparsity(2,2);
+  for (unsigned int b=0; b<2; ++b)
+    for (unsigned int c=0; c<2; ++c)
+      {
+        sparsity.block(b,c).reinit(partition[b].size(),partition[c].size());
+        for (unsigned int i=0; i<partition[b].size(); ++i)
+          for (unsigned int j=0; j<partition[c].size(); ++j)
+            sparsity.block(b,c).add(i,j);
+      }
+  sparsity.collect_sizes();
+  aspect::LinearAlgebra::BlockSparseMatrix matrix;
+  matrix.reinit(partition,sparsity,comm);
+  const double entries[3][3] = {{4.,-2.,3.},{-2.,5.,-1.},{3.,-1.,0.}};
+  aspect::LinearAlgebra::BlockVector state(partition,comm), perturbation(partition,comm), action(partition,comm);
+  const double x[3] = {2.,-1.,7.};
+  const double eps = std::numeric_limits<double>::epsilon();
+  for (unsigned int b=0; b<2; ++b)
+    for (const auto i : partition[b])
+      {
+        const unsigned int row = b == 0 ? i : 2;
+        state.block(b)[i] = x[row];
+        perturbation.block(b)[i] = eps*(b == 0 ? 2. : 7.);
+        for (unsigned int c=0; c<2; ++c)
+          for (unsigned int j=0; j<partition[c].size(); ++j)
+            matrix.block(b,c).set(i,j,entries[row][c == 0 ? j : 2]);
+      }
+  matrix.compress(VectorOperation::insert);
+  state.compress(VectorOperation::insert);
+  perturbation.compress(VectorOperation::insert);
+  const double precision = reconstructed_fault_bulk_precision_scale(matrix,state,comm);
+  REQUIRE(precision/eps == Approx(std::sqrt(33.*33.+21.*21.+8.*8.)));
+  matrix.vmult(action,perturbation);
+  REQUIRE(action.l2_norm() <= precision);
+  state *= 2.;
+  REQUIRE(reconstructed_fault_bulk_precision_scale(matrix,state,comm)/precision == Approx(2.));
+  state = 0.;
+  REQUIRE(reconstructed_fault_bulk_precision_scale(matrix,state,comm) == 0.);
+
+  // Mixed acceptance is a fixed absolute plus relative target, not permission
+  // to accept stagnation. A materially larger residual still fails both tests.
+  const double relative_scale = 1e-10, tolerance = 1e-8;
+  const double mixed_scale = relative_scale+precision/tolerance;
+  const double large = normalized_reconstructed_fault_residual(100.*precision,mixed_scale,"bulk");
+  REQUIRE(large > tolerance);
+  const auto result = reconstructed_fault_armijo_line_search(
+    1.,5,large*large/2.,[&](double) { return large*large/2.; },
+    [&](double) { FAIL("Stagnation above the mixed target was accepted."); });
+  REQUIRE_FALSE(result.accepted);
+  REQUIRE(result.rejected_candidates == 6);
+}
+
+
+TEST_CASE("Stage-I bulk residual floor handles a tiny initial block")
 {
   const double scale = aspect::internal::reconstructed_fault_residual_scale(
     1e-300, 1e-290, 1e-8);

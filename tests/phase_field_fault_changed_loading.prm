@@ -1,0 +1,7 @@
+# Nearly balanced surface block coupled to a changed shear loading.
+# Enable if: ASPECT_WITH_VORO
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/pilot.prm
+set End time = 2
+subsection Mesh refinement
+  set Initial global refinement = 3
+end

@@ -19,6 +19,34 @@ namespace aspect
 {
   namespace internal
   {
+    double
+    reconstructed_fault_bulk_precision_scale(
+      const LinearAlgebra::BlockSparseMatrix &matrix,
+      const LinearAlgebra::BlockVector &solver_state,
+      const MPI_Comm communicator)
+    {
+      // For |delta x_j| <= epsilon * max_block |x|, each residual row is
+      // bounded by epsilon * sum_j |A_ij| max_block |x|. Sum owned rows only;
+      // pressure is already in the same scaled coordinates as A's columns.
+      AssertDimension(solver_state.n_blocks(), 2);
+      const double magnitude[2] = {solver_state.block(0).linfty_norm(),
+                                   solver_state.block(1).linfty_norm()};
+      double local_square = 0.0;
+      for (unsigned int b=0; b<2; ++b)
+        for (const auto row : matrix.block(b,b).locally_owned_range_indices())
+          {
+            double row_bound = 0.0;
+            for (unsigned int c=0; c<2; ++c)
+              for (auto entry = matrix.block(b,c).begin(row);
+                   entry != matrix.block(b,c).end(row); ++entry)
+                row_bound += std::abs(entry->value()) * magnitude[c];
+            local_square += row_bound * row_bound;
+          }
+      return std::numeric_limits<double>::epsilon()
+             * std::sqrt(Utilities::MPI::sum(local_square, communicator));
+    }
+
+
     bool
     reconstructed_fault_locally_at_lower_bound(const double value,
                                                 const double minimum)

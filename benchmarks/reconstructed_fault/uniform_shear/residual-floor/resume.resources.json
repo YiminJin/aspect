@@ -1,0 +1,16 @@
+{
+  "command": [
+    "/home/ein/repository/aspect/build-pf-cpdi/aspect-release",
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/residual-floor/resume.prm"
+  ],
+  "cwd": "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/diagnostics/pilot-build",
+  "executable_sha256": "27a2defaf8fa44492d33c22235927cdf2a60cb4ed1c35e722c72f9345d9b61b4",
+  "parameter_sha256": "fa7583173951451fc25588925b04123257677388a28b56ee019e3e740555dd60",
+  "configuration": "Release",
+  "plugin_sha256": "fc4cfdfd0da17ef6ebd6e3914c6578c70725e02cb0860c4f7a288045c70709fc",
+  "git_head": "f4032b1824ef4892020af8c58ef981aca03dc0ec",
+  "ranks": 1,
+  "exit_status": 0,
+  "wall_seconds": 61.64736897199873,
+  "peak_rss_KiB": 260804
+}

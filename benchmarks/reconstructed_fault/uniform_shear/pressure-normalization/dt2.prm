@@ -1,0 +1,3 @@
+# The accepted K1 pilot, with an output-only override after the pressure-gauge fix.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/pilot.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/pressure-normalization/dt2

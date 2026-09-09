@@ -1020,6 +1020,58 @@ namespace aspect
 
 
 
+      std::pair<Triangulation<2>::active_cell_iterator, Point<2>>
+      cpdi_sample_owner(const Point<2> &point,
+                        const std::set<Triangulation<2>::active_cell_iterator> &cells,
+                        const Mapping<2> &mapping,
+                        const double eps)
+      {
+        std::pair<Triangulation<2>::active_cell_iterator, Point<2>> strict, fallback;
+        bool has_strict = false;
+        bool has_fallback = false;
+        double closest_distance = std::numeric_limits<double>::max();
+
+        // Independent inverse maps can leave a roundoff gap at a shared face.
+        // Choose one owner for the sample, not separate acceptance decisions
+        // for each cell; retain the existing half-open choice when available.
+        for (const auto &cell : cells)
+          {
+            const Point<2> unit = mapping.transform_real_to_unit_cell(cell, point);
+            if (is_inside_unit_cell(cell, unit, eps))
+              {
+                if (!has_strict || cell->id() < strict.first->id())
+                  strict = {cell, unit};
+                has_strict = true;
+              }
+
+            double distance = 0.0;
+            for (unsigned int d = 0; d < 2; ++d)
+              distance = std::max(distance, std::max(-unit[d], unit[d]-1.0));
+            if (distance <= eps &&
+                (!has_fallback || distance < closest_distance ||
+                 (distance == closest_distance && cell->id() < fallback.first->id())))
+              {
+                fallback = {cell, unit};
+                closest_distance = distance;
+                has_fallback = true;
+              }
+          }
+
+        if (has_strict)
+          return strict;
+
+        // Only a tolerance-near fallback is projected onto its chosen cell.
+        // Missing support beyond roundoff is a failure, not a zero basis value.
+        AssertThrow(has_fallback,
+                    ExcMessage("No candidate cell supports a 2-D CPDI sample within "
+                               "the reference-cell tolerance."));
+        for (unsigned int d = 0; d < 2; ++d)
+          fallback.second[d] = std::max(0.0, std::min(1.0, fallback.second[d]));
+        return fallback;
+      }
+
+
+
       double
       compute_voronoi_cell(const VoronoiCell<2>                                   &voronoi_cell,
                            const std::set<Triangulation<2>::active_cell_iterator> &cells,
@@ -1053,7 +1105,7 @@ namespace aspect
 
         if (compute_cpdi_data)
           {
-            // Tolerance parameter for function is_inside_unit_cell()
+            // Existing reference-cell tolerance, also used to close ownership gaps.
             constexpr double eps = 1.e-12;
             constexpr unsigned int dofs_per_cell = 4;
 
@@ -1061,6 +1113,14 @@ namespace aspect
             const unsigned int n_voro_vertices = voro_vertices.size();
 
             const Point<2> center = A_and_C.second;
+
+            // Fix the sample ownership before integrating any cell basis. The
+            // polygon, centroid triangles and particle volume remain unchanged.
+            std::vector<std::pair<Triangulation<2>::active_cell_iterator, Point<2>>> samples;
+            for (const auto &vertex : voro_vertices)
+              samples.push_back(cpdi_sample_owner(vertex, cells, mapping, eps));
+            if (n_voro_vertices > 3)
+              samples.push_back(cpdi_sample_owner(center, cells, mapping, eps));
 
             // Arrays storing the values of shape functions at the Voronoi vertices
             std::vector<std::array<double, dofs_per_cell>> N_v(n_voro_vertices);
@@ -1099,10 +1159,9 @@ namespace aspect
                 // Evaluate the shape functions at the vertices
                 for (unsigned int v = 0; v < n_voro_vertices; ++v)
                   {
-                    const Point<2> vertex_unit = mapping.transform_real_to_unit_cell(cell, voro_vertices[v]);
-                    if (is_inside_unit_cell(cell, vertex_unit, eps))
+                    if (samples[v].first == cell)
                       for (unsigned int i = 0; i < dofs_per_cell; ++i)
-                        N_v[v][i] = fe.shape_value(i, vertex_unit);
+                        N_v[v][i] = fe.shape_value(i, samples[v].second);
                     else
                       std::fill(N_v[v].begin(), N_v[v].end(), 0.0);
                   }
@@ -1110,10 +1169,9 @@ namespace aspect
                 if (n_voro_vertices > 3)
                   {
                     // Evaluate the shape functions at the centroid
-                    const Point<2> center_unit = mapping.transform_real_to_unit_cell(cell, center);
-                    if (is_inside_unit_cell(cell, center_unit, eps))
+                    if (samples.back().first == cell)
                       for (unsigned int i = 0; i < dofs_per_cell; ++i)
-                        N_c[i] = fe.shape_value(i, center_unit);
+                        N_c[i] = fe.shape_value(i, samples.back().second);
                     else
                       std::fill(N_c.begin(), N_c.end(), 0.0);
 

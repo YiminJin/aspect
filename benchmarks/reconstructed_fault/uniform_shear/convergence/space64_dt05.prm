@@ -1,0 +1,11 @@
+# K1 convergence: only mesh/fault resolution and real timestep vary.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/pilot.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/convergence/space64_dt05
+set Maximum time step = 0.5
+subsection Mesh refinement
+  set Initial global refinement = 6
+end
+subsection Fault reconstruction
+  set Structural point spacing = 0.0078125
+end
+

@@ -1,0 +1,15 @@
+# Enable if: ASPECT_WITH_VORO
+# EXPECT FAILURE
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_stage_i_rollback.prm
+set Max nonlinear iterations = 30
+subsection Material model
+  subsection Phase field fault
+    set Use adiabatic pressure in fault friction = true
+  end
+end
+subsection Solver parameters
+  subsection Stokes solver parameters
+    set Number of cheap Stokes solver steps = 0
+    set Maximum number of expensive Stokes solver steps = 1
+  end
+end

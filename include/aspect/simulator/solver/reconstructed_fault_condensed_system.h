@@ -84,6 +84,12 @@ namespace aspect
             make_physical_bulk_direction(
               const LinearAlgebra::BlockVector &solver_direction) const;
 
+            /** Unit algebraic constant-pressure null vector, or zero outside
+             * eligible prescribed-pressure closed domains. Verify both sides
+             * of the full constrained condensed operator before returning it. */
+            LinearAlgebra::BlockVector
+            verified_pressure_nullspace(double &right_error, double &left_error) const;
+
           private:
             friend class ReconstructedFaultCondensedSystem<dim>;
 
@@ -139,6 +145,7 @@ namespace aspect
         ReconstructedFaultSurfaceSystem<dim> &surface_system;
         Assemblers::ReconstructedFaultStokes<dim> &stokes_coupling;
         unsigned int active_generation = 0;
+        bool pressure_gauge_candidate = false;
     };
   }
 }

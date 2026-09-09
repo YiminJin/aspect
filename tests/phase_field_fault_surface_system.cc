@@ -591,6 +591,28 @@ namespace aspect
           const auto linearization = condensed_system.linearize(
             this->get_system_matrix(), this->get_solution(), V);
 
+          double right_null, left_null;
+          const auto pressure_null = linearization.verified_pressure_nullspace(right_null, left_null);
+          const auto &material = Plugins::get_plugin_as_type<
+            const MaterialModel::PhaseFieldFault<dim>>(this->get_material_model());
+          if (!material.uses_adiabatic_friction_pressure())
+            AssertThrow(pressure_null.l2_norm()==0.,
+                        ExcMessage("True-pressure coupling incorrectly enabled a pressure quotient."));
+          else
+            {
+#ifdef VERIFY_PRESSURE_QUOTIENT
+              AssertThrow(std::abs(pressure_null.l2_norm()-1.)<1e-12,
+                          ExcMessage("Closed prescribed-pressure coupling missed its pressure nullspace."));
+#endif
+              auto physical_null = linearization.make_physical_bulk_direction(pressure_null);
+              LinearAlgebra::BlockVector owned_null(
+                this->introspection().index_sets.system_partitioning,
+                this->get_mpi_communicator());
+              owned_null = physical_null;
+              AssertThrow(owned_null.block(0).l2_norm()==0.,
+                          ExcMessage("Pressure nullspace changed a homogeneous velocity constraint."));
+            }
+
           ReconstructedFaultActiveSet no_active_vertices(V.size());
           ReconstructedFaultActiveSet all_active_vertices(V.size());
           for (unsigned int fault = 0; fault < V.size(); ++fault)

@@ -1,0 +1,16 @@
+{
+  "command": [
+    "/home/ein/repository/aspect/build-pf-cpdi/aspect-release",
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/residual-floor/convergence/space16_dt05.prm"
+  ],
+  "cwd": "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/diagnostics/pilot-build",
+  "executable_sha256": "27a2defaf8fa44492d33c22235927cdf2a60cb4ed1c35e722c72f9345d9b61b4",
+  "parameter_sha256": "5cee98ba4e6a02bf0a3f82a03a3fc7134043fe494a1ceeb0d9994bd17337ba3a",
+  "configuration": "Release",
+  "plugin_sha256": "fc4cfdfd0da17ef6ebd6e3914c6578c70725e02cb0860c4f7a288045c70709fc",
+  "git_head": "f4032b1824ef4892020af8c58ef981aca03dc0ec",
+  "ranks": 1,
+  "exit_status": 0,
+  "wall_seconds": 138.14489496200076,
+  "peak_rss_KiB": 260968
+}

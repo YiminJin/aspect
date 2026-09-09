@@ -32,6 +32,9 @@
 #include <aspect/reconstructed_fault/surface_system.h>
 #include <aspect/simulator/solver/reconstructed_fault_condensed_system.h>
 #include <aspect/simulator/solver/reconstructed_fault_nonlinear.h>
+#include <aspect/simulator/solver/reconstructed_fault_linear.h>
+#include <iomanip>
+#include <sstream>
 
 #include <deal.II/base/signaling_nan.h>
 #include <deal.II/lac/solver_gmres.h>
@@ -1025,6 +1028,13 @@ namespace aspect
     LinearAlgebra::BlockVector working_x(current_linearization_point);
     working_x = solution;
 
+    // A pressure shift is a surface-equation gauge only in prescribed-pressure
+    // mode. Keep the adjustment private, just like the accepted bulk iterate;
+    // failed trials/solves must not alter published normalization bookkeeping.
+    const bool normalize_fault_pressure =
+      phase_field_fault.uses_adiabatic_friction_pressure();
+    double working_pressure_adjustment = last_pressure_normalization_adjustment;
+
     // Coupled residual evaluation temporarily changes ASPECT assembly controls.
     // Snapshot them once so both success and every exception restore the caller.
     const bool saved_assemble_fault_terms =
@@ -1035,6 +1045,7 @@ namespace aspect
     const bool saved_rebuild_preconditioner = rebuild_stokes_preconditioner;
     const double saved_derivative_scaling =
       newton_handler->parameters.newton_derivative_scaling_factor;
+    const AffineConstraints<double> saved_current_constraints(current_constraints);
 
     const unsigned int max_nonlinear_iterations =
       (pre_refinement_step < parameters.initial_adaptive_refinement)
@@ -1061,6 +1072,7 @@ namespace aspect
       rebuild_stokes_preconditioner = saved_rebuild_preconditioner;
       newton_handler->parameters.newton_derivative_scaling_factor =
         saved_derivative_scaling;
+      current_constraints.copy_from(saved_current_constraints);
     };
 
     try
@@ -1078,7 +1090,29 @@ namespace aspect
         // explicit B/K_V/G blocks, not by ASPECT's viscosity-derivative output.
         newton_handler->parameters.newton_derivative_scaling_factor = 0.0;
         set_assemblers();
+        // Lift the base iterate with the current physical solution constraints,
+        // including changed boundary loading. Never publish this lift before
+        // convergence: a failed solve must restore the pre-solve bulk solution.
+        assemble_newton_stokes_system = false;
         compute_current_constraints();
+        assemble_newton_stokes_system = true;
+        LinearAlgebra::BlockVector lifted_solution(
+          introspection.index_sets.system_partitioning, mpi_communicator);
+        lifted_solution = working_x;
+        current_constraints.distribute(lifted_solution);
+        working_x = lifted_solution;
+        if (normalize_fault_pressure)
+          working_pressure_adjustment = normalize_pressure(working_x);
+
+        // Every subsequent assembly is a Newton residual/direction problem.
+        // The physical lift is already present in working_x, so eliminate with
+        // homogeneous Stokes constraints to avoid subtracting it a second time.
+        const types::global_dof_index n_stokes_dofs =
+          working_x.block(introspection.block_indices.velocities).size()
+          + working_x.block(introspection.block_indices.pressure).size();
+        for (const auto &line : current_constraints.get_lines())
+          if (line.index < n_stokes_dofs)
+            current_constraints.set_inhomogeneity(line.index, 0.0);
         pressure_scaling = compute_pressure_scaling_factor();
 
         auto evaluate_coupled_residual =
@@ -1155,6 +1189,8 @@ namespace aspect
           aspect_bulk_reference,
           scale_floor_factor);
         double surface_scale = numbers::signaling_nan<double>();
+        double bulk_precision = 0.0;
+        double bulk_convergence_scale = bulk_scale;
 
         auto solve_condensed_system =
           [&](const typename StokesSolver::ReconstructedFaultCondensedSystem<dim>
@@ -1169,11 +1205,8 @@ namespace aspect
 
           const double tolerance =
             parameters.linear_stokes_solver_tolerance*rhs_norm;
-          SolverControl solver_control(
-            std::max(1U, parameters.n_cheap_stokes_solver_steps
-                         + parameters.n_expensive_stokes_solver_steps),
-            tolerance);
-          solver_control.enable_history_data();
+          const unsigned int budget = std::max(1U,
+            parameters.n_cheap_stokes_solver_steps + parameters.n_expensive_stokes_solver_steps);
           PrimitiveVectorMemory<LinearAlgebra::BlockVector> memory;
 
           std::unique_ptr<internal::SchurComplementOperator> schur;
@@ -1210,12 +1243,70 @@ namespace aspect
 
           // B and G are not assumed adjoints, so the condensed operator is
           // generally nonsymmetric and requires FGMRES rather than CG/MINRES.
-          SolverFGMRES<LinearAlgebra::BlockVector> solver(
-            solver_control,
-            memory,
-            typename SolverFGMRES<LinearAlgebra::BlockVector>::AdditionalData(
-              parameters.stokes_gmres_restart_length));
-          solver.solve(linearization, direction, rhs, preconditioner);
+          double right_null_error, left_null_error;
+          const auto q = linearization.verified_pressure_nullspace(right_null_error, left_null_error);
+          LinearAlgebra::BlockVector compatible_rhs(rhs), residual(rhs);
+          // Compatibility noise must be both backward-small in the original
+          // weak loads and below the unchanged nonlinear bulk target.
+          const double compatibility_tolerance = std::min(
+            100.*std::numeric_limits<double>::epsilon()
+              * std::max({initial_residual.bulk_norm, aspect_bulk_reference, rhs_norm}),
+            parameters.nonlinear_tolerance*bulk_scale);
+          const double removed_rhs = internal::project_compatible_fault_rhs(
+            q, compatibility_tolerance, compatible_rhs);
+          const internal::FaultPressureComplementOperator<
+            typename StokesSolver::ReconstructedFaultCondensedSystem<dim>::Linearization,
+            LinearAlgebra::BlockVector> projected_operator{linearization, q};
+          const internal::FaultPressureComplementOperator<
+            decltype(preconditioner), LinearAlgebra::BlockVector>
+            projected_preconditioner{preconditioner, q};
+
+          unsigned int iterations = 0;
+          while (iterations < budget)
+            {
+              SolverControl control(budget-iterations, tolerance);
+              control.enable_history_data();
+              SolverFGMRES<LinearAlgebra::BlockVector> solver(
+                control, memory,
+                typename SolverFGMRES<LinearAlgebra::BlockVector>::AdditionalData(
+                  parameters.stokes_gmres_restart_length));
+              bool solver_failed = false;
+              try
+                {
+                  solver.solve(projected_operator, direction, compatible_rhs, projected_preconditioner);
+                }
+              catch (const SolverControl::NoConvergence &)
+                {
+                  solver_failed = true;
+                }
+              iterations += std::max(1U, control.last_step());
+              internal::project_fault_pressure(q, direction);
+
+              // Arnoldi's residual estimate may disagree with the final vector.
+              // Verify C*x-b afresh, retaining raw and null-component diagnostics.
+              double raw_residual, residual_null_component;
+              const double fresh = internal::fault_true_linear_residual(
+                linearization, q, direction, rhs, residual,
+                raw_residual, residual_null_component);
+              std::ostringstream report;
+              report << std::setprecision(17)
+                     << "      Fault linear solve: iterations=" << iterations
+                     << ", estimated=" << control.last_value() << ", fresh=" << fresh
+                     << ", target=" << tolerance << ", raw=" << raw_residual
+                     << ", rhs null=" << removed_rhs << ", residual null=" << residual_null_component
+                     << ", compatibility bound=" << compatibility_tolerance
+                     << ", pressure quotient=" << (q.l2_norm() > 0.)
+                     << ", right null=" << right_null_error << ", left null=" << left_null_error;
+              pcout << report.str() << std::endl;
+              AssertThrow(std::abs(residual_null_component) <= compatibility_tolerance,
+                          ExcMessage("The full condensed residual has a significant pressure incompatibility."));
+              if (fresh <= tolerance)
+                return;
+              if (solver_failed || iterations >= budget)
+                throw SolverControl::NoConvergence(iterations, fresh);
+              // Re-enter FGMRES from this vector with its freshly evaluated
+              // residual, charging every restart to the same total budget.
+            }
         };
 
         for (nonlinear_iteration = 0;
@@ -1290,8 +1381,22 @@ namespace aspect
 
             if (nonlinear_iteration == 0)
               {
+                // Fix the attainable bulk accuracy from A and the represented
+                // initial state, not from stalled residuals. The same mixed
+                // absolute/relative scale is used by convergence and merit.
+                LinearAlgebra::BlockVector solver_state(
+                  introspection.index_sets.stokes_partitioning, mpi_communicator);
+                solver_state.block(0) = working_x.block(introspection.block_indices.velocities);
+                solver_state.block(1) = working_x.block(introspection.block_indices.pressure);
+                solver_state.block(1) /= pressure_scaling;
+                bulk_precision = internal::reconstructed_fault_bulk_precision_scale(
+                  system_matrix, solver_state, mpi_communicator);
+                bulk_convergence_scale = bulk_scale + bulk_precision/parameters.nonlinear_tolerance;
+
                 // The surface scale is fixed from the first stabilized free set;
-                // a characteristic K_V action supplies a meaningful zero floor.
+                // a characteristic K_V action supplies a physical traction scale.
+                // Do not suppress it to roundoff: an initially balanced surface
+                // still develops second-order residuals when bulk loading changes.
                 FaultVector characteristic_slip_rate = slip_rate;
                 for (auto &fault_values : characteristic_slip_rate)
                   for (double &value : fault_values)
@@ -1310,16 +1415,12 @@ namespace aspect
                     linearization->surface_residual(), no_active_vertices),
                   surface_system.surface_residual_rms(
                     characteristic_residual, no_active_vertices));
-                surface_scale =
-                  internal::reconstructed_fault_residual_scale(
-                  current_surface_norm,
-                  surface_reference,
-                  scale_floor_factor);
+                surface_scale = std::max(current_surface_norm, surface_reference);
               }
 
             const double relative_bulk_residual =
               internal::normalized_reconstructed_fault_residual(
-                current_bulk_norm, bulk_scale, "bulk");
+                current_bulk_norm, bulk_convergence_scale, "bulk");
             const double relative_surface_residual =
               internal::normalized_reconstructed_fault_residual(
                 current_surface_norm, surface_scale, "surface");
@@ -1327,6 +1428,18 @@ namespace aspect
                   << "nonlinear iteration " << nonlinear_iteration << ": "
                   << relative_bulk_residual << ", "
                   << relative_surface_residual << std::endl;
+            {
+              std::ostringstream report;
+              report << std::setprecision(17)
+                     << "      Fault nonlinear residual: bulk=" << current_bulk_norm
+                     << ", bulk scale=" << bulk_scale << ", surface=" << current_surface_norm
+                     << ", surface scale=" << surface_scale
+                     << ", velocity=" << current_velocity_norm << ", scaled continuity=" << current_pressure_norm
+                     << ", bulk precision=" << bulk_precision
+                     << ", bulk target=" << parameters.nonlinear_tolerance*bulk_convergence_scale
+                     << ", velocity correction=" << bulk_direction.block(0).linfty_norm();
+              pcout << report.str() << std::endl;
+            }
 
             if (relative_bulk_residual < parameters.nonlinear_tolerance
                 && relative_surface_residual < parameters.nonlinear_tolerance)
@@ -1354,6 +1467,7 @@ namespace aspect
                 fault_manager.commit_slip_rate_nonlinear_solve();
                 solution.swap(accepted_solution);
                 current_linearization_point.swap(accepted_linearization);
+                last_pressure_normalization_adjustment = working_pressure_adjustment;
                 nonlinear_state_is_active = false;
                 terminal_commit_complete = true;
                 signals.post_nonlinear_solver(nonlinear_solver_control);
@@ -1384,6 +1498,7 @@ namespace aspect
             owned_physical_bulk_direction = physical_bulk_direction;
 
             LinearAlgebra::BlockVector accepted_trial_x(working_x);
+            double accepted_trial_pressure_adjustment = working_pressure_adjustment;
             FaultVector accepted_trial_slip_rate;
             const auto line_search_result =
               internal::reconstructed_fault_armijo_line_search(
@@ -1413,6 +1528,13 @@ namespace aspect
                     mpi_communicator);
                   trial_x = owned_trial_x;
 
+                  // Normalize the physical candidate before residual/merit
+                  // evaluation, not the homogeneous Newton direction. This
+                  // removes arbitrary pressure offsets from cancellation in
+                  // bulk assembly; true-pressure friction is left unchanged.
+                  const double trial_pressure_adjustment = normalize_fault_pressure
+                    ? normalize_pressure(trial_x) : working_pressure_adjustment;
+
                   FaultVector trial_slip_rate = slip_rate;
                   for (unsigned int fault = 0; fault < slip_rate.size(); ++fault)
                     for (unsigned int vertex = 0;
@@ -1438,7 +1560,7 @@ namespace aspect
                     evaluate_coupled_residual(trial_x, trial_slip_rate);
                   const double trial_relative_bulk =
                     internal::normalized_reconstructed_fault_residual(
-                      trial_residual.bulk_norm, bulk_scale, "bulk");
+                      trial_residual.bulk_norm, bulk_convergence_scale, "bulk");
                   const double trial_relative_surface =
                     internal::normalized_reconstructed_fault_residual(
                       surface_system.surface_residual_rms(
@@ -1449,6 +1571,7 @@ namespace aspect
                     trial_relative_bulk*trial_relative_bulk
                     + trial_relative_surface*trial_relative_surface);
                   accepted_trial_x = trial_x;
+                  accepted_trial_pressure_adjustment = trial_pressure_adjustment;
                   accepted_trial_slip_rate = std::move(trial_slip_rate);
                   return trial_merit;
                 },
@@ -1467,6 +1590,7 @@ namespace aspect
                   fault_manager.set_slip_rate_trial(accepted_increment, 1.0);
                   fault_manager.accept_slip_rate_trial();
                   working_x = accepted_trial_x;
+                  working_pressure_adjustment = accepted_trial_pressure_adjustment;
                 });
 
             if (!line_search_result.accepted)

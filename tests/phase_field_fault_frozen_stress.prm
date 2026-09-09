@@ -1,0 +1,9 @@
+# Full-bulk frozen-history assembly, including unsupported QPs.
+# Enable if: ASPECT_WITH_VORO
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_changed_loading.prm
+set End time = 0
+subsection Initial composition model
+  subsection Function
+    set Function expression = 0; 0; 1500+1000*y; 200
+  end
+end

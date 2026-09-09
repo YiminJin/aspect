@@ -643,6 +643,39 @@ namespace aspect
                                            this->introspection,
                                            current_linearization_point);
 
+    if (assemble_reconstructed_fault_stokes_terms)
+      {
+        // A cellwise constant velocity has zero gradient. Remove it before
+        // summation so cancellation of a large translation does not pollute
+        // the small strain/divergence used by the coupled residual.
+        Vector<double> local_values(finite_element.dofs_per_cell);
+        cell->get_dof_values(current_linearization_point, local_values);
+        for (unsigned int d=0; d<dim; ++d)
+          {
+            bool first = true;
+            double origin = 0.0;
+            for (unsigned int i=0; i<finite_element.dofs_per_cell; ++i)
+              if (finite_element.system_to_component_index(i).first ==
+                  introspection.component_indices.velocities[d])
+                {
+                  if (first)
+                    {
+                      origin = local_values[i];
+                      first = false;
+                    }
+                  local_values[i] -= origin;
+                }
+          }
+        const auto &velocities = scratch.finite_element_values[introspection.extractors.velocities];
+        for (unsigned int q=0; q<scratch.finite_element_values.n_quadrature_points; ++q)
+          {
+            scratch.material_model_inputs.strain_rate[q] = 0;
+            for (unsigned int i=0; i<finite_element.dofs_per_cell; ++i)
+              scratch.material_model_inputs.strain_rate[q] +=
+                local_values[i] * velocities.symmetric_gradient(i,q);
+          }
+      }
+
     scratch.material_model_inputs.requested_properties
       =
         MaterialModel::MaterialProperties::equation_of_state_properties |
@@ -669,7 +702,13 @@ namespace aspect
     scratch.finite_element_values[introspection.extractors.velocities].get_function_values(current_linearization_point,
         scratch.velocity_values);
     if (assemble_newton_stokes_system)
-      scratch.finite_element_values[introspection.extractors.velocities].get_function_divergences(current_linearization_point,scratch.velocity_divergence);
+      {
+        if (assemble_reconstructed_fault_stokes_terms)
+          for (unsigned int q=0; q<scratch.velocity_divergence.size(); ++q)
+            scratch.velocity_divergence[q] = trace(scratch.material_model_inputs.strain_rate[q]);
+        else
+          scratch.finite_element_values[introspection.extractors.velocities].get_function_divergences(current_linearization_point,scratch.velocity_divergence);
+      }
     if (parameters.formulation_mass_conservation == Parameters<dim>::Formulation::MassConservation::hydrostatic_compression)
       scratch.finite_element_values[introspection.extractors.temperature].get_function_gradients(current_linearization_point,
           scratch.temperature_gradients);

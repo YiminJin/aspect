@@ -10,6 +10,8 @@ include $ASPECT_SOURCE_DIR/tests/phase_field_fault_ih.prm
 subsection Solver parameters
   subsection Phase field solver parameters
     set Linear solver tolerance = 2e-7
+    # Converged initialization needs twenty iterations at the original accuracy.
+    set Max nonlinear iterations = 50
   end
 end
 

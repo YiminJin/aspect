@@ -1,0 +1,3 @@
+# Same physical problem, tolerances and support policy; preserve prior artifacts.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/pilot.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/diagnostics/mechanical-pilot

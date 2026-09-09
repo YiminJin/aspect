@@ -1,0 +1,8 @@
+# Enable if: ASPECT_WITH_VORO
+# MPI: 2
+# DEPENDS-ON: phase_field_fault_pressure_gauge_mpi
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_changed_loading.prm
+subsection Postprocess
+  set List of postprocessors = particles, uniform shear pilot, verify coupled pressure gauge
+end
+

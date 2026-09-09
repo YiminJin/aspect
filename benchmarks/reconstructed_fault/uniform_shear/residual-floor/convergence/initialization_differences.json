@@ -1,0 +1,17 @@
+[
+  {
+    "case": "space16_dt05",
+    "phi_L2_difference_to_finest": 0.0002552091339043593,
+    "phi_max_difference_to_finest": 0.0012544192579045932
+  },
+  {
+    "case": "space32_dt05",
+    "phi_L2_difference_to_finest": 7.852238107248344e-05,
+    "phi_max_difference_to_finest": 0.00037967464983257315
+  },
+  {
+    "case": "space64_dt05",
+    "phi_L2_difference_to_finest": 0.0,
+    "phi_max_difference_to_finest": 0.0
+  }
+]

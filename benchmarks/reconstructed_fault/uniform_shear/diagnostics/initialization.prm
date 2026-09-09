@@ -1,0 +1,8 @@
+# Only output/plugin configuration differs from the pilot. The diagnostic
+# signal deliberately stops after initialization, before mechanical assembly.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/pilot.prm
+set Additional shared libraries = ./libk1_initialization_diagnostics.so
+set Output directory = output-initialization
+subsection Postprocess
+  set List of postprocessors = particles
+end
