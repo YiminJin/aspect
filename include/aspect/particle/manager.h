@@ -38,6 +38,7 @@
 #include <aspect/particle/property/interface.h>
 
 #include <aspect/simulator_access.h>
+#include <deal.II/base/timer.h>
 #include <aspect/simulator_signals.h>
 #include <aspect/solution_evaluator.h>
 
@@ -413,6 +414,9 @@ namespace aspect
          * tessellation based on the particles.
          */
         std::unique_ptr<ParticleDomainHandler<dim>> particle_domain_handler;
+
+        /** Rank-local domain timings, without adding MPI synchronization. */
+        std::unique_ptr<TimerOutput> domain_timer;
 
         /**
          * Whether the particle domains are requested by the user.

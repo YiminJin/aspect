@@ -13,6 +13,9 @@ namespace aspect
       public:
         std::pair<std::string,std::string> execute(TableHandler &) override
         {
+          AssertThrow(coupled_solve_converged,
+                      ExcMessage("The surface-temperature test requires both "
+                                 "final nonlinear convergence criteria."));
           auto &model = const_cast<MaterialModel::PhaseFieldFault<dim> &>(
             Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(
               this->get_material_model()));

@@ -12,23 +12,42 @@ Number of degrees of freedom: 124,937 (33,282+4,225+16,641+16,641+16,641+16,641+
       Iteration  3: linear solver iterations =    5, line search iterations = 0, relative residual = 3.902e-02
       Iteration  4: linear solver iterations =    5, line search iterations = 0, relative residual = 1.734e-02
       Iteration  5: linear solver iterations =    5, line search iterations = 0, relative residual = 7.707e-03
-      Iteration  6: linear solver iterations =    5, line search iterations = 0, relative residual = 3.425e-03
-      Iteration  7: linear solver iterations =   13, line search iterations = 0, relative residual = 1.522e-03
-      Iteration  8: linear solver iterations =   14, line search iterations = 0, relative residual = 6.766e-04
-      Iteration  9: linear solver iterations =   36, line search iterations = 0, relative residual = 3.007e-04
+      Iteration  6: linear solver iterations =    5, line search iterations = 1, relative residual = 4.933e-03
+      Iteration  7: linear solver iterations =    5, line search iterations = 1, relative residual = 3.157e-03
+      Iteration  8: linear solver iterations =    5, line search iterations = 1, relative residual = 2.020e-03
+      Iteration  9: linear solver iterations =    5, line search iterations = 1, relative residual = 1.293e-03
+      Iteration 10: linear solver iterations =    5, line search iterations = 1, relative residual = 8.276e-04
+      Iteration 11: linear solver iterations =    5, line search iterations = 2, relative residual = 6.539e-04
+      Iteration 12: linear solver iterations =    5, line search iterations = 2, relative residual = 5.166e-04
+      Iteration 13: linear solver iterations =    5, line search iterations = 2, relative residual = 4.082e-04
+      Iteration 14: linear solver iterations =    5, line search iterations = 1, relative residual = 2.613e-04
+      Iteration 15: linear solver iterations =    5, line search iterations = 0, relative residual = 1.161e-04
+      Iteration 16: linear solver iterations =    5, line search iterations = 1, relative residual = 7.431e-05
+      Iteration 17: linear solver iterations =    5, line search iterations = 1, relative residual = 4.756e-05
+      Iteration 18: linear solver iterations =    5, line search iterations = 0, relative residual = 2.114e-05
+      Iteration 19: linear solver iterations =    5, line search iterations = 0, relative residual = 9.395e-06
    Reconstruction initial faults... done.
 
    Solving temperature system... 0 iterations.
    Advecting particles...  done.
-   Initial cohesive q profile variation for fault 0: weighted RMS=1.710e+09 Pa, maximum=6.119e+09 Pa, normalized RMS=2.438e-01, normalized maximum=8.725e-01
+   Initial cohesive q profile variation for fault 0: weighted RMS=3.017e+08 Pa, maximum=1.079e+09 Pa, normalized RMS=2.438e-01, normalized maximum=8.725e-01
    Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=25, estimated=1.4067184033378548, fresh=1.4067184155230059, target=1.7851395553974001, raw=1.4067184155230059, rhs null=0, residual null=0, compatibility bound=5.8890184368694636e-13, pressure quotient=0, right null=0, left null=0
+      Fault linear solve: iterations=19, estimated=2.6704664602349387e-14, fresh=2.6704664484812176e-14, target=5.8890184368694636e-14, raw=2.6704664484812176e-14, rhs null=0, residual null=0, compatibility bound=1.3076247722109054e-20, pressure quotient=0, right null=0, left null=0
       Relative nonlinear residuals (bulk, fault) after nonlinear iteration 0: 1.000e+00, 0.000e+00
+      Fault nonlinear residual: bulk=5.8890184368694637e-07, bulk scale=5.8890184368694637e-07, surface=0, surface scale=156788247.47774017, velocity=5.8890184368694637e-07, scaled continuity=0, bulk precision=0, bulk target=5.8890184368694636e-13, velocity correction=3.6227747057152424e-17
       Reconstructed-fault line search accepted after 0 rejected candidates.
    Rebuilding Stokes preconditioner...
-      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 1: 7.076e-08, 0.000e+00
+      Fault linear solve: iterations=25, estimated=1.4067184033356614, fresh=1.4067184218721327, target=1.7851395553973908, raw=1.4067184218721327, rhs null=0, residual null=0, compatibility bound=5.8890184368694636e-13, pressure quotient=0, right null=0, left null=0
+      Fault linear solve: iterations=17, estimated=2.1644208935221408e-21, fresh=2.1644208934831915e-21, target=2.6704664312561428e-21, raw=2.1644208934831915e-21, rhs null=0, residual null=0, compatibility bound=1.3076247722109054e-20, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 1: 4.535e-08, 0.000e+00
+      Fault nonlinear residual: bulk=2.6704664312561429e-14, bulk scale=5.8890184368694637e-07, surface=0, surface scale=156788247.47774017, velocity=1.4876042666375531e-14, scaled continuity=2.2177521291496188e-14, bulk precision=0, bulk target=5.8890184368694636e-13, velocity correction=2.8243232933246027e-25
 
    Postprocessing:
      Number of advected particles:      36864
      Reconstructed-fault Stage-I solve: verified
 
 Termination requested by criterion: end time
+
+
+

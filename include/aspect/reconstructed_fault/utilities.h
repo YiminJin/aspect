@@ -106,6 +106,30 @@ namespace aspect
                              const std::vector<double> &rhs);
     /** @} */
 
+    /** Domain-integrated Q1 coordinate and physical area weight. */
+    struct DomainQuadraturePoint
+    {
+      unsigned int segment_index;
+      double xi;
+      double weight;
+    };
+
+    /** Optional local work counters; straight calls include partition subpieces. */
+    struct DomainQuadratureStatistics
+    {
+      unsigned long long straight_calls = 0;
+      unsigned long long general_calls = 0;
+      unsigned long long segment_tests = 0;
+      unsigned long long candidate_segments = 0;
+    };
+
+    /** Full convex-domain quadrature on an open 2-D polyline, without support clipping. */
+    std::vector<DomainQuadraturePoint>
+    domain_quadrature(const std::vector<Point<2>> &vertices,
+                      const ReconstructedFault<2> &fault,
+                      const unsigned int order = 3,
+                      DomainQuadratureStatistics *statistics = nullptr);
+
     namespace internal
     {
       /*

@@ -1,0 +1,11 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/nonuniform/refinement/space32.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/diagnostics/pilot-build/libuniform_shear.so, ./libhistory_timeline.so
+set Output directory = ../replay
+set End time = 1
+subsection Postprocess
+  set List of postprocessors = particles, uniform shear pilot, stress timeline, visualization, reconstructed faults
+  subsection Particles
+    set Data output format = vtu
+    set Time between data output = 0
+  end
+end

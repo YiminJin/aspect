@@ -1,0 +1,176 @@
+{
+  "representation": "continuous Q2, incident-cell ADD/count",
+  "steps": [
+    {
+      "step": 0,
+      "time_s": 0.0,
+      "physical_dt_s": 0.0,
+      "initialization_Maxwell_interval_s": 2.0,
+      "particles": 36864,
+      "active_surface_parents": 22848,
+      "cells": 4096,
+      "first_bulk_qp_count": 36864,
+      "transfer_error_Pa": 0.0,
+      "working_error_Pa": 0.0,
+      "committed_change_max_Pa": 0.0,
+      "consumed_history_minus_initial_max_Pa": 0.0,
+      "bulk_VTU_quantization_Pa": 0.0,
+      "particle_VTU_quantization_Pa": 0.0,
+      "first_working_xy_min_Pa": 1500.0,
+      "first_working_xy_max_Pa": 1500.0000000000002
+    },
+    {
+      "step": 1,
+      "time_s": 0.5,
+      "physical_dt_s": 0.5,
+      "initialization_Maxwell_interval_s": null,
+      "particles": 36864,
+      "active_surface_parents": 22848,
+      "cells": 4096,
+      "first_bulk_qp_count": 36864,
+      "transfer_error_Pa": 0.0,
+      "working_error_Pa": 0.0,
+      "committed_change_max_Pa": 377.0315538086279,
+      "consumed_history_minus_initial_max_Pa": 0.0,
+      "bulk_VTU_quantization_Pa": 0.0,
+      "particle_VTU_quantization_Pa": 6.103493137743499e-05,
+      "first_working_xy_min_Pa": 1500.0,
+      "first_working_xy_max_Pa": 1500.0000000000002
+    },
+    {
+      "step": 2,
+      "time_s": 1.0,
+      "physical_dt_s": 0.5,
+      "initialization_Maxwell_interval_s": null,
+      "particles": 36864,
+      "active_surface_parents": 22848,
+      "cells": 4096,
+      "first_bulk_qp_count": 36864,
+      "transfer_error_Pa": 0.0,
+      "working_error_Pa": 0.0,
+      "committed_change_max_Pa": 91.33757613032458,
+      "consumed_history_minus_initial_max_Pa": 377.0315538086279,
+      "bulk_VTU_quantization_Pa": 6.1027861420370755e-05,
+      "particle_VTU_quantization_Pa": 6.103514738242666e-05,
+      "first_working_xy_min_Pa": 1123.1080510149266,
+      "first_working_xy_max_Pa": 1129.507905792592
+    }
+  ],
+  "comparison": [
+    {
+      "step": 0,
+      "time_s": 0.0,
+      "fields": {
+        "V": {
+          "old_mean": 0.00031480859613314374,
+          "new_mean": 0.00031480859613314374,
+          "difference_rms": 0.0,
+          "anomaly_difference_rms": 0.0
+        },
+        "Theta": {
+          "old_mean": 201.8750000000011,
+          "new_mean": 201.8750000000011,
+          "difference_rms": 0.0,
+          "anomaly_difference_rms": 0.0
+        },
+        "C": {
+          "old_mean": 318.7476557675632,
+          "new_mean": 318.7476557675632,
+          "difference_rms": 0.0,
+          "anomaly_difference_rms": 0.0
+        },
+        "q": {
+          "old_mean": 1045.0485557283632,
+          "new_mean": 1045.0485557283632,
+          "difference_rms": 0.0,
+          "anomaly_difference_rms": 0.0
+        },
+        "slip": {
+          "old_mean": 0.0,
+          "new_mean": 0.0,
+          "difference_rms": 0.0,
+          "anomaly_difference_rms": 0.0
+        }
+      },
+      "initial_phase_unchanged": true
+    },
+    {
+      "step": 1,
+      "time_s": 0.5,
+      "fields": {
+        "V": {
+          "old_mean": 0.0008397184111347594,
+          "new_mean": 0.0008397184111347594,
+          "difference_rms": 0.0,
+          "anomaly_difference_rms": 0.0
+        },
+        "Theta": {
+          "old_mean": 133.06994394683613,
+          "new_mean": 133.06994394683613,
+          "difference_rms": 0.0,
+          "anomaly_difference_rms": 0.0
+        },
+        "C": {
+          "old_mean": 321.0322586169164,
+          "new_mean": 321.0322586169164,
+          "difference_rms": 0.0,
+          "anomaly_difference_rms": 0.0
+        },
+        "q": {
+          "old_mean": 1124.896731506501,
+          "new_mean": 1124.896731506501,
+          "difference_rms": 0.0,
+          "anomaly_difference_rms": 0.0
+        },
+        "slip": {
+          "old_mean": 0.0004198592055673797,
+          "new_mean": 0.0004198592055673797,
+          "difference_rms": 0.0,
+          "anomaly_difference_rms": 0.0
+        }
+      },
+      "initial_phase_unchanged": true
+    },
+    {
+      "step": 2,
+      "time_s": 1.0,
+      "fields": {
+        "V": {
+          "old_mean": 0.00027461996190209366,
+          "new_mean": 0.00027461996191374834,
+          "difference_rms": 3.2564357512886727e-10,
+          "anomaly_difference_rms": 3.256435749203083e-10
+        },
+        "Theta": {
+          "old_mean": 116.46524696327555,
+          "new_mean": 116.46524693827465,
+          "difference_rms": 1.8744419267619136e-05,
+          "anomaly_difference_rms": 1.8744402594813324e-05
+        },
+        "C": {
+          "old_mean": 320.6981682217339,
+          "new_mean": 320.69816822178785,
+          "difference_rms": 1.5020058620829424e-06,
+          "anomaly_difference_rms": 1.5020058611146844e-06
+        },
+        "q": {
+          "old_mean": 1034.6925279964291,
+          "new_mean": 1034.6925280058306,
+          "difference_rms": 6.365923804916314e-05,
+          "anomaly_difference_rms": 6.365923735493236e-05
+        },
+        "slip": {
+          "old_mean": 0.0005571691865184265,
+          "new_mean": 0.0005571691865242539,
+          "difference_rms": 1.6282178757921052e-10,
+          "anomaly_difference_rms": 1.628217874749306e-10
+        }
+      },
+      "initial_phase_unchanged": true
+    }
+  ],
+  "surface_source": "same immutable parent properties read directly in surface_system.cc before commit",
+  "nonlinear_acceptances": 3,
+  "fresh_linear_checks": 17,
+  "wall_seconds": 5.480661933001102
+}

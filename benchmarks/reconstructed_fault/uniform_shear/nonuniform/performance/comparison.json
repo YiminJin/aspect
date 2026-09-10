@@ -1,0 +1,1148 @@
+{
+  "cases": {
+    "baseline": {
+      "resources": {
+        "command": [
+          "/home/ein/repository/aspect/build-pf-cpdi/aspect-release",
+          "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/nonuniform/performance/baseline.prm"
+        ],
+        "cwd": "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/diagnostics/pilot-build",
+        "executable_sha256": "8b5056ff378fe90649c032a9d9af769c0ad5aadcafa2d72bbcd4d9521742e620",
+        "parameter_sha256": "1c30659702012026dd0c9c239f267660bc4fbddc0acb2a0158b2e6de5bf5b4c8",
+        "configuration": "Release",
+        "plugin_sha256": "40aac2f889e311f92cc6b69942b951fcafe4813dc5655460321f69f6e8d89880",
+        "git_head": "a24c3623108e99240997141121a9d167fa119042",
+        "ranks": 1,
+        "exit_status": 0,
+        "wall_seconds": 38.21705634199998,
+        "peak_rss_KiB": 492556
+      },
+      "aspect_elapsed": 33.97,
+      "startup_shutdown_seconds": 4.247056341999979,
+      "timings": {
+        "Assemble Stokes system Picard": {
+          "calls": 13,
+          "seconds": 1.952
+        },
+        "Assemble Stokes system rhs": {
+          "calls": 15,
+          "seconds": 1.656
+        },
+        "Build Stokes preconditioner": {
+          "calls": 13,
+          "seconds": 1.373
+        },
+        "Fault: Cache build total": {
+          "calls": 2,
+          "seconds": 0.144
+        },
+        "Fault: Cache validation": {
+          "calls": 33,
+          "seconds": 0.01444
+        },
+        "Fault: Domain partition": {
+          "calls": 45696,
+          "seconds": 0.04188
+        },
+        "Fault: G FE sampling": {
+          "calls": 250,
+          "seconds": 1.004
+        },
+        "Fault: G integrate/reduce": {
+          "calls": 250,
+          "seconds": 0.3118
+        },
+        "Fault: G lookup build": {
+          "calls": 13,
+          "seconds": 0.1372
+        },
+        "Fault: G total": {
+          "calls": 250,
+          "seconds": 1.319
+        },
+        "Fault: I_h preparation": {
+          "calls": 2,
+          "seconds": 11.31
+        },
+        "Fault: Linearization total": {
+          "calls": 13,
+          "seconds": 1.06
+        },
+        "Fault: Parent FE sampling": {
+          "calls": 28,
+          "seconds": 0.2694
+        },
+        "Fault: Parent association": {
+          "calls": 73728,
+          "seconds": 0.02272
+        },
+        "Fault: Parent lookup build": {
+          "calls": 28,
+          "seconds": 0.3012
+        },
+        "Fault: Property preparation": {
+          "calls": 2,
+          "seconds": 11.41
+        },
+        "Fault: Surface R/K integrate": {
+          "calls": 28,
+          "seconds": 1.208
+        },
+        "Fault: Surface R/K total": {
+          "calls": 28,
+          "seconds": 1.874
+        },
+        "Initialization": {
+          "calls": 1,
+          "seconds": 0.1604
+        },
+        "Particles: Advect": {
+          "calls": 4,
+          "seconds": 0.0243
+        },
+        "Particles: Copy": {
+          "calls": 2,
+          "seconds": 0.002788
+        },
+        "Particles: Domains/CPDI": {
+          "calls": 3,
+          "seconds": 2.403
+        },
+        "Particles: Generate": {
+          "calls": 1,
+          "seconds": 0.004685
+        },
+        "Particles: Initialization": {
+          "calls": 1,
+          "seconds": 0.0001056
+        },
+        "Particles: Initialize properties": {
+          "calls": 1,
+          "seconds": 0.02529
+        },
+        "Particles: Interpolate": {
+          "calls": 2,
+          "seconds": 0.008216
+        },
+        "Particles: Sort": {
+          "calls": 4,
+          "seconds": 0.005583
+        },
+        "Postprocessing": {
+          "calls": 2,
+          "seconds": 0.8945
+        },
+        "Setup dof systems": {
+          "calls": 1,
+          "seconds": 0.04615
+        },
+        "Setup initial conditions": {
+          "calls": 1,
+          "seconds": 1.097
+        },
+        "Setup matrices": {
+          "calls": 1,
+          "seconds": 0.1277
+        }
+      },
+      "converged_states": 2,
+      "fresh_linear_checks": 13,
+      "final_residuals": [
+        {
+          "bulk": 6.7304234019651496e-12,
+          "bulk scale": 1586.5488603268366,
+          "surface": 7.12121102071612e-08,
+          "surface scale": 951.6837594913193,
+          "velocity": 6.573908058421762e-12,
+          "scaled continuity": 1.4430287624082747e-12,
+          "bulk precision": 6.489195376910149e-11,
+          "bulk target": 1.5865553495222133e-05,
+          "velocity correction": 2.5682949884488173e-14
+        },
+        {
+          "bulk": 4.838235008559776e-12,
+          "bulk scale": 9.99125516114037,
+          "surface": 6.16993821371157e-09,
+          "surface scale": 339.95141867026996,
+          "velocity": 4.804115946005853e-12,
+          "scaled continuity": 5.735747339150367e-13,
+          "bulk precision": 3.879566240130842e-11,
+          "bulk target": 9.995134727380501e-08,
+          "velocity correction": 3.3430514440822545e-15
+        }
+      ]
+    },
+    "optimized": {
+      "resources": {
+        "command": [
+          "/home/ein/repository/aspect/build-pf-cpdi/aspect-release",
+          "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/nonuniform/performance/optimized.prm"
+        ],
+        "cwd": "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/diagnostics/pilot-build",
+        "executable_sha256": "d4af367681cc8e956c7e7162bbc96771baa9dcd77df068121f2129f6b45ba1f1",
+        "parameter_sha256": "e4012f5332868e852ade54ebaec5f6cf069c2c26bbf6248e69d6dac8ca43b134",
+        "configuration": "Release",
+        "plugin_sha256": "40aac2f889e311f92cc6b69942b951fcafe4813dc5655460321f69f6e8d89880",
+        "git_head": "a24c3623108e99240997141121a9d167fa119042",
+        "ranks": 1,
+        "exit_status": 0,
+        "wall_seconds": 32.99969991800003,
+        "peak_rss_KiB": 600516
+      },
+      "aspect_elapsed": 29.37,
+      "startup_shutdown_seconds": 3.629699918000032,
+      "timings": {
+        "Assemble Stokes system Picard": {
+          "calls": 13,
+          "seconds": 1.876
+        },
+        "Assemble Stokes system rhs": {
+          "calls": 15,
+          "seconds": 1.585
+        },
+        "Build Stokes preconditioner": {
+          "calls": 13,
+          "seconds": 1.318
+        },
+        "Fault: Cache build total": {
+          "calls": 2,
+          "seconds": 0.1473
+        },
+        "Fault: Cache validation": {
+          "calls": 33,
+          "seconds": 0.01544
+        },
+        "Fault: Domain partition": {
+          "calls": 45696,
+          "seconds": 0.04282
+        },
+        "Fault: G FE sampling": {
+          "calls": 250,
+          "seconds": 0.9294
+        },
+        "Fault: G integrate/reduce": {
+          "calls": 250,
+          "seconds": 0.2996
+        },
+        "Fault: G lookup build": {
+          "calls": 13,
+          "seconds": 0.1362
+        },
+        "Fault: G total": {
+          "calls": 250,
+          "seconds": 1.232
+        },
+        "Fault: I_h FE total": {
+          "calls": 2590,
+          "seconds": 4.635
+        },
+        "Fault: I_h lookup access": {
+          "calls": 2590,
+          "seconds": 4.349
+        },
+        "Fault: I_h preparation": {
+          "calls": 2,
+          "seconds": 7.345
+        },
+        "Fault: Linearization total": {
+          "calls": 13,
+          "seconds": 1.05
+        },
+        "Fault: Parent FE sampling": {
+          "calls": 28,
+          "seconds": 0.2451
+        },
+        "Fault: Parent association": {
+          "calls": 73728,
+          "seconds": 0.02296
+        },
+        "Fault: Parent lookup build": {
+          "calls": 28,
+          "seconds": 0.2978
+        },
+        "Fault: Property preparation": {
+          "calls": 2,
+          "seconds": 7.445
+        },
+        "Fault: Surface R/K integrate": {
+          "calls": 28,
+          "seconds": 1.222
+        },
+        "Fault: Surface R/K total": {
+          "calls": 28,
+          "seconds": 1.864
+        },
+        "Initialization": {
+          "calls": 1,
+          "seconds": 0.1425
+        },
+        "Particles: Advect": {
+          "calls": 4,
+          "seconds": 0.01777
+        },
+        "Particles: Copy": {
+          "calls": 2,
+          "seconds": 0.003051
+        },
+        "Particles: Domains/CPDI": {
+          "calls": 3,
+          "seconds": 2.399
+        },
+        "Particles: Generate": {
+          "calls": 1,
+          "seconds": 0.003229
+        },
+        "Particles: Initialization": {
+          "calls": 1,
+          "seconds": 7.166e-05
+        },
+        "Particles: Initialize properties": {
+          "calls": 1,
+          "seconds": 0.02521
+        },
+        "Particles: Interpolate": {
+          "calls": 2,
+          "seconds": 0.008364
+        },
+        "Particles: Sort": {
+          "calls": 4,
+          "seconds": 0.004312
+        },
+        "Postprocessing": {
+          "calls": 2,
+          "seconds": 0.8181
+        },
+        "Setup dof systems": {
+          "calls": 1,
+          "seconds": 0.02929
+        },
+        "Setup initial conditions": {
+          "calls": 1,
+          "seconds": 1.056
+        },
+        "Setup matrices": {
+          "calls": 1,
+          "seconds": 0.1161
+        }
+      },
+      "converged_states": 2,
+      "fresh_linear_checks": 13,
+      "final_residuals": [
+        {
+          "bulk": 6.7304234019651496e-12,
+          "bulk scale": 1586.5488603268366,
+          "surface": 7.12121102071612e-08,
+          "surface scale": 951.6837594913193,
+          "velocity": 6.573908058421762e-12,
+          "scaled continuity": 1.4430287624082747e-12,
+          "bulk precision": 6.489195376910149e-11,
+          "bulk target": 1.5865553495222133e-05,
+          "velocity correction": 2.5682949884488173e-14
+        },
+        {
+          "bulk": 4.838235008559776e-12,
+          "bulk scale": 9.99125516114037,
+          "surface": 6.16993821371157e-09,
+          "surface scale": 339.95141867026996,
+          "velocity": 4.804115946005853e-12,
+          "scaled continuity": 5.735747339150367e-13,
+          "bulk precision": 3.879566240130842e-11,
+          "bulk target": 9.995134727380501e-08,
+          "velocity correction": 3.3430514440822545e-15
+        }
+      ]
+    },
+    "accounted": {
+      "resources": {
+        "command": [
+          "/home/ein/repository/aspect/build-pf-cpdi/aspect-release",
+          "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/nonuniform/performance/accounted.prm"
+        ],
+        "cwd": "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/diagnostics/pilot-build",
+        "executable_sha256": "9427c8d9602c014ec07d28d233b1a4581f8eceb76e4b58bae6413aab25398793",
+        "parameter_sha256": "beee249a35a03e01feae5b3f542407a567dc2525d43cad7de22d4b6c37c3669e",
+        "configuration": "Release",
+        "plugin_sha256": "40aac2f889e311f92cc6b69942b951fcafe4813dc5655460321f69f6e8d89880",
+        "git_head": "a24c3623108e99240997141121a9d167fa119042",
+        "ranks": 1,
+        "exit_status": 0,
+        "wall_seconds": 32.999510708000344,
+        "peak_rss_KiB": 605872
+      },
+      "aspect_elapsed": 29.38,
+      "startup_shutdown_seconds": 3.6195107080003446,
+      "timings": {
+        "Assemble Stokes system Picard": {
+          "calls": 13,
+          "seconds": 1.881
+        },
+        "Assemble Stokes system rhs": {
+          "calls": 15,
+          "seconds": 1.575
+        },
+        "Build Stokes preconditioner": {
+          "calls": 13,
+          "seconds": 1.314
+        },
+        "Fault: B action": {
+          "calls": 250,
+          "seconds": 3.563
+        },
+        "Fault: B linearization": {
+          "calls": 13,
+          "seconds": 0.2047
+        },
+        "Fault: Cache build total": {
+          "calls": 2,
+          "seconds": 0.1465
+        },
+        "Fault: Cache validation": {
+          "calls": 33,
+          "seconds": 0.0157
+        },
+        "Fault: Domain partition": {
+          "calls": 45696,
+          "seconds": 0.04182
+        },
+        "Fault: G FE sampling": {
+          "calls": 250,
+          "seconds": 0.9165
+        },
+        "Fault: G integrate/reduce": {
+          "calls": 250,
+          "seconds": 0.2913
+        },
+        "Fault: G lookup build": {
+          "calls": 13,
+          "seconds": 0.1349
+        },
+        "Fault: G total": {
+          "calls": 250,
+          "seconds": 1.211
+        },
+        "Fault: History commit": {
+          "calls": 2,
+          "seconds": 0.04726
+        },
+        "Fault: I_h FE total": {
+          "calls": 2590,
+          "seconds": 4.596
+        },
+        "Fault: I_h lookup access": {
+          "calls": 2590,
+          "seconds": 4.307
+        },
+        "Fault: I_h preparation": {
+          "calls": 2,
+          "seconds": 7.289
+        },
+        "Fault: Linearization total": {
+          "calls": 13,
+          "seconds": 1.023
+        },
+        "Fault: Parent FE sampling": {
+          "calls": 28,
+          "seconds": 0.2486
+        },
+        "Fault: Parent association": {
+          "calls": 73728,
+          "seconds": 0.02299
+        },
+        "Fault: Parent lookup build": {
+          "calls": 28,
+          "seconds": 0.2964
+        },
+        "Fault: Property preparation": {
+          "calls": 2,
+          "seconds": 7.388
+        },
+        "Fault: Surface R/K integrate": {
+          "calls": 28,
+          "seconds": 1.181
+        },
+        "Fault: Surface R/K total": {
+          "calls": 28,
+          "seconds": 1.824
+        },
+        "Initialization": {
+          "calls": 1,
+          "seconds": 0.1442
+        },
+        "Particles: Advect": {
+          "calls": 4,
+          "seconds": 0.01716
+        },
+        "Particles: Copy": {
+          "calls": 2,
+          "seconds": 0.002977
+        },
+        "Particles: Domains/CPDI": {
+          "calls": 3,
+          "seconds": 2.523
+        },
+        "Particles: Generate": {
+          "calls": 1,
+          "seconds": 0.003297
+        },
+        "Particles: Initialization": {
+          "calls": 1,
+          "seconds": 7.772e-05
+        },
+        "Particles: Initialize properties": {
+          "calls": 1,
+          "seconds": 0.02556
+        },
+        "Particles: Interpolate": {
+          "calls": 2,
+          "seconds": 0.00787
+        },
+        "Particles: Sort": {
+          "calls": 4,
+          "seconds": 0.004222
+        },
+        "Postprocessing": {
+          "calls": 2,
+          "seconds": 0.8117
+        },
+        "Setup dof systems": {
+          "calls": 1,
+          "seconds": 0.02996
+        },
+        "Setup initial conditions": {
+          "calls": 1,
+          "seconds": 1.208
+        },
+        "Setup matrices": {
+          "calls": 1,
+          "seconds": 0.1115
+        }
+      },
+      "converged_states": 2,
+      "fresh_linear_checks": 13,
+      "final_residuals": [
+        {
+          "bulk": 6.7304234019651496e-12,
+          "bulk scale": 1586.5488603268366,
+          "surface": 7.12121102071612e-08,
+          "surface scale": 951.6837594913193,
+          "velocity": 6.573908058421762e-12,
+          "scaled continuity": 1.4430287624082747e-12,
+          "bulk precision": 6.489195376910149e-11,
+          "bulk target": 1.5865553495222133e-05,
+          "velocity correction": 2.5682949884488173e-14
+        },
+        {
+          "bulk": 4.838235008559776e-12,
+          "bulk scale": 9.99125516114037,
+          "surface": 6.16993821371157e-09,
+          "surface scale": 339.95141867026996,
+          "velocity": 4.804115946005853e-12,
+          "scaled continuity": 5.735747339150367e-13,
+          "bulk precision": 3.879566240130842e-11,
+          "bulk target": 9.995134727380501e-08,
+          "velocity correction": 3.3430514440822545e-15
+        }
+      ]
+    },
+    "local": {
+      "resources": {
+        "command": [
+          "/home/ein/repository/aspect/build-pf-cpdi/aspect-release",
+          "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/nonuniform/performance/local.prm"
+        ],
+        "cwd": "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/diagnostics/pilot-build",
+        "executable_sha256": "442031409fdcc735a433484a4ebc4477ab0a3405d0af1dbb8cd003fc4d9473cf",
+        "parameter_sha256": "dfaa4a4e1004b8eaec5081b09ac1d3e554c399a4d02e90582638ed7639e2a06c",
+        "configuration": "Release",
+        "plugin_sha256": "40aac2f889e311f92cc6b69942b951fcafe4813dc5655460321f69f6e8d89880",
+        "git_head": "a24c3623108e99240997141121a9d167fa119042",
+        "ranks": 1,
+        "exit_status": 0,
+        "wall_seconds": 36.17734465600006,
+        "peak_rss_KiB": 604844
+      },
+      "aspect_elapsed": 32.59,
+      "startup_shutdown_seconds": 3.587344656000056,
+      "timings": {
+        "Assemble Stokes system Picard": {
+          "calls": 13,
+          "seconds": 2.071
+        },
+        "Assemble Stokes system rhs": {
+          "calls": 15,
+          "seconds": 1.774
+        },
+        "Build Stokes preconditioner": {
+          "calls": 13,
+          "seconds": 1.472
+        },
+        "Initialization": {
+          "calls": 1,
+          "seconds": 0.149
+        },
+        "Particles: Advect": {
+          "calls": 4,
+          "seconds": 0.01989
+        },
+        "Particles: Copy": {
+          "calls": 2,
+          "seconds": 0.002786
+        },
+        "Particles: Generate": {
+          "calls": 1,
+          "seconds": 0.00254
+        },
+        "Particles: Initialization": {
+          "calls": 1,
+          "seconds": 8.606e-05
+        },
+        "Particles: Initialize properties": {
+          "calls": 1,
+          "seconds": 0.02188
+        },
+        "Particles: Interpolate": {
+          "calls": 2,
+          "seconds": 0.008438
+        },
+        "Particles: Sort": {
+          "calls": 4,
+          "seconds": 0.005124
+        },
+        "Postprocessing": {
+          "calls": 2,
+          "seconds": 0.9089
+        },
+        "Setup dof systems": {
+          "calls": 1,
+          "seconds": 0.02995
+        },
+        "Setup initial conditions": {
+          "calls": 1,
+          "seconds": 1.083
+        },
+        "Setup matrices": {
+          "calls": 1,
+          "seconds": 0.1144
+        },
+        "Particles: Domains/CPDI": {
+          "calls": 3,
+          "seconds": 2.56
+        },
+        "Fault: History commit": {
+          "calls": 2,
+          "seconds": 0.0507
+        },
+        "Fault: I_h FE total": {
+          "calls": 2590,
+          "seconds": 5.21
+        },
+        "Fault: I_h lookup access": {
+          "calls": 2590,
+          "seconds": 4.88
+        },
+        "Fault: I_h preparation": {
+          "calls": 2,
+          "seconds": 8.26
+        },
+        "Fault: Property preparation": {
+          "calls": 2,
+          "seconds": 8.37
+        },
+        "Fault: B action": {
+          "calls": 250,
+          "seconds": 3.94
+        },
+        "Fault: B linearization": {
+          "calls": 13,
+          "seconds": 0.226
+        },
+        "Fault: G FE sampling": {
+          "calls": 250,
+          "seconds": 1.02
+        },
+        "Fault: G integrate/reduce": {
+          "calls": 250,
+          "seconds": 0.297
+        },
+        "Fault: G lookup build": {
+          "calls": 13,
+          "seconds": 0.152
+        },
+        "Fault: G total": {
+          "calls": 250,
+          "seconds": 1.32
+        },
+        "Fault: Linearization total": {
+          "calls": 13,
+          "seconds": 1.13
+        },
+        "Fault: Parent FE sampling": {
+          "calls": 28,
+          "seconds": 0.276
+        },
+        "Fault: Parent lookup build": {
+          "calls": 28,
+          "seconds": 0.334
+        },
+        "Fault: Surface R/K integrate": {
+          "calls": 28,
+          "seconds": 1.3
+        },
+        "Fault: Surface R/K total": {
+          "calls": 28,
+          "seconds": 2.01
+        },
+        "Fault: Cache build total": {
+          "calls": 2,
+          "seconds": 0.151
+        },
+        "Fault: Cache validation": {
+          "calls": 33,
+          "seconds": 0.0135
+        },
+        "Fault: Domain partition": {
+          "calls": 45696,
+          "seconds": 0.0452
+        },
+        "Fault: Parent association": {
+          "calls": 73728,
+          "seconds": 0.0261
+        }
+      },
+      "converged_states": 2,
+      "fresh_linear_checks": 13,
+      "final_residuals": [
+        {
+          "bulk": 6.7304234019651496e-12,
+          "bulk scale": 1586.5488603268366,
+          "surface": 7.12121102071612e-08,
+          "surface scale": 951.6837594913193,
+          "velocity": 6.573908058421762e-12,
+          "scaled continuity": 1.4430287624082747e-12,
+          "bulk precision": 6.489195376910149e-11,
+          "bulk target": 1.5865553495222133e-05,
+          "velocity correction": 2.5682949884488173e-14
+        },
+        {
+          "bulk": 4.838235008559776e-12,
+          "bulk scale": 9.99125516114037,
+          "surface": 6.16993821371157e-09,
+          "surface scale": 339.95141867026996,
+          "velocity": 4.804115946005853e-12,
+          "scaled continuity": 5.735747339150367e-13,
+          "bulk precision": 3.879566240130842e-11,
+          "bulk target": 9.995134727380501e-08,
+          "velocity correction": 3.3430514440822545e-15
+        }
+      ]
+    },
+    "local-mpi": {
+      "resources": {
+        "command": [
+          "mpirun",
+          "-np",
+          "2",
+          "/home/ein/repository/aspect/build-pf-cpdi/aspect-release",
+          "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/nonuniform/performance/local-mpi.prm"
+        ],
+        "cwd": "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/diagnostics/pilot-build",
+        "executable_sha256": "442031409fdcc735a433484a4ebc4477ab0a3405d0af1dbb8cd003fc4d9473cf",
+        "parameter_sha256": "931cfdecb8eb34d7981e6273b8e715ba35b86f22356f0518b7adfa822011f54b",
+        "configuration": "Release",
+        "plugin_sha256": "40aac2f889e311f92cc6b69942b951fcafe4813dc5655460321f69f6e8d89880",
+        "git_head": "a24c3623108e99240997141121a9d167fa119042",
+        "ranks": 2,
+        "exit_status": 0,
+        "wall_seconds": 29.31029892999959,
+        "peak_rss_KiB": 448480
+      },
+      "aspect_elapsed": 25.56,
+      "startup_shutdown_seconds": 3.750298929999591,
+      "timings": {
+        "Assemble Stokes system Picard": {
+          "calls": 13,
+          "seconds": 1.511
+        },
+        "Assemble Stokes system rhs": {
+          "calls": 15,
+          "seconds": 1.312
+        },
+        "Build Stokes preconditioner": {
+          "calls": 13,
+          "seconds": 1.17
+        },
+        "Initialization": {
+          "calls": 1,
+          "seconds": 0.1394
+        },
+        "Particles: Advect": {
+          "calls": 4,
+          "seconds": 0.01486
+        },
+        "Particles: Copy": {
+          "calls": 2,
+          "seconds": 0.002357
+        },
+        "Particles: Exchange ghosts": {
+          "calls": 3,
+          "seconds": 0.001144
+        },
+        "Particles: Generate": {
+          "calls": 1,
+          "seconds": 0.001686
+        },
+        "Particles: Initialization": {
+          "calls": 1,
+          "seconds": 6.494e-05
+        },
+        "Particles: Initialize properties": {
+          "calls": 1,
+          "seconds": 0.01304
+        },
+        "Particles: Interpolate": {
+          "calls": 2,
+          "seconds": 0.009552
+        },
+        "Particles: Sort": {
+          "calls": 4,
+          "seconds": 0.003201
+        },
+        "Postprocessing": {
+          "calls": 2,
+          "seconds": 0.5868
+        },
+        "Setup dof systems": {
+          "calls": 1,
+          "seconds": 0.04867
+        },
+        "Setup initial conditions": {
+          "calls": 1,
+          "seconds": 0.6441
+        },
+        "Setup matrices": {
+          "calls": 1,
+          "seconds": 0.2074
+        },
+        "Particles: Domains/CPDI": {
+          "calls": 3,
+          "seconds": 1.33
+        },
+        "Fault: History commit": {
+          "calls": 2,
+          "seconds": 0.0339
+        },
+        "Fault: I_h FE total": {
+          "calls": 2590,
+          "seconds": 2.46
+        },
+        "Fault: I_h lookup access": {
+          "calls": 2590,
+          "seconds": 2.14
+        },
+        "Fault: I_h preparation": {
+          "calls": 2,
+          "seconds": 4.41
+        },
+        "Fault: Property preparation": {
+          "calls": 2,
+          "seconds": 4.48
+        },
+        "Fault: B action": {
+          "calls": 250,
+          "seconds": 3.37
+        },
+        "Fault: B linearization": {
+          "calls": 13,
+          "seconds": 0.114
+        },
+        "Fault: G FE sampling": {
+          "calls": 250,
+          "seconds": 0.833
+        },
+        "Fault: G integrate/reduce": {
+          "calls": 250,
+          "seconds": 0.288
+        },
+        "Fault: G lookup build": {
+          "calls": 13,
+          "seconds": 0.121
+        },
+        "Fault: G total": {
+          "calls": 250,
+          "seconds": 1.12
+        },
+        "Fault: Linearization total": {
+          "calls": 13,
+          "seconds": 0.747
+        },
+        "Fault: Parent FE sampling": {
+          "calls": 28,
+          "seconds": 0.21
+        },
+        "Fault: Parent lookup build": {
+          "calls": 28,
+          "seconds": 0.272
+        },
+        "Fault: Surface R/K integrate": {
+          "calls": 28,
+          "seconds": 0.779
+        },
+        "Fault: Surface R/K total": {
+          "calls": 28,
+          "seconds": 1.32
+        }
+      },
+      "converged_states": 2,
+      "fresh_linear_checks": 13,
+      "final_residuals": [
+        {
+          "bulk": 6.535280949413162e-12,
+          "bulk scale": 1586.5488603268357,
+          "surface": 7.121216114019657e-08,
+          "surface scale": 951.6837594912789,
+          "velocity": 6.467102084923313e-12,
+          "scaled continuity": 9.415347635340578e-13,
+          "bulk precision": 6.489195376910862e-11,
+          "bulk target": 1.5865553495222127e-05,
+          "velocity correction": 2.568276195662437e-14
+        },
+        {
+          "bulk": 4.8140525506727304e-12,
+          "bulk scale": 9.991255161140382,
+          "surface": 6.169968854224869e-09,
+          "surface scale": 339.9514186702502,
+          "velocity": 4.766405569841884e-12,
+          "scaled continuity": 6.756329657579557e-13,
+          "bulk precision": 3.879566240129773e-11,
+          "bulk target": 9.995134727380512e-08,
+          "velocity correction": 3.3430113228135746e-15
+        }
+      ]
+    }
+  },
+  "exported_fields": {
+    "bulk_0.csv": {
+      "byte_identical": true,
+      "max_absolute_errors": {},
+      "baseline_sha256": "e8291a67169aee14ddd51d26ac7f4457c65e7e578878738bc5b88f028e63200a"
+    },
+    "bulk_1.csv": {
+      "byte_identical": true,
+      "max_absolute_errors": {},
+      "baseline_sha256": "b3ddc18978d9040e48fa5b5724ebdfdbfd219bc8920bbb3464d42c6d78ffcc0e"
+    },
+    "bulk_cell_ids_0.csv": {
+      "byte_identical": true,
+      "max_absolute_errors": {},
+      "baseline_sha256": "05f2d885923e637a8fafd5aa70be8755cfbe34b45e3f5d16ff0ec9a48663a70d"
+    },
+    "bulk_cell_ids_1.csv": {
+      "byte_identical": true,
+      "max_absolute_errors": {},
+      "baseline_sha256": "05f2d885923e637a8fafd5aa70be8755cfbe34b45e3f5d16ff0ec9a48663a70d"
+    },
+    "history_transfer_0.csv": {
+      "byte_identical": true,
+      "max_absolute_errors": {},
+      "baseline_sha256": "5f7433496ea74341e65c45c550151e19dcf19a9133de46f70b638228fac25207"
+    },
+    "history_transfer_1.csv": {
+      "byte_identical": true,
+      "max_absolute_errors": {},
+      "baseline_sha256": "5f7433496ea74341e65c45c550151e19dcf19a9133de46f70b638228fac25207"
+    },
+    "particle_traction_initial_0.csv": {
+      "byte_identical": true,
+      "max_absolute_errors": {},
+      "baseline_sha256": "24acac17f5c7c583d0fae3a16077c8594b5293e04239d3f2ebf53b57d1583e1b"
+    },
+    "particles_0.csv": {
+      "byte_identical": true,
+      "max_absolute_errors": {},
+      "baseline_sha256": "6c43e2ff13796a728452064890ea739f5cece4aacfa55e65ec185046c8fb4bab"
+    },
+    "particles_1.csv": {
+      "byte_identical": true,
+      "max_absolute_errors": {},
+      "baseline_sha256": "d91d204c8afbaf40198fe0082f4953f54fdace8a98273da853853e9c09821426"
+    },
+    "phase_0.csv": {
+      "byte_identical": true,
+      "max_absolute_errors": {},
+      "baseline_sha256": "66850c4d8a9e661d5e60795ffc2118115827afa3fe5aff447c31c0b3e6f15249"
+    },
+    "phase_1.csv": {
+      "byte_identical": true,
+      "max_absolute_errors": {},
+      "baseline_sha256": "66850c4d8a9e661d5e60795ffc2118115827afa3fe5aff447c31c0b3e6f15249"
+    },
+    "segments_0.csv": {
+      "byte_identical": true,
+      "max_absolute_errors": {},
+      "baseline_sha256": "a0a1b035d08f1440d7ba65bde3ca88b13bb0246a19281f187069e646c3ef3868"
+    },
+    "segments_1.csv": {
+      "byte_identical": true,
+      "max_absolute_errors": {},
+      "baseline_sha256": "a0a1b035d08f1440d7ba65bde3ca88b13bb0246a19281f187069e646c3ef3868"
+    },
+    "surface_0.csv": {
+      "byte_identical": true,
+      "max_absolute_errors": {},
+      "baseline_sha256": "bd0fc402fd8eadd7c1ee2f530232b5aaeaeb91a0efb9d78a90485c1bddb2807d"
+    },
+    "surface_1.csv": {
+      "byte_identical": true,
+      "max_absolute_errors": {},
+      "baseline_sha256": "1e8f098128e437bf40559f1cc2e180d9c582d7720753ef6085de01db3222ca20"
+    },
+    "surface_weak_0.csv": {
+      "byte_identical": true,
+      "max_absolute_errors": {},
+      "baseline_sha256": "217072f10c367d6aaaff6cd95e8aca1375a602189cf3cf13bbcce18e7c3c9d4a"
+    },
+    "surface_weak_1.csv": {
+      "byte_identical": true,
+      "max_absolute_errors": {},
+      "baseline_sha256": "a9432931724ef6037cac9c96b490df0f1fe136da6397874ea1fc937d43df8be7"
+    },
+    "time_0.csv": {
+      "byte_identical": true,
+      "max_absolute_errors": {},
+      "baseline_sha256": "e3eb6c7de3dfab6f62696eee0c27a55f6c05d39280b92e974997012897b30659"
+    },
+    "time_1.csv": {
+      "byte_identical": true,
+      "max_absolute_errors": {},
+      "baseline_sha256": "2bac11fefe85fa97490b1915d63d669416e600c5ff99d9cab736c45750bfcd5d"
+    }
+  },
+  "all_exports_numerically_identical": true,
+  "accounted_exports_identical": {
+    "bulk_0.csv": true,
+    "bulk_1.csv": true,
+    "bulk_cell_ids_0.csv": true,
+    "bulk_cell_ids_1.csv": true,
+    "history_transfer_0.csv": true,
+    "history_transfer_1.csv": true,
+    "particle_traction_initial_0.csv": true,
+    "particles_0.csv": true,
+    "particles_1.csv": true,
+    "phase_0.csv": true,
+    "phase_1.csv": true,
+    "segments_0.csv": true,
+    "segments_1.csv": true,
+    "surface_0.csv": true,
+    "surface_1.csv": true,
+    "surface_weak_0.csv": true,
+    "surface_weak_1.csv": true,
+    "time_0.csv": true,
+    "time_1.csv": true
+  },
+  "local_timer_exports_identical": {
+    "bulk_0.csv": true,
+    "bulk_1.csv": true,
+    "bulk_cell_ids_0.csv": true,
+    "bulk_cell_ids_1.csv": true,
+    "history_transfer_0.csv": true,
+    "history_transfer_1.csv": true,
+    "particle_traction_initial_0.csv": true,
+    "particles_0.csv": true,
+    "particles_1.csv": true,
+    "phase_0.csv": true,
+    "phase_1.csv": true,
+    "segments_0.csv": true,
+    "segments_1.csv": true,
+    "surface_0.csv": true,
+    "surface_1.csv": true,
+    "surface_weak_0.csv": true,
+    "surface_weak_1.csv": true,
+    "time_0.csv": true,
+    "time_1.csv": true
+  },
+  "mpi_surface_max_absolute_differences": {
+    "surface_0.csv": {
+      "x": 0.0,
+      "y": 2.9032892525379778e-15,
+      "V": 4.6566483308252415e-17,
+      "Theta": 1.5205614545266144e-11,
+      "C": 3.205968823749572e-11,
+      "Ih": 1.2363443602225743e-11
+    },
+    "surface_weak_0.csv": {
+      "Mdiag": 1.0408340855860843e-16,
+      "Moff": 2.5587171270657905e-17,
+      "q": 3.0020430585864233e-13,
+      "C": 2.757793993168889e-13,
+      "friction": 1.6608936448392342e-13,
+      "damping": 2.503552920529728e-14,
+      "F": 1.5748310825695608e-15
+    },
+    "surface_1.csv": {
+      "x": 0.0,
+      "y": 2.9032892525379778e-15,
+      "V": 8.521829075736065e-17,
+      "Theta": 1.5575096767861396e-11,
+      "C": 3.728928277269006e-11,
+      "Ih": 1.2363443602225743e-11
+    },
+    "surface_weak_1.csv": {
+      "Mdiag": 1.249000902703301e-16,
+      "Moff": 1.474514954580286e-17,
+      "q": 3.268496584496461e-13,
+      "C": 3.1175062531474396e-13,
+      "friction": 9.325873406851315e-14,
+      "damping": 5.861977570020827e-14,
+      "F": 3.3187608657844624e-15
+    }
+  },
+  "accepted_spatial_prefix_identical": {
+    "bulk_0.csv": true,
+    "bulk_1.csv": true,
+    "bulk_cell_ids_0.csv": true,
+    "bulk_cell_ids_1.csv": true,
+    "history_transfer_0.csv": true,
+    "history_transfer_1.csv": true,
+    "particle_traction_initial_0.csv": true,
+    "particles_0.csv": true,
+    "particles_1.csv": true,
+    "phase_0.csv": true,
+    "phase_1.csv": true,
+    "segments_0.csv": true,
+    "segments_1.csv": true,
+    "surface_0.csv": true,
+    "surface_1.csv": true,
+    "surface_weak_0.csv": true,
+    "surface_weak_1.csv": true,
+    "time_0.csv": true,
+    "time_1.csv": true
+  },
+  "elapsed_reconciliation": {
+    "disjoint_regions": [
+      "Fault: Property preparation",
+      "Particles: Domains/CPDI",
+      "Fault: Surface R/K total",
+      "Fault: G total",
+      "Fault: B action",
+      "Fault: B linearization",
+      "Fault: History commit",
+      "Assemble Stokes system Picard",
+      "Assemble Stokes system rhs",
+      "Build Stokes preconditioner",
+      "Postprocessing",
+      "Initialization",
+      "Setup dof systems",
+      "Setup matrices"
+    ],
+    "assigned_seconds": 22.62832,
+    "remaining_aspect_seconds": 6.75168,
+    "startup_shutdown_seconds": 3.6195107080003446,
+    "remaining_scope": "Other setup/phase-field solve, Krylov preconditioner applications, linear algebra, constraints, scalar reductions and uninstrumented orchestration; not attributed to surface nonlinear quadrature."
+  },
+  "local_timer_reconciliation": {
+    "assigned_seconds": 24.99595,
+    "remaining_aspect_seconds": 7.594050000000003,
+    "startup_shutdown_seconds": 3.587344656000056,
+    "note": "Subsystem timers are rank-local and unsynchronized. Their individual lifetime totals overlap and are not additive."
+  }
+}

@@ -1,0 +1,437 @@
+[
+  {
+    "step": 0,
+    "time": 0.0,
+    "linear": [
+      {
+        "iterations": 11.0,
+        "estimated": 8.562093581769388e-07,
+        "fresh": 8.5620939128205e-07,
+        "target": 1.5865488603268367e-06,
+        "raw": 8.562093912820512e-07,
+        "rhs null": 6.926285596860503e-16,
+        "residual null": 8.379721403918977e-15,
+        "compatibility bound": 3.522846148855311e-11,
+        "pressure quotient": 1.0,
+        "right null": 3.1064880172994634e-10,
+        "left null": 3.1064880172994634e-10
+      },
+      {
+        "iterations": 12.0,
+        "estimated": 3.505472481930927e-14,
+        "fresh": 3.505524100717114e-14,
+        "target": 2.314911079182794e-13,
+        "raw": 3.505524105037733e-14,
+        "rhs null": 1.797526336804283e-18,
+        "residual null": -1.7404599399285953e-18,
+        "compatibility bound": 3.522846148855311e-11,
+        "pressure quotient": 1.0,
+        "right null": 3.1064880172994634e-10,
+        "left null": 3.1064880172994634e-10
+      },
+      {
+        "iterations": 10.0,
+        "estimated": 4.488065863346949e-12,
+        "fresh": 4.488069511856764e-12,
+        "target": 9.092399838183446e-12,
+        "raw": 4.4880716421686486e-12,
+        "rhs null": -4.377025918696058e-15,
+        "residual null": 4.372868637195247e-15,
+        "compatibility bound": 3.522846148855311e-11,
+        "pressure quotient": 1.0,
+        "right null": 3.1064880172994634e-10,
+        "left null": 3.1064880172994634e-10
+      },
+      {
+        "iterations": 10.0,
+        "estimated": 1.5859520699882347e-10,
+        "fresh": 1.5859479208115629e-10,
+        "target": 3.203574490898357e-10,
+        "raw": 1.585947920853788e-10,
+        "rhs null": 1.1573016046076299e-15,
+        "residual null": -1.1572857072063748e-15,
+        "compatibility bound": 3.522846148855311e-11,
+        "pressure quotient": 1.0,
+        "right null": 3.1064880172994634e-10,
+        "left null": 3.1064880172994634e-10
+      },
+      {
+        "iterations": 12.0,
+        "estimated": 6.840328376359162e-10,
+        "fresh": 6.840651903988852e-10,
+        "target": 7.4356735822755565e-09,
+        "raw": 6.840651904172804e-10,
+        "rhs null": 2.6141929508996283e-16,
+        "residual null": -5.0167912179341884e-15,
+        "compatibility bound": 3.522846148855311e-11,
+        "pressure quotient": 1.0,
+        "right null": 3.1064880172994634e-10,
+        "left null": 3.1064880172994634e-10
+      },
+      {
+        "iterations": 15.0,
+        "estimated": 1.1275153032899472e-08,
+        "fresh": 1.1275200007171068e-08,
+        "target": 1.7367916091342147e-08,
+        "raw": 1.127520000723856e-08,
+        "rhs null": -3.0684359051228885e-16,
+        "residual null": -3.901438219725363e-14,
+        "compatibility bound": 3.522846148855311e-11,
+        "pressure quotient": 1.0,
+        "right null": 3.1064880172994634e-10,
+        "left null": 3.1064880172994634e-10
+      },
+      {
+        "iterations": 19.0,
+        "estimated": 4.804711027995718e-10,
+        "fresh": 4.80477421219659e-10,
+        "target": 1.4062194367843392e-09,
+        "raw": 4.804774212220282e-10,
+        "rhs null": 1.6792311421836002e-15,
+        "residual null": -1.508694241169729e-15,
+        "compatibility bound": 3.522846148855311e-11,
+        "pressure quotient": 1.0,
+        "right null": 3.1064880172994634e-10,
+        "left null": 3.1064880172994634e-10
+      },
+      {
+        "iterations": 19.0,
+        "estimated": 6.238626804651162e-13,
+        "fresh": 6.238687491832577e-13,
+        "target": 1.6531070685256827e-12,
+        "raw": 6.238690398365115e-13,
+        "rhs null": 6.025650291928304e-16,
+        "residual null": -6.022117966232849e-16,
+        "compatibility bound": 3.522846148855311e-11,
+        "pressure quotient": 1.0,
+        "right null": 3.1064880172994634e-10,
+        "left null": 3.1064880172994634e-10
+      },
+      {
+        "iterations": 20.0,
+        "estimated": 1.9458530279965014e-18,
+        "fresh": 1.9458561658008796e-18,
+        "target": 2.108956637202306e-18,
+        "raw": 1.0385851010013704e-15,
+        "rhs null": 1.0385832815782342e-15,
+        "residual null": -1.0385832781562638e-15,
+        "compatibility bound": 3.522846148855311e-11,
+        "pressure quotient": 1.0,
+        "right null": 3.1064880172994634e-10,
+        "left null": 3.1064880172994634e-10
+      }
+    ],
+    "nonlinear": [
+      {
+        "bulk": 1586.5488603268366,
+        "bulk scale": 1586.5488603268366,
+        "surface": 951.8034535383164,
+        "surface scale": 951.8034535383164,
+        "velocity": 1586.5488603268366,
+        "scaled continuity": 5.519681561887355e-15,
+        "bulk precision": 6.489195376910149e-11,
+        "bulk target": 1.5865553495222133e-05,
+        "velocity correction": 4.960937521293457e-05
+      },
+      {
+        "bulk": 8.562093745960049e-07,
+        "bulk scale": 1586.5488603268366,
+        "surface": 1053.5668354339284,
+        "surface scale": 951.8034535383164,
+        "velocity": 4.4827474845486606e-07,
+        "scaled continuity": 7.294821745894881e-07,
+        "bulk precision": 6.489195376910149e-11,
+        "bulk target": 1.5865553495222133e-05,
+        "velocity correction": 6.652767756096838e-10
+      },
+      {
+        "bulk": 1.425304564986015e-12,
+        "bulk scale": 1586.5488603268366,
+        "surface": 959.4499613277534,
+        "surface scale": 951.8034535383164,
+        "velocity": 1.4215087105965923e-12,
+        "scaled continuity": 1.0395233844405229e-13,
+        "bulk precision": 6.489195376910149e-11,
+        "bulk target": 1.5865553495222133e-05,
+        "velocity correction": 2.6133156528644452e-08
+      },
+      {
+        "bulk": 5.084355161367819e-12,
+        "bulk scale": 1586.5488603268366,
+        "surface": 867.4607041955658,
+        "surface scale": 951.8034535383164,
+        "velocity": 3.5281962712636673e-12,
+        "scaled continuity": 3.660942293777483e-12,
+        "bulk precision": 6.489195376910149e-11,
+        "bulk target": 1.5865553495222133e-05,
+        "velocity correction": 9.242197112345648e-07
+      },
+      {
+        "bulk": 1.5860302301451205e-10,
+        "bulk scale": 1586.5488603268366,
+        "surface": 772.4728122443236,
+        "surface scale": 951.8034535383164,
+        "velocity": 9.114593451919054e-11,
+        "scaled continuity": 1.2979729400093545e-10,
+        "bulk precision": 6.489195376910149e-11,
+        "bulk target": 1.5865553495222133e-05,
+        "velocity correction": 2.3744331083735523e-05
+      },
+      {
+        "bulk": 6.840619374540752e-10,
+        "bulk scale": 1586.5488603268366,
+        "surface": 542.7509780684394,
+        "surface scale": 951.8034535383164,
+        "velocity": 1.8295077719253138e-10,
+        "scaled continuity": 6.591431918772064e-10,
+        "bulk precision": 6.489195376910149e-11,
+        "bulk target": 1.5865553495222133e-05,
+        "velocity correction": 7.47787400016617e-05
+      },
+      {
+        "bulk": 1.1275274800660489e-08,
+        "bulk scale": 1586.5488603268366,
+        "surface": 40.869144632238715,
+        "surface scale": 951.8034535383164,
+        "velocity": 5.021505778667974e-09,
+        "scaled continuity": 1.0095360396994928e-08,
+        "bulk precision": 6.489195376910149e-11,
+        "bulk target": 1.5865553495222133e-05,
+        "velocity correction": 6.2903884661160455e-06
+      },
+      {
+        "bulk": 4.805174554926712e-10,
+        "bulk scale": 1586.5488603268366,
+        "surface": 0.04797345988176603,
+        "surface scale": 951.8034535383164,
+        "velocity": 2.132940890438062e-10,
+        "scaled continuity": 4.3058408773679057e-10,
+        "bulk precision": 6.489195376910149e-11,
+        "bulk target": 1.5865553495222133e-05,
+        "velocity correction": 7.4008783955374455e-09
+      },
+      {
+        "bulk": 5.705695497282727e-12,
+        "bulk scale": 1586.5488603268366,
+        "surface": 6.120359661448635e-08,
+        "surface scale": 951.8034535383164,
+        "velocity": 5.6323524920220984e-12,
+        "scaled continuity": 9.119026885171673e-13,
+        "bulk precision": 6.489195376910149e-11,
+        "bulk target": 1.5865553495222133e-05,
+        "velocity correction": 9.441940194626035e-15
+      }
+    ],
+    "accepted_updates": 8
+  },
+  {
+    "step": 1,
+    "time": 0.5,
+    "linear": [
+      {
+        "iterations": 13.0,
+        "estimated": 5.3189735629160565e-09,
+        "fresh": 5.319092950444887e-09,
+        "target": 1.4225120046712468e-08,
+        "raw": 5.319092950464752e-09,
+        "rhs null": 2.707701933941084e-16,
+        "residual null": -1.453704876260482e-14,
+        "compatibility bound": 3.158611160783413e-13,
+        "pressure quotient": 1.0,
+        "right null": 1.8102782171529197e-10,
+        "left null": 1.8102782171529197e-10
+      },
+      {
+        "iterations": 14.0,
+        "estimated": 3.6684943430297346e-10,
+        "fresh": 3.668465961550376e-10,
+        "target": 4.987861248368955e-10,
+        "raw": 3.6684659615555437e-10,
+        "rhs null": -3.122529595804512e-16,
+        "residual null": -6.158076053348096e-16,
+        "compatibility bound": 2.218319603098731e-13,
+        "pressure quotient": 1.0,
+        "right null": 1.8102782171529197e-10,
+        "left null": 1.8102782171529197e-10
+      },
+      {
+        "iterations": 14.0,
+        "estimated": 2.7175721678479835e-13,
+        "fresh": 2.717609798691676e-13,
+        "target": 3.6497146205190453e-13,
+        "raw": 2.7176104380910907e-13,
+        "rhs null": 1.859738173562402e-16,
+        "residual null": -1.8642093850881893e-16,
+        "compatibility bound": 2.218319603098731e-13,
+        "pressure quotient": 1.0,
+        "right null": 1.8102782171529197e-10,
+        "left null": 1.8102782171529197e-10
+      },
+      {
+        "iterations": 16.0,
+        "estimated": 1.8560329108891069e-19,
+        "fresh": 1.8560360820667477e-19,
+        "target": 1.8788928247993277e-19,
+        "raw": 6.043616885981051e-16,
+        "rhs null": -6.043616601745806e-16,
+        "residual null": 6.043616600980361e-16,
+        "compatibility bound": 2.218319603098731e-13,
+        "pressure quotient": 1.0,
+        "right null": 1.8102782171529197e-10,
+        "left null": 1.8102782171529197e-10
+      }
+    ],
+    "nonlinear": [
+      {
+        "bulk": 9.990423337904112,
+        "bulk scale": 9.990423337904112,
+        "surface": 340.0335340024856,
+        "surface scale": 340.0335340024856,
+        "velocity": 9.990423337904112,
+        "scaled continuity": 2.2968791679916517e-13,
+        "bulk precision": 3.8789691977021045e-11,
+        "bulk target": 9.994302307101814e-08,
+        "velocity correction": 0.00016823675451000536
+      },
+      {
+        "bulk": 5.319054663034618e-09,
+        "bulk scale": 9.990423337904112,
+        "surface": 15.923261345585194,
+        "surface scale": 340.0335340024856,
+        "velocity": 2.70346152416896e-09,
+        "scaled continuity": 4.5807901387957475e-09,
+        "bulk precision": 3.8789691977021045e-11,
+        "bulk target": 9.994302307101814e-08,
+        "velocity correction": 8.437459536080454e-06
+      },
+      {
+        "bulk": 3.6688228270240067e-10,
+        "bulk scale": 9.990423337904112,
+        "surface": 0.011639983921942987,
+        "surface scale": 340.0335340024856,
+        "velocity": 2.253736887813444e-10,
+        "scaled continuity": 2.8949837610255083e-10,
+        "bulk precision": 3.8789691977021045e-11,
+        "bulk target": 9.994302307101814e-08,
+        "velocity correction": 6.176765346732477e-09
+      },
+      {
+        "bulk": 4.830245857487915e-12,
+        "bulk scale": 9.990423337904112,
+        "surface": 5.990884636039322e-09,
+        "surface scale": 340.0335340024856,
+        "velocity": 4.789805689540434e-12,
+        "scaled continuity": 6.237279056008736e-13,
+        "bulk precision": 3.8789691977021045e-11,
+        "bulk target": 9.994302307101814e-08,
+        "velocity correction": 3.179338895199614e-15
+      }
+    ],
+    "accepted_updates": 3
+  },
+  {
+    "step": 2,
+    "time": 1.0,
+    "linear": [
+      {
+        "iterations": 14.0,
+        "estimated": 1.3880301951147265e-08,
+        "fresh": 1.3880486070759538e-08,
+        "target": 1.531398768741097e-08,
+        "raw": 1.3880486070766488e-08,
+        "rhs null": -5.327913804203286e-16,
+        "residual null": -1.3912412729635988e-14,
+        "compatibility bound": 5.49097821530653e-13,
+        "pressure quotient": 1.0,
+        "right null": 1.8102782171529197e-10,
+        "left null": 1.8102782171529197e-10
+      },
+      {
+        "iterations": 13.0,
+        "estimated": 1.279238251718178e-10,
+        "fresh": 1.279268957891964e-10,
+        "target": 3.5831313415366693e-10,
+        "raw": 1.2792689579140282e-10,
+        "rhs null": 1.1996424987734367e-16,
+        "residual null": 7.513227917525208e-16,
+        "compatibility bound": 5.49097821530653e-13,
+        "pressure quotient": 1.0,
+        "right null": 1.8102782171529197e-10,
+        "left null": 1.8102782171529197e-10
+      },
+      {
+        "iterations": 13.0,
+        "estimated": 6.667475595161285e-13,
+        "fresh": 6.667578821189033e-13,
+        "target": 1.6284118616872975e-12,
+        "raw": 6.66757882550397e-13,
+        "rhs null": -2.2579381496755274e-17,
+        "residual null": 2.3987592256759287e-17,
+        "compatibility bound": 5.49097821530653e-13,
+        "pressure quotient": 1.0,
+        "right null": 1.8102782171529197e-10,
+        "left null": 1.8102782171529197e-10
+      },
+      {
+        "iterations": 13.0,
+        "estimated": 9.300940538872897e-18,
+        "fresh": 9.300968033688108e-18,
+        "target": 3.0977726015596246e-17,
+        "raw": 9.79074515788507e-18,
+        "rhs null": -3.0579368013850496e-18,
+        "residual null": 3.057888876817115e-18,
+        "compatibility bound": 5.49097821530653e-13,
+        "pressure quotient": 1.0,
+        "right null": 1.8102782171529197e-10,
+        "left null": 1.8102782171529197e-10
+      }
+    ],
+    "nonlinear": [
+      {
+        "bulk": 9.99042423656602,
+        "bulk scale": 9.99042423656602,
+        "surface": 370.1812421083623,
+        "surface scale": 788.6647053326182,
+        "velocity": 9.99042423656602,
+        "scaled continuity": 6.237439110143909e-13,
+        "bulk precision": 9.636584815056362e-11,
+        "bulk target": 1.0000060821381076e-07,
+        "velocity correction": 0.0001955002044098978
+      },
+      {
+        "bulk": 1.3880476788922595e-08,
+        "bulk scale": 9.99042423656602,
+        "surface": 12.248816550093146,
+        "surface scale": 788.6647053326182,
+        "velocity": 8.308416231837099e-09,
+        "scaled continuity": 1.1119256072524128e-08,
+        "bulk precision": 9.636584815056362e-11,
+        "bulk target": 1.0000060821381076e-07,
+        "velocity correction": 5.873771024373169e-06
+      },
+      {
+        "bulk": 1.2794215805144737e-10,
+        "bulk scale": 9.99042423656602,
+        "surface": 0.05532423040841606,
+        "surface scale": 788.6647053326182,
+        "velocity": 5.954969829972596e-11,
+        "scaled continuity": 1.1323881507360078e-10,
+        "bulk precision": 9.636584815056362e-11,
+        "bulk target": 1.0000060821381076e-07,
+        "velocity correction": 2.676666731284933e-08
+      },
+      {
+        "bulk": 1.7794566270553355e-12,
+        "bulk scale": 9.99042423656602,
+        "surface": 1.0524202536991617e-06,
+        "surface scale": 788.6647053326182,
+        "velocity": 1.6681343565062802e-12,
+        "scaled continuity": 6.195108200947984e-13,
+        "bulk precision": 9.636584815056362e-11,
+        "bulk target": 1.0000060821381076e-07,
+        "velocity correction": 5.091956695293113e-13
+      }
+    ],
+    "accepted_updates": 3
+  }
+]

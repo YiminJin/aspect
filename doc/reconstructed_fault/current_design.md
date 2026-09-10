@@ -329,11 +329,46 @@ property pool does not provide trial or rollback machinery.
 
 ## 17. Particle-to-fault property projection
 
+**Approved discrete revision, 2026-09-09:** the domain-integrated rule in
+`benchmarking/stage_K2_domain_quadrature_addendum.md` supersedes point-volume
+quadrature throughout this document, including surface residual/Jacobian,
+G, mass-based norms and diagnostics. The former source obeyed its former
+specification. Preserve the admitted center set and each full existing domain
+without normal clipping. The objective is now
+\(\sum_p\int_{D_p}(z_p-z_\Gamma(s(x)))^2\,dx\); equivalently replace
+\(\sum_p m_p N_i(\xi_p)F_p\) by
+\(\sum_{p,q}w_{pq}N_i(\xi_{pq})F_{pq}\), with the corresponding second Q1
+factor in mass/Jacobian terms. Bulk FE inputs and particle histories remain
+parent-center/P0 inputs; surface Q1 fields and nonlinear responses are evaluated
+at every integration coordinate. The first integrated geometry is straight
+ordered 2-D faults, including inclined/nonuniform collinear segments. Split
+domains at fault-node planes and projected polygon vertices. Beyond true tips
+use constant endpoint continuation, without admitting new centers or joining
+endpoint DoFs. Three-point Gauss integrates the linear transverse width times
+Q1 products exactly; nonlinear accuracy is checked separately. Curved domain
+partitions were unsupported by the first implementation. The approved extension
+in `benchmarking/stage_K2_polyline_quadrature_addendum.md` now defines the
+actual open 2-D polyline map: nearest finite segment-normal projection without
+reapplying width, with nearest-vertex continuation in corner/tip gaps. Split
+at endpoint planes and distance bisectors; use each selected segment's own
+frame. Parent admission/fault assignment and full measure remain unchanged.
+Overlap, branching, closed loops, self-intersections and 3-D remain unsupported.
+History-commit timing is unchanged.
+
+The bounded K2 performance pass caches only the geometric point-location maps
+for the adaptive `I_h` batch sequence of the last preparation. Exact coordinate
+equality and deal.II's mesh-validity flag are required on every rank before a
+batch can be reused; any rank's mismatch causes collective reconstruction.
+Phase-field values and cell-diameter reductions are evaluated afresh. Unused
+trailing batches are discarded, and mesh-deformation configurations use fresh
+lookups. This does not change adaptive panels, quadrature, tail termination,
+support, residuals, or history publication.
+
 Stage 5 projects generic components from the phase-field-associated particle
 manager to registered reconstructed-fault properties by a consistent weighted
-Q1 least-squares solve. Only locally owned particles contribute. The sampling
-weight is the existing particle-domain volume; within the admitted influence
-region the geometric kernel is one. Fault-sized tridiagonal matrices and packed
+Q1 least-squares solve. Only locally owned parents contribute. The sampling
+measure is their full existing particle domains, with geometric kernel one.
+Fault-sized tridiagonal matrices and packed
 right-hand sides are summed over MPI, and every rank solves the identical
 replicated systems.
 
@@ -503,6 +538,16 @@ after two independent outer integral windows are negligible; the activation
 threshold does not truncate the profile and no monotonic tail is required.
 The completed quadrature-point integrals are projected to replicated fault
 vertices with the consistent Q1 mass matrix.
+
+Cold point location may conservatively reject points outside the global
+reference-tolerance-expanded mesh enclosure. This optimization is limited to
+exact `MappingCartesian` or degree-one `MappingQ`/`MappingQ1` on axis-aligned affine cells; unsupported
+maps/shapes use the original lookup. The enclosure includes the existing
+deal.II reference-cell tolerance plus outward roundoff padding. It is reduced
+across MPI owners and invalidated with the geometric cache. Surviving requests
+retain their order and ordinary shared-face/MPI ownership search, and their
+samples are restored to the original request indices. Proved-outside samples
+remain missing. No profile, physical, or integration tolerance changes.
 
 The physical lower bound is zero, but the unconstrained Q1 solve may produce a
 small negative numerical undershoot. For `I_h` only, degradation is evaluated
@@ -695,12 +740,12 @@ Only locally owned associated particles contribute to the projection-
 consistent weak residual and Jacobian,
 
 \[
-(R_\Gamma)_i=\sum_p m_pN_i(\xi_p)F_p,
+(R_\Gamma)_i=\sum_{p,q} w_{pq}N_i(\xi_{pq})F_{pq},
 \]
 
 \[
 (K_V)_{ij}
-=\sum_p m_pN_i(\xi_p)N_j(\xi_p)
+=\sum_{p,q} w_{pq}N_i(\xi_{pq})N_j(\xi_{pq})
 \left[
 2\kappa_p\chi_p\boldsymbol S_p:\boldsymbol S_p
 +\frac{\kappa_p}{I_{h,p}}
@@ -710,9 +755,10 @@ consistent weak residual and Jacobian,
 \qquad K_V=-\frac{\partial R_\Gamma}{\partial V},
 \]
 
-where \(\chi=h/I_h\). The rate-and-state derivative holds `Theta` fixed;
+where all bracketed coefficients use the same (p,q) evaluation as the residual
+and \(\chi=h/I_h\). The rate-and-state derivative holds `Theta` fixed;
 the rate-dependent law uses its exact signed derivative. The replicated
-ordered Q1 polyline and single-segment particle association make each
+ordered Q1 segments and segment-local integration points make each
 per-fault block symmetric tridiagonal, but the friction term means it is not
 assumed positive definite. Fault-sized vectors and tridiagonal coefficients
 are reduced over MPI and replicated. Each fault block is represented as a
@@ -777,7 +823,26 @@ or updated during Newton. `PhaseFieldFault` evaluates the pointwise frozen
 stress with the local bulk composition/temperature and the same Maxwell
 interval as the viscosity. The slip-only residual and B interfaces do not
 include this V-independent bulk history load. Initial history retention and
-terminal publication semantics are unchanged. When dynamic pressure is used,
+terminal publication semantics are unchanged.
+
+Particle-to-FE transfer averages the incident-cell interpolator proposals at
+each shared continuous DoF: sum values and counts from locally owned cells
+using MPI ADD, then divide at the owning DoF. Each cell contributes once;
+unshared/DG DoFs retain their single proposal. This is not an L2 projection
+or a change to the configured particle interpolator. The published FE history
+and the privately constrained working history remain distinct. The generic
+rule also applies to other particle-mapped continuous compositional fields.
+
+Keep the genuinely frozen Maxwell/profile RHS load in a separate accumulator
+from the unknown-dependent residual through cell quadrature, homogeneous
+constraint distribution and MPI compression. Combine only completed global
+vectors. The positive RHS contribution B V stays unknown-dependent, even for
+an all-active set whose current direction has dV=0. The same assembly path
+serves every Newton base and non-committing trial. This arithmetic separation
+prevents loss of the small residual in cancelling stress loads; it changes
+neither the equations nor convergence/line-search criteria.
+
+When dynamic pressure is used,
 
 \[
 G\delta x=

@@ -43,6 +43,247 @@ namespace
 }
 
 
+TEST_CASE("ReconstructedFault domain quadrature covers nodes and tips", "[fault_domain_quadrature]")
+{
+  for (const double angle : {0.0, 0.37})
+    {
+      const auto rotate = [angle](double x, double y)
+      {
+        return dealii::Point<2>(2+x*std::cos(angle)-y*std::sin(angle),
+                               3+x*std::sin(angle)+y*std::cos(angle));
+      };
+      const aspect::ReconstructedFault<2> fault(
+        {rotate(0,0),rotate(.3,0),rotate(.7,0),rotate(1,0)});
+      const std::vector<dealii::Point<2>> polygon =
+        {rotate(-.1,-1),rotate(1.1,-1),rotate(1.1,1),rotate(-.1,1)};
+      const auto quadrature = aspect::ReconstructedFaultUtilities::domain_quadrature(polygon,fault);
+      dealii::FullMatrix<double> mass(4,4), reference(4,4);
+      std::vector<double> load(4,0.0);
+      double area=0;
+      for (const auto &q : quadrature)
+        {
+          REQUIRE(q.weight>0);
+          REQUIRE(q.xi>=0);
+          REQUIRE(q.xi<=1);
+          area+=q.weight;
+          const double shape[2]={1-q.xi,q.xi};
+          for (unsigned int i=0;i<2;++i)
+            {
+              load[q.segment_index+i]+=q.weight*shape[i]*7;
+              for (unsigned int j=0;j<2;++j)
+                mass(q.segment_index+i,q.segment_index+j)+=q.weight*shape[i]*shape[j];
+            }
+        }
+      REQUIRE(area==Approx(2.4).margin(1e-13));
+      for (unsigned int s=0;s<3;++s)
+        {
+          const double ds=fault.vertex(s).distance(fault.vertex(s+1));
+          reference(s,s)+=2*ds/3;
+          reference(s+1,s+1)+=2*ds/3;
+          reference(s,s+1)+=ds/3;
+          reference(s+1,s)+=ds/3;
+        }
+      reference(0,0)+=.2;
+      reference(3,3)+=.2;
+      for (unsigned int i=0;i<4;++i)
+        {
+          double row=0;
+          for (unsigned int j=0;j<4;++j)
+            {
+              REQUIRE(mass(i,j)==Approx(reference(i,j)).margin(1e-13));
+              row+=reference(i,j);
+            }
+          REQUIRE(load[i]==Approx(7*row).margin(1e-12));
+        }
+    }
+}
+
+TEST_CASE("ReconstructedFault nonlinear domain quadrature accuracy", "[fault_domain_quadrature]")
+{
+  const aspect::ReconstructedFault<2> fault({{0,0},{.3,0},{.7,0},{1,0}});
+  // A slanted convex domain exercises nonconstant transverse width. Compare
+  // smooth nonlinear loads separately from exact polynomial geometry moments.
+  const std::vector<dealii::Point<2>> polygon={{0,-1},{1,-.8},{.9,1},{.1,.8}};
+  std::vector<std::vector<double>> loads;
+  for (const unsigned int order : {3,5,7})
+    {
+      std::vector<double> load(4,0.0);
+      for (const auto &q : aspect::ReconstructedFaultUtilities::domain_quadrature(polygon,fault,order))
+        {
+          const double s=(1-q.xi)*fault.vertex(q.segment_index)[0]
+                         +q.xi*fault.vertex(q.segment_index+1)[0];
+          const double response=std::log(2+.5*s);
+          load[q.segment_index]+=q.weight*(1-q.xi)*response;
+          load[q.segment_index+1]+=q.weight*q.xi*response;
+        }
+      loads.push_back(load);
+    }
+  for (unsigned int i=0;i<4;++i)
+    {
+      REQUIRE(std::abs(loads[0][i]-loads[2][i])<1e-8);
+      REQUIRE(std::abs(loads[1][i]-loads[2][i])<1e-12);
+    }
+}
+
+TEST_CASE("ReconstructedFault bent-domain first and second moments", "[fault_domain_quadrature]")
+{
+  // For this right-angle bend the finite-projection overlap is split by y=-x.
+  // The lower-right quadrant is a constant-vertex corner region. Integrating
+  // its rectangles/triangles analytically gives the fractions below.
+  const aspect::ReconstructedFault<2> fault({{-1,0},{0,0},{0,1}});
+  const std::vector<dealii::Point<2>> polygon={{-.5,-.5},{.5,-.5},{.5,.5},{-.5,.5}};
+  const auto quadrature=aspect::ReconstructedFaultUtilities::domain_quadrature(polygon,fault);
+  dealii::FullMatrix<double> mass(3,3);
+  std::vector<double> first(3,0), corner(2,0);
+  for (const auto &q : quadrature)
+    {
+      REQUIRE(q.weight>0);
+      const double shape[2]={1-q.xi,q.xi};
+      for (unsigned int i=0;i<2;++i)
+        {
+          first[q.segment_index+i]+=q.weight*shape[i];
+          for (unsigned int j=0;j<2;++j)
+            mass(q.segment_index+i,q.segment_index+j)+=q.weight*shape[i]*shape[j];
+        }
+      if (q.segment_index==0 && q.xi==1) corner[0]+=q.weight;
+      if (q.segment_index==1 && q.xi==0) corner[1]+=q.weight;
+    }
+  const double exact_first[3]={5./48,19./24,5./48};
+  const double exact_mass[3][3]={{7./192,13./192,0},{13./192,21./32,13./192},{0,13./192,7./192}};
+  for (unsigned int i=0;i<3;++i)
+    {
+      REQUIRE(first[i]==Approx(exact_first[i]).margin(1e-13));
+      for (unsigned int j=0;j<3;++j)
+        REQUIRE(mass(i,j)==Approx(exact_mass[i][j]).margin(1e-13));
+    }
+  REQUIRE(corner[0]==Approx(.125).margin(1e-13));
+  REQUIRE(corner[1]==Approx(.125).margin(1e-13));
+
+  // Off-origin tip pieces have no finite orthogonal candidate. They retain
+  // their whole measure and the sole incident endpoint frame.
+  for (const bool last : {false,true})
+    {
+      const std::vector<dealii::Point<2>> tip=last ?
+        std::vector<dealii::Point<2>>{{.1,1.1},{.2,1.1},{.2,1.5},{.1,1.5}} :
+        std::vector<dealii::Point<2>>{{-1.5,-.2},{-1.1,-.2},{-1.1,-.1},{-1.5,-.1}};
+      double area=0;
+      for (const auto &q : aspect::ReconstructedFaultUtilities::domain_quadrature(tip,fault))
+        {
+          REQUIRE(q.segment_index==(last ? 1 : 0));
+          REQUIRE(q.xi==(last ? 1.0 : 0.0));
+          area+=q.weight;
+        }
+      REQUIRE(area==Approx(.04).margin(1e-13));
+    }
+}
+
+TEST_CASE("ReconstructedFault polyline straight limit and tiny cuts", "[fault_domain_quadrature]")
+{
+  const std::vector<dealii::Point<2>> polygon={{-.2,-.3},{.2,-.3},{.2,.3},{-.2,.3}};
+  std::vector<std::vector<double>> moments;
+  for (const double bend : {0.,1e-5,1e-7,1e-12})
+    {
+      const aspect::ReconstructedFault<2> fault({{-1,0},{0,bend},{1,0}});
+      std::vector<double> entries(9,0);
+      double area=0;
+      for (const auto &q : aspect::ReconstructedFaultUtilities::domain_quadrature(polygon,fault))
+        {
+          const double shape[2]={1-q.xi,q.xi};
+          area+=q.weight;
+          for (unsigned int i=0;i<2;++i)
+            for (unsigned int j=0;j<2;++j)
+              entries[3*(q.segment_index+i)+q.segment_index+j]+=q.weight*shape[i]*shape[j];
+        }
+      REQUIRE(area==Approx(.24).margin(1e-13));
+      moments.push_back(entries);
+    }
+  for (unsigned int k=1;k<moments.size();++k)
+    for (unsigned int i=0;i<9;++i)
+      REQUIRE(std::abs(moments[k][i]-moments[0][i])<1e-5);
+  for (unsigned int i=0;i<9;++i)
+    REQUIRE(std::abs(moments[3][i]-moments[0][i])<1e-12);
+}
+
+TEST_CASE("ReconstructedFault captured near-straight polyline", "[fault_domain_quadrature]")
+{
+  // Captured verbatim from phase_field_fault_condensed_adiabatic's reconstructed
+  // geometry, not its prescribed horizontal reference or a flattened fit.
+  const aspect::ReconstructedFault<2> fault({
+    {.20000000000000001,.49999985615271447},
+    {.28571428571428575,.49999970654504250},
+    {.37142857142857144,.49999960406507321},
+    {.45714285714285718,.49999955150387382},
+    {.54285714285714293,.49999954964845694},
+    {.62857142857142867,.49999959839597602},
+    {.71428571428571441,.49999969640130554},
+    {.80000000000000004,.49999983934469361}});
+  for (unsigned int vertex=0;vertex<fault.n_vertices();++vertex)
+    {
+      const double x=fault.vertex(vertex)[0];
+      const std::vector<dealii::Point<2>> polygon={{x-.003,.45},{x+.003,.45},{x+.003,.55},{x-.003,.55}};
+      std::vector<std::vector<double>> matrices;
+      for (const unsigned int order : {3,7})
+        {
+          std::vector<double> matrix(64,0);
+          double area=0;
+          for (const auto &q : aspect::ReconstructedFaultUtilities::domain_quadrature(polygon,fault,order))
+            {
+              area+=q.weight;
+              const double shape[2]={1-q.xi,q.xi};
+              for (unsigned int i=0;i<2;++i)
+                for (unsigned int j=0;j<2;++j)
+                  matrix[8*(q.segment_index+i)+q.segment_index+j]+=q.weight*shape[i]*shape[j];
+            }
+          REQUIRE(area==Approx(.0006).margin(1e-14));
+          matrices.push_back(matrix);
+        }
+      for (unsigned int i=0;i<64;++i)
+        REQUIRE(matrices[0][i]==Approx(matrices[1][i]).margin(1e-14));
+    }
+}
+
+TEST_CASE("ReconstructedFault polyline near-degenerate tip cut", "[fault_domain_quadrature]")
+{
+  const aspect::ReconstructedFault<2> fault({{-1,0},{0,0},{0,1}});
+  for (const double delta : {1e-8,1e-13})
+    {
+      const double left=-1-delta, right=-1+delta;
+      const std::vector<dealii::Point<2>> polygon={{left,-.2},{right,-.2},{right,-.1},{left,-.1}};
+      double area=0,tip=0;
+      for (const auto &q : aspect::ReconstructedFaultUtilities::domain_quadrature(polygon,fault))
+        {
+          area+=q.weight;
+          if (q.segment_index==0 && q.xi==0) tip+=q.weight;
+        }
+      REQUIRE(area==Approx(.1*(right-left)).epsilon(1e-10));
+      REQUIRE(tip==Approx(.1*(-1-left)).epsilon(1e-10));
+      REQUIRE(tip>0);
+    }
+}
+
+TEST_CASE("ReconstructedFault bent nonlinear quadrature accuracy", "[fault_domain_quadrature]")
+{
+  const aspect::ReconstructedFault<2> fault({{-1,0},{0,0},{0,1}});
+  const std::vector<dealii::Point<2>> polygon={{-.5,-.5},{.5,-.5},{.5,.5},{-.5,.5}};
+  std::vector<std::vector<double>> loads;
+  for (const unsigned int order : {3,5,7})
+    {
+      std::vector<double> load(3,0);
+      for (const auto &q : aspect::ReconstructedFaultUtilities::domain_quadrature(polygon,fault,order))
+        {
+          const double response=std::log(2+.5*(q.segment_index+q.xi));
+          load[q.segment_index]+=q.weight*(1-q.xi)*response;
+          load[q.segment_index+1]+=q.weight*q.xi*response;
+        }
+      loads.push_back(load);
+    }
+  for (unsigned int i=0;i<3;++i)
+    {
+      REQUIRE(std::abs(loads[0][i]-loads[2][i])<1e-8);
+      REQUIRE(std::abs(loads[1][i]-loads[2][i])<1e-12);
+    }
+}
+
 TEST_CASE("ReconstructedFault empty geometry")
 {
   const aspect::ReconstructedFault<2> fault;

@@ -1,0 +1,4 @@
+# Recheck the existing homogeneous K1 case; only output and end time differ.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/convergence/space32_dt05.prm
+set End time = 1
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/nonuniform/polyline-quadrature/k1_short

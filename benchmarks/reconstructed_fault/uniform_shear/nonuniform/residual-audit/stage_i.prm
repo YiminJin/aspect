@@ -1,0 +1,4 @@
+# Unchanged checked-in fixture; isolate diagnostics and keep previous evidence.
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_stage_i.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/build-pf-cpdi/tests/libphase_field_fault_stage_i.so
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/nonuniform/residual-audit/stage_i

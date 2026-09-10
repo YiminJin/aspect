@@ -1,6 +1,249 @@
 # Stage K: K0 inventory and proposed K1 benchmark
 
-**Current status, 2026-09-09:** Gate K1 passes with the reviewed K1-only
+**Bounded transfer correction and timeline verified:** DGQ1-only Maxwell fields
+hit existing vertex-indexing and mixed-base batching incompatibilities. The
+approved alternative retains continuous Q2 and replaces shared-node INSERT by
+incident-cell MPI ADD/count in the generic particle composition transfer.
+One-/two-rank and traversal differences are at roundoff (history <=2.274e-13 Pa;
+weak load <=8.029e-14); constant and independent weak-integration controls pass.
+One unchanged-physics coarse replay through 0/.5/1 s took 38.01 s and verifies
+actual first-assembly inputs consume the preceding commit, with supplied stress
+retained at zero. Bulk VTU stress compositions show old published inputs;
+particle VTU stress shows terminal commits. No extra computational lag exists
+in this measured timeline. Three nonlinear acceptances, 17 fresh linear checks
+and 52 Stage-I unit assertions pass. Initial projections/profile/I_h are
+unchanged; at 1 s weak-traction RMS changes by 6.366e-5 Pa. No convergence
+campaign or K2.3 was run. Gate K2 and the provisional reference remain unchanged.
+See `stage_K2_stress_transfer_timeline.md` for scope, tests, limitations and
+recoverable evidence. Earlier unimplemented/proposed statements below are
+historical records, superseded by this approved bounded correction.
+
+**K2.2 campaign accepted complete; separate transfer audit requires review:**
+the reference remains provisional and Gate K2 unmet. A bounded frozen-data
+8x32-cell test passes the forward-production, constant and independent FE
+weak-integration controls on one/two ranks, but reversing shared-node transfer
+writes changes the actual constrained history by 4.431 Pa RMS and its weak
+load by 80.7%. Reverse-order one/two-rank loads differ by .583%; normal-order
+MPI loads agree to roundoff for this partition. The physical constraint lift
+is measured separately from published history. The proposed smallest fix is
+an explicit MPI ADD/count incident-cell average at shared continuous DoFs;
+it is not implemented and needs transfer-policy review. No connection to
+the K2.2 temporal plateau is established. Runs took 1.386/3.822 s; no further
+timestep, cancellation analysis, production change, or K2.3 run was made.
+See `stage_K2_history_transfer_audit.md` and `nonuniform/history-transfer/`.
+
+**K2.2 approved sequence completed; temporal reference needs review:** the
+accepted Cartesian/lookup performance baseline is frozen and archived. Only
+the missing .25/.125-s cases were completed (1750.999/2908.272 s, about
+5.52 GiB each), with opt-in timings. All 155 overlapping exports match saved
+states byte-for-byte. The three timestep trajectories pass 31 final nonlinear
+acceptances, 136 fresh linear checks, unchanged profile/initialization and
+both separate 1e-4 allowances. Spatial evidence is reused, not rerun.
+Total errors contract, but at 2 s actual weak-traction anomaly differences
+barely decrease (.001056798 -> .001035198 Pa); raw-stress anomaly differences
+decrease slowly (.04943618 -> .04429940 Pa). Signed-component cancellation is
+measured, but an asymptotically resolved nonuniform temporal reference is not
+established. No production/criterion change or additional run was made.
+All runs have finished; stop for review before further expensive cases or
+K2.3. The separate bulk-history transfer concern remains separate. See
+`stage_K2_2_temporal_completion.md` and
+`nonuniform/domain-convergence-completion/` for the complete assessment,
+saved-data diagnosis, unchanged baseline snapshot, numerical checks and costs.
+Older entries below are historical execution records.
+
+**Accepted performance baseline closed; approved K2.2 completion resumed:**
+the exact lookup reuse and Cartesian early rejection are frozen. Recoverable
+source archive, working-tree patch, executable, plugin and per-file manifest
+are in `nonuniform/performance/accepted-cartesian-baseline/`. The tested
+executable SHA is e2451b97ad5a76ba431967c4938bccb5b94cf910ff1182f9bd830e7666f1b453.
+No further I_h integration/cache development belongs to this task.
+The t=1-s temporal anomaly reversal is traced in saved weak terms to
+cancellation; slip's endpoint/time-load accounting closes to 1e-19 m, and
+cohesive accounting leaves a separately reported small projection remainder.
+This is an interpretation of the reversal, not a temporal convergence pass.
+Only the approved .25/.125-s cases are being completed, under their existing
+9000/14400-s caps, in `nonuniform/domain-convergence-completion/`. No executable
+checkpoint exists, so replayed prefixes must match the saved accepted data.
+Both runs use distinct physical cores, opt-in timings and recorded peak RSS;
+spatial and dt=.5 results are reused. See `temporal-cancellation.json` and the
+completion README for the decision and pre-run resource bounds. K2.3 remains
+out of scope, and production/criterion changes still require review.
+
+**Production Cartesian lookup verified; K2 resume point:** exact
+MappingCartesian support is now active in the real undeformed-box I_h path.
+The bounded K2 t=0/.5-s replay genuinely converges and reproduces all 19 saved
+exports byte-for-byte; profile preparation is 3.194/1.636 s cold/warm, with
+2,448 excluded requests and 1,295 warm batch hits. The same-Cartesian nine-profile
+comparison improves cold time 17.217 -> 3.715 s with unchanged integrals and
+found/missing sequence; one-/two-rank checks pass. See
+`nonuniform/performance/cartesian-review.md` and its machine-readable artifacts.
+Resume from the completed spatial sequence and preserved partial temporal
+states, not fresh full-fine runs. The previously reported mean-removed temporal
+trend remains unresolved; no Gate K2 claim follows from this performance check.
+Use `ASPECT_FAULT_PERFORMANCE=1` for the next necessary authorized run and
+obtain runtime approval before exceeding the current bounded-run budget.
+Historical stopped/in-progress entries below remain the execution record.
+
+**User-requested stop and review, 2026-09-10:** both temporal processes are
+stopped (SIGTERM, confirmed absent); do not restart automatically. The
+domain-rule 32/64/128 spatial sequence is complete through 2 s, with
+contracting errors and both 1e-4 allowances satisfied. The .25 s run has
+accepted outputs through 1.75 s and the .125 s run through 1 s. All 17
+completed temporal states pass the final solver criteria and 79 fresh
+linear checks. Initial temporal datasets are byte-identical. Partial total
+errors contract, but mean-removed q/C/slip errors do not contract uniformly:
+at 1 s q anomaly RMS differences are 2.81087e-4 then 6.53755e-4 Pa across
+successive timestep pairs. The cause is not diagnosed; no production
+correction is inferred. Later temporal normalization and raw bulk-stress
+comparisons are unmeasured. K2.2 remains incomplete, K2.3 unstarted, and
+the bulk-history transfer concern separate. See the updated
+`stage_K2_2_domain_convergence.md` and `nonuniform/domain-convergence/`
+for the review, preserved outputs, costs and partial checks. Earlier
+"in progress" entries below describe the execution history, not active jobs.
+
+**K2.2 baseline accepted; new-rule convergence resumed, 2026-09-10:** the user
+accepts the global-accumulator correction and demonstrated endpoint improvement
+as the tested baseline. Solver/quadrature development is closed absent a new
+reproducible failure. Evidence under `nonuniform/global-accumulator/` is
+preserved; source snapshots and the executable/plugin hashes are recorded in
+`nonuniform/domain-convergence/`. No new-rule 64/128 checkpoint exists, so
+complete through-2-s runs are required, with shared-prefix checks against
+the accepted runs. The new 32/64/128 sequence now completes through 2 s using
+the domain rule throughout; all 15 nonlinear acceptance and 75 fresh linear
+checks pass, as do both support/normalization allowances. Shared prefixes for
+64 and 128 are byte-identical to the accepted through-1-s data. At 2 s the
+actual weak-traction anomaly RMS contracts from .00112168 to .000165367 Pa;
+raw bulk-stress anomaly RMS contracts from .0686696 to .0341007 Pa. Initial
+projection offsets remain explicitly reported. This supports the planned
+fine-grid .5/.25/.125 time sequence: .5 is reused and the two finer time runs
+are in progress, with resource estimates recorded before launch.
+Both separate 1e-4 allowances and all
+physical/solver settings are retained. Stop before K2.3; the bulk-history
+transfer concern stays separate. See `stage_K2_2_domain_convergence.md` for
+the current record and resource estimates.
+
+**Approved separate-global accumulation, 2026-09-10 (bounded verification
+complete):** frozen Maxwell/profile weak loads now remain independent of
+unknown-dependent bulk/BV terms through constraints and MPI, with completed
+global vectors combined afterward. No equation, surface rule, history,
+support, I_h, tolerance or iteration budget changed. The unchanged positive
+Stage-I fixture genuinely converges; represented-increment and nonzero-dV
+audits pass on one/two ranks. Geometry/Stage-I units (815 assertions per rank),
+the 12-case focused coupling/load/lifecycle batch and a fresh sequential
+two-rank restart pair pass. The prepared short K1 and K2-64 replays reach 1 s
+with final convergence and measured support/normalization checks passing.
+K1's coarse initial raw-stress maximum retains its known pointwise-resolution
+limitation, numerically matching the saved same-mesh baseline; later raw
+stress and all mean/history checks pass. K2-128 also completes through 1 s
+(1651.82 s, 4.29 GiB), passing final criteria and measured allowances. The
+mean-removed left/right endpoint traction mismatches at 1 s fall from
+3.67339e-3 / 3.66451e-3 Pa to 5.71007e-5 / 6.99507e-5 Pa in magnitude.
+Whole-fault traction-anomaly RMS falls from 4.92231e-4 to 2.48890e-4 Pa,
+but the new initial central discrepancy is larger and raw bulk stress
+differences remain. Initial phase/particle histories are unchanged; changed
+surface projections are recorded, not reset. Gate K2 is not declared passed;
+the larger campaign and separate bulk-history transfer concern remain held
+for review. See `stage_K2_global_accumulator_review.md`
+and `nonuniform/global-accumulator/`. This supersedes the pending-correction
+hold below; the older entries remain as the recoverable decision history.
+
+**Bounded residual-consistency audit, 2026-09-09:** the polyline quadrature and
+its passing evidence are preserved. The unchanged failing Stage-I fixture
+identifies mixed residual/load accumulation as the cause: at the audited
+linearization the velocity affine mismatch is 5.74370e-10, whereas represented
+increment effects are 2.14881e-20. Newton-only assembly agrees with A to
+4.27230e-21 and the frozen load does not change. Cell-only separation remains
+inconsistent at 1.36437e-10; independent global accumulation gives 4.27230e-21
+consistency. All eight surface nodes are active and dV=0. No stopping rule,
+physics, support, initialization or quadrature is changed. Positive tests now
+explicitly require the final convergence criteria; intentional failure tests
+remain separate. The proposed residual-accumulation correction requires review
+before implementation and before short K1/K2-64/K2-128 trajectory replays.
+See `stage_K2_residual_consistency_audit.md` and the new `nonuniform/residual-audit/`
+artifacts; the preceding nonlinear hold below remains in effect.
+The completed audit replay reproduces all twelve residual/rejection records
+exactly and now fails the explicit positive convergence guard (exit 1).
+Wall time is 1042.02 s, peak RSS 633696 KiB. Strengthened positive temperature
+checks and rollback pass on one/two ranks; linear exhaustion and all 815
+quadrature/Stage-I unit assertions per rank pass. No golden output is refreshed.
+
+**Polyline extension: nonlinear verification hold, 2026-09-09:** the approved bounded map
+is defined in `stage_K2_polyline_quadrature_addendum.md`, written before its
+production implementation. Actual reconstructed polylines are partitioned
+without flattening, normal clipping or changes to parent admission/P0 inputs.
+The installed Voro++ cut/copy probe favors the existing 2-D polygon
+representation. Final one-/two-rank geometry and nonlinear-safeguard tests
+pass (815 assertions in 18 cases per rank), including the captured formerly
+blocked geometry. All seven selected surface/condensed fixtures pass. The
+concurrent integration batch is 14/19: three wall-time timeouts, a stale
+rate-state golden output and a stale-reference restart comparison. An isolated
+dynamic-pressure Stage-I replay then genuinely exhausts its 12 nonlinear
+iterations: last reported bulk residual 3.47631e-10 versus target 5.88894e-13,
+with fresh linear residual 3.17288e-17. Its configured continue-on-failure
+strategy returns zero; this is not convergence. The fresh isolated restart
+create/resume pair passes (340.34/119.93 s). Short K1 and 64/128 K2 replays are held; no solver, support or
+stopping-rule workaround is made. See `stage_K2_polyline_quadrature_review.md`.
+Evidence is under
+`benchmarks/reconstructed_fault/uniform_shear/nonuniform/polyline-quadrature/`.
+The previous straight-only stop below is historical, not the current geometry
+scope. This uncommitted revision is not yet a verified trajectory baseline.
+
+**Domain quadrature implementation stop, 2026-09-09:** the approved integrated
+rule is implemented for straight 2-D faults and passes production-domain
+manufactured tests on one/two ranks (149 assertions per rank). Five coupling
+fixtures fail before derivative checks because their reconstructed geometry
+is not straight; a bounded replay measures a 1.47e-7 m chord deviation versus
+1.71e-14 m roundoff. The first implementation's geometry scope is too narrow.
+See `stage_K2_domain_quadrature_addendum.md` and
+`stage_K2_domain_quadrature_progress.md`. No fixture straightening/tolerance
+relaxation or trajectory replay was performed. A polyline-domain partition
+needs geometric review; K1 recheck and 64/128 through-1-s comparisons remain
+pending. This partial, uncommitted revision is not a verified baseline.
+
+**Endpoint-moment regression, 2026-09-09:** constant reproduction passes but
+smooth nonconstant transverse fields expose displacement-dependent endpoint
+weak-moment errors. Periodic areas alone fail the odd-field control; full Q1
+domain moments on unchanged wall-clipped domains recover the reference mass
+and decrease traction error with refinement. Ten focused analysis tests and
+an independent Voro++ area cross-check pass. See
+`stage_K2_endpoint_moment_regression.md` for the proposed surface-quadrature
+revision (approval required), scope limits and separate history-transfer item.
+No production correction or mechanical replay was made in this step.
+The 64/128 replays through 1 s await correction approval and focused checks;
+temporal refinement and true normal stress remain held. K2.2 is incomplete.
+
+**Bounded endpoint diagnosis, 2026-09-09:** saved 0.5/1 s data and one
+field-identical 64x256 replay identify moving wall-clipped particle-domain
+volumes/coordinates as the dominant endpoint traction signature. Their signed
+projection contribution accounts for about 96% of the 64--128 endpoint
+difference at 1 s. Correct old particle history is verified; the bulk FE
+transfer and its physical periodic constraint are separately measured.
+See `stage_K2_endpoint_diagnosis.md`. No production correction or Jacobian
+change was made. Endpoint-moment/seam semantics need review; the temporal
+sequence and true-normal-stress branch remain held. K2.2 is not complete.
+
+**K2.2 review stop, 2026-09-09:** the 32/64/128 spatial sequence completed
+through 2 s. Support and actual slip-normalization checks pass under the
+separately approved family allowance below. The late-time nonuniform actual
+particle/Q1 traction shows an endpoint-localized plateau: adjacent RMS
+differences at 2 s are 1.00656e-3 and 9.71051e-4 Pa. Temporal runs are held
+under the user's explicit review gate; K2.2 and Gate K2 are not complete.
+See `stage_K2_2_spatial_review.md` for initialization/raw-stress errors,
+actual weak-balance checks, resources, artifacts and remaining uncertainty.
+No production correction or true-normal-stress run was made.
+
+**K2.2 follow-up:** the user accepted K2.1 as a feasibility pilot and explicitly
+revised this fixed-profile, prescribed-pressure K2.1/K2.2 family's omitted-
+fraction allowance from 1e-6 to provisional 1e-4. The independent 1e-4 actual
+slip-normalization requirement is unchanged. The spatial refinement is
+complete and awaiting review before temporal runs; see
+`benchmarks/reconstructed_fault/uniform_shear/nonuniform/refinement/README.md`.
+Production solver/physics remain at the committed K1 baseline. The diagnostic-
+only initial replay is field-identical to the pilot, and actual particle/Q1
+balance checks pass. No true-normal-stress test is authorized by this revision.
+Earlier containment status below is historical.
+
+**Prior status before K2.2 authorization, retained for history:** Gate K1 passes with the reviewed K1-only
 1e-4 containment allowance. `stage_K1_verification.md` records the completed
 five-case spatial/time cross, raw stress and trajectory errors, MPI/restart
 and focused failure regressions. Production correctness baseline is frozen.

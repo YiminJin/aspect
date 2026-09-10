@@ -1,0 +1,85 @@
+{
+  "resources": {
+    "command": [
+      "/home/ein/repository/aspect/build-pf-cpdi/aspect-release",
+      "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/nonuniform/performance/cartesian-prefix.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/diagnostics/pilot-build",
+    "executable_sha256": "e2451b97ad5a76ba431967c4938bccb5b94cf910ff1182f9bd830e7666f1b453",
+    "parameter_sha256": "cc530e97b128608009cb3dea22b5b107f1643559b5a23489a0a78f3e81d04eb9",
+    "configuration": "Release",
+    "plugin_sha256": "40aac2f889e311f92cc6b69942b951fcafe4813dc5655460321f69f6e8d89880",
+    "git_head": "a24c3623108e99240997141121a9d167fa119042",
+    "ranks": 1,
+    "exit_status": 0,
+    "wall_seconds": 30.9243309579997,
+    "peak_rss_KiB": 615404
+  },
+  "converged_states": 2,
+  "exports_identical": {
+    "segments_1.csv": true,
+    "particle_traction_initial_0.csv": true,
+    "surface_0.csv": true,
+    "history_transfer_0.csv": true,
+    "surface_1.csv": true,
+    "segments_0.csv": true,
+    "bulk_cell_ids_1.csv": true,
+    "time_0.csv": true,
+    "surface_weak_0.csv": true,
+    "phase_1.csv": true,
+    "phase_0.csv": true,
+    "bulk_0.csv": true,
+    "time_1.csv": true,
+    "history_transfer_1.csv": true,
+    "particles_1.csv": true,
+    "particles_0.csv": true,
+    "bulk_1.csv": true,
+    "surface_weak_1.csv": true,
+    "bulk_cell_ids_0.csv": true
+  },
+  "lookup_work": [
+    [
+      "0",
+      "1295",
+      "1571184",
+      "2448",
+      "N6dealii16MappingCartesianILi2ELi2EEE",
+      "1",
+      "3.194e+00"
+    ],
+    [
+      "1295",
+      "0",
+      "1571184",
+      "2448",
+      "N6dealii16MappingCartesianILi2ELi2EEE",
+      "1",
+      "1.636e+00"
+    ]
+  ],
+  "final_residuals": [
+    {
+      "bulk": 6.7304234019651496e-12,
+      "bulk scale": 1586.5488603268366,
+      "surface": 7.12121102071612e-08,
+      "surface scale": 951.6837594913193,
+      "velocity": 6.573908058421762e-12,
+      "scaled continuity": 1.4430287624082747e-12,
+      "bulk precision": 6.489195376910149e-11,
+      "bulk target": 1.5865553495222133e-05,
+      "velocity correction": 2.5682949884488173e-14
+    },
+    {
+      "bulk": 4.838235008559776e-12,
+      "bulk scale": 9.99125516114037,
+      "surface": 6.16993821371157e-09,
+      "surface scale": 339.95141867026996,
+      "velocity": 4.804115946005853e-12,
+      "scaled continuity": 5.735747339150367e-13,
+      "bulk precision": 3.879566240130842e-11,
+      "bulk target": 9.995134727380501e-08,
+      "velocity correction": 3.3430514440822545e-15
+    }
+  ],
+  "fresh_checks": 13
+}

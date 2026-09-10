@@ -20,6 +20,8 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdlib>
+#include <iostream>
 #include <limits>
 #include <map>
 #include <set>
@@ -226,6 +228,10 @@ namespace aspect
   ReconstructedFaultManager<dim>::ReconstructedFaultManager(const Simulator<dim> &simulator)
   {
     this->initialize_simulator(simulator);
+    performance_timer = std::make_unique<TimerOutput>(
+      std::cout,
+      std::getenv("ASPECT_FAULT_PERFORMANCE") && this->get_pcout().is_active()
+      ? TimerOutput::summary : TimerOutput::never, TimerOutput::wall_times);
   }
 
 
@@ -1063,6 +1069,7 @@ namespace aspect
   bool
   ReconstructedFaultManager<dim>::particle_projection_cache_is_valid() const
   {
+    TimerOutput::Scope timer(*performance_timer, "Fault: Cache validation");
     if (!particle_projection_cache_valid
         || cached_projection_metadata_version != projection_metadata_version
         || cached_fault_geometry_versions.size() != reconstructed_faults.size())
@@ -1079,6 +1086,8 @@ namespace aspect
       return false;
     const auto &particle_handler = particle_manager.get_particle_handler();
     const auto &particle_domain_handler = particle_manager.get_particle_domain_handler();
+    if (cached_domain_geometry_version != particle_domain_handler.geometry_version())
+      return false;
     if (particle_handler.n_locally_owned_particles() != particle_projection_cache.size())
       return false;
 
@@ -1101,6 +1110,9 @@ namespace aspect
   void
   ReconstructedFaultManager<dim>::rebuild_particle_projection_cache()
   {
+    TimerOutput::Scope timer(*performance_timer, "Fault: Cache build total");
+    ReconstructedFaultUtilities::DomainQuadratureStatistics quadrature_statistics;
+    unsigned long long integration_points = 0;
     Particle::Manager<dim> &particle_manager =
       this->get_phase_field_handler().get_associated_particle_manager();
     AssertThrow(particle_manager.particle_domains_requested(),
@@ -1133,44 +1145,77 @@ namespace aspect
     particle_projection_cache.clear();
     particle_projection_cache.reserve(particle_handler.n_locally_owned_particles());
     std::vector<unsigned int> local_contributing_particles(reconstructed_faults.size(), 0);
-    for (const auto &particle : particle_handler)
+    std::string local_geometry_error;
+    try
       {
-        const double volume = particle_domain_handler
-                              .get_particle_domain(particle.get_local_index()).volume();
-        AssertThrow(std::isfinite(volume) && volume > 0.0,
-                    ExcMessage("Particle-to-fault projection encountered a non-positive "
-                               "or non-finite particle-domain volume."));
-        ReconstructedFaultUtilities::internal::
-        validate_normal_profile_projection_position(particle.get_location());
-
-        const ReconstructedFaultUtilities::NormalProfileProjection projection =
-          ReconstructedFaultUtilities::internal::project_to_normal_profiles_unchecked(
-            reconstructed_faults, projection_half_widths, particle.get_location());
-        ParticleFaultAssociation entry;
-        entry.particle_id = particle.get_id();
-        entry.position = particle.get_location();
-        entry.particle_domain_volume = volume;
-        entry.active = projection.active;
-        entry.fault_index = projection.fault_index;
-        entry.segment_index = projection.segment_index;
-        entry.xi = projection.xi;
-        particle_projection_cache.push_back(entry);
-
-        if (entry.active)
+        for (const auto &particle : particle_handler)
           {
-            ProjectionSystem &system = projection_systems[entry.fault_index];
-            auto &support =
-              particle_projection_diagnostics[entry.fault_index].weighted_support;
-            const double shape[2] = {1.0-entry.xi, entry.xi};
-            const unsigned int first_vertex = entry.segment_index;
-            system.diagonal[first_vertex] += volume * shape[0] * shape[0];
-            system.diagonal[first_vertex+1] += volume * shape[1] * shape[1];
-            system.off_diagonal[first_vertex] += volume * shape[0] * shape[1];
-            support[first_vertex] += volume * shape[0];
-            support[first_vertex+1] += volume * shape[1];
-            ++local_contributing_particles[entry.fault_index];
+            const double volume = particle_domain_handler
+                                  .get_particle_domain(particle.get_local_index()).volume();
+            AssertThrow(std::isfinite(volume) && volume > 0.0,
+                        ExcMessage("Particle-to-fault projection encountered a non-positive "
+                                   "or non-finite particle-domain volume."));
+            ReconstructedFaultUtilities::internal::
+            validate_normal_profile_projection_position(particle.get_location());
+
+            TimerOutput::Scope association_timer(*performance_timer, "Fault: Parent association");
+            const ReconstructedFaultUtilities::NormalProfileProjection projection =
+              ReconstructedFaultUtilities::internal::project_to_normal_profiles_unchecked(
+                reconstructed_faults, projection_half_widths, particle.get_location());
+            association_timer.stop();
+            ParticleFaultAssociation entry;
+            entry.particle_id = particle.get_id();
+            entry.position = particle.get_location();
+            entry.particle_domain_volume = volume;
+            entry.active = projection.active;
+            entry.fault_index = projection.fault_index;
+            entry.segment_index = projection.segment_index;
+            entry.xi = projection.xi;
+            if (entry.active)
+              {
+                TimerOutput::Scope partition_timer(*performance_timer, "Fault: Domain partition");
+                if constexpr (dim == 2)
+                  entry.quadrature = ReconstructedFaultUtilities::domain_quadrature(
+                    particle_domain_handler.get_particle_domain(particle.get_local_index()).vertices(),
+                    reconstructed_faults[entry.fault_index], 3, &quadrature_statistics);
+                else
+                  AssertThrow(false, ExcNotImplemented());
+                partition_timer.stop();
+                integration_points += entry.quadrature.size();
+                double integrated_volume = 0.0;
+                ProjectionSystem &system = projection_systems[entry.fault_index];
+                auto &support =
+                  particle_projection_diagnostics[entry.fault_index].weighted_support;
+                for (const auto &q : entry.quadrature)
+                  {
+                    const double shape[2] = {1.0-q.xi, q.xi};
+                    const unsigned int first_vertex = q.segment_index;
+                    system.diagonal[first_vertex] += q.weight * shape[0] * shape[0];
+                    system.diagonal[first_vertex+1] += q.weight * shape[1] * shape[1];
+                    system.off_diagonal[first_vertex] += q.weight * shape[0] * shape[1];
+                    support[first_vertex] += q.weight * shape[0];
+                    support[first_vertex+1] += q.weight * shape[1];
+                    integrated_volume += q.weight;
+                  }
+                AssertThrow(std::abs(integrated_volume-volume) <= 1.e-10*volume,
+                            ExcMessage("Surface domain quadrature does not cover the full parent volume."));
+                ++local_contributing_particles[entry.fault_index];
+              }
+            particle_projection_cache.push_back(std::move(entry));
           }
       }
+    catch (const std::exception &exception)
+      {
+        local_geometry_error=exception.what();
+      }
+    // A local cut/coverage failure must reach every owner before matrix sums.
+    const unsigned int rank=Utilities::MPI::this_mpi_process(this->get_mpi_communicator());
+    const unsigned int n_ranks=Utilities::MPI::n_mpi_processes(this->get_mpi_communicator());
+    const unsigned int error_rank=Utilities::MPI::min(
+      local_geometry_error.empty() ? n_ranks : rank,this->get_mpi_communicator());
+    const std::string geometry_error=error_rank<n_ranks ? Utilities::MPI::broadcast(
+      this->get_mpi_communicator(),local_geometry_error,error_rank) : std::string();
+    AssertThrow(error_rank==n_ranks,ExcMessage(geometry_error));
 
     // The replicated fault ordering gives every rank the same packed layout,
     // so one collective reduction assembles all matrices and diagnostics.
@@ -1236,7 +1281,23 @@ namespace aspect
     for (unsigned int fault = 0; fault < reconstructed_faults.size(); ++fault)
       cached_fault_geometry_versions[fault] = reconstructed_faults[fault].geometry_version();
     cached_projection_metadata_version = projection_metadata_version;
+    cached_domain_geometry_version = particle_domain_handler.geometry_version();
     particle_projection_cache_valid = true;
+    if (std::getenv("ASPECT_FAULT_PERFORMANCE") != nullptr)
+      {
+        const auto mpi = this->get_mpi_communicator();
+        const auto sum = [mpi](const unsigned long long value)
+        { return Utilities::MPI::sum(value, mpi); };
+        const auto points = sum(integration_points);
+        const auto straight = sum(quadrature_statistics.straight_calls);
+        const auto general = sum(quadrature_statistics.general_calls);
+        const auto tests = sum(quadrature_statistics.segment_tests);
+        const auto candidates = sum(quadrature_statistics.candidate_segments);
+        this->get_pcout() << "Fault quadrature work: points=" << points
+                         << ", straight calls=" << straight << ", general calls=" << general
+                         << ", segment tests=" << tests << ", candidates=" << candidates
+                         << std::endl;
+      }
   }
 
 
@@ -1374,9 +1435,6 @@ namespace aspect
         if (!entry.active)
           continue;
         const ArrayView<const double> particle_properties = particle.get_properties();
-        const double shape[2] = {1.0-entry.xi, entry.xi};
-        const unsigned int first_vertex = vertex_offsets[entry.fault_index]
-                                          + entry.segment_index;
         for (unsigned int component = 0; component < components.size(); ++component)
           {
             const double value = particle_properties[components[component].particle_position];
@@ -1384,10 +1442,14 @@ namespace aspect
                         ExcMessage("Particle " + Utilities::int_to_string(particle.get_id())
                                    + " has a non-finite value for "
                                    + components[component].description + "."));
-            local_rhs[component*n_fault_vertices + first_vertex]
-            += entry.particle_domain_volume * shape[0] * value;
-            local_rhs[component*n_fault_vertices + first_vertex+1]
-            += entry.particle_domain_volume * shape[1] * value;
+            for (const auto &q : entry.quadrature)
+              {
+                const unsigned int first_vertex = vertex_offsets[entry.fault_index]+q.segment_index;
+                local_rhs[component*n_fault_vertices + first_vertex]
+                += q.weight * (1.0-q.xi) * value;
+                local_rhs[component*n_fault_vertices + first_vertex+1]
+                += q.weight * q.xi * value;
+              }
           }
       }
 
@@ -1489,11 +1551,12 @@ namespace aspect
             continue;
           }
 
-        const double shape[2] = {1.0-entry.xi, entry.xi};
-        const unsigned int first_vertex = vertex_offsets[entry.fault_index]
-                                          + entry.segment_index;
-        local_rhs[first_vertex] += entry.particle_domain_volume * shape[0] * value->second;
-        local_rhs[first_vertex+1] += entry.particle_domain_volume * shape[1] * value->second;
+        for (const auto &q : entry.quadrature)
+          {
+            const unsigned int first_vertex = vertex_offsets[entry.fault_index]+q.segment_index;
+            local_rhs[first_vertex] += q.weight * (1.0-q.xi) * value->second;
+            local_rhs[first_vertex+1] += q.weight * q.xi * value->second;
+          }
       }
     const unsigned int rank =
       Utilities::MPI::this_mpi_process(this->get_mpi_communicator());
@@ -1523,15 +1586,17 @@ namespace aspect
         if (!entry.active)
           continue;
         const double value = locally_owned_values.find(particle.get_id())->second;
-        const double projected =
-          (1.0-entry.xi) * result.nodal_values[entry.fault_index][entry.segment_index]
-          + entry.xi * result.nodal_values[entry.fault_index][entry.segment_index+1];
-        const double residual = std::abs(value-projected);
-        local_squared_residual[entry.fault_index] +=
-          entry.particle_domain_volume * residual * residual;
-        local_weight[entry.fault_index] += entry.particle_domain_volume;
-        local_maximum_residual[entry.fault_index] =
-          std::max(local_maximum_residual[entry.fault_index], residual);
+        for (const auto &q : entry.quadrature)
+          {
+            const double projected =
+              (1.0-q.xi) * result.nodal_values[entry.fault_index][q.segment_index]
+              + q.xi * result.nodal_values[entry.fault_index][q.segment_index+1];
+            const double residual = std::abs(value-projected);
+            local_squared_residual[entry.fault_index] += q.weight * residual * residual;
+            local_weight[entry.fault_index] += q.weight;
+            local_maximum_residual[entry.fault_index] =
+              std::max(local_maximum_residual[entry.fault_index], residual);
+          }
         local_maximum_value[entry.fault_index] =
           std::max(local_maximum_value[entry.fault_index], std::abs(value));
       }

@@ -31,11 +31,14 @@
 
 #include <deal.II/fe/fe_values.h>
 #include <deal.II/fe/mapping_cartesian.h>
+#include <deal.II/fe/mapping_q1.h>
 #include <deal.II/base/mpi_remote_point_evaluation.h>
 #include <deal.II/base/quadrature_lib.h>
 #include <deal.II/numerics/vector_tools_evaluate.h>
 
 #include <numeric>
+#include <cstdlib>
+#include <iostream>
 
 namespace aspect
 {
@@ -45,6 +48,69 @@ namespace aspect
 
   namespace
   {
+    // Only exact, axis-aligned affine maps are admitted. Subclasses may
+    // change the map, so a base-class cast alone is insufficient here.
+    template <int dim>
+    std::pair<bool, BoundingBox<dim>>
+    normalization_search_enclosure(const GridTools::Cache<dim> &grid)
+    {
+      const auto &mapping = grid.get_mapping();
+      bool supported = typeid(mapping) == typeid(MappingCartesian<dim>)
+                       || typeid(mapping) == typeid(MappingQ1<dim>)
+                       || (typeid(mapping) == typeid(MappingQ<dim>)
+                           && static_cast<const MappingQ<dim> &>(mapping).get_degree() == 1);
+      Point<dim> lower, upper;
+      for (unsigned int d=0; d<dim; ++d)
+        {
+          lower[d] = std::numeric_limits<double>::max();
+          upper[d] = -std::numeric_limits<double>::max();
+        }
+      // Use deal.II's existing reference-cell tolerance, not an I_h tolerance.
+      const typename Utilities::MPI::RemotePointEvaluation<dim>::AdditionalData lookup_options;
+      const double tolerance = lookup_options.tolerance;
+      if (supported)
+        for (const auto &cell : grid.get_triangulation().active_cell_iterators())
+          if (cell->is_locally_owned())
+            {
+              if (cell->reference_cell() != ReferenceCells::get_hypercube<dim>())
+                { supported = false; break; }
+              const auto vertices = mapping.get_vertices(cell);
+              const auto &lo = vertices[0];
+              const auto &hi = vertices[GeometryInfo<dim>::vertices_per_cell-1];
+              for (unsigned int v=0; v<vertices.size(); ++v)
+                for (unsigned int d=0; d<dim; ++d)
+                  if (!(hi[d] > lo[d])
+                      || vertices[v][d] != ((v & (1u<<d)) ? hi[d] : lo[d]))
+                    supported = false;
+              if (!supported) break;
+              for (unsigned int d=0; d<dim; ++d)
+                {
+                  // Enclose [-tol,1+tol]^dim with an outward arithmetic guard.
+                  // A false positive is harmless; near-boundary points still
+                  // undergo the original inverse-map/ownership checks.
+                  const double width = hi[d]-lo[d];
+                  const double padding = tolerance*width + 64*std::numeric_limits<double>::epsilon()
+                                         *std::max({std::abs(lo[d]), std::abs(hi[d]), width});
+                  lower[d] = std::min(lower[d], std::nextafter(lo[d]-padding,
+                                                            -std::numeric_limits<double>::infinity()));
+                  upper[d] = std::max(upper[d], std::nextafter(hi[d]+padding,
+                                                            std::numeric_limits<double>::infinity()));
+                }
+            }
+      const auto communicator = grid.get_triangulation().get_communicator();
+      if (Utilities::MPI::min(static_cast<unsigned int>(supported), communicator) == 0)
+        return {false, {}};
+      // Global bounds: an outside request must not be discarded merely because
+      // its containing cell belongs to another rank (including empty owners).
+      for (unsigned int d=0; d<dim; ++d)
+        {
+          lower[d] = Utilities::MPI::min(lower[d], communicator);
+          upper[d] = Utilities::MPI::max(upper[d], communicator);
+        }
+      return {true, BoundingBox<dim>({lower, upper})};
+    }
+
+
     void
     throw_if_history_error(const std::string &local_error, const MPI_Comm communicator)
     {
@@ -432,6 +498,10 @@ namespace aspect
     {
       if (!this->get_parameters().reconstruct_faults)
         return;
+      performance_timer = std::make_unique<TimerOutput>(
+        std::cout,
+        std::getenv("ASPECT_FAULT_PERFORMANCE") && this->get_pcout().is_active()
+        ? TimerOutput::summary : TimerOutput::never, TimerOutput::wall_times);
 
       const std::vector<unsigned int> &chemical_field_indices =
         this->introspection().chemical_composition_field_indices();
@@ -564,6 +634,10 @@ namespace aspect
         MaterialUtilities::arithmetic);
 
       ReconstructedFaultPointResponse response;
+      response.shear_traction = stress * inputs.slip_tensor;
+      response.cohesive_traction = cohesive.cohesive_traction;
+      response.friction_traction = mu * sigma_n;
+      response.damping_traction = damping * inputs.slip_rate;
       response.residual_density = stress * inputs.slip_tensor
                                   - cohesive.cohesive_traction
                                   - mu * sigma_n
@@ -636,6 +710,7 @@ namespace aspect
     void
     PhaseFieldFault<dim>::prepare_reconstructed_fault_mechanical_solve()
     {
+      TimerOutput::Scope timer(*performance_timer, "Fault: Property preparation");
       AssertThrow(dim == 2, ExcNotImplemented());
       ReconstructedFaultManager<dim> &fault_manager =
         this->get_reconstructed_fault_manager();
@@ -885,6 +960,7 @@ namespace aspect
     PhaseFieldFault<dim>::commit_reconstructed_fault_mechanical_history(
       const LinearAlgebra::BlockVector &accepted_bulk_state)
     {
+      TimerOutput::Scope timer(*performance_timer, "Fault: History commit");
       validate_reconstructed_fault_constitutive_state();
       ReconstructedFaultManager<dim> &fault_manager =
         this->get_reconstructed_fault_manager();
@@ -1650,6 +1726,17 @@ namespace aspect
     void
     PhaseFieldFault<dim>::compute_normalization_integrals()
     {
+      TimerOutput::Scope timer(*performance_timer, "Fault: I_h preparation");
+      Timer preparation_timer;
+      // Only point-location geometry survives a preparation. Adaptive requests
+      // and FE values are regenerated from the current state on every call.
+      normalization_point_lookups.next_batch = 0;
+      normalization_point_lookups.hits = 0;
+      normalization_point_lookups.rebuilds = 0;
+      // Mapping motion need not emit a triangulation-change signal. Keep the
+      // original lookup path in that configuration rather than risk stale maps.
+      if (this->get_parameters().mesh_deformation_enabled)
+        normalization_point_lookups.batches.clear();
       ReconstructedFaultManager<dim> &fault_manager =
         this->get_reconstructed_fault_manager();
       const std::vector<ReconstructedFault<dim>> &faults = fault_manager.get_faults();
@@ -1657,7 +1744,10 @@ namespace aspect
       current_normalization_integrals.resize(faults.size());
       current_minimum_raw_normalization_phase_field = numbers::signaling_nan<double>();
       if (faults.empty())
-        return;
+        {
+          normalization_point_lookups.batches.clear();
+          return;
+        }
 
       const PhaseFieldHandler<dim> &phase_field_handler =
         this->get_phase_field_handler();
@@ -1733,6 +1823,27 @@ namespace aspect
                                          this->get_mpi_communicator(),
                                          evaluate_points,
                                          integrand);
+      normalization_point_lookups.batches.resize(normalization_point_lookups.next_batch);
+      if (std::getenv("ASPECT_FAULT_PERFORMANCE") != nullptr)
+        {
+          unsigned long long local_points = 0, local_rejected = 0;
+          for (const auto &batch : normalization_point_lookups.batches)
+            {
+              local_points += batch.points.size();
+              local_rejected += batch.points.size()-batch.request_indices.size();
+            }
+          const auto points = Utilities::MPI::sum(local_points, this->get_mpi_communicator());
+          const auto rejected = Utilities::MPI::sum(local_rejected, this->get_mpi_communicator());
+          this->get_pcout() << "Fault I_h lookup work: hits=" << normalization_point_lookups.hits
+                           << ", rebuilds=" << normalization_point_lookups.rebuilds
+                           << ", stored points=" << points
+                           << ", rejected requests=" << rejected
+                           << ", mapping=" << typeid(phase_field_handler.get_grid_cache().get_mapping()).name()
+                           << ", rejection eligible=" << normalization_point_lookups.rejection_supported
+                           << ", preparation seconds=" << preparation_timer.wall_time() << std::endl;
+        }
+      if (this->get_parameters().mesh_deformation_enabled)
+        normalization_point_lookups.batches.clear();
 
       // Reduce the raw minimum and its owning-rank context before applying the
       // empirical excessive-undershoot guard, so every rank reports one diagnosis.
@@ -2125,14 +2236,68 @@ namespace aspect
 
 
     template <int dim>
+    const typename PhaseFieldFault<dim>::NormalizationPointLookupCache::Batch &
+    PhaseFieldFault<dim>::NormalizationPointLookupCache::get(
+      const GridTools::Cache<dim> &grid,
+      const std::vector<Point<dim>> &points)
+    {
+      const auto &tria = grid.get_triangulation();
+      const bool geometry_valid = !batches.empty() && batches.front().lookup
+                                  && batches.front().lookup->is_ready()
+                                  && &batches.front().lookup->get_triangulation() == &tria
+                                  && &batches.front().lookup->get_mapping() == &grid.get_mapping();
+      if (Utilities::MPI::min(static_cast<unsigned int>(geometry_valid), tria.get_communicator()) == 0)
+        {
+          batches.clear();
+          next_batch = 0;
+          std::tie(rejection_supported, search_enclosure) = normalization_search_enclosure(grid);
+        }
+      if (next_batch == batches.size())
+        batches.emplace_back();
+      Batch &batch = batches[next_batch++];
+      const bool local_hit = batch.lookup && batch.lookup->is_ready()
+                             && &batch.lookup->get_triangulation() == &grid.get_triangulation()
+                             && &batch.lookup->get_mapping() == &grid.get_mapping()
+                             && batch.points == points;
+      // Even a change confined to one requesting rank changes the distributed
+      // lookup. All ranks must take the same reinit/communication branch.
+      if (Utilities::MPI::min(static_cast<unsigned int>(local_hit),
+                             grid.get_triangulation().get_communicator()) == 0)
+        {
+          if (!batch.lookup)
+            batch.lookup = std::make_unique<Utilities::MPI::RemotePointEvaluation<dim>>();
+          std::vector<Point<dim>> requests;
+          batch.request_indices.clear();
+          for (unsigned int p=0; p<points.size(); ++p)
+            if (!rejection_supported || search_enclosure.point_inside(points[p], 0.0))
+              {
+                requests.push_back(points[p]);
+                batch.request_indices.push_back(p);
+              }
+          // Preserve order and let deal.II find every owner of surviving
+          // points. No communication indices are edited after its handshake.
+          batch.lookup->reinit(grid, requests);
+          batch.points = points;
+          ++rebuilds;
+        }
+      else
+        ++hits;
+      return batch;
+    }
+
+
+    template <int dim>
     std::vector<typename PhaseFieldFault<dim>::NormalizationPointSample>
     PhaseFieldFault<dim>::evaluate_normalization_points(
       const std::vector<Point<dim>> &points) const
     {
+      TimerOutput::Scope timer(*performance_timer, "Fault: I_h FE total");
       const PhaseFieldHandler<dim> &phase_field_handler =
         this->get_phase_field_handler();
-      Utilities::MPI::RemotePointEvaluation<dim> cache;
-      cache.reinit(phase_field_handler.get_grid_cache(), points);
+      TimerOutput::Scope lookup_timer(*performance_timer, "Fault: I_h lookup access");
+      const auto &batch = normalization_point_lookups.get(phase_field_handler.get_grid_cache(), points);
+      const auto &cache = *batch.lookup;
+      lookup_timer.stop();
       const unsigned int phase_field_component =
         this->introspection().variable("phase_field").first_component_index;
       const std::vector<double> phase_field_values =
@@ -2159,14 +2324,15 @@ namespace aspect
 
       const std::vector<unsigned int> &point_ptrs = cache.get_point_ptrs();
       std::vector<NormalizationPointSample> samples(points.size());
-      for (unsigned int point = 0; point < points.size(); ++point)
-        if (cache.point_found(point))
+      for (unsigned int request = 0; request < batch.request_indices.size(); ++request)
+        if (cache.point_found(request))
           {
+            const unsigned int point = batch.request_indices[request];
             samples[point].found = true;
-            samples[point].phase_field = phase_field_values[point];
+            samples[point].phase_field = phase_field_values[request];
             samples[point].cell_diameter = std::numeric_limits<double>::max();
-            for (unsigned int entry = point_ptrs[point];
-                 entry < point_ptrs[point+1]; ++entry)
+            for (unsigned int entry = point_ptrs[request];
+                 entry < point_ptrs[request+1]; ++entry)
               samples[point].cell_diameter = std::min(
                 samples[point].cell_diameter, cell_diameters[entry]);
           }

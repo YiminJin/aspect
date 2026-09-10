@@ -1,0 +1,184 @@
+{
+  "particle_count": 2304,
+  "identical_physical_particle_data": true,
+  "comparisons": [
+    {
+      "comparison": "constant one traversal",
+      "published": {
+        "rms": 0.0,
+        "maximum": 0.0
+      },
+      "working": {
+        "rms": 0.0,
+        "maximum": 0.0
+      },
+      "load": {
+        "l2": 0.0,
+        "maximum": 0.0,
+        "relative_l2": 0.0
+      }
+    },
+    {
+      "comparison": "constant two traversal",
+      "published": {
+        "rms": 0.0,
+        "maximum": 0.0
+      },
+      "working": {
+        "rms": 0.0,
+        "maximum": 0.0
+      },
+      "load": {
+        "l2": 0.0,
+        "maximum": 0.0,
+        "relative_l2": 0.0
+      }
+    },
+    {
+      "comparison": "nonconstant one traversal",
+      "published": {
+        "rms": 4.431132905752682,
+        "maximum": 9.385552879629586
+      },
+      "working": {
+        "rms": 4.431132905752682,
+        "maximum": 9.385552879629586
+      },
+      "load": {
+        "l2": 2.418183738394034,
+        "maximum": 0.14400812807722005,
+        "relative_l2": 0.8071876402137841
+      }
+    },
+    {
+      "comparison": "nonconstant two traversal",
+      "published": {
+        "rms": 4.43154487537118,
+        "maximum": 9.385552879629586
+      },
+      "working": {
+        "rms": 4.43154487537118,
+        "maximum": 9.385552879629586
+      },
+      "load": {
+        "l2": 2.418263261946511,
+        "maximum": 0.14400812807721886,
+        "relative_l2": 0.8072141851068153
+      }
+    },
+    {
+      "comparison": "constant forward MPI",
+      "published": {
+        "rms": 0.0,
+        "maximum": 0.0
+      },
+      "working": {
+        "rms": 0.0,
+        "maximum": 0.0
+      },
+      "load": {
+        "l2": 1.4857506665735394e-14,
+        "maximum": 2.6645352591003757e-15,
+        "relative_l2": 0.9015928539183704
+      }
+    },
+    {
+      "comparison": "constant reverse MPI",
+      "published": {
+        "rms": 0.0,
+        "maximum": 0.0
+      },
+      "working": {
+        "rms": 0.0,
+        "maximum": 0.0
+      },
+      "load": {
+        "l2": 1.4857506665735394e-14,
+        "maximum": 2.6645352591003757e-15,
+        "relative_l2": 0.9015928539183704
+      }
+    },
+    {
+      "comparison": "nonconstant forward MPI",
+      "published": {
+        "rms": 0.0,
+        "maximum": 0.0
+      },
+      "working": {
+        "rms": 0.0,
+        "maximum": 0.0
+      },
+      "load": {
+        "l2": 7.956710817738442e-14,
+        "maximum": 1.4210854715202004e-14,
+        "relative_l2": 2.655943188625996e-14
+      }
+    },
+    {
+      "comparison": "nonconstant reverse MPI",
+      "published": {
+        "rms": 0.028527216536728857,
+        "maximum": 0.2147807295691564
+      },
+      "working": {
+        "rms": 0.028527216536729953,
+        "maximum": 0.2147807295691564
+      },
+      "load": {
+        "l2": 0.01961151311964382,
+        "maximum": 0.00425433451956673,
+        "relative_l2": 0.00583239335569359
+      }
+    }
+  ],
+  "constraint_corrections": [
+    {
+      "case": "one",
+      "mode": 1,
+      "rms_Pa": 0.0,
+      "maximum_Pa": 0.0
+    },
+    {
+      "case": "two",
+      "mode": 1,
+      "rms_Pa": 0.0,
+      "maximum_Pa": 0.0
+    },
+    {
+      "case": "one",
+      "mode": 2,
+      "rms_Pa": 0.0,
+      "maximum_Pa": 0.0
+    },
+    {
+      "case": "two",
+      "mode": 2,
+      "rms_Pa": 0.0,
+      "maximum_Pa": 0.0
+    },
+    {
+      "case": "one",
+      "mode": 3,
+      "rms_Pa": 1.931277869109262,
+      "maximum_Pa": 10.281717821703296
+    },
+    {
+      "case": "two",
+      "mode": 3,
+      "rms_Pa": 1.931277869109262,
+      "maximum_Pa": 10.281717821703296
+    },
+    {
+      "case": "one",
+      "mode": 4,
+      "rms_Pa": 1.9312778691092558,
+      "maximum_Pa": 10.281717821703523
+    },
+    {
+      "case": "two",
+      "mode": 4,
+      "rms_Pa": 1.931277869109256,
+      "maximum_Pa": 10.281717821703523
+    }
+  ]
+}

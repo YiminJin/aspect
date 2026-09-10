@@ -72,10 +72,11 @@ namespace aspect
                   {
                     scratch.reinit(cell);
                     data.local_rhs=0.;
+                    data.local_frozen_fault_rhs=0.;
                     assembler.execute(scratch,data);
                     if (mode == 0)
                       {
-                        zero_history_rhs.emplace(cell->id(),data.local_rhs);
+                        zero_history_rhs.emplace(cell->id(),data.local_frozen_fault_rhs);
                         continue;
                       }
                     const auto &values=scratch.finite_element_values;
@@ -87,7 +88,7 @@ namespace aspect
                     values[intro.extractors.velocities].get_function_gradients(working,gradients);
                     values[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)]
                       .get_function_values(working,phi);
-                    Vector<double> expected(nc), increment=data.local_rhs;
+                    Vector<double> expected(nc), increment=data.local_frozen_fault_rhs;
                     increment -= zero_history_rhs.at(cell->id());
                     reference_values.reinit(cell);
                     std::vector<double> reference_stress(reference_values.n_quadrature_points);

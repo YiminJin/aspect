@@ -1,0 +1,4 @@
+# Diagnostic-only replay: accepted K2.1 physics and settings, stopped at 1 s.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/nonuniform/pilot.prm
+set End time = 1
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/nonuniform/endpoint/replay64

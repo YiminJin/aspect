@@ -17,12 +17,19 @@ class AnalysisChecks(unittest.TestCase):
                            delimiter=",", header="x,value", comments="")
                 np.savetxt(directory/f"surface_rank{rank}_0.csv", [[0., 7.]],
                            delimiter=",", header="x,value", comments="")
+                np.savetxt(directory/f"surface_weak_rank{rank}_0.csv", [[0., .1, 7.]],
+                           delimiter=",", header="node,Mdiag,q", comments="")
             self.assertEqual(len(read(directory,"bulk",0,("x",))),2)
             self.assertEqual(len(read(directory,"surface",0,("x",))),1)
+            self.assertEqual(len(read(directory,"surface_weak",0,("Mdiag",))),1)
             np.savetxt(directory/"surface_rank1_0.csv", [[0., 8.]],
                        delimiter=",", header="x,value", comments="")
             with self.assertRaisesRegex(ValueError,"Inconsistent replicated"):
                 read(directory,"surface",0,("x",))
+            np.savetxt(directory/"surface_weak_rank1_0.csv", [[0., .2, 7.]],
+                       delimiter=",", header="node,Mdiag,q", comments="")
+            with self.assertRaisesRegex(ValueError,"Inconsistent replicated"):
+                read(directory,"surface_weak",0,("Mdiag",))
 
     def test_boundary_trace_uses_q2_not_nearest_sample(self):
         gauss = np.polynomial.legendre.leggauss(3)[0]

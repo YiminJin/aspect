@@ -765,9 +765,9 @@ m_p
 \]
 This particle-domain measure is the authoritative AMR-aware sampling measure for the particle-to-fault projection.  Do not replace it by the approximation $|K|/N_{p,K}$ unless a future configuration explicitly runs without valid particle-domain data.
 
-Within the admitted influence strip, the current geometric kernel is one, so
+Within the admitted parent-domain measure, the geometric kernel is one, so
 \[
-w_p=m_p.
+\sum_q w_{pq}=m_p.
 \]
 No second user-facing influence-distance or kernel parameter is introduced.
 Dynamic phase-field or constitutive values shall not enter this cached weight
@@ -776,15 +776,44 @@ unless the cache invalidation rules and authoritative design are first revised.
 The CPDI weighting functions provided by \texttt{ParticleDomainAccessor} remain bulk-grid transfer functions.  They shall not be substituted for the reconstructed-fault Q1 shape functions in the least-squares surface projection.
 
 \subsection{Consistent weighted least-squares projection}
+\paragraph{Approved discrete revision (2026-09-09).}
+The domain-integrated rule replaces the former point-volume formula
+and its surface residual/Jacobian counterparts throughout this specification.
+The former source obeyed the former specification. Preserve the admitted
+parent-center set and each full existing domain $D_p$, without normal clipping.
+The objective is now $\sum_p\int_{D_p}(z_p-z_\Gamma(s(x)))^2\,dx$.
+Replace $\sum_p m_pN_i(\xi_p)F_p$ by
+$\sum_{p,q}w_{pq}N_i(\xi_{pq})F_{pq}$, with the corresponding second Q1
+factor in mass and derivative terms; $\sum_qw_{pq}=m_p$.
+Bulk FE inputs and particle histories remain parent-center/P0 inputs;
+surface Q1 fields and nonlinear responses are evaluated at every domain
+quadrature coordinate. This applies consistently to projections, $R_\Gamma$,
+$K_V$, $G$, mass-based residual norms and diagnostics.
+The first integrated geometry supports straight ordered 2-D faults, including
+inclined and nonuniform collinear segments. Split domains at node planes and
+projected polygon vertices. Beyond true tips use constant endpoint continuation
+without admitting new parents or joining endpoint DoFs. Three-point Gauss
+integrates the linear transverse width times Q1 products exactly; nonlinear
+accuracy must be tested separately. Curved domain partitions, overlap and 3-D
+were unsupported by the first implementation. The approved extension in
+\texttt{benchmarking/stage\_K2\_polyline\_quadrature\_addendum.md} defines
+the open 2-D polyline map: nearest finite segment-normal projection without
+reapplying width, with nearest-vertex continuation in corner/tip gaps. Split
+at endpoint planes and distance bisectors and use the selected segment's
+one-sided tangent/normal frame. Parent admission/fault assignment, full measure
+and parent-P0 evaluation remain unchanged. Overlap, branching, closed loops,
+self-intersections and 3-D remain unsupported. History-commit timing is unchanged. The implementation
+addendum in \texttt{benchmarking/stage\_K2\_domain\_quadrature\_addendum.md}
+defines evaluation locations.
+
 Let $z_p$ be a scalar particle quantity.  Let $N_a(\boldsymbol\xi_p)$ denote the Q1 shape functions of the projected fault cell.  Determine the fault nodal field $\mathbf{z}_\Gamma$ by
 \[
 \boxed{
 \min_{\mathbf{z}_\Gamma}
-\sum_p
-w_p
+\sum_p\int_{D_p}
 \left(
- z_p-\sum_aN_a(\boldsymbol\xi_p)z_{\Gamma,a}
-\right)^2.
+ z_p-\sum_aN_a(\boldsymbol\xi(\boldsymbol x))z_{\Gamma,a}
+\right)^2\,d\boldsymbol x.
 }
 \]
 The normal equations are
@@ -797,12 +826,12 @@ with
 \[
 (\mathbf{M}_\Gamma)_{ab}
 =
-\sum_p w_pN_a(\boldsymbol\xi_p)N_b(\boldsymbol\xi_p),
+\sum_{p,q} w_{pq}N_a(\boldsymbol\xi_{pq})N_b(\boldsymbol\xi_{pq}),
 \]
 \[
 (\mathbf{b}_\Gamma)_a
 =
-\sum_p w_pN_a(\boldsymbol\xi_p)z_p.
+\sum_{p,q} w_{pq}N_a(\boldsymbol\xi_{pq})z_p.
 \]
 The same matrix is reused for all projected scalar components that use the same particle set and geometric weights.
 
@@ -929,6 +958,26 @@ Valid while the relevant bulk geometry remains unchanged relative to the fault:
 \end{itemize}
 
 They are invalidated by events such as fault growth, AMR/repartitioning that changes QPs, or particle movement/migration that changes particle projections.
+
+The adaptive $I_h$ evaluator may retain the geometric point-location maps of
+the last preparation's batch sequence. Reuse requires exact batch-coordinate
+equality and a valid deal.II mesh lookup on every rank; a mismatch on any rank
+requires collective rebuilding. It never caches phase-field values or
+constitutive responses. Unused trailing batches are discarded. Configurations
+with mesh deformation use fresh lookups, because mapping motion need not emit
+a triangulation-change signal. Adaptive panels, tolerances and tail criteria
+are unchanged by this geometric reuse.
+
+Cold lookup may reject requests outside a conservative global enclosure of
+the reference-tolerance-expanded mesh. The implemented fast path is restricted
+to exact MappingCartesian or degree-one MappingQ/MappingQ1 maps on axis-aligned affine hypercubes;
+all other mappings/cell shapes retain the original search. Each cell enclosure
+includes the unchanged deal.II reference-cell tolerance and an outward
+floating-point guard. Bounds are reduced across all owners before rejection.
+Surviving requests retain their order and the original distributed ownership
+search; samples are scattered back to the original adaptive-request indices.
+Rejected entries remain missing, not zero-valued found samples. The enclosure
+has the same mesh/mapping lifetime as the geometric lookup cache.
 
 \subsection{Nonlinear-iteration data}
 These values are never treated as geometric caches:
@@ -1135,7 +1184,7 @@ The replicated surface residual has one nested vector per reconstructed fault
 and one entry per Q1 fault vertex.  Only locally owned associated particles
 assemble
 \begin{equation}
- (R_\Gamma)_i=\sum_p m_pN_i(\xi_p)F_p.
+ (R_\Gamma)_i=\sum_{p,q} w_{pq}N_i(\xi_{pq})F_{pq}.
 \end{equation}
 Fault-sized local vectors are summed over MPI so every rank obtains the same
 replicated residual.  Report volume-weighted RMS residuals per fault and over
@@ -1149,7 +1198,7 @@ define
 For the current constitutive law its Q1 entries are
 \begin{equation}
  (K_V)_{ij}
- =\sum_p m_pN_i(\xi_p)N_j(\xi_p)
+ =\sum_{p,q} w_{pq}N_i(\xi_{pq})N_j(\xi_{pq})
  \left[
   2\kappa_p\chi_p\boldsymbol S_p:\boldsymbol S_p
   +\frac{\kappa_p}{I_{h,p}}
@@ -1228,6 +1277,24 @@ fields in the current working FE vector represent the frozen particle
 history; do not read an older FE timestep or evolve that history in a trial.
 The slip-only residual and $B$ actions remain unchanged. Timestep-zero history
 retention and terminal history publication retain their established semantics.
+
+For particle-to-FE transfer, shared continuous DoFs receive the arithmetic
+average of incident-cell interpolator proposals. Accumulate values and counts
+from locally owned cells with MPI ADD, count each cell once, and divide at
+owned DoFs. Unshared/DG DoFs retain their single proposal. This generic rule
+also applies to other particle-mapped continuous fields; it is not an L2
+projection or a change of particle interpolator. Apply physical constraints
+only through the existing private working-vector workflow, not by republishing
+history.
+
+Accumulate the genuinely frozen Maxwell/profile right-hand side separately
+from unknown-dependent contributions through local quadrature, homogeneous
+constraint distribution, and MPI compression. Combine only the completed
+global vectors. The $BV$ contribution remains unknown-dependent, including
+when an active set happens to give $\delta V=0$. Use this same evaluation for
+every Newton base and non-committing trial. This arithmetic separation avoids
+cancellation of small residuals against stress loads without changing the
+equations, normalization scales, or convergence and line-search criteria.
 
 A fault-slip increment changes stress by
 \begin{equation}

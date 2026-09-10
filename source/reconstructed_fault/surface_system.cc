@@ -27,6 +27,8 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdlib>
+#include <iostream>
 #include <limits>
 
 namespace aspect
@@ -207,6 +209,7 @@ namespace aspect
     struct CouplingPoint
     {
       Point<dim> position;
+      unsigned int parent_index;
       unsigned int fault_index;
       unsigned int segment_index;
       double xi;
@@ -234,6 +237,7 @@ namespace aspect
     const FaultVector &slip_rate,
     const bool assemble_jacobian) const
   {
+    TimerOutput::Scope total_timer(*performance_timer, "Fault: Surface R/K total");
     AssertThrow(dim == 2, ExcNotImplemented());
     phase_field_fault.validate_reconstructed_fault_constitutive_state();
 
@@ -262,7 +266,9 @@ namespace aspect
         points.push_back(association.position);
 
     Utilities::MPI::RemotePointEvaluation<dim> point_cache;
+    TimerOutput::Scope lookup_timer(*performance_timer, "Fault: Parent lookup build");
     point_cache.reinit(grid_cache, points);
+    lookup_timer.stop();
     const unsigned int velocity_component =
       this->introspection().component_indices.velocities[0];
     const unsigned int pressure_component =
@@ -272,6 +278,7 @@ namespace aspect
     const unsigned int phase_field_component =
       this->introspection().variable("phase_field").first_component_index;
 
+    TimerOutput::Scope sample_timer(*performance_timer, "Fault: Parent FE sampling");
     const auto velocity_gradients = VectorTools::point_gradients<dim>(
                                       point_cache, this->get_dof_handler(), bulk_state,
                                       VectorTools::EvaluationFlags::avg, velocity_component);
@@ -287,6 +294,8 @@ namespace aspect
     const std::vector<double> previous_phase_fields = VectorTools::point_values<1>(
                                                         point_cache, this->get_dof_handler(), this->get_old_solution(),
                                                         VectorTools::EvaluationFlags::avg, phase_field_component);
+    sample_timer.stop();
+    TimerOutput::Scope assembly_timer(*performance_timer, "Fault: Surface R/K integrate");
 
     const Particle::Manager<dim> &particle_manager =
       this->get_phase_field_handler().get_associated_particle_manager();
@@ -317,6 +326,10 @@ namespace aspect
     // surface residual and, when requested, K_V=-dR_Gamma/dV.
     SurfaceAssembly local;
     local.residual.values.resize(faults.size());
+    local.residual.shear_traction.resize(faults.size());
+    local.residual.cohesive_traction.resize(faults.size());
+    local.residual.friction_traction.resize(faults.size());
+    local.residual.damping_traction.resize(faults.size());
     local.residual.per_fault_weighted_rms.assign(faults.size(), 0.0);
     local.diagonal.resize(faults.size());
     local.off_diagonal.resize(faults.size());
@@ -327,6 +340,10 @@ namespace aspect
     for (unsigned int fault = 0; fault < faults.size(); ++fault)
       {
         local.residual.values[fault].assign(faults[fault].n_vertices(), 0.0);
+        local.residual.shear_traction[fault].assign(faults[fault].n_vertices(), 0.0);
+        local.residual.cohesive_traction[fault].assign(faults[fault].n_vertices(), 0.0);
+        local.residual.friction_traction[fault].assign(faults[fault].n_vertices(), 0.0);
+        local.residual.damping_traction[fault].assign(faults[fault].n_vertices(), 0.0);
         local.diagonal[fault].assign(faults[fault].n_vertices(), 0.0);
         local.off_diagonal[fault].assign(faults[fault].n_cells(), 0.0);
         local.mass_diagonal[fault].assign(faults[fault].n_vertices(), 0.0);
@@ -343,33 +360,16 @@ namespace aspect
           continue;
 
         const ReconstructedFault<dim> &fault = faults[association.fault_index];
-        Tensor<1,dim> tangent = fault.vertex(association.segment_index+1)
-                                - fault.vertex(association.segment_index);
-        tangent /= tangent.norm();
-        Tensor<1,dim> normal;
-        normal[0] = -tangent[1];
-        normal[1] = tangent[0];
 
         typename MaterialModel::PhaseFieldFault<dim>::
         ReconstructedFaultPointInputs inputs;
         inputs.fault_index = association.fault_index;
-        inputs.segment_index = association.segment_index;
-        inputs.xi = association.xi;
         inputs.position = association.position;
-        const double left_slip_rate =
-          slip_rate[association.fault_index][association.segment_index];
-        inputs.slip_rate = left_slip_rate
-                           + association.xi
-                             * (slip_rate[association.fault_index]
-                                          [association.segment_index+1]
-                                - left_slip_rate);
         inputs.phase_field = phase_fields[point_index];
         inputs.previous_phase_field = previous_phase_fields[point_index];
         inputs.temperature = temperatures[point_index];
         inputs.dynamic_pressure = pressures[point_index];
         inputs.strain_rate = symmetrize(velocity_gradients[point_index]);
-        inputs.slip_tensor = symmetrize(outer_product(tangent, normal));
-        inputs.normal_tensor = symmetrize(outer_product(normal, normal));
 
         const ArrayView<const double> properties = particle.get_properties();
         for (unsigned int component = 0;
@@ -385,53 +385,83 @@ namespace aspect
           MaterialModel::MaterialUtilities::compute_composition_fractions(
             chemical_compositions);
 
-        const auto response =
-          phase_field_fault.evaluate_reconstructed_fault_point(inputs);
-        AssertThrow(std::isfinite(response.residual_density)
-                    && std::isfinite(response.minus_derivative_wrt_slip_rate),
-                    ExcMessage("Reconstructed-fault constitutive evaluation produced "
-                               "a non-finite surface coefficient at particle "
-                               + Utilities::int_to_string(particle.get_id()) + "."));
-        const double shape[2] = {1.0-association.xi, association.xi};
-        const unsigned int vertex = association.segment_index;
-        const double weight = association.particle_domain_volume;
-        auto &residual = local.residual.values[association.fault_index];
-        residual[vertex] += weight*shape[0]*response.residual_density;
-        residual[vertex+1] += weight*shape[1]*response.residual_density;
-        local_squared_residual[association.fault_index]
-        += weight*response.residual_density*response.residual_density;
-        local_weight[association.fault_index] += weight;
-
-        auto &mass_diagonal = local.mass_diagonal[association.fault_index];
-        auto &mass_off_diagonal =
-          local.mass_off_diagonal[association.fault_index];
-        mass_diagonal[vertex] += weight*shape[0]*shape[0];
-        mass_diagonal[vertex+1] += weight*shape[1]*shape[1];
-        mass_off_diagonal[vertex] += weight*shape[0]*shape[1];
-
-        if (assemble_jacobian)
+        // Parent bulk/history samples stay P0; all surface Q1 inputs and the
+        // nonlinear response vary across the domain. K_V and G differentiate
+        // exactly these evaluations, including domains crossing fault nodes.
+        for (const auto &q : association.quadrature)
           {
-            auto &diagonal = local.diagonal[association.fault_index];
-            auto &off_diagonal = local.off_diagonal[association.fault_index];
-            diagonal[vertex] += weight*shape[0]*shape[0]
-                                * response.minus_derivative_wrt_slip_rate;
-            diagonal[vertex+1] += weight*shape[1]*shape[1]
-                                  * response.minus_derivative_wrt_slip_rate;
-            off_diagonal[vertex] += weight*shape[0]*shape[1]
+            Tensor<1,dim> tangent=fault.vertex(q.segment_index+1)-fault.vertex(q.segment_index);
+            tangent/=tangent.norm();
+            Tensor<1,dim> normal;
+            normal[0]=-tangent[1];
+            normal[1]=tangent[0];
+            inputs.slip_tensor=symmetrize(outer_product(tangent,normal));
+            inputs.normal_tensor=symmetrize(outer_product(normal,normal));
+            inputs.segment_index = q.segment_index;
+            inputs.xi = q.xi;
+            const double left_slip_rate = slip_rate[association.fault_index][q.segment_index];
+            inputs.slip_rate = left_slip_rate + q.xi *
+              (slip_rate[association.fault_index][q.segment_index+1]-left_slip_rate);
+            const auto response =
+              phase_field_fault.evaluate_reconstructed_fault_point(inputs);
+            AssertThrow(std::isfinite(response.residual_density)
+                        && std::isfinite(response.minus_derivative_wrt_slip_rate),
+                        ExcMessage("Reconstructed-fault constitutive evaluation produced "
+                                   "a non-finite surface coefficient at particle "
+                                   + Utilities::int_to_string(particle.get_id()) + "."));
+            const double shape[2] = {1.0-q.xi, q.xi};
+            const unsigned int vertex = q.segment_index;
+            const double weight = q.weight;
+            auto &residual = local.residual.values[association.fault_index];
+            residual[vertex] += weight*shape[0]*response.residual_density;
+            residual[vertex+1] += weight*shape[1]*response.residual_density;
+            for (unsigned int i=0; i<2; ++i)
+              {
+                local.residual.shear_traction[association.fault_index][vertex+i]
+                  += weight*shape[i]*response.shear_traction;
+                local.residual.cohesive_traction[association.fault_index][vertex+i]
+                  += weight*shape[i]*response.cohesive_traction;
+                local.residual.friction_traction[association.fault_index][vertex+i]
+                  += weight*shape[i]*response.friction_traction;
+                local.residual.damping_traction[association.fault_index][vertex+i]
+                  += weight*shape[i]*response.damping_traction;
+              }
+            local_squared_residual[association.fault_index]
+            += weight*response.residual_density*response.residual_density;
+            local_weight[association.fault_index] += weight;
+
+            auto &mass_diagonal = local.mass_diagonal[association.fault_index];
+            auto &mass_off_diagonal =
+              local.mass_off_diagonal[association.fault_index];
+            mass_diagonal[vertex] += weight*shape[0]*shape[0];
+            mass_diagonal[vertex+1] += weight*shape[1]*shape[1];
+            mass_off_diagonal[vertex] += weight*shape[0]*shape[1];
+
+            if (assemble_jacobian)
+              {
+                auto &diagonal = local.diagonal[association.fault_index];
+                auto &off_diagonal = local.off_diagonal[association.fault_index];
+                diagonal[vertex] += weight*shape[0]*shape[0]
                                     * response.minus_derivative_wrt_slip_rate;
-            local.coupling_points.push_back(
-            {
-              association.position,
-              association.fault_index,
-              association.segment_index,
-              association.xi,
-              association.particle_domain_volume,
-              response.kappa,
-              response.friction_coefficient,
-              inputs.slip_tensor,
-              inputs.normal_tensor,
-              response.uses_adiabatic_friction_pressure
-            });
+                diagonal[vertex+1] += weight*shape[1]*shape[1]
+                                      * response.minus_derivative_wrt_slip_rate;
+                off_diagonal[vertex] += weight*shape[0]*shape[1]
+                                        * response.minus_derivative_wrt_slip_rate;
+                local.coupling_points.push_back(
+                {
+                  association.position,
+                  point_index,
+                  association.fault_index,
+                  q.segment_index,
+                  q.xi,
+                  q.weight,
+                  response.kappa,
+                  response.friction_coefficient,
+                  inputs.slip_tensor,
+                  inputs.normal_tensor,
+                  response.uses_adiabatic_friction_pressure
+                });
+              }
           }
         ++point_index;
       }
@@ -443,7 +473,7 @@ namespace aspect
     // residuals, Jacobian coefficients, and diagnostics.
     unsigned int packed_size = 2*faults.size();
     for (const auto &fault : faults)
-      packed_size += 4*fault.n_vertices() + 2*fault.n_cells();
+      packed_size += 8*fault.n_vertices() + 2*fault.n_cells();
     std::vector<double> local_values(packed_size, 0.0);
     unsigned int position = 0;
     for (unsigned int fault = 0; fault < faults.size(); ++fault)
@@ -451,6 +481,14 @@ namespace aspect
         std::copy(local.residual.values[fault].begin(),
                   local.residual.values[fault].end(), local_values.begin()+position);
         position += local.residual.values[fault].size();
+        for (const auto *term : {&local.residual.shear_traction,
+                                &local.residual.cohesive_traction,
+                                &local.residual.friction_traction,
+                                &local.residual.damping_traction})
+          {
+            std::copy((*term)[fault].begin(), (*term)[fault].end(), local_values.begin()+position);
+            position += (*term)[fault].size();
+          }
         std::copy(local.diagonal[fault].begin(), local.diagonal[fault].end(),
                   local_values.begin()+position);
         position += local.diagonal[fault].size();
@@ -478,6 +516,14 @@ namespace aspect
                     local.residual.values[fault].size(),
                     local.residual.values[fault].begin());
         position += local.residual.values[fault].size();
+        for (auto *term : {&local.residual.shear_traction,
+                          &local.residual.cohesive_traction,
+                          &local.residual.friction_traction,
+                          &local.residual.damping_traction})
+          {
+            std::copy_n(global_values.begin()+position, (*term)[fault].size(), (*term)[fault].begin());
+            position += (*term)[fault].size();
+          }
         std::copy_n(global_values.begin()+position, local.diagonal[fault].size(),
                     local.diagonal[fault].begin());
         position += local.diagonal[fault].size();
@@ -504,6 +550,8 @@ namespace aspect
       (total_weight > 0.0
        ? std::sqrt(total_squared_residual/total_weight)
        : 0.0);
+    local.residual.mass_diagonal = local.mass_diagonal;
+    local.residual.mass_off_diagonal = local.mass_off_diagonal;
     return local;
   }
 
@@ -514,6 +562,7 @@ namespace aspect
     struct CouplingPoint
     {
       Point<dim> position;
+      unsigned int parent_index;
       unsigned int fault_index;
       unsigned int segment_index;
       double xi;
@@ -554,7 +603,12 @@ namespace aspect
       Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(
         this->get_material_model())),
     grid_cache(this->get_triangulation(), this->get_mapping())
-  {}
+  {
+    performance_timer = std::make_unique<TimerOutput>(
+      std::cout,
+      std::getenv("ASPECT_FAULT_PERFORMANCE") && this->get_pcout().is_active()
+      ? TimerOutput::summary : TimerOutput::never, TimerOutput::wall_times);
+  }
 
 
   template <int dim>
@@ -578,6 +632,7 @@ namespace aspect
     const FaultVector &slip_rate)
   {
     // Invalidate all previous semantic solves before building any new K_V data.
+    TimerOutput::Scope timer(*performance_timer, "Fault: Linearization total");
     surface_linearization.reset();
     ++linearization_generation;
 #ifndef DEAL_II_WITH_UMFPACK
@@ -598,6 +653,7 @@ namespace aspect
       candidate->coupling_points.push_back(
       {
         point.position,
+        point.parent_index,
         point.fault_index,
         point.segment_index,
         point.xi,
@@ -656,11 +712,14 @@ namespace aspect
     // G reuses the same particle points and constitutive coefficients as K_V;
     // cache their remote bulk-field lookup for the lifetime of this linearization.
     std::vector<Point<dim>> points;
-    points.reserve(candidate->coupling_points.size());
+    points.reserve(candidate->coupling_points.empty() ? 0 :
+                   candidate->coupling_points.back().parent_index+1);
     for (const auto &point : candidate->coupling_points)
-      points.push_back(point.position);
+      if (point.parent_index == points.size())
+        points.push_back(point.position);
     candidate->point_cache =
       std::make_unique<Utilities::MPI::RemotePointEvaluation<dim>>();
+    TimerOutput::Scope lookup_timer(*performance_timer, "Fault: G lookup build");
     candidate->point_cache->reinit(grid_cache, points);
     surface_linearization = std::move(candidate);
 #endif
@@ -871,6 +930,7 @@ namespace aspect
     const LinearAlgebra::BlockVector &physical_bulk_direction,
     FaultVector &result) const
   {
+    TimerOutput::Scope timer(*performance_timer, "Fault: G total");
     AssertThrow(surface_linearization != nullptr,
                 ExcMessage("The surface system must be linearized before applying G."));
     AssertThrow(physical_bulk_direction.size()
@@ -891,6 +951,7 @@ namespace aspect
       this->introspection().component_indices.velocities[0];
     const unsigned int pressure_component =
       this->introspection().component_indices.pressure;
+    TimerOutput::Scope sample_timer(*performance_timer, "Fault: G FE sampling");
     const auto velocity_gradients = VectorTools::point_gradients<dim>(
                                       *surface_linearization->point_cache, this->get_dof_handler(),
                                       physical_bulk_direction, VectorTools::EvaluationFlags::avg,
@@ -899,10 +960,9 @@ namespace aspect
                                             *surface_linearization->point_cache, this->get_dof_handler(),
                                             physical_bulk_direction, VectorTools::EvaluationFlags::avg,
                                             pressure_component);
-    AssertDimension(velocity_gradients.size(),
-                    surface_linearization->coupling_points.size());
-    AssertDimension(pressures.size(),
-                    surface_linearization->coupling_points.size());
+    AssertDimension(velocity_gradients.size(), pressures.size());
+    sample_timer.stop();
+    TimerOutput::Scope action_timer(*performance_timer, "Fault: G integrate/reduce");
 
     // Apply the pointwise G action with its pressure-mode sign convention. The
     // adiabatic branch has neither the mu*N strain term nor the -mu*delta-p term.
@@ -911,7 +971,7 @@ namespace aspect
       {
         const auto &point = surface_linearization->coupling_points[p];
         const SymmetricTensor<2,dim> strain_rate =
-          symmetrize(velocity_gradients[p]);
+          symmetrize(velocity_gradients[point.parent_index]);
         const SymmetricTensor<2,dim> stress_direction =
           point.uses_adiabatic_friction_pressure
           ? 2.0 * point.kappa * point.slip_tensor
@@ -920,7 +980,7 @@ namespace aspect
              + point.friction_coefficient * point.normal_tensor);
         double value = stress_direction * strain_rate;
         if (!point.uses_adiabatic_friction_pressure)
-          value -= point.friction_coefficient * pressures[p];
+          value -= point.friction_coefficient * pressures[point.parent_index];
 
         const double shape[2] = {1.0-point.xi, point.xi};
         result[point.fault_index][point.segment_index] +=
@@ -942,6 +1002,16 @@ namespace aspect
     for (auto &fault_values : result)
       for (double &value : fault_values)
         value = global_values[position++];
+  }
+
+
+  template <int dim>
+  const ReconstructedFaultSurfaceResidual &
+  ReconstructedFaultSurfaceSystem<dim>::get_linearization_residual() const
+  {
+    AssertThrow(surface_linearization != nullptr,
+                ExcMessage("Surface weak diagnostics require a completed linearization."));
+    return surface_linearization->residual;
   }
 
 

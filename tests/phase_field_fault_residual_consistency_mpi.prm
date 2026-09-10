@@ -1,0 +1,4 @@
+# Enable if: ASPECT_WITH_VORO
+# MPI: 2
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_residual_consistency.prm
+set Additional shared libraries = ./libphase_field_fault_residual_consistency_mpi.so

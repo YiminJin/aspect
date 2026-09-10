@@ -18,6 +18,17 @@ byte-identical binaries.
 The final K1 five-case cross uses `residual-floor/convergence/*.prm`, with
 one-/two-rank and restart evidence in `residual-floor/`. The bounded K2.1
 fixture is `nonuniform/pilot.prm`; compact sampled fault profiles and its
-measurement report are in `nonuniform/measurements/`. No K2.2 campaign has
-been run. K2's original containment requirement remains unmet, and the
-reviewed K1-only allowance does not transfer to it.
+measurement report are in `nonuniform/measurements/`. The subsequent K2.2
+refinement is in `nonuniform/refinement/`. The user explicitly revised the
+original 1e-6 containment allowance to provisional 1e-4 for this fixed-profile,
+prescribed-pressure K2.1/K2.2 family only; this is a separate approval, not
+automatic inheritance of K1's allowance. Actual normalization remains 1e-4.
+The approved K2.2 execution campaign is complete, but its numerical reference
+remains provisional and Gate K2 remains unmet. The current assessment is in
+`doc/reconstructed_fault/benchmarking/stage_K2_2_temporal_completion.md`;
+earlier spatial reviews retain their historical context. The subsequent
+bounded stress-transfer correction and consumption/output timeline are in
+`stage_K2_stress_transfer_timeline.md`. Compact JSON evidence is versioned
+alongside the fixtures; full CSV/VTU exports and recovery archives remain local.
+The accepted Cartesian lookup/rejection optimization is retained. K2.3 is the
+next authorized stage, not part of this saved implementation or verification.

@@ -310,6 +310,16 @@ Provide reference code, fixture, exact run commands, error/convergence tables, p
 
 ## Step K2 — Nonuniform slip and non-local coupling, fixed phase field
 
+Approved fixture-family revision (2026-09-09): the original 1e-6 omitted-
+profile-fraction target is provisionally revised to 1e-4 for the fixed-profile,
+prescribed-normal-stress K2.1/K2.2 fixture family only. The separate 1e-4 actual
+slip-normalization requirement is unchanged and applies at measured locations
+and accepted times. This is not approval to extend support, renormalize I_h,
+or transfer the allowance to true-normal-stress/later tests. Same-support
+refinement does not establish equivalence to the full profile. Stop for review
+on an allowance failure, unexplained convergence plateau, or needed production
+correction. K2.1's accepted feasibility pilot is not Gate K2.
+
 ### K2.1 Add one smooth along-fault perturbation
 
 Reuse K1 as much as possible. Keep temperature, composition, and the normal phase-field profile simple. Introduce one smooth variation, preferably in the initial rate-state variable, for example

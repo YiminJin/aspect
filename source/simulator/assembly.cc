@@ -32,6 +32,7 @@
 #include <aspect/simulator/assemblers/advection.h>
 #include <aspect/simulator/assemblers/entropy_advection.h>
 #include <aspect/simulator/assemblers/reconstructed_fault_stokes.h>
+#include "reconstructed_fault_residual_audit.h"
 
 #include <aspect/simulator/solver/stokes_matrix_free.h>
 
@@ -49,6 +50,12 @@
 
 namespace aspect
 {
+  namespace internal
+  {
+    FaultResidualAuditChannel fault_residual_audit_channel =
+      FaultResidualAuditChannel::normal;
+  }
+
   namespace
   {
     // This function initializes the simulator access for all assemblers
@@ -631,6 +638,8 @@ namespace aspect
     if (rebuild_stokes_matrix)
       data.local_matrix = 0;
     data.local_rhs = 0;
+    if (assemble_reconstructed_fault_stokes_terms)
+      data.local_frozen_fault_rhs = 0;
     if (do_pressure_rhs_compatibility_modification)
       data.local_pressure_shape_function_integrals = 0;
 
@@ -732,7 +741,16 @@ namespace aspect
       assemblers->stokes_system[i]->execute(scratch,data);
 
     if (assemble_reconstructed_fault_stokes_terms)
-      reconstructed_fault_stokes_coupling->execute(scratch, data);
+      {
+        // Shadow diagnostics use the same split as normal assembly. BV is
+        // unknown-dependent; only Maxwell/profile history is frozen.
+        const auto channel = internal::fault_residual_audit_channel;
+        reconstructed_fault_stokes_coupling->execute(scratch, data);
+        if (channel == internal::FaultResidualAuditChannel::frozen)
+          data.local_rhs = 0.0;
+        if (channel == internal::FaultResidualAuditChannel::unknowns)
+          data.local_frozen_fault_rhs = 0.0;
+      }
 
     if (!assemblers->stokes_system_on_boundary_face.empty())
       {
@@ -907,9 +925,20 @@ namespace aspect
       this->local_assemble_stokes_system(cell, scratch, data);
     };
 
+    // Do not combine cancelling cell loads before constraint distribution or
+    // MPI summation. This scratch vector has one assembly's lifetime, not a
+    // history/cache lifetime, and the same path serves Newton bases and trials.
+    LinearAlgebra::BlockVector frozen_fault_rhs;
+    if (assemble_reconstructed_fault_stokes_terms)
+      frozen_fault_rhs.reinit(introspection.index_sets.system_partitioning,
+                             mpi_communicator);
     auto copier = [&](const internal::Assembly::CopyData::StokesSystem<dim> &data)
     {
       this->copy_local_to_global_stokes_system(data);
+      if (assemble_reconstructed_fault_stokes_terms)
+        current_constraints.distribute_local_to_global(data.local_frozen_fault_rhs,
+                                                       data.local_dof_indices,
+                                                       frozen_fault_rhs);
     };
 
     WorkStream::
@@ -938,6 +967,12 @@ namespace aspect
 
     system_matrix.compress(VectorOperation::add);
     system_rhs.compress(VectorOperation::add);
+
+    if (assemble_reconstructed_fault_stokes_terms)
+      {
+        frozen_fault_rhs.compress(VectorOperation::add);
+        system_rhs += frozen_fault_rhs;
+      }
 
     // If we change the system_rhs, matrix-free Stokes must update
     if (stokes_matrix_free)

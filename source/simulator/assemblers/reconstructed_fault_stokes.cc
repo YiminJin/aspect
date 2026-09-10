@@ -19,6 +19,8 @@
 #include <deal.II/fe/fe_values.h>
 
 #include <map>
+#include <cstdlib>
+#include <iostream>
 
 namespace aspect
 {
@@ -141,6 +143,10 @@ namespace aspect
         Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(
           this->get_material_model()))
     {
+      performance_timer = std::make_unique<TimerOutput>(
+        std::cout,
+        std::getenv("ASPECT_FAULT_PERFORMANCE") && this->get_pcout().is_active()
+        ? TimerOutput::summary : TimerOutput::never, TimerOutput::wall_times);
       // MaxwellStress validates this complete, one-to-one mapping at plugin
       // initialization. Cache the FE field indices, not a second stress history.
       stress_composition_indices.fill(numbers::invalid_unsigned_int);
@@ -162,6 +168,7 @@ namespace aspect
     ReconstructedFaultStokes<dim>::linearize_B(
       const LinearAlgebra::BlockVector &bulk_linearization_point)
     {
+      TimerOutput::Scope timer(*performance_timer, "Fault: B linearization");
       AssertThrow(bulk_linearization_point.size()
                   == this->get_dof_handler().n_dofs(),
                   ExcMessage("The reconstructed-fault B linearization point has "
@@ -213,6 +220,7 @@ namespace aspect
       const FaultVector &slip_rate,
       LinearAlgebra::BlockVector &result) const
     {
+      TimerOutput::Scope timer(*performance_timer, "Fault: Bulk slip residual");
       AssertThrow(bulk_state.size() == this->get_dof_handler().n_dofs(),
                   ExcMessage("The reconstructed-fault bulk state has the wrong size."));
       AssertThrow(result.size() == this->get_dof_handler().n_dofs(),
@@ -288,6 +296,7 @@ namespace aspect
       const FaultVector &fault_direction,
       LinearAlgebra::BlockVector &result) const
     {
+      TimerOutput::Scope timer(*performance_timer, "Fault: B action");
       AssertThrow(B_linearization != nullptr,
                   ExcMessage("B must be linearized before applying it."));
       AssertThrow(result.size() == this->get_dof_handler().n_dofs(),
@@ -406,18 +415,19 @@ namespace aspect
           std::vector<double> composition(compositions.size());
           for (unsigned int c=0; c<composition.size(); ++c)
             composition[c] = compositions[c][q];
-          SymmetricTensor<2,dim> stress = -phase_field_fault.evaluate_frozen_maxwell_stress(
+          SymmetricTensor<2,dim> frozen_stress = -phase_field_fault.evaluate_frozen_maxwell_stress(
             temperatures[q], composition, old_stress);
+          SymmetricTensor<2,dim> slip_stress;
           if (associations[q].active)
             {
               const auto &association = associations[q];
               const double V = fault_manager.interpolate_slip_rate(
                 association.fault_index, association.segment_index, association.xi);
-              const double crack_strain_rate =
-                responses[q].localization_factor * V
-                + responses[q].history_correction;
-              stress += 2.0 * responses[q].kappa * crack_strain_rate
-                        * slip_tensor<dim>(association);
+              const auto shear = slip_tensor<dim>(association);
+              frozen_stress += 2.0 * responses[q].kappa
+                               * responses[q].history_correction * shear;
+              slip_stress = 2.0 * responses[q].kappa
+                            * responses[q].localization_factor * V * shear;
             }
 
           for (unsigned int i = 0, i_stokes = 0;
@@ -427,12 +437,15 @@ namespace aspect
               {
                 if (this->introspection().component_masks.velocities[
                       fe.system_to_component_index(i).first])
-                  data.local_rhs[i_stokes] +=
-                    stress
-                    * scratch.finite_element_values[
-                        this->introspection().extractors.velocities]
-                        .symmetric_gradient(i,q)
-                    * scratch.finite_element_values.JxW(q);
+                  {
+                    const auto test_gradient = scratch.finite_element_values[
+                      this->introspection().extractors.velocities].symmetric_gradient(i,q);
+                    const double weight = scratch.finite_element_values.JxW(q);
+                    // BV varies with every trial, even when the current active
+                    // set makes dV zero. Only the history load is kept separate.
+                    data.local_rhs[i_stokes] += slip_stress * test_gradient * weight;
+                    data.local_frozen_fault_rhs[i_stokes] += frozen_stress * test_gradient * weight;
+                  }
                 ++i_stokes;
               }
         }

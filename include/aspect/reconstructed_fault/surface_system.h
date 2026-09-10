@@ -15,6 +15,7 @@
 #include <aspect/simulator_access.h>
 
 #include <deal.II/grid/grid_tools_cache.h>
+#include <deal.II/base/timer.h>
 
 #include <memory>
 #include <vector>
@@ -33,6 +34,10 @@ namespace aspect
     std::vector<std::vector<double>> values;
     double weighted_rms = numbers::signaling_nan<double>();
     std::vector<double> per_fault_weighted_rms;
+    /** Weak terms from this evaluation, before any history publication. */
+    std::vector<std::vector<double>> shear_traction, cohesive_traction,
+      friction_traction, damping_traction;
+    std::vector<std::vector<double>> mass_diagonal, mass_off_diagonal;
   };
 
 
@@ -120,6 +125,9 @@ namespace aspect
       unsigned int
       get_linearization_generation() const;
 
+      /** Frozen weak balance of the most recent linearization, not reevaluated history. */
+      const ReconstructedFaultSurfaceResidual &get_linearization_residual() const;
+
     private:
       struct SurfaceAssembly;
       struct SurfaceLinearization;
@@ -132,6 +140,8 @@ namespace aspect
       const MaterialModel::PhaseFieldFault<dim> &phase_field_fault;
       GridTools::Cache<dim> grid_cache;
       std::unique_ptr<SurfaceLinearization> surface_linearization;
+      /** Rank-local timings; surface failures must not enter timer collectives. */
+      std::unique_ptr<TimerOutput> performance_timer;
       unsigned int linearization_generation = 0;
   };
 }

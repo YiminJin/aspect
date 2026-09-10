@@ -1,0 +1,6 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/nonuniform/history-transfer/frozen.prm
+set Output directory = ../dg-one
+subsection Discretization
+  set Composition polynomial degree = 1, 1, 1, 2
+  set Use discontinuous composition discretization = true, true, true, false
+end

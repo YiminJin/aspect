@@ -1,0 +1,13 @@
+{
+  "command": [
+    "/home/ein/repository/aspect/build-pf-cpdi/aspect-release",
+    "--test",
+    "[.fault_ih_performance]"
+  ],
+  "wall_seconds": 23.078632190999997,
+  "user_seconds": 19.581879,
+  "system_seconds": 1.946057,
+  "peak_rss_KiB": 305508,
+  "exit_status": 0,
+  "executable_sha256": "9427c8d9602c014ec07d28d233b1a4581f8eceb76e4b58bae6413aab25398793"
+}

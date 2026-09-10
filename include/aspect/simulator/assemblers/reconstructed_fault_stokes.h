@@ -14,6 +14,7 @@
 
 #include <aspect/simulator/assemblers/interface.h>
 #include <aspect/simulator_access.h>
+#include <deal.II/base/timer.h>
 
 #include <array>
 
@@ -38,7 +39,8 @@ namespace aspect
         explicit ReconstructedFaultStokes(const Simulator<dim> &simulator);
         ~ReconstructedFaultStokes() override;
 
-        /** Add -R from frozen bulk stress and active fault slip to the Stokes RHS. */
+        /** Add BV to the ordinary cell RHS and Maxwell/profile history to its
+         * separate frozen-load RHS; combine only after global assembly. */
         void execute(internal::Assembly::Scratch::ScratchBase<dim> &scratch,
                      internal::Assembly::CopyData::CopyDataBase<dim> &data) const override;
 
@@ -63,6 +65,7 @@ namespace aspect
         std::array<unsigned int, SymmetricTensor<2,dim>::n_independent_components>
           stress_composition_indices;
         std::unique_ptr<BLinearization> B_linearization;
+        std::unique_ptr<TimerOutput> performance_timer;
         unsigned int B_linearization_rebuild_count = 0;
     };
   }

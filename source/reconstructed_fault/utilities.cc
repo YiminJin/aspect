@@ -14,6 +14,7 @@
 
 #include <deal.II/lac/full_matrix.h>
 #include <deal.II/lac/vector.h>
+#include <deal.II/base/quadrature_lib.h>
 
 #include <algorithm>
 #include <cmath>
@@ -515,6 +516,304 @@ namespace aspect
 
 namespace aspect
 {
+  // --- Full-domain surface quadrature
+  namespace
+  {
+    using DomainPolygon = std::vector<Point<2>>;
+
+    struct DomainPlane
+    {
+      Tensor<1,2> normal;
+      double offset;
+    };
+
+    // Complementary half-planes share the very same computed intersections.
+    // Equality belongs to the boundary, not to a finite-width tolerance band.
+    std::pair<DomainPolygon,DomainPolygon>
+    split_domain_polygon(const DomainPolygon &polygon, const DomainPlane &plane)
+    {
+      double minimum=std::numeric_limits<double>::max(), maximum=-minimum;
+      std::vector<double> distance;
+      for (const auto &point : polygon)
+        {
+          distance.push_back(plane.normal*point-plane.offset);
+          minimum=std::min(minimum,distance.back());
+          maximum=std::max(maximum,distance.back());
+        }
+      if (maximum<=0) return {polygon,{}};
+      if (minimum>=0) return {{},polygon};
+      std::pair<DomainPolygon,DomainPolygon> halves;
+      for (unsigned int i=0;i<polygon.size();++i)
+        {
+          const unsigned int j=(i+1)%polygon.size();
+          if (distance[i]<=0) halves.first.push_back(polygon[i]);
+          if (distance[i]>=0) halves.second.push_back(polygon[i]);
+          if ((distance[i]<0 && distance[j]>0) || (distance[i]>0 && distance[j]<0))
+            {
+              const Point<2> intersection=polygon[i]+distance[i]/(distance[i]-distance[j])
+                                           *(polygon[j]-polygon[i]);
+              halves.first.push_back(intersection);
+              halves.second.push_back(intersection);
+            }
+        }
+      return halves;
+    }
+
+    double domain_polygon_area(const DomainPolygon &polygon)
+    {
+      if (polygon.size()<3) return 0;
+      long double twice_area=0;
+      for (unsigned int i=1;i+1<polygon.size();++i)
+        {
+          const auto a=polygon[i]-polygon[0], b=polygon[i+1]-polygon[0];
+          twice_area+=static_cast<long double>(a[0])*b[1]-static_cast<long double>(a[1])*b[0];
+        }
+      return .5*std::abs(twice_area);
+    }
+
+    Point<2> domain_polygon_center(const DomainPolygon &polygon)
+    {
+      Point<2> center;
+      for (const auto &point : polygon) center+=point;
+      center/=polygon.size();
+      return center;
+    }
+
+    std::vector<DomainPolygon>
+    partition_domain(std::vector<DomainPolygon> pieces, const std::vector<DomainPlane> &planes)
+    {
+      for (const auto &plane : planes)
+        {
+          std::vector<DomainPolygon> next;
+          for (const auto &piece : pieces)
+            {
+              auto halves=split_domain_polygon(piece,plane);
+              if (domain_polygon_area(halves.first)>0) next.push_back(std::move(halves.first));
+              if (domain_polygon_area(halves.second)>0) next.push_back(std::move(halves.second));
+            }
+          pieces=std::move(next);
+        }
+      return pieces;
+    }
+
+    struct DomainSegment
+    {
+      Point<2> origin;
+      Tensor<1,2> tangent,normal;
+      double length,offset;
+    };
+
+    std::vector<DomainPlane>
+    distance_bisectors(const DomainSegment &a, const DomainSegment &b)
+    {
+      return {{a.normal-b.normal,a.offset-b.offset},
+              {a.normal+b.normal,a.offset+b.offset}};
+    }
+
+    std::vector<ReconstructedFaultUtilities::DomainQuadraturePoint>
+    polyline_domain_quadrature(const DomainPolygon &vertices,
+                               const ReconstructedFault<2> &fault,
+                               const unsigned int order,
+                               ReconstructedFaultUtilities::DomainQuadratureStatistics *statistics)
+    {
+      // Work near the parent domain to avoid subtracting large plane offsets.
+      const Point<2> origin=vertices[0];
+      DomainPolygon polygon, nodes;
+      for (const auto &vertex : vertices) polygon.emplace_back(vertex-origin);
+      for (const auto &vertex : fault.get_vertices()) nodes.emplace_back(vertex-origin);
+      std::vector<DomainSegment> segments;
+      std::vector<unsigned int> candidates;
+      std::vector<DomainPlane> end_planes;
+      for (unsigned int j=0;j<fault.n_cells();++j)
+        {
+          const auto delta=nodes[j+1]-nodes[j];
+          const double length=delta.norm();
+          const auto tangent=delta/length;
+          const Tensor<1,2> normal({-tangent[1],tangent[0]});
+          segments.push_back({nodes[j],tangent,normal,length,normal*nodes[j]});
+          double first=std::numeric_limits<double>::max(), last=-first;
+          for (const auto &point : polygon)
+            {
+              const double u=tangent*(point-nodes[j]);
+              first=std::min(first,u); last=std::max(last,u);
+            }
+          if (last>=0 && first<=length)
+            {
+              candidates.push_back(j);
+              end_planes.push_back({tangent,tangent*nodes[j]});
+              end_planes.push_back({tangent,tangent*nodes[j+1]});
+            }
+        }
+      if (statistics != nullptr)
+        {
+          statistics->segment_tests += fault.n_cells();
+          statistics->candidate_segments += candidates.size();
+        }
+      std::vector<ReconstructedFaultUtilities::DomainQuadraturePoint> result;
+      for (const auto &piece : partition_domain({polygon},end_planes))
+        {
+          const auto center=domain_polygon_center(piece);
+          std::vector<unsigned int> active;
+          for (const unsigned int j : candidates)
+            {
+              const double u=segments[j].tangent*(center-segments[j].origin);
+              if (u>=0 && u<=segments[j].length) active.push_back(j);
+            }
+          if (!active.empty())
+            {
+              // Signed distances are affine; both factors of d_i^2-d_j^2
+              // give straight bisectors. The winner is constant in each piece.
+              std::vector<DomainPlane> bisectors;
+              for (unsigned int i=0;i<active.size();++i)
+                for (unsigned int j=i+1;j<active.size();++j)
+                  for (const auto &plane : distance_bisectors(segments[active[i]],segments[active[j]]))
+                    bisectors.push_back(plane);
+              for (const auto &part : partition_domain({piece},bisectors))
+                {
+                  const auto point=domain_polygon_center(part);
+                  unsigned int owner=active.front();
+                  double distance=std::numeric_limits<double>::max();
+                  for (const unsigned int j : active)
+                    {
+                      const double d=std::abs(segments[j].normal*point-segments[j].offset);
+                      if (d<distance) { distance=d; owner=j; }
+                    }
+                  // Reuse the validated straight-segment integrator on this
+                  // exact polygon. First and second moments stay distinct.
+                  const ReconstructedFault<2> segment_fault({nodes[owner],nodes[owner+1]});
+                  auto quadrature=ReconstructedFaultUtilities::domain_quadrature(part,segment_fault,order,statistics);
+                  for (auto &q : quadrature) q.segment_index=owner;
+                  result.insert(result.end(),quadrature.begin(),quadrature.end());
+                }
+            }
+          else
+            {
+              // Fill only the finite-projection gaps. A vertex Voronoi partition
+              // preserves the entire corner/tip measure with constant Q1 data.
+              double radius=0, nearest=std::numeric_limits<double>::max();
+              for (const auto &point : piece) radius=std::max(radius,point.distance(center));
+              for (const auto &node : nodes) nearest=std::min(nearest,node.distance(center));
+              std::vector<unsigned int> vertices_in_range;
+              for (unsigned int i=0;i<nodes.size();++i)
+                if (nodes[i].distance(center)<=nearest+2*radius) vertices_in_range.push_back(i);
+              for (const unsigned int i : vertices_in_range)
+                {
+                  auto corner=piece;
+                  for (const unsigned int j : vertices_in_range)
+                    if (i!=j)
+                      {
+                        const auto delta=nodes[j]-nodes[i];
+                        const DomainPlane plane={delta,delta*(nodes[i]+.5*delta)};
+                        corner=split_domain_polygon(corner,plane).first;
+                        if (domain_polygon_area(corner)==0) break;
+                      }
+                  if (domain_polygon_area(corner)==0) continue;
+                  const unsigned int left=i==0 ? 0 : i-1;
+                  const unsigned int right=i==nodes.size()-1 ? left : i;
+                  for (const auto &part : partition_domain({corner},distance_bisectors(segments[left],segments[right])))
+                    {
+                      const auto point=domain_polygon_center(part);
+                      const double dl=std::abs(segments[left].normal*point-segments[left].offset);
+                      const double dr=std::abs(segments[right].normal*point-segments[right].offset);
+                      const unsigned int owner=dl<=dr ? left : right;
+                      result.push_back({owner,i==owner ? 0.0 : 1.0,domain_polygon_area(part)});
+                    }
+                }
+            }
+        }
+      return result;
+    }
+  }
+
+  namespace ReconstructedFaultUtilities
+  {
+    std::vector<DomainQuadraturePoint>
+    domain_quadrature(const std::vector<Point<2>> &vertices,
+                      const ReconstructedFault<2> &fault,
+                      const unsigned int order,
+                      DomainQuadratureStatistics *statistics)
+    {
+      AssertThrow(vertices.size() >= 3, ExcMessage("Surface quadrature requires a domain polygon."));
+      const Point<2> origin = fault.vertex(0);
+      Tensor<1,2> tangent = fault.vertex(fault.n_vertices()-1)-origin;
+      const double length = tangent.norm();
+      tangent /= length;
+      Tensor<1,2> normal;
+      normal[0] = -tangent[1];
+      normal[1] = tangent[0];
+      const double tolerance = 128*std::numeric_limits<double>::epsilon()*length;
+      std::vector<double> nodes(fault.n_vertices());
+      bool straight=true;
+      for (unsigned int i=0; i<nodes.size(); ++i)
+        {
+          const Tensor<1,2> offset = fault.vertex(i)-origin;
+          nodes[i] = offset*tangent;
+          straight=straight && std::abs(offset*normal)<=tolerance
+                   && (i==0 || nodes[i]>nodes[i-1]);
+        }
+      if (!straight)
+        {
+          if (statistics != nullptr) ++statistics->general_calls;
+          return polyline_domain_quadrature(vertices,fault,order,statistics);
+        }
+      if (statistics != nullptr) ++statistics->straight_calls;
+
+      // Between projected polygon vertices the transverse width is linear.
+      // Additional fault-node cuts keep every surface basis segment-local.
+      std::vector<Point<2>> polygon;
+      std::vector<double> cuts;
+      for (const auto &vertex : vertices)
+        {
+          const auto offset = vertex-origin;
+          polygon.emplace_back(offset*tangent, offset*normal);
+          cuts.push_back(polygon.back()[0]);
+        }
+      const auto bounds = std::minmax_element(cuts.begin(), cuts.end());
+      const double first = *bounds.first, last = *bounds.second;
+      for (const double node : nodes)
+        if (node>first && node<last)
+          cuts.push_back(node);
+      std::sort(cuts.begin(), cuts.end());
+      cuts.erase(std::unique(cuts.begin(), cuts.end()), cuts.end());
+      const QGauss<1> gauss(order);
+      std::vector<DomainQuadraturePoint> result;
+      for (unsigned int interval=1; interval<cuts.size(); ++interval)
+        {
+          const double a=cuts[interval-1], b=cuts[interval];
+          // Ignore only intervals too narrow to represent interior Gauss points.
+          if (b-a <= 8*std::numeric_limits<double>::epsilon()*std::max(std::abs(a),std::abs(b)))
+            continue;
+          const double center = .5*(a+b);
+          const unsigned int segment = center<=0 ? 0 : center>=length ? fault.n_cells()-1
+            : std::upper_bound(nodes.begin(),nodes.end(),center)-nodes.begin()-1;
+          for (unsigned int q=0; q<gauss.size(); ++q)
+            {
+              const double s = a+(b-a)*gauss.point(q)[0];
+              double bottom=std::numeric_limits<double>::max();
+              double top=-bottom;
+              for (unsigned int edge=0; edge<polygon.size(); ++edge)
+                {
+                  const auto &v=polygon[edge];
+                  const auto &w=polygon[(edge+1)%polygon.size()];
+                  if (s>std::min(v[0],w[0]) && s<std::max(v[0],w[0]))
+                    {
+                      const double y=v[1]+(s-v[0])/(w[0]-v[0])*(w[1]-v[1]);
+                      bottom=std::min(bottom,y);
+                      top=std::max(top,y);
+                    }
+                }
+              AssertThrow(top>=bottom, ExcMessage("Invalid transverse domain cross-section."));
+              // Constant continuation retains portions beyond true tips without
+              // extrapolating constrained surface fields or joining endpoint DoFs.
+              const double xi = std::max(0.0,std::min(1.0,
+                (s-nodes[segment])/(nodes[segment+1]-nodes[segment])));
+              result.push_back({segment,xi,(b-a)*gauss.weight(q)*(top-bottom)});
+            }
+        }
+      return result;
+    }
+  }
+
 #define INSTANTIATE(dim) \
   namespace ReconstructedFaultUtilities::internal \
   { \

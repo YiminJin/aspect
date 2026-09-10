@@ -17,6 +17,7 @@
 #include <aspect/reconstructed_fault/manager.h>
 #include <aspect/reconstructed_fault/surface_system.h>
 #include <aspect/simulator_access.h>
+#include <aspect/simulator_signals.h>
 
 #include "phase_field_fault_test_access.h"
 
@@ -26,6 +27,33 @@
 
 namespace aspect
 {
+  namespace
+  {
+    bool coupled_solve_converged = false;
+  }
+
+  namespace StageIConvergence
+  {
+    template <int dim>
+    void connect_stage_i_convergence(SimulatorSignals<dim> &signals)
+    {
+      signals.start_timestep.connect([](const SimulatorAccess<dim> &)
+      {
+        coupled_solve_converged = false;
+      });
+      signals.post_nonlinear_solver.connect([](const SolverControl &control)
+      {
+        coupled_solve_converged = control.last_check() == SolverControl::success
+          && std::isfinite(control.last_value())
+          && control.last_value() < control.tolerance();
+      });
+    }
+    // Included lifecycle fixtures register their own connectors. The macro
+    // needs a distinct namespace for this shared positive-convergence guard.
+    ASPECT_REGISTER_SIGNALS_CONNECTOR(connect_stage_i_convergence<2>,
+                                      connect_stage_i_convergence<3>)
+  }
+
   namespace Postprocess
   {
     template <int dim>
@@ -36,6 +64,10 @@ namespace aspect
         std::pair<std::string,std::string>
         execute(TableHandler &) override
         {
+          AssertThrow(coupled_solve_converged,
+                      ExcMessage("The positive Stage-I/lifecycle test requires both "
+                                 "final nonlinear convergence criteria; continued "
+                                 "execution after solver failure is not a pass."));
           const auto &model =
             Plugins::get_plugin_as_type<
               const MaterialModel::PhaseFieldFault<dim>>(

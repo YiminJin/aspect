@@ -441,6 +441,7 @@ namespace aspect
           :
           StokesPreconditioner<dim> (stokes_dofs_per_cell),
           local_rhs (stokes_dofs_per_cell),
+          local_frozen_fault_rhs (stokes_dofs_per_cell),
           local_pressure_shape_function_integrals (do_pressure_rhs_compatibility_modification ?
                                                    stokes_dofs_per_cell
                                                    :
@@ -455,6 +456,7 @@ namespace aspect
           :
           StokesPreconditioner<dim> (data),
           local_rhs (data.local_rhs),
+          local_frozen_fault_rhs (data.local_frozen_fault_rhs),
           local_pressure_shape_function_integrals (data.local_pressure_shape_function_integrals.size())
         {}
 

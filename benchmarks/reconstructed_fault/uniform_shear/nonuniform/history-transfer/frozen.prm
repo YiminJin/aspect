@@ -1,0 +1,15 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/pilot.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/diagnostics/pilot-build/libuniform_shear.so, ./libhistory_transfer.so
+set Output directory = ../one
+set End time = 0
+subsection Mesh refinement
+  set Initial global refinement = 3
+end
+subsection Initial composition model
+  subsection Function
+    set Function expression = 0; 0; 1500+20*sin(8*pi*x)+10*y; 200
+  end
+end
+subsection Postprocess
+  set List of postprocessors = particles, frozen history transfer
+end

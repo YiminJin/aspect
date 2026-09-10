@@ -1,0 +1,16 @@
+{
+  "command": [
+    "/home/ein/repository/aspect/build-pf-cpdi/aspect-release",
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/nonuniform/domain-convergence-completion/time0125.prm"
+  ],
+  "cwd": "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/diagnostics/pilot-build",
+  "executable_sha256": "e2451b97ad5a76ba431967c4938bccb5b94cf910ff1182f9bd830e7666f1b453",
+  "parameter_sha256": "6280a0211bd612ba4ce0f18e0776d0042ec11c32a9d54daf43fb5efbb44deb27",
+  "configuration": "Release",
+  "plugin_sha256": "40aac2f889e311f92cc6b69942b951fcafe4813dc5655460321f69f6e8d89880",
+  "git_head": "a24c3623108e99240997141121a9d167fa119042",
+  "ranks": 1,
+  "exit_status": 0,
+  "wall_seconds": 2908.2724614730014,
+  "peak_rss_KiB": 5786604
+}

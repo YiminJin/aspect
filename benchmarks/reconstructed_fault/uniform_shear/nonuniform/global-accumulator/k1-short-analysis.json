@@ -1,0 +1,172 @@
+{
+  "geometry": {
+    "length_m": 0.25,
+    "vertices": 17,
+    "max_abs_y_m": 5.068028444090488e-15,
+    "max_angle_rad": 1.0758013173936529e-15,
+    "endpoints": [
+      [
+        0.0,
+        4.959866057196893e-15
+      ],
+      [
+        0.25,
+        5.011454711158748e-15
+      ]
+    ],
+    "normal_half_widths_m": [
+      0.3088215939070757,
+      0.3088215939070757
+    ]
+  },
+  "profile": {
+    "raw_min": 3.4371261667480294e-09,
+    "raw_max": 0.5999103232803504,
+    "max_along_fault_phi_range": 1.2547259370997095e-14,
+    "independent_Ih_m": 108.09809507227017,
+    "independent_Ih_range_m": [
+      108.09809507226952,
+      108.09809507227088
+    ],
+    "max_Ih_quadrature_change_m": 0.0,
+    "max_midpoint_Ih_relative_error": 8.129172821441696e-11,
+    "max_projected_Ih_relative_error": 8.129199113958136e-11,
+    "max_omitted_strip_fraction": 5.83027365745417e-05
+  },
+  "initialization": {
+    "C_mean_Pa": 318.7476557675631,
+    "H": {
+      "max_relative_error": 3.101304590081319e-07,
+      "max_along_fault_range_Pa": 0.0
+    },
+    "surface_rule": "domain integrated",
+    "legacy_point_projection_difference_Pa": 1.1482370609883219e-11,
+    "independent_domain_initial_projection_check": "covered by focused moment/projection regressions",
+    "endpoint_projection_mass_m2": [
+      0.0032280815972222554,
+      0.0032280815972222186
+    ]
+  },
+  "steps": [
+    {
+      "step": 0,
+      "time_s": 0.0,
+      "dt_s": 2.0,
+      "U_m_s": 0.0001,
+      "V_mean_m_s": 0.000314863529832435,
+      "V_reference_m_s": 0.0003148175754489738,
+      "V_error_m_s": 4.595438346120719e-08,
+      "V_along_fault_range_over_scale": 3.323079658668071e-13,
+      "C_mean_Pa": 318.7476557675631,
+      "C_reference_Pa": 318.7476557675631,
+      "C_along_fault_range_over_scale": 4.699055959160129e-15,
+      "Theta_mean_s": 200.00000000000045,
+      "Theta_reference_s": 200.00000000000045,
+      "Theta_reference_increment_s": 0.0,
+      "Theta_along_fault_range_over_scale": 7.915446076367516e-14,
+      "Theta_vertex_update_error_s": 0.0,
+      "prescribed_velocity_max_error_m_s": 2.0328790734103208e-20,
+      "evaluated_stress_mean_Pa": 1044.8723631002163,
+      "evaluated_stress_reference_Pa": 1044.9307108685457,
+      "evaluated_stress_range_Pa": 4.227945748948741,
+      "retained_particle_stress_mean_Pa": 1499.9999999999998,
+      "integrated_slip_normalization": 0.9999476351293997,
+      "particle_volume_sum_m2": 0.25000000000000056,
+      "particle_volume_relative_extrema": [
+        0.9999999999999769,
+        1.0000000000000355
+      ],
+      "max_transverse_velocity_m_s": 1.3243865821883475e-18,
+      "transverse_velocity_rms_m_s": 3.243818873567435e-19,
+      "divergence_rms_s_inv": 2.4158513724042236e-18,
+      "accumulated_slip_m": 0.0,
+      "accumulated_reference_slip_m": 0.0
+    },
+    {
+      "step": 1,
+      "time_s": 0.5,
+      "dt_s": 0.5,
+      "U_m_s": 0.0001025,
+      "V_mean_m_s": 0.000839907463558089,
+      "V_reference_m_s": 0.0008398012546741888,
+      "V_error_m_s": 1.0620888390023685e-07,
+      "V_along_fault_range_over_scale": 9.22829521132762e-11,
+      "C_mean_Pa": 321.0331308828172,
+      "C_reference_Pa": 321.0326408476551,
+      "C_along_fault_range_over_scale": 2.6943780540022998e-14,
+      "Theta_mean_s": 131.82373056266232,
+      "Theta_reference_s": 131.83071957631682,
+      "Theta_reference_increment_s": -68.16928042368363,
+      "Theta_along_fault_range_over_scale": 2.9844215987395727e-12,
+      "Theta_vertex_update_error_s": 0.0,
+      "prescribed_velocity_max_error_m_s": 4.0657581468206416e-20,
+      "evaluated_stress_mean_Pa": 1124.7571479295734,
+      "evaluated_stress_reference_Pa": 1124.7881838941282,
+      "evaluated_stress_range_Pa": 2.840723200456523,
+      "retained_particle_stress_mean_Pa": 1124.7864074580662,
+      "integrated_slip_normalization": 0.9999476351294017,
+      "particle_volume_sum_m2": 0.24999999986315327,
+      "particle_volume_relative_extrema": [
+        0.9772158847862858,
+        1.0227839774367509
+      ],
+      "max_transverse_velocity_m_s": 2.4263422510638636e-16,
+      "transverse_velocity_rms_m_s": 3.459638323727434e-17,
+      "divergence_rms_s_inv": 1.932013927522034e-17,
+      "accumulated_slip_m": 0.0004199537317790445,
+      "accumulated_reference_slip_m": 0.0004199006273370944
+    },
+    {
+      "step": 2,
+      "time_s": 1.0,
+      "dt_s": 0.5,
+      "U_m_s": 0.000105,
+      "V_mean_m_s": 0.0002746570737005041,
+      "V_reference_m_s": 0.0002746297806524583,
+      "V_error_m_s": 2.7293048045836255e-08,
+      "V_along_fault_range_over_scale": 6.250100263727187e-10,
+      "C_mean_Pa": 320.6992073644351,
+      "C_reference_Pa": 320.6985938464767,
+      "C_along_fault_range_over_scale": 2.102448585598419e-13,
+      "Theta_mean_s": 115.37579718554971,
+      "Theta_reference_s": 115.38346070728448,
+      "Theta_reference_increment_s": -16.44725886903234,
+      "Theta_along_fault_range_over_scale": 2.0520687371572423e-11,
+      "Theta_vertex_update_error_s": 0.0,
+      "prescribed_velocity_max_error_m_s": 2.710505431213761e-20,
+      "evaluated_stress_mean_Pa": 1034.5668665711023,
+      "evaluated_stress_reference_Pa": 1034.575073368644,
+      "evaluated_stress_range_Pa": 0.9316471750018991,
+      "retained_particle_stress_mean_Pa": 1034.5764346923866,
+      "integrated_slip_normalization": 0.9999476351293454,
+      "particle_volume_sum_m2": 0.2499999972232552,
+      "particle_volume_relative_extrema": [
+        0.9037340591209432,
+        1.0962627982442772
+      ],
+      "max_transverse_velocity_m_s": 1.538717121384902e-15,
+      "transverse_velocity_rms_m_s": 2.0680166959487572e-16,
+      "divergence_rms_s_inv": 1.25531832582748e-16,
+      "accumulated_slip_m": 0.0005572822686292966,
+      "accumulated_reference_slip_m": 0.0005572155176633236
+    }
+  ],
+  "completed_to_6_seconds": false,
+  "containment_allowance": {
+    "value": 0.0001,
+    "scope": "provisional K1 only",
+    "full_Ih_reference_unchanged": true,
+    "completed_refinement_campaign": false
+  },
+  "assumption_checks": {
+    "straight_centered_fault": true,
+    "contained_profiles": true,
+    "projected_Ih": true,
+    "integrated_slip": true,
+    "along_fault_uniformity": true,
+    "transverse_velocity": true,
+    "divergence": true,
+    "prescribed_velocities": true
+  },
+  "trajectory_comparison_valid": true
+}

@@ -1,0 +1,40 @@
+{
+  "baseline": {
+    "cold_seconds": 17.216761289,
+    "resources": {
+      "command": [
+        "/home/ein/repository/aspect/build-pf-cpdi/aspect-release",
+        "--test",
+        "[.fault_ih_performance]"
+      ],
+      "mode": "baseline",
+      "wall_seconds": 20.85030457799985,
+      "user_seconds": 17.566724,
+      "system_seconds": 0.196513,
+      "peak_rss_KiB": 308624,
+      "exit_status": 0,
+      "executable_sha256": "e2451b97ad5a76ba431967c4938bccb5b94cf910ff1182f9bd830e7666f1b453"
+    },
+    "result": "Cold result: found=811863, missing=522, status digest=4277628729994074550, I_h=108.12665787747622, I_h=108.1266578774209, I_h=108.12665787729944, I_h=108.12665787774048, I_h=108.12665787774317, I_h=108.1266578777462, I_h=108.12665787752164, I_h=108.12665787745453, I_h=108.12665787748398"
+  },
+  "rejection": {
+    "cold_seconds": 3.714599196,
+    "resources": {
+      "command": [
+        "/home/ein/repository/aspect/build-pf-cpdi/aspect-release",
+        "--test",
+        "[.fault_ih_performance]"
+      ],
+      "mode": "rejection",
+      "wall_seconds": 7.677949390999856,
+      "user_seconds": 4.464146,
+      "system_seconds": 1.747366,
+      "peak_rss_KiB": 309028,
+      "exit_status": 0,
+      "executable_sha256": "e2451b97ad5a76ba431967c4938bccb5b94cf910ff1182f9bd830e7666f1b453"
+    },
+    "result": "Cold result: found=811863, missing=522, status digest=4277628729994074550, I_h=108.12665787747622, I_h=108.1266578774209, I_h=108.12665787729944, I_h=108.12665787774048, I_h=108.12665787774317, I_h=108.1266578777462, I_h=108.12665787752164, I_h=108.12665787745453, I_h=108.12665787748398"
+  },
+  "speedup": 4.634890705715859,
+  "peak_rss_difference_KiB": 404
+}

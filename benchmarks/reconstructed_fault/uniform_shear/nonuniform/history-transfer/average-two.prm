@@ -1,0 +1,2 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/nonuniform/history-transfer/frozen.prm
+set Output directory = ../average-two

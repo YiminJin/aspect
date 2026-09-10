@@ -1,0 +1,4 @@
+# Unchanged K2.1 physical fixture and solver settings, bounded at 1 s.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/nonuniform/pilot.prm
+set End time = 1
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/nonuniform/polyline-quadrature/k2_64

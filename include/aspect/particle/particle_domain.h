@@ -256,6 +256,9 @@ namespace aspect
 
         bool cpdi_data_requested() const;
 
+        /** Changes whenever domains are regenerated, even at unchanged volume. */
+        std::uint64_t geometry_version() const { return domain_geometry_version; }
+
       private:
         /**
          *  Address of the particle handler to work on.
@@ -273,6 +276,10 @@ namespace aspect
 #endif
 
         std::vector<double> volumes;
+
+        // Retain the constructed boundary, not a second reconstruction of it.
+        std::vector<std::vector<Point<dim>>> domain_vertices;
+        std::uint64_t domain_geometry_version = 0;
 
         ParticleDomain::FaceData<dim> face_data;
 
@@ -295,6 +302,13 @@ namespace aspect
                                const types::particle_index       particle_index);
 
         double volume() const;
+
+        /** Ordered boundary vertices of the existing domain (2-D). */
+        const std::vector<Point<dim>> &vertices() const
+        {
+          AssertIndexRange(particle_index, handler->domain_vertices.size());
+          return handler->domain_vertices[particle_index];
+        }
 
         unsigned int n_faces() const;
 

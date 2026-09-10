@@ -21,6 +21,8 @@
 #include <aspect/simulator_access.h>
 
 #include <deal.II/numerics/vector_tools.h>
+#include <fstream>
+#include <iomanip>
 
 namespace aspect
 {
@@ -35,6 +37,16 @@ namespace aspect
         execute(TableHandler &) override
         {
           AssertThrow(dim == 2, ExcNotImplemented());
+          if (Utilities::MPI::this_mpi_process(this->get_mpi_communicator())==0)
+            {
+              std::ofstream geometry(this->get_output_directory()+"domain_fault_geometry.csv");
+              geometry << std::setprecision(17) << "fault,node,x,y\n";
+              const auto &faults=this->get_reconstructed_fault_manager().get_faults();
+              for (unsigned int f=0;f<faults.size();++f)
+                for (unsigned int i=0;i<faults[f].n_vertices();++i)
+                  geometry << f << ',' << i << ',' << faults[f].vertex(i)[0]
+                           << ',' << faults[f].vertex(i)[1] << '\n';
+            }
           const auto &const_model =
             Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(
               this->get_material_model());
@@ -77,6 +89,48 @@ namespace aspect
           const auto &linearized = surface_system.linearize_surface_system(
             this->get_solution(), V);
           assert_same_residual(evaluated, linearized);
+
+          // Every locally owned admitted parent contributes its full domain.
+          // This is also checked against the replicated integrated mass after
+          // MPI reduction, not merely against a serial quadrature utility.
+          std::vector<double> local_volume(V.size(),0.0);
+          std::map<types::particle_index,double> constant_samples;
+          for (const auto &parent : fault_manager.get_locally_owned_particle_fault_associations())
+            if (parent.active)
+              {
+                double measure=0.0;
+                for (const auto &q : parent.quadrature)
+                  measure+=q.weight;
+                AssertThrow(std::abs(measure-parent.particle_domain_volume)<1.e-10*parent.particle_domain_volume,
+                            ExcMessage("Domain quadrature lost parent measure."));
+                local_volume[parent.fault_index]+=parent.particle_domain_volume;
+                constant_samples.emplace(parent.particle_id,2.7);
+              }
+          const auto constant_projection=fault_manager.project_particle_scalar(constant_samples);
+          for (unsigned int f=0; f<V.size(); ++f)
+            {
+              double mass=0.0;
+              for (const double entry : linearized.mass_diagonal[f])
+                mass+=entry;
+              for (const double entry : linearized.mass_off_diagonal[f])
+                mass+=2*entry;
+              const double volume=Utilities::MPI::sum(local_volume[f],this->get_mpi_communicator());
+              AssertThrow(std::abs(mass-volume)<1.e-10*volume,
+                          ExcMessage("Distributed surface mass lost or double-counted domain measure."));
+              for (const double value : constant_projection.nodal_values[f])
+                AssertThrow(std::abs(value-2.7)<1.e-10,
+                            ExcMessage("Integrated production projection does not reproduce constants."));
+              for (unsigned int i=0; i<V[f].size(); ++i)
+                {
+                  const double balance=linearized.shear_traction[f][i]-linearized.cohesive_traction[f][i]
+                    -linearized.friction_traction[f][i]-linearized.damping_traction[f][i];
+                  const double scale=std::abs(linearized.shear_traction[f][i])
+                    +std::abs(linearized.cohesive_traction[f][i])+std::abs(linearized.friction_traction[f][i])
+                    +std::abs(linearized.damping_traction[f][i]);
+                  AssertThrow(std::abs(balance-linearized.values[f][i])<1.e-12*std::max(1.0,scale),
+                              ExcMessage("Integrated weak traction decomposition does not close."));
+                }
+            }
 
           double previous_error = std::numeric_limits<double>::max();
           for (const double epsilon : {2.e-1, 1.e-1, 5.e-2, 2.5e-2})
@@ -804,6 +858,7 @@ namespace aspect
           internal::Assembly::CopyData::StokesSystem<dim> data(
             stokes_dofs_per_cell, false);
           Vector<double> increment(stokes_dofs_per_cell);
+          Vector<double> frozen_increment(stokes_dofs_per_cell);
           bool found_nonzero_cell = false;
           for (const auto &cell : this->get_dof_handler().active_cell_iterators())
             if (cell->is_locally_owned())
@@ -821,10 +876,12 @@ namespace aspect
                   continue;
 
                 data.local_rhs = 0.0;
+                data.local_frozen_fault_rhs = 0.0;
                 bulk_assembler.execute(scratch, data);
                 if (data.local_rhs.l2_norm() > 0.0)
                   {
                     increment = data.local_rhs;
+                    frozen_increment = data.local_frozen_fault_rhs;
                     found_nonzero_cell = true;
                     break;
                   }
@@ -841,13 +898,20 @@ namespace aspect
             }
 
           data.local_rhs = 3.0;
+          data.local_frozen_fault_rhs = 3.0;
           bulk_assembler.execute(scratch, data);
           for (unsigned int i = 0; i < data.local_rhs.size(); ++i)
-            AssertThrow(std::abs(data.local_rhs[i]-(3.0+increment[i]))
-                        <= 4.0*std::numeric_limits<double>::epsilon()
-                           * std::max(3.0, std::abs(increment[i])),
-                        ExcMessage("The Stage-G execute operation overwrote rather "
-                                   "than accumulated into CopyData."));
+            {
+              AssertThrow(std::abs(data.local_frozen_fault_rhs[i]-(3.0+frozen_increment[i]))
+                          <= 4.0*std::numeric_limits<double>::epsilon()
+                             * std::max(3.0, std::abs(frozen_increment[i])),
+                          ExcMessage("The frozen-load assembler is not additive."));
+              AssertThrow(std::abs(data.local_rhs[i]-(3.0+increment[i]))
+                          <= 4.0*std::numeric_limits<double>::epsilon()
+                             * std::max(3.0, std::abs(increment[i])),
+                          ExcMessage("The Stage-G execute operation overwrote rather "
+                                     "than accumulated into CopyData."));
+            }
           linearization_point = saved_linearization_point;
         }
 

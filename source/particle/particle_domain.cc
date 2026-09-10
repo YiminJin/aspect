@@ -1552,6 +1552,9 @@ namespace aspect
       const types::particle_index max_local_particle_index 
         = particle_handler->get_max_local_particle_index();
       volumes.resize(max_local_particle_index);
+      domain_vertices.clear();
+      domain_vertices.resize(max_local_particle_index);
+      ++domain_geometry_version;
       face_data.reinit(max_local_particle_index);
       cpdi_data.reinit(max_local_particle_index);
 
@@ -1662,6 +1665,9 @@ namespace aspect
                                                    generate_cpdi_data,
                                                    face_data, 
                                                    cpdi_data);
+
+                domain_vertices[voronoi_cell.particle_index].assign(
+                  voronoi_cell.vertices.begin(), voronoi_cell.vertices.end());
 
 #if DEBUG
                 local_volume += volumes[voronoi_cell.particle_index];

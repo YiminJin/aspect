@@ -1,0 +1,16 @@
+{
+  "command": [
+    "/home/ein/repository/aspect/build-pf-cpdi/aspect-release",
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/nonuniform/performance/local.prm"
+  ],
+  "cwd": "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/diagnostics/pilot-build",
+  "executable_sha256": "6b5749a40d5b2fb9ae1ae8d8083f003fe2b85cd6245a1e93ca990d86f754bb93",
+  "parameter_sha256": "dfaa4a4e1004b8eaec5081b09ac1d3e554c399a4d02e90582638ed7639e2a06c",
+  "configuration": "Release",
+  "plugin_sha256": "40aac2f889e311f92cc6b69942b951fcafe4813dc5655460321f69f6e8d89880",
+  "git_head": "a24c3623108e99240997141121a9d167fa119042",
+  "ranks": 1,
+  "exit_status": -11,
+  "wall_seconds": 34.553323662000366,
+  "peak_rss_KiB": 604452
+}

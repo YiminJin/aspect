@@ -363,6 +363,9 @@ namespace aspect
 
     particle_solution.reinit(system_rhs, false);
 
+    LinearAlgebra::BlockVector particle_contributions;
+    particle_contributions.reinit(system_rhs, false);
+
     const unsigned int base_element_index = advection_fields[0].base_element(introspection);
 
     // We can only combine the interpolation of properties into fields
@@ -439,18 +442,28 @@ namespace aspect
                       = finite_element.component_to_system_index(advection_fields[field_and_particle_property.first].component_index(introspection),
                                                                  /*dof index within component=*/i);
 
-                    particle_solution(local_dof_indices[system_local_dof]) = particle_properties[i][field_and_particle_property.second];
+                    // Each locally owned cell proposes one value at this DoF.
+                    // Shared continuous DoFs must not select a last writer;
+                    // unshared (including DG) DoFs have just one contribution.
+                    particle_solution(local_dof_indices[system_local_dof]) += particle_properties[i][field_and_particle_property.second];
+                    particle_contributions(local_dof_indices[system_local_dof]) += 1.0;
                   }
             }
         }
 
-    particle_solution.compress(VectorOperation::insert);
+    particle_solution.compress(VectorOperation::add);
+    particle_contributions.compress(VectorOperation::add);
 
     // overwrite the relevant composition blocks only
     std::vector<bool> particle_blocks (introspection.n_blocks,false);
     for (const auto &advection_field: advection_fields)
       {
         const unsigned int blockidx = advection_field.block_index(introspection);
+        for (const auto index : particle_solution.block(blockidx).locally_owned_elements())
+          {
+            Assert(particle_contributions.block(blockidx)[index] > 0., ExcInternalError());
+            particle_solution.block(blockidx)[index] /= particle_contributions.block(blockidx)[index];
+          }
         particle_blocks[blockidx] = true;
         solution.block(blockidx) = particle_solution.block(blockidx);
 

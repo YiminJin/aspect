@@ -28,6 +28,8 @@
 #include <aspect/material_model/equation_of_state/multicomponent_incompressible.h>
 #include <aspect/material_model/rheology/fault_friction.h>
 #include <aspect/reconstructed_fault/manager.h>
+#include <deal.II/base/mpi_remote_point_evaluation.h>
+#include <deal.II/base/timer.h>
 
 #include <functional>
 #include <map>
@@ -112,6 +114,11 @@ namespace aspect
         /** Constitutive values required by the surface weak form. */
         struct ReconstructedFaultPointResponse
         {
+          /** Evaluated traction terms, for projection-consistent weak diagnostics. */
+          double shear_traction;
+          double cohesive_traction;
+          double friction_traction;
+          double damping_traction;
           double residual_density = numbers::signaling_nan<double>();
           double minus_derivative_wrt_slip_rate = numbers::signaling_nan<double>();
           double kappa = numbers::signaling_nan<double>();
@@ -476,6 +483,33 @@ namespace aspect
 
         std::vector<std::vector<double>> current_normalization_integrals;
 
+        /** Geometry-only lookups for the batch sequence of the last I_h solve.
+         * Values are never cached. A changed batch or invalidated mesh forces
+         * a collective rebuild; unused trailing batches are discarded. */
+        struct NormalizationPointLookupCache
+        {
+          struct Batch
+          {
+            std::vector<Point<dim>> points;
+            // Surviving lookup requests -> original adaptive-batch indices.
+            std::vector<unsigned int> request_indices;
+            std::unique_ptr<Utilities::MPI::RemotePointEvaluation<dim>> lookup;
+          };
+
+          const Batch &
+          get(const GridTools::Cache<dim> &grid,
+              const std::vector<Point<dim>> &points);
+
+          std::vector<Batch> batches;
+          unsigned int next_batch = 0;
+          unsigned int hits = 0;
+          unsigned int rebuilds = 0;
+          bool rejection_supported = false;
+          BoundingBox<dim> search_enclosure;
+        };
+
+        mutable NormalizationPointLookupCache normalization_point_lookups;
+
         std::vector<std::vector<double>> current_fault_surface_temperatures;
 
         double current_minimum_raw_normalization_phase_field =
@@ -488,6 +522,9 @@ namespace aspect
           initial_cohesive_projection_diagnostics;
 
         std::unique_ptr<SolutionEvaluator<dim>> solution_evaluator;
+
+        /** Rank-local timings: no synchronization, including during exceptions. */
+        std::unique_ptr<TimerOutput> performance_timer;
         /**
          * @}
          */

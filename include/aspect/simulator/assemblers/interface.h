@@ -410,6 +410,9 @@ namespace aspect
           StokesSystem<dim> &operator= (const StokesSystem<dim> &data) = default;
 
           Vector<double> local_rhs;
+          /** Frozen reconstructed-fault Maxwell/profile load; assemble globally
+           * separately from the unknown-dependent residual before adding it. */
+          Vector<double> local_frozen_fault_rhs;
           Vector<double> local_pressure_shape_function_integrals;
         };
 

@@ -26,6 +26,8 @@ namespace aspect
       {
         public:
           using PointSample = typename PhaseFieldFault<dim>::NormalizationPointSample;
+          using NormalizationPointLookupCache =
+            typename PhaseFieldFault<dim>::NormalizationPointLookupCache;
           using CohesiveResponse = typename PhaseFieldFault<dim>::CohesiveResponse;
 
           static const std::vector<std::vector<double>> &

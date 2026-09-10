@@ -1,0 +1,29 @@
+{
+  "0": {
+    "time": true,
+    "surface": true,
+    "phase": true,
+    "particles": true,
+    "bulk": true,
+    "surface_weak": true,
+    "segments": true
+  },
+  "1": {
+    "time": true,
+    "surface": true,
+    "phase": true,
+    "particles": true,
+    "bulk": true,
+    "surface_weak": true,
+    "segments": true
+  },
+  "2": {
+    "time": true,
+    "surface": true,
+    "phase": true,
+    "particles": true,
+    "bulk": true,
+    "surface_weak": true,
+    "segments": true
+  }
+}

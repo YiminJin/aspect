@@ -23,7 +23,7 @@ def read(directory, name, step, required):
     if not paths:
         raise ValueError(f"Missing diagnostic data: {path}")
     ranks = [np.atleast_1d(np.genfromtxt(p, delimiter=",", names=True)) for p in paths]
-    if name in ("surface", "segments", "time"):
+    if name in ("surface", "surface_weak", "segments", "time"):
         if any(not np.array_equal(ranks[0], other) for other in ranks[1:]):
             raise ValueError(f"Inconsistent replicated {name} data at step {step}")
         values = ranks[0]
@@ -155,8 +155,9 @@ def main():
             load[s:s+2] += lengths[s]*weight*value*shape
     independent_projected_Ih = np.linalg.solve(mass, load)
 
-    # Check the initial consistent projection from the exported particle data,
-    # independently assembling M and the q right hand side with Q1 weights.
+    # Retain the independent OLD point-rule reconstruction for old artifacts.
+    # For domain-rule output this is a discretization comparison, not an
+    # independent check of the new domain-integrated initial projection.
     particles0 = read(directory, "particles", 0, ("id", "x", "y", "volume", "H", "active", "segment", "xi"))
     matrix, rhs = np.zeros((len(points), len(points))), np.zeros(len(points))
     for particle in particles0[particles0["active"] == 1]:
@@ -167,6 +168,18 @@ def main():
         matrix[s:s+2, s:s+2] += particle["volume"]*np.outer(shape, shape)
         rhs[s:s+2] += particle["volume"]*q*shape
     projected_C = np.linalg.solve(matrix, rhs)
+    domain_rule = ((directory / "surface_weak_0.csv").exists()
+                   or any(directory.glob("surface_weak_rank*_0.csv")))
+    projection_difference = float(np.max(abs(projected_C-surface0["C"])))
+    initial_projection = dict(surface_rule="point volume",
+                              C_projection_max_error_Pa=projection_difference,
+                              endpoint_projection_mass_m2=np.diag(matrix)[[0, -1]].tolist())
+    if domain_rule:
+        weak = read(directory, "surface_weak", 0, ("Mdiag",))
+        initial_projection = dict(surface_rule="domain integrated",
+            legacy_point_projection_difference_Pa=projection_difference,
+            independent_domain_initial_projection_check="covered by focused moment/projection regressions",
+            endpoint_projection_mass_m2=weak["Mdiag"][[0, -1]].tolist())
 
     report = dict(
         geometry=dict(length_m=float(length), vertices=len(points),
@@ -183,9 +196,8 @@ def main():
                      max_projected_Ih_relative_error=float(np.max(abs(surface0["Ih"]-independent_projected_Ih)/independent_projected_Ih)),
                      max_omitted_strip_fraction=float(max(omitted))),
         initialization=dict(C_mean_Pa=float(np.dot(weights, surface0["C"])/length),
-                            C_projection_max_error_Pa=float(np.max(abs(projected_C-surface0["C"]))),
                             H=initial_history_audit(particles0),
-                            endpoint_projection_mass_m2=np.diag(matrix)[[0, -1]].tolist()),
+                            **initial_projection),
         steps=[])
     # Initialize ONCE from the retained initial histories. Subsequent ASPECT
     # values are observations, never inputs resetting the reference history.

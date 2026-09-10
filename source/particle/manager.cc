@@ -35,6 +35,8 @@
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 #include <aspect/particle/distribution.h>
+#include <cstdlib>
+#include <iostream>
 
 namespace aspect
 {
@@ -73,6 +75,10 @@ namespace aspect
     void
     Manager<dim>::initialize()
     {
+      domain_timer = std::make_unique<TimerOutput>(
+        std::cout,
+        std::getenv("ASPECT_FAULT_PERFORMANCE") && this->get_pcout().is_active()
+        ? TimerOutput::summary : TimerOutput::never, TimerOutput::wall_times);
       CitationInfo::add("particles");
 
       // Create a particle handler that stores the future particles.
@@ -240,7 +246,10 @@ namespace aspect
       {
         this->apply_particle_per_cell_bounds();
         if (this->particle_domain_handler != nullptr)
-          this->particle_domain_handler->generate_particle_domains();
+          {
+            TimerOutput::Scope timer(*domain_timer, "Particles: Domains/CPDI");
+            this->particle_domain_handler->generate_particle_domains();
+          }
       });
     }
 
@@ -866,7 +875,10 @@ namespace aspect
 
       // Generate particle domains if requested
       if (particle_domain_handler != nullptr)
-        particle_domain_handler->generate_particle_domains();
+        {
+          TimerOutput::Scope timer(*domain_timer, "Particles: Domains/CPDI");
+          particle_domain_handler->generate_particle_domains();
+        }
     }
 
 
@@ -1053,7 +1065,10 @@ namespace aspect
       // owned particles. Build only after both describe the accepted advection;
       // otherwise restart's fresh ghost exchange changes the discrete operator.
       if (particle_domain_handler != nullptr)
-        particle_domain_handler->generate_particle_domains();
+        {
+          TimerOutput::Scope timer(*domain_timer, "Particles: Domains/CPDI");
+          particle_domain_handler->generate_particle_domains();
+        }
 
       this->get_pcout() << " done." << std::endl;
     }

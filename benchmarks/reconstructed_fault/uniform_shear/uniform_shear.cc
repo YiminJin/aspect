@@ -7,8 +7,12 @@
 #include <aspect/particle/manager.h>
 #include <aspect/particle/particle_domain.h>
 #include <aspect/reconstructed_fault/manager.h>
+#include <aspect/reconstructed_fault/surface_system.h>
 #include <aspect/plugins.h>
 #include <deal.II/fe/fe_values.h>
+#include <deal.II/base/mpi_remote_point_evaluation.h>
+#include <deal.II/numerics/vector_tools_evaluate.h>
+#include <array>
 #include <fstream>
 #include <iomanip>
 #include <sstream>
@@ -20,6 +24,7 @@ namespace aspect
     // Fixed-mesh pilot snapshots, not a production or restart facility.
     std::map<types::global_dof_index, double> frozen_phi;
     std::map<types::particle_index, double> frozen_H;
+    bool coupled_solve_converged = false;
 
     template <int dim>
     void freeze_phase(const SimulatorAccess<dim> &simulator,
@@ -44,6 +49,16 @@ namespace aspect
   void connect_uniform_shear(SimulatorSignals<dim> &signals)
   {
     signals.post_constraints_creation.connect(&freeze_phase<dim>);
+    signals.start_timestep.connect([](const SimulatorAccess<dim> &)
+    {
+      coupled_solve_converged = false;
+    });
+    signals.post_nonlinear_solver.connect([](const SolverControl &control)
+    {
+      coupled_solve_converged = control.last_check() == SolverControl::success
+        && std::isfinite(control.last_value())
+        && control.last_value() < control.tolerance();
+    });
   }
   ASPECT_REGISTER_SIGNALS_CONNECTOR(connect_uniform_shear<2>, connect_uniform_shear<3>)
 
@@ -74,6 +89,10 @@ namespace aspect
 
         std::pair<std::string,std::string> execute(TableHandler &) override
         {
+          AssertThrow(coupled_solve_converged,
+                      ExcMessage("Benchmark output requires both final nonlinear "
+                                 "convergence criteria; a continued failed solve "
+                                 "is not an accepted trajectory sample."));
           AssertThrow(dim == 2, ExcMessage("This diagnostic pilot is two-dimensional only."));
           const auto communicator = this->get_mpi_communicator();
           const bool distributed = Utilities::MPI::n_mpi_processes(communicator)>1;
@@ -135,6 +154,18 @@ namespace aspect
           const unsigned int C_position = position("phase field fault cohesive traction");
           const unsigned int Ih_position = position("phase field fault previous I h");
           auto segments = csv("segments", "fault,segment,x,y,nx,ny,half_width_minus,half_width_plus");
+          // The final linearization precedes history publication. Its frozen
+          // weak terms are the actual accepted equation, not a reconstruction
+          // from newly committed particle stress or a normal-column average.
+          const auto &weak = this->get_reconstructed_fault_surface_system().get_linearization_residual();
+          auto weak_output = csv("surface_weak", "fault,node,Mdiag,Moff,q,C,friction,damping,F");
+          for (unsigned int f=0; f<weak.values.size(); ++f)
+            for (unsigned int i=0; i<weak.values[f].size(); ++i)
+              weak_output << f << ',' << i << ',' << weak.mass_diagonal[f][i] << ','
+                          << (i<weak.mass_off_diagonal[f].size() ? weak.mass_off_diagonal[f][i] : 0.0)
+                          << ',' << weak.shear_traction[f][i] << ',' << weak.cohesive_traction[f][i]
+                          << ',' << weak.friction_traction[f][i] << ',' << weak.damping_traction[f][i]
+                          << ',' << weak.values[f][i] << '\n';
           for (unsigned int f=0; f<manager.get_faults().size(); ++f)
             {
               const auto &fault = manager.get_fault(f);
@@ -199,6 +230,68 @@ namespace aspect
               particles << '\n';
             }
 
+          // At real steps the published particle stress is the accepted stress.
+          // At zero it is deliberately retained instead: export the evaluated
+          // traction and production point balance before any physical evolution.
+          if (step == 0)
+            {
+              const auto &associations = manager.get_locally_owned_particle_fault_associations();
+              std::vector<Point<dim>> points;
+              for (const auto &a : associations)
+                points.push_back(a.position);
+              GridTools::Cache<dim> grid(this->get_triangulation(), this->get_mapping());
+              Utilities::MPI::RemotePointEvaluation<dim> cache;
+              cache.reinit(grid, points);
+              const auto strain = VectorTools::point_gradients<dim>(cache,
+                this->get_dof_handler(), solution, VectorTools::EvaluationFlags::avg,
+                intro.component_indices.velocities[0]);
+              const auto phase = VectorTools::point_values<1>(cache,
+                this->get_dof_handler(), solution, VectorTools::EvaluationFlags::avg, phi_component);
+              const auto temperatures = VectorTools::point_values<1>(cache,
+                this->get_dof_handler(), solution, VectorTools::EvaluationFlags::avg,
+                intro.component_indices.temperature);
+              auto traction = csv("particle_traction_initial", "id,x,y,fault,segment,xi,volume,V,phi,q,mu,F");
+              unsigned int p=0;
+              for (const auto &particle : pm.get_particle_handler())
+                {
+                  const auto &a = associations[p];
+                  if (a.active)
+                    {
+                      const auto &fault = manager.get_fault(a.fault_index);
+                      Tensor<1,dim> tangent = fault.vertex(a.segment_index+1)-fault.vertex(a.segment_index);
+                      tangent /= tangent.norm();
+                      Tensor<1,dim> normal;
+                      normal[0]=-tangent[1]; normal[1]=tangent[0];
+                      typename MaterialModel::PhaseFieldFault<dim>::ReconstructedFaultPointInputs input;
+                      input.fault_index=a.fault_index; input.segment_index=a.segment_index; input.xi=a.xi;
+                      input.position=a.position;
+                      input.slip_rate=manager.interpolate_slip_rate(a.fault_index,a.segment_index,a.xi);
+                      input.phase_field=phase[p]; input.previous_phase_field=phase[p];
+                      input.temperature=temperatures[p]; input.dynamic_pressure=0;
+                      input.strain_rate=symmetrize(strain[p]);
+                      input.slip_tensor=symmetrize(outer_product(tangent,normal));
+                      input.normal_tensor=symmetrize(outer_product(normal,normal));
+                      input.bulk_material_fractions={1.0};
+                      for (unsigned int c=0; c<SymmetricTensor<2,dim>::n_independent_components; ++c)
+                        input.old_maxwell_stress[SymmetricTensor<2,dim>::unrolled_to_component_indices(c)]
+                          =particle.get_properties()[stress_position+c];
+                      const auto response=model.evaluate_reconstructed_fault_point(input);
+                      // Fixed initial profile has no history-slip correction.
+                      // Reuse production beta*tau_old rather than retained tau0.
+                      std::vector<double> composition(intro.n_compositional_fields,0.0);
+                      const auto stress = 2*response.kappa*(input.strain_rate
+                        -response.localization_factor*input.slip_rate*input.slip_tensor)
+                        +model.evaluate_frozen_maxwell_stress(input.temperature,composition,input.old_maxwell_stress);
+                      traction << particle.get_id() << ',' << a.position[0] << ',' << a.position[1]
+                               << ',' << a.fault_index << ',' << a.segment_index << ',' << a.xi
+                               << ',' << a.particle_domain_volume << ',' << input.slip_rate << ',' << phase[p]
+                               << ',' << stress*input.slip_tensor << ',' << response.friction_coefficient
+                               << ',' << response.residual_density << '\n';
+                    }
+                  ++p;
+                }
+            }
+
           // Use the exact assembler quadrature/cache. Export resolved gradients
           // and the FE old stress so reference analysis can reconstruct the
           // evaluated stress independently of the committed particle stress.
@@ -209,7 +302,17 @@ namespace aspect
           std::vector<Tensor<1,dim>> velocity(nq);
           std::vector<Tensor<2,dim>> gradients(nq);
           std::vector<double> pressure(nq), phi(nq), old_phi(nq), old_stress(nq);
+          std::array<std::vector<double>,3> published_history, assembly_history;
+          for (unsigned int c=0; c<3; ++c)
+            {
+              published_history[c].resize(nq);
+              assembly_history[c].resize(nq);
+            }
           auto bulk = csv("bulk", "x,y,weight,ux,uy,ux_x,ux_y,uy_x,uy_y,p,phi,old_tau_xy,active,V,chi,kappa,history");
+          // Publication retains non-Stokes fields from solution, whereas the
+          // accepted linearization retains the constrained working fields used
+          // in assembly. Export both histories; do not infer one from the other.
+          auto transfer = csv("history_transfer", "row,published_xx,published_yy,published_xy,assembly_xx,assembly_yy,assembly_xy");
           // Explicit provenance for the existing QP rows; no change to their
           // values or ordering. Cell vertices also identify the saved native mesh.
           auto qp_cells = csv("bulk_cell_ids", "row,cell_id,q,v0,v1,v2,v3");
@@ -224,10 +327,22 @@ namespace aspect
                 values[phi_extractor].get_function_values(solution, phi);
                 values[phi_extractor].get_function_values(this->get_old_solution(), old_phi);
                 values[intro.extractors.compositional_fields[2]].get_function_values(solution, old_stress);
+                for (unsigned int c=0; c<3; ++c)
+                  {
+                    values[intro.extractors.compositional_fields[c]].get_function_values(solution, published_history[c]);
+                    values[intro.extractors.compositional_fields[c]].get_function_values(
+                      this->get_current_linearization_point(), assembly_history[c]);
+                  }
                 const auto &associations = manager.get_stokes_qp_fault_associations(
                   cell->id(), quadrature, values.get_quadrature_points());
                 for (unsigned int q=0; q<nq; ++q)
                   {
+                    transfer << bulk_row;
+                    for (unsigned int c=0; c<3; ++c)
+                      transfer << ',' << published_history[c][q];
+                    for (unsigned int c=0; c<3; ++c)
+                      transfer << ',' << assembly_history[c][q];
+                    transfer << '\n';
                     qp_cells << bulk_row++ << ',' << cell->id().to_string() << ',' << q;
                     for (unsigned int v=0; v<4; ++v)
                       qp_cells << ',' << cell->vertex_index(v);

@@ -1,0 +1,4 @@
+# Unchanged K2.2 fine physical fixture and solver settings, bounded at 1 s.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/nonuniform/refinement/space128.prm
+set End time = 1
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/nonuniform/polyline-quadrature/k2_128

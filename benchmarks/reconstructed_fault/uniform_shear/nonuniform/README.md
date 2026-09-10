@@ -1,5 +1,17 @@
 # Bounded K2.1 pilot (prescribed normal stress)
 
+K2.2 update: the three spatial runs are complete; temporal refinement is
+held for review on an endpoint-traction plateau. Both approved allowance
+checks pass. See `doc/reconstructed_fault/benchmarking/stage_K2_2_spatial_review.md`.
+This is not a Gate K2 completion claim.
+
+Current follow-up: the user explicitly approved a provisional 1e-4 omitted-
+profile-fraction allowance for this fixed-profile, prescribed-pressure
+K2.1/K2.2 family, replacing its original 1e-6 target. The separate 1e-4
+actual normalization requirement is unchanged. See `refinement/README.md`
+for the authorized controlled K2.2 sequence, costs and stop conditions.
+The earlier pilot status and proposal below are retained as historical records.
+
 Completed through 2 s in 414.14 s / 933372 KiB peak RSS. See
 `doc/reconstructed_fault/benchmarking/stage_K2_1_pilot.md` and
 `measurements/report.json`. Actual normalization and lifecycle checks pass;

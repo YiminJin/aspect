@@ -1,0 +1,10 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/nonuniform/pilot.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/nonuniform/refinement/space128
+set End time = 2
+set Maximum time step = 0.5
+subsection Mesh refinement
+  set Initial global refinement = 7
+end
+subsection Fault reconstruction
+  set Structural point spacing = 0.00390625
+end

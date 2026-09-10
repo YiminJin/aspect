@@ -1,0 +1,65 @@
+{
+  "mesh": [
+    128,
+    512
+  ],
+  "support_half_width_m": 0.3088215939070757,
+  "independent_Ih_m": 108.12665788265475,
+  "omitted_fraction": 5.897276980459942e-05,
+  "original_containment_target": 1e-06,
+  "approved_family_allowance": 0.0001,
+  "actual_normalization_requirement": 0.0001,
+  "phi_center": 0.5997110506382999,
+  "steps": [
+    {
+      "time_s": 0.0,
+      "dt_s": 2.0,
+      "normalization_max_error": 5.7711540068172695e-05,
+      "surface_rule": "domain integrated",
+      "raw_sample_semantics": "published parent history (evaluated parent at zero)",
+      "global_normalization": 0.9999422884605046,
+      "Ih_relative_error": 4.9856785366841905e-11,
+      "raw_particle_q_min": 1039.8598498591573,
+      "raw_particle_q_max": 1055.450248537444,
+      "raw_F_rms_Pa": 1.8611409918718032,
+      "strong_F_rms_Pa": 6.964120721987984e-08,
+      "production_F_rms_Pa": 6.964120721987994e-08,
+      "balance_rms_difference_Pa": 9.26442286059391e-23,
+      "theta_update_error_s": 0.0,
+      "boundary_error_m_s": 2.0328790734103208e-20,
+      "volume_sum_m2": 0.24999999999736966,
+      "min_volume_m2": 4.2385525173606297e-07
+    },
+    {
+      "time_s": 0.25,
+      "dt_s": 0.25,
+      "normalization_max_error": 5.771154006928292e-05,
+      "surface_rule": "domain integrated",
+      "raw_sample_semantics": "published parent history (evaluated parent at zero)",
+      "global_normalization": 0.999942288460458,
+      "Ih_relative_error": 4.9856785366841905e-11,
+      "raw_particle_q_min": 1184.6826486067291,
+      "raw_particle_q_max": 1188.4724720563734,
+      "raw_F_rms_Pa": 0.4575824908539727,
+      "strong_F_rms_Pa": 3.636783031449281e-07,
+      "production_F_rms_Pa": 3.6367830314492805e-07,
+      "balance_rms_difference_Pa": 5.293955920339377e-23,
+      "theta_update_error_s": 0.0,
+      "boundary_error_m_s": 3.3881317890172014e-20,
+      "volume_sum_m2": 0.2500000031506535,
+      "min_volume_m2": 4.045114507983059e-07
+    }
+  ],
+  "independent_Ih_range_m": [
+    108.12665788217629,
+    108.12665788317486
+  ],
+  "measured_profile_locations": 129,
+  "initial": {
+    "C_mean_Pa": 317.2451785182549,
+    "Theta_min_s": 199.99999216822573,
+    "Theta_max_s": 210.03177950608625
+  },
+  "completed_to_2_seconds": false,
+  "allowances_pass": true
+}

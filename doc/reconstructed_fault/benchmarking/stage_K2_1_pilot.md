@@ -1,5 +1,13 @@
 # Bounded K2.1 prescribed-normal-stress pilot
 
+Subsequent explicit review: K2.1 is accepted as a completed feasibility pilot,
+not Gate K2. The user revised the original 1e-6 omitted-profile target to a
+provisional 1e-4 allowance for this fixed-profile, prescribed-pressure K2.1/
+K2.2 family only, retaining the separate 1e-4 actual normalization requirement.
+K2.2 is now proceeding under those conditions. The measurements and original
+gate failure recorded below remain historical evidence of the approximation;
+same-support refinement does not establish equivalence to the full profile.
+
 2026-09-09. The full coupled pilot completes initialization and four real
 0.5 s timesteps through 2 s. **This is not Gate K2 or a converged K2 numerical
 reference.** K2's original containment target remains unmet; the K1-only

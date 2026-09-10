@@ -17,6 +17,7 @@
 #include <aspect/simulator_access.h>
 
 #include <deal.II/base/quadrature.h>
+#include <deal.II/base/timer.h>
 #include <deal.II/grid/cell_id.h>
 #include <deal.II/particles/property_pool.h>
 
@@ -210,6 +211,7 @@ namespace aspect
         unsigned int fault_index = numbers::invalid_unsigned_int;
         unsigned int segment_index = numbers::invalid_unsigned_int;
         double xi = numbers::signaling_nan<double>();
+        std::vector<ReconstructedFaultUtilities::DomainQuadraturePoint> quadrature;
       };
 
       void project_particle_properties(
@@ -401,7 +403,10 @@ namespace aspect
       std::vector<FaultReconstructionDiagnostics> diagnostics;
 
       // Particle/fault projection cache. These members are reconstructible.
+      // Local loop/validation timings must never synchronize MPI ranks.
+      std::unique_ptr<TimerOutput> performance_timer;
       bool particle_projection_cache_valid = false;
+      std::uint64_t cached_domain_geometry_version = 0;
       std::uint64_t cached_projection_metadata_version = 0;
       std::vector<std::uint64_t> cached_fault_geometry_versions;
       std::vector<ParticleFaultAssociation> particle_projection_cache;

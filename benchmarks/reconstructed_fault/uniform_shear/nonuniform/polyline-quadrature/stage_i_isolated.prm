@@ -1,0 +1,5 @@
+# Same checked-in dynamic-pressure fixture and numerical settings; separate
+# artifacts for a bounded isolated replay after the concurrent wall timeout.
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_stage_i.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/build-pf-cpdi/tests/libphase_field_fault_stage_i.so
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/nonuniform/polyline-quadrature/stage_i_isolated

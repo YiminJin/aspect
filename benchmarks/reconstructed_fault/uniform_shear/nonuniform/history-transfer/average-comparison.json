@@ -1,0 +1,198 @@
+{
+  "particle_count": 2304,
+  "identical_physical_particle_data": true,
+  "comparisons": [
+    {
+      "comparison": "constant one traversal",
+      "published": {
+        "rms": 0.0,
+        "maximum": 0.0
+      },
+      "working": {
+        "rms": 0.0,
+        "maximum": 0.0
+      },
+      "load": {
+        "l2": 0.0,
+        "maximum": 0.0,
+        "relative_l2": 0.0
+      }
+    },
+    {
+      "comparison": "constant two traversal",
+      "published": {
+        "rms": 0.0,
+        "maximum": 0.0
+      },
+      "working": {
+        "rms": 0.0,
+        "maximum": 0.0
+      },
+      "load": {
+        "l2": 0.0,
+        "maximum": 0.0,
+        "relative_l2": 0.0
+      }
+    },
+    {
+      "comparison": "nonconstant one traversal",
+      "published": {
+        "rms": 5.973590392875061e-14,
+        "maximum": 2.2737367544323206e-13
+      },
+      "working": {
+        "rms": 5.973590392875061e-14,
+        "maximum": 2.2737367544323206e-13
+      },
+      "load": {
+        "l2": 5.860136403840524e-14,
+        "maximum": 7.105427357601002e-15,
+        "relative_l2": 1.989197202999122e-14
+      }
+    },
+    {
+      "comparison": "nonconstant two traversal",
+      "published": {
+        "rms": 5.868320643176343e-14,
+        "maximum": 2.2737367544323206e-13
+      },
+      "working": {
+        "rms": 5.868320643176343e-14,
+        "maximum": 2.2737367544323206e-13
+      },
+      "load": {
+        "l2": 5.775250195058796e-14,
+        "maximum": 7.105427357601002e-15,
+        "relative_l2": 1.9603829574858007e-14
+      }
+    },
+    {
+      "comparison": "constant forward MPI",
+      "published": {
+        "rms": 0.0,
+        "maximum": 0.0
+      },
+      "working": {
+        "rms": 0.0,
+        "maximum": 0.0
+      },
+      "load": {
+        "l2": 1.4857506665735394e-14,
+        "maximum": 2.6645352591003757e-15,
+        "relative_l2": 0.9015928539183704
+      }
+    },
+    {
+      "comparison": "constant reverse MPI",
+      "published": {
+        "rms": 0.0,
+        "maximum": 0.0
+      },
+      "working": {
+        "rms": 0.0,
+        "maximum": 0.0
+      },
+      "load": {
+        "l2": 1.4857506665735394e-14,
+        "maximum": 2.6645352591003757e-15,
+        "relative_l2": 0.9015928539183704
+      }
+    },
+    {
+      "comparison": "nonconstant forward MPI",
+      "published": {
+        "rms": 7.894919286223336e-15,
+        "maximum": 2.2737367544323206e-13
+      },
+      "working": {
+        "rms": 7.894919286223336e-15,
+        "maximum": 2.2737367544323206e-13
+      },
+      "load": {
+        "l2": 8.028830532784065e-14,
+        "maximum": 1.4210854715202004e-14,
+        "relative_l2": 2.7253507663577996e-14
+      }
+    },
+    {
+      "comparison": "nonconstant reverse MPI",
+      "published": {
+        "rms": 7.894919286223336e-15,
+        "maximum": 2.2737367544323206e-13
+      },
+      "working": {
+        "rms": 7.894919286223336e-15,
+        "maximum": 2.2737367544323206e-13
+      },
+      "load": {
+        "l2": 7.833562877600539e-14,
+        "maximum": 1.4210854715202004e-14,
+        "relative_l2": 2.6590680304691435e-14
+      }
+    }
+  ],
+  "constraint_corrections": [
+    {
+      "case": "one",
+      "mode": 1,
+      "rms_Pa": 0.0,
+      "maximum_Pa": 0.0
+    },
+    {
+      "case": "two",
+      "mode": 1,
+      "rms_Pa": 0.0,
+      "maximum_Pa": 0.0
+    },
+    {
+      "case": "one",
+      "mode": 2,
+      "rms_Pa": 0.0,
+      "maximum_Pa": 0.0
+    },
+    {
+      "case": "two",
+      "mode": 2,
+      "rms_Pa": 0.0,
+      "maximum_Pa": 0.0
+    },
+    {
+      "case": "one",
+      "mode": 3,
+      "rms_Pa": 1.9312778691092607,
+      "maximum_Pa": 10.281717821703523
+    },
+    {
+      "case": "two",
+      "mode": 3,
+      "rms_Pa": 1.9312778691092607,
+      "maximum_Pa": 10.281717821703523
+    },
+    {
+      "case": "one",
+      "mode": 4,
+      "rms_Pa": 1.9312778691092607,
+      "maximum_Pa": 10.281717821703523
+    },
+    {
+      "case": "two",
+      "mode": 4,
+      "rms_Pa": 1.9312778691092607,
+      "maximum_Pa": 10.281717821703523
+    }
+  ],
+  "approximation": [
+    {
+      "case": "one",
+      "published_rms_Pa": 1.6233632899326629,
+      "working_rms_Pa": 1.5685670434554888,
+      "single_contribution_center_error_Pa": 0.0
+    },
+    {
+      "case": "two",
+      "published_rms_Pa": 1.6233632899326629,
+      "working_rms_Pa": 1.5685670434554886,
+      "single_contribution_center_error_Pa": 0.0
+    }
+  ]
+}
