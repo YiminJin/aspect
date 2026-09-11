@@ -1,0 +1,26 @@
+# Approved physical boundary variant, not a pressure-gauge shift.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/nonuniform/refinement/space32.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/diagnostics/pilot-build/libuniform_shear.so
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/nonuniform/true-pressure/pilot
+set End time = 1
+set Pressure normalization = no
+subsection Material model
+  subsection Phase field fault
+    set Use adiabatic pressure in fault friction = false
+  end
+end
+subsection Boundary velocity model
+  set Prescribed velocity boundary indicators = bottom:function, top x:function
+end
+subsection Boundary traction model
+  set Prescribed traction boundary indicators = top y:function
+  subsection Function
+    set Function expression = 0; -1000
+  end
+end
+subsection Postprocess
+  subsection Particles
+    set Data output format = vtu
+    set Time between data output = 0
+  end
+end

@@ -28,6 +28,8 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
+#include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <limits>
 
@@ -337,6 +339,23 @@ namespace aspect
     local.mass_off_diagonal.resize(faults.size());
     std::vector<double> local_squared_residual(faults.size(), 0.0);
     std::vector<double> local_weight(faults.size(), 0.0);
+    // Opt-in pilot evidence from the actual pre-publication linearization.
+    // Keep rank-local moments separate from the residual and its MPI reduction.
+    const bool record_normal_stress = assemble_jacobian
+      && std::getenv("ASPECT_FAULT_NORMAL_STRESS_DIAGNOSTIC");
+    std::vector<std::vector<std::array<double,10>>> normal_stress_moments;
+    if (record_normal_stress)
+      {
+        AssertThrow(!phase_field_fault.uses_adiabatic_friction_pressure(),
+                    ExcMessage("Normal-stress pilot diagnostics require true-pressure friction."));
+        normal_stress_moments.resize(faults.size());
+        for (unsigned int f=0; f<faults.size(); ++f)
+          normal_stress_moments[f].resize(faults[f].n_vertices(),
+            {{0,0,0,0, std::numeric_limits<double>::infinity(),
+              -std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity(),
+              -std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity(),
+              -std::numeric_limits<double>::infinity()}});
+      }
     for (unsigned int fault = 0; fault < faults.size(); ++fault)
       {
         local.residual.values[fault].assign(faults[fault].n_vertices(), 0.0);
@@ -412,6 +431,28 @@ namespace aspect
             const double shape[2] = {1.0-q.xi, q.xi};
             const unsigned int vertex = q.segment_index;
             const double weight = q.weight;
+            if (record_normal_stress)
+              {
+                // The response already contains mu*(p-tau:N). Recover its
+                // sigma_n without reevaluating Maxwell from committed history.
+                AssertThrow(response.friction_coefficient > 0.0,
+                            ExcMessage("Normal-stress diagnostic requires positive friction coefficient."));
+                const double sigma = response.friction_traction/response.friction_coefficient;
+                const double values[3] = {inputs.dynamic_pressure, sigma,
+                                         inputs.dynamic_pressure-sigma};
+                for (unsigned int i=0; i<2; ++i)
+                  if (weight*shape[i] > 0.0)
+                    {
+                      auto &moments = normal_stress_moments[association.fault_index][vertex+i];
+                      moments[0] += weight*shape[i];
+                      for (unsigned int c=0; c<3; ++c)
+                        {
+                          moments[1+c] += weight*shape[i]*values[c];
+                          moments[4+2*c] = std::min(moments[4+2*c],values[c]);
+                          moments[5+2*c] = std::max(moments[5+2*c],values[c]);
+                        }
+                    }
+              }
             auto &residual = local.residual.values[association.fault_index];
             residual[vertex] += weight*shape[0]*response.residual_density;
             residual[vertex+1] += weight*shape[1]*response.residual_density;
@@ -552,6 +593,25 @@ namespace aspect
        : 0.0);
     local.residual.mass_diagonal = local.mass_diagonal;
     local.residual.mass_off_diagonal = local.mass_off_diagonal;
+    if (record_normal_stress)
+      {
+        // Replace only this step/rank's diagnostic on each new linearization.
+        // A final file is accepted evidence only if the solve actually converges.
+        std::ofstream output(this->get_output_directory()+"constitutive_normal_"
+          + std::to_string(this->get_timestep_number())+"_rank"
+          + std::to_string(Utilities::MPI::this_mpi_process(this->get_mpi_communicator()))+".csv");
+        output.exceptions(std::ios::failbit | std::ios::badbit);
+        output << std::setprecision(17)
+               << "step,time,fault,node,weight,p_load,sigma_load,tauN_load,p_min,p_max,sigma_min,sigma_max,tauN_min,tauN_max\n";
+        for (unsigned int f=0; f<faults.size(); ++f)
+          for (unsigned int i=0; i<faults[f].n_vertices(); ++i)
+            {
+              output << this->get_timestep_number() << ',' << this->get_time() << ',' << f << ',' << i;
+              for (const double value : normal_stress_moments[f][i])
+                output << ',' << value;
+              output << '\n';
+            }
+      }
     return local;
   }
 

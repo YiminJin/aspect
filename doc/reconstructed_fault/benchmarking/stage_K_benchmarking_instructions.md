@@ -344,6 +344,17 @@ Verify any symmetry expected from the actual geometry and loading. Do not requir
 
 ### K2.3 Repeat with true normal stress
 
+Explicit bounded-pilot approval (2026-09-10): for initialization plus at most
+two coarse real steps, the omitted-fraction allowance is provisionally 1e-4
+(original target 1e-6), separately from the unchanged 1e-4 actual slip-
+normalization requirement. This is new approval for this pilot only, not
+automatic inheritance from K2.2. The approved physical boundary variant uses
+top total normal traction -1000 Pa, top tangential velocity, both bottom
+velocity components, x periodicity, and `Pressure normalization = no`.
+It changes a physical boundary condition, not a pressure gauge. The matched
+homogeneous control removes only the Theta bump. See `stage_K2_3_pilot_report.md`;
+the K2.2 reference remains provisional and Gate K2 remains unmet.
+
 Switch only the frictional normal-stress choice to the supported true-traction mode, retaining the matched pressure convention. Inspect short-wavelength variations and mesh dependence, particularly the behavior that motivated prescribed pressure in the earlier implementation.
 
 Do not add smoothing or revert silently to prescribed pressure if this case fails. Separate an incorrect residual/Jacobian, underresolution, and a difficulty inherent to the formulation.
@@ -352,7 +363,36 @@ A symmetric homogeneous planar configuration may legitimately give no net normal
 
 ### K2.4 One alignment check, not an orientation campaign
 
-After convergence is established, perform one controlled grid-offset or orientation variation if affordable. A translated line avoids changing the constitutive problem when boundaries permit it. A rotated fault requires correspondingly transformed loading and boundary conditions; rotating the line alone is not an equivalent benchmark.
+Recorded K2.3 disposition (2026-09-10): the user accepts completed feasibility
+verification with a spatial-resolution limitation, not a fully converged
+normal-stress reference. Endpoint amplitude is approximately constant and
+physical width O(h_Gamma), with strong normalized-coordinate collapse. After
+excluding three coarse endpoint elements, interior Delta sigma_n and
+-Delta(tau:N) differences remain about 19.6% and 21.9% of the fine interior
+signals. K2.2 and K2.3 references remain provisional; no 128x512 pair is to be
+launched now. The accepted 64x256 configuration is the preparation baseline.
+Gate K2 remains unmet.
+
+Explicit subsequent scope approval: K2.4 is a bounded alignment-sensitivity
+check against the provisional 64x256 baseline, **not** the originally proposed
+post-convergence alignment verification. The original convergence prerequisite
+is superseded for this bounded check only. Prepare one normal-grid parity
+variation using existing Box settings, without moving the physical fault or
+boundaries. The candidate 64x255 mesh changes normal cell size by +.3922%;
+that is acceptable but is not a pure translation. Review the preflight in
+`stage_K2_4_preparation.md` before execution. No production mesh/mapping
+infrastructure, orientation campaign, or 128x512 run is authorized.
+
+The provisional omitted-profile allowance <=1e-4 (original target 1e-6) is
+explicitly extended to this K2.4 sensitivity check and must be independently
+remeasured. The separate actual slip-normalization requirement remains <=1e-4.
+Keep support and full I_h with no renormalization. A rotated line alone would
+not be an equivalent benchmark and is not part of this check.
+
+Preserve pressure treatment, open endpoint topology, quadrature, history
+transfer, and solver tolerances. If an authorized K2.4 check reveals sensitivity
+to the unresolved interior tau:N response, stop and revisit whether a matched
+128x512 K2.3 confirmation is justified; do not run it automatically.
 
 ### Gate K2
 
@@ -361,6 +401,16 @@ Report prescribed- and true-normal-stress results separately. Include resolution
 ---
 
 ## Step K3 — Evolving phase-field profile with a 1-D reference
+
+Explicit sequencing exception: after accepting K2.4 as completed bounded
+alignment sensitivity, the user authorizes K3 **preparation** despite Gate K2
+remaining unmet. K2.2 retains temporal traction uncertainty; K2.3 retains
+interior true-normal-stress spatial uncertainty. Their references remain
+provisional and no 128x512 K2 run is authorized. This exception is not evidence
+that K2 converged. Return to homogeneous K1-style mechanics with an independent
+1-D reference; review `stage_K3_preparation.md` before running its smoke test.
+Do not inherit the K2 omitted-profile allowance or launch a convergence
+campaign. The preparation proposes a separate K3 budget for review.
 
 ### K3.1 Return to the homogeneous-along-fault configuration
 

@@ -1,0 +1,2458 @@
+{
+  "scope": "parity, normal spacing, hierarchy and particle/initial representation sensitivity; not pure alignment",
+  "reference": "provisional 64x256",
+  "initialization": {
+    "baseline": {
+      "fields": {
+        "Theta": {
+          "mean": 201.87500000000534,
+          "minimum": 199.99988383640684,
+          "maximum": 210.1282188855263,
+          "rms": 201.90014520267152,
+          "anomaly_rms": 3.1863784862591857
+        },
+        "C": {
+          "mean": 317.51376268478555,
+          "minimum": 317.51376268478003,
+          "maximum": 317.5137626847941,
+          "rms": 317.51376268478555,
+          "anomaly_rms": 1.4558672142304961e-12
+        },
+        "Ih": {
+          "mean": 108.14483384389925,
+          "minimum": 108.14483384389844,
+          "maximum": 108.14483384390006,
+          "rms": 108.14483384389925,
+          "anomaly_rms": 5.642368519127357e-13
+        },
+        "V": {
+          "mean": 0.00031534428126814924,
+          "minimum": 0.00031300648107493814,
+          "maximum": 0.0003159830374427605,
+          "rms": 0.0003153455092225046,
+          "anomaly_rms": 8.800331102205072e-07
+        }
+      },
+      "interpolated_phi_at_y0_range": [
+        0.599764016906789,
+        0.5997640169067923
+      ],
+      "support_half_width_range": [
+        0.3088215939070757,
+        0.3088215939070757
+      ]
+    },
+    "staggered": {
+      "fields": {
+        "Theta": {
+          "mean": 201.87499999999545,
+          "minimum": 199.9998838363975,
+          "maximum": 210.1282188855442,
+          "rms": 201.9001452026616,
+          "anomaly_rms": 3.186378486257474
+        },
+        "C": {
+          "mean": 318.49468077323763,
+          "minimum": 318.4946807732229,
+          "maximum": 318.49468077324207,
+          "rms": 318.49468077323763,
+          "anomaly_rms": 2.5755973571113587e-12
+        },
+        "Ih": {
+          "mean": 108.14928124071433,
+          "minimum": 108.14928124071382,
+          "maximum": 108.14928124071481,
+          "rms": 108.14928124071433,
+          "anomaly_rms": 3.475491070445173e-13
+        },
+        "V": {
+          "mean": 0.000314901808477229,
+          "minimum": 0.00031256238337987787,
+          "maximum": 0.0003155400320042717,
+          "rms": 0.0003149030405421983,
+          "anomaly_rms": 8.808861969456132e-07
+        }
+      },
+      "interpolated_phi_at_y0_range": [
+        0.599633735472594,
+        0.599633735472596
+      ],
+      "support_half_width_range": [
+        0.3088215939070757,
+        0.3088215939070757
+      ]
+    }
+  },
+  "steps": [
+    {
+      "time_s": 0.0,
+      "fields": {
+        "sigma": {
+          "baseline": {
+            "mean": 1.3823608924212749e-11,
+            "minimum": -5.2859655170323094e-05,
+            "maximum": 5.2859686093142955e-05,
+            "rms": 3.725754255989088e-05,
+            "anomaly_rms": 3.725754255988832e-05
+          },
+          "staggered": {
+            "mean": -2.34106067864559e-11,
+            "minimum": -5.354584095584869e-05,
+            "maximum": 5.3545800710708136e-05,
+            "rms": 3.774117167348291e-05,
+            "anomaly_rms": 3.774117167347564e-05
+          },
+          "change": {
+            "mean": -3.723421571066865e-11,
+            "minimum": -6.861857855255948e-07,
+            "maximum": 6.861146175651811e-07,
+            "rms": 4.836291238804274e-07,
+            "anomaly_rms": 4.836291224471113e-07
+          },
+          "cuts": [
+            {
+              "width_each_end_m": 0.0078125,
+              "interior_change": {
+                "mean": -5.4685263724726e-11,
+                "minimum": -6.861857855255948e-07,
+                "maximum": 6.861146175651811e-07,
+                "rms": 4.990895632872302e-07,
+                "anomaly_rms": 4.990895602912969e-07
+              },
+              "baseline_interior_signal": {
+                "mean": -5.754012969797866e-10,
+                "minimum": -5.2859655170323094e-05,
+                "maximum": 5.2859686093142955e-05,
+                "rms": 3.8448578604300846e-05,
+                "anomaly_rms": 3.844857859999527e-05
+              },
+              "left_change": {
+                "mean": -6.713366929034237e-08,
+                "minimum": -1.3340184068511007e-07,
+                "maximum": -8.654978955746628e-10,
+                "rms": 7.727064815129025e-08,
+                "anomaly_rms": 3.825994659347339e-08
+              },
+              "right_change": {
+                "mean": 6.758273229934275e-08,
+                "minimum": 1.4420038496609777e-09,
+                "maximum": 1.3372346074902453e-07,
+                "rms": 7.762489522266341e-08,
+                "anomaly_rms": 3.818636737482171e-08
+              },
+              "endpoint_squared_error_fraction": 0.0016027849309587115,
+              "interior_change_over_baseline_signal": 0.012980702574825542
+            },
+            {
+              "width_each_end_m": 0.015625,
+              "interior_change": {
+                "mean": -7.12349544431033e-11,
+                "minimum": -6.861857855255948e-07,
+                "maximum": 6.861146175651811e-07,
+                "rms": 5.137899473014342e-07,
+                "anomaly_rms": 5.13789942363211e-07
+              },
+              "baseline_interior_signal": {
+                "mean": -1.2263805209451156e-09,
+                "minimum": -5.2859655170323094e-05,
+                "maximum": 5.2859686093142955e-05,
+                "rms": 3.958106526101436e-05,
+                "anomaly_rms": 3.958106524201526e-05
+              },
+              "left_change": {
+                "mean": -1.325309995081625e-07,
+                "minimum": -2.6245481876685517e-07,
+                "maximum": -8.654978955746628e-10,
+                "rms": 1.5253567785355182e-07,
+                "anomaly_rms": 7.5516006168295e-08
+              },
+              "right_change": {
+                "mean": 1.3293254141899524e-07,
+                "minimum": 1.4420038496609777e-09,
+                "maximum": 2.6284124032827094e-07,
+                "rms": 1.5285744716960454e-07,
+                "anomaly_rms": 7.546084141523708e-08
+              },
+              "endpoint_squared_error_fraction": 0.012460748310604872,
+              "interior_change_over_baseline_signal": 0.012980700340258278
+            },
+            {
+              "width_each_end_m": 0.03125,
+              "interior_change": {
+                "mean": -1.0966753431299973e-10,
+                "minimum": -6.861857855255948e-07,
+                "maximum": 6.861146175651811e-07,
+                "rms": 5.324789898658787e-07,
+                "anomaly_rms": 5.324789785725052e-07
+              },
+              "baseline_interior_signal": {
+                "mean": -2.6604093742813952e-09,
+                "minimum": -5.2859655170323094e-05,
+                "maximum": 5.2859686093142955e-05,
+                "rms": 4.1020632058112267e-05,
+                "anomaly_rms": 4.102063197184132e-05
+              },
+              "left_change": {
+                "mean": -2.549496116444061e-07,
+                "minimum": -4.850381856158492e-07,
+                "maximum": -8.654978955746628e-10,
+                "rms": 2.9138196114365766e-07,
+                "anomaly_rms": 1.410820428059167e-07
+              },
+              "right_change": {
+                "mean": 2.5530974312459875e-07,
+                "minimum": 1.4420038496609777e-09,
+                "maximum": 4.852861366089201e-07,
+                "rms": 2.9166820284589676e-07,
+                "anomaly_rms": 1.4102225220512755e-07
+              },
+              "endpoint_squared_error_fraction": 0.09083789752989445,
+              "interior_change_over_baseline_signal": 0.012980760245515898
+            },
+            {
+              "width_each_end_m": 0.046875,
+              "interior_change": {
+                "mean": -1.5089085536601488e-10,
+                "minimum": -6.861857855255948e-07,
+                "maximum": 6.861146175651811e-07,
+                "rms": 5.253804233728175e-07,
+                "anomaly_rms": 5.253804017046608e-07
+              },
+              "baseline_interior_signal": {
+                "mean": -4.178878043603618e-09,
+                "minimum": -5.2859655170323094e-05,
+                "maximum": 5.2859686093142955e-05,
+                "rms": 4.047328858291206e-05,
+                "anomaly_rms": 4.047328836717691e-05
+              },
+              "left_change": {
+                "mean": -3.582682002919076e-07,
+                "minimum": -6.338264029182028e-07,
+                "maximum": -8.654978955746628e-10,
+                "rms": 4.0446664175078265e-07,
+                "anomaly_rms": 1.8771563853007435e-07
+              },
+              "right_change": {
+                "mean": 3.585725873260041e-07,
+                "minimum": 1.4420038496609777e-09,
+                "maximum": 6.339450919767842e-07,
+                "rms": 4.0469263478353505e-07,
+                "anomaly_rms": 1.8762150267593235e-07
+              },
+              "endpoint_squared_error_fraction": 0.2624305878230859,
+              "interior_change_over_baseline_signal": 0.012980917582136745
+            }
+          ]
+        },
+        "p": {
+          "baseline": {
+            "mean": 1.2459366871553357e-11,
+            "minimum": -7.761118581584014e-06,
+            "maximum": 7.761140182083182e-06,
+            "rms": 5.470343604825362e-06,
+            "anomaly_rms": 5.470343604811173e-06
+          },
+          "staggered": {
+            "mean": -2.69455568968624e-11,
+            "minimum": -7.878069936850807e-06,
+            "maximum": 7.878020937823749e-06,
+            "rms": 5.552752943062019e-06,
+            "anomaly_rms": 5.55275294299664e-06
+          },
+          "change": {
+            "mean": -3.9404923768415756e-11,
+            "minimum": -1.1695135526679223e-07,
+            "maximum": 1.1688075574056711e-07,
+            "rms": 8.240935072598328e-08,
+            "anomaly_rms": 8.240934130503716e-08
+          },
+          "cuts": [
+            {
+              "width_each_end_m": 0.0078125,
+              "interior_change": {
+                "mean": -4.342079288714255e-11,
+                "minimum": -1.1695135526679223e-07,
+                "maximum": 1.1688075574056711e-07,
+                "rms": 8.504375630069764e-08,
+                "anomaly_rms": 8.504374521601921e-08
+              },
+              "baseline_interior_signal": {
+                "mean": -7.311579490002866e-11,
+                "minimum": -7.761118581584014e-06,
+                "maximum": 7.761140182083182e-06,
+                "rms": 5.6452175660986075e-06,
+                "anomaly_rms": 5.645217565625117e-06
+              },
+              "left_change": {
+                "mean": -1.1452470971562434e-08,
+                "minimum": -2.2783638087275904e-08,
+                "maximum": -1.213038558489643e-10,
+                "rms": 1.3189296446584594e-08,
+                "anomaly_rms": 6.542052384489807e-09
+              },
+              "right_change": {
+                "mean": 1.1494137197587406e-08,
+                "minimum": 2.2282620193436742e-10,
+                "maximum": 2.2765448193240445e-08,
+                "rms": 1.3208431919442172e-08,
+                "anomaly_rms": 6.507494437460271e-09
+              },
+              "endpoint_squared_error_fraction": 0.0016032467953258369,
+              "interior_change_over_baseline_signal": 0.015064743795068844
+            },
+            {
+              "width_each_end_m": 0.015625,
+              "interior_change": {
+                "mean": -4.6057380131969694e-11,
+                "minimum": -1.1695135526679223e-07,
+                "maximum": 1.1688075574056711e-07,
+                "rms": 8.754858969169641e-08,
+                "anomaly_rms": 8.754857757681017e-08
+              },
+              "baseline_interior_signal": {
+                "mean": -1.6818546555441571e-10,
+                "minimum": -7.761118581584014e-06,
+                "maximum": 7.761140182083182e-06,
+                "rms": 5.811494098176688e-06,
+                "anomaly_rms": 5.811494095743033e-06
+              },
+              "left_change": {
+                "mean": -2.2609924599237274e-08,
+                "minimum": -4.4751118366548326e-08,
+                "maximum": -1.213038558489643e-10,
+                "rms": 2.6023139276038987e-08,
+                "anomaly_rms": 1.288390807934177e-08
+              },
+              "right_change": {
+                "mean": 2.2624249140790198e-08,
+                "minimum": 2.2282620193436742e-10,
+                "maximum": 4.4743273974745534e-08,
+                "rms": 2.6019911940659038e-08,
+                "anomaly_rms": 1.2852204799765091e-08
+              },
+              "endpoint_squared_error_fraction": 0.012462998417163572,
+              "interior_change_over_baseline_signal": 0.015064730035459231
+            },
+            {
+              "width_each_end_m": 0.03125,
+              "interior_change": {
+                "mean": -5.24948973179562e-11,
+                "minimum": -1.1695135526679223e-07,
+                "maximum": 1.1688075574056711e-07,
+                "rms": 9.073392764538841e-08,
+                "anomaly_rms": 9.073391245969908e-08
+              },
+              "baseline_interior_signal": {
+                "mean": -3.7771267595113994e-10,
+                "minimum": -7.761118581584014e-06,
+                "maximum": 7.761140182083182e-06,
+                "rms": 6.022852779131186e-06,
+                "anomaly_rms": 6.022852767287391e-06
+              },
+              "left_change": {
+                "mean": -4.347046456132375e-08,
+                "minimum": -8.266113127319841e-08,
+                "maximum": -1.213038558489643e-10,
+                "rms": 4.967683649784699e-08,
+                "anomaly_rms": 2.4043851506289892e-08
+              },
+              "right_change": {
+                "mean": 4.347019455508416e-08,
+                "minimum": 2.2282620193436742e-10,
+                "maximum": 8.265340056823334e-08,
+                "rms": 4.9666355377052376e-08,
+                "anomaly_rms": 2.4022677656389398e-08
+              },
+              "endpoint_squared_error_fraction": 0.0908245503623465,
+              "interior_change_over_baseline_signal": 0.015064941975632525
+            },
+            {
+              "width_each_end_m": 0.046875,
+              "interior_change": {
+                "mean": -5.929621238465189e-11,
+                "minimum": -1.1695135526679223e-07,
+                "maximum": 1.1688075574056711e-07,
+                "rms": 8.952739050459898e-08,
+                "anomaly_rms": 8.952737086792035e-08
+              },
+              "baseline_interior_signal": {
+                "mean": -5.99308691562328e-10,
+                "minimum": -7.761118581584014e-06,
+                "maximum": 7.761140182083182e-06,
+                "rms": 5.94247665819133e-06,
+                "anomaly_rms": 5.942476627970688e-06
+              },
+              "left_change": {
+                "mean": -6.107366819681677e-08,
+                "minimum": -1.0801397820614511e-07,
+                "maximum": -1.213038558489643e-10,
+                "rms": 6.894270355405815e-08,
+                "anomaly_rms": 3.198598796860701e-08
+              },
+              "right_change": {
+                "mean": 6.106116264466739e-08,
+                "minimum": 2.2282620193436742e-10,
+                "maximum": 1.0798635230457876e-07,
+                "rms": 6.892022385239357e-08,
+                "anomaly_rms": 3.196140911076222e-08
+              },
+              "endpoint_squared_error_fraction": 0.2623694683286209,
+              "interior_change_over_baseline_signal": 0.015065669695343458
+            }
+          ]
+        },
+        "minus_tauN": {
+          "baseline": {
+            "mean": -1.1312089726364972e-14,
+            "minimum": -4.509854062394824e-05,
+            "maximum": 4.509854060038239e-05,
+            "rms": 3.1787195979921296e-05,
+            "anomaly_rms": 3.178719597992129e-05
+          },
+          "staggered": {
+            "mean": 1.3769998841869848e-14,
+            "minimum": -4.566778759841349e-05,
+            "maximum": 4.5667787630555024e-05,
+            "rms": 3.218842330637314e-05,
+            "anomaly_rms": 3.218842330637313e-05
+          },
+          "change": {
+            "mean": 2.5082088276240063e-14,
+            "minimum": -5.692469744652531e-07,
+            "maximum": 5.692470301726314e-07,
+            "rms": 4.0122733262106437e-07,
+            "anomaly_rms": 4.0122733262106357e-07
+          },
+          "cuts": [
+            {
+              "width_each_end_m": 0.0078125,
+              "interior_change": {
+                "mean": -1.2941261080369004e-11,
+                "minimum": -5.692469744652531e-07,
+                "maximum": 5.692470301726314e-07,
+                "rms": 4.140536472534453e-07,
+                "anomaly_rms": 4.140536470512055e-07
+              },
+              "baseline_interior_signal": {
+                "mean": -5.04228926097234e-10,
+                "minimum": -4.509854062394824e-05,
+                "maximum": 4.509854060038239e-05,
+                "rms": 3.280335793578122e-05,
+                "anomaly_rms": 3.28033579319059e-05
+              },
+              "left_change": {
+                "mean": -5.568725437687815e-08,
+                "minimum": -1.1059286725285025e-07,
+                "maximum": -7.816415009060439e-10,
+                "rms": 6.40776539972959e-08,
+                "anomaly_rms": 3.1699770373963874e-08
+              },
+              "right_change": {
+                "mean": 5.607629483611431e-08,
+                "minimum": 1.174451968280634e-09,
+                "maximum": 1.1097813770394798e-07,
+                "rms": 6.441496947636928e-08,
+                "anomaly_rms": 3.1697593758750306e-08
+              },
+              "endpoint_squared_error_fraction": 0.0016025012997464255,
+              "interior_change_over_baseline_signal": 0.012622294585329761
+            },
+            {
+              "width_each_end_m": 0.015625,
+              "interior_change": {
+                "mean": -2.7226327094296184e-11,
+                "minimum": -5.692469744652531e-07,
+                "maximum": 5.692470301726314e-07,
+                "rms": 4.2624958178707896e-07,
+                "anomaly_rms": 4.2624958091754977e-07
+              },
+              "baseline_interior_signal": {
+                "mean": -1.0597165450653137e-09,
+                "minimum": -4.509854062394824e-05,
+                "maximum": 4.509854060038239e-05,
+                "rms": 3.376956799641845e-05,
+                "anomaly_rms": 3.376956797979106e-05
+              },
+              "left_change": {
+                "mean": -1.0992114487936395e-07,
+                "minimum": -2.1771720351084926e-07,
+                "maximum": -7.816415009060439e-10,
+                "rms": 1.2650913669489106e-07,
+                "anomaly_rms": 6.262510339868914e-08
+              },
+              "right_change": {
+                "mean": 1.1030271477209654e-07,
+                "minimum": 1.174451968280634e-09,
+                "maximum": 2.1808013171220955e-07,
+                "rms": 1.268365632493437e-07,
+                "anomaly_rms": 6.261649056606636e-08
+              },
+              "endpoint_squared_error_fraction": 0.012459390586949828,
+              "interior_change_over_baseline_signal": 0.012622298924057494
+            },
+            {
+              "width_each_end_m": 0.03125,
+              "interior_change": {
+                "mean": -5.8722993965417e-11,
+                "minimum": -5.692469744652531e-07,
+                "maximum": 5.692470301726314e-07,
+                "rms": 4.4175342556927303e-07,
+                "anomaly_rms": 4.41753421666202e-07
+              },
+              "baseline_interior_signal": {
+                "mean": -2.284436339541175e-09,
+                "minimum": -4.509854062394824e-05,
+                "maximum": 4.509854060038239e-05,
+                "rms": 3.499777602355372e-05,
+                "anomaly_rms": 3.4997775948996846e-05
+              },
+              "left_change": {
+                "mean": -2.1148541064880063e-07,
+                "minimum": -4.0236623835821053e-07,
+                "maximum": -7.816415009060439e-10,
+                "rms": 2.4171155296904913e-07,
+                "anomaly_rms": 1.1704014662250558e-07
+              },
+              "right_change": {
+                "mean": 2.1183794926929938e-07,
+                "minimum": 1.174451968280634e-09,
+                "maximum": 4.026440411365978e-07,
+                "rms": 2.4200407163079e-07,
+                "anomaly_rms": 1.170070678859114e-07
+              },
+              "endpoint_squared_error_fraction": 0.09084047295519936,
+              "interior_change_over_baseline_signal": 0.012622328495158383
+            },
+            {
+              "width_each_end_m": 0.046875,
+              "interior_change": {
+                "mean": -9.208586399210302e-11,
+                "minimum": -5.692469744652531e-07,
+                "maximum": 5.692470301726314e-07,
+                "rms": 4.3586130157838093e-07,
+                "anomaly_rms": 4.358612918507378e-07
+              },
+              "baseline_interior_signal": {
+                "mean": -3.5817041220604675e-09,
+                "minimum": -4.509854062394824e-05,
+                "maximum": 4.509854060038239e-05,
+                "rms": 3.453080816305376e-05,
+                "anomaly_rms": 3.4530807977297837e-05
+              },
+              "left_change": {
+                "mean": -2.972038107994463e-07,
+                "minimum": -5.258278595604441e-07,
+                "maximum": -7.816415009060439e-10,
+                "rms": 3.3553444153159587e-07,
+                "anomaly_rms": 1.5573457002286554e-07
+              },
+              "right_change": {
+                "mean": 2.975108974505575e-07,
+                "minimum": 1.174451968280634e-09,
+                "maximum": 5.259782432902253e-07,
+                "rms": 3.357742955109698e-07,
+                "anomaly_rms": 1.5566516445259e-07
+              },
+              "endpoint_squared_error_fraction": 0.26244294934173695,
+              "interior_change_over_baseline_signal": 0.012622389244996899
+            }
+          ]
+        },
+        "V": {
+          "baseline": {
+            "mean": -5.4931398936071216e-08,
+            "minimum": -2.3927315921495862e-06,
+            "maximum": 5.838247756865676e-07,
+            "rms": 8.817458441499515e-07,
+            "anomaly_rms": 8.800331102217897e-07
+          },
+          "staggered": {
+            "mean": -5.492821284524015e-08,
+            "minimum": -2.394353310172857e-06,
+            "maximum": 5.832953142151571e-07,
+            "rms": 8.825970771080395e-07,
+            "anomaly_rms": 8.808861969365183e-07
+          },
+          "change": {
+            "mean": 3.1860908310650743e-12,
+            "minimum": -1.7799551456777578e-09,
+            "maximum": 2.0585184479313817e-09,
+            "rms": 1.4566617176324298e-09,
+            "anomaly_rms": 1.456658233231487e-09
+          },
+          "cuts": [
+            {
+              "width_each_end_m": 0.0078125,
+              "interior_change": {
+                "mean": -1.3269141946148916e-10,
+                "minimum": -1.7799551456777578e-09,
+                "maximum": 2.0246385557128564e-09,
+                "rms": 1.4090803435557776e-09,
+                "anomaly_rms": 1.4028187344758992e-09
+              },
+              "baseline_interior_signal": {
+                "mean": -7.875910283556555e-08,
+                "minimum": -2.3927315921495862e-06,
+                "maximum": 5.838247756865676e-07,
+                "rms": 9.07307872671071e-07,
+                "anomaly_rms": 9.038830563360734e-07
+              },
+              "left_change": {
+                "mean": 2.041578501822119e-09,
+                "minimum": 2.0246385557128564e-09,
+                "maximum": 2.0585184479313817e-09,
+                "rms": 2.0416019281502887e-09,
+                "anomaly_rms": 9.780282446240546e-12
+              },
+              "right_change": {
+                "mean": 2.041118988616638e-09,
+                "minimum": 2.023806178522679e-09,
+                "maximum": 2.058431798710597e-09,
+                "rms": 2.0411434630673374e-09,
+                "anomaly_rms": 9.99555556817619e-12
+              },
+              "endpoint_squared_error_fraction": 0.12274596158724774,
+              "interior_change_over_baseline_signal": 0.0015530344065102317
+            },
+            {
+              "width_each_end_m": 0.015625,
+              "interior_change": {
+                "mean": -2.830956525923028e-10,
+                "minimum": -1.7799551456777578e-09,
+                "maximum": 1.922547716891928e-09,
+                "rms": 1.3598616794964136e-09,
+                "anomaly_rms": 1.330067907607031e-09
+              },
+              "baseline_interior_signal": {
+                "mean": -1.0658016961976588e-07,
+                "minimum": -2.3927315921495862e-06,
+                "maximum": 5.838247756865676e-07,
+                "rms": 9.354733011061025e-07,
+                "anomaly_rms": 9.293820336794608e-07
+              },
+              "left_change": {
+                "mean": 2.0075858190622556e-09,
+                "minimum": 1.922547716891928e-09,
+                "maximum": 2.0585184479313817e-09,
+                "rms": 2.0079936311694924e-09,
+                "anomaly_rms": 4.04672944162963e-11
+              },
+              "right_change": {
+                "mean": 2.006730770527025e-09,
+                "minimum": 1.920878926352145e-09,
+                "maximum": 2.058431798710597e-09,
+                "rms": 2.007147804213041e-09,
+                "anomaly_rms": 4.091359892803851e-11
+              },
+              "endpoint_squared_error_fraction": 0.2374293063642942,
+              "interior_change_over_baseline_signal": 0.0014536616682576775
+            },
+            {
+              "width_each_end_m": 0.03125,
+              "interior_change": {
+                "mean": -6.194806575646462e-10,
+                "minimum": -1.7799551456777578e-09,
+                "maximum": 1.5172241696510824e-09,
+                "rms": 1.2858049976053603e-09,
+                "anomaly_rms": 1.1267378607157008e-09
+              },
+              "baseline_interior_signal": {
+                "mean": -1.808530617161165e-07,
+                "minimum": -2.3927315921495862e-06,
+                "maximum": 5.838247756865676e-07,
+                "rms": 1.0008845254837455e-06,
+                "anomaly_rms": 9.844094693879824e-07
+              },
+              "left_change": {
+                "mean": 1.8719989473354104e-09,
+                "minimum": 1.5172241696510824e-09,
+                "maximum": 2.0585184479313817e-09,
+                "rms": 1.8789554219009766e-09,
+                "anomaly_rms": 1.6153457421305358e-10
+              },
+              "right_change": {
+                "mean": 1.8703737247009874e-09,
+                "minimum": 1.5141463174418723e-09,
+                "maximum": 2.058431798710597e-09,
+                "rms": 1.8774095046724044e-09,
+                "anomaly_rms": 1.6238404534447966e-10
+              },
+              "endpoint_squared_error_fraction": 0.41562171603515824,
+              "interior_change_over_baseline_signal": 0.0012846686754237784
+            },
+            {
+              "width_each_end_m": 0.046875,
+              "interior_change": {
+                "mean": -9.835026950816608e-10,
+                "minimum": -1.7799551456777578e-09,
+                "maximum": 8.572637856746682e-10,
+                "rms": 1.299371253893567e-09,
+                "anomaly_rms": 8.491690669189795e-10
+              },
+              "baseline_interior_signal": {
+                "mean": -2.9721547247033166e-07,
+                "minimum": -2.3927315921495862e-06,
+                "maximum": 5.838247756865676e-07,
+                "rms": 1.081608147197206e-06,
+                "anomaly_rms": 1.0399707433421436e-06
+              },
+              "left_change": {
+                "mean": 1.648806545424342e-09,
+                "minimum": 8.572637856746682e-10,
+                "maximum": 2.0585184479313817e-09,
+                "rms": 1.6875166596906787e-09,
+                "anomaly_rms": 3.593736947794501e-10
+              },
+              "right_change": {
+                "mean": 1.6465282559468746e-09,
+                "minimum": 8.532422156510601e-10,
+                "maximum": 2.058431798710597e-09,
+                "rms": 1.6855285787356242e-09,
+                "anomaly_rms": 3.6048757551832033e-10
+              },
+              "endpoint_squared_error_fraction": 0.502687800384976,
+              "interior_change_over_baseline_signal": 0.0012013327167150647
+            }
+          ]
+        },
+        "slip": {
+          "baseline": {
+            "mean": 0.0,
+            "minimum": 0.0,
+            "maximum": 0.0,
+            "rms": 0.0,
+            "anomaly_rms": 0.0
+          },
+          "staggered": {
+            "mean": 0.0,
+            "minimum": 0.0,
+            "maximum": 0.0,
+            "rms": 0.0,
+            "anomaly_rms": 0.0
+          },
+          "change": {
+            "mean": 0.0,
+            "minimum": 0.0,
+            "maximum": 0.0,
+            "rms": 0.0,
+            "anomaly_rms": 0.0
+          },
+          "cuts": [
+            {
+              "width_each_end_m": 0.0078125,
+              "interior_change": {
+                "mean": 0.0,
+                "minimum": 0.0,
+                "maximum": 0.0,
+                "rms": 0.0,
+                "anomaly_rms": 0.0
+              },
+              "baseline_interior_signal": {
+                "mean": 0.0,
+                "minimum": 0.0,
+                "maximum": 0.0,
+                "rms": 0.0,
+                "anomaly_rms": 0.0
+              },
+              "left_change": {
+                "mean": 0.0,
+                "minimum": 0.0,
+                "maximum": 0.0,
+                "rms": 0.0,
+                "anomaly_rms": 0.0
+              },
+              "right_change": {
+                "mean": 0.0,
+                "minimum": 0.0,
+                "maximum": 0.0,
+                "rms": 0.0,
+                "anomaly_rms": 0.0
+              },
+              "endpoint_squared_error_fraction": null,
+              "interior_change_over_baseline_signal": null
+            },
+            {
+              "width_each_end_m": 0.015625,
+              "interior_change": {
+                "mean": 0.0,
+                "minimum": 0.0,
+                "maximum": 0.0,
+                "rms": 0.0,
+                "anomaly_rms": 0.0
+              },
+              "baseline_interior_signal": {
+                "mean": 0.0,
+                "minimum": 0.0,
+                "maximum": 0.0,
+                "rms": 0.0,
+                "anomaly_rms": 0.0
+              },
+              "left_change": {
+                "mean": 0.0,
+                "minimum": 0.0,
+                "maximum": 0.0,
+                "rms": 0.0,
+                "anomaly_rms": 0.0
+              },
+              "right_change": {
+                "mean": 0.0,
+                "minimum": 0.0,
+                "maximum": 0.0,
+                "rms": 0.0,
+                "anomaly_rms": 0.0
+              },
+              "endpoint_squared_error_fraction": null,
+              "interior_change_over_baseline_signal": null
+            },
+            {
+              "width_each_end_m": 0.03125,
+              "interior_change": {
+                "mean": 0.0,
+                "minimum": 0.0,
+                "maximum": 0.0,
+                "rms": 0.0,
+                "anomaly_rms": 0.0
+              },
+              "baseline_interior_signal": {
+                "mean": 0.0,
+                "minimum": 0.0,
+                "maximum": 0.0,
+                "rms": 0.0,
+                "anomaly_rms": 0.0
+              },
+              "left_change": {
+                "mean": 0.0,
+                "minimum": 0.0,
+                "maximum": 0.0,
+                "rms": 0.0,
+                "anomaly_rms": 0.0
+              },
+              "right_change": {
+                "mean": 0.0,
+                "minimum": 0.0,
+                "maximum": 0.0,
+                "rms": 0.0,
+                "anomaly_rms": 0.0
+              },
+              "endpoint_squared_error_fraction": null,
+              "interior_change_over_baseline_signal": null
+            },
+            {
+              "width_each_end_m": 0.046875,
+              "interior_change": {
+                "mean": 0.0,
+                "minimum": 0.0,
+                "maximum": 0.0,
+                "rms": 0.0,
+                "anomaly_rms": 0.0
+              },
+              "baseline_interior_signal": {
+                "mean": 0.0,
+                "minimum": 0.0,
+                "maximum": 0.0,
+                "rms": 0.0,
+                "anomaly_rms": 0.0
+              },
+              "left_change": {
+                "mean": 0.0,
+                "minimum": 0.0,
+                "maximum": 0.0,
+                "rms": 0.0,
+                "anomaly_rms": 0.0
+              },
+              "right_change": {
+                "mean": 0.0,
+                "minimum": 0.0,
+                "maximum": 0.0,
+                "rms": 0.0,
+                "anomaly_rms": 0.0
+              },
+              "endpoint_squared_error_fraction": null,
+              "interior_change_over_baseline_signal": null
+            }
+          ]
+        }
+      }
+    },
+    {
+      "time_s": 0.5,
+      "fields": {
+        "sigma": {
+          "baseline": {
+            "mean": 3.977562686330316e-06,
+            "minimum": -6.2949232074061e-05,
+            "maximum": 0.00021964173959077016,
+            "rms": 3.371706954991157e-05,
+            "anomaly_rms": 3.348163338473628e-05
+          },
+          "staggered": {
+            "mean": 3.9792583734765685e-06,
+            "minimum": -6.299461097114545e-05,
+            "maximum": 0.00021963351684917143,
+            "rms": 3.379591373083715e-05,
+            "anomaly_rms": 3.3560829663452954e-05
+          },
+          "change": {
+            "mean": 1.6956871462525669e-09,
+            "minimum": -2.3981897356861737e-07,
+            "maximum": 2.439646777929738e-07,
+            "rms": 1.6519197711681755e-07,
+            "anomaly_rms": 1.6518327381688862e-07
+          },
+          "cuts": [
+            {
+              "width_each_end_m": 0.0078125,
+              "interior_change": {
+                "mean": 2.0331659319102377e-09,
+                "minimum": -2.3981897356861737e-07,
+                "maximum": 2.439646777929738e-07,
+                "rms": 1.704520608342496e-07,
+                "anomaly_rms": 1.7043993451927882e-07
+              },
+              "baseline_interior_signal": {
+                "mean": -1.1291956373800835e-06,
+                "minimum": -6.2949232074061e-05,
+                "maximum": 2.455967978676199e-05,
+                "rms": 1.8702915064960706e-05,
+                "anomaly_rms": 1.8668796135253498e-05
+              },
+              "left_change": {
+                "mean": -2.7853729989146814e-08,
+                "minimum": -4.537889708444709e-08,
+                "maximum": -1.0328562893846538e-08,
+                "rms": 2.963456486741502e-08,
+                "anomaly_rms": 1.0118159940064785e-08
+              },
+              "right_change": {
+                "mean": 2.1120740711921826e-08,
+                "minimum": -8.222741598729044e-09,
+                "maximum": 5.0464223022572696e-08,
+                "rms": 2.7075801119426285e-08,
+                "anomaly_rms": 1.6941467411015302e-08
+              },
+              "endpoint_squared_error_fraction": 0.0018452289625856882,
+              "interior_change_over_baseline_signal": 0.009113662776215345
+            },
+            {
+              "width_each_end_m": 0.015625,
+              "interior_change": {
+                "mean": 2.1007439597399623e-09,
+                "minimum": -2.3981897356861737e-07,
+                "maximum": 2.439646777929738e-07,
+                "rms": 1.7540022420964686e-07,
+                "anomaly_rms": 1.7538764360014077e-07
+              },
+              "baseline_interior_signal": {
+                "mean": 3.167110967134639e-07,
+                "minimum": -2.3060738726599084e-05,
+                "maximum": 2.455967978676199e-05,
+                "rms": 1.7496637276110304e-05,
+                "anomaly_rms": 1.7493770607075855e-05
+              },
+              "left_change": {
+                "mean": -4.848288881476037e-08,
+                "minimum": -9.284519819630077e-08,
+                "maximum": -1.0328562893846538e-08,
+                "rms": 5.404829649965748e-08,
+                "anomaly_rms": 2.3887817955821557e-08
+              },
+              "right_change": {
+                "mean": 4.620346771844197e-08,
+                "minimum": -8.222741598729044e-09,
+                "maximum": 9.210816642735153e-08,
+                "rms": 5.458634780395634e-08,
+                "anomaly_rms": 2.9067317340363206e-08
+              },
+              "endpoint_squared_error_fraction": 0.013515106313630107,
+              "interior_change_over_baseline_signal": 0.010024796276089931
+            },
+            {
+              "width_each_end_m": 0.03125,
+              "interior_change": {
+                "mean": 2.50621212671831e-09,
+                "minimum": -2.3981897356861737e-07,
+                "maximum": 2.439646777929738e-07,
+                "rms": 1.811993676302432e-07,
+                "anomaly_rms": 1.8118203478925805e-07
+              },
+              "baseline_interior_signal": {
+                "mean": 1.4149409347889256e-08,
+                "minimum": -2.3060738726599084e-05,
+                "maximum": 2.3244819999490574e-05,
+                "rms": 1.7985016314473767e-05,
+                "anomaly_rms": 1.7985010748567893e-05
+              },
+              "left_change": {
+                "mean": -9.128984856943134e-08,
+                "minimum": -1.6704791505617322e-07,
+                "maximum": -1.0328562893846538e-08,
+                "rms": 1.0336283379289031e-07,
+                "anomaly_rms": 4.847720039221491e-08
+              },
+              "right_change": {
+                "mean": 8.981807297914202e-08,
+                "minimum": -8.222741598729044e-09,
+                "maximum": 1.662393742662971e-07,
+                "rms": 1.0307266389692563e-07,
+                "anomaly_rms": 5.056370050858733e-08
+              },
+              "endpoint_squared_error_fraction": 0.09760492464081981,
+              "interior_change_over_baseline_signal": 0.010075018251966762
+            },
+            {
+              "width_each_end_m": 0.046875,
+              "interior_change": {
+                "mean": 3.0575705523006035e-09,
+                "minimum": -2.3981897356861737e-07,
+                "maximum": 2.439646777929738e-07,
+                "rms": 1.772094450654108e-07,
+                "anomaly_rms": 1.7718306545126864e-07
+              },
+              "baseline_interior_signal": {
+                "mean": -2.0236549858054788e-08,
+                "minimum": -2.3060738726599084e-05,
+                "maximum": 2.3244819999490574e-05,
+                "rms": 1.775087979765456e-05,
+                "anomaly_rms": 1.7750868262505657e-05
+              },
+              "left_change": {
+                "mean": -1.2738816697795605e-07,
+                "minimum": -2.2031611024431186e-07,
+                "maximum": -1.0328562893846538e-08,
+                "rms": 1.4311990011245877e-07,
+                "anomaly_rms": 6.523465890304449e-08
+              },
+              "right_change": {
+                "mean": 1.2623992991696772e-07,
+                "minimum": -8.222741598729044e-09,
+                "maximum": 2.1963614926789887e-07,
+                "rms": 1.4274970780087063e-07,
+                "anomaly_rms": 6.664052199520215e-08
+              },
+              "endpoint_squared_error_fraction": 0.2807566647021692,
+              "interior_change_over_baseline_signal": 0.009983135883147923
+            }
+          ]
+        },
+        "p": {
+          "baseline": {
+            "mean": 2.6517583933127753e-06,
+            "minimum": -3.967260283843643e-05,
+            "maximum": 0.0001464202171064244,
+            "rms": 1.9812969205496593e-05,
+            "anomaly_rms": 1.963471227600373e-05
+          },
+          "staggered": {
+            "mean": 2.651605237602439e-06,
+            "minimum": -3.9654066085859085e-05,
+            "maximum": 0.0001463228047668963,
+            "rms": 1.9802784818339986e-05,
+            "anomaly_rms": 1.962445607463799e-05
+          },
+          "change": {
+            "mean": -1.531557103362502e-10,
+            "minimum": -9.812231382966274e-08,
+            "maximum": 4.1155431063089054e-08,
+            "rms": 2.7504355130918484e-08,
+            "anomaly_rms": 2.7503928710205627e-08
+          },
+          "cuts": [
+            {
+              "width_each_end_m": 0.0078125,
+              "interior_change": {
+                "mean": 2.221478704692951e-09,
+                "minimum": -3.666946213343181e-08,
+                "maximum": 4.1155431063089054e-08,
+                "rms": 2.5195763369402278e-08,
+                "anomaly_rms": 2.5097639811972548e-08
+              },
+              "baseline_interior_signal": {
+                "mean": -7.516410562402598e-07,
+                "minimum": -3.967260283843643e-05,
+                "maximum": 1.174234523659834e-05,
+                "rms": 5.952434873241697e-06,
+                "anomaly_rms": 5.904787603526305e-06
+              },
+              "left_change": {
+                "mean": -3.9792780626157764e-08,
+                "minimum": -9.812231382966274e-08,
+                "maximum": 1.8536752577347215e-08,
+                "rms": 5.213038337867639e-08,
+                "anomaly_rms": 3.367657169674881e-08
+              },
+              "right_change": {
+                "mean": -3.1752563245390775e-08,
+                "minimum": -9.741233952809125e-08,
+                "maximum": 3.39072130373097e-08,
+                "rms": 4.944991418749514e-08,
+                "anomaly_rms": 3.790868951174773e-08
+              },
+              "endpoint_squared_error_fraction": 0.21327421494079324,
+              "interior_change_over_baseline_signal": 0.004232849901922684
+            },
+            {
+              "width_each_end_m": 0.015625,
+              "interior_change": {
+                "mean": 1.6808294438825605e-09,
+                "minimum": -3.666946213343181e-08,
+                "maximum": 4.1155431063089054e-08,
+                "rms": 2.5657974216931228e-08,
+                "anomaly_rms": 2.5602860256176168e-08
+              },
+              "baseline_interior_signal": {
+                "mean": 2.1504902341413462e-07,
+                "minimum": -4.69850738227251e-06,
+                "maximum": 1.174234523659834e-05,
+                "rms": 2.959528517138649e-06,
+                "anomaly_rms": 2.951705093888195e-06
+              },
+              "left_change": {
+                "mean": -2.0401699885042035e-08,
+                "minimum": -9.812231382966274e-08,
+                "maximum": 1.8536752577347215e-08,
+                "rms": 3.7722438963202423e-08,
+                "anomaly_rms": 3.172937193096025e-08
+              },
+              "right_change": {
+                "mean": -5.580403694693814e-09,
+                "minimum": -9.741233952809125e-08,
+                "maximum": 3.39072130373097e-08,
+                "rms": 3.8264963668040655e-08,
+                "anomaly_rms": 3.785586531993053e-08
+              },
+              "endpoint_squared_error_fraction": 0.23853517221358775,
+              "interior_change_over_baseline_signal": 0.008669615470283774
+            },
+            {
+              "width_each_end_m": 0.03125,
+              "interior_change": {
+                "mean": 2.074474518091544e-09,
+                "minimum": -3.666946213343181e-08,
+                "maximum": 4.1155431063089054e-08,
+                "rms": 2.63463790015247e-08,
+                "anomaly_rms": 2.6264581511339003e-08
+              },
+              "baseline_interior_signal": {
+                "mean": 1.9355908875695604e-08,
+                "minimum": -3.426822331675794e-06,
+                "maximum": 3.3922110560524743e-06,
+                "rms": 2.6474573255964613e-06,
+                "anomaly_rms": 2.647386567852523e-06
+              },
+              "left_change": {
+                "mean": -2.088526684929093e-08,
+                "minimum": -9.812231382966274e-08,
+                "maximum": 1.8536752577347215e-08,
+                "rms": 3.066442547285507e-08,
+                "anomaly_rms": 2.245245238752757e-08
+              },
+              "right_change": {
+                "mean": 7.2131740580516635e-09,
+                "minimum": -9.741233952809125e-08,
+                "maximum": 3.39072130373097e-08,
+                "rms": 3.0770428999435206e-08,
+                "anomaly_rms": 2.9913030953374374e-08
+              },
+              "endpoint_squared_error_fraction": 0.31182292727584376,
+              "interior_change_over_baseline_signal": 0.00995157834908216
+            },
+            {
+              "width_each_end_m": 0.046875,
+              "interior_change": {
+                "mean": 2.3604741272720276e-09,
+                "minimum": -3.666946213343181e-08,
+                "maximum": 4.1155431063089054e-08,
+                "rms": 2.538006366817861e-08,
+                "anomaly_rms": 2.5270057255480826e-08
+              },
+              "baseline_interior_signal": {
+                "mean": 5.834101557411487e-09,
+                "minimum": -3.426822331675794e-06,
+                "maximum": 3.3922110560524743e-06,
+                "rms": 2.6109248871261825e-06,
+                "anomaly_rms": 2.6109183689793687e-06
+              },
+              "left_change": {
+                "mean": -2.390090495888823e-08,
+                "minimum": -9.812231382966274e-08,
+                "maximum": 1.8536752577347215e-08,
+                "rms": 3.046071448638443e-08,
+                "anomaly_rms": 1.8883905029607155e-08
+              },
+              "right_change": {
+                "mean": 1.5215827412854804e-08,
+                "minimum": -9.741233952809125e-08,
+                "maximum": 3.400066361791687e-08,
+                "rms": 3.0977363346008135e-08,
+                "anomaly_rms": 2.698287671863074e-08
+              },
+              "endpoint_squared_error_fraction": 0.46781516115579247,
+              "interior_change_over_baseline_signal": 0.009720717663430823
+            }
+          ]
+        },
+        "minus_tauN": {
+          "baseline": {
+            "mean": 1.325804030487675e-06,
+            "minimum": -2.3276639893544692e-05,
+            "maximum": 7.322153252544526e-05,
+            "rms": 1.7053510600186546e-05,
+            "anomaly_rms": 1.700189599613577e-05
+          },
+          "staggered": {
+            "mean": 1.327653654966012e-06,
+            "minimum": -2.3340568506072994e-05,
+            "maximum": 7.331071966913981e-05,
+            "rms": 1.7175697650291023e-05,
+            "anomaly_rms": 1.712430803117802e-05
+          },
+          "change": {
+            "mean": 1.8496244783364783e-09,
+            "minimum": -2.0313476720434186e-07,
+            "maximum": 2.0279377845581985e-07,
+            "rms": 1.4198180283478536e-07,
+            "anomaly_rms": 1.4196975461521726e-07
+          },
+          "cuts": [
+            {
+              "width_each_end_m": 0.0078125,
+              "interior_change": {
+                "mean": -1.883931726391507e-10,
+                "minimum": -2.0313476720434186e-07,
+                "maximum": 2.0279377845581985e-07,
+                "rms": 1.4603471472429236e-07,
+                "anomaly_rms": 1.4603459320523325e-07
+              },
+              "baseline_interior_signal": {
+                "mean": -3.7755449624612956e-07,
+                "minimum": -2.3276639893544692e-05,
+                "maximum": 1.9852584333076238e-05,
+                "rms": 1.4630859628317538e-05,
+                "anomaly_rms": 1.4625987353539463e-05
+              },
+              "left_change": {
+                "mean": 1.1948272482467878e-08,
+                "minimum": -6.392861252830245e-08,
+                "maximum": 8.782515749323821e-08,
+                "rms": 4.5407728141376845e-08,
+                "anomaly_rms": 4.380753998623853e-08
+              },
+              "right_change": {
+                "mean": 5.289150600347395e-08,
+                "minimum": 1.6595868312399114e-08,
+                "maximum": 8.918714369454878e-08,
+                "rms": 5.689143912560815e-08,
+                "anomaly_rms": 2.095529619135118e-08
+              },
+              "endpoint_squared_error_fraction": 0.008213672691288951,
+              "interior_change_over_baseline_signal": 0.009981280555904389
+            },
+            {
+              "width_each_end_m": 0.015625,
+              "interior_change": {
+                "mean": 4.2084344500682875e-10,
+                "minimum": -2.0313476720434186e-07,
+                "maximum": 2.0279377845581985e-07,
+                "rms": 1.5025928732254928e-07,
+                "anomaly_rms": 1.502586979761079e-07
+              },
+              "baseline_interior_signal": {
+                "mean": 1.0166176438252167e-07,
+                "minimum": -1.9633885435048113e-05,
+                "maximum": 1.9852584333076238e-05,
+                "rms": 1.4823395874364448e-05,
+                "anomaly_rms": 1.4823047262077646e-05
+              },
+              "left_change": {
+                "mean": -2.808923913003462e-08,
+                "minimum": -7.232488895677178e-08,
+                "maximum": 8.782515749323821e-08,
+                "rms": 5.7918005533047496e-08,
+                "anomaly_rms": 5.065066643215914e-08
+              },
+              "right_change": {
+                "mean": 5.179142255332267e-08,
+                "minimum": 1.6595868312399114e-08,
+                "maximum": 8.918714369454878e-08,
+                "rms": 5.56495646074775e-08,
+                "anomaly_rms": 2.0359827870220146e-08
+              },
+              "endpoint_squared_error_fraction": 0.02000168368611894,
+              "interior_change_over_baseline_signal": 0.010136630539727229
+            },
+            {
+              "width_each_end_m": 0.03125,
+              "interior_change": {
+                "mean": 4.322820010722507e-10,
+                "minimum": -2.0313476720434186e-07,
+                "maximum": 2.0279377845581985e-07,
+                "rms": 1.5540423717737973e-07,
+                "anomaly_rms": 1.5540363594509248e-07
+              },
+              "baseline_interior_signal": {
+                "mean": -5.206389672664041e-09,
+                "minimum": -1.9633885435048113e-05,
+                "maximum": 1.9852584333076238e-05,
+                "rms": 1.5345040649673233e-05,
+                "anomaly_rms": 1.534503976644018e-05
+              },
+              "left_change": {
+                "mean": -7.041152708599818e-08,
+                "minimum": -1.433320952528292e-07,
+                "maximum": 8.782515749323821e-08,
+                "rms": 9.080638127919447e-08,
+                "anomaly_rms": 5.7341221947567385e-08
+              },
+              "right_change": {
+                "mean": 8.26148309062565e-08,
+                "minimum": 1.6595868312399114e-08,
+                "maximum": 1.4263455997297554e-07,
+                "rms": 9.012212942781991e-08,
+                "anomaly_rms": 3.6010941766848694e-08
+              },
+              "endpoint_squared_error_fraction": 0.1014927155789549,
+              "interior_change_over_baseline_signal": 0.010127326523614586
+            },
+            {
+              "width_each_end_m": 0.046875,
+              "interior_change": {
+                "mean": 6.963941670636066e-10,
+                "minimum": -2.0313476720434186e-07,
+                "maximum": 2.0279377845581985e-07,
+                "rms": 1.5248155496597562e-07,
+                "anomaly_rms": 1.5247996471669954e-07
+              },
+              "baseline_interior_signal": {
+                "mean": -2.6069102155994408e-08,
+                "minimum": -1.9633885435048113e-05,
+                "maximum": 1.9852584333076238e-05,
+                "rms": 1.5146949523413252e-05,
+                "anomaly_rms": 1.5146927089899845e-05
+              },
+              "left_change": {
+                "mean": -1.0349010670244045e-07,
+                "minimum": -1.886713374378797e-07,
+                "maximum": 8.782515749323821e-08,
+                "rms": 1.2308198692850536e-07,
+                "anomaly_rms": 6.662562060488633e-08
+              },
+              "right_change": {
+                "mean": 1.1103345669668964e-07,
+                "minimum": 1.6595868312399114e-08,
+                "maximum": 1.8633632376193574e-07,
+                "rms": 1.2191191466550624e-07,
+                "anomaly_rms": 5.033971028317524e-08
+              },
+              "endpoint_squared_error_fraction": 0.2791427531286279,
+              "interior_change_over_baseline_signal": 0.01006681607608705
+            }
+          ]
+        },
+        "V": {
+          "baseline": {
+            "mean": -1.8906219678658963e-07,
+            "minimum": -3.885601230857005e-06,
+            "maximum": 7.247209671386529e-07,
+            "rms": 1.4267376303379417e-06,
+            "anomaly_rms": 1.4141554905909582e-06
+          },
+          "staggered": {
+            "mean": -1.890451711179475e-07,
+            "minimum": -3.886203902062481e-06,
+            "maximum": 7.241767725559185e-07,
+            "rms": 1.4272003781951057e-06,
+            "anomaly_rms": 1.4146246296446413e-06
+          },
+          "change": {
+            "mean": 1.7025668642121645e-11,
+            "minimum": -1.2079688151448928e-09,
+            "maximum": 1.4599281592669877e-09,
+            "rms": 9.584903599309825e-10,
+            "anomaly_rms": 9.583391344862805e-10
+          },
+          "cuts": [
+            {
+              "width_each_end_m": 0.0078125,
+              "interior_change": {
+                "mean": -7.821875625139395e-11,
+                "minimum": -1.2079688151448928e-09,
+                "maximum": 1.43173277205276e-09,
+                "rms": 9.168484930293866e-10,
+                "anomaly_rms": 9.135058759202057e-10
+              },
+              "baseline_interior_signal": {
+                "mean": -2.377110669942452e-07,
+                "minimum": -3.885601230857005e-06,
+                "maximum": 7.247209671386529e-07,
+                "rms": 1.4669005392948717e-06,
+                "anomaly_rms": 1.4475118793336527e-06
+              },
+              "left_change": {
+                "mean": 1.4458173456209644e-09,
+                "minimum": 1.43173277205276e-09,
+                "maximum": 1.4599019191891688e-09,
+                "rms": 1.445840213152656e-09,
+                "anomaly_rms": 8.131732341023876e-12
+              },
+              "right_change": {
+                "mean": 1.4455667384687468e-09,
+                "minimum": 1.4312053176705058e-09,
+                "maximum": 1.4599281592669877e-09,
+                "rms": 1.4455905179209469e-09,
+                "anomaly_rms": 8.291570163809891e-12
+              },
+              "endpoint_squared_error_fraction": 0.1421903475448287,
+              "interior_change_over_baseline_signal": 0.0006250243070127365
+            },
+            {
+              "width_each_end_m": 0.015625,
+              "interior_change": {
+                "mean": -1.8306015878967215e-10,
+                "minimum": -1.2079688151448928e-09,
+                "maximum": 1.348142957620542e-09,
+                "rms": 8.733229795472772e-10,
+                "anomaly_rms": 8.539215449145395e-10
+              },
+              "baseline_interior_signal": {
+                "mean": -2.93737337734467e-07,
+                "minimum": -3.885601230857005e-06,
+                "maximum": 7.247209671386529e-07,
+                "rms": 1.5113409167804399e-06,
+                "anomaly_rms": 1.4825214140630175e-06
+              },
+              "left_change": {
+                "mean": 1.4178776052288077e-09,
+                "minimum": 1.348142957620542e-09,
+                "maximum": 1.4599019191891688e-09,
+                "rms": 1.418267157749035e-09,
+                "anomaly_rms": 3.323894312621868e-11
+              },
+              "right_change": {
+                "mean": 1.4173753161005487e-09,
+                "minimum": 1.3471624697941956e-09,
+                "maximum": 1.4599281592669877e-09,
+                "rms": 1.4177715676602474e-09,
+                "anomaly_rms": 3.3517627819768516e-11
+              },
+              "endpoint_squared_error_fraction": 0.2735891372024082,
+              "interior_change_over_baseline_signal": 0.0005778464473837502
+            },
+            {
+              "width_each_end_m": 0.03125,
+              "interior_change": {
+                "mean": -4.1300934685586065e-10,
+                "minimum": -1.2079688151448928e-09,
+                "maximum": 1.0205431490118919e-09,
+                "rms": 8.060081608015114e-10,
+                "anomaly_rms": 6.921505867138526e-10
+              },
+              "baseline_interior_signal": {
+                "mean": -4.3690816753274696e-07,
+                "minimum": -3.885601230857005e-06,
+                "maximum": 7.247209671386529e-07,
+                "rms": 1.6160355188802772e-06,
+                "anomaly_rms": 1.5558541227974506e-06
+              },
+              "left_change": {
+                "mean": 1.3076063999352362e-09,
+                "minimum": 1.0205431490118919e-09,
+                "maximum": 1.4599019191891688e-09,
+                "rms": 1.3141714183987873e-09,
+                "anomaly_rms": 1.3119458748245705e-10
+              },
+              "right_change": {
+                "mean": 1.3066550303369008e-09,
+                "minimum": 1.0187965739051272e-09,
+                "maximum": 1.4599281592669877e-09,
+                "rms": 1.3132740430073633e-09,
+                "anomaly_rms": 1.316865358803955e-10
+              },
+              "endpoint_squared_error_fraction": 0.46964747252945666,
+              "interior_change_over_baseline_signal": 0.0004987564638183079
+            },
+            {
+              "width_each_end_m": 0.046875,
+              "interior_change": {
+                "mean": -6.496922157732268e-10,
+                "minimum": -1.2079688151448928e-09,
+                "maximum": 5.003471131338755e-10,
+                "rms": 8.101550165877521e-10,
+                "anomaly_rms": 4.839950161581996e-10
+              },
+              "baseline_interior_signal": {
+                "mean": -6.455007310425639e-07,
+                "minimum": -3.885601230857005e-06,
+                "maximum": 7.247209671386529e-07,
+                "rms": 1.7493953297077261e-06,
+                "anomaly_rms": 1.6259498226657303e-06
+              },
+              "left_change": {
+                "mean": 1.128886882501157e-09,
+                "minimum": 5.003471131338755e-10,
+                "maximum": 1.4599019191891688e-09,
+                "rms": 1.1650200992628576e-09,
+                "anomaly_rms": 2.8789970163801424e-10
+              },
+              "right_change": {
+                "mean": 1.1275574028342481e-09,
+                "minimum": 4.980521059591222e-10,
+                "maximum": 1.4599281592669877e-09,
+                "rms": 1.1638919361647038e-09,
+                "anomaly_rms": 2.8854591035554134e-10
+              },
+              "endpoint_squared_error_fraction": 0.5534801503231694,
+              "interior_change_over_baseline_signal": 0.00046310573878295756
+            }
+          ]
+        },
+        "slip": {
+          "baseline": {
+            "mean": -9.453109839329481e-08,
+            "minimum": -1.9428006154285026e-06,
+            "maximum": 3.6236048356932645e-07,
+            "rms": 7.133688151689709e-07,
+            "anomaly_rms": 7.070777452954791e-07
+          },
+          "staggered": {
+            "mean": -9.452258555897375e-08,
+            "minimum": -1.9431019510312403e-06,
+            "maximum": 3.6208838627795926e-07,
+            "rms": 7.136001890975529e-07,
+            "anomaly_rms": 7.073123148223206e-07
+          },
+          "change": {
+            "mean": 8.512834321060822e-12,
+            "minimum": -6.039844075724464e-10,
+            "maximum": 7.299640796334939e-10,
+            "rms": 4.792451799654913e-10,
+            "anomaly_rms": 4.791695672431403e-10
+          },
+          "cuts": [
+            {
+              "width_each_end_m": 0.0078125,
+              "interior_change": {
+                "mean": -3.9109378125696974e-11,
+                "minimum": -6.039844075724464e-10,
+                "maximum": 7.1586638602638e-10,
+                "rms": 4.584242465146933e-10,
+                "anomaly_rms": 4.5675293796010283e-10
+              },
+              "baseline_interior_signal": {
+                "mean": -1.188555334971226e-07,
+                "minimum": -1.9428006154285026e-06,
+                "maximum": 3.6236048356932645e-07,
+                "rms": 7.334502696474358e-07,
+                "anomaly_rms": 7.237559396668264e-07
+              },
+              "left_change": {
+                "mean": 7.229086728104822e-10,
+                "minimum": 7.1586638602638e-10,
+                "maximum": 7.299509595945844e-10,
+                "rms": 7.22920106576328e-10,
+                "anomaly_rms": 4.065866170511938e-12
+              },
+              "right_change": {
+                "mean": 7.227833692343734e-10,
+                "minimum": 7.156026588352529e-10,
+                "maximum": 7.299640796334939e-10,
+                "rms": 7.227952589604734e-10,
+                "anomaly_rms": 4.145785081904946e-12
+              },
+              "endpoint_squared_error_fraction": 0.1421903475448287,
+              "interior_change_over_baseline_signal": 0.0006250243070127365
+            },
+            {
+              "width_each_end_m": 0.015625,
+              "interior_change": {
+                "mean": -9.153007939483607e-11,
+                "minimum": -6.039844075724464e-10,
+                "maximum": 6.74071478810271e-10,
+                "rms": 4.366614897736386e-10,
+                "anomaly_rms": 4.2696077245726973e-10
+              },
+              "baseline_interior_signal": {
+                "mean": -1.468686688672335e-07,
+                "minimum": -1.9428006154285026e-06,
+                "maximum": 3.6236048356932645e-07,
+                "rms": 7.556704583902199e-07,
+                "anomaly_rms": 7.412607070315088e-07
+              },
+              "left_change": {
+                "mean": 7.089388026144039e-10,
+                "minimum": 6.74071478810271e-10,
+                "maximum": 7.299509595945844e-10,
+                "rms": 7.091335788745175e-10,
+                "anomaly_rms": 1.661947156310934e-11
+              },
+              "right_change": {
+                "mean": 7.086876580502744e-10,
+                "minimum": 6.735812348970978e-10,
+                "maximum": 7.299640796334939e-10,
+                "rms": 7.088857838301237e-10,
+                "anomaly_rms": 1.6758813909884258e-11
+              },
+              "endpoint_squared_error_fraction": 0.2735891372024082,
+              "interior_change_over_baseline_signal": 0.0005778464473837502
+            },
+            {
+              "width_each_end_m": 0.03125,
+              "interior_change": {
+                "mean": -2.0650467342793032e-10,
+                "minimum": -6.039844075724464e-10,
+                "maximum": 5.102715745059459e-10,
+                "rms": 4.030040804007557e-10,
+                "anomaly_rms": 3.460752933569263e-10
+              },
+              "baseline_interior_signal": {
+                "mean": -2.1845408376637348e-07,
+                "minimum": -1.9428006154285026e-06,
+                "maximum": 3.6236048356932645e-07,
+                "rms": 8.080177594401386e-07,
+                "anomaly_rms": 7.779270613987253e-07
+              },
+              "left_change": {
+                "mean": 6.538031999676181e-10,
+                "minimum": 5.102715745059459e-10,
+                "maximum": 7.299509595945844e-10,
+                "rms": 6.570857091993937e-10,
+                "anomaly_rms": 6.559729374122853e-11
+              },
+              "right_change": {
+                "mean": 6.533275151684504e-10,
+                "minimum": 5.093982869525636e-10,
+                "maximum": 7.299640796334939e-10,
+                "rms": 6.566370215036817e-10,
+                "anomaly_rms": 6.584326794019775e-11
+              },
+              "endpoint_squared_error_fraction": 0.46964747252945666,
+              "interior_change_over_baseline_signal": 0.0004987564638183079
+            },
+            {
+              "width_each_end_m": 0.046875,
+              "interior_change": {
+                "mean": -3.248461078866134e-10,
+                "minimum": -6.039844075724464e-10,
+                "maximum": 2.5017355656693774e-10,
+                "rms": 4.0507750829387607e-10,
+                "anomaly_rms": 2.419975080790998e-10
+              },
+              "baseline_interior_signal": {
+                "mean": -3.2275036552128197e-07,
+                "minimum": -1.9428006154285026e-06,
+                "maximum": 3.6236048356932645e-07,
+                "rms": 8.746976648538631e-07,
+                "anomaly_rms": 8.129749113328651e-07
+              },
+              "left_change": {
+                "mean": 5.644434412505785e-10,
+                "minimum": 2.5017355656693774e-10,
+                "maximum": 7.299509595945844e-10,
+                "rms": 5.825100496314288e-10,
+                "anomaly_rms": 1.4394985081900712e-10
+              },
+              "right_change": {
+                "mean": 5.637787014171241e-10,
+                "minimum": 2.490260529795611e-10,
+                "maximum": 7.299640796334939e-10,
+                "rms": 5.819459680823519e-10,
+                "anomaly_rms": 1.4427295517777067e-10
+              },
+              "endpoint_squared_error_fraction": 0.5534801503231694,
+              "interior_change_over_baseline_signal": 0.00046310573878295756
+            }
+          ]
+        }
+      }
+    },
+    {
+      "time_s": 1.0,
+      "fields": {
+        "sigma": {
+          "baseline": {
+            "mean": 2.5763666201328306e-05,
+            "minimum": -0.002052830306524811,
+            "maximum": 0.006058610294985556,
+            "rms": 0.0022100461757203357,
+            "anomaly_rms": 0.0022098960003402754
+          },
+          "staggered": {
+            "mean": 2.578074279213638e-05,
+            "minimum": -0.002043775729475783,
+            "maximum": 0.006035835694774505,
+            "rms": 0.002201860519943232,
+            "anomaly_rms": 0.0022017095863409793
+          },
+          "change": {
+            "mean": 1.7076590808073888e-08,
+            "minimum": -2.277460021105071e-05,
+            "maximum": 9.81781772679824e-06,
+            "rms": 8.3475859575812e-06,
+            "anomaly_rms": 8.347568490839306e-06
+          },
+          "cuts": [
+            {
+              "width_each_end_m": 0.0078125,
+              "interior_change": {
+                "mean": 2.08821613038405e-08,
+                "minimum": -2.277460021105071e-05,
+                "maximum": 9.81781772679824e-06,
+                "rms": 8.621069634892361e-06,
+                "anomaly_rms": 8.621044344219697e-06
+              },
+              "baseline_interior_signal": {
+                "mean": 2.6650052120658074e-05,
+                "minimum": -0.002052830306524811,
+                "maximum": 0.006058610294985556,
+                "rms": 0.0022786024524217314,
+                "anomaly_rms": 0.002278446600406578
+              },
+              "left_change": {
+                "mean": -1.1386777032384998e-07,
+                "minimum": -5.416368367150426e-07,
+                "maximum": 3.1390129606734263e-07,
+                "rms": 2.719583188142181e-07,
+                "anomaly_rms": 2.4697258563194995e-07
+              },
+              "right_change": {
+                "mean": 3.3853837066999404e-08,
+                "minimum": -4.236349013808649e-07,
+                "maximum": 4.913425755148637e-07,
+                "rms": 2.6629194045827175e-07,
+                "anomaly_rms": 2.6413124629409676e-07
+              },
+              "endpoint_squared_error_fraction": 6.497029674233803e-05,
+              "interior_change_over_baseline_signal": 0.003783490018511024
+            },
+            {
+              "width_each_end_m": 0.015625,
+              "interior_change": {
+                "mean": 3.6663873207284526e-08,
+                "minimum": -2.277460021105071e-05,
+                "maximum": 9.81781772679824e-06,
+                "rms": 8.923332096265104e-06,
+                "anomaly_rms": 8.923256774330569e-06
+              },
+              "baseline_interior_signal": {
+                "mean": 7.630954230616485e-05,
+                "minimum": -0.002052830306524811,
+                "maximum": 0.006058610294985556,
+                "rms": 0.002351572101618296,
+                "anomaly_rms": 0.00235033363649983
+              },
+              "left_change": {
+                "mean": -2.1396456872935232e-07,
+                "minimum": -5.416368367150426e-07,
+                "maximum": 3.1390129606734263e-07,
+                "rms": 3.0810663815505304e-07,
+                "anomaly_rms": 2.2169543027241458e-07
+              },
+              "right_change": {
+                "mean": -2.6104203243448865e-08,
+                "minimum": -4.236349013808649e-07,
+                "maximum": 4.913425755148637e-07,
+                "rms": 2.411464358946133e-07,
+                "anomaly_rms": 2.3972937683500445e-07
+              },
+              "endpoint_squared_error_fraction": 0.0001373031088734658,
+              "interior_change_over_baseline_signal": 0.003794624068776917
+            },
+            {
+              "width_each_end_m": 0.03125,
+              "interior_change": {
+                "mean": -5.1682100377092866e-08,
+                "minimum": -2.277460021105071e-05,
+                "maximum": 9.81781772679824e-06,
+                "rms": 9.634115757295582e-06,
+                "anomaly_rms": 9.633977132289221e-06
+              },
+              "baseline_interior_signal": {
+                "mean": 0.0001928550443821564,
+                "minimum": -0.002052830306524811,
+                "maximum": 0.006058610294985556,
+                "rms": 0.002527000848045832,
+                "anomaly_rms": 0.002519630968590581
+              },
+              "left_change": {
+                "mean": 5.84401362857534e-08,
+                "minimum": -5.416368367150426e-07,
+                "maximum": 8.998836165119428e-07,
+                "rms": 3.790666311515503e-07,
+                "anomaly_rms": 3.7453472645869306e-07
+              },
+              "right_change": {
+                "mean": 3.882651924413949e-07,
+                "minimum": -4.236349013808649e-07,
+                "maximum": 1.497375365033804e-06,
+                "rms": 6.455389167013206e-07,
+                "anomaly_rms": 5.157234077626893e-07
+              },
+              "endpoint_squared_error_fraction": 0.0010052999073703625,
+              "interior_change_over_baseline_signal": 0.003812470330093395
+            },
+            {
+              "width_each_end_m": 0.046875,
+              "interior_change": {
+                "mean": -4.910282825676404e-07,
+                "minimum": -2.277460021105071e-05,
+                "maximum": 9.81781772679824e-06,
+                "rms": 1.0505573531587531e-05,
+                "anomaly_rms": 1.049409197850444e-05
+              },
+              "baseline_interior_signal": {
+                "mean": 0.00040671839620074477,
+                "minimum": -0.002052830306524811,
+                "maximum": 0.006058610294985556,
+                "rms": 0.00273995921264507,
+                "anomaly_rms": 0.0027096045160042246
+              },
+              "left_change": {
+                "mean": 6.369285946069189e-07,
+                "minimum": -5.416368367150426e-07,
+                "maximum": 2.8142259225205635e-06,
+                "rms": 1.1272683038581997e-06,
+                "anomaly_rms": 9.300837565807704e-07
+              },
+              "right_change": {
+                "mean": 1.09090749826161e-06,
+                "minimum": -4.236349013808649e-07,
+                "maximum": 3.5955159773948253e-06,
+                "rms": 1.5739660463019073e-06,
+                "anomaly_rms": 1.1345880067883025e-06
+              },
+              "endpoint_squared_error_fraction": 0.010085350197185605,
+              "interior_change_over_baseline_signal": 0.003834207999558425
+            }
+          ]
+        },
+        "p": {
+          "baseline": {
+            "mean": 1.767153975151814e-05,
+            "minimum": -0.002729881101117826,
+            "maximum": 0.0013370395291758541,
+            "rms": 0.0010113096575259627,
+            "anomaly_rms": 0.0010111552502400857
+          },
+          "staggered": {
+            "mean": 1.7668457417130412e-05,
+            "minimum": -0.0027217304724445057,
+            "maximum": 0.001337011908731256,
+            "rms": 0.0010084276863861785,
+            "anomaly_rms": 0.0010082728917722027
+          },
+          "change": {
+            "mean": -3.0823343877273146e-09,
+            "minimum": -3.4151006502725068e-06,
+            "maximum": 8.15062867332017e-06,
+            "rms": 2.98458252136501e-06,
+            "anomaly_rms": 2.9845809297206607e-06
+          },
+          "cuts": [
+            {
+              "width_each_end_m": 0.0078125,
+              "interior_change": {
+                "mean": -3.824519959986598e-09,
+                "minimum": -3.4151006502725068e-06,
+                "maximum": 8.15062867332017e-06,
+                "rms": 3.082386517945935e-06,
+                "anomaly_rms": 3.082384145278122e-06
+              },
+              "baseline_interior_signal": {
+                "mean": -2.2983642732773054e-05,
+                "minimum": -0.002729881101117826,
+                "maximum": 0.0008757348409744736,
+                "rms": 0.0010278170274218275,
+                "anomaly_rms": 0.0010275600196703715
+              },
+              "left_change": {
+                "mean": -2.9572220228146762e-08,
+                "minimum": -1.983905804081587e-07,
+                "maximum": 1.392461399518652e-07,
+                "rms": 1.0185477793004163e-07,
+                "anomaly_rms": 9.746732569408111e-08
+              },
+              "right_change": {
+                "mean": 4.567311862047063e-08,
+                "minimum": -2.7620444598142058e-08,
+                "maximum": 1.1896668183908332e-07,
+                "rms": 6.22630112314942e-08,
+                "anomaly_rms": 4.231605845413289e-08
+              },
+              "endpoint_squared_error_fraction": 4.9995459815035424e-05,
+              "interior_change_over_baseline_signal": 0.002998964247243288
+            },
+            {
+              "width_each_end_m": 0.015625,
+              "interior_change": {
+                "mean": -7.47131626407541e-09,
+                "minimum": -3.4151006502725068e-06,
+                "maximum": 8.15062867332017e-06,
+                "rms": 3.19052005277038e-06,
+                "anomaly_rms": 3.19051130487939e-06
+              },
+              "baseline_interior_signal": {
+                "mean": -3.8378113399874436e-05,
+                "minimum": -0.002729881101117826,
+                "maximum": 0.0008757348409744736,
+                "rms": 0.0010623256463233677,
+                "anomaly_rms": 0.0010616321864225042
+              },
+              "left_change": {
+                "mean": 3.1982096970750717e-09,
+                "minimum": -1.983905804081587e-07,
+                "maximum": 1.392461399518652e-07,
+                "rms": 8.724549515084266e-08,
+                "anomaly_rms": 8.71868561128869e-08
+              },
+              "right_change": {
+                "mean": 5.2082867796343635e-08,
+                "minimum": -2.7620444598142058e-08,
+                "maximum": 1.1896668183908332e-07,
+                "rms": 6.525759080385062e-08,
+                "anomaly_rms": 3.9318291412921294e-08
+              },
+              "endpoint_squared_error_fraction": 8.32866918299569e-05,
+              "interior_change_over_baseline_signal": 0.0030033352426466773
+            },
+            {
+              "width_each_end_m": 0.03125,
+              "interior_change": {
+                "mean": 2.705419651268433e-08,
+                "minimum": -3.4151006502725068e-06,
+                "maximum": 8.15062867332017e-06,
+                "rms": 3.4446669416641315e-06,
+                "anomaly_rms": 3.4445606990507185e-06
+              },
+              "baseline_interior_signal": {
+                "mean": -0.00010043355260336284,
+                "minimum": -0.002729881101117826,
+                "maximum": 0.0008757348409744736,
+                "rms": 0.0011392903675465586,
+                "anomaly_rms": 0.0011348548995778448
+              },
+              "left_change": {
+                "mean": -1.2533965332295338e-07,
+                "minimum": -4.891958269581664e-07,
+                "maximum": 1.392461399518652e-07,
+                "rms": 2.0868157340552798e-07,
+                "anomaly_rms": 1.6684714676580065e-07
+              },
+              "right_change": {
+                "mean": -6.164420085497113e-08,
+                "minimum": -3.922701807823614e-07,
+                "maximum": 1.1896668183908332e-07,
+                "rms": 1.5470158906366498e-07,
+                "anomaly_rms": 1.4188930248533552e-07
+              },
+              "endpoint_squared_error_fraction": 0.0009469382115744711,
+              "interior_change_over_baseline_signal": 0.0030235197626415117
+            },
+            {
+              "width_each_end_m": 0.046875,
+              "interior_change": {
+                "mean": 1.8823323557626282e-07,
+                "minimum": -3.4151006502725068e-06,
+                "maximum": 8.15062867332017e-06,
+                "rms": 3.756105535051369e-06,
+                "anomaly_rms": 3.7513860157904333e-06
+              },
+              "baseline_interior_signal": {
+                "mean": -0.00020495996677993844,
+                "minimum": -0.002729881101117826,
+                "maximum": 0.0008757348409744736,
+                "rms": 0.0012335658717217313,
+                "anomaly_rms": 0.0012164194062469415
+              },
+              "left_change": {
+                "mean": -3.6226115677588194e-07,
+                "minimum": -1.2197385785839288e-06,
+                "maximum": 1.392461399518652e-07,
+                "rms": 5.262296595430017e-07,
+                "anomaly_rms": 3.8168640121720793e-07
+              },
+              "right_change": {
+                "mean": -2.8162207854620647e-07,
+                "minimum": -1.093631908588577e-06,
+                "maximum": 1.1896668183908332e-07,
+                "rms": 4.508082967355448e-07,
+                "anomaly_rms": 3.520186433712246e-07
+              },
+              "endpoint_squared_error_fraction": 0.010106649420274208,
+              "interior_change_over_baseline_signal": 0.003044916871612896
+            }
+          ]
+        },
+        "minus_tauN": {
+          "baseline": {
+            "mean": 8.092127728752478e-06,
+            "minimum": -0.0029183532775296436,
+            "maximum": 0.008788491384702488,
+            "rms": 0.0032041145158717642,
+            "anomaly_rms": 0.0032041042973487885
+          },
+          "staggered": {
+            "mean": 8.112286409260654e-06,
+            "minimum": -0.00290588361451694,
+            "maximum": 0.0087575662049169,
+            "rms": 0.0031929942212645954,
+            "anomaly_rms": 0.003192983916000567
+          },
+          "change": {
+            "mean": 2.0158680508084527e-08,
+            "minimum": -3.0925179785586815e-05,
+            "maximum": 1.3114420293212827e-05,
+            "rms": 1.132921185121398e-05,
+            "anomaly_rms": 1.1329193916483532e-05
+          },
+          "cuts": [
+            {
+              "width_each_end_m": 0.0078125,
+              "interior_change": {
+                "mean": 2.4706303132350953e-08,
+                "minimum": -3.0925179785586815e-05,
+                "maximum": 1.3114420293212827e-05,
+                "rms": 1.170044657958884e-05,
+                "anomaly_rms": 1.1700420495024855e-05
+              },
+              "baseline_interior_signal": {
+                "mean": 4.963369638639924e-05,
+                "minimum": -0.0029183532775296436,
+                "maximum": 0.008788491384702488,
+                "rms": 0.003305101348286119,
+                "anomaly_rms": 0.0033047286452333336
+              },
+              "left_change": {
+                "mean": -8.429451124858075e-08,
+                "minimum": -6.80900607510416e-07,
+                "maximum": 5.123115850132545e-07,
+                "rms": 3.5461506265089645e-07,
+                "anomaly_rms": 3.4445069027694235e-07
+              },
+              "right_change": {
+                "mean": -1.1816806463242971e-08,
+                "minimum": -5.426306044788685e-07,
+                "maximum": 5.189969915523826e-07,
+                "rms": 3.0669322289476965e-07,
+                "anomaly_rms": 3.0646548917388905e-07
+              },
+              "endpoint_squared_error_fraction": 5.351840488234614e-05,
+              "interior_change_over_baseline_signal": 0.003540117335783418
+            },
+            {
+              "width_each_end_m": 0.015625,
+              "interior_change": {
+                "mean": 4.413565327031206e-08,
+                "minimum": -3.0925179785586815e-05,
+                "maximum": 1.3114420293212827e-05,
+                "rms": 1.2110769669058575e-05,
+                "anomaly_rms": 1.2110689246326962e-05
+              },
+              "baseline_interior_signal": {
+                "mean": 0.0001146876572930681,
+                "minimum": -0.0029183532775296436,
+                "maximum": 0.008788491384702488,
+                "rms": 0.003413347523718853,
+                "anomaly_rms": 0.003411420240741714
+              },
+              "left_change": {
+                "mean": -2.1716071168411516e-07,
+                "minimum": -6.80900607510416e-07,
+                "maximum": 5.123115850132545e-07,
+                "rms": 3.773348309530697e-07,
+                "anomaly_rms": 3.0858191773211577e-07
+              },
+              "right_change": {
+                "mean": -7.819954597090123e-08,
+                "minimum": -5.426306044788685e-07,
+                "maximum": 5.189969915523826e-07,
+                "rms": 2.896367768402134e-07,
+                "anomaly_rms": 2.788804286936114e-07
+              },
+              "endpoint_squared_error_fraction": 0.00011018173045516351,
+              "interior_change_over_baseline_signal": 0.0035480623009824246
+            },
+            {
+              "width_each_end_m": 0.03125,
+              "interior_change": {
+                "mean": -7.873578774920498e-08,
+                "minimum": -3.0925179785586815e-05,
+                "maximum": 1.3114420293212827e-05,
+                "rms": 1.307573252565234e-05,
+                "anomaly_rms": 1.307549546893463e-05
+              },
+              "baseline_interior_signal": {
+                "mean": 0.0002932885984205994,
+                "minimum": -0.0029183532775296436,
+                "maximum": 0.008788491384702488,
+                "rms": 0.0036659303353118373,
+                "anomaly_rms": 0.003654179390970843
+              },
+              "left_change": {
+                "mean": 1.8378005547164066e-07,
+                "minimum": -6.80900607510416e-07,
+                "maximum": 1.389079746011955e-06,
+                "rms": 5.71353453318192e-07,
+                "anomaly_rms": 5.409895191493678e-07
+              },
+              "right_change": {
+                "mean": 4.499041150882654e-07,
+                "minimum": -5.426306044788685e-07,
+                "maximum": 1.8896460599790964e-06,
+                "rms": 7.957374532246802e-07,
+                "anomaly_rms": 6.563416653627476e-07
+              },
+              "endpoint_squared_error_fraction": 0.0009345881170282266,
+              "interior_change_over_baseline_signal": 0.003566825152049724
+            },
+            {
+              "width_each_end_m": 0.046875,
+              "interior_change": {
+                "mean": -6.792616049745489e-07,
+                "minimum": -3.0925179785586815e-05,
+                "maximum": 1.3114420293212827e-05,
+                "rms": 1.4258984525899072e-05,
+                "anomaly_rms": 1.4242796192526121e-05
+              },
+              "baseline_interior_signal": {
+                "mean": 0.0006116783644989755,
+                "minimum": -0.0029183532775296436,
+                "maximum": 0.008788491384702488,
+                "rms": 0.003973189654771337,
+                "anomaly_rms": 0.003925822921526879
+              },
+              "left_change": {
+                "mean": 9.991904814250932e-07,
+                "minimum": -6.80900607510416e-07,
+                "maximum": 4.033911539892037e-06,
+                "rms": 1.6487359113801227e-06,
+                "anomaly_rms": 1.3114680656820942e-06
+              },
+              "right_change": {
+                "mean": 1.372527831199854e-06,
+                "minimum": -5.426306044788685e-07,
+                "maximum": 4.6891207740660905e-06,
+                "rms": 2.022809210008133e-06,
+                "anomaly_rms": 1.485908628642943e-06
+              },
+              "endpoint_squared_error_fraction": 0.009948430019791657,
+              "interior_change_over_baseline_signal": 0.0035888003757323025
+            }
+          ]
+        },
+        "V": {
+          "baseline": {
+            "mean": -3.710841493834676e-08,
+            "minimum": -2.5440244933664226e-06,
+            "maximum": 6.14366882987008e-07,
+            "rms": 9.505586813511949e-07,
+            "anomaly_rms": 9.498340761590341e-07
+          },
+          "staggered": {
+            "mean": -3.711409333585303e-08,
+            "minimum": -2.5449975210998957e-06,
+            "maximum": 6.137968162400536e-07,
+            "rms": 9.511589529473286e-07,
+            "anomaly_rms": 9.504345836761812e-07
+          },
+          "change": {
+            "mean": -5.67839750626576e-12,
+            "minimum": -1.4261545081277645e-09,
+            "maximum": 1.6827373364625316e-09,
+            "rms": 1.1461742828400353e-09,
+            "anomaly_rms": 1.146160216743554e-09
+          },
+          "cuts": [
+            {
+              "width_each_end_m": 0.0078125,
+              "interior_change": {
+                "mean": -1.1718758634923082e-10,
+                "minimum": -1.4261545081277645e-09,
+                "maximum": 1.6529495123454759e-09,
+                "rms": 1.102742633020704e-09,
+                "anomaly_rms": 1.096498237247592e-09
+              },
+              "baseline_interior_signal": {
+                "mean": -6.615850770656163e-08,
+                "minimum": -2.5440244933664226e-06,
+                "maximum": 6.14366882987008e-07,
+                "rms": 9.76321871475726e-07,
+                "anomaly_rms": 9.740777425749472e-07
+              },
+              "left_change": {
+                "mean": 1.6660754458724166e-09,
+                "minimum": 1.6512656901015131e-09,
+                "maximum": 1.6808852016433201e-09,
+                "rms": 1.6660973863976169e-09,
+                "anomaly_rms": 8.55041648096375e-12
+              },
+              "right_change": {
+                "mean": 1.6678434244040037e-09,
+                "minimum": 1.6529495123454759e-09,
+                "maximum": 1.6827373364625316e-09,
+                "rms": 1.667865591467073e-09,
+                "anomaly_rms": 8.599004136277671e-12
+              },
+              "endpoint_squared_error_fraction": 0.1322027150442703,
+              "interior_change_over_baseline_signal": 0.0011294867658284567
+            },
+            {
+              "width_each_end_m": 0.015625,
+              "interior_change": {
+                "mean": -2.402197003394482e-10,
+                "minimum": -1.4261545081277645e-09,
+                "maximum": 1.5587392029783702e-09,
+                "rms": 1.0577274066970178e-09,
+                "anomaly_rms": 1.030088230418552e-09
+              },
+              "baseline_interior_signal": {
+                "mean": -9.996455420240018e-08,
+                "minimum": -2.5440244933664226e-06,
+                "maximum": 6.14366882987008e-07,
+                "rms": 1.0047142045265472e-06,
+                "anomaly_rms": 9.997288235719361e-07
+              },
+              "left_change": {
+                "mean": 1.635377553619059e-09,
+                "minimum": 1.5580936326298894e-09,
+                "maximum": 1.6808852016433201e-09,
+                "rms": 1.6357873847049168e-09,
+                "anomaly_rms": 3.6614547364310993e-11
+              },
+              "right_change": {
+                "mean": 1.6368438910329634e-09,
+                "minimum": 1.5587392029783702e-09,
+                "maximum": 1.6827373364625316e-09,
+                "rms": 1.6372616412932242e-09,
+                "anomaly_rms": 3.698321833278365e-11
+              },
+              "endpoint_squared_error_fraction": 0.25483191111712483,
+              "interior_change_over_baseline_signal": 0.0010527644597156385
+            },
+            {
+              "width_each_end_m": 0.03125,
+              "interior_change": {
+                "mean": -5.12016075502332e-10,
+                "minimum": -1.4261545081277645e-09,
+                "maximum": 1.1939053073538493e-09,
+                "rms": 9.905126710712872e-10,
+                "anomaly_rms": 8.479120767980405e-10
+              },
+              "baseline_interior_signal": {
+                "mean": -1.8799730201892104e-07,
+                "minimum": -2.5440244933664226e-06,
+                "maximum": 6.14366882987008e-07,
+                "rms": 1.0710320900381596e-06,
+                "anomaly_rms": 1.0544035054594209e-06
+              },
+              "left_change": {
+                "mean": 1.5129819027603886e-09,
+                "minimum": 1.1939053073538493e-09,
+                "maximum": 1.6808852016433201e-09,
+                "rms": 1.519976015933957e-09,
+                "anomaly_rms": 1.4564632138855667e-10
+              },
+              "right_change": {
+                "mean": 1.5136873702034778e-09,
+                "minimum": 1.193168398664398e-09,
+                "maximum": 1.6827373364625316e-09,
+                "rms": 1.520757934327431e-09,
+                "anomaly_rms": 1.464760734943244e-10
+              },
+              "endpoint_squared_error_fraction": 0.43988137374827396,
+              "interior_change_over_baseline_signal": 0.0009248207222586547
+            },
+            {
+              "width_each_end_m": 0.046875,
+              "interior_change": {
+                "mean": -7.974079236557096e-10,
+                "minimum": -1.4261545081277645e-09,
+                "maximum": 6.122358494199502e-10,
+                "rms": 1.0021249051533807e-09,
+                "anomaly_rms": 6.069554586786103e-10
+              },
+              "baseline_interior_signal": {
+                "mean": -3.206553053877132e-07,
+                "minimum": -2.5440244933664226e-06,
+                "maximum": 6.14366882987008e-07,
+                "rms": 1.1538184187173524e-06,
+                "anomaly_rms": 1.10836686999302e-06
+              },
+              "left_change": {
+                "mean": 1.3138550623390773e-09,
+                "minimum": 6.122358494199502e-10,
+                "maximum": 1.6808852016433201e-09,
+                "rms": 1.3524332829747725e-09,
+                "anomaly_rms": 3.2071897365746874e-10
+              },
+              "right_change": {
+                "mean": 1.3138865631465374e-09,
+                "minimum": 6.104281843454656e-10,
+                "maximum": 1.6827373364625316e-09,
+                "rms": 1.3527351522405053e-09,
+                "anomaly_rms": 3.218609813104455e-10
+              },
+              "endpoint_squared_error_fraction": 0.5222261137692062,
+              "interior_change_over_baseline_signal": 0.0008685291280645333
+            }
+          ]
+        },
+        "slip": {
+          "baseline": {
+            "mean": -1.1308530586247878e-07,
+            "minimum": -3.2148128621116868e-06,
+            "maximum": 6.695439250627763e-07,
+            "rms": 1.1871779473289058e-06,
+            "anomaly_rms": 1.1817796716063717e-06
+          },
+          "staggered": {
+            "mean": -1.1307963222690789e-07,
+            "minimum": -3.215600711581161e-06,
+            "maximum": 6.689867943980403e-07,
+            "rms": 1.1877144694340205e-06,
+            "anomaly_rms": 1.182319186040032e-06
+          },
+          "change": {
+            "mean": 5.673635570892558e-12,
+            "minimum": -1.3170616615550135e-09,
+            "maximum": 1.5713327479460748e-09,
+            "rms": 1.0514535240077646e-09,
+            "anomaly_rms": 1.0514382164481923e-09
+          },
+          "cuts": [
+            {
+              "width_each_end_m": 0.0078125,
+              "interior_change": {
+                "mean": -9.770317129850539e-11,
+                "minimum": -1.3170616615550135e-09,
+                "maximum": 1.5420774149808858e-09,
+                "rms": 1.0088492392691266e-09,
+                "anomaly_rms": 1.004107005200198e-09
+              },
+              "baseline_interior_signal": {
+                "mean": -1.519347873504138e-07,
+                "minimum": -3.2148128621116868e-06,
+                "maximum": 6.695439250627763e-07,
+                "rms": 1.2201006101255522e-06,
+                "anomaly_rms": 1.2106037003171306e-06
+              },
+              "left_change": {
+                "mean": 1.555946395760243e-09,
+                "minimum": 1.5414992312126619e-09,
+                "maximum": 1.5703935603078242e-09,
+                "rms": 1.5559687528997637e-09,
+                "anomaly_rms": 8.341074340572817e-12
+              },
+              "right_change": {
+                "mean": 1.5567050814634803e-09,
+                "minimum": 1.5420774149808858e-09,
+                "maximum": 1.5713327479460748e-09,
+                "rms": 1.5567279895761483e-09,
+                "anomaly_rms": 8.445287181342003e-12
+              },
+              "endpoint_squared_error_fraction": 0.13693469928199395,
+              "interior_change_over_baseline_signal": 0.0008268574172463637
+            },
+            {
+              "width_each_end_m": 0.015625,
+              "interior_change": {
+                "mean": -2.1163992956698026e-10,
+                "minimum": -1.3170616615550135e-09,
+                "maximum": 1.4531182951794258e-09,
+                "rms": 9.645041035866181e-10,
+                "anomaly_rms": 9.409977184076003e-10
+              },
+              "baseline_interior_signal": {
+                "mean": -1.9685094596844327e-07,
+                "minimum": -3.2148128621116868e-06,
+                "maximum": 6.695439250627763e-07,
+                "rms": 1.2564761313403642e-06,
+                "anomaly_rms": 1.2409601015743324e-06
+              },
+              "left_change": {
+                "mean": 1.5266275794781434e-09,
+                "minimum": 1.4531182951794258e-09,
+                "maximum": 1.5703935603078242e-09,
+                "rms": 1.5270270503222848e-09,
+                "anomaly_rms": 3.492629371522664e-11
+              },
+              "right_change": {
+                "mean": 1.5271096035938611e-09,
+                "minimum": 1.452950836467598e-09,
+                "maximum": 1.5713327479460748e-09,
+                "rms": 1.5275163751206118e-09,
+                "anomaly_rms": 3.524960812568003e-11
+              },
+              "endpoint_squared_error_fraction": 0.26373178760044164,
+              "interior_change_over_baseline_signal": 0.0007676262839610963
+            },
+            {
+              "width_each_end_m": 0.03125,
+              "interior_change": {
+                "mean": -4.625127111836139e-10,
+                "minimum": -1.3170616615550135e-09,
+                "maximum": 1.1072242279931352e-09,
+                "rms": 8.970711543089066e-10,
+                "anomaly_rms": 7.686472844463169e-10
+              },
+              "baseline_interior_signal": {
+                "mean": -3.124527347758453e-07,
+                "minimum": -3.2148128621116868e-06,
+                "maximum": 6.695439250627763e-07,
+                "rms": 1.3419051807842673e-06,
+                "anomaly_rms": 1.3050221464583474e-06
+              },
+              "left_change": {
+                "mean": 1.4102941513715293e-09,
+                "minimum": 1.1072242279931352e-09,
+                "maximum": 1.5703935603078242e-09,
+                "rms": 1.4170708476164706e-09,
+                "anomaly_rms": 1.3842035172517229e-10
+              },
+              "right_change": {
+                "mean": 1.4101712002972944e-09,
+                "minimum": 1.1059824863660778e-09,
+                "maximum": 1.5713327479460748e-09,
+                "rms": 1.4170131907161728e-09,
+                "anomaly_rms": 1.3908115801832025e-10
+              },
+              "endpoint_squared_error_fraction": 0.45407260814207456,
+              "interior_change_over_baseline_signal": 0.0006685056195882778
+            },
+            {
+              "width_each_end_m": 0.046875,
+              "interior_change": {
+                "mean": -7.235500697124354e-10,
+                "minimum": -1.3170616615550135e-09,
+                "maximum": 5.562914813040179e-10,
+                "rms": 9.047588144109221e-10,
+                "anomaly_rms": 5.431977622131622e-10
+              },
+              "baseline_interior_signal": {
+                "mean": -4.830780182151514e-07,
+                "minimum": -3.2148128621116868e-06,
+                "maximum": 6.695439250627763e-07,
+                "rms": 1.4499443981704336e-06,
+                "anomaly_rms": 1.3671043801053165e-06
+              },
+              "left_change": {
+                "mean": 1.2213709724223757e-09,
+                "minimum": 5.562914813040179e-10,
+                "maximum": 1.5703935603078242e-09,
+                "rms": 1.2587101082012616e-09,
+                "anomaly_rms": 3.0430919179684915e-10
+              },
+              "right_change": {
+                "mean": 1.220721982997169e-09,
+                "minimum": 5.542401449896636e-10,
+                "maximum": 1.5713327479460748e-09,
+                "rms": 1.2582969546662246e-09,
+                "anomaly_rms": 3.0520331968993144e-10
+              },
+              "endpoint_squared_error_fraction": 0.5372296760817798,
+              "interior_change_over_baseline_signal": 0.0006239955239335821
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

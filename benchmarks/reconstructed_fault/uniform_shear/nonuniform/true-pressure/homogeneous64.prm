@@ -1,0 +1,8 @@
+# Matched fine control: remove only the initial Theta bump.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/nonuniform/true-pressure/pilot64.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/nonuniform/true-pressure/homogeneous64
+subsection Initial composition model
+  subsection Function
+    set Function expression = 0; 0; 1500; 200
+  end
+end

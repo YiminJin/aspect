@@ -1,0 +1,13 @@
+# K2.4 preflight only: do not execute before review.
+# Same physical box/fault and loading as pilot64; odd normal grid parity.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/nonuniform/true-pressure/pilot64.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/nonuniform/alignment/pilot
+subsection Geometry model
+  subsection Box
+    set X repetitions = 64
+    set Y repetitions = 255
+  end
+end
+subsection Mesh refinement
+  set Initial global refinement = 0
+end

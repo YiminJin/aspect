@@ -1,0 +1,380 @@
+{
+  "case": "pilot64",
+  "resources": {
+    "command": [
+      "/home/ein/repository/aspect/build-pf-cpdi/aspect-release",
+      "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/nonuniform/true-pressure/pilot64.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/diagnostics/pilot-build",
+    "executable_sha256": "abd1a3b8ec4cac3fd025f2ce9ee727abdaef4888d5507e859ce3a1915fb9f2a9",
+    "parameter_sha256": "5e4d869fefd066771c2ca5d43d3fbe2916d1eb51432a37a7fa02fc466792330b",
+    "configuration": "Release",
+    "plugin_sha256": "eb42df87be0f9665beb0888d21fea2923ae2292274723e51f8cbfa3188ee90a9",
+    "git_head": "8ace2d1b8d71d1de6d8a3ae1249fda502c276d01",
+    "ranks": 1,
+    "exit_status": 0,
+    "wall_seconds": 150.5235747379993,
+    "peak_rss_KiB": 1715228
+  },
+  "original_omitted_target": 1e-06,
+  "pilot_omitted_allowance": 0.0001,
+  "actual_normalization_requirement": 0.0001,
+  "omitted_fraction_max": 5.913959441983252e-05,
+  "profile_locations": 65,
+  "independent_Ih_range_m": [
+    108.1448338435247,
+    108.14483384352629
+  ],
+  "support_half_width_m": 0.3088215939070757,
+  "steps": [
+    {
+      "time_s": 0.0,
+      "nonlinear": {
+        "bulk": 1.3008755698002491e-11,
+        "bulk scale": 2243.7189156417917,
+        "surface": 6.986987098164561e-08,
+        "surface scale": 952.8932224942658,
+        "velocity": 1.2981784338708695e-11,
+        "scaled continuity": 8.372575431549918e-13,
+        "bulk precision": 1.276862945822573e-10,
+        "bulk target": 2.24373168427125e-05,
+        "velocity correction": 2.690783433410571e-14
+      },
+      "fresh_linear_checks": 9,
+      "maximum_fresh_over_target": 0.8403274014128139,
+      "active_nodes": 0,
+      "free_nodes": 33,
+      "theta_update_error_s": 0.0,
+      "particle_stress_commit_change_max_Pa": 0.0,
+      "constitutive": {
+        "p": {
+          "domain_weighted_mean_Pa": 999.9999999999995,
+          "raw_min_Pa": 991.4898275294041,
+          "raw_max_Pa": 1008.5101723439348,
+          "surface_Q1": {
+            "mean": 999.9999999999998,
+            "minimum": 999.9999922388694,
+            "maximum": 1000.0000077611307,
+            "rms": 999.9999999999998,
+            "anomaly_rms": 5.4703434390199464e-06
+          }
+        },
+        "sigma": {
+          "domain_weighted_mean_Pa": 1000.0000000000005,
+          "raw_min_Pa": 987.152815062512,
+          "raw_max_Pa": 1012.847183118361,
+          "surface_Q1": {
+            "mean": 1000.0000000000002,
+            "minimum": 999.9999471403266,
+            "maximum": 1000.0000528596752,
+            "rms": 1000.0000000000009,
+            "anomaly_rms": 3.7257539430477106e-05
+          }
+        },
+        "tauN": {
+          "domain_weighted_mean_Pa": -9.783271184430138e-14,
+          "raw_min_Pa": -4.8645800739960805,
+          "raw_max_Pa": 4.864582416311578,
+          "surface_Q1": {
+            "mean": -9.783274059751812e-14,
+            "minimum": -4.509853927003804e-05,
+            "maximum": 4.5098539823858744e-05,
+            "rms": 3.178719523040992e-05,
+            "anomaly_rms": 3.178719523040992e-05
+          }
+        }
+      },
+      "surface_balance_rms_Pa": 6.986987098164563e-08,
+      "surface_balance_weak_max": 4.74216987970932e-10,
+      "normalization_max_error": 6.006427239935164e-05,
+      "global_normalization": 0.9999399357275827,
+      "measured_slip_locations": 192,
+      "boundaries": {
+        "prescribed_velocity_error_m_s": 2.0328790734103208e-20,
+        "top_uy_min_m_s": -1.480623114084058e-10,
+        "top_uy_max_m_s": 1.4806286655264e-10,
+        "top_flux_m2_s": 3.0307520694647983e-22
+      },
+      "bulk_QP_pressure_mean_Pa": 1000.0000000000014,
+      "response": {
+        "V": {
+          "mean": 0.00031534428126814924,
+          "minimum": 0.00031300648107493814,
+          "maximum": 0.0003159830374427605,
+          "rms": 0.0003153455092225046,
+          "anomaly_rms": 8.800331102205072e-07
+        },
+        "Theta": {
+          "mean": 201.87500000000534,
+          "minimum": 199.99988383640684,
+          "maximum": 210.1282188855263,
+          "rms": 201.90014520267152,
+          "anomaly_rms": 3.1863784862591857
+        },
+        "C": {
+          "mean": 317.51376268478555,
+          "minimum": 317.51376268478003,
+          "maximum": 317.5137626847941,
+          "rms": 317.51376268478555,
+          "anomaly_rms": 1.4558672142304961e-12
+        },
+        "slip": {
+          "mean": 0.0,
+          "minimum": 0.0,
+          "maximum": 0.0,
+          "rms": 0.0,
+          "anomaly_rms": 0.0
+        },
+        "q": {
+          "mean": 1043.942479475872,
+          "minimum": 1043.8930589739357,
+          "maximum": 1044.0024541526525,
+          "rms": 1043.9424801392083,
+          "anomaly_rms": 0.03721518507108191
+        },
+        "friction": {
+          "mean": 695.4075263336476,
+          "minimum": 695.3160658173242,
+          "maximum": 695.7440862287561,
+          "rms": 695.4075391901948,
+          "anomaly_rms": 0.13372015364605894
+        }
+      }
+    },
+    {
+      "time_s": 0.5,
+      "nonlinear": {
+        "bulk": 9.567136560820894e-12,
+        "bulk scale": 14.128744065345494,
+        "surface": 6.138693661850828e-09,
+        "surface scale": 340.8026467198524,
+        "velocity": 9.548580163828043e-12,
+        "scaled continuity": 5.955827636403399e-13,
+        "bulk precision": 7.650719012097382e-11,
+        "bulk target": 1.4136394784357593e-07,
+        "velocity correction": 3.3195058487978956e-15
+      },
+      "fresh_linear_checks": 4,
+      "maximum_fresh_over_target": 0.8948269791315634,
+      "active_nodes": 0,
+      "free_nodes": 33,
+      "theta_update_error_s": 0.0,
+      "particle_stress_commit_change_max_Pa": 377.8352634497187,
+      "constitutive": {
+        "p": {
+          "domain_weighted_mean_Pa": 1000.000002651764,
+          "raw_min_Pa": 996.5921041620918,
+          "raw_max_Pa": 1003.40811461605,
+          "surface_Q1": {
+            "mean": 1000.000002651764,
+            "minimum": 999.9999603274,
+            "maximum": 1000.0001464202278,
+            "rms": 1000.0000026517642,
+            "anomaly_rms": 1.963471326015961e-05
+          }
+        },
+        "sigma": {
+          "domain_weighted_mean_Pa": 1000.000003977568,
+          "raw_min_Pa": 994.9138009663772,
+          "raw_max_Pa": 1005.0867680089843,
+          "surface_Q1": {
+            "mean": 1000.0000039775684,
+            "minimum": 999.9999370507726,
+            "maximum": 1000.00021964175,
+            "rms": 1000.000003977569,
+            "anomaly_rms": 3.348163375262724e-05
+          }
+        },
+        "tauN": {
+          "domain_weighted_mean_Pa": -1.3258041082165947e-06,
+          "raw_min_Pa": -1.9081355784677498,
+          "raw_max_Pa": 1.9080633340882969,
+          "surface_Q1": {
+            "mean": -1.3258041148540711e-06,
+            "minimum": -7.322153198758394e-05,
+            "maximum": 2.3276638115915575e-05,
+            "rms": 1.705351008614427e-05,
+            "anomaly_rms": 1.7001895473954084e-05
+          }
+        }
+      },
+      "surface_balance_rms_Pa": 6.13869366185083e-09,
+      "surface_balance_weak_max": 4.5210887248468254e-11,
+      "normalization_max_error": 6.006427239912959e-05,
+      "global_normalization": 0.9999399357275963,
+      "measured_slip_locations": 192,
+      "boundaries": {
+        "prescribed_velocity_error_m_s": 4.0657581468206416e-20,
+        "top_uy_min_m_s": -2.5708909920982875e-10,
+        "top_uy_max_m_s": 2.5708953589716525e-10,
+        "top_flux_m2_s": 1.1840070124447342e-23
+      },
+      "bulk_QP_pressure_mean_Pa": 1000.0000000000107,
+      "response": {
+        "V": {
+          "mean": 0.0008416122059660685,
+          "minimum": 0.0008379156669323971,
+          "maximum": 0.0008425259891298486,
+          "rms": 0.0008416133940633453,
+          "anomaly_rms": 1.4141554905758128e-06
+        },
+        "Theta": {
+          "mean": 132.94411480861203,
+          "minimum": 131.65246377337607,
+          "maximum": 138.61651429594696,
+          "rms": 132.96211870859545,
+          "anomaly_rms": 2.188001195888634
+        },
+        "C": {
+          "mean": 319.81157912656363,
+          "minimum": 319.7945389363029,
+          "maximum": 319.81579276306064,
+          "rms": 319.8115791930251,
+          "anomaly_rms": 0.0065199919854362
+        },
+        "slip": {
+          "mean": 0.00042080610298303423,
+          "minimum": 0.00041895783346619853,
+          "maximum": 0.0004212629945649243,
+          "rms": 0.00042080669703167264,
+          "anomaly_rms": 7.070777452879064e-07
+        },
+        "q": {
+          "mean": 1123.9217498804906,
+          "minimum": 1123.899958579314,
+          "maximum": 1123.9475247498508,
+          "rms": 1123.9217499980923,
+          "anomaly_rms": 0.016258855965042538
+        },
+        "friction": {
+          "mean": 719.9489501513597,
+          "minimum": 719.8509529410496,
+          "maximum": 720.3614269520818,
+          "rms": 719.9489681103154,
+          "anomaly_rms": 0.16080753337900514
+        }
+      }
+    },
+    {
+      "time_s": 1.0,
+      "nonlinear": {
+        "bulk": 3.286431570895011e-12,
+        "bulk scale": 14.128634517914042,
+        "surface": 1.0938678861655793e-06,
+        "surface scale": 793.1020176289948,
+        "velocity": 3.2711823938206845e-12,
+        "scaled continuity": 3.162249460953814e-13,
+        "bulk precision": 1.8995821060083465e-10,
+        "bulk target": 1.4147630338974128e-07,
+        "velocity correction": 5.37622996376229e-13
+      },
+      "fresh_linear_checks": 4,
+      "maximum_fresh_over_target": 0.7129175224669616,
+      "active_nodes": 0,
+      "free_nodes": 33,
+      "theta_update_error_s": 0.0,
+      "particle_stress_commit_change_max_Pa": 91.45630972543267,
+      "constitutive": {
+        "p": {
+          "domain_weighted_mean_Pa": 1000.0000176715478,
+          "raw_min_Pa": 994.3201042392129,
+          "raw_max_Pa": 1005.6824431750492,
+          "surface_Q1": {
+            "mean": 1000.0000176715503,
+            "minimum": 999.9972701189129,
+            "maximum": 1000.0013370395085,
+            "rms": 1000.0000176720614,
+            "anomaly_rms": 0.0010111552492390772
+          }
+        },
+        "sigma": {
+          "domain_weighted_mean_Pa": 1000.0000257636761,
+          "raw_min_Pa": 991.48576841773,
+          "raw_max_Pa": 1008.5067515288592,
+          "surface_Q1": {
+            "mean": 1000.0000257636763,
+            "minimum": 999.9979471697078,
+            "maximum": 1000.0060586103097,
+            "rms": 1000.0000257661181,
+            "anomaly_rms": 0.002209896001113178
+          }
+        },
+        "tauN": {
+          "domain_weighted_mean_Pa": -8.092130027727666e-06,
+          "raw_min_Pa": -3.202627849627561,
+          "raw_max_Pa": 3.201386084421074,
+          "surface_Q1": {
+            "mean": -8.092127603948963e-06,
+            "minimum": -0.008788491383559964,
+            "maximum": 0.0029183532765476527,
+            "rms": 0.003204114515906646,
+            "anomaly_rms": 0.003204104297383985
+          }
+        }
+      },
+      "surface_balance_rms_Pa": 1.093867886165579e-06,
+      "surface_balance_weak_max": 8.413012839967959e-09,
+      "normalization_max_error": 6.006427239901857e-05,
+      "global_normalization": 0.9999399357276134,
+      "measured_slip_locations": 192,
+      "boundaries": {
+        "prescribed_velocity_error_m_s": 2.710505431213761e-20,
+        "top_uy_min_m_s": -1.662557806164285e-10,
+        "top_uy_max_m_s": 1.660090964248543e-10,
+        "top_flux_m2_s": -9.035166502455731e-22
+      },
+      "bulk_QP_pressure_mean_Pa": 1000.0000000651706,
+      "response": {
+        "V": {
+          "mean": 0.0002749949484587843,
+          "minimum": 0.0002724880323805592,
+          "maximum": 0.0002756464237568576,
+          "rms": 0.0002749965888199734,
+          "anomaly_rms": 9.49834076087065e-07
+        },
+        "Theta": {
+          "mean": 116.33373927352412,
+          "minimum": 115.16963927849709,
+          "maximum": 121.42831781011687,
+          "rms": 116.35030488482771,
+          "anomaly_rms": 1.963301666090051
+        },
+        "C": {
+          "mean": 319.4847586842919,
+          "minimum": 319.4562531441156,
+          "maximum": 319.49195491601984,
+          "rms": 319.48475886897796,
+          "anomaly_rms": 0.010863185073397915
+        },
+        "slip": {
+          "mean": 0.0005583035772124263,
+          "minimum": 0.0005552018496564782,
+          "maximum": 0.0005590862064433531,
+          "rms": 0.0005583048279671096,
+          "anomaly_rms": 1.181779671560016e-06
+        },
+        "q": {
+          "mean": 1033.5384442124614,
+          "minimum": 1033.502738961109,
+          "maximum": 1033.579477217055,
+          "rms": 1033.5384445546656,
+          "anomaly_rms": 0.026596288348297602
+        },
+        "friction": {
+          "mean": 686.5541896205095,
+          "minimum": 686.4695858411534,
+          "maximum": 686.8744303467629,
+          "rms": 686.5542013219216,
+          "anomaly_rms": 0.12675688154283477
+        }
+      }
+    }
+  ],
+  "initial_Theta": {
+    "mean": 201.87500000000534,
+    "minimum": 199.99988383640684,
+    "maximum": 210.1282188855263,
+    "rms": 201.90014520267152,
+    "anomaly_rms": 3.1863784862591857
+  }
+}

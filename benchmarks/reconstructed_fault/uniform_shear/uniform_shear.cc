@@ -250,6 +250,9 @@ namespace aspect
               const auto temperatures = VectorTools::point_values<1>(cache,
                 this->get_dof_handler(), solution, VectorTools::EvaluationFlags::avg,
                 intro.component_indices.temperature);
+              const auto pressures = VectorTools::point_values<1>(cache,
+                this->get_dof_handler(), solution, VectorTools::EvaluationFlags::avg,
+                intro.component_indices.pressure);
               auto traction = csv("particle_traction_initial", "id,x,y,fault,segment,xi,volume,V,phi,q,mu,F");
               unsigned int p=0;
               for (const auto &particle : pm.get_particle_handler())
@@ -267,7 +270,7 @@ namespace aspect
                       input.position=a.position;
                       input.slip_rate=manager.interpolate_slip_rate(a.fault_index,a.segment_index,a.xi);
                       input.phase_field=phase[p]; input.previous_phase_field=phase[p];
-                      input.temperature=temperatures[p]; input.dynamic_pressure=0;
+                      input.temperature=temperatures[p]; input.dynamic_pressure=pressures[p];
                       input.strain_rate=symmetrize(strain[p]);
                       input.slip_tensor=symmetrize(outer_product(tangent,normal));
                       input.normal_tensor=symmetrize(outer_product(normal,normal));

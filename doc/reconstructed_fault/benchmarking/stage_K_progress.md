@@ -1,5 +1,132 @@
 # Stage K: K0 inventory and proposed K1 benchmark
 
+**Current accepted disposition: K2.4 closed; K3 preparation authorized by
+sequencing exception, not by Gate K2 passage.** The completed parity check
+changes the matched true-normal-stress response by about 1% or less on the
+fixed interior at the real steps. It does not explain K2.3's larger unresolved
+spatial uncertainty. K2 is bounded verification with unresolved convergence:
+K2.2 retains temporal traction uncertainty; K2.3 retains interior true-normal-
+stress spatial uncertainty. Both references remain provisional. Gate K2 is
+unmet and no 128x512 run is authorized.
+
+K3 preparation returns to homogeneous K1-style mechanics and an independent
+1-D phase/history reference. Equations, exact indexed cycle, actual phase
+boundary/admissibility rules, proposed two-real-step loading and a separately
+proposed K3 containment budget are in `stage_K3_preparation.md`. The frozen K1
+exporter cannot be used unchanged. Only source inspection and a 0.22-s scalar
+signal estimate were performed; no K3 smoke/build/campaign was launched.
+Implementation/execution awaits review of the preparation and error budget.
+
+**K2.4 approved parity pair completed; stop for review:** 64x255 bumped/control
+runs both pass at 0/.5/1 s in 151.164/131.842 s (283.007 s aggregate), with
+34 passing fresh-linear checks and 33 free surface nodes. Exported geometry
+confirms y=0 to 1.87e-15 m inside the central cell row, reference coordinate
+.5. Omitted fraction 5.91995e-5 and actual-normalization error <=5.87241e-5
+pass their separate 1e-4 limits. Against the provisional 64x256 matched pair,
+global Delta sigma_n RMS differences are 1.298%/.490%/.378% at 0/.5/1 s.
+On the fixed interior at .5 s, sigma_n/-tau:N changes are .998%/1.007%; at
+1 s, .383%/.359%. Endpoint profiles nearly overlap. These are measurements,
+not new pass thresholds. Initial phi/C/I_h differences are retained; the
+test combines parity, .3922% spacing, hierarchy and particle representation
+changes, not pure alignment. Recommend completing the bounded sensitivity
+check, without claiming a converged reference. See `stage_K2_4_report.md`.
+No production correction or 128 run follows. K2.2/K2.3 remain provisional and
+Gate K2 remains unmet. This supersedes the execution hold below.
+
+**K2.4 parity preflight prepared; awaiting execution review:** scope is now
+explicitly a bounded sensitivity check against the provisional 64x256 baseline,
+not post-convergence verification. Existing Box repetitions 64/255 and initial
+global refinement 0 produce the source-implied 64x255 mesh on the unchanged
+physical box, with y=0 midway through the central cell row. Normal spacing
+increases .3922%; no fault translation or production infrastructure is needed.
+Bumped/control fixtures differ from their baselines only in three mesh settings
+and output paths; the static include/geometry check passes. No ASPECT run was
+made. Actual reconstructed geometry and initialization remain to be checked.
+The separate <=1e-4 containment and actual-normalization requirements both
+apply, with the former explicitly extended by the user. See
+`stage_K2_4_preparation.md` for particle/hierarchy effects and cost estimates.
+K2.2/K2.3 references remain provisional, Gate K2 unmet, and 128 remains barred.
+This authorization supersedes the scope-clarification hold recorded below.
+
+**Current decision: K2.3 feasibility verification completed and accepted with
+an explicit spatial-resolution limitation.** The endpoint feature has
+approximately constant amplitude and O(h_Gamma) physical width, with strong
+collapse in normalized endpoint coordinates. After excluding three coarse
+elements at each end, interior Delta sigma_n and -Delta(tau:N) differences
+are still 19.6% and 21.9% of the fine interior signals. This is not a fully
+spatially converged reference. K2.2/K2.3 references remain provisional and
+Gate K2 remains unmet. No 128x512 pair is authorized now. This decision
+supersedes the earlier hold on K2.3 feasibility closure below; the measurements
+and their uncertainty are unchanged.
+
+K2.4 preparation uses the accepted 64x256 baseline. Its existing instruction
+explicitly starts "After convergence is established," so post-convergence
+verification cannot be claimed with the present evidence. A bounded alignment-
+sensitivity interpretation needs clarification before implementation/execution;
+see `stage_K2_4_preparation.md`. No pressure, endpoint, quadrature, transfer,
+I_h, or solver change follows from the endpoint layer. If a later authorized
+alignment check reveals sensitivity to unresolved interior tau:N, stop for
+review of whether the 128 confirmation is justified; do not launch it.
+
+**K2.3 saved-data endpoint localization completed; no new runs:** at .5 s,
+the outer two coarse surface elements per end contain 98.25% of the squared
+Delta sigma_n spatial difference. Endpoint amplitude changes <.6% and width
+ratios .508/.492 confirm a grid-scale lobe. However, after excluding three
+coarse elements per end, interior differences remain 19.55% of the fine
+Delta sigma_n signal and 21.92% for -Delta(tau:N), also after mean removal.
+The open surface is independent of bulk x periodicity; the feature is not
+strictly confined to the endpoint basis coefficients. No topology/production
+change is proposed. A matched 128 pair could distinguish interior convergence
+from persistence, but remains unstarted and requires approval/budget. See
+`stage_K2_3_endpoint_localization.md` and `true-pressure/endpoint-*` artifacts.
+Analysis took .999 s; K2.3 remains a feasibility pass, not resolved closure.
+K2.2 remains provisional and Gate K2 unmet.
+
+**K2.3 targeted spatial pair verified; hold before K2.4:** both authorized
+64x256 runs pass at 0/.5/1 s with unchanged equations/settings, six nonlinear
+acceptances and 34 fresh linear checks. Omitted fraction 5.91396e-5 and actual
+normalization error <=6.00643e-5 pass separate 1e-4 limits; active/free is 0/33.
+Runs took 150.524/139.018 s; total recorded simulation/analysis time 300.954 s
+is below 600 s. Coarse evidence is reused. Mean-removed Delta sigma_n spatial
+change/fine signal is 2.83%, 87.93%, 9.40% at 0/.5/1 s; profile correlations
+are .999984/.750767/.995589. The final-time broad profile is stable, but the
+0.5-s endpoint contribution is not small relative to its signal. Signed p and
+-tau:N components and initialization changes are retained. Recommend review
+of one matched 128x512 confirmation; none was started. No production correction
+is proposed. See `stage_K2_3_spatial_review.md` and `true-pressure/spatial-*`
+artifacts. K2.2 remains provisional and Gate K2 unmet.
+
+**K2.3 approved coarse feasibility pair completed:** top normal traction -1000
+Pa, tangential top velocity/full bottom velocity, x periodicity and no pressure
+normalization were explicitly approved. Bumped and homogeneous runs both pass
+at 0/.5/1 s: six nonlinear acceptances, 34 fresh linear checks, and 0 active /
+17 free nodes throughout. Runtime/RSS: 39.184 s/615768 KiB and 36.589 s/557076
+KiB. Omitted fraction 5.83027e-5 and actual normalization error <=5.23649e-5
+pass their separately approved pilot-only 1e-4 limits. Initial stress/Theta/H
+retention and real-step Theta checks pass; the accepted transfer/timeline
+investigations remain closed. At 1 s constitutive sigma_n has mean 1000.000052
+Pa and raw range [991.592597,1008.402794] Pa; its along-fault bump-minus-control
+RMS is only .00218997 Pa. Control sigma_n is 1000 Pa to near roundoff. This is
+detectable coarse-discrete feedback, not a resolved continuum reference or
+Gate K2. No production correction, pressure shift, convergence run or broader
+campaign was made. See `stage_K2_3_pilot_report.md` and `nonuniform/true-pressure/`
+for actual weak balances, p/tau:N/sigma_n profiles, accepted histories and
+ParaView outputs. K2.2 remains provisional; stop for review.
+
+**K2.3 preflight requires a pressure/loading decision:** continuous Q2 ADD/count
+transfer and the measured history timeline are accepted; those investigations
+are closed. The inherited closed-velocity fixture normalizes bulk pressure to
+zero volume mean, while its 1000-Pa friction load comes separately from the
+adiabatic model. True-normal-stress mode uses FE pressure directly and does not
+apply gauge normalization in the coupled solve. No silent +1000-Pa shift or
+run was made. The bounded proposal replaces top normal velocity by -1000-Pa
+normal total traction, retaining tangential loading/bottom velocity/periodicity
+and using `Pressure normalization = no`. This changes a physical boundary
+condition and awaits approval. See `stage_K2_3_pilot_preflight.md` for source
+evidence, planned measurements, explicit pilot-only 1e-4 containment allowance,
+separate 1e-4 normalization requirement and 120-s cap. Gate K2 remains unmet;
+the K2.2 reference remains provisional. No tests or production edits were made.
+
 **Bounded transfer correction and timeline verified:** DGQ1-only Maxwell fields
 hit existing vertex-indexing and mixed-base batching incompatibilities. The
 approved alternative retains continuous Q2 and replaces shared-node INSERT by

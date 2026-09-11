@@ -1,0 +1,649 @@
+{
+  "coarse": "reused accepted 32x128 pair",
+  "fine": "64x256 pair only",
+  "comparison": "bump minus matched homogeneous, then fine minus coarse",
+  "exact_piecewise_Q1_integration": true,
+  "initialization": {
+    "coarse": {
+      "Theta": {
+        "mean": 201.87500000000114,
+        "minimum": 199.99902440520887,
+        "maximum": 210.5235857769763,
+        "rms": 201.9001022101679,
+        "anomaly_rms": 3.183653165120748
+      },
+      "initial_C": {
+        "mean": 318.7476557675632,
+        "minimum": 318.7476557675591,
+        "maximum": 318.74765576756613,
+        "rms": 318.7476557675632,
+        "anomaly_rms": 1.4835887305911214e-12
+      },
+      "Ih": {
+        "mean": 108.09809508105764,
+        "minimum": 108.09809508105688,
+        "maximum": 108.09809508105835,
+        "rms": 108.09809508105764,
+        "anomaly_rms": 4.906004737917737e-13
+      },
+      "phi_center_range": [
+        0.5999103232803475,
+        0.5999103232803504
+      ],
+      "omitted_fraction": 5.8302736574589176e-05
+    },
+    "fine": {
+      "Theta": {
+        "mean": 201.87500000000534,
+        "minimum": 199.99988383640684,
+        "maximum": 210.1282188855263,
+        "rms": 201.90014520267152,
+        "anomaly_rms": 3.1863784862591857
+      },
+      "initial_C": {
+        "mean": 317.51376268478555,
+        "minimum": 317.51376268478003,
+        "maximum": 317.5137626847941,
+        "rms": 317.51376268478555,
+        "anomaly_rms": 1.4558672142304961e-12
+      },
+      "Ih": {
+        "mean": 108.14483384389925,
+        "minimum": 108.14483384389844,
+        "maximum": 108.14483384390006,
+        "rms": 108.14483384389925,
+        "anomaly_rms": 5.642368519127357e-13
+      },
+      "phi_center_range": [
+        0.599764016906789,
+        0.5997640169067923
+      ],
+      "omitted_fraction": 5.913959441983252e-05
+    }
+  },
+  "steps": [
+    {
+      "time_s": 0.0,
+      "fields": {
+        "sigma": {
+          "coarse": {
+            "mean": -1.2953194072906626e-11,
+            "minimum": -5.484894563778653e-05,
+            "maximum": 5.484890357365657e-05,
+            "rms": 3.8288019788470406e-05,
+            "anomaly_rms": 3.828801978846822e-05
+          },
+          "fine": {
+            "mean": 1.3823608924212749e-11,
+            "minimum": -5.2859655170323094e-05,
+            "maximum": 5.2859686093142955e-05,
+            "rms": 3.725754255989088e-05,
+            "anomaly_rms": 3.725754255988832e-05
+          },
+          "fine_minus_coarse": {
+            "mean": 2.6776802997119376e-11,
+            "minimum": -1.9892174805136165e-06,
+            "maximum": 1.9892904674634337e-06,
+            "rms": 1.0526690582165095e-06,
+            "anomaly_rms": 1.0526690578759479e-06
+          },
+          "change_rms_over_fine_signal_rms": 0.028253851056450154,
+          "change_anomaly_over_fine_anomaly": 0.028253851047311353,
+          "anomaly_profile_correlation": 0.9999837966145108
+        },
+        "p": {
+          "coarse": {
+            "mean": -1.3780976360067143e-11,
+            "minimum": -8.091407494248415e-06,
+            "maximum": 8.091370659712993e-06,
+            "rms": 5.648302713280416e-06,
+            "anomaly_rms": 5.648302713263604e-06
+          },
+          "fine": {
+            "mean": 1.2459366871553357e-11,
+            "minimum": -7.761118581584014e-06,
+            "maximum": 7.761140182083182e-06,
+            "rms": 5.470343604825362e-06,
+            "anomaly_rms": 5.470343604811173e-06
+          },
+          "fine_minus_coarse": {
+            "mean": 2.62403432316205e-11,
+            "minimum": -3.302304776298115e-07,
+            "maximum": 3.302889126644004e-07,
+            "rms": 1.8074836720114672e-07,
+            "anomaly_rms": 1.8074836529641134e-07
+          },
+          "change_rms_over_fine_signal_rms": 0.033041501642000974,
+          "change_anomaly_over_fine_anomaly": 0.033041501293893674,
+          "anomaly_profile_correlation": 0.9999838092723737
+        },
+        "tauN": {
+          "coarse": {
+            "mean": -2.261740837722871e-15,
+            "minimum": -4.67575297687985e-05,
+            "maximum": 4.675752975640828e-05,
+            "rms": 3.263971372526637e-05,
+            "anomaly_rms": 3.263971372526637e-05
+          },
+          "fine": {
+            "mean": 1.1312089726364972e-14,
+            "minimum": -4.509854060038239e-05,
+            "maximum": 4.509854062394824e-05,
+            "rms": 3.1787195979921296e-05,
+            "anomaly_rms": 3.178719597992129e-05
+          },
+          "fine_minus_coarse": {
+            "mean": 1.357383031758802e-14,
+            "minimum": -1.6589891324600444e-06,
+            "maximum": 1.6589891684161052e-06,
+            "rms": 8.720168608805976e-07,
+            "anomaly_rms": 8.720168608805975e-07
+          },
+          "change_rms_over_fine_signal_rms": 0.027432959529724354,
+          "change_anomaly_over_fine_anomaly": 0.027432959529724358,
+          "anomaly_profile_correlation": 0.9999837946554158
+        },
+        "V": {
+          "coarse": {
+            "mean": -5.493369069914112e-08,
+            "minimum": -2.455909306116951e-06,
+            "maximum": 5.975355700240065e-07,
+            "rms": 8.700860306122678e-07,
+            "anomaly_rms": 8.683501541963262e-07
+          },
+          "fine": {
+            "mean": -5.4931398936071216e-08,
+            "minimum": -2.3927315921495862e-06,
+            "maximum": 5.838247756865676e-07,
+            "rms": 8.817458441499515e-07,
+            "anomaly_rms": 8.800331102217897e-07
+          },
+          "fine_minus_coarse": {
+            "mean": 2.2917630699054625e-12,
+            "minimum": -1.4359334987859096e-07,
+            "maximum": 1.1397701034756083e-07,
+            "rms": 3.5693660877014174e-08,
+            "anomaly_rms": 3.5693660803441197e-08
+          },
+          "change_rms_over_fine_signal_rms": 0.040480668112957995,
+          "change_anomaly_over_fine_anomaly": 0.040559452126120034,
+          "anomaly_profile_correlation": 0.9992557050733469
+        },
+        "slip": {
+          "coarse": {
+            "mean": 0.0,
+            "minimum": 0.0,
+            "maximum": 0.0,
+            "rms": 0.0,
+            "anomaly_rms": 0.0
+          },
+          "fine": {
+            "mean": 0.0,
+            "minimum": 0.0,
+            "maximum": 0.0,
+            "rms": 0.0,
+            "anomaly_rms": 0.0
+          },
+          "fine_minus_coarse": {
+            "mean": 0.0,
+            "minimum": 0.0,
+            "maximum": 0.0,
+            "rms": 0.0,
+            "anomaly_rms": 0.0
+          },
+          "change_rms_over_fine_signal_rms": null,
+          "change_anomaly_over_fine_anomaly": null,
+          "anomaly_profile_correlation": null
+        }
+      },
+      "signed_components": {
+        "coarse": {
+          "delta_p": {
+            "mean": -1.3780976360067143e-11,
+            "minimum": -8.091407494248415e-06,
+            "maximum": 8.091370659712993e-06,
+            "rms": 5.648302713280416e-06,
+            "anomaly_rms": 5.648302713263604e-06
+          },
+          "minus_delta_tauN": {
+            "mean": 2.261740837722871e-15,
+            "minimum": -4.675752975640828e-05,
+            "maximum": 4.67575297687985e-05,
+            "rms": 3.263971372526637e-05,
+            "anomaly_rms": 3.263971372526637e-05
+          },
+          "component_anomaly_cross_moment_Pa2": 1.843589835377978e-10,
+          "component_anomaly_correlation": 0.9999999996920598,
+          "identity_max_error_Pa": 1.9221600548215145e-11
+        },
+        "fine": {
+          "delta_p": {
+            "mean": 1.2459366871553357e-11,
+            "minimum": -7.761118581584014e-06,
+            "maximum": 7.761140182083182e-06,
+            "rms": 5.470343604825362e-06,
+            "anomaly_rms": 5.470343604811173e-06
+          },
+          "minus_delta_tauN": {
+            "mean": -1.1312089726364972e-14,
+            "minimum": -4.509854062394824e-05,
+            "maximum": 4.509854060038239e-05,
+            "rms": 3.1787195979921296e-05,
+            "anomaly_rms": 3.178719597992129e-05
+          },
+          "component_anomaly_cross_moment_Pa2": 1.738868842372648e-10,
+          "component_anomaly_correlation": 0.9999999999633264,
+          "identity_max_error_Pa": 2.5640447084745928e-11
+        },
+        "change": {
+          "delta_p": {
+            "mean": 2.62403432316205e-11,
+            "minimum": -3.302304776298115e-07,
+            "maximum": 3.302889126644004e-07,
+            "rms": 1.8074836720114672e-07,
+            "anomaly_rms": 1.8074836529641134e-07
+          },
+          "minus_delta_tauN": {
+            "mean": -1.357383031758802e-14,
+            "minimum": -1.6589891684161052e-06,
+            "maximum": 1.6589891324600444e-06,
+            "rms": 8.720168608805976e-07,
+            "anomaly_rms": 8.720168608805975e-07
+          },
+          "component_anomaly_cross_moment_Pa2": 1.575136654215819e-13,
+          "component_anomaly_correlation": 0.9993531307866182,
+          "identity_max_error_Pa": 2.8483450516832117e-11
+        }
+      }
+    },
+    {
+      "time_s": 0.5,
+      "fields": {
+        "sigma": {
+          "coarse": {
+            "mean": 7.980014569142213e-06,
+            "minimum": -6.797582841500116e-05,
+            "maximum": 0.00022093465111083788,
+            "rms": 4.527550604930697e-05,
+            "anomaly_rms": 4.4566700747274416e-05
+          },
+          "fine": {
+            "mean": 3.977562686330316e-06,
+            "minimum": -6.2949232074061e-05,
+            "maximum": 0.00021964173959077016,
+            "rms": 3.371706954991157e-05,
+            "anomaly_rms": 3.348163338473628e-05
+          },
+          "fine_minus_coarse": {
+            "mean": -4.002451882811897e-06,
+            "minimum": -0.00013955515953512077,
+            "maximum": 7.482150510895735e-05,
+            "rms": 2.971015009368444e-05,
+            "anomaly_rms": 2.9439317205312917e-05
+          },
+          "change_rms_over_fine_signal_rms": 0.8811605068377707,
+          "change_anomaly_over_fine_anomaly": 0.8792676530152144,
+          "anomaly_profile_correlation": 0.7507667675076035
+        },
+        "p": {
+          "coarse": {
+            "mean": 5.32091182137151e-06,
+            "minimum": -4.069533974870865e-05,
+            "maximum": 0.00014712659992710542,
+            "rms": 2.805434755340157e-05,
+            "anomaly_rms": 2.754513231110422e-05
+          },
+          "fine": {
+            "mean": 2.6517583933127753e-06,
+            "minimum": -3.967260283843643e-05,
+            "maximum": 0.0001464202171064244,
+            "rms": 1.9812969205496593e-05,
+            "anomaly_rms": 1.963471227600373e-05
+          },
+          "fine_minus_coarse": {
+            "mean": -2.669153428058735e-06,
+            "minimum": -9.291218941598345e-05,
+            "maximum": 4.983299561445165e-05,
+            "rms": 1.9719411939603308e-05,
+            "anomaly_rms": 1.9537933033492864e-05
+          },
+          "change_rms_over_fine_signal_rms": 0.9952779785340135,
+          "change_anomaly_over_fine_anomaly": 0.9950710129514276,
+          "anomaly_profile_correlation": 0.7049444928610269
+        },
+        "tauN": {
+          "coarse": {
+            "mean": -2.6591016790707712e-06,
+            "minimum": -7.380803995756529e-05,
+            "maximum": 2.7280491424573855e-05,
+            "rms": 2.025128369121908e-05,
+            "anomaly_rms": 2.007594753436557e-05
+          },
+          "fine": {
+            "mean": -1.325804030487675e-06,
+            "minimum": -7.322153252544526e-05,
+            "maximum": 2.3276639893544692e-05,
+            "rms": 1.7053510600186546e-05,
+            "anomaly_rms": 1.700189599613577e-05
+          },
+          "fine_minus_coarse": {
+            "mean": 1.3332976485830957e-06,
+            "minimum": -2.4988556506142362e-05,
+            "maximum": 4.6642994387084886e-05,
+            "rms": 1.0215572458859605e-05,
+            "anomaly_rms": 1.0128190264923623e-05
+          },
+          "change_rms_over_fine_signal_rms": 0.5990304693479276,
+          "change_anomaly_over_fine_anomaly": 0.595709458946554,
+          "anomaly_profile_correlation": 0.8635767862496997
+        },
+        "V": {
+          "coarse": {
+            "mean": -1.8906149098846318e-07,
+            "minimum": -4.032223482496565e-06,
+            "maximum": 7.271072092813373e-07,
+            "rms": 1.4197910634071802e-06,
+            "anomaly_rms": 1.4071469064586365e-06
+          },
+          "fine": {
+            "mean": -1.8906219678658963e-07,
+            "minimum": -3.885601230857005e-06,
+            "maximum": 7.247209671386529e-07,
+            "rms": 1.4267376303379417e-06,
+            "anomaly_rms": 1.4141554905909582e-06
+          },
+          "fine_minus_coarse": {
+            "mean": -7.057981264458344e-13,
+            "minimum": -1.852510999700123e-07,
+            "maximum": 1.4662225163955978e-07,
+            "rms": 4.563705135247373e-08,
+            "anomaly_rms": 4.563705134701598e-08
+          },
+          "change_rms_over_fine_signal_rms": 0.03198699633489304,
+          "change_anomaly_over_fine_anomaly": 0.03227159364770052,
+          "anomaly_profile_correlation": 0.9994890207694439
+        },
+        "slip": {
+          "coarse": {
+            "mean": -9.453074549423159e-08,
+            "minimum": -2.0161117412482825e-06,
+            "maximum": 3.6355360464066866e-07,
+            "rms": 7.098955317035901e-07,
+            "anomaly_rms": 7.035734532293183e-07
+          },
+          "fine": {
+            "mean": -9.453109839329481e-08,
+            "minimum": -1.9428006154285026e-06,
+            "maximum": 3.6236048356932645e-07,
+            "rms": 7.133688151689709e-07,
+            "anomaly_rms": 7.070777452954791e-07
+          },
+          "fine_minus_coarse": {
+            "mean": -3.528990632229172e-13,
+            "minimum": -9.262554998500615e-08,
+            "maximum": 7.331112581977989e-08,
+            "rms": 2.2818525676236865e-08,
+            "anomaly_rms": 2.281852567350799e-08
+          },
+          "change_rms_over_fine_signal_rms": 0.03198699633489304,
+          "change_anomaly_over_fine_anomaly": 0.03227159364770052,
+          "anomaly_profile_correlation": 0.9994890207694439
+        }
+      },
+      "signed_components": {
+        "coarse": {
+          "delta_p": {
+            "mean": 5.32091182137151e-06,
+            "minimum": -4.069533974870865e-05,
+            "maximum": 0.00014712659992710542,
+            "rms": 2.805434755340157e-05,
+            "anomaly_rms": 2.754513231110422e-05
+          },
+          "minus_delta_tauN": {
+            "mean": 2.6591016790707712e-06,
+            "minimum": -2.7280491424573855e-05,
+            "maximum": 7.380803995756529e-05,
+            "rms": 2.025128369121908e-05,
+            "anomaly_rms": 2.007594753436557e-05
+          },
+          "component_anomaly_cross_moment_Pa2": 4.1220647318778167e-10,
+          "component_anomaly_correlation": 0.7454077309289441,
+          "identity_max_error_Pa": 2.1346665100575304e-11
+        },
+        "fine": {
+          "delta_p": {
+            "mean": 2.6517583933127753e-06,
+            "minimum": -3.967260283843643e-05,
+            "maximum": 0.0001464202171064244,
+            "rms": 1.9812969205496593e-05,
+            "anomaly_rms": 1.963471227600373e-05
+          },
+          "minus_delta_tauN": {
+            "mean": 1.325804030487675e-06,
+            "minimum": -2.3276639893544692e-05,
+            "maximum": 7.322153252544526e-05,
+            "rms": 1.7053510600186546e-05,
+            "anomaly_rms": 1.700189599613577e-05
+          },
+          "component_anomaly_cross_moment_Pa2": 2.2321663481579213e-10,
+          "component_anomaly_correlation": 0.6686589464779099,
+          "identity_max_error_Pa": 5.613434142767216e-11
+        },
+        "change": {
+          "delta_p": {
+            "mean": -2.669153428058735e-06,
+            "minimum": -9.291218941598345e-05,
+            "maximum": 4.983299561445165e-05,
+            "rms": 1.9719411939603308e-05,
+            "anomaly_rms": 1.9537933033492864e-05
+          },
+          "minus_delta_tauN": {
+            "mean": -1.3332976485830957e-06,
+            "minimum": -4.6642994387084886e-05,
+            "maximum": 2.4988556506142362e-05,
+            "rms": 1.0215572458859605e-05,
+            "anomaly_rms": 1.0128190264923623e-05
+          },
+          "component_anomaly_cross_moment_Pa2": 1.9118129496540375e-10,
+          "component_anomaly_correlation": 0.9661285831006454,
+          "identity_max_error_Pa": 6.149133916085684e-11
+        }
+      }
+    },
+    {
+      "time_s": 1.0,
+      "fields": {
+        "sigma": {
+          "coarse": {
+            "mean": 5.17983263073063e-05,
+            "minimum": -0.0021574072702605918,
+            "maximum": 0.006338664623854129,
+            "rms": 0.002189973204351166,
+            "anomaly_rms": 0.002189360538871539
+          },
+          "fine": {
+            "mean": 2.5763666201328306e-05,
+            "minimum": -0.002052830306524811,
+            "maximum": 0.006058610294985556,
+            "rms": 0.0022100461757203357,
+            "anomaly_rms": 0.0022098960003402754
+          },
+          "fine_minus_coarse": {
+            "mean": -2.603466010597799e-05,
+            "minimum": -0.000946863729893721,
+            "maximum": 0.0005065912704367292,
+            "rms": 0.00020924819235926056,
+            "anomaly_rms": 0.00020762225911203331
+          },
+          "change_rms_over_fine_signal_rms": 0.09468046172884095,
+          "change_anomaly_over_fine_anomaly": 0.09395114479598318,
+          "anomaly_profile_correlation": 0.9955887751735613
+        },
+        "p": {
+          "coarse": {
+            "mean": 3.553574624604039e-05,
+            "minimum": -0.0028331621089137116,
+            "maximum": 0.0013507231462881464,
+            "rms": 0.0010112945852072724,
+            "anomaly_rms": 0.0010106700494267584
+          },
+          "fine": {
+            "mean": 1.767153975151814e-05,
+            "minimum": -0.002729881101117826,
+            "maximum": 0.0013370395291758541,
+            "rms": 0.0010113096575259627,
+            "anomaly_rms": 0.0010111552502400857
+          },
+          "fine_minus_coarse": {
+            "mean": -1.786420649452225e-05,
+            "minimum": -0.000681072338636568,
+            "maximum": 0.00036315887007276615,
+            "rms": 0.00013753879073903277,
+            "anomaly_rms": 0.0001363737111186629
+          },
+          "change_rms_over_fine_signal_rms": 0.13600066974096095,
+          "change_anomaly_over_fine_anomaly": 0.13486921131674162,
+          "anomaly_profile_correlation": 0.9909008968601036
+        },
+        "tauN": {
+          "coarse": {
+            "mean": -1.6262587147033373e-05,
+            "minimum": -0.00917182670358047,
+            "maximum": 0.0030630808747074616,
+            "rms": 0.0031659631198057685,
+            "anomaly_rms": 0.0031659213515546404
+          },
+          "fine": {
+            "mean": -8.092127728752478e-06,
+            "minimum": -0.008788491384702488,
+            "maximum": 0.0029183532775296436,
+            "rms": 0.0032041145158717642,
+            "anomaly_rms": 0.0032041042973487885
+          },
+          "fine_minus_coarse": {
+            "mean": 8.170459418280733e-06,
+            "minimum": -0.0005375182971457948,
+            "maximum": 0.0004103376596234854,
+            "rms": 0.00014450389485533665,
+            "anomaly_rms": 0.00014427272514670408
+          },
+          "change_rms_over_fine_signal_rms": 0.04509947885430697,
+          "change_anomaly_over_fine_anomaly": 0.04502747468803729,
+          "anomaly_profile_correlation": 0.9990458994404924
+        },
+        "V": {
+          "coarse": {
+            "mean": -3.7153533026159914e-08,
+            "minimum": -2.6550553616823142e-06,
+            "maximum": 6.346706617867473e-07,
+            "rms": 9.479582190645185e-07,
+            "anomaly_rms": 9.47229855988317e-07
+          },
+          "fine": {
+            "mean": -3.710841493834676e-08,
+            "minimum": -2.5440244933664226e-06,
+            "maximum": 6.14366882987008e-07,
+            "rms": 9.505586813511949e-07,
+            "anomaly_rms": 9.498340761590341e-07
+          },
+          "fine_minus_coarse": {
+            "mean": 4.5118087813152336e-11,
+            "minimum": -1.2212947630770997e-07,
+            "maximum": 1.1103086831589165e-07,
+            "rms": 3.1442834173852605e-08,
+            "anomaly_rms": 3.144280180331494e-08
+          },
+          "change_rms_over_fine_signal_rms": 0.03307826732922729,
+          "change_anomaly_over_fine_anomaly": 0.033103467850368384,
+          "anomaly_profile_correlation": 0.9994543427780976
+        },
+        "slip": {
+          "coarse": {
+            "mean": -1.1310751200731324e-07,
+            "minimum": -3.3436394220894396e-06,
+            "maximum": 6.808889355340965e-07,
+            "rms": 1.182392056635877e-06,
+            "anomaly_rms": 1.1769696964336568e-06
+          },
+          "fine": {
+            "mean": -1.1308530586247878e-07,
+            "minimum": -3.2148128621116868e-06,
+            "maximum": 6.695439250627763e-07,
+            "rms": 1.1871779473289058e-06,
+            "anomaly_rms": 1.1817796716063717e-06
+          },
+          "fine_minus_coarse": {
+            "mean": 2.2206144834459405e-11,
+            "minimum": -1.5369028813873916e-07,
+            "maximum": 1.2882655997775282e-07,
+            "rms": 3.850267605101091e-08,
+            "anomaly_rms": 3.850266964739226e-08
+          },
+          "change_rms_over_fine_signal_rms": 0.03243210180718072,
+          "change_anomaly_over_fine_anomaly": 0.03258024365494143,
+          "anomaly_profile_correlation": 0.9994754116327799
+        }
+      },
+      "signed_components": {
+        "coarse": {
+          "delta_p": {
+            "mean": 3.553574624604039e-05,
+            "minimum": -0.0028331621089137116,
+            "maximum": 0.0013507231462881464,
+            "rms": 0.0010112945852072724,
+            "anomaly_rms": 0.0010106700494267584
+          },
+          "minus_delta_tauN": {
+            "mean": 1.6262587147033373e-05,
+            "minimum": -0.0030630808747074616,
+            "maximum": 0.00917182670358047,
+            "rms": 0.0031659631198057685,
+            "anomaly_rms": 0.0031659213515546404
+          },
+          "component_anomaly_cross_moment_Pa2": -3.1256062026985333e-06,
+          "component_anomaly_correlation": -0.9768429407700558,
+          "identity_max_error_Pa": 2.9187371269889795e-11
+        },
+        "fine": {
+          "delta_p": {
+            "mean": 1.767153975151814e-05,
+            "minimum": -0.002729881101117826,
+            "maximum": 0.0013370395291758541,
+            "rms": 0.0010113096575259627,
+            "anomaly_rms": 0.0010111552502400857
+          },
+          "minus_delta_tauN": {
+            "mean": 8.092127728752478e-06,
+            "minimum": -0.0029183532775296436,
+            "maximum": 0.008788491384702488,
+            "rms": 0.0032041145158717642,
+            "anomaly_rms": 0.0032041042973487885
+          },
+          "component_anomaly_cross_moment_Pa2": -3.2025394759179876e-06,
+          "component_anomaly_correlation": -0.9884848241243612,
+          "identity_max_error_Pa": 5.333666624682265e-11
+        },
+        "change": {
+          "delta_p": {
+            "mean": -1.786420649452225e-05,
+            "minimum": -0.000681072338636568,
+            "maximum": 0.00036315887007276615,
+            "rms": 0.00013753879073903277,
+            "anomaly_rms": 0.0001363737111186629
+          },
+          "minus_delta_tauN": {
+            "mean": -8.170459418280733e-06,
+            "minimum": -0.0004103376596234854,
+            "maximum": 0.0005375182971457948,
+            "rms": 0.00014450389485533665,
+            "anomaly_rms": 0.00014427272514670408
+          },
+          "component_anomaly_cross_moment_Pa2": 1.8472967892195681e-09,
+          "component_anomaly_correlation": 0.09389052795335856,
+          "identity_max_error_Pa": 6.055514097970394e-11
+        }
+      }
+    }
+  ],
+  "analysis_seconds": 0.6578531459999795
+}

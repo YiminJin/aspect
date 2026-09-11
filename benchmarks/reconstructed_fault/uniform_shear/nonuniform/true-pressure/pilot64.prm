@@ -1,0 +1,9 @@
+# One approved spatial refinement; no temporal or physical changes.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/nonuniform/true-pressure/pilot.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/nonuniform/true-pressure/pilot64
+subsection Mesh refinement
+  set Initial global refinement = 6
+end
+subsection Fault reconstruction
+  set Structural point spacing = 0.0078125
+end

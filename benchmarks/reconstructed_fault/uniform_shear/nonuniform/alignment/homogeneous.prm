@@ -1,0 +1,9 @@
+# Matched staggered control: remove only the initial Theta bump.
+# K2.4 preflight only: do not execute before review.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/nonuniform/alignment/pilot.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/nonuniform/alignment/homogeneous
+subsection Initial composition model
+  subsection Function
+    set Function expression = 0; 0; 1500; 200
+  end
+end

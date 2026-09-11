@@ -1,0 +1,1302 @@
+{
+  "time_s": 0.5,
+  "L_m": 0.25,
+  "h_coarse_m": 0.015625,
+  "h_fine_m": 0.0078125,
+  "comparison": "fine minus coarse of bump-minus-homogeneous fields",
+  "cuts": {
+    "coarse": [
+      {
+        "elements_each_end": 1,
+        "width_m": 0.015625,
+        "fields": {
+          "sigma": {
+            "total_rms": 2.971015009368444e-05,
+            "endpoint_squared_error_fraction": 0.8077573395800581,
+            "left_squared_error_fraction": 0.4031636690444732,
+            "right_squared_error_fraction": 0.40459367053558487,
+            "endpoint_rms_global_denominator": 2.670209288354659e-05,
+            "interior_rms_global_denominator": 1.3026559569882913e-05,
+            "interior_conditional_rms": 1.3925977953972338e-05,
+            "fine_interior_rms": 1.7496637276110304e-05,
+            "interior_error_over_fine_signal": 0.7959231099216247,
+            "interior_local_anomaly_error": 1.3648202706064811e-05,
+            "fine_interior_anomaly_rms": 1.749377060707586e-05,
+            "interior_anomaly_error_over_fine_anomaly": 0.7801750127296401,
+            "globally_mean_removed_endpoint_fraction": 0.7656634385115643
+          },
+          "p": {
+            "total_rms": 1.9719411939603308e-05,
+            "endpoint_squared_error_fraction": 0.8131717652944435,
+            "left_squared_error_fraction": 0.4064193732127181,
+            "right_squared_error_fraction": 0.40675239208172537,
+            "endpoint_rms_global_denominator": 1.778218421112414e-05,
+            "interior_rms_global_denominator": 8.523446012348339e-06,
+            "interior_conditional_rms": 9.111947066534874e-06,
+            "fine_interior_rms": 2.959528517138649e-06,
+            "interior_error_over_fine_signal": 3.078850909449775,
+            "interior_local_anomaly_error": 8.925948755331454e-06,
+            "fine_interior_anomaly_rms": 2.951705093888195e-06,
+            "interior_anomaly_error_over_fine_anomaly": 3.023997476514011,
+            "globally_mean_removed_endpoint_fraction": 0.7709413893032416
+          },
+          "minus_tauN": {
+            "total_rms": 1.0215572458859605e-05,
+            "endpoint_squared_error_fraction": 0.7624419645021063,
+            "left_squared_error_fraction": 0.3795044907641407,
+            "right_squared_error_fraction": 0.38293747373796555,
+            "endpoint_rms_global_denominator": 8.920025674909855e-06,
+            "interior_rms_global_denominator": 4.97906242390672e-06,
+            "interior_conditional_rms": 5.322841627891184e-06,
+            "fine_interior_rms": 1.4823395874364448e-05,
+            "interior_error_over_fine_signal": 0.35908382080630363,
+            "interior_local_anomaly_error": 5.239918013390132e-06,
+            "fine_interior_anomaly_rms": 1.4823047262077646e-05,
+            "interior_anomaly_error_over_fine_anomaly": 0.35349803051600664,
+            "globally_mean_removed_endpoint_fraction": 0.7218739647112098
+          }
+        }
+      },
+      {
+        "elements_each_end": 2,
+        "width_m": 0.03125,
+        "fields": {
+          "sigma": {
+            "total_rms": 2.971015009368444e-05,
+            "endpoint_squared_error_fraction": 0.9825159786636648,
+            "left_squared_error_fraction": 0.49127622040027086,
+            "right_squared_error_fraction": 0.49123975826339394,
+            "endpoint_rms_global_denominator": 2.9449278344618376e-05,
+            "interior_rms_global_denominator": 3.928488713290231e-06,
+            "interior_conditional_rms": 4.536228032253043e-06,
+            "fine_interior_rms": 1.7985016314473767e-05,
+            "interior_error_over_fine_signal": 0.25222262537523704,
+            "interior_local_anomaly_error": 4.4822240320231655e-06,
+            "fine_interior_anomaly_rms": 1.7985010748567893e-05,
+            "interior_anomaly_error_over_fine_anomaly": 0.2492199807208942,
+            "globally_mean_removed_endpoint_fraction": 0.97316415849539
+          },
+          "p": {
+            "total_rms": 1.9719411939603308e-05,
+            "endpoint_squared_error_fraction": 0.9904548858142306,
+            "left_squared_error_fraction": 0.49525920452537203,
+            "right_squared_error_fraction": 0.49519568128885855,
+            "endpoint_rms_global_denominator": 1.962507426454475e-05,
+            "interior_rms_global_denominator": 1.926568803565768e-06,
+            "interior_conditional_rms": 2.2246100347020624e-06,
+            "fine_interior_rms": 2.6474573255964613e-06,
+            "interior_error_over_fine_signal": 0.8402817349287649,
+            "interior_local_anomaly_error": 2.1678293232826663e-06,
+            "fine_interior_anomaly_rms": 2.6473865678525233e-06,
+            "interior_anomaly_error_over_fine_anomaly": 0.818856358042619,
+            "globally_mean_removed_endpoint_fraction": 0.9815171657549894
+          },
+          "minus_tauN": {
+            "total_rms": 1.0215572458859605e-05,
+            "endpoint_squared_error_fraction": 0.9249388190147727,
+            "left_squared_error_fraction": 0.46242014697912726,
+            "right_squared_error_fraction": 0.4625186720356455,
+            "endpoint_rms_global_denominator": 9.824698056029134e-06,
+            "interior_rms_global_denominator": 2.7987905906066265e-06,
+            "interior_conditional_rms": 3.231765001784255e-06,
+            "fine_interior_rms": 1.5345040649673233e-05,
+            "interior_error_over_fine_signal": 0.21060648033233292,
+            "interior_local_anomaly_error": 3.2256649311024527e-06,
+            "fine_interior_anomaly_rms": 1.534503976644018e-05,
+            "interior_anomaly_error_over_fine_anomaly": 0.21020896525514568,
+            "globally_mean_removed_endpoint_fraction": 0.9145102476038014
+          }
+        }
+      },
+      {
+        "elements_each_end": 3,
+        "width_m": 0.046875,
+        "fields": {
+          "sigma": {
+            "total_rms": 2.971015009368444e-05,
+            "endpoint_squared_error_fraction": 0.9914712463087577,
+            "left_squared_error_fraction": 0.4954196433021748,
+            "right_squared_error_fraction": 0.4960516030065829,
+            "endpoint_rms_global_denominator": 2.958318352119546e-05,
+            "interior_rms_global_denominator": 2.743769549456909e-06,
+            "interior_conditional_rms": 3.470624460359137e-06,
+            "fine_interior_rms": 1.775087979765456e-05,
+            "interior_error_over_fine_signal": 0.19551844753169437,
+            "interior_local_anomaly_error": 3.4579630227163083e-06,
+            "fine_interior_anomaly_rms": 1.7750868262505657e-05,
+            "interior_anomaly_error_over_fine_anomaly": 0.19480528904720704,
+            "globally_mean_removed_endpoint_fraction": 0.9780512819849186
+          },
+          "p": {
+            "total_rms": 1.9719411939603308e-05,
+            "endpoint_squared_error_fraction": 0.9992132062533835,
+            "left_squared_error_fraction": 0.49955422973237146,
+            "right_squared_error_fraction": 0.49965897652101193,
+            "endpoint_rms_global_denominator": 1.971165285810327e-05,
+            "interior_rms_global_denominator": 5.531264280421953e-07,
+            "interior_conditional_rms": 6.996557386586267e-07,
+            "fine_interior_rms": 2.6109248871261825e-06,
+            "interior_error_over_fine_signal": 0.26797237335645085,
+            "interior_local_anomaly_error": 6.844885126164372e-07,
+            "fine_interior_anomaly_rms": 2.6109183689793687e-06,
+            "interior_anomaly_error_over_fine_anomaly": 0.262163888671866,
+            "globally_mean_removed_endpoint_fraction": 0.9862675241708742
+          },
+          "minus_tauN": {
+            "total_rms": 1.0215572458859605e-05,
+            "endpoint_squared_error_fraction": 0.9339837318984668,
+            "left_squared_error_fraction": 0.4661347634268277,
+            "right_squared_error_fraction": 0.46784896847163915,
+            "endpoint_rms_global_denominator": 9.872618710010826e-06,
+            "interior_rms_global_denominator": 2.624751506134444e-06,
+            "interior_conditional_rms": 3.320077220536904e-06,
+            "fine_interior_rms": 1.5146949523413252e-05,
+            "interior_error_over_fine_signal": 0.21919114574224507,
+            "interior_local_anomaly_error": 3.3166281885369138e-06,
+            "fine_interior_anomaly_rms": 1.5146927089899843e-05,
+            "interior_anomaly_error_over_fine_anomaly": 0.21896376531372375,
+            "globally_mean_removed_endpoint_fraction": 0.9195505486595663
+          }
+        }
+      },
+      {
+        "elements_each_end": 4,
+        "width_m": 0.0625,
+        "fields": {
+          "sigma": {
+            "total_rms": 2.971015009368444e-05,
+            "endpoint_squared_error_fraction": 0.9921858938427469,
+            "left_squared_error_fraction": 0.49586253284995774,
+            "right_squared_error_fraction": 0.49632336099278923,
+            "endpoint_rms_global_denominator": 2.959384330629827e-05,
+            "interior_rms_global_denominator": 2.626301001698524e-06,
+            "interior_conditional_rms": 3.714150495476097e-06,
+            "fine_interior_rms": 1.6355433915465667e-05,
+            "interior_error_over_fine_signal": 0.22708969475667676,
+            "interior_local_anomaly_error": 3.7132368748442606e-06,
+            "fine_interior_anomaly_rms": 1.6355387171058514e-05,
+            "interior_anomaly_error_over_fine_anomaly": 0.22703448325668352,
+            "globally_mean_removed_endpoint_fraction": 0.9824190130602326
+          },
+          "p": {
+            "total_rms": 1.9719411939603308e-05,
+            "endpoint_squared_error_fraction": 0.9999453081217352,
+            "left_squared_error_fraction": 0.499952007386133,
+            "right_squared_error_fraction": 0.49999330073560216,
+            "endpoint_rms_global_denominator": 1.9718872686391386e-05,
+            "interior_rms_global_denominator": 1.4583285520487605e-07,
+            "interior_conditional_rms": 2.0623880167032752e-07,
+            "fine_interior_rms": 2.4059645671251743e-06,
+            "interior_error_over_fine_signal": 0.08571980007035473,
+            "interior_local_anomaly_error": 1.849347132365811e-07,
+            "fine_interior_anomaly_rms": 2.405943604063965e-06,
+            "interior_anomaly_error_over_fine_anomaly": 0.07686577229998297,
+            "globally_mean_removed_endpoint_fraction": 0.9912509184218891
+          },
+          "minus_tauN": {
+            "total_rms": 1.0215572458859605e-05,
+            "endpoint_squared_error_fraction": 0.9350272239879269,
+            "left_squared_error_fraction": 0.46667896340932086,
+            "right_squared_error_fraction": 0.46834826057860607,
+            "endpoint_rms_global_denominator": 9.87813225553998e-06,
+            "interior_rms_global_denominator": 2.6039246925115774e-06,
+            "interior_conditional_rms": 3.6825056155480642e-06,
+            "fine_interior_rms": 1.3958919222062242e-05,
+            "interior_error_over_fine_signal": 0.2638102246288394,
+            "interior_local_anomaly_error": 3.6784083575918676e-06,
+            "fine_interior_anomaly_rms": 1.3958832705432075e-05,
+            "interior_anomaly_error_over_fine_anomaly": 0.26351833532329794,
+            "globally_mean_removed_endpoint_fraction": 0.9229791963784993
+          }
+        }
+      },
+      {
+        "elements_each_end": 5,
+        "width_m": 0.078125,
+        "fields": {
+          "sigma": {
+            "total_rms": 2.971015009368444e-05,
+            "endpoint_squared_error_fraction": 0.9925402084357283,
+            "left_squared_error_fraction": 0.49607423379662113,
+            "right_squared_error_fraction": 0.4964659746391072,
+            "endpoint_rms_global_denominator": 2.9599126890084847e-05,
+            "interior_rms_global_denominator": 2.5660681857491007e-06,
+            "interior_conditional_rms": 4.190371800183107e-06,
+            "fine_interior_rms": 1.3714149028336752e-05,
+            "interior_error_over_fine_signal": 0.3055509890934381,
+            "interior_local_anomaly_error": 4.189935973989184e-06,
+            "fine_interior_anomaly_rms": 1.371412977876562e-05,
+            "interior_anomaly_error_over_fine_anomaly": 0.30551963861948456,
+            "globally_mean_removed_endpoint_fraction": 0.9856801321904253
+          },
+          "p": {
+            "total_rms": 1.9719411939603308e-05,
+            "endpoint_squared_error_fraction": 0.9999895382427351,
+            "left_squared_error_fraction": 0.49996664703957167,
+            "right_squared_error_fraction": 0.5000228912031633,
+            "endpoint_rms_global_denominator": 1.9719308789482965e-05,
+            "interior_rms_global_denominator": 6.378172770779908e-08,
+            "interior_conditional_rms": 1.0415512519816232e-07,
+            "fine_interior_rms": 2.017633655496291e-06,
+            "interior_error_over_fine_signal": 0.05162241664359161,
+            "interior_local_anomaly_error": 9.671302853396427e-08,
+            "fine_interior_anomaly_rms": 2.017587812102008e-06,
+            "interior_anomaly_error_over_fine_anomaly": 0.047934978568890424,
+            "globally_mean_removed_endpoint_fraction": 0.9931933421150791
+          },
+          "minus_tauN": {
+            "total_rms": 1.0215572458859605e-05,
+            "endpoint_squared_error_fraction": 0.9375109477509702,
+            "left_squared_error_fraction": 0.4683043374692694,
+            "right_squared_error_fraction": 0.46920661028170085,
+            "endpoint_rms_global_denominator": 9.891243253775022e-06,
+            "interior_rms_global_denominator": 2.5536694298324896e-06,
+            "interior_conditional_rms": 4.170124716555767e-06,
+            "fine_interior_rms": 1.1711180090406577e-05,
+            "interior_error_over_fine_signal": 0.3560806583421767,
+            "interior_local_anomaly_error": 4.170067883512065e-06,
+            "fine_interior_anomaly_rms": 1.1711176337282304e-05,
+            "interior_anomaly_error_over_fine_anomaly": 0.35607591956725426,
+            "globally_mean_removed_endpoint_fraction": 0.9301416359390754
+          }
+        }
+      },
+      {
+        "elements_each_end": 6,
+        "width_m": 0.09375,
+        "fields": {
+          "sigma": {
+            "total_rms": 2.971015009368444e-05,
+            "endpoint_squared_error_fraction": 0.9947523597263378,
+            "left_squared_error_fraction": 0.49741902842336544,
+            "right_squared_error_fraction": 0.4973333313029724,
+            "endpoint_rms_global_denominator": 2.963209346562656e-05,
+            "interior_rms_global_denominator": 2.152221046646809e-06,
+            "interior_conditional_rms": 4.304442093293618e-06,
+            "fine_interior_rms": 9.927619107910607e-06,
+            "interior_error_over_fine_signal": 0.43358251827608063,
+            "interior_local_anomaly_error": 3.799373540209141e-06,
+            "fine_interior_anomaly_rms": 9.910889022425142e-06,
+            "interior_anomaly_error_over_fine_anomaly": 0.38335345412630345,
+            "globally_mean_removed_endpoint_fraction": 0.9947058991725416
+          },
+          "p": {
+            "total_rms": 1.9719411939603308e-05,
+            "endpoint_squared_error_fraction": 0.9999950260333501,
+            "left_squared_error_fraction": 0.4999706402854294,
+            "right_squared_error_fraction": 0.5000243857479207,
+            "endpoint_rms_global_denominator": 1.971936289769365e-05,
+            "interior_rms_global_denominator": 4.397900445004506e-08,
+            "interior_conditional_rms": 8.795800890009011e-08,
+            "fine_interior_rms": 1.4593390169721728e-06,
+            "interior_error_over_fine_signal": 0.0602724986292663,
+            "interior_local_anomaly_error": 3.9574022998660806e-08,
+            "fine_interior_anomaly_rms": 1.459292220954882e-06,
+            "interior_anomaly_error_over_fine_anomaly": 0.027118641784279304,
+            "globally_mean_removed_endpoint_fraction": 0.9956037223275623
+          },
+          "minus_tauN": {
+            "total_rms": 1.0215572458859605e-05,
+            "endpoint_squared_error_fraction": 0.9559525659564946,
+            "left_squared_error_fraction": 0.47921269697121205,
+            "right_squared_error_fraction": 0.4767398689852825,
+            "endpoint_rms_global_denominator": 9.988053966360252e-06,
+            "interior_rms_global_denominator": 2.143991284330724e-06,
+            "interior_conditional_rms": 4.287982568661448e-06,
+            "fine_interior_rms": 8.488389088059083e-06,
+            "interior_error_over_fine_signal": 0.5051585788749369,
+            "interior_local_anomaly_error": 3.821710991347496e-06,
+            "fine_interior_anomaly_rms": 8.468013458536075e-06,
+            "interior_anomaly_error_over_fine_anomaly": 0.4513113978928633,
+            "globally_mean_removed_endpoint_fraction": 0.9634941419029415
+          }
+        }
+      },
+      {
+        "elements_each_end": 7,
+        "width_m": 0.109375,
+        "fields": {
+          "sigma": {
+            "total_rms": 2.971015009368444e-05,
+            "endpoint_squared_error_fraction": 0.9956835293215812,
+            "left_squared_error_fraction": 0.4979566246129998,
+            "right_squared_error_fraction": 0.49772690470858133,
+            "endpoint_rms_global_denominator": 2.9645959253437426e-05,
+            "interior_rms_global_denominator": 1.95195249245098e-06,
+            "interior_conditional_rms": 5.520955375864285e-06,
+            "fine_interior_rms": 5.397133672942861e-06,
+            "interior_error_over_fine_signal": 1.0229421226941575,
+            "interior_local_anomaly_error": 1.6545738872640566e-06,
+            "fine_interior_anomaly_rms": 5.189317996672586e-06,
+            "interior_anomaly_error_over_fine_anomaly": 0.3188422618010646,
+            "globally_mean_removed_endpoint_fraction": 0.9993744489568965
+          },
+          "p": {
+            "total_rms": 1.9719411939603308e-05,
+            "endpoint_squared_error_fraction": 0.9999987749603024,
+            "left_squared_error_fraction": 0.4999712376523199,
+            "right_squared_error_fraction": 0.5000275373079826,
+            "endpoint_rms_global_denominator": 1.971939986106839e-05,
+            "interior_rms_global_denominator": 2.1825743181942777e-08,
+            "interior_conditional_rms": 6.173252403355117e-08,
+            "fine_interior_rms": 7.713376969517605e-07,
+            "interior_error_over_fine_signal": 0.08003307018120745,
+            "interior_local_anomaly_error": 1.4248847486289819e-08,
+            "fine_interior_anomaly_rms": 7.691626575643325e-07,
+            "interior_anomaly_error_over_fine_anomaly": 0.018525142043961034,
+            "globally_mean_removed_endpoint_fraction": 0.9977708302876519
+          },
+          "minus_tauN": {
+            "total_rms": 1.0215572458859605e-05,
+            "endpoint_squared_error_fraction": 0.9642316388960152,
+            "left_squared_error_fraction": 0.4839057968668492,
+            "right_squared_error_fraction": 0.48032584202916606,
+            "endpoint_rms_global_denominator": 1.0031211734975188e-05,
+            "interior_rms_global_denominator": 1.9320227199251444e-06,
+            "interior_conditional_rms": 5.46458546666219e-06,
+            "fine_interior_rms": 4.685446071773013e-06,
+            "interior_error_over_fine_signal": 1.166289267436674,
+            "interior_local_anomaly_error": 1.657531332585902e-06,
+            "fine_interior_anomaly_rms": 4.4247408815217e-06,
+            "interior_anomaly_error_over_fine_anomaly": 0.37460528807640936,
+            "globally_mean_removed_endpoint_fraction": 0.9783656578535141
+          }
+        }
+      }
+    ],
+    "fine": [
+      {
+        "elements_each_end": 1,
+        "width_m": 0.0078125,
+        "fields": {
+          "sigma": {
+            "total_rms": 2.971015009368444e-05,
+            "endpoint_squared_error_fraction": 0.46301279817596835,
+            "left_squared_error_fraction": 0.2310315884889985,
+            "right_squared_error_fraction": 0.2319812096869699,
+            "endpoint_rms_global_denominator": 2.0216284635595242e-05,
+            "interior_rms_global_denominator": 2.1771422877750858e-05,
+            "interior_conditional_rms": 2.248542886100486e-05,
+            "fine_interior_rms": 1.8702915064960706e-05,
+            "interior_error_over_fine_signal": 1.2022419383773264,
+            "interior_local_anomaly_error": 2.2481508628375207e-05,
+            "fine_interior_anomaly_rms": 1.8668796135253495e-05,
+            "interior_anomaly_error_over_fine_anomaly": 1.2042291567972034,
+            "globally_mean_removed_endpoint_fraction": 0.4321227390541046
+          },
+          "p": {
+            "total_rms": 1.9719411939603308e-05,
+            "endpoint_squared_error_fraction": 0.4658291555567206,
+            "left_squared_error_fraction": 0.23280525480183062,
+            "right_squared_error_fraction": 0.23302390075488993,
+            "endpoint_rms_global_denominator": 1.345882954882031e-05,
+            "interior_rms_global_denominator": 1.4412325087215135e-05,
+            "interior_conditional_rms": 1.4884985344776421e-05,
+            "fine_interior_rms": 5.952434873241697e-06,
+            "interior_error_over_fine_signal": 2.500654885228514,
+            "interior_local_anomaly_error": 1.4882487798110123e-05,
+            "fine_interior_anomaly_rms": 5.904787603526305e-06,
+            "interior_anomaly_error_over_fine_anomaly": 2.520410351292295,
+            "globally_mean_removed_endpoint_fraction": 0.43478808464933183
+          },
+          "minus_tauN": {
+            "total_rms": 1.0215572458859605e-05,
+            "endpoint_squared_error_fraction": 0.43756873995241674,
+            "left_squared_error_fraction": 0.21764558936993553,
+            "right_squared_error_fraction": 0.2199231505824812,
+            "endpoint_rms_global_denominator": 6.757496862612508e-06,
+            "interior_rms_global_denominator": 7.66121118453166e-06,
+            "interior_conditional_rms": 7.91246488785843e-06,
+            "fine_interior_rms": 1.4630859628317538e-05,
+            "interior_error_over_fine_signal": 0.5408065615327291,
+            "interior_local_anomaly_error": 7.911095636213536e-06,
+            "fine_interior_anomaly_rms": 1.4625987353539463e-05,
+            "interior_anomaly_error_over_fine_anomaly": 0.540893099726294,
+            "globally_mean_removed_endpoint_fraction": 0.4079881889556308
+          }
+        }
+      },
+      {
+        "elements_each_end": 2,
+        "width_m": 0.015625,
+        "fields": {
+          "sigma": {
+            "total_rms": 2.971015009368444e-05,
+            "endpoint_squared_error_fraction": 0.8077573395800581,
+            "left_squared_error_fraction": 0.4031636690444732,
+            "right_squared_error_fraction": 0.40459367053558487,
+            "endpoint_rms_global_denominator": 2.670209288354659e-05,
+            "interior_rms_global_denominator": 1.3026559569882913e-05,
+            "interior_conditional_rms": 1.3925977953972338e-05,
+            "fine_interior_rms": 1.7496637276110304e-05,
+            "interior_error_over_fine_signal": 0.7959231099216247,
+            "interior_local_anomaly_error": 1.3648202706064811e-05,
+            "fine_interior_anomaly_rms": 1.749377060707586e-05,
+            "interior_anomaly_error_over_fine_anomaly": 0.7801750127296401,
+            "globally_mean_removed_endpoint_fraction": 0.7656634385115643
+          },
+          "p": {
+            "total_rms": 1.9719411939603308e-05,
+            "endpoint_squared_error_fraction": 0.8131717652944435,
+            "left_squared_error_fraction": 0.4064193732127181,
+            "right_squared_error_fraction": 0.40675239208172537,
+            "endpoint_rms_global_denominator": 1.778218421112414e-05,
+            "interior_rms_global_denominator": 8.523446012348339e-06,
+            "interior_conditional_rms": 9.111947066534874e-06,
+            "fine_interior_rms": 2.959528517138649e-06,
+            "interior_error_over_fine_signal": 3.078850909449775,
+            "interior_local_anomaly_error": 8.925948755331454e-06,
+            "fine_interior_anomaly_rms": 2.951705093888195e-06,
+            "interior_anomaly_error_over_fine_anomaly": 3.023997476514011,
+            "globally_mean_removed_endpoint_fraction": 0.7709413893032416
+          },
+          "minus_tauN": {
+            "total_rms": 1.0215572458859605e-05,
+            "endpoint_squared_error_fraction": 0.7624419645021063,
+            "left_squared_error_fraction": 0.3795044907641407,
+            "right_squared_error_fraction": 0.38293747373796555,
+            "endpoint_rms_global_denominator": 8.920025674909855e-06,
+            "interior_rms_global_denominator": 4.97906242390672e-06,
+            "interior_conditional_rms": 5.322841627891184e-06,
+            "fine_interior_rms": 1.4823395874364448e-05,
+            "interior_error_over_fine_signal": 0.35908382080630363,
+            "interior_local_anomaly_error": 5.239918013390132e-06,
+            "fine_interior_anomaly_rms": 1.4823047262077646e-05,
+            "interior_anomaly_error_over_fine_anomaly": 0.35349803051600664,
+            "globally_mean_removed_endpoint_fraction": 0.7218739647112098
+          }
+        }
+      },
+      {
+        "elements_each_end": 3,
+        "width_m": 0.0234375,
+        "fields": {
+          "sigma": {
+            "total_rms": 2.971015009368444e-05,
+            "endpoint_squared_error_fraction": 0.9763243786535621,
+            "left_squared_error_fraction": 0.4882210185058924,
+            "right_squared_error_fraction": 0.4881033601476698,
+            "endpoint_rms_global_denominator": 2.9356340250719165e-05,
+            "interior_rms_global_denominator": 4.571466468570398e-06,
+            "interior_conditional_rms": 5.07158669430611e-06,
+            "fine_interior_rms": 1.77602800516486e-05,
+            "interior_error_over_fine_signal": 0.2855578110005838,
+            "interior_local_anomaly_error": 5.041608439871719e-06,
+            "fine_interior_anomaly_rms": 1.7759983601310464e-05,
+            "interior_anomaly_error_over_fine_anomaly": 0.283874611207395,
+            "globally_mean_removed_endpoint_fraction": 0.965000584854528
+          },
+          "p": {
+            "total_rms": 1.9719411939603308e-05,
+            "endpoint_squared_error_fraction": 0.9841977774562735,
+            "left_squared_error_fraction": 0.4921369623050401,
+            "right_squared_error_fraction": 0.4920608151512334,
+            "endpoint_rms_global_denominator": 1.9562986242432838e-05,
+            "interior_rms_global_denominator": 2.4788659750282897e-06,
+            "interior_conditional_rms": 2.750054885528472e-06,
+            "fine_interior_rms": 2.643822333747803e-06,
+            "interior_error_over_fine_signal": 1.04018142612105,
+            "interior_local_anomaly_error": 2.7223772742028203e-06,
+            "fine_interior_anomaly_rms": 2.6430989721500593e-06,
+            "interior_anomaly_error_over_fine_anomaly": 1.0299944507898133,
+            "globally_mean_removed_endpoint_fraction": 0.9731609297913811
+          },
+          "minus_tauN": {
+            "total_rms": 1.0215572458859605e-05,
+            "endpoint_squared_error_fraction": 0.9190916351911117,
+            "left_squared_error_fraction": 0.459620137549264,
+            "right_squared_error_fraction": 0.45947149764184775,
+            "endpoint_rms_global_denominator": 9.793594434454374e-06,
+            "interior_rms_global_denominator": 2.905757855643717e-06,
+            "interior_conditional_rms": 3.223648905417142e-06,
+            "fine_interior_rms": 1.5145733030012556e-05,
+            "interior_error_over_fine_signal": 0.21284205254570432,
+            "interior_local_anomaly_error": 3.2196044019799576e-06,
+            "fine_interior_anomaly_rms": 1.5145678142784985e-05,
+            "interior_anomaly_error_over_fine_anomaly": 0.2125757837732538,
+            "globally_mean_removed_endpoint_fraction": 0.9070187434370356
+          }
+        }
+      },
+      {
+        "elements_each_end": 4,
+        "width_m": 0.03125,
+        "fields": {
+          "sigma": {
+            "total_rms": 2.971015009368444e-05,
+            "endpoint_squared_error_fraction": 0.9825159786636648,
+            "left_squared_error_fraction": 0.49127622040027086,
+            "right_squared_error_fraction": 0.49123975826339394,
+            "endpoint_rms_global_denominator": 2.9449278344618376e-05,
+            "interior_rms_global_denominator": 3.928488713290231e-06,
+            "interior_conditional_rms": 4.536228032253043e-06,
+            "fine_interior_rms": 1.7985016314473767e-05,
+            "interior_error_over_fine_signal": 0.25222262537523704,
+            "interior_local_anomaly_error": 4.4822240320231655e-06,
+            "fine_interior_anomaly_rms": 1.7985010748567893e-05,
+            "interior_anomaly_error_over_fine_anomaly": 0.2492199807208942,
+            "globally_mean_removed_endpoint_fraction": 0.97316415849539
+          },
+          "p": {
+            "total_rms": 1.9719411939603308e-05,
+            "endpoint_squared_error_fraction": 0.9904548858142306,
+            "left_squared_error_fraction": 0.49525920452537203,
+            "right_squared_error_fraction": 0.49519568128885855,
+            "endpoint_rms_global_denominator": 1.962507426454475e-05,
+            "interior_rms_global_denominator": 1.926568803565768e-06,
+            "interior_conditional_rms": 2.2246100347020624e-06,
+            "fine_interior_rms": 2.6474573255964613e-06,
+            "interior_error_over_fine_signal": 0.8402817349287649,
+            "interior_local_anomaly_error": 2.1678293232826663e-06,
+            "fine_interior_anomaly_rms": 2.6473865678525233e-06,
+            "interior_anomaly_error_over_fine_anomaly": 0.818856358042619,
+            "globally_mean_removed_endpoint_fraction": 0.9815171657549894
+          },
+          "minus_tauN": {
+            "total_rms": 1.0215572458859605e-05,
+            "endpoint_squared_error_fraction": 0.9249388190147727,
+            "left_squared_error_fraction": 0.46242014697912726,
+            "right_squared_error_fraction": 0.4625186720356455,
+            "endpoint_rms_global_denominator": 9.824698056029134e-06,
+            "interior_rms_global_denominator": 2.7987905906066265e-06,
+            "interior_conditional_rms": 3.231765001784255e-06,
+            "fine_interior_rms": 1.5345040649673233e-05,
+            "interior_error_over_fine_signal": 0.21060648033233292,
+            "interior_local_anomaly_error": 3.2256649311024527e-06,
+            "fine_interior_anomaly_rms": 1.534503976644018e-05,
+            "interior_anomaly_error_over_fine_anomaly": 0.21020896525514568,
+            "globally_mean_removed_endpoint_fraction": 0.9145102476038014
+          }
+        }
+      },
+      {
+        "elements_each_end": 5,
+        "width_m": 0.0390625,
+        "fields": {
+          "sigma": {
+            "total_rms": 2.971015009368444e-05,
+            "endpoint_squared_error_fraction": 0.9907460491451024,
+            "left_squared_error_fraction": 0.4950605325128624,
+            "right_squared_error_fraction": 0.49568551663224,
+            "endpoint_rms_global_denominator": 2.9572362448327855e-05,
+            "interior_rms_global_denominator": 2.8580409048833183e-06,
+            "interior_conditional_rms": 3.44692702435847e-06,
+            "fine_interior_rms": 1.799917324920824e-05,
+            "interior_error_over_fine_signal": 0.19150474172529539,
+            "interior_local_anomaly_error": 3.4416329963821106e-06,
+            "fine_interior_anomaly_rms": 1.7999155771109778e-05,
+            "interior_anomaly_error_over_fine_anomaly": 0.19121080122581266,
+            "globally_mean_removed_endpoint_fraction": 0.9766545883506919
+          },
+          "p": {
+            "total_rms": 1.9719411939603308e-05,
+            "endpoint_squared_error_fraction": 0.9985183292711797,
+            "left_squared_error_fraction": 0.49920852419132716,
+            "right_squared_error_fraction": 0.4993098050798525,
+            "endpoint_rms_global_denominator": 1.9704797686488613e-05,
+            "interior_rms_global_denominator": 7.590489959959501e-07,
+            "interior_conditional_rms": 9.154475335325618e-07,
+            "fine_interior_rms": 2.647493773957557e-06,
+            "interior_error_over_fine_signal": 0.34577891836327984,
+            "interior_local_anomaly_error": 9.118333024203333e-07,
+            "fine_interior_anomaly_rms": 2.6474924032369445e-06,
+            "interior_anomaly_error_over_fine_anomaly": 0.3444139447975316,
+            "globally_mean_removed_endpoint_fraction": 0.9848782947999128
+          },
+          "minus_tauN": {
+            "total_rms": 1.0215572458859605e-05,
+            "endpoint_squared_error_fraction": 0.9331712041359941,
+            "left_squared_error_fraction": 0.46573809441050984,
+            "right_squared_error_fraction": 0.4674331097254842,
+            "endpoint_rms_global_denominator": 9.86832338776369e-06,
+            "interior_rms_global_denominator": 2.6408548193202552e-06,
+            "interior_conditional_rms": 3.1849907496316687e-06,
+            "fine_interior_rms": 1.5358133838211948e-05,
+            "interior_error_over_fine_signal": 0.20738136437561333,
+            "interior_local_anomaly_error": 3.1831009548065447e-06,
+            "fine_interior_anomaly_rms": 1.535811752009559e-05,
+            "interior_anomaly_error_over_fine_anomaly": 0.20725853612212317,
+            "globally_mean_removed_endpoint_fraction": 0.9181383773162892
+          }
+        }
+      },
+      {
+        "elements_each_end": 6,
+        "width_m": 0.046875,
+        "fields": {
+          "sigma": {
+            "total_rms": 2.971015009368444e-05,
+            "endpoint_squared_error_fraction": 0.9914712463087577,
+            "left_squared_error_fraction": 0.4954196433021748,
+            "right_squared_error_fraction": 0.4960516030065829,
+            "endpoint_rms_global_denominator": 2.958318352119546e-05,
+            "interior_rms_global_denominator": 2.743769549456909e-06,
+            "interior_conditional_rms": 3.470624460359137e-06,
+            "fine_interior_rms": 1.775087979765456e-05,
+            "interior_error_over_fine_signal": 0.19551844753169437,
+            "interior_local_anomaly_error": 3.4579630227163083e-06,
+            "fine_interior_anomaly_rms": 1.7750868262505657e-05,
+            "interior_anomaly_error_over_fine_anomaly": 0.19480528904720704,
+            "globally_mean_removed_endpoint_fraction": 0.9780512819849186
+          },
+          "p": {
+            "total_rms": 1.9719411939603308e-05,
+            "endpoint_squared_error_fraction": 0.9992132062533835,
+            "left_squared_error_fraction": 0.49955422973237146,
+            "right_squared_error_fraction": 0.49965897652101193,
+            "endpoint_rms_global_denominator": 1.971165285810327e-05,
+            "interior_rms_global_denominator": 5.531264280421953e-07,
+            "interior_conditional_rms": 6.996557386586267e-07,
+            "fine_interior_rms": 2.6109248871261825e-06,
+            "interior_error_over_fine_signal": 0.26797237335645085,
+            "interior_local_anomaly_error": 6.844885126164372e-07,
+            "fine_interior_anomaly_rms": 2.6109183689793687e-06,
+            "interior_anomaly_error_over_fine_anomaly": 0.262163888671866,
+            "globally_mean_removed_endpoint_fraction": 0.9862675241708742
+          },
+          "minus_tauN": {
+            "total_rms": 1.0215572458859605e-05,
+            "endpoint_squared_error_fraction": 0.9339837318984668,
+            "left_squared_error_fraction": 0.4661347634268277,
+            "right_squared_error_fraction": 0.46784896847163915,
+            "endpoint_rms_global_denominator": 9.872618710010826e-06,
+            "interior_rms_global_denominator": 2.624751506134444e-06,
+            "interior_conditional_rms": 3.320077220536904e-06,
+            "fine_interior_rms": 1.5146949523413252e-05,
+            "interior_error_over_fine_signal": 0.21919114574224507,
+            "interior_local_anomaly_error": 3.3166281885369138e-06,
+            "fine_interior_anomaly_rms": 1.5146927089899843e-05,
+            "interior_anomaly_error_over_fine_anomaly": 0.21896376531372375,
+            "globally_mean_removed_endpoint_fraction": 0.9195505486595663
+          }
+        }
+      },
+      {
+        "elements_each_end": 7,
+        "width_m": 0.0546875,
+        "fields": {
+          "sigma": {
+            "total_rms": 2.971015009368444e-05,
+            "endpoint_squared_error_fraction": 0.9920919367502109,
+            "left_squared_error_fraction": 0.49584140944823785,
+            "right_squared_error_fraction": 0.496250527301973,
+            "endpoint_rms_global_denominator": 2.9592442048065355e-05,
+            "interior_rms_global_denominator": 2.6420431906294035e-06,
+            "interior_conditional_rms": 3.522724254172538e-06,
+            "fine_interior_rms": 1.7208983484415253e-05,
+            "interior_error_over_fine_signal": 0.20470263437481806,
+            "interior_local_anomaly_error": 3.522645560555019e-06,
+            "fine_interior_anomaly_rms": 1.7208958343613158e-05,
+            "interior_anomaly_error_over_fine_anomaly": 0.20469836059905364,
+            "globally_mean_removed_endpoint_fraction": 0.9814261610293689
+          },
+          "p": {
+            "total_rms": 1.9719411939603308e-05,
+            "endpoint_squared_error_fraction": 0.9998967486174811,
+            "left_squared_error_fraction": 0.49992628968556263,
+            "right_squared_error_fraction": 0.4999704589319185,
+            "endpoint_rms_global_denominator": 1.971839388505113e-05,
+            "interior_rms_global_denominator": 2.0037424422212738e-07,
+            "interior_conditional_rms": 2.6716565896283654e-07,
+            "fine_interior_rms": 2.531503140581024e-06,
+            "interior_error_over_fine_signal": 0.10553637271076716,
+            "interior_local_anomaly_error": 2.603084869631461e-07,
+            "fine_interior_anomaly_rms": 2.5314956634147195e-06,
+            "interior_anomaly_error_over_fine_anomaly": 0.10282794109629939,
+            "globally_mean_removed_endpoint_fraction": 0.9898697693540074
+          },
+          "minus_tauN": {
+            "total_rms": 1.0215572458859605e-05,
+            "endpoint_squared_error_fraction": 0.9345579969224139,
+            "left_squared_error_fraction": 0.46664787085706694,
+            "right_squared_error_fraction": 0.46791012606534704,
+            "endpoint_rms_global_denominator": 9.875653360515646e-06,
+            "interior_rms_global_denominator": 2.613310422653014e-06,
+            "interior_conditional_rms": 3.484413896870685e-06,
+            "fine_interior_rms": 1.4685488540058177e-05,
+            "interior_error_over_fine_signal": 0.23726918497577482,
+            "interior_local_anomaly_error": 3.4834087463063614e-06,
+            "fine_interior_anomaly_rms": 1.4685445467196382e-05,
+            "interior_anomaly_error_over_fine_anomaly": 0.23720143553611817,
+            "globally_mean_removed_endpoint_fraction": 0.9224522491331437
+          }
+        }
+      },
+      {
+        "elements_each_end": 8,
+        "width_m": 0.0625,
+        "fields": {
+          "sigma": {
+            "total_rms": 2.971015009368444e-05,
+            "endpoint_squared_error_fraction": 0.9921858938427469,
+            "left_squared_error_fraction": 0.49586253284995774,
+            "right_squared_error_fraction": 0.49632336099278923,
+            "endpoint_rms_global_denominator": 2.959384330629827e-05,
+            "interior_rms_global_denominator": 2.626301001698524e-06,
+            "interior_conditional_rms": 3.714150495476097e-06,
+            "fine_interior_rms": 1.6355433915465667e-05,
+            "interior_error_over_fine_signal": 0.22708969475667676,
+            "interior_local_anomaly_error": 3.7132368748442606e-06,
+            "fine_interior_anomaly_rms": 1.6355387171058514e-05,
+            "interior_anomaly_error_over_fine_anomaly": 0.22703448325668352,
+            "globally_mean_removed_endpoint_fraction": 0.9824190130602326
+          },
+          "p": {
+            "total_rms": 1.9719411939603308e-05,
+            "endpoint_squared_error_fraction": 0.9999453081217352,
+            "left_squared_error_fraction": 0.499952007386133,
+            "right_squared_error_fraction": 0.49999330073560216,
+            "endpoint_rms_global_denominator": 1.9718872686391386e-05,
+            "interior_rms_global_denominator": 1.4583285520487605e-07,
+            "interior_conditional_rms": 2.0623880167032752e-07,
+            "fine_interior_rms": 2.4059645671251743e-06,
+            "interior_error_over_fine_signal": 0.08571980007035473,
+            "interior_local_anomaly_error": 1.849347132365811e-07,
+            "fine_interior_anomaly_rms": 2.405943604063965e-06,
+            "interior_anomaly_error_over_fine_anomaly": 0.07686577229998297,
+            "globally_mean_removed_endpoint_fraction": 0.9912509184218891
+          },
+          "minus_tauN": {
+            "total_rms": 1.0215572458859605e-05,
+            "endpoint_squared_error_fraction": 0.9350272239879269,
+            "left_squared_error_fraction": 0.46667896340932086,
+            "right_squared_error_fraction": 0.46834826057860607,
+            "endpoint_rms_global_denominator": 9.87813225553998e-06,
+            "interior_rms_global_denominator": 2.6039246925115774e-06,
+            "interior_conditional_rms": 3.6825056155480642e-06,
+            "fine_interior_rms": 1.3958919222062242e-05,
+            "interior_error_over_fine_signal": 0.2638102246288394,
+            "interior_local_anomaly_error": 3.6784083575918676e-06,
+            "fine_interior_anomaly_rms": 1.3958832705432075e-05,
+            "interior_anomaly_error_over_fine_anomaly": 0.26351833532329794,
+            "globally_mean_removed_endpoint_fraction": 0.9229791963784993
+          }
+        }
+      },
+      {
+        "elements_each_end": 9,
+        "width_m": 0.0703125,
+        "fields": {
+          "sigma": {
+            "total_rms": 2.971015009368444e-05,
+            "endpoint_squared_error_fraction": 0.99228316917618,
+            "left_squared_error_fraction": 0.49587691179408416,
+            "right_squared_error_fraction": 0.4964062573820958,
+            "endpoint_rms_global_denominator": 2.959529398224382e-05,
+            "interior_rms_global_denominator": 2.609902813098675e-06,
+            "interior_conditional_rms": 3.945802165432562e-06,
+            "fine_interior_rms": 1.5187661148262531e-05,
+            "interior_error_over_fine_signal": 0.25980314723336856,
+            "interior_local_anomaly_error": 3.941080457229737e-06,
+            "fine_interior_anomaly_rms": 1.5187602203307466e-05,
+            "interior_anomaly_error_over_fine_anomaly": 0.2594932632862528,
+            "globally_mean_removed_endpoint_fraction": 0.9832739699308135
+          },
+          "p": {
+            "total_rms": 1.9719411939603308e-05,
+            "endpoint_squared_error_fraction": 0.9999853012635928,
+            "left_squared_error_fraction": 0.4999645894208849,
+            "right_squared_error_fraction": 0.5000207118427078,
+            "endpoint_rms_global_denominator": 1.9719267013851644e-05,
+            "interior_rms_global_denominator": 7.560211764127547e-08,
+            "interior_conditional_rms": 1.1429965821066512e-07,
+            "fine_interior_rms": 2.2342693420977738e-06,
+            "interior_error_over_fine_signal": 0.05115751089497036,
+            "interior_local_anomaly_error": 1.0825704005539382e-07,
+            "fine_interior_anomaly_rms": 2.234229511461523e-06,
+            "interior_anomaly_error_over_fine_anomaly": 0.04845385825405976,
+            "globally_mean_removed_endpoint_fraction": 0.9920441728551332
+          },
+          "minus_tauN": {
+            "total_rms": 1.0215572458859605e-05,
+            "endpoint_squared_error_fraction": 0.9354291889344566,
+            "left_squared_error_fraction": 0.46677691198499166,
+            "right_squared_error_fraction": 0.468652276949465,
+            "endpoint_rms_global_denominator": 9.880255314714205e-06,
+            "interior_rms_global_denominator": 2.5958573878918267e-06,
+            "interior_conditional_rms": 3.9245674784865735e-06,
+            "fine_interior_rms": 1.2965013837791219e-05,
+            "interior_error_over_fine_signal": 0.30270445736409496,
+            "interior_local_anomaly_error": 3.917842782973113e-06,
+            "fine_interior_anomaly_rms": 1.296489437991348e-05,
+            "interior_anomaly_error_over_fine_anomaly": 0.3021885615237275,
+            "globally_mean_removed_endpoint_fraction": 0.9241167071094905
+          }
+        }
+      },
+      {
+        "elements_each_end": 10,
+        "width_m": 0.078125,
+        "fields": {
+          "sigma": {
+            "total_rms": 2.971015009368444e-05,
+            "endpoint_squared_error_fraction": 0.9925402084357283,
+            "left_squared_error_fraction": 0.49607423379662113,
+            "right_squared_error_fraction": 0.4964659746391072,
+            "endpoint_rms_global_denominator": 2.9599126890084847e-05,
+            "interior_rms_global_denominator": 2.5660681857491007e-06,
+            "interior_conditional_rms": 4.190371800183107e-06,
+            "fine_interior_rms": 1.3714149028336752e-05,
+            "interior_error_over_fine_signal": 0.3055509890934381,
+            "interior_local_anomaly_error": 4.189935973989184e-06,
+            "fine_interior_anomaly_rms": 1.371412977876562e-05,
+            "interior_anomaly_error_over_fine_anomaly": 0.30551963861948456,
+            "globally_mean_removed_endpoint_fraction": 0.9856801321904253
+          },
+          "p": {
+            "total_rms": 1.9719411939603308e-05,
+            "endpoint_squared_error_fraction": 0.9999895382427351,
+            "left_squared_error_fraction": 0.49996664703957167,
+            "right_squared_error_fraction": 0.5000228912031633,
+            "endpoint_rms_global_denominator": 1.9719308789482965e-05,
+            "interior_rms_global_denominator": 6.378172770779908e-08,
+            "interior_conditional_rms": 1.0415512519816232e-07,
+            "fine_interior_rms": 2.017633655496291e-06,
+            "interior_error_over_fine_signal": 0.05162241664359161,
+            "interior_local_anomaly_error": 9.671302853396427e-08,
+            "fine_interior_anomaly_rms": 2.017587812102008e-06,
+            "interior_anomaly_error_over_fine_anomaly": 0.047934978568890424,
+            "globally_mean_removed_endpoint_fraction": 0.9931933421150791
+          },
+          "minus_tauN": {
+            "total_rms": 1.0215572458859605e-05,
+            "endpoint_squared_error_fraction": 0.9375109477509702,
+            "left_squared_error_fraction": 0.4683043374692694,
+            "right_squared_error_fraction": 0.46920661028170085,
+            "endpoint_rms_global_denominator": 9.891243253775022e-06,
+            "interior_rms_global_denominator": 2.5536694298324896e-06,
+            "interior_conditional_rms": 4.170124716555767e-06,
+            "fine_interior_rms": 1.1711180090406577e-05,
+            "interior_error_over_fine_signal": 0.3560806583421767,
+            "interior_local_anomaly_error": 4.170067883512065e-06,
+            "fine_interior_anomaly_rms": 1.1711176337282304e-05,
+            "interior_anomaly_error_over_fine_anomaly": 0.35607591956725426,
+            "globally_mean_removed_endpoint_fraction": 0.9301416359390754
+          }
+        }
+      },
+      {
+        "elements_each_end": 11,
+        "width_m": 0.0859375,
+        "fields": {
+          "sigma": {
+            "total_rms": 2.971015009368444e-05,
+            "endpoint_squared_error_fraction": 0.9933220904929263,
+            "left_squared_error_fraction": 0.49657703569132133,
+            "right_squared_error_fraction": 0.49674505480160497,
+            "endpoint_rms_global_denominator": 2.96107830779362e-05,
+            "interior_rms_global_denominator": 2.427868221437248e-06,
+            "interior_conditional_rms": 4.34310270683616e-06,
+            "fine_interior_rms": 1.1950769750059793e-05,
+            "interior_error_over_fine_signal": 0.36341614788574017,
+            "interior_local_anomaly_error": 4.2817991174967055e-06,
+            "fine_interior_anomaly_rms": 1.1948676713757779e-05,
+            "interior_anomaly_error_over_fine_anomaly": 0.35834923147319037,
+            "globally_mean_removed_endpoint_fraction": 0.9895211932615303
+          },
+          "p": {
+            "total_rms": 1.9719411939603308e-05,
+            "endpoint_squared_error_fraction": 0.9999935931796712,
+            "left_squared_error_fraction": 0.4999704314035229,
+            "right_squared_error_fraction": 0.5000231617761483,
+            "endpoint_rms_global_denominator": 1.9719348770137484e-05,
+            "interior_rms_global_denominator": 4.9913179088661366e-08,
+            "interior_conditional_rms": 8.928740913229425e-08,
+            "fine_interior_rms": 1.7581422728515383e-06,
+            "interior_error_over_fine_signal": 0.050785087481844474,
+            "interior_local_anomaly_error": 5.242147978110652e-08,
+            "fine_interior_anomaly_rms": 1.7581330795936714e-06,
+            "interior_anomaly_error_over_fine_anomaly": 0.029816559616307227,
+            "globally_mean_removed_endpoint_fraction": 0.9944770427990569
+          },
+          "minus_tauN": {
+            "total_rms": 1.0215572458859605e-05,
+            "endpoint_squared_error_fraction": 0.9435975123725243,
+            "left_squared_error_fraction": 0.47210844080637376,
+            "right_squared_error_fraction": 0.4714890715661506,
+            "endpoint_rms_global_denominator": 9.923299568854677e-06,
+            "interior_rms_global_denominator": 2.426117542284262e-06,
+            "interior_conditional_rms": 4.339970996761864e-06,
+            "fine_interior_rms": 1.0210151865472607e-05,
+            "interior_error_over_fine_signal": 0.4250642942381911,
+            "interior_local_anomaly_error": 4.290279584085896e-06,
+            "fine_interior_anomaly_rms": 1.020782497220856e-05,
+            "interior_anomaly_error_over_fine_anomaly": 0.4202932158188889,
+            "globally_mean_removed_endpoint_fraction": 0.9425243566915561
+          }
+        }
+      },
+      {
+        "elements_each_end": 12,
+        "width_m": 0.09375,
+        "fields": {
+          "sigma": {
+            "total_rms": 2.971015009368444e-05,
+            "endpoint_squared_error_fraction": 0.9947523597263378,
+            "left_squared_error_fraction": 0.49741902842336544,
+            "right_squared_error_fraction": 0.4973333313029724,
+            "endpoint_rms_global_denominator": 2.963209346562656e-05,
+            "interior_rms_global_denominator": 2.152221046646809e-06,
+            "interior_conditional_rms": 4.304442093293618e-06,
+            "fine_interior_rms": 9.927619107910607e-06,
+            "interior_error_over_fine_signal": 0.43358251827608063,
+            "interior_local_anomaly_error": 3.799373540209141e-06,
+            "fine_interior_anomaly_rms": 9.910889022425142e-06,
+            "interior_anomaly_error_over_fine_anomaly": 0.38335345412630345,
+            "globally_mean_removed_endpoint_fraction": 0.9947058991725416
+          },
+          "p": {
+            "total_rms": 1.9719411939603308e-05,
+            "endpoint_squared_error_fraction": 0.9999950260333501,
+            "left_squared_error_fraction": 0.4999706402854294,
+            "right_squared_error_fraction": 0.5000243857479207,
+            "endpoint_rms_global_denominator": 1.971936289769365e-05,
+            "interior_rms_global_denominator": 4.397900445004506e-08,
+            "interior_conditional_rms": 8.795800890009011e-08,
+            "fine_interior_rms": 1.4593390169721728e-06,
+            "interior_error_over_fine_signal": 0.0602724986292663,
+            "interior_local_anomaly_error": 3.9574022998660806e-08,
+            "fine_interior_anomaly_rms": 1.459292220954882e-06,
+            "interior_anomaly_error_over_fine_anomaly": 0.027118641784279304,
+            "globally_mean_removed_endpoint_fraction": 0.9956037223275623
+          },
+          "minus_tauN": {
+            "total_rms": 1.0215572458859605e-05,
+            "endpoint_squared_error_fraction": 0.9559525659564946,
+            "left_squared_error_fraction": 0.47921269697121205,
+            "right_squared_error_fraction": 0.4767398689852825,
+            "endpoint_rms_global_denominator": 9.988053966360252e-06,
+            "interior_rms_global_denominator": 2.143991284330724e-06,
+            "interior_conditional_rms": 4.287982568661448e-06,
+            "fine_interior_rms": 8.488389088059083e-06,
+            "interior_error_over_fine_signal": 0.5051585788749369,
+            "interior_local_anomaly_error": 3.821710991347496e-06,
+            "fine_interior_anomaly_rms": 8.468013458536075e-06,
+            "interior_anomaly_error_over_fine_anomaly": 0.4513113978928633,
+            "globally_mean_removed_endpoint_fraction": 0.9634941419029415
+          }
+        }
+      },
+      {
+        "elements_each_end": 13,
+        "width_m": 0.1015625,
+        "fields": {
+          "sigma": {
+            "total_rms": 2.971015009368444e-05,
+            "endpoint_squared_error_fraction": 0.9955637859577507,
+            "left_squared_error_fraction": 0.49790995676595634,
+            "right_squared_error_fraction": 0.49765382919179446,
+            "endpoint_rms_global_denominator": 2.964417655164664e-05,
+            "interior_rms_global_denominator": 1.978841874446007e-06,
+            "interior_conditional_rms": 4.569939555580423e-06,
+            "fine_interior_rms": 7.70661510651142e-06,
+            "interior_error_over_fine_signal": 0.5929892037451334,
+            "interior_local_anomaly_error": 2.6124930222547967e-06,
+            "fine_interior_anomaly_rms": 7.637341053707275e-06,
+            "interior_anomaly_error_over_fine_anomaly": 0.34206839839719544,
+            "globally_mean_removed_endpoint_fraction": 0.9985095872930106
+          },
+          "p": {
+            "total_rms": 1.9719411939603308e-05,
+            "endpoint_squared_error_fraction": 0.9999977171493999,
+            "left_squared_error_fraction": 0.49997104674008136,
+            "right_squared_error_fraction": 0.5000266704093185,
+            "endpoint_rms_global_denominator": 1.971938943135477e-05,
+            "interior_rms_global_denominator": 2.979426695181533e-08,
+            "interior_conditional_rms": 6.880691217975261e-08,
+            "fine_interior_rms": 1.1271353026605435e-06,
+            "interior_error_over_fine_signal": 0.061045831868931366,
+            "interior_local_anomaly_error": 2.198702381964152e-08,
+            "fine_interior_anomaly_rms": 1.1265944689091588e-06,
+            "interior_anomaly_error_over_fine_anomaly": 0.019516360524058644,
+            "globally_mean_removed_endpoint_fraction": 0.9966692531498454
+          },
+          "minus_tauN": {
+            "total_rms": 1.0215572458859605e-05,
+            "endpoint_squared_error_fraction": 0.9632747490566664,
+            "left_squared_error_fraction": 0.4835172403284873,
+            "right_squared_error_fraction": 0.4797575087281791,
+            "endpoint_rms_global_denominator": 1.0026233083165716e-05,
+            "interior_rms_global_denominator": 1.957695283808023e-06,
+            "interior_conditional_rms": 4.521103596391292e-06,
+            "fine_interior_rms": 6.608420285555406e-06,
+            "interior_error_over_fine_signal": 0.6841428663781354,
+            "interior_local_anomaly_error": 2.6202707026628083e-06,
+            "fine_interior_anomaly_rms": 6.521892610317271e-06,
+            "interior_anomaly_error_over_fine_anomaly": 0.4017653860963129,
+            "globally_mean_removed_endpoint_fraction": 0.9773469799626293
+          }
+        }
+      },
+      {
+        "elements_each_end": 14,
+        "width_m": 0.109375,
+        "fields": {
+          "sigma": {
+            "total_rms": 2.971015009368444e-05,
+            "endpoint_squared_error_fraction": 0.9956835293215812,
+            "left_squared_error_fraction": 0.4979566246129998,
+            "right_squared_error_fraction": 0.49772690470858133,
+            "endpoint_rms_global_denominator": 2.9645959253437426e-05,
+            "interior_rms_global_denominator": 1.95195249245098e-06,
+            "interior_conditional_rms": 5.520955375864285e-06,
+            "fine_interior_rms": 5.397133672942861e-06,
+            "interior_error_over_fine_signal": 1.0229421226941575,
+            "interior_local_anomaly_error": 1.6545738872640566e-06,
+            "fine_interior_anomaly_rms": 5.189317996672586e-06,
+            "interior_anomaly_error_over_fine_anomaly": 0.3188422618010646,
+            "globally_mean_removed_endpoint_fraction": 0.9993744489568965
+          },
+          "p": {
+            "total_rms": 1.9719411939603308e-05,
+            "endpoint_squared_error_fraction": 0.9999987749603024,
+            "left_squared_error_fraction": 0.4999712376523199,
+            "right_squared_error_fraction": 0.5000275373079826,
+            "endpoint_rms_global_denominator": 1.971939986106839e-05,
+            "interior_rms_global_denominator": 2.1825743181942777e-08,
+            "interior_conditional_rms": 6.173252403355117e-08,
+            "fine_interior_rms": 7.713376969517605e-07,
+            "interior_error_over_fine_signal": 0.08003307018120745,
+            "interior_local_anomaly_error": 1.4248847486289819e-08,
+            "fine_interior_anomaly_rms": 7.691626575643325e-07,
+            "interior_anomaly_error_over_fine_anomaly": 0.018525142043961034,
+            "globally_mean_removed_endpoint_fraction": 0.9977708302876519
+          },
+          "minus_tauN": {
+            "total_rms": 1.0215572458859605e-05,
+            "endpoint_squared_error_fraction": 0.9642316388960152,
+            "left_squared_error_fraction": 0.4839057968668492,
+            "right_squared_error_fraction": 0.48032584202916606,
+            "endpoint_rms_global_denominator": 1.0031211734975188e-05,
+            "interior_rms_global_denominator": 1.9320227199251444e-06,
+            "interior_conditional_rms": 5.46458546666219e-06,
+            "fine_interior_rms": 4.685446071773013e-06,
+            "interior_error_over_fine_signal": 1.166289267436674,
+            "interior_local_anomaly_error": 1.657531332585902e-06,
+            "fine_interior_anomaly_rms": 4.4247408815217e-06,
+            "interior_anomaly_error_over_fine_anomaly": 0.37460528807640936,
+            "globally_mean_removed_endpoint_fraction": 0.9783656578535141
+          }
+        }
+      },
+      {
+        "elements_each_end": 15,
+        "width_m": 0.1171875,
+        "fields": {
+          "sigma": {
+            "total_rms": 2.971015009368444e-05,
+            "endpoint_squared_error_fraction": 0.996768353034052,
+            "left_squared_error_fraction": 0.49846039383343127,
+            "right_squared_error_fraction": 0.49830795920062065,
+            "endpoint_rms_global_denominator": 2.9662104887783505e-05,
+            "interior_rms_global_denominator": 1.6889500334194333e-06,
+            "interior_conditional_rms": 6.755800133677733e-06,
+            "fine_interior_rms": 3.1892954349303906e-06,
+            "interior_error_over_fine_signal": 2.1182735408220923,
+            "interior_local_anomaly_error": 9.0818872088506e-07,
+            "fine_interior_anomaly_rms": 2.62287949052829e-06,
+            "interior_anomaly_error_over_fine_anomaly": 0.346256366014794,
+            "globally_mean_removed_endpoint_fraction": 0.9994179029423731
+          },
+          "p": {
+            "total_rms": 1.9719411939603308e-05,
+            "endpoint_squared_error_fraction": 0.9999994733676144,
+            "left_squared_error_fraction": 0.4999714258264157,
+            "right_squared_error_fraction": 0.5000280475411987,
+            "endpoint_rms_global_denominator": 1.9719406747162148e-05,
+            "interior_rms_global_denominator": 1.431026713299407e-08,
+            "interior_conditional_rms": 5.724106853197628e-08,
+            "fine_interior_rms": 3.970579454219758e-07,
+            "interior_error_over_fine_signal": 0.144163009938368,
+            "interior_local_anomaly_error": 6.049526676233323e-09,
+            "fine_interior_anomaly_rms": 3.900304319233456e-07,
+            "interior_anomaly_error_over_fine_anomaly": 0.01551039657700931,
+            "globally_mean_removed_endpoint_fraction": 0.998882753731778
+          },
+          "minus_tauN": {
+            "total_rms": 1.0215572458859605e-05,
+            "endpoint_squared_error_fraction": 0.973113475421669,
+            "left_squared_error_fraction": 0.48805826683899417,
+            "right_squared_error_fraction": 0.4850552085826749,
+            "endpoint_rms_global_denominator": 1.0077306131272525e-05,
+            "interior_rms_global_denominator": 1.6750587448886793e-06,
+            "interior_conditional_rms": 6.700234979554717e-06,
+            "fine_interior_rms": 2.925091346940845e-06,
+            "interior_error_over_fine_signal": 2.290607090463017,
+            "interior_local_anomaly_error": 9.142174987373488e-07,
+            "fine_interior_anomaly_rms": 2.233528648446127e-06,
+            "interior_anomaly_error_over_fine_anomaly": 0.409315322359251,
+            "globally_mean_removed_endpoint_fraction": 0.9823485040455788
+          }
+        }
+      }
+    ]
+  },
+  "endpoint_similarity": {
+    "left": {
+      "sigma": {
+        "32": {
+          "amplitude_Pa": 0.00022073729769545025,
+          "first_interior_value_Pa": -6.797582841500116e-05,
+          "half_height_width_m": 0.005973092257627277,
+          "first_zero_width_m": 0.011946184515254555,
+          "half_height_width_over_h": 0.38227790448814575,
+          "first_zero_width_over_h": 0.7645558089762915
+        },
+        "64": {
+          "amplitude_Pa": 0.00021956692671665223,
+          "first_interior_value_Pa": -6.2949232074061e-05,
+          "half_height_width_m": 0.0030358734564357817,
+          "first_zero_width_m": 0.006071746912871563,
+          "half_height_width_over_h": 0.38859180242378005,
+          "first_zero_width_over_h": 0.7771836048475601
+        },
+        "amplitude_ratio_64_over_32": 0.9946979011203952,
+        "half_height_width_ratio_64_over_32": 0.5082582564431606,
+        "first_zero_width_ratio_64_over_32": 0.5082582564431606,
+        "normalized_0_to_2_profile_rms_over_coarse_amplitude": 0.022335420935388085
+      },
+      "p": {
+        "32": {
+          "amplitude_Pa": 0.00014710276468576922,
+          "first_interior_value_Pa": -4.069533974870865e-05,
+          "half_height_width_m": 0.0061195524447294845,
+          "first_zero_width_m": 0.012239104889458969,
+          "half_height_width_over_h": 0.391651356462687,
+          "first_zero_width_over_h": 0.783302712925374
+        },
+        "64": {
+          "amplitude_Pa": 0.00014641199322795728,
+          "first_interior_value_Pa": -3.967260283843643e-05,
+          "half_height_width_m": 0.003073450788708219,
+          "first_zero_width_m": 0.006146901577416438,
+          "half_height_width_over_h": 0.39340170095465204,
+          "first_zero_width_over_h": 0.7868034019093041
+        },
+        "amplitude_ratio_64_over_32": 0.9953041572040641,
+        "half_height_width_ratio_64_over_32": 0.5022345696792343,
+        "first_zero_width_ratio_64_over_32": 0.5022345696792343,
+        "normalized_0_to_2_profile_rms_over_coarse_amplitude": 0.005786834335761626
+      },
+      "minus_tauN": {
+        "32": {
+          "amplitude_Pa": 7.363453839930003e-05,
+          "first_interior_value_Pa": -2.7280491424573855e-05,
+          "half_height_width_m": 0.005700536701505662,
+          "first_zero_width_m": 0.011401073403011323,
+          "half_height_width_over_h": 0.36483434889636235,
+          "first_zero_width_over_h": 0.7296686977927247
+        },
+        "64": {
+          "amplitude_Pa": 7.315494017985447e-05,
+          "first_interior_value_Pa": -2.3276639893544692e-05,
+          "half_height_width_m": 0.00296335997875435,
+          "first_zero_width_m": 0.0059267199575087,
+          "half_height_width_over_h": 0.3793100772805568,
+          "first_zero_width_over_h": 0.7586201545611136
+        },
+        "amplitude_ratio_64_over_32": 0.9934867763162332,
+        "half_height_width_ratio_64_over_32": 0.5198387685095771,
+        "first_zero_width_ratio_64_over_32": 0.5198387685095771,
+        "normalized_0_to_2_profile_rms_over_coarse_amplitude": 0.05574767886433446
+      }
+    },
+    "right": {
+      "sigma": {
+        "32": {
+          "amplitude_Pa": 0.00022093465111083788,
+          "first_interior_value_Pa": -4.9711700171428674e-05,
+          "half_height_width_m": 0.006377517944083646,
+          "first_zero_width_m": 0.012755035888167293,
+          "half_height_width_over_h": 0.40816114842135337,
+          "first_zero_width_over_h": 0.8163222968427067
+        },
+        "64": {
+          "amplitude_Pa": 0.00021964173959077016,
+          "first_interior_value_Pa": -5.3943684065416164e-05,
+          "half_height_width_m": 0.0031360426071334133,
+          "first_zero_width_m": 0.006272085214266827,
+          "half_height_width_over_h": 0.4014134537130769,
+          "first_zero_width_over_h": 0.8028269074261538
+        },
+        "amplitude_ratio_64_over_32": 0.9941479912111247,
+        "half_height_width_ratio_64_over_32": 0.4917340311120074,
+        "first_zero_width_ratio_64_over_32": 0.4917340311120074,
+        "normalized_0_to_2_profile_rms_over_coarse_amplitude": 0.022495377929021544
+      },
+      "p": {
+        "32": {
+          "amplitude_Pa": 0.00014712659992710542,
+          "first_interior_value_Pa": -3.7999434994162584e-05,
+          "half_height_width_m": 0.006208886623749864,
+          "first_zero_width_m": 0.012417773247499727,
+          "half_height_width_over_h": 0.3973687439199913,
+          "first_zero_width_over_h": 0.7947374878399825
+        },
+        "64": {
+          "amplitude_Pa": 0.0001464202171064244,
+          "first_interior_value_Pa": -3.834860694951203e-05,
+          "half_height_width_m": 0.0030955112476053776,
+          "first_zero_width_m": 0.006191022495210755,
+          "half_height_width_over_h": 0.39622543969348833,
+          "first_zero_width_over_h": 0.7924508793869767
+        },
+        "amplitude_ratio_64_over_32": 0.9951988095896255,
+        "half_height_width_ratio_64_over_32": 0.4985614064467874,
+        "first_zero_width_ratio_64_over_32": 0.4985614064467874,
+        "normalized_0_to_2_profile_rms_over_coarse_amplitude": 0.004785483582754165
+      },
+      "minus_tauN": {
+        "32": {
+          "amplitude_Pa": 7.380803995756529e-05,
+          "first_interior_value_Pa": -1.1712261354947635e-05,
+          "half_height_width_m": 0.0067425547305001105,
+          "first_zero_width_m": 0.013485109461000221,
+          "half_height_width_over_h": 0.43152350275200707,
+          "first_zero_width_over_h": 0.8630470055040141
+        },
+        "64": {
+          "amplitude_Pa": 7.322153252544526e-05,
+          "first_interior_value_Pa": -1.5595105085776058e-05,
+          "half_height_width_m": 0.0032203607242995186,
+          "first_zero_width_m": 0.006440721448599037,
+          "half_height_width_over_h": 0.4122061727103384,
+          "first_zero_width_over_h": 0.8244123454206768
+        },
+        "amplitude_ratio_64_over_32": 0.9920536105218722,
+        "half_height_width_ratio_64_over_32": 0.47761729092566924,
+        "first_zero_width_ratio_64_over_32": 0.47761729092566924,
+        "normalized_0_to_2_profile_rms_over_coarse_amplitude": 0.05827521200856316
+      }
+    }
+  },
+  "topology": {
+    "coarse": {
+      "independent_surface_nodes": 17,
+      "segments": 16,
+      "endpoint_mass_coupling": 0.0,
+      "endpoint_row_mass": [
+        0.0048421223827315035,
+        0.004842122381591545
+      ],
+      "adjacent_row_mass": [
+        0.009684244783751073,
+        0.009684244787979525
+      ]
+    },
+    "fine": {
+      "independent_surface_nodes": 33,
+      "segments": 32,
+      "endpoint_mass_coupling": 0.0,
+      "endpoint_row_mass": [
+        0.0024108886634472033,
+        0.0024108886614620873
+      ],
+      "adjacent_row_mass": [
+        0.004821777334412449,
+        0.004821777336650878
+      ]
+    }
+  },
+  "analysis_seconds": 0.9988394869978947
+}
