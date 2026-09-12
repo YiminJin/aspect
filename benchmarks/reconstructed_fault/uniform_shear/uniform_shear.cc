@@ -499,6 +499,18 @@ namespace aspect
               AssertThrow(std::system(command.c_str())==0,
                           ExcMessage("K3 evolving smoke gate failed; inspect guard JSON. Do not retry."));
             }
+          else if (std::getenv("ASPECT_K4_STATE_GUARD"))
+            {
+              // K4 keeps the K1 snapshots. Check every accepted state before
+              // advancing, including the transient outside the accuracy window.
+              nodes.close(); surface.close(); segments.close(); particles.close();
+              bulk.close(); times.close(); weak_output.close(); transfer.close(); qp_cells.close();
+              const std::string command = std::string("OPENBLAS_NUM_THREADS=1 timeout 120 python3 \"")
+                +ASPECT_SOURCE_DIR+"/benchmarks/reconstructed_fault/uniform_shear/finite-width/production.py\" check \""
+                +this->get_output_directory()+"\" --step "+std::to_string(step);
+              AssertThrow(std::system(command.c_str())==0,
+                          ExcMessage("K4 accepted-state guard failed; preserve output and stop."));
+            }
           return {"K1 accepted-state export:", std::to_string(step)};
         }
     };

@@ -1,0 +1,6 @@
+# Same physical mesh as A; independently initialize the half-width model.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/finite-width/k42_A.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/finite-width/k42_B
+subsection Phase field model
+  set Length scale = 0.078125
+end

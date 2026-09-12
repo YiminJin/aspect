@@ -1,5 +1,61 @@
 # Stage K: K0 inventory and proposed K1 benchmark
 
+**K4.2 post-transient comparison completed.** All three A/B/C cases reach 6 s
+at dt=.125 with 147 passing accepted-state guards and 476 passing fresh-linear
+checks. A (ell0,32x256) and C (half width,32x512) pass every K1 observable
+tolerance on [4,6] against both .125/.0625 references. B (half width,32x256)
+fails cohesive traction only; B→C reduces that error from .991835 to .246654
+Pa (4.02x). Traction, state, slip, velocity profiles and total Ih width signals
+exceed the conservative uncertainty by >4 throughout the interval; V and the
+actual supported-integral contrasts remain unresolved. Containment and actual
+normalization remain below their separate 1e-4 limits at every accepted state.
+Initial differences and the small nonmonotone second-moment self-error remain
+documented. Runtime A/B/C: 966.8/798.4/1941.8 s; peak RSS 1.061/.829/1.508 GiB.
+No production equations or criteria changed. One stopped attempt due solely
+to an erroneous new benchmark-volume threshold is preserved, with its
+diagnostic correction and passing test evidence. Eleven focused Python tests
+pass. K4.1 is not a full-history pass; K4.3 has not begun.
+See `stage_K4_2_result.md` and `stage_K4_2_execution.md`.
+
+**K4 post-transient recommendation: [4,6] s is useful and persistently qualified
+on saved .125-s common samples of the .125/.0625 references.** Earliest width
+qualification times are C=0, Theta=1.125, q=1.875, slip=2.375, velocity max/L2
+=3.375, and V/full/supported integrals=4 s. All 17 interval samples pass the
+reported width-specific budget, with unchanged coefficients/scales. Individual
+trajectories also meet the original quarter-allowance budget on this interval
+(ratios .9852/.9857), but not over the full history (568/578). Traction and
+velocity-profile width signals remain about 16--17 Pa and 1.6e-5 m/s.
+Recommend explicitly post-transient K4.2 after review, running from original
+t=0 initialization and keeping all guards active; do not reset histories at
+4 s or declare K4.1 fully passed. No new reference or ASPECT run occurred.
+See `stage_K4_post_transient_recommendation.md`.
+
+**K4.1b: matched width differences cancel most common-mode timestep error and
+contract, but the complete transient remains unqualified.** Saved .25/.125-s
+differences justified one .0625-s scalar pair (.055 s). At identical physical
+times, width-change maxima contract by 1.61--1.78; individual/common-mode
+transients remain much larger. Early matched changes are still material
+(q 1.1323 Pa; velocity max 3.70392e-5 m/s at .125 s). Late-time contrasts
+are stable. The original K4.1 criterion still fails by factors 568/578.
+A distinct width-specific uncertainty criterion is proposed for review, not
+adopted, and it also does not qualify the complete all-observable transient.
+Three focused scalar/timeline/accounting tests pass. No further level, ASPECT
+run or K4.2 action was made. See `stage_K4_1b_temporal_width_result.md`.
+
+**K4.1 reference-only check stopped at temporal qualification; Stage 4.2 has
+not begun.** Independent 2048/4096 references at ell=.15625/.078125 m resolve
+the initial width differences: I_h changes by -.344277 m (summed grid change
+.000221 m), C0 by -17.6630 Pa (grid change .004952 Pa). Both widths pass
+admissibility and the approved 1e-4 support/normalization checks. Reference
+resolution errors are below .027 of the quarter K1 observable allowance.
+However, .5/.25 and .25/.125-s scalar comparisons fail the prescribed temporal
+criterion, dominated by the retained-history initial transient. No timestep
+is qualified. Several late-time width effects are robust, but they do not
+certify the complete transient. The original K1 scalar replay cross-check and
+three cheap tests pass. No ASPECT, MPI, production edit or new convergence
+campaign was performed. See `stage_K4_1_reference_result.md`. K3's I_h-feedback
+disposition remains closed and unchanged.
+
 **K3 I_h-feedback investigation closed by user direction, with a documented
 limitation.** One offline scalar sensitivity replay injects only the saved
 I_h-feedback errors, with no initial offset or repeated history reset. The

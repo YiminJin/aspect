@@ -1,0 +1,22 @@
+# Approved post-transient K4.2: original initialization, accuracy window [4,6].
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/pilot.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/finite-width/build/libuniform_shear.so
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/finite-width/k42_A
+set Maximum time step = 0.125
+set Maximum first time step = 0.125
+subsection Geometry model
+  subsection Box
+    set Y repetitions = 8
+  end
+end
+subsection Mesh refinement
+  set Initial global refinement = 5
+end
+subsection Fault reconstruction
+  set Structural point spacing = 0.0078125
+end
+subsection Material model
+  subsection Phase field fault
+    set Phase field activation threshold = 0.1
+  end
+end

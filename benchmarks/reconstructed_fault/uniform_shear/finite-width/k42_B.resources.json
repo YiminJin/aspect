@@ -1,0 +1,17 @@
+{
+  "case": "k42_B",
+  "status": 0,
+  "wall_seconds": 798.4046769460001,
+  "cap_s": 1200,
+  "peak_rss_KiB": 869532,
+  "command": [
+    "/home/ein/repository/aspect/build-pf-cpdi/aspect-release",
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/finite-width/k42_B.prm"
+  ],
+  "sha256": {
+    "build-pf-cpdi/aspect-release": "61261bbaa827dd4e368f3879aff8cc078e96fc67684e604e898c15605d84c7f5",
+    "benchmarks/reconstructed_fault/uniform_shear/finite-width/build/libuniform_shear.release.so": "dc3a8d5405747e1572ea9278e6041a0da44b00c88b576457209678ab81964c31",
+    "benchmarks/reconstructed_fault/uniform_shear/finite-width/k42_B.prm": "408012810bfc14a1237c28076a6a653349842be02f4ffbac181bd11b18a72db6"
+  },
+  "git_head": "86fff739569da2600d095bc2dca4aa4e6ac04035"
+}

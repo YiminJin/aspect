@@ -1,0 +1,4696 @@
+{
+  "ready": false,
+  "selected_common_dt_s": null,
+  "spatial": {
+    "ell0": {
+      "rows": [
+        {
+          "time_s": 0.0,
+          "metrics": {
+            "V": {
+              "difference": 3.702535649493903e-10,
+              "quarter_allowance": 1.5788522344900666e-07,
+              "ratio": 0.0023450805392752527
+            },
+            "q": {
+              "difference": 0.0007331511799293366,
+              "quarter_allowance": 0.5257669826586492,
+              "ratio": 0.0013944412717246078
+            },
+            "C": {
+              "difference": 0.0007995365152169143,
+              "quarter_allowance": 0.1623624319018662,
+              "ratio": 0.0049243935672272
+            },
+            "Theta": {
+              "difference": 0.0,
+              "quarter_allowance": 0.1005,
+              "ratio": 0.0
+            },
+            "slip": {
+              "difference": 0.0,
+              "quarter_allowance": 1.5e-09,
+              "ratio": 0.0
+            },
+            "velocity": {
+              "difference": 1.0037813330911801e-10,
+              "quarter_allowance": 5.965076884098908e-08,
+              "ratio": 0.0016827634456262547
+            },
+            "crack_integral": {
+              "difference": 3.702535638651881e-10,
+              "quarter_allowance": 1.5788522344900687e-07,
+              "ratio": 0.002345080532408222
+            },
+            "velocity_L2": {
+              "difference": 6.568783417484378e-11,
+              "quarter_allowance": 4.581154090003829e-08,
+              "ratio": 0.0014338708736773547
+            }
+          }
+        },
+        {
+          "time_s": 0.5,
+          "metrics": {
+            "V": {
+              "difference": 1.2941565236991581e-09,
+              "quarter_allowance": 4.2094077487311374e-07,
+              "ratio": 0.0030744384981218845
+            },
+            "q": {
+              "difference": 0.0006454632591612608,
+              "quarter_allowance": 0.5657500042193895,
+              "ratio": 0.0011408983726864626
+            },
+            "C": {
+              "difference": 0.0008133322008916366,
+              "quarter_allowance": 0.1637697181849245,
+              "ratio": 0.004966316178020427
+            },
+            "Theta": {
+              "difference": 8.509621724783756e-05,
+              "quarter_allowance": 0.06636338373703529,
+              "ratio": 0.0012822766479935843
+            },
+            "slip": {
+              "difference": 6.470782618495791e-10,
+              "quarter_allowance": 2.1184538743655687e-07,
+              "ratio": 0.0030544836008920186
+            },
+            "velocity": {
+              "difference": 3.6436972525571293e-10,
+              "quarter_allowance": 1.4790246705469837e-07,
+              "ratio": 0.0024635811187717314
+            },
+            "crack_integral": {
+              "difference": 1.2941565208802325e-09,
+              "quarter_allowance": 4.2094077487311427e-07,
+              "ratio": 0.0030744384914251533
+            },
+            "velocity_L2": {
+              "difference": 2.358516031643345e-10,
+              "quarter_allowance": 1.041854221789676e-07,
+              "ratio": 0.0022637677923807173
+            }
+          }
+        },
+        {
+          "time_s": 1.0,
+          "metrics": {
+            "V": {
+              "difference": 2.519367028365471e-10,
+              "quarter_allowance": 1.3771949173925743e-07,
+              "ratio": 0.001829346737014799
+            },
+            "q": {
+              "difference": 0.0007678979525280738,
+              "quarter_allowance": 0.5205683067009572,
+              "ratio": 0.0014751146826331787
+            },
+            "C": {
+              "difference": 0.0008076019573763915,
+              "quarter_allowance": 0.163605668543086,
+              "ratio": 0.004936271246394543
+            },
+            "Theta": {
+              "difference": 8.865744078434545e-05,
+              "quarter_allowance": 0.058137529992382184,
+              "ratio": 0.0015249605684307937
+            },
+            "slip": {
+              "difference": 7.730466132678526e-10,
+              "quarter_allowance": 2.8058013330618557e-07,
+              "ratio": 0.00275517230731464
+            },
+            "velocity": {
+              "difference": 6.565000869047499e-11,
+              "quarter_allowance": 5.330439989234357e-08,
+              "ratio": 0.0012316058115852588
+            },
+            "crack_integral": {
+              "difference": 2.519367019149753e-10,
+              "quarter_allowance": 1.377194917392576e-07,
+              "ratio": 0.0018293467303231376
+            },
+            "velocity_L2": {
+              "difference": 4.4775332133146927e-11,
+              "quarter_allowance": 4.203604598981867e-08,
+              "ratio": 0.0010651651714338624
+            }
+          }
+        },
+        {
+          "time_s": 1.5,
+          "metrics": {
+            "V": {
+              "difference": 6.437334996653443e-11,
+              "quarter_allowance": 7.780883169363653e-08,
+              "ratio": 0.0008273270342883083
+            },
+            "q": {
+              "difference": 0.0007961743878013294,
+              "quarter_allowance": 0.5061159602956898,
+              "ratio": 0.0015731066598575112
+            },
+            "C": {
+              "difference": 0.0008029884079974181,
+              "quarter_allowance": 0.16316611051319213,
+              "ratio": 0.004921294044896019
+            },
+            "Theta": {
+              "difference": 8.548223384252651e-05,
+              "quarter_allowance": 0.05407674092486077,
+              "ratio": 0.0015807578707693099
+            },
+            "slip": {
+              "difference": 8.052332882511198e-10,
+              "quarter_allowance": 3.193595491530038e-07,
+              "ratio": 0.0025214003789357053
+            },
+            "velocity": {
+              "difference": 4.8899277090344844e-11,
+              "quarter_allowance": 3.3982653067448386e-08,
+              "ratio": 0.0014389481890448668
+            },
+            "crack_integral": {
+              "difference": 6.43733494515384e-11,
+              "quarter_allowance": 7.780883169363663e-08,
+              "ratio": 0.0008273270276695722
+            },
+            "velocity_L2": {
+              "difference": 1.757230898730192e-11,
+              "quarter_allowance": 2.9754535644562736e-08,
+              "ratio": 0.0005905758099274198
+            }
+          }
+        },
+        {
+          "time_s": 2.0,
+          "metrics": {
+            "V": {
+              "difference": 2.095306992689651e-11,
+              "quarter_allowance": 6.14337548668178e-08,
+              "ratio": 0.0003410677073592629
+            },
+            "q": {
+              "difference": 0.0008026538388321569,
+              "quarter_allowance": 0.5005262390092664,
+              "ratio": 0.00160361990296636
+            },
+            "C": {
+              "difference": 0.0007986590918562797,
+              "quarter_allowance": 0.1626532178431363,
+              "ratio": 0.004910195460298308
+            },
+            "Theta": {
+              "difference": 8.14673806388555e-05,
+              "quarter_allowance": 0.05113948708294066,
+              "ratio": 0.0015930425838399103
+            },
+            "slip": {
+              "difference": 8.157098231468055e-10,
+              "quarter_allowance": 3.4995142658641273e-07,
+              "ratio": 0.0023309229829511324
+            },
+            "velocity": {
+              "difference": 4.462571442611545e-11,
+              "quarter_allowance": 2.9306831104695285e-08,
+              "ratio": 0.0015227069165784323
+            },
+            "crack_integral": {
+              "difference": 2.0953069520320694e-11,
+              "quarter_allowance": 6.143375486681788e-08,
+              "ratio": 0.0003410677007411449
+            },
+            "velocity_L2": {
+              "difference": 1.5136122213917052e-11,
+              "quarter_allowance": 2.6793772385961274e-08,
+              "ratio": 0.0005649119502801963
+            }
+          }
+        },
+        {
+          "time_s": 2.5,
+          "metrics": {
+            "V": {
+              "difference": 7.596701086655215e-12,
+              "quarter_allowance": 5.6459090266300765e-08,
+              "ratio": 0.00013455231125446463
+            },
+            "q": {
+              "difference": 0.0008024394566064075,
+              "quarter_allowance": 0.4980689609954313,
+              "ratio": 0.001611101111385594
+            },
+            "C": {
+              "difference": 0.0007944314898509219,
+              "quarter_allowance": 0.1621199385362912,
+              "ratio": 0.004900270114974694
+            },
+            "Theta": {
+              "difference": 7.737907277771683e-05,
+              "quarter_allowance": 0.04861471000356756,
+              "ratio": 0.0015916802295444818
+            },
+            "slip": {
+              "difference": 8.195081737782245e-10,
+              "quarter_allowance": 3.780559717195631e-07,
+              "ratio": 0.0021676900646503336
+            },
+            "velocity": {
+              "difference": 4.34492363928765e-11,
+              "quarter_allowance": 2.8375000000000107e-08,
+              "ratio": 0.0015312506217753776
+            },
+            "crack_integral": {
+              "difference": 7.596700707184455e-12,
+              "quarter_allowance": 5.645909026630084e-08,
+              "ratio": 0.00013455230453330124
+            },
+            "velocity_L2": {
+              "difference": 1.5148534598922896e-11,
+              "quarter_allowance": 2.6150718216711235e-08,
+              "ratio": 0.0005792779560923281
+            }
+          }
+        },
+        {
+          "time_s": 3.0,
+          "metrics": {
+            "V": {
+              "difference": 2.746169516288678e-12,
+              "quarter_allowance": 5.5301545070229465e-08,
+              "ratio": 4.965809748717177e-05
+            },
+            "q": {
+              "difference": 0.0007998069308996492,
+              "quarter_allowance": 0.49682470688281594,
+              "ratio": 0.0016098372722198303
+            },
+            "C": {
+              "difference": 0.0007902516542230842,
+              "quarter_allowance": 0.1615839800127851,
+              "ratio": 0.004890655955872338
+            },
+            "Theta": {
+              "difference": 7.335975273292661e-05,
+              "quarter_allowance": 0.04628075423766445,
+              "ratio": 0.0015851027914584976
+            },
+            "slip": {
+              "difference": 8.208812584753825e-10,
+              "quarter_allowance": 4.0558174425467786e-07,
+              "ratio": 0.0020239600773547754
+            },
+            "velocity": {
+              "difference": 4.355642194440795e-11,
+              "quarter_allowance": 2.9000000000000045e-08,
+              "ratio": 0.001501945584289927
+            },
+            "crack_integral": {
+              "difference": 2.746169150370445e-12,
+              "quarter_allowance": 5.530154507022954e-08,
+              "ratio": 4.965809087039033e-05
+            },
+            "velocity_L2": {
+              "difference": 1.5432779170408777e-11,
+              "quarter_allowance": 2.625996773260422e-08,
+              "ratio": 0.0005876922366224971
+            }
+          }
+        },
+        {
+          "time_s": 3.5,
+          "metrics": {
+            "V": {
+              "difference": 8.466535849141477e-13,
+              "quarter_allowance": 5.559303316945315e-08,
+              "ratio": 1.5229490758913306e-05
+            },
+            "q": {
+              "difference": 0.0007962401473378122,
+              "quarter_allowance": 0.49606471831839516,
+              "ratio": 0.0016051134417238515
+            },
+            "C": {
+              "difference": 0.0007861003416564927,
+              "quarter_allowance": 0.16105203902729776,
+              "ratio": 0.0048810331517954355
+            },
+            "Theta": {
+              "difference": 6.944687794430138e-05,
+              "quarter_allowance": 0.04405915058747997,
+              "ratio": 0.001576219173958285
+            },
+            "slip": {
+              "difference": 8.213045852136294e-10,
+              "quarter_allowance": 4.332532608394045e-07,
+              "ratio": 0.0018956685602836475
+            },
+            "velocity": {
+              "difference": 4.4198802705622525e-11,
+              "quarter_allowance": 2.962500000000006e-08,
+              "ratio": 0.0014919427073627827
+            },
+            "crack_integral": {
+              "difference": 8.466532189959144e-13,
+              "quarter_allowance": 5.5593033169453223e-08,
+              "ratio": 1.5229484176825346e-05
+            },
+            "velocity_L2": {
+              "difference": 1.5771330869772646e-11,
+              "quarter_allowance": 2.6650720807718087e-08,
+              "ratio": 0.0005917787733983257
+            }
+          }
+        },
+        {
+          "time_s": 4.0,
+          "metrics": {
+            "V": {
+              "difference": 7.817303662033259e-14,
+              "quarter_allowance": 5.646299158105837e-08,
+              "ratio": 1.3845004388070237e-06
+            },
+            "q": {
+              "difference": 0.0007923078720750709,
+              "quarter_allowance": 0.4954980667457293,
+              "ratio": 0.00159901304414504
+            },
+            "C": {
+              "difference": 0.0007819700400659713,
+              "quarter_allowance": 0.1605267636271894,
+              "ratio": 0.00487127518425547
+            },
+            "Theta": {
+              "difference": 6.565398484781326e-05,
+              "quarter_allowance": 0.0419212132906295,
+              "ratio": 0.0015661279742227468
+            },
+            "slip": {
+              "difference": 8.213436716777295e-10,
+              "quarter_allowance": 4.6135975662993365e-07,
+              "ratio": 0.001780267264048664
+            },
+            "velocity": {
+              "difference": 4.5061761366451325e-11,
+              "quarter_allowance": 3.0250000000000096e-08,
+              "ratio": 0.0014896450038496259
+            },
+            "crack_integral": {
+              "difference": 7.817265714957222e-14,
+              "quarter_allowance": 5.646299158105844e-08,
+              "ratio": 1.3844937181082111e-06
+            },
+            "velocity_L2": {
+              "difference": 1.6126280193792273e-11,
+              "quarter_allowance": 2.715318529711493e-08,
+              "ratio": 0.000593900126903554
+            }
+          }
+        },
+        {
+          "time_s": 4.5,
+          "metrics": {
+            "V": {
+              "difference": 2.3544469325564865e-13,
+              "quarter_allowance": 5.680958069548621e-08,
+              "ratio": 4.1444539877471025e-06
+            },
+            "q": {
+              "difference": 0.0007882387915287836,
+              "quarter_allowance": 0.49476137931759273,
+              "ratio": 0.001593169605550001
+            },
+            "C": {
+              "difference": 0.0007778604946793166,
+              "quarter_allowance": 0.1600057066258114,
+              "ratio": 0.0048614547011027395
+            },
+            "Theta": {
+              "difference": 6.203443948038512e-05,
+              "quarter_allowance": 0.039886529643465486,
+              "ratio": 0.0015552729213319282
+            },
+            "slip": {
+              "difference": 8.212259493311017e-10,
+              "quarter_allowance": 4.896395469776768e-07,
+              "ratio": 0.001677205108125268
+            },
+            "velocity": {
+              "difference": 4.5407166148972314e-11,
+              "quarter_allowance": 3.0250000000000036e-08,
+              "ratio": 0.001501063343767678
+            },
+            "crack_integral": {
+              "difference": 2.35445072726409e-13,
+              "quarter_allowance": 5.680958069548628e-08,
+              "ratio": 4.144460667443651e-06
+            },
+            "velocity_L2": {
+              "difference": 1.6269046517566335e-11,
+              "quarter_allowance": 2.721996224874582e-08,
+              "ratio": 0.0005976880632270511
+            }
+          }
+        },
+        {
+          "time_s": 5.0,
+          "metrics": {
+            "V": {
+              "difference": 3.641157742071549e-13,
+              "quarter_allowance": 5.694651177427029e-08,
+              "ratio": 6.3939961002435024e-06
+            },
+            "q": {
+              "difference": 0.0007841258307053067,
+              "quarter_allowance": 0.49396007147287213,
+              "ratio": 0.0015874275594123
+            },
+            "C": {
+              "difference": 0.0007737715295661474,
+              "quarter_allowance": 0.15948787997577388,
+              "ratio": 0.004851600821853565
+            },
+            "Theta": {
+              "difference": 5.86015553381003e-05,
+              "quarter_allowance": 0.03795862008547893,
+              "ratio": 0.0015438273363503623
+            },
+            "slip": {
+              "difference": 8.210438915117607e-10,
+              "quarter_allowance": 5.179878028648119e-07,
+              "ratio": 0.0015850641404505088
+            },
+            "velocity": {
+              "difference": 4.554465452442035e-11,
+              "quarter_allowance": 3.0250000000000115e-08,
+              "ratio": 0.001505608414030419
+            },
+            "crack_integral": {
+              "difference": 3.641161536779153e-13,
+              "quarter_allowance": 5.694651177427036e-08,
+              "ratio": 6.394002763878343e-06
+            },
+            "velocity_L2": {
+              "difference": 1.632616275985518e-11,
+              "quarter_allowance": 2.7246360683518246e-08,
+              "ratio": 0.0005992052644935855
+            }
+          }
+        },
+        {
+          "time_s": 5.5,
+          "metrics": {
+            "V": {
+              "difference": 4.1897503532967867e-13,
+              "quarter_allowance": 5.7000107151651156e-08,
+              "ratio": 7.350425398587027e-06
+            },
+            "q": {
+              "difference": 0.0007800060221825333,
+              "quarter_allowance": 0.49313602936171375,
+              "ratio": 0.0015817258844220473
+            },
+            "C": {
+              "difference": 0.0007697030117697068,
+              "quarter_allowance": 0.15897288319547012,
+              "ratio": 0.004841725181666952
+            },
+            "Theta": {
+              "difference": 5.5353637293364955e-05,
+              "quarter_allowance": 0.03613507203528366,
+              "ratio": 0.0015318535200183232
+            },
+            "slip": {
+              "difference": 8.20834403919557e-10,
+              "quarter_allowance": 5.463628564406376e-07,
+              "ratio": 0.0015023612865395083
+            },
+            "velocity": {
+              "difference": 4.559943551969855e-11,
+              "quarter_allowance": 3.025000000000004e-08,
+              "ratio": 0.0015074193560230904
+            },
+            "crack_integral": {
+              "difference": 4.1897541480043904e-13,
+              "quarter_allowance": 5.700010715165123e-08,
+              "ratio": 7.350432055956263e-06
+            },
+            "velocity_L2": {
+              "difference": 1.6349150098971554e-11,
+              "quarter_allowance": 2.7256695606670827e-08,
+              "ratio": 0.0005998214286463341
+            }
+          }
+        },
+        {
+          "time_s": 6.0,
+          "metrics": {
+            "V": {
+              "difference": 4.4464686923748054e-13,
+              "quarter_allowance": 5.702061317964645e-08,
+              "ratio": 7.798002238885035e-06
+            },
+            "q": {
+              "difference": 0.0007758939574387114,
+              "quarter_allowance": 0.49230586975360074,
+              "ratio": 0.0015760404356483634
+            },
+            "C": {
+              "difference": 0.0007656548278873743,
+              "quarter_allowance": 0.1584605495524998,
+              "ratio": 0.004831832465870024
+            },
+            "Theta": {
+              "difference": 5.228368871712519e-05,
+              "quarter_allowance": 0.03441143598395632,
+              "ratio": 0.0015193695706712577
+            },
+            "slip": {
+              "difference": 8.206120804578332e-10,
+              "quarter_allowance": 5.747481630304608e-07,
+              "ratio": 0.0014277767781475136
+            },
+            "velocity": {
+              "difference": 4.562140228241726e-11,
+              "quarter_allowance": 3.0250000000000115e-08,
+              "ratio": 0.001508145529997259
+            },
+            "crack_integral": {
+              "difference": 4.446472487082409e-13,
+              "quarter_allowance": 5.702061317964653e-08,
+              "ratio": 7.798008893860114e-06
+            },
+            "velocity_L2": {
+              "difference": 1.6358596011797178e-11,
+              "quarter_allowance": 2.726065019933553e-08,
+              "ratio": 0.0006000809185466865
+            }
+          }
+        }
+      ],
+      "max_ratio": 0.004966316178020427,
+      "maxima": {
+        "V": 1.2941565236991581e-09,
+        "q": 0.0008026538388321569,
+        "C": 0.0008133322008916366,
+        "Theta": 8.865744078434545e-05,
+        "slip": 8.213436716777295e-10,
+        "velocity": 3.6436972525571293e-10,
+        "crack_integral": 1.2941565208802325e-09,
+        "velocity_L2": 2.358516031643345e-10
+      },
+      "phi_max_difference": 1.4216080491680216e-06
+    },
+    "half": {
+      "rows": [
+        {
+          "time_s": 0.0,
+          "metrics": {
+            "V": {
+              "difference": 1.8546077317654376e-09,
+              "quarter_allowance": 1.6185772872033123e-07,
+              "ratio": 0.011458258721583538
+            },
+            "q": {
+              "difference": 0.003672369358355354,
+              "quarter_allowance": 0.5179008951918357,
+              "ratio": 0.007090872775948904
+            },
+            "C": {
+              "difference": 0.004001279521787637,
+              "quarter_allowance": 0.15378798991180126,
+              "ratio": 0.026018153459723387
+            },
+            "Theta": {
+              "difference": 0.0,
+              "quarter_allowance": 0.1005,
+              "ratio": 0.0
+            },
+            "slip": {
+              "difference": 0.0,
+              "quarter_allowance": 1.5e-09,
+              "ratio": 0.0
+            },
+            "velocity": {
+              "difference": 6.908651121887224e-10,
+              "quarter_allowance": 6.954225282502474e-08,
+              "ratio": 0.009934465510155503
+            },
+            "crack_integral": {
+              "difference": 1.8546077327412196e-09,
+              "quarter_allowance": 1.618577287203306e-07,
+              "ratio": 0.011458258727612223
+            },
+            "velocity_L2": {
+              "difference": 4.341543307411213e-10,
+              "quarter_allowance": 5.111725325295048e-08,
+              "ratio": 0.008493303202203298
+            }
+          }
+        },
+        {
+          "time_s": 0.5,
+          "metrics": {
+            "V": {
+              "difference": 6.485299442545063e-09,
+              "quarter_allowance": 4.348217340312153e-07,
+              "ratio": 0.014914846556587927
+            },
+            "q": {
+              "difference": 0.0032345565909963625,
+              "quarter_allowance": 0.5588268469567335,
+              "ratio": 0.005788119537583338
+            },
+            "C": {
+              "difference": 0.0040696286737897935,
+              "quarter_allowance": 0.15505267795212313,
+              "ratio": 0.026246748702053412
+            },
+            "Theta": {
+              "difference": 0.00042055966264342715,
+              "quarter_allowance": 0.06545695452070951,
+              "ratio": 0.006424980595612173
+            },
+            "slip": {
+              "difference": 3.2426497212725315e-09,
+              "quarter_allowance": 2.1878586701560765e-07,
+              "ratio": 0.014821111461652178
+            },
+            "velocity": {
+              "difference": 2.4472210824640073e-09,
+              "quarter_allowance": 1.7976488398557797e-07,
+              "ratio": 0.013613454575813266
+            },
+            "crack_integral": {
+              "difference": 6.485299445038728e-09,
+              "quarter_allowance": 4.348217340312137e-07,
+              "ratio": 0.014914846562322896
+            },
+            "velocity_L2": {
+              "difference": 1.5405474412865781e-09,
+              "quarter_allowance": 1.2046524197928906e-07,
+              "ratio": 0.012788314836502269
+            }
+          }
+        },
+        {
+          "time_s": 1.0,
+          "metrics": {
+            "V": {
+              "difference": 1.2574523829416047e-09,
+              "quarter_allowance": 1.4042055158953104e-07,
+              "ratio": 0.00895490274541375
+            },
+            "q": {
+              "difference": 0.0038455811650237592,
+              "quarter_allowance": 0.512332519608696,
+              "ratio": 0.007506025906692196
+            },
+            "C": {
+              "difference": 0.004041378175486443,
+              "quarter_allowance": 0.15494662777483142,
+              "ratio": 0.026082388713611616
+            },
+            "Theta": {
+              "difference": 0.0004366949521568131,
+              "quarter_allowance": 0.0571945024213543,
+              "ratio": 0.007635260972106428
+            },
+            "slip": {
+              "difference": 3.871375912770439e-09,
+              "quarter_allowance": 2.888711428103732e-07,
+              "ratio": 0.013401739873033175
+            },
+            "velocity": {
+              "difference": 4.629804296830877e-10,
+              "quarter_allowance": 6.113465730446215e-08,
+              "ratio": 0.007573125459383171
+            },
+            "crack_integral": {
+              "difference": 1.2574523837547563e-09,
+              "quarter_allowance": 1.4042055158953048e-07,
+              "ratio": 0.008954902751204617
+            },
+            "velocity_L2": {
+              "difference": 2.9096849518435663e-10,
+              "quarter_allowance": 4.63443219130053e-08,
+              "ratio": 0.0062784065700765826
+            }
+          }
+        },
+        {
+          "time_s": 1.5,
+          "metrics": {
+            "V": {
+              "difference": 3.193390385024947e-10,
+              "quarter_allowance": 7.84990711719774e-08,
+              "ratio": 0.004068061363463525
+            },
+            "q": {
+              "difference": 0.003985672258750128,
+              "quarter_allowance": 0.4975769909868901,
+              "ratio": 0.008010161906492055
+            },
+            "C": {
+              "difference": 0.004018552359809746,
+              "quarter_allowance": 0.15455459321328233,
+              "ratio": 0.026000860124967117
+            },
+            "Theta": {
+              "difference": 0.00042060662670451165,
+              "quarter_allowance": 0.053167807229435315,
+              "ratio": 0.007910926717166757
+            },
+            "slip": {
+              "difference": 4.031045431913266e-09,
+              "quarter_allowance": 3.279956783963619e-07,
+              "ratio": 0.0122899345857905
+            },
+            "velocity": {
+              "difference": 1.805186026904832e-10,
+              "quarter_allowance": 3.6522106751909594e-08,
+              "ratio": 0.0049427215115690065
+            },
+            "crack_integral": {
+              "difference": 3.193390389632806e-10,
+              "quarter_allowance": 7.849907117197711e-08,
+              "ratio": 0.004068061369333494
+            },
+            "velocity_L2": {
+              "difference": 7.85374801470649e-11,
+              "quarter_allowance": 3.168952363338083e-08,
+              "ratio": 0.002478342087299027
+            }
+          }
+        },
+        {
+          "time_s": 2.0,
+          "metrics": {
+            "V": {
+              "difference": 1.0371427008231196e-10,
+              "quarter_allowance": 6.165982049685472e-08,
+              "ratio": 0.001682039766684083
+            },
+            "q": {
+              "difference": 0.0040175213433713,
+              "quarter_allowance": 0.49191710728420446,
+              "ratio": 0.008167069784483389
+            },
+            "C": {
+              "difference": 0.003997094562521397,
+              "quarter_allowance": 0.15408659800639785,
+              "ratio": 0.02594057247182155
+            },
+            "Theta": {
+              "difference": 0.0004007038247664241,
+              "quarter_allowance": 0.050273272656170674,
+              "ratio": 0.007970514024557751
+            },
+            "slip": {
+              "difference": 4.082902566927317e-09,
+              "quarter_allowance": 3.5870058864478924e-07,
+              "ratio": 0.011382480810396708
+            },
+            "velocity": {
+              "difference": 1.7336328387933773e-10,
+              "quarter_allowance": 3.0116655370946125e-08,
+              "ratio": 0.005756392326572333
+            },
+            "crack_integral": {
+              "difference": 1.0371427043467767e-10,
+              "quarter_allowance": 6.165982049685449e-08,
+              "ratio": 0.0016820397723987625
+            },
+            "velocity_L2": {
+              "difference": 4.4968614880007374e-11,
+              "quarter_allowance": 2.812940660600099e-08,
+              "ratio": 0.001598633611788099
+            }
+          }
+        },
+        {
+          "time_s": 2.5,
+          "metrics": {
+            "V": {
+              "difference": 3.773369750068988e-11,
+              "quarter_allowance": 5.654269012662134e-08,
+              "ratio": 0.0006673488193821214
+            },
+            "q": {
+              "difference": 0.004016303632170093,
+              "quarter_allowance": 0.4894610718896973,
+              "ratio": 0.008205562940202912
+            },
+            "C": {
+              "difference": 0.003976127017494946,
+              "quarter_allowance": 0.15359725975645683,
+              "ratio": 0.02588670542560119
+            },
+            "Theta": {
+              "difference": 0.0003805501312541537,
+              "quarter_allowance": 0.047791898094153934,
+              "ratio": 0.007962649453772248
+            },
+            "slip": {
+              "difference": 4.101769415657333e-09,
+              "quarter_allowance": 3.868469337080999e-07,
+              "ratio": 0.010603081111022514
+            },
+            "velocity": {
+              "difference": 1.7197862645901263e-10,
+              "quarter_allowance": 2.838937545767368e-08,
+              "ratio": 0.006057851702846341
+            },
+            "crack_integral": {
+              "difference": 3.7733697825950534e-11,
+              "quarter_allowance": 5.654269012662113e-08,
+              "ratio": 0.0006673488251346031
+            },
+            "velocity_L2": {
+              "difference": 4.2266873197762474e-11,
+              "quarter_allowance": 2.730459806435124e-08,
+              "ratio": 0.0015479763920402078
+            }
+          }
+        },
+        {
+          "time_s": 3.0,
+          "metrics": {
+            "V": {
+              "difference": 1.3837482077056276e-11,
+              "quarter_allowance": 5.533348480794778e-08,
+              "ratio": 0.0002500742927195639
+            },
+            "q": {
+              "difference": 0.004003173707133101,
+              "quarter_allowance": 0.4882438197924588,
+              "ratio": 0.008199128273317946
+            },
+            "C": {
+              "difference": 0.003955393034118515,
+              "quarter_allowance": 0.15310476704701045,
+              "ratio": 0.025834551793570353
+            },
+            "Theta": {
+              "difference": 0.0003607759724530979,
+              "quarter_allowance": 0.04550058171755344,
+              "ratio": 0.007929040878919488
+            },
+            "slip": {
+              "difference": 4.108688156736519e-09,
+              "quarter_allowance": 4.1438867611207374e-07,
+              "ratio": 0.009915058961759132
+            },
+            "velocity": {
+              "difference": 1.7363902058480595e-10,
+              "quarter_allowance": 2.8999999999999998e-08,
+              "ratio": 0.0059875524339588265
+            },
+            "crack_integral": {
+              "difference": 1.3837482402316928e-11,
+              "quarter_allowance": 5.533348480794757e-08,
+              "ratio": 0.0002500742985977533
+            },
+            "velocity_L2": {
+              "difference": 4.318582561650873e-11,
+              "quarter_allowance": 2.736132709261236e-08,
+              "ratio": 0.0015783527410908747
+            }
+          }
+        },
+        {
+          "time_s": 3.5,
+          "metrics": {
+            "V": {
+              "difference": 4.4936068077259736e-12,
+              "quarter_allowance": 5.560478171268917e-08,
+              "ratio": 8.081331621702095e-05
+            },
+            "q": {
+              "difference": 0.003985448990874829,
+              "quarter_allowance": 0.48752076897056196,
+              "ratio": 0.008174931704531102
+            },
+            "C": {
+              "difference": 0.003934801564582813,
+              "quarter_allowance": 0.1526159859574652,
+              "ratio": 0.025782368340361544
+            },
+            "Theta": {
+              "difference": 0.00034153984033480356,
+              "quarter_allowance": 0.04332048050468077,
+              "ratio": 0.007884027055006931
+            },
+            "slip": {
+              "difference": 4.110934960174263e-09,
+              "quarter_allowance": 4.4206606696841834e-07,
+              "ratio": 0.00929936782609454
+            },
+            "velocity": {
+              "difference": 1.767108278620728e-10,
+              "quarter_allowance": 2.9625000000000002e-08,
+              "ratio": 0.00596492245947925
+            },
+            "crack_integral": {
+              "difference": 4.493607132986625e-12,
+              "quarter_allowance": 5.5604781712688956e-08,
+              "ratio": 8.081332206652991e-05
+            },
+            "velocity_L2": {
+              "difference": 4.4349415415541973e-11,
+              "quarter_allowance": 2.7746689680514082e-08,
+              "ratio": 0.0015983678026531445
+            }
+          }
+        },
+        {
+          "time_s": 4.0,
+          "metrics": {
+            "V": {
+              "difference": 7.189291886420743e-13,
+              "quarter_allowance": 5.646660671770728e-08,
+              "ratio": 1.2731935393890534e-05
+            },
+            "q": {
+              "difference": 0.003965930048593691,
+              "quarter_allowance": 0.4869949274661193,
+              "ratio": 0.008143678352521659
+            },
+            "C": {
+              "difference": 0.003914317135183865,
+              "quarter_allowance": 0.1521336303745632,
+              "ratio": 0.02572946642728865
+            },
+            "Theta": {
+              "difference": 0.00032289853072597907,
+              "quarter_allowance": 0.04122277379002819,
+              "ratio": 0.007833013187581481
+            },
+            "slip": {
+              "difference": 4.111294424694045e-09,
+              "quarter_allowance": 4.70174370327272e-07,
+              "ratio": 0.008744190845265166
+            },
+            "velocity": {
+              "difference": 1.803674997782911e-10,
+              "quarter_allowance": 3.025e-08,
+              "ratio": 0.005962561976141854
+            },
+            "crack_integral": {
+              "difference": 7.18929513902726e-13,
+              "quarter_allowance": 5.646660671770707e-08,
+              "ratio": 1.2731941154120753e-05
+            },
+            "velocity_L2": {
+              "difference": 4.545976661732457e-11,
+              "quarter_allowance": 2.82622541499719e-08,
+              "ratio": 0.001608497552109437
+            }
+          }
+        },
+        {
+          "time_s": 4.5,
+          "metrics": {
+            "V": {
+              "difference": 8.213346859185441e-13,
+              "quarter_allowance": 5.6809879355926105e-08,
+              "ratio": 1.445760306535252e-05
+            },
+            "q": {
+              "difference": 0.003945740247559115,
+              "quarter_allowance": 0.48630050066455144,
+              "ratio": 0.008113790222644402
+            },
+            "C": {
+              "difference": 0.0038939367710213446,
+              "quarter_allowance": 0.1516552688871991,
+              "ratio": 0.025676237954631483
+            },
+            "Theta": {
+              "difference": 0.0003051106004789972,
+              "quarter_allowance": 0.039226485676930434,
+              "ratio": 0.0077781783204309935
+            },
+            "slip": {
+              "difference": 4.110883757317205e-09,
+              "quarter_allowance": 4.98454310005235e-07,
+              "ratio": 0.008247262938250108
+            },
+            "velocity": {
+              "difference": 1.8183264607074816e-10,
+              "quarter_allowance": 3.025e-08,
+              "ratio": 0.006010996564322252
+            },
+            "crack_integral": {
+              "difference": 8.213343471053652e-13,
+              "quarter_allowance": 5.680987935592589e-08,
+              "ratio": 1.445759710136915e-05
+            },
+            "velocity_L2": {
+              "difference": 4.5910940064288244e-11,
+              "quarter_allowance": 2.8337739531882294e-08,
+              "ratio": 0.0016201341681694353
+            }
+          }
+        },
+        {
+          "time_s": 5.0,
+          "metrics": {
+            "V": {
+              "difference": 1.4536259836887139e-12,
+              "quarter_allowance": 5.694545026374082e-08,
+              "ratio": 2.5526639563938772e-05
+            },
+            "q": {
+              "difference": 0.00392533578713028,
+              "quarter_allowance": 0.48554192105874633,
+              "ratio": 0.008084442592662042
+            },
+            "C": {
+              "difference": 0.0038736589152108536,
+              "quarter_allowance": 0.15117992053003732,
+              "ratio": 0.02562284000169991
+            },
+            "Theta": {
+              "difference": 0.0002882400842310062,
+              "quarter_allowance": 0.037334996194051,
+              "ratio": 0.007720372669461654
+            },
+            "slip": {
+              "difference": 4.110156944393123e-09,
+              "quarter_allowance": 5.268020351371055e-07,
+              "ratio": 0.0078020901026386764
+            },
+            "velocity": {
+              "difference": 1.8241693441558736e-10,
+              "quarter_allowance": 3.025e-08,
+              "ratio": 0.006030311881507019
+            },
+            "crack_integral": {
+              "difference": 1.453625644875535e-12,
+              "quarter_allowance": 5.69454502637406e-08,
+              "ratio": 2.552663361415399e-05
+            },
+            "velocity_L2": {
+              "difference": 4.609261053943066e-11,
+              "quarter_allowance": 2.836757146084513e-08,
+              "ratio": 0.001624834561642009
+            }
+          }
+        },
+        {
+          "time_s": 5.5,
+          "metrics": {
+            "V": {
+              "difference": 1.7237074804608496e-12,
+              "quarter_allowance": 5.699846534916023e-08,
+              "ratio": 3.024129632090604e-05
+            },
+            "q": {
+              "difference": 0.0039048983907150614,
+              "quarter_allowance": 0.4847606835003461,
+              "ratio": 0.00805531166949985
+            },
+            "C": {
+              "difference": 0.0038534826378509024,
+              "quarter_allowance": 0.1507071882857426,
+              "ratio": 0.025569335356085698
+            },
+            "Theta": {
+              "difference": 0.0002722781708257571,
+              "quarter_allowance": 0.03554591071981278,
+              "ratio": 0.0076599013870248985
+            },
+            "slip": {
+              "difference": 4.109295090619011e-09,
+              "quarter_allowance": 5.551762678116855e-07,
+              "ratio": 0.00740178449416875
+            },
+            "velocity": {
+              "difference": 1.826507959093969e-10,
+              "quarter_allowance": 3.025e-08,
+              "ratio": 0.0060380428399800625
+            },
+            "crack_integral": {
+              "difference": 1.7237071416476707e-12,
+              "quarter_allowance": 5.699846534916001e-08,
+              "ratio": 3.0241290376655257e-05
+            },
+            "velocity_L2": {
+              "difference": 4.6166384515506215e-11,
+              "quarter_allowance": 2.8379240321074115e-08,
+              "ratio": 0.0016267660442349319
+            }
+          }
+        },
+        {
+          "time_s": 6.0,
+          "metrics": {
+            "V": {
+              "difference": 1.850624539137709e-12,
+              "quarter_allowance": 5.70186991006455e-08,
+              "ratio": 3.2456449696811096e-05
+            },
+            "q": {
+              "difference": 0.003884499625883109,
+              "quarter_allowance": 0.4839732507548696,
+              "ratio": 0.008026269261419557
+            },
+            "C": {
+              "difference": 0.0038334072691554866,
+              "quarter_allowance": 0.1502369074257774,
+              "ratio": 0.02551574932444168
+            },
+            "Theta": {
+              "difference": 0.0002571903410171217,
+              "quarter_allowance": 0.03385485363582816,
+              "ratio": 0.007596852840767872
+            },
+            "slip": {
+              "difference": 4.108369778491744e-09,
+              "quarter_allowance": 5.835606173620082e-07,
+              "ratio": 0.007040176557944694
+            },
+            "velocity": {
+              "difference": 1.8274566544940933e-10,
+              "quarter_allowance": 3.025e-08,
+              "ratio": 0.006041179023120969
+            },
+            "crack_integral": {
+              "difference": 1.85062420032453e-12,
+              "quarter_allowance": 5.7018699100645285e-08,
+              "ratio": 3.2456443754669704e-05
+            },
+            "velocity_L2": {
+              "difference": 4.6197290507627655e-11,
+              "quarter_allowance": 2.838369431516797e-08,
+              "ratio": 0.0016275996350108757
+            }
+          }
+        }
+      ],
+      "max_ratio": 0.026246748702053412,
+      "maxima": {
+        "V": 6.485299442545063e-09,
+        "q": 0.0040175213433713,
+        "C": 0.0040696286737897935,
+        "Theta": 0.0004366949521568131,
+        "slip": 4.111294424694045e-09,
+        "velocity": 2.4472210824640073e-09,
+        "crack_integral": 6.485299445038728e-09,
+        "velocity_L2": 1.5405474412865781e-09
+      },
+      "phi_max_difference": 5.692189686268279e-06
+    }
+  },
+  "temporal": {
+    "ell0": {
+      "dt05": {
+        "rows": [
+          {
+            "time_s": 0.0,
+            "metrics": {
+              "V": {
+                "difference": 0.0,
+                "quarter_allowance": 1.5788522344900666e-07,
+                "ratio": 0.0
+              },
+              "q": {
+                "difference": 0.0,
+                "quarter_allowance": 0.5257669826586492,
+                "ratio": 0.0
+              },
+              "C": {
+                "difference": 0.0,
+                "quarter_allowance": 0.1623624319018662,
+                "ratio": 0.0
+              },
+              "Theta": {
+                "difference": 0.0,
+                "quarter_allowance": 0.1005,
+                "ratio": 0.0
+              },
+              "slip": {
+                "difference": 0.0,
+                "quarter_allowance": 1.5e-09,
+                "ratio": 0.0
+              },
+              "velocity": {
+                "difference": 0.0,
+                "quarter_allowance": 5.965076884098908e-08,
+                "ratio": 0.0
+              },
+              "crack_integral": {
+                "difference": 0.0,
+                "quarter_allowance": 1.5788522344900687e-07,
+                "ratio": 0.0
+              },
+              "velocity_L2": {
+                "difference": 0.0,
+                "quarter_allowance": 4.581154090003829e-08,
+                "ratio": 0.0
+              }
+            }
+          },
+          {
+            "time_s": 0.5,
+            "metrics": {
+              "V": {
+                "difference": 0.000314199651912457,
+                "quarter_allowance": 2.638409489168852e-07,
+                "ratio": 1190.8676541768946
+              },
+              "q": {
+                "difference": 47.02391220205777,
+                "quarter_allowance": 0.5422380481183606,
+                "ratio": 86.72189708051124
+              },
+              "C": {
+                "difference": 0.43198406086338537,
+                "quarter_allowance": 0.1639857102153562,
+                "ratio": 2.6342786837711474
+              },
+              "Theta": {
+                "difference": 6.027593645513633,
+                "quarter_allowance": 0.06334958691427847,
+                "ratio": 95.14811286251755
+              },
+              "slip": {
+                "difference": 4.7084691087173624e-05,
+                "quarter_allowance": 2.3538773298014367e-07,
+                "ratio": 200.03035201135776
+              },
+              "velocity": {
+                "difference": 0.00010555116355990342,
+                "quarter_allowance": 9.522570324983584e-08,
+                "ratio": 1108.4314419078378
+              },
+              "crack_integral": {
+                "difference": 0.0003141996519124574,
+                "quarter_allowance": 2.6384094891688554e-07,
+                "ratio": 1190.8676541768948
+              },
+              "velocity_L2": {
+                "difference": 7.041663302941651e-05,
+                "quarter_allowance": 6.931778083047407e-08,
+                "ratio": 1015.8523857194712
+              }
+            }
+          },
+          {
+            "time_s": 1.0,
+            "metrics": {
+              "V": {
+                "difference": 9.673744709465319e-05,
+                "quarter_allowance": 8.935076819193083e-08,
+                "ratio": 1082.670569623479
+              },
+              "q": {
+                "difference": 21.77942882092293,
+                "quarter_allowance": 0.5096785922904957,
+                "ratio": 42.731692384893336
+              },
+              "C": {
+                "difference": 0.19566585664824743,
+                "quarter_allowance": 0.1637035014714101,
+                "ratio": 1.1952453972551063
+              },
+              "Theta": {
+                "difference": 2.43148219808198,
+                "quarter_allowance": 0.056921788893341194,
+                "ratio": 42.7161943669416
+              },
+              "slip": {
+                "difference": 2.1728820141510524e-05,
+                "quarter_allowance": 2.914445433769408e-07,
+                "ratio": 74.55559088442935
+              },
+              "velocity": {
+                "difference": 3.249764930834553e-05,
+                "quarter_allowance": 3.744554009969634e-08,
+                "ratio": 867.8643497148828
+              },
+              "crack_integral": {
+                "difference": 9.673744709465332e-05,
+                "quarter_allowance": 8.935076819193095e-08,
+                "ratio": 1082.6705696234792
+              },
+              "velocity_L2": {
+                "difference": 2.1680244617727064e-05,
+                "quarter_allowance": 3.18105530706619e-08,
+                "ratio": 681.5425236262938
+              }
+            }
+          },
+          {
+            "time_s": 1.5,
+            "metrics": {
+              "V": {
+                "difference": 3.3077100773121884e-05,
+                "quarter_allowance": 6.127028130707559e-08,
+                "ratio": 539.855539545272
+              },
+              "q": {
+                "difference": 9.922707821354265,
+                "quarter_allowance": 0.5011546063850126,
+                "ratio": 19.799693936627477
+              },
+              "C": {
+                "difference": 0.0831679843748816,
+                "quarter_allowance": 0.16320769450537959,
+                "ratio": 0.5095837216923633
+              },
+              "Theta": {
+                "difference": 0.9771089681019873,
+                "quarter_allowance": 0.053588186440809774,
+                "ratio": 18.23366366729432
+              },
+              "slip": {
+                "difference": 9.644788552448983e-06,
+                "quarter_allowance": 3.241819434292283e-07,
+                "ratio": 29.75115902639569
+              },
+              "velocity": {
+                "difference": 1.1111808853193837e-05,
+                "quarter_allowance": 2.899026472796346e-08,
+                "ratio": 383.2944941160057
+              },
+              "crack_integral": {
+                "difference": 3.307710077312194e-05,
+                "quarter_allowance": 6.127028130707567e-08,
+                "ratio": 539.8555395452722
+              },
+              "velocity_L2": {
+                "difference": 7.413051073229482e-06,
+                "quarter_allowance": 2.643280359826255e-08,
+                "ratio": 280.44891438291273
+              }
+            }
+          },
+          {
+            "time_s": 2.0,
+            "metrics": {
+              "V": {
+                "difference": 1.3264330912195405e-05,
+                "quarter_allowance": 5.480158941072009e-08,
+                "ratio": 242.0428139918271
+              },
+              "q": {
+                "difference": 4.61988861088696,
+                "quarter_allowance": 0.4982162947038229,
+                "ratio": 9.272857311167167
+              },
+              "C": {
+                "difference": 0.03129286289788524,
+                "quarter_allowance": 0.16266886427458524,
+                "ratio": 0.19237155824155047
+              },
+              "Theta": {
+                "difference": 0.35906376472652823,
+                "quarter_allowance": 0.05095995520057739,
+                "ratio": 7.045998437660714
+              },
+              "slip": {
+                "difference": 4.06752403581069e-06,
+                "quarter_allowance": 3.5198518860431807e-07,
+                "ratio": 11.55595226020482
+              },
+              "velocity": {
+                "difference": 4.455974260646114e-06,
+                "quarter_allowance": 2.7750000000000004e-08,
+                "ratio": 160.57564903229238
+              },
+              "crack_integral": {
+                "difference": 1.3264330912195419e-05,
+                "quarter_allowance": 5.480158941072016e-08,
+                "ratio": 242.04281399182705
+              },
+              "velocity_L2": {
+                "difference": 2.972726152112562e-06,
+                "quarter_allowance": 2.5495816868535282e-08,
+                "ratio": 116.59662318100669
+              }
+            }
+          },
+          {
+            "time_s": 2.5,
+            "metrics": {
+              "V": {
+                "difference": 5.65881241719544e-06,
+                "quarter_allowance": 5.3629684057703044e-08,
+                "ratio": 105.51642279128143
+              },
+              "q": {
+                "difference": 2.213075114831099,
+                "quarter_allowance": 0.4969624234380158,
+                "ratio": 4.453204126623726
+              },
+              "C": {
+                "difference": 0.006213286530623918,
+                "quarter_allowance": 0.1621230451795565,
+                "ratio": 0.03832451163091899
+              },
+              "Theta": {
+                "difference": 0.08067157468695996,
+                "quarter_allowance": 0.048574374216224084,
+                "ratio": 1.6607846418743002
+              },
+              "slip": {
+                "difference": 1.36583821006822e-06,
+                "quarter_allowance": 3.7873889082459723e-07,
+                "ratio": 3.6062792682697364
+              },
+              "velocity": {
+                "difference": 1.9010022174329033e-06,
+                "quarter_allowance": 2.8375000000000054e-08,
+                "ratio": 66.99567286107136
+              },
+              "crack_integral": {
+                "difference": 5.658812417195453e-06,
+                "quarter_allowance": 5.362968405770311e-08,
+                "ratio": 105.51642279128156
+              },
+              "velocity_L2": {
+                "difference": 1.2682207473450213e-06,
+                "quarter_allowance": 2.5602814350395734e-08,
+                "ratio": 49.53442734803953
+              }
+            }
+          },
+          {
+            "time_s": 3.0,
+            "metrics": {
+              "V": {
+                "difference": 2.4326863657063696e-06,
+                "quarter_allowance": 5.408520188737628e-08,
+                "ratio": 44.978779422364866
+              },
+              "q": {
+                "difference": 1.1328489316950936,
+                "quarter_allowance": 0.4962582824169684,
+                "ratio": 2.2827809063008164
+              },
+              "C": {
+                "difference": 0.006584329799693478,
+                "quarter_allowance": 0.16158068784788523,
+                "ratio": 0.04074948490064652
+              },
+              "Theta": {
+                "difference": 0.050008831580001356,
+                "quarter_allowance": 0.046305758653454446,
+                "ratio": 1.079970030385641
+              },
+              "slip": {
+                "difference": 1.8344588035039064e-08,
+                "quarter_allowance": 4.055725719606603e-07,
+                "ratio": 0.0452313329433393
+              },
+              "velocity": {
+                "difference": 8.172283925642087e-07,
+                "quarter_allowance": 2.9000000000000174e-08,
+                "ratio": 28.180289398765648
+              },
+              "crack_integral": {
+                "difference": 2.4326863657063696e-06,
+                "quarter_allowance": 5.408520188737635e-08,
+                "ratio": 44.97877942236481
+              },
+              "velocity_L2": {
+                "difference": 5.451997863362512e-07,
+                "quarter_allowance": 2.6025367079581443e-08,
+                "ratio": 20.94878372585934
+              }
+            }
+          },
+          {
+            "time_s": 3.5,
+            "metrics": {
+              "V": {
+                "difference": 1.0287506291774447e-06,
+                "quarter_allowance": 5.507865785486443e-08,
+                "ratio": 18.677844908426497
+              },
+              "q": {
+                "difference": 0.6599824660654576,
+                "quarter_allowance": 0.4957347270853624,
+                "ratio": 1.3313218340497917
+              },
+              "C": {
+                "difference": 0.01375125914637465,
+                "quarter_allowance": 0.16104516339772457,
+                "ratio": 0.08538759473585622
+              },
+              "Theta": {
+                "difference": 0.11518013455615517,
+                "quarter_allowance": 0.04411674065475805,
+                "ratio": 2.610803355975774
+              },
+              "slip": {
+                "difference": 7.991724009613491e-07,
+                "quarter_allowance": 4.328536746389238e-07,
+                "ratio": 1.8462876666762726
+              },
+              "velocity": {
+                "difference": 3.455949911521363e-07,
+                "quarter_allowance": 2.9625000000000178e-08,
+                "ratio": 11.665653709776683
+              },
+              "crack_integral": {
+                "difference": 1.0287506291774447e-06,
+                "quarter_allowance": 5.50786578548645e-08,
+                "ratio": 18.677844908426472
+              },
+              "velocity_L2": {
+                "difference": 2.305577205214101e-07,
+                "quarter_allowance": 2.6551648883557056e-08,
+                "ratio": 8.683367331819088
+              }
+            }
+          },
+          {
+            "time_s": 4.0,
+            "metrics": {
+              "V": {
+                "difference": 4.2124180420144636e-07,
+                "quarter_allowance": 5.625237067895765e-08,
+                "ratio": 7.488427582999991
+              },
+              "q": {
+                "difference": 0.4595794634044523,
+                "quarter_allowance": 0.4952682770140271,
+                "ratio": 0.9279404410378499
+              },
+              "C": {
+                "difference": 0.01838459229975342,
+                "quarter_allowance": 0.1605175713310395,
+                "ratio": 0.11453320746947016
+              },
+              "Theta": {
+                "difference": 0.1510457971837127,
+                "quarter_allowance": 0.041996736189221354,
+                "ratio": 3.5966079959918233
+              },
+              "slip": {
+                "difference": 1.3092606254662062e-06,
+                "quarter_allowance": 4.6070512631720055e-07,
+                "ratio": 2.84186250743988
+              },
+              "velocity": {
+                "difference": 1.415105405207253e-07,
+                "quarter_allowance": 3.025000000000018e-08,
+                "ratio": 4.678034397379321
+              },
+              "crack_integral": {
+                "difference": 4.2124180420144636e-07,
+                "quarter_allowance": 5.625237067895772e-08,
+                "ratio": 7.488427582999981
+              },
+              "velocity_L2": {
+                "difference": 9.440630937222802e-08,
+                "quarter_allowance": 2.7112633823789e-08,
+                "ratio": 3.4820043668865033
+              }
+            }
+          },
+          {
+            "time_s": 4.5,
+            "metrics": {
+              "V": {
+                "difference": 4.747862466775285e-08,
+                "quarter_allowance": 5.678584138315233e-08,
+                "ratio": 0.8360996951229321
+              },
+              "q": {
+                "difference": 0.337535630622142,
+                "quarter_allowance": 0.4945926115022817,
+                "ratio": 0.6824518255477111
+              },
+              "C": {
+                "difference": 0.019400326590584882,
+                "quarter_allowance": 0.1599960064625161,
+                "ratio": 0.1212550676702671
+              },
+              "Theta": {
+                "difference": 0.1521826362938441,
+                "quarter_allowance": 0.03996262096161241,
+                "ratio": 3.8081245081504744
+              },
+              "slip": {
+                "difference": 1.429432465368044e-06,
+                "quarter_allowance": 4.889248307449928e-07,
+                "ratio": 2.923624196361566
+              },
+              "velocity": {
+                "difference": 1.5949807860771896e-08,
+                "quarter_allowance": 3.0250000000000115e-08,
+                "ratio": 0.5272663755627053
+              },
+              "crack_integral": {
+                "difference": 4.747862466775285e-08,
+                "quarter_allowance": 5.6785841383152404e-08,
+                "ratio": 0.8360996951229311
+              },
+              "velocity_L2": {
+                "difference": 1.0640638427229914e-08,
+                "quarter_allowance": 2.7215386558478564e-08,
+                "ratio": 0.3909787724075143
+              }
+            }
+          },
+          {
+            "time_s": 5.0,
+            "metrics": {
+              "V": {
+                "difference": 1.9018784042627466e-08,
+                "quarter_allowance": 5.69560211662916e-08,
+                "ratio": 0.3339205171495265
+              },
+              "q": {
+                "difference": 0.3148037187728505,
+                "quarter_allowance": 0.4938026696134857,
+                "ratio": 0.6375091471645079
+              },
+              "C": {
+                "difference": 0.01949821682410402,
+                "quarter_allowance": 0.15947813086736182,
+                "ratio": 0.1222626370026917
+              },
+              "Theta": {
+                "difference": 0.14537230190830996,
+                "quarter_allowance": 0.03803130623643308,
+                "ratio": 3.822437783350359
+              },
+              "slip": {
+                "difference": 1.4505718871995511e-06,
+                "quarter_allowance": 5.172625169212122e-07,
+                "ratio": 2.804324380265307
+              },
+              "velocity": {
+                "difference": 6.389105694414791e-09,
+                "quarter_allowance": 3.0250000000000016e-08,
+                "ratio": 0.21121010560048886
+              },
+              "crack_integral": {
+                "difference": 1.9018784042627466e-08,
+                "quarter_allowance": 5.695602116629168e-08,
+                "ratio": 0.333920517149526
+              },
+              "velocity_L2": {
+                "difference": 4.262381350307539e-09,
+                "quarter_allowance": 2.7248194300766453e-08,
+                "ratio": 0.15642802980847959
+              }
+            }
+          },
+          {
+            "time_s": 5.5,
+            "metrics": {
+              "V": {
+                "difference": 1.8900392970887464e-08,
+                "quarter_allowance": 5.7009557348136596e-08,
+                "ratio": 0.3315302529972238
+              },
+              "q": {
+                "difference": 0.3131174213926897,
+                "quarter_allowance": 0.49297947065101744,
+                "ratio": 0.6351530642426022
+              },
+              "C": {
+                "difference": 0.019402043712375416,
+                "quarter_allowance": 0.1589631821736139,
+                "ratio": 0.12205369474288201
+              },
+              "Theta": {
+                "difference": 0.1373601116482348,
+                "quarter_allowance": 0.03620375209110778,
+                "ratio": 3.794084969496094
+              },
+              "slip": {
+                "difference": 1.450700358571113e-06,
+                "quarter_allowance": 5.456375062613519e-07,
+                "ratio": 2.6587255126781
+              },
+              "velocity": {
+                "difference": 6.349333799957784e-09,
+                "quarter_allowance": 3.025000000000002e-08,
+                "ratio": 0.20989533223000922
+              },
+              "crack_integral": {
+                "difference": 1.8900392970887464e-08,
+                "quarter_allowance": 5.7009557348136676e-08,
+                "ratio": 0.33153025299722333
+              },
+              "velocity_L2": {
+                "difference": 4.235848218924109e-09,
+                "quarter_allowance": 2.7258518054229456e-08,
+                "ratio": 0.1553953964223991
+              }
+            }
+          },
+          {
+            "time_s": 6.0,
+            "metrics": {
+              "V": {
+                "difference": 1.0306620850056443e-08,
+                "quarter_allowance": 5.702576649007148e-08,
+                "ratio": 0.18073620898810516
+              },
+              "q": {
+                "difference": 0.31387483015225826,
+                "quarter_allowance": 0.4921489323385246,
+                "ratio": 0.637763915611544
+              },
+              "C": {
+                "difference": 0.01928382937586548,
+                "quarter_allowance": 0.15845090763781186,
+                "ratio": 0.12170223360250221
+              },
+              "Theta": {
+                "difference": 0.12962179670554974,
+                "quarter_allowance": 0.0344762468823091,
+                "ratio": 3.7597420957112053
+              },
+              "slip": {
+                "difference": 1.4483790075523698e-06,
+                "quarter_allowance": 5.740239735266845e-07,
+                "ratio": 2.523202992122139
+              },
+              "velocity": {
+                "difference": 3.4623711913490084e-09,
+                "quarter_allowance": 3.025000000000003e-08,
+                "ratio": 0.1144585517801324
+              },
+              "crack_integral": {
+                "difference": 1.0306620850056443e-08,
+                "quarter_allowance": 5.7025766490071554e-08,
+                "ratio": 0.18073620898810494
+              },
+              "velocity_L2": {
+                "difference": 2.3098610509123497e-09,
+                "quarter_allowance": 2.7261644048456834e-08,
+                "ratio": 0.08472933792278389
+              }
+            }
+          }
+        ],
+        "max_ratio": 1190.8676541768948,
+        "maxima": {
+          "V": 0.000314199651912457,
+          "q": 47.02391220205777,
+          "C": 0.43198406086338537,
+          "Theta": 6.027593645513633,
+          "slip": 4.7084691087173624e-05,
+          "velocity": 0.00010555116355990342,
+          "crack_integral": 0.0003141996519124574,
+          "velocity_L2": 7.041663302941651e-05
+        }
+      },
+      "dt025": {
+        "rows": [
+          {
+            "time_s": 0.0,
+            "metrics": {
+              "V": {
+                "difference": 0.0,
+                "quarter_allowance": 1.5788522344900666e-07,
+                "ratio": 0.0
+              },
+              "q": {
+                "difference": 0.0,
+                "quarter_allowance": 0.5257669826586492,
+                "ratio": 0.0
+              },
+              "C": {
+                "difference": 0.0,
+                "quarter_allowance": 0.1623624319018662,
+                "ratio": 0.0
+              },
+              "Theta": {
+                "difference": 0.0,
+                "quarter_allowance": 0.1005,
+                "ratio": 0.0
+              },
+              "slip": {
+                "difference": 0.0,
+                "quarter_allowance": 1.5e-09,
+                "ratio": 0.0
+              },
+              "velocity": {
+                "difference": 0.0,
+                "quarter_allowance": 5.965076884098908e-08,
+                "ratio": 0.0
+              },
+              "crack_integral": {
+                "difference": 0.0,
+                "quarter_allowance": 1.5788522344900687e-07,
+                "ratio": 0.0
+              },
+              "velocity_L2": {
+                "difference": 0.0,
+                "quarter_allowance": 4.581154090003829e-08,
+                "ratio": 0.0
+              }
+            }
+          },
+          {
+            "time_s": 0.25,
+            "metrics": {
+              "V": {
+                "difference": 0.0003206575705564337,
+                "quarter_allowance": 5.118811977254725e-07,
+                "ratio": 626.4296715356321
+              },
+              "q": {
+                "difference": 41.73431220583325,
+                "quarter_allowance": 0.5758704454215378,
+                "ratio": 72.47170355353744
+              },
+              "C": {
+                "difference": 0.3852253811014066,
+                "quarter_allowance": 0.16396924827581796,
+                "ratio": 2.349375783277402
+              },
+              "Theta": {
+                "difference": 5.846794092650754,
+                "quarter_allowance": 0.06914651140517933,
+                "ratio": 84.55660269525626
+              },
+              "slip": {
+                "difference": 4.178464379867746e-05,
+                "quarter_allowance": 1.9038231765026108e-07,
+                "ratio": 219.47754557457012
+              },
+              "velocity": {
+                "difference": 0.00010772061480817166,
+                "quarter_allowance": 1.783458407389798e-07,
+                "ratio": 603.9984692764855
+              },
+              "crack_integral": {
+                "difference": 0.00032065757055643415,
+                "quarter_allowance": 5.118811977254732e-07,
+                "ratio": 626.4296715356321
+              },
+              "velocity_L2": {
+                "difference": 7.186394490426685e-05,
+                "quarter_allowance": 1.2433454377820455e-07,
+                "ratio": 577.9885679434517
+              }
+            }
+          },
+          {
+            "time_s": 0.5,
+            "metrics": {
+              "V": {
+                "difference": 0.00016501119533034268,
+                "quarter_allowance": 1.8133535125171384e-07,
+                "ratio": 909.9780831002367
+              },
+              "q": {
+                "difference": 27.10248505903496,
+                "quarter_allowance": 0.5286868055888431,
+                "ratio": 51.263781831756965
+              },
+              "C": {
+                "difference": 0.2491952733161611,
+                "quarter_allowance": 0.16411030785201428,
+                "ratio": 1.5184620428649236
+              },
+              "Theta": {
+                "difference": 3.3508394090065536,
+                "quarter_allowance": 0.0616741672097752,
+                "ratio": 54.331328019544856
+              },
+              "slip": {
+                "difference": 2.7177432345780786e-05,
+                "quarter_allowance": 2.4897644915303406e-07,
+                "ratio": 109.156638863767
+              },
+              "velocity": {
+                "difference": 5.543330032835631e-05,
+                "quarter_allowance": 6.76375066283452e-08,
+                "ratio": 819.5645151875779
+              },
+              "crack_integral": {
+                "difference": 0.00016501119533034284,
+                "quarter_allowance": 1.8133535125171408e-07,
+                "ratio": 909.9780831002364
+              },
+              "velocity_L2": {
+                "difference": 3.698136747318711e-05,
+                "quarter_allowance": 5.11940382920408e-08,
+                "ratio": 722.3764466913846
+              }
+            }
+          },
+          {
+            "time_s": 0.75,
+            "metrics": {
+              "V": {
+                "difference": 7.37631185385905e-05,
+                "quarter_allowance": 9.84949141259626e-08,
+                "ratio": 748.9028158779524
+              },
+              "q": {
+                "difference": 15.951216704997023,
+                "quarter_allowance": 0.5121310270893735,
+                "ratio": 31.14674929119912
+              },
+              "C": {
+                "difference": 0.14535413394241914,
+                "quarter_allowance": 0.16397031050607205,
+                "ratio": 0.8864661748447227
+              },
+              "Theta": {
+                "difference": 1.8455200700287406,
+                "quarter_allowance": 0.05844164703100033,
+                "ratio": 31.578851106810628
+              },
+              "slip": {
+                "difference": 1.600644275730255e-05,
+                "quarter_allowance": 2.771725727076094e-07,
+                "ratio": 57.749013911949426
+              },
+              "velocity": {
+                "difference": 2.4779731429252588e-05,
+                "quarter_allowance": 4.0307723671688856e-08,
+                "ratio": 614.7638509950701
+              },
+              "crack_integral": {
+                "difference": 7.376311853859061e-05,
+                "quarter_allowance": 9.849491412596273e-08,
+                "ratio": 748.9028158779524
+              },
+              "velocity_L2": {
+                "difference": 1.6531369203058376e-05,
+                "quarter_allowance": 3.3560365136259885e-08,
+                "ratio": 492.5860948156747
+              }
+            }
+          },
+          {
+            "time_s": 1.0,
+            "metrics": {
+              "V": {
+                "difference": 3.591358827116829e-05,
+                "quarter_allowance": 7.139397405634669e-08,
+                "ratio": 503.0338869051328
+              },
+              "q": {
+                "difference": 9.58800374249563,
+                "quarter_allowance": 0.5048845904192479,
+                "ratio": 18.99048599311361
+              },
+              "C": {
+                "difference": 0.08579329809879255,
+                "quarter_allowance": 0.16374639812045952,
+                "ratio": 0.5239400627040296
+              },
+              "Theta": {
+                "difference": 1.0516911865170755,
+                "quarter_allowance": 0.05639594330008266,
+                "ratio": 18.64834817853883
+              },
+              "slip": {
+                "difference": 9.598680981154372e-06,
+                "quarter_allowance": 2.9624388386751803e-07,
+                "ratio": 32.401279836875744
+              },
+              "velocity": {
+                "difference": 1.2064688826228599e-05,
+                "quarter_allowance": 3.1763220982173886e-08,
+                "ratio": 379.83203381670666
+              },
+              "crack_integral": {
+                "difference": 3.5913588271168343e-05,
+                "quarter_allowance": 7.139397405634678e-08,
+                "ratio": 503.03388690513293
+              },
+              "velocity_L2": {
+                "difference": 8.048748465084266e-06,
+                "quarter_allowance": 2.813280595184038e-08,
+                "ratio": 286.09831805837825
+              }
+            }
+          },
+          {
+            "time_s": 1.25,
+            "metrics": {
+              "V": {
+                "difference": 1.9277357715062255e-05,
+                "quarter_allowance": 6.054064004454312e-08,
+                "ratio": 318.42011747610906
+              },
+              "q": {
+                "difference": 5.901449306787072,
+                "quarter_allowance": 0.5012687931172748,
+                "ratio": 11.773023551071915
+              },
+              "C": {
+                "difference": 0.05098719118603867,
+                "quarter_allowance": 0.163491080215619,
+                "ratio": 0.3118652780249209
+              },
+              "Theta": {
+                "difference": 0.6100408306393064,
+                "quarter_allowance": 0.05480092992106022,
+                "ratio": 11.131943043996872
+              },
+              "slip": {
+                "difference": 5.854081982477246e-06,
+                "quarter_allowance": 3.1185391409369803e-07,
+                "ratio": 18.771872719604087
+              },
+              "velocity": {
+                "difference": 6.475970055346307e-06,
+                "quarter_allowance": 2.865039199662058e-08,
+                "ratio": 226.03425656829307
+              },
+              "crack_integral": {
+                "difference": 1.9277357715062282e-05,
+                "quarter_allowance": 6.054064004454322e-08,
+                "ratio": 318.42011747610906
+              },
+              "velocity_L2": {
+                "difference": 4.320331406275861e-06,
+                "quarter_allowance": 2.612437759107783e-08,
+                "ratio": 165.37547703151284
+              }
+            }
+          },
+          {
+            "time_s": 1.5,
+            "metrics": {
+              "V": {
+                "difference": 1.1037886174608828e-05,
+                "quarter_allowance": 5.5751338219771164e-08,
+                "ratio": 197.98423727691704
+              },
+              "q": {
+                "difference": 3.68834295471504,
+                "quarter_allowance": 0.4993104349076551,
+                "ratio": 7.386873369464389
+              },
+              "C": {
+                "difference": 0.029808876483912172,
+                "quarter_allowance": 0.16322259894362154,
+                "ratio": 0.18262714033985214
+              },
+              "Theta": {
+                "difference": 0.35107141106156803,
+                "quarter_allowance": 0.05341265073527899,
+                "ratio": 6.572813860175747
+              },
+              "slip": {
+                "difference": 3.5751859058190784e-06,
+                "quarter_allowance": 3.2596953638213787e-07,
+                "ratio": 10.967852841401248
+              },
+              "velocity": {
+                "difference": 3.7080299799197638e-06,
+                "quarter_allowance": 2.7515605500290838e-08,
+                "ratio": 134.76098063262936
+              },
+              "crack_integral": {
+                "difference": 1.1037886174608842e-05,
+                "quarter_allowance": 5.575133821977124e-08,
+                "ratio": 197.98423727691704
+              },
+              "velocity_L2": {
+                "difference": 2.4737480625677228e-06,
+                "quarter_allowance": 2.5348325559785897e-08,
+                "ratio": 97.59019611505326
+              }
+            }
+          },
+          {
+            "time_s": 1.75,
+            "metrics": {
+              "V": {
+                "difference": 6.5483191411565685e-06,
+                "quarter_allowance": 5.363723171906078e-08,
+                "ratio": 122.08533012022556
+              },
+              "q": {
+                "difference": 2.3301528517805536,
+                "quarter_allowance": 0.4981766876178652,
+                "ratio": 4.677362288714595
+              },
+              "C": {
+                "difference": 0.0165383511311461,
+                "quarter_allowance": 0.16294865064808034,
+                "ratio": 0.10149425027681833
+              },
+              "Theta": {
+                "difference": 0.19401124694226723,
+                "quarter_allowance": 0.05213150676238698,
+                "ratio": 3.7215737466895327
+              },
+              "slip": {
+                "difference": 2.146572334737833e-06,
+                "quarter_allowance": 3.39420577419007e-07,
+                "ratio": 6.324225687966874
+              },
+              "velocity": {
+                "difference": 2.199820084152249e-06,
+                "quarter_allowance": 2.7437500000000132e-08,
+                "ratio": 80.17567504882874
+              },
+              "crack_integral": {
+                "difference": 6.548319141156582e-06,
+                "quarter_allowance": 5.3637231719060844e-08,
+                "ratio": 122.08533012022566
+              },
+              "velocity_L2": {
+                "difference": 1.4675719184144644e-06,
+                "quarter_allowance": 2.510330741286842e-08,
+                "ratio": 58.46129732141031
+              }
+            }
+          },
+          {
+            "time_s": 2.0,
+            "metrics": {
+              "V": {
+                "difference": 3.949517309276049e-06,
+                "quarter_allowance": 5.282683075608206e-08,
+                "ratio": 74.76347251479463
+              },
+              "q": {
+                "difference": 1.4890772083966795,
+                "quarter_allowance": 0.4974717560996245,
+                "ratio": 2.993289950914267
+              },
+              "C": {
+                "difference": 0.00805172022376155,
+                "quarter_allowance": 0.16267289013469713,
+                "ratio": 0.04949638638063496
+              },
+              "Theta": {
+                "difference": 0.09675591505775571,
+                "quarter_allowance": 0.05091157724304851,
+                "ratio": 1.9004698007262544
+              },
+              "slip": {
+                "difference": 1.2322397732105004e-06,
+                "quarter_allowance": 3.5260130849092336e-07,
+                "ratio": 3.494711288747871
+              },
+              "velocity": {
+                "difference": 1.326787426264384e-06,
+                "quarter_allowance": 2.7750000000000004e-08,
+                "ratio": 47.81215950502284
+              },
+              "crack_integral": {
+                "difference": 3.9495173092760625e-06,
+                "quarter_allowance": 5.282683075608213e-08,
+                "ratio": 74.7634725147948
+              },
+              "velocity_L2": {
+                "difference": 8.851432817249458e-07,
+                "quarter_allowance": 2.5113421212365467e-08,
+                "ratio": 35.24582629502964
+              }
+            }
+          },
+          {
+            "time_s": 2.25,
+            "metrics": {
+              "V": {
+                "difference": 2.3944320282258614e-06,
+                "quarter_allowance": 5.2687908809300666e-08,
+                "ratio": 45.44556962570485
+              },
+              "q": {
+                "difference": 0.9679890358023613,
+                "quarter_allowance": 0.4969945258454917,
+                "ratio": 1.9476855085186489
+              },
+              "C": {
+                "difference": 0.0025260075806272653,
+                "quarter_allowance": 0.16239717187397756,
+                "ratio": 0.015554504745855315
+              },
+              "Theta": {
+                "difference": 0.03559530184641346,
+                "quarter_allowance": 0.04973026715482809,
+                "ratio": 0.7157673562378535
+              },
+              "slip": {
+                "difference": 6.36148062825386e-07,
+                "quarter_allowance": 3.6571204384158415e-07,
+                "ratio": 1.7394780224983426
+              },
+              "velocity": {
+                "difference": 8.043773604013576e-07,
+                "quarter_allowance": 2.8062500000000143e-08,
+                "ratio": 28.663781216974733
+              },
+              "crack_integral": {
+                "difference": 2.394432028225875e-06,
+                "quarter_allowance": 5.268790880930074e-08,
+                "ratio": 45.44556962570505
+              },
+              "velocity_L2": {
+                "difference": 5.366264425156883e-07,
+                "quarter_allowance": 2.5253877486498515e-08,
+                "ratio": 21.249269257862878
+              }
+            }
+          },
+          {
+            "time_s": 2.5,
+            "metrics": {
+              "V": {
+                "difference": 1.4494803590069176e-06,
+                "quarter_allowance": 5.2904943878199585e-08,
+                "ratio": 27.397824338382893
+              },
+              "q": {
+                "difference": 0.6466204398126365,
+                "quarter_allowance": 0.49663911321810944,
+                "ratio": 1.3019925789225135
+              },
+              "C": {
+                "difference": 0.0011509929252042639,
+                "quarter_allowance": 0.1621224696830939,
+                "ratio": 0.007099527458804121
+              },
+              "Theta": {
+                "difference": 0.0034987490843434443,
+                "quarter_allowance": 0.048576123590766254,
+                "ratio": 0.07202610718424052
+              },
+              "slip": {
+                "difference": 2.3869946535516346e-07,
+                "quarter_allowance": 3.788582405572748e-07,
+                "ratio": 0.6300495536379326
+              },
+              "velocity": {
+                "difference": 4.86933507148008e-07,
+                "quarter_allowance": 2.837500000000002e-08,
+                "ratio": 17.16065223429102
+              },
+              "crack_integral": {
+                "difference": 1.4494803590069176e-06,
+                "quarter_allowance": 5.290494387819965e-08,
+                "ratio": 27.397824338382858
+              },
+              "velocity_L2": {
+                "difference": 3.248492667075848e-07,
+                "quarter_allowance": 2.5463121329325523e-08,
+                "ratio": 12.757637310295513
+              }
+            }
+          },
+          {
+            "time_s": 2.75,
+            "metrics": {
+              "V": {
+                "difference": 8.725538663115938e-07,
+                "quarter_allowance": 5.331324572372028e-08,
+                "ratio": 16.366549334350033
+              },
+              "q": {
+                "difference": 0.4498962741889727,
+                "quarter_allowance": 0.4963487996251371,
+                "ratio": 0.9064115286039832
+              },
+              "C": {
+                "difference": 0.0036735583204858813,
+                "quarter_allowance": 0.1618493027288984,
+                "ratio": 0.022697399732633898
+              },
+              "Theta": {
+                "difference": 0.029040244014254313,
+                "quarter_allowance": 0.04744330670935516,
+                "ratio": 0.6121041307714746
+              },
+              "slip": {
+                "difference": 3.4764907404444614e-08,
+                "quarter_allowance": 3.92096389035114e-07,
+                "ratio": 0.08866418660471585
+              },
+              "velocity": {
+                "difference": 2.9312278131867343e-07,
+                "quarter_allowance": 2.8687500000000216e-08,
+                "ratio": 10.217787584093115
+              },
+              "crack_integral": {
+                "difference": 8.725538663116074e-07,
+                "quarter_allowance": 5.3313245723720347e-08,
+                "ratio": 16.366549334350267
+              },
+              "velocity_L2": {
+                "difference": 1.9555179335321228e-07,
+                "quarter_allowance": 2.5709239404388374e-08,
+                "ratio": 7.60628466199716
+              }
+            }
+          },
+          {
+            "time_s": 3.0,
+            "metrics": {
+              "V": {
+                "difference": 5.207572087767342e-07,
+                "quarter_allowance": 5.382482328298791e-08,
+                "ratio": 9.675037966010876
+              },
+              "q": {
+                "difference": 0.3305849810546988,
+                "quarter_allowance": 0.4960929899264411,
+                "ratio": 0.6663770457706262
+              },
+              "C": {
+                "difference": 0.005478476397911436,
+                "quarter_allowance": 0.16157794860968627,
+                "ratio": 0.03390608956885229
+              },
+              "Theta": {
+                "difference": 0.04624526029761,
+                "quarter_allowance": 0.046328881283603254,
+                "ratio": 0.9981950570858518
+              },
+              "slip": {
+                "difference": 2.3121824801076041e-07,
+                "quarter_allowance": 4.0545696283665496e-07,
+                "ratio": 0.5702658215390187
+              },
+              "velocity": {
+                "difference": 1.7494140742693655e-07,
+                "quarter_allowance": 2.900000000000029e-08,
+                "ratio": 6.032462325066717
+              },
+              "crack_integral": {
+                "difference": 5.207572087767342e-07,
+                "quarter_allowance": 5.3824823282987984e-08,
+                "ratio": 9.675037966010864
+              },
+              "velocity_L2": {
+                "difference": 1.1670913396829288e-07,
+                "quarter_allowance": 2.5975244240441543e-08,
+                "ratio": 4.493090917181266
+              }
+            }
+          },
+          {
+            "time_s": 3.25,
+            "metrics": {
+              "V": {
+                "difference": 3.0718700048209776e-07,
+                "quarter_allowance": 5.4392159357948437e-08,
+                "ratio": 5.647633852161229
+              },
+              "q": {
+                "difference": 0.25900642410942964,
+                "quarter_allowance": 0.495855162447779,
+                "ratio": 0.522342901162609
+              },
+              "C": {
+                "difference": 0.00684022461399536,
+                "quarter_allowance": 0.16130855478985107,
+                "ratio": 0.04240459920372259
+              },
+              "Theta": {
+                "difference": 0.058309439725505285,
+                "quarter_allowance": 0.045231430675669114,
+                "ratio": 1.2891354276103208
+              },
+              "slip": {
+                "difference": 3.80181128686939e-07,
+                "quarter_allowance": 4.189564196108642e-07,
+                "ratio": 0.9074479131745002
+              },
+              "velocity": {
+                "difference": 1.0319535726437096e-07,
+                "quarter_allowance": 2.9312500000000005e-08,
+                "ratio": 3.5205239152024204
+              },
+              "crack_integral": {
+                "difference": 3.0718700048209776e-07,
+                "quarter_allowance": 5.4392159357948516e-08,
+                "ratio": 5.647633852161221
+              },
+              "velocity_L2": {
+                "difference": 6.884499760810092e-08,
+                "quarter_allowance": 2.6251980219788926e-08,
+                "ratio": 2.622468744517988
+              }
+            }
+          },
+          {
+            "time_s": 3.5,
+            "metrics": {
+              "V": {
+                "difference": 1.783109927821965e-07,
+                "quarter_allowance": 5.498950235847333e-08,
+                "ratio": 3.242636960411055
+              },
+              "q": {
+                "difference": 0.2166192337517714,
+                "quarter_allowance": 0.49562641746848657,
+                "ratio": 0.4370615167331041
+              },
+              "C": {
+                "difference": 0.007930272412920658,
+                "quarter_allowance": 0.1610411982615181,
+                "ratio": 0.04924374941648488
+              },
+              "Theta": {
+                "difference": 0.06718125390769103,
+                "quarter_allowance": 0.04415033128171189,
+                "ratio": 1.52164778739767
+              },
+              "slip": {
+                "difference": 5.000970672930719e-07,
+                "quarter_allowance": 4.326036261052772e-07,
+                "ratio": 1.1560168179713075
+              },
+              "velocity": {
+                "difference": 5.990118909817284e-08,
+                "quarter_allowance": 2.9625000000000002e-08,
+                "ratio": 2.02198106660499
+              },
+              "crack_integral": {
+                "difference": 1.783109927821965e-07,
+                "quarter_allowance": 5.49895023584734e-08,
+                "ratio": 3.2426369604110508
+              },
+              "velocity_L2": {
+                "difference": 3.9962042183876795e-08,
+                "quarter_allowance": 2.6534490413141778e-08,
+                "ratio": 1.5060414412211487
+              }
+            }
+          },
+          {
+            "time_s": 3.75,
+            "metrics": {
+              "V": {
+                "difference": 1.0106860249436316e-07,
+                "quarter_allowance": 5.560290173290224e-08,
+                "ratio": 1.8176857563992423
+              },
+              "q": {
+                "difference": 0.19193367500838576,
+                "quarter_allowance": 0.4954019855133458,
+                "ratio": 0.38743016907673494
+              },
+              "C": {
+                "difference": 0.008854877808914807,
+                "quarter_allowance": 0.16077591783478953,
+                "ratio": 0.0550758964910026
+              },
+              "Theta": {
+                "difference": 0.07404079303570654,
+                "quarter_allowance": 0.043085368871764854,
+                "ratio": 1.718467196046863
+              },
+              "slip": {
+                "difference": 6.023962646619719e-07,
+                "quarter_allowance": 4.4640333551513013e-07,
+                "ratio": 1.3494439148104318
+              },
+              "velocity": {
+                "difference": 3.395264293814485e-08,
+                "quarter_allowance": 2.993750000000011e-08,
+                "ratio": 1.1341175094161078
+              },
+              "crack_integral": {
+                "difference": 1.0106860249436316e-07,
+                "quarter_allowance": 5.5602901732902315e-08,
+                "ratio": 1.8176857563992401
+              },
+              "velocity_L2": {
+                "difference": 2.265091845050643e-08,
+                "quarter_allowance": 2.6820090682495666e-08,
+                "ratio": 0.8445504050920202
+              }
+            }
+          },
+          {
+            "time_s": 4.0,
+            "metrics": {
+              "V": {
+                "difference": 5.51034871356076e-08,
+                "quarter_allowance": 5.622481893538984e-08,
+                "ratio": 0.9800562843773528
+              },
+              "q": {
+                "difference": 0.17789253756927792,
+                "quarter_allowance": 0.49517933074524245,
+                "ratio": 0.3592487135954373
+              },
+              "C": {
+                "difference": 0.009679308135503106,
+                "quarter_allowance": 0.16051273167697175,
+                "ratio": 0.06030243230164754
+              },
+              "Theta": {
+                "difference": 0.07959792337668148,
+                "quarter_allowance": 0.042036535150909694,
+                "ratio": 1.8935414893479614
+              },
+              "slip": {
+                "difference": 6.941000034402928e-07,
+                "quarter_allowance": 4.603580763154804e-07,
+                "ratio": 1.507739386252519
+              },
+              "velocity": {
+                "difference": 1.8511278252603385e-08,
+                "quarter_allowance": 3.025000000000004e-08,
+                "ratio": 0.6119430827306895
+              },
+              "crack_integral": {
+                "difference": 5.51034871356076e-08,
+                "quarter_allowance": 5.6224818935389916e-08,
+                "ratio": 0.9800562843773516
+              },
+              "velocity_L2": {
+                "difference": 1.2349479092882972e-08,
+                "quarter_allowance": 2.7107330811535687e-08,
+                "ratio": 0.45557709752918857
+              }
+            }
+          },
+          {
+            "time_s": 4.25,
+            "metrics": {
+              "V": {
+                "difference": 4.148969716645187e-08,
+                "quarter_allowance": 5.661372117659967e-08,
+                "ratio": 0.7328558572758319
+              },
+              "q": {
+                "difference": 0.14708926131015687,
+                "quarter_allowance": 0.49488058545611,
+                "ratio": 0.2972217250644235
+              },
+              "C": {
+                "difference": 0.009935892016983416,
+                "quarter_allowance": 0.1602512720281801,
+                "ratio": 0.06200195412636846
+              },
+              "Theta": {
+                "difference": 0.07984516959301402,
+                "quarter_allowance": 0.04100720269969514,
+                "ratio": 1.9471011026462337
+              },
+              "slip": {
+                "difference": 7.245225653569956e-07,
+                "quarter_allowance": 4.744286091165262e-07,
+                "ratio": 1.5271477129218463
+              },
+              "velocity": {
+                "difference": 1.3937907903687125e-08,
+                "quarter_allowance": 3.025000000000025e-08,
+                "ratio": 0.4607572860722979
+              },
+              "crack_integral": {
+                "difference": 4.148969716645187e-08,
+                "quarter_allowance": 5.661372117659975e-08,
+                "ratio": 0.7328558572758308
+              },
+              "velocity_L2": {
+                "difference": 9.298434171094638e-09,
+                "quarter_allowance": 2.718221902301784e-08,
+                "ratio": 0.3420778179743436
+              }
+            }
+          },
+          {
+            "time_s": 4.5,
+            "metrics": {
+              "V": {
+                "difference": 6.134126547478042e-08,
+                "quarter_allowance": 5.6816512015889724e-08,
+                "ratio": 1.079638001319498
+              },
+              "q": {
+                "difference": 0.14083414257970617,
+                "quarter_allowance": 0.4945221944309918,
+                "ratio": 0.2847883151973655
+              },
+              "C": {
+                "difference": 0.009965532440958214,
+                "quarter_allowance": 0.15999102369629564,
+                "ratio": 0.06228807223507347
+              },
+              "Theta": {
+                "difference": 0.07808446396509794,
+                "quarter_allowance": 0.04000166319359496,
+                "ratio": 1.952030434014573
+              },
+              "slip": {
+                "difference": 7.304310604708481e-07,
+                "quarter_allowance": 4.885596152147574e-07,
+                "ratio": 1.495070484181896
+              },
+              "velocity": {
+                "difference": 2.0606776314729784e-08,
+                "quarter_allowance": 3.025000000000018e-08,
+                "ratio": 0.6812157459414764
+              },
+              "crack_integral": {
+                "difference": 6.134126547478042e-08,
+                "quarter_allowance": 5.68165120158898e-08,
+                "ratio": 1.0796380013194966
+              },
+              "velocity_L2": {
+                "difference": 1.3747454378811067e-08,
+                "quarter_allowance": 2.7221298294128295e-08,
+                "ratio": 0.5050256688813564
+              }
+            }
+          },
+          {
+            "time_s": 4.75,
+            "metrics": {
+              "V": {
+                "difference": 5.422050424619277e-08,
+                "quarter_allowance": 5.692183379070914e-08,
+                "ratio": 0.9525431743037539
+              },
+              "q": {
+                "difference": 0.14301943008683793,
+                "quarter_allowance": 0.4941332993288894,
+                "ratio": 0.28943491620799644
+              },
+              "C": {
+                "difference": 0.009917188923338927,
+                "quarter_allowance": 0.15973171554065746,
+                "ratio": 0.06208653610068218
+              },
+              "Theta": {
+                "difference": 0.07570841837684839,
+                "quarter_allowance": 0.03902172620956134,
+                "ratio": 1.9401606676820424
+              },
+              "slip": {
+                "difference": 7.278978435517388e-07,
+                "quarter_allowance": 5.027220627078634e-07,
+                "ratio": 1.4479130667768747
+              },
+              "velocity": {
+                "difference": 1.821465198055582e-08,
+                "quarter_allowance": 3.025000000000009e-08,
+                "ratio": 0.6021372555555625
+              },
+              "crack_integral": {
+                "difference": 5.422050424619277e-08,
+                "quarter_allowance": 5.692183379070922e-08,
+                "ratio": 0.9525431743037526
+              },
+              "velocity_L2": {
+                "difference": 1.2151590006328276e-08,
+                "quarter_allowance": 2.724160243638774e-08,
+                "ratio": 0.4460673719434688
+              }
+            }
+          },
+          {
+            "time_s": 5.0,
+            "metrics": {
+              "V": {
+                "difference": 4.0616432015532443e-08,
+                "quarter_allowance": 5.697632938229937e-08,
+                "ratio": 0.7128650170319782
+              },
+              "q": {
+                "difference": 0.1471185340176362,
+                "quarter_allowance": 0.4937291103464769,
+                "ratio": 0.29797419462343433
+              },
+              "C": {
+                "difference": 0.00985121724943383,
+                "quarter_allowance": 0.1594732052587371,
+                "ratio": 0.061773495010968994
+              },
+              "Theta": {
+                "difference": 0.07325723013944696,
+                "quarter_allowance": 0.038067934851502803,
+                "ratio": 1.924381514920949
+              },
+              "slip": {
+                "difference": 7.234396249610007e-07,
+                "quarter_allowance": 5.169007971087316e-07,
+                "ratio": 1.3995715019352601
+              },
+              "velocity": {
+                "difference": 1.364454617573793e-08,
+                "quarter_allowance": 3.0250000000000096e-08,
+                "ratio": 0.4510593777103434
+              },
+              "crack_integral": {
+                "difference": 4.0616432015532443e-08,
+                "quarter_allowance": 5.697632938229944e-08,
+                "ratio": 0.7128650170319774
+              },
+              "velocity_L2": {
+                "difference": 9.102722968666655e-09,
+                "quarter_allowance": 2.725211031203617e-08,
+                "ratio": 0.3340190122687983
+              }
+            }
+          },
+          {
+            "time_s": 5.25,
+            "metrics": {
+              "V": {
+                "difference": 2.7942533411133065e-08,
+                "quarter_allowance": 5.700437127912821e-08,
+                "ratio": 0.49018229276329284
+              },
+              "q": {
+                "difference": 0.15080897335963073,
+                "quarter_allowance": 0.49331754581220516,
+                "ratio": 0.30570364796438904
+              },
+              "C": {
+                "difference": 0.009789094857353575,
+                "quarter_allowance": 0.15921541798513703,
+                "ratio": 0.06148333485056956
+              },
+              "Theta": {
+                "difference": 0.07091084094390965,
+                "quarter_allowance": 0.037140196557151214,
+                "ratio": 1.9092747889686656
+              },
+              "slip": {
+                "difference": 7.1937860219402e-07,
+                "quarter_allowance": 5.310879276232207e-07,
+                "ratio": 1.354537666509305
+              },
+              "velocity": {
+                "difference": 9.38691973868637e-09,
+                "quarter_allowance": 3.025000000000028e-08,
+                "ratio": 0.31031139632020766
+              },
+              "crack_integral": {
+                "difference": 2.7942533411133065e-08,
+                "quarter_allowance": 5.700437127912828e-08,
+                "ratio": 0.4901822927632922
+              },
+              "velocity_L2": {
+                "difference": 6.262321136148655e-09,
+                "quarter_allowance": 2.7257517928014415e-08,
+                "ratio": 0.2297465657983642
+              }
+            }
+          },
+          {
+            "time_s": 5.5,
+            "metrics": {
+              "V": {
+                "difference": 1.8183537480473497e-08,
+                "quarter_allowance": 5.7018649116876835e-08,
+                "ratio": 0.31890509091509484
+              },
+              "q": {
+                "difference": 0.15349288968047858,
+                "quarter_allowance": 0.4929027242061772,
+                "ratio": 0.31140604858226295
+              },
+              "C": {
+                "difference": 0.009736350389289328,
+                "quarter_allowance": 0.15895831399841928,
+                "ratio": 0.06125096664894262
+              },
+              "Theta": {
+                "difference": 0.06870802461442338,
+                "quarter_allowance": 0.03623810610341499,
+                "ratio": 1.8960158794818613
+              },
+              "slip": {
+                "difference": 7.163152337189005e-07,
+                "quarter_allowance": 5.452793486444925e-07,
+                "ratio": 1.3136665371604213
+              },
+              "velocity": {
+                "difference": 6.10851580209055e-09,
+                "quarter_allowance": 3.025e-08,
+                "ratio": 0.20193440668067933
+              },
+              "crack_integral": {
+                "difference": 1.8183537480473497e-08,
+                "quarter_allowance": 5.701864911687691e-08,
+                "ratio": 0.3189050909150944
+              },
+              "velocity_L2": {
+                "difference": 4.075190657078803e-09,
+                "quarter_allowance": 2.7260271420547455e-08,
+                "ratio": 0.14949193257140955
+              }
+            }
+          },
+          {
+            "time_s": 5.75,
+            "metrics": {
+              "V": {
+                "difference": 1.130963262682683e-08,
+                "quarter_allowance": 5.70257573875725e-08,
+                "ratio": 0.19832498760098033
+              },
+              "q": {
+                "difference": 0.15520397828447585,
+                "quarter_allowance": 0.49248678840893667,
+                "ratio": 0.3151434351891733
+              },
+              "C": {
+                "difference": 0.00969267206630775,
+                "quarter_allowance": 0.1587018718509855,
+                "ratio": 0.0610747179806976
+              },
+              "Theta": {
+                "difference": 0.06663920468990625,
+                "quarter_allowance": 0.03536110978467533,
+                "ratio": 1.8845337461322016
+              },
+              "slip": {
+                "difference": 7.142187299540373e-07,
+                "quarter_allowance": 5.594729225391897e-07,
+                "ratio": 1.27659213016517
+              },
+              "velocity": {
+                "difference": 3.7993195598680645e-09,
+                "quarter_allowance": 3.025e-08,
+                "ratio": 0.12559734082208476
+              },
+              "crack_integral": {
+                "difference": 1.130963262682683e-08,
+                "quarter_allowance": 5.702575738757258e-08,
+                "ratio": 0.19832498760098005
+              },
+              "velocity_L2": {
+                "difference": 2.5346503267097433e-09,
+                "quarter_allowance": 2.726164229296994e-08,
+                "ratio": 0.09297496825286138
+              }
+            }
+          },
+          {
+            "time_s": 6.0,
+            "metrics": {
+              "V": {
+                "difference": 6.706274843283101e-09,
+                "quarter_allowance": 5.702911962749312e-08,
+                "ratio": 0.11759386936161081
+              },
+              "q": {
+                "difference": 0.15615387781281242,
+                "quarter_allowance": 0.4920708553996182,
+                "ratio": 0.3173402287481495
+              },
+              "C": {
+                "difference": 0.009656102543146972,
+                "quarter_allowance": 0.1584460795865403,
+                "ratio": 0.06094251475545653
+              },
+              "Theta": {
+                "difference": 0.06468313542183068,
+                "quarter_allowance": 0.034508588450020014,
+                "ratio": 1.8744068745527946
+              },
+              "slip": {
+                "difference": 7.128798436618379e-07,
+                "quarter_allowance": 5.736675336048536e-07,
+                "ratio": 1.242670714136796
+              },
+              "velocity": {
+                "difference": 2.252883186339876e-09,
+                "quarter_allowance": 3.025000000000026e-08,
+                "ratio": 0.07447547723437542
+              },
+              "crack_integral": {
+                "difference": 6.706274843283101e-09,
+                "quarter_allowance": 5.702911962749319e-08,
+                "ratio": 0.11759386936161066
+              },
+              "velocity_L2": {
+                "difference": 1.5029720490935702e-09,
+                "quarter_allowance": 2.7262290729496273e-08,
+                "ratio": 0.05513007193733132
+              }
+            }
+          }
+        ],
+        "max_ratio": 909.9780831002367,
+        "maxima": {
+          "V": 0.0003206575705564337,
+          "q": 41.73431220583325,
+          "C": 0.3852253811014066,
+          "Theta": 5.846794092650754,
+          "slip": 4.178464379867746e-05,
+          "velocity": 0.00010772061480817166,
+          "crack_integral": 0.00032065757055643415,
+          "velocity_L2": 7.186394490426685e-05
+        }
+      }
+    },
+    "half": {
+      "dt05": {
+        "rows": [
+          {
+            "time_s": 0.0,
+            "metrics": {
+              "V": {
+                "difference": 0.0,
+                "quarter_allowance": 1.6185772872033123e-07,
+                "ratio": 0.0
+              },
+              "q": {
+                "difference": 0.0,
+                "quarter_allowance": 0.5179008951918357,
+                "ratio": 0.0
+              },
+              "C": {
+                "difference": 0.0,
+                "quarter_allowance": 0.15378798991180126,
+                "ratio": 0.0
+              },
+              "Theta": {
+                "difference": 0.0,
+                "quarter_allowance": 0.1005,
+                "ratio": 0.0
+              },
+              "slip": {
+                "difference": 0.0,
+                "quarter_allowance": 1.5e-09,
+                "ratio": 0.0
+              },
+              "velocity": {
+                "difference": 0.0,
+                "quarter_allowance": 6.954225282502474e-08,
+                "ratio": 0.0
+              },
+              "crack_integral": {
+                "difference": 0.0,
+                "quarter_allowance": 1.618577287203306e-07,
+                "ratio": 0.0
+              },
+              "velocity_L2": {
+                "difference": 0.0,
+                "quarter_allowance": 5.111725325295048e-08,
+                "ratio": 0.0
+              }
+            }
+          },
+          {
+            "time_s": 0.5,
+            "metrics": {
+              "V": {
+                "difference": 0.0003275143515633213,
+                "quarter_allowance": 2.7106455824955466e-07,
+                "ratio": 1208.2522100207448
+              },
+              "q": {
+                "difference": 48.62922106092742,
+                "quarter_allowance": 0.5345122364262698,
+                "ratio": 90.97868626181638
+              },
+              "C": {
+                "difference": 0.4482566280142919,
+                "quarter_allowance": 0.15527680626613027,
+                "ratio": 2.8868228217292216
+              },
+              "Theta": {
+                "difference": 6.143784221957105,
+                "quarter_allowance": 0.06238506240973096,
+                "ratio": 98.48165545793834
+              },
+              "slip": {
+                "difference": 4.870436283415947e-05,
+                "quarter_allowance": 2.431380484326874e-07,
+                "ratio": 200.3156772381647
+              },
+              "velocity": {
+                "difference": 0.00013228611019688757,
+                "quarter_allowance": 1.1366833423599263e-07,
+                "ratio": 1163.7903474704012
+              },
+              "crack_integral": {
+                "difference": 0.0003275143515633201,
+                "quarter_allowance": 2.710645582495536e-07,
+                "ratio": 1208.252210020745
+              },
+              "velocity_L2": {
+                "difference": 8.393264566880035e-05,
+                "quarter_allowance": 7.883676789610409e-08,
+                "ratio": 1064.638339555116
+              }
+            }
+          },
+          {
+            "time_s": 1.0,
+            "metrics": {
+              "V": {
+                "difference": 0.00010021590723747732,
+                "quarter_allowance": 9.031259797079238e-08,
+                "ratio": 1109.6559006074406
+              },
+              "q": {
+                "difference": 22.375434432084035,
+                "quarter_allowance": 0.501144802392654,
+                "ratio": 44.6486411217981
+              },
+              "C": {
+                "difference": 0.2018200890498747,
+                "quarter_allowance": 0.15504753781935637,
+                "ratio": 1.3016658754362957
+              },
+              "Theta": {
+                "difference": 2.4579275871688395,
+                "quarter_allowance": 0.05596553862776988,
+                "ratio": 43.9185907512954
+              },
+              "slip": {
+                "difference": 2.2345610259322246e-05,
+                "quarter_allowance": 3.0004394794003426e-07,
+                "ratio": 74.47445753442813
+              },
+              "velocity": {
+                "difference": 4.0478142362365685e-05,
+                "quarter_allowance": 4.107778283297237e-08,
+                "ratio": 985.4023165504112
+              },
+              "crack_integral": {
+                "difference": 0.00010021590723747692,
+                "quarter_allowance": 9.031259797079203e-08,
+                "ratio": 1109.6559006074403
+              },
+              "velocity_L2": {
+                "difference": 2.5682496636836052e-05,
+                "quarter_allowance": 3.417466444208971e-08,
+                "ratio": 751.5069147308245
+              }
+            }
+          },
+          {
+            "time_s": 1.5,
+            "metrics": {
+              "V": {
+                "difference": 3.4016720465682604e-05,
+                "quarter_allowance": 6.14907109391361e-08,
+                "ratio": 553.200962326693
+              },
+              "q": {
+                "difference": 10.15570148087761,
+                "quarter_allowance": 0.4924991402464513,
+                "ratio": 20.620749664244286
+              },
+              "C": {
+                "difference": 0.08559515616877889,
+                "quarter_allowance": 0.15459739079136672,
+                "ratio": 0.5536649469349183
+              },
+              "Theta": {
+                "difference": 0.9848215141187353,
+                "quarter_allowance": 0.05267539647237594,
+                "ratio": 18.696043695374858
+              },
+              "slip": {
+                "difference": 9.90077471782144e-06,
+                "quarter_allowance": 3.329460657552726e-07,
+                "ratio": 29.736872533279513
+              },
+              "velocity": {
+                "difference": 1.3739671591734832e-05,
+                "quarter_allowance": 2.990414973636894e-08,
+                "ratio": 459.4570222815888
+              },
+              "crack_integral": {
+                "difference": 3.401672046568247e-05,
+                "quarter_allowance": 6.149071093913587e-08,
+                "ratio": 553.200962326693
+              },
+              "velocity_L2": {
+                "difference": 8.717521330080603e-06,
+                "quarter_allowance": 2.7773030617986268e-08,
+                "ratio": 313.88441002311765
+              }
+            }
+          },
+          {
+            "time_s": 2.0,
+            "metrics": {
+              "V": {
+                "difference": 1.3587219733265184e-05,
+                "quarter_allowance": 5.4866210630222116e-08,
+                "ratio": 247.642758214851
+              },
+              "q": {
+                "difference": 4.717027197492257,
+                "quarter_allowance": 0.48955859368545834,
+                "ratio": 9.635265846283867
+              },
+              "C": {
+                "difference": 0.03229398845195419,
+                "quarter_allowance": 0.15410274500062382,
+                "ratio": 0.20956140951170898
+              },
+              "Theta": {
+                "difference": 0.3624789778186681,
+                "quarter_allowance": 0.050092033167261345,
+                "ratio": 7.236260037765318
+              },
+              "slip": {
+                "difference": 4.188513235137679e-06,
+                "quarter_allowance": 3.6079484526235807e-07,
+                "ratio": 11.609127153942376
+              },
+              "velocity": {
+                "difference": 5.488005146414279e-06,
+                "quarter_allowance": 2.7750000000000004e-08,
+                "ratio": 197.76595122213615
+              },
+              "crack_integral": {
+                "difference": 1.358721973326513e-05,
+                "quarter_allowance": 5.486621063022192e-08,
+                "ratio": 247.64275821485091
+              },
+              "velocity_L2": {
+                "difference": 3.4820193193146005e-06,
+                "quarter_allowance": 2.6608946051883868e-08,
+                "ratio": 130.85897173548815
+              }
+            }
+          },
+          {
+            "time_s": 2.5,
+            "metrics": {
+              "V": {
+                "difference": 5.7862337384894215e-06,
+                "quarter_allowance": 5.3649573257376626e-08,
+                "ratio": 107.85237210985336
+              },
+              "q": {
+                "difference": 2.2541739293619685,
+                "quarter_allowance": 0.4883339849250163,
+                "ratio": 4.616049668769412
+              },
+              "C": {
+                "difference": 0.0066144149522529005,
+                "quarter_allowance": 0.15360056696393296,
+                "ratio": 0.043062438394553815
+              },
+              "Theta": {
+                "difference": 0.08308272339539258,
+                "quarter_allowance": 0.04775035673245624,
+                "ratio": 1.7399393236139047
+              },
+              "slip": {
+                "difference": 1.431143147066988e-06,
+                "quarter_allowance": 3.875625052816334e-07,
+                "ratio": 3.6926769941973796
+              },
+              "velocity": {
+                "difference": 2.337113931957796e-06,
+                "quarter_allowance": 2.8375e-08,
+                "ratio": 82.36524870335845
+              },
+              "crack_integral": {
+                "difference": 5.786233738489408e-06,
+                "quarter_allowance": 5.364957325737643e-08,
+                "ratio": 107.8523721098535
+              },
+              "velocity_L2": {
+                "difference": 1.4828477097608793e-06,
+                "quarter_allowance": 2.666473460213144e-08,
+                "ratio": 55.61081825439763
+              }
+            }
+          },
+          {
+            "time_s": 3.0,
+            "metrics": {
+              "V": {
+                "difference": 2.4856305153512885e-06,
+                "quarter_allowance": 5.4090669550272137e-08,
+                "ratio": 45.953036559126545
+              },
+              "q": {
+                "difference": 1.149962242024685,
+                "quarter_allowance": 0.48766883867144645,
+                "ratio": 2.3580802192683072
+              },
+              "C": {
+                "difference": 0.006446595507725306,
+                "quarter_allowance": 0.1531015437492566,
+                "ratio": 0.042106665614575864
+              },
+              "Theta": {
+                "difference": 0.04770580451528872,
+                "quarter_allowance": 0.04552443461981108,
+                "ratio": 1.0479164631849895
+              },
+              "slip": {
+                "difference": 2.3123619284550617e-08,
+                "quarter_allowance": 4.14400237921716e-07,
+                "ratio": 0.05580020754939547
+              },
+              "velocity": {
+                "difference": 1.0039694159752049e-06,
+                "quarter_allowance": 2.8999999999999998e-08,
+                "ratio": 34.61963503362776
+              },
+              "crack_integral": {
+                "difference": 2.485630515351275e-06,
+                "quarter_allowance": 5.409066955027194e-08,
+                "ratio": 45.95303655912647
+              },
+              "velocity_L2": {
+                "difference": 6.36996651635876e-07,
+                "quarter_allowance": 2.708769692433489e-08,
+                "ratio": 23.516087521771354
+              }
+            }
+          },
+          {
+            "time_s": 3.5,
+            "metrics": {
+              "V": {
+                "difference": 1.0509852124094692e-06,
+                "quarter_allowance": 5.507928910648443e-08,
+                "ratio": 19.08131403761596
+              },
+              "q": {
+                "difference": 0.6668080595877655,
+                "quarter_allowance": 0.4871873649407681,
+                "ratio": 1.3686891483091634
+              },
+              "C": {
+                "difference": 0.013731857235200096,
+                "quarter_allowance": 0.1526091200288476,
+                "ratio": 0.08998058066650519
+              },
+              "Theta": {
+                "difference": 0.11271944762569319,
+                "quarter_allowance": 0.04337684022849361,
+                "ratio": 2.598609004988091
+              },
+              "slip": {
+                "difference": 7.679309714805037e-07,
+                "quarter_allowance": 4.416821014826781e-07,
+                "ratio": 1.7386508733377335
+              },
+              "velocity": {
+                "difference": 4.2450275830805653e-07,
+                "quarter_allowance": 2.9625000000000002e-08,
+                "ratio": 14.329207031495578
+              },
+              "crack_integral": {
+                "difference": 1.0509852124094692e-06,
+                "quarter_allowance": 5.507928910648422e-08,
+                "ratio": 19.081314037616032
+              },
+              "velocity_L2": {
+                "difference": 2.693377221952353e-07,
+                "quarter_allowance": 2.763117463044447e-08,
+                "ratio": 9.747603053345214
+              }
+            }
+          },
+          {
+            "time_s": 4.0,
+            "metrics": {
+              "V": {
+                "difference": 4.3054568647764725e-07,
+                "quarter_allowance": 5.625133387446846e-08,
+                "ratio": 7.653964036452205
+              },
+              "q": {
+                "difference": 0.4620405631367248,
+                "quarter_allowance": 0.4867639071845509,
+                "ratio": 0.9492087566828316
+              },
+              "C": {
+                "difference": 0.01842047944813885,
+                "quarter_allowance": 0.15212442013483915,
+                "ratio": 0.12108824757926054
+              },
+              "Theta": {
+                "difference": 0.14835849409261925,
+                "quarter_allowance": 0.0412969530370745,
+                "ratio": 3.592480393394395
+              },
+              "slip": {
+                "difference": 1.2823600933306069e-06,
+                "quarter_allowance": 4.695331902806067e-07,
+                "ratio": 2.731138330315331
+              },
+              "velocity": {
+                "difference": 1.739014301337097e-07,
+                "quarter_allowance": 3.025e-08,
+                "ratio": 5.74880760772594
+              },
+              "crack_integral": {
+                "difference": 4.3054568647764725e-07,
+                "quarter_allowance": 5.625133387446825e-08,
+                "ratio": 7.653964036452233
+              },
+              "velocity_L2": {
+                "difference": 1.1033665662242313e-07,
+                "quarter_allowance": 2.8214953055808827e-08,
+                "ratio": 3.9105738153871314
+              }
+            }
+          },
+          {
+            "time_s": 4.5,
+            "metrics": {
+              "V": {
+                "difference": 5.13472228300002e-08,
+                "quarter_allowance": 5.678420574451111e-08,
+                "ratio": 0.9042518453287258
+              },
+              "q": {
+                "difference": 0.33816795046573134,
+                "quarter_allowance": 0.4861314166893186,
+                "ratio": 0.6956307262936081
+              },
+              "C": {
+                "difference": 0.019456423966005332,
+                "quarter_allowance": 0.1516455406752161,
+                "ratio": 0.12830198553398778
+              },
+              "Theta": {
+                "difference": 0.1496249876217064,
+                "quarter_allowance": 0.03930129817074129,
+                "ratio": 3.8071258351740145
+              },
+              "slip": {
+                "difference": 1.4043528416439119e-06,
+                "quarter_allowance": 4.977521335844131e-07,
+                "ratio": 2.8213898984839805
+              },
+              "velocity": {
+                "difference": 2.0739623607954425e-08,
+                "quarter_allowance": 3.025e-08,
+                "ratio": 0.6856073919984933
+              },
+              "crack_integral": {
+                "difference": 5.134722282998665e-08,
+                "quarter_allowance": 5.6784205744510895e-08,
+                "ratio": 0.9042518453284906
+              },
+              "velocity_L2": {
+                "difference": 1.3158837893070903e-08,
+                "quarter_allowance": 2.833209141057366e-08,
+                "ratio": 0.4644499307297861
+              }
+            }
+          },
+          {
+            "time_s": 5.0,
+            "metrics": {
+              "V": {
+                "difference": 1.739088984379169e-08,
+                "quarter_allowance": 5.695414570866271e-08,
+                "ratio": 0.3053489720090129
+              },
+              "q": {
+                "difference": 0.31466892851005923,
+                "quarter_allowance": 0.48538458659449135,
+                "ratio": 0.6482878467934243
+              },
+              "C": {
+                "difference": 0.019561743519489028,
+                "quarter_allowance": 0.15117013965827758,
+                "ratio": 0.1294021660872223
+              },
+              "Theta": {
+                "difference": 0.14298570592183069,
+                "quarter_allowance": 0.037406489047011916,
+                "ratio": 3.822484001161627
+              },
+              "slip": {
+                "difference": 1.4262580711815135e-06,
+                "quarter_allowance": 5.260889061015147e-07,
+                "ratio": 2.711059014246351
+              },
+              "velocity": {
+                "difference": 7.024343083973997e-09,
+                "quarter_allowance": 3.025e-08,
+                "ratio": 0.2322096887264131
+              },
+              "crack_integral": {
+                "difference": 1.739088984379169e-08,
+                "quarter_allowance": 5.695414570866249e-08,
+                "ratio": 0.30534897200901406
+              },
+              "velocity_L2": {
+                "difference": 4.456792162398072e-09,
+                "quarter_allowance": 2.836948524956178e-08,
+                "ratio": 0.15709809759297327
+              }
+            }
+          },
+          {
+            "time_s": 5.5,
+            "metrics": {
+              "V": {
+                "difference": 1.8184213722183154e-08,
+                "quarter_allowance": 5.700755745602132e-08,
+                "ratio": 0.3189790009195084
+              },
+              "q": {
+                "difference": 0.31265339637309353,
+                "quarter_allowance": 0.4846043568021596,
+                "ratio": 0.6451724834589854
+              },
+              "C": {
+                "difference": 0.019468317625864984,
+                "quarter_allowance": 0.15069745412692964,
+                "ratio": 0.1291880990203536
+              },
+              "Theta": {
+                "difference": 0.135128400066165,
+                "quarter_allowance": 0.035613474919845865,
+                "ratio": 3.7943053962101216
+              },
+              "slip": {
+                "difference": 1.4267172407948694e-06,
+                "quarter_allowance": 5.544629091912881e-07,
+                "ratio": 2.573151814385218
+              },
+              "velocity": {
+                "difference": 7.3447740192927814e-09,
+                "quarter_allowance": 3.025e-08,
+                "ratio": 0.24280244691876962
+              },
+              "crack_integral": {
+                "difference": 1.8184213722183154e-08,
+                "quarter_allowance": 5.70075574560211e-08,
+                "ratio": 0.31897900091950965
+              },
+              "velocity_L2": {
+                "difference": 4.660098587519858e-09,
+                "quarter_allowance": 2.8381241707864572e-08,
+                "ratio": 0.164196430708968
+              }
+            }
+          },
+          {
+            "time_s": 6.0,
+            "metrics": {
+              "V": {
+                "difference": 9.957469359093366e-09,
+                "quarter_allowance": 5.702367783532505e-08,
+                "ratio": 0.17461990767850666
+              },
+              "q": {
+                "difference": 0.3132599875435744,
+                "quarter_allowance": 0.48381662076109777,
+                "ratio": 0.6474766969575815
+              },
+              "C": {
+                "difference": 0.019351124890306437,
+                "quarter_allowance": 0.15022723186333226,
+                "ratio": 0.128812364111927
+              },
+              "Theta": {
+                "difference": 0.12752630853918845,
+                "quarter_allowance": 0.03391861679009775,
+                "ratio": 3.759773263407919
+              },
+              "slip": {
+                "difference": 1.424549378489402e-06,
+                "quarter_allowance": 5.828483426727635e-07,
+                "ratio": 2.4441167181789623
+              },
+              "velocity": {
+                "difference": 4.021915017328882e-09,
+                "quarter_allowance": 3.025e-08,
+                "ratio": 0.13295586834145062
+              },
+              "crack_integral": {
+                "difference": 9.957469359093366e-09,
+                "quarter_allowance": 5.702367783532483e-08,
+                "ratio": 0.17461990767850732
+              },
+              "velocity_L2": {
+                "difference": 2.5518171753178354e-09,
+                "quarter_allowance": 2.838479030728339e-08,
+                "ratio": 0.08990086407871233
+              }
+            }
+          }
+        ],
+        "max_ratio": 1208.252210020745,
+        "maxima": {
+          "V": 0.0003275143515633213,
+          "q": 48.62922106092742,
+          "C": 0.4482566280142919,
+          "Theta": 6.143784221957105,
+          "slip": 4.870436283415947e-05,
+          "velocity": 0.00013228611019688757,
+          "crack_integral": 0.0003275143515633201,
+          "velocity_L2": 8.393264566880035e-05
+        }
+      },
+      "dt025": {
+        "rows": [
+          {
+            "time_s": 0.0,
+            "metrics": {
+              "V": {
+                "difference": 0.0,
+                "quarter_allowance": 1.6185772872033123e-07,
+                "ratio": 0.0
+              },
+              "q": {
+                "difference": 0.0,
+                "quarter_allowance": 0.5179008951918357,
+                "ratio": 0.0
+              },
+              "C": {
+                "difference": 0.0,
+                "quarter_allowance": 0.15378798991180126,
+                "ratio": 0.0
+              },
+              "Theta": {
+                "difference": 0.0,
+                "quarter_allowance": 0.1005,
+                "ratio": 0.0
+              },
+              "slip": {
+                "difference": 0.0,
+                "quarter_allowance": 1.5e-09,
+                "ratio": 0.0
+              },
+              "velocity": {
+                "difference": 0.0,
+                "quarter_allowance": 6.954225282502474e-08,
+                "ratio": 0.0
+              },
+              "crack_integral": {
+                "difference": 0.0,
+                "quarter_allowance": 1.618577287203306e-07,
+                "ratio": 0.0
+              },
+              "velocity_L2": {
+                "difference": 0.0,
+                "quarter_allowance": 5.111725325295048e-08,
+                "ratio": 0.0
+              }
+            }
+          },
+          {
+            "time_s": 0.25,
+            "metrics": {
+              "V": {
+                "difference": 0.00033457945173448163,
+                "quarter_allowance": 5.286979096139541e-07,
+                "ratio": 632.8367214063427
+              },
+              "q": {
+                "difference": 43.29183161714627,
+                "quarter_allowance": 0.5691546969246751,
+                "ratio": 76.06338285718432
+              },
+              "C": {
+                "difference": 0.4009052495105152,
+                "quarter_allowance": 0.15522766118227802,
+                "ratio": 2.5826920695516193
+              },
+              "Theta": {
+                "difference": 5.989061555702591,
+                "quarter_allowance": 0.06823019467195197,
+                "ratio": 87.7772895782836
+              },
+              "slip": {
+                "difference": 4.33472628508941e-05,
+                "quarter_allowance": 1.971080402957458e-07,
+                "ratio": 219.91625905191282
+              },
+              "velocity": {
+                "difference": 0.00013513977024364019,
+                "quarter_allowance": 2.176199228380603e-07,
+                "ratio": 620.9898821818952
+              },
+              "crack_integral": {
+                "difference": 0.00033457945173448033,
+                "quarter_allowance": 5.286979096139522e-07,
+                "ratio": 632.8367214063426
+              },
+              "velocity_L2": {
+                "difference": 8.574323059874307e-05,
+                "quarter_allowance": 1.4430517558065897e-07,
+                "ratio": 594.1798709140347
+              }
+            }
+          },
+          {
+            "time_s": 0.5,
+            "metrics": {
+              "V": {
+                "difference": 0.00017177230321941452,
+                "quarter_allowance": 1.8517840663984737e-07,
+                "ratio": 927.6043915503262
+              },
+              "q": {
+                "difference": 27.966253037105616,
+                "quarter_allowance": 0.520529109907717,
+                "ratio": 53.72658801361497
+              },
+              "C": {
+                "difference": 0.25800457119913744,
+                "quarter_allowance": 0.15540580855172986,
+                "ratio": 1.6601990208960278
+              },
+              "Theta": {
+                "difference": 3.403543318422095,
+                "quarter_allowance": 0.06068329075051992,
+                "ratio": 56.08699324521939
+              },
+              "slip": {
+                "difference": 2.8049951323141995e-05,
+                "quarter_allowance": 2.571630240942584e-07,
+                "ratio": 109.07458963797534
+              },
+              "velocity": {
+                "difference": 6.938044004481861e-05,
+                "quarter_allowance": 7.903881185189637e-08,
+                "ratio": 877.8021635095463
+              },
+              "crack_integral": {
+                "difference": 0.00017177230321941387,
+                "quarter_allowance": 1.8517840663984666e-07,
+                "ratio": 927.6043915503263
+              },
+              "velocity_L2": {
+                "difference": 4.4020372826445194e-05,
+                "quarter_allowance": 5.720236513135685e-08,
+                "ratio": 769.555117613736
+              }
+            }
+          },
+          {
+            "time_s": 0.75,
+            "metrics": {
+              "V": {
+                "difference": 7.636213294128093e-05,
+                "quarter_allowance": 9.962993358795461e-08,
+                "ratio": 766.4577320416201
+              },
+              "q": {
+                "difference": 16.383446874665196,
+                "quarter_allowance": 0.5036005192087767,
+                "ratio": 32.53262506640336
+              },
+              "C": {
+                "difference": 0.14982828957550964,
+                "quarter_allowance": 0.15529202462070396,
+                "ratio": 0.9648163834650277
+              },
+              "Theta": {
+                "difference": 1.8643464946329544,
+                "quarter_allowance": 0.0574602841884263,
+                "ratio": 32.4458279482104
+              },
+              "slip": {
+                "difference": 1.644918118232368e-05,
+                "quarter_allowance": 2.8575288903849804e-07,
+                "ratio": 57.56435652382
+              },
+              "velocity": {
+                "difference": 3.08433797936536e-05,
+                "quarter_allowance": 4.473160337977186e-08,
+                "ratio": 689.5209977561709
+              },
+              "crack_integral": {
+                "difference": 7.636213294128066e-05,
+                "quarter_allowance": 9.962993358795424e-08,
+                "ratio": 766.4577320416204
+              },
+              "velocity_L2": {
+                "difference": 1.956945036478862e-05,
+                "quarter_allowance": 3.6256347054433836e-08,
+                "ratio": 539.7524007426293
+              }
+            }
+          },
+          {
+            "time_s": 1.0,
+            "metrics": {
+              "V": {
+                "difference": 3.697481484608197e-05,
+                "quarter_allowance": 7.182519054775139e-08,
+                "ratio": 514.7889558538669
+              },
+              "q": {
+                "difference": 9.816678859508215,
+                "quarter_allowance": 0.49623646296289986,
+                "ratio": 19.78226025732845
+              },
+              "C": {
+                "difference": 0.08818879084634546,
+                "quarter_allowance": 0.15509163221477953,
+                "ratio": 0.5686237844490327
+              },
+              "Theta": {
+                "difference": 1.0589978033961245,
+                "quarter_allowance": 0.05543603972607182,
+                "ratio": 19.10305657887883
+              },
+              "slip": {
+                "difference": 9.838729514574911e-06,
+                "quarter_allowance": 3.049633126973217e-07,
+                "ratio": 32.262010231833756
+              },
+              "velocity": {
+                "difference": 1.4934473582275002e-05,
+                "quarter_allowance": 3.377093954707966e-08,
+                "ratio": 442.2285486447611
+              },
+              "crack_integral": {
+                "difference": 3.697481484608183e-05,
+                "quarter_allowance": 7.182519054775112e-08,
+                "ratio": 514.7889558538669
+              },
+              "velocity_L2": {
+                "difference": 9.475597079432644e-06,
+                "quarter_allowance": 2.982841217651096e-08,
+                "ratio": 317.67018047626453
+              }
+            }
+          },
+          {
+            "time_s": 1.25,
+            "metrics": {
+              "V": {
+                "difference": 1.9769343700361608e-05,
+                "quarter_allowance": 6.073308847163634e-08,
+                "ratio": 325.5119111815681
+              },
+              "q": {
+                "difference": 6.029518249211947,
+                "quarter_allowance": 0.4925828031209831,
+                "ratio": 12.24061865540003
+              },
+              "C": {
+                "difference": 0.052338167631660326,
+                "quarter_allowance": 0.15485893626942773,
+                "ratio": 0.3379731831594205
+              },
+              "Theta": {
+                "difference": 0.6132375640824819,
+                "quarter_allowance": 0.053864184988505544,
+                "ratio": 11.384885229644613
+              },
+              "slip": {
+                "difference": 5.9939845005339745e-06,
+                "quarter_allowance": 3.2063288027075556e-07,
+                "ratio": 18.694229036873597
+              },
+              "velocity": {
+                "difference": 7.985022844901378e-06,
+                "quarter_allowance": 2.9541983983904692e-08,
+                "ratio": 270.29406180884274
+              },
+              "crack_integral": {
+                "difference": 1.9769343700361527e-05,
+                "quarter_allowance": 6.073308847163612e-08,
+                "ratio": 325.511911181568
+              },
+              "velocity_L2": {
+                "difference": 5.066322474074467e-06,
+                "quarter_allowance": 2.7442691773139636e-08,
+                "ratio": 184.61463314008006
+              }
+            }
+          },
+          {
+            "time_s": 1.5,
+            "metrics": {
+              "V": {
+                "difference": 1.1291293318443926e-05,
+                "quarter_allowance": 5.5845064279914136e-08,
+                "ratio": 202.18963777798137
+              },
+              "q": {
+                "difference": 3.762694134232106,
+                "quarter_allowance": 0.49061779317933524,
+                "ratio": 7.6692981513141545
+              },
+              "C": {
+                "difference": 0.030593858043005184,
+                "quarter_allowance": 0.15461268772038822,
+                "ratio": 0.1978741751021956
+              },
+              "Theta": {
+                "difference": 0.3527250681277678,
+                "quarter_allowance": 0.05249903393831206,
+                "ratio": 6.718696358150711
+              },
+              "slip": {
+                "difference": 3.661629841393956e-06,
+                "quarter_allowance": 3.3477688067596956e-07,
+                "ratio": 10.937523027278715
+              },
+              "velocity": {
+                "difference": 4.560658991153527e-06,
+                "quarter_allowance": 2.7786661840170578e-08,
+                "ratio": 164.1312302062956
+              },
+              "crack_integral": {
+                "difference": 1.1291293318443885e-05,
+                "quarter_allowance": 5.5845064279913924e-08,
+                "ratio": 202.18963777798143
+              },
+              "velocity_L2": {
+                "difference": 2.8936384519205062e-06,
+                "quarter_allowance": 2.6503849079065985e-08,
+                "ratio": 109.17804592413111
+              }
+            }
+          },
+          {
+            "time_s": 1.75,
+            "metrics": {
+              "V": {
+                "difference": 6.688235190909514e-06,
+                "quarter_allowance": 5.368478980266499e-08,
+                "ratio": 124.58342885376261
+              },
+              "q": {
+                "difference": 2.3741258505659744,
+                "quarter_allowance": 0.4894915042855318,
+                "ratio": 4.850188062061015
+              },
+              "C": {
+                "difference": 0.016999121726428257,
+                "quarter_allowance": 0.15436076628399098,
+                "ratio": 0.11012592212164514
+              },
+              "Theta": {
+                "difference": 0.19508236003494517,
+                "quarter_allowance": 0.05124069472604365,
+                "ratio": 3.807176328852395
+              },
+              "slip": {
+                "difference": 2.2027889487884374e-06,
+                "quarter_allowance": 3.482421870791967e-07,
+                "ratio": 6.325451167372442
+              },
+              "velocity": {
+                "difference": 2.701440755997963e-06,
+                "quarter_allowance": 2.74375e-08,
+                "ratio": 98.45797743956129
+              },
+              "crack_integral": {
+                "difference": 6.688235190909487e-06,
+                "quarter_allowance": 5.368478980266478e-08,
+                "ratio": 124.58342885376258
+              },
+              "velocity_L2": {
+                "difference": 1.7140051168709165e-06,
+                "quarter_allowance": 2.6185131581238612e-08,
+                "ratio": 65.45718938067068
+              }
+            }
+          },
+          {
+            "time_s": 2.0,
+            "metrics": {
+              "V": {
+                "difference": 4.0299984755509086e-06,
+                "quarter_allowance": 5.285121139244666e-08,
+                "ratio": 76.2517711396652
+              },
+              "q": {
+                "difference": 1.51526152943768,
+                "quarter_allowance": 0.4888009629207395,
+                "ratio": 3.099956105617133
+              },
+              "C": {
+                "difference": 0.008320355176806515,
+                "quarter_allowance": 0.15410690517821224,
+                "ratio": 0.05399080052373185
+              },
+              "Theta": {
+                "difference": 0.09762916641693664,
+                "quarter_allowance": 0.050043218584052876,
+                "ratio": 1.9508970281949018
+              },
+              "slip": {
+                "difference": 1.2707569099102301e-06,
+                "quarter_allowance": 3.614302237173132e-07,
+                "ratio": 3.5159121360700927
+              },
+              "velocity": {
+                "difference": 1.6277540812650176e-06,
+                "quarter_allowance": 2.7750000000000004e-08,
+                "ratio": 58.6578047302709
+              },
+              "crack_integral": {
+                "difference": 4.029998475550895e-06,
+                "quarter_allowance": 5.285121139244647e-08,
+                "ratio": 76.25177113966521
+              },
+              "velocity_L2": {
+                "difference": 1.0327743882968015e-06,
+                "quarter_allowance": 2.6163312354313145e-08,
+                "ratio": 39.47414510481674
+              }
+            }
+          },
+          {
+            "time_s": 2.25,
+            "metrics": {
+              "V": {
+                "difference": 2.4417474183591637e-06,
+                "quarter_allowance": 5.2700193110544914e-08,
+                "ratio": 46.33279831133272
+              },
+              "q": {
+                "difference": 0.9835648542858735,
+                "quarter_allowance": 0.4883416798610897,
+                "ratio": 2.0140915568903552
+              },
+              "C": {
+                "difference": 0.002678576101232011,
+                "quarter_allowance": 0.15385299624789459,
+                "ratio": 0.017409970338934273
+              },
+              "Theta": {
+                "difference": 0.03643272047163748,
+                "quarter_allowance": 0.048884023908816035,
+                "ratio": 0.7452889013309517
+              },
+              "slip": {
+                "difference": 6.641096874512257e-07,
+                "quarter_allowance": 3.7454466681101483e-07,
+                "ratio": 1.7731121179902358
+              },
+              "velocity": {
+                "difference": 9.86244622613358e-07,
+                "quarter_allowance": 2.80625e-08,
+                "ratio": 35.14457452519761
+              },
+              "crack_integral": {
+                "difference": 2.44174741835915e-06,
+                "quarter_allowance": 5.270019311054472e-08,
+                "ratio": 46.33279831133263
+              },
+              "velocity_L2": {
+                "difference": 6.257506576417116e-07,
+                "quarter_allowance": 2.629285909082004e-08,
+                "ratio": 23.799262586098436
+              }
+            }
+          },
+          {
+            "time_s": 2.5,
+            "metrics": {
+              "V": {
+                "difference": 1.477578671032993e-06,
+                "quarter_allowance": 5.291078392186013e-08,
+                "ratio": 27.925851055526135
+              },
+              "q": {
+                "difference": 0.6558214403402189,
+                "quarter_allowance": 0.48800607420484615,
+                "ratio": 1.3438796666799897
+              },
+              "C": {
+                "difference": 0.0010693092493738732,
+                "quarter_allowance": 0.15360003230930827,
+                "ratio": 0.006961647294582452
+              },
+              "Theta": {
+                "difference": 0.0026270038880227276,
+                "quarter_allowance": 0.04775167023440025,
+                "ratio": 0.05501386391570104
+              },
+              "slip": {
+                "difference": 2.603176654493661e-07,
+                "quarter_allowance": 3.8769266411435805e-07,
+                "ratio": 0.6714536785059724
+              },
+              "velocity": {
+                "difference": 5.968078466420991e-07,
+                "quarter_allowance": 2.8375e-08,
+                "ratio": 21.032875652584988
+              },
+              "crack_integral": {
+                "difference": 1.4775786710329795e-06,
+                "quarter_allowance": 5.2910783921859934e-08,
+                "ratio": 27.925851055525985
+              },
+              "velocity_L2": {
+                "difference": 3.786615348353469e-07,
+                "quarter_allowance": 2.65021949334385e-08,
+                "ratio": 14.287931085948655
+              }
+            }
+          },
+          {
+            "time_s": 2.75,
+            "metrics": {
+              "V": {
+                "difference": 8.892940294492912e-07,
+                "quarter_allowance": 5.331561399533392e-08,
+                "ratio": 16.67980471025093
+              },
+              "q": {
+                "difference": 0.45526165380522343,
+                "quarter_allowance": 0.4877365413418426,
+                "ratio": 0.9334171529422924
+              },
+              "C": {
+                "difference": 0.0036355155497744818,
+                "quarter_allowance": 0.15334854254979116,
+                "ratio": 0.023707532457271682
+              },
+              "Theta": {
+                "difference": 0.0281040858353947,
+                "quarter_allowance": 0.04664032388785035,
+                "ratio": 0.6025705546765235
+              },
+              "slip": {
+                "difference": 1.69638923343653e-08,
+                "quarter_allowance": 4.0093158858798086e-07,
+                "ratio": 0.042311189283212904
+              },
+              "velocity": {
+                "difference": 3.5919417703582043e-07,
+                "quarter_allowance": 2.8687499999999998e-08,
+                "ratio": 12.520929918459972
+              },
+              "crack_integral": {
+                "difference": 8.892940294492912e-07,
+                "quarter_allowance": 5.331561399533372e-08,
+                "ratio": 16.679804710250995
+              },
+              "velocity_L2": {
+                "difference": 2.279008547651347e-07,
+                "quarter_allowance": 2.6754275247743456e-08,
+                "ratio": 8.518296707901165
+              }
+            }
+          },
+          {
+            "time_s": 3.0,
+            "metrics": {
+              "V": {
+                "difference": 5.307260454822093e-07,
+                "quarter_allowance": 5.382530652753103e-08,
+                "ratio": 9.860158347834934
+              },
+              "q": {
+                "difference": 0.33364766624185904,
+                "quarter_allowance": 0.4875020148383255,
+                "ratio": 0.6844026405767974
+              },
+              "C": {
+                "difference": 0.0054675610815593245,
+                "quarter_allowance": 0.15309880996871583,
+                "ratio": 0.03571262952779688
+              },
+              "Theta": {
+                "difference": 0.0452329207301716,
+                "quarter_allowance": 0.04554705108017617,
+                "ratio": 0.9931031682061785
+              },
+              "slip": {
+                "difference": 2.1570926837940433e-07,
+                "quarter_allowance": 4.1429238328752634e-07,
+                "ratio": 0.5206691628450679
+              },
+              "velocity": {
+                "difference": 2.1436521423237273e-07,
+                "quarter_allowance": 2.8999999999999998e-08,
+                "ratio": 7.391903939047336
+              },
+              "crack_integral": {
+                "difference": 5.307260454822093e-07,
+                "quarter_allowance": 5.382530652753083e-08,
+                "ratio": 9.860158347834972
+              },
+              "velocity_L2": {
+                "difference": 1.3601004325466383e-07,
+                "quarter_allowance": 2.7029400577278257e-08,
+                "ratio": 5.031929689517349
+              }
+            }
+          },
+          {
+            "time_s": 3.25,
+            "metrics": {
+              "V": {
+                "difference": 3.131111399029806e-07,
+                "quarter_allowance": 5.4391609567412356e-08,
+                "ratio": 5.756607358988231
+              },
+              "q": {
+                "difference": 0.2606921426181543,
+                "quarter_allowance": 0.48728572031612505,
+                "ratio": 0.534988266122453
+              },
+              "C": {
+                "difference": 0.006846433094324311,
+                "quarter_allowance": 0.1528509849876492,
+                "ratio": 0.04479155364865671
+              },
+              "Theta": {
+                "difference": 0.05721783919710788,
+                "quarter_allowance": 0.0444704338719515,
+                "ratio": 1.286648998340366
+              },
+              "slip": {
+                "difference": 3.660431121518858e-07,
+                "quarter_allowance": 4.2779175764998107e-07,
+                "ratio": 0.8556572341708883
+              },
+              "velocity": {
+                "difference": 1.2646851827847978e-07,
+                "quarter_allowance": 2.9312500000000005e-08,
+                "ratio": 4.314491028690141
+              },
+              "crack_integral": {
+                "difference": 3.131111399029806e-07,
+                "quarter_allowance": 5.439160956741215e-08,
+                "ratio": 5.756607358988252
+              },
+              "velocity_L2": {
+                "difference": 8.024151074604254e-08,
+                "quarter_allowance": 2.7316959337655863e-08,
+                "ratio": 2.9374246875065366
+              }
+            }
+          },
+          {
+            "time_s": 3.5,
+            "metrics": {
+              "V": {
+                "difference": 1.8182358092476186e-07,
+                "quarter_allowance": 5.498837731602205e-08,
+                "ratio": 3.306582041506863
+              },
+              "q": {
+                "difference": 0.21748525378200156,
+                "quarter_allowance": 0.48707862231387705,
+                "ratio": 0.4465095444937275
+              },
+              "C": {
+                "difference": 0.007947566983830257,
+                "quarter_allowance": 0.15260514624535568,
+                "ratio": 0.05207928552456749
+              },
+              "Theta": {
+                "difference": 0.0660115370189942,
+                "quarter_allowance": 0.043409845997003114,
+                "ratio": 1.5206581710414602
+              },
+              "slip": {
+                "difference": 4.867755214423746e-07,
+                "quarter_allowance": 4.414387137219569e-07,
+                "ratio": 1.1027023827116653
+              },
+              "velocity": {
+                "difference": 7.344024513071263e-08,
+                "quarter_allowance": 2.9625000000000002e-08,
+                "ratio": 2.4789956162265865
+              },
+              "crack_integral": {
+                "difference": 1.818235809247483e-07,
+                "quarter_allowance": 5.4988377316021845e-08,
+                "ratio": 3.306582041506629
+              },
+              "velocity_L2": {
+                "difference": 4.659623042206854e-08,
+                "quarter_allowance": 2.7611207952355e-08,
+                "ratio": 1.687583915288077
+              }
+            }
+          },
+          {
+            "time_s": 3.75,
+            "metrics": {
+              "V": {
+                "difference": 1.0314899301609455e-07,
+                "quarter_allowance": 5.560144682073801e-08,
+                "ratio": 1.8551494415001883
+              },
+              "q": {
+                "difference": 0.19231378023971502,
+                "quarter_allowance": 0.4868758785829701,
+                "ratio": 0.3949954982354752
+              },
+              "C": {
+                "difference": 0.008879633465596726,
+                "quarter_allowance": 0.15236133349210926,
+                "ratio": 0.05828009811988551
+              },
+              "Theta": {
+                "difference": 0.07279617498565472,
+                "quarter_allowance": 0.04236507001921869,
+                "ratio": 1.7183064952478804
+              },
+              "slip": {
+                "difference": 5.895590538548085e-07,
+                "quarter_allowance": 4.5523807728506217e-07,
+                "ratio": 1.2950565501260496
+              },
+              "velocity": {
+                "difference": 4.1662843144834965e-08,
+                "quarter_allowance": 2.99375e-08,
+                "ratio": 1.391660731351481
+              },
+              "crack_integral": {
+                "difference": 1.0314899301609455e-07,
+                "quarter_allowance": 5.560144682073781e-08,
+                "ratio": 1.8551494415001952
+              },
+              "velocity_L2": {
+                "difference": 2.64341633903166e-08,
+                "quarter_allowance": 2.7909036765022533e-08,
+                "ratio": 0.9471542716746734
+              }
+            }
+          },
+          {
+            "time_s": 4.0,
+            "metrics": {
+              "V": {
+                "difference": 5.6337581556717116e-08,
+                "quarter_allowance": 5.62231650836901e-08,
+                "ratio": 1.0020350414790185
+              },
+              "q": {
+                "difference": 0.17798547257029895,
+                "quarter_allowance": 0.48667491444826577,
+                "ratio": 0.3657173757806641
+              },
+              "C": {
+                "difference": 0.009709361123384497,
+                "quarter_allowance": 0.15211956545427746,
+                "ratio": 0.06382716841445907
+              },
+              "Theta": {
+                "difference": 0.0782826173374076,
+                "quarter_allowance": 0.04133609434574321,
+                "ratio": 1.8938077865469443
+              },
+              "slip": {
+                "difference": 6.815493579886674e-07,
+                "quarter_allowance": 4.6919241560161236e-07,
+                "ratio": 1.4526009699341893
+              },
+              "velocity": {
+                "difference": 2.2755276178080196e-08,
+                "quarter_allowance": 3.025e-08,
+                "ratio": 0.7522405348125684
+              },
+              "crack_integral": {
+                "difference": 5.6337581556717116e-08,
+                "quarter_allowance": 5.622316508368989e-08,
+                "ratio": 1.0020350414790222
+              },
+              "velocity_L2": {
+                "difference": 1.4437725394586138e-08,
+                "quarter_allowance": 2.8208765766402504e-08,
+                "ratio": 0.5118169832081738
+              }
+            }
+          },
+          {
+            "time_s": 4.25,
+            "metrics": {
+              "V": {
+                "difference": 4.075223992552131e-08,
+                "quarter_allowance": 5.661194359067696e-08,
+                "ratio": 0.7198523375239235
+              },
+              "q": {
+                "difference": 0.14701152012821694,
+                "quarter_allowance": 0.4863978406422001,
+                "ratio": 0.302245421020198
+              },
+              "C": {
+                "difference": 0.009968347923177134,
+                "quarter_allowance": 0.15187947353775852,
+                "ratio": 0.0656332794088789
+              },
+              "Theta": {
+                "difference": 0.07853859306392508,
+                "quarter_allowance": 0.04032623307945257,
+                "ratio": 1.9475806954045218
+              },
+              "slip": {
+                "difference": 7.121425686126663e-07,
+                "quarter_allowance": 4.83262510863979e-07,
+                "ratio": 1.473614345419624
+              },
+              "velocity": {
+                "difference": 1.646021090653452e-08,
+                "quarter_allowance": 3.025e-08,
+                "ratio": 0.5441392035218023
+              },
+              "crack_integral": {
+                "difference": 4.075223992552131e-08,
+                "quarter_allowance": 5.661194359067675e-08,
+                "ratio": 0.7198523375239262
+              },
+              "velocity_L2": {
+                "difference": 1.0443644064990803e-08,
+                "quarter_allowance": 2.829420473044859e-08,
+                "ratio": 0.36910894525874255
+              }
+            }
+          },
+          {
+            "time_s": 4.5,
+            "metrics": {
+              "V": {
+                "difference": 6.089406548642274e-08,
+                "quarter_allowance": 5.681465277725432e-08,
+                "ratio": 1.0718021233916897
+              },
+              "q": {
+                "difference": 0.14065418603661328,
+                "quarter_allowance": 0.4860610895963003,
+                "ratio": 0.2893755312803049
+              },
+              "C": {
+                "difference": 0.009999031293205007,
+                "quarter_allowance": 0.15164054115956951,
+                "ratio": 0.0659390372570825
+              },
+              "Theta": {
+                "difference": 0.07681449704215026,
+                "quarter_allowance": 0.03933970541926236,
+                "ratio": 1.952594617155895
+              },
+              "slip": {
+                "difference": 7.181535954703562e-07,
+                "quarter_allowance": 4.973930567866778e-07,
+                "ratio": 1.4438351836068315
+              },
+              "velocity": {
+                "difference": 2.4595682659027157e-08,
+                "quarter_allowance": 3.025e-08,
+                "ratio": 0.8130804184802365
+              },
+              "crack_integral": {
+                "difference": 6.089406548640919e-08,
+                "quarter_allowance": 5.68146527772541e-08,
+                "ratio": 1.0718021233914552
+              },
+              "velocity_L2": {
+                "difference": 1.5605423082753053e-08,
+                "quarter_allowance": 2.833878971565981e-08,
+                "ratio": 0.5506735904861035
+              }
+            }
+          },
+          {
+            "time_s": 4.75,
+            "metrics": {
+              "V": {
+                "difference": 5.394179504087412e-08,
+                "quarter_allowance": 5.691991525726384e-08,
+                "ratio": 0.9476787658075498
+              },
+              "q": {
+                "difference": 0.14277723853535917,
+                "quarter_allowance": 0.4856937964187016,
+                "ratio": 0.2939655387574177
+              },
+              "C": {
+                "difference": 0.0099511107380863,
+                "quarter_allowance": 0.15140249651349,
+                "ratio": 0.06572619981335416
+              },
+              "Theta": {
+                "difference": 0.07448198871411194,
+                "quarter_allowance": 0.03837829127947608,
+                "ratio": 1.9407322793952362
+              },
+              "slip": {
+                "difference": 7.156831369531293e-07,
+                "quarter_allowance": 5.115550281058724e-07,
+                "ratio": 1.3990345077890824
+              },
+              "velocity": {
+                "difference": 2.1787595593844155e-08,
+                "quarter_allowance": 3.025e-08,
+                "ratio": 0.720251094011377
+              },
+              "crack_integral": {
+                "difference": 5.394179504087412e-08,
+                "quarter_allowance": 5.6919915257263625e-08,
+                "ratio": 0.9476787658075534
+              },
+              "velocity_L2": {
+                "difference": 1.3823753213579268e-08,
+                "quarter_allowance": 2.836195170500388e-08,
+                "ratio": 0.487404864000962
+              }
+            }
+          },
+          {
+            "time_s": 5.0,
+            "metrics": {
+              "V": {
+                "difference": 4.043498178035135e-08,
+                "quarter_allowance": 5.697436319955289e-08,
+                "ratio": 0.709704848103834
+              },
+              "q": {
+                "difference": 0.14683733325057347,
+                "quarter_allowance": 0.48531116792786605,
+                "ratio": 0.30256326858812066
+              },
+              "C": {
+                "difference": 0.009885290252043433,
+                "quarter_allowance": 0.15116519701315156,
+                "ratio": 0.0653939560650551
+              },
+              "Theta": {
+                "difference": 0.07207365516865138,
+                "quarter_allowance": 0.03744252587459625,
+                "ratio": 1.9249143449895145
+              },
+              "slip": {
+                "difference": 7.112645782746813e-07,
+                "quarter_allowance": 5.257332738123773e-07,
+                "ratio": 1.352900061122089
+              },
+              "velocity": {
+                "difference": 1.6332067373897835e-08,
+                "quarter_allowance": 3.025e-08,
+                "ratio": 0.539903053682573
+              },
+              "crack_integral": {
+                "difference": 4.043498178035135e-08,
+                "quarter_allowance": 5.697436319955267e-08,
+                "ratio": 0.7097048481038367
+              },
+              "velocity_L2": {
+                "difference": 1.0362339794295018e-08,
+                "quarter_allowance": 2.8373935115412625e-08,
+                "ratio": 0.36520629768643653
+              }
+            }
+          },
+          {
+            "time_s": 5.25,
+            "metrics": {
+              "V": {
+                "difference": 2.7816916023642307e-08,
+                "quarter_allowance": 5.7002363361084206e-08,
+                "ratio": 0.48799583707494226
+              },
+              "q": {
+                "difference": 0.15050219083218508,
+                "quarter_allowance": 0.48492112077741806,
+                "ratio": 0.3103642724220844
+              },
+              "C": {
+                "difference": 0.009823206772580306,
+                "quarter_allowance": 0.15092856770855656,
+                "ratio": 0.06508513876278839
+              },
+              "Theta": {
+                "difference": 0.06976727108352065,
+                "quarter_allowance": 0.036532319634020864,
+                "ratio": 1.9097410671549477
+              },
+              "slip": {
+                "difference": 7.072298690785975e-07,
+                "quarter_allowance": 5.399199048927435e-07,
+                "ratio": 1.3098792296221984
+              },
+              "velocity": {
+                "difference": 1.1235512584359625e-08,
+                "quarter_allowance": 3.025e-08,
+                "ratio": 0.37142190361519417
+              },
+              "crack_integral": {
+                "difference": 2.7816916023642307e-08,
+                "quarter_allowance": 5.700236336108399e-08,
+                "ratio": 0.48799583707494415
+              },
+              "velocity_L2": {
+                "difference": 7.128687170794934e-09,
+                "quarter_allowance": 2.8380098359078556e-08,
+                "ratio": 0.25118613334595885
+              }
+            }
+          },
+          {
+            "time_s": 5.5,
+            "metrics": {
+              "V": {
+                "difference": 1.8089762158926895e-08,
+                "quarter_allowance": 5.701660233710078e-08,
+                "ratio": 0.3172718369287302
+              },
+              "q": {
+                "difference": 0.15316824852379796,
+                "quarter_allowance": 0.4845277726778977,
+                "ratio": 0.3161186151977721
+              },
+              "C": {
+                "difference": 0.00977045952026856,
+                "quarter_allowance": 0.1506925688971695,
+                "ratio": 0.06483703603815914
+              },
+              "Theta": {
+                "difference": 0.06760144912411192,
+                "quarter_allowance": 0.03564727564440792,
+                "ratio": 1.896398754240192
+              },
+              "slip": {
+                "difference": 7.041851455219864e-07,
+                "quarter_allowance": 5.54110816618527e-07,
+                "ratio": 1.2708381146920955
+              },
+              "velocity": {
+                "difference": 7.306624149365168e-09,
+                "quarter_allowance": 3.025e-08,
+                "ratio": 0.2415412941938898
+              },
+              "crack_integral": {
+                "difference": 1.8089762158926895e-08,
+                "quarter_allowance": 5.7016602337100563e-08,
+                "ratio": 0.3172718369287314
+              },
+              "velocity_L2": {
+                "difference": 4.63589332885316e-09,
+                "quarter_allowance": 2.8383232749356388e-08,
+                "ratio": 0.1633321112429761
+              }
+            }
+          },
+          {
+            "time_s": 5.75,
+            "metrics": {
+              "V": {
+                "difference": 1.1233850636118109e-08,
+                "quarter_allowance": 5.702367301589458e-08,
+                "ratio": 0.1970032802514637
+              },
+              "q": {
+                "difference": 0.154865892719954,
+                "quarter_allowance": 0.48413326621822705,
+                "ratio": 0.3198827751079326
+              },
+              "C": {
+                "difference": 0.009726766418111765,
+                "quarter_allowance": 0.15045717920387977,
+                "ratio": 0.06464807109623749
+              },
+              "Theta": {
+                "difference": 0.06556704997349527,
+                "quarter_allowance": 0.03478685100824177,
+                "ratio": 1.8848228015223625
+              },
+              "slip": {
+                "difference": 7.021029116579224e-07,
+                "quarter_allowance": 5.683038717581033e-07,
+                "ratio": 1.2354357352623673
+              },
+              "velocity": {
+                "difference": 4.537457354597161e-09,
+                "quarter_allowance": 3.025e-08,
+                "ratio": 0.14999859023461687
+              },
+              "crack_integral": {
+                "difference": 1.1233850636118109e-08,
+                "quarter_allowance": 5.702367301589436e-08,
+                "ratio": 0.19700328025146446
+              },
+              "velocity_L2": {
+                "difference": 2.878917520563238e-09,
+                "quarter_allowance": 2.838478924635231e-08,
+                "ratio": 0.10142465725487829
+              }
+            }
+          },
+          {
+            "time_s": 6.0,
+            "metrics": {
+              "V": {
+                "difference": 6.6405135474331255e-09,
+                "quarter_allowance": 5.7026998092098764e-08,
+                "ratio": 0.11644508337452161
+              },
+              "q": {
+                "difference": 0.15580484852125664,
+                "quarter_allowance": 0.4837387183368371,
+                "ratio": 0.3220847176693567
+              },
+              "C": {
+                "difference": 0.009690181621465399,
+                "quarter_allowance": 0.1502223867725215,
+                "ratio": 0.06450557623038589
+              },
+              "Theta": {
+                "difference": 0.06364333835246327,
+                "quarter_allowance": 0.033950438459273986,
+                "ratio": 1.874595476250125
+              },
+              "slip": {
+                "difference": 7.007758250918497e-07,
+                "quarter_allowance": 5.824979547602176e-07,
+                "ratio": 1.2030528508556233
+              },
+              "velocity": {
+                "difference": 2.6821655378070396e-09,
+                "quarter_allowance": 3.025e-08,
+                "ratio": 0.08866662934899304
+              },
+              "crack_integral": {
+                "difference": 6.6405135474331255e-09,
+                "quarter_allowance": 5.7026998092098545e-08,
+                "ratio": 0.11644508337452206
+              },
+              "velocity_L2": {
+                "difference": 1.7017754122074422e-09,
+                "quarter_allowance": 2.8385521219342662e-08,
+                "ratio": 0.05995223406529546
+              }
+            }
+          }
+        ],
+        "max_ratio": 927.6043915503263,
+        "maxima": {
+          "V": 0.00033457945173448163,
+          "q": 43.29183161714627,
+          "C": 0.4009052495105152,
+          "Theta": 5.989061555702591,
+          "slip": 4.33472628508941e-05,
+          "velocity": 0.00013513977024364019,
+          "crack_integral": 0.00033457945173448033,
+          "velocity_L2": 8.574323059874307e-05
+        }
+      }
+    }
+  },
+  "elapsed_seconds": 0.32704451799872913,
+  "stop": "Reference resolution or the approved timestep checks do not meet the quarter-allowance criterion."
+}

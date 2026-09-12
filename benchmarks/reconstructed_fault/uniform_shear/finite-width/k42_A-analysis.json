@@ -1,0 +1,6051 @@
+{
+  "case": "k42_A",
+  "reference": "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/finite-width/k41/ell0-4096",
+  "reference_histories_reset": false,
+  "completed": true,
+  "original_K41_all_time_pass": false,
+  "accuracy_interval": [
+    4,
+    6
+  ],
+  "initial": {
+    "phi_error_max": 7.837359683438017e-05,
+    "phi_range": [
+      4.093234158232501e-09,
+      0.5997640169066863
+    ],
+    "normal_cells": 256,
+    "center_phi": 0.5997640169066688,
+    "localization_second_moment_m2": 0.004745154054686496,
+    "reference_second_moment_m2": 0.004742848522223285,
+    "observed": {
+      "V": 0.0003153992126560201,
+      "q": 1043.8337175477361,
+      "C": 317.51376268497427,
+      "Theta": 199.9999999999988,
+      "slip": 0.0,
+      "Ih": 108.14483383971712,
+      "supported_integral": 0.0003153802684437562
+    },
+    "errors": {
+      "V": 1.2876575800676443e-07,
+      "q": -0.200247769562111,
+      "C": -0.22971260453516607,
+      "Theta": -1.1937117960769683e-12,
+      "slip": 0.0,
+      "Ih": 0.009867683562120533
+    },
+    "independent": {
+      "q": 1500.0,
+      "C": 317.74347528950943,
+      "Theta": 200.0,
+      "Ih": 108.134966156155
+    }
+  },
+  "residuals": {
+    "linear_checks": 158,
+    "max_fresh_over_requested": 0.9909237973545841,
+    "final": [
+      {
+        "bulk": 9.186375604124842e-12,
+        "bulk_target": 3.173110158860017e-05,
+        "surface": 5.924009128840343e-08,
+        "surface_scale": 953.0129138872384
+      },
+      {
+        "bulk": 3.652418849621158e-12,
+        "bulk_target": 1.2530104608937695e-08,
+        "surface": 1.4594256510429528e-13,
+        "surface_scale": 426.90790944183834
+      },
+      {
+        "bulk": 1.8917217170719526e-12,
+        "bulk_target": 1.2618807776075434e-08,
+        "surface": 3.7069201970792587e-09,
+        "surface_scale": 632.0616654022031
+      },
+      {
+        "bulk": 1.0636310652629755e-12,
+        "bulk_target": 1.2567376634793124e-08,
+        "surface": 2.822706026888488e-08,
+        "surface_scale": 335.7619662271933
+      },
+      {
+        "bulk": 8.258903629821413e-13,
+        "bulk_target": 1.2543794406355598e-08,
+        "surface": 5.6318334010526623e-08,
+        "surface_scale": 199.71856459020367
+      },
+      {
+        "bulk": 5.649593611902521e-13,
+        "bulk_target": 1.253261123054632e-08,
+        "surface": 3.4228144113702646e-08,
+        "surface_scale": 134.97690237157022
+      },
+      {
+        "bulk": 5.403541368435682e-13,
+        "bulk_target": 1.2527013719769345e-08,
+        "surface": 8.960046894272435e-09,
+        "surface_scale": 102.32130903888084
+      },
+      {
+        "bulk": 4.899571893056175e-13,
+        "bulk_target": 1.2524029269046655e-08,
+        "surface": 1.3950278155387456e-09,
+        "surface_scale": 84.65869742070429
+      },
+      {
+        "bulk": 4.146978696873196e-13,
+        "bulk_target": 1.2522342809894426e-08,
+        "surface": 1.5967544777276379e-10,
+        "surface_scale": 74.44358882540699
+      },
+      {
+        "bulk": 2.983917670744039e-13,
+        "bulk_target": 1.25213463374306e-08,
+        "surface": 1.5069715100466992e-11,
+        "surface_scale": 68.19838242926444
+      },
+      {
+        "bulk": 2.973936821046774e-13,
+        "bulk_target": 1.252074082146381e-08,
+        "surface": 1.2532039567607146e-12,
+        "surface_scale": 64.21759497940245
+      },
+      {
+        "bulk": 2.999030595303933e-13,
+        "bulk_target": 1.2520368961631685e-08,
+        "surface": 7.510126988021685e-14,
+        "surface_scale": 61.60665648571364
+      },
+      {
+        "bulk": 2.9633460422807573e-13,
+        "bulk_target": 1.2520143280699228e-08,
+        "surface": 8.020930741055316e-14,
+        "surface_scale": 59.86541272278483
+      },
+      {
+        "bulk": 3.030151375956653e-13,
+        "bulk_target": 1.2520012691809082e-08,
+        "surface": 2.3848216166279296e-07,
+        "surface_scale": 58.69791448745998
+      },
+      {
+        "bulk": 3.0017869339787394e-13,
+        "bulk_target": 1.2519987555708086e-08,
+        "surface": 4.699147705820681e-08,
+        "surface_scale": 57.92035374465879
+      },
+      {
+        "bulk": 2.9628505292006804e-13,
+        "bulk_target": 1.2520036599279927e-08,
+        "surface": 7.430828982225299e-09,
+        "surface_scale": 57.41388493131705
+      },
+      {
+        "bulk": 2.956081887610475e-13,
+        "bulk_target": 1.2520085642851972e-08,
+        "surface": 7.778353090143911e-10,
+        "surface_scale": 57.09911425272457
+      },
+      {
+        "bulk": 2.983949793357367e-13,
+        "bulk_target": 1.2520134686423346e-08,
+        "surface": 2.9979161104300253e-11,
+        "surface_scale": 56.921611465223855
+      },
+      {
+        "bulk": 7.989552675100409e-10,
+        "bulk_target": 1.2520183729995476e-08,
+        "surface": 4.691508851152936e-07,
+        "surface_scale": 56.84330024320573
+      },
+      {
+        "bulk": 3.004964193767274e-13,
+        "bulk_target": 1.2520232773554447e-08,
+        "surface": 3.736514479638478e-12,
+        "surface_scale": 56.837131576742706
+      },
+      {
+        "bulk": 2.9999990007593535e-13,
+        "bulk_target": 1.2520281817149442e-08,
+        "surface": 4.146199778663266e-11,
+        "surface_scale": 56.883669416744446
+      },
+      {
+        "bulk": 2.990043563258889e-13,
+        "bulk_target": 1.2520330860713396e-08,
+        "surface": 1.287796572794026e-10,
+        "surface_scale": 56.96882746829983
+      },
+      {
+        "bulk": 2.995220023457197e-13,
+        "bulk_target": 1.2520379904283357e-08,
+        "surface": 2.477403372672681e-10,
+        "surface_scale": 57.08233723369095
+      },
+      {
+        "bulk": 2.997941277933209e-13,
+        "bulk_target": 1.252042894785535e-08,
+        "surface": 3.73105787685311e-10,
+        "surface_scale": 57.21668106526891
+      },
+      {
+        "bulk": 2.9773532155057574e-13,
+        "bulk_target": 1.2520477991426351e-08,
+        "surface": 4.867644058927163e-10,
+        "surface_scale": 57.366340032863626
+      },
+      {
+        "bulk": 2.9832004112691865e-13,
+        "bulk_target": 1.2520527034999064e-08,
+        "surface": 5.798400092967244e-10,
+        "surface_scale": 57.52725545524385
+      },
+      {
+        "bulk": 2.991126510013759e-13,
+        "bulk_target": 1.2520576078570904e-08,
+        "surface": 6.502312861167871e-10,
+        "surface_scale": 57.6964397783531
+      },
+      {
+        "bulk": 2.9901258642844193e-13,
+        "bulk_target": 1.2520625122142041e-08,
+        "surface": 6.996544996269111e-10,
+        "surface_scale": 57.8716930583485
+      },
+      {
+        "bulk": 2.961950512266809e-13,
+        "bulk_target": 1.2520674165714716e-08,
+        "surface": 7.314232986752394e-10,
+        "surface_scale": 58.05139543688414
+      },
+      {
+        "bulk": 2.9872808805927253e-13,
+        "bulk_target": 1.2520723209286091e-08,
+        "surface": 7.491873966264453e-10,
+        "surface_scale": 58.234354632981436
+      },
+      {
+        "bulk": 2.989750895714885e-13,
+        "bulk_target": 1.252077225285821e-08,
+        "surface": 7.56275629953229e-10,
+        "surface_scale": 58.41969361818925
+      },
+      {
+        "bulk": 2.982696958464533e-13,
+        "bulk_target": 1.2520821296430374e-08,
+        "surface": 7.554850996093059e-10,
+        "surface_scale": 58.60676777042221
+      },
+      {
+        "bulk": 3.0057578280860917e-13,
+        "bulk_target": 1.2520870340001773e-08,
+        "surface": 7.49046545734099e-10,
+        "surface_scale": 58.79510368971726
+      },
+      {
+        "bulk": 2.9853652636490897e-13,
+        "bulk_target": 9.417426981566014e-12,
+        "surface": 2.0133618817295664e-10,
+        "surface_scale": 58.98435411530226
+      },
+      {
+        "bulk": 2.986288525841597e-13,
+        "bulk_target": 9.417135665485402e-12,
+        "surface": 5.409649169402896e-11,
+        "surface_scale": 59.12139837959585
+      },
+      {
+        "bulk": 2.9593510392171256e-13,
+        "bulk_target": 9.416922373905349e-12,
+        "surface": 1.4525447549439964e-11,
+        "surface_scale": 59.2204714140682
+      },
+      {
+        "bulk": 2.997868189739183e-13,
+        "bulk_target": 9.4167676518464e-12,
+        "surface": 3.8943107030460605e-12,
+        "surface_scale": 59.292002321569726
+      },
+      {
+        "bulk": 2.978529372388775e-13,
+        "bulk_target": 9.416655642616195e-12,
+        "surface": 1.050458132758626e-12,
+        "surface_scale": 59.343594672647384
+      },
+      {
+        "bulk": 2.999713226662151e-13,
+        "bulk_target": 9.416574667105024e-12,
+        "surface": 2.785048307833844e-13,
+        "surface_scale": 59.38077288668028
+      },
+      {
+        "bulk": 2.996004123633205e-13,
+        "bulk_target": 9.416516183619735e-12,
+        "surface": 7.89590658377595e-14,
+        "surface_scale": 59.407540732369796
+      },
+      {
+        "bulk": 3.0007322494626567e-13,
+        "bulk_target": 9.41647397228688e-12,
+        "surface": 2.8656585171333146e-14,
+        "surface_scale": 59.426794780367175
+      },
+      {
+        "bulk": 2.9872526785055566e-13,
+        "bulk_target": 9.416453992718938e-12,
+        "surface": 1.4720603063221255e-14,
+        "surface_scale": 59.44062790735839
+      },
+      {
+        "bulk": 3.114552802788542e-13,
+        "bulk_target": 9.416454018127888e-12,
+        "surface": 5.312101437431323e-07,
+        "surface_scale": 59.45055090465848
+      },
+      {
+        "bulk": 3.0712835040589565e-13,
+        "bulk_target": 9.416454036314342e-12,
+        "surface": 2.7044389453392226e-07,
+        "surface_scale": 59.457653288415166
+      },
+      {
+        "bulk": 3.012388267368577e-13,
+        "bulk_target": 9.416454049293137e-12,
+        "surface": 1.3643022699264952e-07,
+        "surface_scale": 59.462721919064315
+      },
+      {
+        "bulk": 3.0026472329807743e-13,
+        "bulk_target": 9.416454058512667e-12,
+        "surface": 6.792035218808996e-08,
+        "surface_scale": 59.466322437118244
+      },
+      {
+        "bulk": 2.968244050676682e-13,
+        "bulk_target": 9.416454065018373e-12,
+        "surface": 3.314592008737352e-08,
+        "surface_scale": 59.468863120694735
+      },
+      {
+        "bulk": 3.002259609762913e-13,
+        "bulk_target": 9.416454069563419e-12,
+        "surface": 1.5687247438529646e-08,
+        "surface_scale": 59.47063806789454
+      },
+      {
+        "bulk": 3.003187456862997e-13,
+        "bulk_target": 9.41645407269034e-12,
+        "surface": 7.071989869026973e-09,
+        "surface_scale": 59.471859265668954
+      }
+    ],
+    "passed": true
+  },
+  "rows": [
+    {
+      "step": 0,
+      "time_s": 0.0,
+      "observed": {
+        "V": 0.0003153992126560201,
+        "q": 1043.8337175477361,
+        "C": 317.51376268497427,
+        "Theta": 199.9999999999988,
+        "slip": 0.0,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.0003153802684437562
+      },
+      "errors": {
+        "V": 1.2876575800676443e-07,
+        "q": -0.200247769562111,
+        "C": -0.22971260453516607,
+        "Theta": -1.1937117960769683e-12,
+        "slip": 0.0,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 1.2876575808233332e-07,
+        "C": 0.2888988812491107,
+        "Theta": 4.916955731459893e-12
+      },
+      "raw_stress_error_max": 0.6898166456583112,
+      "raw_stress_error_rms": 0.2784230978596162,
+      "raw_stress_range": [
+        1043.34414867164,
+        1044.4069483556013
+      ],
+      "velocity_error_max": 3.922557686982322e-08,
+      "velocity_error_rms": 2.6599480976808585e-08,
+      "velocity_profile_error_max": 3.922486225909315e-08,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "guards": {
+        "step": 0,
+        "time_s": 0.0,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "retained_initial_histories": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.0003153992126560201,
+          "C": 317.51376268497427,
+          "Theta": 199.9999999999988,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.0064234468804045e-05,
+        "instantaneous_range": [
+          0.0003153802684437229,
+          0.00031538026844383707
+        ],
+        "history_range": [
+          -1.6915748775651774e-19,
+          2.0007158241395415e-19
+        ],
+        "actual_weak_q_mean": 1043.8337175477361,
+        "actual_weak_q_range": [
+          1043.833717547717,
+          1043.8337175477832
+        ],
+        "balance_rms_Pa": 5.92400912884034e-08,
+        "theta_update_error": 0.0,
+        "C_update_error": 0.0,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2499999999999999,
+        "particle_volume_relative_error": -4.440892098500626e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.3331984879987431
+      }
+    },
+    {
+      "step": 1,
+      "time_s": 0.125,
+      "observed": {
+        "V": 0.0019999089551328026,
+        "q": 1260.885888664887,
+        "C": 319.4272837273679,
+        "Theta": 155.8725294813302,
+        "slip": 0.0002499886193916003,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.0019997888321324135
+      },
+      "errors": {
+        "V": 1.0542681795704632e-06,
+        "q": -0.10980927509763205,
+        "C": -0.2284185201583,
+        "Theta": -0.020535192934090674,
+        "slip": 1.317835224463079e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 1.054268180379278e-06,
+        "C": 0.22841852017251085,
+        "Theta": 0.020535192946596226
+      },
+      "raw_stress_error_max": 0.30565213316322115,
+      "raw_stress_error_rms": 0.1358503990274434,
+      "raw_stress_range": [
+        1260.6900458068214,
+        1261.1151989115795
+      ],
+      "velocity_error_max": 3.248330468848433e-07,
+      "velocity_error_rms": 2.2105601552159555e-07,
+      "velocity_profile_error_max": 3.248381620236246e-07,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": false,
+        "q": false,
+        "C": true,
+        "Theta": false,
+        "slip": false,
+        "raw_stress": false,
+        "velocity_max": false,
+        "velocity_rms": false
+      },
+      "guards": {
+        "step": 1,
+        "time_s": 0.125,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.0019999089551328026,
+          "C": 319.4272837273679,
+          "Theta": 155.8725294813302,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.0064234468582e-05,
+        "instantaneous_range": [
+          0.001999788832132003,
+          0.0019997888321331373
+        ],
+        "history_range": [
+          -2.748523052228928e-18,
+          3.250824800331615e-18
+        ],
+        "actual_weak_q_mean": 1260.885888664887,
+        "actual_weak_q_range": [
+          1260.885888664797,
+          1260.885888664994
+        ],
+        "balance_rms_Pa": 1.4594256510429528e-13,
+        "theta_update_error": 2.842170943040401e-14,
+        "C_update_error": 8.29913915367797e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.25000000025000585,
+        "particle_volume_relative_error": 1.0000233974238881e-09,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.4104396739967342
+      }
+    },
+    {
+      "step": 2,
+      "time_s": 0.25,
+      "observed": {
+        "V": 0.0010237767833710613,
+        "q": 1144.07553442979,
+        "C": 320.21084970174553,
+        "Theta": 137.26613074956015,
+        "slip": 0.000377960717312983,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.001023715291002284
+      },
+      "errors": {
+        "V": 5.143879201162382e-07,
+        "q": -0.1653564132855081,
+        "C": -0.22764684989039097,
+        "Theta": -0.02689206079850237,
+        "slip": 1.9608201246083768e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 5.143879210198123e-07,
+        "C": 0.22764684990494288,
+        "Theta": 0.026892060825019826
+      },
+      "raw_stress_error_max": 0.265641810016632,
+      "raw_stress_error_rms": 0.17259515557752456,
+      "raw_stress_range": [
+        1143.9752490330588,
+        1144.1929599561824
+      ],
+      "velocity_error_max": 1.4726041452754485e-07,
+      "velocity_error_rms": 1.0052495239484505e-07,
+      "velocity_profile_error_max": 1.4726009648117436e-07,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": false,
+        "q": false,
+        "C": true,
+        "Theta": false,
+        "slip": false,
+        "raw_stress": false,
+        "velocity_max": false,
+        "velocity_rms": false
+      },
+      "guards": {
+        "step": 2,
+        "time_s": 0.25,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.0010237767833710613,
+          "C": 320.21084970174553,
+          "Theta": 137.26613074956015,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423447013631e-05,
+        "instantaneous_range": [
+          0.001023715291001556,
+          0.0010237152910030725
+        ],
+        "history_range": [
+          -2.7552652726128457e-18,
+          3.258799183961225e-18
+        ],
+        "actual_weak_q_mean": 1144.07553442979,
+        "actual_weak_q_range": [
+          1144.075534429655,
+          1144.0755344298962
+        ],
+        "balance_rms_Pa": 3.706920197079259e-09,
+        "theta_update_error": 0.0,
+        "C_update_error": 7.16227077646181e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.25000000005257955,
+        "particle_volume_relative_error": 2.1031820729433548e-10,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.40302426500056754
+      }
+    },
+    {
+      "step": 3,
+      "time_s": 0.375,
+      "observed": {
+        "V": 0.000575594279515519,
+        "q": 1083.4733704067582,
+        "C": 320.47572543076313,
+        "Theta": 127.8574627342141,
+        "slip": 0.00044991000225242284,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.0005755597068857378
+      },
+      "errors": {
+        "V": 2.5887797457948246e-07,
+        "q": -0.19253638254713223,
+        "C": -0.2271240761498916,
+        "Theta": -0.02916149955258618,
+        "slip": 2.2844175928324589e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 2.588779746756512e-07,
+        "C": 0.2271240761645572,
+        "Theta": 0.029161499576943584
+      },
+      "raw_stress_error_max": 0.24891795504686343,
+      "raw_stress_error_rms": 0.1955458791789233,
+      "raw_stress_range": [
+        1083.4169888342585,
+        1083.5393882314988
+      ],
+      "velocity_error_max": 7.366253428612484e-08,
+      "velocity_error_rms": 5.018564921431095e-08,
+      "velocity_profile_error_max": 7.366343695569262e-08,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": false,
+        "q": false,
+        "C": true,
+        "Theta": false,
+        "slip": false,
+        "raw_stress": false,
+        "velocity_max": false,
+        "velocity_rms": false
+      },
+      "guards": {
+        "step": 3,
+        "time_s": 0.375,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.000575594279515519,
+          "C": 320.47572543076313,
+          "Theta": 127.8574627342141,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423447135756e-05,
+        "instantaneous_range": [
+          0.0005755597068857099,
+          0.0005755597068858537
+        ],
+        "history_range": [
+          -2.7575444049357967e-18,
+          3.2614948353121266e-18
+        ],
+        "actual_weak_q_mean": 1083.4733704067582,
+        "actual_weak_q_range": [
+          1083.4733704067487,
+          1083.4733704067746
+        ],
+        "balance_rms_Pa": 2.822706026888489e-08,
+        "theta_update_error": 0.0,
+        "C_update_error": 3.353761712787673e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2500000000000002,
+        "particle_volume_relative_error": 8.881784197001252e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.4211136500016437
+      }
+    },
+    {
+      "step": 4,
+      "time_s": 0.5,
+      "observed": {
+        "V": 0.00036230881381107044,
+        "q": 1049.6672704595069,
+        "C": 320.4938967164249,
+        "Theta": 122.31835301404016,
+        "slip": 0.0004951986039788066,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.000362287052009521
+      },
+      "errors": {
+        "V": 1.381113076427405e-07,
+        "q": -0.2063407181792627,
+        "C": -0.22671898760364684,
+        "Theta": -0.029981405510241643,
+        "slip": 2.457056727385139e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 1.3811130772546512e-07,
+        "C": 0.22671898761660714,
+        "Theta": 0.02998140553312112
+      },
+      "raw_stress_error_max": 0.24182911759021408,
+      "raw_stress_error_rms": 0.20797036481285125,
+      "raw_stress_range": [
+        1049.631782060096,
+        1049.7088241448675
+      ],
+      "velocity_error_max": 3.896805970222614e-08,
+      "velocity_error_rms": 2.6388268710864272e-08,
+      "velocity_profile_error_max": 3.8967825068190846e-08,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": false,
+        "q": false,
+        "C": true,
+        "Theta": false,
+        "slip": false,
+        "raw_stress": false,
+        "velocity_max": false,
+        "velocity_rms": false
+      },
+      "guards": {
+        "step": 4,
+        "time_s": 0.5,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00036230881381107044,
+          "C": 320.4938967164249,
+          "Theta": 122.31835301404016,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.0064234474577205e-05,
+        "instantaneous_range": [
+          0.00036228705200948747,
+          0.0003622870520096106
+        ],
+        "history_range": [
+          -2.7577007603884234e-18,
+          3.26167976524483e-18
+        ],
+        "actual_weak_q_mean": 1049.6672704595069,
+        "actual_weak_q_range": [
+          1049.6672704594864,
+          1049.6672704595144
+        ],
+        "balance_rms_Pa": 5.631833401052666e-08,
+        "theta_update_error": 0.0,
+        "C_update_error": 4.206412995699793e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2500000000000002,
+        "particle_volume_relative_error": 8.881784197001252e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.40281316400069045
+      }
+    },
+    {
+      "step": 5,
+      "time_s": 0.625,
+      "observed": {
+        "V": 0.00025472795791230243,
+        "q": 1029.419786807976,
+        "C": 320.38777486541704,
+        "Theta": 118.60799913136238,
+        "slip": 0.0005270395987178444,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.0002547126578725153
+      },
+      "errors": {
+        "V": 7.980929102259417e-08,
+        "q": -0.21374146532093619,
+        "C": -0.22637041786032341,
+        "Theta": -0.030224737230099663,
+        "slip": 2.556818341162975e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 7.980929219011728e-08,
+        "C": 0.22637041787515955,
+        "Theta": 0.030224737269563207
+      },
+      "raw_stress_error_max": 0.23869158226284526,
+      "raw_stress_error_rms": 0.21480133125926595,
+      "raw_stress_range": [
+        1029.394836691034,
+        1029.4490010714806
+      ],
+      "velocity_error_max": 2.2446182746383423e-08,
+      "velocity_error_rms": 1.4956027834734492e-08,
+      "velocity_profile_error_max": 2.244595662839028e-08,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": false,
+        "q": false,
+        "C": true,
+        "Theta": false,
+        "slip": false,
+        "raw_stress": false,
+        "velocity_max": false,
+        "velocity_rms": false
+      },
+      "guards": {
+        "step": 5,
+        "time_s": 0.625,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00025472795791230243,
+          "C": 320.38777486541704,
+          "Theta": 118.60799913136238,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423447779685e-05,
+        "instantaneous_range": [
+          0.0002547126578717807,
+          0.00025471265787352945
+        ],
+        "history_range": [
+          -2.7567876312704584e-18,
+          3.260599758737275e-18
+        ],
+        "actual_weak_q_mean": 1029.419786807976,
+        "actual_weak_q_range": [
+          1029.4197868078224,
+          1029.4197868082329
+        ],
+        "balance_rms_Pa": 3.422814411370265e-08,
+        "theta_update_error": 0.0,
+        "C_update_error": 3.808509063674137e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2500000000280365,
+        "particle_volume_relative_error": 1.1214607020804124e-10,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.40167233100146404
+      }
+    },
+    {
+      "step": 6,
+      "time_s": 0.75,
+      "observed": {
+        "V": 0.00019654010459189833,
+        "q": 1016.5441151951478,
+        "C": 320.21457074450876,
+        "Theta": 115.85307494276313,
+        "slip": 0.0005516071117918316,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.00019652829956096565
+      },
+      "errors": {
+        "V": 5.027633997314938e-08,
+        "q": -0.21793898359908326,
+        "C": -0.22605026763534397,
+        "Theta": -0.030219119237514747,
+        "slip": 2.6196637661283616e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 5.0276340024377935e-08,
+        "C": 0.2260502676623446,
+        "Theta": 0.03021911927598353
+      },
+      "raw_stress_error_max": 0.23718932316501196,
+      "raw_stress_error_rms": 0.21872255008351782,
+      "raw_stress_range": [
+        1016.5248648555819,
+        1016.5666555194925
+      ],
+      "velocity_error_max": 1.4236889829492686e-08,
+      "velocity_error_rms": 9.227621943144988e-09,
+      "velocity_profile_error_max": 1.4236729815807442e-08,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": false,
+        "q": false,
+        "C": true,
+        "Theta": false,
+        "slip": false,
+        "raw_stress": false,
+        "velocity_max": false,
+        "velocity_rms": false
+      },
+      "guards": {
+        "step": 6,
+        "time_s": 0.75,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00019654010459189833,
+          "C": 320.21457074450876,
+          "Theta": 115.85307494276313,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.00642344810165e-05,
+        "instantaneous_range": [
+          0.00019652829956094404,
+          0.00019652829956102576
+        ],
+        "history_range": [
+          -2.7552972904532553e-18,
+          3.258837053168731e-18
+        ],
+        "actual_weak_q_mean": 1016.5441151951478,
+        "actual_weak_q_range": [
+          1016.5441151951293,
+          1016.5441151951592
+        ],
+        "balance_rms_Pa": 8.960046894272437e-09,
+        "theta_update_error": 0.0,
+        "C_update_error": 1.0970779840135947e-11,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.25000000000000017,
+        "particle_volume_relative_error": 6.661338147750939e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.4050823079996917
+      }
+    },
+    {
+      "step": 7,
+      "time_s": 0.875,
+      "observed": {
+        "V": 0.00016288736662513576,
+        "q": 1007.966276751527,
+        "C": 320.0027095302615,
+        "Theta": 113.64178796903087,
+        "slip": 0.0005719680326199736,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.0001628775829201579
+      },
+      "errors": {
+        "V": 3.433617929085998e-08,
+        "q": -0.2204317613885678,
+        "C": -0.22574538474350447,
+        "Theta": -0.03009766656600732,
+        "slip": 2.6625839902425126e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 3.4336179380550606e-08,
+        "C": 0.2257453847644797,
+        "Theta": 0.030097666604007145
+      },
+      "raw_stress_error_max": 0.23638571809658515,
+      "raw_stress_error_rms": 0.2210652126313677,
+      "raw_stress_range": [
+        1007.9503227948189,
+        1007.9849573058071
+      ],
+      "velocity_error_max": 9.86933030983875e-09,
+      "velocity_error_rms": 6.192475643829635e-09,
+      "velocity_profile_error_max": 9.869609633494968e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": false,
+        "q": false,
+        "C": true,
+        "Theta": false,
+        "slip": false,
+        "raw_stress": false,
+        "velocity_max": false,
+        "velocity_rms": false
+      },
+      "guards": {
+        "step": 7,
+        "time_s": 0.875,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00016288736662513576,
+          "C": 320.0027095302615,
+          "Theta": 113.64178796903087,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.0064234482792855e-05,
+        "instantaneous_range": [
+          0.00016287758292012612,
+          0.00016287758292023662
+        ],
+        "history_range": [
+          -2.7534743233465246e-18,
+          3.2566809327476313e-18
+        ],
+        "actual_weak_q_mean": 1007.966276751527,
+        "actual_weak_q_range": [
+          1007.9662767515205,
+          1007.9662767515396
+        ],
+        "balance_rms_Pa": 1.3950278155387466e-09,
+        "theta_update_error": 0.0,
+        "C_update_error": 6.0254023992456496e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.25000000000000017,
+        "particle_volume_relative_error": 6.661338147750939e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.43160284500117996
+      }
+    },
+    {
+      "step": 8,
+      "time_s": 1.0,
+      "observed": {
+        "V": 0.00014231310714570393,
+        "q": 1002.047224925978,
+        "C": 319.76734692512815,
+        "Theta": 111.76196823499028,
+        "slip": 0.0005897571710131866,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.0001423045592178659
+      },
+      "errors": {
+        "V": 2.5159033010570264e-08,
+        "q": -0.2219559125177284,
+        "C": -0.22544931579085414,
+        "Theta": -0.029918365175035433,
+        "slip": 2.6940327815057254e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 2.515903307291189e-08,
+        "C": 0.22544931581757055,
+        "Theta": 0.029918365212267872
+      },
+      "raw_stress_error_max": 0.23589459119943967,
+      "raw_stress_error_rms": 0.22250097917749234,
+      "raw_stress_range": [
+        1002.0332862472962,
+        1002.0635457719427
+      ],
+      "velocity_error_max": 7.401181981178478e-09,
+      "velocity_error_rms": 4.4944580446223855e-09,
+      "velocity_profile_error_max": 7.401388214836016e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": false,
+        "q": false,
+        "C": true,
+        "Theta": false,
+        "slip": false,
+        "raw_stress": false,
+        "velocity_max": false,
+        "velocity_rms": false
+      },
+      "guards": {
+        "step": 8,
+        "time_s": 1.0,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00014231310714570393,
+          "C": 319.76734692512815,
+          "Theta": 111.76196823499028,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.00642344840141e-05,
+        "instantaneous_range": [
+          0.00014230455921784241,
+          0.00014230455921792666
+        ],
+        "history_range": [
+          -2.751449137713358e-18,
+          3.2542856376904712e-18
+        ],
+        "actual_weak_q_mean": 1002.047224925978,
+        "actual_weak_q_range": [
+          1002.0472249259702,
+          1002.0472249259855
+        ],
+        "balance_rms_Pa": 1.5967544777276368e-10,
+        "theta_update_error": 0.0,
+        "C_update_error": 5.286437954055145e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2500000000000002,
+        "particle_volume_relative_error": 8.881784197001252e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.4194508090004092
+      }
+    },
+    {
+      "step": 9,
+      "time_s": 1.125,
+      "observed": {
+        "V": 0.00012919876819870765,
+        "q": 997.8517952513993,
+        "C": 319.5171295045096,
+        "Theta": 110.09552229890207,
+        "slip": 0.000605907017038025,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.00012919100797360045
+      },
+      "errors": {
+        "V": 1.9564668914112812e-08,
+        "q": -0.2228957721159759,
+        "C": -0.2251586971487427,
+        "Theta": -0.02970823698282743,
+        "slip": 2.7184886176477227e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 1.9564669567371726e-08,
+        "C": 0.22515869717130954,
+        "Theta": 0.029708237028458484
+      },
+      "raw_stress_error_max": 0.23554989635465517,
+      "raw_stress_error_rms": 0.2233858222571309,
+      "raw_stress_range": [
+        997.8391411271606,
+        997.8666120013328
+      ],
+      "velocity_error_max": 5.928100480532899e-09,
+      "velocity_error_rms": 3.5011062518580306e-09,
+      "velocity_profile_error_max": 5.928248580083101e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": false,
+        "q": false,
+        "C": true,
+        "Theta": false,
+        "slip": false,
+        "raw_stress": false,
+        "velocity_max": false,
+        "velocity_rms": false
+      },
+      "guards": {
+        "step": 9,
+        "time_s": 1.125,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00012919876819870765,
+          "C": 319.5171295045096,
+          "Theta": 110.09552229890207,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423448845499e-05,
+        "instantaneous_range": [
+          0.00012919100797315893,
+          0.00012919100797415835
+        ],
+        "history_range": [
+          -2.749296133309314e-18,
+          3.2517391645560216e-18
+        ],
+        "actual_weak_q_mean": 997.8517952513993,
+        "actual_weak_q_range": [
+          997.8517952512265,
+          997.8517952515815
+        ],
+        "balance_rms_Pa": 1.5069715100466995e-11,
+        "theta_update_error": 0.0,
+        "C_update_error": 5.059064278611913e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2499999998543014,
+        "particle_volume_relative_error": -5.827943683200942e-10,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.4071927050026716
+      }
+    },
+    {
+      "step": 10,
+      "time_s": 1.25,
+      "observed": {
+        "V": 0.00012059727090127308,
+        "q": 994.8141213380019,
+        "C": 319.2572887677048,
+        "Theta": 108.57237913357093,
+        "slip": 0.0006209816759006841,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.00012059002731851916
+      },
+      "errors": {
+        "V": 1.5990812186832235e-08,
+        "q": -0.22346489654773904,
+        "C": -0.22487166353323573,
+        "Theta": -0.029480708549499468,
+        "slip": 2.738477132880907e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 1.5990812245894148e-08,
+        "C": 0.22487166355307409,
+        "Theta": 0.02948070859423524
+      },
+      "raw_stress_error_max": 0.2352765068210374,
+      "raw_stress_error_rms": 0.22391941755658135,
+      "raw_stress_range": [
+        994.8023097277286,
+        994.8279515814685
+      ],
+      "velocity_error_max": 5.008390389807209e-09,
+      "velocity_error_rms": 2.900159827752104e-09,
+      "velocity_profile_error_max": 5.0086044311908385e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": false,
+        "q": false,
+        "C": true,
+        "Theta": false,
+        "slip": false,
+        "raw_stress": false,
+        "velocity_max": false,
+        "velocity_rms": false
+      },
+      "guards": {
+        "step": 10,
+        "time_s": 1.25,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00012059727090127308,
+          "C": 319.2572887677048,
+          "Theta": 108.57237913357093,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423449012033e-05,
+        "instantaneous_range": [
+          0.00012059002731849374,
+          0.00012059002731857223
+        ],
+        "history_range": [
+          -2.747060324750064e-18,
+          3.2490947545310392e-18
+        ],
+        "actual_weak_q_mean": 994.8141213380019,
+        "actual_weak_q_range": [
+          994.8141213379862,
+          994.814121338014
+        ],
+        "balance_rms_Pa": 1.253203956760714e-12,
+        "theta_update_error": 0.0,
+        "C_update_error": 3.353761712787673e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2500000000000002,
+        "particle_volume_relative_error": 8.881784197001252e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.40052007399935974
+      }
+    },
+    {
+      "step": 11,
+      "time_s": 1.375,
+      "observed": {
+        "V": 0.00011486090309437071,
+        "q": 992.5748648761274,
+        "C": 318.9911463483569,
+        "Theta": 107.14878311906156,
+        "slip": 0.0006353392887874804,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.00011485400406215507
+      },
+      "errors": {
+        "V": 1.3622918875133777e-08,
+        "q": -0.22378897795749708,
+        "C": -0.22458711930192976,
+        "Theta": -0.02924286366760498,
+        "slip": 2.755505781475197e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 1.3622918924654712e-08,
+        "C": 0.2245871193205744,
+        "Theta": 0.029242863711473888
+      },
+      "raw_stress_error_max": 0.23503871507216445,
+      "raw_stress_error_rms": 0.2242200508492256,
+      "raw_stress_range": [
+        992.5636151390128,
+        992.5880372179017
+      ],
+      "velocity_error_max": 4.4137775828507965e-09,
+      "velocity_error_rms": 2.5275292467536482e-09,
+      "velocity_profile_error_max": 4.413887265614699e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": false,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": false,
+        "raw_stress": true,
+        "velocity_max": false,
+        "velocity_rms": false
+      },
+      "guards": {
+        "step": 11,
+        "time_s": 1.375,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00011486090309437071,
+          "C": 318.9911463483569,
+          "Theta": 107.14878311906156,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423449078646e-05,
+        "instantaneous_range": [
+          0.00011485400406213421,
+          0.00011485400406220308
+        ],
+        "history_range": [
+          -2.744770293146573e-18,
+          3.2463862120197726e-18
+        ],
+        "actual_weak_q_mean": 992.5748648761274,
+        "actual_weak_q_range": [
+          992.5748648760956,
+          992.5748648761344
+        ],
+        "balance_rms_Pa": 7.510126988021685e-14,
+        "theta_update_error": 0.0,
+        "C_update_error": 2.6716406864579767e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2500000000000002,
+        "particle_volume_relative_error": 8.881784197001252e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.41888746000040555
+      }
+    },
+    {
+      "step": 12,
+      "time_s": 1.5,
+      "observed": {
+        "V": 0.00011101468728660289,
+        "q": 990.8969239929219,
+        "C": 318.7208934998125,
+        "Theta": 105.79630281477336,
+        "slip": 0.0006492161246983058,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.0001110080192743991
+      },
+      "errors": {
+        "V": 1.2010847060567212e-08,
+        "q": -0.22394582238837302,
+        "C": -0.22430438743054992,
+        "Theta": -0.028998655784619132,
+        "slip": 2.770519340301262e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 1.201084710598173e-08,
+        "C": 0.22430438744657977,
+        "Theta": 0.028998655827578546
+      },
+      "raw_stress_error_max": 0.23481882587191194,
+      "raw_stress_error_rms": 0.22436128726753748,
+      "raw_stress_range": [
+        990.8860509894383,
+        990.9096552143831
+      ],
+      "velocity_error_max": 4.018399764034539e-09,
+      "velocity_error_rms": 2.2921648250003776e-09,
+      "velocity_profile_error_max": 4.0185197889419785e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": false,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": false,
+        "velocity_rms": false
+      },
+      "guards": {
+        "step": 12,
+        "time_s": 1.5,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00011101468728660289,
+          "C": 318.7208934998125,
+          "Theta": 105.79630281477336,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423449156362e-05,
+        "instantaneous_range": [
+          0.0001110080192743763,
+          0.00011100801927444156
+        ],
+        "history_range": [
+          -2.742444893213656e-18,
+          3.2436358374989722e-18
+        ],
+        "actual_weak_q_mean": 990.8969239929219,
+        "actual_weak_q_range": [
+          990.8969239929132,
+          990.8969239929339
+        ],
+        "balance_rms_Pa": 8.020930741055322e-14,
+        "theta_update_error": 0.0,
+        "C_update_error": 7.617018127348274e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2500000000000002,
+        "particle_volume_relative_error": 8.881784197001252e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.4133337599996594
+      }
+    },
+    {
+      "step": 13,
+      "time_s": 1.625,
+      "observed": {
+        "V": 0.00010845308476232361,
+        "q": 989.6191327141688,
+        "C": 318.4480192589589,
+        "Theta": 104.4958953809727,
+        "slip": 0.0006627727602935963,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.00010844657061080787
+      },
+      "errors": {
+        "V": 1.0891610539260168e-08,
+        "q": -0.22398563094202473,
+        "C": -0.22402303172322036,
+        "Theta": -0.028750404707778898,
+        "slip": 2.784133853474778e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 1.0891610617200752e-08,
+        "C": 0.22402303173907967,
+        "Theta": 0.02875040474886248
+      },
+      "raw_stress_error_max": 0.23460772720000023,
+      "raw_stress_error_rms": 0.22439075583224127,
+      "raw_stress_range": [
+        989.6085106179108,
+        989.6315701463806
+      ],
+      "velocity_error_max": 3.7505946692839316e-09,
+      "velocity_error_rms": 2.1414080263090006e-09,
+      "velocity_profile_error_max": 3.75061270517003e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": false,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": false,
+        "velocity_rms": false
+      },
+      "guards": {
+        "step": 13,
+        "time_s": 1.625,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00010845308476232361,
+          "C": 318.4480192589589,
+          "Theta": 104.4958953809727,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423449267384e-05,
+        "instantaneous_range": [
+          0.0001084465706107318,
+          0.00010844657061088408
+        ],
+        "history_range": [
+          -2.7400969374204175e-18,
+          3.240858784959215e-18
+        ],
+        "actual_weak_q_mean": 989.6191327141688,
+        "actual_weak_q_range": [
+          989.6191327141557,
+          989.6191327141963
+        ],
+        "balance_rms_Pa": 2.384821616627929e-07,
+        "theta_update_error": 0.0,
+        "C_update_error": 2.7853275241795927e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2500000000124952,
+        "particle_volume_relative_error": 4.9980908300995e-11,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.4032036139979027
+      }
+    },
+    {
+      "step": 14,
+      "time_s": 1.75,
+      "observed": {
+        "V": 0.00010678456972846812,
+        "q": 988.6294330574829,
+        "C": 318.17355853731704,
+        "Theta": 103.23451396056745,
+        "slip": 0.0006761208315096547,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.00010677815579503737
+      },
+      "errors": {
+        "V": 1.0106290346568471e-08,
+        "q": -0.22394217824762563,
+        "C": -0.2237427588436276,
+        "Theta": -0.028499564206498462,
+        "slip": 2.796766716407599e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 1.0106290390126294e-08,
+        "C": 0.22374275885800898,
+        "Theta": 0.028499564246331488
+      },
+      "raw_stress_error_max": 0.2344008437140701,
+      "raw_stress_error_rms": 0.22434059687176217,
+      "raw_stress_range": [
+        988.6189743920164,
+        988.6416791272239
+      ],
+      "velocity_error_max": 3.5677754586742176e-09,
+      "velocity_error_rms": 2.044183439087962e-09,
+      "velocity_profile_error_max": 3.5678870800796955e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": false,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": false,
+        "velocity_rms": false
+      },
+      "guards": {
+        "step": 14,
+        "time_s": 1.75,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00010678456972846812,
+          "C": 318.17355853731704,
+          "Theta": 103.23451396056745,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423449222975e-05,
+        "instantaneous_range": [
+          0.00010677815579499117,
+          0.00010677815579507739
+        ],
+        "history_range": [
+          -2.7377353306986724e-18,
+          3.2380655867382753e-18
+        ],
+        "actual_weak_q_mean": 988.6294330574829,
+        "actual_weak_q_range": [
+          988.6294330574751,
+          988.6294330575059
+        ],
+        "balance_rms_Pa": 4.699147705820683e-08,
+        "theta_update_error": 0.0,
+        "C_update_error": 5.5138116294983774e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2500000000000002,
+        "particle_volume_relative_error": 8.881784197001252e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.42709264299992356
+      }
+    },
+    {
+      "step": 15,
+      "time_s": 1.875,
+      "observed": {
+        "V": 0.00010574758661003425,
+        "q": 987.848578699139,
+        "C": 317.8982428215121,
+        "Theta": 102.00307068744871,
+        "slip": 0.0006893392798359091,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.00010574123496220662
+      },
+      "errors": {
+        "V": 9.550971537023128e-09,
+        "q": -0.22383856315536832,
+        "C": -0.22346336830332802,
+        "Theta": -0.02824706099686125,
+        "slip": 2.8087054308289627e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 9.550971579307013e-09,
+        "C": 0.2234633683186189,
+        "Theta": 0.028247061035472143
+      },
+      "raw_stress_error_max": 0.23419565510369011,
+      "raw_stress_error_rms": 0.22423283149548828,
+      "raw_stress_range": [
+        987.8382216071907,
+        987.8607058354802
+      ],
+      "velocity_error_max": 3.4425990178536424e-09,
+      "velocity_error_rms": 1.9813312595714572e-09,
+      "velocity_profile_error_max": 3.4426786126045715e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": false,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": false,
+        "velocity_rms": false
+      },
+      "guards": {
+        "step": 15,
+        "time_s": 1.875,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00010574758661003425,
+          "C": 317.8982428215121,
+          "Theta": 102.00307068744871,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423449234077e-05,
+        "instantaneous_range": [
+          0.00010574123496215419,
+          0.00010574123496223974
+        ],
+        "history_range": [
+          -2.7353663671502055e-18,
+          3.23526368720604e-18
+        ],
+        "actual_weak_q_mean": 987.848578699139,
+        "actual_weak_q_range": [
+          987.8485786991204,
+          987.8485786991495
+        ],
+        "balance_rms_Pa": 7.430828982225296e-09,
+        "theta_update_error": 0.0,
+        "C_update_error": 4.320099833421409e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2500000000000002,
+        "particle_volume_relative_error": 8.881784197001252e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.395786904002307
+      }
+    },
+    {
+      "step": 16,
+      "time_s": 2.0,
+      "observed": {
+        "V": 0.0001051628199636098,
+        "q": 987.2198211200703,
+        "C": 317.62259555079055,
+        "Theta": 100.79516096109097,
+        "slip": 0.0007024846323313603,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.00010515650343933053
+      },
+      "errors": {
+        "V": 9.15845144566893e-09,
+        "q": -0.22369107917882047,
+        "C": -0.22318471860370437,
+        "Theta": -0.027993525006053233,
+        "slip": 2.8201534951364723e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 9.158451489443592e-09,
+        "C": 0.22318471861751732,
+        "Theta": 0.027993525043513046
+      },
+      "raw_stress_error_max": 0.23399089114241178,
+      "raw_stress_error_rms": 0.22408302127878646,
+      "raw_stress_range": [
+        987.2095213081067,
+        987.2318811866478
+      ],
+      "velocity_error_max": 3.357527298917531e-09,
+      "velocity_error_rms": 1.9411370672624563e-09,
+      "velocity_profile_error_max": 3.3576001151822675e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": false,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": false,
+        "velocity_rms": false
+      },
+      "guards": {
+        "step": 16,
+        "time_s": 2.0,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.0001051628199636098,
+          "C": 317.62259555079055,
+          "Theta": 100.79516096109097,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.0064234492007706e-05,
+        "instantaneous_range": [
+          0.00010515650343929377,
+          0.00010515650343937762
+        ],
+        "history_range": [
+          -2.7329945507260947e-18,
+          3.2324584134255742e-18
+        ],
+        "actual_weak_q_mean": 987.2198211200703,
+        "actual_weak_q_range": [
+          987.2198211200619,
+          987.2198211200766
+        ],
+        "balance_rms_Pa": 7.778353090143915e-10,
+        "theta_update_error": 0.0,
+        "C_update_error": 4.945377440890297e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2500000000000002,
+        "particle_volume_relative_error": 8.881784197001252e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.4043193479992624
+      }
+    },
+    {
+      "step": 17,
+      "time_s": 2.125,
+      "observed": {
+        "V": 0.00010490483082821761,
+        "q": 986.7021516298298,
+        "C": 317.34699461156055,
+        "Theta": 99.60623583341537,
+        "slip": 0.0007155977361848875,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.00010489852979986774
+      },
+      "errors": {
+        "V": 8.88283624569464e-09,
+        "q": -0.22351140333080366,
+        "C": -0.22290670820365222,
+        "Theta": -0.027739399191446523,
+        "slip": 2.831257040442981e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 8.882836284021187e-09,
+        "C": 0.22290670821774938,
+        "Theta": 0.027739399227513672
+      },
+      "raw_stress_error_max": 0.2337859423464579,
+      "raw_stress_error_rms": 0.22390233478791852,
+      "raw_stress_range": [
+        986.6918770908142,
+        986.7141821038837
+      ],
+      "velocity_error_max": 3.30085914377736e-09,
+      "velocity_error_rms": 1.916170060980066e-09,
+      "velocity_profile_error_max": 3.300937566024626e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": false,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": false,
+        "velocity_rms": false
+      },
+      "guards": {
+        "step": 17,
+        "time_s": 2.125,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00010490483082821761,
+          "C": 317.34699461156055,
+          "Theta": 99.60623583341537,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423449300691e-05,
+        "instantaneous_range": [
+          0.00010489852979980236,
+          0.0001048985297999002
+        ],
+        "history_range": [
+          -2.7306231329628637e-18,
+          3.2296536111626413e-18
+        ],
+        "actual_weak_q_mean": 986.7021516298298,
+        "actual_weak_q_range": [
+          986.7021516298239,
+          986.7021516298381
+        ],
+        "balance_rms_Pa": 2.997916110430026e-11,
+        "theta_update_error": 0.0,
+        "C_update_error": 3.183231456205249e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2500000000000002,
+        "particle_volume_relative_error": 8.881784197001252e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.39164605399855645
+      }
+    },
+    {
+      "step": 18,
+      "time_s": 2.25,
+      "observed": {
+        "V": 0.00010488450872256991,
+        "q": 986.2657438073378,
+        "C": 317.0717144834987,
+        "Theta": 98.43304931730601,
+        "slip": 0.0007287082997752087,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.00010487820891484373
+      },
+      "errors": {
+        "V": 8.691103968572048e-09,
+        "q": -0.22330788364558884,
+        "C": -0.2226292644564296,
+        "Theta": -0.02748499235016766,
+        "slip": 2.8421209204035434e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 8.69110717481537e-09,
+        "C": 0.22262926447490372,
+        "Theta": 0.027484992388721707
+      },
+      "raw_stress_error_max": 0.23358043324685696,
+      "raw_stress_error_rms": 0.22369876020456964,
+      "raw_stress_range": [
+        986.2554712577365,
+        986.2777719466842
+      ],
+      "velocity_error_max": 3.31715173437216e-09,
+      "velocity_error_rms": 1.901548832651856e-09,
+      "velocity_profile_error_max": 3.3318717886492177e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": false,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": false,
+        "velocity_rms": false
+      },
+      "guards": {
+        "step": 18,
+        "time_s": 2.25,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00010488450872256991,
+          "C": 317.0717144834987,
+          "Theta": 98.43304931730601,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423449267384e-05,
+        "instantaneous_range": [
+          0.00010487820891101676,
+          0.00010487820891804602
+        ],
+        "history_range": [
+          -2.728254475630363e-18,
+          3.2268520738083335e-18
+        ],
+        "actual_weak_q_mean": 986.2657438073378,
+        "actual_weak_q_range": [
+          986.2657438059263,
+          986.2657438084315
+        ],
+        "balance_rms_Pa": 4.691508851152934e-07,
+        "theta_update_error": 0.0,
+        "C_update_error": 5.286437954055145e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2500000000000002,
+        "particle_volume_relative_error": 8.881784197001252e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.40064964100020006
+      }
+    },
+    {
+      "step": 19,
+      "time_s": 2.375,
+      "observed": {
+        "V": 0.00010503782352462061,
+        "q": 985.8888066744122,
+        "C": 316.7969553399553,
+        "Theta": 97.27328054461148,
+        "slip": 0.0007418380277157862,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.0001050315145081635
+      },
+      "errors": {
+        "V": 8.563829969520037e-09,
+        "q": -0.2230870129875484,
+        "C": -0.22235233048809278,
+        "Theta": -0.027230572069640857,
+        "slip": 2.852825707865816e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 8.563831384566503e-09,
+        "C": 0.22235233050770375,
+        "Theta": 0.027230572107683315
+      },
+      "raw_stress_error_max": 0.23337457244122106,
+      "raw_stress_error_rms": 0.22347853430817058,
+      "raw_stress_range": [
+        985.8785191149585,
+        985.9008523938369
+      ],
+      "velocity_error_max": 3.3511378157197625e-09,
+      "velocity_error_rms": 1.89435034400758e-09,
+      "velocity_profile_error_max": 3.365905048051469e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": false,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": false,
+        "velocity_rms": false
+      },
+      "guards": {
+        "step": 19,
+        "time_s": 2.375,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00010503782352462061,
+          "C": 316.7969553399553,
+          "Theta": 97.27328054461148,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423449311793e-05,
+        "instantaneous_range": [
+          0.00010503151450721783,
+          0.00010503151450931992
+        ],
+        "history_range": [
+          -2.725890301127093e-18,
+          3.224055838535239e-18
+        ],
+        "actual_weak_q_mean": 985.8888066744122,
+        "actual_weak_q_range": [
+          985.8888066739908,
+          985.8888066748779
+        ],
+        "balance_rms_Pa": 3.7365144796384774e-12,
+        "theta_update_error": 0.0,
+        "C_update_error": 8.58335624798201e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2500000000000001,
+        "particle_volume_relative_error": 4.440892098500626e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.39763991899963
+      }
+    },
+    {
+      "step": 20,
+      "time_s": 2.5,
+      "observed": {
+        "V": 0.00010531836875337888,
+        "q": 985.5553732341489,
+        "C": 316.52286349845303,
+        "Theta": 96.1252708776794,
+        "slip": 0.0007550028238099586,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.00010531204288618436
+      },
+      "errors": {
+        "V": 8.480996979703817e-09,
+        "q": -0.22285320207004133,
+        "C": -0.22207586773475896,
+        "Theta": -0.0269763038531039,
+        "slip": 2.8634269540900054e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 8.480998730026252e-09,
+        "C": 0.22207586775516575,
+        "Theta": 0.026976303895779097
+      },
+      "raw_stress_error_max": 0.233168236359802,
+      "raw_stress_error_rms": 0.22324588019838715,
+      "raw_stress_range": [
+        985.5450581998591,
+        985.5674511241026
+      ],
+      "velocity_error_max": 3.3821000568661018e-09,
+      "velocity_error_rms": 1.8921640696523363e-09,
+      "velocity_profile_error_max": 3.396926567002912e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": false,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": false,
+        "velocity_rms": true
+      },
+      "guards": {
+        "step": 20,
+        "time_s": 2.5,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00010531836875337888,
+          "C": 316.52286349845303,
+          "Theta": 96.1252708776794,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423449234077e-05,
+        "instantaneous_range": [
+          0.00010531204288522311,
+          0.00010531204288759798
+        ],
+        "history_range": [
+          -2.723531868447195e-18,
+          3.2212663944228833e-18
+        ],
+        "actual_weak_q_mean": 985.5553732341489,
+        "actual_weak_q_range": [
+          985.5553732337228,
+          985.5553732347363
+        ],
+        "balance_rms_Pa": 4.146199778663266e-11,
+        "theta_update_error": 0.0,
+        "C_update_error": 2.5011104298755527e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2500000005843309,
+        "particle_volume_relative_error": 2.337323667944702e-09,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.3903230399992026
+      }
+    },
+    {
+      "step": 21,
+      "time_s": 2.625,
+      "observed": {
+        "V": 0.00010569231626022418,
+        "q": 985.2537220060747,
+        "C": 316.249546017649,
+        "Theta": 94.98783822400138,
+        "slip": 0.0007682143633424866,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.00010568596793216288
+      },
+      "errors": {
+        "V": 8.4320622373643e-09,
+        "q": -0.22260984577508225,
+        "C": -0.22179984629121918,
+        "Theta": -0.02672232974794042,
+        "slip": 2.873967031886016e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 8.432063609096888e-09,
+        "C": 0.2217998463099775,
+        "Theta": 0.026722329796058375
+      },
+      "raw_stress_error_max": 0.2329615037348276,
+      "raw_stress_error_rms": 0.22300405826567526,
+      "raw_stress_range": [
+        985.2433703481149,
+        985.2658427782166
+      ],
+      "velocity_error_max": 3.4106552568255206e-09,
+      "velocity_error_rms": 1.893629193692168e-09,
+      "velocity_profile_error_max": 3.425465148280938e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": false,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": false,
+        "velocity_rms": true
+      },
+      "guards": {
+        "step": 21,
+        "time_s": 2.625,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00010569231626022418,
+          "C": 316.249546017649,
+          "Theta": 94.98783822400138,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423449278486e-05,
+        "instantaneous_range": [
+          0.00010568596793126918,
+          0.00010568596793327032
+        ],
+        "history_range": [
+          -2.7211800987805454e-18,
+          3.2184848310116612e-18
+        ],
+        "actual_weak_q_mean": 985.2537220060747,
+        "actual_weak_q_range": [
+          985.2537220056668,
+          985.2537220065221
+        ],
+        "balance_rms_Pa": 1.2877965727940256e-10,
+        "theta_update_error": 0.0,
+        "C_update_error": 5.002220859751105e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2500000000000002,
+        "particle_volume_relative_error": 8.881784197001252e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.39465593899876694
+      }
+    },
+    {
+      "step": 22,
+      "time_s": 2.75,
+      "observed": {
+        "V": 0.00010613489971909946,
+        "q": 984.9752397810352,
+        "C": 315.9770812140016,
+        "Theta": 93.86014465654063,
+        "slip": 0.000781481225807374,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.00010612852480760084
+      },
+      "errors": {
+        "V": 8.408271658902518e-09,
+        "q": -0.22235946923910888,
+        "C": -0.22152424379515878,
+        "Theta": -0.02646876216969929,
+        "slip": 2.884477371459509e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 8.408273031759966e-09,
+        "C": 0.22152424381420133,
+        "Theta": 0.026468762233292864
+      },
+      "raw_stress_error_max": 0.23275447339574384,
+      "raw_stress_error_rms": 0.2227554940224554,
+      "raw_stress_range": [
+        984.9648447768785,
+        984.9874113071769
+      ],
+      "velocity_error_max": 3.4375910848781336e-09,
+      "velocity_error_rms": 1.8977228880445506e-09,
+      "velocity_profile_error_max": 3.4521307587592417e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": false,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "guards": {
+        "step": 22,
+        "time_s": 2.75,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00010613489971909946,
+          "C": 315.9770812140016,
+          "Theta": 93.86014465654063,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423449311793e-05,
+        "instantaneous_range": [
+          0.00010612852480671214,
+          0.00010612852480870893
+        ],
+        "history_range": [
+          -2.7188356660038388e-18,
+          3.215711945331453e-18
+        ],
+        "actual_weak_q_mean": 984.9752397810352,
+        "actual_weak_q_range": [
+          984.9752397806415,
+          984.9752397814758
+        ],
+        "balance_rms_Pa": 2.4774033726726805e-10,
+        "theta_update_error": 0.0,
+        "C_update_error": 3.637978807091713e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2500000000000001,
+        "particle_volume_relative_error": 4.440892098500626e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.40702627100108657
+      }
+    },
+    {
+      "step": 23,
+      "time_s": 2.875,
+      "observed": {
+        "V": 0.00010662793742305579,
+        "q": 984.7135952374445,
+        "C": 315.7055263038091,
+        "Theta": 92.74160126005937,
+        "slip": 0.0007948097179852559,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.00010662153289762205
+      },
+      "errors": {
+        "V": 8.40316437706332e-09,
+        "q": -0.22210395307115505,
+        "C": -0.22124904345520235,
+        "Theta": -0.026215691631790605,
+        "slip": 2.89498132693077e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 8.403165772174017e-09,
+        "C": 0.22124904347339225,
+        "Theta": 0.02621569171070348
+      },
+      "raw_stress_error_max": 0.23254724527839699,
+      "raw_stress_error_rms": 0.2225019955162509,
+      "raw_stress_range": [
+        984.7031519452372,
+        984.7258233040218
+      ],
+      "velocity_error_max": 3.463018870633345e-09,
+      "velocity_error_rms": 1.9037224255015672e-09,
+      "velocity_profile_error_max": 3.4773775861472657e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "guards": {
+        "step": 23,
+        "time_s": 2.875,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00010662793742305579,
+          "C": 315.7055263038091,
+          "Theta": 92.74160126005937,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423449278486e-05,
+        "instantaneous_range": [
+          0.0001066215328967028,
+          0.00010662153289874901
+        ],
+        "history_range": [
+          -2.71649906243664e-18,
+          3.2129483196749253e-18
+        ],
+        "actual_weak_q_mean": 984.7135952374445,
+        "actual_weak_q_range": [
+          984.7135952370487,
+          984.7135952378993
+        ],
+        "balance_rms_Pa": 3.731057876853112e-10,
+        "theta_update_error": 0.0,
+        "C_update_error": 7.44648787076585e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2500000001149534,
+        "particle_volume_relative_error": 4.5981352059243363e-10,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.39955225399899064
+      }
+    },
+    {
+      "step": 24,
+      "time_s": 3.0,
+      "observed": {
+        "V": 0.00010715805851708634,
+        "q": 984.4641351529972,
+        "C": 315.4349229867361,
+        "Theta": 91.63179937496338,
+        "slip": 0.0008082044752998918,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.00010715162215033332
+      },
+      "errors": {
+        "V": 8.411951110516244e-09,
+        "q": -0.22184469988496858,
+        "C": -0.22097423263642213,
+        "Theta": -0.025963192243125377,
+        "slip": 2.9054962658188986e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 8.41195249231836e-09,
+        "C": 0.22097423265608995,
+        "Theta": 0.02596319233677491
+      },
+      "raw_stress_error_max": 0.23233991232450535,
+      "raw_stress_error_rms": 0.22224491182983588,
+      "raw_stress_range": [
+        984.4536399405577,
+        984.4764240130241
+      ],
+      "velocity_error_max": 3.4873033552535035e-09,
+      "velocity_error_rms": 1.9111109782066925e-09,
+      "velocity_profile_error_max": 3.501547649260758e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "guards": {
+        "step": 24,
+        "time_s": 3.0,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00010715805851708634,
+          "C": 315.4349229867361,
+          "Theta": 91.63179937496338,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423449178566e-05,
+        "instantaneous_range": [
+          0.00010715162214944476,
+          0.00010715162215145204
+        ],
+        "history_range": [
+          -2.714170646885225e-18,
+          3.2101943784212997e-18
+        ],
+        "actual_weak_q_mean": 984.4641351529972,
+        "actual_weak_q_range": [
+          984.4641351525977,
+          984.4641351534431
+        ],
+        "balance_rms_Pa": 4.867644058927161e-10,
+        "theta_update_error": 0.0,
+        "C_update_error": 4.320099833421409e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.25000000000000017,
+        "particle_volume_relative_error": 6.661338147750939e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.39679814299961436
+      }
+    },
+    {
+      "step": 25,
+      "time_s": 3.125,
+      "observed": {
+        "V": 0.00010771542074433226,
+        "q": 984.2234415417291,
+        "C": 315.1653015412327,
+        "Theta": 90.53046073275846,
+        "slip": 0.0008216689028929333,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.00010770895090004122
+      },
+      "errors": {
+        "V": 8.431072881157206e-09,
+        "q": -0.2215827560020216,
+        "C": -0.2206998017786077,
+        "Theta": -0.02571132572539625,
+        "slip": 2.9160351069197014e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 8.431074269342562e-09,
+        "C": 0.2206998018003219,
+        "Theta": 0.025711325833526644
+      },
+      "raw_stress_error_max": 0.23213255687278433,
+      "raw_stress_error_rms": 0.2219852499396745,
+      "raw_stress_range": [
+        984.2128917408584,
+        984.2357943193952
+      ],
+      "velocity_error_max": 3.5107202692776776e-09,
+      "velocity_error_rms": 1.9195156525311705e-09,
+      "velocity_profile_error_max": 3.5248997577699197e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "guards": {
+        "step": 25,
+        "time_s": 3.125,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00010771542074433226,
+          "C": 315.1653015412327,
+          "Theta": 90.53046073275846,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423449300691e-05,
+        "instantaneous_range": [
+          0.00010770895089915329,
+          0.00010770895090116775
+        ],
+        "history_range": [
+          -2.711850679881498e-18,
+          3.2074504297156087e-18
+        ],
+        "actual_weak_q_mean": 984.2234415417291,
+        "actual_weak_q_range": [
+          984.2234415413324,
+          984.2234415421724
+        ],
+        "balance_rms_Pa": 5.798400092967245e-10,
+        "theta_update_error": 0.0,
+        "C_update_error": 4.547473508864641e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.25000000000000017,
+        "particle_volume_relative_error": 6.661338147750939e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.3923958360028337
+      }
+    },
+    {
+      "step": 26,
+      "time_s": 3.25,
+      "observed": {
+        "V": 0.00010829277659619955,
+        "q": 983.9890059936458,
+        "C": 314.89668383606886,
+        "Theta": 89.43740120695647,
+        "slip": 0.0008352054999674583,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.00010828627207347338
+      },
+      "errors": {
+        "V": 8.457880302674197e-09,
+        "q": -0.22131890191224102,
+        "C": -0.22042574363325684,
+        "Theta": -0.02546014438175348,
+        "slip": 2.9266074572987556e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 8.45788191451691e-09,
+        "C": 0.22042574365474366,
+        "Theta": 0.025460144501067816
+      },
+      "raw_stress_error_max": 0.23192524952548865,
+      "raw_stress_error_rms": 0.2217237612960529,
+      "raw_stress_range": [
+        983.9783996460326,
+        984.0014249819727
+      ],
+      "velocity_error_max": 3.5334788556207457e-09,
+      "velocity_error_rms": 1.9286655018824223e-09,
+      "velocity_profile_error_max": 3.5476305289028646e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "guards": {
+        "step": 26,
+        "time_s": 3.25,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00010829277659619955,
+          "C": 314.89668383606886,
+          "Theta": 89.43740120695647,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423449156362e-05,
+        "instantaneous_range": [
+          0.00010828627207222898,
+          0.00010828627207479992
+        ],
+        "history_range": [
+          -2.709539349596058e-18,
+          3.204716696117262e-18
+        ],
+        "actual_weak_q_mean": 983.9890059936458,
+        "actual_weak_q_range": [
+          983.9890059931942,
+          983.9890059941876
+        ],
+        "balance_rms_Pa": 6.502312861167875e-10,
+        "theta_update_error": 0.0,
+        "C_update_error": 4.945377440890297e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.24999999999525513,
+        "particle_volume_relative_error": -1.8979484650571976e-11,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.40203051599746686
+      }
+    },
+    {
+      "step": 27,
+      "time_s": 3.375,
+      "observed": {
+        "V": 0.00010888478959346102,
+        "q": 983.7589898266618,
+        "C": 314.62908554833734,
+        "Theta": 88.35250442568812,
+        "slip": 0.0008488160986666409,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.00010887824951193386
+      },
+      "errors": {
+        "V": 8.49039979899306e-09,
+        "q": -0.22105371939710494,
+        "C": -0.22015205268172622,
+        "Theta": -0.025209693321286863,
+        "slip": 2.937220457047531e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 8.490401200880022e-09,
+        "C": 0.22015205270156457,
+        "Theta": 0.02520969345442836
+      },
+      "raw_stress_error_max": 0.2317180494112563,
+      "raw_stress_error_rms": 0.2214610063445596,
+      "raw_stress_range": [
+        983.7483254966477,
+        983.7714767065991
+      ],
+      "velocity_error_max": 3.5557380800526717e-09,
+      "velocity_error_rms": 1.9383626504839717e-09,
+      "velocity_profile_error_max": 3.569889500634369e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "guards": {
+        "step": 27,
+        "time_s": 3.375,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00010888478959346102,
+          "C": 314.62908554833734,
+          "Theta": 88.35250442568812,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423449078646e-05,
+        "instantaneous_range": [
+          0.00010887824951103402,
+          0.00010887824951306259
+        ],
+        "history_range": [
+          -2.7072367909229586e-18,
+          3.2019933371726755e-18
+        ],
+        "actual_weak_q_mean": 983.7589898266618,
+        "actual_weak_q_range": [
+          983.7589898262663,
+          983.7589898271124
+        ],
+        "balance_rms_Pa": 6.996544996269111e-10,
+        "theta_update_error": 0.0,
+        "C_update_error": 5.115907697472721e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.25000000000000017,
+        "particle_volume_relative_error": 6.661338147750939e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.39814784699774464
+      }
+    },
+    {
+      "step": 28,
+      "time_s": 3.5,
+      "observed": {
+        "V": 0.00010948753187734702,
+        "q": 983.5320472951646,
+        "C": 314.3625177983392,
+        "Theta": 87.27570255129432,
+        "slip": 0.0008625020401513093,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.00010948095559255828
+      },
+      "errors": {
+        "V": 8.527160400364792e-09,
+        "q": -0.22078764180855615,
+        "C": -0.21987872469702552,
+        "Theta": -0.024960012129469078,
+        "slip": 2.94787940754819e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 8.527161805165547e-09,
+        "C": 0.21987872471629544,
+        "Theta": 0.0249600122761251
+      },
+      "raw_stress_error_max": 0.2315110051258671,
+      "raw_stress_error_rms": 0.22119740265088816,
+      "raw_stress_range": [
+        983.5213239318473,
+        983.5446032972271
+      ],
+      "velocity_error_max": 3.5776189087886087e-09,
+      "velocity_error_rms": 1.948462017833141e-09,
+      "velocity_profile_error_max": 3.591790594674227e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "guards": {
+        "step": 28,
+        "time_s": 3.5,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00010948753187734702,
+          "C": 314.3625177983392,
+          "Theta": 87.27570255129432,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423449211873e-05,
+        "instantaneous_range": [
+          0.00010948095559165996,
+          0.00010948095559369645
+        ],
+        "history_range": [
+          -2.7049430995472512e-18,
+          3.199280466053624e-18
+        ],
+        "actual_weak_q_mean": 983.5320472951646,
+        "actual_weak_q_range": [
+          983.5320472947932,
+          983.5320472956143
+        ],
+        "balance_rms_Pa": 7.314232986752397e-10,
+        "theta_update_error": 0.0,
+        "C_update_error": 3.979039320256561e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2500000000000001,
+        "particle_volume_relative_error": 4.440892098500626e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.39464997699906235
+      }
+    },
+    {
+      "step": 29,
+      "time_s": 3.625,
+      "observed": {
+        "V": 0.00011009811415809598,
+        "q": 983.3071952438303,
+        "C": 314.09698835495954,
+        "Theta": 86.20696227970431,
+        "slip": 0.0008762643044210712,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.00011009150119914981
+      },
+      "errors": {
+        "V": 8.56706625349576e-09,
+        "q": -0.22052099149220794,
+        "C": -0.21960575642265212,
+        "Theta": -0.024711136136133405,
+        "slip": 2.958588240365009e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 8.567067666400926e-09,
+        "C": 0.21960575644379787,
+        "Theta": 0.02471113629599131
+      },
+      "raw_stress_error_max": 0.2313041560014426,
+      "raw_stress_error_rms": 0.2209332609557347,
+      "raw_stress_range": [
+        983.296412079321,
+        983.3198212671823
+      ],
+      "velocity_error_max": 3.59921329621659e-09,
+      "velocity_error_rms": 1.9588569750731975e-09,
+      "velocity_profile_error_max": 3.61342050404499e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "guards": {
+        "step": 29,
+        "time_s": 3.625,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00011009811415809598,
+          "C": 314.09698835495954,
+          "Theta": 86.20696227970431,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.0064234489010104e-05,
+        "instantaneous_range": [
+          0.00011009150119824664,
+          0.00011009150120029398
+        ],
+        "history_range": [
+          -2.7026583423165825e-18,
+          3.196578161824368e-18
+        ],
+        "actual_weak_q_mean": 983.3071952438303,
+        "actual_weak_q_range": [
+          983.3071952434489,
+          983.3071952442663
+        ],
+        "balance_rms_Pa": 7.49187396626445e-10,
+        "theta_update_error": 0.0,
+        "C_update_error": 3.922195901395753e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.25000000000000017,
+        "particle_volume_relative_error": 6.661338147750939e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.40028857499783044
+      }
+    },
+    {
+      "step": 30,
+      "time_s": 3.75,
+      "observed": {
+        "V": 0.00011071441276697015,
+        "q": 983.0837170188552,
+        "C": 313.8325025242651,
+        "Theta": 85.14627464615609,
+        "slip": 0.0008901036060169425,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.00011070776279052701
+      },
+      "errors": {
+        "V": 8.609301165664373e-09,
+        "q": -0.22025400783650184,
+        "C": -0.21933314531395354,
+        "Theta": -0.024463097373612186,
+        "slip": 2.9693498668225977e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 8.609302587514207e-09,
+        "C": 0.2193331453340761,
+        "Theta": 0.024463097546359336
+      },
+      "raw_stress_error_max": 0.23109753344760975,
+      "raw_stress_error_rms": 0.2206688121455011,
+      "raw_stress_range": [
+        983.0728734932441,
+        983.0964137190786
+      ],
+      "velocity_error_max": 3.6205911429343764e-09,
+      "velocity_error_rms": 1.9694690123479093e-09,
+      "velocity_profile_error_max": 3.6348452007547885e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "guards": {
+        "step": 30,
+        "time_s": 3.75,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00011071441276697015,
+          "C": 313.8325025242651,
+          "Theta": 85.14627464615609,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.0064234491452595e-05,
+        "instantaneous_range": [
+          0.00011070776278961612,
+          0.00011070776279167124
+        ],
+        "history_range": [
+          -2.700382564887134e-18,
+          3.1938864784849787e-18
+        ],
+        "actual_weak_q_mean": 983.0837170188552,
+        "actual_weak_q_range": [
+          983.0837170184724,
+          983.0837170192918
+        ],
+        "balance_rms_Pa": 7.562756299532287e-10,
+        "theta_update_error": 0.0,
+        "C_update_error": 5.115907697472721e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2500000000000001,
+        "particle_volume_relative_error": 4.440892098500626e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.3939637479998055
+      }
+    },
+    {
+      "step": 31,
+      "time_s": 3.875,
+      "observed": {
+        "V": 0.00011133486819251106,
+        "q": 982.8610916645524,
+        "C": 313.569063804236,
+        "Theta": 84.0936476080917,
+        "slip": 0.0009040204645410064,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.00011132818094888771
+      },
+      "errors": {
+        "V": 8.653257686474223e-09,
+        "q": -0.21998686833399006,
+        "C": -0.21906088937868162,
+        "Theta": -0.024215925303792574,
+        "slip": 2.98016643893108e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 8.653259329962086e-09,
+        "C": 0.21906088939897472,
+        "Theta": 0.02421592549144691
+      },
+      "raw_stress_error_max": 0.23089116221160566,
+      "raw_stress_error_rms": 0.2204042274600723,
+      "raw_stress_range": [
+        982.8501873706748,
+        982.8738595183609
+      ],
+      "velocity_error_max": 3.6418055122391327e-09,
+      "velocity_error_rms": 1.9802402686741444e-09,
+      "velocity_profile_error_max": 3.656114816695939e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "guards": {
+        "step": 31,
+        "time_s": 3.875,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00011133486819251106,
+          "C": 313.569063804236,
+          "Theta": 84.0936476080917,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423449023135e-05,
+        "instantaneous_range": [
+          0.00011132818094783555,
+          0.00011132818095021858
+        ],
+        "history_range": [
+          -2.6981157973574297e-18,
+          3.1912054516345273e-18
+        ],
+        "actual_weak_q_mean": 982.8610916645524,
+        "actual_weak_q_range": [
+          982.8610916641363,
+          982.8610916650596
+        ],
+        "balance_rms_Pa": 7.55485099609306e-10,
+        "theta_update_error": 0.0,
+        "C_update_error": 5.002220859751105e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.24999999993561228,
+        "particle_volume_relative_error": -2.5755086952017336e-10,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.39577053600078216
+      }
+    },
+    {
+      "step": 32,
+      "time_s": 4.0,
+      "observed": {
+        "V": 0.00011195833635468518,
+        "q": 982.6389417861349,
+        "C": 313.30667436691823,
+        "Theta": 83.04910065445222,
+        "slip": 0.0009180152565853421,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.0001119516116629182
+      },
+      "errors": {
+        "V": 8.69848390549783e-09,
+        "q": -0.21971970435004096,
+        "C": -0.2187889870252775,
+        "Theta": -0.023969647367167113,
+        "slip": 2.991039543812817e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 8.698485340764665e-09,
+        "C": 0.21878898704625271,
+        "Theta": 0.023969647567071206
+      },
+      "raw_stress_error_max": 0.23068506154436363,
+      "raw_stress_error_rms": 0.2201396336010558,
+      "raw_stress_range": [
+        982.6279764289405,
+        982.6517811390945
+      ],
+      "velocity_error_max": 3.6628966933681915e-09,
+      "velocity_error_rms": 1.991128070067796e-09,
+      "velocity_profile_error_max": 3.6772674551576834e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "guards": {
+        "step": 32,
+        "time_s": 4.0,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00011195833635468518,
+          "C": 313.30667436691823,
+          "Theta": 83.04910065445222,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.0064234491008506e-05,
+        "instantaneous_range": [
+          0.00011195161166200676,
+          0.00011195161166407858
+        ],
+        "history_range": [
+          -2.6958580584169455e-18,
+          3.18853510337804e-18
+        ],
+        "actual_weak_q_mean": 982.6389417861349,
+        "actual_weak_q_range": [
+          982.6389417857519,
+          982.6389417865714
+        ],
+        "balance_rms_Pa": 7.490465457340985e-10,
+        "theta_update_error": 0.0,
+        "C_update_error": 3.240074875066057e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2500000000000002,
+        "particle_volume_relative_error": 8.881784197001252e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.3983978290016239
+      }
+    },
+    {
+      "step": 33,
+      "time_s": 4.125,
+      "observed": {
+        "V": 0.00011240981610872585,
+        "q": 982.3606738308644,
+        "C": 313.0451342316601,
+        "Theta": 82.0144450018279,
+        "slip": 0.0009320664835989328,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.00011240306429917685
+      },
+      "errors": {
+        "V": 8.733645192791038e-09,
+        "q": -0.21945314515494374,
+        "C": -0.2185174313085554,
+        "Theta": -0.02372469318521553,
+        "slip": 3.001956600303399e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 8.733646632408235e-09,
+        "C": 0.21851743133061063,
+        "Theta": 0.02372469339707095
+      },
+      "raw_stress_error_max": 0.2304627236117085,
+      "raw_stress_error_rms": 0.21987494908730928,
+      "raw_stress_range": [
+        982.3496642524076,
+        982.3735649627679
+      ],
+      "velocity_error_max": 3.677878409461731e-09,
+      "velocity_error_rms": 1.998901626390222e-09,
+      "velocity_profile_error_max": 3.692286190778749e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "guards": {
+        "step": 33,
+        "time_s": 4.125,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00011240981610872585,
+          "C": 313.0451342316601,
+          "Theta": 82.0144450018279,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423449034237e-05,
+        "instantaneous_range": [
+          0.00011240306429825933,
+          0.00011240306430033665
+        ],
+        "history_range": [
+          -2.6936076273252453e-18,
+          3.1858733985040547e-18
+        ],
+        "actual_weak_q_mean": 982.3606738308644,
+        "actual_weak_q_range": [
+          982.3606738304801,
+          982.3606738313008
+        ],
+        "balance_rms_Pa": 2.0133618817295672e-10,
+        "theta_update_error": 0.0,
+        "C_update_error": 3.751665644813329e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2500000000000001,
+        "particle_volume_relative_error": 4.440892098500626e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.3979870100010885
+      }
+    },
+    {
+      "step": 34,
+      "time_s": 4.25,
+      "observed": {
+        "V": 0.00011273620313022382,
+        "q": 982.0419835823643,
+        "C": 312.78429783847827,
+        "Theta": 80.99092404005332,
+        "slip": 0.0009461585089902108,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.00011272943171648619
+      },
+      "errors": {
+        "V": 8.760777024470934e-09,
+        "q": -0.21918732985579936,
+        "C": -0.21824621788192644,
+        "Theta": -0.023481359336969376,
+        "slip": 3.012907571584445e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 8.760778472680433e-09,
+        "C": 0.21824621790420906,
+        "Theta": 0.023481359560562964
+      },
+      "raw_stress_error_max": 0.23022887709339557,
+      "raw_stress_error_rms": 0.21961050188786588,
+      "raw_stress_range": [
+        982.0309420351267,
+        982.0549121466781
+      ],
+      "velocity_error_max": 3.6883405979435486e-09,
+      "velocity_error_rms": 2.004626453003806e-09,
+      "velocity_profile_error_max": 3.702784864117179e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "guards": {
+        "step": 34,
+        "time_s": 4.25,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00011273620313022382,
+          "C": 312.78429783847827,
+          "Theta": 80.99092404005332,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423449123055e-05,
+        "instantaneous_range": [
+          0.00011272943171557096,
+          0.00011272943171765492
+        ],
+        "history_range": [
+          -2.6913632516064398e-18,
+          3.1832188556425574e-18
+        ],
+        "actual_weak_q_mean": 982.0419835823643,
+        "actual_weak_q_range": [
+          982.0419835819974,
+          982.0419835827962
+        ],
+        "balance_rms_Pa": 5.4096491694028984e-11,
+        "theta_update_error": 0.0,
+        "C_update_error": 7.048583938740194e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2500000000000001,
+        "particle_volume_relative_error": 4.440892098500626e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.39562963099888293
+      }
+    },
+    {
+      "step": 35,
+      "time_s": 4.375,
+      "observed": {
+        "V": 0.00011297185510395654,
+        "q": 981.6942555035979,
+        "C": 312.5240594969878,
+        "Theta": 79.97937129496279,
+        "slip": 0.0009602799908782053,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.00011296506953596312
+      },
+      "errors": {
+        "V": 8.781564037491649e-09,
+        "q": -0.21892229350066827,
+        "C": -0.2179753440898935,
+        "Theta": -0.023239848221010106,
+        "slip": 3.0238845266314113e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 8.781565493358326e-09,
+        "C": 0.21797534411473407,
+        "Theta": 0.02323984845598659
+      },
+      "raw_stress_error_max": 0.22998692223518447,
+      "raw_stress_error_rms": 0.2193464657448964,
+      "raw_stress_range": [
+        981.6831908748634,
+        981.7072110941895
+      ],
+      "velocity_error_max": 3.6956366250140828e-09,
+      "velocity_error_rms": 2.0088334618081946e-09,
+      "velocity_profile_error_max": 3.7101140823804274e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "guards": {
+        "step": 35,
+        "time_s": 4.375,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00011297185510395654,
+          "C": 312.5240594969878,
+          "Theta": 79.97937129496279,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423449067544e-05,
+        "instantaneous_range": [
+          0.00011296506953504767,
+          0.00011296506953713844
+        ],
+        "history_range": [
+          -2.6891240218439876e-18,
+          3.1805703991780863e-18
+        ],
+        "actual_weak_q_mean": 981.6942555035979,
+        "actual_weak_q_range": [
+          981.6942555032247,
+          981.6942555040282
+        ],
+        "balance_rms_Pa": 1.4525447549439961e-11,
+        "theta_update_error": 0.0,
+        "C_update_error": 4.320099833421409e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2500000000000001,
+        "particle_volume_relative_error": 4.440892098500626e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.3991327439980523
+      }
+    },
+    {
+      "step": 36,
+      "time_s": 4.5,
+      "observed": {
+        "V": 0.00011314182140827891,
+        "q": 981.325730848759,
+        "C": 312.26434258426343,
+        "Theta": 78.98032609125575,
+        "slip": 0.0009744227185542402,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.00011313502563139561
+      },
+      "errors": {
+        "V": 8.797376499467837e-09,
+        "q": -0.2186580132246263,
+        "C": -0.21770480832782368,
+        "Theta": -0.023000295934167525,
+        "slip": 3.0348812472553565e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 8.797378035226662e-09,
+        "C": 0.21770480835368744,
+        "Theta": 0.02300029618098165
+      },
+      "raw_stress_error_max": 0.22973928973306101,
+      "raw_stress_error_rms": 0.2190829191647682,
+      "raw_stress_range": [
+        981.3146495722506,
+        981.3387059322957
+      ],
+      "velocity_error_max": 3.700722564079406e-09,
+      "velocity_error_rms": 2.0119183401242635e-09,
+      "velocity_profile_error_max": 3.7152286531244843e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "guards": {
+        "step": 36,
+        "time_s": 4.5,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00011314182140827891,
+          "C": 312.26434258426343,
+          "Theta": 78.98032609125575,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423449134157e-05,
+        "instantaneous_range": [
+          0.00011313502563041505,
+          0.00011313502563262822
+        ],
+        "history_range": [
+          -2.6868892787333065e-18,
+          3.1779272493159525e-18
+        ],
+        "actual_weak_q_mean": 981.325730848759,
+        "actual_weak_q_range": [
+          981.3257308483782,
+          981.3257308492216
+        ],
+        "balance_rms_Pa": 3.894310703046059e-12,
+        "theta_update_error": 0.0,
+        "C_update_error": 2.8990143619012088e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2499999998888408,
+        "particle_volume_relative_error": -4.4463677184580774e-10,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.3985080869970261
+      }
+    },
+    {
+      "step": 37,
+      "time_s": 4.625,
+      "observed": {
+        "V": 0.00011326430162307377,
+        "q": 980.942367216845,
+        "C": 312.0050915960741,
+        "Theta": 77.99411751948062,
+        "slip": 0.0009885807562571244,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.0001132574984895086
+      },
+      "errors": {
+        "V": 8.809314796525574e-09,
+        "q": -0.21839443748274334,
+        "C": -0.2174346096409181,
+        "Theta": -0.022762792102383855,
+        "slip": 3.0458928907501834e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 8.809316261038764e-09,
+        "C": 0.21743460966786188,
+        "Theta": 0.02276279235999823
+      },
+      "raw_stress_error_max": 0.2294877106119202,
+      "raw_stress_error_rms": 0.21881988429420596,
+      "raw_stress_range": [
+        980.9312739437158,
+        980.9553563472876
+      ],
+      "velocity_error_max": 3.704270565818953e-09,
+      "velocity_error_rms": 2.014174924853614e-09,
+      "velocity_profile_error_max": 3.7188004005280764e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "guards": {
+        "step": 37,
+        "time_s": 4.625,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00011326430162307377,
+          "C": 312.0050915960741,
+          "Theta": 77.99411751948062,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423449078646e-05,
+        "instantaneous_range": [
+          0.00011325749848859357,
+          0.00011325749849068635
+        ],
+        "history_range": [
+          -2.684658544686299e-18,
+          3.1752888411872428e-18
+        ],
+        "actual_weak_q_mean": 980.942367216845,
+        "actual_weak_q_range": [
+          980.9423672164917,
+          980.9423672172769
+        ],
+        "balance_rms_Pa": 1.0504581327586259e-12,
+        "theta_update_error": 0.0,
+        "C_update_error": 5.059064278611913e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2500000000000001,
+        "particle_volume_relative_error": 4.440892098500626e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.39732759700200404
+      }
+    },
+    {
+      "step": 38,
+      "time_s": 4.75,
+      "observed": {
+        "V": 0.00011335248583458055,
+        "q": 980.5484671542631,
+        "C": 311.7462663338534,
+        "Theta": 77.02092502523436,
+        "slip": 0.0010027498169864469,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.00011334567740429389
+      },
+      "errors": {
+        "V": 8.818253162265954e-09,
+        "q": -0.21813150351567856,
+        "C": -0.21716474746153835,
+        "Theta": -0.0225273938883106,
+        "slip": 3.056915707201017e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 8.818254630180828e-09,
+        "C": 0.2171647474856968,
+        "Theta": 0.022527394156426794
+      },
+      "raw_stress_error_max": 0.2292334140759067,
+      "raw_stress_error_rms": 0.21855735189396658,
+      "raw_stress_range": [
+        980.5373652437029,
+        980.5614663982766
+      ],
+      "velocity_error_max": 3.706751285926233e-09,
+      "velocity_error_rms": 2.0158208340719835e-09,
+      "velocity_profile_error_max": 3.72130017976436e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "guards": {
+        "step": 38,
+        "time_s": 4.75,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00011335248583458055,
+          "C": 311.7462663338534,
+          "Theta": 77.02092502523436,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423449078646e-05,
+        "instantaneous_range": [
+          0.00011334567740338555,
+          0.00011334567740547928
+        ],
+        "history_range": [
+          -2.682431473813047e-18,
+          3.1726547656894756e-18
+        ],
+        "actual_weak_q_mean": 980.5484671542631,
+        "actual_weak_q_range": [
+          980.5484671539157,
+          980.5484671546806
+        ],
+        "balance_rms_Pa": 2.7850483078338434e-13,
+        "theta_update_error": 0.0,
+        "C_update_error": 4.831690603168681e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2500000000000001,
+        "particle_volume_relative_error": 4.440892098500626e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.39620435500182793
+      }
+    },
+    {
+      "step": 39,
+      "time_s": 4.875,
+      "observed": {
+        "V": 0.00011341591652902747,
+        "q": 980.1471358540394,
+        "C": 311.4878376721178,
+        "Theta": 76.06082194111634,
+        "slip": 0.0010169268065525752,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.00011340910428882124
+      },
+      "errors": {
+        "V": 8.82487973437329e-09,
+        "q": -0.21786914758149578,
+        "C": -0.21689522142963824,
+        "Theta": -0.022294135834513895,
+        "slip": 3.0679468068675435e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 8.824881211246384e-09,
+        "C": 0.2168952214541946,
+        "Theta": 0.022294136112861906
+      },
+      "raw_stress_error_max": 0.22897727100666998,
+      "raw_stress_error_rms": 0.21829529691481134,
+      "raw_stress_range": [
+        980.1360277306143,
+        980.1601423727301
+      ],
+      "velocity_error_max": 3.7084932508732232e-09,
+      "velocity_error_rms": 2.017016905860715e-09,
+      "velocity_profile_error_max": 3.7230569798733933e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "guards": {
+        "step": 39,
+        "time_s": 4.875,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00011341591652902747,
+          "C": 311.4878376721178,
+          "Theta": 76.06082194111634,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423449078646e-05,
+        "instantaneous_range": [
+          0.00011340910428790887,
+          0.00011340910429001683
+        ],
+        "history_range": [
+          -2.680207815502301e-18,
+          3.1700247264114164e-18
+        ],
+        "actual_weak_q_mean": 980.1471358540394,
+        "actual_weak_q_range": [
+          980.147135853678,
+          980.1471358544612
+        ],
+        "balance_rms_Pa": 7.895906583775946e-14,
+        "theta_update_error": 0.0,
+        "C_update_error": 3.751665644813329e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2500000000000001,
+        "particle_volume_relative_error": 4.440892098500626e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.40007606300059706
+      }
+    },
+    {
+      "step": 40,
+      "time_s": 5.0,
+      "observed": {
+        "V": 0.00011346148849662419,
+        "q": 979.7406133827524,
+        "C": 311.22978448617914,
+        "Theta": 75.11380666625017,
+        "slip": 0.0010311094926146532,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.0001134546735191751
+      },
+      "errors": {
+        "V": 8.829732025454704e-09,
+        "q": -0.21760731020140156,
+        "C": -0.21662603129504987,
+        "Theta": -0.022063036755440635,
+        "slip": 3.078983971899294e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 8.829733506312241e-09,
+        "C": 0.21662603132216418,
+        "Theta": 0.022063037043764666
+      },
+      "raw_stress_error_max": 0.22871989726718311,
+      "raw_stress_error_rms": 0.21803368789557961,
+      "raw_stress_range": [
+        979.7295007956866,
+        979.7536251279552
+      ],
+      "velocity_error_max": 3.709725159423545e-09,
+      "velocity_error_rms": 2.0178818271958463e-09,
+      "velocity_profile_error_max": 3.7243000642340194e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "guards": {
+        "step": 40,
+        "time_s": 5.0,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00011346148849662419,
+          "C": 311.22978448617914,
+          "Theta": 75.11380666625017,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423449012033e-05,
+        "instantaneous_range": [
+          0.00011345467351826137,
+          0.00011345467352037082
+        ],
+        "history_range": [
+          -2.6779873879859834e-18,
+          3.167398508366214e-18
+        ],
+        "actual_weak_q_mean": 979.7406133827524,
+        "actual_weak_q_range": [
+          979.7406133823841,
+          979.7406133831818
+        ],
+        "balance_rms_Pa": 2.865658517133313e-14,
+        "theta_update_error": 0.0,
+        "C_update_error": 6.934897101018578e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.25000000000000017,
+        "particle_volume_relative_error": 6.661338147750939e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.39824498500092886
+      }
+    },
+    {
+      "step": 41,
+      "time_s": 5.125,
+      "observed": {
+        "V": 0.00011349417890073207,
+        "q": 979.3305152973277,
+        "C": 310.9720914270427,
+        "Theta": 74.17982494753403,
+        "slip": 0.0010452962649772446,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.00011348736195976272
+      },
+      "errors": {
+        "V": 8.833227161614905e-09,
+        "q": -0.21734593865642182,
+        "C": -0.2163571768438146,
+        "Theta": -0.021834104550393363,
+        "slip": 3.0900255058516346e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 8.83322864492545e-09,
+        "C": 0.21635717686797307,
+        "Theta": 0.021834104848394986
+      },
+      "raw_stress_error_max": 0.22846172767128792,
+      "raw_stress_error_rms": 0.21777249237462817,
+      "raw_stress_range": [
+        979.3193995083128,
+        979.3435307916682
+      ],
+      "velocity_error_max": 3.710605837674817e-09,
+      "velocity_error_rms": 2.0185030723192703e-09,
+      "velocity_profile_error_max": 3.7251888335947255e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "guards": {
+        "step": 41,
+        "time_s": 5.125,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00011349417890073207,
+          "C": 310.9720914270427,
+          "Theta": 74.17982494753403,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423449134157e-05,
+        "instantaneous_range": [
+          0.00011348736195884947,
+          0.00011348736196095609
+        ],
+        "history_range": [
+          -2.6757700591931218e-18,
+          3.1647759553465016e-18
+        ],
+        "actual_weak_q_mean": 979.3305152973277,
+        "actual_weak_q_range": [
+          979.3305152969843,
+          979.3305152977633
+        ],
+        "balance_rms_Pa": 1.472060306322126e-14,
+        "theta_update_error": 0.0,
+        "C_update_error": 6.480149750132114e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2500000000000001,
+        "particle_volume_relative_error": 4.440892098500626e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.39965099899927736
+      }
+    },
+    {
+      "step": 42,
+      "time_s": 5.25,
+      "observed": {
+        "V": 0.00011351757705501857,
+        "q": 978.9180067852651,
+        "C": 310.71474731102387,
+        "Theta": 73.25878578563604,
+        "slip": 0.001059485962109122,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.00011351075870865893
+      },
+      "errors": {
+        "V": 8.834496762155598e-09,
+        "q": -0.21708483914528642,
+        "C": -0.21608865925014697,
+        "Theta": -0.021607328666391368,
+        "slip": 3.101068626804905e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 8.834498245967586e-09,
+        "C": 0.2160886592750444,
+        "Theta": 0.021607328973786366
+      },
+      "raw_stress_error_max": 0.22820291994048603,
+      "raw_stress_error_rms": 0.21751153112985394,
+      "raw_stress_range": [
+        978.9068887044699,
+        978.9310249630526
+      ],
+      "velocity_error_max": 3.7115019019848088e-09,
+      "velocity_error_rms": 2.018870961581173e-09,
+      "velocity_profile_error_max": 3.726083582042422e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "guards": {
+        "step": 42,
+        "time_s": 5.25,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00011351757705501857,
+          "C": 310.71474731102387,
+          "Theta": 73.25878578563604,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423448923215e-05,
+        "instantaneous_range": [
+          0.00011351075870773674,
+          0.00011351075870984989
+        ],
+        "history_range": [
+          -2.6735557328933073e-18,
+          3.1621569535354855e-18
+        ],
+        "actual_weak_q_mean": 978.9180067852651,
+        "actual_weak_q_range": [
+          978.9180067849076,
+          978.9180067856937
+        ],
+        "balance_rms_Pa": 5.312101437431322e-07,
+        "theta_update_error": 0.0,
+        "C_update_error": 3.524291969370097e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2500000000000001,
+        "particle_volume_relative_error": 4.440892098500626e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.3956097449990921
+      }
+    },
+    {
+      "step": 43,
+      "time_s": 5.375,
+      "observed": {
+        "V": 0.00011353427519092432,
+        "q": 978.5039277757022,
+        "C": 310.45774396278796,
+        "Theta": 72.35057271776923,
+        "slip": 0.0010736777465079875,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.00011352745584160281
+      },
+      "errors": {
+        "V": 8.837084329468793e-09,
+        "q": -0.2168242370611324,
+        "C": -0.21582047586542785,
+        "Theta": -0.021382723666135917,
+        "slip": 3.112114982217317e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 8.837085813280781e-09,
+        "C": 0.21582047589191689,
+        "Theta": 0.02138272398258323
+      },
+      "raw_stress_error_max": 0.22794395339190032,
+      "raw_stress_error_rms": 0.2172510400742198,
+      "raw_stress_range": [
+        978.4928080593714,
+        978.5169478685278
+      ],
+      "velocity_error_max": 3.711778940586693e-09,
+      "velocity_error_rms": 2.0192380361832738e-09,
+      "velocity_profile_error_max": 3.726369360906238e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "guards": {
+        "step": 43,
+        "time_s": 5.375,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00011353427519092432,
+          "C": 310.45774396278796,
+          "Theta": 72.35057271776923,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423448978726e-05,
+        "instantaneous_range": [
+          0.00011352745584068559,
+          0.00011352745584279462
+        ],
+        "history_range": [
+          -2.671344338741613e-18,
+          3.1595414197324035e-18
+        ],
+        "actual_weak_q_mean": 978.5039277757022,
+        "actual_weak_q_range": [
+          978.503927775356,
+          978.5039277761266
+        ],
+        "balance_rms_Pa": 2.704438945339222e-07,
+        "theta_update_error": 0.0,
+        "C_update_error": 2.8421709430404007e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.25000000000757605,
+        "particle_volume_relative_error": 3.030420359095842e-11,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.40127344299980905
+      }
+    },
+    {
+      "step": 44,
+      "time_s": 5.5,
+      "observed": {
+        "V": 0.00011354613676728227,
+        "q": 978.0888843786586,
+        "C": 310.20107536976127,
+        "Theta": 71.45505193092018,
+        "slip": 0.0010878710136038978,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.00011353931670549748
+      },
+      "errors": {
+        "V": 8.838533528600801e-09,
+        "q": -0.21656403369581767,
+        "C": -0.21555262707727252,
+        "Theta": -0.02116027590980707,
+        "slip": 3.123163149127729e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 8.8385350138087e-09,
+        "C": 0.21555262710376155,
+        "Theta": 0.02116027623503669
+      },
+      "raw_stress_error_max": 0.22768491184012873,
+      "raw_stress_error_rms": 0.2169909280960208,
+      "raw_stress_range": [
+        978.0777635005143,
+        978.1019058318236
+      ],
+      "velocity_error_max": 3.71205968039052e-09,
+      "velocity_error_rms": 2.019474482329692e-09,
+      "velocity_profile_error_max": 3.7266540593490374e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "guards": {
+        "step": 44,
+        "time_s": 5.5,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00011354613676728227,
+          "C": 310.20107536976127,
+          "Theta": 71.45505193092018,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423449034237e-05,
+        "instantaneous_range": [
+          0.00011353931670458847,
+          0.00011353931670669692
+        ],
+        "history_range": [
+          -2.6691358250026313e-18,
+          3.1569292927470726e-18
+        ],
+        "actual_weak_q_mean": 978.0888843786586,
+        "actual_weak_q_range": [
+          978.0888843783116,
+          978.0888843790743
+        ],
+        "balance_rms_Pa": 1.3643022699264957e-07,
+        "theta_update_error": 1.4210854715202004e-14,
+        "C_update_error": 2.8421709430404007e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2500000000000001,
+        "particle_volume_relative_error": 4.440892098500626e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.397687433000101
+      }
+    },
+    {
+      "step": 45,
+      "time_s": 5.625,
+      "observed": {
+        "V": 0.00011355450681620315,
+        "q": 977.6733139352638,
+        "C": 309.9447370805756,
+        "Theta": 70.57207796279518,
+        "slip": 0.0011020653269559232,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.00011354768625168176
+      },
+      "errors": {
+        "V": 8.839276191869466e-09,
+        "q": -0.2163041721589707,
+        "C": -0.2152851129151827,
+        "Theta": -0.02093997206691256,
+        "slip": 3.1342122443689044e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 8.83927767715868e-09,
+        "C": 0.21528511293905694,
+        "Theta": 0.020939972400668694
+      },
+      "raw_stress_error_max": 0.22742587012623972,
+      "raw_stress_error_rms": 0.21673114376872804,
+      "raw_stress_range": [
+        977.6621922372965,
+        977.6863363483585
+      ],
+      "velocity_error_max": 3.71231824296427e-09,
+      "velocity_error_rms": 2.019623785746054e-09,
+      "velocity_profile_error_max": 3.7269137927357725e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "guards": {
+        "step": 45,
+        "time_s": 5.625,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00011355450681620315,
+          "C": 309.9447370805756,
+          "Theta": 70.57207796279518,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423449078646e-05,
+        "instantaneous_range": [
+          0.00011354768625076951,
+          0.00011354768625287668
+        ],
+        "history_range": [
+          -2.666930153374419e-18,
+          3.1543205272777284e-18
+        ],
+        "actual_weak_q_mean": 977.6733139352638,
+        "actual_weak_q_range": [
+          977.6733139349158,
+          977.6733139356899
+        ],
+        "balance_rms_Pa": 6.792035218808996e-08,
+        "theta_update_error": 0.0,
+        "C_update_error": 4.263256414560601e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2500000000000001,
+        "particle_volume_relative_error": 4.440892098500626e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.3963359230001515
+      }
+    },
+    {
+      "step": 46,
+      "time_s": 5.75,
+      "observed": {
+        "V": 0.00011356035433830326,
+        "q": 977.2575321997734,
+        "C": 309.68872576875185,
+        "Theta": 69.70149777089773,
+        "slip": 0.0011162603712482112,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.00011355353342255447
+      },
+      "errors": {
+        "V": 8.839563158256534e-09,
+        "q": -0.21604461809988607,
+        "C": -0.2150179332191442,
+        "Theta": -0.02072179845293931,
+        "slip": 3.1452616983183683e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 8.839564646473093e-09,
+        "C": 0.2150179332407447,
+        "Theta": 0.02072179879495195
+      },
+      "raw_stress_error_max": 0.22716688881769187,
+      "raw_stress_error_rms": 0.21647165670316576,
+      "raw_stress_range": [
+        977.2464099290556,
+        977.2705552834934
+      ],
+      "velocity_error_max": 3.712548981041027e-09,
+      "velocity_error_rms": 2.0197135334546785e-09,
+      "velocity_profile_error_max": 3.727144002612948e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "guards": {
+        "step": 46,
+        "time_s": 5.75,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00011356035433830326,
+          "C": 309.68872576875185,
+          "Theta": 69.70149777089773,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.0064234490453394e-05,
+        "instantaneous_range": [
+          0.00011355353342163584,
+          0.0001135535334237517
+        ],
+        "history_range": [
+          -2.6647272952341398e-18,
+          3.151715089470633e-18
+        ],
+        "actual_weak_q_mean": 977.2575321997734,
+        "actual_weak_q_range": [
+          977.2575321994352,
+          977.2575322001853
+        ],
+        "balance_rms_Pa": 3.314592008737354e-08,
+        "theta_update_error": 0.0,
+        "C_update_error": 6.536993168992922e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2500000000000002,
+        "particle_volume_relative_error": 8.881784197001252e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.4015295800018066
+      }
+    },
+    {
+      "step": 47,
+      "time_s": 5.875,
+      "observed": {
+        "V": 0.0001135643773409041,
+        "q": 976.841767342113,
+        "C": 309.4330389182521,
+        "Theta": 68.843153618042,
+        "slip": 0.0011304559184158241,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.00011355755618351276
+      },
+      "errors": {
+        "V": 8.83954526904266e-09,
+        "q": -0.2157853495323252,
+        "C": -0.21475108773609008,
+        "Theta": -0.02050574085674839,
+        "slip": 3.15631112990291e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 8.839546682435718e-09,
+        "C": 0.21475108775814533,
+        "Theta": 0.02050574120607962
+      },
+      "raw_stress_error_max": 0.2269080144619693,
+      "raw_stress_error_rms": 0.21621244792764402,
+      "raw_stress_range": [
+        976.8306446771834,
+        976.8547908870329
+      ],
+      "velocity_error_max": 3.712754264768056e-09,
+      "velocity_error_rms": 2.0197617441890436e-09,
+      "velocity_profile_error_max": 3.727347671356467e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "guards": {
+        "step": 47,
+        "time_s": 5.875,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.0001135643773409041,
+          "C": 309.4330389182521,
+          "Theta": 68.843153618042,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423449023135e-05,
+        "instantaneous_range": [
+          0.00011355755618256167,
+          0.00011355755618465832
+        ],
+        "history_range": [
+          -2.662527228932503e-18,
+          3.1491129537199673e-18
+        ],
+        "actual_weak_q_mean": 976.841767342113,
+        "actual_weak_q_range": [
+          976.8417673418126,
+          976.8417673425105
+        ],
+        "balance_rms_Pa": 1.5687247438529646e-08,
+        "theta_update_error": 0.0,
+        "C_update_error": 2.2737367544323206e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.25000000033148734,
+        "particle_volume_relative_error": 1.325949350317046e-09,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.40414368599886075
+      }
+    },
+    {
+      "step": 48,
+      "time_s": 6.0,
+      "observed": {
+        "V": 0.00011356707856980723,
+        "q": 976.4261844471043,
+        "C": 309.1776745969282,
+        "Theta": 67.99688511548854,
+        "slip": 0.00114465180323705,
+        "Ih": 108.14483383971712,
+        "supported_integral": 0.0001135602572501727
+      },
+      "errors": {
+        "V": 8.839314820989984e-09,
+        "q": -0.2155263521320876,
+        "C": -0.21448457615235839,
+        "Theta": -0.020291784551488945,
+        "slip": 3.1673602734279445e-07,
+        "Ih": 0.009867683562120533
+      },
+      "max_surface_errors": {
+        "V": 8.839316313895718e-09,
+        "C": 0.2144845761760621,
+        "Theta": 0.020291784908593513
+      },
+      "raw_stress_error_max": 0.226649281469804,
+      "raw_stress_error_rms": 0.2159535046477029,
+      "raw_stress_range": [
+        976.4150615177666,
+        976.4392083019814
+      ],
+      "velocity_error_max": 3.7129393225375387e-09,
+      "velocity_error_rms": 2.01978037805951e-09,
+      "velocity_profile_error_max": 3.7275303745878084e-09,
+      "checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "fine_reference_checks": {
+        "V": true,
+        "q": true,
+        "C": true,
+        "Theta": true,
+        "slip": true,
+        "raw_stress": true,
+        "velocity_max": true,
+        "velocity_rms": true
+      },
+      "guards": {
+        "step": 48,
+        "time_s": 6.0,
+        "checks": {
+          "finite": true,
+          "geometry_fixed": true,
+          "geometry_horizontal": true,
+          "fault32": true,
+          "phase_admissible": true,
+          "sequence": true,
+          "interior_positive_V": true,
+          "positive_particle_measure": true,
+          "containment": true,
+          "normalization": true,
+          "homogeneity": true,
+          "weak_balance": true,
+          "theta_update": true,
+          "cohesive_update": true
+        },
+        "passed": true,
+        "means": {
+          "V": 0.00011356707856980723,
+          "C": 309.1776745969282,
+          "Theta": 67.99688511548854,
+          "Ih": 108.14483383971712
+        },
+        "independent_Ih_range": [
+          108.1448338434416,
+          108.14483384345306
+        ],
+        "max_omitted_fraction": 5.913959441986621e-05,
+        "max_normalization_error": 6.006423449023135e-05,
+        "instantaneous_range": [
+          0.00011356025724925303,
+          0.00011356025725137239
+        ],
+        "history_range": [
+          -2.6603299378442853e-18,
+          3.1465141003622122e-18
+        ],
+        "actual_weak_q_mean": 976.4261844471043,
+        "actual_weak_q_range": [
+          976.426184446757,
+          976.4261844475217
+        ],
+        "balance_rms_Pa": 7.071989869026974e-09,
+        "theta_update_error": 0.0,
+        "C_update_error": 6.934897101018578e-12,
+        "phi_range": [
+          4.093234158232501e-09,
+          0.5997640169066863
+        ],
+        "phi_along_fault_range": 1.9206858326015208e-14,
+        "particle_volume_sum": 0.2500000000000001,
+        "particle_volume_relative_error": 4.440892098500626e-16,
+        "normal_half_widths": [
+          0.3088215939070757,
+          0.3088215939070757
+        ],
+        "seconds": 0.40008905500144465
+      }
+    }
+  ],
+  "post_transient_checks": {
+    "V": true,
+    "q": true,
+    "C": true,
+    "Theta": true,
+    "slip": true,
+    "raw_stress": true,
+    "velocity_max": true,
+    "velocity_rms": true
+  },
+  "post_transient_fine_reference_checks": {
+    "V": true,
+    "q": true,
+    "C": true,
+    "Theta": true,
+    "slip": true,
+    "raw_stress": true,
+    "velocity_max": true,
+    "velocity_rms": true
+  }
+}

@@ -1,0 +1,188 @@
+{
+  "budget": "Proposed K4.1b width-specific budget; coefficients and physical scales unchanged.",
+  "sampled_time_spacing_s": 0.125,
+  "qualification": {
+    "V": {
+      "t_qual_s": 4.0,
+      "last_failure_time_s": 3.875,
+      "max_ratio_after_start": 0.9324528553993198
+    },
+    "q": {
+      "t_qual_s": 1.875,
+      "last_failure_time_s": 1.75,
+      "max_ratio_after_start": 0.8643123075946384
+    },
+    "C": {
+      "t_qual_s": 0.0,
+      "last_failure_time_s": null,
+      "max_ratio_after_start": 0.9065280639100014
+    },
+    "Theta": {
+      "t_qual_s": 1.125,
+      "last_failure_time_s": 1.0,
+      "max_ratio_after_start": 0.7764801819936744
+    },
+    "slip": {
+      "t_qual_s": 2.375,
+      "last_failure_time_s": 2.25,
+      "max_ratio_after_start": 0.9308052784357476
+    },
+    "crack_integral": {
+      "t_qual_s": 4.0,
+      "last_failure_time_s": 3.875,
+      "max_ratio_after_start": 0.9324528553982657
+    },
+    "supported_integral": {
+      "t_qual_s": 4.0,
+      "last_failure_time_s": 3.875,
+      "max_ratio_after_start": 0.9380481829060109
+    },
+    "history_integral": {
+      "t_qual_s": 0.0,
+      "last_failure_time_s": null,
+      "max_ratio_after_start": 0.0
+    },
+    "Ih": {
+      "t_qual_s": 0.0,
+      "reason": "Frozen profile integral; exactly zero timestep change, no new tolerance assigned."
+    },
+    "velocity_max": {
+      "t_qual_s": 3.375,
+      "last_failure_time_s": 3.25,
+      "max_ratio_after_start": 0.9914505786768436
+    },
+    "velocity_L2": {
+      "t_qual_s": 3.375,
+      "last_failure_time_s": 3.25,
+      "max_ratio_after_start": 0.9584880915616575
+    }
+  },
+  "common_interval_s": [
+    4.0,
+    6.0
+  ],
+  "samples_in_common_interval": 17,
+  "interval_signals": {
+    "V": {
+      "signal_min": -4.2704848737790515e-09,
+      "signal_max": -3.5424682056294735e-09,
+      "max_temporal_change": 2.347648061465802e-10,
+      "max_individual_ell0_change": 4.5090046139968274e-08,
+      "max_individual_half_change": 4.498162631551262e-08,
+      "max_common_mode_change": 4.5035836227740446e-08,
+      "max_width_budget_ratio": 0.9324528553993198
+    },
+    "q": {
+      "signal_min": -17.008751275289796,
+      "signal_max": -16.664095621511365,
+      "max_temporal_change": 0.00017850405072294961,
+      "max_individual_ell0_change": 0.0824329934994239,
+      "max_individual_half_change": 0.08235167483587702,
+      "max_common_mode_change": 0.08239233416765046,
+      "max_width_budget_ratio": 0.014774320836906614
+    },
+    "C": {
+      "signal_min": -16.786348855418908,
+      "signal_max": -16.447402704770695,
+      "max_temporal_change": 1.731398259607886e-05,
+      "max_individual_ell0_change": 0.005034796106087924,
+      "max_individual_half_change": 0.005052063909602111,
+      "max_common_mode_change": 0.005043430007845018,
+      "max_width_budget_ratio": 0.0014321086283999058
+    },
+    "Theta": {
+      "signal_min": -1.401531166794598,
+      "signal_max": -1.1168140463737188,
+      "max_temporal_change": 0.0006535279490691437,
+      "max_individual_ell0_change": 0.04058572317468645,
+      "max_individual_half_change": 0.039932195225617306,
+      "max_common_mode_change": 0.04025895920015188,
+      "max_width_budget_ratio": 0.5497798629896372
+    },
+    "slip": {
+      "signal_min": 1.76669971250151e-05,
+      "signal_max": 1.7674933572297668e-05,
+      "max_temporal_change": 6.255000033770011e-09,
+      "max_individual_ell0_change": 3.645257113897701e-07,
+      "max_individual_half_change": 3.583177354163185e-07,
+      "max_common_mode_change": 3.614217234030443e-07,
+      "max_width_budget_ratio": 0.6050805446989278
+    },
+    "crack_integral": {
+      "signal_min": -4.27048487436181e-09,
+      "signal_max": -3.5424682061986797e-09,
+      "max_temporal_change": 2.347648061465802e-10,
+      "max_individual_ell0_change": 4.5090046139968274e-08,
+      "max_individual_half_change": 4.498162631551262e-08,
+      "max_common_mode_change": 4.5035836227740446e-08,
+      "max_width_budget_ratio": 0.9324528553982657
+    },
+    "supported_integral": {
+      "signal_min": 5.95953583939937e-10,
+      "signal_max": 1.2545759022310806e-09,
+      "max_temporal_change": 2.351004720492055e-10,
+      "max_individual_ell0_change": 4.5087381282850206e-08,
+      "max_individual_half_change": 4.4980895442915474e-08,
+      "max_common_mode_change": 4.503413836288284e-08,
+      "max_width_budget_ratio": 0.9380481829060109
+    },
+    "history_integral": {
+      "signal_min": 0.0,
+      "signal_max": 0.0,
+      "max_temporal_change": 0.0,
+      "max_individual_ell0_change": 0.0,
+      "max_individual_half_change": 0.0,
+      "max_common_mode_change": 0.0,
+      "max_width_budget_ratio": 0.0
+    },
+    "Ih": {
+      "signal_min": -0.34427742865273103,
+      "signal_max": -0.34427742865273103,
+      "max_temporal_change": 0.0,
+      "max_individual_ell0_change": 0.0,
+      "max_individual_half_change": 0.0,
+      "max_common_mode_change": 0.0,
+      "max_width_budget_ratio": null
+    },
+    "velocity_max": {
+      "signal_min": 1.591123719075104e-05,
+      "signal_max": 1.614114120575521e-05,
+      "max_temporal_change": 6.372279843270829e-09,
+      "max_individual_ell0_change": 1.514739690537621e-08,
+      "max_individual_half_change": 1.8168499631665785e-08,
+      "max_common_mode_change": 1.634310827963972e-08,
+      "max_width_budget_ratio": 0.7694707732770913
+    },
+    "velocity_L2": {
+      "signal_min": 5.633949145542307e-06,
+      "signal_max": 5.715316432914525e-06,
+      "max_temporal_change": 2.2503280681390863e-09,
+      "max_individual_ell0_change": 1.010532383785061e-08,
+      "max_individual_half_change": 1.1527515924338997e-08,
+      "max_common_mode_change": 1.0781215261894032e-08,
+      "max_width_budget_ratio": 0.7273680489956008
+    }
+  },
+  "individual_trajectory_criterion": {
+    "ell0": {
+      "all_time_max_ratio": 567.9555215726024,
+      "interval_max_ratio": 0.9851959329786761
+    },
+    "half": {
+      "all_time_max_ratio": 578.2417775095516,
+      "interval_max_ratio": 0.9857170919188638
+    }
+  },
+  "older_pair_qualification": {
+    "V": 5.0,
+    "q": 2.5,
+    "C": 0.5,
+    "Theta": 5.75,
+    "slip": null,
+    "velocity_max": 4.75,
+    "velocity_L2": 4.0
+  },
+  "frozen_input_qualification": "H, phi, support, localization moments and Ih: t=0; no temporal evolution.",
+  "original_K41_all_time_pass": false,
+  "recommendation": "Proceed only after review with explicitly post-transient K4.2, initialized at t=0 and compared on [4,6] s; do not certify the early transient."
+}

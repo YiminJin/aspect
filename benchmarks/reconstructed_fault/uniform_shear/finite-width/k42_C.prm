@@ -1,0 +1,8 @@
+# Fixed half width and fault32; only normal bulk resolution changes from B.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/finite-width/k42_B.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/finite-width/k42_C
+subsection Geometry model
+  subsection Box
+    set Y repetitions = 16
+  end
+end
