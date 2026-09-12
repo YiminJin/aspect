@@ -1,0 +1,8 @@
+# First K3 fixed-ell NORMAL refinement only. Keep x/fault spacing and all physics.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/evolving/smoke.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/evolving/normal256
+subsection Geometry model
+  subsection Box
+    set Y repetitions = 8
+  end
+end

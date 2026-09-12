@@ -1,0 +1,2 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/evolving/phase-floor/one.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/evolving/phase-floor/two

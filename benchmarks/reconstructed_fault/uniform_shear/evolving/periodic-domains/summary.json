@@ -1,0 +1,272 @@
+{
+  "production_parameter_differences": {
+    "Output directory": [
+      "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/evolving/spatial0375_n128_f32",
+      "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/evolving/spatial0375_n128_f32_periodic"
+    ],
+    "Additional shared libraries": [
+      "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/evolving/build/libuniform_shear.so",
+      "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/evolving/periodic-domains/coupled-build/libuniform_shear.so"
+    ]
+  },
+  "initial_surface_max_changes": {
+    "x": 0.0,
+    "y": 2.9612668999179678e-18,
+    "V": 5.4752209710517974e-18,
+    "Theta": 7.105427357601002e-13,
+    "C": 1.7053025658242404e-12,
+    "Ih": 7.105427357601002e-14
+  },
+  "initial_particle_max_changes": {
+    "id": 0.0,
+    "x": 0.0,
+    "y": 0.0,
+    "H": 0.0,
+    "tau_xx": 0.0,
+    "tau_yy": 0.0,
+    "tau_xy": 0.0
+  },
+  "rank_weak_load_differences": {
+    "normal_partition": {
+      "periodic_phase_0.000000.csv": 1.6653345369377348e-16,
+      "periodic_phase_0.120000.csv": 1.6653345369377348e-16,
+      "periodic_phase_0.180000.csv": 1.6653345369377348e-16,
+      "periodic_phase_0.800000.csv": 1.1102230246251565e-16
+    },
+    "-remote": {
+      "periodic_phase_0.000000.csv": 2.7755575615628914e-17,
+      "periodic_phase_0.120000.csv": 2.7755575615628914e-17,
+      "periodic_phase_0.180000.csv": 4.163336342344337e-17,
+      "periodic_phase_0.800000.csv": 1.3877787807814457e-17
+    }
+  },
+  "regression_resources": {
+    "one": {
+      "command": [
+        "/home/ein/repository/aspect/build-pf-cpdi/aspect-release",
+        "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/evolving/periodic-domains/one.prm"
+      ],
+      "status": 0,
+      "wall_seconds": 1.616975752000144,
+      "peak_rss_KiB": 199452
+    },
+    "two": {
+      "command": [
+        "mpirun",
+        "-np",
+        "2",
+        "/home/ein/repository/aspect/build-pf-cpdi/aspect-release",
+        "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/evolving/periodic-domains/two.prm"
+      ],
+      "status": 0,
+      "wall_seconds": 2.0180256120002014,
+      "peak_rss_KiB": 220520
+    },
+    "one-remote": {
+      "command": [
+        "/home/ein/repository/aspect/build-pf-cpdi/aspect-release",
+        "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/evolving/periodic-domains/one-remote.prm"
+      ],
+      "status": 0,
+      "wall_seconds": 3.4227477479998925,
+      "peak_rss_KiB": 200844
+    },
+    "two-remote": {
+      "command": [
+        "mpirun",
+        "-np",
+        "2",
+        "/home/ein/repository/aspect/build-pf-cpdi/aspect-release",
+        "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/evolving/periodic-domains/two-remote.prm"
+      ],
+      "status": 0,
+      "wall_seconds": 2.469091607000337,
+      "peak_rss_KiB": 220616
+    }
+  },
+  "coupled_resources": {
+    "command": [
+      "/home/ein/repository/aspect/build-pf-cpdi/aspect-release",
+      "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/evolving/spatial0375_n128_f32_periodic.prm"
+    ],
+    "status": 0,
+    "wall_seconds": 120.4027996019995,
+    "peak_rss_KiB": 740440,
+    "wall_cap_s": 300,
+    "purpose": "Does periodic-domain correction restore whole-fault homogeneity through the former 3-s failure?",
+    "sha256": {
+      "build-pf-cpdi/aspect-release": "02aa66fe96898b60c36913f41471fd113cca63dad5155c173af05551c3a56c70",
+      "benchmarks/reconstructed_fault/uniform_shear/evolving/periodic-domains/coupled-build/libuniform_shear.release.so": "85b6ace73782ddf646faa1663c4e5fe406e4a76054078dc9b2db543d9aa6a5cd",
+      "source/particle/particle_domain.cc": "ed9e9d7493de744e75300eee85bd8b1c966307f5d58b918bcbdf548033a6ab22",
+      "source/reconstructed_fault/manager.cc": "a07629f65d1132fd76fcf0a99f324f166b070e5949ddbf03350173210adcb9d4",
+      "source/simulator/phase_field.cc": "f7140a9aa02d82b8534f7820879af9a17814cde612e6eced83f131c6899253b6"
+    }
+  },
+  "all_nine_states_pass": true,
+  "fresh_linear_checks": 37,
+  "max_fresh_over_target": 0.9527507396613399,
+  "maximum_omission": 5.8366240744551156e-05,
+  "maximum_complete_normalization_error": 5.335760006521851e-05,
+  "maximum_surface_balance_rms_Pa": 5.786968850312963e-06,
+  "maximum_theta_update_error_s": 4.440892098500626e-16,
+  "measured_wraps": 350,
+  "old_final_ranges": {
+    "H": 0.001306963814215134,
+    "phi": 1.643541187623665e-05,
+    "Ih": 0.004756832313063342,
+    "C": 0.008844695137725012,
+    "V": 5.098686871891217e-07
+  },
+  "new_final_ranges": {
+    "H": 5.926657165034044e-09,
+    "phi": 1.4876894161020005e-10,
+    "Ih": 9.538183576296433e-10,
+    "C": 3.883485533151543e-09,
+    "V": 6.637442331869359e-14
+  },
+  "maximum_trajectory_ranges": {
+    "H": 1.3953329602856002e-08,
+    "phi": 6.042792932703378e-10,
+    "Ih": 2.6386857143734233e-09,
+    "C": 6.776019745302619e-09,
+    "V": 4.620312379216562e-13
+  },
+  "final_reference_relative_percent": {
+    "V": 0.011814018511668856,
+    "C": 0.2756571800416996,
+    "Theta": 0.02431618813478753,
+    "Ih": -0.0319152267836853
+  },
+  "final_slip_relative_percent": -0.007525212862979913,
+  "final": {
+    "step": 8,
+    "time_s": 3.0,
+    "dt_s": 0.375,
+    "surface_means": {
+      "V": 0.002243450928991121,
+      "C": 356.6070802556029,
+      "Theta": 1.5838632403218489,
+      "Ih": 108.10371465482439
+    },
+    "reference": {
+      "V": 0.0022431859185914477,
+      "C": 355.6267695312397,
+      "Theta": 1.5834781987839592,
+      "Ih": 108.13822721528
+    },
+    "phi_mean_max": 0.599921924930102,
+    "reference_phi_max": 0.5997046555955509,
+    "phi_max_absolute_error": 0.00021726933455112896,
+    "particle_H_max_absolute_error": 0.023095313317753607,
+    "H_profile_max_absolute_error": 0.023095309425116284,
+    "H_increment_profile_max_error": 0.0003880361230770256,
+    "phi_increment_profile_max_error": 1.7692517131351337e-06,
+    "raw_stress_error_rms_Pa": 1.3270156724941067,
+    "raw_stress_error_max_Pa": 4.106648311307254,
+    "evaluated_stress_mean_Pa": 1270.9862960594144,
+    "surface_balance_rms_Pa": 9.417861466889892e-13,
+    "free_nodes": 33,
+    "active_nodes": 0,
+    "guard": {
+      "step": 8,
+      "checks": {
+        "unchanged_geometry": true,
+        "admissible_phi": true,
+        "common_timestep_sequence": true,
+        "approved_parameter_changes_only": true,
+        "realized_normal_mesh": true,
+        "approved_fault_resolution": true,
+        "unchanged_support_width": true,
+        "containment": true,
+        "supported_normalization": true,
+        "stable_particle_ids": true,
+        "homogeneity_including_seam": true,
+        "phase_probe_restore": true,
+        "phase_converged": true
+      },
+      "refinement_parameter_differences": {
+        "Fault reconstruction/Structural point spacing": [
+          "0.015625",
+          "0.0078125"
+        ],
+        "Maximum time step": [
+          "2",
+          "0.375"
+        ],
+        "Output directory": [
+          "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/evolving/smoke",
+          "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/evolving/spatial0375_n128_f32_periodic"
+        ],
+        "Termination criteria/End step": [
+          "2",
+          "8"
+        ],
+        "Maximum first time step": [
+          "5.69e+300",
+          "0.375"
+        ],
+        "End time": [
+          "4",
+          "3"
+        ],
+        "Additional shared libraries": [
+          "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/evolving/build/libuniform_shear.so",
+          "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/evolving/periodic-domains/coupled-build/libuniform_shear.so"
+        ]
+      },
+      "passed": true,
+      "max_omitted_fraction": 5.8366240744551156e-05,
+      "max_supported_normalization_error": 5.2710342926843506e-05,
+      "signed_integral_ranges": {
+        "instantaneous": [
+          0.0022433333217427983,
+          0.002243333321803589
+        ],
+        "history": [
+          -6.458365412495346e-10,
+          -6.45834544917929e-10
+        ],
+        "total": [
+          0.0022433326759066894,
+          0.002243332675968307
+        ]
+      },
+      "phi_range": [
+        3.4418138102156625e-09,
+        0.5999219249301093
+      ],
+      "along_fault_ranges": {
+        "H": 5.926657165034044e-09,
+        "phi": 1.4876894161020005e-10,
+        "Ih": 9.538183576296433e-10,
+        "C": 3.883485533151543e-09,
+        "V": 6.637442331869359e-14
+      },
+      "reference_signal_scales": {
+        "H": 0.3520119911023968,
+        "phi": 2.052558885504152e-05,
+        "Ih": 0.0033046950978672385,
+        "C": 37.88411922359444,
+        "V": 0.0019279151014398694
+      },
+      "periodic_crossings": 12,
+      "elapsed_seconds": 0.7474801479984308
+    },
+    "theta_update_max_error_s": 2.220446049250313e-16,
+    "H_increment_max_Pa": 0.016664334088118182,
+    "H_increment_min_Pa": 0.0,
+    "mean_phi_increment_max": 3.2635841203249027e-06,
+    "reference_H_increment_max_Pa": 0.017427331551236325,
+    "reference_phi_increment_max": 3.453931386079856e-06,
+    "accumulated_slip_m": 0.005178829508251158,
+    "reference_slip_m": 0.005179219255524777
+  },
+  "scope": "Periodic-domain correction verified; no spatial/temporal K3 convergence claim.",
+  "source_sha256": {
+    "source/particle/particle_domain.cc": "ed9e9d7493de744e75300eee85bd8b1c966307f5d58b918bcbdf548033a6ab22",
+    "include/aspect/particle/particle_domain.h": "2beef50d07ae7fe607db80246a02c8bafcc6344c1c3dd7e5892020e7409616e2",
+    "source/reconstructed_fault/manager.cc": "a07629f65d1132fd76fcf0a99f324f166b070e5949ddbf03350173210adcb9d4",
+    "source/simulator/phase_field.cc": "f7140a9aa02d82b8534f7820879af9a17814cde612e6eced83f131c6899253b6",
+    "tests/phase_field_periodic_domains.cc": "9d4c95767e72b0a3f2dd9bea84267519e0fc7687897948fac13f8def7e789d04"
+  }
+}

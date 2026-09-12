@@ -1081,7 +1081,10 @@ namespace aspect
                            const bool                                              compute_face_data,
                            const bool                                              compute_cpdi_data,
                            ParticleDomain::FaceData<2>                            &face_data,
-                           ParticleDomain::CPDIData<2>                            &cpdi_data)
+                           ParticleDomain::CPDIData<2>                            &cpdi_data,
+                           const unsigned int periodic_axis = numbers::invalid_unsigned_int,
+                           const double periodic_lower = 0,
+                           const double periodic_length = 0)
       {
         // Calculate the area of the Voronoi polygon
         const auto A_and_C = area_and_centroid_2d(voronoi_cell.vertices);
@@ -1117,10 +1120,17 @@ namespace aspect
             // Fix the sample ownership before integrating any cell basis. The
             // polygon, centroid triangles and particle volume remain unchanged.
             std::vector<std::pair<Triangulation<2>::active_cell_iterator, Point<2>>> samples;
+            const auto owner = [&](Point<2> point)
+            {
+              if (periodic_axis != numbers::invalid_unsigned_int)
+                point[periodic_axis] -= periodic_length * std::floor(
+                  (point[periodic_axis]-periodic_lower)/periodic_length);
+              return cpdi_sample_owner(point, cells, mapping, eps);
+            };
             for (const auto &vertex : voro_vertices)
-              samples.push_back(cpdi_sample_owner(vertex, cells, mapping, eps));
+              samples.push_back(owner(vertex));
             if (n_voro_vertices > 3)
-              samples.push_back(cpdi_sample_owner(center, cells, mapping, eps));
+              samples.push_back(owner(center));
 
             // Arrays storing the values of shape functions at the Voronoi vertices
             std::vector<std::array<double, dofs_per_cell>> N_v(n_voro_vertices);
@@ -1494,6 +1504,52 @@ namespace aspect
 
 
 
+    namespace
+    {
+      // Preserve orientation and all positive-area pieces of the unwrapped
+      // polygon. Translations change its chart, never its parent or measure.
+      std::vector<std::vector<Point<2>>>
+      physical_periodic_fragments(const std::vector<Point<2>> &polygon,
+                                  const unsigned int axis,
+                                  const double lower, const double length)
+      {
+        double first=polygon.front()[axis], last=first;
+        for (const auto &point : polygon)
+          { first=std::min(first,point[axis]); last=std::max(last,point[axis]); }
+        if (first>=lower && last<=lower+length) return {};
+        const auto clip = [axis](const std::vector<Point<2>> &input,
+                                 const double bound, const bool keep_above)
+        {
+          std::vector<Point<2>> output;
+          for (unsigned int i=0; i<input.size(); ++i)
+            {
+              const auto &a=input[i], &b=input[(i+1)%input.size()];
+              const bool inside_a=keep_above ? a[axis]>=bound : a[axis]<=bound;
+              const bool inside_b=keep_above ? b[axis]>=bound : b[axis]<=bound;
+              if (inside_a) output.push_back(a);
+              if (inside_a != inside_b)
+                {
+                  Point<2> point=a+(b-a)*((bound-a[axis])/(b[axis]-a[axis]));
+                  point[axis]=bound;
+                  if (point!=a && point!=b) output.push_back(point);
+                }
+            }
+          return output;
+        };
+        std::vector<std::vector<Point<2>>> fragments;
+        for (int shift=static_cast<int>(std::floor((first-lower)/length));
+             shift<=static_cast<int>(std::floor((last-lower)/length)); ++shift)
+          {
+            auto piece=clip(clip(polygon,lower+shift*length,true),lower+(shift+1)*length,false);
+            if (piece.size()<3) continue;
+            if (internal::area_and_centroid_2d(piece).first==0) continue;
+            for (auto &point : piece) point[axis]-=shift*length;
+            fragments.push_back(std::move(piece));
+          }
+        return fragments;
+      }
+    }
+
     /*-------------------- class ParticleDomainHandler --------------------*/
 
     template <int dim>
@@ -1538,12 +1594,46 @@ namespace aspect
       GridTools::Cache<dim> grid_cache(*triangulation, *mapping);
       const auto &vertex_to_cell_map = grid_cache.get_vertex_to_cell_map();
 
+      // deal.II supplies periodic vertex equivalence, including MPI ghosts.
+      // The global box extent supplies the period; local patch boxes do not.
+      std::map<unsigned int,std::vector<unsigned int>> periodic_groups;
+      std::map<unsigned int,unsigned int> vertex_group;
+      GridTools::collect_coinciding_vertices(*triangulation,periodic_groups,vertex_group);
+
       // Get the bounding box of the triangulation
-      const BoundingBox<dim> bounding_box = GridTools::compute_bounding_box(*triangulation);
+      const auto local_box = GridTools::compute_bounding_box(*triangulation);
+      Point<dim> global_lower, global_upper;
+#if DEAL_II_VERSION_GTE(9,8,0)
+      const auto communicator=triangulation->get_mpi_communicator();
+#else
+      const auto communicator=triangulation->get_communicator();
+#endif
+      for (unsigned int d=0; d<dim; ++d)
+        {
+          global_lower[d]=Utilities::MPI::min(local_box.get_boundary_points().first[d],communicator);
+          global_upper[d]=Utilities::MPI::max(local_box.get_boundary_points().second[d],communicator);
+        }
+      const BoundingBox<dim> bounding_box(std::make_pair(global_lower,global_upper));
       const double tria_volume = GridTools::volume(*triangulation, *mapping);
       AssertThrow(std::abs(tria_volume - bounding_box.volume()) < tria_volume * 1.e-8,
           ExcMessage("Particle domains can be generated only when the model geometry is "
                      "hyper-rectangle."));
+
+      unsigned int periodic_axis=numbers::invalid_unsigned_int;
+      for (const auto &pair : triangulation->get_periodic_face_map())
+        {
+          const unsigned int axis=pair.first.second/2;
+          AssertThrow(dim==2 && (periodic_axis==numbers::invalid_unsigned_int || periodic_axis==axis),
+                      ExcMessage("Particle domains currently support only one periodic axis in 2-D."));
+          periodic_axis=axis;
+        }
+      const bool periodic=periodic_axis!=numbers::invalid_unsigned_int;
+      if (!periodic) periodic_axis=0;
+      AssertThrow(!periodic || !generate_face_data,
+                  ExcMessage("Periodic particle domains do not yet support face-neighbor interpolation: "
+                             "that interface needs periodic image offsets."));
+      const double periodic_lower=periodic ? bounding_box.get_boundary_points().first[periodic_axis] : 0;
+      const double periodic_length=periodic ? bounding_box.side_length(periodic_axis) : 0;
 
       // The FE space of the background mesh
       FE_Q<dim> fe(1);
@@ -1554,6 +1644,8 @@ namespace aspect
       volumes.resize(max_local_particle_index);
       domain_vertices.clear();
       domain_vertices.resize(max_local_particle_index);
+      domain_periodic_fragments.clear();
+      domain_periodic_fragments.resize(max_local_particle_index);
       ++domain_geometry_version;
       face_data.reinit(max_local_particle_index);
       cpdi_data.reinit(max_local_particle_index);
@@ -1570,11 +1662,22 @@ namespace aspect
           {
             // Find the cells neighboring the current cell
             std::set<typename Triangulation<dim>::active_cell_iterator> neighbor_cells;
+            std::set<std::pair<typename Triangulation<dim>::active_cell_iterator,int>> image_cells;
             for (const unsigned int v : cell->vertex_indices())
               {
                 const unsigned int vertex_index = cell->vertex_index(v);
                 neighbor_cells.insert(vertex_to_cell_map[vertex_index].begin(),
                                       vertex_to_cell_map[vertex_index].end());
+                const auto group=vertex_group.find(vertex_index);
+                if (group!=vertex_group.end())
+                  for (const unsigned int partner : periodic_groups.at(group->second))
+                    if (partner!=vertex_index)
+                      {
+                        const int shift=std::lround((triangulation->get_vertices()[vertex_index][periodic_axis]
+                                                   -triangulation->get_vertices()[partner][periodic_axis])/periodic_length);
+                        for (const auto &neighbor : vertex_to_cell_map[partner])
+                          if (!neighbor->is_artificial()) image_cells.emplace(neighbor,shift);
+                      }
               }
 
             // Create the voro container, which is the bounding box of the current cell and
@@ -1594,6 +1697,18 @@ namespace aspect
                       }
                   }
                 n_particles += particle_handler->n_particles_in_cell(neighbor);
+              }
+
+            for (const auto &image : image_cells)
+              {
+                for (const auto v : image.first->vertex_indices())
+                  {
+                    Point<dim> vertex=image.first->vertex(v);
+                    vertex[periodic_axis]+=image.second*periodic_length;
+                    for (unsigned int d=0; d<dim; ++d)
+                      { corner1[d]=std::min(corner1[d],vertex[d]); corner2[d]=std::max(corner2[d],vertex[d]); }
+                  }
+                n_particles+=particle_handler->n_particles_in_cell(image.first);
               }
 
             const std::array<int, 3> n_blocks 
@@ -1623,6 +1738,18 @@ namespace aspect
                   const Point<dim> &location = particle.get_location();
                   container.put(particle.get_local_index(), location[0], location[1], (dim > 2 ? location[2] : 0.0));
                 }
+
+            // Image IDs cannot collide with local/ghost real-parent IDs. They
+            // are used only by Voro geometry, never by a particle/history store.
+            unsigned int image_id=max_local_particle_index;
+            for (const auto &image : image_cells)
+              for (const auto &particle : particle_handler->particles_in_cell(image.first))
+                {
+                  Point<dim> location=particle.get_location();
+                  location[periodic_axis]+=image.second*periodic_length;
+                  container.put(image_id++,location[0],location[1],0.0);
+                }
+            for (const auto &image : image_cells) neighbor_cells.insert(image.first);
 
             // Collect the local indices of the particles in the current cell
             std::set<types::particle_index> particle_indices;
@@ -1655,8 +1782,13 @@ namespace aspect
                                     voro_neighbors,
                                     bounding_box);
 
-                volumes[voronoi_cell.particle_index]
-                  = internal::compute_voronoi_cell(voronoi_cell,
+                if constexpr (dim==2)
+                  volumes[particle_index]=internal::compute_voronoi_cell(
+                    voronoi_cell,neighbor_cells,fe,*mapping,*particle_handler,
+                    generate_face_data,generate_cpdi_data,face_data,cpdi_data,
+                    periodic ? periodic_axis : numbers::invalid_unsigned_int,periodic_lower,periodic_length);
+                else
+                  volumes[voronoi_cell.particle_index] = internal::compute_voronoi_cell(voronoi_cell,
                                                    neighbor_cells,
                                                    fe, 
                                                    *mapping,
@@ -1668,6 +1800,10 @@ namespace aspect
 
                 domain_vertices[voronoi_cell.particle_index].assign(
                   voronoi_cell.vertices.begin(), voronoi_cell.vertices.end());
+                if constexpr (dim==2)
+                  if (periodic)
+                    domain_periodic_fragments[particle_index]=physical_periodic_fragments(
+                      domain_vertices[particle_index],periodic_axis,periodic_lower,periodic_length);
 
 #if DEBUG
                 local_volume += volumes[voronoi_cell.particle_index];

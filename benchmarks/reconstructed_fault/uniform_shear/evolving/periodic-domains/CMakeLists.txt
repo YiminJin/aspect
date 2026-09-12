@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.13.4)
+find_package(Aspect REQUIRED HINTS ${Aspect_DIR})
+DEAL_II_INITIALIZE_CACHED_VARIABLES()
+project(k3_periodic_domains)
+add_library(periodic_domains SHARED ../../../../../tests/phase_field_periodic_domains.cc)
+ASPECT_SETUP_PLUGIN(periodic_domains)

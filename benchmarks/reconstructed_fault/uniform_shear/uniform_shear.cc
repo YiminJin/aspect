@@ -9,6 +9,8 @@
 #include <aspect/reconstructed_fault/manager.h>
 #include <aspect/reconstructed_fault/surface_system.h>
 #include <aspect/plugins.h>
+#include <aspect/boundary_velocity/interface.h>
+#include <aspect/geometry_model/interface.h>
 #include <deal.II/fe/fe_values.h>
 #include <deal.II/base/mpi_remote_point_evaluation.h>
 #include <deal.II/numerics/vector_tools_evaluate.h>
@@ -16,6 +18,8 @@
 #include <fstream>
 #include <iomanip>
 #include <sstream>
+#include <cstdlib>
+#include "evolving/safeguards.h"
 
 namespace aspect
 {
@@ -25,12 +29,58 @@ namespace aspect
     std::map<types::global_dof_index, double> frozen_phi;
     std::map<types::particle_index, double> frozen_H;
     bool coupled_solve_converged = false;
+    bool evolving_profile = false;
+    std::vector<std::vector<double>> previous_cohesive_traction, previous_Ih;
+
+    // Read-only phase-entry evidence, before composition advection or mechanics.
+    // Stable IDs connect these old inputs to the previous accepted publication.
+    template <int dim>
+    void capture_evolving_inputs(const SimulatorAccess<dim> &simulator)
+    {
+      if (!evolving_profile)
+        return;
+      K3::phase_entry(simulator);
+      const auto &pm = simulator.get_phase_field_handler().get_associated_particle_manager();
+      const auto H_position = pm.get_property_manager().get_data_info()
+                              .get_position_by_field_name("crack_driving_force");
+      const auto step = simulator.get_timestep_number();
+      const auto rank = Utilities::MPI::this_mpi_process(simulator.get_mpi_communicator());
+      std::ofstream out(simulator.get_output_directory()+"phase_input_"
+                        +std::to_string(step)+"_rank"+std::to_string(rank)+".csv");
+      out.exceptions(std::ios::failbit | std::ios::badbit);
+      out << std::setprecision(17) << "step,time,id,x,y,H\n";
+      for (const auto &particle : pm.get_particle_handler())
+        out << step << ',' << simulator.get_time() << ',' << particle.get_id()
+            << ',' << particle.get_location()[0] << ',' << particle.get_location()[1]
+            << ',' << particle.get_properties()[H_position] << '\n';
+
+      previous_cohesive_traction.clear();
+      previous_Ih.clear();
+      if (step > 0)
+        {
+          const auto &manager = simulator.get_reconstructed_fault_manager();
+          const auto C = manager.get_property_information()[manager.get_property_index(
+                           "phase field fault cohesive traction")].position;
+          const auto I = manager.get_property_information()[manager.get_property_index(
+                           "phase field fault previous I h")].position;
+          for (const auto &fault : manager.get_faults())
+            {
+              previous_cohesive_traction.emplace_back();
+              previous_Ih.emplace_back();
+              for (unsigned int v=0; v<fault.n_vertices(); ++v)
+                {
+                  previous_cohesive_traction.back().push_back(fault.get_properties(v)[C]);
+                  previous_Ih.back().push_back(fault.get_properties(v)[I]);
+                }
+            }
+        }
+    }
 
     template <int dim>
     void freeze_phase(const SimulatorAccess<dim> &simulator,
                       AffineConstraints<double> &constraints)
     {
-      if (simulator.get_timestep_number() == 0)
+      if (evolving_profile || simulator.get_timestep_number() == 0)
         return;
       AssertThrow(!frozen_phi.empty(), ExcMessage("Missing initial K1 phase snapshot."));
       // Prescribe independent phi DoFs only. Existing periodic/hanging-node
@@ -49,6 +99,11 @@ namespace aspect
   void connect_uniform_shear(SimulatorSignals<dim> &signals)
   {
     signals.post_constraints_creation.connect(&freeze_phase<dim>);
+    signals.start_timestep.connect(&capture_evolving_inputs<dim>);
+    signals.post_advection_solver.connect([](const SimulatorAccess<dim> &sim,
+                                             const bool temperature, const unsigned int,
+                                             const SolverControl &)
+    { if (evolving_profile && temperature) K3::phase_exit(sim); });
     signals.start_timestep.connect([](const SimulatorAccess<dim> &)
     {
       coupled_solve_converged = false;
@@ -68,6 +123,27 @@ namespace aspect
     class UniformShear : public Interface<dim>, public SimulatorAccess<dim>
     {
       public:
+        static void declare_parameters(ParameterHandler &prm)
+        {
+          prm.enter_subsection("Postprocess");
+          prm.enter_subsection("Uniform shear pilot");
+          prm.declare_entry("Evolving profile", "false", Patterns::Bool(),
+                            "Opt in to the K3 evolving-profile diagnostic mode. "
+                            "Do not constrain phi or require H to remain frozen. "
+                            "The material's Evolve phase field parameter still controls H updates.");
+          prm.leave_subsection();
+          prm.leave_subsection();
+        }
+
+        void parse_parameters(ParameterHandler &prm) override
+        {
+          prm.enter_subsection("Postprocess");
+          prm.enter_subsection("Uniform shear pilot");
+          evolving_profile = prm.get_bool("Evolving profile");
+          prm.leave_subsection();
+          prm.leave_subsection();
+        }
+
         // The fixed-profile fixture must restore its original snapshots, not
         // silently redefine them from the resumed solution or evolved histories.
         void save(std::map<std::string,std::string> &strings) const override
@@ -94,6 +170,7 @@ namespace aspect
                                  "convergence criteria; a continued failed solve "
                                  "is not an accepted trajectory sample."));
           AssertThrow(dim == 2, ExcMessage("This diagnostic pilot is two-dimensional only."));
+          if (evolving_profile) K3::accepted(*this);
           const auto communicator = this->get_mpi_communicator();
           const bool distributed = Utilities::MPI::n_mpi_processes(communicator)>1;
           const std::string rank_suffix = distributed
@@ -118,9 +195,19 @@ namespace aspect
           // Export the actual accepted time/load sequence. At zero, dt=2 is
           // the numerical Maxwell interval, not physical history advancement.
           auto times = csv("time", "step,time,dt,U");
+          double loading = 1e-4*(1+0.2*std::min(this->get_time()/4,1.0));
+          if (evolving_profile)
+            {
+              const auto &geometry = this->get_geometry_model();
+              const auto &boundary = this->get_boundary_velocity_manager();
+              Point<dim> top, bottom;
+              top[0]=bottom[0]=.125; top[1]=.5; bottom[1]=-.5;
+              loading = boundary.boundary_velocity(geometry.translate_symbolic_boundary_name_to_id("top"),top)[0]
+                        -boundary.boundary_velocity(geometry.translate_symbolic_boundary_name_to_id("bottom"),bottom)[0];
+            }
           times << step << ',' << this->get_time() << ','
                 << (step == 0 ? 2.0 : this->get_timestep()) << ','
-                << 1e-4*(1+0.2*std::min(this->get_time()/4,1.0)) << '\n';
+                << loading << '\n';
 
           // Export all Q1 support values, independently addressable as a
           // rectangular FE grid by the reference. Repeated cell nodes agree.
@@ -138,7 +225,7 @@ namespace aspect
                       const double value = solution[indices[i]];
                       if (step == 0)
                         frozen_phi[indices[i]] = value;
-                      else
+                      else if (!evolving_profile)
                         AssertThrow(value == frozen_phi.at(indices[i]),
                                     ExcMessage("K1 constraints did not freeze the initial Q1 phase field."));
                       nodes << indices[i] << ',' << point[0] << ',' << point[1] << ',' << value << '\n';
@@ -215,7 +302,7 @@ namespace aspect
               const auto values = particle.get_properties();
               if (step == 0)
                 frozen_H[particle.get_id()] = values[H_position];
-              else
+              else if (!evolving_profile)
                 AssertThrow(values[H_position] == frozen_H.at(particle.get_id()),
                             ExcMessage("K1 changed frozen particle H."));
               const auto association = manager.project_to_normal_profiles(particle.get_location());
@@ -358,9 +445,31 @@ namespace aspect
                         input.fault_index=association.fault_index; input.segment_index=association.segment_index;
                         input.xi=association.xi; input.phase_field=phi[q]; input.previous_phase_field=old_phi[q];
                         input.temperature=293; input.bulk_material_fractions={1.0};
-                        const auto response = model.evaluate_reconstructed_fault_bulk_point(input);
                         V=manager.interpolate_slip_rate(input.fault_index,input.segment_index,input.xi);
-                        chi=response.localization_factor; kappa=response.kappa; history=response.history_correction;
+                        if (evolving_profile && step > 0)
+                          {
+                            // Postprocessing follows commit. Reconstruct the diagnostic
+                            // from SAVED old C/Ih, never from already advanced history.
+                            const auto &fault = manager.get_fault(input.fault_index);
+                            const unsigned int s = input.segment_index;
+                            const double xi = input.xi;
+                            const double I = (1-xi)*fault.get_properties(s)[Ih_position]
+                                             +xi*fault.get_properties(s+1)[Ih_position];
+                            const double Ip = (1-xi)*previous_Ih[input.fault_index][s]
+                                              +xi*previous_Ih[input.fault_index][s+1];
+                            const double Cp = (1-xi)*previous_cohesive_traction[input.fault_index][s]
+                                              +xi*previous_cohesive_traction[input.fault_index][s+1];
+                            const auto &phase = this->get_phase_field_handler();
+                            const double h = 1/phase.energetic_degradation({1.0},std::max(phi[q],0.0))-1;
+                            const double hp = 1/phase.energetic_degradation({1.0},std::max(old_phi[q],0.0))-1;
+                            chi=h/I;
+                            history=std::exp(-this->get_timestep()/100.)*Cp/kappa*(h*Ip/I-hp);
+                          }
+                        else
+                          {
+                            const auto response = model.evaluate_reconstructed_fault_bulk_point(input);
+                            chi=response.localization_factor; kappa=response.kappa; history=response.history_correction;
+                          }
                       }
                     bulk << values.quadrature_point(q)[0] << ',' << values.quadrature_point(q)[1] << ',' << values.JxW(q)
                          << ',' << velocity[q][0] << ',' << velocity[q][1] << ',' << gradients[q][0][0] << ',' << gradients[q][0][1]
@@ -377,6 +486,18 @@ namespace aspect
                 frozen_phi.insert(snapshot.begin(), snapshot.end());
               for (const auto &snapshot : Utilities::MPI::all_gather(communicator, frozen_H))
                 frozen_H.insert(snapshot.begin(), snapshot.end());
+            }
+          if (evolving_profile)
+            {
+              // Flush accepted exports before the read-only bounded gate. A
+              // failed gate stops this smoke before another timestep starts.
+              nodes.close(); surface.close(); segments.close(); particles.close();
+              bulk.close(); times.close(); weak_output.close(); transfer.close(); qp_cells.close();
+              const std::string command = std::string("OPENBLAS_NUM_THREADS=1 timeout 30 python3 \"")
+                +ASPECT_SOURCE_DIR+"/benchmarks/reconstructed_fault/uniform_shear/evolving/check_smoke.py\" \""
+                +this->get_output_directory()+"\" --step "+std::to_string(step);
+              AssertThrow(std::system(command.c_str())==0,
+                          ExcMessage("K3 evolving smoke gate failed; inspect guard JSON. Do not retry."));
             }
           return {"K1 accepted-state export:", std::to_string(step)};
         }

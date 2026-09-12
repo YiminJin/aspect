@@ -1175,9 +1175,21 @@ namespace aspect
               {
                 TimerOutput::Scope partition_timer(*performance_timer, "Fault: Domain partition");
                 if constexpr (dim == 2)
-                  entry.quadrature = ReconstructedFaultUtilities::domain_quadrature(
-                    particle_domain_handler.get_particle_domain(particle.get_local_index()).vertices(),
-                    reconstructed_faults[entry.fault_index], 3, &quadrature_statistics);
+                  {
+                    const auto domain = particle_domain_handler.get_particle_domain(particle.get_local_index());
+                    // Periodicity belongs to the bulk domain, not fault topology.
+                    // Integrate every physical piece once against the open fault.
+                    const auto append = [&](const std::vector<Point<dim>> &polygon)
+                    {
+                      const auto quadrature = ReconstructedFaultUtilities::domain_quadrature(
+                        polygon, reconstructed_faults[entry.fault_index], 3, &quadrature_statistics);
+                      entry.quadrature.insert(entry.quadrature.end(), quadrature.begin(), quadrature.end());
+                    };
+                    if (domain.periodic_fragments().empty())
+                      append(domain.vertices());
+                    else
+                      for (const auto &fragment : domain.periodic_fragments()) append(fragment);
+                  }
                 else
                   AssertThrow(false, ExcNotImplemented());
                 partition_timer.stop();

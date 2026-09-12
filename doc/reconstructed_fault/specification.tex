@@ -769,6 +769,14 @@ Within the admitted parent-domain measure, the geometric kernel is one, so
 \[
 \sum_q w_{pq}=m_p.
 \]
+For a fixed axis-aligned two-dimensional Box with one periodic coordinate,
+the approved periodic-domain correction uses the global period and translated
+image neighbors, with one owner per real parent. Integrate all physical-Box
+fragments of its full periodic domain exactly once. Surface fragments use the
+existing open-polyline map, not cyclic endpoint identification. CPDI samples
+map periodically into actual FE cells using the existing unique-owner rule.
+See \texttt{benchmarking/stage\_K3\_periodic\_domain\_addendum.md} for the
+bounded geometry and consumer contract.
 No second user-facing influence-distance or kernel parameter is introduced.
 Dynamic phase-field or constitutive values shall not enter this cached weight
 unless the cache invalidation rules and authoritative design are first revised.
@@ -1552,6 +1560,30 @@ zero of particle property \texttt{phase field fault state}. Restarted or
 later-time models require complete committed state. Stage I commits only $V$.
 
 \subsection{Stage-J history feedback}
+
+\paragraph{Phase nonlinear roundoff allowance.}
+The phase nonlinear residual target is the maximum of the configured relative
+tolerance times its initial residual and $8\epsilon_{\rm double}\|S\|_2$,
+fixed at entry to each phase solve. With
+$P_p=\sum_j|w_j\phi_j|$, $D_{p,d}=\sum_j|\partial_dw_j\,\phi_j|$,
+$a_p=\sum_mf_m(|Hg'_m|+|E_m\alpha'|)$ and
+$b_p=\sum_mf_m(|Hg''_m|+|E_m\alpha''|)$, assemble
+\[
+ S_i=\sum_pm_p\left[|w_i|(a_p+b_pP_p)
+             +|F_p|\sum_d|\partial_dw_i|D_{p,d}\right],
+ \qquad E_m=\frac{G_{c,m}}{c_0\ell}.
+\]
+$F_p$ is the phase gradient coefficient. Use the same nonnegative Q1
+constraint weights and owned-parent MPI ADD assembly as for the residual.
+This conservative first-order roundoff estimate includes nodal representation
+and interpolation sensitivity; its arithmetic safety factor is not fitted to
+a stalled residual. It is not a rigorous bound for arbitrary ill-conditioned
+problems. It introduces no physical parameter, leaves the relative target and
+iteration budget intact, and cannot accept stagnation without a sufficiently
+small residual. Nonfinite targets are failures. The equations, line search,
+history update and benchmark physical criteria are unchanged. The diagnostic
+evidence is recorded in
+\texttt{benchmarking/stage\_K3\_phase\_precision\_audit.md}.
 
 The authoritative fixed-fault ordering is
 \begin{equation}

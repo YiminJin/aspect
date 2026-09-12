@@ -1,0 +1,408 @@
+{
+  "passed": true,
+  "resources": {
+    "command": [
+      "/home/ein/repository/aspect/build-pf-cpdi/aspect-release",
+      "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/evolving/spatial0375_n256_f32_periodic_floor.prm"
+    ],
+    "status": 0,
+    "wall_seconds": 237.81654539299961,
+    "peak_rss_KiB": 1161548,
+    "wall_cap_s": 600.0,
+    "purpose": "Resume the identical 32x256/fault32 K3 trajectory after independently verified phase roundoff stopping; verify every accepted state and the former t=.75 failure.",
+    "sha256": {
+      "build-pf-cpdi/aspect-release": "61261bbaa827dd4e368f3879aff8cc078e96fc67684e604e898c15605d84c7f5",
+      "benchmarks/reconstructed_fault/uniform_shear/evolving/phase-floor/coupled-build/libuniform_shear.release.so": "aa3bef5159775ec7111f5e6f3696ff2218d4a081e99c2df2a4c2d84cd627940c",
+      "source/particle/particle_domain.cc": "ed9e9d7493de744e75300eee85bd8b1c966307f5d58b918bcbdf548033a6ab22",
+      "source/reconstructed_fault/manager.cc": "a07629f65d1132fd76fcf0a99f324f166b070e5949ddbf03350173210adcb9d4",
+      "source/simulator/phase_field.cc": "1ff689982e5696867dafad64e73d2115c847225cfa5392518372345fb566ff7e"
+    }
+  },
+  "phases": [
+    {
+      "step": 1,
+      "initial": 3.0864688082972865e-06,
+      "absolute": 1.644909055341758e-14,
+      "relative": 5.329420634090922e-09,
+      "allowance": 1.3501992779456261e-12,
+      "target": 1.3501992779456261e-12
+    },
+    {
+      "step": 2,
+      "initial": 5.69211285929763e-07,
+      "absolute": 6.466375500075585e-14,
+      "relative": 1.1360237683118415e-07,
+      "allowance": 1.3117205093105655e-12,
+      "target": 1.3117205093105655e-12
+    },
+    {
+      "step": 3,
+      "initial": 3.0661215868219954e-06,
+      "absolute": 1.092904430629092e-12,
+      "relative": 3.5644523535085134e-07,
+      "allowance": 1.300184149633507e-12,
+      "target": 1.300184149633507e-12
+    },
+    {
+      "step": 4,
+      "initial": 1.545989180992626e-06,
+      "absolute": 3.0835166868694393e-13,
+      "relative": 1.9945266918941957e-07,
+      "allowance": 1.2940153291203917e-12,
+      "target": 1.2940153291203917e-12
+    },
+    {
+      "step": 5,
+      "initial": 2.861583706040282e-06,
+      "absolute": 1.4976262856914087e-14,
+      "relative": 5.233557496606485e-09,
+      "allowance": 1.2851501866666704e-12,
+      "target": 1.2851501866666704e-12
+    },
+    {
+      "step": 6,
+      "initial": 2.119363339823223e-05,
+      "absolute": 1.4274232539533894e-14,
+      "relative": 6.735151199097609e-10,
+      "allowance": 1.2745188940149735e-12,
+      "target": 1.2745188940149735e-12
+    },
+    {
+      "step": 7,
+      "initial": 1.88707876681939e-05,
+      "absolute": 1.4018268306185196e-14,
+      "relative": 7.428554945701885e-10,
+      "allowance": 1.2642032741344806e-12,
+      "target": 1.2642032741344806e-12
+    },
+    {
+      "step": 8,
+      "initial": 8.483014303075868e-06,
+      "absolute": 1.436807584796143e-14,
+      "relative": 1.6937465073884986e-09,
+      "allowance": 1.2616290428525438e-12,
+      "target": 1.2616290428525438e-12
+    }
+  ],
+  "states_passing": 9,
+  "fresh_linear_checks": 37,
+  "max_fresh_over_target": 0.9909237973545841,
+  "max_containment": 5.9194172244512926e-05,
+  "max_normalization": 6.113453970999844e-05,
+  "max_surface_balance": 5.784567056746081e-06,
+  "max_theta_update_error": 7.105427357601002e-15,
+  "old_prefix_changes": {
+    "particles_0": {
+      "H": 0.0,
+      "tau_xx": 0.0,
+      "tau_xy": 0.0,
+      "tau_yy": 0.0
+    },
+    "phase_0": {
+      "phi": 1.1102230246251565e-16
+    },
+    "surface_0": {
+      "x": 0.0,
+      "y": 5.032023246802821e-18,
+      "V": 2.927345865710862e-18,
+      "Theta": 4.263256414560601e-13,
+      "C": 7.389644451905042e-13,
+      "Ih": 4.263256414560601e-14
+    },
+    "particles_1": {
+      "H": 0.0,
+      "tau_xx": 1.2159704464429196e-10,
+      "tau_xy": 4.013145371573046e-10,
+      "tau_yy": 1.0724256042113488e-10
+    },
+    "phase_1": {
+      "phi": 1.1102230246251565e-16
+    },
+    "surface_1": {
+      "x": 0.0,
+      "y": 5.032023246802821e-18,
+      "V": 4.2934406030425976e-17,
+      "Theta": 1.8758328224066645e-12,
+      "C": 1.1937117960769683e-12,
+      "Ih": 5.684341886080802e-14
+    }
+  },
+  "spatial": [
+    {
+      "normal": 128,
+      "final": {
+        "step": 8,
+        "time_s": 3.0,
+        "dt_s": 0.375,
+        "surface_means": {
+          "V": 0.002243450928991121,
+          "C": 356.6070802556029,
+          "Theta": 1.5838632403218489,
+          "Ih": 108.10371465482439
+        },
+        "reference": {
+          "V": 0.0022431859185914477,
+          "C": 355.6267695312397,
+          "Theta": 1.5834781987839592,
+          "Ih": 108.13822721528
+        },
+        "phi_mean_max": 0.599921924930102,
+        "reference_phi_max": 0.5997046555955509,
+        "phi_max_absolute_error": 0.00021726933455112896,
+        "particle_H_max_absolute_error": 0.023095313317753607,
+        "H_profile_max_absolute_error": 0.023095309425116284,
+        "H_increment_profile_max_error": 0.0003880361230770256,
+        "phi_increment_profile_max_error": 1.7692517131351337e-06,
+        "raw_stress_error_rms_Pa": 1.3270156724941067,
+        "raw_stress_error_max_Pa": 4.106648311307254,
+        "evaluated_stress_mean_Pa": 1270.9862960594144,
+        "surface_balance_rms_Pa": 9.417861466889892e-13,
+        "free_nodes": 33,
+        "active_nodes": 0,
+        "guard": {
+          "step": 8,
+          "checks": {
+            "unchanged_geometry": true,
+            "admissible_phi": true,
+            "common_timestep_sequence": true,
+            "approved_parameter_changes_only": true,
+            "realized_normal_mesh": true,
+            "approved_fault_resolution": true,
+            "unchanged_support_width": true,
+            "containment": true,
+            "supported_normalization": true,
+            "stable_particle_ids": true,
+            "homogeneity_including_seam": true,
+            "phase_probe_restore": true,
+            "phase_converged": true
+          },
+          "refinement_parameter_differences": {
+            "Fault reconstruction/Structural point spacing": [
+              "0.015625",
+              "0.0078125"
+            ],
+            "Maximum time step": [
+              "2",
+              "0.375"
+            ],
+            "Output directory": [
+              "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/evolving/smoke",
+              "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/evolving/spatial0375_n128_f32_periodic"
+            ],
+            "Termination criteria/End step": [
+              "2",
+              "8"
+            ],
+            "Maximum first time step": [
+              "5.69e+300",
+              "0.375"
+            ],
+            "End time": [
+              "4",
+              "3"
+            ],
+            "Additional shared libraries": [
+              "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/evolving/build/libuniform_shear.so",
+              "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/evolving/periodic-domains/coupled-build/libuniform_shear.so"
+            ]
+          },
+          "passed": true,
+          "max_omitted_fraction": 5.8366240744551156e-05,
+          "max_supported_normalization_error": 5.2710342926843506e-05,
+          "signed_integral_ranges": {
+            "instantaneous": [
+              0.0022433333217427983,
+              0.002243333321803589
+            ],
+            "history": [
+              -6.458365412495346e-10,
+              -6.45834544917929e-10
+            ],
+            "total": [
+              0.0022433326759066894,
+              0.002243332675968307
+            ]
+          },
+          "phi_range": [
+            3.4418138102156625e-09,
+            0.5999219249301093
+          ],
+          "along_fault_ranges": {
+            "H": 5.926657165034044e-09,
+            "phi": 1.4876894161020005e-10,
+            "Ih": 9.538183576296433e-10,
+            "C": 3.883485533151543e-09,
+            "V": 6.637442331869359e-14
+          },
+          "reference_signal_scales": {
+            "H": 0.3520119911023968,
+            "phi": 2.052558885504152e-05,
+            "Ih": 0.0033046950978672385,
+            "C": 37.88411922359444,
+            "V": 0.0019279151014398694
+          },
+          "periodic_crossings": 12,
+          "elapsed_seconds": 0.7474801479984308
+        },
+        "theta_update_max_error_s": 2.220446049250313e-16,
+        "H_increment_max_Pa": 0.016664334088118182,
+        "H_increment_min_Pa": 0.0,
+        "mean_phi_increment_max": 3.2635841203249027e-06,
+        "reference_H_increment_max_Pa": 0.017427331551236325,
+        "reference_phi_increment_max": 3.453931386079856e-06,
+        "accumulated_slip_m": 0.005178829508251158,
+        "reference_slip_m": 0.005179219255524777
+      },
+      "total_feedback": {
+        "phi": 2.3151555672035196e-05,
+        "H": 0.33552121912421684,
+        "Ih": 0.005619573766750818
+      },
+      "cumulative_feedback_error": {
+        "phi": 9.80133959116447e-06,
+        "H": 0.0020751370570709637,
+        "Ih": 0.00231487866888358
+      }
+    },
+    {
+      "normal": 256,
+      "final": {
+        "step": 8,
+        "time_s": 3.0,
+        "dt_s": 0.375,
+        "surface_means": {
+          "V": 0.0022433614904679,
+          "C": 355.4025595604871,
+          "Theta": 1.5827337962188102,
+          "Ih": 108.1491910803575
+        },
+        "reference": {
+          "V": 0.0022431859185914477,
+          "C": 355.6267695312397,
+          "Theta": 1.5834781987839592,
+          "Ih": 108.13822721528
+        },
+        "phi_mean_max": 0.5997710467863182,
+        "reference_phi_max": 0.5997046555955509,
+        "phi_max_absolute_error": 7.69935899345292e-05,
+        "particle_H_max_absolute_error": 0.025885893006488914,
+        "H_profile_max_absolute_error": 0.02588589283186593,
+        "H_increment_profile_max_error": 0.00013874150572378702,
+        "phi_increment_profile_max_error": 8.749470131741433e-07,
+        "raw_stress_error_rms_Pa": 0.3309437333871382,
+        "raw_stress_error_max_Pa": 0.8695202975418397,
+        "evaluated_stress_mean_Pa": 1269.8125959880745,
+        "surface_balance_rms_Pa": 1.0359419214345642e-12,
+        "free_nodes": 33,
+        "active_nodes": 0,
+        "guard": {
+          "step": 8,
+          "checks": {
+            "unchanged_geometry": true,
+            "admissible_phi": true,
+            "common_timestep_sequence": true,
+            "approved_parameter_changes_only": true,
+            "realized_normal_mesh": true,
+            "approved_fault_resolution": true,
+            "unchanged_support_width": true,
+            "containment": true,
+            "supported_normalization": true,
+            "stable_particle_ids": true,
+            "homogeneity_including_seam": true,
+            "phase_probe_restore": true,
+            "phase_converged": true
+          },
+          "refinement_parameter_differences": {
+            "Additional shared libraries": [
+              "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/evolving/build/libuniform_shear.so",
+              "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/evolving/phase-floor/coupled-build/libuniform_shear.so"
+            ],
+            "Fault reconstruction/Structural point spacing": [
+              "0.015625",
+              "0.0078125"
+            ],
+            "Maximum first time step": [
+              "5.69e+300",
+              "0.375"
+            ],
+            "Output directory": [
+              "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/evolving/smoke",
+              "/home/ein/repository/aspect/benchmarks/reconstructed_fault/uniform_shear/evolving/spatial0375_n256_f32_periodic_floor"
+            ],
+            "Geometry model/Box/Y repetitions": [
+              "4",
+              "8"
+            ],
+            "Maximum time step": [
+              "2",
+              "0.375"
+            ],
+            "Termination criteria/End step": [
+              "2",
+              "8"
+            ],
+            "End time": [
+              "4",
+              "3"
+            ]
+          },
+          "passed": true,
+          "max_omitted_fraction": 5.9194172244512926e-05,
+          "max_supported_normalization_error": 6.043127100617635e-05,
+          "signed_integral_ranges": {
+            "instantaneous": [
+              0.002243226620408713,
+              0.002243226620573951
+            ],
+            "history": [
+              -6.99208699846696e-10,
+              -6.992080503515456e-10
+            ],
+            "total": [
+              0.002243225921200648,
+              0.0022432259213653175
+            ]
+          },
+          "phi_range": [
+            4.097735284717808e-09,
+            0.5997710467863381
+          ],
+          "along_fault_ranges": {
+            "H": 1.4515221691269176e-08,
+            "phi": 4.0278567287055367e-10,
+            "Ih": 5.23755261383485e-10,
+            "C": 2.26032170758117e-09,
+            "V": 1.683193515122916e-13
+          },
+          "reference_signal_scales": {
+            "H": 0.3520119911023968,
+            "phi": 2.052558885504152e-05,
+            "Ih": 0.0033046950978672385,
+            "C": 37.88411922359444,
+            "V": 0.0019279151014398694
+          },
+          "periodic_crossings": 22,
+          "elapsed_seconds": 1.5245869030004542
+        },
+        "theta_update_max_error_s": 2.220446049250313e-16,
+        "H_increment_max_Pa": 0.01662959513785367,
+        "H_increment_min_Pa": 0.0,
+        "mean_phi_increment_max": 3.1150285996761617e-06,
+        "reference_H_increment_max_Pa": 0.017427331551236325,
+        "reference_phi_increment_max": 3.453931386079856e-06,
+        "accumulated_slip_m": 0.005179846540263201,
+        "reference_slip_m": 0.005179219255524777
+      },
+      "total_feedback": {
+        "phi": 1.9189033545141676e-05,
+        "H": 0.3103016554484115,
+        "Ih": 0.004357240640359805
+      },
+      "cumulative_feedback_error": {
+        "phi": 5.229569482012586e-06,
+        "H": 0.0016457225450914326,
+        "Ih": 0.0010525455424925667
+      }
+    }
+  ]
+}

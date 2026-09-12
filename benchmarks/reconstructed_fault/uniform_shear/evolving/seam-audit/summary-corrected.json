@@ -1,0 +1,307 @@
+{
+  "definition": "rhs is minus the production weak phase residual; density = rhs / constrained CPDI lumped test mass",
+  "fixed_interior": [
+    0.046875,
+    0.203125
+  ],
+  "hx": 0.0078125,
+  "states": {
+    "0": {
+      "rhs": {
+        "weak_l2": 4.3931864786405805e-06,
+        "weak_nonuniform_l2": 4.622468338218212e-15,
+        "density_nonuniform_rms": 1.1787563011909844e-12,
+        "fixed_interior_density_nonuniform_rms": 1.1054202913626212e-12,
+        "seam_node_density_nonuniform_rms": 1.4269890236015946e-12,
+        "max_density_nonuniform": 7.445259686544858e-12,
+        "seam_energy_fraction": {
+          "0": 0.0457976540420915,
+          "1": 0.13800885974532273,
+          "2": 0.22799698710902538,
+          "3": 0.309154180931797
+        }
+      },
+      "reaction": {
+        "weak_l2": 0.24869042633719213,
+        "weak_nonuniform_l2": 1.703771874672065e-16,
+        "density_nonuniform_rms": 1.922459420187109e-14,
+        "fixed_interior_density_nonuniform_rms": 1.9620714994680342e-14,
+        "seam_node_density_nonuniform_rms": 2.059584954191117e-14,
+        "max_density_nonuniform": 1.7053025658242404e-13,
+        "seam_energy_fraction": {
+          "0": 0.035867002249362165,
+          "1": 0.10056208130086754,
+          "2": 0.15650458115440585,
+          "3": 0.20754041815753813
+        }
+      },
+      "gradient": {
+        "weak_l2": 0.24868926398957375,
+        "weak_nonuniform_l2": 4.6187145996766384e-15,
+        "density_nonuniform_rms": 1.1797212549868995e-12,
+        "fixed_interior_density_nonuniform_rms": 1.106696290802315e-12,
+        "seam_node_density_nonuniform_rms": 1.4362958399581167e-12,
+        "max_density_nonuniform": 7.744915819785092e-12,
+        "seam_energy_fraction": {
+          "0": 0.04632111647048241,
+          "1": 0.1380390791090774,
+          "2": 0.22719380751291993,
+          "3": 0.3081751127725247
+        }
+      },
+      "phi_max_tangential_difference": 0.0,
+      "consistency": {
+        "partition_unity_max": 4.440892098500626e-16,
+        "gradient_constant_max": 1.1374233532693354e-13,
+        "first_moment_max_m": 3.407450903519513e-13,
+        "physical_linear_gradient_error_max": 2.828427124746213,
+        "positive_identity_count": 17680,
+        "negative_identity_norm_count": 19184,
+        "polygon_volume_relative_max": 2.0429213876127506e-12,
+        "total_domain_measure": 0.25000000000000056,
+        "total_measure_relative_error": 2.220446049250313e-15,
+        "max_abs_homogeneous_input_cpdi_grad_x": 5.2421595486041137e-14
+      },
+      "particle_regions": {
+        "seam_cells": {
+          "count": 2304,
+          "volume_ratio_min": 0.9999999999999732,
+          "volume_ratio_max": 1.0000000000000213,
+          "centroid_minus_parent_y_rms": 5.063426960969115e-14,
+          "grad_x_rms": 6.144419542339758e-15,
+          "partition_unity_max": 4.440892098500626e-16,
+          "gradient_constant_max": 1.0646292071052483e-13,
+          "first_moment_max_m": 3.062633385953958e-13
+        },
+        "fixed_interior": {
+          "count": 23040,
+          "volume_ratio_min": 1.0,
+          "volume_ratio_max": 1.0,
+          "centroid_minus_parent_y_rms": 4.389560552323865e-14,
+          "grad_x_rms": 4.413799342399412e-15,
+          "partition_unity_max": 4.440892098500626e-16,
+          "gradient_constant_max": 1.1374233532693354e-13,
+          "first_moment_max_m": 3.2413405294852525e-13
+        }
+      },
+      "actual_saved_H_minus_H0_max": 0.0,
+      "actual_max_displacement_x": 0.0,
+      "actual_max_displacement_y": 0.0,
+      "wall_strip_model": {
+        "relative_volume_error_rms": 8.130177948425589e-15,
+        "relative_volume_error_max": 2.120525977034049e-14,
+        "centroid_shift_error_max_m": 1.3322676295501878e-13
+      },
+      "following_phase_entry_position_difference_max": 0.0
+    },
+    "2": {
+      "rhs": {
+        "weak_l2": 1.1554169403243025e-05,
+        "weak_nonuniform_l2": 1.3575331250324324e-09,
+        "density_nonuniform_rms": 3.4617856706499393e-07,
+        "fixed_interior_density_nonuniform_rms": 2.632793235862716e-07,
+        "seam_node_density_nonuniform_rms": 1.1374290906349871e-06,
+        "max_density_nonuniform": 9.129447635224108e-06,
+        "seam_energy_fraction": {
+          "0": 0.3373636857714806,
+          "1": 0.4971113656124405,
+          "2": 0.5097397362475063,
+          "3": 0.5448074940718683
+        }
+      },
+      "reaction": {
+        "weak_l2": 0.2486904416787797,
+        "weak_nonuniform_l2": 3.3009279464757653e-10,
+        "density_nonuniform_rms": 4.544416125833984e-09,
+        "fixed_interior_density_nonuniform_rms": 4.111886357582484e-09,
+        "seam_node_density_nonuniform_rms": 1.1791655169333776e-08,
+        "max_density_nonuniform": 6.931329465942326e-08,
+        "seam_energy_fraction": {
+          "0": 0.21039885782623513,
+          "1": 0.2971911630906419,
+          "2": 0.33275278335851655,
+          "3": 0.3724270512837626
+        }
+      },
+      "gradient": {
+        "weak_l2": 0.24868544228410827,
+        "weak_nonuniform_l2": 1.3912008834495172e-09,
+        "density_nonuniform_rms": 3.4940919593397394e-07,
+        "fixed_interior_density_nonuniform_rms": 2.6663556731203087e-07,
+        "seam_node_density_nonuniform_rms": 1.1452505200163284e-06,
+        "max_density_nonuniform": 9.17758647744904e-06,
+        "seam_energy_fraction": {
+          "0": 0.3357239741055949,
+          "1": 0.4937491186192474,
+          "2": 0.5065790169592361,
+          "3": 0.5417878665693929
+        }
+      },
+      "phi_max_tangential_difference": 0.0,
+      "consistency": {
+        "partition_unity_max": 5.551115123125783e-16,
+        "gradient_constant_max": 1.56964020692204e-13,
+        "first_moment_max_m": 4.056536200905732e-13,
+        "physical_linear_gradient_error_max": 2.8284271247462183,
+        "positive_identity_count": 16708,
+        "negative_identity_norm_count": 20156,
+        "polygon_volume_relative_max": 2.3583357489087575e-12,
+        "total_domain_measure": 0.24999999803863077,
+        "total_measure_relative_error": -7.845476934775775e-09,
+        "max_abs_homogeneous_input_cpdi_grad_x": 3.6188939525108704e-12
+      },
+      "particle_regions": {
+        "seam_cells": {
+          "count": 2304,
+          "volume_ratio_min": 0.9999996052923044,
+          "volume_ratio_max": 1.000000481418303,
+          "centroid_minus_parent_y_rms": 9.679310477394886e-11,
+          "grad_x_rms": 8.161491438595867e-15,
+          "partition_unity_max": 4.440892098500626e-16,
+          "gradient_constant_max": 1.4281732235759946e-13,
+          "first_moment_max_m": 3.63117992909499e-13
+        },
+        "fixed_interior": {
+          "count": 23040,
+          "volume_ratio_min": 0.9999997126492329,
+          "volume_ratio_max": 1.0000002652330562,
+          "centroid_minus_parent_y_rms": 6.765335737473964e-11,
+          "grad_x_rms": 5.939732278781453e-14,
+          "partition_unity_max": 5.551115123125783e-16,
+          "gradient_constant_max": 1.56964020692204e-13,
+          "first_moment_max_m": 4.056536200905732e-13
+        }
+      },
+      "actual_saved_H_minus_H0_max": 0.0,
+      "actual_max_displacement_x": 0.0003100336920536795,
+      "actual_max_displacement_y": 1.0061396160665481e-16,
+      "wall_strip_model": {
+        "relative_volume_error_rms": 0.09349240118311646,
+        "relative_volume_error_max": 0.11905293774861292,
+        "centroid_shift_error_max_m": 0.00015502280185367145
+      },
+      "following_phase_entry_position_difference_max": 0.0
+    },
+    "3": {
+      "rhs": {
+        "weak_l2": 1.5537188067060352e-05,
+        "weak_nonuniform_l2": 1.1196893148500405e-09,
+        "density_nonuniform_rms": 2.8552799163755604e-07,
+        "fixed_interior_density_nonuniform_rms": 2.026682094063081e-07,
+        "seam_node_density_nonuniform_rms": 9.837947582431203e-07,
+        "max_density_nonuniform": 6.663007717780042e-06,
+        "seam_energy_fraction": {
+          "0": 0.3709895264529303,
+          "1": 0.5330303435972114,
+          "2": 0.5582365334984598,
+          "3": 0.5839100874782277
+        }
+      },
+      "reaction": {
+        "weak_l2": 0.24869045000059906,
+        "weak_nonuniform_l2": 3.9153434361468595e-10,
+        "density_nonuniform_rms": 1.543760426357263e-08,
+        "fixed_interior_density_nonuniform_rms": 5.500507365523514e-09,
+        "seam_node_density_nonuniform_rms": 1.6719833869540353e-08,
+        "max_density_nonuniform": 1.70146392974857e-07,
+        "seam_energy_fraction": {
+          "0": 0.03665676454432982,
+          "1": 0.35017522750041863,
+          "2": 0.5821196629345639,
+          "3": 0.7665536777542288
+        }
+      },
+      "gradient": {
+        "weak_l2": 0.24868375936102288,
+        "weak_nonuniform_l2": 1.255913671562452e-09,
+        "density_nonuniform_rms": 2.894380147846021e-07,
+        "fixed_interior_density_nonuniform_rms": 2.063992439608117e-07,
+        "seam_node_density_nonuniform_rms": 9.895382757071775e-07,
+        "max_density_nonuniform": 6.728246788156866e-06,
+        "seam_energy_fraction": {
+          "0": 0.36526164883266476,
+          "1": 0.5292808087607426,
+          "2": 0.5558401635332578,
+          "3": 0.5807517396258027
+        }
+      },
+      "phi_max_tangential_difference": 0.0,
+      "consistency": {
+        "partition_unity_max": 4.440892098500626e-16,
+        "gradient_constant_max": 1.498477053821537e-13,
+        "first_moment_max_m": 4.4409743236321696e-13,
+        "physical_linear_gradient_error_max": 2.82842712474622,
+        "positive_identity_count": 16355,
+        "negative_identity_norm_count": 20509,
+        "polygon_volume_relative_max": 2.7017277304253184e-12,
+        "total_domain_measure": 0.24999999865570402,
+        "total_measure_relative_error": -5.3771839203520244e-09,
+        "max_abs_homogeneous_input_cpdi_grad_x": 1.850352288968163e-10
+      },
+      "particle_regions": {
+        "seam_cells": {
+          "count": 2304,
+          "volume_ratio_min": 0.9999995233840673,
+          "volume_ratio_max": 1.0000004825151487,
+          "centroid_minus_parent_y_rms": 1.0103962267394646e-10,
+          "grad_x_rms": 2.0012870676811158e-11,
+          "partition_unity_max": 4.440892098500626e-16,
+          "gradient_constant_max": 1.498477053821537e-13,
+          "first_moment_max_m": 3.2170731359123633e-13
+        },
+        "fixed_interior": {
+          "count": 23040,
+          "volume_ratio_min": 0.9999998165444901,
+          "volume_ratio_max": 1.0000002049088057,
+          "centroid_minus_parent_y_rms": 8.89169385474384e-11,
+          "grad_x_rms": 5.31133233092373e-13,
+          "partition_unity_max": 4.440892098500626e-16,
+          "gradient_constant_max": 1.4210854715202004e-13,
+          "first_moment_max_m": 4.4409743236321696e-13
+        }
+      },
+      "actual_saved_H_minus_H0_max": 0.0,
+      "actual_max_displacement_x": 0.00047832867986210767,
+      "actual_max_displacement_y": 1.0359164429041279e-09,
+      "wall_strip_model": {
+        "relative_volume_error_rms": 0.15818367135437242,
+        "relative_volume_error_max": 0.18367820559686454,
+        "centroid_shift_error_max_m": 0.0002391694289838181
+      },
+      "following_phase_entry_position_difference_max": 0.0
+    }
+  },
+  "domain_recovery": [
+    {
+      "snapshot": 0.0,
+      "max_saved_volume_relative_error": 2.6756374893466273e-14,
+      "total_volume": 0.250000000000203
+    },
+    {
+      "snapshot": 2.0,
+      "max_saved_volume_relative_error": 0.13514384275641134,
+      "total_volume": 0.24999999803874629
+    },
+    {
+      "snapshot": 3.0,
+      "max_saved_volume_relative_error": 0.2250097499749839,
+      "total_volume": 0.24999999865573186
+    }
+  ],
+  "resources": {
+    "status": 1,
+    "wall_seconds": 19.52039467799932,
+    "peak_rss_KiB": 598544,
+    "complete": true
+  },
+  "sha256": {
+    "source/particle/particle_domain.cc": "ed9e9d7493de744e75300eee85bd8b1c966307f5d58b918bcbdf548033a6ab22",
+    "source/simulator/phase_field.cc": "f7140a9aa02d82b8534f7820879af9a17814cde612e6eced83f131c6899253b6",
+    "tests/phase_field_test_access.h": "7a5cfc12c0d38dea0adb75d5272fec89aefe26d315e038fec3c758023861a596",
+    "benchmarks/reconstructed_fault/uniform_shear/uniform_shear.cc": "027ad56332e96db6db78dce86cc81a6211d9e522cdc0fc5317cc1880a3fc57eb",
+    "build-pf-cpdi/aspect-release": "02aa66fe96898b60c36913f41471fd113cca63dad5155c173af05551c3a56c70",
+    "benchmarks/reconstructed_fault/uniform_shear/evolving/seam-audit/output-corrected/parameters.prm": "429d616f96698bc4b3dc98648def482d8564308687cb9cd98daf4e013acd6922",
+    "benchmarks/reconstructed_fault/uniform_shear/evolving/seam-audit/diagnostic.cc": "ed610aa54baa0c0c2cfea4c77a036876439dfe62077e6b7f21770feaf81ced56",
+    "benchmarks/reconstructed_fault/uniform_shear/evolving/seam-audit/build/libk3_phase_seam_audit.release.so": "39af090f2e22b8cdb46d6ecfaa1a5671cb559faa611e094d326b76599066c007"
+  }
+}

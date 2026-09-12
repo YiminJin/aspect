@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.13.4)
+find_package(Aspect REQUIRED HINTS ${Aspect_DIR})
+DEAL_II_INITIALIZE_CACHED_VARIABLES()
+project(k3_phase_seam_audit)
+add_library(k3_phase_seam_audit SHARED diagnostic.cc)
+ASPECT_SETUP_PLUGIN(k3_phase_seam_audit)

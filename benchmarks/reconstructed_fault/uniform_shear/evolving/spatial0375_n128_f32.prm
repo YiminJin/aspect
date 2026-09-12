@@ -1,0 +1,6 @@
+# Fresh coupled initialization; no state transfer from the 16-element fault.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/evolving/common0375.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/evolving/spatial0375_n128_f32
+subsection Fault reconstruction
+  set Structural point spacing = 0.0078125
+end

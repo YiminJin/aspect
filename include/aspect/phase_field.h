@@ -349,7 +349,8 @@ namespace aspect
       assemble_phase_field_system(LinearAlgebra::BlockSparseMatrix &system_matrix,
                                   LinearAlgebra::BlockVector       &system_rhs,
                                   const LinearAlgebra::BlockVector &current_solution,
-                                  const bool assemble_system_jacobian) const;
+                                  const bool assemble_system_jacobian,
+                                  double *residual_roundoff_allowance = nullptr) const;
 
       unsigned int
       solve_phase_field_system(const LinearAlgebra::BlockSparseMatrix &system_matrix,

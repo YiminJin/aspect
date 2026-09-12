@@ -1,0 +1,8 @@
+# Same 32-element fault, fresh initialization, only normal bulk resolution differs.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/evolving/spatial0375_n128_f32.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/evolving/spatial0375_n256_f32
+subsection Geometry model
+  subsection Box
+    set Y repetitions = 8
+  end
+end

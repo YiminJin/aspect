@@ -1,0 +1,8 @@
+# Common-time/common-step K3 spatial comparison, unchanged physical problem.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/evolving/smoke.prm
+set Maximum time step = 0.375
+set Maximum first time step = 0.375
+set End time = 3
+subsection Termination criteria
+  set End step = 8
+end

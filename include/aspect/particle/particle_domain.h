@@ -279,6 +279,8 @@ namespace aspect
 
         // Retain the constructed boundary, not a second reconstruction of it.
         std::vector<std::vector<Point<dim>>> domain_vertices;
+        // Only seam-crossing parents allocate fragments; each keeps full measure.
+        std::vector<std::vector<std::vector<Point<dim>>>> domain_periodic_fragments;
         std::uint64_t domain_geometry_version = 0;
 
         ParticleDomain::FaceData<dim> face_data;
@@ -303,11 +305,19 @@ namespace aspect
 
         double volume() const;
 
-        /** Ordered boundary vertices of the existing domain (2-D). */
+        /** Ordered full-domain boundary in the parent's unwrapped chart (2-D). */
         const std::vector<Point<dim>> &vertices() const
         {
           AssertIndexRange(particle_index, handler->domain_vertices.size());
           return handler->domain_vertices[particle_index];
+        }
+
+        /** Physical-box pieces of a seam-crossing domain. Empty means vertices()
+         * already lies in the physical box. Pieces share one parent/history. */
+        const std::vector<std::vector<Point<dim>>> &periodic_fragments() const
+        {
+          AssertIndexRange(particle_index, handler->domain_periodic_fragments.size());
+          return handler->domain_periodic_fragments[particle_index];
         }
 
         unsigned int n_faces() const;

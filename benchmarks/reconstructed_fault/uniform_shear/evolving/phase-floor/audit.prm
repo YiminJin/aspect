@@ -1,0 +1,3 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/evolving/spatial0375_n256_f32_periodic.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/evolving/phase-floor/build/libk3_phase_floor.so
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/evolving/phase-floor/output

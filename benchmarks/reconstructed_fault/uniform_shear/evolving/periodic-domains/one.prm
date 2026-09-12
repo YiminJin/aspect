@@ -1,0 +1,28 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/pilot.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/evolving/periodic-domains/build/libperiodic_domains.so
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/evolving/periodic-domains/one
+set Nonlinear solver scheme = single Advection, no Stokes
+subsection Time stepping
+  set List of model names = convection time step
+end
+subsection Boundary velocity model
+  set Prescribed velocity boundary indicators =
+end
+subsection Prescribed Stokes solution
+  set Model name = function
+end
+subsection Mesh refinement
+  set Initial global refinement = 2
+end
+subsection Termination criteria
+  set Termination criteria = end step
+  set End step = 0
+end
+subsection Material model
+  subsection Phase field fault
+    set Evolve phase field = true
+  end
+end
+subsection Postprocess
+  set List of postprocessors = particles, verify periodic phase domains
+end

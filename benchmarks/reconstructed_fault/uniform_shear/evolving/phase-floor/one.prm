@@ -1,0 +1,6 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/evolving/periodic-domains/one.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/evolving/phase-floor/tests/build/libphase_precision_tests.so
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/evolving/phase-floor/one
+subsection Postprocess
+  set List of postprocessors = particles, verify phase precision
+end

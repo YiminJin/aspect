@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.13.4)
+find_package(Aspect REQUIRED HINTS ${Aspect_DIR})
+DEAL_II_INITIALIZE_CACHED_VARIABLES()
+project(phase_precision_tests)
+add_library(phase_precision_tests SHARED ../../../../../../../tests/phase_field_precision.cc)
+ASPECT_SETUP_PLUGIN(phase_precision_tests)

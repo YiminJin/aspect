@@ -497,7 +497,11 @@ namespace aspect
         prm.declare_entry("Nonlinear solver tolerance", "1e-5",
                           Patterns::Double(0., 1.),
                           "A relative tolerance up to which the Nonlinear solver for the "
-                          "phase field system will iterate.");
+                          "phase field system will iterate. The absolute residual target is "
+                          "the larger of this tolerance times the initial residual and an "
+                          "internal roundoff allowance computed from the initial phase "
+                          "residual-term magnitudes. The allowance does not depend on "
+                          "nonlinear stagnation or increase the iteration budget.");
 
         prm.declare_entry("Max nonlinear iterations", "10",
                           Patterns::Integer(1),
@@ -806,7 +810,8 @@ namespace aspect
   assemble_phase_field_system(LinearAlgebra::BlockSparseMatrix &system_matrix,
                               LinearAlgebra::BlockVector       &system_rhs,
                               const LinearAlgebra::BlockVector &current_solution,
-                              const bool assemble_system_jacobian) const
+                              const bool assemble_system_jacobian,
+                              double *residual_roundoff_allowance) const
   {
     const Particles::ParticleHandler<dim> &particle_handler = particle_manager->get_particle_handler();
     const Particle::ParticleDomainHandler<dim> &particle_domain_handler = particle_manager->get_particle_domain_handler();
@@ -815,6 +820,14 @@ namespace aspect
     const unsigned int block_index = this->introspection().variable("phase_field").block_index;
     system_matrix.block(block_index, block_index) = 0;
     system_rhs.block(block_index) = 0;
+
+    // Compute the positive, pre-cancellation weak-load scale only at the
+    // nonlinear solve's entry. It follows the same owned-parent measure and
+    // Q1 constraints as the residual, and is fixed throughout line search.
+    LinearAlgebra::BlockVector rounding_scale;
+    if (residual_roundoff_allowance != nullptr)
+      rounding_scale.reinit(this->introspection().index_sets.system_partitioning,
+                            this->get_mpi_communicator());
 
     // We need to retrieve the crack driving force and chemical composition values
     // from particle properties
@@ -850,6 +863,8 @@ namespace aspect
 
             double phi = 0;
             Tensor<1, dim> grad_phi;
+            double absolute_phi = 0;
+            Tensor<1, dim> absolute_grad_phi;
 
             for (unsigned int i = 0; i < n_dofs; ++i)
               {
@@ -866,6 +881,12 @@ namespace aspect
                 const double dof_value = current_solution[dof_index];
                 phi      += dof_value * weighting_function_values[i];
                 grad_phi += dof_value * weighting_function_gradients[i];
+                if (residual_roundoff_allowance != nullptr)
+                  {
+                    absolute_phi += std::abs(dof_value * weighting_function_values[i]);
+                    for (unsigned int d=0; d<dim; ++d)
+                      absolute_grad_phi[d] += std::abs(dof_value * weighting_function_gradients[i][d]);
+                  }
               }
 
             // Get the crack driving force
@@ -897,6 +918,8 @@ namespace aspect
             double F = 0;
             double K = 0;
             double dK_dphi = 0;
+            double absolute_reaction = 0;
+            double absolute_reaction_derivative = 0;
             for (unsigned int j = 0; j < volume_fractions.size(); ++j)
               if (volume_fractions[j] > 0)
                 {
@@ -906,17 +929,37 @@ namespace aspect
 
                   F += volume_fractions[j] * (2. * Gc_over_c0l * l * l);
                   K += volume_fractions[j] * (H * dg_dphi + Gc_over_c0l * da_dphi);
-                  if (assemble_system_jacobian)
+                  if (assemble_system_jacobian || residual_roundoff_allowance != nullptr)
                     dK_dphi += volume_fractions[j] * (H * d2g_dphi2 + Gc_over_c0l * d2a_dphi2);
+                  if (residual_roundoff_allowance != nullptr)
+                    {
+                      absolute_reaction += volume_fractions[j] *
+                        (std::abs(H * dg_dphi) + std::abs(Gc_over_c0l * da_dphi));
+                      absolute_reaction_derivative += volume_fractions[j] *
+                        (std::abs(H * d2g_dphi2) + std::abs(Gc_over_c0l * d2a_dphi2));
+                    }
                 }
 
             const double V_p = particle_domain.volume();
+            Vector<double> particle_scale(residual_roundoff_allowance != nullptr ? n_dofs : 0);
 
             for (unsigned int i = 0; i < n_dofs; ++i)
               {
                 const double w_ip               = weighting_function_values[i];
                 const Tensor<1, dim> &grad_w_ip = weighting_function_gradients[i];
                 particle_rhs(i) -= (w_ip * K + F * (grad_w_ip * grad_phi)) * V_p;
+
+                if (residual_roundoff_allowance != nullptr)
+                  {
+                    // Include roundoff in phi and especially its gradient:
+                    // nearby O(1) nodal values can cancel before weak assembly.
+                    double gradient_scale = 0;
+                    for (unsigned int d=0; d<dim; ++d)
+                      gradient_scale += std::abs(grad_w_ip[d]) * absolute_grad_phi[d];
+                    particle_scale(i) = V_p * (std::abs(w_ip) *
+                      (absolute_reaction + absolute_reaction_derivative * absolute_phi)
+                      + std::abs(F) * gradient_scale);
+                  }
 
                 if (assemble_system_jacobian)
                   {
@@ -928,6 +971,11 @@ namespace aspect
                       }
                   }
               }
+
+            if (residual_roundoff_allowance != nullptr)
+              this->get_current_constraints().distribute_local_to_global(particle_scale,
+                                                                         particle_dof_indices,
+                                                                         rounding_scale);
 
             if (assemble_system_jacobian)
               this->get_current_constraints().distribute_local_to_global(particle_matrix,
@@ -944,6 +992,15 @@ namespace aspect
     system_rhs.compress(VectorOperation::add);
     if (assemble_system_jacobian)
       system_matrix.compress(VectorOperation::add);
+    if (residual_roundoff_allowance != nullptr)
+      {
+        rounding_scale.compress(VectorOperation::add);
+        // A first-order roundoff estimate, not a physical accuracy parameter.
+        // The factor eight allows for evaluation/assembly of the expanded
+        // term scale; it is independent of the measured stalled residual.
+        *residual_roundoff_allowance = 8 * std::numeric_limits<double>::epsilon() *
+                                      rounding_scale.block(block_index).l2_norm();
+      }
     return Utilities::MPI::min(static_cast<unsigned int>(locally_admissible),
                                this->get_mpi_communicator()) == 1;
   }
@@ -1031,15 +1088,25 @@ namespace aspect
     const unsigned int block_index = this->introspection().variable("phase_field").block_index;
 
     // Compute the initial residual
-    AssertThrow(assemble_phase_field_system(system_matrix, system_rhs, solution, false),
+    double residual_roundoff_allowance = 0;
+    AssertThrow(assemble_phase_field_system(system_matrix, system_rhs, solution, false,
+                                           &residual_roundoff_allowance),
                 ExcMessage("The phase-field iterate lies outside the nonsingular "
                            "degradation branch containing [0,1]."));
     const double initial_residual = system_rhs.block(block_index).l2_norm();
+    const double residual_target = std::max(solver_parameters.nonlinear_solver_tolerance * initial_residual,
+                                            residual_roundoff_allowance);
+    AssertThrow(std::isfinite(residual_target),
+                ExcMessage("Nonfinite phase-field residual or roundoff scale."));
+    this->get_pcout() << "   Phase-field residual target: initial=" << std::setprecision(17)
+                     << initial_residual << ", roundoff=" << residual_roundoff_allowance
+                     << ", absolute target=" << residual_target << std::endl;
 
-    // Skip solving the phase field system if the initial residual is too small
-    if (initial_residual < 1e-50)
+    // A tiny entry residual must satisfy the same residual-based criterion;
+    // stagnation or a negligible update alone never establishes convergence.
+    if (initial_residual <= residual_target)
       {
-        this->get_pcout() << "   Skipping phase field solve because the nonlinear residual is 0." << std::endl;
+        this->get_pcout() << "   Skipping phase field solve: initial residual meets the absolute target." << std::endl;
         return;
       }
 
@@ -1058,7 +1125,8 @@ namespace aspect
     double relative_residual = 1;
 
     SolverControl nonlinear_solver_control(solver_parameters.max_nonlinear_iterations,
-                                           solver_parameters.nonlinear_solver_tolerance);
+                                           residual_target);
+    double residual = initial_residual;
     do
       {
         // Assemble and solve for the Newton update
@@ -1077,7 +1145,7 @@ namespace aspect
         const double alpha = 1e-4;
 
         double step_length = 1;
-        double residual = numbers::signaling_nan<double>();
+        residual = numbers::signaling_nan<double>();
         unsigned int line_search_iteration = 0;
         bool admissible_trial = false;
 
@@ -1123,7 +1191,7 @@ namespace aspect
 
         ++nonlinear_iteration;
       }
-    while (nonlinear_solver_control.check(nonlinear_iteration, relative_residual) == SolverControl::iterate);
+    while (nonlinear_solver_control.check(nonlinear_iteration, residual) == SolverControl::iterate);
 
     // SolverControl also stops on iteration exhaustion. Report that failure
     // collectively through the simulator's configured nonlinear-failure path.
@@ -1145,6 +1213,10 @@ namespace aspect
     // Create the vertex-to-cell map
     const auto &vertex_to_cell_map = grid_cache->get_vertex_to_cell_map();
 
+    std::map<unsigned int,std::vector<unsigned int>> periodic_groups;
+    std::map<unsigned int,unsigned int> vertex_group;
+    GridTools::collect_coinciding_vertices(this->get_triangulation(),periodic_groups,vertex_group);
+
     const AffineConstraints<double> &current_constraints = this->get_current_constraints();
 
     const unsigned int component_index = this->introspection().variable("phase_field").first_component_index;
@@ -1161,6 +1233,13 @@ namespace aspect
               const unsigned int vertex_index = cell->vertex_index(v);
               cell_patch.insert(vertex_to_cell_map[vertex_index].begin(),
                                 vertex_to_cell_map[vertex_index].end());
+              // Full periodic CPDI domains couple across the bulk seam. This
+              // is a sparsity completion, not a change of phase weak form.
+              const auto group=vertex_group.find(vertex_index);
+              if (group!=vertex_group.end())
+                for (const auto partner : periodic_groups.at(group->second))
+                  for (const auto &neighbor : vertex_to_cell_map[partner])
+                    if (!neighbor->is_artificial()) cell_patch.insert(neighbor);
             }
 
           // Since the CPDI method requires the fields to be discretized by FE_Q(1) element,

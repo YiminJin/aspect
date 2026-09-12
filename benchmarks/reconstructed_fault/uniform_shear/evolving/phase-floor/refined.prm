@@ -1,0 +1,7 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/evolving/phase-floor/one.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/evolving/phase-floor/refined
+subsection Geometry model
+  subsection Box
+    set Y repetitions = 8
+  end
+end

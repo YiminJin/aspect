@@ -1,0 +1,36 @@
+# K3 reference-preflight-approved candidate; report/review before ASPECT execution.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/convergence/space32_dt05.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/evolving/build/libuniform_shear.so
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/evolving/smoke
+set End time = 4
+set Maximum time step = 2
+subsection Termination criteria
+  set Termination criteria = end step
+  set End step = 2
+end
+subsection Material model
+  subsection Phase field fault
+    # Explicitly pin the already validated K1 value, not the generic default.
+    set Phase field activation threshold = 0.1
+    set Evolve phase field = true
+  end
+end
+subsection Boundary velocity model
+  subsection Function
+    set Function expression = y*(1e-4+(2.25e-3-1e-4)*min(t/2,1)); 0
+  end
+end
+subsection Postprocess
+  set List of postprocessors = particles, uniform shear pilot, visualization, reconstructed faults
+  subsection Uniform shear pilot
+    set Evolving profile = true
+  end
+  subsection Particles
+    set Data output format = vtu
+    set Time between data output = 0
+  end
+  subsection Visualization
+    set Time between graphical output = 0
+    set Output format = vtu
+  end
+end

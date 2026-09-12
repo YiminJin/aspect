@@ -15,8 +15,16 @@ K3 preparation is explicitly authorized as a sequencing exception because it
 returns to the homogeneous-along-fault problem with an independent 1-D
 reference. This is not evidence of K2 convergence. This document specifies
 the reference and proposes one initialization-plus-two-real-step smoke test.
-No K3 production run, convergence campaign or production-code edit has occurred.
-Review is required before implementing/running the smoke fixture.
+The independent reference and opt-in benchmark mode are implemented and build.
+The first smoke stopped on a benchmark fingerprint initialization bug. The
+explicitly approved corrected invocation now passes initialization and both
+real steps; see `stage_K3_smoke_result.md`. No production algorithm was edited.
+The original .009-m/s preflight was rejected for smoke. The authorized bounded
+adjustment selects .00225 m/s after .0045 m/s also failed normalization.
+Both independent and separately production-initialized references pass the
+unchanged preflight checks; see `stage_K3_bounded_adjustment.md`. The successful
+one-rank smoke also passes both support gates, narrowly for total normalization.
+No further invocation or convergence campaign is authorized automatically.
 
 ## 1. Independent reference equations
 
@@ -68,7 +76,8 @@ it does not replace phi by max(phi,0).
 
 For localization and I_h use phi_eff=max(phi,0), h=1/g(phi_eff)-1, with the
 existing empirical -1e-4 excessive-undershoot diagnostic. This is not an
-accuracy parameter. Never clamp to the .01 activation threshold. Do not clip
+accuracy parameter. Never clamp to the configured activation threshold (.1
+in the validated K1 fixture). Do not clip
 the upper end: g=0 is singular; phi>1 is invalid. The .99 fault-model
 admissibility threshold is distinct from the physical range and is not a
 license to operate near g=0. The proposed smoke should remain comfortably
@@ -92,10 +101,17 @@ Then reproduce **the actual initializer**, not an untruncated stationary ideal:
 \[
 H_0(y)=
 \begin{cases}
-E_c\alpha(\phi_c)/(h(\phi_c)g(\phi_\star(y))^2),&\phi_\star(y)>.01,\\
-H_c,&\phi_\star(y)\le .01.
+E_c\alpha(\phi_c)/(h(\phi_c)g(\phi_\star(y))^2),&\phi_\star(y)>\phi_{\rm act},\\
+H_c,&\phi_\star(y)\le \phi_{\rm act}.
 \end{cases}
 \]
+
+Here phi_act is read from the resolved PhaseFieldFault parameter `Phase field
+activation threshold`, **0.1 in validated K1**, not the generic PhaseFieldModel
+default 0.01. The virtual PhaseFieldFault accessor returns its parsed member;
+the manager obtains it through that accessor, not a hard-coded cutoff.
+This corrects the earlier preparation's mistaken attribution of the generic
+default to the benchmark. No K1/K3 initialization parameter has been changed.
 
 This replaces the baseline H_c where the profile contributes; initialization
 does not take max(H_c, prescribed H). Independently solve the phase weak
@@ -224,7 +240,8 @@ mechanics and reconstructs only at step zero; `source/simulator/phase_field.cc`
 supplies the weak CPDI equation, degradation branch and iteration-exhaustion
 failure; `source/simulator/core.cc` supplies periodic/hanging-node constraints
 without a phase Dirichlet boundary or irreversibility obstacle;
-`source/reconstructed_fault/manager.cc` supplies the initial .01 cutoff;
+`source/reconstructed_fault/manager.cc` applies the material-model activation
+accessor (configured .1 for this fixture) to the initial prescribed profile;
 `source/particle/property/crack_driving_force.cc` supplies H_c;
 `source/material_model/phase_field_fault.cc` supplies the cohesive projection,
 factorized maximum update and retained timestep-zero histories. No conflict
@@ -250,7 +267,7 @@ Proposed explicit differences from the frozen K1 fixture:
   not changed. Remove the benchmark-only phi freezing and H-frozen assertion
   through a clearly selected evolving diagnostic mode, not a production bypass.
 - Use boundary u_x(y,t)=y U(t)/W, u_y=0, with
-  U(t)=1e-4+(9e-3-1e-4)*min(t/2,1) m/s. This is a specified ramp, not an
+  U(t)=1e-4+(2.25e-3-1e-4)*min(t/2,1) m/s. This is the selected bounded ramp, not an
   automatic forcing search. Retain the original initial loading U(0).
 - Maximum timestep 2 s and existing convection plus reconstructed-fault
   timestep selection, CFL=.5. The rate-strengthening a_f>b_f branch imposes
@@ -264,7 +281,7 @@ iterations) or coupled solver settings. First verify the selected first dt
 is actually 2 s and the reference predicts observable feedback at that dt;
 do not disable timestep safeguards to obtain the desired signal.
 
-A cheap **ideal, untruncated-profile scalar estimate**, not a K3 reference
+A superseded **ideal, untruncated-profile scalar estimate**, not a K3 reference
 solution or production run, gives I_h=108.6525644 m and, for first dt=2 s,
 U=.009 m/s, V_1=.0086750603 m/s, C_1=468.0642 Pa, q_1=2113.7217 Pa,
 Theta_1=.115279 s. It predicts H_candidate/H_0=1.24239 in the ideal profile
@@ -272,20 +289,19 @@ interior (core 29568 -> 36735 Pa). This predicts a clear H_1 input change for
 phi_2. The sampled C/I_h initialization and activation cutoff must be included
 in the complete independent reference before trusting these values.
 
-The ramp is 90 times the small initial velocity, so "moderate" here refers
-to the first-step macroscopic shear increment U_1 dt/W=.018 and predicted
-24% history growth, not a small relative rate perturbation. It strongly evolves
-Theta under the exact update. No bound on the resulting phi/I_h excursion is
-claimed from the scalar estimate alone. The initialized 1-D feedback solve must
-confirm the proposed phi<.8 envelope and observable phi/I_h changes; otherwise
-return revised parameters for review, without launching ASPECT or scanning a
-large parameter family.
+The selected ramp is 22.5 times the initial velocity, with first-step
+macroscopic shear increment U_1 dt/W=.0045. The independent reference predicts
+max|H1-H0|=3.93555 Pa in the transverse tail, while the core H maximum remains
+unchanged. Max|phi2-phi1|=.000953568 and I_h increases by .151855 m (.140431%).
+These signals exceed reference noise by 628/1483/3480 times, respectively.
+Maximum phi2=.599784 passes the .8 envelope. This supersedes the ideal .009-m/s
+estimate above without discarding its documented failed support diagnostic.
 
 ## 4. Reference accuracy, containment and diagnostics before execution
 
-Implement one small independent 1-D solver after this plan is accepted. Use
-the weak residual above with consistent Jacobian and natural boundaries,
-independent adaptive quadrature and scalar bracketing. Independently tighten
+The implemented independent 1-D solver uses the weak residual above with
+consistent Jacobian and natural boundaries, its own split normal mesh/Gauss
+quadrature and scalar bracketing. Independently tighten
 its normal grid/quadrature until changes are below 1e-6 absolute in phi and
 1e-5 relative in H/I_h/V/C where nonzero. These are proposed reference error
 targets, not changes to production tolerances or a Gate-K3 pass claim. Use the
@@ -299,9 +315,11 @@ even before evolution. For this bounded K3 smoke only, propose review of:
 
 - Omitted fraction <=1e-4 for **each current and previous** full-profile h
   integral, independently remeasured at initialization and every accepted time.
-- Actual |integral upsilon - V|/max(|V|,V_*) <=1e-4, with signed history and
-  instantaneous contributions reported separately. A small h tail does not
-  guarantee small error after history-term cancellation; measure it directly.
+- Actual |integral upsilon - V|/max(|V|,V_*) <=1e-4 is the **primary
+  normalization check**, with signed history and instantaneous contributions
+  reported separately. K3's rejected ramps demonstrate that a small omitted
+  h fraction does not certify support adequacy: truncating the history
+  correction can dominate. Retain both diagnostics without changing full I_h.
 - Separate tail/support error estimates in q, C and H from the independent
   scalar/profile calculation; do not absorb them into the reference solver
   tolerance. Report numerical, initialization and support errors separately.
@@ -316,12 +334,15 @@ the smoke to demonstrate feedback. Do not use monotonicity alone as evidence.
 Required exports/checks:
 
 1. At phase assembly entry: timestep/physical time, stable particle IDs/current
-   positions, consumed H, old FE phi, actual CPDI weights/gradients and residual.
+   positions, consumed H, old FE phi and the noncommitting production residual.
    Match consumed H to the preceding commit, not a post-solve visualization.
-2. Evaluate the frozen pre-phase residual on phi_1 with both H_0 and H_1:
+2. Reuse production assembly to evaluate R(phi1;H0), R(phi1;H1) and R(phi2;H1)
+   noncommittingly. Evaluate the frozen pre-phase residual on phi_1 with both H_0 and H_1:
    R(phi_1;H_1)-R(phi_1;H_0)=integral g'(phi_1)(H_1-H_0)w. Freeze the same
    domains/constraints during this diagnostic; no physical or history mutation.
-   Show the subsequent phi_2 solve reduces R(phi_2;H_1) genuinely.
+   Show the subsequent phi_2 solve reduces R(phi_2;H_1) genuinely. Verify H1
+   by stable ID against the preceding commit, including migrated particles.
+   Full CPDI weight/gradient export is required only if this check fails.
 3. Independently solve the counterfactual phase problem retaining H_0 in the
    1-D reference. It must lack the measured H_1-driven phi_2 response. This is
    reference-only, not a second production run or disabled-H workaround.
@@ -336,28 +357,41 @@ Required exports/checks:
 
 ## 5. Implementation and resource boundary
 
-`uniform_shear.cc` currently installs phi constraints after step zero and
-asserts particle H is frozen; it also hard-codes the old diagnostic loading.
-Simply setting `Evolve phase field=true` in a parameter overlay would **not**
-implement this test. After approval, make a minimal opt-in evolving benchmark
-mode (default frozen behavior unchanged), export actual imposed loading and
-the noncommitting history-input diagnostics above, and retain the original
-fixed-profile mode/evidence. Reuse the Stage-J test's entry/commit diagnostic
-pattern. Do not refresh history fields for visualization or reevaluate a
-Maxwell update from already committed stress. No production algorithm change
-or new geometry evolution is needed. No runnable K3 parameter file is claimed
-prepared while that benchmark mode/reference remains unimplemented.
+`uniform_shear.cc` now has a default-false `Postprocess/Uniform shear pilot/
+Evolving profile` option. The opt-in mode omits benchmark phi constraints and
+H-frozen assertions, reports imposed boundary loading, and records stable-ID
+particle H at timestep entry. It saves old surface C/I_h before mechanics so
+post-commit localization diagnostics do not mistakenly consume new history.
+It does not refresh live fields or update Maxwell stress for visualization.
+Default fixed-profile behavior is retained. The parameter overlay is
+`benchmarks/reconstructed_fault/uniform_shear/evolving/smoke.prm`.
+
+The noncommitting production phase-entry residual comparison and stable-ID
+history handoff are now verified in the successful smoke. Both normal return
+and a forced exception restore the live H/state/solver data. Full CPDI weight
+export was not needed. This completes bounded smoke verification, not a
+convergence campaign or a fully resolved numerical reference.
+
+The selected reference predicts zero periodic-x crossing events on step 1 and
+358 on step 2 for the 96x384 particle lattice. RK2 advects before mechanics;
+use old and extrapolated predictor velocities, not the new accepted velocity.
+These are estimates, not measured CPDI periodic-domain behavior. Any eventual
+smoke must measure H, phi, I_h, C and V along the fault including both open
+endpoints and the periodic seam. A seam artifact comparable to the intended
+H/phi/I_h feedback prevents interpretation as a 1-D K3 result; wrapping alone
+does not constitute failure.
 
 Expected one-rank Release smoke cost: about 60--120 s and 0.7--1.2 GiB,
 estimated from the accepted 32x128 fixed-profile 37--39-s cases with allowance
 for two additional phase/preparation passes. Evolving domains/conditioning
-remain unmeasured. Propose a hard 120-s smoke cap, no retry, with review if
+remain unmeasured. The approved hard smoke cap is 180 s, no automatic retry, with review if
 it times out. Keep independent exploratory calculations under 120 s each
 and 600 s aggregate; no automatic mesh/timestep campaign. A plugin build,
 if approved, uses -j4. A longer convergence sequence belongs to a later review.
 
-Preparation verification consisted of source/specification inspection and one
-0.22-s reused independent K1 scalar estimate of the proposed first real step.
-No K3 phase/reference solver, ASPECT run, build or convergence test was run.
-Review the loading, smoke scope, reference plan and proposed K3-specific
-containment/normalization budget before implementation/execution.
+The bounded adjustment tests exactly two lower peaks; independent and conditional
+accuracy checks pass for the selected .00225-m/s case. Six cheap tests pass.
+All reference execution remains well below 120 s per command/600 s aggregate.
+Neither support nor the budget was changed to obtain a pass. See the
+bounded-adjustment record for reference timings and initialization distinctions,
+and `stage_K3_smoke.md` for the failed invocation and remaining verification.

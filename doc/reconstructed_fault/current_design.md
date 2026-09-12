@@ -355,6 +355,14 @@ frame. Parent admission/fault assignment and full measure remain unchanged.
 Overlap, branching, closed loops, self-intersections and 3-D remain unsupported.
 History-commit timing is unchanged.
 
+For the approved 2-D Box periodic-domain correction, see
+`benchmarking/stage_K3_periodic_domain_addendum.md`. Domains use the global
+period and geometry-only image neighbors. Surface quadrature integrates all
+physical-box fragments of each admitted real parent's full periodic domain,
+once, with the existing open-polyline map. Periodic bulk geometry does not
+identify the independent surface endpoint DoFs. CPDI samples use periodically
+mapped FE locations and the existing unique-owner rule.
+
 The bounded K2 performance pass caches only the geometric point-location maps
 for the adaptive `I_h` batch sequence of the last preparation. Exact coordinate
 equality and deal.II's mesh-validity flag are required on every rank before a
@@ -1062,6 +1070,43 @@ must already contain complete committed state and never reconstruct it from
 initial fields.
 
 ## 25. Stage-J constitutive history feedback
+
+### Phase nonlinear precision criterion
+
+The phase equations and Newton/line-search algorithm are unchanged. Phase
+convergence uses the mixed absolute residual target
+`max(relative_tolerance * initial_residual, roundoff_allowance)`, frozen at
+entry to each phase solve. The configured relative tolerance retains its
+meaning; the internal allowance is not a physical/convergence parameter and
+is not inferred from stagnation or an unsuccessful iteration.
+
+For each owned particle let `P = sum_j |w_j phi_j|` and
+`D_d = sum_j |grad(w_j)_d phi_j|`. Before cancellation, assemble the positive
+nodal scale
+
+\[
+ S_i=\sum_p m_p\left\{|w_i|\left(a_p+b_p P_p\right)
+       +|F_p|\sum_d|\partial_d w_i|D_{p,d}\right\},
+\]
+
+where `F` is the phase gradient coefficient,
+`a = sum_m f_m (|H g'_m| + |E_m alpha'|)`,
+`b = sum_m f_m (|H g''_m| + |E_m alpha''|)`, and `E_m=Gc_m/(c0 ell)`.
+Apply the same nonnegative Q1 hanging-node/periodic constraint weights and MPI
+ADD ownership as the residual. The allowance is `8 epsilon_double ||S||_2`.
+This is a conservative first-order roundoff estimate including represented
+nodal-value sensitivity, with a modest arithmetic safety factor; it is not a
+rigorous error bound for arbitrary ill-conditioned problems. It scales with
+the physical coefficients and discrete weak-load measure, not a fixed
+dimensional constant. Reject nonfinite targets. A tiny initial residual may
+skip Newton only if it meets this same residual criterion. Keep iteration
+exhaustion/failure handling and line-search logic unchanged.
+
+The K3 phase-entry/exit checks use this production scale while retaining the
+1e-8 relative target. Physical benchmark criteria (admissibility, feedback,
+support/normalization, lifecycle and homogeneity) are separate and unchanged.
+See `benchmarking/stage_K3_phase_precision_audit.md` for the exact failed-state
+audit, independent verification and the scope of the precision estimate.
 
 The fixed-fault timestep cycle is indexed as
 

@@ -1,5 +1,202 @@
 # Stage K: K0 inventory and proposed K1 benchmark
 
+**K3 I_h-feedback investigation closed by user direction, with a documented
+limitation.** One offline scalar sensitivity replay injects only the saved
+I_h-feedback errors, with no initial offset or repeated history reset. The
+unperturbed replay reproduces the independent reference. For the 512 sequence,
+maximum relative changes in V/q/C/Theta/slip are 3.896e-6/3.046e-6/1.100e-5/
+3.167e-6/3.896e-6. These small direct mechanical effects justify deferring
+further pursuit of the nonconverged small increment, not calling it converged
+or bounding future coupled H/phase feedback. No ASPECT run was added.
+See `stage_K3_ih_feedback_disposition.md`. Reopen this sub-metric only if a
+later benchmark demonstrates consequential sensitivity. Gate K3 is not
+declared fully passed, and K2's provisional references remain unchanged.
+
+**Current K3 review: the sole 32x512/fault32, dt=.375 refinement passes through
+3 s, but feedback convergence remains unresolved.** The verified precision-floor
+binary/plugin/source hashes are unchanged. Runtime 542.711 s, peak RSS 1.886
+GiB; all nine guards and 37 fresh linear checks pass. Omission/complete supported
+normalization maxima are 5.903258e-5/5.875046e-5. No new solver, lifecycle,
+geometry, support or seam failure appears.
+
+Total phi and cumulative phi feedback errors contract again (256/512 factors
+1.836/1.575). Raw-stress RMS and cumulative H errors do not (.692/.903).
+Cumulative I_h feedback error increases from 1.05255e-3 to 1.20014e-3 m
+(factor .877), or 31.85% to 36.32% of the independent feedback signal.
+Only the final per-step I_h increment contracts weakly (1.133); this does not
+establish convergence of its trajectory. Initial raw stress is already
+nonmonotone; initial H/profile differences are retained explicitly. See
+`stage_K3_normal512.md` and `evolving/normal512-errors.csv` for all common-time
+errors/factors. Gate K3 remains unmet. No temporal or further spatial case was
+run; production equations, tolerances and support are unchanged. Entries below
+preserve the preceding evidence and chronology.
+
+**Current K3 result: phase precision floor diagnosed and corrected; 32x256
+replay passes through 3 s.** A private-vector replay reproduces the passing and
+failed phase solves. Fresh constrained linear residuals ~1.1e-21 and independent
+represented Jacobian actions verify the direction. Double rounding of the
+updated phase produces ~1.4e-14 residual effects, versus ~3e-15 after an
+unrounded extended-precision update: a reproducible numerical floor, not a
+CG failure. The authorized mixed target retains relative 1e-8 and the same
+iteration budget/line search, with a fixed positive weak-term-scale allowance
+`8 eps ||S||`. Analytic mesh scaling, zero/tiny/material residuals, one/two-rank
+tests, nonlinear exhaustion, rollback, and focused units pass. No equations,
+domain/seam rule, I_h, support, histories or physical K3 criteria changed.
+
+The fresh 32x256/fault32 dt=.375 replay completes initialization plus eight
+real steps in 237.817 s, peak RSS 1.108 GiB. All nine state guards and 37 fresh
+coupled-linear checks pass. Maximum omission/complete normalization errors are
+5.919417e-5/6.113454e-5. Initial H/Maxwell histories are exactly unchanged;
+initial and previously accepted phase differences are <=1.11e-16. Total phi,
+raw stress and feedback-increment errors contract versus the corrected-periodic
+32x128 baseline, but the fine I_h increment remains about 31.85% above the
+independent reference. Gate K3 remains unmet pending spatial/temporal
+convergence; the reference's timestep-induced feedback suppression is retained.
+No normal512 or production temporal run was added in this correction task.
+See `stage_K3_phase_precision_audit.md` and `phase-floor/replay-summary.json`.
+Earlier failure and accepted baseline entries below are historical, preserved.
+
+**Current K3 convergence review: new phase nonlinear failure; Gate K3 unmet.**
+The fresh corrected-periodic 32x256/fault32, dt=.375 run passes initialization
+and t=.375 s, then aborts at t=.75 s after all 50 phase iterations plateau at
+2.430e-8 relative residual versus unchanged 1e-8. Runtime 78.583 s, peak RSS
+1.061 GiB. The saved phase-entry scale implies a final absolute residual near
+1.383e-14 and target 5.692e-15. The previous successful solve also ended near
+1.536e-14 but had a larger entry scale. This suggests a numerical floor, not
+yet a demonstrated cause or permission to change the stopping rule. A bounded
+fresh linear/action/represented-increment audit is the next discriminating
+step. No production correction, retry, normal512 or temporal production run
+was performed. Resolved seam, fault32, support and homogeneity results remain
+closed; every accepted fine-state guard and all 13 fresh mechanical-linear
+checks pass.
+
+Accepted-prefix total phi/I_h/mechanical errors contract versus the independent
+reference, while small phi/I_h increment errors do not. Independently resolved
+nested reference timesteps .375/.1875/.09375 s show another important result:
+the two smaller steps suppress H/phi/I_h feedback because every candidate lies
+below retained H (maximum candidate/H .851374/.425796). This is retained as a
+model/discrete-update finding, not tuned away or called production convergence.
+Full failed evidence, comparisons, accuracy checks and resumption instructions
+are in `stage_K3_periodic_convergence.md`. K2 references remain provisional and
+Gate K2 remains unmet. Earlier entries below preserve the accepted baseline.
+
+**Current K3 result: periodic-image domains restore whole-fault homogeneity.**
+The approved correction uses global-period geometry-only neighbors, unique real
+parent ownership, unwrapped CPDI domains and full physical-box fragments for
+open-fault quadrature. No equations, support, I_h, history, solver criterion or
+endpoint topology changed. Controlled nonlinear phase regressions pass before
+and after wrapping on one/two ranks, including remote periodic images; weak
+load differences are roundoff and full-measure/open-endpoint mass checks pass.
+The saved advected-state seam residual falls by 130,000–237,000 times. Domain
+and Stage-I units (888 assertions/21 cases per rank), one/two-rank coupled
+actions, changed loading, rollback and Stage-J lifecycle tests pass.
+
+The fresh 32x128/fault32, dt=.375-s replay passes initialization and eight real
+steps through 3 s: all nine state guards and 37 fresh-linear checks pass.
+Runtime 120.403 s, peak RSS 723 MiB. Maximum omitted fraction / complete
+supported normalization error are 5.836624e-5 / 5.335760e-5, below unchanged
+1e-4 limits. At 3 s the whole-fault I_h range falls from .004756832 m to
+9.538184e-10 m; H, phi, C and V homogeneity also pass despite 350 wraps.
+Initial histories are unchanged and surface projection differences are
+roundoff. The exact-time independent reference is retained without resets.
+Total-field errors are small but feedback-increment/normal-resolution errors
+remain; this is not K3 convergence. Gate K2 remains unmet. The next spatial
+comparison must use this corrected rule on both levels, with fresh initial
+data; no further resolution run was performed here. Details, source hashes
+and preserved evidence: `stage_K3_periodic_domain_review.md` and
+`evolving/periodic-domains/summary.json`. Earlier entries below are historical.
+
+**Current K3 review point: homogeneous phase input exposes a periodic-domain
+seam residual; correction proposal only.** The accepted fault32 I_h result is
+closed. A 14.701-s one-rank frozen-data diagnostic regenerates the initial and
+saved step-2/3 domains with exact stable-ID saved-volume agreement, then calls
+production phase residual assembly with identical phi(y), H(y). Initial
+tangential variation is roundoff; advected seam/interior residual-density RMS
+are .147951/2.63e-7 and .233182/2.03e-7 Pa. More than 99.99999999% of the
+nonuniform squared norm is at the periodic seam and immediately adjacent node
+columns. Constant and first-moment reproduction pass; nonperiodic-wall domain
+volume changes of +/-12% and +/-18% explain the geometry mechanism despite
+nearly conserved total measure. The old gradient-orientation sign observation
+is confirmed, cancels from the phase bilinear form, and remains separate.
+Normal/forced-failure restoration and split-versus-production assembly pass.
+No production numerics or coupled trajectory changed. Propose periodic-image
+domain construction/CPDI ownership with explicit full-domain surface-consumer
+review and a small displaced-lattice one/two-rank regression before another
+K3 replay. See `stage_K3_phase_seam_audit.md`; K3 is not converged and Gate K2
+remains unmet. The following entries retain the preceding evidence/history.
+
+**Current K3 result: coupled fault32 refinement verifies the normalization
+improvement; a separate homogeneity gate remains.** Fresh 32-element faults
+on 32x128/32x256 bulk meshes suppress the full-profile identity defect below
+4.45e-9 at every computed state. Complete normalization maxima are
+5.454994e-5/6.230620e-5, with unchanged 1e-4 thresholds, support and full I_h.
+The coupled runs pass phase/mechanics and all 37/34 fresh-linear checks.
+However, endpoint I_h variation reaches the existing reference-feedback
+comparability limit: the coarse run stops at 3 s and the fine run at 2.625 s.
+Both final exports are mechanically converged but not fully benchmark-passing.
+The common-time I_h range increases from .003286013 to .004042486 m under
+normal refinement, despite improved transverse phase/raw-stress errors.
+No fault64 or bulk512 run follows: the resolved I_h representation error is
+no longer the limitation. Review endpoint/phase homogeneity next, preserving
+the verified coupled normalization result. Runtime 114.044/219.007 s; all
+failed evidence retained. See `stage_K3_coupled_fault_resolution.md`.
+No equations, projection method, support, pressure or solver criteria changed.
+K3 remains unconverged; Gate K2 remains unmet with provisional references.
+
+**Current K3 review point: conclusion (2), surface I_h representation limits
+normal-only convergence.** Under the broader execution authorization, a
+reference-selected common .375-s pair removes the CFL/history confounding.
+32x128/32x256 both fail the actual-normalization guard at 1.125 s
+(1.887058e-4/2.273543e-4), despite converged phase/mechanics, unchanged H,
+valid geometry and passing lifecycle checks. Runtime is 54.469/115.075 s.
+The dominant measured contribution is a full-profile identity defect amplified
+by history, caused by the 16-element Q1 representation of the normal integral.
+An independent calculation reproduces the specified three-point projection;
+better quadrature on that same space remains insufficient. A frozen-data
+bulk-aligned 32-element scalar approximation reduces the identity defect below
+1e-9 with unchanged tails near 6e-5. No production change or live re-projection
+was made. Stop for a targeted representation/normalization-consistency test or
+design decision, not support widening or a normal512/temporal run. See
+`stage_K3_common_timestep_spatial.md`. K3 is not converged; previous failed
+outputs and spatial improvements remain valid evidence, and Gate K2 is unmet.
+
+**Latest K3 action: reference-only common-timestep support diagnostic completed.**
+No ASPECT run followed the 32x256 support failure, which remains nonpassing.
+Through 3 s, dt=.5/.25/.125 sequences have maximum complete normalization
+errors 6.160459e-5/5.914151e-5/5.909980e-5 at unchanged support; all containment
+and reference admissibility checks pass. Current half-width .308821594 m is
+sufficient for the existing 1e-4 target. Frozen-profile offline widths for
+5e-5 are at most .311872323 m; no width or criterion is changed. Feedback
+decreases strongly with timestep refinement and vanishes at .125 s because
+every H candidate lies below H_old, not because its update is omitted. A
+common-dt=.5-s 32x128/32x256 pair is proposed only as a fixed-discrete-cycle
+spatial comparison, not temporal convergence; it awaits execution/budget
+review. See `stage_K3_timestep_support_diagnostic.md`. K3 convergence and Gate
+K2 remain unestablished; retained K2 references stay provisional.
+
+**Latest K3 status: first normal refinement stops at the support review gate.**
+The authorized 32x256 case (unchanged 17-node fault) took 87.979 s/909 MiB.
+Phase/mechanics, all 16 fresh-linear checks, histories, geometry and seam gates
+pass, but step-2 actual normalization is 1.526976e-4 > 1e-4; omission is
+6.171689e-5. Its shorter CFL second step is .8560969314 s. The independent
+exact-time reference also fails normalization (1.1166385e-4). Transverse phase
+errors improve, while total H-profile convergence is not established. The last
+saved mechanically committed state is not a passing benchmark state. No retry,
+criterion/support change or further run follows. See `stage_K3_normal_refinement.md`.
+The accepted baseline smoke below was reused, not rerun; K3 convergence is held
+for review. K2 references remain provisional and Gate K2 remains unmet.
+
+**Latest K3 smoke status: bounded verification passes.** The explicitly approved
+corrected one-rank Release invocation reaches 0/2/3.712347940 s in 43.412 s,
+585 MiB, below the 180-s cap. All 16 fresh linear checks and phase/mechanical
+criteria pass. Normal/exceptional probe restoration and stable-ID H handoff
+are verified; geometry is unchanged. Max omission/total normalization are
+6.100e-5/9.567e-5, with a narrow normalization margin. 358 second-step wraps
+do not produce comparable seam feedback. The independent reference rerun on
+exact accepted times differs in final slip by .002804%; initialization errors
+remain visible. See `stage_K3_smoke_result.md`. The original failed attempt is
+archived, not overwritten. No further simulation or convergence claim follows.
+
 **Current accepted disposition: K2.4 closed; K3 preparation authorized by
 sequencing exception, not by Gate K2 passage.** The completed parity check
 changes the matched true-normal-stress response by about 1% or less on the
@@ -12,10 +209,18 @@ unmet and no 128x512 run is authorized.
 K3 preparation returns to homogeneous K1-style mechanics and an independent
 1-D phase/history reference. Equations, exact indexed cycle, actual phase
 boundary/admissibility rules, proposed two-real-step loading and a separately
-proposed K3 containment budget are in `stage_K3_preparation.md`. The frozen K1
-exporter cannot be used unchanged. Only source inspection and a 0.22-s scalar
-signal estimate were performed; no K3 smoke/build/campaign was launched.
-Implementation/execution awaits review of the preparation and error budget.
+proposed K3 containment budget are in `stage_K3_preparation.md`. The corrected
+reference reads the validated configured activation threshold .1. A default-off
+evolving exporter mode and smoke overlay are implemented but unbuilt/unexecuted.
+The original .009-m/s ramp fails normalization despite acceptable h omission.
+The authorized two-candidate reference-only adjustment rejects .0045 m/s and
+selects .00225 m/s: independent/conditional normalization errors are
+8.693e-5/8.701e-5 and h omissions 6.167e-5/6.141e-5. H/phi/I_h signals exceed
+their reference noise by >600x. These are preflight predictions, not production
+measurements. The conditional calculation retains a visible initialization
+representation adjustment; neither reference is reset from later outputs.
+Six cheap tests pass. No ASPECT smoke/build/campaign was launched, and no
+support, I_h or acceptance criterion changed. See `stage_K3_bounded_adjustment.md`.
 
 **K2.4 approved parity pair completed; stop for review:** 64x255 bumped/control
 runs both pass at 0/.5/1 s in 151.164/131.842 s (283.007 s aggregate), with

@@ -1,0 +1,8 @@
+# One normal-resolution refinement; all physical and solver inputs inherited.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/evolving/spatial0375_n256_f32_periodic_floor.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/evolving/spatial0375_n512_f32_periodic_floor
+subsection Geometry model
+  subsection Box
+    set Y repetitions = 16
+  end
+end

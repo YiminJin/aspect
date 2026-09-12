@@ -1,0 +1,136 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "case": "one",
+      "exact_zero_allowance": 6.993523870246155e-15,
+      "samples": [
+        {
+          "value": 0.0,
+          "initial": 0.0,
+          "allowance": 6.993523870246154e-15,
+          "final": 0.0,
+          "target": 6.993523870246154e-15
+        },
+        {
+          "value": 1e-18,
+          "initial": 8.741904837807691e-16,
+          "allowance": 6.993523870246154e-15,
+          "final": 8.741904837807691e-16,
+          "target": 6.993523870246154e-15
+        },
+        {
+          "value": 1e-06,
+          "initial": 0.0004920332575865688,
+          "allowance": 6.994087010842002e-15,
+          "final": 3.5212744729988166e-15,
+          "target": 4.920332575865689e-12
+        }
+      ],
+      "resources": {
+        "status": 0,
+        "seconds": 1.516584150998824,
+        "peak_rss_KiB": 199792
+      }
+    },
+    {
+      "case": "two",
+      "exact_zero_allowance": 6.993523870246155e-15,
+      "samples": [
+        {
+          "value": 0.0,
+          "initial": 0.0,
+          "allowance": 6.993523870246155e-15,
+          "final": 0.0,
+          "target": 6.993523870246155e-15
+        },
+        {
+          "value": 1e-18,
+          "initial": 8.741904837807691e-16,
+          "allowance": 6.993523870246155e-15,
+          "final": 8.741904837807691e-16,
+          "target": 6.993523870246155e-15
+        },
+        {
+          "value": 1e-13,
+          "initial": 4.92125532844384e-11,
+          "allowance": 6.993523870302484e-15,
+          "final": 3.619946058294287e-26,
+          "target": 6.993523870302484e-15
+        },
+        {
+          "value": 1e-06,
+          "initial": 0.0004920332575865687,
+          "allowance": 6.9940870108420015e-15,
+          "final": 3.563545197577481e-15,
+          "target": 4.920332575865687e-12
+        }
+      ],
+      "resources": {
+        "status": 0,
+        "seconds": 2.067297593999683,
+        "peak_rss_KiB": 2070208
+      }
+    },
+    {
+      "case": "refined",
+      "exact_zero_allowance": 4.98488901726627e-15,
+      "samples": [
+        {
+          "value": 0.0,
+          "initial": 0.0,
+          "allowance": 4.98488901726627e-15,
+          "final": 0.0,
+          "target": 4.98488901726627e-15
+        },
+        {
+          "value": 1e-18,
+          "initial": 6.231111271582838e-16,
+          "allowance": 4.98488901726627e-15,
+          "final": 6.231111271582838e-16,
+          "target": 4.98488901726627e-15
+        },
+        {
+          "value": 1e-06,
+          "initial": 0.00035071463648077934,
+          "allowance": 4.985678180393638e-15,
+          "final": 2.8040298426425885e-15,
+          "target": 3.5071463648077935e-12
+        }
+      ],
+      "resources": {
+        "status": 0,
+        "seconds": 1.5664026819995343,
+        "peak_rss_KiB": 200232
+      }
+    }
+  ],
+  "plateau": {
+    "step": 2,
+    "iteration": 9,
+    "alpha": 1.0,
+    "production_residual": 1.3829684310623851e-14,
+    "extended_residual": 1.3899872766360767e-14,
+    "production_vs_extended": 3.1203668880435126e-15,
+    "offline_double_vs_extended": 4.077387165664397e-15,
+    "reaction": 0.17592014907773854,
+    "gradient": 0.17592014907773856,
+    "reaction_gradient_cancellation": 25312483363658.527,
+    "term_scale": 738.4329850669836,
+    "epsilon_term_scale": 1.6396506043280992e-13,
+    "update": 1.4511762215672334e-15,
+    "represented": 1.392729923616789e-15,
+    "Jrepresented": 1.3234641879865598e-14,
+    "J_action_vs_extended": 3.7398321451276886e-30,
+    "production_trial": 1.425445838935209e-14,
+    "extended_trial": 1.4240940443501853e-14,
+    "extended_unrounded_trial": 3.120587864623594e-15,
+    "rounding_residual_effect": 1.4065376292573761e-14,
+    "affine_error": 1.666897225027291e-15,
+    "extended_affine_error": 1.1807146219387719e-18,
+    "unchanged_free_dofs": 3450,
+    "free_dofs": 8224
+  },
+  "criterion": "max(relative * initial residual, 8 eps ||positive phase term scale||)",
+  "scale_is_estimate_not_rigorous_bound": true
+}

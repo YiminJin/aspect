@@ -1,0 +1,11 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/evolving/periodic-domains/one.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/evolving/periodic-domains/one-remote
+subsection Geometry model
+  subsection Box
+    set X repetitions = 4
+    set Y repetitions = 1
+  end
+end
+subsection Mesh refinement
+  set Initial global refinement = 3
+end
