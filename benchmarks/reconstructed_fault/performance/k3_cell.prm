@@ -1,0 +1,7 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/performance/k3_remote.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/performance/k3_cell
+subsection Material model
+  subsection Phase field fault
+    set I h integration backend = cell intervals
+  end
+end

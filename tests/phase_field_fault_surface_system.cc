@@ -10,6 +10,7 @@
 */
 
 #include "phase_field_fault_test_access.h"
+#include "../source/reconstructed_fault/surface_direct_internal.h"
 
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/postprocess/interface.h>
@@ -19,13 +20,56 @@
 #include <aspect/reconstructed_fault/surface_system.h>
 #include <aspect/simulator/solver/reconstructed_fault_condensed_system.h>
 #include <aspect/simulator_access.h>
+#include <aspect/simulator_signals.h>
 
 #include <deal.II/numerics/vector_tools.h>
 #include <fstream>
 #include <iomanip>
+#include <random>
 
 namespace aspect
 {
+  // Test-only semantic inverse reconstructed from the production K_V action.
+  // Explicit backend choice permits independent condensed-action/recovery
+  // comparisons without extending the production surface-solve interface.
+  template <int dim>
+  class SurfaceInverseComparison : public ReconstructedFaultSurfaceLinearSolve<dim>
+  {
+    public:
+      SurfaceInverseComparison(const ReconstructedFaultSurfaceSystem<dim> &surface,
+                               const ReconstructedFaultActiveSet &active, const bool pivoted)
+      {
+        ReconstructedFaultVector basis(active.size()), action;
+        for (unsigned int f=0;f<active.size();++f) basis[f].assign(active[f].size(),0.);
+        for (unsigned int f=0;f<active.size();++f)
+          {
+            std::vector<double> diagonal(active[f].size()),edge(active[f].size()-1);
+            for (unsigned int i=0;i<active[f].size();++i)
+              {
+                basis[f][i]=1.; surface.apply_surface_jacobian(basis,action); basis[f][i]=0.;
+                diagonal[i]=action[f][i];
+                if (i+1<active[f].size()) edge[i]=action[f][i+1];
+              }
+            factors.push_back(std::make_unique<internal::FaultSurfaceDirect>(diagonal,edge,active[f],f,pivoted));
+          }
+      }
+      void solve(const ReconstructedFaultVector &rhs,ReconstructedFaultVector &result) const override
+      {
+        result.resize(rhs.size());
+        for (unsigned int f=0;f<rhs.size();++f) factors[f]->solve(rhs[f],result[f]);
+      }
+    private:
+      std::vector<std::unique_ptr<internal::FaultSurfaceDirect>> factors;
+  };
+
+  template <int dim>
+  void register_test_background_tractions(SimulatorSignals<dim> &signals)
+  {
+    signals.post_simulator_initialization.connect([](const SimulatorAccess<dim> &sim)
+    { sim.get_reconstructed_fault_manager().register_property("test background tractions",2); });
+  }
+  ASPECT_REGISTER_SIGNALS_CONNECTOR(register_test_background_tractions<2>,register_test_background_tractions<3>)
+
   namespace Postprocess
   {
     template <int dim>
@@ -235,8 +279,8 @@ namespace aspect
 
         static bool
         verify_point_response_pressure_mode(
-          const MaterialModel::PhaseFieldFault<dim> &model,
-          const ReconstructedFaultManager<dim> &fault_manager)
+          MaterialModel::PhaseFieldFault<dim> &model,
+          ReconstructedFaultManager<dim> &fault_manager)
         {
           const ReconstructedFault<dim> &fault = fault_manager.get_fault(0);
           Assert(fault.n_cells() > 0, ExcInternalError());
@@ -268,7 +312,25 @@ namespace aspect
           inputs.slip_tensor = symmetrize(outer_product(tangent, normal));
           inputs.normal_tensor = symmetrize(outer_product(normal, normal));
 
+          const auto unshifted = model.evaluate_reconstructed_fault_point(inputs);
+          const auto property = fault_manager.get_property_index("test background tractions");
+          const auto position = fault_manager.get_property_information()[property].position;
+          for (unsigned int f=0; f<fault_manager.get_faults().size(); ++f)
+            for (unsigned int v=0; v<fault_manager.get_fault(f).n_vertices(); ++v)
+              {
+                auto data=fault_manager.get_fault(f).get_properties(v);
+                data[position]=7e5+1000*v;
+                data[position+1]=2e5+200*v;
+              }
+          model.set_reconstructed_fault_background_traction_property(property);
           const auto baseline = model.evaluate_reconstructed_fault_point(inputs);
+          const double shear_background=7e5+1000*(segment+xi);
+          const double normal_background=2e5+200*(segment+xi);
+          assert_close(baseline.residual_density-unshifted.residual_density,
+                       shear_background-baseline.friction_coefficient*normal_background,
+                       "background residual sign and Q1 interpolation");
+          assert_close(baseline.normal_traction-unshifted.normal_traction,normal_background,
+                       "total background normal traction");
 
           constexpr double pressure_increment = 2.e5;
           auto pressure_inputs = inputs;
@@ -301,6 +363,43 @@ namespace aspect
           assert_close(strain_rate_response.residual_density-baseline.residual_density,
                        expected_strain_rate_change,
                        "strain-rate response");
+          auto plus=inputs, minus=inputs;
+          const double epsilon=inputs.slip_rate*1e-4;
+          plus.slip_rate+=epsilon;
+          minus.slip_rate-=epsilon;
+          const double derivative=-(model.evaluate_reconstructed_fault_point(plus).residual_density
+                                    -model.evaluate_reconstructed_fault_point(minus).residual_density)/(2*epsilon);
+          AssertThrow(std::abs(derivative-baseline.minus_derivative_wrt_slip_rate)
+                      < 2e-5*std::max(std::abs(derivative),1.),
+                      ExcMessage("K_V does not differentiate the background-traction residual."));
+          // Inclined S:N=0 is essential: changing V at fixed bulk unknowns
+          // cannot change normal stress, including with a background selected.
+          auto inclined=inputs;
+          Tensor<1,dim> inclined_tangent, inclined_normal;
+          inclined_tangent[0]=0.5;
+          inclined_tangent[1]=std::sqrt(3.)/2.;
+          inclined_normal[0]=-inclined_tangent[1];
+          inclined_normal[1]=inclined_tangent[0];
+          inclined.slip_tensor=symmetrize(outer_product(inclined_tangent,inclined_normal));
+          inclined.normal_tensor=symmetrize(outer_product(inclined_normal,inclined_normal));
+          const auto inclined_response=model.evaluate_reconstructed_fault_point(inclined);
+          plus=minus=inclined;
+          plus.slip_rate+=epsilon;
+          minus.slip_rate-=epsilon;
+          const auto inclined_plus=model.evaluate_reconstructed_fault_point(plus);
+          const auto inclined_minus=model.evaluate_reconstructed_fault_point(minus);
+          assert_close(inclined_plus.normal_traction,inclined_minus.normal_traction,
+                       "inclined fixed-bulk slip has no normal-stress derivative");
+          const double inclined_derivative=-(inclined_plus.residual_density-inclined_minus.residual_density)/(2*epsilon);
+          AssertThrow(std::abs(inclined_derivative-inclined_response.minus_derivative_wrt_slip_rate)
+                      <2e-5*std::max(std::abs(inclined_derivative),1.),
+                      ExcMessage("Inclined background-traction K_V fails finite differences."));
+          model.set_reconstructed_fault_background_traction_property(numbers::invalid_unsigned_int);
+          assert_close(model.evaluate_reconstructed_fault_point(inputs).residual_density,
+                       unshifted.residual_density,"disabled background recovers previous model");
+          // Continue the assembled K_V/G finite-difference checks with background
+          // enabled, not just the point-response checks above.
+          model.set_reconstructed_fault_background_traction_property(property);
           return baseline.uses_adiabatic_friction_pressure;
         }
 
@@ -505,6 +604,41 @@ namespace aspect
                       ExcMessage("The Stage-G geometry cache was not built exactly once."));
           AssertThrow(bulk_assembler.get_B_linearization_rebuild_count() == 1,
                       ExcMessage("The Stage-G B linearization cache was not built once."));
+
+          if (std::getenv("ASPECT_FAULT_COMPARE_COUPLING"))
+            {
+              // Seeded global-order probes are identical on one/two ranks.
+              // Include endpoint basis columns and dense random directions.
+              for (unsigned int sample=0; sample<8; ++sample)
+                {
+                  auto probe=V;
+                  std::mt19937 generator(1729+sample);
+                  std::uniform_real_distribution<double> random(-1.,1.);
+                  for (unsigned int f=0; f<probe.size(); ++f)
+                    for (unsigned int i=0; i<probe[f].size(); ++i)
+                      probe[f][i]=sample<4 ? (i==(sample*(probe[f].size()-1))/3 ? 1. : 0.)
+                                           : random(generator);
+                  auto result=make_owned_system_vector();
+                  bulk_assembler.apply_B(probe,result);
+                  auto owned=make_owned_system_vector();
+                  for (unsigned int b=0; b<2; ++b)
+                    for (types::global_dof_index i=0; i<owned.block(b).size(); ++i)
+                      {
+                        const double value=sample<4
+                          ? (i==(sample+1)*owned.block(b).size()/5 ? 1. : 0.) : random(generator);
+                        if (owned.block(b).locally_owned_elements().is_element(i)) owned.block(b)[i]=value;
+                      }
+                  this->get_current_constraints().set_zero(owned);
+                  owned.compress(VectorOperation::insert);
+                  LinearAlgebra::BlockVector ghosted(
+                    this->introspection().index_sets.system_partitioning,
+                    this->introspection().index_sets.system_relevant_partitioning,
+                    this->get_mpi_communicator());
+                  ghosted=owned;
+                  surface_system.apply_G(ghosted,probe);
+                }
+              this->get_pcout() << "Sparse B/G basis/random reference actions: verified" << std::endl;
+            }
 
           auto bulk_fault_direction = fault_direction;
           auto bulk_V = V;
@@ -802,6 +936,34 @@ namespace aspect
             AssertThrow(restricted_recovery[fault][V[fault].size()/2] == 0.0,
                         ExcMessage("The condensed Stage-I recovery did not use "
                                    "the semantic restricted surface solve."));
+
+          // Both inverses act on the SAME frozen A/B/G/K_V generation. Compare
+          // the complete condensed action and recovery, not just scalar solves.
+          std::vector<std::unique_ptr<SurfaceInverseComparison<dim>>> comparison_solves;
+          auto current = std::make_unique<typename CondensedSystem::Linearization>(restricted_linearization);
+          for (unsigned int pattern=0;pattern<4;++pattern)
+            {
+              auto mask=no_active_vertices;
+              for (unsigned int f=0;f<V.size();++f)
+                for (unsigned int i=0;i<V[f].size();++i)
+                  mask[f][i]=pattern==1 ? i==V[f].size()/2
+                            : pattern==2 ? i==0 || i+1==V[f].size()
+                            : pattern==3 ? i%2==1 : false;
+              comparison_solves.push_back(std::make_unique<SurfaceInverseComparison<dim>>(surface_system,mask,true));
+              comparison_solves.push_back(std::make_unique<SurfaceInverseComparison<dim>>(surface_system,mask,false));
+              current=std::make_unique<typename CondensedSystem::Linearization>(
+                current->with_surface_solve(*comparison_solves[comparison_solves.size()-2]));
+              auto pivot_action=make_owned_stokes_vector(),reference_action=make_owned_stokes_vector();
+              typename CondensedSystem::FaultVector pivot_recovery,reference_recovery;
+              current->vmult(pivot_action,solver_direction);
+              current->recover_slip_rate_increment(solver_direction,pivot_recovery);
+              current=std::make_unique<typename CondensedSystem::Linearization>(
+                current->with_surface_solve(*comparison_solves.back()));
+              current->vmult(reference_action,solver_direction);
+              current->recover_slip_rate_increment(solver_direction,reference_recovery);
+              assert_bulk_vectors_close(pivot_action,reference_action,"pivoted/UMFPACK complete condensed action");
+              assert_fault_vectors_close(pivot_recovery,reference_recovery,2e-12,"pivoted/UMFPACK recovered delta V");
+            }
 
           const auto superseded = condensed_system.linearize(
             this->get_system_matrix(), this->get_solution(), V);

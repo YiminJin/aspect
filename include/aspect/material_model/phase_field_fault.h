@@ -99,6 +99,8 @@ namespace aspect
           Point<dim> position;
 
           double slip_rate = numbers::signaling_nan<double>();
+          /** Only the opt-in noncommitting nodal-state diagnostic uses these. */
+          std::array<double,2> diagnostic_nodal_rates = {{0.,0.}};
           double phase_field = numbers::signaling_nan<double>();
           double previous_phase_field = numbers::signaling_nan<double>();
           double temperature = numbers::signaling_nan<double>();
@@ -116,11 +118,17 @@ namespace aspect
         {
           /** Evaluated traction terms, for projection-consistent weak diagnostics. */
           double shear_traction;
+          /** Total normal traction and its fixed background contribution. */
+          double normal_traction;
+          double background_normal_traction;
           double cohesive_traction;
           double friction_traction;
           double damping_traction;
           double residual_density = numbers::signaling_nan<double>();
           double minus_derivative_wrt_slip_rate = numbers::signaling_nan<double>();
+          /** Extra column coefficients sigma mu_Theta dTheta_j/dV_j, without N_j. */
+          std::array<double,2> diagnostic_state_tangent = {{0.,0.}};
+          double evaluated_state = 0.;
           double kappa = numbers::signaling_nan<double>();
           double localization_factor = numbers::signaling_nan<double>();
           double friction_coefficient = numbers::signaling_nan<double>();
@@ -150,6 +158,29 @@ namespace aspect
         ReconstructedFaultPointResponse
         evaluate_reconstructed_fault_point(
           const ReconstructedFaultPointInputs &inputs) const;
+
+        /** Select a manager-owned two-component Q1 field (shear, compressive
+         * normal) of fixed background tractions. Invalid index disables it.
+         * Configure outside mechanics and keep values frozen during the solve.
+         * These offsets never enter bulk assembly or Maxwell history. */
+        void set_reconstructed_fault_background_traction_property(
+          unsigned int property_index,
+          unsigned int shear_correction_property = numbers::invalid_unsigned_int);
+
+        /** Fixed background at a surface coordinate. An optional three-component
+         * correction (a,b,d) subtracts a(s)+b(s)/d(s), without Q1 reprojection. */
+        std::pair<double,double> reconstructed_fault_background_tractions(
+          unsigned int fault, unsigned int segment, double xi) const;
+
+        /** Explicit constitutive selection, never inferred from a frozen phase. */
+        bool is_mature_frictional_fault() const;
+
+        /** Select immutable, geometry-checked outside-profile integrals for a
+         * frozen mature through-boundary benchmark. Applied before the existing
+         * consistent I_h projection; no outside mechanical integration is added.
+         * Reattach the same file on restart, before constitutive preparation.
+         */
+        void set_boundary_normalization_completion_file(const std::string &path);
 
         ReconstructedFaultBulkPointResponse
         evaluate_reconstructed_fault_bulk_point(
@@ -249,7 +280,8 @@ namespace aspect
                                   const double previous_cohesive_traction,
                                   const double slip_rate,
                                   const double current_h,
-                                  const double previous_h);
+                                  const double previous_h,
+                                  const bool mature = false);
 
         /** Surface mixture and cohesive-profile values shared by surface and bulk points. */
         struct LocalizationResponse
@@ -361,7 +393,8 @@ namespace aspect
           const double tail_tolerance,
           const MPI_Comm communicator,
           const NormalizationPointEvaluator &evaluate_points,
-          const NormalizationIntegrandEvaluator &integrand);
+          const NormalizationIntegrandEvaluator &integrand,
+          double *mpi_seconds = nullptr);
         /**
          * @}
          */
@@ -370,9 +403,12 @@ namespace aspect
          * @name Normalization-integral evaluation
          * @{
          */
-        /** Recompute transient nodal I_h from the current distributed phase field. */
+        /** Compute or exactly reuse transient nodal I_h for the current state. */
         void
         compute_normalization_integrals();
+
+        /** Discard transient value and lookup data after checkpoint loading. */
+        void invalidate_normalization_cache();
 
         /**
          * Return the phase field used to evaluate degradation for I_h.
@@ -400,7 +436,15 @@ namespace aspect
 
         /** Construct the balanced rank-owned set of normal profiles. */
         std::vector<NormalizationProfile>
-        build_owned_normalization_profiles() const;
+        build_owned_normalization_profiles(const bool all_profiles = false) const;
+
+        /** Integrate current phase values on cached, locally owned ray intervals. */
+        std::vector<double>
+        integrate_cell_normalization_profiles(
+          const std::vector<NormalizationProfile> &profiles,
+          const NormalizationIntegrandEvaluator &integrand,
+          double &sampling_seconds,
+          double &mpi_seconds);
 
         /** Evaluate the distributed Q1 phase field and local cell size at arbitrary points. */
         std::vector<NormalizationPointSample>
@@ -433,6 +477,10 @@ namespace aspect
         EquationOfState::MulticomponentIncompressible<dim> equation_of_state;
 
         Rheology::FaultFriction<dim> fault_friction;
+
+        unsigned int background_traction_property = numbers::invalid_unsigned_int;
+        unsigned int background_shear_correction_property = numbers::invalid_unsigned_int;
+        bool mature_frictional_fault = false;
 
         MaterialUtilities::CompositionalAveragingOperation viscosity_averaging;
 
@@ -482,9 +530,28 @@ namespace aspect
         FaultPropertyIndices fault_property_indices;
 
         std::vector<std::vector<double>> current_normalization_integrals;
+        std::string boundary_normalization_completion_file;
+
+        /** Non-checkpointed exact value-cache key. Owned phase entries are
+         * compared directly (not hashed or inferred from the timestep). Every
+         * rank must match; a failed preparation cannot leave a valid entry. */
+        struct NormalizationValueCache
+        {
+          bool valid = false;
+          IndexSet owned_phase_indices;
+          std::vector<double> phase_values;
+          std::vector<std::uint64_t> fault_versions;
+          std::vector<Point<dim>> fault_vertices;
+          std::vector<double> surface_compositions;
+          std::uint64_t degradation_revision = 0;
+          unsigned int hits = 0;
+          unsigned int integrations = 0;
+          unsigned long long last_requested_points = 0;
+        };
+        NormalizationValueCache normalization_value_cache;
 
         /** Geometry-only lookups for the batch sequence of the last I_h solve.
-         * Values are never cached. A changed batch or invalidated mesh forces
+         * This cache holds no values. A changed batch or invalidated mesh forces
          * a collective rebuild; unused trailing batches are discarded. */
         struct NormalizationPointLookupCache
         {
@@ -509,6 +576,31 @@ namespace aspect
         };
 
         mutable NormalizationPointLookupCache normalization_point_lookups;
+
+        /** Geometry only: phase/material changes do not invalidate ray traversals. */
+        struct NormalizationCellCache
+        {
+          struct Interval
+          {
+            double lower, upper, diameter;
+            Point<dim> reference_origin;
+            Tensor<1,dim> reference_direction;
+            std::array<types::global_dof_index, GeometryInfo<dim>::vertices_per_cell> phase_dofs;
+          };
+          struct Profile
+          {
+            Point<dim> origin;
+            Tensor<1,dim> normal;
+            std::vector<Interval> intervals;
+          };
+          bool mesh_changed = true;
+          bool supported = false;
+          BoundingBox<dim> physical_box;
+          std::vector<Profile> profiles;
+          boost::signals2::scoped_connection change_connection, create_connection;
+        };
+        NormalizationCellCache normalization_cell_cache;
+        bool use_cell_normalization_profiles = false;
 
         std::vector<std::vector<double>> current_fault_surface_temperatures;
 

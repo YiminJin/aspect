@@ -1,0 +1,3 @@
+# Rebuildable local plugin products and Python bytecode.
+build/
+__pycache__/

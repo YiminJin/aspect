@@ -1,0 +1,10 @@
+# Fresh local diagnostic, initialization through step 12 only.
+# Physical settings and ordinary output follow the actual server input.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/first_cycle_coarse/original.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/build/libbp3.release.so
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/normal-stress-fresh-local4
+set Resume computation = false
+subsection Termination criteria
+  set Termination criteria = end step
+  set End step = 12
+end

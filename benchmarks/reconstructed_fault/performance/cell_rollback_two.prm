@@ -1,0 +1,2 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/performance/cell_rollback_one.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/performance/cell_rollback_two

@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.13.4)
+find_package(Aspect REQUIRED HINTS ${Aspect_DIR})
+DEAL_II_INITIALIZE_CACHED_VARIABLES()
+project(reconstructed_fault_performance_checks)
+add_library(fault_rollback SHARED ../../../tests/phase_field_fault_stage_i_rollback.cc)
+ASPECT_SETUP_PLUGIN(fault_rollback)
+add_library(fault_stage_i SHARED ../../../tests/phase_field_fault_stage_i.cc)
+ASPECT_SETUP_PLUGIN(fault_stage_i)

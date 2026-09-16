@@ -16,6 +16,7 @@
 #include <aspect/boundary_velocity/interface.h>
 #include <aspect/geometry_model/interface.h>
 #include <aspect/plugins.h>
+#include <aspect/reconstructed_fault/linear_performance.h>
 
 namespace aspect
 {
@@ -31,6 +32,7 @@ namespace aspect
       {
         AssertDimension(source.n_blocks(), 2);
         AssertDimension(result.n_blocks(), 2);
+        aspect::internal::FaultLinearSection timing(aspect::internal::FaultLinearTiming::A);
         matrix.block(0,0).vmult(result.block(0), source.block(0));
         matrix.block(0,1).vmult_add(result.block(0), source.block(1));
         matrix.block(1,0).vmult(result.block(1), source.block(0));
@@ -338,6 +340,33 @@ namespace aspect
     {
       assert_is_current();
       return residual;
+    }
+
+
+    template <int dim>
+    void
+    ReconstructedFaultCondensedSystem<dim>::Linearization::apply_B(
+      const FaultVector &source, LinearAlgebra::BlockVector &result) const
+    {
+      assert_is_current();
+      LinearAlgebra::BlockVector full(owner.introspection().index_sets.system_partitioning,
+                                     owner.get_mpi_communicator());
+      owner.stokes_coupling.apply_B(source,full);
+      result.block(0)=full.block(0);
+      result.block(1)=full.block(1);
+      homogeneous_stokes_constraints->set_zero(result);
+      result.compress(VectorOperation::insert);
+    }
+
+
+    template <int dim>
+    void
+    ReconstructedFaultCondensedSystem<dim>::Linearization::apply_G(
+      const LinearAlgebra::BlockVector &source, FaultVector &result) const
+    {
+      assert_is_current();
+      owner.surface_system.apply_G(make_physical_bulk_direction(
+        make_constrained_solver_direction(source)),result);
     }
 
 

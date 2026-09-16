@@ -1,0 +1,4 @@
+# Exercise the assembled Stokes matrix as well as the surface/B/G tests.
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_condensed_dynamic.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/build/libbp3_coupling_checks.release.so
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/performance/mechanical_condensed

@@ -1,0 +1,48 @@
+{
+  "command": [
+    "timeout",
+    "--signal=TERM",
+    "--kill-after=15",
+    "300",
+    "mpirun",
+    "-np",
+    "4",
+    "--bind-to",
+    "core",
+    "--map-by",
+    "core",
+    "/home/ein/repository/aspect/build-pf-cpdi/aspect-release",
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/within-step-50-local4/A/run.prm"
+  ],
+  "checkpoint": "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/work-replay-50-local4/restart/01",
+  "checkpoint_sha256": {
+    "mesh_fixed.data": "01f1cc9e295afc3caff6fc83cc407f20efb09b7c401e95f00c4c22c767120d5a",
+    "mesh_variable.data": "64ffedbae080f19317491dc3e664766487ba9aa4cebce4acab9e78a8f7cd04cb",
+    "mesh": "73a6c24feae666c1e1312fbe542e5cbe35bc9051e12e75573aed041f4ee1d43c",
+    "resume.z": "9d0227ef3552f2cb4c791d7a6cb09b099892296b29de2ade9c8781c740816854",
+    "mesh.info": "ce877139a37c1ca324aa5f0cdbd900bc6cc5fc5aac4df9db67fb95a9a8fe4f90"
+  },
+  "environment": {
+    "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect",
+    "ASPECT_FAULT_EXPLICIT_B": "1",
+    "ASPECT_FAULT_EXPLICIT_G": "1",
+    "ASPECT_FAULT_SURFACE_SOLVER": "tridiagonal",
+    "ASPECT_FAULT_COMPARE_SURFACE_INVERSE": "1",
+    "ASPECT_FAULT_NONCOMMITTING_DIAGNOSTIC": "1",
+    "ASPECT_BP3_WITHIN_STEP_DIAGNOSTIC": "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/work-replay-50-local4",
+    "ASPECT_FAULT_STRESS_SAMPLE_DIAGNOSTIC": "1",
+    "ASPECT_BP3_TIMESTEP_SEQUENCE": "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/work-replay-50-local4/accepted_steps.csv",
+    "ASPECT_BP3_TARGET_MESH": "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/junction-matched-qualified-local4/refined/target_cells.txt"
+  },
+  "executable_sha256": "667fc445bb2203f1c0594410cb11087cb34022e20c2e3b4830e928f8c06cfb27",
+  "plugin_sha256": "51e1bbe0b05030a102ee05209b532ee82f8504cf98da389cb82a315b5bcc17f1",
+  "status": 15,
+  "seconds": 32.44277743400016,
+  "verified": false,
+  "fresh_linear_passed": false,
+  "fresh_linear_checks": 0,
+  "krylov": 0,
+  "original_unchanged": true,
+  "copy_unchanged": true,
+  "accepted_output_written": false
+}

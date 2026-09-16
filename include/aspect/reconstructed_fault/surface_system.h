@@ -36,7 +36,10 @@ namespace aspect
     std::vector<double> per_fault_weighted_rms;
     /** Weak terms from this evaluation, before any history publication. */
     std::vector<std::vector<double>> shear_traction, cohesive_traction,
-      friction_traction, damping_traction;
+      friction_traction, damping_traction, normal_traction;
+    /** Actual constitutive sample extrema, not extrema of a projected field. */
+    double minimum_normal_traction = std::numeric_limits<double>::infinity();
+    double maximum_normal_traction = -std::numeric_limits<double>::infinity();
     std::vector<std::vector<double>> mass_diagonal, mass_off_diagonal;
   };
 
@@ -75,6 +78,11 @@ namespace aspect
 
       explicit ReconstructedFaultSurfaceSystem(const Simulator<dim> &simulator);
       ~ReconstructedFaultSurfaceSystem();
+
+      /** Opt into the common Stokes-QP work measure for a straight, frozen
+       * mature fault. Reattach before mechanics; generic projections are unchanged.
+       */
+      void enable_bulk_work_measure();
 
       ReconstructedFaultSurfaceResidual
       evaluate_surface_residual(const LinearAlgebra::BlockVector &bulk_state,
@@ -121,6 +129,10 @@ namespace aspect
       apply_G(const LinearAlgebra::BlockVector &physical_bulk_direction,
               FaultVector &result) const;
 
+      /** Independent parent-sampling/domain action for matrix verification. */
+      void apply_G_reference(const LinearAlgebra::BlockVector &physical_bulk_direction,
+                             FaultVector &result) const;
+
       /** Generation of the current surface-system state. */
       unsigned int
       get_linearization_generation() const;
@@ -137,12 +149,18 @@ namespace aspect
                               const FaultVector &slip_rate,
                               const bool assemble_jacobian) const;
 
+      SurfaceAssembly
+      assemble_bulk_work_system(const LinearAlgebra::BlockVector &bulk_state,
+                                const FaultVector &slip_rate,
+                                bool assemble_jacobian) const;
+
       const MaterialModel::PhaseFieldFault<dim> &phase_field_fault;
       GridTools::Cache<dim> grid_cache;
       std::unique_ptr<SurfaceLinearization> surface_linearization;
       /** Rank-local timings; surface failures must not enter timer collectives. */
       std::unique_ptr<TimerOutput> performance_timer;
       unsigned int linearization_generation = 0;
+      bool bulk_work_measure = false;
   };
 }
 

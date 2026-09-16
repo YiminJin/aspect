@@ -1,0 +1,41 @@
+{
+  "command": [
+    "timeout",
+    "--signal=TERM",
+    "--kill-after=15",
+    "1200",
+    "mpirun",
+    "-np",
+    "4",
+    "--bind-to",
+    "core",
+    "--map-by",
+    "core",
+    "/home/ein/repository/aspect/build-pf-cpdi/aspect-release",
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/coupled-substeps-50-local4/substeps4/run.prm"
+  ],
+  "environment": {
+    "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect",
+    "ASPECT_FAULT_EXPLICIT_B": "1",
+    "ASPECT_FAULT_EXPLICIT_G": "1",
+    "ASPECT_FAULT_SURFACE_SOLVER": "tridiagonal",
+    "ASPECT_FAULT_COMPARE_SURFACE_INVERSE": "1",
+    "ASPECT_FAULT_WITHIN_STEP_STATE": "1",
+    "ASPECT_BP3_COUPLED_STATE_REPLAY": "4",
+    "ASPECT_BP3_COUPLED_STATE_INPUT": "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/work-replay-50-local4",
+    "ASPECT_FAULT_STRESS_SAMPLE_DIAGNOSTIC": "1",
+    "ASPECT_FAULT_SOURCE_HISTORY_DIAGNOSTIC": "1",
+    "ASPECT_BP3_TIMESTEP_SEQUENCE": "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/coupled-substeps-50-local4/substeps4/clock.csv",
+    "ASPECT_BP3_TARGET_MESH": "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/junction-matched-qualified-local4/refined/target_cells.txt"
+  },
+  "sha256": {
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/run_coupled_substeps.py": "d4e551bec7d229277421fd455c5d4b8e7f7a30658ce3135ef1261c8ec34d2068",
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/coupled-substeps-50-local4/substeps4/run.prm": "ba9707bed708f60e60f3707787d421154cbe49736f4bc2fd2b3ad945f52dbda4",
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/coupled-substeps-50-local4/substeps4/clock.csv": "871ea675971d78c11ac5c9b22f858b8e7d3d4bb5a2841f289154dd5b6e2fc1a3",
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/bp3.cc": "bde2d652e3895890b9489eb97507e6745faaa3d5e771632be30846fdbe41a54e",
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/within_step_diagnostic.h": "798a5e22836b5677a8cc41c0c6a826c28a82904c1799c4fa6bbd723298f5951a",
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/work_replay.h": "f0c64e0f09781d4f3b6b5459f4403b2a3fac55bde197606d35561acac7cfc250",
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/build/libbp3.release.so": "dd3d6e70ded23072c676e7b78312f69e657b87f976310a047b571a6f17038f36",
+    "/home/ein/repository/aspect/build-pf-cpdi/aspect-release": "dba57978ea5bbd9d00fa35d9bd4b4f4a38a2eb6d851581e8a1ce9cf445c93064"
+  }
+}

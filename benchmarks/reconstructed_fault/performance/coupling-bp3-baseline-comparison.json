@@ -1,0 +1,615 @@
+{
+  "timings": {
+    "benchmarks/reconstructed_fault/performance/mechanical_bp3_pivot": {
+      "status": 0,
+      "wall_seconds": 663.3262719650011,
+      "peak_rss_KiB": 4473840,
+      "integrated_Ih_seconds": [
+        31.696434755
+      ],
+      "completed_value_hits_seconds": [
+        1.519953262,
+        3.269129005,
+        1.522456304,
+        1.483795918
+      ],
+      "property_preparation_seconds": [
+        32.067909179,
+        1.522838851,
+        3.27491158,
+        1.525417057,
+        1.486813191
+      ],
+      "integrated_Ih_sum": 31.696434755,
+      "property_preparation_sum": 39.877889857999996,
+      "preparation_fraction": 0.06011806187001751,
+      "projected_relative_differences": [],
+      "cold_detail": [
+        "Fault I_h cold detail (rank 0 seconds): surface composition projection=3.1421128120000001, key comparison/copies=0.000250685, key MPI=7.7700000000000004e-07, profile geometry/mixtures=0.00067556400000000003, support geometry=0.46363226506361277, coordinate/context=0.46783603707110377, phase admissibility=0.46094116807275498, degradation/mixture=0.7741352860677907, integrand guards=0.57278661506831319, final projection/reduction/key publication=0.0001626769999987232"
+      ],
+      "cell_work": []
+    },
+    "benchmarks/reconstructed_fault/performance/coupling_bp3": {
+      "status": 0,
+      "wall_seconds": 603.11487437,
+      "peak_rss_KiB": 4569716,
+      "integrated_Ih_seconds": [
+        22.801922332
+      ],
+      "completed_value_hits_seconds": [
+        1.368045359,
+        1.418236861,
+        1.443586761,
+        1.51983163
+      ],
+      "property_preparation_seconds": [
+        23.150853331,
+        1.370587774,
+        1.420578805,
+        1.446187659,
+        1.522466174
+      ],
+      "integrated_Ih_sum": 22.801922332,
+      "property_preparation_sum": 28.910673743,
+      "preparation_fraction": 0.04793560061538762,
+      "projected_relative_differences": [],
+      "cold_detail": [
+        "Fault I_h cold detail (rank 0 seconds): surface composition projection=1.3738701099999999, key comparison/copies=0.00020547799999999999, key MPI=1.294e-06, profile geometry/mixtures=0.00062364699999999996, support geometry=0.31520322096483483, coordinate/context=0.31918345196754483, phase admissibility=0.31491694397570946, degradation/mixture=0.62058731504112574, integrand guards=0.3876859059938732, final projection/reduction/key publication=0.00022178500000080703"
+      ],
+      "cell_work": []
+    }
+  },
+  "comparison": {
+    "fields": {
+      "surface": {},
+      "phase": {},
+      "time": {},
+      "particles": {},
+      "fault": {
+        "fault_0": {
+          "xd": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "x": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "y": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "time": {
+            "absolute": 0.0,
+            "relative": null,
+            "bitwise": true
+          },
+          "dt": {
+            "absolute": 0.0,
+            "relative": null,
+            "bitwise": true
+          },
+          "V": {
+            "absolute": 8.271806125530277e-25,
+            "relative": 8.141475710263392e-16,
+            "bitwise": false
+          },
+          "Theta": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "C": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "Ih": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "slip": {
+            "absolute": 0.0,
+            "relative": null,
+            "bitwise": true
+          },
+          "q": {
+            "absolute": 1.1175870895385742e-08,
+            "relative": 4.1010494889065187e-16,
+            "bitwise": false
+          },
+          "F": {
+            "absolute": 6.567576566864021e-10,
+            "relative": 7.700488614684923e-14,
+            "bitwise": false
+          },
+          "prescribed": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "mass_diagonal": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "mass_upper": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "tau_bg": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "delta_tau": {
+            "absolute": 1.1175870895385742e-08,
+            "relative": 2.6443779558899176e-13,
+            "bitwise": false
+          },
+          "tau_total": {
+            "absolute": 1.1175870895385742e-08,
+            "relative": 4.1010494889065187e-16,
+            "bitwise": false
+          },
+          "sigma_n_bg": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "C_evaluated": {
+            "absolute": 2.3283064365386963e-10,
+            "relative": 4.463113380635969e-16,
+            "bitwise": false
+          },
+          "friction_traction": {
+            "absolute": 1.1175870895385742e-08,
+            "relative": 4.1785823939534124e-16,
+            "bitwise": false
+          },
+          "weak_residual": {
+            "absolute": 6.177998147904873e-05,
+            "relative": 1.805958705928494e-13,
+            "bitwise": false
+          }
+        },
+        "fault_1": {
+          "xd": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "x": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "y": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "time": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "dt": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "V": {
+            "absolute": 8.271806125530277e-25,
+            "relative": 8.117801586741272e-16,
+            "bitwise": false
+          },
+          "Theta": {
+            "absolute": 1.862645149230957e-09,
+            "relative": 2.328306436538701e-16,
+            "bitwise": false
+          },
+          "C": {
+            "absolute": 1.1641532182693481e-10,
+            "relative": 2.267431254449907e-16,
+            "bitwise": false
+          },
+          "Ih": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "slip": {
+            "absolute": 2.168404344971009e-18,
+            "relative": 8.107871130527288e-16,
+            "bitwise": false
+          },
+          "q": {
+            "absolute": 1.1175870895385742e-08,
+            "relative": 4.1010511978053605e-16,
+            "bitwise": false
+          },
+          "F": {
+            "absolute": 4.3980074624659963e-10,
+            "relative": 4.5257095423203643e-14,
+            "bitwise": false
+          },
+          "prescribed": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "mass_diagonal": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "mass_upper": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "tau_bg": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "delta_tau": {
+            "absolute": 1.1175870895385742e-08,
+            "relative": 4.0175447308913684e-13,
+            "bitwise": false
+          },
+          "tau_total": {
+            "absolute": 1.1175870895385742e-08,
+            "relative": 4.1010511978053605e-16,
+            "bitwise": false
+          },
+          "sigma_n_bg": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "C_evaluated": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "friction_traction": {
+            "absolute": 1.1175870895385742e-08,
+            "relative": 4.1780446991947065e-16,
+            "bitwise": false
+          },
+          "weak_residual": {
+            "absolute": 4.611544439114823e-05,
+            "relative": 7.07588983131816e-14,
+            "bitwise": false
+          }
+        },
+        "fault_2": {
+          "xd": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "x": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "y": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "time": {
+            "absolute": 9.313225746154785e-10,
+            "relative": 1.7767671119755457e-16,
+            "bitwise": false
+          },
+          "dt": {
+            "absolute": 4.656612873077393e-10,
+            "relative": 1.7793579245021568e-16,
+            "bitwise": false
+          },
+          "V": {
+            "absolute": 2.0679515313825692e-25,
+            "relative": 2.067951531382569e-16,
+            "bitwise": false
+          },
+          "Theta": {
+            "absolute": 2.7939677238464355e-09,
+            "relative": 3.482500501585394e-16,
+            "bitwise": false
+          },
+          "C": {
+            "absolute": 2.3283064365386963e-10,
+            "relative": 4.4325428279006817e-16,
+            "bitwise": false
+          },
+          "Ih": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "slip": {
+            "absolute": 2.168404344971009e-18,
+            "relative": 4.1354439705106804e-16,
+            "bitwise": false
+          },
+          "q": {
+            "absolute": 1.1175870895385742e-08,
+            "relative": 4.1028789882089566e-16,
+            "bitwise": false
+          },
+          "F": {
+            "absolute": 4.001891211011308e-10,
+            "relative": 3.8591452100337434e-14,
+            "bitwise": false
+          },
+          "prescribed": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "mass_diagonal": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "mass_upper": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "tau_bg": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "delta_tau": {
+            "absolute": 1.1175870895385742e-08,
+            "relative": 2.3575816715359443e-13,
+            "bitwise": false
+          },
+          "tau_total": {
+            "absolute": 1.1175870895385742e-08,
+            "relative": 4.1028789882089566e-16,
+            "bitwise": false
+          },
+          "sigma_n_bg": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "C_evaluated": {
+            "absolute": 1.7462298274040222e-10,
+            "relative": 3.3155559866842065e-16,
+            "bitwise": false
+          },
+          "friction_traction": {
+            "absolute": 1.4901161193847656e-08,
+            "relative": 5.574570934000785e-16,
+            "bitwise": false
+          },
+          "weak_residual": {
+            "absolute": 4.796843404619722e-05,
+            "relative": 5.3514710528676455e-14,
+            "bitwise": false
+          }
+        },
+        "fault_3": {
+          "xd": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "x": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "y": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "time": {
+            "absolute": 3.725290298461914e-09,
+            "relative": 3.637916639287687e-16,
+            "bitwise": false
+          },
+          "dt": {
+            "absolute": 9.313225746154785e-10,
+            "relative": 1.8632020151855044e-16,
+            "bitwise": false
+          },
+          "V": {
+            "absolute": 2.0679515313825692e-25,
+            "relative": 2.067951531382569e-16,
+            "bitwise": false
+          },
+          "Theta": {
+            "absolute": 3.725290298461914e-09,
+            "relative": 3.778857091216884e-16,
+            "bitwise": false
+          },
+          "C": {
+            "absolute": 3.4924596548080444e-10,
+            "relative": 6.360280566111452e-16,
+            "bitwise": false
+          },
+          "Ih": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "slip": {
+            "absolute": 5.204170427930421e-18,
+            "relative": 5.082110836106846e-16,
+            "bitwise": false
+          },
+          "q": {
+            "absolute": 1.1175870895385742e-08,
+            "relative": 4.1060103375713886e-16,
+            "bitwise": false
+          },
+          "F": {
+            "absolute": 4.5087744470196377e-10,
+            "relative": 1.343195049193306e-14,
+            "bitwise": false
+          },
+          "prescribed": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "mass_diagonal": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "mass_upper": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "tau_bg": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "delta_tau": {
+            "absolute": 1.1175870895385742e-08,
+            "relative": 1.2386473372938528e-13,
+            "bitwise": false
+          },
+          "tau_total": {
+            "absolute": 1.1175870895385742e-08,
+            "relative": 4.1060103375713886e-16,
+            "bitwise": false
+          },
+          "sigma_n_bg": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "C_evaluated": {
+            "absolute": 3.4924596548080444e-10,
+            "relative": 6.341492294518958e-16,
+            "bitwise": false
+          },
+          "friction_traction": {
+            "absolute": 1.4901161193847656e-08,
+            "relative": 5.581395555952936e-16,
+            "bitwise": false
+          },
+          "weak_residual": {
+            "absolute": 4.562079266179353e-05,
+            "relative": 1.4896147798404378e-14,
+            "bitwise": false
+          }
+        }
+      },
+      "history": {
+        "history_0": {
+          "step": {
+            "absolute": 0.0,
+            "relative": null,
+            "bitwise": true
+          },
+          "time": {
+            "absolute": 0.0,
+            "relative": null,
+            "bitwise": true
+          },
+          "Theta_reference_relative_error": {
+            "absolute": 0.0,
+            "relative": null,
+            "bitwise": true
+          },
+          "committed_particle_stress_max_Pa": {
+            "absolute": 0.0,
+            "relative": null,
+            "bitwise": true
+          }
+        },
+        "history_1": {
+          "step": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "time": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "Theta_reference_relative_error": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "committed_particle_stress_max_Pa": {
+            "absolute": 4.0745362639427185e-10,
+            "relative": 1.7148598260700001e-15,
+            "bitwise": false
+          }
+        },
+        "history_2": {
+          "step": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "time": {
+            "absolute": 9.313225746154785e-10,
+            "relative": 1.7767671119755457e-16,
+            "bitwise": false
+          },
+          "Theta_reference_relative_error": {
+            "absolute": 2.220446049250313e-16,
+            "relative": 0.2222222222222222,
+            "bitwise": false
+          },
+          "committed_particle_stress_max_Pa": {
+            "absolute": 5.820766091346741e-11,
+            "relative": 1.3462148791177692e-16,
+            "bitwise": false
+          }
+        },
+        "history_3": {
+          "step": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "time": {
+            "absolute": 3.725290298461914e-09,
+            "relative": 3.637916639287687e-16,
+            "bitwise": false
+          },
+          "Theta_reference_relative_error": {
+            "absolute": 1.1102230246251565e-16,
+            "relative": 0.125,
+            "bitwise": false
+          },
+          "committed_particle_stress_max_Pa": {
+            "absolute": 3.4924596548080444e-10,
+            "relative": 4.2265257771385965e-16,
+            "bitwise": false
+          }
+        }
+      },
+      "constitutive_normal": {}
+    },
+    "guards": {
+      "benchmarks/reconstructed_fault/performance/mechanical_bp3_pivot": {},
+      "benchmarks/reconstructed_fault/performance/coupling_bp3": {}
+    }
+  }
+}

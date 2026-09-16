@@ -1,0 +1,6 @@
+include /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/top-source-paired-50-local4/run.prm
+set Output directory = /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/work-measure-free-top-local4
+set Resume computation = false
+subsection Termination criteria
+  set End step = 0
+end

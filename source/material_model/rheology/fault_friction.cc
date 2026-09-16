@@ -61,6 +61,35 @@ namespace aspect
       }
 
 
+      template <int dim>
+      double FaultFriction<dim>::update_state_derivative_wrt_slip_rate(
+        const double V, const double old, const double dt) const
+      {
+        Assert(friction_law==FrictionLaw::rate_state && V>=Vmin && old>0. && dt>=0.,
+               ExcInternalError());
+        const double x=V*dt/Dc;
+        // The two O(x) terms cancel. Use the analytic Taylor limit for small x,
+        // not a subtraction of the already updated state from the old state.
+        const double kernel=x<1e-3
+          ? -.5+x*(1./3.+x*(-1./8.+x*(1./30.+x*(-1./144.+x/840.))))
+          : (std::expm1(-x)+x*std::exp(-x))/(x*x);
+        return dt/Dc*(dt*kernel-old*std::exp(-x));
+      }
+
+
+      template <int dim>
+      double FaultFriction<dim>::friction_coefficient_derivative_wrt_state(
+        const std::vector<double> &fractions, const double V, const double theta) const
+      {
+        double a_eff=0.,b_eff=0.;
+        for (unsigned int m=0;m<fractions.size();++m)
+          { a_eff+=fractions[m]*a[m]; b_eff+=fractions[m]*b[m]; }
+        // Both partial derivatives share the same regularization multiplier.
+        return friction_coefficient_derivative_wrt_slip_rate(fractions,V,theta)
+               *(b_eff/a_eff)*V/theta;
+      }
+
+
 
       template <int dim>
       double

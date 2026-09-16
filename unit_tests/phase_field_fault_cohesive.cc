@@ -23,6 +23,28 @@ namespace
     aspect::MaterialModel::internal::PhaseFieldFaultTestAccess<2>;
 }
 
+TEST_CASE("Mature friction has no cohesive storage under repeated slip",
+          "[phase_field_fault_cohesive][mature_fault]")
+{
+  double mature_C=0., cohesive_C=0.;
+  for (unsigned int step=0; step<100; ++step)
+    {
+      const auto mature=TestAccess::compute_cohesive_response(.99,4.,12.,12.,mature_C,2.,3.,3.,true);
+      const auto cohesive=TestAccess::compute_cohesive_response(.99,4.,12.,12.,cohesive_C,2.,3.,3.);
+      mature_C=mature.cohesive_traction;
+      CHECK(mature_C==0.);
+      CHECK(12.*mature_C*mature_C/(2.*10.)==0.);
+      CHECK(mature.history_correction==0.);
+      CHECK(mature.localization_factor==.25);
+      CHECK(mature.crack_strain_rate==.5);
+      CHECK(cohesive.cohesive_traction>cohesive_C);
+      cohesive_C=cohesive.cohesive_traction;
+    }
+  CHECK_THROWS(TestAccess::compute_cohesive_response(.99,4.,12.,12.,1.,2.,3.,3.,true));
+  CHECK_THROWS(TestAccess::compute_cohesive_response(.99,4.,12.,12.,0.,2.,3.,2.,true));
+  CHECK_THROWS(TestAccess::compute_cohesive_response(.99,4.,12.,11.,0.,2.,3.,3.,true));
+}
+
 
 
 TEST_CASE("Common cohesive law evaluates traction and fixed-profile localization",

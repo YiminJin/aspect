@@ -11,6 +11,8 @@
 
 #include <aspect/reconstructed_fault/fault.h>
 
+#include <deal.II/base/signaling_nan.h>
+
 #include <cmath>
 #include <cstring>
 #include <limits>

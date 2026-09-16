@@ -19,6 +19,7 @@
 */
 
 #include <aspect/particle/interpolator/voronoi_linear_reconstruction.h>
+#include <aspect/particle/manager.h>
 #include <aspect/particle/particle_domain.h>
 
 #include <deal.II/grid/grid_tools.h>

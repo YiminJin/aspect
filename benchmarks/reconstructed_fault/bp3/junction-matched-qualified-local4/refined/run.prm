@@ -1,0 +1,15 @@
+# Matched physical-time local-resolution test, not a first-event run.
+include /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/normal_stress_fresh_local4.prm
+set Output directory = /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/junction-matched-qualified-local4/refined
+set End time = 2232176379.2516127
+subsection Mesh refinement
+  set Initial adaptive refinement = 7
+  set Strategy = BP3 saved mesh
+end
+subsection Time stepping
+  set List of model names = BP3 shared clock
+end
+subsection Termination criteria
+  set Termination criteria = end time, end step
+  set End step = 60
+end

@@ -7,6 +7,7 @@
 #include <cmath>
 #include <sstream>
 #include <iomanip>
+#include <aspect/reconstructed_fault/linear_performance.h>
 
 namespace aspect
 {
@@ -47,9 +48,14 @@ namespace aspect
     {
       const Operator &op;
       const VectorType &q;
+      bool is_preconditioner = false;
 
       void vmult(VectorType &result, const VectorType &source) const
       {
+        // For the operator, nested A/B/G/inverse sections charge their own time;
+        // constraint/scaling/vector work is separate from Arnoldi/vector work.
+        FaultLinearSection timing(is_preconditioner ? FaultLinearTiming::preconditioner
+                                                    : FaultLinearTiming::other);
         VectorType projected(source);
         project_fault_pressure(q, projected);
         op.vmult(result, projected);

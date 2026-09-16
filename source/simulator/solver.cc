@@ -35,7 +35,9 @@
 #include <aspect/simulator/solver/reconstructed_fault_linear.h>
 #include <aspect/simulator/assemblers/reconstructed_fault_stokes.h>
 #include "reconstructed_fault_residual_audit.h"
+#include "reconstructed_fault_interface_preconditioner.h"
 #include <cstdlib>
+#include <fstream>
 #include <iomanip>
 #include <sstream>
 
@@ -419,16 +421,6 @@ namespace aspect
       for (unsigned int fault = 0; fault < values.size(); ++fault)
         values[fault] = fault_manager.get_slip_rate(fault);
       return values;
-    }
-
-
-    bool
-    within_lower_bound_roundoff(const double value, const double minimum)
-    {
-      constexpr double tolerance_factor = 100.0;
-      return std::abs(value-minimum)
-             <= tolerance_factor*std::numeric_limits<double>::epsilon()
-                * std::max(minimum, std::abs(value));
     }
 
 
@@ -1004,6 +996,8 @@ namespace aspect
   void
   Simulator<dim>::solve_reconstructed_fault_stokes ()
   {
+    unsigned int total_fault_krylov_iterations = 0;
+    double minimum_fault_accepted_alpha = 1.0;
     AssertThrow(dim == 2, ExcNotImplemented());
     AssertThrow(newton_handler != nullptr,
                 ExcMessage("The coupled reconstructed-fault solver requires "
@@ -1122,25 +1116,13 @@ namespace aspect
           [&](const LinearAlgebra::BlockVector &bulk_state,
               const FaultVector &slip_rate) -> CoupledResidual
         {
-          // Represent explicit V as a temporary displacement from manager current
-          // state, assemble both residual blocks, and unconditionally roll it back.
-          const FaultVector base_slip_rate = current_slip_rate(fault_manager);
-          FaultVector delta_slip_rate = slip_rate;
-          AssertDimension(delta_slip_rate.size(), base_slip_rate.size());
-          for (unsigned int fault = 0; fault < delta_slip_rate.size(); ++fault)
-            {
-              AssertDimension(delta_slip_rate[fault].size(),
-                              base_slip_rate[fault].size());
-              for (unsigned int vertex = 0;
-                   vertex < delta_slip_rate[fault].size(); ++vertex)
-                delta_slip_rate[fault][vertex] -= base_slip_rate[fault][vertex];
-            }
-
+          // Use the very same absolute V in bulk and surface evaluation. A
+          // subtract/add reconstruction could lose a small bound-contact value.
           fault_manager.begin_slip_rate_trial();
           bool trial_is_active = true;
           try
             {
-              fault_manager.set_slip_rate_trial(delta_slip_rate, 1.0);
+              fault_manager.set_slip_rate_trial_values(slip_rate);
               current_linearization_point = bulk_state;
               assemble_newton_stokes_matrix = false;
               rebuild_stokes_preconditioner = false;
@@ -1198,6 +1180,7 @@ namespace aspect
         auto solve_condensed_system =
           [&](const typename StokesSolver::ReconstructedFaultCondensedSystem<dim>
                       ::Linearization &linearization,
+              const ReconstructedFaultActiveSet &active,
               const LinearAlgebra::BlockVector &rhs,
               LinearAlgebra::BlockVector &direction)
         {
@@ -1205,6 +1188,8 @@ namespace aspect
           const double rhs_norm = rhs.l2_norm();
           if (rhs_norm == 0.0)
             return;
+
+          TimerOutput::Scope linear_timer(computing_timer, "Fault: condensed linear solve");
 
           const double tolerance =
             parameters.linear_stokes_solver_tolerance*rhs_norm;
@@ -1262,7 +1247,12 @@ namespace aspect
             LinearAlgebra::BlockVector> projected_operator{linearization, q};
           const internal::FaultPressureComplementOperator<
             decltype(preconditioner), LinearAlgebra::BlockVector>
-            projected_preconditioner{preconditioner, q};
+            projected_preconditioner{preconditioner, q, true};
+          const internal::FaultInterfacePreconditioner<dim,decltype(projected_preconditioner)>
+            interface_preconditioner(projected_preconditioner,linearization,surface_system,active,rhs,pcout);
+          const internal::FaultPressureComplementOperator<
+            decltype(interface_preconditioner),LinearAlgebra::BlockVector>
+            projected_interface{interface_preconditioner,q};
 
           unsigned int iterations = 0;
           while (iterations < budget)
@@ -1276,13 +1266,15 @@ namespace aspect
               bool solver_failed = false;
               try
                 {
-                  solver.solve(projected_operator, direction, compatible_rhs, projected_preconditioner);
+                  internal::FaultLinearSection krylov_timer(internal::FaultLinearTiming::krylov_vectors);
+                  solver.solve(projected_operator, direction, compatible_rhs, projected_interface);
                 }
               catch (const SolverControl::NoConvergence &)
                 {
                   solver_failed = true;
                 }
               iterations += std::max(1U, control.last_step());
+              total_fault_krylov_iterations += std::max(1U, control.last_step());
               internal::project_fault_pressure(q, direction);
 
               // Arnoldi's residual estimate may disagree with the final vector.
@@ -1326,6 +1318,7 @@ namespace aspect
             build_stokes_preconditioner();
 
             const FaultVector slip_rate = current_slip_rate(fault_manager);
+            internal::FaultLinearProfile linear_profile(pcout, timestep_number, nonlinear_iteration);
             using CondensedLinearization =
               typename StokesSolver::ReconstructedFaultCondensedSystem<dim>
                 ::Linearization;
@@ -1333,9 +1326,27 @@ namespace aspect
               condensed_system.linearize(system_matrix, working_x, slip_rate));
 
             ReconstructedFaultActiveSet active_set =
-              internal::make_reconstructed_fault_inactive_set(slip_rate);
+              fault_manager.prescribed_slip_rate_mask();
             std::unique_ptr<ReconstructedFaultSurfaceLinearSolve<dim>>
               restricted_surface_solve;
+            // Prescribed rates are already lifted into the base iterate. Their
+            // perturbations vanish, so condensation uses K_FF^{-1} from the
+            // first solve, not after an unrestricted direction has been taken.
+            bool has_prescribed_vertices = false;
+            for (unsigned int f = 0; f < active_set.size(); ++f)
+              for (unsigned int v = 0; v < active_set[f].size(); ++v)
+                if (active_set[f][v])
+                  {
+                    has_prescribed_vertices = true;
+                    AssertThrow(slip_rate[f][v] >= phase_field_fault.minimum_fault_slip_rate(),
+                                ExcMessage("Prescribed V is below the material's minimum slip rate."));
+                  }
+            if (has_prescribed_vertices)
+              {
+                restricted_surface_solve = surface_system.create_restricted_linear_solve(active_set);
+                linearization = std::make_unique<CondensedLinearization>(
+                  linearization->with_surface_solve(*restricted_surface_solve));
+              }
             LinearAlgebra::BlockVector bulk_rhs(
               introspection.index_sets.stokes_partitioning, mpi_communicator);
             LinearAlgebra::BlockVector bulk_direction(
@@ -1347,7 +1358,7 @@ namespace aspect
             while (true)
               {
                 linearization->build_condensed_rhs(system_rhs, bulk_rhs);
-                solve_condensed_system(*linearization, bulk_rhs, bulk_direction);
+                solve_condensed_system(*linearization, active_set, bulk_rhs, bulk_direction);
                 linearization->recover_slip_rate_increment(
                   bulk_direction, slip_rate_direction);
 
@@ -1368,6 +1379,8 @@ namespace aspect
                 linearization = std::move(new_linearization);
                 restricted_surface_solve = std::move(new_surface_solve);
               }
+
+            linear_profile.report();
 
             // Active residual entries do not participate in convergence or the
             // merit function; the bulk and free-surface blocks remain separate.
@@ -1412,7 +1425,7 @@ namespace aspect
                 characteristic_residual.values =
                   std::move(characteristic_surface_action);
                 const ReconstructedFaultActiveSet no_active_vertices =
-                  internal::make_reconstructed_fault_inactive_set(slip_rate);
+                  fault_manager.prescribed_slip_rate_mask();
                 const double surface_reference = std::max(
                   surface_system.surface_residual_rms(
                     linearization->surface_residual(), no_active_vertices),
@@ -1444,9 +1457,115 @@ namespace aspect
               pcout << report.str() << std::endl;
             }
 
+            const double maximum_step_length =
+              internal::reconstructed_fault_maximum_step_length(
+                slip_rate, slip_rate_direction, active_set,
+                phase_field_fault.minimum_fault_slip_rate());
+
+            // Observational bound probe: hold the current bulk iterate fixed
+            // and set every unprescribed rate to V_min. This is a weak F(V_min)
+            // diagnostic, not an independent scalar root or an accepted trial.
+            const bool bound_audit = std::getenv("ASPECT_FAULT_NONLINEAR_DIAGNOSTIC") != nullptr;
+            if (bound_audit)
+              {
+                const auto prescribed = fault_manager.prescribed_slip_rate_mask();
+                FaultVector lower_rates = slip_rate;
+                for (unsigned int f = 0; f < lower_rates.size(); ++f)
+                  for (unsigned int v = 0; v < lower_rates[f].size(); ++v)
+                    if (!prescribed[f][v])
+                      lower_rates[f][v] = phase_field_fault.minimum_fault_slip_rate();
+                const auto lower_residual = surface_system.evaluate_surface_residual(working_x, lower_rates);
+                unsigned int free = 0, lower_active = 0, prefers_lower = 0;
+                double minimum = std::numeric_limits<double>::max(), minimum_free = minimum;
+                std::ofstream out;
+                if (pcout.is_active())
+                  {
+                    out.open(parameters.output_directory + "nonlinear_bounds_"
+                             + Utilities::int_to_string(timestep_number) + ".csv",
+                             nonlinear_iteration == 0 ? std::ios::out : std::ios::app);
+                    if (nonlinear_iteration == 0)
+                      out << "iteration,fault,vertex,V,dV,prescribed,lower_active,Fmin_weak_density,alpha_max,bulk,surface\n";
+                    out << std::setprecision(17);
+                  }
+                for (unsigned int f = 0; f < slip_rate.size(); ++f)
+                  for (unsigned int v = 0; v < slip_rate[f].size(); ++v)
+                    {
+                      double mass = lower_residual.mass_diagonal[f][v];
+                      if (v > 0) mass += lower_residual.mass_off_diagonal[f][v-1];
+                      if (v+1 < slip_rate[f].size()) mass += lower_residual.mass_off_diagonal[f][v];
+                      const double density = lower_residual.values[f][v]/mass;
+                      if (!prescribed[f][v])
+                        {
+                          minimum = std::min(minimum, slip_rate[f][v]);
+                          lower_active += active_set[f][v];
+                          free += !active_set[f][v];
+                          // R = shear - resistance; a negative F_min requests
+                          // still lower rates when the local tangent is negative.
+                          prefers_lower += density < 0.0;
+                          if (!active_set[f][v]) minimum_free = std::min(minimum_free, slip_rate[f][v]);
+                        }
+                      if (pcout.is_active())
+                        out << nonlinear_iteration << ',' << f << ',' << v << ',' << slip_rate[f][v]
+                            << ',' << slip_rate_direction[f][v] << ',' << prescribed[f][v]
+                            << ',' << (active_set[f][v] && !prescribed[f][v]) << ',' << density
+                            << ',' << maximum_step_length << ',' << current_bulk_norm << ','
+                            << current_surface_norm << '\n';
+                    }
+                pcout << "      Fault bound audit: free=" << free << ", lower-active=" << lower_active
+                      << ", min V=" << minimum << ", min free V=" << minimum_free
+                      << ", negative Fmin=" << prefers_lower << ", alpha_max=" << maximum_step_length
+                      << std::endl;
+              }
+
             if (relative_bulk_residual < parameters.nonlinear_tolerance
                 && relative_surface_residual < parameters.nonlinear_tolerance)
               {
+                // Observe accepted physical slip with the still-frozen history.
+                // This opt-in standalone evaluation writes separate QP moments;
+                // its residual is discarded and never enters the solve.
+                if (std::getenv("ASPECT_FAULT_STRESS_SAMPLE_DIAGNOSTIC"))
+                  {
+                    LinearAlgebra::BlockVector diagnostic_residual(system_rhs);
+                    reconstructed_fault_stokes_coupling->evaluate_slip_dependent_bulk_residual(
+                      working_x, slip_rate, diagnostic_residual);
+                  }
+
+                if (std::getenv("ASPECT_FAULT_NONCOMMITTING_DIAGNOSTIC"))
+                  {
+                    // A diagnostic result is not an accepted timestep. Export
+                    // its weak data, then use the ordinary exception rollback
+                    // before any bulk, V, or constitutive history publication.
+                    bool written = true;
+                    if (pcout.is_active())
+                      {
+                        std::ofstream out(parameters.output_directory+"noncommitting_surface.csv");
+                        out << "step,time,fault,node,x,y,V,prescribed,lower_active,mass_diagonal,mass_upper,weak_q,weak_sigma,weak_C,weak_R\n";
+                        const auto &weak = surface_system.get_linearization_residual();
+                        const auto prescribed = fault_manager.prescribed_slip_rate_mask();
+                        for (unsigned int f=0; f<slip_rate.size(); ++f)
+                          for (unsigned int i=0; i<slip_rate[f].size(); ++i)
+                            {
+                              const auto point = fault_manager.get_fault(f).vertex(i);
+                              out << std::setprecision(17) << timestep_number << ',' << time << ','
+                                  << f << ',' << i << ',' << point[0] << ',' << point[1] << ','
+                                  << slip_rate[f][i] << ',' << prescribed[f][i] << ','
+                                  << (active_set[f][i] && !prescribed[f][i]) << ','
+                                  << weak.mass_diagonal[f][i] << ','
+                                  << (i+1<slip_rate[f].size() ? weak.mass_off_diagonal[f][i] : 0.) << ','
+                                  << weak.shear_traction[f][i] << ',' << weak.normal_traction[f][i] << ','
+                                  << weak.cohesive_traction[f][i] << ',' << weak.values[f][i] << '\n';
+                            }
+                        out.close();
+                        written = static_cast<bool>(out);
+                      }
+                    AssertThrow(Utilities::MPI::min(static_cast<unsigned int>(written), mpi_communicator),
+                                ExcMessage("Cannot write noncommitting surface diagnostic."));
+                    pcout << "Noncommitting fault diagnostic converged: bulk=" << relative_bulk_residual
+                          << ", surface=" << relative_surface_residual
+                          << "; discarding mechanical trial and retaining all histories." << std::endl;
+                    throw std::runtime_error("Noncommitting fault diagnostic completed; intentional rollback stop.");
+                  }
+
                 // Allocate and validate the complete accepted publication
                 // state before the first constitutive or kinematic write.
                 LinearAlgebra::BlockVector accepted_solution(solution);
@@ -1473,6 +1592,9 @@ namespace aspect
                 last_pressure_normalization_adjustment = working_pressure_adjustment;
                 nonlinear_state_is_active = false;
                 terminal_commit_complete = true;
+                signals.post_reconstructed_fault_solver(
+                  nonlinear_iteration, total_fault_krylov_iterations,
+                  minimum_fault_accepted_alpha, active_set);
                 signals.post_nonlinear_solver(nonlinear_solver_control);
                 return;
               }
@@ -1483,13 +1605,6 @@ namespace aspect
 
             // Limit only free downward directions and allow exact arrival at
             // V_min; active outward directions were already removed by K_FF.
-            const double maximum_step_length =
-              internal::reconstructed_fault_maximum_step_length(
-                slip_rate,
-                slip_rate_direction,
-                active_set,
-                phase_field_fault.minimum_fault_slip_rate());
-
             const LinearAlgebra::BlockVector physical_bulk_direction =
               linearization->make_physical_bulk_direction(bulk_direction);
 
@@ -1600,20 +1715,9 @@ namespace aspect
                     for (unsigned int vertex = 0;
                          vertex < slip_rate[fault].size(); ++vertex)
                       {
-                        const double minimum =
-                          phase_field_fault.minimum_fault_slip_rate();
-                        double value = slip_rate[fault][vertex]
-                                       + step_length
-                                         * slip_rate_direction[fault][vertex];
-
-                        // Snap roundoff-level contact exactly to V_min, but never
-                        // clamp a genuinely inadmissible constitutive trial.
-                        if (within_lower_bound_roundoff(value, minimum))
-                          value = minimum;
-                        AssertThrow(std::isfinite(value) && value >= minimum,
-                                    ExcMessage("A reconstructed-fault line-search "
-                                               "candidate violates V >= V_min."));
-                        trial_slip_rate[fault][vertex] = value;
+                        trial_slip_rate[fault][vertex] = internal::reconstructed_fault_trial_value(
+                          slip_rate[fault][vertex], slip_rate_direction[fault][vertex],
+                          step_length, phase_field_fault.minimum_fault_slip_rate());
                       }
 
                   const CoupledResidual trial_residual =
@@ -1765,11 +1869,11 @@ namespace aspect
                   const double trial_merit = 0.5*(
                     trial_relative_bulk*trial_relative_bulk
                     + trial_relative_surface*trial_relative_surface);
-                  if (audit)
+                  if (audit || bound_audit)
                     {
                       std::ostringstream report;
                       report << std::setprecision(17)
-                        << "      Affine audit merit: alpha=" << step_length
+                        << (audit ? "      Affine audit merit: alpha=" : "      Fault trial merit: alpha=") << step_length
                         << " bulk_relative=" << trial_relative_bulk
                         << " surface_relative=" << trial_relative_surface
                         << " current=" << current_merit << " trial=" << trial_merit;
@@ -1784,15 +1888,8 @@ namespace aspect
                 {
                   // Accepting replaces manager current V and working_x; the
                   // timestep-committed V still changes only at convergence.
-                  FaultVector accepted_increment = accepted_trial_slip_rate;
-                  for (unsigned int fault = 0;
-                       fault < accepted_increment.size(); ++fault)
-                    for (unsigned int vertex = 0;
-                         vertex < accepted_increment[fault].size(); ++vertex)
-                      accepted_increment[fault][vertex] -=
-                        slip_rate[fault][vertex];
                   fault_manager.begin_slip_rate_trial();
-                  fault_manager.set_slip_rate_trial(accepted_increment, 1.0);
+                  fault_manager.set_slip_rate_trial_values(accepted_trial_slip_rate);
                   fault_manager.accept_slip_rate_trial();
                   working_x = accepted_trial_x;
                   working_pressure_adjustment = accepted_trial_pressure_adjustment;
@@ -1806,7 +1903,9 @@ namespace aspect
               }
             pcout << "      Reconstructed-fault line search accepted after "
                   << line_search_result.rejected_candidates
-                  << " rejected candidates." << std::endl;
+                  << " rejected candidates; alpha=" << line_search_result.step_length << "." << std::endl;
+            minimum_fault_accepted_alpha = std::min(minimum_fault_accepted_alpha,
+                                                     line_search_result.step_length);
           }
 
         nonlinear_solver_control.check(max_nonlinear_iterations,

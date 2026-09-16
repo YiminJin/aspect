@@ -1,0 +1,3 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/nonuniform/true-pressure/pilot.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/evolving/periodic-domains/coupled-build/libuniform_shear.so
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/performance/mechanical_k2

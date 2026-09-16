@@ -244,6 +244,10 @@ namespace aspect
       prm.declare_entry("Structural point spacing", "1000",
                         Patterns::Double(0.0),
                         "Target arc-length spacing of reconstructed-fault vertices. Units: meter.");
+      prm.declare_entry("Fit prescribed geometry to phase field", "true",
+                        Patterns::Bool(),
+                        "Fit normal offsets to the solved phase ridge. If false, retain the "
+                        "resampled prescribed polyline exactly, using the same profile support policy.");
       prm.declare_entry("Ridge coefficient", "1",
                         Patterns::Double(0.0),
                         "Dimensionless second-difference ridge coefficient applied after "
@@ -266,6 +270,7 @@ namespace aspect
     prm.enter_subsection("Fault reconstruction");
     {
       structural_spacing = prm.get_double("Structural point spacing");
+      fit_prescribed_geometry = prm.get_bool("Fit prescribed geometry to phase field");
       ridge_coefficient = prm.get_double("Ridge coefficient");
       prescribed_faults_filename = prm.get("Prescribed faults file");
       AssertThrow(std::isfinite(structural_spacing) && structural_spacing > 0.0,
@@ -500,6 +505,7 @@ namespace aspect
     current_newton_slip_rates.clear();
     trial_slip_rates.clear();
     slip_rate_initialized.clear();
+    prescribed_slip_rates.clear();
     slip_rate_nonlinear_solve_active = false;
     slip_rate_trial_active = false;
     invalidate_particle_projection_cache();
@@ -541,9 +547,20 @@ namespace aspect
 
     // Resample the prescribed geometry into structural Q1 nodes and interpolate
     // the projection widths onto that common parameterization.
-    const std::vector<Point<dim>> reference_points =
-      ReconstructedFaultUtilities::resample_reference_fault(
-        prescribed_fault.vertices, structural_spacing);
+    std::vector<Point<dim>> reference_points;
+    if (fit_prescribed_geometry)
+      reference_points = ReconstructedFaultUtilities::resample_reference_fault(
+                           prescribed_fault.vertices, structural_spacing);
+    else
+      // Preserve supplied corners and boundary-condition transition vertices.
+      // In fixed-geometry mode resample each input segment, not its whole length.
+      for (unsigned int segment=0; segment+1<prescribed_fault.vertices.size(); ++segment)
+        {
+          const auto points = ReconstructedFaultUtilities::resample_reference_fault<dim>(
+            {prescribed_fault.vertices[segment], prescribed_fault.vertices[segment+1]},
+            structural_spacing);
+          reference_points.insert(reference_points.end(), points.begin()+(segment>0), points.end());
+        }
     const std::vector<Tensor<1,dim>> normals = reference_normals(reference_points);
     const unsigned int n_points = reference_points.size();
 
@@ -558,6 +575,15 @@ namespace aspect
           * prescribed_half_widths[coordinates.segment]
           + coordinates.xi
           * prescribed_half_widths[coordinates.segment+1];
+      }
+
+    if (!fit_prescribed_geometry)
+      {
+        // Boundary-truncated profiles need not define an unbiased ridge fit.
+        // Keep prescribed topology/coordinates, without changing admission widths.
+        add_reconstructed_fault(reference_points, result.projection_half_widths);
+        diagnostics.emplace_back();
+        return;
       }
 
     std::vector<double> local_matrix(n_points*n_points, 0.0);
@@ -692,6 +718,7 @@ namespace aspect
     current_newton_slip_rates.emplace_back();
     trial_slip_rates.emplace_back();
     slip_rate_initialized.push_back(false);
+    prescribed_slip_rates.emplace_back();
     ++projection_metadata_version;
     invalidate_particle_projection_cache();
     invalidate_stokes_qp_projection_cache();
@@ -835,6 +862,10 @@ namespace aspect
     const std::vector<double> &values = get_slip_rate(fault_index);
     AssertIndexRange(segment_index, reconstructed_faults[fault_index].n_cells());
     Assert(std::isfinite(xi) && xi >= 0.0 && xi <= 1.0, ExcInternalError());
+    // Open-tip domain quadrature has exact endpoint coordinates. Preserve the
+    // stored absolute node there, including exact nonlinear bound contact.
+    if (xi == 0.0) return values[segment_index];
+    if (xi == 1.0) return values[segment_index+1];
     return values[segment_index]
            + xi * (values[segment_index+1]-values[segment_index]);
   }
@@ -849,8 +880,44 @@ namespace aspect
     Assert(!slip_rate_nonlinear_solve_active && !slip_rate_trial_active,
            ExcInternalError());
     current_newton_slip_rates = timestep_committed_slip_rates;
+    for (unsigned int fault = 0; fault < prescribed_slip_rates.size(); ++fault)
+      for (const auto &entry : prescribed_slip_rates[fault])
+        current_newton_slip_rates[fault][entry.first] = entry.second;
     trial_slip_rates.assign(reconstructed_faults.size(), {});
     slip_rate_nonlinear_solve_active = true;
+  }
+
+
+  template <int dim>
+  void
+  ReconstructedFaultManager<dim>::set_prescribed_slip_rates(
+    const std::vector<std::map<unsigned int, double>> &values)
+  {
+    Assert(!slip_rate_nonlinear_solve_active, ExcInternalError());
+    AssertThrow(values.size() == reconstructed_faults.size(),
+                ExcMessage("Prescribed slip rates require one map per fault."));
+    for (unsigned int fault = 0; fault < values.size(); ++fault)
+      for (const auto &entry : values[fault])
+        AssertThrow(entry.first < reconstructed_faults[fault].n_vertices()
+                    && std::isfinite(entry.second) && entry.second > 0.0,
+                    ExcMessage("A prescribed fault slip rate needs a valid vertex and positive finite value."));
+    prescribed_slip_rates = values;
+  }
+
+
+  template <int dim>
+  std::vector<std::vector<bool>>
+  ReconstructedFaultManager<dim>::prescribed_slip_rate_mask() const
+  {
+    std::vector<std::vector<bool>> mask(reconstructed_faults.size());
+    for (unsigned int fault = 0; fault < reconstructed_faults.size(); ++fault)
+      {
+        mask[fault].assign(reconstructed_faults[fault].n_vertices(), false);
+        if (fault < prescribed_slip_rates.size())
+          for (const auto &entry : prescribed_slip_rates[fault])
+            mask[fault][entry.first] = true;
+      }
+    return mask;
   }
 
 
@@ -941,6 +1008,33 @@ namespace aspect
                                  "and nonnegative."));
           trial_slip_rates[fault][vertex] = value;
         }
+    for (unsigned int fault = 0; fault < prescribed_slip_rates.size(); ++fault)
+      for (const auto &entry : prescribed_slip_rates[fault])
+        AssertThrow(trial_slip_rates[fault][entry.first] == entry.second,
+                    ExcMessage("A Newton trial changed a prescribed fault slip rate."));
+  }
+
+
+  template <int dim>
+  void
+  ReconstructedFaultManager<dim>::set_slip_rate_trial_values(
+    const std::vector<std::vector<double>> &values)
+  {
+    Assert(slip_rate_nonlinear_solve_active && slip_rate_trial_active, ExcInternalError());
+    AssertDimension(values.size(), reconstructed_faults.size());
+    // Validate the complete candidate before replacing any trial entries. The
+    // material's lower bound is checked by the caller, not owned by geometry.
+    for (unsigned int f = 0; f < values.size(); ++f)
+      {
+        AssertDimension(values[f].size(), reconstructed_faults[f].n_vertices());
+        for (const double value : values[f])
+          AssertThrow(std::isfinite(value) && value >= 0.,
+                      ExcMessage("Absolute fault trial rates must be finite and nonnegative."));
+        for (const auto &entry : prescribed_slip_rates[f])
+          AssertThrow(values[f][entry.first] == entry.second,
+                      ExcMessage("An absolute trial changed a prescribed fault slip rate."));
+      }
+    trial_slip_rates = values;
   }
 
 
@@ -1110,6 +1204,9 @@ namespace aspect
   void
   ReconstructedFaultManager<dim>::rebuild_particle_projection_cache()
   {
+    TimerOutput::Scope coarse_timer(this->get_computing_timer(), "Fault: Cache build");
+    Timer elapsed;
+    this->get_pcout() << "Begin fault cache construction." << std::endl;
     TimerOutput::Scope timer(*performance_timer, "Fault: Cache build total");
     ReconstructedFaultUtilities::DomainQuadratureStatistics quadrature_statistics;
     unsigned long long integration_points = 0;
@@ -1310,6 +1407,8 @@ namespace aspect
                          << ", segment tests=" << tests << ", candidates=" << candidates
                          << std::endl;
       }
+    this->get_pcout() << "End fault cache construction: " << elapsed.wall_time()
+                     << " s." << std::endl;
   }
 
 
@@ -1664,6 +1763,21 @@ namespace aspect
 
 
   template <int dim>
+  void
+  ReconstructedFaultManager<dim>::enable_top_source_continuation()
+  {
+    AssertThrow(bottom_source_fault!=numbers::invalid_unsigned_int,
+                ExcMessage("Configure the straight through-bottom fault before its top continuation."));
+    const auto &fault=reconstructed_faults[bottom_source_fault];
+    AssertThrow(std::abs(fault.vertex(fault.n_vertices()-1)[1]-source_box_upper[1])
+                <1e-10*(source_box_upper-source_box_lower).norm(),
+                ExcMessage("The last fault vertex must cross the physical top."));
+    if (!top_source_continuation) invalidate_stokes_qp_projection_cache();
+    top_source_continuation=true;
+  }
+
+
+  template <int dim>
   ReconstructedFaultUtilities::NormalProfileProjection
   ReconstructedFaultManager<dim>::project_to_normal_profiles(
     const Point<dim> &position) const
@@ -1678,6 +1792,74 @@ namespace aspect
   // -----------------------------------------------------------------------------
   // Stokes quadrature-point geometry cache
   // -----------------------------------------------------------------------------
+
+  template <int dim>
+  void
+  ReconstructedFaultManager<dim>::enable_bottom_source_continuation(
+    const unsigned int fault_index, const Point<dim> &lower, const Point<dim> &upper)
+  {
+    AssertThrow(dim == 2 && fault_index < reconstructed_faults.size(),
+                ExcMessage("Bottom source continuation requires a 2-D fault."));
+    for (unsigned int d=0; d<dim; ++d)
+      AssertThrow(std::isfinite(lower[d]) && std::isfinite(upper[d]) && upper[d]>lower[d],
+                  ExcMessage("Invalid physical box for source continuation."));
+    const auto &fault=reconstructed_faults[fault_index];
+    const double tolerance=1e-10*(upper-lower).norm();
+    const Point<dim> origin=fault.vertex(0);
+    Tensor<1,dim> tangent=fault.vertex(1)-origin;
+    tangent/=tangent.norm();
+    AssertThrow(std::abs(origin[1]-lower[1])<tolerance && tangent[1]>0.,
+                ExcMessage("The first fault vertex must cross the physical bottom upwards."));
+    for (unsigned int v=0; v<fault.n_vertices(); ++v)
+      {
+        const Tensor<1,dim> offset=fault.vertex(v)-origin;
+        AssertThrow((offset-(offset*tangent)*tangent).norm()<tolerance,
+                    ExcMessage("Bottom source continuation requires a straight fault."));
+      }
+    if (bottom_source_fault!=fault_index || source_box_lower!=lower || source_box_upper!=upper)
+      invalidate_stokes_qp_projection_cache();
+    bottom_source_fault=fault_index;
+    source_box_lower=lower;
+    source_box_upper=upper;
+  }
+
+
+  template <int dim>
+  ReconstructedFaultUtilities::NormalProfileProjection
+  ReconstructedFaultManager<dim>::project_to_bulk_source(
+    const Point<dim> &position, const bool normal_profiles_checked) const
+  {
+    ReconstructedFaultUtilities::NormalProfileProjection result;
+    if (!normal_profiles_checked)
+      result=ReconstructedFaultUtilities::internal::project_to_normal_profiles_unchecked(
+        reconstructed_faults, projection_half_widths, position);
+    if (result.active || bottom_source_fault==numbers::invalid_unsigned_int)
+      return result;
+    for (unsigned int d=0; d<dim; ++d)
+      if (position[d]<source_box_lower[d] || position[d]>source_box_upper[d])
+        return result;
+
+    const auto &fault=reconstructed_faults[bottom_source_fault];
+    Tensor<1,dim> tangent=fault.vertex(1)-fault.vertex(0), normal;
+    tangent/=tangent.norm();
+    normal[0]=-tangent[1]; normal[1]=tangent[0];
+    const Tensor<1,dim> offset=position-fault.vertex(0);
+    const double distance=offset*normal;
+    // Only the in-box tangent-extension wedge gets endpoint fields. Do not
+    // reapply the segment's normal cutoff here: physical Q1 phase can remain
+    // positive beyond it. Zero physical phase produces exactly zero source.
+    const bool beyond_top=top_source_continuation
+      && (position-fault.vertex(fault.n_vertices()-1))*tangent>0.;
+    if (offset*tangent<0. || beyond_top)
+      {
+        result.active=true;
+        result.fault_index=bottom_source_fault;
+        result.segment_index=beyond_top ? fault.n_cells()-1 : 0;
+        result.xi=beyond_top ? 1. : 0.;
+        result.signed_distance=distance;
+      }
+    return result;
+  }
 
   template <int dim>
   bool
@@ -1702,6 +1884,9 @@ namespace aspect
   void
   ReconstructedFaultManager<dim>::rebuild_stokes_qp_projection_cache()
   {
+    TimerOutput::Scope timer(this->get_computing_timer(), "Fault: Stokes QP cache build");
+    Timer elapsed;
+    this->get_pcout() << "Begin fault Stokes QP cache construction." << std::endl;
     AssertThrow(dim == 2, ExcNotImplemented());
     AssertThrow(!reconstructed_faults.empty(),
                 ExcMessage("The Stokes QP projection cache requires reconstructed "
@@ -1729,8 +1914,7 @@ namespace aspect
               StokesQPFaultAssociation &entry = entries[q];
               entry.position = fe_values.quadrature_point(q);
               const ReconstructedFaultUtilities::NormalProfileProjection projection =
-                ReconstructedFaultUtilities::internal::project_to_normal_profiles_unchecked(
-                  reconstructed_faults, projection_half_widths, entry.position);
+                project_to_bulk_source(entry.position);
               if (!projection.active)
                 continue;
 
@@ -1766,6 +1950,8 @@ namespace aspect
     stokes_qp_cache_diagnostics.n_active_q_points = n_active_q_points;
     ++stokes_qp_cache_diagnostics.rebuild_count;
     stokes_qp_projection_cache_valid = true;
+    this->get_pcout() << "End fault Stokes QP cache construction: " << elapsed.wall_time()
+                     << " s." << std::endl;
   }
 
 

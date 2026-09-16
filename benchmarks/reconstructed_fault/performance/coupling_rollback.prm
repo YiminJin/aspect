@@ -1,0 +1,2 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/performance/mechanical_rollback.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/performance/coupling_rollback

@@ -28,18 +28,33 @@ def check(path, step):
     checks['admissible_phi'] = bool(np.min(phase['phi']) >= -1e-4 and np.max(phase['phi']) < .8)
     xs, ys = np.unique(phase['x']), np.unique(phase['y'])
     refinement_scope = None
-    common_case = re.fullmatch(r'spatial0375_n(128|256|512)(?:_f(32|64))?(?:_periodic)?(?:_floor)?',path.name)
+    # Performance wrappers use exactly the accepted periodic fault32 problem.
+    # Keep its tighter common-dt signal and geometry checks, not the two-step
+    # smoke defaults merely because the output directory has another name.
+    performance_case = path.name in {'k3_remote','k3_remote_checked','k3_cell','k3_compare',
+                                    'mechanical_k3_umf','mechanical_k3_pivot',
+                                    'coupling_k3','interface_k3','interface_zero_k3'}
+    comparison_name = 'spatial0375_n128_f32_periodic' if performance_case else path.name
+    evidence_root = Path(__file__).resolve().parent if performance_case else path.parent
+    common_case = re.fullmatch(r'spatial0375_n(128|256|512)(?:_f(32|64))?(?:_periodic)?(?:_floor)?',comparison_name)
     if path.name == 'normal256' or common_case:
-        baseline = path.parent/'smoke'
+        baseline = evidence_root/'smoke'
         old = read_parameters(baseline/'parameters.prm')
         new = read_parameters(path/'parameters.prm')
         refinement_scope = {key:[old.get(key),new.get(key)] for key in old.keys() | new.keys()
                             if old.get(key) != new.get(key)}
         allowed = {'Output directory','Geometry model/Box/Y repetitions'}
-        if '_periodic' in path.name:
+        if '_periodic' in comparison_name:
             # Same fixture, rebuilt against the corrected domain ABI. This
             # permits only the library path change, not a numerical parameter.
             allowed.add('Additional shared libraries')
+        if performance_case:
+            allowed.add('Material model/Phase field fault/I h integration backend')
+            # The old snapshot predates this switch; true is precisely its
+            # original unconditional reconstruction behavior, not a new choice.
+            key = 'Fault reconstruction/Fit prescribed geometry to phase field'
+            if refinement_scope.get(key) == [None, 'true']:
+                allowed.add(key)
         if common_case:
             allowed |= {'Maximum time step','Maximum first time step','End time',
                         'Termination criteria/End step'}
@@ -135,7 +150,7 @@ def check(path, step):
     if common_case:
         # The same comparability rule uses the PRE-run reference response of
         # this common timestep sequence, not the larger two-step smoke signal.
-        preflight = json.loads((path.parent/'timestep-support/dt0375/report.json').read_text())
+        preflight = json.loads((evidence_root/'timestep-support/dt0375/report.json').read_text())
         diagnostics = preflight['diagnostics']
         signal = dict(H=max(r['H_cumulative_increment_max_Pa'] for r in diagnostics),
                       phi=max(r['phi_cumulative_increment_max'] for r in diagnostics),

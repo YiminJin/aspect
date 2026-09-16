@@ -1,0 +1,6 @@
+include /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/mature-fault-50-local4/run.prm
+set Output directory = /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/uniform-sliding-50-local4
+set End time = 4970143.2669182401
+subsection Termination criteria
+  set End step = 2
+end

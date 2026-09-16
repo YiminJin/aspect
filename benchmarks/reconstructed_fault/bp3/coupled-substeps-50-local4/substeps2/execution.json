@@ -1,0 +1,11 @@
+{
+  "status": 0,
+  "seconds": 273.62268731200004,
+  "child_peak_RSS_KiB": 1560016,
+  "source_unchanged": true,
+  "candidate_commits": 2,
+  "completed": true,
+  "fresh_linear_checks": 16,
+  "fresh_linear_passed": true,
+  "krylov": 600
+}

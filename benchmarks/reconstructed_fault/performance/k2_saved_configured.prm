@@ -1,0 +1,6 @@
+# Repair the frozen-data harness only: no Stokes solve is requested.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/performance/k2_saved.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/performance/k2_saved_configured
+subsection Prescribed Stokes solution
+  set Model name = function
+end

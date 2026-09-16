@@ -28,6 +28,9 @@
 #include <aspect/simulator.h>
 #include <aspect/postprocess/visualization.h>
 #include <aspect/postprocess/particles.h>
+#include <aspect/geometry_model/box.h>
+#include <aspect/plugins.h>
+#include <boost/math/tools/roots.hpp>
 
 #include <deal.II/fe/fe_values.h>
 #include <deal.II/fe/mapping_cartesian.h>
@@ -39,6 +42,11 @@
 #include <numeric>
 #include <cstdlib>
 #include <iostream>
+#include <fstream>
+#include <iomanip>
+#include <chrono>
+#include "fault_theta_history_diagnostic.h"
+#include "fault_cohesion_diagnostic.h"
 
 namespace aspect
 {
@@ -498,10 +506,22 @@ namespace aspect
     {
       if (!this->get_parameters().reconstruct_faults)
         return;
+      normalization_cell_cache.change_connection = this->get_triangulation().signals.any_change.connect(
+        [this]() { normalization_cell_cache.mesh_changed = true; });
+      normalization_cell_cache.create_connection = this->get_triangulation().signals.create.connect(
+        [this]() { normalization_cell_cache.mesh_changed = true; });
       performance_timer = std::make_unique<TimerOutput>(
         std::cout,
         std::getenv("ASPECT_FAULT_PERFORMANCE") && this->get_pcout().is_active()
         ? TimerOutput::summary : TimerOutput::never, TimerOutput::wall_times);
+      this->get_signals().post_resume_load_user_data.connect(
+        [this](parallel::distributed::Triangulation<dim> &)
+        {
+          invalidate_normalization_cache();
+          AssertThrow(this->get_reconstructed_fault_manager().has_property(
+                        "mature fault reference geometry") == mature_frictional_fault,
+                      ExcMessage("Cannot change cohesive/mature fault mode on restart."));
+        });
 
       const std::vector<unsigned int> &chemical_field_indices =
         this->introspection().chemical_composition_field_indices();
@@ -544,6 +564,8 @@ namespace aspect
         fault_property_indices.chemical_compositions.push_back(
           fault_manager.register_property(
             "phase field fault chemical composition " + chemical_field_names[c], 1));
+      if (mature_frictional_fault)
+        fault_manager.register_property("mature fault reference geometry", dim);
     }
 
 
@@ -590,7 +612,7 @@ namespace aspect
       const CohesiveResponse cohesive = compute_cohesive_response(
         surface_coefficients, localization.current_I_h, localization.previous_I_h,
         localization.previous_cohesive_traction, inputs.slip_rate,
-        localization.current_h, localization.previous_h);
+        localization.current_h, localization.previous_h, mature_frictional_fault);
 
       const SymmetricTensor<2,dim> trial_stress = compute_maxwell_stress(
         bulk_coefficients, inputs.strain_rate, inputs.old_maxwell_stress);
@@ -603,7 +625,7 @@ namespace aspect
         - 2.0 * bulk_coefficients.kappa * cohesive.localization_factor
           * inputs.slip_rate * inputs.slip_tensor;
 
-      const double theta = fault_friction.has_state_variable()
+      double theta = fault_friction.has_state_variable()
                            ? interpolate_fault_scalar(
                                fault,
                                inputs.segment_index, inputs.xi,
@@ -611,6 +633,68 @@ namespace aspect
                                  fault_property_indices.state].position,
                                "phase field fault state")
                            : 0.0;
+      // Disposable aging/interpolation audit. The file contains preceding
+      // histories and accepted rates, never the current Newton unknown V.
+      // Keep this frozen point state common to residual, K_V and G evaluation.
+      if (const char *path=std::getenv("ASPECT_FAULT_THETA_UPDATE_DIAGNOSTIC"))
+        {
+          AssertThrow(std::getenv("ASPECT_FAULT_NONCOMMITTING_DIAGNOSTIC") && fault_friction.has_state_variable(),
+                      ExcMessage("Pointwise aging override is restricted to noncommitting diagnostics."));
+          struct FrozenUpdate
+          {
+            unsigned int step, fault, segment;
+            double dt, theta_left, theta_right, V_left, V_right;
+          };
+          static const std::vector<FrozenUpdate> updates=[&]()
+          {
+            std::ifstream in(path);
+            AssertThrow(in,ExcMessage("Cannot read frozen pointwise aging inputs."));
+            std::vector<FrozenUpdate> values;
+            FrozenUpdate r;
+            while (in>>r.step>>r.fault>>r.segment>>r.dt>>r.theta_left>>r.theta_right>>r.V_left>>r.V_right)
+              values.push_back(r);
+            AssertThrow(in.eof() && !values.empty(),ExcMessage("Invalid frozen pointwise aging inputs."));
+            return values;
+          }();
+          for (const auto &r:updates)
+            {
+              AssertThrow(this->get_timestep_number()==r.step,ExcMessage("Frozen aging diagnostic used at the wrong step."));
+              if (inputs.fault_index==r.fault && inputs.segment_index==r.segment)
+                theta=fault_friction.update_state(
+                  (1-inputs.xi)*r.V_left+inputs.xi*r.V_right,
+                  (1-inputs.xi)*r.theta_left+inputs.xi*r.theta_right,r.dt);
+            }
+        }
+      if (const char *path=std::getenv("ASPECT_FAULT_THETA_HISTORY_DIAGNOSTIC"))
+        {
+          AssertThrow(!std::getenv("ASPECT_FAULT_THETA_UPDATE_DIAGNOSTIC")
+                      && inputs.fault_index==0 && dim==2 && fault_friction.has_state_variable(),
+                      ExcMessage("Functional Theta replay requires one fixed 2-D stateful fault."));
+          static internal::FaultThetaHistoryDiagnostic history;
+          history.load(path,this->get_timestep_number(),fault);
+          theta=history.value(inputs.segment_index,inputs.xi,
+            [&](const double v,const double old,const double dt)
+            { return fault_friction.update_state(v,old,dt); });
+        }
+      std::array<double,2> state_rate_derivative={{0.,0.}};
+      if (std::getenv("ASPECT_FAULT_WITHIN_STEP_STATE"))
+        {
+          AssertThrow((std::getenv("ASPECT_FAULT_NONCOMMITTING_DIAGNOSTIC")
+                       || std::getenv("ASPECT_BP3_COUPLED_STATE_REPLAY"))
+                      && mature_frictional_fault && this->get_timestep_number()>0
+                      && fault_friction.has_state_variable(),
+                      ExcMessage("Candidate nodal state requires the mature diagnostic or bounded coupled-state replay."));
+          const auto position=fault_manager.get_property_information()[
+            fault_manager.get_property_index("phase field fault state")].position;
+          theta=0.;
+          for (unsigned int j=0;j<2;++j)
+            {
+              const double old=fault.get_properties(inputs.segment_index+j)[position];
+              const double V=inputs.diagnostic_nodal_rates[j];
+              theta+=(j ? inputs.xi : 1-inputs.xi)*fault_friction.update_state(V,old,time_step);
+              state_rate_derivative[j]=fault_friction.update_state_derivative_wrt_slip_rate(V,old,time_step);
+            }
+        }
       const double mu = fault_friction.has_state_variable()
                         ? fault_friction.friction_coefficient(
                             localization.surface_material_fractions,
@@ -625,27 +709,58 @@ namespace aspect
                             : fault_friction.friction_coefficient_derivative_wrt_slip_rate(
                                 localization.surface_material_fractions,
                                 inputs.slip_rate);
-      const double sigma_n = use_adiabatic_pressure_in_fault_friction
+      const auto background = reconstructed_fault_background_tractions(
+        inputs.fault_index, inputs.segment_index, inputs.xi);
+      const double background_shear = background.first, background_normal = background.second;
+      // The bulk unknowns/history may represent stress changes. Background
+      // tractions are fixed surface data, not another bulk Maxwell load.
+      const double sigma_n = background_normal + (use_adiabatic_pressure_in_fault_friction
                              ? this->get_adiabatic_conditions().pressure(inputs.position)
                              : inputs.dynamic_pressure
-                               - stress * inputs.normal_tensor;
+                               - stress * inputs.normal_tensor);
       const double damping = MaterialUtilities::average_value(
         localization.surface_material_fractions, radiation_damping_coefficients,
         MaterialUtilities::arithmetic);
 
+      double surface_resistance=cohesive.cohesive_traction;
+      double cohesive_tangent=mature_frictional_fault ? 0.0
+                              : surface_coefficients.kappa/localization.current_I_h;
+      if (const char *path=std::getenv("ASPECT_FAULT_FROZEN_COHESION_DIAGNOSTIC"))
+        if (this->get_timestep_number()>0)
+          {
+            AssertThrow(dim==2 && inputs.fault_index==0
+                        && cohesive.history_correction==0.
+                        && localization.current_h==localization.previous_h
+                        && localization.current_I_h==localization.previous_I_h,
+                        ExcMessage("Frozen resistance diagnostic requires a fixed profile and one 2-D fault."));
+            static internal::FaultCohesionDiagnostic initial;
+            initial.load(path,fault);
+            const auto initial_coefficients=compute_maxwell_coefficients(surface_eta,surface_G,initial_time_step);
+            surface_resistance=initial.value(inputs.segment_index,inputs.xi,
+                                            initial_coefficients.beta,initial_coefficients.kappa);
+            cohesive_tangent=0.;
+          }
       ReconstructedFaultPointResponse response;
-      response.shear_traction = stress * inputs.slip_tensor;
-      response.cohesive_traction = cohesive.cohesive_traction;
+      response.evaluated_state=theta;
+      if (std::getenv("ASPECT_FAULT_WITHIN_STEP_STATE"))
+        for (unsigned int j=0;j<2;++j)
+          response.diagnostic_state_tangent[j]=sigma_n*state_rate_derivative[j]
+            *fault_friction.friction_coefficient_derivative_wrt_state(
+              localization.surface_material_fractions,inputs.slip_rate,theta);
+      response.shear_traction = background_shear + stress * inputs.slip_tensor;
+      response.normal_traction = sigma_n;
+      response.background_normal_traction = background_normal;
+      response.cohesive_traction = surface_resistance;
       response.friction_traction = mu * sigma_n;
       response.damping_traction = damping * inputs.slip_rate;
-      response.residual_density = stress * inputs.slip_tensor
-                                  - cohesive.cohesive_traction
+      response.residual_density = response.shear_traction
+                                  - surface_resistance
                                   - mu * sigma_n
                                   - damping * inputs.slip_rate;
       response.minus_derivative_wrt_slip_rate =
         2.0 * bulk_coefficients.kappa * cohesive.localization_factor
         * (inputs.slip_tensor * inputs.slip_tensor)
-        + surface_coefficients.kappa/localization.current_I_h
+        + cohesive_tangent
         + sigma_n*dmu_dV
         + damping;
       response.kappa = bulk_coefficients.kappa;
@@ -654,6 +769,91 @@ namespace aspect
       response.uses_adiabatic_friction_pressure =
         use_adiabatic_pressure_in_fault_friction;
       return response;
+    }
+
+
+    template <int dim>
+    void PhaseFieldFault<dim>::set_reconstructed_fault_background_traction_property(
+      const unsigned int property_index, const unsigned int correction_property)
+    {
+      const auto &manager = this->get_reconstructed_fault_manager();
+      if (property_index != numbers::invalid_unsigned_int)
+        {
+          const auto &info = manager.get_property_information();
+          AssertThrow(property_index < info.size() && info[property_index].n_components == 2,
+                      ExcMessage("Background fault tractions require a two-component property."));
+          for (const auto &fault : manager.get_faults())
+            for (unsigned int v=0; v<fault.n_vertices(); ++v)
+              for (unsigned int c=0; c<2; ++c)
+                AssertThrow(fault.property_value_is_initialized(v,info[property_index].position+c)
+                            && std::isfinite(fault.get_properties(v)[info[property_index].position+c]),
+                            ExcMessage("Background fault tractions must be initialized and finite."));
+        }
+      if (correction_property != numbers::invalid_unsigned_int)
+        {
+          const auto &info = manager.get_property_information();
+          AssertThrow(property_index != numbers::invalid_unsigned_int
+                      && correction_property < info.size() && info[correction_property].n_components == 3,
+                      ExcMessage("Background shear correction requires (a,b,d) and a selected background."));
+          for (const auto &fault : manager.get_faults())
+            for (unsigned int v=0; v<fault.n_vertices(); ++v)
+              {
+                const auto position=info[correction_property].position;
+                for (unsigned int c=0; c<3; ++c)
+                  AssertThrow(fault.property_value_is_initialized(v,position+c)
+                              && std::isfinite(fault.get_properties(v)[position+c]),
+                              ExcMessage("Background correction coefficients must be initialized and finite."));
+                AssertThrow(fault.get_properties(v)[position+2]>0.0,
+                            ExcMessage("Background correction denominator must be positive."));
+              }
+        }
+      background_traction_property = property_index;
+      background_shear_correction_property = correction_property;
+    }
+
+
+    template <int dim>
+    std::pair<double,double> PhaseFieldFault<dim>::reconstructed_fault_background_tractions(
+      const unsigned int f, const unsigned int segment, const double xi) const
+    {
+      if (background_traction_property == numbers::invalid_unsigned_int) return {0.,0.};
+      const auto &manager=this->get_reconstructed_fault_manager();
+      const auto &fault=manager.get_fault(f);
+      const auto left=fault.get_properties(segment), right=fault.get_properties(segment+1);
+      const auto interpolate=[&](const unsigned int i) {return (1-xi)*left[i]+xi*right[i];};
+      const auto position=manager.get_property_information()[background_traction_property].position;
+      double shear=interpolate(position);
+      if (background_shear_correction_property != numbers::invalid_unsigned_int)
+        {
+          const auto p=manager.get_property_information()[background_shear_correction_property].position;
+          // The fixed rational field is evaluated at the quadrature coordinate;
+          // a Q1 interpolation of its nodal values is a different prestress.
+          shear -= interpolate(p)+interpolate(p+1)/interpolate(p+2);
+        }
+      return {shear,interpolate(position+1)};
+    }
+
+
+    template <int dim>
+    bool PhaseFieldFault<dim>::is_mature_frictional_fault() const
+    {
+      return mature_frictional_fault;
+    }
+
+
+    template <int dim>
+    void PhaseFieldFault<dim>::set_boundary_normalization_completion_file(const std::string &path)
+    {
+      AssertThrow(!path.empty() && mature_frictional_fault && !evolve_phase_field,
+                  ExcMessage("Boundary normalization completion requires a file and a frozen mature fault."));
+      AssertThrow(boundary_normalization_completion_file.empty()
+                  || boundary_normalization_completion_file==path,
+                  ExcMessage("Boundary normalization completion must remain fixed during a run."));
+      if (boundary_normalization_completion_file.empty())
+        {
+          boundary_normalization_completion_file=path;
+          normalization_value_cache.valid=false;
+        }
     }
 
 
@@ -688,7 +888,7 @@ namespace aspect
       const CohesiveResponse cohesive = compute_cohesive_response(
         surface_coefficients, localization.current_I_h, localization.previous_I_h,
         localization.previous_cohesive_traction, 0.0,
-        localization.current_h, localization.previous_h);
+        localization.current_h, localization.previous_h, mature_frictional_fault);
 
       ReconstructedFaultBulkPointResponse response;
       response.kappa = bulk_coefficients.kappa;
@@ -710,6 +910,9 @@ namespace aspect
     void
     PhaseFieldFault<dim>::prepare_reconstructed_fault_mechanical_solve()
     {
+      TimerOutput::Scope coarse_timer(this->get_computing_timer(), "Fault: Property preparation");
+      Timer elapsed;
+      this->get_pcout() << "   Begin fault surface-property preparation." << std::endl;
       TimerOutput::Scope timer(*performance_timer, "Fault: Property preparation");
       AssertThrow(dim == 2, ExcNotImplemented());
       ReconstructedFaultManager<dim> &fault_manager =
@@ -722,7 +925,24 @@ namespace aspect
         this->get_timestep_number() == 0
         && !this->get_parameters().resume_computation;
 
-      // Recompute the transient normalization profile for every solve. Missing
+      // This marker is both checkpoint mode provenance and the fixed geometry
+      // contract. Only fresh initialization may populate it.
+      if (mature_frictional_fault)
+        {
+          const auto position = fault_manager.get_property_information()[
+            fault_manager.get_property_index("mature fault reference geometry")].position;
+          for (unsigned int f=0; f<faults.size(); ++f)
+            for (unsigned int v=0; v<faults[f].n_vertices(); ++v)
+              for (unsigned int d=0; d<dim; ++d)
+                {
+                  if (fresh_timestep_zero && !faults[f].property_value_is_initialized(v,position+d))
+                    fault_manager.get_fault(f).get_properties(v)[position+d]=faults[f].vertex(v)[d];
+                  AssertThrow(faults[f].get_properties(v)[position+d]==faults[f].vertex(v)[d],
+                              ExcMessage("Mature frictional faults require fixed reconstructed geometry."));
+                }
+        }
+
+      // Validate/reuse the transient normalization profile for this solve. Missing
       // cohesive history may be constructed only for a genuinely fresh model.
       const unsigned int cohesive_position =
         fault_manager.get_property_information()[
@@ -784,6 +1004,8 @@ namespace aspect
       // Newton may start only after all pointwise constitutive inputs form one
       // complete frozen state.
       validate_reconstructed_fault_constitutive_state();
+      this->get_pcout() << "   End fault surface-property preparation: "
+                       << elapsed.wall_time() << " s." << std::endl;
     }
 
 
@@ -1041,6 +1263,15 @@ namespace aspect
       };
       std::map<types::particle_index, double> cohesive_samples;
       std::map<types::particle_index, ParticleCandidate> particle_candidates;
+      std::ofstream source_history_audit;
+      if (std::getenv("ASPECT_FAULT_SOURCE_HISTORY_DIAGNOSTIC"))
+        {
+          source_history_audit.open(this->get_output_directory()+"continued_source_history_"
+            +std::to_string(this->get_timestep_number())+"_rank"
+            +std::to_string(Utilities::MPI::this_mpi_process(this->get_mpi_communicator()))+".csv");
+          source_history_audit<<std::setprecision(17)
+            <<"id,x,y,phi,chi,V,kappa,beta,eps_xx,eps_yy,eps_xy,crack_xx,crack_yy,crack_xy,old_xx,old_yy,old_xy,new_xx,new_yy,new_xy\n";
+        }
 
       // First evaluate the accepted cohesive traction samples. Projection is
       // completed before any particle history candidate uses the new traction.
@@ -1080,7 +1311,7 @@ namespace aspect
                       localization.previous_I_h,
                       localization.previous_cohesive_traction, slip_rate,
                       localization.current_h,
-                      localization.previous_h).cohesive_traction);
+                      localization.previous_h, mature_frictional_fault).cohesive_traction);
                 }
               ++particle_index;
             }
@@ -1142,7 +1373,22 @@ namespace aspect
           particle_index = 0;
           for (const auto &particle : particle_handler)
             {
-              const auto &association = associations[particle_index];
+              auto association = associations[particle_index];
+              if (!association.active)
+                {
+                  // Bulk source continuation changes Maxwell strain subtraction,
+                  // never particle ownership or the surface projection above.
+                  const auto source = fault_manager.project_to_bulk_source(association.position, true);
+                  if (source.active)
+                    {
+                      AssertThrow(mature_frictional_fault && !evolve_phase_field,
+                                  ExcMessage("Continued bottom source requires a frozen mature fault."));
+                      association.active = true;
+                      association.fault_index = source.fault_index;
+                      association.segment_index = source.segment_index;
+                      association.xi = source.xi;
+                    }
+                }
               const ArrayView<const double> properties = particle.get_properties();
               SymmetricTensor<2,dim> old_stress;
               for (unsigned int component = 0;
@@ -1166,6 +1412,8 @@ namespace aspect
 
               SymmetricTensor<2,dim> effective_strain_rate =
                 symmetrize(velocity_gradients[particle_index]);
+              SymmetricTensor<2,dim> continued_crack;
+              double continued_chi=0., continued_V=0.;
               double new_H = properties[H_position];
               if (association.active)
                 {
@@ -1202,8 +1450,14 @@ namespace aspect
                     surface_coefficients, localization.current_I_h,
                     localization.previous_I_h,
                     localization.previous_cohesive_traction, slip_rate,
-                    localization.current_h, localization.previous_h);
+                    localization.current_h, localization.previous_h, mature_frictional_fault);
                   effective_strain_rate -= cohesive.crack_strain_rate*slip_tensor;
+                  if (!associations[particle_index].active)
+                    {
+                      continued_crack=cohesive.crack_strain_rate*slip_tensor;
+                      continued_chi=cohesive.localization_factor;
+                      continued_V=slip_rate;
+                    }
 
                   AssertThrow(std::isfinite(new_H) && new_H >= 0.0,
                               ExcMessage("Stored crack-driving history is inadmissible."));
@@ -1236,6 +1490,17 @@ namespace aspect
                           && candidate.crack_driving_force >= 0.0,
                           ExcMessage("Stage-J particle history candidate is inadmissible."));
               particle_candidates.emplace(particle.get_id(), candidate);
+              if (source_history_audit.is_open() && association.active && !associations[particle_index].active)
+                {
+                  const auto position=particle.get_location();
+                  source_history_audit<<particle.get_id()<<','<<position[0]<<','<<position[1]<<','
+                    <<phase_fields[particle_index]<<','<<continued_chi<<','<<continued_V<<','
+                    <<bulk_coefficients.kappa<<','<<bulk_coefficients.beta;
+                  for (const auto &tensor : {symmetrize(velocity_gradients[particle_index]),
+                                            continued_crack,old_stress,candidate.stress})
+                    source_history_audit<<','<<tensor[0][0]<<','<<tensor[1][1]<<','<<tensor[0][1];
+                  source_history_audit<<'\n';
+                }
               ++particle_index;
             }
         }
@@ -1418,14 +1683,17 @@ namespace aspect
       const double current_degradation =
         phase_field_handler.energetic_degradation(
           response.surface_material_fractions, current_phi);
-      const double previous_degradation =
-        phase_field_handler.energetic_degradation(
-          response.surface_material_fractions, previous_phi);
       response.current_degradation = current_degradation;
       response.current_h = normalization_integrand(
         current_phi, current_degradation, context);
-      response.previous_h = normalization_integrand(
-        previous_phi, previous_degradation, context + " history");
+      // An unchanged local phase sample uses exactly the same material mixture.
+      // Reuse h, but do not infer this from a frozen Eulerian profile alone:
+      // advected parents can sample different coordinates at the next timestep.
+      response.previous_h = current_phi == previous_phi
+        ? response.current_h
+        : normalization_integrand(previous_phi,
+            phase_field_handler.energetic_degradation(
+              response.surface_material_fractions, previous_phi), context + " history");
       return response;
     }
 
@@ -1439,7 +1707,8 @@ namespace aspect
       const double previous_cohesive_traction,
       const double slip_rate,
       const double current_h,
-      const double previous_h)
+      const double previous_h,
+      const bool mature)
     {
       AssertThrow(coefficients.kappa > 0.0,
                   ExcMessage("The cohesive effective viscosity kappa must be positive."));
@@ -1459,13 +1728,18 @@ namespace aspect
 
       CohesiveResponse response;
       response.cohesive_traction =
-        (coefficients.kappa * slip_rate
+        mature ? 0.0 : (coefficients.kappa * slip_rate
          + coefficients.beta * previous_I_h * previous_cohesive_traction)
         / current_I_h;
       response.localization_factor = current_h/current_I_h;
-      response.history_correction =
-        coefficients.beta * previous_cohesive_traction/coefficients.kappa
-        * (current_h * previous_I_h/current_I_h - previous_h);
+      if (mature)
+        AssertThrow(previous_cohesive_traction == 0.0
+                    && current_h == previous_h && current_I_h == previous_I_h,
+                    ExcMessage("Mature friction requires zero cohesive history and a fixed profile."));
+      response.history_correction = current_h == previous_h && current_I_h == previous_I_h
+        ? 0.0
+        : coefficients.beta * previous_cohesive_traction/coefficients.kappa
+          * (current_h * previous_I_h/current_I_h - previous_h);
       response.crack_strain_rate =
         response.localization_factor * slip_rate + response.history_correction;
 
@@ -1596,6 +1870,13 @@ namespace aspect
     std::map<types::particle_index, double>
     PhaseFieldFault<dim>::evaluate_initial_cohesive_particle_values()
     {
+      if (mature_frictional_fault)
+        {
+          std::map<types::particle_index,double> zero;
+          for (const auto &p : this->get_reconstructed_fault_manager().get_locally_owned_particle_fault_associations())
+            if (p.active) zero.emplace(p.particle_id,0.0);
+          return zero;
+        }
       const PhaseFieldHandler<dim> &phase_field_handler =
         this->get_phase_field_handler();
       const Particle::Manager<dim> &particle_manager =
@@ -1726,10 +2007,18 @@ namespace aspect
     void
     PhaseFieldFault<dim>::compute_normalization_integrals()
     {
+      TimerOutput::Scope coarse_timer(this->get_computing_timer(), "Fault: I_h");
       TimerOutput::Scope timer(*performance_timer, "Fault: I_h preparation");
       Timer preparation_timer;
-      // Only point-location geometry survives a preparation. Adaptive requests
-      // and FE values are regenerated from the current state on every call.
+      using Clock = std::chrono::steady_clock;
+      const bool detailed_timing = std::getenv("ASPECT_FAULT_PERFORMANCE");
+      const auto preparation_begin = Clock::now();
+      this->get_pcout() << "   Begin fault I_h preparation." << std::endl;
+      // Invalidate before any failure-capable projection/evaluation. Only a
+      // completed hit or successfully projected new result can publish validity.
+      const bool previous_cache_valid = normalization_value_cache.valid;
+      normalization_value_cache.valid = false;
+      normalization_value_cache.last_requested_points = 0;
       normalization_point_lookups.next_batch = 0;
       normalization_point_lookups.hits = 0;
       normalization_point_lookups.rebuilds = 0;
@@ -1740,12 +2029,12 @@ namespace aspect
       ReconstructedFaultManager<dim> &fault_manager =
         this->get_reconstructed_fault_manager();
       const std::vector<ReconstructedFault<dim>> &faults = fault_manager.get_faults();
-      current_normalization_integrals.clear();
-      current_normalization_integrals.resize(faults.size());
-      current_minimum_raw_normalization_phase_field = numbers::signaling_nan<double>();
       if (faults.empty())
         {
+          current_normalization_integrals.clear();
           normalization_point_lookups.batches.clear();
+          this->get_pcout() << "   End fault I_h preparation: no faults, "
+                           << preparation_timer.wall_time() << " s." << std::endl;
           return;
         }
 
@@ -1755,11 +2044,73 @@ namespace aspect
       // First project each named chemical field to the fault. Every normal
       // profile then keeps its surface mixture fixed along both +/-n sides.
       project_surface_chemical_compositions();
+      const auto projection_end = Clock::now();
+
+      // Exact owned-entry comparison detects even nonstandard noncommitting
+      // substitutions. No distributed point requests or integration occur on a
+      // hit. deal.II's lookup readiness supplies the mesh-lifetime check.
+      const unsigned int phase_block = this->introspection().variable("phase_field").block_index;
+      const auto &owned_indices = this->introspection().index_sets.system_partitioning[phase_block];
+      std::vector<double> phase_values;
+      phase_values.reserve(owned_indices.n_elements());
+      for (const auto i : owned_indices)
+        phase_values.push_back(this->get_solution().block(phase_block)[i]);
+      std::vector<std::uint64_t> fault_versions;
+      std::vector<Point<dim>> fault_vertices;
+      std::vector<double> surface_compositions;
+      // Equal G, cohesion and Gc imply exactly the same g_m: mixture changes
+      // then affect friction but not degradation. This is a conservative test;
+      // differing-but-equivalent parameterizations simply miss the cache.
+      const auto uniform = [](const std::vector<double> &values)
+      { return std::all_of(values.begin(), values.end(),
+                          [&](const double value) { return value == values.front(); }); };
+      const bool composition_independent = uniform(elastic_shear_moduli)
+        && uniform(cohesions) && uniform(critical_energy_release_rates);
+      for (const auto &fault : faults)
+        {
+          fault_versions.push_back(fault.geometry_version());
+          for (unsigned int v=0; v<fault.n_vertices(); ++v)
+            {
+              fault_vertices.push_back(fault.vertex(v));
+              if (!composition_independent)
+                for (const auto property : fault_property_indices.chemical_compositions)
+                  surface_compositions.push_back(fault.get_properties(v)[
+                    fault_manager.get_property_information()[property].position]);
+            }
+        }
+      const bool local_hit = previous_cache_valid
+        && !std::getenv("ASPECT_DISABLE_IH_VALUE_CACHE")
+        && !this->get_parameters().mesh_deformation_enabled
+        && ((use_cell_normalization_profiles && normalization_cell_cache.supported
+             && !normalization_cell_cache.mesh_changed)
+            || (!normalization_point_lookups.batches.empty()
+                && normalization_point_lookups.batches.front().lookup->is_ready()))
+        && normalization_value_cache.owned_phase_indices == owned_indices
+        && normalization_value_cache.phase_values == phase_values
+        && normalization_value_cache.fault_versions == fault_versions
+        && normalization_value_cache.fault_vertices == fault_vertices
+        && normalization_value_cache.surface_compositions == surface_compositions
+        && normalization_value_cache.degradation_revision == phase_field_handler.get_degradation_revision();
+      const auto key_end = Clock::now();
+      const bool global_hit = Utilities::MPI::min(static_cast<unsigned int>(local_hit), this->get_mpi_communicator());
+      const auto key_mpi_end = Clock::now();
+      if (global_hit)
+        {
+          normalization_value_cache.valid = true;
+          ++normalization_value_cache.hits;
+          this->get_pcout() << "   End fault I_h preparation: value cache hit, integration requests=0, "
+                           << preparation_timer.wall_time() << " s." << std::endl;
+          return;
+        }
+      ++normalization_value_cache.integrations;
+      current_normalization_integrals.assign(faults.size(), {});
+      current_minimum_raw_normalization_phase_field = numbers::signaling_nan<double>();
 
       // Surface quadrature profiles are distributed by deterministic global
       // profile id; each profile is integrated by exactly one rank.
       const std::vector<NormalizationProfile> profiles =
         build_owned_normalization_profiles();
+      const auto profiles_end = Clock::now();
 
       const unsigned int mpi_rank =
         Utilities::MPI::this_mpi_process(this->get_mpi_communicator());
@@ -1769,11 +2120,19 @@ namespace aspect
       const double length_scale = phase_field_handler.get_length_scale();
       double local_minimum_raw_phase_field = std::numeric_limits<double>::max();
       std::string local_minimum_raw_phase_field_context;
+      double fe_seconds = 0., material_seconds = 0., mpi_seconds = 0.;
+      double support_seconds = 0., context_seconds = 0., phase_seconds = 0.;
+      double degradation_seconds = 0., integrand_guard_seconds = 0.;
+      const bool baseline_guards = std::getenv("ASPECT_IH_BASELINE_GUARDS");
 
       const auto evaluate_points =
-        [this](const std::vector<Point<dim>> &points)
+        [&](const std::vector<Point<dim>> &points)
         {
-          return evaluate_normalization_points(points);
+          const auto begin = Clock::now();
+          normalization_value_cache.last_requested_points += points.size();
+          auto values = evaluate_normalization_points(points);
+          fe_seconds += std::chrono::duration<double>(Clock::now()-begin).count();
+          return values;
         };
 
       const auto integrand =
@@ -1783,46 +2142,113 @@ namespace aspect
             const Point<dim> &point,
             const NormalizationPointSample &sample)
         {
+          const auto begin = detailed_timing ? Clock::now() : Clock::time_point();
           // Profile overlap is unsupported. Small negative FE undershoot is
           // diagnosed globally and evaluated at phi_eff=max(phi_h,0), whereas
           // the upper singular limit is deliberately never clipped.
-          const auto projection = fault_manager.project_to_normal_profiles(point);
-          AssertThrow(!projection.active
+          // With one fault, another-fault overlap is impossible. Retain the
+          // geometric check for multiple faults and the opt-in comparison path.
+          if (faults.size() > 1 || baseline_guards)
+            {
+              const auto projection = fault_manager.project_to_normal_profiles(point);
+              AssertThrow(!projection.active
                       || projection.fault_index == profile.fault_index,
                       ExcMessage("Unsupported reconstructed-fault overlap during I_h evaluation: "
                                  "profile " + Utilities::int_to_string(profile.id)
                                  + " encountered fault "
                                  + Utilities::int_to_string(projection.fault_index)
                                  + " before its local tail terminated."));
+            }
+          const auto support_end = detailed_timing ? Clock::now() : Clock::time_point();
 
-          const std::string context =
-            "fault " + Utilities::int_to_string(profile.fault_index)
+          // Formatting coordinates is expensive compared with the constitutive
+          // law. Keep the same context, but create it only for a new minimum or
+          // an actual inadmissible sample; successful checks need no message.
+          const auto make_context = [&]()
+          { return "fault " + Utilities::int_to_string(profile.fault_index)
             + ", segment " + Utilities::int_to_string(profile.segment_index)
             + ", profile " + Utilities::int_to_string(profile.id)
             + ", side " + (side == 0 ? std::string("+n") : std::string("-n"))
             + ", zeta=" + Utilities::to_string(zeta)
             + ", point=(" + Utilities::to_string(point[0])
-            + "," + Utilities::to_string(point[1]) + ")";
+            + "," + Utilities::to_string(point[1]) + ")"; };
+          std::string context;
+          if (baseline_guards || sample.phase_field < local_minimum_raw_phase_field
+              || !std::isfinite(sample.phase_field) || sample.phase_field > 1.)
+            context = make_context();
           if (sample.phase_field < local_minimum_raw_phase_field)
             {
               local_minimum_raw_phase_field = sample.phase_field;
               local_minimum_raw_phase_field_context = context;
             }
+          const auto context_end = detailed_timing ? Clock::now() : Clock::time_point();
           const double effective_phase_field =
             this->normalization_effective_phase_field(sample.phase_field, context);
+          const auto phase_end = detailed_timing ? Clock::now() : Clock::time_point();
           const double degradation = phase_field_handler.energetic_degradation(
             profile.material_fractions, effective_phase_field);
-          return this->normalization_integrand(effective_phase_field, degradation, context);
+          if (!(degradation >= std::numeric_limits<double>::min()) || !std::isfinite(degradation))
+            context = make_context();
+          const auto degradation_end = detailed_timing ? Clock::now() : Clock::time_point();
+          const double value = this->normalization_integrand(effective_phase_field, degradation, context);
+          if (detailed_timing)
+            {
+              const auto end = Clock::now();
+              support_seconds += std::chrono::duration<double>(support_end-begin).count();
+              context_seconds += std::chrono::duration<double>(context_end-support_end).count();
+              phase_seconds += std::chrono::duration<double>(phase_end-context_end).count();
+              degradation_seconds += std::chrono::duration<double>(degradation_end-phase_end).count();
+              integrand_guard_seconds += std::chrono::duration<double>(end-degradation_end).count();
+              material_seconds += std::chrono::duration<double>(end-begin).count();
+            }
+          return value;
         };
 
-      const std::vector<double> profile_integrals =
-        integrate_normalization_profiles(profiles,
+      const auto integration_begin = Clock::now();
+      std::vector<double> profile_integrals;
+      std::vector<double> reference_integrals;
+      if (use_cell_normalization_profiles)
+        {
+          const auto all_profiles = build_owned_normalization_profiles(true);
+          const auto all_integrals = integrate_cell_normalization_profiles(
+            all_profiles, integrand, fe_seconds, mpi_seconds);
+          if (normalization_cell_cache.supported)
+            for (const auto &profile : profiles)
+              profile_integrals.push_back(all_integrals[profile.id]);
+          if (normalization_cell_cache.supported && std::getenv("ASPECT_IH_COMPARE_CELL"))
+            {
+              const auto reference_begin=Clock::now();
+              Utilities::System::MemoryStats cell_memory{};
+              Utilities::System::get_memory_stats(cell_memory);
+              const double reference_factor=std::getenv("ASPECT_IH_REFERENCE_FACTOR")
+                                            ? std::stod(std::getenv("ASPECT_IH_REFERENCE_FACTOR")) : 1.;
+              AssertThrow(reference_factor>0. && reference_factor<=1.,
+                          ExcMessage("The diagnostic I_h reference may only tighten tolerances."));
+              reference_integrals=integrate_normalization_profiles(profiles, length_scale,
+                reference_factor*normalization_quadrature_tolerance,
+                reference_factor*normalization_tail_tolerance,
+                this->get_mpi_communicator(), evaluate_points, integrand, &mpi_seconds);
+              Utilities::System::MemoryStats reference_memory{};
+              Utilities::System::get_memory_stats(reference_memory);
+              this->get_pcout() << "Cell I_h comparison: cell seconds="
+                               << std::chrono::duration<double>(reference_begin-integration_begin).count()
+                               << ", remote reference seconds="
+                               << std::chrono::duration<double>(Clock::now()-reference_begin).count()
+                               << ", reference tolerance factor=" << reference_factor
+                               << ", RSS before remote KiB=" << cell_memory.VmRSS
+                               << ", RSS after remote KiB=" << reference_memory.VmRSS << std::endl;
+            }
+        }
+      if (!use_cell_normalization_profiles || !normalization_cell_cache.supported)
+        profile_integrals = integrate_normalization_profiles(profiles,
                                          length_scale,
                                          normalization_quadrature_tolerance,
                                          normalization_tail_tolerance,
                                          this->get_mpi_communicator(),
                                          evaluate_points,
-                                         integrand);
+                                         integrand,
+                                         &mpi_seconds);
+      const double integration_seconds = std::chrono::duration<double>(Clock::now()-integration_begin).count();
       normalization_point_lookups.batches.resize(normalization_point_lookups.next_batch);
       if (std::getenv("ASPECT_FAULT_PERFORMANCE") != nullptr)
         {
@@ -1861,15 +2287,150 @@ namespace aspect
       validate_normalization_phase_field_minimum(
         current_minimum_raw_normalization_phase_field, minimum_context);
 
+      // Auxiliary outside integrals enter the SAME profile-weighted RHS before
+      // Q1 projection. They add no physical quadrature or mass weight. The
+      // benchmark selector is reconstructible; completed values remain cached.
+      const char *completion_path=boundary_normalization_completion_file.empty()
+        ? std::getenv("ASPECT_IH_BOTTOM_COMPLETION_DIAGNOSTIC")
+        : boundary_normalization_completion_file.c_str();
+      if (completion_path)
+        {
+          AssertThrow(dim==2 && mature_frictional_fault && !evolve_phase_field
+                      && !std::getenv("ASPECT_IH_COMPARE_CELL"),
+                      ExcMessage("Bottom I_h completion requires a frozen mature 2-D fault."));
+          if (boundary_normalization_completion_file.empty())
+            AssertThrow(!this->get_parameters().resume_computation
+                        && std::getenv("ASPECT_BP3_UNIFORM_SLIDING"),
+                        ExcMessage("The legacy completion diagnostic is fresh uniform sliding only."));
+          std::istringstream input(Utilities::read_and_distribute_file_content(completion_path,this->get_mpi_communicator()));
+          unsigned int n=0;
+          AssertThrow(input>>n,ExcMessage("Missing normalization completion count."));
+          unsigned int expected=0;
+          for (const auto &fault:faults) expected+=3*fault.n_cells();
+          AssertThrow(n==expected,ExcMessage("Normalization completion profile count mismatch."));
+          std::vector<Point<dim>> origins(n);
+          std::vector<double> outside(n);
+          for (unsigned int i=0;i<n;++i)
+            {
+              unsigned int id;
+              AssertThrow(input>>id>>origins[i][0]>>origins[i][1]>>outside[i],
+                          ExcMessage("Incomplete normalization completion data."));
+              AssertThrow(id==i && std::isfinite(outside[i]) && outside[i]>=0.,
+                          ExcMessage("Invalid normalization completion profile."));
+            }
+          bool valid=true;
+          for (const auto &profile:profiles)
+            valid=valid && origins[profile.id].distance(profile.origin)<1e-8;
+          AssertThrow(Utilities::MPI::min(static_cast<unsigned int>(valid),this->get_mpi_communicator()),
+                      ExcMessage("Normalization completion geometry differs from the actual profiles."));
+          std::ofstream out(this->get_output_directory()+"ih_bottom_completion_rank"+std::to_string(mpi_rank)+".csv");
+          out.exceptions(std::ios::failbit|std::ios::badbit);
+          out<<std::setprecision(17)<<"id,segment,xi,x,y,surface_weight,inside,outside,completed\n";
+          for (unsigned int i=0;i<profiles.size();++i)
+            {
+              const auto &p=profiles[i];const double inside=profile_integrals[i];
+              profile_integrals[i]+=outside[p.id];
+              out<<p.id<<','<<p.segment_index<<','<<p.xi<<','<<p.origin[0]<<','<<p.origin[1]<<','
+                 <<p.surface_weight<<','<<inside<<','<<outside[p.id]<<','<<profile_integrals[i]<<'\n';
+            }
+          this->get_pcout()<<"Bottom-only I_h completion: added auxiliary profile integrals before projection."<<std::endl;
+        }
+
       // Project distributed profile integrals through one consistent Q1 mass
       // solve, producing the replicated vertex field used by constitutive calls.
+      std::vector<std::vector<double>> reference_nodal;
+      const bool compare_cell = use_cell_normalization_profiles && normalization_cell_cache.supported
+                                && std::getenv("ASPECT_IH_COMPARE_CELL");
+      if (compare_cell)
+        {
+          project_normalization_integrals_to_fault(profiles,reference_integrals);
+          reference_nodal=current_normalization_integrals;
+        }
       project_normalization_integrals_to_fault(profiles, profile_integrals);
+      if (compare_cell)
+        {
+          double error=0.;
+          std::ofstream profile_comparison(this->get_output_directory()+"ih_profile_comparison_"
+            +std::to_string(this->get_timestep_number())+"_"+std::to_string(normalization_value_cache.integrations)
+            +"_rank"+std::to_string(mpi_rank)+".csv");
+          profile_comparison << std::setprecision(17) << "profile,fault,segment,xi,x,y,remote,cell\n";
+          for (unsigned int p=0; p<profiles.size(); ++p)
+            profile_comparison << profiles[p].id << ',' << profiles[p].fault_index << ','
+                               << profiles[p].segment_index << ',' << profiles[p].xi << ','
+                               << profiles[p].origin[0] << ',' << profiles[p].origin[1] << ','
+                               << reference_integrals[p] << ',' << profile_integrals[p] << '\n';
+          profile_comparison.close();
+          std::ofstream comparison;
+          if (this->get_pcout().is_active())
+            {
+              comparison.open(this->get_output_directory()+"ih_comparison_"
+                              +std::to_string(this->get_timestep_number())+"_"
+                              +std::to_string(normalization_value_cache.integrations)+".csv");
+              comparison << std::setprecision(17) << "fault,vertex,remote,cell,relative_difference\n";
+            }
+          for (unsigned int f=0; f<reference_nodal.size(); ++f)
+            for (unsigned int v=0; v<reference_nodal[f].size(); ++v)
+              {
+                const double difference=current_normalization_integrals[f][v]/reference_nodal[f][v]-1.;
+                error=std::max(error,std::abs(difference));
+                if (comparison)
+                  comparison << f << ',' << v << ',' << reference_nodal[f][v] << ','
+                             << current_normalization_integrals[f][v] << ',' << difference << '\n';
+              }
+          comparison.close();
+          this->get_pcout() << "Cell I_h comparison: maximum projected nodal relative difference=" << error << std::endl;
+          AssertThrow(error <= normalization_quadrature_tolerance+normalization_tail_tolerance,
+                      ExcMessage("Cell I_h differs from the remote reference beyond the configured accuracy budget."));
+        }
+      // The result and key become reusable only after every profile and the
+      // complete replicated projection have passed validation on every rank.
+      normalization_value_cache.owned_phase_indices = owned_indices;
+      normalization_value_cache.phase_values = std::move(phase_values);
+      normalization_value_cache.fault_versions = std::move(fault_versions);
+      normalization_value_cache.fault_vertices = std::move(fault_vertices);
+      normalization_value_cache.surface_compositions = std::move(surface_compositions);
+      normalization_value_cache.degradation_revision = phase_field_handler.get_degradation_revision();
+      normalization_value_cache.valid = true;
+      if (detailed_timing)
+        {
+          this->get_pcout() << "Fault I_h phases (rank 0 seconds): adaptive/requests="
+                         << integration_seconds-fe_seconds-material_seconds-mpi_seconds
+                         << ", FE/lookup=" << fe_seconds << ", material/guards=" << material_seconds
+                         << ", adaptive MPI=" << mpi_seconds << std::endl;
+          this->get_pcout() << "Fault I_h cold detail (rank 0 seconds): surface composition projection="
+                           << std::chrono::duration<double>(projection_end-preparation_begin).count()
+                           << ", key comparison/copies=" << std::chrono::duration<double>(key_end-projection_end).count()
+                           << ", key MPI=" << std::chrono::duration<double>(key_mpi_end-key_end).count()
+                           << ", profile geometry/mixtures=" << std::chrono::duration<double>(profiles_end-key_mpi_end).count()
+                           << ", support geometry=" << support_seconds
+                           << ", coordinate/context=" << context_seconds
+                           << ", phase admissibility=" << phase_seconds
+                           << ", degradation/mixture=" << degradation_seconds
+                           << ", integrand guards=" << integrand_guard_seconds
+                           << ", final projection/reduction/key publication="
+                           << std::chrono::duration<double>(Clock::now()-integration_begin).count()-integration_seconds
+                           << std::endl;
+        }
+      this->get_pcout() << "   End fault I_h preparation: integrated, "
+                       << preparation_timer.wall_time() << " s." << std::endl;
     }
 
 
     // -----------------------------------------------------------------------------
     // Normalization phase-field utilities
     // -----------------------------------------------------------------------------
+
+
+    template <int dim>
+    void
+    PhaseFieldFault<dim>::invalidate_normalization_cache()
+    {
+      normalization_value_cache.valid = false;
+      normalization_point_lookups.batches.clear();
+      normalization_cell_cache.mesh_changed = true;
+      normalization_cell_cache.profiles.clear();
+      current_normalization_integrals.clear();
+    }
 
 
     template <int dim>
@@ -1942,6 +2503,376 @@ namespace aspect
 
     template <int dim>
     std::vector<double>
+    PhaseFieldFault<dim>::integrate_cell_normalization_profiles(
+      const std::vector<NormalizationProfile> &profiles,
+      const NormalizationIntegrandEvaluator &integrand,
+      double &sampling_seconds,
+      double &mpi_seconds)
+    {
+      using Clock = std::chrono::steady_clock;
+      const auto begin = Clock::now();
+      auto &cache = normalization_cell_cache;
+      const auto &grid = this->get_phase_field_handler().get_grid_cache();
+      const auto communicator = this->get_mpi_communicator();
+      const auto &tria = this->get_triangulation();
+      const bool timing = std::getenv("ASPECT_FAULT_PERFORMANCE");
+      unsigned long long candidates = 0, rebuilt = 0, reused = 0, samples = 0, intervals = 0;
+
+      // Admit only mappings whose exact cell image is an axis-aligned box.
+      // Mapping motion is deliberately left to the remote reference backend.
+      if (cache.mesh_changed)
+        {
+          cache.profiles.clear();
+          cache.supported = dim == 2 && !this->get_parameters().mesh_deformation_enabled
+                            && Plugins::plugin_type_matches<GeometryModel::Box<dim>>(this->get_geometry_model());
+          if (cache.supported)
+            cache.supported = normalization_search_enclosure(grid).first;
+          if (cache.supported)
+            {
+              Point<dim> lower, upper;
+              for (unsigned int d=0; d<dim; ++d)
+                { lower[d] = std::numeric_limits<double>::max(); upper[d] = -lower[d]; }
+              for (const auto &cell : tria.active_cell_iterators())
+                if (cell->is_locally_owned())
+                  for (unsigned int d=0; d<dim; ++d)
+                    {
+                      lower[d] = std::min(lower[d], cell->vertex(0)[d]);
+                      upper[d] = std::max(upper[d], cell->vertex(GeometryInfo<dim>::vertices_per_cell-1)[d]);
+                    }
+              for (unsigned int d=0; d<dim; ++d)
+                {
+                  lower[d] = Utilities::MPI::min(lower[d], communicator);
+                  upper[d] = Utilities::MPI::max(upper[d], communicator);
+                }
+              cache.physical_box = BoundingBox<dim>({lower,upper});
+            }
+          cache.mesh_changed = false;
+        }
+      if (!cache.supported)
+        {
+          this->get_pcout() << "   Cell I_h: unsupported map/geometry; using remote points." << std::endl;
+          return {};
+        }
+
+      // Slab intersections retain physical-box portions on both sides of the
+      // surface. Half-open parallel faces assign positive measure only once.
+      const auto clip = [&](const NormalizationProfile &profile, const BoundingBox<dim> &box)
+      {
+        double lo = -std::numeric_limits<double>::infinity(), hi = -lo;
+        const auto &bounds = box.get_boundary_points();
+        for (unsigned int d=0; d<dim; ++d)
+          if (profile.normal[d] == 0.)
+            {
+              if (profile.origin[d] < bounds.first[d] || profile.origin[d] > bounds.second[d]
+                  || (profile.origin[d] == bounds.second[d]
+                      && bounds.second[d] != cache.physical_box.get_boundary_points().second[d]))
+                return std::make_pair(0.,0.);
+            }
+          else
+            {
+              double a=(bounds.first[d]-profile.origin[d])/profile.normal[d];
+              double b=(bounds.second[d]-profile.origin[d])/profile.normal[d];
+              if (b<a) std::swap(a,b);
+              lo=std::max(lo,a); hi=std::min(hi,b);
+            }
+        return std::make_pair(lo,hi);
+      };
+      const auto &tree = grid.get_locally_owned_cell_bounding_boxes_rtree();
+      const unsigned int component = this->introspection().variable("phase_field").first_component_index;
+      const auto &fe = this->get_fe();
+      const unsigned int old_size = cache.profiles.size();
+      cache.profiles.resize(profiles.size());
+      std::vector<std::array<double,2>> ends(profiles.size());
+      for (unsigned int p=0; p<profiles.size(); ++p)
+        {
+          const auto &profile = profiles[p];
+          auto &traversal = cache.profiles[p];
+          const auto limits = clip(profile, cache.physical_box);
+          AssertThrow(limits.first <= 0. && limits.second >= 0.,
+                      ExcMessage("Cell I_h profile origin lies outside the physical Box."));
+          ends[p] = {{limits.second,-limits.first}};
+          if (p<old_size && traversal.origin == profile.origin && traversal.normal == profile.normal)
+            { ++reused; intervals += traversal.intervals.size(); continue; }
+          ++rebuilt;
+          traversal.origin=profile.origin; traversal.normal=profile.normal;
+          traversal.intervals.clear();
+          Point<dim> lower, upper;
+          for (unsigned int d=0; d<dim; ++d)
+            {
+              const double a=profile.origin[d]+limits.first*profile.normal[d];
+              const double b=profile.origin[d]+limits.second*profile.normal[d];
+              lower[d]=std::min(a,b); upper[d]=std::max(a,b);
+            }
+          using Entry = typename std::decay_t<decltype(tree)>::value_type;
+          std::vector<Entry> cells;
+          tree.query(boost::geometry::index::intersects(BoundingBox<dim>({lower,upper})),
+                     std::back_inserter(cells));
+          candidates += cells.size();
+          for (const auto &entry : cells)
+            {
+              const auto range = clip(profile, entry.first);
+              if (!(range.second > range.first)) continue;
+              typename NormalizationCellCache::Interval interval;
+              interval.lower=range.first; interval.upper=range.second;
+              const auto &bounds=entry.first.get_boundary_points();
+              interval.diameter=entry.second->diameter();
+              for (unsigned int d=0; d<dim; ++d)
+                {
+                  const double width=bounds.second[d]-bounds.first[d];
+                  interval.reference_origin[d]=(profile.origin[d]-bounds.first[d])/width;
+                  interval.reference_direction[d]=profile.normal[d]/width;
+                }
+              typename DoFHandler<dim>::active_cell_iterator cell(
+                &tria,entry.second->level(),entry.second->index(),&this->get_dof_handler());
+              std::vector<types::global_dof_index> dofs(fe.n_dofs_per_cell());
+              cell->get_dof_indices(dofs);
+              for (unsigned int v=0; v<GeometryInfo<dim>::vertices_per_cell; ++v)
+                interval.phase_dofs[v]=dofs[fe.component_to_system_index(component,v)];
+              traversal.intervals.push_back(interval);
+            }
+          std::sort(traversal.intervals.begin(),traversal.intervals.end(),
+                    [](const auto &a,const auto &b) { return a.lower<b.lower; });
+          intervals += traversal.intervals.size();
+        }
+      const double geometry_seconds=std::chrono::duration<double>(Clock::now()-begin).count();
+
+      // Local four/eight-point refinement sees the current Q1 field in a known
+      // cell. No adaptive point request, global search or stale phase value.
+      const QGauss<1> q4(4), q8(8);
+      const bool compare_samples=std::getenv("ASPECT_IH_COMPARE_SAMPLES");
+      std::vector<Point<dim>> diagnostic_points;
+      std::vector<double> diagnostic_phase;
+      std::vector<double> diagnostic_h, diagnostic_weights;
+      std::vector<unsigned int> diagnostic_profiles;
+      const double ell=this->get_phase_field_handler().get_length_scale();
+      std::vector<double> totals(2*profiles.size(),0.);
+      std::vector<unsigned int> small(totals.size(),0);
+      std::vector<bool> done(totals.size(),false);
+      unsigned int window=0;
+      while (std::find(done.begin(),done.end(),false) != done.end())
+        {
+          AssertThrow(window<4096,ExcMessage("Cell I_h tail exceeded 4096 integral windows."));
+          std::vector<double> local(2*totals.size(),0.), global(local.size());
+          std::string error;
+          try
+            {
+              for (unsigned int p=0; p<profiles.size(); ++p)
+                for (unsigned int side=0; side<2; ++side)
+                  {
+                    const unsigned int index=2*p+side;
+                    if (done[index]) continue;
+                    const double start=window*ell, end=std::min((window+1)*ell,ends[p][side]);
+                    for (const auto &cell : cache.profiles[p].intervals)
+                      {
+                        const double left=std::max(start,side==0 ? cell.lower : -cell.upper);
+                        const double right=std::min(end,side==0 ? cell.upper : -cell.lower);
+                        if (!(right>left)) continue;
+                        local[totals.size()+index] += right-left;
+                        std::array<double,GeometryInfo<dim>::vertices_per_cell> phase;
+                        for (unsigned int v=0; v<phase.size(); ++v)
+                          phase[v]=this->get_solution()[cell.phase_dofs[v]];
+                        const auto phase_at = [&](const double z)
+                        {
+                          const Point<dim> unit=cell.reference_origin+(side==0 ? z : -z)*cell.reference_direction;
+                          double value=0.;
+                          for (unsigned int v=0; v<phase.size(); ++v)
+                            {
+                              double shape=1.;
+                              for (unsigned int d=0; d<dim; ++d)
+                                shape *= (v & (1u<<d)) ? unit[d] : 1.-unit[d];
+                              value += shape*phase[v];
+                            }
+                          return value;
+                        };
+                        // Q1 restricted to a 2-D ray is quadratic. Split its
+                        // zero crossings: two Gauss rules can otherwise both
+                        // miss a narrow positive sliver after the phi=0 clamp.
+                        const double f0=phase_at(left), fm=phase_at(.5*(left+right)), f1=phase_at(right);
+                        const double a=2.*(f0+f1-2.*fm), b=f1-f0-a;
+                        const auto roots=boost::math::tools::quadratic_roots(a,b,f0);
+                        std::vector<double> cuts{left,right};
+                        for (const double root : {roots.first,roots.second})
+                          if (root>0. && root<1.) cuts.push_back(left+root*(right-left));
+                        std::sort(cuts.begin(),cuts.end());
+                        cuts.erase(std::unique(cuts.begin(),cuts.end()),cuts.end());
+                        struct Panel { double left,right; unsigned int depth; };
+                        std::vector<Panel> panels;
+                        for (unsigned int i=1; i<cuts.size(); ++i)
+                          panels.push_back({cuts[i-1],cuts[i],0});
+                        while (!panels.empty())
+                          {
+                            const auto panel=panels.back(); panels.pop_back();
+                            const double width=panel.right-panel.left;
+                            const auto quadrature=[&](const QGauss<1> &rule)
+                            {
+                              double result=0.;
+                              for (unsigned int q=0; q<rule.size(); ++q)
+                                {
+                                  const auto sample_begin=timing ? Clock::now() : Clock::time_point();
+                                  const double z=panel.left+width*rule.point(q)[0];
+                                  const double signed_z=side==0 ? z : -z;
+                                  NormalizationPointSample sample;
+                                  sample.found=true; sample.cell_diameter=cell.diameter;
+                                  sample.phase_field=phase_at(z);
+                                  ++samples;
+                                  if (compare_samples)
+                                    {
+                                      diagnostic_points.push_back(profiles[p].origin+signed_z*profiles[p].normal);
+                                      diagnostic_phase.push_back(sample.phase_field);
+                                    }
+                                  if (timing)
+                                    sampling_seconds += std::chrono::duration<double>(Clock::now()-sample_begin).count();
+                                  const double h=integrand(profiles[p],side,z,
+                                    profiles[p].origin+signed_z*profiles[p].normal,sample);
+                                  result += rule.weight(q)*h;
+                                  if (compare_samples)
+                                    {
+                                      diagnostic_h.push_back(h); diagnostic_weights.push_back(0.);
+                                      diagnostic_profiles.push_back(p);
+                                    }
+                                }
+                              return width*result;
+                            };
+                            const double i4=quadrature(q4), i8=quadrature(q8);
+                            if (std::abs(i8-i4) <= normalization_quadrature_tolerance*std::max(std::abs(i8),width))
+                              {
+                                local[index] += i8;
+                                if (compare_samples)
+                                  for (unsigned int q=0; q<q8.size(); ++q)
+                                    diagnostic_weights[diagnostic_weights.size()-q8.size()+q]=width*q8.weight(q);
+                              }
+                            else
+                              {
+                                const double middle=.5*(panel.left+panel.right);
+                                AssertThrow(panel.depth<64 && middle>panel.left && middle<panel.right,
+                                            ExcMessage("Cell I_h quadrature could not resolve a panel."));
+                                panels.push_back({middle,panel.right,panel.depth+1});
+                                panels.push_back({panel.left,middle,panel.depth+1});
+                              }
+                          }
+                      }
+                  }
+            }
+          catch (const std::exception &exception) { error=exception.what(); }
+          const auto mpi_begin=Clock::now();
+          throw_if_history_error(error,communicator);
+          Utilities::MPI::sum(local,communicator,global);
+          mpi_seconds += std::chrono::duration<double>(Clock::now()-mpi_begin).count();
+
+          // Coverage is independent of phase quadrature. Every physical ray
+          // interval must be integrated once, even on an MPI/shared cell face.
+          for (unsigned int index=0; index<totals.size(); ++index)
+            if (!done[index])
+              {
+                const double end=ends[index/2][index%2];
+                const double width=std::max(0.,std::min((window+1)*ell,end)-window*ell);
+                AssertThrow(std::abs(global[totals.size()+index]-width)
+                            <= 2048*std::numeric_limits<double>::epsilon()*std::max({1.,ell,end}),
+                            ExcMessage("Cell I_h ray coverage is incomplete or multiply owned."));
+                totals[index] += global[index];
+                small[index]=global[index]<=normalization_tail_tolerance*std::max(totals[index],ell)
+                             ? small[index]+1 : 0;
+                done[index]=(window+1)*ell>=end || small[index]>=2;
+              }
+          ++window;
+        }
+      std::vector<double> result(profiles.size());
+      for (unsigned int p=0; p<profiles.size(); ++p) result[p]=totals[2*p]+totals[2*p+1];
+      if (std::getenv("ASPECT_IH_VERIFY_CELL_QUADRATURE"))
+        {
+          // Independent diagnostic: fixed 8-panel x 32-point integration on
+          // each physical cell interval, sampled through the remote backend.
+          // It shares neither the adaptive panels nor the direct FE evaluator.
+          const QGauss<1> check_rule(32);
+          std::vector<Point<dim>> points;
+          std::vector<double> weights;
+          std::vector<unsigned int> profile_indices;
+          for (unsigned int p=0; p<profiles.size(); ++p)
+            for (const auto &cell : cache.profiles[p].intervals)
+              for (unsigned int panel=0; panel<8; ++panel)
+                for (unsigned int q=0; q<check_rule.size(); ++q)
+                  {
+                    const double width=(cell.upper-cell.lower)/8.;
+                    const double z=cell.lower+(panel+check_rule.point(q)[0])*width;
+                    points.push_back(profiles[p].origin+z*profiles[p].normal);
+                    weights.push_back(width*check_rule.weight(q));
+                    profile_indices.push_back(p);
+                  }
+          const auto values=evaluate_normalization_points(points);
+          std::vector<double> local_reference(profiles.size(),0.), reference(profiles.size());
+          std::string error;
+          try
+            {
+              for (unsigned int q=0; q<points.size(); ++q)
+                {
+                  const auto p=profile_indices[q];
+                  AssertThrow(values[q].found,ExcMessage("Independent cell reference missed an interior point."));
+                  local_reference[p] += weights[q]*integrand(profiles[p],0,0.,points[q],values[q]);
+                }
+            }
+          catch (const std::exception &exception) { error=exception.what(); }
+          throw_if_history_error(error,communicator);
+          Utilities::MPI::sum(local_reference,communicator,reference);
+          double maximum=0.;
+          for (unsigned int p=0; p<profiles.size(); ++p)
+            maximum=std::max(maximum,std::abs(result[p]/reference[p]-1.));
+          this->get_pcout() << std::setprecision(17)
+                           << "Cell I_h independent fixed quadrature: maximum profile relative difference=" << maximum
+                           << ", first origin=" << profiles.front().origin
+                           << ", first normal=" << profiles.front().normal << std::endl;
+        }
+      if (compare_samples)
+        {
+          const auto reference=evaluate_normalization_points(diagnostic_points);
+          double error=0., maximum=0.;
+          unsigned int missing=0, worst=0;
+          std::vector<double> local_difference(profiles.size(),0.), difference(profiles.size());
+          for (unsigned int i=0; i<reference.size(); ++i)
+            {
+              missing+=!reference[i].found;
+              if (reference[i].found && std::abs(reference[i].phase_field-diagnostic_phase[i])>error)
+                { error=std::abs(reference[i].phase_field-diagnostic_phase[i]); worst=i; }
+              maximum=std::max(maximum,diagnostic_phase[i]);
+              if (reference[i].found && diagnostic_weights[i]!=0.)
+                {
+                  const double phi=normalization_effective_phase_field(reference[i].phase_field,"common-point comparison");
+                  const double g=this->get_phase_field_handler().energetic_degradation(
+                    profiles[diagnostic_profiles[i]].material_fractions,phi);
+                  local_difference[diagnostic_profiles[i]] += diagnostic_weights[i]
+                    *(normalization_integrand(phi,g,"common-point comparison")-diagnostic_h[i]);
+                }
+            }
+          Utilities::MPI::sum(local_difference,communicator,difference);
+          double integral_difference=0.;
+          for (unsigned int p=0; p<profiles.size(); ++p)
+            integral_difference=std::max(integral_difference,std::abs(difference[p]/result[p]));
+          this->get_pcout() << "Cell I_h sample diagnostic: max absolute phase difference="
+                           << Utilities::MPI::max(error,communicator)
+                           << ", max phase=" << Utilities::MPI::max(maximum,communicator)
+                           << ", same-quadrature integral relative difference=" << integral_difference
+                           << ", missing=" << Utilities::MPI::sum(missing,communicator) << std::endl;
+          if (!reference.empty())
+            {
+              const auto &batch=normalization_point_lookups.batches[normalization_point_lookups.next_batch-1];
+              const auto request=std::find(batch.request_indices.begin(),batch.request_indices.end(),worst)-batch.request_indices.begin();
+              const auto &ptrs=batch.lookup->get_point_ptrs();
+              this->get_pcout() << std::setprecision(17) << "Cell I_h worst sample: point=" << diagnostic_points[worst]
+                               << ", direct=" << diagnostic_phase[worst] << ", remote=" << reference[worst].phase_field
+                               << ", owners=" << ptrs[request+1]-ptrs[request] << std::endl;
+            }
+        }
+      this->get_pcout() << "Cell I_h: rebuilt profiles=" << rebuilt << ", reused profiles=" << reused
+                       << ", local intervals=" << intervals << ", cell candidates=" << candidates
+                       << ", FE samples=" << samples << ", remote requests=0, windows=" << window
+                       << ", geometry seconds=" << geometry_seconds
+                       << ", local interval bytes=" << intervals*sizeof(typename NormalizationCellCache::Interval)
+                       << std::endl;
+      return result;
+    }
+
+
+    template <int dim>
+    std::vector<double>
     PhaseFieldFault<dim>::integrate_normalization_profiles(
       const std::vector<NormalizationProfile> &profiles,
       const double length_scale,
@@ -1949,7 +2880,8 @@ namespace aspect
       const double tail_tolerance,
       const MPI_Comm communicator,
       const NormalizationPointEvaluator &evaluate_points,
-      const NormalizationIntegrandEvaluator &integrand)
+      const NormalizationIntegrandEvaluator &integrand,
+      double *mpi_seconds)
     {
       // Each rank advances only its owned profile sides, but all ranks enter
       // the same batched point-evaluation collectives until every side has
@@ -2025,8 +2957,11 @@ namespace aspect
                 requests.push_back(std::move(request));
               }
 
+          const auto mpi_begin = std::chrono::steady_clock::now();
           const unsigned int global_incomplete_sides =
             Utilities::MPI::sum(local_incomplete_sides, communicator);
+          if (mpi_seconds)
+            *mpi_seconds += std::chrono::duration<double>(std::chrono::steady_clock::now()-mpi_begin).count();
           if (global_incomplete_sides == 0)
             break;
 
@@ -2152,7 +3087,12 @@ namespace aspect
                                      + Utilities::int_to_string(profile.id) + "."));
 
               if (state.boundary_final_panel)
-                state.complete = true;
+                {
+                  // Bisection fixed the physical endpoint in boundary_low.
+                  // Adaptive halving changes only the next panel, not the
+                  // remaining domain: accept subpanels until that endpoint.
+                  state.complete = state.panel_start+state.panel_width >= state.boundary_low;
+                }
               else if (state.window_span >= length_scale)
                 {
                   if (state.window_integral
@@ -2175,6 +3115,9 @@ namespace aspect
                     std::min({2.0*state.panel_width,
                               0.5*length_scale,
                               0.5*panel_cell_diameter});
+                  if (state.boundary_final_panel)
+                    state.panel_width = std::min(state.panel_width,
+                                                state.boundary_low-state.panel_start);
                   state.refinement_depth = 0;
                 }
             }
@@ -2198,12 +3141,19 @@ namespace aspect
     void
     PhaseFieldFault<dim>::project_surface_chemical_compositions()
     {
+      TimerOutput::Scope coarse_timer(this->get_computing_timer(), "Fault: Surface-property projection");
+      Timer elapsed;
+      this->get_pcout() << "   Begin fault surface material projection." << std::endl;
       const std::vector<unsigned int> &chemical_field_indices =
         this->introspection().chemical_composition_field_indices();
       AssertDimension(fault_property_indices.chemical_compositions.size(),
                       chemical_field_indices.size());
       if (chemical_field_indices.empty())
-        return;
+        {
+          this->get_pcout() << "   End fault surface material projection: no chemical fields, "
+                           << elapsed.wall_time() << " s." << std::endl;
+          return;
+        }
 
       ReconstructedFaultManager<dim> &fault_manager =
         this->get_reconstructed_fault_manager();
@@ -2231,6 +3181,8 @@ namespace aspect
         }
 
       fault_manager.project_particle_properties(projections);
+      this->get_pcout() << "   End fault surface material projection: "
+                       << elapsed.wall_time() << " s." << std::endl;
     }
 
 
@@ -2343,7 +3295,7 @@ namespace aspect
 
     template <int dim>
     std::vector<typename PhaseFieldFault<dim>::NormalizationProfile>
-    PhaseFieldFault<dim>::build_owned_normalization_profiles() const
+    PhaseFieldFault<dim>::build_owned_normalization_profiles(const bool all_profiles) const
     {
       const ReconstructedFaultManager<dim> &fault_manager =
         this->get_reconstructed_fault_manager();
@@ -2360,8 +3312,8 @@ namespace aspect
         Utilities::MPI::this_mpi_process(this->get_mpi_communicator());
       const unsigned int n_processes =
         Utilities::MPI::n_mpi_processes(this->get_mpi_communicator());
-      const unsigned int first_owned_profile = n_profiles * rank / n_processes;
-      const unsigned int end_owned_profile = n_profiles * (rank + 1) / n_processes;
+      const unsigned int first_owned_profile = all_profiles ? 0 : n_profiles * rank / n_processes;
+      const unsigned int end_owned_profile = all_profiles ? n_profiles : n_profiles * (rank + 1) / n_processes;
 
       std::vector<unsigned int> chemical_composition_positions;
       chemical_composition_positions.reserve(
@@ -2443,6 +3395,7 @@ namespace aspect
       const std::vector<NormalizationProfile> &profiles,
       const std::vector<double> &profile_integrals)
     {
+      TimerOutput::Scope timer(*performance_timer, "Fault: I_h final projection");
       const auto &faults = this->get_reconstructed_fault_manager().get_faults();
       struct FaultSystem
       {
@@ -2499,7 +3452,10 @@ namespace aspect
           position += system.rhs.size();
         }
       std::vector<double> global_values(packed_size);
-      Utilities::MPI::sum(local_values, this->get_mpi_communicator(), global_values);
+      {
+        TimerOutput::Scope reduction_timer(*performance_timer, "Fault: I_h projection MPI");
+        Utilities::MPI::sum(local_values, this->get_mpi_communicator(), global_values);
+      }
 
       // Solve one replicated tridiagonal Q1 projection per fault and publish
       // the resulting vertex values as the current constitutive I_h field.
@@ -2696,6 +3652,17 @@ namespace aspect
                             "frozen after initialization. This is useful when conducting benchmarks "
                             "with pre-existing faults.");
 
+          prm.declare_entry("Fault constitutive mode", "cohesive",
+                            Patterns::Selection("cohesive|mature frictional"),
+                            "Mature frictional removes cohesive force/storage for a permanently "
+                            "prescribed phase profile. Requires Evolve phase field=false, fixed "
+                            "reconstructed geometry and a fresh compatible initialization.");
+
+          prm.declare_entry("I h integration backend", "remote points",
+                            Patterns::Selection("remote points|cell intervals"),
+                            "Normal-profile integration backend. Cell intervals reuses affine "
+                            "Box ray/cell geometry, not phase values; unsupported maps retain "
+                            "the remote-point reference implementation.");
           prm.declare_entry("I h quadrature tolerance", "1e-8",
                             Patterns::Double(0),
                             "Relative tolerance used to compare the four- and eight-point "
@@ -2716,6 +3683,7 @@ namespace aspect
     void
     PhaseFieldFault<dim>::parse_parameters(ParameterHandler &prm)
     {
+      normalization_value_cache.valid = false;
       prm.enter_subsection("Material model");
       {
         prm.enter_subsection("Phase field fault");
@@ -2746,10 +3714,17 @@ namespace aspect
             initial_time_step *= year_in_seconds;
 
           evolve_phase_field = prm.get_bool("Evolve phase field");
+          mature_frictional_fault = prm.get("Fault constitutive mode") == "mature frictional";
+          AssertThrow(!mature_frictional_fault || (!evolve_phase_field
+                        && this->get_parameters().reconstruct_faults),
+                      ExcMessage("Mature frictional mode requires reconstructed faults and Evolve phase field=false."));
+          AssertThrow(!mature_frictional_fault || !std::getenv("ASPECT_FAULT_FROZEN_COHESION_DIAGNOSTIC"),
+                      ExcMessage("Do not combine mature friction with the frozen-cohesion diagnostic."));
           use_adiabatic_pressure_in_fault_friction =
             prm.get_bool("Use adiabatic pressure in fault friction");
           normalization_quadrature_tolerance =
             prm.get_double("I h quadrature tolerance");
+          use_cell_normalization_profiles = prm.get("I h integration backend") == "cell intervals";
           normalization_tail_tolerance =
             prm.get_double("I h tail tolerance");
           AssertThrow(numbers::is_finite(normalization_quadrature_tolerance)
@@ -2817,14 +3792,13 @@ namespace aspect
   }
 }
 
-// -----------------------------------------------------------------------------
-// Material-model registration
-// -----------------------------------------------------------------------------
-
 namespace aspect
 {
 namespace MaterialModel
   {
+
+    // Material-model registration
+
     ASPECT_REGISTER_MATERIAL_MODEL(PhaseFieldFault,
                                    "phase field fault",
                                    "")

@@ -1,0 +1,7 @@
+include /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/bottom-source-complete-wedge-50-local4/run.prm
+set Output directory = /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/top-source-paired-50-local4
+subsection Postprocess
+  subsection BP3
+    set Bottom normalization completion file = /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/top-source-paired-50-local4/completion.txt
+  end
+end

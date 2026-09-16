@@ -68,3 +68,6 @@ cmake-build-debug/
 build.ninja
 rules.ninja
 .ninja_*
+
+# Recoverable local archives from benchmark-artifact cleanup.
+/.benchmark-cleanup-*/

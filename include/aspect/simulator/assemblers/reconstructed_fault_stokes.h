@@ -57,6 +57,10 @@ namespace aspect
         void apply_B(const FaultVector &fault_direction,
                      LinearAlgebra::BlockVector &result) const;
 
+        /** Independent quadrature action retained for matrix verification. */
+        void apply_B_reference(const FaultVector &fault_direction,
+                               LinearAlgebra::BlockVector &result) const;
+
         unsigned int get_B_linearization_rebuild_count() const;
 
       private:

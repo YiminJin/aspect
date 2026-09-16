@@ -1,0 +1,11 @@
+include /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/top-source-paired-50-local4/run.prm
+set Output directory = /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/deep-mesh-shift48-uniform-local4
+subsection Postprocess
+  subsection BP3
+    set Bottom normalization completion file = /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/deep-mesh-shift48-uniform-local4/completion.txt
+  end
+end
+subsection Termination criteria
+  set Termination criteria = end time, end step, BP3 replay complete
+  set End step = 2
+end

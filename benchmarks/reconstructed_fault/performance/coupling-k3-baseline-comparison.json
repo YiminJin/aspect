@@ -1,0 +1,1483 @@
+{
+  "timings": {
+    "benchmarks/reconstructed_fault/performance/mechanical_k3_pivot": {
+      "status": 0,
+      "wall_seconds": 88.43777111899544,
+      "peak_rss_KiB": 520568,
+      "integrated_Ih_seconds": [
+        0.02748,
+        0.02388,
+        0.02394,
+        0.02373,
+        0.02518,
+        0.02539,
+        0.02509,
+        0.02506,
+        0.02474
+      ],
+      "completed_value_hits_seconds": [],
+      "property_preparation_seconds": [
+        0.1327,
+        0.0244,
+        0.02442,
+        0.02414,
+        0.02568,
+        0.02577,
+        0.02546,
+        0.02543,
+        0.02527
+      ],
+      "integrated_Ih_sum": 0.22449,
+      "property_preparation_sum": 0.33327,
+      "preparation_fraction": 0.0037684124756104053,
+      "projected_relative_differences": [],
+      "cold_detail": [
+        "Fault I_h cold detail (rank 0 seconds): surface composition projection=2.274e-05, key comparison/copies=1.842e-05, key MPI=3.825e-06, profile geometry/mixtures=2.450e-05, support geometry=2.082e-03, coordinate/context=2.713e-03, phase admissibility=2.818e-03, degradation/mixture=3.065e-03, integrand guards=2.660e-03, final projection/reduction/key publication=1.098e-04",
+        "Fault I_h cold detail (rank 0 seconds): surface composition projection=1.758e-05, key comparison/copies=2.015e-05, key MPI=5.376e-06, profile geometry/mixtures=1.016e-05, support geometry=2.120e-03, coordinate/context=2.613e-03, phase admissibility=2.162e-03, degradation/mixture=3.090e-03, integrand guards=2.732e-03, final projection/reduction/key publication=6.150e-05",
+        "Fault I_h cold detail (rank 0 seconds): surface composition projection=1.675e-05, key comparison/copies=2.432e-05, key MPI=5.313e-06, profile geometry/mixtures=1.261e-05, support geometry=2.131e-03, coordinate/context=2.699e-03, phase admissibility=2.170e-03, degradation/mixture=3.097e-03, integrand guards=2.714e-03, final projection/reduction/key publication=4.460e-05",
+        "Fault I_h cold detail (rank 0 seconds): surface composition projection=1.738e-05, key comparison/copies=2.147e-05, key MPI=3.616e-06, profile geometry/mixtures=8.850e-06, support geometry=2.111e-03, coordinate/context=2.584e-03, phase admissibility=2.159e-03, degradation/mixture=3.077e-03, integrand guards=2.735e-03, final projection/reduction/key publication=3.923e-05",
+        "Fault I_h cold detail (rank 0 seconds): surface composition projection=1.843e-05, key comparison/copies=1.993e-05, key MPI=3.723e-06, profile geometry/mixtures=9.433e-06, support geometry=2.248e-03, coordinate/context=2.735e-03, phase admissibility=2.281e-03, degradation/mixture=3.268e-03, integrand guards=2.913e-03, final projection/reduction/key publication=4.331e-05",
+        "Fault I_h cold detail (rank 0 seconds): surface composition projection=1.750e-05, key comparison/copies=2.109e-05, key MPI=2.962e-06, profile geometry/mixtures=9.591e-06, support geometry=2.256e-03, coordinate/context=2.853e-03, phase admissibility=2.300e-03, degradation/mixture=3.313e-03, integrand guards=2.903e-03, final projection/reduction/key publication=3.437e-05",
+        "Fault I_h cold detail (rank 0 seconds): surface composition projection=1.756e-05, key comparison/copies=2.038e-05, key MPI=3.241e-06, profile geometry/mixtures=1.107e-05, support geometry=2.228e-03, coordinate/context=2.784e-03, phase admissibility=2.289e-03, degradation/mixture=3.272e-03, integrand guards=2.888e-03, final projection/reduction/key publication=3.326e-05",
+        "Fault I_h cold detail (rank 0 seconds): surface composition projection=1.996e-05, key comparison/copies=2.001e-05, key MPI=3.521e-06, profile geometry/mixtures=9.688e-06, support geometry=2.260e-03, coordinate/context=2.672e-03, phase admissibility=2.280e-03, degradation/mixture=3.273e-03, integrand guards=2.893e-03, final projection/reduction/key publication=3.227e-05",
+        "Fault I_h cold detail (rank 0 seconds): surface composition projection=1.682e-05, key comparison/copies=1.921e-05, key MPI=5.294e-06, profile geometry/mixtures=9.854e-06, support geometry=2.204e-03, coordinate/context=2.662e-03, phase admissibility=2.232e-03, degradation/mixture=3.210e-03, integrand guards=2.832e-03, final projection/reduction/key publication=4.651e-05"
+      ],
+      "cell_work": [
+        "Cell I_h: rebuilt profiles=96, reused profiles=0, local intervals=12288, cell candidates=12288, FE samples=155520, remote requests=0, windows=4, geometry seconds=2.260e-03, local interval bytes=884736",
+        "Cell I_h: rebuilt profiles=0, reused profiles=96, local intervals=12288, cell candidates=0, FE samples=155520, remote requests=0, windows=4, geometry seconds=2.705e-06, local interval bytes=884736",
+        "Cell I_h: rebuilt profiles=0, reused profiles=96, local intervals=12288, cell candidates=0, FE samples=155520, remote requests=0, windows=4, geometry seconds=3.398e-06, local interval bytes=884736",
+        "Cell I_h: rebuilt profiles=0, reused profiles=96, local intervals=12288, cell candidates=0, FE samples=155520, remote requests=0, windows=4, geometry seconds=2.600e-06, local interval bytes=884736",
+        "Cell I_h: rebuilt profiles=0, reused profiles=96, local intervals=12288, cell candidates=0, FE samples=155520, remote requests=0, windows=4, geometry seconds=2.213e-06, local interval bytes=884736",
+        "Cell I_h: rebuilt profiles=0, reused profiles=96, local intervals=12288, cell candidates=0, FE samples=155520, remote requests=0, windows=4, geometry seconds=2.517e-06, local interval bytes=884736",
+        "Cell I_h: rebuilt profiles=0, reused profiles=96, local intervals=12288, cell candidates=0, FE samples=155520, remote requests=0, windows=4, geometry seconds=2.364e-06, local interval bytes=884736",
+        "Cell I_h: rebuilt profiles=0, reused profiles=96, local intervals=12288, cell candidates=0, FE samples=155520, remote requests=0, windows=4, geometry seconds=2.317e-06, local interval bytes=884736",
+        "Cell I_h: rebuilt profiles=0, reused profiles=96, local intervals=12288, cell candidates=0, FE samples=155520, remote requests=0, windows=4, geometry seconds=2.356e-06, local interval bytes=884736"
+      ]
+    },
+    "benchmarks/reconstructed_fault/performance/coupling_k3": {
+      "status": 0,
+      "wall_seconds": 92.66766503400004,
+      "peak_rss_KiB": 540860,
+      "integrated_Ih_seconds": [
+        0.02544,
+        0.02241,
+        0.02265,
+        0.02254,
+        0.02411,
+        0.02552,
+        0.02411,
+        0.02572,
+        0.02389
+      ],
+      "completed_value_hits_seconds": [],
+      "property_preparation_seconds": [
+        0.1217,
+        0.02293,
+        0.02316,
+        0.02306,
+        0.02465,
+        0.02606,
+        0.02465,
+        0.02638,
+        0.02441
+      ],
+      "integrated_Ih_sum": 0.21639,
+      "property_preparation_sum": 0.317,
+      "preparation_fraction": 0.003420826454229658,
+      "projected_relative_differences": [],
+      "cold_detail": [
+        "Fault I_h cold detail (rank 0 seconds): surface composition projection=3.345e-05, key comparison/copies=2.103e-05, key MPI=5.111e-06, profile geometry/mixtures=4.088e-05, support geometry=2.022e-03, coordinate/context=2.880e-03, phase admissibility=2.083e-03, degradation/mixture=2.894e-03, integrand guards=2.567e-03, final projection/reduction/key publication=1.158e-04",
+        "Fault I_h cold detail (rank 0 seconds): surface composition projection=2.777e-05, key comparison/copies=2.356e-05, key MPI=6.384e-06, profile geometry/mixtures=1.467e-05, support geometry=1.990e-03, coordinate/context=2.444e-03, phase admissibility=2.013e-03, degradation/mixture=2.884e-03, integrand guards=2.558e-03, final projection/reduction/key publication=5.484e-05",
+        "Fault I_h cold detail (rank 0 seconds): surface composition projection=2.600e-05, key comparison/copies=2.170e-05, key MPI=6.580e-06, profile geometry/mixtures=1.731e-05, support geometry=1.994e-03, coordinate/context=2.549e-03, phase admissibility=2.030e-03, degradation/mixture=2.911e-03, integrand guards=2.593e-03, final projection/reduction/key publication=5.225e-05",
+        "Fault I_h cold detail (rank 0 seconds): surface composition projection=2.820e-05, key comparison/copies=2.174e-05, key MPI=5.948e-06, profile geometry/mixtures=2.015e-05, support geometry=1.985e-03, coordinate/context=2.459e-03, phase admissibility=2.019e-03, degradation/mixture=2.906e-03, integrand guards=2.578e-03, final projection/reduction/key publication=5.916e-05",
+        "Fault I_h cold detail (rank 0 seconds): surface composition projection=2.475e-05, key comparison/copies=2.190e-05, key MPI=6.566e-06, profile geometry/mixtures=1.818e-05, support geometry=1.995e-03, coordinate/context=2.456e-03, phase admissibility=2.091e-03, degradation/mixture=2.900e-03, integrand guards=2.660e-03, final projection/reduction/key publication=4.890e-05",
+        "Fault I_h cold detail (rank 0 seconds): surface composition projection=2.515e-05, key comparison/copies=2.305e-05, key MPI=5.289e-06, profile geometry/mixtures=1.663e-05, support geometry=2.029e-03, coordinate/context=2.552e-03, phase admissibility=3.525e-03, degradation/mixture=2.945e-03, integrand guards=2.571e-03, final projection/reduction/key publication=4.690e-05",
+        "Fault I_h cold detail (rank 0 seconds): surface composition projection=2.691e-05, key comparison/copies=2.104e-05, key MPI=8.530e-06, profile geometry/mixtures=3.449e-05, support geometry=3.488e-03, coordinate/context=2.530e-03, phase admissibility=1.999e-03, degradation/mixture=2.895e-03, integrand guards=2.585e-03, final projection/reduction/key publication=7.186e-05",
+        "Fault I_h cold detail (rank 0 seconds): surface composition projection=2.403e-05, key comparison/copies=2.240e-05, key MPI=3.975e-06, profile geometry/mixtures=1.584e-05, support geometry=1.978e-03, coordinate/context=2.518e-03, phase admissibility=2.036e-03, degradation/mixture=2.901e-03, integrand guards=3.772e-03, final projection/reduction/key publication=6.289e-05",
+        "Fault I_h cold detail (rank 0 seconds): surface composition projection=3.845e-05, key comparison/copies=2.166e-05, key MPI=6.524e-06, profile geometry/mixtures=3.199e-05, support geometry=2.058e-03, coordinate/context=2.400e-03, phase admissibility=3.359e-03, degradation/mixture=2.918e-03, integrand guards=2.559e-03, final projection/reduction/key publication=6.010e-05"
+      ],
+      "cell_work": [
+        "Cell I_h: rebuilt profiles=96, reused profiles=0, local intervals=12288, cell candidates=12288, FE samples=155520, remote requests=0, windows=4, geometry seconds=2.295e-03, local interval bytes=884736",
+        "Cell I_h: rebuilt profiles=0, reused profiles=96, local intervals=12288, cell candidates=0, FE samples=155520, remote requests=0, windows=4, geometry seconds=4.204e-06, local interval bytes=884736",
+        "Cell I_h: rebuilt profiles=0, reused profiles=96, local intervals=12288, cell candidates=0, FE samples=155520, remote requests=0, windows=4, geometry seconds=3.703e-06, local interval bytes=884736",
+        "Cell I_h: rebuilt profiles=0, reused profiles=96, local intervals=12288, cell candidates=0, FE samples=155520, remote requests=0, windows=4, geometry seconds=4.021e-06, local interval bytes=884736",
+        "Cell I_h: rebuilt profiles=0, reused profiles=96, local intervals=12288, cell candidates=0, FE samples=155520, remote requests=0, windows=4, geometry seconds=4.268e-06, local interval bytes=884736",
+        "Cell I_h: rebuilt profiles=0, reused profiles=96, local intervals=12288, cell candidates=0, FE samples=155520, remote requests=0, windows=4, geometry seconds=3.617e-06, local interval bytes=884736",
+        "Cell I_h: rebuilt profiles=0, reused profiles=96, local intervals=12288, cell candidates=0, FE samples=155520, remote requests=0, windows=4, geometry seconds=3.743e-06, local interval bytes=884736",
+        "Cell I_h: rebuilt profiles=0, reused profiles=96, local intervals=12288, cell candidates=0, FE samples=155520, remote requests=0, windows=4, geometry seconds=4.559e-06, local interval bytes=884736",
+        "Cell I_h: rebuilt profiles=0, reused profiles=96, local intervals=12288, cell candidates=0, FE samples=155520, remote requests=0, windows=4, geometry seconds=3.683e-06, local interval bytes=884736"
+      ]
+    }
+  },
+  "comparison": {
+    "fields": {
+      "surface": {
+        "surface_0": {
+          "fault": {
+            "absolute": 0.0,
+            "relative": null,
+            "bitwise": true
+          },
+          "node": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "x": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "y": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "V": {
+            "absolute": 1.5720931501039814e-18,
+            "relative": 4.9929350377853964e-15,
+            "bitwise": false
+          },
+          "Theta": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "C": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "Ih": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          }
+        },
+        "surface_1": {
+          "fault": {
+            "absolute": 0.0,
+            "relative": null,
+            "bitwise": true
+          },
+          "node": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "x": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "y": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "V": {
+            "absolute": 3.903127820947816e-18,
+            "relative": 2.94117806927185e-15,
+            "bitwise": false
+          },
+          "Theta": {
+            "absolute": 1.8474111129762605e-13,
+            "relative": 1.5156735744687615e-15,
+            "bitwise": false
+          },
+          "C": {
+            "absolute": 1.1368683772161603e-13,
+            "relative": 3.529035281948502e-16,
+            "bitwise": false
+          },
+          "Ih": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          }
+        },
+        "surface_2": {
+          "fault": {
+            "absolute": 0.0,
+            "relative": null,
+            "bitwise": true
+          },
+          "node": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "x": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "y": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "V": {
+            "absolute": 3.859759734048396e-17,
+            "relative": 3.825724687859878e-14,
+            "bitwise": false
+          },
+          "Theta": {
+            "absolute": 1.1368683772161603e-12,
+            "relative": 1.3565649409130637e-14,
+            "bitwise": false
+          },
+          "C": {
+            "absolute": 5.684341886080801e-13,
+            "relative": 1.752076556619994e-15,
+            "bitwise": false
+          },
+          "Ih": {
+            "absolute": 5.684341886080802e-14,
+            "relative": 5.258460113253317e-16,
+            "bitwise": false
+          }
+        },
+        "surface_3": {
+          "fault": {
+            "absolute": 0.0,
+            "relative": null,
+            "bitwise": true
+          },
+          "node": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "x": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "y": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "V": {
+            "absolute": 3.230922474006803e-17,
+            "relative": 2.6256933203019927e-14,
+            "bitwise": false
+          },
+          "Theta": {
+            "absolute": 8.313350008393172e-13,
+            "relative": 1.5647474114444105e-14,
+            "bitwise": false
+          },
+          "C": {
+            "absolute": 9.094947017729282e-13,
+            "relative": 2.777248755419108e-15,
+            "bitwise": false
+          },
+          "Ih": {
+            "absolute": 4.263256414560601e-14,
+            "relative": 3.943840007394488e-16,
+            "bitwise": false
+          }
+        },
+        "surface_4": {
+          "fault": {
+            "absolute": 0.0,
+            "relative": null,
+            "bitwise": true
+          },
+          "node": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "x": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "y": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "V": {
+            "absolute": 5.139118297581291e-17,
+            "relative": 3.2286849165097575e-14,
+            "bitwise": false
+          },
+          "Theta": {
+            "absolute": 7.887024366937112e-13,
+            "relative": 2.6707574832701347e-14,
+            "bitwise": false
+          },
+          "C": {
+            "absolute": 1.2505552149377763e-12,
+            "relative": 3.769391218784841e-15,
+            "bitwise": false
+          },
+          "Ih": {
+            "absolute": 5.684341886080802e-14,
+            "relative": 5.258449753036863e-16,
+            "bitwise": false
+          }
+        },
+        "surface_5": {
+          "fault": {
+            "absolute": 0.0,
+            "relative": null,
+            "bitwise": true
+          },
+          "node": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "x": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "y": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "V": {
+            "absolute": 6.765421556309548e-17,
+            "relative": 3.402626523577882e-14,
+            "bitwise": false
+          },
+          "Theta": {
+            "absolute": 4.0323300254385686e-13,
+            "relative": 2.8247159928723287e-14,
+            "bitwise": false
+          },
+          "C": {
+            "absolute": 1.5347723092418164e-12,
+            "relative": 4.548721043900181e-15,
+            "bitwise": false
+          },
+          "Ih": {
+            "absolute": 5.684341886080802e-14,
+            "relative": 5.258431835294251e-16,
+            "bitwise": false
+          }
+        },
+        "surface_6": {
+          "fault": {
+            "absolute": 0.0,
+            "relative": null,
+            "bitwise": true
+          },
+          "node": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "x": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "y": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "V": {
+            "absolute": 6.548581121812447e-17,
+            "relative": 2.994638157711017e-14,
+            "bitwise": false
+          },
+          "Theta": {
+            "absolute": 2.6290081223123707e-13,
+            "relative": 4.018113349567795e-14,
+            "bitwise": false
+          },
+          "C": {
+            "absolute": 1.8758328224066645e-12,
+            "relative": 5.457592029376622e-15,
+            "bitwise": false
+          },
+          "Ih": {
+            "absolute": 9.947598300641403e-14,
+            "relative": 9.202106642313514e-16,
+            "bitwise": false
+          }
+        },
+        "surface_7": {
+          "fault": {
+            "absolute": 0.0,
+            "relative": null,
+            "bitwise": true
+          },
+          "node": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "x": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "y": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "V": {
+            "absolute": 9.8879238130678e-17,
+            "relative": 4.427037963407191e-14,
+            "bitwise": false
+          },
+          "Theta": {
+            "absolute": 1.652011860642233e-13,
+            "relative": 5.354179053368752e-14,
+            "bitwise": false
+          },
+          "C": {
+            "absolute": 2.1032064978498966e-12,
+            "relative": 6.006545189305523e-15,
+            "bitwise": false
+          },
+          "Ih": {
+            "absolute": 7.105427357601002e-14,
+            "relative": 6.572833911337463e-16,
+            "bitwise": false
+          }
+        },
+        "surface_8": {
+          "fault": {
+            "absolute": 0.0,
+            "relative": null,
+            "bitwise": true
+          },
+          "node": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "x": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "y": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "V": {
+            "absolute": 1.0755285551056204e-16,
+            "relative": 4.794081035031731e-14,
+            "bitwise": false
+          },
+          "Theta": {
+            "absolute": 1.0391687510491465e-13,
+            "relative": 6.560975242181413e-14,
+            "bitwise": false
+          },
+          "C": {
+            "absolute": 2.2168933355715126e-12,
+            "relative": 6.216627370275473e-15,
+            "bitwise": false
+          },
+          "Ih": {
+            "absolute": 5.684341886080802e-14,
+            "relative": 5.258229936582714e-16,
+            "bitwise": false
+          }
+        }
+      },
+      "phase": {
+        "phase_0": {
+          "dof": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "x": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "y": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "phi": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          }
+        },
+        "phase_1": {
+          "dof": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "x": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "y": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "phi": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          }
+        },
+        "phase_2": {
+          "dof": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "x": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "y": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "phi": {
+            "absolute": 1.1102230246251565e-16,
+            "relative": 1.850643950458783e-16,
+            "bitwise": false
+          }
+        },
+        "phase_3": {
+          "dof": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "x": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "y": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "phi": {
+            "absolute": 1.1102230246251565e-16,
+            "relative": 1.8506396863153902e-16,
+            "bitwise": false
+          }
+        },
+        "phase_4": {
+          "dof": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "x": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "y": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "phi": {
+            "absolute": 1.1102230246251565e-16,
+            "relative": 1.8506374962502353e-16,
+            "bitwise": false
+          }
+        },
+        "phase_5": {
+          "dof": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "x": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "y": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "phi": {
+            "absolute": 1.1102230246251565e-16,
+            "relative": 1.850633701548021e-16,
+            "bitwise": false
+          }
+        },
+        "phase_6": {
+          "dof": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "x": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "y": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "phi": {
+            "absolute": 2.220446049250313e-16,
+            "relative": 3.7012532790371773e-16,
+            "bitwise": false
+          }
+        },
+        "phase_7": {
+          "dof": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "x": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "y": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "phi": {
+            "absolute": 2.220446049250313e-16,
+            "relative": 3.7012378082951243e-16,
+            "bitwise": false
+          }
+        },
+        "phase_8": {
+          "dof": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "x": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "y": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "phi": {
+            "absolute": 1.1102230246251565e-16,
+            "relative": 1.850612518878181e-16,
+            "bitwise": false
+          }
+        }
+      },
+      "time": {
+        "time_0": {
+          "step": {
+            "absolute": 0.0,
+            "relative": null,
+            "bitwise": true
+          },
+          "time": {
+            "absolute": 0.0,
+            "relative": null,
+            "bitwise": true
+          },
+          "dt": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "U": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          }
+        },
+        "time_1": {
+          "step": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "time": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "dt": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "U": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          }
+        },
+        "time_2": {
+          "step": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "time": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "dt": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "U": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          }
+        },
+        "time_3": {
+          "step": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "time": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "dt": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "U": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          }
+        },
+        "time_4": {
+          "step": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "time": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "dt": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "U": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          }
+        },
+        "time_5": {
+          "step": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "time": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "dt": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "U": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          }
+        },
+        "time_6": {
+          "step": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "time": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "dt": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "U": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          }
+        },
+        "time_7": {
+          "step": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "time": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "dt": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "U": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          }
+        },
+        "time_8": {
+          "step": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "time": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "dt": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "U": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          }
+        }
+      },
+      "particles": {
+        "particles_0": {
+          "id": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "x": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "y": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "volume": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "H": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "tau_xx": {
+            "absolute": 0.0,
+            "relative": null,
+            "bitwise": true
+          },
+          "tau_yy": {
+            "absolute": 0.0,
+            "relative": null,
+            "bitwise": true
+          },
+          "tau_xy": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "active": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "fault": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "segment": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "xi": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          }
+        },
+        "particles_1": {
+          "id": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "x": {
+            "absolute": 2.7755575615628914e-17,
+            "relative": 1.1158360514919374e-16,
+            "bitwise": false
+          },
+          "y": {
+            "absolute": 8.673617379884035e-19,
+            "relative": 1.739252780091629e-18,
+            "bitwise": false
+          },
+          "volume": {
+            "absolute": 7.453889935837843e-20,
+            "relative": 1.0991202664892219e-14,
+            "bitwise": false
+          },
+          "H": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "tau_xx": {
+            "absolute": 4.8892344297525074e-11,
+            "relative": 0.1324030237438151,
+            "bitwise": false
+          },
+          "tau_yy": {
+            "absolute": 1.8277397445649168e-12,
+            "relative": 0.004981868638327462,
+            "bitwise": false
+          },
+          "tau_xy": {
+            "absolute": 2.1759660739917308e-10,
+            "relative": 1.8317974103948598e-13,
+            "bitwise": false
+          },
+          "active": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "fault": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "segment": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "xi": {
+            "absolute": 3.552713678800501e-15,
+            "relative": 4.234313970858688e-15,
+            "bitwise": false
+          }
+        },
+        "particles_2": {
+          "id": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "x": {
+            "absolute": 2.7755575615628914e-17,
+            "relative": 1.1146461619255024e-16,
+            "bitwise": false
+          },
+          "y": {
+            "absolute": 1.3877787807814457e-17,
+            "relative": 2.782804448146606e-17,
+            "bitwise": false
+          },
+          "volume": {
+            "absolute": 1.4484263398048536e-19,
+            "relative": 2.1357905154139955e-14,
+            "bitwise": false
+          },
+          "H": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "tau_xx": {
+            "absolute": 9.968989253030726e-11,
+            "relative": 2.0675551234800015e-05,
+            "bitwise": false
+          },
+          "tau_yy": {
+            "absolute": 7.503024282652716e-11,
+            "relative": 1.3745940381619628e-05,
+            "bitwise": false
+          },
+          "tau_xy": {
+            "absolute": 2.994511305587366e-10,
+            "relative": 2.612349959592668e-13,
+            "bitwise": false
+          },
+          "active": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "fault": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "segment": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "xi": {
+            "absolute": 3.552713678800501e-15,
+            "relative": 4.069463767905145e-15,
+            "bitwise": false
+          }
+        },
+        "particles_3": {
+          "id": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "x": {
+            "absolute": 2.7755575615628914e-17,
+            "relative": 1.1138933242138433e-16,
+            "bitwise": false
+          },
+          "y": {
+            "absolute": 5.551115123125783e-17,
+            "relative": 1.1131217792586425e-16,
+            "bitwise": false
+          },
+          "volume": {
+            "absolute": 1.8211208365967457e-19,
+            "relative": 2.6853506382090116e-14,
+            "bitwise": false
+          },
+          "H": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "tau_xx": {
+            "absolute": 9.554772780995058e-11,
+            "relative": 8.333653172582322e-05,
+            "bitwise": false
+          },
+          "tau_yy": {
+            "absolute": 9.362461865083351e-11,
+            "relative": 0.00015221714509420687,
+            "bitwise": false
+          },
+          "tau_xy": {
+            "absolute": 5.181846063351259e-10,
+            "relative": 4.417033085718333e-13,
+            "bitwise": false
+          },
+          "active": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "fault": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "segment": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "xi": {
+            "absolute": 3.552713678800501e-15,
+            "relative": 3.971467631556176e-15,
+            "bitwise": false
+          }
+        },
+        "particles_4": {
+          "id": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "x": {
+            "absolute": 2.7755575615628914e-17,
+            "relative": 1.112741548811463e-16,
+            "bitwise": false
+          },
+          "y": {
+            "absolute": 5.551115123125783e-17,
+            "relative": 1.1131217792586425e-16,
+            "bitwise": false
+          },
+          "volume": {
+            "absolute": 1.4484263398048536e-19,
+            "relative": 2.1357905154009957e-14,
+            "bitwise": false
+          },
+          "H": {
+            "absolute": 8.482103908136196e-14,
+            "relative": 2.8711214351076425e-18,
+            "bitwise": false
+          },
+          "tau_xx": {
+            "absolute": 1.3286769481399225e-10,
+            "relative": 0.0002236749821219031,
+            "bitwise": false
+          },
+          "tau_yy": {
+            "absolute": 1.4608646723467074e-10,
+            "relative": 0.00026688460721728703,
+            "bitwise": false
+          },
+          "tau_xy": {
+            "absolute": 6.516529538203031e-10,
+            "relative": 5.358595667283658e-13,
+            "bitwise": false
+          },
+          "active": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "fault": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "segment": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "xi": {
+            "absolute": 3.552713678800501e-15,
+            "relative": 3.830118503983912e-15,
+            "bitwise": false
+          }
+        },
+        "particles_5": {
+          "id": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "x": {
+            "absolute": 2.7755575615628914e-17,
+            "relative": 1.1112289757752697e-16,
+            "bitwise": false
+          },
+          "y": {
+            "absolute": 5.551115123125783e-17,
+            "relative": 1.1131217792586425e-16,
+            "bitwise": false
+          },
+          "volume": {
+            "absolute": 2.896852679609707e-19,
+            "relative": 4.271582502564532e-14,
+            "bitwise": false
+          },
+          "H": {
+            "absolute": 1.3955503419538218e-13,
+            "relative": 4.723821523468988e-18,
+            "bitwise": false
+          },
+          "tau_xx": {
+            "absolute": 1.845990690185876e-10,
+            "relative": 0.0004607754317308637,
+            "bitwise": false
+          },
+          "tau_yy": {
+            "absolute": 1.2768013973081177e-10,
+            "relative": 0.00024238753143674018,
+            "bitwise": false
+          },
+          "tau_xy": {
+            "absolute": 7.376002031378448e-10,
+            "relative": 5.845461794946852e-13,
+            "bitwise": false
+          },
+          "active": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "fault": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "segment": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "xi": {
+            "absolute": 3.552713678800501e-15,
+            "relative": 3.658700074121741e-15,
+            "bitwise": false
+          }
+        },
+        "particles_6": {
+          "id": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "x": {
+            "absolute": 5.551115123125783e-17,
+            "relative": 2.220477001635111e-16,
+            "bitwise": false
+          },
+          "y": {
+            "absolute": 5.551115123125783e-17,
+            "relative": 1.1131217792586425e-16,
+            "bitwise": false
+          },
+          "volume": {
+            "absolute": 2.896852679609707e-19,
+            "relative": 4.2715824905301136e-14,
+            "bitwise": false
+          },
+          "H": {
+            "absolute": 1.6964207816272392e-13,
+            "relative": 5.742242870215285e-18,
+            "bitwise": false
+          },
+          "tau_xx": {
+            "absolute": 2.675790113959359e-10,
+            "relative": 0.0006707017374011744,
+            "bitwise": false
+          },
+          "tau_yy": {
+            "absolute": 1.3706708560529103e-10,
+            "relative": 0.0002975404071470736,
+            "bitwise": false
+          },
+          "tau_xy": {
+            "absolute": 9.53377821133472e-10,
+            "relative": 7.427107534110334e-13,
+            "bitwise": false
+          },
+          "active": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "fault": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "segment": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "xi": {
+            "absolute": 7.105427357601002e-15,
+            "relative": 7.108598252046066e-15,
+            "bitwise": false
+          }
+        },
+        "particles_7": {
+          "id": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "x": {
+            "absolute": 5.551115123125783e-17,
+            "relative": 2.2204827767027207e-16,
+            "bitwise": false
+          },
+          "y": {
+            "absolute": 5.551115123125783e-17,
+            "relative": 1.1131217792586425e-16,
+            "bitwise": false
+          },
+          "volume": {
+            "absolute": 2.888382350137164e-19,
+            "relative": 4.2590924040843755e-14,
+            "bitwise": false
+          },
+          "H": {
+            "absolute": 1.509903313490213e-13,
+            "relative": 5.110896795479573e-18,
+            "bitwise": false
+          },
+          "tau_xx": {
+            "absolute": 2.808208131770485e-10,
+            "relative": 0.00010172403092226262,
+            "bitwise": false
+          },
+          "tau_yy": {
+            "absolute": 1.9440367018268623e-10,
+            "relative": 5.1074236833708406e-05,
+            "bitwise": false
+          },
+          "tau_xy": {
+            "absolute": 1.1730207916116342e-09,
+            "relative": 9.107900512657675e-13,
+            "bitwise": false
+          },
+          "active": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "fault": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "segment": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "xi": {
+            "absolute": 7.105427357601002e-15,
+            "relative": 7.109190178141614e-15,
+            "bitwise": false
+          }
+        },
+        "particles_8": {
+          "id": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "x": {
+            "absolute": 5.551115123125783e-17,
+            "relative": 2.2206735066173164e-16,
+            "bitwise": false
+          },
+          "y": {
+            "absolute": 5.551115123125783e-17,
+            "relative": 1.1131217792586425e-16,
+            "bitwise": false
+          },
+          "volume": {
+            "absolute": 3.066259269060567e-19,
+            "relative": 4.5213824912044896e-14,
+            "bitwise": false
+          },
+          "H": {
+            "absolute": 1.6719958750854857e-13,
+            "relative": 5.659566598523704e-18,
+            "bitwise": false
+          },
+          "tau_xx": {
+            "absolute": 2.806573664715054e-10,
+            "relative": 0.00015403407328724633,
+            "bitwise": false
+          },
+          "tau_yy": {
+            "absolute": 1.8775322000336018e-10,
+            "relative": 7.735454122061342e-05,
+            "bitwise": false
+          },
+          "tau_xy": {
+            "absolute": 1.2141754268668592e-09,
+            "relative": 9.423425284229958e-13,
+            "bitwise": false
+          },
+          "active": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "fault": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "segment": {
+            "absolute": 0.0,
+            "relative": 0.0,
+            "bitwise": true
+          },
+          "xi": {
+            "absolute": 7.105427357601002e-15,
+            "relative": 7.128793191787507e-15,
+            "bitwise": false
+          }
+        }
+      },
+      "fault": {},
+      "history": {},
+      "constitutive_normal": {}
+    },
+    "guards": {
+      "benchmarks/reconstructed_fault/performance/mechanical_k3_pivot": {
+        "guard_0": true,
+        "guard_1": true,
+        "guard_2": true,
+        "guard_3": true,
+        "guard_4": true,
+        "guard_5": true,
+        "guard_6": true,
+        "guard_7": true,
+        "guard_8": true
+      },
+      "benchmarks/reconstructed_fault/performance/coupling_k3": {
+        "guard_0": true,
+        "guard_1": true,
+        "guard_2": true,
+        "guard_3": true,
+        "guard_4": true,
+        "guard_5": true,
+        "guard_6": true,
+        "guard_7": true,
+        "guard_8": true
+      }
+    }
+  }
+}

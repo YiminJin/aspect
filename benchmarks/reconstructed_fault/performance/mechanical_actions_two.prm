@@ -1,0 +1,2 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/performance/mechanical_actions.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/performance/mechanical_actions_two

@@ -1,0 +1,43 @@
+{
+  "command": [
+    "/usr/bin/time",
+    "-v",
+    "timeout",
+    "--signal=TERM",
+    "--kill-after=15",
+    "2400",
+    "mpirun",
+    "-np",
+    "4",
+    "--bind-to",
+    "core",
+    "--map-by",
+    "core",
+    "/home/ein/repository/aspect/build-pf-cpdi/aspect-release",
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/work-replay-50-local4/run.prm"
+  ],
+  "environment": {
+    "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect",
+    "ASPECT_FAULT_EXPLICIT_B": "1",
+    "ASPECT_FAULT_EXPLICIT_G": "1",
+    "ASPECT_FAULT_SURFACE_SOLVER": "tridiagonal",
+    "ASPECT_FAULT_STRESS_SAMPLE_DIAGNOSTIC": "1",
+    "ASPECT_FAULT_SOURCE_HISTORY_DIAGNOSTIC": "1",
+    "ASPECT_BP3_TIMESTEP_SEQUENCE": "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/work-replay-50-local4/clock.csv",
+    "ASPECT_BP3_ADAPTIVE_REPLAY": "1",
+    "ASPECT_BP3_TARGET_MESH": "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/junction-matched-qualified-local4/refined/target_cells.txt",
+    "ASPECT_BP3_EXACT_TARGET": "1",
+    "ASPECT_BP3_EXPECTED_FAULT": "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/fault-grid-50-local4/fault.txt"
+  },
+  "sha256": {
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/run_work_replay.py": "9e173c84008cf4f83d476407ae44d2455c002b52135698b04f7ce27e3f8d5e40",
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/work-replay-50-local4/run.prm": "6740ae84ab3364a6a46993bbd43ccbf8f451a8a82c52e29a398fdd1473bd0dc6",
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/work-replay-50-local4/clock.csv": "7bf7791e78f06bae1e6d59e2b6b55c258effd5db1a1072daea73c98393e53b26",
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/mature-fault-50-local4/prestress.txt": "0f4889001a63b78ee87759066392db7177db4bb28e2a52307167f403be829563",
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/top-source-paired-50-local4/completion.txt": "a3dae8570a6b7bb68e9c2557823ef3eb2c6b9f9db3ea74891c3cf7bcab253667",
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/bp3.cc": "9c557536d3952405f9708e00d009b8bac319b7fd106745377064bcf80afdae4d",
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/work_replay.h": "c318cf661d5e9e9059da61c97a53840883d3dc11ebda6de735d019f067265842",
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/build/libbp3.release.so": "729e7aebb6790acd05eb84b018c027398bd47b37101aec888fb47995c8686bf6",
+    "/home/ein/repository/aspect/build-pf-cpdi/aspect-release": "9157a3362be4e659d0ae0c626ab4fdcf2439794e63251d6605a6da50eba0f31e"
+  }
+}

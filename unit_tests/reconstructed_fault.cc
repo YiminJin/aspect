@@ -10,6 +10,7 @@
 */
 
 #include "common.h"
+#include "../source/reconstructed_fault/surface_direct_internal.h"
 
 #include <aspect/reconstructed_fault/fault.h>
 #include <aspect/reconstructed_fault/manager.h>
@@ -24,6 +25,9 @@
 
 #include <limits>
 #include <sstream>
+#include <fstream>
+#include <iomanip>
+#include <cstdlib>
 
 namespace
 {
@@ -40,6 +44,37 @@ namespace
         dealii::deal_II_exceptions::enable_abort_on_exception();
       }
   };
+}
+
+
+TEST_CASE("Prescribed fault V is private until commit and cannot be released",
+          "[fault_prescribed_v]")
+{
+  ThrowOnDealIIException exceptions;
+  aspect::ReconstructedFaultManager<2> manager;
+  manager.add_reconstructed_fault({{0,0},{1,0},{2,0}}, {1,1,1});
+  manager.initialize_slip_rate(0, {2,2,2});
+  manager.set_prescribed_slip_rates({{{2,3}}});
+  manager.begin_slip_rate_nonlinear_solve();
+  REQUIRE(manager.get_slip_rate(0)[2] == 3);
+  REQUIRE(manager.get_timestep_committed_slip_rate(0)[2] == 2);
+  auto active = manager.prescribed_slip_rate_mask();
+  REQUIRE(active[0] == std::vector<bool>{false,false,true});
+  aspect::internal::update_reconstructed_fault_active_set(
+    {{2,2,3}}, {{1,1,1}}, 1., active);
+  REQUIRE(active[0][2]);
+  manager.begin_slip_rate_trial();
+  REQUIRE_THROWS(manager.set_slip_rate_trial({{1,1,1}}, 1.));
+  manager.rollback_slip_rate_trial();
+  manager.rollback_slip_rate_nonlinear_solve();
+  REQUIRE(manager.get_timestep_committed_slip_rate(0)[2] == 2);
+  manager.begin_slip_rate_nonlinear_solve();
+  manager.begin_slip_rate_trial();
+  manager.set_slip_rate_trial({{1,1,0}}, .5);
+  manager.accept_slip_rate_trial();
+  manager.validate_slip_rate_nonlinear_commit();
+  manager.commit_slip_rate_nonlinear_solve();
+  REQUIRE(manager.get_timestep_committed_slip_rate(0) == std::vector<double>{2.5,2.5,3});
 }
 
 
@@ -551,6 +586,86 @@ TEST_CASE("Stage-I fraction-to-boundary permits exact contact")
 }
 
 
+TEST_CASE("Stage-I captured BP3 contact retains absolute evaluated and accepted rates")
+{
+  ThrowOnDealIIException exceptions;
+  using namespace aspect;
+  constexpr double base = 1.018971212482027e-9;
+  constexpr double direction = -8.573688417268437e-9;
+  constexpr double minimum = 1e-20;
+  const double alpha = aspect::internal::reconstructed_fault_maximum_step_length(
+    {{base,2e-9}}, {{direction,0.}}, {{false,true}}, minimum);
+  REQUIRE(base+alpha*direction < minimum);
+  REQUIRE(base+(minimum-base) < minimum);
+  REQUIRE(aspect::internal::reconstructed_fault_trial_value(base,direction,alpha,minimum) == minimum);
+  REQUIRE_THROWS(aspect::internal::reconstructed_fault_trial_value(base,direction,alpha*1.01,minimum));
+  // The follow-up replay reaches a tip whose right node is exactly in contact.
+  // Even endpoint interpolation must not reconstruct that node by subtract/add.
+  constexpr double tip_left = 4.879984001041503e-13;
+  ReconstructedFaultManager<2> tip;
+  tip.add_reconstructed_fault({{0,0},{1,0}}, {1,1});
+  tip.initialize_slip_rate(0, {tip_left,minimum});
+  REQUIRE(tip_left+(minimum-tip_left) < minimum);
+  REQUIRE(tip.interpolate_slip_rate(0,0,0.) == tip_left);
+  REQUIRE(tip.interpolate_slip_rate(0,0,1.) == minimum);
+  REQUIRE(tip.interpolate_slip_rate(0,0,.37) == tip_left+.37*(minimum-tip_left));
+  REQUIRE(dealii::Utilities::MPI::min(tip.interpolate_slip_rate(0,0,1.),MPI_COMM_WORLD) == minimum);
+  ReconstructedFaultManager<2> manager;
+  manager.add_reconstructed_fault({{0,0},{1,0}}, {1,1});
+  manager.initialize_slip_rate(0, {base,2e-9});
+  manager.set_prescribed_slip_rates({{{1,2e-9}}});
+  manager.begin_slip_rate_nonlinear_solve();
+  ReconstructedFaultVector evaluated;
+  unsigned int evaluations = 0;
+  const auto evaluate = [&](const double step)
+  {
+    evaluated = {{aspect::internal::reconstructed_fault_trial_value(base,direction,step,minimum),2e-9}};
+    manager.begin_slip_rate_trial();
+    manager.set_slip_rate_trial_values(evaluated);
+    REQUIRE(manager.get_slip_rate(0) == evaluated[0]);
+    REQUIRE(dealii::Utilities::MPI::min(manager.get_slip_rate(0)[0], MPI_COMM_WORLD)
+            == dealii::Utilities::MPI::max(evaluated[0][0], MPI_COMM_WORLD));
+    manager.rollback_slip_rate_trial();
+    REQUIRE(manager.get_slip_rate(0)[0] == base);
+    return ++evaluations <= 2 ? 1.0 : .5;
+  };
+  const auto accept = [&](const double)
+  {
+    manager.begin_slip_rate_trial();
+    manager.set_slip_rate_trial_values(evaluated);
+    manager.accept_slip_rate_trial();
+    REQUIRE(manager.get_slip_rate(0) == evaluated[0]);
+  };
+  auto result = aspect::internal::reconstructed_fault_armijo_line_search(alpha,4,1.,evaluate,accept);
+  REQUIRE(result.accepted);
+  REQUIRE(result.rejected_candidates == 2);
+  REQUIRE(evaluated[0][0] == base+result.step_length*direction);
+  manager.rollback_slip_rate_nonlinear_solve();
+  REQUIRE(manager.get_timestep_committed_slip_rate(0)[0] == base);
+  manager.begin_slip_rate_nonlinear_solve();
+  evaluations = 0;
+  result = aspect::internal::reconstructed_fault_armijo_line_search(alpha,1,1.,evaluate,accept);
+  REQUIRE_FALSE(result.accepted);
+  REQUIRE(manager.get_slip_rate(0)[0] == base);
+  manager.begin_slip_rate_trial();
+  manager.set_slip_rate_trial_values({{minimum,2e-9}});
+  REQUIRE_THROWS(manager.set_slip_rate_trial_values({{minimum,3e-9}}));
+  REQUIRE(manager.get_slip_rate(0)[0] == minimum);
+  manager.accept_slip_rate_trial();
+  REQUIRE(manager.get_slip_rate(0)[0] == minimum);
+  auto active = manager.prescribed_slip_rate_mask();
+  aspect::internal::update_reconstructed_fault_active_set({{minimum,2e-9}},{{-minimum,0.}},minimum,active);
+  REQUIRE(active[0][0]);
+  active = manager.prescribed_slip_rate_mask();
+  aspect::internal::update_reconstructed_fault_active_set({{minimum,2e-9}},{{minimum,0.}},minimum,active);
+  REQUIRE_FALSE(active[0][0]);
+  REQUIRE(aspect::internal::reconstructed_fault_trial_value(minimum,minimum,1.,minimum)==2*minimum);
+  manager.validate_slip_rate_nonlinear_commit();
+  manager.commit_slip_rate_nonlinear_solve();
+  REQUIRE(manager.get_timestep_committed_slip_rate(0)[0] == minimum);
+}
+
+
 TEST_CASE("Stage-I Armijo search rejects twice before acceptance")
 {
   std::vector<double> evaluated_steps;
@@ -821,6 +936,35 @@ TEST_CASE("ReconstructedFaultManager checkpoint restores committed slip rate")
   REQUIRE(restored.has_property("phase field fault previous I h"));
 }
 
+TEST_CASE("Mature fixed prestress and geometry survive manager checkpoint", "[mature_fault]")
+{
+  aspect::ReconstructedFaultManager<2> manager;
+  manager.register_property("mature fault reference geometry",2);
+  manager.register_property("background tractions",2);
+  manager.register_property("BP3 fixed shear correction",3);
+  manager.register_property("phase field fault cohesive traction",1);
+  manager.add_reconstructed_fault({dealii::Point<2>(0,0),dealii::Point<2>(1,0)},{.5,.5});
+  manager.initialize_slip_rate(0,{1.,2.});
+  for (unsigned int v=0;v<2;++v)
+    {
+      auto p=manager.get_fault(0).get_properties(v);
+      const std::vector<double> data={double(v),0.,20.+v,50.,1.+v,2.+v,4.+v,0.};
+      std::copy(data.begin(),data.end(),p.begin());
+    }
+  std::stringstream storage;
+  {aspect::oarchive archive(storage);archive<<manager;}
+  aspect::ReconstructedFaultManager<2> restored;
+  {aspect::iarchive archive(storage);archive>>restored;}
+  REQUIRE(restored.has_property("mature fault reference geometry"));
+  for (unsigned int v=0;v<2;++v)
+    for (unsigned int c=0;c<8;++c)
+      CHECK(restored.get_fault(0).get_properties(v)[c]==manager.get_fault(0).get_properties(v)[c]);
+  // The restored coefficients retain a rational interior background, not
+  // the linear interpolation of the endpoint background values.
+  const double rational=20.5-(1.5+2.5/4.5);
+  CHECK(std::abs(rational-(.5*(20.-1.-2./4.)+.5*(21.-2.-3./5.)))>1e-3);
+}
+
 
 TEST_CASE("Fault normal-profile projection respects finite segments and varying widths")
 {
@@ -849,6 +993,77 @@ TEST_CASE("Fault normal-profile projection respects finite segments and varying 
     aspect::ReconstructedFaultUtilities::project_to_normal_profiles(
       faults, widths, dealii::Point<2>(-0.1, 0.1));
   REQUIRE_FALSE(beyond_open_tip.active);
+}
+
+
+TEST_CASE("Bottom bulk source continuation preserves surface admission", "[fault_bottom_source]")
+{
+  aspect::ReconstructedFaultManager<2> manager;
+  manager.add_reconstructed_fault({dealii::Point<2>(2,0),dealii::Point<2>(3,2),dealii::Point<2>(4,4)},
+                                 {1.,1.,1.});
+  const dealii::Point<2> wedge(1.8,.01), admitted(2.5,1.);
+  REQUIRE_FALSE(manager.project_to_bulk_source(wedge).active);
+  const auto before=manager.project_to_bulk_source(admitted);
+  manager.enable_bottom_source_continuation(0,dealii::Point<2>(0,0),dealii::Point<2>(6,4));
+  const auto continued=manager.project_to_bulk_source(wedge);
+  REQUIRE(continued.active);
+  REQUIRE(continued.segment_index==0);
+  REQUIRE(continued.xi==0.);
+  REQUIRE_FALSE(manager.project_to_normal_profiles(wedge).active);
+  const auto after=manager.project_to_bulk_source(admitted);
+  REQUIRE(after.active==before.active);
+  REQUIRE(after.segment_index==before.segment_index);
+  REQUIRE(after.xi==before.xi);
+  REQUIRE(after.signed_distance==before.signed_distance);
+  REQUIRE_FALSE(manager.project_to_bulk_source(dealii::Point<2>(1.8,-.01)).active);
+  REQUIRE(manager.project_to_bulk_source(dealii::Point<2>(0,.01)).active);
+  REQUIRE_FALSE(manager.project_to_bulk_source(dealii::Point<2>(-.01,.01)).active);
+  REQUIRE_FALSE(manager.project_to_bulk_source(dealii::Point<2>(0,3.)).active);
+  REQUIRE_FALSE(manager.project_to_bulk_source(dealii::Point<2>(4.2,4.1)).active);
+
+  const dealii::Point<2> top_wedge(4.2,3.99);
+  REQUIRE_FALSE(manager.project_to_bulk_source(top_wedge).active);
+  manager.enable_top_source_continuation();
+  const auto top=manager.project_to_bulk_source(top_wedge);
+  REQUIRE(top.active);
+  REQUIRE(top.segment_index==1);
+  REQUIRE(top.xi==1.);
+  REQUIRE_FALSE(manager.project_to_normal_profiles(top_wedge).active);
+  REQUIRE_FALSE(manager.project_to_bulk_source(dealii::Point<2>(4.2,4.01)).active);
+  REQUIRE(manager.project_to_bulk_source(wedge).xi==0.);
+  REQUIRE(manager.project_to_bulk_source(admitted).xi==before.xi);
+}
+
+
+TEST_CASE("Saved bulk quadrature support audit", "[.fault_saved_support]")
+{
+  // Frozen-data audit only: exercise the same projection used by the Stokes
+  // QP cache, including points missing from associated-only diagnostic exports.
+  const char *directory=std::getenv("ASPECT_SAVED_FAULT_SUPPORT_AUDIT");
+  REQUIRE(directory!=nullptr);
+  const std::string root=std::string(directory)+"/";
+  std::ifstream geometry(root+"geometry.txt");
+  unsigned int n=0;double width=0.;
+  REQUIRE(static_cast<bool>(geometry>>n>>width));
+  std::vector<dealii::Point<2>> vertices(n);
+  for (auto &p:vertices) REQUIRE(static_cast<bool>(geometry>>p[0]>>p[1]));
+  aspect::ReconstructedFaultManager<2> manager;
+  manager.add_reconstructed_fault(vertices,std::vector<double>(n,width));
+  std::ifstream input(root+"points.txt");
+  REQUIRE(input.good());
+  std::ofstream output(root+"production_projection.csv");
+  output<<std::setprecision(17)<<"id,active,fault,segment,xi,distance\n";
+  unsigned int id,count=0;dealii::Point<2> point;
+  while (input>>id>>point[0]>>point[1])
+    {
+      const auto p=manager.project_to_normal_profiles(point);
+      output<<id<<','<<p.active<<','<<p.fault_index<<','<<p.segment_index<<','
+            <<(p.active ? p.xi : 0.)<<','<<(p.active ? p.signed_distance : 0.)<<'\n';
+      ++count;
+    }
+  REQUIRE(input.eof());
+  REQUIRE(count>0);
+  REQUIRE(output.good());
 }
 
 
@@ -937,4 +1152,76 @@ TEST_CASE("Fault projection MPI reduction reproduces a constant field")
       {global_values[3], global_values[4]});
   REQUIRE(solution[0] == Approx(2.0));
   REQUIRE(solution[1] == Approx(2.0));
+}
+
+TEST_CASE("Pivoted surface inverse preserves indefinite free blocks", "[fault_surface_direct]")
+{
+  ThrowOnDealIIException exceptions;
+  using aspect::internal::FaultSurfaceDirect;
+  const std::vector<std::vector<double>> diagonals={{4,3,2,4,3}, {-2,3,-4,5,-6}, {0,0}, {0,0,1}};
+  const std::vector<std::vector<double>> edges={{1,.5,1,.5}, {1,2,1,.5}, {1}, {1,1}};
+  for (unsigned int example=0;example<diagonals.size();++example)
+    {
+      const unsigned int n=diagonals[example].size();
+      for (unsigned int pattern=0;pattern<(example<2 ? 5U : 1U);++pattern)
+        {
+          std::vector<bool> active(n,false);
+          if (pattern==1) active.front()=active.back()=true;
+          if (pattern==2) active[n/2]=true;
+          if (pattern==3) for (unsigned int i=0;i<n;++i) active[i]=(i%2==1);
+          if (pattern==4) active.assign(n,true);
+          FaultSurfaceDirect pivot(diagonals[example],edges[example],active,example,true);
+          FaultSurfaceDirect umf(diagonals[example],edges[example],active,example,false);
+          for (unsigned int load=0;load<4;++load)
+            {
+              std::vector<double> rhs(n),actual,reference;
+              for (unsigned int i=0;i<n;++i)
+                rhs[i]=load==0 ? 0. : (load==1 ? 1. : (i%2 ? -1. : 2.))*(i+1)*load;
+              // Active RHS entries are deliberately enormous and must be ignored.
+              for (unsigned int i=0;i<n;++i) if (active[i]) rhs[i]=1e200;
+              pivot.solve(rhs,actual); umf.solve(rhs,reference);
+              for (unsigned int i=0;i<n;++i)
+                {
+                  REQUIRE(std::abs(actual[i]-reference[i])<=2e-12*std::max(1.,std::abs(reference[i])));
+                  if (active[i]) REQUIRE(actual[i]==0.);
+                  REQUIRE(dealii::Utilities::MPI::min(actual[i],MPI_COMM_WORLD)
+                          ==dealii::Utilities::MPI::max(actual[i],MPI_COMM_WORLD));
+                }
+            }
+        }
+    }
+  // A scalar free block is valid even when negative; a zero pivot is not.
+  FaultSurfaceDirect scalar({-2},{},{false},7,true);
+  std::vector<double> result;
+  scalar.solve({4},result);
+  REQUIRE(result[0]==-2.);
+  REQUIRE_THROWS(FaultSurfaceDirect({1,1},{1},{false,false},8,true));
+  REQUIRE_THROWS(FaultSurfaceDirect({0},{},{false},9,true));
+  REQUIRE_THROWS(scalar.solve({std::numeric_limits<double>::quiet_NaN()},result));
+  REQUIRE_THROWS(FaultSurfaceDirect({std::numeric_limits<double>::infinity()},{},{false},10,true));
+}
+
+TEST_CASE("Pivoted surface inverse retains nonsymmetric state columns", "[fault_surface_direct]")
+{
+  using aspect::internal::FaultSurfaceDirect;
+  const std::vector<double> diagonal={0,3,-4,5,-6},upper={1,2,.5,1},lower={-2,.25,3,-.5};
+  for (const auto active:{std::vector<bool>{false,false,false,false,false},
+                          std::vector<bool>{true,false,true,false,true}})
+    {
+      FaultSurfaceDirect pivot(diagonal,upper,active,0,true,lower);
+      FaultSurfaceDirect reference(diagonal,upper,active,0,false,lower);
+      std::vector<double> a,b;pivot.solve({1,2,3,4,5},a);reference.solve({1,2,3,4,5},b);
+      for(unsigned int i=0;i<a.size();++i)
+        {
+          REQUIRE(a[i]==Approx(b[i]).epsilon(1e-12));
+          if(active[i]) REQUIRE(a[i]==0.);
+          else
+            {
+              double value=diagonal[i]*a[i];
+              if(i>0)value+=lower[i-1]*a[i-1];
+              if(i+1<a.size())value+=upper[i]*a[i+1];
+              REQUIRE(value==Approx(i+1.).epsilon(1e-12));
+            }
+        }
+    }
 }

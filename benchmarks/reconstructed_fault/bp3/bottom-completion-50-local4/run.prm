@@ -1,0 +1,2 @@
+include /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/uniform-sliding-50-local4/run.prm
+set Output directory = /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/bottom-completion-50-local4

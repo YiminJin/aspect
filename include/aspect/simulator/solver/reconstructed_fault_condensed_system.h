@@ -84,6 +84,11 @@ namespace aspect
             make_physical_bulk_direction(
               const LinearAlgebra::BlockVector &solver_direction) const;
 
+            /** Homogeneous solver-space coupling actions, also used to build
+             * a small interface preconditioner without exposing matrix state. */
+            void apply_B(const FaultVector &source, LinearAlgebra::BlockVector &result) const;
+            void apply_G(const LinearAlgebra::BlockVector &source, FaultVector &result) const;
+
             /** Unit algebraic constant-pressure null vector, or zero outside
              * eligible prescribed-pressure closed domains. Verify both sides
              * of the full constrained condensed operator before returning it. */

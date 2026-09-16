@@ -37,6 +37,18 @@ namespace aspect
             return model.current_normalization_integrals;
           }
 
+          static auto normalization_cache_status(const PhaseFieldFault<dim> &model)
+          {
+            const auto &cache = model.normalization_value_cache;
+            return std::make_tuple(cache.valid, cache.hits, cache.integrations,
+                                   cache.last_requested_points);
+          }
+
+          static void invalidate_normalization_cache(PhaseFieldFault<dim> &model)
+          {
+            model.invalidate_normalization_cache();
+          }
+
           static double
           current_minimum_raw_normalization_phase_field(
             const PhaseFieldFault<dim> &model)
@@ -48,6 +60,12 @@ namespace aspect
           current_normalization_integrals(const PhaseFieldFault<dim> &model)
           {
             return model.current_normalization_integrals;
+          }
+
+          static void restore_diagnostic_normalization(
+            PhaseFieldFault<dim> &model, const std::vector<std::vector<double>> &values)
+          {
+            model.current_normalization_integrals=values;
           }
 
           static double
@@ -135,12 +153,13 @@ namespace aspect
                                     const double previous_cohesive_traction,
                                     const double slip_rate,
                                     const double current_h,
-                                    const double previous_h)
+                                    const double previous_h,
+                                    const bool mature = false)
           {
             return PhaseFieldFault<dim>::compute_cohesive_response(
               {beta, kappa}, current_normalization_integral,
               previous_normalization_integral, previous_cohesive_traction,
-              slip_rate, current_h, previous_h);
+              slip_rate, current_h, previous_h, mature);
           }
 
           static double

@@ -1,5 +1,301 @@
 # Stage K: K0 inventory and proposed K1 benchmark
 
+**Latest K5 result: bounded coupled-state timestep refinement contracts slowly.**
+Reusing the same step-9 checkpoint and the saved single coupled solve, two
+half-steps and four quarter-steps finish at 29.24190894 yr. All six accepted
+states pass unchanged nonlinear/fresh-linear criteria and exact candidate-state
+publication checks. No lower contact. The final deficit is 0.18815/0.20760/0.22034,
+neighbor contrast 0.14305/0.18320/0.21394, and accumulated gradient increment
+0.00165490/0.00176499/0.00186017 for one/two/four steps. Successive differences
+contract by 0.655/0.766/0.865, respectively, but remain material. Stop at this
+bounded temporal result, not a timestep-independent or full-trajectory claim.
+See `../bp3/stage_K5_coupled_substeps_report.md` for history verification and
+the preserved, repaired benchmark snapshot-order failure. Default production
+split state and physical/spatial/solver settings remain unchanged.
+
+**Latest K5 controlled diagnosis: within-step state coupling deepens the notch.**
+Two four-rank noncommitting mechanics-10 solves use identical incoming step-9
+bulk/history data and dt=439775721.3758315 s. A reproduces the saved lagged-state
+rates to 8.66e-15 relative. B evaluates candidate nodal Theta(V) from immutable
+old Theta and uses its verified nonsymmetric Jacobian. The 39.90–39.95-km rate
+contrast increases 21.30%, and the predicted last-element slip-gradient
+increment increases 17.13%. Neither solve has lower-active nodes. The two
+incident-element weak residual contributions cancel at about +/-2.981 MPa m
+in A and +/-3.181 MPa m in B; raw normal stress stays compressive.
+Both genuinely converge, pass fresh linear checks and complete rollback
+(140.53/181.47 s). Default split history and production settings are unchanged.
+This isolates a within-step effect, not timestep convergence or approval to
+adopt B. The diagnostic restores exact saved frozen I_h after a roundoff-level
+restart recomputation check; general committing-work restart remains unqualified.
+See `../bp3/stage_K5_within_step_report.md` and
+`benchmarks/reconstructed_fault/bp3/within-step-50-local4/`.
+
+**Latest K5 result: revised-work timestep halving shows material notch sensitivity.**
+One fresh four-rank run reaches 29.24190894 yr with 20 real half-steps,
+unchanged artificial dt0=4e6 s, spatial/model inputs and tolerances. Runtime
+1369.655 s, below the 40-minute cap. The accepted-clock guard stops at step 20
+without a remainder step. All 112 fresh linear checks, accepted nonlinear
+criteria and history checks pass; all 440 RSF nodes remain free.
+
+Final V39.95/V_p changes 0.839369 -> 0.806758: the notch deficit increases
+20.3%, the adjacent 39.90–39.95-km rate contrast 38.0%, and final-element slip
+gradient 11.9%. Current raw normal traction near 40 km spans
+47.094–52.754 MPa versus 47.208–52.673 MPa. Its native weak peak-to-peak
+variation increases 7.416 -> 9.282 kPa. At fixed accepted V/sigma, replacing
+lagged by newly committed Theta changes the 39.95-km weak friction by
+30.468/16.177 kPa in the baseline/half-step runs; this is diagnostic only.
+The next question is temporal accuracy, not a new spatial/physical correction.
+Two levels do not prove convergence or isolate Theta from other history errors.
+See `../bp3/stage_K5_work_halfdt_report.md` and
+`benchmarks/reconstructed_fault/bp3/work-replay-halfdt-50-local4/comparison/`.
+
+**Latest K5 bounded diagnosis: distinguish deep-edge and transverse-wing features.**
+Saved accepted work step 10 is retained; published FE tau fields are old history,
+not current constitutive stress. Uniform sliding already shows the small feature
+at s=42.934745 km, r=-526.178548 m next to coarse cells in the source wing.
+An offline same-location fine-Q1 control finds an 11.75% local chi-wing error
+at 42.95 km despite only about 0.02% I_h change.
+
+One four-rank uniform-sliding initialization/two-step test extends the bulk
+refinement edge from 44 to 48 km while leaving the surface grid and physical
+40-km junction fixed. The main pressure minimum moves 43.930→47.916 km;
+the old-edge amplitude falls 99.35%. The small 42.935-km feature stays beside
+its unchanged coarse patch: direct causal evidence applies to the moved edge,
+not to removing that untouched intrusion. Runtime 148.302 s; all six fresh
+linear checks and history checks pass. The new benchmark accepted-clock guard
+prevents a remainder solve. No second test, physics or solver correction.
+See `../bp3/stage_K5_deep_mesh_feature_report.md` and the retained full-profile
+CSV/plot overlays for the distinction and next decision.
+
+**Latest K5 trajectory result: committing mature work replay through 29.24 yr.**
+One fresh four-rank run finished in 967.306 s, retaining both boundary treatments,
+fixed background and current mature-history updates. First-update Maxwell/Theta
+checks pass before continuation; H, geometry and I_h stay fixed. Step 10 is the
+requested physical comparison: 85 fresh linear checks pass, all 440 RSF nodes
+remain free. Relative final bulk/surface residuals are 2.27e-13/1.88e-12.
+
+Common physical-node pressure variation falls 24.7% near 18 km and 44.2% near
+40 km, but increases 3.2% near 15 km. The final-element slip gradient falls
+36.6%; bottom pressure variation falls 99.3%. Common-rule weak normal traction
+near 15/18/40 km changes little, so raw pressure reductions are not called a
+normal-traction repair. The next focus is remaining RSF transition/slip-gradient
+behavior, not another boundary or work-measure redesign.
+
+A two-ULP final time discrepancy generated an extra 2.384e-7-s step before the
+process could be stopped. Preserve it separately; do not substitute it for step
+10 or blindly resume its final checkpoint. No retry or production criterion
+change. See `../bp3/stage_K5_work_replay_report.md` for the lifecycle evidence,
+sampling distinctions, initialization changes, plots and launcher limitation.
+
+**Latest K5 formulation result: opt-in mature work measure qualified.**
+The authorized common physical Stokes-QP mechanical measure uses J*chi for
+all traction terms, K, G and the residual mass, with the exact bulk source map
+and working FE old stress. Default volume mechanics and generic property
+projection remain unchanged. Both boundary completion/source corrections and
+fixed background fields are retained without recalibration.
+
+One fresh four-rank free-top noncommitting case completed in 72.161 s. K/G
+directional errors are 1.58e-9/5.23e-9, shear virtual-work error 1.45e-14,
+and affine-history weak-load error 4.77e-9 Pa. Three Newton updates converge
+to relative bulk/surface residuals 5.14e-15/1.23e-12; all fresh linear checks
+pass. The top rate is 9.99275e-10 m/s, no free node is lower-active, and full
+rollback proves no history publication. Existing two-rank source/Stage-I tests
+pass 112 assertions in 12 cases per rank. No timestep or mature-RSF trajectory
+was run. The next proposed step is a short mature-RSF replay; see
+`../bp3/stage_K5_work_measure_report.md` for the restricted qualification,
+equations, changed files and artifacts.
+
+**Latest K5 first-event preparation: corrected smoke/restart pass; launch held for baseline review.**
+The minimal remote I_h boundary-panel repair passes its analytic one-/two-rank
+regression. The actual BP3 remote/cell comparison still differs by 5.24e-6 at
+projected nodes versus the unchanged 2e-10 allowance, so corrected remote is
+retained. No integration redesign or tolerance change. The new coarse fixture
+uses pivoted tridiagonal inversion, sparse B, original G and no few-mode or
+profiling callbacks. Initialization plus three real steps pass (530.74 s,
+4.30 GiB), and filesystem resume from step 1 passes through step 3 (391.26 s,
+4.28 GiB). Bulk/particle relative restart differences are below 2e-14; surface
+differences are about 1e-15; backgrounds and accepted times/dt agree exactly.
+
+The event observer, twelve-station append-only diagnostics, adaptive heavy
+output and checkpoint/milestone configuration are implemented. The launcher
+was prepared after restart qualification but is fail-closed: the mandatory
+boundary repair changes I_h, derived initial shear background and the accepted
+timestep trajectory beyond strict numerical equivalence to the old defective
+baseline. That requested condition is not called passed. Review the corrected
+baseline before enabling the long run. No server submission, fine pilot, GMG,
+physics change or additional numerical optimization was performed. See
+`../bp3/stage_K5_first_cycle_preparation.md` and the benchmark's
+`README_first_cycle.md` / `first_cycle_readiness.json`.
+
+**Latest K5 mechanical result: sparse coupling qualified; few-mode correction not promoted.**
+Explicit B/G retain the independent bulk-QP and parent/domain actions and pass
+one-/two-rank basis/random, derivative, condensed recovery, genuine nonlinear
+convergence and rollback checks. Coarse BP3 completes three real steps; evolving
+K3 passes all nine state guards. No physics, quadrature, support, pressure,
+FGMRES or solver-tolerance change. Pivoted tridiagonal surface inversion is now
+preferred by default, with UMFPACK still available for comparison.
+
+Including setup, B costs 18.44/2.00 s instead of 79.92/10.53 s in BP3/K3;
+G costs 27.78/3.63 s instead of 31.36/4.06 s. The same-run timed-component
+estimate for preconditioner+B+G improves only 1.33x/1.53x, not the roughly 2x
+target. Sparse operators remain opt-in; B is recommended for the tested reuse
+counts, G only with sufficient reuse. The corrected two-mode candidate retains
+502 BP3 iterations and changes K3 558 to 559, while adding 58/74 setup probes;
+it is experimental/off by default, not promoted. Its earlier caller-side
+zero-pressure setup defect was fixed and separately reverified; failed attempts
+remain preserved. Stop at the separate GMG-preconditioner design, not another
+surface-inverse study, larger mode scan, fine pilot or GMG implementation.
+See `../bp3/stage_K5_coupling_report.md` and
+`../bp3/stage_K5_gmg_followup_design.md` for results and limitations.
+
+**Previous K5 mechanical result: pivoted surface prototype verified.**
+LAPACK GTTRF/GTTRS supports indefinite nonsingular free tridiagonal blocks and
+preserves the semantic inverse and active/history lifecycle. One-/two-rank
+tests pass 615 assertions, plus actual assembled condensed-action/recovery and
+production rollback checks. K1/K2 short replays, all nine evolving K3 states
+and three real coarse BP3 steps pass with every inverse also compared against
+UMFPACK. BP3/K3 retain 502/558 linear iterations and roundoff-level trajectory
+agreement. No equations, criteria, I_h/support or pressure changes were made.
+
+BP3 factorization plus 589 surface RHS solves falls from 0.0734 to 0.00675 s;
+the full timed coupled work remains about 334 s, dominated by preconditioning
+(157 s), B (82 s) and G (32 s). Surface LU is not an end-to-end bottleneck;
+wall-time differences in these single runs are not claimed as overall speedup.
+The new backend remains opt-in. A separate few-mode interface-preconditioner
+proposal is prepared, not implemented. No fine BP3 pilot or new I_h correction.
+See `../bp3/stage_K5_surface_solver_report.md` and
+`../bp3/stage_K5_interface_preconditioner_proposal.md`.
+
+**Latest K5: bound contact closed; three real BP3 steps pass; cell-I_h review stop.**
+Absolute trial vectors and exact surface-endpoint reads preserve Vmin without
+subtract/add cancellation. One-/two-rank bound tests pass, and the unchanged
+coarse 1e-20 smoke genuinely converges through three real steps (573.46 s,
+4.268 GiB; all 29 fresh linear checks pass). Existing coarse support/normalization
+limitations remain; this is not fine-pilot approval.
+
+The opt-in bulk-cell-owned I_h backend passes the evolving nine-state K3
+comparison (maximum projected nodal difference about 8.13e-11), reducing total
+property preparation from 31.293 to 0.301 s with **no completed-value hits**.
+End-to-end time falls from 111.18 to 80.62 s and peak RSS from 711 to 493 MiB.
+Saved K2 phase/geometry, Stage-I positive convergence, actions, and one-/two-rank
+cache/rollback checks also pass, with the reference-accuracy qualification
+documented in the report.
+
+The long BP3 comparison **does not pass**: near-end nodal I_h differs by 11.4%.
+A bounded audit confirms that the legacy remote integrator discards the
+remainder of a boundary-final panel after adaptive halving (16 actual BP3
+profiles). A hidden analytic reproducer fails on one/two ranks as expected.
+Smaller interior reference differences remain unresolved. Do not enable the
+alternate backend for BP3, fix the legacy reference silently, or launch the fine
+pilot. The next decision is review of the minimal boundary-panel correction.
+See `../bp3/stage_K5_bound_and_cell_profiles_report.md` for evidence and scope.
+
+**Previous K5 cache/bound report (superseded by the result above).**
+The exact completed-I_h cache passes one-/two-rank phase/geometry/failure/restart
+invalidation tests. Repeated coarse preparation is 46.5--47.9x faster with zero
+integration requests; four calls total 87.83 s versus 287.20 s before caching.
+Both strengthening and initial-Theta bulk extensions now have horizontal
+15--18 km-equivalent interfaces, retaining the 3 km sharp-fault transition.
+The saved 1e-12 audit demonstrated 152 negative Fmin values and bound-limited
+progress. The authorized 1e-20 replay retains bitwise-identical accepted surface
+states 0/1 and removes those negative Fmin values, but fails on step 2 when
+bound-contact arithmetic produces 9.99999322e-21 below Vmin. Offline replay
+also exposes loss in subtract/add reconstruction of absolute trial values.
+A narrow candidate/publication correction is proposed, **not implemented**.
+No retry or fine pilot was launched. See `../bp3/stage_K5_cache_and_bound_report.md`
+for exact diagnostics, tests, timings, retained support limitations and next decision.
+
+**K4 closed by user decision as a bounded, partially resolved study.** The
+K4.3 stopping conclusion below is retained. K5 now follows the direct BP3
+implementation/performance task in `../bp3/stage_5_redesign.md`, not the former
+K5.1/K5.2/K5.3 review sequence. Only a short 60-degree thrust pilot is in scope;
+no long first-event or 1500-year calculation is authorized.
+
+**BP3 stress-perturbation initialization accepted for the bounded smoke.**
+The user rejected variable cohesive Airy prestress for production; its audit
+and analytic source are preserved below as historical evidence. The current
+plugin initializes zero Maxwell history, zero top/bottom perturbation traction,
+and a frozen generic Q1 surface background. At dt0=4e6 s the coupled initial
+velocity has max/RMS 1.0040/0.9978 times Vp/2; free V/Vinit is 0.9871--1.0160,
+actual normal stress 49.829--50.073 MPa, and retained Theta0/stress are exact.
+All nonlinear/fresh-linear checks pass. Background K_V/G tests pass on one/two
+ranks, including an inclined S:N=0 check. Coarse tip normalization is not
+certified (6.53% column error; interior sampled maximum 3.51e-4), and no
+support/I_h correction was made. See `../bp3/stage_K5_perturbation_report.md`
+for ownership, signs, the exact weak initial root, and short dynamics evidence.
+The three-step smoke accepted only the first real step (t=2.62465e6 s), with
+independent Theta-update error 2.22e-16 and unchanged geometry/background.
+It hit its 900-s cap in step 2 at Newton iteration 16, residuals 0.4976/0.1940;
+all 38 returned linear directions passed fresh checks. No retry or numerical
+change was made. A bounded lower-bound/step-length audit is the next decision;
+the requested three-real-step performance smoke is **not complete**.
+
+**BP3 pre-mechanics prestress audit completed; no new mechanical solve.**
+Particles exactly reproduce the variable Airy deviatoric tensor, and the
+normal transfer replay exactly matches published FE history. Constrained FE
+error reaches 4.24 MPa on the common particle grid. The variable-field global
+prestress equilibrium-defect norm is 9.298e10 N/m; 93.13% of its squared norm
+is attributed to 6250 m bulk cells. Direct analytic Q3/Q6/Q12 norms are
+1.269e11/5.018e10/3.215e10: direct quadrature itself remains underresolved.
+The radial r*qprime term reaches 56.1 MPa along the fault despite an 82.4 kPa
+q variation; its existing extension reaches 61.9 MPa elsewhere in the box.
+Constant-tau0 control and its known unchanged-bottom-traction mismatch are
+separated. No history corruption, production correction or offset redesign
+was demonstrated/implemented. Audit 198.11 s / 3.582 GiB; all data exported,
+before any nonlinear residual or linear solve. See
+`../bp3/stage_K5_prestress_audit.md` for uncertainty and the saved-field work
+decomposition. At that audit stage initialization/dynamics remained unapproved;
+the subsequent user-authorized stress-perturbation work is recorded above.
+
+**Phase mixed-FE DoF indexing fixed; BP3 distance-weighted check completed.**
+CPDI connectivity and its vertex map now use component-to-system DoF lookup,
+not a component number as a vertex DoF index. Production phase-map/assembly/
+solve checks pass for continuous and DG compositions on one rank and DG on
+two. The same full frozen-Airy 4e6 s initialization with `distance weighted
+average` (default linear weights) passes nonlinear/fresh-linear checks in
+271.49 s / 3.952 GiB, but does not reproduce the reported removal of velocity
+error: max speed remains 1.36918e-8 m/s (27.38 Vp/2), and max free V is
+12.0018 Vinit. No real steps or offset redesign. The exact successful user
+configuration remains to be reconciled with this controlled comparison.
+See `../bp3/stage_K5_dof_and_interpolation.md` and its preserved evidence.
+
+**K5 frozen-Airy dt0 sensitivity completed; initialization gate still unmet.**
+With the same Airy field, changing dt0 from 1 to 4e6 s reduces corrective
+velocity almost exactly by four million, but preserves a 5.68 cm maximum /
+1.545 cm RMS displacement-like correction (field correlation 0.999962).
+Maximum free V/Vinit falls from 22.55 to 12.66, not to unity; maximum shear
+target error remains 1.026 MPa and actual sigma_n spans 45.63--52.61 MPa.
+The 1 s interval is the dominant cause of the enormous rate-form velocity,
+not a complete explanation/cure of the initial traction mismatch. One new
+initialization took 273.75 s / 3.947 GiB, passing unchanged nonlinear and
+every fresh-linear check. No real steps or production changes in this test.
+Unfinished offset changes remain unselected and suspended for review.
+See `../bp3/stage_K5_airy_dt0_sensitivity.md` for controls and evidence.
+
+**Earlier K5 implementation record; BP3 initialization gate unmet.** Current
+plugin, smoke/pilot inputs, fixed prescribed geometry/direct Q1 phase data and
+essential deep V are implemented. The corrected-mesh initialization04 took
+273.18 s / 3.895 GiB, with genuine nonlinear/fresh-linear convergence, retained
+Theta0 and exact deep Vp. It does not reproduce official shallow Vinit: the
+surface-intersection node reaches 22.55 Vinit, and bulk speed reaches
+0.05685 m/s. No real BP3 step or pilot-resolution run was launched. Analytic
+Airy equilibrium does not certify the discrete prestress transfer or
+finite-width surface traction. See `../bp3/stage_K5_initialization_report.md`;
+K5 is not complete and dynamics remain gated on initialization review.
+
+**K4.3 preflight complete; nonuniform width attribution remains unresolved.**
+No new runs were launched. The saved domain-rule K2 spatial evidence contracts,
+but at 1 s the mean-removed temporal q/C/slip differences grow by
+2.326/1.284/1.289, including the fixed interior. Compatible K4 A/C homogeneous
+controls exist for new dt=.125 bumped fixtures; existing K2 outputs do not
+match their meshes/timestep histories or the later production baseline.
+No double-difference width signal or factor-four separation is established.
+Outcome 4: “Nonuniform finite-width sensitivity remains unverified at the
+existing K2 accuracy.” Recommend closing K4 as partially resolved, retaining
+the successful homogeneous post-transient comparison and unresolved early/
+nonuniform response. K2 remains provisional; no further campaign, production
+correction, or stage is started. See `stage_K4_3_result.md`.
+
 **K4.2 post-transient comparison completed.** All three A/B/C cases reach 6 s
 at dt=.125 with 147 passing accepted-state guards and 476 passing fresh-linear
 checks. A (ell0,32x256) and C (half width,32x512) pass every K1 observable

@@ -329,6 +329,22 @@ property pool does not provide trial or rollback machinery.
 
 ## 17. Particle-to-fault property projection
 
+The BP3 implementation task additionally permits fixed prescribed geometry:
+`Fit prescribed geometry to phase field = false` retains the resampled input
+polyline, with the unchanged profile-derived admission widths. The default
+remains the existing phase-ridge fit. A benchmark may prescribe independent
+phase DoFs through the existing constraint signal; this does not constrain
+mechanics or change the production phase equation.
+
+Selected surface V DoFs may have prescribed positive values. The manager
+lifts them only into the private Newton base, leaving committed V intact until
+convergence. Their perturbations vanish and their friction equations are
+replaced by the essential kinematic condition: condensation and residual norms
+use the same principal free block as the existing active-set machinery.
+They cannot be released by the lower-bound active set. Caller-supplied boundary
+configuration is reapplied after reconstruction/restart, rather than treated
+as constitutive history. Unprescribed DoFs retain existing behavior.
+
 **Approved discrete revision, 2026-09-09:** the domain-integrated rule in
 `benchmarking/stage_K2_domain_quadrature_addendum.md` supersedes point-volume
 quadrature throughout this document, including surface residual/Jacobian,
@@ -372,6 +388,18 @@ trailing batches are discarded, and mesh-deformation configurations use fresh
 lookups. This does not change adaptive panels, quadrature, tail termination,
 support, residuals, or history publication.
 
+The approved K5 extension additionally retains a completed surface `I_h` value
+field. Reuse requires exact owned phase entries, fault vertices/versions, a valid
+mesh lookup, and unchanged degradation-law parameters and projected surface
+mixtures on every rank. Mixtures need not match when all material degradation
+laws are identical (friction projection still runs). Mesh deformation disables
+reuse. Restart and parameter parsing invalidate the transient cache; validity
+is published only after successful integration and surface projection. A hit
+performs neither adaptive integration nor remote FE sampling. Endpoint truncation,
+full integral values, quadrature/tail tolerances and history timing are unchanged.
+At identical current/previous local phase and I_h, the history-localization
+difference is exactly zero. Moving parents still require fresh local sampling.
+
 Stage 5 projects generic components from the phase-field-associated particle
 manager to registered reconstructed-fault properties by a consistent weighted
 Q1 least-squares solve. Only locally owned parents contribute. The sampling
@@ -394,6 +422,91 @@ tangent extensions beyond the two true open tips. At internal vertices both
 incident segments remain candidates, and the candidate with the smallest
 absolute normal distance is selected. The current implementation assumes small
 enough turning angles that no separate corner construction is needed.
+
+The qualified K5 BP3 bottom continuation is a narrow exception for bulk
+mechanics only: a straight through-bottom fault may continue its endpoint
+fields into the missing tangent-extension wedge inside the physical Box.
+The ordinary normal-width cutoff is not reapplied inside this wedge: Q1 phase
+can remain positive beyond it. Outside the wedge the original admission is
+unchanged. Actual physical FE phase and constantly
+extended completed endpoint I_h define chi there. Existing admitted bulk
+values are unchanged. Stokes residual/B assembly and particle Maxwell-history
+strain subtraction use the same bulk-source coordinate map. Particle/surface
+admission, surface-domain quadrature, ownership and open connectivity do not
+change. It is opt-in for the fixed-profile mature BP3 through-boundary fault
+with prescribed bottom Vp, not a general internal-tip continuation policy.
+`Postprocess/BP3/Bottom normalization completion file` selects the paired
+normalization/source treatment. It must reference immutable completion data
+for the exact mesh, profile and fault; the same selector is reattached on
+restart before rebuilding non-checkpointed caches. The table and path are
+external run inputs, not checkpoint payload. The legacy diagnostic switches
+remain available for reproducing denominator-only comparisons. See
+`bp3/stage_K5_bottom_source_continuation_report.md` for qualification and limits.
+
+The subsequent bounded **top experiment** pairs outside-top normalization
+completion with the analogous in-box straight tangent wedge. It is restricted
+to frozen mature uniform prescribed slip (`ASPECT_BP3_TOP_SOURCE_EXPERIMENT`).
+The endpoint coordinates are the last segment at xi=1, so bulk assembly and
+history subtraction read the endpoint field rather than a hardcoded rate.
+Surface admission and its weak measure remain unchanged for this experiment.
+Success with prescribed slip does not qualify a free endpoint: its continued
+bulk virtual work and the corresponding surface traction/G contribution must
+be checked before adoption. No free-RSF top continuation is enabled by this
+experimental switch.
+The uniform experiment passed, including the endpoint B finite difference,
+but free-endpoint adoption remains blocked on surface-measure qualification;
+see `bp3/stage_K5_top_source_continuation_report.md`. No mature-RSF top replay
+is part of that evidence.
+
+**Authorized work-measure qualification (K5):** an explicit simulator-side
+`ReconstructedFaultSurfaceSystem::enable_bulk_work_measure()` mode changes
+mechanical surface assembly only, for one straight, frozen mature 2-D fault
+with true normal stress. Default particle-volume assembly is unchanged.
+Visit each owned physical Stokes QP once using its exact existing bulk-source
+map, phase, FE material fields and frozen working FE stress. All mechanical
+terms use JxW*chi*N_i, including background driving, friction and damping;
+K=-dR/dV, G=dR/d(u,p), and the consistent mass matrix use the same measure.
+Zero chi contributes nothing. Surface state is interpolated at the same
+extended fault coordinate and remains committed/frozen during mechanics.
+The same QP positions and frozen coefficients feed the existing G action
+and optional sparse matrix machinery (no particle-center substitution).
+Only the shear part of G is work-adjoint to B on homogeneous bulk directions;
+normal/friction and pressure terms remain non-associated.
+
+Mechanical weak residuals change from Pa*m^2 to Pa*m in 2-D. The new mass
+matrix changes from m^2 to m, so M^-1 R, R_i/(M*1)_i and the existing consistent
+RMS norm remain in Pa. K*V supplies the same traction characteristic after
+that mass conversion; the fixed merit scales, nonlinear tolerances, bound
+and fraction-to-boundary rules are not retuned. Generic property projection,
+ownership, topology and history commit remain unchanged. Fixed benchmark
+background fields are loaded without recalibration. The BP3 qualification
+switch `ASPECT_BP3_WORK_MEASURE=1` currently requires a fresh noncommitting
+free-top run with paired boundary completion/source enabled.
+
+The separately authorized committing follow-up is explicitly selected by
+`Postprocess/BP3/Committing work-measure replay = true`. It starts fresh,
+retains mature friction, immutable initial background, both paired boundary
+treatments and ordinary accepted-state publication (nodal split Theta and
+particle Maxwell stress; inert H and zero C). It is not a restart conversion
+or the noncommitting qualification switch. Existing time-step controllers
+may insert smaller steps between saved comparison times. Diagnostic native
+work averages and observational legacy parent/domain FE-history averages
+are labelled separately; no post-commit reevaluation uses newly published
+particle stress as old history. The bounded replay is capped at 40 minutes
+on four ranks and approximately 29.24 years physical time.
+
+The separately authorized bounded candidate-state experiment is documented in
+`bp3/stage_K5_coupled_substeps_addendum.md`. It permits only two/four substeps
+from the saved revised-work step-9 state: candidate nodal Theta(V) is used
+during mechanics with its nonsymmetric Jacobian, then ordinary terminal
+publication commits that candidate once. This benchmark alternative does not
+replace the default split-state algorithm or qualify general replay restart.
+
+Bounded benchmark replays may select `BP3 replay complete`, which terminates
+only after the accepted-state history audit reaches the last saved comparison
+time, allowing eight machine-epsilon-scaled units of time-representation error.
+This prevents a roundoff-sized extra Maxwell interval; it changes neither
+physical timestep selection nor nonlinear acceptance criteria.
 
 A particle may contribute to at most one fault. Admission to more than one
 fault is an error, but the implementation does not attempt exhaustive geometric
@@ -546,6 +659,40 @@ after two independent outer integral windows are negligible; the activation
 threshold does not truncate the profile and no monotonic tail is required.
 The completed quadrature-point integrals are projected to replicated fault
 vertices with the consistent Q1 mass matrix.
+
+When a physical boundary is located, its coordinate is independent of the
+adaptive panel width. If the boundary-truncated panel is bisected for accuracy,
+accepted subpanels continue until the stored boundary coordinate is reached;
+accepting the first refined subpanel must not discard the remaining interval.
+
+An approved opt-in cell-interval backend is specified in
+`bp3/stage_K5_cell_profile_addendum.md`. It replaces per-sample distributed
+location with cached ray/cell intersections and bulk-cell-owned quadrature,
+not with cached evolving phase values. The remote backend remains the default
+and validation reference. The equations, material mixture, tail coefficient,
+physical boundary truncation and surface projection above are unchanged.
+
+The authorized K5 bottom-normalization experiment is an opt-in exception,
+not a changed default policy. In a fresh frozen mature uniform-sliding BP3
+test only, `ASPECT_IH_BOTTOM_COMPLETION_DIAGNOSTIC` supplies fixed auxiliary
+outside-profile integrals at the actual three-point surface quadrature origins.
+Their profile owners add them to the in-box integrals before the existing
+weighted Q1 RHS assembly; the surface mass and every physical mechanical
+quadrature remain unchanged. The benchmark extends the bottom-resolution Q1
+nodal phase grid below the box, validates it against saved physical FE samples,
+and integrates only the missing bottom interval. Complete columns and the top
+receive no virtual contribution. This fixed input is immutable during the
+process; restart and evolving-phase use are rejected. Completed-value cache
+hits reuse the augmented result. See `bp3/stage_K5_bottom_normalization_report.md`.
+
+Following the paired source-support verification, the BP3 parameter
+`Bottom normalization completion file` selects this same preprojection
+completion together with bottom bulk-source continuation (described above).
+Unlike the legacy diagnostic selector, it may be reattached on restart and
+does not require all RSF nodes to be prescribed; the continued bottom endpoint
+must still be prescribed to Vp. Only the tested frozen mature, straight,
+through-bottom geometry is qualified. Completion tables must be regenerated
+for a changed mesh/profile/fault, not reused as universal analytic constants.
 
 Cold point location may conservatively reject points outside the global
 reference-tolerance-expanded mesh enclosure. This optimization is limited to
@@ -769,10 +916,24 @@ the rate-dependent law uses its exact signed derivative. The replicated
 ordered Q1 segments and segment-local integration points make each
 per-fault block symmetric tridiagonal, but the friction term means it is not
 assumed positive definite. Fault-sized vectors and tridiagonal coefficients
-are reduced over MPI and replicated. Each fault block is represented as a
-deal.II sparse matrix and factorized with the tested UMFPACK direct solver,
-which supports nonsingular indefinite systems. Factorization failure and an
+are reduced over MPI and replicated. Each fault block has a reusable
+indefinite-capable direct factorization. Factorization failure and an
 excessive scaled solve backward error are explicit numerical failures.
+
+The qualified K5 surface inverse prefers LAPACK GTTRF/GTTRS
+adjacent-pivoting tridiagonal LU. Active rows split each fault into contiguous
+principal free blocks; each block is factored once and reused for all right-hand
+sides. Pivoting supports nonsingular indefinite matrices, including zero initial
+diagonal entries. UMFPACK remains the reference. The semantic surface solve,
+exact zero active increments, generation validity, and numerical failure checks
+are unchanged; no SPD-only path or new condition estimator is introduced.
+
+The next approved K5 prototype may assemble the identical B/G actions as
+sparse rectangular matrices for one coupled linearization, retaining the
+quadrature actions as references. A solver-side few-mode correction may
+precondition the nonsymmetric condensed operator, never replace it or its
+fresh residual tests. The bounded ownership, constraint, pressure and mode
+rules are recorded in `bp3/stage_K5_coupling_addendum.md`.
 
 `R_\Gamma` is a nested fault-major vector with one entry per reconstructed-
 fault vertex. It is accompanied by volume-weighted per-fault and global RMS
@@ -792,6 +953,41 @@ bulk residual, implement \(B\) or \(G\), alter the Stokes operator, run a
 coupled nonlinear solve, or commit/rollback constitutive state.
 
 ## 24. Reviewed boundaries for Stages G--I
+
+**Approved BP3 stress-change extension (2026-09-12).** Optional fixed Q1
+background tractions are stored as a generic two-component manager property
+(positive shear, compressive normal) selected by PhaseFieldFault. They are
+frozen through mechanics and never enter bulk assembly or Maxwell history.
+The surface residual is tau_pre + Delta_tau - C - mu*(sigma_pre+Delta_sigma_n)
+- damping*V. K_V uses total normal traction in sigma_n*dmu/dV; B and G keep
+their stress-change derivatives. Diagnostics distinguish total normal stress
+from incremental p and tau:N. With no property selected the previous equations
+are unchanged. The caller initializes/reselects the property; offset data may
+not be mutated during a nonlinear solve.
+
+For BP3, particle Maxwell history begins at zero stress change, side velocities
+retain the official translations, top/bottom have zero stress-change traction,
+and pressure is the unshifted incremental pressure. The analytic Airy field is
+not an initial bulk history or boundary load. For the approved discrete BP3
+initialization, the plugin solves the existing consistent surface mass system
+`M tau_bg = weak(C_eval,0 + mu(Vinit,Theta0)*sigma_bg + damping*Vinit)`.
+The same admitted domains and nonlinear quadrature as the surface residual
+are used. Here `C_eval,0 = kappa_Gamma*Vinit/Ih0 + beta_Gamma*C0`, with the
+supplied stored C0 retained at timestep zero. This is an exact weak initial
+root **at zero stress perturbation**, not a prescription that an arbitrary
+finite-element velocity field has zero constitutive stress. Supplied nodal
+Theta0 is not modified. The difference from `tau0_BP3 + projected(C_eval,0)`
+arising from the represented surface state/composition is exported explicitly.
+The background is initialized once and is not recalibrated at real timesteps.
+
+The BP3 first-event continuation serializes its benchmark accumulated slip,
+history-audit state, accepted-step index, event observer and output schedule.
+The manager remains owner of frozen background data and physical histories;
+the benchmark reselects the background property and reapplies deep prescribed
+rows after restart, without recalibration. See
+`bp3/stage_K5_first_cycle_preparation.md` for the checkpoint/output contract and
+the status of full filesystem restart qualification. Accepted-solver statistics
+and completed-checkpoint notifications are observational only.
 
 Stage G introduces `Assemblers::ReconstructedFaultStokes` as a genuine
 cell/QP `Assemblers::Interface` implementation. It owns the slip-dependent
@@ -1002,6 +1198,15 @@ nonlinear convergence commits timestep state. Rejected trials and failed
 timesteps leave committed `Theta`, cohesive history, particle Maxwell stress,
 and committed \(V\) unchanged.
 
+Bound-contact candidates retain absolute nodal values: at the limiting local
+fraction set V_trial exactly to V_min; non-contact entries keep their ordinary
+affine trial. Exact surface endpoint evaluation likewise reads the stored
+absolute node directly, rather than reconstructing it by left+(right-left).
+The same validated vector is copied into manager trial state,
+residual evaluation and accepted state without subtract/add reconstruction.
+This fixes cancellation when V_min is tiny relative to the base rate; the
+fraction formula, active-set tolerance and acceptance criteria are unchanged.
+
 The bound test is local to each vertex:
 \(V_i-V_{\min}\leq 100\epsilon_{\rm mach}\max(V_{\min},|V_i|)\).
 Within one Newton iteration the active set starts empty and can only grow; it
@@ -1068,6 +1273,49 @@ compositional field mapped to particle property `phase field fault state`
 component zero, and initializes \(V=V_{\min}\). Restart and later-time paths
 must already contain complete committed state and never reconstruct it from
 initial fields.
+
+## Explicit mature frictional specialization (K5)
+
+`Material model / Phase field fault / Fault constitutive mode` selects
+`cohesive` (unchanged default) or `mature frictional`. Maturity is explicit,
+not inferred from a frozen phase field. This task introduces no transition
+between modes. The mature mode applies to every vertex of the pre-existing
+fixed fault, including prescribed-rate vertices, and requires `Evolve phase
+field = false`. Phase is prescribed at initialization and thereafter retained;
+geometry changes and conversion of cohesive checkpoints are rejected.
+
+The reduced law is
+\[
+\upsilon=\chi V,\quad\chi=h/I_h,\qquad C=0,\quad
+F=\tau_{\rm bg}^{\rm eff}+\Delta\tau:S
+ -\mu(V,\widehat\Theta)\bigl(\sigma_{n,\rm bg}+\Delta p-\Delta\tau:N\bigr)
+ -\eta^d V.
+\]
+The bulk Maxwell law and its retained stress are unchanged. The positive
+minus-V derivative is `2 kappa_bulk chi S:S + sigma_n mu_V + eta_d`:
+only the cohesive `kappa_Gamma/I_h` term is absent. G and B keep their
+existing discretizations, signs, pressure convention and true-normal feedback.
+
+There is no recoverable cohesive energy, `W_coh=0`, and no cohesive driving
+candidate for H. Initialized H remains inert profile/irreversibility metadata
+(`H_k=H_0`, not growing shadow cohesive work); it does not enter mechanics.
+The phase/gradient energy is constant because the profile is fixed. Bulk
+elastic storage and Maxwell dissipation remain; frictional power is
+`mu sigma_n V` and radiation loss is `eta_d V^2`. No positivity is inferred
+for frictional work if the signed normal traction is tensile. Fixed prestress
+is external/background work, not a recoverable cohesive spring.
+
+For the bounded BP3 comparison initialize the fixed effective background as
+`tau_bg_old(s)-C_star(s)`, using the previously captured **evaluated** initial
+resistance, not retained nodal C0. A generic optional background correction
+is represented by three checkpointed Q1 coefficient fields `a,b,d`, evaluated
+as `a(s)+b(s)/d(s)` **after interpolation**. For this fixture they are
+`a=beta0 C0`, `b=kappa0 V0_accepted`, `d=I0`. They are prestress data, never
+updated with slip, C, temperature or time; do not project the ratio back into
+Q1. The background selector is reattached by the owning plugin on restart.
+The mature geometry marker and identically zero C distinguish compatible
+histories. Theta keeps its original nodal split update and timestep-zero
+retention semantics. Restart does not reload the initial snapshot file.
 
 ## 25. Stage-J constitutive history feedback
 

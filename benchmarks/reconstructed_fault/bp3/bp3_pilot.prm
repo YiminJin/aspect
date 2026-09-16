@@ -1,0 +1,15 @@
+# Same physical problem; 48.828125 m near-fault square cells and 50 m fault spacing.
+# Prepared server fixture, not executed locally. Stress-perturbation smoke
+# initialization is verified; coarse normalization and finite-domain accuracy
+# are not certified by that feasibility check.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/bp3_smoke.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/pilot
+subsection Mesh refinement
+  set Initial adaptive refinement = 7
+  subsection Minimum refinement function
+    set Function expression = if(abs((xt-x)*st-(100000-y)*0.5)<1500,11,if(abs((xt-x)*st-(100000-y)*0.5)<8000,6,4))
+  end
+end
+subsection Fault reconstruction
+  set Structural point spacing = 50
+end

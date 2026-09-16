@@ -1,0 +1,6 @@
+# Complete the frozen-data harness's required particle postprocessor.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/performance/k2_saved_configured.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/performance/k2_saved_particles
+subsection Postprocess
+  set List of postprocessors = particles, verify fault I h cache
+end

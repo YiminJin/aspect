@@ -22,6 +22,8 @@
 #include <aspect/utilities.h>
 #include <aspect/simulator_signals.h>
 #include <aspect/particle/particle_domain.h>
+#include <aspect/material_model/phase_field_fault.h>
+#include <aspect/plugins.h>
 
 #include <deal.II/grid/grid_tools.h>
 #include <deal.II/dofs/dof_tools.h>
@@ -527,6 +529,7 @@ namespace aspect
   void
   PhaseFieldHandler<dim>::parse_parameters(ParameterHandler &prm)
   {
+    ++degradation_revision;
     prm.enter_subsection("Phase field model");
     {
       // Initialize the geometric function
@@ -1087,6 +1090,27 @@ namespace aspect
   {
     const unsigned int block_index = this->introspection().variable("phase_field").block_index;
 
+    // Essential phase data are a physical state, not a Newton increment. Lift
+    // them before testing the entry residual (including a fully prescribed
+    // profile, where there are no free phase equations to trigger a solve).
+    LinearAlgebra::BlockVector lifted(this->introspection().index_sets.system_partitioning,
+                                      this->get_mpi_communicator());
+    lifted = solution;
+    this->get_current_constraints().distribute(lifted);
+    solution.block(block_index) = lifted.block(block_index);
+
+    if (Plugins::plugin_type_matches<MaterialModel::PhaseFieldFault<dim>>(this->get_material_model())
+        && Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(
+             this->get_material_model()).is_mature_frictional_fault())
+      {
+        // Mature faults have prescribed geometry, not a phase equilibrium
+        // equation. Initialize from the supplied field/lift; never evolve H/phi.
+        if (this->get_timestep_number()>0)
+          solution.block(block_index)=this->get_old_solution().block(block_index);
+        this->get_pcout()<<"   Mature frictional fault: retaining prescribed phase profile."<<std::endl;
+        return;
+      }
+
     // Compute the initial residual
     double residual_roundoff_allowance = 0;
     AssertThrow(assemble_phase_field_system(system_matrix, system_rhs, solution, false,
@@ -1221,6 +1245,11 @@ namespace aspect
 
     const unsigned int component_index = this->introspection().variable("phase_field").first_component_index;
 
+    // Q1 component-local DoFs follow the vertices. A component index is not
+    // a vertex-local DoF index: preceding DG components have no vertex DoFs.
+    const auto &fe = this->get_dof_handler().get_fe();
+    std::vector<types::global_dof_index> local_dof_indices(fe.dofs_per_cell);
+
     // Loop over the locally owned cells and add the nonzero entries of CPDI system
     for (const auto &cell : this->get_dof_handler().active_cell_iterators())
       if (cell->is_locally_owned())
@@ -1253,8 +1282,9 @@ namespace aspect
                                                                       neighbor->index(),
                                                                       &this->get_dof_handler());
 
+              dof_cell->get_dof_indices(local_dof_indices);
               for (const unsigned int v : dof_cell->vertex_indices())
-                coupled_dofs.insert(dof_cell->vertex_dof_index(v, component_index));
+                coupled_dofs.insert(local_dof_indices[fe.component_to_system_index(component_index, v)]);
             }
 
           current_constraints.add_entries_local_to_global(std::vector<types::global_dof_index>(coupled_dofs.begin(),
@@ -1267,12 +1297,15 @@ namespace aspect
     vertex_to_dof_indices.resize(this->get_triangulation().n_vertices(), numbers::invalid_dof_index);
     for (const auto &cell : this->get_dof_handler().active_cell_iterators())
       if (!cell->is_artificial())
-        for (const unsigned int v : cell->vertex_indices())
-          {
-            const unsigned int vertex_index = cell->vertex_index(v);
-            if (vertex_to_dof_indices[vertex_index] == numbers::invalid_dof_index)
-              vertex_to_dof_indices[vertex_index] = cell->vertex_dof_index(v, component_index);
-          }
+        {
+          cell->get_dof_indices(local_dof_indices);
+          for (const unsigned int v : cell->vertex_indices())
+            {
+              const unsigned int vertex_index = cell->vertex_index(v);
+              if (vertex_to_dof_indices[vertex_index] == numbers::invalid_dof_index)
+                vertex_to_dof_indices[vertex_index] = local_dof_indices[fe.component_to_system_index(component_index, v)];
+            }
+        }
   }
 
 

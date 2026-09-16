@@ -10,6 +10,8 @@
 */
 
 #include <aspect/simulator/assemblers/reconstructed_fault_stokes.h>
+#include <aspect/reconstructed_fault/linear_performance.h>
+#include <aspect/reconstructed_fault/sparse_coupling.h>
 
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/material_model/utilities.h>
@@ -21,6 +23,9 @@
 #include <map>
 #include <cstdlib>
 #include <iostream>
+#include <array>
+#include <fstream>
+#include <iomanip>
 
 namespace aspect
 {
@@ -131,6 +136,7 @@ namespace aspect
     {
       std::map<CellId, std::vector<SymmetricTensor<2,dim>>> coefficients;
       unsigned int geometry_cache_rebuild_count = 0;
+      std::unique_ptr<aspect::internal::FaultSparseCoupling> matrix;
     };
 
 
@@ -169,6 +175,8 @@ namespace aspect
       const LinearAlgebra::BlockVector &bulk_linearization_point)
     {
       TimerOutput::Scope timer(*performance_timer, "Fault: B linearization");
+      aspect::internal::FaultLinearSection setup_timing(
+        aspect::internal::FaultLinearTiming::B_setup,std::getenv("ASPECT_FAULT_EXPLICIT_B"));
       AssertThrow(bulk_linearization_point.size()
                   == this->get_dof_handler().n_dofs(),
                   ExcMessage("The reconstructed-fault B linearization point has "
@@ -184,8 +192,14 @@ namespace aspect
         fault_manager.get_stokes_qp_cache_diagnostics().rebuild_count;
       const Quadrature<dim> &quadrature =
         this->introspection().quadratures.velocities;
+      const bool assemble_matrix = std::getenv("ASPECT_FAULT_EXPLICIT_B");
       FEValues<dim> fe_values(this->get_mapping(), this->get_fe(), quadrature,
-                              update_values | update_quadrature_points);
+                              update_values | update_quadrature_points
+                              | (assemble_matrix ? update_gradients | update_JxW_values : update_default));
+      aspect::internal::FaultSparseCoupling::Entries entries;
+      std::vector<unsigned int> fault_offsets(1,0);
+      for (const auto &fault : fault_manager.get_faults())
+        fault_offsets.push_back(fault_offsets.back()+fault.n_vertices());
 
       // Freeze 2*kappa*chi*S once per nonlinear linearization. Krylov B actions
       // then reuse these coefficients without reevaluating constitutive data.
@@ -205,9 +219,46 @@ namespace aspect
                 coefficients[q] = 2.0 * responses[q].kappa
                                   * responses[q].localization_factor
                                   * slip_tensor<dim>(associations[q]);
+            if (assemble_matrix)
+              {
+                std::vector<types::global_dof_index> indices(this->get_fe().dofs_per_cell);
+                cell->get_dof_indices(indices);
+                const auto &constraints=this->get_current_constraints();
+                // Expand only test rows through the same closed homogeneous
+                // constraints as the reference local-to-global load assembly.
+                for (unsigned int q=0; q<quadrature.size(); ++q)
+                  if (associations[q].active)
+                    for (unsigned int i=0; i<indices.size(); ++i)
+                      if (this->introspection().component_masks.velocities[
+                            this->get_fe().system_to_component_index(i).first])
+                        {
+                          const auto &a=associations[q];
+                          const double value=coefficients[q]
+                            *fe_values[this->introspection().extractors.velocities].symmetric_gradient(i,q)
+                            *fe_values.JxW(q);
+                          for (unsigned int end=0; end<2; ++end)
+                            {
+                              const auto column=fault_offsets[a.fault_index]+a.segment_index+end;
+                              const double entry=value*(end==0 ? a.shape_0 : a.shape_1);
+                              const auto *masters=constraints.get_constraint_entries(indices[i]);
+                              if (masters)
+                                for (const auto &master : *masters)
+                                  entries[{master.first,column}]+=master.second*entry;
+                              else
+                                entries[{indices[i],column}]+=entry;
+                            }
+                        }
+              }
             candidate->coefficients.emplace(cell->id(), std::move(coefficients));
           }
 
+      if (assemble_matrix)
+        {
+          candidate->matrix=std::make_unique<aspect::internal::FaultSparseCoupling>();
+          candidate->matrix->build(entries);
+          this->get_pcout() << "Fault sparse B: rank0 entries=" << candidate->matrix->values.size()
+                           << ", bytes=" << candidate->matrix->bytes() << std::endl;
+        }
       B_linearization = std::move(candidate);
       ++B_linearization_rebuild_count;
     }
@@ -232,6 +283,9 @@ namespace aspect
         this->get_reconstructed_fault_manager();
       validate_fault_vector(fault_manager, slip_rate, "fault slip-rate vector");
       fault_manager.prepare_stokes_qp_projection_cache();
+
+      const bool record_transfer=std::getenv("ASPECT_FAULT_STRESS_SAMPLE_DIAGNOSTIC");
+      std::map<std::pair<unsigned int,unsigned int>,std::array<double,8>> transfer_moments;
 
       const Quadrature<dim> &quadrature =
         this->introspection().quadratures.velocities;
@@ -269,6 +323,19 @@ namespace aspect
                   const SymmetricTensor<2,dim> stress =
                     2.0 * responses[q].kappa * crack_strain_rate
                     * slip_tensor<dim>(association);
+                  if (record_transfer)
+                    {
+                      // Observe exactly the QP values entering -int stress:eps.
+                      // Prescribed nodes are not excluded from this physical load.
+                      auto &m=transfer_moments[{association.fault_index,association.segment_index}];
+                      const double w=fe_values.JxW(q);
+                      m[0]+=w; m[1]+=w*V; m[2]+=w*responses[q].localization_factor;
+                      m[3]+=w*responses[q].localization_factor*V;
+                      m[4]+=w*responses[q].history_correction;
+                      m[5]+=w*crack_strain_rate;
+                      m[6]+=w*2.*responses[q].kappa*crack_strain_rate;
+                      m[7]+=1.;
+                    }
                   for (unsigned int i = 0; i < this->get_fe().dofs_per_cell; ++i)
                     if (this->introspection().component_masks.velocities[
                           this->get_fe().system_to_component_index(i).first])
@@ -284,6 +351,26 @@ namespace aspect
               local_residual, dof_indices, result);
           }
 
+      if (record_transfer)
+        {
+          const auto rank=Utilities::MPI::this_mpi_process(this->get_mpi_communicator());
+          std::ofstream out(this->get_output_directory()+"bulk_slip_transfer_"
+            +std::to_string(this->get_timestep_number())+"_rank"+std::to_string(rank)+".csv");
+          out.exceptions(std::ios::failbit | std::ios::badbit);
+          out<<"step,time,rank,fault,segment,x0,y0,x1,y1,V0,V1,weight,V_integral,chi_integral,instantaneous_integral,history_integral,total_integral,stress_coefficient_integral,qp_count\n";
+          for (const auto &entry:transfer_moments)
+            {
+              const auto f=entry.first.first, s=entry.first.second;
+              const auto &fault=fault_manager.get_faults()[f];
+              out<<std::setprecision(17)<<this->get_timestep_number()<<','<<this->get_time()<<','
+                 <<rank<<','<<f<<','<<s<<','<<fault.vertex(s)[0]<<','<<fault.vertex(s)[1]<<','
+                 <<fault.vertex(s+1)[0]<<','<<fault.vertex(s+1)[1]<<','
+                 <<slip_rate[f][s]<<','<<slip_rate[f][s+1];
+              for (double value:entry.second) out<<','<<value;
+              out<<'\n';
+            }
+        }
+
       // Cell contributions are owned locally; compress(add) completes the
       // distributed Stokes residual while preserving overwrite semantics.
       result.compress(VectorOperation::add);
@@ -296,7 +383,48 @@ namespace aspect
       const FaultVector &fault_direction,
       LinearAlgebra::BlockVector &result) const
     {
+      AssertThrow(B_linearization, ExcMessage("B must be linearized before applying it."));
+      AssertThrow(result.size()==this->get_dof_handler().n_dofs(),
+                  ExcMessage("The reconstructed-fault B result vector has the wrong size."));
+      if (!B_linearization->matrix)
+        { apply_B_reference(fault_direction,result); return; }
+      {
+        aspect::internal::FaultLinearSection timing(aspect::internal::FaultLinearTiming::B_sparse);
+        const auto &manager=this->get_reconstructed_fault_manager();
+        AssertThrow(B_linearization->geometry_cache_rebuild_count
+                    ==manager.get_stokes_qp_cache_diagnostics().rebuild_count,
+                    ExcMessage("The geometry changed after sparse B assembly."));
+        validate_fault_vector(manager,fault_direction,"fault-direction vector");
+        std::vector<double> source;
+        for (const auto &fault : fault_direction)
+          source.insert(source.end(),fault.begin(),fault.end());
+        result=0.;
+        B_linearization->matrix->add(source,result);
+        result.compress(VectorOperation::add);
+      }
+      if (std::getenv("ASPECT_FAULT_COMPARE_COUPLING"))
+        {
+          LinearAlgebra::BlockVector reference(result);
+          apply_B_reference(fault_direction,reference);
+          const double scale=std::max(result.l2_norm(),reference.l2_norm());
+          reference-=result;
+          auto &diagnostics=aspect::internal::FaultLinearTiming::get();
+          diagnostics.B_relative_error=std::max(diagnostics.B_relative_error,
+                                               scale>0. ? reference.l2_norm()/scale : 0.);
+          AssertThrow(reference.l2_norm()<=2.e-11*scale,
+                      ExcMessage("Sparse B disagrees with the independent quadrature action."));
+        }
+    }
+
+
+    template <int dim>
+    void
+    ReconstructedFaultStokes<dim>::apply_B_reference(
+      const FaultVector &fault_direction,
+      LinearAlgebra::BlockVector &result) const
+    {
       TimerOutput::Scope timer(*performance_timer, "Fault: B action");
+      aspect::internal::FaultLinearSection linear_timing(aspect::internal::FaultLinearTiming::B);
       AssertThrow(B_linearization != nullptr,
                   ExcMessage("B must be linearized before applying it."));
       AssertThrow(result.size() == this->get_dof_handler().n_dofs(),

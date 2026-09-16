@@ -336,6 +336,9 @@ namespace aspect
       /** Return the configured phase-field regularization length scale. */
       double get_length_scale() const;
 
+      /** Changes whenever the configured geometric/degradation laws are rebuilt. */
+      std::uint64_t get_degradation_revision() const { return degradation_revision; }
+
       static void declare_parameters(ParameterHandler &prm);
 
       void parse_parameters(ParameterHandler &prm);
@@ -370,6 +373,7 @@ namespace aspect
       Particle::Manager<dim> *particle_manager;
 
       std::unique_ptr<GridTools::Cache<dim>> grid_cache;
+      std::uint64_t degradation_revision = 0;
 
       std::vector<types::global_dof_index> vertex_to_dof_indices;
   };

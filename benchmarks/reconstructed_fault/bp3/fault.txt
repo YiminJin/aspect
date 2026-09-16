@@ -1,0 +1,5 @@
+# Proper rotated BP3 chart; vertices ordered up dip. Preserve the Wf vertex.
+# x_ASPECT y_ASPECT phi_core
+21132.4865405187 0 0.6
+58867.5134594813 65358.9838486225 0.6
+78867.5134594813 100000 0.6

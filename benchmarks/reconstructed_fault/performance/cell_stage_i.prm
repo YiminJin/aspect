@@ -1,0 +1,8 @@
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_stage_i.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/performance/build/libfault_stage_i.release.so
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/performance/cell_stage_i
+subsection Material model
+  subsection Phase field fault
+    set I h integration backend = cell intervals
+  end
+end

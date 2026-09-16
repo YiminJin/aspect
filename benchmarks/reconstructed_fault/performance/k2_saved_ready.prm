@@ -1,0 +1,10 @@
+# This is an I_h-only frozen-data check, not a mechanical replay. Remove the
+# irrelevant Stokes BCs, which ASPECT forbids with its no-Stokes scheme.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/performance/k2_saved_particles.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/performance/k2_saved_ready
+subsection Boundary velocity model
+  set Prescribed velocity boundary indicators =
+end
+subsection Boundary traction model
+  set Prescribed traction boundary indicators =
+end

@@ -588,7 +588,99 @@ coordinator.
 
 No rank shall gather the complete bulk FE field or a complete bulk-node point cloud.
 
+The opt-in cell-interval normalization backend specified in
+\texttt{bp3/stage\_K5\_cell\_profile\_addendum.md} may instead cache geometric
+ray/cell intersections and integrate current Q1 phase values on bulk-cell
+owners, reducing integrals by profile ID. The remote-point backend remains the
+default and numerical validation reference. This exception is limited to the
+supported affine Box geometry and preserves the profile-uniform mixture,
+quadrature/tail coefficients, full physical-box truncation and consistent
+surface projection. Phase changes invalidate values but not cell traversals.
+
 \subsection{Normalization-profile material mixture}
+For the authorized bounded K5 bottom-completion diagnostic only, augment a
+physical profile integral by its missing outside-bottom Q1 continuation before
+projection: $b_i=\sum_q w_q N_i(s_q)(I_q^{\rm box}+I_q^{\rm outside})$,
+with unchanged $M_{ij}=\sum_q w_q N_i(s_q)N_j(s_q)$ and $M I_h=b$.
+Outside data contribute no mechanical domain or forces. The diagnostic is
+fresh-start, frozen-profile, mature uniform sliding only; the ordinary
+physical-boundary truncation policy remains unchanged. A clipped physical
+column is not renormalized to unit integrated localization.
+
+For the qualified opt-in K5 BP3 through-boundary treatment, also continue the bulk
+crack-strain source into the in-box wedge beyond the straight bottom tip.
+Do not reapply the normal-width cutoff inside this wedge: physical Q1 phase
+can remain positive beyond it. Outside the wedge admission is unchanged.
+Use physical FE $\phi_h$ and
+constant endpoint $I_h,V$ and surface mixture. Already admitted sources are
+unchanged. The same source enters Stokes assembly and particle Maxwell-history
+updates, but does not admit new particles to surface quadrature or modify
+surface topology/ownership. This frozen mature BP3 exception requires prescribed
+bottom $V_p$ and immutable completion data for the exact mesh, phase and fault.
+It is not a general continuation rule for internal fault tips. The paired
+normalization/source treatment is selected by the benchmark parameter
+\texttt{Bottom normalization completion file}; legacy diagnostic switches
+retain the earlier denominator-only comparison. The same completion input is
+reattached before constitutive preparation after restart; derived caches are
+rebuilt. No new history update or outside mechanical domain is introduced.
+
+The authorized short top-boundary experiment applies the analogous paired
+completion and in-box source continuation at the opposite endpoint, restricted
+to frozen mature uniform prescribed slip. Its coordinate is the last segment
+at $\xi=1$, with current endpoint fields. This experiment does not revise
+surface particle admission. Free-endpoint adoption requires a separate check
+of the continued bulk virtual work and its surface traction/$G$ contribution;
+prescribed-slip success alone is insufficient.
+
+The subsequent authorized K5 work-measure mode changes mechanical surface
+weighting throughout one straight, frozen mature 2-D fault, retaining the
+volume-weighted mode as default. With the actual bulk-source extended basis
+$b_i=N_i(\widetilde s(x))$, each locally owned physical Stokes QP contributes
+exactly once:
+\[
+ R_i=\sum_q J_q\chi_q b_i(q)
+ [\tau_{\rm bg}+\Delta\tau:S-\mu(V_\Gamma,\Theta_{k-1})
+ (\sigma_{\rm bg}+\Delta p-\Delta\tau:N)-\eta^d V_\Gamma].
+\]
+Use exactly the bulk FE phase, completed $I_h$, bulk material coefficients,
+and frozen working FE Maxwell history at that QP. Committed surface state
+uses the existing interpolation and constant endpoint extension. $C=0$ in
+this mode. Every traction term, $K=-R_V$, $G=R_{(u,p)}$, and the mechanical
+mass matrix share $J_q\chi_q$; no intact contribution or overlapping wedge
+pass is added. Generic particle-property projection is unchanged.
+The shear portion of $G$ satisfies the discrete work identity with $B$ on
+homogeneous bulk directions; the full $G$ retains normal/friction/pressure
+terms and is not $B^T$.
+In particular, with frozen $\chi$, bulk Maxwell coefficient $\kappa_b$, and
+committed surface state, the common-QP derivatives are
+\[
+ K_{ij}=\sum_q J_q\chi_q b_i b_j
+ [2\kappa_b\chi_q S:S+\sigma_n\mu_V+\eta^d],\qquad
+ (G\delta x)_i=\sum_q J_q\chi_q b_i
+ [2\kappa_b(S+\mu N):\delta\dot\epsilon-\mu\delta p].
+\]
+Here $S:N=0$ removes the direct normal-stress $V$ derivative; bulk-mediated
+normal feedback remains. Background tractions are fixed constants under
+these derivatives. With $\delta\dot\epsilon$ from a homogeneously constrained
+bulk test vector, $\delta V^T G_{\rm shear}\delta x=\delta u^T B\delta V$.
+In 2-D, mechanical rows now have units Pa*m and mass units m; traction-scaled
+rows and the consistent RMS norm remain Pa. Preserve existing nonlinear
+accuracy, active-set signs, merit conventions and solver thresholds.
+The qualification uses fixed previously initialized background data without
+recalibration and a fresh noncommitting free-endpoint solve, not a reinterpreted
+checkpoint. See the K5 work-measure task and qualification report for its
+bounded deployment and verification status.
+
+The authorized subsequent committing BP3 replay retains this work measure
+and both boundary treatments, with unchanged mature-friction history updates.
+It is explicitly selected in the benchmark, starts fresh with the existing
+fixed initial background, and is not a reinterpretation of a legacy
+checkpoint. Native work-weighted output and legacy parent/domain FE-stress
+observations are distinct measures; the latter do not enter mechanics.
+Accepted bulk diagnostics use the frozen working FE old history, not the
+newly committed particle array. Initial stress and state retention, followed
+by the first physical history update, must be checked before continuing.
+
 For every reconstructed-fault quadrature point determine one surface material
 mixture $\mathbf f_\Gamma$ by projecting chemical compositional fields from
 particles to the Q1 fault surface and converting the interpolated surface
@@ -693,6 +785,57 @@ linearization,
 \]
 The previous pointwise \(h_{k-1}\) is evaluated from ASPECT's previous FE
 phase-field solution. It is not duplicated as fault history.
+
+\subsection{Explicit mature frictional specialization}
+
+The opt-in parameter \texttt{Fault constitutive mode = mature frictional}
+specializes a pre-existing, permanently fixed reconstructed fault. The default
+\texttt{cohesive} law above is unchanged. A frozen phase field alone does not
+select maturity; no damage-to-mature transition is defined. The mode applies
+throughout the selected problem's faults, including prescribed-rate vertices.
+Require \texttt{Evolve phase field = false}; initialize the prescribed phase
+without a phase equilibrium solve, then retain it. Reject changing fault
+geometry and incompatible cohesive/mature checkpoint histories.
+
+The reduced equations are
+\[
+ C=0,\qquad \upsilon=\frac{h}{I_h}V,\qquad
+ F=\tau_{\rm bg}^{\rm eff}+\Delta\boldsymbol\tau:\boldsymbol S
+ -\mu(V,\widehat\Theta)
+ (\sigma_{n,\rm bg}+\Delta p-\Delta\boldsymbol\tau:\boldsymbol N)-\eta^d V,
+\]
+\[
+ -F_V=2\kappa_{\rm bulk}\chi\boldsymbol S:\boldsymbol S
+       +\sigma_n\mu_V+\eta^d,\qquad \chi=h/I_h.
+\]
+Retain bulk Maxwell stress, B/G, true normal-stress feedback and the existing
+nodal split aging update. The direct normal derivative remains zero since
+$S:N=0$. Only the cohesive force and $\kappa_\Gamma/I_h$ tangent are removed.
+No shared shear modulus or localization normalization is altered.
+
+There is no recoverable cohesive energy: $W_{\rm coh}=0$. The cohesive
+driving candidate is zero, hence initialized $H_k=\max(H_{k-1},0)=H_0$
+remains inert profile metadata, not evolving physical cohesive work. Phase
+and gradient energies are constant. Bulk elastic storage/Maxwell dissipation
+remain, as do frictional power $\mu\sigma_n V$ and radiation loss $\eta^dV^2$.
+Signed tensile normal traction does not imply positive frictional dissipation.
+The fixed background supplies prestress work, not cohesive elastic storage.
+
+For the BP3 comparison, preserve the initial mechanical problem by setting
+\[
+ \tau_{\rm bg}^{\rm eff}(s)=\widehat\tau_{\rm bg,old}(s)-C_\star(s),\qquad
+ C_\star(s)=a(s)+b(s)/d(s),
+\]
+where the fixed Q1 coefficients are $a_i=\beta_0 C_{0,i}$,
+$b_i=\kappa_0 V_{0,i}^{\rm accepted}$, $d_i=I_{0,i}$ from the captured
+initial diagnostic. Interpolate coefficients before dividing, rather than
+projecting the nonlinear resistance into Q1. These coefficients and the
+original background are ordinary manager-owned checkpointed data; their
+selector is restored by the initializing plugin. They have zero derivatives
+with respect to mechanical unknowns and are never updated from later history.
+Mature C is identically zero at initialization and after every accepted step;
+retain supplied $\Theta_0$, bulk stress and H at timestep zero. No late
+cohesive checkpoint conversion is permitted.
 
 \subsection{Initial committed cohesive state}
 
@@ -976,6 +1119,18 @@ with mesh deformation use fresh lookups, because mapping motion need not emit
 a triangulation-change signal. Adaptive panels, tolerances and tail criteria
 are unchanged by this geometric reuse.
 
+The approved K5 value-reuse extension caches the completed surface $I_h$ field
+as transient data. A collective hit requires exact agreement of owned phase
+entries, fault coordinates/versions, mesh-lookup validity, degradation parameters,
+and projected surface mixtures. The mixture key is unnecessary when all material
+degradation laws are identical; friction fields are still projected afresh.
+Mesh deformation disables reuse. Parameter parsing and restart invalidate it;
+validity is published only after successful integration and final projection.
+A hit issues no adaptive or remote FE requests. The full production integral,
+including endpoint truncation, and all tolerances remain unchanged.
+Identical current/previous local phase and $I_h$ imply a zero history-localization
+difference, but do not imply frozen samples for moving particles.
+
 Cold lookup may reject requests outside a conservative global enclosure of
 the reference-tolerance-expanded mesh. The implemented fast path is restricted
 to exact MappingCartesian or degree-one MappingQ/MappingQ1 maps on axis-aligned affine hypercubes;
@@ -1106,6 +1261,15 @@ Do not checkpoint reconstructible runtime data:
 After restart, rebuild property-name indices, current slip-rate state, and all
 projection/search caches from the serialized registry.
 
+The approved BP3 first-event benchmark additionally checkpoints accumulated
+slip, its independent history-audit inputs, last accepted step, event observer,
+and output schedule. The benchmark restores the background-traction selector
+and deep prescribed-rate map from the fixed configuration; it never recalibrates
+the checkpointed background. Accepted-solver and completed-checkpoint observers
+do not modify constitutive history, timesteps, or solver decisions. Full
+filesystem restart equivalence is required before server-run preparation is
+considered complete.
+
 \section{Timestep ordering}
 
 For the initial implementation use
@@ -1223,11 +1387,11 @@ block symmetric tridiagonal.  The signed friction contribution means that
 $K_V$ is not assumed positive definite.
 
 Store the reduced diagonal and off-diagonal coefficients as replicated
-per-fault data.  For the initial implementation, materialize each block as a
-deal.II sparse matrix and factor it with the tested
-\texttt{SparseDirectUMFPACK} implementation, which supports nonsingular
-indefinite matrices.  Do not add a bespoke tridiagonal factorization or
-condition estimator.  Factorization failure is a numerical failure.  Every
+per-fault data. The qualified K5 implementation prefers LAPACK GTTRF/GTTRS:
+adjacent-pivoting tridiagonal LU, with one reusable factor
+per contiguous principal free block. UMFPACK remains the comparison backend;
+neither path assumes positive definiteness. Do not add a bespoke condition
+estimator or substitute an SPD-only solve. Factorization failure is a numerical failure. Every
 application of the stored inverse shall also check a scaled backward error and
 diagnose a singular or excessively ill-conditioned block explicitly.
 
@@ -1251,6 +1415,40 @@ slip-dependent bulk residual, implement either coupling action, modify the
 Stokes operator, connect a nonlinear solver lifecycle, or commit history.
 
 \subsection{Stage-G weak-form coupling}
+
+The approved BP3 stress-change extension permits fixed surface background
+tractions stored in a generic two-component manager Q1 property. They do not
+enter bulk assembly or Maxwell history. The point residual becomes
+\[
+ R_\Gamma=\tau_{\rm pre}+\Delta\boldsymbol\tau:\boldsymbol S-C
+ -\mu\bigl(\sigma_{n,\rm pre}+\Delta p
+                  -\Delta\boldsymbol\tau:\boldsymbol N\bigr)-\eta^d V.
+\]
+The $\sigma_n\mu'$ term in $K_V$ uses total normal traction; background
+coefficients are frozen and contribute no $B/G$ derivative. Diagnostics must
+not infer incremental $\tau:N$ by subtracting total normal stress from
+incremental pressure without removing its background. No selected background
+property recovers the previous formulation. BP3 initializes zero particle
+Maxwell stress change, uses zero top/bottom perturbation traction, and keeps
+the official lateral velocities and retained initial state. The Airy field
+is an optional analytic diagnostic only, not a bulk prestress to equilibrate.
+The BP3 plugin initializes its frozen Q1 shear background with the same
+consistent mass and domain quadrature as the surface residual:
+\[
+ M\boldsymbol\tau_{\rm bg}
+ =\left[\int_{\mathcal D_{\rm adm}} N_i
+ \left(C_{\rm eval,0}+\mu(V_{\rm init},\Theta_0)\sigma_{n,\rm bg}
+                   +\eta^d V_{\rm init}\right)\,d\nu\right]_i,
+ \qquad C_{\rm eval,0}=\frac{\kappa_\Gamma V_{\rm init}}{I_{h,0}}
+                         +\beta_\Gamma C_0.
+\]
+Here $d\nu$ denotes the existing admitted-domain surface integration measure;
+no domain or support is changed. This balances the represented resistance at
+zero stress perturbation, not at zero bulk velocity gradient. In particular,
+the slip-induced shear of a zero-rate constitutive probe is not incorporated
+into the background. The supplied nodal $\Theta_0$ and stored $C_0$ are retained.
+The finite-Q1 difference from $\tau_0^{\rm BP3}+\Pi_{Q1} C_{\rm eval,0}$
+must be reported. Later cohesive/state evolution does not change this background.
 
 Stage G introduces \texttt{Assemblers::ReconstructedFaultStokes} as a genuine
 cell/QP \texttt{Assemblers::Interface} implementation.  It owns the
@@ -1433,6 +1631,14 @@ Every normalization allocation and MPI collective precedes all history and
 $V$ writes. This gauge-only correction shall not shift pressure in the
 true-normal-stress friction mode, where it would change the surface equation.
 
+The approved K5 performance prototype may assemble the same discrete $B$ and
+$G$ as sparse rectangular matrices for one coupled linearization, retaining
+their independent quadrature actions for verification. It may use a bounded
+few-mode approximation to $K_V-GP_A B$ to correct the existing Stokes
+preconditioner $P_A$, without changing the condensed operator or its residual
+criteria. Preserve shared-face averaging, homogeneous constraints and physical
+pressure conversion; do not identify $G$ with $B^T$.
+
 The supported assembled iterative path shall use FGMRES.  The condensed
 operator is generally nonsymmetric because $B$ and $G$ are not assumed to be
 transposes, so CG and MINRES are not valid outer solvers.  Verification shall
@@ -1467,6 +1673,14 @@ outward direction at an active node would otherwise force
 $\alpha_{\max}=0$.
 
 Every line-search candidate uses the non-committing coupled residual path.
+At lower-bound contact, construct the absolute candidate value exactly as
+$V_{\rm trial,i}=V_{\min}$, using the same local contact fraction as the limiter.
+Non-contact entries retain the affine trial. Copy this validated absolute vector
+without cancellation; at exact surface endpoints read the corresponding stored
+node directly, including when it is at the lower bound. Copy the same vector
+unchanged into temporary residual state and accepted manager state; do not
+reconstruct it by subtracting and adding the base rate. The active-set tolerance,
+fraction formula and acceptance criteria are unchanged.
 Rejected candidates do not accumulate.  Only an accepted trial replaces the
 current Newton iterate, and only nonlinear convergence commits timestep state.
 A failed solve or rejected timestep restores current $V$ from committed $V$
@@ -1771,6 +1985,16 @@ Atomically commit the accepted cohesive, rate-and-state, Maxwell, and
 crack-driving histories using the ordering and timestep-zero semantics above.
 
 \subsection*{Stage K: fixed-fault benchmarks}
+The approved BP3 task permits exact retention of resampled prescribed geometry
+(without changing profile-derived support), and prescribed positive surface
+slip rates on selected nodes. Lift these essential values into the private
+Newton base; use zero increments there and the principal free $K_V$ solve
+from the first condensed action. Exclude the replaced friction equations from
+convergence/merit, preserve all bulk equations, and publish prescribed $V$
+only with the existing terminal commit. Lower-bound active-set release cannot
+release essential nodes. The benchmark reapplies its boundary configuration
+after reconstruction/restart. Defaults retain the existing unconstrained
+frictional geometry/kinematic workflow.
 Verify fixed-fault benchmarks. Propagation, 3-D surfaces, and overlapping
 faults remain deferred.
 

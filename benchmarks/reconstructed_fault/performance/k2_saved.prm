@@ -1,0 +1,21 @@
+# Frozen-data I_h test, not a K2 dynamics replay. The postprocessor substitutes
+# the saved phase and actual fault coordinates, checks both backends, restores.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/nonuniform/true-pressure/pilot.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/uniform_shear/evolving/periodic-domains/coupled-build/libuniform_shear.so, $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/build/libbp3_coupling_checks.release.so
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/performance/k2_saved
+set End time = 0
+set Nonlinear solver scheme = single Advection, no Stokes
+subsection Termination criteria
+  set End step = 0
+end
+subsection Time stepping
+  set List of model names = convection time step
+end
+subsection Material model
+  subsection Phase field fault
+    set I h integration backend = cell intervals
+  end
+end
+subsection Postprocess
+  set List of postprocessors = verify fault I h cache
+end

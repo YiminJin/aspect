@@ -16,6 +16,7 @@
 
 #include <deal.II/base/numbers.h>
 #include <deal.II/base/point.h>
+#include <deal.II/base/signaling_nan.h>
 
 #include <string>
 #include <utility>

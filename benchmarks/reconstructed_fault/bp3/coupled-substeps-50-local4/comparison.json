@@ -1,0 +1,119 @@
+{
+  "metrics": {
+    "deficit": {
+      "values": [
+        0.1881526444308057,
+        0.20760395132705645,
+        0.22033931404495855
+      ],
+      "change_1_to_2": 0.019451306896250742,
+      "change_2_to_4": 0.012735362717902099,
+      "difference_ratio": 0.6547304397503929,
+      "relative_change_1_to_2": 0.10338045981279886,
+      "relative_change_2_to_4": 0.06134451023930167,
+      "decreasing_changes": true
+    },
+    "contrast": {
+      "values": [
+        0.1430492750589234,
+        0.18319588164830386,
+        0.21394355987304547
+      ],
+      "change_1_to_2": 0.04014660658938046,
+      "change_2_to_4": 0.030747678224741615,
+      "difference_ratio": 0.7658848614337173,
+      "relative_change_1_to_2": 0.2806487944300569,
+      "relative_change_2_to_4": 0.16784044460000716,
+      "decreasing_changes": true
+    },
+    "gradient_increment": {
+      "values": [
+        0.0016548992986665588,
+        0.001764990709319339,
+        0.0018601687849581603
+      ],
+      "change_1_to_2": 0.00011009141065278032,
+      "change_2_to_4": 9.517807563882118e-05,
+      "difference_ratio": 0.8645367978706837,
+      "relative_change_1_to_2": 0.06652453762080078,
+      "relative_change_2_to_4": 0.05392553917494908,
+      "decreasing_changes": true
+    },
+    "final_gradient": {
+      "values": [
+        0.0023758153067563216,
+        0.002485906717409103,
+        0.002581084793047925
+      ],
+      "change_1_to_2": 0.0001100914106527814,
+      "change_2_to_4": 9.517807563882204e-05,
+      "difference_ratio": 0.864536797870683,
+      "relative_change_1_to_2": 0.04633837080673084,
+      "relative_change_2_to_4": 0.03828706643426262,
+      "decreasing_changes": true
+    }
+  },
+  "verification": {
+    "2": {
+      "status": 0,
+      "seconds": 273.62268731200004,
+      "child_peak_RSS_KiB": 1560016,
+      "source_unchanged": true,
+      "candidate_commits": 2,
+      "completed": true,
+      "fresh_linear_checks": 16,
+      "fresh_linear_passed": true,
+      "krylov": 600,
+      "independent_theta_error": 2.355971320811001e-16,
+      "independent_slip_error_m": 2.220446049250313e-16,
+      "final_nonlinear_residuals": [
+        [
+          10,
+          2.4265249238529084e-13,
+          2.906065162930998e-09
+        ],
+        [
+          11,
+          2.4588539636255994e-13,
+          3.387844612324213e-10
+        ]
+      ],
+      "discarded_attempt_qp_identical": true
+    },
+    "4": {
+      "status": 0,
+      "seconds": 390.74484728900006,
+      "child_peak_RSS_KiB": 1562384,
+      "source_unchanged": true,
+      "candidate_commits": 4,
+      "completed": true,
+      "fresh_linear_checks": 26,
+      "fresh_linear_passed": true,
+      "krylov": 828,
+      "independent_theta_error": 2.8059152223924855e-16,
+      "independent_slip_error_m": 2.220446049250313e-16,
+      "final_nonlinear_residuals": [
+        [
+          10,
+          2.472215049817929e-13,
+          3.7887965519899616e-14
+        ],
+        [
+          11,
+          2.4355407282830166e-13,
+          1.5031637111069883e-09
+        ],
+        [
+          12,
+          2.563848442142283e-13,
+          4.8766062954174565e-09
+        ],
+        [
+          13,
+          2.7713086531830436e-13,
+          6.787097503396824e-09
+        ]
+      ]
+    }
+  }
+}

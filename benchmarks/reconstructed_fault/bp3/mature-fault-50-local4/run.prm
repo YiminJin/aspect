@@ -1,0 +1,17 @@
+include /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/fault-grid-50-local4/run.prm
+set Output directory = /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/mature-fault-50-local4
+set Resume computation = false
+set End time = 922804465.5975173
+subsection Material model
+  subsection Phase field fault
+    set Fault constitutive mode = mature frictional
+  end
+end
+subsection Postprocess
+  subsection BP3
+    set Mature prestress file = /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/mature-fault-50-local4/prestress.txt
+  end
+end
+subsection Termination criteria
+  set End step = 10
+end

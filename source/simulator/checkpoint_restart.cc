@@ -408,6 +408,7 @@ namespace aspect
       }
 
     pcout << "*** Snapshot " << checkpoint_path << " created!" << std::endl << std::endl;
+    signals.post_checkpoint(checkpoint_path);
 
     computing_timer.leave_subsection("Create snapshot");
   }

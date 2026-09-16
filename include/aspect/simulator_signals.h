@@ -213,6 +213,12 @@ namespace aspect
      */
     boost::signals2::signal<void (typename parallel::distributed::Triangulation<dim> &)>  post_resume_load_user_data;
 
+    /** Notification after a complete checkpoint and its last-good marker have
+     * been published. The path identifies the completed checkpoint directory.
+     * Intended for output archival, not mutation of simulator/history state.
+     */
+    boost::signals2::signal<void (const std::string &)> post_checkpoint;
+
     /**
      * This signal is called whenever the pressure scaling is computed, see
      * Simulator::compute_pressure_scaling_factor(), and allows inspection
@@ -305,6 +311,15 @@ namespace aspect
      * and a remaining residual of zero.
      */
     boost::signals2::signal<void (const SolverControl &)> post_nonlinear_solver;
+
+    /** Accepted reconstructed-fault solve diagnostics: Newton updates, total
+     * Krylov iterations (including residual replacements), minimum accepted
+     * line-search step, and the final active/prescribed mask. Observers must
+     * not mutate the accepted physical state. Not emitted for failed solves.
+     */
+    boost::signals2::signal<void (unsigned int, unsigned int, double,
+                                 const std::vector<std::vector<bool>> &)>
+      post_reconstructed_fault_solver;
 
     /**
      * A signal that is triggered when ARKode is done solving an ODE.

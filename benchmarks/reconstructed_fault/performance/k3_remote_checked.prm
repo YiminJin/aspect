@@ -1,0 +1,4 @@
+# Identical replay after recognizing the newly explicit, unchanged true default
+# in the benchmark parameter guard. The first run and failed guard are retained.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/performance/k3_remote.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/performance/k3_remote_checked

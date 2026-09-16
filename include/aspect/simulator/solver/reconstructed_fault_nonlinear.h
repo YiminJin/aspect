@@ -43,6 +43,12 @@ namespace aspect
       const ReconstructedFaultActiveSet &active_set,
       const double minimum);
 
+    /** Affine non-contact trial, with exact absolute V_min at bound contact. */
+    double reconstructed_fault_trial_value(const double value,
+                                          const double direction,
+                                          const double step_length,
+                                          const double minimum);
+
     double
     reconstructed_fault_residual_scale(const double initial_norm,
                                        const double reference_norm,

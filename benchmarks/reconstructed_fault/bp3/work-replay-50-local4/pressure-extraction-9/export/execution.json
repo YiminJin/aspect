@@ -1,0 +1,47 @@
+{
+  "mode": "export",
+  "command": [
+    "mpirun",
+    "-np",
+    "4",
+    "--bind-to",
+    "core",
+    "--map-by",
+    "core",
+    "/home/ein/repository/aspect/build-pf-cpdi/aspect-release",
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/work-replay-50-local4/pressure-extraction-9/export/diagnostic.prm"
+  ],
+  "checkpoint": "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/work-replay-50-local4/restart/01",
+  "checkpoint_sha256": {
+    "mesh_fixed.data": "01f1cc9e295afc3caff6fc83cc407f20efb09b7c401e95f00c4c22c767120d5a",
+    "mesh_variable.data": "64ffedbae080f19317491dc3e664766487ba9aa4cebce4acab9e78a8f7cd04cb",
+    "mesh": "73a6c24feae666c1e1312fbe542e5cbe35bc9051e12e75573aed041f4ee1d43c",
+    "resume.z": "9d0227ef3552f2cb4c791d7a6cb09b099892296b29de2ade9c8781c740816854",
+    "mesh.info": "ce877139a37c1ca324aa5f0cdbd900bc6cc5fc5aac4df9db67fb95a9a8fe4f90"
+  },
+  "environment": {
+    "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect",
+    "ASPECT_FAULT_EXPLICIT_B": "1",
+    "ASPECT_FAULT_EXPLICIT_G": "1",
+    "ASPECT_FAULT_SURFACE_SOLVER": "tridiagonal",
+    "ASPECT_BP3_TIMESTEP_SEQUENCE": "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/work-replay-50-local4/accepted_steps.csv",
+    "ASPECT_BP3_TARGET_MESH": "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/junction-matched-qualified-local4/refined/target_cells.txt",
+    "ASPECT_BP3_EXPORT_CHECKPOINT_BULK": "1"
+  },
+  "files": {
+    "/home/ein/repository/aspect/build-pf-cpdi/aspect-release": "9157a3362be4e659d0ae0c626ab4fdcf2439794e63251d6605a6da50eba0f31e",
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/build/libbp3.release.so": "d78e8119e951e5e6cb9369f2ba025739a9144020105e18e6da648f5ecf080086",
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/theta_exact_diagnostic.h": "223b6cdbacc88575f05cc70ff719d88053033eac71fd49467e3bf8cd14db3358",
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/junction_diagnostic.h": "ef65b7cf1948676a4c552e0e0892139ea56311ab9912a1ec6f3850eee7710e1b",
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/bp3.cc": "a5fcf88fd0a9291b287c2bf4149dd63100c2607ea8f2899ea4a817bedd4b123e",
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/work-replay-50-local4/pressure-extraction-9/export/diagnostic.prm": "51327beff0ea580d9148d321ac0941c4f6ab81c666be76780bbda858ebca00cd",
+    "/home/ein/repository/aspect/source/material_model/phase_field_fault.cc": "0226bd78ef2cfc4ae14e154ecf1c7ded95ba598ce49f289888ba703c2a101770",
+    "/home/ein/repository/aspect/source/reconstructed_fault/surface_system.cc": "d8214d818bfc9d9f6255e9a0bbcf61af21216be826e17d6590544060a91e5cb5"
+  },
+  "status": 1,
+  "seconds": 4.038862174995302,
+  "verified": true,
+  "original_checkpoint_unchanged": true,
+  "copied_checkpoint_unchanged": true,
+  "accepted_output_written": false
+}

@@ -1,0 +1,30 @@
+# Scientific first-event continuation of the verified stress-change coarse
+# trajectory (interface_zero_bp3): NOT the historical fine/Airy pilot.
+# Physics is inherited from that trajectory's bp3_smoke base, with its 1e-20 floor.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/bp3_smoke.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/first_cycle_coarse
+# 1500 Julian years, seconds throughout. This is a safety stop, not event success.
+set End time = 47336400000
+subsection Material model
+  subsection Phase field fault
+    set Minimum slip rate = 1e-20
+    # Corrected remote reference retained: cell backend misses the 2e-10 allowance.
+    set I h integration backend = remote points
+  end
+end
+subsection Termination criteria
+  set Termination criteria = BP3 first event, end time
+  set Checkpoint on termination = true
+end
+subsection Checkpointing
+  # Guarantees a complete state immediately preceding onset, independently of dt.
+  set Steps between checkpoint = 1
+end
+subsection Postprocess
+  # BP3 provides adaptive bulk VTU, fault profiles and every-step stations.
+  # Do not refresh particle/FE history solely to produce output.
+  set List of postprocessors = particles, reconstructed fault BP3
+  subsection BP3
+    set First event run = true
+  end
+end

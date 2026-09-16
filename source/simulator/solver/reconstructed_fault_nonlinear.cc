@@ -130,6 +130,32 @@ namespace aspect
 
 
     double
+    reconstructed_fault_trial_value(const double value,
+                                    const double direction,
+                                    const double step_length,
+                                    const double minimum)
+    {
+      AssertThrow(std::isfinite(value) && value >= minimum
+                  && std::isfinite(direction) && std::isfinite(step_length) && step_length >= 0.,
+                  ExcMessage("Invalid reconstructed-fault trial inputs."));
+      // Use the same contact fraction as the limiter. Evaluating the affine
+      // expression at contact can lose V_min when it is tiny relative to V.
+      if (direction < 0.)
+        {
+          const double contact = (value-minimum)/(-direction);
+          AssertThrow(step_length <= contact,
+                      ExcMessage("A reconstructed-fault trial exceeds its lower-bound contact fraction."));
+          if (step_length == contact)
+            return minimum;
+        }
+      const double trial = value + step_length*direction;
+      AssertThrow(std::isfinite(trial) && trial >= minimum,
+                  ExcMessage("A reconstructed-fault affine trial violates V >= V_min."));
+      return trial;
+    }
+
+
+    double
     reconstructed_fault_residual_scale(const double initial_norm,
                                        const double reference_norm,
                                        const double floor_factor)

@@ -1,0 +1,8 @@
+include /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/work-replay-50-local4/run.prm
+set Output directory = /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/within-step-50-local4/A
+set Resume computation = true
+subsection Postprocess
+  subsection BP3
+    set Committing work-measure replay = false
+  end
+end

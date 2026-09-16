@@ -36,6 +36,42 @@
 #include <numeric>
 #include <sstream>
 
+// A boundary-truncated panel requires adaptive refinement. Its accepted first
+// subpanel must not discard the remainder of the known physical interval.
+TEST_CASE("Legacy I_h boundary refinement must retain the remainder",
+          "[ih_boundary_reproducer][phase_field_fault_ih_accuracy]")
+{
+  using Access=aspect::MaterialModel::internal::PhaseFieldFaultTestAccess<2>;
+  const unsigned int rank=dealii::Utilities::MPI::this_mpi_process(MPI_COMM_WORLD);
+  std::vector<dealii::Point<2>> origins;
+  std::vector<dealii::Tensor<1,2>> normals;
+  if (rank==0)
+    {
+      origins.push_back({0.,0.});
+      dealii::Tensor<1,2> normal;
+      normal[1]=1.;
+      normals.push_back(normal);
+    }
+  constexpr double boundary=.073;
+  const auto values=Access::integrate_normalization_profiles(origins,normals,.5,1e-12,1e-12,
+    MPI_COMM_WORLD,[](const std::vector<dealii::Point<2>> &points)
+    {
+      std::vector<Access::PointSample> samples(points.size());
+      for (unsigned int i=0; i<points.size(); ++i)
+        {
+          samples[i].found=std::abs(points[i][1])<=boundary;
+          samples[i].phase_field=std::abs(points[i][1]);
+          samples[i].cell_diameter=1.;
+        }
+      return samples;
+    },[](const double phi) { return 1./(1.+std::exp(20.*phi)); });
+  const double integral=dealii::Utilities::MPI::broadcast(MPI_COMM_WORLD,rank==0 ? values[0] : 0.,0);
+  const double exact=2.*std::expm1(20.*boundary)/20.;
+  std::cout << std::setprecision(17) << "Boundary reproducer: integral=" << integral
+            << ", exact=" << exact << ", relative error=" << (integral-exact)/exact << std::endl;
+  REQUIRE(std::abs(integral-exact)/exact < 1e-10);
+}
+
 TEST_CASE("I_h lookup reuse samples fresh values and invalidates collectively",
           "[phase_field_fault_ih_cache]")
 {

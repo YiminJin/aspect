@@ -1,0 +1,6 @@
+include /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/work-replay-50-local4/run.prm
+set Output directory = /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/coupled-substeps-50-local4/substeps4
+set Resume computation = true
+subsection Termination criteria
+  set Termination criteria = end time, BP3 replay complete
+end

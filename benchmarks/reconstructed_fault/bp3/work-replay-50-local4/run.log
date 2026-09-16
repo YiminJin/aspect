@@ -1,0 +1,1018 @@
+-----------------------------------------------------------------------------
+--                             This is ASPECT                              --
+-- The Advanced Solver for Planetary Evolution, Convection, and Tectonics. --
+-----------------------------------------------------------------------------
+--     . version 3.1.0-pre (pf-rsf, fb4411915)
+--     . using deal.II 9.6.2 (dealii-9.6, 6890ca740b)
+--     .       with 32 bit indices
+--     .       with vectorization level 2 (AVX, 4 doubles, 256 bits)
+--     . using Trilinos 14.2.0
+--     . using p4est 2.8.7
+--     . using Geodynamic World Builder 1.0.0
+--     . running in OPTIMIZED mode
+--     . running with 4 MPI processes
+-----------------------------------------------------------------------------
+
+Loading shared library </home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/build/libbp3.release.so>
+
+-----------------------------------------------------------------------------
+-- For information on how to cite ASPECT, see:
+--   https://aspect.geodynamics.org/citing.html?ver=3.1.0-pre&NewtonSolver=1&particles=1&sha=fb4411915&src=code
+-----------------------------------------------------------------------------
+Number of active cells: 256 (on 5 levels)
+Number of degrees of freedom: 9,290 (2,178+289+1,089+1,089+1,089+1,089+1,089+1,089+289)
+
+Number of active cells: 514 (on 6 levels)
+Number of degrees of freedom: 18,986 (4,458+577+2,229+2,229+2,229+2,229+2,229+2,229+577)
+
+Number of active cells: 1,090 (on 7 levels)
+Number of degrees of freedom: 40,362 (9,486+1,209+4,743+4,743+4,743+4,743+4,743+4,743+1,209)
+
+Number of active cells: 2,206 (on 8 levels)
+Number of degrees of freedom: 81,814 (19,238+2,431+9,619+9,619+9,619+9,619+9,619+9,619+2,431)
+
+Number of active cells: 5,017 (on 9 levels)
+Number of degrees of freedom: 184,348 (43,362+5,450+21,681+21,681+21,681+21,681+21,681+21,681+5,450)
+
+Number of active cells: 13,186 (on 10 levels)
+Number of degrees of freedom: 475,926 (111,966+14,031+55,983+55,983+55,983+55,983+55,983+55,983+14,031)
+
+Number of active cells: 36,658 (on 11 levels)
+Number of degrees of freedom: 1,301,494 (306,214+38,319+153,107+153,107+153,107+153,107+153,107+153,107+38,319)
+
+Number of active cells: 42,880 (on 12 levels)
+Number of degrees of freedom: 1,518,040 (357,166+44,688+178,583+178,583+178,583+178,583+178,583+178,583+44,688)
+
+*** Timestep 0:  t=0 seconds, dt=0 seconds
+   Mature frictional fault: retaining prescribed phase profile.
+   Reconstruction initial faults... done.
+
+BP3 mesh guard: extra leaves=0, invalid leaves=0
+BP3 target mesh verified before mechanics: cells=42880, extra grading leaves=0
+BP3 exact fault-grid guard: vertices=1236, coordinate error=0
+   Begin fault surface-property preparation.
+   Begin fault I_h preparation.
+   Begin fault surface material projection.
+Begin fault cache construction.
+End fault cache construction: 0.573129 s.
+   End fault surface material projection: 0.577795 s.
+Bottom-only I_h completion: added auxiliary profile integrals before projection.
+   End fault I_h preparation: integrated, 17.4057 s.
+   Initial cohesive q profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa, normalized RMS=0, normalized maximum=0
+   End fault surface-property preparation: 17.4381 s.
+Mature BP3: fixed effective prestress initialized; C and cohesive energy are zero.
+   Advecting particles...  done.
+   Begin fault surface-property preparation.
+   Begin fault I_h preparation.
+   Begin fault surface material projection.
+Begin fault cache construction.
+End fault cache construction: 0.567206 s.
+   End fault surface material projection: 0.572238 s.
+   End fault I_h preparation: value cache hit, integration requests=0, 0.572484 s.
+   End fault surface-property preparation: 0.576275 s.
+Begin fault Stokes QP cache construction.
+End fault Stokes QP cache construction: 0.170963 s.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=18, estimated=0.78028300510902648, fresh=0.78028298789881834, target=1.417022768778891, raw=0.78028298789881834, rhs null=0, residual null=0, compatibility bound=3.1684493370377644e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 0: 0.999992, 0.180896
+      Fault nonlinear residual: bulk=1426942725.3625572, bulk scale=1426942725.3625572, surface=219774.81155112907, surface scale=1214925.8486247147, velocity=1066993456.9304039, scaled continuity=947465305.08131444, bulk precision=0.00011507442689382528, bulk target=14.269542328052466, velocity correction=4.3319325124211884e-10
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=20, estimated=4.3330674485068139e-09, fresh=4.3330678166527909e-09, target=8.6347460177619626e-09, raw=4.3330678166527909e-09, rhs null=0, residual null=0, compatibility bound=3.1684493370377644e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 1: 5.46817e-10, 9.834e-09
+      Fault nonlinear residual: bulk=0.78028296624940896, bulk scale=1426942725.3625572, surface=0.011947586025181501, surface scale=1214925.8486247147, velocity=0.225718114953563, scaled continuity=0.74692224494975801, bulk precision=0.00011507442689382528, bulk target=14.269542328052466, velocity correction=2.0749054157126789e-17
+
+BP3 adaptive comparison clock: time=0 selected=2487214.2056652424
+   Postprocessing:
+Work replay accepted observation: step=0, frozen weak stress discrepancy=7.6324757169927325e-08 Pa; inert H and geometry unchanged.
+Mature history verified: C=0, W_coh=0; H is inert profile metadata.
+     Number of advected particles: 385920
+     BP3 accepted state            0
+
+*** Snapshot /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/work-replay-50-local4/restart/01/ created!
+
+*** Timestep 1:  t=2487214.2056652424 seconds, dt=2487214.2056652424 seconds
+   Mature frictional fault: retaining prescribed phase profile.
+   Advecting particles...  done.
+   Begin fault surface-property preparation.
+   Begin fault I_h preparation.
+   Begin fault surface material projection.
+Begin fault cache construction.
+End fault cache construction: 0.60307196600000001 s.
+   End fault surface material projection: 0.60925647699999996 s.
+   End fault I_h preparation: value cache hit, integration requests=0, 0.609534731 s.
+   End fault surface-property preparation: 0.61348904699999995 s.
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Frozen cohesion K check: h=1.0000000000000001e-15, relative error=3.3726069034287873e-07
+Frozen cohesion K check: h=9.9999999999999998e-17, relative error=3.4071714536613925e-08
+Frozen cohesion G pressure check: relative error=2.4649729463262807e-12
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=17, estimated=0.00032087752331233597, fresh=0.0003208775244896131, target=0.0010150666433553725, raw=0.0003208775244896131, rhs null=0, residual null=0, compatibility bound=6.4147793039677876e-06, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 0: 0.9929900161007692, 2.5021858227203869e-05
+      Fault nonlinear residual: bulk=1015301.0312711331, bulk scale=1015301.0312711331, surface=28.418763959895216, surface scale=1135757.532548011, velocity=1015301.0312710268, scaled continuity=0.46443890464951793, bulk precision=7.1674878565555476e-05, bulk target=0.010224685191276886, velocity correction=2.6410261387256089e-14
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=18, estimated=1.5334570120745696e-10, fresh=1.5334568198485054e-10, target=3.1025552199925591e-10, raw=1.5334568198485054e-10, rhs null=0, residual null=0, compatibility bound=6.4147793039677876e-06, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 1: 3.1385977429254021e-10, 1.2146826156224108e-09
+      Fault nonlinear residual: bulk=0.00032091173863464418, bulk scale=1015301.0312711331, surface=0.0013795849303482734, surface scale=1135757.532548011, velocity=0.00013086833320586678, scaled continuity=0.0002930150565370804, bulk precision=7.1674878565555476e-05, bulk target=0.010224685191276886, velocity correction=1.253367553099096e-18
+   Cohesive traction profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa
+
+BP3 adaptive comparison clock: time=2487214.2056652424 selected=2482929.0612529977
+   Postprocessing:
+Work replay accepted observation: step=1, frozen weak stress discrepancy=3.81627270666935e-08 Pa; inert H and geometry unchanged.
+Mature history verified: C=0, W_coh=0; H is inert profile metadata.
+BP3 WORK REPLAY FIRST UPDATE PASSED: exact inert H/geometry, Maxwell update, retained FE input, C=0 and independent Theta reference; continuing with unchanged controllers.
+     Number of advected particles: 385920
+     BP3 accepted state            1
+
+*** Snapshot /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/work-replay-50-local4/restart/02/ created!
+
+*** Timestep 2:  t=4970143.2669182401 seconds, dt=2482929.0612529977 seconds
+   Mature frictional fault: retaining prescribed phase profile.
+   Advecting particles...  done.
+   Begin fault surface-property preparation.
+   Begin fault I_h preparation.
+   Begin fault surface material projection.
+Begin fault cache construction.
+End fault cache construction: 0.63826997600000002 s.
+   End fault surface material projection: 0.64539364300000002 s.
+   End fault I_h preparation: value cache hit, integration requests=0, 0.64567463199999997 s.
+   End fault surface-property preparation: 0.64969416700000004 s.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=18, estimated=0.5898521729356041, fresh=0.58985211946298777, target=0.73198120872917649, raw=0.58985211946298777, rhs null=0, residual null=0, compatibility bound=1.6253247830481684e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 0: 0.99646965328548409, 1
+      Fault nonlinear residual: bulk=2018603.1272667402, bulk scale=2018603.1272667402, surface=2638570.6095096283, surface scale=2638570.6095096283, velocity=2018603.1272667402, scaled continuity=0.00029251649266617152, bulk precision=7.1516166044406873e-05, bulk target=0.020257547438711807, velocity correction=4.6656759980376723e-09
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=0.11920063471249302.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=18, estimated=0.020163041428089789, fresh=0.020163050714883866, target=0.051232126874816764, raw=0.020163050714883866, rhs null=0, residual null=0, compatibility bound=6.3867983239301357e-06, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 1: 0.87768983813888546, 0.4534687937830752
+      Fault nonlinear residual: bulk=1777984.353257376, bulk scale=2018603.1272667402, surface=1196509.4316058047, surface scale=2638570.6095096283, velocity=1777984.3532573746, scaled continuity=0.067474660417080723, bulk precision=7.1516166044406873e-05, bulk target=0.020257547438711807, velocity correction=3.9159276719715135e-10
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=0.18086216986243447.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=18, estimated=0.0068827920861136418, fresh=0.0068827899871635682, target=0.020848741202947288, raw=0.0068827899871635682, rhs null=0, residual null=0, compatibility bound=6.3867983239301357e-06, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 2: 0.71894894954219501, 0.30354094305843565
+      Fault nonlinear residual: bulk=1456414.2451363038, bulk scale=2018603.1272667402, surface=800914.21113682399, surface scale=2638570.6095096283, velocity=1456414.2451363027, scaled continuity=0.055748671912711385, bulk precision=7.1516166044406873e-05, bulk target=0.020257547438711807, velocity correction=1.5428328276554687e-10
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=0.34212408807216227.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=18, estimated=0.0024371187825860405, fresh=0.0024371171012937398, target=0.0067734716211730987, raw=0.0024371171012937398, rhs null=0, residual null=0, compatibility bound=6.3867983239301357e-06, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 3: 0.47297919581756021, 0.11519820262052753
+      Fault nonlinear residual: bulk=958139.8496797987, bulk scale=2018603.1272667402, surface=303958.59170285898, surface scale=2638570.6095096283, velocity=958139.849679798, scaled continuity=0.037112188741537107, bulk precision=7.1516166044406873e-05, bulk target=0.020257547438711807, velocity correction=4.9190188486273909e-11
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=18, estimated=0.00038711949144897191, fresh=0.00038711966584536165, target=0.0012285962259991877, raw=0.00038711966584536165, rhs null=0, residual null=0, compatibility bound=6.3867983239301357e-06, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 4: 1.203068752085589e-09, 0.095457474353193586
+      Fault nonlinear residual: bulk=0.0024371222317405633, bulk scale=2018603.1272667402, surface=251871.28628635572, surface scale=2638570.6095096283, velocity=0.00095366159902521915, scaled continuity=0.0022427871782647515, bulk precision=7.1516166044406873e-05, bulk target=0.020257547438711807, velocity correction=8.8596930585113374e-12
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=17, estimated=0.00034044873172779584, fresh=0.00034044873569213458, target=0.00038837370744342336, raw=0.00034044873569213458, rhs null=0, residual null=0, compatibility bound=6.3867983239301357e-06, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 5: 1.9111057944810652e-10, 0.051413330965884387
+      Fault nonlinear residual: bulk=0.00038714316292097196, bulk scale=2018603.1272667402, surface=135657.70402357381, surface scale=2638570.6095096283, velocity=0.00014339689401956656, scaled continuity=0.00035960695124259684, bulk precision=7.1516166044406873e-05, bulk target=0.020257547438711807, velocity correction=2.6360611370836901e-12
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=17, estimated=4.0117124533950456e-05, fresh=4.0117123125589682e-05, target=6.8260748498824635e-05, raw=4.0117123125589682e-05, rhs null=0, residual null=0, compatibility bound=6.3867983239301357e-06, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 6: 1.6807208006965203e-10, 0.034864949331873181
+      Fault nonlinear residual: bulk=0.00034047281351339454, bulk scale=2018603.1272667402, surface=91993.63060912292, surface scale=2638570.6095096283, velocity=4.4552745209338495e-05, scaled continuity=0.00033754524087303985, bulk precision=7.1516166044406873e-05, bulk target=0.020257547438711807, velocity correction=3.8497690648142319e-13
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=17, estimated=9.3707782572764696e-07, fresh=9.3707804162924517e-07, target=2.6348778803244837e-06, raw=9.3707804162924517e-07, rhs null=0, residual null=0, compatibility bound=6.3867983239301357e-06, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 7: 1.9912095110442483e-11, 0.024037559602987618
+      Fault nonlinear residual: bulk=4.0337021130393005e-05, bulk scale=2018603.1272667402, surface=63424.798292779058, surface scale=2638570.6095096283, velocity=6.2373220197865894e-06, scaled continuity=3.9851864293847749e-05, bulk precision=7.1516166044406873e-05, bulk target=0.020257547438711807, velocity correction=1.0162812697446253e-14
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=16, estimated=1.4118613704247252e-06, fresh=1.4118614016334454e-06, target=1.6578356304452445e-06, raw=1.4118614016334454e-06, rhs null=0, residual null=0, compatibility bound=6.3867983239301357e-06, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 8: 2.1163537432679665e-12, 0.014610907532076957
+      Fault nonlinear residual: bulk=4.2872136351346145e-06, bulk scale=2018603.1272667402, surface=38551.911192401116, surface scale=2638570.6095096283, velocity=4.1840873630995682e-06, scaled continuity=9.3467303974954936e-07, bulk precision=7.1516166044406873e-05, bulk target=0.020257547438711807, velocity correction=3.9676893744530864e-15
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=16, estimated=2.3223399596068957e-06, fresh=2.3223399473449376e-06, target=2.3976108378339899e-06, raw=2.3223399473449376e-06, rhs null=0, residual null=0, compatibility bound=6.3867983239301357e-06, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 9: 2.1818584466371801e-12, 0.0069471123871816878
+      Fault nonlinear residual: bulk=4.4199100987306733e-06, bulk scale=2018603.1272667402, surface=18330.446565777875, surface scale=2638570.6095096283, velocity=4.1975186841675292e-06, scaled continuity=1.384356231945333e-06, bulk precision=7.1516166044406873e-05, bulk target=0.020257547438711807, velocity correction=5.7843181877912388e-15
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=17, estimated=5.0076346572292712e-07, fresh=5.0076338877721689e-07, target=1.3227983353477924e-06, raw=5.0076338877721689e-07, rhs null=0, residual null=0, compatibility bound=6.3867983239301357e-06, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 10: 2.3631974030112024e-12, 0.0020560347112963426
+      Fault nonlinear residual: bulk=4.7872583498539976e-06, bulk scale=2018603.1272667402, surface=5424.9927613581431, surface scale=2638570.6095096283, velocity=4.2282914763655301e-06, scaled continuity=2.2448593940693535e-06, bulk precision=7.1516166044406873e-05, bulk target=0.020257547438711807, velocity correction=3.5197178567100543e-15
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=17, estimated=6.7884312884199821e-08, fresh=6.7884310756634309e-08, target=1.8458745698268591e-07, raw=6.7884310756634309e-08, rhs null=0, residual null=0, compatibility bound=6.3867983239301357e-06, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 11: 2.08154251495831e-12, 0.00023116406321239274
+      Fault nonlinear residual: bulk=4.2166946242463449e-06, bulk scale=2018603.1272667402, surface=609.94270316704535, surface scale=2638570.6095096283, velocity=4.1890840747344477e-06, scaled continuity=4.8175529987148196e-07, bulk precision=7.1516166044406873e-05, bulk target=0.020257547438711807, velocity correction=5.1538724468305746e-16
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=17, estimated=9.9058342626444913e-10, fresh=9.9058340307200089e-10, target=2.7054822163046476e-09, raw=9.9058340307200089e-10, rhs null=0, residual null=0, compatibility bound=6.3867983239301357e-06, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 12: 2.0669398335407666e-12, 3.3102359974624259e-06
+      Fault nonlinear residual: bulk=4.1871131730915172e-06, bulk scale=2018603.1272667402, surface=8.7342914134451455, surface scale=2638570.6095096283, velocity=4.1855819443013616e-06, scaled continuity=1.1322769897401055e-07, bulk precision=7.1516166044406873e-05, bulk target=0.020257547438711807, velocity correction=7.6647426697922648e-18
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=17, estimated=2.2910933891463161e-13, fresh=2.2910930938496699e-13, target=5.6431757129154845e-13, raw=2.2910930938496699e-13, rhs null=0, residual null=0, compatibility bound=6.3867983239301357e-06, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 13: 2.0667486732263154e-12, 6.9071075856304879e-10
+      Fault nonlinear residual: bulk=4.1867259291776775e-06, bulk scale=2018603.1272667402, surface=0.0018224891072165614, surface scale=2638570.6095096283, velocity=4.1857731348090418e-06, scaled continuity=8.9315563926864976e-08, bulk precision=7.1516166044406873e-05, bulk target=0.020257547438711807, velocity correction=1.6018946376531851e-21
+   Cohesive traction profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa
+
+BP3 adaptive comparison clock: time=4970143.2669182401 selected=4742394.5069932248
+   Postprocessing:
+Work replay accepted observation: step=2, frozen weak stress discrepancy=3.816097642468154e-08 Pa; inert H and geometry unchanged.
+Mature history verified: C=0, W_coh=0; H is inert profile metadata.
+     Number of advected particles: 385920
+     BP3 accepted state            2
+
+*** Snapshot /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/work-replay-50-local4/restart/03/ created!
+
+*** Timestep 3:  t=9712537.773911465 seconds, dt=4742394.5069932248 seconds
+   Mature frictional fault: retaining prescribed phase profile.
+   Advecting particles...  done.
+   Begin fault surface-property preparation.
+   Begin fault I_h preparation.
+   Begin fault surface material projection.
+Begin fault cache construction.
+End fault cache construction: 0.63258230400000004 s.
+   End fault surface material projection: 0.63977697899999997 s.
+   End fault I_h preparation: value cache hit, integration requests=0, 0.64007908300000005 s.
+   End fault surface-property preparation: 0.64422047299999996 s.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=19, estimated=0.04433673799704007, fresh=0.044336743569206666, target=0.044536743454112016, raw=0.044336743569206666, rhs null=0, residual null=0, compatibility bound=1.1158167554210526e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 0: 0.99966308331989173, 0.30954983460664709
+      Fault nonlinear residual: bulk=43712413.515489452, bulk scale=43712413.515489452, surface=369261.63312984642, surface scale=1192898.8222496603, velocity=43712413.515489452, scaled continuity=2.8645239460162831e-07, bulk precision=0.0001473240483408186, bulk target=0.43727145920323535, velocity correction=3.4259228095133868e-11
+      Reconstructed-fault line search accepted after 1 rejected candidates; alpha=0.57814069704153259.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=20, estimated=0.0038984107106595322, fresh=0.0038984114848103048, target=0.018579723933261471, raw=0.0038984114848103048, rhs null=0, residual null=0, compatibility bound=1.1158167554210526e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 1: 0.42171717152023003, 0.031570386179352712
+      Fault nonlinear residual: bulk=18440488.296171207, bulk scale=43712413.515489452, surface=37660.276491316799, surface scale=1192898.8222496603, velocity=18440488.296171207, scaled continuity=0.025354708176930887, bulk precision=0.0001473240483408186, bulk target=0.43727145920323535, velocity correction=1.0849557429240552e-11
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=18, estimated=6.9763731773942239e-05, fresh=6.9763804569742389e-05, target=0.00013252157793231813, raw=6.9763804569742389e-05, rhs null=0, residual null=0, compatibility bound=1.1158167554210526e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 2: 8.9153436163073439e-11, 0.0024194313476294011
+      Fault nonlinear residual: bulk=0.0038984253124009615, bulk scale=43712413.515489452, surface=2886.1368051010209, surface scale=1192898.8222496603, velocity=0.00052672634939611711, scaled continuity=0.0038626777330267115, bulk precision=0.0001473240483408186, bulk target=0.43727145920323535, velocity correction=5.2178913126253306e-13
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=18, estimated=2.8841090953666037e-07, fresh=2.8841103215271608e-07, target=6.6208464143894905e-07, raw=2.8841103215271608e-07, rhs null=0, residual null=0, compatibility bound=1.1158167554210526e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 3: 1.6058750321913566e-12, 1.8485715322597674e-05
+      Fault nonlinear residual: bulk=7.02203318624357e-05, bulk scale=43712413.515489452, surface=22.051588036769264, surface scale=1192898.8222496603, velocity=3.8648331603463452e-05, scaled continuity=5.8627651079838859e-05, bulk precision=0.0001473240483408186, bulk target=0.43727145920323535, velocity correction=2.5385916643540718e-15
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=18, estimated=1.0993864257433141e-11, fresh=1.0993871437391681e-11, target=3.0979022287617591e-11, raw=1.0993871437391681e-11, rhs null=0, residual null=0, compatibility bound=1.1158167554210526e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 4: 1.818536802641522e-13, 1.3637385967275302e-09
+      Fault nonlinear residual: bulk=7.9519424130584432e-06, bulk scale=43712413.515489452, surface=0.0016268021658926751, surface scale=1192898.8222496603, velocity=7.9462461553482475e-06, scaled continuity=3.009321837406866e-07, bulk precision=0.0001473240483408186, bulk target=0.43727145920323535, velocity correction=1.1536241533192282e-19
+   Cohesive traction profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa
+
+BP3 adaptive comparison clock: time=9712537.773911465 selected=9057973.5083570592
+   Postprocessing:
+Work replay accepted observation: step=3, frozen weak stress discrepancy=5.7248222716388692e-08 Pa; inert H and geometry unchanged.
+Mature history verified: C=0, W_coh=0; H is inert profile metadata.
+     Number of advected particles: 385920
+     BP3 accepted state            3
+
+*** Snapshot /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/work-replay-50-local4/restart/01/ created!
+
+*** Timestep 4:  t=18770511.282268524 seconds, dt=9057973.5083570592 seconds
+   Mature frictional fault: retaining prescribed phase profile.
+   Advecting particles...  done.
+   Begin fault surface-property preparation.
+   Begin fault I_h preparation.
+   Begin fault surface material projection.
+Begin fault cache construction.
+End fault cache construction: 0.620999148 s.
+   End fault surface material projection: 0.62851910499999997 s.
+   End fault I_h preparation: value cache hit, integration requests=0, 0.63109889200000002 s.
+   End fault surface-property preparation: 0.63533561299999997 s.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=20, estimated=0.054974458641685445, fresh=0.054974467913568394, target=0.085268493678352777, raw=0.054974467913568394, rhs null=0, residual null=0, compatibility bound=2.1270942628933515e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 0: 0.99966663664294031, 0.24523351569489371
+      Fault nonlinear residual: bulk=84335262.287523776, bulk scale=84335262.287523776, surface=333669.67432281264, surface scale=1360620.1965393117, velocity=84335262.287523776, scaled continuity=6.3432100787046588e-07, bulk precision=0.00028123661552904991, bulk target=0.84363385949076686, velocity correction=3.0886950470041118e-11
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=0.9461233646934577.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=20, estimated=0.0024600653303216086, fresh=0.0024600653744011125, target=0.0045843006515001884, raw=0.0024600653744011125, rhs null=0, residual null=0, compatibility bound=2.1270942628933515e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 1: 0.053858674810929014, 0.83255063664471007
+      Fault nonlinear residual: bulk=4543700.169780219, bulk scale=84335262.287523776, surface=1132785.2108604545, surface scale=1360620.1965393117, velocity=4543700.169780219, scaled continuity=0.049897004666343926, bulk precision=0.00028123661552904991, bulk target=0.84363385949076686, velocity correction=1.8732358690239346e-12
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=19, estimated=2.033232476262048e-05, fresh=2.0332326052722989e-05, target=4.1091332538553331e-05, raw=2.0332326052722989e-05, rhs null=0, residual null=0, compatibility bound=2.1270942628933515e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 2: 2.9160821267300631e-11, 0.51705239337339126
+      Fault nonlinear residual: bulk=0.0024601056191653264, bulk scale=84335262.287523776, surface=703511.92909282504, surface scale=1360620.1965393117, velocity=0.00072617982228305521, scaled continuity=0.0023504855930547128, bulk precision=0.00028123661552904991, bulk target=0.84363385949076686, velocity correction=8.4075950491492179e-14
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=18, estimated=2.1932664017064028e-06, fresh=2.1932662429146562e-06, target=3.0240373062232196e-06, raw=2.1932662429146562e-06, rhs null=0, residual null=0, compatibility bound=2.1270942628933515e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 3: 3.0094964817470703e-13, 0.29232572742965079
+      Fault nonlinear residual: bulk=2.5389131320201648e-05, bulk scale=84335262.287523776, surface=397744.28870882868, surface scale=1360620.1965393117, velocity=1.8477235188450911e-05, scaled continuity=1.7412632454201622e-05, bulk precision=0.00028123661552904991, bulk target=0.84363385949076686, velocity correction=4.8456804176634037e-15
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=18, estimated=1.3313519932426196e-06, fresh=1.3313519256634681e-06, target=1.8862530028748891e-06, raw=1.3313519256634681e-06, rhs null=0, residual null=0, compatibility bound=2.1270942628933515e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 4: 1.8213457619365875e-13, 0.1546682207737918
+      Fault nonlinear residual: bulk=1.5365489546097148e-05, bulk scale=84335262.287523776, surface=210444.70494762226, surface scale=1360620.1965393117, velocity=1.5224639136993381e-05, scaled continuity=2.0757244854629006e-06, bulk precision=0.00028123661552904991, bulk target=0.84363385949076686, velocity correction=4.576853690977126e-15
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=18, estimated=5.0917463056023872e-07, fresh=5.0917462340209733e-07, target=1.1207030965403657e-06, raw=5.0917462340209733e-07, rhs null=0, residual null=0, compatibility bound=2.1270942628933515e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 5: 1.8062388978802347e-13, 0.081021720138874695
+      Fault nonlinear residual: bulk=1.5238042925810513e-05, bulk scale=84335262.287523776, surface=110239.78877930879, surface scale=1360620.1965393117, velocity=1.5177959864731549e-05, scaled continuity=1.3518456100613256e-06, bulk precision=0.00028123661552904991, bulk target=0.84363385949076686, velocity correction=3.4679309721479319e-15
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=17, estimated=7.3392444954128882e-07, fresh=7.3392440971918233e-07, target=8.3850025895093973e-07, raw=7.3392440971918233e-07, rhs null=0, residual null=0, compatibility bound=2.1270942628933515e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 6: 1.7968652403244426e-13, 0.042574940314402746
+      Fault nonlinear residual: bulk=1.5158963576797137e-05, bulk scale=84335262.287523776, surface=57928.323658232126, surface scale=1360620.1965393117, velocity=1.5146752458055994e-05, scaled continuity=6.0833107518596961e-07, bulk precision=0.00028123661552904991, bulk target=0.84363385949076686, velocity correction=1.7634550428126437e-15
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=17, estimated=2.9510506257614909e-07, fresh=2.9510498814923024e-07, target=7.8312745495311623e-07, raw=2.9510498814923024e-07, rhs null=0, residual null=0, compatibility bound=2.1270942628933515e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 7: 1.7990164102061855e-13, 0.020898439471997442
+      Fault nonlinear residual: bulk=1.5177111574294688e-05, bulk scale=84335262.287523776, surface=28434.838821754071, surface scale=1360620.1965393117, velocity=1.5156334806808751e-05, scaled continuity=7.9387087269111985e-07, bulk precision=0.00028123661552904991, bulk target=0.84363385949076686, velocity correction=9.8641539636178041e-16
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=16, estimated=7.8985827019387078e-07, fresh=7.8985827020913019e-07, target=7.9879551872813708e-07, raw=7.8985827020913019e-07, rhs null=0, residual null=0, compatibility bound=2.1270942628933515e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 8: 1.7936071814988475e-13, 0.0079462596974903179
+      Fault nonlinear residual: bulk=1.513147748938229e-05, bulk scale=84335262.287523776, surface=10811.841431351688, surface scale=1360620.1965393117, velocity=1.5124932259296193e-05, scaled continuity=4.4501141938645465e-07, bulk precision=0.00028123661552904991, bulk target=0.84363385949076686, velocity correction=6.0433009180441833e-16
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=17, estimated=9.4897049392762267e-08, fresh=9.4897045022164957e-08, target=2.4391522858295357e-07, raw=9.4897045022164957e-08, rhs null=0, residual null=0, compatibility bound=2.1270942628933515e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 9: 1.7998904392472817e-13, 0.0015844725293509951
+      Fault nonlinear residual: bulk=1.5184485179227158e-05, bulk scale=84335262.287523776, surface=2155.8653242966911, surface scale=1360620.1965393117, velocity=1.5161295934046665e-05, scaled continuity=8.3886575709662519e-07, bulk precision=0.00028123661552904991, bulk target=0.84363385949076686, velocity correction=1.8329344796813652e-16
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=17, estimated=4.7978720971335395e-09, fresh=4.7978721108654367e-09, target=1.2916633768910392e-08, raw=4.7978721108654367e-09, rhs null=0, residual null=0, compatibility bound=2.1270942628933515e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 10: 1.7987665842606677e-13, 7.6809537298618442e-05
+      Fault nonlinear residual: bulk=1.5175003958028507e-05, bulk scale=84335262.287523776, surface=104.50860773533981, surface scale=1360620.1965393117, velocity=1.5170871883472377e-05, scaled continuity=3.5410651144553397e-07, bulk precision=0.00028123661552904991, bulk target=0.84363385949076686, velocity correction=9.9853613632447301e-18
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=17, estimated=1.1972774395183199e-11, fresh=1.197277498628476e-11, target=3.2225533934763304e-11, raw=1.197277498628476e-11, rhs null=0, residual null=0, compatibility bound=2.1270942628933515e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 11: 1.802319181120003e-13, 1.9113242364200557e-07
+      Fault nonlinear residual: bulk=1.5204974868025066e-05, bulk scale=84335262.287523776, surface=0.26005863582082062, surface scale=1360620.1965393117, velocity=1.5200894226727646e-05, scaled continuity=3.5224344580420652e-07, bulk precision=0.00028123661552904991, bulk target=0.84363385949076686, velocity correction=2.5063241698481236e-20
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=18, estimated=7.7328228543014049e-15, fresh=7.7328236943414789e-15, target=1.5185420516904362e-14, raw=7.7328236943414789e-15, rhs null=0, residual null=0, compatibility bound=2.1270942628933515e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 12: 1.798985203782549e-13, 1.1870705196985843e-12
+      Fault nonlinear residual: bulk=1.5176848306338554e-05, bulk scale=84335262.287523776, surface=1.6151521238183106e-06, surface scale=1360620.1965393117, velocity=1.5172986098014403e-05, scaled continuity=3.4237024268050356e-07, bulk precision=0.00028123661552904991, bulk target=0.84363385949076686, velocity correction=7.7037564374768762e-25
+   Cohesive traction profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa
+
+BP3 adaptive comparison clock: time=18770511.282268524 selected=17300729.400961984
+   Postprocessing:
+Work replay accepted observation: step=4, frozen weak stress discrepancy=1.0494654110865008e-07 Pa; inert H and geometry unchanged.
+Mature history verified: C=0, W_coh=0; H is inert profile metadata.
+     Number of advected particles: 385920
+     BP3 accepted state            4
+
+*** Snapshot /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/work-replay-50-local4/restart/02/ created!
+
+*** Timestep 5:  t=36071240.683230504 seconds, dt=17300729.400961984 seconds
+   Mature frictional fault: retaining prescribed phase profile.
+   Advecting particles...  done.
+   Begin fault surface-property preparation.
+   Begin fault I_h preparation.
+   Begin fault surface material projection.
+Begin fault cache construction.
+End fault cache construction: 0.65753966699999999 s.
+   End fault surface material projection: 0.66513197800000001 s.
+   End fault I_h preparation: value cache hit, integration requests=0, 0.66542721100000002 s.
+   End fault surface-property preparation: 0.66952831999999995 s.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=22, estimated=0.082657890132641895, fresh=0.082657882302685892, target=0.16145736844609107, raw=0.082657882302685892, rhs null=0, residual null=0, compatibility bound=4.0511362097630667e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 0: 0.99966454227793777, 0.18481737447967905
+      Fault nonlinear residual: bulk=160449308.77177379, bulk scale=160449308.77177379, surface=310321.81107108825, surface scale=1679072.7167548232, velocity=160449308.77177379, scaled continuity=9.5897022178883238e-07, bulk precision=0.00053842021348856121, bulk target=1.6050315079312265, velocity correction=3.2502516569175951e-11
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=0.98817521512440176.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=22, estimated=0.0012699685029646569, fresh=0.0012699697244408384, target=0.0024675269428492599, raw=0.0012699697244408384, rhs null=0, residual null=0, compatibility bound=4.0511362097630667e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 1: 0.011820818169251832, 0.57347520980967237
+      Fault nonlinear residual: bulk=1897278.5611175108, bulk scale=160449308.77177379, surface=962906.57852666883, surface scale=1679072.7167548232, velocity=1897278.5611175096, scaled continuity=0.067448465020495715, bulk precision=0.00053842021348856121, bulk target=1.6050315079312265, velocity correction=1.995622068246113e-12
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=21, estimated=1.8948558650815121e-05, fresh=1.8948555220356225e-05, target=4.0247664768260841e-05, raw=1.8948555220356225e-05, rhs null=0, residual null=0, compatibility bound=4.0511362097630667e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 2: 7.9146529700435242e-12, 0.34534624735524
+      Fault nonlinear residual: bulk=0.0012703267391261318, bulk scale=160449308.77177379, surface=579861.46176784602, surface scale=1679072.7167548232, velocity=0.00065492864939531469, scaled continuity=0.0010884844915477945, bulk precision=0.00053842021348856121, bulk target=1.6050315079312265, velocity correction=4.4769911828430451e-14
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=20, estimated=8.3054216085465971e-07, fresh=8.3054232201129903e-07, target=1.8437017676648209e-06, raw=8.3054232201129903e-07, rhs null=0, residual null=0, compatibility bound=4.0511362097630667e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 3: 2.1463647459931633e-13, 0.19045972403363873
+      Fault nonlinear residual: bulk=3.4449830448318309e-05, bulk scale=160449308.77177379, surface=319795.72626553569, surface scale=1679072.7167548232, velocity=3.0517559261204631e-05, scaled continuity=1.5983409982126555e-05, bulk precision=0.00053842021348856121, bulk target=1.6050315079312265, velocity correction=1.7275959578995522e-15
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=19, estimated=8.550368856158238e-07, fresh=8.5503693185117599e-07, target=1.0821512180285004e-06, raw=8.5503693185117599e-07, rhs null=0, residual null=0, compatibility bound=4.0511362097630667e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 4: 1.7990513382679166e-13, 0.099719786289028473
+      Fault nonlinear residual: bulk=2.8875340823058453e-05, bulk scale=160449308.77177379, surface=167436.7724785294, surface scale=1679072.7167548232, velocity=2.8857472496131266e-05, scaled continuity=1.0156715920087445e-06, bulk precision=0.00053842021348856121, bulk target=1.6050315079312265, velocity correction=1.5856656453729825e-15
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=19, estimated=2.6477952442563727e-07, fresh=2.6477949779456465e-07, target=7.1503513337378325e-07, raw=2.6477949779456465e-07, rhs null=0, residual null=0, compatibility bound=4.0511362097630667e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 5: 1.7919426382787043e-13, 0.051923041674446252
+      Fault nonlinear residual: bulk=2.8761243948427293e-05, bulk scale=160449308.77177379, surface=87182.562646486374, surface scale=1679072.7167548232, velocity=2.8743342147981275e-05, scaled continuity=1.0146110708191166e-06, bulk precision=0.00053842021348856121, bulk target=1.6050315079312265, velocity correction=1.0645149891078643e-15
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=18, estimated=3.0902081035926487e-07, fresh=3.0902083746863142e-07, target=5.0520613974315852e-07, raw=3.0902083746863142e-07, rhs null=0, residual null=0, compatibility bound=4.0511362097630667e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 6: 1.797485325269317e-13, 0.02686289095675623
+      Fault nonlinear residual: bulk=2.8850205821012631e-05, bulk scale=160449308.77177379, surface=45104.747298649258, surface scale=1679072.7167548232, velocity=2.8842440583574797e-05, scaled continuity=6.693258531900065e-07, bulk precision=0.00053842021348856121, bulk target=1.6050315079312265, velocity correction=5.0395568327775552e-16
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=17, estimated=3.655870703588896e-07, fresh=3.6558705437621369e-07, target=6.105784046278e-07, raw=3.6558705437621369e-07, rhs null=0, residual null=0, compatibility bound=4.0511362097630667e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 7: 1.7959419338960693e-13, 0.012434611276830211
+      Fault nonlinear residual: bulk=2.8825433903181312e-05, bulk scale=160449308.77177379, surface=20878.616538377464, surface scale=1679072.7167548232, velocity=2.8817714507401072e-05, scaled continuity=6.6706092420440383e-07, bulk precision=0.00053842021348856121, bulk target=1.6050315079312265, velocity correction=2.9606205970642531e-16
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=17, estimated=2.1114835237408505e-07, fresh=2.1114835202978421e-07, target=4.2413354799027128e-07, raw=2.1114835202978421e-07, rhs null=0, residual null=0, compatibility bound=4.0511362097630667e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 8: 1.7946756599850688e-13, 0.003972870773358784
+      Fault nonlinear residual: bulk=2.880510980793304e-05, bulk scale=160449308.77177379, surface=6670.7389227393696, surface scale=1679072.7167548232, velocity=2.8796633787965306e-05, scaled continuity=6.987370956913941e-07, bulk precision=0.00053842021348856121, bulk target=1.6050315079312265, velocity correction=1.6298340822068076e-16
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=17, estimated=3.6364678130134481e-08, fresh=3.6364678578043637e-08, target=7.4370472694086248e-08, raw=3.6364678578043637e-08, rhs null=0, residual null=0, compatibility bound=4.0511362097630667e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 9: 1.7942995174328137e-13, 0.00053337521282967781
+      Fault nonlinear residual: bulk=2.879907260145461e-05, bulk scale=160449308.77177379, surface=895.57576765560918, surface scale=1679072.7167548232, velocity=2.8791753791928456e-05, scaled continuity=6.4922745538599845e-07, bulk precision=0.00053842021348856121, bulk target=1.6050315079312265, velocity correction=2.9671544475128348e-17
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=17, estimated=7.9427950508224506e-10, fresh=7.942795126977393e-10, target=1.6049966144016294e-09, raw=7.942795126977393e-10, rhs null=0, residual null=0, compatibility bound=4.0511362097630667e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 10: 1.7951883083590736e-13, 1.1111710090543067e-05
+      Fault nonlinear residual: bulk=2.8813337975860714e-05, bulk scale=160449308.77177379, surface=18.65736924952013, surface scale=1679072.7167548232, velocity=2.8806216481484846e-05, scaled continuity=6.4057578240832608e-07, bulk precision=0.00053842021348856121, bulk target=1.6050315079312265, velocity correction=6.5199950241863341e-19
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=18, estimated=3.0286590131728508e-13, fresh=3.0286588212057008e-13, target=7.1475179274924301e-13, raw=3.0286588212057008e-13, rhs null=0, residual null=0, compatibility bound=4.0511362097630667e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 11: 1.8003013443944756e-13, 4.9455809708091226e-09
+      Fault nonlinear residual: bulk=2.8895403815240795e-05, bulk scale=160449308.77177379, surface=0.0083039900765874298, surface scale=1679072.7167548232, velocity=2.8888346273586965e-05, scaled continuity=6.3860098901145602e-07, bulk precision=0.00053842021348856121, bulk target=1.6050315079312265, velocity correction=2.9106720018006894e-22
+   Cohesive traction profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa
+
+BP3 adaptive comparison clock: time=36071240.683230504 selected=33044393.155837391
+   Postprocessing:
+Work replay accepted observation: step=5, frozen weak stress discrepancy=2.0991014996009188e-07 Pa; inert H and geometry unchanged.
+Mature history verified: C=0, W_coh=0; H is inert profile metadata.
+     Number of advected particles: 385920
+     BP3 accepted state            5
+
+*** Snapshot /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/work-replay-50-local4/restart/03/ created!
+
+*** Timestep 6:  t=69115633.839067891 seconds, dt=33044393.155837391 seconds
+   Mature frictional fault: retaining prescribed phase profile.
+   Advecting particles...  done.
+   Begin fault surface-property preparation.
+   Begin fault I_h preparation.
+   Begin fault surface material projection.
+Begin fault cache construction.
+End fault cache construction: 0.65676747899999999 s.
+   End fault surface material projection: 0.66437573500000002 s.
+   End fault I_h preparation: value cache hit, integration requests=0, 0.664668013 s.
+   End fault surface-property preparation: 0.66875784599999999 s.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=24, estimated=0.1845993184021944, fresh=0.18459936705243479, target=0.30356585390609148, raw=0.18459936705243479, rhs null=0, residual null=0, compatibility bound=7.7011362474086931e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 0: 0.99965864987161179, 0.12693386166252016
+      Fault nonlinear residual: bulk=302014425.1756261, bulk scale=302014425.1756261, surface=288857.7601180487, surface scale=2275655.6551161786, velocity=302014425.1756261, scaled continuity=1.8923881859266423e-06, bulk precision=0.0010312786551895264, bulk target=3.0211755304114503, velocity correction=4.0631836756305076e-11
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=24, estimated=0.0017349393183642169, fresh=0.0017349382026782397, target=0.0030657396147719907, raw=0.0017349382026782397, rhs null=0, residual null=0, compatibility bound=7.7011362474086931e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 1: 6.1101879410142784e-10, 0.26548711908041228
+      Fault nonlinear residual: bulk=0.18459950293607461, bulk scale=302014425.1756261, surface=604157.26389584248, surface scale=2275655.6551161786, velocity=0.10521005719112592, scaled continuity=0.15168328962046487, bulk precision=0.0010312786551895264, bulk target=3.0211755304114503, velocity correction=2.5671450694414416e-12
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=24, estimated=1.1547165987275611e-05, fresh=1.1547159626919057e-05, target=2.2735501743530768e-05, raw=1.1547159626919057e-05, rhs null=0, residual null=0, compatibility bound=7.7011362474086931e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 2: 5.745467896043052e-12, 0.12842801724768879
+      Fault nonlinear residual: bulk=0.0017358067018289826, bulk scale=302014425.1756261, surface=292257.94372506114, surface scale=2275655.6551161786, velocity=0.0009715536052148639, scaled continuity=0.0014384396053739659, bulk precision=0.0010312786551895264, bulk target=3.0211755304114503, velocity correction=1.7084477964819063e-14
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=21, estimated=7.7313692412526269e-07, fresh=7.7313699042358888e-07, target=1.0834448895837469e-06, raw=7.7313699042358888e-07, rhs null=0, residual null=0, compatibility bound=7.7011362474086931e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 3: 1.8645519856355818e-13, 0.046620949983568694
+      Fault nonlinear residual: bulk=5.6331388341823014e-05, bulk scale=302014425.1756261, surface=106093.22847699661, surface scale=2275655.6551161786, velocity=5.5525279560997095e-05, scaled continuity=9.4957170445623502e-06, bulk precision=0.0010312786551895264, bulk target=3.0211755304114503, velocity correction=6.2280297578023061e-16
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=20, estimated=3.4091222299709644e-07, fresh=3.4091221440343458e-07, target=3.8463643816374309e-07, raw=3.4091221440343458e-07, rhs null=0, residual null=0, compatibility bound=7.7011362474086931e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 4: 1.8247460733068306e-13, 0.010304887209113392
+      Fault nonlinear residual: bulk=5.5128781858889749e-05, bulk scale=302014425.1756261, surface=23450.374852753266, surface scale=2275655.6551161786, velocity=5.5110964820744348e-05, scaled continuity=1.4014798506330695e-06, bulk precision=0.0010312786551895264, bulk target=3.0211755304114503, velocity correction=2.6446495325193315e-16
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=20, estimated=2.3685395384357479e-08, fresh=2.3685398972372424e-08, target=4.1756041135284724e-08, raw=2.3685398972372424e-08, rhs null=0, residual null=0, compatibility bound=7.7011362474086931e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 5: 1.8263296198327848e-13, 0.0008409255095258002
+      Fault nonlinear residual: bulk=5.5176623579044556e-05, bulk scale=302014425.1756261, surface=1913.6568912838411, surface scale=2275655.6551161786, velocity=5.5160406331468764e-05, scaled continuity=1.337670710913579e-06, bulk precision=0.0010312786551895264, bulk target=3.0211755304114503, velocity correction=2.8345187850495311e-17
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=20, estimated=2.2488742828318399e-10, fresh=2.2488742401121315e-10, target=4.8804116337413258e-10, raw=2.2488742401121315e-10, rhs null=0, residual null=0, compatibility bound=7.7011362474086931e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 6: 1.8224714331182573e-13, 8.2753432519517877e-06
+      Fault nonlinear residual: bulk=5.5060060986107669e-05, bulk scale=302014425.1756261, surface=18.831831669331592, surface scale=2275655.6551161786, velocity=5.5047752888327959e-05, scaled continuity=1.1641381960388931e-06, bulk precision=0.0010312786551895264, bulk target=3.0211755304114503, velocity correction=3.0154134754592133e-19
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=21, estimated=5.1589943844962088e-14, fresh=5.1589944956597878e-14, target=9.3360193860566875e-14, raw=5.1589944956597878e-14, rhs null=0, residual null=0, compatibility bound=7.7011362474086931e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 7: 1.8237593303866569e-13, 1.0741585975524078e-09
+      Fault nonlinear residual: bulk=5.5098970623237397e-05, bulk scale=302014425.1756261, surface=0.0024444150870118002, surface scale=2275655.6551161786, velocity=5.5085255635209404e-05, scaled continuity=1.2292987204125309e-06, bulk precision=0.0010312786551895264, bulk target=3.0211755304114503, velocity correction=4.297598217619715e-23
+   Cohesive traction profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa
+
+BP3 adaptive comparison clock: time=69115633.839067891 selected=63114790.927649416
+   Postprocessing:
+Work replay accepted observation: step=6, frozen weak stress discrepancy=4.3890623302405584e-07 Pa; inert H and geometry unchanged.
+Mature history verified: C=0, W_coh=0; H is inert profile metadata.
+     Number of advected particles: 385920
+     BP3 accepted state            6
+
+*** Snapshot /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/work-replay-50-local4/restart/01/ created!
+
+*** Timestep 7:  t=132230424.76671731 seconds, dt=63114790.927649416 seconds
+   Mature frictional fault: retaining prescribed phase profile.
+   Advecting particles...  done.
+   Begin fault surface-property preparation.
+   Begin fault I_h preparation.
+   Begin fault surface material projection.
+Begin fault cache construction.
+End fault cache construction: 0.64742647499999995 s.
+   End fault surface material projection: 0.65527397600000004 s.
+   End fault I_h preparation: value cache hit, integration requests=0, 0.65554951900000002 s.
+   End fault surface-property preparation: 0.65962706800000004 s.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=27, estimated=0.27773176707894009, fresh=0.2777319787546253, target=0.56593818399983054, raw=0.2777319787546253, rhs null=0, residual null=0, compatibility bound=0.0001459850415639576, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 0: 0.99964891579280901, 0.079238111421429128
+      Fault nonlinear residual: bulk=562928346.11469448, bulk scale=562928346.11469448, surface=266803.5581518386, surface scale=3367111.5245647356, velocity=562928346.11469448, scaled continuity=3.3073703527881852e-06, bulk precision=0.0019770466308589381, bulk target=5.631260507777804, velocity correction=4.8251838545151175e-11
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=27, estimated=0.0033786757175398585, fresh=0.0033786779404499853, target=0.0060762510913291825, raw=0.0033786779404499853, rhs null=0, residual null=0, compatibility bound=0.0001459850415639576, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 1: 4.9319669293934759e-10, 0.12905272559824596
+      Fault nonlinear residual: bulk=0.27773190595159641, bulk scale=562928346.11469448, surface=434534.91963834444, surface scale=3367111.5245647356, velocity=0.1483259684869031, scaled continuity=0.23480719464260164, bulk precision=0.0019770466308589381, bulk target=5.631260507777804, velocity correction=3.0249952560618286e-12
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=27, estimated=2.1438400656223402e-05, fresh=2.1438406104333186e-05, target=3.886620224916724e-05, raw=2.1438406104333186e-05, rhs null=0, residual null=0, compatibility bound=0.0001459850415639576, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 2: 6.0035028715623937e-12, 0.055436153402240042
+      Fault nonlinear residual: bulk=0.0033807288628959951, bulk scale=562928346.11469448, surface=186659.71099822101, surface scale=3367111.5245647356, velocity=0.0021736790351757017, scaled continuity=0.0025892947102359124, bulk precision=0.0019770466308589381, bulk target=5.631260507777804, velocity correction=1.9038865165970083e-14
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=23, estimated=2.7986628280214194e-07, fresh=2.7986626664224297e-07, target=5.3247562746582077e-07, raw=2.7986626664224297e-07, rhs null=0, residual null=0, compatibility bound=0.0001459850415639576, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 3: 2.0483666968927162e-13, 0.01643931690104598
+      Fault nonlinear residual: bulk=0.00011534886485659221, bulk scale=562928346.11469448, surface=55353.013393483758, surface scale=3367111.5245647356, velocity=0.00011399238719292711, scaled continuity=1.7637921809616954e-05, bulk precision=0.0019770466308589381, bulk target=5.631260507777804, velocity correction=1.7860051544184069e-16
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=21, estimated=1.0561131223932504e-07, fresh=1.056113154816525e-07, target=1.1300441963292969e-07, raw=1.056113154816525e-07, rhs null=0, residual null=0, compatibility bound=0.0001459850415639576, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 4: 2.0186948447137006e-13, 0.0024229013684342374
+      Fault nonlinear residual: bulk=0.00011367796556290909, bulk scale=562928346.11469448, surface=8158.1791205385898, surface scale=3367111.5245647356, velocity=0.00011365401613133652, scaled continuity=2.3333391823395592e-06, bulk precision=0.0019770466308589381, bulk target=5.631260507777804, velocity correction=4.1235565431712749e-17
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=21, estimated=4.0398236314562461e-09, fresh=4.0398239525766099e-09, target=4.6506333819615123e-09, raw=4.0398239525766099e-09, rhs null=0, residual null=0, compatibility bound=0.0001459850415639576, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 5: 2.0187904084169514e-13, 8.2120334424576986e-05
+      Fault nonlinear residual: bulk=0.00011368334700399002, bulk scale=562928346.11469448, surface=276.50832444210334, surface scale=3367111.5245647356, velocity=0.00011365507567715981, scaled continuity=2.5351841843710581e-06, bulk precision=0.0019770466308589381, bulk target=5.631260507777804, velocity correction=1.6102982752635772e-18
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=21, estimated=7.0654573330105521e-12, fresh=7.0654565122832876e-12, target=8.6235939393035743e-12, raw=7.0654565122832876e-12, rhs null=0, residual null=0, compatibility bound=0.0001459850415639576, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 6: 2.0203287139263659e-13, 1.2979000477476943e-07
+      Fault nonlinear residual: bulk=0.00011376997299463065, bulk scale=562928346.11469448, surface=0.43701742085043821, surface scale=3367111.5245647356, velocity=0.0001137477075160843, scaled continuity=2.2507309999926923e-06, bulk precision=0.0019770466308589381, bulk target=5.631260507777804, velocity correction=2.7350167952272796e-21
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=23, estimated=6.4566064739955566e-14, fresh=6.4566065584317393e-14, target=1.1352509107884115e-13, raw=6.4566065584317393e-14, rhs null=0, residual null=0, compatibility bound=0.0001459850415639576, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 7: 2.0158572401256779e-13, 4.2600870228550334e-13
+      Fault nonlinear residual: bulk=0.00011351817265637687, bulk scale=562928346.11469448, surface=1.4344188110303857e-06, surface scale=3367111.5245647356, velocity=0.00011349186755838135, scaled continuity=2.4436696490763468e-06, bulk precision=0.0019770466308589381, bulk target=5.631260507777804, velocity correction=5.3067160624891818e-25
+   Cohesive traction profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa
+
+BP3 adaptive comparison clock: time=132230424.76671731 selected=120549250.67181039
+   Postprocessing:
+Work replay accepted observation: step=7, frozen weak stress discrepancy=6.7738221988310506e-07 Pa; inert H and geometry unchanged.
+Mature history verified: C=0, W_coh=0; H is inert profile metadata.
+     Number of advected particles: 385920
+     BP3 accepted state            7
+
+*** Snapshot /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/work-replay-50-local4/restart/02/ created!
+
+*** Timestep 8:  t=252779675.4385277 seconds, dt=120549250.67181039 seconds
+   Mature frictional fault: retaining prescribed phase profile.
+   Advecting particles...  done.
+   Begin fault surface-property preparation.
+   Begin fault I_h preparation.
+   Begin fault surface material projection.
+Begin fault cache construction.
+End fault cache construction: 0.65192729199999999 s.
+   End fault surface material projection: 0.65980880900000005 s.
+   End fault I_h preparation: value cache hit, integration requests=0, 0.66009531200000005 s.
+   End fault surface-property preparation: 0.66420106700000003 s.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=30, estimated=0.67690953376828444, fresh=0.67691003357817747, target=1.0490306639855747, raw=0.67691003357817747, rhs null=0, residual null=0, compatibility bound=0.00027586877852809065, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 0: 0.99963679260719951, 0.046922990723488343
+      Fault nonlinear residual: bulk=1044470250.9014956, bulk scale=1044470250.9014956, surface=249064.45215200356, surface scale=5307940.6984032849, velocity=1044470250.9014956, scaled continuity=6.4251493595437813e-06, bulk precision=0.0037949715285914652, bulk target=10.448497480543548, velocity correction=5.0789978171906155e-11
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=31, estimated=0.0052835902281868994, fresh=0.0052835869858004298, target=0.0092439391837804887, raw=0.0052835869858004298, rhs null=0, residual null=0, compatibility bound=0.00027586877852809065, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 1: 6.478540789384308e-10, 0.061178161777010978
+      Fault nonlinear residual: bulk=0.67691017115480545, bulk scale=1044470250.9014956, surface=324730.05474969681, surface scale=5307940.6984032849, velocity=0.59318789673890604, scaled continuity=0.32609124332815342, bulk precision=0.0037949715285914652, bulk target=10.448497480543548, velocity correction=3.136500248282632e-12
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=31, estimated=3.3228724912880402e-05, fresh=3.3228780295924765e-05, target=5.3332628862275754e-05, raw=3.3228780295924765e-05, rhs null=0, residual null=0, compatibility bound=0.00027586877852809065, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 2: 5.0614080851510805e-12, 0.024268326550894958
+      Fault nonlinear residual: bulk=0.0052884109625703805, bulk scale=1044470250.9014956, surface=128814.83818163637, surface scale=5307940.6984032849, velocity=0.0047229363937804549, scaled continuity=0.0023793197198650404, bulk precision=0.0037949715285914652, bulk target=10.448497480543548, velocity correction=1.7233329523081931e-14
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=26, estimated=1.221552463547048e-07, fresh=1.2215520756087484e-07, target=2.7274617794354738e-07, raw=1.2215520756087484e-07, rhs null=0, residual null=0, compatibility bound=0.00027586877852809065, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 3: 2.1579097637562642e-13, 0.0062792942341501259
+      Fault nonlinear residual: bulk=0.00022546914729847645, bulk scale=1044470250.9014956, surface=33330.121422694538, surface scale=5307940.6984032849, velocity=0.00022488206258143142, scaled continuity=1.626020641391851e-05, bulk precision=0.0037949715285914652, bulk target=10.448497480543548, velocity correction=5.1062766089397934e-17
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=24, estimated=2.6281162611912454e-08, fresh=2.6281161639010011e-08, target=4.1461819012875135e-08, raw=2.6281161639010011e-08, rhs null=0, residual null=0, compatibility bound=0.00027586877852809065, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 4: 2.1323424889601513e-13, 0.00069459932181797901
+      Fault nonlinear residual: bulk=0.00022279775123556096, bulk scale=1044470250.9014956, surface=3686.8920093609713, surface scale=5307940.6984032849, velocity=0.00022275148709948307, scaled continuity=4.5401487411455063e-06, bulk precision=0.0037949715285914652, bulk target=10.448497480543548, velocity correction=7.7903380069823196e-18
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=24, estimated=4.4076688825823155e-10, fresh=4.40766950335202e-10, target=9.0664939090881552e-10, raw=4.40766950335202e-10, rhs null=0, residual null=0, compatibility bound=0.00027586877852809065, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 5: 2.1368835804823626e-13, 1.26978207907056e-05
+      Fault nonlinear residual: bulk=0.0002232722270688484, bulk scale=1044470250.9014956, surface=67.399279756017634, surface scale=5307940.6984032849, velocity=0.00022322385907891951, scaled continuity=4.6471623812904814e-06, bulk precision=0.0037949715285914652, bulk target=10.448497480543548, velocity correction=1.5445028549270834e-19
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=25, estimated=3.9006718031726042e-13, fresh=3.9006715963002351e-13, target=5.3181059139691488e-13, raw=3.9006715963002351e-13, rhs null=0, residual null=0, compatibility bound=0.00027586877852809065, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 6: 2.140732270524364e-13, 5.701814269815224e-09
+      Fault nonlinear residual: bulk=0.00022367435735092084, bulk scale=1044470250.9014956, surface=0.030264892017488835, surface scale=5307940.6984032849, velocity=0.00022363320695350196, scaled continuity=4.2903244678693431e-06, bulk precision=0.0037949715285914652, bulk target=10.448497480543548, velocity correction=7.6411273358590352e-23
+   Cohesive traction profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa
+
+BP3 adaptive comparison clock: time=252779675.4385277 selected=230249068.78315786
+   Postprocessing:
+Work replay accepted observation: step=8, frozen weak stress discrepancy=1.3548844584655637e-06 Pa; inert H and geometry unchanged.
+Mature history verified: C=0, W_coh=0; H is inert profile metadata.
+     Number of advected particles: 385920
+     BP3 accepted state            8
+
+*** Snapshot /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/work-replay-50-local4/restart/03/ created!
+
+*** Timestep 9:  t=483028744.22168553 seconds, dt=230249068.78315786 seconds
+   Mature frictional fault: retaining prescribed phase profile.
+   Advecting particles...  done.
+   Begin fault surface-property preparation.
+   Begin fault I_h preparation.
+   Begin fault surface material projection.
+Begin fault cache construction.
+End fault cache construction: 0.65448230699999999 s.
+   End fault surface material projection: 0.66227291899999996 s.
+   End fault I_h preparation: value cache hit, integration requests=0, 0.66254639599999998 s.
+   End fault surface-property preparation: 0.66657495499999997 s.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=35, estimated=1.2504409208714904, fresh=1.2504430258783079, target=1.9453560610120757, raw=1.2504430258783079, rhs null=0, residual null=0, compatibility bound=0.00052006476265368, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 0: 0.99962423089630925, 0.030452757735164305
+      Fault nonlinear residual: bulk=1940197092.7090588, bulk scale=1940197092.7090588, surface=264048.27492800658, surface scale=8670750.8470770009, velocity=1940197092.7090588, scaled continuity=1.0931207605314385e-05, bulk precision=0.0072934018601862258, bulk target=19.409264328950776, velocity correction=4.7929723694341498e-11
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=36, estimated=0.012530268177743041, fresh=0.01253026988192231, target=0.014383337282641401, raw=0.01253026988192231, rhs null=0, residual null=0, compatibility bound=0.00052006476265368, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 1: 6.4425017812003746e-10, 0.027572888252410693
+      Fault nonlinear residual: bulk=1.2504422001105426, bulk scale=1940197092.7090588, surface=239077.6441709495, surface scale=8670750.8470770009, velocity=0.98151875958992629, scaled continuity=0.77474293826426488, bulk precision=0.0072934018601862258, bulk target=19.409264328950776, velocity correction=2.7161733211132867e-12
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=35, estimated=0.00032573986522496906, fresh=0.00032573958775856981, target=0.00046918930616928086, raw=0.00032573958775856981, rhs null=0, residual null=0, compatibility bound=0.00052006476265368, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 2: 6.4594260104452751e-12, 0.010094591768486622
+      Fault nonlinear residual: bulk=0.012537270685003229, bulk scale=1940197092.7090588, surface=87527.69012750189, surface scale=8670750.8470770009, velocity=0.011300587047318978, scaled continuity=0.0054295385268923078, bulk precision=0.0072934018601862258, bulk target=19.409264328950776, velocity correction=4.8416213189394129e-14
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=34, estimated=9.9639991334394631e-07, fresh=9.9639971080682441e-07, target=1.6991298444031735e-06, raw=9.9639971080682441e-07, rhs null=0, residual null=0, compatibility bound=0.00052006476265368, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 3: 2.7789384443328924e-13, 0.002249184208024487
+      Fault nonlinear residual: bulk=0.00053937150819940364, bulk scale=1940197092.7090588, surface=19502.115876960532, surface scale=8670750.8470770009, velocity=0.00051324710085116725, scaled continuity=0.00016582833691854693, bulk precision=0.0072934018601862258, bulk target=19.409264328950776, velocity correction=1.3973318187119919e-16
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=28, estimated=7.5646886359947696e-09, fresh=7.5646906191402952e-09, target=1.4494659464763928e-08, raw=7.5646906191402952e-09, rhs null=0, residual null=0, compatibility bound=0.00052006476265368, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 4: 2.2102471182524637e-13, 0.00017991328740894319
+      Fault nonlinear residual: bulk=0.00042899270550463789, bulk scale=1940197092.7090588, surface=1559.983289201502, surface scale=8670750.8470770009, velocity=0.00042889452179513269, scaled continuity=9.1777203222494716e-06, bulk precision=0.0072934018601862258, bulk target=19.409264328950776, velocity correction=1.3560451265275913e-18
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=27, estimated=1.0769453820687384e-10, fresh=1.0769454714581863e-10, target=1.5934184712335933e-10, raw=1.0769454714581863e-10, rhs null=0, residual null=0, compatibility bound=0.00052006476265368, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 5: 2.2054013810169073e-13, 1.6573208928232192e-06
+      Fault nonlinear residual: bulk=0.00042805218355590236, bulk scale=1940197092.7090588, surface=14.370216535325339, surface scale=8670750.8470770009, velocity=0.00042796925808507089, scaled continuity=8.4253178628401832e-06, bulk precision=0.0072934018601862258, bulk target=19.409264328950776, velocity correction=1.3662022659552413e-20
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=30, estimated=3.8663397342508781e-13, fresh=3.8663398106174019e-13, target=4.2824870111029138e-13, raw=3.8663398106174019e-13, rhs null=0, residual null=0, compatibility bound=0.00052006476265368, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 6: 2.2035970944795395e-13, 1.8645870209277894e-10
+      Fault nonlinear residual: bulk=0.00042770198481261297, bulk scale=1940197092.7090588, surface=0.0016167369491158412, surface scale=8670750.8470770009, velocity=0.00042760849967516664, scaled continuity=8.9419694811386447e-06, bulk precision=0.0072934018601862258, bulk target=19.409264328950776, velocity correction=1.7427060516584394e-24
+   Cohesive traction profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa
+
+BP3 adaptive comparison clock: time=483028744.22168553 selected=439775721.37583148
+   Postprocessing:
+Work replay accepted observation: step=9, frozen weak stress discrepancy=2.4137704454989519e-06 Pa; inert H and geometry unchanged.
+Mature history verified: C=0, W_coh=0; H is inert profile metadata.
+     Number of advected particles: 385920
+     BP3 accepted state            9
+
+*** Snapshot /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/work-replay-50-local4/restart/01/ created!
+
+*** Timestep 10:  t=922804465.59751701 seconds, dt=439775721.37583148 seconds
+   Mature frictional fault: retaining prescribed phase profile.
+   Advecting particles...  done.
+   Begin fault surface-property preparation.
+   Begin fault I_h preparation.
+   Begin fault surface material projection.
+Begin fault cache construction.
+End fault cache construction: 0.64146170300000005 s.
+   End fault surface material projection: 0.64936226200000002 s.
+   End fault I_h preparation: value cache hit, integration requests=0, 0.64965611199999995 s.
+   End fault surface-property preparation: 0.65375833000000005 s.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=39, estimated=2.8297420597647087, fresh=2.8297366073423951, target=3.6290340763651874, raw=2.8297366073423951, rhs null=0, residual null=0, compatibility bound=0.00098021196493273521, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 0: 0.99961325850545946, 0.026671660687578855
+      Fault nonlinear residual: bulk=3624010148.2136393, bulk scale=3624010148.2136393, surface=385489.47509953554, surface scale=14453148.591495849, velocity=3624010148.2136393, scaled continuity=2.1647877024135425e-05, bulk precision=0.014020973501748812, bulk target=36.254122455638139, velocity correction=3.6870081699556162e-11
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=41, estimated=0.03805423554769953, fresh=0.038054228513408193, target=0.049358614811194336, raw=0.038054228513408193, rhs null=0, residual null=0, compatibility bound=0.00098021196493273521, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 1: 7.8052821076699772e-10, 0.013257183100975246
+      Fault nonlinear residual: bulk=2.8297365333226874, bulk scale=3624010148.2136393, surface=191608.03726306296, surface scale=14453148.591495849, velocity=2.6138020944623763, scaled continuity=1.0841805472361115, bulk precision=0.014020973501748812, bulk target=36.254122455638139, velocity correction=3.5227521468673262e-12
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=39, estimated=0.0073889318209352595, fresh=0.0073889292749924323, target=0.0076532503557638683, raw=0.0073889292749924323, rhs null=0, residual null=0, compatibility bound=0.00098021196493273521, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 2: 1.049883497440837e-11, 0.0040654750413826176
+      Fault nonlinear residual: bulk=0.03806260488037376, bulk scale=3624010148.2136393, surface=58758.914868120708, surface scale=14453148.591495849, velocity=0.034581900181617845, scaled continuity=0.015901385792064539, bulk precision=0.014020973501748812, bulk target=36.254122455638139, velocity correction=4.209249419357513e-13
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=38, estimated=0.00039968074515417542, fresh=0.00039968071312543709, target=0.0004011088650967983, raw=0.00039968071312543709, rhs null=0, residual null=0, compatibility bound=0.00098021196493273521, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 3: 2.0506728323053144e-12, 0.00069023886289935898
+      Fault nonlinear residual: bulk=0.0074345343978847169, bulk scale=3624010148.2136393, surface=9976.1248491095666, surface scale=14453148.591495849, velocity=0.0067088012459586436, scaled continuity=0.0032037926829860297, bulk precision=0.014020973501748812, bulk target=36.254122455638139, velocity correction=1.7605406751759316e-14
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=38, estimated=1.6884254605288088e-06, fresh=1.6884258046525095e-06, target=2.2356055189788052e-06, raw=1.6884258046525095e-06, rhs null=0, residual null=0, compatibility bound=0.00098021196493273521, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 4: 2.5171801648199337e-13, 3.4127517665598322e-05
+      Fault nonlinear residual: bulk=0.00091258157938285277, bulk scale=3624010148.2136393, surface=493.2500838797921, surface scale=14453148.591495849, velocity=0.00089727430693698992, scaled continuity=0.00016644505742029851, bulk precision=0.014020973501748812, bulk target=36.254122455638139, velocity correction=8.1198016127672787e-17
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=37, estimated=1.2089216634811757e-10, fresh=1.2089213734208746e-10, target=1.3308147633657296e-10, raw=1.2089213734208746e-10, rhs null=0, residual null=0, compatibility bound=0.00098021196493273521, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 5: 2.2713357695909777e-13, 1.1853995018139505e-07
+      Fault nonlinear residual: bulk=0.00082345285128622404, bulk scale=3624010148.2136393, surface=1.713275514000218, surface scale=14453148.591495849, velocity=0.00082328700554674342, scaled continuity=1.6525882405748336e-05, bulk precision=0.014020973501748812, bulk target=36.254122455638139, velocity correction=4.1582590480333808e-21
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=35, estimated=5.3457937006514293e-13, fresh=5.345793734327917e-13, target=8.2208671403756963e-13, raw=5.345793734327917e-13, rhs null=0, residual null=0, compatibility bound=0.00098021196493273521, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 6: 2.2675425622545307e-13, 1.8777296986275766e-12
+      Fault nonlinear residual: bulk=0.00082207765725347229, bulk scale=3624010148.2136393, surface=2.7139106348929082e-05, surface scale=14453148.591495849, velocity=0.00082191202908299984, scaled continuity=1.6501242499384492e-05, bulk precision=0.014020973501748812, bulk target=36.254122455638139, velocity correction=5.8691060850589846e-25
+   Cohesive traction profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa
+
+BP3 adaptive comparison clock: time=922804465.59751701 selected=2.384185791015625e-07
+   Postprocessing:
+Work replay accepted observation: step=10, frozen weak stress discrepancy=4.522642488117445e-06 Pa; inert H and geometry unchanged.
+Mature history verified: C=0, W_coh=0; H is inert profile metadata.
+     Number of advected particles: 385920
+     BP3 accepted state            10
+
+*** Snapshot /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/work-replay-50-local4/restart/02/ created!
+
+*** Timestep 11:  t=922804465.59751725 seconds, dt=2.384185791015625e-07 seconds
+   Mature frictional fault: retaining prescribed phase profile.
+   Advecting particles...  done.
+   Begin fault surface-property preparation.
+   Begin fault I_h preparation.
+   Begin fault surface material projection.
+Begin fault cache construction.
+End fault cache construction: 0.64328187100000001 s.
+   End fault surface material projection: 0.65103970899999997 s.
+   End fault I_h preparation: value cache hit, integration requests=0, 0.65132421299999999 s.
+   End fault surface-property preparation: 0.65541926299999997 s.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=18, estimated=0.89281460944599189, fresh=0.89281464462491833, target=1.379232099580546, raw=0.89281464462491833, rhs null=0, residual null=0, compatibility bound=3.0625104665128377e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 0: 0.99997985708978043, 0.3192746792301161
+      Fault nonlinear residual: bulk=1379232099.5805459, bulk scale=1379232099.5805459, surface=321850.58993011585, surface scale=1008068.0081057828, velocity=1379232099.5805459, scaled continuity=1.1777519904459189e-20, bulk precision=0.00027782307970338795, bulk target=13.792598818885162, velocity correction=25482.598439259426
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=19, estimated=2.2357516246915046e-10, fresh=2.235751287200289e-10, target=8.9281465847108549e-10, raw=2.235751287200289e-10, rhs null=0, residual null=0, compatibility bound=3.0625104665128377e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 1: 6.4731430979291304e-10, 0.83340162553352659
+      Fault nonlinear residual: bulk=0.89281465846971964, bulk scale=1379232099.5805459, surface=840125.51660370361, surface scale=1008068.0081057828, velocity=0.040806657632164151, scaled continuity=0.89188162391165648, bulk precision=0.00027782307970338795, bulk target=13.792598818885162, velocity correction=1.2896444960425449e-05
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=18, estimated=6.5923246538370618e-15, fresh=6.5923253533816373e-15, target=9.0807610435840028e-15, raw=6.5923253533816373e-15, rhs null=0, residual null=0, compatibility bound=3.0625104665128377e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 2: 6.5838029795585523e-15, 0.42894204913943723
+      Fault nonlinear residual: bulk=9.0807753199631903e-06, bulk scale=1379232099.5805459, surface=432402.75706880528, surface scale=1008068.0081057828, velocity=9.0800207995105187e-06, scaled continuity=1.1705849866168743e-07, bulk precision=0.00027782307970338795, bulk target=13.792598818885162, velocity correction=2.5774888448522711e-10
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=18, estimated=8.0417499376176608e-15, fresh=8.0417498344330908e-15, target=8.1432413636532629e-15, raw=8.0417498344330908e-15, rhs null=0, residual null=0, compatibility bound=3.0625104665128377e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 3: 5.9040656725468513e-15, 0.16062512945414398
+      Fault nonlinear residual: bulk=8.143240922179013e-06, bulk scale=1379232099.5805459, surface=161921.05430057243, surface scale=1008068.0081057828, velocity=8.1426236965083368e-06, scaled continuity=1.0025993073906311e-07, bulk precision=0.00027782307970338795, bulk target=13.792598818885162, velocity correction=2.2757695182949238e-10
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=18, estimated=7.6753524392816324e-15, fresh=7.6753531099276447e-15, target=8.0665575382729377e-15, raw=7.6753531099276447e-15, rhs null=0, residual null=0, compatibility bound=3.0625104665128377e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 4: 5.8484681860213426e-15, 0.031851297968953592
+      Fault nonlinear residual: bulk=8.0665575394805415e-06, bulk scale=1379232099.5805459, surface=32108.27449914681, surface scale=1008068.0081057828, velocity=8.0656302616799005e-06, scaled continuity=1.2230707102942828e-07, bulk precision=0.00027782307970338795, bulk target=13.792598818885162, velocity correction=3.1379531561595498e-10
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=18, estimated=6.1430771236366245e-15, fresh=6.1430770930434334e-15, target=8.1725165051286431e-15, raw=6.1430770930434334e-15, rhs null=0, residual null=0, compatibility bound=3.0625104665128377e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 5: 5.9252912466968464e-15, 0.0016612043450344866
+      Fault nonlinear residual: bulk=8.1725165050741511e-06, bulk scale=1379232099.5805459, surface=1674.6069551555863, surface scale=1008068.0081057828, velocity=8.1719881431894319e-06, scaled continuity=9.2929076616403699e-08, bulk precision=0.00027782307970338795, bulk target=13.792598818885162, velocity correction=1.2134001560011292e-10
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=19, estimated=2.9093036361480095e-15, fresh=2.909303804141793e-15, target=8.0858954302460954e-15, raw=2.909303804141793e-15, rhs null=0, residual null=0, compatibility bound=3.0625104665128377e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 6: 5.8624886697745197e-15, 6.2562390633333264e-06
+      Fault nonlinear residual: bulk=8.0858954302459687e-06, bulk scale=1379232099.5805459, surface=6.3067144508080144, surface scale=1008068.0081057828, velocity=8.0851658052733143e-06, scaled continuity=1.0862232786940593e-07, bulk precision=0.00027782307970338795, bulk target=13.792598818885162, velocity correction=2.1493865086050466e-10
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=18, estimated=7.6158819417220012e-15, fresh=7.6158822235398396e-15, target=8.0622232989946817e-15, raw=7.6158822235398396e-15, rhs null=0, residual null=0, compatibility bound=3.0625104665128377e-05, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 7: 5.8453257467009709e-15, 1.5681307423664904e-10
+      Fault nonlinear residual: bulk=8.0622232989946836e-06, bulk scale=1379232099.5805459, surface=0.00015807824339068304, surface scale=1008068.0081057828, velocity=8.0613090820848769e-06, scaled continuity=1.2141007350540595e-07, bulk precision=0.00027782307970338795, bulk target=13.792598818885162, velocity correction=1.0584864780256239e-10
+   Cohesive traction profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa
+
+BP3 adaptive comparison clock: time=922804465.59751725 selected=4.5537948608398441e-07
+   Postprocessing:
+Work replay accepted observation: step=11, frozen weak stress discrepancy=2.4794784351551881e-07 Pa; inert H and geometry unchanged.
+Mature history verified: C=0, W_coh=0; H is inert profile metadata.
+     Number of advected particles: 385920
+     BP3 accepted state            11
+
+Termination requested by criterion: end time
+*** Snapshot /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/work-replay-50-local4/restart/03/ created!
+
+
+
++------------------------------------------------+------------+------------+
+| Total wallclock time elapsed since start       |       966s |            |
+|                                                |            |            |
+| Section                            | no. calls |  wall time | % of total |
++------------------------------------+-----------+------------+------------+
+| Assemble Stokes system Picard      |        93 |      66.4s |       6.9% |
+| Assemble Stokes system rhs         |       106 |      61.5s |       6.4% |
+| Build Stokes preconditioner        |        93 |      51.7s |       5.4% |
+| Create snapshot                    |        12 |      2.17s |      0.23% |
+| Fault: Cache build                 |        13 |      8.19s |      0.85% |
+| Fault: I_h                         |        13 |      25.1s |       2.6% |
+| Fault: Property preparation        |        13 |      25.2s |       2.6% |
+| Fault: Stokes QP cache build       |         1 |     0.185s |         0% |
+| Fault: Surface-property projection |        13 |      8.29s |      0.86% |
+| Fault: condensed linear solve      |        93 |       547s |        57% |
+| Initialization                     |         1 |     0.139s |         0% |
+| Particles: Advect                  |        24 |     0.567s |         0% |
+| Particles: Copy                    |        12 |     0.127s |         0% |
+| Particles: Exchange ghosts         |        20 |    0.0213s |         0% |
+| Particles: Generate                |         8 |    0.0153s |         0% |
+| Particles: Initialization          |         1 |  5.65e-05s |         0% |
+| Particles: Initialize properties   |         8 |     0.108s |         0% |
+| Particles: Interpolate             |        12 |      1.78s |      0.18% |
+| Particles: Sort                    |        24 |     0.143s |         0% |
+| Particles: Update properties       |        12 |     0.193s |         0% |
+| Postprocessing                     |        12 |      17.9s |       1.9% |
+| Refine mesh structure, part 1      |         7 |     0.281s |         0% |
+| Refine mesh structure, part 2      |         7 |     0.466s |         0% |
+| Setup dof systems                  |         8 |     0.512s |         0% |
+| Setup initial conditions           |         8 |      10.1s |         1% |
+| Setup matrices                     |         1 |     0.864s |         0% |
++------------------------------------+-----------+------------+------------+
+
+-- Total wallclock time elapsed including restarts: 9.7e+02s
+
+-- Approximate resource usage including restarts:             1.1 core hours
+-- Approximate economic cost assuming 0.10 $/core hour:       0.11 $
+-- Approximate energy usage assuming 5 Wh/core hour:          0.0054 kWh
+-- Approximate energy carbon footprint assuming 300 gCO2/kWh: 0.0016 kgCO2
+-- Please use ASPECT responsibly.
+
+-----------------------------------------------------------------------------
+-- For information on how to cite ASPECT, see:
+--   https://aspect.geodynamics.org/citing.html?ver=3.1.0-pre&NewtonSolver=1&particles=1&sha=fb4411915&src=code
+-----------------------------------------------------------------------------

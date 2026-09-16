@@ -124,6 +124,17 @@ namespace aspect
       void initialize_slip_rate(const unsigned int fault_index,
                                 const std::vector<double> &values);
 
+      /**
+       * Configure fixed nodal slip rates outside a mechanical solve. Missing
+       * vertices remain frictional. Boundary configuration is supplied by the
+       * caller again after reconstruction/restart, not a constitutive history.
+       */
+      void set_prescribed_slip_rates(
+        const std::vector<std::map<unsigned int, double>> &values);
+
+      /** Vertices excluded from frictional Newton equations by prescribed V. */
+      std::vector<std::vector<bool>> prescribed_slip_rate_mask() const;
+
       /** Return the active nodal slip rate: trial if active, otherwise current Newton. */
       const std::vector<double> &get_slip_rate(const unsigned int fault_index) const;
 
@@ -154,6 +165,9 @@ namespace aspect
       /** Set V_trial = V_current + step_length * delta_V without accumulation. */
       void set_slip_rate_trial(const std::vector<std::vector<double>> &delta_V,
                                const double step_length);
+
+      /** Publish validated absolute trial values without subtract/add reconstruction. */
+      void set_slip_rate_trial_values(const std::vector<std::vector<double>> &values);
 
       /** Accept the trial as the current Newton iterate, without timestep commit. */
       void accept_slip_rate_trial();
@@ -250,6 +264,28 @@ namespace aspect
       /** Associate a point with the manager-owned fault normal profiles. */
       ReconstructedFaultUtilities::NormalProfileProjection
       project_to_normal_profiles(const Point<dim> &position) const;
+
+      /** Extend only the bulk source of a straight fault through the bottom
+       * of an axis-aligned physical box. Surface/particle admission is unchanged.
+       * Configure before mechanics; endpoint fields are continued constantly.
+       */
+      void enable_bottom_source_continuation(unsigned int fault_index,
+                                             const Point<dim> &box_lower,
+                                             const Point<dim> &box_upper);
+
+      /** Add the opposite through-top wedge to an already configured straight
+       * bottom continuation. This bulk-only experiment does not extend the
+       * surface weak measure and must not be used for a free endpoint yet.
+       */
+      void enable_top_source_continuation();
+
+      /** Bulk-source coordinates, also used when updating particle Maxwell
+       * stress. This must not be used to admit particles to surface quadrature.
+       * Set normal_profiles_checked only for a known inactive cached association.
+       */
+      ReconstructedFaultUtilities::NormalProfileProjection
+      project_to_bulk_source(const Point<dim> &position,
+                             bool normal_profiles_checked = false) const;
       /**
        * @}
        */
@@ -414,6 +450,9 @@ namespace aspect
       std::vector<ParticleProjectionDiagnostics> particle_projection_diagnostics;
 
       // Bulk-cell/QP geometry cache. Constitutive coefficients are not stored here.
+      unsigned int bottom_source_fault = numbers::invalid_unsigned_int;
+      bool top_source_continuation = false;
+      Point<dim> source_box_lower, source_box_upper;
       bool stokes_qp_projection_cache_valid = false;
       std::uint64_t cached_stokes_qp_projection_metadata_version = 0;
       std::vector<std::uint64_t> cached_stokes_qp_fault_geometry_versions;
@@ -428,6 +467,8 @@ namespace aspect
       std::vector<std::vector<double>> current_newton_slip_rates;
       std::vector<std::vector<double>> trial_slip_rates;
       std::vector<bool> slip_rate_initialized;
+      std::vector<std::map<unsigned int, double>> prescribed_slip_rates;
+      bool fit_prescribed_geometry = true;
       bool slip_rate_nonlinear_solve_active = false;
       bool slip_rate_trial_active = false;
   };

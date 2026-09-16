@@ -12,6 +12,30 @@ namespace aspect
         std::pair<std::string,std::string> execute(TableHandler &) override
         {
           auto &handler=this->get_phase_field_handler();
+          // The CPDI map must select Q1 phase DoFs even when preceding
+          // components are DG. Verify by the inverse FE map and support point,
+          // independently of the component-to-system lookup in production.
+          const auto &fe=this->get_dof_handler().get_fe();
+          const auto component=this->introspection().variable("phase_field").first_component_index;
+          const auto &vertex_dofs=internal::PhaseFieldTestAccess<dim>::vertex_dofs(handler);
+          std::vector<types::global_dof_index> local_dofs(fe.dofs_per_cell);
+          for (const auto &cell:this->get_dof_handler().active_cell_iterators())
+            if (!cell->is_artificial())
+              {
+                cell->get_dof_indices(local_dofs);
+                unsigned int phase_vertices=0;
+                for (unsigned int i=0;i<fe.dofs_per_cell;++i)
+                  if (fe.system_to_component_index(i).first==component)
+                    for (const auto v:cell->vertex_indices())
+                      if (fe.unit_support_point(i).distance(GeometryInfo<dim>::unit_cell_vertex(v))<1e-14)
+                        {
+                          AssertThrow(vertex_dofs[cell->vertex_index(v)]==local_dofs[i],
+                                      ExcMessage("CPDI vertex map selected a non-phase DoF."));
+                          ++phase_vertices;
+                        }
+                AssertThrow(phase_vertices==GeometryInfo<dim>::vertices_per_cell,
+                            ExcMessage("Incomplete Q1 phase vertex map."));
+              }
           auto &pm=handler.get_associated_particle_manager();
           const auto Hindex=pm.get_property_manager().get_data_info().get_position_by_field_name("crack_driving_force");
           const auto block=this->introspection().variable("phase_field").block_index;

@@ -1,0 +1,12 @@
+{
+  "boundary_reproducer_passed": true,
+  "cell_backend_qualified": false,
+  "selected_Ih_backend": "corrected remote points",
+  "three_step_convergence_passed": true,
+  "filesystem_restart_equivalence_passed": true,
+  "old_trajectory_numerically_equivalent": false,
+  "server_ready": false,
+  "review_reason": "The approved boundary correction changes Ih, derived initial shear background and the accepted timestep trajectory. Review the corrected coarse baseline rather than silently replacing the requested old-trajectory equivalence condition.",
+  "verified_executable_sha256": "41e923c4eb5c2476315af5533355b8830d07e06009aa82545444481e86b70b48",
+  "verified_plugin_sha256": "cad4ed109f5cc6a75af3bcb44a1c5fc1a4e05419b7ff3fad24cde988bc836242"
+}

@@ -1,0 +1,15 @@
+# Fault-grid-only comparison; no late-history interpolation.
+include /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/junction-matched-qualified-local4/refined/run.prm
+set Output directory = /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/fault-grid-50-local4
+set Resume computation = false
+subsection Fault reconstruction
+  set Structural point spacing = 101
+  set Prescribed faults file = /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/fault-grid-50-local4/fault.txt
+end
+subsection Time stepping
+  set List of model names = convection time step, reconstructed fault time step, BP3 replay cap
+end
+subsection Termination criteria
+  set Termination criteria = end time, end step
+  set End step = 13
+end

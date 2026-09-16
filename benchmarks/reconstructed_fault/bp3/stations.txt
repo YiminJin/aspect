@@ -1,0 +1,13 @@
+# Official down-dip stations, meters from the free surface.
+0
+2500
+5000
+7500
+10000
+12500
+15000
+17500
+20000
+25000
+30000
+35000

@@ -1,0 +1,235 @@
+-----------------------------------------------------------------------------
+--                             This is ASPECT                              --
+-- The Advanced Solver for Planetary Evolution, Convection, and Tectonics. --
+-----------------------------------------------------------------------------
+--     . version 3.1.0-pre (pf-rsf, fb4411915)
+--     . using deal.II 9.6.2 (dealii-9.6, 6890ca740b)
+--     .       with 32 bit indices
+--     .       with vectorization level 2 (AVX, 4 doubles, 256 bits)
+--     . using Trilinos 14.2.0
+--     . using p4est 2.8.7
+--     . using Geodynamic World Builder 1.0.0
+--     . running in OPTIMIZED mode
+--     . running with 4 MPI processes
+-----------------------------------------------------------------------------
+
+Loading shared library </home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/build/libbp3.release.so>
+
+-----------------------------------------------------------------------------
+-- For information on how to cite ASPECT, see:
+--   https://aspect.geodynamics.org/citing.html?ver=3.1.0-pre&NewtonSolver=1&particles=1&sha=fb4411915&src=code
+-----------------------------------------------------------------------------
+*** Resuming from snapshot /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/coupled-substeps-50-local4/substeps2/restart/01/
+
+Number of active cells: 42,880 (on 12 levels)
+Number of degrees of freedom: 1,518,040 (357,166+44,688+178,583+178,583+178,583+178,583+178,583+178,583+44,688)
+
+*** Timestep 10:  t=7.02917e+08 seconds, dt=2.19888e+08 seconds
+   Mature frictional fault: retaining prescribed phase profile.
+   Advecting particles...  done.
+   Begin fault surface-property preparation.
+   Begin fault I_h preparation.
+   Begin fault surface material projection.
+Begin fault cache construction.
+End fault cache construction: 0.560834 s.
+   End fault surface material projection: 0.568352 s.
+Bottom-only I_h completion: added auxiliary profile integrals before projection.
+   End fault I_h preparation: integrated, 18.6338 s.
+   End fault surface-property preparation: 18.6384 s.
+Begin fault Stokes QP cache construction.
+End fault Stokes QP cache construction: 0.181188 s.
+Within-step frozen I_h reconstruction: relative difference=4.4408920985006262e-16
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Within-step input/derivative checks passed; same retained history, no state publication.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=41, estimated=1.6483603016185346, fresh=1.6483626224952403, target=1.6915970198359889, raw=1.6483626224952403, rhs null=0, residual null=0, compatibility bound=0.0004894274359378782, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 0: 0.99958298623936215, 0.050023462698736497
+      Fault nonlinear residual: bulk=1684083581.8240201, bulk scale=1684083581.8240201, surface=357123.09524363064, surface scale=7139111.8482617745, velocity=1684083581.8240201, scaled continuity=1.0827124396327172e-05, bulk precision=0.0070257901280124241, bulk target=16.847861608368213, velocity correction=5.6222493457725638e-11
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=0.66206058023659842.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=41, estimated=0.4226221958835748, fresh=0.42262248977565614, target=0.57300415074438027, raw=0.42262248977565614, rhs null=0, residual null=0, compatibility bound=0.0004894274359378782, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 1: 0.33779849437403769, 0.06707817690958115
+      Fault nonlinear residual: bulk=569118228.4728936, bulk scale=1684083581.8240201, surface=478878.60753499018, surface scale=7139111.8482617745, velocity=569118228.4728936, scaled continuity=0.55738209269537098, bulk precision=0.0070257901280124241, bulk target=16.847861608368213, velocity correction=1.5854183057129979e-11
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=42, estimated=0.0096869849774091354, fresh=0.0096869839194421038, target=0.011708008435256753, raw=0.0096869839194421038, rhs null=0, residual null=0, compatibility bound=0.0004894274359378782, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 2: 2.5084664717696035e-10, 0.036576792051321846
+      Fault nonlinear residual: bulk=0.42262295965605967, bulk scale=1684083581.8240201, surface=261125.80950499891, surface scale=7139111.8482617745, velocity=0.36305882965924535, scaled continuity=0.21632949922492423, bulk precision=0.0070257901280124241, bulk target=16.847861608368213, velocity correction=1.443973020428558e-12
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=39, estimated=0.00074938417230165815, fresh=0.00074938419829629059, target=0.00099267267160761761, raw=0.00074938419829629059, rhs null=0, residual null=0, compatibility bound=0.0004894274359378782, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 3: 5.7545448316952914e-12, 0.018988457973992824
+      Fault nonlinear residual: bulk=0.0096951774943552817, bulk scale=1684083581.8240201, surface=135560.72530235295, surface scale=7139111.8482617745, velocity=0.0083332053852459512, scaled continuity=0.0049552148948719694, bulk precision=0.0070257901280124241, bulk target=16.847861608368213, velocity correction=8.870644929904486e-14
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=40, estimated=2.6460454970930393e-06, fresh=2.6460450740833438e-06, target=3.5023418080376658e-06, raw=2.6460450740833438e-06, rhs null=0, residual null=0, compatibility bound=0.0004894274359378782, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 4: 5.0683458596935145e-13, 0.0089244559724414134
+      Fault nonlinear residual: bulk=0.00085390789627462342, bulk scale=1684083581.8240201, surface=63712.689372147055, surface scale=7139111.8482617745, velocity=0.00077725584838730921, scaled continuity=0.00035359870116825551, bulk precision=0.0070257901280124241, bulk target=16.847861608368213, velocity correction=3.025649612385289e-16
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=31, estimated=3.5603478189184357e-08, fresh=3.5603476784565595e-08, target=3.7443660108310512e-08, raw=3.5603476784565595e-08, rhs null=0, residual null=0, compatibility bound=0.0004894274359378782, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 5: 2.4225947479444003e-13, 0.003629842508360806
+      Fault nonlinear residual: bulk=0.0004081554104652693, bulk scale=1684083581.8240201, surface=25913.851658762869, surface scale=7139111.8482617745, velocity=0.00040806686414859833, scaled continuity=8.5013808291271992e-06, bulk precision=0.0070257901280124241, bulk target=16.847861608368213, velocity correction=2.5789398075776514e-18
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=29, estimated=2.1434862151910391e-08, fresh=2.143486215213459e-08, target=2.5481039039614574e-08, raw=2.143486215213459e-08, rhs null=0, residual null=0, compatibility bound=0.0004894274359378782, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 6: 2.4238974681555992e-13, 0.0011007064087877941
+      Fault nonlinear residual: bulk=0.00040837489096359633, bulk scale=1684083581.8240201, surface=7858.0661644346092, surface scale=7139111.8482617745, velocity=0.00040828979371577772, scaled continuity=8.3364211180139744e-06, bulk precision=0.0070257901280124241, bulk target=16.847861608368213, velocity correction=1.047893662915104e-18
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=29, estimated=3.5740894951029124e-09, fresh=3.5740895860817373e-09, target=5.4426300670548147e-09, raw=3.5740895860817373e-09, rhs null=0, residual null=0, compatibility bound=0.0004894274359378782, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 7: 2.4186314120121449e-13, 0.00016081521134018751
+      Fault nonlinear residual: bulk=0.00040748767311232813, bulk scale=1684083581.8240201, surface=1148.077780659454, surface scale=7139111.8482617745, velocity=0.00040739135582311653, scaled continuity=8.8592854735830248e-06, bulk precision=0.0070257901280124241, bulk target=16.847861608368213, velocity correction=1.7801722477109738e-19
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=29, estimated=1.0010337993789471e-10, fresh=1.0010337765272972e-10, target=1.5007701163442261e-10, raw=1.0010337765272972e-10, rhs null=0, residual null=0, compatibility bound=0.0004894274359378782, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 8: 2.4248493582997577e-13, 4.1760215544654856e-06
+      Fault nonlinear residual: bulk=0.00040853526409774787, bulk scale=1684083581.8240201, surface=29.813084958081102, surface scale=7139111.8482617745, velocity=0.00040844437774713072, scaled continuity=8.6169773224592015e-06, bulk precision=0.0070257901280124241, bulk target=16.847861608368213, velocity correction=4.7968457428500802e-21
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+Fault sparse G: rank0 entries=206862, bytes=3151968
+Fault sparse B: rank0 entries=179152, bytes=3932256
+      Fault linear solve: iterations=36, estimated=3.1393342380961169e-13, fresh=3.1393342993344685e-13, target=4.2189415353081651e-13, raw=3.1393342993344685e-13, rhs null=0, residual null=0, compatibility bound=0.0004894274359378782, pressure quotient=0, right null=0, left null=0
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration 9: 2.4265249238529084e-13, 2.9060651629309979e-09
+      Fault nonlinear residual: bulk=0.00040881756106330016, bulk scale=1684083581.8240201, surface=0.020746724236501472, surface scale=7139111.8482617745, velocity=0.00040874353118620395, scaled continuity=7.7797138236478702e-06, bulk precision=0.0070257901280124241, bulk target=16.847861608368213, velocity correction=3.4834768538838035e-24
+   Cohesive traction profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa
+
+BP3 matched timestep: next=11 requested=219887860.68791574 selected=219887860.68791574
+   Postprocessing:
+
+
+----------------------------------------------------
+Exception on MPI process <0> while running postprocessor <N6aspect11Postprocess9BP3OutputILi2EEE>: 
+
+
+----------------------------------------------------
+Exception on MPI process <2> while running postprocessor <N6aspect11Postprocess9BP3OutputILi2EEE>: 
+
+
+----------------------------------------------------
+Exception on MPI process <3> while running postprocessor <N6aspect11Postprocess9BP3OutputILi2EEE>: 
+
+
+----------------------------------------------------
+Exception on MPI process <1> while running postprocessor <N6aspect11Postprocess9BP3OutputILi2EEE>: 
+
+--------------------------------------------------------
+An error occurred in line <75> of file </home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/work_replay.h> in function
+    std::vector<double> aspect::BP3Benchmark::export_work_replay(const aspect::SimulatorAccess<dim>&, const aspect::ReconstructedFaultSurfaceResidual&) [with int dim = 2]
+The violated condition was: 
+    Utilities::MPI::min(static_cast<unsigned int>(history_ok),comm)
+Additional information: 
+    Work replay changed inert H, geometry or completed I_h.
+
+Stacktrace:
+-----------
+#0  /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/build/libbp3.release.so: std::vector<double, std::allocator<double> > aspect::BP3Benchmark::export_work_replay<2>(aspect::SimulatorAccess<2> const&, aspect::ReconstructedFaultSurfaceResidual const&)
+#1  /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/build/libbp3.release.so: aspect::Postprocess::BP3Output<2>::execute[abi:cxx11](dealii::TableHandler&)
+#2  /home/ein/repository/aspect/build-pf-cpdi/aspect-release: aspect::Postprocess::Manager<2>::execute[abi:cxx11](dealii::TableHandler&)
+#3  /home/ein/repository/aspect/build-pf-cpdi/aspect-release: aspect::Simulator<2>::postprocess()
+#4  /home/ein/repository/aspect/build-pf-cpdi/aspect-release: aspect::Simulator<2>::run()
+#5  /home/ein/repository/aspect/build-pf-cpdi/aspect-release: 
+#6  /home/ein/repository/aspect/build-pf-cpdi/aspect-release: main
+--------------------------------------------------------
+
+Aborting!
+----------------------------------------------------
+
+--------------------------------------------------------
+An error occurred in line <75> of file </home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/work_replay.h> in function
+    std::vector<double> aspect::BP3Benchmark::export_work_replay(const aspect::SimulatorAccess<dim>&, const aspect::ReconstructedFaultSurfaceResidual&) [with int dim = 2]
+The violated condition was: 
+    Utilities::MPI::min(static_cast<unsigned int>(history_ok),comm)
+Additional information: 
+    Work replay changed inert H, geometry or completed I_h.
+
+Stacktrace:
+-----------
+#0  /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/build/libbp3.release.so: std::vector<double, std::allocator<double> > aspect::BP3Benchmark::export_work_replay<2>(aspect::SimulatorAccess<2> const&, aspect::ReconstructedFaultSurfaceResidual const&)
+#1  /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/build/libbp3.release.so: aspect::Postprocess::BP3Output<2>::execute[abi:cxx11](dealii::TableHandler&)
+#2  /home/ein/repository/aspect/build-pf-cpdi/aspect-release: aspect::Postprocess::Manager<2>::execute[abi:cxx11](dealii::TableHandler&)
+#3  /home/ein/repository/aspect/build-pf-cpdi/aspect-release: aspect::Simulator<2>::postprocess()
+#4  /home/ein/repository/aspect/build-pf-cpdi/aspect-release: aspect::Simulator<2>::run()
+#5  /home/ein/repository/aspect/build-pf-cpdi/aspect-release: 
+#6  /home/ein/repository/aspect/build-pf-cpdi/aspect-release: main
+--------------------------------------------------------
+
+Aborting!
+----------------------------------------------------
+--------------------------------------------------------------------------
+MPI_ABORT was invoked on rank 3 in communicator MPI_COMM_WORLD
+  Proc: [[31359,1],3]
+  Errorcode: 1
+
+NOTE: invoking MPI_ABORT causes Open MPI to kill all MPI processes.
+You may or may not see output from other processes, depending on
+exactly when Open MPI kills them.
+--------------------------------------------------------------------------
+
+--------------------------------------------------------
+An error occurred in line <75> of file </home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/work_replay.h> in function
+    std::vector<double> aspect::BP3Benchmark::export_work_replay(const aspect::SimulatorAccess<dim>&, const aspect::ReconstructedFaultSurfaceResidual&) [with int dim = 2]
+The violated condition was: 
+    Utilities::MPI::min(static_cast<unsigned int>(history_ok),comm)
+Additional information: 
+    Work replay changed inert H, geometry or completed I_h.
+
+Stacktrace:
+-----------
+#0  /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/build/libbp3.release.so: std::vector<double, std::allocator<double> > aspect::BP3Benchmark::export_work_replay<2>(aspect::SimulatorAccess<2> const&, aspect::ReconstructedFaultSurfaceResidual const&)
+#1  /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/build/libbp3.release.so: aspect::Postprocess::BP3Output<2>::execute[abi:cxx11](dealii::TableHandler&)
+#2  /home/ein/repository/aspect/build-pf-cpdi/aspect-release: aspect::Postprocess::Manager<2>::execute[abi:cxx11](dealii::TableHandler&)
+#3  /home/ein/repository/aspect/build-pf-cpdi/aspect-release: aspect::Simulator<2>::postprocess()
+#4  /home/ein/repository/aspect/build-pf-cpdi/aspect-release: aspect::Simulator<2>::run()
+#5  /home/ein/repository/aspect/build-pf-cpdi/aspect-release: 
+#6  /home/ein/repository/aspect/build-pf-cpdi/aspect-release: main
+--------------------------------------------------------
+
+Aborting!
+----------------------------------------------------
+
+--------------------------------------------------------
+An error occurred in line <75> of file </home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/work_replay.h> in function
+    std::vector<double> aspect::BP3Benchmark::export_work_replay(const aspect::SimulatorAccess<dim>&, const aspect::ReconstructedFaultSurfaceResidual&) [with int dim = 2]
+The violated condition was: 
+    Utilities::MPI::min(static_cast<unsigned int>(history_ok),comm)
+Additional information: 
+    Work replay changed inert H, geometry or completed I_h.
+
+Stacktrace:
+-----------
+#0  /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/build/libbp3.release.so: std::vector<double, std::allocator<double> > aspect::BP3Benchmark::export_work_replay<2>(aspect::SimulatorAccess<2> const&, aspect::ReconstructedFaultSurfaceResidual const&)
+#1  /home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/build/libbp3.release.so: aspect::Postprocess::BP3Output<2>::execute[abi:cxx11](dealii::TableHandler&)
+#2  /home/ein/repository/aspect/build-pf-cpdi/aspect-release: aspect::Postprocess::Manager<2>::execute[abi:cxx11](dealii::TableHandler&)
+#3  /home/ein/repository/aspect/build-pf-cpdi/aspect-release: aspect::Simulator<2>::postprocess()
+#4  /home/ein/repository/aspect/build-pf-cpdi/aspect-release: aspect::Simulator<2>::run()
+#5  /home/ein/repository/aspect/build-pf-cpdi/aspect-release: 
+#6  /home/ein/repository/aspect/build-pf-cpdi/aspect-release: main
+--------------------------------------------------------
+
+Aborting!
+----------------------------------------------------
+--------------------------------------------------------------------------
+prterun has exited due to process rank 0 with PID 0 on node BEBOP calling
+"abort". This may have caused other processes in the application to be
+terminated by signals sent by prterun (as reported here).
+--------------------------------------------------------------------------
+ 

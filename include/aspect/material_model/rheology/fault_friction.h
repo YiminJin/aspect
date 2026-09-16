@@ -124,6 +124,14 @@ namespace aspect
 
           double get_characteristic_slip_distance() const;
 
+          /** Derivatives for noncommitting within-step state evaluation. */
+          double update_state_derivative_wrt_slip_rate(double slip_rate,
+                                                       double old_state,
+                                                       double time_step) const;
+          double friction_coefficient_derivative_wrt_state(
+            const std::vector<double> &volume_fractions,
+            double slip_rate, double slip_state) const;
+
           static
           void
           declare_parameters (ParameterHandler &prm);

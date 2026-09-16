@@ -1,0 +1,279 @@
+# Global parameters
+set Additional shared libraries = plugin/libbp3.release.so
+set Dimension                              = 2
+set Start time                             = 0
+set End time                               = 2e10
+set Use years instead of seconds           = false
+set Nonlinear solver scheme                = single Advection, iterated Newton Stokes
+set Nonlinear solver tolerance             = 1e-5
+set Max nonlinear iterations               = 50
+set CFL number                             = 0.5
+set Maximum time step                      = 2e7
+set Maximum relative increase in time step = 50
+set Output directory                       = output-tmp3
+set Pressure normalization                 = no
+set Resume computation                     = false
+
+#
+subsection Solver parameters
+  subsection Phase field solver parameters
+    set Nonlinear solver tolerance        = 1e-7
+    set Max linear solver iterations      = 1000
+    set Max nonlinear iterations          = 20
+    set Max Newton line search iterations = 3
+  end
+  subsection Stokes solver parameters
+    set Stokes solver type                  = block AMG
+    set Number of cheap Stokes solver steps = 1000
+    set Linear solver tolerance             = 1e-7
+    set GMRES solver restart length         = 100
+    set Use full A block as preconditioner  = true
+  end
+
+  subsection Newton solver parameters
+    set Max pre-Newton nonlinear iterations     = 1
+    set SPD safety factor                       = 0.9
+    set Max Newton line search iterations       = 3
+    set Maximum linear Stokes solver tolerance  = 1e-2
+    set Use Newton residual scaling method      = false
+    set Use Newton failsafe                     = true
+    set Stabilization preconditioner            = SPD
+    set Stabilization velocity block            = none
+  end
+end
+
+# Governing equations
+subsection Formulation
+  set Enable phase field              = true
+  set Use implicit constitutive model = true
+  set Need slip rate                  = true
+end
+
+#
+subsection Phase field model
+  set Length scale                    = 400
+  set Geometric function type         = CZM
+  set Degradation curvature parameter = 1
+end
+
+#
+subsection Discretization
+  set Temperature polynomial degree = 1
+  set Composition polynomial degree = 1
+  set Use locally conservative discretization = false
+end
+
+# Model geometry
+subsection Geometry model
+  set Model name = box
+
+  subsection Box
+    set X extent = 100e3
+    set Y extent = 70e3
+    set X repetitions = 10
+    set Y repetitions = 7
+  end
+end
+
+# 
+subsection Mesh refinement
+  set Initial global refinement          = 5
+  set Initial adaptive refinement        = 3
+  set Time steps between mesh refinement = 0
+  set Skip solvers on initial refinement = true
+  set Strategy = minimum refinement function
+
+  subsection Minimum refinement function
+    set Coordinate system   = cartesian
+    set Variable names      = x,y
+    set Function constants  = k=1.73205, w=100e3, h=70e3, wb=1000
+    set Function expression = if(abs(k*x + y - (k*w + h)*0.5) / sqrt(1 + k*k) < wb, 8, 2)
+  end
+end
+
+#
+subsection Boundary velocity model
+  set Prescribed velocity boundary indicators = left: function, right: function
+
+  subsection Function
+    set Variable names      = x,y
+    set Function constants  = V=5.e-10, k=1.73205
+    set Function expression = V / sqrt(1 + k*k) * (x < 30e3 ? 1 : -1); \
+                              -k*V / sqrt(1 + k*k) * (x < 30e3 ? 1 : -1)
+  end
+end
+
+#
+subsection Boundary traction model
+  set Prescribed traction boundary indicators = bottom: bp3
+end
+
+#
+subsection Compositional fields
+  set Number of fields = 9
+  set Names of fields             = H,       V,       theta,   n_x,     n_y,     tau_xx,  tau_yy,  tau_xy,  inactive_region
+  set Types of fields             = generic, generic, generic, generic, generic, generic, generic, generic, chemical composition
+  set Compositional field methods = particles
+  set Mapped particle properties  = H          : crack_driving_force, \
+                                    V          : slip_rate, \
+                                    theta      : slip_state, \
+                                    n_x        : normal_direction[0], \
+                                    n_y        : normal_direction[1], \
+                                    tau_xx     : ve_stress[0], \
+                                    tau_yy     : ve_stress[1], \
+                                    tau_xy     : ve_stress[2], \
+                                    inactive_region : initial inactive_region
+end
+
+#
+subsection Initial composition model
+  set Model name = bp3
+
+  subsection BP3
+    set Dip angle    = 60
+    set Model width  = 100e3
+    set Model height = 70e3
+    set Stress regularization radius = 1500
+    set Peak phase field = 0.9
+  end
+end
+
+# 
+subsection Boundary composition model
+  set Fixed composition boundary indicators = left, right
+  set List of model names = initial composition
+end
+
+#
+subsection Initial temperature model
+  set Model name = function
+
+  subsection Function
+    set Function expression = 293
+  end
+end
+
+#
+subsection Boundary temperature model
+  set Fixed temperature boundary indicators = left, right, bottom, top
+  set List of model names = box
+
+  subsection Box
+    set Left temperature   = 293
+    set Right temperature  = 293
+    set Bottom temperature = 293
+    set Top temperature    = 293   
+  end
+end
+
+#
+subsection Material model
+  set Model name = phase field rsf
+  
+  subsection Phase field RSF
+    set Phase field activation threshold    = 0.01
+    set Phase field normal lock threshold   = 0.01
+    set Reference temperature               = 293
+    set Reference viscosities               = 1.e22
+    set Thermal viscosity exponents         = 0
+    set Elastic shear moduli                = 3.204e10
+    set Initial time step                   = 4e6
+    set Viscosity averaging scheme          = harmonic
+    set Cohesions                           = 1e6
+    set Critical energy release rates       = 1.e5
+    set Radiation damping coefficients      = 4.624e6
+    set Evolve phase field                  = false
+    set Reference slip rate                 = 1.e-6
+    set Minimum slip rate                   = 1.e-20
+    set Characteristic slip distance        = 0.008
+    set Reference friction coefficients     = 0.6
+    set Direct effect parameters            = 0.010, 0.025
+    set Evolution effect parameters         = 0.015
+  end
+end
+
+# Gravity model
+subsection Gravity model
+  set Model name = vertical
+
+  subsection Vertical
+    set Magnitude = 0
+  end
+end
+
+#
+subsection Adiabatic conditions model
+  set Model name = function
+
+  subsection Function
+    set Function expression = 293; 50e6; 2670
+  end
+end
+
+#
+subsection Time stepping
+  set List of model names = convection time step, rsf time step, repeat on cutback
+
+  subsection RSF time step
+    set CFL number = 0.75
+  end
+end
+
+#
+subsection Checkpointing
+  set Steps between checkpoint = 10
+end
+
+#
+subsection Particles
+  set Load balancing strategy       = remove and add particles
+  set Particle removal algorithm    = point density function
+  set Particle addition algorithm   = point density function
+  set Minimum particles per cell    = 6
+  set Maximum particles per cell    = 12
+  set Generate particle domains     = true
+  set Generate face data for particle domains = false
+  set Generate CPDI data for particle domains = true
+  set List of particle properties   = phase field rsf, initial composition
+  set Interpolation scheme          = distance weighted average
+  set Particle generator name       = reference cell
+
+  subsection Phase field RSF
+    set Output friction coefficient = true
+    set Slip distance between graphical output = 1e-9
+  end
+
+  subsection Initial composition
+    set List of field names = inactive_region
+  end
+
+  subsection Generator
+    subsection Reference cell
+      set Number of particles per cell per direction = 3
+    end
+  end
+end
+
+#
+subsection Postprocess
+  set List of postprocessors = velocity statistics, basic statistics, particles, visualization, cumulative slip profile
+  set Run postprocessors on nonlinear iterations = false
+
+  subsection Particles
+    set Time between data output = 1e20
+    set Number of grouped files  = 4
+  end
+
+  subsection Visualization
+    set List of output variables        = strain rate
+    set Time between graphical output   = 1e20
+    set Interpolate output              = true
+    set Point-wise stress and strain    = true
+    set Write higher order output       = true
+    set Number of grouped files         = 4
+  end
+
+  subsection Cumulative slip profile
+    set Sample points file = sample_points.txt
+  end
+end
