@@ -24,6 +24,7 @@
 #include <aspect/melt.h>
 #include <aspect/simulator/solver/block_stokes_preconditioner.h>
 #include <aspect/simulator/solver/stokes_matrix_free.h>
+#include <aspect/simulator/solver/stokes_matrix_free_local_smoothing.h>
 #include <aspect/simulator/solver/stokes_direct.h>
 #include <aspect/mesh_deformation/interface.h>
 #include <aspect/material_model/phase_field_fault.h>
@@ -1176,6 +1177,7 @@ namespace aspect
         double surface_scale = numbers::signaling_nan<double>();
         double bulk_precision = 0.0;
         double bulk_convergence_scale = bulk_scale;
+        double fault_preconditioner_setup_seconds = 0.;
 
         auto solve_condensed_system =
           [&](const typename StokesSolver::ReconstructedFaultCondensedSystem<dim>
@@ -1213,94 +1215,145 @@ namespace aspect
                 *Mp_preconditioner,
                 parameters.linear_solver_S_block_tolerance);
 
-          internal::InverseVelocityBlock<
-            LinearAlgebra::PreconditionAMG,
-            LinearAlgebra::Vector,
-            LinearAlgebra::SparseMatrix> inverse_velocity(
-              system_matrix.block(0,0),
-              *Amg_preconditioner,
-              true,
-              stokes_A_block_is_symmetric(),
-              parameters.linear_solver_A_block_tolerance);
-          const internal::BlockSchurPreconditioner<
-            decltype(inverse_velocity),
-            internal::SchurComplementOperator,
-            LinearAlgebra::SparseMatrix,
-            LinearAlgebra::BlockVector> preconditioner(
-              inverse_velocity, *schur, system_matrix.block(0,1));
+          const auto solve_with_velocity_preconditioner = [&](const auto &velocity_preconditioner)
+          {
+            internal::InverseVelocityBlock<
+              std::decay_t<decltype(velocity_preconditioner)>,
+              LinearAlgebra::Vector,
+              LinearAlgebra::SparseMatrix> inverse_velocity(
+                system_matrix.block(0,0),
+                velocity_preconditioner,
+                true,
+                stokes_A_block_is_symmetric(),
+                parameters.linear_solver_A_block_tolerance);
+            const internal::BlockSchurPreconditioner<
+              decltype(inverse_velocity),
+              internal::SchurComplementOperator,
+              LinearAlgebra::SparseMatrix,
+              LinearAlgebra::BlockVector> preconditioner(
+                inverse_velocity, *schur, system_matrix.block(0,1));
 
-          // B and G are not assumed adjoints, so the condensed operator is
-          // generally nonsymmetric and requires FGMRES rather than CG/MINRES.
-          double right_null_error, left_null_error;
-          const auto q = linearization.verified_pressure_nullspace(right_null_error, left_null_error);
-          LinearAlgebra::BlockVector compatible_rhs(rhs), residual(rhs);
-          // Compatibility noise must be both backward-small in the original
-          // weak loads and below the unchanged nonlinear bulk target.
-          const double compatibility_tolerance = std::min(
-            100.*std::numeric_limits<double>::epsilon()
-              * std::max({initial_residual.bulk_norm, aspect_bulk_reference, rhs_norm}),
-            parameters.nonlinear_tolerance*bulk_scale);
-          const double removed_rhs = internal::project_compatible_fault_rhs(
-            q, compatibility_tolerance, compatible_rhs);
-          const internal::FaultPressureComplementOperator<
-            typename StokesSolver::ReconstructedFaultCondensedSystem<dim>::Linearization,
-            LinearAlgebra::BlockVector> projected_operator{linearization, q};
-          const internal::FaultPressureComplementOperator<
-            decltype(preconditioner), LinearAlgebra::BlockVector>
-            projected_preconditioner{preconditioner, q, true};
-          const internal::FaultInterfacePreconditioner<dim,decltype(projected_preconditioner)>
-            interface_preconditioner(projected_preconditioner,linearization,surface_system,active,rhs,pcout);
-          const internal::FaultPressureComplementOperator<
-            decltype(interface_preconditioner),LinearAlgebra::BlockVector>
-            projected_interface{interface_preconditioner,q};
+            // B and G are not assumed adjoints, so the condensed operator is
+            // generally nonsymmetric and requires FGMRES rather than CG/MINRES.
+            double right_null_error, left_null_error;
+            const auto q = linearization.verified_pressure_nullspace(right_null_error, left_null_error);
+            LinearAlgebra::BlockVector compatible_rhs(rhs), residual(rhs);
+            // Compatibility noise must be both backward-small in the original
+            // weak loads and below the unchanged nonlinear bulk target.
+            const double compatibility_tolerance = std::min(
+              100.*std::numeric_limits<double>::epsilon()
+                * std::max({initial_residual.bulk_norm, aspect_bulk_reference, rhs_norm}),
+              parameters.nonlinear_tolerance*bulk_scale);
+            const double removed_rhs = internal::project_compatible_fault_rhs(
+              q, compatibility_tolerance, compatible_rhs);
+            const internal::FaultPressureComplementOperator<
+              typename StokesSolver::ReconstructedFaultCondensedSystem<dim>::Linearization,
+              LinearAlgebra::BlockVector> projected_operator{linearization, q};
+            const internal::FaultPressureComplementOperator<
+              decltype(preconditioner), LinearAlgebra::BlockVector>
+              projected_preconditioner{preconditioner, q, true};
+            const internal::FaultInterfacePreconditioner<dim,decltype(projected_preconditioner)>
+              interface_preconditioner(projected_preconditioner,linearization,surface_system,active,rhs,pcout);
+            const internal::FaultPressureComplementOperator<
+              decltype(interface_preconditioner),LinearAlgebra::BlockVector>
+              projected_interface{interface_preconditioner,q};
 
-          unsigned int iterations = 0;
-          while (iterations < budget)
+            unsigned int iterations = 0;
+            while (iterations < budget)
+              {
+                SolverControl control(budget-iterations, tolerance);
+                control.enable_history_data();
+                SolverFGMRES<LinearAlgebra::BlockVector> solver(
+                  control, memory,
+                  typename SolverFGMRES<LinearAlgebra::BlockVector>::AdditionalData(
+                    parameters.stokes_gmres_restart_length));
+                bool solver_failed = false;
+                try
+                  {
+                    internal::FaultLinearSection krylov_timer(internal::FaultLinearTiming::krylov_vectors);
+                    solver.solve(projected_operator, direction, compatible_rhs, projected_interface);
+                  }
+                catch (const SolverControl::NoConvergence &)
+                  {
+                    solver_failed = true;
+                  }
+                iterations += std::max(1U, control.last_step());
+                total_fault_krylov_iterations += std::max(1U, control.last_step());
+                internal::project_fault_pressure(q, direction);
+
+                // Arnoldi's residual estimate may disagree with the final vector.
+                // Verify C*x-b afresh, retaining raw and null-component diagnostics.
+                double raw_residual, residual_null_component;
+                const double fresh = internal::fault_true_linear_residual(
+                  linearization, q, direction, rhs, residual,
+                  raw_residual, residual_null_component);
+                std::ostringstream report;
+                report << std::setprecision(17)
+                       << "      Fault linear solve: iterations=" << iterations
+                       << ", estimated=" << control.last_value() << ", fresh=" << fresh
+                       << ", target=" << tolerance << ", raw=" << raw_residual
+                       << ", rhs null=" << removed_rhs << ", residual null=" << residual_null_component
+                       << ", compatibility bound=" << compatibility_tolerance
+                       << ", pressure quotient=" << (q.l2_norm() > 0.)
+                       << ", right null=" << right_null_error << ", left null=" << left_null_error;
+                if (std::getenv("ASPECT_FAULT_NONLINEAR_DIAGNOSTIC"))
+                  pcout << report.str() << std::endl;
+                else
+                  {
+                    std::ostringstream progress;
+                    progress << "      Fault linear solve: iterations=" << iterations
+                             << std::scientific << std::setprecision(6)
+                             << ", fresh=" << fresh << ", target=" << tolerance;
+                    pcout << progress.str() << std::endl;
+                  }
+                AssertThrow(std::abs(residual_null_component) <= compatibility_tolerance,
+                            ExcMessage("The full condensed residual has a significant pressure incompatibility."));
+                if (fresh <= tolerance)
+                  {
+                    if (!signals.post_reconstructed_fault_linear_solver.empty())
+                      signals.post_reconstructed_fault_linear_solver(
+                        *this,
+                        [&](auto &dst,const auto &src) { projected_operator.vmult(dst,src); },
+                        [&](auto &dst,const auto &src) { projected_interface.vmult(dst,src); },
+                        [&](auto &dst,const auto &src) { schur->vmult(dst,src); },
+                        compatible_rhs,direction,tolerance,budget,fault_preconditioner_setup_seconds);
+                    return;
+                  }
+                if (solver_failed || iterations >= budget)
+                  throw SolverControl::NoConvergence(iterations, fresh);
+                // Re-enter FGMRES from this vector with its freshly evaluated
+                // residual, charging every restart to the same total budget.
+              }
+          };
+
+          if (!std::getenv("ASPECT_FAULT_VELOCITY_GMG"))
+            solve_with_velocity_preconditioner(*Amg_preconditioner);
+          else
             {
-              SolverControl control(budget-iterations, tolerance);
-              control.enable_history_data();
-              SolverFGMRES<LinearAlgebra::BlockVector> solver(
-                control, memory,
-                typename SolverFGMRES<LinearAlgebra::BlockVector>::AdditionalData(
-                  parameters.stokes_gmres_restart_length));
-              bool solver_failed = false;
-              try
+              AssertThrow(parameters.stokes_velocity_degree==2 && stokes_A_block_is_symmetric(),
+                          ExcMessage("The velocity-GMG prototype requires symmetric Q2 bulk Stokes."));
+              StokesMatrixFreeHandlerLocalSmoothingImplementation<dim,2> gmg(*this,parameters);
+              gmg.initialize_simulator(*this);
+              gmg.initialize();
+              gmg.with_velocity_preconditioner([&](const auto &cycle)
+              {
+                // Only adapt vector storage. The approximate velocity inverse
+                // still applies the original assembled fine-level A matrix.
+                struct Adapter
                 {
-                  internal::FaultLinearSection krylov_timer(internal::FaultLinearTiming::krylov_vectors);
-                  solver.solve(projected_operator, direction, compatible_rhs, projected_interface);
-                }
-              catch (const SolverControl::NoConvergence &)
-                {
-                  solver_failed = true;
-                }
-              iterations += std::max(1U, control.last_step());
-              total_fault_krylov_iterations += std::max(1U, control.last_step());
-              internal::project_fault_pressure(q, direction);
-
-              // Arnoldi's residual estimate may disagree with the final vector.
-              // Verify C*x-b afresh, retaining raw and null-component diagnostics.
-              double raw_residual, residual_null_component;
-              const double fresh = internal::fault_true_linear_residual(
-                linearization, q, direction, rhs, residual,
-                raw_residual, residual_null_component);
-              std::ostringstream report;
-              report << std::setprecision(17)
-                     << "      Fault linear solve: iterations=" << iterations
-                     << ", estimated=" << control.last_value() << ", fresh=" << fresh
-                     << ", target=" << tolerance << ", raw=" << raw_residual
-                     << ", rhs null=" << removed_rhs << ", residual null=" << residual_null_component
-                     << ", compatibility bound=" << compatibility_tolerance
-                     << ", pressure quotient=" << (q.l2_norm() > 0.)
-                     << ", right null=" << right_null_error << ", left null=" << left_null_error;
-              pcout << report.str() << std::endl;
-              AssertThrow(std::abs(residual_null_component) <= compatibility_tolerance,
-                          ExcMessage("The full condensed residual has a significant pressure incompatibility."));
-              if (fresh <= tolerance)
-                return;
-              if (solver_failed || iterations >= budget)
-                throw SolverControl::NoConvergence(iterations, fresh);
-              // Re-enter FGMRES from this vector with its freshly evaluated
-              // residual, charging every restart to the same total budget.
+                  const typename StokesMatrixFreeHandlerLocalSmoothingImplementation<dim,2>::VelocityCycle &cycle;
+                  mutable dealii::LinearAlgebra::distributed::Vector<double> input,output;
+                  void vmult(LinearAlgebra::Vector &dst,const LinearAlgebra::Vector &src) const
+                  {
+                    internal::ChangeVectorTypes::copy(input,src);
+                    cycle.vmult(output,input);
+                    internal::ChangeVectorTypes::copy(dst,output);
+                  }
+                } adapter{cycle,
+                  dealii::LinearAlgebra::distributed::Vector<double>(rhs.block(0).locally_owned_elements(),mpi_communicator),
+                  dealii::LinearAlgebra::distributed::Vector<double>(rhs.block(0).locally_owned_elements(),mpi_communicator)};
+                solve_with_velocity_preconditioner(adapter);
+              });
             }
         };
 
@@ -1315,7 +1368,10 @@ namespace aspect
             rebuild_stokes_matrix = true;
             rebuild_stokes_preconditioner = true;
             assemble_stokes_system();
+            const auto preconditioner_start=internal::FaultLinearTiming::Clock::now();
             build_stokes_preconditioner();
+            fault_preconditioner_setup_seconds=std::chrono::duration<double>(
+              internal::FaultLinearTiming::Clock::now()-preconditioner_start).count();
 
             const FaultVector slip_rate = current_slip_rate(fault_manager);
             internal::FaultLinearProfile linear_profile(pcout, timestep_number, nonlinear_iteration);
@@ -1440,10 +1496,15 @@ namespace aspect
             const double relative_surface_residual =
               internal::normalized_reconstructed_fault_residual(
                 current_surface_norm, surface_scale, "surface");
-            pcout << "      Relative nonlinear residuals (bulk, fault) after "
-                  << "nonlinear iteration " << nonlinear_iteration << ": "
-                  << relative_bulk_residual << ", "
-                  << relative_surface_residual << std::endl;
+            {
+              std::ostringstream progress;
+              progress << "      Relative nonlinear residuals (bulk, fault) after "
+                       << "nonlinear iteration " << std::setw(2) << nonlinear_iteration << ": "
+                       << std::scientific << std::setprecision(6)
+                       << relative_bulk_residual << ", " << relative_surface_residual;
+              pcout << progress.str() << std::endl;
+            }
+            if (std::getenv("ASPECT_FAULT_NONLINEAR_DIAGNOSTIC"))
             {
               std::ostringstream report;
               report << std::setprecision(17)
@@ -1530,41 +1591,6 @@ namespace aspect
                       working_x, slip_rate, diagnostic_residual);
                   }
 
-                if (std::getenv("ASPECT_FAULT_NONCOMMITTING_DIAGNOSTIC"))
-                  {
-                    // A diagnostic result is not an accepted timestep. Export
-                    // its weak data, then use the ordinary exception rollback
-                    // before any bulk, V, or constitutive history publication.
-                    bool written = true;
-                    if (pcout.is_active())
-                      {
-                        std::ofstream out(parameters.output_directory+"noncommitting_surface.csv");
-                        out << "step,time,fault,node,x,y,V,prescribed,lower_active,mass_diagonal,mass_upper,weak_q,weak_sigma,weak_C,weak_R\n";
-                        const auto &weak = surface_system.get_linearization_residual();
-                        const auto prescribed = fault_manager.prescribed_slip_rate_mask();
-                        for (unsigned int f=0; f<slip_rate.size(); ++f)
-                          for (unsigned int i=0; i<slip_rate[f].size(); ++i)
-                            {
-                              const auto point = fault_manager.get_fault(f).vertex(i);
-                              out << std::setprecision(17) << timestep_number << ',' << time << ','
-                                  << f << ',' << i << ',' << point[0] << ',' << point[1] << ','
-                                  << slip_rate[f][i] << ',' << prescribed[f][i] << ','
-                                  << (active_set[f][i] && !prescribed[f][i]) << ','
-                                  << weak.mass_diagonal[f][i] << ','
-                                  << (i+1<slip_rate[f].size() ? weak.mass_off_diagonal[f][i] : 0.) << ','
-                                  << weak.shear_traction[f][i] << ',' << weak.normal_traction[f][i] << ','
-                                  << weak.cohesive_traction[f][i] << ',' << weak.values[f][i] << '\n';
-                            }
-                        out.close();
-                        written = static_cast<bool>(out);
-                      }
-                    AssertThrow(Utilities::MPI::min(static_cast<unsigned int>(written), mpi_communicator),
-                                ExcMessage("Cannot write noncommitting surface diagnostic."));
-                    pcout << "Noncommitting fault diagnostic converged: bulk=" << relative_bulk_residual
-                          << ", surface=" << relative_surface_residual
-                          << "; discarding mechanical trial and retaining all histories." << std::endl;
-                    throw std::runtime_error("Noncommitting fault diagnostic completed; intentional rollback stop.");
-                  }
 
                 // Allocate and validate the complete accepted publication
                 // state before the first constitutive or kinematic write.

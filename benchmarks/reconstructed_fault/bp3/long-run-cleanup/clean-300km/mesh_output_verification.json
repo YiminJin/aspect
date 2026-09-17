@@ -1,0 +1,65 @@
+{
+  "passed": true,
+  "cells": 36282,
+  "max_side_m": 12500.0,
+  "coordinate_error_m": 0.0,
+  "fault_vertices": 1156,
+  "fault_midpoint_m": [
+    50000,
+    50000
+  ],
+  "crossed_windows": {
+    "0-2000": {
+      "cells": 28,
+      "side_m": 97.65625
+    },
+    "15000-18000": {
+      "cells": 42,
+      "side_m": 97.65625
+    },
+    "35000-45000": {
+      "cells": 140,
+      "side_m": 97.65625
+    },
+    "113000-116000": {
+      "cells": 35,
+      "side_m": 97.65625
+    }
+  },
+  "VTK_type": 70,
+  "nodes_per_cell": 9,
+  "outputs": [
+    {
+      "file": "solution/solution-00000.0000.vtu",
+      "Q2_cells": 9070
+    },
+    {
+      "file": "solution/solution-00000.0001.vtu",
+      "Q2_cells": 9071
+    },
+    {
+      "file": "solution/solution-00000.0002.vtu",
+      "Q2_cells": 9071
+    },
+    {
+      "file": "solution/solution-00000.0003.vtu",
+      "Q2_cells": 9070
+    },
+    {
+      "file": "solution/solution-00001.0000.vtu",
+      "Q2_cells": 9070
+    },
+    {
+      "file": "solution/solution-00001.0001.vtu",
+      "Q2_cells": 9071
+    },
+    {
+      "file": "solution/solution-00001.0002.vtu",
+      "Q2_cells": 9071
+    },
+    {
+      "file": "solution/solution-00001.0003.vtu",
+      "Q2_cells": 9070
+    }
+  ]
+}

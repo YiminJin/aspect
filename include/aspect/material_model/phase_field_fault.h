@@ -99,8 +99,6 @@ namespace aspect
           Point<dim> position;
 
           double slip_rate = numbers::signaling_nan<double>();
-          /** Only the opt-in noncommitting nodal-state diagnostic uses these. */
-          std::array<double,2> diagnostic_nodal_rates = {{0.,0.}};
           double phase_field = numbers::signaling_nan<double>();
           double previous_phase_field = numbers::signaling_nan<double>();
           double temperature = numbers::signaling_nan<double>();
@@ -126,9 +124,6 @@ namespace aspect
           double damping_traction;
           double residual_density = numbers::signaling_nan<double>();
           double minus_derivative_wrt_slip_rate = numbers::signaling_nan<double>();
-          /** Extra column coefficients sigma mu_Theta dTheta_j/dV_j, without N_j. */
-          std::array<double,2> diagnostic_state_tangent = {{0.,0.}};
-          double evaluated_state = 0.;
           double kappa = numbers::signaling_nan<double>();
           double localization_factor = numbers::signaling_nan<double>();
           double friction_coefficient = numbers::signaling_nan<double>();
@@ -549,6 +544,7 @@ namespace aspect
           unsigned long long last_requested_points = 0;
         };
         NormalizationValueCache normalization_value_cache;
+        bool restore_frozen_normalization_after_restart = false;
 
         /** Geometry-only lookups for the batch sequence of the last I_h solve.
          * This cache holds no values. A changed batch or invalidated mesh forces

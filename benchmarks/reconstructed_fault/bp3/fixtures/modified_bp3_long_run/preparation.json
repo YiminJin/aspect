@@ -1,0 +1,14 @@
+{
+  "cells": 36194,
+  "removed_cells": 6774,
+  "vertices": 1156,
+  "fault_spacing_min_m": 99.96033620915738,
+  "fault_spacing_max_m": 100.00000000001293,
+  "crossed_cell_widths_m": [
+    97.65625
+  ],
+  "ell_over_h": 4.096,
+  "endpoint_mesh_equal": true,
+  "completion_nonzero_rows": 28,
+  "prestress": "Restriction of immutable rational coefficients at retained physical vertices; no recalibration."
+}

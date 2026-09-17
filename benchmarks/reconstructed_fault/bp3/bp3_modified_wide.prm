@@ -1,0 +1,18 @@
+# Modified BP3, 200 x 100 km. Symmetric lateral extension keeps the fault
+# and all fixed initial data at their existing physical coordinates.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/bp3_modified_fully_frictional.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/modified-bp3-wide
+subsection Geometry model
+  subsection Box
+    set Box origin X coordinate = -50000
+    set X extent = 200000
+    set X repetitions = 4
+    set Y repetitions = 2
+  end
+end
+subsection Mesh refinement
+  # 50-km coarse squares; the target tree retains every original physical
+  # cell inside [0,100] km and adds graded exterior strips.
+  set Initial global refinement = 1
+  set Initial adaptive refinement = 9
+end

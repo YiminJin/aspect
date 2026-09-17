@@ -4,10 +4,8 @@ namespace aspect
 {
   namespace BP3Benchmark
   {
-    bool work_measure_replay=false;
-
-    // Fixed-profile audit baseline, captured at initialization or immediately
-    // after loading the explicitly qualified step-9 comparison checkpoint.
+    // Fixed-profile audit baseline: capture once at initialization and serialize
+    // it with the benchmark history, never recapture from a restarted state.
     std::map<types::particle_index,double> work_initial_H;
     std::vector<Point<2>> work_initial_geometry;
     std::vector<double> work_initial_I;
@@ -24,7 +22,6 @@ namespace aspect
       for (const auto &part:Utilities::MPI::all_gather(comm,local))
         for (const auto &entry:part) work_initial_H.emplace(entry);
       AssertThrow(!work_initial_H.empty(),ExcMessage("Work history audit must capture after particle deserialization."));
-      sim.get_pcout()<<"Work history invariant capture: "<<work_initial_H.size()<<" real particle IDs before evolution."<<std::endl;
       const auto &manager=sim.get_reconstructed_fault_manager();
       const auto &fault=manager.get_fault(0);
       const auto I=manager.get_property_information()[manager.get_property_index("phase field fault previous I h")].position;
@@ -37,7 +34,7 @@ namespace aspect
 
     template <int dim>
     std::vector<double> export_work_replay(
-      const SimulatorAccess<dim> &sim,const ReconstructedFaultSurfaceResidual &weak)
+      const SimulatorAccess<dim> &sim,const ReconstructedFaultSurfaceResidual &weak,const bool write_files=true)
     {
       const auto &intro=sim.introspection();const auto comm=sim.get_mpi_communicator();
       auto &manager=sim.get_reconstructed_fault_manager();const auto &fault=manager.get_fault(0);
@@ -95,7 +92,7 @@ namespace aspect
         AssertThrow(r.history_correction==0.,ExcMessage("Mature frozen-profile history correction changed."));
         Sample result;
         result.chi=active ? r.localization_factor : 0.;result.kappa=r.kappa;
-        result.rate=(1-xi)*V[segment]+xi*V[segment+1];
+        result.rate=manager.interpolate_slip_rate(0,segment,xi);
         SymmetricTensor<2,dim> old;
         old[0][0]=all[fields[0]];old[1][1]=all[fields[1]];old[0][1]=all[fields[2]];
         result.tau=2*r.kappa*(eps-result.chi*result.rate*S)+model.evaluate_frozen_maxwell_stress(temp,all,old);
@@ -115,9 +112,13 @@ namespace aspect
       std::vector<SymmetricTensor<2,dim>> eps(nq);
       std::vector<std::vector<double>> composition(intro.n_compositional_fields,std::vector<double>(nq));
       std::vector<double> native(6*n),common(6*n);
-      std::ofstream raw(sim.get_output_directory()+"work_qp_"+std::to_string(step)+"_rank"+std::to_string(rank)+".csv");
+      std::ofstream raw;
+      if (write_files)
+      {
+      raw.open(sim.get_output_directory()+"work_qp_"+std::to_string(step)+"_rank"+std::to_string(rank)+".csv");
       raw.exceptions(std::ios::failbit|std::ios::badbit);
       raw<<std::setprecision(17)<<"cell,qp,x,y,xd,r,JxW,source_active,segment,xi,phi,Ih,chi,V,p,tau_xx,tau_yy,tau_xy,tauN,sigma_n,q,eps_xx,eps_yy,eps_xy,elastic_norm\n";
+      }
       const auto accumulate=[](std::vector<double> &v,unsigned int j,double xi,double weight,double p,const Sample &s,double tauN)
       {
         const double values[]={1.,p,tauN,s.q,s.sigma,s.bg};
@@ -144,8 +145,8 @@ namespace aspect
                 const auto j=a[q].active ? a[q].segment_index : 0u;
                 const auto xi=a[q].active ? a[q].xi : 0.;
                 const auto s=evaluate(j,xi,a[q].active,phi[q],temp[q],pressure[q],eps[q],all);
-                if (a[q].active && s.chi>0.) accumulate(native,j,xi,fe.JxW(q)*s.chi,pressure[q],s,s.tau*N);
-                if (window && phi[q]>0.)
+                if (a[q].active && s.chi>0.) accumulate(native,j,a[q].shape_1,fe.JxW(q)*s.chi,pressure[q],s,s.tau*N);
+                if (write_files && window && phi[q]>0.)
                   {
                     raw<<cell->id().to_string()<<','<<q<<','<<p[0]<<','<<p[1]<<','<<xd<<','
                        <<(BP3::trace_x-p[0])*BP3::sine-(BP3::box_size-p[1])*BP3::cosine<<','<<fe.JxW(q)<<','
@@ -222,7 +223,7 @@ namespace aspect
           consistency=std::max(consistency,std::abs(native[6*j+4]-weak.normal_traction[0][j])/native[6*j]);
         }
       AssertThrow(consistency<1e-5,ExcMessage("Accepted work observer does not reproduce frozen mechanical traction."));
-      if (sim.get_pcout().is_active())
+      if (write_files && sim.get_pcout().is_active())
         {
           for (unsigned int mode=0;mode<2;++mode)
             {

@@ -256,8 +256,9 @@ namespace aspect
         {
           candidate->matrix=std::make_unique<aspect::internal::FaultSparseCoupling>();
           candidate->matrix->build(entries);
-          this->get_pcout() << "Fault sparse B: rank0 entries=" << candidate->matrix->values.size()
-                           << ", bytes=" << candidate->matrix->bytes() << std::endl;
+          if (std::getenv("ASPECT_FAULT_PERFORMANCE"))
+            this->get_pcout() << "   Fault sparse B: rank0 entries=" << candidate->matrix->values.size()
+                             << ", bytes=" << candidate->matrix->bytes() << std::endl;
         }
       B_linearization = std::move(candidate);
       ++B_linearization_rebuild_count;
@@ -402,18 +403,6 @@ namespace aspect
         B_linearization->matrix->add(source,result);
         result.compress(VectorOperation::add);
       }
-      if (std::getenv("ASPECT_FAULT_COMPARE_COUPLING"))
-        {
-          LinearAlgebra::BlockVector reference(result);
-          apply_B_reference(fault_direction,reference);
-          const double scale=std::max(result.l2_norm(),reference.l2_norm());
-          reference-=result;
-          auto &diagnostics=aspect::internal::FaultLinearTiming::get();
-          diagnostics.B_relative_error=std::max(diagnostics.B_relative_error,
-                                               scale>0. ? reference.l2_norm()/scale : 0.);
-          AssertThrow(reference.l2_norm()<=2.e-11*scale,
-                      ExcMessage("Sparse B disagrees with the independent quadrature action."));
-        }
     }
 
 

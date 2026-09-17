@@ -7,6 +7,7 @@ This is not an analytic stress-reproduction or first-event accuracy test.
 """
 import argparse
 import json
+import io
 from pathlib import Path
 import re
 import numpy as np
@@ -23,7 +24,14 @@ def difference(a, b, scale_floor=0.):
 def load_parts(path, pattern):
     parts = sorted(path.glob(pattern))
     assert parts, (path, pattern)
-    data = np.concatenate([np.atleast_2d(np.loadtxt(p, delimiter=',', skiprows=1)) for p in parts])
+    rows=[]
+    for p in parts:
+        with p.open() as stream:
+            next(stream)  # Ranks without boundary-source parents write a header only.
+            body=stream.read()
+        if body.strip(): rows.append(np.loadtxt(io.StringIO(body),delimiter=',',ndmin=2))
+    assert rows,(path,pattern)
+    data = np.concatenate(rows)
     data = data[np.argsort(data[:, 0])]
     assert len(np.unique(data[:, 0])) == len(data)
     return data
@@ -35,9 +43,9 @@ def convergence(path):
     chunks = re.split(r'\*\*\* Timestep (\d+):', text)
     for i in range(1, len(chunks), 2):
         step, body = int(chunks[i]), chunks[i+1]
-        nonlinear = re.findall(r'after nonlinear iteration (\d+): ([^,\n]+), ([^\n]+)', body)
+        nonlinear = re.findall(r'after nonlinear iteration\s+(\d+): ([^,\n]+), ([^\n]+)', body)
         assert nonlinear and max(map(float, nonlinear[-1][1:])) < 1e-8, step
-        linear = re.findall(r'Fault linear solve: iterations=(\d+), estimated=([^,]+), fresh=([^,]+), target=([^,]+)', body)
+        linear = re.findall(r'Fault linear solve: iterations=(\d+),(?: estimated=([^,\n]+),)? fresh=([^,\n]+), target=([^,\n]+)', body)
         pending = None
         for row in linear:
             if pending:

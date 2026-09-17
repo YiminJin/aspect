@@ -25,7 +25,8 @@ namespace aspect
             const std::vector<ReconstructedFault<dim>> &faults,
             const std::vector<typename ReconstructedFaultManager<dim>::PropertyInformation>
             &property_information,
-            const std::vector<std::vector<double>> *slip_rates = nullptr);
+            const std::vector<std::vector<double>> *slip_rates = nullptr,
+            const std::vector<std::string> &excluded_properties = {});
 
           void write_vtu(std::ostream &output,
                          const double time,
@@ -41,10 +42,8 @@ namespace aspect
 
           std::vector<Point<dim>> points;
           std::vector<unsigned int> point_fault_ids;
-          std::vector<unsigned int> vertex_ids;
           std::vector<std::array<unsigned int,2>> cells;
           std::vector<unsigned int> cell_fault_ids;
-          std::vector<unsigned int> cell_ids;
           std::vector<double> slip_rates;
           std::vector<PropertyOutput> properties;
       };
@@ -56,12 +55,19 @@ namespace aspect
     class ReconstructedFaults : public Interface<dim>, public SimulatorAccess<dim>
     {
       public:
+        static void declare_parameters(ParameterHandler &prm);
+        void parse_parameters(ParameterHandler &prm) override;
+
         void initialize() override;
 
         std::pair<std::string,std::string>
         execute(TableHandler &statistics) override;
 
+        void save(std::map<std::string,std::string> &status) const override;
+        void load(const std::map<std::string,std::string> &status) override;
+
       private:
+        std::vector<std::string> excluded_properties;
         std::vector<std::pair<double,std::string>> times_and_vtu_file_names;
     };
   }

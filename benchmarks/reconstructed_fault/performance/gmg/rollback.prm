@@ -1,0 +1,3 @@
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_stage_i_rollback.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/performance/build-gmg/libfault_rollback.release.so
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/performance/gmg/rollback

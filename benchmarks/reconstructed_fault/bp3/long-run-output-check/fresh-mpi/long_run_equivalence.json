@@ -1,0 +1,1036 @@
+{
+  "coefficient": 1e-08,
+  "convergence": {
+    "0": {
+      "final_bulk": 4.177285e-10,
+      "final_surface": 3.257963e-09,
+      "fresh_attempts": 2
+    },
+    "1": {
+      "final_bulk": 3.912837e-10,
+      "final_surface": 1.377377e-10,
+      "fresh_attempts": 2
+    },
+    "2": {
+      "final_bulk": 2.369698e-12,
+      "final_surface": 5.771517e-10,
+      "fresh_attempts": 14
+    }
+  },
+  "outputs": {
+    "times": {
+      "solution": [
+        0.0,
+        5332320.54099
+      ],
+      "particles": [
+        0.0,
+        5332320.54099
+      ],
+      "reconstructed_faults": [
+        0.0,
+        5332320.54099
+      ]
+    },
+    "bytes": {
+      "solution": [
+        4825177,
+        8063325
+      ],
+      "particles": [
+        3255531,
+        8017951
+      ],
+      "reconstructed_faults": [
+        199273,
+        222243
+      ]
+    },
+    "profile_bytes": [
+      171614,
+      214118,
+      214126
+    ]
+  },
+  "fields": {
+    "0": {
+      "fault": {
+        "x_m": {
+          "absolute": 0.0,
+          "scale": 78867.5134594813,
+          "relative": 0.0
+        },
+        "y_m": {
+          "absolute": 0.0,
+          "scale": 100000.0,
+          "relative": 0.0
+        },
+        "V_m_per_s": {
+          "absolute": 0.0,
+          "scale": 1.0002219021133522e-09,
+          "relative": 0.0
+        },
+        "Theta_s": {
+          "absolute": 0.0,
+          "scale": 7999999.999999978,
+          "relative": 0.0
+        },
+        "slip_m": {
+          "absolute": 0.0,
+          "scale": 0.0,
+          "relative": 0.0
+        },
+        "q_weak_Pa": {
+          "absolute": 0.0,
+          "scale": 26745437.95968516,
+          "relative": 0.0
+        },
+        "sigma_n_weak_Pa": {
+          "absolute": 0.0,
+          "scale": 50000110.372993656,
+          "relative": 0.0
+        }
+      },
+      "current_stress_source": {
+        "V": {
+          "absolute": 0.0,
+          "scale": 1.0000933336267593e-09,
+          "relative": 0.0
+        },
+        "chi": {
+          "absolute": 0.0,
+          "scale": 0.0027425661757889924,
+          "relative": 0.0
+        },
+        "p": {
+          "absolute": 0.0,
+          "scale": 757.8719389518133,
+          "relative": 0.0
+        },
+        "tau_xx": {
+          "absolute": 0.0,
+          "scale": 3906.814820477751,
+          "relative": 0.0
+        },
+        "tau_yy": {
+          "absolute": 0.0,
+          "scale": 6801.938084441995,
+          "relative": 0.0
+        },
+        "tau_xy": {
+          "absolute": 0.0,
+          "scale": 5171.9502482039625,
+          "relative": 0.0
+        },
+        "tauN": {
+          "absolute": 0.0,
+          "scale": 3152.2691647782462,
+          "relative": 0.0
+        },
+        "sigma_n": {
+          "absolute": 0.0,
+          "scale": 50002453.00001771,
+          "relative": 0.0
+        },
+        "q": {
+          "absolute": 0.0,
+          "scale": 26746943.552179374,
+          "relative": 0.0
+        },
+        "eps_xx": {
+          "absolute": 0.0,
+          "scale": 1.1771996489615988e-12,
+          "relative": 0.0
+        },
+        "eps_yy": {
+          "absolute": 0.0,
+          "scale": 1.1664585414824512e-12,
+          "relative": 0.0
+        },
+        "eps_xy": {
+          "absolute": 0.0,
+          "scale": 6.877657283713369e-13,
+          "relative": 0.0
+        }
+      },
+      "top": {
+        "chi": {
+          "absolute": 0.0,
+          "scale": 0.0027423574019480503,
+          "relative": 0.0
+        },
+        "tau_xx": {
+          "absolute": 0.0,
+          "scale": 3886.9943555866994,
+          "relative": 0.0
+        },
+        "tau_yy": {
+          "absolute": 0.0,
+          "scale": 6757.822821145199,
+          "relative": 0.0
+        },
+        "tau_xy": {
+          "absolute": 0.0,
+          "scale": 5163.530558540512,
+          "relative": 0.0
+        }
+      },
+      "bottom": {
+        "chi": {
+          "absolute": 0.0,
+          "scale": 0.0027423608759278924,
+          "relative": 0.0
+        },
+        "tau_xx": {
+          "absolute": 0.0,
+          "scale": 3906.814820477751,
+          "relative": 0.0
+        },
+        "tau_yy": {
+          "absolute": 0.0,
+          "scale": 6739.66072558546,
+          "relative": 0.0
+        },
+        "tau_xy": {
+          "absolute": 0.0,
+          "scale": 5171.9502482039625,
+          "relative": 0.0
+        }
+      },
+      "committed_particle_stress": {
+        "2": {
+          "absolute": 0.0,
+          "scale": 0.0,
+          "relative": 0.0
+        },
+        "3": {
+          "absolute": 0.0,
+          "scale": 0.0,
+          "relative": 0.0
+        },
+        "4": {
+          "absolute": 0.0,
+          "scale": 0.0,
+          "relative": 0.0
+        }
+      },
+      "bulk_FE": {
+        "0.0": {
+          "absolute": 0.0,
+          "scale": 2.501286254259821e-10,
+          "relative": 0.0
+        },
+        "1.0": {
+          "absolute": 0.0,
+          "scale": 4.331693988869922e-10,
+          "relative": 0.0
+        },
+        "2.0": {
+          "absolute": 0.0,
+          "scale": 983.2902340680414,
+          "relative": 0.0
+        },
+        "3.0": {
+          "absolute": 0.0,
+          "scale": 293.0,
+          "relative": 0.0
+        },
+        "4.0": {
+          "absolute": 0.0,
+          "scale": 0.0,
+          "relative": 0.0
+        },
+        "5.0": {
+          "absolute": 0.0,
+          "scale": 0.0,
+          "relative": 0.0
+        },
+        "6.0": {
+          "absolute": 0.0,
+          "scale": 0.0,
+          "relative": 0.0
+        },
+        "7.0": {
+          "absolute": 0.0,
+          "scale": 7999999.999999984,
+          "relative": 0.0
+        },
+        "8.0": {
+          "absolute": 0.0,
+          "scale": 1.0,
+          "relative": 0.0
+        },
+        "9.0": {
+          "absolute": 0.0,
+          "scale": 0.6,
+          "relative": 0.0
+        }
+      },
+      "particle_properties": {
+        "1": {
+          "absolute": 0.0,
+          "scale": 197916.66666666666,
+          "relative": 0.0
+        },
+        "2": {
+          "absolute": 0.0,
+          "scale": 99983.72395833333,
+          "relative": 0.0
+        },
+        "3": {
+          "absolute": 0.0,
+          "scale": 2141.472802616511,
+          "relative": 0.0
+        },
+        "4": {
+          "absolute": 0.0,
+          "scale": 7999999.999999978,
+          "relative": 0.0
+        },
+        "5": {
+          "absolute": 0.0,
+          "scale": 1.0,
+          "relative": 0.0
+        },
+        "6": {
+          "absolute": 0.0,
+          "scale": 0.0,
+          "relative": 0.0
+        },
+        "7": {
+          "absolute": 0.0,
+          "scale": 0.0,
+          "relative": 0.0
+        },
+        "8": {
+          "absolute": 0.0,
+          "scale": 0.0,
+          "relative": 0.0
+        },
+        "9": {
+          "absolute": 0.0,
+          "scale": 197916.66666666666,
+          "relative": 0.0
+        },
+        "10": {
+          "absolute": 0.0,
+          "scale": 99983.72395833333,
+          "relative": 0.0
+        }
+      },
+      "native_fault": {
+        "fault_id": {
+          "absolute": 0.0,
+          "scale": 0.0,
+          "relative": 0.0
+        },
+        "slip_rate": {
+          "absolute": 0.0,
+          "scale": 1.0002219021133522e-09,
+          "relative": 0.0
+        },
+        "slip_state": {
+          "absolute": 0.0,
+          "scale": 7999999.999999978,
+          "relative": 0.0
+        },
+        "cohesive_traction": {
+          "absolute": 0.0,
+          "scale": 0.0,
+          "relative": 0.0
+        },
+        "previous_I_h": {
+          "absolute": 0.0,
+          "scale": 12713.30754698249,
+          "relative": 0.0
+        },
+        "composition_strengthening": {
+          "absolute": 0.0,
+          "scale": 1.0000460879581758,
+          "relative": 0.0
+        },
+        "background_tractions": {
+          "absolute": 0.0,
+          "scale": 50000000.0,
+          "relative": 0.0
+        },
+        "cumulative_slip": {
+          "absolute": 0.0,
+          "scale": 0.0,
+          "relative": 0.0
+        }
+      },
+      "weak": {
+        "weight": {
+          "absolute": 0.0,
+          "scale": 100.07758103040881,
+          "relative": 0.0
+        },
+        "p": {
+          "absolute": 0.0,
+          "scale": 8449.159123730817,
+          "relative": 0.0
+        },
+        "tauN": {
+          "absolute": 0.0,
+          "scale": 6275.145445866631,
+          "relative": 0.0
+        },
+        "q": {
+          "absolute": 0.0,
+          "scale": 2670838727.9451265,
+          "relative": 0.0
+        },
+        "sigma": {
+          "absolute": 0.0,
+          "scale": 5003873583.584111,
+          "relative": 0.0
+        },
+        "bg": {
+          "absolute": 0.0,
+          "scale": 2670842710.454354,
+          "relative": 0.0
+        }
+      }
+    },
+    "1": {
+      "fault": {
+        "x_m": {
+          "absolute": 0.0,
+          "scale": 78867.5134594813,
+          "relative": 0.0
+        },
+        "y_m": {
+          "absolute": 0.0,
+          "scale": 100000.0,
+          "relative": 0.0
+        },
+        "V_m_per_s": {
+          "absolute": 0.0,
+          "scale": 1.0001579691969758e-09,
+          "relative": 0.0
+        },
+        "Theta_s": {
+          "absolute": 0.0,
+          "scale": 8001050.765702692,
+          "relative": 0.0
+        },
+        "slip_m": {
+          "absolute": 0.0,
+          "scale": 0.002666496216712868,
+          "relative": 0.0
+        },
+        "q_weak_Pa": {
+          "absolute": 0.0,
+          "scale": 26745450.87427399,
+          "relative": 0.0
+        },
+        "sigma_n_weak_Pa": {
+          "absolute": 0.0,
+          "scale": 50000073.61063127,
+          "relative": 0.0
+        }
+      },
+      "current_stress_source": {
+        "V": {
+          "absolute": 0.0,
+          "scale": 1.0000644994346174e-09,
+          "relative": 0.0
+        },
+        "chi": {
+          "absolute": 0.0,
+          "scale": 0.002742566175788993,
+          "relative": 0.0
+        },
+        "p": {
+          "absolute": 0.0,
+          "scale": 505.18175600068764,
+          "relative": 0.0
+        },
+        "tau_xx": {
+          "absolute": 0.0,
+          "scale": 2603.7893480990465,
+          "relative": 0.0
+        },
+        "tau_yy": {
+          "absolute": 0.0,
+          "scale": 4535.871689227423,
+          "relative": 0.0
+        },
+        "tau_xy": {
+          "absolute": 0.0,
+          "scale": 3447.1532292037537,
+          "relative": 0.0
+        },
+        "tauN": {
+          "absolute": 0.0,
+          "scale": 2101.062532189244,
+          "relative": 0.0
+        },
+        "sigma_n": {
+          "absolute": 0.0,
+          "scale": 50001635.79523152,
+          "relative": 0.0
+        },
+        "q": {
+          "absolute": 0.0,
+          "scale": 26746369.511280593,
+          "relative": 0.0
+        },
+        "eps_xx": {
+          "absolute": 0.0,
+          "scale": 1.1772139766289768e-12,
+          "relative": 0.0
+        },
+        "eps_yy": {
+          "absolute": 0.0,
+          "scale": 1.1664848836101146e-12,
+          "relative": 0.0
+        },
+        "eps_xy": {
+          "absolute": 0.0,
+          "scale": 6.877735126986189e-13,
+          "relative": 0.0
+        }
+      },
+      "top": {
+        "chi": {
+          "absolute": 0.0,
+          "scale": 0.0027423574019480503,
+          "relative": 0.0
+        },
+        "tau_xx": {
+          "absolute": 0.0,
+          "scale": 2590.1543079982357,
+          "relative": 0.0
+        },
+        "tau_yy": {
+          "absolute": 0.0,
+          "scale": 4504.7255964257765,
+          "relative": 0.0
+        },
+        "tau_xy": {
+          "absolute": 0.0,
+          "scale": 3441.4535660036163,
+          "relative": 0.0
+        }
+      },
+      "bottom": {
+        "chi": {
+          "absolute": 0.0,
+          "scale": 0.0027423608759278924,
+          "relative": 0.0
+        },
+        "tau_xx": {
+          "absolute": 0.0,
+          "scale": 2603.7893480990465,
+          "relative": 0.0
+        },
+        "tau_yy": {
+          "absolute": 0.0,
+          "scale": 4492.134200217802,
+          "relative": 0.0
+        },
+        "tau_xy": {
+          "absolute": 0.0,
+          "scale": 3447.1532292037537,
+          "relative": 0.0
+        }
+      },
+      "committed_particle_stress": {
+        "2": {
+          "absolute": 0.0,
+          "scale": 2494.3904230382586,
+          "relative": 0.0
+        },
+        "3": {
+          "absolute": 0.0,
+          "scale": 4548.652384919962,
+          "relative": 0.0
+        },
+        "4": {
+          "absolute": 0.0,
+          "scale": 2117.9479737324,
+          "relative": 0.0
+        }
+      },
+      "bulk_FE": {
+        "0.0": {
+          "absolute": 0.0,
+          "scale": 2.501285582584681e-10,
+          "relative": 0.0
+        },
+        "1.0": {
+          "absolute": 0.0,
+          "scale": 4.3317573781085673e-10,
+          "relative": 0.0
+        },
+        "2.0": {
+          "absolute": 0.0,
+          "scale": 655.4393427442462,
+          "relative": 0.0
+        },
+        "3.0": {
+          "absolute": 0.0,
+          "scale": 293.0,
+          "relative": 0.0
+        },
+        "4.0": {
+          "absolute": 0.0,
+          "scale": 0.0,
+          "relative": 0.0
+        },
+        "5.0": {
+          "absolute": 0.0,
+          "scale": 0.0,
+          "relative": 0.0
+        },
+        "6.0": {
+          "absolute": 0.0,
+          "scale": 0.0,
+          "relative": 0.0
+        },
+        "7.0": {
+          "absolute": 0.0,
+          "scale": 7999999.999999984,
+          "relative": 0.0
+        },
+        "8.0": {
+          "absolute": 0.0,
+          "scale": 1.0,
+          "relative": 0.0
+        },
+        "9.0": {
+          "absolute": 0.0,
+          "scale": 0.6,
+          "relative": 0.0
+        }
+      },
+      "particle_properties": {
+        "1": {
+          "absolute": 0.0,
+          "scale": 197916.66600014953,
+          "relative": 0.0
+        },
+        "2": {
+          "absolute": 0.0,
+          "scale": 99983.72511260786,
+          "relative": 0.0
+        },
+        "3": {
+          "absolute": 0.0,
+          "scale": 2141.472802616511,
+          "relative": 0.0
+        },
+        "4": {
+          "absolute": 0.0,
+          "scale": 7999999.999999978,
+          "relative": 0.0
+        },
+        "5": {
+          "absolute": 0.0,
+          "scale": 1.0,
+          "relative": 0.0
+        },
+        "6": {
+          "absolute": 0.0,
+          "scale": 2494.3904230382586,
+          "relative": 0.0
+        },
+        "7": {
+          "absolute": 0.0,
+          "scale": 4548.652384919962,
+          "relative": 0.0
+        },
+        "8": {
+          "absolute": 0.0,
+          "scale": 2117.9479737324,
+          "relative": 0.0
+        },
+        "9": {
+          "absolute": 0.0,
+          "scale": 197916.66666666666,
+          "relative": 0.0
+        },
+        "10": {
+          "absolute": 0.0,
+          "scale": 99983.72395833333,
+          "relative": 0.0
+        }
+      },
+      "weak": {
+        "weight": {
+          "absolute": 0.0,
+          "scale": 100.07758103040881,
+          "relative": 0.0
+        },
+        "p": {
+          "absolute": 0.0,
+          "scale": 5631.954421118979,
+          "relative": 0.0
+        },
+        "tauN": {
+          "absolute": 0.0,
+          "scale": 4182.489162630064,
+          "relative": 0.0
+        },
+        "q": {
+          "absolute": 0.0,
+          "scale": 2670840081.6653547,
+          "relative": 0.0
+        },
+        "sigma": {
+          "absolute": 0.0,
+          "scale": 5003875404.926041,
+          "relative": 0.0
+        },
+        "bg": {
+          "absolute": 0.0,
+          "scale": 2670842710.454354,
+          "relative": 0.0
+        }
+      }
+    },
+    "2": {
+      "fault": {
+        "x_m": {
+          "absolute": 0.0,
+          "scale": 78867.5134594813,
+          "relative": 0.0
+        },
+        "y_m": {
+          "absolute": 0.0,
+          "scale": 100000.0,
+          "relative": 0.0
+        },
+        "V_m_per_s": {
+          "absolute": 0.0,
+          "scale": 1.0001512716247519e-09,
+          "relative": 0.0
+        },
+        "Theta_s": {
+          "absolute": 0.0,
+          "scale": 8043190.220884953,
+          "relative": 0.0
+        },
+        "slip_m": {
+          "absolute": 0.0,
+          "scale": 0.005332904599490282,
+          "relative": 0.0
+        },
+        "q_weak_Pa": {
+          "absolute": 0.0,
+          "scale": 26721168.89869865,
+          "relative": 0.0
+        },
+        "sigma_n_weak_Pa": {
+          "absolute": 0.0,
+          "scale": 50004101.12429236,
+          "relative": 0.0
+        }
+      },
+      "current_stress_source": {
+        "V": {
+          "absolute": 0.0,
+          "scale": 1.0000125915967102e-09,
+          "relative": 0.0
+        },
+        "chi": {
+          "absolute": 0.0,
+          "scale": 0.002742566175788993,
+          "relative": 0.0
+        },
+        "p": {
+          "absolute": 0.0,
+          "scale": 36049.12429584301,
+          "relative": 0.0
+        },
+        "tau_xx": {
+          "absolute": 0.0,
+          "scale": 30625.717455252303,
+          "relative": 0.0
+        },
+        "tau_yy": {
+          "absolute": 0.0,
+          "scale": 32133.13689264153,
+          "relative": 0.0
+        },
+        "tau_xy": {
+          "absolute": 0.0,
+          "scale": 26392.828482531142,
+          "relative": 0.0
+        },
+        "tauN": {
+          "absolute": 0.0,
+          "scale": 25609.460755010645,
+          "relative": 0.0
+        },
+        "sigma_n": {
+          "absolute": 0.0,
+          "scale": 50015530.49529259,
+          "relative": 0.0
+        },
+        "q": {
+          "absolute": 0.0,
+          "scale": 26742856.272000097,
+          "relative": 0.0
+        },
+        "eps_xx": {
+          "absolute": 0.0,
+          "scale": 1.1746840902480412e-12,
+          "relative": 0.0
+        },
+        "eps_yy": {
+          "absolute": 0.0,
+          "scale": 1.163548929759567e-12,
+          "relative": 0.0
+        },
+        "eps_xy": {
+          "absolute": 0.0,
+          "scale": 6.862332479199619e-13,
+          "relative": 0.0
+        }
+      },
+      "top": {
+        "chi": {
+          "absolute": 0.0,
+          "scale": 0.0027423574019480503,
+          "relative": 0.0
+        },
+        "tau_xx": {
+          "absolute": 0.0,
+          "scale": 3037.906072514117,
+          "relative": 0.0
+        },
+        "tau_yy": {
+          "absolute": 0.0,
+          "scale": 3680.024937326636,
+          "relative": 0.0
+        },
+        "tau_xy": {
+          "absolute": 0.0,
+          "scale": 701.859228181932,
+          "relative": 0.0
+        }
+      },
+      "bottom": {
+        "chi": {
+          "absolute": 0.0,
+          "scale": 0.0027423608759278924,
+          "relative": 0.0
+        },
+        "tau_xx": {
+          "absolute": 0.0,
+          "scale": 3127.3865241144113,
+          "relative": 0.0
+        },
+        "tau_yy": {
+          "absolute": 0.0,
+          "scale": 5479.3455513694125,
+          "relative": 0.0
+        },
+        "tau_xy": {
+          "absolute": 0.0,
+          "scale": 3825.529184019467,
+          "relative": 0.0
+        }
+      },
+      "committed_particle_stress": {
+        "2": {
+          "absolute": 0.0,
+          "scale": 30556.404250704054,
+          "relative": 0.0
+        },
+        "3": {
+          "absolute": 0.0,
+          "scale": 32934.368574882,
+          "relative": 0.0
+        },
+        "4": {
+          "absolute": 0.0,
+          "scale": 26611.29757248055,
+          "relative": 0.0
+        }
+      },
+      "bulk_FE": {
+        "0.0": {
+          "absolute": 0.0,
+          "scale": 2.840987388644745e-10,
+          "relative": 0.0
+        },
+        "1.0": {
+          "absolute": 0.0,
+          "scale": 5.101057466444509e-10,
+          "relative": 0.0
+        },
+        "2.0": {
+          "absolute": 0.0,
+          "scale": 36172.247564525365,
+          "relative": 0.0
+        },
+        "3.0": {
+          "absolute": 0.0,
+          "scale": 293.0,
+          "relative": 0.0
+        },
+        "4.0": {
+          "absolute": 0.0,
+          "scale": 842.2551546265867,
+          "relative": 0.0
+        },
+        "5.0": {
+          "absolute": 0.0,
+          "scale": 1692.9237333482536,
+          "relative": 0.0
+        },
+        "6.0": {
+          "absolute": 0.0,
+          "scale": 385.21871016028757,
+          "relative": 0.0
+        },
+        "7.0": {
+          "absolute": 0.0,
+          "scale": 7999999.999999984,
+          "relative": 0.0
+        },
+        "8.0": {
+          "absolute": 0.0,
+          "scale": 1.0,
+          "relative": 0.0
+        },
+        "9.0": {
+          "absolute": 0.0,
+          "scale": 0.6,
+          "relative": 0.0
+        }
+      },
+      "particle_properties": {
+        "1": {
+          "absolute": 0.0,
+          "scale": 197916.66533358934,
+          "relative": 0.0
+        },
+        "2": {
+          "absolute": 0.0,
+          "scale": 99983.72626700385,
+          "relative": 0.0
+        },
+        "3": {
+          "absolute": 0.0,
+          "scale": 2141.472802616511,
+          "relative": 0.0
+        },
+        "4": {
+          "absolute": 0.0,
+          "scale": 7999999.999999978,
+          "relative": 0.0
+        },
+        "5": {
+          "absolute": 0.0,
+          "scale": 1.0,
+          "relative": 0.0
+        },
+        "6": {
+          "absolute": 0.0,
+          "scale": 30556.404250704054,
+          "relative": 0.0
+        },
+        "7": {
+          "absolute": 0.0,
+          "scale": 32934.368574882,
+          "relative": 0.0
+        },
+        "8": {
+          "absolute": 0.0,
+          "scale": 26611.29757248055,
+          "relative": 0.0
+        },
+        "9": {
+          "absolute": 0.0,
+          "scale": 197916.66600014953,
+          "relative": 0.0
+        },
+        "10": {
+          "absolute": 0.0,
+          "scale": 99983.72511260786,
+          "relative": 0.0
+        }
+      },
+      "native_fault": {
+        "fault_id": {
+          "absolute": 0.0,
+          "scale": 0.0,
+          "relative": 0.0
+        },
+        "slip_rate": {
+          "absolute": 0.0,
+          "scale": 1.0001512716247519e-09,
+          "relative": 0.0
+        },
+        "slip_state": {
+          "absolute": 0.0,
+          "scale": 8043190.220884953,
+          "relative": 0.0
+        },
+        "cohesive_traction": {
+          "absolute": 0.0,
+          "scale": 0.0,
+          "relative": 0.0
+        },
+        "previous_I_h": {
+          "absolute": 0.0,
+          "scale": 12713.30754698249,
+          "relative": 0.0
+        },
+        "composition_strengthening": {
+          "absolute": 0.0,
+          "scale": 1.0000460905375907,
+          "relative": 0.0
+        },
+        "background_tractions": {
+          "absolute": 0.0,
+          "scale": 50000000.0,
+          "relative": 0.0
+        },
+        "cumulative_slip": {
+          "absolute": 0.0,
+          "scale": 0.005332904599490282,
+          "relative": 0.0
+        }
+      },
+      "weak": {
+        "weight": {
+          "absolute": 0.0,
+          "scale": 100.07758103040881,
+          "relative": 0.0
+        },
+        "p": {
+          "absolute": 0.0,
+          "scale": 262494.9464246596,
+          "relative": 0.0
+        },
+        "tauN": {
+          "absolute": 0.0,
+          "scale": 120249.37701766794,
+          "relative": 0.0
+        },
+        "q": {
+          "absolute": 0.0,
+          "scale": 2668442995.204855,
+          "relative": 0.0
+        },
+        "sigma": {
+          "absolute": 0.0,
+          "scale": 5004051069.059912,
+          "relative": 0.0
+        },
+        "bg": {
+          "absolute": 0.0,
+          "scale": 2670842710.454354,
+          "relative": 0.0
+        }
+      }
+    }
+  },
+  "passed": true
+}

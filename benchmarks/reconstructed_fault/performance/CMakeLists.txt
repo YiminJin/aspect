@@ -6,3 +6,5 @@ add_library(fault_rollback SHARED ../../../tests/phase_field_fault_stage_i_rollb
 ASPECT_SETUP_PLUGIN(fault_rollback)
 add_library(fault_stage_i SHARED ../../../tests/phase_field_fault_stage_i.cc)
 ASPECT_SETUP_PLUGIN(fault_stage_i)
+add_library(fault_frozen_gmg SHARED ../../../tests/reconstructed_fault_frozen_gmg.cc)
+ASPECT_SETUP_PLUGIN(fault_frozen_gmg)

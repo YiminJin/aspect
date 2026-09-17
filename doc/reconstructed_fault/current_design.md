@@ -502,6 +502,36 @@ during mechanics with its nonsymmetric Jacobian, then ordinary terminal
 publication commits that candidate once. This benchmark alternative does not
 replace the default split-state algorithm or qualify general replay restart.
 
+The separately authorized frozen BP3 free-trace diagnostic is specified in
+`bp3/stage_K5_free_trace_addendum.md`. At the 40-km prescribed/free junction,
+one node represents the free trace while the deep trace stays exactly Vp.
+Mechanical weights on the adjacent fully prescribed segment become (1,0),
+eliminating its constant prescribed trace through its other prescribed node.
+Geometric/property interpolation remains unchanged; B, residual, K, G and
+norms share the modified kinematic basis. This explicitly selected experiment
+must roll back before any history or kinematic publication. It is not a new
+default or a general discontinuous/committing surface representation.
+The later explicitly authorized seven-step committing comparison is specified
+in `bp3/stage_K5_trace_replay_addendum.md`. Its separate benchmark selector
+also splits state/slip on the prescribed side, while leaving geometry and
+material-property interpolation unchanged.
+
+The later fully frictional comparison is explicitly authorized in
+`bp3/stage_K5_fully_frictional_addendum.md`: remove every prescribed deep
+rate, retain continuous Q1 fields and the work-measure boundary extensions,
+and start from the original physical initial data for seven steps. This is
+a changed BP3 boundary condition, not the default or a split-trace method.
+
+**K5 consolidation:** the successful fully frictional configuration is now
+selected explicitly by benchmark parameter `Fault loading configuration =
+fully frictional`, with `prescribed deep slip` retained as the reference/default.
+See `bp3/stage_K5_cleanup_report.md`. The earlier free-trace, candidate-state,
+frozen-cohesion and noncommitting A/B descriptions above record historical
+experiments, not current runtime choices. Their sources and evidence are
+archived; the maintained core uses continuous Q1 kinematics and committed
+state during mechanics. The split history cycle and work-measure equations
+are unchanged. No unrestricted boundary-extension default is introduced.
+
 Bounded benchmark replays may select `BP3 replay complete`, which terminates
 only after the accepted-state history audit reaches the last saved comparison
 time, allowing eight machine-epsilon-scaled units of time-representation error.
@@ -1162,6 +1192,15 @@ assumed. A returned linear direction must pass a freshly computed residual
 test, not merely the Arnoldi estimate. Residual replacement/restart shares
 the existing total linear iteration budget.
 
+The bounded K5 GMG experiment changes only the velocity-block preconditioner
+inside the assembled block-Schur inverse. It reuses ASPECT's velocity GMG
+hierarchy while retaining assembled fine A, sparse B/G, the surface inverse,
+pressure-block treatment and outer FGMRES. The synchronous post-linear-solve
+observer permits tests to compare the same frozen RHS/operator before any
+trial/history commit. Reference-action comparisons belong in tests, not in
+production vmult loops. See `bp3/stage_K5_gmg_prototype.md`; this is not support
+for a full matrix-free reconstructed-fault solver or coupled multigrid levels.
+
 For incompressible prescribed-friction-pressure coupling in a closed/periodic
 domain, the solver may work on the algebraic constant-pressure complement.
 First verify both null identities for the full homogeneous constrained
@@ -1174,8 +1213,10 @@ RHS or full-residual null component exceeding either 100 machine epsilons
 times the maximum of the initial bulk residual, zero-velocity reference,
 and current condensed RHS norm, or the unchanged absolute nonlinear bulk
 target. This is an internal backward-error check, not a new parameter
-or permission to discard significant incompatibility. Report the estimated,
-fresh projected and raw full residuals and the compatibility component.
+or permission to discard significant incompatibility. Normal convergence output
+reports the fresh residual and requested target. Detailed diagnostic mode also
+reports the Arnoldi estimate, raw full residual and compatibility components;
+silencing diagnostic prose never disables these acceptance checks.
 
 Block-action, condensed-action, right-hand-side,
 and recovery signs must be verified against centered finite differences of a
@@ -1316,6 +1357,48 @@ Q1. The background selector is reattached by the owning plugin on restart.
 The mature geometry marker and identically zero C distinguish compatible
 histories. Theta keeps its original nodal split update and timestep-zero
 retention semantics. Restart does not reload the initial snapshot file.
+
+The modified fully frictional research fixture's original restart audit was
+blocked by cold-Ih bitwise reproducibility (see the K5 research restart report).
+The long-run preparation adds the approved restricted restoration: after
+restart, cold-recompute and compare with persisted previous-Ih using the
+unchanged quadrature/tail budget; require fixed mature geometry, identical
+current/previous frozen phase and composition-independent degradation, then
+restore the persisted values exactly before publishing the cache key. This
+does not restore search caches or overwrite accepted history. Changed inputs
+are rejected rather than silently accepting a new normalization.
+Benchmark checkpoint version 4 preserves
+the original inert-H, fixed-geometry and completed-Ih audit baseline, in
+addition to accumulated slip, preceding Theta, last accepted step and output
+state. It verifies the fully-frictional/work-measure selectors before reuse;
+it does not convert earlier investigation checkpoints. Runtime work/source
+selectors and the fixed background-property indices are reattached before
+mechanics, without reinitializing histories or recalibrating background.
+Immutable mesh, fault, prestress and paired completion inputs reside in
+`benchmarks/reconstructed_fault/bp3/fixtures/modified_bp3/` with SHA-256 provenance.
+The seven-step saved-clock regression and explicitly bounded ordinary-adaptive
+continuation are separate benchmark execution modes. Neither changes the
+split constitutive cycle or global endpoint/mature defaults.
+
+The separately selected modified-BP3 long-run fixture removes junction-only
+refinement, not the physical junction law or the ordinary fault band. Its
+version-5 checkpoints additionally retain coordinated output clocks/slip
+references and native fault time-series metadata. Only strengthening is
+spatially refreshed by the opt-in initial-composition property; unrelated
+histories are untouched, and old particle-layout checkpoints are not converted.
+A benchmark observer chooses heavy output after accepted history publication;
+native bulk/particle/fault writers share the decision, and a final observer
+advances its per-node slip reference only after all writers return. Rejected
+states cannot advance it. Restart creates a new output branch and restores
+the selected checkpoint's metadata prefix, preserving prior evidence.
+The BP3 cumulative-slip CSV records every accepted vertex state, independently
+of visualization throttling, with stored-order arclength and physical down-dip
+coordinate. Its restart branch streams only the selected accepted prefix;
+the checkpointed slip vector, not the CSV, remains constitutive/output history.
+Reconstructed-fault VTU names are output-only aliases with underscore separators;
+optional property exclusions do not change registry names, values or checkpoints.
+See `bp3/stage_K5_long_run_preparation.md` for the bounded verification and
+limitations; this is not first-event or recurrence-cycle qualification.
 
 ## 25. Stage-J constitutive history feedback
 

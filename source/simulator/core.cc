@@ -148,10 +148,12 @@ namespace aspect
     typename parallel::distributed::Triangulation<dim>::Settings
     settings(const Parameters<dim> &parameters)
     {
-      // Only local smoothing GMG needs a mesh hierarchy to be constructed:
-      if ((parameters.stokes_solver_type == Parameters<dim>::StokesSolverType::block_gmg ||
+      // The opt-in assembled-preconditioner probe also needs level ghosts;
+      // it retains the assembled fine operator and ordinary AMG reference.
+      if (std::getenv("ASPECT_FAULT_GMG_HIERARCHY") || std::getenv("ASPECT_FAULT_VELOCITY_GMG") ||
+          ((parameters.stokes_solver_type == Parameters<dim>::StokesSolverType::block_gmg ||
            parameters.stokes_solver_type == Parameters<dim>::StokesSolverType::default_solver)
-          && parameters.stokes_gmg_type == Parameters<dim>::StokesGMGType::local_smoothing)
+          && parameters.stokes_gmg_type == Parameters<dim>::StokesGMGType::local_smoothing))
         return static_cast<typename parallel::distributed::Triangulation<dim>::Settings>
                (parallel::distributed::Triangulation<dim>::mesh_reconstruction_after_repartitioning |
                 parallel::distributed::Triangulation<dim>::construct_multigrid_hierarchy);

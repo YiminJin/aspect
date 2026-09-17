@@ -2,9 +2,7 @@
 #define ASPECT_BENCHMARK_BP3_MODEL_H
 
 #include <algorithm>
-#include <array>
 #include <cmath>
-#include <stdexcept>
 
 namespace BP3
 {
@@ -58,70 +56,5 @@ namespace BP3
   inline double normal_distance(double x, double y)
   { return std::abs((trace_x-x)*sine-(box_size-y)*cosine); }
 
-  using Stress = std::array<double, 3>; // total effective xx, yy, xy; tensile positive
-
-  class Airy
-  {
-    public:
-      Airy(double angle, double normal, double shear)
-      {
-        const double sn=std::sin(2*angle), co=std::cos(2*angle);
-        const double a11=2*(co-1), a12=2*(sn-2*angle);
-        const double a21=2*sn, a22=2*(1-co), det=a11*a22-a12*a21;
-        if (std::abs(det)<1e-12) throw std::runtime_error("Singular BP3 Airy wedge");
-        C=(normal*a22-a12*shear)/det;
-        D=(a11*shear-normal*a21)/det;
-        A=-C; B=-2*D;
-      }
-
-      Stress stress(double theta, int side) const
-      {
-        // Phi=r^2 f(theta): equilibrium is exact away from the corner.
-        // No old radial blending or cohesion-dependent change of Theta0.
-        const double f=A+B*theta+C*std::cos(2*theta)+D*std::sin(2*theta);
-        const double rr=2*f-4*C*std::cos(2*theta)-4*D*std::sin(2*theta);
-        const double tt=2*f, rt=-B+2*C*std::sin(2*theta)-2*D*std::cos(2*theta);
-        const double c=std::cos(theta), s=std::sin(theta);
-        return {{rr*c*c+tt*s*s-2*rt*c*s,
-                rr*s*s+tt*c*c+2*rt*c*s,
-                side*((rr-tt)*c*s+rt*(c*c-s*s))}};
-      }
-
-      Stress radial_stress(double theta, int side, double integral_over_r,
-                           double traction, double r_derivative) const
-      {
-        // For the unit-shear angular mode use Phi=r*integral(q dr)*f.
-        // Its fault value f=0 preserves normal traction, while -f'=+/-1
-        // prescribes q(r). Radial derivatives are retained: this is not stress blending.
-        const double f=A+B*theta+C*std::cos(2*theta)+D*std::sin(2*theta);
-        const double df=B-2*C*std::sin(2*theta)+2*D*std::cos(2*theta);
-        const double ddf=-4*C*std::cos(2*theta)-4*D*std::sin(2*theta);
-        const double rr=(integral_over_r+traction)*f+integral_over_r*ddf;
-        const double tt=(2*traction+r_derivative)*f, rt=-traction*df;
-        const double c=std::cos(theta), s=std::sin(theta);
-        return {{rr*c*c+tt*s*s-2*rt*c*s, rr*s*s+tt*c*c+2*rt*c*s,
-                side*((rr-tt)*c*s+rt*(c*c-s*s))}};
-      }
-
-    private:
-      double A, B, C, D;
-  };
-
-  inline Stress stress(double x, double y, double cohesive)
-  {
-    const double xb=trace_x-x, z=box_size-y;
-    if (std::hypot(xb,z)==0)
-      throw std::runtime_error("BP3 Airy corner has directional traces, not a unique point stress");
-    const bool plus = xb*sine-z*cosine>=0;
-    const Airy wedge(plus ? dip : std::acos(-1.)-dip,
-                     -sigma0, (plus ? 1 : -1)*(tau0+cohesive));
-    return wedge.stress(std::atan2(z, plus ? xb : -xb), plus ? 1 : -1);
-  }
-
-  inline double shear(const Stress &s)
-  { return sine*cosine*(s[1]-s[0])+(cosine*cosine-sine*sine)*s[2]; }
-
-  inline double normal(const Stress &s)
-  { return -sine*sine*s[0]+2*sine*cosine*s[2]-cosine*cosine*s[1]; }
 }
 #endif

@@ -620,6 +620,12 @@ namespace aspect
                                            : random(generator);
                   auto result=make_owned_system_vector();
                   bulk_assembler.apply_B(probe,result);
+                  auto reference=make_owned_system_vector();
+                  bulk_assembler.apply_B_reference(probe,reference);
+                  const double scale=std::max(result.l2_norm(),reference.l2_norm());
+                  reference-=result;
+                  AssertThrow(reference.l2_norm()<=2.e-11*scale,
+                              ExcMessage("Sparse B disagrees with the independent quadrature action."));
                   auto owned=make_owned_system_vector();
                   for (unsigned int b=0; b<2; ++b)
                     for (types::global_dof_index i=0; i<owned.block(b).size(); ++i)
@@ -636,6 +642,17 @@ namespace aspect
                     this->get_mpi_communicator());
                   ghosted=owned;
                   surface_system.apply_G(ghosted,probe);
+                  typename ReconstructedFaultSurfaceSystem<dim>::FaultVector reference_G;
+                  surface_system.apply_G_reference(ghosted,reference_G);
+                  double error=0.,norm=0.;
+                  for (unsigned int f=0; f<probe.size(); ++f)
+                    for (unsigned int v=0; v<probe[f].size(); ++v)
+                      {
+                        error+=Utilities::fixed_power<2>(probe[f][v]-reference_G[f][v]);
+                        norm+=Utilities::fixed_power<2>(reference_G[f][v]);
+                      }
+                  AssertThrow(std::sqrt(error)<=2.e-11*std::sqrt(norm),
+                              ExcMessage("Sparse G disagrees with the independent quadrature action."));
                 }
               this->get_pcout() << "Sparse B/G basis/random reference actions: verified" << std::endl;
             }

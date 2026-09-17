@@ -1,0 +1,6 @@
+{
+  "target_cells.txt": {
+    "sha256": "747900473112d36c76bedc7eddbaf6adb152098425a13bf6a3270f2029ae54cf",
+    "source": "prepare_wide_fixture.py; unchanged central leaf cells plus graded lateral extension"
+  }
+}

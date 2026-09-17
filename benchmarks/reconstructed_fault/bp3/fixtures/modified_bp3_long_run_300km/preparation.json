@@ -1,0 +1,16 @@
+{
+  "cells": 36282,
+  "old_cells": 36194,
+  "minimum_side_m": 97.65625,
+  "maximum_side_m": 12500.0,
+  "box": [
+    -100000,
+    200000,
+    0,
+    100000
+  ],
+  "retained_physical_cells": 36186,
+  "fault_and_prestress_and_completion_unchanged": true,
+  "dip_degrees": 60,
+  "ell_m": 400
+}

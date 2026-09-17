@@ -1,4 +1,4 @@
-#include "bp3_model.h"
+#include "reference_200km/bp3_model.h" // Airy diagnostic, never production prestress.
 #include <iostream>
 #include <iomanip>
 

@@ -72,8 +72,7 @@ namespace aspect
               // this response with the nonlinear load copied for its layout.
               response=0.;
               base.vmult(response,load);
-              if (std::getenv("ASPECT_FAULT_VERIFY_INTERFACE")
-                  || std::getenv("ASPECT_FAULT_COMPARE_COUPLING"))
+              if (std::getenv("ASPECT_FAULT_VERIFY_INTERFACE"))
                 AssertThrow(response.block(1).l2_norm()==0.,
                             dealii::ExcMessage("A B-generated interface response retained stale pressure."));
               FaultVector KQ,GY;

@@ -300,6 +300,8 @@ namespace aspect
         unsigned int fault_index = numbers::invalid_unsigned_int;
         unsigned int segment_index = numbers::invalid_unsigned_int;
         double xi = numbers::signaling_nan<double>();
+        /** Continuous Q1 mechanical basis weights (1-xi,xi), including
+         * the constant endpoint extension of the bulk source. */
         double shape_0 = numbers::signaling_nan<double>();
         double shape_1 = numbers::signaling_nan<double>();
         double signed_distance = numbers::signaling_nan<double>();

@@ -1,0 +1,52 @@
+# Exploratory modified BP3. No seven-step clock; not a converged SEAS reference.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/bp3_modified_wide.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/modified-bp3-long-run
+set End time = 47336400000
+subsection Mesh refinement
+  set Initial adaptive refinement = 8
+end
+subsection Fault reconstruction
+  set Prescribed faults file = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/fixtures/modified_bp3_long_run/fault.txt
+end
+subsection Time stepping
+  set List of model names = convection time step, reconstructed fault time step
+end
+subsection Termination criteria
+  set Termination criteria = end time, BP3 long run complete
+  set Checkpoint on termination = true
+end
+subsection Postprocess
+  # Decision first, writers next, reference publication last.
+  set List of postprocessors = reconstructed fault BP3, visualization, particles, reconstructed faults, BP3 output complete
+  subsection Particles
+    set Data output format = vtu
+    set Time between data output = 0
+    set Number of grouped files = 4
+  end
+  subsection Visualization
+    set Time between graphical output = 0
+    set Output format = vtu
+    set Number of grouped files = 4
+    set Interpolate output = true
+    set Write in background thread = false
+    set List of output variables =
+  end
+  subsection BP3
+    set Long run output = true
+    set First event run = true
+    set Stop after first event = false
+    set Audit full state every step = false
+    set Heavy output slip interval = 0.1
+    set Heavy output time interval = 31557600
+    set Profile slip interval = 0.01
+    set Profile time interval = 3155760
+    set Graceful wall seconds = 86400
+    set Mature prestress file = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/fixtures/modified_bp3_long_run/prestress.txt
+    set Bottom normalization completion file = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/fixtures/modified_bp3_long_run/completion.txt
+  end
+end
+subsection Checkpointing
+  set Steps between checkpoint = 0
+  set Time between checkpoint = 1800
+  # This branch retains three checkpoint slots in checkpoint_restart.cc.
+end

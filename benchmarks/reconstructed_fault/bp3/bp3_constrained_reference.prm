@@ -1,0 +1,9 @@
+# Reference only: retain the entire deep interval prescribed at Vp.
+# Same corrected work measure, mature law, mesh, phase and loading.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/bp3_modified_fully_frictional.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/constrained-reference
+subsection Postprocess
+  subsection BP3
+    set Fault loading configuration = prescribed deep slip
+  end
+end

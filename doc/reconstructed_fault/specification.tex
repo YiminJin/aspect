@@ -681,6 +681,35 @@ Accepted bulk diagnostics use the frozen working FE old history, not the
 newly committed particle array. Initial stress and state retention, followed
 by the first physical history update, must be checked before continuing.
 
+The separately authorized frozen BP3 free-trace diagnostic permits one
+independent free-side rate at the 40-km prescribed/free junction. The deep
+trace remains exactly prescribed. Eliminate that constant trace through the
+other prescribed endpoint of the adjacent deep segment, using mechanical
+weights $(1,0)$ there, while retaining geometric Q1 interpolation of every
+history and material property. The same mechanical basis shall enter source,
+$B$, residual, $K$, $G$ and norms, with no extra or omitted physical measure.
+This explicitly selected noncommitting experiment must roll back before
+publication; it does not revise the default continuous-Q1 representation.
+See \texttt{bp3/stage\_K5\_free\_trace\_addendum.md} for the bounded scope.
+The subsequent authorized seven-step committing experiment additionally uses
+the deep node's independent state and slip on the adjacent prescribed segment;
+the free trace retains its own nodal histories. Both evolve once per accepted
+step, with lagged state in mechanics. It is separately selected and bounded by
+\texttt{bp3/stage\_K5\_trace\_replay\_addendum.md}.
+The later authorized fully frictional comparison instead removes all deep
+prescribed rates, including the bottom endpoint, and retains continuous Q1
+fields. Both continued boundary sources use their current free endpoint
+rates in the same work equation. See
+\texttt{bp3/stage\_K5\_fully\_frictional\_addendum.md} for the seven-step scope.
+
+Following K5 consolidation, the benchmark explicitly selects the successful
+fully frictional research configuration; prescribed deep slip remains its
+reference/default. The preceding alternative-trace and candidate-state
+experiments are archived qualifications, not maintained runtime alternatives.
+The current core retains continuous Q1 kinematics and the split committed-state
+mechanical equation above. See the K5 cleanup report; no global endpoint or
+mature-fault default is changed.
+
 For every reconstructed-fault quadrature point determine one surface material
 mixture $\mathbf f_\Gamma$ by projecting chemical compositional fields from
 particles to the Q1 fault surface and converting the interpolated surface
@@ -1270,6 +1299,43 @@ do not modify constitutive history, timesteps, or solver decisions. Full
 filesystem restart equivalence is required before server-run preparation is
 considered complete.
 
+For the explicitly selected fully frictional mature work-measure research
+fixture, benchmark checkpoint version 4 additionally preserves its original
+inert-$H$, fixed-geometry and completed-$I_h$ audit baseline and validates
+the kinematic/work-measure selectors. This targets restart of that same
+fixture, not conversion of earlier investigation checkpoints. The original
+qualification was blocked by cold-$I_h$ bitwise reproducibility. The approved
+long-run correction retains the fixed-profile invariant: for fixed mature
+geometry, identical current/previous phase and composition-independent
+degradation, recompute once and compare to persisted previous-$I_h$ within
+the unchanged quadrature/tail budget, then restore those persisted values
+exactly before publishing the transient cache key. Invalid or changed inputs
+fail validation; evolved histories are never overwritten. Runtime source
+continuations, work-measure selection and background-property indices are
+reattached before mechanics; stored histories and background coefficients are
+never reinitialized. The bounded saved-clock replay and ordinary adaptive
+continuation are separate benchmark modes, both checkpointing accepted states.
+
+The separate modified-BP3 long-run mode uses version-5 benchmark archives and
+a new selected-field particle layout; old-layout archives are not converted.
+It serializes accumulated signed slip, event state, all light/heavy output
+references and clocks, and native fault time-series metadata. A heavy output
+decision uses $\max_j|\delta_j-\delta_j^{\rm last\ output}|$ only at accepted
+states and is shared by native bulk, particle and fault writers. Advance the
+reference only after those writers succeed. Initial and gracefully final
+accepted states are included; output triggers do not constrain timesteps.
+Checkpoint metadata snapshots identify their actual accepted state. Restart
+branches preserve prior evidence and restore the selected metadata prefix.
+The benchmark's every-accepted-state cumulative-slip table is independent of
+the throttled graphical output. It records local arclength and down-dip
+coordinates; restart branches retain only the selected accepted prefix.
+Its data are not used to reconstruct constitutive history: accumulated slip
+is already checkpointed. Output-only property aliases/exclusions never alter
+the manager's stored registry or its checkpoint layout.
+Selected-field initial-composition refresh reevaluates only strengthening at
+current particle positions; it never resets constitutive history. Empty
+selection preserves the generic property's previous behavior.
+
 \section{Timestep ordering}
 
 For the initial implementation use
@@ -1639,6 +1705,15 @@ preconditioner $P_A$, without changing the condensed operator or its residual
 criteria. Preserve shared-face averaging, homogeneous constraints and physical
 pressure conversion; do not identify $G$ with $B^T$.
 
+The bounded K5 GMG prototype changes only the velocity-block preconditioner
+inside the assembled block-Schur inverse. It retains fine-level assembled
+$A$, the same $B/G/K_V^{-1}$, pressure-block treatment, and outer FGMRES.
+Reuse ASPECT's velocity hierarchy and verify the homogeneous constraints and
+active-vector numbering; do not apply an additional matrix-free RHS lift.
+Test-only synchronous observers may compare the same frozen operator/RHS
+before a nonlinear trial is committed. This does not qualify a full
+matrix-free fault solver or a coupled multigrid hierarchy.
+
 The supported assembled iterative path shall use FGMRES.  The condensed
 operator is generally nonsymmetric because $B$ and $G$ are not assumed to be
 transposes, so CG and MINRES are not valid outer solvers.  Verification shall
@@ -1653,7 +1728,9 @@ surface inverse. Project operator and preconditioner consistently. Reject
 RHS or residual incompatibility larger than either $100\epsilon_{\rm mach}$
 times the maximum of the initial bulk residual, zero-velocity reference,
 and current condensed RHS norm, or the unchanged absolute nonlinear bulk
-target. Retain and report raw and projected residuals. This numerical
+target. Retain both raw and projected residual checks. Normal convergence output
+reports the fresh residual and target; detailed diagnostic mode additionally
+reports the raw residual, Arnoldi estimate and compatibility components. This numerical
 backward-error check introduces no physical parameter and does not alter
 physical pressure normalization, homogeneous Newton constraints, or true-
 normal-stress/absolute-pressure configurations. Verification shall

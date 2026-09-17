@@ -127,6 +127,17 @@ namespace aspect
        */
       void build_preconditioner() override;
 
+      /** Build the existing velocity V-cycle without changing the Stokes RHS
+       * or solving with the matrix-free fine operator. The consumer borrows
+       * the cycle only during this call. Active velocity numbering and
+       * homogeneous constraints must match the assembled simulator system.
+       */
+      using VelocityCycle = PreconditionMG<dim,
+            dealii::LinearAlgebra::distributed::Vector<GMGNumberType>,
+            MGTransferMF<dim,GMGNumberType>>;
+      void with_velocity_preconditioner(
+        const std::function<void(const VelocityCycle &)> &consumer);
+
       /**
        * Declare parameters.
        */
@@ -183,6 +194,11 @@ namespace aspect
        * vmult of different matrices, solver IDR with the cheap preconditioner, etc.
        */
       bool do_timings;
+
+      // The preconditioner-only path validates velocity constraints against
+      // the simulator; auxiliary-field constraint callbacks must not receive
+      // a velocity-only DoF numbering.
+      bool preconditioner_only = false;
 
       /**
        * The max/min of the evaluated viscosities.

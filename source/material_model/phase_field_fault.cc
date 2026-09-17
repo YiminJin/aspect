@@ -45,8 +45,6 @@
 #include <fstream>
 #include <iomanip>
 #include <chrono>
-#include "fault_theta_history_diagnostic.h"
-#include "fault_cohesion_diagnostic.h"
 
 namespace aspect
 {
@@ -518,6 +516,7 @@ namespace aspect
         [this](parallel::distributed::Triangulation<dim> &)
         {
           invalidate_normalization_cache();
+          restore_frozen_normalization_after_restart = mature_frictional_fault && !evolve_phase_field;
           AssertThrow(this->get_reconstructed_fault_manager().has_property(
                         "mature fault reference geometry") == mature_frictional_fault,
                       ExcMessage("Cannot change cohesive/mature fault mode on restart."));
@@ -625,76 +624,15 @@ namespace aspect
         - 2.0 * bulk_coefficients.kappa * cohesive.localization_factor
           * inputs.slip_rate * inputs.slip_tensor;
 
-      double theta = fault_friction.has_state_variable()
+      // Mechanics uses the committed nodal state, interpolated in the same
+      // continuous Q1 space. Aging is applied once after the accepted solve.
+      const double theta = fault_friction.has_state_variable()
                            ? interpolate_fault_scalar(
-                               fault,
-                               inputs.segment_index, inputs.xi,
+                               fault, inputs.segment_index, inputs.xi,
                                fault_manager.get_property_information()[
                                  fault_property_indices.state].position,
                                "phase field fault state")
                            : 0.0;
-      // Disposable aging/interpolation audit. The file contains preceding
-      // histories and accepted rates, never the current Newton unknown V.
-      // Keep this frozen point state common to residual, K_V and G evaluation.
-      if (const char *path=std::getenv("ASPECT_FAULT_THETA_UPDATE_DIAGNOSTIC"))
-        {
-          AssertThrow(std::getenv("ASPECT_FAULT_NONCOMMITTING_DIAGNOSTIC") && fault_friction.has_state_variable(),
-                      ExcMessage("Pointwise aging override is restricted to noncommitting diagnostics."));
-          struct FrozenUpdate
-          {
-            unsigned int step, fault, segment;
-            double dt, theta_left, theta_right, V_left, V_right;
-          };
-          static const std::vector<FrozenUpdate> updates=[&]()
-          {
-            std::ifstream in(path);
-            AssertThrow(in,ExcMessage("Cannot read frozen pointwise aging inputs."));
-            std::vector<FrozenUpdate> values;
-            FrozenUpdate r;
-            while (in>>r.step>>r.fault>>r.segment>>r.dt>>r.theta_left>>r.theta_right>>r.V_left>>r.V_right)
-              values.push_back(r);
-            AssertThrow(in.eof() && !values.empty(),ExcMessage("Invalid frozen pointwise aging inputs."));
-            return values;
-          }();
-          for (const auto &r:updates)
-            {
-              AssertThrow(this->get_timestep_number()==r.step,ExcMessage("Frozen aging diagnostic used at the wrong step."));
-              if (inputs.fault_index==r.fault && inputs.segment_index==r.segment)
-                theta=fault_friction.update_state(
-                  (1-inputs.xi)*r.V_left+inputs.xi*r.V_right,
-                  (1-inputs.xi)*r.theta_left+inputs.xi*r.theta_right,r.dt);
-            }
-        }
-      if (const char *path=std::getenv("ASPECT_FAULT_THETA_HISTORY_DIAGNOSTIC"))
-        {
-          AssertThrow(!std::getenv("ASPECT_FAULT_THETA_UPDATE_DIAGNOSTIC")
-                      && inputs.fault_index==0 && dim==2 && fault_friction.has_state_variable(),
-                      ExcMessage("Functional Theta replay requires one fixed 2-D stateful fault."));
-          static internal::FaultThetaHistoryDiagnostic history;
-          history.load(path,this->get_timestep_number(),fault);
-          theta=history.value(inputs.segment_index,inputs.xi,
-            [&](const double v,const double old,const double dt)
-            { return fault_friction.update_state(v,old,dt); });
-        }
-      std::array<double,2> state_rate_derivative={{0.,0.}};
-      if (std::getenv("ASPECT_FAULT_WITHIN_STEP_STATE"))
-        {
-          AssertThrow((std::getenv("ASPECT_FAULT_NONCOMMITTING_DIAGNOSTIC")
-                       || std::getenv("ASPECT_BP3_COUPLED_STATE_REPLAY"))
-                      && mature_frictional_fault && this->get_timestep_number()>0
-                      && fault_friction.has_state_variable(),
-                      ExcMessage("Candidate nodal state requires the mature diagnostic or bounded coupled-state replay."));
-          const auto position=fault_manager.get_property_information()[
-            fault_manager.get_property_index("phase field fault state")].position;
-          theta=0.;
-          for (unsigned int j=0;j<2;++j)
-            {
-              const double old=fault.get_properties(inputs.segment_index+j)[position];
-              const double V=inputs.diagnostic_nodal_rates[j];
-              theta+=(j ? inputs.xi : 1-inputs.xi)*fault_friction.update_state(V,old,time_step);
-              state_rate_derivative[j]=fault_friction.update_state_derivative_wrt_slip_rate(V,old,time_step);
-            }
-        }
       const double mu = fault_friction.has_state_variable()
                         ? fault_friction.friction_coefficient(
                             localization.surface_material_fractions,
@@ -722,31 +660,10 @@ namespace aspect
         localization.surface_material_fractions, radiation_damping_coefficients,
         MaterialUtilities::arithmetic);
 
-      double surface_resistance=cohesive.cohesive_traction;
-      double cohesive_tangent=mature_frictional_fault ? 0.0
-                              : surface_coefficients.kappa/localization.current_I_h;
-      if (const char *path=std::getenv("ASPECT_FAULT_FROZEN_COHESION_DIAGNOSTIC"))
-        if (this->get_timestep_number()>0)
-          {
-            AssertThrow(dim==2 && inputs.fault_index==0
-                        && cohesive.history_correction==0.
-                        && localization.current_h==localization.previous_h
-                        && localization.current_I_h==localization.previous_I_h,
-                        ExcMessage("Frozen resistance diagnostic requires a fixed profile and one 2-D fault."));
-            static internal::FaultCohesionDiagnostic initial;
-            initial.load(path,fault);
-            const auto initial_coefficients=compute_maxwell_coefficients(surface_eta,surface_G,initial_time_step);
-            surface_resistance=initial.value(inputs.segment_index,inputs.xi,
-                                            initial_coefficients.beta,initial_coefficients.kappa);
-            cohesive_tangent=0.;
-          }
+      const double surface_resistance = cohesive.cohesive_traction;
+      const double cohesive_tangent = mature_frictional_fault ? 0.0
+                                     : surface_coefficients.kappa/localization.current_I_h;
       ReconstructedFaultPointResponse response;
-      response.evaluated_state=theta;
-      if (std::getenv("ASPECT_FAULT_WITHIN_STEP_STATE"))
-        for (unsigned int j=0;j<2;++j)
-          response.diagnostic_state_tangent[j]=sigma_n*state_rate_derivative[j]
-            *fault_friction.friction_coefficient_derivative_wrt_state(
-              localization.surface_material_fractions,inputs.slip_rate,theta);
       response.shear_traction = background_shear + stress * inputs.slip_tensor;
       response.normal_traction = sigma_n;
       response.background_normal_traction = background_normal;
@@ -911,8 +828,6 @@ namespace aspect
     PhaseFieldFault<dim>::prepare_reconstructed_fault_mechanical_solve()
     {
       TimerOutput::Scope coarse_timer(this->get_computing_timer(), "Fault: Property preparation");
-      Timer elapsed;
-      this->get_pcout() << "   Begin fault surface-property preparation." << std::endl;
       TimerOutput::Scope timer(*performance_timer, "Fault: Property preparation");
       AssertThrow(dim == 2, ExcNotImplemented());
       ReconstructedFaultManager<dim> &fault_manager =
@@ -1004,8 +919,6 @@ namespace aspect
       // Newton may start only after all pointwise constitutive inputs form one
       // complete frozen state.
       validate_reconstructed_fault_constitutive_state();
-      this->get_pcout() << "   End fault surface-property preparation: "
-                       << elapsed.wall_time() << " s." << std::endl;
     }
 
 
@@ -2007,13 +1920,12 @@ namespace aspect
     void
     PhaseFieldFault<dim>::compute_normalization_integrals()
     {
+      Timer preparation_timer;
       TimerOutput::Scope coarse_timer(this->get_computing_timer(), "Fault: I_h");
       TimerOutput::Scope timer(*performance_timer, "Fault: I_h preparation");
-      Timer preparation_timer;
       using Clock = std::chrono::steady_clock;
       const bool detailed_timing = std::getenv("ASPECT_FAULT_PERFORMANCE");
       const auto preparation_begin = Clock::now();
-      this->get_pcout() << "   Begin fault I_h preparation." << std::endl;
       // Invalidate before any failure-capable projection/evaluation. Only a
       // completed hit or successfully projected new result can publish validity.
       const bool previous_cache_valid = normalization_value_cache.valid;
@@ -2033,8 +1945,6 @@ namespace aspect
         {
           current_normalization_integrals.clear();
           normalization_point_lookups.batches.clear();
-          this->get_pcout() << "   End fault I_h preparation: no faults, "
-                           << preparation_timer.wall_time() << " s." << std::endl;
           return;
         }
 
@@ -2098,8 +2008,6 @@ namespace aspect
         {
           normalization_value_cache.valid = true;
           ++normalization_value_cache.hits;
-          this->get_pcout() << "   End fault I_h preparation: value cache hit, integration requests=0, "
-                           << preparation_timer.wall_time() << " s." << std::endl;
           return;
         }
       ++normalization_value_cache.integrations;
@@ -2382,6 +2290,37 @@ namespace aspect
           AssertThrow(error <= normalization_quadrature_tolerance+normalization_tail_tolerance,
                       ExcMessage("Cell I_h differs from the remote reference beyond the configured accuracy budget."));
         }
+      // A frozen mature checkpoint already owns the accepted normalization.
+      // Recompute once to validate the restored inputs, then retain its exact
+      // stored values instead of introducing a last-bit history change.
+      if (restore_frozen_normalization_after_restart)
+        {
+          AssertThrow(!this->get_parameters().mesh_deformation_enabled && composition_independent,
+                      ExcMessage("Frozen normalization restoration requires fixed geometry and composition-independent degradation."));
+          bool phase_unchanged=true;
+          for (const auto i : owned_indices)
+            phase_unchanged &= this->get_solution().block(phase_block)[i]
+                              == this->get_old_solution().block(phase_block)[i];
+          AssertThrow(Utilities::MPI::min(static_cast<unsigned int>(phase_unchanged),this->get_mpi_communicator()),
+                      ExcMessage("Frozen restart phase field differs from its retained history."));
+          const auto position=fault_manager.get_property_information()[
+            fault_property_indices.previous_normalization_integral].position;
+          double discrepancy=0.;
+          for (unsigned int f=0; f<faults.size(); ++f)
+            for (unsigned int v=0; v<faults[f].n_vertices(); ++v)
+              {
+                const double stored=faults[f].get_properties(v)[position];
+                AssertThrow(std::isfinite(stored) && stored>0.,ExcMessage("Invalid checkpointed frozen normalization."));
+                discrepancy=std::max(discrepancy,std::abs(current_normalization_integrals[f][v]/stored-1.));
+              }
+          AssertThrow(discrepancy<=normalization_quadrature_tolerance+normalization_tail_tolerance,
+                      ExcMessage("Restart normalization disagrees with the checkpointed frozen profile; inputs or mesh changed."));
+          for (unsigned int f=0; f<faults.size(); ++f)
+            for (unsigned int v=0; v<faults[f].n_vertices(); ++v)
+              current_normalization_integrals[f][v]=faults[f].get_properties(v)[position];
+          restore_frozen_normalization_after_restart=false;
+          this->get_pcout()<<"Restored validated frozen normalization; cold relative difference="<<discrepancy<<std::endl;
+        }
       // The result and key become reusable only after every profile and the
       // complete replicated projection have passed validation on every rank.
       normalization_value_cache.owned_phase_indices = owned_indices;
@@ -2411,8 +2350,6 @@ namespace aspect
                            << std::chrono::duration<double>(Clock::now()-integration_begin).count()-integration_seconds
                            << std::endl;
         }
-      this->get_pcout() << "   End fault I_h preparation: integrated, "
-                       << preparation_timer.wall_time() << " s." << std::endl;
     }
 
 
@@ -3142,16 +3079,12 @@ namespace aspect
     PhaseFieldFault<dim>::project_surface_chemical_compositions()
     {
       TimerOutput::Scope coarse_timer(this->get_computing_timer(), "Fault: Surface-property projection");
-      Timer elapsed;
-      this->get_pcout() << "   Begin fault surface material projection." << std::endl;
       const std::vector<unsigned int> &chemical_field_indices =
         this->introspection().chemical_composition_field_indices();
       AssertDimension(fault_property_indices.chemical_compositions.size(),
                       chemical_field_indices.size());
       if (chemical_field_indices.empty())
         {
-          this->get_pcout() << "   End fault surface material projection: no chemical fields, "
-                           << elapsed.wall_time() << " s." << std::endl;
           return;
         }
 
@@ -3181,8 +3114,6 @@ namespace aspect
         }
 
       fault_manager.project_particle_properties(projections);
-      this->get_pcout() << "   End fault surface material projection: "
-                       << elapsed.wall_time() << " s." << std::endl;
     }
 
 
@@ -3718,8 +3649,6 @@ namespace aspect
           AssertThrow(!mature_frictional_fault || (!evolve_phase_field
                         && this->get_parameters().reconstruct_faults),
                       ExcMessage("Mature frictional mode requires reconstructed faults and Evolve phase field=false."));
-          AssertThrow(!mature_frictional_fault || !std::getenv("ASPECT_FAULT_FROZEN_COHESION_DIAGNOSTIC"),
-                      ExcMessage("Do not combine mature friction with the frozen-cohesion diagnostic."));
           use_adiabatic_pressure_in_fault_friction =
             prm.get_bool("Use adiabatic pressure in fault friction");
           normalization_quadrature_tolerance =

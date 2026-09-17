@@ -219,6 +219,12 @@ namespace aspect
      */
     boost::signals2::signal<void (const std::string &)> post_checkpoint;
 
+    /** Optional shared accepted-state file gate for native bulk, particle and
+     * fault writers. Empty retains their ordinary schedules. This gates only
+     * files, not statistics, particle evolution or the postprocessor manager.
+     */
+    boost::signals2::signal<bool (const std::string &)> allow_native_output;
+
     /**
      * This signal is called whenever the pressure scaling is computed, see
      * Simulator::compute_pressure_scaling_factor(), and allows inspection
@@ -287,6 +293,27 @@ namespace aspect
                                   const unsigned int number_A_iterations,
                                   const SolverControl &solver_control_cheap,
                                   const SolverControl &solver_control_expensive)> post_stokes_solver;
+
+    /** Synchronous, noncommitting observation of a freshly verified condensed
+     * direction. The borrowed actions and vectors are valid only during the
+     * callback: full constrained operator, current block preconditioner,
+     * pressure-block inverse, RHS, direction, tolerance, iteration budget,
+     * and current bulk-preconditioner setup time. Test plugins may compare
+     * preconditioners without rebuilding or replacing the frozen operator.
+     * An observer must not mutate the simulator; exceptions retain the
+     * ordinary nonlinear rollback semantics.
+     */
+    using FaultBulkAction=std::function<void(LinearAlgebra::BlockVector &,
+                                           const LinearAlgebra::BlockVector &)>;
+    using FaultPressureAction=std::function<void(LinearAlgebra::Vector &,
+                                               const LinearAlgebra::Vector &)>;
+    boost::signals2::signal<void(const SimulatorAccess<dim> &,
+                                const FaultBulkAction &, const FaultBulkAction &,
+                                const FaultPressureAction &,
+                                const LinearAlgebra::BlockVector &,
+                                const LinearAlgebra::BlockVector &,
+                                double, unsigned int, double)>
+      post_reconstructed_fault_linear_solver;
 
     /**
      * A signal that is triggered when the iterative advection solver is done.

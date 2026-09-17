@@ -1649,7 +1649,8 @@ namespace aspect
       sim.prescribed_solution_manager.constrain_solution(constraints_v);
 
       // Let plugins add more constraints if they so choose:
-      sim.signals.post_constraints_creation(*this, constraints_v);
+      if (!preconditioner_only)
+        sim.signals.post_constraints_creation(*this, constraints_v);
 
       constraints_v.close ();
     }
@@ -1951,6 +1952,86 @@ namespace aspect
     mg_transfer_Schur_complement.build(dof_handler_p);
   }
 
+
+
+  template <int dim, int velocity_degree>
+  void
+  StokesMatrixFreeHandlerLocalSmoothingImplementation<dim,velocity_degree>::with_velocity_preconditioner(
+    const std::function<void(const VelocityCycle &)> &consumer)
+  {
+    AssertThrow(!this->get_parameters().mesh_deformation_enabled
+                && !this->get_material_model().is_compressible(),
+                ExcMessage("The assembled velocity-GMG prototype requires a fixed incompressible mesh."));
+    auto setup_timer=std::make_unique<TimerOutput::Scope>(
+      this->get_computing_timer(),"Fault: velocity GMG setup");
+    preconditioner_only = true;
+    setup_dofs();
+
+    // Both handlers use hierarchical numbering. Check its exact compatibility
+    // instead of silently interpreting an assembled vector in another space.
+    std::vector<types::global_dof_index> full(this->get_fe().n_dofs_per_cell());
+    std::vector<types::global_dof_index> velocity(fe_v.n_dofs_per_cell());
+    unsigned int mismatch = 0;
+    for (const auto &cell : dof_handler_v.active_cell_iterators())
+      if (cell->is_locally_owned())
+        {
+          cell->get_dof_indices(velocity);
+          typename DoFHandler<dim>::active_cell_iterator original(
+            &this->get_triangulation(),cell->level(),cell->index(),&this->get_dof_handler());
+          original->get_dof_indices(full);
+          for (unsigned int i=0; i<velocity.size(); ++i)
+            {
+              const auto component=fe_v.system_to_component_index(i);
+              const auto index=this->get_fe().component_to_system_index(
+                this->introspection().component_indices.velocities[component.first],component.second);
+              mismatch |= velocity[i]!=full[index];
+            }
+        }
+    for (const auto i : dof_handler_v.locally_owned_dofs())
+      {
+        const auto &constraints=this->get_current_constraints();
+        mismatch |= constraints.is_constrained(i)!=constraints_v.is_constrained(i);
+        if (constraints.is_constrained(i) && constraints_v.is_constrained(i))
+          mismatch |= *constraints.get_constraint_entries(i)!=*constraints_v.get_constraint_entries(i);
+      }
+    AssertThrow(Utilities::MPI::max(mismatch,this->get_mpi_communicator())==0,
+                ExcMessage("Velocity GMG numbering or homogeneous constraints differ from assembled Stokes."));
+
+    // Reuse material projection and level operators, but never assemble() here:
+    // its physical RHS lifting would double-count the coupled base lifting.
+    evaluate_material_model();
+    const unsigned int last=this->get_triangulation().n_global_levels()-1;
+    using VectorType=dealii::LinearAlgebra::distributed::Vector<GMGNumberType>;
+    using Smoother=PreconditionChebyshev<GMGABlockMatrixType,VectorType>;
+    MGLevelObject<typename Smoother::AdditionalData> data(0,last);
+    for (unsigned int level=0; level<=last; ++level)
+      {
+        mg_matrices_A_block[level].compute_diagonal();
+        data[level].smoothing_range=level ? 15. : 1e-3;
+        data[level].degree=level ? 4 : 8;
+        data[level].eig_cg_n_iterations=level ? 10 : 100;
+        data[level].preconditioner=mg_matrices_A_block[level].get_matrix_diagonal_inverse();
+      }
+    mg::SmootherRelaxation<Smoother,VectorType> smoother;
+    smoother.initialize(mg_matrices_A_block,data);
+    for (unsigned int level=0; level<=last; ++level)
+      {
+        VectorType v;
+        mg_matrices_A_block[level].initialize_dof_vector(v);
+        smoother[level].estimate_eigenvalues(v);
+      }
+    MGCoarseGridApplySmoother<VectorType> coarse;
+    coarse.initialize(smoother);
+    MGLevelObject<MatrixFreeOperators::MGInterfaceOperator<GMGABlockMatrixType>> interfaces(0,last);
+    for (unsigned int level=0; level<=last; ++level)
+      interfaces[level].initialize(mg_matrices_A_block[level]);
+    mg::Matrix<VectorType> matrix(mg_matrices_A_block), edge(interfaces);
+    Multigrid<VectorType> mg(matrix,coarse,mg_transfer_A_block,smoother,smoother);
+    mg.set_edge_matrices(edge,edge);
+    VelocityCycle cycle(dof_handler_v,mg,mg_transfer_A_block);
+    setup_timer.reset();
+    consumer(cycle);
+  }
 
 
   template <int dim, int velocity_degree>

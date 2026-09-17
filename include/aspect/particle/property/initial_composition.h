@@ -42,6 +42,15 @@ namespace aspect
       class InitialComposition : public Interface<dim>, public SimulatorAccess<dim>
       {
         public:
+          void initialize() override;
+
+          /** Refresh only explicitly selected spatial fields, after advection. */
+          void update_particle_properties(const ParticleUpdateInputs<dim> &inputs,
+            typename ParticleHandler<dim>::particle_iterator_range &particles) const override;
+
+          UpdateTimeFlags need_update() const override;
+          UpdateFlags get_update_flags(unsigned int) const override;
+
           /**
            * Initialization function. This function is called once at the
            * creation of every particle for every property to initialize its
@@ -107,6 +116,10 @@ namespace aspect
            * Indices of the compositional fields to be handled by this plugin.
            */
           std::vector<unsigned int> compositional_field_indices;
+
+          // Local property slots, not global compositional component indices.
+          std::vector<unsigned int> refreshed_property_components;
+          std::shared_ptr<const aspect::InitialComposition::Manager<dim>> initial_composition;
       };
     }
   }

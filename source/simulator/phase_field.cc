@@ -1107,7 +1107,6 @@ namespace aspect
         // equation. Initialize from the supplied field/lift; never evolve H/phi.
         if (this->get_timestep_number()>0)
           solution.block(block_index)=this->get_old_solution().block(block_index);
-        this->get_pcout()<<"   Mature frictional fault: retaining prescribed phase profile."<<std::endl;
         return;
       }
 

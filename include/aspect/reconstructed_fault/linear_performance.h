@@ -26,7 +26,6 @@ namespace aspect
       Clock::time_point last;
       std::array<double,count> seconds{};
       std::array<unsigned long long,count> calls{};
-      double B_relative_error=0., G_relative_error=0.;
 
       static FaultLinearTiming &get()
       {
@@ -86,8 +85,7 @@ namespace aspect
           for (unsigned int i=0;i<FaultLinearTiming::count;++i)
             { total+=t.seconds[i]; line << ", " << names[i] << "_s=" << t.seconds[i]
                                       << ", " << names[i] << "_calls=" << t.calls[i]; }
-          line << ", elapsed=" << total << ", B_relative_error=" << t.B_relative_error
-               << ", G_relative_error=" << t.G_relative_error;
+          line << ", elapsed=" << total;
           output << line.str() << std::endl;
         }
       private:

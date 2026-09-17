@@ -356,6 +356,9 @@ namespace aspect
 
       // If it's not time to generate an output file
       // return early with the number of particles that were advected
+      if (!this->get_signals().allow_native_output.empty()
+          && !*this->get_signals().allow_native_output("particles"))
+        write_output = false;
       if (!output_requested &&
           (this->get_time() < last_output_time + output_interval))
         {

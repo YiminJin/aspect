@@ -742,6 +742,9 @@ namespace aspect
     std::pair<std::string,std::string>
     Visualization<dim>::execute (TableHandler &statistics)
     {
+      if (!this->get_signals().allow_native_output.empty()
+          && !*this->get_signals().allow_native_output("visualization"))
+        return {"", ""};
       // if this is the first time we get here, set the last output time
       // to the current time - output_interval. this makes sure we
       // always produce data during the first time step

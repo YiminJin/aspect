@@ -54,7 +54,6 @@ namespace aspect
           const unsigned int generation,
           const ReconstructedFaultVector &diagonal,
           const ReconstructedFaultVector &off_diagonal,
-          const ReconstructedFaultVector &lower_diagonal,
           const ReconstructedFaultActiveSet &active_set)
           : owner(owner), generation(generation)
         {
@@ -63,8 +62,7 @@ namespace aspect
               internal::FaultLinearSection timing(internal::FaultLinearTiming::factor);
               factorizations.push_back(std::make_unique<internal::FaultSurfaceDirect>(
                 diagonal[fault],off_diagonal[fault],active_set[fault],fault,
-                internal::FaultSurfaceDirect::use_pivoting(),
-                lower_diagonal.empty() ? std::vector<double>() : lower_diagonal[fault]));
+                internal::FaultSurfaceDirect::use_pivoting()));
             }
         }
 
@@ -112,7 +110,6 @@ namespace aspect
     ReconstructedFaultSurfaceResidual residual;
     std::vector<std::vector<double>> diagonal;
     std::vector<std::vector<double>> off_diagonal;
-    std::vector<std::vector<double>> lower_diagonal;
     std::vector<std::vector<double>> mass_diagonal;
     std::vector<std::vector<double>> mass_off_diagonal;
     std::vector<CouplingPoint> coupling_points;
@@ -189,9 +186,6 @@ namespace aspect
     // Disposable history-representation audit. Sample the complete frozen FE
     // tensor at the same parent points; stress components are not Newton unknowns.
     const bool history_audit=std::getenv("ASPECT_FAULT_HISTORY_AUDIT");
-    const bool use_fe_history=std::getenv("ASPECT_FAULT_HISTORY_FE");
-    AssertThrow(!use_fe_history || (history_audit && std::getenv("ASPECT_FAULT_NONCOMMITTING_DIAGNOSTIC")),
-                ExcMessage("Alternative surface history is restricted to noncommitting diagnostics."));
     std::vector<std::vector<double>> fe_history(SymmetricTensor<2,dim>::n_independent_components);
     if (history_audit)
       for (const auto &m:this->get_parameters().mapped_particle_properties)
@@ -291,21 +285,6 @@ namespace aspect
 
     unsigned int association_index = 0;
     unsigned int point_index = 0;
-    // Complete, opt-in domain samples for a bounded frozen-state audit. These
-    // are separate files; ordinary graphical and extrema outputs are unchanged.
-    std::ofstream theta_samples;
-    std::set<unsigned int> theta_segments;
-    if (const char *prefix=assemble_jacobian ? std::getenv("ASPECT_FAULT_THETA_QP_EXPORT") : nullptr)
-      {
-        AssertThrow(std::getenv("ASPECT_FAULT_NONCOMMITTING_DIAGNOSTIC"),ExcMessage("Theta quadrature export requires a disposable solve."));
-        const char *selected=std::getenv("ASPECT_FAULT_THETA_AUDIT_SEGMENTS");
-        AssertThrow(selected,ExcMessage("Missing theta audit segments."));
-        std::istringstream in(selected); unsigned int segment;
-        while (in>>segment) theta_segments.insert(segment);
-        theta_samples.open(std::string(prefix)+"_rank"+std::to_string(Utilities::MPI::this_mpi_process(this->get_mpi_communicator()))+".csv");
-        theta_samples.exceptions(std::ios::failbit|std::ios::badbit);
-        theta_samples<<std::setprecision(17)<<"step,time,particle,fault,segment,xi,weight,parent_x,parent_y,V,p,tau_N,sigma_n,q,C,mu,friction,damping,R,minus_dR_dV,phi,chi\n";
-      }
     for (const auto &particle : particle_handler)
       {
         const auto &association = associations[association_index++];
@@ -373,16 +352,7 @@ namespace aspect
                               : left_slip_rate + q.xi*(right_slip_rate-left_slip_rate);
             const auto particle_response =
               phase_field_fault.evaluate_reconstructed_fault_point(inputs);
-            auto response=particle_response;
-            if (theta_samples.is_open() && theta_segments.count(q.segment_index))
-              theta_samples<<this->get_timestep_number()<<','<<this->get_time()<<','<<particle.get_id()<<','
-                <<association.fault_index<<','<<q.segment_index<<','<<q.xi<<','<<q.weight<<','
-                <<association.position[0]<<','<<association.position[1]<<','<<inputs.slip_rate<<','
-                <<inputs.dynamic_pressure<<','<<inputs.dynamic_pressure+response.background_normal_traction-response.normal_traction<<','
-                <<response.normal_traction<<','<<response.shear_traction<<','<<response.cohesive_traction<<','
-                <<response.friction_coefficient<<','<<response.friction_traction<<','<<response.damping_traction<<','
-                <<response.residual_density<<','<<response.minus_derivative_wrt_slip_rate<<','
-                <<inputs.phase_field<<','<<response.localization_factor<<'\n';
+            const auto &response=particle_response;
             if (history_audit)
               {
                 auto fe_inputs=inputs;
@@ -390,7 +360,6 @@ namespace aspect
                   fe_inputs.old_maxwell_stress[SymmetricTensor<2,dim>::unrolled_to_component_indices(c)]
                     =fe_history[c][point_index];
                 const auto fe_response=phase_field_fault.evaluate_reconstructed_fault_point(fe_inputs);
-                if (use_fe_history) response=fe_response;
                 if (assemble_jacobian)
                   for (unsigned int i=0;i<2;++i)
                     {
@@ -734,7 +703,6 @@ namespace aspect
     ReconstructedFaultSurfaceResidual residual;
     std::vector<std::vector<double>> diagonal;
     std::vector<std::vector<double>> off_diagonal;
-    std::vector<std::vector<double>> lower_diagonal;
     std::vector<std::vector<double>> mass_diagonal;
     std::vector<std::vector<double>> mass_off_diagonal;
     std::vector<std::unique_ptr<FaultFactorization>> factorizations;
@@ -799,21 +767,6 @@ namespace aspect
     const auto &faults=manager.get_faults();
     AssertDimension(slip_rate.size(),faults.size());
     SurfaceAssembly local;
-    const bool candidate_state=std::getenv("ASPECT_FAULT_WITHIN_STEP_STATE");
-    if (candidate_state)
-      {
-        local.lower_diagonal.resize(faults.size());
-        for (unsigned int f=0;f<faults.size();++f) local.lower_diagonal[f].assign(faults[f].n_cells(),0.);
-      }
-    std::ofstream state_export;
-    if (assemble_jacobian && (std::getenv("ASPECT_BP3_WITHIN_STEP_DIAGNOSTIC")
-                             || std::getenv("ASPECT_BP3_COUPLED_STATE_REPLAY")))
-      {
-        state_export.open(this->get_output_directory()+"state_qp_rank"+
-          std::to_string(Utilities::MPI::this_mpi_process(this->get_mpi_communicator()))+".csv");
-        state_export.exceptions(std::ios::failbit|std::ios::badbit);
-        state_export<<std::setprecision(17)<<"cell,qp,segment,xi,weight,V,Theta,q,friction,damping,sigma,R,p,Kfixed,Kstate0,Kstate1\n";
-      }
     for (auto *v:{&local.residual.values,&local.residual.shear_traction,
                  &local.residual.cohesive_traction,&local.residual.friction_traction,
                  &local.residual.damping_traction,&local.residual.normal_traction,
@@ -878,9 +831,8 @@ namespace aspect
                 for (const auto c:intro.chemical_composition_field_indices()) chemical.push_back(composition[c][q]);
                 input.bulk_material_fractions=MaterialModel::MaterialUtilities::compute_composition_fractions(chemical);
                 const auto &V=slip_rate[a.fault_index];
-                input.diagnostic_nodal_rates={{V[a.segment_index],V[a.segment_index+1]}};
-                input.slip_rate=a.xi==0. ? V[a.segment_index] : a.xi==1. ? V[a.segment_index+1]
-                  : (1-a.xi)*V[a.segment_index]+a.xi*V[a.segment_index+1];
+                input.slip_rate=a.shape_1==0. ? V[a.segment_index] : a.shape_1==1. ? V[a.segment_index+1]
+                  : a.shape_0*V[a.segment_index]+a.shape_1*V[a.segment_index+1];
                 const auto response=phase_field_fault.evaluate_reconstructed_fault_point(input);
                 const double weight=fe.JxW(q)*response.localization_factor;
                 if (weight==0.) continue;
@@ -892,13 +844,8 @@ namespace aspect
                 // One work measure multiplies every traction, K and the mass
                 // matrix. Consequently M^{-1}R and the RMS norm remain in Pa.
                 const unsigned int f=a.fault_index,j=a.segment_index;
-                const double N[2]={1-a.xi,a.xi};
-                if (state_export.is_open() && (j==795 || j==796))
-                  state_export<<cell->id()<<','<<q<<','<<j<<','<<a.xi<<','<<weight<<','<<input.slip_rate
-                    <<','<<response.evaluated_state<<','<<response.shear_traction<<','<<response.friction_traction
-                    <<','<<response.damping_traction<<','<<response.normal_traction<<','<<response.residual_density
-                    <<','<<pressure[q]<<','<<response.minus_derivative_wrt_slip_rate<<','
-                    <<response.diagnostic_state_tangent[0]<<','<<response.diagnostic_state_tangent[1]<<'\n';
+                // The same continuous Q1 weights enter source, test and trial.
+                const double N[2]={a.shape_0,a.shape_1};
                 for (unsigned int i=0;i<2;++i)
                   {
                     local.residual.values[f][j+i]+=weight*N[i]*response.residual_density;
@@ -908,8 +855,7 @@ namespace aspect
                     local.residual.normal_traction[f][j+i]+=weight*N[i]*response.normal_traction;
                     local.mass_diagonal[f][j+i]+=weight*N[i]*N[i];
                     if (assemble_jacobian)
-                      local.diagonal[f][j+i]+=weight*N[i]*N[i]*(response.minus_derivative_wrt_slip_rate
-                        +response.diagnostic_state_tangent[i]);
+                      local.diagonal[f][j+i]+=weight*N[i]*N[i]*response.minus_derivative_wrt_slip_rate;
                   }
                 local.mass_off_diagonal[f][j]+=weight*N[0]*N[1];
                 squared[f]+=weight*response.residual_density*response.residual_density;
@@ -918,13 +864,9 @@ namespace aspect
                 local.residual.maximum_normal_traction=std::max(local.residual.maximum_normal_traction,response.normal_traction);
                 if (assemble_jacobian)
                   {
-                    local.off_diagonal[f][j]+=weight*N[0]*N[1]*(response.minus_derivative_wrt_slip_rate
-                      +response.diagnostic_state_tangent[1]);
-                    if (candidate_state)
-                      local.lower_diagonal[f][j]+=weight*N[0]*N[1]*(response.minus_derivative_wrt_slip_rate
-                        +response.diagnostic_state_tangent[0]);
+                    local.off_diagonal[f][j]+=weight*N[0]*N[1]*response.minus_derivative_wrt_slip_rate;
                     const unsigned int point_index=local.coupling_points.size();
-                    local.coupling_points.push_back({input.position,point_index,f,j,a.xi,weight,response.kappa,
+                    local.coupling_points.push_back({input.position,point_index,f,j,a.shape_1,weight,response.kappa,
                       response.friction_coefficient,input.slip_tensor,input.normal_tensor,false});
                   }
               }
@@ -936,7 +878,7 @@ namespace aspect
     for (auto *v:{&local.residual.values,&local.residual.shear_traction,
                  &local.residual.cohesive_traction,&local.residual.friction_traction,
                  &local.residual.damping_traction,&local.residual.normal_traction,
-                 &local.diagonal,&local.off_diagonal,&local.lower_diagonal,&local.mass_diagonal,&local.mass_off_diagonal})
+                 &local.diagonal,&local.off_diagonal,&local.mass_diagonal,&local.mass_off_diagonal})
       for (auto &fault:*v)
         { const auto copy=fault; Utilities::MPI::sum(copy,comm,fault); }
     const auto local_squared=squared,local_measure=measure;
@@ -988,7 +930,6 @@ namespace aspect
     candidate->residual = assembled.residual;
     candidate->diagonal = assembled.diagonal;
     candidate->off_diagonal = assembled.off_diagonal;
-    candidate->lower_diagonal = assembled.lower_diagonal;
     candidate->mass_diagonal = assembled.mass_diagonal;
     candidate->mass_off_diagonal = assembled.mass_off_diagonal;
     candidate->coupling_points.reserve(assembled.coupling_points.size());
@@ -1018,8 +959,7 @@ namespace aspect
           std::make_unique<typename SurfaceLinearization::FaultFactorization>(
             assembled.diagonal[fault], assembled.off_diagonal[fault],
             std::vector<bool>(assembled.diagonal[fault].size(),false), fault,
-            internal::FaultSurfaceDirect::use_pivoting(),
-            assembled.lower_diagonal.empty() ? std::vector<double>() : assembled.lower_diagonal[fault]);
+            internal::FaultSurfaceDirect::use_pivoting());
       }
 
     // G reuses the same particle points and constitutive coefficients as K_V;
@@ -1108,8 +1048,9 @@ namespace aspect
           });
         candidate->matrix=std::make_unique<internal::FaultSparseCoupling>();
         candidate->matrix->build(entries);
-        this->get_pcout() << "Fault sparse G: rank0 entries=" << candidate->matrix->values.size()
-                         << ", bytes=" << candidate->matrix->bytes() << std::endl;
+        if (std::getenv("ASPECT_FAULT_PERFORMANCE"))
+          this->get_pcout() << "   Fault sparse G: rank0 entries=" << candidate->matrix->values.size()
+                           << ", bytes=" << candidate->matrix->bytes() << std::endl;
       }
     surface_linearization = std::move(candidate);
 #endif
@@ -1160,7 +1101,6 @@ namespace aspect
              linearization_generation,
              surface_linearization->diagonal,
              surface_linearization->off_diagonal,
-             surface_linearization->lower_diagonal,
              active_set);
   }
 
@@ -1190,9 +1130,7 @@ namespace aspect
             double value = surface_linearization->diagonal[fault][i]
                            * direction[fault][i];
             if (i > 0)
-              value += (surface_linearization->lower_diagonal.empty()
-                        ? surface_linearization->off_diagonal[fault][i-1]
-                        : surface_linearization->lower_diagonal[fault][i-1])
+              value += surface_linearization->off_diagonal[fault][i-1]
                        * direction[fault][i-1];
             if (i+1 < direction[fault].size())
               value += surface_linearization->off_diagonal[fault][i]
@@ -1288,23 +1226,6 @@ namespace aspect
       unsigned int i=0;
       for (auto &fault : result) for (auto &value : fault) value=global[i++];
     }
-    if (std::getenv("ASPECT_FAULT_COMPARE_COUPLING"))
-      {
-        FaultVector reference;
-        apply_G_reference(physical_bulk_direction,reference);
-        double error=0.,scale=0.;
-        for (unsigned int f=0; f<result.size(); ++f)
-          for (unsigned int i=0; i<result[f].size(); ++i)
-            {
-              error+=Utilities::fixed_power<2>(result[f][i]-reference[f][i]);
-              scale+=Utilities::fixed_power<2>(reference[f][i]);
-            }
-        auto &diagnostics=internal::FaultLinearTiming::get();
-        diagnostics.G_relative_error=std::max(diagnostics.G_relative_error,
-                                             scale>0. ? std::sqrt(error/scale) : 0.);
-        AssertThrow(std::sqrt(error)<=2.e-11*std::sqrt(scale),
-                    ExcMessage("Sparse G disagrees with the independent parent/domain action."));
-      }
   }
 
 

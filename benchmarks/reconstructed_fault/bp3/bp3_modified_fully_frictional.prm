@@ -1,0 +1,170 @@
+# Modified BP3: fully frictional continuous Q1, mature C=0, split aging.
+# Effective settings of the qualified seven-step run, flattened without an
+# include chain through historical experiments. Mesh/background/completion
+# data remain the immutable tested inputs. Run via run_research.py.
+set Additional shared libraries = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/build/libbp3.release.so
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/modified-bp3-research
+set Dimension = 2
+set Use years instead of seconds = false
+set End time = 132230424.76671731
+set Nonlinear solver scheme = single Advection, iterated Newton Stokes
+set Nonlinear solver tolerance = 1e-8
+set Max nonlinear iterations = 30
+set Nonlinear solver failure strategy = abort program
+set CFL number = 0.5
+set Pressure normalization = no
+set Surface pressure = 0
+subsection Termination criteria
+  set Termination criteria = end time, BP3 replay complete
+  set End step = 10
+  set Checkpoint on termination = true
+end
+subsection Formulation
+  set Enable phase field = true
+  set Reconstruct faults from phase field = true
+end
+subsection Geometry model
+  set Model name = box
+  subsection Box
+    set X extent = 100000
+    set Y extent = 100000
+  end
+end
+subsection Mesh refinement
+  set Initial global refinement = 4
+  set Initial adaptive refinement = 7
+  set Skip solvers on initial refinement = true
+  set Time steps between mesh refinement = 0
+  set Strategy = BP3 saved mesh
+  subsection Minimum refinement function
+    set Coordinate system = cartesian
+    set Variable names = x,y
+    set Function constants = xt=78867.5134594813, st=0.8660254037844386
+    set Function expression = if(abs((xt-x)*st-(100000-y)*0.5)<1500,10,if(abs((xt-x)*st-(100000-y)*0.5)<8000,6,4))
+  end
+end
+subsection Boundary velocity model
+  set Prescribed velocity boundary indicators = left:reconstructed fault BP3, right:reconstructed fault BP3
+end
+subsection Boundary traction model
+  set Prescribed traction boundary indicators = bottom:reconstructed fault BP3
+end
+subsection Gravity model
+  set Model name = vertical
+  subsection Vertical
+    set Magnitude = 0
+  end
+end
+subsection Initial temperature model
+  set Model name = function
+  subsection Function
+    set Function expression = 293
+  end
+end
+subsection Temperature field
+  set Temperature method = static
+end
+subsection Compositional fields
+  set Number of fields = 5
+  set Names of fields = tau_xx, tau_yy, tau_xy, theta_initial, strengthening
+  set Types of fields = stress, stress, stress, generic, chemical composition
+  set Compositional field methods = particles, particles, particles, particles, particles
+  set Mapped particle properties = tau_xx:maxwell stress[0], tau_yy:maxwell stress[1], tau_xy:maxwell stress[2], theta_initial:phase field fault state[0], strengthening:initial strengthening[0]
+end
+subsection Initial composition model
+  set Model name = reconstructed fault BP3
+end
+subsection Material model
+  set Model name = phase field fault
+  subsection Phase field fault
+    set Evolve phase field = false
+    set Reference viscosities = 1e26
+    set Minimum viscosity = 1e6
+    set Maximum viscosity = 1e30
+    set Elastic shear moduli = 32038120320
+    set Cohesions = 1e6
+    set Critical energy release rates = 1e5
+    set Initial time step = 4e6
+    set Phase field activation threshold = 0.1
+    set Friction law = rate state
+    set Reference friction coefficients = 0.6
+    set Direct effect parameters = 0.010, 0.025
+    set Evolution effect parameters = 0.015
+    set Characteristic slip distance = 0.008
+    set Reference slip rate = 1e-6
+    set Minimum slip rate = 1e-20
+    set Radiation damping coefficients = 4624440
+    set Use regularized formulation = true
+    set Use adiabatic pressure in fault friction = false
+    set I h quadrature tolerance = 1e-10
+    set I h tail tolerance = 1e-10
+    set I h integration backend = remote points
+    set Fault constitutive mode = mature frictional
+  end
+end
+subsection Phase field model
+  set Length scale = 400
+  set Geometric function type = AT1
+  set Degradation curvature parameter = 1
+end
+subsection Fault reconstruction
+  set Structural point spacing = 101
+  set Fit prescribed geometry to phase field = false
+  set Prescribed faults file = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/fixtures/modified_bp3/fault.txt
+end
+subsection Solver parameters
+  subsection Stokes solver parameters
+    set Stokes solver type = block AMG
+    set Linear solver tolerance = 1e-9
+  end
+  subsection Phase field solver parameters
+    set Linear solver tolerance = 2e-7
+    set Nonlinear solver tolerance = 1e-8
+    set Max nonlinear iterations = 50
+  end
+end
+subsection Time stepping
+  set List of model names = convection time step, reconstructed fault time step, BP3 replay cap
+end
+subsection Particles
+  set Particle generator name = reference cell
+  set Interpolation scheme = distance weighted average
+  set Integration scheme = rk2
+  set List of particle properties = crack driving force, initial composition, maxwell stress
+  set Generate particle domains = true
+  set Generate CPDI data for particle domains = true
+  set Load balancing strategy = none
+  subsection Generator
+    subsection Reference cell
+      set Number of particles per cell per direction = 3
+    end
+  end
+  subsection Initial composition
+    set List of field names = theta_initial, strengthening
+    set Spatially refreshed field names = strengthening
+  end
+end
+subsection Postprocess
+  set List of postprocessors = particles, reconstructed fault BP3
+  subsection Particles
+    set Data output format = none
+    set Time between data output = 0
+    set Number of grouped files = 4
+  end
+  subsection Visualization
+    set Time between graphical output = 0
+    set Output format = vtu
+    set Number of grouped files = 4
+  end
+  subsection BP3
+    set First event run = true
+    set Mature prestress file = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/fixtures/modified_bp3/prestress.txt
+    set Committing work-measure replay = true
+    set Bottom normalization completion file = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/fixtures/modified_bp3/completion.txt
+    set Fault loading configuration = fully frictional
+  end
+end
+subsection Checkpointing
+  set Steps between checkpoint = 1
+end
+set Resume computation = false

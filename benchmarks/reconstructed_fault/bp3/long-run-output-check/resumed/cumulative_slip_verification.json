@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "accepted_states": 3,
+  "vertices": 1156,
+  "s_range_m": [
+    0.0,
+    115470.05383792489
+  ],
+  "every_step_file_bytes": 257948
+}

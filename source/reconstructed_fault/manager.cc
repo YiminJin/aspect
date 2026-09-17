@@ -30,6 +30,8 @@ namespace aspect
 {
   namespace
   {
+
+
     template <int dim>
     std::vector<Tensor<1,dim>>
     reference_normals(const std::vector<Point<dim>> &points)
@@ -1205,8 +1207,6 @@ namespace aspect
   ReconstructedFaultManager<dim>::rebuild_particle_projection_cache()
   {
     TimerOutput::Scope coarse_timer(this->get_computing_timer(), "Fault: Cache build");
-    Timer elapsed;
-    this->get_pcout() << "Begin fault cache construction." << std::endl;
     TimerOutput::Scope timer(*performance_timer, "Fault: Cache build total");
     ReconstructedFaultUtilities::DomainQuadratureStatistics quadrature_statistics;
     unsigned long long integration_points = 0;
@@ -1407,8 +1407,6 @@ namespace aspect
                          << ", segment tests=" << tests << ", candidates=" << candidates
                          << std::endl;
       }
-    this->get_pcout() << "End fault cache construction: " << elapsed.wall_time()
-                     << " s." << std::endl;
   }
 
 
@@ -1885,8 +1883,6 @@ namespace aspect
   ReconstructedFaultManager<dim>::rebuild_stokes_qp_projection_cache()
   {
     TimerOutput::Scope timer(this->get_computing_timer(), "Fault: Stokes QP cache build");
-    Timer elapsed;
-    this->get_pcout() << "Begin fault Stokes QP cache construction." << std::endl;
     AssertThrow(dim == 2, ExcNotImplemented());
     AssertThrow(!reconstructed_faults.empty(),
                 ExcMessage("The Stokes QP projection cache requires reconstructed "
@@ -1922,8 +1918,8 @@ namespace aspect
               entry.fault_index = projection.fault_index;
               entry.segment_index = projection.segment_index;
               entry.xi = projection.xi;
-              entry.shape_0 = 1.0-projection.xi;
-              entry.shape_1 = projection.xi;
+              entry.shape_1 = entry.xi;
+              entry.shape_0 = 1.0-entry.shape_1;
               entry.signed_distance = projection.signed_distance;
               const ReconstructedFault<dim> &fault =
                 reconstructed_faults[projection.fault_index];
@@ -1950,8 +1946,6 @@ namespace aspect
     stokes_qp_cache_diagnostics.n_active_q_points = n_active_q_points;
     ++stokes_qp_cache_diagnostics.rebuild_count;
     stokes_qp_projection_cache_valid = true;
-    this->get_pcout() << "End fault Stokes QP cache construction: " << elapsed.wall_time()
-                     << " s." << std::endl;
   }
 
 

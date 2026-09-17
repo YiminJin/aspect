@@ -12,7 +12,11 @@ def report(path):
     result = summarize(path)
     log = path.with_suffix('.log').read_text()
     totals = result['totals']
-    verified = 'ASPECT_FAULT_COMPARE_COUPLING=1' in result['resources'].get('overrides', [])
+    # Historical logs carried in-loop error counters. The selector now belongs
+    # only to tests; its presence alone no longer certifies production actions.
+    verified = ('ASPECT_FAULT_COMPARE_COUPLING=1' in result['resources'].get('overrides', [])
+                and 'B_relative_error=' in log and 'G_relative_error=' in log)
+    result['focused_reference_test_passed'] = 'Sparse B/G basis/random reference actions: verified' in log
     result['reference_checks_enabled'] = verified
     iterations = [int(row[0]) for row in result['accepted_linear_checks']]
     result['iteration_distribution'] = dict(mean=float(np.mean(iterations)),

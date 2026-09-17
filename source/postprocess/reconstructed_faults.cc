@@ -6,11 +6,13 @@
 
 #include <aspect/postprocess/reconstructed_faults.h>
 #include <aspect/utilities.h>
+#include <aspect/simulator_signals.h>
 
 #include <deal.II/numerics/data_out.h>
 
 #include <fstream>
 #include <iomanip>
+#include <set>
 
 namespace aspect
 {
@@ -18,17 +20,49 @@ namespace aspect
   {
     namespace internal
     {
+      // Display aliases do not change the property registry or checkpoint layout.
+      std::string property_output_name(std::string name)
+      {
+        const std::map<std::string,std::string> aliases = {
+          {"phase field fault state", "slip_state"},
+          {"phase field fault cohesive traction", "cohesive_traction"},
+          {"phase field fault previous I h", "previous_I_h"},
+          {"cumulative_signed_slip_m", "cumulative_slip"}
+        };
+        const auto alias = aliases.find(name);
+        if (alias != aliases.end())
+          return alias->second;
+        const std::string chemical_prefix = "phase field fault chemical composition ";
+        if (name.compare(0, chemical_prefix.size(), chemical_prefix) == 0)
+          name = "composition_" + name.substr(chemical_prefix.size());
+        std::replace(name.begin(), name.end(), ' ', '_');
+        return name;
+      }
+
       template <int dim>
       ReconstructedFaultOutput<dim>::ReconstructedFaultOutput(
         const std::vector<ReconstructedFault<dim>> &faults,
         const std::vector<typename ReconstructedFaultManager<dim>::PropertyInformation>
         &property_information,
-        const std::vector<std::vector<double>> *fault_slip_rates)
+        const std::vector<std::vector<double>> *fault_slip_rates,
+        const std::vector<std::string> &excluded_properties)
       {
         if (fault_slip_rates != nullptr)
           Assert(fault_slip_rates->size() == faults.size(), ExcInternalError());
-        for (const auto &property : property_information)
-          properties.push_back({property.name, property.n_components, {}});
+        std::vector<unsigned int> selected_properties;
+        std::set<std::string> output_names = {"fault_id", "slip_rate"};
+        for (unsigned int i = 0; i < property_information.size(); ++i)
+          {
+            const auto &property = property_information[i];
+            if (std::find(excluded_properties.begin(), excluded_properties.end(), property.name)
+                != excluded_properties.end())
+              continue;
+            const auto name = property_output_name(property.name);
+            AssertThrow(output_names.insert(name).second,
+                        ExcMessage("Reconstructed-fault output name collision: " + name));
+            properties.push_back({name, property.n_components, {}});
+            selected_properties.push_back(i);
+          }
 
         for (unsigned int fault_id = 0; fault_id < faults.size(); ++fault_id)
           {
@@ -38,7 +72,6 @@ namespace aspect
               {
                 points.push_back(fault.vertex(vertex_id));
                 point_fault_ids.push_back(fault_id);
-                vertex_ids.push_back(vertex_id);
                 if (fault_slip_rates != nullptr)
                   {
                     Assert((*fault_slip_rates)[fault_id].size() == fault.n_vertices(),
@@ -54,7 +87,6 @@ namespace aspect
               {
                 cells.push_back({{first_point + cell_id, first_point + cell_id + 1}});
                 cell_fault_ids.push_back(fault_id);
-                cell_ids.push_back(cell_id);
               }
 
             for (unsigned int property_index = 0;
@@ -63,7 +95,7 @@ namespace aspect
                    vertex_index < fault.n_vertices(); ++vertex_index)
                 {
                   const ArrayView<const double> values = fault.get_properties(vertex_index);
-                  const auto &information = property_information[property_index];
+                  const auto &information = property_information[selected_properties[property_index]];
                   AssertThrow(information.position + information.n_components <= values.size(),
                               ExcMessage("A reconstructed fault does not use the manager's "
                                          "property layout."));
@@ -145,7 +177,6 @@ namespace aspect
 
         output << "      <PointData>\n";
         write_identifier_array("fault_id", point_fault_ids);
-        write_identifier_array("vertex_id", vertex_ids);
         if (!slip_rates.empty())
           {
             output << "        <DataArray type=\"Float64\" Name=\"slip_rate\" "
@@ -156,9 +187,6 @@ namespace aspect
           }
         for (const PropertyOutput &property : properties)
           {
-            AssertThrow(property.name != "fault_id" && property.name != "vertex_id",
-                        ExcMessage("The reconstructed-fault vertex property <" + property.name
-                                   + "> conflicts with a built-in VTU point-data identifier."));
             output << "        <DataArray type=\"Float64\" Name=\""
                    << escape_xml_attribute(property.name)
                    << "\" NumberOfComponents=\"" << property.n_components
@@ -170,13 +198,34 @@ namespace aspect
         output << "      </PointData>\n"
                << "      <CellData>\n";
         write_identifier_array("fault_id", cell_fault_ids);
-        write_identifier_array("cell_id", cell_ids);
         output << "      </CellData>\n";
 
         output << "    </Piece>\n"
                << "  </UnstructuredGrid>\n"
                << "</VTKFile>\n";
       }
+    }
+
+    template <int dim>
+    void ReconstructedFaults<dim>::declare_parameters(ParameterHandler &prm)
+    {
+      prm.enter_subsection("Postprocess");
+      prm.enter_subsection("Reconstructed faults");
+      prm.declare_entry("Excluded properties", "", Patterns::List(Patterns::Anything()),
+                        "Registered vertex property names to omit from visualization only. "
+                        "Their stored values and checkpoint representation are unchanged.");
+      prm.leave_subsection();
+      prm.leave_subsection();
+    }
+
+    template <int dim>
+    void ReconstructedFaults<dim>::parse_parameters(ParameterHandler &prm)
+    {
+      prm.enter_subsection("Postprocess");
+      prm.enter_subsection("Reconstructed faults");
+      excluded_properties = Utilities::split_string_list(prm.get("Excluded properties"));
+      prm.leave_subsection();
+      prm.leave_subsection();
     }
 
 
@@ -193,9 +242,29 @@ namespace aspect
 
 
     template <int dim>
+    void ReconstructedFaults<dim>::save(std::map<std::string,std::string> &status) const
+    {
+      std::ostringstream text;
+      { aspect::oarchive archive(text); archive << times_and_vtu_file_names; }
+      status["Reconstructed fault output"]=text.str();
+    }
+
+    template <int dim>
+    void ReconstructedFaults<dim>::load(const std::map<std::string,std::string> &status)
+    {
+      const auto entry=status.find("Reconstructed fault output");
+      if (entry==status.end()) return;
+      std::istringstream text(entry->second);
+      aspect::iarchive archive(text); archive >> times_and_vtu_file_names;
+    }
+
+    template <int dim>
     std::pair<std::string,std::string>
     ReconstructedFaults<dim>::execute(TableHandler &)
     {
+      if (!this->get_signals().allow_native_output.empty()
+          && !*this->get_signals().allow_native_output("reconstructed faults"))
+        return {"", ""};
       const auto &fault_manager = this->get_reconstructed_fault_manager();
       const auto &faults = fault_manager.get_faults();
       if (faults.empty())
@@ -219,7 +288,8 @@ namespace aspect
             fault_manager.get_property_information(),
             fault_manager.slip_rates_are_initialized()
             ? &timestep_committed_slip_rates
-            : nullptr);
+            : nullptr,
+            excluded_properties);
           std::ofstream output(this->get_output_directory() + filename);
           AssertThrow(output, ExcMessage("Could not open reconstructed-fault output file <"
                                          + this->get_output_directory() + filename + ">."));

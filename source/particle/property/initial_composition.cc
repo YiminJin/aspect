@@ -28,6 +28,31 @@ namespace aspect
     namespace Property
     {
       template <int dim>
+      void InitialComposition<dim>::initialize()
+      {
+        if (!refreshed_property_components.empty())
+          initial_composition=this->get_initial_composition_manager_pointer();
+      }
+
+      template <int dim>
+      void InitialComposition<dim>::update_particle_properties(const ParticleUpdateInputs<dim> &,
+        typename ParticleHandler<dim>::particle_iterator_range &particles) const
+      {
+        for (auto &particle : particles)
+          for (const unsigned int slot : refreshed_property_components)
+            particle.get_properties()[this->data_position+slot]=
+              initial_composition->initial_composition(particle.get_location(),compositional_field_indices[slot]);
+      }
+
+      template <int dim>
+      UpdateTimeFlags InitialComposition<dim>::need_update() const
+      { return refreshed_property_components.empty() ? update_never : update_time_step; }
+
+      template <int dim>
+      UpdateFlags InitialComposition<dim>::get_update_flags(unsigned int) const
+      { return update_default; }
+
+      template <int dim>
       void
       InitialComposition<dim>::initialize_one_particle_property(const Point<dim> &position,
                                                                 std::vector<double> &data) const
@@ -93,6 +118,11 @@ namespace aspect
       {
         prm.enter_subsection("Initial composition");
         {
+          prm.declare_entry("Spatially refreshed field names", "", Patterns::List(Patterns::Anything()),
+                            "Selected fields from List of field names to reevaluate using the initial "
+                            "composition model at current particle positions after advection. Empty "
+                            "preserves ordinary advected initial-composition properties. Other fields "
+                            "are never reset by this option.");
           prm.declare_entry("List of field names", "",
                             Patterns::List(Patterns::Anything()),
                             "A comma separated list of names denoting those "
@@ -141,6 +171,18 @@ namespace aspect
                                          "by this field is not advected by particles."));
                   compositional_field_indices.push_back(index);
                 }
+            }
+          refreshed_property_components.clear();
+          for (const auto &name : Utilities::split_string_list(prm.get("Spatially refreshed field names")))
+            {
+              const unsigned int field=this->introspection().compositional_index_for_name(name);
+              const auto it=std::find(compositional_field_indices.begin(),compositional_field_indices.end(),field);
+              AssertThrow(it!=compositional_field_indices.end(),
+                          ExcMessage("Spatially refreshed field '"+name+"' must be handled by initial composition."));
+              const unsigned int slot=std::distance(compositional_field_indices.begin(),it);
+              AssertThrow(std::find(refreshed_property_components.begin(),refreshed_property_components.end(),slot)
+                          ==refreshed_property_components.end(),ExcMessage("Duplicate spatially refreshed field: "+name));
+              refreshed_property_components.push_back(slot);
             }
         }
         prm.leave_subsection();
