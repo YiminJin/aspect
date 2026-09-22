@@ -586,6 +586,15 @@ Each owner generates and updates only its profiles, while all ranks participate
 in every batched point-evaluation collective. There is no rank-zero profile
 coordinator.
 
+For the normalization projection, three-point Gauss quadrature may be iterated
+over a configured number of equal panels per surface element to resolve
+bulk-cell-scale tangential variation. This changes only the approximation of
+$b_i=\int_\Gamma N_i(s)I(s)\,ds$; the Q1 mass matrix remains exact.
+Normal profiles, profile-uniform material mixtures, and any boundary-completion
+data use the same refined surface origins. The rule is fixed per run and profile
+IDs are segment/panel/Gauss-point ordered. All mechanical equations and
+derivatives consume the resulting single projected $I_h$ field.
+
 No rank shall gather the complete bulk FE field or a complete bulk-node point cloud.
 
 The opt-in cell-interval normalization backend specified in
@@ -663,6 +672,13 @@ Here $S:N=0$ removes the direct normal-stress $V$ derivative; bulk-mediated
 normal feedback remains. Background tractions are fixed constants under
 these derivatives. With $\delta\dot\epsilon$ from a homogeneously constrained
 bulk test vector, $\delta V^T G_{\rm shear}\delta x=\delta u^T B\delta V$.
+For the explicitly authorized initialization-only prescribed-normal control,
+replace the normal traction in the friction residual and $K$ by
+$\sigma_{\rm bg}+p_{\rm ad}$. Its $G$ contains only
+$\sum_q J_q\chi_q b_i\,2\kappa_b S:\delta\dot\epsilon$.
+In the BP5 control $p_{\rm ad}=0$ and $\sigma_{\rm bg}=50$ MPa; the independently
+solved mechanical $\Delta p-\Delta\tau:N$ is exported separately, not added
+to friction. This diagnostic does not change the default pressure mode.
 In 2-D, mechanical rows now have units Pa*m and mass units m; traction-scaled
 rows and the consistent RMS norm remain Pa. Preserve existing nonlinear
 accuracy, active-set signs, merit conventions and solver thresholds.
@@ -1515,6 +1531,31 @@ the slip-induced shear of a zero-rate constitutive probe is not incorporated
 into the background. The supplied nodal $\Theta_0$ and stored $C_0$ are retained.
 The finite-Q1 difference from $\tau_0^{\rm BP3}+\Pi_{Q1} C_{\rm eval,0}$
 must be reported. Later cohesive/state evolution does not change this background.
+
+The explicitly selected modified-BP5 steady-sliding benchmark instead supplies
+uniform $\Theta_0=D_c/V_{\rm init}$ and uses the same native weak projection
+with $C=0$ to initialize spatially varying background shear.  Project chemical
+composition before evaluating friction; use the same work measure, Q1 state
+interpolation and endpoint continuation as mechanics.  Replace the captured
+background and its correction together, leaving the latter identically zero.
+This is an initial-data choice, not a change to subsequent split aging or to
+the mature frictional equations.  Checkpoint metadata distinguishes this
+choice from inverse-state initializations; restart restores the frozen
+background and evolved histories without importing or recalibrating initial
+data.
+
+The explicitly selected loading-driven BP5 variant instead initializes
+$\Theta_{0,i}=(D_c/V_{\rm init})R_{\rm VW}^{1-f_i}$, with $0<R_{\rm VW}\leq1$
+and $f_i=(a_i-a_{\rm VW})/(a_{\rm VS}-a_{\rm VW})$ obtained from the projected
+surface material mixture. For the arithmetic two-material friction mixture,
+$f_i$ is its strengthening fraction. The default $R_{\rm VW}=1$ retains the
+steady variant; the selected loading case uses $R_{\rm VW}=0.8$.
+Construct prestress using the actual Q1 interpolation of this nodal state in
+the same native weak equation. The particle initial-state input has the
+corresponding horizontal-depth extension, but the final projected-mixture
+nodal state is authoritative. Record the profile version and ratio in restart
+identity; restore rather than reconstruct these initial data. Subsequent
+split aging and mechanical/history equations are unchanged.
 
 Stage G introduces \texttt{Assemblers::ReconstructedFaultStokes} as a genuine
 cell/QP \texttt{Assemblers::Interface} implementation.  It owns the

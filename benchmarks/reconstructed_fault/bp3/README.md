@@ -5,6 +5,33 @@ Completed experimental payloads were reorganized on 2026-09-15; see
 [CLEANUP.md](CLEANUP.md) for the archive, checks and recovery instructions.
 No physical or numerical settings were changed by that cleanup.
 
+Large generated artifacts, including the copied long-run visualization output,
+were subsequently compressed on 2026-09-17. See [the latest cleanup and recovery
+instructions](../CLEANUP.md). Sources, fixtures, cumulative slip histories and
+compact results remain accessible; restore archived raw inputs before rerunning
+analyses that need them.
+
+## Separate Dc=0.024 m, ell=50 m candidate
+
+[`bp3_dc024_ell50.prm`](bp3_dc024_ell50.prm) and its
+[fixture instructions](fixtures/modified_bp3_dc024_ell50/README.md) preserve
+the old physical background while using a fresh, parameter-consistent state.
+All six frozen probes passed; the 12.207-m candidate failed the 1% localization
+RMS-width gate (1.925%). That initial screen stopped before evolution.
+The 6.104-m local reference reduces that error to 0.481%, but is not a
+whole-fault fine-mesh qualification. See the
+[bounded report](../../../doc/reconstructed_fault/bp3/stage_K5_dc024_ell50_qualification.md).
+The separate ell25 configuration is prepared only. Neither replaces the
+Dc=.008/ell400 long-run model below.
+
+The subsequently authorized [coupled diagnostic comparison](../../../doc/reconstructed_fault/bp3/stage_K5_length_coupled_qualification.md)
+completed fresh initialization and two matched real steps on 12.207-m and
+locally 6.104-m meshes, including endpoint refinement. Kinematics agree closely;
+localized traction increments remain less resolved, so startup/restart/half-step
+qualification is deferred. The original failed 1% gate is preserved; neither
+mesh is promoted to production. Profiles and logs are in
+`length-scale-study/coupled-diagnostic/`.
+
 ## Prepared long-run configuration
 
 Use the separately named **`bp3_modified_long_run.prm`** and
@@ -267,6 +294,80 @@ No new run is authorized by this directory organization.
 | `evidence/server/` | Supplied `CMakeCache.txt` and `BP3.e3498041` with module/build context |
 | `evidence/completed/` | Compact copies of archived logs, JSON summaries, plots and parameter wrappers, grouped by original case name |
 | `stage_K5_*task.md` | User task specifications, retained at their original paths |
+
+## Slip-increment contours from a long run
+
+`plot_cumulative_slip.py` reads the every-accepted-state `cumulative_slip.csv`
+directly (NumPy and Matplotlib required). Unlike the older
+`plot_recorded_slip.py`, it does not need the sparsely written `profiles.csv`.
+For Fig.-8-style axes and the first 40 km down dip:
+
+```sh
+python3 benchmarks/reconstructed_fault/bp3/plot_cumulative_slip.py \
+  benchmarks/reconstructed_fault/bp3/first_long_run --slip-increment 0.1
+```
+
+A contour is selected when the **maximum absolute change of cumulative slip
+over the displayed vertices**, relative to the last plotted profile, reaches
+0.1 m. First/last states and both sides of seismic-regime transitions are
+also retained. This is not the difference of two spatial maxima. Use a smaller
+increment for denser contours; an accepted step exceeding the increment cannot
+be subdivided without inventing unsolved profiles, which this script never does.
+All stored spatial oscillations are preserved.
+
+Horizontal axis: cumulative signed slip in metres. Vertical axis: down-dip
+distance in kilometres, increasing downward. Blue/red classify accepted
+states below/above the paper's `max |V| = 1e-3 m/s` threshold over the **whole
+fault**, independently of the displayed window. Rates are recovered from
+consecutive slip increments divided by physical timestep: the maintained
+benchmark updates slip by `dt * accepted V`. This is not evidence about
+unresolved peaks between accepted states. Initialization has unknown rate and
+is grey. No event colouring is fabricated when the threshold is never reached.
+
+Options include `--xd-min-km`, `--xd-max-km`, `--start-years`, `--end-years`,
+`--fault`, and `--output path/to/figure.pdf` (PNG/PDF/SVG supported). Changing
+the time window does not re-zero the cumulative slip. The default output is
+`cumulative_slip_fig8.png`, accompanied by `.profiles.csv` (selected times,
+steps and rate classification) and `.summary.json`. Input is streamed rather
+than loading the entire long-run CSV into memory. Exact consecutive duplicate
+profile blocks are skipped with a warning; conflicting duplicates, changed
+geometry, missing steps or incomplete final profiles fail explicitly. The
+input file is never edited. Copy a complete accepted-state file before plotting.
+
+The supplied first long-run file has 5104 distinct accepted profiles through
+380.095862 years plus an identical duplicate initialization block. With a
+0.1-m selection increment, 122 profiles are plotted. Its minimum recorded real
+timestep is 17404.38 s and maximum recovered rate is 1.53218e-7 m/s, so there
+are no red/coseismic accepted profiles under the unchanged 1e-3 m/s threshold.
+These are plotting diagnostics, not a convergence or first-event qualification.
+
+Run the lightweight reader/selection tests with:
+
+```sh
+python3 benchmarks/reconstructed_fault/bp3/test_plot_cumulative_slip.py
+```
+
+## Along-fault property evolution
+
+`plot_fault_evolution.py RUN` reads `profiles.csv`, the indexed profile CSVs,
+and `reconstructed_faults.pvd`/ASCII VTUs. It writes selected-time profiles for
+the shallow and entire fault, irregular-time space–time maps, and native
+property range plots into `RUN/fault_evolution/`. No simulation is launched.
+For the partially copied first long run:
+
+```sh
+python3 benchmarks/reconstructed_fault/bp3/plot_fault_evolution.py \
+  benchmarks/reconstructed_fault/bp3/first_long_run/output --skip-missing
+```
+
+Missing indexed files normally fail; the explicit flag plots only available
+files and records their omissions. Use `--times-years 0 50 100 200 300` to
+choose nearest saved profiles (initial/final always included), `--xd-max-km 45`
+for the shallow window, and `--output DIRECTORY` for another figure location.
+The generated README and summary distinguish committed Theta from the lagged
+state used during mechanics, weak/Q1 traction from raw stress, and retained
+previous-I_h from a separately evaluated current integral. No smoothing or
+constitutive reevaluation is performed. Tests: `test_plot_fault_evolution.py`.
 
 ## Retained input directories are not complete output datasets
 

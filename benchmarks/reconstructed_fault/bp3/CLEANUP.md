@@ -1,5 +1,10 @@
 # BP3 artifact organization — 2026-09-15
 
+For the latest **2026-09-17 compressed cleanup**, including the copied long-run
+output, see [the parent cleanup record](../CLEANUP.md). Its archive and restore
+utility are separate from those below. The retention statements in this older
+record describe September 15, not the current availability of raw output.
+
 The active BP3 tree was reduced from approximately **14 GB to 498 MB**.
 The original 283 loose root files became 90 before adding this README/cleanup
 documentation. Maintained source, scripts and task instructions remain at

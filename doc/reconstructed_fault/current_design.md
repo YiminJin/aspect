@@ -473,6 +473,13 @@ and optional sparse matrix machinery (no particle-center substitution).
 Only the shear part of G is work-adjoint to B on homogeneous bulk directions;
 normal/friction and pressure terms remain non-associated.
 
+Absolute Q1 slip-rate evaluation in the bulk source and both surface integration
+paths preserves the nodal convex hull in floating-point arithmetic. Equal nodes
+at the lower bound and exact endpoint coordinates retain their stored values;
+descending profiles are evaluated from the smaller endpoint to avoid cancellation.
+This is not a clamp to the constitutive minimum: invalid nodal inputs are not
+repaired. Linear B/G/K actions retain the same mathematical Q1 shape derivatives.
+
 Mechanical weak residuals change from Pa*m^2 to Pa*m in 2-D. The new mass
 matrix changes from m^2 to m, so M^-1 R, R_i/(M*1)_i and the existing consistent
 RMS norm remain in Pa. K*V supplies the same traction characteristic after
@@ -689,6 +696,18 @@ after two independent outer integral windows are negligible; the activation
 threshold does not truncate the profile and no monotonic tail is required.
 The completed quadrature-point integrals are projected to replicated fault
 vertices with the consistent Q1 mass matrix.
+
+The along-fault projection may use `I h surface quadrature subdivisions`
+equal panels per element, with three Gauss points on each panel (default one
+for compatibility). This resolves tangential bulk-FE column variation without
+altering the Q1 space or mass matrix. Profile IDs are ordered by segment, then
+panel, then Gauss point. The rule is fixed during a run; normal integration,
+surface mixture sampling and any outside-boundary completion all use those
+same origins and weights. Completion files with old counts/origins are rejected.
+The resulting single projected field is used by every constitutive and
+coupling consumer; neither a smoothed denominator nor a separate mechanical
+normalization is introduced. Completed-value caches are invalidated at parameter
+parsing; cell-interval caches additionally compare profile origins and normals.
 
 When a physical boundary is located, its coordinate is independent of the
 adaptive panel width. If the boundary-truncated panel is bisected for accuracy,
@@ -994,6 +1013,14 @@ their stress-change derivatives. Diagnostics distinguish total normal stress
 from incremental p and tau:N. With no property selected the previous equations
 are unchanged. The caller initializes/reselects the property; offset data may
 not be mutated during a nonlinear solve.
+
+The explicitly selected BP5 initialization normal-feedback control uses the
+existing prescribed-pressure branch with zero adiabatic pressure and the same
+50 MPa background. Thus friction sees 50 MPa while the bulk still solves its
+own pressure and deviatoric stress. The native bulk-work surface path carries
+the constitutive pressure-mode selector into G: in this control only its shear
+term remains. K uses the prescribed total normal traction. Fixed background,
+work weights and all true-normal-stress default equations are unchanged.
 
 For BP3, particle Maxwell history begins at zero stress change, side velocities
 retain the official translations, top/bottom have zero stress-change traction,
@@ -1399,6 +1426,42 @@ Reconstructed-fault VTU names are output-only aliases with underscore separators
 optional property exclusions do not change registry names, values or checkpoints.
 See `bp3/stage_K5_long_run_preparation.md` for the bounded verification and
 limitations; this is not first-event or recurrence-cycle qualification.
+
+### Selected BP5 steady-sliding initialization
+
+The benchmark-only `bp5_steady_initialization` plugin selects the approved
+alternative initial data, not a new mature constitutive law. Set all initial
+particle and nodal state to the configured `Dc/Vinit` (1e8 s for the current
+fixture). After the normal surface chemical projection, use the production
+surface residual evaluator's native bulk-QP work mass and resistance loads to
+solve `M tau_bg = friction_load + damping_load` at this constant state/rate and
+50 MPa background compression. Both continued endpoint wedges participate.
+Exclude the constitutive probe's crack-induced shear; it is not initial
+prestress. The captured shear and its correction are replaced together: the
+correction is identically zero, while the background is spatially varying Q1.
+Bulk Maxwell stress and pressure remain perturbations initialized to zero.
+
+This explicitly selected variant bypasses both captured-prestress import and
+nodal/weak inverse-state initialization. It rejects a nonempty captured
+prestress filename. Benchmark checkpoint metadata identifies the initial-data
+variant; incompatible checkpoints are rejected in either direction. Restore
+the manager's background, state, slip and histories and reattach runtime
+selectors, without reinitialization (including a timestep-zero checkpoint).
+Subsequent split aging, timestep safeguards and history publication are unchanged.
+The original inverse-state plugin and its verification artifacts remain separate.
+
+The benchmark's explicitly selected loading-driven variant sets
+`Weakening initial state ratio = 0.8` (default `1` preserves the steady variant).
+After material projection, use production material fractions to set
+`Theta_i = (Dc/Vinit) R_VW^(1-f_i)`, where the arithmetic two-material friction
+mixture gives `f_i = (a_i-a_VW)/(a_VS-a_VW)`, its strengthening fraction.
+The native weak prestress initializer then evaluates the actual Q1 state,
+not an analytic state evaluated independently at quadrature points. Initial
+particle inputs use the corresponding horizontal-depth extension; the final
+projected-mixture nodal state is authoritative. Restart identity includes the
+profile version and ratio and rejects incompatible initial data; no histories
+or prestress are recalibrated on restart. This changes initial data only,
+not split aging, the work measure, mechanical equations or solver tolerances.
 
 ## 25. Stage-J constitutive history feedback
 
