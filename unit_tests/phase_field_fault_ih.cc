@@ -36,6 +36,40 @@
 #include <numeric>
 #include <sstream>
 
+TEST_CASE("Subdivided surface normalization preserves Q1 mass and resolves a column signal",
+          "[phase_field_fault_ih_accuracy]")
+{
+  using namespace dealii;
+  // A bulk-cell-scale column fluctuation inside one much longer fault element.
+  // Composite quadrature changes the RHS accuracy, not the projected space.
+  const double omega=8.3*numbers::PI;
+  const double exact[2]={.5+1.e-3*(1./omega-std::sin(omega)/(omega*omega)),
+                         .5+1.e-3*(-std::cos(omega)/omega+std::sin(omega)/(omega*omega))};
+  double previous_error=1.;
+  for (const unsigned int panels : {4u,8u,16u})
+    {
+      const QIterated<1> quadrature(QGauss<1>(3),panels);
+      double mass[2][2]={{0.,0.},{0.,0.}},rhs[2]={0.,0.};
+      for (unsigned int q=0;q<quadrature.size();++q)
+        {
+          const double x=quadrature.point(q)[0],w=quadrature.weight(q);
+          const double N[2]={1.-x,x};
+          for (unsigned int i=0;i<2;++i)
+            {
+              rhs[i]+=w*N[i]*(1.+1.e-3*std::sin(omega*x));
+              for (unsigned int j=0;j<2;++j) mass[i][j]+=w*N[i]*N[j];
+            }
+        }
+      for (unsigned int i=0;i<2;++i)
+        for (unsigned int j=0;j<2;++j)
+          CHECK(mass[i][j]==Approx(i==j ? 1./3. : 1./6.).epsilon(1e-13));
+      const double error=std::max(std::abs(rhs[0]-exact[0]),std::abs(rhs[1]-exact[1]));
+      CHECK(error<previous_error/10.);
+      previous_error=error;
+    }
+  CHECK(previous_error<1e-9);
+}
+
 // A boundary-truncated panel requires adaptive refinement. Its accepted first
 // subpanel must not discard the remainder of the known physical interval.
 TEST_CASE("Legacy I_h boundary refinement must retain the remainder",

@@ -347,9 +347,8 @@ namespace aspect
             const double right_slip_rate = slip_rate[association.fault_index][q.segment_index+1];
             // Tip partitions evaluate exact endpoint basis functions. Reading
             // the absolute node avoids losing lower contact by cancellation.
-            inputs.slip_rate = q.xi == 0.0 ? left_slip_rate
-                              : q.xi == 1.0 ? right_slip_rate
-                              : left_slip_rate + q.xi*(right_slip_rate-left_slip_rate);
+            inputs.slip_rate = ReconstructedFaultUtilities::interpolate_slip_rate(
+              left_slip_rate, right_slip_rate, q.xi);
             const auto particle_response =
               phase_field_fault.evaluate_reconstructed_fault_point(inputs);
             const auto &response=particle_response;
@@ -736,9 +735,8 @@ namespace aspect
   template <int dim>
   void ReconstructedFaultSurfaceSystem<dim>::enable_bulk_work_measure()
   {
-    AssertThrow(dim==2 && phase_field_fault.is_mature_frictional_fault()
-                && !phase_field_fault.uses_adiabatic_friction_pressure(),
-                ExcMessage("Bulk work measure requires a frozen mature 2-D fault with true normal stress."));
+    AssertThrow(dim==2 && phase_field_fault.is_mature_frictional_fault(),
+                ExcMessage("Bulk work measure requires a frozen mature 2-D fault."));
     const auto &faults=this->get_reconstructed_fault_manager().get_faults();
     AssertThrow(faults.size()==1,ExcMessage("Bulk work measure currently supports one straight fault."));
     const auto &fault=faults[0];
@@ -831,8 +829,8 @@ namespace aspect
                 for (const auto c:intro.chemical_composition_field_indices()) chemical.push_back(composition[c][q]);
                 input.bulk_material_fractions=MaterialModel::MaterialUtilities::compute_composition_fractions(chemical);
                 const auto &V=slip_rate[a.fault_index];
-                input.slip_rate=a.shape_1==0. ? V[a.segment_index] : a.shape_1==1. ? V[a.segment_index+1]
-                  : a.shape_0*V[a.segment_index]+a.shape_1*V[a.segment_index+1];
+                input.slip_rate=ReconstructedFaultUtilities::interpolate_slip_rate(
+                  V[a.segment_index],V[a.segment_index+1],a.shape_1);
                 const auto response=phase_field_fault.evaluate_reconstructed_fault_point(input);
                 const double weight=fe.JxW(q)*response.localization_factor;
                 if (weight==0.) continue;
@@ -867,7 +865,8 @@ namespace aspect
                     local.off_diagonal[f][j]+=weight*N[0]*N[1]*response.minus_derivative_wrt_slip_rate;
                     const unsigned int point_index=local.coupling_points.size();
                     local.coupling_points.push_back({input.position,point_index,f,j,a.shape_1,weight,response.kappa,
-                      response.friction_coefficient,input.slip_tensor,input.normal_tensor,false});
+                      response.friction_coefficient,input.slip_tensor,input.normal_tensor,
+                      response.uses_adiabatic_friction_pressure});
                   }
               }
         }

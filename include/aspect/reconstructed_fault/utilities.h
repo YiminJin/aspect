@@ -38,6 +38,11 @@ namespace aspect
 
   namespace ReconstructedFaultUtilities
   {
+    /** Q1 interpolation of nonnegative absolute slip rates. Preserve the nodal
+     * convex hull and exact endpoint/contact values in floating-point arithmetic.
+     * This does not impose V_min or repair inadmissible nodal inputs. */
+    double interpolate_slip_rate(const double left, const double right, const double xi);
+
     /**
      * @name Prescribed-fault input and geometry
      * @{

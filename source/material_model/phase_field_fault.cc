@@ -2214,7 +2214,8 @@ namespace aspect
           unsigned int n=0;
           AssertThrow(input>>n,ExcMessage("Missing normalization completion count."));
           unsigned int expected=0;
-          for (const auto &fault:faults) expected+=3*fault.n_cells();
+          for (const auto &fault:faults)
+            expected += 3*normalization_surface_subdivisions*fault.n_cells();
           AssertThrow(n==expected,ExcMessage("Normalization completion profile count mismatch."));
           std::vector<Point<dim>> origins(n);
           std::vector<double> outside(n);
@@ -3233,7 +3234,10 @@ namespace aspect
       const auto &fault_property_info = fault_manager.get_property_information();
       const auto &faults = fault_manager.get_faults();
 
-      const QGauss<1> surface_quadrature(3);
+      // Resolve tangential variation of the bulk FE column integral without
+      // changing the Q1 field or its consistent (exact) mass matrix.
+      const QIterated<1> surface_quadrature(QGauss<1>(3),
+                                           normalization_surface_subdivisions);
 
       unsigned int n_profiles = 0;
       for (const ReconstructedFault<dim> &fault : faults)
@@ -3599,6 +3603,14 @@ namespace aspect
                             "Relative tolerance used to compare the four- and eight-point "
                             "normal-profile quadrature rules.");
 
+          prm.declare_entry("I h surface quadrature subdivisions", "1",
+                            Patterns::Integer(1),
+                            "Number of equal panels per fault element for the consistent Q1 "
+                            "normalization projection. Each panel uses three Gauss points. "
+                            "Increase this to resolve bulk-cell-scale tangential variation of "
+                            "the profile integrals; it does not change normal-profile tolerances. "
+                            "Boundary completion input must use these same ordered profile origins.");
+
           prm.declare_entry("I h tail tolerance", "1e-8",
                             Patterns::Double(0),
                             "Relative integral tolerance used to terminate each normal-profile tail.");
@@ -3653,6 +3665,8 @@ namespace aspect
             prm.get_bool("Use adiabatic pressure in fault friction");
           normalization_quadrature_tolerance =
             prm.get_double("I h quadrature tolerance");
+          normalization_surface_subdivisions =
+            prm.get_integer("I h surface quadrature subdivisions");
           use_cell_normalization_profiles = prm.get("I h integration backend") == "cell intervals";
           normalization_tail_tolerance =
             prm.get_double("I h tail tolerance");

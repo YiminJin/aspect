@@ -137,7 +137,9 @@ namespace aspect
             for (unsigned int q=0;q<nq;++q)
               {
                 const auto p=fe.quadrature_point(q);const double xd=BP3::down_dip(p[0],p[1]);
-                const bool window=(xd>=13000. && xd<=20000.) || (xd>=37000. && xd<=43000.)
+                const bool window=(xd>=BP3::weakening_length-2000. && xd<=BP3::weakening_length+5000.) || (xd>=37000. && xd<=43000.)
+                  || (std::getenv("ASPECT_BP5_SHORT_TEST") &&
+                      ((xd>=BP3::weakening_length-11000. && xd<=BP3::weakening_length+13000.) || xd>100000./BP3::sine-6000.))
                   || p[1]<2000. || p[1]>98000. || (xd>59000. && xd<61000.);
                 if (!a[q].active && !(phi[q]>0. && window)) continue;
                 std::vector<double> all(composition.size());
@@ -220,7 +222,15 @@ namespace aspect
         {
           background[j]=native[6*j+5];
           consistency=std::max(consistency,std::abs(native[6*j+3]-weak.shear_traction[0][j])/native[6*j]);
+#ifdef ASPECT_BP5_NORMAL_CONTROL
+          // Native output remains the actual mechanical stress. The residual's
+          // normal load is deliberately different: exactly the fixed 50 MPa.
+          AssertThrow(model.uses_adiabatic_friction_pressure() && step==0,
+                      ExcMessage("Normal control is prescribed-pressure initialization only."));
+          consistency=std::max(consistency,std::abs(BP3::sigma0-weak.normal_traction[0][j]/native[6*j]));
+#else
           consistency=std::max(consistency,std::abs(native[6*j+4]-weak.normal_traction[0][j])/native[6*j]);
+#endif
         }
       AssertThrow(consistency<1e-5,ExcMessage("Accepted work observer does not reproduce frozen mechanical traction."));
       if (write_files && sim.get_pcout().is_active())

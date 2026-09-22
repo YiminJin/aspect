@@ -26,6 +26,21 @@
 #include "mature_fault.h"
 #include "work_replay.h"
 #include "matched_resolution.h"
+#if defined(ASPECT_BP5_WEAK_INITIALIZATION) && defined(ASPECT_BP5_STEADY_INITIALIZATION)
+#error Select only one BP5 initialization procedure
+#endif
+#ifdef ASPECT_BP5_WEAK_INITIALIZATION
+#include "../bp5/weak_initialization.h"
+#endif
+#ifdef ASPECT_BP5_STEADY_INITIALIZATION
+#include "../bp5/steady_initialization.h"
+#endif
+#ifdef ASPECT_BP5_NORMAL_CONTROL
+#include "../bp5/normal_control_checks.h"
+#endif
+#ifdef ASPECT_BP3_DISTURBANCE_TEST
+#include "disturbance_diagnostic.h"
+#endif
 
 namespace aspect
 {
@@ -33,6 +48,7 @@ namespace aspect
   {
     bool converged = false;
     bool long_run_stop = false;
+    bool restored_history = false;
     std::string bottom_normalization_completion_file;
     unsigned int newton_updates = 0, krylov_iterations = 0;
     double minimum_alpha = 1.;
@@ -179,11 +195,11 @@ namespace aspect
                                                  box.get_origin () + box.get_extents ());
       manager.enable_top_source_continuation ();
       sim.get_reconstructed_fault_surface_system ().enable_bulk_work_measure ();
-      if (sim.get_timestep_number () != 0)
+      if (sim.get_timestep_number () != 0 || restored_history)
         model.set_reconstructed_fault_background_traction_property (
             manager.get_property_index ("background tractions"),
             manager.get_property_index ("BP3 fixed shear correction"));
-      if (sim.get_timestep_number () != 0)
+      if (sim.get_timestep_number () != 0 || restored_history)
         return;
       verify_paired_mesh (sim);
       verify_velocity_constraints (sim);
@@ -206,16 +222,24 @@ namespace aspect
       // callback precedes the particle-to-FE transfer; no assembly loop casts.
       model.prepare_reconstructed_fault_mechanical_solve ();
 
-      // Preserve official nodal Theta. The ordinary particle property supplies
-      // the same initial function; subsequent states use the production update.
+#ifdef ASPECT_BP5_STEADY_INITIALIZATION
+      initialize_steady_prestress (sim, model);
+#else
+      // Set the selected initial state only after surface material preparation.
+      // The ordinary particle property supplies the same initial function.
       const auto state
           = manager.get_property_information ()[manager.get_property_index ("phase field fault state")]
                 .position;
       for (unsigned int v = 0; v < fault.n_vertices (); ++v)
         manager.get_fault (0).get_properties (v)[state]
-            = BP3::theta0 (BP3::down_dip (fault.vertex (v)[0], fault.vertex (v)[1]));
+            = BP3::configured_initial_state (
+                BP3::down_dip (fault.vertex (v)[0], fault.vertex (v)[1]), model.get_fault_friction ());
 
       initialize_mature_prestress (sim, model);
+#ifdef ASPECT_BP5_WEAK_INITIALIZATION
+      initialize_weak_state (sim, model);
+#endif
+#endif
     }
   }
 
@@ -235,6 +259,10 @@ namespace aspect
           });
     signals.post_advection_solver.connect (&BP3Benchmark::prepare<dim>);
     signals.start_timestep.connect ([] (const SimulatorAccess<dim> &) { BP3Benchmark::converged = false; });
+#ifdef ASPECT_BP3_DISTURBANCE_TEST
+    signals.start_timestep.connect (&BP3Disturbance::begin<dim>);
+    signals.post_advection_solver.connect (&BP3Disturbance::enable_normal_control<dim>);
+#endif
     signals.post_nonlinear_solver.connect (
         [] (const SolverControl &c)
           {
@@ -258,6 +286,12 @@ namespace aspect
     template <int dim> class BP3Initial : public Interface<dim>, public SimulatorAccess<dim>
     {
     public:
+      void initialize () override
+      {
+        friction = &Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>> (
+                 this->get_material_model ()).get_fault_friction ();
+      }
+
       double
       initial_composition (const Point<dim> &p, const unsigned int field) const override
       {
@@ -266,13 +300,16 @@ namespace aspect
         const double xd = (BP3::box_size - p[1]) / BP3::sine;
         const auto &name = this->introspection ().name_for_compositional_index (field);
         if (name == "theta_initial")
-          return BP3::theta0 (xd);
+          return BP3::configured_initial_state (xd, *friction);
         if (name == "strengthening")
           return BP3::depth_fraction (p[1]);
         AssertThrow (name == "tau_xx" || name == "tau_yy" || name == "tau_xy",
                      ExcMessage ("Unexpected BP3 composition."));
         return 0.; // Maxwell stores Delta tau, not the official prestress.
       }
+
+    private:
+      const MaterialModel::Rheology::FaultFriction<dim> *friction = nullptr;
     };
     ASPECT_REGISTER_INITIAL_COMPOSITION_MODEL (BP3Initial, "reconstructed fault BP3",
                                                "Official BP3 state and zero initial bulk stress change.")
@@ -325,6 +362,13 @@ namespace aspect
       {
         prm.enter_subsection ("Postprocess");
         prm.enter_subsection ("BP3");
+        prm.declare_entry ("Weakening region length", "15000", Patterns::Double (0),
+                           "Down-dip extent in metres of the uniform weakening region; followed by a 3 km transition.");
+#ifdef ASPECT_BP5_STEADY_INITIALIZATION
+        prm.declare_entry ("Weakening initial state ratio", "1", Patterns::Double (0, 1),
+                           "Initial Vinit*Theta/Dc in the weakening material. Must be positive. "
+                           "The projected strengthening mixture blends this ratio geometrically to one.");
+#endif
         prm.declare_entry ("Heavy output slip interval", "0.1", Patterns::Double (0),
                            "Maximum nodal slip change in metres since the last heavy output.");
         prm.declare_entry ("Heavy output time interval", "31557600", Patterns::Double (0),
@@ -360,6 +404,12 @@ namespace aspect
       {
         prm.enter_subsection ("Postprocess");
         prm.enter_subsection ("BP3");
+        BP3::weakening_length = prm.get_double ("Weakening region length");
+#ifdef ASPECT_BP5_STEADY_INITIALIZATION
+        BP3::weakening_initial_state_ratio = prm.get_double ("Weakening initial state ratio");
+        AssertThrow (BP3::weakening_initial_state_ratio > 0.,
+                     ExcMessage ("Weakening initial state ratio must be positive."));
+#endif
         heavy.slip_interval = prm.get_double ("Heavy output slip interval");
         heavy.time_interval = prm.get_double ("Heavy output time interval");
         profiles.slip_interval = prm.get_double ("Profile slip interval");
@@ -371,6 +421,10 @@ namespace aspect
         stop_after_event = prm.get_bool ("Stop after first event");
         audit_states = prm.get_bool ("Audit full state every step");
         BP3Benchmark::mature_prestress_file = prm.get ("Mature prestress file");
+#ifdef ASPECT_BP5_STEADY_INITIALIZATION
+        AssertThrow (BP3Benchmark::mature_prestress_file.empty (),
+                     ExcMessage ("Steady BP5 constructs its native weak background; remove the captured Mature prestress file."));
+#endif
         BP3Benchmark::bottom_normalization_completion_file = prm.get ("Bottom normalization completion file");
         prm.leave_subsection ();
         prm.leave_subsection ();
@@ -390,6 +444,10 @@ namespace aspect
         this->get_signals ().post_checkpoint.connect (
             [this] (const std::string &path)
               {
+                // This bounded diagnostic needs the accepted-step-2 checkpoint
+                // and termination checkpoint only; no changes to its clock.
+                if (std::getenv ("ASPECT_BP5_SHORT_TEST") && last_step == 2)
+                  const_cast<Parameters<dim> &>(this->get_parameters ()).checkpoint_steps = 0;
                 if (this->get_pcout ().is_active ())
                   {
                     std::ofstream out (path + "/bp3_accepted_state.txt");
@@ -434,11 +492,23 @@ namespace aspect
                   << profiles << last_accepted_time;
         }
         status["BP3 accepted history"] = stream.str ();
+#ifdef ASPECT_BP5_STEADY_INITIALIZATION
+        status["BP5 initial condition"] = BP3::initial_condition_identity ();
+#endif
       }
 
       void
       load (const std::map<std::string, std::string> &status) override
       {
+        const auto initialization = status.find ("BP5 initial condition");
+#ifdef ASPECT_BP5_STEADY_INITIALIZATION
+        AssertThrow (initialization != status.end ()
+                       && initialization->second == BP3::initial_condition_identity (),
+                     ExcMessage ("BP5 checkpoint initial-condition identity/ratio differs; histories cannot be converted on restart."));
+#else
+        AssertThrow (initialization == status.end (),
+                     ExcMessage ("This checkpoint requires the steady BP5 initialization plugin."));
+#endif
         const auto entry = status.find ("BP3 accepted history");
         AssertThrow (entry != status.end (), ExcMessage ("Checkpoint lacks BP3 history."));
         std::istringstream stream (entry->second);
@@ -461,12 +531,24 @@ namespace aspect
                          && BP3Benchmark::work_initial_geometry.size () == slip.size ()
                          && BP3Benchmark::work_initial_I.size () == slip.size (),
                      ExcMessage ("Incomplete BP3 checkpoint histories."));
+        BP3Benchmark::restored_history = true;
+#ifdef ASPECT_BP3_DISTURBANCE_TEST
+        BP3Disturbance::perturb_audit(previous_theta, BP3Benchmark::work_initial_geometry);
+#endif
       }
 
       std::pair<std::string, std::string>
       execute (TableHandler &) override
       {
         AssertThrow (BP3Benchmark::converged, ExcMessage ("BP3 requires genuine bulk/surface convergence."));
+#ifdef ASPECT_BP5_NORMAL_CONTROL
+        BP3Benchmark::check_normal_control(*this);
+#endif
+        const double Dc = Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>> (
+            this->get_material_model ()).characteristic_fault_slip_distance ();
+#ifdef ASPECT_BP3_DISTURBANCE_TEST
+        BP3Disturbance::accepted(*this);
+#endif
         const auto &manager = this->get_reconstructed_fault_manager ();
         const auto &fault = manager.get_faults ()[0];
         const auto &weak = this->get_reconstructed_fault_surface_system ().get_linearization_residual ();
@@ -491,7 +573,17 @@ namespace aspect
             weak.mass_diagonal[0], weak.mass_off_diagonal[0], weak.cohesive_traction[0]);
         const auto normal_field = ReconstructedFaultUtilities::solve_tridiagonal_system (
             weak.mass_diagonal[0], weak.mass_off_diagonal[0], weak.normal_traction[0]);
-        BP3Benchmark::export_work_replay (*this, weak, audit_states);
+        // The selected length-scale diagnostic exports current mechanical
+        // work/source observations without dumping every bulk/particle field.
+        const bool work_files = audit_states || std::getenv ("ASPECT_BP3_LENGTH_COUPLED_DIAGNOSTIC");
+#ifdef ASPECT_BP3_DISTURBANCE_TEST
+        // The normal-feedback control has a prescribed friction traction but
+        // still has its own physical bulk normal stress. Keep the independent
+        // working-stress observer checking that physical quantity.
+        BP3Benchmark::export_work_replay (*this, BP3Disturbance::physical_weak(weak), work_files);
+#else
+        BP3Benchmark::export_work_replay (*this, weak, work_files);
+#endif
 
         // A Q1 rate attains its physical maximum at a vertex. Prescribed deep
         // nodes participate in max(V), but not in free/lower-contact counts.
@@ -516,7 +608,9 @@ namespace aspect
         const unsigned int previous_below = event.below;
         const bool previous_complete = event.complete;
         event.observe (this->get_time (), maximum, maximum_xd);
-        if (audit_states)
+        const char *audit_from = std::getenv ("ASPECT_BP3_LENGTH_FULL_AUDIT_FROM");
+        const bool full_audit = audit_states || (audit_from && this->get_timestep_number () >= std::stoul (audit_from));
+        if (full_audit)
           write_audit_state ();
         if (this->get_pcout ().is_active ())
           {
@@ -536,15 +630,45 @@ namespace aspect
         // committed, whereas weak traction above belongs to the accepted solve.
         double theta_error = 0.;
         std::string theta_failure;
+        std::ofstream state_audit;
+        if (std::getenv ("ASPECT_BP5_SHORT_TEST") && this->get_pcout ().is_active ())
+          {
+            state_audit.open (this->get_output_directory () + "state_work_"
+                              + std::to_string (this->get_timestep_number ()) + ".csv");
+            state_audit << std::setprecision (17)
+                        << "node,xd,time,dt,V,Theta_in,Theta_out,slip,weak_q,weak_sigma,weak_friction,weak_damping,weak_residual\n";
+          }
         for (unsigned int j = 0; j < n; ++j)
           {
             const double actual = fault.get_properties (j)[state];
             const double xd = BP3::down_dip (fault.vertex (j)[0], fault.vertex (j)[1]);
-            const double old_theta = this->get_timestep_number () > 0 ? previous_theta[j] : BP3::theta0 (xd);
+            const double old_theta = this->get_timestep_number () > 0 ? previous_theta[j]
+#ifdef ASPECT_BP5_WEAK_INITIALIZATION
+              : BP3Benchmark::weak_initial_state.at(j);
+#elif defined(ASPECT_BP5_STEADY_INITIALIZATION)
+              : (BP3Benchmark::restored_history ? previous_theta.at(j)
+                                               : BP3Benchmark::prepared_initial_state.at(j));
+#else
+              : BP3::configured_initial_state (xd,
+                  Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>> (
+                    this->get_material_model ()).get_fault_friction ());
+#endif
             const long double expected
                 = this->get_timestep_number () > 0
-                      ? BP3::aging_state_reference (V[j], old_theta, this->get_timestep ())
+                      ? BP3::aging_state_reference (
+#ifdef ASPECT_BP3_DISTURBANCE_TEST
+                            BP3Disturbance::aging_rate(j, V[j]),
+#else
+                            V[j],
+#endif
+                            old_theta, this->get_timestep (), Dc)
                       : old_theta;
+            if (state_audit)
+              state_audit << j << ',' << xd << ',' << this->get_time () << ',' << this->get_timestep ()
+                          << ',' << V[j] << ',' << old_theta << ',' << actual << ',' << slip[j]
+                          << ',' << weak.shear_traction[0][j] << ',' << weak.normal_traction[0][j]
+                          << ',' << weak.friction_traction[0][j] << ',' << weak.damping_traction[0][j]
+                          << ',' << weak.values[0][j] << '\n';
             const double relative_error = std::abs (actual / static_cast<double> (expected) - 1.);
             if (!std::isfinite (relative_error) || relative_error > theta_error)
               {
@@ -605,7 +729,7 @@ namespace aspect
           // audit verify retention despite particle movement and exchange.
           const auto H = particles.get_property_manager ().get_data_info ().get_position_by_field_name (
               "crack_driving_force");
-          if (audit_states)
+          if (full_audit)
             {
               std::ofstream out (
                   this->get_output_directory () + "mature_history_"
@@ -639,7 +763,7 @@ namespace aspect
                 << BP3Benchmark::newton_updates << ',' << BP3Benchmark::krylov_iterations << ','
                 << BP3Benchmark::minimum_alpha << ',' << BP3Benchmark::accepted_nonlinear_residual << ','
                 << surface_rms << ',' << theta_error << ',' << maximum_stress << ','
-                << (this->get_timestep_number () ? maximum * this->get_timestep () / BP3::Dc : 0.) << ",1\n";
+                << (this->get_timestep_number () ? maximum * this->get_timestep () / Dc : 0.) << ",1\n";
             AssertThrow (out, ExcMessage ("Cannot append BP3 accepted-step diagnostics."));
           }
         last_accepted_time = this->get_time ();

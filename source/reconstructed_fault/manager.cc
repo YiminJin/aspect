@@ -864,12 +864,8 @@ namespace aspect
     const std::vector<double> &values = get_slip_rate(fault_index);
     AssertIndexRange(segment_index, reconstructed_faults[fault_index].n_cells());
     Assert(std::isfinite(xi) && xi >= 0.0 && xi <= 1.0, ExcInternalError());
-    // Open-tip domain quadrature has exact endpoint coordinates. Preserve the
-    // stored absolute node there, including exact nonlinear bound contact.
-    if (xi == 0.0) return values[segment_index];
-    if (xi == 1.0) return values[segment_index+1];
-    return values[segment_index]
-           + xi * (values[segment_index+1]-values[segment_index]);
+    return ReconstructedFaultUtilities::interpolate_slip_rate(
+      values[segment_index], values[segment_index+1], xi);
   }
 
 

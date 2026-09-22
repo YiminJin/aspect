@@ -1,0 +1,5 @@
+# Bounded 2-D research case, NOT an official three-dimensional BP5 benchmark.
+# Generate exact mesh/completion inputs with run_short.py setup first.
+# Use run_short.py prepare/run for checked hashes, the diagnostic opt-in and
+# the aggregate one-hour budget. This is not a production-qualified long run.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp5/dc010-ell100/fixtures/candidate/case.prm

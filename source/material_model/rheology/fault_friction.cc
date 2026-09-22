@@ -94,6 +94,43 @@ namespace aspect
       template <int dim>
       double
       FaultFriction<dim>::
+      initial_state_for_friction_coefficient(const std::vector<double> &fractions,
+                                             const double V,
+                                             const double coefficient) const
+      {
+        AssertThrow(friction_law == FrictionLaw::rate_state,
+                    ExcMessage("Initial-state inversion requires rate-state friction."));
+        AssertDimension(fractions.size(), mu0.size());
+        AssertThrow(std::isfinite(V) && V >= Vmin && std::isfinite(coefficient),
+                    ExcMessage("Invalid initial friction target or slip rate."));
+        double f = 0., direct = 0., evolution = 0.;
+        for (unsigned int m=0; m<fractions.size(); ++m)
+          {
+            f += fractions[m]*mu0[m];
+            direct += fractions[m]*a[m];
+            evolution += fractions[m]*b[m];
+          }
+        AssertThrow(evolution > 0. && (!regularized || coefficient > 0.),
+                    ExcMessage("The requested friction target has no unique positive initial state."));
+        double state_term = coefficient-f-direct*std::log(V/V0);
+        if (regularized)
+          {
+            // log(2 sinh(z)) = z + log(1-exp(-2z)): avoid overflow
+            // while retaining the small-target limit without cancellation.
+            const double z=coefficient/direct;
+            state_term=direct*(std::log(V0/V)+z+std::log(-std::expm1(-2*z)))-f;
+          }
+        const double theta=Dc/V0*std::exp(state_term/evolution);
+        AssertThrow(std::isfinite(theta) && theta > 0.,
+                    ExcMessage("Initial friction state is outside the representable positive range."));
+        return theta;
+      }
+
+
+
+      template <int dim>
+      double
+      FaultFriction<dim>::
       friction_coefficient(const std::vector<double> &volume_fractions,
                            const double               V_raw,
                            const double               theta) const

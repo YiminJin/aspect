@@ -190,6 +190,18 @@ namespace aspect
 
         double minimum_fault_slip_rate() const;
 
+        /** Read-only configured law for constitutively consistent initialization. */
+        const Rheology::FaultFriction<dim> &get_fault_friction() const
+        {
+          return fault_friction;
+        }
+
+        /** Authoritative global aging distance, also used by initial-state models. */
+        double characteristic_fault_slip_distance() const
+        {
+          return fault_friction.get_characteristic_slip_distance();
+        }
+
         /** Whether friction uses prescribed adiabatic rather than bulk pressure.
          * Only in this mode can a constant bulk-pressure shift be treated as
          * a gauge operation without changing the surface equation. */
@@ -510,6 +522,9 @@ namespace aspect
         bool evolve_phase_field;
 
         double normalization_quadrature_tolerance;
+
+        // Fixed per run: also defines completion-file profile IDs and cache layout.
+        unsigned int normalization_surface_subdivisions = 1;
 
         double normalization_tail_tolerance;
 

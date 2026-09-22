@@ -140,6 +140,19 @@ namespace aspect
 
   namespace ReconstructedFaultUtilities
   {
+    double interpolate_slip_rate(const double left, const double right, const double xi)
+    {
+      Assert(std::isfinite(left) && std::isfinite(right) && left >= 0. && right >= 0., ExcInternalError());
+      Assert(std::isfinite(xi) && xi >= 0. && xi <= 1., ExcInternalError());
+      if (xi == 0.) return left;
+      if (xi == 1.) return right;
+      // Start at the smaller endpoint: neither equal bound contact nor a
+      // descending profile suffers subtract/add cancellation. Limit only an
+      // upper-end rounding overshoot, never a physical slip-rate threshold.
+      return left <= right ? std::min(right, left + xi*(right-left))
+                           : std::min(left, right + (1.-xi)*(left-right));
+    }
+
     // -----------------------------------------------------------------------------
     // Prescribed-fault input and geometry
     // -----------------------------------------------------------------------------

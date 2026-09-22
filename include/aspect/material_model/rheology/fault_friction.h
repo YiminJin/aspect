@@ -124,6 +124,12 @@ namespace aspect
 
           double get_characteristic_slip_distance() const;
 
+          /** Invert the configured stateful law for a positive initial state.
+           * Parameters are mixed before inversion, as in friction_coefficient. */
+          double initial_state_for_friction_coefficient(
+            const std::vector<double> &volume_fractions,
+            double slip_rate, double coefficient) const;
+
           /** Derivatives for noncommitting within-step state evaluation. */
           double update_state_derivative_wrt_slip_rate(double slip_rate,
                                                        double old_state,

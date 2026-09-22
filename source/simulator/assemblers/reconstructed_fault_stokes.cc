@@ -17,6 +17,7 @@
 #include <aspect/material_model/utilities.h>
 #include <aspect/plugins.h>
 #include <aspect/reconstructed_fault/manager.h>
+#include <aspect/reconstructed_fault/utilities.h>
 
 #include <deal.II/fe/fe_values.h>
 
@@ -312,12 +313,10 @@ namespace aspect
               if (associations[q].active)
                 {
                   const auto &association = associations[q];
-                  const double V = association.shape_0
-                                   * slip_rate[association.fault_index]
-                                              [association.segment_index]
-                                   + association.shape_1
-                                   * slip_rate[association.fault_index]
-                                              [association.segment_index+1];
+                  const double V = ReconstructedFaultUtilities::interpolate_slip_rate(
+                    slip_rate[association.fault_index][association.segment_index],
+                    slip_rate[association.fault_index][association.segment_index+1],
+                    association.shape_1);
                   const double crack_strain_rate =
                     responses[q].localization_factor * V
                     + responses[q].history_correction;

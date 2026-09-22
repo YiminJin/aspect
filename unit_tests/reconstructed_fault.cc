@@ -608,7 +608,7 @@ TEST_CASE("Stage-I captured BP3 contact retains absolute evaluated and accepted 
   REQUIRE(tip_left+(minimum-tip_left) < minimum);
   REQUIRE(tip.interpolate_slip_rate(0,0,0.) == tip_left);
   REQUIRE(tip.interpolate_slip_rate(0,0,1.) == minimum);
-  REQUIRE(tip.interpolate_slip_rate(0,0,.37) == tip_left+.37*(minimum-tip_left));
+  REQUIRE(tip.interpolate_slip_rate(0,0,.37) == Approx(tip_left+.37*(minimum-tip_left)).epsilon(1e-15));
   REQUIRE(dealii::Utilities::MPI::min(tip.interpolate_slip_rate(0,0,1.),MPI_COMM_WORLD) == minimum);
   ReconstructedFaultManager<2> manager;
   manager.add_reconstructed_fault({{0,0},{1,0}}, {1,1});
@@ -663,6 +663,38 @@ TEST_CASE("Stage-I captured BP3 contact retains absolute evaluated and accepted 
   manager.validate_slip_rate_nonlinear_commit();
   manager.commit_slip_rate_nonlinear_solve();
   REQUIRE(manager.get_timestep_committed_slip_rate(0)[0] == minimum);
+}
+
+
+TEST_CASE("Stage-I slip-rate interpolation preserves nodal bounds", "[fault_slip_interpolation]")
+{
+  using aspect::ReconstructedFaultUtilities::interpolate_slip_rate;
+  constexpr double minimum=1e-20, captured_xi=0.07893139508566324;
+  REQUIRE((1.-captured_xi)*minimum+captured_xi*minimum < minimum);
+  REQUIRE(interpolate_slip_rate(minimum,minimum,captured_xi)==minimum);
+  const double near=std::nextafter(minimum,std::numeric_limits<double>::infinity());
+  for (const auto endpoints:std::vector<std::pair<double,double>>{
+         {minimum,minimum},{minimum,near},{near,minimum},{minimum,1e-9},{1e-9,minimum}})
+    {
+      aspect::ReconstructedFaultManager<2> manager;
+      manager.add_reconstructed_fault({{0,0},{1,0}}, {1,1});
+      manager.initialize_slip_rate(0,{endpoints.first,endpoints.second});
+      for (unsigned int i=0;i<=1000;++i)
+        {
+          const double xi=double(i)/1000.;
+          const double actual=interpolate_slip_rate(endpoints.first,endpoints.second,xi);
+          const long double exact=(1.L-xi)*endpoints.first+static_cast<long double>(xi)*endpoints.second;
+          REQUIRE(actual>=std::min(endpoints.first,endpoints.second));
+          REQUIRE(actual<=std::max(endpoints.first,endpoints.second));
+          REQUIRE(std::abs(actual-exact)<=4*std::numeric_limits<double>::epsilon()*exact);
+          REQUIRE(manager.interpolate_slip_rate(0,0,xi)==actual);
+        }
+      REQUIRE(interpolate_slip_rate(endpoints.first,endpoints.second,0.)==endpoints.first);
+      REQUIRE(interpolate_slip_rate(endpoints.first,endpoints.second,1.)==endpoints.second);
+    }
+  // Invalid nodal values are not silently raised to the constitutive bound.
+  REQUIRE(interpolate_slip_rate(.5*minimum,.5*minimum,captured_xi)<minimum);
+  REQUIRE(dealii::Utilities::MPI::min(interpolate_slip_rate(minimum,minimum,captured_xi),MPI_COMM_WORLD)==minimum);
 }
 
 

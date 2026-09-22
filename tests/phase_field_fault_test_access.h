@@ -215,6 +215,13 @@ namespace aspect
             return model.fault_friction;
           }
 
+          // Diagnostic use only: reuse the existing prescribed-normal-traction
+          // constitutive/Jacobian path with a spatial reference-pressure plugin.
+          static void prescribed_friction_normal(PhaseFieldFault<dim> &model, bool enabled)
+          {
+            model.use_adiabatic_pressure_in_fault_friction = enabled;
+          }
+
           static std::vector<double>
           surface_material_fractions_at_vertex(
             const PhaseFieldFault<dim> &model,
