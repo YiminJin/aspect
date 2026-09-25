@@ -1,6 +1,9 @@
 #include "bp3_model.h"
 #include "first_event.h"
 #include "output_schedule.h"
+#ifdef ASPECT_BP3_RESEARCH_EXECUTION
+#include "execution_environment.h"
+#endif
 
 #include <aspect/initial_composition/interface.h>
 #include <aspect/boundary_velocity/interface.h>
@@ -433,6 +436,13 @@ namespace aspect
       void
       initialize () override
       {
+#ifdef ASPECT_BP3_RESEARCH_EXECUTION
+        const char *unexpected = BP3::unexpected_execution_switch ();
+        AssertThrow (!unexpected,
+                     ExcMessage (std::string ("Ordinary BP3 rejects inherited diagnostic selector: ")
+                                 + (unexpected ? unexpected : "")
+                                 + ". Unset it or use the dedicated diagnostic plugin."));
+#endif
         wall_start = std::chrono::steady_clock::now ();
         this->get_signals ().allow_native_output.connect (
             [this] (const std::string &)
@@ -446,8 +456,10 @@ namespace aspect
               {
                 // This bounded diagnostic needs the accepted-step-2 checkpoint
                 // and termination checkpoint only; no changes to its clock.
+#if defined(ASPECT_BP5_WEAK_INITIALIZATION) || defined(ASPECT_BP5_STEADY_INITIALIZATION)
                 if (std::getenv ("ASPECT_BP5_SHORT_TEST") && last_step == 2)
                   const_cast<Parameters<dim> &>(this->get_parameters ()).checkpoint_steps = 0;
+#endif
                 if (this->get_pcout ().is_active ())
                   {
                     std::ofstream out (path + "/bp3_accepted_state.txt");

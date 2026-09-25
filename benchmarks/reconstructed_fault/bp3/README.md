@@ -1,6 +1,9 @@
 # Reconstructed-fault BP3 workspace
 
 This directory contains the maintained plugin and small benchmark drivers.
+The [execution-path audit](../../../doc/reconstructed_fault/bp3/execution_cleanup.md)
+records the pre-cleanup checkpoint, diagnostic isolation, optional stress-only
+LLS routing, passing A/B replay, and the unresolved free-rate/state smoke failure.
 Completed experimental payloads were reorganized on 2026-09-15; see
 [CLEANUP.md](CLEANUP.md) for the archive, checks and recovery instructions.
 No physical or numerical settings were changed by that cleanup.
