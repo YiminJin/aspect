@@ -1,0 +1,7 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/output-cleanup-evidence/after.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/output-cleanup-evidence/thin
+subsection Postprocess
+  subsection BP3
+    set Profile time interval = 250
+  end
+end

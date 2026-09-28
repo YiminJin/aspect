@@ -81,6 +81,11 @@ set Additional shared libraries = {plugin}
 set Output directory = {OUT}
 set Resume computation = {str(resume).lower()}
 set End time = {args.end_time if adaptive else clock[-1]['time']}
+subsection Solver parameters
+  subsection Stokes solver parameters
+    set Stokes solver type = block {args.velocity_preconditioner.upper()}
+  end
+end
 subsection Termination criteria
   set Termination criteria = end time, end step, wall time{'' if adaptive else ', BP3 replay complete'}
   set End step = {end_step}
@@ -98,15 +103,13 @@ end
     (OUT/f'{first_name}.prm').open('x').write(parameters(args.resume, args.end_step or (4 if args.mode=='restart-qualification' else 7)))
     env = {k:v for k,v in os.environ.items() if not k.startswith('ASPECT_')}
     env.update(ASPECT_SOURCE_DIR=str(REPO), ASPECT_FAULT_EXPLICIT_B='1', ASPECT_FAULT_EXPLICIT_G='1',
-               ASPECT_FAULT_SURFACE_SOLVER='tridiagonal', ASPECT_FAULT_STRESS_SAMPLE_DIAGNOSTIC='1',
+               ASPECT_FAULT_STRESS_SAMPLE_DIAGNOSTIC='1',
                ASPECT_FAULT_SOURCE_HISTORY_DIAGNOSTIC='1',
                ASPECT_BP3_EXACT_TARGET='1',
                ASPECT_BP3_TARGET_MESH=str(mesh_inputs/'target_cells.txt'),
                ASPECT_BP3_EXPECTED_FAULT=str(INPUTS/'fault.txt'),
                OMP_NUM_THREADS='1', OPENBLAS_NUM_THREADS='1', DEAL_II_NUM_THREADS='1')
     if args.mode!='continuation': env['ASPECT_BP3_TIMESTEP_SEQUENCE']=str(OUT/'clock.csv')
-    if args.velocity_preconditioner=='gmg':
-        env.update(ASPECT_FAULT_VELOCITY_GMG='1', ASPECT_FAULT_GMG_HIERARCHY='1')
     if args.mesh_only: env['ASPECT_BP3_MESH_ONLY']='1'
     command = ['timeout', '--signal=TERM', '--kill-after=15', str(180 if args.mesh_only else args.wall_seconds or 2400), 'mpirun', '-np', '4',
                '--bind-to', 'core', '--map-by', 'core', str(REPO/'build-pf-cpdi/aspect-release')]

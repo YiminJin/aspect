@@ -1,0 +1,2 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/restore_shear_test.prm
+set Output directory = /tmp/aspect-bp3-restored-shear-two

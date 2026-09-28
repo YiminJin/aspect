@@ -11,6 +11,8 @@
 
 #include "common.h"
 #include "../source/reconstructed_fault/surface_direct_internal.h"
+#include "../tests/fault_surface_reference.h"
+#include "../source/reconstructed_fault/normal_filter_internal.h"
 
 #include <aspect/reconstructed_fault/fault.h>
 #include <aspect/reconstructed_fault/manager.h>
@@ -22,6 +24,7 @@
 #include <deal.II/lac/precondition.h>
 #include <deal.II/lac/block_sparsity_pattern.h>
 #include <aspect/utilities.h>
+#include <aspect/phase_field.h>
 
 #include <limits>
 #include <sstream>
@@ -44,6 +47,114 @@ namespace
         dealii::deal_II_exceptions::enable_abort_on_exception();
       }
   };
+}
+
+TEST_CASE("Fault shear sense preserves positive rates and survives restart", "[fault_shear_sense]")
+{
+  ThrowOnDealIIException exceptions;
+  aspect::ReconstructedFaultManager<2> manager;
+  const double c=.5, s=std::sqrt(3.)/2;
+  manager.add_reconstructed_fault({dealii::Point<2>(c,0),dealii::Point<2>(0,s)}, {1.,1.});
+  REQUIRE(manager.get_shear_sense(0)==1);
+  manager.set_shear_sense(0,-1);
+  manager.set_shear_sense(0,-1);
+  REQUIRE_THROWS(manager.set_shear_sense(0,1));
+  REQUIRE_THROWS(manager.set_shear_sense(0,0));
+  manager.initialize_slip_rate(0,{1e-9,1e-9});
+  const dealii::Tensor<1,2> tangent({-c,s}),normal({-s,-c});
+  const auto S=manager.get_shear_sense(0)*dealii::symmetrize(dealii::outer_product(tangent,normal));
+  const auto N=dealii::symmetrize(dealii::outer_product(normal,normal));
+  const dealii::Tensor<1,2> down({c,-s}),right({s,c});
+  const auto required=-dealii::symmetrize(dealii::outer_product(down,right));
+  REQUIRE((S-required).norm()==0.);
+  REQUIRE(std::abs(S*N)<1e-15);
+  REQUIRE(S*S==Approx(.5));
+  std::stringstream storage;
+  {aspect::oarchive archive(storage);archive<<manager;}
+  aspect::ReconstructedFaultManager<2> restored;
+  {aspect::iarchive archive(storage);archive>>restored;}
+  REQUIRE(restored.get_shear_sense(0)==-1);
+  REQUIRE(restored.get_slip_rate(0)[0]==1e-9);
+  restored.set_shear_sense(0,-1);
+  REQUIRE_THROWS(restored.set_shear_sense(0,1));
+}
+
+TEST_CASE("Restored BP3 stationary profile matches independent completion table", "[.][bp3_restore_profile]")
+{
+  const aspect::PhaseField::GeometricFunction geometry(20.,1.,8./3.);
+  const double m=1e5/((8./3.)*20.*(1e12/(2.*32038120320.)));
+  const aspect::PhaseField::DegradationFunction degradation(1.,m);
+  const aspect::PhaseField::PhaseFieldProfile profile(geometry,degradation,.6);
+  std::ifstream in(aspect::Utilities::expand_ASPECT_SOURCE_DIR(
+    "$ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/fixtures/bp3_150x50/profile.txt"));
+  unsigned int n=0;double stored_m=0.;
+  REQUIRE(static_cast<bool>(in>>n>>stored_m));
+  REQUIRE(stored_m==Approx(m));
+  double error=0.;
+  for(unsigned int i=0;i<n;++i)
+    {
+      double r,p,integral;
+      REQUIRE(static_cast<bool>(in>>r>>p>>integral));
+      error=std::max(error,std::abs(p-profile.value(r)));
+    }
+  std::cout<<"Restored BP3 completion profile max phase error="<<error<<std::endl;
+  REQUIRE(error<2e-11);
+}
+
+TEST_CASE("Normal filter preserves work mean and attenuates generalized modes", "[fault_normal_filter]")
+{
+  ThrowOnDealIIException exceptions;
+  const unsigned int n=9;const double h=100.,L=200.;
+  std::vector<double> m(n,2*h/3),me(n-1,h/6),k(n,2/h),ke(n-1,-1/h);
+  m.front()=m.back()=h/3;k.front()=k.back()=1/h;
+  auto multiply=[&](const auto &d,const auto &e,const auto &x)
+  {
+    std::vector<double> y(n);
+    for (unsigned int i=0;i<n;++i)
+      {y[i]=d[i]*x[i];if(i)y[i]+=e[i-1]*x[i-1];if(i+1<n)y[i]+=e[i]*x[i+1];}
+    return y;
+  };
+  aspect::internal::FaultNormalFilter filter(m,me,k,ke,L,0);
+  REQUIRE(filter.matches(m,me,k,ke,L));REQUIRE_FALSE(filter.matches(m,me,k,ke,L/2));
+  auto changed_mass=m;changed_mass[3]*=1.01;
+  REQUIRE_FALSE(filter.matches(changed_mass,me,k,ke,L));
+  const auto zero=multiply(k,ke,std::vector<double>(n,1.));
+  for (double v:zero) REQUIRE(v==0.);
+  for (const double constant:{1.,5e7})
+    {
+      const auto rhs=multiply(m,me,std::vector<double>(n,constant));
+      const auto z=filter.solve(rhs);
+      double error=0.;for(double v:z) error=std::max(error,std::abs(v-constant));
+      std::cout<<"Normal filter constant="<<constant<<" max absolute error="<<std::setprecision(17)<<error<<std::endl;
+      for (double v:z) REQUIRE(std::abs(v-constant)<2e-14*constant);
+    }
+  dealii::FullMatrix<double> dense(n),inverse(n);
+  for (unsigned int i=0;i<n;++i)
+    {dense(i,i)=m[i]+L*L*k[i];if(i+1<n)dense(i,i+1)=dense(i+1,i)=me[i]+L*L*ke[i];}
+  inverse.invert(dense);
+  double previous=1.;
+  for (const unsigned int mode:{1u,4u,8u})
+    {
+      const double angle=mode*dealii::numbers::PI/(n-1),lambda=6*(1-std::cos(angle))/(h*h*(2+std::cos(angle)));
+      const double attenuation=1/(1+L*L*lambda);REQUIRE(attenuation<previous);previous=attenuation;
+      std::vector<double> v(n);for(unsigned int i=0;i<n;++i)v[i]=5e7+1000*std::cos(angle*i);
+      const auto rhs=multiply(m,me,v),z=filter.solve(rhs),mz=multiply(m,me,z);
+      double mean_error=0.;
+      double mode_error=0.,dense_error=0.;
+      for(unsigned int i=0;i<n;++i)
+        {
+          REQUIRE(std::abs(z[i]-5e7-1000*attenuation*std::cos(angle*i))<2e-7);
+          double reference=0;for(unsigned int j=0;j<n;++j)reference+=inverse(i,j)*rhs[j];
+          REQUIRE(std::abs(reference-z[i])<2e-7);
+          mode_error=std::max(mode_error,std::abs(z[i]-5e7-1000*attenuation*std::cos(angle*i)));
+          dense_error=std::max(dense_error,std::abs(reference-z[i]));
+          mean_error+=mz[i]-rhs[i];
+        }
+      REQUIRE(std::abs(mean_error)<1e-4);
+      std::cout<<"Normal filter mode="<<mode<<" attenuation="<<attenuation<<" mode error Pa="<<mode_error
+               <<" dense error Pa="<<dense_error<<" mean integral error Pa m="<<mean_error<<std::endl;
+    }
+  m[3]=0.;REQUIRE_THROWS(aspect::internal::FaultNormalFilter(m,me,k,ke,L,0));
 }
 
 
@@ -822,6 +933,45 @@ TEST_CASE("Stage-I pressure compatibility rejects a significant RHS before proje
   REQUIRE(std::abs(q*rhs)<1e-25);
 }
 
+TEST_CASE("Stage-I compatibility uses uncancelled operations and still rejects physical flux")
+{
+  using namespace dealii;
+  using namespace aspect::internal;
+  const ThrowOnDealIIException throw_on_dealii_exception;
+  Vector<double> q(3),rhs(3);
+  q[1]=q[2]=1./std::sqrt(2.);
+  // The surviving residual can be tiny despite O(1) terms in its assembly.
+  const double cap=1.75e-10;
+  const double bound=fault_pressure_compatibility_bound(2.,64.,1e-13,12.,cap);
+  REQUIRE(bound<cap);
+  REQUIRE(bound>1.6047464209644725e-14);
+  rhs[0]=1e-11;rhs.add(1.6047464209644725e-14,q);
+  const double removed=project_compatible_fault_rhs(q,bound,rhs);
+  REQUIRE(removed==Approx(1.6047464209644725e-14).epsilon(1e-12));
+  REQUIRE(std::abs(q*rhs)<1e-29);
+  rhs.add(1e-6,q);
+  const Vector<double> saved(rhs);
+  REQUIRE_THROWS(project_compatible_fault_rhs(q,bound,rhs));
+  rhs-=saved;REQUIRE(rhs.l2_norm()==0.);
+  REQUIRE(fault_pressure_compatibility_bound(1e20,64.,0.,12.,cap)==cap);
+  REQUIRE(fault_pressure_compatibility_bound(0.,64.,0.,12.,cap)==0.);
+}
+
+TEST_CASE("Stage-I nonsymmetric pressure compatibility requires the left nullspace")
+{
+  using namespace dealii;
+  using namespace aspect::internal;
+  const ThrowOnDealIIException throw_on_dealii_exception;
+  FullMatrix<double> C(2);C(0,0)=1.;C(0,1)=1.;
+  Vector<double> right(2),left(2),rhs(2),check(2);
+  right[0]=1./std::sqrt(2.);right[1]=-right[0];left[1]=1.;
+  C.vmult(check,right);REQUIRE(check.l2_norm()==0.);
+  C.Tvmult(check,left);REQUIRE(check.l2_norm()==0.);
+  rhs[0]=rhs[1]=1.;
+  REQUIRE(right*rhs==0.); // A right-null test alone would accept this RHS.
+  REQUIRE_THROWS(project_compatible_fault_rhs(left,1e-14,rhs));
+}
+
 TEST_CASE("Stage-I bulk residual scale handles a zero initial block")
 {
   const double scale = aspect::internal::reconstructed_fault_residual_scale(
@@ -1189,7 +1339,7 @@ TEST_CASE("Fault projection MPI reduction reproduces a constant field")
 TEST_CASE("Pivoted surface inverse preserves indefinite free blocks", "[fault_surface_direct]")
 {
   ThrowOnDealIIException exceptions;
-  using aspect::internal::FaultSurfaceDirect;
+  using FaultSurfaceDirect = aspect::Testing::FaultSurfaceInverse;
   const std::vector<std::vector<double>> diagonals={{4,3,2,4,3}, {-2,3,-4,5,-6}, {0,0}, {0,0,1}};
   const std::vector<std::vector<double>> edges={{1,.5,1,.5}, {1,2,1,.5}, {1}, {1,1}};
   for (unsigned int example=0;example<diagonals.size();++example)
@@ -1235,7 +1385,7 @@ TEST_CASE("Pivoted surface inverse preserves indefinite free blocks", "[fault_su
 
 TEST_CASE("Pivoted surface inverse retains nonsymmetric state columns", "[fault_surface_direct]")
 {
-  using aspect::internal::FaultSurfaceDirect;
+  using FaultSurfaceDirect = aspect::Testing::FaultSurfaceInverse;
   const std::vector<double> diagonal={0,3,-4,5,-6},upper={1,2,.5,1},lower={-2,.25,3,-.5};
   for (const auto active:{std::vector<bool>{false,false,false,false,false},
                           std::vector<bool>{true,false,true,false,true}})

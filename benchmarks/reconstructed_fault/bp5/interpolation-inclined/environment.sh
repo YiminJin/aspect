@@ -1,0 +1,7 @@
+# Source only for this diagnostic; particle advection is deliberately enabled.
+unset ASPECT_DIAGNOSTIC_FREEZE_PARTICLE_ADVECTION
+export ASPECT_STRESS_CYCLE_TRACE=1
+export ASPECT_FAULT_EXPLICIT_B=1
+export ASPECT_FAULT_EXPLICIT_G=1
+export ASPECT_FAULT_SURFACE_SOLVER=tridiagonal
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 DEAL_II_NUM_THREADS=1

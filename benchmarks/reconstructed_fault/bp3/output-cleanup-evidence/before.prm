@@ -1,0 +1,3 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/output-cleanup-evidence/fixture-base.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/output-cleanup-evidence/before.release.so
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/output-cleanup-evidence/before-uniform

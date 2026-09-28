@@ -1,0 +1,18 @@
+# Enable if: ASPECT_WITH_VORO
+# MPI: 2
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_stage_i_rate_state.prm
+set Maximum time step = 100000
+# A traction-free top avoids the unrelated all-Dirichlet pressure-nullspace
+# compatibility failure of the historical Stage-I rate/state fixture.
+subsection Boundary velocity model
+  set Prescribed velocity boundary indicators = left:function, right:function, bottom:function
+end
+subsection Time stepping
+  set List of model names = convection time step, reconstructed fault time step
+  subsection Reconstructed fault time step
+    set Maximum logarithmic state change = 0.1
+  end
+end
+subsection Postprocess
+  set List of postprocessors = particles, verify fault state limiter
+end

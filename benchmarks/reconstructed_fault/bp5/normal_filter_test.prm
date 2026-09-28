@@ -1,0 +1,13 @@
+# Focused free-equation derivative test, not a BP5 trajectory.
+# Run from repository root with ASPECT_TEST_NORMAL_FILTER=1.
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_surface_dynamic_pressure.prm
+set Additional shared libraries = ./build-pf-cpdi/tests/libphase_field_fault_surface_dynamic_pressure.release.so
+set Output directory = /tmp/aspect-normal-filter-one
+subsection Material model
+  subsection Phase field fault
+    set Fault constitutive mode = mature frictional
+  end
+end
+subsection Fault reconstruction
+  set Fit prescribed geometry to phase field = false
+end

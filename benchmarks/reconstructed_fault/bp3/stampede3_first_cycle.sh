@@ -28,7 +28,6 @@ PY
 # override used by ASPECT's existing input/library expansion infrastructure.
 while IFS= read -r flag; do unset "$flag"; done < <(compgen -v ASPECT_)
 export ASPECT_SOURCE_DIR="$BP3_SOURCE_DIR"
-export ASPECT_FAULT_SURFACE_SOLVER=tridiagonal
 export ASPECT_FAULT_EXPLICIT_B=1
 export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 DEAL_II_NUM_THREADS=1
 

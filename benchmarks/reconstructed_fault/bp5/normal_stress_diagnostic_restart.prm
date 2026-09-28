@@ -1,0 +1,43 @@
+# Stage with stage_normal_stress_diagnostic.py; production_input.prm is an
+# unchanged copy of the actual run input, not a historical fixture.
+include production_input.prm
+set Additional shared libraries = ./libbp5_steady_initialization.release.so, ./libbp5_normal_stress_diagnostic.release.so
+set Output directory = output-normal-diagnostic
+set Resume computation = true
+
+subsection Termination criteria
+  set Termination criteria = end time, BP5 normal diagnostic complete
+  set Checkpoint on termination = true
+end
+
+subsection Postprocess
+  set List of postprocessors = reconstructed fault BP3, visualization, particles, reconstructed faults, BP3 output complete, BP5 normal diagnostic
+  subsection BP3
+    set Stop after first event = false
+    set Last accepted step = 2147483647
+    set Graceful wall seconds = 1e30
+    set Audit full state every step = false
+    set Heavy output slip interval = 1e30
+    set Heavy output time interval = 1e30
+    set Profile slip interval = 1e30
+    set Profile time interval = 1e30
+  end
+  subsection BP5 normal diagnostic
+    set Checkpoint accepted step = 5612
+    set Checkpoint physical time = 5310111071.5634108
+    set New accepted steps = 5
+    set Wall seconds = 600
+    set Capture stress split = true
+  end
+end
+
+subsection Time stepping
+  subsection BP5 state startup
+    set Record timestep selection = true
+  end
+end
+
+subsection Checkpointing
+  set Steps between checkpoint = 0
+  set Time between checkpoint = 0
+end

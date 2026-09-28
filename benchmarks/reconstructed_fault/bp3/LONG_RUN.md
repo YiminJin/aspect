@@ -1,5 +1,9 @@
 # Prepared adaptive modified-BP3 run
 
+Historical 300 × 100 km experiment documentation. The maintained restored
+150 × 50 km plugin uses the [current runtime instructions](plugin/README.md),
+including scheduled profiles instead of the dense slip table described below.
+
 The long simulation has **not** been launched. The maintained configuration is
 now **300 x 100 km**, with square side lengths at most **12.5 km**. The physical
 fault remains centered at (50,50) km and retains its **60-degree** dip; changing
@@ -50,10 +54,11 @@ mpirun -np 4 --bind-to core --map-by core \
   build-pf-cpdi/aspect-release /absolute/path/to/prepared/fresh.prm > run.log 2>&1
 ```
 
-The environment script locates this checkout, clears inherited ASPECT probe
-flags, selects sparse B/G, pivoted tridiagonal K, GMG plus its hierarchy, and
-one thread per MPI rank. `source .../environment.sh amg` selects the reference
-AMG backend instead. It does not load machine-specific modules or launch MPI.
+The environment script selects sparse B/G and one thread per MPI rank and
+clears obsolete backend/comparison flags. The surface inverse is always pivoted
+tridiagonal LU. Choose `block AMG` or `block GMG` with `Stokes solver type` in
+the PRM; GMG automatically enables its required hierarchy. The script takes
+no backend argument. It does not load machine-specific modules or launch MPI.
 `run_long.py` reads the **same** script; there is no second flag list to maintain.
 Use the prepared `launch.sh` if you also want its executable/input hash checks;
 bare mpirun intentionally does not provide those checks. Four-rank restart is

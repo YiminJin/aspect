@@ -32,10 +32,15 @@
 #include <deal.II/base/timer.h>
 
 #include <functional>
+#include <array>
 #include <map>
 
 namespace aspect
 {
+  namespace Postprocess
+  {
+    template <int dim> class MomentCycle;
+  }
   namespace MaterialModel
   {
     namespace internal
@@ -109,11 +114,20 @@ namespace aspect
           SymmetricTensor<2,dim> old_maxwell_stress;
           SymmetricTensor<2,dim> slip_tensor;
           SymmetricTensor<2,dim> normal_tensor;
+          /** Output only; never changes the constitutive evaluation. */
+          bool capture_stress_components = false;
         };
 
         /** Constitutive values required by the surface weak form. */
         struct ReconstructedFaultPointResponse
         {
+          /** Current stress from this evaluation, before history publication. */
+          SymmetricTensor<2,dim> stress;
+          /** Optional beta*tau_old, 2*kappa*strain, and crack-strain terms. */
+          std::array<SymmetricTensor<2,dim>,3> stress_components;
+          /** Diagnostic coefficients from the same constitutive evaluation. */
+          double stress_time_step = 0., stress_beta = 0.;
+          double normalization_integral;
           /** Evaluated traction terms, for projection-consistent weak diagnostics. */
           double shear_traction;
           /** Total normal traction and its fixed background contribution. */
@@ -127,6 +141,7 @@ namespace aspect
           double kappa = numbers::signaling_nan<double>();
           double localization_factor = numbers::signaling_nan<double>();
           double friction_coefficient = numbers::signaling_nan<double>();
+          double friction_derivative_wrt_slip_rate = numbers::signaling_nan<double>();
           bool uses_adiabatic_friction_pressure = false;
         };
 
@@ -188,6 +203,14 @@ namespace aspect
                                       const std::vector<double> &composition,
                                       const SymmetricTensor<2,dim> &old_stress) const;
 
+        /** Default-off, fixed-mesh benchmark hook. Returns unrelaxed retained
+         * stress in the specified cell trace, never an additional RHS force.
+         * The plugin owns storage and may publish it only after acceptance.
+         * Not serialized and not supported by the particle-domain surface rule.
+         */
+        std::function<SymmetricTensor<2,dim>(const CellId &, const Point<dim> &)>
+          benchmark_retained_stress;
+
         double minimum_fault_slip_rate() const;
 
         /** Read-only configured law for constitutively consistent initialization. */
@@ -234,6 +257,7 @@ namespace aspect
 
       private:
         friend class internal::PhaseFieldFaultTestAccess<dim>;
+        friend class Postprocess::MomentCycle<dim>;
 
         /**
          * @name Maxwell constitutive helpers

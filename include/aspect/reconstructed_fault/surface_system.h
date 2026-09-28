@@ -18,10 +18,13 @@
 #include <deal.II/base/timer.h>
 
 #include <memory>
+#include <functional>
+#include <array>
 #include <vector>
 
 namespace aspect
 {
+  namespace internal { class FaultNormalFilter; }
   namespace MaterialModel
   {
     template <int dim>
@@ -41,6 +44,11 @@ namespace aspect
     double minimum_normal_traction = std::numeric_limits<double>::infinity();
     double maximum_normal_traction = -std::numeric_limits<double>::infinity();
     std::vector<std::vector<double>> mass_diagonal, mass_off_diagonal;
+    /** Populated only by the explicitly selected normal-filter experiment.
+     * Raw means the current mechanical input including background, before filtering. */
+    std::vector<std::vector<double>> raw_normal_traction, normal_filter_coefficients;
+    double minimum_raw_normal_traction = std::numeric_limits<double>::infinity();
+    double maximum_raw_normal_traction = -std::numeric_limits<double>::infinity();
   };
 
 
@@ -83,6 +91,71 @@ namespace aspect
        * mature fault. Reattach before mechanics; generic projections are unchanged.
        */
       void enable_bulk_work_measure();
+
+      /** Experimental normal input: raw (default/bypass), projected, helmholtz.
+       * Length is physical metres; zero length still projects. Configure outside
+       * mechanics, including on restart. Currently requires true-normal bulk work. */
+      void set_normal_stress_filter(const std::string &mode, double length);
+
+      /** Output-only snapshot of the true-normal, bulk-QP work evaluation.
+       * Loads are globally reduced; samples retain unique local cell ownership.
+       * A consumer may publish this only after successful mechanical acceptance.
+       * Nothing here is checkpointed or used in a residual or Jacobian.
+       */
+      struct NormalTractionDiagnostic
+      {
+        struct Sample
+        {
+          std::string cell;
+          unsigned int qp, level, fault, segment;
+          Point<dim> position, surface_position;
+          Tensor<1,dim> normal;
+          SymmetricTensor<2,dim> stress;
+          double cell_size, xi, pressure, deviatoric, background, total;
+          double phase, I_h, chi, JxW, weight;
+          SymmetricTensor<2,dim> incoming_stress;
+          std::array<SymmetricTensor<2,dim>,3> stress_components;
+          Point<dim> reference_position;
+          SymmetricTensor<2,dim> particle_interpolated_stress;
+          Tensor<2,dim> velocity_gradient;
+          double stress_time_step = 0., beta = 0., kappa = 0.;
+          double friction_coefficient = 0., friction_normal = 0.;
+        };
+        struct ParticleSample
+        {
+          std::string cell;
+          types::particle_index id;
+          unsigned int owner_rank;
+          Point<dim> position;
+          SymmetricTensor<2,dim> stress;
+        };
+        unsigned int step;
+        double time;
+        FaultVector pressure_load, deviatoric_load, background_load, rates;
+        FaultVector filter_stiffness_diagonal, filter_stiffness_off_diagonal;
+        FaultVector friction_mass_diagonal, friction_mass_off_diagonal;
+        std::array<FaultVector,3> deviatoric_component_loads;
+        /** Independent owned-QP sums, globally reduced (Pa*m in 2-D). */
+        std::array<double,6> integrated_loads = {{0.,0.,0.,0.,0.,0.}};
+        std::vector<Sample> samples;
+        /** Native point evaluations, not quadrature weights or weak loads. */
+        std::vector<Sample> line_samples;
+        std::vector<ParticleSample> particles;
+        unsigned int unassociated_phase_points = 0;
+      };
+
+      /** Select mapped surface positions for raw QPs; empty disables capture.
+       * All fault rows are captured regardless of the sample window.
+       */
+      void set_normal_traction_diagnostic(std::function<bool(const Point<dim> &)> window,
+                                         std::vector<std::pair<Point<dim>,Point<dim>>> lines = {});
+      const NormalTractionDiagnostic &get_normal_traction_diagnostic() const;
+
+      /** Opt-in, read-only observer of a completed linearization, before any
+       * history commit. Receives uniquely owned samples and reduced moments.
+       */
+      std::function<void(const ReconstructedFaultSurfaceResidual &,
+                         const NormalTractionDiagnostic &)> normal_diagnostic_observer;
 
       ReconstructedFaultSurfaceResidual
       evaluate_surface_residual(const LinearAlgebra::BlockVector &bulk_state,
@@ -161,6 +234,12 @@ namespace aspect
       std::unique_ptr<TimerOutput> performance_timer;
       unsigned int linearization_generation = 0;
       bool bulk_work_measure = false;
+      std::function<bool(const Point<dim> &)> normal_diagnostic_window;
+      std::vector<std::pair<Point<dim>,Point<dim>>> normal_diagnostic_lines;
+      std::shared_ptr<const NormalTractionDiagnostic> normal_diagnostic;
+      std::string normal_filter_mode = "raw";
+      double normal_filter_length = 0.;
+      mutable std::vector<std::shared_ptr<const internal::FaultNormalFilter>> normal_filter_cache;
   };
 }
 

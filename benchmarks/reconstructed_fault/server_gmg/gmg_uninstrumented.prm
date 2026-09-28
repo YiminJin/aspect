@@ -1,0 +1,2 @@
+# Historical control alias. All GMG cases now run without core debug observers.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/server_gmg/gmg.prm

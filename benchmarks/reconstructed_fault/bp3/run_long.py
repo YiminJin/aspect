@@ -12,7 +12,7 @@ import resource
 import shutil
 import subprocess
 import time
-from slip_history import restore_prefix
+from slip_history import restore_prefix, restore_profile_payloads
 
 HERE=Path(__file__).resolve().parent
 REPO=HERE.parents[2]
@@ -54,11 +54,21 @@ def main():
         chosen=prior/f'restart/{checkpoint:02d}'
         step,accepted_time=(chosen/'bp3_accepted_state.txt').read_text().split()
         assert (chosen/'bp3_output_metadata').is_dir(),'Not a qualified new-layout checkpoint'
-        shutil.copytree(prior,out)
+        # The checkpoint index, not the parent's later profile directory,
+        # determines the branch prefix. Never roll back the original run.
+        metadata=chosen/'bp3_output_metadata'
+        def ignore_later_profiles(directory, names):
+            if Path(directory)==prior:
+                return [name for name in names if name=='profiles'
+                        or (name=='restored_growth.csv' and not (metadata/name).exists())]
+            return []
+        shutil.copytree(prior,out,ignore=ignore_later_profiles)
         # This is a disposable branch, not an in-place rollback of prior evidence.
         (out/'restart/last_good_checkpoint.txt').write_text(str(checkpoint)+'\n')
-        for source in (chosen/'bp3_output_metadata').iterdir(): shutil.copy2(source,out/source.name)
-        restore_prefix(out/'cumulative_slip.csv',int(step))
+        for source in metadata.iterdir(): shutil.copy2(source,out/source.name)
+        restore_profile_payloads(prior,out,int(step))
+        if (out/'cumulative_slip.csv').is_file():
+            restore_prefix(out/'cumulative_slip.csv',int(step))
         phase='resume'
     else:
         out.mkdir(parents=True);phase='fresh';step=None;accepted_time=None
@@ -66,6 +76,11 @@ def main():
 set Output directory = {out}
 set Resume computation = {str(bool(args.resume_from)).lower()}
 set End time = {args.end_years*31557600.:.17g}
+subsection Solver parameters
+  subsection Stokes solver parameters
+    set Stokes solver type = block {args.velocity_preconditioner.upper()}
+  end
+end
 subsection Fault reconstruction
   set Prescribed faults file = {properties/'fault.txt'}
 end
@@ -132,8 +147,8 @@ end
         return ''.join(lines)
     (out/f'{phase}.prm').write_text('# Resolved modified BP3: no parameter includes.\n'+render())
     # The direct mpirun recipe and this launcher share one environment authority.
-    raw=subprocess.check_output(['bash','-c','source "$1" "$2" && env -0',
-                                 'bp3',str(HERE/'environment.sh'),args.velocity_preconditioner])
+    raw=subprocess.check_output(['bash','-c','source "$1" && env -0',
+                                 'bp3',str(HERE/'environment.sh')])
     env=dict(item.split('=',1) for item in raw.decode().split('\0') if item)
     command=['mpirun','-np',str(args.ranks),'--bind-to','core','--map-by','core',str(binary),str(out/f'{phase}.prm')]
     record=dict(command=command,ranks=args.ranks,hashes=hashes,purpose=args.purpose,

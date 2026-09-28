@@ -54,7 +54,8 @@ namespace aspect
       const auto I=manager.get_property_information()[manager.get_property_index("phase field fault previous I h")].position;
       Tensor<1,dim> t=fault.vertex(1)-fault.vertex(0);t/=t.norm();
       Tensor<1,dim> normal;normal[0]=-t[1];normal[1]=t[0];
-      const auto S=symmetrize(outer_product(t,normal)),N=symmetrize(outer_product(normal,normal));
+      const auto S=manager.get_shear_sense(0)*symmetrize(outer_product(t,normal)),
+                 N=symmetrize(outer_product(normal,normal));
 
       // Stable-ID inert history, geometry and completed profile remain fixed
       // even when particles move to another MPI owner. Capture only at t=0.
@@ -139,8 +140,8 @@ namespace aspect
                 const auto p=fe.quadrature_point(q);const double xd=BP3::down_dip(p[0],p[1]);
                 const bool window=(xd>=BP3::weakening_length-2000. && xd<=BP3::weakening_length+5000.) || (xd>=37000. && xd<=43000.)
                   || (std::getenv("ASPECT_BP5_SHORT_TEST") &&
-                      ((xd>=BP3::weakening_length-11000. && xd<=BP3::weakening_length+13000.) || xd>100000./BP3::sine-6000.))
-                  || p[1]<2000. || p[1]>98000. || (xd>59000. && xd<61000.);
+                      ((xd>=BP3::weakening_length-11000. && xd<=BP3::weakening_length+13000.) || xd>BP3::box_size/BP3::sine-6000.))
+                  || p[1]<2000. || p[1]>BP3::box_size-2000. || (xd>59000. && xd<61000.);
                 if (!a[q].active && !(phi[q]>0. && window)) continue;
                 std::vector<double> all(composition.size());
                 for (unsigned int c=0;c<all.size();++c) all[c]=composition[c][q];
@@ -151,7 +152,7 @@ namespace aspect
                 if (write_files && window && phi[q]>0.)
                   {
                     raw<<cell->id().to_string()<<','<<q<<','<<p[0]<<','<<p[1]<<','<<xd<<','
-                       <<(BP3::trace_x-p[0])*BP3::sine-(BP3::box_size-p[1])*BP3::cosine<<','<<fe.JxW(q)<<','
+                       <<BP3::signed_normal(p[0],p[1])<<','<<fe.JxW(q)<<','
                        <<a[q].active<<','<<j<<','<<xi<<','<<phi[q]<<','<<s.Ih<<','<<s.chi<<','<<s.rate<<','<<pressure[q]<<','
                        <<s.tau[0][0]<<','<<s.tau[1][1]<<','<<s.tau[0][1]<<','<<s.tau*N<<','<<s.sigma<<','<<s.q<<','
                        <<eps[q][0][0]<<','<<eps[q][1][1]<<','<<eps[q][0][1]<<','<<(eps[q]-s.chi*s.rate*S).norm()<<'\n';
@@ -229,7 +230,11 @@ namespace aspect
                       ExcMessage("Normal control is prescribed-pressure initialization only."));
           consistency=std::max(consistency,std::abs(BP3::sigma0-weak.normal_traction[0][j]/native[6*j]));
 #else
-          consistency=std::max(consistency,std::abs(native[6*j+4]-weak.normal_traction[0][j])/native[6*j]);
+          // Filtering changes the friction input, not the mechanical stress
+          // reconstructed by this observer. Compare its raw load with raw
+          // assembly; the unfiltered path retains its original check.
+          const auto &raw_normal=weak.raw_normal_traction.empty() ? weak.normal_traction : weak.raw_normal_traction;
+          consistency=std::max(consistency,std::abs(native[6*j+4]-raw_normal[0][j])/native[6*j]);
 #endif
         }
       AssertThrow(consistency<1e-5,ExcMessage("Accepted work observer does not reproduce frozen mechanical traction."));

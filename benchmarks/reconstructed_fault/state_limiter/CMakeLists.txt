@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.13.4)
+find_package(Aspect REQUIRED HINTS ${Aspect_DIR})
+DEAL_II_INITIALIZE_CACHED_VARIABLES()
+project(fault_state_limiter_checks)
+add_library(state_limiter_test SHARED ../../../tests/phase_field_fault_state_limiter.cc)
+ASPECT_SETUP_PLUGIN(state_limiter_test)

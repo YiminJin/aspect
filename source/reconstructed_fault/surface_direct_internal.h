@@ -4,17 +4,12 @@
 #define _aspect_surface_direct_internal_h
 
 #include <aspect/global.h>
-#include <aspect/reconstructed_fault/linear_performance.h>
-#include <deal.II/lac/dynamic_sparsity_pattern.h>
-#include <deal.II/lac/sparse_direct.h>
-#include <deal.II/lac/sparse_matrix.h>
 #ifdef DEAL_II_WITH_TRILINOS
 #include <Teuchos_LAPACK.hpp>
 #endif
 #include <algorithm>
 #include <cmath>
-#include <cstdlib>
-#include <memory>
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -28,28 +23,18 @@ namespace aspect
     class FaultSurfaceDirect
     {
       public:
-        static bool use_pivoting()
-        {
-          const char *name=std::getenv("ASPECT_FAULT_SURFACE_SOLVER");
-          AssertThrow(!name || std::string(name)=="umfpack" || std::string(name)=="tridiagonal",
-                      dealii::ExcMessage("ASPECT_FAULT_SURFACE_SOLVER must be umfpack or tridiagonal."));
-          return !name || std::string(name)=="tridiagonal";
-        }
-
         FaultSurfaceDirect(const std::vector<double> &diagonal,
                            const std::vector<double> &off_diagonal,
                            const std::vector<bool> &active,
                            const unsigned int fault,
-                           const bool pivoted=use_pivoting(),
                            const std::vector<double> &lower_diagonal={})
           : diagonal(diagonal), off_diagonal(off_diagonal),
             lower_diagonal(lower_diagonal.empty() ? off_diagonal : lower_diagonal), active(active),
-            fault(fault), pivoted(pivoted), compare(std::getenv("ASPECT_FAULT_COMPARE_SURFACE_INVERSE"))
+            fault(fault)
         {
           AssertDimension(active.size(),diagonal.size());
           AssertDimension(off_diagonal.size(),diagonal.empty() ? 0 : diagonal.size()-1);
           AssertDimension(this->lower_diagonal.size(),off_diagonal.size());
-          // Active entries are identity rows only in the comparison matrix.
           // The specialized solve factors solely contiguous free principal blocks.
           for (unsigned int i=0;i<diagonal.size();++i)
             {
@@ -65,57 +50,27 @@ namespace aspect
               while (i<active.size() && !active[i]) ++i;
               Block block;
               block.first=first; block.size=i-first;
-              if (pivoted)
-                {
-                  block.d.assign(diagonal.begin()+first,diagonal.begin()+i);
-                  block.dl.assign(this->lower_diagonal.begin()+first,this->lower_diagonal.begin()+i-1);
-                  block.du.assign(off_diagonal.begin()+first,off_diagonal.begin()+i-1);
-                  block.du2.resize(block.size>2 ? block.size-2 : 1);
-                  block.pivots.resize(block.size);
-                  int info=0;
+              block.d.assign(diagonal.begin()+first,diagonal.begin()+i);
+              block.dl.assign(this->lower_diagonal.begin()+first,this->lower_diagonal.begin()+i-1);
+              block.du.assign(off_diagonal.begin()+first,off_diagonal.begin()+i-1);
+              block.du2.resize(block.size>2 ? block.size-2 : 1);
+              block.pivots.resize(block.size);
+              int info=0;
 #ifdef DEAL_II_WITH_TRILINOS
-                  Teuchos::LAPACK<int,double>().GTTRF(block.size,block.dl.data(),block.d.data(),
-                    block.du.data(),block.du2.data(),block.pivots.data(),&info);
+              Teuchos::LAPACK<int,double>().GTTRF(block.size,block.dl.data(),block.d.data(),
+                block.du.data(),block.du2.data(),block.pivots.data(),&info);
 #else
-                  AssertThrow(false,dealii::ExcMessage("Pivoted surface solve requires the Trilinos LAPACK wrapper."));
+              AssertThrow(false,dealii::ExcMessage("Pivoted surface solve requires the Trilinos LAPACK wrapper."));
 #endif
-                  AssertThrow(info==0,dealii::ExcMessage(context(first)+": GTTRF failed, info="
-                    +std::to_string(info)+(info>0 ? ", singular pivot vertex="+std::to_string(first+info-1) : "")));
-                  for (unsigned int j=0;j<block.d.size();++j)
-                    AssertThrow(std::isfinite(block.d[j]) && block.d[j]!=0.,
-                                dealii::ExcMessage(context(first+j)+": nonfinite/zero factored pivot."));
-                  for (const auto *values : {&block.dl,&block.du,&block.du2})
-                    for (const double value : *values)
-                      AssertThrow(std::isfinite(value),dealii::ExcMessage(context(first)+": nonfinite LU factor."));
-                }
+              AssertThrow(info==0,dealii::ExcMessage(context(first)+": GTTRF failed, info="
+                +std::to_string(info)+(info>0 ? ", singular pivot vertex="+std::to_string(first+info-1) : "")));
+              for (unsigned int j=0;j<block.d.size();++j)
+                AssertThrow(std::isfinite(block.d[j]) && block.d[j]!=0.,
+                            dealii::ExcMessage(context(first+j)+": nonfinite/zero factored pivot."));
+              for (const auto *values : {&block.dl,&block.du,&block.du2})
+                for (const double value : *values)
+                  AssertThrow(std::isfinite(value),dealii::ExcMessage(context(first)+": nonfinite LU factor."));
               blocks.push_back(std::move(block));
-            }
-          if (!pivoted || compare)
-            {
-              FaultLinearSection comparison_timing(FaultLinearTiming::other,pivoted);
-#ifdef DEAL_II_WITH_UMFPACK
-              const unsigned int n=diagonal.size();
-              dealii::DynamicSparsityPattern pattern(n,n);
-              for (unsigned int i=0;i<n;++i)
-                {
-                  pattern.add(i,i);
-                  if (i+1<n && !active[i] && !active[i+1])
-                    { pattern.add(i,i+1); pattern.add(i+1,i); }
-                }
-              sparsity.copy_from(pattern); matrix.reinit(sparsity);
-              for (unsigned int i=0;i<n;++i)
-                {
-                  matrix.set(i,i,active[i] ? 1. : diagonal[i]);
-                  if (i+1<n && !active[i] && !active[i+1])
-                    { matrix.set(i,i+1,off_diagonal[i]); matrix.set(i+1,i,this->lower_diagonal[i]); }
-                }
-              inverse=std::make_unique<dealii::SparseDirectUMFPACK>();
-              try { inverse->initialize(matrix); }
-              catch (const std::exception &e)
-                { AssertThrow(false,dealii::ExcMessage(context(0)+": UMFPACK factorization: "+e.what())); }
-#else
-              AssertThrow(false,dealii::ExcMessage("UMFPACK surface reference is unavailable."));
-#endif
             }
         }
 
@@ -126,37 +81,15 @@ namespace aspect
           for (unsigned int i=0;i<rhs.size();++i)
             if (!active[i])
               AssertThrow(std::isfinite(rhs[i]),dealii::ExcMessage(context(i)+": nonfinite free RHS."));
-          if (pivoted)
-            for (const auto &block : blocks)
-              {
-                std::copy_n(rhs.begin()+block.first,block.size,solution.begin()+block.first);
-                int info=0;
-#ifdef DEAL_II_WITH_TRILINOS
-                Teuchos::LAPACK<int,double>().GTTRS('N',block.size,1,block.dl.data(),block.d.data(),
-                  block.du.data(),block.du2.data(),block.pivots.data(),solution.data()+block.first,block.size,&info);
-#endif
-                AssertThrow(info==0,dealii::ExcMessage(context(block.first)+": GTTRS failed, info="+std::to_string(info)));
-              }
-          if (!pivoted || compare)
+          for (const auto &block : blocks)
             {
-              FaultLinearSection comparison_timing(FaultLinearTiming::other,pivoted);
-              dealii::Vector<double> source(rhs.size()),reference(rhs.size());
-              for (unsigned int i=0;i<rhs.size();++i) source[i]=active[i] ? 0. : rhs[i];
-#ifdef DEAL_II_WITH_UMFPACK
-              inverse->vmult(reference,source);
+              std::copy_n(rhs.begin()+block.first,block.size,solution.begin()+block.first);
+              int info=0;
+#ifdef DEAL_II_WITH_TRILINOS
+              Teuchos::LAPACK<int,double>().GTTRS('N',block.size,1,block.dl.data(),block.d.data(),
+                block.du.data(),block.du2.data(),block.pivots.data(),solution.data()+block.first,block.size,&info);
 #endif
-              if (!pivoted)
-                for (unsigned int i=0;i<rhs.size();++i) solution[i]=active[i] ? 0. : reference[i];
-              else
-                {
-                  double difference=0.,scale=0.;
-                  for (unsigned int i=0;i<rhs.size();++i)
-                    if (!active[i])
-                      { difference=std::max(difference,std::abs(solution[i]-reference[i]));
-                        scale=std::max(scale,std::abs(reference[i])); }
-                  AssertThrow(difference<=2e-12*std::max(scale,std::numeric_limits<double>::min()),
-                              dealii::ExcMessage(context(0)+": pivoted/UMFPACK inverse disagreement."));
-                }
+              AssertThrow(info==0,dealii::ExcMessage(context(block.first)+": GTTRS failed, info="+std::to_string(info)));
             }
           // Check each free block against the original coefficients, not LU.
           // Keep the existing 100*epsilon*n_fault allowance, now with block-local
@@ -203,13 +136,7 @@ namespace aspect
         const std::vector<double> diagonal,off_diagonal,lower_diagonal;
         const std::vector<bool> active;
         const unsigned int fault;
-        const bool pivoted,compare;
         std::vector<Block> blocks;
-        dealii::SparsityPattern sparsity;
-        dealii::SparseMatrix<double> matrix;
-#ifdef DEAL_II_WITH_UMFPACK
-        std::unique_ptr<dealii::SparseDirectUMFPACK> inverse;
-#endif
     };
   }
 }

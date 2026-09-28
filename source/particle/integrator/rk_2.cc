@@ -22,6 +22,7 @@
 #include <aspect/particle/property/interface.h>
 #include <aspect/particle/manager.h>
 #include <aspect/geometry_model/interface.h>
+#include <cstdlib>
 
 namespace aspect
 {
@@ -53,8 +54,11 @@ namespace aspect
                                      const typename ParticleHandler<dim>::particle_iterator &end_particle,
                                      const std::vector<Tensor<1,dim>> &old_velocities,
                                      const std::vector<Tensor<1,dim>> &velocities,
-                                     const double dt)
+                                     const double requested_dt)
       {
+        // Frozen-data diagnostic only: keep the ordinary RK2 property layout
+        // and stages, without changing the timestep used by constitutive laws.
+        const double dt = std::getenv("ASPECT_DIAGNOSTIC_FREEZE_PARTICLE_ADVECTION") ? 0. : requested_dt;
         Assert(static_cast<unsigned int> (std::distance(begin_particle, end_particle)) == old_velocities.size(),
                ExcMessage("The particle integrator expects the old velocity vector to be of equal size "
                           "to the number of particles to advect. For some unknown reason they are different, "

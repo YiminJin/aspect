@@ -13,11 +13,16 @@ namespace BP3
   constexpr double damping = G/(2*cs), sigma0 = 50e6;
   constexpr double Vp = 1e-9, Vinit = 1e-9, Vref = 1e-6;
   constexpr double a0 = .010, amax = .025, b = .015, f0 = .6;
-  constexpr double Wf = 40000., box_size = 100000., core_phi = .6;
+  constexpr double Wf = 40000., core_phi = .6;
+#ifdef ASPECT_BP3_RESTORE_150X50
+  constexpr double box_size = 50000., horizontal_sign = -1.;
+#else
+  constexpr double box_size = 100000., horizontal_sign = 1.;
+#endif
   inline const double sine = std::sqrt(3.)/2;
   constexpr double cosine = .5;
   inline const double dip = std::acos(cosine);
-  inline const double trace_x = .5*box_size*(1+cosine/sine);
+  inline const double trace_x = horizontal_sign < 0 ? 0. : .5*box_size*(1+cosine/sine);
   inline const double tau0 = sigma0*amax*std::asinh(Vinit/(2*Vref)
     *std::exp((f0+b*std::log(Vref/Vinit))/amax))+damping*Vinit;
 
@@ -83,13 +88,17 @@ namespace BP3
     return old_theta*std::exp(-x)-steady*std::expm1(-x);
   }
 
-  // ASPECT x=trace_x-x_BP3, y=box_size-z_BP3. This proper 180-degree
-  // rotation keeps positive manager V equal to official positive thrust slip.
+  // The maintained chart is a proper 180-degree rotation. The explicitly
+  // restored right-dipping chart reflects x and selects manager shear sense -1
+  // so V remains the positive thrust magnitude in either chart.
   inline double down_dip(double x, double y)
-  { return (trace_x-x)*cosine+(box_size-y)*sine; }
+  { return horizontal_sign*(trace_x-x)*cosine+(box_size-y)*sine; }
+
+  inline double signed_normal(double x, double y)
+  { return horizontal_sign*(trace_x-x)*sine-(box_size-y)*cosine; }
 
   inline double normal_distance(double x, double y)
-  { return std::abs((trace_x-x)*sine-(box_size-y)*cosine); }
+  { return std::abs(signed_normal(x,y)); }
 
 }
 #endif

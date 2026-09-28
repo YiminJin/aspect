@@ -24,6 +24,10 @@
 #include <aspect/initial_temperature/interface.h>
 #include <aspect/initial_composition/interface.h>
 #include <aspect/postprocess/particles.h>
+#include <cstdlib>
+#include <fstream>
+#include <iomanip>
+#include <set>
 
 #include <deal.II/base/quadrature_lib.h>
 #include <deal.II/base/function.h>
@@ -390,6 +394,23 @@ namespace aspect
 
     std::vector<types::global_dof_index> local_dof_indices (finite_element.dofs_per_cell);
 
+    // Opt-in cell trace: record the actual proposals before MPI ADD/count and
+    // the published field afterwards, not a second interpolation of that field.
+    std::set<std::string> trace_cells;
+    std::ofstream trace;
+    if (std::getenv("ASPECT_STRESS_CYCLE_TRACE"))
+      {
+        const std::string rank = std::to_string(Utilities::MPI::this_mpi_process(mpi_communicator));
+        std::ifstream cells(parameters.output_directory+"stress_trace_cells_rank"+rank+".txt");
+        for (std::string id; cells>>id;) trace_cells.insert(id);
+        if (!trace_cells.empty())
+          {
+            trace.open(parameters.output_directory+"stress_transfer_"+std::to_string(timestep_number)
+                       +"_rank"+rank+".csv",std::ios::app);
+            trace<<std::setprecision(17);
+          }
+      }
+
     for (const auto &cell : dof_handler.active_cell_iterators())
       if (cell->is_locally_owned())
         {
@@ -434,6 +455,18 @@ namespace aspect
               // go through the composition dofs and set their global values
               // to the particle field interpolated at these points
               cell->get_dof_indices (local_dof_indices);
+              if (trace_cells.count(cell->id().to_string()))
+                for (const auto &entry:particle_property_indices[particle_manager])
+                  for (unsigned int i=0;i<support_points.size();++i)
+                    {
+                      const auto &field=advection_fields[entry.first];
+                      const unsigned int component=field.component_index(introspection);
+                      const auto dof=local_dof_indices[finite_element.component_to_system_index(component,i)];
+                      trace<<"support_proposal,"<<timestep_number<<','<<time<<','<<time_step<<','
+                           <<cell->id()<<','<<i<<','<<field.name(introspection)<<','<<component<<','
+                           <<entry.second<<','<<dof<<','<<quadrature_points[i][0]<<','<<quadrature_points[i][1]
+                           <<','<<support_points[i][0]<<','<<support_points[i][1]<<','<<particle_properties[i][entry.second]<<'\n';
+                    }
               const unsigned int n_dofs_per_cell = finite_element.base_element(base_element_index).dofs_per_cell;
               for (const std::pair<unsigned int, unsigned int> &field_and_particle_property: particle_property_indices[particle_manager])
                 for (unsigned int i=0; i<n_dofs_per_cell; ++i)
@@ -486,6 +519,30 @@ namespace aspect
         Assert (particle_solution.block(b).l2_norm() == 0,
                 ExcInternalError());
 
+    if (!trace_cells.empty())
+      {
+        FEValues<dim> trace_fe(*mapping,finite_element,introspection.quadratures.velocities,
+                              update_values|update_quadrature_points);
+        std::vector<double> values(trace_fe.n_quadrature_points);
+        for (const auto &cell:dof_handler.active_cell_iterators())
+          if (cell->is_locally_owned() && trace_cells.count(cell->id().to_string()))
+            {
+              trace_fe.reinit(cell);
+              for (const auto &field:advection_fields)
+                {
+                  const unsigned int component=field.component_index(introspection);
+                  trace_fe[FEValuesExtractors::Scalar(component)].get_function_values(solution,values);
+                  for (unsigned int q=0;q<values.size();++q)
+                    {
+                      const auto &x=trace_fe.quadrature_point(q);
+                      const auto &r=introspection.quadratures.velocities.point(q);
+                      trace<<"published_FE,"<<timestep_number<<','<<time<<','<<time_step<<','
+                           <<cell->id()<<','<<q<<','<<field.name(introspection)<<','<<component
+                           <<",-1,-1,"<<x[0]<<','<<x[1]<<','<<r[0]<<','<<r[1]<<','<<values[q]<<'\n';
+                    }
+                }
+            }
+      }
     computing_timer.leave_subsection("Particles: Interpolate");
   }
 

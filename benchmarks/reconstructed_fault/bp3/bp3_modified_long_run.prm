@@ -1,6 +1,6 @@
 # Modified BP3: 300 x 100 km, fully frictional, mature C=0, fixed phase.
 # Self-contained physical/numerical configuration; run_long.py only sets run limits.
-# The velocity-GMG backend is selected by the launcher, not Stokes solver type.
+# The launcher selects the velocity backend through Stokes solver type.
 set Additional shared libraries = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/build/libbp3.release.so
 set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/modified-bp3-long-run
 set Dimension = 2

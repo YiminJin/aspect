@@ -1,4 +1,79 @@
-# Latest cleanup — BP5, 2026-09-20
+# Latest cleanup — reconstructed-fault artifacts, 2026-09-24 UTC
+
+Lossless archival reclaimed **11.62 GiB (12.47 GB)** of actual disk space.
+The active benchmark tree decreased from approximately **23 GiB to 4.6 GiB**.
+No scientific evidence was permanently discarded and no source, fixture,
+parameter, authoritative specification or numerical result was rewritten.
+
+| Quantity | Result |
+|---|---:|
+| Archived generated files | 1,381 |
+| Uncompressed archived bytes | 19,115,365,151 |
+| Compressed payload bytes | 6,642,728,400 |
+| Payload bytes reclaimed | 12,472,636,751 |
+| Retained benchmark files SHA256-verified | 16,434 |
+| Documents / pre-existing modified source files separately verified | 207 |
+
+Archived material comprises older raw QP/particle CSVs, visualization and binary
+exports, disposable checkpoint payloads, Python bytecode and large historical
+cumulative-slip tables. It includes restored/copied outputs in BP3
+`first_long_run/` and `length-scale-study/`, BP5's old loading/startup studies,
+three large stress-cycle staging copies, and normal-stress A/B output.
+Directory skeletons, reports, logs, summaries and small histories remain.
+Large historical `cumulative_slip.csv` files now require restoration; this
+supersedes earlier notes below saying every such file remains extracted.
+
+Kept directly accessible:
+
+- BP5 `moment-consistency/`, including failed controls and exact tested snapshots;
+  `clean-stress-cycle/`; and `normal-stress-cycle/`.
+- Maintained fixtures, server packages, meshes, source/plugins/scripts, all PRMs,
+  reports, figures, provenance and tracked files.
+- Existing build trees, to avoid an unnecessary rebuild for the next task.
+- The protected BP3 accepted-step-11 mechanical-discrimination source checkpoint
+  and `state-disturbance/reference32/restart/`.
+- All existing archives. These were neither repacked nor deleted.
+
+Documentation is only about 7 MiB. Its original paths remain intact to preserve
+links and historical authority. A new [documentation index](../../doc/reconstructed_fault/README.md)
+identifies the authoritative pair, historical evidence, and latest experiment.
+
+## Recovery of the 2026-09-24 archive
+
+The local archive (not an off-machine backup) is:
+
+```
+/home/ein/repository/aspect/.benchmark-cleanup-20260924-gTxCPW
+```
+
+It contains 27 `part-*.tar.zst` chunks, per-file SHA256 `manifest.json`, the exact
+cleanup/restoration scripts, `completed.jsonl`, `verified.json`, and a successful
+`restoration_test.json`. Each member was decompressed and hash-checked before
+the unchanged original was removed. All retained benchmark files were checked
+before this cleanup note was updated.
+
+Preview restoration from repository root:
+
+```sh
+python3 .benchmark-cleanup-20260924-gTxCPW/restore.py bp5/output-normal-diagnostic
+```
+
+Add `--restore` to recover matching files at their original paths. A single file
+or narrower directory can be specified. Python and `zstd` are required. Equal
+existing files are left alone; differing files are never overwritten.
+
+Restore complete output/checkpoint groups before visualization or restart.
+Some older data were already archived by earlier cleanups: consult those
+manifests as well. Surviving checkpoint metadata does not mean its entire
+payload is still extracted. Existing analysis scripts expect their original
+paths and may need restoration first; they were not modified to hide missing data.
+
+Verification restored a 3,314,806-byte CSV with its original SHA256, repeated
+restoration idempotently, and confirmed refusal to overwrite a deliberately
+different disposable target. No ASPECT simulation was launched. The current
+moment-consistency qualification remains partial; cleanup does not change it.
+
+# Earlier cleanup — BP5, 2026-09-20
 
 The new BP5 outputs, including both copied server results, were losslessly
 archived with per-file verification. This reclaimed **12.73 GiB** and reduced

@@ -24,6 +24,8 @@
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/split_member.hpp>
 #include <boost/serialization/vector.hpp>
+#include <boost/serialization/map.hpp>
+#include <boost/serialization/version.hpp>
 
 #include <cstdint>
 #include <map>
@@ -75,6 +77,13 @@ namespace aspect
       unsigned int add_reconstructed_fault(
         const std::vector<Point<dim>> &vertices,
         const std::vector<double> &projection_half_widths);
+
+      /** Configure once, before mechanics; +1 retains the geometric convention.
+       * The sign multiplies S, not V or the geometric normal. Restart preserves
+       * the choice and rejects a conflicting reattachment by the model.
+       */
+      void set_shear_sense(const unsigned int fault_index, const int sense);
+      int get_shear_sense(const unsigned int fault_index) const;
       /**
        * @}
        */
@@ -357,7 +366,7 @@ namespace aspect
        * @{
        */
       template <class Archive>
-      void save(Archive &ar, const unsigned int) const
+      void save(Archive &ar, const unsigned int version) const
       {
         ar &initial_reconstruction_complete;
         ar &reconstructed_faults;
@@ -366,10 +375,12 @@ namespace aspect
         ar &n_property_components;
         ar &timestep_committed_slip_rates;
         ar &slip_rate_initialized;
+        if (version >= 1)
+          ar &shear_senses;
       }
 
       template <class Archive>
-      void load(Archive &ar, const unsigned int)
+      void load(Archive &ar, const unsigned int version)
       {
         ar &initial_reconstruction_complete;
         ar &reconstructed_faults;
@@ -378,6 +389,17 @@ namespace aspect
         ar &n_property_components;
         ar &timestep_committed_slip_rates;
         ar &slip_rate_initialized;
+        shear_senses.clear();
+        if (version >= 1)
+          ar &shear_senses;
+        for (const auto &entry : shear_senses)
+          AssertThrow(entry.first < reconstructed_faults.size()
+                      && (entry.second == -1 || entry.second == 1),
+                      ExcMessage("Invalid checkpointed fault shear sense."));
+        // Unconfigured faults, including legacy checkpoints, used +1.
+        // Record that choice so restart cannot silently reverse a loaded fault.
+        for (unsigned int f = 0; f < reconstructed_faults.size(); ++f)
+          shear_senses.emplace(f, 1);
 
         rebuild_after_deserialization();
       }
@@ -431,6 +453,7 @@ namespace aspect
       bool initial_reconstruction_complete = false;
       std::vector<PrescribedInitialFault<dim>> prescribed_faults;
       std::vector<ReconstructedFault<dim>> reconstructed_faults;
+      std::map<unsigned int, int> shear_senses;
       std::vector<std::vector<double>> projection_half_widths;
       std::uint64_t projection_metadata_version = 0;
 
@@ -475,6 +498,18 @@ namespace aspect
       bool slip_rate_trial_active = false;
   };
 
+}
+
+namespace boost
+{
+  namespace serialization
+  {
+    template <int dim>
+    struct version<aspect::ReconstructedFaultManager<dim>>
+    {
+      BOOST_STATIC_CONSTANT(unsigned int, value = 1);
+    };
+  }
 }
 
 #endif

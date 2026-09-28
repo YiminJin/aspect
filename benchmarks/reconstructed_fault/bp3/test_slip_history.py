@@ -32,16 +32,17 @@ class SlipHistory(unittest.TestCase):
 
     def test_environment(self):
         for shell in ('bash','zsh'):
-            for backend in ('amg','gmg'):
-                env=dict(os.environ,ASPECT_COMPARE_COUPLING='1',ASPECT_FAULT_GMG_HIERARCHY='stale')
-                command='source "$1" "$2" && python3 -c "import os,json; print(json.dumps(dict(os.environ)))"'
-                result=json.loads(subprocess.check_output(
-                    [shell,'-c',command,'test',str(HERE/'environment.sh'),backend],env=env))
-                self.assertNotIn('ASPECT_COMPARE_COUPLING',result)
-                self.assertEqual(result['ASPECT_SOURCE_DIR'],str(HERE.parents[2]))
-                self.assertEqual(result['ASPECT_FAULT_EXPLICIT_B'],'1')
-                self.assertEqual(result['OMP_NUM_THREADS'],'1')
-                self.assertEqual(result.get('ASPECT_FAULT_GMG_HIERARCHY'), '1' if backend=='gmg' else None)
+            env=dict(os.environ,ASPECT_COMPARE_COUPLING='1',ASPECT_FAULT_GMG_HIERARCHY='stale',
+                     ASPECT_FAULT_VELOCITY_GMG='1',ASPECT_FAULT_SURFACE_SOLVER='umfpack')
+            command='source "$1" && python3 -c "import os,json; print(json.dumps(dict(os.environ)))"'
+            result=json.loads(subprocess.check_output(
+                [shell,'-c',command,'test',str(HERE/'environment.sh')],env=env))
+            self.assertNotIn('ASPECT_COMPARE_COUPLING',result)
+            self.assertEqual(result['ASPECT_FAULT_EXPLICIT_B'],'1')
+            self.assertEqual(result['OMP_NUM_THREADS'],'1')
+            self.assertNotIn('ASPECT_FAULT_GMG_HIERARCHY',result)
+            self.assertNotIn('ASPECT_FAULT_VELOCITY_GMG',result)
+            self.assertNotIn('ASPECT_FAULT_SURFACE_SOLVER',result)
 
 
 if __name__=='__main__': unittest.main()

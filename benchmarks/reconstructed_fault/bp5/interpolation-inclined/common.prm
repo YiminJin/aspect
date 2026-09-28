@@ -1,0 +1,24 @@
+# Fresh-start comparison. Run from the ASPECT source root.
+include benchmarks/reconstructed_fault/bp5/inclined_production.prm
+set Additional shared libraries = ./benchmarks/reconstructed_fault/bp5/build/libbp5_moment_cycle.release.so
+set Resume computation = false
+subsection Discretization
+  set Composition polynomial degree = 2, 2, 2, 2
+  set Use discontinuous composition discretization = false, false, false, false
+end
+subsection Particles
+  subsection Interpolator
+    subsection Distance weighted average
+      set Weight type = linear
+    end
+    subsection Linear least squares
+      set Use linear least squares limiter = false
+      set Use boundary extrapolation = false
+    end
+  end
+end
+subsection Postprocess
+  subsection Clean stress cycle
+    set Advect particles = true
+  end
+end

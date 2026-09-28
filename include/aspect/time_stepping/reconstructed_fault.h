@@ -13,6 +13,7 @@
 #define _aspect_time_stepping_reconstructed_fault_h
 
 #include <aspect/time_stepping/interface.h>
+#include <limits>
 
 namespace aspect
 {
@@ -24,18 +25,23 @@ namespace aspect
 
   namespace TimeStepping
   {
-    /** Return the law-specific timestep restriction of a reconstructed fault. */
+    /** Law-specific restriction and optional committed-state aging predictor. */
     template <int dim>
     class ReconstructedFault : public Interface<dim>,
       public SimulatorAccess<dim>
     {
       public:
+        static void declare_parameters(ParameterHandler &prm);
+
+        void parse_parameters(ParameterHandler &prm) override;
+
         void initialize() override;
 
         double execute() override;
 
       private:
         const MaterialModel::PhaseFieldFault<dim> *phase_field_fault = nullptr;
+        double maximum_logarithmic_state_change = std::numeric_limits<double>::max();
     };
   }
 }

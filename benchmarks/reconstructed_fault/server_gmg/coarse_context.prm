@@ -1,0 +1,8 @@
+# Select the comparisons explicitly, including for direct ASPECT launches.
+# No Stokes, advection, particles or fault equations are solved.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/server_gmg/coarse.prm
+subsection Postprocess
+  subsection Fault GMG coarse probe
+    set Test mode = context
+  end
+end

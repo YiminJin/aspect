@@ -458,6 +458,15 @@ but free-endpoint adoption remains blocked on surface-measure qualification;
 see `bp3/stage_K5_top_source_continuation_report.md`. No mature-RSF top replay
 is part of that evidence.
 
+The approved 150 x 50 km reflected BP3 chart additionally permits an immutable
+per-fault shear sense `a = +/-1`, default +1. The mechanical slip tensor is
+`S = a sym(t tensor n)` with the existing geometric `n = (-t_y,t_x)`.
+Geometry/projection normals do not change. Positive V remains a rate magnitude;
+source assembly, shear traction, B/G/K and particle Maxwell publication all use
+the same signed S. N, friction/state laws and bound handling are unchanged.
+The manager serializes this choice and rejects conflicting restart attachment;
+legacy checkpoints retain +1. The reflected right-dipping thrust selects -1.
+
 **Authorized work-measure qualification (K5):** an explicit simulator-side
 `ReconstructedFaultSurfaceSystem::enable_bulk_work_measure()` mode changes
 mechanical surface assembly only, for one straight, frozen mature 2-D fault
@@ -969,11 +978,12 @@ are reduced over MPI and replicated. Each fault block has a reusable
 indefinite-capable direct factorization. Factorization failure and an
 excessive scaled solve backward error are explicit numerical failures.
 
-The qualified K5 surface inverse prefers LAPACK GTTRF/GTTRS
+The production surface inverse uses LAPACK GTTRF/GTTRS
 adjacent-pivoting tridiagonal LU. Active rows split each fault into contiguous
 principal free blocks; each block is factored once and reused for all right-hand
 sides. Pivoting supports nonsingular indefinite matrices, including zero initial
-diagonal entries. UMFPACK remains the reference. The semantic surface solve,
+diagonal entries. UMFPACK remains only in independent tests, not as a runtime
+backend or environment-selected comparison. The semantic surface solve,
 exact zero active increments, generation validity, and numerical failure checks
 are unchanged; no SPD-only path or new condition estimator is introduced.
 
@@ -1219,13 +1229,22 @@ assumed. A returned linear direction must pass a freshly computed residual
 test, not merely the Arnoldi estimate. Residual replacement/restart shares
 the existing total linear iteration budget.
 
-The bounded K5 GMG experiment changes only the velocity-block preconditioner
+For reconstructed faults, `Solver parameters / Stokes solver parameters /
+Stokes solver type` selects `block AMG` or `block GMG`. The default remains
+AMG for this assembled coupled path. GMG supports Q2/local smoothing and changes
+only the velocity-block preconditioner
 inside the assembled block-Schur inverse. It reuses ASPECT's velocity GMG
 hierarchy while retaining assembled fine A, sparse B/G, the surface inverse,
 pressure-block treatment and outer FGMRES. The synchronous post-linear-solve
 observer permits tests to compare the same frozen RHS/operator before any
 trial/history commit. Reference-action comparisons belong in tests, not in
-production vmult loops. See `bp3/stage_K5_gmg_prototype.md`; this is not support
+production vmult loops. The selection also builds the required mesh hierarchy;
+no fault-specific GMG environment switches select the backend. Temporary
+server-debug observers and scratch-vector probes have been removed after the
+Intel toolchain issue was resolved; standalone reproduction tests remain in
+the benchmark package. Default material averaging
+remains `none` for either coupled backend, so selecting a preconditioner does
+not change the fine operator. See `bp3/stage_K5_gmg_prototype.md`; this is not support
 for a full matrix-free reconstructed-fault solver or coupled multigrid levels.
 
 For incompressible prescribed-friction-pressure coupling in a closed/periodic
@@ -1236,10 +1255,25 @@ rows; the right identity includes G and the current surface solve. Do not
 apply this to open or absolute-pressure-dependent configurations. Project
 operator/preconditioner actions consistently, without changing physical
 pressure normalization or homogeneous Newton constraints. Reject any removed
-RHS or full-residual null component exceeding either 100 machine epsilons
-times the maximum of the initial bulk residual, zero-velocity reference,
-and current condensed RHS norm, or the unchanged absolute nonlinear bulk
-target. This is an internal backward-error check, not a new parameter
+RHS or full-residual null component exceeding the continuity assembly/reduction
+roundoff bound or the unchanged mixed nonlinear bulk target. The previous
+relative-only cap can be smaller than rounding of an already-converged iterate
+and is superseded. For the eligible incompressible continuity equation, assemble
+the noncancelling scale
+\[
+ S_p=\sum_{K,q}|s_p JxW|\Big(\sum_i|q_i^K\phi_i^p|\Big)
+       \sum_{j,d}(|u_j^K|+|u_{\mathrm{origin},d}^K|)
+                    |\partial_d\phi^u_{j,d}|.
+\]
+Here the unit **verified left** pressure mode is distributed through homogeneous
+constraints, and the origin is the same componentwise cell constant used in
+residual evaluation. Use `gamma(n)=n*epsilon/(1-n*epsilon)` with the conservative
+operation count `n=6*n_local_dofs+2*n_quadrature_points+4*dim+16+n_global_cells`
+for local evaluation, constraint/cell assembly and MPI summation. Add
+`gamma(2*n_pressure_dofs)*||q||_inf*||rhs_p||_1` for the final reduced dot product.
+Cap the sum by the existing fixed mixed target; no new physical or user tuning
+parameter is introduced. Significant flux incompatibility remains an error.
+This is an internal backward-error check, not a new parameter
 or permission to discard significant incompatibility. Normal convergence output
 reports the fresh residual and requested target. Detailed diagnostic mode also
 reports the Arnoldi estimate, raw full residual and compatibility components;
@@ -1306,9 +1340,12 @@ the MPI sum. The mixed bulk target is
 \(\epsilon_{\rm nl}s_b+\rho_b\); equivalently use the fixed scale
 \(s_b^{\rm mixed}=s_b+\rho_b/\epsilon_{\rm nl}\) for both convergence and
 merit. Neither scale is updated from subsequent residuals or trial states.
-The original relative bulk target remains the cap on pressure-compatibility
-projection; the absolute allowance does not authorize incompatible pressure
-loads or weaken fresh linear checks. Surface convergence is unchanged.
+Pressure-compatibility projection is capped by this same mixed target **and**
+the independently calculated continuity roundoff bound above, not the former
+relative-only target. Surface convergence and fresh linear targets are unchanged.
+Check fresh bulk and all unprescribed surface rows before requesting a direction;
+if both already pass, still validate compatibility but do not solve an unused
+Newton direction. Otherwise retain the existing active-set direction algorithm.
 Cellwise constant velocity is removed before evaluating the bulk residual's
 FE strain and divergence, reducing cancellation without changing the affine
 Maxwell law or its Jacobian. This does not remove rounding in the represented
@@ -1418,10 +1455,19 @@ native bulk/particle/fault writers share the decision, and a final observer
 advances its per-node slip reference only after all writers return. Rejected
 states cannot advance it. Restart creates a new output branch and restores
 the selected checkpoint's metadata prefix, preserving prior evidence.
-The BP3 cumulative-slip CSV records every accepted vertex state, independently
-of visualization throttling, with stored-order arclength and physical down-dip
-coordinate. Its restart branch streams only the selected accepted prefix;
-the checkpointed slip vector, not the CSV, remains constitutive/output history.
+For maintained restored BP3, `profiles.csv` indexes the canonical scheduled
+full-fault history (slip, instantaneous velocity, state and tractions). Slip
+still integrates at every accepted physical step, with no step-zero increment;
+the checkpointed vector, never CSV data, remains the restart history. Production
+profile/heavy triggers are 0.1 m maximum nodal change of signed slip or 31557600 s,
+with initial/final and event profile forcing, and a profile on every heavy step.
+An offline legacy slip export contains saved profiles only. Event classification
+uses saved instantaneous velocity; every-step peak summaries resolve unsaved
+profile intervals. Legacy experiments may retain the dense cumulative-slip CSV.
+Version-5 archives retain their layout. Restart may change output intervals
+while retaining last-written reference states. Branches restore the selected
+metadata prefix and its referenced profile payloads from the parent run;
+newer/conflicting output is rejected rather than overwritten.
 Reconstructed-fault VTU names are output-only aliases with underscore separators;
 optional property exclusions do not change registry names, values or checkpoints.
 See `bp3/stage_K5_long_run_preparation.md` for the bounded verification and
@@ -1574,3 +1620,65 @@ timestep-committed Q1 $V$ and the Q1 surface mixture, ASPECT's global CFL
 number, and operator-splitting semantics. It is opt-in: the time-stepping
 manager does not add it implicitly and preserves standard explicit model-list
 selection. Stage J adds no post-solve cutback or repeat operation.
+
+The plugin also provides `Time stepping / Reconstructed fault time step /
+Maximum logarithmic state change`, a positive dimensionless bound
+\(\delta_\Theta\), disabled by default using `std::numeric_limits<double>::max()`.
+The literal `infinity` is accepted as an alias for this disabled sentinel.
+For an enabled bound and a
+stateful friction law, start from the law-specific proposal capped by ASPECT's
+maximum timestep. Predict at every fault vertex using the same exact exponential
+aging update, with the latest committed \(V_i^n\), \(\Theta_i^n\) and the
+existing global \(D_c\). Shorten the proposal until
+\(\max_i |\ln(\Theta_i^{\rm predicted}/\Theta_i^n)|\leq\delta_\Theta\).
+This is an **unweighted** log-change bound; the benchmark BP5 predictor's
+\(b/a\) weighting is not used. Fixed-rate aging is monotone toward \(D_c/V\),
+so halving brackets an admissible positive timestep and bisection retains the
+safe endpoint. The predictor never commits state or reads trial velocity.
+Infinity bypasses it completely, and stateless friction ignores it. The ordinary
+time-stepping manager still combines restrictions and performs the MPI minimum;
+its configured minimum-timestep floor retains its existing semantics. This is
+a forward prediction, not a post-solve guarantee for the next solved velocity.
+
+For the explicitly selected BP5 four-step/eight-half-step diagnostic only,
+`BP5 recorded half steps` reads A's accepted clock and supplies an additional
+ordinary timestep cap. The generic opt-in `post_resume_time_step` signal may
+reduce the already pending first restart interval before `start_timestep`.
+It preserves the last accepted time (`time-dt`), old timestep, step number,
+and every restored history; it changes no checkpoint serialization. Only
+positive finite reductions agreed across MPI ranks are admitted. Subsequent
+safety controllers remain active, and a changed schedule stops the diagnostic
+before mechanics rather than forcing a larger interval. At large absolute
+times, the second half is rounding-adjusted to A's represented endpoint by at
+most one time ULP, recorded explicitly. No slot means unchanged restart behavior.
+
+### Experimental BP5 friction-normal filter (default off)
+
+The bounded September 2026 BP5 filter experiment leaves raw bulk stress,
+pressure, background, and all retained histories unchanged. In the straight
+2-D mature bulk-work formulation only, an explicitly selected `projected` or
+`helmholtz` mode replaces the normal input to friction by `N z`, where
+`(M + L_s^2 K) z = b_sigma`. All three objects use the full production work
+measure `JxW chi`: `M=integral N N^T`, `K=integral d_s N d_s N^T`,
+`b_sigma=integral N (sigma_bg+p-tau:N)`. Ordinary Q1 derivatives contain the
+physical segment length; a constant endpoint continuation has zero derivatives.
+There are natural filter endpoints, no window boundaries or slip-Dirichlet
+row substitutions. Unsupported rows fail without regularization. Raw mode
+bypasses this operator; zero length means consistent projection, not raw.
+
+The simulator-side surface system owns factors, not constitutive history.
+Exact assembled operator equality permits reuse; RHS values are recomputed for
+every Newton base and trial. K_V replaces only `sigma_raw mu_V` by
+`sigma_filtered mu_V`, since `S:N=0` at fixed bulk unknowns. G applies the
+nonlocal variation `delta b -> H^{-1} delta b -> N delta z`, multiplied by
+the local mu; it is not the old local sparse G or B transpose. B, bulk mechanics,
+constraints, pressure scaling and history publication remain unchanged.
+Incoming state stays fixed inside mechanics. This is an experimental equation
+change, not qualified BP5 physics or stress-history smoothing.
+
+For the single authorized matched-clock retry, the benchmark-only `BP5 filter
+clock` may halve each original R constitutive interval once. It retains ten
+steps and halves the total elapsed interval; it does not create twenty paired
+half-steps. All three branches start from the original checkpoint and read the
+same original clock. The existing pending-interval restart hook and ordinary
+timestep caps remain active; a further mismatch aborts before mechanics.

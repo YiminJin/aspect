@@ -10,11 +10,12 @@
 */
 
 #include "phase_field_fault_test_access.h"
-#include "../source/reconstructed_fault/surface_direct_internal.h"
+#include "fault_surface_reference.h"
 
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/postprocess/interface.h>
 #include <aspect/plugins.h>
+#include <aspect/phase_field.h>
 #include <aspect/reconstructed_fault/manager.h>
 #include <aspect/simulator/assemblers/reconstructed_fault_stokes.h>
 #include <aspect/reconstructed_fault/surface_system.h>
@@ -50,7 +51,7 @@ namespace aspect
                 diagonal[i]=action[f][i];
                 if (i+1<active[f].size()) edge[i]=action[f][i+1];
               }
-            factors.push_back(std::make_unique<internal::FaultSurfaceDirect>(diagonal,edge,active[f],f,pivoted));
+            factors.push_back(std::make_unique<Testing::FaultSurfaceInverse>(diagonal,edge,active[f],f,pivoted));
           }
       }
       void solve(const ReconstructedFaultVector &rhs,ReconstructedFaultVector &result) const override
@@ -59,7 +60,7 @@ namespace aspect
         for (unsigned int f=0;f<rhs.size();++f) factors[f]->solve(rhs[f],result[f]);
       }
     private:
-      std::vector<std::unique_ptr<internal::FaultSurfaceDirect>> factors;
+      std::vector<std::unique_ptr<Testing::FaultSurfaceInverse>> factors;
   };
 
   template <int dim>
@@ -77,6 +78,32 @@ namespace aspect
       public SimulatorAccess<dim>
     {
       public:
+        void initialize() override
+        {
+          if (!std::getenv("ASPECT_TEST_NORMAL_FILTER")) return;
+          this->get_signals().post_constraints_creation.connect(
+            [this](const SimulatorAccess<dim> &, AffineConstraints<double> &constraints)
+            {
+              const auto profiles=this->get_phase_field_handler().get_phase_field_profiles(.6);
+              const auto &fe=this->get_fe();
+              const auto phi=this->introspection().variable("phase_field").first_component_index;
+              std::vector<types::global_dof_index> dofs(fe.n_dofs_per_cell());
+              for (const auto &cell:this->get_dof_handler().active_cell_iterators())
+                if (!cell->is_artificial())
+                  {
+                    cell->get_dof_indices(dofs);
+                    for (unsigned int j=0;j<dofs.size();++j)
+                      if (fe.system_to_component_index(j).first==phi
+                          && constraints.can_store_line(dofs[j]) && !constraints.is_constrained(dofs[j]))
+                        {
+                          const auto x=this->get_mapping().transform_unit_to_real_cell(cell,fe.get_unit_support_points()[j]);
+                          constraints.add_line(dofs[j]);
+                          constraints.set_inhomogeneity(dofs[j],profiles[0]->value(std::abs(x[1]-.5)));
+                        }
+                  }
+            });
+        }
+
         std::pair<std::string,std::string>
         execute(TableHandler &) override
         {
@@ -101,6 +128,11 @@ namespace aspect
 
           ReconstructedFaultManager<dim> &fault_manager =
             this->get_reconstructed_fault_manager();
+          // Test-only reflected-chart selection: all production B/G/residual
+          // paths below must use the same signed tensor, not just point tests.
+          if (std::getenv("ASPECT_TEST_REVERSED_SHEAR"))
+            for (unsigned int f=0;f<fault_manager.get_faults().size();++f)
+              fault_manager.set_shear_sense(f,-1);
           const bool stateful_friction =
             MaterialModel::internal::PhaseFieldFaultTestAccess<dim>
               ::fault_friction(model).has_state_variable();
@@ -127,6 +159,131 @@ namespace aspect
                       ExcMessage("The Stage-F test fixture unexpectedly has committed slip rate."));
           const bool uses_adiabatic_pressure =
             verify_point_response_pressure_mode(model, fault_manager);
+          if (std::getenv("ASPECT_TEST_NORMAL_FILTER"))
+            {
+              AssertThrow(!uses_adiabatic_pressure, ExcMessage("Filter test needs true normal stress."));
+              surface_system.enable_bulk_work_measure();
+              for (auto &fault : V)
+                for (unsigned int i=0;i<fault.size();++i) fault[i]*=1.+double(i)/fault.size();
+              const auto raw=surface_system.evaluate_surface_residual(this->get_solution(),V);
+              SymmetricTensor<2,dim> strain;
+              strain[0][0]=2e-6;strain[1][1]=-1e-6;strain[0][1]=3e-6;
+              const auto bulk_direction=make_bulk_direction(strain,3e5);
+              for (const auto mode : {std::string("projected"),std::string("helmholtz")})
+                {
+                  surface_system.set_normal_stress_filter(mode,mode=="projected" ? 0. : .15);
+                  const auto base=surface_system.linearize_surface_system(this->get_solution(),V);
+                  assert_replicated(base,this->get_mpi_communicator());
+                  // Accepted-state work observers reconstruct physical stress,
+                  // not the filtered friction input. Preserve both loads so a
+                  // filtered run can retain the independent raw-stress audit.
+                  assert_fault_vectors_close(base.raw_normal_traction,raw.normal_traction,1e-14,
+                                             "filter preserves raw mechanical normal load");
+                  assert_fault_vectors_close(base.shear_traction,raw.shear_traction,1e-14,
+                                             "filter preserves mechanical shear load");
+                  double filtered_load_change=0.;
+                  for (unsigned int f=0;f<V.size();++f)
+                    for (unsigned int i=0;i<V[f].size();++i)
+                      {
+                        const auto &d=base.mass_diagonal[f], &e=base.mass_off_diagonal[f];
+                        const auto &z=base.normal_filter_coefficients[f];
+                        double represented=d[i]*z[i],mass=d[i];
+                        if (i) {represented+=e[i-1]*z[i-1];mass+=e[i-1];}
+                        if (i+1<z.size()) {represented+=e[i]*z[i+1];mass+=e[i];}
+                        AssertThrow(std::abs(represented-base.normal_traction[f][i])/mass<1e-5,
+                                    ExcMessage("Filtered friction load disagrees with M z."));
+                        filtered_load_change=std::max(filtered_load_change,
+                          std::abs(base.normal_traction[f][i]-base.raw_normal_traction[f][i])/mass);
+                      }
+                  if (mode=="helmholtz")
+                    AssertThrow(filtered_load_change>1e-5,
+                                ExcMessage("Observer regression must distinguish raw and filtered loads."));
+                  this->get_pcout()<<"Normal filter raw-stress audit verified; raw/filtered row difference="
+                                   <<filtered_load_change<<" Pa"<<std::endl;
+                  FaultVector K,G;
+                  surface_system.apply_surface_jacobian(direction,K);
+                  surface_system.apply_G(bulk_direction,G);
+                  verify_G_direction(surface_system,V,bulk_direction,mode+" nonlocal G");
+                  if (this->get_pcout().is_active())
+                    {
+                      std::ofstream out(this->get_output_directory()+"filter_"+mode+".csv");
+                      out<<std::setprecision(17)<<"fault,node,residual,normal,K_direction,G_direction\n";
+                      for (unsigned int f=0;f<V.size();++f)
+                        for (unsigned int i=0;i<V[f].size();++i)
+                          out<<f<<','<<i<<','<<base.values[f][i]<<','<<base.normal_filter_coefficients[f][i]
+                             <<','<<K[f][i]<<','<<G[f][i]<<'\n';
+                    }
+                  double previous=1.;
+                  for (const double epsilon : {0.1,0.05,0.025,0.0125})
+                    {
+                      auto plus=V,minus=V;
+                      for (unsigned int f=0;f<V.size();++f)
+                        for (unsigned int i=0;i<V[f].size();++i)
+                          {plus[f][i]+=epsilon*direction[f][i];minus[f][i]-=epsilon*direction[f][i];}
+                      const auto rp=surface_system.evaluate_surface_residual(perturb_bulk_state(this->get_solution(),epsilon,bulk_direction),plus);
+                      const auto rm=surface_system.evaluate_surface_residual(perturb_bulk_state(this->get_solution(),-epsilon,bulk_direction),minus);
+                      auto fd=G,expected=G;
+                      for (unsigned int f=0;f<V.size();++f)
+                        for (unsigned int i=0;i<V[f].size();++i)
+                          {fd[f][i]=(rp.values[f][i]-rm.values[f][i])/(2*epsilon);expected[f][i]-=K[f][i];}
+                      const double error=relative_maximum_error(fd,expected);
+                      this->get_pcout()<<"Normal filter "<<mode<<" epsilon="<<epsilon<<" derivative error="<<error<<std::endl;
+                      AssertThrow(error<0.4*previous,ExcMessage("Filtered coupled derivative fails second-order convergence."));
+                      previous=error;
+                    }
+                  AssertThrow(previous<1e-4,ExcMessage("Filtered coupled derivative error too large."));
+                  // A rejected trial must leave the original linearization and
+                  // the incoming histories intact; no filtered values persist.
+                  assert_same_residual(base,surface_system.evaluate_surface_residual(this->get_solution(),V));
+                  FaultVector again;surface_system.apply_G(bulk_direction,again);
+                  assert_fault_vectors_close(again,G,1e-14,"filter trial rollback");
+                  this->get_pcout()<<"Normal filter range "<<base.minimum_normal_traction<<' '<<base.maximum_normal_traction<<std::endl;
+                }
+              surface_system.set_normal_stress_filter("raw",0.);
+              assert_same_residual(raw,surface_system.evaluate_surface_residual(this->get_solution(),V));
+              if (std::getenv("ASPECT_TEST_REVERSED_SHEAR"))
+                {
+                  auto &bulk=this->get_reconstructed_fault_stokes_coupling();
+                  bulk.linearize_B(this->get_solution());
+                  LinearAlgebra::BlockVector action,plus_load,minus_load;
+                  for(auto *vector:{&action,&plus_load,&minus_load})
+                    vector->reinit(this->introspection().index_sets.system_partitioning,
+                                   this->get_mpi_communicator());
+                  bulk.apply_B(direction,action);
+                  auto plus=V,minus=V;
+                  const double epsilon=.125;
+                  for(unsigned int f=0;f<V.size();++f)
+                    for(unsigned int i=0;i<V[f].size();++i)
+                      {plus[f][i]+=epsilon*direction[f][i];minus[f][i]-=epsilon*direction[f][i];}
+                  bulk.evaluate_slip_dependent_bulk_residual(this->get_solution(),plus,plus_load);
+                  bulk.evaluate_slip_dependent_bulk_residual(this->get_solution(),minus,minus_load);
+                  plus_load-=minus_load;plus_load*=.5/epsilon;
+                  const double scale=action.l2_norm();
+                  plus_load+=action;
+                  AssertThrow(scale>0. && plus_load.l2_norm()<1e-10*scale,
+                              ExcMessage("Reflected bulk B has inconsistent residual sign."));
+                  this->get_pcout()<<"Reflected bulk source/B relative error="<<plus_load.l2_norm()/scale<<std::endl;
+                  const auto wp=surface_system.evaluate_surface_residual(
+                    perturb_bulk_state(this->get_solution(),epsilon,bulk_direction),V);
+                  const auto wm=surface_system.evaluate_surface_residual(
+                    perturb_bulk_state(this->get_solution(),-epsilon,bulk_direction),V);
+                  double surface_work=0.;
+                  for(unsigned int f=0;f<V.size();++f)
+                    for(unsigned int i=0;i<V[f].size();++i)
+                      surface_work+=direction[f][i]*(wp.shear_traction[f][i]-wm.shear_traction[f][i])/(2*epsilon);
+                  LinearAlgebra::BlockVector owned_direction;
+                  owned_direction.reinit(this->introspection().index_sets.system_partitioning,
+                                         this->get_mpi_communicator());
+                  owned_direction=bulk_direction;
+                  const double bulk_work=action*owned_direction;
+                  const double work_scale=std::max(std::abs(surface_work),std::abs(bulk_work));
+                  AssertThrow(work_scale>0. && std::abs(surface_work-bulk_work)<1e-9*work_scale,
+                              ExcMessage("Reflected source and shear traction fail virtual-work pairing."));
+                  this->get_pcout()<<"Reflected virtual-work relative error="<<std::abs(surface_work-bulk_work)/work_scale<<std::endl;
+                }
+              AssertThrow(!fault_manager.slip_rates_are_initialized(),ExcMessage("Filter test published trial rates."));
+              return {"Free-equation normal filter coupling:","verified"};
+            }
           const auto evaluated = surface_system.evaluate_surface_residual(
             this->get_solution(), V);
           assert_replicated(evaluated, this->get_mpi_communicator());
@@ -265,7 +422,8 @@ namespace aspect
                   return result;
                 }
               if (component == pressure_component)
-                return pressure;
+                return std::getenv("ASPECT_TEST_NORMAL_FILTER")
+                       ? pressure*(0.2+std::sin(8*numbers::PI*position[0])) : pressure;
               return 0.0;
             }
 
@@ -309,7 +467,7 @@ namespace aspect
           inputs.strain_rate[0][0] = 1.e-15;
           inputs.strain_rate[1][1] = -0.5e-15;
           inputs.strain_rate[0][1] = 0.75e-15;
-          inputs.slip_tensor = symmetrize(outer_product(tangent, normal));
+          inputs.slip_tensor = fault_manager.get_shear_sense(0)*symmetrize(outer_product(tangent, normal));
           inputs.normal_tensor = symmetrize(outer_product(normal, normal));
 
           const auto unshifted = model.evaluate_reconstructed_fault_point(inputs);
@@ -383,6 +541,26 @@ namespace aspect
           inclined.slip_tensor=symmetrize(outer_product(inclined_tangent,inclined_normal));
           inclined.normal_tensor=symmetrize(outer_product(inclined_normal,inclined_normal));
           const auto inclined_response=model.evaluate_reconstructed_fault_point(inclined);
+          // Output terms must close for nonzero retained history without
+          // changing mechanics. The direct crack-strain normal term is zero.
+          auto diagnostic_inputs=inclined;
+          diagnostic_inputs.old_maxwell_stress[0][0]=2.e6;
+          diagnostic_inputs.old_maxwell_stress[1][1]=-2.e6;
+          diagnostic_inputs.old_maxwell_stress[0][1]=3.e5;
+          const auto diagnostic_control=model.evaluate_reconstructed_fault_point(diagnostic_inputs);
+          diagnostic_inputs.capture_stress_components=true;
+          const auto diagnostic=model.evaluate_reconstructed_fault_point(diagnostic_inputs);
+          AssertThrow(diagnostic.stress==diagnostic_control.stress
+                      && diagnostic.residual_density==diagnostic_control.residual_density
+                      && diagnostic.minus_derivative_wrt_slip_rate==diagnostic_control.minus_derivative_wrt_slip_rate,
+                      ExcMessage("Stress diagnostic changes the constitutive response."));
+          const auto reconstructed=diagnostic.stress_components[0]+diagnostic.stress_components[1]
+                                   +diagnostic.stress_components[2];
+          AssertThrow((reconstructed-diagnostic.stress).norm()<1e-12*std::max(1.,diagnostic.stress.norm()),
+                      ExcMessage("Constitutive stress diagnostic components do not close."));
+          AssertThrow(std::abs(diagnostic.stress_components[2]*inclined.normal_tensor)
+                      <1e-12*std::max(1.,diagnostic.stress_components[2].norm()),
+                      ExcMessage("Direct crack strain has a nonzero normal projection."));
           plus=minus=inclined;
           plus.slip_rate+=epsilon;
           minus.slip_rate-=epsilon;
@@ -533,6 +711,8 @@ namespace aspect
                  - residual_minus.values[fault][vertex])/(2.0*epsilon);
           assert_fault_vectors_close(action, finite_difference, 2.e-7,
                                      description + " centered finite difference");
+          if (std::getenv("ASPECT_TEST_NORMAL_FILTER"))
+            this->get_pcout()<<description<<" relative error="<<relative_maximum_error(action,finite_difference)<<std::endl;
         }
 
 

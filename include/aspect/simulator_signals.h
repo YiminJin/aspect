@@ -213,6 +213,18 @@ namespace aspect
      */
     boost::signals2::signal<void (typename parallel::distributed::Triangulation<dim> &)>  post_resume_load_user_data;
 
+    /**
+     * Optional reduction of the pending first timestep after a complete
+     * restart, before start_timestep and any physical update. Slots see the
+     * restored clock and may only decrease the supplied timestep (seconds).
+     * The simulator preserves time-dt, old_time_step, step number and all
+     * histories, and validates positivity and MPI agreement before changing
+     * its clock. No connected slot means an unchanged restart. Slots must not
+     * modify restored state or assume that ordinary timestep models ran here;
+     * the restored pending interval is the previously accepted safety cap.
+     */
+    boost::signals2::signal<void (const SimulatorAccess<dim> &, double &)> post_resume_time_step;
+
     /** Notification after a complete checkpoint and its last-good marker have
      * been published. The path identifies the completed checkpoint directory.
      * Intended for output archival, not mutation of simulator/history state.

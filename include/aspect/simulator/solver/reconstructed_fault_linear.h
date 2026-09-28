@@ -5,6 +5,8 @@
 
 #include <deal.II/base/exceptions.h>
 #include <cmath>
+#include <algorithm>
+#include <limits>
 #include <sstream>
 #include <iomanip>
 #include <aspect/reconstructed_fault/linear_performance.h>
@@ -13,6 +15,25 @@ namespace aspect
 {
   namespace internal
   {
+    /** Standard first-order accumulation bound, capped by the existing mixed
+     * nonlinear target. Scales precede cancellation, not the final residual. */
+    inline double fault_pressure_compatibility_bound(const double assembly_scale,
+                                                    const double assembly_operations,
+                                                    const double reduction_scale,
+                                                    const double reduction_operations,
+                                                    const double nonlinear_target)
+    {
+      const auto gamma = [](const double operations)
+      {
+        const double ne = operations*std::numeric_limits<double>::epsilon();
+        AssertThrow(ne < 1., dealii::ExcMessage("Pressure roundoff bound is not representable."));
+        return ne/(1.-ne);
+      };
+      return std::min(gamma(assembly_operations)*assembly_scale
+                      + gamma(reduction_operations)*reduction_scale,
+                      nonlinear_target);
+    }
+
     /** Algebraic pressure-complement projection. q is unit or zero, with zero
      * constrained entries. This is not physical pressure normalization. */
     template <typename VectorType>

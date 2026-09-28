@@ -1179,16 +1179,100 @@ namespace aspect
         double bulk_convergence_scale = bulk_scale;
         double fault_preconditioner_setup_seconds = 0.;
 
+        // Bound the continuity evaluation before cancellation, using the actual
+        // FE gradients, physical base iterate and constrained left-null test.
+        // The source/history/B terms have no pressure rows in this eligible path.
+        auto pressure_assembly_scale = [&](const LinearAlgebra::BlockVector &q)
+        {
+          if (q.l2_norm()==0.)
+            return 0.;
+          LinearAlgebra::BlockVector owned(introspection.index_sets.system_partitioning,mpi_communicator);
+          owned.block(1)=q.block(1);
+          current_constraints.distribute(owned);
+          LinearAlgebra::BlockVector test(introspection.index_sets.system_partitioning,
+                                         introspection.index_sets.system_relevant_partitioning,mpi_communicator);
+          test=owned;
+          FEValues<dim> fe(*mapping,finite_element,introspection.quadratures.velocities,
+                           update_values|update_gradients|update_JxW_values);
+          Vector<double> u(finite_element.n_dofs_per_cell()),p(u.size());
+          double local=0.;
+          for (const auto &cell:dof_handler.active_cell_iterators())
+            if (cell->is_locally_owned())
+              {
+                fe.reinit(cell);cell->get_dof_values(working_x,u);cell->get_dof_values(test,p);
+                double origin[dim]={};
+                for (unsigned int d=0;d<dim;++d)
+                  for (unsigned int i=0;i<u.size();++i)
+                    if (finite_element.system_to_component_index(i).first==introspection.component_indices.velocities[d])
+                      {origin[d]=u[i];break;}
+                for (unsigned int k=0;k<fe.n_quadrature_points;++k)
+                  {
+                    double pressure_test=0.,divergence_terms=0.;
+                    for (unsigned int i=0;i<u.size();++i)
+                      {
+                        pressure_test+=std::abs(p[i]*fe[introspection.extractors.pressure].value(i,k));
+                        for (unsigned int d=0;d<dim;++d)
+                          if (finite_element.system_to_component_index(i).first==introspection.component_indices.velocities[d])
+                            divergence_terms+=(std::abs(u[i])+std::abs(origin[d]))
+                              *std::abs(fe[introspection.extractors.velocities].gradient(i,k)[d][d]);
+                      }
+                    local+=std::abs(pressure_scaling*fe.JxW(k))*pressure_test*divergence_terms;
+                  }
+              }
+          return Utilities::MPI::sum(local,mpi_communicator);
+        };
+
         auto solve_condensed_system =
           [&](const typename StokesSolver::ReconstructedFaultCondensedSystem<dim>
                       ::Linearization &linearization,
               const ReconstructedFaultActiveSet &active,
               const LinearAlgebra::BlockVector &rhs,
-              LinearAlgebra::BlockVector &direction)
+              LinearAlgebra::BlockVector &direction,
+              const bool already_converged)
         {
           direction = 0.0;
           const double rhs_norm = rhs.l2_norm();
           if (rhs_norm == 0.0)
+            return;
+
+          double right_null_error,left_null_error;
+          const auto q=linearization.verified_pressure_nullspace(right_null_error,left_null_error);
+          LinearAlgebra::BlockVector compatible_rhs(rhs),residual(rhs);
+          const double assembly_scale=pressure_assembly_scale(q);
+          // A worst-case serial chain also bounds parallel cell/constraint
+          // accumulation; the final dot product has at most two operations/row.
+          const double assembly_operations=6.*finite_element.n_dofs_per_cell()
+            +2.*introspection.quadratures.velocities.size()+4.*dim+16.
+            +triangulation.n_global_active_cells();
+          const double reduction_operations=2.*rhs.block(1).size();
+          const double reduction_scale=q.block(1).linfty_norm()*rhs.block(1).l1_norm();
+          const double nonlinear_target=parameters.nonlinear_tolerance*bulk_convergence_scale;
+          const double compatibility_tolerance=internal::fault_pressure_compatibility_bound(
+            assembly_scale,assembly_operations,reduction_scale,reduction_operations,nonlinear_target);
+          if (std::getenv("ASPECT_FAULT_COMPATIBILITY_DIAGNOSTIC"))
+            {
+              std::ostringstream audit;
+              audit<<std::setprecision(17)<<"      Fault compatibility audit: step="<<timestep_number
+                <<", Newton="<<nonlinear_iteration<<", rhs null="<<q*rhs<<", rhs norm="<<rhs_norm
+                <<", velocity="<<system_rhs.block(0).l2_norm()<<", continuity="<<system_rhs.block(1).l2_norm()
+                <<", initial="<<initial_residual.bulk_norm<<", reference="<<aspect_bulk_reference
+                <<", old roundoff="<<100.*std::numeric_limits<double>::epsilon()
+                  *std::max({initial_residual.bulk_norm,aspect_bulk_reference,rhs_norm})
+                <<", relative cap="<<parameters.nonlinear_tolerance*bulk_scale
+                <<", bulk precision="<<bulk_precision<<", mixed target="<<nonlinear_target
+                <<", assembly scale="<<assembly_scale<<", assembly operations="<<assembly_operations
+                <<", reduction scale="<<reduction_scale<<", reduction operations="<<reduction_operations
+                <<", compatibility bound="<<compatibility_tolerance<<", already converged="<<already_converged
+                <<", pressure scaling="<<pressure_scaling<<", right null="<<right_null_error
+                <<", left null="<<left_null_error<<", q norm="<<q.l2_norm()
+                <<", right null scale="<<system_matrix.block(0,1).frobenius_norm()
+                <<", left null scale="<<system_matrix.block(1,0).frobenius_norm();
+              pcout<<audit.str()<<std::endl;
+            }
+          const double removed_rhs=internal::project_compatible_fault_rhs(q,compatibility_tolerance,compatible_rhs);
+          // Still check compatibility, but do not solve an unused direction
+          // after the unprojected bulk and all unprescribed surface rows pass.
+          if (already_converged)
             return;
 
           TimerOutput::Scope linear_timer(computing_timer, "Fault: condensed linear solve");
@@ -1235,17 +1319,6 @@ namespace aspect
 
             // B and G are not assumed adjoints, so the condensed operator is
             // generally nonsymmetric and requires FGMRES rather than CG/MINRES.
-            double right_null_error, left_null_error;
-            const auto q = linearization.verified_pressure_nullspace(right_null_error, left_null_error);
-            LinearAlgebra::BlockVector compatible_rhs(rhs), residual(rhs);
-            // Compatibility noise must be both backward-small in the original
-            // weak loads and below the unchanged nonlinear bulk target.
-            const double compatibility_tolerance = std::min(
-              100.*std::numeric_limits<double>::epsilon()
-                * std::max({initial_residual.bulk_norm, aspect_bulk_reference, rhs_norm}),
-              parameters.nonlinear_tolerance*bulk_scale);
-            const double removed_rhs = internal::project_compatible_fault_rhs(
-              q, compatibility_tolerance, compatible_rhs);
             const internal::FaultPressureComplementOperator<
               typename StokesSolver::ReconstructedFaultCondensedSystem<dim>::Linearization,
               LinearAlgebra::BlockVector> projected_operator{linearization, q};
@@ -1326,12 +1399,12 @@ namespace aspect
               }
           };
 
-          if (!std::getenv("ASPECT_FAULT_VELOCITY_GMG"))
+          if (parameters.stokes_solver_type == Parameters<dim>::StokesSolverType::block_amg)
             solve_with_velocity_preconditioner(*Amg_preconditioner);
           else
             {
               AssertThrow(parameters.stokes_velocity_degree==2 && stokes_A_block_is_symmetric(),
-                          ExcMessage("The velocity-GMG prototype requires symmetric Q2 bulk Stokes."));
+                          ExcMessage("The fault velocity-GMG preconditioner requires symmetric Q2 bulk Stokes."));
               StokesMatrixFreeHandlerLocalSmoothingImplementation<dim,2> gmg(*this,parameters);
               gmg.initialize_simulator(*this);
               gmg.initialize();
@@ -1408,13 +1481,67 @@ namespace aspect
             LinearAlgebra::BlockVector bulk_direction(
               introspection.index_sets.stokes_partitioning, mpi_communicator);
             FaultVector slip_rate_direction;
+            if (nonlinear_iteration == 0)
+              {
+                // Fix the attainable bulk accuracy from A and the represented
+                // initial state, not from stalled residuals. The same mixed
+                // absolute/relative scale is used by convergence and merit.
+                LinearAlgebra::BlockVector solver_state(
+                  introspection.index_sets.stokes_partitioning, mpi_communicator);
+                solver_state.block(0) = working_x.block(introspection.block_indices.velocities);
+                solver_state.block(1) = working_x.block(introspection.block_indices.pressure);
+                solver_state.block(1) /= pressure_scaling;
+                bulk_precision = internal::reconstructed_fault_bulk_precision_scale(
+                  system_matrix, solver_state, mpi_communicator);
+                bulk_convergence_scale = bulk_scale + bulk_precision/parameters.nonlinear_tolerance;
+
+                // Establish the surface reference before the first direction;
+                // the stabilized-free-set RMS completes this scale below.
+                // A characteristic K_V action supplies a physical traction scale.
+                // Do not suppress it to roundoff: an initially balanced surface
+                // still develops second-order residuals when bulk loading changes.
+                FaultVector characteristic_slip_rate = slip_rate;
+                for (auto &fault_values : characteristic_slip_rate)
+                  for (double &value : fault_values)
+                    value = std::max(phase_field_fault.minimum_fault_slip_rate(),
+                                     std::abs(value));
+                FaultVector characteristic_surface_action;
+                surface_system.apply_surface_jacobian(
+                  characteristic_slip_rate, characteristic_surface_action);
+                ReconstructedFaultSurfaceResidual characteristic_residual;
+                characteristic_residual.values =
+                  std::move(characteristic_surface_action);
+                const ReconstructedFaultActiveSet no_active_vertices =
+                  fault_manager.prescribed_slip_rate_mask();
+                const double surface_reference = std::max(
+                  surface_system.surface_residual_rms(
+                    linearization->surface_residual(), no_active_vertices),
+                  surface_system.surface_residual_rms(
+                    characteristic_residual, no_active_vertices));
+                surface_scale = surface_reference;
+              }
+
+
+            const bool already_converged =
+              std::hypot(system_rhs.block(0).l2_norm(),system_rhs.block(1).l2_norm())
+                < parameters.nonlinear_tolerance*bulk_convergence_scale
+              && internal::normalized_reconstructed_fault_residual(
+                   surface_system.surface_residual_rms(linearization->surface_residual(),active_set),
+                   surface_scale,"surface") < parameters.nonlinear_tolerance;
 
             // Projected Newton solve: start free, add only at-bound vertices
             // whose direction is outward, and rebuild only K_FF^{-1} until stable.
             while (true)
               {
                 linearization->build_condensed_rhs(system_rhs, bulk_rhs);
-                solve_condensed_system(*linearization, active_set, bulk_rhs, bulk_direction);
+                solve_condensed_system(*linearization, active_set, bulk_rhs, bulk_direction, already_converged);
+                if (already_converged)
+                  {
+                    slip_rate_direction=slip_rate;
+                    for (auto &values:slip_rate_direction)
+                      std::fill(values.begin(),values.end(),0.);
+                    break;
+                  }
                 linearization->recover_slip_rate_increment(
                   bulk_direction, slip_rate_direction);
 
@@ -1451,44 +1578,12 @@ namespace aspect
               surface_system.surface_residual_rms(
                 linearization->surface_residual(), active_set);
 
+            // Preserve the original stabilized-free-set RMS floor. Removing
+            // active rows also changes its mass normalization, so it can exceed
+            // the preliminary all-unprescribed-row RMS used for the early check.
             if (nonlinear_iteration == 0)
-              {
-                // Fix the attainable bulk accuracy from A and the represented
-                // initial state, not from stalled residuals. The same mixed
-                // absolute/relative scale is used by convergence and merit.
-                LinearAlgebra::BlockVector solver_state(
-                  introspection.index_sets.stokes_partitioning, mpi_communicator);
-                solver_state.block(0) = working_x.block(introspection.block_indices.velocities);
-                solver_state.block(1) = working_x.block(introspection.block_indices.pressure);
-                solver_state.block(1) /= pressure_scaling;
-                bulk_precision = internal::reconstructed_fault_bulk_precision_scale(
-                  system_matrix, solver_state, mpi_communicator);
-                bulk_convergence_scale = bulk_scale + bulk_precision/parameters.nonlinear_tolerance;
+              surface_scale = std::max(surface_scale,current_surface_norm);
 
-                // The surface scale is fixed from the first stabilized free set;
-                // a characteristic K_V action supplies a physical traction scale.
-                // Do not suppress it to roundoff: an initially balanced surface
-                // still develops second-order residuals when bulk loading changes.
-                FaultVector characteristic_slip_rate = slip_rate;
-                for (auto &fault_values : characteristic_slip_rate)
-                  for (double &value : fault_values)
-                    value = std::max(phase_field_fault.minimum_fault_slip_rate(),
-                                     std::abs(value));
-                FaultVector characteristic_surface_action;
-                surface_system.apply_surface_jacobian(
-                  characteristic_slip_rate, characteristic_surface_action);
-                ReconstructedFaultSurfaceResidual characteristic_residual;
-                characteristic_residual.values =
-                  std::move(characteristic_surface_action);
-                const ReconstructedFaultActiveSet no_active_vertices =
-                  fault_manager.prescribed_slip_rate_mask();
-                const double surface_reference = std::max(
-                  surface_system.surface_residual_rms(
-                    linearization->surface_residual(), no_active_vertices),
-                  surface_system.surface_residual_rms(
-                    characteristic_residual, no_active_vertices));
-                surface_scale = std::max(current_surface_norm, surface_reference);
-              }
 
             const double relative_bulk_residual =
               internal::normalized_reconstructed_fault_residual(

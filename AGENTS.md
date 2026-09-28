@@ -35,3 +35,13 @@ For every task related to reconstructed-fault development:
     C++ whose structure follows the mathematical algorithm. Do not
     introduce additional abstraction merely to reduce line count or
     eliminate small amounts of duplication.
+
+## Reconstructed-fault session recovery
+
+- Read [current status](doc/reconstructed_fault/CURRENT_STATUS.md) for verified
+  implementation, executed evidence, open questions, and the next bounded task.
+- Use [the recovery handoff](doc/reconstructed_fault/CODEX_RECOVERY_HANDOFF.md)
+  as historical context; verify older plans against current code and artifacts.
+- Preserve uncommitted source, configurations, outputs, and checkpoints. Update
+  the status note after meaningful milestones; keep numerical changes separate
+  from documentation and cleanup.

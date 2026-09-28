@@ -1,0 +1,29 @@
+cells 542958
+planned_particles 4886622
+hmin 3.90625
+hmax 1000
+aspect_ratio 1
+support_radius 39.529164020104623
+fine_half_width 47.341664020104623
+support_cells 319324
+level 1 cells 6958
+level 2 cells 1078
+level 3 cells 2167
+level 4 cells 4328
+level 5 cells 8646
+level 6 cells 17312
+level 7 cells 34613
+level 8 cells 69216
+level 9 cells 398640
+dofs_total 19149424
+component 0 dofs 2252838
+component 1 dofs 2252838
+component 2 dofs 563360
+component 3 dofs 2252838
+component 4 dofs 2252838
+component 5 dofs 2252838
+component 6 dofs 2252838
+component 7 dofs 2252838
+component 8 dofs 2252838
+component 9 dofs 563360
+mesh_inventory_RSS_KiB 584612

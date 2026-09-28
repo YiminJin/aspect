@@ -1,0 +1,647 @@
+# Phase-field / RSF current status
+
+## Repository checkpoint selection — September 28
+
+The user requested a commit of reusable development work. The selection retains
+the current core implementation, tests, maintained BP3/BP5 tools and PRMs,
+required restored-BP3 fixture inputs, scientific specifications, recovery notes
+and compact reports. Long-run outputs, checkpoints, generated visualizations,
+build products, archives and copied source snapshots remain local and unchanged.
+Reports can therefore reference local evidence that is intentionally absent
+from a fresh checkout; the commit is not a backup of simulation data.
+
+Commit preparation reran the 14 offline BP3 reader/launcher tests and two BP5
+stress-cycle analysis tests successfully. No simulations or full C++ rebuild
+were run for this checkpoint. Earlier build/solver/limiter evidence below
+records the implementation tested at that time, not a new qualification of
+every intervening working-tree edit. In particular, the current limiter uses
+`maximum_logarithmic_state_change`, `Patterns::Double(0.)` and `get_double()`;
+the earlier explicit sentinel parser/validation described below is historical.
+Its present parameter-edge behavior was not retested during commit preparation.
+
+## Copied first-event run: fault evolution plots — September 28
+
+Plotted the new data without running simulations or changing numerical code.
+The newer index is `benchmarks/reconstructed_fault/bp3/output-first-event/profiles/profiles.csv`,
+with payloads in its nested `profiles/` directory: 124 complete snapshots of
+2889 vertices, steps 0–594, through 142.399097 model years. The top-level
+`profiles.csv`, accepted-step log, event summary and native VTUs are older;
+accepted steps/native snapshots reach only step 54 (10.627038 years).
+All nine overlapping profile payloads are byte-identical. Later profiles are
+internally consistent but cannot be checked against the stale accepted-step log.
+
+PNG/PDF profiles, time–distance maps, selected-node histories, and separately
+labeled early native-property ranges are in
+`benchmarks/reconstructed_fault/bp3/output-first-event/fault_evolution/`.
+See its `REPORT.md` for provenance, reproduction and observations, and
+`summary.json` for exact ranges. Saved peak V is 1.04299733037e-9 m/s; these
+snapshots show creep/locking evolution, not a recorded fast event. Sparse output
+does not rule out an unsaved transient. The reported seven-hour failure is not
+diagnosed by this plotting task; the copied log ends during step 55.
+
+The plotting utility now accepts a separate `--profile-run`, writes PDF copies,
+and plots histories at existing vertices. Four existing reader tests passed;
+the full copied dataset passed index/geometry/finiteness checks and generated
+figures were visually inspected. Original outputs and checkpoints are preserved.
+Next bounded task, if failure analysis is requested: obtain the matching latest
+accepted-step/event summaries and final server stdout/stderr before attributing
+the failure to any numerical mechanism. Do not rerun the experiment for context.
+
+## Optional reconstructed-fault Theta timestep limiter — September 26
+
+The user explicitly authorized this new timestep policy after the plugin
+cleanup. The core `reconstructed fault time step` plugin now declares
+`Time stepping / Reconstructed fault time step / Maximum logarithmic state change`.
+Following the user's sentinel revision, the default is
+`std::numeric_limits<double>::max()`, with `infinity` accepted as an alias.
+Both bypass the new limiter, preserving the previous proposal. The mismatched
+sentinel references and missing positive-bound validation were corrected;
+the member is also initialized to the disabled sentinel.
+The sentinel fix passed the Release build, 16 parameter assertions (including
+exact maximum-double round-trip), and the expanded one-rank integration check
+for both disabled spellings. Evidence is in
+`benchmarks/reconstructed_fault/state_limiter/sentinel-fix/`; the earlier
+two-rank results below predate this parameter-only correction.
+A positive finite value limits the **unweighted** maximum predicted absolute
+log-change of Theta over all fault vertices. It reuses the existing exponential
+aging law at the latest committed velocity/state and the existing material Dc;
+it does not copy the old BP5 b/a weighting or introduce another controller.
+Halving/bisection returns a safe proposal without modifying histories. Stateless
+friction bypasses it. Ordinary manager/MPI combination and minimum-step semantics
+remain unchanged. No production PRM was opted in implicitly.
+
+Verified local Release build, 14 parameter assertions, real-plugin stateful
+checks on one/two MPI ranks, and stateless bypass. The tests cover analytic
+increasing/decreasing bounds, equilibrium, very small predicted timesteps,
+ratio overflow, all vertices, committed versus trial velocity and nonmutation.
+The historical closed-box Stage-I rate/state fixture hit its pressure-nullspace
+compatibility assertion before reaching the limiter; the new test uses a free
+top and leaves core pressure handling unchanged. No production trajectory or
+server validation was run. See [implementation and evidence](../../benchmarks/reconstructed_fault/state_limiter/README.md).
+
+Next bounded task: rebuild ASPECT on the matching server stack and explicitly
+choose a finite bound in the intended BP3 input if desired. This replaces the
+need for a BP5 startup plugin; existing inputs otherwise retain disabled behavior.
+
+## Maintained BP3 diagnostics/output cleanup — September 26
+
+Completed the explicit `BP3_PLUGIN_CLEANUP_INSTRUCTIONS.md` task. The maintained
+five-source plugin now separates `work_audit.cc` from output lifecycle. Mandatory
+native weak-traction, stable-ID H, geometry/Ih, Theta/compression/boundary and
+first-step Maxwell checks remain enabled. Production avoids later particle
+replay, incoming-state copies, full-state dumps and initial mesh CSVs. Monitor
+profile/filter initialization and callback order remain unchanged. Four live
+core experiment guards remain; the two hidden LENGTH output selectors are gone
+from this plugin. No core solver or physical production behavior was changed.
+
+Scheduled full-precision profiles are now canonical full-fault history; the
+duplicate every-step cumulative-slip table is removed. Slip still integrates
+and checkpoints every physical step, without step-zero accumulation. Production
+continuation uses 0.1 m / 31557600 s profile/heavy intervals and diagnostics off;
+dedicated startup comparisons retain their explicit dense settings. Readers use
+instantaneous profile V, with a clearly sparse offline legacy exporter.
+
+Version-5 archive layout is preserved. New PRM intervals apply on restart while
+last-written references persist. Output failures propagate collectively;
+successful writes precede schedule advancement. Growth headers work in a new
+directory; newer/conflicting output is rejected. `branch_output.sh` restores the
+selected metadata prefix and indexed profile payloads from the preserved parent.
+
+Verified: Release build and production PRM parse; a six-step reduced functional
+fixture comparing the old/new plugin byte-for-byte in accepted summaries,
+V/Theta/slip/tractions, events and audits; diagnostics off/on; slip/time schedules;
+production initial/final forcing; version-5 baseline checkpoint load; split
+restart between profiles with a changed cadence; one/two-rank output-error
+checks; ten reader/launcher tests. The stable fixture does not produce a seismic
+event; event transitions were tested synthetically. No full production run was
+launched. The requested existing small full restored fixture was not found;
+the new explicitly coarse fixture is for functional checks, not BP3 resolution
+qualification. Its physical settings are identical before/after, and separate
+from production inputs.
+
+Evidence: [cleanup report](../../benchmarks/reconstructed_fault/bp3/output-cleanup-evidence/REPORT.md),
+[exact comparisons](../../benchmarks/reconstructed_fault/bp3/output-cleanup-evidence/comparison.txt),
+[sizes](../../benchmarks/reconstructed_fault/bp3/output-cleanup-evidence/sizes.csv),
+and [runtime instructions](../../benchmarks/reconstructed_fault/bp3/plugin/README.md).
+At 32 vertices/seven accepted states, baseline profiles plus dense slip were
+49,896 B; production-clock profiles are 9,866 B. Checkpoints/native outputs
+dominate this small case; no universal reduction factor is inferred. The global
+16,875-entry H audit map measured ~1.08 MB heap storage per rank and 202,562 B
+serialized; the audit remains intentionally replicated/checkpointed.
+
+Next bounded task: compile the package against the matching Intel 26 server
+stack and verify a short preserved-filter20 checkpoint branch using the desired
+server timestep caps. The AMG/GMG performance investigation below remains a
+separate unresolved task. Supplied server files and all prior changes remain
+preserved; no completed production experiment was repeated.
+
+## Latest server AMG / GMG performance audit — September 26
+
+The new `bp3/output-test-gmg/` is directly comparable in saved parameters with
+`output-test-amg/`: only backend and output directory differ. Both use 48 ranks,
+542,958 cells, 19,149,424 DoFs, ten levels, deal.II 9.7.0, Trilinos 16.2.1 and
+AVX512. Both saved runs still use the pre-cleanup BP5 state bound 0.1; the new
+files do not exercise the removed controller's absence. GMG completes through
+step 2 in the upload, so comparisons stop there.
+
+At that matched state, total wall time is AMG 340 s versus GMG 401 s; condensed
+solve time is 173 s versus 235 s; outer iterations are 183 versus 205. GMG setup
+is only 5.52 s, nested inside its solve timer. Existing rank-local detailed
+profiles show block-preconditioner application totals 88.066 versus 134.683 s,
+or 0.481 versus 0.657 s per call. At step 2 the per-call gap is 0.504 versus
+0.839 s. Thus both more outer iterations and slower preconditioner applications
+contribute. Active-cell ownership is balanced (11,308–11,314 cells/rank).
+The cause inside the preconditioner (inner CG iterations, cycle throughput,
+copies, pressure work, communication) is not resolved by these outputs.
+
+See [the comparison report](../../benchmarks/reconstructed_fault/bp3/amg_gmg_server_comparison.md)
+for exact scopes, earlier four-rank local evidence and limitations. The next
+bounded performance task is one matched frozen solve with inner velocity
+iterations and preconditioner sub-timings, not another full trajectory. This
+audit changed documentation only; outputs and source were preserved and no
+simulation or Python script was run.
+
+## GMG and BP3 plugin cleanup — September 26
+
+At the user's request, removed production GMG debug logging, raw-diagonal
+observers, diagnostic collectives and scratch-vector probes. The original
+diagonal calculation, eigenvalue estimator and velocity GMG cycle are retained.
+Standalone reproduction probes remain in `server_gmg/`; their helper is now
+benchmark-local and the runner no longer requires removed diagnostic markers.
+
+The maintained BP3 plugin no longer builds/registers `BP5 state startup`.
+Its source is retained outside the build in
+[`gmg-bp5-cleanup-evidence`](../../benchmarks/reconstructed_fault/bp3/gmg-bp5-cleanup-evidence/).
+The raw/filter20/filter40 PRMs and their generator now select convection and
+reconstructed-fault timestep controllers only; first-event inherits filter20.
+There is no replacement state-change limiter. Standard ASPECT caps are unchanged:
+the maintained PRMs still have first/global caps `100 / 4e6` s, while the latest
+saved server run used `4e6 / 4e7` s. Preserve the user's chosen server caps when
+removing its BP5 subsection. The full-resolution saved output-test-amg inputs
+and outputs remain historical records and were not edited.
+
+BP5 checkpoint/test-environment rejection checks remain in BP3 because they
+prevent incompatible inputs, not because BP3 uses BP5 physics or timestep
+selection. The separate BP5 benchmark is unchanged. Updating the server requires
+rebuilding ASPECT and the matching BP3 plugin, removing `BP5 state startup` from
+the controller list and deleting the corresponding PRM subsection. The two
+predictor-owned CSVs stop being emitted; accepted-step dt output remains.
+Local Release ASPECT/plugin/probe builds passed, all four maintained BP3 inputs
+validate, and otherwise valid inputs reject both the retired BP5 selector and
+its subsection. A new one-rank Cartesian GMG Stage-I initialization passes with
+final bulk/fault residuals `9.165224e-08 / 0`. Source/symbol audits, shell syntax,
+whitespace and supplied-output hash checks pass. See the
+[cleanup report](../../benchmarks/reconstructed_fault/bp3/gmg-bp5-cleanup-evidence/README.md)
+for exact scope and evidence. No full BP3 trajectory, restart or new server run
+was performed. **Next bounded task:** transfer/rebuild this cleanup with the
+working Intel 26.0 stack and update the server BP3 PRM as described above.
+
+## Latest BP3 AMG timestep evidence — September 26
+
+The new `bp3/output-test-amg/` run uses first cap `4e6` s, global maximum
+`4e7` s and state-change bound `0.1`. This is executed evidence of a later
+policy relaxation relative to the earlier `100 / 4e6 / 0.02` startup settings;
+the maintained candidate PRMs are unchanged by this audit. Its timestep
+selection audit directly identifies **BP5 state startup** as the limiter:
+552.083566, 590.185962, 630.854254 and 674.325550 s. All four predictor
+measures saturate `0.1`; convection, fault-law, first-step, growth and global
+caps are larger, and termination reduction is false. Three physical intervals
+are recorded as accepted; the fourth starts in the log but is not recorded
+as accepted in the supplied files. The duplicated state-zero row is not a step.
+
+The shallow initial Theta is 8,000 s with b/a = 1.5 and V near `1e-9` m/s;
+the exact aging predictor explains the first 552.083566 s interval. See
+[the timestep audit](../../benchmarks/reconstructed_fault/bp3/output_test_amg_timestep_analysis.md)
+for evidence, formulas and limits. The active limiter is resolved without a
+rerun. If larger startup steps are desired, the next bounded task is to assess
+a proposed state-bound relaxation at matched physical times; the current
+short successful solve does not itself qualify temporal accuracy.
+Only documentation was changed; all source, PRMs and supplied outputs remain
+intact. No simulations or Python scripts were used.
+
+## Follow-up: server GMG diagnosis
+
+**Resolution reported by the user (September 26):** rebuilding both deal.II
+and ASPECT with `intel/26.0` instead of `intel/24.0` makes GMG run properly.
+This supersedes the pending investigation/workaround recommendations below.
+The report establishes a working toolchain remedy; a specific compiler defect
+or faulty dependency instruction is not identified. New GMG build provenance
+was not independently audited in this BP3 AMG timestep task. Preserve the
+earlier Cartesian/Q1 experiments as historical evidence; do not repeat them.
+
+**Newest server Q1 evidence (September 26):**
+`server_gmg/output-gmg-q1.tar` records a successful OPTIMIZED/deal.II 9.6.0/
+AVX512 one-rank Stage-I initialization: 4,096 cells, seven levels, four velocity
+GMG setups, final printed bulk/fault residuals `9.165231e-08 / 0`, Stage-I
+`verified`, and normal end-time termination. Saved parameters select local
+smoothing block GMG and the zero-valued topography function that selects
+MappingQ1 in the current source. The archive lacks the separate diagnostic
+logs and binary hashes; no direct server mapping-type trace is claimed.
+This completes the previously pending server workaround test. Keep the Q1 PRM
+workaround for the affected flat-box build; velocity/pressure remain Q2/Q1.
+The underlying Intel/deal.II defect is still unproven. A minimal source bypass
+and its wider scope are documented, not applied, in
+[the updated analysis](../../benchmarks/reconstructed_fault/server_gmg/mapping_cartesian_workaround.md).
+**Next bounded task for an upstream repair:** locate the first invalid
+Cartesian geometry/evaluation quantity in the existing one-cell probe before
+choosing a dependency patch. No repeated Stage-I experiment is needed.
+This update only inspected the supplied archive and edited documentation;
+no simulation, build, Python script or production-code modification was made.
+
+**Newest corrected Release context evidence (September 26):**
+`server_gmg/output-coarse-context-release/coarse_diagonal_probe.txt` now contains
+all three cases. `cartesian_active` and `cartesian_parent` both produce NaNs in
+the production inverse, test raw diagonal and production action; `q1_parent`
+passes. FEValues references remain finite in every case. This isolates the
+failure to the server's matrix-free MappingCartesian path; neither a refined
+hierarchy, coefficient projection, CG nor the fault model is needed to trigger
+it. A particular Intel/deal.II source defect is still unproven. The assertion
+correctly reports the failed comparisons; keep it.
+
+A **PRM-only flat-box workaround** is prepared in `server_gmg/gmg_q1.prm`:
+select initial-topography `function`, expression `0`, maximum topography `0`.
+The existing mapping factory then selects MappingQ1 while zero displacement
+preserves vertex coordinates. This is applied to Stage I, not to the standalone
+probe that constructs its mappings explicitly. No production C++ or BP3/BP5
+input was changed for this workaround. The new local one-rank Release Stage-I
+initialization passes, with MappingQ1 confirmed, 28 eigenvalue estimates,
+four consumers and final printed bulk/fault residuals `9.165224e-08 / 0`.
+Evidence is under
+[verification-q1-local](../../benchmarks/reconstructed_fault/server_gmg/verification-q1-local/).
+The previously pending server `gmg_q1` Stage-I verification is now complete,
+as recorded above; no core/deal.II rebuild was needed for this input change.
+See [instructions and limits](../../benchmarks/reconstructed_fault/server_gmg/mapping_cartesian_workaround.md).
+
+### Earlier context-selection correction (superseded by the new Release upload)
+
+**Latest context-output audit (September 26):** The copied
+`server_gmg/output-coarse-context-debug/` and `output-coarse-context-release/`
+each contain only `case=q1_active refinements=0` and one successful result.
+They repeat the baseline; the three mapping/hierarchy cases have **not** been
+verified on the server. The earlier test selector depended on a runner-set
+environment variable. This fixture weakness is corrected: `coarse_context.prm`
+explicitly sets `Postprocess / Fault GMG coarse probe / Test mode = context`,
+and the runner requires all three expected case headers/pass records through
+`check_context_output.sh`. Rebuild the plugin and use the updated PRM/runner/
+checker, then run the corrected Release context case to a new directory. No
+core rebuild is needed for this correction. Only after the three cases pass
+should the next original-context Stage-I measurement be interpreted.
+The [analysis](../../benchmarks/reconstructed_fault/server_gmg/server_context_analysis.md)
+records exact evidence, the PRM entry and next instructions. A direct local
+launch without the old environment selector passed all three cases and matched
+the earlier local context output exactly; validation rejected the supplied
+baseline-only and truncated outputs. Evidence is in
+[verification-context-selection-local](../../benchmarks/reconstructed_fault/server_gmg/verification-context-selection-local/).
+Server artifacts remain unchanged. No production numerical changes or Python
+scripts were involved in this correction.
+
+**September 26 update:** Both supplied server coarse probes pass, including
+Release/AVX512; the two production inverse diagonals match Debug exactly. See
+[server_context_analysis.md](../../benchmarks/reconstructed_fault/server_gmg/server_context_analysis.md)
+for the superseding analysis, configuration evidence and next commands.
+The compiler is IntelLLVM/icpx 2024.0.0 with Intel MPI 2021.11. ASPECT already
+has `-fno-finite-math-only -fp-model=precise -ffp-contract=off`; recommending
+these again would repeat an existing setting. The supplied cache is
+DebugRelease with unity build ON. No compiler bug or numerical fix is established.
+
+The original passing reduced probe uses MappingQ1 on an active cell, whereas
+the failing Stage-I configuration uses MappingCartesian on a level-zero parent
+with six refined levels. The new `coarse_context` case isolates mapping and
+parent hierarchy in three tests, without solving physical equations or replaying
+the completed baseline. **Next bounded task:** run this case in server Release
+against the same executable used for Stage I. If it passes, use one instrumented
+Stage-I initialization to capture initialized/raw/constrained/inverse diagonals
+from the original context. The observer in `matrix_free_operators.cc` is opt-in,
+records to stderr and changes no diagonal or solver controls. Return the runner
+logs, actual compile command and confirmation of executable identity/diagnostic
+switch for the reported CG failure; general configuration files are now supplied.
+
+Locally all three new context cases pass before and after the observer change;
+their 96-line numerical probe outputs are byte-identical. Evidence is under
+[verification-context-local](../../benchmarks/reconstructed_fault/server_gmg/verification-context-local/).
+The core was rebuilt for this observer; its new hash is recorded there.
+Server outputs/configuration/tar files were hash-checked unchanged. No local
+Stage-I/BP3/BP5 rerun or Python script was used in this update.
+
+### Earlier diagonal localization and recovery follow-up
+
+The next task requested after recovery is a bounded debugging package for the
+Intel-build GMG NaN, not first-event continuation. See
+[server_gmg/README.md](../../benchmarks/reconstructed_fault/server_gmg/README.md)
+for the small initialization-only model, shell runner, opt-in per-level C++
+diagnostics, server build/backtrace instructions, and local verification.
+No Python is used in that workflow. The copied server Debug/Release outputs now
+localize the first observed NaN to **level-zero velocity inverse-diagonal DoF
+16, before eigenvalue estimation**. Both runs have identical active/coarse
+viscosities, one MPI rank and eight SIMD lanes. Debug's inverse diagonal agrees
+with `15/(128 eta)` for the two free central Q2 velocity DoFs; its coupled
+Stage-I verifier passes. Resolved PRMs differ only by plugin mode and output
+directory. The first invalid operation and the cause of the Release-only
+failure remain unknown; compiler/optimization, undefined behavior and build
+consistency are hypotheses, not established fixes. See the
+[server result analysis](../../benchmarks/reconstructed_fault/server_gmg/server_debug_release_analysis.md)
+for exact evidence, source locations and missing provenance.
+
+The new probe passed locally with GCC 12.4/OpenMPI, deal.II 9.6.2 and four SIMD
+lanes; both free Q2 entries agree with the independent quadrature/analytic
+reference. Build/run/provenance evidence is in
+[verification-coarse-local](../../benchmarks/reconstructed_fault/server_gmg/verification-coarse-local/).
+This validates the fixture, not the Intel server path. All 11 copied server
+output files were hash-verified unchanged. No production source was modified
+or core binary rebuilt in this analysis follow-up.
+
+The **previous bounded debugging task (now completed on the server)** was the one-cell `coarse` probe, run with
+the existing matched server Debug/Release binaries. It compares production
+inverse diagonals and matrix-vector actions with a test-compiled raw diagonal,
+FEValues quadrature and the analytic result. It solves no physical equations.
+Do not repeat the completed startup trajectories or alter CG/timestep settings.
+The later supplied cache/configuration is analyzed above; exact compile commands
+and full failing-run stderr remain useful. The local `build-tmp` binary was
+rebuilt for this follow-up, so its hash in the recovery inventory below is a
+historical snapshot, not the hash of the new instrumented binary. Existing
+startup outputs and physical/timestep settings are preserved.
+
+## Recovery snapshot
+
+Recovered 2026-09-25 from `/home/ein/repository/aspect`. This is a checkout and
+evidence audit, not a new numerical qualification. No build, test simulation,
+analysis that regenerates outputs, or server submission was run during recovery.
+
+## Authority and checkout
+
+The applicable instruction file is [AGENTS.md](../../AGENTS.md); no nested
+AGENTS.md was found. Scientific/ownership/MPI authority remains
+[current_design.md](current_design.md) and [specification.tex](specification.tex),
+with [refactoring.md](refactoring.md) governing code quality. The
+[recovery handoff](CODEX_RECOVERY_HANDOFF.md) is historical context, not proof of
+implementation or an instruction to repeat completed experiments.
+
+Branch: `pf-rsf`. HEAD: `3ce447a17e14ac21cb24abf8fbf679d77b4f3f0e`, September 24,
+“Isolate BP3 execution diagnostics and share opt-in stress interpolation.”
+At the start of this audit there were 42 modified tracked files, no staged diff,
+and 2,505 untracked entries in default `git status --short` (entries can represent
+directories; ignored outputs are additional). The tracked diff was 1,738
+insertions / 289 deletions. HEAD alone does **not** reproduce the current model.
+
+Recent history establishes these completed layers:
+
+| Commit | Completed scope |
+|---|---|
+| `3ce447a17` (Sep 24) | Execution guards, shared opt-in stress-only LLS adapter, narrow A/B replay; substantial core changes remained uncommitted |
+| `33228369d` (Sep 21) | Documentation update |
+| `b56829272` (Sep 21) | BP5 loading initialization, refined normalization, startup/restart safeguards and benchmark infrastructure |
+| `359ea223c` (Sep 17) | Modified BP3 research/long-run configuration consolidation |
+| `3335d3d26` (Sep 15) | Work-measure replay and coupled-state timestep evidence |
+| `fb4411915`, `86fff7395`, `dc1a96d3f`, `a24c36231` | K1–K4 bounded qualification; see historical reports for limits |
+
+Uncommitted work includes normal-input filtering and derivatives; pressure
+compatibility/convergence corrections; reflected-fault shear sense; diagnostic
+history/restart hooks; solver-selector cleanup; tests; updated authority
+documents; and restored BP3 inputs/runtime. In particular,
+`source/reconstructed_fault/normal_filter_internal.h`,
+`tests/fault_surface_reference.h`, and the entire restored `bp3/plugin/` runtime
+are untracked. Preserve these with the tracked diff. Old experiment sources,
+PRMs, binaries, archives and output directories were left intact.
+
+## Current implementation and selected research model
+
+The framework has reconstructed geometry, replicated fault Q1 properties,
+manager-owned committed/current/trial slip rates, particle Maxwell history,
+adaptive normalization, coupled bulk/surface residuals and exact condensation,
+nonlinear acceptance/rollback, and accepted-state constitutive publication.
+It is beyond the old geometry-only and Stage-F plans. The current research
+fixture uses incompressible viscoelastic Q2/Q1 Stokes, frozen AT1 phase, mature
+frictional C=0, true normal feedback, and fully frictional deep extension.
+It is a modified BP3 research model, not exact standard SEAS BP3.
+
+The canonical restored runtime is
+[bp3/plugin/](../../benchmarks/reconstructed_fault/bp3/plugin/README.md), built
+from `bp3.cc`, `mesh.cc`, `monitor.cc`, and `output.cc` (the BP5 state predictor
+was retired in the cleanup above).
+The parent historical `bp3.cc` is retained for other variants; it is not the
+restored target's implementation. The restored monitor now installs surface
+settings at `post_simulator_initialization`, after the surface system exists.
+The constructor null dereference was reproduced and fixed; the early paragraph
+in the cleanup report saying it was undiagnosed is superseded by its follow-up.
+
+Verified current core behavior:
+
+- Normal filtering solves `(M + Ls^2 K) z = b(sigma_raw)` with native work
+  weights and physical arc derivatives, where
+  `sigma_raw = sigma_background + p - n^T tau n`. It changes friction input
+  and its consistent derivatives, not raw mechanics or retained stress.
+  Raw remains the generic default; restored BP3 explicitly selects Helmholtz.
+- Timestep-zero mechanics retains supplied Theta/H and zero initial perturbation
+  Maxwell history. Its artificial interval is separate from physical aging.
+  Saved startup rows confirm zero committed stress at state zero.
+- Particle-to-FE publication sums incident-cell proposals with MPI ADD and
+  divides by contribution count for continuous DoFs. It is not last-writer-wins
+  ([initial_conditions.cc](../../source/simulator/initial_conditions.cc)).
+- Pressure compatibility uses the assembly-roundoff bound capped by the mixed
+  nonlinear target and checks compatibility even when skipping an unused
+  direction at an already-converged base
+  ([solver.cc](../../source/simulator/solver.cc)). This qualified correction is
+  present in the dirty tree and recorded in both authority documents.
+- Surface inversion always uses pivoted tridiagonal GTTRF/GTTRS. The ordinary
+  `Stokes solver type` selects AMG/GMG; old environment backend selectors no
+  longer select production behavior. AMG remains the restored PRM choice.
+  This does not establish that the historical server GMG NaN is fixed.
+
+No new specification/implementation conflict was established in these inspected
+paths. This is not a full scientific code review.
+
+## LLS routing: resolved discrepancy
+
+**Restored BP3 uses native unlimited LLS for all five mapped composition fields:**
+`tau_xx`, `tau_yy`, `tau_xy`, `theta_initial`, and `strengthening`, in continuous
+Q2. Limiter and boundary extrapolation are false. The restored CMake target
+does not compile the stress-only adapter, and publication calls the configured
+particle interpolator with the selected property mask.
+
+This is explicit in the current
+[filter20 PRM](../../benchmarks/reconstructed_fault/bp3/bp3_150x50_filter20.prm),
+generator, saved run PRMs, and the September 24
+[restoration preflight](../../benchmarks/reconstructed_fault/bp3/restore_150x50_preflight.md)
+(“Other requested choices”). Thus it is a documented restoration choice, not
+an unnoticed routing adapter. It does not change the separate particle-to-fault
+Q1 projection or turn committed fault Theta into a bulk composition history.
+
+The earlier
+[inclined interpolation comparison](../../benchmarks/reconstructed_fault/bp5/interpolation-inclined/README.md)
+used [the stress-only adapter](../../benchmarks/reconstructed_fault/stress_only_interpolator.cc):
+three Maxwell components to LLS, other properties to DWA. The legacy BP3 target
+registers this optional adapter, while its maintained long-run PRM selects DWA.
+Those are different configurations. The controlled A/B result therefore does
+not isolate the effect of changing non-stress interpolation in restored BP3.
+The three restored startups do exercise the all-field LLS configuration, but
+are not a DWA-versus-all-field-LLS sensitivity study or long-time qualification.
+
+## Active configuration
+
+Maintained candidate:
+[bp3_150x50_filter20.prm](../../benchmarks/reconstructed_fault/bp3/bp3_150x50_filter20.prm).
+The [first-event PRM](../../benchmarks/reconstructed_fault/bp3/bp3_150x50_first_event.prm)
+includes it and changes resume/output/termination settings only.
+
+| Item | Current value / evidence |
+|---|---|
+| Domain / fault | 150 × 50 km; x = −60…90 km; 60° right-dipping thrust, (0,50 km) to (28.8675 km,0); positive V with selected shear sense −1 |
+| Fault grid | 57.735026919 km; 2,889 Q1 vertices, all frictional; spacing 19.9818–20 m |
+| Mesh | Saved `fixtures/bp3_150x50/target_cells.txt`; root 75 × 25, global 1/adaptive 8; runtime adaptation off |
+| Realized inventory | 542,958 cells, 19,149,424 DoFs, 4,886,622 particles; confirmed in saved full-resolution log, not only the mesh estimate |
+| Resolution / phase | Minimum edge 3.90625 m; ell = 20 m; frozen AT1 core 0.6; mature C=0 |
+| Loading | Smooth bottom and rigid side Dirichlet velocities; relative far-side Vp = 1e−9 m/s; free perturbation top; no explicit traction list; zero gravity/surface pressure; pressure normalization `no` |
+| Friction | a = .010→.025 over 15–18 km down dip; b=.015; Dc=.008 m; mu0=.6; V0=1e−6 m/s; Vmin=1e−20 m/s |
+| Bulk / damping | G=32,038,120,320 Pa; viscosity=1e26 Pa s; radiation damping=4,624,440 Pa s/m |
+| Background / initial state | 50 MPa normal; nominal uniform shear 26.5461223651 MPa; inverse initial Theta about 8,000 s shallow / 8e6 s deep; zero perturbation stress |
+| Normalization | `cell intervals`, eight surface subdivisions; quadrature/tail tolerance 1e−10; prepared endpoint completion/profile retained |
+| Normal input | Helmholtz 20 m provisionally selected; raw and 40 m are separate clean-start controls |
+| Particles / FE | RK2, 3×3 per cell initially; native unlimited LLS, continuous Q2 compositions; strengthening spatially refreshed |
+| Solver | AMG; linear 1e−9, nonlinear 1e−8; abort on nonlinear failure |
+| Time controllers | Convection + reconstructed-fault law; CFL .5; first physical cap 100 s; global ceiling 4e6 s; BP5 state predictor removed by user request |
+| Artificial initialization | Material `Initial time step = 4e6` s; not elapsed time or a state-aging update |
+| Startup termination | Accepted step 10 or accepted-state 3,600 s wall guard; checkpoint-on-termination requested |
+| Event continuation | Resume filter20; detailed diagnostic capture off; 82,800 s accepted-state wall guard; 1,500-year safety end; threshold crossing 1e−3 m/s followed by five states below threshold |
+
+Startup diagnostics are detailed; the continuation keeps growth, station,
+event/solver and scheduled outputs. Current compact cumulative-slip output uses
+ten significant digits for slip, seventeen for time/coordinates; computational
+state and checkpoints retain full precision.
+
+## Completed experiments and available evidence
+
+The following are historical completed tests/results, inspected rather than
+rerun in this recovery. A report's narrower qualification is retained.
+
+| Evidence | What is established / limitation |
+|---|---|
+| [Restored filter comparison, Sep 25](../../benchmarks/reconstructed_fault/bp3/filter-test/comparison/README.md), [summary](../../benchmarks/reconstructed_fault/bp3/filter-test/comparison/summary.json) | Raw/20/40 each accepted states 0–10, t≈1133.7390530913 s, 2 Newton updates/state, 493 Krylov iterations total per run, alpha=1, no lower-active nodes, fresh checks pass; Theta error ≤2.23e−16. All three logs report 80 MPI ranks. No first event. |
+| [filter20 accepted states](../../benchmarks/reconstructed_fault/bp3/filter-test/output-150x50-filter20/accepted_steps.csv), [log](../../benchmarks/reconstructed_fault/bp3/filter-test/output-150x50-filter20/log.txt), [boundary constraints](../../benchmarks/reconstructed_fault/bp3/filter-test/output-150x50-filter20/velocity_constraints.csv) | Realized full mesh/particle inventory; zero reported side/bottom velocity-constraint error; summary net flux ≈4.8e−18. Final max V≈1.000264e−9 m/s; event table says not started/not complete. Logged wall times raw/20/40: 750/675/593 s; no all-rank peak RSS record identified. |
+| [Restoration verification](../../benchmarks/reconstructed_fault/bp3/restore_150x50_report.md), [logs/hashes](../../benchmarks/reconstructed_fault/bp3/restore-150x50-verification/) | Sign/filter/profile/manager and Stage-I tests; reflected B, G and work identities on one/two ranks; generated mesh/completion. Its “startups not run” conclusion is superseded by Sep 25 outputs. |
+| [Plugin cleanup](../../benchmarks/reconstructed_fault/bp3/plugin_cleanup_report.md), [evidence](../../benchmarks/reconstructed_fault/bp3/plugin-cleanup-evidence/) | 157 model comparisons, environment checks, four PRM validations, 20,236 assertions/16 cases, one/two-rank coupling checks. Constructor fix verified before mesh generation. Not a full restored restart equivalence test. |
+| [Runtime cleanup, Sep 25](../../benchmarks/reconstructed_fault/bp3/runtime_cleanup_report.md), `/tmp/bp3-runtime-cleanup-KF1mxB/` | Later completed selector/output cleanup: 636 assertions/3 cases on one/two ranks; AMG/GMG coupled fixtures, two-rank GMG, intentional-failure rollback, condensed fixture and constructor checks. Logs still exist. Report also records 3 slip-history, 1 launcher and 5 plot tests. No post-cleanup full-resolution BP3 trajectory. |
+| [Inclined LLS comparison](../../benchmarks/reconstructed_fault/bp5/interpolation-inclined/README.md), [metrics](../../benchmarks/reconstructed_fault/bp5/interpolation-inclined/comparison.json) | Six one/two-rank runs, four 0.1 s steps with RK2; B continuous-Q2 stress-only LLS reduces interior jump 0.293767→0.060060 Pa m; whole-domain jump slightly increases; DG is worse on that measure. No host-cell crossings, no free-RSF qualification. |
+| [Execution cleanup](bp3/execution_cleanup.md), [replay metrics](../../benchmarks/reconstructed_fault/bp5/interpolation-inclined/cleanup_comparison.json) | A/B cleanup replays retained fields/histories with zero measured differences. Separate two-rank free-rate/state smoke failed its pressure-compatibility guard; not a passing test. Later successes do not demonstrate rerunning that exact failed fixture. |
+| [Moment qualification](../../benchmarks/reconstructed_fault/bp5/moment-qualified-final/report.md) | A/B/C four-step horizontal prescribed-slip qualification and C two-rank replay after pressure-compatibility correction; 20,136 Stage-I assertions/14 cases. Does not select a production moment-transfer replacement. Supersedes earlier “partial” moment-study summaries. |
+| [BP5 history-cycle audit](../../benchmarks/reconstructed_fault/bp5/normal-stress-cycle/stress_cycle_report.md), [half-clock filter study](../../benchmarks/reconstructed_fault/bp5/normal-filter/half/report.md) | Earlier loaded BP5 reached ~168 years and rapid slip; half-clock branches 5613–5622 finish near 5.3101110716e9 s, final Vmax≈.096–.097 m/s. Filter smooths input but raw bands persist and shallow rate roughness increases. Not a prescription to use BP5's 100/200 m lengths for restored BP3. |
+
+The restored comparison recommends **20 m provisionally**: normal-input chord
+roughness falls roughly 8–11×; bottom velocity-chord RMS/Vp is 5.9573e−7 raw,
+2.1584e−7 at 20 m, 1.9408e−7 at 40 m. The ~1.0892%-Vp departure near 15 km
+persists in all cases. These are startup findings, not an event-accuracy or
+long-term stability result. Raw versus Helmholtz also changes projection;
+there is no zero-length projected control in this restored comparison.
+
+## Timestep policy after the September 25 report
+
+**Historical recovery finding, superseded by the new AMG evidence above:**
+at recovery, no later policy relaxation was evidenced in the checkout. HEAD/reflog ends
+September 24. The later September 25 runtime cleanup report/source/PRMs change
+solver selection and output, not timestep policy. Current raw/filter20/filter40
+PRMs, their generator, and all three executed `original.prm`/`parameters.prm`
+files retain first cap 100 s and state bound .02. The continuation inherits both.
+File modification times help locate these later files but cannot establish an
+unrecorded conversation decision.
+
+The current predictor source is byte-identical to `bp5/startup_time_step.cc`
+(SHA256 `c54c0bcb76234303363b25ba9df1b56d1ac647e1fa669c6399bb4f658fcde656`).
+Its declaration default `.1` is an older default overridden by these PRMs,
+**not evidence that .1 was adopted for BP3**. It bounds
+`max (b/a)*abs(log(Theta_pred/Theta))` using committed V/Theta and the configured
+constant-rate aging law; it is an accuracy heuristic, not a Newton tolerance.
+
+Direct evidence:
+[filter20 timestep selection](../../benchmarks/reconstructed_fault/bp3/filter-test/output-150x50-filter20/timestep_selection.csv)
+and [state predictor](../../benchmarks/reconstructed_fault/bp3/filter-test/output-150x50-filter20/state_startup_predictor.csv).
+At state zero the state proposal is 107.489084736883 s, fault-law proposal
+2,666,352.925 s, global ceiling 4e6 s, and selected first interval 100 s.
+Subsequent selections are predictor-limited. At state 10 the next proposal is
+122.70173342449 s; the last **completed** interval was 121.077317003674 s.
+The proposal row does not establish that an eleventh interval ran.
+
+Inference limited to that saved state: raising only the first cap to 4e6 s would
+leave the .02 predictor selecting about 107.49 s, not 4e6 s. Raising the state
+bound is a separate, unqualified choice. The handoff's later user question about
+100 s→4e6 s / .02→.1 remains a question, not an approved or tested policy.
+Two Newton updates establish solver convergence, not temporal accuracy.
+
+## Executables, provenance and checkpoint availability
+
+The **recovery's full-resolution successful trajectories** were the three copied
+`filter-test/output-150x50-*` directories. Their PRMs name
+`plugin/build/libbp3_restore_150x50.release.so` relative to the server launch
+directory; the executable path and binary hashes are not recorded in the
+inspected copied artifacts. Logs verify Release ASPECT 3.1.0-pre, deal.II 9.6.0
+(64-bit indices/AVX512), Trilinos 15.0.0, p4est 2.8.5, World Builder 1.0.0,
+80 ranks. Do not substitute a local binary hash for the unknown executed pair.
+
+The **later local cleanup verification** used `build-tmp`, as confirmed by
+`/tmp/bp3-runtime-cleanup-KF1mxB/CMakeLists.txt` and its CMake cache. That cache
+selects Release, `/opt/openmpi/5.0.6/bin/mpic++`, GCC 12.4 compiler utilities,
+and `Aspect_DIR=/home/ein/repository/aspect/build-tmp`. The core cache has
+`DEAL_II_DIR=/opt/dealii/9.6-local`, Voro++ and World Builder ON, and `-no-pie`
+executable linking. These logs substantiate focused checks, not a long run.
+
+Hashes measured during this audit (current bytes, not automatically run-time
+attestations):
+
+| Local artifact | SHA256 |
+|---|---|
+| `build-tmp/aspect-release` | `1b091f3b745fab911f62179fd659d3d028ba26101402d58254a4b581796def38` |
+| `/tmp/bp3-runtime-cleanup-KF1mxB/build/bp3/libbp3_restore_150x50.release.so` | `cafe3a49172afdd1ad3a61fef917b0861aaecf9b7e7e0e072fa41a56fded9ac8` |
+| `build-pf-cpdi/aspect-release` | `d986d6166db2a8e0f73e5b9735bb73887e6ba2f8d4967d9dbf90e28d3f2fa85e` |
+| `benchmarks/reconstructed_fault/bp3/build/libbp3_restore_150x50.release.so` | `ef18ef25ebc6a1bf94278f598d09c8027f0a5c55e690a14b29e0513d6cd70588` |
+| `benchmarks/reconstructed_fault/bp3/plugin.tar` | `a09a5556c550ff75c22d1c87fce2f4df6dbc39f3627f4d08eb06c75185c2e665` |
+
+`build-pf-cpdi` still has the core hash in the earlier restoration verification;
+its cached core build is Release, while the parent BP3 build cache says Debug
+and names a `.release.so` output. Existing directories/library suffixes do not
+prove a current matching build. The earlier plugin hashes `716f077b…` and
+`b4162ab5…` in preserved verification records differ from the current library.
+Use the recorded matched build context, not an arbitrary executable/plugin mix.
+
+No resume/restart/checkpoint payload was found in any of the three copied
+startup directories. The maintained PRMs target `bp3/restore-150x50-filter20`,
+which does not exist here; copied evidence is under
+`bp3/filter-test/output-150x50-filter20`. Thus the continuation PRM is prepared,
+but cannot presently resume these local copies unchanged. Checkpoint-on-termination
+being requested is not proof that a usable checkpoint was copied. Full restored
+checkpoint/resume equivalence and any first-event continuation remain unverified.
+
+Preserved recovery sources include
+[execution-cleanup checkpoint](../../benchmarks/reconstructed_fault/checkpoints/bp3-execution-cleanup-4qkx63tj/),
+`bp3/plugin-cleanup-evidence/before.tar.gz`, its pre-cleanup patch/status, and
+`bp3/restore-150x50-verification/current_tracked.patch`. Historical raw outputs
+may be archived: consult [CLEANUP.md](../../benchmarks/reconstructed_fault/CLEANUP.md).
+The `.benchmark-cleanup-20260914-*`, `20260915-*`, `20260917-*`, `20260920-*`,
+and `20260924-*` directories still exist locally. No archive was extracted,
+repacked, removed or fully revalidated in this task. Temporary cleanup logs
+still under `/tmp` are less durable than repository evidence.
+
+## Unresolved questions and next bounded task
+
+1. Recover the exact server executable/plugin identity and complete filter20
+   accepted-state checkpoint, including its source/build provenance. Determine
+   whether newer server outputs or an explicit timestep decision exist outside
+   this checkout; their absence here cannot prove they never existed.
+2. Resolve the outstanding first-step/state-bound question explicitly. There is
+   no current temporal-accuracy qualification for .1 or larger. The all-field
+   LLS choice is documented, but its non-stress effect is not separately isolated.
+3. Full restored restart equivalence, long-loading raw/filtered stress behavior,
+   the persistent 15-km feature, event completion and measured all-rank memory
+   remain open. Keep the older failed smoke/server GMG evidence visible.
+
+**Recovery's proposed bounded task (deferred during GMG debugging):** prepare a continuation-readiness and timestep
+decision record from the existing filter20 evidence and the actual server
+checkpoint/provenance. Verify model/filter/profile identity and path mapping;
+identify the executable/plugin pair; distinguish inherited pending restart dt
+from a fresh-start cap; and specify a small matched-time temporal-accuracy
+check only if a policy change is requested. Produce reviewable inputs and gates
+before authorizing that check or the first-event continuation. Do not repeat
+the three startups, restore BP3 again, broaden the refactor, or launch a long
+trajectory merely to rebuild context.
+
+Recovery validation is limited to reading source/history/reports, inspecting
+saved PRMs/logs/CSV summaries, hashing selected artifacts, checking document
+links/whitespace, and verifying preservation of the pre-existing tracked diff.
+No numerical tests were rerun because this task changes documentation only.

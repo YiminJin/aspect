@@ -148,12 +148,9 @@ namespace aspect
     typename parallel::distributed::Triangulation<dim>::Settings
     settings(const Parameters<dim> &parameters)
     {
-      // The opt-in assembled-preconditioner probe also needs level ghosts;
-      // it retains the assembled fine operator and ordinary AMG reference.
-      if (std::getenv("ASPECT_FAULT_GMG_HIERARCHY") || std::getenv("ASPECT_FAULT_VELOCITY_GMG") ||
-          ((parameters.stokes_solver_type == Parameters<dim>::StokesSolverType::block_gmg ||
+      if ((parameters.stokes_solver_type == Parameters<dim>::StokesSolverType::block_gmg ||
            parameters.stokes_solver_type == Parameters<dim>::StokesSolverType::default_solver)
-          && parameters.stokes_gmg_type == Parameters<dim>::StokesGMGType::local_smoothing))
+          && parameters.stokes_gmg_type == Parameters<dim>::StokesGMGType::local_smoothing)
         return static_cast<typename parallel::distributed::Triangulation<dim>::Settings>
                (parallel::distributed::Triangulation<dim>::mesh_reconstruction_after_repartitioning |
                 parallel::distributed::Triangulation<dim>::construct_multigrid_hierarchy);
@@ -465,7 +462,17 @@ namespace aspect
     // choose the default solver and averaging scheme
     select_default_solver_and_averaging();
 
-    if (parameters.stokes_solver_type == Parameters<dim>::StokesSolverType::block_gmg)
+    // Fault condensation retains assembled A/B/G. GMG supplies only its
+    // velocity-block inverse, constructed for the coupled linearization.
+    if (parameters.reconstruct_faults
+        && parameters.stokes_solver_type == Parameters<dim>::StokesSolverType::block_gmg)
+      AssertThrow(parameters.nonlinear_solver
+                  == Parameters<dim>::NonlinearSolver::single_Advection_iterated_Newton_Stokes
+                  && Plugins::plugin_type_matches<MaterialModel::PhaseFieldFault<dim>>(*material_model),
+                  ExcMessage("Reconstructed-fault block GMG requires PhaseFieldFault and the "
+                             "single Advection, iterated Newton Stokes coupled scheme."));
+    if (parameters.stokes_solver_type == Parameters<dim>::StokesSolverType::block_gmg
+        && !parameters.reconstruct_faults)
       {
         stokes_matrix_free = create_matrix_free_solver<dim>(*this, parameters);
 
@@ -1318,9 +1325,11 @@ namespace aspect
     // and only needed if we actually solve iteratively and matrix-based
     if (solver_scheme_solves_stokes_equations(parameters) == false)
       return;
-    else if (parameters.stokes_solver_type == Parameters<dim>::StokesSolverType::block_gmg)
+    else if (parameters.stokes_solver_type == Parameters<dim>::StokesSolverType::block_gmg
+             && !parameters.reconstruct_faults)
       return;
-    else if (parameters.stokes_solver_type == Parameters<dim>::StokesSolverType::block_amg)
+    else if (parameters.stokes_solver_type == Parameters<dim>::StokesSolverType::block_amg
+             || parameters.stokes_solver_type == Parameters<dim>::StokesSolverType::block_gmg)
       {
         // continue below
       }

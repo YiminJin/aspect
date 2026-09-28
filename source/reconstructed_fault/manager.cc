@@ -503,6 +503,7 @@ namespace aspect
     // both particle and Stokes-QP caches as one lifecycle transition.
     reconstructed_faults.clear();
     projection_half_widths.clear();
+    shear_senses.clear();
     timestep_committed_slip_rates.clear();
     current_newton_slip_rates.clear();
     trial_slip_rates.clear();
@@ -692,6 +693,37 @@ namespace aspect
     diagnostics.push_back(std::move(result.diagnostics));
   }
 
+
+
+  template <int dim>
+  void ReconstructedFaultManager<dim>::set_shear_sense(
+    const unsigned int fault_index, const int sense)
+  {
+    AssertThrow(fault_index < reconstructed_faults.size()
+                && (sense == -1 || sense == 1),
+                ExcMessage("Fault shear sense must be +1 or -1 on an existing fault."));
+    const auto existing = shear_senses.find(fault_index);
+    if (existing != shear_senses.end())
+      {
+        AssertThrow(existing->second == sense,
+                    ExcMessage("Cannot change an initialized/checkpointed fault shear sense."));
+        return;
+      }
+    AssertThrow(!slip_rate_nonlinear_solve_active
+                && stokes_qp_cache_diagnostics.rebuild_count == 0,
+                ExcMessage("Configure fault shear sense before mechanical cache construction."));
+    shear_senses.emplace(fault_index, sense);
+    invalidate_stokes_qp_projection_cache();
+  }
+
+
+  template <int dim>
+  int ReconstructedFaultManager<dim>::get_shear_sense(const unsigned int fault_index) const
+  {
+    AssertIndexRange(fault_index, reconstructed_faults.size());
+    const auto entry = shear_senses.find(fault_index);
+    return entry == shear_senses.end() ? 1 : entry->second;
+  }
 
 
   template <int dim>

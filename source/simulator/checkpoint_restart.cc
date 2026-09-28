@@ -591,6 +591,30 @@ namespace aspect
 
     signals.post_resume_load_user_data(triangulation);
 
+    // Only the pending interval may be reduced. In particular, old_time_step
+    // describes the last committed history update and must not be changed.
+    if (!signals.post_resume_time_step.empty())
+      {
+        double requested_dt = time_step;
+        signals.post_resume_time_step(*this, requested_dt);
+        const bool admissible = std::isfinite(requested_dt) && requested_dt > 0.
+                                && requested_dt <= time_step;
+        AssertThrow(Utilities::MPI::min(static_cast<unsigned int>(admissible), mpi_communicator) == 1,
+                    ExcMessage("A restart timestep override must be finite, positive, and no larger than the saved pending timestep."));
+        AssertThrow(Utilities::MPI::min(requested_dt, mpi_communicator)
+                    == Utilities::MPI::max(requested_dt, mpi_communicator),
+                    ExcMessage("Restart timestep overrides disagree across MPI ranks."));
+        if (requested_dt != time_step)
+          {
+            const double accepted_time = time - time_step;
+            const double requested_time = accepted_time + requested_dt;
+            AssertThrow(std::isfinite(requested_time) && requested_time > accepted_time && requested_time <= time,
+                        ExcMessage("The reduced restart timestep cannot be represented at the restored physical time."));
+            time = requested_time;
+            time_step = requested_dt;
+          }
+      }
+
     // Overwrite the existing statistics file with the one that would have
     // been current at the time of the snapshot we just read back in. We
     // do this because the simulation that created the snapshot may have

@@ -1,0 +1,3 @@
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_state_limiter.prm
+set Additional shared libraries = /tmp/aspect-state-limiter/libstate_limiter_test.release.so
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/state_limiter/output-stateful-free

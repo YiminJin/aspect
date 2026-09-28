@@ -1,0 +1,8 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/output-cleanup-evidence/after.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/output-cleanup-evidence/slip-trigger
+subsection Postprocess
+  subsection BP3
+    set Profile time interval = 0
+    set Profile slip interval = 2.5e-7
+  end
+end

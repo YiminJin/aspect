@@ -1,0 +1,6 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/server_gmg/gmg.prm
+subsection Solver parameters
+  subsection Stokes solver parameters
+    set Stokes solver type = block AMG
+  end
+end

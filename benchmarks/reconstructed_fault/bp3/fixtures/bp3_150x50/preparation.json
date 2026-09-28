@@ -1,0 +1,21 @@
+{
+  "ell": 20.0,
+  "hmin": 3.90625,
+  "support_radius": 39.52916402010462,
+  "fine_half_width": 47.34166402010462,
+  "full_reference_integral": 13053.839445481044,
+  "surface_nodes": 2889,
+  "spacing_range": [
+    19.98183469572422,
+    20.00000000000682
+  ],
+  "completion_profiles": 69312,
+  "nonzero_completion_profiles": 56,
+  "completion_order_difference": 5.593392415903509e-10,
+  "hashes": {
+    "completion.txt": "f3c869982e38716d1c85ed0897f70ac01ad5e6ee9f8985dc9832d951b71bad88",
+    "profile.txt": "2f598b2d70cdb7fc0e5cbfe405c65a9b9c83253b3fad902b8eb7f730156c5607",
+    "fault.txt": "5460e34da479ef16e7dcc95f62669250a891ee8c969df5064dd3e4320bea4a24",
+    "surface_vertices.csv": "b9221ff24ced10f5b5ef339324c41556939585d8ee3df2d53e00934ba29f817e"
+  }
+}

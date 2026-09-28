@@ -1,0 +1,5 @@
+include benchmarks/reconstructed_fault/bp5/interpolation-inclined/common.prm
+set Output directory = benchmarks/reconstructed_fault/bp5/interpolation-inclined/B-one
+subsection Particles
+  set Interpolation scheme = stress only linear least squares
+end

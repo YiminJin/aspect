@@ -1,0 +1,12 @@
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_stage_i.prm
+set Additional shared libraries = /tmp/aspect-state-limiter/libstate_limiter_test.release.so
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/state_limiter/output-stateless
+subsection Time stepping
+  set List of model names = convection time step, reconstructed fault time step
+  subsection Reconstructed fault time step
+    set Maximum logarithmic state change = 0.1
+  end
+end
+subsection Postprocess
+  set List of postprocessors = particles, verify fault state limiter
+end

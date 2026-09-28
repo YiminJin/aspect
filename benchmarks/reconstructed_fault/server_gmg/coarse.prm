@@ -1,0 +1,21 @@
+# Test harness only: one cell, no equations, no fault model or time evolution.
+# The postprocessor creates its own level-zero Q2/Q1 matrix-free operator.
+set Dimension = 2
+set End time = 0
+set Nonlinear solver scheme = no Advection, no Stokes
+subsection Geometry model
+  set Model name = box
+end
+subsection Mesh refinement
+  set Initial global refinement = 0
+  set Initial adaptive refinement = 0
+end
+subsection Material model
+  set Model name = simple
+end
+subsection Gravity model
+  set Model name = vertical
+end
+subsection Postprocess
+  set List of postprocessors = fault GMG coarse probe
+end

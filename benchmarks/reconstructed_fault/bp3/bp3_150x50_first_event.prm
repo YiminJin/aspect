@@ -1,0 +1,19 @@
+# Only after reviewing the filter20 startup gates. Same model and output path.
+# Resume its ordinary accepted-state checkpoint; never use raw/BP5 histories.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/bp3_150x50_filter20.prm
+set Resume computation = true
+subsection Postprocess
+  subsection BP3 restored monitor
+    set Write detailed diagnostics = false
+  end
+  subsection BP3
+    set Last accepted step = 2147483647
+    set Stop after first event = true
+    set Graceful wall seconds = 82800
+    set Profile slip interval = 0.1
+    set Profile time interval = 31557600
+    set Heavy output slip interval = 0.1
+    set Heavy output time interval = 31557600
+    set Audit full state every step = false
+  end
+end

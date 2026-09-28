@@ -66,10 +66,16 @@ namespace aspect
                   ExcMessage("The coupled reconstructed-fault solver does not "
                              "currently support melt transport."));
       AssertThrow(this->get_parameters().stokes_solver_type
-                  == Parameters<dim>::StokesSolverType::block_amg,
+                  == Parameters<dim>::StokesSolverType::block_amg
+                  || this->get_parameters().stokes_solver_type
+                  == Parameters<dim>::StokesSolverType::block_gmg,
                   ExcMessage("The coupled reconstructed-fault solver currently "
-                             "requires the assembled block-AMG Stokes solver. "
-                             "Direct and matrix-free/GMG solvers are unsupported."));
+                             "requires block AMG or block GMG with an assembled fine operator."));
+      AssertThrow(this->get_parameters().stokes_solver_type
+                  != Parameters<dim>::StokesSolverType::block_gmg
+                  || this->get_parameters().stokes_gmg_type
+                  == Parameters<dim>::StokesGMGType::local_smoothing,
+                  ExcMessage("Fault velocity GMG currently supports only local smoothing."));
       AssertThrow(this->introspection().block_indices.velocities == 0
                   && this->introspection().block_indices.pressure == 1,
                   ExcMessage("The coupled reconstructed-fault solver requires "

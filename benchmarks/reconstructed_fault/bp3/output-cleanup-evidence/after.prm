@@ -1,0 +1,6 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/output-cleanup-evidence/fixture-base.prm
+set Additional shared libraries = /tmp/aspect-bp3-gmg-cleanup-build/libbp3_restore_150x50.release.so, /tmp/bp3-output-checks/libmap_measurement.release.so
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/output-cleanup-evidence/after
+subsection Postprocess
+  set List of postprocessors = reconstructed fault BP3, visualization, particles, reconstructed faults, BP3 output complete, BP3 restored monitor, BP3 map measurement
+end

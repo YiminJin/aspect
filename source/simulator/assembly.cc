@@ -483,9 +483,11 @@ namespace aspect
     if (rebuild_stokes_preconditioner == false)
       return;
 
-    if (parameters.stokes_solver_type == Parameters<dim>::StokesSolverType::block_gmg)
+    if (parameters.stokes_solver_type == Parameters<dim>::StokesSolverType::block_gmg
+        && !parameters.reconstruct_faults)
       return;
-    else if (parameters.stokes_solver_type == Parameters<dim>::StokesSolverType::block_amg)
+    else if (parameters.stokes_solver_type == Parameters<dim>::StokesSolverType::block_amg
+             || parameters.stokes_solver_type == Parameters<dim>::StokesSolverType::block_gmg)
       {
         // continue below
       }

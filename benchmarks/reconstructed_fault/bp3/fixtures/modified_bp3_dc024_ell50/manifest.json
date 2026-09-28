@@ -1,0 +1,16 @@
+{
+  "Dc": 0.024,
+  "ell": 50,
+  "finest_h": 12.20703125,
+  "profile_radius": 98.82291005026413,
+  "completion_order_error": 1.737134880386293e-10,
+  "completion_profiles": 4,
+  "physical_prestress_unchanged": true,
+  "hashes": {
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/fixtures/modified_bp3_dc024_ell50/target_cells.txt": "9ad6a00e679e27451c07b82d6d1c8294d450dac9dee428ee25475255383db79b",
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/fixtures/modified_bp3_dc024_ell50/fault.txt": "ca4760dfb25a0fac454eb559198db7c8669f3bcf29cd7d1f3addfcc3ed9415ca",
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/fixtures/modified_bp3_dc024_ell50/prestress.txt": "a5de2127a03cb99a820d3eb2b1d15ece0c2a6164006fe4bf6d43ab5af9cdd96e",
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/fixtures/modified_bp3_dc024_ell50/completion.txt": "276c4030ec4e91ddd5f0b88c6e5e8b028fc4acd3cc9df7a166beeebb6e119ad2",
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/bp3_dc024_ell50.prm": "6fc09833e859cd792aacaf74e04383ee7e3b2e678375e18488bbb20b917e4803"
+  }
+}

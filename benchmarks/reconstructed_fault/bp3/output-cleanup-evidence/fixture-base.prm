@@ -1,0 +1,46 @@
+# Functional output regression only; coarse broad profile, not production BP3.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/bp3_150x50_filter20.prm
+set Resume computation = false
+set End time = 600
+set Maximum time step = 100
+set Maximum first time step = 100
+subsection Mesh refinement
+  set Initial global refinement = 0
+  set Initial adaptive refinement = 0
+  subsection BP3 saved mesh
+    set Target cells file = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/output-cleanup-evidence/fixture-convex/target_cells.txt
+  end
+end
+subsection Phase field model
+  set Length scale = 4000
+end
+subsection Material model
+  subsection Phase field fault
+    set Critical energy release rates = 2e7
+    # Uniform direct effect avoids unresolved initial-Theta overshoot on this
+    # deliberately coarse functional fixture. Production inputs are unchanged.
+    set Direct effect parameters = 0.025, 0.025
+  end
+end
+subsection Fault reconstruction
+  set Structural point spacing = 2000
+end
+subsection Postprocess
+  set List of postprocessors = reconstructed fault BP3, visualization, particles, reconstructed faults, BP3 output complete, BP3 restored monitor
+  subsection BP3
+    set Bottom normalization completion file = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/output-cleanup-evidence/fixture-convex/completion.txt
+    set Last accepted step = 6
+    set Profile time interval = 1
+    set Profile slip interval = 0.1
+    set Graceful wall seconds = 3600
+    set Audit full state every step = false
+  end
+  subsection BP3 restored monitor
+    set Stationary profile file = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/output-cleanup-evidence/fixture-convex/profile.txt
+    set Write detailed diagnostics = false
+  end
+end
+subsection Checkpointing
+  set Steps between checkpoint = 1
+  set Time between checkpoint = 0
+end

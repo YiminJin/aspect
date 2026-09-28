@@ -1,6 +1,6 @@
 """Fig.-8-style slip contours selected by slip increment, not elapsed time.
 
-Reads the every-accepted-state cumulative_slip.csv, one profile at a time.
+Reads scheduled profiles.csv (preferred) or legacy cumulative_slip.csv.
 Only recorded profiles are drawn: no time interpolation or rate integration.
 """
 import argparse
@@ -23,6 +23,8 @@ class Profile:
     nodes: np.ndarray
     xd: np.ndarray
     slip: np.ndarray
+    velocity: np.ndarray | None = None
+    rate_from_slip: bool = True
 
 
 def read_profiles(path, fault=0):
@@ -31,6 +33,14 @@ def read_profiles(path, fault=0):
     A partially copied final profile fails explicitly, rather than becoming
     a misleading final contour. Copy a complete file from the server first.
     """
+    path = Path(path)
+    if path.is_dir():
+        path = path / ('profiles.csv' if (path/'profiles.csv').is_file() else 'cumulative_slip.csv')
+    if path.name == 'profiles.csv':
+        yield from read_scheduled_profiles(path, fault)
+        return
+    metadata = path.with_suffix(path.suffix+'.metadata.json')
+    sparse_export = metadata.is_file() and json.loads(metadata.read_text()).get('saved_profiles_only', False)
     previous = None
     key = None
     rows = []
@@ -55,9 +65,10 @@ def read_profiles(path, fault=0):
             raise ValueError(f'Incomplete/duplicate/unordered vertices at step {current[0]}')
         if not np.isfinite(data).all() or not np.isfinite(current[1]):
             raise ValueError(f'Nonfinite slip/geometry/time at step {current[0]}')
-        profile = Profile(*current, nodes, data[:, 0], data[:, 1])
+        profile = Profile(*current, nodes, data[:, 0], data[:, 1], rate_from_slip=not sparse_export)
         if previous is not None:
-            if profile.step != previous.step + 1 or profile.time <= previous.time:
+            if ((profile.step <= previous.step if sparse_export else profile.step != previous.step + 1)
+                    or profile.time <= previous.time):
                 raise ValueError('Expected consecutive steps with increasing physical time; '
                                  'rate classification requires the every-step table')
             if (not np.array_equal(profile.nodes, previous.nodes)
@@ -85,14 +96,56 @@ def read_profiles(path, fault=0):
         yield finish(key, rows)
 
 
+def read_scheduled_profiles(index, fault=0):
+    """Stream full-precision saved states; use their instantaneous velocity.
+
+    Gaps in accepted-step numbers are expected. Missing indexed payloads fail,
+    rather than manufacturing the unsaved history between two profiles.
+    """
+    previous = None
+    previous_entry = None
+    geometry = None
+    with Path(index).open(newline='') as stream:
+        for entry in csv.DictReader(stream):
+            if entry == previous_entry:
+                warnings.warn('Skipped identical duplicate profile index row')
+                continue
+            step, time = int(entry['step']), float(entry['time_s'])
+            if previous is not None and (step <= previous.step or time <= previous.time):
+                raise ValueError('Conflicting duplicate or nonincreasing profile index')
+            path = Path(index).parent/entry['file']
+            if not path.is_file():
+                raise ValueError(f'Missing indexed profile: {path}; restore its payload from the parent run')
+            with path.open(newline='') as payload:
+                rows = [r for r in csv.DictReader(payload) if int(r['fault']) == fault]
+            if len(rows) < 2:
+                raise ValueError(f'Incomplete profile: {path}')
+            nodes = np.array([int(r['node']) for r in rows])
+            current = np.array([[float(r[k]) for k in ('xd_m', 'x_m', 'y_m')] for r in rows])
+            slip = np.array([float(r['slip_m']) for r in rows])
+            velocity = np.array([float(r['V_m_per_s']) for r in rows])
+            if (not np.array_equal(nodes, np.arange(len(rows)))
+                    or any(int(r['step']) != step or float(r['time_s']) != time for r in rows)
+                    or not np.isfinite(current).all() or not np.isfinite(slip).all()
+                    or not np.isfinite(velocity).all() or not np.isfinite(time)):
+                raise ValueError(f'Invalid profile geometry/state/index: {path}')
+            if geometry is not None and not np.array_equal(current, geometry):
+                raise ValueError(f'Incomplete profile or changed fault geometry: {path}')
+            geometry = current
+            previous = Profile(step, time, nodes, current[:, 0], slip, velocity)
+            previous_entry = entry
+            yield previous
+
+
 def select_profiles(profiles, increment=0.1, xd_min=0., xd_max=40000.,
                     seismic_rate=1e-3, start_time=0., end_time=float('inf')):
     """Use the infinity norm of slip change in the displayed down-dip window.
 
     Regime changes retain both adjoining accepted states even below the plotting
     increment. Colour uses the entire fault, not only the displayed window.
-    In this benchmark slip[k]-slip[k-1] = dt[k]*V[k]. These inferred accepted
-    rates cannot detect unresolved between-step peaks.
+    Scheduled profiles use saved instantaneous V. Only the consecutive legacy
+    every-step table can use slip[k]-slip[k-1] = dt[k]*V[k]. Neither resolves
+    peaks between the saved states; accepted_steps.csv retains every-step maxima.
     """
     if increment <= 0 or seismic_rate <= 0 or xd_max <= xd_min:
         raise ValueError('Require positive increment/rate and an increasing down-dip window')
@@ -108,6 +161,8 @@ def select_profiles(profiles, increment=0.1, xd_min=0., xd_max=40000.,
     dt_min = float('inf')
     dt_max = 0.
     largest_step_slip = 0.
+    sampled_velocity = False
+    sparse_export = False
 
     def retain(record):
         nonlocal last_plotted
@@ -116,6 +171,7 @@ def select_profiles(profiles, increment=0.1, xd_min=0., xd_max=40000.,
             last_plotted = record['slip']
 
     for profile in profiles:
+        sparse_export |= not profile.rate_from_slip
         all_count += 1
         if mask is None:
             mask = (profile.xd >= xd_min) & (profile.xd <= xd_max)
@@ -129,19 +185,24 @@ def select_profiles(profiles, increment=0.1, xd_min=0., xd_max=40000.,
         if previous is not None:
             dt = profile.time - previous.time
             change = profile.slip - previous.slip
-            rate = float(np.max(np.abs(change)) / dt)
+            if profile.rate_from_slip:
+                rate = float(np.max(np.abs(change)) / dt)
             step_slip = float(np.max(np.abs(change[mask])))
+        if profile.velocity is not None:
+            sampled_velocity = True
+            rate = float(np.max(np.abs(profile.velocity)))
         regime = 'unknown' if rate is None else ('coseismic' if rate >= seismic_rate else 'interseismic')
         record = dict(step=profile.step, time_s=profile.time, time_yr=profile.time/YEAR,
                       regime=regime, max_rate_m_s=rate,
                       slip=profile.slip[mask][order].copy())
         if start_time <= profile.time <= end_time:
             in_window += 1
+            if dt is not None:
+                dt_min, dt_max = min(dt_min, dt), max(dt_max, dt)
+            largest_step_slip = max(largest_step_slip, step_slip)
             if rate is not None:
                 seismic_count += regime == 'coseismic'
                 max_rate = max(max_rate, rate)
-                dt_min, dt_max = min(dt_min, dt), max(dt_max, dt)
-                largest_step_slip = max(largest_step_slip, step_slip)
             if last_plotted is None:
                 retain(record)
             elif previous_record['regime'] != regime:
@@ -164,8 +225,13 @@ def select_profiles(profiles, increment=0.1, xd_min=0., xd_max=40000.,
                    largest_single_step_slip_change_m=largest_step_slip,
                    slip_increment_m=increment, seismic_threshold_m_s=seismic_rate,
                    xd_window_km=[xd_min/1000, xd_max/1000],
-                   rate_definition='max over entire selected fault of abs(delta slip)/delta time; '
-                                   'accepted nodal V for the BP3 dt*V slip update, not substep peaks',
+                   saved_profiles_only=sampled_velocity or sparse_export,
+                   instantaneous_velocity_available=sampled_velocity,
+                   rate_definition=('max absolute saved instantaneous V over the full fault; '
+                                    'unsaved event peaks require accepted_steps.csv'
+                                    if sampled_velocity else 'unknown: sparse legacy export has no V'
+                                    if sparse_export else
+                                    'max abs(delta slip)/delta time for consecutive legacy accepted steps'),
                    selection_definition='max absolute slip change in displayed window since last '
                                         'plotted state; also retain first/last and regime transitions')
     return xd, selected, summary
@@ -173,7 +239,7 @@ def select_profiles(profiles, increment=0.1, xd_min=0., xd_max=40000.,
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('input', type=Path, help='Run directory or cumulative_slip.csv')
+    parser.add_argument('input', type=Path, help='Run directory, profiles.csv or legacy cumulative_slip.csv')
     parser.add_argument('--slip-increment', type=float, default=0.1, metavar='METRES',
                         help='Maximum slip change triggering a new recorded contour (default: 0.1 m)')
     parser.add_argument('--xd-min-km', type=float, default=0.)
@@ -189,7 +255,9 @@ def main():
                          args.seismic_rate, args.start_years]).all()
             or np.isnan(args.end_years) or args.end_years < args.start_years):
         parser.error('Invalid plotting limits/increment')
-    source = args.input/'cumulative_slip.csv' if args.input.is_dir() else args.input
+    source = args.input
+    if source.is_dir():
+        source = source/('profiles.csv' if (source/'profiles.csv').is_file() else 'cumulative_slip.csv')
     try:
         xd, selected, summary = select_profiles(
             read_profiles(source, args.fault), args.slip_increment,
@@ -209,7 +277,7 @@ def main():
         ax.plot(record['slip'], xd/1000, color=colors[record['regime']], lw=0.55, alpha=0.85)
     ax.set(xlabel='Cumulative slip (m)', ylabel='Distance down-dip (km)',
            ylim=(args.xd_max_km, args.xd_min_km),
-           title=f'{args.title}: accepted cumulative-slip profiles\n'
+           title=f'{args.title}: saved cumulative-slip profiles\n'
                  f'{summary["first_time_yr"]:.2f}–{summary["final_time_yr"]:.2f} yr; '
                  f'slip-increment selection {args.slip_increment:g} m')
     ax.margins(x=0.015)
@@ -219,8 +287,12 @@ def main():
                if any(r['regime'] == name for r in selected)]
     ax.legend(handles=handles, loc='upper right', fontsize=9)
     ax.grid(alpha=0.12)
-    fig.text(0.5, 0.01, 'Recorded states only; colours from Δslip/Δt over the entire fault. '
-             'No temporal interpolation.', ha='center', fontsize=8)
+    fig.text(0.5, 0.01, ('Saved profiles only; colours from instantaneous V. Unsaved peaks are not resolved.'
+                       if summary['instantaneous_velocity_available'] else
+                       'Saved profiles only; event classification unavailable in the legacy export.'
+                       if summary['saved_profiles_only'] else
+                       'Consecutive legacy states; colours from Δslip/Δt. No temporal interpolation.'),
+             ha='center', fontsize=8)
     fig.tight_layout(rect=(0, 0.03, 1, 1))
     output = args.output or source.parent/'cumulative_slip_fig8.png'
     fig.savefig(output, dpi=220)
@@ -238,7 +310,7 @@ def main():
     print(json.dumps(summary, indent=2))
     print(f'Wrote {output}')
     if summary['largest_single_step_slip_change_m'] > args.slip_increment:
-        print('Note: some accepted steps exceed the plotting increment; '
+        print('Note: some recorded intervals exceed the plotting increment; '
               'no intermediate profiles were invented.')
 
 

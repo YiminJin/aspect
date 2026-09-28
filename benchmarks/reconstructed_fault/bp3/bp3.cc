@@ -29,6 +29,9 @@
 #include "mature_fault.h"
 #include "work_replay.h"
 #include "matched_resolution.h"
+#ifdef ASPECT_BP3_RESTORE_150X50
+#include "restore_150x50.h"
+#endif
 #if defined(ASPECT_BP5_WEAK_INITIALIZATION) && defined(ASPECT_BP5_STEADY_INITIALIZATION)
 #error Select only one BP5 initialization procedure
 #endif
@@ -74,8 +77,13 @@ namespace aspect
       lifted = owned;
       const auto &fe = sim.get_fe ();
       std::vector<types::global_dof_index> dofs (fe.n_dofs_per_cell ());
-      double error[2] = { 0, 0 };
-      unsigned int count[2] = { 0, 0 };
+#ifdef ASPECT_BP3_RESTORE_150X50
+      constexpr unsigned int n_sides=3;
+#else
+      constexpr unsigned int n_sides=2;
+#endif
+      double error[n_sides] = {};
+      unsigned int count[n_sides] = {};
       const auto &box
           = Plugins::get_plugin_as_type<const GeometryModel::Box<dim>> (sim.get_geometry_model ());
       const double left = box.get_origin ()[0], right = left + box.get_extents ()[0];
@@ -90,11 +98,16 @@ namespace aspect
                   {
                     const auto p = sim.get_mapping ().transform_unit_to_real_cell (
                         cell, fe.get_unit_support_points ()[j]);
-                    if (p[0] != left && p[0] != right)
+                    if (p[0] != left && p[0] != right && !(n_sides==3 && p[1]==box.get_origin()[1]))
                       continue;
-                    const unsigned int side = p[0] == left ? 0 : 1;
+                    const unsigned int side = p[0] == left ? 0 : (p[0]==right ? 1 : 2);
+#ifdef ASPECT_BP3_RESTORE_150X50
+                    const double expected=BP3Restore::loading(sim,p)[d];
+#else
                     const double expected
-                        = (side == 0 ? 1 : -1) * .5 * BP3::Vp * (d == 0 ? BP3::cosine : BP3::sine);
+                        = (side == 0 ? 1 : -1) * .5 * BP3::Vp
+                          * (d == 0 ? BP3::cosine : BP3::horizontal_sign*BP3::sine);
+#endif
                     error[side] = std::max (error[side], std::abs (lifted[dofs[j]] - expected));
                     ++count[side];
                   }
@@ -106,7 +119,7 @@ namespace aspect
           out << std::setprecision (17)
               << "side,expected_ux,expected_uy,expected_speed,max_actual_error,samples\n";
         }
-      for (unsigned int side = 0; side < 2; ++side)
+      for (unsigned int side = 0; side < n_sides; ++side)
         {
           const auto n = Utilities::MPI::sum (count[side], sim.get_mpi_communicator ());
           const double maximum = Utilities::MPI::max (error[side], sim.get_mpi_communicator ());
@@ -114,8 +127,8 @@ namespace aspect
                        ExcMessage ("BP3 realized lateral velocity constraints are incorrect."));
           const double sign = side == 0 ? 1 : -1;
           if (out)
-            out << (side == 0 ? "left" : "right") << ',' << sign * .5 * BP3::Vp * BP3::cosine << ','
-                << sign * .5 * BP3::Vp * BP3::sine << ',' << .5 * BP3::Vp << ',' << maximum << ',' << n
+            out << (side == 0 ? "left" : (side==1 ? "right" : "bottom_profile")) << ',' << (side==2?0.:sign * .5 * BP3::Vp * BP3::cosine) << ','
+                << (side==2?0.:sign * .5 * BP3::Vp * BP3::horizontal_sign*BP3::sine) << ',' << .5 * BP3::Vp << ',' << maximum << ',' << n
                 << '\n';
         }
     }
@@ -179,6 +192,9 @@ namespace aspect
       AssertThrow (dim == 2 && manager.get_faults ().size () == 1,
                    ExcMessage ("Modified BP3 requires one fixed two-dimensional fault."));
       const auto &fault = manager.get_fault (0);
+#ifdef ASPECT_BP3_RESTORE_150X50
+      manager.set_shear_sense(0,-1);
+#endif
       for (unsigned int v = 0; v < fault.n_vertices (); ++v)
         AssertThrow (BP3::normal_distance (fault.vertex (v)[0], fault.vertex (v)[1]) < 1e-8,
                      ExcMessage ("BP3 reconstructed dip changed."));
@@ -320,18 +336,22 @@ namespace aspect
 
   namespace BoundaryVelocity
   {
-    template <int dim> class BP3Velocity : public Interface<dim>
+    template <int dim> class BP3Velocity : public Interface<dim>, public SimulatorAccess<dim>
     {
     public:
       Tensor<1, dim>
       boundary_velocity (const types::boundary_id, const Point<dim> &p) const override
       {
         Tensor<1, dim> v;
+#ifdef ASPECT_BP3_RESTORE_150X50
+        return BP3Restore::loading(*this,p);
+#else
         const double signed_normal = (BP3::trace_x - p[0]) * BP3::sine - (BP3::box_size - p[1]) * BP3::cosine;
         const double sign = signed_normal >= 0 ? 1 : -1;
         v[0] = sign * .5 * BP3::Vp * BP3::cosine;
         v[1] = sign * .5 * BP3::Vp * BP3::sine;
         return v;
+#endif
       }
     };
     ASPECT_REGISTER_BOUNDARY_VELOCITY_MODEL (

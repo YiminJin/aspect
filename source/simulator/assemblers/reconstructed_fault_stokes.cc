@@ -121,10 +121,12 @@ namespace aspect
 
     template <int dim>
     SymmetricTensor<2,dim>
-    slip_tensor(const typename ReconstructedFaultManager<dim>::
+    slip_tensor(const ReconstructedFaultManager<dim> &manager,
+                const typename ReconstructedFaultManager<dim>::
                 StokesQPFaultAssociation &association)
     {
-      return symmetrize(outer_product(association.tangent,
+      return manager.get_shear_sense(association.fault_index)
+             * symmetrize(outer_product(association.tangent,
                                      association.normal));
     }
   }
@@ -219,7 +221,7 @@ namespace aspect
               if (associations[q].active)
                 coefficients[q] = 2.0 * responses[q].kappa
                                   * responses[q].localization_factor
-                                  * slip_tensor<dim>(associations[q]);
+                                  * slip_tensor<dim>(fault_manager, associations[q]);
             if (assemble_matrix)
               {
                 std::vector<types::global_dof_index> indices(this->get_fe().dofs_per_cell);
@@ -322,7 +324,7 @@ namespace aspect
                     + responses[q].history_correction;
                   const SymmetricTensor<2,dim> stress =
                     2.0 * responses[q].kappa * crack_strain_rate
-                    * slip_tensor<dim>(association);
+                    * slip_tensor<dim>(fault_manager, association);
                   if (record_transfer)
                     {
                       // Observe exactly the QP values entering -int stress:eps.
@@ -528,6 +530,9 @@ namespace aspect
           for (unsigned int c=0; c<stress_composition_indices.size(); ++c)
             old_stress[SymmetricTensor<2,dim>::unrolled_to_component_indices(c)] =
               compositions[stress_composition_indices[c]][q];
+          if (phase_field_fault.benchmark_retained_stress)
+            old_stress = phase_field_fault.benchmark_retained_stress(
+              scratch.cell->id(), scratch.finite_element_values.quadrature_point(q));
           std::vector<double> composition(compositions.size());
           for (unsigned int c=0; c<composition.size(); ++c)
             composition[c] = compositions[c][q];
@@ -539,7 +544,7 @@ namespace aspect
               const auto &association = associations[q];
               const double V = fault_manager.interpolate_slip_rate(
                 association.fault_index, association.segment_index, association.xi);
-              const auto shear = slip_tensor<dim>(association);
+              const auto shear = slip_tensor<dim>(fault_manager, association);
               frozen_stress += 2.0 * responses[q].kappa
                                * responses[q].history_correction * shear;
               slip_stress = 2.0 * responses[q].kappa

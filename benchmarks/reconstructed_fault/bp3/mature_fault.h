@@ -15,6 +15,18 @@ namespace aspect
       const auto correction = manager.get_property_index ("BP3 fixed shear correction");
       const auto p = manager.get_property_information ()[background].position;
       const auto c = manager.get_property_information ()[correction].position;
+#ifdef ASPECT_BP3_RESTORE_150X50
+      AssertThrow(mature_prestress_file.empty(),
+                  ExcMessage("Restored BP3 uses uniform nominal background, not captured prestress."));
+      for (unsigned int v=0;v<fault.n_vertices();++v)
+        {
+          auto data=fault.get_properties(v);
+          data[p]=BP3::tau0; data[p+1]=BP3::sigma0;
+          data[c]=data[c+1]=0.; data[c+2]=1.;
+        }
+      model.set_reconstructed_fault_background_traction_property(background,correction);
+      return;
+#endif
       AssertThrow (!mature_prestress_file.empty (),
                    ExcMessage ("Mature BP3 requires its captured initial prestress file."));
       std::istringstream in (Utilities::read_and_distribute_file_content (

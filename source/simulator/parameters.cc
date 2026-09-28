@@ -437,7 +437,10 @@ namespace aspect
                            "may trigger Asserts in the code when used. If this is the case, "
                            "please switch to 'block AMG'. Additionally, the block GMG solver requires "
                            "using material model averaging. The 'default solver' chooses "
-                           "the geometric multigrid solver if supported, otherwise the AMG solver.");
+                           "the geometric multigrid solver if supported, otherwise the AMG solver. "
+                           "For reconstructed faults, the default is block AMG; block GMG selects "
+                           "only the velocity-block preconditioner (Q2, local smoothing), retaining "
+                           "the assembled coupled operator and default unaveraged material coefficients.");
 
         prm.declare_entry ("Stokes GMG type", "local smoothing",
                            Patterns::Selection(StokesGMGType::pattern()),

@@ -83,6 +83,10 @@ namespace WorldBuilder
 
 namespace aspect
 {
+  namespace Postprocess
+  {
+    template <int dim> class MomentCycle;
+  }
   template <int dim>
   class MeltHandler;
 
@@ -2115,6 +2119,9 @@ namespace aspect
 
       friend class boost::serialization::access;
       friend class SimulatorAccess<dim>;
+      // Test-only access to the complete production particle transfer, with
+      // snapshot/restore in the fixed-mesh moment-consistency benchmark.
+      friend class Postprocess::MomentCycle<dim>;
       friend class MeshDeformation::MeshDeformationHandler<dim>;
       friend class VolumeOfFluidHandler<dim>;
       friend class StokesMatrixFreeHandler<dim>;

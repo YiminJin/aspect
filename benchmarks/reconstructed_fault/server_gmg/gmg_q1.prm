@@ -1,0 +1,15 @@
+# Bounded workaround for the server's matrix-free MappingCartesian NaNs.
+# For this flat box, a zero-valued function keeps all vertex positions unchanged
+# while ASPECT's existing mapping factory selects MappingQ1.
+# Use the Stage-I plugin, not the standalone coarse/context probe plugin.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/server_gmg/gmg.prm
+subsection Geometry model
+  subsection Initial topography model
+    set Model name = function
+    subsection Function
+      set Coordinate system = cartesian
+      set Function expression = 0
+      set Maximum topography value = 0
+    end
+  end
+end

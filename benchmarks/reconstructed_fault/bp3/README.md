@@ -1,5 +1,17 @@
 # Reconstructed-fault BP3 workspace
 
+The current restored 150 x 50 km runtime is self-contained in
+[`plugin/`](plugin/README.md), and is the default CMake target. Its development
+and server builds now use the same sources. See
+the [output cleanup report](output-cleanup-evidence/REPORT.md) for current
+validation and preserved evidence. Its canonical full-fault output is scheduled
+profiles, with every-step summaries; see [runtime settings](plugin/README.md).
+The dense cumulative-slip policy described below belongs to the historical
+rotated-chart/BP5 sources, which
+remain available; build the old `bp3` target explicitly with
+`-DBP3_BUILD_LEGACY_PLUGIN=ON`. Mesh preparation/tests require
+`-DBP3_BUILD_TOOLS=ON` and are not server-plugin dependencies.
+
 This directory contains the maintained plugin and small benchmark drivers.
 The [execution-path audit](../../../doc/reconstructed_fault/bp3/execution_cleanup.md)
 records the pre-cleanup checkpoint, diagnostic isolation, optional stress-only
@@ -44,7 +56,8 @@ checkpoint/output schedules and storage estimates. Preparation is the
 default; execution must be explicitly requested. No long run has been launched.
 The next prepared server mode is **multiple events through 1500 years**,
 not first-event termination. Source `environment.sh` for direct `mpirun`
-(GMG default; optional `amg`). `cumulative_slip.csv` records every accepted
+(no solver argument: choose `block AMG` or `block GMG` in the PRM).
+`cumulative_slip.csv` records every accepted
 vertex state with local arclength and official down-dip coordinates, independently
 of graphical output. See the resolution rationale and output aliases in
 [LONG_RUN.md](LONG_RUN.md).
@@ -355,7 +368,8 @@ python3 benchmarks/reconstructed_fault/bp3/test_plot_cumulative_slip.py
 `plot_fault_evolution.py RUN` reads `profiles.csv`, the indexed profile CSVs,
 and `reconstructed_faults.pvd`/ASCII VTUs. It writes selected-time profiles for
 the shallow and entire fault, irregular-time space–time maps, and native
-property range plots into `RUN/fault_evolution/`. No simulation is launched.
+property range plots, and histories at selected fault vertices into
+`RUN/fault_evolution/`, in PNG and PDF. No simulation is launched.
 For the partially copied first long run:
 
 ```sh
@@ -367,6 +381,9 @@ Missing indexed files normally fail; the explicit flag plots only available
 files and records their omissions. Use `--times-years 0 50 100 200 300` to
 choose nearest saved profiles (initial/final always included), `--xd-max-km 45`
 for the shallow window, and `--output DIRECTORY` for another figure location.
+If profiles were copied into a separate directory, use `--profile-run DIRECTORY`
+to select its `profiles.csv` and relative payloads. Native VTUs and accepted-step
+logs still come from `RUN`; their possibly shorter coverage is recorded explicitly.
 The generated README and summary distinguish committed Theta from the lagged
 state used during mechanics, weak/Q1 traction from raw stress, and retained
 previous-I_h from a separately evaluated current integral. No smoothing or

@@ -1,4 +1,4 @@
-#include "execution_environment.h"
+#include "plugin/execution_environment.h"
 #include <cstring>
 #include <iostream>
 
@@ -12,7 +12,7 @@ int main()
     unsetenv(name);
   if (BP3::unexpected_execution_switch()) return 1;
   for (const char *name : {"ASPECT_DIAGNOSTIC_FREEZE_PARTICLE_ADVECTION",
-                         "ASPECT_FAULT_INTERFACE_MODES", "ASPECT_BP5_SHORT_TEST"})
+                         "ASPECT_FAULT_INTERFACE_MODES", "ASPECT_IH_BOTTOM_COMPLETION_DIAGNOSTIC"})
     {
       setenv(name,"0",1);
       const char *found=BP3::unexpected_execution_switch();
@@ -22,6 +22,8 @@ int main()
   setenv("ASPECT_FAULT_EXPLICIT_B","1",1);
   setenv("ASPECT_FAULT_EXPLICIT_G","1",1);
   setenv("ASPECT_FAULT_VELOCITY_GMG","1",1);
+  setenv("ASPECT_FAULT_LINEAR_PERFORMANCE","1",1);
+  setenv("ASPECT_BP5_SHORT_TEST","0",1); // retired from this runtime
   if (BP3::unexpected_execution_switch()) return 3;
   std::cout<<"BP3 clean/contaminated environment checks passed.\n";
 }

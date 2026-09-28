@@ -111,6 +111,8 @@ def edges(values):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('run', type=Path)
+    parser.add_argument('--profile-run', type=Path,
+                        help='Directory containing a separately copied profiles.csv and its payloads')
     parser.add_argument('--output', type=Path, help='Figure directory (default: run/fault_evolution)')
     parser.add_argument('--xd-max-km', type=float, default=45.)
     parser.add_argument('--skip-missing', action='store_true',
@@ -118,7 +120,8 @@ def main():
     parser.add_argument('--times-years', type=float, nargs='+', default=[0, 1, 5, 20, 50, 100, 200, 300],
                         help='Nearest saved states; final state always included')
     args = parser.parse_args()
-    geometry, times, steps, history, duplicates, missing = read_profiles(args.run, args.skip_missing)
+    profile_run = args.profile_run or args.run
+    geometry, times, steps, history, duplicates, missing = read_profiles(profile_run, args.skip_missing)
     fixed, native_count, missing_native, native_times = native_properties(args.run, geometry, args.skip_missing)
     xd = geometry[:, 1]/1000
     if args.xd_max_km <= xd[0] or np.count_nonzero(xd <= args.xd_max_km) < 2:
@@ -136,13 +139,14 @@ def main():
 
     # Mechanics tractions are projected accepted weak loads; Theta is updated state.
     q = history['q_weak_Pa']/1e6
+    omega = history['V_m_per_s']*history['Theta_s']/0.008
     normal = history['sigma_n_weak_Pa']/1e6
     panels = [('Slip rate (m/s)', history['V_m_per_s'], True),
               ('Committed slip state Θ (yr)', history['Theta_s']/YEAR, True),
               ('Accumulated slip (m)', history['slip_m'], False),
               ('Total weak shear traction q (MPa)', q, False),
               ('Total weak normal traction σₙ (MPa)', normal, False),
-              ('Weak normal change σₙ − σₙ,₀ (MPa)', normal-normal[0], False)]
+              ('Omega', omega, True)]
     cmap = plt.get_cmap('viridis')
     norm = Normalize(times[0], times[-1])
     for limit, suffix in [(args.xd_max_km, 'shallow'), (xd[-1], 'full_fault')]:
@@ -166,7 +170,35 @@ def main():
         fig.suptitle('Modified BP3 — fault-property profiles\n'
                      'Actual saved times (yr): '+', '.join(f'{times[i]:.2f}' for i in selected), fontsize=12)
         fig.savefig(output/f'profiles_{suffix}.png', dpi=180)
+        fig.savefig(output/f'profiles_{suffix}.pdf')
         plt.close(fig)
+
+    # Sample existing vertices, without interpolating in space or reconstructing
+    # states between the irregularly saved profiles.
+    locations = [0, 5, 10, 15, 18, 25, 40]
+    nodes = sorted(set(int(np.argmin(np.abs(xd-location))) for location in locations
+                       if xd[0] <= location <= xd[-1]))
+    fig, axes = plt.subplots(3, 2, figsize=(13, 10), sharex=True, layout='constrained')
+    colors = plt.get_cmap('tab10').colors
+    for ax, (label, values, logarithmic) in zip(axes.flat, panels):
+        for index, node in enumerate(nodes):
+            if logarithmic and np.any(values[:, node] <= 0):
+                raise ValueError(f'Cannot logarithmically plot nonpositive {label}')
+            ax.plot(times, values[:, node], '.-', ms=2, lw=.9,
+                    color=colors[index], label=f'{xd[node]:.3f} km')
+        if logarithmic:
+            ax.set_yscale('log')
+        ax.set_ylabel(label)
+        ax.set_xlim(times[0], times[-1])
+        ax.grid(alpha=.2)
+    axes[0, 0].legend(title='Actual down-dip node', fontsize=8, ncol=2)
+    for ax in axes[-1]:
+        ax.set_xlabel('Physical time (yr)')
+    fig.suptitle('Fault-property histories at selected vertices\n'
+                 'Dots are saved states; connecting lines are visual guides', fontsize=12)
+    fig.savefig(output/'time_histories.png', dpi=180)
+    fig.savefig(output/'time_histories.pdf')
+    plt.close(fig)
 
     # Irregular saved times retain their physical spacing. Colour rectangles
     # represent nearest saved samples, not newly solved intermediate states.
@@ -206,6 +238,7 @@ def main():
     fig.suptitle('Saved fault evolution — no smoothing\n'
                  'Midpoint time bins; traction changes referenced to initialization', fontsize=12)
     fig.savefig(output/'space_time_shallow.png', dpi=180)
+    fig.savefig(output/'space_time_shallow.pdf')
     plt.close(fig)
 
     fig, axes = plt.subplots(2, 2, figsize=(12, 7), sharex=True, layout='constrained')
@@ -228,15 +261,24 @@ def main():
                  f'{native_times[0]:.2f}–{native_times[-1]:.2f} yr)\n'
                  'Shading is min–max over saved snapshots, not uncertainty', fontsize=12)
     fig.savefig(output/'native_property_ranges.png', dpi=180)
+    fig.savefig(output/'native_property_ranges.pdf')
     plt.close(fig)
 
-    summary = dict(saved_profiles=len(times), skipped_duplicate_index_rows=duplicates,
+    peak_time, peak_node = np.unravel_index(np.argmax(history['V_m_per_s']),
+                                          history['V_m_per_s'].shape)
+    summary = dict(profile_index=str(profile_run/'profiles.csv'),
+                   native_index=str(args.run/'reconstructed_faults.pvd'),
+                   saved_profiles=len(times), skipped_duplicate_index_rows=duplicates,
                    first_year=float(times[0]), last_year=float(times[-1]),
                    first_step=int(steps[0]), last_step=int(steps[-1]), vertices=len(xd),
                    native_snapshots=native_count,
                    native_time_range_years=[native_times[0], native_times[-1]],
                    missing_indexed_profiles=missing, missing_indexed_native_files=missing_native,
                    selected_profiles=[dict(step=int(steps[i]), year=float(times[i])) for i in selected],
+                   history_nodes_km=[float(xd[node]) for node in nodes],
+                   saved_peak_velocity=dict(value_m_per_s=float(history['V_m_per_s'][peak_time, peak_node]),
+                                            step=int(steps[peak_time]), year=float(times[peak_time]),
+                                            xd_km=float(xd[peak_node])),
                    native_max_change={name: float(np.max(field['maximum']-field['minimum']))
                                       for name, field in fixed.items()},
                    ranges={name: dict(minimum=float(value.min()), maximum=float(value.max()),
@@ -254,10 +296,18 @@ def main():
         'All plots use saved accepted-state data only; no simulation was run.\n\n'
         '- `profiles_shallow.png`: 0–45 km (or requested window).\n'
         '- `profiles_full_fault.png`: full fault, including both boundary endpoints.\n'
+        '- `time_histories.png`: histories at nearest saved vertices to selected down-dip '
+        'locations; dots are saved states and connecting lines are visual guides.\n'
         '- `space_time_shallow.png`: all saved profiles at their irregular physical times; '
         'rectangles use midpoint boundaries, without smoothing. Element slip gradients '
         'are differences of neighbouring Q1 nodal slip values divided by element length.\n'
-        '- `native_property_ranges.png`: initial/final native fields with min–max bands.\n\n'
+        '- `native_property_ranges.png`: initial/final native fields with min–max bands.\n'
+        'Each figure is also saved as PDF.\n\n'
+        f'Profile index: `{profile_run / "profiles.csv"}`. '
+        f'{len(times)} profiles cover steps {steps[0]}–{steps[-1]} '
+        f'({times[0]:.6f}–{times[-1]:.6f} yr). '
+        f'Native properties cover only {native_times[0]:.6f}–{native_times[-1]:.6f} yr '
+        f'({native_count} snapshots); do not extrapolate their ranges beyond that span.\n\n'
         'V and slip are accepted kinematic fields. Theta is the committed post-update state; '
         'the split mechanical solve used the preceding Theta. q and sigma_n are the '
         'consistent-Q1 representations M^-1 times the accepted mechanical weak traction '

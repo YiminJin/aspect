@@ -2798,7 +2798,8 @@ namespace aspect
         //   - Stokes velocity degree not 2 or 3
         //   - Material averaging explicitly disabled
         //   - Robin boundary conditions
-        if (parameters.include_melt_transport == true ||
+        if (parameters.reconstruct_faults ||
+            parameters.include_melt_transport == true ||
             dynamic_cast<const GeometryModel::EllipsoidalChunk<dim>*>(geometry_model.get()) != nullptr ||
             parameters.use_locally_conservative_discretization == true ||
             (material_model->is_compressible() == true && parameters.formulation_mass_conservation ==
@@ -2821,7 +2822,8 @@ namespace aspect
     // Now pick an appropriate material averaging for the chosen solver
     if (parameters.material_averaging == MaterialModel::MaterialAveraging::default_averaging)
       {
-        if (parameters.stokes_solver_type == Parameters<dim>::StokesSolverType::block_gmg)
+        if (parameters.stokes_solver_type == Parameters<dim>::StokesSolverType::block_gmg
+            && !parameters.reconstruct_faults)
           {
             // project to Q1 is more accurate, but not supported if:
             //   - elasticity is enabled

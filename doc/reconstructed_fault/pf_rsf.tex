@@ -1,0 +1,420 @@
+\documentclass{article}
+\bibliographystyle{plainnat}
+
+\usepackage{mathtools}
+\usepackage{mathrsfs}
+\usepackage{hyperref}
+\usepackage[capitalize]{cleveref}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{bm}
+\usepackage{upgreek}
+\usepackage[hmargin=1.25in]{geometry}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{siunitx}
+\usepackage[authoryear,round]{natbib}
+
+\setlength{\parskip}{8pt}
+
+\hypersetup{
+  hidelinks,
+  colorlinks=true,
+  linkcolor=blue, 
+  filecolor=blue, 
+  urlcolor=blue, 
+  citecolor=blue
+}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{remark}{Remark}
+\newtheorem{example}{Example}
+\newtheorem{definition}{Definition}
+
+\begin{document}
+  \title{Phase-Field Model for Rate-State-Friction Law in Stokes System}
+  \author{Yimin Jin}
+  \date{\small\today}
+  \maketitle
+
+\section{Basic Equations}\label{sect:basic equations}
+
+\subsection{Model kinematics}\label{sect:kinematics}
+
+Consider a body $\Omega\in\mathbb R^3$ with a crack surface $\Gamma\subset\Omega$ that is described as the set of points belonging to a 2D manifold. We assume that $\Gamma$ is smooth enough, which means that for any $\bm x\in\Gamma$, there is a neighborhood $\mathcal B_{\bm x}\in\Omega$ such that any $\bm x'\in\mathcal B_{\bm x}$ has a unique Euclidean projection on $\Gamma$. Let $\mathcal B = \bigcup_{\bm x\in\Gamma}\mathcal B_{\bm x}$. For any $\bm x_{\Gamma}\in\Gamma$, define $\mathcal T_{\bm x_\Gamma}\subset\mathcal B$ as the 1D curve composed by all the points $\bm x\in\mathcal B$ that map to a particular crack coordinate $\bm x_\Gamma$, and define a 1D coordinate system $\{\zeta\}_{\bm x_\Gamma}$ along $\mathcal T_{\bm x_\Gamma}$ with the origin at $\bm x_\Gamma$. The positive direction of $\{\zeta\}_{\bm x_\Gamma}$ is the normal direction at $\bm x_\Gamma$, denoted by $\hat{\bm n}_{\bm x_\Gamma}$.
+
+Next, consider a velocity field ${\dot{\bm u}}(\bm x)\in\left(L^2(\Omega)\right)^3$ that is continuous when $\bm x\in\Omega\backslash\Gamma$. For two points $\bm x^\pm\in\mathcal T_{\bm x_\Gamma}$ opposite coordinates $\pm\zeta$, define the normal velocities ${\dot{\bm u}}_{\pm\zeta}^n = ({\dot{\bm u}}_{\pm\zeta}\cdot\hat{\bm n}_{\bm x_\Gamma})\hat{\bm n}_{\bm x_\Gamma}$ and tangential velocities ${\dot{\bm u}}_{\pm\zeta}^t = {\dot{\bm u}}_{\pm\zeta} - {\dot{\bm u}}_{\pm\zeta}^n$. In addition, define the \textit{slip rate} $V$ and \textit{slip direction} $\hat{\bm s}$ at $\bm x_\Gamma$ by
+\begin{equation}
+  V_{\bm x_\Gamma} = \lim_{\zeta\to 0^+}\left|{\dot{\bm u}}_{+\zeta}^t - {\dot{\bm u}}_{-\zeta}^t\right|\quad\text{and}\quad
+  \hat{\bm s}_{\bm x_\Gamma} = \lim_{\zeta\to 0^+}\left({\dot{\bm u}}_{+\zeta}^t - {\dot{\bm u}}_{-\zeta}^t\right)/V_{\bm x_\Gamma},
+\end{equation}
+respectively. Assuming that normal velocity is continuous across $\Gamma$, that is, $\displaystyle\lim_{\zeta\to 0+}({\dot{\bm u}}_{+\zeta}^n - {\dot{\bm u}}_{-\zeta}^n) = \bm 0$, then we have
+\begin{equation}\label{eq:V and s}
+  V_{\bm x_\Gamma} = \lim_{\zeta\to 0^+}\left|{\dot{\bm u}}_{+\zeta} - {\dot{\bm u}}_{-\zeta}\right|\quad\text{and}\quad
+  \hat{\bm s}_{\bm x_\Gamma} = \lim_{\zeta\to 0^+}\left({\dot{\bm u}}_{+\zeta} - {\dot{\bm u}}_{-\zeta}\right)/V_{\bm x_\Gamma}.
+\end{equation}
+
+Now consider the velocity gradient $\bm L = \nabla{\dot{\bm u}}$. For an arbitrary $\bm x\in\mathcal T_{\bm x_\Gamma}$ with coordinate $\zeta$, we define a ``crack velocity gradient'' by
+\begin{equation}
+  \bm L_\zeta^c = \delta(\zeta)V_{\bm x_\Gamma}\hat{\bm s}_{\bm x_\Gamma}\otimes\hat{\bm n}_{\bm x_\Gamma},
+\end{equation}
+where $\delta(\cdot)$ is the Dirac delta function. The velocity gradient related to continuous (bulk) deformation is indicated by $\bm L^b = \bm L - \bm L^c$. Then it is clear that
+\[
+  \lim_{\zeta\to 0^+}({\dot{\bm u}}_{+\zeta} - {\dot{\bm u}}_{-\zeta}) = \lim_{\zeta\to 0^+}\int_{-\zeta}^{+\zeta}\bm L_{\zeta'}\cdot\hat{\bm n}_{\bm x_\Gamma}\mathrm d\zeta' = \lim_{\zeta\to 0^+}\int_{-\zeta}^{+\zeta}\delta(\zeta')V_{\bm x_\Gamma}\hat{\bm s}_{\bm x_\Gamma}\mathrm d\zeta' = V_{\bm x_\Gamma}\hat{\bm s}_{\bm x_\Gamma},
+\]
+which is consistent with the definitions of $V$ and $\hat{\bm s}$ in \eqref{eq:V and s}.
+
+Following the decomposition of velocity gradient, the deviatoric component of strain rate can be decomposed by ${\dot{\bm\varepsilon}} = {\dot{\bm\varepsilon}}^b + {\dot{\bm\varepsilon}}^c$, where ${\dot{\bm\varepsilon}}^b = {\rm dev}({\rm sym}(\bm L^b))$ and ${\dot{\bm\varepsilon}}^c = {\rm dev}({\rm sym}(\bm L^c))$. For convenience, we define the second-order symmetric tensor
+\begin{equation}
+  \bm{\mathcal S}_{\bm x_\Gamma} = \frac{\hat{\bm n}_{\bm x_\Gamma}\otimes\hat{\bm s}_{\bm x_\Gamma} + \hat{\bm s}_{\bm x_\Gamma}\otimes\hat{\bm n}_{\bm x_\Gamma}}{2},
+\end{equation}
+then the ``crack strain rate'' has the simple form 
+\begin{equation}\label{eq:crack strain raw}
+  \dot{\bm\varepsilon}_\zeta^c = \delta(\zeta)V_{\bm x_\Gamma}\bm{\mathcal S}_{\bm x_\Gamma}.
+\end{equation}
+
+In phase-field damage (PFD) models, the material is supposed to have two phases: an ``intact'' phase and a ``damaged'' phase, the latter being identified by a smooth phase-field $\phi(\bm x)$. Hence, we can regularize the crack strain rate by
+\begin{equation}
+  \dot{\bm\varepsilon}^c\approx\chi(\phi)V_{\bm x_\Gamma}\bm{\mathcal S}_{\bm x_\Gamma}\quad\text{with}\quad\int_{-\infty}^{+\infty}\chi(\phi)\mathrm d\zeta = 1.
+\end{equation}
+
+In the following, we omit the subscript $\bm x_\Gamma$ for convenience, only keeping in mind that $V$, $\hat{\bm n}$ and $\hat{\bm s}$ are extended from the crack surface.
+
+
+\subsection{Model rheology}\label{sect:rheology}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.7\linewidth]{fig/rheology.png}
+  \caption{An illustration of the viscoelastic damage model adopted in this study.}
+  \label{fig:rheology}
+\end{figure}
+
+We propose a viscoelastic damage model in analogy to the standard viscoelastic plastic model widely adopted in geodynamic modelling, as plotted in \cref{fig:rheology}. The deviatoric component of bulk strain is governed by a Maxwell-type viscoelastic model, namely,
+\begin{equation}\label{eq:maxwell}
+  \dot{\bm\varepsilon}^b = \dot{\bm\varepsilon}^v + \dot{\bm\varepsilon}^e\quad\text{with}\quad
+  \dot{\bm\varepsilon}^v = \frac{\bm\tau}{2\eta}\quad\text{and}\quad\dot{\bm\varepsilon^e} = \frac{\dot{\bm\tau}}{2G},
+\end{equation}
+where $\eta$ and $G$ are the viscosity and the elastic shear modulus, respectively, which are assumed to be constant in time. Here, we have neglected the rotation terms in the objective stress rate. Furthermore, we assume that both $\dot{\bm\varepsilon}^b$ and $\dot{\bm\varepsilon}^c$ are constant in time within one time step, say the $k$-th time step $t\in[t_{k-1}, t_k]$. Then \eqref{eq:maxwell} can be regarded as an ODE of $\bm\tau$:
+\begin{equation}\label{eq:maxwell ode}
+  \frac{\bm\tau}{2\eta} + \frac{\dot{\bm\tau}}{2G} = \dot{\bm\varepsilon}^b,\qquad t\in[t_{k-1},t_k].
+\end{equation}
+The solution of \cref{eq:maxwell ode} is
+\begin{equation}\label{eq:tau}
+  \bm\tau = 2\eta(1-\beta)\dot{\bm\varepsilon}^b + \beta\bm\tau_{k-1}\quad\text{with}\quad\beta = \mathrm e^{-\frac{t-t_{k-1}}{\lambda}},
+\end{equation}
+where $\lambda = \eta/G$ is the viscoelastic relaxation time.
+
+The crack deformation, characterized by $\bm\varepsilon^c$, is correlated to three mechanisms:
+\begin{itemize}
+  \item The rate- and state-dependent friction (RSF), which is commonly given by
+    \begin{equation}\label{eq:rsf}
+      \mu = \mu_0 + a\ln\left(\frac{V}{V_0}\right) + b\ln\left(\frac{V_0\Theta}{D_c}\right).
+    \end{equation}
+    It can be seen from \eqref{eq:rsf} that the friction coefficient is the linear combination of a reference friction coefficient $f_0$, a logarithmic contribution of the dimensionless slip rate $V /V_0$ , and another logarithmic contribution of a dimensionless quantity $\Theta V_0 / D_c$ representing the evolution state. The slip state is assumed to follow the aging law
+    \begin{equation}\label{eq:aging}
+      \dot\Theta = 1 - \frac{V\Theta}{D_c}.
+    \end{equation}
+    \cref{eq:aging} indicates that the friction is rate-weakening if $a - b < 0$, and rate-strengthening if $a - b > 0$.
+  \item The Maxwell body representing the work done by the cohesive damage process, which is introduced to prevent a sudden drop of stress. It can be proved that the relaxation time of the Maxwell body must be identical to that of the bulk deformation (see \cref{sect:crack deformation} for details).
+  \item The radiation damping, $\eta^{\rm dpr}V$, which is introduced to approximate the inertial effects under the quasi-dynamic settings. Here, the damping viscosity $\eta^{\rm dpr}$ is calculated by $G / 2c_s$, where $c_s$ is the shear wave speed.
+\end{itemize}
+
+In summary, the constitutive relationship for the crack deformation is given by
+\begin{equation}\label{eq:crack deformation raw}
+  (\bm\tau - \bm\tau^{\rm coh}) : \bm{\mathcal S} - \mu\sigma_n - \eta^{\rm dpr}V \leq 0,
+\end{equation}
+where $\sigma_n = -\bm\sigma : \hat{\bm n}\otimes\hat{\bm n}$ denotes the normal stress on the fault surface. In practice, we adopt a regularized form of the RSF law
+\begin{equation}
+  \mu = a\sinh^{-1}\left[\frac{V}{2V_0}\exp\left(\frac{\mu_0 + b\ln(\theta V_0/D_c)}{a}\right)\right],
+\end{equation}
+which makes $\mu\rightarrow 0$ as $V\rightarrow 0$. Thus, without loss of physical plausibility, we can replace the inequality \eqref{eq:crack deformation raw} with an equation
+\begin{equation}\label{eq:crack deformation}
+  (\bm\tau - \bm\tau^{\rm coh}) : \bm{\mathcal S} - \mu\sigma_n - \eta^{\rm dpr}V = 0.
+\end{equation}
+
+
+\subsection{Incremental variational formulation}
+
+Consider the $k$-th time step that starts from $t_{k-1}$. Assume that $\hat{\bm n}$ and $\hat{\bm s}$ are determined beforehand, and ignore the radiation damping at the nucleation stage. Let the independent variables be $\{\dot{\bm u}, p, \upsilon, \phi_k\}$, where $p = -{\rm trace}(\bm\sigma)/3$ is the dynamic pressure, and $\upsilon = \chi V$ represents the magnitude of crack strain rate. For an arbitrary subdomain $\mathcal P\subset\Omega$ and an arbitrary end time $t_k > t_{k-1}$, the one-step increment functional has the form
+\begin{equation}\label{eq:J raw}
+  \begin{aligned}
+    \Delta\mathcal J_k(\mathcal P)
+    =&\underbrace{\int_{t_{k-1}}^{t_k}\int_{\mathcal P}\mathcal I\left(\nabla\dot{\bm u}, p, \upsilon\right)\mathrm d\mathcal P\mathrm dt}_{\text{Internal work incr.}} \\
+     &-\underbrace{\int_{t_{k-1}}^{t_k}\left(\int_{\mathcal P}\bm b\cdot\dot{\bm u}\mathrm d\mathcal P + \int_{\mathcal\partial P}\bm t\cdot\dot{\bm u}\right)\mathrm dS\mathrm dt}_{\text{External work incr.}} \\
+     &+\underbrace{\int_{\mathcal P}\mathcal G_c(\gamma_k - \gamma_{k-1})\mathrm d\mathcal P}_{\text{Surface energy incr.}}.
+  \end{aligned}
+\end{equation}
+In \eqref{eq:J raw}, $\bm b$ and $\bm t$ denote the body force and the boundary traction, respectively, and the functional $\mathcal I\left(\nabla\dot{\bm u}, p, V\right)$ is defined by 
+\begin{equation}\label{eq:I}
+  \begin{aligned}
+    \mathcal I\left(\nabla\dot{\bm u}, p, \upsilon\right)
+    =&\eta(1 - \beta)\Vert\dot{\bm\varepsilon} - \upsilon\bm{\mathcal S}\Vert^2 + \beta\bm\tau_{k-1} : (\dot{\bm\varepsilon} - \upsilon\bm{\mathcal S}) \\
+    &- p\nabla\cdot\dot{\bm u} + \frac{1}{2}\tilde\eta(1-\tilde\beta)\upsilon^2 + \upsilon\tilde\beta\bm\tau_{k-1}^{\rm coh} : \bm{\mathcal S} + \mu\sigma_n\upsilon.
+  \end{aligned}
+\end{equation}
+The physical meanings of the terms on the right-hand side of \eqref{eq:I} are interpreted as follows:
+\begin{itemize}
+  \item $\eta(1 - \beta)\Vert\dot{\bm\varepsilon} - \upsilon\bm{\mathcal S}\Vert^2 + \beta\bm\tau_{k-1} : (\dot{\bm\varepsilon} - \upsilon\bm{\mathcal S})$: a one-step stress potential representing the rate of increase in the work done by the deviatoric part of bulk deformation per unit volume. It is easy to verify that the derivative of this potential with respect to $\dot{\bm\varepsilon}^b_k = \dot{\bm\varepsilon} - \upsilon\bm{\mathcal S}$ equals $\bm\tau(t)$ over $[t_{k-1},t_k]$ as defined in \eqref{eq:tau}.
+  \item $-p\nabla\cdot\dot{\bm u}$: the rate of increase in the strain energy per unit volume related to the volumetric part of bulk deformation.
+  \item $\frac{1}{2}\tilde\eta(1-\tilde\beta)\upsilon^2 + \upsilon\tilde\beta\bm\tau_{k-1}^{\rm coh} : \bm{\mathcal S}$: a one-step stress potential representing the rate of increase in the work done by the cohesive damage process (apart from frictional dissipation) per unit volume, where $\widetilde G$ and $\tilde\eta$ are supposed to be functions of $\phi$, and $\tilde\beta$ is defined by
+    \begin{equation}
+      \tilde\beta = \mathrm e^{-(t-t_{k-1})/\tilde\lambda}\quad\text{with}\quad\tilde\lambda = \tilde\beta\big/\widetilde G.
+    \end{equation}
+    It is easy to see that the potential is equivalent to $\tilde\eta\Vert\dot{\bm\varepsilon}^c\Vert^2 + \tilde\beta\bm\tau_{k-1}^{\rm coh} : \dot{\bm\varepsilon}^c$, which leads to
+    \begin{equation}
+      \bm\tau_k^{\rm coh} = 2\tilde\eta(1-\tilde\beta)\dot{\bm\varepsilon}^c + \tilde\beta\bm\tau_{k-1}^{\rm coh}.
+    \end{equation}
+  \item $\mu\sigma_n\upsilon$: frictional dissipation rate per unit volume. Here $\mu$ is constant, determined by the initial values of $V$ and $\Theta$:
+    \begin{equation}
+      \mu = \mu_0 + a\ln\left(\frac{V^{\rm init}}{V_0}\right) + b\ln\left(\frac{V_0\Theta^{\rm init}}{D_c}\right).
+    \end{equation}
+    $\bm\tau_k^{\rm fric}$, the stress conjugate to $\dot{\bm\varepsilon}^c$ in the frictional shear mechanism, is given by
+    \begin{equation}\label{eq:tau fric}
+      \bm\tau_k^{\rm fric} = 2\mu\sigma_n\bm{\mathcal S}.
+    \end{equation}
+    Thus, the following equality holds:
+    \[
+      \int_{-\infty}^{+\infty}\bm\tau_k^{\rm fric} : \dot{\bm\varepsilon}^c\mathrm d\zeta = \mu\sigma_nV.
+    \]
+\end{itemize}
+
+Finally, in the surface energy increment, the integrand $\mathcal G_c(\gamma_k - \gamma_{k-1})$ represents the increase in the crack surface energy per unit volume. Here, $\mathcal G_c$ is a material property characterizing the surface energy per unit area, known as the \textit{critical energy release rate}, and $\gamma$ denotes the \textit{crack surface density} functional, defined by
+\begin{equation}\label{eq:gamma}
+  \gamma(\phi,\nabla\phi) = \frac{1}{c_0}\left(\frac{\alpha(\phi)}{l} + l|\nabla\phi|^2\right)\quad\text{with}\quad
+  c_0 = 4\int_0^1\sqrt{\alpha(\phi)}\mathrm d\phi,
+\end{equation}
+where $\alpha(\phi)$ is known as the \textit{geometric crack function}, $l$ is the length parameter that controls the width of the smeared crack zone, and $c_0$ is a normalization factor.
+
+
+\subsection{Governing equations}
+
+\subsubsection{Governing equations for bulk deformation}
+
+The first-order stability condition requires that $\delta\mathcal J_k(\mathcal P)\geq 0$ for any virtual increase $\{\delta\dot{\bm u}, \delta p, \upsilon, \phi_k\}$ satisfying $\phi_k - \phi_{k-1}\geq 0$. First, let $\delta p = 0$, $\delta\upsilon = 0$ and $\delta\phi_k = 0$, we have
+\[
+  \begin{aligned}
+    \delta\mathcal J_k 
+    =&\int_{t_{k-1}}^{t_k}\int_{\mathcal P}\Big\{\big[2\eta(1-\beta)(\dot{\bm\varepsilon} - \upsilon\bm{\mathcal S}) + \beta\bm\tau_{k-1}\big] : \delta\dot{\bm\varepsilon} - p\nabla\cdot\delta\dot{\bm u} - \bm b\cdot\delta\dot{\bm u}\Big\}\mathrm d\mathcal P\mathrm dt \\
+    &-\int_{t_{k-1}}^{t_k}\int_{\partial\mathcal P}\bm t\cdot\delta\dot{\bm u}\mathrm dS\mathrm dt \\
+    =&\int_{t_{k-1}}^{t_k}\int_{\mathcal P}\Big\{-\nabla\cdot\big[2\eta(1-\beta)(\dot{\bm\varepsilon} - \upsilon\bm{\mathcal S}) + \beta\bm\tau_{k-1} - p\bm I\big] - \bm b\Big\}\cdot\delta\dot{\bm u}\mathrm d\mathcal P\mathrm dt \\
+    &+\int_{t_{k-1}}^{t_k}\int_{\partial\mathcal P}\Big\{\hat{\bm n}\cdot\big[2\eta(1-\beta)(\dot{\bm\varepsilon} - \upsilon\bm{\mathcal S}) + \beta\bm\tau_{k-1} - p\bm I\big] - \bm t\Big\}\cdot\delta\dot{\bm u}\mathrm dS\mathrm dt \\
+    \geq&0.
+  \end{aligned}
+\]
+The above inequality holds for any $\delta\dot{\bm u}\in\big(H^1(\Omega)\big)^3$, $\mathcal P\subset\Omega$ and $t_k > t_{k-1}$, which leads to
+\begin{subequations}
+  \begin{align}
+    &\nabla\cdot\big[2\eta(1-\beta)(\dot{\bm\varepsilon} - \upsilon\bm{\mathcal S}) + \beta\bm\tau_{k-1} - p\bm I\big] + \bm b = \bm 0,\label{eq:equilibrium}\\
+    &\hat{\bm n}\cdot\big[2\eta(1-\beta)(\dot{\bm\varepsilon} - \upsilon\bm{\mathcal S}) + \beta\bm\tau_{k-1} - p\bm I\big] - \bm t = \bm 0.\label{eq:cauchy}
+  \end{align}
+\end{subequations}
+It is easy to see that \eqref{eq:equilibrium} and \eqref{eq:cauchy} are the quasi-static equilibrium equation and the definition of Cauchy stress, respectively.
+
+
+\subsubsection{Governing equations for crack deformation}\label{sect:crack deformation}
+
+Next, we let $\delta\dot{\bm u} = \bm 0$, $\delta p = 0$ and $\delta\phi_k = 0$. In the non-trivial case $\upsilon > 0$, the first-order stability condition implies that
+\[
+  \begin{aligned}
+    \delta\mathcal J_k(\mathcal P) = \int_{t_{k-1}}^{t_k}\int_{\mathcal P}\Big[
+    &-\eta(1-\beta)(2\dot{\bm\varepsilon} : \bm{\mathcal S} - \upsilon) - \beta\bm\tau_{k-1} : \bm{\mathcal S} \\
+    &+ \tilde\eta(1-\tilde\beta)\upsilon + \tilde\beta\bm\tau_{k-1}^{\rm coh} : \bm{\mathcal S} + \mu\sigma_n\Big]\delta\upsilon\mathrm d\mathcal P\mathrm dt \geq 0
+  \end{aligned}
+\]
+holds for any $\delta\upsilon\in L^2(\Omega)$, $\mathcal P\subset\Omega$ and $t_k > t_{k-1}$. Thus, we have
+\begin{equation}\label{eq:dJ deps c}
+  -\eta(1-\beta)(2\dot{\bm\varepsilon} : \bm{\mathcal S} - \upsilon) - \beta\bm\tau_{k-1} : \bm{\mathcal S} + \tilde\eta(1-\tilde\beta)\upsilon + \tilde\beta\bm\tau_{k-1}^{\rm coh} : \bm{\mathcal S} + \mu\sigma_n = 0.
+\end{equation}
+
+To determine the relationship between $\bm\tau^{\rm coh}$ and $\upsilon$, we assume that the energetic degradation is characterized by
+\begin{equation}\label{eq:stress degradation}
+  \bm\tau : \bm{\mathcal S} - \mu\sigma_n = g(\phi)\left(\bm\tau^{\rm tr} : \bm{\mathcal S} - \mu\sigma_n\right)\quad\text{with}\quad\bm\tau^{\rm tr} = 2\eta(1-\beta)\dot{\bm\varepsilon} + \beta\bm\tau_{k-1}^{\rm tr}.
+\end{equation}
+In \eqref{eq:stress degradation}, $g(\phi)$ is the energetic degradation function in PFD models, which satisfies the following conditions:
+\begin{itemize}
+  \item $g(0) = 1$ and $g(1) = 0$;
+  \item $g'(\phi) < 0$ for $\phi\in[0,1)$, i.e., $g(\phi)$ is a monotonically decreasing function;
+  \item $g'(1) = 0$.
+\end{itemize}
+\eqref{eq:stress degradation} indicates that the strength of the material is weakened as the phase-field increases, and when the material is fully damaged ($\phi = 1$, $g = 0$), the shear traction on the crack surface is taken over by the frictional shear. Assuming that $\mu$ is constant in time during one time step, we have
+\[
+  \bm\tau_{k-1}^{\rm coh} : \bm{\mathcal S} = \bm\tau_{k-1} : \bm{\mathcal S} - \mu\sigma_n = g_{k-1}(\bm\tau_{k-1}^{\rm tr} : \bm{\mathcal S} - \mu\sigma_n)
+  = g_{k-1}\left(\bm\tau_{k-1}^{\rm tr} - \bm\tau_{k-1} + \bm\tau_{k-1}^{\rm coh}\right) : \bm{\mathcal S}
+\]
+\begin{equation}\label{eq:tau coh k-1}
+  \Longrightarrow\quad g_{k-1}\left(\bm\tau_{k-1}^{\rm tr} - \bm\tau_{k-1}\right) : \bm{\mathcal S} = (1-g_{k-1})\bm\tau_{k-1}^{\rm coh} : \bm{\mathcal S}.
+\end{equation}
+Substitution of \eqref{eq:stress degradation} and \eqref{eq:tau coh k-1} in \eqref{eq:dJ deps c} gives
+\begin{equation}\label{eq:v}
+  \left[(1-\tilde\beta)\tilde\eta - \frac{(1-\beta)\eta}{h(\phi)}\right]\upsilon + \left(\tilde\beta - \frac{h_{k-1}}{h(\phi)}\beta\right)\bm\tau_{k-1}^{\rm coh} : \bm{\mathcal S} = 0
+  \quad\text{with}\quad h(\phi) = \frac{1}{g(\phi)} - 1.
+\end{equation}
+In \cref{eq:v}, $\phi$, $\beta$ and $\tilde\beta$ are dependent on $t$. Since \cref{eq:v} holds for any $t > t_{k-1}$, we must have
+\begin{equation}\label{eq:coh relaxation}
+  \tilde\beta = \frac{h_{k-1}}{h(\phi)}\beta\quad\text{and}\quad\tilde\eta = \frac{1 - \beta}{h(\phi) - h_{k-1}\beta}\eta.
+\end{equation}
+Therefore, the constitutive relation of the cohesive damage process can be reformulated by
+\begin{equation}\label{eq:tau coh}
+  \tau^{\rm coh} = \frac{(1-\beta)\eta}{h(\phi)}\upsilon + \frac{h_{k-1}}{h(\phi)}\beta\tau_{k-1}^{\rm coh}\quad\text{with}\quad\tau^{\rm coh} = \bm\tau^{\rm coh} : \bm{\mathcal S}.
+\end{equation}
+It can be seen from \eqref{eq:tau coh} that $\tau^{\rm coh}\to 0$ when $\phi\to 1$.
+
+
+\subsubsection{Governing system for the phase-field}\label{sect:phase-field}
+
+Finally, we let $\delta\dot{\bm u} = \bm 0$, $\delta p = 0$ and $\delta\upsilon = 0$. In the internal work increment, the terms relevant to the phase-field are (using \eqref{eq:coh relaxation})
+\begin{equation}\label{eq:I phi}
+  \int_{\mathcal P}\int_{t_{k-1}}^{t_k}\frac{1}{h(\phi)}\left[\frac{1}{2}(1-\beta)\eta\upsilon^2 + h_{k-1}\beta\tau_{k-1}^{\rm coh}\upsilon\right]\mathrm dt\mathrm d\mathcal P.
+\end{equation}
+In the above expression, both $\phi$ and $\beta$ are dependent on $t$. Since there is no way to prescribe the function $\phi(t)$, the integration cannot be calculated precisely. As an approximation, we let $\phi(t)\approx\phi_k$ and $\beta(t)\approx\beta_k$, and then the variation of the internal work density can be calculated by
+\begin{equation}\label{eq:dJ dphi 1}
+  \begin{aligned}
+    \delta\int_{\mathcal P}\mathcal I(\nabla\dot{\bm u},p,\upsilon)\mathrm d\mathcal P
+    \approx&\Delta t_k\int_{\mathcal P}\left[\frac{1}{2}(1-\beta_k)\eta\upsilon^2 + \beta_kh_{k-1}\tau_{k-1}^{\rm coh}\upsilon\right]\delta\left(\frac{1}{h(\phi_k)}\right)\mathrm d\mathcal P \\
+    =&-\Delta t_k\int_{\mathcal P}\frac{h'_k}{h_k^2}\left[\frac{1}{2}(1-\beta_k)\eta\upsilon^2 + \beta_kh_{k-1}\tau_{k-1}^{\rm coh}\upsilon\right]\delta\phi_k\mathrm d\mathcal P.
+  \end{aligned}
+\end{equation}
+Conventionally, the derivative of internal work with respect to the phase-field is denoted by $g'\mathcal H$, where $\mathcal H$ is called the \textit{crack driving force}. From \eqref{eq:dJ dphi 1} and the definition of $h(\phi)$, we can see that the crack driving force has the form
+\begin{equation}\label{eq:H}
+  \mathcal H_k = \frac{\Delta t_k}{(1-g_k)^2}\left[\frac{1}{2}(1-\beta_k)\eta\upsilon^2 + \beta_kh_{k-1}\tau_{k-1}^{\rm coh}\upsilon\right].
+\end{equation}
+On the other hand, the variation of surface energy increment can be reformulated by
+\begin{equation}\label{eq:dJ dphi 2}
+  \begin{aligned}
+    \delta\int_{\mathcal P}\mathcal G_c(\gamma_k - \gamma_{k-1})\mathrm d\mathcal P
+    =&\int_{\mathcal P}\mathcal G_c\delta\gamma(\phi_k,\nabla\phi_k)\mathrm d\mathcal P \\
+    =&\int_{\mathcal P}\mathcal G_c\left(\frac{\partial\gamma}{\partial\phi_k}\delta\phi_k + \frac{\partial\gamma}{\partial\nabla\phi_k}\cdot\nabla\delta\phi_k\right)\mathrm d\mathcal P \\
+    =&\int_{\mathcal P}\mathcal G_c\left(\frac{\partial\gamma}{\partial\phi_k} - \nabla\cdot\frac{\partial\gamma}{\partial\nabla\phi_k}\right)\delta\phi_k\mathrm d\mathcal P + \int_{\partial\mathcal P}\mathcal G_c\hat{\bm n}\cdot\frac{\partial\gamma}{\partial\nabla\phi_k}\delta\phi_k\mathrm dS.
+  \end{aligned}
+\end{equation}
+The last equality above results from Gauss's theorem. Combining \eqref{eq:dJ dphi 1}, \eqref{eq:H} and \eqref{eq:dJ dphi 2}, we obtain
+\begin{equation}\label{eq:dJ dphi}
+  \delta\mathcal J_k(\mathcal P)\approx\int_{\mathcal P}\left\{g_k'\mathcal H_k + \mathcal G_c\delta_\phi(\gamma_k)\right\}\delta\phi_k\mathrm d\mathcal P 
+  + \int_{\partial\mathcal P}\mathcal G_c\hat{\bm n}\cdot\frac{\partial\gamma}{\partial\nabla\phi_k}\delta\phi_k\mathrm dS\geq 0,\quad\forall\delta\phi_k\geq 0,\quad\forall\mathcal P\subset\Omega,
+\end{equation}
+where $\delta_\phi(\cdot)$ represents the functional derivative with respect to $\phi$, defined by
+\begin{equation}
+  \delta_\phi(\cdot) = \frac{\partial}{\partial\phi} - \nabla\cdot\frac{\partial}{\partial\nabla\phi}.
+\end{equation}
+Assuming $\hat{\bm n}\cdot\nabla\phi = 0$ on $\partial\Omega$, it can be proved that \eqref{eq:dJ dphi} is equivalent to the following conditions (known as the \textit{Karush-Kuhn-Tucker} (KKT) conditions):
+\begin{equation}\label{eq:kkt}
+  \dot\phi\geq 0,\qquad
+  g'_k\mathcal H_k + \mathcal G_c\delta_\phi(\gamma_k)\geq 0,\qquad
+  \big(g'_k\mathcal H_k + \mathcal G_c\delta_\phi(\gamma_k)\big)\dot\phi = 0.
+\end{equation}
+In practice, the KKT conditions \eqref{eq:kkt} are often replaced by a history-field-based formulation
+\begin{equation}\label{eq:H+}
+  g'_k\mathcal H_k^+ + \mathcal G_c\delta_\phi(\gamma_k) = 0\quad\text{with}\quad\mathcal H_k^+ = \max_{t\in[0,t_k)}\mathcal H(t),
+\end{equation}
+which is easier to solve.
+
+
+\subsection{Specification of the degradation function}
+
+It can be seen from \eqref{eq:kkt} that damage occurs only when $-g'_k\mathcal H_k$ grows bigger than $\mathcal G_c\delta_\phi(\gamma_k)$, which implies an internal threshold for the damage process. In geomechanics, this threshold is characterized by \textit{cohesion} $c$, which is defined as
+\begin{equation}
+  c = \tau^{\rm cr} - \mu\sigma_n,
+\end{equation}
+where $\tau^{\rm cr}$ is the critical stress at which the damage occurs.
+
+In PFD models, the cohesion can be determined by the derivative of $g(\phi)$ at $\phi=0$. To show this, we need to reformulate the crack driving force in terms of stress. From \eqref{eq:tau coh} we can get
+\[
+  \upsilon = \frac{h_k\tau_k^{\rm coh} - \beta_kh_{k-1}\tau_{k-1}^{\rm coh}}{(1-\beta_k)\eta}.
+\]
+Substitution of the above equation in \eqref{eq:H} gives
+\begin{equation}
+  \mathcal H_k = \frac{\Delta t_k}{2(1-\beta_k)\eta}\frac{\left(h_k\tau_k^{\rm coh}\right)^2 - \left(\beta_kh_{k-1}\tau_{k-1}^{\rm coh}\right)^2}{(1-g_k)^2}.
+\end{equation}
+In the small-step limit, we have $1-\beta_k\approx\Delta t_k/\lambda$, so $(1-\beta_k)\eta\approx G\Delta t_k$. Hence,
+\begin{equation}\label{eq:H small-step}
+  \mathcal H_k\approx\frac{\left(h_k\tau_k^{\rm coh}\right)^2 - \left(\beta_kh_{k-1}\tau_{k-1}^{\rm coh}\right)^2}{2G(1-g_k)^2}.
+\end{equation}
+For nucleation from an intact state, we have $\tau_{k-1}^{\rm coh} = 0$, $\tau_k^{\rm coh} = \tau^{\rm cr} - \mu\sigma_n = c$ and $g_k\to 1$, so
+\begin{equation}\label{eq:H cr}
+  \mathcal H_k^{\rm cr}\approx\frac{c^2}{2G}.
+\end{equation}
+
+Now, consider the governing equation \eqref{eq:H+}. At the intact state, the functional derivative of $\gamma(\phi,\nabla\phi)$ is
+\begin{equation}\label{eq:delta gamma 0}
+  \delta_\phi(\gamma)\Big|_{\phi=0} = \frac{\alpha'(0)}{c_0l}.
+\end{equation}
+Replacing \eqref{eq:H cr} and \eqref{eq:delta gamma 0} in \eqref{eq:H+}, we obtain
+\begin{equation}\label{eq:g'(0)}
+  g'(0) = -\frac{\mathcal G_c\alpha'(0)}{c_0l}\frac{2G}{c^2}.
+\end{equation}
+If we choose the Lorentz-type degradation function, namely
+\begin{equation}\label{eq:g}
+  g(\phi) = \frac{(1-\phi)^2}{(1-\phi)^2 + m\phi(1 + p\phi)},
+\end{equation}
+then \eqref{eq:g'(0)} provides a constraint on the parameter $m$:
+\begin{equation}
+  m = -g'(0) = \frac{\mathcal G_c\alpha'(0)}{c_0l}\frac{2G}{c^2}.
+\end{equation}
+It should be noted that in the standard AT2 model, i.e. $\alpha(\phi) = \phi^2$, the cohesion does not influence the damage process, since $\alpha'(0) = 0$.
+
+
+\section{Numerical Implementation}\label{sect:implementation}
+
+\subsection{Overall algorithm}
+
+We solve the governing equations \eqref{eq:equilibrium} and \eqref{eq:H+} in a particle-in-cell framework. Specifically, we store the advection fields $\bm\tau^{ve}$ and $H$ in particles, and discretize the variables $\bm u$, $p$ and $\phi$ in FE space. Since the shape of $H$ field is commonly a sharp pulse (as shown in \cref{fig:profile}), we employ the convected particle domain interpolation (CPDI) method to solve \cref{eq:H+}, which requires $\phi$ to be in $Q_1$ space.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.9\linewidth]{fig/profile.pdf}
+  \caption{Stationary profiles of $\phi(\zeta)$ and $H(\zeta)$ for $l=100$ \unit{\meter}, $\alpha(\phi)=\phi$ and $p=1$. The material properties are: $\mathcal G_c = 10^5$ \si{\joule\per\square\meter}, $G=3.204\times10^{10}$ \si{\pascal}, $c=2\times10^6$ \si{\pascal}.}
+  \label{fig:profile}
+\end{figure}
+
+Furthermore, in \cref{sect:basic equations}, we have assumed that all the points in a profile $\mathcal T_{\bm x_\Gamma}$ share the same crack-relevant quantities, such as $V$, $\Theta$, $\hat{\bm n}$ and $\tau^{\rm coh}$. To ensure the uniqueness of crack-relevant quantities in each profile, we reconstruct crack surfaces from the phase field as 2D manifolds, triangulate them into 2D meshes, and store the above quantities for each mesh vertex. During the nonlinear iteration, the calculation process is outlined as below:
+\begin{enumerate}
+  \item Interpolate $\bm u$ and $p$ from the volume mesh (the 3D FE space) to particles;
+  \item Compute the trial stress $\bm\tau^{\rm trial}$ using \cref{eq:tau} on particles;
+  \item Project $\bm\tau^{\rm trial}$ and compositional fields $C^{(m)}$ ($m=1,2,\dots$) onto the crack surface mesh (the 2D FE space);
+  \item Compute $\mathrm d\mu/\mathrm dV$ on surface mesh vertices, and interpolate it onto quadrature points;
+  \item Assemble and solve the linearized system and update $\bm u$, $p$ and $V$.
+\end{enumerate}
+
+The process can be demonstrated by the following graph. The data storage is listed in \cref{tab:data storage}.
+\[\begin{matrix}
+  \textbf{Volume mesh} & \underset{\bm u, p}{\xrightarrow{Interpolate}} & \textbf{Particles} \\
+  \scriptstyle{Solve}\Big\uparrow\scriptstyle{\delta\bm u, \delta p, \delta V} & & \scriptstyle{\bm\tau^{\rm trial}, C^{(m)}}\Big\downarrow\scriptstyle{Project} \\
+  \textbf{Quadrature points} & \underset{\mathrm d\mu/\mathrm dV}{\xleftarrow{Interpolate}} & \textbf{Crack surface mesh}
+\end{matrix}\]
+
+\begin{table}
+  \caption{Data storage of the proposed algorithm}
+  \centering
+  \begin{tabular}{p{3cm}p{4cm}p{6.5cm}}
+    \hline
+    \textbf{Volume mesh} & \textbf{Fault surface mesh} & \hspace{2cm}\textbf{Particles} \\
+    \hline
+    \begin{itemize}[nosep, leftmargin=*]
+      \item Velocity $\bm u$
+      \item Pressure $p$
+      \item Phase field $\phi$
+    \end{itemize} &
+    \begin{itemize}[nosep, leftmargin=*]
+      \item Slip rate $V$
+      \item Slip state $\Theta$
+      \item Normal vector $\hat{\bm n}$
+      \item Cohesive stress $\tau^{\rm coh}$
+    \end{itemize} &
+    \begin{itemize}[nosep, leftmargin=*]
+      \item Viscoelastic stress $\bm\tau^{ve}$
+      \item Compositional fields $C^{(m)}$, $m=1,2,\dots$
+      \item Crack driving force $H$
+    \end{itemize} \\
+    \hline
+  \end{tabular}
+  \label{tab:data storage}
+\end{table}
+
+
+\subsection{Fault reconstruction}
+
+
+\end{document}

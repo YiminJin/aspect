@@ -28,10 +28,9 @@ class ResearchLauncher(unittest.TestCase):
                 record = json.loads((output/'provenance.json').read_text())
                 flags = record['environment']
                 for name in ('ASPECT_FAULT_VELOCITY_GMG', 'ASPECT_FAULT_GMG_HIERARCHY'):
-                    if selection == 'amg':
-                        self.assertNotIn(name, flags)
-                    else:
-                        self.assertEqual(flags[name], '1')
+                    self.assertNotIn(name, flags)
+                self.assertIn('set Stokes solver type = block '+(selection or 'gmg').upper(),
+                              (output/'run.prm').read_text())
                 self.assertNotIn('ASPECT_FAULT_COMPARE_COUPLING', flags)
                 self.assertIn('bp3_modified_wide.prm', (output/'run.prm').read_text())
                 self.assertFalse((output/'run.log').exists())

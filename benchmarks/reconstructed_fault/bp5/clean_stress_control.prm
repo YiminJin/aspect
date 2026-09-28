@@ -1,0 +1,8 @@
+# Same transfer/mesh/loading, negligible source instead of finite localization.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp5/clean_stress_cycle.prm
+set Output directory = output-clean-control
+subsection Postprocess
+  subsection Clean stress cycle
+    set Prescribed slip rate = 1e-12
+  end
+end

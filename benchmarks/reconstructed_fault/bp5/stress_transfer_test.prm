@@ -1,0 +1,87 @@
+set Dimension = 2
+set Use years instead of seconds = false
+set End time = 1
+set Maximum time step = 1
+set CFL number = 0.5
+set Additional shared libraries = ./libbp5_stress_cycle.release.so
+set Output directory = output
+subsection Solver parameters
+  subsection Stokes solver parameters
+    set Stokes solver type = block AMG
+  end
+end
+subsection Geometry model
+  set Model name = box
+end
+subsection Mesh refinement
+  set Initial global refinement = 2
+  set Initial adaptive refinement = 0
+  set Time steps between mesh refinement = 0
+end
+subsection Boundary velocity model
+  set Prescribed velocity boundary indicators = left:function, right:function, top:function, bottom:function
+  subsection Function
+    # Nonzero displacement without the diagnostic switch; small enough that
+    # the one-second test ceiling is below the ordinary parallel CFL limit.
+    set Function expression = 0.01; 0
+  end
+end
+subsection Material model
+  set Model name = simple
+  subsection Simple model
+    set Viscosity = 1
+    set Reference density = 1
+    set Thermal expansion coefficient = 0
+  end
+end
+subsection Gravity model
+  set Model name = vertical
+  subsection Vertical
+    set Magnitude = 0
+  end
+end
+subsection Initial temperature model
+  set Model name = function
+  subsection Function
+    set Function expression = 0
+  end
+end
+subsection Temperature field
+  set Temperature method = static
+end
+subsection Compositional fields
+  set Number of fields = 6
+  set Names of fields = cxx, cyy, cxy, lxx, lyy, lxy
+  set Compositional field methods = particles, particles, particles, particles, particles, particles
+  set Mapped particle properties = cxx:initial cxx, cyy:initial cyy, cxy:initial cxy, lxx:initial lxx, lyy:initial lyy, lxy:initial lxy
+end
+subsection Initial composition model
+  set Model name = function
+  subsection Function
+    set Variable names = x,y
+    set Function expression = 3; -7; 11; 3+2*x-4*y; -7+3*x-5*y; 11+4*x-6*y
+  end
+end
+subsection Particles
+  set Particle generator name = reference cell
+  set Interpolation scheme = distance weighted average
+  set List of particle properties = initial composition
+  set Load balancing strategy = none
+  subsection Generator
+    subsection Reference cell
+      set Number of particles per cell per direction = 3
+    end
+  end
+  subsection Initial composition
+    set List of field names = cxx, cyy, cxy, lxx, lyy, lxy
+  end
+  subsection Interpolator
+    subsection Linear least squares
+      set Use linear least squares limiter = false
+      set Use boundary extrapolation = false
+    end
+  end
+end
+subsection Postprocess
+  set List of postprocessors = particles, stress transfer test
+end

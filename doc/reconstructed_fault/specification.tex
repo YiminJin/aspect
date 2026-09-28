@@ -842,6 +842,14 @@ Require \texttt{Evolve phase field = false}; initialize the prescribed phase
 without a phase equilibrium solve, then retain it. Reject changing fault
 geometry and incompatible cohesive/mature checkpoint histories.
 
+The approved reflected BP3 geometry may select an immutable per-fault shear
+sense $a\in\{-1,+1\}$, default $+1$. Use
+$\boldsymbol S=a\,\operatorname{sym}(\boldsymbol t\otimes\boldsymbol n)$
+consistently in source assembly, surface traction, derivatives and particle
+stress publication; retain the geometric normal and $\boldsymbol N$ unchanged.
+$V$ remains positive. Persist the choice on restart; legacy checkpoints use
+$+1$. The right-dipping thrust chart selects $-1$.
+
 The reduced equations are
 \[
  C=0,\qquad \upsilon=\frac{h}{I_h}V,\qquad
@@ -1342,11 +1350,20 @@ reference only after those writers succeed. Initial and gracefully final
 accepted states are included; output triggers do not constrain timesteps.
 Checkpoint metadata snapshots identify their actual accepted state. Restart
 branches preserve prior evidence and restore the selected metadata prefix.
-The benchmark's every-accepted-state cumulative-slip table is independent of
-the throttled graphical output. It records local arclength and down-dip
-coordinates; restart branches retain only the selected accepted prefix.
-Its data are not used to reconstruct constitutive history: accumulated slip
-is already checkpointed. Output-only property aliases/exclusions never alter
+Maintained restored BP3 uses scheduled full-fault profiles as its canonical
+slip, instantaneous velocity, state and traction history. Production profile
+and heavy triggers are 0.1 m maximum nodal change of signed slip or 31557600 s;
+initial/final and event profile forcing are retained, and every heavy step
+writes a profile. Slip integration and peak summaries still occur at every
+accepted physical timestep, without a step-zero slip increment. Sparse-profile
+event classification uses saved instantaneous velocity, never slip differences
+over sparse intervals. An offline legacy CSV export identifies saved profiles
+only. Legacy experiments may retain their dense slip tables.
+The version-5 layout is unchanged: a new output cadence replaces intervals,
+not the saved reference states. Branches restore the selected metadata prefix
+and its referenced profile payloads from the parent, rejecting newer or
+conflicting output. CSV data never reconstruct constitutive history:
+accumulated slip is already checkpointed. Output-only property aliases/exclusions never alter
 the manager's stored registry or its checkpoint layout.
 Selected-field initial-composition refresh reevaluates only strengthening at
 current particle positions; it never resets constitutive history. Empty
@@ -1469,10 +1486,10 @@ block symmetric tridiagonal.  The signed friction contribution means that
 $K_V$ is not assumed positive definite.
 
 Store the reduced diagonal and off-diagonal coefficients as replicated
-per-fault data. The qualified K5 implementation prefers LAPACK GTTRF/GTTRS:
+per-fault data. The production implementation uses LAPACK GTTRF/GTTRS:
 adjacent-pivoting tridiagonal LU, with one reusable factor
-per contiguous principal free block. UMFPACK remains the comparison backend;
-neither path assumes positive definiteness. Do not add a bespoke condition
+per contiguous principal free block. UMFPACK remains only a test reference,
+not a runtime backend. No positive definiteness is assumed. Do not add a bespoke condition
 estimator or substitute an SPD-only solve. Factorization failure is a numerical failure. Every
 application of the stored inverse shall also check a scaled backward error and
 diagnose a singular or excessively ill-conditioned block explicitly.
@@ -1746,11 +1763,15 @@ preconditioner $P_A$, without changing the condensed operator or its residual
 criteria. Preserve shared-face averaging, homogeneous constraints and physical
 pressure conversion; do not identify $G$ with $B^T$.
 
-The bounded K5 GMG prototype changes only the velocity-block preconditioner
+For reconstructed faults the standard Stokes solver type parameter selects
+block AMG (default) or block GMG (Q2, local smoothing), without environment
+overrides. GMG changes only the velocity-block preconditioner
 inside the assembled block-Schur inverse. It retains fine-level assembled
 $A$, the same $B/G/K_V^{-1}$, pressure-block treatment, and outer FGMRES.
 Reuse ASPECT's velocity hierarchy and verify the homogeneous constraints and
 active-vector numbering; do not apply an additional matrix-free RHS lift.
+Default material averaging remains disabled for both coupled backends, so
+preconditioner selection does not change the fine-level discrete problem.
 Test-only synchronous observers may compare the same frozen operator/RHS
 before a nonlinear trial is committed. This does not qualify a full
 matrix-free fault solver or a coupled multigrid hierarchy.
@@ -1766,10 +1787,23 @@ constant-pressure null mode may be removed algebraically. Verify both null
 identities for the full homogeneous constrained condensed operator; $B$ has
 no pressure rows, while the right-null test includes $G$ and the current
 surface inverse. Project operator and preconditioner consistently. Reject
-RHS or residual incompatibility larger than either $100\epsilon_{\rm mach}$
-times the maximum of the initial bulk residual, zero-velocity reference,
-and current condensed RHS norm, or the unchanged absolute nonlinear bulk
-target. Retain both raw and projected residual checks. Normal convergence output
+RHS or residual incompatibility larger than the continuity assembly/reduction
+roundoff bound or the unchanged mixed nonlinear bulk target. In the eligible
+incompressible continuity equation define the noncancelling scale
+\[
+ S_p=\sum_{K,q}|s_p JxW_{Kq}|\left(\sum_i|q_i^K\phi_i^p|\right)
+       \sum_{j,d}(|u_j^K|+|u_{\mathrm{origin},d}^K|)
+                         |\partial_d\phi^u_{j,d}|.
+\]
+Distribute the unit verified left pressure mode through homogeneous constraints.
+The origin is the componentwise cell constant removed by residual evaluation.
+For $\gamma_n=n\epsilon_{\rm mach}/(1-n\epsilon_{\rm mach})$, use the conservative
+operation count $n=6n_{\rm local\ DoFs}+2n_q+4\dim+16+n_{\rm global\ cells}$.
+It covers local coefficient arithmetic, quadrature, constraint/cell accumulation
+and MPI reduction. Add $\gamma_{2n_p}\|q\|_\infty\|b_p\|_1$ for the final dot
+product, then cap the sum by the existing mixed nonlinear target. This replaces
+the former residual-scaled estimate and relative-only cap, which can reject
+roundoff in an already-converged iterate. Retain both raw and projected residual checks. Normal convergence output
 reports the fresh residual and target; detailed diagnostic mode additionally
 reports the raw residual, Arnoldi estimate and compatibility components. This numerical
 backward-error check introduces no physical parameter and does not alter
@@ -1846,9 +1880,13 @@ count owned rows once. This is not a fitted stagnation floor or a physical
 error estimate. The mixed bulk criterion is
 $\|R_b\|<\epsilon_{\rm nl}s_b+\rho_b$. Use
 $s_b^{\rm mixed}=s_b+\rho_b/\epsilon_{\rm nl}$ in both convergence and merit,
-fixed throughout the solve. Pressure-compatibility projection retains its
-original relative-target cap; fresh linear verification and the independent
-surface criterion are unchanged. Bulk FE gradients are evaluated after
+fixed throughout the solve. Pressure-compatibility projection uses the same
+mixed target as a cap in addition to its independent assembly roundoff bound;
+fresh linear verification and the independent surface criterion are unchanged.
+Before requesting a direction, check the fresh unprojected bulk and all
+unprescribed surface rows. If both already pass, still validate compatibility,
+but do not solve an unused direction. Otherwise retain the active-set solve.
+Bulk FE gradients are evaluated after
 removing a cellwise constant velocity, whose gradient is exactly zero, to
 reduce assembly cancellation. This cannot remove rounding of the represented
 iterate. Stagnation above the mixed target remains failure.
@@ -1945,6 +1983,17 @@ rule without overwriting the old finite-element vector or advancing any
 retained history. At $k>0$, including after restart, continue to use the actual
 previous finite-element phase field.
 
+The opt-in BP5 matched-clock diagnostic may reduce only the pending first
+restart interval, before any physical update, using
+\texttt{post\_resume\_time\_step}. The accepted time (restored time minus
+pending interval), preceding interval, step number, and all restored histories
+remain unchanged. The reduction must be finite, positive, no larger than the
+saved safety cap, and identical on all MPI ranks. Checkpoint serialization and
+default restart behavior are unchanged. Subsequent half-step proposals remain
+subject to all ordinary timestep restrictions; a mismatch aborts the diagnostic
+before mechanics. A second-half adjustment of at most one absolute-time ULP
+may recover the recorded common endpoint and must be reported explicitly.
+
 For $k>0$, distinguish bulk and surface Maxwell coefficients. Bulk
 coefficients use particle-local material fractions and temperature. Surface
 cohesive coefficients use the projected Q1 surface mixture and a transient Q1
@@ -1982,6 +2031,31 @@ timestep-committed Q1 $V$, Q1 surface fractions, the global ASPECT CFL number,
 and \texttt{use\_operator\_splitting=true}. Standard ASPECT model-list
 selection is unchanged: the plugin is never activated implicitly. Stage J
 does not add a post-solve cutback or repeat operation.
+
+An optional forward state limiter is configured by
+\texttt{Time stepping / Reconstructed fault time step / Maximum logarithmic state change}.
+Its dimensionless bound $\delta_\Theta$ is positive. The default is the largest
+finite double, used as a disabled sentinel; the literal \texttt{infinity}
+is accepted as an alias for that sentinel. For stateful friction, predict
+\[
+ \Theta_i^{\rm predicted}(\Delta t)=
+ \frac{D_c}{V_i^n}\left(1-e^{-V_i^n\Delta t/D_c}\right)
+ +\Theta_i^n e^{-V_i^n\Delta t/D_c}
+\]
+using the existing aging-law implementation and the latest committed nodal
+velocity and state. Reduce the law-specific proposal, initially capped by the
+global maximum timestep, until
+\[
+ \max_i\left|\ln\frac{\Theta_i^{\rm predicted}(\Delta t)}{\Theta_i^n}\right|
+ \leq\delta_\Theta.
+\]
+There is no $b/a$ weighting. Constant-rate aging is monotone toward $D_c/V_i^n$;
+halve to bracket an admissible positive timestep and bisect, retaining the safe
+endpoint. No prediction changes committed history or uses trial velocity.
+Infinity leaves the previous proposal unchanged; stateless friction bypasses
+this limiter. Standard manager/MPI combination and minimum-timestep semantics
+remain unchanged. This prediction does not impose a post-solve acceptance test
+on the next solved velocity.
 
 \subsection{Mandatory block-Jacobian verification}
 
@@ -2135,6 +2209,29 @@ When implementing this specification, Codex shall:
   \item stop and report any implementation-critical ambiguity or conflict with existing ASPECT/deal.II code before inventing a new scientific or architectural choice;
   \item after each stage, list changed files and map each implementation change back to the corresponding requirement in this document.
 \end{enumerate}
+
+\section*{Experimental friction-normal filter (opt-in BP5 diagnostic)}
+For the straight, mature 2-D bulk-work formulation, the explicitly requested
+filter uses the full work measure $w_q=JxW_q\chi_q$:
+\[
+ M=\sum_qw_q N_qN_q^T,\quad
+ K=\sum_qw_q(\partial_sN_q)(\partial_sN_q)^T,\quad
+ b=\sum_qw_qN_q(\sigma_{\rm bg}+p_q-\tau_q:N_q^{\rm normal}),
+ \qquad (M+L_s^2K)z=b.
+\]
+Only the friction input becomes $N_q^Tz$. Bulk stress, pressure and histories
+are not replaced. Derivatives use physical arc length; constant endpoint
+extensions have zero derivative. Natural endpoint flux, independent connected
+components, and the complete supported domain define the operator; plotting
+windows and slip constraints do not modify its rows. Unsupported rows fail.
+The default raw mode bypasses it, whereas $L_s=0$ is a distinct projection.
+The surface system caches factors only and recomputes the RHS in every trial.
+The exact variation is $\delta z=(M+L_s^2K)^{-1}\delta b$ and
+$\delta(\mu\bar\sigma)=\bar\sigma\delta\mu+\mu N_q^T\delta z$.
+At fixed bulk fields $S:N=0$ retains the local tridiagonal $K_V$; $G$ must
+include the nonlocal filter action. This experimental extension changes no
+history publication, pressure convention or bulk equations and is not a
+production default.
 
 \section*{Reference}
 Y. Xu, T. You, and Q. Zhu, ``Reconstruct lower-dimensional crack paths from phase-field point cloud,'' \emph{International Journal for Numerical Methods in Engineering}, 124 (2023), 3329--3351, DOI: 10.1002/nme.7249.

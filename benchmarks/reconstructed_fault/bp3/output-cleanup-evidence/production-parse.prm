@@ -1,0 +1,2 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/bp3_150x50_first_event.prm
+set Additional shared libraries = /tmp/aspect-bp3-gmg-cleanup-build/libbp3_restore_150x50.release.so

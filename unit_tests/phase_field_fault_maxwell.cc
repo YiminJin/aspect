@@ -10,6 +10,7 @@
 */
 
 #include "common.h"
+#include <aspect/time_stepping/reconstructed_fault.h>
 
 #include <aspect/material_model/rheology/fault_friction.h>
 #include <aspect/material_model/phase_field_fault.h>
@@ -122,6 +123,37 @@ TEST_CASE("FaultFriction declares the Stage E friction-law defaults")
   parameters.print_parameters(parameter_text,
                               dealii::ParameterHandler::OutputStyle::Text);
   REQUIRE(parameter_text.str().find("Maximum slip rate") == std::string::npos);
+}
+
+TEST_CASE("Reconstructed fault state limiter parameter is opt in", "[fault_state_limiter]")
+{
+  using Limiter = aspect::TimeStepping::ReconstructedFault<2>;
+  const std::string disabled = dealii::Utilities::to_string(std::numeric_limits<double>::max());
+  for (const std::string &value : std::vector<std::string>{disabled, "infinity", "0.1", "1e-12", "2"})
+    {
+      dealii::ParameterHandler parameters;
+      Limiter::declare_parameters(parameters);
+      parameters.enter_subsection("Time stepping");
+      parameters.enter_subsection("Reconstructed fault time step");
+      REQUIRE(parameters.get_double("Maximum logarithmic state change") == std::numeric_limits<double>::max());
+      parameters.set("Maximum logarithmic state change", value);
+      parameters.leave_subsection();
+      parameters.leave_subsection();
+      Limiter limiter;
+      REQUIRE_NOTHROW(limiter.parse_parameters(parameters));
+    }
+  for (const std::string value : {"0", "-0.1", "nan", "-infinity", "invalid", "0.1 junk"})
+    {
+      dealii::ParameterHandler parameters;
+      Limiter::declare_parameters(parameters);
+      parameters.enter_subsection("Time stepping");
+      parameters.enter_subsection("Reconstructed fault time step");
+      parameters.set("Maximum logarithmic state change", value);
+      parameters.leave_subsection();
+      parameters.leave_subsection();
+      Limiter limiter;
+      REQUIRE_THROWS(limiter.parse_parameters(parameters));
+    }
 }
 
 

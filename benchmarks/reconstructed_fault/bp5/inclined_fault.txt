@@ -1,0 +1,4 @@
+# Straight 60-degree trace through the centre of the unrotated Cartesian box.
+# x y phi_core
+-0.28867513459481287 -0.5 0.6
+0.28867513459481287 0.5 0.6
