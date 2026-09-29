@@ -1,5 +1,71 @@
 # Phase-field / RSF current status
 
+## Local rotated-bottom A/B experiment — September 28
+
+The user-requested `bp3_rotated_bottom_local_test.md` task is complete in
+`benchmarks/reconstructed_fault/bp3/rotated_bottom_local/`. See its `REPORT.md`,
+`README.md`, resolved `output-*/parameters.prm`, compact `analysis/` CSVs and
+PNG/PDF figures. Base commit is `0fc1ce782`; the source checkpoint retains the
+opt-in plugin, isolated test inputs/tools and reports. Generated fixtures,
+builds and run outputs remain local. No core source, production PRM or existing
+checkpoint was changed. The user explicitly retained the current production
+BP3 model and requested the new boundary condition as an option only.
+
+The maintained BP3 plugin now has opt-in `Bottom velocity constraint = fault
+parallel`, default `full`. It pairs bottom Q2 velocity support points, preserves
+side corners, checks existing hanging relations, and inserts the tangent-only
+row before constraint closure/sparsity rebuilding. It mirrors ASPECT's physical
+or homogeneous side-corner lift, including initial-field setup. The existing
+coupled Newton physical-lift/homogenization path and stress-history volume
+assembly are reused unchanged. B uses natural zero complementary perturbation
+traction, retaining the 50 MPa fault background and the common natural top.
+
+Executed: uniform-creep A/B checks on one rank; B on two ranks; 10-step disturbed
+A/B pair with dt=2e5 s; sole follow-up is paired dt=1e5 s, 20 steps, same final
+time 2e6 s. All use the verified 6275-cell, 58917-Stokes-DoF ell20/Q2/LLS fixture,
+AMG and one thread per rank. Constraint, normal-freedom, flux, actual normal
+feedback, exponential-state and fresh linear-residual audits pass. B inserts
+123 independent rows and retains two corners; no boundary hanging rows occur
+in this fixture. Default plugin build and parse-only production validation pass,
+as do 157 exact restored-model C++ comparisons. Local compiler: GNU 16.2.1,
+deal.II 9.6.2, OpenMPI 5.0.6; no Intel/GMG/restart qualification is implied.
+
+Result: B reduces the deep 200 m raw-normal peak increment by 12.29% (10.16%
+at half dt), but exact arc-length RMS only by 3.38% (2.09% at half dt). Individual
+RMS changes under timestep halving are larger, so the area-wide benefit is not
+resolved beyond temporal error. The adjacent negative raw-normal excursion
+increases; deep creep persists and flux balances. This does not establish a
+production stress-concentration fix. Primary A/B wall times were 71/67 s;
+half-step runs 131/135 s. All setup-failure artifacts were preserved and the
+mandatory checks corrected rather than bypassed; details are in the report.
+
+Next bounded task: a same-quadrature imposed-profile strain versus continued
+slip-source diagnostic in the local bottom 200 m, retaining separate pressure,
+deviatoric and near-endpoint-node information. Keep full bottom loading in
+production pending stronger evidence; a future controlled production restart
+comparison remains necessary before adoption. No additional sweep is authorized.
+
+## Bottom velocity from copied mesh snapshots — September 28
+
+Read-only C++/VTK extraction and gnuplot figures are complete for
+`bp3/output-first-event/snapshots/solution.pvd`: 13 snapshots, steps 0–563,
+0–139.159274 years. All 52 VTU pieces exist. Their Float32 velocities reside on
+nine-node Q2 Lagrange visualization cells; 158769 horizontal/true-normal probes
+were located and checked without smoothing. Snapshot/profile clocks agree
+within 0.004762 s of PVD rounding. No Python or simulations were used.
+
+Reusable tools: `benchmarks/reconstructed_fault/bp3/velocity_profiles/`.
+Results: `benchmarks/reconstructed_fault/bp3/output-first-event/bottom_velocity/`,
+including `REPORT.md`, CSV samples/metrics, and PNG/PDF figures. The bottom
+velocity is unchanged across snapshots; interior normal motion evolves to
+0.954% and 1.273% of Vp on cuts 500 m and 1 km above the bottom at the final
+mesh snapshot. The continuous loading-reference deviation at the boundary is
+0.04090% of Vp, including FE interpolation/export effects. These data expose
+interior accommodation excluded at the boundary, but do not establish the
+cause of deep-end stress concentration or exclude a discrete source mismatch.
+The latter needs a same-quadrature source/strain-rate comparison; a causal
+boundary-condition test would require a separately requested simulation.
+
 ## Repository checkpoint selection — September 28
 
 The user requested a commit of reusable development work. The selection retains

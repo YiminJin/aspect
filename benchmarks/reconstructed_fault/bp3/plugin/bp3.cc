@@ -17,6 +17,9 @@
 
 
 namespace BP3 { double weakening_length = 15000.; }
+#ifdef ASPECT_BP3_LOCAL_BOTTOM_TEST
+namespace BP3 { double local_state_disturbance = 0.; }
+#endif
 
 // BP3 initialization of fixed prestress data, not a runtime cohesive law.
 namespace aspect
@@ -100,6 +103,21 @@ namespace aspect
                     if (p[0] != left && p[0] != right && !(n_sides==3 && p[1]==box.get_origin()[1]))
                       continue;
                     const unsigned int side = p[0] == left ? 0 : (p[0]==right ? 1 : 2);
+                    if (side==2 && BP3Restore::bottom_velocity_constraint=="fault parallel")
+                      {
+                        if (d!=0) continue;
+                        unsigned int k=0;
+                        for (;k<dofs.size();++k)
+                          if (fe.system_to_component_index(k).first==sim.introspection().component_indices.velocities[1]
+                              && fe.get_unit_support_points()[k]==fe.get_unit_support_points()[j]) break;
+                        AssertThrow(k<dofs.size(),ExcMessage("Unpaired bottom velocity support point."));
+                        const auto t=BP3Restore::bottom_tangent;
+                        const auto prescribed=BP3Restore::loading(sim,p);
+                        error[side]=std::max(error[side],std::abs(t[0]*(lifted[dofs[j]]-prescribed[0])
+                                                                +t[1]*(lifted[dofs[k]]-prescribed[1])));
+                        ++count[side];
+                        continue;
+                      }
                     const double expected=BP3Restore::loading(sim,p)[d];
                     error[side] = std::max (error[side], std::abs (lifted[dofs[j]] - expected));
                     ++count[side];
@@ -120,7 +138,8 @@ namespace aspect
                        ExcMessage ("BP3 realized lateral velocity constraints are incorrect."));
           const double sign = side == 0 ? 1 : -1;
           if (out)
-            out << (side == 0 ? "left" : (side==1 ? "right" : "bottom_profile")) << ',' << (side==2?0.:sign * .5 * BP3::Vp * BP3::cosine) << ','
+            out << (side == 0 ? "left" : (side==1 ? "right" :
+                    (BP3Restore::bottom_velocity_constraint=="full" ? "bottom_profile":"bottom_parallel"))) << ',' << (side==2?0.:sign * .5 * BP3::Vp * BP3::cosine) << ','
                 << (side==2?0.:sign * .5 * BP3::Vp * BP3::horizontal_sign*BP3::sine) << ',' << .5 * BP3::Vp << ',' << maximum << ',' << n
                 << '\n';
         }
@@ -255,6 +274,7 @@ namespace aspect
   connect_bp3 (SimulatorSignals<dim> &signals)
   {
     signals.post_constraints_creation.connect (&BP3Benchmark::prescribe_phase<dim>);
+    signals.post_constraints_creation.connect (&BP3Restore::constrain_bottom<dim>);
     // Register preparation before the monitor attaches its incoming-state
     // observer during postprocessor initialization. Preparation restores
     // selectors, but never reinitializes histories after a restart.
@@ -303,7 +323,11 @@ namespace aspect
       {
         // Extend the official 15--18 km down-dip transition horizontally
         // into the bulk, just as for a. The sharp-fault values are unchanged.
+#ifdef ASPECT_BP3_LOCAL_BOTTOM_TEST
+        const double xd = BP3::down_dip(p[0],p[1]);
+#else
         const double xd = (BP3::box_size - p[1]) / BP3::sine;
+#endif
         const auto &name = this->introspection ().name_for_compositional_index (field);
         if (name == "theta_initial")
           return BP3::configured_initial_state (xd, *friction);

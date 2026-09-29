@@ -1,0 +1,70 @@
+# Isolated 2 x 1 km fixture; the production input and restart are untouched.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/bp3_150x50_filter20.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/rotated_bottom_local/build/libbp3_local.release.so
+set Resume computation = false
+set End time = 2000000
+set Maximum time step = 200000
+set Maximum first time step = 200000
+subsection Geometry model
+  subsection Box
+    set X extent = 2000
+    set Y extent = 1000
+    set Box origin X coordinate = -1000
+    set X repetitions = 20
+    set Y repetitions = 10
+  end
+end
+subsection Mesh refinement
+  set Initial global refinement = 4
+  set Initial adaptive refinement = 0
+  subsection BP3 saved mesh
+    set Target cells file = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/rotated_bottom_local/fixture/target_cells.txt
+  end
+end
+subsection Material model
+  subsection Phase field fault
+    set Direct effect parameters = 0.025, 0.025
+    set Initial time step = 200000
+  end
+end
+subsection Fault reconstruction
+  set Structural point spacing = 6.25
+  set Prescribed faults file = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/rotated_bottom_local/fixture/fault.txt
+end
+subsection Time stepping
+  set List of model names = function
+  subsection Function
+    set Function expression = 200000
+  end
+end
+subsection Postprocess
+  set List of postprocessors = reconstructed fault BP3, visualization, particles, reconstructed faults, BP3 output complete, BP3 restored monitor, rotated bottom audit
+  subsection Particles
+    set Data output format = none
+  end
+  subsection Visualization
+    set Time between graphical output = 2000000
+    set Number of grouped files = 1
+  end
+  subsection BP3
+    set Bottom normalization completion file = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/rotated_bottom_local/fixture/completion.txt
+    set Last accepted step = 10
+    set Stop after first event = false
+    set Profile time interval = 200000
+    set Heavy output time interval = 2000000
+    set Graceful wall seconds = 840
+  end
+  subsection BP3 restored monitor
+    set Stationary profile file = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/rotated_bottom_local/fixture/profile.txt
+    set Write detailed diagnostics = false
+    set Local state disturbance = 0.02
+  end
+end
+subsection Termination criteria
+  set Checkpoint on termination = false
+end
+subsection Checkpointing
+  set Steps between checkpoint = 0
+  set Time between checkpoint = 0
+end
+set Timing output frequency = 1

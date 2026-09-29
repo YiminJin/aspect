@@ -36,6 +36,10 @@ namespace aspect
 
   namespace BP3Restore
   {
+    extern std::string bottom_velocity_constraint;
+    extern Tensor<1,2> bottom_tangent;
+    template <int dim>
+    void constrain_bottom(const SimulatorAccess<dim> &, AffineConstraints<double> &);
     // Profile data are loaded once by the restored monitor's initialization,
     // before the boundary model evaluates this frozen loading function.
     template <int dim>

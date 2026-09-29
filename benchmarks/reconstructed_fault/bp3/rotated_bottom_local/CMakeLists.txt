@@ -1,0 +1,10 @@
+cmake_minimum_required(VERSION 3.13.4)
+find_package(Aspect REQUIRED HINTS ${Aspect_DIR})
+DEAL_II_INITIALIZE_CACHED_VARIABLES()
+project(bp3_rotated_bottom_local)
+add_library(bp3_local SHARED ../plugin/bp3.cc ../plugin/mesh.cc ../plugin/monitor.cc
+  ../plugin/output.cc ../plugin/work_audit.cc ../plugin/bottom_constraint.cc audit.cc)
+target_compile_definitions(bp3_local PRIVATE ASPECT_BP3_LOCAL_BOTTOM_TEST)
+ASPECT_SETUP_PLUGIN(bp3_local)
+add_executable(prepare_local prepare_fixture.cc)
+deal_ii_setup_target(prepare_local)

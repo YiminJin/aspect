@@ -1,0 +1,18 @@
+set Maximum time step = 100000
+set Maximum first time step = 100000
+subsection Material model
+  subsection Phase field fault
+    set Initial time step = 100000
+  end
+end
+subsection Time stepping
+  subsection Function
+    set Function expression = 100000
+  end
+end
+subsection Postprocess
+  subsection BP3
+    set Last accepted step = 20
+    set Profile time interval = 100000
+  end
+end

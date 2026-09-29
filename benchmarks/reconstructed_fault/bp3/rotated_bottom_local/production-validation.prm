@@ -1,0 +1,4 @@
+# Parse only: do not run this production-sized model as a local experiment.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/bp3_150x50_filter20.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/rotated_bottom_local/build-production/libbp3_restore_150x50.release.so
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/rotated_bottom_local/output-production-validation

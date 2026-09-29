@@ -1,0 +1,7 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/rotated_bottom_local/common.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/rotated_bottom_local/output-A
+subsection Postprocess
+  subsection BP3 restored monitor
+    set Bottom velocity constraint = full
+  end
+end

@@ -1,0 +1,3 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/rotated_bottom_local/A.prm
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/rotated_bottom_local/half-step.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/rotated_bottom_local/output-A-half

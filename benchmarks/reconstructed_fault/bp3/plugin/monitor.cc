@@ -104,6 +104,12 @@ namespace aspect
         prm.declare_entry("Stationary profile file","",Patterns::Anything());
         prm.declare_entry("Friction normal input","helmholtz",Patterns::Selection("raw|helmholtz"));
         prm.declare_entry("Normal filter length","20",Patterns::Double(0));
+        prm.declare_entry("Bottom velocity constraint","full",Patterns::Selection("full|fault parallel"),
+                          "Full Cartesian loading (default), or only its fault-parallel component. "
+                          "The latter requires bottom absent from ordinary velocity boundary lists.");
+#ifdef ASPECT_BP3_LOCAL_BOTTOM_TEST
+        prm.declare_entry("Local state disturbance","0",Patterns::Double(0,.02));
+#endif
         prm.declare_entry("Write detailed diagnostics","false",Patterns::Bool(),
                           "Write per-step fault, quadrature, particle and work-replay CSVs, plus the initial mesh. "
                           "The lightweight growth summary is always retained.");
@@ -115,13 +121,35 @@ namespace aspect
         profile_path=prm.get("Stationary profile file");
         BP3Restore::filter_mode=prm.get("Friction normal input");
         BP3Restore::filter_length=prm.get_double("Normal filter length");
+        BP3Restore::bottom_velocity_constraint=prm.get("Bottom velocity constraint");
+#ifdef ASPECT_BP3_LOCAL_BOTTOM_TEST
+        BP3::local_state_disturbance=prm.get_double("Local state disturbance");
+#endif
         detailed_diagnostics=prm.get_bool("Write detailed diagnostics");
         BP3Benchmark::detailed_diagnostics=detailed_diagnostics;
         prm.leave_subsection();prm.leave_subsection();
+        prm.enter_subsection("Fault reconstruction");
+        geometry_path=prm.get("Prescribed faults file");
+        prm.leave_subsection();
       }
       void initialize() override
       {
         using namespace BP3Restore;
+        if (bottom_velocity_constraint=="fault parallel")
+          {
+            std::istringstream geometry(Utilities::read_and_distribute_file_content(
+              Utilities::expand_ASPECT_SOURCE_DIR(geometry_path),this->get_mpi_communicator()));
+            std::vector<Point<2>> points; double x,y,p;
+            while (geometry>>x>>y>>p) points.emplace_back(x,y);
+            AssertThrow(points.size()>1,ExcMessage("Cannot obtain rotated bottom orientation."));
+            const auto ends=std::minmax_element(points.begin(),points.end(),
+              [](const auto &a,const auto &b){return a[1]<b[1];});
+            bottom_tangent=*ends.first-*ends.second;
+            bottom_tangent/=bottom_tangent.norm();
+            AssertThrow(std::abs(bottom_tangent[0]-.5)<1e-12 &&
+                        std::abs(bottom_tangent[1]+std::sqrt(3.)/2)<1e-12,
+                        ExcMessage("Rotated bottom requires the restored BP3 fault orientation."));
+          }
         std::istringstream in(Utilities::read_and_distribute_file_content(
           Utilities::expand_ASPECT_SOURCE_DIR(profile_path),this->get_mpi_communicator()));
         unsigned int n=0;
@@ -271,7 +299,7 @@ namespace aspect
         return {"Restored BP3 monitor","raw/filtered traction and endpoint growth recorded"};
       }
     private:
-      std::string profile_path;
+      std::string profile_path, geometry_path;
       bool detailed_diagnostics = false;
       std::string identity() const
       {
@@ -280,6 +308,8 @@ namespace aspect
            <<BP3Restore::filter_mode<<' '<<BP3Restore::filter_length<<' '<<BP3Restore::degradation_scale;
         for(unsigned int i=0;i<BP3Restore::radius.size();++i)
           out<<' '<<BP3Restore::radius[i]<<' '<<BP3Restore::phi[i]<<' '<<BP3Restore::integral[i];
+        if (BP3Restore::bottom_velocity_constraint!="full")
+          out<<" bottom="<<BP3Restore::bottom_velocity_constraint;
         return out.str();
       }
     };

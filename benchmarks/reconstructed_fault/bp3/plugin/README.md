@@ -123,6 +123,13 @@ without a growth snapshot starts a new growth table with a header.
 
 `bp3.cc`: initial fields, loading registration, preparation/solver observers.
 `mesh.cc`: prescribed mesh reproduction and verification.
+`bottom_constraint.cc`: optional fault-parallel bottom constraint; the default
+`Bottom velocity constraint = full` retains the existing full loading. The
+experimental `fault parallel` value is in `Postprocess / BP3 restored monitor`
+and requires removing bottom from all ordinary velocity boundary lists. It
+retains the side corners and releases the complementary perturbation traction.
+See [the isolated local test](../rotated_bottom_local/REPORT.md) for qualification
+and limits; the present evidence does not support changing production runs.
 `monitor.cc`: loading-profile/filter initialization and growth/diagnostics.
 `work_audit.cc`: mandatory native/inert/Maxwell checks and optional replay.
 `output.cc`: accepted history, schedules, event/stations and v5 restart lifecycle.

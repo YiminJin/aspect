@@ -1,0 +1,10 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/rotated_bottom_local/common.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/rotated_bottom_local/output-B
+subsection Boundary velocity model
+  set Prescribed velocity boundary indicators = left:reconstructed fault BP3, right:reconstructed fault BP3
+end
+subsection Postprocess
+  subsection BP3 restored monitor
+    set Bottom velocity constraint = fault parallel
+  end
+end

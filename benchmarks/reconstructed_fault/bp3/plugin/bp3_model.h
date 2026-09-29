@@ -14,18 +14,35 @@ namespace BP3
   constexpr double Vp = 1e-9, Vinit = 1e-9, Vref = 1e-6;
   constexpr double a0 = .010, amax = .025, b = .015, f0 = .6;
   constexpr double Wf = 40000., core_phi = .6;
-  constexpr double box_size = 50000., horizontal_sign = -1.;
+  constexpr double horizontal_sign = -1.;
+#ifdef ASPECT_BP3_LOCAL_BOTTOM_TEST
+  constexpr double box_size = 1000.;
+  extern double local_state_disturbance;
+#else
+  constexpr double box_size = 50000.;
+#endif
   inline const double sine = std::sqrt(3.)/2;
   constexpr double cosine = .5;
   inline const double dip = std::acos(cosine);
+#ifdef ASPECT_BP3_LOCAL_BOTTOM_TEST
+  inline const double trace_x = -box_size*cosine/sine;
+#else
   inline const double trace_x = horizontal_sign < 0 ? 0. : .5*box_size*(1+cosine/sine);
+#endif
   inline const double tau0 = sigma0*amax*std::asinh(Vinit/(2*Vref)
     *std::exp((f0+b*std::log(Vref/Vinit))/amax))+damping*Vinit;
 
   // Configured before initial fields are evaluated; the transition remains 3 km.
   extern double weakening_length;
   inline double fraction(double xd)
-  { return std::clamp((xd-weakening_length)/3000., 0., 1.); }
+  {
+#ifdef ASPECT_BP3_LOCAL_BOTTOM_TEST
+    (void)xd;
+    return 1.;
+#else
+    return std::clamp((xd-weakening_length)/3000., 0., 1.);
+#endif
+  }
 
   // Horizontal bulk VW/transition/VS interfaces. On the sharp fault this
   // equals true down-dip distance; it is not used for deep V constraints.
@@ -50,7 +67,13 @@ namespace BP3
     const double target=law.friction_coefficient({0.,1.}, Vinit,
                          law.get_characteristic_slip_distance()/Vinit);
     const double f=fraction(xd);
-    return law.initial_state_for_friction_coefficient({1-f,f},Vinit,target);
+    const double steady=law.initial_state_for_friction_coefficient({1-f,f},Vinit,target);
+#ifdef ASPECT_BP3_LOCAL_BOTTOM_TEST
+    const double y=box_size-xd*sine;
+    return steady*std::exp(local_state_disturbance*std::pow(std::sin(std::acos(-1.)*y/box_size),2));
+#else
+    return steady;
+#endif
   }
 
   // Independent benchmark check of the split aging law. Avoid subtracting

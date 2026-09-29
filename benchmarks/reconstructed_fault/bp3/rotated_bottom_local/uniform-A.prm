@@ -1,0 +1,11 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/rotated_bottom_local/A.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/rotated_bottom_local/output-uniform-A
+set End time = 200000
+subsection Postprocess
+  subsection BP3
+    set Last accepted step = 1
+  end
+  subsection BP3 restored monitor
+    set Local state disturbance = 0
+  end
+end

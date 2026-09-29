@@ -498,7 +498,11 @@ namespace aspect
       {
         const auto &fault = this->get_reconstructed_fault_manager ().get_faults ()[0];
         const double stations[]
+#ifdef ASPECT_BP3_LOCAL_BOTTOM_TEST
+            = {0.,200.,500.,1000.,BP3::box_size/BP3::sine};
+#else
             = { 0., 2500., 5000., 7500., 10000., 12500., 15000., 17500., 20000., 25000., 30000., 35000. };
+#endif
         const auto path = this->get_output_directory () + "stations.csv";
         const bool header = BP3::needs_header(path);
         std::ofstream out (path, std::ios::app);
