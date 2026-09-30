@@ -1,5 +1,182 @@
 # Phase-field / RSF current status
 
+Local checkpoint (September 30, 2026): the completed limiter, normalization
+refactoring, prescribed boundary completion, test harnesses and guidance are
+saved in separate local commits at the user's request. Generated evidence and
+binaries remain local. Statements below that no commit was made describe the
+earlier verification sessions. Review remains pending; no next pass is selected.
+
+
+## R2b proposal 3 — private cache-reuse decision (complete; review pending)
+
+The selected extraction is complete against the qualified proposal-2 baseline.
+`PhaseFieldFault::prepare_normalization_reuse(previous_cache_valid) const` in
+`phase_field_fault/normalization.cc` captures the existing inputs, determines
+composition independence and performs the identical collective reuse decision.
+Invalidation, automatic-completion qualification, composition projection,
+counters, frozen-restart validation and final publication remain in the caller.
+The moved 48-line block is exact; mechanically restoring it reconstructs the
+proposal-2 implementation byte-for-byte. No missing cache dependency was
+identified or correctness fix included. No public API or ownership changed.
+
+The Release build and all 30 matched runtime invocations passed. Existing hit/
+miss, failure/recovery, restart-invalidator and lookup tests cover one/two ranks;
+short legacy and automatic BP3 comparisons and an automatic one-to-two-rank
+restart also pass. All 405 field groups and 96 lifecycle/work checks are exact,
+including solver decisions and cache/work counters; elapsed time is excluded.
+The two production files changed are `normalization.cc` and the private header
+declarations in `phase_field_fault.h`. All other 5,834 entry source/header/test/
+plugin files, the user's local edits, M1/M2 and proposal-2 reference artifacts
+are preserved. No commit was made.
+
+See [review](refactor_review.md) and
+[reproduction/evidence](../../benchmarks/reconstructed_fault/refactoring_r2b_cache/README.md).
+The initial compile omission and comparison-script cold-restart coverage
+assumption are recorded separately; neither changed scientific behavior or
+relaxed equality. Long production runs and unrelated qualifications were not
+repeated. Stop for review. A bounded R3 assessment is a possible next task only
+after user selection; no R3 or phase-boundary implementation has begun.
+
+The following sections retain earlier review boundaries and their evidence.
+
+
+## R2b proposal 2 — prescribed boundary completion (complete; review pending)
+
+The selected [boundary-completion task](refactoring/codex_boundary_completion_instructions.md)
+is complete, starting from the qualified geometry-preparation extraction.
+The legacy implementation was first extracted privately with exact one/two-rank
+BP3 agreement across 186 field groups. Its executable and source snapshots are
+preserved separately from the subsequent behavior extension.
+
+`Boundary completion = automatic prescribed` now detects contacts per fault,
+verifies compatible fully prescribed frozen Q1 phase data, and pairs exterior
+ghost-Q1 normalization with the existing physical endpoint mechanical source and
+bulk-work surface measure. The default remains `legacy`; the final executable's
+legacy regression is exact. Geometry belongs to M3, constitutive continuation
+to M4, and mechanical residuals/derivatives to M5. No checkpoint schema, M1/CPDI,
+M2/evolution, limiter edit, cell-preparation extraction or normalization value-
+reuse criterion changed. Proposal 3 and other refactoring stages remain unselected.
+
+The final build, CTest, 56 contact assertions per rank, ten small cases, free-endpoint
+K/B/G checks, short BP3 on one/two ranks, and a one-to-two-rank restart passed.
+Corner/tangent/unrepresented crossing/H-driven/undefined-material cases reject
+with intended diagnostics. Automatic nodal I_h differs from legacy by at most
+1.44e-13 relative; solver decisions match. Small oblique/multiple-fault I_h is
+exact across rank counts; reversing the polyline changes it by less than 8.58e-16.
+The interior diffuse-support-touching case gets no fictitious continuation.
+
+Supported scope is deliberately bounded: transverse 2-D endpoints on planar
+nonperiodic Box faces, straight terminal support, an aligned uniform local ghost
+lattice, constant core per fault and identical profile/degradation coefficients.
+Curves elsewhere, either/both ends and independent faults are qualified.
+Overlapping diffuse supports, unsupported exterior data, deformation, 3D and
+unqualified/evolving phase fields remain unsupported. Adaptive refinement
+invalidation is implemented but not runtime-qualified. Full prescription is
+established through actual phase constraints and nodal profile verification,
+not inferred from H or the frozen flag.
+
+See [review report and contact table](refactor_review.md) and
+[reproduction/evidence](../../benchmarks/reconstructed_fault/refactoring_boundary/README.md).
+Exploratory fixture failures and the existing 45-degree stationary-H roundoff
+assertion are recorded separately. No assertion or expected result was relaxed.
+Stop for review. The next separately selectable design task is the documented
+evolution-compatible phase-boundary treatment, not another automatic extraction.
+
+The following sections describe earlier review boundaries and scientific work.
+
+## Refactoring R2b cell-profile geometry extraction — September 29
+
+The user selected proposal 1 only: a private PhaseFieldFault operation in
+`source/material_model/phase_field_fault/normalization.cc` prepares cell-profile
+geometry. M4 ownership, backend admission/fallback, clipping/shared-face rules,
+interval order, DoF indices, cache criteria/invalidation and MPI order stay
+unchanged. Phase sampling, material evaluation and quadrature remain in the
+integration operation. R2b is complete and ready for review. A fresh Release
+build and matching plugins passed, as did all 15 selected runtime invocations,
+including cell/remote cases and warm traversal reuse on one/two ranks. Both
+six-step BP3 trajectories match preserved R2a and qualified R1 exactly: 186
+field groups and 22 lifecycle/work checks per reference, with zero numerical
+or work-counter differences (elapsed time excluded). All 5,810 other source/
+header/test files match entry hashes. Evidence is in `build-refactor-r2b/` and
+`benchmarks/reconstructed_fault/refactoring_r2b/`. No next pass is authorized.
+
+Proposals 2 (boundary-completion extraction) and 3 (value-cache extraction)
+remain unselected and unchanged. Boundary-completion generalization is recorded
+as a deferred design task requiring separate review. The R2a/R1 entries below
+are historical; see the [rolling report](refactor_review.md) for pass evidence.
+No new restart/rollback, cell-cache AMR/fallback or 3D simulation qualification
+is claimed. Stop for review; the proposed next task is a design-only discussion
+of boundary-completion generalization, only if selected.
+
+## Refactoring R2a normalization relocation — September 29
+
+R1 is completed; the user selected only R2a under
+[codex_R2a_instructions.md](refactoring/codex_R2a_instructions.md).
+R2a is complete and ready for review: complete normalization definitions moved into
+`source/material_model/phase_field_fault/normalization.cc`, retaining M4
+ownership, the existing class/header/state and the sole plugin registration.
+M1/M2 remain frozen. At R2a completion, R2b, helper extraction and R3 were not selected.
+
+Comparison uses the preserved R1 executable/plugins/fixtures/checkpoint in
+`build-refactor-baseline/` and `benchmarks/reconstructed_fault/refactoring_r1/`.
+Their hashes match. The candidate additionally retains the separately validated
+limiter zero-rejection change; all selected R1 inputs use positive/default
+settings. Existing lifecycle initialization and output-filter failures keep
+their recorded dispositions. Candidate builds and evidence are separate in
+`build-refactor-r2a/` and `benchmarks/reconstructed_fault/refactoring_r2a/`.
+See the [rolling report](refactor_review.md) for verification and review status.
+
+The main material file shrank from 3,798 to 2,199 lines; the new file has 1,698
+lines. All twelve methods and four exclusive helpers are byte-identical to
+their entry definitions. Only includes, explicit 2D/3D member instantiations
+and necessary shared-helper linkage were added; no public header/API changed.
+The shared history-error helper retains one definition in the original file.
+Normal Release and focused non-unity/non-PCH compilation/linking passed.
+Normalization accuracy/cache, both backends on 1/2 ranks, no-composition,
+rollback and ordinary particle smoke checks passed. Both six-step BP3 runs
+and the continuation from R1 step 4 match the corresponding R1 physical fields,
+histories and solver records exactly: 219 field groups, zero differences.
+All 19 lifecycle/cache/rollback/statistics comparisons also passed. Reference
+artifacts/checkpoints and pre-existing local source edits remain unchanged.
+This is translation-unit separation, not architectural decoupling. Stop for
+review; proposed next task is a bounded R2b assessment of model-independent
+integration/sampling/projection boundaries, only if the user selects it.
+
+## Refactoring R1 baseline qualification and limiter follow-up — September 29 (historical)
+
+R0 is accepted as a dependency audit. The user selected documentation boundary
+updates and R1 on unchanged source `3af7c2aa2590aa8e39eaf2a1e46df0bc6c9d9700`.
+M1/M2 are frozen; M3–M5 are the scope for later selected passes. R1 execution is
+complete with pre-existing failures; R2a progress is recorded above.
+R1 left production source and the scientific worktree `../aspect/` unchanged.
+Release reference builds, fixture inputs, logs and checkpoints are retained in
+`build-refactor-baseline/` and `benchmarks/reconstructed_fault/refactoring_r1/`.
+Normalization accuracy/cache and supplemental lifecycle checks pass on 1/2
+ranks and both backends; original lifecycle inputs exhaust initialization.
+Mechanics and forced rollback behavior pass (rollback CTest filters are stale).
+Six-step BP3 and a step-4 split restart pass, with exact same-rank final fields,
+histories and solver records. Ordinary particle restart data also matches
+exactly, although its saved log/statistics comparison fails. Cross-rank BP3
+differences are measured separately in the report.
+
+After R1, the user confirmed the numeric-parser design and requested corrected
+comments/documentation, then explicitly required an assertion rejecting zero.
+`Patterns::Double(0.)` stays, followed by `AssertThrow(value > 0)`. The default
+maximum finite double still disables the limiter; literal `infinity` remains
+unsupported. Parameter help and both specifications now describe this contract.
+The old recommendation to restore the infinity alias is withdrawn. Parameter
+tests and the existing integration test now use the numeric disabled sentinel;
+no numerical tolerance changed. R1 artifacts are preserved in their original
+state, including the evidence that zero was previously accepted. Validation in
+`build-limiter-validation/` passed all 15 parameter assertions and the existing
+limiter integration fixture on one/two ranks; R1 reference hashes are unchanged.
+At the end of that follow-up, the other fixture failures still required review
+and no extraction had started. The subsequently selected R2a result is above.
+See the selected
+[roadmap](refactoring/refactoring_plan.md),
+[instruction](refactoring/codex_decoupling_and_R1_instructions.md), and
+[rolling report](refactor_review.md) for current scope and evidence.
+
 ## Local rotated-bottom A/B experiment — September 28
 
 The user-requested `bp3_rotated_bottom_local_test.md` task is complete in
@@ -114,6 +291,13 @@ accepted-step/event summaries and final server stdout/stderr before attributing
 the failure to any numerical mechanism. Do not rerun the experiment for context.
 
 ## Optional reconstructed-fault Theta timestep limiter — September 26
+
+**Historical implementation and verification:** the infinity alias and strict
+positive-bound validation described below predate the user's numeric-parser
+revision. The current contract, confirmed September 29, uses
+`Patterns::Double(0.)` plus a strictly-positive assertion, rejects `infinity`,
+and disables only at the maximum-finite-double sentinel (or for stateless friction). The old test
+results below do not qualify the revised parser.
 
 The user explicitly authorized this new timestep policy after the plugin
 cleanup. The core `reconstructed fault time step` plugin now declares

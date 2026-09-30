@@ -28,8 +28,7 @@ For every task related to reconstructed-fault development:
     existing interface.
 12. Run relevant non-destructive tests after implementation and report
     what was and was not tested.
-13. Follow:
-`       doc/reconstructed_fault/refactoring.md`
+13. Follow: `doc/reconstructed_fault/refactoring.md`
     for code-quality, assertion/validation, readability, and
     responsibility-boundary guidelines. Prefer straightforward scientific
     C++ whose structure follows the mathematical algorithm. Do not
@@ -38,10 +37,47 @@ For every task related to reconstructed-fault development:
 
 ## Reconstructed-fault session recovery
 
-- Read [current status](doc/reconstructed_fault/CURRENT_STATUS.md) for verified
-  implementation, executed evidence, open questions, and the next bounded task.
-- Use [the recovery handoff](doc/reconstructed_fault/CODEX_RECOVERY_HANDOFF.md)
-  as historical context; verify older plans against current code and artifacts.
-- Preserve uncommitted source, configurations, outputs, and checkpoints. Update
-  the status note after meaningful milestones; keep numerical changes separate
-  from documentation and cleanup.
+- Read doc/reconstructed_fault/CURRENT_STATUS.md for implementation
+  status, evidence, and unresolved questions. Treat suggested next
+  tasks there as context. The user's current instruction determines
+  the active task; do not automatically resume a scientific experiment.
+
+## Refactoring workflow
+
+For tasks explicitly designated as refactoring:
+
+- Module boundaries are defined in doc/reconstructed_fault/refactoring.md.
+  M1 particle domains/CPDI and M2 phase-field implementation are frozen;
+  M3 reconstructed-fault infrastructure, M4 fault material physics, and
+  M5 coupled mechanics are the active refactoring scope. Only the stage
+  explicitly selected by the user is authorized; boundary-interface changes
+  and prerequisite cleanup require separately selected tasks.
+
+- Follow doc/reconstructed_fault/refactoring/refactoring_plan.md.
+  The plan describes the roadmap; it does not authorize executing
+  every stage. Perform only the stage/pass selected by the user.
+
+- Confirm the working directory, branch, and local changes before
+  editing. Keep source edits, builds, and outputs within this
+  refactoring worktree or its designated directories. Do not modify
+  the separate scientific-test worktree.
+
+- Preserve numerical algorithms, parameter defaults, MPI ownership,
+  state-publication semantics, and checkpoint compatibility.
+  Report suspected numerical bugs separately from structural changes.
+
+- Keep code movement, structural changes, formatting, and numerical
+  fixes distinguishable in commits or diffs.
+
+- When the user reports manual edits, reread the affected files and
+  inspect staged and unstaged changes before continuing. Preserve
+  unrelated edits.
+
+- Use the agreed stage-specific verification. Record pre-existing
+  failures separately; do not loosen tolerances or change expected
+  numerical results to make a refactor pass.
+
+- Finish the selected pass with a concise review report: revisions,
+  changed responsibilities/interfaces, verification results, remaining
+  limitations, and one proposed next task. Await the user's selection
+  before beginning another pass.
