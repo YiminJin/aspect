@@ -1,5 +1,64 @@
 # Phase-field / RSF current status
 
+## Separate cohesive restart diagnosis (complete; no fix applied)
+
+The existing crash reproduces on one rank with original restored-history
+assertions passing, and with the optional restored-fingerprint observer
+disconnected. GDB locates SIGSEGV at `manager.cc:1077`: an unconditional access
+to `prescribed_slip_rates[0]`. The manager contains one fault/eight vertices and
+valid, identical committed/current/trial/candidate V; solve and trial flags are
+both active. The prescribed-rate container has outer size zero immediately after
+deserialization and at the failing call. Restart rebuild omits its transient
+per-fault initialization; BP3's setup explicitly recreates it and masks the defect.
+
+Proposed smallest correction: add
+`prescribed_slip_rates.assign(reconstructed_faults.size(), {});` to the other
+transient resets in `rebuild_after_deserialization()`, plus an archive-round-trip
+regression that opens an absolute-value trial without prescribing any rows.
+Neither correction nor regression is implemented. Production source, original
+history assertions, physical parameters, tolerances and original checkpoint data
+are unchanged. The separate cross-rank observer check failure and subsequent
+cohesive convergence limitation remain unresolved.
+
+See [cause, state table and backtrace](refactor_review.md) and
+[diagnostic evidence](../../benchmarks/reconstructed_fault/restart_investigation/README.md).
+Stop for review before the targeted correctness fix; R3b remains unimplemented.
+
+## R3a — constitutive/history relocation (complete; review pending)
+
+Against committed R2b `06b70740f`, nine constitutive methods and ten history/setup/
+preparation/query methods moved into private implementation files
+`phase_field_fault/constitutive.cc` and `history.cc`. All 19 method bodies and six
+helpers are exact. Header declarations, both R2 files, ownership, solver acceptance,
+initialization/publication/rollback ordering, MPI and checkpoint behavior are
+unchanged. The ownership/lifecycle table was written before source edits and
+rechecked afterward; see [the rolling review](refactor_review.md).
+
+The Release build passes. All three affected files compile without unity/PCH;
+all 38 required 2D/3D moved-member definitions are present. CMake keeps the new
+files independent, preserving the original 55 unity groups. This avoids a latent
+M2 include dependency exposed by regrouping, without modifying M2. Units
+(20,791 assertions/25 cases per rank), temperature/frozen-stress and actual
+accepted-Newton rollback checks pass on one/two ranks. Four short legacy/automatic
+BP3 runs and a cross-rank reference-checkpoint continuation pass: 405 exact field
+groups and 30 matching cache/work checks. Another 48 lifecycle and five accepted
+cohesive-checkpoint comparisons match exactly. All 5,835 other entry source/test
+files and 31 reference artifacts are unchanged; local documentation edits remain.
+
+Reference failures are preserved: original Stage J has pressure incompatibility;
+the supplemental open-top case verifies one physical Theta/H update then fails
+at step two. Its checkpoint restores correctly but subsequent trial setup segfaults
+in both binaries. This is not successful cohesive restart qualification; no fix
+or tolerance change is included. Mature/frozen BP3 restart passes. No 3D simulation
+or long production run was performed.
+
+Evidence and commands: [R3a harness](../../benchmarks/reconstructed_fault/refactoring_r3a/README.md).
+Qualified executable: `build-refactor-r3a/aspect-r3a-qualified`. R3b is not
+implemented. Stop for review; proposed next task is separately selected R3b
+lifecycle extraction under the recorded ordering and ownership constraints.
+
+The entries below describe earlier checkpoints and review boundaries.
+
 Local checkpoint (September 30, 2026): the completed limiter, normalization
 refactoring, prescribed boundary completion, test harnesses and guidance are
 saved in separate local commits at the user's request. Generated evidence and

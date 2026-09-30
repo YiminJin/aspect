@@ -59,7 +59,16 @@ to change the reference algorithm, parameters, or expected test results.
 
 ## 2. Preserve responsibility boundaries
 
-### Selected module scope (R2b proposal 3 complete; review pending)
+### Selected module scope (R3a move-only pass complete; review pending)
+
+R3a relocates existing constitutive/history definitions only. Record storage
+ownership, preparation, publication, rollback and restart before editing and
+verify the table afterward. Keep header declarations and both R2 implementation
+files unchanged; compile the new translation units independently for 2D/3D.
+R3b lifecycle restructuring is a separate pass. The four-stage readability
+target below does not authorize moving validation, collectives or writes, changing
+rollback, or claiming atomicity from terminal writes. Timestep acceptance stays
+in the solver/simulator; material history operations act only when called.
 
 | Module | Owns | Refactoring scope |
 |---|---|---|

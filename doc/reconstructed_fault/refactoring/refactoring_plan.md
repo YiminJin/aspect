@@ -9,11 +9,13 @@ R2a complete and ready for review under [codex_R2a_instructions.md](codex_R2a_in
 R2b cell-profile geometry extraction and proposal 2 boundary completion are
 complete and ready for review under
 [boundary-completion instructions](codex_boundary_completion_instructions.md);
-R3–R8 remain pending.
+R3a is complete and ready for review: move constitutive/history definitions only, with an
+ownership/lifecycle table recorded before editing and checked afterward.
+R3b and R4–R8 remain pending.
 See [verification and disposition](../refactor_review.md).
 Proposal 3 is complete and ready for review: the private cache-input/reuse
 decision extraction preserves the completed proposal-2 implementation exactly.
-No further pass is selected. Module boundaries and frozen
+R3a stops for review; no R3b implementation is selected. Module boundaries and frozen
 M1/M2 scope are defined in [refactoring.md](../refactoring.md).
 
 Reviewed source: YiminJin/aspect, branch `pf-rsf`, commit `0fc1ce782c48b78f79eff674724686b8277c8618`. The remote branch still pointed to this commit when checked for this plan. The user's local checkout may contain newer work. Inspect and preserve that work before selecting an implementation baseline.
@@ -254,10 +256,19 @@ Proposed implementation files:
 - `phase_field_fault/constitutive.cc`: Maxwell/cohesive/localization and point responses.
 - `phase_field_fault/history.cc`: history initialization, solve preparation, accepted-state publication, and the existing constitutive timestep query.
 - `phase_field_fault/normalization.cc`: the R2 implementation.
+- `phase_field_fault/boundary_completion.cc`: retain the completed R2 implementation.
 
 This is a proposed organization, not a requirement to fill four files regardless of actual dependencies. Retain material semantic ownership even when implementation is separated.
 
-First move methods without rewriting expressions. Then, in a separate pass, make `commit_reconstructed_fault_mechanical_history()` visibly contain:
+R3a moves complete definitions without rewriting expressions, changing header
+declarations or ownership, or reorganizing either R2 file. Verify independent
+translation-unit compilation and the required 2D/3D member instantiations.
+Record storage owners separately from material computation, including preparation,
+publication, rollback and restart for each relevant history quantity.
+
+For a separately selected R3b, first establish whether the current implementation
+already follows these stages before exposing them in
+`commit_reconstructed_fault_mechanical_history()`:
 
 1. Sample the accepted bulk state.
 2. Compute/project candidate cohesive state and construct state/particle candidates.
@@ -265,6 +276,12 @@ First move methods without rewriting expressions. Then, in a separate pass, make
 4. Publish the existing persistent state through terminal writes.
 
 Keep timestep-zero initialization distinct. Avoid introducing a second committed-state owner, a generic transaction framework, or throwing/MPI work in destructors. Preserve existing preparation and publication order; acceptance of a Newton trial is not acceptance of a timestep.
+
+Moving validation ahead of existing writes, reordering collectives or changing
+rollback is a semantic change requiring separate selection. Terminal placement
+of writes alone does not establish atomic publication. Timestep acceptance stays
+with the solver/simulator; history.cc computes/prepares/publishes when called.
+Keep timestep-zero, mature/frozen and cohesive paths distinct.
 
 Checks: Maxwell/cohesive tests; short trajectory beyond timestep zero; rollback after a trial/accepted Newton update; baseline checkpoint read and short restart; stateful/stateless or mature/cohesive coverage as needed for moved paths.
 

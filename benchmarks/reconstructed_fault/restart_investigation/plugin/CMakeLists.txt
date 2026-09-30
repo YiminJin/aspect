@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.13.4)
+find_package(Aspect REQUIRED HINTS ${Aspect_DIR})
+DEAL_II_INITIALIZE_CACHED_VARIABLES()
+project(cohesive_restart_diagnostic)
+add_library(no_restore_observer SHARED no_restore_observer.cc)
+ASPECT_SETUP_PLUGIN(no_restore_observer)

@@ -601,6 +601,13 @@ configure_file(
 # Collect source files
 
 file(GLOB_RECURSE ASPECT_SOURCE_FILES_CC CONFIGURE_DEPENDS "source/*.cc")
+
+# Keep the split constitutive/history implementations independently compiled,
+# including their explicit 2D/3D member instantiations.
+set_source_files_properties(
+  source/material_model/phase_field_fault/constitutive.cc
+  source/material_model/phase_field_fault/history.cc
+  PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE SKIP_PRECOMPILE_HEADERS TRUE)
 list(REMOVE_ITEM  ASPECT_SOURCE_FILES_CC ${CMAKE_CURRENT_SOURCE_DIR}/source/main.cc)
 file(GLOB_RECURSE ASPECT_SOURCE_FILES_H CONFIGURE_DEPENDS  "include/*.h")
 file(GLOB_RECURSE ASPECT_UNIT_TEST_FILES CONFIGURE_DEPENDS "unit_tests/*.cc" "contrib/catch/catch.hpp")

@@ -1,5 +1,200 @@
 # Reconstructed-fault refactoring review
 
+## Separate cohesive restart investigation (complete; correction not applied)
+
+The user selected diagnosis after R3a, not a source correction or R3b. The
+preserved R3a executable reproduces the crash on **one rank**, from a checkpoint
+created on one rank with the same existing cohesive/open-top fixture settings.
+The original restored-history/V/geometry/bulk assertions pass before SIGSEGV.
+The original two-rank checkpoint and all R3a evidence remain intact.
+
+The source-located backtrace is:
+
+```text
+ReconstructedFaultManager<2>::set_slip_rate_trial_values   manager.cc:1077
+  for (const auto &entry : prescribed_slip_rates[f])
+Simulator<2>::solve_reconstructed_fault_stokes::<residual lambda> solver.cc:1126
+  fault_manager.set_slip_rate_trial_values(slip_rate);
+Simulator<2>::solve_reconstructed_fault_stokes             solver.cc:1161
+  initial_residual = evaluate_coupled_residual(working_x, initial_slip_rate);
+```
+
+GDB inspected the manager after deserialization and immediately before the first
+absolute trial assignment. There is one fault with eight vertices:
+
+| State | After restart rebuild | Immediately before failing call |
+|---|---|---|
+| Committed V | outer size 1, inner size 8; all 1e-12 | unchanged |
+| Current V | outer size 1, inner size 8; equals committed | unchanged |
+| Trial V | outer size 1, empty inner vector | outer size 1, inner size 8; equals current |
+| Incoming absolute candidate | not yet constructed | outer size 1, inner size 8; all 1e-12 |
+| Solve/trial active | false / false | true / true |
+| `prescribed_slip_rates` | **outer size 0** | **outer size 0** |
+
+The slip-rate histories and trial lifecycle are valid. The crash is an
+out-of-bounds access to `prescribed_slip_rates[0]`, not an invalid candidate or
+premature trial call. Fresh `add_reconstructed_fault()` creates one empty
+prescribed-rate map per fault (`manager.cc:769`). This boundary-configuration
+container is intentionally not serialized, but `rebuild_after_deserialization()`
+reconstructs current/trial vectors without recreating its per-fault layout.
+`set_slip_rate_trial_values()` nevertheless indexes it unconditionally. Thus the
+normal restart lifecycle leaves a required transient layout absent.
+
+For the diagnostic comparison only, a copied observer plugin disconnects
+`verify_restored_state` from `start_timestep`. All original history assertion
+code and the normal Stage-I/Stage-J callbacks remain unchanged; the original
+plugin/case is retained. Both variants exit 139 and have exactly the same
+pre-call vectors/flags/empty prescribed container. The observer-disabled GDB
+run also captures the empty container on return from deserialization, before any
+observer callback. This excludes the optional observer as the cause of this crash.
+BP3 avoids the defect because its normal prepare callback explicitly calls
+`set_prescribed_slip_rates(std::vector<std::map<unsigned int,double>>(1))` on
+every entry, including restart (`bp3/plugin/bp3.cc:211`).
+
+**Smallest proposed correction:** alongside the other transient-vector resets
+in `ReconstructedFaultManager::rebuild_after_deserialization()`, add:
+
+```cpp
+prescribed_slip_rates.assign(reconstructed_faults.size(), {});
+```
+
+This restores the fresh-manager invariant of one empty map per fault. It does
+not serialize boundary configuration or invent prescribed rates; callers still
+reapply actual prescribed rows after restart, as specified. Do not add a BP3-like
+setup call to the cohesive fixture to hide the missing manager initialization.
+A focused regression should extend the existing manager checkpoint round-trip
+test to begin a solve/trial and call `set_slip_rate_trial_values()` on the newly
+loaded manager without any prescribed-rate setter. That path is currently absent
+from the archive test, which checks restored values but does not open a new
+absolute-value trial.
+
+The correction/regression are **proposed only**, not applied or qualified.
+No physical parameters, solver tolerances or history assertions were adjusted.
+The initial two-to-one-rank checkpoint attempt stops earlier at the observer's
+entry-2 fingerprint assertion; this additional cross-rank observer limitation
+was preserved, not loosened. The same-rank checkpoint creation retains the known
+second-step convergence failure after successfully saving the first real update.
+Neither issue was repaired in this investigation.
+
+Evidence: [restart investigation](../../benchmarks/reconstructed_fault/restart_investigation/README.md),
+especially `evidence/manager-states.json`, `investigation-verification.json` and
+the two `*-gdb.log` files. The diagnostic executable recompiles only the existing
+manager/solver unity groups with debug information and unchanged Release
+optimization, then links untouched R3a objects. All 5,824 entry source/header/test
+files and the original checkpoint hashes are unchanged. Stop for review; proposed
+next task is the separately scoped one-line restart fix and targeted regression.
+
+## R3a — constitutive/history relocation (complete; ready for review)
+
+Selected scope: complete method relocation only. Reference is committed R2b
+`06b70740f`, executable `build-refactor-r2b-cache/aspect-cache-qualified`.
+The user's deletion/move of `refactoring/R2b_review.md` into the local `tmp/`
+directory is preserved. R3b restructuring is not part of this pass.
+
+### Ownership/lifecycle table recorded before source edits
+
+The table records the existing implementation, including initialization writes;
+it is not a proposed transaction model. Material computation does not imply
+ownership of the storage receiving the computed value.
+
+| Quantity | Storage owner | Preparation/update computation | Publication point | Rollback behavior | Restart handling |
+|---|---|---|---|---|---|
+| Nodal Theta | Manager's generic fault properties | Material preparation projects mapped particle initial Theta only on a fresh timestep-zero model; friction law computes later candidates from current V and committed Theta | Fresh projection; later terminal loop in `commit_reconstructed_fault_mechanical_history` after cohesive publication | Newton/trials do not write it; candidates are local. No undo of published history is supplied by this method | Manager archives property schema/values; later/restarted preparation requires complete positive state, never initializes missing Theta |
+| Cohesive traction T_coh and previous I_h | Manager's generic fault properties | Material computes initial q from particle H and FE phi with surface mixture (zero q in mature mode), then projects; later projects accepted cohesive samples before H construction | `commit_cohesive_state`: paired scalar writes after validation, in fresh initialization and at the end of later accepted-history update | No trial mutation; local candidates discarded on pre-publication failure. Fresh initialization has its own publication sequence | Manager archive; current I_h rebuilt, frozen mature restart checks then restores exact saved previous-I_h values as the current snapshot |
+| Maxwell stress tau | Associated particle manager's `maxwell stress` property | Particle plugin initializes mapped stress; material computes accepted slip-corrected Maxwell candidates using bulk mixture/temperature and retained particle stress | Final particle loop of accepted-history update; timestep zero returns without evolving stress | Frozen through trials, so no stress restoration is needed on failed solve; no second stress transaction | Existing particle archive/migration; constitutive method reads restored particle history |
+| Irreversible H | Associated particle manager's `crack_driving_force` property | Initial particle field; material interpolates projected accepted traction before exact cohesive-work candidate and max with old H; `Evolve phase field` gates H update | Same final particle loop; timestep zero retains initial H; frozen mode retains old H | No trial writes; candidate map is local. No general undo after terminal publication | Existing particle checkpoint; restored H drives the next phase solve |
+| Committed/current/trial V | ReconstructedFaultManager's distinct vectors | Fresh material preparation initializes V_min; solver controls manager begin/trial/accept operations | Solver calls material history publication, then manager `commit_slip_rate_nonlinear_solve`, then swaps accepted bulk vectors | Rejected trial discards trial V; failed solve restores current V from committed V in solver catch | Manager archives committed V; load reconstructs current V and clears trial/solve activity |
+| Current I_h, reuse/lookup caches | PhaseFieldFault transient members | Existing normalization operations in unchanged R2 file | Existing successful integration/projection and cache-publication points | Existing invalidation/reuse behavior; not committed constitutive history | Resume callback invalidates caches; qualified frozen mature snapshot handling remains in normalization.cc |
+| Surface temperature and projected chemical composition | Temperature: material transient vectors; composition: manager generic Q1 properties | Material preparation samples FE temperature; normalization preparation projects particle compositions | Existing preparation writes, before constitutive-state validation | Preparation is not an all-or-nothing history transaction; these are frozen solve inputs, not trial candidates | Temperature resampled; composition properties archived and projected by existing preparation |
+| Mature reference geometry; fixed background traction selectors/data | Reference geometry and background data: manager properties; selectors: material members | Fresh preparation fills missing reference geometry and checks exact geometry; caller/benchmark selects initialized background properties | Existing initialization/setup sites; no mechanical-history update of fixed background data | No trial mutation; fresh initialization writes precede later preparation checks | Geometry/property archive; resume checks mode; benchmark reattaches selectors without recalibration |
+| Current/previous FE phi; accepted bulk solution | Simulator FE vectors (phase algorithm remains M2) | Phase solve uses retained H; localization derives h_old from old FE phi except timestep zero uses current phi; solver constructs accepted bulk state | Existing simulator/phase lifecycle; solver bulk-vector swaps follow history and V publication | Solver restores bulk/current-linearization state on pre-terminal failure; material never decides timestep acceptance | Existing simulator vectors restored; no additional stored h_old |
+| Cohesive/state/particle candidates | Local material-method containers | Accepted-state sampling, projection and constitutive evaluation | Only the publication points above; no persistent candidate owner | Local temporaries expire on failure; no destructor-driven MPI or publication | Not serialized |
+
+The later-time method already has the proposed broad four-stage order: accepted
+FE sampling; cohesive sample projection followed by Theta/particle candidates;
+collective error propagation and completeness reduction followed by the existing
+cohesive and local particle-ID validation/diagnostic output; then cohesive/I_h,
+Theta and particle writes. R3a preserves the actual interleaving, including all
+checks and collectives. The table does not infer atomicity from the terminal
+location of writes. Fresh initialization and the timestep-zero early return are
+separate paths. Solver convergence/acceptance and its pre-terminal rollback
+remain in `Simulator::solve_reconstructed_fault_stokes`.
+
+Implementation placement: `initialize()` moves intact with history setup so its
+file-local initial-state mapping validator keeps one definition shared with
+solve preparation. Registration, parameter parsing, ordinary material evaluation
+and accessors remain in the entry file. Existing history error propagation moves
+with history while retaining its `aspect::internal` symbol used by normalization.
+Both R2 files and all header declarations remain unchanged.
+
+### R3a post-move verification and disposition
+
+The table above was rechecked against the moved bodies and unchanged callers,
+manager/particle storage, solver acceptance/rollback and serialization. All ten
+rows still describe the implementation. Its pre-edit text and post-move check
+are retained in the [R3a evidence](../../benchmarks/reconstructed_fault/refactoring_r3a/README.md).
+The existing broad four-stage later-time sequence is compatible with a future
+readability pass, but this pass neither extracts those stages nor establishes a
+new atomicity guarantee. Initial preparation writes and the timestep-zero return
+remain distinct; mature/frozen and cohesive branches are unchanged.
+
+Nine constitutive methods moved into `phase_field_fault/constitutive.cc`; ten
+initialization/history/preparation/timestep-query methods moved into `history.cc`.
+Six existing implementation helpers moved with their callers, with no duplicate
+definitions or changed linkage. The material entry file retains ordinary
+evaluation, parameters, registration and accessors. No header declaration,
+ownership, expression, validation, collective, call order or publication point
+changed. Neither R2 file was reorganized. The entry file is now 580 lines;
+constitutive/history files contain 508/1,222 lines, including copied include
+scaffolding and explicit instantiations. Include cleanup is not part of R3a.
+
+| Check | Result |
+|---|---|
+| Exact source movement | PASS: 19 complete methods and six helpers byte-identical; retained entry code unchanged apart from vacated scaffolding/spacing; all other 5,835 existing source/header/test/plugin files unchanged |
+| Build and instantiation | PASS: fresh Release build; all three affected files separately compile without PCH/unity; all 38 moved-member definitions present for dimensions 2 and 3 |
+| Maxwell/cohesive/lifecycle units | PASS on reference/candidate, one/two ranks: 20,791 assertions in 25 cases per rank |
+| Surface temperature and frozen Maxwell assembly | PASS on reference/candidate, one/two ranks; original assertions retained |
+| Trial/accepted-Newton rollback | PASS: original and traction-free-top cases on reference/candidate, one/two ranks; actual accepted-update and surface/particle/bulk/V restoration markers required |
+| Short legacy/automatic BP3 and automatic cross-rank restart | PASS: four steps-0–6 trajectories plus identical reference-checkpoint continuation through steps 5–6; all 405 field groups exact and 30 cache/work checks equal |
+| Focused history lifecycle equivalence | PASS: 48 outcome, solver-decision, marker and statistics comparisons, including the separately recorded failing fixtures |
+| Evolving cohesive accepted checkpoint | PASS: after the supplemental case's first real update, mesh, mesh metadata, fixed/variable particle/FE data and serialized history/V/geometry/bulk fingerprint all byte-identical (five checks) |
+| Reference protection | PASS: all 31 captured qualified reference artifacts unchanged; user's local documentation move and temporary plan preserved |
+
+The initial default-unity build exposed an existing missing declaration of
+`ExcNonlinearSolverNoConvergence` in untouched M2 `source/simulator/phase_field.cc`
+when adding files shifted unity groups. CMake now explicitly compiles only the
+two new files without unity/PCH, as required for independent translation units.
+All 55 previous unity groups are exactly unchanged, and the build passes. No M2
+include, expression or behavior was modified. The failed build is retained.
+An initial standalone-command lookup used the wrong target spelling and was
+corrected before compiling; all three actual standalone compilations passed.
+
+Pre-existing runtime limitations remain separate from refactoring equivalence:
+
+- Original Stage-J one/two-rank trajectories fail on both executables at the
+  same significant-pressure-incompatibility check. They are not passing tests.
+- The separate traction-free-top Stage-J fixture retains every history assertion
+  and verifies initialization plus one evolving Theta/H update. Both executables
+  then fail to converge at physical step two, with identical solver decisions.
+- Reading that same cohesive checkpoint verifies restored histories, V, geometry
+  and bulk on both executables, then both segfault (exit 139) in
+  `ReconstructedFaultManager<2>::set_slip_rate_trial_values`. This is an unresolved
+  reference/fixture failure, not successful cohesive resumed evolution and not
+  repaired by this pass. The earlier wrapper attempt failed because its checkpoint
+  copy hard-codes output paths; loading the existing shared observer directly
+  avoids only that harness side effect. Both attempt logs are preserved.
+
+No assertion or tolerance was relaxed. Mature/frozen BP3 restart succeeds, but
+general cohesive resumed evolution remains unqualified. No full 3D simulation,
+long production trajectory or unrelated test campaign was run. Elapsed times
+are intentionally excluded from equivalence. Candidate executable is preserved
+as `build-refactor-r3a/aspect-r3a-qualified`; commands, source proofs, snapshots,
+hashes and individual outcomes are in `refactoring_r3a/evidence/`.
+
+R3a is complete and stops for review; no commit was made in this pass. Proposed
+next task: review/select R3b's lifecycle-only extraction using this ownership
+table and actual ordering, with correctness/fixture fixes kept separately scoped.
+
 Local checkpoint (September 30, 2026): the completed limiter, normalization
 refactoring, prescribed boundary completion, test harnesses and guidance are
 saved in separate local commits at the user's request. Generated evidence and
