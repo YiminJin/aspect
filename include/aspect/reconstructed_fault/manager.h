@@ -27,6 +27,7 @@
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/version.hpp>
 
+#include <aspect/reconstructed_fault/boundary_contact.h>
 #include <cstdint>
 #include <map>
 #include <string>
@@ -72,6 +73,21 @@ namespace aspect
         const std::vector<PrescribedInitialFault<dim>> &faults);
 
       void reconstruct_initial_faults();
+
+      /** Explicit opt-in; legacy boundary selectors retain their existing behavior. */
+      bool uses_automatic_boundary_completion() const { return automatic_boundary_completion; }
+      /** Rebuild replicated geometry records only after geometry/mesh invalidation. */
+      void prepare_boundary_contacts();
+      const std::vector<FaultBoundaryContact<dim>> &get_boundary_contacts() const
+      { return boundary_contacts; }
+      const std::vector<FaultBoundaryFace<dim>> &get_boundary_faces() const
+      { return boundary_faces; }
+      const std::vector<PrescribedInitialFault<dim>> &get_prescribed_faults() const
+      { return prescribed_faults; }
+      unsigned int get_boundary_contact_generation() const { return boundary_contact_generation; }
+      /** Admit paired source associations using a verified full Q1 support enclosure. */
+      void enable_automatic_source_continuation(const std::vector<double> &transverse_extents,
+                                                const std::vector<double> &branch_extents);
 
       /** Add one complete reconstructed fault and its normal-profile half widths. */
       unsigned int add_reconstructed_fault(
@@ -477,6 +493,13 @@ namespace aspect
       // Bulk-cell/QP geometry cache. Constitutive coefficients are not stored here.
       unsigned int bottom_source_fault = numbers::invalid_unsigned_int;
       bool top_source_continuation = false;
+      bool automatic_boundary_completion = false;
+      bool boundary_contacts_valid = false, automatic_source_ready = false;
+      unsigned int boundary_contact_generation = 0;
+      double boundary_geometry_tolerance = 0.;
+      std::vector<std::uint64_t> boundary_fault_versions;
+      std::vector<FaultBoundaryFace<dim>> boundary_faces;
+      std::vector<FaultBoundaryContact<dim>> boundary_contacts;
       Point<dim> source_box_lower, source_box_upper;
       bool stokes_qp_projection_cache_valid = false;
       std::uint64_t cached_stokes_qp_projection_metadata_version = 0;

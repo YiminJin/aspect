@@ -752,6 +752,73 @@ must still be prescribed to Vp. Only the tested frozen mature, straight,
 through-bottom geometry is qualified. Completion tables must be regenerated
 for a changed mesh/profile/fault, not reused as universal analytic constants.
 
+### Opt-in automatic prescribed boundary completion (R2b proposal 2)
+
+The selected boundary-completion extension adds `Fault reconstruction / Boundary
+completion = automatic prescribed`; `legacy` remains the default. This is a
+behavior extension after the separately qualified move-only extraction. It
+selects paired exterior normalization and the existing bulk-work mechanical
+measure; it does not introduce physical exterior cells, particles, or unknowns.
+Legacy CSV completion and automatic completion are mutually exclusive.
+
+M3 detects all prescribed polyline/boundary intersections, including crossings
+between input vertices, and retains per-fault/per-endpoint contact records.
+Only transverse endpoints on one planar nonperiodic face are supported. Either
+end, both ends, different faces and independent faults are allowed; a terminal
+neighborhood must be straight and its full support unambiguous. A curved
+interior is allowed. Shared facet contacts are deduplicated using 256 machine
+epsilons times the boundary coordinate/diameter scale. Periodic faces do not
+acquire nonperiodic completion. Unsupported crossings require separately
+designed topology/history remapping, not a new endpoint invented here.
+
+For a contact at e, inward tangent t, fault normal n and inward boundary normal
+m, let x=e+s t+r n, a=m.t>0, b=m.n. The physical half-plane is a s+b r>=0.
+Exterior normalization uses s>=0 outside this half-plane; physical mechanical
+continuation uses s<0 inside it. With full transverse enclosure R, the geometric
+influence is L=R|b|/a. Exactly perpendicular contacts have zero correction;
+near-perpendicular angles are retained. Other faces, diffuse branches and
+contact support rectangles are checked conservatively for overlap. Existing
+normal associations at s=0 survive raw/resampled frame roundoff within the
+geometric tolerance.
+
+M4 requires a frozen mature, fully constrained Q1 phase field and verifies the
+entire physical nodal field against the existing prescribed stationary profile
+(maximum absolute phase error 2e-11). Initial H or the frozen flag alone does not
+qualify the field. The first implementation uses constant core phi per fault,
+identical shear modulus/cohesion/Gc in all material phases, and axis-aligned
+affine Box cells. Boundary cells over the contact footprint must define one
+aligned uniform ghost lattice; mesh deformation and 3D are unsupported. A
+nonuniform boundary mesh needs explicit exterior discretization data. No
+superposition rule for overlapping prescribed profiles is assumed.
+
+M4 evaluates the same stationary profile at ghost-grid vertices, interpolates
+Q1 values, and integrates the missing interval using the ordinary localization
+integrand and profile-uniform material mixture. The BP3 convention is preserved:
+cell-edge interval cuts, Gauss8 compared to two half-panels, tolerance
+1e-11*max(1,abs(panel integral)), maximum depth 20. Correction is added exactly
+once before the unchanged surface Q1 projection. R is the profile radius plus
+a bound on the physical Q1 cell width; it encloses zero support rather than
+truncating a nonzero mechanical tail. Other-branch envelopes include their
+profile radii and the maximum physical cell diameter.
+
+M3 supplies one endpoint association to the existing M5 residual/Jacobian and
+particle-history paths. These use physical phi, pressure, stress and history,
+with endpoint slip rate, normalization and surface state. Free endpoint
+K_V, B and G derivatives are retained; G is not assumed to be B transpose.
+Geometry records rebuild after geometry/mesh/restart invalidation. They and
+the exterior evaluators are transient; checkpoint format and existing
+normalization value-reuse criteria are unchanged. MPI gathers boundary facets,
+not a bulk field, and reduces compatibility checks consistently. Corrections
+remain on existing profile owners. Contact summaries are rank controlled.
+
+BP3's plugin and the focused fixtures constrain every phase DoF to the same
+prescribed profile used for continuation. Ordinary H-driven initialization is
+not qualified. The separate evolution-compatible phase-boundary task in
+[the refactoring plan](refactoring/refactoring_plan.md) must specify exterior
+physics, evolving boundary data, irreversibility, refinement and restart before
+extending this mode. M1/CPDI and M2/evolution are unchanged. See
+[qualification and limitations](refactor_review.md) for the bounded evidence.
+
 Cold point location may conservatively reject points outside the global
 reference-tolerance-expanded mesh enclosure. This optimization is limited to
 exact `MappingCartesian` or degree-one `MappingQ`/`MappingQ1` on axis-aligned affine cells; unsupported
@@ -1622,9 +1689,11 @@ manager does not add it implicitly and preserves standard explicit model-list
 selection. Stage J adds no post-solve cutback or repeat operation.
 
 The plugin also provides `Time stepping / Reconstructed fault time step /
-Maximum logarithmic state change`, a positive dimensionless bound
+Maximum logarithmic state change`, a positive finite dimensionless bound
 \(\delta_\Theta\), disabled by default using `std::numeric_limits<double>::max()`.
-The literal `infinity` is accepted as an alias for this disabled sentinel.
+The numeric parser uses `Patterns::Double(0.)`, followed by an `AssertThrow`
+requiring a strictly positive value. Zero and the literal `infinity` are not
+accepted.
 For an enabled bound and a
 stateful friction law, start from the law-specific proposal capped by ASPECT's
 maximum timestep. Predict at every fault vertex using the same exact exponential
@@ -1635,8 +1704,9 @@ This is an **unweighted** log-change bound; the benchmark BP5 predictor's
 \(b/a\) weighting is not used. Fixed-rate aging is monotone toward \(D_c/V\),
 so halving brackets an admissible positive timestep and bisection retains the
 safe endpoint. The predictor never commits state or reads trial velocity.
-Infinity bypasses it completely, and stateless friction ignores it. The ordinary
-time-stepping manager still combines restrictions and performs the MPI minimum;
+The maximum-finite-double sentinel bypasses it completely, and stateless
+friction ignores it. The ordinary time-stepping manager still combines
+restrictions and performs the MPI minimum;
 its configured minimum-timestep floor retains its existing semantics. This is
 a forward prediction, not a post-solve guarantee for the next solved velocity.
 

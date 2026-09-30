@@ -250,6 +250,10 @@ namespace aspect
                         Patterns::Bool(),
                         "Fit normal offsets to the solved phase ridge. If false, retain the "
                         "resampled prescribed polyline exactly, using the same profile support policy.");
+      prm.declare_entry("Boundary completion", "legacy", Patterns::Selection("legacy|automatic prescribed"),
+                        "Legacy retains existing boundary behavior. Automatic prescribed classifies every "
+                        "fault contact and requires a compatible fully prescribed frozen 2-D phase field, "
+                        "supported exterior Q1 data and paired mechanical work. Unsupported contacts fail.");
       prm.declare_entry("Ridge coefficient", "1",
                         Patterns::Double(0.0),
                         "Dimensionless second-difference ridge coefficient applied after "
@@ -273,6 +277,10 @@ namespace aspect
     {
       structural_spacing = prm.get_double("Structural point spacing");
       fit_prescribed_geometry = prm.get_bool("Fit prescribed geometry to phase field");
+      automatic_boundary_completion = prm.get("Boundary completion") == "automatic prescribed";
+      AssertThrow(!automatic_boundary_completion || (dim==2 && !fit_prescribed_geometry),
+                  ExcMessage("Automatic boundary completion requires 2D prescribed fixed geometry "
+                             "(Fit prescribed geometry to phase field=false); 3D contacts are unsupported."));
       ridge_coefficient = prm.get_double("Ridge coefficient");
       prescribed_faults_filename = prm.get("Prescribed faults file");
       AssertThrow(std::isfinite(structural_spacing) && structural_spacing > 0.0,
@@ -294,16 +302,19 @@ namespace aspect
     this->get_signals().post_refinement_load_user_data.connect(
       [this] (parallel::distributed::Triangulation<dim> &)
     {
+      boundary_contacts_valid = false;
       invalidate_stokes_qp_projection_cache();
     });
     this->get_signals().post_resume_load_user_data.connect(
       [this] (parallel::distributed::Triangulation<dim> &)
     {
+      boundary_contacts_valid = false;
       invalidate_stokes_qp_projection_cache();
     });
     this->get_signals().post_mesh_deformation.connect(
       [this] (const SimulatorAccess<dim> &)
     {
+      boundary_contacts_valid = false;
       invalidate_stokes_qp_projection_cache();
     });
 
@@ -331,6 +342,9 @@ namespace aspect
     const std::vector<PrescribedInitialFault<dim>> &faults)
   {
     prescribed_faults = faults;
+    boundary_contacts_valid = false;
+    if (automatic_boundary_completion)
+      prepare_boundary_contacts();
     if (faults.empty())
       return;
 
@@ -1179,6 +1193,8 @@ namespace aspect
     slip_rate_nonlinear_solve_active = false;
     slip_rate_trial_active = false;
     diagnostics.clear();
+    boundary_contacts_valid = false;
+    automatic_source_ready = false;
     ++projection_metadata_version;
     invalidate_particle_projection_cache();
     invalidate_stokes_qp_projection_cache();
@@ -1824,6 +1840,8 @@ namespace aspect
   ReconstructedFaultManager<dim>::enable_bottom_source_continuation(
     const unsigned int fault_index, const Point<dim> &lower, const Point<dim> &upper)
   {
+    AssertThrow(!automatic_boundary_completion,
+                ExcMessage("Legacy and automatic boundary source continuation are mutually exclusive."));
     AssertThrow(dim == 2 && fault_index < reconstructed_faults.size(),
                 ExcMessage("Bottom source continuation requires a 2-D fault."));
     for (unsigned int d=0; d<dim; ++d)
@@ -1859,6 +1877,34 @@ namespace aspect
     if (!normal_profiles_checked)
       result=ReconstructedFaultUtilities::internal::project_to_normal_profiles_unchecked(
         reconstructed_faults, projection_half_widths, position);
+    if (automatic_boundary_completion)
+      {
+        AssertThrow(automatic_source_ready, ExcMessage("Automatic boundary completion must be qualified before assembly."));
+        const double tolerance=boundary_geometry_tolerance;
+        for (const auto &contact:boundary_contacts)
+          {
+            const auto offset=position-contact.position;
+            const double s=offset*contact.inward_tangent, r=offset*contact.normal;
+            if (contact.influence_length==0. || s>=0.
+                || offset*contact.inward_boundary_normal < -tolerance
+                || std::abs(r)>contact.transverse_extent) continue;
+            // This enclosure contains every nonzero physical Q1 cell in the
+            // verified terminal profile. It is not the normal-profile cutoff.
+            // Raw and resampled endpoint frames can put the same point on
+            // opposite sides of s=0 at roundoff. Retain its existing association.
+            if (result.active && result.fault_index==contact.fault_index
+                && s>=-tolerance)
+              continue;
+            AssertThrow(!result.active, ExcMessage("Overlapping physical boundary continuation associations."));
+            const auto &fault=reconstructed_faults[contact.fault_index];
+            result.active=true;
+            result.fault_index=contact.fault_index;
+            result.segment_index=contact.endpoint==0 ? 0 : fault.n_cells()-1;
+            result.xi=contact.endpoint==0 ? 0. : 1.;
+            result.signed_distance=r;
+          }
+        return result;
+      }
     if (result.active || bottom_source_fault==numbers::invalid_unsigned_int)
       return result;
     for (unsigned int d=0; d<dim; ++d)

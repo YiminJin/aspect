@@ -774,6 +774,15 @@ namespace aspect
     AssertThrow(dim==2 && phase_field_fault.is_mature_frictional_fault(),
                 ExcMessage("Bulk work measure requires a frozen mature 2-D fault."));
     const auto &faults=this->get_reconstructed_fault_manager().get_faults();
+    // Automatic completion has separately qualified each terminal neighborhood
+    // and its common source association. The assembly below is already per fault
+    // and uses each segment's frame; retain the legacy admission restriction.
+    if (this->get_reconstructed_fault_manager().uses_automatic_boundary_completion())
+      {
+        if (!bulk_work_measure) surface_linearization.reset();
+        bulk_work_measure=true;
+        return;
+      }
     AssertThrow(faults.size()==1,ExcMessage("Bulk work measure currently supports one straight fault."));
     const auto &fault=faults[0];
     auto tangent=fault.vertex(1)-fault.vertex(0);tangent/=tangent.norm();

@@ -215,14 +215,21 @@ namespace aspect
       auto &model = const_cast<MaterialModel::PhaseFieldFault<dim> &> (
           Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>> (sim.get_material_model ()));
       AssertThrow (
-          model.is_mature_frictional_fault () && !bottom_normalization_completion_file.empty (),
+          model.is_mature_frictional_fault () &&
+          (manager.uses_automatic_boundary_completion () || !bottom_normalization_completion_file.empty ()),
           ExcMessage ("Modified BP3 requires frozen mature mechanics and paired completion inputs."));
-      model.set_boundary_normalization_completion_file (bottom_normalization_completion_file);
-      const auto &box
-          = Plugins::get_plugin_as_type<const GeometryModel::Box<dim>> (sim.get_geometry_model ());
-      manager.enable_bottom_source_continuation (0, box.get_origin (),
-                                                 box.get_origin () + box.get_extents ());
-      manager.enable_top_source_continuation ();
+      if (manager.uses_automatic_boundary_completion ())
+        AssertThrow(bottom_normalization_completion_file.empty(),
+                    ExcMessage("Automatic BP3 completion requires an empty legacy completion-file selector."));
+      else
+        {
+          model.set_boundary_normalization_completion_file (bottom_normalization_completion_file);
+          const auto &box
+              = Plugins::get_plugin_as_type<const GeometryModel::Box<dim>> (sim.get_geometry_model ());
+          manager.enable_bottom_source_continuation (0, box.get_origin (),
+                                                     box.get_origin () + box.get_extents ());
+          manager.enable_top_source_continuation ();
+        }
       sim.get_reconstructed_fault_surface_system ().enable_bulk_work_measure ();
       if (sim.get_timestep_number () != 0 || restored_history)
         model.set_reconstructed_fault_background_traction_property (

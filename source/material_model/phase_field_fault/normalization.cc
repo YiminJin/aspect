@@ -178,6 +178,8 @@ namespace aspect
       // completed hit or successfully projected new result can publish validity.
       const bool previous_cache_valid = normalization_value_cache.valid;
       normalization_value_cache.valid = false;
+      if (this->get_reconstructed_fault_manager().uses_automatic_boundary_completion())
+        prepare_automatic_boundary_completion();
       normalization_value_cache.last_requested_points = 0;
       normalization_point_lookups.next_batch = 0;
       normalization_point_lookups.hits = 0;
@@ -565,6 +567,11 @@ namespace aspect
       const std::vector<NormalizationProfile> &profiles,
       std::vector<double> &profile_integrals) const
     {
+      if (this->get_reconstructed_fault_manager().uses_automatic_boundary_completion())
+        {
+          apply_automatic_boundary_completion(profiles, profile_integrals);
+          return;
+        }
       const auto &faults = this->get_reconstructed_fault_manager().get_faults();
       const unsigned int mpi_rank = Utilities::MPI::this_mpi_process(this->get_mpi_communicator());
       // Auxiliary outside integrals enter the SAME profile-weighted RHS before
@@ -623,6 +630,8 @@ namespace aspect
     void
     PhaseFieldFault<dim>::invalidate_normalization_cache()
     {
+      boundary_continuations.clear();
+      boundary_continuation_generation = numbers::invalid_unsigned_int;
       normalization_value_cache.valid = false;
       normalization_point_lookups.batches.clear();
       normalization_cell_cache.mesh_changed = true;

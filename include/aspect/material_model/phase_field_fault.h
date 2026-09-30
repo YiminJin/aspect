@@ -444,6 +444,22 @@ namespace aspect
           const std::vector<NormalizationProfile> &profiles,
           std::vector<double> &profile_integrals) const;
 
+        /** Qualify geometry and the fully prescribed current Q1 field before reuse/assembly. */
+        void prepare_automatic_boundary_completion();
+        void apply_automatic_boundary_completion(
+          const std::vector<NormalizationProfile> &profiles,
+          std::vector<double> &profile_integrals) const;
+
+        struct BoundaryContinuation
+        {
+          std::unique_ptr<PhaseField::PhaseFieldProfile> profile;
+          Point<dim> lattice_origin;
+          Tensor<1,dim> spacing;
+          double extent = 0.;
+        };
+        std::vector<BoundaryContinuation> boundary_continuations;
+        unsigned int boundary_continuation_generation = numbers::invalid_unsigned_int;
+
         /** Discard transient value and lookup data after checkpoint loading. */
         void invalidate_normalization_cache();
 

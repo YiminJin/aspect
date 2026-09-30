@@ -606,6 +606,60 @@ supported affine Box geometry and preserves the profile-uniform mixture,
 quadrature/tail coefficients, full physical-box truncation and consistent
 surface projection. Phase changes invalidate values but not cell traversals.
 
+\subsection{Automatic prescribed boundary completion (selected R2b extension)}
+The explicit selector \texttt{Boundary completion = automatic prescribed}
+adds paired completion; \texttt{legacy} remains the default. Reconstructed-fault
+infrastructure owns per-fault contact geometry and association; PhaseFieldFault
+owns exterior constitutive evaluation and normalization; existing mechanical
+assembly owns residuals and derivatives. No generic completion framework or
+physical exterior mesh/particles/unknowns are introduced.
+
+For each transverse endpoint on a single planar nonperiodic face, use
+$x=e+s t+r n$, $a=m\cdot t>0$, $b=m\cdot n$. The physical half-plane is
+$as+br\geq0$. Complete normalization on the real-fault side $s\geq0$ outside
+that half-plane and continue endpoint surface fields in the physical wedge
+$s<0$. A full transverse support enclosure $R$ gives influence length
+$L=R|b|/a$. Exactly perpendicular contacts have zero correction; small angles
+are not rotated. Detect segment crossings as well as endpoints, deduplicate
+shared facets, and reject corners, tangencies, unrepresented crossings,
+short/curved terminal neighborhoods, ambiguous or overlapping diffuse support,
+and unsupported exterior data. Either/both endpoints, different faces and
+independent faults are supported. Periodic faces retain their existing handling.
+
+Admission requires a verified fully prescribed frozen mature Q1 phase field,
+not merely initial H or a frozen flag. The first implementation checks all
+physical phase DoFs against the existing stationary profile (absolute error
+at most $2\times10^{-11}$), requires constant core phase per fault and identical
+profile/degradation coefficients across material phases, and restricts the
+exterior discretization to an aligned uniform local ghost-Q1 lattice on an
+axis-aligned affine Box mesh. Mesh deformation and 3D are unsupported.
+
+Use the BP3 ghost-Q1 convention and ordinary localization integrand: integrate
+cell-edge panels with Gauss8 versus two halves at
+$10^{-11}\max(1,|I_{\rm panel}|)$, with at most 20 bisections. Add
+$I_{\rm out}$ to $I_{\rm in}$ once before the unchanged consistent Q1
+projection. Enclose the entire Q1 support using the prescribed profile radius
+plus cell-width bounds; do not turn an integration extent into a cutoff of
+nonzero physical mechanical support. Diffuse branch envelopes participate in
+admission, not only their centerlines. Legacy CSV and automatic corrections
+are mutually exclusive.
+
+The common physical source association uses endpoint shape functions, current
+physical phase/pressure/stress/history, and endpoint surface fields in every
+bulk/surface residual and coupling derivative, including free endpoints.
+The selected automatic mode uses the existing bulk-work measure. Geometry and
+continuation data are derived caches rebuilt through existing geometry, mesh
+and restart lifecycle paths. Checkpoint formats and normalization value-cache
+criteria do not change. No complete bulk field is gathered.
+
+A separate evolution-compatible phase-boundary treatment remains required for
+unqualified H-driven initialization or evolving faults. Specify exterior
+physics and the evolution of boundary data, irreversibility, refinement and
+restart before selecting that numerical extension. Permanently prescribed
+boundary values and initial-only fault data are distinct; exterior completion
+cannot repair an incompatible physical phase solution. The selected R2b task
+does not modify particle-domain/CPDI or generic phase-field evolution code.
+
 \subsection{Normalization-profile material mixture}
 For the authorized bounded K5 bottom-completion diagnostic only, augment a
 physical profile integral by its missing outside-bottom Q1 continuation before
@@ -2034,9 +2088,11 @@ does not add a post-solve cutback or repeat operation.
 
 An optional forward state limiter is configured by
 \texttt{Time stepping / Reconstructed fault time step / Maximum logarithmic state change}.
-Its dimensionless bound $\delta_\Theta$ is positive. The default is the largest
-finite double, used as a disabled sentinel; the literal \texttt{infinity}
-is accepted as an alias for that sentinel. For stateful friction, predict
+Its dimensionless bound $\delta_\Theta$ is finite and strictly positive, parsed
+with \texttt{Patterns::Double(0.)} followed by an \texttt{AssertThrow} that
+rejects zero. The default is the largest finite double, used
+as a disabled sentinel; the literal \texttt{infinity} is not accepted.
+For stateful friction with an enabled bound, predict
 \[
  \Theta_i^{\rm predicted}(\Delta t)=
  \frac{D_c}{V_i^n}\left(1-e^{-V_i^n\Delta t/D_c}\right)
@@ -2052,8 +2108,8 @@ global maximum timestep, until
 There is no $b/a$ weighting. Constant-rate aging is monotone toward $D_c/V_i^n$;
 halve to bracket an admissible positive timestep and bisect, retaining the safe
 endpoint. No prediction changes committed history or uses trial velocity.
-Infinity leaves the previous proposal unchanged; stateless friction bypasses
-this limiter. Standard manager/MPI combination and minimum-timestep semantics
+The maximum-finite-double sentinel leaves the previous proposal unchanged;
+stateless friction bypasses this limiter. Standard manager/MPI combination and minimum-timestep semantics
 remain unchanged. This prediction does not impose a post-solve acceptance test
 on the next solved velocity.
 
