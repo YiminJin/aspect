@@ -438,6 +438,12 @@ namespace aspect
         void
         compute_normalization_integrals();
 
+        /** Add immutable outside-profile integrals before the existing Q1 projection. */
+        void
+        apply_boundary_normalization_completion(
+          const std::vector<NormalizationProfile> &profiles,
+          std::vector<double> &profile_integrals) const;
+
         /** Discard transient value and lookup data after checkpoint loading. */
         void invalidate_normalization_cache();
 
@@ -468,6 +474,27 @@ namespace aspect
         /** Construct the balanced rank-owned set of normal profiles. */
         std::vector<NormalizationProfile>
         build_owned_normalization_profiles(const bool all_profiles = false) const;
+
+        /** Profile endpoints and local work counts from cell geometry preparation. */
+        struct NormalizationCellGeometry
+        {
+          /** Distances to the physical boundary along the positive and negative normal. */
+          std::vector<std::array<double,2>> ends;
+          unsigned long long candidates = 0;
+          unsigned long long rebuilt = 0;
+          unsigned long long reused = 0;
+          unsigned long long intervals = 0;
+        };
+
+        /**
+         * Admit the cell backend and prepare cached, locally owned ray intervals
+         * and phase DoF indices from the mesh and profile geometry. All ranks
+         * participate in the physical-box reductions when the mesh has changed.
+         * Sets normalization_cell_cache.supported; if false, returns empty data
+         * so the caller can use remote points. Does not sample phase values.
+         */
+        NormalizationCellGeometry
+        prepare_cell_normalization_geometry(const std::vector<NormalizationProfile> &profiles);
 
         /** Integrate current phase values on cached, locally owned ray intervals. */
         std::vector<double>
