@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.13.4)
+find_package(Aspect REQUIRED HINTS ${Aspect_DIR})
+DEAL_II_INITIALIZE_CACHED_VARIABLES()
+project(normalization_cache_extraction_audit)
+add_library(cache_audit SHARED cache_audit.cc)
+ASPECT_SETUP_PLUGIN(cache_audit)

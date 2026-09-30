@@ -164,47 +164,31 @@ namespace aspect
     // Normalization-integral evaluation
     // -----------------------------------------------------------------------------
 
+    /** Inputs and decision for this preparation only; no persistent cache state. */
     template <int dim>
-    void
-    PhaseFieldFault<dim>::compute_normalization_integrals()
+    struct PhaseFieldFault<dim>::NormalizationReuseDecision
     {
-      Timer preparation_timer;
-      TimerOutput::Scope coarse_timer(this->get_computing_timer(), "Fault: I_h");
-      TimerOutput::Scope timer(*performance_timer, "Fault: I_h preparation");
+      // The partition belongs to introspection and outlives this preparation,
+      // just as the original caller-local reference did.
+      unsigned int phase_block;
+      const IndexSet &owned_indices;
+      std::vector<double> phase_values;
+      std::vector<std::uint64_t> fault_versions;
+      std::vector<Point<dim>> fault_vertices;
+      std::vector<double> surface_compositions;
+      bool composition_independent, global_hit;
+      std::chrono::steady_clock::time_point key_end, key_mpi_end;
+    };
+
+
+    template <int dim>
+    typename PhaseFieldFault<dim>::NormalizationReuseDecision
+    PhaseFieldFault<dim>::prepare_normalization_reuse(const bool previous_cache_valid) const
+    {
       using Clock = std::chrono::steady_clock;
-      const bool detailed_timing = std::getenv("ASPECT_FAULT_PERFORMANCE");
-      const auto preparation_begin = Clock::now();
-      // Invalidate before any failure-capable projection/evaluation. Only a
-      // completed hit or successfully projected new result can publish validity.
-      const bool previous_cache_valid = normalization_value_cache.valid;
-      normalization_value_cache.valid = false;
-      if (this->get_reconstructed_fault_manager().uses_automatic_boundary_completion())
-        prepare_automatic_boundary_completion();
-      normalization_value_cache.last_requested_points = 0;
-      normalization_point_lookups.next_batch = 0;
-      normalization_point_lookups.hits = 0;
-      normalization_point_lookups.rebuilds = 0;
-      // Mapping motion need not emit a triangulation-change signal. Keep the
-      // original lookup path in that configuration rather than risk stale maps.
-      if (this->get_parameters().mesh_deformation_enabled)
-        normalization_point_lookups.batches.clear();
-      ReconstructedFaultManager<dim> &fault_manager =
-        this->get_reconstructed_fault_manager();
-      const std::vector<ReconstructedFault<dim>> &faults = fault_manager.get_faults();
-      if (faults.empty())
-        {
-          current_normalization_integrals.clear();
-          normalization_point_lookups.batches.clear();
-          return;
-        }
-
-      const PhaseFieldHandler<dim> &phase_field_handler =
-        this->get_phase_field_handler();
-
-      // First project each named chemical field to the fault. Every normal
-      // profile then keeps its surface mixture fixed along both +/-n sides.
-      project_surface_chemical_compositions();
-      const auto projection_end = Clock::now();
+      const auto &fault_manager = this->get_reconstructed_fault_manager();
+      const auto &faults = fault_manager.get_faults();
+      const auto &phase_field_handler = this->get_phase_field_handler();
 
       // Exact owned-entry comparison detects even nonstandard noncommitting
       // substitutions. No distributed point requests or integration occur on a
@@ -254,6 +238,57 @@ namespace aspect
       const auto key_end = Clock::now();
       const bool global_hit = Utilities::MPI::min(static_cast<unsigned int>(local_hit), this->get_mpi_communicator());
       const auto key_mpi_end = Clock::now();
+      return {phase_block, owned_indices, std::move(phase_values), std::move(fault_versions),
+              std::move(fault_vertices), std::move(surface_compositions),
+              composition_independent, global_hit, key_end, key_mpi_end};
+    }
+
+
+    template <int dim>
+    void
+    PhaseFieldFault<dim>::compute_normalization_integrals()
+    {
+      Timer preparation_timer;
+      TimerOutput::Scope coarse_timer(this->get_computing_timer(), "Fault: I_h");
+      TimerOutput::Scope timer(*performance_timer, "Fault: I_h preparation");
+      using Clock = std::chrono::steady_clock;
+      const bool detailed_timing = std::getenv("ASPECT_FAULT_PERFORMANCE");
+      const auto preparation_begin = Clock::now();
+      // Invalidate before any failure-capable projection/evaluation. Only a
+      // completed hit or successfully projected new result can publish validity.
+      const bool previous_cache_valid = normalization_value_cache.valid;
+      normalization_value_cache.valid = false;
+      if (this->get_reconstructed_fault_manager().uses_automatic_boundary_completion())
+        prepare_automatic_boundary_completion();
+      normalization_value_cache.last_requested_points = 0;
+      normalization_point_lookups.next_batch = 0;
+      normalization_point_lookups.hits = 0;
+      normalization_point_lookups.rebuilds = 0;
+      // Mapping motion need not emit a triangulation-change signal. Keep the
+      // original lookup path in that configuration rather than risk stale maps.
+      if (this->get_parameters().mesh_deformation_enabled)
+        normalization_point_lookups.batches.clear();
+      ReconstructedFaultManager<dim> &fault_manager =
+        this->get_reconstructed_fault_manager();
+      const std::vector<ReconstructedFault<dim>> &faults = fault_manager.get_faults();
+      if (faults.empty())
+        {
+          current_normalization_integrals.clear();
+          normalization_point_lookups.batches.clear();
+          return;
+        }
+
+      const PhaseFieldHandler<dim> &phase_field_handler =
+        this->get_phase_field_handler();
+
+      // First project each named chemical field to the fault. Every normal
+      // profile then keeps its surface mixture fixed along both +/-n sides.
+      project_surface_chemical_compositions();
+      const auto projection_end = Clock::now();
+
+      auto [phase_block, owned_indices, phase_values, fault_versions, fault_vertices,
+            surface_compositions, composition_independent, global_hit, key_end, key_mpi_end] =
+        prepare_normalization_reuse(previous_cache_valid);
       if (global_hit)
         {
           normalization_value_cache.valid = true;
@@ -1705,6 +1740,8 @@ namespace aspect
     // Instantiate the moved members here, including the private/static test paths.
 #define INSTANTIATE(dim) \
     template void PhaseFieldFault<dim>::compute_normalization_integrals(); \
+    template PhaseFieldFault<dim>::NormalizationReuseDecision \
+      PhaseFieldFault<dim>::prepare_normalization_reuse(const bool) const; \
     template void PhaseFieldFault<dim>::apply_boundary_normalization_completion( \
       const std::vector<NormalizationProfile> &, std::vector<double> &) const; \
     template void PhaseFieldFault<dim>::invalidate_normalization_cache(); \

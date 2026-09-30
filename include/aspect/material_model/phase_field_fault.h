@@ -434,6 +434,17 @@ namespace aspect
          * @name Normalization-integral evaluation
          * @{
          */
+        struct NormalizationReuseDecision;
+
+        /**
+         * Capture current cache inputs, test composition independence and agree
+         * collectively on exact reuse. The caller must first invalidate values,
+         * qualify automatic completion and project surface compositions. This
+         * operation neither invalidates nor publishes persistent cache state.
+         */
+        NormalizationReuseDecision
+        prepare_normalization_reuse(const bool previous_cache_valid) const;
+
         /** Compute or exactly reuse transient nodal I_h for the current state. */
         void
         compute_normalization_integrals();
