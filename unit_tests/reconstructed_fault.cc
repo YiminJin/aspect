@@ -1118,6 +1118,59 @@ TEST_CASE("ReconstructedFaultManager checkpoint restores committed slip rate")
   REQUIRE(restored.has_property("phase field fault previous I h"));
 }
 
+TEST_CASE("Restart rebuilds unprescribed and reapplied prescribed trial rates",
+          "[fault_slip_restart]")
+{
+  const ThrowOnDealIIException throw_on_dealii_exception;
+  aspect::ReconstructedFaultManager<2> manager;
+  manager.add_reconstructed_fault({{0,0},{1,0}}, {0.5,0.5});
+  manager.initialize_slip_rate(0, {2e-9,3e-9});
+
+  // Prescriptions are runtime boundary configuration, never checkpoint history.
+  SECTION("checkpoint without prescribed rates") {}
+  SECTION("checkpoint with caller-supplied prescribed rates")
+  {
+    manager.set_prescribed_slip_rates({{{1,4e-9}}});
+  }
+
+  std::stringstream storage;
+  { aspect::oarchive archive(storage); archive << manager; }
+  aspect::ReconstructedFaultManager<2> restored;
+  { aspect::iarchive archive(storage); archive >> restored; }
+  const std::vector<std::vector<bool>> unprescribed = {{false,false}};
+  REQUIRE(restored.prescribed_slip_rate_mask() == unprescribed);
+
+  // A normal restart must support absolute trials without a boundary setter.
+  restored.begin_slip_rate_nonlinear_solve();
+  restored.begin_slip_rate_trial();
+  restored.set_slip_rate_trial_values({{5e-9,6e-9}});
+  REQUIRE(restored.get_slip_rate(0) == std::vector<double>{5e-9,6e-9});
+  REQUIRE(restored.get_timestep_committed_slip_rate(0)
+          == std::vector<double>{2e-9,3e-9});
+  restored.accept_slip_rate_trial();
+  restored.rollback_slip_rate_nonlinear_solve();
+  REQUIRE(restored.get_slip_rate(0) == std::vector<double>{2e-9,3e-9});
+
+  // BP3's caller reattaches prescribed rows after restart. Keep their mask,
+  // exact values and rejection of a violating absolute candidate effective.
+  restored.set_prescribed_slip_rates({{{1,4e-9}}});
+  const std::vector<std::vector<bool>> prescribed = {{false,true}};
+  REQUIRE(restored.prescribed_slip_rate_mask() == prescribed);
+  restored.begin_slip_rate_nonlinear_solve();
+  REQUIRE(restored.get_slip_rate(0) == std::vector<double>{2e-9,4e-9});
+  restored.begin_slip_rate_trial();
+  restored.set_slip_rate_trial_values({{5e-9,4e-9}});
+  REQUIRE_THROWS_WITH(restored.set_slip_rate_trial_values({{6e-9,3e-9}}),
+                      Catch::Contains("An absolute trial changed a prescribed fault slip rate."));
+  REQUIRE(restored.get_slip_rate(0) == std::vector<double>{5e-9,4e-9});
+  restored.accept_slip_rate_trial();
+  restored.validate_slip_rate_nonlinear_commit();
+  restored.commit_slip_rate_nonlinear_solve();
+  REQUIRE(restored.get_timestep_committed_slip_rate(0)
+          == std::vector<double>{5e-9,4e-9});
+}
+
+
 TEST_CASE("Mature fixed prestress and geometry survive manager checkpoint", "[mature_fault]")
 {
   aspect::ReconstructedFaultManager<2> manager;

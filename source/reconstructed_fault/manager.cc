@@ -1192,6 +1192,8 @@ namespace aspect
     trial_slip_rates.assign(reconstructed_faults.size(), {});
     slip_rate_nonlinear_solve_active = false;
     slip_rate_trial_active = false;
+    // Rebuild the transient per-fault layout; callers reapply prescribed rows.
+    prescribed_slip_rates.assign(reconstructed_faults.size(), {});
     diagnostics.clear();
     boundary_contacts_valid = false;
     automatic_source_ready = false;

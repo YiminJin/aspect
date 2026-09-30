@@ -1,6 +1,57 @@
 # Reconstructed-fault refactoring review
 
-## Separate cohesive restart investigation (complete; correction not applied)
+## Minimal restart correction (complete; corrected R3a reference)
+
+The user separately authorized the correctness fix after the diagnosis below.
+`ReconstructedFaultManager::rebuild_after_deserialization()` now assigns one
+empty prescribed-rate map per reconstructed fault beside its other transient
+resets. A short comment explains the layout and caller reapplication contract.
+This is the only production change: no serialized member, header/API, ownership,
+material history operation, MPI ordering, tolerance or physical parameter changed.
+
+The new `[fault_slip_restart]` unit regression round-trips both an unprescribed
+manager and one with runtime prescriptions, verifies that prescriptions are not
+restored, opens an absolute-value trial without calling the setter, then checks
+accepted-Newton rollback. It reapplies a prescribed row as BP3 does, checks its
+mask/exact rate, rejects a violating candidate without changing the trial, and
+commits the valid values. The new test crashes with the original manager object
+(exit 139) and passes with the fix. Existing prescribed-rate/checkpoint/Stage-I
+coverage plus this regression passes 20,173 assertions/17 cases per rank on
+one and two ranks.
+
+The original one-rank cohesive checkpoint and its observer are retained.
+Restart now passes the original restored history/V/geometry/bulk assertions and
+reaches the same step-two nonconvergence as the uninterrupted run. Both accept
+two Newton updates then exhaust line-search candidates at relative bulk residual
+`4.105631e-06`. Phase-field target doubles, iterations, linear residuals,
+nonlinear residuals and decisions match exactly, also against the pre-fix fresh
+run. Comparison normalizes stream whitespace/scientific notation and separately
+checks nondeterministically interleaved stdout/stderr error messages; it applies
+no numerical tolerance. Accepted step-one checkpoint meshes/particle payloads,
+physical fingerprint and fresh-run statistics match. All 15 cohesive checks
+pass. Step-two nonconvergence remains a separate limitation; no accepted step-two
+physical state exists for comparison.
+
+Four short BP3 runs (legacy/automatic, one/two ranks) plus the automatic old-
+checkpoint one-to-two-rank continuation pass. All 405 field groups and 30 cache/
+work checks match the qualified R3a reference exactly. The short maintained BP3
+callback reapplies empty maps; nonempty prescribed-row enforcement after caller
+reapplication is tested through the same manager API in the new regression.
+The full 200-km BP3 prescribed-row run and 3D simulations were not run. The prior
+cross-rank cohesive observer failure remains unmodified.
+
+The move-only R3a and investigation record are committed as `8490431b5`, with
+this correctness correction in a separate commit. Candidate compilation/link
+reuses preserved R3a objects except the rebuilt manager and unit-test groups.
+All 5,822 other entry source/header/test files remain unchanged. The corrected
+R3a reference for R3b is `build-restart-fix/aspect-r3a-corrected-qualified`;
+its SHA256, plugins, source hashes, commands and outcomes are recorded in the
+[correction harness](../../benchmarks/reconstructed_fault/restart_fix/README.md).
+R3b is not implemented. Proposed next task: expose the existing history lifecycle
+against this corrected baseline, preserving validation/write/MPI ordering and
+solver-owned timestep acceptance. The investigation below is a historical record.
+
+## Separate cohesive restart investigation (historical pre-fix record)
 
 The user selected diagnosis after R3a, not a source correction or R3b. The
 preserved R3a executable reproduces the crash on **one rank**, from a checkpoint

@@ -1,6 +1,33 @@
 # Phase-field / RSF current status
 
-## Separate cohesive restart diagnosis (complete; no fix applied)
+## Restart correction complete; corrected R3a reference ready
+
+The separately authorized correction rebuilds the transient prescribed-rate map
+layout after deserialization. Checkpoint format is unchanged; callers still
+reapply prescribed conditions. The new archive/trial regression fails with the
+old manager and passes with the fix. Restart/prescribed/checkpoint/Stage-I tests
+pass on one/two ranks (20,173 assertions/17 cases per rank).
+
+Cohesive restart now passes the original restored-state assertions and reaches
+step two without SIGSEGV. Fresh and restarted step-two solver decisions and
+residuals match exactly; both retain the existing nonlinear nonconvergence.
+Accepted step-one fields/checkpoint payloads match. No physical parameter,
+solver tolerance or history assertion changed. Four short BP3 legacy/automatic
+runs and the old-checkpoint cross-rank continuation match R3a in all 405 field
+groups and 30 cache/work checks. Nonempty prescribed-row reapplication is
+covered by the focused unit regression; the short BP3 fixture reapplies empty
+maps, and the full 200-km prescribed-row run was not repeated.
+
+R3a/investigation is committed as `8490431b5`; the correction is separate.
+Use `build-restart-fix/aspect-r3a-corrected-qualified` and the source/artifact
+manifest in [restart correction evidence](../../benchmarks/reconstructed_fault/restart_fix/README.md)
+as the reference for a subsequently selected R3b. R3b remains unimplemented.
+The step-two convergence and cross-rank cohesive observer limitations remain
+separate; proposed next task is R3b lifecycle extraction with existing ordering,
+publication and ownership preserved. The following diagnosis records pre-fix
+observations, not the current correction status.
+
+## Separate cohesive restart diagnosis (historical pre-fix record)
 
 The existing crash reproduces on one rank with original restored-history
 assertions passing, and with the optional restored-fingerprint observer
