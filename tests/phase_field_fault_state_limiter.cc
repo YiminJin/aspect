@@ -121,8 +121,6 @@ namespace aspect
           fault.get_properties(last)[position]=1e-310;
           set_limit("1000");
           AssertThrow(limiter.execute()==ceiling, ExcMessage("Overflow of a state ratio caused spurious limiting."));
-          set_limit("infinity");
-          AssertThrow(limiter.execute()==old_proposal(), ExcMessage("Infinity did not disable limiting."));
           set_limit(Utilities::to_string(std::numeric_limits<double>::max()));
           AssertThrow(limiter.execute()==old_proposal(), ExcMessage("Maximum finite double did not disable limiting."));
           commit_velocity(saved_velocity);
@@ -131,7 +129,7 @@ namespace aspect
               for (unsigned int i=0; i<velocity[f].size(); ++i)
                 manager.get_fault(f).get_properties(i)[position]=saved_theta[f][i];
             }
-          this->get_pcout() << "State limiter: infinity, equilibrium, increasing/decreasing state, tiny timestep, "
+          this->get_pcout() << "State limiter: maximum finite double, equilibrium, increasing/decreasing state, tiny timestep, "
                            << "all vertices, committed velocity, nonmutation and MPI agreement PASS" << std::endl;
           return {};
         }

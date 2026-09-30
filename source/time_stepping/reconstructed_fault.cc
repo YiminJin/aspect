@@ -27,11 +27,11 @@ namespace aspect
       prm.declare_entry("Maximum logarithmic state change",
                         Utilities::to_string(std::numeric_limits<double>::max()),
                         Patterns::Double(0.),
-                        "Positive dimensionless bound on max abs(ln(Theta_predicted/Theta)) "
+                        "Positive finite dimensionless bound on max abs(ln(Theta_predicted/Theta)) "
                         "over all reconstructed-fault vertices. Predict with the exponential "
                         "aging law at the latest committed slip rate, without advancing history. "
                         "The default, the largest finite double, disables this additional restriction; "
-                        "the literal infinity is also accepted to disable it. "
+                        "the literal infinity is not accepted. Zero is not allowed. "
                         "The bound is unweighted and does not include b/a. "
                         "It has no effect for a friction law without state.");
       prm.leave_subsection();
@@ -47,6 +47,8 @@ namespace aspect
       prm.enter_subsection("Time stepping");
       prm.enter_subsection("Reconstructed fault time step");
       maximum_logarithmic_state_change = prm.get_double("Maximum logarithmic state change");
+      AssertThrow(maximum_logarithmic_state_change > 0.0,
+                  ExcMessage("Maximum logarithmic state change must be strictly positive."));
       prm.leave_subsection();
       prm.leave_subsection();
     }

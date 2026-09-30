@@ -129,7 +129,7 @@ TEST_CASE("Reconstructed fault state limiter parameter is opt in", "[fault_state
 {
   using Limiter = aspect::TimeStepping::ReconstructedFault<2>;
   const std::string disabled = dealii::Utilities::to_string(std::numeric_limits<double>::max());
-  for (const std::string &value : std::vector<std::string>{disabled, "infinity", "0.1", "1e-12", "2"})
+  for (const std::string &value : std::vector<std::string>{disabled, "0.1", "1e-12", "2"})
     {
       dealii::ParameterHandler parameters;
       Limiter::declare_parameters(parameters);
@@ -142,18 +142,26 @@ TEST_CASE("Reconstructed fault state limiter parameter is opt in", "[fault_state
       Limiter limiter;
       REQUIRE_NOTHROW(limiter.parse_parameters(parameters));
     }
-  for (const std::string value : {"0", "-0.1", "nan", "-infinity", "invalid", "0.1 junk"})
+  for (const std::string value : {"-0.1", "nan", "infinity", "-infinity", "invalid", "0.1 junk"})
     {
       dealii::ParameterHandler parameters;
       Limiter::declare_parameters(parameters);
       parameters.enter_subsection("Time stepping");
       parameters.enter_subsection("Reconstructed fault time step");
-      parameters.set("Maximum logarithmic state change", value);
-      parameters.leave_subsection();
-      parameters.leave_subsection();
-      Limiter limiter;
-      REQUIRE_THROWS(limiter.parse_parameters(parameters));
+      REQUIRE_THROWS(parameters.set("Maximum logarithmic state change", value));
     }
+
+  // The numeric pattern admits its lower endpoint; the plugin rejects zero.
+  dealii::ParameterHandler parameters;
+  Limiter::declare_parameters(parameters);
+  parameters.enter_subsection("Time stepping");
+  parameters.enter_subsection("Reconstructed fault time step");
+  parameters.set("Maximum logarithmic state change", "0");
+  parameters.leave_subsection();
+  parameters.leave_subsection();
+  Limiter limiter;
+  REQUIRE_THROWS_WITH(limiter.parse_parameters(parameters),
+                      Catch::Contains("Maximum logarithmic state change must be strictly positive."));
 }
 
 

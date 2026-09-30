@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.13.4)
+find_package(Aspect REQUIRED HINTS ${Aspect_DIR})
+DEAL_II_INITIALIZE_CACHED_VARIABLES()
+project(refactoring_r1_probes)
+add_library(r1_limiter_probe SHARED limiter_probe.cc)
+ASPECT_SETUP_PLUGIN(r1_limiter_probe)
