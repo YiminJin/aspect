@@ -1,0 +1,17 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/bp3_modified_wide.prm
+set Resume computation = false
+set End time = 132230424.76671731
+subsection Termination criteria
+  set Termination criteria = end time, end step, wall time, BP3 replay complete
+  set End step = 7
+  set Wall time = 0.65000000000000002
+  set Checkpoint on termination = true
+end
+# Construct the hierarchy at Simulator construction, then resolve to the
+# existing reconstructed-fault AMG default before any mechanical solve.
+# The observer asserts that the borrowed action really is AMG.
+subsection Solver parameters
+  subsection Stokes solver parameters
+    set Stokes solver type = default solver
+  end
+end

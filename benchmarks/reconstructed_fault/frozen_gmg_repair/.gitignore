@@ -1,0 +1,5 @@
+evidence/
+inputs/
+output-*/
+*-plugin-build/
+__pycache__/

@@ -18,14 +18,15 @@ Both R4b subpasses and the recommendation to retain the existing driver with
 two focused operations are accepted and saved together. No whole-iteration
 helper was implemented. The qualified second-subpass executable and manifests
 recorded in the residual evidence are the baseline for subsequent work.
-R4b is committed as `983d57e28`. The selected R4c inventory proposes only shared
-Schur-wrapper construction; see the rolling review for dependencies and checks.
-The selected R4c implementation and focused verification are accepted:
-53 focused comparisons and 372 BP3 field groups match. The historical frozen-GMG
-probe has an identical baseline/candidate hierarchy-setup failure; its AMG half
-and the supported actual GMG case pass. See the rolling review for that limitation.
-The separately selected next task repairs only the historical frozen AMG/GMG
-comparison fixture. No further consolidation or R5–R8 work is selected.
+R4b is committed as `983d57e28`; accepted R4c is committed as `fa6013678`.
+Its shared Schur construction and qualified baseline are recorded in the rolling
+review and R4c evidence. The separately selected historical frozen AMG/GMG
+fixture repair is complete for review: both immutable executables reach the
+full pass marker with exact matched directions, state and counters (226 checks).
+It uses only existing default selection and test changes, preserving production
+AMG while constructing the hierarchy for the explicit GMG probe. No production
+interface change was needed. The repair remains separate and uncommitted;
+no further consolidation or R5–R8 work is selected.
 Historical outcomes remain in [the rolling review](../refactor_review.md).
 Module boundaries and frozen M1/M2 scope are defined in [refactoring.md](../refactoring.md).
 
@@ -342,7 +343,7 @@ those boundaries. A whole-step call would need broader mutable context or move
 driver decisions. The user accepted retaining the focused operations. See the
 rolling review for the dependency table. Further extraction needs selection.
 
-**R4c (shared Schur construction complete for review): demonstrated common linear-solver work.** Select the smallest
+**R4c (shared Schur construction accepted and committed): demonstrated common linear-solver work.** Select the smallest
 shared operation, potentially preconditioner construction. Retain the condensed
 operator/RHS/recovery and restricted inverse, pressure complement, physical
 normalization, total fault budget and true-residual restarts. Preserve ordinary
@@ -476,12 +477,11 @@ field/history groups and 28 counter/decision checks against the accepted first
 subpass; independent 2D/3D compilation and eight source/protection checks pass.
 It is accepted. The optional iteration-helper assessment is also accepted:
 retain the driver with the two focused operations. R4b is committed as
-`983d57e28`. R4c implements the shared Schur-wrapper construction and passes its
-build/source checks, 53 focused comparisons and 372 exact BP3 field/history groups.
-The frozen probe's GMG half has a confirmed pre-existing hierarchy-setup failure;
-frozen AMG and the supported coupled GMG path pass. R4c is ready for review.
-Further
-R4b operations and later stages require separate selection. Historical R1 fixture failures,
+`983d57e28`. R4c is accepted and committed as `fa6013678`, with its qualified
+baseline recorded. The separately repaired historical frozen AMG/GMG comparison
+now passes on the pre/post-R4c executables with all 226 checks. This test-only
+repair remains uncommitted for review; no R5 or further stage has begun.
+Further R4b operations and later stages require separate selection. Historical R1 fixture failures,
 Stage-J pressure incompatibility and cohesive step-two nonconvergence remain
 separate from refactoring equivalence. See CURRENT_STATUS.md and the rolling
 review for detailed earlier outcomes.

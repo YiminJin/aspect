@@ -1,5 +1,76 @@
 # Reconstructed-fault refactoring review
 
+## Separate historical frozen AMG/GMG fixture repair — complete for review
+
+R4c was accepted and committed first as `fa6013678b525b189a1d27ef08465d4a6ef263f6`.
+Its source/verification commit excludes this fixture repair and local temporary
+review edits. The qualified R4c binary/hash remain as recorded below. This
+separate task uses the immutable pre-R4c `983d57e28` and post-R4c executables,
+with separate plugins; neither binary nor production source/header changed.
+
+### Small correction and preserved responsibilities
+
+The test input now selects the existing `default solver`: core constructs the
+multigrid hierarchy, then its existing reconstructed-fault policy selects AMG.
+`tests/reconstructed_fault_frozen_gmg.cc` asserts the resolved AMG backend and
+hierarchy before labelling the borrowed production action AMG. GMG remains the
+explicit local-smoothing velocity cycle inside the existing assembled-A inverse;
+a collective call-count guard verifies every rank actually used it. Both probes
+retain the same frozen condensed operator, RHS, pressure action, stopping/restart
+policy, tolerance and budget. There is no production-interface redesign or
+restored environment switch. Ownership and observer timing are unchanged.
+
+The historical `performance/gmg/run.py` drops the obsolete switch, uses the
+retained `libbp3_research` replay plugin, selects default and requires the backend,
+preservation and full-pass-before-stop markers. Its new directory preserves the
+original archived failure. The test evidence snapshots serialized manager state
+and transient active V/masks, all four bulk vectors, particle data, RHS and
+accepted direction before/after both probes. Two frozen operator actions must
+also be unchanged. These test snapshots do not alter checkpoint formats.
+
+### Verification and differences
+
+| Result | Evidence |
+|---|---|
+| PASS | Separate reference/candidate plugin builds, including 2D/3D template compilation; Python syntax and whitespace checks |
+| PASS | Both four-rank Q2 runs reach `FROZEN AMG/GMG COMPARISON PASSED` before their intentional exit 1; only steps 0/1 are published |
+| PASS | 226 checks; exact pre/post-R4c rows/counters, 20 rank-local binary payloads, both directions, physical state and operator probes |
+| PASS | 59 CSV/VTU field files per comparison: repaired pre/post plus each against its historical AMG prefix; effective input differences only library/output paths and the default selection |
+| PASS | Original guards: 42,968 cells, 1,236 vertices; all earlier solver decisions/work profiles and historical AMG row unchanged |
+
+| Backend | Iterations | Fresh residual | Target | Relative direction difference from production AMG |
+|---|---:|---:|---:|---:|
+| AMG | 17 | `0.00044068965535591382` | `0.0012258892187472356` | 0 |
+| GMG | 17 | `0.00048708263397949716` | `0.0012258892187472356` | `7.5436570141764325e-10` |
+
+Both rows and vectors match exactly across executables. Time/RSS are not expected
+to match. The initial comparator mistakenly included the old failed observer's
+terminal profile in a production-prefix equality check; its result is retained.
+That profile is emitted during exception cleanup after the callback. The repaired
+GMG solve adds 17 operator applications and one fresh residual; four preservation
+applications make the exactly verified delta 22 in A/B/G/inverse/other counts.
+All other counters remain unchanged. The pre/post-R4c repaired profiles match
+completely. The parameter comparator also needed to skip JSON alias metadata.
+Neither harness correction required a simulation rerun or numerical change.
+
+Commands, hashes, raw outcomes and reproduction instructions are in the
+[fixture evidence](../../benchmarks/reconstructed_fault/frozen_gmg_repair/README.md).
+Production headers/source, local edits, prior R4c evidence and both binaries pass
+the preservation manifest. The complete qualification records 101 artifact
+entries. The historical deployment-layout launcher was source/syntax checked;
+the matched harness executed the same replay/observer sources with explicit
+qualified artifact paths. No new full production build was needed.
+
+### Remaining scope and stop
+
+This closes the historical fixture's missing frozen-GMG result for one 2-D Q2
+linearization on four ranks. It does not qualify long trajectories, other meshes,
+restart or performance/memory improvements; historical scientific issues remain
+separate. This repair is uncommitted for review, separate from the accepted R4c
+source commit. No R5 work has begun. Proposed next task: review this repair, then
+select the R5 duplication/responsibility inventory separately.
+
+
 ## R4c acceptance and baseline record
 
 R4c is accepted and saved separately from the forthcoming frozen-fixture repair.

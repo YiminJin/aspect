@@ -1,5 +1,49 @@
 # Phase-field / RSF current status
 
+## Frozen fixture accepted; R5a1 selected
+
+The accepted fixture repair is saved in its own commit after R4c `fa6013678`.
+Use the unchanged qualified R4c executable and the accepted repaired-fixture
+[manifest record](../../benchmarks/reconstructed_fault/frozen_gmg_repair/README.md#accepted-fixture-baseline).
+All reference artifacts and local temporary reviews are preserved. Verification
+is reused without another runtime campaign. The next selected task is only
+R5a1 manager slip-rate definition movement under the revised R5 instructions;
+projection/cache and surface-system implementation remain outside this task.
+
+
+## R4c committed; separate frozen AMG/GMG fixture repaired
+
+Accepted R4c is commit `fa6013678b525b189a1d27ef08465d4a6ef263f6`. Its qualified
+baseline remains `build-refactor-r4c/aspect-r4c-verified`, SHA256
+`c6811cbd877ff56af9113dc2f110cfd9a8b71998ea63f8e249ff94b292eeed85`.
+The accepted source commit excludes the subsequent fixture repair and local
+`refactoring/tmp/` edits, which remain preserved.
+
+The separate test-only repair selects the existing `default solver` setting:
+mesh construction builds the hierarchy, then reconstructed-fault selection
+resolves to AMG. The observer asserts AMG identity and hierarchy availability;
+its second solve explicitly applies the GMG velocity cycle on every rank.
+No production source/interface, numerical parameter or obsolete switch changed.
+The historical launcher also uses the retained research replay plugin and a
+new output directory.
+
+Matched four-rank pre-R4c (`983d57e28`) and post-R4c immutable executables both
+reach the complete pass marker before the intentional stop. All 226 checks pass:
+exact physical snapshots, RHS, operator probes, both returned directions,
+fields, decisions and counters. AMG/GMG each take 17 iterations with fresh
+residuals `4.4068965535591382e-4` / `4.8708263397949716e-4`, below the unchanged
+`1.2258892187472356e-3` target. No step-2 state is published. Historical AMG field
+and decision comparisons also match; its failed observer lacks exactly the 22
+operator applications now made by the completed GMG solve and preservation audits.
+
+The fixture repair remains uncommitted for review, separate from R4c. See the
+[review](refactor_review.md) and [reproduction/evidence](../../benchmarks/reconstructed_fault/frozen_gmg_repair/README.md).
+Only this frozen Q2/2-D/four-rank case and prefix are qualified; no broader GMG,
+restart or performance claim is made. Stop before R5. Next proposed task: review
+this fixture repair, then select the R5 inventory separately. Earlier status
+entries are historical checkpoints.
+
+
 ## R4c accepted baseline; separate frozen-fixture repair selected
 
 The accepted R4c source, documentation and harness are committed together over

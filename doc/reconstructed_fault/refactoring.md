@@ -59,7 +59,7 @@ to change the reference algorithm, parameters, or expected test results.
 
 ## 2. Preserve responsibility boundaries
 
-### Selected module scope (R4c shared Schur construction)
+### Selected module scope (R4c accepted; separate frozen-fixture verification)
 
 R3a, the separate transient restart correction, R3b and the Maxwell `eta_ve`
 cleanup are the accepted reference for R4. Historical lifecycle reports remain
@@ -67,11 +67,15 @@ in `refactor_review.md`; the original direct frozen-stress implementation is
 retained. R4a is accepted and committed as `0c7ed1a0b`. Both R4b private
 operations (condensed linear solution and coupled residual evaluation) are
 accepted. Retain the driver without a whole-iteration helper, as accepted after
-the dependency assessment. R4b is committed as `983d57e28`. The selected R4c
-implementation shares only Schur-wrapper construction and retains the existing
+the dependency assessment. R4b is committed as `983d57e28`. Accepted R4c is
+committed as `fa6013678`; it shares only Schur-wrapper construction and retains the existing
 Simulator header dependency. Preserve ordinary melt block selection and the
 restriction against combined fault mechanics and melt transport. Follow
 [revised R4 instructions](refactoring/codex_R4_instructions.md).
+The separately selected historical frozen AMG/GMG fixture repair is complete
+for review. It uses existing default selection to build the hierarchy while
+retaining production AMG, and verifies the explicit GMG probe independently.
+No production-interface changes or R5 implementation are authorized by that task.
 
 | Module | Owns | Refactoring scope |
 |---|---|---|

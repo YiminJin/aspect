@@ -1,5 +1,15 @@
 # Bounded bulk-preconditioner GMG prototype
 
+**Current fixture entry point (post-R4c):** the historical hierarchy environment
+switch described below was retired from production. The repaired frozen test
+selects `default solver`, which constructs multigrid levels and then resolves
+to AMG for reconstructed faults. It asserts that the borrowed action is AMG;
+the GMG probe explicitly applies the local-smoothing velocity cycle. See the
+[separate repaired-fixture evidence](../../../benchmarks/reconstructed_fault/frozen_gmg_repair/README.md).
+No production switch or interface was restored. The historical observations
+below retain their original context.
+
+
 **Subsequent approved launcher promotion:** GMG is now the research-launcher
 default, with both its velocity-cycle and mesh-hierarchy flags set
 automatically. Explicit `--velocity-preconditioner amg` preserves the AMG
