@@ -1,5 +1,99 @@
 # Phase-field / RSF current status
 
+## R4b accepted baseline
+
+Both focused extractions and the recommendation to retain the existing driver
+without a whole-iteration helper are accepted. The accepted R4b source,
+documentation and verification scripts are saved together over R4a `0c7ed1a0b`.
+Use `build-refactor-r4b-residual/aspect-r4b-residual-qualified` (SHA256
+`6ccdcf81b65ad5cbe0c949cdcd45da6332c3949354e0a034dcc830fa889fe7a7`)
+as the qualified reference for subsequent work. Its 5,910 source entries and
+21 executable/plugin/input entries were rechecked without mismatches before
+commit; manifest fingerprints are recorded in the
+[baseline evidence](../../benchmarks/reconstructed_fault/refactoring_r4b_residual/README.md).
+Existing verification outcomes remain unchanged. Local temporary files are
+excluded from the commit; no new build or runtime campaign was run. Historical
+entries below preserve the original review/commit status at each stage.
+
+## R4b extractions accepted; iteration-helper assessment ready for review
+
+Both R4b subpasses are accepted and remain uncommitted over `0c7ed1a0b`.
+The small-iteration-helper assessment recommends keeping the two focused
+operations and the existing driver: early direction gating and later convergence
+publication divide the iteration, while the restricted inverse/linearization,
+active mask, directions and scales must survive across those boundaries.
+A whole-step helper would need broader state transfer or take over driver
+decisions. A line-search-only extraction would be a separate proposal.
+
+Only the status, roadmap and [review](refactor_review.md) changed in this task.
+All 5,910 accepted source entries and the qualified second-subpass executable
+hash match. No new build/runtime tests were run; accepted numerical evidence
+is unchanged. Local edits and historical reports are preserved. Stop for review.
+Proposed next task: R4c duplication inventory and a minimal shared-preconditioner
+proposal, before any implementation. R4c has not begun. Earlier entries below
+are historical checkpoints.
+
+## R4b second subpass complete; ready for review
+
+The first R4b condensed-solve extraction is accepted. Its qualified executable
+and accepted uncommitted source patch over `0c7ed1a0b` are the reference for this
+second subpass. The existing coupled residual lambda is now the private
+`Simulator::evaluate_reconstructed_fault_coupled_residual()` operation with a
+two-field result. All five calls remain in place. The pre-edit contract was
+verified afterward: exact absolute trial V, bulk/surface evaluation order and
+guarded trial rollback are preserved. Assembly flags, linearization point and
+RHS retain their existing side effects; driver/audit cleanup remains unchanged.
+The accepted condensed solve is byte-identical. No public API or owner changes.
+
+Fresh Release/link, independent compilation, candidate plugins and 2D/3D
+instantiations pass. Units pass 20,149 assertions/16 cases per rank on one/two
+ranks. All 31 focused comparisons pass, including residual audits, pressure and
+history, accepted-update rollback, expected exhaustion and one-rank GMG. Four
+short legacy/automatic BP3 trajectories match in all 372 field/history groups
+and 28 cache/work/solver-decision checks. Maximum numerical difference is zero.
+All 20 selected build/runtime invocations have their expected outcomes; the
+two deliberate exhaustion failures retain the original budget and rollback.
+
+Qualified candidate: `build-refactor-r4b-residual/aspect-r4b-residual-qualified`.
+Both R4b subpasses remain uncommitted, with an incremental second-subpass patch
+recorded in [residual evidence](../../benchmarks/reconstructed_fault/refactoring_r4b_residual/README.md).
+See the [review](refactor_review.md). Reference artifacts, local edits and earlier
+reports are preserved. Ordinary/restart evidence is reused; no new Debug, 3D or
+production/performance campaign, and historical Stage-J/cohesive limitations
+remain separate. Stop for review. Proposed next task: assess the optional
+iteration-helper boundary without implementing it. No further extraction or
+R4c work has begun. Earlier entries below are historical review checkpoints.
+
+## R4b first subpass complete; ready for review
+
+R4a is committed as `0c7ed1a0b`. Against its qualified executable and source,
+`Simulator::solve_reconstructed_fault_condensed_system()` now holds the existing
+condensed linear solve, pressure compatibility calculation and Schur/AMG/GMG
+wrappers. A private five-scalar input record makes residual scales explicit.
+Matrix/preconditioner assembly, linearization, active sets, trial evaluation,
+convergence, history publication and failure restoration retain their driver
+locations. No public interface, persistent owner, scientific algorithm or
+checkpoint format changes. The pre-edit contract was checked afterward;
+all six source/protection checks pass.
+
+Fresh Release/link, independent compilation, candidate plugins and 2D/3D
+instantiations pass. Units pass 20,149 assertions/16 cases per rank on one/two
+ranks. All 31 focused comparisons pass: affine/fresh residual diagnostics,
+pressure/history, accepted-update rollback, intentional one-iteration-budget
+exhaustion, and the existing one-rank GMG-Q1 case. Four BP3 legacy/automatic
+trajectories match in 372 exact field/history groups, 24 cache/work checks and
+four detailed solver-decision comparisons. No numerical difference was observed.
+
+Candidate: uncommitted first R4b subpass over `0c7ed1a0b`, qualified executable
+`build-refactor-r4b-linear/aspect-r4b-linear-qualified`. See the
+[review](refactor_review.md) and [R4b evidence](../../benchmarks/reconstructed_fault/refactoring_r4b_linear/README.md).
+The initial include-order compile issue was resolved without M3/M4 edits.
+Ordinary/restart evidence is reused; no Debug/3D/production/performance campaign
+was run, and historical Stage-J/cohesive failures remain separate.
+Stop for review. Proposed next selection: the existing non-committing trial
+residual operation, with its contract recorded before editing. Remaining R4b
+operations and R4c are unimplemented. Earlier stage records follow.
+
 ## R4a accepted; committed for the first R4b extraction
 
 The revised [R4 instructions](refactoring/codex_R4_instructions.md) are recorded

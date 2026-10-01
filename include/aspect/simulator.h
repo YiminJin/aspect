@@ -68,6 +68,7 @@ DEAL_II_ENABLE_EXTRA_DIAGNOSTICS
 #include <aspect/adiabatic_conditions/interface.h>
 #include <aspect/particle/manager.h>
 #include <aspect/advection_field.h>
+#include <aspect/simulator/solver/reconstructed_fault_condensed_system.h>
 
 #include <boost/iostreams/tee.hpp>
 #include <boost/iostreams/stream.hpp>
@@ -595,6 +596,39 @@ namespace aspect
 
       /** Solve the Stage-I coupled bulk/reconstructed-fault mechanical system. */
       void solve_reconstructed_fault_stokes ();
+
+      /** Bulk norm and surface residual returned by one coupled evaluation. */
+      struct ReconstructedFaultCoupledResidual;
+
+      /**
+       * Evaluate with the supplied physical bulk state and absolute trial V.
+       * Roll back the temporary V on success or failure without publishing
+       * histories. Assembly controls, RHS and current_linearization_point keep
+       * their existing evaluation side effects; the driver restores the solve.
+       */
+      ReconstructedFaultCoupledResidual evaluate_reconstructed_fault_coupled_residual(
+        const LinearAlgebra::BlockVector &bulk_state,
+        const ReconstructedFaultVector &slip_rate);
+
+      /** Related residual scales supplied to one condensed solve. */
+      struct ReconstructedFaultLinearSolveScales;
+
+      /**
+       * Solve the current restricted condensed system without publishing state.
+       * The caller keeps its linearization, inverse and constraints alive.
+       * Compatibility is checked even when the nonlinear iterate has converged;
+       * direction and the whole-solve Krylov count retain their failure updates.
+       */
+      void solve_reconstructed_fault_condensed_system(
+        const typename StokesSolver::ReconstructedFaultCondensedSystem<dim>::Linearization &linearization,
+        const ReconstructedFaultActiveSet &active,
+        const LinearAlgebra::BlockVector &rhs,
+        const LinearAlgebra::BlockVector &working_x,
+        const ReconstructedFaultLinearSolveScales &scales,
+        const bool already_converged,
+        const double fault_preconditioner_setup_seconds,
+        LinearAlgebra::BlockVector &direction,
+        unsigned int &total_fault_krylov_iterations);
 
       /**
        * This function implements one scheme for the various

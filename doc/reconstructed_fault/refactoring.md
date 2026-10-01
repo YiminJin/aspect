@@ -59,12 +59,15 @@ to change the reference algorithm, parameters, or expected test results.
 
 ## 2. Preserve responsibility boundaries
 
-### Selected module scope (R4a move-only solver relocation)
+### Selected module scope (accepted R4b focused operations)
 
 R3a, the separate transient restart correction, R3b and the Maxwell `eta_ve`
 cleanup are the accepted reference for R4. Historical lifecycle reports remain
 in `refactor_review.md`; the original direct frozen-stress implementation is
-retained. The selected pass is **R4a only**, under
+retained. R4a is accepted and committed as `0c7ed1a0b`. Both R4b private
+operations (condensed linear solution and coupled residual evaluation) are
+accepted. Retain the driver without a whole-iteration helper, as accepted after
+the dependency assessment. Further consolidation requires selection. Follow
 [revised R4 instructions](refactoring/codex_R4_instructions.md).
 
 | Module | Owns | Refactoring scope |
@@ -196,6 +199,14 @@ existing control flow cleanly; focused operations plus a readable driver are
 acceptable. Do not force ordinary `DefectCorrectionResiduals` or `use_picard`
 onto the fault algorithm. Scratch must be solve-local, with no duplicate
 canonical surface/coupling owner, persistent state or all-Simulator context.
+
+For coupled residual evaluation, non-committing means temporary manager trial V
+is rolled back and histories are not published. It does not mean a pure query:
+assembly flags, current linearization point and assembled RHS retain their
+existing side effects. Keep whole-solve restoration in the driver and audit
+matrix/RHS restoration in its callers. Preserve trial opening, exact absolute V,
+bulk assembly, velocity/pressure norm reductions, surface evaluation and guarded
+trial rollback in their existing order, including exception paths.
 
 R4c may consolidate only a demonstrated common operation, such as existing
 preconditioner construction. Retain `C = A - B K_V^-1 G`, the condensed RHS

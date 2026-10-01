@@ -68,6 +68,331 @@ namespace aspect
 
 
   template <int dim>
+  struct Simulator<dim>::ReconstructedFaultCoupledResidual
+  {
+    double bulk_norm;
+    ReconstructedFaultSurfaceResidual surface;
+  };
+
+
+  template <int dim>
+  typename Simulator<dim>::ReconstructedFaultCoupledResidual
+  Simulator<dim>::evaluate_reconstructed_fault_coupled_residual(
+    const LinearAlgebra::BlockVector &bulk_state,
+    const ReconstructedFaultVector &slip_rate)
+  {
+    auto &fault_manager = *reconstructed_fault_manager;
+    auto &surface_system = *reconstructed_fault_surface_system;
+
+    // Use the very same absolute V in bulk and surface evaluation. A
+    // subtract/add reconstruction could lose a small bound-contact value.
+    fault_manager.begin_slip_rate_trial();
+    bool trial_is_active = true;
+    try
+      {
+        fault_manager.set_slip_rate_trial_values(slip_rate);
+        current_linearization_point = bulk_state;
+        assemble_newton_stokes_matrix = false;
+        rebuild_stokes_preconditioner = false;
+        rebuild_stokes_matrix =
+          !boundary_velocity_manager
+             .get_prescribed_boundary_velocity_indicators().empty();
+        assemble_stokes_system();
+
+        const double velocity_residual =
+          system_rhs.block(introspection.block_indices.velocities).l2_norm();
+        const double pressure_residual =
+          system_rhs.block(introspection.block_indices.pressure).l2_norm();
+        ReconstructedFaultCoupledResidual result;
+        result.bulk_norm = std::sqrt(
+          velocity_residual*velocity_residual
+          + pressure_residual*pressure_residual);
+        result.surface = surface_system.evaluate_surface_residual(
+          bulk_state, slip_rate);
+        fault_manager.rollback_slip_rate_trial();
+        trial_is_active = false;
+        return result;
+      }
+    catch (...)
+      {
+        if (trial_is_active)
+          fault_manager.rollback_slip_rate_trial();
+        throw;
+      }
+  }
+
+
+  template <int dim>
+  struct Simulator<dim>::ReconstructedFaultLinearSolveScales
+  {
+    double initial_bulk_residual;
+    double aspect_bulk_reference;
+    double bulk_scale;
+    double bulk_precision;
+    double bulk_convergence_scale;
+  };
+
+
+  template <int dim>
+  void
+  Simulator<dim>::solve_reconstructed_fault_condensed_system(
+    const typename StokesSolver::ReconstructedFaultCondensedSystem<dim>::Linearization &linearization,
+    const ReconstructedFaultActiveSet &active,
+    const LinearAlgebra::BlockVector &rhs,
+    const LinearAlgebra::BlockVector &working_x,
+    const ReconstructedFaultLinearSolveScales &scales,
+    const bool already_converged,
+    const double fault_preconditioner_setup_seconds,
+    LinearAlgebra::BlockVector &direction,
+    unsigned int &total_fault_krylov_iterations)
+  {
+    auto &surface_system = *reconstructed_fault_surface_system;
+
+    // Bound the continuity evaluation before cancellation, using the actual
+    // FE gradients, physical base iterate and constrained left-null test.
+    // The source/history/B terms have no pressure rows in this eligible path.
+    auto pressure_assembly_scale = [&](const LinearAlgebra::BlockVector &q)
+    {
+      if (q.l2_norm()==0.)
+        return 0.;
+      LinearAlgebra::BlockVector owned(introspection.index_sets.system_partitioning,mpi_communicator);
+      owned.block(1)=q.block(1);
+      current_constraints.distribute(owned);
+      LinearAlgebra::BlockVector test(introspection.index_sets.system_partitioning,
+                                     introspection.index_sets.system_relevant_partitioning,mpi_communicator);
+      test=owned;
+      FEValues<dim> fe(*mapping,finite_element,introspection.quadratures.velocities,
+                       update_values|update_gradients|update_JxW_values);
+      Vector<double> u(finite_element.n_dofs_per_cell()),p(u.size());
+      double local=0.;
+      for (const auto &cell:dof_handler.active_cell_iterators())
+        if (cell->is_locally_owned())
+          {
+            fe.reinit(cell);cell->get_dof_values(working_x,u);cell->get_dof_values(test,p);
+            double origin[dim]={};
+            for (unsigned int d=0;d<dim;++d)
+              for (unsigned int i=0;i<u.size();++i)
+                if (finite_element.system_to_component_index(i).first==introspection.component_indices.velocities[d])
+                  {origin[d]=u[i];break;}
+            for (unsigned int k=0;k<fe.n_quadrature_points;++k)
+              {
+                double pressure_test=0.,divergence_terms=0.;
+                for (unsigned int i=0;i<u.size();++i)
+                  {
+                    pressure_test+=std::abs(p[i]*fe[introspection.extractors.pressure].value(i,k));
+                    for (unsigned int d=0;d<dim;++d)
+                      if (finite_element.system_to_component_index(i).first==introspection.component_indices.velocities[d])
+                        divergence_terms+=(std::abs(u[i])+std::abs(origin[d]))
+                          *std::abs(fe[introspection.extractors.velocities].gradient(i,k)[d][d]);
+                  }
+                local+=std::abs(pressure_scaling*fe.JxW(k))*pressure_test*divergence_terms;
+              }
+          }
+      return Utilities::MPI::sum(local,mpi_communicator);
+    };
+
+    direction = 0.0;
+    const double rhs_norm = rhs.l2_norm();
+    if (rhs_norm == 0.0)
+      return;
+
+    double right_null_error,left_null_error;
+    const auto q=linearization.verified_pressure_nullspace(right_null_error,left_null_error);
+    LinearAlgebra::BlockVector compatible_rhs(rhs),residual(rhs);
+    const double assembly_scale=pressure_assembly_scale(q);
+    // A worst-case serial chain also bounds parallel cell/constraint
+    // accumulation; the final dot product has at most two operations/row.
+    const double assembly_operations=6.*finite_element.n_dofs_per_cell()
+      +2.*introspection.quadratures.velocities.size()+4.*dim+16.
+      +triangulation.n_global_active_cells();
+    const double reduction_operations=2.*rhs.block(1).size();
+    const double reduction_scale=q.block(1).linfty_norm()*rhs.block(1).l1_norm();
+    const double nonlinear_target=parameters.nonlinear_tolerance*scales.bulk_convergence_scale;
+    const double compatibility_tolerance=internal::fault_pressure_compatibility_bound(
+      assembly_scale,assembly_operations,reduction_scale,reduction_operations,nonlinear_target);
+    if (std::getenv("ASPECT_FAULT_COMPATIBILITY_DIAGNOSTIC"))
+      {
+        std::ostringstream audit;
+        audit<<std::setprecision(17)<<"      Fault compatibility audit: step="<<timestep_number
+          <<", Newton="<<nonlinear_iteration<<", rhs null="<<q*rhs<<", rhs norm="<<rhs_norm
+          <<", velocity="<<system_rhs.block(0).l2_norm()<<", continuity="<<system_rhs.block(1).l2_norm()
+          <<", initial="<<scales.initial_bulk_residual<<", reference="<<scales.aspect_bulk_reference
+          <<", old roundoff="<<100.*std::numeric_limits<double>::epsilon()
+            *std::max({scales.initial_bulk_residual,scales.aspect_bulk_reference,rhs_norm})
+          <<", relative cap="<<parameters.nonlinear_tolerance*scales.bulk_scale
+          <<", bulk precision="<<scales.bulk_precision<<", mixed target="<<nonlinear_target
+          <<", assembly scale="<<assembly_scale<<", assembly operations="<<assembly_operations
+          <<", reduction scale="<<reduction_scale<<", reduction operations="<<reduction_operations
+          <<", compatibility bound="<<compatibility_tolerance<<", already converged="<<already_converged
+          <<", pressure scaling="<<pressure_scaling<<", right null="<<right_null_error
+          <<", left null="<<left_null_error<<", q norm="<<q.l2_norm()
+          <<", right null scale="<<system_matrix.block(0,1).frobenius_norm()
+          <<", left null scale="<<system_matrix.block(1,0).frobenius_norm();
+        pcout<<audit.str()<<std::endl;
+      }
+    const double removed_rhs=internal::project_compatible_fault_rhs(q,compatibility_tolerance,compatible_rhs);
+    // Still check compatibility, but do not solve an unused direction
+    // after the unprojected bulk and all unprescribed surface rows pass.
+    if (already_converged)
+      return;
+
+    TimerOutput::Scope linear_timer(computing_timer, "Fault: condensed linear solve");
+
+    const double tolerance =
+      parameters.linear_stokes_solver_tolerance*rhs_norm;
+    const unsigned int budget = std::max(1U,
+      parameters.n_cheap_stokes_solver_steps + parameters.n_expensive_stokes_solver_steps);
+    PrimitiveVectorMemory<LinearAlgebra::BlockVector> memory;
+
+    std::unique_ptr<internal::SchurComplementOperator> schur;
+    if (parameters.use_bfbt)
+      schur = std::make_unique<
+        internal::WeightedBFBT<LinearAlgebra::PreconditionBase>>(
+          system_preconditioner_matrix.block(1,1),
+          *Mp_preconditioner,
+          parameters.linear_solver_S_block_tolerance,
+          inverse_lumped_mass_matrix.block(0),
+          system_matrix);
+    else
+      schur = std::make_unique<
+        internal::InverseWeightedMassMatrix<LinearAlgebra::PreconditionBase>>(
+          system_preconditioner_matrix.block(1,1),
+          *Mp_preconditioner,
+          parameters.linear_solver_S_block_tolerance);
+
+    const auto solve_with_velocity_preconditioner = [&](const auto &velocity_preconditioner)
+    {
+      internal::InverseVelocityBlock<
+        std::decay_t<decltype(velocity_preconditioner)>,
+        LinearAlgebra::Vector,
+        LinearAlgebra::SparseMatrix> inverse_velocity(
+          system_matrix.block(0,0),
+          velocity_preconditioner,
+          true,
+          stokes_A_block_is_symmetric(),
+          parameters.linear_solver_A_block_tolerance);
+      const internal::BlockSchurPreconditioner<
+        decltype(inverse_velocity),
+        internal::SchurComplementOperator,
+        LinearAlgebra::SparseMatrix,
+        LinearAlgebra::BlockVector> preconditioner(
+          inverse_velocity, *schur, system_matrix.block(0,1));
+
+      // B and G are not assumed adjoints, so the condensed operator is
+      // generally nonsymmetric and requires FGMRES rather than CG/MINRES.
+      const internal::FaultPressureComplementOperator<
+        typename StokesSolver::ReconstructedFaultCondensedSystem<dim>::Linearization,
+        LinearAlgebra::BlockVector> projected_operator{linearization, q};
+      const internal::FaultPressureComplementOperator<
+        decltype(preconditioner), LinearAlgebra::BlockVector>
+        projected_preconditioner{preconditioner, q, true};
+      const internal::FaultInterfacePreconditioner<dim,decltype(projected_preconditioner)>
+        interface_preconditioner(projected_preconditioner,linearization,surface_system,active,rhs,pcout);
+      const internal::FaultPressureComplementOperator<
+        decltype(interface_preconditioner),LinearAlgebra::BlockVector>
+        projected_interface{interface_preconditioner,q};
+
+      unsigned int iterations = 0;
+      while (iterations < budget)
+        {
+          SolverControl control(budget-iterations, tolerance);
+          control.enable_history_data();
+          SolverFGMRES<LinearAlgebra::BlockVector> solver(
+            control, memory,
+            typename SolverFGMRES<LinearAlgebra::BlockVector>::AdditionalData(
+              parameters.stokes_gmres_restart_length));
+          bool solver_failed = false;
+          try
+            {
+              internal::FaultLinearSection krylov_timer(internal::FaultLinearTiming::krylov_vectors);
+              solver.solve(projected_operator, direction, compatible_rhs, projected_interface);
+            }
+          catch (const SolverControl::NoConvergence &)
+            {
+              solver_failed = true;
+            }
+          iterations += std::max(1U, control.last_step());
+          total_fault_krylov_iterations += std::max(1U, control.last_step());
+          internal::project_fault_pressure(q, direction);
+
+          // Arnoldi's residual estimate may disagree with the final vector.
+          // Verify C*x-b afresh, retaining raw and null-component diagnostics.
+          double raw_residual, residual_null_component;
+          const double fresh = internal::fault_true_linear_residual(
+            linearization, q, direction, rhs, residual,
+            raw_residual, residual_null_component);
+          std::ostringstream report;
+          report << std::setprecision(17)
+                 << "      Fault linear solve: iterations=" << iterations
+                 << ", estimated=" << control.last_value() << ", fresh=" << fresh
+                 << ", target=" << tolerance << ", raw=" << raw_residual
+                 << ", rhs null=" << removed_rhs << ", residual null=" << residual_null_component
+                 << ", compatibility bound=" << compatibility_tolerance
+                 << ", pressure quotient=" << (q.l2_norm() > 0.)
+                 << ", right null=" << right_null_error << ", left null=" << left_null_error;
+          if (std::getenv("ASPECT_FAULT_NONLINEAR_DIAGNOSTIC"))
+            pcout << report.str() << std::endl;
+          else
+            {
+              std::ostringstream progress;
+              progress << "      Fault linear solve: iterations=" << iterations
+                       << std::scientific << std::setprecision(6)
+                       << ", fresh=" << fresh << ", target=" << tolerance;
+              pcout << progress.str() << std::endl;
+            }
+          AssertThrow(std::abs(residual_null_component) <= compatibility_tolerance,
+                      ExcMessage("The full condensed residual has a significant pressure incompatibility."));
+          if (fresh <= tolerance)
+            {
+              if (!signals.post_reconstructed_fault_linear_solver.empty())
+                signals.post_reconstructed_fault_linear_solver(
+                  *this,
+                  [&](auto &dst,const auto &src) { projected_operator.vmult(dst,src); },
+                  [&](auto &dst,const auto &src) { projected_interface.vmult(dst,src); },
+                  [&](auto &dst,const auto &src) { schur->vmult(dst,src); },
+                  compatible_rhs,direction,tolerance,budget,fault_preconditioner_setup_seconds);
+              return;
+            }
+          if (solver_failed || iterations >= budget)
+            throw SolverControl::NoConvergence(iterations, fresh);
+          // Re-enter FGMRES from this vector with its freshly evaluated
+          // residual, charging every restart to the same total budget.
+        }
+    };
+
+    if (parameters.stokes_solver_type == Parameters<dim>::StokesSolverType::block_amg)
+      solve_with_velocity_preconditioner(*Amg_preconditioner);
+    else
+      {
+        AssertThrow(parameters.stokes_velocity_degree==2 && stokes_A_block_is_symmetric(),
+                    ExcMessage("The fault velocity-GMG preconditioner requires symmetric Q2 bulk Stokes."));
+        StokesMatrixFreeHandlerLocalSmoothingImplementation<dim,2> gmg(*this,parameters);
+        gmg.initialize_simulator(*this);
+        gmg.initialize();
+        gmg.with_velocity_preconditioner([&](const auto &cycle)
+        {
+          // Only adapt vector storage. The approximate velocity inverse
+          // still applies the original assembled fine-level A matrix.
+          struct Adapter
+          {
+            const typename StokesMatrixFreeHandlerLocalSmoothingImplementation<dim,2>::VelocityCycle &cycle;
+            mutable dealii::LinearAlgebra::distributed::Vector<double> input,output;
+            void vmult(LinearAlgebra::Vector &dst,const LinearAlgebra::Vector &src) const
+            {
+              internal::ChangeVectorTypes::copy(input,src);
+              cycle.vmult(output,input);
+              internal::ChangeVectorTypes::copy(dst,output);
+            }
+          } adapter{cycle,
+            dealii::LinearAlgebra::distributed::Vector<double>(rhs.block(0).locally_owned_elements(),mpi_communicator),
+            dealii::LinearAlgebra::distributed::Vector<double>(rhs.block(0).locally_owned_elements(),mpi_communicator)};
+          solve_with_velocity_preconditioner(adapter);
+        });
+      }
+  }
+
+
+  template <int dim>
   void
   Simulator<dim>::solve_reconstructed_fault_stokes ()
   {
@@ -127,12 +452,6 @@ namespace aspect
     SolverControl nonlinear_solver_control(max_nonlinear_iterations,
                                            parameters.nonlinear_tolerance);
 
-    struct CoupledResidual
-    {
-      double bulk_norm;
-      ReconstructedFaultSurfaceResidual surface;
-    };
-
     bool nonlinear_state_is_active = false;
     bool terminal_commit_complete = false;
     auto restore_simulator_state = [&]()
@@ -187,58 +506,17 @@ namespace aspect
             current_constraints.set_inhomogeneity(line.index, 0.0);
         pressure_scaling = compute_pressure_scaling_factor();
 
-        auto evaluate_coupled_residual =
-          [&](const LinearAlgebra::BlockVector &bulk_state,
-              const FaultVector &slip_rate) -> CoupledResidual
-        {
-          // Use the very same absolute V in bulk and surface evaluation. A
-          // subtract/add reconstruction could lose a small bound-contact value.
-          fault_manager.begin_slip_rate_trial();
-          bool trial_is_active = true;
-          try
-            {
-              fault_manager.set_slip_rate_trial_values(slip_rate);
-              current_linearization_point = bulk_state;
-              assemble_newton_stokes_matrix = false;
-              rebuild_stokes_preconditioner = false;
-              rebuild_stokes_matrix =
-                !boundary_velocity_manager
-                   .get_prescribed_boundary_velocity_indicators().empty();
-              assemble_stokes_system();
-
-              const double velocity_residual =
-                system_rhs.block(introspection.block_indices.velocities).l2_norm();
-              const double pressure_residual =
-                system_rhs.block(introspection.block_indices.pressure).l2_norm();
-              CoupledResidual result;
-              result.bulk_norm = std::sqrt(
-                velocity_residual*velocity_residual
-                + pressure_residual*pressure_residual);
-              result.surface = surface_system.evaluate_surface_residual(
-                bulk_state, slip_rate);
-              fault_manager.rollback_slip_rate_trial();
-              trial_is_active = false;
-              return result;
-            }
-          catch (...)
-            {
-              if (trial_is_active)
-                fault_manager.rollback_slip_rate_trial();
-              throw;
-            }
-        };
-
         // Freeze separate dimensional normalization scales for the entire solve.
         // Their floors reuse existing bulk and K_V action scales rather than a
         // reconstructed-fault tuning parameter.
         const FaultVector initial_slip_rate = current_slip_rate(fault_manager);
-        const CoupledResidual initial_residual =
-          evaluate_coupled_residual(working_x, initial_slip_rate);
+        const ReconstructedFaultCoupledResidual initial_residual =
+          evaluate_reconstructed_fault_coupled_residual(working_x, initial_slip_rate);
 
         LinearAlgebra::BlockVector bulk_reference(working_x);
         bulk_reference.block(introspection.block_indices.velocities) = 0.0;
         const double aspect_bulk_reference =
-          evaluate_coupled_residual(bulk_reference, initial_slip_rate).bulk_norm;
+          evaluate_reconstructed_fault_coupled_residual(bulk_reference, initial_slip_rate).bulk_norm;
 
         const double scale_floor_factor = std::max(
           parameters.linear_stokes_solver_tolerance,
@@ -253,256 +531,6 @@ namespace aspect
         double bulk_convergence_scale = bulk_scale;
         double fault_preconditioner_setup_seconds = 0.;
 
-        // Bound the continuity evaluation before cancellation, using the actual
-        // FE gradients, physical base iterate and constrained left-null test.
-        // The source/history/B terms have no pressure rows in this eligible path.
-        auto pressure_assembly_scale = [&](const LinearAlgebra::BlockVector &q)
-        {
-          if (q.l2_norm()==0.)
-            return 0.;
-          LinearAlgebra::BlockVector owned(introspection.index_sets.system_partitioning,mpi_communicator);
-          owned.block(1)=q.block(1);
-          current_constraints.distribute(owned);
-          LinearAlgebra::BlockVector test(introspection.index_sets.system_partitioning,
-                                         introspection.index_sets.system_relevant_partitioning,mpi_communicator);
-          test=owned;
-          FEValues<dim> fe(*mapping,finite_element,introspection.quadratures.velocities,
-                           update_values|update_gradients|update_JxW_values);
-          Vector<double> u(finite_element.n_dofs_per_cell()),p(u.size());
-          double local=0.;
-          for (const auto &cell:dof_handler.active_cell_iterators())
-            if (cell->is_locally_owned())
-              {
-                fe.reinit(cell);cell->get_dof_values(working_x,u);cell->get_dof_values(test,p);
-                double origin[dim]={};
-                for (unsigned int d=0;d<dim;++d)
-                  for (unsigned int i=0;i<u.size();++i)
-                    if (finite_element.system_to_component_index(i).first==introspection.component_indices.velocities[d])
-                      {origin[d]=u[i];break;}
-                for (unsigned int k=0;k<fe.n_quadrature_points;++k)
-                  {
-                    double pressure_test=0.,divergence_terms=0.;
-                    for (unsigned int i=0;i<u.size();++i)
-                      {
-                        pressure_test+=std::abs(p[i]*fe[introspection.extractors.pressure].value(i,k));
-                        for (unsigned int d=0;d<dim;++d)
-                          if (finite_element.system_to_component_index(i).first==introspection.component_indices.velocities[d])
-                            divergence_terms+=(std::abs(u[i])+std::abs(origin[d]))
-                              *std::abs(fe[introspection.extractors.velocities].gradient(i,k)[d][d]);
-                      }
-                    local+=std::abs(pressure_scaling*fe.JxW(k))*pressure_test*divergence_terms;
-                  }
-              }
-          return Utilities::MPI::sum(local,mpi_communicator);
-        };
-
-        auto solve_condensed_system =
-          [&](const typename StokesSolver::ReconstructedFaultCondensedSystem<dim>
-                      ::Linearization &linearization,
-              const ReconstructedFaultActiveSet &active,
-              const LinearAlgebra::BlockVector &rhs,
-              LinearAlgebra::BlockVector &direction,
-              const bool already_converged)
-        {
-          direction = 0.0;
-          const double rhs_norm = rhs.l2_norm();
-          if (rhs_norm == 0.0)
-            return;
-
-          double right_null_error,left_null_error;
-          const auto q=linearization.verified_pressure_nullspace(right_null_error,left_null_error);
-          LinearAlgebra::BlockVector compatible_rhs(rhs),residual(rhs);
-          const double assembly_scale=pressure_assembly_scale(q);
-          // A worst-case serial chain also bounds parallel cell/constraint
-          // accumulation; the final dot product has at most two operations/row.
-          const double assembly_operations=6.*finite_element.n_dofs_per_cell()
-            +2.*introspection.quadratures.velocities.size()+4.*dim+16.
-            +triangulation.n_global_active_cells();
-          const double reduction_operations=2.*rhs.block(1).size();
-          const double reduction_scale=q.block(1).linfty_norm()*rhs.block(1).l1_norm();
-          const double nonlinear_target=parameters.nonlinear_tolerance*bulk_convergence_scale;
-          const double compatibility_tolerance=internal::fault_pressure_compatibility_bound(
-            assembly_scale,assembly_operations,reduction_scale,reduction_operations,nonlinear_target);
-          if (std::getenv("ASPECT_FAULT_COMPATIBILITY_DIAGNOSTIC"))
-            {
-              std::ostringstream audit;
-              audit<<std::setprecision(17)<<"      Fault compatibility audit: step="<<timestep_number
-                <<", Newton="<<nonlinear_iteration<<", rhs null="<<q*rhs<<", rhs norm="<<rhs_norm
-                <<", velocity="<<system_rhs.block(0).l2_norm()<<", continuity="<<system_rhs.block(1).l2_norm()
-                <<", initial="<<initial_residual.bulk_norm<<", reference="<<aspect_bulk_reference
-                <<", old roundoff="<<100.*std::numeric_limits<double>::epsilon()
-                  *std::max({initial_residual.bulk_norm,aspect_bulk_reference,rhs_norm})
-                <<", relative cap="<<parameters.nonlinear_tolerance*bulk_scale
-                <<", bulk precision="<<bulk_precision<<", mixed target="<<nonlinear_target
-                <<", assembly scale="<<assembly_scale<<", assembly operations="<<assembly_operations
-                <<", reduction scale="<<reduction_scale<<", reduction operations="<<reduction_operations
-                <<", compatibility bound="<<compatibility_tolerance<<", already converged="<<already_converged
-                <<", pressure scaling="<<pressure_scaling<<", right null="<<right_null_error
-                <<", left null="<<left_null_error<<", q norm="<<q.l2_norm()
-                <<", right null scale="<<system_matrix.block(0,1).frobenius_norm()
-                <<", left null scale="<<system_matrix.block(1,0).frobenius_norm();
-              pcout<<audit.str()<<std::endl;
-            }
-          const double removed_rhs=internal::project_compatible_fault_rhs(q,compatibility_tolerance,compatible_rhs);
-          // Still check compatibility, but do not solve an unused direction
-          // after the unprojected bulk and all unprescribed surface rows pass.
-          if (already_converged)
-            return;
-
-          TimerOutput::Scope linear_timer(computing_timer, "Fault: condensed linear solve");
-
-          const double tolerance =
-            parameters.linear_stokes_solver_tolerance*rhs_norm;
-          const unsigned int budget = std::max(1U,
-            parameters.n_cheap_stokes_solver_steps + parameters.n_expensive_stokes_solver_steps);
-          PrimitiveVectorMemory<LinearAlgebra::BlockVector> memory;
-
-          std::unique_ptr<internal::SchurComplementOperator> schur;
-          if (parameters.use_bfbt)
-            schur = std::make_unique<
-              internal::WeightedBFBT<LinearAlgebra::PreconditionBase>>(
-                system_preconditioner_matrix.block(1,1),
-                *Mp_preconditioner,
-                parameters.linear_solver_S_block_tolerance,
-                inverse_lumped_mass_matrix.block(0),
-                system_matrix);
-          else
-            schur = std::make_unique<
-              internal::InverseWeightedMassMatrix<LinearAlgebra::PreconditionBase>>(
-                system_preconditioner_matrix.block(1,1),
-                *Mp_preconditioner,
-                parameters.linear_solver_S_block_tolerance);
-
-          const auto solve_with_velocity_preconditioner = [&](const auto &velocity_preconditioner)
-          {
-            internal::InverseVelocityBlock<
-              std::decay_t<decltype(velocity_preconditioner)>,
-              LinearAlgebra::Vector,
-              LinearAlgebra::SparseMatrix> inverse_velocity(
-                system_matrix.block(0,0),
-                velocity_preconditioner,
-                true,
-                stokes_A_block_is_symmetric(),
-                parameters.linear_solver_A_block_tolerance);
-            const internal::BlockSchurPreconditioner<
-              decltype(inverse_velocity),
-              internal::SchurComplementOperator,
-              LinearAlgebra::SparseMatrix,
-              LinearAlgebra::BlockVector> preconditioner(
-                inverse_velocity, *schur, system_matrix.block(0,1));
-
-            // B and G are not assumed adjoints, so the condensed operator is
-            // generally nonsymmetric and requires FGMRES rather than CG/MINRES.
-            const internal::FaultPressureComplementOperator<
-              typename StokesSolver::ReconstructedFaultCondensedSystem<dim>::Linearization,
-              LinearAlgebra::BlockVector> projected_operator{linearization, q};
-            const internal::FaultPressureComplementOperator<
-              decltype(preconditioner), LinearAlgebra::BlockVector>
-              projected_preconditioner{preconditioner, q, true};
-            const internal::FaultInterfacePreconditioner<dim,decltype(projected_preconditioner)>
-              interface_preconditioner(projected_preconditioner,linearization,surface_system,active,rhs,pcout);
-            const internal::FaultPressureComplementOperator<
-              decltype(interface_preconditioner),LinearAlgebra::BlockVector>
-              projected_interface{interface_preconditioner,q};
-
-            unsigned int iterations = 0;
-            while (iterations < budget)
-              {
-                SolverControl control(budget-iterations, tolerance);
-                control.enable_history_data();
-                SolverFGMRES<LinearAlgebra::BlockVector> solver(
-                  control, memory,
-                  typename SolverFGMRES<LinearAlgebra::BlockVector>::AdditionalData(
-                    parameters.stokes_gmres_restart_length));
-                bool solver_failed = false;
-                try
-                  {
-                    internal::FaultLinearSection krylov_timer(internal::FaultLinearTiming::krylov_vectors);
-                    solver.solve(projected_operator, direction, compatible_rhs, projected_interface);
-                  }
-                catch (const SolverControl::NoConvergence &)
-                  {
-                    solver_failed = true;
-                  }
-                iterations += std::max(1U, control.last_step());
-                total_fault_krylov_iterations += std::max(1U, control.last_step());
-                internal::project_fault_pressure(q, direction);
-
-                // Arnoldi's residual estimate may disagree with the final vector.
-                // Verify C*x-b afresh, retaining raw and null-component diagnostics.
-                double raw_residual, residual_null_component;
-                const double fresh = internal::fault_true_linear_residual(
-                  linearization, q, direction, rhs, residual,
-                  raw_residual, residual_null_component);
-                std::ostringstream report;
-                report << std::setprecision(17)
-                       << "      Fault linear solve: iterations=" << iterations
-                       << ", estimated=" << control.last_value() << ", fresh=" << fresh
-                       << ", target=" << tolerance << ", raw=" << raw_residual
-                       << ", rhs null=" << removed_rhs << ", residual null=" << residual_null_component
-                       << ", compatibility bound=" << compatibility_tolerance
-                       << ", pressure quotient=" << (q.l2_norm() > 0.)
-                       << ", right null=" << right_null_error << ", left null=" << left_null_error;
-                if (std::getenv("ASPECT_FAULT_NONLINEAR_DIAGNOSTIC"))
-                  pcout << report.str() << std::endl;
-                else
-                  {
-                    std::ostringstream progress;
-                    progress << "      Fault linear solve: iterations=" << iterations
-                             << std::scientific << std::setprecision(6)
-                             << ", fresh=" << fresh << ", target=" << tolerance;
-                    pcout << progress.str() << std::endl;
-                  }
-                AssertThrow(std::abs(residual_null_component) <= compatibility_tolerance,
-                            ExcMessage("The full condensed residual has a significant pressure incompatibility."));
-                if (fresh <= tolerance)
-                  {
-                    if (!signals.post_reconstructed_fault_linear_solver.empty())
-                      signals.post_reconstructed_fault_linear_solver(
-                        *this,
-                        [&](auto &dst,const auto &src) { projected_operator.vmult(dst,src); },
-                        [&](auto &dst,const auto &src) { projected_interface.vmult(dst,src); },
-                        [&](auto &dst,const auto &src) { schur->vmult(dst,src); },
-                        compatible_rhs,direction,tolerance,budget,fault_preconditioner_setup_seconds);
-                    return;
-                  }
-                if (solver_failed || iterations >= budget)
-                  throw SolverControl::NoConvergence(iterations, fresh);
-                // Re-enter FGMRES from this vector with its freshly evaluated
-                // residual, charging every restart to the same total budget.
-              }
-          };
-
-          if (parameters.stokes_solver_type == Parameters<dim>::StokesSolverType::block_amg)
-            solve_with_velocity_preconditioner(*Amg_preconditioner);
-          else
-            {
-              AssertThrow(parameters.stokes_velocity_degree==2 && stokes_A_block_is_symmetric(),
-                          ExcMessage("The fault velocity-GMG preconditioner requires symmetric Q2 bulk Stokes."));
-              StokesMatrixFreeHandlerLocalSmoothingImplementation<dim,2> gmg(*this,parameters);
-              gmg.initialize_simulator(*this);
-              gmg.initialize();
-              gmg.with_velocity_preconditioner([&](const auto &cycle)
-              {
-                // Only adapt vector storage. The approximate velocity inverse
-                // still applies the original assembled fine-level A matrix.
-                struct Adapter
-                {
-                  const typename StokesMatrixFreeHandlerLocalSmoothingImplementation<dim,2>::VelocityCycle &cycle;
-                  mutable dealii::LinearAlgebra::distributed::Vector<double> input,output;
-                  void vmult(LinearAlgebra::Vector &dst,const LinearAlgebra::Vector &src) const
-                  {
-                    internal::ChangeVectorTypes::copy(input,src);
-                    cycle.vmult(output,input);
-                    internal::ChangeVectorTypes::copy(dst,output);
-                  }
-                } adapter{cycle,
-                  dealii::LinearAlgebra::distributed::Vector<double>(rhs.block(0).locally_owned_elements(),mpi_communicator),
-                  dealii::LinearAlgebra::distributed::Vector<double>(rhs.block(0).locally_owned_elements(),mpi_communicator)};
-                solve_with_velocity_preconditioner(adapter);
-              });
-            }
-        };
 
         for (nonlinear_iteration = 0;
              nonlinear_iteration < max_nonlinear_iterations;
@@ -608,7 +636,14 @@ namespace aspect
             while (true)
               {
                 linearization->build_condensed_rhs(system_rhs, bulk_rhs);
-                solve_condensed_system(*linearization, active_set, bulk_rhs, bulk_direction, already_converged);
+                const ReconstructedFaultLinearSolveScales linear_solve_scales{
+                  initial_residual.bulk_norm, aspect_bulk_reference, bulk_scale,
+                  bulk_precision, bulk_convergence_scale};
+                solve_reconstructed_fault_condensed_system(
+                  *linearization, active_set, bulk_rhs, working_x,
+                  linear_solve_scales, already_converged,
+                  fault_preconditioner_setup_seconds, bulk_direction,
+                  total_fault_krylov_iterations);
                 if (already_converged)
                   {
                     slip_rate_direction=slip_rate;
@@ -834,7 +869,7 @@ namespace aspect
               internal::fault_residual_audit_channel = channel;
               try
                 {
-                  evaluate_coupled_residual(x, v);
+                  evaluate_reconstructed_fault_coupled_residual(x, v);
                 }
               catch (...)
                 {
@@ -915,8 +950,8 @@ namespace aspect
                           step_length, phase_field_fault.minimum_fault_slip_rate());
                       }
 
-                  const CoupledResidual trial_residual =
-                    evaluate_coupled_residual(trial_x, trial_slip_rate);
+                  const ReconstructedFaultCoupledResidual trial_residual =
+                    evaluate_reconstructed_fault_coupled_residual(trial_x, trial_slip_rate);
                   if (audit)
                     {
                       // Use the represented, pressure-normalized update, with
@@ -1018,7 +1053,7 @@ namespace aspect
                               - (slip_rate[f][i]
                                  + (trial_slip_rate[f][i]-slip_rate[f][i]));
                           }
-                      evaluate_coupled_residual(trial_x, probe_v);
+                      evaluate_reconstructed_fault_coupled_residual(trial_x, probe_v);
                       const LinearAlgebra::BlockVector probe_rhs(system_rhs);
                       reconstructed_fault_stokes_coupling->apply_B(probe_dv, b_action);
                       const auto probe_frozen = audit_channel(trial_x, probe_v,
@@ -1131,7 +1166,15 @@ namespace aspect
 namespace aspect
 {
 #define INSTANTIATE(dim) \
-  template void Simulator<dim>::solve_reconstructed_fault_stokes ();
+  template void Simulator<dim>::solve_reconstructed_fault_stokes (); \
+  template Simulator<dim>::ReconstructedFaultCoupledResidual \
+  Simulator<dim>::evaluate_reconstructed_fault_coupled_residual( \
+    const LinearAlgebra::BlockVector &, const ReconstructedFaultVector &); \
+  template void Simulator<dim>::solve_reconstructed_fault_condensed_system( \
+    const typename StokesSolver::ReconstructedFaultCondensedSystem<dim>::Linearization &, \
+    const ReconstructedFaultActiveSet &, const LinearAlgebra::BlockVector &, \
+    const LinearAlgebra::BlockVector &, const ReconstructedFaultLinearSolveScales &, \
+    const bool, const double, LinearAlgebra::BlockVector &, unsigned int &);
 
   ASPECT_INSTANTIATE(INSTANTIATE)
 

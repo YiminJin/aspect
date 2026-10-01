@@ -4,12 +4,21 @@ Prepared for Yimin Jin — 28 September 2026, America/Los_Angeles
 
 Status: R0–R3 and the separate restart correction/Maxwell cleanup are complete.
 R4a is accepted under [revised R4 instructions](codex_R4_instructions.md).
-Use the accepted post-R3 `eta_ve` state, including the original frozen-stress
+R4a used the accepted post-R3 `eta_ve` state, including the original frozen-stress
 implementation: `build-refactor-r3b/aspect-maxwell-qualified` and the source
 manifest in [cleanup evidence](../../../benchmarks/reconstructed_fault/maxwell_cleanup/README.md).
-The current reference HEAD is `d7b88b25e`; its difference from `82e43c266` is the
+That reference HEAD was `d7b88b25e`; its difference from `82e43c266` is the
 user's removal of a temporary review document. Preserve local changes and
-reference artifacts. R4b/R4c and R5–R8 require separate selection.
+reference artifacts. The first R4b condensed-solve subpass is accepted against
+R4a commit `0c7ed1a0b`. The selected second subpass extracts only the coupled
+trial residual operation, using the qualified first-subpass executable and
+its accepted uncommitted patch as reference, not plain R4a. The second subpass
+is accepted; see the rolling review and residual evidence for exact comparisons.
+Both R4b subpasses and the recommendation to retain the existing driver with
+two focused operations are accepted and saved together. No whole-iteration
+helper was implemented. The qualified second-subpass executable and manifests
+recorded in the residual evidence are the baseline for subsequent work.
+Remaining R4b operations, R4c and R5–R8 require separate selection.
 Historical outcomes remain in [the rolling review](../refactor_review.md).
 Module boundaries and frozen M1/M2 scope are defined in [refactoring.md](../refactoring.md).
 
@@ -290,7 +299,7 @@ any proposal to merge fault Newton orchestration with ordinary defect correction
 The three levels are driver, iteration operations, and supplied-operator linear
 solve, as detailed in [standing guidance](../refactoring.md#m5-solver-architecture-and-staged-extraction).
 
-**R4a (selected): move only.** Relocate the complete driver and exclusive helpers
+**R4a (accepted): move only.** Relocate the complete driver and exclusive helpers
 from `source/simulator/solver.cc` into
 `source/simulator/solver/reconstructed_fault_stokes.cc`. Keep bodies, expressions,
 lambdas, diagnostics, ordering, declarations and ownership unchanged. Inventory
@@ -308,7 +317,7 @@ pre-existing Stage-J failures separate. No long production/performance campaign.
 Gate: general solver no longer contains the full fault Newton algorithm and the
 independently compiled relocation matches the accepted post-R3 reference.
 
-**R4b (not selected): focused private operations.** First extract condensed linear
+**R4b (both extractions and helper assessment accepted): focused private operations.** First extract condensed linear
 solve/preconditioner setup, then trial residual evaluation, one reviewed subpass
 at a time. Before each extraction record inputs, outputs, mutations, collectives
 and object lifetimes. A single private iteration helper is optional after these
@@ -316,6 +325,15 @@ operations if it fits without changing convergence checks, unused-direction
 avoidance or iterate/timestep acceptance. No ordinary Picard/residual types are
 required merely for signature similarity. Preserve canonical owners; use only
 narrow solve-lifetime scratch where needed.
+
+The residual helper rolls back temporary trial V but retains assembly flags,
+linearization-point and RHS side effects. Preserve existing driver/audit cleanup
+boundaries and all five evaluation sites. The completed assessment recommends
+no whole-step helper: two driver-owned convergence checks divide the iteration,
+and the restricted inverse/linearization, active set, directions and scales span
+those boundaries. A whole-step call would need broader mutable context or move
+driver decisions. The user accepted retaining the focused operations. See the
+rolling review for the dependency table. Further extraction needs selection.
 
 **R4c (not selected): demonstrated common linear-solver work.** Select the smallest
 shared operation, potentially preconditioner construction. Retain the condensed
@@ -430,10 +448,19 @@ Suggested status row:
 
 `stage/pass | not started/in progress/ready for review/accepted/blocked | base SHA | candidate SHA or diff | test summary | next action`
 
-Current status: accepted post-R3/Maxwell reference verified; R4a is complete and
-ready for review. Fresh build, independent 2D/3D compilation, one/two-rank units
+Current status: accepted post-R3/Maxwell reference verified; R4a is accepted and
+committed as `0c7ed1a0b`. Fresh build, independent 2D/3D compilation, one/two-rank units
 and rollback, ordinary AMG smoke and four short BP3 comparisons pass exactly.
-R4b/R4c and subsequent stages are not authorized. Historical R1 fixture failures,
+R4b's first condensed-solve extraction is accepted: 31 focused comparisons,
+372 BP3 field/history groups and 28 counter/decision checks match R4a. The
+second, trial-residual extraction also passes 31 focused comparisons, 372 exact
+field/history groups and 28 counter/decision checks against the accepted first
+subpass; independent 2D/3D compilation and eight source/protection checks pass.
+It is accepted. The optional iteration-helper assessment is also accepted:
+retain the driver with the two focused operations. Next proposed
+task: the R4c duplication inventory and smallest shared-preconditioner proposal,
+before implementation. Further
+R4b operations and later stages require separate selection. Historical R1 fixture failures,
 Stage-J pressure incompatibility and cohesive step-two nonconvergence remain
 separate from refactoring equivalence. See CURRENT_STATUS.md and the rolling
 review for detailed earlier outcomes.

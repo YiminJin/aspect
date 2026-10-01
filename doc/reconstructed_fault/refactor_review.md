@@ -1,5 +1,228 @@
 # Reconstructed-fault refactoring review
 
+## R4b — Accepted baseline and commit
+
+The user accepted both focused operations and the recommendation against a
+whole `do_one_reconstructed_fault_stokes_step()`. The accepted source,
+guidance/reports and verification scripts are committed together over R4a
+`0c7ed1a0b`; unrelated `refactoring/tmp/` files are excluded. The qualified
+second-subpass executable is the next comparison baseline:
+`build-refactor-r4b-residual/aspect-r4b-residual-qualified`, SHA256
+`6ccdcf81b65ad5cbe0c949cdcd45da6332c3949354e0a034dcc830fa889fe7a7`.
+All 5,910 source-manifest entries, 21 executed-artifact/input entries and 1,079
+protected reference/local entries match at commit preparation. Manifest
+fingerprints are in the [baseline record](../../benchmarks/reconstructed_fault/refactoring_r4b_residual/README.md).
+No new runtime checks were required or run. Prior review text below is retained
+as historical evidence, including its then-uncommitted status.
+
+## R4b — Optional iteration-helper assessment (ready for review)
+
+Both R4b extractions are accepted. Assessment reference: `0c7ed1a0b` plus
+those two uncommitted patches, qualified by
+`build-refactor-r4b-residual/aspect-r4b-residual-qualified` (SHA256
+`6ccdcf81b65ad5cbe0c949cdcd45da6332c3949354e0a034dcc830fa889fe7a7`).
+All 5,910 accepted source-manifest entries and the executable hash match.
+This task changes documentation only; the implementation and ownership remain
+unchanged. Earlier reports below are retained intact.
+
+**Recommendation: retain the two focused operations and do not extract a whole
+`do_one_reconstructed_fault_stokes_step()` in R4b.** It is possible to move the
+loop body, but the resulting boundary would not be a small iteration operation
+under the agreed driver responsibilities.
+
+The current sequence in `source/simulator/solver/reconstructed_fault_stokes.cc`
+has these boundaries (line numbers refer to the accepted second subpass):
+
+| Region | Inputs/state and result | Why it crosses a proposed whole-step boundary |
+|---|---|---|
+| Assembly, linearization, early direction gate (539–646) | Accepted bulk/current V, initial/reference scales, canonical matrix/coupling; initialize first-iteration precision/surface scales and test fresh unprojected residuals | The driver must retain the early decision while still entering the existing compatibility path before skipping an unused direction |
+| Active-set stabilization and final convergence (647–830) | Restricted surface inverse, linearization view, active mask and recovered directions; finalize the first surface scale, compute residuals and maximum admissible step | The final convergence/publication branch occurs before line search; it uses the active mask and solve-wide counters, and may return without accepting another iterate |
+| Joint line search (832–1138) | Same linearization and directions, fixed active mask, residual scales, pressure policy/bookkeeping, audit matrix/RHS snapshots | Updates private bulk/current V and pressure adjustment, then the minimum-alpha counter; histories stay frozen and whole-solve rollback remains outside |
+
+A single call covering all three regions would either take over the convergence
+control flow, duplicate it, or require a callback into the driver's publication
+branch. Returning to the driver at the existing checks instead requires several
+operations and a handoff containing the restricted inverse and its referencing
+linearization, active mask, directions, norms and scales. Their lifetimes span
+those checks; they are not a small result record. The solve-wide bulk/pressure
+iterate, first-iteration scale updates, Krylov count and accepted-alpha minimum
+add mutable state beyond that handoff. No persistent owner is needed or proposed.
+
+A line-search-only helper has a more coherent boundary after convergence, but
+it would be a different extraction, carrying pressure handling and substantial
+affine-audit state. The Armijo reduction/acceptance policy already has the
+existing `reconstructed_fault_armijo_line_search()` interface. Do not add a
+wrapper merely to shorten the driver, or relocate diagnostics in this assessment.
+
+The assessment checks the Stage-I specification, manager current/trial/committed
+lifecycle, the condensed Linearization reference-lifetime contract and existing
+nonlinear interfaces/test cases. No scientific conflict or new defect was
+identified. PASS: source/reference hashes and documentation whitespace checks.
+NOT RUN: new builds or runtime tests; no executable source changed, and the
+accepted second-subpass verification remains the numerical evidence. No claim
+of new runtime coverage is made.
+
+Stop for review. Proposed next bounded task: the R4c duplication inventory and
+smallest shared-preconditioner proposal, with implementation selected afterward.
+No additional helper or R4c code is implemented; no commit is made.
+
+
+## R4b — Second residual extraction (complete; ready for review)
+
+The first condensed-solve subpass is accepted. The reference is R4a commit
+`0c7ed1a0b` plus that accepted, still-uncommitted patch, verified against its
+source and executed-artifact manifests before editing. Reference executable:
+`build-refactor-r4b-linear/aspect-r4b-linear-qualified`, SHA256
+`9ff850bc7d4060ab75ee80dfdd44dc09b94c7862b8bfcf448a653ecdc17cd30d`.
+Candidate: uncommitted second R4b diff, executable
+`build-refactor-r4b-residual/aspect-r4b-residual-qualified`, SHA256
+`6ccdcf81b65ad5cbe0c949cdcd45da6332c3949354e0a034dcc830fa889fe7a7`.
+The reference, first-subpass artifacts and user-local temporary files are
+unchanged. The separate scientific worktree was not modified.
+
+### Change and contract
+
+The [pre-edit contract](../../benchmarks/reconstructed_fault/refactoring_r4b_residual/README.md)
+records inputs, result, mutations, collectives and lifetimes; verification after
+extraction confirms it still applies. One private Simulator member,
+`evaluate_reconstructed_fault_coupled_residual()`, replaces the existing lambda.
+It receives the physical bulk vector and exact absolute trial V and returns
+the existing bulk norm and surface residual/mass data. Its two-field result
+type has a private forward declaration and implementation-file definition.
+No public API, persistent state, owner, framework or new include is introduced.
+
+All five call sites remain in their original order: initial and zero-velocity
+reference evaluations, audit-channel evaluation, line-search trial, and
+nonzero-V probe. The body retains bulk assembly, velocity/pressure reductions,
+surface evaluation and temporary V rollback in their original order. Trial
+opening stays outside the existing try; guarded rollback/rethrow is unchanged.
+Non-committing evaluation still changes assembly flags, linearization point
+and assembled RHS. The driver restores whole-solve controls, and audit callers
+restore matrix/RHS where they did before; no stronger exception or atomicity
+guarantee is claimed. Preparation, convergence, accepted-iterate handling,
+history/V/bulk publication and failure restoration stay in the driver.
+
+The accepted condensed-solve helper is byte-identical. The residual body differs
+only in indentation and result-type spelling; the driver is otherwise identical
+after removing the local definitions and renaming calls/types. Only the two
+selected production files change relative to the accepted first subpass.
+`evidence/second-subpass-source.patch` isolates this change from the combined
+uncommitted Git diff. Standing guidance now explicitly documents residual
+assembly side effects and existing cleanup responsibilities.
+
+### Verification and disposition
+
+Evidence is under `benchmarks/reconstructed_fault/refactoring_r4b_residual/`.
+
+| Status | Check | Evidence |
+|---|---|---|
+| PASS | Fresh Release/link, independent driver, candidate plugins, one definition per operation in 2D/3D | `evidence/build.json`, `independent-final.json`, `plugin-build.json`, `linked-symbols.txt` |
+| PASS | Eight source/protection checks, including unchanged accepted helper and all five retained calls | `evidence/source-verification.json` |
+| PASS | Units on one/two ranks: 20,149 assertions/16 cases per rank | `evidence/candidate-unit-{1,2}.json` |
+| PASS | 31 focused checks: affine/nonzero-V residual audits, pressure/history, accepted-update rollback, intentional exhaustion on 1/2 ranks, one-rank GMG | `evidence/focused-comparison.json` |
+| PASS | Four legacy/automatic BP3 trajectories: 372 exact field/history groups and 28 cache/work/solver-decision checks | `evidence/state-comparison.json`, `lifecycle-comparison.json` |
+| NOT RUN | New ordinary/restart, Debug, 3D or production/performance campaign | Reuse qualified earlier evidence where source/lifecycle is unchanged |
+
+All 20 selected build/runtime invocations have their expected outcomes. The two
+intentional exhaustion runs exit 1 with the same one-iteration budget, no accepted
+trial and verified restoration. There is no unexpected failure. Matched fields,
+histories, residual diagnostics, solver decisions and cache/work counters are
+unchanged; maximum field difference is zero. Time/path metadata are excluded.
+Source/artifact/input hashes, exact commands and environments are recorded;
+candidate effective parameters confirm freshly built candidate plugins, and
+recorded runtime environments match the reference. No physical parameters,
+tolerances or history assertions changed. No new scientific defect was found.
+
+Ordinary/shared solver and restart initialization are unchanged. Historical
+Stage-J pressure incompatibility, cohesive step-two nonconvergence and the
+cross-rank cohesive observer limitation remain separate and were not rerun.
+No dedicated BFBT, melt/direct or new stress-observer campaign is claimed.
+
+Stop for review with both R4b subpasses uncommitted. Proposed next bounded task:
+assess whether the remaining iteration boundary supports a small private helper
+without broad mutable context or relocating convergence/publication decisions.
+No iteration-helper extraction or R4c consolidation is implemented. Earlier
+reports below, including the accepted first-subpass report, are retained intact.
+
+
+## R4b — First condensed-solve extraction (complete; ready for review)
+
+The user accepted R4a; it is committed as `0c7ed1a0b` before this subpass.
+Reference executable: `build-refactor-r4a/aspect-r4a-qualified`, SHA256
+`ed827270970996854ae2425e519255422f80a25b0602d1cbf863c88a8d4910be`.
+Candidate: uncommitted first R4b diff, executable
+`build-refactor-r4b-linear/aspect-r4b-linear-qualified`, SHA256
+`9ff850bc7d4060ab75ee80dfdd44dc09b94c7862b8bfcf448a653ecdc17cd30d`.
+Accepted reference artifacts and user-local `refactoring/tmp/` files are unchanged;
+the scientific worktree was not modified.
+
+### Boundary and contract
+
+Before editing, inputs, outputs, mutations, collectives and lifetimes were
+recorded in the [R4b contract/evidence](../../benchmarks/reconstructed_fault/refactoring_r4b_linear/README.md).
+That table was checked after extraction and still applies. The new private
+`Simulator::solve_reconstructed_fault_condensed_system()` replaces the existing
+condensed-solve lambda and contains its exclusive pressure-assembly-scale lambda.
+It receives the immutable linearization, active mask, RHS, accepted physical
+bulk iterate, residual scales, convergence flag and preconditioner setup duration;
+it overwrites direction and accumulates the existing whole-solve Krylov count.
+A private five-scalar record groups only related residual/precision inputs and
+has no persistent storage. Canonical surface/coupling objects remain unchanged.
+
+`simulator.h` gains private declarations and the existing condensed-system header
+for its nested Linearization type. The implementation remains in the R4a file.
+No public accessor, generic framework or ownership change is introduced. The
+ordinary/shared solver implementation is unchanged. Schur construction, AMG/GMG
+wrappers, pressure compatibility, true-residual checks, same-budget restarts,
+observer timing and failure updates move intact. The original zero-RHS exit and
+compatibility-before-already-converged return are preserved. MPI order and
+restricted inverse/matrix/constraint lifetimes are unchanged.
+
+Bulk preconditioner assembly and its timer remain before linearization in the
+driver. Nonlinear preparation, active-set rebuilding, increment recovery,
+residual evaluation, line search, convergence, history/V/bulk publication and
+whole-solve rollback keep their existing locations. The driver is otherwise
+byte-identical outside the removed definitions and replacement call. Moving
+publication or claiming stronger atomicity is not part of this pass.
+
+### Verification and disposition
+
+Evidence paths are relative to
+`benchmarks/reconstructed_fault/refactoring_r4b_linear/`.
+
+| Status | Check | Evidence |
+|---|---|---|
+| PASS | Fresh Release/link, separate candidate plugins, independent driver and 2D/3D definitions | `evidence/build.json`, `plugin-build.json`, `independent-final.json`, `linked-symbols.txt` |
+| PASS | Six source/protection checks: unchanged moved arithmetic/order except explicit scale access, otherwise exact driver, private-only header additions, preserved reference/local files | `evidence/source-verification.json` |
+| PASS | One/two-rank condensation/Stage-I units: 20,149 assertions/16 cases per rank | `evidence/candidate-unit-{1,2}.json` |
+| PASS | 31 focused comparisons: affine residuals, pressure/history, accepted-update rollback, exhaustion/restore on 1/2 ranks and one-rank GMG | `evidence/focused-comparison.json` |
+| PASS | Four short BP3 legacy/automatic trajectories: 372 exact field/history groups, 24 cache/work checks and four detailed solver-decision comparisons | `evidence/state-comparison.json`, `lifecycle-comparison.json` |
+| NOT RUN | New ordinary/restart, Debug, 3D or production/performance campaign | Qualified earlier evidence reused where implementation/lifecycle is unchanged |
+
+All 29 selected build/runtime checks have their expected results; four deliberate
+reference/candidate exhaustion runs exit 1, verify the original one-iteration
+budget and rollback, and accept no trial. No unexpected failure or numerical
+field difference occurs. Deterministic solver diagnostics/decisions also match;
+time/path metadata are excluded. The initial standalone include-order failure
+is retained separately: the condensed-system include needs the existing particle
+declarations, so it follows Simulator's existing particle-manager include.
+The corrected independent and complete builds pass; M3/M4 source is unchanged.
+
+Reference extra-fixture plugins were built with the captured R4a Simulator header;
+candidate effective PRMs confirm candidate-built plugins. Source, binaries,
+plugins, input hashes, commands and environments are recorded. No parameters,
+tolerances or scientific/history assertions were changed. Historical Stage-J
+pressure/cohesive nonconvergence and cross-rank observer limitations were not
+rerun or repaired. No dedicated BFBT, melt/direct, frozen-system observer or
+performance campaign is claimed. No new scientific defect was identified.
+
+The selected first R4b subpass is finished and remains uncommitted for review.
+Next proposed task: extract the existing non-committing trial residual operation,
+after documenting its inputs, outputs, mutations, collectives and lifetimes.
+No trial-residual/iteration-helper extraction or R4c consolidation is implemented.
+Earlier reports below are retained unchanged.
+
+
 ## R4a — Dedicated coupled-driver relocation (accepted)
 
 Reference: `pf-rsf-refactor`, HEAD `d7b88b25e6e157206b6bdcaf714dac434701f97c`.
