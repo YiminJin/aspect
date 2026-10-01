@@ -59,23 +59,24 @@ to change the reference algorithm, parameters, or expected test results.
 
 ## 2. Preserve responsibility boundaries
 
-### Selected module scope (R4c accepted; separate frozen-fixture verification)
+### Selected module scope (R5a1 manager slip-rate lifecycle)
 
-R3a, the separate transient restart correction, R3b and the Maxwell `eta_ve`
-cleanup are the accepted reference for R4. Historical lifecycle reports remain
-in `refactor_review.md`; the original direct frozen-stress implementation is
-retained. R4a is accepted and committed as `0c7ed1a0b`. Both R4b private
-operations (condensed linear solution and coupled residual evaluation) are
-accepted. Retain the driver without a whole-iteration helper, as accepted after
-the dependency assessment. R4b is committed as `983d57e28`. Accepted R4c is
-committed as `fa6013678`; it shares only Schur-wrapper construction and retains the existing
-Simulator header dependency. Preserve ordinary melt block selection and the
-restriction against combined fault mechanics and melt transport. Follow
-[revised R4 instructions](refactoring/codex_R4_instructions.md).
-The separately selected historical frozen AMG/GMG fixture repair is complete
-for review. It uses existing default selection to build the hierarchy while
-retaining production AMG, and verifies the explicit GMG probe independently.
-No production-interface changes or R5 implementation are authorized by that task.
+R4 is accepted: R4c `fa6013678`, followed by the accepted frozen AMG/GMG fixture
+repair `aea2a80b0`. Reuse their qualified artifacts and evidence. Follow
+[revised R5 instructions](refactoring/codex_R5_instructions.md); only R5a1 is
+selected. Move the complete manager slip-rate definitions with unchanged bodies,
+API, owner, data layout, validation order and exception specifications. Keep
+geometry sizing, generic registration, archive save/load and deserialization
+rebuild in place, including the R3 transient prescribed-map sizing fix.
+
+Record the state readers/writers/initialization/reset/checkpoint table before
+moving and verify it afterward. Preserve exact absolute trial values, separate
+trial and whole-solve rollback, caller-supplied prescribed-rate reattachment,
+and validation before the existing noexcept terminal copy. Numerical lower-bound
+policy and acceptance remain with M4/M5. No state-machine framework or new state
+struct, ownership transfer, projection/cache move or surface-system change is
+part of this pass. Independently compile moved methods and verify 2D/3D symbols
+without changing existing unity groups or unrelated build settings.
 
 | Module | Owns | Refactoring scope |
 |---|---|---|

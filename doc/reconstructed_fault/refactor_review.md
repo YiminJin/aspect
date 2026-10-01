@@ -1,5 +1,88 @@
 # Reconstructed-fault refactoring review
 
+## R5a1 — Manager slip-rate lifecycle organization (complete for review)
+
+Accepted fixture repair committed first as `aea2a80b05a2fa01f3f23916163f24cf667b66c2`,
+separate from R4c `fa6013678`. The accepted reference remains
+`build-refactor-r4c/aspect-r4c-verified`, SHA256
+`c6811cbd877ff56af9113dc2f110cfd9a8b71998ea63f8e249ff94b292eeed85`.
+Repaired-fixture evidence (226 checks) and R4 source/artifact manifests were
+verified and reused; their runtime campaigns were not repeated. Local R5
+instructions and temporary reviews are preserved.
+
+### Inventory, move and lifetime check
+
+The [pre-edit inventory and state table](../../benchmarks/reconstructed_fault/refactoring_r5a1/README.md)
+distinguish reconstruction, generic registry/persistence, slip-rate lifecycle,
+particle projection, Stokes-QP associations and existing boundary-contact/source
+continuation. `boundary_contact_manager.cc` and `boundary_contact.cc` were
+already extracted and remain unchanged. No projection-domain API was replaced.
+
+All 16 slip-rate definitions moved byte-for-byte from `manager.cc` into
+`manager_slip_rate.cc`, including the trial rollback that was under the old
+restart heading. There are no exclusive local helpers. The shared interpolation
+utility stays in place. Only member instantiations and direct includes were
+added; no new owner, state copy/struct, API, data layout, assertion or MPI call.
+The remaining manager is byte-identical apart from removal and placement of
+that section heading. CMake and unity/PCH settings are unchanged; source discovery
+finds the new TU. This organizes an existing responsibility without removing
+all manager coupling.
+
+All state remains manager-owned and replicated. The pre-edit table was verified
+unchanged after the move:
+
+| State | Readers and transitions | Initialization/reset/restart |
+|---|---|---|
+| Committed V | material/output/timestep readers; only terminal converged commit copies current V | geometry allocates empty row; explicit initialization; serialized/restored |
+| Current Newton V | active accessor/interpolation when no trial; begin copies committed and applies prescribed values; acceptance copies trial; whole rollback restores committed | initialized explicitly; rebuilt from committed on load |
+| Trial V | active accessor during trial; affine setter uses current base; absolute setter validates then copies exact values | begin copies current; begin-solve/accept/rollback/load clear rows |
+| Initialized/solve/trial flags | readiness, access, geometry and lifecycle guards | initialized flags serialized; active flags false after reconstruction/load; existing transitions unchanged |
+| Prescribed maps | begin-solve lift, mask and trial validation | caller setter outside solve; never serialized; load sizes empty maps per fault (R3 fix); caller reattaches actual conditions |
+| Projection/contact caches | untouched validity, readers, MPI and reference lifetimes | existing geometry/deserialization invalidation order remains in manager.cc |
+
+Geometry addition/reconstruction, generic registration, archive save/load and
+`rebuild_after_deserialization()` stay in their original locations. Accessor
+reference lifetimes remain tied to vector assignment/reset. Commit validation
+remains separate from the no-allocation noexcept copy. M4 computes physical
+initial/history values and its stronger lower bound; M5 decides convergence,
+trial acceptance and terminal publication. No stronger atomicity is claimed.
+
+### Focused verification
+
+Candidate: uncommitted R5a1 over `aea2a80b0`, frozen as
+`build-refactor-r5a1/aspect-r5a1-qualified`, SHA256
+`4159f38bb530c97bed3fddb12009cd892b3428fb28c1e28530a230f050146ec6`.
+
+| Status | Check |
+|---|---|
+| PASS | Fresh Release build/link and separate test plugins on the qualified R4 stack; original/new manager TUs compile without unity/PCH |
+| PASS | 16 methods × 2 dimensions: exactly one definition each in new independent object and executable, none in independent remaining-manager object |
+| PASS | Seven exact source checks; unchanged headers/callers/tests, geometry/registry/archive bodies and CMake; original checkpoint and reference/local protection manifests intact |
+| PASS | Existing initialization/lifecycle/prescribed-rate/absolute-bound/interpolation/commit/restart tests: 20,130 assertions in 7 cases per rank, reference and candidate, one/two ranks |
+| PASS | Coupled pressure/history and accepted-update rollback: exact matched decisions and history fingerprints versus R4c, one/two ranks |
+| PASS with known limitation | Preserved one-rank cohesive checkpoint restores original history/V/geometry/bulk assertions on both executables; exact matching phase-field/coupled trace and unchanged checkpoint payloads; existing step-two nonlinear nonconvergence remains |
+| REUSED / NOT RERUN | R4 BP3 cache/work and repaired frozen AMG/GMG evidence; ordinary melt/BFBT/direct/GMG paths untouched |
+| NOT RUN | Debug, 3-D runtime, full-field BP3 trajectories, long scientific campaigns or later R5 implementations |
+
+31 matched checks pass; all 17 recorded build/runtime outcomes are expected,
+including the two known restart nonconvergences. No candidate-only failure or
+numerical correction occurred. The archive unit regression covers a restored
+absolute trial before any prescribed-rate setter and later nonempty reattachment.
+The short coupled fingerprint includes nodal V/Theta/cohesion/previous I_h,
+velocity norm and particle stress mean; these fixtures emit no full field dumps.
+The existing rollback observer verifies bulk, surface and particle restoration.
+No tolerances, parameters, test assertions or archive layout changed.
+
+Commands, source/artifact hashes and raw results are in the
+[R5a1 evidence](../../benchmarks/reconstructed_fault/refactoring_r5a1/README.md).
+The candidate source manifest contains 857 source/header/unit-test files; the
+executed-artifact manifest has 18 entries. Historical Stage-J/cohesive scientific
+limitations remain separate. R5a1 is uncommitted for review; stop before cache,
+projection or surface-system implementation. Proposed next bounded task: R5a2
+particle-projection inventory/cache-lifetime assessment and one coherent move
+proposal, keeping Stokes-QP associations separate.
+
+
 ## Separate historical frozen AMG/GMG fixture repair — complete for review
 
 R4c was accepted and committed first as `fa6013678b525b189a1d27ef08465d4a6ef263f6`.

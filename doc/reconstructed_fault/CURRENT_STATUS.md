@@ -1,5 +1,47 @@
 # Phase-field / RSF current status
 
+## R5a1 accepted baseline; R5a2 inventory selected
+
+The accepted R5a1 source, guidance and verification harness are saved together
+after fixture commit `aea2a80b0`. Use `build-refactor-r5a1/aspect-r5a1-qualified`
+and the manifest fingerprints in the [accepted baseline](../../benchmarks/reconstructed_fault/refactoring_r5a1/README.md#accepted-r5a1-baseline).
+All qualified source/artifact and protection hashes match; no runtime campaign
+was repeated. Local temporary review files remain excluded. The user's next
+selection follows the recommendation: particle-projection inventory, cache-
+lifetime assessment and one coherent move proposal only, before implementation.
+
+
+## R5a1 manager slip-rate organization complete for review
+
+Accepted fixture repair is committed as `aea2a80b0` after R4c `fa6013678`.
+The unchanged qualified R4c executable and repaired-fixture manifests are the
+reference; no unrelated R4 runtime campaign was repeated.
+
+R5a1 moves all 16 manager slip-rate definitions byte-for-byte into
+`source/reconstructed_fault/manager_slip_rate.cc`. The manager still owns all
+state. Headers/API/layout, geometry sizing, generic registration, archive and
+restart rebuild (including the R3 prescribed-map sizing fix) are unchanged.
+The responsibility/state table was recorded before editing and verified after.
+No cache/projection, boundary-contact or surface-system implementation changed.
+
+Fresh Release/link, independent original/new TUs, and 32 unique 2D/3D symbols
+pass. Seven source checks and 31 matched comparisons pass. Existing lifecycle,
+prescribed/absolute-bound/restart units pass 20,130 assertions in seven cases
+per rank on one/two ranks for reference and candidate. Small coupled-history
+and accepted-update rollback comparisons match the accepted R4c evidence exactly.
+Both binaries restore the preserved one-rank cohesive checkpoint and retain the
+same known step-two nonconvergence with exact phase-field/coupled traces; no
+numerical workaround was made. All 17 recorded outcomes are expected.
+
+Candidate: `build-refactor-r5a1/aspect-r5a1-qualified`, SHA256
+`4159f38bb530c97bed3fddb12009cd892b3428fb28c1e28530a230f050146ec6`.
+R5a1 remains uncommitted for review. See [review](refactor_review.md) and
+[evidence](../../benchmarks/reconstructed_fault/refactoring_r5a1/README.md).
+Projection/cache reorganization and surface-system implementation have not begun.
+Next proposed bounded task: R5a2 particle-projection inventory/cache-lifetime
+assessment and one coherent move proposal. Earlier entries are historical.
+
+
 ## Frozen fixture accepted; R5a1 selected
 
 The accepted fixture repair is saved in its own commit after R4c `fa6013678`.
