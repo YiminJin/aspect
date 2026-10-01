@@ -229,7 +229,7 @@ namespace aspect
                       for(unsigned int c=0;c<3;++c)old[SymmetricTensor<2,dim>::unrolled_to_component_indices(c)]=all[stress_fields[c]];
                       const auto frozen=model.evaluate_frozen_maxwell_stress(temp[q],all,old);
                       history<<cell->id()<<','<<q<<','<<point[0]<<','<<point[1]<<','<<a.segment_index<<','<<a.xi
-                        <<','<<fe.JxW(q)*response.localization_factor<<','<<phase[q]<<','<<response.localization_factor<<','<<response.kappa
+                        <<','<<fe.JxW(q)*response.localization_factor<<','<<phase[q]<<','<<response.localization_factor<<','<<response.eta_ve
                         <<','<<frozen[0][0]<<','<<frozen[1][1]<<','<<frozen[0][1]
                         <<','<<frozen*symmetrize(outer_product(a.tangent,a.normal))
                         <<','<<-frozen*symmetrize(outer_product(a.normal,a.normal))<<'\n';
@@ -237,7 +237,7 @@ namespace aspect
                   if(a.segment_index!=795)continue;
                   ++free_samples;
                   AssertThrow(a.shape_1==a.xi,ExcMessage("Free-side Q1 geometry changed."));
-                  work+=fe.JxW(q)*2.*response.kappa*response.localization_factor*BP3::Vp*a.shape_0
+                  work+=fe.JxW(q)*2.*response.eta_ve*response.localization_factor*BP3::Vp*a.shape_0
                     *(symmetrize(outer_product(a.tangent,a.normal))*strain[q]);
                 }
             }

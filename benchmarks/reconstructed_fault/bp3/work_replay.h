@@ -78,7 +78,7 @@ namespace aspect
       struct Sample
       {
         SymmetricTensor<2,dim> tau;
-        double chi,kappa,rate,bg,q,sigma,Ih;
+        double chi,eta_ve,rate,bg,q,sigma,Ih;
       };
       const auto evaluate=[&](const unsigned int segment,const double xi,const bool active,
                              const double phi,const double temp,const double pressure,
@@ -92,11 +92,11 @@ namespace aspect
         const auto r=model.evaluate_reconstructed_fault_bulk_point(in);
         AssertThrow(r.history_correction==0.,ExcMessage("Mature frozen-profile history correction changed."));
         Sample result;
-        result.chi=active ? r.localization_factor : 0.;result.kappa=r.kappa;
+        result.chi=active ? r.localization_factor : 0.;result.eta_ve=r.eta_ve;
         result.rate=manager.interpolate_slip_rate(0,segment,xi);
         SymmetricTensor<2,dim> old;
         old[0][0]=all[fields[0]];old[1][1]=all[fields[1]];old[0][1]=all[fields[2]];
-        result.tau=2*r.kappa*(eps-result.chi*result.rate*S)+model.evaluate_frozen_maxwell_stress(temp,all,old);
+        result.tau=2*r.eta_ve*(eps-result.chi*result.rate*S)+model.evaluate_frozen_maxwell_stress(temp,all,old);
         const auto bg=model.reconstructed_fault_background_tractions(0,segment,xi);
         result.bg=bg.first;result.q=bg.first+result.tau*S;result.sigma=bg.second+pressure-result.tau*N;
         result.Ih=(1-xi)*fault.get_properties(segment)[I]+xi*fault.get_properties(segment+1)[I];
@@ -191,7 +191,7 @@ namespace aspect
                                     ph[k],T[k],p[k],symmetrize(gradients[k]),all);
               // Timestep zero retained zero particle stress. This independent
               // first finite-step formula must match the newly committed array.
-              const auto expected=2*s.kappa*(symmetrize(gradients[k])-s.chi*s.rate*S);
+              const auto expected=2*s.eta_ve*(symmetrize(gradients[k])-s.chi*s.rate*S);
               for (unsigned int c=0;c<3;++c)
                 {
                   first_old=std::max(first_old,std::abs(all[fields[c]]));

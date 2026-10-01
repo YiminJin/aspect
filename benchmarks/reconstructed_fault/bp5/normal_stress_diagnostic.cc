@@ -524,7 +524,7 @@ namespace aspect
             out<<','<<total-s.deviatoric<<','<<s.reference_position[0]<<','<<s.reference_position[1]
                <<','<<s.particle_interpolated_stress[0][0]<<','<<s.particle_interpolated_stress[1][1]<<','<<s.particle_interpolated_stress[0][1]
                <<','<<update[0][0]<<','<<update[1][1]<<','<<update[0][1]<<','<<-(update*N)
-               <<','<<(kind ? "native_line_trace":"production_QP")<<','<<s.stress_time_step<<','<<s.beta<<','<<s.kappa
+               <<','<<(kind ? "native_line_trace":"production_QP")<<','<<s.stress_time_step<<','<<s.beta<<','<<s.eta_ve
                <<','<<s.velocity_gradient[0][0]<<','<<s.velocity_gradient[0][1]
                <<','<<s.velocity_gradient[1][0]<<','<<s.velocity_gradient[1][1]<<'\n';
           }

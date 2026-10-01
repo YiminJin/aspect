@@ -1,5 +1,33 @@
 # Reconstructed-fault refactoring review
 
+## Maxwell coefficient naming follow-up (complete; ready for review)
+
+The user selected the `kappa` → `eta_ve` rename after R3b and then requested
+retaining the original efficient frozen-stress implementation. The rename covers
+Maxwell coefficients, material responses, coupling data and C++ callers/tests.
+The stable `-eta*expm1(-dt*G/eta)` expression is unchanged. Existing diagnostic CSV
+column names remain compatible with archived output; the design/specification
+identify `eta_ve` with the existing mathematical kappa notation.
+
+`evaluate_frozen_maxwell_stress` is byte-identical to its pre-task implementation.
+It prepares the material coefficients and returns only beta times retained stress.
+The full `compute_maxwell_stress` operation includes the current-strain term;
+ordinary Stokes assembly supplies that contribution separately. No delegation
+through a zero-strain tensor remains. No ownership, checkpoint, algorithm or
+parameter change is included, and prior R3b edits are preserved.
+
+Core and selected plugin builds pass. Existing tests pass 20,816 assertions in
+26 cases per rank on one/two ranks. Frozen-stress/temperature fixtures yield 12
+exact comparisons. Four short legacy/automatic BP3 runs and a cross-rank old-
+checkpoint continuation yield 405 exact field groups and 30 matching cache/work
+checks. No numerical differences were observed. No 3D or long/full BP3 run was
+performed; updated historical/BP5 diagnostic callers were not run, and earlier
+cohesive limitations remain separate. Details and qualified executable hashes:
+[cleanup evidence](../../benchmarks/reconstructed_fault/maxwell_cleanup/README.md).
+
+This cleanup is saved separately from R3b commit `4d2f14f53` for future R4 work. Proposed next task remains separately
+selected R4a solver-method relocation; no R4 work has begun.
+
 ## R3b — expose the existing history lifecycle (complete; ready for review)
 
 Reference is corrected R3a `bef79b31a`, executable

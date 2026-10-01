@@ -118,7 +118,7 @@ namespace aspect
           Point<dim> reference_position;
           SymmetricTensor<2,dim> particle_interpolated_stress;
           Tensor<2,dim> velocity_gradient;
-          double stress_time_step = 0., beta = 0., kappa = 0.;
+          double stress_time_step = 0., beta = 0., eta_ve = 0.;
           double friction_coefficient = 0., friction_normal = 0.;
         };
         struct ParticleSample

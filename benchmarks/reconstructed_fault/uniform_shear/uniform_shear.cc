@@ -369,7 +369,7 @@ namespace aspect
                       // Fixed initial profile has no history-slip correction.
                       // Reuse production beta*tau_old rather than retained tau0.
                       std::vector<double> composition(intro.n_compositional_fields,0.0);
-                      const auto stress = 2*response.kappa*(input.strain_rate
+                      const auto stress = 2*response.eta_ve*(input.strain_rate
                         -response.localization_factor*input.slip_rate*input.slip_tensor)
                         +model.evaluate_frozen_maxwell_stress(input.temperature,composition,input.old_maxwell_stress);
                       traction << particle.get_id() << ',' << a.position[0] << ',' << a.position[1]
@@ -438,7 +438,7 @@ namespace aspect
                       qp_cells << ',' << cell->vertex_index(v);
                     qp_cells << '\n';
                     const auto &association = associations[q];
-                    double V=0, chi=0, kappa=-1e8*std::expm1(-(step == 0 ? 2.0 : this->get_timestep())/100.), history=0;
+                    double V=0, chi=0, eta_ve=-1e8*std::expm1(-(step == 0 ? 2.0 : this->get_timestep())/100.), history=0;
                     if (association.active)
                       {
                         typename MaterialModel::PhaseFieldFault<dim>::ReconstructedFaultBulkPointInputs input;
@@ -463,18 +463,18 @@ namespace aspect
                             const double h = 1/phase.energetic_degradation({1.0},std::max(phi[q],0.0))-1;
                             const double hp = 1/phase.energetic_degradation({1.0},std::max(old_phi[q],0.0))-1;
                             chi=h/I;
-                            history=std::exp(-this->get_timestep()/100.)*Cp/kappa*(h*Ip/I-hp);
+                            history=std::exp(-this->get_timestep()/100.)*Cp/eta_ve*(h*Ip/I-hp);
                           }
                         else
                           {
                             const auto response = model.evaluate_reconstructed_fault_bulk_point(input);
-                            chi=response.localization_factor; kappa=response.kappa; history=response.history_correction;
+                            chi=response.localization_factor; eta_ve=response.eta_ve; history=response.history_correction;
                           }
                       }
                     bulk << values.quadrature_point(q)[0] << ',' << values.quadrature_point(q)[1] << ',' << values.JxW(q)
                          << ',' << velocity[q][0] << ',' << velocity[q][1] << ',' << gradients[q][0][0] << ',' << gradients[q][0][1]
                          << ',' << gradients[q][1][0] << ',' << gradients[q][1][1] << ',' << pressure[q] << ',' << phi[q]
-                         << ',' << old_stress[q] << ',' << association.active << ',' << V << ',' << chi << ',' << kappa << ',' << history << '\n';
+                         << ',' << old_stress[q] << ',' << association.active << ',' << V << ',' << chi << ',' << eta_ve << ',' << history << '\n';
                   }
               }
           // Replicate only the initial diagnostic snapshots: particles may

@@ -645,10 +645,14 @@ law
 
 \[
 \beta=\exp(-\Delta tG/\eta),\qquad
-\kappa=-\eta\,\operatorname{expm1}(-\Delta tG/\eta),\qquad
-\boldsymbol\tau_k=2\kappa\dot{\boldsymbol\epsilon}^{b}_k
+\eta_{\mathrm{ve}}\equiv\kappa=-\eta\,\operatorname{expm1}(-\Delta tG/\eta),\qquad
+\boldsymbol\tau_k=2\eta_{\mathrm{ve}}\dot{\boldsymbol\epsilon}^{b}_k
                   +\beta\boldsymbol\tau_{k-1}.
 \]
+
+The C++ coefficient is named `eta_ve` (viscoelastic viscosity); the remaining
+equations retain the equivalent notation \(\kappa\). Existing diagnostic CSV
+columns named `kappa` retain that spelling for compatibility with saved data.
 
 The `expm1` expression is the authoritative evaluation of
 \(\eta(1-\beta)\); code must not recover it by subtracting `beta` from one.

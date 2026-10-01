@@ -1,5 +1,23 @@
 # Phase-field / RSF current status
 
+## Maxwell naming cleanup complete; frozen-stress implementation retained
+
+The Maxwell viscoelastic viscosity is now named `eta_ve` throughout fault C++
+coefficients, responses, caches and callers. Its stable `expm1` evaluation is
+unchanged. Existing CSV columns retain `kappa`; the design/specification state
+the notation equivalence. `evaluate_frozen_maxwell_stress` is restored exactly to
+its original direct beta-times-old-stress implementation at the user's request.
+
+Release/plugin builds and existing unit/frozen-stress/temperature tests pass on
+one/two ranks (20,816 assertions/26 cases per rank). Short legacy/automatic BP3
+and the cross-rank old-checkpoint continuation match R3b: 405 exact field groups,
+30 matching cache/work checks and 12 frozen/temperature comparisons. No physical
+parameter, tolerance or history behavior changed. R3b and local edits are preserved.
+See [cleanup evidence](../../benchmarks/reconstructed_fault/maxwell_cleanup/README.md).
+Qualified candidate: `build-refactor-r3b/aspect-maxwell-qualified`. R3b and this
+cleanup are saved in separate local commits (R3b: `4d2f14f53`). Use this candidate and the cleanup
+source manifest as the R4 reference; no next refactoring stage has begun.
+
 ## R3b complete; review pending
 
 The R3a ownership/lifecycle table and full report in `refactor_review.md` were

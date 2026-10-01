@@ -147,7 +147,7 @@ namespace aspect
 
           static CohesiveResponse
           compute_cohesive_response(const double beta,
-                                    const double kappa,
+                                    const double eta_ve,
                                     const double current_normalization_integral,
                                     const double previous_normalization_integral,
                                     const double previous_cohesive_traction,
@@ -157,7 +157,7 @@ namespace aspect
                                     const bool mature = false)
           {
             return PhaseFieldFault<dim>::compute_cohesive_response(
-              {beta, kappa}, current_normalization_integral,
+              {beta, eta_ve}, current_normalization_integral,
               previous_normalization_integral, previous_cohesive_traction,
               slip_rate, current_h, previous_h, mature);
           }
@@ -166,14 +166,14 @@ namespace aspect
           compute_crack_driving_force_candidate(
             const double time_step,
             const double beta,
-            const double kappa,
+            const double eta_ve,
             const double current_degradation,
             const double previous_h,
             const double current_cohesive_traction,
             const double previous_cohesive_traction)
           {
             return PhaseFieldFault<dim>::compute_crack_driving_force_candidate(
-              time_step, {beta, kappa}, current_degradation, previous_h,
+              time_step, {beta, eta_ve}, current_degradation, previous_h,
               current_cohesive_traction, previous_cohesive_traction);
           }
 

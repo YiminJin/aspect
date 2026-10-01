@@ -123,7 +123,7 @@ namespace aspect
         {
           /** Current stress from this evaluation, before history publication. */
           SymmetricTensor<2,dim> stress;
-          /** Optional beta*tau_old, 2*kappa*strain, and crack-strain terms. */
+          /** Optional beta*tau_old, 2*eta_ve*strain, and crack-strain terms. */
           std::array<SymmetricTensor<2,dim>,3> stress_components;
           /** Diagnostic coefficients from the same constitutive evaluation. */
           double stress_time_step = 0., stress_beta = 0.;
@@ -138,7 +138,7 @@ namespace aspect
           double damping_traction;
           double residual_density = numbers::signaling_nan<double>();
           double minus_derivative_wrt_slip_rate = numbers::signaling_nan<double>();
-          double kappa = numbers::signaling_nan<double>();
+          double eta_ve = numbers::signaling_nan<double>();
           double localization_factor = numbers::signaling_nan<double>();
           double friction_coefficient = numbers::signaling_nan<double>();
           double friction_derivative_wrt_slip_rate = numbers::signaling_nan<double>();
@@ -160,7 +160,7 @@ namespace aspect
         /** Constitutive scalars required by the fault bulk weak form. */
         struct ReconstructedFaultBulkPointResponse
         {
-          double kappa = numbers::signaling_nan<double>();
+          double eta_ve = numbers::signaling_nan<double>();
           double localization_factor = numbers::signaling_nan<double>();
           double history_correction = numbers::signaling_nan<double>();
         };
@@ -267,10 +267,11 @@ namespace aspect
         struct MaxwellCoefficients
         {
           double beta;
-          double kappa;
+          /** Viscoelastic viscosity eta*(1-beta), evaluated with expm1. */
+          double eta_ve;
         };
 
-        /** Compute beta and kappa for positive viscosity and shear modulus. */
+        /** Compute beta and eta_ve for positive viscosity and shear modulus. */
         static MaxwellCoefficients
         compute_maxwell_coefficients(const double viscosity,
                                      const double shear_modulus,

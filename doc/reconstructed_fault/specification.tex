@@ -847,9 +847,11 @@ With the Maxwell coefficients
 \[
 \beta_k=\exp(-\Delta tG/\eta),
 \qquad
-\kappa_k=-\eta\,\operatorname{expm1}(-\Delta tG/\eta),
+\eta_{\mathrm{ve},k}\equiv\kappa_k=-\eta\,\operatorname{expm1}(-\Delta tG/\eta),
 \]
-the non-committing surface update is
+where the viscoelastic viscosity is named \texttt{eta\_ve} in C++;
+$\kappa$ remains an equivalent notation in the equations below.
+The non-committing surface update is
 \[
 \boxed{
 T^{\rm coh}_k

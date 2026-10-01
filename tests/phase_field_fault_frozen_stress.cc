@@ -38,7 +38,7 @@ namespace aspect
           for (const auto &line : this->get_current_constraints().get_lines())
             constraints.set_inhomogeneity(line.index,0.);
           constraints.close();
-          const double beta = std::exp(-.02), kappa = -1e8*std::expm1(-.02);
+          const double beta = std::exp(-.02), eta_ve = -1e8*std::expm1(-.02);
           // K1 uses cell-average particle interpolation, not exact linear
           // reproduction. Independently integrate the realized Q2 FE history
           // with a different rule; do not change that initialization policy.
@@ -130,7 +130,7 @@ namespace aspect
                             // w=(y^2-1/4,0) is an admissible Q2 test function.
                             // Check the complete accepted production equilibrium,
                             // so a duplicate term elsewhere cannot escape the test.
-                            const double tau=kappa*(gradients[q][0][1]+gradients[q][1][0]-slip)+beta*old_stress[q];
+                            const double tau=eta_ve*(gradients[q][0][1]+gradients[q][1][0]-slip)+beta*old_stress[q];
                             full_work+=2.*y*tau*values.JxW(q);
                           }
                       }

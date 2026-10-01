@@ -151,7 +151,7 @@ namespace aspect
                     for (unsigned int j=0;j<weak.size();++j)
                       if (intro.component_masks.velocities[fe.system_to_component_index(j).first])
                         weak[j]+=inherited*values[intro.extractors.velocities].symmetric_gradient(j,q)*values.JxW(q);
-                    double chi=0.,V=0.,kappa=0.;
+                    double chi=0.,V=0.,eta_ve=0.;
                     if (association[q].active)
                       {
                         typename MaterialModel::PhaseFieldFault<dim>::ReconstructedFaultBulkPointInputs in;
@@ -159,7 +159,7 @@ namespace aspect
                         in.xi=association[q].xi;in.phase_field=in.previous_phase_field=phi[q];
                         in.temperature=293.;in.bulk_material_fractions={1.};
                         const auto response=model.evaluate_reconstructed_fault_bulk_point(in);
-                        chi=response.localization_factor;kappa=response.kappa;
+                        chi=response.localization_factor;eta_ve=response.eta_ve;
                         V=manager.interpolate_slip_rate(in.fault_index,in.segment_index,in.xi);
                         AssertThrow(response.history_correction==0.,ExcMessage("Fixed mature source acquired a history correction."));
                       }
@@ -167,7 +167,7 @@ namespace aspect
                     out<<cell->id()<<','<<q<<','<<x[0]<<','<<x[1]<<','<<values.JxW(q);
                     for (const auto &a:{old,published}) for (const auto &v:a) out<<','<<v[q];
                     out<<','<<gradient[q][0][0]<<','<<gradient[q][0][1]<<','<<gradient[q][1][0]<<','<<gradient[q][1][1]
-                       <<','<<phi[q]<<','<<chi<<','<<V<<','<<kappa<<'\n';
+                       <<','<<phi[q]<<','<<chi<<','<<V<<','<<eta_ve<<'\n';
                   }
                 for (unsigned int j=0;j<weak.size();++j)
                   if (intro.component_masks.velocities[fe.system_to_component_index(j).first])

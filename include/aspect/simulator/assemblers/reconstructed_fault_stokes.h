@@ -44,7 +44,7 @@ namespace aspect
         void execute(internal::Assembly::Scratch::ScratchBase<dim> &scratch,
                      internal::Assembly::CopyData::CopyDataBase<dim> &data) const override;
 
-        /** Freeze 2 kappa chi S at every associated Stokes quadrature point. */
+        /** Freeze 2 eta_ve chi S at every associated Stokes quadrature point. */
         void linearize_B(const LinearAlgebra::BlockVector &bulk_linearization_point);
 
         /** Overwrite @p result with the complete fault-induced bulk residual. */

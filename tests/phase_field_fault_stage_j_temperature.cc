@@ -78,8 +78,8 @@ namespace aspect
               in.temperature = temperatures[i];
               responses.push_back(model.evaluate_reconstructed_fault_point(in));
             }
-          AssertThrow(std::abs(responses[0].kappa-responses[1].kappa)
-                      > 1.e-3*responses[0].kappa,
+          AssertThrow(std::abs(responses[0].eta_ve-responses[1].eta_ve)
+                      > 1.e-3*responses[0].eta_ve,
                       ExcMessage("Bulk Maxwell temperature dependence was not exercised."));
           const auto surface_state =
             MaterialModel::internal::PhaseFieldFaultTestAccess<dim>
@@ -89,11 +89,11 @@ namespace aspect
 
           // With zero friction/damping and unchanged phi/I_h, remove only the
           // bulk stress term from the production response. What remains is the
-          // surface slope kappa_Gamma/I_h and history intercept beta_Gamma*T_old.
+          // surface slope eta_ve_Gamma/I_h and history intercept beta_Gamma*T_old.
           std::vector<double> slopes, intercepts;
           for (const auto &response : responses)
             {
-              const double bulk_slope = 2.0*response.kappa
+              const double bulk_slope = 2.0*response.eta_ve
                 *response.localization_factor*(in.slip_tensor*in.slip_tensor);
               slopes.push_back(response.minus_derivative_wrt_slip_rate-bulk_slope);
               intercepts.push_back(-response.residual_density

@@ -204,7 +204,7 @@ namespace aspect
       for (const auto &fault : fault_manager.get_faults())
         fault_offsets.push_back(fault_offsets.back()+fault.n_vertices());
 
-      // Freeze 2*kappa*chi*S once per nonlinear linearization. Krylov B actions
+      // Freeze 2*eta_ve*chi*S once per nonlinear linearization. Krylov B actions
       // then reuse these coefficients without reevaluating constitutive data.
       for (const auto &cell : this->get_dof_handler().active_cell_iterators())
         if (cell->is_locally_owned())
@@ -219,7 +219,7 @@ namespace aspect
             std::vector<SymmetricTensor<2,dim>> coefficients(quadrature.size());
             for (unsigned int q = 0; q < quadrature.size(); ++q)
               if (associations[q].active)
-                coefficients[q] = 2.0 * responses[q].kappa
+                coefficients[q] = 2.0 * responses[q].eta_ve
                                   * responses[q].localization_factor
                                   * slip_tensor<dim>(fault_manager, associations[q]);
             if (assemble_matrix)
@@ -323,7 +323,7 @@ namespace aspect
                     responses[q].localization_factor * V
                     + responses[q].history_correction;
                   const SymmetricTensor<2,dim> stress =
-                    2.0 * responses[q].kappa * crack_strain_rate
+                    2.0 * responses[q].eta_ve * crack_strain_rate
                     * slip_tensor<dim>(fault_manager, association);
                   if (record_transfer)
                     {
@@ -335,7 +335,7 @@ namespace aspect
                       m[3]+=w*responses[q].localization_factor*V;
                       m[4]+=w*responses[q].history_correction;
                       m[5]+=w*crack_strain_rate;
-                      m[6]+=w*2.*responses[q].kappa*crack_strain_rate;
+                      m[6]+=w*2.*responses[q].eta_ve*crack_strain_rate;
                       m[7]+=1.;
                     }
                   for (unsigned int i = 0; i < this->get_fe().dofs_per_cell; ++i)
@@ -521,7 +521,7 @@ namespace aspect
           .get_function_values(this->get_current_linearization_point(), compositions[c]);
 
       // Add -R exactly once: -beta*tau_old throughout the bulk, plus the
-      // positive RHS counterpart of -2*kappa*(chi*V+history)*S in the strip.
+      // positive RHS counterpart of -2*eta_ve*(chi*V+history)*S in the strip.
       // Neither frozen term belongs to B or to the current-strain-rate matrix.
       const FiniteElement<dim> &fe = this->get_fe();
       for (unsigned int q = 0; q < quadrature.size(); ++q)
@@ -545,9 +545,9 @@ namespace aspect
               const double V = fault_manager.interpolate_slip_rate(
                 association.fault_index, association.segment_index, association.xi);
               const auto shear = slip_tensor<dim>(fault_manager, association);
-              frozen_stress += 2.0 * responses[q].kappa
+              frozen_stress += 2.0 * responses[q].eta_ve
                                * responses[q].history_correction * shear;
-              slip_stress = 2.0 * responses[q].kappa
+              slip_stress = 2.0 * responses[q].eta_ve
                             * responses[q].localization_factor * V * shear;
             }
 

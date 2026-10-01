@@ -200,7 +200,7 @@ namespace aspect
               if(normal_control())
                 {
                   std::vector<double> all(comps.size());for(unsigned int c=0;c<all.size();++c)all[c]=comps[c][q];
-                  const auto stress=2*r.kappa*(in.strain_rate-r.localization_factor*in.slip_rate*in.slip_tensor)
+                  const auto stress=2*r.eta_ve*(in.strain_rate-r.localization_factor*in.slip_rate*in.slip_tensor)
                                     +model.evaluate_frozen_maxwell_stress(in.temperature,all,in.old_maxwell_stress);
                   actual_sigma=r.background_normal_traction+in.dynamic_pressure-stress*in.normal_tensor;
                   AssertThrow(std::abs(r.normal_traction-reference_sigma.at({in.position[0],in.position[1]}))<1e-7,ExcMessage("Friction normal differs from the matched reference sample beyond roundoff."));

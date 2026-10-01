@@ -264,17 +264,17 @@ namespace aspect
                         }
                       const double w=fe.JxW(q)*r.localization_factor;
                       if (w==0.) continue;
-                      const double shear_G=2*r.kappa*(in.slip_tensor*deps[q]);
-                      // 2 kappa S:eps = kappa (d_n u_s + d_s u_n).
+                      const double shear_G=2*r.eta_ve*(in.slip_tensor*deps[q]);
+                      // 2 eta_ve S:eps = eta_ve (d_n u_s + d_s u_n).
                       // Keep both signed contractions: either may oppose the
                       // input mode. Their sum is the existing shear work.
                       const double d_us_dn=a.tangent*(gradient[q]*a.normal);
                       const double d_un_ds=a.normal*(gradient[q]*a.tangent);
-                      normal_gradient_work+=w*v*r.kappa*d_us_dn;
-                      tangent_gradient_work+=w*v*r.kappa*d_un_ds;
-                      const double direct=2*r.kappa*r.localization_factor*(in.slip_tensor*in.slip_tensor);
+                      normal_gradient_work+=w*v*r.eta_ve*d_us_dn;
+                      tangent_gradient_work+=w*v*r.eta_ve*d_un_ds;
+                      const double direct=2*r.eta_ve*r.localization_factor*(in.slip_tensor*in.slip_tensor);
                       const double dq=shear_G-direct*v;
-                      const double minus_dtn=-2*r.kappa*(in.normal_tensor*deps[q]);
+                      const double minus_dtn=-2*r.eta_ve*(in.normal_tensor*deps[q]);
                       const double damping=r.damping_traction/in.slip_rate;
                       const double friction=-(r.minus_derivative_wrt_slip_rate-direct-damping)*v;
                       const double frozen=dq+friction-damping*v;
@@ -294,7 +294,7 @@ namespace aspect
                         for (unsigned int b=0;b<2;++b) loads[c][j+b]+=w*N[b]*terms[c];
                       const double xd=(100000.-in.position[1])/std::sin(numbers::PI/3.);
                       if (xd>12000. && xd<20000.)
-                        raw<<name<<','<<cell->id()<<','<<q<<','<<j<<','<<a.xi<<','<<in.position[0]<<','<<in.position[1]<<','<<w<<','<<in.slip_rate<<','<<r.normal_traction<<','<<r.friction_coefficient<<','<<v<<','<<dq<<','<<dp[q]<<','<<minus_dtn<<','<<friction<<','<<full<<','<<frozen<<','<<fe.JxW(q)<<','<<r.kappa<<','<<r.localization_factor<<','<<d_us_dn<<','<<d_un_ds<<','<<velocity[q]*a.tangent<<','<<velocity[q]*a.normal<<'\n';
+                        raw<<name<<','<<cell->id()<<','<<q<<','<<j<<','<<a.xi<<','<<in.position[0]<<','<<in.position[1]<<','<<w<<','<<in.slip_rate<<','<<r.normal_traction<<','<<r.friction_coefficient<<','<<v<<','<<dq<<','<<dp[q]<<','<<minus_dtn<<','<<friction<<','<<full<<','<<frozen<<','<<fe.JxW(q)<<','<<r.eta_ve<<','<<r.localization_factor<<','<<d_us_dn<<','<<d_un_ds<<','<<velocity[q]*a.tangent<<','<<velocity[q]*a.normal<<'\n';
                     }
               }
           for (auto &load:loads)

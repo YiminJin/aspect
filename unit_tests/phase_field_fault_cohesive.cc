@@ -51,17 +51,17 @@ TEST_CASE("Common cohesive law evaluates traction and fixed-profile localization
           "[phase_field_fault_cohesive]")
 {
   const double beta = 0.75;
-  const double kappa = 4.0;
+  const double eta_ve = 4.0;
   const double I_h = 2.5;
   const double previous_traction = 3.0;
   const double slip_rate = 1.25;
   const double h = 0.8;
 
   const auto response = TestAccess::compute_cohesive_response(
-    beta, kappa, I_h, I_h, previous_traction, slip_rate, h, h);
+    beta, eta_ve, I_h, I_h, previous_traction, slip_rate, h, h);
 
   CHECK(response.cohesive_traction
-        == Approx((kappa*slip_rate + beta*I_h*previous_traction)/I_h));
+        == Approx((eta_ve*slip_rate + beta*I_h*previous_traction)/I_h));
   CHECK(response.localization_factor == Approx(h/I_h));
   CHECK(response.history_correction == Approx(0.0).margin(1.e-14));
   CHECK(response.crack_strain_rate == Approx(h/I_h*slip_rate));
@@ -73,7 +73,7 @@ TEST_CASE("Exact cohesive history correction preserves integrated slip",
           "[phase_field_fault_cohesive]")
 {
   const double beta = 0.83;
-  const double kappa = 7.5;
+  const double eta_ve = 7.5;
   const double previous_traction = 11.0;
   const double slip_rate = 2.25;
   const double current_amplitude = 3.0;
@@ -98,7 +98,7 @@ TEST_CASE("Exact cohesive history correction preserves integrated slip",
       const double previous_h = previous_amplitude
                                 * std::exp(-zeta*zeta/(previous_width*previous_width));
       const auto response = TestAccess::compute_cohesive_response(
-        beta, kappa, current_I_h, previous_I_h, previous_traction,
+        beta, eta_ve, current_I_h, previous_I_h, previous_traction,
         slip_rate, current_h, previous_h);
       integrated_history += weight * response.history_correction;
       integrated_crack_strain_rate += weight * response.crack_strain_rate;
@@ -114,10 +114,10 @@ TEST_CASE("Exact cohesive history correction preserves integrated slip",
                             * std::exp(-zeta*zeta/(previous_width*previous_width));
   const double perturbation = 1.e-6;
   const double plus = TestAccess::compute_cohesive_response(
-    beta, kappa, current_I_h, previous_I_h, previous_traction,
+    beta, eta_ve, current_I_h, previous_I_h, previous_traction,
     slip_rate+perturbation, current_h, previous_h).crack_strain_rate;
   const double minus = TestAccess::compute_cohesive_response(
-    beta, kappa, current_I_h, previous_I_h, previous_traction,
+    beta, eta_ve, current_I_h, previous_I_h, previous_traction,
     slip_rate-perturbation, current_h, previous_h).crack_strain_rate;
   CHECK((plus-minus)/(2.0*perturbation)
         == Approx(current_h/current_I_h).epsilon(1.e-9));
@@ -151,7 +151,7 @@ TEST_CASE("Finite-step cohesive work uses the stable exact form",
 {
   const double dt = 0.25;
   const double beta = 0.8;
-  const double kappa = 4.5;
+  const double eta_ve = 4.5;
   const double g = 0.7;
   const double previous_h = 0.2;
   const double traction = 6.0;
@@ -160,8 +160,8 @@ TEST_CASE("Finite-step cohesive work uses the stable exact form",
   const double b = beta*previous_h*previous_traction/(1.0-g);
 
   CHECK(TestAccess::compute_crack_driving_force_candidate(
-          dt, beta, kappa, g, previous_h, traction, previous_traction)
-        == Approx(dt*(a-b)*(a+b)/(2.0*kappa)));
+          dt, beta, eta_ve, g, previous_h, traction, previous_traction)
+        == Approx(dt*(a-b)*(a+b)/(2.0*eta_ve)));
 }
 
 

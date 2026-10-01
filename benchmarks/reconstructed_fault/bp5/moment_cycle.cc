@@ -276,7 +276,7 @@ namespace aspect::Postprocess
                   in.fault_index=a.fault_index;in.segment_index=a.segment_index;in.xi=a.xi;
                   in.phase_field=in.previous_phase_field=phi[k];in.temperature=293.;in.bulk_material_fractions={1.};
                   const auto response=model().evaluate_reconstructed_fault_bulk_point(in);
-                  AssertThrow(response.kappa==coefficients.kappa && response.history_correction==0.,ExcMessage("Coefficient/source mismatch."));
+                  AssertThrow(response.eta_ve==coefficients.eta_ve && response.history_correction==0.,ExcMessage("Coefficient/source mismatch."));
                   chi=response.localization_factor;V=manager.interpolate_slip_rate(a.fault_index,a.segment_index,a.xi);
                   crack=chi*V*symmetrize(outer_product(a.tangent,a.normal));
                 }
@@ -301,7 +301,7 @@ namespace aspect::Postprocess
               for (const double v:{p[0],p[1],phi[k],chi,V}) invariants.push_back(v);
               if (this->advect_particles)
                 {
-                  const double data[]={p[0],p[1],phi[k],chi,V,coefficients.beta,coefficients.kappa};
+                  const double data[]={p[0],p[1],phi[k],chi,V,coefficients.beta,coefficients.eta_ve};
                   coefficient_output.write(reinterpret_cast<const char*>(data),sizeof(data));
                 }
               // Compact matched-point fields: x,y,w,u_x,u_y, four gradients,
@@ -381,7 +381,7 @@ namespace aspect::Postprocess
       if (this->get_pcout().is_active())
         {std::ofstream out(this->get_output_directory()+"summary.csv",step?std::ios::app:std::ios::out);out<<std::setprecision(17);
          if (!step) out<<"mode,step,time,dt,beta,kappa,relative,newton,krylov,alpha,mean,next_mean,top,bottom,next_top,next_bottom,native_rough,removed,parent_rough,homogeneity,Jproj,Jmap,Jtotal,Jbeta,Fabs,Fcurrent,Fnext,Jmax,proj_map_dot,fit_m0,fit_m1,next_m0,next_m1,assembly_floor\n";
-         out<<mode<<','<<step<<','<<this->get_time()<<','<<dt<<','<<coefficients.beta<<','<<coefficients.kappa<<','<<relative<<','<<newton<<','<<krylov<<','<<alpha<<','
+         out<<mode<<','<<step<<','<<this->get_time()<<','<<dt<<','<<coefficients.beta<<','<<coefficients.eta_ve<<','<<relative<<','<<newton<<','<<krylov<<','<<alpha<<','
             <<mean/volume<<','<<next_mean/volume<<','<<current_load.top<<','<<current_load.bottom<<','<<next_load.top<<','<<next_load.bottom<<','
             <<std::sqrt(rough/volume)<<','<<std::sqrt(removed/volume)<<','<<(mode=="native_history_reference"?-1.:std::sqrt(particle_variance))<<','<<homogeneity<<','
             <<jp<<','<<jm<<','<<jt<<','<<coefficients.beta*jt<<','

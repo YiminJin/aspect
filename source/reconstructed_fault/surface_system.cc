@@ -97,7 +97,7 @@ namespace aspect
       unsigned int segment_index;
       double xi;
       double particle_domain_volume;
-      double kappa;
+      double eta_ve;
       double friction_coefficient;
       SymmetricTensor<2,dim> slip_tensor;
       SymmetricTensor<2,dim> normal_tensor;
@@ -514,7 +514,7 @@ namespace aspect
                   q.segment_index,
                   q.xi,
                   q.weight,
-                  response.kappa,
+                  response.eta_ve,
                   response.friction_coefficient,
                   inputs.slip_tensor,
                   inputs.normal_tensor,
@@ -693,7 +693,7 @@ namespace aspect
       unsigned int segment_index;
       double xi;
       double particle_domain_volume;
-      double kappa;
+      double eta_ve;
       double friction_coefficient;
       SymmetricTensor<2,dim> slip_tensor;
       SymmetricTensor<2,dim> normal_tensor;
@@ -1029,7 +1029,7 @@ namespace aspect
                       -(response.stress*input.normal_tensor),response.background_normal_traction,response.normal_traction,
                       phi[q],response.normalization_integral,response.localization_factor,0.,0.,input.old_maxwell_stress,
                       response.stress_components,reference_points[q],particle_stress,
-                      gradients[q],response.stress_time_step,response.stress_beta,response.kappa});
+                      gradients[q],response.stress_time_step,response.stress_beta,response.eta_ve});
                   }
               }
           if (local.normal_diagnostic)
@@ -1127,7 +1127,7 @@ namespace aspect
                         phase[q],response.normalization_integral,response.localization_factor,
                         fe.JxW(q),weight,input.old_maxwell_stress,response.stress_components,
                         quadrature.point(q),particle_interpolated[q],diagnostic_gradients[q],
-                        response.stress_time_step,response.stress_beta,response.kappa,
+                        response.stress_time_step,response.stress_beta,response.eta_ve,
                         response.friction_coefficient,response.normal_traction});
                   }
                 for (unsigned int i=0;i<2;++i)
@@ -1150,7 +1150,7 @@ namespace aspect
                   {
                     local.off_diagonal[f][j]+=weight*N[0]*N[1]*response.minus_derivative_wrt_slip_rate;
                     const unsigned int point_index=local.coupling_points.size();
-                    local.coupling_points.push_back({input.position,point_index,f,j,a.shape_1,weight,response.kappa,
+                    local.coupling_points.push_back({input.position,point_index,f,j,a.shape_1,weight,response.eta_ve,
                       response.friction_coefficient,input.slip_tensor,input.normal_tensor,
                       response.uses_adiabatic_friction_pressure});
                   }
@@ -1319,7 +1319,7 @@ namespace aspect
         point.segment_index,
         point.xi,
         point.particle_domain_volume,
-        point.kappa,
+        point.eta_ve,
         point.friction_coefficient,
         point.slip_tensor,
         point.normal_tensor,
@@ -1372,7 +1372,7 @@ namespace aspect
             // VectorTools' avg evaluation returns zero for a missing request.
             // Preserve that existing action convention instead of dividing by zero.
             if (multiplicity==0) continue;
-            const auto stress=2.*point.kappa*(point.slip_tensor
+            const auto stress=2.*point.eta_ve*(point.slip_tensor
               +(point.uses_adiabatic_friction_pressure ? 0. : point.friction_coefficient)*point.normal_tensor);
             for (unsigned int end=0; end<2; ++end)
               {
@@ -1656,7 +1656,7 @@ namespace aspect
         for (const auto &p:surface_linearization->coupling_points)
           {
             const double dsigma=pressures[p.parent_index]
-              -2.*p.kappa*(symmetrize(velocity_gradients[p.parent_index])*p.normal_tensor);
+              -2.*p.eta_ve*(symmetrize(velocity_gradients[p.parent_index])*p.normal_tensor);
             normal_direction[p.fault_index][p.segment_index]+=p.particle_domain_volume*(1.-p.xi)*dsigma;
             normal_direction[p.fault_index][p.segment_index+1]+=p.particle_domain_volume*p.xi*dsigma;
           }
@@ -1680,8 +1680,8 @@ namespace aspect
           symmetrize(velocity_gradients[point.parent_index]);
         const SymmetricTensor<2,dim> stress_direction =
           (point.uses_adiabatic_friction_pressure || filtering)
-          ? 2.0 * point.kappa * point.slip_tensor
-          : 2.0 * point.kappa
+          ? 2.0 * point.eta_ve * point.slip_tensor
+          : 2.0 * point.eta_ve
           * (point.slip_tensor
              + point.friction_coefficient * point.normal_tensor);
         double value = stress_direction * strain_rate;

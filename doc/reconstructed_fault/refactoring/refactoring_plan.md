@@ -19,6 +19,10 @@ R3a and its separately authorized transient restart correction are complete.
 For R3b use the corrected R3a executable/source manifest recorded in
 [restart correction evidence](../../../benchmarks/reconstructed_fault/restart_fix/README.md).
 R3b lifecycle extraction is complete against corrected R3a (`bef79b31a`);
+For a subsequently selected R4 pass, use completed R3b plus the Maxwell
+`eta_ve` naming cleanup, with the original frozen-stress calculation retained:
+`build-refactor-r3b/aspect-maxwell-qualified` and the source manifest in
+[cleanup evidence](../../../benchmarks/reconstructed_fault/maxwell_cleanup/README.md).
 R4–R8 remain unselected. Module boundaries and frozen
 M1/M2 scope are defined in [refactoring.md](../refactoring.md).
 

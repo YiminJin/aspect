@@ -911,7 +911,7 @@ namespace aspect
                   stress_cycle_audit<<this->get_timestep_number()<<','<<this->get_time()<<','<<time_step<<','
                     <<particle_index<<','<<particle.get_id()<<','<<particle.get_surrounding_cell()->id()<<','
                     <<x[0]<<','<<x[1]<<','<<r[0]<<','<<r[1]<<','<<points[particle_index][0]<<','<<points[particle_index][1]
-                    <<','<<bulk_coefficients.beta<<','<<bulk_coefficients.kappa<<','
+                    <<','<<bulk_coefficients.beta<<','<<bulk_coefficients.eta_ve<<','
                     <<gradient[0][0]<<','<<gradient[0][1]<<','<<gradient[1][0]<<','<<gradient[1][1];
                   for (const auto &tensor:{old_stress,symmetrize(gradient),
                                           symmetrize(gradient)-effective_strain_rate,candidate.stress})
@@ -923,7 +923,7 @@ namespace aspect
                   const auto position=particle.get_location();
                   source_history_audit<<particle.get_id()<<','<<position[0]<<','<<position[1]<<','
                     <<phase_fields[particle_index]<<','<<continued_chi<<','<<continued_V<<','
-                    <<bulk_coefficients.kappa<<','<<bulk_coefficients.beta;
+                    <<bulk_coefficients.eta_ve<<','<<bulk_coefficients.beta;
                   for (const auto &tensor : {symmetrize(velocity_gradients[particle_index]),
                                             continued_crack,old_stress,candidate.stress})
                     source_history_audit<<','<<tensor[0][0]<<','<<tensor[1][1]<<','<<tensor[0][1];

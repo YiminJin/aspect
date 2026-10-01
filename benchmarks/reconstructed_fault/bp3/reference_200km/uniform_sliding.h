@@ -96,14 +96,14 @@ namespace aspect
                   const auto crack=chi*BP3::Vp*S;
                   SymmetricTensor<2,dim> old;
                   old[0][0]=all[fields[0]];old[1][1]=all[fields[1]];old[0][1]=all[fields[2]];
-                  const auto stress=2*response.kappa*(strain[q]-crack)
+                  const auto stress=2*response.eta_ve*(strain[q]-crack)
                     +model.evaluate_frozen_maxwell_stress(temperature[q],all,old);
                   const double Ih=(1-a.xi)*fault.get_properties(a.segment_index)[I]
                                   +a.xi*fault.get_properties(a.segment_index+1)[I];
                   out<<cell->id().to_string()<<','<<q<<','<<p[0]<<','<<p[1]<<','<<BP3::down_dip(p[0],p[1])
                      <<','<<(BP3::trace_x-p[0])*BP3::sine-(BP3::box_size-p[1])*BP3::cosine
                      <<','<<fe.JxW(q)<<','<<a.segment_index<<','<<a.xi<<','<<phi[q]<<','<<Ih<<','
-                     <<chi<<','<<response.kappa<<','<<velocity[q][0]<<','<<velocity[q][1]<<','<<pressure[q];
+                     <<chi<<','<<response.eta_ve<<','<<velocity[q][0]<<','<<velocity[q][1]<<','<<pressure[q];
                   for (const auto &tensor:{strain[q],crack})
                     out<<','<<tensor[0][0]<<','<<tensor[1][1]<<','<<tensor[0][1];
                   out<<','<<(strain[q]-crack).norm();

@@ -106,7 +106,7 @@ namespace aspect
 
           if (in.requests_property(MaterialProperties::viscosity))
             {
-              // The ordinary Stokes assembler uses kappa for the current strain
+              // The ordinary Stokes assembler uses eta_ve for the current strain
               // rate; the reconstructed-fault assembler supplies the frozen stress.
               const double G = MaterialUtilities::average_value(
                 volume_fractions, elastic_shear_moduli, viscosity_averaging);
@@ -116,7 +116,7 @@ namespace aspect
                                         : initial_time_step);
               const MaxwellCoefficients coefficients =
                 compute_maxwell_coefficients(eta, G, time_step);
-              out.viscosities[i] = coefficients.kappa;
+              out.viscosities[i] = coefficients.eta_ve;
             }
         }
     }

@@ -151,14 +151,14 @@ namespace aspect
                 bi.temperature=temp[q];bi.bulk_material_fractions=in.bulk_material_fractions;
                 const auto br=model.evaluate_reconstructed_fault_bulk_point(bi);
                 coefficient_max=std::max(coefficient_max,std::abs(br.localization_factor-r.localization_factor));
-                coefficient_max=std::max(coefficient_max,std::abs(br.kappa/r.kappa-1.));
+                coefficient_max=std::max(coefficient_max,std::abs(br.eta_ve/r.eta_ve-1.));
                 const auto old=model.evaluate_frozen_maxwell_stress(temp[q],all,in.old_maxwell_stress);
                 old_shear_max=std::max(old_shear_max,std::abs(old*in.slip_tensor));
-                const auto stress=2*br.kappa*(eps[q]-br.localization_factor*in.slip_rate*in.slip_tensor)+old;
+                const auto stress=2*br.eta_ve*(eps[q]-br.localization_factor*in.slip_rate*in.slip_tensor)+old;
                 const double expected=model.reconstructed_fault_background_tractions(0,a.segment_index,a.xi).first+stress*in.slip_tensor;
                 affine_max=std::max(affine_max,std::abs(expected-r.shear_traction));
                 const double weight=fe.JxW(q)*r.localization_factor;
-                const double nonassociated=r.friction_coefficient*(2*r.kappa*(in.normal_tensor*delta_eps[q])-delta_p[q]);
+                const double nonassociated=r.friction_coefficient*(2*r.eta_ve*(in.normal_tensor*delta_eps[q])-delta_p[q]);
                 double dv=0.;
                 for (unsigned int j=0;j<2;++j)
                   {
@@ -167,7 +167,7 @@ namespace aspect
                     independent_shear[vertex]+=weight*N[j]*expected;
                     measure[vertex]+=weight*N[j];dv+=N[j]*dV[0][vertex];
                   }
-                direct_B_work+=weight*2*r.kappa*dv*(in.slip_tensor*delta_eps[q]);
+                direct_B_work+=weight*2*r.eta_ve*dv*(in.slip_tensor*delta_eps[q]);
               }
           }
       for (auto *v:{&normal,&independent_shear,&measure})

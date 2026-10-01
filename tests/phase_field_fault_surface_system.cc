@@ -517,7 +517,7 @@ namespace aspect
             : inputs.slip_tensor
               + baseline.friction_coefficient*inputs.normal_tensor;
           const double expected_strain_rate_change =
-            2.0*baseline.kappa*(surface_derivative*strain_rate_increment);
+            2.0*baseline.eta_ve*(surface_derivative*strain_rate_increment);
           assert_close(strain_rate_response.residual_density-baseline.residual_density,
                        expected_strain_rate_change,
                        "strain-rate response");

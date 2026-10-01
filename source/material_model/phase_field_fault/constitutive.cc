@@ -79,8 +79,8 @@ namespace aspect
     {
       const double exponent = -time_step * shear_modulus / viscosity;
       const double beta = std::exp(exponent);
-      const double kappa = -viscosity * std::expm1(exponent);
-      return {beta, kappa};
+      const double eta_ve = -viscosity * std::expm1(exponent);
+      return {beta, eta_ve};
     }
 
     template <int dim>
@@ -91,7 +91,7 @@ namespace aspect
       const SymmetricTensor<2,dim> &effective_bulk_strain_rate,
       const SymmetricTensor<2,dim> &old_stress)
     {
-      return 2.0 * coefficients.kappa * effective_bulk_strain_rate
+      return 2.0 * coefficients.eta_ve * effective_bulk_strain_rate
              + coefficients.beta * old_stress;
     }
 
@@ -161,11 +161,11 @@ namespace aspect
         bulk_coefficients, inputs.strain_rate, inputs.old_maxwell_stress);
       const SymmetricTensor<2,dim> stress_without_current_slip =
         trial_stress
-        - 2.0 * bulk_coefficients.kappa * cohesive.history_correction
+        - 2.0 * bulk_coefficients.eta_ve * cohesive.history_correction
           * inputs.slip_tensor;
       const SymmetricTensor<2,dim> stress =
         stress_without_current_slip
-        - 2.0 * bulk_coefficients.kappa * cohesive.localization_factor
+        - 2.0 * bulk_coefficients.eta_ve * cohesive.localization_factor
           * inputs.slip_rate * inputs.slip_tensor;
 
       // Mechanics uses the committed nodal state, interpolated in the same
@@ -206,7 +206,7 @@ namespace aspect
 
       const double surface_resistance = cohesive.cohesive_traction;
       const double cohesive_tangent = mature_frictional_fault ? 0.0
-                                     : surface_coefficients.kappa/localization.current_I_h;
+                                     : surface_coefficients.eta_ve/localization.current_I_h;
       ReconstructedFaultPointResponse response;
       response.stress = stress;
       if (inputs.capture_stress_components)
@@ -216,10 +216,10 @@ namespace aspect
           // Report the terms from this incoming-history evaluation. Do not
           // subtract two large stresses to infer a tiny current-step increment.
           response.stress_components[0] = bulk_coefficients.beta * inputs.old_maxwell_stress;
-          response.stress_components[1] = 2.0 * bulk_coefficients.kappa * inputs.strain_rate;
+          response.stress_components[1] = 2.0 * bulk_coefficients.eta_ve * inputs.strain_rate;
           response.stress_components[2] =
-            -2.0 * bulk_coefficients.kappa * cohesive.history_correction * inputs.slip_tensor
-            -2.0 * bulk_coefficients.kappa * cohesive.localization_factor
+            -2.0 * bulk_coefficients.eta_ve * cohesive.history_correction * inputs.slip_tensor
+            -2.0 * bulk_coefficients.eta_ve * cohesive.localization_factor
               * inputs.slip_rate * inputs.slip_tensor;
         }
       response.normalization_integral = localization.current_I_h;
@@ -234,12 +234,12 @@ namespace aspect
                                   - mu * sigma_n
                                   - damping * inputs.slip_rate;
       response.minus_derivative_wrt_slip_rate =
-        2.0 * bulk_coefficients.kappa * cohesive.localization_factor
+        2.0 * bulk_coefficients.eta_ve * cohesive.localization_factor
         * (inputs.slip_tensor * inputs.slip_tensor)
         + cohesive_tangent
         + sigma_n*dmu_dV
         + damping;
-      response.kappa = bulk_coefficients.kappa;
+      response.eta_ve = bulk_coefficients.eta_ve;
       response.localization_factor = cohesive.localization_factor;
       response.friction_coefficient = mu;
       response.friction_derivative_wrt_slip_rate = dmu_dV;
@@ -282,7 +282,7 @@ namespace aspect
         localization.current_h, localization.previous_h, mature_frictional_fault);
 
       ReconstructedFaultBulkPointResponse response;
-      response.kappa = bulk_coefficients.kappa;
+      response.eta_ve = bulk_coefficients.eta_ve;
       response.localization_factor = cohesive.localization_factor;
       response.history_correction = cohesive.history_correction;
       return response;
@@ -298,8 +298,8 @@ namespace aspect
       const double current_cohesive_traction,
       const double previous_cohesive_traction)
     {
-      AssertThrow(time_step > 0.0 && surface_coefficients.kappa > 0.0,
-                  ExcMessage("The cohesive-work update requires positive dt and kappa."));
+      AssertThrow(time_step > 0.0 && surface_coefficients.eta_ve > 0.0,
+                  ExcMessage("The cohesive-work update requires positive dt and eta_ve."));
       AssertThrow(std::isfinite(current_degradation)
                   && current_degradation > 0.0
                   && current_degradation <= 1.0,
@@ -312,7 +312,7 @@ namespace aspect
                                  "previous h is inadmissible healing."));
           return time_step * current_cohesive_traction
                  * current_cohesive_traction
-                 / (2.0*surface_coefficients.kappa);
+                 / (2.0*surface_coefficients.eta_ve);
         }
 
       // This factorization is algebraically the finite-step cohesive-work
@@ -322,7 +322,7 @@ namespace aspect
                        * previous_cohesive_traction
                        / (1.0-current_degradation);
       const double candidate = time_step*(a-b)*(a+b)
-                               / (2.0*surface_coefficients.kappa);
+                               / (2.0*surface_coefficients.eta_ve);
       AssertThrow(std::isfinite(candidate),
                   ExcMessage("The finite-step cohesive-work update is non-finite."));
       return candidate;
@@ -425,8 +425,8 @@ namespace aspect
       const double previous_h,
       const bool mature)
     {
-      AssertThrow(coefficients.kappa > 0.0,
-                  ExcMessage("The cohesive effective viscosity kappa must be positive."));
+      AssertThrow(coefficients.eta_ve > 0.0,
+                  ExcMessage("The cohesive viscoelastic viscosity eta_ve must be positive."));
       AssertThrow(std::isfinite(current_I_h) && current_I_h > 0.0,
                   ExcMessage("The current cohesive normalization integral must be finite and positive."));
       AssertThrow(std::isfinite(previous_I_h) && previous_I_h > 0.0,
@@ -443,7 +443,7 @@ namespace aspect
 
       CohesiveResponse response;
       response.cohesive_traction =
-        mature ? 0.0 : (coefficients.kappa * slip_rate
+        mature ? 0.0 : (coefficients.eta_ve * slip_rate
          + coefficients.beta * previous_I_h * previous_cohesive_traction)
         / current_I_h;
       response.localization_factor = current_h/current_I_h;
@@ -453,7 +453,7 @@ namespace aspect
                     ExcMessage("Mature friction requires zero cohesive history and a fixed profile."));
       response.history_correction = current_h == previous_h && current_I_h == previous_I_h
         ? 0.0
-        : coefficients.beta * previous_cohesive_traction/coefficients.kappa
+        : coefficients.beta * previous_cohesive_traction/coefficients.eta_ve
           * (current_h * previous_I_h/current_I_h - previous_h);
       response.crack_strain_rate =
         response.localization_factor * slip_rate + response.history_correction;
