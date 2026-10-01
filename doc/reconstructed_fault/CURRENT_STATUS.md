@@ -1,5 +1,63 @@
 # Phase-field / RSF current status
 
+## R4c accepted baseline; separate frozen-fixture repair selected
+
+The accepted R4c source, documentation and harness are committed together over
+R4b `983d57e28`. The qualified baseline is
+`build-refactor-r4c/aspect-r4c-verified`, SHA256
+`c6811cbd877ff56af9113dc2f110cfd9a8b71998ea63f8e249ff94b292eeed85`.
+Source/artifact manifest fingerprints and the unchanged verification limitation
+are recorded in the [R4c evidence](../../benchmarks/reconstructed_fault/refactoring_r4c/README.md).
+Local temporary review edits are excluded. The user selected only the separate
+historical frozen AMG/GMG fixture repair before R5; no production redesign or
+further refactoring stage is authorized. Earlier entries retain historical status.
+
+
+## R4c shared Schur construction complete; ready for review
+
+Against accepted R4b `983d57e28`, one source-private constructor helper replaces
+the two BFBT/inverse-weighted-mass branches. It preserves conditional lumped-mass
+access, ordinary melt pressure-block selection and the fault/melt restriction.
+Both callers are otherwise byte-identical; solver policies, MPI/observer order,
+ownership and `simulator.h` are unchanged. Nine source/protection checks pass.
+
+Fresh Release/link, independent ordinary/coupled/header compilation and 2D/3D
+symbols pass. All 31 coupled and 22 ordinary comparisons pass, including actual
+GMG, BFBT, melt and failure histories. Units pass 20,149 assertions/16 cases per
+rank on one/two ranks. Four BP3 legacy/automatic runs match all 372 field/history
+groups and 28 counter/decision checks exactly.
+
+The historical four-rank frozen probe's AMG results match exactly, but its GMG
+half remains blocked on both baseline and candidate: the AMG-selected mesh has
+no multigrid hierarchy and the archive's old hierarchy switch is no longer
+consumed. No numerical change or assertion relaxation was made. The corrected
+replay-plugin pairing and failure diagnosis are recorded in the
+[review](refactor_review.md) and [evidence](../../benchmarks/reconstructed_fault/refactoring_r4c/README.md).
+Candidate: `build-refactor-r4c/aspect-r4c-verified`, with that explicit limitation.
+Changes remain uncommitted for review; local edits/reference artifacts are
+preserved. Stop before further refactoring. Proposed next task: separately
+modernize the historical frozen-comparison fixture. Earlier entries are
+historical checkpoints.
+
+## R4b committed; R4c inventory/proposal ready for review
+
+R4b is committed as `983d57e28`, including its accepted helper assessment and
+qualified-baseline record. Local `refactoring/tmp/` files remain excluded.
+Use `build-refactor-r4b-residual/aspect-r4b-residual-qualified` and its recorded
+source/artifact manifests for subsequent comparisons.
+
+The [R4c inventory](refactor_review.md) proposes one source-private operation:
+construct the existing BFBT or inverse-weighted-mass Schur wrapper. Preserve
+conditional access to BFBT-only lumped mass, caller-selected matrix blocks and
+existing ownership. Keep velocity wrappers, AMG/GMG dispatch, pressure handling,
+stopping/restarts and observers at their current callers. The inventory also
+records why Simulator's nested Linearization parameter needs the condensed
+header; removing that dependency is separate from this proposal.
+
+Only documentation changed after the R4b commit. Existing future verification
+cases are identified; no new build/runtime campaign was run. Stop before R4c
+implementation. Proposed next selection: the Schur-construction operation only.
+
 ## R4b accepted baseline
 
 Both focused extractions and the recommendation to retain the existing driver

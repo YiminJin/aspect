@@ -18,7 +18,14 @@ Both R4b subpasses and the recommendation to retain the existing driver with
 two focused operations are accepted and saved together. No whole-iteration
 helper was implemented. The qualified second-subpass executable and manifests
 recorded in the residual evidence are the baseline for subsequent work.
-Remaining R4b operations, R4c and R5–R8 require separate selection.
+R4b is committed as `983d57e28`. The selected R4c inventory proposes only shared
+Schur-wrapper construction; see the rolling review for dependencies and checks.
+The selected R4c implementation and focused verification are accepted:
+53 focused comparisons and 372 BP3 field groups match. The historical frozen-GMG
+probe has an identical baseline/candidate hierarchy-setup failure; its AMG half
+and the supported actual GMG case pass. See the rolling review for that limitation.
+The separately selected next task repairs only the historical frozen AMG/GMG
+comparison fixture. No further consolidation or R5–R8 work is selected.
 Historical outcomes remain in [the rolling review](../refactor_review.md).
 Module boundaries and frozen M1/M2 scope are defined in [refactoring.md](../refactoring.md).
 
@@ -335,7 +342,7 @@ those boundaries. A whole-step call would need broader mutable context or move
 driver decisions. The user accepted retaining the focused operations. See the
 rolling review for the dependency table. Further extraction needs selection.
 
-**R4c (not selected): demonstrated common linear-solver work.** Select the smallest
+**R4c (shared Schur construction complete for review): demonstrated common linear-solver work.** Select the smallest
 shared operation, potentially preconditioner construction. Retain the condensed
 operator/RHS/recovery and restricted inverse, pressure complement, physical
 normalization, total fault budget and true-residual restarts. Preserve ordinary
@@ -343,6 +350,17 @@ cheap/expensive budgets, signals and exception behavior. An operator-aware helpe
 is permitted only when justified; no generic policy framework. GMG remains a
 velocity preconditioner for the assembled coupled operator. Verify ordinary,
 melt or other common paths only to the extent that shared implementation changes.
+
+The selected inventory identifies the duplicated BFBT/inverse-weighted-mass
+construction branch as the smallest useful shared operation. Propose one
+source-private function with explicit dependencies, preserving lazy access to
+the BFBT-only lumped-mass block. Retain all caller policies and existing
+`simulator.h` dependence on the nested condensed Linearization type. No complete
+solver unification or header-interface reorganization is proposed. The rolling
+review records the bounded checks; no implementation or runtime campaign was
+performed during the inventory. The subsequent selected implementation preserves
+ordinary melt and the existing combined fault/melt rejection, and runs those
+focused checks against accepted R4b without changing numerical policies.
 
 All passes preserve M3 storage/M4 history interfaces, frozen M1/M2, canonical
 surface/coupling generation and constraint lifetimes, temporary flags, exact
@@ -457,9 +475,12 @@ second, trial-residual extraction also passes 31 focused comparisons, 372 exact
 field/history groups and 28 counter/decision checks against the accepted first
 subpass; independent 2D/3D compilation and eight source/protection checks pass.
 It is accepted. The optional iteration-helper assessment is also accepted:
-retain the driver with the two focused operations. Next proposed
-task: the R4c duplication inventory and smallest shared-preconditioner proposal,
-before implementation. Further
+retain the driver with the two focused operations. R4b is committed as
+`983d57e28`. R4c implements the shared Schur-wrapper construction and passes its
+build/source checks, 53 focused comparisons and 372 exact BP3 field/history groups.
+The frozen probe's GMG half has a confirmed pre-existing hierarchy-setup failure;
+frozen AMG and the supported coupled GMG path pass. R4c is ready for review.
+Further
 R4b operations and later stages require separate selection. Historical R1 fixture failures,
 Stage-J pressure incompatibility and cohesive step-two nonconvergence remain
 separate from refactoring equivalence. See CURRENT_STATUS.md and the rolling

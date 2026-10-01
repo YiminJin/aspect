@@ -1,5 +1,204 @@
 # Reconstructed-fault refactoring review
 
+## R4c acceptance and baseline record
+
+R4c is accepted and saved separately from the forthcoming frozen-fixture repair.
+The source/artifact manifests still match; the user's changed local
+`refactoring/tmp/R4c_review.md` is preserved outside the commit. Use the qualified
+R4c executable and manifest fingerprints in the
+[baseline record](../../benchmarks/reconstructed_fault/refactoring_r4c/README.md#accepted-r4c-baseline).
+The existing frozen-GMG limitation remains explicit; no new runtime campaign
+was needed for acceptance. R5 has not begun.
+
+
+## R4c — Shared Schur construction (complete; ready for review)
+
+Reference: accepted R4b `983d57e2863af798de29cb9601d33bfe3a53a6af`, qualified
+executable `build-refactor-r4b-residual/aspect-r4b-residual-qualified` (SHA256
+`6ccdcf81b65ad5cbe0c949cdcd45da6332c3949354e0a034dcc830fa889fe7a7`).
+Candidate: uncommitted R4c source and evidence, frozen as
+`build-refactor-r4c/aspect-r4c-verified` (SHA256
+`c6811cbd877ff56af9113dc2f110cfd9a8b71998ea63f8e249ff94b292eeed85`).
+The approved inventory, earlier reports, qualified artifacts and unrelated
+local files are preserved. The scientific worktree was read only.
+
+### Change and responsibility check
+
+One source-private, non-template `internal::make_stokes_schur_preconditioner()`
+is declared in `solver/stokes_operators.h` and defined beside the shared Stokes
+definitions in `solver.cc`. Both callers replace only their duplicated BFBT/
+inverse-weighted-mass construction branch. The pre-edit contract in the
+[R4c evidence](../../benchmarks/reconstructed_fault/refactoring_r4c/README.md)
+was checked afterward. Constructor expressions/arguments are unchanged, and
+access to the velocity lumped-mass block remains inside the BFBT branch.
+
+The caller owns the returned wrapper and its iteration counter; matrices,
+vectors and pressure preconditioner retain their existing owners/lifetimes.
+Ordinary pressure-block selection, including melt, is unchanged. The existing
+combined reconstructed-fault/melt rejection is byte-identical, as are Simulator's
+header and its condensed-system dependency. No new public interface, persistent
+state, parameter, MPI operation or framework was introduced. A direct `<memory>`
+include supports the private declaration.
+
+Both caller bodies are otherwise byte-identical. Condensed operator/RHS/recovery,
+pressure handling, cheap/expensive versus total-budget restart policies, AMG/GMG
+wrappers, inner Schur algorithms, observer timing and history publication remain
+in place. Only three production files changed. No numerical fix was bundled.
+
+### Verification
+
+Evidence paths are relative to `benchmarks/reconstructed_fault/refactoring_r4c/`.
+
+| Status | Check | Evidence |
+|---|---|---|
+| PASS | Separate Release/link; independent ordinary/coupled TUs and private header; one helper definition and required 2D/3D member symbols | `evidence/build.json`, `independent.json`, `linked-symbols.txt` |
+| PASS | Nine source/protection checks; matching executed-artifact manifests; separate reference/candidate plugins | `evidence/source-verification.json`, `qualification.json` |
+| PASS | Units: 20,149 assertions/16 cases per rank on one/two ranks; all 31 coupled residual/pressure/rollback/exhaustion/GMG-Q1 comparisons | `evidence/focused-comparison.json` |
+| PASS | 22 ordinary AMG/BFBT/melt and expected-failure comparisons: fields/statistics, decisions, residuals and solver histories exact | `evidence/extra-comparison.json` |
+| PASS | Four short legacy/automatic BP3 trajectories: 372 exact field/history groups and 28 cache/work/solver-decision checks | `evidence/state-comparison.json`, `lifecycle-comparison.json` |
+| PASS | Four-rank frozen AMG result and pre-observer decisions/work counts match; 17 iterations, fresh residual `4.4068965535591382e-4` below target `1.2258892187472356e-3`, zero direction difference | `evidence/frozen-comparison.json` |
+| BLOCKED | Historical frozen probe's GMG half fails on both accepted R4b and candidate before a GMG solve; full probe-pass marker is absent | `evidence/{reference,candidate}-frozen-replay.log` |
+| NOT RUN | New ordinary GMG/direct/restart, broad compiler or production campaigns; explicit runtime fault/melt rejection case | Unchanged dispatch/admission source verified; ordinary melt and actual coupled GMG executed |
+
+All completed matched numerical comparisons are exact; time/path metadata are
+excluded. The 38 selected build/runtime invocations include six intentional
+exhaustion/ordinary failures and two separately diagnosed frozen-probe failures.
+No unexpected candidate-only failure occurred. Inputs explicitly select assembled
+block AMG for the ordinary checks; no physical parameters, tolerances or
+scientific assertions were changed. The small existing BFBT test is 3D; it is
+the only new 3D simulation in this pass. Source/plugin/binary/input hashes and
+commands are recorded, and effective candidate parameters use candidate plugins.
+
+### Frozen-probe diagnosis and remaining scope
+
+The initial baseline launch paired the archive with the wrong historical BP3
+plugin and failed to register `BP3 replay complete`. The preserved
+`bp3/reference_200km` plugin resolves that harness error without production or
+parameter changes. A pre-regeneration build-target failure is also retained;
+the final plugin configurations/builds pass.
+
+With the correct replay plugin, both executables reach timestep 2 / Newton 4
+and produce identical frozen AMG results. GMG setup then fails at deal.II
+`dof_handler_policy.cc:3827`, through `setup_dofs()` and
+`with_velocity_preconditioner()`, because `construct_multigrid_hierarchy` was
+not set. The fixture selects block AMG; current `core.cc` constructs the
+hierarchy only for block GMG/default with local smoothing. The archive's old
+`ASPECT_FAULT_GMG_HIERARCHY` switch is no longer consumed. This is an existing
+fixture-setup limitation, not a new Schur-construction failure or a qualified
+frozen-GMG result. The supported coupled GMG-Q1 case passes separately.
+
+A separate fixture update should arrange hierarchy construction while retaining
+the intended frozen AMG operator/RHS. No production backend changes, interface
+redesign, numerical adjustments or relaxed assertions were attempted here.
+Historical Stage-J/cohesive limitations remain separate. Stop for review with
+R4c uncommitted. Proposed next bounded task: modernize that historical frozen
+comparison fixture; no further refactoring stage has begun. Earlier inventory
+and reports below retain their historical status.
+
+
+## R4c — Duplication inventory and one proposed operation (review only)
+
+Accepted R4b is committed as `983d57e2863af798de29cb9601d33bfe3a53a6af`
+(`refactor: extract coupled fault solve and residual operations`). The commit
+includes both focused operations, documentation and verification scripts; it
+excludes unrelated `refactoring/tmp/` files. Qualified reference:
+`build-refactor-r4b-residual/aspect-r4b-residual-qualified`, SHA256
+`6ccdcf81b65ad5cbe0c949cdcd45da6332c3949354e0a034dcc830fa889fe7a7`.
+Its source/artifact manifests and fingerprints are recorded in the committed
+[baseline evidence](../../benchmarks/reconstructed_fault/refactoring_r4b_residual/README.md).
+This inventory changes documentation only. No R4c implementation is authorized
+by this proposal and no new build/runtime campaign was run.
+
+### Inventory
+
+Line numbers refer to the accepted R4b source.
+
+| Operation/dependency | Current locations and comparison | Disposition |
+|---|---|---|
+| Pressure Schur wrapper selection/construction | `solver.cc:497` and `solver/reconstructed_fault_stokes.cc:247` both select `WeightedBFBT<PreconditionBase>` or `InverseWeightedMassMatrix<PreconditionBase>` from the same setting, pressure matrix/preconditioner and S tolerance; BFBT additionally references lumped velocity mass and the full matrix | Genuine duplicated branch; select this operation only |
+| Velocity inverse and block-Schur wiring | `solver.cc:516` constructs cheap (`do_solve_A=false`) and expensive (`true`) AMG wrappers; fault source `:263` constructs `true` with either AMG or its GMG adapter | Related wiring but different policy/backend/lifetime; keep at callers. Implementations are already shared in `block_stokes_preconditioner.h` |
+| Matrix assembly and AMG/ILU setup | `assembly.cc:481`, `build_stokes_preconditioner()`, is already shared; it selects pressure AMG for melt/BFBT and ILU otherwise | No duplicate setup to extract; leave invocation/timing/rebuild decisions unchanged |
+| Stokes/Schur mathematical operations | One existing implementation in source-private `solver/stokes_operators.h`, with non-inline StokesBlock methods in `solver.cc` | Already shared by R4a; do not duplicate or alter class algorithms |
+| Outer Krylov solve and pressure handling | Ordinary `solver.cc:300` onward versus fault `:193` onward | FGMRES syntax is similar, but policies differ as listed below; no full-solver unification |
+| `simulator.h` condensed-system include | `simulator.h:71` supports private parameter `ReconstructedFaultCondensedSystem<dim>::Linearization` at `:623`; the included header also exposes concrete surface-system dependencies | Retain in this pass. Forward-declaring the outer class alone cannot declare its nested type. Removing this dependency requires a separate declaration/interface reorganization; the proposed helper adds no Simulator header dependency |
+
+### Proposed shared operation
+
+Add one source-private, non-template
+`internal::make_stokes_schur_preconditioner()`, declared in the existing
+`solver/stokes_operators.h` and defined in `solver.cc` beside the existing shared
+Stokes definitions. Both solvers replace only their construction branch with
+this call at the same execution point. Add a direct `<memory>` include to that
+private header as needed; do not change `simulator.h` or the condensed interface.
+
+Inputs are explicit and read-only: `use_bfbt`, the caller-selected pressure
+preconditioner matrix block, the existing `PreconditionBase`, S-block tolerance,
+the whole inverse-lumped-mass block vector, velocity block index and full system
+matrix. Ordinary code retains its introspection/melt pressure-block selection;
+fault code retains block `(1,1)` and velocity index `0`. No new settings,
+callbacks, parameter/context struct, template policy or validation is needed.
+
+Return the existing `unique_ptr<SchurComplementOperator>`. The caller owns the
+wrapper and its accumulated iteration counter; canonical matrices/vectors and
+the pressure preconditioner remain Simulator-owned and must outlive it. The
+constructors only retain references and initialize the counter; no assembly,
+solve, MPI collective, history publication or observer call belongs here.
+
+**Preserve lazy BFBT access:** `core.cc:1424` initializes
+`inverse_lumped_mass_matrix` only when BFBT is enabled. Pass the whole vector by
+reference and select its velocity block only inside the helper's BFBT branch.
+Passing `.block(velocity_index)` unconditionally would introduce an invalid
+dependency on the normal mass-matrix path. This is a constraint on the proposed
+extraction, not a discovered defect in the accepted implementation.
+
+### Policies retained by callers
+
+- Ordinary: solve the bulk Stokes block; preserve initial-guess/pressure scaling,
+  nonlinear-dependent tolerance, separate cheap/expensive budgets and fallback,
+  solver-history failure handling, constraints, nullspace removal and permitted
+  physical pressure normalization. Keep `post_stokes_solver` on its existing
+  success/failure paths with the same accumulated inner iteration counts.
+- Coupled: retain `C=A-B K_FF^-1 G`, condensed RHS and increment recovery, verified
+  pressure-complement/compatibility checks (including the existing zero-RHS and
+  already-converged exits), projected/interface preconditioners, fresh raw and
+  projected residual checks, and residual-replacement restarts within one total
+  budget. Keep the synchronous post-linear observer after fresh-residual success
+  while operator/preconditioner references remain valid, before trial commit.
+- Backend: ordinary GMG/direct dispatch bypasses this assembled construction.
+  Coupled GMG continues to supply only the velocity preconditioner for the same
+  assembled fine operator; its adapter/hierarchy lifetimes and initialization
+  order remain local. Keep the preconditioner setup timer and all current MPI
+  operations at their existing sites. Neither Schur class's inner numerical
+  policy, thresholds or tolerances change.
+
+### Existing checks for a subsequently selected implementation
+
+| Coverage | Bounded checks to reuse |
+|---|---|
+| Compile and dependency boundary | Full candidate build/link, independent ordinary/fault translation units and private header, 2D/3D instantiations; confirm `simulator.h` unchanged |
+| Ordinary mass/BFBT and failure paths | R4a `convection_box_particles.prm` block-AMG smoke; small `nsinker_bfbt.prm` (existing 3D, eight-cell case); `stokes_solver_fail_S.prm` and `stokes_solver_fail.prm` with their intentional failure/history checks |
+| Melt pressure-block selection | Existing `melt_transport_compressible_iterative.prm`; compare matched ordinary assembled-solver output, retaining its parameters/tolerances |
+| Coupled operator, pressure, stopping and rollback | Existing condensation/Stage-I units; `phase_field_fault_residual_consistency`, `phase_field_fault_pressure_gauge`, `phase_field_fault_linear_exhaustion` and accepted-update rollback cases on one/two ranks; short matched legacy/automatic BP3 outputs as in R4b |
+| Frozen AMG/GMG and observer lifetime | Existing `tests/reconstructed_fault_frozen_gmg.cc` with the qualified frozen fixture and intentional-stop/pass-marker check; existing `server_gmg/gmg_q1.prm` for the actual coupled-GMG path |
+
+The qualified frozen fixture is available read-only in
+`../aspect/benchmarks/reconstructed_fault/performance/gmg/frozen-wide-verified-local4/`
+(four ranks). If implementation is selected, copy the fixture into this worktree,
+build matching observer plugins and obtain matched R4b/candidate results; old
+scientific results alone do not qualify the new code. Match each backend against
+itself before/after, not AMG against GMG for bitwise identity. Require unchanged
+deterministic actions/directions, fresh residuals, solver decisions, work counts
+and observer point; elapsed time may differ. Preserve the existing known
+Stage-J/cohesive limitations. No new ordinary GMG/direct or restart campaign is
+needed unless the eventual diff reaches those paths. Do not run these tests for
+the inventory itself, and do not tune a fixture to make an extraction pass.
+
+PASS: accepted source/artifact hashes, scoped commit, source/interface inventory
+and documentation checks. NOT RUN: new compilation or runtime tests. The proposal
+is uncommitted for review, separate from accepted R4b. Next bounded selection:
+implement this Schur-construction operation only, with the checks above.
+
+
 ## R4b — Accepted baseline and commit
 
 The user accepted both focused operations and the recommendation against a

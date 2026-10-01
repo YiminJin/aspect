@@ -244,21 +244,12 @@ namespace aspect
       parameters.n_cheap_stokes_solver_steps + parameters.n_expensive_stokes_solver_steps);
     PrimitiveVectorMemory<LinearAlgebra::BlockVector> memory;
 
-    std::unique_ptr<internal::SchurComplementOperator> schur;
-    if (parameters.use_bfbt)
-      schur = std::make_unique<
-        internal::WeightedBFBT<LinearAlgebra::PreconditionBase>>(
-          system_preconditioner_matrix.block(1,1),
-          *Mp_preconditioner,
-          parameters.linear_solver_S_block_tolerance,
-          inverse_lumped_mass_matrix.block(0),
-          system_matrix);
-    else
-      schur = std::make_unique<
-        internal::InverseWeightedMassMatrix<LinearAlgebra::PreconditionBase>>(
-          system_preconditioner_matrix.block(1,1),
-          *Mp_preconditioner,
-          parameters.linear_solver_S_block_tolerance);
+    const auto schur = internal::make_stokes_schur_preconditioner(
+      parameters.use_bfbt,
+      system_preconditioner_matrix.block(1,1),
+      *Mp_preconditioner,
+      parameters.linear_solver_S_block_tolerance,
+      inverse_lumped_mass_matrix, 0, system_matrix);
 
     const auto solve_with_velocity_preconditioner = [&](const auto &velocity_preconditioner)
     {

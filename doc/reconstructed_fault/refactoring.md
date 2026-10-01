@@ -59,7 +59,7 @@ to change the reference algorithm, parameters, or expected test results.
 
 ## 2. Preserve responsibility boundaries
 
-### Selected module scope (accepted R4b focused operations)
+### Selected module scope (R4c shared Schur construction)
 
 R3a, the separate transient restart correction, R3b and the Maxwell `eta_ve`
 cleanup are the accepted reference for R4. Historical lifecycle reports remain
@@ -67,7 +67,10 @@ in `refactor_review.md`; the original direct frozen-stress implementation is
 retained. R4a is accepted and committed as `0c7ed1a0b`. Both R4b private
 operations (condensed linear solution and coupled residual evaluation) are
 accepted. Retain the driver without a whole-iteration helper, as accepted after
-the dependency assessment. Further consolidation requires selection. Follow
+the dependency assessment. R4b is committed as `983d57e28`. The selected R4c
+implementation shares only Schur-wrapper construction and retains the existing
+Simulator header dependency. Preserve ordinary melt block selection and the
+restriction against combined fault mechanics and melt transport. Follow
 [revised R4 instructions](refactoring/codex_R4_instructions.md).
 
 | Module | Owns | Refactoring scope |

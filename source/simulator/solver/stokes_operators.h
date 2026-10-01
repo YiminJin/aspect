@@ -26,6 +26,8 @@
 #include <aspect/utilities.h>
 #include <deal.II/lac/solver_cg.h>
 
+#include <memory>
+
 namespace aspect
 {
   namespace internal
@@ -95,6 +97,20 @@ namespace aspect
         virtual unsigned int n_iterations() const=0;
 
     };
+
+    /**
+     * Construct the selected Schur wrapper around caller-owned data, which
+     * must outlive the result. The velocity mass block is used only for BFBT.
+     */
+    std::unique_ptr<SchurComplementOperator>
+    make_stokes_schur_preconditioner(
+      const bool use_bfbt,
+      const LinearAlgebra::SparseMatrix &pressure_matrix,
+      const LinearAlgebra::PreconditionBase &pressure_preconditioner,
+      const double solver_tolerance,
+      const LinearAlgebra::BlockVector &inverse_lumped_mass_matrix,
+      const unsigned int velocity_block_index,
+      const LinearAlgebra::BlockSparseMatrix &system_matrix);
 
     /**
      * This class approximates the Schur Complement inverse operator

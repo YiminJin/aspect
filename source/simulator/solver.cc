@@ -38,6 +38,27 @@ namespace aspect
 {
   namespace internal
   {
+    std::unique_ptr<SchurComplementOperator>
+    make_stokes_schur_preconditioner(
+      const bool use_bfbt,
+      const LinearAlgebra::SparseMatrix &pressure_matrix,
+      const LinearAlgebra::PreconditionBase &pressure_preconditioner,
+      const double solver_tolerance,
+      const LinearAlgebra::BlockVector &inverse_lumped_mass_matrix,
+      const unsigned int velocity_block_index,
+      const LinearAlgebra::BlockSparseMatrix &system_matrix)
+    {
+      if (use_bfbt)
+        return std::make_unique<WeightedBFBT<LinearAlgebra::PreconditionBase>>(
+          pressure_matrix, pressure_preconditioner, solver_tolerance,
+          inverse_lumped_mass_matrix.block(velocity_block_index), system_matrix);
+      else
+        return std::make_unique<InverseWeightedMassMatrix<LinearAlgebra::PreconditionBase>>(
+          pressure_matrix, pressure_preconditioner, solver_tolerance);
+    }
+
+
+
     void StokesBlock::vmult (LinearAlgebra::BlockVector       &dst,
                              const LinearAlgebra::BlockVector &src) const
     {
@@ -494,24 +515,12 @@ namespace aspect
         solver_control_cheap.enable_history_data();
         solver_control_expensive.enable_history_data();
 
-        std::unique_ptr<internal::SchurComplementOperator> schur;
-        if (parameters.use_bfbt)
-          {
-            schur = std::make_unique<internal::WeightedBFBT<LinearAlgebra::PreconditionBase>>(
-                      system_preconditioner_matrix.block(pressure_block_index,pressure_block_index),
-                      *Mp_preconditioner,
-                      parameters.linear_solver_S_block_tolerance,
-                      inverse_lumped_mass_matrix.block(velocity_block_index),
-                      system_matrix);
-          }
-        else
-          {
-            schur = std::make_unique<internal::InverseWeightedMassMatrix<LinearAlgebra::PreconditionBase>>(
-                      system_preconditioner_matrix.block(pressure_block_index,pressure_block_index),
-                      *Mp_preconditioner,
-                      parameters.linear_solver_S_block_tolerance);
-
-          }
+        const auto schur = internal::make_stokes_schur_preconditioner(
+          parameters.use_bfbt,
+          system_preconditioner_matrix.block(pressure_block_index,pressure_block_index),
+          *Mp_preconditioner,
+          parameters.linear_solver_S_block_tolerance,
+          inverse_lumped_mass_matrix, velocity_block_index, system_matrix);
 
         // create a cheap preconditioner that consists of only a single V-cycle
         internal::InverseVelocityBlock<LinearAlgebra::PreconditionAMG, LinearAlgebra::Vector, LinearAlgebra::SparseMatrix> inverse_velocity_block_cheap(
