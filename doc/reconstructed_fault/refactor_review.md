@@ -1,5 +1,86 @@
 # Reconstructed-fault refactoring review
 
+## R4a — Dedicated coupled-driver relocation (accepted)
+
+Reference: `pf-rsf-refactor`, HEAD `d7b88b25e6e157206b6bdcaf714dac434701f97c`.
+All 5,907 accepted post-R3/Maxwell source-manifest entries match; the intervening
+commit after `82e43c266` only removes the user's temporary R2b review document.
+Reference executable: `build-refactor-r3b/aspect-maxwell-qualified`
+(`1cea4bfcc506594374e9b4556d7000fd059360d532070cbd1f190de32cdcc7b5`).
+Candidate: accepted R4a changes over that HEAD,
+`build-refactor-r4a/aspect-r4a-qualified`
+(`ed827270970996854ae2425e519255422f80a25b0602d1cbf863c88a8d4910be`).
+Reference artifacts and user-local instructions/tmp files remain unchanged;
+the separate scientific worktree was not modified.
+
+### Change and boundaries
+
+The standing guidance and roadmap now distinguish the dedicated coupled driver,
+iteration operations and supplied-operator linear solution, with separate
+R4a/R4b/R4c review gates. Existing scheme and dispatch remain unchanged. R4a
+moves the complete driver and its exclusive `current_slip_rate` helper into
+`source/simulator/solver/reconstructed_fault_stokes.cc`, retaining every local
+lambda, expression, diagnostic, collective and publication/rollback operation.
+The general solver no longer contains the full fault Newton algorithm.
+
+Before moving definitions, both solver paths were inspected: `StokesBlock`,
+`SchurComplementOperator`, `WeightedBFBT` and `InverseWeightedMassMatrix` are
+shared. Their declarations/template definitions now live in source-private
+`solver/stokes_operators.h`; the five non-inline StokesBlock definitions remain
+in `solver.cc`. Existing `InverseVelocityBlock` and `BlockSchurPreconditioner`
+remain in their original header. No implementation is duplicated, no public
+interface or owner changes, and duplicated setup remains for later R4c review.
+The full definition/consumer inventory is in the
+[R4a evidence README](../../benchmarks/reconstructed_fault/refactoring_r4a/README.md).
+
+CMake excludes the new driver from unity/PCH and adds its own 2D/3D instantiations.
+All 55 existing unity groups remain identical. Initial standalone compilation
+exposed a previously indirect NewtonHandler definition; the explicit `newton.h`
+include resolves it. General solver and the internal header compile independently
+without PCH as well. The byte-exact source proof covers the moved driver/helper,
+shared definitions and retained ordinary method bodies. M1/M2, M3 storage,
+M4 constitutive/history methods, both R2 files, defaults and checkpoint format
+are unchanged. No stronger publication/exception guarantee is claimed.
+
+### Focused verification
+
+Evidence paths below are relative to
+`benchmarks/reconstructed_fault/refactoring_r4a/`.
+
+| Status | Check | Evidence |
+|---|---|---|
+| PASS | Fresh Release build/link; candidate plugins | `evidence/build-includes.json`, `plugin-build.json` |
+| PASS | Independent compilation/header, 2D/3D symbols, exact movement | `evidence/independent.json`, `driver-symbols.txt`, `ordinary-symbols.txt`, `source-verification.json` |
+| PASS | Condensation/Stage-I units on one/two ranks: 20,149 assertions/16 cases per rank | `evidence/candidate-unit-{1,2}.json` |
+| PASS | Accepted-Newton rollback on one/two ranks; ordinary AMG smoke and exact outputs/decisions; 16 focused checks | `evidence/focused-comparison.json` |
+| PASS | Legacy/automatic BP3 steps 0–6 on one/two ranks: 372 exact field/history groups, 24 cache/work checks, four detailed solver-decision comparisons | `evidence/state-comparison.json`, `lifecycle-comparison.json` |
+| NOT RUN | New restart, Debug, 3D simulation, full earthquake/performance campaign | Earlier qualified restart evidence reused; outside the selected bounded move |
+
+All 19 selected build/runtime invocations pass, using the same Release stack and
+floating-point flags as the reference and one compute thread per MPI rank.
+Candidate effective parameters confirm candidate-built test plugins are loaded.
+Maximum matched-rank physical/history difference is zero; solver decisions and
+counters agree. Time/path metadata are excluded. The first MPI attempt was
+blocked by sandbox sockets (retained `sandbox-reference-*` logs); the authorized
+runs pass. The initial missing-include build is retained separately from the
+passing final build, not reported as a numerical regression.
+
+Restart initialization and restoration semantics do not change, so accepted
+restart/checkpoint evidence from the corrected R3a/R3b/Maxwell checks is reused.
+Fresh rollback tests cover the relocated failure restoration. Historical Stage-J
+pressure incompatibility, cohesive step-two nonconvergence and cross-rank
+cohesive-observer limitations remain unresolved and were not rerun or repaired.
+No new scientific defect was found in these checked paths. No dedicated new
+GMG, BFBT, melt or direct-solver campaign was run; their algorithms/dispatch are
+unchanged and shared definitions are mechanically identical.
+
+`evidence/qualification.json` records final hashes/results; supporting scripts
+retain commands, manifests, comparisons and the original source snapshot.
+Next proposed bounded task: R4b's private condensed linear solve/preconditioner
+operation, after recording inputs, outputs, mutated state, collectives and
+required lifetimes. R4b and R4c are not implemented. The user accepted R4a and requested its local commit before R4b; no push or merge. Earlier reports below are preserved unchanged.
+
+
 ## Maxwell coefficient naming follow-up (complete; ready for review)
 
 The user selected the `kappa` → `eta_ve` rename after R3b and then requested

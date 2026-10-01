@@ -1,5 +1,39 @@
 # Phase-field / RSF current status
 
+## R4a accepted; committed for the first R4b extraction
+
+The revised [R4 instructions](refactoring/codex_R4_instructions.md) are recorded
+in the standing guidance and roadmap, with driver/iteration/linear-solve
+responsibilities and separately selected R4a/R4b/R4c passes. HEAD `d7b88b25e`
+matches all 5,907 accepted post-R3/Maxwell source-manifest entries. The reference
+executable, plugins, outputs and local instruction/tmp files are preserved.
+
+The complete `Simulator::solve_reconstructed_fault_stokes()` body and exclusive
+helper move unchanged into `source/simulator/solver/reconstructed_fault_stokes.cc`.
+Shared Stokes/Schur declarations and templates move into source-private
+`solver/stokes_operators.h`; non-inline StokesBlock definitions stay in the
+general solver. There is no public API, ownership or numerical change. Independent
+compilation required an explicit `newton.h` include. All 55 unity groups remain
+unchanged, and both affected member sets have 2D/3D instantiations.
+
+Fresh Release/link, independent compilation and candidate plugin builds pass.
+Units pass 20,149 assertions/16 cases per rank on one/two ranks. Accepted-Newton
+rollback passes on both ranks; ordinary feature-disabled AMG fields/statistics
+and solver decisions match. Four short legacy/automatic BP3 trajectories match
+in 372 field/history groups (zero differences), 24 cache/work checks and four
+solver-decision comparisons. All 16 focused comparisons pass.
+
+Candidate: accepted R4a changes over `d7b88b25e`, qualified executable
+`build-refactor-r4a/aspect-r4a-qualified`. See the [review](refactor_review.md) and
+[R4a evidence](../../benchmarks/reconstructed_fault/refactoring_r4a/README.md).
+Restart evidence is reused because initialization/restoration semantics are
+unchanged; fresh rollback covers the moved failure path. Known Stage-J/cohesive
+failures remain separate, with no tolerance or parameter changes. No 3D,
+Debug, full earthquake or large performance run was performed.
+Proposed next selection: the private condensed-solve/preconditioner operation,
+with its input/mutation/MPI/lifetime contract recorded first. Stop for review;
+R4b/R4c remain unimplemented. The following entries are historical stage records.
+
 ## Maxwell naming cleanup complete; frozen-stress implementation retained
 
 The Maxwell viscoelastic viscosity is now named `eta_ve` throughout fault C++

@@ -59,25 +59,13 @@ to change the reference algorithm, parameters, or expected test results.
 
 ## 2. Preserve responsibility boundaries
 
-### Selected module scope (R3b lifecycle extraction complete; review pending)
+### Selected module scope (R4a move-only solver relocation)
 
-R3a relocates existing constitutive/history definitions only. Record storage
-ownership, preparation, publication, rollback and restart before editing and
-verify the table afterward. Keep header declarations and both R2 implementation
-files unchanged; compile the new translation units independently for 2D/3D.
-R3b lifecycle restructuring is a separate pass. The four-stage readability
-target below does not authorize moving validation, collectives or writes, changing
-rollback, or claiming atomicity from terminal writes. Timestep acceptance stays
-in the solver/simulator; material history operations act only when called.
-
-The selected R3b reference is corrected R3a (`bef79b31a`), with the separately
-qualified restart initialization fix. Expose accepted-state sampling, candidate
-construction, validation and publication privately in `history.cc`. Per-call
-scratch buffers may cross those operations; committed storage ownership must not
-change. Keep intermediate collective error checks within candidate construction
-at their existing boundaries, including before cohesive projection. Retain
-pre-publication diagnostics and all existing property lookup/write ordering.
-Do not infer a stronger atomicity guarantee from the extracted operations.
+R3a, the separate transient restart correction, R3b and the Maxwell `eta_ve`
+cleanup are the accepted reference for R4. Historical lifecycle reports remain
+in `refactor_review.md`; the original direct frozen-stress implementation is
+retained. The selected pass is **R4a only**, under
+[revised R4 instructions](refactoring/codex_R4_instructions.md).
 
 | Module | Owns | Refactoring scope |
 |---|---|---|
@@ -176,6 +164,59 @@ this extraction does not authorize a correctness fix. Use the completed
 proposal-2 implementation as reference and compare existing hit/miss/MPI cases
 and short legacy/automatic trajectories and work counters exactly (excluding
 time). Stop after this pass for review.
+
+### M5 solver architecture and staged extraction
+
+Retain the user-facing `single Advection, iterated Newton Stokes` scheme and
+its existing dispatch to `Simulator::solve_reconstructed_fault_stokes()`.
+Keep that dedicated driver; do not merge it into ordinary
+`do_one_defect_correction_Stokes_step()` or import its Picard, stabilization,
+residual or publication semantics.
+
+The intended responsibilities are three levels:
+
+- Driver: prepare frozen solve data, maintain the outer iteration and private
+  accepted bulk state, test convergence, publish and restore on failure.
+- Iteration operations: residual evaluation, linearization, bounds/active sets,
+  increment recovery and joint bulk/V line search.
+- Linear solve: solve the supplied condensed operator using existing Stokes
+  preconditioner components.
+
+R4a moves complete definitions without restructuring their bodies. Shared
+Stokes operator/Schur definitions may move mechanically to a private internal
+header; preserve one implementation and existing interfaces. Compile both
+translation units independently, including 2D/3D instantiations. This does not
+authorize consolidation of duplicated preconditioner setup.
+
+R4b selects one substantial private extraction per reviewable subpass, starting
+with the condensed solve/preconditioner setup, then trial residual evaluation.
+Record inputs, outputs, mutations, collectives and lifetime before each move.
+A private `do_one_reconstructed_fault_stokes_step()` is optional only if it fits
+existing control flow cleanly; focused operations plus a readable driver are
+acceptable. Do not force ordinary `DefectCorrectionResiduals` or `use_picard`
+onto the fault algorithm. Scratch must be solve-local, with no duplicate
+canonical surface/coupling owner, persistent state or all-Simulator context.
+
+R4c may consolidate only a demonstrated common operation, such as existing
+preconditioner construction. Retain `C = A - B K_V^-1 G`, the condensed RHS
+`-R_bulk + B K_V^-1 R_Gamma`, and recovery
+`dV = K_V^-1(R_Gamma + G dx)`, with the restricted free-block inverse and
+projected residuals. Never substitute A for C or lag coupling to reuse
+`solve_stokes()`. Preserve ordinary cheap/expensive and fault total iteration
+budgets, fresh-residual restarts, pressure checks, AMG/GMG dispatch, signals and
+failure behavior. GMG remains a velocity preconditioner for the assembled
+coupled fine operator. No generic integration framework, new persistent owner,
+plugin family or abstract constitutive interface is introduced.
+
+All passes retain preparation once per solve, non-committing trial evaluations,
+manager committed/current/trial V, final publication/rollback, canonical
+linearization/constraint lifetimes, physical versus homogeneous constraints,
+pressure scaling and temporary assembly controls. Preserve fixed residual
+scales, precision bounds, active-set rebuilding, exact bound-contact V and joint
+Armijo acceptance. Algebraic pressure-complement projection and permitted
+physical pressure normalization remain distinct. Preserve MPI ordering,
+observers, defaults and checkpoint compatibility; extraction does not establish
+stronger atomicity. M1/M2 remain frozen and M3/M4 ownership is unchanged.
 
 ## 3. Reduce the core-facing interface
 

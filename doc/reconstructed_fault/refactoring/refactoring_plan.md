@@ -2,29 +2,16 @@
 
 Prepared for Yimin Jin — 28 September 2026, America/Los_Angeles
 
-Status (29 September 2026): R0 accepted as an audit; R1 completed with the
-recorded test dispositions under
-[codex_decoupling_and_R1_instructions.md](codex_decoupling_and_R1_instructions.md);
-R2a complete and ready for review under [codex_R2a_instructions.md](codex_R2a_instructions.md);
-R2b cell-profile geometry extraction and proposal 2 boundary completion are
-complete and ready for review under
-[boundary-completion instructions](codex_boundary_completion_instructions.md);
-R3a is complete and ready for review: move constitutive/history definitions only, with an
-ownership/lifecycle table recorded before editing and checked afterward.
-R3b is complete and ready for review; R4–R8 remain pending.
-See [verification and disposition](../refactor_review.md).
-Proposal 3 is complete and ready for review: the private cache-input/reuse
-decision extraction preserves the completed proposal-2 implementation exactly.
-R3a and its separately authorized transient restart correction are complete.
-For R3b use the corrected R3a executable/source manifest recorded in
-[restart correction evidence](../../../benchmarks/reconstructed_fault/restart_fix/README.md).
-R3b lifecycle extraction is complete against corrected R3a (`bef79b31a`);
-For a subsequently selected R4 pass, use completed R3b plus the Maxwell
-`eta_ve` naming cleanup, with the original frozen-stress calculation retained:
-`build-refactor-r3b/aspect-maxwell-qualified` and the source manifest in
-[cleanup evidence](../../../benchmarks/reconstructed_fault/maxwell_cleanup/README.md).
-R4–R8 remain unselected. Module boundaries and frozen
-M1/M2 scope are defined in [refactoring.md](../refactoring.md).
+Status: R0–R3 and the separate restart correction/Maxwell cleanup are complete.
+R4a is accepted under [revised R4 instructions](codex_R4_instructions.md).
+Use the accepted post-R3 `eta_ve` state, including the original frozen-stress
+implementation: `build-refactor-r3b/aspect-maxwell-qualified` and the source
+manifest in [cleanup evidence](../../../benchmarks/reconstructed_fault/maxwell_cleanup/README.md).
+The current reference HEAD is `d7b88b25e`; its difference from `82e43c266` is the
+user's removal of a temporary review document. Preserve local changes and
+reference artifacts. R4b/R4c and R5–R8 require separate selection.
+Historical outcomes remain in [the rolling review](../refactor_review.md).
+Module boundaries and frozen M1/M2 scope are defined in [refactoring.md](../refactoring.md).
 
 Reviewed source: YiminJin/aspect, branch `pf-rsf`, commit `0fc1ce782c48b78f79eff674724686b8277c8618`. The remote branch still pointed to this commit when checked for this plan. The user's local checkout may contain newer work. Inspect and preserve that work before selecting an implementation baseline.
 
@@ -295,19 +282,54 @@ Checks: Maxwell/cohesive tests; short trajectory beyond timestep zero; rollback 
 
 Gate: a compact state-ownership and lifecycle table must match the implementation. Any intentional semantic change is a separate task.
 
-### R4 — Extract and simplify the coupled nonlinear solver
+### R4 — Dedicated coupled solver: relocation, decomposition, targeted reuse
 
-Pass R4a: relocate `Simulator::solve_reconstructed_fault_stokes()` and exclusively used helpers from general `source/simulator/solver.cc` into a dedicated implementation file under `source/simulator/solver/`. Keep it a Simulator member initially if that is the smallest safe move. Avoid inventing broad public accessors solely to enable a new helper class.
+The revised architecture retains the existing solver scheme/dispatch and the
+dedicated `Simulator::solve_reconstructed_fault_stokes()` driver. It supersedes
+any proposal to merge fault Newton orchestration with ordinary defect correction.
+The three levels are driver, iteration operations, and supplied-operator linear
+solve, as detailed in [standing guidance](../refactoring.md#m5-solver-architecture-and-staged-extraction).
 
-Pass R4b: separate substantial operations, especially the condensed linear solve/preconditioner setup and trial residual evaluation. Retain the existing condensed-system and nonlinear helper APIs where they already serve clear purposes.
+**R4a (selected): move only.** Relocate the complete driver and exclusive helpers
+from `source/simulator/solver.cc` into
+`source/simulator/solver/reconstructed_fault_stokes.cc`. Keep bodies, expressions,
+lambdas, diagnostics, ordering, declarations and ownership unchanged. Inventory
+shared definitions first; mechanically expose Stokes operator/Schur definitions
+through a narrowly scoped internal header if needed, without duplication or
+public API expansion. Preconditioner setup consolidation belongs to R4c.
 
-The driver should expose preparation → residual → linearization/active set → solve → trial → convergence/publication, while handling failure restoration clearly. Preserve physical pressure normalization separately from algebraic pressure-complement projection.
+R4a checks: candidate build/link, independent affected translation-unit compilation
+and 2D/3D instantiations; existing short coupled matched comparison, rollback,
+small MPI case, and ordinary feature-disabled smoke if shared definitions move.
+Use candidate plugins with the candidate executable. Reuse qualified restart
+checks unless initialization/restoration semantics change. Compare deterministic
+fields/history/solver decisions exactly, excluding time/path metadata. Keep
+pre-existing Stage-J failures separate. No long production/performance campaign.
+Gate: general solver no longer contains the full fault Newton algorithm and the
+independently compiled relocation matches the accepted post-R3 reference.
 
-Keep one canonical surface system and coupling instance. Preserve the lifetime of restricted surface solves, immutable linearizations, current constraints, and temporary assembly flags. Do not alter active-set rebuilding, absolute bound-contact trial values, precision bounds, fresh linear residual checks, line-search reductions, or the choice of existing AMG/GMG paths.
+**R4b (not selected): focused private operations.** First extract condensed linear
+solve/preconditioner setup, then trial residual evaluation, one reviewed subpass
+at a time. Before each extraction record inputs, outputs, mutations, collectives
+and object lifetimes. A single private iteration helper is optional after these
+operations if it fits without changing convergence checks, unused-direction
+avoidance or iterate/timestep acceptance. No ordinary Picard/residual types are
+required merely for signature similarity. Preserve canonical owners; use only
+narrow solve-lifetime scratch where needed.
 
-Checks: condensation and lower-bound/Armijo tests; fresh residual consistency; pressure-mode/changed-loading cases relevant to the extraction; rollback; short coupled trajectory. If the AMG/GMG dispatch is touched, use a small existing frozen-solve comparison, not a new large performance campaign.
+**R4c (not selected): demonstrated common linear-solver work.** Select the smallest
+shared operation, potentially preconditioner construction. Retain the condensed
+operator/RHS/recovery and restricted inverse, pressure complement, physical
+normalization, total fault budget and true-residual restarts. Preserve ordinary
+cheap/expensive budgets, signals and exception behavior. An operator-aware helper
+is permitted only when justified; no generic policy framework. GMG remains a
+velocity preconditioner for the assembled coupled operator. Verify ordinary,
+melt or other common paths only to the extent that shared implementation changes.
 
-Gate: the general solver file no longer contains the full fault Newton algorithm; the implementation has fewer hidden shared dependencies without expanding ASPECT's public surface gratuitously.
+All passes preserve M3 storage/M4 history interfaces, frozen M1/M2, canonical
+surface/coupling generation and constraint lifetimes, temporary flags, exact
+bound contact, active sets and Armijo acceptance. No diagnostic removal or
+assertion cleanup is bundled. Stop and report scientific conflicts separately.
 
 ### R5 — Organize manager and surface-system internals
 
@@ -408,25 +430,13 @@ Suggested status row:
 
 `stage/pass | not started/in progress/ready for review/accepted/blocked | base SHA | candidate SHA or diff | test summary | next action`
 
-Current status: R0 complete and accepted as an audit; R1 completed with recorded
-pre-existing failures; R2a complete; the selected R2b private cell-profile
-geometry extraction is complete and ready for review. R3–R8 remain pending.
-R2b passed a fresh Release build, 15 selected runtime invocations including
-one/two-rank cell and warm-cache coverage, and exact matched-rank R2a/R1
-comparisons (186 field groups and 22 lifecycle/work checks per reference).
-Boundary-completion generalization is deferred; no next pass is selected.
-R2a passed normal and separate compilation/linking, selected normalization and
-lifecycle checks, and exact matching-rank R1 field/history/solver comparisons,
-including continuation from the preserved baseline checkpoint. It separates
-translation units; the material still owns normalization data and interfaces.
-The user confirmed the existing numeric
-limiter parser as intentional and separately requested a zero-rejecting assertion.
-Parameter help, specifications and limiter tests now match the numeric-sentinel
-contract. The earlier recommendation to restore the infinity alias is withdrawn.
-The recorded R1 fixture/output failures remain separate from passing R2a checks.
-R2a remains normalization relocation within M4; R4 concerns M5. M1/M2
-implementation, broad cleanup and prerequisite PR preparation are deferred.
-R0 inspection is not an implementation baseline test.
+Current status: accepted post-R3/Maxwell reference verified; R4a is complete and
+ready for review. Fresh build, independent 2D/3D compilation, one/two-rank units
+and rollback, ordinary AMG smoke and four short BP3 comparisons pass exactly.
+R4b/R4c and subsequent stages are not authorized. Historical R1 fixture failures,
+Stage-J pressure incompatibility and cohesive step-two nonconvergence remain
+separate from refactoring equivalence. See CURRENT_STATUS.md and the rolling
+review for detailed earlier outcomes.
 
 Every completed task should report:
 
