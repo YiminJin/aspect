@@ -1,5 +1,76 @@
 # Reconstructed-fault refactoring review
 
+## R3b — expose the existing history lifecycle (complete; ready for review)
+
+Reference is corrected R3a `bef79b31a`, executable
+`build-restart-fix/aspect-r3a-corrected-qualified`. Before editing, the suspected
+R3a deletion was checked: the entire R3a section in this document, including its
+ownership/lifecycle table and equivalence report, matched the committed section
+exactly. Nothing needed restoration. It remains intact below; local temporary
+review/plan files and the R2b review move are preserved.
+
+The pre-edit ordering check confirmed the proposed four broad later-time stages.
+`commit_reconstructed_fault_mechanical_history()` now keeps its entry validation,
+timestep-zero return, timestep/property/mapping checks and calls four private
+operations in `history.cc`:
+
+| Operation | Responsibility and data boundary |
+|---|---|
+| `sample_accepted_history` | Accepted bulk state and existing association/FE data → velocity gradients, temperature and current/previous phase samples in unchanged association order |
+| `compute_history_candidates` | Samples, timestep and particle property/composition offsets → cohesive Q1 projection, Theta and particle stress/H candidates; frozen surface state and retained histories are read through the existing material/manager interfaces |
+| `validate_history_candidates` | Candidate completeness MPI minimum, cohesive validation, local particle-ID checks and profile diagnostics, in their original order |
+| `publish_history_candidates` | Existing cohesive/previous-I_h writes, followed by Theta and particle stress/H writes; no timestep acceptance decision |
+
+Two private forward-declared scratch types are defined only in `history.cc` and
+instantiated locally in the driver. They introduce no persistent member,
+serialized field, public API or second committed-state owner. The sampling cache
+and diagnostic streams retain their lifetime through publication. Buffer members
+replace local variables; manager/particle aliases are obtained by their consuming
+operation. Exact expression checks permit these declaration/reference adaptations
+and verify the numerical bodies unchanged.
+
+The first collective error propagation remains before cohesive projection; the
+second remains after Theta/particle candidate construction. They have not been
+moved to the third stage. Projection still precedes the H update. Local validation
+and diagnostics retain their positions before writes; the Theta property lookup
+remains after cohesive publication, as before. The extraction adds no new atomicity
+or noexcept guarantee. Solver acceptance, V publication, bulk swaps and rollback
+are untouched. Timestep zero, mature/frozen and cohesive/evolving paths stay
+distinct, and both R2 files and all other history/constitutive methods are intact.
+
+The ten-row R3a ownership/lifecycle table was verified before editing and again
+after extraction. It still applies: material computes, manager/particles store
+and serialize, simulator/solver accepts. Evidence includes `lifecycle-before.md`,
+`lifecycle-after.md`, and an exact copy of the preserved R3a section. Source checks
+confirm only `history.cc` and private header declarations changed, with 5,822 other
+entry source/header/test files and the corrected reference executable unchanged.
+
+Verification against the corrected R3a reference:
+
+| Check | Result |
+|---|---|
+| Full Release build; independent compilation | PASS; all four helpers and the driver instantiated for 2D/3D |
+| Selected units on reference/candidate, one/two ranks | PASS: 20,828 assertions in 28 cases per rank, including restart/prescribed-rate regression, Maxwell/cohesive, limiter and Stage-I tests |
+| Temperature, frozen stress, original/open-top accepted-Newton rollback | PASS on reference/candidate, one/two ranks; actual restoration markers retained |
+| Lifecycle comparisons | PASS: all 40 outcomes, decisions, markers and statistics checks match |
+| Cohesive accepted checkpoint and same-rank restart | PASS: 15 exact comparisons; original restored-state assertions pass; step-one mesh/particle payloads and physical fingerprint match |
+| Short legacy/automatic BP3 and old-checkpoint cross-rank continuation | PASS: 405 exact field groups and 30 matching cache/work checks, including solver decisions |
+
+The original Stage-J pressure-compatibility failure and supplemental cohesive
+step-two nonconvergence remain separate reference limitations. Fresh and restarted
+step-two traces match exactly; no accepted step-two state exists for comparison.
+No physical parameter, solver tolerance or history assertion was changed. The
+prior cross-rank cohesive observer limitation was not repaired. No full 3D,
+200-km BP3 or long production run was performed. Elapsed times are excluded.
+
+Commands, source proof, lifecycle tables and individual results are in the
+[R3b harness](../../benchmarks/reconstructed_fault/refactoring_r3b/README.md).
+Qualified candidate: `build-refactor-r3b/aspect-r3b-qualified` (SHA256
+`fbd3a74e0238c0fcf5026c9ec8b554f5296302fe14f3d0de4d986096d2c109db`).
+R3b is complete and saved in its own local commit. Proposed next task: separately
+select R4a, moving the existing coupled solver method without restructuring it.
+No R4 work has begun. The sections below preserve earlier pass records.
+
 ## Minimal restart correction (complete; corrected R3a reference)
 
 The user separately authorized the correctness fix after the diagnosis below.

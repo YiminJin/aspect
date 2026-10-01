@@ -339,6 +339,32 @@ namespace aspect
          * @}
          */
 
+        /** Scratch buffers confined to one accepted-history call. */
+        struct HistorySamples;
+        struct HistoryCandidates;
+
+        /** Sample accepted bulk and previous phase fields in association order. */
+        void sample_accepted_history(const LinearAlgebra::BlockVector &accepted_bulk_state,
+                                     HistorySamples &samples);
+
+        /** Project cohesive samples before computing Theta and particle candidates.
+         * Intermediate collective error checks stay at their existing boundaries. */
+        void compute_history_candidates(const HistorySamples &samples,
+                                        const double time_step,
+                                        const unsigned int stress_position,
+                                        const unsigned int H_position,
+                                        const std::vector<unsigned int> &chemical_positions,
+                                        HistoryCandidates &candidates);
+
+        /** Complete existing collective/local checks and projection diagnostics. */
+        void validate_history_candidates(const HistoryCandidates &candidates);
+
+        /** Publish the already validated histories in their existing order.
+         * Timestep acceptance and slip-rate publication remain with the caller. */
+        void publish_history_candidates(const HistoryCandidates &candidates,
+                                        const unsigned int stress_position,
+                                        const unsigned int H_position);
+
         /**
          * @name Initial cohesive-state setup
          * @{

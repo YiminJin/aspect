@@ -508,6 +508,36 @@ namespace aspect
         }
     }
 
+    // Per-call scratch storage, never a second owner of committed history.
+    // Keep the sampling cache and audit streams alive through publication.
+    template <int dim>
+    struct PhaseFieldFault<dim>::HistorySamples
+    {
+      std::vector<Point<dim>> points;
+      Utilities::MPI::RemotePointEvaluation<dim> point_cache;
+      std::vector<Tensor<2,dim>> velocity_gradients;
+      std::vector<double> temperatures;
+      std::vector<double> phase_fields;
+      std::vector<double> previous_phase_fields;
+    };
+
+    template <int dim>
+    struct PhaseFieldFault<dim>::HistoryCandidates
+    {
+      struct ParticleCandidate
+      {
+        SymmetricTensor<2,dim> stress;
+        double crack_driving_force;
+      };
+      std::map<types::particle_index, double> cohesive_samples;
+      std::map<types::particle_index, ParticleCandidate> particle_candidates;
+      std::ofstream source_history_audit;
+      std::set<std::string> trace_cells;
+      std::ofstream stress_cycle_audit;
+      typename ReconstructedFaultManager<dim>::ParticleScalarProjectionResult cohesive_projection;
+      std::vector<std::vector<double>> state_candidates;
+    };
+
     template <int dim>
     void
     PhaseFieldFault<dim>::commit_reconstructed_fault_mechanical_history(
@@ -515,9 +545,6 @@ namespace aspect
     {
       TimerOutput::Scope timer(*performance_timer, "Fault: History commit");
       validate_reconstructed_fault_constitutive_state();
-      ReconstructedFaultManager<dim> &fault_manager =
-        this->get_reconstructed_fault_manager();
-      const auto &faults = fault_manager.get_faults();
 
       // Timestep zero supplies the initial kinematic solution only. Its
       // constitutive histories were initialized explicitly during preparation.
@@ -531,7 +558,6 @@ namespace aspect
 
       Particle::Manager<dim> &particle_manager =
         this->get_phase_field_handler().get_associated_particle_manager();
-      auto &particle_handler = particle_manager.get_particle_handler();
       const auto &property_manager = particle_manager.get_property_manager();
       const auto &particle_data = property_manager.get_data_info();
       AssertThrow(property_manager.plugin_name_exists("maxwell stress")
@@ -559,44 +585,84 @@ namespace aspect
             + property->second.second);
         }
 
+      HistorySamples samples;
+      sample_accepted_history(accepted_bulk_state, samples);
+
+      HistoryCandidates candidates;
+      compute_history_candidates(samples, time_step, stress_position, H_position,
+                                 chemical_positions, candidates);
+      validate_history_candidates(candidates);
+      publish_history_candidates(candidates, stress_position, H_position);
+    }
+
+    template <int dim>
+    void
+    PhaseFieldFault<dim>::sample_accepted_history(
+      const LinearAlgebra::BlockVector &accepted_bulk_state,
+      HistorySamples &samples)
+    {
+      ReconstructedFaultManager<dim> &fault_manager =
+        this->get_reconstructed_fault_manager();
       const auto &associations =
         fault_manager.get_locally_owned_particle_fault_associations();
-      std::vector<Point<dim>> points;
+      auto &points = samples.points;
       points.reserve(associations.size());
       for (const auto &association : associations)
         points.push_back(association.position);
 
       // Bulk samples use the accepted solution, whereas the surface state is
       // interpolated from the frozen reconstructed-fault Q1 fields.
-      Utilities::MPI::RemotePointEvaluation<dim> point_cache;
+      auto &point_cache = samples.point_cache;
       point_cache.reinit(this->get_phase_field_handler().get_grid_cache(), points);
-      const auto velocity_gradients = VectorTools::point_gradients<dim>(
+      samples.velocity_gradients = VectorTools::point_gradients<dim>(
         point_cache, this->get_dof_handler(), accepted_bulk_state,
         VectorTools::EvaluationFlags::avg,
         this->introspection().component_indices.velocities[0]);
-      const std::vector<double> temperatures = VectorTools::point_values<1>(
+      samples.temperatures = VectorTools::point_values<1>(
         point_cache, this->get_dof_handler(), accepted_bulk_state,
         VectorTools::EvaluationFlags::avg,
         this->introspection().component_indices.temperature);
       const unsigned int phase_field_component =
         this->introspection().variable("phase_field").first_component_index;
-      const std::vector<double> phase_fields = VectorTools::point_values<1>(
+      samples.phase_fields = VectorTools::point_values<1>(
         point_cache, this->get_dof_handler(), accepted_bulk_state,
         VectorTools::EvaluationFlags::avg, phase_field_component);
-      const std::vector<double> previous_phase_fields = VectorTools::point_values<1>(
+      samples.previous_phase_fields = VectorTools::point_values<1>(
         point_cache, this->get_dof_handler(), this->get_old_solution(),
         VectorTools::EvaluationFlags::avg, phase_field_component);
+    }
 
-      struct ParticleCandidate
-      {
-        SymmetricTensor<2,dim> stress;
-        double crack_driving_force;
-      };
-      std::map<types::particle_index, double> cohesive_samples;
-      std::map<types::particle_index, ParticleCandidate> particle_candidates;
-      std::ofstream source_history_audit;
-      std::set<std::string> trace_cells;
-      std::ofstream stress_cycle_audit;
+    template <int dim>
+    void
+    PhaseFieldFault<dim>::compute_history_candidates(
+      const HistorySamples &samples,
+      const double time_step,
+      const unsigned int stress_position,
+      const unsigned int H_position,
+      const std::vector<unsigned int> &chemical_positions,
+      HistoryCandidates &candidates)
+    {
+      ReconstructedFaultManager<dim> &fault_manager =
+        this->get_reconstructed_fault_manager();
+      const auto &faults = fault_manager.get_faults();
+      auto &particle_handler = this->get_phase_field_handler()
+                               .get_associated_particle_manager().get_particle_handler();
+      const auto &associations =
+        fault_manager.get_locally_owned_particle_fault_associations();
+      using ParticleCandidate = typename HistoryCandidates::ParticleCandidate;
+      const auto &points = samples.points;
+      const auto &velocity_gradients = samples.velocity_gradients;
+      const auto &temperatures = samples.temperatures;
+      const auto &phase_fields = samples.phase_fields;
+      const auto &previous_phase_fields = samples.previous_phase_fields;
+      auto &cohesive_samples = candidates.cohesive_samples;
+      auto &particle_candidates = candidates.particle_candidates;
+      auto &source_history_audit = candidates.source_history_audit;
+      auto &trace_cells = candidates.trace_cells;
+      auto &stress_cycle_audit = candidates.stress_cycle_audit;
+      auto &cohesive_projection = candidates.cohesive_projection;
+      auto &state_candidates = candidates.state_candidates;
+
       if (std::getenv("ASPECT_STRESS_CYCLE_TRACE"))
         {
           const auto rank=std::to_string(Utilities::MPI::this_mpi_process(this->get_mpi_communicator()));
@@ -665,10 +731,9 @@ namespace aspect
         }
       throw_if_history_error(local_error, this->get_mpi_communicator());
 
-      const auto cohesive_projection =
+      cohesive_projection =
         fault_manager.project_particle_scalar(cohesive_samples);
 
-      std::vector<std::vector<double>> state_candidates;
       try
         {
           if (fault_friction.has_state_variable())
@@ -873,8 +938,18 @@ namespace aspect
         }
       throw_if_history_error(local_error, this->get_mpi_communicator());
 
-      // Every rank validates before the first persistent write. The terminal
-      // block below performs only fixed-size scalar assignments.
+    }
+
+    template <int dim>
+    void
+    PhaseFieldFault<dim>::validate_history_candidates(
+      const HistoryCandidates &candidates)
+    {
+      auto &particle_handler = this->get_phase_field_handler()
+                               .get_associated_particle_manager().get_particle_handler();
+      const auto &particle_candidates = candidates.particle_candidates;
+      const auto &cohesive_projection = candidates.cohesive_projection;
+      // Finish the existing collective and local checks before publication.
       const unsigned int local_valid =
         particle_candidates.size() == particle_handler.n_locally_owned_particles()
         ? 1u : 0u;
@@ -897,7 +972,24 @@ namespace aspect
           << " Pa, maximum="
           << cohesive_projection.diagnostics[fault].maximum_absolute_residual
           << " Pa" << std::endl;
+    }
 
+    template <int dim>
+    void
+    PhaseFieldFault<dim>::publish_history_candidates(
+      const HistoryCandidates &candidates,
+      const unsigned int stress_position,
+      const unsigned int H_position)
+    {
+      ReconstructedFaultManager<dim> &fault_manager =
+        this->get_reconstructed_fault_manager();
+      const auto &faults = fault_manager.get_faults();
+      auto &particle_handler = this->get_phase_field_handler()
+                               .get_associated_particle_manager().get_particle_handler();
+      using ParticleCandidate = typename HistoryCandidates::ParticleCandidate;
+      const auto &particle_candidates = candidates.particle_candidates;
+      const auto &cohesive_projection = candidates.cohesive_projection;
+      const auto &state_candidates = candidates.state_candidates;
       commit_cohesive_state(cohesive_projection.nodal_values);
 
       if (fault_friction.has_state_variable())

@@ -11,14 +11,15 @@ complete and ready for review under
 [boundary-completion instructions](codex_boundary_completion_instructions.md);
 R3a is complete and ready for review: move constitutive/history definitions only, with an
 ownership/lifecycle table recorded before editing and checked afterward.
-R3b and R4–R8 remain pending.
+R3b is complete and ready for review; R4–R8 remain pending.
 See [verification and disposition](../refactor_review.md).
 Proposal 3 is complete and ready for review: the private cache-input/reuse
 decision extraction preserves the completed proposal-2 implementation exactly.
 R3a and its separately authorized transient restart correction are complete.
 For R3b use the corrected R3a executable/source manifest recorded in
 [restart correction evidence](../../../benchmarks/reconstructed_fault/restart_fix/README.md).
-No R3b implementation is selected. Module boundaries and frozen
+R3b lifecycle extraction is complete against corrected R3a (`bef79b31a`);
+R4–R8 remain unselected. Module boundaries and frozen
 M1/M2 scope are defined in [refactoring.md](../refactoring.md).
 
 Reviewed source: YiminJin/aspect, branch `pf-rsf`, commit `0fc1ce782c48b78f79eff674724686b8277c8618`. The remote branch still pointed to this commit when checked for this plan. The user's local checkout may contain newer work. Inspect and preserve that work before selecting an implementation baseline.

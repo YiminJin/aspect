@@ -1,5 +1,34 @@
 # Phase-field / RSF current status
 
+## R3b complete; review pending
+
+The R3a ownership/lifecycle table and full report in `refactor_review.md` were
+already intact and matched commit `bef79b31a`; no restoration was necessary.
+They remain unchanged. Local documentation moves and temporary files are preserved.
+
+Against corrected R3a, the history driver now calls four private operations:
+accepted-state sampling, candidate construction, validation and publication.
+Two call-local scratch buffers add no persistent owner or checkpoint state.
+Numerical expressions, intermediate collective error checks, cohesive projection
+before H, validation/diagnostic order and terminal write order are preserved.
+Timestep-zero, mature/frozen and cohesive paths remain distinct. Solver acceptance
+and rollback, both R2 files and the restart correction are unchanged.
+
+Fresh Release and independent compilation pass; all affected operations have
+2D/3D definitions. Units pass 20,828 assertions/28 cases per rank on one/two ranks.
+Temperature, frozen stress and accepted-Newton rollback pass. All 40 lifecycle,
+15 cohesive and 30 BP3 cache/work comparisons match; all 405 BP3 field groups
+are exact. Original Stage-J pressure incompatibility and cohesive step-two
+nonconvergence remain unchanged, with identical solver decisions. No tolerances,
+physical parameters or history assertions changed. No 3D or long/full BP3 run
+was performed, and the prior cross-rank cohesive observer limitation remains.
+
+Qualified candidate: `build-refactor-r3b/aspect-r3b-qualified`. See the
+[review](refactor_review.md) and [evidence](../../benchmarks/reconstructed_fault/refactoring_r3b/README.md).
+R3b is saved in its own local commit. Proposed next task is separately selected R4a
+solver-method relocation; no R4 work has begun. The entries below are historical
+checkpoints and review boundaries.
+
 ## Restart correction complete; corrected R3a reference ready
 
 The separately authorized correction rebuilds the transient prescribed-rate map
