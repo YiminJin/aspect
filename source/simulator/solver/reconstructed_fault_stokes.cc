@@ -33,6 +33,7 @@
 #include <aspect/simulator/solver/reconstructed_fault_linear.h>
 #include <aspect/simulator/assemblers/reconstructed_fault_stokes.h>
 #include "stokes_operators.h"
+#include "reconstructed_fault_bound_diagnostics.h"
 #include "../reconstructed_fault_residual_audit.h"
 #include "../reconstructed_fault_interface_preconditioner.h"
 
@@ -735,14 +736,8 @@ namespace aspect
                 double minimum = std::numeric_limits<double>::max(), minimum_free = minimum;
                 std::ofstream out;
                 if (pcout.is_active())
-                  {
-                    out.open(parameters.output_directory + "nonlinear_bounds_"
-                             + Utilities::int_to_string(timestep_number) + ".csv",
-                             nonlinear_iteration == 0 ? std::ios::out : std::ios::app);
-                    if (nonlinear_iteration == 0)
-                      out << "iteration,fault,vertex,V,dV,prescribed,lower_active,Fmin_weak_density,alpha_max,bulk,surface\n";
-                    out << std::setprecision(17);
-                  }
+                  internal::open_fault_bound_diagnostic(
+                    out, parameters.output_directory, timestep_number, nonlinear_iteration);
                 for (unsigned int f = 0; f < slip_rate.size(); ++f)
                   for (unsigned int v = 0; v < slip_rate[f].size(); ++v)
                     {
@@ -761,16 +756,15 @@ namespace aspect
                           if (!active_set[f][v]) minimum_free = std::min(minimum_free, slip_rate[f][v]);
                         }
                       if (pcout.is_active())
-                        out << nonlinear_iteration << ',' << f << ',' << v << ',' << slip_rate[f][v]
-                            << ',' << slip_rate_direction[f][v] << ',' << prescribed[f][v]
-                            << ',' << (active_set[f][v] && !prescribed[f][v]) << ',' << density
-                            << ',' << maximum_step_length << ',' << current_bulk_norm << ','
-                            << current_surface_norm << '\n';
+                        internal::write_fault_bound_diagnostic(
+                          out, nonlinear_iteration, f, v, slip_rate[f][v],
+                          slip_rate_direction[f][v], prescribed[f][v],
+                          active_set[f][v] && !prescribed[f][v], density,
+                          maximum_step_length, current_bulk_norm, current_surface_norm);
                     }
-                pcout << "      Fault bound audit: free=" << free << ", lower-active=" << lower_active
-                      << ", min V=" << minimum << ", min free V=" << minimum_free
-                      << ", negative Fmin=" << prefers_lower << ", alpha_max=" << maximum_step_length
-                      << std::endl;
+                internal::report_fault_bound_diagnostic(
+                  pcout, free, lower_active, minimum, minimum_free,
+                  prefers_lower, maximum_step_length);
               }
 
             if (relative_bulk_residual < parameters.nonlinear_tolerance

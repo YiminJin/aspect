@@ -442,14 +442,14 @@ read timing, ownership, rank requirements, file schemas/consumers and dispositio
 | Numerical implementation choice | Existing algorithms, selectors/defaults, dependency and MPI requirements; no migration/removal |
 | Benchmark initialization/loading | Existing setup/restart/observer boundaries; completion and prescribed/loading inputs remain numerical |
 
-- **R6a (complete for review):** refresh the inventory and extract only the
+- **R6a (accepted as `1a3b57eda`):** refresh the inventory and extract only the
   two M4 history streams (stress-cycle and continued-source) into source-private
   support. Keep per-call stream lifetime, setup/try-catch boundaries, getenv
   reads, lazy guards and pre-publication capture sites. No resampling, physics,
   collective, public API or persistent-state change. Verify nonempty rows on
   one/two ranks with off/off, on/on and within-version off/on comparisons,
   missing-input/open-failure and rollback cases; independent 2D/3D compilation.
-- **R6b (unselected):** choose one coupled/surface diagnostic family; leave
+- **R6b (selected family complete for review):** extract nonlinear-bound CSV/summary formatting only; leave
   assembly/audits, acceptance, observer timing, MPI and timers at existing sites.
   Preserve shared stream formatting flags as well as text; reuse existing recorders.
 - **R6c (unselected):** assess one benchmark setup boundary using existing
@@ -551,10 +551,12 @@ committed as `c3ce532be`, with 16 exact definition moves and focused build,
 lifecycle, restart and one/two-rank coupled/rollback checks passing. R5a2 is accepted as `d29115ada`, with the approved prepared-cache
 clarification, independent builds and 115 matched checks. R5b1 surface backend
 movement is accepted as `dfb7ad9f2` with 148 matched checks. R5b2 candidate
-preparation is complete for review, with 248 matched checks including fresh
-four-rank repaired frozen AMG/GMG comparisons. R6a switch-inventory refresh and material-history diagnostics are complete for
-review, with independent 2D/3D builds and 258 comparisons across 20 one/two-rank
-cases. R6b/R6c/R7 remain unselected. Repair of the original stale singular-fixture message
+preparation is accepted as `3b4ae16dd`, with 248 matched checks including fresh
+four-rank repaired frozen AMG/GMG comparisons. R6a switch-inventory refresh and material-history diagnostics are accepted as
+`1a3b57eda`, with independent 2D/3D builds and 258 comparisons across 20 one/two-rank
+cases. R6b nonlinear-bound formatting is complete for review: 18 one/two-rank
+cases and 170 comparisons, with no physical changes and the same additional
+diagnostic work. R6c/R7 remain unselected. Repair of the original stale singular-fixture message
 is recommended separately.
 Further R4b operations and later stages require separate selection. Historical R1 fixture failures,
 Stage-J pressure incompatibility and cohesive step-two nonconvergence remain

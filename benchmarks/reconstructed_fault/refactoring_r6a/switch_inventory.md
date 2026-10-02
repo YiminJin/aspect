@@ -39,7 +39,7 @@ formatting remain the schema, never an invitation to rename historical labels.
 | `ASPECT_IH_BOTTOM_COMPLETION_DIAGNOSTIC` | M4 legacy completion in normalization; automatic-mode compatibility in boundary_completion.cc; reference BP3 setup | Absent none; **value is a filename**, empty/0 are paths, not off. Nonempty `set_boundary_normalization_completion_file()` path takes precedence in legacy mode; automatic prescribed mode rejects incompatible explicit/legacy inputs | **N/B**, adds outside I_h RHS contributions. Collective file read/distribution, count/origin/value checks; requires frozen mature 2D; legacy env path additionally fresh uniform sliding, no compare-cell. Completion files are numerical inputs, not output. BP3 reference launchers; maintained plugin rejects this env | Retain; never classify as passive diagnostic |
 | `ASPECT_BP3_UNIFORM_SLIDING` | M4 legacy-completion admission; reference_200km/uniform_sliding.h | P | B/N: required admission for legacy env completion and benchmark prescribed sliding/setup. All ranks consistent; maintained BP3 rejects presence | Retain |
 | `ASPECT_FAULT_LINEAR_PERFORMANCE` | M5 `linear_performance.h::FaultLinearProfile` construction, each nonlinear linear solve | P resets/activates existing thread-local recorder | O: nested factor/inverse/A/B/G/preconditioner/FGMRES counts and seconds; pcout line `Fault linear profile`; destructor reports, no recorder collective. Existing frozen/performance comparers | Retain existing recorder |
-| `ASPECT_FAULT_NONLINEAR_DIAGNOSTIC` | M5 reconstructed_fault_stokes.cc, per compatibility/iteration/trial reporting site | P, read repeatedly | O/**V**: active-bound CSV and details; also evaluates surface residual at lower rates, so can prepare caches/filter factors and invoke collectives. `nonlinear_bounds_K.csv` rank0, truncate iteration0 then append, precision17; stdout. Not merely prose; all ranks must agree | Retain; possible R6b family |
+| `ASPECT_FAULT_NONLINEAR_DIAGNOSTIC` | M5 reconstructed_fault_stokes.cc, per compatibility/iteration/trial reporting site | P, read repeatedly | O/**V**: active-bound CSV and details; also evaluates surface residual at lower rates, so can prepare caches/filter factors and invoke collectives. `nonlinear_bounds_K.csv` rank0, truncate iteration0 then append, precision17; stdout. Not merely prose; all ranks must agree | Retain; R6b extracts bound CSV/summary only into source-private reconstructed_fault_bound_diagnostics.cc; numerical probe and other output remain in driver |
 | `ASPECT_FAULT_COMPATIBILITY_DIAGNOSTIC` | M5 pressure-complement compatibility check, each check | P | O: stdout existing sums/thresholds in local formatted string. Actual compatibility/fresh-residual rejection is unconditional and remains on with prose off | Retain |
 | `ASPECT_K1_FLOOR_AUDIT` | M5 driver, selected assembly site | P plus existing diagnostic-site condition | V: shadow residual assembly under process-global `fault_residual_audit_channel`; restore channel before production solve, extra assembly/collectives/output. Not passive logging; exact checks/errors retained | Retain |
 | `ASPECT_FAULT_EXPLICIT_B` | M5 reconstructed_fault_stokes assembler, each B linearization/timing setup | P | N: build sparse rectangular B rather than reference quadrature action; physical/homogeneous constraints and cache lifetime unchanged; distributed assembly/communication. stdout size when performance enabled; B/G comparison fixtures | Retain |
@@ -239,3 +239,16 @@ constraint fixture. `ASPECT_TEST_REVERSED_SHEAR` changes shear sense;
 `ASPECT_TEST_NORMAL_FILTER` selects bulk work/filtered test equations.
 `ASPECT_FAULT_COMPARE_COUPLING` adds independent actions/collectives. None of
 these is reclassified as harmless merely because it is test-only.
+
+### R6b bound-output boundary
+
+`ASPECT_FAULT_NONLINEAR_DIAGNOSTIC` remains a repeatedly read presence selector
+(including empty/"0"), with the same collective consistency requirement. Only
+file/header/row/summary formatting moves. The driver owns the per-iteration
+stream, guards, lower-rate audit and current Newton state. Summary uses the same
+ConditionalOStream directly; no formatting-state reset. Silent open/write errors
+remain silent. All 11 CSV columns and row order remain available to BP3
+`bound_roundoff_audit.py`, `bound_contact_followup.py`, `analyze_cache_audit.py`,
+and BP5 `analyze_small_startup.py`. Lower-rate audit output is not a committed
+state or accepted trial. Linear/nonlinear detail and trial-merit readers/output
+are unchanged. See [R6b evidence](../refactoring_r6b/README.md).

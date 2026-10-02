@@ -59,41 +59,34 @@ to change the reference algorithm, parameters, or expected test results.
 
 ## 2. Preserve responsibility boundaries
 
-### Selected module scope (R6a material-history diagnostics)
+### Selected module scope (R6b nonlinear-bound diagnostics)
 
-R5 is accepted, with R5b2 committed as `3b4ae16dd`. Use its qualified source,
-executable and manifests; retain the repaired frozen-fixture evidence. Follow
-[the R6 instructions](refactoring/codex_R6_instructions.md). Refresh the existing
-R0 inventory using current readers, parameters, setters and observers; record
-exact defaults/parsing, dependencies, MPI participation, output schemas/consumers
-and whether a name is live or only historical. The [current switch inventory](../../benchmarks/reconstructed_fault/refactoring_r6a/switch_inventory.md)
-updates the rolling review; no switch removal/migration or changed defaults.
+R6a is accepted as `1a3b57eda`, with its immutable qualified executable and
+repaired frozen-fixture evidence. Follow [the R6 instructions](refactoring/codex_R6_instructions.md)
+and [R6b boundary/verification record](../../benchmarks/reconstructed_fault/refactoring_r6b/README.md).
+The [current switch inventory](../../benchmarks/reconstructed_fault/refactoring_r6a/switch_inventory.md)
+remains authoritative for observed readers and parsing; no switch removal,
+migration or changed default is selected.
 
-Extract only M4 history diagnostics selected by ASPECT_STRESS_CYCLE_TRACE and
-ASPECT_FAULT_SOURCE_HISTORY_DIAGNOSTIC. A small source-private per-call recorder
-may own the existing streams/cell filter, with the existing candidate lifetime
-through validation/publication and unwinding. No persistent diagnostic owner,
-public material API or general logging framework. Keep numerical sampling,
-source admission, candidate construction, collective validation/publication and
-rollback with their existing owners. Leave the core particle-transfer trace alone.
+Extract only nonlinear-bound file setup, row formatting and summary from the
+M5 driver. Three source-private functions borrow the existing streams and
+computed scalars; the driver still owns stream lifetime. Keep presence reads,
+rank guards, lower-rate residual reevaluation, cache work, mass normalization,
+bound counters, active-set/line-search decisions and MPI at their original sites.
+Rows describe the current Newton iterate plus the separate lower-rate probe,
+not committed state. Preserve exact schema, append/truncate policy, precision,
+ordering, silent I/O failures and shared pcout formatting state. No callbacks,
+persistent owner, public API or generic framework. Leave other diagnostic
+families and the synchronous linear observer untouched.
 
-Keep getenv reads and both setup/capture sites in place. Pass actual pre-publication
-inputs/candidates; never resample/re-evaluate them later. Disabled streams must
-not perform diagnostic-only geometry, material work, allocation of a trace, or
-MPI. Preserve selection short-circuiting, original continued-source guards,
-filenames/truncation, headers (including historical kappa labels), numeric
-precision, row order and units. Keep setup outside and row writing inside the
-original try/catch. Preserve silent stream-open/write failure and missing-cell
-input behavior, rather than adding assertions or changing exception masks.
-
-Verification uses nonempty rows on one/two ranks: reference/candidate off/off,
-on/on, and off/on neutrality within each version, plus missing selection,
-failed-open and existing rollback checks. Preserve physical/history fields,
-decisions, deterministic work and complete scientific CSV columns exactly.
-Compile old/new TUs independently with 2D/3D symbols and original unity grouping.
-Reuse the repaired frozen proof because this history-only extraction does not
-touch its observer, operator lifetime or output contract. Stop after R6a; no
-R6b/R6c, M1/M2 change, numerical correction, switch deletion or R7 is authorized.
+Verify baseline/candidate off/off and on/on on one/two ranks, nonempty exact
+rows, blocked opens and existing accepted-update rollback. Check off/on physical
+neutrality separately from additional diagnostic evaluation/cache/collective
+work. Same-selector deterministic counters must match; elapsed time may differ.
+Compile helper/driver independently, verify 2D/3D driver symbols and preserve
+unity grouping. Reuse frozen evidence because its observer, operator lifetime
+and associated output are untouched. Stop after this R6b family for review;
+no R6c/R7, numerical correction, M1/M2 change or switch compatibility change.
 
 | Module | Owns | Refactoring scope |
 |---|---|---|

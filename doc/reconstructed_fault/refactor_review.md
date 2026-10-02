@@ -1,5 +1,49 @@
 # Reconstructed-fault refactoring review
 
+## R6b — Nonlinear-bound presentation complete for review
+
+Accepted R6a is committed as `1a3b57eda`; its 258 comparisons were rechecked
+before commit. The selected R6b family moves only nonlinear-bound file setup,
+CSV rows and summary formatting to source-private
+`source/simulator/solver/reconstructed_fault_bound_diagnostics.h/.cc`. Three
+functions borrow the existing streams/scalars and retain nothing. The driver
+still owns the local stream, rank guards, audit evaluation, density/counters,
+active-set and line-search decisions. Rows retain current Newton values and
+the separate lower-rate probe density. Capture sites, stream precision/state,
+append/truncate policy, error behavior, MPI and observer timing are unchanged.
+Public interfaces and checkpoint ownership are unchanged.
+
+Release and independent driver/helper builds pass, with all six driver 2D/3D
+and three dimension-independent helper definitions present exactly once. Eight
+structural/protection checks pass, including byte-exact reconstruction of the
+surrounding driver and unchanged unity groups. All 18 one/two-rank runtime cases
+and 170 comparisons pass. Every ordinary on-run has 512 exact 11-column rows
+across seven timestep files; rollback on-runs have 16 active-bound rows. Fields,
+histories, statistics, solver decisions, summaries and same-selector work counts
+match. Failed opens remain silent and rollback reaches its complete marker.
+
+Off/on physical neutrality passes. The pre-existing diagnostic deliberately
+adds 16 bulk-work/normal-filter evaluations (39 to 55 in BP3); that difference
+is recorded, not normalized away. No numerical or MPI defect was demonstrated.
+The initial symbol matcher counted nested lambdas as method definitions; its
+filter was corrected without a source/runtime change.
+
+| Check | Result |
+|---|---|
+| Release; independent TUs; symbols; source/ownership protection | PASS |
+| Matched off/off, on/on and off/on physical neutrality, 1/2 ranks | PASS |
+| Nonempty rows, blocked opens, accepted-update rollback | PASS |
+| Repaired frozen AMG/GMG | REUSED — relevant code/observer contract unchanged |
+| Debug/3D runtime, long/restart, mid-write failure injection | NOT RUN |
+
+The qualified candidate and full commands/manifests are in the
+[R6b evidence](../../benchmarks/reconstructed_fault/refactoring_r6b/README.md).
+Existing scientific/cache limitations remain. R6b is uncommitted for review;
+stop before R6c/R7. Proposed next bounded task: extract surface stress-sample/
+weak-moment CSV formatting, keeping sampling, residual reevaluations and capture
+sites with their present owners.
+
+
 ## R6a — Material-history diagnostics and switch inventory (complete for review)
 
 Accepted R5b2 was committed first as `3b4ae16dd`. Reference:

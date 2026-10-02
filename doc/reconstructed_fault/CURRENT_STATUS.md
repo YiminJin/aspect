@@ -1,5 +1,42 @@
 # Phase-field / RSF current status
 
+## R6b accepted; R6c selected
+
+The commit containing this entry records accepted R6b and its rechecked qualified
+baseline. See [acceptance](../../benchmarks/reconstructed_fault/refactoring_r6b/README.md#accepted-r6b-baseline).
+The user selected R6c benchmark setup boundaries. Assess existing callback state,
+timing, restart reattachment and errors before any relocation. Retain production
+integration where the existing interfaces cannot preserve behavior.
+Earlier review entries are historical.
+
+
+## R6b nonlinear-bound presentation complete for review
+
+R6a is accepted and committed as `1a3b57eda`. The selected R6b extraction adds
+three source-private formatting functions; the driver retains stream lifetime,
+audit calculations, guards, MPI, decisions and observer timing. No public API,
+physical ownership, selector or error-policy change. Guidance and the rolling
+switch inventory describe the boundary.
+
+Separate Release/independent builds, nine definitions and eight source/protection
+checks pass. All 18 one/two-rank cases and 170 comparisons pass: exact bound rows,
+fields/history, decisions, same-selector work counts, off/on physical neutrality,
+silent blocked opens and complete rollback markers. Each ordinary on-run has
+512 rows across seven timestep files; rollback has 16 active-bound rows.
+Diagnostic-on retains its pre-existing extra 16 bulk-work/normal-filter calls
+(39 to 55), without changing physical state.
+
+Candidate: `build-refactor-r6b/aspect-r6b-qualified`, SHA256
+`cdf7e0c58009d11dfe8c216caeb31ba6d8edc08b71360fec9fb63fcd95287596`.
+See [review](refactor_review.md#r6b--nonlinear-bound-presentation-complete-for-review)
+and [evidence](../../benchmarks/reconstructed_fault/refactoring_r6b/README.md).
+R6b remains uncommitted for review. Local tmp edits and previous qualified
+artifacts are preserved. Frozen evidence reused; no Debug/3D runtime, new
+restart/long campaign or injected mid-write failure. No numerical/MPI defect
+demonstrated. Stop before R6c/R7. Recommended next bounded task: surface
+stress-sample/weak-moment CSV formatting only. Earlier entries are historical.
+
+
 ## R6a accepted; R6b selected
 
 The commit containing this entry records accepted R6a and its rechecked qualified
