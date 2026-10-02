@@ -59,34 +59,36 @@ to change the reference algorithm, parameters, or expected test results.
 
 ## 2. Preserve responsibility boundaries
 
-### Selected module scope (R6b nonlinear-bound diagnostics)
+### Accepted module scope (R6 closed)
 
-R6a is accepted as `1a3b57eda`, with its immutable qualified executable and
-repaired frozen-fixture evidence. Follow [the R6 instructions](refactoring/codex_R6_instructions.md)
-and [R6b boundary/verification record](../../benchmarks/reconstructed_fault/refactoring_r6b/README.md).
-The [current switch inventory](../../benchmarks/reconstructed_fault/refactoring_r6a/switch_inventory.md)
-remains authoritative for observed readers and parsing; no switch removal,
-migration or changed default is selected.
+R6b is accepted as `00ad5ce1c`, with its immutable qualified executable and
+one/two-rank evidence. Follow [R6 §5](refactoring/codex_R6_instructions.md) and
+[the R6c boundary assessment](../../benchmarks/reconstructed_fault/refactoring_r6c/README.md).
+Keep the [rolling switch inventory](../../benchmarks/reconstructed_fault/refactoring_r6a/switch_inventory.md)
+current; classification does not authorize migration/removal or changed defaults.
 
-Extract only nonlinear-bound file setup, row formatting and summary from the
-M5 driver. Three source-private functions borrow the existing streams and
-computed scalars; the driver still owns stream lifetime. Keep presence reads,
-rank guards, lower-rate residual reevaluation, cache work, mass normalization,
-bound counters, active-set/line-search decisions and MPI at their original sites.
-Rows describe the current Newton iterate plus the separate lower-rate probe,
-not committed state. Preserve exact schema, append/truncate policy, precision,
-ordering, silent I/O failures and shared pcout formatting state. No callbacks,
-persistent owner, public API or generic framework. Leave other diagnostic
-families and the synchronous linear observer untouched.
+The selected legacy-completion boundary is retained. Benchmark plugins already
+own supported input attachment, loading, initial fields and output scheduling.
+Production owns profile geometry/integration, consistent projection, cache/MPI
+lifecycle and current legacy admission. A setup callback cannot reproduce the
+cache-miss application point or access its private profile/integral data. Passing
+the legacy environment path through the explicit setter would change restart
+rejection, empty-path handling, read/failure timing and invalidation behavior.
+No relocation or new public hook is justified under the current contract.
 
-Verify baseline/candidate off/off and on/on on one/two ranks, nonempty exact
-rows, blocked opens and existing accepted-update rollback. Check off/on physical
-neutrality separately from additional diagnostic evaluation/cache/collective
-work. Same-selector deterministic counters must match; elapsed time may differ.
-Compile helper/driver independently, verify 2D/3D driver symbols and preserve
-unity grouping. Reuse frozen evidence because its observer, operator lifetime
-and associated output are untouched. Stop after this R6b family for review;
-no R6c/R7, numerical correction, M1/M2 change or switch compatibility change.
+For future benchmark moves, first compare actual callback arguments/order,
+available state, fresh versus restart reattachment, error propagation and MPI
+participation. Retain integration if these differ; document the smallest
+separate compatibility decision. Do not move generic geometry, prescribed-rate
+interfaces, supported completion, constitutive computation or acceptance into a
+benchmark merely because BP3 uses them. Preserve all scientific algorithms,
+parameters, switch semantics, ownership, checkpoint and observer lifetimes.
+
+R6c is accepted and R6 is closed. This R6c result changes documentation only. Verify source/artifact/local-edit
+preservation and relevant existing environment-guard coverage; reuse numerical
+qualification of the identical source. No new runtime campaign is implied by
+classification. No refactoring pass is currently selected. R7 and legacy compatibility
+migration require separate selection.
 
 | Module | Owns | Refactoring scope |
 |---|---|---|

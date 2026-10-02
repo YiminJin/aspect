@@ -1,5 +1,49 @@
 # Phase-field / RSF current status
 
+## R6 accepted and closed
+
+The user accepted R6c and requested this commit as the closure of R6. R6a
+(`1a3b57eda`) extracted material-history diagnostics; R6b (`00ad5ce1c`)
+extracted nonlinear-bound presentation; this commit records the accepted R6c
+assessment and retained legacy-completion boundary. The switch inventory and
+selected diagnostic extractions are complete. No further migration is implied.
+
+The qualified post-R6 implementation is unchanged from R6b:
+`build-refactor-r6b/aspect-r6b-qualified`, SHA256
+`cdf7e0c58009d11dfe8c216caeb31ba6d8edc08b71360fec9fb63fcd95287596`.
+R6c preservation checks cover the same source/artifacts; its environment-guard
+regression passes. Numerical evidence and stated coverage limits remain those
+of the accepted passes. Local refactoring/tmp files are excluded from the commit.
+R7 and legacy-switch compatibility changes remain unselected. Earlier entries
+retain their historical review state.
+
+
+## R6c benchmark setup boundary assessment complete for review
+
+R6b is accepted and committed as `00ad5ce1c`, using the qualified executable
+`build-refactor-r6b/aspect-r6b-qualified`, SHA256
+`cdf7e0c58009d11dfe8c216caeb31ba6d8edc08b71360fec9fb63fcd95287596`.
+Its 170 comparisons and structural/symbol checks were rechecked before commit.
+
+R6c inventories existing plugin setup and assesses legacy completion attachment/
+application. The production integration is retained under R6 §5: available
+callbacks cannot preserve cache-miss profile data/timing, legacy restart rejection
+and file-error ordering. Explicit supported BP3 attachment already uses the
+existing preparation callback. No production/plugin source, public API, selector,
+checkpoint, ownership or scientific algorithm changes; no new interface needed.
+
+Guidelines/roadmap/inventory and [the assessment](../../benchmarks/reconstructed_fault/refactoring_r6c/README.md)
+record the boundary and deferred compatibility decision. Source, benchmark,
+specification, qualified-artifact and local-edit preservation checks pass, as do
+the unchanged BP3 execution-environment regression and documentation checks.
+No new numerical/MPI/frozen/restart campaign for this documentation-only result;
+accepted R6b evidence is reused. Earlier scientific/cache/restart gaps remain.
+
+R6c assessment is complete, uncommitted for review. Recommended next bounded
+task: R7 core-integration inventory/proposal only. Stop before R7 and any
+legacy-switch migration. Earlier entries are historical.
+
+
 ## R6b accepted; R6c selected
 
 The commit containing this entry records accepted R6b and its rechecked qualified

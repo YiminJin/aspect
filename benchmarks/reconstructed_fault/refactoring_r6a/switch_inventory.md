@@ -252,3 +252,23 @@ remain silent. All 11 CSV columns and row order remain available to BP3
 and BP5 `analyze_small_startup.py`. Lower-rate audit output is not a committed
 state or accepted trial. Linear/nonlinear detail and trial-merit readers/output
 are unchanged. See [R6b evidence](../refactoring_r6b/README.md).
+
+### R6c benchmark boundary disposition
+
+Accepted R6b source is `00ad5ce1c`. [The R6c assessment](../refactoring_r6c/README.md)
+locates existing benchmark policy in maintained BP3, historical reference BP3
+and the BP5 retained-stress fixture, and distinguishes those policies from M3/M4/M5
+mechanisms. No readers/defaults/parameters or source paths change in R6c.
+
+The legacy completion environment adapter remains in M4 normalization. A
+nonempty explicit setter path takes precedence; the member-empty environment
+branch retains fresh/uniform-sliding admission and cache-miss read timing.
+The explicit setter is not an equivalent legacy adapter: it permits reattachment
+on restart and changes path validation/invalidation behavior. Supported BP3
+attachment already uses `post_advection_solver`; maintained BP3 rejects legacy
+environment presence. No existing callback supplies actual private profile
+integrals before projection, so completion application/output also remains.
+The automatic-mode compatibility check still precedes collective cache reuse.
+Any later switch migration requires its own compatibility decision; no new
+signal or accessor is proposed. Source/hash evidence and environment-guard
+coverage are linked from the assessment. R7 is unselected.

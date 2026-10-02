@@ -1,5 +1,64 @@
 # Reconstructed-fault refactoring review
 
+## R6 accepted and closed
+
+The user accepted R6c and requested this commit as the closure of R6. R6a
+(`1a3b57eda`) extracted material-history diagnostics; R6b (`00ad5ce1c`)
+extracted nonlinear-bound presentation; this commit records the accepted R6c
+assessment and retained legacy-completion boundary. The switch inventory and
+selected diagnostic extractions are complete. No further migration is implied.
+
+The qualified post-R6 implementation is unchanged from R6b:
+`build-refactor-r6b/aspect-r6b-qualified`, SHA256
+`cdf7e0c58009d11dfe8c216caeb31ba6d8edc08b71360fec9fb63fcd95287596`.
+R6c preservation checks cover the same source/artifacts; its environment-guard
+regression passes. Numerical evidence and stated coverage limits remain those
+of the accepted passes. Local refactoring/tmp files are excluded from the commit.
+R7 and legacy-switch compatibility changes remain unselected. Earlier entries
+retain their historical review state.
+
+
+## R6c — Benchmark setup boundary assessment complete for review
+
+Accepted R6b is committed as `00ad5ce1c`; its 170 comparisons and structural/
+symbol qualification passed again before commit. R6c identifies existing BP3
+plugin ownership of mesh/profile/loading, initial history/background selection,
+filter setup and output scheduling, separately from generic M3/M4/M5 mechanisms.
+The selected boundary is legacy normalization-completion input attachment and
+application. **Retain the existing production integration; no source move.**
+
+Supported explicit file attachment already uses BP3's temperature
+`post_advection_solver` callback, before material preparation, including restart
+reattachment without history reinitialization. The legacy environment path is
+different: it remains available without BP3, requires fresh uniform sliding and
+is read only during completion on a cache miss. Passing it through the explicit
+setter would change restart rejection, empty-path handling, invalidation and
+failure timing. The maintained BP3 plugin deliberately rejects those switches.
+
+Completion needs actual owned profiles and in-box integrals after integration
+and before projection. Existing startup/restart/postprocess callbacks do not
+supply that private state at that point. Moving its output would also change
+capture/error timing. R6 §5 explicitly directs retention in this situation;
+no new signal/accessor, interface redesign or compatibility change is proposed.
+The [assessment](../../benchmarks/reconstructed_fault/refactoring_r6c/README.md)
+records callback arguments/order, dependencies, MPI/errors, restart behavior,
+future compatibility questions and relevant existing tests.
+
+| Check | Result |
+|---|---|
+| Accepted source, benchmark inputs, specifications, artifacts and local edits | PASS — hashes preserved except intended inventory update |
+| Existing BP3 clean/contaminated environment test | PASS |
+| Documentation links and whitespace | PASS |
+| Numerical/MPI, independent TU and frozen checks | REUSED R6b evidence; no source changes |
+| New restart/legacy failure matrix | NOT RUN; broader qualification remains open |
+
+Guidelines, roadmap and switch inventory now record this retained boundary.
+No numerical/MPI defect was demonstrated or repaired. R6c assessment is complete
+and uncommitted for review; no claim of legacy-migration or restart qualification.
+Recommended next bounded task: R7 core-integration inventory/proposal only.
+Stop before R7 or any compatibility migration pending the user's selection.
+
+
 ## R6b — Nonlinear-bound presentation complete for review
 
 Accepted R6a is committed as `1a3b57eda`; its 258 comparisons were rechecked

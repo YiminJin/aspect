@@ -428,7 +428,7 @@ New numerical defects or public-interface/build redesign require a separate
 proposal. Use focused checks for the selected group; retain historical scientific
 failures separately.
 
-### R6 — Isolate diagnostics and classify configuration
+### R6 — Isolate diagnostics and classify configuration (accepted and closed)
 
 Follow [the revised R6 instructions](codex_R6_instructions.md). Accepted post-R5
 is `3b4ae16dd` and its qualified R5b2 executable/manifests. Refresh the R0 review's
@@ -449,12 +449,14 @@ read timing, ownership, rank requirements, file schemas/consumers and dispositio
   collective, public API or persistent-state change. Verify nonempty rows on
   one/two ranks with off/off, on/on and within-version off/on comparisons,
   missing-input/open-failure and rollback cases; independent 2D/3D compilation.
-- **R6b (selected family complete for review):** extract nonlinear-bound CSV/summary formatting only; leave
+- **R6b (accepted as `00ad5ce1c`):** extract nonlinear-bound CSV/summary formatting only; leave
   assembly/audits, acceptance, observer timing, MPI and timers at existing sites.
   Preserve shared stream formatting flags as well as text; reuse existing recorders.
-- **R6c (unselected):** assess one benchmark setup boundary using existing
-  callbacks only where state/timing/restart/error contracts match. No new signal
-  or accessor merely to shorten a file, no M3 benchmark dependence.
+- **R6c (accepted; recorded in the R6 closure commit):** legacy completion input
+  selection/application remains in M4: existing setup callbacks cannot preserve
+  its cache-miss data/timing, restart rejection and failure semantics. Supported
+  benchmark attachment is already plugin-owned. See [the assessment](../../../benchmarks/reconstructed_fault/refactoring_r6c/README.md).
+  No source relocation, new signal/accessor or switch migration; R7 unselected.
 
 Environment migration/removal, changed output schemas/frequency/defaults and
 numerical fixes require separate selection and compatibility decisions. The
@@ -554,9 +556,9 @@ movement is accepted as `dfb7ad9f2` with 148 matched checks. R5b2 candidate
 preparation is accepted as `3b4ae16dd`, with 248 matched checks including fresh
 four-rank repaired frozen AMG/GMG comparisons. R6a switch-inventory refresh and material-history diagnostics are accepted as
 `1a3b57eda`, with independent 2D/3D builds and 258 comparisons across 20 one/two-rank
-cases. R6b nonlinear-bound formatting is complete for review: 18 one/two-rank
+cases. R6b nonlinear-bound formatting is accepted as `00ad5ce1c`: 18 one/two-rank
 cases and 170 comparisons, with no physical changes and the same additional
-diagnostic work. R6c/R7 remain unselected. Repair of the original stale singular-fixture message
+diagnostic work. R6c boundary assessment is accepted with legacy integration retained; R6 is closed and R7 remains unselected. Repair of the original stale singular-fixture message
 is recommended separately.
 Further R4b operations and later stages require separate selection. Historical R1 fixture failures,
 Stage-J pressure incompatibility and cohesive step-two nonconvergence remain
