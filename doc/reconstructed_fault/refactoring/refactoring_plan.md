@@ -35,8 +35,9 @@ is covered; broader cache-lifecycle gaps remain recorded. The user selected
 R5b1 surface implementation boundaries: both backend bodies are now separated,
 with dispatch/publication/solves/G retained; 148 matched checks pass. The original
 singular fixture has a stale diagnostic expectation, separately reproduced and
-covered by a current-diagnostic invalidation probe. R5b1 is complete for review. R5b2 and manager
-Stokes-QP reorganization remain unselected.
+covered by a current-diagnostic invalidation probe. R5b1 is accepted as `dfb7ad9f2`. R5b2 candidate preparation is complete for review: one private operation,
+with invalidation/assembly/observer/publication retained in the caller. Release,
+independent 2D/3D and 248 matched one/two/four-rank checks pass. Manager Stokes-QP work remains unselected.
 Historical outcomes remain in [the rolling review](../refactor_review.md).
 Module boundaries and frozen M1/M2 scope are defined in [refactoring.md](../refactoring.md).
 
@@ -382,7 +383,9 @@ assertion cleanup is bundled. Stop and report scientific conflicts separately.
 
 Follow [revised R5 instructions](codex_R5_instructions.md). R4c `fa6013678` and
 the separate fixture repair `aea2a80b0` are accepted; their executable/plugins,
-inputs and manifests are the baseline. Do not rerun unrelated R4 checks.
+inputs and manifests are the historical baseline. The selected R5b2 reference
+is accepted R5b1 `dfb7ad9f2` and its qualified executable. Do not rerun unrelated
+R4 checks; reuse the repaired frozen fixture when touched lifetimes require it.
 
 - **R5a1 (accepted, `c3ce532be`):** inventory manager responsibilities and slip-rate state;
   move complete lifecycle definitions/exclusive helpers into
@@ -401,7 +404,7 @@ inputs and manifests are the baseline. Do not rerun unrelated R4 checks.
   decision. Move unchanged bodies and verify independently, with a two-rank
   cold/warm regression. Keep Stokes-QP associations distinct and
   preserve domain construction, owner/API and existing boundary-contact files.
-- **R5b1 (complete for review):** the pre-edit inventory selects particle-domain and bulk-work
+- **R5b1 (accepted, `dfb7ad9f2`):** the pre-edit inventory selects particle-domain and bulk-work
   backend bodies for separate files, retaining dispatch/lifecycle/solves/G.
   Only private SurfaceAssembly needs a source-private complete definition;
   SurfaceLinearization and out-of-line construction/destruction stay in place.
@@ -410,17 +413,20 @@ inputs and manifests are the baseline. Do not rerun unrelated R4 checks.
   canonical simulator owners, publication/failure sequence, observer timing and
   factor/reference lifetimes. Compile all three TUs independently and verify
   particle/bulk/filter/coupling and short one/two-rank comparisons.
-- **R5b2 (later selection):** choose one substantial assembly/linearization
-  operation with explicit inputs and lifetime. Preserve quadrature, collective
+- **R5b2 (complete for review):** extract private linearization-candidate preparation
+  from const SurfaceAssembly, returning unpublished owned factors/G lookup.
+  Retain invalidation, assembly, observer and publication in the caller.
+  Preserve quadrature, collective
   ordering, full/restricted inverse generations, failure invalidation semantics,
   normal-filter behavior and observer timing. No B/G transpose assumption or
   material-history/acceptance ownership transfer.
 
-M1/M2 remain frozen. No projection/cache reorganization or surface-system
-implementation is authorized by R5a1. The pass clarifies an existing manager
-responsibility; it does not remove all manager coupling. New numerical defects
-or public-interface/build redesign require a separate proposal. Use focused
-checks for the selected group; retain historical scientific failures separately.
+M1/M2 remain frozen. Each pass authorizes only its selected responsibility;
+manager Stokes-QP organization and additional surface operations are unselected.
+These passes preserve existing owners and do not remove all manager coupling.
+New numerical defects or public-interface/build redesign require a separate
+proposal. Use focused checks for the selected group; retain historical scientific
+failures separately.
 
 ### R6 — Isolate diagnostics and classify configuration
 
@@ -524,8 +530,9 @@ repair is committed as `aea2a80b0`. R5a1 is accepted and
 committed as `c3ce532be`, with 16 exact definition moves and focused build,
 lifecycle, restart and one/two-rank coupled/rollback checks passing. R5a2 is accepted as `d29115ada`, with the approved prepared-cache
 clarification, independent builds and 115 matched checks. R5b1 surface backend
-movement is complete for review with 148 matched checks; no R5b2 operation
-extraction is authorized. Repair of the original stale singular-fixture message
+movement is accepted as `dfb7ad9f2` with 148 matched checks. R5b2 candidate
+preparation is complete for review, with 248 matched checks including fresh
+four-rank repaired frozen AMG/GMG comparisons. No other operation is selected. Repair of the original stale singular-fixture message
 is recommended separately.
 Further R4b operations and later stages require separate selection. Historical R1 fixture failures,
 Stage-J pressure incompatibility and cohesive step-two nonconvergence remain

@@ -246,6 +246,20 @@ namespace aspect
       assemble_surface_system(bulk_state, slip_rate, true);
     if (assembled.normal_diagnostic && normal_diagnostic_observer)
       normal_diagnostic_observer(assembled.residual,*assembled.normal_diagnostic);
+    auto candidate = prepare_surface_linearization(assembled);
+    normal_diagnostic = assembled.normal_diagnostic;
+    surface_linearization = std::move(candidate);
+#endif
+    return surface_linearization->residual;
+  }
+
+
+#ifdef DEAL_II_WITH_UMFPACK
+  template <int dim>
+  std::unique_ptr<typename ReconstructedFaultSurfaceSystem<dim>::SurfaceLinearization>
+  ReconstructedFaultSurfaceSystem<dim>::prepare_surface_linearization(
+    const SurfaceAssembly &assembled)
+  {
     auto candidate = std::make_unique<SurfaceLinearization>();
     candidate->residual = assembled.residual;
     candidate->diagonal = assembled.diagonal;
@@ -372,11 +386,9 @@ namespace aspect
           this->get_pcout() << "   Fault sparse G: rank0 entries=" << candidate->matrix->values.size()
                            << ", bytes=" << candidate->matrix->bytes() << std::endl;
       }
-    normal_diagnostic = assembled.normal_diagnostic;
-    surface_linearization = std::move(candidate);
-#endif
-    return surface_linearization->residual;
+    return candidate;
   }
+#endif
 
 
   template <int dim>

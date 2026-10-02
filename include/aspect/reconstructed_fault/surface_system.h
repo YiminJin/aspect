@@ -233,6 +233,16 @@ namespace aspect
                                 const FaultVector &slip_rate,
                                 bool assemble_jacobian) const;
 
+#ifdef DEAL_II_WITH_UMFPACK
+      /**
+       * Prepare the full factors and G lookup from assembled coefficients.
+       * The caller retains invalidation, observer invocation and publication;
+       * this operation returns a complete, unpublished candidate.
+       */
+      std::unique_ptr<SurfaceLinearization>
+      prepare_surface_linearization(const SurfaceAssembly &assembled);
+#endif
+
       const MaterialModel::PhaseFieldFault<dim> &phase_field_fault;
       GridTools::Cache<dim> grid_cache;
       std::unique_ptr<SurfaceLinearization> surface_linearization;

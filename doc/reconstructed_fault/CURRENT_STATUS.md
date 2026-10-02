@@ -1,5 +1,47 @@
 # Phase-field / RSF current status
 
+## R5 accepted; R6a selected
+
+The commit containing this entry records accepted R5b2 and the qualified
+post-R5 baseline. See [baseline evidence](../../benchmarks/reconstructed_fault/refactoring_r5b2/README.md#accepted-post-r5-baseline).
+The user selected the R6a switch inventory refresh and material-history trace
+extraction. No singular-fixture correction, R6b/R6c or R7 is selected.
+
+## R5b2 candidate preparation complete for review
+
+Accepted R5b1 is committed as `dfb7ad9f2`. R5b2 adds one private preparation
+operation in surface_system.cc: the existing complete candidate copy/factor/RPE/
+optional sparse-G block, byte-identical, returns unpublished owned data. The
+caller retains reset/generation/diagnostic invalidation, assembly, observer and
+publication order. Both backend files and all other production source remain
+unchanged. No public API/layout, owner, MPI, physical or cache-policy change.
+
+Release and independent compilation pass with unique 2D/3D helper definitions.
+Six source/protection checks and 248 matched comparisons pass: 148 surface/filter/
+coupled/rollback/short-BP3 checks on one/two ranks against qualified R5b1, plus
+100 fresh repaired frozen AMG/GMG checks on four ranks. Inverse/filter units pass
+636 assertions per rank. Frozen directions, state, RHS and work counts match;
+both runs prove actual backends and reach the complete pass marker before the
+intentional stop. Recorded numerical/solver/counter differences are zero.
+
+The original singular fixture's obsolete diagnostic assertion still fails as
+on R5b1; the unchanged supplemental probe verifies failed-preparation invalidation
+on one/two ranks. No fixture correction or numerical fix is bundled. Initial
+sandbox socket denial and symbol-parser correction are documented separately.
+No Debug/3D runtime, unsupported-UMFPACK build, restart/long campaign or dedicated
+native-QP/line observer test; historical scientific/cache-lifecycle gaps remain.
+
+Candidate: `build-refactor-r5b2/aspect-r5b2-qualified`, SHA256
+`edf23c823e86fe579a231110f2e2167dd929fa531996501516759d8faa432cd2`.
+See [review](refactor_review.md#r5b2--surface-linearization-candidate-preparation-complete-for-review)
+and [evidence](../../benchmarks/reconstructed_fault/refactoring_r5b2/README.md).
+R5b2 remains uncommitted for review. Accepted artifacts and unrelated local edits
+are preserved. No further extraction or R6 started. Recommended next bounded
+task: separately repair the original singular-fixture diagnostic expectation,
+retaining all generation/invalidation assertions. Earlier entries are historical.
+
+
+
 ## R5b1 accepted; R5b2 selected
 
 The commit containing this entry records accepted R5b1. Its qualified executable

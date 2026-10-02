@@ -59,35 +59,38 @@ to change the reference algorithm, parameters, or expected test results.
 
 ## 2. Preserve responsibility boundaries
 
-### Selected module scope (R5b1 surface assembly boundaries)
+### Selected module scope (R5b2 candidate preparation)
 
-R5a is accepted: R5a1 `c3ce532be`, R5a2 `d29115ada`. Use the qualified R5a2
-executable and manifests, retaining repaired-fixture evidence. Follow the
+R5b1 is accepted and committed as `dfb7ad9f2`. Use its qualified executable,
+source/artifact manifests and repaired frozen-fixture evidence. Follow the
 [revised R5 instructions](refactoring/codex_R5_instructions.md) and the
-[pre-edit inventory](../../benchmarks/reconstructed_fault/refactoring_r5b1/README.md).
+[pre-edit boundary table](../../benchmarks/reconstructed_fault/refactoring_r5b2/README.md).
 
-Separate the particle/domain and bulk-work assembly implementations into two
-focused source files. Keep dispatch, configuration, private linearization record,
-construction/destruction, publication, full/restricted solves, norm and G actions
-in surface_system.cc. A narrow source-private header holds only the complete
-private SurfaceAssembly record; do not merge it with published linearization.
-One private particle-backend method is the only declaration addition. Preserve
-all backend expressions, guards, timers, sampling, MPI and diagnostic order.
+Extract one private operation in surface_system.cc that prepares a complete,
+unpublished SurfaceLinearization from const SurfaceAssembly: copied residual,
+coefficients and shared filter factors, full fault factorizations, remote lookup
+and optional sparse G. Preserve the contiguous block's expressions and order.
+The owner supplies existing FE/grid/DoF/timer dependencies. Keep both backend
+files and private records unchanged; do not merge measures or scratch/published
+state. No additional assembly/reduction or diagnostic extraction is selected.
 
-Retain reset/generation/diagnostic invalidation before assembly, observer timing
-before candidate factorization, and publication only after preparation succeeds.
-Residual-only calls can prepare transient caches and filter factors; do not call
-them side-effect-free. Retain shared factor lifetimes, restricted generation
-checks and concrete material/canonical simulator ownership. Do not merge the
-quadrature paths or move B/history/acceptance responsibilities. Keep the existing
-source-private direct-solve/filter helpers; no framework or R5b2 extraction.
+The caller retains total timing, reset/generation/diagnostic invalidation before
+assembly, existing UMFPACK admission, observer invocation before preparation,
+and diagnostic/pointer publication after successful preparation. Failure still
+leaves old solves invalid. Keep factor and lookup timers, collective ordering,
+point multiplicity, missing points, sparse/filter selection and pressure/signs.
+Restricted inverses retain their owner/generation contract and immutable filter
+factors retain shared ownership across trial cache changes. Residual-only calls
+may prepare caches; no claim of purity or new publication atomicity is made.
 
-Compile three TUs independently and check 2D/3D symbols. New TUs use the existing
-per-source unity/PCH exclusion, preserving existing unity membership. Verify both
-paths, normal filtering, explicit/reference G, restricted/stale/failure cases and
-short coupled comparisons before review. No physical/tolerance/cache-policy fix
-or broader lifecycle/interface redesign is authorized. All R5a contracts remain
-fixed; manager Stokes-QP reorganization is not selected by this task.
+Verify the exact extracted block and retained caller, independent 2D/3D builds,
+existing surface/filter/coupling/stale/failure cases and short coupled comparisons.
+Reuse R5b1 matched one/two-rank outputs. Rerun the repaired four-rank frozen AMG/GMG
+comparison against R5b1 because candidate inverse/G preparation is touched.
+Keep the original stale singular-fixture diagnostic assertion unchanged and
+report it separately; the existing supplemental probe covers invalidation.
+No numerical, public-interface, owner, cache-policy or solver redesign; M1/M2,
+manager Stokes-QP organization and later refactoring stages remain out of scope.
 
 | Module | Owns | Refactoring scope |
 |---|---|---|

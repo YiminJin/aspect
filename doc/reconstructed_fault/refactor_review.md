@@ -1,5 +1,66 @@
 # Reconstructed-fault refactoring review
 
+## R5b2 — Surface linearization candidate preparation (complete for review)
+
+Accepted R5b1 is committed as `dfb7ad9f2`; its qualified reference is
+`build-refactor-r5b1/aspect-r5b1-qualified`, SHA256
+`fd8c03ab1f1f4e363e2b69cb69d8517a35c648c5a682308004aee4453ed4910c`.
+Candidate is the uncommitted R5b2 diff and
+`build-refactor-r5b2/aspect-r5b2-qualified`, SHA256 `edf23c823e86fe579a231110f2e2167dd929fa531996501516759d8faa432cd2`.
+The [boundary/lifetime table](../../benchmarks/reconstructed_fault/refactoring_r5b2/README.md)
+was recorded before editing and verified afterward.
+
+One private `prepare_surface_linearization(const SurfaceAssembly &)` operation
+now prepares the complete unpublished candidate: copies residual/K/mass and
+shared filter factors, factors the full fault blocks, builds RPE and optionally
+sparse G. The contiguous preparation block is byte-identical. Replacing its call
+with that block and removing the helper reproduces the original source exactly.
+The original method now makes invalidation, assembly, observation, preparation
+and publication easy to locate. No backend or second operation was extracted.
+
+| Boundary | Preserved responsibilities and lifetimes |
+|---|---|
+| Caller | Total timer, old-pointer reset, generation advance and diagnostic reset precede assembly; same admission guard and observer point; diagnostic then pointer publication follow successful preparation |
+| Preparation | Const assembly input; returned unique candidate owns full factors, copied ordered coupling data, RPE and optional sparse G; existing owner supplies grid/FE/DoF/timer dependencies |
+| MPI and numerical policy | Same factor order, lookup reinit and optional routing; same coefficients/signs, physical pressure, multiplicity and missing-point handling, sparse/filter selector and work counters |
+| Failure and borrowed views | Failure still leaves old linearization unavailable; restricted solves retain owner/generation checks; residual views expire on replacement; shared immutable filter factors survive residual-trial cache replacement |
+| Physical state | Manager/particles retain storage, material retains history meaning, solver/simulator retains acceptance; no history publication or cache-policy change in the helper |
+
+Public API/layout, owner, records, both backend files and all other production
+files remain unchanged. Only a private declaration is added. Existing UMFPACK
+compilation admission is preserved. The stopped lookup timer and completed local
+temporaries now destruct at helper return; timing behavior and publication order
+are unchanged. No extra collective, validation, framework or numerical fix.
+
+| Result | Focused evidence |
+|---|---|
+| PASS | Full Release build/link; changed TU compiles independently; unique 2D/3D helper and caller definitions |
+| PASS | Six source/protection checks, unchanged original tests and accepted reference artifacts/local edits |
+| PASS | 148 matched one/two-rank surface/coupled checks against preserved R5b1 outputs: particle pressure/rate modes, residual/K/G, explicit/reference sparse actions, bulk-work filter derivatives/raw preservation, full/restricted/stale solves, short history/rollback and seven-output automatic BP3 |
+| PASS | 636 inverse/filter unit assertions in three cases per rank |
+| KNOWN FIXTURE FAILURE | Original singular test still fails its obsolete diagnostic-text assertion identically to R5b1; original source unchanged |
+| PASS / INTENTIONAL EXIT 1 | Existing supplemental probe verifies current singular diagnostic, generation advance and unavailable old inverse on one/two ranks |
+| PASS / INTENTIONAL EXIT 1 | Fresh matched four-rank repaired frozen AMG/GMG runs: 100 checks, actual backends, fresh residuals below unchanged targets, exact state/RHS/directions/operator actions and full pass marker before stop; no step-two publication |
+| NOT RUN | Debug/3D runtime, unsupported-UMFPACK build, restart/long scientific campaign or dedicated native-QP/line diagnostic observer test |
+
+Recorded numerical fields, histories, solver decisions and work counts match
+exactly at matching ranks; elapsed time/path metadata are excluded. No tolerance
+or physical parameter changed. The first reference MPI launch was blocked by
+sandbox socket permissions before simulation; its log is retained separately
+from the successful authorized run. The initial symbol parser also counted
+nested lambda operators as member definitions; correcting that parser confirmed
+unique existing definitions without a rebuild or simulation rerun. Initial reports
+are retained. No demonstrated MPI or numerical defect.
+Historical restart/scientific and broader manager cache-lifecycle gaps remain.
+
+[Reproduction and evidence](../../benchmarks/reconstructed_fault/refactoring_r5b2/README.md)
+record commands, manifests and limitations. R5b2 is uncommitted for review; no
+further operation, manager cache or R6 work has begun. Recommended next bounded
+task: separately repair the original singular fixture's stale diagnostic
+expectation while retaining all generation/invalidation assertions.
+
+
+
 ## R5b1 — Surface assembly implementation boundaries (complete for review)
 
 Accepted R5a2 was committed first as `d29115ada`, following R5a1 `c3ce532be`.
