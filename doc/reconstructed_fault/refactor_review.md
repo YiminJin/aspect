@@ -1,5 +1,219 @@
 # Reconstructed-fault refactoring review
 
+## R5a2 — Particle-projection move (complete for review)
+
+Reference: accepted R5a1 `c3ce532be86765c7c9edcacb2f44377ff62820e1` and its
+qualified executable, including accepted post-R4/repaired-fixture evidence.
+Candidate: uncommitted R5a2, `build-refactor-r5a2/aspect-r5a2-qualified`, SHA256
+`8f696bedb006147c564f4146b96f765e88b9cd11f68f3fb120c5f0c222a1bf27`.
+The prior inventory below is retained as the pre-move assessment; its contract
+question is resolved by the user's explicit prepared-cache clarification.
+
+### Changes and verified responsibility boundary
+
+`specification.tex` and `current_design.md` now state that reverse interpolation
+with a valid cache performs no geometric search or MPI. Public lazy preparation
+may rebuild an invalid cache using geometry work and MPI collectives. Consistent
+rank entry remains a caller requirement; the local validity predicate does not
+enforce global agreement. These documentation hunks are separate from movement.
+
+All ten proposed manager definitions and two exclusive factor/solve helpers move
+byte-for-byte into `manager_particle_projection.cc`. Direct includes and explicit
+2D/3D instantiations are added. Owner, header/API/layout, arithmetic, comparisons,
+validation/publication sequence and MPI ordering are unchanged. The remaining
+manager is byte-identical after removal of those two blocks. No generic framework,
+new cache key, collective or correctness fix. M1/M2 source, existing extracted
+files, Stokes-QP/source-continuation paths, registry and restart remain untouched.
+
+The pre-edit inventory/lifetime table below was checked again against the moved
+implementation and unchanged header/callers:
+
+| Responsibility | Owner and unchanged lifetime/publication |
+|---|---|
+| Associations / domain quadrature | Manager, rank-local owned-parent order; borrowed entries expire on invalidate/rebuild; finite surface admission remains distinct from bulk continuation |
+| Mass matrix / LDL factors / support | Manager, replicated after existing reductions; geometry-only cache, same exact keys and invalidation callers; no checkpoint payload |
+| Property projection | Fresh parent P0 values, unchanged component mapping, existing reduction/solve then selected generic nodal writes |
+| Scalar projection / reverse interpolation | Returned values owned by caller; scalar values replicated with residual diagnostics, reverse values local at parent xi; lazy cache preparation unchanged |
+| Rebuild/failure | Same early storage mutations and failure propagation; no new atomicity claim or global validity agreement |
+| Physical history and solver acceptance | Still M4/M5 responsibilities; manager neither computes physical laws nor decides acceptance |
+
+### Verification and deviations
+
+| Result | Check |
+|---|---|
+| PASS | Release build/link; independent original/new TUs; exactly 20 moved 2D/3D symbols in new object/executable and none in original object |
+| PASS | Nine source/structure checks: exact ten methods/two helpers, remaining manager, unchanged headers/other source/unit tests and baseline unity membership |
+| PASS | 834 assertions in 16 selected geometry/quadrature/projection/registry/restart cases per rank on both binaries, one/two ranks |
+| PASS | Matched composition/no-composition I_h, actual manager surface measure/mass/constant projection, remote/cell cache fixtures, one/two ranks |
+| PASS | New two-rank cold/warm fixture: one rebuild after consistent invalidation, zero on warm call; interpolation/support identical before/cold/warm and full emitted local values identical across binaries |
+| PASS | Coupled pressure/history and accepted-update rollback match preserved R5a1 fields/fingerprints, statistics, decisions and cache-build counts on one/two ranks |
+| PASS with existing limitation | Original cohesive checkpoint restores; exact phase-field/coupled decision trace and checkpoint bytes; known step-two nonconvergence unchanged |
+| NOT RUN | Debug, 3D runtime, exhaustive cache-lifecycle scenarios, full BP3 or unrelated frozen AMG/GMG reruns |
+
+All 115 matched comparisons pass; available deterministic values, solver decisions
+and cache/work counts have zero differences. No tolerances or physical parameters
+were changed. The new test reads existing timer counts, without production
+instrumentation. It verifies the two-rank lazy-preparation/reuse distinction,
+not global agreement for arbitrary local cache misses or every warm-path MPI call.
+Broader migration/reordering, equal-volume domain regeneration and empty-owner
+coverage remain gaps. No MPI correctness defect was demonstrated or repaired.
+
+A build-only accommodation is visible separately in CMake: the new TU joins the
+existing independent compilation list, preserving all baseline unity groups.
+Initial automatic regrouping exposed unchanged M2 `phase_field.cc`'s implicit
+include dependencies. An independent baseline compile reproduces those failures;
+no M2 source/include cleanup was bundled. All successful build outputs and the
+initial failure are retained. The runtime harness's omitted inherited I_h plugin
+was corrected after reference-only parameter-parse failures; the symbol checker
+was narrowed to actual manager symbols after counting an STL local-type symbol.
+Neither required a production or numerical change. The five candidate
+coupled/restart cases were also repeated with optional performance diagnostics
+disabled to match the reused baseline environment and optional MPI calls; initial
+outputs are preserved separately. All 18 recorded case environments now match.
+Sandbox MPI socket denials
+are preserved separately from actual test outcomes.
+
+[Commands, hashes and evidence](../../benchmarks/reconstructed_fault/refactoring_r5a2/README.md)
+record 39 expected build/runtime outcomes, 858 candidate source/header/unit files
+and 61 executed artifacts. Accepted binaries, original tests/checkpoint, prior
+qualification data and local temporary edits remain intact. R5a2 is uncommitted
+for review. Stop before another pass; recommended next bounded task is the
+Stokes-QP association inventory/cache-lifetime assessment only.
+
+
+## R5a2 — Particle-projection inventory and move proposal (no implementation)
+
+R5a1 is accepted and committed as `c3ce532be86765c7c9edcacb2f44377ff62820e1`.
+The [qualified baseline](../../benchmarks/reconstructed_fault/refactoring_r5a1/README.md#accepted-r5a1-baseline)
+is `build-refactor-r5a1/aspect-r5a1-qualified`, SHA256
+`4159f38bb530c97bed3fddb12009cd892b3428fb28c1e28530a230f050146ec6`.
+Its 857 source/header/unit-test hashes, 18 executed artifacts, 1,807 protected
+files and 11 checkpoint files were checked before committing. The repaired
+frozen-fixture evidence remains part of this baseline; no runtime was repeated.
+This selected task follows the R5a1 recommendation: inventory, cache-lifetime
+assessment and one move proposal only. Source, headers and tests remain unchanged.
+
+### One coherent move
+
+Propose moving ten complete `ReconstructedFaultManager` member definitions from
+`source/reconstructed_fault/manager.cc` to `manager_particle_projection.cc`:
+`particle_projection_cache_is_valid`, `rebuild_particle_projection_cache`,
+`fault_vertex_offsets`, `reduce_and_solve_projection_rhs`,
+`invalidate_particle_projection_cache`, `project_particle_properties`,
+`interpolate_property_at_particle_projections`, `project_particle_scalar`,
+`get_locally_owned_particle_fault_associations`, and
+`get_particle_projection_diagnostics`. Move their two exclusive anonymous
+helpers, `factor_tridiagonal` and `solve_tridiagonal_factors`, unchanged too.
+Use direct includes and explicit 2D/3D member instantiations as in R5a1.
+No new helper abstraction or cache record is proposed.
+
+Purpose: locate the complete generic particle-domain projection responsibility
+in one translation unit. Inputs are manager-owned fault geometry/half-widths
+and property schema, M1 particle domains/versions, locally owned particle
+identity/order/positions, fresh caller-selected particle properties or scalar
+samples, and the simulator communicator/timers. Outputs are cached associations
+and mass factors, replicated support diagnostics, selected generic nodal property
+writes, returned scalar nodal values/residuals, or returned local interpolated
+values. The dependencies become visible together; no new interface makes them
+explicit arguments and none of the existing manager coupling disappears.
+
+Leave geometry construction, registry, archive/restart rebuild, invalidation
+callers and timer construction in place. Leave Stokes-QP associations, bulk-source
+continuation, `manager_slip_rate.cc`, `boundary_contact_manager.cc` and
+`boundary_contact.cc` unchanged. Particle admission uses finite normal profiles;
+a bulk-source continuation association does not authorize surface quadrature.
+No empty future file, owner/layout/API change or domain-construction replacement.
+
+### Cache and publication inventory
+
+| Quantity | Owner / content / lifetime |
+|---|---|
+| Particle associations | Manager, rank-local; every owned parent's stable ID, position, full domain volume and active flag; admitted fault/segment/xi and ordered domain quadrature. Borrowed association reference/elements must be treated as expired after invalidation or rebuild. |
+| Projection systems | Manager, replicated after reduction; Q1 diagonal/off-diagonal and cached LDL-transpose factors, shared across projected components. No particle property/phase/material values cached. |
+| Projection diagnostics | Manager, replicated support per vertex and contributing-parent count per fault. Const accessor does not ensure validity; contents are cleared/replaced by invalidation/rebuild. |
+| Fresh values and RHS | Current particle properties or caller scalar map, sampled as parent P0 values over domain quadrature; component-major packed RHS reduced then solved with cached factors. Property projection publishes only selected registry components after solves. |
+| Returned values | Scalar projection returns replicated nodal values and residual diagnostics without storage; reverse interpolation returns a local stable-ID map using current fault properties at parent-center xi. Callers own both returned values. |
+| Keys and persistence | Manager owns validity flag, metadata/domain versions and per-fault geometry versions. None of these caches/factors is checkpointed; deserialization invalidates them. |
+
+Validity is a local predicate with the existing exact comparisons: flag,
+projection metadata version, fault-count/version vector, domains requested,
+domain geometry version, owned-particle count, and each ordered entry's ID,
+position and domain volume. It also checks the final traversal count. It has
+no separate mesh/DoF-generation key or direct domain-shape hash. Domain-generation
+version changes cover regenerated shapes even when volumes are unchanged;
+property-value changes alone do not invalidate geometry. This is distinct from
+M4's I_h value-cache decision and from the Stokes-QP cell/quadrature cache.
+
+Initial reconstruction, fault addition and `rebuild_after_deserialization()`
+perform the existing invalidations; geometry/metadata updates retain their order.
+The invalidator clears the flag, associations, systems, diagnostics and fault
+version vector. Particle-domain generation increments its version before the
+local particle loop, including on an empty rank. The particle manager generates
+domains at initialization, after advection/property/ghost updates and on resume.
+The reconstructed-fault manager's refinement/resume/deformation signal callbacks
+explicitly invalidate Stokes-QP/contact caches, not this particle cache. Particle
+reuse instead depends on the keys above and upstream domain lifecycle; do not
+claim a new mesh-signal invalidation policy.
+
+Rebuild validates configuration, clears/resizes storage, constructs local parent
+associations and full-domain quadrature (including periodic fragments), and
+accumulates Q1 mass/support. It retains existing full-parent coverage checks and
+quadrature order. A minimum failing-rank reduction and conditional error broadcast
+precede the packed mass/support/count sum. Global support validation and factor
+construction precede recording versions and setting valid. The optional performance
+path then performs its five work-counter sums. Empty ranks contribute zero local
+data and must participate in the same collectives. This is not atomic publication:
+storage is mutated before all checks complete; moving writes or adding rollback
+would change the existing exception behavior.
+
+Both projection paths reduce RHS values before solves. Scalar input failures use
+minimum-rank/broadcast propagation; property projection has local pre-reduction
+validation, including nonfinite inputs. Scalar residual diagnostics add their
+existing per-fault sum/max reductions. Preserve these differences and all ordering.
+Cache validity itself has no all-rank agreement reduction: callers must enter
+collective rebuild consistently. Normal domain regeneration supplies a common
+version change; rank-local invalidation or particle-only changes need dedicated
+coverage. This is a contract/coverage risk, not a demonstrated production failure
+or authorization to add a collective reuse test.
+
+### Specification discrepancy requiring clarification
+
+`current_design.md` section 17 and `specification.tex`'s reverse-local-operation
+paragraph state that reverse interpolation performs no new geometric search or
+MPI communication. The public `interpolate_property_at_particle_projections()`
+in `manager.cc` first tests validity and calls the collective geometric rebuild
+on a miss. Only its valid-cache evaluation path has the stated property.
+No source or specification correction is included here. Before implementing the
+move, resolve whether the specification describes that prepared-cache path
+(then clarify its scope explicitly), or requires the entire public call to be
+local (then a separately reviewed lifecycle/interface change is needed).
+The proposed move preserves the current behavior; it must not silently choose
+between these contracts.
+
+### Focused verification proposed after contract clarification
+
+| Check | Existing evidence / required use |
+|---|---|
+| Structural build | Byte-exact ten methods/two helpers; remaining-manager/header/archive/callers unchanged; full build/link and independent original/new TUs, unique 2D/3D definitions. Compilation does not qualify unsupported 3D projection runtime. |
+| Geometry and algebra | `unit_tests/reconstructed_fault.cc` normal-profile/domain-quadrature, support/measure and tridiagonal/MPI projection cases. The latter use the utility solver/hand-assembled systems, so are not direct manager cache coverage. |
+| Actual manager projection | `phase_field_fault_ih`, `_mpi`, `_no_composition`: mapped composition, uninitialized-property interpolation rejection, projected-vs-parent initial cohesive values. `phase_field_fault_surface_adiabatic_pressure` observer checks cached domain measure, mass and constant scalar projection; use one/two ranks. |
+| Cache lifecycle | Existing `phase_field_fault_ih_cache` exercises material I_h reuse/invalidation and some explicit manager invalidations, not a full manager cache-lifetime suite. Dedicated unchanged-geometry reuse, equal-volume domain regeneration, migration/order changes and empty-owner coverage are gaps; assess a small test-only observer before claiming coverage, without new production getters/counters. |
+| Caller/restart equivalence | One short affected coupled pressure/history and rollback comparison on one/two ranks against R5a1; preserved cohesive restart and existing restored-state assertions. Compare fields/fingerprints, solver decisions and available cache/work outputs exactly at matched ranks, excluding time/paths; retain known step-two nonconvergence. |
+
+Callers inspected include M4 normalization's composition projection (also on an
+I_h hit), history initialization/update and reverse sampling, and M5 surface
+assembly's association access. These retain physical-value computation, sampling
+and acceptance responsibilities. No full R4 campaign, scientific retuning,
+projection/cache implementation or surface-system change was performed.
+
+Status: R5a1 commit and R5a2 source/caller/specification assessment complete;
+all four baseline manifests still match after the documentation edits, and
+`git diff --check` passes. Implementation pauses at the documented contract
+discrepancy. Next bounded task:
+resolve the reverse-interpolation cold-cache contract, then select the single
+move and focused verification above. Do not bundle a cache-policy correction.
+
+
 ## R5a1 — Manager slip-rate lifecycle organization (complete for review)
 
 Accepted fixture repair committed first as `aea2a80b05a2fa01f3f23916163f24cf667b66c2`,

@@ -602,11 +602,12 @@ configure_file(
 
 file(GLOB_RECURSE ASPECT_SOURCE_FILES_CC CONFIGURE_DEPENDS "source/*.cc")
 
-# Keep the split material and reconstructed-fault solver implementations independently compiled,
+# Keep the split material, particle-projection and reconstructed-fault solver implementations independently compiled,
 # including their explicit 2D/3D member instantiations.
 set_source_files_properties(
   source/material_model/phase_field_fault/constitutive.cc
   source/material_model/phase_field_fault/history.cc
+  source/reconstructed_fault/manager_particle_projection.cc
   source/simulator/solver/reconstructed_fault_stokes.cc
   PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE SKIP_PRECOMPILE_HEADERS TRUE)
 list(REMOVE_ITEM  ASPECT_SOURCE_FILES_CC ${CMAKE_CURRENT_SOURCE_DIR}/source/main.cc)

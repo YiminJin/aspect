@@ -1,14 +1,68 @@
 # Phase-field / RSF current status
 
-## R5a1 accepted baseline; R5a2 inventory selected
+## R5a accepted; R5b1 selected
 
-The accepted R5a1 source, guidance and verification harness are saved together
-after fixture commit `aea2a80b0`. Use `build-refactor-r5a1/aspect-r5a1-qualified`
+R5a1 is committed as `c3ce532be`; accepted R5a2 is saved by the commit containing
+this entry. Use `build-refactor-r5a2/aspect-r5a2-qualified` and the
+[accepted baseline record](../../benchmarks/reconstructed_fault/refactoring_r5a2/README.md#accepted-r5a-baseline).
+All source/artifact/protection/checkpoint and local temporary-file hashes match.
+The user's active selection is R5b1: inventory the surface implementation, then
+move the coherent backend group with private records and lifecycle preserved.
+Stokes-QP manager work and R5b2 remain outside this task.
+
+
+## R5a2 particle-projection move complete for review
+
+Reference is accepted R5a1 `c3ce532be` and its qualified executable. The user
+confirmed the reverse-interpolation contract applies to a valid cache. Both
+specifications now explicitly allow collective lazy preparation on a miss and
+require consistent rank entry; local validity does not establish global agreement.
+
+Ten manager methods and two exclusive helpers moved byte-for-byte into
+`manager_particle_projection.cc`. Owner/API/layout, checkpoint, cache keys,
+measures, MPI and publication order are unchanged. The new TU uses the existing
+independent-build mechanism to preserve baseline unity groups; no M1/M2 source
+change. Stokes-QP associations and source continuation remain in place.
+
+Release/independent builds, 20 unique 2D/3D symbols and nine source checks pass.
+All 115 matched comparisons pass, including one/two-rank projection/material,
+cache, coupled-history/rollback and preserved restart checks. Selected units
+pass 834 assertions in 16 cases per rank on both binaries. The added two-rank
+cold/warm test records one rebuild then zero, with exact values and support.
+The known cohesive step-two nonconvergence is unchanged. Broader cache-lifecycle
+gaps remain recorded; no demonstrated MPI correctness defect or numerical fix.
+
+Candidate: `build-refactor-r5a2/aspect-r5a2-qualified`, SHA256
+`8f696bedb006147c564f4146b96f765e88b9cd11f68f3fb120c5f0c222a1bf27`.
+See [review](refactor_review.md#r5a2--particle-projection-move-complete-for-review)
+and [evidence](../../benchmarks/reconstructed_fault/refactoring_r5a2/README.md)
+for the initial unity dependency/harness failures and successful checks. Local
+edits and reference evidence are preserved. Uncommitted for review; stop before
+another pass. Proposed next task: Stokes-QP association inventory/cache-lifetime
+assessment only. Entries below are historical, including the resolved contract
+question from the initial R5a2 inventory.
+
+
+## R5a1 committed; R5a2 inventory complete, contract clarification needed
+
+The accepted R5a1 source, guidance and verification harness are committed as
+`c3ce532be86765c7c9edcacb2f44377ff62820e1`, after fixture commit `aea2a80b0`. Use `build-refactor-r5a1/aspect-r5a1-qualified`
 and the manifest fingerprints in the [accepted baseline](../../benchmarks/reconstructed_fault/refactoring_r5a1/README.md#accepted-r5a1-baseline).
 All qualified source/artifact and protection hashes match; no runtime campaign
 was repeated. Local temporary review files remain excluded. The user's next
 selection follows the recommendation: particle-projection inventory, cache-
 lifetime assessment and one coherent move proposal only, before implementation.
+
+The [R5a2 inventory](refactor_review.md#r5a2--particle-projection-inventory-and-move-proposal-no-implementation)
+proposes moving ten particle-projection members and two exclusive helpers into
+`manager_particle_projection.cc`, preserving all storage, APIs and cache/MPI
+behavior. Stokes-QP associations and source continuation remain separate. No
+source was edited and no new runtime campaign was run. The assessment found a
+contract discrepancy: both specifications describe reverse interpolation as
+search/MPI-free, while its public method rebuilds collectively on a stale cache.
+Clarify this before implementation; no behavior or specification was silently
+changed. Cache-lifetime test gaps and the focused verification proposal are
+recorded in the review. Earlier entries below describe their original review state.
 
 
 ## R5a1 manager slip-rate organization complete for review

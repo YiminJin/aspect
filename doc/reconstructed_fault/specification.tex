@@ -1106,8 +1106,14 @@ field shall be returned as generic diagnostics.
 The manager shall also support the reverse local operation needed to evaluate
 surface constitutive inputs at particles: Q1-interpolate a registered fault
 property at every active locally owned particle's cached fault coordinate and
-return the values keyed by stable particle ID. This operation performs no new
-geometric search and no MPI communication.
+return the values keyed by stable particle ID. With an already valid
+particle-projection cache, this interpolation performs no new geometric search
+and no MPI communication. The public method may first rebuild an invalid cache;
+this lazy preparation involves geometric work and MPI collectives. Ranks must
+enter the collective rebuild consistently. The existing local validity
+predicate does not enforce global agreement on the rebuild decision. This
+clarification preserves the existing cache validity rules, MPI ordering, and
+public interface.
 
 \subsection{MPI assembly}
 Each rank assembles only contributions from its locally owned particles:

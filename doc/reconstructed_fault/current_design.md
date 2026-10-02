@@ -577,8 +577,13 @@ volume-weighted RMS and maximum projection residuals so a material model can
 diagnose assumptions such as profile-uniform initial cohesive traction.
 The reverse local operation Q1-interpolates a registered fault property at
 every active locally owned particle's cached fault coordinate and returns the
-values keyed by stable particle ID. It performs neither a new geometry search
-nor MPI communication.
+values keyed by stable particle ID. When the particle-projection cache is already
+valid, this interpolation performs neither a new geometric search nor MPI
+communication. The public method may first rebuild an invalid cache; that lazy
+preparation performs geometric work and MPI collectives. Ranks must enter the
+collective rebuild consistently. The existing validity predicate is local and
+does not enforce global agreement on whether to rebuild. This distinction does
+not change cache validity rules, collective ordering, or the public interface.
 
 ## 18. Distinguished fault slip-rate field
 

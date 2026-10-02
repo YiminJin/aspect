@@ -1,0 +1,14 @@
+# MPI: 2
+# Enable if: ASPECT_WITH_VORO
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_ih.prm
+
+# Same initialization budget as the existing normalization cache fixture.
+subsection Solver parameters
+  subsection Phase field solver parameters
+    set Max nonlinear iterations = 50
+  end
+end
+
+subsection Postprocess
+  set List of postprocessors = particles, verify phase field fault I h, verify particle projection cold warm cache
+end

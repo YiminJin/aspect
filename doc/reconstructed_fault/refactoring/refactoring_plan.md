@@ -25,10 +25,14 @@ fixture repair is accepted as `aea2a80b0`: both immutable executables reach the
 full pass marker with exact matched directions, state and counters (226 checks).
 It uses only existing default selection and test changes, preserving production
 AMG while constructing the hierarchy for the explicit GMG probe. No production
-interface change was needed. R5a1 slip-rate lifecycle organization is complete
-for review: 16 byte-exact method moves, independent 2D/3D compilation, 20,130 assertions per rank and 31
+interface change was needed. R5a1 slip-rate lifecycle organization is accepted
+and committed as `c3ce532be`: 16 byte-exact method moves, independent 2D/3D compilation, 20,130 assertions per rank and 31
 matched checks pass. The known cohesive restart nonconvergence is unchanged.
-Projection/cache and surface-system implementation remain unselected.
+R5a2 is complete for review: both specifications clarify the prepared-cache
+reverse-interpolation contract; ten methods/two helpers moved unchanged, with
+independent 2D/3D builds and 115 matched checks passing. Two-rank cold/warm reuse
+is covered; broader cache-lifecycle gaps remain recorded. Other cache and
+surface-system implementation remain unselected.
 Historical outcomes remain in [the rolling review](../refactor_review.md).
 Module boundaries and frozen M1/M2 scope are defined in [refactoring.md](../refactoring.md).
 
@@ -376,7 +380,7 @@ Follow [revised R5 instructions](codex_R5_instructions.md). R4c `fa6013678` and
 the separate fixture repair `aea2a80b0` are accepted; their executable/plugins,
 inputs and manifests are the baseline. Do not rerun unrelated R4 checks.
 
-- **R5a1 (complete for review):** inventory manager responsibilities and slip-rate state;
+- **R5a1 (accepted, `c3ce532be`):** inventory manager responsibilities and slip-rate state;
   move complete lifecycle definitions/exclusive helpers into
   `manager_slip_rate.cc`. Preserve owner/API/layout, arithmetic, validation and
   rollback order, exact absolute bound-contact values, separate validated
@@ -384,10 +388,15 @@ inputs and manifests are the baseline. Do not rerun unrelated R4 checks.
   geometry/registry/archive/rebuild operations in place. Build and independently
   compile 2D/3D; verify existing lifecycle, prescribed/restart and small one/two-
   rank coupled/rollback cases. Stop for review after this pass.
-- **R5a2 (later selection):** choose one coherent particle-projection or Stokes-QP
-  group. First document contents, validity inputs, invalidation order, returned
-  reference lifetime and MPI behavior. Keep the two measures/caches distinct,
-  preserve projection-domain construction and existing boundary-contact files.
+- **R5a2 (particle-projection move complete for review):** the selected
+  particle group comprises ten manager members and two exclusive factor/solve
+  helpers, proposed for `manager_particle_projection.cc`. Contents, exact keys,
+  invalidation, references, MPI and coverage gaps are recorded in the rolling
+  review. Clarify both specifications as approved: warm interpolation is local;
+  cold preparation can rebuild collectively, without an all-rank validity
+  decision. Move unchanged bodies and verify independently, with a two-rank
+  cold/warm regression. Keep Stokes-QP associations distinct and
+  preserve domain construction, owner/API and existing boundary-contact files.
 - **R5b1 (later selection):** inventory both surface assembly paths, dispatcher,
   residual/linearization lifecycle and consumers before choosing a move. Keep
   private assembly/linearization records private and retain the concrete material
@@ -502,10 +511,11 @@ retain the driver with the two focused operations. R4b is committed as
 `983d57e28`. R4c is accepted and committed as `fa6013678`, with its qualified
 baseline recorded. The separately repaired historical frozen AMG/GMG comparison
 now passes on the pre/post-R4c executables with all 226 checks. The fixture
-repair is committed as `aea2a80b0`. R5a1 is complete and
-uncommitted for review, with 16 exact definition moves and focused build,
-lifecycle, restart and one/two-rank coupled/rollback checks passing. No projection/
-cache or surface-system implementation has begun.
+repair is committed as `aea2a80b0`. R5a1 is accepted and
+committed as `c3ce532be`, with 16 exact definition moves and focused build,
+lifecycle, restart and one/two-rank coupled/rollback checks passing. No surface-system implementation has begun. R5a2 particle-projection movement is
+complete for review with the approved prepared-cache clarification, independent
+builds and 115 matched checks, including two-rank cold/warm coverage.
 Further R4b operations and later stages require separate selection. Historical R1 fixture failures,
 Stage-J pressure incompatibility and cohesive step-two nonconvergence remain
 separate from refactoring equivalence. See CURRENT_STATUS.md and the rolling

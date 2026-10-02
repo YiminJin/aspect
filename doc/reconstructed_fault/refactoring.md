@@ -59,24 +59,40 @@ to change the reference algorithm, parameters, or expected test results.
 
 ## 2. Preserve responsibility boundaries
 
-### Selected module scope (R5a1 manager slip-rate lifecycle)
+### Selected module scope (R5a2 particle-projection movement)
 
-R4 is accepted: R4c `fa6013678`, followed by the accepted frozen AMG/GMG fixture
-repair `aea2a80b0`. Reuse their qualified artifacts and evidence. Follow
-[revised R5 instructions](refactoring/codex_R5_instructions.md); only R5a1 is
-selected. Move the complete manager slip-rate definitions with unchanged bodies,
-API, owner, data layout, validation order and exception specifications. Keep
-geometry sizing, generic registration, archive save/load and deserialization
-rebuild in place, including the R3 transient prescribed-map sizing fix.
+R5a1 `c3ce532be` and its qualified executable/manifests are the reference,
+including the accepted R4 fixture repair. The user approved the
+[ten-member/two-helper proposal](refactor_review.md#r5a2--particle-projection-inventory-and-move-proposal-no-implementation)
+and clarified that the search/MPI-free reverse-interpolation contract applies
+only with an already valid cache. Record this clarification in both design
+specifications separately from the mechanical source movement.
 
-Record the state readers/writers/initialization/reset/checkpoint table before
-moving and verify it afterward. Preserve exact absolute trial values, separate
-trial and whole-solve rollback, caller-supplied prescribed-rate reattachment,
-and validation before the existing noexcept terminal copy. Numerical lower-bound
-policy and acceptance remain with M4/M5. No state-machine framework or new state
-struct, ownership transfer, projection/cache move or surface-system change is
-part of this pass. Independently compile moved methods and verify 2D/3D symbols
-without changing existing unity groups or unrelated build settings.
+Move the complete definitions unchanged into `manager_particle_projection.cc`.
+Retain owner/API/layout, existing domain construction, exact cache keys, measures,
+component mapping, validation/publication order and collectives. Leave Stokes-QP
+associations, bulk-source continuation and already extracted files unchanged.
+Compile original/new TUs independently with unique 2D/3D definitions. Keep the
+new TU outside unity/PCH using the existing per-source mechanism so adding it
+does not alter the baseline unity groups or require unrelated M2 include fixes.
+
+The public reverse-interpolation method retains lazy preparation of invalid
+caches. Callers must arrange consistent rank participation in collective rebuild;
+the local validity predicate does not establish global agreement. Do not add a
+collective, change ordering or fix asymmetric property/scalar error propagation
+within this pass. Any demonstrated MPI defect must be reported separately.
+
+Run focused projection/material-caller checks and matched one/two-rank comparisons,
+including the small two-rank cold/warm check with existing timer counts. Keep
+broader cache-lifetime coverage gaps recorded; material I_h cache tests are not
+a complete manager-cache suite. Stop after verification, before another manager
+or surface-system pass. No ownership/interface redesign is authorized.
+
+The accepted R5a1 contracts remain fixed: exact absolute trial values, separate
+trial and whole-solve rollback, caller-reapplied prescribed conditions, the R3
+restart transient sizing fix and validation before the noexcept terminal copy.
+Geometry sizing, generic registry, archive and restart rebuild remain in place;
+M4/M5 retain physical bounds and acceptance responsibility.
 
 | Module | Owns | Refactoring scope |
 |---|---|---|
