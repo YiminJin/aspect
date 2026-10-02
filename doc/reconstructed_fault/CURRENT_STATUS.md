@@ -1560,3 +1560,26 @@ Recovery validation is limited to reading source/history/reports, inspecting
 saved PRMs/logs/CSV summaries, hashing selected artifacts, checking document
 links/whitespace, and verifying preservation of the pre-existing tracked diff.
 No numerical tests were rerun because this task changes documentation only.
+
+## Post-R6 particle replenishment experiment (2026-10-02)
+
+The separately authorized 12/24 study is recorded in
+[the local experiment report](../../benchmarks/reconstructed_fault/particle_replenishment/README.md).
+It uses unchanged R6 closure `9980ff301` and the qualified R6b executable/plugin;
+all 865 baseline source/header hashes match. Native regular 4×4 and fully random
+seeds 5432/5433/5434 exercise real addition/removal and Q2 transfer. Constant and
+unlimited affine histories remain accurate; native limiting controls curved
+extrapolation but reduces affine accuracy near inflow. Random BP3 startup
+produces negative H with Maxwell-only limiting; explicitly limiting H as well
+makes both short coupled generator cases pass. No production source changed.
+
+A labeled internal-cell-crossing fixture passes on one/two ranks and across
+serial checkpoints before/after replenishment. Rejected-step restoration returns
+particle/ID data exactly, but its smaller retry differs from the direct run:
+particle-management RNG is not restored. RNG is also absent from checkpoints;
+these passing short restarts do not establish RNG preservation. The parsed
+regular 12/24 include is **not qualified for server continuation**. Proposed
+next bounded task: correct RNG rollback and establish compatible per-rank
+checkpoint handling, then repeat the recorded event/retry/restart checks. No
+server job or R7 work was performed. The historical 142.93-year failure remains
+unproved by this experiment.

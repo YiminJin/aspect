@@ -1,0 +1,116 @@
+set Additional shared libraries = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_replenishment/build/libreplenishment.release.so
+# Verify that MaxwellStress initializes every independent tensor component
+# from its explicitly mapped initial compositional field.
+
+set Dimension                    = 2
+set End time                     = 4.0
+set Maximum time step = 0.2
+set Maximum first time step = 0.2
+set Use years instead of seconds = false
+set Nonlinear solver scheme      = single Advection, no Stokes
+
+subsection Geometry model
+  set Model name = box
+ subsection Box
+ set X extent = 16
+ set Y extent = 8
+ set X repetitions = 16
+ set Y repetitions = 8
+ end
+end
+
+subsection Prescribed Stokes solution
+  set Model name = function
+  subsection Velocity function
+    set Function expression = 1; 0.6
+  end
+  subsection Pressure function
+    set Function expression = 0
+  end
+end
+
+subsection Gravity model
+  set Model name = vertical
+  subsection Vertical
+    set Magnitude = 0
+  end
+end
+
+subsection Initial temperature model
+  set Model name = function
+  subsection Function
+    set Function expression = 293
+  end
+end
+
+subsection Compositional fields
+  set Number of fields               = 9
+  set Names of fields                = tau_xx, tau_yy, tau_xy, affine_xx, affine_yy, affine_xy, curved_xx, curved_yy, curved_xy
+  set Types of fields                = stress, stress, stress, generic, generic, generic, generic, generic, generic
+  set Compositional field methods    = particles
+  set Mapped particle properties     = tau_xx:maxwell stress[0], tau_yy:maxwell stress[1], tau_xy:maxwell stress[2], affine_xx:function[0], affine_yy:function[1], affine_xy:function[2], curved_xx:function[3], curved_yy:function[4], curved_xy:function[5]
+end
+
+subsection Initial composition model
+  set Model name = function
+  subsection Function
+    set Variable names      = x,y
+    set Function expression = 1e8; -1e8; .5e8; 1e8*(1+.02*x+.03*y); -(1e8*(1+.02*x+.03*y)); .5*(1e8*(1+.02*x+.03*y)); 1e8*(1+.1*sin(pi*x/4)*cos(pi*y/4)); -(1e8*(1+.1*sin(pi*x/4)*cos(pi*y/4))); .5*(1e8*(1+.1*sin(pi*x/4)*cos(pi*y/4)))
+  end
+end
+
+subsection Material model
+  set Model name = phase field fault
+  subsection Phase field fault
+    set Friction law                  = rate state
+    set Maximum viscosity              = 1e31
+    set Reference viscosities          = 1e30
+    set Elastic shear moduli           = 1e10
+    set Initial time step              = 1e-6
+    set Radiation damping coefficients = 1e7
+  end
+end
+
+subsection Mesh refinement
+  set Initial global refinement          = 0
+  set Initial adaptive refinement        = 0
+  set Time steps between mesh refinement = 0
+end
+
+subsection Particles
+  set Particle generator name     = reference cell
+  set List of particle properties = maxwell stress, function
+  set Load balancing strategy = remove and add particles
+  set Minimum particles per cell = 12
+  set Maximum particles per cell = 24
+  set Particle addition algorithm = point density function
+  set Particle removal algorithm = point density function
+  set Interpolation scheme = observed native LLS
+  subsection Function
+    set Number of components = 6
+    set Function expression = 1e8*(1+.02*x+.03*y); -(1e8*(1+.02*x+.03*y)); .5*(1e8*(1+.02*x+.03*y)); 1e8*(1+.1*sin(pi*x/4)*cos(pi*y/4)); -(1e8*(1+.1*sin(pi*x/4)*cos(pi*y/4))); .5*(1e8*(1+.1*sin(pi*x/4)*cos(pi*y/4)))
+  end
+  subsection Interpolator
+    subsection Linear least squares
+      set Use linear least squares limiter = false
+      set Use boundary extrapolation = false
+    end
+  end
+  subsection Generator
+    subsection Reference cell
+      set Number of particles per cell per direction = 4
+    end
+  end
+end
+
+subsection Postprocess
+  set List of postprocessors = particles, replenishment observer
+  subsection Particles
+    set Data output format = none
+  end
+end
+
+subsection Discretization
+ set Composition polynomial degree = 2
+ set Use discontinuous composition discretization = false
+end

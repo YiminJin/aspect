@@ -1,0 +1,3 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_replenishment/inputs/coupled-base.prm
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_replenishment/inputs/proposed-bp3-12-24.inc.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_replenishment/output-candidate-parse

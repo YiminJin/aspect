@@ -1,0 +1,18 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_replenishment/inputs/coupled-base.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_replenishment/output-crossing-resume
+subsection Particles
+ set Particle generator name = crossing reference cell
+end
+subsection Postprocess
+ subsection Coupled replenishment
+  set Track birth audit = true
+ end
+end
+set Resume computation = true
+subsection Particles
+ subsection Interpolator
+  subsection Observed native LLS
+   set Limit crack driving history = true
+  end
+ end
+end

@@ -1,0 +1,12 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_replenishment/inputs/coupled-base.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_replenishment/output-coupled-random-5433
+subsection Particles
+ set Particle generator name = random uniform
+ subsection Generator
+  subsection Random uniform
+   set Number of particles = 30000
+   set Random cell selection = true
+   set Random number seed = 5433
+  end
+ end
+end

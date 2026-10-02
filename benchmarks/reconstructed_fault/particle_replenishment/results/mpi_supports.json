@@ -1,0 +1,27 @@
+{
+  "common_support_positions": 7701,
+  "shared_piece_occurrences": 83,
+  "shared_max_abs": {
+    "velocity": 0,
+    "p": 0,
+    "T": 0,
+    "tau_xx": 0,
+    "tau_yy": 0,
+    "tau_xy": 0,
+    "theta_initial": 0,
+    "strengthening": 0,
+    "phase_field": 0
+  },
+  "serial_mpi_max_abs": {
+    "velocity": 1.0047518372857667e-14,
+    "p": 0.00015259161591529846,
+    "T": 0.0,
+    "tau_xx": 0.000145710539072752,
+    "tau_yy": 0.00024812889751046896,
+    "tau_xy": 0.00010533211752772331,
+    "theta_initial": 0.0,
+    "strengthening": 0.0,
+    "phase_field": 0.0
+  },
+  "precision": "Float32 visualization, not full-precision DoF dumps"
+}

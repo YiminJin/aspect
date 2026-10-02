@@ -1,0 +1,9 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_replenishment/inputs/base.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_replenishment/output-regular-limited
+subsection Particles
+ subsection Interpolator
+ subsection Observed native LLS
+ set Limit histories = true
+ end
+ end
+end

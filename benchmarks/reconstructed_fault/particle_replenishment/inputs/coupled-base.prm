@@ -1,0 +1,31 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/refactoring_boundary/inputs/auto-bp3-base.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/refactoring_r6b/plugin-build/bp3/libbp3_restore_150x50.release.so, $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_replenishment/build/libreplenishment.release.so, $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_replenishment/build/libcoupled_replenishment.release.so
+set End time = 200
+subsection Postprocess
+ set List of postprocessors = reconstructed fault BP3, particles, reconstructed faults, BP3 output complete, BP3 restored monitor, coupled replenishment observer
+ subsection BP3
+  set Audit full state every step = false
+  set Last accepted step = 2
+ end
+ subsection Particles
+  set Data output format = none
+ end
+end
+subsection Particles
+ set Load balancing strategy = remove and add particles
+ set Minimum particles per cell = 12
+ set Maximum particles per cell = 24
+ set Particle addition algorithm = point density function
+ set Particle removal algorithm = point density function
+ set Interpolation scheme = observed native LLS
+ subsection Generator
+  subsection Reference cell
+   set Number of particles per cell per direction = 4
+  end
+ end
+ subsection Interpolator
+  subsection Observed native LLS
+   set Limit histories = true
+  end
+ end
+end

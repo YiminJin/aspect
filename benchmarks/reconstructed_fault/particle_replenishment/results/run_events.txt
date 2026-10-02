@@ -1,0 +1,676 @@
+
+regular-limited-measured-np1
+Test LLS runtime history mask: true,true,true,true,true,true,true,true,true
+*** Timestep 0:  t=0 seconds, dt=0 seconds
+*** Timestep 1:  t=0.2 seconds, dt=0.2 seconds
+*** Timestep 2:  t=0.4 seconds, dt=0.2 seconds
+*** Timestep 3:  t=0.6 seconds, dt=0.2 seconds
+*** Timestep 4:  t=0.8 seconds, dt=0.2 seconds
+*** Timestep 5:  t=1 seconds, dt=0.2 seconds
+*** Timestep 6:  t=1.2 seconds, dt=0.2 seconds
+*** Timestep 7:  t=1.4 seconds, dt=0.2 seconds
+*** Timestep 8:  t=1.6 seconds, dt=0.2 seconds
+*** Timestep 9:  t=1.8 seconds, dt=0.2 seconds
+*** Timestep 10:  t=2 seconds, dt=0.2 seconds
+*** Timestep 11:  t=2.2 seconds, dt=0.2 seconds
+*** Timestep 12:  t=2.4 seconds, dt=0.2 seconds
+*** Timestep 13:  t=2.6 seconds, dt=0.2 seconds
+*** Timestep 14:  t=2.8 seconds, dt=0.2 seconds
+*** Timestep 15:  t=3 seconds, dt=0.2 seconds
+*** Timestep 16:  t=3.2 seconds, dt=0.2 seconds
+*** Timestep 17:  t=3.4 seconds, dt=0.2 seconds
+*** Timestep 18:  t=3.6 seconds, dt=0.2 seconds
+*** Timestep 19:  t=3.8 seconds, dt=0.2 seconds
+*** Timestep 20:  t=4 seconds, dt=0.2 seconds
+| Total wallclock time elapsed since start     |      6.29s |            |
+| Particles: Advect                |        44 |      0.05s |       0.8% |
+| Particles: Copy                  |        21 |    0.0101s |      0.16% |
+| Particles: Generate              |         1 |  0.000143s |         0% |
+| Particles: Initialization        |         1 |  0.000248s |         0% |
+| Particles: Initialize properties |         1 |     0.013s |      0.21% |
+| Particles: Interpolate           |        21 |     0.163s |       2.6% |
+| Particles: Sort                  |        44 |   0.00592s |         0% |
+-- Total wallclock time elapsed including restarts: 6s
+
+regular-measured-np1
+*** Timestep 0:  t=0 seconds, dt=0 seconds
+*** Timestep 1:  t=0.2 seconds, dt=0.2 seconds
+*** Timestep 2:  t=0.4 seconds, dt=0.2 seconds
+*** Timestep 3:  t=0.6 seconds, dt=0.2 seconds
+*** Timestep 4:  t=0.8 seconds, dt=0.2 seconds
+*** Timestep 5:  t=1 seconds, dt=0.2 seconds
+*** Timestep 6:  t=1.2 seconds, dt=0.2 seconds
+*** Timestep 7:  t=1.4 seconds, dt=0.2 seconds
+*** Timestep 8:  t=1.6 seconds, dt=0.2 seconds
+*** Timestep 9:  t=1.8 seconds, dt=0.2 seconds
+*** Timestep 10:  t=2 seconds, dt=0.2 seconds
+*** Timestep 11:  t=2.2 seconds, dt=0.2 seconds
+*** Timestep 12:  t=2.4 seconds, dt=0.2 seconds
+*** Timestep 13:  t=2.6 seconds, dt=0.2 seconds
+*** Timestep 14:  t=2.8 seconds, dt=0.2 seconds
+*** Timestep 15:  t=3 seconds, dt=0.2 seconds
+*** Timestep 16:  t=3.2 seconds, dt=0.2 seconds
+*** Timestep 17:  t=3.4 seconds, dt=0.2 seconds
+*** Timestep 18:  t=3.6 seconds, dt=0.2 seconds
+*** Timestep 19:  t=3.8 seconds, dt=0.2 seconds
+*** Timestep 20:  t=4 seconds, dt=0.2 seconds
+| Total wallclock time elapsed since start     |       5.1s |            |
+| Particles: Advect                |        44 |    0.0205s |       0.4% |
+| Particles: Copy                  |        21 |   0.00328s |         0% |
+| Particles: Generate              |         1 |  0.000136s |         0% |
+| Particles: Initialization        |         1 |  0.000272s |         0% |
+| Particles: Initialize properties |         1 |  0.000888s |         0% |
+| Particles: Interpolate           |        21 |     0.159s |       3.1% |
+| Particles: Sort                  |        44 |   0.00514s |       0.1% |
+-- Total wallclock time elapsed including restarts: 5s
+
+random-5433-limited-measured-np1
+Test LLS runtime history mask: true,true,true,true,true,true,true,true,true
+*** Timestep 0:  t=0 seconds, dt=0 seconds
+*** Timestep 1:  t=0.2 seconds, dt=0.2 seconds
+*** Timestep 2:  t=0.4 seconds, dt=0.2 seconds
+*** Timestep 3:  t=0.6 seconds, dt=0.2 seconds
+*** Timestep 4:  t=0.8 seconds, dt=0.2 seconds
+*** Timestep 5:  t=1 seconds, dt=0.2 seconds
+*** Timestep 6:  t=1.2 seconds, dt=0.2 seconds
+*** Timestep 7:  t=1.4 seconds, dt=0.2 seconds
+*** Timestep 8:  t=1.6 seconds, dt=0.2 seconds
+*** Timestep 9:  t=1.8 seconds, dt=0.2 seconds
+*** Timestep 10:  t=2 seconds, dt=0.2 seconds
+*** Timestep 11:  t=2.2 seconds, dt=0.2 seconds
+*** Timestep 12:  t=2.4 seconds, dt=0.2 seconds
+*** Timestep 13:  t=2.6 seconds, dt=0.2 seconds
+*** Timestep 14:  t=2.8 seconds, dt=0.2 seconds
+*** Timestep 15:  t=3 seconds, dt=0.2 seconds
+*** Timestep 16:  t=3.2 seconds, dt=0.2 seconds
+*** Timestep 17:  t=3.4 seconds, dt=0.2 seconds
+*** Timestep 18:  t=3.6 seconds, dt=0.2 seconds
+*** Timestep 19:  t=3.8 seconds, dt=0.2 seconds
+*** Timestep 20:  t=4 seconds, dt=0.2 seconds
+| Total wallclock time elapsed since start     |      5.61s |            |
+| Particles: Advect                |        44 |    0.0205s |      0.37% |
+| Particles: Copy                  |        21 |   0.00343s |         0% |
+| Particles: Generate              |         1 |   0.00045s |         0% |
+| Particles: Initialization        |         1 |  0.000206s |         0% |
+| Particles: Initialize properties |         1 |  0.000814s |         0% |
+| Particles: Interpolate           |        21 |     0.128s |       2.3% |
+| Particles: Sort                  |        44 |   0.00616s |      0.11% |
+-- Total wallclock time elapsed including restarts: 6s
+
+random-5433-measured-np1
+*** Timestep 0:  t=0 seconds, dt=0 seconds
+*** Timestep 1:  t=0.2 seconds, dt=0.2 seconds
+*** Timestep 2:  t=0.4 seconds, dt=0.2 seconds
+*** Timestep 3:  t=0.6 seconds, dt=0.2 seconds
+*** Timestep 4:  t=0.8 seconds, dt=0.2 seconds
+*** Timestep 5:  t=1 seconds, dt=0.2 seconds
+*** Timestep 6:  t=1.2 seconds, dt=0.2 seconds
+*** Timestep 7:  t=1.4 seconds, dt=0.2 seconds
+*** Timestep 8:  t=1.6 seconds, dt=0.2 seconds
+*** Timestep 9:  t=1.8 seconds, dt=0.2 seconds
+*** Timestep 10:  t=2 seconds, dt=0.2 seconds
+*** Timestep 11:  t=2.2 seconds, dt=0.2 seconds
+*** Timestep 12:  t=2.4 seconds, dt=0.2 seconds
+*** Timestep 13:  t=2.6 seconds, dt=0.2 seconds
+*** Timestep 14:  t=2.8 seconds, dt=0.2 seconds
+*** Timestep 15:  t=3 seconds, dt=0.2 seconds
+*** Timestep 16:  t=3.2 seconds, dt=0.2 seconds
+*** Timestep 17:  t=3.4 seconds, dt=0.2 seconds
+*** Timestep 18:  t=3.6 seconds, dt=0.2 seconds
+*** Timestep 19:  t=3.8 seconds, dt=0.2 seconds
+*** Timestep 20:  t=4 seconds, dt=0.2 seconds
+| Total wallclock time elapsed since start     |      5.77s |            |
+| Particles: Advect                |        44 |     0.033s |      0.57% |
+| Particles: Copy                  |        21 |   0.00371s |         0% |
+| Particles: Generate              |         1 |  0.000327s |         0% |
+| Particles: Initialization        |         1 |  0.000233s |         0% |
+| Particles: Initialize properties |         1 |  0.000838s |         0% |
+| Particles: Interpolate           |        21 |     0.203s |       3.5% |
+| Particles: Sort                  |        44 |   0.00651s |      0.11% |
+-- Total wallclock time elapsed including restarts: 6s
+
+random-5434-limited-measured-np1
+Test LLS runtime history mask: true,true,true,true,true,true,true,true,true
+*** Timestep 0:  t=0 seconds, dt=0 seconds
+*** Timestep 1:  t=0.2 seconds, dt=0.2 seconds
+*** Timestep 2:  t=0.4 seconds, dt=0.2 seconds
+*** Timestep 3:  t=0.6 seconds, dt=0.2 seconds
+*** Timestep 4:  t=0.8 seconds, dt=0.2 seconds
+*** Timestep 5:  t=1 seconds, dt=0.2 seconds
+*** Timestep 6:  t=1.2 seconds, dt=0.2 seconds
+*** Timestep 7:  t=1.4 seconds, dt=0.2 seconds
+*** Timestep 8:  t=1.6 seconds, dt=0.2 seconds
+*** Timestep 9:  t=1.8 seconds, dt=0.2 seconds
+*** Timestep 10:  t=2 seconds, dt=0.2 seconds
+*** Timestep 11:  t=2.2 seconds, dt=0.2 seconds
+*** Timestep 12:  t=2.4 seconds, dt=0.2 seconds
+*** Timestep 13:  t=2.6 seconds, dt=0.2 seconds
+*** Timestep 14:  t=2.8 seconds, dt=0.2 seconds
+*** Timestep 15:  t=3 seconds, dt=0.2 seconds
+*** Timestep 16:  t=3.2 seconds, dt=0.2 seconds
+*** Timestep 17:  t=3.4 seconds, dt=0.2 seconds
+*** Timestep 18:  t=3.6 seconds, dt=0.2 seconds
+*** Timestep 19:  t=3.8 seconds, dt=0.2 seconds
+*** Timestep 20:  t=4 seconds, dt=0.2 seconds
+| Total wallclock time elapsed since start     |      4.86s |            |
+| Particles: Advect                |        44 |    0.0529s |       1.1% |
+| Particles: Copy                  |        21 |    0.0108s |      0.22% |
+| Particles: Generate              |         1 |  0.000403s |         0% |
+| Particles: Initialization        |         1 |  0.000268s |         0% |
+| Particles: Initialize properties |         1 |   0.00991s |       0.2% |
+| Particles: Interpolate           |        21 |     0.141s |       2.9% |
+| Particles: Sort                  |        44 |   0.00632s |      0.13% |
+-- Total wallclock time elapsed including restarts: 5s
+
+random-5434-measured-np1
+*** Timestep 0:  t=0 seconds, dt=0 seconds
+*** Timestep 1:  t=0.2 seconds, dt=0.2 seconds
+*** Timestep 2:  t=0.4 seconds, dt=0.2 seconds
+*** Timestep 3:  t=0.6 seconds, dt=0.2 seconds
+*** Timestep 4:  t=0.8 seconds, dt=0.2 seconds
+*** Timestep 5:  t=1 seconds, dt=0.2 seconds
+*** Timestep 6:  t=1.2 seconds, dt=0.2 seconds
+*** Timestep 7:  t=1.4 seconds, dt=0.2 seconds
+*** Timestep 8:  t=1.6 seconds, dt=0.2 seconds
+*** Timestep 9:  t=1.8 seconds, dt=0.2 seconds
+*** Timestep 10:  t=2 seconds, dt=0.2 seconds
+*** Timestep 11:  t=2.2 seconds, dt=0.2 seconds
+*** Timestep 12:  t=2.4 seconds, dt=0.2 seconds
+*** Timestep 13:  t=2.6 seconds, dt=0.2 seconds
+*** Timestep 14:  t=2.8 seconds, dt=0.2 seconds
+*** Timestep 15:  t=3 seconds, dt=0.2 seconds
+*** Timestep 16:  t=3.2 seconds, dt=0.2 seconds
+*** Timestep 17:  t=3.4 seconds, dt=0.2 seconds
+*** Timestep 18:  t=3.6 seconds, dt=0.2 seconds
+*** Timestep 19:  t=3.8 seconds, dt=0.2 seconds
+*** Timestep 20:  t=4 seconds, dt=0.2 seconds
+| Total wallclock time elapsed since start     |      6.31s |            |
+| Particles: Advect                |        44 |    0.0304s |      0.48% |
+| Particles: Copy                  |        21 |   0.00349s |         0% |
+| Particles: Generate              |         1 |  0.000399s |         0% |
+| Particles: Initialization        |         1 |  0.000158s |         0% |
+| Particles: Initialize properties |         1 |  0.000851s |         0% |
+| Particles: Interpolate           |        21 |     0.166s |       2.6% |
+| Particles: Sort                  |        44 |   0.00614s |         0% |
+-- Total wallclock time elapsed including restarts: 6s
+
+crossing-audit-original-measured-np1
+Test LLS runtime history mask: true,false,false,true,true,true
+*** Timestep 0:  t=0 seconds, dt=0 seconds
+      Fault linear solve: iterations=22, fresh=2.138352e+00, target=2.404252e+00
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.999990e-01, 1.612496e-02
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Fault linear solve: iterations=23, fresh=4.367135e-09, target=6.412027e-09
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 8.892820e-10, 1.906104e-08
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  2: 6.802612e-16, 1.172894e-14
+*** Snapshot /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_replenishment/output-crossing-audit-original/restart/01/ created!
+*** Timestep 1:  t=100 seconds, dt=100 seconds
+      Fault linear solve: iterations=20, fresh=5.364367e-03, target=9.276542e-03
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.999987e-01, 1.164529e-04
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Fault linear solve: iterations=25, fresh=1.715913e-12, target=5.366426e-12
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 5.782715e-10, 1.917596e-08
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  2: 4.439068e-18, 1.095463e-14
+An error occurred in line <90> of file </home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3/plugin/work_audit.cc> in function
+    Work replay changed inert H, geometry or completed I_h.
+
+random-5432-limited-measured-np1
+Test LLS runtime history mask: true,true,true,true,true,true,true,true,true
+*** Timestep 0:  t=0 seconds, dt=0 seconds
+*** Timestep 1:  t=0.2 seconds, dt=0.2 seconds
+*** Timestep 2:  t=0.4 seconds, dt=0.2 seconds
+*** Timestep 3:  t=0.6 seconds, dt=0.2 seconds
+*** Timestep 4:  t=0.8 seconds, dt=0.2 seconds
+*** Timestep 5:  t=1 seconds, dt=0.2 seconds
+*** Timestep 6:  t=1.2 seconds, dt=0.2 seconds
+*** Timestep 7:  t=1.4 seconds, dt=0.2 seconds
+*** Timestep 8:  t=1.6 seconds, dt=0.2 seconds
+*** Timestep 9:  t=1.8 seconds, dt=0.2 seconds
+*** Timestep 10:  t=2 seconds, dt=0.2 seconds
+*** Timestep 11:  t=2.2 seconds, dt=0.2 seconds
+*** Timestep 12:  t=2.4 seconds, dt=0.2 seconds
+*** Timestep 13:  t=2.6 seconds, dt=0.2 seconds
+*** Timestep 14:  t=2.8 seconds, dt=0.2 seconds
+*** Timestep 15:  t=3 seconds, dt=0.2 seconds
+*** Timestep 16:  t=3.2 seconds, dt=0.2 seconds
+*** Timestep 17:  t=3.4 seconds, dt=0.2 seconds
+*** Timestep 18:  t=3.6 seconds, dt=0.2 seconds
+*** Timestep 19:  t=3.8 seconds, dt=0.2 seconds
+*** Timestep 20:  t=4 seconds, dt=0.2 seconds
+| Total wallclock time elapsed since start     |      6.33s |            |
+| Particles: Advect                |        44 |    0.0447s |      0.71% |
+| Particles: Copy                  |        21 |   0.00641s |       0.1% |
+| Particles: Generate              |         1 |  0.000374s |         0% |
+| Particles: Initialization        |         1 |  0.000282s |         0% |
+| Particles: Initialize properties |         1 |    0.0209s |      0.33% |
+| Particles: Interpolate           |        21 |     0.147s |       2.3% |
+| Particles: Sort                  |        44 |    0.0065s |       0.1% |
+-- Total wallclock time elapsed including restarts: 6s
+
+random-5432-measured-np1
+*** Timestep 0:  t=0 seconds, dt=0 seconds
+*** Timestep 1:  t=0.2 seconds, dt=0.2 seconds
+*** Timestep 2:  t=0.4 seconds, dt=0.2 seconds
+*** Timestep 3:  t=0.6 seconds, dt=0.2 seconds
+*** Timestep 4:  t=0.8 seconds, dt=0.2 seconds
+*** Timestep 5:  t=1 seconds, dt=0.2 seconds
+*** Timestep 6:  t=1.2 seconds, dt=0.2 seconds
+*** Timestep 7:  t=1.4 seconds, dt=0.2 seconds
+*** Timestep 8:  t=1.6 seconds, dt=0.2 seconds
+*** Timestep 9:  t=1.8 seconds, dt=0.2 seconds
+*** Timestep 10:  t=2 seconds, dt=0.2 seconds
+*** Timestep 11:  t=2.2 seconds, dt=0.2 seconds
+*** Timestep 12:  t=2.4 seconds, dt=0.2 seconds
+*** Timestep 13:  t=2.6 seconds, dt=0.2 seconds
+*** Timestep 14:  t=2.8 seconds, dt=0.2 seconds
+*** Timestep 15:  t=3 seconds, dt=0.2 seconds
+*** Timestep 16:  t=3.2 seconds, dt=0.2 seconds
+*** Timestep 17:  t=3.4 seconds, dt=0.2 seconds
+*** Timestep 18:  t=3.6 seconds, dt=0.2 seconds
+*** Timestep 19:  t=3.8 seconds, dt=0.2 seconds
+*** Timestep 20:  t=4 seconds, dt=0.2 seconds
+| Total wallclock time elapsed since start     |      5.69s |            |
+| Particles: Advect                |        44 |    0.0416s |      0.73% |
+| Particles: Copy                  |        21 |   0.00337s |         0% |
+| Particles: Generate              |         1 |  0.000376s |         0% |
+| Particles: Initialization        |         1 |  0.000203s |         0% |
+| Particles: Initialize properties |         1 |   0.00691s |      0.12% |
+| Particles: Interpolate           |        21 |      0.13s |       2.3% |
+| Particles: Sort                  |        44 |   0.00585s |       0.1% |
+-- Total wallclock time elapsed including restarts: 6s
+
+coupled-regular-Hlimited-np1
+Test LLS runtime history mask: true,false,false,true,true,true
+*** Timestep 0:  t=0 seconds, dt=0 seconds
+      Fault linear solve: iterations=22, fresh=2.138352e+00, target=2.404252e+00
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.999990e-01, 1.612496e-02
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Fault linear solve: iterations=23, fresh=4.367135e-09, target=6.412027e-09
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 8.892820e-10, 1.906104e-08
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  2: 6.802612e-16, 1.172894e-14
+*** Snapshot /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_replenishment/output-coupled-regular-Hlimited/restart/01/ created!
+*** Timestep 1:  t=100 seconds, dt=100 seconds
+      Fault linear solve: iterations=20, fresh=5.364367e-03, target=9.276542e-03
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.999987e-01, 1.164529e-04
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Fault linear solve: iterations=25, fresh=1.715913e-12, target=5.366426e-12
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 5.782715e-10, 1.917596e-08
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  2: 4.439068e-18, 1.095463e-14
+*** Snapshot /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_replenishment/output-coupled-regular-Hlimited/restart/02/ created!
+*** Timestep 2:  t=200 seconds, dt=100 seconds
+      Fault linear solve: iterations=21, fresh=8.880539e-08, target=2.034591e-07
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.997049e-01, 3.704729e-09
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 4.363494e-10, 1.400520e-14
+*** Snapshot /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_replenishment/output-coupled-regular-Hlimited/restart/03/ created!
+| Total wallclock time elapsed since start       |      21.1s |            |
+| Fault: Cache build                 |         4 |     0.318s |       1.5% |
+| Fault: I_h                         |         4 |     0.394s |       1.9% |
+| Fault: Property preparation        |         4 |     0.408s |       1.9% |
+| Fault: Stokes QP cache build       |         1 |   0.00682s |         0% |
+| Fault: Surface-property projection |         4 |     0.323s |       1.5% |
+| Fault: condensed linear solve      |         5 |      4.03s |        19% |
+| Particles: Advect                  |         6 |    0.0401s |      0.19% |
+| Particles: Copy                    |         3 |   0.00899s |         0% |
+| Particles: Generate                |         1 |   0.00462s |         0% |
+| Particles: Initialization          |         1 |  0.000154s |         0% |
+| Particles: Initialize properties   |         1 |    0.0261s |      0.12% |
+| Particles: Interpolate             |         3 |     0.106s |       0.5% |
+| Particles: Sort                    |         6 |    0.0107s |         0% |
+| Particles: Update properties       |         3 |   0.00982s |         0% |
+-- Total wallclock time elapsed including restarts: 21s
+
+coupled-random-5433-Hlimited-np1
+Test LLS runtime history mask: true,false,false,true,true,true
+*** Timestep 0:  t=0 seconds, dt=0 seconds
+      Fault linear solve: iterations=22, fresh=2.138352e+00, target=2.404252e+00
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.999990e-01, 1.612496e-02
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Fault linear solve: iterations=23, fresh=4.367125e-09, target=6.412027e-09
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 8.892820e-10, 1.906104e-08
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  2: 6.819033e-16, 1.133475e-14
+*** Snapshot /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_replenishment/output-coupled-random-5433-Hlimited/restart/01/ created!
+*** Timestep 1:  t=100 seconds, dt=100 seconds
+      Fault linear solve: iterations=20, fresh=5.364367e-03, target=9.276542e-03
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.999987e-01, 1.164529e-04
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Fault linear solve: iterations=25, fresh=1.715913e-12, target=5.366426e-12
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 5.782715e-10, 1.917596e-08
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  2: 4.391432e-18, 1.080284e-14
+*** Snapshot /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_replenishment/output-coupled-random-5433-Hlimited/restart/02/ created!
+*** Timestep 2:  t=200 seconds, dt=100 seconds
+      Fault linear solve: iterations=21, fresh=1.377614e-07, target=2.615817e-07
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.997705e-01, 4.697607e-09
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 5.265266e-10, 1.167022e-14
+*** Snapshot /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_replenishment/output-coupled-random-5433-Hlimited/restart/03/ created!
+| Total wallclock time elapsed since start       |      22.1s |            |
+| Fault: Cache build                 |         4 |     0.324s |       1.5% |
+| Fault: I_h                         |         4 |     0.404s |       1.8% |
+| Fault: Property preparation        |         4 |     0.411s |       1.9% |
+| Fault: Stokes QP cache build       |         1 |   0.00601s |         0% |
+| Fault: Surface-property projection |         4 |      0.33s |       1.5% |
+| Fault: condensed linear solve      |         5 |      3.38s |        15% |
+| Particles: Advect                  |         6 |    0.0425s |      0.19% |
+| Particles: Copy                    |         3 |   0.00757s |         0% |
+| Particles: Generate                |         1 |   0.00744s |         0% |
+| Particles: Initialization          |         1 |  0.000214s |         0% |
+| Particles: Initialize properties   |         1 |    0.0294s |      0.13% |
+| Particles: Interpolate             |         3 |    0.0981s |      0.44% |
+| Particles: Sort                    |         6 |   0.00474s |         0% |
+| Particles: Update properties       |         3 |    0.0185s |         0% |
+-- Total wallclock time elapsed including restarts: 22s
+
+coupled-random-5433-diagnosed-np1
+Test LLS runtime history mask: false,false,false,true,true,true
+*** Timestep 0:  t=0 seconds, dt=0 seconds
+      Fault linear solve: iterations=22, fresh=2.138352e+00, target=2.404252e+00
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.999990e-01, 1.612496e-02
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Fault linear solve: iterations=23, fresh=4.367125e-09, target=6.412027e-09
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 8.892820e-10, 1.906104e-08
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  2: 6.819033e-16, 1.133475e-14
+*** Snapshot /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_replenishment/output-coupled-random-5433/restart/01/ created!
+*** Timestep 1:  t=100 seconds, dt=100 seconds
+      Fault linear solve: iterations=20, fresh=5.364367e-03, target=9.276542e-03
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.999987e-01, 1.164529e-04
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Fault linear solve: iterations=25, fresh=1.715913e-12, target=5.366426e-12
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 5.782715e-10, 1.917596e-08
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  2: 4.391432e-18, 1.080284e-14
+An error occurred in line <68> of file </home/ein/repository/aspect-pf-rsf-refactor/source/material_model/phase_field_fault/history.cc> in function
+    An error occurred in line <856> of file
+    Stored crack-driving history is inadmissible.
+
+crossing-serial-np1
+Test LLS runtime history mask: true,false,false,true,true,true
+*** Timestep 0:  t=0 seconds, dt=0 seconds
+      Fault linear solve: iterations=22, fresh=2.138352e+00, target=2.404252e+00
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.999990e-01, 1.612496e-02
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Fault linear solve: iterations=23, fresh=4.367135e-09, target=6.412027e-09
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 8.892820e-10, 1.906104e-08
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  2: 6.802612e-16, 1.172894e-14
+*** Snapshot /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_replenishment/output-crossing-serial/restart/01/ created!
+*** Timestep 1:  t=100 seconds, dt=100 seconds
+      Fault linear solve: iterations=20, fresh=5.364367e-03, target=9.276542e-03
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.999987e-01, 1.164529e-04
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Fault linear solve: iterations=25, fresh=1.715913e-12, target=5.366426e-12
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 5.782715e-10, 1.917596e-08
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  2: 4.439068e-18, 1.095463e-14
+*** Snapshot /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_replenishment/output-crossing-serial/restart/02/ created!
+*** Timestep 2:  t=200 seconds, dt=100 seconds
+      Fault linear solve: iterations=21, fresh=9.812831e-08, target=1.928108e-07
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.996886e-01, 4.700062e-09
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 5.087776e-10, 1.261735e-14
+*** Snapshot /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_replenishment/output-crossing-serial/restart/03/ created!
+| Total wallclock time elapsed since start       |        46s |            |
+| Fault: Cache build                 |         4 |      0.63s |       1.4% |
+| Fault: I_h                         |         4 |      0.83s |       1.8% |
+| Fault: Property preparation        |         4 |     0.856s |       1.9% |
+| Fault: Stokes QP cache build       |         1 |    0.0149s |         0% |
+| Fault: Surface-property projection |         4 |     0.646s |       1.4% |
+| Fault: condensed linear solve      |         5 |      9.34s |        20% |
+| Particles: Advect                  |         6 |    0.0824s |      0.18% |
+| Particles: Copy                    |         3 |    0.0256s |         0% |
+| Particles: Generate                |         1 |   0.00791s |         0% |
+| Particles: Initialization          |         1 |  0.000255s |         0% |
+| Particles: Initialize properties   |         1 |    0.0426s |         0% |
+| Particles: Interpolate             |         3 |      0.18s |      0.39% |
+| Particles: Sort                    |         6 |    0.0172s |         0% |
+| Particles: Update properties       |         3 |    0.0169s |         0% |
+-- Total wallclock time elapsed including restarts: 46s
+
+crossing-mpi-np2
+Test LLS runtime history mask: true,false,false,true,true,true
+*** Timestep 0:  t=0 seconds, dt=0 seconds
+      Fault linear solve: iterations=22, fresh=2.073682e+00, target=2.404252e+00
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.999990e-01, 1.612496e-02
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Fault linear solve: iterations=23, fresh=4.442591e-09, target=6.387793e-09
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 8.623874e-10, 1.906104e-08
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  2: 6.841333e-16, 1.182445e-14
+*** Snapshot /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_replenishment/output-crossing-mpi/restart/01/ created!
+*** Timestep 1:  t=100 seconds, dt=100 seconds
+      Fault linear solve: iterations=20, fresh=3.484648e-03, target=9.276542e-03
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.999987e-01, 1.164529e-04
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Fault linear solve: iterations=24, fresh=3.430627e-12, target=3.486225e-12
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 3.756404e-10, 1.917596e-08
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  2: 4.457122e-18, 5.749744e-15
+*** Snapshot /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_replenishment/output-crossing-mpi/restart/02/ created!
+*** Timestep 2:  t=200 seconds, dt=100 seconds
+      Fault linear solve: iterations=21, fresh=8.575655e-08, target=1.928070e-07
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.996886e-01, 4.700065e-09
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 4.446404e-10, 1.266423e-14
+*** Snapshot /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_replenishment/output-crossing-mpi/restart/03/ created!
+| Total wallclock time elapsed since start       |      39.5s |            |
+| Fault: Cache build                 |         4 |      0.33s |      0.84% |
+| Fault: I_h                         |         4 |     0.458s |       1.2% |
+| Fault: Property preparation        |         4 |     0.502s |       1.3% |
+| Fault: Stokes QP cache build       |         1 |    0.0136s |         0% |
+| Fault: Surface-property projection |         4 |     0.357s |       0.9% |
+| Fault: condensed linear solve      |         5 |      13.1s |        33% |
+| Particles: Advect                  |         6 |    0.0324s |         0% |
+| Particles: Copy                    |         3 |    0.0032s |         0% |
+| Particles: Exchange ghosts         |         4 |    0.0371s |         0% |
+| Particles: Generate                |         1 |    0.0132s |         0% |
+| Particles: Initialization          |         1 |  0.000189s |         0% |
+| Particles: Initialize properties   |         1 |     0.068s |      0.17% |
+| Particles: Interpolate             |         3 |     0.142s |      0.36% |
+| Particles: Sort                    |         6 |    0.0162s |         0% |
+| Particles: Update properties       |         3 |     0.017s |         0% |
+-- Total wallclock time elapsed including restarts: 39s
+
+crossing-create-np1
+Test LLS runtime history mask: true,false,false,true,true,true
+*** Timestep 0:  t=0 seconds, dt=0 seconds
+      Fault linear solve: iterations=22, fresh=2.138352e+00, target=2.404252e+00
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.999990e-01, 1.612496e-02
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Fault linear solve: iterations=23, fresh=4.367135e-09, target=6.412027e-09
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 8.892820e-10, 1.906104e-08
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  2: 6.802612e-16, 1.172894e-14
+*** Snapshot /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_replenishment/output-crossing-create/restart/01/ created!
+| Total wallclock time elapsed since start       |      24.6s |            |
+| Fault: Cache build                 |         2 |     0.368s |       1.5% |
+| Fault: I_h                         |         2 |     0.561s |       2.3% |
+| Fault: Property preparation        |         2 |      0.58s |       2.4% |
+| Fault: Stokes QP cache build       |         1 |    0.0149s |         0% |
+| Fault: Surface-property projection |         2 |     0.381s |       1.5% |
+| Fault: condensed linear solve      |         2 |      4.67s |        19% |
+| Particles: Advect                  |         2 |    0.0241s |         0% |
+| Particles: Copy                    |         1 |  0.000449s |         0% |
+| Particles: Generate                |         1 |   0.00194s |         0% |
+| Particles: Initialization          |         1 |  0.000258s |         0% |
+| Particles: Initialize properties   |         1 |    0.0448s |      0.18% |
+| Particles: Interpolate             |         1 |    0.0767s |      0.31% |
+| Particles: Sort                    |         2 |     0.023s |         0% |
+| Particles: Update properties       |         1 |    0.0156s |         0% |
+-- Total wallclock time elapsed including restarts: 25s
+
+crossing-resume-np1
+Test LLS runtime history mask: true,false,false,true,true,true
+*** Timestep 1:  t=100 seconds, dt=100 seconds
+      Fault linear solve: iterations=20, fresh=5.364367e-03, target=9.276542e-03
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.999987e-01, 1.164529e-04
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Fault linear solve: iterations=25, fresh=1.715913e-12, target=5.366426e-12
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 5.782715e-10, 1.917596e-08
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  2: 4.439068e-18, 1.095463e-14
+*** Snapshot /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_replenishment/output-crossing-resume/restart/02/ created!
+*** Timestep 2:  t=200 seconds, dt=100 seconds
+      Fault linear solve: iterations=21, fresh=9.812831e-08, target=1.928108e-07
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.996886e-01, 4.700062e-09
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 5.087776e-10, 1.261735e-14
+*** Snapshot /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_replenishment/output-crossing-resume/restart/03/ created!
+| Total wallclock time elapsed since start       |       6.9s |            |
+| Fault: Cache build                 |         2 |    0.0706s |         1% |
+| Fault: I_h                         |         2 |     0.111s |       1.6% |
+| Fault: Property preparation        |         2 |     0.113s |       1.6% |
+| Fault: Stokes QP cache build       |         1 |   0.00325s |         0% |
+| Fault: Surface-property projection |         2 |    0.0716s |         1% |
+| Fault: condensed linear solve      |         3 |      1.02s |        15% |
+| Particles: Advect                  |         4 |    0.0116s |      0.17% |
+| Particles: Copy                    |         2 |   0.00228s |         0% |
+| Particles: Initialization          |         1 |   0.00022s |         0% |
+| Particles: Interpolate             |         2 |    0.0283s |      0.41% |
+| Particles: Sort                    |         4 |   0.00312s |         0% |
+| Particles: Update properties       |         2 |   0.00465s |         0% |
+-- Total wallclock time elapsed including restarts: 31s
+
+crossing-after-create-np1
+Test LLS runtime history mask: true,false,false,true,true,true
+*** Timestep 0:  t=0 seconds, dt=0 seconds
+      Fault linear solve: iterations=22, fresh=2.138352e+00, target=2.404252e+00
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.999990e-01, 1.612496e-02
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Fault linear solve: iterations=23, fresh=4.367135e-09, target=6.412027e-09
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 8.892820e-10, 1.906104e-08
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  2: 6.802612e-16, 1.172894e-14
+*** Snapshot /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_replenishment/output-crossing-after-create/restart/01/ created!
+*** Timestep 1:  t=100 seconds, dt=100 seconds
+      Fault linear solve: iterations=20, fresh=5.364367e-03, target=9.276542e-03
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.999987e-01, 1.164529e-04
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Fault linear solve: iterations=25, fresh=1.715913e-12, target=5.366426e-12
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 5.782715e-10, 1.917596e-08
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  2: 4.439068e-18, 1.095463e-14
+*** Snapshot /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_replenishment/output-crossing-after-create/restart/02/ created!
+| Total wallclock time elapsed since start       |      7.45s |            |
+| Fault: Cache build                 |         3 |     0.105s |       1.4% |
+| Fault: I_h                         |         3 |     0.138s |       1.9% |
+| Fault: Property preparation        |         3 |     0.143s |       1.9% |
+| Fault: Stokes QP cache build       |         1 |   0.00267s |         0% |
+| Fault: Surface-property projection |         3 |     0.106s |       1.4% |
+| Fault: condensed linear solve      |         4 |      1.39s |        19% |
+| Particles: Advect                  |         4 |    0.0112s |      0.15% |
+| Particles: Copy                    |         2 |   0.00193s |         0% |
+| Particles: Generate                |         1 |   0.00283s |         0% |
+| Particles: Initialization          |         1 |  0.000229s |         0% |
+| Particles: Initialize properties   |         1 |    0.0244s |      0.33% |
+| Particles: Interpolate             |         2 |    0.0271s |      0.36% |
+| Particles: Sort                    |         4 |   0.00308s |         0% |
+| Particles: Update properties       |         2 |   0.00449s |         0% |
+-- Total wallclock time elapsed including restarts: 7s
+
+crossing-after-resume-np1
+Test LLS runtime history mask: true,false,false,true,true,true
+*** Timestep 2:  t=200 seconds, dt=100 seconds
+      Fault linear solve: iterations=21, fresh=9.812831e-08, target=1.928108e-07
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.996886e-01, 4.700062e-09
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 5.087776e-10, 1.261735e-14
+*** Snapshot /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_replenishment/output-crossing-after-resume/restart/03/ created!
+| Total wallclock time elapsed since start       |      3.71s |            |
+| Fault: Cache build                 |         1 |    0.0337s |      0.91% |
+| Fault: I_h                         |         1 |    0.0656s |       1.8% |
+| Fault: Property preparation        |         1 |    0.0672s |       1.8% |
+| Fault: Stokes QP cache build       |         1 |   0.00321s |         0% |
+| Fault: Surface-property projection |         1 |    0.0344s |      0.93% |
+| Fault: condensed linear solve      |         1 |     0.325s |       8.7% |
+| Particles: Advect                  |         2 |   0.00605s |      0.16% |
+| Particles: Copy                    |         1 |  0.000982s |         0% |
+| Particles: Initialization          |         1 |  0.000219s |         0% |
+| Particles: Interpolate             |         1 |    0.0135s |      0.36% |
+| Particles: Sort                    |         2 |   0.00189s |         0% |
+| Particles: Update properties       |         1 |   0.00232s |         0% |
+-- Total wallclock time elapsed including restarts: 11s
+
+crossing-direct-np1
+Test LLS runtime history mask: true,false,false,true,true,true
+*** Timestep 0:  t=0 seconds, dt=0 seconds
+      Fault linear solve: iterations=22, fresh=2.138352e+00, target=2.404252e+00
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.999990e-01, 1.612496e-02
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Fault linear solve: iterations=23, fresh=4.367135e-09, target=6.412027e-09
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 8.892820e-10, 1.906104e-08
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  2: 6.802612e-16, 1.172894e-14
+*** Snapshot /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_replenishment/output-crossing-direct/restart/01/ created!
+*** Timestep 1:  t=50 seconds, dt=50 seconds
+      Fault linear solve: iterations=20, fresh=5.364428e-03, target=9.276658e-03
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.999988e-01, 1.164543e-04
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Fault linear solve: iterations=25, fresh=1.715668e-12, target=5.364921e-12
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 5.782709e-10, 1.917645e-08
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  2: 2.237546e-18, 7.266594e-15
+*** Snapshot /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_replenishment/output-crossing-direct/restart/02/ created!
+| Total wallclock time elapsed since start       |      39.9s |            |
+| Fault: Cache build                 |         3 |     0.518s |       1.3% |
+| Fault: I_h                         |         3 |     0.721s |       1.8% |
+| Fault: Property preparation        |         3 |      0.75s |       1.9% |
+| Fault: Stokes QP cache build       |         1 |    0.0152s |         0% |
+| Fault: Surface-property projection |         3 |     0.529s |       1.3% |
+| Fault: condensed linear solve      |         4 |      8.45s |        21% |
+| Particles: Advect                  |         4 |    0.0431s |      0.11% |
+| Particles: Copy                    |         2 |   0.00214s |         0% |
+| Particles: Generate                |         1 |   0.00286s |         0% |
+| Particles: Initialization          |         1 |  0.000256s |         0% |
+| Particles: Initialize properties   |         1 |    0.0612s |      0.15% |
+| Particles: Interpolate             |         2 |     0.133s |      0.33% |
+| Particles: Sort                    |         4 |    0.0158s |         0% |
+| Particles: Update properties       |         2 |     0.014s |         0% |
+-- Total wallclock time elapsed including restarts: 40s
+
+crossing-retry-np1
+Test LLS runtime history mask: true,false,false,true,true,true
+*** Timestep 0:  t=0 seconds, dt=0 seconds
+      Fault linear solve: iterations=22, fresh=2.138352e+00, target=2.404252e+00
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.999990e-01, 1.612496e-02
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Fault linear solve: iterations=23, fresh=4.367135e-09, target=6.412027e-09
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 8.892820e-10, 1.906104e-08
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  2: 6.802612e-16, 1.172894e-14
+*** Snapshot /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_replenishment/output-crossing-retry/restart/01/ created!
+*** Timestep 1:  t=100 seconds, dt=100 seconds
+      Fault linear solve: iterations=20, fresh=5.364367e-03, target=9.276542e-03
+*** Timestep 1:  t=50 seconds, dt=50 seconds
+      Fault linear solve: iterations=20, fresh=5.364428e-03, target=9.276658e-03
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.999988e-01, 1.164543e-04
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Fault linear solve: iterations=25, fresh=1.715668e-12, target=5.364921e-12
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 5.782709e-10, 1.917645e-08
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  2: 2.237546e-18, 7.266594e-15
+*** Snapshot /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_replenishment/output-crossing-retry/restart/02/ created!
+| Total wallclock time elapsed since start       |      44.3s |            |
+| Fault: Cache build                 |         4 |     0.666s |       1.5% |
+| Fault: I_h                         |         4 |     0.862s |       1.9% |
+| Fault: Property preparation        |         4 |      0.88s |         2% |
+| Fault: Stokes QP cache build       |         1 |    0.0154s |         0% |
+| Fault: Surface-property projection |         4 |     0.678s |       1.5% |
+| Fault: condensed linear solve      |         5 |      8.09s |        18% |
+| Particles: Advect                  |         6 |    0.0956s |      0.22% |
+| Particles: Copy                    |         4 |    0.0224s |         0% |
+| Particles: Generate                |         1 |   0.00219s |         0% |
+| Particles: Initialization          |         1 |  0.000256s |         0% |
+| Particles: Initialize properties   |         1 |    0.0732s |      0.17% |
+| Particles: Interpolate             |         3 |     0.218s |      0.49% |
+| Particles: Sort                    |         6 |    0.0225s |         0% |
+| Particles: Update properties       |         3 |    0.0249s |         0% |
+-- Total wallclock time elapsed including restarts: 44s
+
+candidate-parse-np1

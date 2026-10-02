@@ -1,0 +1,15 @@
+{
+  "revision": "9980ff30162ba4b6f058e313eb7a2be16b947cd4",
+  "branch": "pf-rsf-refactor",
+  "baseline_source_entries": 865,
+  "baseline_source_differences": [],
+  "hashes": {
+    "build-refactor-r6b/aspect-r6b-qualified": "cdf7e0c58009d11dfe8c216caeb31ba6d8edc08b71360fec9fb63fcd95287596",
+    "benchmarks/reconstructed_fault/refactoring_r6b/plugin-build/bp3/libbp3_restore_150x50.release.so": "bdc716cd051fa82d99ba107449d8fefba2d5999485b724236098c0572b27dc25",
+    "benchmarks/reconstructed_fault/particle_replenishment/plugin/CMakeLists.txt": "152168710373f7106b7f3eab14b6dc8494474aebdc4a9c182be04bdfe5a53d03",
+    "benchmarks/reconstructed_fault/particle_replenishment/plugin/replenishment.cc": "50ab7bf1ef1d9ed91a8e56a2939b3d184b188c56ca32e5ae1138128845bc74ff",
+    "benchmarks/reconstructed_fault/particle_replenishment/plugin/coupled.cc": "af9ddbe16a5c9b3c3c58b1e3856edd4f09137de37892990c36a6a5be5cce7c69",
+    "benchmarks/reconstructed_fault/particle_replenishment/build/libcoupled_replenishment.release.so": "841eb4d5f671eef2aa66d0cab1da9bc7504546292e7ba43f5118eac9198ab5a7",
+    "benchmarks/reconstructed_fault/particle_replenishment/build/libreplenishment.release.so": "2b0482c51ea855f761c75eb373d910aeea4d03e19dc5e0b0010c42495c656062"
+  }
+}

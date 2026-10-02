@@ -1,0 +1,29 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_replenishment/inputs/coupled-base.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_replenishment/output-crossing-retry
+subsection Particles
+ set Particle generator name = crossing reference cell
+end
+subsection Postprocess
+ subsection Coupled replenishment
+  set Track birth audit = true
+ end
+end
+set End time = 100
+subsection Postprocess
+ subsection BP3
+ set Last accepted step = 1
+ end
+end
+set Nonlinear solver failure strategy = cut timestep size
+subsection Postprocess
+ subsection Coupled replenishment
+  set Reject first step = true
+ end
+end
+subsection Particles
+ subsection Interpolator
+  subsection Observed native LLS
+   set Limit crack driving history = true
+  end
+ end
+end

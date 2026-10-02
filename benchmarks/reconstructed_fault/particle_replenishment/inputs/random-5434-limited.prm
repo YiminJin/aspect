@@ -1,0 +1,19 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_replenishment/inputs/base.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_replenishment/output-random-5434-limited
+subsection Particles
+ set Particle generator name = random uniform
+ subsection Generator
+ subsection Random uniform
+ set Number of particles = 2048
+ set Random cell selection = true
+ set Random number seed = 5434
+ end
+ end
+end
+subsection Particles
+ subsection Interpolator
+ subsection Observed native LLS
+ set Limit histories = true
+ end
+ end
+end
