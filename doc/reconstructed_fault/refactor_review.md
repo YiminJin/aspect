@@ -1,5 +1,66 @@
 # Reconstructed-fault refactoring review
 
+## R6a — Material-history diagnostics and switch inventory (complete for review)
+
+Accepted R5b2 was committed first as `3b4ae16dd`. Reference:
+`build-refactor-r5b2/aspect-r5b2-qualified`, SHA256
+`edf23c823e86fe579a231110f2e2167dd929fa531996501516759d8faa432cd2`.
+Candidate: uncommitted R6a, `build-refactor-r6a/aspect-r6a-qualified`, SHA256
+`d373cb3308ecc00fb05a574975cf55f9d65facea003464b48153fc6aecf88f01`.
+
+The existing R0 switch inventory (§5 below) and standing R6 guidance are updated.
+The [detailed current inventory](../../benchmarks/reconstructed_fault/refactoring_r6a/switch_inventory.md)
+covers all 87 literal feature selectors found (23 production, 64 additional
+research/test), plus dynamic rejection lists, parameters, setters and observers.
+It distinguishes formatting from extra evaluations/MPI, numerical selection and
+benchmark loading, with parsing/defaults, schemas/consumers and stale names.
+No selector/default is removed, migrated or reinterpreted.
+
+M4 `FaultHistoryDiagnostics<dim>` in source-private `history_diagnostics.h/.cc`
+owns only the existing two streams and cell-ID set inside per-call HistoryCandidates.
+It moves file setup, selection and row presentation out of candidate computation.
+Public headers, material/history/manager/particle ownership and checkpoints are
+unchanged. The numerical history code reconstructs byte-for-byte after reversing
+only diagnostic calls/storage/includes; extracted expressions and strings match.
+
+| Boundary / lifetime | Verified retained contract |
+|---|---|
+| Switch/setup | Same per-call presence reads after sampling; empty and "0" enable; setup stays outside the candidate try/catch |
+| Capture | Same point after local candidate insertion inside particle loop/try; actual old stress, samples, coefficients and candidate; no later reconstruction/evaluation |
+| Lazy admission | Closed stress stream skips cell lookup; selected CellId filter unchanged; source requires continued active and original inactive association; diagnostic arguments evaluated only under guards |
+| Streams | Same order/lifetime through validation/publication and unwinding; truncating rank/timestep files, precision17, exact headers/rows; no retained borrowed values or new collectives |
+| Errors/history | Silent missing-input/open/write behavior retained; sampling, projection, collective checks, terminal history writes and solver rollback stay with existing owners |
+
+| Result | Focused verification |
+|---|---|
+| PASS | Release build/link; independent history and diagnostic TUs; 12 unique helper definitions covering 2D/3D; unchanged unity grouping |
+| PASS | 15 source/protection checks; public headers, other production/tests, qualified R5 artifacts and unrelated local inputs preserved |
+| PASS | 20 reference/candidate cases on one/two ranks, 258 comparisons: off/off, on/on and within-version off/on physical/history/decision/work equality |
+| PASS | Nonempty exact CSVs across six updates: 16,875 stress-cycle rows and 146 continued-source rows per update, split across rank-local files; 30/20-column schemas preserved |
+| PASS | Missing selected-cell input produces stress headers only while source rows remain; directory-obstructed outputs silently fail to open and leave physical results unchanged |
+| PASS | Existing accepted-Newton-update rollback with diagnostics off/on on one/two ranks; exact decisions and full rollback marker |
+| REUSED | Repaired frozen AMG/GMG evidence; R6a does not touch its observer/operator lifetime/output contract |
+| NOT RUN | Debug/3D runtime, new restart/long trajectory, injected mid-write or late history-validation failure; no new units mirroring formatting |
+
+Recorded physical/history fields, solver decisions, work counts and complete
+scientific diagnostic columns have zero differences. No numerical correction or
+new tolerance. The initial comparator flagged only statistics padding determined
+by different output-path lengths. Its report is retained; comparing exact tokens
+after path normalization resolves this without dropping numerical values or
+rerunning simulations. All selected runtime outcomes were successful.
+
+The historical `kappa` column contains eta_ve (Pa s); it remains unchanged pending
+a separate compatibility decision. Original singular-fixture wording, restart
+nonconvergence and broader scientific/cache questions are not repaired here.
+[Reproduction/evidence](../../benchmarks/reconstructed_fault/refactoring_r6a/README.md)
+records commands, inputs, plugins, hashes and coverage limits. R6a is uncommitted
+for review; R6b/R6c/R7 remain unstarted. Recommended next bounded extraction:
+R6b nonlinear-bound CSV/report formatting only, keeping lower-rate residual
+evaluation, active-set/line-search decisions, collectives and capture timing in
+the driver. Do not extract a generic solver diagnostic framework.
+
+
+
 ## R5b2 — Surface linearization candidate preparation (complete for review)
 
 Accepted R5b1 is committed as `dfb7ad9f2`; its qualified reference is
@@ -2315,6 +2376,16 @@ implementation only. An abstract constitutive hierarchy is not proposed.
 
 ## 5. Configuration and environment inventory
 
+**R6a refresh against accepted post-R5 `3b4ae16dd`:** the current detailed
+[reader/API inventory](../../benchmarks/reconstructed_fault/refactoring_r6a/switch_inventory.md)
+records owners, read timing, defaults/parsing, rank requirements, side effects,
+output schemas/consumers and disposition. Source reader/parameter snapshots are
+in its evidence directory. The table below is the compact production summary;
+old declaration defaults/benchmark appendices remain historical context. The
+state-limiter conflict noted by R0 was resolved before R6 (Double plus positive
+assertion); it is not reopened here. No control or output is removed/renamed.
+
+
 Core parameter additions and defaults are catalogued below from declarations.
 Existing global CFL, timestep caps, Newton/linear tolerances and friction Dc
 remain authoritative; no replacement controls are proposed.
@@ -2347,13 +2418,15 @@ All literal environment reads in production feature/core files inspected:
 
 | Names | Reader/owner | Classification and retained behavior |
 |---|---|---|
-| `ASPECT_FAULT_PERFORMANCE` | Material, particle/fault manager, surface, coupling | Observational timing; presence enables |
+| `ASPECT_FAULT_PERFORMANCE` | Material, particle/fault manager, surface, coupling | Presence enables timers **and guarded counter reductions**; consistent rank settings required at collective sites |
 | `ASPECT_FAULT_LINEAR_PERFORMANCE` | `linear_performance.h` | Observational rank-local timings |
-| `ASPECT_FAULT_NONLINEAR_DIAGNOSTIC`, `ASPECT_FAULT_COMPATIBILITY_DIAGNOSTIC` | Driver | Observational residual/active-bound/compatibility logging |
+| `ASPECT_FAULT_NONLINEAR_DIAGNOSTIC` | Driver | Verification plus output: extra lower-rate surface residual, cache/filter effects and collectives; not passive prose |
+| `ASPECT_FAULT_COMPATIBILITY_DIAGNOSTIC` | Driver | Compatibility prose only; actual rejection/fresh-residual checks remain unconditional |
 | `ASPECT_K1_FLOOR_AUDIT` | Driver + residual channel | Shadow assembly audit; temporarily changes assembly channel, restores before solve |
-| `ASPECT_STRESS_CYCLE_TRACE` | Particle-to-FE publication and material history | Observational CSVs from actual proposals/evaluations; requires selected-cell files |
-| `ASPECT_FAULT_SOURCE_HISTORY_DIAGNOSTIC` | Material history | Observational history/source output |
-| `ASPECT_FAULT_HISTORY_AUDIT`, `ASPECT_FAULT_NORMAL_STRESS_DIAGNOSTIC` | Surface | Observation/audit; output failures/checks may abort |
+| `ASPECT_STRESS_CYCLE_TRACE` | Core particle-to-FE publication and M4 history.cc / history_diagnostics.cc | Actual proposal/candidate rows; M4 formatter selected in R6a, core unchanged; per-call presence read, rank-local selected-cell files, silent file errors |
+| `ASPECT_FAULT_SOURCE_HISTORY_DIAGNOSTIC` | M4 history.cc / history_diagnostics.cc | Selected R6a formatting: continued-source candidate rows, pre-publication capture, rank-local truncating CSVs; existing source admission and silent errors unchanged |
+| `ASPECT_FAULT_HISTORY_AUDIT` | Particle surface backend | Extra remote FE history sampling, local moments and throwing output |
+| `ASPECT_FAULT_NORMAL_STRESS_DIAGNOSTIC` | Particle surface backend | Jacobian-only normal moments; true-pressure admission and throwing output |
 | `ASPECT_FAULT_STRESS_SAMPLE_DIAGNOSTIC` | Surface, coupling, driver | Additional sample diagnostics and standalone discarded residual evaluation |
 | `ASPECT_FAULT_EXPLICIT_B`, `ASPECT_FAULT_EXPLICIT_G` | B/G owners | Numerical implementation selection; sparse action instead of reference path; G checks filter applicability |
 | `ASPECT_FAULT_INTERFACE_MODES` | Interface preconditioner | Numerical preconditioning selection; parse setting, retain defaults/zero-mode behavior |
@@ -2730,6 +2803,7 @@ These are literal `getenv` reads outside production source, grouped by file. Mos
 | `benchmarks/reconstructed_fault/uniform_shear/evolving/seam-audit/diagnostic.cc` | `ASPECT_SOURCE_DIR`, `K3_CORRECTED_PERIODIC_AUDIT` |
 | `benchmarks/reconstructed_fault/uniform_shear/uniform_shear.cc` | `ASPECT_K4_STATE_GUARD` |
 | `tests/bp3_length_scale_checks.h` | `ASPECT_BP3_LENGTH_STUDY`, `ASPECT_BP5_SHORT_TEST` |
+| `tests/phase_field_fault_boundary_completion.cc` | `ASPECT_TEST_BOUNDARY_H_DRIVEN` (fixture constraint selection) |
 | `tests/phase_field_fault_ih_cache.cc` | `ASPECT_IH_SAVED_PHASE`, `ASPECT_IH_SAVED_SURFACE` |
 | `tests/phase_field_fault_surface_system.cc` | `ASPECT_FAULT_COMPARE_COUPLING`, `ASPECT_TEST_NORMAL_FILTER`, `ASPECT_TEST_REVERSED_SHEAR` |
 | `tests/phase_field_periodic_domains.cc` | `K3_REQUIRE_REMOTE_PERIODIC_IMAGES` |

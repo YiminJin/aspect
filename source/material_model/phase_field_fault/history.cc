@@ -19,6 +19,7 @@
 */
 
 #include <aspect/material_model/phase_field_fault.h>
+#include "history_diagnostics.h"
 #include <aspect/material_model/utilities.h>
 #include <aspect/phase_field.h>
 #include <aspect/particle/manager.h>
@@ -42,10 +43,7 @@
 #include <numeric>
 #include <cstdlib>
 #include <iostream>
-#include <fstream>
-#include <iomanip>
 #include <chrono>
-#include <set>
 
 namespace aspect
 {
@@ -531,9 +529,7 @@ namespace aspect
       };
       std::map<types::particle_index, double> cohesive_samples;
       std::map<types::particle_index, ParticleCandidate> particle_candidates;
-      std::ofstream source_history_audit;
-      std::set<std::string> trace_cells;
-      std::ofstream stress_cycle_audit;
+      aspect::internal::FaultHistoryDiagnostics<dim> diagnostics;
       typename ReconstructedFaultManager<dim>::ParticleScalarProjectionResult cohesive_projection;
       std::vector<std::vector<double>> state_candidates;
     };
@@ -657,30 +653,16 @@ namespace aspect
       const auto &previous_phase_fields = samples.previous_phase_fields;
       auto &cohesive_samples = candidates.cohesive_samples;
       auto &particle_candidates = candidates.particle_candidates;
-      auto &source_history_audit = candidates.source_history_audit;
-      auto &trace_cells = candidates.trace_cells;
-      auto &stress_cycle_audit = candidates.stress_cycle_audit;
+      auto &diagnostics = candidates.diagnostics;
       auto &cohesive_projection = candidates.cohesive_projection;
       auto &state_candidates = candidates.state_candidates;
 
       if (std::getenv("ASPECT_STRESS_CYCLE_TRACE"))
-        {
-          const auto rank=std::to_string(Utilities::MPI::this_mpi_process(this->get_mpi_communicator()));
-          std::ifstream cells(this->get_output_directory()+"stress_trace_cells_rank"+rank+".txt");
-          for (std::string id; cells>>id;) trace_cells.insert(id);
-          stress_cycle_audit.open(this->get_output_directory()+"stress_update_"
-                                 +std::to_string(this->get_timestep_number())+"_rank"+rank+".csv");
-          stress_cycle_audit<<std::setprecision(17)
-            <<"step,time_s,dt,particle_index,particle_id,cell,x,y,ref_x,ref_y,sample_x,sample_y,beta,kappa,grad_xx,grad_xy,grad_yx,grad_yy,old_xx,old_yy,old_xy,eps_xx,eps_yy,eps_xy,crack_xx,crack_yy,crack_xy,new_xx,new_yy,new_xy\n";
-        }
+        diagnostics.open_stress_cycle(this->get_output_directory(),
+                                      this->get_timestep_number(), this->get_mpi_communicator());
       if (std::getenv("ASPECT_FAULT_SOURCE_HISTORY_DIAGNOSTIC"))
-        {
-          source_history_audit.open(this->get_output_directory()+"continued_source_history_"
-            +std::to_string(this->get_timestep_number())+"_rank"
-            +std::to_string(Utilities::MPI::this_mpi_process(this->get_mpi_communicator()))+".csv");
-          source_history_audit<<std::setprecision(17)
-            <<"id,x,y,phi,chi,V,kappa,beta,eps_xx,eps_yy,eps_xy,crack_xx,crack_yy,crack_xy,old_xx,old_yy,old_xy,new_xx,new_yy,new_xy\n";
-        }
+        diagnostics.open_source_history(this->get_output_directory(),
+                                        this->get_timestep_number(), this->get_mpi_communicator());
 
       // First evaluate the accepted cohesive traction samples. Projection is
       // completed before any particle history candidate uses the new traction.
@@ -904,31 +886,19 @@ namespace aspect
               particle_candidates.emplace(particle.get_id(), candidate);
               // Capture the inputs and candidate actually used before publication.
               // In particular, old_stress is the parent value, not reconstructed FE history.
-              if (stress_cycle_audit.is_open() && trace_cells.count(particle.get_surrounding_cell()->id().to_string()))
-                {
-                  const auto x=particle.get_location(), r=particle.get_reference_location();
-                  const auto &gradient=velocity_gradients[particle_index];
-                  stress_cycle_audit<<this->get_timestep_number()<<','<<this->get_time()<<','<<time_step<<','
-                    <<particle_index<<','<<particle.get_id()<<','<<particle.get_surrounding_cell()->id()<<','
-                    <<x[0]<<','<<x[1]<<','<<r[0]<<','<<r[1]<<','<<points[particle_index][0]<<','<<points[particle_index][1]
-                    <<','<<bulk_coefficients.beta<<','<<bulk_coefficients.eta_ve<<','
-                    <<gradient[0][0]<<','<<gradient[0][1]<<','<<gradient[1][0]<<','<<gradient[1][1];
-                  for (const auto &tensor:{old_stress,symmetrize(gradient),
-                                          symmetrize(gradient)-effective_strain_rate,candidate.stress})
-                    stress_cycle_audit<<','<<tensor[0][0]<<','<<tensor[1][1]<<','<<tensor[0][1];
-                  stress_cycle_audit<<'\n';
-                }
-              if (source_history_audit.is_open() && association.active && !associations[particle_index].active)
-                {
-                  const auto position=particle.get_location();
-                  source_history_audit<<particle.get_id()<<','<<position[0]<<','<<position[1]<<','
-                    <<phase_fields[particle_index]<<','<<continued_chi<<','<<continued_V<<','
-                    <<bulk_coefficients.eta_ve<<','<<bulk_coefficients.beta;
-                  for (const auto &tensor : {symmetrize(velocity_gradients[particle_index]),
-                                            continued_crack,old_stress,candidate.stress})
-                    source_history_audit<<','<<tensor[0][0]<<','<<tensor[1][1]<<','<<tensor[0][1];
-                  source_history_audit<<'\n';
-                }
+              if (diagnostics.selects_stress_cycle(particle))
+                diagnostics.record_stress_cycle(
+                  this->get_timestep_number(), this->get_time(), time_step,
+                  particle_index, particle, points[particle_index],
+                  bulk_coefficients.beta, bulk_coefficients.eta_ve,
+                  velocity_gradients[particle_index], old_stress,
+                  effective_strain_rate, candidate.stress);
+              if (diagnostics.source_history_is_open() && association.active && !associations[particle_index].active)
+                diagnostics.record_source_history(
+                  particle, phase_fields[particle_index], continued_chi, continued_V,
+                  bulk_coefficients.eta_ve, bulk_coefficients.beta,
+                  velocity_gradients[particle_index], continued_crack,
+                  old_stress, candidate.stress);
               ++particle_index;
             }
         }

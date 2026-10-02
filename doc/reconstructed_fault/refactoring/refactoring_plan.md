@@ -35,7 +35,7 @@ is covered; broader cache-lifecycle gaps remain recorded. The user selected
 R5b1 surface implementation boundaries: both backend bodies are now separated,
 with dispatch/publication/solves/G retained; 148 matched checks pass. The original
 singular fixture has a stale diagnostic expectation, separately reproduced and
-covered by a current-diagnostic invalidation probe. R5b1 is accepted as `dfb7ad9f2`. R5b2 candidate preparation is complete for review: one private operation,
+covered by a current-diagnostic invalidation probe. R5b1 is accepted as `dfb7ad9f2`. R5b2 is accepted as `3b4ae16dd`: one private operation,
 with invalidation/assembly/observer/publication retained in the caller. Release,
 independent 2D/3D and 248 matched one/two/four-rank checks pass. Manager Stokes-QP work remains unselected.
 Historical outcomes remain in [the rolling review](../refactor_review.md).
@@ -430,23 +430,43 @@ failures separately.
 
 ### R6 — Isolate diagnostics and classify configuration
 
-Build on the R0 switch inventory. Separate three categories:
+Follow [the revised R6 instructions](codex_R6_instructions.md). Accepted post-R5
+is `3b4ae16dd` and its qualified R5b2 executable/manifests. Refresh the R0 review's
+switch inventory from current readers and feature headers, not historical names.
+Include environment controls, parameters, setters and observers; record parsing,
+read timing, ownership, rank requirements, file schemas/consumers and disposition.
 
-| Category | Example | Initial treatment |
-|---|---|---|
-| Observational | Timing, stress-cycle CSVs, detailed residual logs | Extract recording/formatting; preserve capture points |
-| Numerical implementation choice | Explicit G, interface preconditioner modes, cache disable/reference path | Preserve existing selection and defaults; review separately |
-| Benchmark setup | Fixed background traction, completion input, specialized initial/loading state | Isolate setup where existing extension points suffice; retain mechanics hooks actually required |
+| Category | Preserve and expose |
+|---|---|
+| Observation / verification | Exact captured values and timing, side effects, extra evaluations/collectives, failure behavior and output contract |
+| Numerical implementation choice | Existing algorithms, selectors/defaults, dependency and MPI requirements; no migration/removal |
+| Benchmark initialization/loading | Existing setup/restart/observer boundaries; completion and prescribed/loading inputs remain numerical |
 
-Use a small named diagnostic configuration/recorder only if it simplifies real repeated code. Retain exact computation inputs in records instead of recomputing them later. Preserve whether a diagnostic failure currently aborts or continues unless a separate behavior change is selected.
+- **R6a (complete for review):** refresh the inventory and extract only the
+  two M4 history streams (stress-cycle and continued-source) into source-private
+  support. Keep per-call stream lifetime, setup/try-catch boundaries, getenv
+  reads, lazy guards and pre-publication capture sites. No resampling, physics,
+  collective, public API or persistent-state change. Verify nonempty rows on
+  one/two ranks with off/off, on/on and within-version off/on comparisons,
+  missing-input/open-failure and rollback cases; independent 2D/3D compilation.
+- **R6b (unselected):** choose one coupled/surface diagnostic family; leave
+  assembly/audits, acceptance, observer timing, MPI and timers at existing sites.
+  Preserve shared stream formatting flags as well as text; reuse existing recorders.
+- **R6c (unselected):** assess one benchmark setup boundary using existing
+  callbacks only where state/timing/restart/error contracts match. No new signal
+  or accessor merely to shorten a file, no M3 benchmark dependence.
 
-If moving setup/output to a plugin, verify callback timing and information availability first. Prefer existing signals when suitable. Do not add a new signal or change callback order purely to reduce a core file's line count.
+Environment migration/removal, changed output schemas/frequency/defaults and
+numerical fixes require separate selection and compatibility decisions. The
+R6a inventory records historical kappa column labels and obsolete solver env
+names without changing them. Keep current research stress/decomposition/filter
+observations. Reuse the repaired frozen proof unless an extraction actually
+touches its observer, relevant lifetime or output contract.
 
-Supported parameter migration, removal of environment variables, or deletion of experiments is a separate reviewed subtask. Record compatibility decisions. Assertion cleanup and formatting belong in separate commits from algorithm extraction; update log-matching tests only when an intentional message change is the actual task.
-
-Checks: diagnostics off/on leave the selected numerical trajectory unchanged; touched output/error paths behave as specified; retained numerical modes remain selectable. Do not delete useful oscillation diagnostics before their replacements preserve the evidence needed for ongoing research.
-
-Gate: every live switch has an owner and a documented purpose; production calculations are readable without CSV formatting blocks.
+Gate: every live feature switch has a recorded owner/purpose; selected controls
+remain available; targeted formatting is outside physics while evidence and
+failure semantics are preserved. Mark only the selected completed pass complete.
+No mandatory blanket migration or R7 work follows automatically.
 
 ### R7 — Review core integration and qualify the result
 
@@ -532,7 +552,9 @@ lifecycle, restart and one/two-rank coupled/rollback checks passing. R5a2 is acc
 clarification, independent builds and 115 matched checks. R5b1 surface backend
 movement is accepted as `dfb7ad9f2` with 148 matched checks. R5b2 candidate
 preparation is complete for review, with 248 matched checks including fresh
-four-rank repaired frozen AMG/GMG comparisons. No other operation is selected. Repair of the original stale singular-fixture message
+four-rank repaired frozen AMG/GMG comparisons. R6a switch-inventory refresh and material-history diagnostics are complete for
+review, with independent 2D/3D builds and 258 comparisons across 20 one/two-rank
+cases. R6b/R6c/R7 remain unselected. Repair of the original stale singular-fixture message
 is recommended separately.
 Further R4b operations and later stages require separate selection. Historical R1 fixture failures,
 Stage-J pressure incompatibility and cohesive step-two nonconvergence remain

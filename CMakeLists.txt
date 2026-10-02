@@ -607,6 +607,7 @@ file(GLOB_RECURSE ASPECT_SOURCE_FILES_CC CONFIGURE_DEPENDS "source/*.cc")
 set_source_files_properties(
   source/material_model/phase_field_fault/constitutive.cc
   source/material_model/phase_field_fault/history.cc
+  source/material_model/phase_field_fault/history_diagnostics.cc
   source/reconstructed_fault/manager_particle_projection.cc
   source/reconstructed_fault/surface_system_particle.cc
   source/reconstructed_fault/surface_system_bulk_work.cc

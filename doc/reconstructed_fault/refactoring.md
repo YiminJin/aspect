@@ -59,38 +59,41 @@ to change the reference algorithm, parameters, or expected test results.
 
 ## 2. Preserve responsibility boundaries
 
-### Selected module scope (R5b2 candidate preparation)
+### Selected module scope (R6a material-history diagnostics)
 
-R5b1 is accepted and committed as `dfb7ad9f2`. Use its qualified executable,
-source/artifact manifests and repaired frozen-fixture evidence. Follow the
-[revised R5 instructions](refactoring/codex_R5_instructions.md) and the
-[pre-edit boundary table](../../benchmarks/reconstructed_fault/refactoring_r5b2/README.md).
+R5 is accepted, with R5b2 committed as `3b4ae16dd`. Use its qualified source,
+executable and manifests; retain the repaired frozen-fixture evidence. Follow
+[the R6 instructions](refactoring/codex_R6_instructions.md). Refresh the existing
+R0 inventory using current readers, parameters, setters and observers; record
+exact defaults/parsing, dependencies, MPI participation, output schemas/consumers
+and whether a name is live or only historical. The [current switch inventory](../../benchmarks/reconstructed_fault/refactoring_r6a/switch_inventory.md)
+updates the rolling review; no switch removal/migration or changed defaults.
 
-Extract one private operation in surface_system.cc that prepares a complete,
-unpublished SurfaceLinearization from const SurfaceAssembly: copied residual,
-coefficients and shared filter factors, full fault factorizations, remote lookup
-and optional sparse G. Preserve the contiguous block's expressions and order.
-The owner supplies existing FE/grid/DoF/timer dependencies. Keep both backend
-files and private records unchanged; do not merge measures or scratch/published
-state. No additional assembly/reduction or diagnostic extraction is selected.
+Extract only M4 history diagnostics selected by ASPECT_STRESS_CYCLE_TRACE and
+ASPECT_FAULT_SOURCE_HISTORY_DIAGNOSTIC. A small source-private per-call recorder
+may own the existing streams/cell filter, with the existing candidate lifetime
+through validation/publication and unwinding. No persistent diagnostic owner,
+public material API or general logging framework. Keep numerical sampling,
+source admission, candidate construction, collective validation/publication and
+rollback with their existing owners. Leave the core particle-transfer trace alone.
 
-The caller retains total timing, reset/generation/diagnostic invalidation before
-assembly, existing UMFPACK admission, observer invocation before preparation,
-and diagnostic/pointer publication after successful preparation. Failure still
-leaves old solves invalid. Keep factor and lookup timers, collective ordering,
-point multiplicity, missing points, sparse/filter selection and pressure/signs.
-Restricted inverses retain their owner/generation contract and immutable filter
-factors retain shared ownership across trial cache changes. Residual-only calls
-may prepare caches; no claim of purity or new publication atomicity is made.
+Keep getenv reads and both setup/capture sites in place. Pass actual pre-publication
+inputs/candidates; never resample/re-evaluate them later. Disabled streams must
+not perform diagnostic-only geometry, material work, allocation of a trace, or
+MPI. Preserve selection short-circuiting, original continued-source guards,
+filenames/truncation, headers (including historical kappa labels), numeric
+precision, row order and units. Keep setup outside and row writing inside the
+original try/catch. Preserve silent stream-open/write failure and missing-cell
+input behavior, rather than adding assertions or changing exception masks.
 
-Verify the exact extracted block and retained caller, independent 2D/3D builds,
-existing surface/filter/coupling/stale/failure cases and short coupled comparisons.
-Reuse R5b1 matched one/two-rank outputs. Rerun the repaired four-rank frozen AMG/GMG
-comparison against R5b1 because candidate inverse/G preparation is touched.
-Keep the original stale singular-fixture diagnostic assertion unchanged and
-report it separately; the existing supplemental probe covers invalidation.
-No numerical, public-interface, owner, cache-policy or solver redesign; M1/M2,
-manager Stokes-QP organization and later refactoring stages remain out of scope.
+Verification uses nonempty rows on one/two ranks: reference/candidate off/off,
+on/on, and off/on neutrality within each version, plus missing selection,
+failed-open and existing rollback checks. Preserve physical/history fields,
+decisions, deterministic work and complete scientific CSV columns exactly.
+Compile old/new TUs independently with 2D/3D symbols and original unity grouping.
+Reuse the repaired frozen proof because this history-only extraction does not
+touch its observer, operator lifetime or output contract. Stop after R6a; no
+R6b/R6c, M1/M2 change, numerical correction, switch deletion or R7 is authorized.
 
 | Module | Owns | Refactoring scope |
 |---|---|---|
@@ -400,7 +403,13 @@ Inventory environment switches and options by purpose:
 
 Preserve names, defaults, and behavior during initial extraction. Removing a
 numerical option or migrating it to a parameter is a separately selected task.
-Do not assume all environment switches are disposable debug code.
+Do not assume all environment switches are disposable debug code. A diagnostic
+may run extra residual/material evaluations, prepare caches, invoke collectives,
+mutate scratch state or intentionally stop. Record those effects separately from
+formatting; only require off/on physical neutrality when the behavior claims it.
+For presence tests, empty and "0" remain enabled; preserve repeated reads rather
+than centralizing configuration at startup. Numerical filtering, completion
+inputs, loading and cache controls stay numerical/setup choices.
 
 Extract file handling and formatting where useful. Pass values actually used
 by the computation to the diagnostic recorder; avoid recomputing them in a way

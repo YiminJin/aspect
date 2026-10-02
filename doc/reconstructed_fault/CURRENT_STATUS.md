@@ -1,5 +1,45 @@
 # Phase-field / RSF current status
 
+## R6a accepted; R6b selected
+
+The commit containing this entry records accepted R6a and its rechecked qualified
+baseline. See [acceptance](../../benchmarks/reconstructed_fault/refactoring_r6a/README.md#accepted-r6a-baseline).
+R6b selects nonlinear-bound CSV and summary formatting only. Audit evaluations,
+solver decisions, MPI and capture timing remain in the driver. Earlier entries
+record their historical review state.
+
+## R6a material-history diagnostics complete for review
+
+Accepted post-R5 source is committed as `3b4ae16dd`. R6a refreshes the existing
+switch inventory (87 literal selectors: 23 production and 64 research/test,
+plus parameters/APIs/observers) and extracts only the two M4 history trace
+streams to source-private history_diagnostics.h/.cc. Per-call candidate storage
+owns the streams through publication/unwinding. Switch reads, lazy capture,
+source/selected-cell admission, error policy and numerical/history/MPI control
+flow stay at their existing sites. Public headers and physical ownership remain
+unchanged; historical kappa CSV labels still mean eta_ve.
+
+Release, independent 2D/3D compilation/symbols and 15 source/protection checks pass.
+All 20 one/two-rank runtime cases and 258 comparisons pass: off/off and on/on
+between binaries, off/on neutrality within each, nonempty exact diagnostic rows,
+missing-selection, silent failed-open and accepted-update rollback. Each of six
+history updates records 16,875 selected-particle and 146 continued-source rows
+across ranks. Recorded physical/history values, decisions and work counts match.
+The initial statistics comparison flagged path-dependent padding only; exact
+numeric-token comparison passes. No simulation rerun or tolerance change.
+
+Candidate: `build-refactor-r6a/aspect-r6a-qualified`, SHA256
+`d373cb3308ecc00fb05a574975cf55f9d65facea003464b48153fc6aecf88f01`.
+See [review](refactor_review.md#r6a--material-history-diagnostics-and-switch-inventory-complete-for-review)
+and [inventory/evidence](../../benchmarks/reconstructed_fault/refactoring_r6a/README.md).
+R6a is uncommitted for review; user's instruction file and local temporary edits
+are preserved. No R6b/R6c/R7, Debug/3D runtime, long/restart or injected late-history
+failure campaign. Frozen evidence reused; unrelated historical limitations remain.
+Recommended next task: one R6b nonlinear-bound reporting extraction, retaining
+residual audits, decisions, MPI and timing in the driver. Earlier entries are historical.
+
+
+
 ## R5 accepted; R6a selected
 
 The commit containing this entry records accepted R5b2 and the qualified
