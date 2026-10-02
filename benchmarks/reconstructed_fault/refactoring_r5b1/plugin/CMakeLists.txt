@@ -1,0 +1,21 @@
+cmake_minimum_required(VERSION 3.13.4)
+find_package(Aspect REQUIRED HINTS ${Aspect_DIR})
+DEAL_II_INITIALIZE_CACHED_VARIABLES()
+project(r5b1_surface_checks)
+get_filename_component(REPO "${CMAKE_CURRENT_SOURCE_DIR}/../../../.." ABSOLUTE)
+foreach(name phase_field_fault_surface_dynamic_pressure phase_field_fault_surface_singular phase_field_fault_pressure_gauge phase_field_fault_stage_i_rollback)
+  add_library(${name} SHARED ${REPO}/tests/${name}.cc)
+  ASPECT_SETUP_PLUGIN(${name})
+endforeach()
+add_library(cache_audit SHARED ${REPO}/benchmarks/reconstructed_fault/refactoring_r2b_cache/plugin/cache_audit.cc)
+ASPECT_SETUP_PLUGIN(cache_audit)
+add_subdirectory(${REPO}/benchmarks/reconstructed_fault/bp3/plugin bp3)
+# Separate supplemental probe for the current LAPACK diagnostic. The original
+# fixture is still built and run, with its historical assertion left intact.
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+set(singular_probe "${CMAKE_CURRENT_BINARY_DIR}/singular_current_diagnostic.cc")
+execute_process(COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/singular_current_diagnostic.py ${singular_probe}
+  COMMAND_ERROR_IS_FATAL ANY)
+add_library(singular_current_diagnostic SHARED ${singular_probe})
+target_include_directories(singular_current_diagnostic PRIVATE ${REPO}/tests)
+ASPECT_SETUP_PLUGIN(singular_current_diagnostic)

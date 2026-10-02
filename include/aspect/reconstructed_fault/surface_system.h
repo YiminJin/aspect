@@ -16,6 +16,7 @@
 
 #include <deal.II/grid/grid_tools_cache.h>
 #include <deal.II/base/timer.h>
+#include <deal.II/particles/property_pool.h>
 
 #include <memory>
 #include <functional>
@@ -221,6 +222,11 @@ namespace aspect
       assemble_surface_system(const LinearAlgebra::BlockVector &bulk_state,
                               const FaultVector &slip_rate,
                               const bool assemble_jacobian) const;
+
+      SurfaceAssembly
+      assemble_particle_system(const LinearAlgebra::BlockVector &bulk_state,
+                               const FaultVector &slip_rate,
+                               const bool assemble_jacobian) const;
 
       SurfaceAssembly
       assemble_bulk_work_system(const LinearAlgebra::BlockVector &bulk_state,

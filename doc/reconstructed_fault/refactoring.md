@@ -59,40 +59,35 @@ to change the reference algorithm, parameters, or expected test results.
 
 ## 2. Preserve responsibility boundaries
 
-### Selected module scope (R5a2 particle-projection movement)
+### Selected module scope (R5b1 surface assembly boundaries)
 
-R5a1 `c3ce532be` and its qualified executable/manifests are the reference,
-including the accepted R4 fixture repair. The user approved the
-[ten-member/two-helper proposal](refactor_review.md#r5a2--particle-projection-inventory-and-move-proposal-no-implementation)
-and clarified that the search/MPI-free reverse-interpolation contract applies
-only with an already valid cache. Record this clarification in both design
-specifications separately from the mechanical source movement.
+R5a is accepted: R5a1 `c3ce532be`, R5a2 `d29115ada`. Use the qualified R5a2
+executable and manifests, retaining repaired-fixture evidence. Follow the
+[revised R5 instructions](refactoring/codex_R5_instructions.md) and the
+[pre-edit inventory](../../benchmarks/reconstructed_fault/refactoring_r5b1/README.md).
 
-Move the complete definitions unchanged into `manager_particle_projection.cc`.
-Retain owner/API/layout, existing domain construction, exact cache keys, measures,
-component mapping, validation/publication order and collectives. Leave Stokes-QP
-associations, bulk-source continuation and already extracted files unchanged.
-Compile original/new TUs independently with unique 2D/3D definitions. Keep the
-new TU outside unity/PCH using the existing per-source mechanism so adding it
-does not alter the baseline unity groups or require unrelated M2 include fixes.
+Separate the particle/domain and bulk-work assembly implementations into two
+focused source files. Keep dispatch, configuration, private linearization record,
+construction/destruction, publication, full/restricted solves, norm and G actions
+in surface_system.cc. A narrow source-private header holds only the complete
+private SurfaceAssembly record; do not merge it with published linearization.
+One private particle-backend method is the only declaration addition. Preserve
+all backend expressions, guards, timers, sampling, MPI and diagnostic order.
 
-The public reverse-interpolation method retains lazy preparation of invalid
-caches. Callers must arrange consistent rank participation in collective rebuild;
-the local validity predicate does not establish global agreement. Do not add a
-collective, change ordering or fix asymmetric property/scalar error propagation
-within this pass. Any demonstrated MPI defect must be reported separately.
+Retain reset/generation/diagnostic invalidation before assembly, observer timing
+before candidate factorization, and publication only after preparation succeeds.
+Residual-only calls can prepare transient caches and filter factors; do not call
+them side-effect-free. Retain shared factor lifetimes, restricted generation
+checks and concrete material/canonical simulator ownership. Do not merge the
+quadrature paths or move B/history/acceptance responsibilities. Keep the existing
+source-private direct-solve/filter helpers; no framework or R5b2 extraction.
 
-Run focused projection/material-caller checks and matched one/two-rank comparisons,
-including the small two-rank cold/warm check with existing timer counts. Keep
-broader cache-lifetime coverage gaps recorded; material I_h cache tests are not
-a complete manager-cache suite. Stop after verification, before another manager
-or surface-system pass. No ownership/interface redesign is authorized.
-
-The accepted R5a1 contracts remain fixed: exact absolute trial values, separate
-trial and whole-solve rollback, caller-reapplied prescribed conditions, the R3
-restart transient sizing fix and validation before the noexcept terminal copy.
-Geometry sizing, generic registry, archive and restart rebuild remain in place;
-M4/M5 retain physical bounds and acceptance responsibility.
+Compile three TUs independently and check 2D/3D symbols. New TUs use the existing
+per-source unity/PCH exclusion, preserving existing unity membership. Verify both
+paths, normal filtering, explicit/reference G, restricted/stale/failure cases and
+short coupled comparisons before review. No physical/tolerance/cache-policy fix
+or broader lifecycle/interface redesign is authorized. All R5a contracts remain
+fixed; manager Stokes-QP reorganization is not selected by this task.
 
 | Module | Owns | Refactoring scope |
 |---|---|---|

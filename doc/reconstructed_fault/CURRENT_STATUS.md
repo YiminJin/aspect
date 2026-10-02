@@ -1,5 +1,48 @@
 # Phase-field / RSF current status
 
+## R5b1 accepted; R5b2 selected
+
+The commit containing this entry records accepted R5b1. Its qualified executable
+and evidence are preserved; see the [accepted baseline](../../benchmarks/reconstructed_fault/refactoring_r5b1/README.md#accepted-r5b1-baseline).
+The user selected R5b2: one coherent surface-operation extraction, preserving
+ownership, MPI and linearization lifetimes. The singular-fixture text correction
+remains separate and is not selected. Earlier entries are historical.
+
+## R5b1 surface assembly separation complete for review
+
+R5a2 is committed as `d29115ada` (R5a1: `c3ce532be`). Its immutable qualified
+binary, repaired-fixture evidence and local temporary edits are preserved.
+R5b1 moves particle-domain and bulk-work backend bodies unchanged into separate
+files; only private SurfaceAssembly gets a source-private shared definition.
+Dispatch, configuration, SurfaceLinearization, solves/G, observer timing and
+publication/failure semantics stay in surface_system.cc. No owner/public API/
+layout change. The header adds one private method and the direct deal.II include
+for its existing particle-index field; independent compilation exposed that
+pre-existing dependency. No M1/M2 source or existing test was edited.
+
+Full Release and three independent TUs pass; four backend/two dispatcher symbols
+are unique across 2D/3D. Eight source checks and 148 matched comparisons pass.
+Inverse/filter units pass 636 assertions in three cases per rank on both binaries.
+Particle pressure/rate modes, explicit/reference G, bulk-work normal filtering,
+restricted/stale views, coupled history/rollback and seven-output automatic BP3
+comparisons match on one/two ranks. Recorded values and work counts are unchanged.
+
+The original singular fixture fails its obsolete diagnostic-text expectation
+on both binaries before checking invalidation. It is retained unchanged. A
+separate probe requires the current GTTRF singular-pivot message, verifies
+generation advance/stale-inverse rejection, and reaches its intentional final
+failure marker on both binaries/rank counts. This is a fixture issue, not a
+numerical correction. Other historical restart/scientific limitations remain.
+
+Candidate: `build-refactor-r5b1/aspect-r5b1-qualified`, SHA256
+`fd8c03ab1f1f4e363e2b69cb69d8517a35c648c5a682308004aee4453ed4910c`.
+See [review](refactor_review.md#r5b1--surface-assembly-implementation-boundaries-complete-for-review)
+and [evidence](../../benchmarks/reconstructed_fault/refactoring_r5b1/README.md).
+Uncommitted for review; no R5b2 or manager Stokes-QP pass begun. Recommended next
+bounded task: separately repair the original singular-fixture diagnostic
+expectation, retaining all lifecycle assertions. Older entries below are historical.
+
+
 ## R5a accepted; R5b1 selected
 
 R5a1 is committed as `c3ce532be`; accepted R5a2 is saved by the commit containing

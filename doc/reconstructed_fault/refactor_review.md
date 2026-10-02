@@ -1,5 +1,92 @@
 # Reconstructed-fault refactoring review
 
+## R5b1 — Surface assembly implementation boundaries (complete for review)
+
+Accepted R5a2 was committed first as `d29115ada`, following R5a1 `c3ce532be`.
+Reference is `build-refactor-r5a2/aspect-r5a2-qualified`, SHA256
+`8f696bedb006147c564f4146b96f765e88b9cd11f68f3fb120c5f0c222a1bf27`.
+The user selected R5b1 rather than the earlier manager Stokes-QP recommendation.
+The [pre-edit inventory](../../benchmarks/reconstructed_fault/refactoring_r5b1/README.md)
+was recorded before source changes and verified afterward.
+
+### Implementation boundary and lifetime check
+
+Particle-domain assembly now lives in `surface_system_particle.cc`; complete
+bulk-work assembly lives in `surface_system_bulk_work.cc`. The dispatcher stays
+in `surface_system.cc` and calls one new private `assemble_particle_system()`
+operation after the existing bulk-work selection. Both backend bodies, including
+all guards/timers/diagnostics, are byte-identical to their original code.
+No local accumulation/reduction phase was extracted or reordered.
+
+Only the complete private nested `SurfaceAssembly` record moves into
+`source/reconstructed_fault/surface_system_internal.h`, unchanged. The complete
+private `SurfaceLinearization` record, constructor/destructor, configuration,
+residual evaluation, linearization, full/restricted solves, norm and G actions
+remain in the original source. The rest of that source is byte-identical except
+for the new internal-header include and dispatcher. There is no public record,
+new public accessor, new owner, unified measure or competing helper framework.
+
+| Responsibility | Verified unchanged contract |
+|---|---|
+| Particle backend | Owned-parent order, full domain weights, parent FE/P0 particle history/composition samples, surface-Q1 response, original packed reduction and local coupling points |
+| Bulk-work backend | Owned physical Stokes QPs, existing continuation association, physical FE inputs/incoming history, JxW*chi measure, zero-weight skip, per-fault reductions and optional filter/diagnostics |
+| Assembly scratch | Private temporary result; replicated arrays and local coupling samples, separate from published state |
+| Linearization | Reset old state, advance generation and clear diagnostic before assembly; observer after assembly and before factorization; construct/factor/RPE/sparse-G candidate before publication; failure leaves old inverse invalid |
+| Inverses / G | Existing direct factors, principal-free-block restricted inverse and stale-generation checks; same remote samples/multiplicity, explicit/reference G and physical pressure convention |
+| Filter / borrowed views | Exact operator reuse, fresh RHS; shared immutable factors survive later trial cache replacement; borrowed residuals expire on reset/replacement; raw/projected/Helmholtz remain distinct |
+| State / acceptance | Canonical simulator-owned helper, concrete material reference, no checkpointed surface state; M4 computes history and existing manager/particles store it; M5 solver/simulator retains acceptance |
+
+The public header adds only the private method declaration and a direct
+`deal.II/particles/property_pool.h` include for its existing particle-index field.
+The initial independent build exposed that previously implicit unity dependency;
+the saved baseline header fails independently with the same missing type. This
+small dependency correction changes no public API/layout or numerical behavior.
+Both new TUs use the existing per-source no-unity/no-PCH mechanism, preserving
+all baseline unity groups. No M1/M2 source or existing test was changed.
+
+### Focused verification
+
+Candidate is the uncommitted R5b1 source, frozen as
+`build-refactor-r5b1/aspect-r5b1-qualified`, SHA256 `fd8c03ab1f1f4e363e2b69cb69d8517a35c648c5a682308004aee4453ed4910c`.
+
+| Result | Check |
+|---|---|
+| PASS | Full Release build/link, three independent TUs, four unique backend 2D/3D definitions plus two retained dispatcher definitions |
+| PASS | Eight source checks: exact backend/record movement, retained lifecycle, narrow private declaration/direct include, other source/unit tests unchanged, single private record definition and unchanged unity grouping |
+| PASS | 636 inverse/filter unit assertions in three cases per rank, both executables, one/two ranks |
+| PASS | Dynamic/adiabatic/rate-dependent particle residual/K/G/full/restricted/stale cases, and explicit/reference B/G basis/random checks, one/two ranks |
+| PASS | Mature bulk-work raw/projected/Helmholtz free-equation derivatives, retained linearization after trials and raw-state preservation, one/two ranks |
+| KNOWN FIXTURE FAILURE | Original singular test expects obsolete diagnostic wording and fails that assertion identically on both binaries, one/two ranks; retained unchanged |
+| PASS / INTENTIONAL EXIT 1 | Separate probe requires the exact current GTTRF singular-pivot diagnostic, then verifies generation advance and rejection of stale inverse on both binaries, one/two ranks |
+| PASS | Short coupled pressure/history and accepted-update rollback against preserved R5a2, one/two ranks |
+| PASS | Automatic-completion BP3 through seven outputs on both binaries, one/two ranks; exact audited particle/bulk/fault fields, filter actions, decisions and work counts |
+| REUSED / NOT RERUN | Accepted repaired frozen AMG/GMG and restart evidence; no change to solver backend or lifetime/observer call sites |
+| NOT RUN | Debug/3D runtime, long BP3/BP5, dedicated detailed native-QP/line diagnostic capture/observer run; its code and call timing are preserved by exact source checks |
+
+148 matched checks pass with zero differences in recorded deterministic
+values, histories, decisions and cache/work counts; times/paths are excluded.
+There was no numerical fix, tolerance change or demonstrated MPI correctness
+defect. The initial include failure and its baseline reproduction are retained
+separately from successful build results. The original singular fixture stops
+at its obsolete `Failed to factor reconstructed-fault K_V block` text assertion,
+not at its intended final marker. A separate generated test-only probe requires
+`GTTRF failed, info=1, singular pivot vertex=0` and retains all subsequent
+invalidation assertions. Its full marker is reached on both binaries/rank counts.
+The production exception and original fixture are unchanged. Initial comparator
+flags for output-directory paths and asynchronously printed timer-block ordering
+were resolved by excluding paths and comparing exact call-count multisets; all
+numeric values and counts remain checked. No simulation rerun was needed. Historical cohesive restart step-two
+nonconvergence, Stage-J scientific questions and broader manager cache-lifecycle
+gaps remain unchanged, not resolved by these comparisons.
+
+[Reproduction and evidence](../../benchmarks/reconstructed_fault/refactoring_r5b1/README.md)
+record commands, hashes, raw outcomes and compared files. Accepted artifacts,
+checkpoint data and local temporary edits remain intact. R5b1 is uncommitted for
+review. Stop before R5b2. Recommended next bounded task: repair the original
+singular fixture's stale diagnostic expectation as a separate test-only change,
+retaining its generation/stale-inverse assertions before further refactoring.
+
+
 ## R5a2 — Particle-projection move (complete for review)
 
 Reference: accepted R5a1 `c3ce532be86765c7c9edcacb2f44377ff62820e1` and its
