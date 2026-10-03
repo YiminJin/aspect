@@ -9,5 +9,5 @@ target_link_libraries(frozen_birth_observer ${CMAKE_CURRENT_BINARY_DIR}/../bp3/l
 # Standalone guard loads the maintained property implementation, without the
 # frozen BP3 simulator callbacks (which intentionally reject evolving BP3).
 add_library(evolving_birth_guard SHARED
-  ../../bp3/plugin/particle_initialization.cc evolving_guard.cc)
+  ../../bp3/plugin/particle_initialization.cc ../../bp3/plugin/geometry.cc evolving_guard.cc)
 ASPECT_SETUP_PLUGIN(evolving_birth_guard)

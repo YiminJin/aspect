@@ -7,6 +7,7 @@ project(reconstructed_fault_bp3_restore)
 # test executables, BP5 variants, or sibling-directory sources are required.
 add_library(bp3_restore_150x50 SHARED
   bp3.cc
+  geometry.cc
   mesh.cc
   monitor.cc
   output.cc

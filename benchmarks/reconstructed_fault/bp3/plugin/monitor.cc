@@ -58,7 +58,7 @@ namespace aspect
     Tensor<1,dim> loading(const SimulatorAccess<dim> &,const Point<dim> &p)
     {
       const double rate=-BP3::Vp*(cumulative(BP3::signed_normal(p[0],p[1]))-.5);
-      Tensor<1,dim> u;u[0]=rate*BP3::cosine;u[1]=-rate*BP3::sine;
+      Tensor<1,dim> u;u[0]=rate*BP3::geometry().tangent[0];u[1]=rate*BP3::geometry().tangent[1];
       return u;
     }
 
@@ -78,7 +78,7 @@ namespace aspect
           for(unsigned int i=0;i<fault.n_vertices();++i) incoming_theta[i]=fault.get_properties(i)[state];
         }
       if(sim.get_timestep_number()!=0) return;
-      const auto profiles=sim.get_phase_field_handler().get_phase_field_profiles(BP3::core_phi);
+      const auto profiles=sim.get_phase_field_handler().get_phase_field_profiles(BP3::geometry().peak_phase);
       double error=0.;
       for(unsigned int i=0;i<radius.size();++i)
         error=std::max(error,std::abs(profiles[0]->value(radius[i])-phi[i]));
@@ -117,6 +117,7 @@ namespace aspect
       }
       void parse_parameters(ParameterHandler &prm) override
       {
+        BP3::configure_geometry(*this,prm);
         prm.enter_subsection("Postprocess");prm.enter_subsection("BP3 restored monitor");
         profile_path=prm.get("Stationary profile file");
         BP3Restore::filter_mode=prm.get("Friction normal input");
@@ -128,28 +129,10 @@ namespace aspect
         detailed_diagnostics=prm.get_bool("Write detailed diagnostics");
         BP3Benchmark::detailed_diagnostics=detailed_diagnostics;
         prm.leave_subsection();prm.leave_subsection();
-        prm.enter_subsection("Fault reconstruction");
-        geometry_path=prm.get("Prescribed faults file");
-        prm.leave_subsection();
       }
       void initialize() override
       {
         using namespace BP3Restore;
-        if (bottom_velocity_constraint=="fault parallel")
-          {
-            std::istringstream geometry(Utilities::read_and_distribute_file_content(
-              Utilities::expand_ASPECT_SOURCE_DIR(geometry_path),this->get_mpi_communicator()));
-            std::vector<Point<2>> points; double x,y,p;
-            while (geometry>>x>>y>>p) points.emplace_back(x,y);
-            AssertThrow(points.size()>1,ExcMessage("Cannot obtain rotated bottom orientation."));
-            const auto ends=std::minmax_element(points.begin(),points.end(),
-              [](const auto &a,const auto &b){return a[1]<b[1];});
-            bottom_tangent=*ends.first-*ends.second;
-            bottom_tangent/=bottom_tangent.norm();
-            AssertThrow(std::abs(bottom_tangent[0]-.5)<1e-12 &&
-                        std::abs(bottom_tangent[1]+std::sqrt(3.)/2)<1e-12,
-                        ExcMessage("Rotated bottom requires the restored BP3 fault orientation."));
-          }
         std::istringstream in(Utilities::read_and_distribute_file_content(
           Utilities::expand_ASPECT_SOURCE_DIR(profile_path),this->get_mpi_communicator()));
         unsigned int n=0;
@@ -172,9 +155,9 @@ namespace aspect
               [](const Point<dim> &p)
               {
                 const double s=BP3::down_dip(p[0],p[1]);
-                return s<200. || s>BP3::box_size/BP3::sine-200.
-                       || std::abs(s-BP3::weakening_length)<100.
-                       || std::abs(s-(BP3::weakening_length+3000.))<100.;
+                return s<200. || s>BP3::geometry().length-200.
+                       || std::abs(s-BP3::geometry().weakening_length)<100.
+                       || std::abs(s-(BP3::geometry().weakening_length+3000.))<100.;
               });
           });
         this->get_signals().post_advection_solver.connect(&before_mechanics<dim>);
@@ -185,7 +168,7 @@ namespace aspect
       {
         const auto entry=status.find("BP3 restored model");
         AssertThrow(entry!=status.end() && entry->second==identity(),
-                    ExcMessage("Cannot change restored BP3 geometry, profile or normal filter across restart."));
+                    ExcMessage("BP3 restart requires the same geometry identity, profile and normal filter. Older checkpoints without the geometry identity require their original plugin."));
       }
       std::pair<std::string,std::string> execute(TableHandler &) override
       {
@@ -299,12 +282,12 @@ namespace aspect
         return {"Restored BP3 monitor","raw/filtered traction and endpoint growth recorded"};
       }
     private:
-      std::string profile_path, geometry_path;
+      std::string profile_path;
       bool detailed_diagnostics = false;
       std::string identity() const
       {
         std::ostringstream out;
-        out<<std::setprecision(17)<<"BP3 150x50 thrust a=-1 ell20 Q2 LLS-unlimited v1 "
+        out<<std::setprecision(17)<<BP3::geometry().identity<<" loading stationary thrust v2 "
            <<BP3Restore::filter_mode<<' '<<BP3Restore::filter_length<<' '<<BP3Restore::degradation_scale;
         for(unsigned int i=0;i<BP3Restore::radius.size();++i)
           out<<' '<<BP3Restore::radius[i]<<' '<<BP3Restore::phi[i]<<' '<<BP3Restore::integral[i];

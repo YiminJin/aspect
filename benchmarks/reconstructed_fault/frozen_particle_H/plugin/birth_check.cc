@@ -17,7 +17,7 @@ namespace aspect { namespace Postprocess {
       const auto &property=pm.get_property_manager().template get_matching_active_plugin<Particle::Property::BP3FrozenCrackDrivingForce<dim>>();
       const auto H=pm.get_property_manager().get_data_info().get_position_by_field_name("crack_driving_force");
       const auto &model=Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(this->get_material_model());
-      const auto profiles=this->get_phase_field_handler().get_phase_field_profiles(BP3::core_phi);
+      const auto profiles=this->get_phase_field_handler().get_phase_field_profiles(BP3::geometry().peak_phase);
       const auto rank=Utilities::MPI::this_mpi_process(this->get_mpi_communicator());
       const auto path=this->get_output_directory()+"birth_H_rank"+std::to_string(rank)+".csv";
       const bool header=!std::ifstream(path).good();std::ofstream out(path,std::ios::app);out<<std::setprecision(17);

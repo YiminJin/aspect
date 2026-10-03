@@ -30,7 +30,7 @@ namespace aspect
                  MaterialModel::MaterialUtilities::arithmetic);
 
       return sim.get_phase_field_handler().stationary_crack_driving_force(
-               {1-f, f}, phi, BP3::core_phi);
+               {1-f, f}, phi, BP3::geometry().peak_phase);
     }
 
     template double stationary_particle_H(const SimulatorAccess<2> &, const Point<2> &,
@@ -63,7 +63,7 @@ namespace aspect
           }
 
         if (!profile)
-          profile = std::move(this->get_phase_field_handler().get_phase_field_profiles(BP3::core_phi)[0]);
+          profile = std::move(this->get_phase_field_handler().get_phase_field_profiles(BP3::geometry().peak_phase)[0]);
         return BP3Benchmark::stationary_particle_H(*this, position, *profile);
       }
 

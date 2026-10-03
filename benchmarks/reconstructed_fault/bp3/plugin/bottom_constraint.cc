@@ -1,4 +1,5 @@
 #include "runtime.h"
+#include "geometry.h"
 #include <aspect/boundary_velocity/interface.h>
 #include <aspect/geometry_model/box.h>
 #include <aspect/plugins.h>
@@ -13,7 +14,6 @@ namespace aspect
 namespace BP3Restore
 {
 std::string bottom_velocity_constraint = "full";
-Tensor<1, 2> bottom_tangent;
 
 template <int dim>
 void
@@ -77,7 +77,7 @@ constrain_bottom (const SimulatorAccess<dim> &sim,
       mate[entry.second[0]] = entry.second[1];
     }
   unsigned rows = 0, corners = 0, hanging = 0, covered = 0;
-  const double tx = bottom_tangent[0], ty = bottom_tangent[1];
+  const double tx = BP3::geometry().tangent[0], ty = BP3::geometry().tangent[1];
   const auto is_corner = [&] (const Point<dim> &p)
     {
       return std::abs (p[0] - box.get_origin ()[0]) < 1e-10

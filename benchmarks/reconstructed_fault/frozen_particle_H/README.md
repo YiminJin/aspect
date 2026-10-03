@@ -1,5 +1,10 @@
 # Frozen BP3 newborn H review
 
+The subsequent [section-2 geometry review](../bp3_geometry/README.md) derives
+BP3 geometry from the prescribed file/Box. Its small consumer updates keep these
+fixtures buildable; the binary/output evidence below remains the accepted
+`126049420` baseline, not evidence for the newer geometry implementation.
+
 This bounded follow-up starts from `617d52838` on `pf-rsf-refactor`, after the
 accepted particle/audit lifecycle correction. It stops before runtime-cleanup
 section 2. The executable and earlier qualified plugin remain unchanged.

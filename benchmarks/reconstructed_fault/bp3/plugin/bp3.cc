@@ -17,7 +17,6 @@
 #include <iomanip>
 
 
-namespace BP3 { double weakening_length = 15000.; }
 #ifdef ASPECT_BP3_LOCAL_BOTTOM_TEST
 namespace BP3 { double local_state_disturbance = 0.; }
 #endif
@@ -112,7 +111,7 @@ namespace aspect
                           if (fe.system_to_component_index(k).first==sim.introspection().component_indices.velocities[1]
                               && fe.get_unit_support_points()[k]==fe.get_unit_support_points()[j]) break;
                         AssertThrow(k<dofs.size(),ExcMessage("Unpaired bottom velocity support point."));
-                        const auto t=BP3Restore::bottom_tangent;
+                        const auto t=BP3::geometry().tangent;
                         const auto prescribed=BP3Restore::loading(sim,p);
                         error[side]=std::max(error[side],std::abs(t[0]*(lifted[dofs[j]]-prescribed[0])
                                                                 +t[1]*(lifted[dofs[k]]-prescribed[1])));
@@ -140,8 +139,8 @@ namespace aspect
           const double sign = side == 0 ? 1 : -1;
           if (out)
             out << (side == 0 ? "left" : (side==1 ? "right" :
-                    (BP3Restore::bottom_velocity_constraint=="full" ? "bottom_profile":"bottom_parallel"))) << ',' << (side==2?0.:sign * .5 * BP3::Vp * BP3::cosine) << ','
-                << (side==2?0.:sign * .5 * BP3::Vp * BP3::horizontal_sign*BP3::sine) << ',' << .5 * BP3::Vp << ',' << maximum << ',' << n
+                    (BP3Restore::bottom_velocity_constraint=="full" ? "bottom_profile":"bottom_parallel"))) << ',' << (side==2?0.:sign * .5 * BP3::Vp * BP3::geometry().tangent[0]) << ','
+                << (side==2?0.:sign * .5 * BP3::Vp * BP3::geometry().tangent[1]) << ',' << .5 * BP3::Vp << ',' << maximum << ',' << n
                 << '\n';
         }
     }
@@ -151,7 +150,7 @@ namespace aspect
     prescribe_phase (const SimulatorAccess<dim> &sim, AffineConstraints<double> &constraints)
     {
       AssertThrow (dim == 2, ExcMessage ("BP3 currently supports two dimensions."));
-      const auto profiles = sim.get_phase_field_handler ().get_phase_field_profiles (BP3::core_phi);
+      const auto profiles = sim.get_phase_field_handler ().get_phase_field_profiles (BP3::geometry().peak_phase);
       const auto &fe = sim.get_fe ();
       const auto phi = sim.introspection ().variable ("phase_field").first_component_index;
       std::vector<types::global_dof_index> dofs (fe.n_dofs_per_cell ());
@@ -181,7 +180,7 @@ namespace aspect
       auto &pm = sim.get_phase_field_handler ().get_associated_particle_manager ();
       const auto H
           = pm.get_property_manager ().get_data_info ().get_position_by_field_name ("crack_driving_force");
-      const auto profiles = sim.get_phase_field_handler ().get_phase_field_profiles (BP3::core_phi);
+      const auto profiles = sim.get_phase_field_handler ().get_phase_field_profiles (BP3::geometry().peak_phase);
       for (auto &particle : pm.get_particle_handler ())
         particle.get_properties ()[H] = stationary_particle_H(
           sim, particle.get_location (), *profiles[0]);
@@ -197,7 +196,7 @@ namespace aspect
       AssertThrow (dim == 2 && manager.get_faults ().size () == 1,
                    ExcMessage ("Modified BP3 requires one fixed two-dimensional fault."));
       const auto &fault = manager.get_fault (0);
-      manager.set_shear_sense(0,-1);
+      manager.set_shear_sense(0,BP3::geometry().shear_sense);
       for (unsigned int v = 0; v < fault.n_vertices (); ++v)
         AssertThrow (BP3::normal_distance (fault.vertex (v)[0], fault.vertex (v)[1]) < 1e-8,
                      ExcMessage ("BP3 reconstructed dip changed."));
@@ -282,6 +281,14 @@ namespace aspect
     signals.post_simulator_initialization.connect (
         [] (const SimulatorAccess<dim> &sim)
           {
+            const auto &prescribed=sim.get_reconstructed_fault_manager().get_prescribed_faults();
+            AssertThrow(prescribed.size()==1 && prescribed[0].vertices.size()==BP3::geometry().prescribed.vertices.size(),
+                        ExcMessage("BP3 early geometry and native prescribed geometry disagree."));
+            for (unsigned i=0;i<prescribed[0].vertices.size();++i)
+              AssertThrow(prescribed[0].vertices[i][0]==BP3::geometry().prescribed.vertices[i][0]
+                          && prescribed[0].vertices[i][1]==BP3::geometry().prescribed.vertices[i][1]
+                          && prescribed[0].core_phase_field_values[i]==BP3::geometry().peak_phase,
+                          ExcMessage("BP3 fault.txt changed between geometry setup and native initialization."));
             sim.get_reconstructed_fault_manager ().register_property ("background tractions", 2);
             sim.get_reconstructed_fault_manager ().register_property ("cumulative_signed_slip_m", 1);
             sim.get_reconstructed_fault_manager ().register_property ("BP3 fixed shear correction", 3);
@@ -313,6 +320,9 @@ namespace aspect
     template <int dim> class BP3Initial : public Interface<dim>, public SimulatorAccess<dim>
     {
     public:
+      void parse_parameters(ParameterHandler &prm) override
+      { BP3::configure_geometry(*this,prm); }
+
       void initialize () override
       {
         friction = &Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>> (
@@ -327,7 +337,7 @@ namespace aspect
 #ifdef ASPECT_BP3_LOCAL_BOTTOM_TEST
         const double xd = BP3::down_dip(p[0],p[1]);
 #else
-        const double xd = (BP3::box_size - p[1]) / BP3::sine;
+        const double xd = (BP3::geometry().upper[1] - p[1]) / BP3::geometry().sine;
 #endif
         const auto &name = this->introspection ().name_for_compositional_index (field);
         if (name == "theta_initial")
@@ -351,6 +361,9 @@ namespace aspect
     template <int dim> class BP3Velocity : public Interface<dim>, public SimulatorAccess<dim>
     {
     public:
+      void parse_parameters(ParameterHandler &prm) override
+      { BP3::configure_geometry(*this,prm); }
+
       Tensor<1, dim>
       boundary_velocity (const types::boundary_id, const Point<dim> &p) const override
       {

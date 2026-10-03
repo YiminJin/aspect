@@ -143,8 +143,8 @@ namespace aspect
             for (unsigned int q=0;q<nq;++q)
               {
                 const auto p=fe.quadrature_point(q);const double xd=BP3::down_dip(p[0],p[1]);
-                const bool window=(xd>=BP3::weakening_length-2000. && xd<=BP3::weakening_length+5000.)
-                  || p[1]<2000. || p[1]>BP3::box_size-2000.;
+                const bool window=(xd>=BP3::geometry().weakening_length-2000. && xd<=BP3::geometry().weakening_length+5000.)
+                  || xd<2000. || xd>BP3::geometry().length-2000.;
                 if (!a[q].active && !(write_files && phi[q]>0. && window)) continue;
                 std::vector<double> all(composition.size());
                 for (unsigned int c=0;c<all.size();++c) all[c]=composition[c][q];

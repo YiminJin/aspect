@@ -1,7 +1,6 @@
 #include "../../bp3/plugin/particle_initialization.h"
 #include <aspect/particle/manager.h>
 #include <aspect/postprocess/interface.h>
-namespace BP3 { double weakening_length=15000.; }
 namespace aspect { namespace Postprocess {
   template <int dim>
   class EvolvingBirthGuard : public Interface<dim>, public SimulatorAccess<dim>

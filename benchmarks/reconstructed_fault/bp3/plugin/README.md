@@ -1,12 +1,35 @@
 # Restored BP3 runtime
 
-This self-contained source package implements the 150 × 50 km right-dipping
-thrust model with frozen mature phase field, paired endpoint completion,
+This self-contained source package implements stationary straight-fault BP3
+with frozen mature phase field, paired endpoint completion,
 Q2 continuous stress fields, native linear-least-squares particle interpolation,
 and the selected raw/Helmholtz normal traction. Preparation and monitor signal
 ordering are required: the monitor loads the stationary boundary profile and
 configures the surface filter after simulator initialization. Accepted output
 never performs a second constitutive update.
+
+## Geometry (runtime-cleanup section 2)
+
+`Fault reconstruction / Prescribed faults file` and the native Box settings now
+supply the geometry for initial fields/H, loading direction, constraints, mesh
+audit and output. The native reader accepts comments and retains all prescribed
+anchors. One straight, strictly ordered 2D polyline must intersect the interiors
+of the top and bottom faces and have a constant admissible peak. Reversing its
+vertices preserves physical thrust. Curved/multiple faults, corner contacts,
+duplicate/backtracking segments and nonuniform peaks fail explicitly.
+
+Each consumer requests the same read-only description during parameter parsing,
+so geometric setup precedes field queries, constraints and refinement. Production
+material fractions retain the horizontal `(y_top-y)/sin(dip)` extension of the
+configured weakening region and its 3 km transition. A small functional input
+must explicitly set `Postprocess / BP3 / Allow truncated transition = true` if
+that transition does not fit. This is not production qualification.
+
+Section 2 replaces compiled geometry; **section 3 remains deferred**. The saved
+mesh and stationary loading table are still required, and the legacy completion
+table remains available alongside the already supported automatic mode. A changed
+fault must still use compatible completion/mesh/profile inputs. No geometry change
+silently repairs those tables. See the [geometry review](../../bp3_geometry/README.md).
 
 ## Build and inputs
 
@@ -93,9 +116,9 @@ models retain native late-history interpolation. See the
 [frozen-H verification](../../frozen_particle_H/README.md).
 Historical inputs remain unchanged. This candidate still
 requires all historical geometry/profile fixtures; geometry/runtime cleanup and
-server qualification remain deferred. The old monitor identity string is retained
-for compatibility and is not evidence of the new limiter policy; use the explicit
-limiter startup lines and parameter files.
+server qualification remain deferred. The geometry-aware monitor identity includes Box bounds, ordered prescribed
+vertices/peak and the transition setting. Use explicit limiter startup lines and
+parameter files for the native limiting policy.
 
 The matching core stores manager and generator placement RNG streams per rank and
 per particle manager, and restores both on timestep rejection. Old snapshots or
@@ -131,8 +154,11 @@ Keep them together. Event colors use instantaneous profile V, never sparse
 
 ## Restart
 
-Version-5 layout, slip/Theta/event history, audit baselines and schedule reference
-states remain unchanged. On restart, parsed PRM output intervals replace stored
+The existing history archive layout, slip/Theta/event history, audit baselines
+and schedule reference states remain unchanged. Geometry-aware checkpoints must
+match actual Box bounds and ordered fault contents as well as loading profile and
+normal filter. Older checkpoints without this geometry identity require their
+original plugin; their histories are not silently converted. On restart, parsed PRM output intervals replace stored
 intervals while retaining the last successful write's time/slip reference.
 No CSV is used to reconstruct physical history.
 
@@ -155,6 +181,8 @@ without a growth snapshot starts a new growth table with a header.
 
 ## Source ownership
 
+`geometry.cc`: shared read-only straight-fault/Box description, native parsing,
+validation, physical coordinates/orientation and restart identity.
 `bp3.cc`: initial fields, loading registration, preparation/solver observers.
 `particle_initialization.cc`: shared stationary H initializer and opt-in frozen
 BP3 particle property; generic history transfer remains in the native property.
