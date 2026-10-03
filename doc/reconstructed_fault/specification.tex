@@ -647,6 +647,12 @@ are mutually exclusive.
 The common physical source association uses endpoint shape functions, current
 physical phase/pressure/stress/history, and endpoint surface fields in every
 bulk/surface residual and coupling derivative, including free endpoints.
+At the endpoint plane, allow only a local floating-point roundoff band,
+scaled by coordinates and the conditioning of the resampled terminal tangent,
+to reconcile the raw and resampled frames. An admitted normal-strip association
+owns the point; the endpoint fills only an otherwise unassigned point in this
+band. Preserve transverse support, physical-half-plane and overlap checks,
+and the zero continuation of perpendicular contacts.
 The selected automatic mode uses the existing bulk-work measure. Geometry and
 continuation data are derived caches rebuilt through existing geometry, mesh
 and restart lifecycle paths. Checkpoint formats and normalization value-cache
@@ -1384,6 +1390,21 @@ the checkpointed background. Accepted-solver and completed-checkpoint observers
 do not modify constitutive history, timesteps, or solver decisions. Full
 filesystem restart equivalence is required before server-run preparation is
 considered complete.
+
+The maintained BP3 runtime-cleanup section 2 derives its stationary chart from
+the native prescribed-fault reader and Box bounds. One straight, strictly ordered
+2D polyline with constant admissible peak and top/bottom interior intersections
+is supported; curved/multiple faults, duplicate/backtracking segments, corners
+and tangencies are rejected. Consumers configure a shared read-only description
+before field evaluation, constraints or refinement. Native anchors and resampling
+remain manager-owned. Physical top-to-bottom orientation and thrust do not depend
+on vertex ordering. Bulk material fractions retain the horizontal extension
+$(y_{\rm top}-y)/\sin(\mathrm{dip})$ and the existing weakening length plus
+3 km transition. Production domains must contain the transition; a labeled local
+fixture may explicitly permit truncation. Table removal is deferred to section 3;
+this change does not alter generic completion admission. Restart identity records
+Box bounds, ordered input vertices and peak; older BP3 checkpoints without this
+identity require the original plugin rather than an unverified geometry match.
 
 The separately selected BP3 particle-lifecycle correction preserves inert $H$
 per retained particle. The separately approved frozen-BP3 follow-up uses one
@@ -2326,7 +2347,15 @@ filter uses the full work measure $w_q=JxW_q\chi_q$:
 \]
 Only the friction input becomes $N_q^Tz$. Bulk stress, pressure and histories
 are not replaced. Derivatives use physical arc length; constant endpoint
-extensions have zero derivative. Natural endpoint flux, independent connected
+extensions have zero derivative. At a shared vertex's normal plane, assign
+the arithmetic mean of the two one-sided stiffness integrands
+$(\partial_sN)(\partial_sN)^T$; at an endpoint plane, average the interior
+integrand with its zero exterior trace. This is not the outer product of an
+averaged gradient and retains the tridiagonal stencil. Identify only
+roundoff-sized plane ambiguity using machine epsilon, coordinate scales and
+adjacent-segment tangent conditioning. Away from this band, use the ordinary
+segment or exterior derivative. Preserve source associations, Q1 values,
+support and native input order. Natural endpoint flux, independent connected
 components, and the complete supported domain define the operator; plotting
 windows and slip constraints do not modify its rows. Unsupported rows fail.
 The default raw mode bypasses it, whereas $L_s=0$ is a distinct projection.

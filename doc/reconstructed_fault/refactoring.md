@@ -485,3 +485,43 @@ task. Follow the user's agreed stage boundary rather than executing the whole
 roadmap. If a pass has not yet been selected or its boundaries are unresolved,
 produce the concrete proposal first; an already selected implementation pass
 does not require restarting the planning process.
+
+## BP3 runtime-cleanup section 2 review boundary
+
+The separately selected section 2 replaces compiled BP3 geometry with one
+validated read-only description from the native prescribed-fault reader and Box
+bounds. Each consumer configures it during parameter parsing; no postprocessor
+execution order supplies geometry. Preserve native anchors/resampling and the
+horizontal material extension. Table generation/removal remains section 3.
+
+The anticipated stationary-profile peak roundoff fix is separate (`8df2bc5b5`):
+preserve the interpolation expression and its mathematical endpoint bounds;
+never lower prescribed peak or loosen H/solver assertions. The new 45-degree
+reversed-order comparison exposes an additional endpoint-plane association gap
+in unchanged core projection/automatic-continuation code. Record its failed
+qualification separately; do not canonicalize input ordering, change resampling,
+or broaden a numerical fix inside this geometry pass. See
+[the section-2 report](../../benchmarks/reconstructed_fault/bp3_geometry/README.md).
+
+
+The user subsequently selected the endpoint-plane correction as a separate
+numerical task. Use a coordinate/terminal-tangent floating-point error bound,
+retain every already valid association, and keep support/overlap checks and
+native resampling unchanged. Its implementation and evidence are recorded in
+[the endpoint review](../../benchmarks/reconstructed_fault/bp3_geometry/endpoint/README.md).
+Full QP admission agreement and the original 60-degree/lifecycle successes are
+verified, but one of the seven original field comparisons still fails (also
+reproduced on one rank). Do not treat the endpoint correction as fully qualified,
+change comparison tolerances, or proceed to section 3. Further timestep-zero
+order-sensitivity investigation is a separately selected bounded task.
+
+
+The user selected the subsequent filter-derivative correction. At shared-vertex
+planes use the mean of the two one-sided stiffness integrands; at endpoint
+planes use the interior/zero-exterior mean. Average gradient outer products,
+not gradients, to retain the tridiagonal operator. Use only a local geometric
+floating-point bound; do not reassign valid source associations or canonicalize
+native input. The [qualified correction](../../benchmarks/reconstructed_fault/bp3_geometry/filter_derivative/README.md)
+passes all 927 existing qualification checks, including the seven prior failures.
+Keep this numerical correction distinct from the section-2 geometry work and
+endpoint-admission correction. Section 3 remains a separately selected task.

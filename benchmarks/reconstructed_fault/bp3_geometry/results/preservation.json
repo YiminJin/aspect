@@ -1,0 +1,17 @@
+{
+  "preserved_local": {
+    "doc/reconstructed_fault/refactoring/tmp/R3_plan.md": "d0ba376340a7e05a158b1eb499598809c287714c5daff5b1bb78c81a5a7e292f",
+    "doc/reconstructed_fault/refactoring/tmp/R4c_review.md": "f5be2850a093946432bd60e0e4ab185f00b31cd68e4f1862c3cd798263f57aef",
+    "doc/reconstructed_fault/refactoring/tmp/R3b_review.md": "72cf306fa424637672f09e361830a438009326e40ce868552ed8c8aaba48a0eb",
+    "doc/reconstructed_fault/refactoring/tmp/R5a2_review1.md": "3b09284e9b98d5c925ea2f3b7b9415ae70e91f32749a84e6346215508f00b0ca",
+    "doc/reconstructed_fault/refactoring/tmp/R3a_review.md": "be578ae1813124c4d7c1e64ef3d53032d65ff05eb08603457a13a72e80f8abc7",
+    "doc/reconstructed_fault/refactoring/tmp/R6_plan.md": "24c5eef9a8e39844830e3e52eb03266c147b427fa7f14426e715cd7885d814c0",
+    "doc/reconstructed_fault/refactoring/tmp/R2b_review.md": "231a440a7aba60e9d383aaf77931a7f6dcddf8e2e436f995028936c9189a70c3",
+    "doc/reconstructed_fault/refactoring/tmp/R4c_plan.md": "9cb2726b3011045183ffdc7e480326acbfed920e1234a0f97ca9a3f6f6c88509",
+    "doc/reconstructed_fault/refactoring/tmp/R4ab_review.md": "eaf6cff858ca388cacc70ac292edaa4aecea59d9b17a81355d70539afaa14b54",
+    "doc/reconstructed_fault/bp3/bp3_particle_replenishment_codex.md": "fe8d4aa9ab7904b1a0468223bde02541e9c86bdffdab95d54b03c48884dbe82b",
+    "doc/reconstructed_fault/bp3/bp3_runtime_cleanup_local_tests_codex.md": "298eabe819afaa0c2cb55df2631e332e7001365d80f796e3dc101e5288193dd1"
+  },
+  "old_qualified_binaries_unchanged": true,
+  "endpoint_association_core_unchanged_from": "126049420"
+}

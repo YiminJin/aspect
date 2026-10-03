@@ -1637,3 +1637,120 @@ observed absolute difference about 1.97e5). User-local files and prior qualified
 artifacts are preserved. This is short 2D AMG evidence, not long-time/server
 qualification. Section 2, making fault.txt the single geometry input, remains
 unstarted and is the next bounded task after review.
+
+## BP3 geometry section 2 (2026-10-02; qualification incomplete)
+
+Accepted frozen-BP3 startup/birth H is committed as `126049420`. Section 2 now
+uses one early, read-only geometry description from the native prescribed-fault
+reader and Box bounds across initialization, loading, mesh audit and diagnostics.
+It derives peak, coordinates and thrust independently of input order, preserves
+native anchors/resampling and the horizontal material extension, and validates
+straight top/bottom geometry. Table removal remains unstarted section 3.
+
+[The geometry review](../../benchmarks/reconstructed_fault/bp3_geometry/README.md)
+records 794 passing checks and seven failed 45-degree reversed-order comparisons.
+The 60-degree comparisons, exact one/two-rank retry/restart, newborn/survivor H,
+native evolving-H fallback and explicit restart-identity rejection pass. Geometry
+identity now requires actual Box/ordered fault contents; old checkpoints without
+that identity require their original plugin.
+
+The anticipated peak interpolation overshoot is fixed separately in `8df2bc5b5`
+with endpoint bounds on the unchanged convex expression and a focused regression
+(38,967 assertions on each of two ranks). It permits the 45-degree runs to reach
+accepted steps 0–2 without changing physical settings or solver/history gates.
+
+**Remaining blocker:** four endpoint-plane QPs are omitted in one 45-degree input
+order and admitted in the reverse, on both one and two ranks. Strict normal-strip
+xi admission and the automatic continuation's `s>=0` rejection leave a roundoff
+gap. Identical startup particles and near-identical Ih still yield a 762 Pa
+initial normal-traction difference. This unchanged core behavior is recorded,
+not repaired by canonicalizing geometry or loosening comparisons. Recommended
+next bounded task: consistent endpoint-plane association ownership and its
+regression, before section 3 or production qualification. No server job or R7
+work was performed; current geometry implementation remains for review.
+
+
+### Endpoint handoff correction (2026-10-02; qualification still blocked)
+
+The separately requested core correction fills only the automatic endpoint-plane
+roundoff band, scaled by coordinates, machine epsilon and terminal-tangent
+conditioning. Already valid associations, support/overlap checks, native input
+order and MPI ownership are preserved. The reference is `8df2bc5b5` plus the
+section-2 geometry implementation; the tested executable is
+`build-refactor-r6b/aspect-endpoint-plane-qualified`.
+
+All 16,875 velocity QP admissions now match between input orders. Against the
+immutable reference, every previously active association remains exact; the
+nine/five new associations lie within 2.26e-12 m of an endpoint plane. Reported
+points, adjacent floating-point values and both sides pass in both orders on
+one/two ranks. Release builds and 39,045 unit assertions per rank pass. The
+successful 60-degree and birth/retry/restart checks remain successful.
+
+**Six of the original seven failed comparisons pass; qualification is not
+complete.** Timestep-zero 45-degree slip rate still differs by 7.07047e-18 m/s
+(7.0664e-9 relative), exceeding the unchanged 5e-10 column-scale bound, in both
+one- and two-rank reversed-order comparisons. The combined endpoint report is
+925 passed / 2 failed (the same failure and its serial counterpart). All source
+admissions match, but the cause of this remaining solution sensitivity is not
+yet established. Do not loosen tolerances or claim full qualification.
+
+See [endpoint review](../../benchmarks/reconstructed_fault/bp3_geometry/endpoint/README.md).
+Recommended next bounded task: isolate the remaining timestep-zero order
+sensitivity in assembled-system/normal-traction diagnostics. Section 3 remains
+unstarted; no production/server run or broader numerical correction is authorized.
+
+
+### Bounded timestep-zero diagnosis (2026-10-02; no numerical correction)
+
+The corrected 45-degree forward/reversed serial cases were diagnosed using
+existing read-only observers; instrumented production-tolerance profiles match
+the prior serial outputs byte for byte. The maximum signed difference
+(reverse minus forward) is -7.070475385e-18 m/s at
+(48611.111111111109,1388.8888888888889) m. The implemented-law discrete
+friction+damping sensitivity predicts -7.070474857e-18 m/s, using matched weak
+loads and the actual filtered normal input, not independent traction maxima.
+
+The first non-roundoff operator difference is the Helmholtz normal-filter
+stiffness: seven endpoint-plane samples switch zero/nonzero derivative under
+strict along/length tests; seventeen central-vertex samples select opposite
+adjacent Q1 derivatives. Admissions, valid associations and source mass remain
+unchanged/to roundoff. Physical DoF maps, homogeneous Newton constraints,
+lifted initial iterates and A match exactly; B/K_V differ only at roundoff.
+G actions differ consistently with the changed filter. At the maximum-rate
+location, endpoint derivative classification contributes +0.0168150 Pa of the
++0.0167966 Pa filtered-normal difference; pressure/deviatoric responses are much
+smaller. The absolute pressure reference was retained without recentering.
+
+A labelled 1000x tighter linear/nonlinear tolerance pair improves fresh linear
+residuals but leaves the rate difference at 7.070498753e-18 m/s. Both pairs
+satisfy their own fresh solver checks; the existing field comparator still
+fails. No production setting or core source was changed for this diagnosis.
+See [matched-location attribution](../../benchmarks/reconstructed_fault/bp3_geometry/diagnosis/README.md).
+Recommended next bounded task: review/implement a common filter-derivative
+convention at endpoint planes and shared vertices without changing valid
+source associations or native order, then rerun the unchanged qualification.
+This numerical correction needs selection; Section 3 has not started.
+
+
+### Filter derivative convention (2026-10-02; qualification complete)
+
+Implemented the selected symmetric one-sided stiffness trace at shared-vertex
+planes, averaging the interior and zero exterior trace at endpoint planes.
+A coordinate/adjacent-tangent machine-epsilon bound resolves roundoff ambiguity;
+source associations, native order and support remain unchanged. This is a
+separate numerical correction in the private normal-filter operation, with no
+history/MPI/cache-publication or solver-setting changes.
+
+**927/927 qualification checks pass**, including all seven original failures,
+45-degree reversal on one/two ranks, the accepted 60-degree comparisons and
+birth/retry/restart checks. Focused units pass 39,226 assertions per rank;
+18 additional matrix/action checks pass. All 16,875 source associations remain
+exactly as in the endpoint-corrected reference. The initial filter K difference
+is now 4.424e-15 relative; the maximum 45-degree reversal V difference through
+steps 0–2 is 5.191e-23 m/s. Thresholds were not relaxed.
+
+Qualified executable: `build-refactor-r6b/aspect-filter-derivative-qualified`.
+See [correction review](../../benchmarks/reconstructed_fault/bp3_geometry/filter_derivative/README.md)
+for hashes, exact comparisons and preserved reference evidence. The scientific
+specification now states the trace convention. Section 3 has not started;
+review the correction before selecting the next bounded task.

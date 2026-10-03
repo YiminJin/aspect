@@ -1,0 +1,20 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_geometry/inputs/guard-60.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_geometry/output-guard-small
+subsection Geometry model
+ subsection Box
+  set X extent = 2000
+  set Y extent = 1000
+  set Box origin X coordinate = -600
+  set Box origin Y coordinate = 200
+  set X repetitions = 2
+  set Y repetitions = 1
+ end
+end
+subsection Fault reconstruction
+ set Prescribed faults file = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_geometry/inputs/fault-small.txt
+end
+subsection Postprocess
+ subsection BP3
+  set Allow truncated transition = true
+ end
+end

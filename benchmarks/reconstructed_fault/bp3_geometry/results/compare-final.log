@@ -1,0 +1,8 @@
+794 passed; 7 failed geometry, field, lifecycle and MPI checks
+{'check': '45/0/reversed-physical-profile/column8', 'passed': False, 'max_abs': 6.205409999257758e-13, 'scale': 1.0005780775339155e-09}
+{'check': '45/0/reversed-physical-profile/column10', 'passed': False, 'max_abs': 420.9296577014029, 'scale': 26546981.068243347}
+{'check': '45/0/reversed-physical-profile/column11', 'passed': False, 'max_abs': 761.6785568743944, 'scale': 50001456.78270872}
+{'check': '45/1/reversed-physical-profile/column7', 'passed': False, 'max_abs': 1.5637558048041574e-15, 'scale': 1.0000000146384015e-07}
+{'check': '45/1/reversed-physical-profile/column8', 'passed': False, 'max_abs': 1.5637558105944216e-17, 'scale': 1.0000000146384015e-09}
+{'check': '45/2/reversed-physical-profile/column7', 'passed': False, 'max_abs': 2.9684318870317015e-15, 'scale': 2.000000044766804e-07}
+{'check': '45/2/reversed-physical-profile/column8', 'passed': False, 'max_abs': 1.4046760747829186e-17, 'scale': 1.0000000301284024e-09}

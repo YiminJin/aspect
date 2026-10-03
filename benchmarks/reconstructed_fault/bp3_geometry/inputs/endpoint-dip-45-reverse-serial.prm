@@ -1,0 +1,6 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_geometry/inputs/qualified-dip-45-reverse-serial.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_geometry/output-endpoint-dip-45-reverse-serial
+set Additional shared libraries = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_geometry/build/bp3/libbp3_restore_150x50.release.so, $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_geometry/build/observer/libfrozen_birth_observer.release.so, $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_geometry/build/observer/libendpoint_check.release.so
+subsection Postprocess
+ set List of postprocessors = reconstructed fault BP3, particles, reconstructed faults, BP3 output complete, BP3 restored monitor, coupled replenishment observer, check frozen birth H, endpoint handoff check
+end

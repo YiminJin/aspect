@@ -250,6 +250,35 @@ particle's baseline `H` unchanged; more than one contribution is an error.
 This profile initializes particle `H` only. Sharp-fault reconstruction uses the
 subsequently solved Q1 phase field and belongs to a later stage.
 
+### BP3 stationary geometry specialization (runtime-cleanup section 2)
+
+The maintained BP3 plugin derives a single read-only chart from the native
+prescribed-fault reader and live Box bounds. It admits one straight 2D polyline
+with strictly ordered nonzero segments, a constant admissible prescribed peak,
+and endpoints on the interiors of the top and bottom faces. It rejects curved,
+multiple, backtracking, corner and tangential geometries. Native input anchors,
+ordering and resampling remain owned by the reconstructed-fault manager.
+
+Each geometry-consuming plugin configures the shared description during its own
+parameter parsing. The first call reads/distributes the prescribed input; later
+calls reuse it. This precedes field evaluation, refinement and constraints and
+does not depend on postprocessor execution. The native manager's later parsed
+geometry must match the shared description. Physical tangent points from top to
+bottom; signed normal and thrust sense follow dip direction, independently of
+vertex order. Geometry determines coordinates, profile peak, loading direction,
+endpoint windows and stations. Chemical fractions retain the horizontal bulk
+extension `(y_top-y)/sin(dip)` and the existing weakening length plus 3 km width.
+A production domain must contain that transition; only explicitly labeled local
+fixtures may select `Postprocess/BP3/Allow truncated transition`.
+
+This is section 2 only. The existing saved mesh, tabulated loading profile and
+legacy completion inputs remain supported pending their separately selected
+section-3 replacement. Generic automatic completion admission is unchanged.
+The model restart identity now includes actual Box bounds and ordered prescribed
+vertices/peak instead of a compiled geometric label. Old BP3 checkpoints lacking
+this identity require their original plugin; section-2 restarts retain committed
+history and rederive only the geometry description.
+
 ## 14. Initial sharp-fault reconstruction
 
 `ReconstructedFaultManager<dim>` is owned by `Simulator` when `Formulation /`
@@ -814,6 +843,14 @@ M3 supplies one endpoint association to the existing M5 residual/Jacobian and
 particle-history paths. These use physical phi, pressure, stress and history,
 with endpoint slip rate, normalization and surface state. Free endpoint
 K_V, B and G derivatives are retained; G is not assumed to be B transpose.
+At the endpoint plane, the raw contact frame and resampled terminal tangent
+can disagree at floating-point accuracy. A local roundoff bound accounts for
+coordinate subtraction, dot products and the conditioning of the terminal
+segment tangent. Within this band an existing strip association owns the
+point; only an unassigned point receives the endpoint association. Outside
+the band the usual signed endpoint classification applies. This handoff does
+not widen transverse support or relax physical-half-plane and overlap checks;
+zero-influence perpendicular contacts still add no continuation.
 Geometry records rebuild after geometry/mesh/restart invalidation. They and
 the exterior evaluators are transient; checkpoint format and existing
 normalization value-reuse criteria are unchanged. MPI gathers boundary facets,
@@ -1791,6 +1828,15 @@ pressure, background, and all retained histories unchanged. In the straight
 measure `JxW chi`: `M=integral N N^T`, `K=integral d_s N d_s N^T`,
 `b_sigma=integral N (sigma_bg+p-tau:N)`. Ordinary Q1 derivatives contain the
 physical segment length; a constant endpoint continuation has zero derivatives.
+At a shared vertex's normal plane, the quadrature value of the stiffness
+integrand is the arithmetic mean of its two one-sided gradient outer products.
+At an endpoint plane the exterior trace is zero, giving half the interior
+contribution. This averages energies, not gradients: no next-neighbor matrix
+entries are introduced. A local machine-epsilon bound, scaled by coordinates
+and adjacent-segment tangent conditioning, identifies only roundoff-sized
+plane ambiguity. Away from this band the ordinary segment/exterior derivative
+applies. This convention affects only filter stiffness; valid source
+associations, Q1 values, native vertex order and support are retained.
 There are natural filter endpoints, no window boundaries or slip-Dirichlet
 row substitutions. Unsupported rows fail without regularization. Raw mode
 bypasses this operator; zero length means consistent projection, not raw.

@@ -1,0 +1,2 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_geometry/inputs/endpoint-dip-60-reverse.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_geometry/output-filter-dip-60-reverse

@@ -1,0 +1,22 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_geometry/inputs/base.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_geometry/output-direct2
+set Resume computation = true
+subsection Postprocess
+ subsection Coupled replenishment
+  set Resume interval = 50
+ end
+end
+subsection Particles
+ subsection Generator
+  subsection Crossing reference cell
+   set Gap = 6e-8
+  end
+ end
+end
+subsection Particles
+ subsection Generator
+  subsection Crossing reference cell
+   set Staggered = true
+  end
+ end
+end

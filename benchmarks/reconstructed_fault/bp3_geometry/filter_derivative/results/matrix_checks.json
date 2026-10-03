@@ -1,0 +1,110 @@
+[
+  {
+    "observation": 0,
+    "matrix": "M",
+    "max_abs": 6.139089236967266e-12,
+    "relative": 4.545669331182465e-15
+  },
+  {
+    "observation": 0,
+    "matrix": "K",
+    "max_abs": 4.87890977618477e-18,
+    "relative": 4.423634264540649e-15
+  },
+  {
+    "observation": 0,
+    "matrix": "Mmu",
+    "max_abs": 3.410605131648481e-12,
+    "relative": 4.75657389120938e-15
+  },
+  {
+    "observation": 1,
+    "matrix": "M",
+    "max_abs": 6.139089236967266e-12,
+    "relative": 4.545669331182465e-15
+  },
+  {
+    "observation": 1,
+    "matrix": "K",
+    "max_abs": 4.87890977618477e-18,
+    "relative": 4.423634264540649e-15
+  },
+  {
+    "observation": 1,
+    "matrix": "Mmu",
+    "max_abs": 3.524291969370097e-12,
+    "relative": 4.915132894898844e-15
+  },
+  {
+    "observation": 2,
+    "matrix": "M",
+    "max_abs": 6.139089236967266e-12,
+    "relative": 4.545669331182465e-15
+  },
+  {
+    "observation": 2,
+    "matrix": "K",
+    "max_abs": 4.87890977618477e-18,
+    "relative": 4.423634264540649e-15
+  },
+  {
+    "observation": 2,
+    "matrix": "Mmu",
+    "max_abs": 3.296918293926865e-12,
+    "relative": 4.598027546752294e-15
+  },
+  {
+    "probe": 0,
+    "matrix": "G action",
+    "max_abs": 2.0116567611694336e-07,
+    "relative": 3.3891368572270157e-15
+  },
+  {
+    "probe": 1,
+    "matrix": "G action",
+    "max_abs": 1.6391277313232422e-07,
+    "relative": 2.7526097615410157e-15
+  },
+  {
+    "probe": 2,
+    "matrix": "G action",
+    "max_abs": 1.862645149230957e-08,
+    "relative": 6.9283987555399025e-15
+  },
+  {
+    "probe": 3,
+    "matrix": "G action",
+    "max_abs": 7.450580596923828e-08,
+    "relative": 4.352890529967123e-16
+  },
+  {
+    "probe": 4,
+    "matrix": "G action",
+    "max_abs": 1.043081283569336e-07,
+    "relative": 5.905724080503398e-16
+  },
+  {
+    "probe": 5,
+    "matrix": "G action",
+    "max_abs": 2.7008354663848877e-08,
+    "relative": 3.4840050339594874e-15
+  },
+  {
+    "probe": 6,
+    "matrix": "G action",
+    "max_abs": 2.7284841053187847e-12,
+    "relative": 2.6012446032737566e-15
+  },
+  {
+    "probe": 7,
+    "matrix": "G action",
+    "max_abs": 2.8421709430404007e-12,
+    "relative": 2.9860111542387236e-15
+  },
+  {
+    "probe": 8,
+    "matrix": "G action",
+    "max_abs": 2.7284841053187847e-12,
+    "relative": 2.8778115890125207e-15
+  }
+]

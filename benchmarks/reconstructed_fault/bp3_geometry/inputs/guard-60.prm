@@ -1,0 +1,9 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_geometry/inputs/serial-fixed.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_geometry/output-guard-60
+subsection Fault reconstruction
+ set Prescribed faults file = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_geometry/inputs/fault60.txt
+end
+set Additional shared libraries = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_geometry/build/bp3/libbp3_restore_150x50.release.so, $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_geometry/build/observer/libfrozen_birth_observer.release.so, $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_geometry/build/observer/libgeometry_check.release.so
+subsection Postprocess
+ set List of postprocessors = reconstructed fault BP3, particles, reconstructed faults, BP3 output complete, BP3 restored monitor, coupled replenishment observer, check frozen birth H, BP3 geometry check
+end

@@ -1,0 +1,149 @@
+[
+  {
+    "label": "diagnosis-configure",
+    "command": [
+      "cmake",
+      "-S",
+      "benchmarks/reconstructed_fault/bp3_geometry/plugin",
+      "-B",
+      "benchmarks/reconstructed_fault/bp3_geometry/build/observer",
+      "-DAspect_DIR=/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 0.11415819399917382,
+    "child_max_rss_kib": 25880,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  {
+    "label": "endpoint-diagnosis-np1",
+    "command": [
+      "mpirun",
+      "-np",
+      "1",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-endpoint-plane-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_geometry/inputs/endpoint-diagnosis.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 1,
+    "seconds": 3.621066828000039,
+    "child_max_rss_kib": 186908,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  {
+    "label": "diagnosis-build2",
+    "command": [
+      "cmake",
+      "--build",
+      "benchmarks/reconstructed_fault/bp3_geometry/build/observer",
+      "--target",
+      "timestep_zero",
+      "-j2"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 2,
+    "seconds": 6.677901799997926,
+    "child_max_rss_kib": 1429668,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  {
+    "label": "endpoint-diagnosis-forward-np1",
+    "command": [
+      "mpirun",
+      "-np",
+      "1",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-endpoint-plane-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_geometry/inputs/endpoint-diagnosis-forward.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 1,
+    "seconds": 7.127714332000323,
+    "child_max_rss_kib": 329328,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  {
+    "label": "diagnosis-build4",
+    "command": [
+      "cmake",
+      "--build",
+      "benchmarks/reconstructed_fault/bp3_geometry/build/observer",
+      "--target",
+      "timestep_zero",
+      "-j2"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 9.985319874002016,
+    "child_max_rss_kib": 1493492,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  {
+    "label": "diagnosis-build",
+    "command": [
+      "cmake",
+      "--build",
+      "benchmarks/reconstructed_fault/bp3_geometry/build/observer",
+      "--target",
+      "timestep_zero",
+      "-j2"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 2,
+    "seconds": 6.277191414999834,
+    "child_max_rss_kib": 1289644,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  {
+    "label": "diagnosis-build3",
+    "command": [
+      "cmake",
+      "--build",
+      "benchmarks/reconstructed_fault/bp3_geometry/build/observer",
+      "--target",
+      "timestep_zero",
+      "-j2"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 10.08656443200016,
+    "child_max_rss_kib": 1490676,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  }
+]

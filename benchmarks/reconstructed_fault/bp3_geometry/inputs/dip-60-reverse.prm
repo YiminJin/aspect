@@ -1,0 +1,8 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_geometry/inputs/serial-fixed.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_geometry/output-dip-60-reverse
+subsection Fault reconstruction
+ set Prescribed faults file = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_geometry/inputs/fault60-reverse.txt
+end
+subsection Particles
+ set Particle generator name = reference cell
+end

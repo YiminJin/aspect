@@ -1,0 +1,20 @@
+[1;33mFilters: [fault_normal_filter],[fault_normal_filter_traces],[fault_boundary_contact],[fault_bottom_source],[phase_field_profile_bounds],[bp3_restore_profile]
+[1;33mFilters: [fault_normal_filter],[fault_normal_filter_traces],[fault_boundary_contact],[fault_bottom_source],[phase_field_profile_bounds],[bp3_restore_profile]
+[0mRestored BP3 completion profile max phase error=6.41154e-14
+Normal filter constant=1 max absolute error=2.2204460492503131e-16
+Normal filter constant=50000000 max absolute error=2.2351741790771484e-08
+Normal filter mode=1 attenuation=0.61545372003741095 mode error Pa=1.2492137102526613e-08 dense error Pa=2.9802322387695312e-08 mean integral error Pa m=-1.430511474609375e-06
+Normal filter mode=4 attenuation=0.076923076923076927 mode error Pa=1.2035542340527172e-08 dense error Pa=2.9802322387695312e-08 mean integral error Pa m=-3.337860107421875e-06
+Normal filter mode=8 attenuation=0.020408163265306124 mode error Pa=8.3628997060714028e-09 dense error Pa=3.7252902984619141e-08 mean integral error Pa m=-6.67572021484375e-06
+[1;31m[0m[1;33m[0m[1;32m===============================================================================[0m
+[1;32mAll tests passed[0m (39226 assertions in 7 test cases)
+
+[0mRestored BP3 completion profile max phase error=6.41154e-14
+Normal filter constant=1 max absolute error=2.2204460492503131e-16
+Normal filter constant=50000000 max absolute error=2.2351741790771484e-08
+Normal filter mode=1 attenuation=0.61545372003741095 mode error Pa=1.2492137102526613e-08 dense error Pa=2.9802322387695312e-08 mean integral error Pa m=-1.430511474609375e-06
+Normal filter mode=4 attenuation=0.076923076923076927 mode error Pa=1.2035542340527172e-08 dense error Pa=2.9802322387695312e-08 mean integral error Pa m=-3.337860107421875e-06
+Normal filter mode=8 attenuation=0.020408163265306124 mode error Pa=8.3628997060714028e-09 dense error Pa=3.7252902984619141e-08 mean integral error Pa m=-6.67572021484375e-06
+[1;31m[0m[1;33m[0m[1;32m===============================================================================[0m
+[1;32mAll tests passed[0m (39226 assertions in 7 test cases)
+

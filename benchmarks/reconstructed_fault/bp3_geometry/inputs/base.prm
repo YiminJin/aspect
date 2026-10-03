@@ -1,0 +1,8 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_lifecycle/inputs/base.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_geometry/build/bp3/libbp3_restore_150x50.release.so, $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_geometry/build/observer/libfrozen_birth_observer.release.so
+subsection Particles
+ set List of particle properties = BP3 frozen crack driving force, initial composition, maxwell stress
+end
+subsection Postprocess
+ set List of postprocessors = reconstructed fault BP3, particles, reconstructed faults, BP3 output complete, BP3 restored monitor, coupled replenishment observer, check frozen birth H
+end

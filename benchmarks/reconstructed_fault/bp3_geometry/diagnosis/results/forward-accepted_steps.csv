@@ -1,0 +1,2 @@
+step,time,dt,max_V,xd_at_max_V,min_sigma_n,max_sigma_n,min_free_V,max_free_V,free,lower_active,newton_updates,krylov_iterations,min_alpha,normalized_nonlinear_residual,surface_RMS_Pa,Theta_relative_error,max_committed_stress_Pa,max_step_slip_over_Dc,fresh_linear_checks_passed
+0,0,0,1.000579542782251e-09,68746.492615358773,49999688.86244902,50000788.199837074,9.9976248196294049e-10,1.000579542782251e-09,37,0,2,46,1,1.4099376857282606e-14,1.7914921807471301e-08,0,0,0,1

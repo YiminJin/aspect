@@ -130,6 +130,58 @@ TEST_CASE("Restored BP3 stationary profile matches independent completion table"
   REQUIRE(error<2e-11);
 }
 
+TEST_CASE("Normal filter derivative traces are independent of source side and order", "[fault_normal_filter_traces]")
+{
+  using namespace dealii;
+  const std::vector<Point<2>> vertices={{50000.,0.},{25000.,25000.},{0.,50000.}};
+  const auto assemble=[&](const std::vector<Point<2>> &v,const Point<2> &p,unsigned int segment)
+  {
+    aspect::ReconstructedFault<2> fault(v);
+    auto tangent=v[segment+1]-v[segment];tangent/=tangent.norm();
+    std::vector<double> d(v.size(),0.),e(v.size()-1,0.);
+    aspect::internal::add_normal_filter_stiffness(fault,p,segment,tangent,2.,d,e);
+    return std::make_pair(d,e);
+  };
+  auto reversed=vertices;std::reverse(reversed.begin(),reversed.end());
+  const Tensor<1,2> tangent({-std::sqrt(.5),std::sqrt(.5)});
+  // Endpoint and shared-vertex planes, including off-axis physical samples.
+  for (const Point<2> p : {Point<2>(51000.,1000.),Point<2>(53000.,3000.),
+                           Point<2>(53774.59666924148,3774.5966692414836),
+                           Point<2>(-5000.,45000.),Point<2>(25000.,25000.)})
+    for (const double shift : {-1e-6,0.,1e-6})
+      {
+        const auto x=p+shift*tangent;
+        const unsigned int j=p[0]>40000. ? 0 : 1;
+        const auto a=assemble(vertices,x,j),b=assemble(reversed,x,1-j);
+        for (unsigned int k=0;k<3;++k) REQUIRE(a.first[k]==Approx(b.first[2-k]).margin(1e-22));
+        for (unsigned int k=0;k<2;++k) REQUIRE(a.second[k]==Approx(b.second[1-k]).margin(1e-22));
+      }
+  const auto left=assemble(vertices,Point<2>(23000.,23000.),0);
+  const auto right=assemble(vertices,Point<2>(23000.,23000.),1);
+  REQUIRE(left==right);
+  const double k=1./vertices[0].distance_square(vertices[1]);
+  REQUIRE(left.first[0]==Approx(k));REQUIRE(left.first[1]==Approx(2*k));
+  REQUIRE(left.first[2]==Approx(k));
+  const auto endpoint=assemble(vertices,Point<2>(51000.,1000.),0);
+  REQUIRE(endpoint.first[0]==Approx(k));REQUIRE(endpoint.first[1]==Approx(k));
+  REQUIRE(endpoint.first[2]==0.);
+  const auto outside=assemble(vertices,Point<2>(51000.,1000.)-1e-6*tangent,0);
+  REQUIRE(outside.first==std::vector<double>(3,0.));
+  const auto inside=assemble(vertices,Point<2>(51000.,1000.)+1e-6*tangent,0);
+  REQUIRE(inside.first[0]==Approx(2*k));
+  // Unequal adjacent lengths retain their physical derivatives; the average
+  // is of energies and introduces neither a next-neighbor edge nor a bias.
+  const std::vector<Point<2>> unequal={{0.,0.},{2.,0.},{5.,0.}};
+  const auto u=assemble(unequal,Point<2>(2.,1.),0);
+  REQUIRE(u.first[0]==Approx(1./4.));REQUIRE(u.first[1]==Approx(1./4.+1./9.));
+  REQUIRE(u.first[2]==Approx(1./9.));
+  for (unsigned int j=0;j<3;++j)
+    {
+      double sum=u.first[j];if(j)sum+=u.second[j-1];if(j<2)sum+=u.second[j];
+      REQUIRE(std::abs(sum)<1e-16);
+    }
+}
+
 TEST_CASE("Normal filter preserves work mean and attenuates generalized modes", "[fault_normal_filter]")
 {
   ThrowOnDealIIException exceptions;

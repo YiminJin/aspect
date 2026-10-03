@@ -1,0 +1,5 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_geometry/inputs/endpoint-dump-reverse.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_geometry/output-qualified-endpoint-dump-reverse
+subsection Postprocess
+ set List of postprocessors = reconstructed fault BP3, particles, reconstructed faults, BP3 output complete, BP3 restored monitor, coupled replenishment observer, check frozen birth H, endpoint association dump
+end

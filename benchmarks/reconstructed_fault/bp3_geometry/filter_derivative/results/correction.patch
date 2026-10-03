@@ -1,0 +1,156 @@
+diff --git a/source/reconstructed_fault/normal_filter_internal.h b/source/reconstructed_fault/normal_filter_internal.h
+index 417040f90..542192663 100644
+--- a/source/reconstructed_fault/normal_filter_internal.h
++++ b/source/reconstructed_fault/normal_filter_internal.h
+@@ -4,10 +4,65 @@
+ #define _aspect_normal_filter_internal_h
+ 
+ #include "surface_direct_internal.h"
++#include <aspect/reconstructed_fault/fault.h>
++#include <algorithm>
++#include <cmath>
++#include <limits>
+ #include <memory>
+ 
+ namespace aspect::internal
+ {
++  /** Add one bulk-work sample to the straight fault's filter stiffness.
++   * At a Q1 derivative jump, use the arithmetic mean of the two one-sided
++   * gradient outer products (not the outer product of averaged gradients).
++   * The exterior endpoint trace is zero. Source values/associations are untouched.
++   */
++  template <int dim>
++  void add_normal_filter_stiffness(const ReconstructedFault<dim> &fault,
++                                   const Point<dim> &position,
++                                   const unsigned int segment,
++                                   const Tensor<1,dim> &tangent,
++                                   const double weight,
++                                   std::vector<double> &diagonal,
++                                   std::vector<double> &edge)
++  {
++    const auto add_segment = [&](const unsigned int j, const double trace_weight)
++    {
++      const double length=fault.vertex(j).distance(fault.vertex(j+1));
++      const double k=trace_weight/(length*length);
++      diagonal[j]+=k;diagonal[j+1]+=k;edge[j]-=k;
++    };
++    const auto on_vertex_plane = [&](const unsigned int vertex)
++    {
++      const auto offset=position-fault.vertex(vertex);
++      // Include subtraction/tangent conditioning from either adjacent segment,
++      // so the bound does not depend on which valid source association won.
++      double conditioning=0.;
++      for (unsigned int j=(vertex==0 ? 0 : vertex-1);
++           j<std::min(vertex+1,fault.n_cells());++j)
++        conditioning=std::max(conditioning,
++          (fault.vertex(j).norm()+fault.vertex(j+1).norm())
++          /fault.vertex(j).distance(fault.vertex(j+1)));
++      const double roundoff=32.*std::numeric_limits<double>::epsilon()
++        *(position.norm()+fault.vertex(vertex).norm()+offset.norm()*(1.+conditioning));
++      return std::abs(offset*tangent)<=roundoff;
++    };
++    for (const unsigned int vertex : {segment,segment+1})
++      if (on_vertex_plane(vertex))
++        {
++          if (vertex>0) add_segment(vertex-1,.5*weight);
++          if (vertex<fault.n_cells()) add_segment(vertex,.5*weight);
++          return;
++        }
++    // Away from the roundoff band retain the ordinary one-sided derivative,
++    // including zero in a constant endpoint continuation.
++    if ((segment==0 && (position-fault.vertex(0))*tangent<0.)
++        || (segment+1==fault.n_cells()
++            && (position-fault.vertex(segment+1))*tangent>0.))
++      return;
++    add_segment(segment,weight);
++  }
++
+   /** One full supported open fault. No slip constraints, recentering, or
+    * artificial diagonal shift. The caller assembles physical work moments. */
+   class FaultNormalFilter
+diff --git a/source/reconstructed_fault/surface_system_bulk_work.cc b/source/reconstructed_fault/surface_system_bulk_work.cc
+index 8ce3a732d..7f893cad9 100644
+--- a/source/reconstructed_fault/surface_system_bulk_work.cc
++++ b/source/reconstructed_fault/surface_system_bulk_work.cc
+@@ -316,16 +316,8 @@ namespace aspect
+                       response.friction_coefficient,response.friction_derivative_wrt_slip_rate,response.residual_density});
+                   }
+                 if (filtering || local.normal_diagnostic)
+-                  {
+-                    // A continued endpoint has a constant source basis, hence
+-                    // zero arc-length derivatives. Do not extrapolate a slope
+-                    // into the wedge or add a second integration pass.
+-                    const double length=faults[f].vertex(j).distance(faults[f].vertex(j+1));
+-                    const double along=(input.position-faults[f].vertex(j))*a.tangent;
+-                    const bool extended=(j==0 && along<0.) || (j+1==faults[f].n_cells() && along>length);
+-                    const double k=extended ? 0. : weight/(length*length);
+-                    stiffness[f][j]+=k;stiffness[f][j+1]+=k;stiffness_edge[f][j]-=k;
+-                  }
++                  internal::add_normal_filter_stiffness(faults[f],input.position,j,
++                    a.tangent,weight,stiffness[f],stiffness_edge[f]);
+                 if (local.normal_diagnostic)
+                   {
+                     auto &d = *local.normal_diagnostic;
+diff --git a/unit_tests/reconstructed_fault.cc b/unit_tests/reconstructed_fault.cc
+index b8a3b8d9c..550ab5561 100644
+--- a/unit_tests/reconstructed_fault.cc
++++ b/unit_tests/reconstructed_fault.cc
+@@ -130,6 +130,58 @@ TEST_CASE("Restored BP3 stationary profile matches independent completion table"
+   REQUIRE(error<2e-11);
+ }
+ 
++TEST_CASE("Normal filter derivative traces are independent of source side and order", "[fault_normal_filter_traces]")
++{
++  using namespace dealii;
++  const std::vector<Point<2>> vertices={{50000.,0.},{25000.,25000.},{0.,50000.}};
++  const auto assemble=[&](const std::vector<Point<2>> &v,const Point<2> &p,unsigned int segment)
++  {
++    aspect::ReconstructedFault<2> fault(v);
++    auto tangent=v[segment+1]-v[segment];tangent/=tangent.norm();
++    std::vector<double> d(v.size(),0.),e(v.size()-1,0.);
++    aspect::internal::add_normal_filter_stiffness(fault,p,segment,tangent,2.,d,e);
++    return std::make_pair(d,e);
++  };
++  auto reversed=vertices;std::reverse(reversed.begin(),reversed.end());
++  const Tensor<1,2> tangent({-std::sqrt(.5),std::sqrt(.5)});
++  // Endpoint and shared-vertex planes, including off-axis physical samples.
++  for (const Point<2> p : {Point<2>(51000.,1000.),Point<2>(53000.,3000.),
++                           Point<2>(53774.59666924148,3774.5966692414836),
++                           Point<2>(-5000.,45000.),Point<2>(25000.,25000.)})
++    for (const double shift : {-1e-6,0.,1e-6})
++      {
++        const auto x=p+shift*tangent;
++        const unsigned int j=p[0]>40000. ? 0 : 1;
++        const auto a=assemble(vertices,x,j),b=assemble(reversed,x,1-j);
++        for (unsigned int k=0;k<3;++k) REQUIRE(a.first[k]==Approx(b.first[2-k]).margin(1e-22));
++        for (unsigned int k=0;k<2;++k) REQUIRE(a.second[k]==Approx(b.second[1-k]).margin(1e-22));
++      }
++  const auto left=assemble(vertices,Point<2>(23000.,23000.),0);
++  const auto right=assemble(vertices,Point<2>(23000.,23000.),1);
++  REQUIRE(left==right);
++  const double k=1./vertices[0].distance_square(vertices[1]);
++  REQUIRE(left.first[0]==Approx(k));REQUIRE(left.first[1]==Approx(2*k));
++  REQUIRE(left.first[2]==Approx(k));
++  const auto endpoint=assemble(vertices,Point<2>(51000.,1000.),0);
++  REQUIRE(endpoint.first[0]==Approx(k));REQUIRE(endpoint.first[1]==Approx(k));
++  REQUIRE(endpoint.first[2]==0.);
++  const auto outside=assemble(vertices,Point<2>(51000.,1000.)-1e-6*tangent,0);
++  REQUIRE(outside.first==std::vector<double>(3,0.));
++  const auto inside=assemble(vertices,Point<2>(51000.,1000.)+1e-6*tangent,0);
++  REQUIRE(inside.first[0]==Approx(2*k));
++  // Unequal adjacent lengths retain their physical derivatives; the average
++  // is of energies and introduces neither a next-neighbor edge nor a bias.
++  const std::vector<Point<2>> unequal={{0.,0.},{2.,0.},{5.,0.}};
++  const auto u=assemble(unequal,Point<2>(2.,1.),0);
++  REQUIRE(u.first[0]==Approx(1./4.));REQUIRE(u.first[1]==Approx(1./4.+1./9.));
++  REQUIRE(u.first[2]==Approx(1./9.));
++  for (unsigned int j=0;j<3;++j)
++    {
++      double sum=u.first[j];if(j)sum+=u.second[j-1];if(j<2)sum+=u.second[j];
++      REQUIRE(std::abs(sum)<1e-16);
++    }
++}
++
+ TEST_CASE("Normal filter preserves work mean and attenuates generalized modes", "[fault_normal_filter]")
+ {
+   ThrowOnDealIIException exceptions;

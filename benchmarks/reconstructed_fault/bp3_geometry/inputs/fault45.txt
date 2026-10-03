@@ -1,0 +1,4 @@
+# Straight top-to-bottom, 45 degrees, retains an interior anchor.
+50000 0 .6
+25000 25000 .6
+0 50000 .6

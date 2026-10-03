@@ -316,16 +316,8 @@ namespace aspect
                       response.friction_coefficient,response.friction_derivative_wrt_slip_rate,response.residual_density});
                   }
                 if (filtering || local.normal_diagnostic)
-                  {
-                    // A continued endpoint has a constant source basis, hence
-                    // zero arc-length derivatives. Do not extrapolate a slope
-                    // into the wedge or add a second integration pass.
-                    const double length=faults[f].vertex(j).distance(faults[f].vertex(j+1));
-                    const double along=(input.position-faults[f].vertex(j))*a.tangent;
-                    const bool extended=(j==0 && along<0.) || (j+1==faults[f].n_cells() && along>length);
-                    const double k=extended ? 0. : weight/(length*length);
-                    stiffness[f][j]+=k;stiffness[f][j+1]+=k;stiffness_edge[f][j]-=k;
-                  }
+                  internal::add_normal_filter_stiffness(faults[f],input.position,j,
+                    a.tangent,weight,stiffness[f],stiffness_edge[f]);
                 if (local.normal_diagnostic)
                   {
                     auto &d = *local.normal_diagnostic;

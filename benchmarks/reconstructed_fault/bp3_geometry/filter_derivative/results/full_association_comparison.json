@@ -1,0 +1,19 @@
+{
+  "forward": {
+    "samples": 16875,
+    "previously_active_preserved_exactly": true,
+    "new_associations": 0,
+    "positive_phase_new": 0,
+    "new": []
+  },
+  "reverse": {
+    "samples": 16875,
+    "previously_active_preserved_exactly": true,
+    "new_associations": 0,
+    "positive_phase_new": 0,
+    "new": []
+  },
+  "corrected_order_admission_mismatches": 0,
+  "max_physical_shape_coordinate_difference": 1.4210854715202004e-14,
+  "max_reoriented_tangent_difference": 1.4432899320127035e-15
+}

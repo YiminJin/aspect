@@ -1,0 +1,113 @@
+-----------------------------------------------------------------------------
+--                             This is ASPECT                              --
+-- The Advanced Solver for Planetary Evolution, Convection, and Tectonics. --
+-----------------------------------------------------------------------------
+--     . version 3.1.0-pre (pf-rsf-refactor, 1a3b57eda)
+--     . using deal.II 9.6.2 (dealii-9.6, 6890ca740b)
+--     .       with 32 bit indices
+--     .       with vectorization level 2 (AVX, 4 doubles, 256 bits)
+--     . using Trilinos 14.2.0
+--     . using p4est 2.8.7
+--     . using Geodynamic World Builder 1.0.0
+--     . running in OPTIMIZED mode
+--     . running with 2 MPI processes
+-----------------------------------------------------------------------------
+
+Loading shared library </home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_geometry/build/bp3/libbp3_restore_150x50.release.so>
+Loading shared library </home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_geometry/build/observer/libfrozen_birth_observer.release.so>
+Loading shared library </home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_geometry/build/observer/libendpoint_check.release.so>
+
+
+-----------------------------------------------------------------------------
+The output directory </home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_geometry/output-filter-points-reverse-2/> provided in the input file appears not to exist.
+ASPECT will create it for you.
+-----------------------------------------------------------------------------
+
+
+BP3 straight geometry v1 box -60000 0 150000 50000 anchors 0 50000 0.59999999999999998 25000 25000 0.59999999999999998 50000 0 0.59999999999999998 thrust -1 weakening 15000 width 3000 local 0
+BP3 dip=45, length=70710.7, tangent=0.707107 -0.707107, normal=0.707107 0.707107
+BP3 native LLS limiter: crack_driving_force components 0..0; boundary extrapolation disabled.
+BP3 native LLS limiter: maxwell stress components 3..5; boundary extrapolation disabled.
+-----------------------------------------------------------------------------
+-- For information on how to cite ASPECT, see:
+--   https://aspect.geodynamics.org/citing.html?ver=3.1.0-pre&NewtonSolver=1&particles=1&sha=1a3b57eda&src=code
+-----------------------------------------------------------------------------
+Number of active cells: 1,875 (on 1 levels)
+Number of degrees of freedom: 65,560 (15,402+1,976+7,701+7,701+7,701+7,701+7,701+7,701+1,976)
+
+*** Timestep 0:  t=0 seconds, dt=0 seconds
+   Reconstruction initial faults... done.
+
+BP3 mesh geometry: cells=1875, support cells=325, h range=2000:2000
+Automatic boundary contact: fault=0, contact=0, endpoint=0, boundary=3, position=0 50000, influence=10734.3, treatment=paired completion
+Automatic boundary contact: fault=0, contact=1, endpoint=1, boundary=2, position=50000 0, influence=10734.3, treatment=paired completion
+Cell I_h: rebuilt profiles=864, reused profiles=0, local intervals=17263, cell candidates=224422, FE samples=137640, remote requests=0, windows=5, geometry seconds=0.00498825, local interval bytes=1242936
+   Initial cohesive q profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa, normalized RMS=0, normalized maximum=0
+Restored BP3 stationary profile: max error=6.37268e-14, full normal integral=2.61077e+06
+   Advecting particles...  done.
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=22, fresh=2.140761e+00, target=2.335500e+00
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.999992e-01, 1.614775e-02
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=23, fresh=6.461129e-09, target=6.852512e-09
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 9.164584e-10, 2.051639e-08
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  2: 7.038467e-16, 1.242824e-14
+
+   Postprocessing:
+Work replay accepted observation: step=0, frozen weak stress discrepancy=1.55969e-08 Pa; inert H and geometry unchanged.
+BP3 LONG RUN GRACEFUL STOP at accepted step 0, time=0 s.
+ENDPOINT HANDOFF PASS rank 0
+ENDPOINT HANDOFF PASS rank 1
+     BP3 accepted state            0
+     Number of advected particles: 30000
+     Writing reconstructed faults: reconstructed_faults/reconstructed_faults-00000.vtu
+     Restored BP3 monitor          raw/filtered traction and endpoint growth recorded
+     Coupled replenishment:        sampled
+     Frozen newborn H:             verified before birth audit
+     Writing graphical output:     /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_geometry/output-filter-points-reverse-2/solution/solution-00000
+
+Termination requested by criterion: end time
+Termination requested by criterion: BP3 long run complete
+*** Snapshot /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_geometry/output-filter-points-reverse-2/restart/01/ created!
+
+
+
++------------------------------------------------+------------+------------+
+| Total wallclock time elapsed since start       |      4.72s |            |
+|                                                |            |            |
+| Section                            | no. calls |  wall time | % of total |
++------------------------------------+-----------+------------+------------+
+| Assemble Stokes system Picard      |         3 |     0.225s |       4.8% |
+| Assemble Stokes system rhs         |         4 |     0.241s |       5.1% |
+| Build Stokes preconditioner        |         3 |     0.184s |       3.9% |
+| Create snapshot                    |         1 |     0.186s |       3.9% |
+| Fault: Cache build                 |         2 |    0.0639s |       1.4% |
+| Fault: I_h                         |         2 |    0.0947s |         2% |
+| Fault: Property preparation        |         2 |    0.0984s |       2.1% |
+| Fault: Stokes QP cache build       |         1 |   0.00222s |         0% |
+| Fault: Surface-property projection |         2 |    0.0645s |       1.4% |
+| Fault: condensed linear solve      |         2 |       1.3s |        28% |
+| Initialization                     |         1 |     0.106s |       2.2% |
+| Particles: Advect                  |         2 |   0.00478s |       0.1% |
+| Particles: Copy                    |         1 |  0.000437s |         0% |
+| Particles: Exchange ghosts         |         2 |  0.000805s |         0% |
+| Particles: Generate                |         1 |   0.00118s |         0% |
+| Particles: Initialization          |         1 |  0.000114s |         0% |
+| Particles: Initialize properties   |         1 |   0.00801s |      0.17% |
+| Particles: Interpolate             |         1 |    0.0166s |      0.35% |
+| Particles: Sort                    |         2 |   0.00157s |         0% |
+| Particles: Update properties       |         1 |   0.00219s |         0% |
+| Postprocessing                     |         1 |     0.182s |       3.9% |
+| Setup dof systems                  |         1 |    0.0217s |      0.46% |
+| Setup initial conditions           |         1 |     0.817s |        17% |
+| Setup matrices                     |         1 |     0.202s |       4.3% |
++------------------------------------+-----------+------------+------------+
+
+-- Total wallclock time elapsed including restarts: 5s
+-----------------------------------------------------------------------------
+-- For information on how to cite ASPECT, see:
+--   https://aspect.geodynamics.org/citing.html?ver=3.1.0-pre&NewtonSolver=1&particles=1&sha=1a3b57eda&src=code
+-----------------------------------------------------------------------------

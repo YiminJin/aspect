@@ -1,0 +1,13 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_geometry/inputs/qualified-dip-45-serial.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_geometry/output-endpoint-t0-tight
+set Additional shared libraries = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_geometry/build/bp3/libbp3_restore_150x50.release.so, $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_geometry/build/observer/libfrozen_birth_observer.release.so, $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_geometry/build/observer/libtimestep_zero.release.so
+subsection Postprocess
+ set List of postprocessors = reconstructed fault BP3, particles, reconstructed faults, BP3 output complete, BP3 restored monitor, coupled replenishment observer, check frozen birth H, timestep zero diagnosis
+end
+set Nonlinear solver tolerance = 1e-11
+subsection Solver parameters
+ subsection Stokes solver parameters
+  set Linear solver tolerance = 1e-12
+ end
+end
+set End time = 0

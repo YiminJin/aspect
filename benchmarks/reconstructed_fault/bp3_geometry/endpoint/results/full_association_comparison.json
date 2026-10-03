@@ -1,0 +1,203 @@
+{
+  "forward": {
+    "samples": 16875,
+    "previously_active_preserved_exactly": true,
+    "new_associations": 9,
+    "positive_phase_new": 6,
+    "new": [
+      {
+        "cell": "766_0:",
+        "qp": "4",
+        "x": "-7000",
+        "y": "43000",
+        "phi": "0",
+        "active": "1",
+        "segment": "35",
+        "xi": "1",
+        "tx": "-0.70710678118654746",
+        "ty": "0.70710678118654746",
+        "distance_to_nearest_endpoint_plane": 0.0
+      },
+      {
+        "cell": "766_0:",
+        "qp": "8",
+        "x": "-6225.4033307585169",
+        "y": "43774.59666924148",
+        "phi": "0",
+        "active": "1",
+        "segment": "35",
+        "xi": "1",
+        "tx": "-0.70710678118654746",
+        "ty": "0.70710678118654746",
+        "distance_to_nearest_endpoint_plane": 0.0
+      },
+      {
+        "cell": "773_0:",
+        "qp": "4",
+        "x": "-5000",
+        "y": "45000",
+        "phi": "0.022525197198650704",
+        "active": "1",
+        "segment": "35",
+        "xi": "1",
+        "tx": "-0.70710678118654746",
+        "ty": "0.70710678118654746",
+        "distance_to_nearest_endpoint_plane": 0.0
+      },
+      {
+        "cell": "1077_0:",
+        "qp": "4",
+        "x": "51000",
+        "y": "1000",
+        "phi": "0.49042403074615482",
+        "active": "1",
+        "segment": "0",
+        "xi": "0",
+        "tx": "-0.70710678118654791",
+        "ty": "0.70710678118654713",
+        "distance_to_nearest_endpoint_plane": 0.0
+      },
+      {
+        "cell": "1122_0:",
+        "qp": "4",
+        "x": "53000",
+        "y": "3000",
+        "phi": "0.19471653757466031",
+        "active": "1",
+        "segment": "0",
+        "xi": "0",
+        "tx": "-0.70710678118654791",
+        "ty": "0.70710678118654713",
+        "distance_to_nearest_endpoint_plane": 0.0
+      },
+      {
+        "cell": "1122_0:",
+        "qp": "8",
+        "x": "53774.59666924148",
+        "y": "3774.5966692414836",
+        "phi": "0.096627297080409985",
+        "active": "1",
+        "segment": "0",
+        "xi": "0",
+        "tx": "-0.70710678118654791",
+        "ty": "0.70710678118654713",
+        "distance_to_nearest_endpoint_plane": 2.25088454876906e-12
+      },
+      {
+        "cell": "1129_0:",
+        "qp": "4",
+        "x": "55000",
+        "y": "5000",
+        "phi": "0.022525197198650738",
+        "active": "1",
+        "segment": "0",
+        "xi": "0",
+        "tx": "-0.70710678118654791",
+        "ty": "0.70710678118654713",
+        "distance_to_nearest_endpoint_plane": 0.0
+      },
+      {
+        "cell": "1129_0:",
+        "qp": "8",
+        "x": "55774.59666924148",
+        "y": "5774.5966692414831",
+        "phi": "0.0028534612270216301",
+        "active": "1",
+        "segment": "0",
+        "xi": "0",
+        "tx": "-0.70710678118654791",
+        "ty": "0.70710678118654713",
+        "distance_to_nearest_endpoint_plane": 1.9293296132306226e-12
+      },
+      {
+        "cell": "1134_0:",
+        "qp": "4",
+        "x": "57000",
+        "y": "7000",
+        "phi": "0",
+        "active": "1",
+        "segment": "0",
+        "xi": "0",
+        "tx": "-0.70710678118654791",
+        "ty": "0.70710678118654713",
+        "distance_to_nearest_endpoint_plane": 0.0
+      }
+    ]
+  },
+  "reverse": {
+    "samples": 16875,
+    "previously_active_preserved_exactly": true,
+    "new_associations": 5,
+    "positive_phase_new": 2,
+    "new": [
+      {
+        "cell": "766_0:",
+        "qp": "4",
+        "x": "-7000",
+        "y": "43000",
+        "phi": "0",
+        "active": "1",
+        "segment": "0",
+        "xi": "0",
+        "tx": "0.70710678118654713",
+        "ty": "-0.70710678118654791",
+        "distance_to_nearest_endpoint_plane": 0.0
+      },
+      {
+        "cell": "766_0:",
+        "qp": "8",
+        "x": "-6225.4033307585169",
+        "y": "43774.59666924148",
+        "phi": "0",
+        "active": "1",
+        "segment": "0",
+        "xi": "0",
+        "tx": "0.70710678118654713",
+        "ty": "-0.70710678118654791",
+        "distance_to_nearest_endpoint_plane": 0.0
+      },
+      {
+        "cell": "1129_0:",
+        "qp": "4",
+        "x": "55000",
+        "y": "5000",
+        "phi": "0.022525197198650738",
+        "active": "1",
+        "segment": "35",
+        "xi": "1",
+        "tx": "0.70710678118654746",
+        "ty": "-0.70710678118654746",
+        "distance_to_nearest_endpoint_plane": 0.0
+      },
+      {
+        "cell": "1129_0:",
+        "qp": "8",
+        "x": "55774.59666924148",
+        "y": "5774.5966692414831",
+        "phi": "0.0028534612270216301",
+        "active": "1",
+        "segment": "35",
+        "xi": "1",
+        "tx": "0.70710678118654746",
+        "ty": "-0.70710678118654746",
+        "distance_to_nearest_endpoint_plane": 1.9293296132306226e-12
+      },
+      {
+        "cell": "1134_0:",
+        "qp": "4",
+        "x": "57000",
+        "y": "7000",
+        "phi": "0",
+        "active": "1",
+        "segment": "35",
+        "xi": "1",
+        "tx": "0.70710678118654746",
+        "ty": "-0.70710678118654746",
+        "distance_to_nearest_endpoint_plane": 0.0
+      }
+    ]
+  },
+  "corrected_order_admission_mismatches": 0,
+  "max_physical_shape_coordinate_difference": 1.4210854715202004e-14,
+  "max_reoriented_tangent_difference": 1.4432899320127035e-15
+}
