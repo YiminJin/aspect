@@ -1,3 +1,86 @@
+# Refactoring-worktree cleanup — 2026-10-02
+
+This cleanup applies to **`/home/ein/repository/aspect-pf-rsf-refactor`**, at
+`8b93d69fd`, not the separate scientific-test worktree referenced in older notes.
+It reclaimed approximately **19.4 GiB**, increasing free space from **9.3 GiB
+to 29 GiB**. No tracked source, fixture, scientific evidence or local user edit
+was deleted. No scientific algorithm or qualification result changed.
+
+| Material | Action |
+|---|---|
+| 2,656 old compiler objects, dependency files and precompiled headers (14.59 GiB) | Removed; rebuildable |
+| 8,787 older raw output/checkpoint files (6.58 GiB) | Losslessly archived into 14 verified chunks (1.75 GiB) |
+| `build-refactor-r6b/` | Entire current build preserved |
+| All qualified executables and shared libraries in older builds | Preserved at their original paths |
+| `particle_replenishment/`, `refactoring_r6b/`, `frozen_gmg_repair/` | Entire benchmark families preserved and directly usable |
+| Sources, scripts, PRMs, logs, compact summaries, provenance and user documents | Preserved |
+
+The benchmark tree decreased from about **11 GiB to 4.2 GiB**; combined
+`build-refactor-*` directories decreased from about **24 GiB to 8.5 GiB**.
+The local archive occupies about **1.8 GiB**, including its compressed inventory.
+It is recoverable local storage, **not an off-machine backup**.
+
+## Organization and recovery
+
+All maintained source/input paths remain unchanged. Historical raw payloads
+are centralized at the worktree root:
+
+```
+.benchmark-cleanup-20261002-refactor/
+```
+
+This archive covers older `output*` directories in refactoring stages R1–R6a,
+`refactoring_boundary`, `restart_fix`, `restart_investigation`, and
+`maxwell_cleanup`. Exact members and hashes are in `archives.json`; all original
+and retained paths are in `plan.json.zst`. `family_summary.json` lists per-family
+sizes. Earlier archives in the separate `aspect` worktree were not touched.
+
+Preview restoration from this worktree root:
+
+```sh
+python3 .benchmark-cleanup-20261002-refactor/restore.py \
+  benchmarks/reconstructed_fault/refactoring_r5b2/output-candidate-frozen
+```
+
+Add `--restore` to restore the selected original paths. Prefixes may name a
+single file, run directory, or benchmark family. Python and `zstd` are required.
+Restore a **complete run directory** before historical field comparisons,
+visualization or checkpoint restart. Unarchived logs/metadata alone do not prove
+that a checkpoint remains usable. Current R6b, replenishment and repaired-GMG
+outputs need no restoration.
+
+Restore checks compressed-payload and per-file SHA256, checks available space,
+skips identical existing files, and refuses to overwrite differing files. A
+1,611,610-byte particle CSV was restored and verified; repeat restoration and
+refusal to overwrite a deliberately different temporary copy were both tested.
+The temporary copy was then removed. See `restoration_test.json`.
+
+## Build use and verification
+
+Older build trees keep their configurations, generated makefiles, test inputs,
+executables and shared libraries, but their next build must regenerate removed
+objects/precompiled headers. Local `ARTIFACTS_AFTER_CLEANUP.md` notes mark those
+trees. To reproduce a historical build, use its recorded source revision and
+matching toolchain; building against the current checkout does not recreate an
+older qualified baseline. The current R6b build remains intact for incremental
+work.
+
+Before removal, every archived member was decompressed and SHA256-checked.
+After cleanup, **56,756 retained files were rehashed**, including source,
+scientific evidence, qualified binaries and the active build; **488,096 other
+retained build files passed size/mtime checks**, with their initial SHA256 hashes
+also recorded. These checks preceded this cleanup-note update. Full results are
+in `verified.json`; scripts and archive checksums remain with the archive.
+
+The current qualified R6b executable retains SHA256
+`cdf7e0c58009d11dfe8c216caeb31ba6d8edc08b71360fec9fb63fcd95287596`.
+Its dependencies and the three matched BP3/replenishment plugin dependencies
+resolve. The retained replenishment evidence checker passes unchanged, including
+its explicit **failed server-qualification gate for RNG restoration**. No new
+simulation or build was needed for artifact cleanup.
+
+---
+
 # Latest cleanup — reconstructed-fault artifacts, 2026-09-24 UTC
 
 Lossless archival reclaimed **11.62 GiB (12.47 GB)** of actual disk space.
