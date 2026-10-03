@@ -1386,9 +1386,24 @@ filesystem restart equivalence is required before server-run preparation is
 considered complete.
 
 The separately selected BP3 particle-lifecycle correction preserves inert $H$
-per retained particle. Native births take their audit baseline from initialized,
-limited/interpolated $H$ before mechanics, never an analytical reset. Removal
-forgets the baseline, and rejection restores the timestep backup. The benchmark
+per retained particle. The separately approved frozen-BP3 follow-up uses one
+initializer for startup and native births: evaluate the prescribed stationary
+profile at the particle position and, above the activation threshold, use the
+existing stationary-$H$ function with BP3 material fractions and peak phase.
+Outside the active region use the same material critical driving force $H_c$ as
+startup. Native property initialization completes before insertion and the audit
+checks newborn $H$ against this initializer before recording it. Maxwell stress
+continues through the validated interpolator; retained, migrated and restarted
+particles keep their committed $H$.
+
+The opt-in BP3 property is gated by the mature specialization, which requires
+\texttt{Evolve phase field = false}. This does not replace generic history
+transfer: in an evolving fracture model the current $\phi$ cannot uniquely
+recover loading history $H$. The generic property is unchanged and the opt-in
+property falls back to native late-history interpolation outside the supported
+frozen mature specialization. There is no new particle layout or checkpoint
+version. Removal forgets the baseline, and rejection restores the timestep backup.
+The benchmark
 retains only owned/ghost baselines and one backup, using native auxiliary
 particle transfer for migration. Since the qualified deal.II build omits that
 auxiliary payload from mesh checkpoints, an all-rank pre-checkpoint hook gathers

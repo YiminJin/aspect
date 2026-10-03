@@ -1,5 +1,9 @@
 # BP3 particle/audit lifecycle — section 1
 
+The subsequent [frozen-BP3 H follow-up](../frozen_particle_H/README.md) supersedes
+this report's interpolated-newborn-H policy for the selected frozen candidate.
+This report and its saved baseline evidence remain unchanged otherwise.
+
 **Local lifecycle checks pass.** This task stops before `fault.txt` geometry
 consolidation. It does not qualify server continuation, long-time inflow history,
 first-event timing, or R7.

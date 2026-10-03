@@ -5,3 +5,7 @@ include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/bp3_150x50_filter2
 include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/particle_policy.prm
 set Resume computation = false
 set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/output-particle-lifecycle
+# Only the frozen BP3 property changes birth H; Maxwell history remains native.
+subsection Particles
+  set List of particle properties = BP3 frozen crack driving force, initial composition, maxwell stress
+end

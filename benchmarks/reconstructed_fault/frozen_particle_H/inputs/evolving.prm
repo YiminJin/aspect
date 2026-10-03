@@ -1,0 +1,17 @@
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_stage_i.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/frozen_particle_H/build/observer/libevolving_birth_guard.release.so
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/frozen_particle_H/output-evolving
+subsection Mesh refinement
+ set Initial global refinement = 3
+end
+subsection Material model
+ subsection Phase field fault
+  set Evolve phase field = true
+ end
+end
+subsection Particles
+ set List of particle properties = BP3 frozen crack driving force, initial composition, maxwell stress
+end
+subsection Postprocess
+ set List of postprocessors = particles, evolving birth guard
+end

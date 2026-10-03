@@ -1617,3 +1617,23 @@ consolidation, AMR/long-time history accuracy, production memory, first-event ti
 and server continuation remain unqualified. Stop before section 2, `Make fault.txt
 the single geometry input`; that is the recommended next bounded task after review.
 No server job, R7 work, geometry cleanup or numerical-tolerance change was performed.
+
+## Frozen BP3 newborn H follow-up (2026-10-02)
+
+Starting from `617d52838`, the separately authorized follow-up shares one
+stationary-profile H initializer between startup and later births in the opt-in
+frozen mature BP3 property. It retains material Hc outside the active profile,
+initializes before native insertion/audit capture, and preserves survivor H and
+native Maxwell transfer. Generic evolving-model history interpolation remains
+available. No core source, particle layout or checkpoint version changed.
+
+[The focused review](../../benchmarks/reconstructed_fault/frozen_particle_H/README.md)
+records successful 2D/3D plugin builds and 195 passing checks: one/two-rank births,
+exact retry/direct and checkpoint/uninterrupted replay, old-checkpoint survivor
+preservation, and a two-rank evolving-history transfer guard. Startup values,
+non-H particle fields, bulk/fault fields and solver summaries match the preceding
+lifecycle baseline. Only H of particles born under the new policy differs (maximum
+observed absolute difference about 1.97e5). User-local files and prior qualified
+artifacts are preserved. This is short 2D AMG evidence, not long-time/server
+qualification. Section 2, making fault.txt the single geometry input, remains
+unstarted and is the next bounded task after review.

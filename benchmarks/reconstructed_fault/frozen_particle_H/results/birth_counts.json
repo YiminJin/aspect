@@ -1,0 +1,121 @@
+[
+  {
+    "case": "serial-fixed",
+    "rank": 0,
+    "observations": 248,
+    "active": 26,
+    "outside": 222
+  },
+  {
+    "case": "mpi",
+    "rank": 0,
+    "observations": 32,
+    "active": 26,
+    "outside": 6
+  },
+  {
+    "case": "mpi",
+    "rank": 1,
+    "observations": 216,
+    "active": 0,
+    "outside": 216
+  },
+  {
+    "case": "retry",
+    "rank": 0,
+    "observations": 487,
+    "active": 43,
+    "outside": 444
+  },
+  {
+    "case": "direct",
+    "rank": 0,
+    "observations": 242,
+    "active": 20,
+    "outside": 222
+  },
+  {
+    "case": "staggered",
+    "rank": 0,
+    "observations": 29,
+    "active": 23,
+    "outside": 6
+  },
+  {
+    "case": "staggered",
+    "rank": 1,
+    "observations": 216,
+    "active": 0,
+    "outside": 216
+  },
+  {
+    "case": "create",
+    "rank": 0,
+    "observations": 14,
+    "active": 11,
+    "outside": 3
+  },
+  {
+    "case": "create",
+    "rank": 1,
+    "observations": 108,
+    "active": 0,
+    "outside": 108
+  },
+  {
+    "case": "resume",
+    "rank": 0,
+    "observations": 29,
+    "active": 23,
+    "outside": 6
+  },
+  {
+    "case": "resume",
+    "rank": 1,
+    "observations": 216,
+    "active": 0,
+    "outside": 216
+  },
+  {
+    "case": "retry2",
+    "rank": 0,
+    "observations": 39,
+    "active": 30,
+    "outside": 9
+  },
+  {
+    "case": "retry2",
+    "rank": 1,
+    "observations": 324,
+    "active": 0,
+    "outside": 324
+  },
+  {
+    "case": "direct2",
+    "rank": 0,
+    "observations": 24,
+    "active": 18,
+    "outside": 6
+  },
+  {
+    "case": "direct2",
+    "rank": 1,
+    "observations": 216,
+    "active": 0,
+    "outside": 216
+  },
+  {
+    "case": "old-resume",
+    "rank": 0,
+    "observations": 15,
+    "active": 12,
+    "outside": 3
+  },
+  {
+    "case": "old-resume",
+    "rank": 1,
+    "observations": 108,
+    "active": 0,
+    "outside": 108
+  }
+]

@@ -1,4 +1,5 @@
 #include "runtime.h"
+#include "particle_initialization.h"
 #include "bp3_model.h"
 
 #include <aspect/initial_composition/interface.h>
@@ -180,18 +181,10 @@ namespace aspect
       auto &pm = sim.get_phase_field_handler ().get_associated_particle_manager ();
       const auto H
           = pm.get_property_manager ().get_data_info ().get_position_by_field_name ("crack_driving_force");
-      const auto &model = Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>> (
-          sim.get_material_model ());
       const auto profiles = sim.get_phase_field_handler ().get_phase_field_profiles (BP3::core_phi);
       for (auto &particle : pm.get_particle_handler ())
-        {
-          const auto p = particle.get_location ();
-          const double phi = profiles[0]->value (BP3::normal_distance (p[0], p[1]));
-          const double f = BP3::depth_fraction (p[1]);
-          if (phi > model.get_phase_field_activation_threshold ())
-            particle.get_properties ()[H] = sim.get_phase_field_handler ().stationary_crack_driving_force (
-                { 1 - f, f }, phi, BP3::core_phi);
-        }
+        particle.get_properties ()[H] = stationary_particle_H(
+          sim, particle.get_location (), *profiles[0]);
     }
 
     template <int dim>

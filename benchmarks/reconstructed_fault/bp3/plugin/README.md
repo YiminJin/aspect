@@ -83,7 +83,15 @@ includes [`particle_policy.prm`](../particle_policy.prm): native regular 4×4,
 12–24 particles, point-density addition/removal, native LLS limiting of H and all
 Maxwell components, and no boundary extrapolation. `BP3 history linear least
 squares` resolves/validates/logs the mask by runtime field names. Local verification
-uses that same include. Historical inputs remain unchanged. This candidate still
+uses that same include. The candidate selects `BP3 frozen crack driving force`:
+startup and later births share the stationary-profile H initializer, retaining
+material Hc outside the active region. Native initialization runs before insertion
+and the birth audit verifies the value before recording it. Survivors retain their
+committed H, and Maxwell stress retains the validated native interpolation. The
+property uses this rule only for the frozen mature BP3 specialization; other
+models retain native late-history interpolation. See the
+[frozen-H verification](../../frozen_particle_H/README.md).
+Historical inputs remain unchanged. This candidate still
 requires all historical geometry/profile fixtures; geometry/runtime cleanup and
 server qualification remain deferred. The old monitor identity string is retained
 for compatibility and is not evidence of the new limiter policy; use the explicit
@@ -148,6 +156,9 @@ without a growth snapshot starts a new growth table with a header.
 ## Source ownership
 
 `bp3.cc`: initial fields, loading registration, preparation/solver observers.
+`particle_initialization.cc`: shared stationary H initializer and opt-in frozen
+BP3 particle property; generic history transfer remains in the native property.
+`particle_history.cc`: validated native interpolation and retained/birth H audit.
 `mesh.cc`: prescribed mesh reproduction and verification.
 `bottom_constraint.cc`: optional fault-parallel bottom constraint; the default
 `Bottom velocity constraint = full` retains the existing full loading. The

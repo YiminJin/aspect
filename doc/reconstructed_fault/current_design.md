@@ -1487,9 +1487,27 @@ for frictional work if the signed normal traction is tensile. Fixed prestress
 is external/background work, not a recoverable cohesive spring.
 
 The separately selected BP3 particle-lifecycle correction keeps this invariant
-per retained particle. A native birth establishes its baseline from the initialized,
-limited/interpolated H before mechanics; it is not reset analytically. Survivors
-must retain that exact value. Removal discards the baseline and rejection restores
+per retained particle. The separately approved frozen-BP3 follow-up selects the
+opt-in particle property `BP3 frozen crack driving force`. Startup and later births
+share one initializer: evaluate the prescribed stationary profile at the actual
+particle position, and above the activation threshold call the existing stationary-H
+function with BP3's horizontal material fractions and prescribed peak phase. Outside
+the active region retain the material's arithmetic critical-driving-force average
+Hc, identical to startup. Later births use the stationary material fractions directly;
+the initial-composition manager is no longer available after startup. The native
+property manager computes this value before insertion; the birth audit checks it
+against the shared initializer before recording the baseline. Maxwell components
+retain native interpolation. Existing particles (including restored or migrated
+particles) keep their committed H and original audit baseline.
+
+This specialization is gated by the existing mature-BP3 material invariant, which
+requires `Evolve phase field = false`. It is not a rule for evolving fracture: H
+carries loading history that current phi cannot uniquely reconstruct. The generic
+`crack driving force` property remains unchanged; the opt-in property's late mode
+also falls back to native history interpolation outside the supported frozen mature
+specialization. No particle layout or checkpoint version changes here. Survivors
+must retain their exact initialized/committed value. Removal discards the baseline
+and rejection restores
 the timestep backup. The BP3 plugin keeps only local owned/ghost baselines and one
 backup. Native additional-data callbacks carry baselines during migration/ghost
 exchange. On this deal.II build those callbacks do not participate in mesh

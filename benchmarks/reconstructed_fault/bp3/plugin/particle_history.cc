@@ -1,4 +1,5 @@
 #include "runtime.h"
+#include "particle_initialization.h"
 
 #include <aspect/particle/manager.h>
 #include <aspect/phase_field.h>
@@ -64,11 +65,18 @@ namespace aspect
                 // native ID can establish a new baseline after initialization.
                 valid = valid && (!initialized || particle.get_id()>=birth_floor)
                         && std::isfinite(value) && value>=0.;
+                const auto &properties = pm.get_property_manager();
+                if (properties.template has_matching_active_plugin<Particle::Property::BP3FrozenCrackDrivingForce<dim>>())
+                  {
+                    const auto &initializer = properties.template get_matching_active_plugin<Particle::Property::BP3FrozenCrackDrivingForce<dim>>();
+                    if (initializer.uses_stationary_initialization())
+                      valid = valid && value==initializer.initial_H(particle.get_location());
+                  }
                 current.emplace(particle.get_id(), value);
               }
           }
         AssertThrow(Utilities::MPI::min(static_cast<unsigned int>(valid), pm.get_mpi_communicator()),
-                    ExcMessage("BP3 particle audit: changed survivor H, missing migrated baseline, or invalid birth H."));
+                    ExcMessage("BP3 particle audit: changed survivor H, missing migrated baseline, or invalid birth H (including the selected stationary initializer)."));
         work_initial_H.swap(current); // Legitimate removals and old ghost entries are forgotten.
         initialized = true;
         birth_floor = pm.get_particle_handler().get_next_free_particle_index();
