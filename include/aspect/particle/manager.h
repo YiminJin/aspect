@@ -46,6 +46,7 @@
 #include <deal.II/base/array_view.h>
 
 #include <boost/serialization/unique_ptr.hpp>
+#include <boost/serialization/version.hpp>
 
 #include <random>
 #include <vector>
@@ -193,6 +194,9 @@ namespace aspect
          * of the iterated advection scheme or when a timestep has to be repeated.
          */
         void restore_particles ();
+
+        /** Native population-management and insertion streams, for replay diagnostics. */
+        std::string get_random_number_state () const;
 
 
         /**
@@ -382,6 +386,16 @@ namespace aspect
          * Random number generator used for creating and deleting particles
          */
         std::mt19937 random_number_generator;
+        std::mt19937 random_number_generator_backup;
+        std::string generator_random_number_state_backup;
+
+        /**
+         * Rank-indexed manager and generator streams. Filled collectively by
+         * pre_checkpoint_store_user_data, never inside serialization. Version-0
+         * snapshots have no streams; load() handles this explicitly.
+         */
+        std::vector<std::string> checkpoint_random_number_states;
+        bool checkpoint_has_random_number_states = false;
 
         /**
          * Interpolation scheme for moving particles in this manager
@@ -574,7 +588,7 @@ namespace aspect
 
     template <int dim>
     template <class Archive>
-    void Manager<dim>::serialize (Archive &ar, const unsigned int)
+    void Manager<dim>::serialize (Archive &ar, const unsigned int version)
     {
       // Note that although Boost claims to handle serialization of pointers
       // correctly, at least for the case of unique_ptr it seems to not work.
@@ -582,7 +596,23 @@ namespace aspect
       ar
       &(*particle_handler)
       ;
+      if (version >= 1)
+        ar & checkpoint_random_number_states;
+      if (Archive::is_loading::value)
+        checkpoint_has_random_number_states = version >= 1;
     }
+  }
+}
+
+namespace boost
+{
+  namespace serialization
+  {
+    template <int dim>
+    struct version<aspect::Particle::Manager<dim>>
+    {
+      BOOST_STATIC_CONSTANT(unsigned int, value = 1);
+    };
   }
 }
 

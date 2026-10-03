@@ -55,6 +55,11 @@ namespace aspect
   :
     generator(std::move(other.generator)),
               integrator(std::move(other.integrator)),
+              random_number_generator(other.random_number_generator),
+              random_number_generator_backup(other.random_number_generator_backup),
+              generator_random_number_state_backup(std::move(other.generator_random_number_state_backup)),
+              checkpoint_random_number_states(std::move(other.checkpoint_random_number_states)),
+              checkpoint_has_random_number_states(other.checkpoint_has_random_number_states),
               interpolator(std::move(other.interpolator)),
               particle_handler(std::move(other.particle_handler)),
               particle_handler_backup(), // can not move
@@ -190,6 +195,9 @@ namespace aspect
     Manager<dim>::backup_particles ()
     {
       copy_particle_handler (*particle_handler.get(), particle_handler_backup);
+      random_number_generator_backup = random_number_generator;
+      generator_random_number_state_backup = generator->get_random_number_state ();
+      this->get_signals().post_particle_backup(*this);
     }
 
 
@@ -199,6 +207,10 @@ namespace aspect
     Manager<dim>::restore_particles ()
     {
       copy_particle_handler (particle_handler_backup, *particle_handler.get());
+      // Rejected advection may have consumed placement/removal choices as well as particles.
+      random_number_generator = random_number_generator_backup;
+      generator->set_random_number_state (generator_random_number_state_backup);
+      this->get_signals().post_particle_restore(*this);
     }
 
 
@@ -230,6 +242,13 @@ namespace aspect
       {
         this->setup_initial_state();
       });
+
+      signals.pre_checkpoint_store_user_data.connect(
+        [this] (typename parallel::distributed::Triangulation<dim> &)
+        {
+          checkpoint_random_number_states = Utilities::MPI::all_gather(
+            this->get_mpi_communicator(), this->get_random_number_state ());
+        });
 
       connect_particle_handler_signals(signals,*particle_handler);
       // Particle handler backup will not be stored for checkpointing
@@ -646,6 +665,7 @@ namespace aspect
 
           particle_handler->update_cached_numbers();
         }
+      this->get_signals().post_particle_management(*this);
     }
 
     template <int dim>
@@ -1107,6 +1127,16 @@ namespace aspect
 
 
     template <int dim>
+    std::string Manager<dim>::get_random_number_state () const
+    {
+      std::ostringstream state;
+      state << random_number_generator << '\n' << generator->get_random_number_state ();
+      return state.str();
+    }
+
+
+
+    template <int dim>
     void
     Manager<dim>::save (std::ostringstream &os) const
     {
@@ -1122,6 +1152,27 @@ namespace aspect
     {
       aspect::iarchive ia (is);
       ia >> (*this);
+      const unsigned int ranks = Utilities::MPI::n_mpi_processes(this->get_mpi_communicator());
+      const bool population_changes = particle_load_balancing & ParticleLoadBalancing::remove_and_add_particles;
+      const bool compatible = checkpoint_has_random_number_states && checkpoint_random_number_states.size() == ranks;
+      AssertThrow (compatible || !population_changes,
+                  ExcMessage("Particle population management requires a checkpoint with per-rank RNG states "
+                             "and the same MPI rank count. Legacy snapshots or changed rank counts cannot "
+                             "replay additions/removals; start fresh or disable population changes explicitly."));
+      if (compatible)
+        {
+          const auto rank = Utilities::MPI::this_mpi_process(this->get_mpi_communicator());
+          std::istringstream state(checkpoint_random_number_states[rank]);
+          state >> random_number_generator;
+          AssertThrow (!state.fail(), ExcMessage("Invalid particle manager RNG checkpoint."));
+          state.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+          std::string generator_state;
+          std::getline(state, generator_state);
+          generator->set_random_number_state (generator_state);
+        }
+      else
+        this->get_pcout() << "Particle RNG replay unavailable in this restart; population changes are disabled."
+                         << std::endl;
     }
 
 

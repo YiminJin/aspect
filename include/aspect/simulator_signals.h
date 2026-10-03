@@ -402,6 +402,13 @@ namespace aspect
      */
     boost::signals2::signal<void (Particle::Manager<dim> &)> post_restore_particles;
 
+    /** Notifications after native particle backup, restoration, and count management.
+     * Observers may maintain auxiliary audits; timestep acceptance remains with the simulator.
+     */
+    boost::signals2::signal<void (Particle::Manager<dim> &)> post_particle_backup;
+    boost::signals2::signal<void (Particle::Manager<dim> &)> post_particle_restore;
+    boost::signals2::signal<void (Particle::Manager<dim> &)> post_particle_management;
+
   };
 
 

@@ -42,6 +42,22 @@ namespace aspect
 
 
       template <int dim>
+      std::string Interface<dim>::get_random_number_state () const
+      {
+        std::ostringstream stream;
+        stream << random_number_generator;
+        return stream.str();
+      }
+
+      template <int dim>
+      void Interface<dim>::set_random_number_state (const std::string &state)
+      {
+        std::istringstream stream(state);
+        stream >> random_number_generator;
+        AssertThrow(!stream.fail(), ExcMessage("Invalid particle generator RNG state."));
+      }
+
+      template <int dim>
       std::pair<Particles::internal::LevelInd,Particle<dim>>
       Interface<dim>::generate_particle(const Point<dim> &position,
                                         const types::particle_index id) const

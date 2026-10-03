@@ -113,6 +113,10 @@ namespace aspect
                              const types::particle_index id,
                              const Point<dim> &reference_position);
 
+          /** State of the native generator stream used by random insertion. */
+          std::string get_random_number_state () const;
+          void set_random_number_state (const std::string &state);
+
         protected:
           /**
            * Generate a particle at the specified position and with the
