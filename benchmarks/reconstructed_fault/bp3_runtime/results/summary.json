@@ -1,0 +1,218 @@
+{
+  "legacy_loading": {
+    "samples": 2001,
+    "max_C_difference": 2.886579864025407e-14,
+    "max_phase_difference": 6.367129046225273e-14,
+    "passed": true
+  },
+  "meshes": {
+    "small-60-startup": {
+      "cells": 10634,
+      "support_cells": 6386,
+      "h_min": 3.90625,
+      "h_max": 125.0,
+      "area": 2000000.0,
+      "invalid": 0,
+      "unique_cells": 10634
+    },
+    "small-45-startup": {
+      "cells": 13178,
+      "support_cells": 7936,
+      "h_min": 3.90625,
+      "h_max": 125.0,
+      "area": 2000000.0,
+      "invalid": 0,
+      "unique_cells": 13178
+    },
+    "small-45-reverse-startup": {
+      "cells": 13178,
+      "support_cells": 7936,
+      "h_min": 3.90625,
+      "h_max": 125.0,
+      "area": 2000000.0,
+      "invalid": 0,
+      "unique_cells": 13178
+    },
+    "baseline-graded": {
+      "cells": 10634,
+      "support_cells": 6386,
+      "h_min": 3.90625,
+      "h_max": 125.0,
+      "area": 2000000.0,
+      "invalid": 0,
+      "unique_cells": 10634
+    }
+  },
+  "graded_limitation": {
+    "profile_radius": 39.52916402010462,
+    "fine_band": 47.34166402010462,
+    "maximum_projected_cell_width_60": 170.75317547305482,
+    "required_uniform_boundary_half_width_60": 242.81313062439978,
+    "preserved_refinement_band_boundary_half_width_60": 54.66544493178446,
+    "accepted_plugin_reproduces": true
+  },
+  "heterogeneous": true,
+  "legacy-rejected": true,
+  "baseline-graded": true,
+  "model_only_runtime": true,
+  "runs": [
+    {
+      "case": "baseline-graded-np2",
+      "exit_code": 1,
+      "seconds": 4.2773636380002245,
+      "rss_kib": 500288
+    },
+    {
+      "case": "create-np2",
+      "exit_code": 0,
+      "seconds": 11.39687848099993,
+      "rss_kib": 294892
+    },
+    {
+      "case": "dip-45-reverse-serial-np1",
+      "exit_code": 0,
+      "seconds": 24.38064453700008,
+      "rss_kib": 331620
+    },
+    {
+      "case": "dip-45-serial-np1",
+      "exit_code": 1,
+      "seconds": 2.0203815629997735,
+      "rss_kib": 185688
+    },
+    {
+      "case": "dip-45-serial-registered-np1",
+      "exit_code": 0,
+      "seconds": 26.789416854000137,
+      "rss_kib": 331676
+    },
+    {
+      "case": "dip-60-authorized-np1",
+      "exit_code": 0,
+      "seconds": 16.212330715999997,
+      "rss_kib": 329780
+    },
+    {
+      "case": "dip-60-final-np1",
+      "exit_code": 0,
+      "seconds": 14.155709245000025,
+      "rss_kib": 333112
+    },
+    {
+      "case": "dip-60-matched-np2",
+      "exit_code": 0,
+      "seconds": 13.24996707199989,
+      "rss_kib": 292672
+    },
+    {
+      "case": "dip-60-np1",
+      "exit_code": 213,
+      "seconds": 2.370746163999911,
+      "rss_kib": 14588
+    },
+    {
+      "case": "direct-np1",
+      "exit_code": 0,
+      "seconds": 9.641569776000324,
+      "rss_kib": 336440
+    },
+    {
+      "case": "direct2-np2",
+      "exit_code": 0,
+      "seconds": 5.278498055,
+      "rss_kib": 293164
+    },
+    {
+      "case": "heterogeneous-np1",
+      "exit_code": 1,
+      "seconds": 2.3213196280003103,
+      "rss_kib": 211620
+    },
+    {
+      "case": "legacy-rejected-np1",
+      "exit_code": 1,
+      "seconds": 3.57495240299977,
+      "rss_kib": 288660
+    },
+    {
+      "case": "model-only-np1",
+      "exit_code": 0,
+      "seconds": 11.54522514600012,
+      "rss_kib": 329016
+    },
+    {
+      "case": "resume-np2",
+      "exit_code": 0,
+      "seconds": 7.082104382000125,
+      "rss_kib": 294596
+    },
+    {
+      "case": "retry-np1",
+      "exit_code": 0,
+      "seconds": 13.750287792000108,
+      "rss_kib": 340672
+    },
+    {
+      "case": "retry2-np2",
+      "exit_code": 0,
+      "seconds": 6.836059921000015,
+      "rss_kib": 293424
+    },
+    {
+      "case": "small-45-np1",
+      "exit_code": 1,
+      "seconds": 2.320687773999907,
+      "rss_kib": 211264
+    },
+    {
+      "case": "small-45-reverse-startup-np2",
+      "exit_code": 1,
+      "seconds": 6.887820212000406,
+      "rss_kib": 564752
+    },
+    {
+      "case": "small-45-startup-np1",
+      "exit_code": 1,
+      "seconds": 11.20290856199972,
+      "rss_kib": 804980
+    },
+    {
+      "case": "small-60-final-np2",
+      "exit_code": 1,
+      "seconds": 3.9751767430002474,
+      "rss_kib": 208144
+    },
+    {
+      "case": "small-60-mesh-np2",
+      "exit_code": 1,
+      "seconds": 4.174384368999881,
+      "rss_kib": 210424
+    },
+    {
+      "case": "small-60-np2",
+      "exit_code": 1,
+      "seconds": 4.2758259670001735,
+      "rss_kib": 210528
+    },
+    {
+      "case": "small-60-startup-np2",
+      "exit_code": 1,
+      "seconds": 6.483105263000198,
+      "rss_kib": 498744
+    },
+    {
+      "case": "staggered-np2",
+      "exit_code": 0,
+      "seconds": 13.249660533999986,
+      "rss_kib": 296112
+    }
+  ],
+  "total_simulation_seconds": 227.45302479700126,
+  "source_commit": "48f23492d",
+  "artifacts": {
+    "build-refactor-r6b/aspect-filter-derivative-qualified": "5ded9532b898a8b5f569ef9c568644c4e929c11db550515a74373344c0d2fa83",
+    "benchmarks/reconstructed_fault/bp3_geometry/build/bp3/libbp3_restore_150x50.release.so": "513a8ac249d25d27961d0de588d10279086c4538864cf4501edd39d1d8c74b82",
+    "benchmarks/reconstructed_fault/bp3_runtime/build/libbp3_restore_150x50.release.so": "a66e9ac864e26f4689f74dd983e4b78c27eaa020747dfff011c5b37a62024500",
+    "benchmarks/reconstructed_fault/bp3_runtime/build/observer/libfrozen_birth_observer.release.so": "7d0ae918f783fc903dff984ac6d3d0890455bee87963ea7f14b1deecd7b825d9"
+  }
+}

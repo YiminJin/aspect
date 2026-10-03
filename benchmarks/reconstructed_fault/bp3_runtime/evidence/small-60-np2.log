@@ -1,0 +1,108 @@
+-----------------------------------------------------------------------------
+--                             This is ASPECT                              --
+-- The Advanced Solver for Planetary Evolution, Convection, and Tectonics. --
+-----------------------------------------------------------------------------
+--     . version 3.1.0-pre (pf-rsf-refactor, 1a3b57eda)
+--     . using deal.II 9.6.2 (dealii-9.6, 6890ca740b)
+--     .       with 32 bit indices
+--     .       with vectorization level 2 (AVX, 4 doubles, 256 bits)
+--     . using Trilinos 14.2.0
+--     . using p4est 2.8.7
+--     . using Geodynamic World Builder 1.0.0
+--     . running in OPTIMIZED mode
+--     . running with 2 MPI processes
+-----------------------------------------------------------------------------
+
+Loading shared library </home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_runtime/build/libbp3_restore_150x50.release.so>
+Loading shared library </home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_runtime/build/observer/libfrozen_birth_observer.release.so>
+
+
+-----------------------------------------------------------------------------
+The output directory </home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_runtime/output-small-60/> provided in the input file appears not to exist.
+ASPECT will create it for you.
+-----------------------------------------------------------------------------
+
+
+BP3 straight geometry v1 box -1000 0 2000 1000 anchors -288.67513459481296 1000 0.59999999999999998 288.67513459481296 0 0.59999999999999998 thrust -1 weakening 15000 width 3000 local 1
+BP3 dip=60, length=1154.7, tangent=0.5 -0.866025, normal=0.866025 0.5
+BP3 native LLS limiter: crack_driving_force components 0..0; boundary extrapolation disabled.
+BP3 native LLS limiter: maxwell stress components 3..5; boundary extrapolation disabled.
+-----------------------------------------------------------------------------
+-- For information on how to cite ASPECT, see:
+--   https://aspect.geodynamics.org/citing.html?ver=3.1.0-pre&NewtonSolver=1&particles=1&sha=1a3b57eda&src=code
+-----------------------------------------------------------------------------
+Number of active cells: 32 (on 2 levels)
+Number of degrees of freedom: 1,314 (306+45+153+153+153+153+153+153+45)
+
+Number of active cells: 128 (on 3 levels)
+Number of degrees of freedom: 4,794 (1,122+153+561+561+561+561+561+561+153)
+
+
+
+----------------------------------------------------
+Exception 'ExcMessage("Newborn H differs from shared initialization or was audited too early.")' on rank 0 on processing: 
+
+
+----------------------------------------------------
+Exception 'ExcMessage("Newborn H differs from shared initialization or was audited too early.")' on rank 1 on processing: 
+
+--------------------------------------------------------
+An error occurred in line <37> of file </home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/frozen_particle_H/plugin/birth_check.cc> in function
+    void aspect::Postprocess::CheckFrozenBirthH<dim>::check(aspect::Particle::Manager<dim>&) [with int dim = 2]
+The violated condition was: 
+    Utilities::MPI::min(static_cast<unsigned int>(valid),this->get_mpi_communicator())
+Additional information: 
+    Newborn H differs from shared initialization or was audited too early.
+
+Stacktrace:
+-----------
+#0  /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_runtime/build/observer/libfrozen_birth_observer.release.so: aspect::Postprocess::CheckFrozenBirthH<2>::check(aspect::Particle::Manager<2>&)
+#1  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: boost::signals2::detail::signal_impl<void (aspect::Particle::Manager<2>&), boost::signals2::optional_last_value<void>, int, std::less<int>, boost::function<void (aspect::Particle::Manager<2>&)>, boost::function<void (boost::signals2::connection const&, aspect::Particle::Manager<2>&)>, boost::signals2::mutex>::operator()(aspect::Particle::Manager<2>&)
+#2  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: boost::signals2::detail::signal_impl<void (dealii::parallel::distributed::Triangulation<2, 2>&), boost::signals2::optional_last_value<void>, int, std::less<int>, boost::function<void (dealii::parallel::distributed::Triangulation<2, 2>&)>, boost::function<void (boost::signals2::connection const&, dealii::parallel::distributed::Triangulation<2, 2>&)>, boost::signals2::mutex>::operator()(dealii::parallel::distributed::Triangulation<2, 2>&)
+#3  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: aspect::Simulator<2>::refine_mesh(unsigned int)
+#4  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: aspect::Simulator<2>::maybe_do_initial_refinement(unsigned int)
+#5  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: aspect::Simulator<2>::run()
+#6  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: ) [0x1e4fa4c]
+#7  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: main
+--------------------------------------------------------
+
+Aborting!
+----------------------------------------------------
+
+--------------------------------------------------------
+An error occurred in line <37> of file </home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/frozen_particle_H/plugin/birth_check.cc> in function
+    void aspect::Postprocess::CheckFrozenBirthH<dim>::check(aspect::Particle::Manager<dim>&) [with int dim = 2]
+The violated condition was: 
+    Utilities::MPI::min(static_cast<unsigned int>(valid),this->get_mpi_communicator())
+Additional information: 
+    Newborn H differs from shared initialization or was audited too early.
+
+Stacktrace:
+-----------
+#0  /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_runtime/build/observer/libfrozen_birth_observer.release.so: aspect::Postprocess::CheckFrozenBirthH<2>::check(aspect::Particle::Manager<2>&)
+#1  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: boost::signals2::detail::signal_impl<void (aspect::Particle::Manager<2>&), boost::signals2::optional_last_value<void>, int, std::less<int>, boost::function<void (aspect::Particle::Manager<2>&)>, boost::function<void (boost::signals2::connection const&, aspect::Particle::Manager<2>&)>, boost::signals2::mutex>::operator()(aspect::Particle::Manager<2>&)
+#2  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: boost::signals2::detail::signal_impl<void (dealii::parallel::distributed::Triangulation<2, 2>&), boost::signals2::optional_last_value<void>, int, std::less<int>, boost::function<void (dealii::parallel::distributed::Triangulation<2, 2>&)>, boost::function<void (boost::signals2::connection const&, dealii::parallel::distributed::Triangulation<2, 2>&)>, boost::signals2::mutex>::operator()(dealii::parallel::distributed::Triangulation<2, 2>&)
+#3  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: aspect::Simulator<2>::refine_mesh(unsigned int)
+#4  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: aspect::Simulator<2>::maybe_do_initial_refinement(unsigned int)
+#5  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: aspect::Simulator<2>::run()
+#6  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: ) [0x1e4fa4c]
+#7  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: main
+--------------------------------------------------------
+
+Aborting!
+----------------------------------------------------
+--------------------------------------------------------------------------
+MPI_ABORT was invoked on rank 0 in communicator MPI_COMM_WORLD
+  Proc: [[3989,1],0]
+  Errorcode: 1
+
+NOTE: invoking MPI_ABORT causes Open MPI to kill all MPI processes.
+You may or may not see output from other processes, depending on
+exactly when Open MPI kills them.
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
+prterun has exited due to process rank 1 with PID 0 on node BEBOP calling
+"abort". This may have caused other processes in the application to be
+terminated by signals sent by prterun (as reported here).
+--------------------------------------------------------------------------
+ 

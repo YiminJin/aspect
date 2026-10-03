@@ -271,13 +271,44 @@ extension `(y_top-y)/sin(dip)` and the existing weakening length plus 3 km width
 A production domain must contain that transition; only explicitly labeled local
 fixtures may select `Postprocess/BP3/Allow truncated transition`.
 
-This is section 2 only. The existing saved mesh, tabulated loading profile and
-legacy completion inputs remain supported pending their separately selected
-section-3 replacement. Generic automatic completion admission is unchanged.
-The model restart identity now includes actual Box bounds and ordered prescribed
-vertices/peak instead of a compiled geometric label. Old BP3 checkpoints lacking
-this identity require their original plugin; section-2 restarts retain committed
-history and rederive only the geometry description.
+Section 3 removes the maintained plugin's legacy completion selector, loading
+profile table and saved leaf-tree dependency. It requires core `automatic
+prescribed` completion; M3/M4 still own contact admission, exterior Q1
+normalization and paired mechanical continuation. Both endpoint supports must
+qualify after mesh construction. Generic legacy completion remains available to
+other callers and historical, version-pinned tests.
+
+The benchmark lazily prepares one transient symmetric loading primitive from
+`get_phase_field_profiles(peak)` and the live energetic degradation law,
+`h = 1/g - 1`. All material profiles and loading degradation must agree. For
+`J = integral_0^R h(phi(r)) dr`, loading uses
+`C(r) = 1/2 + sign(r) integral_0^abs(r) h(phi(q)) dq / (2 J)`, clamped to exact
+0/1 outside support. Preparation compares Gauss8 with two half-panels and checks
+cubic Hermite interpolation at three interior points; boundary queries only
+interpolate. Startup phase and startup/newborn H retain the same live profile
+factory. This analytic loading J never replaces discrete Q1 mechanical Ih.
+Preparation precedes the first boundary consumer and does not depend on monitor
+execution. Restart reconstructs the cache; model identity records its actual
+knots, integral and slopes alongside geometry and filter settings. Older
+checkpoints require their original plugin; committed history is unchanged.
+
+`BP3 fault support` uses conservative cell-to-line distance and the established
+fine band `max(2 ell, R + 2 h_fine)` with exterior target
+`min(h_coarse, 2 h_fine + (d-band)/4)`. Existing ASPECT initial-global tagging
+passes construct the complete graded mesh before particles are initialized:
+`Initial global refinement` selects the finest level, `Minimum refinement level`
+the coarsest, and `Initial adaptive refinement = 0`. Time-dependent AMR is
+rejected. This preserves native smoothing and checks square affine cells, domain
+coverage, global cell totals and target resolution instead of leaf IDs. Adaptive
+startup with repeated particle initialization is not qualified by this change.
+
+Resolved graded meshes are **not yet qualified for automatic completion**. Its
+existing global maximum-cell-width padding can require a uniform boundary
+footprint larger than the preserved fine band. The small 60-degree mesh fails
+that unchanged admission check with both the new and accepted legacy plugins.
+Do not widen the grading policy or weaken core admission implicitly. See the
+[section-3 evidence](../../benchmarks/reconstructed_fault/bp3_runtime/README.md)
+for the separately proposed support-bound investigation.
 
 ## 14. Initial sharp-fault reconstruction
 

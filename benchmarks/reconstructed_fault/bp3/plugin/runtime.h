@@ -17,7 +17,7 @@ namespace aspect
     // Observations shared by initialization callbacks and accepted-state output.
     // Constitutive history remains simulator/manager owned and is never stored here.
     extern bool converged, long_run_stop, restored_history, detailed_diagnostics;
-    extern std::string bottom_normalization_completion_file, mature_prestress_file;
+    extern std::string mature_prestress_file;
     extern unsigned int newton_updates, krylov_iterations;
     extern double minimum_alpha, accepted_nonlinear_residual;
     extern std::vector<std::vector<bool>> final_active;
@@ -44,8 +44,8 @@ namespace aspect
     extern std::string bottom_velocity_constraint;
     template <int dim>
     void constrain_bottom(const SimulatorAccess<dim> &, AffineConstraints<double> &);
-    // Profile data are loaded once by the restored monitor's initialization,
-    // before the boundary model evaluates this frozen loading function.
+    // The live-profile primitive is prepared lazily before its first consumer;
+    // boundary evaluations then use interpolation only.
     template <int dim>
     Tensor<1,dim> loading(const SimulatorAccess<dim> &sim, const Point<dim> &point);
   }

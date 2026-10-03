@@ -1,0 +1,10 @@
+-- Setting up plugin:
+--   name <frozen_birth_observer>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b
+--   setting up RELEASE variant
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_runtime/build/observer
+[ 25%] Building CXX object CMakeFiles/frozen_birth_observer.dir/profile_check.cc.o
+[ 50%] Linking CXX shared library libfrozen_birth_observer.release.so
+[100%] Built target frozen_birth_observer

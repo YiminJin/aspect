@@ -1,0 +1,119 @@
+-----------------------------------------------------------------------------
+--                             This is ASPECT                              --
+-- The Advanced Solver for Planetary Evolution, Convection, and Tectonics. --
+-----------------------------------------------------------------------------
+--     . version 3.1.0-pre (pf-rsf-refactor, 1a3b57eda)
+--     . using deal.II 9.6.2 (dealii-9.6, 6890ca740b)
+--     .       with 32 bit indices
+--     .       with vectorization level 2 (AVX, 4 doubles, 256 bits)
+--     . using Trilinos 14.2.0
+--     . using p4est 2.8.7
+--     . using Geodynamic World Builder 1.0.0
+--     . running in OPTIMIZED mode
+--     . running with 2 MPI processes
+-----------------------------------------------------------------------------
+
+Loading shared library </home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_runtime/build/libbp3_restore_150x50.release.so>
+Loading shared library </home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_runtime/build/observer/libfrozen_birth_observer.release.so>
+
+
+-----------------------------------------------------------------------------
+The output directory </home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_runtime/output-small-45-reverse-startup/> provided in the input file appears not to exist.
+ASPECT will create it for you.
+-----------------------------------------------------------------------------
+
+
+BP3 straight geometry v1 box -1000 0 2000 1000 anchors 500.00000000000006 0 0.59999999999999998 -500.00000000000006 1000 0.59999999999999998 thrust -1 weakening 15000 width 3000 local 1
+BP3 dip=45, length=1414.21, tangent=0.707107 -0.707107, normal=0.707107 0.707107
+BP3 native LLS limiter: crack_driving_force components 0..0; boundary extrapolation disabled.
+BP3 native LLS limiter: maxwell stress components 3..5; boundary extrapolation disabled.
+-----------------------------------------------------------------------------
+-- For information on how to cite ASPECT, see:
+--   https://aspect.geodynamics.org/citing.html?ver=3.1.0-pre&NewtonSolver=1&particles=1&sha=1a3b57eda&src=code
+-----------------------------------------------------------------------------
+Number of active cells: 13,178 (on 8 levels)
+Number of degrees of freedom: 466,362 (109,706+13,769+54,853+54,853+54,853+54,853+54,853+54,853+13,769)
+
+*** Timestep 0:  t=0 seconds, dt=0 seconds
+   Reconstruction initial faults... done.
+
+BP3 mesh geometry: cells=13178, support cells=7936, h range=3.90625:125, area=2e+06
+
+
+----------------------------------------------------
+Exception 'ExcMessage ("Nonuniform or misaligned boundary ghost-Q1 lattice at fault " + std::to_string (contact.fault_index) + "; exterior mesh data are required.")' on rank 0 on processing: 
+
+
+----------------------------------------------------
+Exception 'ExcMessage ("Nonuniform or misaligned boundary ghost-Q1 lattice at fault " + std::to_string (contact.fault_index) + "; exterior mesh data are required.")' on rank 1 on processing: 
+
+--------------------------------------------------------
+An error occurred in line <143> of file </home/ein/repository/aspect-pf-rsf-refactor/source/material_model/phase_field_fault/boundary_completion.cc> in function
+    void aspect::MaterialModel::PhaseFieldFault<dim>::prepare_automatic_boundary_completion() [with int dim = 2]
+The violated condition was: 
+    std::abs (face.cell_upper[d] - face.cell_lower[d] - data.spacing[d]) <= tolerance && std::abs ((face.cell_lower[d] - data.lattice_origin[d]) / data.spacing[d] - std::round ((face.cell_lower[d] - data.lattice_origin[d]) / data.spacing[d])) <= tolerance / data.spacing[d]
+Additional information: 
+    Nonuniform or misaligned boundary ghost-Q1 lattice at fault 0;
+    exterior mesh data are required.
+
+Stacktrace:
+-----------
+#0  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: aspect::MaterialModel::PhaseFieldFault<2>::prepare_automatic_boundary_completion()
+#1  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: aspect::MaterialModel::PhaseFieldFault<2>::compute_normalization_integrals()
+#2  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: aspect::MaterialModel::PhaseFieldFault<2>::initialize_cohesive_state_from_initial_fields()
+#3  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: aspect::MaterialModel::PhaseFieldFault<2>::prepare_reconstructed_fault_mechanical_solve()
+#4  /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_runtime/build/libbp3_restore_150x50.release.so: void aspect::BP3Benchmark::prepare<2>(aspect::SimulatorAccess<2> const&, bool, unsigned int, dealii::SolverControl const&)
+#5  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: boost::signals2::detail::signal_impl<void (aspect::SimulatorAccess<2> const&, bool, unsigned int, dealii::SolverControl const&), boost::signals2::optional_last_value<void>, int, std::less<int>, boost::function<void (aspect::SimulatorAccess<2> const&, bool, unsigned int, dealii::SolverControl const&)>, boost::function<void (boost::signals2::connection const&, aspect::SimulatorAccess<2> const&, bool, unsigned int, dealii::SolverControl const&)>, boost::signals2::mutex>::operator()(aspect::SimulatorAccess<2> const&, bool, unsigned int, dealii::SolverControl const&)
+#6  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: aspect::Simulator<2>::assemble_and_solve_temperature(double const&, double*)
+#7  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: aspect::Simulator<2>::solve_single_advection_iterated_newton_stokes(bool)
+#8  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: aspect::Simulator<2>::solve_timestep()
+#9  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: aspect::Simulator<2>::run()
+#10  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: ) [0x1e4fa4c]
+#11  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: main
+--------------------------------------------------------
+
+Aborting!
+----------------------------------------------------
+--------------------------------------------------------------------------
+MPI_ABORT was invoked on rank 1 in communicator MPI_COMM_WORLD
+  Proc: [[14367,1],1]
+  Errorcode: 1
+
+NOTE: invoking MPI_ABORT causes Open MPI to kill all MPI processes.
+You may or may not see output from other processes, depending on
+exactly when Open MPI kills them.
+--------------------------------------------------------------------------
+
+--------------------------------------------------------
+An error occurred in line <143> of file </home/ein/repository/aspect-pf-rsf-refactor/source/material_model/phase_field_fault/boundary_completion.cc> in function
+    void aspect::MaterialModel::PhaseFieldFault<dim>::prepare_automatic_boundary_completion() [with int dim = 2]
+The violated condition was: 
+    std::abs (face.cell_upper[d] - face.cell_lower[d] - data.spacing[d]) <= tolerance && std::abs ((face.cell_lower[d] - data.lattice_origin[d]) / data.spacing[d] - std::round ((face.cell_lower[d] - data.lattice_origin[d]) / data.spacing[d])) <= tolerance / data.spacing[d]
+Additional information: 
+    Nonuniform or misaligned boundary ghost-Q1 lattice at fault 0;
+    exterior mesh data are required.
+
+Stacktrace:
+-----------
+#0  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: aspect::MaterialModel::PhaseFieldFault<2>::prepare_automatic_boundary_completion()
+#1  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: aspect::MaterialModel::PhaseFieldFault<2>::compute_normalization_integrals()
+#2  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: aspect::MaterialModel::PhaseFieldFault<2>::initialize_cohesive_state_from_initial_fields()
+#3  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: aspect::MaterialModel::PhaseFieldFault<2>::prepare_reconstructed_fault_mechanical_solve()
+#4  /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_runtime/build/libbp3_restore_150x50.release.so: void aspect::BP3Benchmark::prepare<2>(aspect::SimulatorAccess<2> const&, bool, unsigned int, dealii::SolverControl const&)
+#5  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: boost::signals2::detail::signal_impl<void (aspect::SimulatorAccess<2> const&, bool, unsigned int, dealii::SolverControl const&), boost::signals2::optional_last_value<void>, int, std::less<int>, boost::function<void (aspect::SimulatorAccess<2> const&, bool, unsigned int, dealii::SolverControl const&)>, boost::function<void (boost::signals2::connection const&, aspect::SimulatorAccess<2> const&, bool, unsigned int, dealii::SolverControl const&)>, boost::signals2::mutex>::operator()(aspect::SimulatorAccess<2> const&, bool, unsigned int, dealii::SolverControl const&)
+#6  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: aspect::Simulator<2>::assemble_and_solve_temperature(double const&, double*)
+#7  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: aspect::Simulator<2>::solve_single_advection_iterated_newton_stokes(bool)
+#8  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: aspect::Simulator<2>::solve_timestep()
+#9  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: aspect::Simulator<2>::run()
+#10  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: ) [0x1e4fa4c]
+#11  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified: main
+--------------------------------------------------------
+
+Aborting!
+----------------------------------------------------
+--------------------------------------------------------------------------
+prterun has exited due to process rank 1 with PID 0 on node BEBOP calling
+"abort". This may have caused other processes in the application to be
+terminated by signals sent by prterun (as reported here).
+--------------------------------------------------------------------------
+ 

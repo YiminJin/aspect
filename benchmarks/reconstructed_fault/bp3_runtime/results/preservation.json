@@ -1,0 +1,16 @@
+{
+  "doc/reconstructed_fault/refactoring/tmp/R3_plan.md": true,
+  "doc/reconstructed_fault/refactoring/tmp/R4c_review.md": true,
+  "doc/reconstructed_fault/refactoring/tmp/R3b_review.md": true,
+  "doc/reconstructed_fault/refactoring/tmp/R5a2_review1.md": true,
+  "doc/reconstructed_fault/refactoring/tmp/R3a_review.md": true,
+  "doc/reconstructed_fault/refactoring/tmp/R6_plan.md": true,
+  "doc/reconstructed_fault/refactoring/tmp/R2b_review.md": true,
+  "doc/reconstructed_fault/refactoring/tmp/R4c_plan.md": true,
+  "doc/reconstructed_fault/refactoring/tmp/R4ab_review.md": true,
+  "doc/reconstructed_fault/bp3/bp3_particle_replenishment_codex.md": true,
+  "doc/reconstructed_fault/bp3/bp3_runtime_cleanup_local_tests_codex.md": true,
+  "core_source_unchanged": true,
+  "accepted_executable_unchanged": true,
+  "accepted_plugin_unchanged": true
+}

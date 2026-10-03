@@ -1,3 +1,29 @@
+# BP3 runtime-cleanup section 3 implemented; graded qualification blocked
+
+Accepted geometry/endpoint/filter work is committed as `bc2b5eb64`, `82a1daaa8`,
+and `48f23492d`. Section 3 removes the maintained plugin's completion, loading
+profile and leaf-tree inputs. Standalone model-only startup works; the live
+loading primitive and native geometry-driven mesh have no external table input.
+Core mechanics/completion, native geometry ordering, material parameters,
+solver gates, history publication and checkpoint payload remain unchanged.
+
+All 1,888 matched physical/solver/lifecycle comparisons pass, including exact
+retry and two-rank restart replay. Legacy loading C differs by at most 2.89e-14.
+The generated resolved 60-degree mesh has 10,634 cells, h=3.90625–125 m and
+passes geometric invariants, but core automatic completion rejects its graded
+boundary. The accepted legacy plugin reproduces the same failure on identical
+leaves. Global maximum-cell-width padding requires a 242.81 m uniform endpoint
+half-footprint, beyond the preserved fine-band half-footprint of 54.67 m.
+45-degree forward/reverse meshes also fail this unchanged admission rule.
+
+See [review and evidence](../../benchmarks/reconstructed_fault/bp3_runtime/README.md).
+No resolved coupled smoke, graded-interface particle transport, production
+inventory or server readiness is claimed. Recommended next bounded task: design
+and qualify a conservative support-local completion enclosure, separately from
+fixture removal, without weakening overlap/source checks. Await selection;
+Section 4 and subsequent refactoring remain unstarted. Current Section-3 changes
+are uncommitted for review. Earlier entries below are historical.
+
 # Phase-field / RSF current status
 
 ## R6 accepted and closed

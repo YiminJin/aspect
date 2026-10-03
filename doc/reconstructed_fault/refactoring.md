@@ -525,3 +525,21 @@ native input. The [qualified correction](../../benchmarks/reconstructed_fault/bp
 passes all 927 existing qualification checks, including the seven prior failures.
 Keep this numerical correction distinct from the section-2 geometry work and
 endpoint-admission correction. Section 3 remains a separately selected task.
+
+
+## BP3 runtime-cleanup section 3 review boundary
+
+Accepted section-2/filter work is committed as `bc2b5eb64`, `82a1daaa8`, and
+`48f23492d`. Section 3 replaces only the maintained plugin's three table inputs;
+retain historical data and version-pinned binaries. Use the live material/profile
+factory, preserve discrete Ih, and keep automatic completion in core. Prepare
+geometry-only meshes through native initial-global tagging before particles
+exist; initial adaptive passes and later AMR are unsupported in this BP3 path.
+Do not bypass history audits to accommodate repeated startup initialization.
+
+The [section-3 report](../../benchmarks/reconstructed_fault/bp3_runtime/README.md)
+records passing uniform-mesh/lifecycle comparisons and a baseline-reproduced
+graded-boundary admission failure. Do not claim resolved-mesh readiness, change
+the retained grading rule, or narrow core support without a separately selected
+correction. Section 4 production packaging and longer qualification remain
+unselected.

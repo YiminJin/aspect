@@ -60,11 +60,6 @@ namespace aspect
             "Export bulk DoFs and stable-ID particle histories for the short restart regression.");
         prm.declare_entry ("Mature prestress file", "", Patterns::Anything (),
                            "Deprecated compatibility entry; must be empty for restored BP3.");
-        prm.declare_entry (
-            "Bottom normalization completion file", "", Patterns::Anything (),
-            "Paired top/bottom outside-profile integrals (count, then id x y integral). "
-            "The table must match the fixed mesh, phase profile and fault geometry. "
-            "Both in-box source continuations use the same work measure, without changing connectivity.");
         prm.leave_subsection ();
         prm.leave_subsection ();
       }
@@ -88,7 +83,6 @@ namespace aspect
         BP3Benchmark::mature_prestress_file = prm.get ("Mature prestress file");
         AssertThrow (BP3Benchmark::mature_prestress_file.empty (),
                      ExcMessage ("Mature prestress file is unsupported in restored BP3; leave it empty."));
-        BP3Benchmark::bottom_normalization_completion_file = prm.get ("Bottom normalization completion file");
         prm.leave_subsection ();
         prm.leave_subsection ();
       }

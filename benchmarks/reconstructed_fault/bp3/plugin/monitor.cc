@@ -1,4 +1,5 @@
 #include "runtime.h"
+#include "profile.h"
 #include "bp3_model.h"
 #include "output_files.h"
 
@@ -25,45 +26,9 @@ namespace aspect
 {
   namespace BP3Restore
   {
-    std::vector<double> radius, phi, integral;
-    double degradation_scale=0.;
     std::string filter_mode="helmholtz";
     double filter_length=20.;
     std::vector<double> incoming_theta;
-
-    double h(const double p)
-    {return degradation_scale*p*(1+p)/((1-p)*(1-p));}
-
-    // Integral of the SAME tabulated stationary profile used for completion.
-    // Integrate the final table interval, rather than differentiating a coarse
-    // piecewise-linear cumulative table in the bottom boundary layer.
-    double cumulative(const double r)
-    {
-      AssertThrow(!radius.empty(),ExcMessage("Missing restored BP3 loading profile."));
-      const double a=std::abs(r);
-      if (a>=radius.back()) return r<0 ? 0. : 1.;
-      const unsigned int i=std::upper_bound(radius.begin(),radius.end(),a)-radius.begin()-1;
-      static const QGauss<1> quadrature(8);
-      double value=integral[i];
-      for (unsigned int q=0;q<quadrature.size();++q)
-        {
-          const double x=radius[i]+(a-radius[i])*quadrature.point(q)[0];
-          const double p=phi[i]+(phi[i+1]-phi[i])*(x-radius[i])/(radius[i+1]-radius[i]);
-          value+=(a-radius[i])*quadrature.weight(q)*h(p);
-        }
-      return .5+(r<0 ? -.5 : .5)*value/integral.back();
-    }
-
-    template <int dim>
-    Tensor<1,dim> loading(const SimulatorAccess<dim> &,const Point<dim> &p)
-    {
-      const double rate=-BP3::Vp*(cumulative(BP3::signed_normal(p[0],p[1]))-.5);
-      Tensor<1,dim> u;u[0]=rate*BP3::geometry().tangent[0];u[1]=rate*BP3::geometry().tangent[1];
-      return u;
-    }
-
-    template Tensor<1,2> loading(const SimulatorAccess<2> &, const Point<2> &);
-    template Tensor<1,3> loading(const SimulatorAccess<3> &, const Point<3> &);
 
     template <int dim>
     void before_mechanics(const SimulatorAccess<dim> &sim,bool temperature,unsigned int,const SolverControl &)
@@ -78,17 +43,10 @@ namespace aspect
           for(unsigned int i=0;i<fault.n_vertices();++i) incoming_theta[i]=fault.get_properties(i)[state];
         }
       if(sim.get_timestep_number()!=0) return;
-      const auto profiles=sim.get_phase_field_handler().get_phase_field_profiles(BP3::geometry().peak_phase);
-      double error=0.;
-      for(unsigned int i=0;i<radius.size();++i)
-        error=std::max(error,std::abs(profiles[0]->value(radius[i])-phi[i]));
-      AssertThrow(error<2e-11,ExcMessage("Restored completion/loading profile differs from the production profile."));
-      const auto &handler=sim.get_phase_field_handler();
-      for(const double p:{.1,.3,.6})
-        AssertThrow(std::abs((1./handler.energetic_degradation({1.,0.},p)-1.)/h(p)-1.)<1e-12,
-                    ExcMessage("Restored profile degradation differs from the production law."));
-      sim.get_pcout()<<"Restored BP3 stationary profile: max error="<<error
-                     <<", full normal integral="<<2*integral.back()<<std::endl;
+      const auto &profile=BP3::loading_profile(sim);
+      sim.get_pcout()<<"BP3 live stationary profile: support="<<profile.support
+                     <<", full normal integral="<<2*profile.integral.back()
+                     <<", primitive knots="<<profile.radius.size()<<std::endl;
     }
   }
 
@@ -101,7 +59,6 @@ namespace aspect
       static void declare_parameters(ParameterHandler &prm)
       {
         prm.enter_subsection("Postprocess");prm.enter_subsection("BP3 restored monitor");
-        prm.declare_entry("Stationary profile file","",Patterns::Anything());
         prm.declare_entry("Friction normal input","helmholtz",Patterns::Selection("raw|helmholtz"));
         prm.declare_entry("Normal filter length","20",Patterns::Double(0));
         prm.declare_entry("Bottom velocity constraint","full",Patterns::Selection("full|fault parallel"),
@@ -119,7 +76,6 @@ namespace aspect
       {
         BP3::configure_geometry(*this,prm);
         prm.enter_subsection("Postprocess");prm.enter_subsection("BP3 restored monitor");
-        profile_path=prm.get("Stationary profile file");
         BP3Restore::filter_mode=prm.get("Friction normal input");
         BP3Restore::filter_length=prm.get_double("Normal filter length");
         BP3Restore::bottom_velocity_constraint=prm.get("Bottom velocity constraint");
@@ -133,19 +89,8 @@ namespace aspect
       void initialize() override
       {
         using namespace BP3Restore;
-        std::istringstream in(Utilities::read_and_distribute_file_content(
-          Utilities::expand_ASPECT_SOURCE_DIR(profile_path),this->get_mpi_communicator()));
-        unsigned int n=0;
-        AssertThrow(in>>n>>degradation_scale && n>2 && degradation_scale>0.,ExcMessage("Invalid restored loading table."));
-        radius.resize(n);phi.resize(n);integral.resize(n);
-        for(unsigned int i=0;i<n;++i)
-          AssertThrow(in>>radius[i]>>phi[i]>>integral[i]
-                      && (i==0 || (radius[i]>radius[i-1] && integral[i]>=integral[i-1])),
-                      ExcMessage("Invalid restored profile row."));
-        AssertThrow(radius[0]==0. && integral[0]==0. && integral.back()>0.,ExcMessage("Invalid profile normalization."));
-        // Postprocessors initialize before the surface system is constructed.
-        // Load the boundary profile now, but attach surface options only after
-        // simulator construction, before any initial mechanics or restart solve.
+        // Surface options attach after simulator construction. Loading prepares
+        // its own live-profile cache and does not depend on this observer.
         this->get_signals().post_simulator_initialization.connect(
           [this](const SimulatorAccess<dim> &sim)
           {
@@ -282,15 +227,15 @@ namespace aspect
         return {"Restored BP3 monitor","raw/filtered traction and endpoint growth recorded"};
       }
     private:
-      std::string profile_path;
       bool detailed_diagnostics = false;
       std::string identity() const
       {
         std::ostringstream out;
-        out<<std::setprecision(17)<<BP3::geometry().identity<<" loading stationary thrust v2 "
-           <<BP3Restore::filter_mode<<' '<<BP3Restore::filter_length<<' '<<BP3Restore::degradation_scale;
-        for(unsigned int i=0;i<BP3Restore::radius.size();++i)
-          out<<' '<<BP3Restore::radius[i]<<' '<<BP3Restore::phi[i]<<' '<<BP3Restore::integral[i];
+        const auto &profile=BP3::loading_profile(*this);
+        out<<std::setprecision(17)<<BP3::geometry().identity<<" loading live stationary v3 "
+           <<BP3Restore::filter_mode<<' '<<BP3Restore::filter_length;
+        for(unsigned int i=0;i<profile.radius.size();++i)
+          out<<' '<<profile.radius[i]<<' '<<profile.integral[i]<<' '<<profile.slope[i];
         if (BP3Restore::bottom_velocity_constraint!="full")
           out<<" bottom="<<BP3Restore::bottom_velocity_constraint;
         return out.str();

@@ -60,7 +60,6 @@ namespace aspect
     bool long_run_stop = false;
     bool restored_history = false;
     bool detailed_diagnostics = false;
-    std::string bottom_normalization_completion_file;
     std::string mature_prestress_file;
     unsigned int newton_updates = 0, krylov_iterations = 0;
     double minimum_alpha = 1.;
@@ -206,22 +205,8 @@ namespace aspect
       // manager owns the checkpointed coefficients, not a new initial solve.
       auto &model = const_cast<MaterialModel::PhaseFieldFault<dim> &> (
           Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>> (sim.get_material_model ()));
-      AssertThrow (
-          model.is_mature_frictional_fault () &&
-          (manager.uses_automatic_boundary_completion () || !bottom_normalization_completion_file.empty ()),
-          ExcMessage ("Modified BP3 requires frozen mature mechanics and paired completion inputs."));
-      if (manager.uses_automatic_boundary_completion ())
-        AssertThrow(bottom_normalization_completion_file.empty(),
-                    ExcMessage("Automatic BP3 completion requires an empty legacy completion-file selector."));
-      else
-        {
-          model.set_boundary_normalization_completion_file (bottom_normalization_completion_file);
-          const auto &box
-              = Plugins::get_plugin_as_type<const GeometryModel::Box<dim>> (sim.get_geometry_model ());
-          manager.enable_bottom_source_continuation (0, box.get_origin (),
-                                                     box.get_origin () + box.get_extents ());
-          manager.enable_top_source_continuation ();
-        }
+      AssertThrow (model.is_mature_frictional_fault () && manager.uses_automatic_boundary_completion (),
+                   ExcMessage ("BP3 requires frozen mature mechanics and automatic prescribed boundary completion."));
       sim.get_reconstructed_fault_surface_system ().enable_bulk_work_measure ();
       if (sim.get_timestep_number () != 0 || restored_history)
         model.set_reconstructed_fault_background_traction_property (
@@ -253,6 +238,13 @@ namespace aspect
       // The simulator owns a mutable material object. This initialization-only
       // callback precedes the particle-to-FE transfer; no assembly loop casts.
       model.prepare_reconstructed_fault_mechanical_solve ();
+      const auto &contacts=manager.get_boundary_contacts();
+      AssertThrow(contacts.size()==2 && contacts[0].endpoint!=contacts[1].endpoint,
+                  ExcMessage("BP3 requires automatic completion at both fault endpoints."));
+      for(const auto &contact:contacts)
+        AssertThrow(contact.unsupported_reason.empty() && contact.transverse_extent>0.,
+                    ExcMessage("BP3 endpoint support was not qualified by automatic completion."));
+      sim.get_pcout()<<"BP3 automatic completion: both endpoint supports qualified."<<std::endl;
 
       // Set the selected initial state only after surface material preparation.
       // The ordinary particle property supplies the same initial function.

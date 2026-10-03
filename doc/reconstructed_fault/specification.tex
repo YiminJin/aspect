@@ -1401,10 +1401,29 @@ remain manager-owned. Physical top-to-bottom orientation and thrust do not depen
 on vertex ordering. Bulk material fractions retain the horizontal extension
 $(y_{\rm top}-y)/\sin(\mathrm{dip})$ and the existing weakening length plus
 3 km transition. Production domains must contain the transition; a labeled local
-fixture may explicitly permit truncation. Table removal is deferred to section 3;
-this change does not alter generic completion admission. Restart identity records
-Box bounds, ordered input vertices and peak; older BP3 checkpoints without this
-identity require the original plugin rather than an unverified geometry match.
+fixture may explicitly permit truncation. Selected section 3 removes the maintained
+plugin's saved mesh, loading profile and legacy completion inputs. Core automatic
+prescribed completion retains ownership and admission checks. The benchmark
+prepares a transient primitive from the live stationary profile and energetic
+law $h=1/g-1$, with $J=\int_0^R h(\phi(q))\,dq$ and
+$C(r)=1/2+\operatorname{sign}(r)\int_0^{|r|}h(\phi(q))\,dq/(2J)$, clamped
+outside support. Material profiles/degradation must agree. Gauss integration
+and cubic interpolation are checked during preparation; boundary queries only
+interpolate. This loading integral never replaces discrete mechanical $I_h$.
+Restart identity records actual geometry and generated primitive data; older
+checkpoints require the original plugin. Committed history is not reinitialized.
+
+The geometry-based mesh preserves the fine band
+$\max(2\ell,R+2h_{\rm fine})$ and exterior target
+$\min(h_{\rm coarse},2h_{\rm fine}+(d-r_f)/4)$, with conservative rectangular
+cell-to-line distance. Native initial-global tagging passes run before particle
+initialization, using global/minimum levels for finest/coarsest sizes and zero
+initial adaptive passes. Native smoothing and geometric resolution/coverage
+checks replace leaf membership. No time-dependent AMR is selected.
+The resolved graded mesh remains unqualified for automatic completion: existing
+global maximum-cell-width padding can extend its required uniform boundary
+footprint beyond this fine band. This demonstrated limitation is retained for
+a separate support-bound decision, not resolved by changing admission or grading.
 
 The separately selected BP3 particle-lifecycle correction preserves inert $H$
 per retained particle. The separately approved frozen-BP3 follow-up uses one
