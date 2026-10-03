@@ -259,7 +259,12 @@ namespace aspect
                                           1.),
                                  0.);
       
-      return (1. - xi) * phase_field_values[idx-1] + xi * phase_field_values[idx];
+      const double value = (1. - xi) * phase_field_values[idx-1] + xi * phase_field_values[idx];
+      // A convex interpolation can overshoot its endpoints by one ulp near
+      // the peak. Preserve the tabulated bounds required by stationary H.
+      return std::clamp(value,
+                        std::min(phase_field_values[idx-1], phase_field_values[idx]),
+                        std::max(phase_field_values[idx-1], phase_field_values[idx]));
     }
 
 

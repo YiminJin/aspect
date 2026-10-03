@@ -79,6 +79,35 @@ TEST_CASE("Fault shear sense preserves positive rates and survives restart", "[f
   REQUIRE_THROWS(restored.set_shear_sense(0,1));
 }
 
+TEST_CASE("Stationary phase profile interpolation preserves endpoint bounds", "[phase_field_profile_bounds]")
+{
+  const aspect::PhaseField::GeometricFunction geometry(20.,1.,8./3.);
+  const double m=1e5/((8./3.)*20.*(1e12/(2.*32038120320.)));
+  const aspect::PhaseField::DegradationFunction degradation(1.,m);
+  const aspect::PhaseField::PhaseFieldProfile profile(geometry,degradation,.6);
+  const auto &r=profile.get_coordinate_values();
+  const auto &phi=profile.get_phase_field_values();
+  REQUIRE(profile.value(0.)==.6);
+  // Distances very close to the center occur on an oblique fault even when
+  // particles lie on it mathematically. Exercise rounded convex weights.
+  for (unsigned exponent=1;exponent<=64;++exponent)
+    for (unsigned numerator=1;numerator<32;++numerator)
+      {
+        const double xi=std::ldexp(numerator/32.,-static_cast<int>(exponent));
+        const double value=profile.value(r[1]*xi);
+        REQUIRE(value<=phi[0]);
+        REQUIRE(value>=phi[1]);
+      }
+  for (unsigned i=1;i<r.size();++i)
+    for (const double xi : {.1,.5,.9})
+      {
+        const double value=profile.value((1.-xi)*r[i-1]+xi*r[i]);
+        REQUIRE(value<=phi[i-1]);
+        REQUIRE(value>=phi[i]);
+      }
+  REQUIRE(profile.value(r.back()*1.01)==0.);
+}
+
 TEST_CASE("Restored BP3 stationary profile matches independent completion table", "[.][bp3_restore_profile]")
 {
   const aspect::PhaseField::GeometricFunction geometry(20.,1.,8./3.);
