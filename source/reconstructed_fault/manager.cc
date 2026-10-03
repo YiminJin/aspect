@@ -952,21 +952,30 @@ namespace aspect
           {
             const auto offset=position-contact.position;
             const double s=offset*contact.inward_tangent, r=offset*contact.normal;
-            if (contact.influence_length==0. || s>=0.
+            const auto &fault=reconstructed_faults[contact.fault_index];
+            const unsigned int segment=contact.endpoint==0 ? 0 : fault.n_cells()-1;
+            const auto &a=fault.vertex(segment), &b=fault.vertex(segment+1);
+            // Bound endpoint subtraction/dot-product roundoff and the angular
+            // error from forming the resampled terminal tangent. This is a
+            // floating-point handoff band, not a physical extension of support.
+            const double endpoint_roundoff=32.*std::numeric_limits<double>::epsilon()
+              *(position.norm()+contact.position.norm()
+                +offset.norm()*(1.+(a.norm()+b.norm())/a.distance(b)));
+            if (contact.influence_length==0. || s>endpoint_roundoff
                 || offset*contact.inward_boundary_normal < -tolerance
                 || std::abs(r)>contact.transverse_extent) continue;
             // This enclosure contains every nonzero physical Q1 cell in the
             // verified terminal profile. It is not the normal-profile cutoff.
             // Raw and resampled endpoint frames can put the same point on
-            // opposite sides of s=0 at roundoff. Retain its existing association.
+            // opposite sides of s=0 at roundoff. The strip owns an already
+            // admitted point; otherwise the endpoint fills this narrow gap.
             if (result.active && result.fault_index==contact.fault_index
-                && s>=-tolerance)
+                && s>=-endpoint_roundoff)
               continue;
             AssertThrow(!result.active, ExcMessage("Overlapping physical boundary continuation associations."));
-            const auto &fault=reconstructed_faults[contact.fault_index];
             result.active=true;
             result.fault_index=contact.fault_index;
-            result.segment_index=contact.endpoint==0 ? 0 : fault.n_cells()-1;
+            result.segment_index=segment;
             result.xi=contact.endpoint==0 ? 0. : 1.;
             result.signed_distance=r;
           }
