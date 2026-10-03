@@ -11,6 +11,7 @@ add_library(bp3_restore_150x50 SHARED
   monitor.cc
   output.cc
   work_audit.cc
+  particle_history.cc
   bottom_constraint.cc
 )
 ASPECT_SETUP_PLUGIN(bp3_restore_150x50)

@@ -21,7 +21,12 @@ namespace aspect
     extern unsigned int newton_updates, krylov_iterations;
     extern double minimum_alpha, accepted_nonlinear_residual;
     extern std::vector<std::vector<bool>> final_active;
+    // Owned/ghost particle audit, transported by the native particle handler.
     extern std::map<types::particle_index,double> work_initial_H;
+    extern std::map<types::particle_index,double> checkpoint_particle_H;
+    void restore_particle_audit(types::particle_index next_id);
+    template <int dim>
+    void connect_particle_history_audit(const SimulatorAccess<dim> &sim);
     extern std::vector<Point<2>> work_initial_geometry;
     extern std::vector<double> work_initial_I;
 

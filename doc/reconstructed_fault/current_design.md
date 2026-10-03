@@ -1486,6 +1486,38 @@ elastic storage and Maxwell dissipation remain; frictional power is
 for frictional work if the signed normal traction is tensile. Fixed prestress
 is external/background work, not a recoverable cohesive spring.
 
+The separately selected BP3 particle-lifecycle correction keeps this invariant
+per retained particle. A native birth establishes its baseline from the initialized,
+limited/interpolated H before mechanics; it is not reset analytically. Survivors
+must retain that exact value. Removal discards the baseline and rejection restores
+the timestep backup. The BP3 plugin keeps only local owned/ghost baselines and one
+backup. Native additional-data callbacks carry baselines during migration/ghost
+exchange. On this deal.II build those callbacks do not participate in mesh
+checkpoint packing: the all-rank pre-checkpoint hook gathers **current owned**
+baselines to rank zero. Version-6 BP3 archives persist that current population
+and next-ID birth threshold. Loading briefly holds the current global snapshot,
+then checks and prunes it after native particle deserialization/management.
+Version-5 audit maps are checked and pruned in the same way. No constitutive
+update or timestep-acceptance decision belongs to the audit.
+
+Native particle-manager backups include the manager population RNG and generator
+base placement RNG. Version-1 manager archives store both streams separately for
+each rank/manager, gathered before serialization in the existing all-rank hook.
+Exact replay is qualified only for the same build, MPI count and partition.
+An old archive without streams, or a changed MPI count, is rejected when particle
+addition/removal is enabled. With population changes explicitly disabled, unrelated
+restart remains supported and emits an explicit RNG-replay-unavailable message;
+this is not a reproducible population restart. No silent reseeding is presented as
+replay. The initial random-uniform/PDF generator's temporary seeding stream does
+not participate in subsequent management.
+
+The section-1 BP3 candidate shares a regular 4-by-4, 12--24 native point-density
+policy between local and production inputs. A BP3 interpolator wrapper resolves
+and validates the native LLS mask from `crack_driving_force` and `maxwell stress`
+component names, limits both, disables boundary extrapolation, and logs the
+resolved fields. It does not replace fitting/limiting algorithms. This addresses
+the demonstrated negative-H birth; it does not establish long-time inflow accuracy.
+
 For the bounded BP3 comparison initialize the fixed effective background as
 `tau_bg_old(s)-C_star(s)`, using the previously captured **evaluated** initial
 resistance, not retained nodal C0. A generic optional background correction

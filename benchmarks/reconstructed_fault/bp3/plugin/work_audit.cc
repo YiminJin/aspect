@@ -21,22 +21,13 @@ namespace aspect
   {
     // Fixed-profile audit baseline: capture once at initialization and serialize
     // it with the benchmark history, never recapture from a restarted state.
-    std::map<types::particle_index,double> work_initial_H;
     std::vector<Point<2>> work_initial_geometry;
     std::vector<double> work_initial_I;
 
     template <int dim>
     void capture_work_invariants(const SimulatorAccess<dim> &sim)
     {
-      const auto comm=sim.get_mpi_communicator();
-      const auto &pm=sim.get_phase_field_handler().get_associated_particle_manager();
-      const auto H=pm.get_property_manager().get_data_info().get_position_by_field_name("crack_driving_force");
-      std::vector<std::pair<types::particle_index,double>> local;
-      for (const auto &p:pm.get_particle_handler()) local.emplace_back(p.get_id(),p.get_properties()[H]);
-      work_initial_H.clear();work_initial_geometry.clear();work_initial_I.clear();
-      for (const auto &part:Utilities::MPI::all_gather(comm,local))
-        for (const auto &entry:part) work_initial_H.emplace(entry);
-      AssertThrow(!work_initial_H.empty(),ExcMessage("Work history audit must capture after particle deserialization."));
+      work_initial_geometry.clear();work_initial_I.clear();
       const auto &manager=sim.get_reconstructed_fault_manager();
       const auto &fault=manager.get_fault(0);
       const auto I=manager.get_property_information()[manager.get_property_index("phase field fault previous I h")].position;
@@ -72,9 +63,9 @@ namespace aspect
       const auto S=manager.get_shear_sense(0)*symmetrize(outer_product(t,normal)),
                  N=symmetrize(outer_product(normal,normal));
 
-      // Stable-ID inert history, geometry and completed profile remain fixed
-      // even when particles move to another MPI owner. Capture only at t=0.
-      if (step==0 && work_initial_H.empty()) capture_work_invariants(sim);
+      // Particle baselines follow native births/migration/rollback. Geometry
+      // and completed profile retain the original timestep-zero baseline.
+      if (step==0 && work_initial_geometry.empty()) capture_work_invariants(sim);
       const auto &initial_H=work_initial_H;
       const auto &initial_geometry=work_initial_geometry;
       const auto &initial_I=work_initial_I;

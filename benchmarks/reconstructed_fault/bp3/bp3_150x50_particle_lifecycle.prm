@@ -1,0 +1,7 @@
+# Section-1 lifecycle candidate; retains the historical geometry/profile fixtures.
+# Physical/timestep settings are inherited from filter20, not server-verified.
+# Not a fault.txt-only runtime or authorization for server continuation.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/bp3_150x50_filter20.prm
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/particle_policy.prm
+set Resume computation = false
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/output-particle-lifecycle

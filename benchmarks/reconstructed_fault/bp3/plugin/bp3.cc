@@ -293,6 +293,7 @@ namespace aspect
             sim.get_reconstructed_fault_manager ().register_property ("cumulative_signed_slip_m", 1);
             sim.get_reconstructed_fault_manager ().register_property ("BP3 fixed shear correction", 3);
             sim.get_signals ().post_set_initial_state.connect (&BP3Benchmark::initial_history<dim>);
+            BP3Benchmark::connect_particle_history_audit(sim);
           });
     signals.post_advection_solver.connect (&BP3Benchmark::prepare<dim>);
     signals.start_timestep.connect ([] (const SimulatorAccess<dim> &) { BP3Benchmark::converged = false; });

@@ -90,6 +90,17 @@ qualification of the identical source. No new runtime campaign is implied by
 classification. No refactoring pass is currently selected. R7 and legacy compatibility
 migration require separate selection.
 
+The separately selected post-R6 BP3 lifecycle correction is a numerical-state
+ownership fix, not a new refactoring stage. Native particle backups/checkpoints
+must include every reached population/placement RNG; gather per-rank checkpoint
+state in an all-rank lifecycle hook, never inside serialization. Benchmark audits
+follow particle backup/restore/management, retain exact survivor checks and baseline
+initialized births before mechanics. Keep acceptance in the simulator and physical
+history computation in the material. Runtime-named native limiter policy is shared
+between local and production candidates. See the
+[section-1 lifecycle report](../../benchmarks/reconstructed_fault/particle_lifecycle/README.md).
+This does not reopen particle-domain/CPDI algorithms, geometry consolidation or R7.
+
 | Module | Owns | Refactoring scope |
 |---|---|---|
 | M1 — Particle domains / CPDI | Domain construction, integration weights, shape-function information and domain lifecycle | Current implementation frozen |

@@ -2,7 +2,7 @@
 
 This self-contained source package implements the 150 × 50 km right-dipping
 thrust model with frozen mature phase field, paired endpoint completion,
-Q2 continuous stress fields, unlimited linear-least-squares particle interpolation,
+Q2 continuous stress fields, native linear-least-squares particle interpolation,
 and the selected raw/Helmholtz normal traction. Preparation and monitor signal
 ordering are required: the monitor loads the stationary boundary profile and
 configures the surface filter after simulator initialization. Accepted output
@@ -65,10 +65,36 @@ traction plugin boundary; the obsolete zero-traction registration is removed.
   The two hidden LENGTH output selectors no longer affect this plugin.
 
 Mandatory checks remain enabled: accepted Theta/compression/boundaries, fixed
-geometry/completed Ih, stable-ID inert H, native weak traction, mesh verification,
+geometry/completed Ih, inert H for retained particles, native weak traction, mesh verification,
 and the first-real-step Maxwell publication check. The latter always writes
 `first_update_maxwell.csv`. Particle replay after step one runs only when
-diagnostics request it. The replicated H map remains checkpointed intentionally.
+diagnostics request it. The birth-aware audit captures initialized H after native
+management and before mechanics, checks surviving IDs exactly, and discards
+removed/trial-only entries. Native particle transfer carries the local baseline
+through migration/ghost exchange; backup/restore signals follow particle rollback.
+Version-6 checkpoints gather only current owned baselines to rank zero in the
+all-rank preparation hook. Loading checks/prunes the temporarily global current
+snapshot; version-5 audit maps are also readable. There is no growing replicated
+historical-ID map and no extra constitutive update.
+
+The separately qualified section-1 candidate
+[`bp3_150x50_particle_lifecycle.prm`](../bp3_150x50_particle_lifecycle.prm)
+includes [`particle_policy.prm`](../particle_policy.prm): native regular 4×4,
+12–24 particles, point-density addition/removal, native LLS limiting of H and all
+Maxwell components, and no boundary extrapolation. `BP3 history linear least
+squares` resolves/validates/logs the mask by runtime field names. Local verification
+uses that same include. Historical inputs remain unchanged. This candidate still
+requires all historical geometry/profile fixtures; geometry/runtime cleanup and
+server qualification remain deferred. The old monitor identity string is retained
+for compatibility and is not evidence of the new limiter policy; use the explicit
+limiter startup lines and parameter files.
+
+The matching core stores manager and generator placement RNG streams per rank and
+per particle manager, and restores both on timestep rejection. Old snapshots or
+changed MPI counts reject active addition/removal; explicit `Load balancing
+strategy = none` permits unrelated restart with a warning that RNG replay is
+unavailable. Same-build/count/partition replay and the current birth audit are
+covered in the [lifecycle report](../../particle_lifecycle/README.md).
 
 ## Outputs
 

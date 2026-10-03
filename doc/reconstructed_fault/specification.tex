@@ -1385,6 +1385,32 @@ do not modify constitutive history, timesteps, or solver decisions. Full
 filesystem restart equivalence is required before server-run preparation is
 considered complete.
 
+The separately selected BP3 particle-lifecycle correction preserves inert $H$
+per retained particle. Native births take their audit baseline from initialized,
+limited/interpolated $H$ before mechanics, never an analytical reset. Removal
+forgets the baseline, and rejection restores the timestep backup. The benchmark
+retains only owned/ghost baselines and one backup, using native auxiliary
+particle transfer for migration. Since the qualified deal.II build omits that
+auxiliary payload from mesh checkpoints, an all-rank pre-checkpoint hook gathers
+only current owned baselines to rank zero. Version-6 BP3 archives persist that
+population and the next-ID birth threshold; after loading, the temporarily global
+snapshot is checked and pruned to local ownership. Version-5 audit maps remain
+readable and undergo the same checks. Audit callbacks never advance constitutive
+history or decide timestep acceptance.
+
+Native particle-manager version-1 archives retain manager and generator-base RNG
+streams per rank and per manager; timestep rollback restores both streams too.
+Gathering occurs in the established all-rank checkpoint hook, never in root-only
+serialization. Exact replay requires the same build, rank count and partition.
+Legacy snapshots without RNG state and changed-rank-count restarts are rejected
+if population changes are enabled. Explicitly disabling addition/removal preserves
+unrelated restart support, with a diagnostic that RNG replay is unavailable.
+The BP3 section-1 policy uses regular $4\times4$ seeding, bounds 12--24, native
+point-density management and native LLS limiting of runtime-named $H$ and all
+Maxwell components, with boundary extrapolation disabled. This validity policy
+is shared by local and production candidates; it is not a long-time inflow
+accuracy claim.
+
 For the explicitly selected fully frictional mature work-measure research
 fixture, benchmark checkpoint version 4 additionally preserves its original
 inert-$H$, fixed-geometry and completed-$I_h$ audit baseline and validates

@@ -147,16 +147,19 @@ namespace aspect
         std::ostringstream stream;
         {
           aspect::oarchive archive (stream);
-          const unsigned int version = 5;
+          const unsigned int version = 6;
           const bool selected = true;
-          // Keep the qualified v5 wire layout. These retired custom-writer
+          // Version 6 stores current owned H baselines, gathered before saving.
+          // These retired custom-writer
           // fields have no role in native output; they are not runtime state.
           const double unused_time = -std::numeric_limits<double>::max ();
           const std::vector<std::string> unused_labels;
           archive << version << selected << slip << previous_theta << last_step << event << unused_time
-                  << unused_time << unused_labels << selected << selected << BP3Benchmark::work_initial_H
+                  << unused_time << unused_labels << selected << selected << BP3Benchmark::checkpoint_particle_H
                   << BP3Benchmark::work_initial_geometry << BP3Benchmark::work_initial_I << selected << heavy
-                  << profiles << last_accepted_time;
+                  << profiles << last_accepted_time
+                  << this->get_phase_field_handler().get_associated_particle_manager()
+                     .get_particle_handler().get_next_free_particle_index();
         }
         status["BP3 accepted history"] = stream.str ();
       }
@@ -179,12 +182,16 @@ namespace aspect
         double unused_profile_time, unused_bulk_time;
         std::vector<std::string> unused_labels;
         archive >> version;
-        AssertThrow (version == 5,
-                     ExcMessage ("Modified BP3 requires its version-5 particle/output checkpoint."));
+        AssertThrow (version == 5 || version == 6,
+                     ExcMessage ("Modified BP3 requires a version-5 or version-6 particle/output checkpoint."));
         archive >> mature >> slip >> previous_theta >> last_step >> event >> unused_profile_time
             >> unused_bulk_time >> unused_labels >> frictional >> work >> BP3Benchmark::work_initial_H
             >> BP3Benchmark::work_initial_geometry >> BP3Benchmark::work_initial_I >> native >> heavy
             >> profiles >> last_accepted_time;
+        types::particle_index next_id = BP3Benchmark::work_initial_H.empty()
+                                        ? 0 : BP3Benchmark::work_initial_H.rbegin()->first+1;
+        if (version >= 6) archive >> next_id;
+        BP3Benchmark::restore_particle_audit(next_id);
         heavy.slip_interval=requested_heavy.slip_interval;
         heavy.time_interval=requested_heavy.time_interval;
         profiles.slip_interval=requested_profiles.slip_interval;
@@ -192,7 +199,6 @@ namespace aspect
         AssertThrow (mature && frictional && work && native,
                      ExcMessage ("Cannot convert a different BP3 formulation on restart."));
         AssertThrow (!slip.empty () && slip.size () == previous_theta.size ()
-                         && !BP3Benchmark::work_initial_H.empty ()
                          && BP3Benchmark::work_initial_geometry.size () == slip.size ()
                          && BP3Benchmark::work_initial_I.size () == slip.size (),
                      ExcMessage ("Incomplete BP3 checkpoint histories."));
