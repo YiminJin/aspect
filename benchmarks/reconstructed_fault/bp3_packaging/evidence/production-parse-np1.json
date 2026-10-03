@@ -1,0 +1,21 @@
+{
+  "command": [
+    "mpirun",
+    "-np",
+    "1",
+    "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified",
+    "--validate",
+    "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_packaging/inputs/production-parse.prm"
+  ],
+  "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+  "exit_code": 0,
+  "seconds": 3.724034292000397,
+  "child_max_rss_kib": 186388,
+  "environment": {
+    "OMP_PROC_BIND": "spread",
+    "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "OMP_NUM_THREADS": "1",
+    "DEAL_II_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1"
+  }
+}

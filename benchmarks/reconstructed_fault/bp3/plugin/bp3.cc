@@ -37,8 +37,6 @@ namespace aspect
       const auto correction = manager.get_property_index ("BP3 fixed shear correction");
       const auto p = manager.get_property_information ()[background].position;
       const auto c = manager.get_property_information ()[correction].position;
-      AssertThrow(mature_prestress_file.empty(),
-                  ExcMessage("Restored BP3 uses uniform nominal background, not captured prestress."));
       for (unsigned int v=0;v<fault.n_vertices();++v)
         {
           auto data=fault.get_properties(v);
@@ -60,7 +58,6 @@ namespace aspect
     bool long_run_stop = false;
     bool restored_history = false;
     bool detailed_diagnostics = false;
-    std::string mature_prestress_file;
     unsigned int newton_updates = 0, krylov_iterations = 0;
     double minimum_alpha = 1.;
     double accepted_nonlinear_residual = std::numeric_limits<double>::infinity ();

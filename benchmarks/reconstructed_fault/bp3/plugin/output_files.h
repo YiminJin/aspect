@@ -71,7 +71,7 @@ namespace BP3
   inline void check_restart_output(const std::string &directory, const unsigned int step,
                                    const double time)
   {
-    for (const auto *name : {"accepted_steps.csv","stations.csv","heavy_outputs.csv","restored_growth.csv"})
+    for (const auto *name : {"accepted_steps.csv","stations.csv","heavy_outputs.csv","restored_growth.csv","particle_summary.csv"})
       check_series_prefix(directory+name,step,time);
     check_series_prefix(directory+"profiles.csv",step,time,true);
     const auto payloads=std::filesystem::path(directory)/"profiles";

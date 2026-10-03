@@ -1,0 +1,3 @@
+step,time,particles,births_since_backup,removed_or_exited_since_backup,H_min,H_max,stress_component_min,stress_component_max
+0,0,30000,0,0,15.606408709560647,813214.38860402908,0,0
+1,100,30000,0,0,15.606408709560647,813214.38860402908,-0.058691945829416552,0.070597516881489478

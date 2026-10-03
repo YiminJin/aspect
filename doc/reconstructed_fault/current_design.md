@@ -310,6 +310,38 @@ Do not widen the grading policy or weaken core admission implicitly. See the
 [section-3 evidence](../../benchmarks/reconstructed_fault/bp3_runtime/README.md)
 for the separately proposed support-bound investigation.
 
+### BP3 maintained inputs and outputs (runtime-cleanup section 4)
+
+The fresh `bp3/production/bp3_fresh.prm` candidate uses only its prescribed fault
+file as model data. It retains production ell/material contrast, full bottom
+loading and filter20, with the user-selected regular 4x4 / 12–24 particle policy.
+Its last-server provenance is unconfirmed: the explicit 0.1 unweighted state
+bound and 0.5 nonlinear-failure cutback are provisional choices, not claims of
+matching a server job. Existing historical inputs/fixtures stay version-pinned.
+The section-3 graded-completion blocker remains; parsing does not qualify a run.
+
+The model identity now includes resolved material/profile parameters, native
+geometry/Box discretization, refinement policy, composition/discretization,
+loading convention, native particle controls and effective runtime-named limiter,
+in addition to actual geometry, generated primitive and filter. Exact resolved
+parameter strings give a conservative identity; paths/output schedules are not
+physical identity. Older identities require their original plugin. Timestep and
+solver policies remain caller-adjustable and are printed with the other resolved
+settings; changing them is not an exact-replay guarantee.
+
+Native bulk/particle visualization is independently selectable on the existing
+heavy schedule (historical default true; candidate false). Accepted summaries,
+slip/time-triggered fault profiles and full checkpoints remain enabled. The
+v6 accepted-history payload and manager RNG lifecycle are unchanged; schedules
+retain their saved reference states and adopt requested intervals on restart.
+A compact particle summary observes owned particle IDs/H/stress after acceptance.
+Counts captured at the existing particle backup identify surviving births and
+incoming-population losses, including outflow; MPI migration cancels globally.
+Step-zero event counts are zero, with the realized startup population reported.
+These diagnostic scalars refresh at every backup; they own no history and require
+no new checkpoint state. Summary metadata participates in the existing output
+branch/prefix checks. No cumulative per-step slip table is reintroduced.
+
 ## 14. Initial sharp-fault reconstruction
 
 `ReconstructedFaultManager<dim>` is owned by `Simulator` when `Formulation /`

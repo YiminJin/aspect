@@ -1,3 +1,18 @@
+# Current maintained BP3 entry point
+
+Use [production/bp3_fresh.prm](production/bp3_fresh.prm) and its
+[settings/provenance](production/README.md), with the single [plugin package](plugin/README.md).
+This is a fresh candidate with regular 4×4 / 12–24 particles, live profile,
+generated refinement and automatic completion. Resolved graded runs remain
+unqualified because of the documented boundary-lattice admission blocker.
+
+The older PRMs, fixtures, checkpoints and reports below are historical evidence.
+They require their version-matched plugin; `bp3_150x50_first_event.prm` resumes
+an old checkpoint and must not be used as a fresh-run template. No historical
+input or referenced dataset was deleted or redirected.
+
+## Historical workflow and evidence (preserved)
+
 # Reconstructed-fault BP3 workspace
 
 The current restored 150 x 50 km runtime is self-contained in

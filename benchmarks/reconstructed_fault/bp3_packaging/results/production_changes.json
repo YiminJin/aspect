@@ -1,0 +1,152 @@
+[
+  {
+    "parameter": "Additional shared libraries",
+    "historical_explicit": "$ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/build/libbp3_restore_150x50.release.so",
+    "candidate": "$ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/build-maintained/libbp3_restore_150x50.release.so"
+  },
+  {
+    "parameter": "Fault reconstruction / Boundary completion",
+    "historical_explicit": "<not explicitly set; native default>",
+    "candidate": "automatic prescribed"
+  },
+  {
+    "parameter": "Fault reconstruction / Prescribed faults file",
+    "historical_explicit": "$ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/fixtures/bp3_150x50/fault.txt",
+    "candidate": "$ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/production/fault.txt"
+  },
+  {
+    "parameter": "Mesh refinement / BP3 saved mesh / Target cells file",
+    "historical_explicit": "$ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/fixtures/bp3_150x50/target_cells.txt",
+    "candidate": "<removed>"
+  },
+  {
+    "parameter": "Mesh refinement / Initial adaptive refinement",
+    "historical_explicit": "8",
+    "candidate": "0"
+  },
+  {
+    "parameter": "Mesh refinement / Initial global refinement",
+    "historical_explicit": "1",
+    "candidate": "9"
+  },
+  {
+    "parameter": "Mesh refinement / Minimum refinement level",
+    "historical_explicit": "<not explicitly set; native default>",
+    "candidate": "1"
+  },
+  {
+    "parameter": "Mesh refinement / Strategy",
+    "historical_explicit": "BP3 saved mesh",
+    "candidate": "BP3 fault support"
+  },
+  {
+    "parameter": "Nonlinear solver failure strategy",
+    "historical_explicit": "abort program",
+    "candidate": "cut timestep size"
+  },
+  {
+    "parameter": "Output directory",
+    "historical_explicit": "$ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/restore-150x50-filter20",
+    "candidate": "$ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/output-fresh-candidate"
+  },
+  {
+    "parameter": "Particles / Addition point density function granularity",
+    "historical_explicit": "<not explicitly set; native default>",
+    "candidate": "6"
+  },
+  {
+    "parameter": "Particles / Bandwidth",
+    "historical_explicit": "<not explicitly set; native default>",
+    "candidate": "0.3"
+  },
+  {
+    "parameter": "Particles / Generator / Reference cell / Number of particles per cell per direction",
+    "historical_explicit": "3",
+    "candidate": "4"
+  },
+  {
+    "parameter": "Particles / Interpolation scheme",
+    "historical_explicit": "linear least squares",
+    "candidate": "BP3 history linear least squares"
+  },
+  {
+    "parameter": "Particles / Interpolator / Linear least squares / Use linear least squares limiter",
+    "historical_explicit": "false",
+    "candidate": "true, false, false, true, true, true"
+  },
+  {
+    "parameter": "Particles / List of particle properties",
+    "historical_explicit": "crack driving force, initial composition, maxwell stress",
+    "candidate": "BP3 frozen crack driving force, initial composition, maxwell stress"
+  },
+  {
+    "parameter": "Particles / Load balancing strategy",
+    "historical_explicit": "none",
+    "candidate": "remove and add particles"
+  },
+  {
+    "parameter": "Particles / Maximum particles per cell",
+    "historical_explicit": "<not explicitly set; native default>",
+    "candidate": "24"
+  },
+  {
+    "parameter": "Particles / Minimum particles per cell",
+    "historical_explicit": "<not explicitly set; native default>",
+    "candidate": "12"
+  },
+  {
+    "parameter": "Particles / Particle addition algorithm",
+    "historical_explicit": "<not explicitly set; native default>",
+    "candidate": "point density function"
+  },
+  {
+    "parameter": "Particles / Particle removal algorithm",
+    "historical_explicit": "<not explicitly set; native default>",
+    "candidate": "point density function"
+  },
+  {
+    "parameter": "Particles / Point density kernel function",
+    "historical_explicit": "<not explicitly set; native default>",
+    "candidate": "cutoff c1 dealii"
+  },
+  {
+    "parameter": "Postprocess / BP3 / Bottom normalization completion file",
+    "historical_explicit": "$ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/fixtures/bp3_150x50/completion.txt",
+    "candidate": "<removed>"
+  },
+  {
+    "parameter": "Postprocess / BP3 / Weakening region length",
+    "historical_explicit": "<not explicitly set; native default>",
+    "candidate": "15000"
+  },
+  {
+    "parameter": "Postprocess / BP3 / Write bulk and particle visualization",
+    "historical_explicit": "<not explicitly set; native default>",
+    "candidate": "false"
+  },
+  {
+    "parameter": "Postprocess / BP3 restored monitor / Bottom velocity constraint",
+    "historical_explicit": "<not explicitly set; native default>",
+    "candidate": "full"
+  },
+  {
+    "parameter": "Postprocess / BP3 restored monitor / Stationary profile file",
+    "historical_explicit": "$ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/fixtures/bp3_150x50/profile.txt",
+    "candidate": "<removed>"
+  },
+  {
+    "parameter": "Resume computation",
+    "historical_explicit": "true",
+    "candidate": "false"
+  },
+  {
+    "parameter": "Time stepping / Reconstructed fault time step / Maximum logarithmic state change",
+    "historical_explicit": "<not explicitly set; native default>",
+    "candidate": "0.1"
+  },
+  {
+    "parameter": "Time stepping / Repeat on nonlinear solver failure / Cut back factor",
+    "historical_explicit": "<not explicitly set; native default>",
+    "candidate": "0.5"
+  }
+]

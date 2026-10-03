@@ -58,8 +58,10 @@ namespace aspect
         prm.declare_entry (
             "Audit full state every step", "false", Patterns::Bool (),
             "Export bulk DoFs and stable-ID particle histories for the short restart regression.");
-        prm.declare_entry ("Mature prestress file", "", Patterns::Anything (),
-                           "Deprecated compatibility entry; must be empty for restored BP3.");
+        prm.declare_entry ("Write bulk and particle visualization", "true", Patterns::Bool (),
+                           "Write native bulk/particle files on the existing heavy schedule. "
+                           "False retains fault profiles, accepted summaries and complete checkpoints. "
+                           "The historical default is true; the fresh production candidate explicitly disables it.");
         prm.leave_subsection ();
         prm.leave_subsection ();
       }
@@ -80,9 +82,7 @@ namespace aspect
         last_requested_step = prm.get_integer ("Last accepted step");
         stop_after_event = prm.get_bool ("Stop after first event");
         audit_states = prm.get_bool ("Audit full state every step");
-        BP3Benchmark::mature_prestress_file = prm.get ("Mature prestress file");
-        AssertThrow (BP3Benchmark::mature_prestress_file.empty (),
-                     ExcMessage ("Mature prestress file is unsupported in restored BP3; leave it empty."));
+        write_bulk_and_particles=prm.get_bool("Write bulk and particle visualization");
         prm.leave_subsection ();
         prm.leave_subsection ();
       }
@@ -97,11 +97,12 @@ namespace aspect
                                  + ". Unset it or use the dedicated diagnostic plugin."));
         wall_start = std::chrono::steady_clock::now ();
         this->get_signals ().allow_native_output.connect (
-            [this] (const std::string &)
+            [this] (const std::string &writer)
               {
                 AssertThrow (last_step == this->get_timestep_number (),
                              ExcMessage ("BP3 output decision must precede native writers."));
-                return heavy_pending;
+                return heavy_pending && (write_bulk_and_particles
+                                         || (writer!="visualization" && writer!="particles"));
               });
         this->get_signals ().post_checkpoint.connect (
             [this] (const std::string &path)
@@ -130,7 +131,7 @@ namespace aspect
                           if (extension == ".pvd" || extension == ".visit" || extension == ".xdmf"
                               || name == "profiles.csv" || name == "heavy_outputs.csv"
                               || name == "stations.csv" || name == "accepted_steps.csv"
-                              || name == "first_event.csv" || name == "restored_growth.csv" || name == "statistics")
+                              || name == "particle_summary.csv" || name == "first_event.csv" || name == "restored_growth.csv" || name == "statistics")
                             std::filesystem::copy_file (entry.path (), destination + "/" + name,
                                                         std::filesystem::copy_options::overwrite_existing);
                         }
@@ -349,10 +350,36 @@ namespace aspect
             = particles.get_property_manager ().get_data_info ().get_position_by_field_name (
                 "maxwell stress");
         double maximum_stress = 0.;
+        double minimum_stress = std::numeric_limits<double>::infinity();
+        double largest_stress = -std::numeric_limits<double>::infinity();
+        double minimum_H = std::numeric_limits<double>::infinity(), maximum_H = 0.;
+        types::particle_index born=0;
+        const auto H_position=particles.get_property_manager().get_data_info()
+                              .get_position_by_field_name("crack_driving_force");
         for (const auto &particle : particles.get_particle_handler ())
-          for (unsigned int c = 0; c < 3; ++c)
-            maximum_stress
-                = std::max (maximum_stress, std::abs (particle.get_properties ()[stress_position + c]));
+          {
+            minimum_H=std::min(minimum_H,particle.get_properties()[H_position]);
+            maximum_H=std::max(maximum_H,particle.get_properties()[H_position]);
+            if(this->get_timestep_number()>0 && particle.get_id()>=BP3Benchmark::first_attempt_birth_id) ++born;
+            for (unsigned int c = 0; c < 3; ++c)
+              {
+                const double value=particle.get_properties()[stress_position+c];
+                maximum_stress=std::max(maximum_stress,std::abs(value));
+                minimum_stress=std::min(minimum_stress,value);
+                largest_stress=std::max(largest_stress,value);
+              }
+          }
+        const auto comm=this->get_mpi_communicator();
+        const auto count=particles.get_particle_handler().n_global_particles();
+        born=Utilities::MPI::sum(born,comm);
+        const auto previous_count=Utilities::MPI::sum(BP3Benchmark::population_before_attempt,comm);
+        // MPI migration cancels in the global count. Losses include physical
+        // outflow as well as native removal; never label them as removals alone.
+        AssertThrow(this->get_timestep_number()==0 || previous_count+born>=count,
+                    ExcMessage("Invalid BP3 accepted population accounting."));
+        const auto losses=this->get_timestep_number()>0 ? previous_count+born-count : 0;
+        minimum_H=Utilities::MPI::min(minimum_H,comm);maximum_H=Utilities::MPI::max(maximum_H,comm);
+        minimum_stress=Utilities::MPI::min(minimum_stress,comm);largest_stress=Utilities::MPI::max(largest_stress,comm);
         maximum_stress = Utilities::MPI::max (maximum_stress, this->get_mpi_communicator ());
         if (this->get_timestep_number () == 0)
           AssertThrow (maximum_stress == 0.,
@@ -405,6 +432,15 @@ namespace aspect
                 << surface_rms << ',' << theta_error << ',' << maximum_stress << ','
                 << (this->get_timestep_number () ? maximum * this->get_timestep () / Dc : 0.) << ",1\n";
             out.close();
+            const auto particle_path=this->get_output_directory()+"particle_summary.csv";
+            const bool particle_header=BP3::needs_header(particle_path);
+            std::ofstream population(particle_path,std::ios::app);
+            population.exceptions(std::ios::failbit|std::ios::badbit);
+            if(particle_header)
+              population<<"step,time,particles,births_since_backup,removed_or_exited_since_backup,H_min,H_max,stress_component_min,stress_component_max\n";
+            population<<std::setprecision(17)<<last_step<<','<<this->get_time()<<','<<count<<','<<born<<','<<losses
+                      <<','<<minimum_H<<','<<maximum_H<<','<<minimum_stress<<','<<largest_stress<<'\n';
+            population.close();
           });
         last_accepted_time = this->get_time ();
         // Slip is integrated/published/checkpointed every accepted step above
@@ -461,6 +497,7 @@ namespace aspect
       }
 
     private:
+      bool write_bulk_and_particles = true;
       void
       write_long_profile (const std::vector<double> &V, const std::vector<double> &q,
                           const std::vector<double> &normal, unsigned int state)

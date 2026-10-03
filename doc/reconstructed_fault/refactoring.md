@@ -543,3 +543,19 @@ graded-boundary admission failure. Do not claim resolved-mesh readiness, change
 the retained grading rule, or narrow core support without a separately selected
 correction. Section 4 production packaging and longer qualification remain
 unselected.
+
+
+## BP3 runtime-cleanup section 4 review boundary
+
+Section 3 is committed as `e2ff248fb`. Section 4 selects maintained packaging,
+resolved configuration/identity and observational output cleanup only. Preserve
+all historical inputs/evidence and the single plugin source package. Explicitly
+label unconfirmed production settings; parser validation is not a server gate.
+Keep output schedules and physical/RNG checkpoint ownership unchanged. Diagnostic
+population counts refresh at native backup and must not be mistaken for new
+physical history or gross insertion/removal event counters. A changed output
+selection must leave accepted physical results and checkpoint recovery intact.
+
+The existing graded-boundary completion failure is outside this selection;
+retain its admission, mesh policy and evidence. Do not proceed to Section 5 or
+server execution without the separately selected prerequisite correction.

@@ -8,6 +8,7 @@ project(reconstructed_fault_bp3_restore)
 add_library(bp3_restore_150x50 SHARED
   bp3.cc
   geometry.cc
+  configuration.cc
   profile.cc
   mesh.cc
   monitor.cc

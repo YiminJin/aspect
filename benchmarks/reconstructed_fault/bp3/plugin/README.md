@@ -1,200 +1,122 @@
-# Restored BP3 runtime
+# Maintained BP3 runtime
 
-This self-contained source package implements stationary straight-fault BP3
-with frozen mature phase field, paired endpoint completion,
-Q2 continuous stress fields, native linear-least-squares particle interpolation,
-and the selected raw/Helmholtz normal traction. Preparation and monitor signal
-ordering are required: the monitor loads the stationary boundary profile and
-configures the surface filter after simulator initialization. Accepted output
-never performs a second constitutive update.
+One source package supports stationary straight 2D BP3 faults with frozen mature
+phase field, core automatic endpoint completion, continuous Q2 stress fields,
+native LLS history interpolation and mechanical normal-traction feedback.
+Accepted output observes committed state; it never performs a constitutive update.
 
-## Geometry (runtime-cleanup section 2)
+Use the [fresh production candidate](../production/README.md). **Resolved graded
+runs remain blocked by the Section-3 automatic-completion boundary-lattice
+restriction.** The old `bp3_150x50_raw/filter20/filter40/first_event.prm` files and
+`fixtures/` are historical, version-pinned inputs/evidence. In particular,
+`first_event` resumes an old checkpoint; it is not a fresh-run template.
 
-`Fault reconstruction / Prescribed faults file` and the native Box settings now
-supply the geometry for initial fields/H, loading direction, constraints, mesh
-audit and output. The native reader accepts comments and retains all prescribed
-anchors. One straight, strictly ordered 2D polyline must intersect the interiors
-of the top and bottom faces and have a constant admissible peak. Reversing its
-vertices preserves physical thrust. Curved/multiple faults, corner contacts,
-duplicate/backtracking segments and nonuniform peaks fail explicitly.
+## Model data and setup
 
-Each consumer requests the same read-only description during parameter parsing,
-so geometric setup precedes field queries, constraints and refinement. Production
-material fractions retain the horizontal `(y_top-y)/sin(dip)` extension of the
-configured weakening region and its 3 km transition. A small functional input
-must explicitly set `Postprocess / BP3 / Allow truncated transition = true` if
-that transition does not fit. This is not production qualification.
+The native prescribed-fault file is the only external model data file. Box
+settings and ordered fault contents define geometry. One straight, strictly
+ordered polyline with constant peak must intersect the interiors of the top
+and bottom faces. Reversal preserves physical thrust; anchors/native resampling
+are not canonicalized. Unsupported curves, multiple faults and corner/tangent
+contacts fail explicitly. The horizontal material extension and 15–18 km
+transition remain intact; only labeled local fixtures allow truncation.
 
-Section 2 replaces compiled geometry; **section 3 remains deferred**. The saved
-mesh and stationary loading table are still required, and the legacy completion
-table remains available alongside the already supported automatic mode. A changed
-fault must still use compatible completion/mesh/profile inputs. No geometry change
-silently repairs those tables. See the [geometry review](../../bp3_geometry/README.md).
+`profile.cc` prepares a cached loading primitive from the live phase-field
+factory and energetic law before its first consumer. It does not depend on
+monitor execution. Initial phase, startup/newborn frozen H and core completion
+use that same material/profile configuration; discrete mechanical Ih is not
+replaced by the loading integral. No completion, profile or mesh table is read.
 
-## Build and inputs
+`BP3 fault support` retains the established support-band/exterior grading with
+native smoothing. Initial-global tagging runs before particles exist: choose
+the global level for the finest cells, the minimum level for the coarsest,
+and zero initial adaptive refinement. Later AMR is not selected. Geometric
+coverage, resolution and MPI count checks replace leaf-ID assertions.
 
-```sh
-cmake -S plugin -B build-bp3 -DAspect_DIR=/absolute/path/to/aspect-build \
-  -DCMAKE_BUILD_TYPE=Release
-cmake --build build-bp3 -j4
-```
+Build with `cmake -S .../bp3/plugin -B .../bp3/build-maintained
+-DAspect_DIR=/absolute/aspect-build -DCMAKE_BUILD_TYPE=Release`, then
+`cmake --build .../bp3/build-maintained -j 3`. Load only the resulting
+`libbp3_restore_150x50.release.so` using the matching executable stack. The library
+and registered monitor names are retained for API compatibility; they do not
+restrict the dip to 60 degrees.
 
-Load only `build-bp3/libbp3_restore_150x50.release.so`, built with the same
-compiler/MPI/deal.II/ASPECT as the executable. Keep the separate prepared
-`fixtures/bp3_150x50/` inputs and resolve their paths on the server.
+## Particle history and outputs
 
-The parent `bp3_150x50_raw/filter20/filter40.prm` files are **detailed startup
-comparisons**. `bp3_150x50_first_event.prm` is the normal continuation input;
-it explicitly sets both profile/heavy intervals to 0.1 m and 31557600 s,
-with both diagnostics controls false. Explicit experiment settings are honored.
-The input resumes the filter20 checkpoint, after its startup gates are reviewed.
+The candidate uses regular 4×4, 12–24 native point-density management and
+`BP3 history linear least squares`. The adapter resolves H/Maxwell components
+by name and disables boundary extrapolation. `BP3 frozen crack driving force`
+shares startup/newborn initialization, retaining material Hc outside the active
+region. Maxwell inheritance stays native. Survivor H, MPI audit transport,
+rollback and the manager-owned RNG/checkpoint lifecycle remain unchanged.
 
-Solver selection uses ordinary `Stokes solver type`. BP3 uses convection and
-reconstructed-fault timestep controllers; no BP5 startup predictor is registered.
-The core reconstructed-fault controller now supports an optional unweighted
-Theta predictor (requires rebuilding ASPECT):
+- `accepted_steps.csv`, `stations.csv`, `restored_growth.csv`: existing accepted
+  summaries and mechanical diagnostics.
+- `particle_summary.csv`: global accepted count, surviving births since the
+  particle backup, losses from the incoming population (native removals **or
+  outflow**, not MPI migration), H range and stress-component extrema. Step-zero
+  event counts are zero because no timestep backup exists; population includes
+  startup management. Diagnostic scalars refresh on every backup, including
+  after restart; no physical state or extra global ID map is stored.
+- `profiles/fault_*.csv` and `profiles.csv`: signed-slip/state profiles on the
+  existing slip/time schedule, including initial/final/event/heavy forcing.
+  There is no every-step `cumulative_slip.csv` writer.
+- `BP3 / Write bulk and particle visualization`: selects native visualization
+  and particle writers on the existing heavy schedule. Historical default true;
+  the fresh candidate explicitly uses false. Fault output and complete
+  checkpoints remain enabled. It does not change the schedule references.
+- `BP3 restored monitor / Write detailed diagnostics` and `BP3 / Audit full state
+  every step`: opt-in per-step field/particle/work dumps, both false by default.
+- `first_update_maxwell.csv`: mandatory first-real-step publication check.
 
-```text
-subsection Time stepping
-  subsection Reconstructed fault time step
-    set Maximum logarithmic state change = 0.1
-  end
-end
-```
+`Last accepted step`, `Graceful wall seconds`, profile and heavy intervals retain
+their existing meanings and never control the physics timestep. The core
+log-state bound is positive, finite and unweighted. The largest-finite-double
+sentinel disables it; zero and the word `infinity` are rejected. The candidate's
+0.1 bound and 0.5 nonlinear-failure cutback are explicitly provisional pending
+identification of the latest server input; see its settings table.
 
-It bounds the predicted absolute log-change of Theta at committed velocity.
-The default largest finite double disables it; `infinity` remains an accepted
-alias. No production input is opted in implicitly.
-This is separate from the retired BP5 predictor and its b/a weighting.
-The supplied caps remain 100 s first / 4e6 s maximum. Preserve your newer server
-caps when updating its input. `Mature prestress file` is deprecated and must be
-empty. The maintained input prescribes left/right/bottom velocity and has no
-traction plugin boundary; the obsolete zero-traction registration is removed.
+## Restart and model identity
 
-## Supported diagnostics and environment
+Identity v4 records actual ordered geometry, live primitive data, material and
+phase-field parameters, loading convention, mesh/refinement policy, composition/
+discretization, native particle settings, effective limiter and normal filter.
+Parameter values are compared as exact resolved strings; numerically equivalent
+re-spellings may conservatively reject. Paths and output schedules are excluded.
+Time/solver settings are printed but remain caller-adjustable on restart, as in
+the existing retry tests. This is a model compatibility guard, not a universal
+bitwise-replay promise across changed solver policies/builds.
 
-- `BP3 restored monitor / Write detailed diagnostics`: incoming Theta copies,
-  quadrature/particle/fault samples, work replay and initial mesh CSVs.
-- `BP3 / Audit full state every step`: bulk DoFs, particle histories and work
-  replay, for short restart comparisons. Both default false.
-- `BP3 / Last accepted step` and `Graceful wall seconds`: bounded graceful
-  stopping, never timestep controls.
-- `ASPECT_FAULT_LINEAR_PERFORMANCE`: core linear-solver profiling is allowed.
-- Unset `ASPECT_DIAGNOSTIC_FREEZE_PARTICLE_ADVECTION`,
-  `ASPECT_IH_BOTTOM_COMPLETION_DIAGNOSTIC`, `ASPECT_BP3_UNIFORM_SLIDING`,
-  and `ASPECT_FAULT_INTERFACE_MODES`. These guard live core experiments;
-  setting them to zero does not bypass the guard. See the
-  [consumer audit](../output-cleanup-evidence/REPORT.md).
-  The two hidden LENGTH output selectors no longer affect this plugin.
+New-plugin checkpoints retain the existing v6 accepted-history archive and
+manager RNG payload. Only derived caches rebuild. Older model identities require
+the matching original plugin; missing material identity is not silently accepted.
+A changed output cadence or visualization selection retains saved last-written
+references and committed slip/Theta/H/stress. Checkpoints include physical
+history regardless of visualization selection.
 
-Mandatory checks remain enabled: accepted Theta/compression/boundaries, fixed
-geometry/completed Ih, inert H for retained particles, native weak traction, mesh verification,
-and the first-real-step Maxwell publication check. The latter always writes
-`first_update_maxwell.csv`. Particle replay after step one runs only when
-diagnostics request it. The birth-aware audit captures initialized H after native
-management and before mechanics, checks surviving IDs exactly, and discards
-removed/trial-only entries. Native particle transfer carries the local baseline
-through migration/ghost exchange; backup/restore signals follow particle rollback.
-Version-6 checkpoints gather only current owned baselines to rank zero in the
-all-rank preparation hook. Loading checks/prunes the temporarily global current
-snapshot; version-5 audit maps are also readable. There is no growing replicated
-historical-ID map and no extra constitutive update.
+Use `bash ../branch_output.sh PARENT CHECKPOINT_ID NEW_DIRECTORY` from this
+folder for an older selected checkpoint, then resume into that new directory
+with the matching model and rank count. The helper copies checkpoint metadata
+and indexed profile payloads without changing the parent. New particle summaries
+join the metadata prefix and its newer-than-checkpoint checks. Do not reuse a
+directory containing outputs newer than the selected checkpoint.
 
-The separately qualified section-1 candidate
-[`bp3_150x50_particle_lifecycle.prm`](../bp3_150x50_particle_lifecycle.prm)
-includes [`particle_policy.prm`](../particle_policy.prm): native regular 4×4,
-12–24 particles, point-density addition/removal, native LLS limiting of H and all
-Maxwell components, and no boundary extrapolation. `BP3 history linear least
-squares` resolves/validates/logs the mask by runtime field names. Local verification
-uses that same include. The candidate selects `BP3 frozen crack driving force`:
-startup and later births share the stationary-profile H initializer, retaining
-material Hc outside the active region. Native initialization runs before insertion
-and the birth audit verifies the value before recording it. Survivors retain their
-committed H, and Maxwell stress retains the validated native interpolation. The
-property uses this rule only for the frozen mature BP3 specialization; other
-models retain native late-history interpolation. See the
-[frozen-H verification](../../frozen_particle_H/README.md).
-Historical inputs remain unchanged. This candidate still
-requires all historical geometry/profile fixtures; geometry/runtime cleanup and
-server qualification remain deferred. The geometry-aware monitor identity includes Box bounds, ordered prescribed
-vertices/peak and the transition setting. Use explicit limiter startup lines and
-parameter files for the native limiting policy.
+## Source responsibilities
 
-The matching core stores manager and generator placement RNG streams per rank and
-per particle manager, and restores both on timestep rejection. Old snapshots or
-changed MPI counts reject active addition/removal; explicit `Load balancing
-strategy = none` permits unrelated restart with a warning that RNG replay is
-unavailable. Same-build/count/partition replay and the current birth audit are
-covered in the [lifecycle report](../../particle_lifecycle/README.md).
-
-## Outputs
-
-| Files | Contents and cadence |
+| File | Responsibility |
 |---|---|
-| `accepted_steps.csv` | Every accepted state: time/dt, peak V, nonlinear/linear counts and required consistency summaries |
-| `stations.csv` | Existing stations every accepted state |
-| `restored_growth.csv`, `first_event.csv` | Growth/flux summary each state; current event decision |
-| `profiles.csv` → `profiles/fault_<step>.csv` | Canonical full-fault slip, V, Theta, shear/normal traction and coordinates, at full precision |
-| `heavy_outputs.csv`, native solution/particle/fault files | Coordinated heavy-output schedule; completion postprocessor commits its clock |
-| Raw/full-state CSVs | Explicit diagnostics only |
+| geometry.cc | Native geometry parsing, validation and physical coordinates |
+| configuration.cc | Resolved parameter reporting and model compatibility description |
+| profile.cc | Transient live loading primitive; no mechanical Ih ownership |
+| mesh.cc | Geometry-driven startup tagging and invariants |
+| bp3.cc | Initial fields, loading registration, preparation/solver observers |
+| particle_initialization.cc | Shared frozen-BP3 H initializer; generic fallback retained |
+| particle_history.cc | Native limiter policy and birth/survivor audit lifecycle |
+| bottom_constraint.cc | Existing optional experimental fault-parallel constraint; production remains full |
+| monitor.cc | Filter setup, restart identity and traction/growth observations |
+| work_audit.cc | Mandatory native/inert/Maxwell checks and optional replay |
+| output.cc | Accepted histories, schedules, compact summaries and checkpoint metadata |
 
-Profile and heavy triggers use the maximum absolute nodal change of cumulative
-**signed** slip since their last write, or elapsed physical seconds. Initial and
-graceful-final states are forced; onset/down-crossing/completion force profiles;
-every heavy state also has a profile. Slip integrates at every accepted physical
-step using committed V, with no step-zero increment, regardless of output cadence.
-
-The plugin no longer writes `cumulative_slip.csv`. Use the maintained
-`plot_cumulative_slip.py RUN_DIRECTORY`, `plot_recorded_slip.py` or
-`plot_fault_evolution.py` readers. Optional
-`export_profile_slip.py RUN/profiles.csv legacy.csv` creates a legacy schema plus
-a mandatory provenance sidecar: **saved profiles only**, no unsaved timesteps.
-Keep them together. Event colors use instantaneous profile V, never sparse
-Δslip/Δtime. Consult every-step peak summaries for peaks between saved profiles.
-
-## Restart
-
-The existing history archive layout, slip/Theta/event history, audit baselines
-and schedule reference states remain unchanged. Geometry-aware checkpoints must
-match actual Box bounds and ordered fault contents as well as loading profile and
-normal filter. Older checkpoints without this geometry identity require their
-original plugin; their histories are not silently converted. On restart, parsed PRM output intervals replace stored
-intervals while retaining the last successful write's time/slip reference.
-No CSV is used to reconstruct physical history.
-
-In-place resume is allowed only when its output is no newer than the selected
-checkpoint. To branch from an older checkpoint, preserve the parent and run:
-
-```sh
-bash branch_output.sh /absolute/parent 2 /absolute/new-branch
-```
-
-Then set `Output directory` to that new branch, `Resume computation = true`,
-and load the matching model/library. Use the same rank count and physical
-settings; changing output cadence is supported. The helper copies the selected
-checkpoint and its metadata prefix, only indexed profile payloads, and native
-visualization directories once when branching. Ordinary checkpoints copy small
-metadata, not the growing payload trees. Keep the parent available: an index
-alone cannot restore missing profile payloads. Missing or newer/conflicting
-profiles fail instead of silently appending mixed histories. An old checkpoint
-without a growth snapshot starts a new growth table with a header.
-
-## Source ownership
-
-`geometry.cc`: shared read-only straight-fault/Box description, native parsing,
-validation, physical coordinates/orientation and restart identity.
-`bp3.cc`: initial fields, loading registration, preparation/solver observers.
-`particle_initialization.cc`: shared stationary H initializer and opt-in frozen
-BP3 particle property; generic history transfer remains in the native property.
-`particle_history.cc`: validated native interpolation and retained/birth H audit.
-`mesh.cc`: prescribed mesh reproduction and verification.
-`bottom_constraint.cc`: optional fault-parallel bottom constraint; the default
-`Bottom velocity constraint = full` retains the existing full loading. The
-experimental `fault parallel` value is in `Postprocess / BP3 restored monitor`
-and requires removing bottom from all ordinary velocity boundary lists. It
-retains the side corners and releases the complementary perturbation traction.
-See [the isolated local test](../rotated_bottom_local/REPORT.md) for qualification
-and limits; the present evidence does not support changing production runs.
-`monitor.cc`: loading-profile/filter initialization and growth/diagnostics.
-`work_audit.cc`: mandatory native/inert/Maxwell checks and optional replay.
-`output.cc`: accepted history, schedules, event/stations and v5 restart lifecycle.
+Environment guards still reject inherited scientific experiment selectors;
+`ASPECT_FAULT_LINEAR_PERFORMANCE` remains allowed. The historical BP5 checkpoint
+rejection key is deliberately retained as a compatibility check, not an active
+BP3 model selector. No obsolete prestress-file option is registered.

@@ -1,5 +1,6 @@
 #include "runtime.h"
 #include "profile.h"
+#include "configuration.h"
 #include "bp3_model.h"
 #include "output_files.h"
 
@@ -18,7 +19,7 @@
 #include <iomanip>
 
 
-// Explicit restored-chart benchmark; no selector changes existing BP3/BP5.
+// Stationary BP3 observations; no constitutive update is performed here.
 #include <deal.II/base/quadrature_lib.h>
 #include <numeric>
 
@@ -85,6 +86,7 @@ namespace aspect
         detailed_diagnostics=prm.get_bool("Write detailed diagnostics");
         BP3Benchmark::detailed_diagnostics=detailed_diagnostics;
         prm.leave_subsection();prm.leave_subsection();
+        configuration=BP3::read_configuration(prm);
       }
       void initialize() override
       {
@@ -94,6 +96,15 @@ namespace aspect
         this->get_signals().post_simulator_initialization.connect(
           [this](const SimulatorAccess<dim> &sim)
           {
+            sim.get_pcout()<<"BP3 resolved model and runtime settings (not server qualification):\n"
+                           <<configuration.resolved_settings;
+            BP3::collective_root_write(sim.get_mpi_communicator(),[&]()
+              {
+                std::ofstream out(sim.get_output_directory()+"bp3_resolved_settings.json");
+                out.exceptions(std::ios::failbit|std::ios::badbit);
+                out<<configuration.resolved_settings;
+                out.close();
+              });
             auto &surface=sim.get_reconstructed_fault_surface_system();
             surface.set_normal_stress_filter(BP3Restore::filter_mode,BP3Restore::filter_length);
             if (detailed_diagnostics) surface.set_normal_traction_diagnostic(
@@ -113,7 +124,7 @@ namespace aspect
       {
         const auto entry=status.find("BP3 restored model");
         AssertThrow(entry!=status.end() && entry->second==identity(),
-                    ExcMessage("BP3 restart requires the same geometry identity, profile and normal filter. Older checkpoints without the geometry identity require their original plugin."));
+                    ExcMessage("BP3 restart requires the same geometry, material/profile, loading, refinement, particle policy and normal filter identity. Older checkpoints require their original plugin."));
       }
       std::pair<std::string,std::string> execute(TableHandler &) override
       {
@@ -228,11 +239,13 @@ namespace aspect
       }
     private:
       bool detailed_diagnostics = false;
+      BP3::Configuration configuration;
       std::string identity() const
       {
         std::ostringstream out;
         const auto &profile=BP3::loading_profile(*this);
-        out<<std::setprecision(17)<<BP3::geometry().identity<<" loading live stationary v3 "
+        out<<std::setprecision(17)<<BP3::geometry().identity<<" loading live stationary v4 "
+           <<configuration.model_identity
            <<BP3Restore::filter_mode<<' '<<BP3Restore::filter_length;
         for(unsigned int i=0;i<profile.radius.size();++i)
           out<<' '<<profile.radius[i]<<' '<<profile.integral[i]<<' '<<profile.slope[i];

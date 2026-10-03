@@ -16,6 +16,7 @@ namespace aspect
     // Native MPI transfer carries baselines; checkpoint capture is separate.
     std::map<types::particle_index,double> work_initial_H;
     std::map<types::particle_index,double> checkpoint_particle_H;
+    types::particle_index population_before_attempt = 0, first_attempt_birth_id = 0;
     namespace
     {
       std::map<types::particle_index,double> backup_H;
@@ -107,6 +108,8 @@ namespace aspect
       sim.get_signals().post_particle_backup.connect([&pm](Particle::Manager<dim> &manager)
       {
         if (&manager != &pm) return;
+        population_before_attempt=pm.get_particle_handler().n_locally_owned_particles();
+        first_attempt_birth_id=pm.get_particle_handler().get_next_free_particle_index();
         backup_H = work_initial_H;
         birth_floor = pm.get_particle_handler().get_next_free_particle_index();
         backup_birth_floor = birth_floor;

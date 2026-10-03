@@ -1,0 +1,115 @@
+{
+  "accepted_baseline": "e2ff248fb",
+  "passed_checks": 211,
+  "checks": 211,
+  "artifacts": {
+    "build-refactor-r6b/aspect-filter-derivative-qualified": "5ded9532b898a8b5f569ef9c568644c4e929c11db550515a74373344c0d2fa83",
+    "benchmarks/reconstructed_fault/bp3_runtime/build/libbp3_restore_150x50.release.so": "a66e9ac864e26f4689f74dd983e4b78c27eaa020747dfff011c5b37a62024500",
+    "benchmarks/reconstructed_fault/bp3/build-maintained/libbp3_restore_150x50.release.so": "4e6cf4b73047f9bc9a426642416b4f1bcf67a2796d5c11cf8988b0abdb881e48",
+    "benchmarks/reconstructed_fault/bp3_packaging/build/observer/libfrozen_birth_observer.release.so": "8402df390824aa0ae0d6ff547a1b75af373aafe402fc3403a6d5edd87e24656d",
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/bp3_150x50_filter20.prm": "92d7e960a748a0e790c4e19b140633b42895d5b9bd6ad333e42d0049ed9791c8",
+    "/home/ein/repository/aspect/benchmarks/reconstructed_fault/bp3/bp3_150x50_first_event.prm": "23743000ec027177562699c93e7e49682273eb822b5e8463608bc7ee792075c4"
+  },
+  "runs": [
+    {
+      "case": "branch-np2",
+      "exit_code": 0,
+      "seconds": 7.237312898999335,
+      "rss_kib": 296384
+    },
+    {
+      "case": "create-np2",
+      "exit_code": 0,
+      "seconds": 8.940086012999927,
+      "rss_kib": 296364
+    },
+    {
+      "case": "direct-np1",
+      "exit_code": 0,
+      "seconds": 9.789037989999997,
+      "rss_kib": 338188
+    },
+    {
+      "case": "model-only-np1",
+      "exit_code": 0,
+      "seconds": 11.393868152999858,
+      "rss_kib": 332272
+    },
+    {
+      "case": "production-json-np1",
+      "exit_code": 0,
+      "seconds": 3.9259348429995953,
+      "rss_kib": 196040
+    },
+    {
+      "case": "production-parse-np1",
+      "exit_code": 0,
+      "seconds": 3.724034292000397,
+      "rss_kib": 186388
+    },
+    {
+      "case": "quiet-np2",
+      "exit_code": 0,
+      "seconds": 11.195394733000285,
+      "rss_kib": 293292
+    },
+    {
+      "case": "reject-filter-np2",
+      "exit_code": 1,
+      "seconds": 1.9198163099999874,
+      "rss_kib": 209160
+    },
+    {
+      "case": "reject-interpolator-np2",
+      "exit_code": 1,
+      "seconds": 1.9195372180001868,
+      "rss_kib": 209916
+    },
+    {
+      "case": "reject-limiter-np2",
+      "exit_code": 1,
+      "seconds": 1.969977504999406,
+      "rss_kib": 209820
+    },
+    {
+      "case": "reject-material-np2",
+      "exit_code": 1,
+      "seconds": 1.970088367000244,
+      "rss_kib": 209232
+    },
+    {
+      "case": "reject-mesh-np2",
+      "exit_code": 1,
+      "seconds": 1.9697272370003702,
+      "rss_kib": 210020
+    },
+    {
+      "case": "reschedule-np2",
+      "exit_code": 0,
+      "seconds": 5.080011484999886,
+      "rss_kib": 294200
+    },
+    {
+      "case": "resume-np2",
+      "exit_code": 0,
+      "seconds": 7.183344492000288,
+      "rss_kib": 294776
+    },
+    {
+      "case": "retry-np1",
+      "exit_code": 0,
+      "seconds": 11.846367754000312,
+      "rss_kib": 342960
+    },
+    {
+      "case": "staggered-np2",
+      "exit_code": 0,
+      "seconds": 11.445609876000162,
+      "rss_kib": 298796
+    }
+  ],
+  "total_seconds": 101.51014916700024,
+  "production_mesh_run": false,
+  "server_input_confirmed": false,
+  "graded_completion_blocker": "unchanged; Section-3 evidence reused"
+}

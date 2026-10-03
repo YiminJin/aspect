@@ -17,7 +17,6 @@ namespace aspect
     // Observations shared by initialization callbacks and accepted-state output.
     // Constitutive history remains simulator/manager owned and is never stored here.
     extern bool converged, long_run_stop, restored_history, detailed_diagnostics;
-    extern std::string mature_prestress_file;
     extern unsigned int newton_updates, krylov_iterations;
     extern double minimum_alpha, accepted_nonlinear_residual;
     extern std::vector<std::vector<bool>> final_active;
@@ -25,6 +24,9 @@ namespace aspect
     extern std::map<types::particle_index,double> work_initial_H;
     extern std::map<types::particle_index,double> checkpoint_particle_H;
     void restore_particle_audit(types::particle_index next_id);
+    // Read-only diagnostics captured at the existing particle backup. They
+    // describe the current attempt; the next backup refreshes them on restart.
+    extern types::particle_index population_before_attempt, first_attempt_birth_id;
     template <int dim>
     void connect_particle_history_audit(const SimulatorAccess<dim> &sim);
     extern std::vector<Point<2>> work_initial_geometry;

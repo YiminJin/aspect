@@ -1,3 +1,27 @@
+# BP3 runtime-cleanup section 4 complete for review
+
+Section 3 is committed as `e2ff248fb`. Section 4 provides the fresh 150x50 km
+[candidate](../../benchmarks/reconstructed_fault/bp3/production/README.md), updates
+maintained guidance, removes the unused prestress-file option, expands model
+identity/resolved reporting, and adds optional native bulk/particle visualization
+plus compact accepted population/H/stress summaries. Historical data, physical
+history, v6 checkpoint payload and schedule reference ownership are preserved.
+
+Release build, production parsing/default expansion and 211 focused checks pass.
+Matched one/two-rank physical/lifecycle outputs agree bitwise with Section 3;
+quiet output, changed-cadence restart and an older-checkpoint output branch retain
+accepted states. Five incompatible model configurations are explicitly rejected.
+The new summary matches particle dumps, including genuine nonzero-history births
+and losses. See [review/evidence](../../benchmarks/reconstructed_fault/bp3_packaging/README.md).
+
+The latest server input is unconfirmed. The candidate explicitly labels inherited
+physical/cap settings and provisional 0.1 log-state / 0.5 nonlinear-failure cutback
+choices. No server readiness is claimed: the Section-3 graded-boundary admission
+blocker remains unchanged. No production mesh allocation, resolved trajectory,
+Section 5 or later refactoring was attempted. Recommended next bounded task is
+separate qualification of a conservative local-support completion enclosure.
+Current Section-4 changes are uncommitted for review. Earlier entries are historical.
+
 # BP3 runtime-cleanup section 3 implemented; graded qualification blocked
 
 Accepted geometry/endpoint/filter work is committed as `bc2b5eb64`, `82a1daaa8`,
