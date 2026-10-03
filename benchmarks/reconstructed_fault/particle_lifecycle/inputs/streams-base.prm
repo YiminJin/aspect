@@ -1,0 +1,33 @@
+include $ASPECT_SOURCE_DIR/tests/checkpoint_08_particles_multiple_systems.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_lifecycle/build/observer/libparticle_streams.release.so
+set Maximum time step = 100
+set Maximum first time step = 100
+subsection Mesh refinement
+ set Initial global refinement = 2
+end
+subsection Postprocess
+ set List of postprocessors = particles, particle streams
+ subsection Particles
+  set Data output format = none
+ end
+end
+subsection Checkpointing
+ set Steps between checkpoint = 1
+end
+subsection Termination criteria
+ set Checkpoint on termination = true
+end
+subsection Particles
+ set Load balancing strategy = remove and add particles
+ set Minimum particles per cell = 8
+ set Maximum particles per cell = 12
+ set Particle addition algorithm = random
+ set Particle removal algorithm = random
+end
+subsection Particles 2
+ set Load balancing strategy = remove and add particles
+ set Minimum particles per cell = 16
+ set Maximum particles per cell = 20
+ set Particle addition algorithm = random
+ set Particle removal algorithm = random
+end

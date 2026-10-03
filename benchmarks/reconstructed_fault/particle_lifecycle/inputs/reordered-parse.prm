@@ -1,0 +1,5 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_lifecycle/inputs/candidate-parse.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_lifecycle/output-reordered-parse
+subsection Particles
+ set List of particle properties = maxwell stress, crack driving force, initial composition
+end

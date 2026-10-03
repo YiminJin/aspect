@@ -1,0 +1,7 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_lifecycle/inputs/base.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_lifecycle/output-corrupt-missing
+subsection Postprocess
+ subsection Coupled replenishment
+ set Corrupt audit = missing
+ end
+end

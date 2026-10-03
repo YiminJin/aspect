@@ -1,0 +1,10 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_lifecycle/inputs/base.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_lifecycle/output-final-direct
+set End time = 100
+subsection Postprocess
+ subsection BP3
+ set Last accepted step = 1
+ end
+end
+set Maximum time step = 50
+set Maximum first time step = 50

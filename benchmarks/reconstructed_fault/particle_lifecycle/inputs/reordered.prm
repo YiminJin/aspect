@@ -1,0 +1,11 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_lifecycle/inputs/base.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_lifecycle/output-reordered
+set End time = 0
+subsection Particles
+ set List of particle properties = maxwell stress, crack driving force, initial composition
+end
+subsection Postprocess
+ subsection BP3
+  set Last accepted step = 0
+ end
+end

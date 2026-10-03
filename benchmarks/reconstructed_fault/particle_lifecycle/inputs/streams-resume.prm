@@ -1,0 +1,4 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_lifecycle/inputs/streams-base.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_lifecycle/output-streams-resume
+set End time = 200
+set Resume computation = true

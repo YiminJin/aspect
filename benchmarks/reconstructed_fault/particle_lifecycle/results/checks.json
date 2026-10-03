@@ -1,0 +1,1548 @@
+[
+  {
+    "check": "final-direct/final-retry/rank0/n",
+    "passed": true,
+    "reference": "30122",
+    "candidate": "30122"
+  },
+  {
+    "check": "final-direct/final-retry/rank0/next_id",
+    "passed": true,
+    "reference": "30242",
+    "candidate": "30242"
+  },
+  {
+    "check": "final-direct/final-retry/rank0/position_hash",
+    "passed": true,
+    "reference": "8146131323884969485",
+    "candidate": "8146131323884969485"
+  },
+  {
+    "check": "final-direct/final-retry/rank0/membership_hash",
+    "passed": true,
+    "reference": "4037876879660670568",
+    "candidate": "4037876879660670568"
+  },
+  {
+    "check": "final-direct/final-retry/rank0/property_hash",
+    "passed": true,
+    "reference": "17542126071529805723",
+    "candidate": "17542126071529805723"
+  },
+  {
+    "check": "final-direct/final-retry/rank0/integrator_hash",
+    "passed": true,
+    "reference": "11180901121191706788",
+    "candidate": "11180901121191706788"
+  },
+  {
+    "check": "final-direct/final-retry/rank0/rng_hash",
+    "passed": true,
+    "reference": "417121906730660183",
+    "candidate": "417121906730660183"
+  },
+  {
+    "check": "final-direct/final-retry/rank0/partition_hash",
+    "passed": true,
+    "reference": "8222793204435427317",
+    "candidate": "8222793204435427317"
+  },
+  {
+    "check": "final-direct/final-retry/rank0/stress_max",
+    "passed": true,
+    "reference": "0.035298759441891481",
+    "candidate": "0.035298759441891481"
+  },
+  {
+    "check": "final-direct/final-retry/rank0/stress_mean",
+    "passed": true,
+    "reference": "-2.8094049038541022e-05",
+    "candidate": "-2.8094049038541022e-05"
+  },
+  {
+    "check": "final-direct/final-retry/rank0/H_min",
+    "passed": true,
+    "reference": "15.606408709560643",
+    "candidate": "15.606408709560643"
+  },
+  {
+    "check": "final-direct/final-retry/rank0/H_negative",
+    "passed": true,
+    "reference": "0",
+    "candidate": "0"
+  },
+  {
+    "check": "final-direct/final-retry/rank0/pressure_min",
+    "passed": true,
+    "reference": "-0.030276830396278719",
+    "candidate": "-0.030276830396278719"
+  },
+  {
+    "check": "final-direct/final-retry/rank0/pressure_max",
+    "passed": true,
+    "reference": "0.040315302277544103",
+    "candidate": "0.040315302277544103"
+  },
+  {
+    "check": "final-direct/final-retry/rank0/mapped_stress_max",
+    "passed": true,
+    "reference": "0",
+    "candidate": "0"
+  },
+  {
+    "check": "final-direct/final-retry/rank0/audit_size",
+    "passed": true,
+    "reference": "30122",
+    "candidate": "30122"
+  },
+  {
+    "check": "final-direct/final-retry/rank0/audit_hash",
+    "passed": true,
+    "reference": "12014516071112072541",
+    "candidate": "12014516071112072541"
+  },
+  {
+    "check": "final-direct/final-retry/audit_bulk_1_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "final-direct/final-retry/audit_particles_1_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "final-direct/final-retry/mature_history_1_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "final-direct/final-retry/work_qp_1_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "final-direct/final-retry/profiles/fault_1.csv",
+    "passed": true
+  },
+  {
+    "check": "final-direct/final-retry/work_weak_1.csv",
+    "passed": true
+  },
+  {
+    "check": "final-direct/final-retry/common_fe_weak_1.csv",
+    "passed": true
+  },
+  {
+    "check": "final-direct/final-retry/accepted_steps.csv",
+    "passed": true
+  },
+  {
+    "check": "final-direct/final-retry/restored_growth.csv",
+    "passed": true
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/rank0/n",
+    "passed": true,
+    "reference": "15008",
+    "candidate": "15008"
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/rank0/next_id",
+    "passed": true,
+    "reference": "30245",
+    "candidate": "30245"
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/rank0/position_hash",
+    "passed": true,
+    "reference": "11185031111515942716",
+    "candidate": "11185031111515942716"
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/rank0/membership_hash",
+    "passed": true,
+    "reference": "15692377300352115863",
+    "candidate": "15692377300352115863"
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/rank0/property_hash",
+    "passed": true,
+    "reference": "6584723697590713587",
+    "candidate": "6584723697590713587"
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/rank0/integrator_hash",
+    "passed": true,
+    "reference": "3326943225029450788",
+    "candidate": "3326943225029450788"
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/rank0/rng_hash",
+    "passed": true,
+    "reference": "9950420861948261084",
+    "candidate": "9950420861948261084"
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/rank0/partition_hash",
+    "passed": true,
+    "reference": "7327332771342214326",
+    "candidate": "7327332771342214326"
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/rank0/stress_max",
+    "passed": true,
+    "reference": "0.13849824134675698",
+    "candidate": "0.13849824134675698"
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/rank0/stress_mean",
+    "passed": true,
+    "reference": "-9.9853741631900932e-05",
+    "candidate": "-9.9853741631900932e-05"
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/rank0/H_min",
+    "passed": true,
+    "reference": "15.606408709560643",
+    "candidate": "15.606408709560643"
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/rank0/H_negative",
+    "passed": true,
+    "reference": "0",
+    "candidate": "0"
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/rank0/pressure_min",
+    "passed": true,
+    "reference": "-0.089405599105129005",
+    "candidate": "-0.089405599105129005"
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/rank0/pressure_max",
+    "passed": true,
+    "reference": "0.13694855377933818",
+    "candidate": "0.13694855377933818"
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/rank0/mapped_stress_max",
+    "passed": true,
+    "reference": "0.048209148237970907",
+    "candidate": "0.048209148237970907"
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/rank0/audit_size",
+    "passed": true,
+    "reference": "15668",
+    "candidate": "15668"
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/rank0/audit_hash",
+    "passed": true,
+    "reference": "16232479859340377000",
+    "candidate": "16232479859340377000"
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/audit_bulk_2_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/audit_particles_2_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/mature_history_2_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/work_qp_2_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/rank1/n",
+    "passed": true,
+    "reference": "15116",
+    "candidate": "15116"
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/rank1/next_id",
+    "passed": true,
+    "reference": "30245",
+    "candidate": "30245"
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/rank1/position_hash",
+    "passed": true,
+    "reference": "11408101745181826268",
+    "candidate": "11408101745181826268"
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/rank1/membership_hash",
+    "passed": true,
+    "reference": "7111721991019409779",
+    "candidate": "7111721991019409779"
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/rank1/property_hash",
+    "passed": true,
+    "reference": "7171004185686901028",
+    "candidate": "7171004185686901028"
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/rank1/integrator_hash",
+    "passed": true,
+    "reference": "4296284110386656863",
+    "candidate": "4296284110386656863"
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/rank1/rng_hash",
+    "passed": true,
+    "reference": "16448014684875610129",
+    "candidate": "16448014684875610129"
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/rank1/partition_hash",
+    "passed": true,
+    "reference": "12128545676541155694",
+    "candidate": "12128545676541155694"
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/rank1/stress_max",
+    "passed": true,
+    "reference": "0.10187014756307217",
+    "candidate": "0.10187014756307217"
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/rank1/stress_mean",
+    "passed": true,
+    "reference": "-0.00013030673104436904",
+    "candidate": "-0.00013030673104436904"
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/rank1/H_min",
+    "passed": true,
+    "reference": "15.606408709560643",
+    "candidate": "15.606408709560643"
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/rank1/H_negative",
+    "passed": true,
+    "reference": "0",
+    "candidate": "0"
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/rank1/pressure_min",
+    "passed": true,
+    "reference": "-0.023710108192750667",
+    "candidate": "-0.023710108192750667"
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/rank1/pressure_max",
+    "passed": true,
+    "reference": "0.028171655018531406",
+    "candidate": "0.028171655018531406"
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/rank1/mapped_stress_max",
+    "passed": true,
+    "reference": "0.015078588972389562",
+    "candidate": "0.015078588972389562"
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/rank1/audit_size",
+    "passed": true,
+    "reference": "15776",
+    "candidate": "15776"
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/rank1/audit_hash",
+    "passed": true,
+    "reference": "10480731033800414060",
+    "candidate": "10480731033800414060"
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/audit_bulk_2_rank1.csv",
+    "passed": true
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/audit_particles_2_rank1.csv",
+    "passed": true
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/mature_history_2_rank1.csv",
+    "passed": true
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/work_qp_2_rank1.csv",
+    "passed": true
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/profiles/fault_2.csv",
+    "passed": true
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/work_weak_2.csv",
+    "passed": true
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/common_fe_weak_2.csv",
+    "passed": true
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/accepted_steps.csv",
+    "passed": true
+  },
+  {
+    "check": "final-staggered/final-resume-fixed/restored_growth.csv",
+    "passed": true
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/rank0/n",
+    "passed": true,
+    "reference": "15008",
+    "candidate": "15008"
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/rank0/next_id",
+    "passed": true,
+    "reference": "30240",
+    "candidate": "30240"
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/rank0/position_hash",
+    "passed": true,
+    "reference": "11788081482369709759",
+    "candidate": "11788081482369709759"
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/rank0/membership_hash",
+    "passed": true,
+    "reference": "12145545245960265863",
+    "candidate": "12145545245960265863"
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/rank0/property_hash",
+    "passed": true,
+    "reference": "18258445080058641979",
+    "candidate": "18258445080058641979"
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/rank0/integrator_hash",
+    "passed": true,
+    "reference": "12690697602958891111",
+    "candidate": "12690697602958891111"
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/rank0/rng_hash",
+    "passed": true,
+    "reference": "13604287259927801",
+    "candidate": "13604287259927801"
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/rank0/partition_hash",
+    "passed": true,
+    "reference": "7327332771342214326",
+    "candidate": "7327332771342214326"
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/rank0/stress_max",
+    "passed": true,
+    "reference": "0.10350816593563128",
+    "candidate": "0.10350816593563128"
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/rank0/stress_mean",
+    "passed": true,
+    "reference": "-8.3233373413739309e-05",
+    "candidate": "-8.3233373413739309e-05"
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/rank0/H_min",
+    "passed": true,
+    "reference": "15.606408709560643",
+    "candidate": "15.606408709560643"
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/rank0/H_negative",
+    "passed": true,
+    "reference": "0",
+    "candidate": "0"
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/rank0/pressure_min",
+    "passed": true,
+    "reference": "-0.057911363740670622",
+    "candidate": "-0.057911363740670622"
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/rank0/pressure_max",
+    "passed": true,
+    "reference": "0.097338910107457224",
+    "candidate": "0.097338910107457224"
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/rank0/mapped_stress_max",
+    "passed": true,
+    "reference": "0.047676920072303709",
+    "candidate": "0.047676920072303709"
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/rank0/audit_size",
+    "passed": true,
+    "reference": "15668",
+    "candidate": "15668"
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/rank0/audit_hash",
+    "passed": true,
+    "reference": "13174559837299210443",
+    "candidate": "13174559837299210443"
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/audit_bulk_2_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/audit_particles_2_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/mature_history_2_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/work_qp_2_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/rank1/n",
+    "passed": true,
+    "reference": "15116",
+    "candidate": "15116"
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/rank1/next_id",
+    "passed": true,
+    "reference": "30240",
+    "candidate": "30240"
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/rank1/position_hash",
+    "passed": true,
+    "reference": "9008706070830581710",
+    "candidate": "9008706070830581710"
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/rank1/membership_hash",
+    "passed": true,
+    "reference": "7522246378226200539",
+    "candidate": "7522246378226200539"
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/rank1/property_hash",
+    "passed": true,
+    "reference": "10294987458558019656",
+    "candidate": "10294987458558019656"
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/rank1/integrator_hash",
+    "passed": true,
+    "reference": "14830720023504033624",
+    "candidate": "14830720023504033624"
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/rank1/rng_hash",
+    "passed": true,
+    "reference": "16448014684875610129",
+    "candidate": "16448014684875610129"
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/rank1/partition_hash",
+    "passed": true,
+    "reference": "12128545676541155694",
+    "candidate": "12128545676541155694"
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/rank1/stress_max",
+    "passed": true,
+    "reference": "0.076524501484080784",
+    "candidate": "0.076524501484080784"
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/rank1/stress_mean",
+    "passed": true,
+    "reference": "-8.3689484859482646e-05",
+    "candidate": "-8.3689484859482646e-05"
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/rank1/H_min",
+    "passed": true,
+    "reference": "15.606408709560643",
+    "candidate": "15.606408709560643"
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/rank1/H_negative",
+    "passed": true,
+    "reference": "0",
+    "candidate": "0"
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/rank1/pressure_min",
+    "passed": true,
+    "reference": "-0.017225391366027094",
+    "candidate": "-0.017225391366027094"
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/rank1/pressure_max",
+    "passed": true,
+    "reference": "0.020602354668896525",
+    "candidate": "0.020602354668896525"
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/rank1/mapped_stress_max",
+    "passed": true,
+    "reference": "0.015078588972478841",
+    "candidate": "0.015078588972478841"
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/rank1/audit_size",
+    "passed": true,
+    "reference": "15776",
+    "candidate": "15776"
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/rank1/audit_hash",
+    "passed": true,
+    "reference": "13761070182781981468",
+    "candidate": "13761070182781981468"
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/audit_bulk_2_rank1.csv",
+    "passed": true
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/audit_particles_2_rank1.csv",
+    "passed": true
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/mature_history_2_rank1.csv",
+    "passed": true
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/work_qp_2_rank1.csv",
+    "passed": true
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/profiles/fault_2.csv",
+    "passed": true
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/work_weak_2.csv",
+    "passed": true
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/common_fe_weak_2.csv",
+    "passed": true
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/accepted_steps.csv",
+    "passed": true
+  },
+  {
+    "check": "final-direct2-fixed/final-retry2-fixed/restored_growth.csv",
+    "passed": true
+  },
+  {
+    "check": "random-direct/random-retry/rank0/n",
+    "passed": true,
+    "reference": "15006",
+    "candidate": "15006"
+  },
+  {
+    "check": "random-direct/random-retry/rank0/next_id",
+    "passed": true,
+    "reference": "30242",
+    "candidate": "30242"
+  },
+  {
+    "check": "random-direct/random-retry/rank0/position_hash",
+    "passed": true,
+    "reference": "5960365881649840340",
+    "candidate": "5960365881649840340"
+  },
+  {
+    "check": "random-direct/random-retry/rank0/membership_hash",
+    "passed": true,
+    "reference": "6387071600504675664",
+    "candidate": "6387071600504675664"
+  },
+  {
+    "check": "random-direct/random-retry/rank0/property_hash",
+    "passed": true,
+    "reference": "9193486060168892968",
+    "candidate": "9193486060168892968"
+  },
+  {
+    "check": "random-direct/random-retry/rank0/integrator_hash",
+    "passed": true,
+    "reference": "6362897821342960509",
+    "candidate": "6362897821342960509"
+  },
+  {
+    "check": "random-direct/random-retry/rank0/rng_hash",
+    "passed": true,
+    "reference": "16407933464324529632",
+    "candidate": "16407933464324529632"
+  },
+  {
+    "check": "random-direct/random-retry/rank0/partition_hash",
+    "passed": true,
+    "reference": "7327332771342214326",
+    "candidate": "7327332771342214326"
+  },
+  {
+    "check": "random-direct/random-retry/rank0/stress_max",
+    "passed": true,
+    "reference": "0.035298759441890308",
+    "candidate": "0.035298759441890308"
+  },
+  {
+    "check": "random-direct/random-retry/rank0/stress_mean",
+    "passed": true,
+    "reference": "-5.9368062922542175e-06",
+    "candidate": "-5.9368062922542175e-06"
+  },
+  {
+    "check": "random-direct/random-retry/rank0/H_min",
+    "passed": true,
+    "reference": "15.606408709560643",
+    "candidate": "15.606408709560643"
+  },
+  {
+    "check": "random-direct/random-retry/rank0/H_negative",
+    "passed": true,
+    "reference": "0",
+    "candidate": "0"
+  },
+  {
+    "check": "random-direct/random-retry/rank0/pressure_min",
+    "passed": true,
+    "reference": "-0.030276830396277585",
+    "candidate": "-0.030276830396277585"
+  },
+  {
+    "check": "random-direct/random-retry/rank0/pressure_max",
+    "passed": true,
+    "reference": "0.040315302277543923",
+    "candidate": "0.040315302277543923"
+  },
+  {
+    "check": "random-direct/random-retry/rank0/mapped_stress_max",
+    "passed": true,
+    "reference": "0",
+    "candidate": "0"
+  },
+  {
+    "check": "random-direct/random-retry/rank0/audit_size",
+    "passed": true,
+    "reference": "15666",
+    "candidate": "15666"
+  },
+  {
+    "check": "random-direct/random-retry/rank0/audit_hash",
+    "passed": true,
+    "reference": "7330974054703265142",
+    "candidate": "7330974054703265142"
+  },
+  {
+    "check": "random-direct/random-retry/audit_bulk_1_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "random-direct/random-retry/audit_particles_1_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "random-direct/random-retry/mature_history_1_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "random-direct/random-retry/work_qp_1_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "random-direct/random-retry/rank1/n",
+    "passed": true,
+    "reference": "15116",
+    "candidate": "15116"
+  },
+  {
+    "check": "random-direct/random-retry/rank1/next_id",
+    "passed": true,
+    "reference": "30242",
+    "candidate": "30242"
+  },
+  {
+    "check": "random-direct/random-retry/rank1/position_hash",
+    "passed": true,
+    "reference": "682808501000027288",
+    "candidate": "682808501000027288"
+  },
+  {
+    "check": "random-direct/random-retry/rank1/membership_hash",
+    "passed": true,
+    "reference": "1730965724122655495",
+    "candidate": "1730965724122655495"
+  },
+  {
+    "check": "random-direct/random-retry/rank1/property_hash",
+    "passed": true,
+    "reference": "318694775384284634",
+    "candidate": "318694775384284634"
+  },
+  {
+    "check": "random-direct/random-retry/rank1/integrator_hash",
+    "passed": true,
+    "reference": "4183060303661117810",
+    "candidate": "4183060303661117810"
+  },
+  {
+    "check": "random-direct/random-retry/rank1/rng_hash",
+    "passed": true,
+    "reference": "12087466029787948148",
+    "candidate": "12087466029787948148"
+  },
+  {
+    "check": "random-direct/random-retry/rank1/partition_hash",
+    "passed": true,
+    "reference": "12128545676541155694",
+    "candidate": "12128545676541155694"
+  },
+  {
+    "check": "random-direct/random-retry/rank1/stress_max",
+    "passed": true,
+    "reference": "0.025343946795085108",
+    "candidate": "0.025343946795085108"
+  },
+  {
+    "check": "random-direct/random-retry/rank1/stress_mean",
+    "passed": true,
+    "reference": "-4.663487311502978e-05",
+    "candidate": "-4.663487311502978e-05"
+  },
+  {
+    "check": "random-direct/random-retry/rank1/H_min",
+    "passed": true,
+    "reference": "15.606408709560643",
+    "candidate": "15.606408709560643"
+  },
+  {
+    "check": "random-direct/random-retry/rank1/H_negative",
+    "passed": true,
+    "reference": "0",
+    "candidate": "0"
+  },
+  {
+    "check": "random-direct/random-retry/rank1/pressure_min",
+    "passed": true,
+    "reference": "-0.0064846872677651888",
+    "candidate": "-0.0064846872677651888"
+  },
+  {
+    "check": "random-direct/random-retry/rank1/pressure_max",
+    "passed": true,
+    "reference": "0.007620382746102443",
+    "candidate": "0.007620382746102443"
+  },
+  {
+    "check": "random-direct/random-retry/rank1/mapped_stress_max",
+    "passed": true,
+    "reference": "0",
+    "candidate": "0"
+  },
+  {
+    "check": "random-direct/random-retry/rank1/audit_size",
+    "passed": true,
+    "reference": "15776",
+    "candidate": "15776"
+  },
+  {
+    "check": "random-direct/random-retry/rank1/audit_hash",
+    "passed": true,
+    "reference": "3447853169709919141",
+    "candidate": "3447853169709919141"
+  },
+  {
+    "check": "random-direct/random-retry/audit_bulk_1_rank1.csv",
+    "passed": true
+  },
+  {
+    "check": "random-direct/random-retry/audit_particles_1_rank1.csv",
+    "passed": true
+  },
+  {
+    "check": "random-direct/random-retry/mature_history_1_rank1.csv",
+    "passed": true
+  },
+  {
+    "check": "random-direct/random-retry/work_qp_1_rank1.csv",
+    "passed": true
+  },
+  {
+    "check": "random-direct/random-retry/profiles/fault_1.csv",
+    "passed": true
+  },
+  {
+    "check": "random-direct/random-retry/work_weak_1.csv",
+    "passed": true
+  },
+  {
+    "check": "random-direct/random-retry/common_fe_weak_1.csv",
+    "passed": true
+  },
+  {
+    "check": "random-direct/random-retry/accepted_steps.csv",
+    "passed": true
+  },
+  {
+    "check": "random-direct/random-retry/restored_growth.csv",
+    "passed": true
+  },
+  {
+    "check": "final-retry/rollback/rank0/n",
+    "passed": true
+  },
+  {
+    "check": "final-retry/rollback/rank0/next_id",
+    "passed": true
+  },
+  {
+    "check": "final-retry/rollback/rank0/position_hash",
+    "passed": true
+  },
+  {
+    "check": "final-retry/rollback/rank0/membership_hash",
+    "passed": true
+  },
+  {
+    "check": "final-retry/rollback/rank0/property_hash",
+    "passed": true
+  },
+  {
+    "check": "final-retry/rollback/rank0/integrator_hash",
+    "passed": true
+  },
+  {
+    "check": "final-retry/rollback/rank0/rng_hash",
+    "passed": true
+  },
+  {
+    "check": "final-retry/rollback/rank0/audit_size",
+    "passed": true
+  },
+  {
+    "check": "final-retry/rollback/rank0/audit_hash",
+    "passed": true
+  },
+  {
+    "check": "final-retry2-fixed/rollback/rank0/n",
+    "passed": true
+  },
+  {
+    "check": "final-retry2-fixed/rollback/rank0/next_id",
+    "passed": true
+  },
+  {
+    "check": "final-retry2-fixed/rollback/rank0/position_hash",
+    "passed": true
+  },
+  {
+    "check": "final-retry2-fixed/rollback/rank0/membership_hash",
+    "passed": true
+  },
+  {
+    "check": "final-retry2-fixed/rollback/rank0/property_hash",
+    "passed": true
+  },
+  {
+    "check": "final-retry2-fixed/rollback/rank0/integrator_hash",
+    "passed": true
+  },
+  {
+    "check": "final-retry2-fixed/rollback/rank0/rng_hash",
+    "passed": true
+  },
+  {
+    "check": "final-retry2-fixed/rollback/rank0/audit_size",
+    "passed": true
+  },
+  {
+    "check": "final-retry2-fixed/rollback/rank0/audit_hash",
+    "passed": true
+  },
+  {
+    "check": "final-retry2-fixed/rollback/rank1/n",
+    "passed": true
+  },
+  {
+    "check": "final-retry2-fixed/rollback/rank1/next_id",
+    "passed": true
+  },
+  {
+    "check": "final-retry2-fixed/rollback/rank1/position_hash",
+    "passed": true
+  },
+  {
+    "check": "final-retry2-fixed/rollback/rank1/membership_hash",
+    "passed": true
+  },
+  {
+    "check": "final-retry2-fixed/rollback/rank1/property_hash",
+    "passed": true
+  },
+  {
+    "check": "final-retry2-fixed/rollback/rank1/integrator_hash",
+    "passed": true
+  },
+  {
+    "check": "final-retry2-fixed/rollback/rank1/rng_hash",
+    "passed": true
+  },
+  {
+    "check": "final-retry2-fixed/rollback/rank1/audit_size",
+    "passed": true
+  },
+  {
+    "check": "final-retry2-fixed/rollback/rank1/audit_hash",
+    "passed": true
+  },
+  {
+    "check": "random-retry/rollback/rank0/n",
+    "passed": true
+  },
+  {
+    "check": "random-retry/rollback/rank0/next_id",
+    "passed": true
+  },
+  {
+    "check": "random-retry/rollback/rank0/position_hash",
+    "passed": true
+  },
+  {
+    "check": "random-retry/rollback/rank0/membership_hash",
+    "passed": true
+  },
+  {
+    "check": "random-retry/rollback/rank0/property_hash",
+    "passed": true
+  },
+  {
+    "check": "random-retry/rollback/rank0/integrator_hash",
+    "passed": true
+  },
+  {
+    "check": "random-retry/rollback/rank0/rng_hash",
+    "passed": true
+  },
+  {
+    "check": "random-retry/rollback/rank0/audit_size",
+    "passed": true
+  },
+  {
+    "check": "random-retry/rollback/rank0/audit_hash",
+    "passed": true
+  },
+  {
+    "check": "random-retry/rollback/rank1/n",
+    "passed": true
+  },
+  {
+    "check": "random-retry/rollback/rank1/next_id",
+    "passed": true
+  },
+  {
+    "check": "random-retry/rollback/rank1/position_hash",
+    "passed": true
+  },
+  {
+    "check": "random-retry/rollback/rank1/membership_hash",
+    "passed": true
+  },
+  {
+    "check": "random-retry/rollback/rank1/property_hash",
+    "passed": true
+  },
+  {
+    "check": "random-retry/rollback/rank1/integrator_hash",
+    "passed": true
+  },
+  {
+    "check": "random-retry/rollback/rank1/rng_hash",
+    "passed": true
+  },
+  {
+    "check": "random-retry/rollback/rank1/audit_size",
+    "passed": true
+  },
+  {
+    "check": "random-retry/rollback/rank1/audit_hash",
+    "passed": true
+  },
+  {
+    "check": "rank0/two-native-RNG-events",
+    "passed": true
+  },
+  {
+    "check": "rank0/nonzero-incoming-Maxwell",
+    "passed": true
+  },
+  {
+    "check": "rank0/complete-streams-at-restart",
+    "passed": true
+  },
+  {
+    "check": "rank0/RNG-sensitive-placement",
+    "passed": true
+  },
+  {
+    "check": "rank0/native-migration",
+    "passed": true
+  },
+  {
+    "check": "rank1/two-native-RNG-events",
+    "passed": true
+  },
+  {
+    "check": "rank1/nonzero-incoming-Maxwell",
+    "passed": true
+  },
+  {
+    "check": "rank1/complete-streams-at-restart",
+    "passed": true
+  },
+  {
+    "check": "rank1/RNG-sensitive-placement",
+    "passed": true
+  },
+  {
+    "check": "rank1/native-migration",
+    "passed": true
+  },
+  {
+    "check": "multiple-managers/manager0-rank0.txt/accepted",
+    "passed": true
+  },
+  {
+    "check": "multiple-managers/manager0-rank0.txt/loaded-streams-and-next-ID",
+    "passed": true
+  },
+  {
+    "check": "multiple-managers/manager0-rank1.txt/accepted",
+    "passed": true
+  },
+  {
+    "check": "multiple-managers/manager0-rank1.txt/loaded-streams-and-next-ID",
+    "passed": true
+  },
+  {
+    "check": "multiple-managers/manager1-rank0.txt/accepted",
+    "passed": true
+  },
+  {
+    "check": "multiple-managers/manager1-rank0.txt/loaded-streams-and-next-ID",
+    "passed": true
+  },
+  {
+    "check": "multiple-managers/manager1-rank1.txt/accepted",
+    "passed": true
+  },
+  {
+    "check": "multiple-managers/manager1-rank1.txt/loaded-streams-and-next-ID",
+    "passed": true
+  },
+  {
+    "check": "corrupt-value",
+    "passed": true
+  },
+  {
+    "check": "corrupt-missing",
+    "passed": true
+  },
+  {
+    "check": "legacy-active",
+    "passed": true
+  },
+  {
+    "check": "changed-active",
+    "passed": true
+  },
+  {
+    "check": "legacy-disabled",
+    "passed": true
+  },
+  {
+    "check": "changed-disabled",
+    "passed": true
+  },
+  {
+    "check": "runtime-name-limiter-reordering",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-serial/step0/rank0/n",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-serial/step0/rank0/next_id",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-serial/step0/rank0/position_hash",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-serial/step0/rank0/property_hash",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-serial/step0/rank0/integrator_hash",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-serial/step0/rank0/stress_max",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-serial/step0/rank0/pressure_min",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-serial/step0/rank0/pressure_max",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-serial/step0/rank0/mapped_stress_max",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-serial/step0/rank0/H_min",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-serial/step1/rank0/n",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-serial/step1/rank0/next_id",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-serial/step1/rank0/position_hash",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-serial/step1/rank0/property_hash",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-serial/step1/rank0/integrator_hash",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-serial/step1/rank0/stress_max",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-serial/step1/rank0/pressure_min",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-serial/step1/rank0/pressure_max",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-serial/step1/rank0/mapped_stress_max",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-serial/step1/rank0/H_min",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-serial/step2/rank0/n",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-serial/step2/rank0/next_id",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-serial/step2/rank0/position_hash",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-serial/step2/rank0/property_hash",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-serial/step2/rank0/integrator_hash",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-serial/step2/rank0/stress_max",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-serial/step2/rank0/pressure_min",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-serial/step2/rank0/pressure_max",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-serial/step2/rank0/mapped_stress_max",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-serial/step2/rank0/H_min",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step0/rank0/n",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step0/rank0/next_id",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step0/rank0/position_hash",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step0/rank0/property_hash",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step0/rank0/integrator_hash",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step0/rank0/stress_max",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step0/rank0/pressure_min",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step0/rank0/pressure_max",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step0/rank0/mapped_stress_max",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step0/rank0/H_min",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step1/rank0/n",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step1/rank0/next_id",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step1/rank0/position_hash",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step1/rank0/property_hash",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step1/rank0/integrator_hash",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step1/rank0/stress_max",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step1/rank0/pressure_min",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step1/rank0/pressure_max",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step1/rank0/mapped_stress_max",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step1/rank0/H_min",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step2/rank0/n",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step2/rank0/next_id",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step2/rank0/position_hash",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step2/rank0/property_hash",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step2/rank0/integrator_hash",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step2/rank0/stress_max",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step2/rank0/pressure_min",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step2/rank0/pressure_max",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step2/rank0/mapped_stress_max",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step2/rank0/H_min",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step0/rank1/n",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step0/rank1/next_id",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step0/rank1/position_hash",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step0/rank1/property_hash",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step0/rank1/integrator_hash",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step0/rank1/stress_max",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step0/rank1/pressure_min",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step0/rank1/pressure_max",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step0/rank1/mapped_stress_max",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step0/rank1/H_min",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step1/rank1/n",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step1/rank1/next_id",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step1/rank1/position_hash",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step1/rank1/property_hash",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step1/rank1/integrator_hash",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step1/rank1/stress_max",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step1/rank1/pressure_min",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step1/rank1/pressure_max",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step1/rank1/mapped_stress_max",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step1/rank1/H_min",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step2/rank1/n",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step2/rank1/next_id",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step2/rank1/position_hash",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step2/rank1/property_hash",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step2/rank1/integrator_hash",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step2/rank1/stress_max",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step2/rank1/pressure_min",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step2/rank1/pressure_max",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step2/rank1/mapped_stress_max",
+    "passed": true
+  },
+  {
+    "check": "pre-correction/final-mpi/step2/rank1/H_min",
+    "passed": true
+  }
+]

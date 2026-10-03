@@ -1,0 +1,17 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_lifecycle/inputs/base.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_lifecycle/output-final-resume-fixed
+set Resume computation = true
+subsection Particles
+ subsection Generator
+  subsection Crossing reference cell
+   set Gap = 6e-8
+  end
+ end
+end
+subsection Particles
+ subsection Generator
+  subsection Crossing reference cell
+   set Staggered = true
+  end
+ end
+end

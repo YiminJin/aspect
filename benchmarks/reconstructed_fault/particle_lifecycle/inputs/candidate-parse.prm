@@ -1,0 +1,3 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/bp3_150x50_particle_lifecycle.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_lifecycle/build/bp3/libbp3_restore_150x50.release.so
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_lifecycle/output-candidate-parse

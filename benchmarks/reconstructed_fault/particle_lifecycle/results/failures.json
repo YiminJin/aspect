@@ -1,0 +1,32 @@
+[
+  {
+    "case": "plugin-build",
+    "kind": "compile correction",
+    "cause": "Const setup access required narrow mutable access to register particle transport callbacks; corrected before runtime."
+  },
+  {
+    "case": "resume-np2",
+    "kind": "implementation correction",
+    "cause": "Native additional particle-transfer callbacks did not enter the mesh checkpoint payload. Corrected by gathering current owned audit baselines in the all-rank hook; final restart comparisons pass."
+  },
+  {
+    "case": "migration-np2",
+    "kind": "discarded diagnostic geometry",
+    "cause": "Duplicate initial coordinates in the first near-face probe caused native Voro++ compute_cell failure. No production domain algorithm or assertion changed."
+  },
+  {
+    "case": "migration-distinct-np2",
+    "kind": "discarded diagnostic geometry",
+    "cause": "Near-face probe hit existing Voronoi face_is_at_boundary assertion. Replaced with an explicitly artificial native transfer of retained particles across rank ownership; this is an audit-transport test, not a physical trajectory."
+  },
+  {
+    "case": "legacy-active/changed-active",
+    "kind": "expected compatibility rejection",
+    "cause": "Population management requires per-rank streams with the same MPI count."
+  },
+  {
+    "case": "corrupt-value/corrupt-missing",
+    "kind": "expected invariant rejection",
+    "cause": "Maintained audit rejects changed survivor H or a missing survivor baseline collectively."
+  }
+]

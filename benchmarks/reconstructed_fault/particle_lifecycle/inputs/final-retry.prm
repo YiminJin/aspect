@@ -1,0 +1,14 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_lifecycle/inputs/base.prm
+set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_lifecycle/output-final-retry
+set End time = 100
+subsection Postprocess
+ subsection BP3
+ set Last accepted step = 1
+ end
+end
+set Nonlinear solver failure strategy = cut timestep size
+subsection Postprocess
+ subsection Coupled replenishment
+  set Reject step = 1
+ end
+end

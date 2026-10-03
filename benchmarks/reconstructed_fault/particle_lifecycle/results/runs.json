@@ -1,0 +1,1228 @@
+[
+  {
+    "label": "candidate-parse-np1",
+    "command": [
+      "mpirun",
+      "-np",
+      "1",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-particle-lifecycle-qualified",
+      "--validate",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/candidate-parse.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 1.6171794180008874,
+    "child_max_rss_kib": 186260,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "ca18856dbbb14aa11f5382bd4129ba6acb4b1fac5af22e4c8ae235ac336fc10a"
+  },
+  {
+    "label": "changed-active-np1",
+    "command": [
+      "mpirun",
+      "-np",
+      "1",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-release",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/changed-active.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 1,
+    "seconds": 3.872628381999675,
+    "child_max_rss_kib": 213328,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "b827c20884a3f572c32c1af0f4c201daeb1bf2505d63cf5aee131c82e0bd4708"
+  },
+  {
+    "label": "changed-disabled-np1",
+    "command": [
+      "mpirun",
+      "-np",
+      "1",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-release",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/changed-disabled.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 7.628406078998523,
+    "child_max_rss_kib": 336000,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "30e818703db32c9ea0da202baea4ecfc07757a60e8711bc3a1eae2340771eb36"
+  },
+  {
+    "label": "core-build-final",
+    "command": [
+      "cmake",
+      "--build",
+      "build-refactor-r6b",
+      "-j2"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 366.1136394990008,
+    "child_max_rss_kib": 4758220,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "4fe3545c51613e7cd4e0b26846dcea3c41c0a6c1823b1cfb766de8a403e38495"
+  },
+  {
+    "label": "core-build",
+    "command": [
+      "cmake",
+      "--build",
+      "build-refactor-r6b",
+      "-j2"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 362.43397660200026,
+    "child_max_rss_kib": 4759068,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "a460db9d5a9ba947b3a50a9cdd67872f0e9ffad25966e37c11bbf07324fae78b"
+  },
+  {
+    "label": "corrupt-missing-np2",
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-particle-lifecycle-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/corrupt-missing.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 1,
+    "seconds": 6.778546564999488,
+    "child_max_rss_kib": 294180,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "d4c45064cb56af253a62b3ce052e2f42a66629b6bef83cd0c3efa3ae55c14194"
+  },
+  {
+    "label": "corrupt-value-np2",
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-particle-lifecycle-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/corrupt-value.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 1,
+    "seconds": 6.5767338250007015,
+    "child_max_rss_kib": 295380,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "66ba1ccc1aa9396e54c2503e47dda488b9fc5ae0c13b58abc0afe03a4f4fa1c2"
+  },
+  {
+    "label": "create-fixed-np2",
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-release",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/create-fixed.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 11.835465467000176,
+    "child_max_rss_kib": 298732,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "4e6663943269b258400217aec3c93dca853c3a140adfd4790386764979d65a4f"
+  },
+  {
+    "label": "create-np2",
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-release",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/create.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 11.73807154899987,
+    "child_max_rss_kib": 296260,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "d4b4b6570497e4d4e1184ebba3d2594e872ef28d97a688d48c549665434b7a08"
+  },
+  {
+    "label": "delayed-np2",
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-release",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/delayed.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 13.992344804999448,
+    "child_max_rss_kib": 297452,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "e2d69867e25a4d7f31ca8e6241d8e3e81229f9e1ba923df6e8423ffdc71e5c92"
+  },
+  {
+    "label": "direct-np1",
+    "command": [
+      "mpirun",
+      "-np",
+      "1",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-release",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/direct.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 11.134671949999756,
+    "child_max_rss_kib": 338836,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "e3f0cea6ba533957133dd889f3d7901fcba810af0df46dd6581fed6eedc8ad47"
+  },
+  {
+    "label": "direct2-fixed-np2",
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-release",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/direct2-fixed.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 7.980652820000614,
+    "child_max_rss_kib": 298244,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "ef0db98f2897282b4498f015e9910816d89871f3153300267cf5bad72e88c068"
+  },
+  {
+    "label": "final-create-fixed-np2",
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-particle-lifecycle-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/final-create-fixed.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 10.034031494000374,
+    "child_max_rss_kib": 296472,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "47d2757454abc4f01fa17a26cbd3dbf90619916c18bb544ac29959f94c099fd3"
+  },
+  {
+    "label": "final-direct-np1",
+    "command": [
+      "mpirun",
+      "-np",
+      "1",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-particle-lifecycle-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/final-direct.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 9.83244319699952,
+    "child_max_rss_kib": 337616,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "1d45c04a9b68bae1f1f9bd6b479ccaef4e8678ff625e84375ef82782441c8c71"
+  },
+  {
+    "label": "final-direct2-fixed-np2",
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-particle-lifecycle-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/final-direct2-fixed.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 5.476235772001019,
+    "child_max_rss_kib": 297400,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "231ec7e4c84ebfbd88431295646fc8180643f04eb8fa4ea1ba04f9c8bdb76add"
+  },
+  {
+    "label": "final-mpi-np2",
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-particle-lifecycle-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/final-mpi.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 12.542943888000082,
+    "child_max_rss_kib": 299776,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "116f9bc6c92337057fd2cd3d196cf8a187df2c90754c54e8cefc7c96ad65d32c"
+  },
+  {
+    "label": "final-resume-fixed-np2",
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-particle-lifecycle-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/final-resume-fixed.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 7.128378520001206,
+    "child_max_rss_kib": 297244,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "337584e93b8cf8fed91d10654c081cbd82aa5975429373d2820b297f17a17b55"
+  },
+  {
+    "label": "final-retry-np1",
+    "command": [
+      "mpirun",
+      "-np",
+      "1",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-particle-lifecycle-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/final-retry.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 11.934362967000197,
+    "child_max_rss_kib": 340736,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "685f2f158b10bf21132c6c22e6f3fe4a3d10d95a0addc90f7ec08a222bf80fbd"
+  },
+  {
+    "label": "final-retry2-fixed-np2",
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-particle-lifecycle-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/final-retry2-fixed.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 7.1781500929992035,
+    "child_max_rss_kib": 298124,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "c76592f9e3f52f17056457d07d25c9d822b45d14c80a3bba8547841b1273c60e"
+  },
+  {
+    "label": "final-rng-negative-np2",
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-particle-lifecycle-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/final-rng-negative.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 5.5756216360005055,
+    "child_max_rss_kib": 297576,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "5b0361019cf477d92033f5550e678f6839806dd4e4690842e5f837feab13883b"
+  },
+  {
+    "label": "final-serial-np1",
+    "command": [
+      "mpirun",
+      "-np",
+      "1",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-particle-lifecycle-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/final-serial.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 14.193587237999964,
+    "child_max_rss_kib": 345256,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "8d4b1a8c443eb9dcbf5d2d309ef272460abadb66592286aa20a8452654e25e0a"
+  },
+  {
+    "label": "final-staggered-np2",
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-particle-lifecycle-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/final-staggered.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 13.19594122700073,
+    "child_max_rss_kib": 298732,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "8838de16e8f52d42f7a38d0d772e6980b88ff907e5c03d2cd7f272d4ae8ab758"
+  },
+  {
+    "label": "legacy-active-np1",
+    "command": [
+      "mpirun",
+      "-np",
+      "1",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-release",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/legacy-active.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 1,
+    "seconds": 3.872510429000613,
+    "child_max_rss_kib": 213296,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "40a4cea6eacb4ac135f1d97ca6b7c8094ce31b709f1e2c756c30ce53220dde35"
+  },
+  {
+    "label": "legacy-disabled-np1",
+    "command": [
+      "mpirun",
+      "-np",
+      "1",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-release",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/legacy-disabled.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 8.530458140001429,
+    "child_max_rss_kib": 335548,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "a26876f847d890aa4a1d6ecf74ff6ff6727046643ae798fa166c3be6fd97d365"
+  },
+  {
+    "label": "migration-distinct-np2",
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-release",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/migration-distinct.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 1,
+    "seconds": 1.7671962550011813,
+    "child_max_rss_kib": 221496,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "c09ff866a5dea1b2c51ceb9ae9ec2af63d86d767450d94c330d99d566150e190"
+  },
+  {
+    "label": "migration-native-np2",
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-particle-lifecycle-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/migration-native.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 13.04277132199968,
+    "child_max_rss_kib": 299452,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "7102cdbf660974531e1bd92b4ae4a47f2aee46cc6d8b16ddfc365ab36b617a8a"
+  },
+  {
+    "label": "migration-np2",
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-release",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/migration.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 1,
+    "seconds": 3.823417328998403,
+    "child_max_rss_kib": 221264,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "8b4485f988b4015deb6d784435bc3026b43e4a702d56a58ad2afffd763e64cef"
+  },
+  {
+    "label": "mpi-np2",
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-release",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/mpi.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 13.091926117000185,
+    "child_max_rss_kib": 296712,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "65b3f6fcdb28d962cf722f236fac8541690086e3c3487519ddbc53a494156a70"
+  },
+  {
+    "label": "observer-build-2",
+    "command": [
+      "cmake",
+      "--build",
+      "benchmarks/reconstructed_fault/particle_lifecycle/build/observer",
+      "-j2"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 0.41462334400057443,
+    "child_max_rss_kib": 236272,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "16c994a35775f684fca6d9bbc2040007e86aa1f3a16648c3be355edfe3f0c2e1"
+  },
+  {
+    "label": "observer-build-3",
+    "command": [
+      "cmake",
+      "--build",
+      "benchmarks/reconstructed_fault/particle_lifecycle/build/observer",
+      "-j2"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 12.887926962001075,
+    "child_max_rss_kib": 1589704,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "ef96de9d27c5411acd3012077ec957293ac5d1afa190b84876abff9012dba547"
+  },
+  {
+    "label": "observer-build-4",
+    "command": [
+      "cmake",
+      "--build",
+      "benchmarks/reconstructed_fault/particle_lifecycle/build/observer",
+      "-j2"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 13.192835677000403,
+    "child_max_rss_kib": 1591604,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "9f93026c132fc05ce6d2bece7973eaa86f2b39096c2613fac043af1ebe1ed049"
+  },
+  {
+    "label": "observer-build-5",
+    "command": [
+      "cmake",
+      "--build",
+      "benchmarks/reconstructed_fault/particle_lifecycle/build/observer",
+      "-j2"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 2,
+    "seconds": 8.530321415000799,
+    "child_max_rss_kib": 1491396,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "481853de0a26754f984b1fa40fe0d316714a14fe1548b0e92fbb2eb69f65798c"
+  },
+  {
+    "label": "observer-build-6",
+    "command": [
+      "cmake",
+      "--build",
+      "benchmarks/reconstructed_fault/particle_lifecycle/build/observer",
+      "-j2"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 15.346570421999786,
+    "child_max_rss_kib": 1589792,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "fe06935dbf6d63dc57344fb9b335b0e1fb24d9ed71c3f3baca3199030ee23e7c"
+  },
+  {
+    "label": "observer-build-7",
+    "command": [
+      "cmake",
+      "--build",
+      "benchmarks/reconstructed_fault/particle_lifecycle/build/observer",
+      "-j2"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 16.50083460499991,
+    "child_max_rss_kib": 1591220,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "6e1a4e9a439d6e47669b1dee027f3551571f08a551f1692a09d3d09f8d9d335b"
+  },
+  {
+    "label": "observer-build-8",
+    "command": [
+      "cmake",
+      "--build",
+      "benchmarks/reconstructed_fault/particle_lifecycle/build/observer",
+      "-j2"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 17.104200895999384,
+    "child_max_rss_kib": 1590424,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "bb0115925d59776db69ec6ca6d4755df49c6af05dbeabb8e73617b52e25b8870"
+  },
+  {
+    "label": "observer-build-final",
+    "command": [
+      "cmake",
+      "--build",
+      "benchmarks/reconstructed_fault/particle_lifecycle/build/observer",
+      "-j2"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 13.48964737499955,
+    "child_max_rss_kib": 1595340,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "1b0108bf1340d25d63c31c63fd26eba7e01277a7aa4b3df09ba967f32129ab32"
+  },
+  {
+    "label": "observer-build",
+    "command": [
+      "cmake",
+      "--build",
+      "benchmarks/reconstructed_fault/particle_lifecycle/build/observer",
+      "-j2"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 2,
+    "seconds": 12.037897862999671,
+    "child_max_rss_kib": 1586772,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "37e2405a6f20a9ee4502cdd70a1c1fc2ca091c0a5b38738c9d31101c5a39917b"
+  },
+  {
+    "label": "observer-configure",
+    "command": [
+      "cmake",
+      "-S",
+      "benchmarks/reconstructed_fault/particle_lifecycle/plugin",
+      "-B",
+      "benchmarks/reconstructed_fault/particle_lifecycle/build/observer",
+      "-DAspect_DIR=/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 0.36442781500045385,
+    "child_max_rss_kib": 34644,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "b939c75e07f0380be094a1f504a23709845d8676edabce3943b506ed81ac8de1"
+  },
+  {
+    "label": "plugin-build-2",
+    "command": [
+      "cmake",
+      "--build",
+      "benchmarks/reconstructed_fault/particle_lifecycle/build/bp3",
+      "-j2"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 10.238264145000358,
+    "child_max_rss_kib": 1488448,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "e60e06d5002adea9dfb4edd3cbbcee6dfc6f779426e76b3a86e04b8a20820fd7"
+  },
+  {
+    "label": "plugin-build-3",
+    "command": [
+      "cmake",
+      "--build",
+      "benchmarks/reconstructed_fault/particle_lifecycle/build/bp3",
+      "-j2"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 45.60589655900003,
+    "child_max_rss_kib": 1755120,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "f4f23a4c854a466364caebf29bac68d45ca4856f4dc87a782b9b3c38ab3e6130"
+  },
+  {
+    "label": "plugin-build-final",
+    "command": [
+      "cmake",
+      "--build",
+      "benchmarks/reconstructed_fault/particle_lifecycle/build/bp3",
+      "-j2"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 32.03645487599897,
+    "child_max_rss_kib": 1757248,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "93d00c59594c87be2d55518f1ca92052a076ac6496f5c6aefc50dd094dbea194"
+  },
+  {
+    "label": "plugin-build",
+    "command": [
+      "cmake",
+      "--build",
+      "benchmarks/reconstructed_fault/particle_lifecycle/build/bp3",
+      "-j2"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 2,
+    "seconds": 34.22580553700027,
+    "child_max_rss_kib": 1756580,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "0a70de58a9b4de40c58d116104ed4035affeb2e2ab003b4e3811dd78c7bc407d"
+  },
+  {
+    "label": "plugin-configure",
+    "command": [
+      "cmake",
+      "-S",
+      "benchmarks/reconstructed_fault/bp3/plugin",
+      "-B",
+      "benchmarks/reconstructed_fault/particle_lifecycle/build/bp3",
+      "-DAspect_DIR=/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 0.46497631999955047,
+    "child_max_rss_kib": 33960,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "fa1265f090ba0c6cac65f287482a6e1cd9e116518e23250f8748e1d88a573d5d"
+  },
+  {
+    "label": "random-direct-np2",
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-particle-lifecycle-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/random-direct.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 10.68803470199964,
+    "child_max_rss_kib": 296920,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "ea084e310fafd8de31609265786eee24ded756b81402892269e8bcce2e812592"
+  },
+  {
+    "label": "random-retry-np2",
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-particle-lifecycle-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/random-retry.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 12.088264164000066,
+    "child_max_rss_kib": 297692,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "b345d29c1d6860ebe3c190935dacefd464d5d0c1a74fba37b1938283356f6462"
+  },
+  {
+    "label": "resume-fixed-np2",
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-release",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/resume-fixed.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 7.178093219999937,
+    "child_max_rss_kib": 297924,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "93423d3b2fca7dfc7fdcf51fac4d63842c69442730884d4ccf7f51e4a1caac24"
+  },
+  {
+    "label": "resume-np2",
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-release",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/resume.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 1,
+    "seconds": 3.6702001169996947,
+    "child_max_rss_kib": 224192,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "978731fca90f58f20e94efab087acd5909c97fa98b38801cefd333e5059fe58e"
+  },
+  {
+    "label": "retry-np1",
+    "command": [
+      "mpirun",
+      "-np",
+      "1",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-release",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/retry.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 11.43971338800111,
+    "child_max_rss_kib": 341036,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "ba20a46651d65c64d4dc882b88b21206a41ee7a7bb78d09e483e253d21c06b55"
+  },
+  {
+    "label": "retry2-fixed-np2",
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-release",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/retry2-fixed.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 11.039591253998879,
+    "child_max_rss_kib": 298640,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "9489f4f0f58e4f12d0b1f7fb5a9e5bf496653ad25f31a2dd3ddb4fdb2070865d"
+  },
+  {
+    "label": "rng-negative-np2",
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-release",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/rng-negative.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 7.379789900000105,
+    "child_max_rss_kib": 298348,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "e80243fb0c957a1bf037db1966d41e06f390f22a696fc8ffe12d8003e8971d6b"
+  },
+  {
+    "label": "serial-np1",
+    "command": [
+      "mpirun",
+      "-np",
+      "1",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-release",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/serial.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 13.192325222000363,
+    "child_max_rss_kib": 339084,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "7f7d7debdec57369f9393b2e785c13830cfbd43cefc6d4c8e64e69fb01e6045f"
+  },
+  {
+    "label": "staggered-np2",
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-release",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/staggered.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 14.34136450099868,
+    "child_max_rss_kib": 299636,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "b86c0beb75c4c482849619383fdf457083e53ea07014ff70e569282ee9e86b78"
+  },
+  {
+    "label": "streams-create-np2",
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-particle-lifecycle-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/streams-create.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 1.76661824599978,
+    "child_max_rss_kib": 214772,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "3d484d5cf31f4ccb20ed4083ae400747f785248f9a937f87aea98d9f4cc6746a"
+  },
+  {
+    "label": "streams-np2",
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-particle-lifecycle-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/streams.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 1.8174646190000203,
+    "child_max_rss_kib": 215120,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "1e9ea072a5187016efb03206c8f805daf026dff9f480779a0fc38186033062d5"
+  },
+  {
+    "label": "streams-resume-np2",
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-particle-lifecycle-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/streams-resume.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 1.81774965600016,
+    "child_max_rss_kib": 213988,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "68a1af79951cf549d9a83c5223d083cf0d8a6480f6a78cc7c1af19cc6061e23f"
+  },
+  {
+    "label": "reordered-np1",
+    "command": [
+      "mpirun",
+      "-np",
+      "1",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-particle-lifecycle-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/reordered.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 7.826724302000002,
+    "child_max_rss_kib": 333644,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "e687626c1e4d3e5336c63a57962df6fbdd4b14753c9718ff036a9c9eeb2aa8d1"
+  },
+  {
+    "label": "reordered-parse-np1",
+    "command": [
+      "mpirun",
+      "-np",
+      "1",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-particle-lifecycle-qualified",
+      "--validate",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/inputs/reordered-parse.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 3.470177147999493,
+    "child_max_rss_kib": 185844,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "log_sha256": "ca18856dbbb14aa11f5382bd4129ba6acb4b1fac5af22e4c8ae235ac336fc10a"
+  }
+]

@@ -1,0 +1,17 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/refactoring_boundary/inputs/auto-bp3-base.prm
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/particle_policy.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_lifecycle/build/bp3/libbp3_restore_150x50.release.so, $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_lifecycle/build/observer/libcoupled_lifecycle.release.so
+set End time = 200
+subsection Particles
+ set Particle generator name = crossing reference cell
+end
+subsection Postprocess
+ set List of postprocessors = reconstructed fault BP3, particles, reconstructed faults, BP3 output complete, BP3 restored monitor, coupled replenishment observer
+ subsection BP3
+  set Audit full state every step = true
+  set Last accepted step = 2
+ end
+ subsection Particles
+  set Data output format = none
+ end
+end

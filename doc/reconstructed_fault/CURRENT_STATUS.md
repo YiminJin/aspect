@@ -1583,3 +1583,37 @@ next bounded task: correct RNG rollback and establish compatible per-rank
 checkpoint handling, then repeat the recorded event/retry/restart checks. No
 server job or R7 work was performed. The historical 142.93-year failure remains
 unproved by this experiment.
+
+## BP3 particle/audit lifecycle corrected (2026-10-02)
+
+The selected **section 1 only** of the runtime-cleanup brief is implemented:
+core RNG rollback/per-rank checkpoint state in `2a894c83c`, maintained birth-aware
+H audit and runtime-named native H/Maxwell limiter in `4425b7033`. The candidate
+uses the same regular 4×4 / 12–24 point-density policy locally and in a separate
+production include. Historical physical inputs and user's local edits remain intact.
+
+[The lifecycle review](../../benchmarks/reconstructed_fault/particle_lifecycle/README.md)
+records 327 passing exact checks, including original retry/direct equivalence,
+two-rank nonzero-Maxwell retry/direct equivalence, genuinely RNG-sensitive two-rank
+checkpoint continuation, random-placement rollback, two particle managers,
+native migration, expected survivor-audit failures and explicit legacy/changed-count
+restart behavior. Unrejected original particle/physical summaries match the
+pre-correction reference. Full bulk, particle, fault and work-audit files match
+for the qualified replay pairs. Source/artifact hashes and failure records are
+retained separately from ignored raw outputs. Release core/plugin 2D/3D builds
+pass; runtime BP3 coverage is 2D, one/two ranks, AMG.
+
+The native auxiliary particle transfer callback does not enter this build's mesh
+checkpoint packing. The audit therefore gathers current owned baselines in the
+all-rank checkpoint hook and prunes them after loading. This fixes the failed first
+implementation without an ever-growing replicated ID dictionary. Root checkpoint
+capture and temporary restart loading still have global-current-population memory;
+production-scale peak memory is unmeasured. Near-face diagnostic probes hit existing
+Voronoi assertions; no domain algorithm/assertion was changed. The passing explicit
+rank-transfer case is a transport diagnostic, not a physical trajectory.
+
+**Readiness:** the selected local lifecycle gates pass. Geometry/profile/mesh fixture
+consolidation, AMR/long-time history accuracy, production memory, first-event timing
+and server continuation remain unqualified. Stop before section 2, `Make fault.txt
+the single geometry input`; that is the recommended next bounded task after review.
+No server job, R7 work, geometry cleanup or numerical-tolerance change was performed.
