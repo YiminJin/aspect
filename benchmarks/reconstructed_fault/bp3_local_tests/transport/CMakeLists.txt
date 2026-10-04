@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.13.4)
+find_package(Aspect REQUIRED HINTS ${Aspect_DIR})
+DEAL_II_INITIALIZE_CACHED_VARIABLES()
+project(bp3_local_transport)
+set(BP3 ../../bp3/plugin)
+add_library(bp3_local_transport SHARED transport.cc ${BP3}/geometry.cc ${BP3}/profile.cc ${BP3}/mesh.cc ${BP3}/particle_initialization.cc)
+target_compile_definitions(bp3_local_transport PRIVATE ASPECT_BP3_LOCAL_OSCILLATION_TEST)
+ASPECT_SETUP_PLUGIN(bp3_local_transport)

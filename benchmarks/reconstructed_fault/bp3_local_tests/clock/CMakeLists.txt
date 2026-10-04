@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.13.4)
+find_package(Aspect REQUIRED HINTS ${Aspect_DIR})
+DEAL_II_INITIALIZE_CACHED_VARIABLES()
+project(bp3_local_clock)
+add_library(bp3_local_clock SHARED clock.cc)
+ASPECT_SETUP_PLUGIN(bp3_local_clock)

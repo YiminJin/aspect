@@ -1,0 +1,3 @@
+[ 16%] Building CXX object CMakeFiles/bp3_local_transport.dir/transport.cc.o
+[ 33%] Linking CXX shared library libbp3_local_transport.release.so
+[100%] Built target bp3_local_transport

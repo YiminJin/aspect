@@ -19,3 +19,10 @@ add_library(bp3_restore_150x50 SHARED
   bottom_constraint.cc
 )
 ASPECT_SETUP_PLUGIN(bp3_restore_150x50)
+
+# Same maintained sources, isolated diagnostic binary; OFF in production builds.
+option(BP3_LOCAL_OSCILLATION_TEST "Build the bounded section-5 functional fixture" OFF)
+if(BP3_LOCAL_OSCILLATION_TEST)
+  target_compile_definitions(bp3_restore_150x50 PRIVATE ASPECT_BP3_LOCAL_OSCILLATION_TEST)
+  target_sources(bp3_restore_150x50 PRIVATE ../../bp3_local_tests/diagnostics.cc)
+endif()

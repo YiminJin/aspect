@@ -47,6 +47,10 @@ namespace BP3
     model.put("BP3.initial_slip_rate_m_per_s",Vinit);
     model.put("BP3.background_normal_stress_Pa",sigma0);
     model.put("BP3.refinement_policy","support band max(2 ell,R+2 h_fine); exterior min(h_coarse,2 h_fine+(d-band)/4); native startup tagging v1");
+#ifdef ASPECT_BP3_LOCAL_OSCILLATION_TEST
+    model.put("BP3.local_comparison_policy",all.get<std::string>("Mesh refinement.BP3 local comparison.Policy"));
+    model.put("BP3.local_comparison_buffer","R+coarse projected width; same boundary strip on A/B; production unbuffered limitation retained");
+#endif
     report=model;
     report.put_child("Time stepping",all.get_child("Time stepping"));
     report.put_child("Solver parameters",all.get_child("Solver parameters"));

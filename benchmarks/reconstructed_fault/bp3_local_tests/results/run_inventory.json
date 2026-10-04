@@ -1,0 +1,189 @@
+{
+  "A-np2.json": {
+    "exit_code": 0,
+    "seconds": 244.49069466500077,
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_local_tests/inputs/A.prm"
+    ]
+  },
+  "A-replay-final-np2.json": {
+    "exit_code": 0,
+    "seconds": 36.376070215001164,
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_local_tests/inputs/A-replay-final.prm"
+    ]
+  },
+  "A-replay-np2.json": {
+    "exit_code": 1,
+    "seconds": 1.5668096709996462,
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_local_tests/inputs/A-replay.prm"
+    ]
+  },
+  "A-replay-v2-np2.json": {
+    "exit_code": 0,
+    "seconds": 35.477042321000226,
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_local_tests/inputs/A-replay.prm"
+    ]
+  },
+  "A-small-dt-np2.json": {
+    "exit_code": 0,
+    "seconds": 95.90418682400013,
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_local_tests/inputs/A-small-dt.prm"
+    ]
+  },
+  "B-np2.json": {
+    "exit_code": 0,
+    "seconds": 225.1405240439999,
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_local_tests/inputs/B.prm"
+    ]
+  },
+  "pilot-A-np2.json": {
+    "exit_code": 213,
+    "seconds": 2.2197391190002236,
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_local_tests/inputs/pilot-A.prm"
+    ]
+  },
+  "pilot-A-sockets-np2.json": {
+    "exit_code": 0,
+    "seconds": 28.73982733199955,
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_local_tests/inputs/pilot-A.prm"
+    ]
+  },
+  "transport-A-final-np2.json": {
+    "exit_code": 0,
+    "seconds": 18.99905867400048,
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_local_tests/inputs/transport-A.prm"
+    ]
+  },
+  "transport-A-np2.json": {
+    "exit_code": 1,
+    "seconds": 3.42068841299988,
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_local_tests/inputs/transport-A.prm"
+    ]
+  },
+  "transport-A-serial-final-np1.json": {
+    "exit_code": 0,
+    "seconds": 24.107219157000145,
+    "command": [
+      "mpirun",
+      "-np",
+      "1",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_local_tests/inputs/transport-A-serial.prm"
+    ]
+  },
+  "transport-A-serial-np1.json": {
+    "exit_code": 0,
+    "seconds": 23.81032602599953,
+    "command": [
+      "mpirun",
+      "-np",
+      "1",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_local_tests/inputs/transport-A-serial.prm"
+    ]
+  },
+  "transport-A-v2-np2.json": {
+    "exit_code": 0,
+    "seconds": 17.445417922999695,
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_local_tests/inputs/transport-A.prm"
+    ]
+  },
+  "transport-A-v3-np2.json": {
+    "exit_code": 0,
+    "seconds": 17.900763082000594,
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_local_tests/inputs/transport-A.prm"
+    ]
+  },
+  "transport-B-final-np2.json": {
+    "exit_code": 0,
+    "seconds": 17.443804245000138,
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_local_tests/inputs/transport-B.prm"
+    ]
+  },
+  "transport-B-np2.json": {
+    "exit_code": 0,
+    "seconds": 17.051629363999382,
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_local_tests/inputs/transport-B.prm"
+    ]
+  },
+  "transport-B-v2-np2.json": {
+    "exit_code": 0,
+    "seconds": 16.800781899999492,
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-filter-derivative-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_local_tests/inputs/transport-B.prm"
+    ]
+  }
+}

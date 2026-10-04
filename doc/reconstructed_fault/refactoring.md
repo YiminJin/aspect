@@ -559,3 +559,25 @@ selection must leave accepted physical results and checkpoint recovery intact.
 The existing graded-boundary completion failure is outside this selection;
 retain its admission, mesh policy and evidence. Do not proceed to Section 5 or
 server execution without the separately selected prerequisite correction.
+
+
+## BP3 runtime-cleanup section 5 local comparison boundary
+
+Section 4 is accepted as `1678949c2`. The user's subsequent selection authorizes
+Section 5 and the bounded velocity/mesh/timestep extension, superseding the
+preceding stop-before-5 workflow boundary. It does not select a core completion
+correction. The two diagnostic policies share a conservative fine boundary
+buffer satisfying current completion admission; the maintained unbuffered
+production policy and its documented failure remain unchanged. Recover B's
+exterior slope/cap from `tests/bp3_length_scale_mesh.cc`; do not call an invented
+coarsening policy historical. Compile the isolated functional fixture from the
+maintained sources, keeping its rate/mesh selectors absent from the default build.
+
+Follow [the predeclared local plan](../../benchmarks/reconstructed_fault/bp3_local_tests/PLAN.md).
+Retain all positivity/history/solver gates, native ownership and checkpoint
+format. Use the existing bounded pending-restart-step hook, never rewrite old dt
+or accepted history. Exact-position transport shadow components are separate
+from stored Maxwell history and use native LLS/continuous-Q2 publication.
+Unexpected ID/lifecycle behavior is evidence to report separately, not authority
+to change production insertion, audit or communication semantics. No production
+refinement replacement, server run, Section 6 deployment or R7 is selected.

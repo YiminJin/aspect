@@ -1920,3 +1920,24 @@ steps and halves the total elapsed interval; it does not create twenty paired
 half-steps. All three branches start from the original checkpoint and read the
 same original clock. The existing pending-interval restart hook and ordinary
 timestep caps remain active; a further mismatch aborts before mechanics.
+
+
+### Selected Section-5 local velocity comparison
+
+The isolated benchmark build reuses maintained BP3 geometry/profile/startup mesh
+sources for a bounded uniform-strengthening test at Vp=Vinit=1e-3 m/s. Initial
+state is obtained from the live friction law (steady Theta=8 s here), and fixed
+shear uses that same law plus the retained BP3 damping. These are diagnostic
+settings; the default production build is unchanged. The shared endpoint buffer
+covers the existing global projected-cell-width completion enclosure. It does
+not narrow M4 admission or resolve the unbuffered graded-production limitation.
+Candidate B recovers only the historical exterior slope/cap, outside the same
+protected band as A; native balancing remains in charge.
+
+Read-only probes and exact-position shadow transport fields belong to the test.
+The native spatially refreshed initial-composition property provides shadow
+samples before native continuous-Q2 projection; stored Maxwell histories remain
+separate. The diagnostic restart uses the existing pending-interval reduction
+signal, preserving accepted time, old timestep and physical/RNG history. No
+scientific algorithm, production cache, MPI owner or checkpoint format is changed.
+See the [bounded plan/evidence](../../benchmarks/reconstructed_fault/bp3_local_tests/PLAN.md).

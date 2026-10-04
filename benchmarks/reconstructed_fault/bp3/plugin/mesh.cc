@@ -8,6 +8,9 @@ namespace aspect
 {
   namespace
   {
+#ifdef ASPECT_BP3_LOCAL_OSCILLATION_TEST
+    std::string local_mesh_policy="A";
+#endif
     struct Resolution
     {
       double h, fine, coarse, distance, target;
@@ -33,7 +36,24 @@ namespace aspect
       const double d=BP3::geometry().minimum_cell_distance((lo+hi)/2.,Point<2>((hi-lo)/2.));
       const double band=std::max(2*sim.get_phase_field_handler().get_length_scale(),
                                  BP3::loading_profile(sim).support+2*fine);
-      return {h,fine,coarse,d,d<=band ? fine : std::min(coarse,2*fine+(d-band)/4.)};
+      double target=d<=band ? fine : std::min(coarse,2*fine+(d-band)/4.);
+#ifdef ASPECT_BP3_LOCAL_OSCILLATION_TEST
+      // Recover only the original exterior slope/cap (bp3_length_scale_mesh.cc).
+      // Both diagnostic candidates retain the larger accepted support band.
+      if(local_mesh_policy=="B" && d>band)
+        target=std::min({coarse,12500.,2*fine+(d-band)/2.});
+      // Protect the CURRENT core completion footprint using an a-priori upper
+      // bound on every cell width. This diagnostic boundary buffer does not
+      // narrow core admission or fix the unbuffered production-mesh limitation.
+      const auto &g=BP3::geometry();
+      const double half_width=(BP3::loading_profile(sim).support
+                                +coarse*(std::abs(g.normal[0])+std::abs(g.normal[1])))/g.sine;
+      for(const auto &end : {g.upper,g.lower})
+        if(lo[0]<=end[0]+half_width+fine && hi[0]>=end[0]-half_width-fine
+           && lo[1]<=end[1]+2*fine && hi[1]>=end[1]-2*fine)
+          target=fine;
+#endif
+      return {h,fine,coarse,d,target};
     }
   }
 
@@ -76,8 +96,22 @@ namespace aspect
     class BP3FaultSupport : public Interface<dim>, public SimulatorAccess<dim>
     {
     public:
+#ifdef ASPECT_BP3_LOCAL_OSCILLATION_TEST
+      static void declare_parameters(ParameterHandler &prm)
+      {
+        prm.enter_subsection("Mesh refinement");prm.enter_subsection("BP3 local comparison");
+        prm.declare_entry("Policy","A",Patterns::Selection("A|B"));
+        prm.leave_subsection();prm.leave_subsection();
+      }
+#endif
       void parse_parameters(ParameterHandler &prm) override
-      {BP3::configure_geometry(*this,prm);}
+      {
+        BP3::configure_geometry(*this,prm);
+#ifdef ASPECT_BP3_LOCAL_OSCILLATION_TEST
+        prm.enter_subsection("Mesh refinement");prm.enter_subsection("BP3 local comparison");
+        local_mesh_policy=prm.get("Policy");prm.leave_subsection();prm.leave_subsection();
+#endif
+      }
 
       void initialize() override
       {

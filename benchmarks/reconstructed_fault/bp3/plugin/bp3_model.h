@@ -12,7 +12,12 @@ namespace BP3
   // SEAS BP3-QD, 2021-10-01, Table 1 and equations (18), (25), (26).
   constexpr double rho = 2670., cs = 3464., G = rho*cs*cs;
   constexpr double damping = G/(2*cs), sigma0 = 50e6;
+#ifdef ASPECT_BP3_LOCAL_OSCILLATION_TEST
+  // Bounded functional fixture only; the maintained production build is unchanged.
+  constexpr double Vp = 1e-3, Vinit = 1e-3, Vref = 1e-6;
+#else
   constexpr double Vp = 1e-9, Vinit = 1e-9, Vref = 1e-6;
+#endif
   constexpr double a0 = .010, amax = .025, b = .015, f0 = .6;
 #ifdef ASPECT_BP3_LOCAL_BOTTOM_TEST
   extern double local_state_disturbance;

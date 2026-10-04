@@ -1,0 +1,17 @@
+-- Setting up plugin:
+--   name <bp3_restore_150x50>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b
+--   setting up RELEASE variant
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_local_tests/build
+[  7%] Building CXX object CMakeFiles/bp3_restore_150x50.dir/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_local_tests/diagnostics.cc.o
+/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_local_tests/diagnostics.cc: In member function ‘std::pair<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > aspect::Postprocess::BP3LocalProbes<dim>::execute(dealii::TableHandler&)’:
+/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_local_tests/diagnostics.cc:110:10: warning: this ‘for’ clause does not guard... [-Wmisleading-indentation]
+  110 |          for(unsigned int k=0;k<3;++k)probes<<','<<v[intro.component_indices.compositional_fields[k]];probes<<','<<h<<'\n';
+      |          ^~~
+/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_local_tests/diagnostics.cc:110:103: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘for’
+  110 |          for(unsigned int k=0;k<3;++k)probes<<','<<v[intro.component_indices.compositional_fields[k]];probes<<','<<h<<'\n';
+      |                                                                                                       ^~~~~~
+[ 15%] Linking CXX shared library libbp3_restore_150x50.release.so
+[100%] Built target bp3_restore_150x50

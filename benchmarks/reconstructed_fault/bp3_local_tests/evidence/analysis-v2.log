@@ -1,0 +1,960 @@
+/home/ein/.config/matplotlib is not a writable directory
+Matplotlib created a temporary cache directory at /tmp/matplotlib-sunzf2qh because there was an issue with the default path ({configdir}); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+{
+  "scale_m_per_s": 0.001,
+  "roughness": "center minus mean at x+-8m on the three raw 2m-spaced transects; not an exact error",
+  "coupled": {
+    "A": {
+      "cells": 12656,
+      "stokes_dofs": 120071,
+      "particles": 202496,
+      "seconds": 244.49069466500077,
+      "max_rank_child_RSS_KiB": 1169008,
+      "max_V": 0.0010035272432929248,
+      "max_sampled_bulk_speed": 0.0005000588484033596,
+      "max_Cp": 6.404245962009895e-06,
+      "max_Ap": 0.00012807605892971235,
+      "max_log_state_change": 2.0638022284449684e-05,
+      "max_S": 0.006272045270580744,
+      "max_stress": 40233.0019205965,
+      "max_nonlinear_residual": 1.8236269725167843e-09,
+      "max_fresh_over_target": 0.5435986460065534,
+      "krylov_total": 503,
+      "births": 0,
+      "losses": 0,
+      "population_range": [
+        16,
+        16
+      ]
+    },
+    "B": {
+      "cells": 11732,
+      "stokes_dofs": 111843,
+      "particles": 187712,
+      "seconds": 225.1405240439999,
+      "max_rank_child_RSS_KiB": 1103184,
+      "max_V": 0.0010035274854381714,
+      "max_sampled_bulk_speed": 0.0005000588046952414,
+      "max_Cp": 6.404245916066918e-06,
+      "max_Ap": 0.00012807603229647845,
+      "max_log_state_change": 2.063947023966854e-05,
+      "max_S": 0.006272046783988535,
+      "max_stress": 40232.84820128852,
+      "max_nonlinear_residual": 1.8236820684821386e-09,
+      "max_fresh_over_target": 0.9661996909555997,
+      "krylov_total": 473,
+      "births": 0,
+      "losses": 0,
+      "population_range": [
+        16,
+        16
+      ]
+    }
+  },
+  "mesh_comparison": {
+    "0": {
+      "V": {
+        "rms": 5.130497814633972e-14,
+        "maximum": 3.4361380928105145e-13,
+        "rms_over_Vtest": 5.130497814633972e-11
+      },
+      "Theta": {
+        "rms": 0.0,
+        "maximum": 0.0
+      },
+      "raw_normal_Q1": {
+        "rms": 0.0001040964934779637,
+        "maximum": 0.0007018968462944031
+      },
+      "friction_normal_Q1": {
+        "rms": 8.065899771504747e-05,
+        "maximum": 0.000445343554019928
+      },
+      "active_nodes": 290,
+      "endpoints": {
+        "rms": 8.63551157679755e-14,
+        "maximum": 3.4361380928105145e-13
+      },
+      "interior": {
+        "rms": 3.791937825139999e-15,
+        "maximum": 7.666176721210505e-15
+      },
+      "frozen_local_normal_sensitivity_m_s_Pa_max": 5.333970277662195e-10,
+      "normal_only_local_sensitivity_bound_m_s": 2.375412298962787e-13,
+      "bulk_u": {
+        "rms": 7.460215648720666e-12,
+        "maximum": 6.534073217386027e-11
+      },
+      "roughness_A": {
+        "rms": 9.636370746946388e-06,
+        "maximum": 9.033893268531302e-05
+      },
+      "roughness_B": {
+        "rms": 9.636370746008696e-06,
+        "maximum": 9.033893268117521e-05
+      },
+      "slip_m": {
+        "rms": 0.0,
+        "maximum": 0.0
+      },
+      "q_weak_Pa": {
+        "rms": 2.3835971268925677e-05,
+        "maximum": 0.00015064328908920288
+      },
+      "sigma_n_weak_Pa": {
+        "rms": 8.065899771504747e-05,
+        "maximum": 0.000445343554019928
+      }
+    },
+    "1": {
+      "V": {
+        "rms": 5.1927300846715377e-14,
+        "maximum": 4.244564769106951e-13,
+        "rms_over_Vtest": 5.1927300846715375e-11
+      },
+      "Theta": {
+        "rms": 2.588215392929845e-12,
+        "maximum": 2.1156409957256983e-11
+      },
+      "raw_normal_Q1": {
+        "rms": 9.844345293288418e-05,
+        "maximum": 0.0007284060120582581
+      },
+      "friction_normal_Q1": {
+        "rms": 7.696871155291738e-05,
+        "maximum": 0.00048203766345977783
+      },
+      "active_nodes": 290,
+      "endpoints": {
+        "rms": 8.726930382760793e-14,
+        "maximum": 4.244564769106951e-13
+      },
+      "interior": {
+        "rms": 5.23080299696161e-15,
+        "maximum": 1.7884131675582893e-14
+      },
+      "frozen_local_normal_sensitivity_m_s_Pa_max": 5.333970374662453e-10,
+      "normal_only_local_sensitivity_bound_m_s": 2.5707995674692933e-13,
+      "bulk_u": {
+        "rms": 7.435735602895169e-12,
+        "maximum": 6.595799801516547e-11
+      },
+      "roughness_A": {
+        "rms": 9.636370748206746e-06,
+        "maximum": 9.033893269747561e-05
+      },
+      "roughness_B": {
+        "rms": 9.636370748245933e-06,
+        "maximum": 9.033893269756422e-05
+      },
+      "slip_m": {
+        "rms": 2.596364929545636e-15,
+        "maximum": 2.1222823845534755e-14
+      },
+      "q_weak_Pa": {
+        "rms": 3.4298147157291746e-05,
+        "maximum": 0.00020996108651161194
+      },
+      "sigma_n_weak_Pa": {
+        "rms": 7.696871155291738e-05,
+        "maximum": 0.00048203766345977783
+      }
+    },
+    "20": {
+      "V": {
+        "rms": 4.233244830438766e-11,
+        "maximum": 3.092516702787873e-10,
+        "rms_over_Vtest": 4.2332448304387664e-08
+      },
+      "Theta": {
+        "rms": 1.600283188111329e-08,
+        "maximum": 1.1434480473582198e-07
+      },
+      "raw_normal_Q1": {
+        "rms": 0.08798429912797276,
+        "maximum": 0.678949236869812
+      },
+      "friction_normal_Q1": {
+        "rms": 0.07280046188090078,
+        "maximum": 0.4008527547121048
+      },
+      "active_nodes": 290,
+      "endpoints": {
+        "rms": 6.79280126021762e-11,
+        "maximum": 3.092516702787873e-10
+      },
+      "interior": {
+        "rms": 1.615097860126404e-11,
+        "maximum": 4.3648447920277555e-11
+      },
+      "frozen_local_normal_sensitivity_m_s_Pa_max": 5.352272323041575e-10,
+      "normal_only_local_sensitivity_bound_m_s": 2.139556141209299e-10,
+      "bulk_u": {
+        "rms": 3.7939706665067733e-10,
+        "maximum": 1.912340576257915e-09
+      },
+      "roughness_A": {
+        "rms": 9.632923339326246e-06,
+        "maximum": 9.030226997228115e-05
+      },
+      "roughness_B": {
+        "rms": 9.632923194302909e-06,
+        "maximum": 9.030226833167329e-05
+      },
+      "slip_m": {
+        "rms": 1.6551626506102808e-11,
+        "maximum": 1.1823021099470477e-10
+      },
+      "q_weak_Pa": {
+        "rms": 0.044895473776521616,
+        "maximum": 0.13493774831295013
+      },
+      "sigma_n_weak_Pa": {
+        "rms": 0.07280046188090078,
+        "maximum": 0.4008527547121048
+      }
+    }
+  },
+  "transport": {
+    "A": [
+      {
+        "step": 0,
+        "particles": 202496,
+        "births": 0,
+        "reused_id_births": 0,
+        "crossings": 0,
+        "max_Cp": 0.0,
+        "max_Ap": 0.0,
+        "population_min": 16,
+        "population_max": 16,
+        "boundary": {
+          "LLS_stored_rms": 5276180.062848781,
+          "LLS_shadow_rms": 5276180.062848781,
+          "Q2_stored_rms": 5237627.834858166,
+          "Q2_shadow_rms": 5237627.834858166,
+          "shadow_max": 9967375.495981649
+        },
+        "interface_interior": {
+          "LLS_stored_rms": 3161782.027661854,
+          "LLS_shadow_rms": 3161782.027661854,
+          "Q2_stored_rms": 2992993.551736629,
+          "Q2_shadow_rms": 2992993.551736629,
+          "shadow_max": 10151920.237642467
+        },
+        "uniform_fine_interior": {
+          "LLS_stored_rms": 21120.638003020278,
+          "LLS_shadow_rms": 21120.638003020278,
+          "Q2_stored_rms": 11867.693404621567,
+          "Q2_shadow_rms": 11867.693404621567,
+          "shadow_max": 83760.31466396153
+        },
+        "uniform_coarse_interior": {
+          "LLS_stored_rms": 3129009.4776065224,
+          "LLS_shadow_rms": 3129009.4776065224,
+          "Q2_stored_rms": 2971201.223913157,
+          "Q2_shadow_rms": 2971201.223913157,
+          "shadow_max": 9888583.317443013
+        },
+        "losses_or_outflow": 0
+      },
+      {
+        "step": 1,
+        "particles": 202496,
+        "births": 0,
+        "reused_id_births": 0,
+        "crossings": 0,
+        "max_Cp": 0.11941789480643421,
+        "max_Ap": 0.11941789480643421,
+        "population_min": 16,
+        "population_max": 16,
+        "boundary": {
+          "LLS_stored_rms": 5253377.173989879,
+          "LLS_shadow_rms": 5253377.173989879,
+          "Q2_stored_rms": 5214091.5106974635,
+          "Q2_shadow_rms": 5214091.5106974635,
+          "shadow_max": 9955591.447928205
+        },
+        "interface_interior": {
+          "LLS_stored_rms": 3152381.290582982,
+          "LLS_shadow_rms": 3152381.290582982,
+          "Q2_stored_rms": 2982782.047917121,
+          "Q2_shadow_rms": 2982782.047917121,
+          "shadow_max": 10178521.823230922
+        },
+        "uniform_fine_interior": {
+          "LLS_stored_rms": 25808.532697848317,
+          "LLS_shadow_rms": 25808.532697848317,
+          "Q2_stored_rms": 12036.25981678608,
+          "Q2_shadow_rms": 12036.25981678608,
+          "shadow_max": 71387.25789923966
+        },
+        "uniform_coarse_interior": {
+          "LLS_stored_rms": 3117490.078553249,
+          "LLS_shadow_rms": 3117490.078553249,
+          "Q2_stored_rms": 2956655.494592864,
+          "Q2_shadow_rms": 2956655.494592864,
+          "shadow_max": 9851111.491676405
+        },
+        "losses_or_outflow": 0
+      },
+      {
+        "step": 2,
+        "particles": 202496,
+        "births": 0,
+        "reused_id_births": 0,
+        "crossings": 1024,
+        "max_Cp": 0.11941789480643421,
+        "max_Ap": 0.23883578961286842,
+        "population_min": 12,
+        "population_max": 24,
+        "boundary": {
+          "LLS_stored_rms": 5229806.28996203,
+          "LLS_shadow_rms": 5229806.28996203,
+          "Q2_stored_rms": 5189933.330091026,
+          "Q2_shadow_rms": 5189933.330091025,
+          "shadow_max": 10003278.876414895
+        },
+        "interface_interior": {
+          "LLS_stored_rms": 3143744.190488534,
+          "LLS_shadow_rms": 3143744.190488534,
+          "Q2_stored_rms": 2973063.0125785526,
+          "Q2_shadow_rms": 2973063.0125785526,
+          "shadow_max": 10199900.060418785
+        },
+        "uniform_fine_interior": {
+          "LLS_stored_rms": 26800.493780594934,
+          "LLS_shadow_rms": 26800.49378059501,
+          "Q2_stored_rms": 11926.727614701047,
+          "Q2_shadow_rms": 11926.727614701149,
+          "shadow_max": 66566.04268400371
+        },
+        "uniform_coarse_interior": {
+          "LLS_stored_rms": 3106819.6101760305,
+          "LLS_shadow_rms": 3106819.6101760305,
+          "Q2_stored_rms": 2943046.7026548847,
+          "Q2_shadow_rms": 2943046.702654884,
+          "shadow_max": 9808526.309224963
+        },
+        "losses_or_outflow": 0
+      },
+      {
+        "step": 3,
+        "particles": 201443,
+        "births": 72,
+        "reused_id_births": 1,
+        "crossings": 2289,
+        "max_Cp": 0.11941789480643421,
+        "max_Ap": 0.3582536844193026,
+        "population_min": 12,
+        "population_max": 24,
+        "boundary": {
+          "LLS_stored_rms": 5205558.701707134,
+          "LLS_shadow_rms": 5205558.702367346,
+          "Q2_stored_rms": 5165009.406832241,
+          "Q2_shadow_rms": 5165009.407115032,
+          "shadow_max": 10044758.00052008
+        },
+        "interface_interior": {
+          "LLS_stored_rms": 3135879.904659091,
+          "LLS_shadow_rms": 3135879.902074145,
+          "Q2_stored_rms": 2964004.0297456626,
+          "Q2_shadow_rms": 2964004.0235835123,
+          "shadow_max": 10213056.631760448
+        },
+        "uniform_fine_interior": {
+          "LLS_stored_rms": 23289.183767901584,
+          "LLS_shadow_rms": 23289.183767901504,
+          "Q2_stored_rms": 13229.33705313794,
+          "Q2_shadow_rms": 13229.929134287144,
+          "shadow_max": 123257.08167749643
+        },
+        "uniform_coarse_interior": {
+          "LLS_stored_rms": 3097106.1415277617,
+          "LLS_shadow_rms": 3097106.1415277612,
+          "Q2_stored_rms": 2930272.6402704706,
+          "Q2_shadow_rms": 2930272.6407807935,
+          "shadow_max": 9767708.409412488
+        },
+        "losses_or_outflow": 1125
+      },
+      {
+        "step": 4,
+        "particles": 201304,
+        "births": 582,
+        "reused_id_births": 0,
+        "crossings": 445,
+        "max_Cp": 0.11941789480643421,
+        "max_Ap": 0.47767157922573683,
+        "population_min": 12,
+        "population_max": 24,
+        "boundary": {
+          "LLS_stored_rms": 5180647.84462373,
+          "LLS_shadow_rms": 5180647.841368808,
+          "Q2_stored_rms": 5139350.17568148,
+          "Q2_shadow_rms": 5139350.173991279,
+          "shadow_max": 10081179.225456357
+        },
+        "interface_interior": {
+          "LLS_stored_rms": 3128856.9025523695,
+          "LLS_shadow_rms": 3128856.700913273,
+          "Q2_stored_rms": 2955624.1018216726,
+          "Q2_shadow_rms": 2955623.994869054,
+          "shadow_max": 10220484.926630557
+        },
+        "uniform_fine_interior": {
+          "LLS_stored_rms": 23673.965198135975,
+          "LLS_shadow_rms": 23673.11187308896,
+          "Q2_stored_rms": 12375.15548051907,
+          "Q2_shadow_rms": 12375.516451645064,
+          "shadow_max": 86579.81924703717
+        },
+        "uniform_coarse_interior": {
+          "LLS_stored_rms": 3088611.63204876,
+          "LLS_shadow_rms": 3088611.63204876,
+          "Q2_stored_rms": 2918454.376581301,
+          "Q2_shadow_rms": 2918454.3854106045,
+          "shadow_max": 9773309.778981537
+        },
+        "losses_or_outflow": 721
+      }
+    ],
+    "B": [
+      {
+        "step": 0,
+        "particles": 187712,
+        "births": 0,
+        "reused_id_births": 0,
+        "crossings": 0,
+        "max_Cp": 0.0,
+        "max_Ap": 0.0,
+        "population_min": 16,
+        "population_max": 16,
+        "boundary": {
+          "LLS_stored_rms": 5521158.069314647,
+          "LLS_shadow_rms": 5521158.069314647,
+          "Q2_stored_rms": 5513077.013692133,
+          "Q2_shadow_rms": 5513077.013692133,
+          "shadow_max": 9967375.495981649
+        },
+        "interface_interior": {
+          "LLS_stored_rms": 3098734.122822661,
+          "LLS_shadow_rms": 3098734.122822661,
+          "Q2_stored_rms": 2938465.951426935,
+          "Q2_shadow_rms": 2938465.951426935,
+          "shadow_max": 10138928.21521224
+        },
+        "uniform_fine_interior": {
+          "LLS_stored_rms": 21120.638003020278,
+          "LLS_shadow_rms": 21120.638003020278,
+          "Q2_stored_rms": 11867.693404621567,
+          "Q2_shadow_rms": 11867.693404621567,
+          "shadow_max": 83760.31466396153
+        },
+        "uniform_coarse_interior": {
+          "LLS_stored_rms": 4512185.474549317,
+          "LLS_shadow_rms": 4512185.474549317,
+          "Q2_stored_rms": 4456863.216805709,
+          "Q2_shadow_rms": 4456863.216805709,
+          "shadow_max": 10001743.523345575
+        },
+        "losses_or_outflow": 0
+      },
+      {
+        "step": 1,
+        "particles": 187712,
+        "births": 0,
+        "reused_id_births": 0,
+        "crossings": 0,
+        "max_Cp": 0.11941789480643421,
+        "max_Ap": 0.11941789480643421,
+        "population_min": 16,
+        "population_max": 16,
+        "boundary": {
+          "LLS_stored_rms": 5498699.066914294,
+          "LLS_shadow_rms": 5498699.066914294,
+          "Q2_stored_rms": 5490579.117366395,
+          "Q2_shadow_rms": 5490579.117366395,
+          "shadow_max": 9955591.447928205
+        },
+        "interface_interior": {
+          "LLS_stored_rms": 3093219.302170363,
+          "LLS_shadow_rms": 3093219.302170363,
+          "Q2_stored_rms": 2931271.139479948,
+          "Q2_shadow_rms": 2931271.139479948,
+          "shadow_max": 10122121.320663169
+        },
+        "uniform_fine_interior": {
+          "LLS_stored_rms": 25808.532697848317,
+          "LLS_shadow_rms": 25808.532697848317,
+          "Q2_stored_rms": 12036.25981678608,
+          "Q2_shadow_rms": 12036.25981678608,
+          "shadow_max": 71387.25789923966
+        },
+        "uniform_coarse_interior": {
+          "LLS_stored_rms": 4491454.570085137,
+          "LLS_shadow_rms": 4491454.570085137,
+          "Q2_stored_rms": 4435302.500508636,
+          "Q2_shadow_rms": 4435302.500508636,
+          "shadow_max": 9992692.179041982
+        },
+        "losses_or_outflow": 0
+      },
+      {
+        "step": 2,
+        "particles": 187712,
+        "births": 0,
+        "reused_id_births": 0,
+        "crossings": 1024,
+        "max_Cp": 0.11941789480643421,
+        "max_Ap": 0.23883578961286842,
+        "population_min": 12,
+        "population_max": 24,
+        "boundary": {
+          "LLS_stored_rms": 5475388.223801128,
+          "LLS_shadow_rms": 5475388.223801128,
+          "Q2_stored_rms": 5467203.317278716,
+          "Q2_shadow_rms": 5467203.317278716,
+          "shadow_max": 9938590.355212599
+        },
+        "interface_interior": {
+          "LLS_stored_rms": 3088864.8567399187,
+          "LLS_shadow_rms": 3088864.8567399187,
+          "Q2_stored_rms": 2924988.7692201585,
+          "Q2_shadow_rms": 2924988.769220158,
+          "shadow_max": 10112933.380243018
+        },
+        "uniform_fine_interior": {
+          "LLS_stored_rms": 26800.493780594934,
+          "LLS_shadow_rms": 26800.49378059501,
+          "Q2_stored_rms": 11926.727614701047,
+          "Q2_shadow_rms": 11926.727614701149,
+          "shadow_max": 66566.04268400371
+        },
+        "uniform_coarse_interior": {
+          "LLS_stored_rms": 4470798.330958081,
+          "LLS_shadow_rms": 4470798.330958081,
+          "Q2_stored_rms": 4413708.7180763045,
+          "Q2_shadow_rms": 4413708.7180763045,
+          "shadow_max": 9979206.746158108
+        },
+        "losses_or_outflow": 0
+      },
+      {
+        "step": 3,
+        "particles": 186659,
+        "births": 72,
+        "reused_id_births": 1,
+        "crossings": 2289,
+        "max_Cp": 0.11941789480643421,
+        "max_Ap": 0.3582536844193026,
+        "population_min": 12,
+        "population_max": 24,
+        "boundary": {
+          "LLS_stored_rms": 5451268.954804507,
+          "LLS_shadow_rms": 5451268.955375362,
+          "Q2_stored_rms": 5442972.5247425735,
+          "Q2_shadow_rms": 5442972.524985554,
+          "shadow_max": 9916390.068046689
+        },
+        "interface_interior": {
+          "LLS_stored_rms": 3085744.7508104444,
+          "LLS_shadow_rms": 3085744.7486054837,
+          "Q2_stored_rms": 2919785.321570069,
+          "Q2_shadow_rms": 2919785.3170207,
+          "shadow_max": 10097921.291042864
+        },
+        "uniform_fine_interior": {
+          "LLS_stored_rms": 23289.183767901584,
+          "LLS_shadow_rms": 23289.183767901504,
+          "Q2_stored_rms": 13229.33705313794,
+          "Q2_shadow_rms": 13229.929134287144,
+          "shadow_max": 123257.08167749643
+        },
+        "uniform_coarse_interior": {
+          "LLS_stored_rms": 4450182.982592724,
+          "LLS_shadow_rms": 4450182.982592724,
+          "Q2_stored_rms": 4391969.883319957,
+          "Q2_shadow_rms": 4391969.884019807,
+          "shadow_max": 9980596.829144374
+        },
+        "losses_or_outflow": 1125
+      },
+      {
+        "step": 4,
+        "particles": 186520,
+        "births": 582,
+        "reused_id_births": 0,
+        "crossings": 445,
+        "max_Cp": 0.11941789480643421,
+        "max_Ap": 0.47767157922573683,
+        "population_min": 12,
+        "population_max": 24,
+        "boundary": {
+          "LLS_stored_rms": 5426331.899817282,
+          "LLS_shadow_rms": 5426331.8970035035,
+          "Q2_stored_rms": 5417911.459742687,
+          "Q2_shadow_rms": 5417911.458290955,
+          "shadow_max": 9890286.600229084
+        },
+        "interface_interior": {
+          "LLS_stored_rms": 3083881.6726805824,
+          "LLS_shadow_rms": 3083881.5009638034,
+          "Q2_stored_rms": 2915479.951897293,
+          "Q2_shadow_rms": 2915479.8639325774,
+          "shadow_max": 10087623.813274965
+        },
+        "uniform_fine_interior": {
+          "LLS_stored_rms": 23673.965198135975,
+          "LLS_shadow_rms": 23673.11187308896,
+          "Q2_stored_rms": 12375.15548051907,
+          "Q2_shadow_rms": 12375.516451645064,
+          "shadow_max": 86579.81924703717
+        },
+        "uniform_coarse_interior": {
+          "LLS_stored_rms": 4429607.588936843,
+          "LLS_shadow_rms": 4429607.588936843,
+          "Q2_stored_rms": 4370135.813336483,
+          "Q2_shadow_rms": 4370135.822852662,
+          "shadow_max": 9995147.843323871
+        },
+        "losses_or_outflow": 721
+      }
+    ],
+    "A-serial": [
+      {
+        "step": 0,
+        "particles": 202496,
+        "births": 0,
+        "reused_id_births": 0,
+        "crossings": 0,
+        "max_Cp": 0.0,
+        "max_Ap": 0.0,
+        "population_min": 16,
+        "population_max": 16,
+        "boundary": {
+          "LLS_stored_rms": 5276180.062848781,
+          "LLS_shadow_rms": 5276180.062848781,
+          "Q2_stored_rms": 5237627.834858166,
+          "Q2_shadow_rms": 5237627.834858166,
+          "shadow_max": 9967375.495981649
+        },
+        "interface_interior": {
+          "LLS_stored_rms": 3161782.027661855,
+          "LLS_shadow_rms": 3161782.027661855,
+          "Q2_stored_rms": 2992993.551736629,
+          "Q2_shadow_rms": 2992993.551736629,
+          "shadow_max": 10151920.237642467
+        },
+        "uniform_fine_interior": {
+          "LLS_stored_rms": 21120.638003020278,
+          "LLS_shadow_rms": 21120.638003020278,
+          "Q2_stored_rms": 11867.693404621567,
+          "Q2_shadow_rms": 11867.693404621567,
+          "shadow_max": 83760.31466396153
+        },
+        "uniform_coarse_interior": {
+          "LLS_stored_rms": 3129009.4776065224,
+          "LLS_shadow_rms": 3129009.4776065224,
+          "Q2_stored_rms": 2971201.223913156,
+          "Q2_shadow_rms": 2971201.223913156,
+          "shadow_max": 9888583.317443013
+        },
+        "losses_or_outflow": 0
+      },
+      {
+        "step": 1,
+        "particles": 202496,
+        "births": 0,
+        "reused_id_births": 0,
+        "crossings": 0,
+        "max_Cp": 0.11941789480643421,
+        "max_Ap": 0.11941789480643421,
+        "population_min": 16,
+        "population_max": 16,
+        "boundary": {
+          "LLS_stored_rms": 5253377.173989878,
+          "LLS_shadow_rms": 5253377.173989878,
+          "Q2_stored_rms": 5214091.5106974635,
+          "Q2_shadow_rms": 5214091.5106974635,
+          "shadow_max": 9955591.447928205
+        },
+        "interface_interior": {
+          "LLS_stored_rms": 3152381.2905829814,
+          "LLS_shadow_rms": 3152381.2905829814,
+          "Q2_stored_rms": 2982782.047917121,
+          "Q2_shadow_rms": 2982782.047917121,
+          "shadow_max": 10178521.823230922
+        },
+        "uniform_fine_interior": {
+          "LLS_stored_rms": 25808.532697848317,
+          "LLS_shadow_rms": 25808.532697848317,
+          "Q2_stored_rms": 12036.259816786082,
+          "Q2_shadow_rms": 12036.259816786082,
+          "shadow_max": 71387.25789923966
+        },
+        "uniform_coarse_interior": {
+          "LLS_stored_rms": 3117490.0785532496,
+          "LLS_shadow_rms": 3117490.0785532496,
+          "Q2_stored_rms": 2956655.494592864,
+          "Q2_shadow_rms": 2956655.494592864,
+          "shadow_max": 9851111.491676405
+        },
+        "losses_or_outflow": 0
+      },
+      {
+        "step": 2,
+        "particles": 202496,
+        "births": 0,
+        "reused_id_births": 0,
+        "crossings": 1024,
+        "max_Cp": 0.11941789480643421,
+        "max_Ap": 0.23883578961286842,
+        "population_min": 12,
+        "population_max": 24,
+        "boundary": {
+          "LLS_stored_rms": 5229806.289962029,
+          "LLS_shadow_rms": 5229806.289962029,
+          "Q2_stored_rms": 5189933.330091025,
+          "Q2_shadow_rms": 5189933.330091025,
+          "shadow_max": 10003278.876414895
+        },
+        "interface_interior": {
+          "LLS_stored_rms": 3143744.1904885336,
+          "LLS_shadow_rms": 3143744.190488534,
+          "Q2_stored_rms": 2973063.0125785526,
+          "Q2_shadow_rms": 2973063.0125785526,
+          "shadow_max": 10199900.060418785
+        },
+        "uniform_fine_interior": {
+          "LLS_stored_rms": 26800.493780594934,
+          "LLS_shadow_rms": 26800.49378059501,
+          "Q2_stored_rms": 11926.727614701045,
+          "Q2_shadow_rms": 11926.727614701149,
+          "shadow_max": 66566.04268400371
+        },
+        "uniform_coarse_interior": {
+          "LLS_stored_rms": 3106819.6101760305,
+          "LLS_shadow_rms": 3106819.6101760305,
+          "Q2_stored_rms": 2943046.7026548847,
+          "Q2_shadow_rms": 2943046.7026548847,
+          "shadow_max": 9808526.309224963
+        },
+        "losses_or_outflow": 0
+      },
+      {
+        "step": 3,
+        "particles": 201443,
+        "births": 72,
+        "reused_id_births": 1,
+        "crossings": 2292,
+        "max_Cp": 0.11941789480643421,
+        "max_Ap": 0.3582536844193026,
+        "population_min": 12,
+        "population_max": 24,
+        "boundary": {
+          "LLS_stored_rms": 5205558.701707134,
+          "LLS_shadow_rms": 5205558.702367347,
+          "Q2_stored_rms": 5165009.406832241,
+          "Q2_shadow_rms": 5165009.407115032,
+          "shadow_max": 10044758.00052008
+        },
+        "interface_interior": {
+          "LLS_stored_rms": 3135879.919210836,
+          "LLS_shadow_rms": 3135879.9166258895,
+          "Q2_stored_rms": 2964004.0350843505,
+          "Q2_shadow_rms": 2964004.028922201,
+          "shadow_max": 10213056.631760448
+        },
+        "uniform_fine_interior": {
+          "LLS_stored_rms": 23289.183767901584,
+          "LLS_shadow_rms": 23289.183767901504,
+          "Q2_stored_rms": 13229.334152086807,
+          "Q2_shadow_rms": 13229.926233365843,
+          "shadow_max": 123257.08167749643
+        },
+        "uniform_coarse_interior": {
+          "LLS_stored_rms": 3097106.1415277617,
+          "LLS_shadow_rms": 3097106.1415277617,
+          "Q2_stored_rms": 2930272.642712522,
+          "Q2_shadow_rms": 2930272.6432228447,
+          "shadow_max": 9767708.409412488
+        },
+        "losses_or_outflow": 1125
+      },
+      {
+        "step": 4,
+        "particles": 201304,
+        "births": 582,
+        "reused_id_births": 0,
+        "crossings": 446,
+        "max_Cp": 0.11941789480643421,
+        "max_Ap": 0.47767157922573683,
+        "population_min": 12,
+        "population_max": 24,
+        "boundary": {
+          "LLS_stored_rms": 5180647.8446237305,
+          "LLS_shadow_rms": 5180647.841368808,
+          "Q2_stored_rms": 5139350.17568148,
+          "Q2_shadow_rms": 5139350.173991279,
+          "shadow_max": 10081179.225456357
+        },
+        "interface_interior": {
+          "LLS_stored_rms": 3128856.8741942057,
+          "LLS_shadow_rms": 3128856.6725551076,
+          "Q2_stored_rms": 2955624.093414908,
+          "Q2_shadow_rms": 2955623.9864622885,
+          "shadow_max": 10220484.926630557
+        },
+        "uniform_fine_interior": {
+          "LLS_stored_rms": 23673.965198135975,
+          "LLS_shadow_rms": 23673.11187308896,
+          "Q2_stored_rms": 12375.185685103364,
+          "Q2_shadow_rms": 12375.546655348347,
+          "shadow_max": 86579.81924703717
+        },
+        "uniform_coarse_interior": {
+          "LLS_stored_rms": 3088611.63204876,
+          "LLS_shadow_rms": 3088611.63204876,
+          "Q2_stored_rms": 2918454.379593609,
+          "Q2_shadow_rms": 2918454.3884229125,
+          "shadow_max": 9773309.778981537
+        },
+        "losses_or_outflow": 721
+      }
+    ]
+  },
+  "timestep_change": {
+    "V": {
+      "rms": 5.288979095098923e-09,
+      "maximum": 5.018643502358901e-08
+    },
+    "Theta": {
+      "rms": 5.881114838356707e-07,
+      "maximum": 5.129588778629568e-06
+    },
+    "raw_normal_Q1": {
+      "rms": 9.711690084899743,
+      "maximum": 141.19269350916147
+    },
+    "friction_normal_Q1": {
+      "rms": 0.7859272540058133,
+      "maximum": 6.1547010242938995
+    },
+    "bulk_u": {
+      "rms": 1.4926929696492847e-09,
+      "maximum": 2.8071515791295535e-08
+    },
+    "roughness_baseline": {
+      "rms": 9.632866294205111e-06,
+      "maximum": 9.030681479305644e-05
+    },
+    "roughness_small": {
+      "rms": 9.632709710790538e-06,
+      "maximum": 9.028356249424494e-05
+    },
+    "integrated_probe_displacement": {
+      "rms": 3.2235729111124452e-09,
+      "maximum": 1.0740220337331248e-08
+    },
+    "cumulative_slip": {
+      "rms": 5.926741633144397e-10,
+      "maximum": 5.1681920085764124e-09
+    },
+    "early_roughness": {
+      "10": {
+        "rms": 9.622120555591262e-06,
+        "maximum": 9.020836277320892e-05
+      },
+      "11": {
+        "rms": 9.632679751054618e-06,
+        "maximum": 9.028139151715263e-05
+      },
+      "12": {
+        "rms": 9.632668332375755e-06,
+        "maximum": 9.028450261202458e-05
+      },
+      "13": {
+        "rms": 9.632676406477394e-06,
+        "maximum": 9.028515391986207e-05
+      },
+      "14": {
+        "rms": 9.63268494953619e-06,
+        "maximum": 9.028506572166541e-05
+      },
+      "15": {
+        "rms": 9.632693426290933e-06,
+        "maximum": 9.028466980120612e-05
+      },
+      "16": {
+        "rms": 9.632701704276189e-06,
+        "maximum": 9.028414108438082e-05
+      },
+      "17": {
+        "rms": 9.632709710790538e-06,
+        "maximum": 9.028356249424494e-05
+      }
+    },
+    "base_constitutive": {
+      "eta_ve_range": [
+        1601906016.0000002,
+        1601906016.0000002
+      ],
+      "beta_range": [
+        1.0,
+        1.0
+      ],
+      "actual_normal_range": [
+        49999966.614042625,
+        50000020.26592396
+      ]
+    },
+    "small_constitutive": {
+      "eta_ve_range": [
+        400476504.00000006,
+        400476504.00000006
+      ],
+      "beta_range": [
+        1.0,
+        1.0
+      ],
+      "actual_normal_range": [
+        49999967.053067274,
+        50000021.45134717
+      ]
+    },
+    "base": {
+      "last_time": 0.5499999999999999,
+      "max_Cp": 6.403761262361049e-06,
+      "max_Ap": 7.04418894103628e-05,
+      "max_delta_stress": 2012.8975345989056,
+      "last_dt": 0.05
+    },
+    "small": {
+      "last_time": 0.5499999999999998,
+      "max_Cp": 1.6011669589709888e-06,
+      "max_Ap": 7.044150521278724e-05,
+      "max_delta_stress": 492.10270579425196,
+      "last_dt": 0.0125
+    },
+    "bulk_column_max_abs_differences": [
+      0.0,
+      1003.524118417019
+    ],
+    "particles_column_max_abs_differences": [
+      0.0,
+      1.956345840881113e-08,
+      1.894238721433794e-08,
+      0.0,
+      0.0,
+      0.0,
+      1103.8724748853144,
+      1305.0072803843004,
+      1196.810768793035,
+      9.378896351108779e-06,
+      1.625203931610031e-05
+    ]
+  },
+  "simulation_seconds": 729.968430683999,
+  "checks_passed": 74,
+  "checks_total": 74
+}

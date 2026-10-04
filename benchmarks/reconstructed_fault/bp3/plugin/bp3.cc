@@ -40,7 +40,17 @@ namespace aspect
       for (unsigned int v=0;v<fault.n_vertices();++v)
         {
           auto data=fault.get_properties(v);
-          data[p]=BP3::tau0; data[p+1]=BP3::sigma0;
+#ifdef ASPECT_BP3_LOCAL_OSCILLATION_TEST
+          // Uniform strengthening diagnostic: use the live regularized law and
+          // the fixed BP3 damping, consistently with the shared state initializer.
+          const auto &law=model.get_fault_friction();
+          data[p]=BP3::sigma0*law.friction_coefficient({0.,1.},BP3::Vinit,
+                    law.get_characteristic_slip_distance()/BP3::Vinit)
+                    + BP3::damping*BP3::Vinit;
+#else
+          data[p]=BP3::tau0;
+#endif
+          data[p+1]=BP3::sigma0;
           data[c]=data[c+1]=0.; data[c+2]=1.;
         }
       model.set_reconstructed_fault_background_traction_property(background,correction);

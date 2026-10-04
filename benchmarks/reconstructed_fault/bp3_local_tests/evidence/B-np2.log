@@ -1,0 +1,705 @@
+-----------------------------------------------------------------------------
+--                             This is ASPECT                              --
+-- The Advanced Solver for Planetary Evolution, Convection, and Tectonics. --
+-----------------------------------------------------------------------------
+--     . version 3.1.0-pre (pf-rsf-refactor, 1a3b57eda)
+--     . using deal.II 9.6.2 (dealii-9.6, 6890ca740b)
+--     .       with 32 bit indices
+--     .       with vectorization level 2 (AVX, 4 doubles, 256 bits)
+--     . using Trilinos 14.2.0
+--     . using p4est 2.8.7
+--     . using Geodynamic World Builder 1.0.0
+--     . running in OPTIMIZED mode
+--     . running with 2 MPI processes
+-----------------------------------------------------------------------------
+
+Loading shared library </home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_local_tests/build/libbp3_restore_150x50.release.so>
+
+
+-----------------------------------------------------------------------------
+The output directory </home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_local_tests/output-B/> provided in the input file appears not to exist.
+ASPECT will create it for you.
+-----------------------------------------------------------------------------
+
+
+BP3 straight geometry v1 box -1000 0 2000 1000 anchors -288.67513459481296 1000 0.59999999999999998 288.67513459481296 0 0.59999999999999998 thrust -1 weakening 15000 width 3000 local 1
+BP3 dip=60, length=1154.7, tangent=0.5 -0.866025, normal=0.866025 0.5
+BP3 native LLS limiter: crack_driving_force components 0..0; boundary extrapolation disabled.
+BP3 native LLS limiter: maxwell stress components 3..5; boundary extrapolation disabled.
+BP3 resolved model and runtime settings (not server qualification):
+{
+    "Material model": {
+        "Phase field fault": {
+            "Characteristic slip distance": "0.008",
+            "Characteristic weakening slip rates": "1.e-6",
+            "Cohesions": "1e6",
+            "Critical energy release rates": "1e5",
+            "Densities": "3300.",
+            "Direct effect parameters": "0.025, 0.025",
+            "Dynamic friction coefficients": "0.4",
+            "Elastic shear moduli": "32038120320",
+            "Evolution effect parameters": "0.015",
+            "Evolve phase field": "false",
+            "Fault constitutive mode": "mature frictional",
+            "Friction law": "rate state",
+            "Heat capacities": "1250.",
+            "I h integration backend": "cell intervals",
+            "I h quadrature tolerance": "1e-10",
+            "I h surface quadrature subdivisions": "8",
+            "I h tail tolerance": "1e-10",
+            "Initial friction coefficients": "0.6",
+            "Initial time step": "0.05",
+            "Maximum viscosity": "1e30",
+            "Minimum slip rate": "1e-20",
+            "Minimum viscosity": "1e6",
+            "Phase field activation threshold": "0.1",
+            "Phase field normal lock threshold": "0.5",
+            "Radiation damping coefficients": "4624440",
+            "Reference friction coefficients": "0.6",
+            "Reference slip rate": "1e-6",
+            "Reference temperature": "293",
+            "Reference viscosities": "1e26",
+            "Specific heats": {
+                "alias": "Heat capacities",
+                "deprecation_status": "false"
+            },
+            "Thermal conductivities": "3.0",
+            "Thermal expansivities": "0.000035",
+            "Thermal viscosity exponents": "0.0",
+            "Use adiabatic pressure in fault friction": "false",
+            "Use regularized formulation": "true",
+            "Viscosity averaging scheme": "harmonic"
+        },
+        "Model name": "phase field fault"
+    },
+    "Phase field model": {
+        "Degradation curvature parameter": "1",
+        "Geometric function type": "AT1",
+        "Length scale": "20"
+    },
+    "Compositional fields": {
+        "Compositional field methods": "particles, particles, particles, particles, particles",
+        "List of normalized fields": "",
+        "Mapped particle properties": "tau_xx:maxwell stress[0], tau_yy:maxwell stress[1], tau_xy:maxwell stress[2], theta_initial:phase field fault state[0], strengthening:initial strengthening[0]",
+        "Names of fields": "tau_xx, tau_yy, tau_xy, theta_initial, strengthening",
+        "Number of fields": "5",
+        "Types of fields": "stress, stress, stress, generic, chemical composition"
+    },
+    "Discretization": {
+        "Composition polynomial degree": "2",
+        "Stokes velocity polynomial degree": "2",
+        "Temperature polynomial degree": "2",
+        "Use discontinuous composition discretization": "false",
+        "Use discontinuous temperature discretization": "false",
+        "Use equal order interpolation for Stokes": "false",
+        "Use locally conservative discretization": "false",
+        "Stabilization parameters": {
+            "Discontinuous penalty": "10.",
+            "Global composition maximum": "1.7976931348623157e+308",
+            "Global composition minimum": "-1.7976931348623157e+308",
+            "Global temperature maximum": "1.7976931348623157e+308",
+            "Global temperature minimum": "-1.7976931348623157e+308",
+            "List of compositional fields with disabled boundary entropy viscosity": "",
+            "Stabilization method": "entropy viscosity",
+            "Use artificial viscosity smoothing": "false",
+            "Use limiter for discontinuous composition solution": "false",
+            "Use limiter for discontinuous temperature solution": "false",
+            "alpha": "2",
+            "beta": "0.052",
+            "cR": "0.11",
+            "gamma": "0.0"
+        }
+    },
+    "Geometry model": {
+        "Box": {
+            "Box origin X coordinate": "-1000",
+            "Box origin Y coordinate": "0.",
+            "Box origin Z coordinate": "0.",
+            "X extent": "2000",
+            "X periodic": "false",
+            "X repetitions": "4",
+            "Y extent": "1000",
+            "Y periodic": "false",
+            "Y repetitions": "2",
+            "Z extent": "1.",
+            "Z periodic": "false",
+            "Z repetitions": "1"
+        },
+        "Model name": "box"
+    },
+    "Particles": {
+        "Initial composition": {
+            "List of field names": "theta_initial, strengthening",
+            "Spatially refreshed field names": "strengthening"
+        },
+        "Generator": {
+            "Reference cell": {
+                "Number of particles per cell per direction": "4"
+            },
+            "Random uniform": {
+                "Number of particles": "1000",
+                "Random cell selection": "true",
+                "Random number seed": "5432"
+            }
+        },
+        "Interpolator": {
+            "Linear least squares": {
+                "Use boundary extrapolation": "false",
+                "Use linear least squares limiter": "runtime fields: crack_driving_force, maxwell stress"
+            }
+        },
+        "Particle generator name": "reference cell",
+        "Interpolation scheme": "BP3 history linear least squares",
+        "Integration scheme": "rk2",
+        "List of particle properties": "BP3 frozen crack driving force, initial composition, maxwell stress",
+        "Minimum particles per cell": "12",
+        "Maximum particles per cell": "24",
+        "Load balancing strategy": "remove and add particles",
+        "Particle addition algorithm": "point density function",
+        "Particle removal algorithm": "point density function",
+        "Generate particle domains": "true",
+        "Generate CPDI data for particle domains": "true",
+        "Addition histogram granularity": "3",
+        "Addition point density function granularity": "6",
+        "Allow cells without particles": "false",
+        "Bandwidth": "0.3",
+        "Generate face data for particle domains": "false",
+        "Number of particle systems": "1",
+        "Particle weight": "10",
+        "Point density kernel function": "cutoff c1 dealii",
+        "Update ghost particles": "true"
+    },
+    "Formulation": {
+        "Enable phase field": "true",
+        "Reconstruct faults from phase field": "true"
+    },
+    "Mesh refinement": {
+        "Strategy": "BP3 fault support",
+        "Initial global refinement": "7",
+        "Minimum refinement level": "1",
+        "Initial adaptive refinement": "0",
+        "Time steps between mesh refinement": "0",
+        "Additional refinement times": ""
+    },
+    "Fault reconstruction": {
+        "Structural point spacing": "4",
+        "Fit prescribed geometry to phase field": "false",
+        "Boundary completion": "automatic prescribed"
+    },
+    "BP3": {
+        "loading": "stationary symmetric primitive; physical top-to-bottom thrust; full Q1 completion remains core-owned",
+        "loading_rate_m_per_s": "0.001",
+        "initial_slip_rate_m_per_s": "0.001",
+        "background_normal_stress_Pa": "50000000",
+        "refinement_policy": "support band max(2 ell,R+2 h_fine); exterior min(h_coarse,2 h_fine+(d-band)\/4); native startup tagging v1",
+        "local_comparison_policy": "B",
+        "local_comparison_buffer": "R+coarse projected width; same boundary strip on A\/B; production unbuffered limitation retained"
+    },
+    "Time stepping": {
+        "List of model names": "convection time step, reconstructed fault time step",
+        "Minimum time step size": "0.",
+        "Function": {
+            "Function constants": "",
+            "Function expression": "1.0",
+            "Variable names": "time"
+        },
+        "Reconstructed fault time step": {
+            "Maximum logarithmic state change": "0.1"
+        },
+        "Repeat on cutback": {
+            "Cut back amount": "0.5",
+            "Relative repeat threshold": "0.2"
+        },
+        "Repeat on nonlinear solver failure": {
+            "Cut back factor": "0.5"
+        }
+    },
+    "Solver parameters": {
+        "Composition solver tolerance": "1e-12",
+        "Temperature solver tolerance": "1e-12",
+        "AMG parameters": {
+            "AMG aggregation threshold": "0.001",
+            "AMG output details": "false",
+            "AMG smoother sweeps": "2",
+            "AMG smoother type": "Chebyshev"
+        },
+        "Advection solver parameters": {
+            "GMRES solver restart length": "50"
+        },
+        "Diffusion solver parameters": {
+            "Diffusion length scale": "1.e4"
+        },
+        "Matrix Free": {
+            "Execute solver timings": "false",
+            "Output details": "false"
+        },
+        "Newton solver parameters": {
+            "Max Newton line search iterations": "5",
+            "Max pre-Newton nonlinear iterations": "10",
+            "Maximum linear Stokes solver tolerance": "1e-2",
+            "Nonlinear Newton solver switch tolerance": "1e-5",
+            "SPD safety factor": "0.9",
+            "Stabilization preconditioner": "SPD",
+            "Stabilization velocity block": "SPD",
+            "Use Eisenstat Walker method for Picard iterations": "false",
+            "Use Newton failsafe": "false",
+            "Use Newton residual scaling method": "false"
+        },
+        "Operator splitting parameters": {
+            "Reaction solver relative tolerance": "1e-6",
+            "Reaction solver type": "ARKode",
+            "Reaction time step": "1000.0",
+            "Reaction time steps per advection step": "0"
+        },
+        "Phase field solver parameters": {
+            "Linear solver tolerance": "2e-7",
+            "Max Newton line search iterations": "3",
+            "Max linear solver iterations": "1000",
+            "Max nonlinear iterations": "50",
+            "Nonlinear solver tolerance": "1e-8"
+        },
+        "Stokes solver parameters": {
+            "Force nonsymmetric A block solver": "false",
+            "GMRES solver restart length": "100",
+            "IDR(s) parameter": "2",
+            "Krylov method for cheap solver steps": "GMRES",
+            "Linear solver A block tolerance": "1e-2",
+            "Linear solver S block tolerance": "1e-6",
+            "Linear solver tolerance": "1e-9",
+            "Maximum number of expensive Stokes solver steps": "1000",
+            "Number of cheap Stokes solver steps": "1000",
+            "Stokes GMG type": "local smoothing",
+            "Stokes solver type": "block AMG",
+            "Use direct solver for Stokes system": "false",
+            "Use full A block as preconditioner": "false",
+            "Use weighted BFBT for Schur complement": "false"
+        }
+    },
+    "Postprocess": {
+        "BP3": {
+            "Allow truncated transition": "true",
+            "Audit full state every step": "false",
+            "Graceful wall seconds": "3600",
+            "Heavy output slip interval": "0.1",
+            "Heavy output time interval": "31557600",
+            "Last accepted step": "20",
+            "Profile slip interval": "0.1",
+            "Profile time interval": "0.05",
+            "Stop after first event": "true",
+            "Weakening region length": "15000",
+            "Write bulk and particle visualization": "false"
+        },
+        "BP3 restored monitor": {
+            "Bottom velocity constraint": "full",
+            "Friction normal input": "helmholtz",
+            "Normal filter length": "20",
+            "Write detailed diagnostics": "false"
+        }
+    },
+    "Maximum time step": "0.05",
+    "Maximum first time step": "0.05",
+    "Maximum relative increase in time step": "91.0",
+    "Nonlinear solver tolerance": "1e-8",
+    "Max nonlinear iterations": "30",
+    "Nonlinear solver failure strategy": "cut timestep size"
+}
+-----------------------------------------------------------------------------
+-- For information on how to cite ASPECT, see:
+--   https://aspect.geodynamics.org/citing.html?ver=3.1.0-pre&NewtonSolver=1&particles=1&sha=1a3b57eda&src=code
+-----------------------------------------------------------------------------
+Number of active cells: 11,732 (on 8 levels)
+Number of degrees of freedom: 422,290 (99,302+12,541+49,651+49,651+49,651+49,651+49,651+49,651+12,541)
+
+*** Timestep 0:  t=0 seconds, dt=0 seconds
+   Reconstruction initial faults... done.
+
+BP3 mesh geometry: cells=11732, support cells=6386, h range=3.90625:125, area=2e+06
+Automatic boundary contact: fault=0, contact=0, endpoint=0, boundary=3, position=-288.675 1000, influence=121.407, treatment=paired completion
+Automatic boundary contact: fault=0, contact=1, endpoint=1, boundary=2, position=288.675 0, influence=121.407, treatment=paired completion
+Cell I_h: rebuilt profiles=6936, reused profiles=0, local intervals=277203, cell candidates=26224085, FE samples=2711244, remote requests=0, windows=5, geometry seconds=0.64079, local interval bytes=19958616
+   Initial cohesive q profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa, normalized RMS=0, normalized maximum=0
+BP3 automatic completion: both endpoint supports qualified.
+BP3 live stationary profile: support=39.5292, full normal integral=13053.8, primitive knots=5000
+   Advecting particles...  done.
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=22, fresh=4.534354e-02, target=4.754374e-02
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.999984e-01, 4.219465e-02
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 9.536247e-10, 1.650042e-09
+
+   Postprocessing:
+     BP3 accepted state            0
+     Writing reconstructed faults: reconstructed_faults/reconstructed_faults-00000.vtu
+     Restored BP3 monitor          raw/filtered traction and endpoint growth recorded
+     BP3 local observations:       accepted
+     Number of advected particles: 187712
+
+*** Timestep 1:  t=0.05 seconds, dt=0.05 seconds
+   Advecting particles...  done.
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=23, fresh=3.166906e-11, target=4.570250e-11
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 6.043438e-04, 1.650042e-09
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 6.648646e-10, 8.284808e-15
+   Cohesive traction profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa
+
+   Postprocessing:
+     BP3 accepted state            1
+     Restored BP3 monitor          raw/filtered traction and endpoint growth recorded
+     BP3 local observations:       accepted
+     Number of advected particles: 187712
+
+*** Timestep 2:  t=0.1 seconds, dt=0.05 seconds
+   Advecting particles...  done.
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=22, fresh=7.544977e-06, target=8.756947e-06
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.915272e-01, 3.714835e-05
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 8.525648e-10, 1.823682e-09
+   Cohesive traction profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa
+
+   Postprocessing:
+     BP3 accepted state            2
+     Restored BP3 monitor          raw/filtered traction and endpoint growth recorded
+     BP3 local observations:       accepted
+     Number of advected particles: 187712
+
+*** Timestep 3:  t=0.15 seconds, dt=0.05 seconds
+   Advecting particles...  done.
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=22, fresh=6.566380e-06, target=8.232651e-06
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.909860e-01, 2.605410e-05
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 7.888985e-10, 1.737124e-09
+   Cohesive traction profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa
+
+   Postprocessing:
+     BP3 accepted state            3
+     Restored BP3 monitor          raw/filtered traction and endpoint growth recorded
+     BP3 local observations:       accepted
+     Number of advected particles: 187712
+
+*** Timestep 4:  t=0.2 seconds, dt=0.05 seconds
+   Advecting particles...  done.
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=22, fresh=6.773455e-06, target=8.106645e-06
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.908414e-01, 2.545590e-05
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 8.263474e-10, 1.655607e-09
+   Cohesive traction profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa
+
+   Postprocessing:
+     BP3 accepted state            4
+     Restored BP3 monitor          raw/filtered traction and endpoint growth recorded
+     BP3 local observations:       accepted
+     Number of advected particles: 187712
+
+*** Timestep 5:  t=0.25 seconds, dt=0.05 seconds
+   Advecting particles...  done.
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=22, fresh=6.667732e-06, target=8.028967e-06
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.907475e-01, 2.486973e-05
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 8.212739e-10, 1.577794e-09
+   Cohesive traction profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa
+
+   Postprocessing:
+     BP3 accepted state            5
+     Restored BP3 monitor          raw/filtered traction and endpoint growth recorded
+     BP3 local observations:       accepted
+     Number of advected particles: 187712
+
+*** Timestep 6:  t=0.3 seconds, dt=0.05 seconds
+   Advecting particles...  done.
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=22, fresh=6.293894e-06, target=7.970416e-06
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.906741e-01, 2.429997e-05
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 7.808941e-10, 1.503571e-09
+   Cohesive traction profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa
+
+   Postprocessing:
+     BP3 accepted state            6
+     Restored BP3 monitor          raw/filtered traction and endpoint growth recorded
+     BP3 local observations:       accepted
+     Number of advected particles: 187712
+
+*** Timestep 7:  t=0.35 seconds, dt=0.05 seconds
+   Advecting particles...  done.
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=22, fresh=6.577079e-06, target=7.923318e-06
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.906129e-01, 2.374490e-05
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 8.208825e-10, 1.432839e-09
+   Cohesive traction profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa
+
+   Postprocessing:
+     BP3 accepted state            7
+     Restored BP3 monitor          raw/filtered traction and endpoint growth recorded
+     BP3 local observations:       accepted
+     Number of advected particles: 187712
+
+*** Timestep 8:  t=0.4 seconds, dt=0.05 seconds
+   Advecting particles...  done.
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=22, fresh=7.177936e-06, target=7.884195e-06
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.905605e-01, 2.320383e-05
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 9.003005e-10, 1.365442e-09
+   Cohesive traction profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa
+
+   Postprocessing:
+     BP3 accepted state            8
+     Restored BP3 monitor          raw/filtered traction and endpoint growth recorded
+     BP3 local observations:       accepted
+     Number of advected particles: 187712
+
+*** Timestep 9:  t=0.45 seconds, dt=0.05 seconds
+   Advecting particles...  done.
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=22, fresh=7.507293e-06, target=7.850875e-06
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.905145e-01, 2.267626e-05
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 9.456236e-10, 1.301222e-09
+   Cohesive traction profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa
+
+   Postprocessing:
+     BP3 accepted state            9
+     Restored BP3 monitor          raw/filtered traction and endpoint growth recorded
+     BP3 local observations:       accepted
+     Number of advected particles: 187712
+
+*** Snapshot /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_local_tests/output-B/restart/01/ created!
+
+*** Timestep 10:  t=0.5 seconds, dt=0.05 seconds
+   Advecting particles...  done.
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=22, fresh=7.557785e-06, target=7.822177e-06
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.904737e-01, 2.216021e-05
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 9.554853e-10, 1.239568e-09
+   Cohesive traction profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa
+
+   Postprocessing:
+     BP3 accepted state            10
+     Restored BP3 monitor          raw/filtered traction and endpoint growth recorded
+     BP3 local observations:       accepted
+     Number of advected particles: 187712
+
+*** Timestep 11:  t=0.55 seconds, dt=0.05 seconds
+   Advecting particles...  done.
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=23, fresh=4.216287e-06, target=7.797317e-06
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.904372e-01, 2.165834e-05
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 5.347615e-10, 1.181652e-09
+   Cohesive traction profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa
+
+   Postprocessing:
+     BP3 accepted state            11
+     Restored BP3 monitor          raw/filtered traction and endpoint growth recorded
+     BP3 local observations:       accepted
+     Number of advected particles: 187712
+
+*** Timestep 12:  t=0.6 seconds, dt=0.05 seconds
+   Advecting particles...  done.
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=23, fresh=4.716714e-06, target=7.772635e-06
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.904008e-01, 2.117209e-05
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 6.001287e-10, 1.125394e-09
+   Cohesive traction profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa
+
+   Postprocessing:
+     BP3 accepted state            12
+     Restored BP3 monitor          raw/filtered traction and endpoint growth recorded
+     BP3 local observations:       accepted
+     Number of advected particles: 187712
+
+*** Timestep 13:  t=0.65 seconds, dt=0.05 seconds
+   Advecting particles...  done.
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=23, fresh=4.575895e-06, target=7.751481e-06
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.903684e-01, 2.069436e-05
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 5.838070e-10, 1.071862e-09
+   Cohesive traction profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa
+
+   Postprocessing:
+     BP3 accepted state            13
+     Restored BP3 monitor          raw/filtered traction and endpoint growth recorded
+     BP3 local observations:       accepted
+     Number of advected particles: 187712
+
+*** Timestep 14:  t=0.7 seconds, dt=0.05 seconds
+   Advecting particles...  done.
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=23, fresh=5.543225e-06, target=7.731243e-06
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.903370e-01, 2.022597e-05
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 7.090851e-10, 1.021413e-09
+   Cohesive traction profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa
+
+   Postprocessing:
+     BP3 accepted state            14
+     Restored BP3 monitor          raw/filtered traction and endpoint growth recorded
+     BP3 local observations:       accepted
+     Number of advected particles: 187712
+
+*** Timestep 15:  t=0.75 seconds, dt=0.05 seconds
+   Advecting particles...  done.
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=23, fresh=5.892865e-06, target=7.715219e-06
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.903107e-01, 1.977142e-05
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 7.553826e-10, 9.732411e-10
+   Cohesive traction profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa
+
+   Postprocessing:
+     BP3 accepted state            15
+     Restored BP3 monitor          raw/filtered traction and endpoint growth recorded
+     BP3 local observations:       accepted
+     Number of advected particles: 187712
+
+*** Timestep 16:  t=0.8 seconds, dt=0.05 seconds
+   Advecting particles...  done.
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=23, fresh=6.064428e-06, target=7.701460e-06
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.902870e-01, 1.932859e-05
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 7.787885e-10, 9.273260e-10
+   Cohesive traction profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa
+
+   Postprocessing:
+     BP3 accepted state            16
+     Restored BP3 monitor          raw/filtered traction and endpoint growth recorded
+     BP3 local observations:       accepted
+     Number of advected particles: 187712
+
+*** Timestep 17:  t=0.85 seconds, dt=0.05 seconds
+   Advecting particles...  done.
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=23, fresh=6.387562e-06, target=7.686643e-06
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.902620e-01, 1.889711e-05
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 8.218744e-10, 8.836400e-10
+   Cohesive traction profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa
+
+   Postprocessing:
+     BP3 accepted state            17
+     Restored BP3 monitor          raw/filtered traction and endpoint growth recorded
+     BP3 local observations:       accepted
+     Number of advected particles: 187712
+
+*** Timestep 18:  t=0.9 seconds, dt=0.05 seconds
+   Advecting particles...  done.
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=23, fresh=6.696849e-06, target=7.672818e-06
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.902381e-01, 1.847615e-05
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 8.632594e-10, 8.420334e-10
+   Cohesive traction profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa
+
+   Postprocessing:
+     BP3 accepted state            18
+     Restored BP3 monitor          raw/filtered traction and endpoint growth recorded
+     BP3 local observations:       accepted
+     Number of advected particles: 187712
+
+*** Timestep 19:  t=0.95 seconds, dt=0.05 seconds
+   Advecting particles...  done.
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=23, fresh=6.553165e-06, target=7.659900e-06
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.902152e-01, 1.806565e-05
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 8.461541e-10, 8.024132e-10
+   Cohesive traction profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa
+
+   Postprocessing:
+     BP3 accepted state            19
+     Restored BP3 monitor          raw/filtered traction and endpoint growth recorded
+     BP3 local observations:       accepted
+     Number of advected particles: 187712
+
+*** Snapshot /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_local_tests/output-B/restart/02/ created!
+
+*** Timestep 20:  t=1 seconds, dt=0.05 seconds
+   Advecting particles...  done.
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=23, fresh=6.816000e-06, target=7.647822e-06
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.901933e-01, 1.766539e-05
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+   Rebuilding Stokes preconditioner...
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 8.814949e-10, 7.646784e-10
+   Cohesive traction profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa
+
+   Postprocessing:
+BP3 LONG RUN GRACEFUL STOP at accepted step 20, time=1 s.
+     BP3 accepted state            20
+     Writing reconstructed faults: reconstructed_faults/reconstructed_faults-00020.vtu
+     Restored BP3 monitor          raw/filtered traction and endpoint growth recorded
+     BP3 local observations:       accepted
+     Number of advected particles: 187712
+
+Termination requested by criterion: end time
+Termination requested by criterion: BP3 long run complete
+*** Snapshot /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_local_tests/output-B/restart/03/ created!
+
+
+
++------------------------------------------------+------------+------------+
+| Total wallclock time elapsed since start       |       223s |            |
+|                                                |            |            |
+| Section                            | no. calls |  wall time | % of total |
++------------------------------------+-----------+------------+------------+
+| Assemble Stokes system Picard      |        42 |      15.1s |       6.8% |
+| Assemble Stokes system rhs         |        63 |        17s |       7.6% |
+| Build Stokes preconditioner        |        42 |      10.9s |       4.9% |
+| Create snapshot                    |         3 |      17.3s |       7.7% |
+| Fault: Cache build                 |        22 |      8.77s |       3.9% |
+| Fault: I_h                         |        22 |      9.87s |       4.4% |
+| Fault: Property preparation        |        22 |      9.95s |       4.5% |
+| Fault: Stokes QP cache build       |         1 |    0.0679s |         0% |
+| Fault: Surface-property projection |        22 |      8.85s |         4% |
+| Fault: condensed linear solve      |        21 |      68.7s |        31% |
+| Initialization                     |         1 |     0.318s |      0.14% |
+| Particles: Advect                  |        42 |     0.592s |      0.27% |
+| Particles: Copy                    |        21 |     0.127s |         0% |
+| Particles: Exchange ghosts         |        22 |    0.0388s |         0% |
+| Particles: Generate                |         1 |   0.00856s |         0% |
+| Particles: Initialization          |         1 |   0.00021s |         0% |
+| Particles: Initialize properties   |         1 |    0.0764s |         0% |
+| Particles: Interpolate             |        21 |      1.23s |      0.55% |
+| Particles: Sort                    |        42 |     0.129s |         0% |
+| Particles: Update properties       |        21 |     0.253s |      0.11% |
+| Postprocessing                     |        21 |      11.4s |       5.1% |
+| Setup dof systems                  |         1 |     0.241s |      0.11% |
+| Setup initial conditions           |         1 |      3.77s |       1.7% |
+| Setup matrices                     |         1 |      2.17s |      0.97% |
++------------------------------------+-----------+------------+------------+
+
+-- Total wallclock time elapsed including restarts: 2.2e+02s
+-----------------------------------------------------------------------------
+-- For information on how to cite ASPECT, see:
+--   https://aspect.geodynamics.org/citing.html?ver=3.1.0-pre&NewtonSolver=1&particles=1&sha=1a3b57eda&src=code
+-----------------------------------------------------------------------------

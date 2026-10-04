@@ -1,3 +1,38 @@
+# BP3 Section 5 local comparison complete for review (2026-10-03)
+
+Section 4 is accepted and committed as `1678949c2`. The selected Section-5
+extension adds isolated diagnostic builds of the maintained plugin, two generated
+local mesh PRMs, a native exact-shadow transport comparison and a bounded
+same-checkpoint timestep branch. Production defaults, core mechanics, ownership,
+checkpoint format and the accepted executable/library remain unchanged.
+
+[Review and evidence](../../benchmarks/reconstructed_fault/bp3_local_tests/README.md):
+116/116 focused checks pass in 826.9 seconds total simulation time (13.8 minutes,
+including failed launches and reruns; builds excluded). A/B each accept 20 fixed
+.05 s fast-sliding steps, with 120071/111843 Stokes DoFs. B is 7.9% cheaper;
+final fault-V RMS difference is 4.23e-11 m/s. A replay is bitwise equivalent,
+and eight dt/4 steps have common-time V RMS difference 5.29e-9 m/s. No substantial
+velocity amplification is observed. Independent transport reaches .478 cell
+edges with real interface crossings; exact shadow samples and shared newborn-H
+initialization agree exactly, survivor H stays unchanged, and B's coarser
+exterior has larger manufactured reconstruction error.
+
+Two limits remain explicit. Both diagnostic meshes add the same conservative
+endpoint buffer; this does not fix or qualify the unbuffered production mesh's
+existing automatic-completion admission failure. Also, transport demonstrates
+retired-ID reuse after outflow on one/two ranks (active IDs stay unique). This
+exposes a gap in next-ID-threshold birth counting and ID-keyed H auditing. Only
+known-flow diagnostic tracking was corrected; native allocation, BP3 counters
+and audit semantics are unchanged. Prior lifecycle passes did not cover this
+outflow/reuse case. No MPI-only defect is demonstrated here.
+
+The [candidate exterior policy](../../benchmarks/reconstructed_fault/bp3_local_tests/CANDIDATE.md)
+is for separate review, not a production replacement. Recommended next bounded
+task: qualify and correct allocation/audit behavior under outflow and retired-ID
+reuse, including retry and checkpoint continuation. No server run, core completion
+correction or R7 started. Section-5 source/docs/evidence are uncommitted for review;
+earlier status entries retain their historical review state.
+
 # BP3 runtime-cleanup section 4 complete for review
 
 Section 3 is committed as `e2ff248fb`. Section 4 provides the fresh 150x50 km
