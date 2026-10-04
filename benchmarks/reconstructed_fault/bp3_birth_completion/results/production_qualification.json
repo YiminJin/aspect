@@ -1,0 +1,17 @@
+{
+  "mesh_cells": 552084,
+  "finest_edge": 3.90625,
+  "coarsest_edge": 1000,
+  "native_initial_particles_expected": 8833344,
+  "total_dofs": 19498528,
+  "full_mesh_serial_mpi_footprints_exact": true,
+  "core_automatic_admission_passed": true,
+  "core_admission_evidence": "Native call stack in downstream prepare_cell_normalization_geometry, following collective M4 compatibility checks; see production-progress-backtrace.log and normalization.cc compute_normalization_integrals.",
+  "full_normalization_complete": false,
+  "full_mechanics_startup_complete": false,
+  "limitations": [
+    "Normal startup stopped at 20 GiB aggregate RSS in matrix allocation.",
+    "Bounded native phase/material preparation stopped at 600 s in cell-profile geometry preparation (active R-tree query).",
+    "No new 45-degree/unbuffered qualification."
+  ]
+}

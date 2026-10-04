@@ -1,0 +1,4 @@
+make: jobserver mkfifo: /tmp/GMfifo4: File exists
+[ 50%] Building CXX object CMakeFiles/completion_qualification.dir/qualification.cc.o
+[100%] Linking CXX shared library libcompletion_qualification.release.so
+[100%] Built target completion_qualification

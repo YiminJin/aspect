@@ -1420,17 +1420,25 @@ cell-to-line distance. Native initial-global tagging passes run before particle
 initialization, using global/minimum levels for finest/coarsest sizes and zero
 initial adaptive passes. Native smoothing and geometric resolution/coverage
 checks replace leaf membership. No time-dependent AMR is selected.
-The resolved graded mesh remains unqualified for automatic completion: existing
-global maximum-cell-width padding can extend its required uniform boundary
-footprint beyond this fine band. This demonstrated limitation is retained for
-a separate support-bound decision, not resolved by changing admission or grading.
+The original unbuffered graded mesh failed automatic completion: global
+maximum-cell-width padding extended its required uniform boundary footprint
+beyond the fine band. The subsequently selected correction retains a protected
+fine endpoint strip in the maintained policy. Its boundary half-width is
+$(R+h_{\rm coarse}(|n_x|+|n_y|))/\sin(\mathrm{dip})$, plus one fine edge,
+and its inward depth is two fine edges. This uses the configured global cell-size
+upper bound, without changing core enclosure, overlap or admission rules.
+The buffer is part of resolved restart identity. The selected 60-degree
+production boundary admission is checked independently; full normalization
+and mechanics startup remain separate resource/performance qualifications. The historical unbuffered
+45-degree limitation remains explicit and does not block this qualification.
 
 The selected section-4 packaging supplies a fresh 150 by 50 km candidate with
 only its prescribed fault file as model data; historical fixtures are preserved.
 Production physical parameters are inherited and explicitly documented. The latest
 server input is unconfirmed; the candidate's 0.1 unweighted state bound and 0.5
-nonlinear-failure cutback are provisional. Graded-completion qualification remains
-blocked. Model identity includes resolved material/profile, loading, mesh policy,
+nonlinear-failure cutback are provisional. The later buffered boundary-admission
+qualification does not qualify full production normalization or mechanics startup.
+Model identity includes resolved material/profile, loading, mesh policy,
 composition/discretization, native particle controls and effective limiter as well
 as actual geometry, generated primitive and filter. Exact parameter-string
 comparison is conservative; old identities require their original plugin.
@@ -1451,8 +1459,9 @@ The selected section-5 local comparison uses an isolated build of the maintained
 benchmark sources with uniform strengthening and $V_p=V_{\rm init}=10^{-3}$ m/s.
 State and initial frictional shear use the live law, with retained BP3 damping.
 The two generated spatial policies share a protected fine band and conservative
-endpoint buffer satisfying the existing completion enclosure; the default
-unbuffered production policy and its qualification failure remain unchanged.
+endpoint buffer satisfying the existing completion enclosure. The subsequent
+selected correction retains that buffer in the maintained production policy;
+A's exterior slope alone does not reproduce the qualified configuration.
 Exact-position diagnostic shadow tensor components use native spatial refresh
 and continuous-Q2 particle projection separately from stored Maxwell history.
 The existing pending-restart-interval reduction hook preserves accepted time,
@@ -1482,9 +1491,18 @@ retains only owned/ghost baselines and one backup, using native auxiliary
 particle transfer for migration. Since the qualified deal.II build omits that
 auxiliary payload from mesh checkpoints, an all-rank pre-checkpoint hook gathers
 only current owned baselines to rank zero. Version-6 BP3 archives persist that
-population and the next-ID birth threshold; after loading, the temporarily global
+population and the legacy next-ID field (consumed for compatibility, not used
+as a birth criterion); after loading, the temporarily global
 snapshot is checked and pruned to local ownership. Version-5 audit maps remain
-readable and undergo the same checks. Audit callbacks never advance constitutive
+readable and undergo the same checks. Retired IDs may be reused after outflow.
+All three native insertion branches notify observers after physical initialization;
+BP3 records pending births and checks/publishes their baselines at its existing
+collective post-management audit. A reused ID establishes a new baseline. One
+observational birth flag travels with the existing auxiliary H payload during
+migration/ghost exchange; no collective is added. Backup clears attempt flags,
+rollback restores baseline H and discards rejected births, and deserialization
+is never classified as insertion. Population summaries count surviving births
+from these events, not ID thresholds. Audit callbacks never advance constitutive
 history or decide timestep acceptance.
 
 Native particle-manager version-1 archives retain manager and generator-base RNG

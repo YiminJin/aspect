@@ -92,6 +92,17 @@ namespace aspect
     {
       public:
         /**
+         * Notification after native count management inserts a fully initialized
+         * particle. IDs may be reused after outflow; observers must use this
+         * event, not an ID threshold, to distinguish births from survivors.
+         * The iterator is valid only during the call. Slots must not modify
+         * particles or perform MPI collectives (birth counts differ by rank).
+         * Startup generation and checkpoint deserialization are not births.
+         */
+        boost::signals2::signal<void (const typename ParticleHandler<dim>::particle_iterator &)>
+        post_particle_creation;
+
+        /**
          * Default constructor.
          */
         Manager();

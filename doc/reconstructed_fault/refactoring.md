@@ -581,3 +581,23 @@ from stored Maxwell history and use native LLS/continuous-Q2 publication.
 Unexpected ID/lifecycle behavior is evidence to report separately, not authority
 to change production insertion, audit or communication semantics. No production
 refinement replacement, server run, Section 6 deployment or R7 is selected.
+
+
+## Selected post-Section-5 birth identity and production buffer correction
+
+The user selected two bounded correctness/qualification tasks after the local
+comparison: identify births despite retired-ID reuse, and retain/check the
+boundary strip on the actual 60-degree production mesh. This supersedes the
+previous stop-before-production-policy-change boundary only for that buffer.
+Do not change native ID allocation, particle properties, RNG, MPI ownership,
+core completion admission, physical settings or solver gates. Preserve existing
+post-management audit publication and native retry/checkpoint handling. Record
+newborn events after initialized insertion; ID thresholds are not lifetime
+identities. Additional audit bytes use existing transfers, with no new collective.
+
+Keep the incoming Section-5 changes distinguishable (saved tracked patch plus
+preserved original package/evidence). Preserve accepted artifacts; rebuild plugins
+against the corrected core. Record full production boundary/material qualification
+separately from a mechanics solve and resource-limited attempts. The historical
+unbuffered 45-degree failure does not block qualified 60-degree completion. Stop
+for review before server execution, another cleanup section, or R7.

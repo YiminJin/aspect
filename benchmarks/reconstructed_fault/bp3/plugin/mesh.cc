@@ -42,9 +42,10 @@ namespace aspect
       // Both diagnostic candidates retain the larger accepted support band.
       if(local_mesh_policy=="B" && d>band)
         target=std::min({coarse,12500.,2*fine+(d-band)/2.});
-      // Protect the CURRENT core completion footprint using an a-priori upper
-      // bound on every cell width. This diagnostic boundary buffer does not
-      // narrow core admission or fix the unbuffered production-mesh limitation.
+#endif
+      // Protect the existing completion footprint using the configured upper
+      // bound on every cell width. Keep this strip in production as well as
+      // local comparisons; the exterior grading rule alone is insufficient.
       const auto &g=BP3::geometry();
       const double half_width=(BP3::loading_profile(sim).support
                                 +coarse*(std::abs(g.normal[0])+std::abs(g.normal[1])))/g.sine;
@@ -52,7 +53,6 @@ namespace aspect
         if(lo[0]<=end[0]+half_width+fine && hi[0]>=end[0]-half_width-fine
            && lo[1]<=end[1]+2*fine && hi[1]>=end[1]-2*fine)
           target=fine;
-#endif
       return {h,fine,coarse,d,target};
     }
   }

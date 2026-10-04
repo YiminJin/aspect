@@ -1,0 +1,178 @@
+[
+  {
+    "check": "A/velocity_0_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "A/velocity_0_rank1.csv",
+    "passed": true
+  },
+  {
+    "check": "A/friction_samples_0_rank1.csv",
+    "passed": true
+  },
+  {
+    "check": "A/friction_samples_0_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "A/fault_0.csv",
+    "passed": true
+  },
+  {
+    "check": "A/profiles/fault_0.csv",
+    "passed": true
+  },
+  {
+    "check": "A/velocity_1_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "A/velocity_1_rank1.csv",
+    "passed": true
+  },
+  {
+    "check": "A/friction_samples_1_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "A/friction_samples_1_rank1.csv",
+    "passed": true
+  },
+  {
+    "check": "A/fault_1.csv",
+    "passed": true
+  },
+  {
+    "check": "A/profiles/fault_1.csv",
+    "passed": true
+  },
+  {
+    "check": "A/velocity_2_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "A/velocity_2_rank1.csv",
+    "passed": true
+  },
+  {
+    "check": "A/friction_samples_2_rank1.csv",
+    "passed": true
+  },
+  {
+    "check": "A/friction_samples_2_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "A/fault_2.csv",
+    "passed": true
+  },
+  {
+    "check": "A/profiles/fault_2.csv",
+    "passed": true
+  },
+  {
+    "check": "A/mesh_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "A/mesh_rank1.csv",
+    "passed": true
+  },
+  {
+    "check": "A/particle_summary.csv",
+    "passed": true
+  },
+  {
+    "check": "A/solver-decisions-and-fresh-residuals",
+    "passed": true
+  },
+  {
+    "check": "B/velocity_0_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "B/velocity_0_rank1.csv",
+    "passed": true
+  },
+  {
+    "check": "B/friction_samples_0_rank1.csv",
+    "passed": true
+  },
+  {
+    "check": "B/friction_samples_0_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "B/fault_0.csv",
+    "passed": true
+  },
+  {
+    "check": "B/profiles/fault_0.csv",
+    "passed": true
+  },
+  {
+    "check": "B/velocity_1_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "B/velocity_1_rank1.csv",
+    "passed": true
+  },
+  {
+    "check": "B/friction_samples_1_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "B/friction_samples_1_rank1.csv",
+    "passed": true
+  },
+  {
+    "check": "B/fault_1.csv",
+    "passed": true
+  },
+  {
+    "check": "B/profiles/fault_1.csv",
+    "passed": true
+  },
+  {
+    "check": "B/velocity_2_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "B/velocity_2_rank1.csv",
+    "passed": true
+  },
+  {
+    "check": "B/friction_samples_2_rank1.csv",
+    "passed": true
+  },
+  {
+    "check": "B/friction_samples_2_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "B/fault_2.csv",
+    "passed": true
+  },
+  {
+    "check": "B/profiles/fault_2.csv",
+    "passed": true
+  },
+  {
+    "check": "B/mesh_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "B/mesh_rank1.csv",
+    "passed": true
+  },
+  {
+    "check": "B/particle_summary.csv",
+    "passed": true
+  },
+  {
+    "check": "B/solver-decisions-and-fresh-residuals",
+    "passed": true
+  }
+]

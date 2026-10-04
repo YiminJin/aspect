@@ -1613,9 +1613,21 @@ backup. Native additional-data callbacks carry baselines during migration/ghost
 exchange. On this deal.II build those callbacks do not participate in mesh
 checkpoint packing: the all-rank pre-checkpoint hook gathers **current owned**
 baselines to rank zero. Version-6 BP3 archives persist that current population
-and next-ID birth threshold. Loading briefly holds the current global snapshot,
+and the legacy next-ID field (retained for archive compatibility, no longer a
+birth criterion). Loading briefly holds the current global snapshot,
 then checks and prunes it after native particle deserialization/management.
-Version-5 audit maps are checked and pruned in the same way. No constitutive
+Version-5 audit maps are checked and pruned in the same way. Native count
+management may reuse a retired particle ID after outflow. Its rank-local
+`Particle::Manager::post_particle_creation` notification identifies actual births
+in all three insertion branches, after physical property initialization. The BP3
+audit records pending IDs, then checks the shared initializer and establishes
+baselines at the existing collective post-management audit. A reused ID replaces
+its retired baseline; it is never mistaken for a survivor. Current-attempt birth
+flags accompany H in the existing migration/ghost payload, with no additional
+collective. Backup resets these observational flags and pending events; restoration
+restores H baselines and clears rejected-attempt births. Checkpoint deserialization
+is not a birth; the next native backup starts its new diagnostic interval.
+Accepted population summaries count surviving event-identified births. No constitutive
 update or timestep-acceptance decision belongs to the audit.
 
 Native particle-manager backups include the manager population RNG and generator
@@ -1928,9 +1940,11 @@ The isolated benchmark build reuses maintained BP3 geometry/profile/startup mesh
 sources for a bounded uniform-strengthening test at Vp=Vinit=1e-3 m/s. Initial
 state is obtained from the live friction law (steady Theta=8 s here), and fixed
 shear uses that same law plus the retained BP3 damping. These are diagnostic
-settings; the default production build is unchanged. The shared endpoint buffer
-covers the existing global projected-cell-width completion enclosure. It does
-not narrow M4 admission or resolve the unbuffered graded-production limitation.
+settings; production retains its original rate/material values. The shared endpoint
+buffer covers the existing global projected-cell-width completion enclosure. The
+subsequently selected birth/completion correction retains this same buffer in the
+maintained production mesh policy; copying only A's exterior slope is insufficient.
+It does not narrow M4 admission or qualify the old unbuffered policy.
 Candidate B recovers only the historical exterior slope/cap, outside the same
 protected band as A; native balancing remains in charge.
 
@@ -1941,3 +1955,25 @@ separate. The diagnostic restart uses the existing pending-interval reduction
 signal, preserving accepted time, old timestep and physical/RNG history. No
 scientific algorithm, production cache, MPI owner or checkpoint format is changed.
 See the [bounded plan/evidence](../../benchmarks/reconstructed_fault/bp3_local_tests/PLAN.md).
+
+
+### Selected BP3 production boundary buffer
+
+The maintained `BP3 fault support` policy retains A's fine band and exterior slope
+and also protects both top/bottom endpoint strips. The boundary interval has
+half-width `(R + h_coarse*(abs(n_x)+abs(n_y)))/sin(dip)`, plus one fine-cell edge;
+the strip extends two fine edges into the domain. Here `h_coarse` is the configured
+upper bound on every cell edge, not an inferred local spacing. Native balancing,
+conservative cell distance, fixed geometry, and the ordinary resolution check
+remain active. Core M3 contact/source/overlap and M4 uniform-lattice/prescribed-Q1
+checks are unchanged. The buffer is part of resolved model identity, so a changed
+mesh policy cannot silently resume a checkpoint of the old policy.
+
+Only boundary admission for the selected 60-degree production configuration is
+qualified by this task; full normalization and mechanics startup remain bounded
+resource/performance limitations, not completed qualifications.
+Previous unbuffered 45-degree failures are retained as a separate limitation,
+not a blocker for an independently qualified 60-degree configuration. See the
+[birth/completion report](../../benchmarks/reconstructed_fault/bp3_birth_completion/README.md)
+for the distinction between full-mesh boundary/material preparation and a full
+production mechanics solve.

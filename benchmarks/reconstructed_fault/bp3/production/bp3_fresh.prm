@@ -1,10 +1,12 @@
+# The maintained BP3 fault-support policy includes the qualified fine endpoint
+# buffer; the exterior slope alone does not qualify automatic completion.
 # Fresh 150 x 50 km BP3 candidate; NOT qualified for server execution.
-# Graded-boundary automatic-completion admission remains blocked (Section 3).
+# Includes the maintained endpoint buffer; see the bounded completion report.
 # Physical/cap settings inherited from historical filter20 + first_event inputs.
 # Latest server input is unconfirmed. Provisional explicit choices: unweighted
 # log-state bound 0.1 (not 0.2); nonlinear-failure cutback 0.5 (old input aborted).
 # Native H/Maxwell limiter resolves this displayed mask by field names.
-set Additional shared libraries = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/build-maintained/libbp3_restore_150x50.release.so
+set Additional shared libraries = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/build-maintained-buffered/libbp3_restore_150x50.release.so
 set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/output-fresh-candidate
 set Dimension = 2
 set Use years instead of seconds = false

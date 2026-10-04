@@ -1,0 +1,3 @@
+[  7%] Building CXX object CMakeFiles/bp3_restore_150x50.dir/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_local_tests/diagnostics.cc.o
+[ 15%] Linking CXX shared library libbp3_restore_150x50.release.so
+[100%] Built target bp3_restore_150x50

@@ -1,0 +1,657 @@
+{
+  "create-np2": {
+    "peak_aggregate_rss_kib": 600560,
+    "limit_reason": null,
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-birth-identity-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_birth_completion/inputs/create.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 14.027480319999995,
+    "child_max_rss_kib": 295416,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  "direct-final-np1": {
+    "peak_aggregate_rss_kib": 354340,
+    "limit_reason": null,
+    "command": [
+      "mpirun",
+      "-np",
+      "1",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-birth-identity-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_birth_completion/inputs/direct.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 29.121872087000156,
+    "child_max_rss_kib": 338280,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  "direct-np1": {
+    "command": [
+      "mpirun",
+      "-np",
+      "1",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-birth-identity-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_birth_completion/inputs/direct.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 1,
+    "seconds": 9.041972422000072,
+    "child_max_rss_kib": 335052,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  "direct2-np2": {
+    "peak_aggregate_rss_kib": 356812,
+    "limit_reason": null,
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-birth-identity-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_birth_completion/inputs/direct2.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 1,
+    "seconds": 2.0767398299999513,
+    "child_max_rss_kib": 206508,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  "direct2-prepared-np2": {
+    "peak_aggregate_rss_kib": 591228,
+    "limit_reason": null,
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-birth-identity-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_birth_completion/inputs/direct2.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 7.783223082999939,
+    "child_max_rss_kib": 294752,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  "local-A-final-np2": {
+    "peak_aggregate_rss_kib": 1947288,
+    "limit_reason": null,
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-birth-identity-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_birth_completion/inputs/local-A.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 127.5952031630004,
+    "child_max_rss_kib": 1166684,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  "local-A-np2": {
+    "peak_aggregate_rss_kib": 1945540,
+    "limit_reason": null,
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-birth-identity-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_birth_completion/inputs/local-A.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 44.09677523499977,
+    "child_max_rss_kib": 1164648,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  "local-B-final-np2": {
+    "peak_aggregate_rss_kib": 1846756,
+    "limit_reason": null,
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-birth-identity-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_birth_completion/inputs/local-B.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 121.46987461900062,
+    "child_max_rss_kib": 1101940,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  "local-B-np2": {
+    "peak_aggregate_rss_kib": 1843160,
+    "limit_reason": null,
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-birth-identity-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_birth_completion/inputs/local-B.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 40.462472529000024,
+    "child_max_rss_kib": 1098152,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  "production-initial-material-np2": {
+    "peak_aggregate_rss_kib": 8371712,
+    "limit_reason": null,
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-birth-identity-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_birth_completion/inputs/production.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 1,
+    "seconds": 101.35484702500025,
+    "child_max_rss_kib": 5015856,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  "production-mesh-np1": {
+    "peak_aggregate_rss_kib": 429056,
+    "limit_reason": null,
+    "command": [
+      "mpirun",
+      "-np",
+      "1",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-birth-identity-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_birth_completion/inputs/production-mesh.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 1,
+    "seconds": 10.471110871999826,
+    "child_max_rss_kib": 460284,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  "production-normal-timing-np2": {
+    "peak_aggregate_rss_kib": 21609832,
+    "limit_reason": "20 GiB aggregate RSS",
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-birth-identity-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_birth_completion/inputs/production.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 124,
+    "seconds": 127.79810018499984,
+    "child_max_rss_kib": 15312,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  "production-np2": {
+    "peak_aggregate_rss_kib": 8864924,
+    "limit_reason": null,
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-birth-identity-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_birth_completion/inputs/production.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 1,
+    "seconds": 99.06475503000001,
+    "child_max_rss_kib": 5016776,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  "production-parse-np1": {
+    "peak_aggregate_rss_kib": 190200,
+    "limit_reason": null,
+    "command": [
+      "mpirun",
+      "-np",
+      "1",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-birth-identity-qualified",
+      "--validate",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_birth_completion/inputs/production-parse.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 2.047606693000489,
+    "child_max_rss_kib": 185828,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  "production-phase-entry-np2": {
+    "peak_aggregate_rss_kib": 11052012,
+    "limit_reason": "time",
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-birth-identity-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_birth_completion/inputs/production.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 124,
+    "seconds": 600.4394680749997,
+    "child_max_rss_kib": 15388,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  "resume-np2": {
+    "peak_aggregate_rss_kib": 593696,
+    "limit_reason": null,
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-birth-identity-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_birth_completion/inputs/resume.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 5.191942532000212,
+    "child_max_rss_kib": 296148,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  "retry-np1": {
+    "peak_aggregate_rss_kib": 351764,
+    "limit_reason": null,
+    "command": [
+      "mpirun",
+      "-np",
+      "1",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-birth-identity-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_birth_completion/inputs/retry.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 14.513789380000162,
+    "child_max_rss_kib": 339068,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  "retry2-np2": {
+    "peak_aggregate_rss_kib": 596316,
+    "limit_reason": null,
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-birth-identity-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_birth_completion/inputs/retry2.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 9.33931861100018,
+    "child_max_rss_kib": 297144,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  "staggered-np2": {
+    "peak_aggregate_rss_kib": 602444,
+    "limit_reason": null,
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-birth-identity-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_birth_completion/inputs/staggered.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 12.959004234000076,
+    "child_max_rss_kib": 297000,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  "transport-A-audit-np2": {
+    "peak_aggregate_rss_kib": 1183176,
+    "limit_reason": null,
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-birth-identity-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_birth_completion/inputs/transport-A.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 21.261303999999654,
+    "child_max_rss_kib": 595708,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  "transport-A-final-np2": {
+    "peak_aggregate_rss_kib": 1185328,
+    "limit_reason": null,
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-birth-identity-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_birth_completion/inputs/transport-A.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 42.732960405000085,
+    "child_max_rss_kib": 596696,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  "transport-A-np2": {
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-birth-identity-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_birth_completion/inputs/transport-A.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 213,
+    "seconds": 2.2213835679999647,
+    "child_max_rss_kib": 14648,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  "transport-A-resume-np2": {
+    "peak_aggregate_rss_kib": 1173132,
+    "limit_reason": null,
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-birth-identity-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_birth_completion/inputs/transport-A-resume.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 9.861328353000317,
+    "child_max_rss_kib": 606560,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  "transport-A-serial-np1": {
+    "peak_aggregate_rss_kib": 826288,
+    "limit_reason": null,
+    "command": [
+      "mpirun",
+      "-np",
+      "1",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-birth-identity-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_birth_completion/inputs/transport-A-serial.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 26.952141775999735,
+    "child_max_rss_kib": 866372,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  "transport-A-serial-resume-np1": {
+    "peak_aggregate_rss_kib": 797680,
+    "limit_reason": null,
+    "command": [
+      "mpirun",
+      "-np",
+      "1",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-birth-identity-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_birth_completion/inputs/transport-A-serial-resume.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 12.971714584999972,
+    "child_max_rss_kib": 781728,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  "transport-A-sockets-np2": {
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-birth-identity-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_birth_completion/inputs/transport-A.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 1,
+    "seconds": 7.536951743000145,
+    "child_max_rss_kib": 360460,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  "transport-control-1-np1": {
+    "peak_aggregate_rss_kib": 794268,
+    "limit_reason": null,
+    "command": [
+      "mpirun",
+      "-np",
+      "1",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-birth-identity-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_birth_completion/inputs/transport-control-1.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 26.095975410000392,
+    "child_max_rss_kib": 829132,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  "transport-control-2-np2": {
+    "peak_aggregate_rss_kib": 1158620,
+    "limit_reason": null,
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-birth-identity-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_birth_completion/inputs/transport-control-2.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 19.94395041000007,
+    "child_max_rss_kib": 584692,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  "transport-retry-1-np1": {
+    "peak_aggregate_rss_kib": 914552,
+    "limit_reason": null,
+    "command": [
+      "mpirun",
+      "-np",
+      "1",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-birth-identity-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_birth_completion/inputs/transport-retry-1.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 71.9936763820001,
+    "child_max_rss_kib": 1015560,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  "transport-retry-2-np2": {
+    "peak_aggregate_rss_kib": 1264432,
+    "limit_reason": null,
+    "command": [
+      "mpirun",
+      "-np",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-birth-identity-qualified",
+      "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_birth_completion/inputs/transport-retry-2.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "exit_code": 0,
+    "seconds": 47.58713502499995,
+    "child_max_rss_kib": 688980,
+    "environment": {
+      "OMP_PROC_BIND": "spread",
+      "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "OMP_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  }
+}

@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
 
 namespace aspect
 {
@@ -26,7 +27,8 @@ namespace aspect
     void restore_particle_audit(types::particle_index next_id);
     // Read-only diagnostics captured at the existing particle backup. They
     // describe the current attempt; the next backup refreshes them on restart.
-    extern types::particle_index population_before_attempt, first_attempt_birth_id;
+    extern types::particle_index population_before_attempt;
+    extern std::set<types::particle_index> attempt_births;
     template <int dim>
     void connect_particle_history_audit(const SimulatorAccess<dim> &sim);
     extern std::vector<Point<2>> work_initial_geometry;

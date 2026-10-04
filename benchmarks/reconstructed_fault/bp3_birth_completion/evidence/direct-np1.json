@@ -1,0 +1,20 @@
+{
+  "command": [
+    "mpirun",
+    "-np",
+    "1",
+    "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-birth-identity-qualified",
+    "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_birth_completion/inputs/direct.prm"
+  ],
+  "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+  "exit_code": 1,
+  "seconds": 9.041972422000072,
+  "child_max_rss_kib": 335052,
+  "environment": {
+    "OMP_PROC_BIND": "spread",
+    "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "OMP_NUM_THREADS": "1",
+    "DEAL_II_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1"
+  }
+}

@@ -1,3 +1,42 @@
+# BP3 birth identity corrected; production boundary admission checked (2026-10-03)
+
+The selected follow-up corrects retired-ID birth identification and retains the
+successful local meshes' endpoint buffer in the maintained 60° production policy.
+Starting point is `1678949c2` plus the Section-5 work, now committed separately
+as `f935bd94b`. The birth/buffer correction and evidence are committed after
+review; accepted executable/library hashes are unchanged.
+
+[Review and evidence](../../benchmarks/reconstructed_fault/bp3_birth_completion/README.md):
+**1,435/1,435** focused checks pass: 961 baseline/lifecycle, 424 birth/control,
+6 exact reuse-step rollback and 44 short A/B comparisons. Actual creation events
+replace ID thresholds. Reused ID 202495 is a birth on one/two ranks; step 3 counts
+72 births rather than 71. Shared H initialization, retained H, Maxwell inheritance,
+RNG, membership and same-rank restart/retry remain qualified. The native insertion
+signal adds no collective; BP3 retains post-management audit publication. One
+birth flag joins existing H transfer data; checkpoint formats remain unchanged.
+The local coupled observer also resets newborn paths under ID reuse.
+
+The **actual 552,084-cell 150×50 km mesh** has 3.90625–1000 m edges. Both core
+completion footprints have half-width 1622.994616 m, covered by 832 aligned fine
+boundary faces each; full-mesh one/two-rank footprint CSVs match exactly. Core M3
+and M4 boundary/prescribed-Q1 admission passed on the full initialized two-rank
+configuration: the diagnostic backtrace is in downstream cell-normalization
+geometry preparation after those collective checks. The protected strip is part
+of model identity and the maintained production build, not only a diagnostic.
+
+**Full production normalization/mechanics startup remains unqualified.** The
+normal path reached the 20 GiB matrix-allocation guard; the native phase/material
+probe reached 600 s in the unchanged cell-profile R-tree candidate query, before
+full Ih publication/final pass. No gate or physical setting was changed. Historical
+unbuffered 45° failure remains explicit and is not a blocker for 60° boundary
+admission. Historical transport H-minimum differences are separately retained;
+a matched shared-initializer audit-on/off control has exactly unchanged fields.
+
+Next bounded task: profile and propose an exact reduction of cell-normalization
+candidate-query work on this production mesh, preserving clipping, ownership,
+interval ordering and cache rules. Full normalization and memory-suitable mechanics
+startup must precede a production trajectory. No server run, later section or R7.
+
 # BP3 Section 5 local comparison complete for review (2026-10-03)
 
 Section 4 is accepted and committed as `1678949c2`. The selected Section-5

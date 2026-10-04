@@ -53,7 +53,8 @@ namespace aspect
     template <int dim>
     Manager<dim>::Manager(Manager &&other) noexcept
   :
-    generator(std::move(other.generator)),
+    post_particle_creation(std::move(other.post_particle_creation)),
+              generator(std::move(other.generator)),
               integrator(std::move(other.integrator)),
               random_number_generator(other.random_number_generator),
               random_number_generator_backup(other.random_number_generator_backup),
@@ -422,6 +423,7 @@ namespace aspect
                                                                                             new_particle.first.first,
                                                                                             new_particle.first.second));
                             particle->set_properties(particle_properties);
+                            post_particle_creation(particle);
 
                           }
                         else if (addition_algorithm == AdditionAlgorithm::point_density_function)
@@ -455,6 +457,7 @@ namespace aspect
                                                                                             new_particle.first.first,
                                                                                             new_particle.first.second));
                             particle->set_properties(particle_properties);
+                            post_particle_creation(particle);
                           }
                         else if (addition_algorithm == AdditionAlgorithm::histogram)
                           {
@@ -607,6 +610,7 @@ namespace aspect
                                                                                             new_particle.first.first,
                                                                                             new_particle.first.second));
                             particle->set_properties(particle_properties);
+                            post_particle_creation(particle);
 
                           }
                       }

@@ -1,0 +1,4 @@
+make: jobserver mkfifo: /tmp/GMfifo4: File exists
+[ 12%] Building CXX object CMakeFiles/bp3_birth_transport.dir/audit.cc.o
+[ 25%] Linking CXX shared library libbp3_birth_transport.release.so
+[100%] Built target bp3_birth_transport

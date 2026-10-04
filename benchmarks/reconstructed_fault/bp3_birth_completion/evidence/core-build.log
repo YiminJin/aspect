@@ -1,0 +1,17 @@
+[  7%] Built target WorldBuilderRelease
+[ 11%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_0_cxx.cxx.o
+[ 11%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_10_cxx.cxx.o
+[ 11%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_11_cxx.cxx.o
+[01m[Kcc1plus:[m[K [01;35m[Kwarning: [m[K/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/CMakeFiles/aspect.exe.release.dir/cmake_pch.hxx.gch: created by a different GCC executable [[01;35m[K-Winvalid-pch[m[K]
+[01m[Kcc1plus:[m[K [01;35m[Kwarning: [m[K/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/CMakeFiles/aspect.exe.release.dir/cmake_pch.hxx.gch: created by a different GCC executable [[01;35m[K-Winvalid-pch[m[K]
+[01m[Kcc1plus:[m[K [01;35m[Kwarning: [m[K/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/CMakeFiles/aspect.exe.release.dir/cmake_pch.hxx.gch: created by a different GCC executable [[01;35m[K-Winvalid-pch[m[K]
+[ 12%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_17_cxx.cxx.o
+[01m[Kcc1plus:[m[K [01;35m[Kwarning: [m[K/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/CMakeFiles/aspect.exe.release.dir/cmake_pch.hxx.gch: created by a different GCC executable [[01;35m[K-Winvalid-pch[m[K]
+[ 14%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_18_cxx.cxx.o
+[01m[Kcc1plus:[m[K [01;35m[Kwarning: [m[K/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/CMakeFiles/aspect.exe.release.dir/cmake_pch.hxx.gch: created by a different GCC executable [[01;35m[K-Winvalid-pch[m[K]
+[ 15%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_1_cxx.cxx.o
+[01m[Kcc1plus:[m[K [01;35m[Kwarning: [m[K/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/CMakeFiles/aspect.exe.release.dir/cmake_pch.hxx.gch: created by a different GCC executable [[01;35m[K-Winvalid-pch[m[K]
+[ 16%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_21_cxx.cxx.o
+[01m[Kcc1plus:[m[K [01;35m[Kwarning: [m[K/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/CMakeFiles/aspect.exe.release.dir/cmake_pch.hxx.gch: created by a different GCC executable [[01;35m[K-Winvalid-pch[m[K]
+[ 18%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_23_cxx.cxx.o
+[01m[Kcc1plus:[m[K [01;35m[Kwarning: [m[K/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/CMakeFiles/aspect.exe.release.dir/cmake_pch.hxx.gch: created by a different GCC executable [[01;35m[K-Winvalid-pch[m[K]

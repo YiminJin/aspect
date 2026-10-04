@@ -1,0 +1,14 @@
+{
+  "checks": {
+    "comparison": 961,
+    "birth_checks": 424,
+    "local_comparison": 44,
+    "retry_reuse_checks": 6
+  },
+  "total_checks": 1435,
+  "local_simulation_seconds": 726.838189702002,
+  "production_attempt_seconds": 941.1758878800001,
+  "source_baseline": "1678949c2 plus preserved uncommitted Section-5 changes",
+  "production_boundary_admission": true,
+  "full_production_normalization_and_mechanics_qualified": false
+}

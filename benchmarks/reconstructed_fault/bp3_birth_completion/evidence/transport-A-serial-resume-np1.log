@@ -1,0 +1,70 @@
+-----------------------------------------------------------------------------
+--                             This is ASPECT                              --
+-- The Advanced Solver for Planetary Evolution, Convection, and Tectonics. --
+-----------------------------------------------------------------------------
+--     . version 3.1.0-pre (pf-rsf-refactor, 1a3b57eda)
+--     . using deal.II 9.6.2 (dealii-9.6, 6890ca740b)
+--     .       with 32 bit indices
+--     .       with vectorization level 2 (AVX, 4 doubles, 256 bits)
+--     . using Trilinos 14.2.0
+--     . using p4est 2.8.7
+--     . using Geodynamic World Builder 1.0.0
+--     . running in OPTIMIZED mode
+--     . running with 1 MPI process
+-----------------------------------------------------------------------------
+
+Loading shared library </home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_birth_completion/build/transport/libbp3_birth_transport.release.so>
+
+BP3 straight geometry v1 box -1000 0 2000 1000 anchors -288.67513459481296 1000 0.59999999999999998 288.67513459481296 0 0.59999999999999998 thrust -1 weakening 15000 width 3000 local 1
+BP3 dip=60, length=1154.7, tangent=0.5 -0.866025, normal=0.866025 0.5
+-----------------------------------------------------------------------------
+-- For information on how to cite ASPECT, see:
+--   https://aspect.geodynamics.org/citing.html?ver=3.1.0-pre&particles=1&sha=1a3b57eda&src=code
+-----------------------------------------------------------------------------
+*** Resuming from snapshot /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_birth_completion/output-transport-A-serial-resume/restart/01/
+
+Number of active cells: 12,656 (on 8 levels)
+Number of degrees of freedom: 613,291 (106,614+13,457+53,307+53,307+53,307+53,307+53,307+53,307+53,307+53,307+53,307+13,457)
+
+*** Timestep 3:  t=1.2 seconds, dt=0.4 seconds
+   Advecting particles...  done.
+
+   Postprocessing:
+     Curved transport:             native stored/shadow Q2 sampled
+     Number of advected particles: 201443
+     Birth identity audit          passed
+
+*** Timestep 4:  t=1.6 seconds, dt=0.4 seconds
+   Advecting particles...  done.
+
+   Postprocessing:
+     Curved transport:             native stored/shadow Q2 sampled
+     Number of advected particles: 201304
+     Birth identity audit          passed
+
+Termination requested by criterion: end time
+
+
++---------------------------------------------+------------+------------+
+| Total wallclock time elapsed since start    |        11s |            |
+|                                             |            |            |
+| Section                         | no. calls |  wall time | % of total |
++---------------------------------+-----------+------------+------------+
+| Initialization                  |         1 |     0.146s |       1.3% |
+| Interpolate Stokes solution     |         2 |     0.183s |       1.7% |
+| Particles: Advect               |         4 |    0.0962s |      0.87% |
+| Particles: Copy                 |         2 |   0.00929s |         0% |
+| Particles: Initialization       |         1 |  0.000177s |         0% |
+| Particles: Interpolate          |         2 |     0.264s |       2.4% |
+| Particles: Sort                 |         4 |    0.0406s |      0.37% |
+| Particles: Update properties    |         2 |     0.054s |      0.49% |
+| Postprocessing                  |         2 |      2.09s |        19% |
+| Setup dof systems               |         1 |     0.146s |       1.3% |
+| Setup matrices                  |         1 |      0.33s |         3% |
++---------------------------------+-----------+------------+------------+
+
+-- Total wallclock time elapsed including restarts: 27s
+-----------------------------------------------------------------------------
+-- For information on how to cite ASPECT, see:
+--   https://aspect.geodynamics.org/citing.html?ver=3.1.0-pre&particles=1&sha=1a3b57eda&src=code
+-----------------------------------------------------------------------------

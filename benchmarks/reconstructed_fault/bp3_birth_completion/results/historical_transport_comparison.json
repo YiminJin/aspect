@@ -1,0 +1,2058 @@
+[
+  {
+    "check": "transport-A-final/0/baseline-H",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/startup-not-births",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/0/0/shape",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/0/0/x",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/0/y",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/0/h",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/0/interface",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/0/boundary",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/0/n",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/0/Cp_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/0/Ap_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/0/crossings",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/0/born",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/0/reused_id_births",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/0/newborn_H_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/0/survivor_H_max_change",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/0/newborn_stress_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/0/retained_stress_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/0/tensor_constraint_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/0/stored_particle_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/0/shadow_particle_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/0/H_min",
+    "passed": false,
+    "max_abs": 5629.87658666577
+  },
+  {
+    "check": "transport-A-final/0/0/LLS_stored_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/0/LLS_shadow_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/0/Q2_stored_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/0/Q2_shadow_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/0/Q2_shadow_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/0/newborn-H",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/0/1/shape",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/0/1/x",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/1/y",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/1/h",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/1/interface",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/1/boundary",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/1/n",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/1/Cp_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/1/Ap_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/1/crossings",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/1/born",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/1/reused_id_births",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/1/newborn_H_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/1/survivor_H_max_change",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/1/newborn_stress_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/1/retained_stress_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/1/tensor_constraint_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/1/stored_particle_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/1/shadow_particle_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/1/H_min",
+    "passed": false,
+    "max_abs": 5629.876586665072
+  },
+  {
+    "check": "transport-A-final/0/1/LLS_stored_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/1/LLS_shadow_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/1/Q2_stored_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/1/Q2_shadow_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/1/Q2_shadow_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/0/1/newborn-H",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/1/baseline-H",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/1/actual-births-vs-trajectory",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/1/survivor-H",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/1/0/shape",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/1/0/x",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/0/y",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/0/h",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/0/interface",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/0/boundary",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/0/n",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/0/Cp_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/0/Ap_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/0/crossings",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/0/born",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/0/reused_id_births",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/0/newborn_H_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/0/survivor_H_max_change",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/0/newborn_stress_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/0/retained_stress_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/0/tensor_constraint_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/0/stored_particle_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/0/shadow_particle_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/0/H_min",
+    "passed": false,
+    "max_abs": 5629.87658666577
+  },
+  {
+    "check": "transport-A-final/1/0/LLS_stored_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/0/LLS_shadow_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/0/Q2_stored_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/0/Q2_shadow_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/0/Q2_shadow_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/0/newborn-H",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/1/1/shape",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/1/1/x",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/1/y",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/1/h",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/1/interface",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/1/boundary",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/1/n",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/1/Cp_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/1/Ap_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/1/crossings",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/1/born",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/1/reused_id_births",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/1/newborn_H_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/1/survivor_H_max_change",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/1/newborn_stress_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/1/retained_stress_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/1/tensor_constraint_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/1/stored_particle_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/1/shadow_particle_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/1/H_min",
+    "passed": false,
+    "max_abs": 5629.876586665072
+  },
+  {
+    "check": "transport-A-final/1/1/LLS_stored_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/1/LLS_shadow_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/1/Q2_stored_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/1/Q2_shadow_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/1/Q2_shadow_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/1/1/newborn-H",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/2/baseline-H",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/2/actual-births-vs-trajectory",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/2/survivor-H",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/2/0/shape",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/2/0/x",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/0/y",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/0/h",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/0/interface",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/0/boundary",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/0/n",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/0/Cp_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/0/Ap_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/0/crossings",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/0/born",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/0/reused_id_births",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/0/newborn_H_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/0/survivor_H_max_change",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/0/newborn_stress_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/0/retained_stress_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/0/tensor_constraint_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/0/stored_particle_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/0/shadow_particle_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/0/H_min",
+    "passed": false,
+    "max_abs": 5403.0234710158475
+  },
+  {
+    "check": "transport-A-final/2/0/LLS_stored_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/0/LLS_shadow_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/0/Q2_stored_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/0/Q2_shadow_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/0/Q2_shadow_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/0/newborn-H",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/2/1/shape",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/2/1/x",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/1/y",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/1/h",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/1/interface",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/1/boundary",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/1/n",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/1/Cp_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/1/Ap_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/1/crossings",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/1/born",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/1/reused_id_births",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/1/newborn_H_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/1/survivor_H_max_change",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/1/newborn_stress_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/1/retained_stress_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/1/tensor_constraint_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/1/stored_particle_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/1/shadow_particle_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/1/H_min",
+    "passed": false,
+    "max_abs": 5531.293042914302
+  },
+  {
+    "check": "transport-A-final/2/1/LLS_stored_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/1/LLS_shadow_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/1/Q2_stored_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/1/Q2_shadow_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/1/Q2_shadow_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/2/1/newborn-H",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/3/baseline-H",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/3/actual-births-vs-trajectory",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/3/survivor-H",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/3/0/shape",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/3/0/x",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/0/y",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/0/h",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/0/interface",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/0/boundary",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/0/n",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/0/Cp_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/0/Ap_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/0/crossings",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/0/born",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/0/reused_id_births",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/0/newborn_H_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/0/survivor_H_max_change",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/0/newborn_stress_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/0/retained_stress_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/0/tensor_constraint_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/0/stored_particle_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/0/shadow_particle_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/0/H_min",
+    "passed": false,
+    "max_abs": 2577.7808208618953
+  },
+  {
+    "check": "transport-A-final/3/0/LLS_stored_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/0/LLS_shadow_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/0/Q2_stored_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/0/Q2_shadow_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/0/Q2_shadow_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/0/newborn-H",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/3/1/shape",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/3/1/x",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/1/y",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/1/h",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/1/interface",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/1/boundary",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/1/n",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/1/Cp_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/1/Ap_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/1/crossings",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/1/born",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/1/reused_id_births",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/1/newborn_H_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/1/survivor_H_max_change",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/1/newborn_stress_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/1/retained_stress_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/1/tensor_constraint_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/1/stored_particle_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/1/shadow_particle_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/1/H_min",
+    "passed": false,
+    "max_abs": 11874.160977523003
+  },
+  {
+    "check": "transport-A-final/3/1/LLS_stored_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/1/LLS_shadow_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/1/Q2_stored_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/1/Q2_shadow_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/1/Q2_shadow_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/3/1/newborn-H",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/4/baseline-H",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/4/actual-births-vs-trajectory",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/4/survivor-H",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/4/0/shape",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/4/0/x",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/0/y",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/0/h",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/0/interface",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/0/boundary",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/0/n",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/0/Cp_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/0/Ap_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/0/crossings",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/0/born",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/0/reused_id_births",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/0/newborn_H_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/0/survivor_H_max_change",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/0/newborn_stress_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/0/retained_stress_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/0/tensor_constraint_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/0/stored_particle_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/0/shadow_particle_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/0/H_min",
+    "passed": false,
+    "max_abs": 2596.7944917623754
+  },
+  {
+    "check": "transport-A-final/4/0/LLS_stored_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/0/LLS_shadow_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/0/Q2_stored_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/0/Q2_shadow_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/0/Q2_shadow_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/0/newborn-H",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/4/1/shape",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/4/1/x",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/1/y",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/1/h",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/1/interface",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/1/boundary",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/1/n",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/1/Cp_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/1/Ap_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/1/crossings",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/1/born",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/1/reused_id_births",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/1/newborn_H_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/1/survivor_H_max_change",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/1/newborn_stress_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/1/retained_stress_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/1/tensor_constraint_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/1/stored_particle_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/1/shadow_particle_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/1/H_min",
+    "passed": false,
+    "max_abs": 12254.416065116326
+  },
+  {
+    "check": "transport-A-final/4/1/LLS_stored_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/1/LLS_shadow_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/1/Q2_stored_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/1/Q2_shadow_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/1/Q2_shadow_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-final/4/1/newborn-H",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/reuse-nonvacuous",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/restart/3/exact-particles-and-birth-flags",
+    "passed": true
+  },
+  {
+    "check": "transport-A-final/restart/4/exact-particles-and-birth-flags",
+    "passed": true
+  },
+  {
+    "check": "transport-A-serial/0/baseline-H",
+    "passed": true
+  },
+  {
+    "check": "transport-A-serial/startup-not-births",
+    "passed": true
+  },
+  {
+    "check": "transport-A-serial/0/0/shape",
+    "passed": true
+  },
+  {
+    "check": "transport-A-serial/0/0/x",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/0/0/y",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/0/0/h",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/0/0/interface",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/0/0/boundary",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/0/0/n",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/0/0/Cp_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/0/0/Ap_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/0/0/crossings",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/0/0/born",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/0/0/reused_id_births",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/0/0/newborn_H_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/0/0/survivor_H_max_change",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/0/0/newborn_stress_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/0/0/retained_stress_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/0/0/tensor_constraint_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/0/0/stored_particle_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/0/0/shadow_particle_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/0/0/H_min",
+    "passed": false,
+    "max_abs": 5629.87658666577
+  },
+  {
+    "check": "transport-A-serial/0/0/LLS_stored_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/0/0/LLS_shadow_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/0/0/Q2_stored_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/0/0/Q2_shadow_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/0/0/Q2_shadow_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/0/0/newborn-H",
+    "passed": true
+  },
+  {
+    "check": "transport-A-serial/1/baseline-H",
+    "passed": true
+  },
+  {
+    "check": "transport-A-serial/1/actual-births-vs-trajectory",
+    "passed": true
+  },
+  {
+    "check": "transport-A-serial/1/survivor-H",
+    "passed": true
+  },
+  {
+    "check": "transport-A-serial/1/0/shape",
+    "passed": true
+  },
+  {
+    "check": "transport-A-serial/1/0/x",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/1/0/y",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/1/0/h",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/1/0/interface",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/1/0/boundary",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/1/0/n",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/1/0/Cp_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/1/0/Ap_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/1/0/crossings",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/1/0/born",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/1/0/reused_id_births",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/1/0/newborn_H_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/1/0/survivor_H_max_change",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/1/0/newborn_stress_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/1/0/retained_stress_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/1/0/tensor_constraint_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/1/0/stored_particle_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/1/0/shadow_particle_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/1/0/H_min",
+    "passed": false,
+    "max_abs": 5629.87658666577
+  },
+  {
+    "check": "transport-A-serial/1/0/LLS_stored_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/1/0/LLS_shadow_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/1/0/Q2_stored_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/1/0/Q2_shadow_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/1/0/Q2_shadow_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/1/0/newborn-H",
+    "passed": true
+  },
+  {
+    "check": "transport-A-serial/2/baseline-H",
+    "passed": true
+  },
+  {
+    "check": "transport-A-serial/2/actual-births-vs-trajectory",
+    "passed": true
+  },
+  {
+    "check": "transport-A-serial/2/survivor-H",
+    "passed": true
+  },
+  {
+    "check": "transport-A-serial/2/0/shape",
+    "passed": true
+  },
+  {
+    "check": "transport-A-serial/2/0/x",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/2/0/y",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/2/0/h",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/2/0/interface",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/2/0/boundary",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/2/0/n",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/2/0/Cp_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/2/0/Ap_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/2/0/crossings",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/2/0/born",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/2/0/reused_id_births",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/2/0/newborn_H_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/2/0/survivor_H_max_change",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/2/0/newborn_stress_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/2/0/retained_stress_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/2/0/tensor_constraint_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/2/0/stored_particle_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/2/0/shadow_particle_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/2/0/H_min",
+    "passed": false,
+    "max_abs": 5531.293042914302
+  },
+  {
+    "check": "transport-A-serial/2/0/LLS_stored_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/2/0/LLS_shadow_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/2/0/Q2_stored_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/2/0/Q2_shadow_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/2/0/Q2_shadow_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/2/0/newborn-H",
+    "passed": true
+  },
+  {
+    "check": "transport-A-serial/3/baseline-H",
+    "passed": true
+  },
+  {
+    "check": "transport-A-serial/3/actual-births-vs-trajectory",
+    "passed": true
+  },
+  {
+    "check": "transport-A-serial/3/survivor-H",
+    "passed": true
+  },
+  {
+    "check": "transport-A-serial/3/0/shape",
+    "passed": true
+  },
+  {
+    "check": "transport-A-serial/3/0/x",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/3/0/y",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/3/0/h",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/3/0/interface",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/3/0/boundary",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/3/0/n",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/3/0/Cp_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/3/0/Ap_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/3/0/crossings",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/3/0/born",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/3/0/reused_id_births",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/3/0/newborn_H_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/3/0/survivor_H_max_change",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/3/0/newborn_stress_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/3/0/retained_stress_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/3/0/tensor_constraint_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/3/0/stored_particle_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/3/0/shadow_particle_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/3/0/H_min",
+    "passed": false,
+    "max_abs": 11874.160977523003
+  },
+  {
+    "check": "transport-A-serial/3/0/LLS_stored_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/3/0/LLS_shadow_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/3/0/Q2_stored_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/3/0/Q2_shadow_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/3/0/Q2_shadow_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/3/0/newborn-H",
+    "passed": true
+  },
+  {
+    "check": "transport-A-serial/4/baseline-H",
+    "passed": true
+  },
+  {
+    "check": "transport-A-serial/4/actual-births-vs-trajectory",
+    "passed": true
+  },
+  {
+    "check": "transport-A-serial/4/survivor-H",
+    "passed": true
+  },
+  {
+    "check": "transport-A-serial/4/0/shape",
+    "passed": true
+  },
+  {
+    "check": "transport-A-serial/4/0/x",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/4/0/y",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/4/0/h",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/4/0/interface",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/4/0/boundary",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/4/0/n",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/4/0/Cp_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/4/0/Ap_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/4/0/crossings",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/4/0/born",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/4/0/reused_id_births",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/4/0/newborn_H_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/4/0/survivor_H_max_change",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/4/0/newborn_stress_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/4/0/retained_stress_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/4/0/tensor_constraint_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/4/0/stored_particle_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/4/0/shadow_particle_max_error",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/4/0/H_min",
+    "passed": false,
+    "max_abs": 12254.416065116326
+  },
+  {
+    "check": "transport-A-serial/4/0/LLS_stored_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/4/0/LLS_shadow_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/4/0/Q2_stored_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/4/0/Q2_shadow_rms",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/4/0/Q2_shadow_max",
+    "passed": true,
+    "max_abs": 0.0
+  },
+  {
+    "check": "transport-A-serial/4/0/newborn-H",
+    "passed": true
+  },
+  {
+    "check": "transport-A-serial/reuse-nonvacuous",
+    "passed": true
+  },
+  {
+    "check": "transport-A-serial/restart/3/exact-particles-and-birth-flags",
+    "passed": true
+  },
+  {
+    "check": "transport-A-serial/restart/4/exact-particles-and-birth-flags",
+    "passed": true
+  }
+]

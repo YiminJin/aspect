@@ -360,7 +360,7 @@ namespace aspect
           {
             minimum_H=std::min(minimum_H,particle.get_properties()[H_position]);
             maximum_H=std::max(maximum_H,particle.get_properties()[H_position]);
-            if(this->get_timestep_number()>0 && particle.get_id()>=BP3Benchmark::first_attempt_birth_id) ++born;
+            if(this->get_timestep_number()>0 && BP3Benchmark::attempt_births.count(particle.get_id())) ++born;
             for (unsigned int c = 0; c < 3; ++c)
               {
                 const double value=particle.get_properties()[stress_position+c];

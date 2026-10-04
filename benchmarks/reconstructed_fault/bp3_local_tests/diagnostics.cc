@@ -25,7 +25,7 @@ namespace Postprocess
 template <int dim>
 class BP3LocalProbes : public Interface<dim>, public SimulatorAccess<dim>
 {
-  // Replicated accepted diagnostics let stable IDs retain their path through
+  // Replicated accepted diagnostics let surviving particles retain their path through
   // MPI migration. Births start at zero; deleted IDs are discarded.
   // Checkpointed solely to continue these observations, never to restore
   // physical history.
@@ -121,7 +121,9 @@ public:
               const double h = cell->diameter () / std::sqrt (double (dim));
               double path = 0;
               const auto old = previous.find (p.get_id ());
-              if (old != previous.end ())
+              // A native birth can reuse a retired ID. Start its path at zero
+              // even when that ID is present in the previous accepted map.
+              if (old != previous.end () && !BP3Benchmark::attempt_births.count (p.get_id ()))
                 {
                   // Incoming-cell edge is the denominator, before this
                   // accepted move.

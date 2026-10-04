@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.13.4)
+find_package(Aspect REQUIRED HINTS ${Aspect_DIR})
+DEAL_II_INITIALIZE_CACHED_VARIABLES()
+project(bp3_completion_qualification)
+add_library(completion_qualification SHARED qualification.cc)
+ASPECT_SETUP_PLUGIN(completion_qualification)
+target_link_libraries(completion_qualification ${CMAKE_CURRENT_BINARY_DIR}/../maintained/libbp3_restore_150x50.release.so)

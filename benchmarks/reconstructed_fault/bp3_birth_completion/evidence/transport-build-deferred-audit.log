@@ -1,0 +1,3 @@
+[ 12%] Building CXX object CMakeFiles/bp3_birth_transport.dir/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3/plugin/particle_history.cc.o
+[ 25%] Linking CXX shared library libbp3_birth_transport.release.so
+[100%] Built target bp3_birth_transport

@@ -5,10 +5,13 @@ historical checkpoint. Its only model data file is `fault.txt`. Build the single
 maintained source package in `../plugin/`; no geometry/profile/mesh preparation
 script or historical fixture directory is a runtime dependency.
 
-**Do not launch the production mesh yet.** Section 3 demonstrated that the
-preserved graded mesh conflicts with core automatic-completion boundary-lattice
-admission. This packaging pass does not change that numerical restriction.
-Parameter validation is not resolved-mesh or first-event qualification.
+The maintained mesh now retains the fine endpoint buffer used by both successful
+local meshes. A's exterior slope alone is insufficient. The buffer and actual
+150×50 km completion footprint are checked in the
+[birth/completion report](../../bp3_birth_completion/README.md); core admission is
+unchanged. The separate historical unbuffered 45° failure is not a blocker for
+this 60° configuration. A full production mechanics trajectory/server run remains
+unqualified, and the resource-limited startup attempts are recorded explicitly.
 
 ## Settings provenance
 
@@ -35,7 +38,7 @@ obsolete PhaseFieldRSF model and is not the basis of this candidate.
 | Nonlinear / linear tolerance | 1e-8 / 1e-9 | Preserved; no convergence relaxation |
 | Initial particle policy | regular 4×4; 12–24 | User-selected replacement of old 3×3/no-replenishment setup |
 | Interpolation | native LLS via BP3 history adapter; continuous Q2 | H and all Maxwell components limited, boundary extrapolation off |
-| Mesh levels | initial-global 9, minimum 1, adaptive 0 | Same intended h_fine=3.90625 m / h_coarse=1000 m; generated before particle initialization |
+| Mesh levels | initial-global 9, minimum 1, adaptive 0 | h_fine=3.90625 m / h_coarse=1000 m; generated before particles; protected endpoint strip included |
 | Profiles / heavy schedule | 0.1 m or 31557600 s, plus existing forced outputs | Inherited first-event schedule |
 | Field/particle visualization / detailed CSVs | off / off | Explicit opt-in; fault profiles and full checkpoints remain |
 | Checkpoint / graceful wall stop | 1800 wall seconds / 82800 seconds | Inherited |
@@ -50,22 +53,29 @@ The exact explicit differences are in
 and native default-expanded candidate values in
 [production_resolved.json](../../bp3_packaging/results/production_resolved.json).
 
-## Build and parse only
+## Build and validate
 
 From the repository root, with the matching compiler/MPI/deal.II environment:
 
 ```sh
 cmake -S benchmarks/reconstructed_fault/bp3/plugin \
-  -B benchmarks/reconstructed_fault/bp3/build-maintained \
+  -B benchmarks/reconstructed_fault/bp3/build-maintained-buffered \
   -DAspect_DIR="$PWD/build-refactor-r6b" -DCMAKE_BUILD_TYPE=Release
-cmake --build benchmarks/reconstructed_fault/bp3/build-maintained -j 3
+cmake --build benchmarks/reconstructed_fault/bp3/build-maintained-buffered -j 3
 export ASPECT_SOURCE_DIR="$PWD"
-mpirun -np 1 build-refactor-r6b/aspect-filter-derivative-qualified --validate \
+mpirun -np 1 build-refactor-r6b/aspect-birth-identity-qualified --validate \
   benchmarks/reconstructed_fault/bp3/production/bp3_fresh.prm
 ```
 
 For a future separately qualified server run, adjust the library, fault and
-output paths and rebuild against the exact server executable stack. No server
-job or full production inventory was run here. The historical 542,958-cell
-mesh would start with 8,687,328 particles at 4×4; that is an estimate based on
-the historical count, not a measured inventory of this generated candidate.
+output paths and rebuild against the exact server executable stack. The new
+particle-manager notification changes the C++ interface, so rebuild plugins
+against the corrected executable; checkpoint payload versions remain unchanged.
+The old qualified executable and `build-maintained` library are preserved.
+
+The measured buffered mesh has **552,084 cells**, finest/coarsest edges
+**3.90625/1000 m**, corresponding to **8,833,344 initial particles** at 4×4. Its production
+completion footprint has half-width **1622.994616 m** at each endpoint, with
+**832 aligned fine boundary faces** covering each footprint. Native smoothing
+remains active. The model identity includes the full buffer policy; old unbuffered
+checkpoints must use their original plugin rather than silently changing meshes.

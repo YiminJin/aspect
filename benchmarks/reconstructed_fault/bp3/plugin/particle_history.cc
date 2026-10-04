@@ -16,32 +16,41 @@ namespace aspect
     // Native MPI transfer carries baselines; checkpoint capture is separate.
     std::map<types::particle_index,double> work_initial_H;
     std::map<types::particle_index,double> checkpoint_particle_H;
-    types::particle_index population_before_attempt = 0, first_attempt_birth_id = 0;
+    types::particle_index population_before_attempt = 0;
+    std::set<types::particle_index> attempt_births;
     namespace
     {
       std::map<types::particle_index,double> backup_H;
-      types::particle_index birth_floor = 0, backup_birth_floor = 0;
+      std::set<types::particle_index> pending_births;
       bool initialized = false;
 
       template <int dim>
       void attach_transfer(Particle::Manager<dim> &pm)
       {
         pm.get_particle_handler().register_additional_store_load_functions(
-          []() -> std::size_t { return sizeof(double); },
+          []() -> std::size_t { return sizeof(double)+sizeof(unsigned char); },
           [](const auto &particle, void *buffer) -> void *
           {
             const auto found = work_initial_H.find(particle->get_id());
             const double H = found==work_initial_H.end()
                              ? std::numeric_limits<double>::quiet_NaN() : found->second;
             std::memcpy(buffer, &H, sizeof(H));
-            return static_cast<char *>(buffer)+sizeof(H);
+            const unsigned char born = attempt_births.count(particle->get_id()) != 0;
+            auto *next = static_cast<char *>(buffer)+sizeof(H);
+            std::memcpy(next, &born, sizeof(born));
+            return next+sizeof(born);
           },
           [](const auto &particle, const void *buffer) -> const void *
           {
             double H;
             std::memcpy(&H, buffer, sizeof(H));
+            unsigned char born;
+            const auto *next = static_cast<const char *>(buffer)+sizeof(H);
+            std::memcpy(&born, next, sizeof(born));
             if (std::isfinite(H)) work_initial_H[particle->get_id()] = H;
-            return static_cast<const char *>(buffer)+sizeof(H);
+            if (born) attempt_births.insert(particle->get_id());
+            else attempt_births.erase(particle->get_id());
+            return next+sizeof(born);
           });
       }
 
@@ -51,20 +60,21 @@ namespace aspect
         const auto H = pm.get_property_manager().get_data_info().get_position_by_field_name("crack_driving_force");
         std::map<types::particle_index,double> current;
         bool valid = true;
+        std::set<types::particle_index> current_births;
         for (const auto &particle : pm.get_particle_handler())
           {
             const double value = particle.get_properties()[H];
             const auto old = work_initial_H.find(particle.get_id());
-            if (old != work_initial_H.end())
+            if (!pending_births.count(particle.get_id()) && old != work_initial_H.end())
               {
                 valid = valid && value==old->second;
                 current.emplace(*old);
               }
             else
               {
-                // A migrated survivor must bring its audit value. Only a new
-                // native ID can establish a new baseline after initialization.
-                valid = valid && (!initialized || particle.get_id()>=birth_floor)
+                // An actual insertion may reuse a retired ID whose old
+                // baseline remains here. Migrated survivors must bring theirs.
+                valid = valid && (!initialized || pending_births.count(particle.get_id()))
                         && std::isfinite(value) && value>=0.;
                 const auto &properties = pm.get_property_manager();
                 if (properties.template has_matching_active_plugin<Particle::Property::BP3FrozenCrackDrivingForce<dim>>())
@@ -75,21 +85,26 @@ namespace aspect
                   }
                 current.emplace(particle.get_id(), value);
               }
+            if (attempt_births.count(particle.get_id()))
+              current_births.insert(particle.get_id());
           }
         AssertThrow(Utilities::MPI::min(static_cast<unsigned int>(valid), pm.get_mpi_communicator()),
                     ExcMessage("BP3 particle audit: changed survivor H, missing migrated baseline, or invalid birth H (including the selected stationary initializer)."));
         work_initial_H.swap(current); // Legitimate removals and old ghost entries are forgotten.
+        attempt_births.swap(current_births);
+        pending_births.clear();
         initialized = true;
-        birth_floor = pm.get_particle_handler().get_next_free_particle_index();
       }
     }
 
-    void restore_particle_audit(const types::particle_index next_id)
+    void restore_particle_audit(const types::particle_index /*legacy_next_id*/)
     {
       // A restart must verify restored survivors before native management can
       // introduce births. Do not treat deserialization as fresh initialization.
       initialized = true;
-      birth_floor = next_id;
+      // Consume the legacy archive field without treating it as a lifetime ID.
+      attempt_births.clear();
+      pending_births.clear();
     }
 
     template <int dim>
@@ -100,25 +115,33 @@ namespace aspect
       auto &pm = const_cast<Particle::Manager<dim> &>(
         sim.get_phase_field_handler().get_associated_particle_manager());
       attach_transfer(pm);
+      pm.post_particle_creation.connect([](const auto &particle)
+      {
+        // Native count management does not migrate particles between insertion
+        // and post-management. Defer validation/publication to that existing
+        // collective audit, retaining observer timing and survivor baselines.
+        pending_births.insert(particle->get_id());
+        attempt_births.insert(particle->get_id());
+      });
       sim.get_signals().post_set_initial_state.connect([&pm](const SimulatorAccess<dim> &)
       {
         prepare_audit(pm);
-        birth_floor = pm.get_particle_handler().get_next_free_particle_index();
+        attempt_births.clear();
       });
       sim.get_signals().post_particle_backup.connect([&pm](Particle::Manager<dim> &manager)
       {
         if (&manager != &pm) return;
         population_before_attempt=pm.get_particle_handler().n_locally_owned_particles();
-        first_attempt_birth_id=pm.get_particle_handler().get_next_free_particle_index();
         backup_H = work_initial_H;
-        birth_floor = pm.get_particle_handler().get_next_free_particle_index();
-        backup_birth_floor = birth_floor;
+        attempt_births.clear();
+        pending_births.clear();
       });
       sim.get_signals().post_particle_restore.connect([&pm](Particle::Manager<dim> &manager)
       {
         if (&manager != &pm) return;
         work_initial_H = backup_H;
-        birth_floor = backup_birth_floor;
+        attempt_births.clear();
+        pending_births.clear();
         attach_transfer(pm);
       });
       sim.get_signals().post_particle_management.connect([&pm](Particle::Manager<dim> &manager)
@@ -146,7 +169,7 @@ namespace aspect
       {
         // The archive's current-population baseline has already been checked
         // and pruned by the post-management slot, including after repartition.
-        birth_floor = pm.get_particle_handler().get_next_free_particle_index();
+        attempt_births.clear();
         attach_transfer(pm);
       });
     }

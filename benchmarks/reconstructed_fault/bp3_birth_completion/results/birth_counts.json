@@ -1,0 +1,74 @@
+[
+  {
+    "case": "transport-A-final",
+    "step": 1,
+    "particles": 202496,
+    "births": 0,
+    "reused_ids": 0,
+    "old_threshold_births": 0,
+    "lost": 0
+  },
+  {
+    "case": "transport-A-final",
+    "step": 2,
+    "particles": 202496,
+    "births": 0,
+    "reused_ids": 0,
+    "old_threshold_births": 0,
+    "lost": 0
+  },
+  {
+    "case": "transport-A-final",
+    "step": 3,
+    "particles": 201443,
+    "births": 72,
+    "reused_ids": 1,
+    "old_threshold_births": 71,
+    "lost": 1125
+  },
+  {
+    "case": "transport-A-final",
+    "step": 4,
+    "particles": 201304,
+    "births": 582,
+    "reused_ids": 0,
+    "old_threshold_births": 582,
+    "lost": 721
+  },
+  {
+    "case": "transport-A-serial",
+    "step": 1,
+    "particles": 202496,
+    "births": 0,
+    "reused_ids": 0,
+    "old_threshold_births": 0,
+    "lost": 0
+  },
+  {
+    "case": "transport-A-serial",
+    "step": 2,
+    "particles": 202496,
+    "births": 0,
+    "reused_ids": 0,
+    "old_threshold_births": 0,
+    "lost": 0
+  },
+  {
+    "case": "transport-A-serial",
+    "step": 3,
+    "particles": 201443,
+    "births": 72,
+    "reused_ids": 1,
+    "old_threshold_births": 71,
+    "lost": 1125
+  },
+  {
+    "case": "transport-A-serial",
+    "step": 4,
+    "particles": 201304,
+    "births": 582,
+    "reused_ids": 0,
+    "old_threshold_births": 582,
+    "lost": 721
+  }
+]

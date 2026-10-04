@@ -1,0 +1,23 @@
+{
+  "peak_aggregate_rss_kib": 190200,
+  "limit_reason": null,
+  "command": [
+    "mpirun",
+    "-np",
+    "1",
+    "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/aspect-birth-identity-qualified",
+    "--validate",
+    "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_birth_completion/inputs/production-parse.prm"
+  ],
+  "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+  "exit_code": 0,
+  "seconds": 2.047606693000489,
+  "child_max_rss_kib": 185828,
+  "environment": {
+    "OMP_PROC_BIND": "spread",
+    "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "OMP_NUM_THREADS": "1",
+    "DEAL_II_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1"
+  }
+}
