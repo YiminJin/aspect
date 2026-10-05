@@ -1,0 +1,8 @@
+{
+  "baseline": "752c5bcbd",
+  "source": "source/particle/property/crack_driving_force.cc",
+  "unchanged_baseline_source": true,
+  "sha256": "91c78fbd32ce39eea51d2ff2cbe130369117d4b46cf90491264dbb1bc8106f09",
+  "failure_log": "build-gcc12-independent.log",
+  "cause": "InitialComposition::Manager is forward declared; initial_composition/interface.h missing"
+}

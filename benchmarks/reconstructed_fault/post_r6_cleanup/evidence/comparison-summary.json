@@ -1,0 +1,14 @@
+{
+  "gcc12-qualified-unity": {
+    "checks": 961,
+    "passed": 961,
+    "nonzero_field_comparisons": 0,
+    "largest_scaled_difference": 0
+  },
+  "gcc12-independent": {
+    "checks": 961,
+    "passed": 961,
+    "nonzero_field_comparisons": 0,
+    "largest_scaled_difference": 0
+  }
+}

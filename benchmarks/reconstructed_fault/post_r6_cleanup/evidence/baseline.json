@@ -1,0 +1,30 @@
+{
+  "revision": "752c5bcbd96df5c9904387f74e2738cbf7e6bcac",
+  "branch": "pf-rsf-refactor",
+  "status": " M benchmarks/reconstructed_fault/bp3/README.md\n M benchmarks/reconstructed_fault/bp3/plugin/README.md\n M benchmarks/reconstructed_fault/bp3/production/README.md\n M benchmarks/reconstructed_fault/bp3/production/bp3_fresh.prm\n M doc/reconstructed_fault/CURRENT_STATUS.md\n?? benchmarks/reconstructed_fault/bp3/production/bp3-stampede3-752c5bcbd.tar.gz\n?? benchmarks/reconstructed_fault/bp3/production/stampede3/\n?? doc/reconstructed_fault/bp3/bp3_local_velocity_oscillation_tests_codex.md\n?? doc/reconstructed_fault/bp3/bp3_particle_replenishment_codex.md\n?? doc/reconstructed_fault/bp3/bp3_runtime_cleanup_local_tests_codex.md\n?? doc/reconstructed_fault/refactoring/codex_post_R6_cleanup.md\n?? doc/reconstructed_fault/refactoring/tmp/\n",
+  "protected_files": {
+    "benchmarks/reconstructed_fault/bp3/README.md": "9cbae5c1b041bd6929331870a63d6b673ce167a59b03961971f14a9a845fd03a",
+    "benchmarks/reconstructed_fault/bp3/plugin/README.md": "83efc0dc27d85963c84c24f0184b27a929f8666d250734b10cc04f5dd5aff546",
+    "benchmarks/reconstructed_fault/bp3/production/README.md": "8c251c603c3a21b00a0d9b2a69f657300144b7ae25044b9a918fbfc1678b30fd",
+    "benchmarks/reconstructed_fault/bp3/production/bp3_fresh.prm": "3096f0995801ce27331ad05aa33a1110fcf2a93ed606b5bccd85a42cd0aa5cbc",
+    "doc/reconstructed_fault/CURRENT_STATUS.md": "2da3aab9ae9ffc92a1f624a67a92bc678180bd4018e22bd0be84e67852e39c9a",
+    "benchmarks/reconstructed_fault/bp3/production/stampede3/fresh.prm": "866794be430b021bc0cc41ffb27671bff71673eeae6e4943c00a374d8cb55c68",
+    "benchmarks/reconstructed_fault/bp3/production/stampede3/restart.prm": "68b78f530ec8ac7927212b98af99ff05fb33b0c8dd7275129714d7ad6870d207",
+    "benchmarks/reconstructed_fault/bp3/production/stampede3/first_event.prm": "7d9d88494936e15dc9f3f379c7407c71f9f8b381fe1142c4c913ad13a3d621ab",
+    "benchmarks/reconstructed_fault/bp3/production/stampede3/fault.txt": "5460e34da479ef16e7dcc95f62669250a891ee8c969df5064dd3e4320bea4a24",
+    "benchmarks/reconstructed_fault/bp3/production/stampede3/resolved_settings.json": "9d3a29c739ee2235f7272da32dfcd4afa442751b981b78e988c7eecd6275a9d6",
+    "benchmarks/reconstructed_fault/bp3/production/stampede3/SHA256SUMS": "b7acfa67229bd66c28b62f0640b1a2b072efe80ae424e6e0e223e6022bfab3e4",
+    "benchmarks/reconstructed_fault/bp3/production/stampede3/README.md": "344c514ba3b30ef9baaea5b73675424cdb668bdb1062b4885673f49c3cb9e440",
+    "benchmarks/reconstructed_fault/bp3/production/stampede3/environment.sh": "b4e3c3a8874b80d1e8ff3ebdb148ce210bac90554b10a4c2e8c68963adba3774",
+    "benchmarks/reconstructed_fault/bp3/production/stampede3/verification/fresh-validation.log": "da7c231e4183ca513315782fa00120d665d0c039e0afdc685b508a6adf0372cf",
+    "benchmarks/reconstructed_fault/bp3/production/stampede3/verification/restart-validation.log": "da7c231e4183ca513315782fa00120d665d0c039e0afdc685b508a6adf0372cf",
+    "benchmarks/reconstructed_fault/bp3/production/stampede3/verification/first_event-validation.log": "da7c231e4183ca513315782fa00120d665d0c039e0afdc685b508a6adf0372cf",
+    "benchmarks/reconstructed_fault/bp3/production/stampede3/verification/parameter_differences.json": "4544b4ad3dcb9b5bf1ce2382bad0f75bd82b005c26ee3358d6d7bb9fe156409e",
+    "benchmarks/reconstructed_fault/bp3/production/bp3-stampede3-752c5bcbd.tar.gz": "0baf69a336b538df7b1e69070ceb00b34923b5456160123f39bb214f97f36776"
+  },
+  "baseline_binary": "build-refactor-r6b/aspect-birth-identity-qualified",
+  "baseline_binary_sha256": "e2692d2930b33274e8e025653f6c102e0e7afd3a70cc3d30e7d3e9a9681ade2b",
+  "compiler": "g++ (GCC) 16.2.1 20260810\nCopyright (C) 2026 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+  "unity": true,
+  "pch": true
+}

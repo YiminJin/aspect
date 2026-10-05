@@ -1,0 +1,19 @@
+-- Using the deal.II-9.6.2 installation found at /opt/dealii/9.6-local
+-- Include macro /opt/dealii/9.6-local/share/deal.II/macros/macro_deal_ii_add_test.cmake
+-- Include macro /opt/dealii/9.6-local/share/deal.II/macros/macro_deal_ii_initialize_cached_variables.cmake
+-- Include macro /opt/dealii/9.6-local/share/deal.II/macros/macro_deal_ii_invoke_autopilot.cmake
+-- Include macro /opt/dealii/9.6-local/share/deal.II/macros/macro_deal_ii_pickup_tests.cmake
+-- Include macro /opt/dealii/9.6-local/share/deal.II/macros/macro_deal_ii_query_git_information.cmake
+-- Include macro /opt/dealii/9.6-local/share/deal.II/macros/macro_deal_ii_setup_target.cmake
+-- Include macro /opt/dealii/9.6-local/share/deal.II/macros/macro_shell_escape_option_groups.cmake
+-- Include macro /opt/dealii/9.6-local/share/deal.II/macros/macro_target_compile_flags.cmake
+-- Include macro /opt/dealii/9.6-local/share/deal.II/macros/macro_target_link_flags.cmake
+-- The CXX compiler identification is GNU 12.4.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /opt/openmpi/5.0.6/bin/mpic++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Configuring done (0.6s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/post_r6_cleanup/build-gcc12/installed_consumer

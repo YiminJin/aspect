@@ -1,0 +1,29 @@
+[
+  {
+    "variant": "baseline",
+    "binary": "build-refactor-r6b/aspect-birth-identity-qualified",
+    "sha256": "e2692d2930b33274e8e025653f6c102e0e7afd3a70cc3d30e7d3e9a9681ade2b",
+    "required_member_symbols": 200,
+    "missing_members": [],
+    "baseline_manager_signatures": 126,
+    "missing_manager_signatures": []
+  },
+  {
+    "variant": "gcc12-qualified-unity",
+    "binary": "build-refactor-post-r6-gcc12-unity/aspect",
+    "sha256": "f954b70bb1aae8168e2473dc989fbf8eaee1c5ca770121905c04bae90e2866a3",
+    "required_member_symbols": 200,
+    "missing_members": [],
+    "baseline_manager_signatures": 126,
+    "missing_manager_signatures": []
+  },
+  {
+    "variant": "gcc12-independent",
+    "binary": "build-refactor-post-r6-gcc12-independent/aspect",
+    "sha256": "87352e71e47439c835b3483ca1abdab944c089ff646f1794b22b7d4e2a3ff028",
+    "required_member_symbols": 200,
+    "missing_members": [],
+    "baseline_manager_signatures": 126,
+    "missing_manager_signatures": []
+  }
+]

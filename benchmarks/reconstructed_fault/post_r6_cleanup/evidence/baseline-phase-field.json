@@ -1,0 +1,8 @@
+{
+  "baseline": "752c5bcbd",
+  "source": "source/simulator/phase_field.cc",
+  "unchanged_baseline_source": true,
+  "sha256": "243d120e72d3034dc93ed29e6769d876c87eab31855b820689290cb67ddb5954",
+  "failure_log": "build-gcc12-independent-resume.log",
+  "cause": "Particle::Manager incomplete and ExcNonlinearSolverNoConvergence undeclared"
+}

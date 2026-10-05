@@ -1,0 +1,288 @@
+[  1%] Built target WorldBuilderRelease
+[  2%] Built target gwb-dat
+[  2%] Built target gwb-grid
+[  4%] Built target unit_tests
+[  4%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/particle/property/function.cc.o
+[  6%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/particle/property/crack_driving_force.cc.o
+[  6%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/particle/property/elastic_tensor_decomposition.cc.o
+[  6%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/particle/property/grain_size.cc.o
+[  6%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/particle/property/initial_composition.cc.o
+[  6%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/particle/property/initial_position.cc.o
+[  7%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/particle/property/integrated_strain.cc.o
+[  7%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/particle/property/integrated_strain_invariant.cc.o
+[  7%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/particle/property/interface.cc.o
+[  7%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/particle/property/maxwell_stress.cc.o
+[  7%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/particle/property/melt_particle.cc.o
+[  8%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/particle/property/pT_path.cc.o
+[  8%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/particle/property/position.cc.o
+[  8%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/particle/property/reference_position.cc.o
+[  8%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/particle/property/strain_rate.cc.o
+[  8%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/particle/property/velocity.cc.o
+[  9%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/particle/property/velocity_gradient.cc.o
+[  9%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/particle/property/viscoplastic_strain_invariants.cc.o
+[  9%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/plugins.cc.o
+[  9%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/ODE_statistics.cc.o
+[ 10%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/basic_statistics.cc.o
+[ 10%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/boundary_densities.cc.o
+[ 10%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/boundary_pressures.cc.o
+[ 10%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/boundary_strain_rate_residual_statistics.cc.o
+[ 10%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/boundary_velocity_residual_statistics.cc.o
+[ 11%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/command.cc.o
+[ 11%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/composition_statistics.cc.o
+[ 11%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/composition_velocity_statistics.cc.o
+[ 11%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/core_statistics.cc.o
+[ 11%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/crystal_preferred_orientation.cc.o
+[ 12%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/current_surface.cc.o
+[ 12%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/depth_average.cc.o
+[ 12%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/domain_volume_statistics.cc.o
+[ 12%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/dynamic_topography.cc.o
+[ 12%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/entropy_statistics.cc.o
+[ 13%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/entropy_viscosity_statistics.cc.o
+[ 13%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/fluid_velocity_statistics.cc.o
+[ 13%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/geoid.cc.o
+[ 13%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/global_statistics.cc.o
+[ 14%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/gravity_point_values.cc.o
+[ 14%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/heat_flux_densities.cc.o
+[ 14%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/heat_flux_map.cc.o
+[ 14%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/heat_flux_statistics.cc.o
+[ 14%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/heating_statistics.cc.o
+[ 15%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/interface.cc.o
+[ 15%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/load_balance_statistics.cc.o
+[ 15%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/mass_flux_statistics.cc.o
+[ 15%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/material_statistics.cc.o
+[ 15%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/matrix_statistics.cc.o
+[ 16%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/max_depth_field.cc.o
+[ 16%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/melt_statistics.cc.o
+[ 16%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/memory_statistics.cc.o
+[ 16%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/mobility_statistics.cc.o
+[ 16%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/particle_count_statistics.cc.o
+[ 17%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/particle_distribution_score.cc.o
+[ 17%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/particle_distribution_statistics.cc.o
+[ 17%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/particles.cc.o
+[ 17%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/point_values.cc.o
+[ 18%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/pressure_statistics.cc.o
+[ 18%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/reconstructed_faults.cc.o
+[ 18%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/rotation_statistics.cc.o
+[ 18%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/sea_level.cc.o
+[ 18%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/spherical_velocity_statistics.cc.o
+[ 19%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/stokes_residual.cc.o
+[ 19%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/temperature_statistics.cc.o
+[ 19%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/timing_statistics.cc.o
+[ 19%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/topography.cc.o
+[ 19%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/velocity_boundary_statistics.cc.o
+[ 20%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/velocity_statistics.cc.o
+[ 20%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/viscous_dissipation_statistics.cc.o
+[ 20%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization.cc.o
+[ 20%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/ISA_rotation_timescale.cc.o
+[ 20%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/adiabat.cc.o
+[ 21%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/artificial_viscosity.cc.o
+[ 21%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/artificial_viscosity_composition.cc.o
+[ 21%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/boundary_indicator.cc.o
+[ 21%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/boundary_strain_rate_residual.cc.o
+[ 22%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/boundary_velocity_residual.cc.o
+[ 22%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/compositional_vector.cc.o
+[ 22%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/darcy_velocity.cc.o
+[ 22%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/density_anomaly.cc.o
+[ 22%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/depth.cc.o
+[ 23%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/depth_including_mesh_deformation.cc.o
+[ 23%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/dynamic_topography.cc.o
+[ 23%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/entropy_average.cc.o
+[ 23%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/error_indicator.cc.o
+[ 23%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/geoid.cc.o
+[ 24%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/grain_lag_angle.cc.o
+[ 24%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/gravity.cc.o
+[ 24%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/heat_flux_map.cc.o
+[ 24%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/heating.cc.o
+[ 24%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/material_properties.cc.o
+[ 25%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/maximum_horizontal_compressive_stress.cc.o
+[ 25%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/melt.cc.o
+[ 25%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/melt_fraction.cc.o
+[ 25%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/named_additional_outputs.cc.o
+[ 26%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/nonadiabatic_pressure.cc.o
+[ 26%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/nonadiabatic_temperature.cc.o
+[ 26%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/particle_count.cc.o
+[ 26%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/partition.cc.o
+[ 26%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/principal_stress.cc.o
+[ 27%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/seismic_anomalies.cc.o
+[ 27%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/shear_stress.cc.o
+[ 27%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/spd_factor.cc.o
+[ 27%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/spherical_velocity_components.cc.o
+[ 27%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/strain_rate.cc.o
+[ 28%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/strain_rate_tensor.cc.o
+[ 28%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/stress.cc.o
+[ 28%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/stress_residual.cc.o
+[ 28%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/stress_second_invariant.cc.o
+[ 29%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/surface_dynamic_topography.cc.o
+[ 29%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/surface_elevation.cc.o
+[ 29%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/surface_strain_rate_tensor.cc.o
+[ 29%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/surface_stress.cc.o
+[ 29%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/temperature_anomaly.cc.o
+[ 30%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/vertical_heat_flux.cc.o
+[ 30%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/volume_of_fluid_values.cc.o
+[ 30%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/visualization/volumetric_strain_rate.cc.o
+[ 30%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/postprocess/volume_of_fluid_statistics.cc.o
+[ 30%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/prescribed_solution/interface.cc.o
+[ 31%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/prescribed_solution/temperature_function.cc.o
+[ 31%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/prescribed_solution/velocity_function.cc.o
+[ 31%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/prescribed_stokes_solution/ascii_data.cc.o
+[ 31%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/prescribed_stokes_solution/circle.cc.o
+[ 31%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/prescribed_stokes_solution/function.cc.o
+[ 32%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/prescribed_stokes_solution/interface.cc.o
+[ 32%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/reconstructed_fault/boundary_contact.cc.o
+[ 32%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/reconstructed_fault/boundary_contact_manager.cc.o
+[ 32%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/reconstructed_fault/fault.cc.o
+[ 34%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/reconstructed_fault/manager.cc.o
+[ 34%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/reconstructed_fault/manager_particle_projection.cc.o
+[ 34%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/reconstructed_fault/manager_slip_rate.cc.o
+[ 34%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/reconstructed_fault/surface_system.cc.o
+[ 34%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/reconstructed_fault/surface_system_bulk_work.cc.o
+[ 35%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/reconstructed_fault/surface_system_particle.cc.o
+[ 35%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/reconstructed_fault/utilities.cc.o
+[ 35%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/simulator/advection_field.cc.o
+[ 35%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/simulator/assemblers/advection.cc.o
+[ 35%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/simulator/assemblers/entropy_advection.cc.o
+[ 36%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/simulator/assemblers/implicit_constitutive_stokes.cc.o
+[ 36%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/simulator/assemblers/interface.cc.o
+[ 36%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/simulator/assemblers/newton_stokes.cc.o
+[ 36%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/simulator/assemblers/reconstructed_fault_stokes.cc.o
+[ 36%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/simulator/assemblers/stokes.cc.o
+[ 37%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/simulator/assemblers/stokes_anisotropic_viscosity.cc.o
+[ 37%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/simulator/assembly.cc.o
+[ 37%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/simulator/checkpoint_restart.cc.o
+/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/assemblers/reconstructed_fault_stokes.cc: In instantiation of ‘[01m[Kvoid aspect::Assemblers::ReconstructedFaultStokes<dim>::execute(aspect::internal::Assembly::Scratch::ScratchBase<dim>&, aspect::internal::Assembly::CopyData::CopyDataBase<dim>&) const [with int dim = 2][m[K’:
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/assemblers/reconstructed_fault_stokes.cc:585:5:[m[K   required from here
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/assemblers/reconstructed_fault_stokes.cc:517:23:[m[K [01;35m[Kwarning: [m[Kunused variable ‘[01m[Kfield[m[K’ [[01;35m[K-Wunused-variable[m[K]
+  517 |       for (const auto [01;35m[Kfield[m[K : stress_composition_indices)
+      |                       [01;35m[K^~~~~[m[K
+/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/assemblers/reconstructed_fault_stokes.cc: In instantiation of ‘[01m[Kvoid aspect::Assemblers::ReconstructedFaultStokes<dim>::execute(aspect::internal::Assembly::Scratch::ScratchBase<dim>&, aspect::internal::Assembly::CopyData::CopyDataBase<dim>&) const [with int dim = 3][m[K’:
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/assemblers/reconstructed_fault_stokes.cc:585:5:[m[K   required from here
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/assemblers/reconstructed_fault_stokes.cc:517:23:[m[K [01;35m[Kwarning: [m[Kunused variable ‘[01m[Kfield[m[K’ [[01;35m[K-Wunused-variable[m[K]
+[ 37%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/simulator/core.cc.o
+[ 38%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/simulator/entropy_viscosity.cc.o
+[ 38%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/simulator/helper_functions.cc.o
+[ 38%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/simulator/initial_conditions.cc.o
+[ 38%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/simulator/introspection.cc.o
+[ 38%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/simulator/lateral_averaging.cc.o
+[ 39%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/simulator/melt.cc.o
+[ 39%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/simulator/newton.cc.o
+[ 39%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/simulator/nullspace.cc.o
+[ 39%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/simulator/parameters.cc.o
+[ 39%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/simulator/phase_field.cc.o
+[ 40%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/simulator/simulator_access.cc.o
+[ 40%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/simulator/simulator_signals.cc.o
+[ 40%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/simulator/solver.cc.o
+In file included from [01m[K/opt/dealii/9.6-local/include/deal.II/base/array_view.h:20[m[K,
+                 from [01m[K/opt/dealii/9.6-local/include/deal.II/base/mpi.h:20[m[K,
+                 from [01m[K/home/ein/repository/aspect-pf-rsf-refactor/include/aspect/global.h:28[m[K,
+                 from [01m[K/home/ein/repository/aspect-pf-rsf-refactor/include/aspect/phase_field.h:24[m[K,
+                 from [01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/phase_field.cc:21[m[K:
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/phase_field.cc:[m[K In member function ‘[01m[Kvoid aspect::PhaseFieldHandler<dim>::evolve_phase_field(aspect::LinearAlgebra::BlockSparseMatrix&, aspect::LinearAlgebra::BlockVector&, aspect::LinearAlgebra::BlockVector&)[m[K’:
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/phase_field.cc:1200:39:[m[K [01;31m[Kerror: [m[Kthere are no arguments to ‘[01m[KExcNonlinearSolverNoConvergence[m[K’ that depend on a template parameter, so a declaration of ‘[01m[KExcNonlinearSolverNoConvergence[m[K’ must be available [[01;31m[K-fpermissive[m[K]
+ 1200 |         AssertThrow(admissible_trial, [01;31m[KExcNonlinearSolverNoConvergence[m[K());
+      |                                       [01;31m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/phase_field.cc:1200:39:[m[K [01;36m[Knote: [m[K(if you use ‘[01m[K-fpermissive[m[K’, G++ will accept your code, but allowing the use of an undeclared name is deprecated)
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/phase_field.cc:1231:17:[m[K [01;31m[Kerror: [m[Kthere are no arguments to ‘[01m[KExcNonlinearSolverNoConvergence[m[K’ that depend on a template parameter, so a declaration of ‘[01m[KExcNonlinearSolverNoConvergence[m[K’ must be available [[01;31m[K-fpermissive[m[K]
+ 1231 |                 [01;31m[KExcNonlinearSolverNoConvergence[m[K());
+      |                 [01;31m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/phase_field.cc: In instantiation of ‘[01m[Kvoid aspect::PhaseFieldHandler<dim>::initialize() [with int dim = 2][m[K’:
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/phase_field.cc:1381:3:[m[K   required from here
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/phase_field.cc:662:21:[m[K [01;31m[Kerror: [m[Kinvalid use of incomplete type ‘[01m[Kclass aspect::Particle::Manager<2>[m[K’
+  662 |         if ([01;31m[Kmanager.get_property_manager[m[K().get_data_info().fieldname_exists("crack_driving_force"))
+      |             [01;31m[K~~~~~~~~^~~~~~~~~~~~~~~~~~~~[m[K
+In file included from [01m[K/home/ein/repository/aspect-pf-rsf-refactor/include/aspect/phase_field.h:25[m[K:
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/include/aspect/simulator_access.h:155:30:[m[K [01;36m[Knote: [m[Kdeclaration of ‘[01m[Kclass aspect::Particle::Manager<2>[m[K’
+  155 |     template <int dim> class [01;36m[KManager[m[K;
+      |                              [01;36m[K^~~~~~~[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/phase_field.cc:673:35:[m[K [01;31m[Kerror: [m[Kinvalid use of incomplete type ‘[01m[Kclass aspect::Particle::Manager<2>[m[K’
+  673 |     AssertThrow([01;31m[Kparticle_manager->particle_domains_requested[m[K(),
+      |                 [01;31m[K~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/include/aspect/simulator_access.h:155:30:[m[K [01;36m[Knote: [m[Kdeclaration of ‘[01m[Kclass aspect::Particle::Manager<2>[m[K’
+  155 |     template <int dim> class [01;36m[KManager[m[K;
+      |                              [01;36m[K^~~~~~~[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/phase_field.cc:677:35:[m[K [01;31m[Kerror: [m[Kinvalid use of incomplete type ‘[01m[Kclass aspect::Particle::Manager<2>[m[K’
+  677 |     AssertThrow([01;31m[Kparticle_manager->get_particle_domain_handler[m[K().cpdi_data_requested(),
+      |                 [01;31m[K~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/include/aspect/simulator_access.h:155:30:[m[K [01;36m[Knote: [m[Kdeclaration of ‘[01m[Kclass aspect::Particle::Manager<2>[m[K’
+  155 |     template <int dim> class [01;36m[KManager[m[K;
+      |                              [01;36m[K^~~~~~~[m[K
+/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/phase_field.cc: In instantiation of ‘[01m[Kvoid aspect::PhaseFieldHandler<dim>::evolve_phase_field(aspect::LinearAlgebra::BlockSparseMatrix&, aspect::LinearAlgebra::BlockVector&, aspect::LinearAlgebra::BlockVector&) [with int dim = 2; aspect::LinearAlgebra::BlockSparseMatrix = dealii::TrilinosWrappers::BlockSparseMatrix; aspect::LinearAlgebra::BlockVector = dealii::TrilinosWrappers::MPI::BlockVector][m[K’:
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/phase_field.cc:1381:3:[m[K   required from here
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/phase_field.cc:1200:70:[m[K [01;31m[Kerror: [m[K‘[01m[KExcNonlinearSolverNoConvergence[m[K’ was not declared in this scope
+ 1200 |         AssertThrow(admissible_trial, [01;31m[KExcNonlinearSolverNoConvergence()[m[K);
+      |                                       [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/phase_field.cc:1231:48:[m[K [01;31m[Kerror: [m[K‘[01m[KExcNonlinearSolverNoConvergence[m[K’ was not declared in this scope
+ 1231 |                 [01;31m[KExcNonlinearSolverNoConvergence()[m[K);
+      |                 [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~[m[K
+/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/phase_field.cc: In instantiation of ‘[01m[Kbool aspect::PhaseFieldHandler<dim>::assemble_phase_field_system(aspect::LinearAlgebra::BlockSparseMatrix&, aspect::LinearAlgebra::BlockVector&, const aspect::LinearAlgebra::BlockVector&, bool, double*) const [with int dim = 2; aspect::LinearAlgebra::BlockSparseMatrix = dealii::TrilinosWrappers::BlockSparseMatrix; aspect::LinearAlgebra::BlockVector = dealii::TrilinosWrappers::MPI::BlockVector][m[K’:
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/phase_field.cc:1381:3:[m[K   required from here
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/phase_field.cc:824:81:[m[K [01;31m[Kerror: [m[Kinvalid use of incomplete type ‘[01m[Kclass aspect::Particle::Manager<2>[m[K’
+  824 |     const Particles::ParticleHandler<dim> &particle_handler = [01;31m[Kparticle_manager->get_particle_handler[m[K();
+      |                                                               [01;31m[K~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/include/aspect/simulator_access.h:155:30:[m[K [01;36m[Knote: [m[Kdeclaration of ‘[01m[Kclass aspect::Particle::Manager<2>[m[K’
+  155 |     template <int dim> class [01;36m[KManager[m[K;
+      |                              [01;36m[K^~~~~~~[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/phase_field.cc:825:93:[m[K [01;31m[Kerror: [m[Kinvalid use of incomplete type ‘[01m[Kclass aspect::Particle::Manager<2>[m[K’
+  825 |     const Particle::ParticleDomainHandler<dim> &particle_domain_handler = [01;31m[Kparticle_manager->get_particle_domain_handler[m[K();
+      |                                                                           [01;31m[K~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/include/aspect/simulator_access.h:155:30:[m[K [01;36m[Knote: [m[Kdeclaration of ‘[01m[Kclass aspect::Particle::Manager<2>[m[K’
+  155 |     template <int dim> class [01;36m[KManager[m[K;
+      |                              [01;36m[K^~~~~~~[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/phase_field.cc:842:56:[m[K [01;31m[Kerror: [m[Kinvalid use of incomplete type ‘[01m[Kclass aspect::Particle::Manager<2>[m[K’
+  842 |     const auto &particle_data_info = [01;31m[Kparticle_manager->get_property_manager[m[K().get_data_info();
+      |                                      [01;31m[K~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/include/aspect/simulator_access.h:155:30:[m[K [01;36m[Knote: [m[Kdeclaration of ‘[01m[Kclass aspect::Particle::Manager<2>[m[K’
+  155 |     template <int dim> class [01;36m[KManager[m[K;
+      |                              [01;36m[K^~~~~~~[m[K
+/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/phase_field.cc: In instantiation of ‘[01m[Kvoid aspect::PhaseFieldHandler<dim>::initialize() [with int dim = 3][m[K’:
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/phase_field.cc:1381:3:[m[K   required from here
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/phase_field.cc:662:21:[m[K [01;31m[Kerror: [m[Kinvalid use of incomplete type ‘[01m[Kclass aspect::Particle::Manager<3>[m[K’
+  662 |         if ([01;31m[Kmanager.get_property_manager[m[K().get_data_info().fieldname_exists("crack_driving_force"))
+      |             [01;31m[K~~~~~~~~^~~~~~~~~~~~~~~~~~~~[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/include/aspect/simulator_access.h:155:30:[m[K [01;36m[Knote: [m[Kdeclaration of ‘[01m[Kclass aspect::Particle::Manager<3>[m[K’
+  155 |     template <int dim> class [01;36m[KManager[m[K;
+      |                              [01;36m[K^~~~~~~[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/phase_field.cc:673:35:[m[K [01;31m[Kerror: [m[Kinvalid use of incomplete type ‘[01m[Kclass aspect::Particle::Manager<3>[m[K’
+  673 |     AssertThrow([01;31m[Kparticle_manager->particle_domains_requested[m[K(),
+      |                 [01;31m[K~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/include/aspect/simulator_access.h:155:30:[m[K [01;36m[Knote: [m[Kdeclaration of ‘[01m[Kclass aspect::Particle::Manager<3>[m[K’
+  155 |     template <int dim> class [01;36m[KManager[m[K;
+      |                              [01;36m[K^~~~~~~[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/phase_field.cc:677:35:[m[K [01;31m[Kerror: [m[Kinvalid use of incomplete type ‘[01m[Kclass aspect::Particle::Manager<3>[m[K’
+  677 |     AssertThrow([01;31m[Kparticle_manager->get_particle_domain_handler[m[K().cpdi_data_requested(),
+      |                 [01;31m[K~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/include/aspect/simulator_access.h:155:30:[m[K [01;36m[Knote: [m[Kdeclaration of ‘[01m[Kclass aspect::Particle::Manager<3>[m[K’
+  155 |     template <int dim> class [01;36m[KManager[m[K;
+      |                              [01;36m[K^~~~~~~[m[K
+/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/phase_field.cc: In instantiation of ‘[01m[Kvoid aspect::PhaseFieldHandler<dim>::evolve_phase_field(aspect::LinearAlgebra::BlockSparseMatrix&, aspect::LinearAlgebra::BlockVector&, aspect::LinearAlgebra::BlockVector&) [with int dim = 3; aspect::LinearAlgebra::BlockSparseMatrix = dealii::TrilinosWrappers::BlockSparseMatrix; aspect::LinearAlgebra::BlockVector = dealii::TrilinosWrappers::MPI::BlockVector][m[K’:
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/phase_field.cc:1381:3:[m[K   required from here
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/phase_field.cc:1200:70:[m[K [01;31m[Kerror: [m[K‘[01m[KExcNonlinearSolverNoConvergence[m[K’ was not declared in this scope
+ 1200 |         AssertThrow(admissible_trial, [01;31m[KExcNonlinearSolverNoConvergence()[m[K);
+      |                                       [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~[m[K
+[ 40%] Building CXX object CMakeFiles/aspect.exe.release.dir/source/simulator/solver/matrix_free_operators.cc.o
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/phase_field.cc:1231:48:[m[K [01;31m[Kerror: [m[K‘[01m[KExcNonlinearSolverNoConvergence[m[K’ was not declared in this scope
+ 1231 |                 [01;31m[KExcNonlinearSolverNoConvergence()[m[K);
+      |                 [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~[m[K
+/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/phase_field.cc: In instantiation of ‘[01m[Kbool aspect::PhaseFieldHandler<dim>::assemble_phase_field_system(aspect::LinearAlgebra::BlockSparseMatrix&, aspect::LinearAlgebra::BlockVector&, const aspect::LinearAlgebra::BlockVector&, bool, double*) const [with int dim = 3; aspect::LinearAlgebra::BlockSparseMatrix = dealii::TrilinosWrappers::BlockSparseMatrix; aspect::LinearAlgebra::BlockVector = dealii::TrilinosWrappers::MPI::BlockVector][m[K’:
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/phase_field.cc:1381:3:[m[K   required from here
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/phase_field.cc:824:81:[m[K [01;31m[Kerror: [m[Kinvalid use of incomplete type ‘[01m[Kclass aspect::Particle::Manager<3>[m[K’
+  824 |     const Particles::ParticleHandler<dim> &particle_handler = [01;31m[Kparticle_manager->get_particle_handler[m[K();
+      |                                                               [01;31m[K~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/include/aspect/simulator_access.h:155:30:[m[K [01;36m[Knote: [m[Kdeclaration of ‘[01m[Kclass aspect::Particle::Manager<3>[m[K’
+  155 |     template <int dim> class [01;36m[KManager[m[K;
+      |                              [01;36m[K^~~~~~~[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/phase_field.cc:825:93:[m[K [01;31m[Kerror: [m[Kinvalid use of incomplete type ‘[01m[Kclass aspect::Particle::Manager<3>[m[K’
+  825 |     const Particle::ParticleDomainHandler<dim> &particle_domain_handler = [01;31m[Kparticle_manager->get_particle_domain_handler[m[K();
+      |                                                                           [01;31m[K~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/include/aspect/simulator_access.h:155:30:[m[K [01;36m[Knote: [m[Kdeclaration of ‘[01m[Kclass aspect::Particle::Manager<3>[m[K’
+  155 |     template <int dim> class [01;36m[KManager[m[K;
+      |                              [01;36m[K^~~~~~~[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/simulator/phase_field.cc:842:56:[m[K [01;31m[Kerror: [m[Kinvalid use of incomplete type ‘[01m[Kclass aspect::Particle::Manager<3>[m[K’
+  842 |     const auto &particle_data_info = [01;31m[Kparticle_manager->get_property_manager[m[K().get_data_info();
+      |                                      [01;31m[K~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/include/aspect/simulator_access.h:155:30:[m[K [01;36m[Knote: [m[Kdeclaration of ‘[01m[Kclass aspect::Particle::Manager<3>[m[K’
+  155 |     template <int dim> class [01;36m[KManager[m[K;
+      |                              [01;36m[K^~~~~~~[m[K
+make[2]: *** [CMakeFiles/aspect.exe.release.dir/build.make:5749: CMakeFiles/aspect.exe.release.dir/source/simulator/phase_field.cc.o] Error 1
+make[2]: *** Waiting for unfinished jobs....
+make[1]: *** [CMakeFiles/Makefile2:202: CMakeFiles/aspect.exe.release.dir/all] Error 2
+make: *** [Makefile:136: all] Error 2

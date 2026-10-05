@@ -1,0 +1,31 @@
+{
+  "command": [
+    "/usr/bin/clang++",
+    "-DKOKKOS_DEPENDENCE",
+    "-DNDEBUG",
+    "-I/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/include",
+    "-I/home/ein/repository/aspect-pf-rsf-refactor/include",
+    "-I/home/ein/repository/aspect-pf-rsf-refactor/contrib/world_builder/include",
+    "-I/home/ein/repository/aspect-pf-rsf-refactor/contrib/catch",
+    "-I/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/world_builder_release/include",
+    "-isystem",
+    "/home/ein/local/voro++/0.4.6/include/voro++",
+    "-isystem",
+    "/opt/dealii/9.6-local/include",
+    "-isystem",
+    "/opt/dealii/9.6-local/include/deal.II/bundled",
+    "-isystem",
+    "/opt/trilinos/14.2.0-local/include",
+    "-isystem",
+    "/opt/sundials/7.2.1-local/include",
+    "-isystem",
+    "/opt/p4est/2.8.7-local/FAST/include",
+    "-I/opt/openmpi/5.0.6/include",
+    "-march=native",
+    "-std=c++17",
+    "-fsyntax-only",
+    "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/CMakeFiles/aspect.exe.release.dir/Unity/unity_46_cxx.cxx"
+  ],
+  "exit_code": 1,
+  "contains_duplicate_instantiation": false
+}

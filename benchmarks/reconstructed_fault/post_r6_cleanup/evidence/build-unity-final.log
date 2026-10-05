@@ -1,0 +1,6 @@
+[  6%] Built target WorldBuilderRelease
+[  7%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_47_cxx.cxx.o
+[  9%] Linking CXX executable aspect-release
+[ 98%] Built target aspect.exe.release
+[100%] Creating symlink from aspect.exe.release to './aspect'
+[100%] Built target aspect

@@ -1,0 +1,67 @@
+-- 
+-- ====================================================
+-- ===== Configuring ASPECT 3.1.0-pre
+-- ====================================================
+-- 
+-- Setting up ASPECT for Release mode.
+-- 
+-- ===== Configuring external libraries ===============
+-- Found deal.II version 9.6.2 at '/opt/dealii/9.6-local/lib/cmake/deal.II'
+-- Using ASPECT_WITH_ZLIB = 'ON'
+-- Using ASPECT_WITH_PYTHON = 'OFF'
+-- Using ASPECT_WITH_LIBDAP = 'OFF'
+-- Using ASPECT_WITH_FASTSCAPE = 'OFF'
+-- Using ASPECT_WITH_NETCDF = 'ON'
+--   NETCDF_INCLUDE_DIR: /usr/include
+--   NETCDF_LIBRARY: /usr/lib/libnetcdf.so
+--   NETCDF_VERSION: 4.9.3
+-- Using ASPECT_WITH_WORLD_BUILDER = 'ON'
+-- Using World Builder version 1.0.0 found at /home/ein/repository/aspect-pf-rsf-refactor/contrib/world_builder.
+-- 
+-- ===== Setting up Geodynamic World Builder version 1.0.0 in Release mode
+-- Building the Geodynamic World Builder version 1.0.0 in Release mode
+-- Using Floating Point Exceptions if in Debug mode.
+-- Did not find Fortran support or it has been requested to be disabled. Disabling Fortran wrapper and tests.
+-- Could NOT find SWIG (missing: SWIG_EXECUTABLE SWIG_DIR) 
+-- SWIG was not found, disabling python wrapper compilation.
+-- MPI found.
+-- Using MPI found in: 
+-- Python was disabled by cmake options.
+-- Enabling the use of ZLIB.
+-- Combining source files into unity build.
+-- 
+-- Using ASPECT_WITH_VORO = 'ON'
+--   VORO_INCLUDE_DIR: /home/ein/local/voro++/0.4.6/include/voro++
+--   VORO_LIBRARY: /home/ein/local/voro++/0.4.6/lib/libvoro++.a
+-- Query git repository information.
+-- Determining whether we can use floating point exceptions...
+-- Runtime floating point checks enabled.
+-- Enabling dynamic loading of plugins from the input file
+-- Enabling checking of compatible deal.II library when loading plugins
+-- 
+-- ===== Configuring ASPECT build targets =============
+-- Appending ASPECT_ADDITIONAL_CXX_FLAGS: '-fno-finite-math-only -ffp-contract=off':
+--   DEAL_II_WARNING_FLAGS: -pedantic -Wall -Wextra -Wmissing-braces -Woverloaded-virtual -Wpointer-arith -Wsign-compare -Wsuggest-override -Wswitch -Wsynth -Wwrite-strings -Wno-placement-new  -Wno-literal-suffix -Wno-psabi -Wno-parentheses -Wno-unused-local-typedefs -Wno-parentheses
+--   DEAL_II_CXX_FLAGS_DEBUG: -O0 -ggdb -Wa,--compress-debug-sections -fdiagnostics-color=always -fno-finite-math-only -ffp-contract=off
+--   DEAL_II_CXX_FLAGS_RELEASE: -O2 -funroll-loops -funroll-all-loops -fstrict-aliasing -Wno-unused-local-typedefs -fdiagnostics-color=always -fno-finite-math-only -ffp-contract=off
+-- Linking ASPECT against zlib
+-- Linking ASPECT against NetCDF
+-- Linking ASPECT against WorldBuilder
+-- Linking ASPECT against voro++
+-- Linking ASPECT against dlopen
+-- Precompiling common header files.
+-- Combining source files into unity build.
+-- Writing externally readable configuration information
+-- Writing configuration details into detailed.log...
+-- 
+-- ===== Configuring ASPECT documentation =============
+-- Finding .prm files
+-- Finding image files
+-- Setting up build information
+-- 
+-- 
+-- Run   $ make info  to print a detailed help message
+-- 
+-- Configuring done (0.6s)
+-- Generating done (0.1s)
+-- Build files have been written to: /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-post-r6-unity

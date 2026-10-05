@@ -1,0 +1,56 @@
+[
+  {
+    "file": "source/material_model/phase_field_fault/constitutive.cc",
+    "unity": true,
+    "pch": true,
+    "compilation_unit": "build-refactor-post-r6-gcc12-unity/CMakeFiles/aspect.exe.release.dir/Unity/unity_18_cxx.cxx"
+  },
+  {
+    "file": "source/material_model/phase_field_fault/history.cc",
+    "unity": true,
+    "pch": true,
+    "compilation_unit": "build-refactor-post-r6-gcc12-unity/CMakeFiles/aspect.exe.release.dir/Unity/unity_18_cxx.cxx"
+  },
+  {
+    "file": "source/material_model/phase_field_fault/history_diagnostics.cc",
+    "unity": true,
+    "pch": true,
+    "compilation_unit": "build-refactor-post-r6-gcc12-unity/CMakeFiles/aspect.exe.release.dir/Unity/unity_18_cxx.cxx"
+  },
+  {
+    "file": "source/reconstructed_fault/manager_particle_projection.cc",
+    "unity": true,
+    "pch": true,
+    "compilation_unit": "build-refactor-post-r6-gcc12-unity/CMakeFiles/aspect.exe.release.dir/Unity/unity_47_cxx.cxx"
+  },
+  {
+    "file": "source/reconstructed_fault/surface_system_particle.cc",
+    "unity": true,
+    "pch": true,
+    "compilation_unit": "build-refactor-post-r6-gcc12-unity/CMakeFiles/aspect.exe.release.dir/Unity/unity_47_cxx.cxx"
+  },
+  {
+    "file": "source/reconstructed_fault/surface_system_bulk_work.cc",
+    "unity": true,
+    "pch": true,
+    "compilation_unit": "build-refactor-post-r6-gcc12-unity/CMakeFiles/aspect.exe.release.dir/Unity/unity_47_cxx.cxx"
+  },
+  {
+    "file": "source/simulator/solver/reconstructed_fault_stokes.cc",
+    "unity": true,
+    "pch": true,
+    "compilation_unit": "build-refactor-post-r6-gcc12-unity/CMakeFiles/aspect.exe.release.dir/Unity/unity_51_cxx.cxx"
+  },
+  {
+    "file": "source/simulator/solver/reconstructed_fault_bound_diagnostics.cc",
+    "unity": true,
+    "pch": true,
+    "compilation_unit": "build-refactor-post-r6-gcc12-unity/CMakeFiles/aspect.exe.release.dir/Unity/unity_51_cxx.cxx"
+  },
+  {
+    "file": "source/reconstructed_fault/boundary_contact_manager.cc",
+    "unity": true,
+    "pch": true,
+    "compilation_unit": "build-refactor-post-r6-gcc12-unity/CMakeFiles/aspect.exe.release.dir/Unity/unity_46_cxx.cxx"
+  }
+]

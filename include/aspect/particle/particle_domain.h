@@ -21,6 +21,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #ifndef _aspect_particle_particle_domain_h
 #define _aspect_particle_particle_domain_h
 
+#include <aspect/global.h>
 #include <deal.II/particles/particle_handler.h>
 
 namespace aspect

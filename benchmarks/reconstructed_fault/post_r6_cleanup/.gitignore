@@ -1,0 +1,7 @@
+/output-*/
+/build*/
+/install/
+/evidence/*.o
+/evidence/*.raw
+/evidence/header-checks/
+/evidence/incoming.patch

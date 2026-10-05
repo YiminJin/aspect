@@ -1,0 +1,56 @@
+[
+  {
+    "file": "source/material_model/phase_field_fault/constitutive.cc",
+    "unity": false,
+    "pch": false,
+    "compilation_unit": "source/material_model/phase_field_fault/constitutive.cc"
+  },
+  {
+    "file": "source/material_model/phase_field_fault/history.cc",
+    "unity": false,
+    "pch": false,
+    "compilation_unit": "source/material_model/phase_field_fault/history.cc"
+  },
+  {
+    "file": "source/material_model/phase_field_fault/history_diagnostics.cc",
+    "unity": false,
+    "pch": false,
+    "compilation_unit": "source/material_model/phase_field_fault/history_diagnostics.cc"
+  },
+  {
+    "file": "source/reconstructed_fault/manager_particle_projection.cc",
+    "unity": false,
+    "pch": false,
+    "compilation_unit": "source/reconstructed_fault/manager_particle_projection.cc"
+  },
+  {
+    "file": "source/reconstructed_fault/surface_system_particle.cc",
+    "unity": false,
+    "pch": false,
+    "compilation_unit": "source/reconstructed_fault/surface_system_particle.cc"
+  },
+  {
+    "file": "source/reconstructed_fault/surface_system_bulk_work.cc",
+    "unity": false,
+    "pch": false,
+    "compilation_unit": "source/reconstructed_fault/surface_system_bulk_work.cc"
+  },
+  {
+    "file": "source/simulator/solver/reconstructed_fault_stokes.cc",
+    "unity": false,
+    "pch": false,
+    "compilation_unit": "source/simulator/solver/reconstructed_fault_stokes.cc"
+  },
+  {
+    "file": "source/simulator/solver/reconstructed_fault_bound_diagnostics.cc",
+    "unity": false,
+    "pch": false,
+    "compilation_unit": "source/simulator/solver/reconstructed_fault_bound_diagnostics.cc"
+  },
+  {
+    "file": "source/reconstructed_fault/boundary_contact_manager.cc",
+    "unity": false,
+    "pch": false,
+    "compilation_unit": "source/reconstructed_fault/boundary_contact_manager.cc"
+  }
+]

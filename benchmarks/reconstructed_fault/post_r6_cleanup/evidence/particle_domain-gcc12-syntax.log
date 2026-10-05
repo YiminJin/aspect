@@ -1,0 +1,16 @@
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/particle/particle_domain.cc:[m[K In member function ‘[01m[Kvoid aspect::Particle::internal::VoronoiCell<dim>::reinit(dealii::types::particle_index, const std::vector<double>&, const std::vector<int>&, const std::vector<int>&, const dealii::BoundingBox<spacedim>&) [with int dim = 3; dealii::types::particle_index = unsigned int][m[K’:
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/particle/particle_domain.cc:703:59:[m[K [01;35m[Kwarning: [m[Kunused parameter ‘[01m[Kparticle_index_[m[K’ [[01;35m[K-Wunused-parameter[m[K]
+  703 |       VoronoiCell<3>::reinit([01;35m[Kconst types::particle_index  particle_index_[m[K,
+      |                              [01;35m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/particle/particle_domain.cc:704:59:[m[K [01;35m[Kwarning: [m[Kunused parameter ‘[01m[Kvoro_vertices[m[K’ [[01;35m[K-Wunused-parameter[m[K]
+  704 |                              [01;35m[Kconst std::vector<double>   &voro_vertices[m[K,
+      |                              [01;35m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/particle/particle_domain.cc:705:59:[m[K [01;35m[Kwarning: [m[Kunused parameter ‘[01m[Kvoro_faces[m[K’ [[01;35m[K-Wunused-parameter[m[K]
+  705 |                              [01;35m[Kconst std::vector<int>      &voro_faces[m[K,
+      |                              [01;35m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/particle/particle_domain.cc:706:59:[m[K [01;35m[Kwarning: [m[Kunused parameter ‘[01m[Kvoro_neighbors[m[K’ [[01;35m[K-Wunused-parameter[m[K]
+  706 |                              [01;35m[Kconst std::vector<int>      &voro_neighbors[m[K,
+      |                              [01;35m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~[m[K
+[01m[K/home/ein/repository/aspect-pf-rsf-refactor/source/particle/particle_domain.cc:707:59:[m[K [01;35m[Kwarning: [m[Kunused parameter ‘[01m[Kbounding_box[m[K’ [[01;35m[K-Wunused-parameter[m[K]
+  707 |                              [01;35m[Kconst BoundingBox<3>        &bounding_box[m[K)
+      |                              [01;35m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~[m[K

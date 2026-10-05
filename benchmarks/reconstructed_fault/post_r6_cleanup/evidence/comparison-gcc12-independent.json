@@ -1,0 +1,5078 @@
+[
+  {
+    "check": "staggered/fault_0.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/fault_0.csv/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "staggered/fault_0.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 31.0
+  },
+  {
+    "check": "staggered/fault_0.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "staggered/fault_0.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "staggered/fault_0.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 57735.02691896258
+  },
+  {
+    "check": "staggered/fault_0.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 28867.51345948129
+  },
+  {
+    "check": "staggered/fault_0.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000.0
+  },
+  {
+    "check": "staggered/fault_0.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "staggered/fault_0.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0004472683180414e-09
+  },
+  {
+    "check": "staggered/fault_0.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000014
+  },
+  {
+    "check": "staggered/fault_0.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 26546493.092492346
+  },
+  {
+    "check": "staggered/fault_0.csv/11",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000961.033832036
+  },
+  {
+    "check": "staggered/fault_1.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/fault_1.csv/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "staggered/fault_1.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 31.0
+  },
+  {
+    "check": "staggered/fault_1.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0
+  },
+  {
+    "check": "staggered/fault_1.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 100.0
+  },
+  {
+    "check": "staggered/fault_1.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 57735.02691896258
+  },
+  {
+    "check": "staggered/fault_1.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 28867.51345948129
+  },
+  {
+    "check": "staggered/fault_1.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000.0
+  },
+  {
+    "check": "staggered/fault_1.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0000000113305823e-07
+  },
+  {
+    "check": "staggered/fault_1.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0000000113305824e-09
+  },
+  {
+    "check": "staggered/fault_1.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000576
+  },
+  {
+    "check": "staggered/fault_1.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 26546122.37452405
+  },
+  {
+    "check": "staggered/fault_1.csv/11",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000000.024019495
+  },
+  {
+    "check": "staggered/fault_2.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/fault_2.csv/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "staggered/fault_2.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 31.0
+  },
+  {
+    "check": "staggered/fault_2.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 2.0
+  },
+  {
+    "check": "staggered/fault_2.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 200.0
+  },
+  {
+    "check": "staggered/fault_2.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 57735.02691896258
+  },
+  {
+    "check": "staggered/fault_2.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 28867.51345948129
+  },
+  {
+    "check": "staggered/fault_2.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000.0
+  },
+  {
+    "check": "staggered/fault_2.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 2.000000046396925e-07
+  },
+  {
+    "check": "staggered/fault_2.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0000000350663427e-09
+  },
+  {
+    "check": "staggered/fault_2.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.0000014985
+  },
+  {
+    "check": "staggered/fault_2.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 26546122.393036906
+  },
+  {
+    "check": "staggered/fault_2.csv/11",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000000.03988105
+  },
+  {
+    "check": "staggered/audit_particles_0_rank0.csv/IDs",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_particles_0_rank0.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_particles_0_rank0.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 59850.0
+  },
+  {
+    "check": "staggered/audit_particles_0_rank0.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.0
+  },
+  {
+    "check": "staggered/audit_particles_0_rank0.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 813189.4134875815
+  },
+  {
+    "check": "staggered/audit_particles_0_rank0.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000014
+  },
+  {
+    "check": "staggered/audit_particles_0_rank0.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0
+  },
+  {
+    "check": "staggered/audit_particles_0_rank0.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "staggered/audit_particles_0_rank0.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "staggered/audit_particles_0_rank0.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "staggered/audit_particles_0_rank0.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 59850.0
+  },
+  {
+    "check": "staggered/audit_particles_0_rank0.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.0
+  },
+  {
+    "check": "staggered/audit_particles_1_rank0.csv/IDs",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_particles_1_rank0.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_particles_1_rank0.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 59849.999999975
+  },
+  {
+    "check": "staggered/audit_particles_1_rank0.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.00000003901
+  },
+  {
+    "check": "staggered/audit_particles_1_rank0.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 813189.4134875815
+  },
+  {
+    "check": "staggered/audit_particles_1_rank0.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000014
+  },
+  {
+    "check": "staggered/audit_particles_1_rank0.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0
+  },
+  {
+    "check": "staggered/audit_particles_1_rank0.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.05743660291118153
+  },
+  {
+    "check": "staggered/audit_particles_1_rank0.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.07059751688148914
+  },
+  {
+    "check": "staggered/audit_particles_1_rank0.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.044123772729618704
+  },
+  {
+    "check": "staggered/audit_particles_1_rank0.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 59850.0
+  },
+  {
+    "check": "staggered/audit_particles_1_rank0.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.0
+  },
+  {
+    "check": "staggered/audit_particles_2_rank0.csv/IDs",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_particles_2_rank0.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_particles_2_rank0.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 59849.99999995
+  },
+  {
+    "check": "staggered/audit_particles_2_rank0.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.00000007802
+  },
+  {
+    "check": "staggered/audit_particles_2_rank0.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 813189.4134875815
+  },
+  {
+    "check": "staggered/audit_particles_2_rank0.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000014
+  },
+  {
+    "check": "staggered/audit_particles_2_rank0.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0
+  },
+  {
+    "check": "staggered/audit_particles_2_rank0.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.11547298000110237
+  },
+  {
+    "check": "staggered/audit_particles_2_rank0.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.13849824134670263
+  },
+  {
+    "check": "staggered/audit_particles_2_rank0.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.08723613469360392
+  },
+  {
+    "check": "staggered/audit_particles_2_rank0.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 59849.999999975
+  },
+  {
+    "check": "staggered/audit_particles_2_rank0.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.00000003901
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank0.csv/DoFs",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank0.csv/component0/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank0.csv/component0/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 2.508420993271986e-10
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank0.csv/component1/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank0.csv/component1/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 4.355695292140432e-10
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank0.csv/component2/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank0.csv/component2/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 4135.193187414323
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank0.csv/component3/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank0.csv/component3/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 293.0
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank0.csv/component4/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank0.csv/component4/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank0.csv/component5/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank0.csv/component5/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank0.csv/component6/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank0.csv/component6/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank0.csv/component7/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank0.csv/component7/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000014
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank0.csv/component8/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank0.csv/component8/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0527758594192989
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank0.csv/component9/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank0.csv/component9/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.6
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank0.csv/DoFs",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank0.csv/component0/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank0.csv/component0/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 2.508216676839515e-10
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank0.csv/component1/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank0.csv/component1/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 4.355766898348262e-10
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank0.csv/component2/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank0.csv/component2/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.10349647821858034
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank0.csv/component3/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank0.csv/component3/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 293.0
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank0.csv/component4/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank0.csv/component4/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank0.csv/component5/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank0.csv/component5/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank0.csv/component6/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank0.csv/component6/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank0.csv/component7/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank0.csv/component7/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000168
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank0.csv/component8/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank0.csv/component8/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0527758594132957
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank0.csv/component9/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank0.csv/component9/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.6
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank0.csv/DoFs",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank0.csv/component0/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank0.csv/component0/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 2.5076868414191725e-10
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank0.csv/component1/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank0.csv/component1/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 4.350019233889663e-10
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank0.csv/component2/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank0.csv/component2/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.17384562438963835
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank0.csv/component3/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank0.csv/component3/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 293.0
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank0.csv/component4/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank0.csv/component4/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.030270203264846446
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank0.csv/component5/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank0.csv/component5/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.049663406143190925
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank0.csv/component6/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank0.csv/component6/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.03720699959042466
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank0.csv/component7/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank0.csv/component7/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000168
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank0.csv/component8/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank0.csv/component8/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.052775859407292
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank0.csv/component9/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank0.csv/component9/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.6
+  },
+  {
+    "check": "staggered/0/births",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_particles_0_rank1.csv/IDs",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_particles_0_rank1.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_particles_0_rank1.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 89850.0
+  },
+  {
+    "check": "staggered/audit_particles_0_rank1.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.0
+  },
+  {
+    "check": "staggered/audit_particles_0_rank1.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 813214.3886040291
+  },
+  {
+    "check": "staggered/audit_particles_0_rank1.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000014
+  },
+  {
+    "check": "staggered/audit_particles_0_rank1.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0
+  },
+  {
+    "check": "staggered/audit_particles_0_rank1.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "staggered/audit_particles_0_rank1.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "staggered/audit_particles_0_rank1.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "staggered/audit_particles_0_rank1.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 89850.0
+  },
+  {
+    "check": "staggered/audit_particles_0_rank1.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.0
+  },
+  {
+    "check": "staggered/audit_particles_1_rank1.csv/IDs",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_particles_1_rank1.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_particles_1_rank1.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 89849.999999975
+  },
+  {
+    "check": "staggered/audit_particles_1_rank1.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.000000043314
+  },
+  {
+    "check": "staggered/audit_particles_1_rank1.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 813214.3886040291
+  },
+  {
+    "check": "staggered/audit_particles_1_rank1.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000114
+  },
+  {
+    "check": "staggered/audit_particles_1_rank1.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0
+  },
+  {
+    "check": "staggered/audit_particles_1_rank1.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.034960750828325345
+  },
+  {
+    "check": "staggered/audit_particles_1_rank1.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0506878934290891
+  },
+  {
+    "check": "staggered/audit_particles_1_rank1.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.030228997831295026
+  },
+  {
+    "check": "staggered/audit_particles_1_rank1.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 89850.0
+  },
+  {
+    "check": "staggered/audit_particles_1_rank1.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.0
+  },
+  {
+    "check": "staggered/audit_particles_2_rank1.csv/IDs",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_particles_2_rank1.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_particles_2_rank1.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 89849.99999995
+  },
+  {
+    "check": "staggered/audit_particles_2_rank1.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.00000008663
+  },
+  {
+    "check": "staggered/audit_particles_2_rank1.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 813214.3886040291
+  },
+  {
+    "check": "staggered/audit_particles_2_rank1.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000114
+  },
+  {
+    "check": "staggered/audit_particles_2_rank1.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0
+  },
+  {
+    "check": "staggered/audit_particles_2_rank1.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.07146930284111835
+  },
+  {
+    "check": "staggered/audit_particles_2_rank1.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.10187014756307289
+  },
+  {
+    "check": "staggered/audit_particles_2_rank1.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.062154601390009404
+  },
+  {
+    "check": "staggered/audit_particles_2_rank1.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 89849.999999975
+  },
+  {
+    "check": "staggered/audit_particles_2_rank1.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.000000043314
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank1.csv/DoFs",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank1.csv/component0/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank1.csv/component0/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 2.505501552566263e-10
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank1.csv/component1/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank1.csv/component1/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 4.341484432418543e-10
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank1.csv/component2/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank1.csv/component2/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 840.5532880778127
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank1.csv/component3/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank1.csv/component3/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 293.0
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank1.csv/component4/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank1.csv/component4/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank1.csv/component5/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank1.csv/component5/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank1.csv/component6/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank1.csv/component6/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank1.csv/component7/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank1.csv/component7/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000014
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank1.csv/component8/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank1.csv/component8/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0527758594192989
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank1.csv/component9/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_0_rank1.csv/component9/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.5997282911158509
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank1.csv/DoFs",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank1.csv/component0/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank1.csv/component0/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 2.5056106776843025e-10
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank1.csv/component1/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank1.csv/component1/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 4.341534948731255e-10
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank1.csv/component2/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank1.csv/component2/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.021018388722442823
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank1.csv/component3/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank1.csv/component3/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 293.0
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank1.csv/component4/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank1.csv/component4/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank1.csv/component5/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank1.csv/component5/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank1.csv/component6/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank1.csv/component6/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank1.csv/component7/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank1.csv/component7/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000121
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank1.csv/component8/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank1.csv/component8/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0527758594255774
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank1.csv/component9/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_1_rank1.csv/component9/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.5997282911158509
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank1.csv/DoFs",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank1.csv/component0/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank1.csv/component0/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 2.504560126309239e-10
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank1.csv/component1/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank1.csv/component1/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 4.337504941761038e-10
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank1.csv/component2/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank1.csv/component2/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.03876037271123869
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank1.csv/component3/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank1.csv/component3/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 293.0
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank1.csv/component4/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank1.csv/component4/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.009817202321136706
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank1.csv/component5/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank1.csv/component5/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.023386533110983265
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank1.csv/component6/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank1.csv/component6/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0130817998533286
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank1.csv/component7/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank1.csv/component7/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000123
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank1.csv/component8/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank1.csv/component8/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0527758594318561
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank1.csv/component9/shape",
+    "passed": true
+  },
+  {
+    "check": "staggered/audit_bulk_2_rank1.csv/component9/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.5997282911158509
+  },
+  {
+    "check": "staggered/1/births",
+    "passed": true
+  },
+  {
+    "check": "staggered/decisions",
+    "passed": true
+  },
+  {
+    "check": "staggered/fresh-residuals",
+    "passed": true
+  },
+  {
+    "check": "create/fault_0.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "create/fault_0.csv/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "create/fault_0.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 31.0
+  },
+  {
+    "check": "create/fault_0.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "create/fault_0.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "create/fault_0.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 57735.02691896258
+  },
+  {
+    "check": "create/fault_0.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 28867.51345948129
+  },
+  {
+    "check": "create/fault_0.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000.0
+  },
+  {
+    "check": "create/fault_0.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "create/fault_0.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0004472683180414e-09
+  },
+  {
+    "check": "create/fault_0.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000014
+  },
+  {
+    "check": "create/fault_0.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 26546493.092492346
+  },
+  {
+    "check": "create/fault_0.csv/11",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000961.033832036
+  },
+  {
+    "check": "create/fault_1.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "create/fault_1.csv/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "create/fault_1.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 31.0
+  },
+  {
+    "check": "create/fault_1.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0
+  },
+  {
+    "check": "create/fault_1.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 100.0
+  },
+  {
+    "check": "create/fault_1.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 57735.02691896258
+  },
+  {
+    "check": "create/fault_1.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 28867.51345948129
+  },
+  {
+    "check": "create/fault_1.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000.0
+  },
+  {
+    "check": "create/fault_1.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0000000113305823e-07
+  },
+  {
+    "check": "create/fault_1.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0000000113305824e-09
+  },
+  {
+    "check": "create/fault_1.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000576
+  },
+  {
+    "check": "create/fault_1.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 26546122.37452405
+  },
+  {
+    "check": "create/fault_1.csv/11",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000000.024019495
+  },
+  {
+    "check": "create/audit_particles_0_rank0.csv/IDs",
+    "passed": true
+  },
+  {
+    "check": "create/audit_particles_0_rank0.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_particles_0_rank0.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 59850.0
+  },
+  {
+    "check": "create/audit_particles_0_rank0.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.0
+  },
+  {
+    "check": "create/audit_particles_0_rank0.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 813189.4134875815
+  },
+  {
+    "check": "create/audit_particles_0_rank0.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000014
+  },
+  {
+    "check": "create/audit_particles_0_rank0.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0
+  },
+  {
+    "check": "create/audit_particles_0_rank0.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "create/audit_particles_0_rank0.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "create/audit_particles_0_rank0.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "create/audit_particles_0_rank0.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 59850.0
+  },
+  {
+    "check": "create/audit_particles_0_rank0.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.0
+  },
+  {
+    "check": "create/audit_particles_1_rank0.csv/IDs",
+    "passed": true
+  },
+  {
+    "check": "create/audit_particles_1_rank0.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_particles_1_rank0.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 59849.999999975
+  },
+  {
+    "check": "create/audit_particles_1_rank0.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.00000003901
+  },
+  {
+    "check": "create/audit_particles_1_rank0.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 813189.4134875815
+  },
+  {
+    "check": "create/audit_particles_1_rank0.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000014
+  },
+  {
+    "check": "create/audit_particles_1_rank0.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0
+  },
+  {
+    "check": "create/audit_particles_1_rank0.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.05743660291118153
+  },
+  {
+    "check": "create/audit_particles_1_rank0.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.07059751688148914
+  },
+  {
+    "check": "create/audit_particles_1_rank0.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.044123772729618704
+  },
+  {
+    "check": "create/audit_particles_1_rank0.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 59850.0
+  },
+  {
+    "check": "create/audit_particles_1_rank0.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.0
+  },
+  {
+    "check": "create/audit_bulk_0_rank0.csv/DoFs",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_0_rank0.csv/component0/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_0_rank0.csv/component0/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 2.508420993271986e-10
+  },
+  {
+    "check": "create/audit_bulk_0_rank0.csv/component1/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_0_rank0.csv/component1/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 4.355695292140432e-10
+  },
+  {
+    "check": "create/audit_bulk_0_rank0.csv/component2/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_0_rank0.csv/component2/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 4135.193187414323
+  },
+  {
+    "check": "create/audit_bulk_0_rank0.csv/component3/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_0_rank0.csv/component3/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 293.0
+  },
+  {
+    "check": "create/audit_bulk_0_rank0.csv/component4/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_0_rank0.csv/component4/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "create/audit_bulk_0_rank0.csv/component5/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_0_rank0.csv/component5/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "create/audit_bulk_0_rank0.csv/component6/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_0_rank0.csv/component6/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "create/audit_bulk_0_rank0.csv/component7/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_0_rank0.csv/component7/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000014
+  },
+  {
+    "check": "create/audit_bulk_0_rank0.csv/component8/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_0_rank0.csv/component8/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0527758594192989
+  },
+  {
+    "check": "create/audit_bulk_0_rank0.csv/component9/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_0_rank0.csv/component9/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.6
+  },
+  {
+    "check": "create/audit_bulk_1_rank0.csv/DoFs",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_1_rank0.csv/component0/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_1_rank0.csv/component0/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 2.508216676839515e-10
+  },
+  {
+    "check": "create/audit_bulk_1_rank0.csv/component1/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_1_rank0.csv/component1/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 4.355766898348262e-10
+  },
+  {
+    "check": "create/audit_bulk_1_rank0.csv/component2/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_1_rank0.csv/component2/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.10349647821858034
+  },
+  {
+    "check": "create/audit_bulk_1_rank0.csv/component3/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_1_rank0.csv/component3/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 293.0
+  },
+  {
+    "check": "create/audit_bulk_1_rank0.csv/component4/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_1_rank0.csv/component4/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "create/audit_bulk_1_rank0.csv/component5/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_1_rank0.csv/component5/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "create/audit_bulk_1_rank0.csv/component6/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_1_rank0.csv/component6/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "create/audit_bulk_1_rank0.csv/component7/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_1_rank0.csv/component7/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000168
+  },
+  {
+    "check": "create/audit_bulk_1_rank0.csv/component8/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_1_rank0.csv/component8/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0527758594132957
+  },
+  {
+    "check": "create/audit_bulk_1_rank0.csv/component9/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_1_rank0.csv/component9/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.6
+  },
+  {
+    "check": "create/0/births",
+    "passed": true
+  },
+  {
+    "check": "create/audit_particles_0_rank1.csv/IDs",
+    "passed": true
+  },
+  {
+    "check": "create/audit_particles_0_rank1.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_particles_0_rank1.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 89850.0
+  },
+  {
+    "check": "create/audit_particles_0_rank1.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.0
+  },
+  {
+    "check": "create/audit_particles_0_rank1.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 813214.3886040291
+  },
+  {
+    "check": "create/audit_particles_0_rank1.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000014
+  },
+  {
+    "check": "create/audit_particles_0_rank1.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0
+  },
+  {
+    "check": "create/audit_particles_0_rank1.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "create/audit_particles_0_rank1.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "create/audit_particles_0_rank1.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "create/audit_particles_0_rank1.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 89850.0
+  },
+  {
+    "check": "create/audit_particles_0_rank1.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.0
+  },
+  {
+    "check": "create/audit_particles_1_rank1.csv/IDs",
+    "passed": true
+  },
+  {
+    "check": "create/audit_particles_1_rank1.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_particles_1_rank1.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 89849.999999975
+  },
+  {
+    "check": "create/audit_particles_1_rank1.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.000000043314
+  },
+  {
+    "check": "create/audit_particles_1_rank1.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 813214.3886040291
+  },
+  {
+    "check": "create/audit_particles_1_rank1.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000114
+  },
+  {
+    "check": "create/audit_particles_1_rank1.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0
+  },
+  {
+    "check": "create/audit_particles_1_rank1.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.034960750828325345
+  },
+  {
+    "check": "create/audit_particles_1_rank1.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0506878934290891
+  },
+  {
+    "check": "create/audit_particles_1_rank1.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.030228997831295026
+  },
+  {
+    "check": "create/audit_particles_1_rank1.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 89850.0
+  },
+  {
+    "check": "create/audit_particles_1_rank1.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.0
+  },
+  {
+    "check": "create/audit_bulk_0_rank1.csv/DoFs",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_0_rank1.csv/component0/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_0_rank1.csv/component0/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 2.505501552566263e-10
+  },
+  {
+    "check": "create/audit_bulk_0_rank1.csv/component1/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_0_rank1.csv/component1/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 4.341484432418543e-10
+  },
+  {
+    "check": "create/audit_bulk_0_rank1.csv/component2/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_0_rank1.csv/component2/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 840.5532880778127
+  },
+  {
+    "check": "create/audit_bulk_0_rank1.csv/component3/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_0_rank1.csv/component3/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 293.0
+  },
+  {
+    "check": "create/audit_bulk_0_rank1.csv/component4/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_0_rank1.csv/component4/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "create/audit_bulk_0_rank1.csv/component5/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_0_rank1.csv/component5/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "create/audit_bulk_0_rank1.csv/component6/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_0_rank1.csv/component6/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "create/audit_bulk_0_rank1.csv/component7/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_0_rank1.csv/component7/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000014
+  },
+  {
+    "check": "create/audit_bulk_0_rank1.csv/component8/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_0_rank1.csv/component8/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0527758594192989
+  },
+  {
+    "check": "create/audit_bulk_0_rank1.csv/component9/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_0_rank1.csv/component9/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.5997282911158509
+  },
+  {
+    "check": "create/audit_bulk_1_rank1.csv/DoFs",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_1_rank1.csv/component0/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_1_rank1.csv/component0/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 2.5056106776843025e-10
+  },
+  {
+    "check": "create/audit_bulk_1_rank1.csv/component1/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_1_rank1.csv/component1/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 4.341534948731255e-10
+  },
+  {
+    "check": "create/audit_bulk_1_rank1.csv/component2/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_1_rank1.csv/component2/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.021018388722442823
+  },
+  {
+    "check": "create/audit_bulk_1_rank1.csv/component3/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_1_rank1.csv/component3/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 293.0
+  },
+  {
+    "check": "create/audit_bulk_1_rank1.csv/component4/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_1_rank1.csv/component4/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "create/audit_bulk_1_rank1.csv/component5/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_1_rank1.csv/component5/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "create/audit_bulk_1_rank1.csv/component6/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_1_rank1.csv/component6/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "create/audit_bulk_1_rank1.csv/component7/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_1_rank1.csv/component7/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000121
+  },
+  {
+    "check": "create/audit_bulk_1_rank1.csv/component8/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_1_rank1.csv/component8/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0527758594255774
+  },
+  {
+    "check": "create/audit_bulk_1_rank1.csv/component9/shape",
+    "passed": true
+  },
+  {
+    "check": "create/audit_bulk_1_rank1.csv/component9/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.5997282911158509
+  },
+  {
+    "check": "create/1/births",
+    "passed": true
+  },
+  {
+    "check": "create/decisions",
+    "passed": true
+  },
+  {
+    "check": "create/fresh-residuals",
+    "passed": true
+  },
+  {
+    "check": "direct/fault_0.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "direct/fault_0.csv/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "direct/fault_0.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 31.0
+  },
+  {
+    "check": "direct/fault_0.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "direct/fault_0.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "direct/fault_0.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 57735.02691896258
+  },
+  {
+    "check": "direct/fault_0.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 28867.51345948129
+  },
+  {
+    "check": "direct/fault_0.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000.0
+  },
+  {
+    "check": "direct/fault_0.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "direct/fault_0.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0004472683180066e-09
+  },
+  {
+    "check": "direct/fault_0.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000014
+  },
+  {
+    "check": "direct/fault_0.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 26546493.092492346
+  },
+  {
+    "check": "direct/fault_0.csv/11",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000961.03383207
+  },
+  {
+    "check": "direct/fault_1.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "direct/fault_1.csv/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "direct/fault_1.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 31.0
+  },
+  {
+    "check": "direct/fault_1.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0
+  },
+  {
+    "check": "direct/fault_1.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50.0
+  },
+  {
+    "check": "direct/fault_1.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 57735.02691896258
+  },
+  {
+    "check": "direct/fault_1.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 28867.51345948129
+  },
+  {
+    "check": "direct/fault_1.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000.0
+  },
+  {
+    "check": "direct/fault_1.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 5.0000000283264677e-08
+  },
+  {
+    "check": "direct/fault_1.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0000000056652935e-09
+  },
+  {
+    "check": "direct/fault_1.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000155
+  },
+  {
+    "check": "direct/fault_1.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 26546122.36982871
+  },
+  {
+    "check": "direct/fault_1.csv/11",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000000.0120097
+  },
+  {
+    "check": "direct/audit_particles_0_rank0.csv/IDs",
+    "passed": true
+  },
+  {
+    "check": "direct/audit_particles_0_rank0.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "direct/audit_particles_0_rank0.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 89850.0
+  },
+  {
+    "check": "direct/audit_particles_0_rank0.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.0
+  },
+  {
+    "check": "direct/audit_particles_0_rank0.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 813214.3886040291
+  },
+  {
+    "check": "direct/audit_particles_0_rank0.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000014
+  },
+  {
+    "check": "direct/audit_particles_0_rank0.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0
+  },
+  {
+    "check": "direct/audit_particles_0_rank0.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "direct/audit_particles_0_rank0.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "direct/audit_particles_0_rank0.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "direct/audit_particles_0_rank0.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 89850.0
+  },
+  {
+    "check": "direct/audit_particles_0_rank0.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.0
+  },
+  {
+    "check": "direct/audit_particles_1_rank0.csv/IDs",
+    "passed": true
+  },
+  {
+    "check": "direct/audit_particles_1_rank0.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "direct/audit_particles_1_rank0.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 89849.9999999875
+  },
+  {
+    "check": "direct/audit_particles_1_rank0.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.00000002166
+  },
+  {
+    "check": "direct/audit_particles_1_rank0.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 813214.3886040291
+  },
+  {
+    "check": "direct/audit_particles_1_rank0.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000056
+  },
+  {
+    "check": "direct/audit_particles_1_rank0.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0
+  },
+  {
+    "check": "direct/audit_particles_1_rank0.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.02871830014346201
+  },
+  {
+    "check": "direct/audit_particles_1_rank0.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.03529875944187579
+  },
+  {
+    "check": "direct/audit_particles_1_rank0.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.022061886953691056
+  },
+  {
+    "check": "direct/audit_particles_1_rank0.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 89850.0
+  },
+  {
+    "check": "direct/audit_particles_1_rank0.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.0
+  },
+  {
+    "check": "direct/audit_bulk_0_rank0.csv/DoFs",
+    "passed": true
+  },
+  {
+    "check": "direct/audit_bulk_0_rank0.csv/component0/shape",
+    "passed": true
+  },
+  {
+    "check": "direct/audit_bulk_0_rank0.csv/component0/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 2.508420993271986e-10
+  },
+  {
+    "check": "direct/audit_bulk_0_rank0.csv/component1/shape",
+    "passed": true
+  },
+  {
+    "check": "direct/audit_bulk_0_rank0.csv/component1/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 4.35569529214043e-10
+  },
+  {
+    "check": "direct/audit_bulk_0_rank0.csv/component2/shape",
+    "passed": true
+  },
+  {
+    "check": "direct/audit_bulk_0_rank0.csv/component2/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 4135.193187414355
+  },
+  {
+    "check": "direct/audit_bulk_0_rank0.csv/component3/shape",
+    "passed": true
+  },
+  {
+    "check": "direct/audit_bulk_0_rank0.csv/component3/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 293.0
+  },
+  {
+    "check": "direct/audit_bulk_0_rank0.csv/component4/shape",
+    "passed": true
+  },
+  {
+    "check": "direct/audit_bulk_0_rank0.csv/component4/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "direct/audit_bulk_0_rank0.csv/component5/shape",
+    "passed": true
+  },
+  {
+    "check": "direct/audit_bulk_0_rank0.csv/component5/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "direct/audit_bulk_0_rank0.csv/component6/shape",
+    "passed": true
+  },
+  {
+    "check": "direct/audit_bulk_0_rank0.csv/component6/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "direct/audit_bulk_0_rank0.csv/component7/shape",
+    "passed": true
+  },
+  {
+    "check": "direct/audit_bulk_0_rank0.csv/component7/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000014
+  },
+  {
+    "check": "direct/audit_bulk_0_rank0.csv/component8/shape",
+    "passed": true
+  },
+  {
+    "check": "direct/audit_bulk_0_rank0.csv/component8/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0527758594192989
+  },
+  {
+    "check": "direct/audit_bulk_0_rank0.csv/component9/shape",
+    "passed": true
+  },
+  {
+    "check": "direct/audit_bulk_0_rank0.csv/component9/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.6
+  },
+  {
+    "check": "direct/audit_bulk_1_rank0.csv/DoFs",
+    "passed": true
+  },
+  {
+    "check": "direct/audit_bulk_1_rank0.csv/component0/shape",
+    "passed": true
+  },
+  {
+    "check": "direct/audit_bulk_1_rank0.csv/component0/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 2.508216674249975e-10
+  },
+  {
+    "check": "direct/audit_bulk_1_rank0.csv/component1/shape",
+    "passed": true
+  },
+  {
+    "check": "direct/audit_bulk_1_rank0.csv/component1/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 4.355766899250488e-10
+  },
+  {
+    "check": "direct/audit_bulk_1_rank0.csv/component2/shape",
+    "passed": true
+  },
+  {
+    "check": "direct/audit_bulk_1_rank0.csv/component2/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.051748239850650135
+  },
+  {
+    "check": "direct/audit_bulk_1_rank0.csv/component3/shape",
+    "passed": true
+  },
+  {
+    "check": "direct/audit_bulk_1_rank0.csv/component3/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 293.0
+  },
+  {
+    "check": "direct/audit_bulk_1_rank0.csv/component4/shape",
+    "passed": true
+  },
+  {
+    "check": "direct/audit_bulk_1_rank0.csv/component4/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "direct/audit_bulk_1_rank0.csv/component5/shape",
+    "passed": true
+  },
+  {
+    "check": "direct/audit_bulk_1_rank0.csv/component5/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "direct/audit_bulk_1_rank0.csv/component6/shape",
+    "passed": true
+  },
+  {
+    "check": "direct/audit_bulk_1_rank0.csv/component6/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "direct/audit_bulk_1_rank0.csv/component7/shape",
+    "passed": true
+  },
+  {
+    "check": "direct/audit_bulk_1_rank0.csv/component7/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000168
+  },
+  {
+    "check": "direct/audit_bulk_1_rank0.csv/component8/shape",
+    "passed": true
+  },
+  {
+    "check": "direct/audit_bulk_1_rank0.csv/component8/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0527758594224381
+  },
+  {
+    "check": "direct/audit_bulk_1_rank0.csv/component9/shape",
+    "passed": true
+  },
+  {
+    "check": "direct/audit_bulk_1_rank0.csv/component9/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.6
+  },
+  {
+    "check": "direct/0/births",
+    "passed": true
+  },
+  {
+    "check": "direct/decisions",
+    "passed": true
+  },
+  {
+    "check": "direct/fresh-residuals",
+    "passed": true
+  },
+  {
+    "check": "retry/fault_0.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "retry/fault_0.csv/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "retry/fault_0.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 31.0
+  },
+  {
+    "check": "retry/fault_0.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "retry/fault_0.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "retry/fault_0.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 57735.02691896258
+  },
+  {
+    "check": "retry/fault_0.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 28867.51345948129
+  },
+  {
+    "check": "retry/fault_0.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000.0
+  },
+  {
+    "check": "retry/fault_0.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "retry/fault_0.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0004472683180066e-09
+  },
+  {
+    "check": "retry/fault_0.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000014
+  },
+  {
+    "check": "retry/fault_0.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 26546493.092492346
+  },
+  {
+    "check": "retry/fault_0.csv/11",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000961.03383207
+  },
+  {
+    "check": "retry/fault_1.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "retry/fault_1.csv/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "retry/fault_1.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 31.0
+  },
+  {
+    "check": "retry/fault_1.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0
+  },
+  {
+    "check": "retry/fault_1.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50.0
+  },
+  {
+    "check": "retry/fault_1.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 57735.02691896258
+  },
+  {
+    "check": "retry/fault_1.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 28867.51345948129
+  },
+  {
+    "check": "retry/fault_1.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000.0
+  },
+  {
+    "check": "retry/fault_1.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 5.0000000283264677e-08
+  },
+  {
+    "check": "retry/fault_1.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0000000056652935e-09
+  },
+  {
+    "check": "retry/fault_1.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000155
+  },
+  {
+    "check": "retry/fault_1.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 26546122.36982871
+  },
+  {
+    "check": "retry/fault_1.csv/11",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000000.0120097
+  },
+  {
+    "check": "retry/audit_particles_0_rank0.csv/IDs",
+    "passed": true
+  },
+  {
+    "check": "retry/audit_particles_0_rank0.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "retry/audit_particles_0_rank0.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 89850.0
+  },
+  {
+    "check": "retry/audit_particles_0_rank0.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.0
+  },
+  {
+    "check": "retry/audit_particles_0_rank0.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 813214.3886040291
+  },
+  {
+    "check": "retry/audit_particles_0_rank0.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000014
+  },
+  {
+    "check": "retry/audit_particles_0_rank0.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0
+  },
+  {
+    "check": "retry/audit_particles_0_rank0.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "retry/audit_particles_0_rank0.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "retry/audit_particles_0_rank0.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "retry/audit_particles_0_rank0.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 89850.0
+  },
+  {
+    "check": "retry/audit_particles_0_rank0.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.0
+  },
+  {
+    "check": "retry/audit_particles_1_rank0.csv/IDs",
+    "passed": true
+  },
+  {
+    "check": "retry/audit_particles_1_rank0.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "retry/audit_particles_1_rank0.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 89849.9999999875
+  },
+  {
+    "check": "retry/audit_particles_1_rank0.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.00000002166
+  },
+  {
+    "check": "retry/audit_particles_1_rank0.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 813214.3886040291
+  },
+  {
+    "check": "retry/audit_particles_1_rank0.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000056
+  },
+  {
+    "check": "retry/audit_particles_1_rank0.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0
+  },
+  {
+    "check": "retry/audit_particles_1_rank0.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.02871830014346201
+  },
+  {
+    "check": "retry/audit_particles_1_rank0.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.03529875944187579
+  },
+  {
+    "check": "retry/audit_particles_1_rank0.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.022061886953691056
+  },
+  {
+    "check": "retry/audit_particles_1_rank0.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 89850.0
+  },
+  {
+    "check": "retry/audit_particles_1_rank0.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.0
+  },
+  {
+    "check": "retry/audit_bulk_0_rank0.csv/DoFs",
+    "passed": true
+  },
+  {
+    "check": "retry/audit_bulk_0_rank0.csv/component0/shape",
+    "passed": true
+  },
+  {
+    "check": "retry/audit_bulk_0_rank0.csv/component0/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 2.508420993271986e-10
+  },
+  {
+    "check": "retry/audit_bulk_0_rank0.csv/component1/shape",
+    "passed": true
+  },
+  {
+    "check": "retry/audit_bulk_0_rank0.csv/component1/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 4.35569529214043e-10
+  },
+  {
+    "check": "retry/audit_bulk_0_rank0.csv/component2/shape",
+    "passed": true
+  },
+  {
+    "check": "retry/audit_bulk_0_rank0.csv/component2/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 4135.193187414355
+  },
+  {
+    "check": "retry/audit_bulk_0_rank0.csv/component3/shape",
+    "passed": true
+  },
+  {
+    "check": "retry/audit_bulk_0_rank0.csv/component3/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 293.0
+  },
+  {
+    "check": "retry/audit_bulk_0_rank0.csv/component4/shape",
+    "passed": true
+  },
+  {
+    "check": "retry/audit_bulk_0_rank0.csv/component4/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "retry/audit_bulk_0_rank0.csv/component5/shape",
+    "passed": true
+  },
+  {
+    "check": "retry/audit_bulk_0_rank0.csv/component5/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "retry/audit_bulk_0_rank0.csv/component6/shape",
+    "passed": true
+  },
+  {
+    "check": "retry/audit_bulk_0_rank0.csv/component6/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "retry/audit_bulk_0_rank0.csv/component7/shape",
+    "passed": true
+  },
+  {
+    "check": "retry/audit_bulk_0_rank0.csv/component7/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000014
+  },
+  {
+    "check": "retry/audit_bulk_0_rank0.csv/component8/shape",
+    "passed": true
+  },
+  {
+    "check": "retry/audit_bulk_0_rank0.csv/component8/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0527758594192989
+  },
+  {
+    "check": "retry/audit_bulk_0_rank0.csv/component9/shape",
+    "passed": true
+  },
+  {
+    "check": "retry/audit_bulk_0_rank0.csv/component9/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.6
+  },
+  {
+    "check": "retry/audit_bulk_1_rank0.csv/DoFs",
+    "passed": true
+  },
+  {
+    "check": "retry/audit_bulk_1_rank0.csv/component0/shape",
+    "passed": true
+  },
+  {
+    "check": "retry/audit_bulk_1_rank0.csv/component0/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 2.508216674249975e-10
+  },
+  {
+    "check": "retry/audit_bulk_1_rank0.csv/component1/shape",
+    "passed": true
+  },
+  {
+    "check": "retry/audit_bulk_1_rank0.csv/component1/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 4.355766899250488e-10
+  },
+  {
+    "check": "retry/audit_bulk_1_rank0.csv/component2/shape",
+    "passed": true
+  },
+  {
+    "check": "retry/audit_bulk_1_rank0.csv/component2/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.051748239850650135
+  },
+  {
+    "check": "retry/audit_bulk_1_rank0.csv/component3/shape",
+    "passed": true
+  },
+  {
+    "check": "retry/audit_bulk_1_rank0.csv/component3/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 293.0
+  },
+  {
+    "check": "retry/audit_bulk_1_rank0.csv/component4/shape",
+    "passed": true
+  },
+  {
+    "check": "retry/audit_bulk_1_rank0.csv/component4/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "retry/audit_bulk_1_rank0.csv/component5/shape",
+    "passed": true
+  },
+  {
+    "check": "retry/audit_bulk_1_rank0.csv/component5/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "retry/audit_bulk_1_rank0.csv/component6/shape",
+    "passed": true
+  },
+  {
+    "check": "retry/audit_bulk_1_rank0.csv/component6/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "retry/audit_bulk_1_rank0.csv/component7/shape",
+    "passed": true
+  },
+  {
+    "check": "retry/audit_bulk_1_rank0.csv/component7/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000168
+  },
+  {
+    "check": "retry/audit_bulk_1_rank0.csv/component8/shape",
+    "passed": true
+  },
+  {
+    "check": "retry/audit_bulk_1_rank0.csv/component8/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0527758594224381
+  },
+  {
+    "check": "retry/audit_bulk_1_rank0.csv/component9/shape",
+    "passed": true
+  },
+  {
+    "check": "retry/audit_bulk_1_rank0.csv/component9/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.6
+  },
+  {
+    "check": "retry/0/births",
+    "passed": true
+  },
+  {
+    "check": "retry/decisions",
+    "passed": true
+  },
+  {
+    "check": "retry/fresh-residuals",
+    "passed": true
+  },
+  {
+    "check": "direct2/fault_0.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "direct2/fault_0.csv/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "direct2/fault_0.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 31.0
+  },
+  {
+    "check": "direct2/fault_0.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "direct2/fault_0.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "direct2/fault_0.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 57735.02691896258
+  },
+  {
+    "check": "direct2/fault_0.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 28867.51345948129
+  },
+  {
+    "check": "direct2/fault_0.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000.0
+  },
+  {
+    "check": "direct2/fault_0.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "direct2/fault_0.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0004472683180414e-09
+  },
+  {
+    "check": "direct2/fault_0.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000014
+  },
+  {
+    "check": "direct2/fault_0.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 26546493.092492346
+  },
+  {
+    "check": "direct2/fault_0.csv/11",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000961.033832036
+  },
+  {
+    "check": "direct2/fault_1.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "direct2/fault_1.csv/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "direct2/fault_1.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 31.0
+  },
+  {
+    "check": "direct2/fault_1.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0
+  },
+  {
+    "check": "direct2/fault_1.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 100.0
+  },
+  {
+    "check": "direct2/fault_1.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 57735.02691896258
+  },
+  {
+    "check": "direct2/fault_1.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 28867.51345948129
+  },
+  {
+    "check": "direct2/fault_1.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000.0
+  },
+  {
+    "check": "direct2/fault_1.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0000000113305823e-07
+  },
+  {
+    "check": "direct2/fault_1.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0000000113305824e-09
+  },
+  {
+    "check": "direct2/fault_1.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000576
+  },
+  {
+    "check": "direct2/fault_1.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 26546122.37452405
+  },
+  {
+    "check": "direct2/fault_1.csv/11",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000000.024019495
+  },
+  {
+    "check": "direct2/fault_2.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "direct2/fault_2.csv/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "direct2/fault_2.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 31.0
+  },
+  {
+    "check": "direct2/fault_2.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 2.0
+  },
+  {
+    "check": "direct2/fault_2.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 150.0
+  },
+  {
+    "check": "direct2/fault_2.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 57735.02691896258
+  },
+  {
+    "check": "direct2/fault_2.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 28867.51345948129
+  },
+  {
+    "check": "direct2/fault_2.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000.0
+  },
+  {
+    "check": "direct2/fault_2.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.5000000258676638e-07
+  },
+  {
+    "check": "direct2/fault_2.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0000000290741628e-09
+  },
+  {
+    "check": "direct2/fault_2.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000897
+  },
+  {
+    "check": "direct2/fault_2.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 26546122.38879185
+  },
+  {
+    "check": "direct2/fault_2.csv/11",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000000.02718899
+  },
+  {
+    "check": "direct2/audit_particles_2_rank0.csv/IDs",
+    "passed": true
+  },
+  {
+    "check": "direct2/audit_particles_2_rank0.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "direct2/audit_particles_2_rank0.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 59849.9999999625
+  },
+  {
+    "check": "direct2/audit_particles_2_rank0.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.00000005851
+  },
+  {
+    "check": "direct2/audit_particles_2_rank0.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 813189.4134875815
+  },
+  {
+    "check": "direct2/audit_particles_2_rank0.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000014
+  },
+  {
+    "check": "direct2/audit_particles_2_rank0.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0
+  },
+  {
+    "check": "direct2/audit_particles_2_rank0.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.08679217069003302
+  },
+  {
+    "check": "direct2/audit_particles_2_rank0.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.10350816593564273
+  },
+  {
+    "check": "direct2/audit_particles_2_rank0.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0652660318285967
+  },
+  {
+    "check": "direct2/audit_particles_2_rank0.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 59849.999999975
+  },
+  {
+    "check": "direct2/audit_particles_2_rank0.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.00000003901
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank0.csv/DoFs",
+    "passed": true
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank0.csv/component0/shape",
+    "passed": true
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank0.csv/component0/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 2.5106437367881545e-10
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank0.csv/component1/shape",
+    "passed": true
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank0.csv/component1/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 4.3454985757902046e-10
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank0.csv/component2/shape",
+    "passed": true
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank0.csv/component2/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.12310757360032493
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank0.csv/component3/shape",
+    "passed": true
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank0.csv/component3/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 293.0
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank0.csv/component4/shape",
+    "passed": true
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank0.csv/component4/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.030270203264846446
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank0.csv/component5/shape",
+    "passed": true
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank0.csv/component5/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.049663406142243446
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank0.csv/component6/shape",
+    "passed": true
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank0.csv/component6/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.03808237302363462
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank0.csv/component7/shape",
+    "passed": true
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank0.csv/component7/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000168
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank0.csv/component8/shape",
+    "passed": true
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank0.csv/component8/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.052775859410294
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank0.csv/component9/shape",
+    "passed": true
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank0.csv/component9/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.6
+  },
+  {
+    "check": "direct2/0/births",
+    "passed": true
+  },
+  {
+    "check": "direct2/audit_particles_2_rank1.csv/IDs",
+    "passed": true
+  },
+  {
+    "check": "direct2/audit_particles_2_rank1.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "direct2/audit_particles_2_rank1.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 89849.9999999625
+  },
+  {
+    "check": "direct2/audit_particles_2_rank1.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.000000064974
+  },
+  {
+    "check": "direct2/audit_particles_2_rank1.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 813214.3886040291
+  },
+  {
+    "check": "direct2/audit_particles_2_rank1.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000114
+  },
+  {
+    "check": "direct2/audit_particles_2_rank1.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0
+  },
+  {
+    "check": "direct2/audit_particles_2_rank1.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.05398721977433798
+  },
+  {
+    "check": "direct2/audit_particles_2_rank1.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.07652450148408178
+  },
+  {
+    "check": "direct2/audit_particles_2_rank1.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.04706892832985869
+  },
+  {
+    "check": "direct2/audit_particles_2_rank1.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 89849.999999975
+  },
+  {
+    "check": "direct2/audit_particles_2_rank1.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.000000043314
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank1.csv/DoFs",
+    "passed": true
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank1.csv/component0/shape",
+    "passed": true
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank1.csv/component0/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 2.5053659837588473e-10
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank1.csv/component1/shape",
+    "passed": true
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank1.csv/component1/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 4.3338697760084295e-10
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank1.csv/component2/shape",
+    "passed": true
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank1.csv/component2/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.028329963079998865
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank1.csv/component3/shape",
+    "passed": true
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank1.csv/component3/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 293.0
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank1.csv/component4/shape",
+    "passed": true
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank1.csv/component4/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.009817202321169971
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank1.csv/component5/shape",
+    "passed": true
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank1.csv/component5/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.023386533111016485
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank1.csv/component6/shape",
+    "passed": true
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank1.csv/component6/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.013081799853326219
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank1.csv/component7/shape",
+    "passed": true
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank1.csv/component7/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000122
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank1.csv/component8/shape",
+    "passed": true
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank1.csv/component8/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0527758594287167
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank1.csv/component9/shape",
+    "passed": true
+  },
+  {
+    "check": "direct2/audit_bulk_2_rank1.csv/component9/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.5997282911158509
+  },
+  {
+    "check": "direct2/1/births",
+    "passed": true
+  },
+  {
+    "check": "direct2/decisions",
+    "passed": true
+  },
+  {
+    "check": "direct2/fresh-residuals",
+    "passed": true
+  },
+  {
+    "check": "retry2/fault_0.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "retry2/fault_0.csv/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "retry2/fault_0.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 31.0
+  },
+  {
+    "check": "retry2/fault_0.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "retry2/fault_0.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "retry2/fault_0.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 57735.02691896258
+  },
+  {
+    "check": "retry2/fault_0.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 28867.51345948129
+  },
+  {
+    "check": "retry2/fault_0.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000.0
+  },
+  {
+    "check": "retry2/fault_0.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "retry2/fault_0.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0004472683180414e-09
+  },
+  {
+    "check": "retry2/fault_0.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000014
+  },
+  {
+    "check": "retry2/fault_0.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 26546493.092492346
+  },
+  {
+    "check": "retry2/fault_0.csv/11",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000961.033832036
+  },
+  {
+    "check": "retry2/fault_1.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "retry2/fault_1.csv/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "retry2/fault_1.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 31.0
+  },
+  {
+    "check": "retry2/fault_1.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0
+  },
+  {
+    "check": "retry2/fault_1.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 100.0
+  },
+  {
+    "check": "retry2/fault_1.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 57735.02691896258
+  },
+  {
+    "check": "retry2/fault_1.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 28867.51345948129
+  },
+  {
+    "check": "retry2/fault_1.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000.0
+  },
+  {
+    "check": "retry2/fault_1.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0000000113305823e-07
+  },
+  {
+    "check": "retry2/fault_1.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0000000113305824e-09
+  },
+  {
+    "check": "retry2/fault_1.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000576
+  },
+  {
+    "check": "retry2/fault_1.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 26546122.37452405
+  },
+  {
+    "check": "retry2/fault_1.csv/11",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000000.024019495
+  },
+  {
+    "check": "retry2/fault_2.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "retry2/fault_2.csv/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "retry2/fault_2.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 31.0
+  },
+  {
+    "check": "retry2/fault_2.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 2.0
+  },
+  {
+    "check": "retry2/fault_2.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 150.0
+  },
+  {
+    "check": "retry2/fault_2.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 57735.02691896258
+  },
+  {
+    "check": "retry2/fault_2.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 28867.51345948129
+  },
+  {
+    "check": "retry2/fault_2.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000.0
+  },
+  {
+    "check": "retry2/fault_2.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.5000000258676638e-07
+  },
+  {
+    "check": "retry2/fault_2.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0000000290741628e-09
+  },
+  {
+    "check": "retry2/fault_2.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000897
+  },
+  {
+    "check": "retry2/fault_2.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 26546122.38879185
+  },
+  {
+    "check": "retry2/fault_2.csv/11",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000000.02718899
+  },
+  {
+    "check": "retry2/audit_particles_2_rank0.csv/IDs",
+    "passed": true
+  },
+  {
+    "check": "retry2/audit_particles_2_rank0.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "retry2/audit_particles_2_rank0.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 59849.9999999625
+  },
+  {
+    "check": "retry2/audit_particles_2_rank0.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.00000005851
+  },
+  {
+    "check": "retry2/audit_particles_2_rank0.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 813189.4134875815
+  },
+  {
+    "check": "retry2/audit_particles_2_rank0.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000014
+  },
+  {
+    "check": "retry2/audit_particles_2_rank0.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0
+  },
+  {
+    "check": "retry2/audit_particles_2_rank0.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.08679217069003302
+  },
+  {
+    "check": "retry2/audit_particles_2_rank0.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.10350816593564273
+  },
+  {
+    "check": "retry2/audit_particles_2_rank0.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0652660318285967
+  },
+  {
+    "check": "retry2/audit_particles_2_rank0.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 59849.999999975
+  },
+  {
+    "check": "retry2/audit_particles_2_rank0.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.00000003901
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank0.csv/DoFs",
+    "passed": true
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank0.csv/component0/shape",
+    "passed": true
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank0.csv/component0/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 2.5106437367881545e-10
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank0.csv/component1/shape",
+    "passed": true
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank0.csv/component1/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 4.3454985757902046e-10
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank0.csv/component2/shape",
+    "passed": true
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank0.csv/component2/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.12310757360032493
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank0.csv/component3/shape",
+    "passed": true
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank0.csv/component3/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 293.0
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank0.csv/component4/shape",
+    "passed": true
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank0.csv/component4/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.030270203264846446
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank0.csv/component5/shape",
+    "passed": true
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank0.csv/component5/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.049663406142243446
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank0.csv/component6/shape",
+    "passed": true
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank0.csv/component6/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.03808237302363462
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank0.csv/component7/shape",
+    "passed": true
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank0.csv/component7/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000168
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank0.csv/component8/shape",
+    "passed": true
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank0.csv/component8/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.052775859410294
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank0.csv/component9/shape",
+    "passed": true
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank0.csv/component9/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.6
+  },
+  {
+    "check": "retry2/0/births",
+    "passed": true
+  },
+  {
+    "check": "retry2/audit_particles_2_rank1.csv/IDs",
+    "passed": true
+  },
+  {
+    "check": "retry2/audit_particles_2_rank1.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "retry2/audit_particles_2_rank1.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 89849.9999999625
+  },
+  {
+    "check": "retry2/audit_particles_2_rank1.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.000000064974
+  },
+  {
+    "check": "retry2/audit_particles_2_rank1.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 813214.3886040291
+  },
+  {
+    "check": "retry2/audit_particles_2_rank1.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000114
+  },
+  {
+    "check": "retry2/audit_particles_2_rank1.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0
+  },
+  {
+    "check": "retry2/audit_particles_2_rank1.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.05398721977433798
+  },
+  {
+    "check": "retry2/audit_particles_2_rank1.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.07652450148408178
+  },
+  {
+    "check": "retry2/audit_particles_2_rank1.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.04706892832985869
+  },
+  {
+    "check": "retry2/audit_particles_2_rank1.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 89849.999999975
+  },
+  {
+    "check": "retry2/audit_particles_2_rank1.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.000000043314
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank1.csv/DoFs",
+    "passed": true
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank1.csv/component0/shape",
+    "passed": true
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank1.csv/component0/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 2.5053659837588473e-10
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank1.csv/component1/shape",
+    "passed": true
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank1.csv/component1/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 4.3338697760084295e-10
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank1.csv/component2/shape",
+    "passed": true
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank1.csv/component2/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.028329963079998865
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank1.csv/component3/shape",
+    "passed": true
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank1.csv/component3/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 293.0
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank1.csv/component4/shape",
+    "passed": true
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank1.csv/component4/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.009817202321169971
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank1.csv/component5/shape",
+    "passed": true
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank1.csv/component5/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.023386533111016485
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank1.csv/component6/shape",
+    "passed": true
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank1.csv/component6/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.013081799853326219
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank1.csv/component7/shape",
+    "passed": true
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank1.csv/component7/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000122
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank1.csv/component8/shape",
+    "passed": true
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank1.csv/component8/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0527758594287167
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank1.csv/component9/shape",
+    "passed": true
+  },
+  {
+    "check": "retry2/audit_bulk_2_rank1.csv/component9/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.5997282911158509
+  },
+  {
+    "check": "retry2/1/births",
+    "passed": true
+  },
+  {
+    "check": "retry2/decisions",
+    "passed": true
+  },
+  {
+    "check": "retry2/fresh-residuals",
+    "passed": true
+  },
+  {
+    "check": "resume/fault_0.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "resume/fault_0.csv/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "resume/fault_0.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 31.0
+  },
+  {
+    "check": "resume/fault_0.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "resume/fault_0.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "resume/fault_0.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 57735.02691896258
+  },
+  {
+    "check": "resume/fault_0.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 28867.51345948129
+  },
+  {
+    "check": "resume/fault_0.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000.0
+  },
+  {
+    "check": "resume/fault_0.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "resume/fault_0.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0004472683180414e-09
+  },
+  {
+    "check": "resume/fault_0.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000014
+  },
+  {
+    "check": "resume/fault_0.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 26546493.092492346
+  },
+  {
+    "check": "resume/fault_0.csv/11",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000961.033832036
+  },
+  {
+    "check": "resume/fault_1.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "resume/fault_1.csv/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "resume/fault_1.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 31.0
+  },
+  {
+    "check": "resume/fault_1.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0
+  },
+  {
+    "check": "resume/fault_1.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 100.0
+  },
+  {
+    "check": "resume/fault_1.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 57735.02691896258
+  },
+  {
+    "check": "resume/fault_1.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 28867.51345948129
+  },
+  {
+    "check": "resume/fault_1.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000.0
+  },
+  {
+    "check": "resume/fault_1.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0000000113305823e-07
+  },
+  {
+    "check": "resume/fault_1.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0000000113305824e-09
+  },
+  {
+    "check": "resume/fault_1.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000576
+  },
+  {
+    "check": "resume/fault_1.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 26546122.37452405
+  },
+  {
+    "check": "resume/fault_1.csv/11",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000000.024019495
+  },
+  {
+    "check": "resume/fault_2.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "resume/fault_2.csv/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0
+  },
+  {
+    "check": "resume/fault_2.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 31.0
+  },
+  {
+    "check": "resume/fault_2.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 2.0
+  },
+  {
+    "check": "resume/fault_2.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 200.0
+  },
+  {
+    "check": "resume/fault_2.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 57735.02691896258
+  },
+  {
+    "check": "resume/fault_2.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 28867.51345948129
+  },
+  {
+    "check": "resume/fault_2.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000.0
+  },
+  {
+    "check": "resume/fault_2.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 2.000000046396925e-07
+  },
+  {
+    "check": "resume/fault_2.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0000000350663427e-09
+  },
+  {
+    "check": "resume/fault_2.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.0000014985
+  },
+  {
+    "check": "resume/fault_2.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 26546122.393036906
+  },
+  {
+    "check": "resume/fault_2.csv/11",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 50000000.03988105
+  },
+  {
+    "check": "resume/audit_particles_2_rank0.csv/IDs",
+    "passed": true
+  },
+  {
+    "check": "resume/audit_particles_2_rank0.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "resume/audit_particles_2_rank0.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 59849.99999995
+  },
+  {
+    "check": "resume/audit_particles_2_rank0.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.00000007802
+  },
+  {
+    "check": "resume/audit_particles_2_rank0.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 813189.4134875815
+  },
+  {
+    "check": "resume/audit_particles_2_rank0.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000014
+  },
+  {
+    "check": "resume/audit_particles_2_rank0.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0
+  },
+  {
+    "check": "resume/audit_particles_2_rank0.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.11547298000110237
+  },
+  {
+    "check": "resume/audit_particles_2_rank0.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.13849824134670263
+  },
+  {
+    "check": "resume/audit_particles_2_rank0.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.08723613469360392
+  },
+  {
+    "check": "resume/audit_particles_2_rank0.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 59849.999999975
+  },
+  {
+    "check": "resume/audit_particles_2_rank0.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.00000003901
+  },
+  {
+    "check": "resume/audit_bulk_2_rank0.csv/DoFs",
+    "passed": true
+  },
+  {
+    "check": "resume/audit_bulk_2_rank0.csv/component0/shape",
+    "passed": true
+  },
+  {
+    "check": "resume/audit_bulk_2_rank0.csv/component0/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 2.5076868414191725e-10
+  },
+  {
+    "check": "resume/audit_bulk_2_rank0.csv/component1/shape",
+    "passed": true
+  },
+  {
+    "check": "resume/audit_bulk_2_rank0.csv/component1/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 4.350019233889663e-10
+  },
+  {
+    "check": "resume/audit_bulk_2_rank0.csv/component2/shape",
+    "passed": true
+  },
+  {
+    "check": "resume/audit_bulk_2_rank0.csv/component2/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.17384562438963835
+  },
+  {
+    "check": "resume/audit_bulk_2_rank0.csv/component3/shape",
+    "passed": true
+  },
+  {
+    "check": "resume/audit_bulk_2_rank0.csv/component3/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 293.0
+  },
+  {
+    "check": "resume/audit_bulk_2_rank0.csv/component4/shape",
+    "passed": true
+  },
+  {
+    "check": "resume/audit_bulk_2_rank0.csv/component4/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.030270203264846446
+  },
+  {
+    "check": "resume/audit_bulk_2_rank0.csv/component5/shape",
+    "passed": true
+  },
+  {
+    "check": "resume/audit_bulk_2_rank0.csv/component5/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.049663406143190925
+  },
+  {
+    "check": "resume/audit_bulk_2_rank0.csv/component6/shape",
+    "passed": true
+  },
+  {
+    "check": "resume/audit_bulk_2_rank0.csv/component6/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.03720699959042466
+  },
+  {
+    "check": "resume/audit_bulk_2_rank0.csv/component7/shape",
+    "passed": true
+  },
+  {
+    "check": "resume/audit_bulk_2_rank0.csv/component7/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000168
+  },
+  {
+    "check": "resume/audit_bulk_2_rank0.csv/component8/shape",
+    "passed": true
+  },
+  {
+    "check": "resume/audit_bulk_2_rank0.csv/component8/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.052775859407292
+  },
+  {
+    "check": "resume/audit_bulk_2_rank0.csv/component9/shape",
+    "passed": true
+  },
+  {
+    "check": "resume/audit_bulk_2_rank0.csv/component9/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.6
+  },
+  {
+    "check": "resume/0/births",
+    "passed": true
+  },
+  {
+    "check": "resume/audit_particles_2_rank1.csv/IDs",
+    "passed": true
+  },
+  {
+    "check": "resume/audit_particles_2_rank1.csv/shape",
+    "passed": true
+  },
+  {
+    "check": "resume/audit_particles_2_rank1.csv/1",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 89849.99999995
+  },
+  {
+    "check": "resume/audit_particles_2_rank1.csv/2",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.00000008663
+  },
+  {
+    "check": "resume/audit_particles_2_rank1.csv/3",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 813214.3886040291
+  },
+  {
+    "check": "resume/audit_particles_2_rank1.csv/4",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000114
+  },
+  {
+    "check": "resume/audit_particles_2_rank1.csv/5",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0
+  },
+  {
+    "check": "resume/audit_particles_2_rank1.csv/6",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.07146930284111835
+  },
+  {
+    "check": "resume/audit_particles_2_rank1.csv/7",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.10187014756307289
+  },
+  {
+    "check": "resume/audit_particles_2_rank1.csv/8",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.062154601390009404
+  },
+  {
+    "check": "resume/audit_particles_2_rank1.csv/9",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 89849.999999975
+  },
+  {
+    "check": "resume/audit_particles_2_rank1.csv/10",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 49750.000000043314
+  },
+  {
+    "check": "resume/audit_bulk_2_rank1.csv/DoFs",
+    "passed": true
+  },
+  {
+    "check": "resume/audit_bulk_2_rank1.csv/component0/shape",
+    "passed": true
+  },
+  {
+    "check": "resume/audit_bulk_2_rank1.csv/component0/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 2.504560126309239e-10
+  },
+  {
+    "check": "resume/audit_bulk_2_rank1.csv/component1/shape",
+    "passed": true
+  },
+  {
+    "check": "resume/audit_bulk_2_rank1.csv/component1/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 4.337504941761038e-10
+  },
+  {
+    "check": "resume/audit_bulk_2_rank1.csv/component2/shape",
+    "passed": true
+  },
+  {
+    "check": "resume/audit_bulk_2_rank1.csv/component2/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.03876037271123869
+  },
+  {
+    "check": "resume/audit_bulk_2_rank1.csv/component3/shape",
+    "passed": true
+  },
+  {
+    "check": "resume/audit_bulk_2_rank1.csv/component3/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 293.0
+  },
+  {
+    "check": "resume/audit_bulk_2_rank1.csv/component4/shape",
+    "passed": true
+  },
+  {
+    "check": "resume/audit_bulk_2_rank1.csv/component4/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.009817202321136706
+  },
+  {
+    "check": "resume/audit_bulk_2_rank1.csv/component5/shape",
+    "passed": true
+  },
+  {
+    "check": "resume/audit_bulk_2_rank1.csv/component5/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.023386533110983265
+  },
+  {
+    "check": "resume/audit_bulk_2_rank1.csv/component6/shape",
+    "passed": true
+  },
+  {
+    "check": "resume/audit_bulk_2_rank1.csv/component6/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.0130817998533286
+  },
+  {
+    "check": "resume/audit_bulk_2_rank1.csv/component7/shape",
+    "passed": true
+  },
+  {
+    "check": "resume/audit_bulk_2_rank1.csv/component7/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 8000000.000000123
+  },
+  {
+    "check": "resume/audit_bulk_2_rank1.csv/component8/shape",
+    "passed": true
+  },
+  {
+    "check": "resume/audit_bulk_2_rank1.csv/component8/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 1.0527758594318561
+  },
+  {
+    "check": "resume/audit_bulk_2_rank1.csv/component9/shape",
+    "passed": true
+  },
+  {
+    "check": "resume/audit_bulk_2_rank1.csv/component9/0",
+    "passed": true,
+    "max_abs": 0.0,
+    "scale": 0.5997282911158509
+  },
+  {
+    "check": "resume/1/births",
+    "passed": true
+  },
+  {
+    "check": "resume/decisions",
+    "passed": true
+  },
+  {
+    "check": "resume/fresh-residuals",
+    "passed": true
+  },
+  {
+    "check": "direct/retry/audit_particles_1_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "direct/retry/audit_bulk_1_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "direct/retry/mature_history_1_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "direct/retry/work_qp_1_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "direct/retry/0/lifecycle",
+    "passed": true
+  },
+  {
+    "check": "direct/retry/profiles/fault_1.csv",
+    "passed": true
+  },
+  {
+    "check": "direct/retry/common_fe_weak_1.csv",
+    "passed": true
+  },
+  {
+    "check": "direct/retry/work_weak_1.csv",
+    "passed": true
+  },
+  {
+    "check": "staggered/resume/audit_particles_2_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "staggered/resume/audit_bulk_2_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "staggered/resume/mature_history_2_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "staggered/resume/work_qp_2_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "staggered/resume/0/lifecycle",
+    "passed": true
+  },
+  {
+    "check": "staggered/resume/audit_particles_2_rank1.csv",
+    "passed": true
+  },
+  {
+    "check": "staggered/resume/audit_bulk_2_rank1.csv",
+    "passed": true
+  },
+  {
+    "check": "staggered/resume/mature_history_2_rank1.csv",
+    "passed": true
+  },
+  {
+    "check": "staggered/resume/work_qp_2_rank1.csv",
+    "passed": true
+  },
+  {
+    "check": "staggered/resume/1/lifecycle",
+    "passed": true
+  },
+  {
+    "check": "staggered/resume/profiles/fault_2.csv",
+    "passed": true
+  },
+  {
+    "check": "staggered/resume/common_fe_weak_2.csv",
+    "passed": true
+  },
+  {
+    "check": "staggered/resume/work_weak_2.csv",
+    "passed": true
+  },
+  {
+    "check": "direct2/retry2/audit_particles_2_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "direct2/retry2/audit_bulk_2_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "direct2/retry2/mature_history_2_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "direct2/retry2/work_qp_2_rank0.csv",
+    "passed": true
+  },
+  {
+    "check": "direct2/retry2/0/lifecycle",
+    "passed": true
+  },
+  {
+    "check": "direct2/retry2/audit_particles_2_rank1.csv",
+    "passed": true
+  },
+  {
+    "check": "direct2/retry2/audit_bulk_2_rank1.csv",
+    "passed": true
+  },
+  {
+    "check": "direct2/retry2/mature_history_2_rank1.csv",
+    "passed": true
+  },
+  {
+    "check": "direct2/retry2/work_qp_2_rank1.csv",
+    "passed": true
+  },
+  {
+    "check": "direct2/retry2/1/lifecycle",
+    "passed": true
+  },
+  {
+    "check": "direct2/retry2/profiles/fault_2.csv",
+    "passed": true
+  },
+  {
+    "check": "direct2/retry2/common_fe_weak_2.csv",
+    "passed": true
+  },
+  {
+    "check": "direct2/retry2/work_weak_2.csv",
+    "passed": true
+  },
+  {
+    "check": "retry/0/rollback",
+    "passed": true
+  },
+  {
+    "check": "retry2/0/rollback",
+    "passed": true
+  },
+  {
+    "check": "retry2/1/rollback",
+    "passed": true
+  },
+  {
+    "check": "0/checkpoint-RNG",
+    "passed": true
+  },
+  {
+    "check": "0/nontrivial-RNG-stress",
+    "passed": true
+  },
+  {
+    "check": "1/checkpoint-RNG",
+    "passed": true
+  },
+  {
+    "check": "1/nontrivial-RNG-stress",
+    "passed": true
+  }
+]

@@ -1205,7 +1205,53 @@ namespace aspect
 
 namespace aspect
 {
-#define INSTANTIATE(dim) template class ReconstructedFaultManager<dim>;
+  // Instantiate only definitions owned by this translation unit (and the inline
+  // accessors). Whole-class instantiation also picks up earlier member definitions
+  // from other .cc files in unity builds, duplicating their explicit instantiations.
+#define INSTANTIATE(dim) \
+  template ReconstructedFaultManager<dim>::ReconstructedFaultManager(const Simulator<dim> &); \
+  template void ReconstructedFaultManager<dim>::declare_parameters(ParameterHandler &); \
+  template void ReconstructedFaultManager<dim>::parse_parameters(ParameterHandler &); \
+  template void ReconstructedFaultManager<dim>::initialize_crack_driving_force( \
+    const std::vector<PrescribedInitialFault<dim>> &); \
+  template void ReconstructedFaultManager<dim>::reconstruct_initial_faults(); \
+  template void ReconstructedFaultManager<dim>::reconstruct_initial_fault( \
+    const unsigned int, const double, const std::vector<double> &, const std::vector<double> &, const double); \
+  template void ReconstructedFaultManager<dim>::set_shear_sense(const unsigned int, const int); \
+  template int ReconstructedFaultManager<dim>::get_shear_sense(const unsigned int) const; \
+  template unsigned int ReconstructedFaultManager<dim>::add_reconstructed_fault( \
+    const std::vector<Point<dim>> &, const std::vector<double> &); \
+  template unsigned int ReconstructedFaultManager<dim>::register_property(const std::string &, const unsigned int); \
+  template bool ReconstructedFaultManager<dim>::has_property(const std::string &) const; \
+  template unsigned int ReconstructedFaultManager<dim>::get_property_index(const std::string &) const; \
+  template const std::vector<typename ReconstructedFaultManager<dim>::PropertyInformation> & \
+    ReconstructedFaultManager<dim>::get_property_information() const; \
+  template void ReconstructedFaultManager<dim>::rebuild_after_deserialization(); \
+  template void ReconstructedFaultManager<dim>::enable_top_source_continuation(); \
+  template ReconstructedFaultUtilities::NormalProfileProjection \
+    ReconstructedFaultManager<dim>::project_to_normal_profiles(const Point<dim> &) const; \
+  template void ReconstructedFaultManager<dim>::enable_bottom_source_continuation( \
+    const unsigned int, const Point<dim> &, const Point<dim> &); \
+  template ReconstructedFaultUtilities::NormalProfileProjection \
+    ReconstructedFaultManager<dim>::project_to_bulk_source(const Point<dim> &, const bool) const; \
+  template bool ReconstructedFaultManager<dim>::stokes_qp_projection_cache_is_valid() const; \
+  template void ReconstructedFaultManager<dim>::rebuild_stokes_qp_projection_cache(); \
+  template void ReconstructedFaultManager<dim>::prepare_stokes_qp_projection_cache(); \
+  template const std::vector<typename ReconstructedFaultManager<dim>::StokesQPFaultAssociation> & \
+    ReconstructedFaultManager<dim>::get_stokes_qp_fault_associations( \
+      const CellId &, const Quadrature<dim> &, const std::vector<Point<dim>> &) const; \
+  template void ReconstructedFaultManager<dim>::invalidate_stokes_qp_projection_cache(); \
+  template const typename ReconstructedFaultManager<dim>::StokesQPCacheDiagnostics & \
+    ReconstructedFaultManager<dim>::get_stokes_qp_cache_diagnostics() const; \
+  template const std::vector<ReconstructedFault<dim>> &ReconstructedFaultManager<dim>::get_faults() const; \
+  template ReconstructedFault<dim> &ReconstructedFaultManager<dim>::get_fault(const unsigned int); \
+  template const ReconstructedFault<dim> &ReconstructedFaultManager<dim>::get_fault(const unsigned int) const; \
+  template const std::vector<FaultReconstructionDiagnostics> &ReconstructedFaultManager<dim>::get_diagnostics() const; \
+  template bool ReconstructedFaultManager<dim>::uses_automatic_boundary_completion() const; \
+  template const std::vector<FaultBoundaryContact<dim>> &ReconstructedFaultManager<dim>::get_boundary_contacts() const; \
+  template const std::vector<FaultBoundaryFace<dim>> &ReconstructedFaultManager<dim>::get_boundary_faces() const; \
+  template const std::vector<PrescribedInitialFault<dim>> &ReconstructedFaultManager<dim>::get_prescribed_faults() const; \
+  template unsigned int ReconstructedFaultManager<dim>::get_boundary_contact_generation() const;
 
   ASPECT_INSTANTIATE(INSTANTIATE)
 

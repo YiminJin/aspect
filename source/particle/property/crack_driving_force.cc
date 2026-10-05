@@ -19,6 +19,7 @@
  */
 
 #include <aspect/particle/property/crack_driving_force.h>
+#include <aspect/initial_composition/interface.h>
 #include <aspect/phase_field.h>
 
 namespace aspect

@@ -1,0 +1,266 @@
+[
+  {
+    "check": "protected/benchmarks/reconstructed_fault/bp3/README.md",
+    "passed": true
+  },
+  {
+    "check": "protected/benchmarks/reconstructed_fault/bp3/plugin/README.md",
+    "passed": true
+  },
+  {
+    "check": "protected/benchmarks/reconstructed_fault/bp3/production/README.md",
+    "passed": true
+  },
+  {
+    "check": "protected/benchmarks/reconstructed_fault/bp3/production/bp3_fresh.prm",
+    "passed": true
+  },
+  {
+    "check": "protected/doc/reconstructed_fault/CURRENT_STATUS.md",
+    "passed": true
+  },
+  {
+    "check": "protected/benchmarks/reconstructed_fault/bp3/production/stampede3/fresh.prm",
+    "passed": true
+  },
+  {
+    "check": "protected/benchmarks/reconstructed_fault/bp3/production/stampede3/restart.prm",
+    "passed": true
+  },
+  {
+    "check": "protected/benchmarks/reconstructed_fault/bp3/production/stampede3/first_event.prm",
+    "passed": true
+  },
+  {
+    "check": "protected/benchmarks/reconstructed_fault/bp3/production/stampede3/fault.txt",
+    "passed": true
+  },
+  {
+    "check": "protected/benchmarks/reconstructed_fault/bp3/production/stampede3/resolved_settings.json",
+    "passed": true
+  },
+  {
+    "check": "protected/benchmarks/reconstructed_fault/bp3/production/stampede3/SHA256SUMS",
+    "passed": true
+  },
+  {
+    "check": "protected/benchmarks/reconstructed_fault/bp3/production/stampede3/README.md",
+    "passed": true
+  },
+  {
+    "check": "protected/benchmarks/reconstructed_fault/bp3/production/stampede3/environment.sh",
+    "passed": true
+  },
+  {
+    "check": "protected/benchmarks/reconstructed_fault/bp3/production/stampede3/verification/fresh-validation.log",
+    "passed": true
+  },
+  {
+    "check": "protected/benchmarks/reconstructed_fault/bp3/production/stampede3/verification/restart-validation.log",
+    "passed": true
+  },
+  {
+    "check": "protected/benchmarks/reconstructed_fault/bp3/production/stampede3/verification/first_event-validation.log",
+    "passed": true
+  },
+  {
+    "check": "protected/benchmarks/reconstructed_fault/bp3/production/stampede3/verification/parameter_differences.json",
+    "passed": true
+  },
+  {
+    "check": "protected/benchmarks/reconstructed_fault/bp3/production/bp3-stampede3-752c5bcbd.tar.gz",
+    "passed": true
+  },
+  {
+    "check": "baseline-binary",
+    "passed": true
+  },
+  {
+    "check": "header-body/include/aspect/reconstructed_fault/normal_filter_internal.h",
+    "passed": true
+  },
+  {
+    "check": "old-header-absent/source/reconstructed_fault/normal_filter_internal.h",
+    "passed": true
+  },
+  {
+    "check": "header-body/include/aspect/reconstructed_fault/surface_system_internal.h",
+    "passed": true
+  },
+  {
+    "check": "old-header-absent/source/reconstructed_fault/surface_system_internal.h",
+    "passed": true
+  },
+  {
+    "check": "header-body/include/aspect/reconstructed_fault/surface_direct_internal.h",
+    "passed": true
+  },
+  {
+    "check": "old-header-absent/source/reconstructed_fault/surface_direct_internal.h",
+    "passed": true
+  },
+  {
+    "check": "header-body/include/aspect/material_model/phase_field_fault/history_diagnostics.h",
+    "passed": true
+  },
+  {
+    "check": "old-header-absent/source/material_model/phase_field_fault/history_diagnostics.h",
+    "passed": true
+  },
+  {
+    "check": "header-body/include/aspect/simulator/solver/reconstructed_fault_bound_diagnostics.h",
+    "passed": true
+  },
+  {
+    "check": "old-header-absent/source/simulator/solver/reconstructed_fault_bound_diagnostics.h",
+    "passed": true
+  },
+  {
+    "check": "header-body/include/aspect/simulator/solver/stokes_operators.h",
+    "passed": true
+  },
+  {
+    "check": "old-header-absent/source/simulator/solver/stokes_operators.h",
+    "passed": true
+  },
+  {
+    "check": "header-body/include/aspect/simulator/reconstructed_fault_interface_preconditioner.h",
+    "passed": true
+  },
+  {
+    "check": "old-header-absent/source/simulator/reconstructed_fault_interface_preconditioner.h",
+    "passed": true
+  },
+  {
+    "check": "header-body/include/aspect/simulator/reconstructed_fault_residual_audit.h",
+    "passed": true
+  },
+  {
+    "check": "old-header-absent/source/simulator/reconstructed_fault_residual_audit.h",
+    "passed": true
+  },
+  {
+    "check": "unchanged-body/include/aspect/particle/particle_domain.h",
+    "passed": true
+  },
+  {
+    "check": "unchanged-body/source/material_model/phase_field_fault/history.cc",
+    "passed": true
+  },
+  {
+    "check": "unchanged-body/source/material_model/phase_field_fault/history_diagnostics.cc",
+    "passed": true
+  },
+  {
+    "check": "unchanged-body/source/reconstructed_fault/manager.cc",
+    "passed": true
+  },
+  {
+    "check": "unchanged-body/source/reconstructed_fault/surface_system.cc",
+    "passed": true
+  },
+  {
+    "check": "unchanged-body/source/reconstructed_fault/surface_system_bulk_work.cc",
+    "passed": true
+  },
+  {
+    "check": "unchanged-body/source/reconstructed_fault/surface_system_particle.cc",
+    "passed": true
+  },
+  {
+    "check": "unchanged-body/source/simulator/assembly.cc",
+    "passed": true
+  },
+  {
+    "check": "unchanged-body/source/simulator/solver.cc",
+    "passed": true
+  },
+  {
+    "check": "unchanged-body/source/simulator/solver/reconstructed_fault_bound_diagnostics.cc",
+    "passed": true
+  },
+  {
+    "check": "unchanged-body/source/simulator/solver/reconstructed_fault_stokes.cc",
+    "passed": true
+  },
+  {
+    "check": "manager-instantiation-list",
+    "passed": true
+  },
+  {
+    "check": "installed-includes/normal_filter_internal.cc",
+    "passed": true
+  },
+  {
+    "check": "installed-includes/surface_direct_internal.cc",
+    "passed": true
+  },
+  {
+    "check": "installed-includes/surface_system_internal.cc",
+    "passed": true
+  },
+  {
+    "check": "installed-includes/history_diagnostics.cc",
+    "passed": true
+  },
+  {
+    "check": "installed-includes/reconstructed_fault_bound_diagnostics.cc",
+    "passed": true
+  },
+  {
+    "check": "installed-includes/stokes_operators.cc",
+    "passed": true
+  },
+  {
+    "check": "installed-includes/reconstructed_fault_interface_preconditioner.cc",
+    "passed": true
+  },
+  {
+    "check": "installed-includes/reconstructed_fault_residual_audit.cc",
+    "passed": true
+  },
+  {
+    "check": "installed-dependencies/reconstructed_fault_bound_diagnostics.cc.o.d",
+    "passed": true
+  },
+  {
+    "check": "installed-dependencies/reconstructed_fault_residual_audit.cc.o.d",
+    "passed": true
+  },
+  {
+    "check": "installed-dependencies/surface_system_internal.cc.o.d",
+    "passed": true
+  },
+  {
+    "check": "installed-dependencies/history_diagnostics.cc.o.d",
+    "passed": true
+  },
+  {
+    "check": "installed-dependencies/reconstructed_fault_interface_preconditioner.cc.o.d",
+    "passed": true
+  },
+  {
+    "check": "installed-dependencies/stokes_operators.cc.o.d",
+    "passed": true
+  },
+  {
+    "check": "installed-dependencies/surface_direct_internal.cc.o.d",
+    "passed": true
+  },
+  {
+    "check": "installed-dependencies/normal_filter_internal.cc.o.d",
+    "passed": true
+  },
+  {
+    "check": "one-material-registration",
+    "passed": true
+  },
+  {
+    "check": "unchanged-body/source/particle/property/crack_driving_force.cc",
+    "passed": true
+  },
+  {
+    "check": "unchanged-body/source/simulator/phase_field.cc",
+    "passed": true
+  }
+]

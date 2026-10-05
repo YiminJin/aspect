@@ -1,0 +1,46 @@
+warning: unknown warning option '-Wno-enum-constexpr-conversion' [-Wunknown-warning-option]
+In file included from /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/CMakeFiles/aspect.exe.release.dir/Unity/unity_46_cxx.cxx:4:
+In file included from /home/ein/repository/aspect-pf-rsf-refactor/source/prescribed_stokes_solution/circle.cc:22:
+In file included from /home/ein/repository/aspect-pf-rsf-refactor/include/aspect/global.h:33:
+In file included from /opt/dealii/9.6-local/include/deal.II/lac/generic_linear_algebra.h:20:
+In file included from /opt/dealii/9.6-local/include/deal.II/lac/block_sparse_matrix.h:21:
+In file included from /opt/dealii/9.6-local/include/deal.II/lac/block_matrix_base.h:24:
+In file included from /opt/dealii/9.6-local/include/deal.II/base/table.h:20:
+In file included from /opt/dealii/9.6-local/include/deal.II/base/aligned_vector.h:24:
+In file included from /opt/dealii/9.6-local/include/deal.II/base/parallel.h:33:
+In file included from /opt/dealii/9.6-local/include/deal.II/bundled/tbb/parallel_for.h:25:
+/opt/dealii/9.6-local/include/deal.II/bundled/tbb/task.h:537:28: error: in-class initializer for static data member is not a constant expression
+  537 |     static const kind_type binding_completed = kind_type(bound+1);
+      |                            ^                   ~~~~~~~~~~~~~~~~~~
+/opt/dealii/9.6-local/include/deal.II/bundled/tbb/task.h:537:48: note: integer value 2 is outside the valid range of values [0, 1] for the enumeration type 'kind_type'
+  537 |     static const kind_type binding_completed = kind_type(bound+1);
+      |                                                ^
+In file included from /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/CMakeFiles/aspect.exe.release.dir/Unity/unity_46_cxx.cxx:22:
+/home/ein/repository/aspect-pf-rsf-refactor/source/reconstructed_fault/manager.cc:1210:22: error: duplicate explicit instantiation of 'prepare_boundary_contacts'
+ 1210 |   ASPECT_INSTANTIATE(INSTANTIATE)
+      |                      ^
+/home/ein/repository/aspect-pf-rsf-refactor/source/reconstructed_fault/boundary_contact_manager.cc:103:23: note: previous explicit instantiation is here
+  103 |   ASPECT_INSTANTIATE (INSTANTIATE)
+      |                       ^
+In file included from /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/CMakeFiles/aspect.exe.release.dir/Unity/unity_46_cxx.cxx:22:
+/home/ein/repository/aspect-pf-rsf-refactor/source/reconstructed_fault/manager.cc:1210:22: error: duplicate explicit instantiation of 'enable_automatic_source_continuation'
+ 1210 |   ASPECT_INSTANTIATE(INSTANTIATE)
+      |                      ^
+/home/ein/repository/aspect-pf-rsf-refactor/source/reconstructed_fault/boundary_contact_manager.cc:103:23: note: previous explicit instantiation is here
+  103 |   ASPECT_INSTANTIATE (INSTANTIATE)
+      |                       ^
+In file included from /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/CMakeFiles/aspect.exe.release.dir/Unity/unity_46_cxx.cxx:22:
+/home/ein/repository/aspect-pf-rsf-refactor/source/reconstructed_fault/manager.cc:1210:22: error: duplicate explicit instantiation of 'prepare_boundary_contacts'
+ 1210 |   ASPECT_INSTANTIATE(INSTANTIATE)
+      |                      ^
+/home/ein/repository/aspect-pf-rsf-refactor/source/reconstructed_fault/boundary_contact_manager.cc:103:23: note: previous explicit instantiation is here
+  103 |   ASPECT_INSTANTIATE (INSTANTIATE)
+      |                       ^
+In file included from /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-r6b/CMakeFiles/aspect.exe.release.dir/Unity/unity_46_cxx.cxx:22:
+/home/ein/repository/aspect-pf-rsf-refactor/source/reconstructed_fault/manager.cc:1210:22: error: duplicate explicit instantiation of 'enable_automatic_source_continuation'
+ 1210 |   ASPECT_INSTANTIATE(INSTANTIATE)
+      |                      ^
+/home/ein/repository/aspect-pf-rsf-refactor/source/reconstructed_fault/boundary_contact_manager.cc:103:23: note: previous explicit instantiation is here
+  103 |   ASPECT_INSTANTIATE (INSTANTIATE)
+      |                       ^
+1 warning and 5 errors generated.

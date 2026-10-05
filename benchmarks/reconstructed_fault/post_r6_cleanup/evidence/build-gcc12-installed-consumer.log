@@ -1,0 +1,10 @@
+[ 11%] Building CXX object CMakeFiles/installed_header_consumer.dir/normal_filter_internal.cc.o
+[ 22%] Building CXX object CMakeFiles/installed_header_consumer.dir/surface_direct_internal.cc.o
+[ 33%] Building CXX object CMakeFiles/installed_header_consumer.dir/surface_system_internal.cc.o
+[ 44%] Building CXX object CMakeFiles/installed_header_consumer.dir/history_diagnostics.cc.o
+[ 55%] Building CXX object CMakeFiles/installed_header_consumer.dir/reconstructed_fault_bound_diagnostics.cc.o
+[ 66%] Building CXX object CMakeFiles/installed_header_consumer.dir/stokes_operators.cc.o
+[ 77%] Building CXX object CMakeFiles/installed_header_consumer.dir/reconstructed_fault_interface_preconditioner.cc.o
+[ 88%] Building CXX object CMakeFiles/installed_header_consumer.dir/reconstructed_fault_residual_audit.cc.o
+[100%] Linking CXX shared library libinstalled_header_consumer.so
+[100%] Built target installed_header_consumer

@@ -1,0 +1,34 @@
+[
+  {
+    "header": "include/aspect/reconstructed_fault/normal_filter_internal.h",
+    "exit_code": 0
+  },
+  {
+    "header": "include/aspect/reconstructed_fault/surface_system_internal.h",
+    "exit_code": 0
+  },
+  {
+    "header": "include/aspect/reconstructed_fault/surface_direct_internal.h",
+    "exit_code": 0
+  },
+  {
+    "header": "include/aspect/material_model/phase_field_fault/history_diagnostics.h",
+    "exit_code": 0
+  },
+  {
+    "header": "include/aspect/simulator/solver/reconstructed_fault_bound_diagnostics.h",
+    "exit_code": 0
+  },
+  {
+    "header": "include/aspect/simulator/solver/stokes_operators.h",
+    "exit_code": 0
+  },
+  {
+    "header": "include/aspect/simulator/reconstructed_fault_interface_preconditioner.h",
+    "exit_code": 0
+  },
+  {
+    "header": "include/aspect/simulator/reconstructed_fault_residual_audit.h",
+    "exit_code": 0
+  }
+]

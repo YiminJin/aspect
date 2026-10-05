@@ -1,0 +1,6 @@
+[ 40%] Building CXX object CMakeFiles/frozen_birth_observer.dir/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_geometry/plugin/endpoint_check.cc.o
+[ 20%] Building CXX object CMakeFiles/frozen_birth_observer.dir/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_runtime/plugin/profile_check.cc.o
+[ 60%] Building CXX object CMakeFiles/frozen_birth_observer.dir/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/particle_lifecycle/plugin/coupled.cc.o
+[ 80%] Building CXX object CMakeFiles/frozen_birth_observer.dir/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/frozen_particle_H/plugin/birth_check.cc.o
+[100%] Linking CXX shared library libfrozen_birth_observer.release.so
+[100%] Built target frozen_birth_observer

@@ -1,0 +1,14 @@
+[
+  {
+    "variant": "baseline",
+    "binary": "build-refactor-r6b/aspect-birth-identity-qualified",
+    "required_member_symbols": 136,
+    "missing": []
+  },
+  {
+    "variant": "unity",
+    "binary": "build-refactor-post-r6-unity/aspect",
+    "required_member_symbols": 136,
+    "missing": []
+  }
+]

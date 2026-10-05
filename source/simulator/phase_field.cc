@@ -19,8 +19,10 @@
  */
 
 #include <aspect/phase_field.h>
+#include <aspect/simulator.h>
 #include <aspect/utilities.h>
 #include <aspect/simulator_signals.h>
+#include <aspect/particle/manager.h>
 #include <aspect/particle/particle_domain.h>
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/plugins.h>
