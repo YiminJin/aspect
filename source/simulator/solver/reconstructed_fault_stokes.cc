@@ -32,10 +32,10 @@
 #include <aspect/simulator/solver/reconstructed_fault_nonlinear.h>
 #include <aspect/simulator/solver/reconstructed_fault_linear.h>
 #include <aspect/simulator/assemblers/reconstructed_fault_stokes.h>
-#include "stokes_operators.h"
-#include "reconstructed_fault_bound_diagnostics.h"
-#include "../reconstructed_fault_residual_audit.h"
-#include "../reconstructed_fault_interface_preconditioner.h"
+#include <aspect/simulator/solver/stokes_operators.h>
+#include <aspect/simulator/solver/reconstructed_fault_bound_diagnostics.h>
+#include <aspect/simulator/reconstructed_fault_residual_audit.h>
+#include <aspect/simulator/reconstructed_fault_interface_preconditioner.h>
 
 #include <deal.II/base/signaling_nan.h>
 #include <deal.II/fe/fe_values.h>

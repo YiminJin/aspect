@@ -22,7 +22,7 @@ for method,original,begin,end in [('open_stress_cycle',old_setup,'          cons
  checks[method+'/unchanged-expressions']=re.sub(r'\s+','',old)==re.sub(r'\s+','',new)
  checks[method+'/exact-string-literals']=re.findall(r'"(?:\\.|[^"\\])*"',old)==re.findall(r'"(?:\\.|[^"\\])*"',new)
 checks['lazy-guards']=('return stress_cycle_audit.is_open()\n             && trace_cells.count(particle.get_surrounding_cell()->id().to_string());' in c and 'if (diagnostics.source_history_is_open() && association.active && !associations[particle_index].active)' in new_rows and new_setup.count('std::getenv(')==2)
-checks['same-fields-and-no-numerical-owner']=all(x in (repo/'source/material_model/phase_field_fault/history_diagnostics.h').read_text() for x in ('std::ofstream source_history_audit;','std::set<std::string> trace_cells;','std::ofstream stress_cycle_audit;')) and not any(x in c for x in ('MPI::sum','MPI::min','exceptions(','evaluate_','getenv','prepare_'))
+checks['same-fields-and-no-numerical-owner']=all(x in (repo/'include/aspect/material_model/phase_field_fault/history_diagnostics.h').read_text() for x in ('std::ofstream source_history_audit;','std::set<std::string> trace_cells;','std::ofstream stress_cycle_audit;')) and not any(x in c for x in ('MPI::sum','MPI::min','exceptions(','evaluate_','getenv','prepare_'))
 allowed={'source/material_model/phase_field_fault/history.cc','CMakeLists.txt'}
 for name in ('reference-hashes','r5b2-artifacts'):
  items=json.loads((e/(name+'.json')).read_text());checks[name+'/preserved']=all(hashlib.sha256((repo/p).read_bytes()).hexdigest()==v for p,v in items.items() if p not in allowed)

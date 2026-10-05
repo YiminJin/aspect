@@ -23,7 +23,9 @@
 
 #include <aspect/global.h>
 #include <deal.II/base/mpi.h>
+#include <deal.II/base/point.h>
 #include <deal.II/base/symmetric_tensor.h>
+#include <deal.II/base/tensor.h>
 #include <deal.II/particles/particle_accessor.h>
 
 #include <fstream>

@@ -11,7 +11,7 @@ base=shlex.split(entry['command'])
 assert '-include' not in base
 commands=[]
 for name,source in [('solver',repo/'source/simulator/solver.cc'),('header',e/'header-check.cc')]:
-    if name=='header':source.write_text('#include "'+str(repo/'source/simulator/solver/stokes_operators.h')+'"\n')
+    if name=='header':source.write_text('#include <aspect/simulator/solver/stokes_operators.h>\n')
     command=base.copy()
     command[command.index('-o')+1]=str(e/(name+'-independent.o'))
     command[-1]=str(source)

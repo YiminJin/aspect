@@ -3,7 +3,7 @@
 #ifndef ASPECT_TEST_FAULT_SURFACE_REFERENCE_H
 #define ASPECT_TEST_FAULT_SURFACE_REFERENCE_H
 
-#include "../source/reconstructed_fault/surface_direct_internal.h"
+#include <aspect/reconstructed_fault/surface_direct_internal.h>
 #include <deal.II/lac/dynamic_sparsity_pattern.h>
 #include <deal.II/lac/sparse_direct.h>
 #include <deal.II/lac/sparse_matrix.h>

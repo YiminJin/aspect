@@ -27,7 +27,7 @@ for name,current,before,indent,pressure,velocity,terminator in [
  inverse_lumped_mass_matrix, {velocity}, system_matrix);"""
  checks[name+'-arguments-unchanged']=compact(current[c:d])==compact(call)
  checks[name+'-otherwise-byte-identical']=current[:c]+before[a:b]+current[d:]==before
-header=(repo/'source/simulator/solver/stokes_operators.h').read_text()
+header=(repo/'include/aspect/simulator/solver/stokes_operators.h').read_text()
 a=header.index('    /**\n     * Construct the selected Schur wrapper');b=header.index('    /**\n     * This class approximates',a)
 header=(header[:a]+header[b:]).replace('\n#include <memory>\n','')
 checks['header-only-construction-declaration']=header==(e/'before-stokes_operators.h').read_text()

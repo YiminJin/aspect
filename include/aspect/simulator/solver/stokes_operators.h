@@ -25,8 +25,12 @@
 #include <aspect/global.h>
 #include <aspect/utilities.h>
 #include <deal.II/lac/solver_cg.h>
+#include <deal.II/lac/solver_control.h>
+#include <deal.II/lac/vector_memory.h>
 
+#include <exception>
 #include <memory>
+#include <vector>
 
 namespace aspect
 {

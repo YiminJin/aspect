@@ -20,9 +20,9 @@
 #include <aspect/reconstructed_fault/utilities.h>
 #include <aspect/reconstructed_fault/linear_performance.h>
 #include <aspect/reconstructed_fault/sparse_coupling.h>
-#include "surface_system_internal.h"
-#include "surface_direct_internal.h"
-#include "normal_filter_internal.h"
+#include <aspect/reconstructed_fault/surface_system_internal.h>
+#include <aspect/reconstructed_fault/surface_direct_internal.h>
+#include <aspect/reconstructed_fault/normal_filter_internal.h>
 
 #include <deal.II/base/mpi_remote_point_evaluation.h>
 #include <deal.II/fe/fe_values.h>

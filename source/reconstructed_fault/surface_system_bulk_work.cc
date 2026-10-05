@@ -9,7 +9,7 @@
   any later version.
 */
 
-#include "surface_system_internal.h"
+#include <aspect/reconstructed_fault/surface_system_internal.h>
 
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/material_model/utilities.h>
@@ -18,7 +18,7 @@
 #include <aspect/reconstructed_fault/manager.h>
 #include <aspect/reconstructed_fault/utilities.h>
 
-#include "normal_filter_internal.h"
+#include <aspect/reconstructed_fault/normal_filter_internal.h>
 
 #include <deal.II/fe/fe_values.h>
 

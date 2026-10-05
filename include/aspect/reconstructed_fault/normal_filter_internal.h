@@ -3,12 +3,13 @@
 #ifndef _aspect_normal_filter_internal_h
 #define _aspect_normal_filter_internal_h
 
-#include "surface_direct_internal.h"
+#include <aspect/reconstructed_fault/surface_direct_internal.h>
 #include <aspect/reconstructed_fault/fault.h>
 #include <algorithm>
 #include <cmath>
 #include <limits>
 #include <memory>
+#include <vector>
 
 namespace aspect::internal
 {

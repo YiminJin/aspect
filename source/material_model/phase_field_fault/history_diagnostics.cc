@@ -18,7 +18,7 @@
   <http://www.gnu.org/licenses/>.
 */
 
-#include "history_diagnostics.h"
+#include <aspect/material_model/phase_field_fault/history_diagnostics.h>
 
 #include <iomanip>
 

@@ -10,9 +10,9 @@
 */
 
 #include "common.h"
-#include "../source/reconstructed_fault/surface_direct_internal.h"
+#include <aspect/reconstructed_fault/surface_direct_internal.h>
 #include "../tests/fault_surface_reference.h"
-#include "../source/reconstructed_fault/normal_filter_internal.h"
+#include <aspect/reconstructed_fault/normal_filter_internal.h>
 
 #include <aspect/reconstructed_fault/fault.h>
 #include <aspect/reconstructed_fault/manager.h>

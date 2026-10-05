@@ -19,7 +19,7 @@
 */
 
 
-#include "reconstructed_fault_bound_diagnostics.h"
+#include <aspect/simulator/solver/reconstructed_fault_bound_diagnostics.h>
 
 #include <deal.II/base/conditional_ostream.h>
 #include <deal.II/base/utilities.h>

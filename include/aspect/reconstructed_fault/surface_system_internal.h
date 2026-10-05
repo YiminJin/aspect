@@ -14,6 +14,9 @@
 
 #include <aspect/reconstructed_fault/surface_system.h>
 
+#include <memory>
+#include <vector>
+
 namespace aspect
 {
   template <int dim>

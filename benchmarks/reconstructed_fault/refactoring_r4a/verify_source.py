@@ -7,7 +7,7 @@ e=root/'evidence'
 old=(e/'solver-before.cc').read_text()
 ordinary=Path('source/simulator/solver.cc').read_text()
 fault=Path('source/simulator/solver/reconstructed_fault_stokes.cc').read_text()
-header=Path('source/simulator/solver/stokes_operators.h').read_text()
+header=Path('include/aspect/simulator/solver/stokes_operators.h').read_text()
 def between(text,start,end):
     a=text.index(start)
     return text[a:text.index(end,a)]

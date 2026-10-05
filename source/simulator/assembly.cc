@@ -32,7 +32,7 @@
 #include <aspect/simulator/assemblers/advection.h>
 #include <aspect/simulator/assemblers/entropy_advection.h>
 #include <aspect/simulator/assemblers/reconstructed_fault_stokes.h>
-#include "reconstructed_fault_residual_audit.h"
+#include <aspect/simulator/reconstructed_fault_residual_audit.h>
 
 #include <aspect/simulator/solver/stokes_matrix_free.h>
 

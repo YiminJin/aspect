@@ -19,7 +19,7 @@
 */
 
 #include <aspect/material_model/phase_field_fault.h>
-#include "history_diagnostics.h"
+#include <aspect/material_model/phase_field_fault/history_diagnostics.h>
 #include <aspect/material_model/utilities.h>
 #include <aspect/phase_field.h>
 #include <aspect/particle/manager.h>

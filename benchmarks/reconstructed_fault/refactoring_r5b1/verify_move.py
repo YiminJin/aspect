@@ -11,7 +11,7 @@ dispatch=original[:original.index(branch)]+branch+'    return assemble_particle_
 remaining=(a[:a0]+dispatch+a[b1:c0]+a[c1:]).replace('#include "surface_direct_internal.h"','#include "surface_system_internal.h"\n#include "surface_direct_internal.h"',1)
 def src(name):return (repo/'source/reconstructed_fault'/name).read_text()
 checks={'particle-body-byte-exact':particle in src('surface_system_particle.cc'),'bulk-method-byte-exact':a[c0:c1] in src('surface_system_bulk_work.cc'),
- 'record-byte-exact-private':record in src('surface_system_internal.h'),'remaining-lifecycle-exact':remaining==src('surface_system.cc')}
+ 'record-byte-exact-private':record in (repo/'include/aspect/reconstructed_fault/surface_system_internal.h').read_text(),'remaining-lifecycle-exact':remaining==src('surface_system.cc')}
 h=(e/'surface_system.h').read_text();i=h.index('      SurfaceAssembly\n      assemble_bulk_work_system')
 addition='      SurfaceAssembly\n      assemble_particle_system(const LinearAlgebra::BlockVector &bulk_state,\n                               const FaultVector &slip_rate,\n                               const bool assemble_jacobian) const;\n\n'
 expected_header=(h[:i]+addition+h[i:]).replace('#include <deal.II/base/timer.h>','#include <deal.II/base/timer.h>\n#include <deal.II/particles/property_pool.h>',1)

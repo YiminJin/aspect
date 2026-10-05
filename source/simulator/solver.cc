@@ -26,7 +26,7 @@
 #include <aspect/simulator/solver/stokes_matrix_free.h>
 #include <aspect/simulator/solver/stokes_direct.h>
 #include <aspect/mesh_deformation/interface.h>
-#include "solver/stokes_operators.h"
+#include <aspect/simulator/solver/stokes_operators.h>
 
 #include <deal.II/base/signaling_nan.h>
 #include <deal.II/lac/solver_gmres.h>

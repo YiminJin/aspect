@@ -5,10 +5,18 @@
 
 #include <aspect/simulator/solver/reconstructed_fault_condensed_system.h>
 #include <aspect/reconstructed_fault/linear_performance.h>
+#include <aspect/reconstructed_fault/surface_system.h>
+#include <deal.II/base/conditional_ostream.h>
+#include <deal.II/base/numbers.h>
 #include <deal.II/lac/lapack_full_matrix.h>
+#include <deal.II/lac/vector.h>
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <cstdlib>
+#include <ostream>
+#include <utility>
+#include <vector>
 
 namespace aspect
 {
