@@ -1,5 +1,6 @@
 /evidence/
-/fixtures/
+/fixtures/*
+!/fixtures/profile.txt
 /inputs/
 /output-*/
 /plugin-build/

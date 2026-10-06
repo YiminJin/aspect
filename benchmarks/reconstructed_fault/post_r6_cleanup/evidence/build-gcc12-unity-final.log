@@ -1,9 +1,0 @@
-[  6%] Built target WorldBuilderRelease
-[ 11%] Built target gwb-grid
-[ 11%] Built target gwb-dat
-[ 22%] Built target unit_tests
-[ 23%] Building CXX object CMakeFiles/aspect.exe.release.dir/Unity/unity_47_cxx.cxx.o
-[ 25%] Linking CXX executable aspect-release
-[ 98%] Built target aspect.exe.release
-[100%] Creating symlink from aspect.exe.release to './aspect'
-[100%] Built target aspect

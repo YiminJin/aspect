@@ -1,0 +1,33 @@
+{
+  "baseline": "f277a53aeadbe99ee093d5eb5421680dad2055d4",
+  "r7_commit": "73ad87c49",
+  "incoming_head": "6a3781277f2f594d52cd248d84f5b6fdc98fdeb1",
+  "before_tracked_files": 3397,
+  "before_tracked_blob_bytes": 78793540,
+  "untracked_files": 1184,
+  "untracked_blob_bytes": 27483066,
+  "archive": ".benchmark-cleanup-20261006-closeout",
+  "archive_sha256": "d0749f7de228e14091101bcff9c16577603b2109d917896c7c560bd56d909c7a",
+  "archive_bytes": 7649397,
+  "actions": {
+    "keep": 2213,
+    "untrack-keep-local": 1184
+  },
+  "classification_counts": {
+    "maintained benchmark": 765,
+    "required dependency": 484,
+    "uncertain or active research": 329,
+    "historical experiment/evidence": 104,
+    "generated/rebuildable artifact": 1080,
+    "deliberate test reference": 635
+  },
+  "archive_members": 1200,
+  "newly_tracked_reference": {
+    "path": "benchmarks/reconstructed_fault/refactoring_r1/fixtures/profile.txt",
+    "size": 290098,
+    "sha256": "ed1a541d449159bb54220985b78615748cfadfb76b5c212093debc756b3540b5",
+    "origin": "Existing ignored R1 convex fixture; matches refactoring_r1/evidence/fixture-provenance.json. Original source recorded there is aspect/benchmarks/reconstructed_fault/bp3/output-cleanup-evidence/fixture-convex/profile.txt. No regeneration or substitution."
+  },
+  "after_tracked_files": 2221,
+  "after_tracked_blob_bytes": 52531009
+}

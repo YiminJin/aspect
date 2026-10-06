@@ -1,0 +1,146 @@
+{
+  "checks": {
+    "retained_original_bytes": true,
+    "retired_local_bytes": true,
+    "retired_not_in_index": true,
+    "retired_ignored": true,
+    "restored_cmake_exact": true,
+    "production_source_unchanged": true,
+    "reviewed_dependencies_present": true
+  },
+  "local_include_edges": 114,
+  "syntax_files": 539,
+  "missing_reviewed_dependencies": [],
+  "prm_include_edges": 407,
+  "unavailable_historical_prm_includes": [
+    {
+      "consumer": "benchmarks/reconstructed_fault/bp3/normal_stress_fresh_local4.prm",
+      "include": "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3/first_cycle_coarse/original.prm",
+      "available": false
+    },
+    {
+      "consumer": "benchmarks/reconstructed_fault/bp5/bp5_friction_dc010_ell100.prm",
+      "include": "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp5/dc010-ell100/fixtures/candidate/case.prm",
+      "available": false
+    },
+    {
+      "consumer": "benchmarks/reconstructed_fault/bp5/normal_stress_diagnostic_restart.prm",
+      "include": "production_input.prm",
+      "available": false
+    },
+    {
+      "consumer": "benchmarks/reconstructed_fault/performance/mechanical_actions.prm",
+      "include": "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3/cell_actions_one.prm",
+      "available": false
+    },
+    {
+      "consumer": "benchmarks/reconstructed_fault/performance/mechanical_bp3_umf.prm",
+      "include": "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3/bound_tip_smoke.prm",
+      "available": false
+    }
+  ],
+  "retired_files": 1184,
+  "retired_bytes": 27483066,
+  "recovery": {
+    "restored_group_files": 48,
+    "restored_group_bytes": 716165,
+    "repeat_skips_identical": true,
+    "refuses_different_file": true,
+    "overwritten_originals": 0
+  },
+  "checks_executed": {
+    "restored_cmake_fresh_configure": "PASS; no full core rebuild, compiled C++ unchanged",
+    "maintained_plugin_fresh_build": "PASS; GCC 12.4, deal.II 9.6.2, diagnostics OFF",
+    "environment_executable": "PASS; clean and contaminated switch guard",
+    "production_input_validate": "PASS; only library/output paths overridden in isolated include wrapper",
+    "small_model_only_smoke": "PASS; native BP3 accepted step 1/checkpoint and intended stop",
+    "independent_uniform_reference": "PASS; 3 tests",
+    "r7_saved_data_comparator": "PASS; 206/206, no R7 simulations rerun",
+    "optional_tools_aggregate": "FAIL before cleanup-dependent compilation: test_bp3_restored_model lacks ASPECT include setup; baseline sources unchanged"
+  },
+  "runtime": {
+    "validate-production": {
+      "peak_aggregate_rss_kib": 193048,
+      "limit_reason": null,
+      "command": [
+        "mpirun",
+        "-np",
+        "1",
+        "benchmarks/reconstructed_fault/refactoring_r7b/build/aspect-r7b-qualified",
+        "--validate",
+        ".benchmark-cleanup-20261006-closeout/validate-production.prm"
+      ],
+      "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "exit_code": 0,
+      "seconds": 3.582376459000443,
+      "child_max_rss_kib": 194452,
+      "environment": {
+        "OMP_PROC_BIND": "spread",
+        "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+        "OMP_NUM_THREADS": "1",
+        "DEAL_II_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1"
+      }
+    },
+    "model-smoke": {
+      "peak_aggregate_rss_kib": 351084,
+      "limit_reason": null,
+      "command": [
+        "mpirun",
+        "-np",
+        "1",
+        "benchmarks/reconstructed_fault/refactoring_r7b/build/aspect-r7b-qualified",
+        ".benchmark-cleanup-20261006-closeout/smoke.prm"
+      ],
+      "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+      "exit_code": 0,
+      "seconds": 9.216631118000805,
+      "child_max_rss_kib": 335856,
+      "environment": {
+        "OMP_PROC_BIND": "spread",
+        "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+        "OMP_NUM_THREADS": "1",
+        "DEAL_II_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1"
+      }
+    }
+  },
+  "smoke_checkpoints": [
+    ".benchmark-cleanup-20261006-closeout/output-smoke/restart/01/resume.z",
+    ".benchmark-cleanup-20261006-closeout/output-smoke/restart/02/resume.z"
+  ],
+  "artifacts": {
+    "benchmarks/reconstructed_fault/refactoring_r7b/build/aspect-r7b-qualified": "ed74d4d4ad1cfa5d1bd4fbade496d9748ab298c24a259a4612a94d4df375b60d",
+    "benchmarks/reconstructed_fault/refactoring_r7b/build/reference-aspect": "f954b70bb1aae8168e2473dc989fbf8eaee1c5ca770121905c04bae90e2866a3",
+    ".benchmark-cleanup-20261006-closeout/build-bp3/libbp3_restore_150x50.release.so": "f893e88d837471e8437ce387a159abfa9d0faeb37dcd409f6e5d337b062a3482",
+    ".benchmark-cleanup-20261006-closeout/build-bp3/CMakeCache.txt": "8b99b522ca8d8f813352db54fa218db08218a83dfead2c1ead1c7fb69383703d",
+    ".benchmark-cleanup-20261006-closeout/configure-core/CMakeCache.txt": "324da030492a12dd9e11ab1bd552120cad04d6061c15fa0ff0c6951d1b208910",
+    ".benchmark-cleanup-20261006-closeout/incoming.tar.gz": "13b526503bb00191b0b45fcb70c622071e7540b94e70fdb523ae898c3028a732",
+    ".benchmark-cleanup-20261006-closeout/retired-tracked.tar.gz": "d0749f7de228e14091101bcff9c16577603b2109d917896c7c560bd56d909c7a",
+    ".benchmark-cleanup-20261006-closeout/configure-restored-core.log": "810cebd7b9c407246f3548ce400f74d6883049e6916289fc58c55809349d46fd",
+    ".benchmark-cleanup-20261006-closeout/configure-bp3.log": "5fb166220b4c90f038c8801782e90c6fe72e6384772fcdf29987663524421cc0",
+    ".benchmark-cleanup-20261006-closeout/build-bp3.log": "2032efea65e29f997ba31bd5ab62199ea278de18b5e8974bfc4949fd482b86e8",
+    ".benchmark-cleanup-20261006-closeout/build-maintained.log": "e8930f91d49f17e21b6255ccc545d5ea53c0ff234e41fc015923f33453397484",
+    ".benchmark-cleanup-20261006-closeout/uniform-reference.log": "e70fb56a055eb888d79ead0c4baccd29b66165948bddd797bf731f5cc8f98f0a",
+    ".benchmark-cleanup-20261006-closeout/evidence/model-smoke.log": "b649237c9964180f37db116a619ac39147008506118df7ba85be8fdefd2ed1f5",
+    ".benchmark-cleanup-20261006-closeout/evidence/validate-production.log": "6edc315bf3368110a6eeea130520446fab12b4830cd553fcc7408a4286a13f85"
+  },
+  "working_directory": "/home/ein/repository/aspect-pf-rsf-refactor",
+  "core_execution_revision": "6a3781277 (immutable R7 binary; source/include identical to f277a53ae)",
+  "incoming_files_unchanged": 201,
+  "incoming_files_intentionally_documented": [
+    "benchmarks/reconstructed_fault/bp3/README.md",
+    "doc/reconstructed_fault/CURRENT_STATUS.md",
+    "doc/reconstructed_fault/refactor_review.md",
+    "doc/reconstructed_fault/refactoring.md",
+    "doc/reconstructed_fault/refactoring/refactoring_plan.md"
+  ],
+  "complete_smoke_checkpoint_groups": 2,
+  "r7_qualified_artifact_hashes_rechecked": true,
+  "limitations": [
+    "Optional BP3_BUILD_TOOLS aggregate fails at test_bp3_restored_model due to missing ASPECT include setup; exact baseline source/CMake retained.",
+    "Five historical/deployment PRM includes are absent before/after cleanup; see unavailable_historical_prm_includes.",
+    "Static path/syntax audit does not prove arbitrary dynamic/manual workflow completeness; ambiguous research and stage chains retained.",
+    "No new core rebuild, frozen-GMG campaign, full production/server, Debug/3D or scientific qualification."
+  ]
+}

@@ -1,9 +1,0 @@
-[ 12%] Building CXX object CMakeFiles/bp3_birth_transport.dir/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3_local_tests/transport/transport.cc.o
-[ 25%] Building CXX object CMakeFiles/bp3_birth_transport.dir/audit.cc.o
-[ 37%] Building CXX object CMakeFiles/bp3_birth_transport.dir/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3/plugin/geometry.cc.o
-[ 50%] Building CXX object CMakeFiles/bp3_birth_transport.dir/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3/plugin/profile.cc.o
-[ 62%] Building CXX object CMakeFiles/bp3_birth_transport.dir/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3/plugin/mesh.cc.o
-[ 75%] Building CXX object CMakeFiles/bp3_birth_transport.dir/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3/plugin/particle_initialization.cc.o
-[ 87%] Building CXX object CMakeFiles/bp3_birth_transport.dir/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3/plugin/particle_history.cc.o
-[100%] Linking CXX shared library libbp3_birth_transport.release.so
-[100%] Built target bp3_birth_transport

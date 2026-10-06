@@ -2,12 +2,12 @@
 
 Prepared for Yimin Jin — 28 September 2026, America/Los_Angeles
 
-Current selection (2026-10-05): **R7b**, bounded verification gap closure after
-accepted R7a. Complete for review at qualified core `6a3781277`; production
-source/include remain identical to post-R6 `0f66d9869`. Fresh checks and reused
-evidence are distinguished in [the rolling review](../refactor_review.md) and
-the R7b artifact manifest. No automatic architecture change or R8 port.
-Earlier status below is historical.
+Current selection (2026-10-06): **final benchmark closeout**, complete for review.
+R7 is accepted (`73ad87c49`); CMake restored separately in `f277a53ae`. Use the
+actual local post-R7 state and its preserved incoming changes as the cleanup
+baseline. [Closeout inventory/recovery](../../../benchmarks/reconstructed_fault/README.md)
+retain maintained entry points and historical dependencies without algorithm or
+parameter changes. **R8 is deferred.** Earlier status below is historical.
 
 Status: R0–R3 and the separate restart correction/Maxwell cleanup are complete.
 R4a is accepted under [revised R4 instructions](codex_R4_instructions.md).
@@ -489,7 +489,7 @@ The user split this stage into two separately reviewed passes:
   MPI/cache admission and disabled-feature behavior. Keep required creation,
   dispatch, accepted-state and restart hooks. Assessment and documentation only:
   no automatic source, parameter or architecture changes and no runtime campaign.
-- **R7b — Close verification gaps (selected; complete for review).** Select the smallest adequate
+- **R7b — Close verification gaps (accepted).** Select the smallest adequate
   checks from R7a, reuse qualified unchanged-source evidence, and record a final
   source/artifact revision with remaining limits. Test the newly imported CMake
   checks separately from real backend support. Cover relevant ordinary non-fault

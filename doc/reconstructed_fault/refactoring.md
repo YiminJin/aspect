@@ -94,9 +94,14 @@ fresh checks from reused unchanged-source evidence. Qualify intended failure
 markers, not exit codes alone; distinguish configure-only probes from actual
 backend builds and focused Debug checks from a full Debug simulator. Keep
 unsupported cache-entry patterns and scientific nonconvergence explicit.
-R7b is complete for review; its results are in the rolling review and
-`benchmarks/reconstructed_fault/refactoring_r7b/README.md`. Legacy compatibility
-migration, a Tpetra guard/port and R8 still require separate selection.
+R7 is accepted and committed (`73ad87c49`); results remain in the rolling review
+and `benchmarks/reconstructed_fault/refactoring_r7b/README.md`. The user selected
+exact restoration of pre-edit CMake in `f277a53ae`, superseding the proposed
+Tpetra-option follow-up. Final benchmark closeout changes tracking/documentation
+only: preserve dependency closure, deliberate references, local edits and exact
+archive provenance; distinguish historical observations from new qualification.
+R8 is explicitly deferred. Do not resume experiments, porting or compatibility
+work automatically after closeout.
 
 The separately selected post-R6 BP3 lifecycle correction is a numerical-state
 ownership fix, not a new refactoring stage. Native particle backups/checkpoints

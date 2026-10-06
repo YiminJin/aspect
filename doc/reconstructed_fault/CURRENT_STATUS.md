@@ -1,3 +1,23 @@
+# Refactoring closeout complete for review; R8 deferred (2026-10-06)
+
+Accepted R7 is committed as `73ad87c49`; the user's imported CMake checks were
+restored exactly to their pre-edit contents in separate commit `f277a53ae`.
+Cleanup uses that actual local post-R7 revision plus preserved incoming changes.
+The maintained [benchmark index](../../benchmarks/reconstructed_fault/README.md)
+now identifies current BP3, uniform-shear verification, lifecycle/geometry/cache
+checks and retained research. The [path inventory and recovery](../../benchmarks/reconstructed_fault/maintenance/baseline.json)
+record 1,184 untracked campaign artifacts, verified archived bytes and unchanged
+local comparison paths. No existing output/checkpoint or qualified binary is
+removed. The exact ignored R1 profile reference is now explicitly retained.
+
+Fresh restored-CMake configure, maintained plugin build (diagnostics OFF),
+production parser check and existing small model-only startup pass; independent
+reference tests, saved R7 comparisons, syntax/dependency/preservation and recovery
+checks pass. The optional restored-model tool's missing ASPECT include setup and
+five unavailable historical/deployment PRM includes remain explicitly recorded.
+No numerical change or new scientific qualification. R8 is deferred; stop after
+closeout review. Earlier status and scientific limits below remain historical.
+
 # R7b bounded verification complete for review (2026-10-05)
 
 Qualified core revision `6a3781277`: default Epetra full rebuild, maintained plugin

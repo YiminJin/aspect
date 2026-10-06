@@ -1,2 +1,0 @@
-include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/production/bp3_fresh.prm
-set Output directory = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_birth_completion/output-production-parse

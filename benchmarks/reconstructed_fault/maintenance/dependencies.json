@@ -1,0 +1,202 @@
+{
+  "scope": "Runtime/build inputs retained at their existing paths; historical comparison payloads are separately recoverable. Directory retention covers internal headers, imports and constructed/globbed input names.",
+  "edges": [
+    {
+      "consumer": "bp3/CMakeLists.txt",
+      "dependencies": [
+        "bp3/plugin/",
+        "bp3/bp3.cc",
+        "stress_only_interpolator.cc",
+        "bp3/reference_200km/",
+        "bp3/restore_mesh.cc",
+        "bp3/test_execution_environment.cc",
+        "bp3/test_restored_model.cc"
+      ],
+      "role": "Default maintained plugin and optional legacy/research/tools targets; tools aggregate has a pre-existing standalone-header build failure"
+    },
+    {
+      "consumer": "bp3/plugin/CMakeLists.txt",
+      "dependencies": [
+        "bp3/plugin/",
+        "bp3_local_tests/diagnostics.cc"
+      ],
+      "role": "Eleven runtime translation units, local headers; optional diagnostic source when BP3_LOCAL_OSCILLATION_TEST is ON"
+    },
+    {
+      "consumer": "bp3/production/bp3_fresh.prm",
+      "dependencies": [
+        "bp3/production/fault.txt",
+        "bp3/plugin/"
+      ],
+      "role": "Single geometry input, generated mesh/live profile; matching built library path is specified by the PRM"
+    },
+    {
+      "consumer": "tests/reconstructed_fault_disturbance.cc",
+      "dependencies": [
+        "bp3/bp3.cc",
+        "bp3/bp3_model.h",
+        "bp3/first_event.h",
+        "bp3/output_schedule.h"
+      ],
+      "role": "Registered test includes legacy plugin; do not remove or copy it"
+    },
+    {
+      "consumer": "tests/bp3_length_scale_checks.h",
+      "dependencies": [
+        "bp3/bp3_model.h"
+      ],
+      "role": "Registered test support"
+    },
+    {
+      "consumer": "tests/phase_field_periodic_domains.cc",
+      "dependencies": [
+        "uniform_shear/uniform_shear.cc"
+      ],
+      "role": "Registered periodic-domain plugin"
+    },
+    {
+      "consumer": "tests/phase_field_fault_changed_loading.prm",
+      "dependencies": [
+        "uniform_shear/pilot.prm"
+      ],
+      "role": "Parameter include, keep unchanged"
+    },
+    {
+      "consumer": "unit_tests/reconstructed_fault.cc",
+      "dependencies": [
+        "bp3/fixtures/bp3_150x50/profile.txt"
+      ],
+      "role": "Immutable saved-profile test; distinct from R1 convex table"
+    },
+    {
+      "consumer": "frozen_gmg_repair/plugin/CMakeLists.txt",
+      "dependencies": [
+        "bp3/reference_200km/",
+        "performance/gmg/",
+        "frozen_gmg_repair/clock.csv"
+      ],
+      "role": "Includes tests/reconstructed_fault_frozen_gmg.cc; real AMG/GMG and state-preservation fixture unchanged"
+    },
+    {
+      "consumer": "frozen_gmg_repair/prepare.py",
+      "dependencies": [
+        "bp3/fixtures/modified_bp3_wide/target_cells.txt",
+        "bp3/fixtures/modified_bp3/fault.txt",
+        "frozen_gmg_repair/frozen.prm",
+        "frozen_gmg_repair/clock.csv"
+      ],
+      "role": "Environment-selected exact mesh, fault and replay sequence"
+    },
+    {
+      "consumer": "bp3_runtime/summarize.py",
+      "dependencies": [
+        "refactoring_r1/fixtures/profile.txt"
+      ],
+      "role": "Exact 290098-byte legacy reference, SHA256 ed1a541d449159bb54220985b78615748cfadfb76b5c212093debc756b3540b5; promoted from ignored local fixture without byte changes"
+    },
+    {
+      "consumer": "bp3_local_tests/prepare_inputs.py",
+      "dependencies": [
+        "bp3_runtime/prepare_inputs.py",
+        "bp3_runtime/inputs/"
+      ],
+      "role": "Dynamic import of parser, constructed small-60 PRM/fault paths; existing geometry numerical inputs retained"
+    },
+    {
+      "consumer": "bp3_birth_completion/prepare_inputs.py",
+      "dependencies": [
+        "bp3_runtime/prepare_inputs.py",
+        "bp3_local_tests/",
+        "bp3/branch_output.sh"
+      ],
+      "role": "Shared input parser, local diagnostic comparisons and complete checkpoint branching"
+    },
+    {
+      "consumer": "bp3_geometry/plugin/CMakeLists.txt",
+      "dependencies": [
+        "particle_lifecycle/plugin/coupled.cc",
+        "frozen_particle_H/plugin/",
+        "bp3/plugin/"
+      ],
+      "role": "Birth/endpoint observers; built-library sibling layout remains the caller's responsibility"
+    },
+    {
+      "consumer": "bp3_runtime/plugin/CMakeLists.txt",
+      "dependencies": [
+        "particle_lifecycle/plugin/coupled.cc",
+        "frozen_particle_H/plugin/",
+        "bp3/plugin/"
+      ],
+      "role": "Lifecycle observers reused across runtime/packaging checks"
+    },
+    {
+      "consumer": "bp3_packaging/compare.py",
+      "dependencies": [
+        "bp3_runtime/",
+        "bp3_packaging/inputs/"
+      ],
+      "role": "Historical matched outputs/checkpoints required, not silently regenerated or claimed available in Git"
+    },
+    {
+      "consumer": "frozen_particle_H/plugin/CMakeLists.txt",
+      "dependencies": [
+        "particle_lifecycle/plugin/coupled.cc",
+        "frozen_particle_H/plugin/birth_check.cc",
+        "frozen_particle_H/plugin/evolving_guard.cc",
+        "bp3/plugin/"
+      ],
+      "role": "Shared frozen initializer and generic evolving transfer guard"
+    },
+    {
+      "consumer": "particle_replenishment/verify_evidence.py",
+      "dependencies": [
+        "particle_replenishment/results/",
+        "refactoring_r6b/evidence/candidate-source-hashes.json"
+      ],
+      "role": "Historical failed-RNG gate evidence; source-hash guard belongs to its old revision, not a current qualification"
+    },
+    {
+      "consumer": "refactoring_r7b/plugin/CMakeLists.txt",
+      "dependencies": [
+        "refactoring_r5b2/plugin/singular_current_diagnostic.py"
+      ],
+      "role": "Current singular diagnostic generation; tests and SolCx sources also retained outside this benchmark tree"
+    },
+    {
+      "consumer": "refactoring_r6a/plugin/CMakeLists.txt",
+      "dependencies": [
+        "refactoring_r2b_cache/plugin/cache_audit.cc",
+        "refactoring_r6a/plugin/trace_cells.cc"
+      ],
+      "role": "Stage dependency chain; retained R1-R6 helpers and recorded inputs require their original source revision"
+    },
+    {
+      "consumer": "doc/reconstructed_fault/refactoring.md",
+      "dependencies": [
+        "refactoring_r6a/switch_inventory.md",
+        "refactoring_r6c/README.md"
+      ],
+      "role": "Canonical accessible switch inventory and accepted boundary rationale; no move"
+    },
+    {
+      "consumer": "uniform_shear/test_reference.py",
+      "dependencies": [
+        "uniform_shear/reference.py"
+      ],
+      "role": "Independent Python reference tests, invoked from repository root via unittest discovery"
+    },
+    {
+      "consumer": "bp3/branch_output.sh",
+      "dependencies": [
+        "bp3/plugin/output.cc"
+      ],
+      "role": "Native cp-based complete checkpoint/metadata/native-payload branching; no Python helper. The parent run and selected complete restart group are runtime inputs."
+    }
+  ],
+  "unresolved_retained": [
+    "Incoming revised PRM and Stampede3 package variants: user/server activity unknown; kept byte-for-byte and uncommitted.",
+    "BP5, normal-filter, server_gmg/performance, nonuniform shear: unresolved scientific or manual deployment workflows; no blanket retirement.",
+    "Historical R1-R6 stage helpers retain chained imports, constructed paths and source-specific assertions. They are not advertised as turnkey current-source regressions.",
+    "Old output/checkpoint payloads archived in the 20261002 cleanup may need restoration with that archive's existing restore.py; Git metadata alone cannot restore them."
+  ]
+}

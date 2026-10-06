@@ -1,6 +1,46 @@
 # Reconstructed-fault refactoring review
 
-## R7b — Verification gaps closed within the selected scope (complete for review, 2026-10-05)
+## Final closeout — complete for review (2026-10-06); R8 deferred
+
+Accepted R7 is committed as `73ad87c49`. Commit `f277a53ae` separately restores
+`CMakeLists.txt` byte-for-byte to pre-user-edit `0f66d9869`, removing the imported
+Tpetra selection/checks. The actual local post-R7 tree and preserved incoming
+changes, not the advisory remote revision, form the cleanup baseline. Historical
+R7 configure probes describe `6a3781277`; they are not current CMake commands.
+C++ source/include and numerical behavior are unchanged.
+
+The [benchmark index](../../benchmarks/reconstructed_fault/README.md), concise
+BP3 entry point, complete machine-readable classification and dependency/recovery
+records replace ambiguous active-workflow descriptions. 1,184 generated logs,
+expanded PRM copies and exports are removed from tracking, with identical local
+copies and a verified recoverable archive. Replay clocks, geometry/profile
+fixtures, compact final summaries, all R7 evidence, registered-test dependencies
+and qualified binaries remain. The previously ignored convex R1 profile is
+promoted unchanged because the maintained runtime comparator consumes it; it
+is not interchangeable with the later unit-test BP3 profile.
+
+Fresh verification: restored CMake configure; clean maintained BP3 build with
+local diagnostics OFF; unchanged production PRM parser check; existing small
+model-only case through accepted step 1 and a full checkpoint; environment guard;
+3 independent uniform-reference tests; 206/206 saved R7 checks; syntax/dependency
+and byte-preservation audits; 48-file restoration, repeat and overwrite-refusal
+tests. No full R7/frozen-GMG/production campaign was rerun for file tracking.
+Exact counts, hashes and commands are in the closeout manifest/verification.
+
+Unresolved, retained: the optional `test_bp3_restored_model` target lacks ASPECT
+include setup (same source/CMake in the baseline); five old/deployment PRM includes
+are unavailable before and after cleanup; ambiguous user/server packages and
+BP5/nonuniform/normal-stress research stay in place. Chained stage helpers still
+need their recorded revisions and sometimes earlier output archives. No current
+source, physical input, checkpoint format, solver policy or switch semantics were
+changed. Incoming BP3 documentation/parameters/packages are preserved; shortening
+the BP3 README is separately backed up with its incoming additions.
+
+R8 and further experiments are deferred. Cleanup remains a separate reviewable
+diff from the two requested commits; no further task begins automatically.
+
+
+## R7b — Verification gaps closed within the selected scope (accepted; historical qualification, 2026-10-05)
 
 Qualified revision **`6a3781277`**, GCC 12.4 / OpenMPI 5.0.6 / deal.II 9.6.2 /
 Trilinos 14.2 Epetra, Release unity/PCH ON. The core source/include tree remains
@@ -2498,7 +2538,7 @@ marked R7b describe newly executed checks; other entries retain their stated sco
 
 | File/symbol | Project responsibility | Reason | Caller/dependency | Disposition | Proposed destination / smallest retained integration | Verification |
 |---|---|---|---|---|---|---|
-| `CMakeLists.txt`: Voro discovery/link and Epetra/Tpetra package checks | Build prerequisites | Link optional tessellation; diagnose package availability | Domain sources/plugins; deal.II configuration | independent-PR | Standard source glob/unity/PCH; no fault exclusions. Imported Tpetra option is not wired to C++ types | R7b default Epetra build/plugin passes; actual old-stack Tpetra rejection and 9 mocked branches pass. Voro-OFF and real Tpetra stacks unqualified |
+| `CMakeLists.txt`: Voro discovery/link and restored dependency checks | Build prerequisites | Link optional tessellation; diagnose package availability | Domain sources/plugins; deal.II configuration | independent-PR | Standard source glob/unity/PCH; no fault exclusions. Imported Tpetra option/checks removed by explicit user request in `f277a53ae` | R7b build/plugin qualified its revision; closeout restored-CMake configure and clean maintained plugin pass. Voro-OFF/Tpetra remain unqualified |
 | `cmake/AspectConfig.cmake.in`: `ASPECT_WITH_VORO` | Build export | Match plugin capability | `ASPECT_SETUP_PLUGIN`, test configure | keep with prerequisite | Export boolean only | Plugin build |
 | `cmake/write_config.cmake`: Voro report | Build provenance | Record dependency | Build configuration output | keep with prerequisite | One report field | Configuration inspection |
 | `include/aspect/config.h.in`: Voro define | Build capability | Compile guards | Particle domain and tests | keep with prerequisite | One macro | With/without Voro build |

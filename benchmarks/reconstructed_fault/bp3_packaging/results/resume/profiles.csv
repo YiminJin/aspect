@@ -1,4 +1,0 @@
-step,time_s,file,max_slip_change_m
-0,0,profiles/fault_0.csv,0
-1,100,profiles/fault_1.csv,1.0000000113305823e-07
-2,200,profiles/fault_2.csv,1.0000000350663426e-07
