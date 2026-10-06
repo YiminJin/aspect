@@ -94,7 +94,6 @@ endif()
 # Some other ASPECT configuration options:
 set(ASPECT_MAX_NUM_PARTICLE_SYSTEMS 2 CACHE STRING "The maximum number of particle systems supported at runtime.")
 
-set(ASPECT_USE_TPETRA OFF CACHE BOOL "If ON, use Tpetra packages in Trilinos. Requires a Trilinos with Tpetra support and deal.II version 9.8.0 or newer.")
 
 
 # ##############################################################################
@@ -139,58 +138,6 @@ if(NOT DEAL_II_WITH_TRILINOS)
       )
     set(_DEALII_GOOD OFF)
 endif()
-
-# Determine if Trilinos provides all necessary packages
-if (${DEAL_II_PACKAGE_VERSION} VERSION_GREATER_EQUAL 9.8.0)
-  if (NOT DEAL_II_TRILINOS_WITH_TPETRA AND NOT DEAL_II_TRILINOS_WITH_EPETRA)
-    message(SEND_ERROR
-          "\n-- deal.II reports that Trilinos neither supports the Epetra nor the Tpetra stack. One of the two needs to be available!\n"
-          )
-        set(_DEALII_GOOD OFF)
-  endif()
-
-  # If Epetra is not available, always use Tpetra even if the user did not request it
-  if (NOT ASPECT_USE_TPETRA AND NOT DEAL_II_TRILINOS_WITH_EPETRA)
-    message(STATUS "Forcing ASPECT_USE_TPETRA=ON because Epetra support is unavailable.")
-    set(ASPECT_USE_TPETRA ON CACHE BOOL
-      "If ON, use the Tpetra packages in Trilinos. Requires a Trilinos with Tpetra support and deal.II version 9.8.0 or newer." FORCE)
-  endif()
-
-  # Now check if the selected package is actually available
-  if (ASPECT_USE_TPETRA)
-    if (NOT DEAL_II_TRILINOS_WITH_TPETRA)
-      message(SEND_ERROR
-        "\n-- deal.II was built without support for Trilinos Tpetra although it is required. This is not supported. \n"
-        )
-      set(_DEALII_GOOD OFF)
-    endif()
-    if (NOT DEAL_II_TRILINOS_WITH_TPETRA_MUELU)
-      message(SEND_ERROR
-        "\n-- deal.II was built without support for MueLu in Tpetra although it is required. This is not supported. \n"
-        )
-      set(_DEALII_GOOD OFF)
-    endif()
-  else()
-    if (NOT DEAL_II_TRILINOS_WITH_EPETRA)
-      message(SEND_ERROR
-        "\n-- deal.II was built without support for Trilinos Epetra although it is required. This is not supported. \n"
-        )
-      set(_DEALII_GOOD OFF)
-    endif()
-  endif()
-
-# deal.II older than 9.8.0 means we can only use Epetra, and Epetra is always
-# available if DEAL_II_WITH_TRILINOS is true, which was checked above.
-else()
-  if (ASPECT_USE_TPETRA)
-      message(SEND_ERROR
-            "\n-- Tpetra support is only available for deal.II versions greater or equal to 9.8.0!\n"
-            )
-      set(_DEALII_GOOD OFF)
-  endif()
-endif()
-
-message(STATUS "Using ASPECT_USE_TPETRA = '${ASPECT_USE_TPETRA}'")
 
 if(NOT DEAL_II_WITH_SUNDIALS)
     message(SEND_ERROR
