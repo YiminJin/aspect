@@ -1,3 +1,38 @@
+# R7b bounded verification complete for review (2026-10-05)
+
+Qualified core revision `6a3781277`: default Epetra full rebuild, maintained plugin
+load/validation, 9 configure-only branch cases, focused Debug assertions and
+selected two-rank units pass. Matched ordinary AMG/BFBT/melt/GMG, particle/RNG/bulk
+restart, cache cold/warm/equal-volume/empty-owner and current singular/cohesive
+checks give **206/206 exact comparison/outcome checks**. Baseline checkpoints
+also load with the rebuilt core. Known cohesive step-two nonconvergence remains.
+
+[Report and exact artifact manifest](../../benchmarks/reconstructed_fault/refactoring_r7b/README.md)
+record fresh versus reused evidence, rejected fixture constructions and limits.
+No production source/header or physical settings changed; all 65 unrelated
+incoming local files preserved. R7a is accepted. Stop after R7b for review;
+Intel/26.0, real Tpetra, full Debug/3D/production and asymmetric cache entry remain
+unqualified. Recommend a separate Tpetra-option compatibility-contract task;
+no R8 or scientific campaign begins automatically. Earlier entries are historical.
+
+# R7a final interface review complete for review (2026-10-05)
+
+Committed only the user-supplied CMake package checks as `6a3781277`, following
+post-R6 cleanup `0f66d9869`. The [rolling review](refactor_review.md) refreshes the
+existing core-change inventory (44 pre-existing paths) and records retained
+owners, mutable/borrowed APIs, particle RNG/birth hooks, disabled-feature paths
+and the simulator.h condensed-system dependency. No architecture or numerical
+change was made. Incoming BP3 edits, revised PRM, packages and evidence remain.
+
+Latest actual qualification remains the [post-R6 GCC 12.4 evidence](../../benchmarks/reconstructed_fault/post_r6_cleanup/README.md):
+ON/OFF full builds and 961 exact-field comparisons per build, plus focused units,
+plugin and installed-header checks. The new CMake revision is not yet qualified;
+its Tpetra option is package checking only, with Epetra C++ aliases unchanged.
+R7a ran static review/documentation checks only. The proposed bounded R7b covers
+new configure checks and selected ordinary-run/cache/history gaps; no R7b run,
+Tpetra port, production startup or R8 work has begun. Earlier entries below retain
+their historical scope and evidence.
+
 # BP3 birth identity corrected; production boundary admission checked (2026-10-03)
 
 The selected follow-up corrects retired-ID birth identification and retains the

@@ -1,0 +1,9 @@
+CMake Error at benchmarks/reconstructed_fault/refactoring_r7b/build/new-muelu-missing.cmake:31 (message):
+
+
+  -- deal.II was built without support for MueLu in Tpetra although it is
+  required.  This is not supported.
+
+
+
+-- Using ASPECT_USE_TPETRA = 'ON'

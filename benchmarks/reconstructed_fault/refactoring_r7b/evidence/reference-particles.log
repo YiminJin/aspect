@@ -1,0 +1,139 @@
+-----------------------------------------------------------------------------
+--                             This is ASPECT                              --
+-- The Advanced Solver for Planetary Evolution, Convection, and Tectonics. --
+-----------------------------------------------------------------------------
+--     . version 3.1.0-pre (pf-rsf-refactor, 423469d74)
+--     . using deal.II 9.6.2 (dealii-9.6, 6890ca740b)
+--     .       with 32 bit indices
+--     .       with vectorization level 2 (AVX, 4 doubles, 256 bits)
+--     . using Trilinos 14.2.0
+--     . using p4est 2.8.7
+--     . using Geodynamic World Builder 1.0.0
+--     . running in OPTIMIZED mode
+--     . running with 2 MPI processes
+-----------------------------------------------------------------------------
+
+Loading shared library </home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/build/plugin/libordinary_audit.release.so>
+
+
+-----------------------------------------------------------------------------
+The output directory </home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/output-reference-particles/> provided in the input file appears not to exist.
+ASPECT will create it for you.
+-----------------------------------------------------------------------------
+
+
+-----------------------------------------------------------------------------
+-- For information on how to cite ASPECT, see:
+--   https://aspect.geodynamics.org/citing.html?ver=3.1.0-pre&particles=1&sha=423469d74&src=code
+-----------------------------------------------------------------------------
+Number of active cells: 1,024 (on 6 levels)
+Number of degrees of freedom: 13,764 (9,539+4,225)
+
+*** Timestep 0:  t=0 seconds, dt=0 seconds
+   Solving temperature system... 0 iterations.
+   Advecting particles...  done.
+   Solving Stokes system (direct)... done.
+
+   Postprocessing:
+     Temperature min/avg/max:         1 K, 1.041 K, 1.1 K
+     RMS, max velocity:               5.92e-09 m/s, 1.52e-08 m/s
+     Writing particle output:         /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/output-reference-particles/particles/particles-00000
+     Writing graphical output:        /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/output-reference-particles/solution/solution-00000
+     Ordinary feature-disabled audit: verified
+
+*** Timestep 1:  t=1.02774e+06 seconds, dt=1.02774e+06 seconds
+   Solving temperature system... 27 iterations.
+   Advecting particles...  done.
+   Solving Stokes system (direct)... done.
+
+   Postprocessing:
+     Temperature min/avg/max:         1.001 K, 1.041 K, 1.099 K
+     RMS, max velocity:               5.75e-09 m/s, 1.46e-08 m/s
+     Writing particle output:         /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/output-reference-particles/particles/particles-00001
+     Writing graphical output:        /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/output-reference-particles/solution/solution-00001
+     Ordinary feature-disabled audit: verified
+
+*** Timestep 2:  t=2.1003e+06 seconds, dt=1.07256e+06 seconds
+   Solving temperature system... 20 iterations.
+   Advecting particles...  done.
+   Solving Stokes system (direct)... done.
+
+   Postprocessing:
+     Temperature min/avg/max:         1.002 K, 1.041 K, 1.097 K
+     RMS, max velocity:               5.58e-09 m/s, 1.4e-08 m/s
+     Writing particle output:         /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/output-reference-particles/particles/particles-00002
+     Writing graphical output:        /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/output-reference-particles/solution/solution-00002
+     Ordinary feature-disabled audit: verified
+
+*** Timestep 3:  t=3.22036e+06 seconds, dt=1.12006e+06 seconds
+   Solving temperature system... 21 iterations.
+   Advecting particles...  done.
+   Solving Stokes system (direct)... done.
+
+   Postprocessing:
+     Temperature min/avg/max:         1.003 K, 1.041 K, 1.096 K
+     RMS, max velocity:               5.4e-09 m/s, 1.34e-08 m/s
+     Writing particle output:         /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/output-reference-particles/particles/particles-00003
+     Writing graphical output:        /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/output-reference-particles/solution/solution-00003
+     Ordinary feature-disabled audit: verified
+
+*** Snapshot /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/output-reference-particles/restart/01/ created!
+
+*** Timestep 4:  t=4.39059e+06 seconds, dt=1.17022e+06 seconds
+   Solving temperature system... 21 iterations.
+   Advecting particles...  done.
+   Solving Stokes system (direct)... done.
+
+   Postprocessing:
+     Temperature min/avg/max:         1.003 K, 1.041 K, 1.094 K
+     RMS, max velocity:               5.22e-09 m/s, 1.28e-08 m/s
+     Writing particle output:         /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/output-reference-particles/particles/particles-00004
+     Writing graphical output:        /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/output-reference-particles/solution/solution-00004
+     Ordinary feature-disabled audit: verified
+
+*** Timestep 5:  t=5.61338e+06 seconds, dt=1.2228e+06 seconds
+   Solving temperature system... 21 iterations.
+   Advecting particles...  done.
+   Solving Stokes system (direct)... done.
+
+   Postprocessing:
+     Temperature min/avg/max:         1.004 K, 1.041 K, 1.093 K
+     RMS, max velocity:               5.03e-09 m/s, 1.22e-08 m/s
+     Writing particle output:         /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/output-reference-particles/particles/particles-00005
+     Writing graphical output:        /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/output-reference-particles/solution/solution-00005
+     Ordinary feature-disabled audit: verified
+
+Termination requested by criterion: end step
+
+
++----------------------------------------------+------------+------------+
+| Total wallclock time elapsed since start     |      2.29s |            |
+|                                              |            |            |
+| Section                          | no. calls |  wall time | % of total |
++----------------------------------+-----------+------------+------------+
+| Assemble Stokes system           |         6 |    0.0743s |       3.2% |
+| Assemble temperature system      |         6 |     0.125s |       5.5% |
+| Build temperature preconditioner |         6 |    0.0329s |       1.4% |
+| Create snapshot                  |         1 |    0.0083s |      0.36% |
+| Initialization                   |         1 |     0.193s |       8.4% |
+| Particles: Advect                |        12 |   0.00883s |      0.39% |
+| Particles: Copy                  |         6 |  0.000595s |         0% |
+| Particles: Exchange ghosts       |         7 |  0.000789s |         0% |
+| Particles: Generate              |         1 |  0.000331s |         0% |
+| Particles: Initialization        |         1 |   8.7e-05s |         0% |
+| Particles: Initialize properties |         1 |  0.000384s |         0% |
+| Particles: Sort                  |        12 |   0.00244s |      0.11% |
+| Particles: Update properties     |         6 |   0.00238s |       0.1% |
+| Postprocessing                   |         6 |     0.118s |       5.1% |
+| Setup dof systems                |         1 |    0.0159s |       0.7% |
+| Setup initial conditions         |         1 |    0.0188s |      0.82% |
+| Setup matrices                   |         1 |    0.0239s |         1% |
+| Solve Stokes system              |         6 |      1.45s |        63% |
+| Solve temperature system         |         6 |     0.139s |       6.1% |
++----------------------------------+-----------+------------+------------+
+
+-- Total wallclock time elapsed including restarts: 2s
+-----------------------------------------------------------------------------
+-- For information on how to cite ASPECT, see:
+--   https://aspect.geodynamics.org/citing.html?ver=3.1.0-pre&particles=1&sha=423469d74&src=code
+-----------------------------------------------------------------------------

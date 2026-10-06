@@ -2,6 +2,13 @@
 
 Prepared for Yimin Jin — 28 September 2026, America/Los_Angeles
 
+Current selection (2026-10-05): **R7b**, bounded verification gap closure after
+accepted R7a. Complete for review at qualified core `6a3781277`; production
+source/include remain identical to post-R6 `0f66d9869`. Fresh checks and reused
+evidence are distinguished in [the rolling review](../refactor_review.md) and
+the R7b artifact manifest. No automatic architecture change or R8 port.
+Earlier status below is historical.
+
 Status: R0–R3 and the separate restart correction/Maxwell cleanup are complete.
 R4a is accepted under [revised R4 instructions](codex_R4_instructions.md).
 R4a used the accepted post-R3 `eta_ve` state, including the original frozen-stress
@@ -472,15 +479,37 @@ No mandatory blanket migration or R7 work follows automatically.
 
 ### R7 — Review core integration and qualify the result
 
-Revisit the R0 inventory. For each existing core modification, explain why it remains, what behavior it enables, and which test covers it. Review source-level dependencies, public APIs, mutable aliases, call order, and disabled-feature behavior.
+The user split this stage into two separately reviewed passes:
 
-Keep essential hooks for creation, dispatch, persistence, and accepted-state events. Identify broad solver/material changes that can become independent PRs. Do not force elimination of every core hook.
+- **R7a — Final interface review (accepted).** Inspect the
+  completed branch and update the existing R0 core-change inventory in the
+  rolling review. For every retained core hook, record responsibility, reason,
+  callers/dependencies, disposition and existing/missing verification. Review
+  public APIs, mutable aliases, borrowed lifetimes, call order, persistence,
+  MPI/cache admission and disabled-feature behavior. Keep required creation,
+  dispatch, accepted-state and restart hooks. Assessment and documentation only:
+  no automatic source, parameter or architecture changes and no runtime campaign.
+- **R7b — Close verification gaps (selected; complete for review).** Select the smallest adequate
+  checks from R7a, reuse qualified unchanged-source evidence, and record a final
+  source/artifact revision with remaining limits. Test the newly imported CMake
+  checks separately from real backend support. Cover relevant ordinary non-fault
+  execution as well as coupled history/retry/restart and MPI/cache lifecycles;
+  do not rerun every earlier suite merely because it exists. Baseline/candidate
+  comparisons use matching stacks and immutable artifacts. Retain known failure
+  outcomes; fix stale diagnostic expectations only without changing numerical
+  acceptance. Debug invariants are conditional on toolchain availability.
 
-Run the selected integrated qualification set once: unit checks, short coupled evolution, relevant 1/2-rank tests, rollback, checkpoint/restart, and ordinary non-fault cases. Use baseline and candidate built under the same stack. Cover changed solver backends on a small fixture if applicable. Run Debug coverage for touched internal invariants where a Debug build is available; explicitly report missing coverage.
+The concrete gap shortlist is in the R7a review. In particular, the new CMake
+`ASPECT_USE_TPETRA` selection is not a completed Tpetra implementation in this
+branch. No backend port or automatic compatibility fix is authorized by R7a.
+A discovered numerical defect or broader interface requirement is a separate
+reported task, not an implicit extension of R7b.
 
-Measure memory/timing only enough to detect concrete regressions, such as accidental cache rebuilding or a new global gather. A noisy laptop timing difference alone is not a performance conclusion.
-
-Gate: a reviewed branch with a known source revision, test evidence, remaining limitations, and a clear map from research features to proposed upstream contributions. Long scientific qualification can follow when server resources return.
+Keep essential hooks; identify independent generic prerequisite contributions
+without implementing them. A timing difference alone is not a regression claim.
+The R7 gate is a reviewed branch with a known qualified revision, test evidence,
+remaining limitations and a clear contribution map. Production-mesh/first-event
+science and unavailable server-toolchain coverage remain separate qualifications.
 
 ### R8 — Maintainer discussion and incremental upstream port
 
@@ -558,7 +587,7 @@ four-rank repaired frozen AMG/GMG comparisons. R6a switch-inventory refresh and 
 `1a3b57eda`, with independent 2D/3D builds and 258 comparisons across 20 one/two-rank
 cases. R6b nonlinear-bound formatting is accepted as `00ad5ce1c`: 18 one/two-rank
 cases and 170 comparisons, with no physical changes and the same additional
-diagnostic work. R6c boundary assessment is accepted with legacy integration retained; R6 is closed and R7 remains unselected. Repair of the original stale singular-fixture message
+diagnostic work. R6c boundary assessment is accepted with legacy integration retained; R6 is closed; R7a is now selected as a documentation/interface review, and R7b remains unstarted. Repair of the original stale singular-fixture message
 is recommended separately.
 Further R4b operations and later stages require separate selection. Historical R1 fixture failures,
 Stage-J pressure incompatibility and cohesive step-two nonconvergence remain

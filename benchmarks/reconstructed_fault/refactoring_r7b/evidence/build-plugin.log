@@ -1,0 +1,157 @@
+[  7%] Building CXX object CMakeFiles/nsinker_bfbt.dir/home/ein/repository/aspect-pf-rsf-refactor/tests/nsinker_bfbt.cc.o
+[ 14%] Building CXX object CMakeFiles/melt_transport_compressible_iterative.dir/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible_iterative.cc.o
+In file included from /home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible_iterative.cc:21:
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc: In instantiation of ‘class aspect::CompressibleMeltMaterial<2>’:
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc:354:3:   required from here
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc:46:20: warning: ‘bool aspect::CompressibleMeltMaterial<dim>::is_compressible() const [with int dim = 2]’ can be marked override [-Wsuggest-override]
+   46 |       virtual bool is_compressible () const
+      |                    ^~~~~~~~~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc:51:22: warning: ‘double aspect::CompressibleMeltMaterial<dim>::reference_darcy_coefficient() const [with int dim = 2]’ can be marked override [-Wsuggest-override]
+   51 |       virtual double reference_darcy_coefficient () const
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc:57:20: warning: ‘void aspect::CompressibleMeltMaterial<dim>::evaluate(const typename aspect::MaterialModel::Interface<dim>::MaterialModelInputs&, typename aspect::MaterialModel::Interface<dim>::MaterialModelOutputs&) const [with int dim = 2; typename aspect::MaterialModel::Interface<dim>::MaterialModelInputs = aspect::MaterialModel::MaterialModelInputs<2>; typename aspect::MaterialModel::Interface<dim>::MaterialModelOutputs = aspect::MaterialModel::MaterialModelOutputs<2>]’ can be marked override [-Wsuggest-override]
+   57 |       virtual void evaluate(const typename MaterialModel::Interface<dim>::MaterialModelInputs &in,
+      |                    ^~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc:93:20: warning: ‘void aspect::CompressibleMeltMaterial<dim>::initialize() [with int dim = 2]’ can be marked override [-Wsuggest-override]
+   93 |       virtual void initialize ()
+      |                    ^~~~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc: In instantiation of ‘class aspect::CompressibleMeltMaterial<3>’:
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc:354:3:   required from here
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc:46:20: warning: ‘bool aspect::CompressibleMeltMaterial<dim>::is_compressible() const [with int dim = 3]’ can be marked override [-Wsuggest-override]
+   46 |       virtual bool is_compressible () const
+      |                    ^~~~~~~~~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc:51:22: warning: ‘double aspect::CompressibleMeltMaterial<dim>::reference_darcy_coefficient() const [with int dim = 3]’ can be marked override [-Wsuggest-override]
+   51 |       virtual double reference_darcy_coefficient () const
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc:57:20: warning: ‘void aspect::CompressibleMeltMaterial<dim>::evaluate(const typename aspect::MaterialModel::Interface<dim>::MaterialModelInputs&, typename aspect::MaterialModel::Interface<dim>::MaterialModelOutputs&) const [with int dim = 3; typename aspect::MaterialModel::Interface<dim>::MaterialModelInputs = aspect::MaterialModel::MaterialModelInputs<3>; typename aspect::MaterialModel::Interface<dim>::MaterialModelOutputs = aspect::MaterialModel::MaterialModelOutputs<3>]’ can be marked override [-Wsuggest-override]
+   57 |       virtual void evaluate(const typename MaterialModel::Interface<dim>::MaterialModelInputs &in,
+      |                    ^~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc:93:20: warning: ‘void aspect::CompressibleMeltMaterial<dim>::initialize() [with int dim = 3]’ can be marked override [-Wsuggest-override]
+   93 |       virtual void initialize ()
+      |                    ^~~~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc: In instantiation of ‘class aspect::CompressibleMeltPostprocessor<2>’:
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc:359:3:   required from here
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc:194:3: warning: ‘std::pair<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > aspect::CompressibleMeltPostprocessor<dim>::execute(dealii::TableHandler&) [with int dim = 2]’ can be marked override [-Wsuggest-override]
+  194 |   CompressibleMeltPostprocessor<dim>::execute (TableHandler &)
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc: In instantiation of ‘class aspect::CompressibleMeltPostprocessor<3>’:
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc:359:3:   required from here
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc:194:3: warning: ‘std::pair<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > aspect::CompressibleMeltPostprocessor<dim>::execute(dealii::TableHandler&) [with int dim = 3]’ can be marked override [-Wsuggest-override]
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc: In instantiation of ‘class aspect::PressureBdry<2>’:
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc:365:3:   required from here
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc:320:12: warning: ‘void aspect::PressureBdry<dim>::fluid_pressure_gradient(dealii::types::boundary_id, const aspect::MaterialModel::MaterialModelInputs<dim>&, const aspect::MaterialModel::MaterialModelOutputs<dim>&, const std::vector<dealii::Tensor<1, dim> >&, std::vector<double>&) const [with int dim = 2; dealii::types::boundary_id = unsigned int]’ can be marked override [-Wsuggest-override]
+  320 |       void fluid_pressure_gradient (
+      |            ^~~~~~~~~~~~~~~~~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc: In instantiation of ‘class aspect::PressureBdry<3>’:
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc:365:3:   required from here
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc:320:12: warning: ‘void aspect::PressureBdry<dim>::fluid_pressure_gradient(dealii::types::boundary_id, const aspect::MaterialModel::MaterialModelInputs<dim>&, const aspect::MaterialModel::MaterialModelOutputs<dim>&, const std::vector<dealii::Tensor<1, dim> >&, std::vector<double>&) const [with int dim = 3; dealii::types::boundary_id = unsigned int]’ can be marked override [-Wsuggest-override]
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc: In instantiation of ‘void aspect::CompressibleMeltMaterial<dim>::evaluate(const typename aspect::MaterialModel::Interface<dim>::MaterialModelInputs&, typename aspect::MaterialModel::Interface<dim>::MaterialModelOutputs&) const [with int dim = 2; typename aspect::MaterialModel::Interface<dim>::MaterialModelInputs = aspect::MaterialModel::MaterialModelInputs<2>; typename aspect::MaterialModel::Interface<dim>::MaterialModelOutputs = aspect::MaterialModel::MaterialModelOutputs<2>]’:
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc:354:3:   required from here
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc:60:28: warning: unused variable ‘porosity_idx’ [-Wunused-variable]
+   60 |         const unsigned int porosity_idx = this->introspection().compositional_index_for_name("porosity");
+      |                            ^~~~~~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc: In instantiation of ‘void aspect::CompressibleMeltMaterial<dim>::evaluate(const typename aspect::MaterialModel::Interface<dim>::MaterialModelInputs&, typename aspect::MaterialModel::Interface<dim>::MaterialModelOutputs&) const [with int dim = 3; typename aspect::MaterialModel::Interface<dim>::MaterialModelInputs = aspect::MaterialModel::MaterialModelInputs<3>; typename aspect::MaterialModel::Interface<dim>::MaterialModelOutputs = aspect::MaterialModel::MaterialModelOutputs<3>]’:
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc:354:3:   required from here
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc:60:28: warning: unused variable ‘porosity_idx’ [-Wunused-variable]
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc: In instantiation of ‘class aspect::RefFunction<2>’:
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc:196:22:   required from ‘std::pair<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > aspect::CompressibleMeltPostprocessor<dim>::execute(dealii::TableHandler&) [with int dim = 2]’
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc:359:3:   required from here
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc:135:20: warning: ‘void aspect::RefFunction<dim>::vector_value(const dealii::Point<dim>&, dealii::Vector<double>&) const [with int dim = 2]’ can be marked override [-Wsuggest-override]
+  135 |       virtual void vector_value (const Point<dim>   &p,
+      |                    ^~~~~~~~~~~~
+[ 21%] Linking CXX shared library libnsinker_bfbt.release.so
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc: In instantiation of ‘class aspect::RefFunction<3>’:
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc:196:22:   required from ‘std::pair<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > aspect::CompressibleMeltPostprocessor<dim>::execute(dealii::TableHandler&) [with int dim = 3]’
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc:359:3:   required from here
+/home/ein/repository/aspect-pf-rsf-refactor/tests/melt_transport_compressible.cc:135:20: warning: ‘void aspect::RefFunction<dim>::vector_value(const dealii::Point<dim>&, dealii::Vector<double>&) const [with int dim = 3]’ can be marked override [-Wsuggest-override]
+[ 21%] Built target nsinker_bfbt
+[ 28%] Building CXX object CMakeFiles/phase_field_fault_stage_j_restart_create.dir/home/ein/repository/aspect-pf-rsf-refactor/tests/phase_field_fault_stage_j_restart_create.cc.o
+[ 35%] Linking CXX shared library libmelt_transport_compressible_iterative.release.so
+[ 35%] Built target melt_transport_compressible_iterative
+[ 42%] Building CXX object CMakeFiles/cache_lifecycle.dir/cache_lifecycle.cc.o
+In file included from /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/plugin/cache_lifecycle.cc:12:
+/home/ein/repository/aspect-pf-rsf-refactor/tests/phase_field_fault_ih.cc: In instantiation of ‘std::pair<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > aspect::Postprocess::VerifyPhaseFieldFaultIh<dim>::execute(dealii::TableHandler&) [with int dim = 2]’:
+/home/ein/repository/aspect-pf-rsf-refactor/tests/phase_field_fault_ih.cc:332:5:   required from here
+/home/ein/repository/aspect-pf-rsf-refactor/tests/phase_field_fault_ih.cc:169:23: warning: unused variable ‘composition_information’ [-Wunused-variable]
+  169 |           const auto &composition_information =
+      |                       ^~~~~~~~~~~~~~~~~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/tests/phase_field_fault_ih.cc: In instantiation of ‘std::pair<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > aspect::Postprocess::VerifyPhaseFieldFaultIh<dim>::execute(dealii::TableHandler&) [with int dim = 3]’:
+/home/ein/repository/aspect-pf-rsf-refactor/tests/phase_field_fault_ih.cc:332:5:   required from here
+/home/ein/repository/aspect-pf-rsf-refactor/tests/phase_field_fault_ih.cc:169:23: warning: unused variable ‘composition_information’ [-Wunused-variable]
+/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/plugin/cache_lifecycle.cc: In instantiation of ‘std::pair<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > aspect::Postprocess::VerifyParticleProjectionCache<dim>::execute(dealii::TableHandler&) [with int dim = 2]’:
+/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/plugin/cache_lifecycle.cc:115:5:   required from here
+/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/plugin/cache_lifecycle.cc:73:39: error: invalid use of incomplete type ‘class aspect::Particle::ParticleDomainHandler<2>’
+   73 |             volumes.push_back(domains.get_particle_domain(particle.get_local_index()).volume());
+      |                               ~~~~~~~~^~~~~~~~~~~~~~~~~~~
+In file included from /home/ein/repository/aspect-pf-rsf-refactor/tests/phase_field_fault_ih.cc:16:
+/home/ein/repository/aspect-pf-rsf-refactor/include/aspect/particle/manager.h:64:11: note: declaration of ‘class aspect::Particle::ParticleDomainHandler<2>’
+   64 |     class ParticleDomainHandler;
+      |           ^~~~~~~~~~~~~~~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/plugin/cache_lifecycle.cc:74:43: error: invalid use of incomplete type ‘class aspect::Particle::ParticleDomainHandler<2>’
+   74 |           const auto generation = domains.geometry_version();
+      |                                   ~~~~~~~~^~~~~~~~~~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/include/aspect/particle/manager.h:64:11: note: declaration of ‘class aspect::Particle::ParticleDomainHandler<2>’
+   64 |     class ParticleDomainHandler;
+      |           ^~~~~~~~~~~~~~~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/plugin/cache_lifecycle.cc:75:19: error: invalid use of incomplete type ‘class aspect::Particle::ParticleDomainHandler<2>’
+   75 |           domains.generate_particle_domains();
+      |           ~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/include/aspect/particle/manager.h:64:11: note: declaration of ‘class aspect::Particle::ParticleDomainHandler<2>’
+   64 |     class ParticleDomainHandler;
+      |           ^~~~~~~~~~~~~~~~~~~~~
+In file included from /opt/dealii/9.6-local/include/deal.II/base/array_view.h:20,
+                 from /opt/dealii/9.6-local/include/deal.II/base/mpi.h:20,
+                 from /home/ein/repository/aspect-pf-rsf-refactor/include/aspect/global.h:28,
+                 from /home/ein/repository/aspect-pf-rsf-refactor/include/aspect/simulator_access.h:25,
+                 from /home/ein/repository/aspect-pf-rsf-refactor/include/aspect/material_model/phase_field_fault.h:24,
+                 from /home/ein/repository/aspect-pf-rsf-refactor/tests/phase_field_fault_ih.cc:12:
+/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/plugin/cache_lifecycle.cc:76:31: error: invalid use of incomplete type ‘class aspect::Particle::ParticleDomainHandler<2>’
+   76 |           AssertThrow(domains.geometry_version() == generation+1, ExcInternalError());
+      |                       ~~~~~~~~^~~~~~~~~~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/include/aspect/particle/manager.h:64:11: note: declaration of ‘class aspect::Particle::ParticleDomainHandler<2>’
+   64 |     class ParticleDomainHandler;
+      |           ^~~~~~~~~~~~~~~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/plugin/cache_lifecycle.cc:79:56: error: invalid use of incomplete type ‘class aspect::Particle::ParticleDomainHandler<2>’
+   79 |             AssertThrow(volumes.at(index++) == domains.get_particle_domain(particle.get_local_index()).volume(),
+      |                                                ~~~~~~~~^~~~~~~~~~~~~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/include/aspect/particle/manager.h:64:11: note: declaration of ‘class aspect::Particle::ParticleDomainHandler<2>’
+   64 |     class ParticleDomainHandler;
+      |           ^~~~~~~~~~~~~~~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/plugin/cache_lifecycle.cc: In instantiation of ‘std::pair<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > aspect::Postprocess::VerifyParticleProjectionCache<dim>::execute(dealii::TableHandler&) [with int dim = 3]’:
+/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/plugin/cache_lifecycle.cc:115:5:   required from here
+/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/plugin/cache_lifecycle.cc:73:39: error: invalid use of incomplete type ‘class aspect::Particle::ParticleDomainHandler<3>’
+   73 |             volumes.push_back(domains.get_particle_domain(particle.get_local_index()).volume());
+      |                               ~~~~~~~~^~~~~~~~~~~~~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/include/aspect/particle/manager.h:64:11: note: declaration of ‘class aspect::Particle::ParticleDomainHandler<3>’
+   64 |     class ParticleDomainHandler;
+      |           ^~~~~~~~~~~~~~~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/plugin/cache_lifecycle.cc:74:43: error: invalid use of incomplete type ‘class aspect::Particle::ParticleDomainHandler<3>’
+   74 |           const auto generation = domains.geometry_version();
+      |                                   ~~~~~~~~^~~~~~~~~~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/include/aspect/particle/manager.h:64:11: note: declaration of ‘class aspect::Particle::ParticleDomainHandler<3>’
+   64 |     class ParticleDomainHandler;
+      |           ^~~~~~~~~~~~~~~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/plugin/cache_lifecycle.cc:75:19: error: invalid use of incomplete type ‘class aspect::Particle::ParticleDomainHandler<3>’
+   75 |           domains.generate_particle_domains();
+      |           ~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/include/aspect/particle/manager.h:64:11: note: declaration of ‘class aspect::Particle::ParticleDomainHandler<3>’
+   64 |     class ParticleDomainHandler;
+      |           ^~~~~~~~~~~~~~~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/plugin/cache_lifecycle.cc:76:31: error: invalid use of incomplete type ‘class aspect::Particle::ParticleDomainHandler<3>’
+   76 |           AssertThrow(domains.geometry_version() == generation+1, ExcInternalError());
+      |                       ~~~~~~~~^~~~~~~~~~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/include/aspect/particle/manager.h:64:11: note: declaration of ‘class aspect::Particle::ParticleDomainHandler<3>’
+   64 |     class ParticleDomainHandler;
+      |           ^~~~~~~~~~~~~~~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/plugin/cache_lifecycle.cc:79:56: error: invalid use of incomplete type ‘class aspect::Particle::ParticleDomainHandler<3>’
+   79 |             AssertThrow(volumes.at(index++) == domains.get_particle_domain(particle.get_local_index()).volume(),
+      |                                                ~~~~~~~~^~~~~~~~~~~~~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/include/aspect/particle/manager.h:64:11: note: declaration of ‘class aspect::Particle::ParticleDomainHandler<3>’
+   64 |     class ParticleDomainHandler;
+      |           ^~~~~~~~~~~~~~~~~~~~~
+make[2]: *** [CMakeFiles/cache_lifecycle.dir/build.make:79: CMakeFiles/cache_lifecycle.dir/cache_lifecycle.cc.o] Error 1
+make[1]: *** [CMakeFiles/Makefile2:201: CMakeFiles/cache_lifecycle.dir/all] Error 2
+make[1]: *** Waiting for unfinished jobs....
+[ 50%] Linking CXX shared library libphase_field_fault_stage_j_restart_create.release.so
+[ 50%] Built target phase_field_fault_stage_j_restart_create
+make: *** [Makefile:136: all] Error 2

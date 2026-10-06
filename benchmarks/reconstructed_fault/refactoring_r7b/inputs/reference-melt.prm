@@ -1,0 +1,8 @@
+include $ASPECT_SOURCE_DIR/tests/melt_transport_compressible_iterative.prm
+set Output directory = /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/output-reference-melt
+set Additional shared libraries = /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/build/plugin/libmelt_transport_compressible_iterative.release.so
+subsection Solver parameters
+ subsection Stokes solver parameters
+ set Stokes solver type = block AMG
+ end
+end

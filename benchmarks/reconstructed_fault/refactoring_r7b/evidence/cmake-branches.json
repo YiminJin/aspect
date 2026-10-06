@@ -1,0 +1,50 @@
+{
+  "block_sha256": "64f047ce9067691a03522f1d05f744c8677cdaac28e1c11b1136000f259e3878",
+  "checks": [
+    {
+      "case": "old-epetra",
+      "passed": true,
+      "exit_code": 0
+    },
+    {
+      "case": "old-tpetra-rejected",
+      "passed": true,
+      "exit_code": 1
+    },
+    {
+      "case": "new-epetra",
+      "passed": true,
+      "exit_code": 0
+    },
+    {
+      "case": "new-tpetra-missing",
+      "passed": true,
+      "exit_code": 1
+    },
+    {
+      "case": "new-both-epetra",
+      "passed": true,
+      "exit_code": 0
+    },
+    {
+      "case": "new-both-tpetra",
+      "passed": true,
+      "exit_code": 0
+    },
+    {
+      "case": "new-muelu-missing",
+      "passed": true,
+      "exit_code": 1
+    },
+    {
+      "case": "new-forced-tpetra",
+      "passed": true,
+      "exit_code": 0
+    },
+    {
+      "case": "new-neither",
+      "passed": true,
+      "exit_code": 1
+    }
+  ]
+}

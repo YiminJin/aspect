@@ -1,0 +1,116 @@
+-----------------------------------------------------------------------------
+--                             This is ASPECT                              --
+-- The Advanced Solver for Planetary Evolution, Convection, and Tectonics. --
+-----------------------------------------------------------------------------
+--     . version 3.1.0-pre (pf-rsf-refactor, 6a3781277)
+--     . using deal.II 9.6.2 (dealii-9.6, 6890ca740b)
+--     .       with 32 bit indices
+--     .       with vectorization level 2 (AVX, 4 doubles, 256 bits)
+--     . using Trilinos 14.2.0
+--     . using p4est 2.8.7
+--     . using Geodynamic World Builder 1.0.0
+--     . running in OPTIMIZED mode
+--     . running with 2 MPI processes
+-----------------------------------------------------------------------------
+
+Loading shared library </home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/build/plugin/libcache_lifecycle.release.so>
+
+
+-----------------------------------------------------------------------------
+The output directory </home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/output-candidate-empty-cache/> provided in the input file appears not to exist.
+ASPECT will create it for you.
+-----------------------------------------------------------------------------
+
+
+-----------------------------------------------------------------------------
+-- For information on how to cite ASPECT, see:
+--   https://aspect.geodynamics.org/citing.html?ver=3.1.0-pre&particles=1&sha=6a3781277&src=code
+-----------------------------------------------------------------------------
+Number of active cells: 1 (on 1 levels)
+Number of degrees of freedom: 44 (18+4+9+9+4)
+
+*** Timestep 0:  t=0 seconds, dt=0 seconds
+   Phase-field residual target: initial=1.241865956470935e+17, roundoff=220.59970853997427, absolute target=1241865956470.9351
+   Solving phase field system:
+      Iteration  0: linear solver iterations =    1, line search iterations = 0, relative residual = 4.444e-01
+      Iteration  1: linear solver iterations =    1, line search iterations = 0, relative residual = 1.975e-01
+      Iteration  2: linear solver iterations =    1, line search iterations = 0, relative residual = 8.779e-02
+      Iteration  3: linear solver iterations =    1, line search iterations = 0, relative residual = 3.902e-02
+      Iteration  4: linear solver iterations =    1, line search iterations = 0, relative residual = 1.734e-02
+      Iteration  5: linear solver iterations =    1, line search iterations = 0, relative residual = 7.707e-03
+      Iteration  6: linear solver iterations =    1, line search iterations = 0, relative residual = 3.425e-03
+      Iteration  7: linear solver iterations =    1, line search iterations = 0, relative residual = 1.522e-03
+      Iteration  8: linear solver iterations =    1, line search iterations = 0, relative residual = 6.766e-04
+      Iteration  9: linear solver iterations =    1, line search iterations = 0, relative residual = 3.007e-04
+      Iteration 10: linear solver iterations =    1, line search iterations = 0, relative residual = 1.337e-04
+      Iteration 11: linear solver iterations =    1, line search iterations = 0, relative residual = 5.940e-05
+      Iteration 12: linear solver iterations =    1, line search iterations = 0, relative residual = 2.640e-05
+      Iteration 13: linear solver iterations =    1, line search iterations = 0, relative residual = 1.173e-05
+      Iteration 14: linear solver iterations =    1, line search iterations = 0, relative residual = 5.215e-06
+
+
+----------------------------------------------------
+Exception 'ExcMessage("A structural vertex of fault " + Utilities::int_to_string(fault_index) + " has no phase-field support.")' on rank 0 on processing: 
+
+
+----------------------------------------------------
+Exception 'ExcMessage("A structural vertex of fault " + Utilities::int_to_string(fault_index) + " has no phase-field support.")' on rank 1 on processing: 
+
+--------------------------------------------------------
+An error occurred in line <624> of file </home/ein/repository/aspect-pf-rsf-refactor/source/reconstructed_fault/manager.cc> in function
+    void aspect::ReconstructedFaultManager<dim>::reconstruct_initial_fault(unsigned int, double, const std::vector<double>&, const std::vector<double>&, double) [with int dim = 2]
+The violated condition was: 
+    std::isfinite(result.diagnostics.structural_support[vertex]) && result.diagnostics.structural_support[vertex] > 0.0
+Additional information: 
+    A structural vertex of fault 0 has no phase-field support.
+
+Stacktrace:
+-----------
+#0  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-post-r6-gcc12-unity/aspect: aspect::ReconstructedFaultManager<2>::reconstruct_initial_fault(unsigned int, double, std::vector<double, std::allocator<double> > const&, std::vector<double, std::allocator<double> > const&, double)
+#1  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-post-r6-gcc12-unity/aspect: aspect::ReconstructedFaultManager<2>::reconstruct_initial_faults()
+#2  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-post-r6-gcc12-unity/aspect: aspect::Simulator<2>::solve_single_advection_no_stokes()
+#3  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-post-r6-gcc12-unity/aspect: aspect::Simulator<2>::solve_timestep()
+#4  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-post-r6-gcc12-unity/aspect: aspect::Simulator<2>::run()
+#5  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-post-r6-gcc12-unity/aspect: ) [0x1ef0e0c]
+#6  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-post-r6-gcc12-unity/aspect: main
+--------------------------------------------------------
+
+Aborting!
+----------------------------------------------------
+--------------------------------------------------------------------------
+MPI_ABORT was invoked on rank 0 in communicator MPI_COMM_WORLD
+  Proc: [[15835,1],0]
+  Errorcode: 1
+
+NOTE: invoking MPI_ABORT causes Open MPI to kill all MPI processes.
+You may or may not see output from other processes, depending on
+exactly when Open MPI kills them.
+--------------------------------------------------------------------------
+
+--------------------------------------------------------
+An error occurred in line <624> of file </home/ein/repository/aspect-pf-rsf-refactor/source/reconstructed_fault/manager.cc> in function
+    void aspect::ReconstructedFaultManager<dim>::reconstruct_initial_fault(unsigned int, double, const std::vector<double>&, const std::vector<double>&, double) [with int dim = 2]
+The violated condition was: 
+    std::isfinite(result.diagnostics.structural_support[vertex]) && result.diagnostics.structural_support[vertex] > 0.0
+Additional information: 
+    A structural vertex of fault 0 has no phase-field support.
+
+Stacktrace:
+-----------
+#0  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-post-r6-gcc12-unity/aspect: aspect::ReconstructedFaultManager<2>::reconstruct_initial_fault(unsigned int, double, std::vector<double, std::allocator<double> > const&, std::vector<double, std::allocator<double> > const&, double)
+#1  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-post-r6-gcc12-unity/aspect: aspect::ReconstructedFaultManager<2>::reconstruct_initial_faults()
+#2  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-post-r6-gcc12-unity/aspect: aspect::Simulator<2>::solve_single_advection_no_stokes()
+#3  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-post-r6-gcc12-unity/aspect: aspect::Simulator<2>::solve_timestep()
+#4  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-post-r6-gcc12-unity/aspect: aspect::Simulator<2>::run()
+#5  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-post-r6-gcc12-unity/aspect: ) [0x1ef0e0c]
+#6  /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-post-r6-gcc12-unity/aspect: main
+--------------------------------------------------------
+
+Aborting!
+----------------------------------------------------
+--------------------------------------------------------------------------
+prterun has exited due to process rank 0 with PID 0 on node BEBOP calling
+"abort". This may have caused other processes in the application to be
+terminated by signals sent by prterun (as reported here).
+--------------------------------------------------------------------------
+   Reconstruction initial faults...  

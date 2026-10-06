@@ -1,0 +1,9 @@
+CMake Error at benchmarks/reconstructed_fault/refactoring_r7b/build/old-tpetra-rejected.cmake:49 (message):
+
+
+  -- Tpetra support is only available for deal.II versions greater or equal
+  to 9.8.0!
+
+
+
+-- Using ASPECT_USE_TPETRA = 'ON'

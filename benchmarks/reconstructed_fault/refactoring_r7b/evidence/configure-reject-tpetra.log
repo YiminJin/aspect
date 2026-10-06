@@ -1,0 +1,33 @@
+-- The CXX compiler identification is GNU 12.4.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /opt/openmpi/5.0.6/bin/mpic++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- 
+-- ====================================================
+-- ===== Configuring ASPECT 3.1.0-pre
+-- ====================================================
+-- 
+-- Setting up ASPECT for DebugRelease mode.
+-- 
+-- ===== Configuring external libraries ===============
+-- Found deal.II version 9.6.2 at '/opt/dealii/9.6-local/lib/cmake/deal.II'
+CMake Error at CMakeLists.txt:186 (message):
+
+
+  -- Tpetra support is only available for deal.II versions greater or equal
+  to 9.8.0!
+
+
+
+-- Using ASPECT_USE_TPETRA = 'ON'
+CMake Error at CMakeLists.txt:203 (message):
+
+
+  ASPECT requires a deal.II installation built with certain features enabled
+  that seem to be missing (see above)!
+
+
+
+-- Configuring incomplete, errors occurred!

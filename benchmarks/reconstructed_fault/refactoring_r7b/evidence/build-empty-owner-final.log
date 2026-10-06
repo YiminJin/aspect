@@ -1,0 +1,12 @@
+[ 50%] Building CXX object CMakeFiles/empty_owner.dir/cache_lifecycle.cc.o
+In file included from /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/plugin/cache_lifecycle.cc:12:
+/home/ein/repository/aspect-pf-rsf-refactor/tests/phase_field_fault_ih.cc: In instantiation of ‘std::pair<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > aspect::Postprocess::VerifyPhaseFieldFaultIh<dim>::execute(dealii::TableHandler&) [with int dim = 2]’:
+/home/ein/repository/aspect-pf-rsf-refactor/tests/phase_field_fault_ih.cc:332:5:   required from here
+/home/ein/repository/aspect-pf-rsf-refactor/tests/phase_field_fault_ih.cc:169:23: warning: unused variable ‘composition_information’ [-Wunused-variable]
+  169 |           const auto &composition_information =
+      |                       ^~~~~~~~~~~~~~~~~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/tests/phase_field_fault_ih.cc: In instantiation of ‘std::pair<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > aspect::Postprocess::VerifyPhaseFieldFaultIh<dim>::execute(dealii::TableHandler&) [with int dim = 3]’:
+/home/ein/repository/aspect-pf-rsf-refactor/tests/phase_field_fault_ih.cc:332:5:   required from here
+/home/ein/repository/aspect-pf-rsf-refactor/tests/phase_field_fault_ih.cc:169:23: warning: unused variable ‘composition_information’ [-Wunused-variable]
+[100%] Linking CXX shared library libempty_owner.release.so
+[100%] Built target empty_owner

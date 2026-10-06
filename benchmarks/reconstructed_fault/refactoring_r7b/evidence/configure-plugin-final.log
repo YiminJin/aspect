@@ -1,0 +1,31 @@
+-- Setting up plugin:
+--   name <nsinker_bfbt>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-post-r6-gcc12-unity
+--   setting up RELEASE variant
+-- Setting up plugin:
+--   name <melt_transport_compressible_iterative>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-post-r6-gcc12-unity
+--   setting up RELEASE variant
+-- Setting up plugin:
+--   name <phase_field_fault_stage_j_restart_create>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-post-r6-gcc12-unity
+--   setting up RELEASE variant
+-- Setting up plugin:
+--   name <cache_lifecycle>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-post-r6-gcc12-unity
+--   setting up RELEASE variant
+-- Setting up plugin:
+--   name <singular>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-post-r6-gcc12-unity
+--   setting up RELEASE variant
+-- Setting up plugin:
+--   name <solcx>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-post-r6-gcc12-unity
+--   setting up RELEASE variant
+-- Setting up plugin:
+--   name <ordinary_audit>
+--   using ASPECT_DIR /home/ein/repository/aspect-pf-rsf-refactor/build-refactor-post-r6-gcc12-unity
+--   setting up RELEASE variant
+-- Configuring done (0.2s)
+-- Generating done (0.1s)
+-- Build files have been written to: /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/build/plugin

@@ -1,0 +1,184 @@
+-----------------------------------------------------------------------------
+--                             This is ASPECT                              --
+-- The Advanced Solver for Planetary Evolution, Convection, and Tectonics. --
+-----------------------------------------------------------------------------
+--     . version 3.1.0-pre (pf-rsf-refactor, 6a3781277)
+--     . using deal.II 9.6.2 (dealii-9.6, 6890ca740b)
+--     .       with 32 bit indices
+--     .       with vectorization level 2 (AVX, 4 doubles, 256 bits)
+--     . using Trilinos 14.2.0
+--     . using p4est 2.8.7
+--     . using Geodynamic World Builder 1.0.0
+--     . running in OPTIMIZED mode
+--     . running with 1 MPI process
+-----------------------------------------------------------------------------
+
+Loading shared library </home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/build/plugin/libphase_field_fault_stage_j_restart_create.release.so>
+
+
+-----------------------------------------------------------------------------
+The output directory </home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/output-candidate-cohesive/> provided in the input file appears not to exist.
+ASPECT will create it for you.
+-----------------------------------------------------------------------------
+
+
+-----------------------------------------------------------------------------
+-- For information on how to cite ASPECT, see:
+--   https://aspect.geodynamics.org/citing.html?ver=3.1.0-pre&NewtonSolver=1&particles=1&sha=6a3781277&src=code
+-----------------------------------------------------------------------------
+Number of active cells: 4,096 (on 7 levels)
+Number of degrees of freedom: 141,578 (33,282+4,225+16,641+16,641+16,641+16,641+16,641+16,641+4,225)
+
+*** Timestep 0:  t=0 seconds, dt=0 seconds
+   Phase-field residual target: initial=3329356945184012.5, roundoff=5.9141259803853918, absolute target=33293569451.840126
+   Solving phase field system:
+      Iteration  0: linear solver iterations =    5, line search iterations = 0, relative residual = 4.444e-01
+      Iteration  1: linear solver iterations =    5, line search iterations = 0, relative residual = 1.975e-01
+      Iteration  2: linear solver iterations =    5, line search iterations = 0, relative residual = 8.779e-02
+      Iteration  3: linear solver iterations =    5, line search iterations = 0, relative residual = 3.902e-02
+      Iteration  4: linear solver iterations =    5, line search iterations = 0, relative residual = 1.734e-02
+      Iteration  5: linear solver iterations =    5, line search iterations = 0, relative residual = 7.707e-03
+      Iteration  6: linear solver iterations =    5, line search iterations = 1, relative residual = 4.933e-03
+      Iteration  7: linear solver iterations =    5, line search iterations = 1, relative residual = 3.157e-03
+      Iteration  8: linear solver iterations =    5, line search iterations = 1, relative residual = 2.020e-03
+      Iteration  9: linear solver iterations =    5, line search iterations = 1, relative residual = 1.293e-03
+      Iteration 10: linear solver iterations =    5, line search iterations = 1, relative residual = 8.276e-04
+      Iteration 11: linear solver iterations =    5, line search iterations = 2, relative residual = 6.539e-04
+      Iteration 12: linear solver iterations =    5, line search iterations = 2, relative residual = 5.166e-04
+      Iteration 13: linear solver iterations =    5, line search iterations = 2, relative residual = 4.082e-04
+      Iteration 14: linear solver iterations =    5, line search iterations = 1, relative residual = 2.613e-04
+      Iteration 15: linear solver iterations =    5, line search iterations = 0, relative residual = 1.161e-04
+      Iteration 16: linear solver iterations =    5, line search iterations = 1, relative residual = 7.431e-05
+      Iteration 17: linear solver iterations =    5, line search iterations = 1, relative residual = 4.756e-05
+      Iteration 18: linear solver iterations =    5, line search iterations = 0, relative residual = 2.114e-05
+      Iteration 19: linear solver iterations =    5, line search iterations = 0, relative residual = 9.395e-06
+   Reconstruction initial faults... done.
+
+   Solving temperature system... 0 iterations.
+   Advecting particles...  done.
+   Initial cohesive q profile variation for fault 0: weighted RMS=3.017e+08 Pa, maximum=1.079e+09 Pa, normalized RMS=2.438e-01, normalized maximum=8.725e-01
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=25, fresh=1.114266e+00, target=1.747423e+00
+      Fault linear solve: iterations=18, fresh=1.480337e-02, target=2.334591e-02
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 1.000000e+00, 0.000000e+00
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.000e+00.
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=25, fresh=1.069490e+00, target=1.748669e+00
+      Fault linear solve: iterations=21, fresh=6.286205e-10, target=1.482943e-09
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 6.352049e-08, 0.000000e+00
+
+   Postprocessing:
+     Number of advected particles:                 36864
+     Reconstructed-fault Stage-I solve:            verified
+     Reconstructed-fault Stage-J history feedback: verified
+
+*** Timestep 1:  t=1.000e-02 seconds, dt=1.000e-02 seconds
+   Phase-field residual target: initial=3.12782197564349365e+10, roundoff=1.66343451709374796e-04, absolute target=3.12782197564349393e+05
+   Solving phase field system:
+      Iteration 0 : linear solver iterations = 5   , line search iterations = 0, relative residual = 4.444e-01
+      Iteration 1 : linear solver iterations = 5   , line search iterations = 0, relative residual = 1.975e-01
+      Iteration 2 : linear solver iterations = 5   , line search iterations = 0, relative residual = 8.779e-02
+      Iteration 3 : linear solver iterations = 5   , line search iterations = 0, relative residual = 3.902e-02
+      Iteration 4 : linear solver iterations = 5   , line search iterations = 0, relative residual = 1.734e-02
+      Iteration 5 : linear solver iterations = 5   , line search iterations = 0, relative residual = 7.706e-03
+      Iteration 6 : linear solver iterations = 5   , line search iterations = 0, relative residual = 3.425e-03
+      Iteration 7 : linear solver iterations = 5   , line search iterations = 0, relative residual = 1.522e-03
+      Iteration 8 : linear solver iterations = 5   , line search iterations = 0, relative residual = 6.758e-04
+      Iteration 9 : linear solver iterations = 5   , line search iterations = 0, relative residual = 2.999e-04
+      Iteration 10: linear solver iterations = 5   , line search iterations = 0, relative residual = 1.329e-04
+      Iteration 11: linear solver iterations = 5   , line search iterations = 0, relative residual = 5.869e-05
+      Iteration 12: linear solver iterations = 6   , line search iterations = 0, relative residual = 2.576e-05
+      Iteration 13: linear solver iterations = 6   , line search iterations = 0, relative residual = 1.117e-05
+      Iteration 14: linear solver iterations = 6   , line search iterations = 0, relative residual = 4.747e-06
+   Solving temperature system... 5 iterations.
+   Advecting particles...  done.
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=27, fresh=2.876589e+02, target=6.181193e+02
+      Fault linear solve: iterations=20, fresh=6.161607e+02, target=6.178670e+02
+      Fault linear solve: iterations=18, fresh=4.030306e+02, target=6.178635e+02
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 1.000000e+00, 0.000000e+00
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.000e+00.
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=31, fresh=2.334840e+01, target=4.294825e+01
+      Fault linear solve: iterations=21, fresh=3.022657e+01, target=3.548218e+01
+      Fault linear solve: iterations=21, fresh=1.813407e-05, target=4.030681e-05
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 6.523578e-08, 0.000000e+00
+   Cohesive traction profile variation for fault 0: weighted RMS=1.047e+02 Pa, maximum=3.954e+02 Pa
+
+   Postprocessing:
+   Stage-J history resolution: Theta increment/tolerance=4.545e+05, relative H increment=6.230e-02
+   Stage-J feedback step 1: H increment=2.326e+14, phase increment=7.336e+00
+     Number of advected particles:                 36864
+     Reconstructed-fault Stage-I solve:            verified
+     Reconstructed-fault Stage-J history feedback: verified
+
+*** Snapshot /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/output-candidate-cohesive/restart/01/ created!
+
+*** Timestep 2:  t=1.020e-02 seconds, dt=1.963e-04 seconds
+   Phase-field residual target: initial=1.49248522658901697e+05, roundoff=1.90629620001978652e-09, absolute target=1.49248522658901717e+00
+   Solving phase field system:
+      Iteration 0 : linear solver iterations = 7   , line search iterations = 0, relative residual = 4.088e-01
+      Iteration 1 : linear solver iterations = 6   , line search iterations = 0, relative residual = 1.532e-01
+      Iteration 2 : linear solver iterations = 7   , line search iterations = 0, relative residual = 4.562e-02
+      Iteration 3 : linear solver iterations = 8   , line search iterations = 0, relative residual = 7.926e-03
+      Iteration 4 : linear solver iterations = 8   , line search iterations = 0, relative residual = 1.733e-03
+      Iteration 5 : linear solver iterations = 8   , line search iterations = 0, relative residual = 9.432e-04
+      Iteration 6 : linear solver iterations = 8   , line search iterations = 0, relative residual = 4.193e-04
+      Iteration 7 : linear solver iterations = 8   , line search iterations = 0, relative residual = 1.792e-04
+      Iteration 8 : linear solver iterations = 8   , line search iterations = 0, relative residual = 7.319e-05
+      Iteration 9 : linear solver iterations = 8   , line search iterations = 0, relative residual = 1.962e-05
+      Iteration 10: linear solver iterations = 8   , line search iterations = 0, relative residual = 1.963e-06
+   Solving temperature system... 12 iterations.
+   Advecting particles...  done.
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=19, fresh=1.026832e+03, target=1.218046e+03
+      Fault linear solve: iterations=17, fresh=1.088102e+03, target=1.271452e+03
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 1.000000e+00, 0.000000e+00
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.000e+00.
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=20, fresh=5.398019e+01, target=7.071505e+01
+      Fault linear solve: iterations=21, fresh=4.118219e-03, target=5.226375e-03
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 4.110558e-06, 0.000000e+00
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.000e+00.
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=20, fresh=5.393098e+01, target=7.071505e+01
+      Fault linear solve: iterations=21, fresh=1.809169e-03, target=5.220111e-03
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  2: 4.105631e-06, 0.000000e+00
+   Coupled reconstructed-fault Newton line search exhausted all admissible candidates.
+
+   WARNING: The nonlinear solver in the current timestep failed to converge.
+   Acting according to the parameter 'Nonlinear solver failure strategy':
+   Aborting simulation as requested.
+
+
+----------------------------------------------------
+Exception '' on rank 0 on processing: 
+
+--------------------------------------------------------
+An error occurred in line <0> of file <> in function
+    
+The violated condition was: 
+    
+Additional information: 
+    Nonlinear solver failed to converge in the prescribed number of steps.
+    Consider changing `Max nonlinear iterations` or `Nonlinear solver
+    failure strategy`.
+--------------------------------------------------------
+
+Aborting!
+----------------------------------------------------
+--------------------------------------------------------------------------
+MPI_ABORT was invoked on rank 0 in communicator MPI_COMM_WORLD
+  Proc: [[35727,1],0]
+  Errorcode: 1
+
+NOTE: invoking MPI_ABORT causes Open MPI to kill all MPI processes.
+You may or may not see output from other processes, depending on
+exactly when Open MPI kills them.
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
+prterun has exited due to process rank 0 with PID 0 on node BEBOP calling
+"abort". This may have caused other processes in the application to be
+terminated by signals sent by prterun (as reported here).
+--------------------------------------------------------------------------
+ 

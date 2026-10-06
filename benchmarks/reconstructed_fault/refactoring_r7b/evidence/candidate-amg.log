@@ -1,0 +1,89 @@
+-----------------------------------------------------------------------------
+--                             This is ASPECT                              --
+-- The Advanced Solver for Planetary Evolution, Convection, and Tectonics. --
+-----------------------------------------------------------------------------
+--     . version 3.1.0-pre (pf-rsf-refactor, 6a3781277)
+--     . using deal.II 9.6.2 (dealii-9.6, 6890ca740b)
+--     .       with 32 bit indices
+--     .       with vectorization level 2 (AVX, 4 doubles, 256 bits)
+--     . using Trilinos 14.2.0
+--     . using p4est 2.8.7
+--     . using Geodynamic World Builder 1.0.0
+--     . running in OPTIMIZED mode
+--     . running with 1 MPI process
+-----------------------------------------------------------------------------
+
+
+-----------------------------------------------------------------------------
+The output directory </home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/output-candidate-amg/> provided in the input file appears not to exist.
+ASPECT will create it for you.
+-----------------------------------------------------------------------------
+
+
+-----------------------------------------------------------------------------
+-- For information on how to cite ASPECT, see:
+--   https://aspect.geodynamics.org/citing.html?ver=3.1.0-pre&cbfheatflux=1&particles=1&sha=6a3781277&src=code
+-----------------------------------------------------------------------------
+Number of active cells: 64 (on 4 levels)
+Number of degrees of freedom: 948 (578+81+289)
+
+*** Timestep 0:  t=0 years, dt=0 years
+   Solving temperature system... 0 iterations.
+   Advecting particles...  done.
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system (AMG)... 5+0 iterations.
+
+   Postprocessing:
+
+     Model domain depth (m):                        3e+06
+     Temperature contrast across model domain (K):  3000
+     Reference depth (m):                           0
+     Reference temperature (K):                     0
+     Reference pressure (Pa):                       0
+     Reference gravity (m/s^2):                     10
+     Reference density (kg/m^3):                    3000
+     Reference thermal expansion coefficient (1/K): 2e-05
+     Reference specific heat capacity (J/(K*kg)):   1000
+     Reference thermal conductivity (W/(m*K)):      4.86
+     Reference viscosity (Pa*s):                    3e+24
+     Reference thermal diffusivity (m^2/s):         1.62e-06
+     Rayleigh number:                               10000
+
+     RMS, max velocity:                  3.68e-05 m/year, 6e-05 m/year
+     Temperature min/avg/max:            300 K, 1931 K, 3399 K
+     Heat fluxes through boundary parts: 0 W, 0 W, 1.547e+04 W, 1.921e+04 W
+     Writing graphical output:           /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/output-candidate-amg/solution/solution-00000
+     Writing particle output:            /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/output-candidate-amg/particles/particles-00000
+
+Termination requested by criterion: end time
+
+
++----------------------------------------------+------------+------------+
+| Total wallclock time elapsed since start     |     0.102s |            |
+|                                              |            |            |
+| Section                          | no. calls |  wall time | % of total |
++----------------------------------+-----------+------------+------------+
+| Assemble Stokes system           |         1 |   0.00115s |       1.1% |
+| Assemble temperature system      |         1 |   0.00112s |       1.1% |
+| Build Stokes preconditioner      |         1 |    0.0032s |       3.1% |
+| Build temperature preconditioner |         1 |  0.000531s |      0.52% |
+| Initialization                   |         1 |    0.0831s |        81% |
+| Particles: Advect                |         2 |  0.000287s |      0.28% |
+| Particles: Copy                  |         1 |  2.08e-05s |         0% |
+| Particles: Generate              |         1 |  0.000189s |      0.18% |
+| Particles: Initialization        |         1 |  2.97e-05s |         0% |
+| Particles: Initialize properties |         1 |  2.71e-05s |         0% |
+| Particles: Sort                  |         2 |  9.94e-05s |         0% |
+| Postprocessing                   |         1 |   0.00306s |         3% |
+| Setup dof systems                |         1 |   0.00118s |       1.2% |
+| Setup initial conditions         |         1 |   0.00173s |       1.7% |
+| Setup matrices                   |         1 |   0.00267s |       2.6% |
+| Solve Stokes system              |         1 |   0.00179s |       1.7% |
+| Solve temperature system         |         1 |  0.000528s |      0.52% |
++----------------------------------+-----------+------------+------------+
+
+-- Total wallclock time elapsed including restarts: 0s
+-----------------------------------------------------------------------------
+-- For information on how to cite ASPECT, see:
+--   https://aspect.geodynamics.org/citing.html?ver=3.1.0-pre&cbfheatflux=1&particles=1&sha=6a3781277&src=code
+-----------------------------------------------------------------------------

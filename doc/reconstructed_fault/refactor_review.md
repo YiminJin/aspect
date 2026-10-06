@@ -1,5 +1,130 @@
 # Reconstructed-fault refactoring review
 
+## R7b — Verification gaps closed within the selected scope (complete for review, 2026-10-05)
+
+Qualified revision **`6a3781277`**, GCC 12.4 / OpenMPI 5.0.6 / deal.II 9.6.2 /
+Trilinos 14.2 Epetra, Release unity/PCH ON. The core source/include tree remains
+exactly identical to accepted post-R6 `0f66d9869`; the only committed difference
+is the user's CMake package checks. R7b adds test-only fixtures/evidence and these
+review updates. No scientific, ownership, interface, MPI, checkpoint-format or
+production-parameter change. All 65 unrelated incoming files are hash-preserved.
+
+The frozen executable is `benchmarks/reconstructed_fault/refactoring_r7b/build/aspect-r7b-qualified`,
+SHA256 `ed74d4d4ad1cfa5d1bd4fbade496d9748ab298c24a259a4612a94d4df375b60d`.
+The [R7b report and manifest](../../benchmarks/reconstructed_fault/refactoring_r7b/README.md)
+record the immutable reference, artifact/configuration hashes and exact commands.
+
+| Fresh verification | Result |
+|---|---|
+| Default Epetra configure/full rebuild; maintained plugin diagnostics OFF | PASS; plugin load and parameter validation also pass |
+| Actual deal.II 9.6 explicit Tpetra request; configure-only branch probes | Expected rejection; 9/9 mocked package branches pass (not backend qualification) |
+| Ordinary AMG/BFBT/melt/GMG | PASS on matched reference/candidate; actual backend markers checked |
+| Ordinary particles, two ranks | Full-precision particle/RNG/bulk replay and native output pass, including reference checkpoint loaded by candidate |
+| Two-rank projection cache | Cold/warm and equal-volume domain regeneration pass; separate manufactured empty-owner probe passes with 0/1 admitted particles |
+| Cohesive legacy history/restart | Accepted checkpoint/history/V/bulk match, including cross-revision load; unchanged known step-two nonconvergence |
+| Current singular-system diagnostic | Intended full pass marker before intentional exit on both builds |
+| Selected two-rank units | 7 cases per rank; 59,278 and 2,556 assertions pass |
+| Focused Debug boundary-contact/condensation executable | 69 assertions / 4 cases pass; not a full Debug simulator |
+| Matched comparisons | **206/206 pass**, zero compared numerical/decision/work-count differences; elapsed time excluded |
+
+Rejected empty-rank fixture constructions are retained separately: ridge fitting
+on one cell lacks structural support; the inherited constitutive sentinel probe
+assumes admitted particles on every rank; the first standalone input omitted the
+required particle postprocessor. None is counted as a successful cache test or
+claimed as a production MPI defect. The final cache-only fixture uses prescribed
+geometry and manufactured finite nodal values, with unchanged production logic.
+
+Reuse the recorded post-R6 unity/independent builds, 964 assertions/39 cases and
+961 mature/retry/restart comparisons per build, installed-header and 2D/3D symbol
+checks; these are historical evidence at their recorded revision, justified by
+unchanged source. No production BP3 campaign was repeated.
+
+Remaining limits: Intel/26.0, actual newer-stack/Tpetra, Voro-OFF, full Debug and
+3D runtime, production resources/first event, exhaustive AMR/migration/reordering,
+rank-asymmetric invalidation and mid-publication failure injection. Consistent
+collective cache entry remains a caller contract, not enforced by the unchanged
+local predicate. No new production defect demonstrated; known cohesive step-two
+nonconvergence is preserved. The imported Tpetra selection still lacks a C++
+backend implementation. Recommend a separately selected compatibility guard/
+contract task before upstream preparation. Stop for review; R8 is not started.
+
+
+## R7a — Final interface review (accepted; historical assessment, 2026-10-05)
+
+Reviewed branch `pf-rsf-refactor` at **`6a3781277`**, after committing only the
+user-supplied CMake checks (53 added lines). No claim of a live upstream comparison:
+the local merge base remains `42464facd7e0e41ba91a32eb061d97c21d97000b`.
+The latest numerical/build qualification is **`0f66d9869`**, with exact source
+and artifact hashes in the [post-R6 review](../../benchmarks/reconstructed_fault/post_r6_cleanup/README.md).
+The CMake addition has not been configured or runtime-qualified in R7a.
+Incoming BP3 documentation, production/revised PRMs, server packages and temporary
+instructions are preserved. R7a changes documentation only; R7b is not started.
+
+### Assessment
+
+The completed decomposition is coherent enough for bounded gap closure; it is
+not yet an upstream-ready patch or a qualification of the production BP3 run.
+M3 owns geometry/generic storage and V state; M4 computes normalization and
+constitutive history; particles/manager store that history; the simulator/M5
+accepts timesteps. R2/R3/R5/R6 private operations expose these responsibilities
+without a new constitutive hierarchy. R4 retains the driver plus its two focused
+operations, not a whole-iteration abstraction. No automatic architecture changes
+are proposed. The updated existing inventory is in §§3–4 below.
+
+| Boundary reviewed | Finding and disposition |
+|---|---|
+| Core dispatch/ownership | Keep conditional creation, solver-scheme dispatch, canonical surface/B objects, history preparation/publication and restart hooks. Feature-disabled execution bypasses the fault driver; generic particle RNG/transfer/output changes still affect ordinary ASPECT and need separate coverage. |
+| Solver headers/shared helper | `simulator.h` still includes `reconstructed_fault_condensed_system.h` because its private solve declaration names nested `Linearization`. This is retained coupling, not a removed dependency. The one shared Schur constructor is used by ordinary and fault callers; pressure block selection, stopping/restart, GMG hierarchy, melt handling and observer timing remain caller-owned. No full FGMRES unification. |
+| State/publication | Material candidate construction/collective validation precede persistent writes; timestep zero and mature/cohesive paths remain distinct. Terminal V/bulk publication precedes accepted-solve observers. Observer/checkpoint-output exceptions after publication are not pre-publication rollback. Manager restart rebuild creates transient prescribed/trial storage; the model must reapply prescribed conditions. |
+| Mutable/borrowed APIs | Const `SimulatorAccess` methods still return mutable canonical manager/surface/coupling references; generic fault property views and the retained-stress callback remain broad. GMG actions and linearization/particle-birth references are borrowed only for their documented call lifetime. Retain for this review; any constness/interface narrowing needs a separate caller migration. |
+| Particle lifecycle additions | Generator RNG accessors, manager v1 per-rank RNG persistence and three simulator audit signals plus the local birth signal are now in the inventory. Backup/restore own RNG replay; gathering occurs in the all-rank checkpoint hook, not serialization. Birth observers cannot communicate collectively or mutate particles. These are generic lifecycle corrections, not new material ownership. |
+| Projection/MPI | Prepared reverse interpolation needs no search/communication; lazy preparation may rebuild collectively. The local validity predicate does not enforce all-rank agreement. Equal-volume regeneration/empty-owner and explicitly asymmetric invalidation remain dedicated coverage/contract questions; documentation is not an MPI fix. |
+| Build interface | Eight internal headers now have canonical installed paths; no reconstructed-fault unity/PCH exceptions. Manager explicit instantiations belong to their defining files. New `ASPECT_USE_TPETRA` appears only in CMake: `global.h` still selects Epetra `TrilinosWrappers` types, and no config/export macro wires it into C++. Treat this as imported package checks, **not Tpetra support**; a Tpetra-only stack is unqualified and requires a separate compatibility task. |
+| Research/legacy boundary | Retain R6c legacy completion in the numerical owner. Process-global residual audit selection, MomentCycle friendship, RK2 freeze selector, unused request APIs/phase-extension signal and declaration-only `create_particle_domains` remain review/porting candidates, not automatic deletions. Curate research traces and artifacts separately for R8. |
+
+No new scientific specification conflict was established by this static review.
+The known local cache-entry agreement risk and unsupported Tpetra selection are
+reported explicitly, not marked fixed. Source searches confirm no caller for the
+native `request_output()` APIs, no subscriber for `pre_assemble_stokes_system`,
+and no use of `create_particle_domains` beyond its declaration in inspected
+core/test/benchmark C++ files. These searches are not proofs about external plugins.
+
+### Evidence reused and bounded R7b proposal
+
+Already qualified on GCC 12.4/deal.II 9.6.2: complete Release unity/PCH ON and
+OFF builds, maintained plugin with local diagnostics OFF, eight installed-header
+consumers, 200 required 2D/3D member entries and 126 preserved manager signatures.
+Each build passed 964 assertions/39 cases and 961 matched short serial/MPI/retry/
+restart comparisons with zero compared-field differences. R4c ordinary AMG/BFBT/
+melt and failure comparisons, R5b2 repaired four-rank frozen AMG/GMG, and post-R6
+particle lifecycle/birth checks remain historical evidence for their recorded
+revisions, not new R7a runs. Reuse manifests and unchanged-body evidence rather
+than repeat every historical campaign.
+
+R7b should select the following small missing checks, with final exact case names
+and artifact availability checked before running:
+
+| Gap | Smallest useful follow-up; no execution in R7a |
+|---|---|
+| Newly committed CMake checks | Default Epetra configure/build/plugin smoke on the available pinned stack; confirm explicit Tpetra rejection with deal.II 9.6. Test newer-stack package-check branches with a configure-only fixture if useful, clearly distinct from actual backend qualification. Do not claim Intel/26.0 or deal.II 9.8/Tpetra coverage without those toolchains. |
+| Ordinary disabled-feature paths | Reuse R4c's small ordinary AMG/BFBT/melt inputs as applicable; add one existing ordinary GMG case (e.g. `tests/sol_cx_2_gmg.prm`) and a small ordinary particle checkpoint continuation (`tests/checkpoint_03_particles.prm` as starting fixture). Verify empty output gates, no fault owner/dispatch, and particle replay. Reuse already proven unchanged ordinary failure behavior rather than invent another solver test. |
+| Cache collective lifecycle | Reuse R5a2's two-rank cold/warm probe; extend only with supported collective domain regeneration at unchanged volume and an empty owner if not covered by current unit fixtures. Compare values and rebuild/reuse counters; do not introduce a rank-local invalidation policy. Keep unsupported asymmetric-entry risk separately recorded. |
+| Current scientific-path boundary | One short cohesive/legacy history case or existing restart probe alongside the already qualified mature/automatic suite; preserve and report the known step-two nonconvergence separately. Use existing singular-system invalidation probe with the current diagnostic, not a tolerance change or a claim that the stale original fixture passes. |
+
+Run the specific two-rank unit checks still missing from the final-build record;
+use Debug invariant checks only if the dependency/build configuration supports
+them. Preserve immutable reference executables and compare against their
+recorded source/stack, never their stale banner alone. Freeze the resulting
+source/artifact manifest and list every pass, expected failure and untested path.
+No broad cache reorganization, Tpetra port, source fix, production first-event run
+or R8 port is selected. Intel build, Debug if unavailable, 3D runtime, production
+normalization/resource limits and full first-event physics remain explicit limits.
+
+R7a verification consists only of ancestry/path/caller/ownership/evidence review,
+inventory coverage (44/44 paths), Markdown/whitespace checks and preservation of all 66 incoming local files (the status file only receives this pass's prepended entry). No CMake
+configure, compilation or simulation was run. Stop for review; recommend R7b as
+the next bounded task, not an architectural rewrite.
+
 ## R6 accepted and closed
 
 The user accepted R6c and requested this commit as the closure of R6. R6a
@@ -2333,11 +2458,11 @@ contribution task. Do not copy all benchmark data into an upstream PR.
 | `reconstructed_fault/surface_system.{h,cc}`, `normal_filter_internal.h`, `surface_direct_internal.h` | Canonical simulator-owned surface system | Concrete material response + manager projections/bulk FE sampling → R, K, G, mass norms, restricted pivoted solves and normal filters | Preserve both particle-domain and bulk-work assembly paths; they use different measures. |
 | `simulator/assemblers/reconstructed_fault_stokes.{h,cc}`, `sparse_coupling.h` | Canonical simulator-owned coupling | Material bulk coefficients + manager QP/source association → B, slip source and frozen history load | Preserve separate frozen/unknown MPI assembly and matrix/reference actions. |
 | `solver/reconstructed_fault_condensed_system.{h,cc}`, `reconstructed_fault_linear.h`, `reconstructed_fault_nonlinear.{h,cc}` | Coupled algebra / nonlinear helpers | Existing A, canonical B/G/K, constraints, pressure scaling → condensed solve, active set and acceptance | Immutable linearization lifetime and principal free-block inverse; no duplicate surface owner. |
-| Full driver currently in `simulator/solver.cc`; interface preconditioner and residual-audit headers | Simulator solve orchestration | Material prepare/commit, manager V lifecycle, assembled linear system, optional velocity GMG, diagnostics | R4 candidate extraction; retain Simulator member first. |
+| Driver/two private operations in `simulator/solver/reconstructed_fault_stokes.cc`; installed preconditioner/audit headers | Simulator solve orchestration | Material prepare/commit, manager V lifecycle, assembled linear system, optional velocity GMG, diagnostics | R4 completed; simulator remains the acceptance/rollback owner. |
 | `time_stepping/reconstructed_fault.{h,cc}` | Opt-in timestep plugin | Committed V/Theta, material friction law, existing CFL/global cap | Limiter contract discrepancy below; no new controller proposed. |
 | `postprocess/reconstructed_faults.{h,cc}` | Output plugin | Replicated geometry/schema and committed V → rank-zero VTU/PVD | Output aliases/exclusions must not affect checkpoint schema. |
 | `implicit_constitutive_stokes.{h,cc}` and generic output type | General implicit constitutive support | Additional material tangent/stress outputs, particle-point shape gradients, Newton assembly | Independent prerequisite candidate; not the architectural basis of reconstructed-fault coupling. |
-| Maintained `bp3/plugin/`, BP5/uniform-shear tools and shared stress-only adapter | Model/benchmark plugins | Setup and accepted-state observations, native-output gates, restart metadata | Keep setup/output outside scientific owners where existing hooks suffice. Six source files now build the maintained BP3 library. |
+| Maintained `bp3/plugin/`, BP5/uniform-shear tools and shared stress-only adapter | Model/benchmark plugins | Setup and accepted-state observations, native-output gates, restart metadata | Keep setup/output outside scientific owners where existing hooks suffice. The maintained BP3 plugin now derives geometry/profile/mesh from fault.txt and existing material/mesh APIs; archived packages retain their historical inputs. |
 
 Lifecycle seen in the production path:
 
@@ -2358,14 +2483,22 @@ sequence and should not be used to reverse the implemented Stage-J ordering.
 
 ## 3. Every modified pre-existing core/build file
 
+Refreshed by R7a at `6a3781277`: **44 modified pre-existing paths**, including
+`.gitignore` and test/build integration (43 excluding `.gitignore`). The R0
+checkout/population counts in §§1–2 remain historical. Classification is checked
+against the same merge base; it does not attribute unrelated upstream changes
+from a tip-to-tip diff. Unchanged rows retain their earlier responsibility
+assessment; R7b refreshes specific verification cells below. Other entries remain
+historical evidence or proposed coverage.
+
 Paths are repository-relative. Paired header/source rows explicitly cover both
 files. `keep`, `move`, `independent-PR`, and `exclude` are review recommendations,
-not authorization to change/remove anything. Verification entries are proposed
-coverage, **not newly executed passing results**.
+not authorization to change/remove anything. Only verification entries explicitly
+marked R7b describe newly executed checks; other entries retain their stated scope.
 
 | File/symbol | Project responsibility | Reason | Caller/dependency | Disposition | Proposed destination / smallest retained integration | Verification |
 |---|---|---|---|---|---|---|
-| `CMakeLists.txt`: Voro discovery/link blocks | Particle prerequisite | Link optional tessellation library | Domain/interpolator sources; plugins | independent-PR | Keep capability detection/link hook; existing source glob discovers future splits | Configure with/without Voro; domain tests |
+| `CMakeLists.txt`: Voro discovery/link and Epetra/Tpetra package checks | Build prerequisites | Link optional tessellation; diagnose package availability | Domain sources/plugins; deal.II configuration | independent-PR | Standard source glob/unity/PCH; no fault exclusions. Imported Tpetra option is not wired to C++ types | R7b default Epetra build/plugin passes; actual old-stack Tpetra rejection and 9 mocked branches pass. Voro-OFF and real Tpetra stacks unqualified |
 | `cmake/AspectConfig.cmake.in`: `ASPECT_WITH_VORO` | Build export | Match plugin capability | `ASPECT_SETUP_PLUGIN`, test configure | keep with prerequisite | Export boolean only | Plugin build |
 | `cmake/write_config.cmake`: Voro report | Build provenance | Record dependency | Build configuration output | keep with prerequisite | One report field | Configuration inspection |
 | `include/aspect/config.h.in`: Voro define | Build capability | Compile guards | Particle domain and tests | keep with prerequisite | One macro | With/without Voro build |
@@ -2373,18 +2506,19 @@ coverage, **not newly executed passing results**.
 | Same header: `MaterialProperties::operator\|=` | General API correction | Actually assign the OR-ed property mask | Requested-properties updates throughout material assembly | independent-PR | Small isolated correctness change | Property-mask regression; generic material tests |
 | `include/aspect/parameters.h`: enable flags, `create_particle_domains` | Configuration | Phase/reconstruction/implicit switches | Simulator and particle subsystem | keep / exclude unused member later | Three active formulation flags; `create_particle_domains` has declaration only in source/include search | Parsing and disabled cases |
 | `include/aspect/particle/interpolator/distance_weighted_average.h`; `source/particle/interpolator/distance_weighted_average.cc`: `compute_weight`, declare/parse | Generic interpolation | Optional reciprocal/Shepard weights, regularization | Configured particle-to-field interpolation | independent-PR | Existing plugin owns alternatives; default linear unchanged | Constant transfer and selected-weight cases |
-| `include/aspect/particle/manager.h`; `source/particle/manager.cc`: initialization, move constructor, `connect_to_signals`, `advance_timestep`, domain getters, declare/parse | Domain lifecycle | Build/regenerate domains after particle changes | Phase handler, fault projections, Voronoi interpolator | keep prerequisite; move timing later | Domain owner and lifecycle calls; observational timer separate | Domain constants/area, advection, MPI/AMR |
+| `include/aspect/particle/manager.h`; `source/particle/manager.cc`: initialization, move constructor, `connect_to_signals`, `advance_timestep`, domain getters, declare/parse | Domain and population/RNG lifecycle | Regenerate domains; exact retry/restart of insertion/removal choices | Phase/fault/Voronoi consumers and BP3 audit slots | keep prerequisite; independent RNG correction | Manager v1 archive, all-rank pre-checkpoint RNG gather, backup/restore, post-management and local birth notifications | Particle lifecycle 327 checks; birth/reuse and same-rank restart in post-R6 961 comparisons; R7b two-rank ordinary same-build/cross-revision particle/RNG/bulk restart passes |
+| `include/aspect/particle/generator/interface.h`; `source/particle/generator/interface.cc`: RNG get/set | Native placement stream | Preserve generator randomness as well as manager randomness | Particle manager backup/restore/checkpoint | independent-PR with RNG lifecycle correction | Validated textual stream state; no checkpoint collectives here | Existing random-insertion retry and two-manager/two-rank checkpoint controls in particle_lifecycle |
 | `include/aspect/particle/property/interface.h`; `source/particle/property/interface.cc`: custom late initialization enum/virtual/dispatch | Generic particle property | Property-specific late particle values | Property manager; inspect override consumers before port | independent-PR | One virtual hook and dispatch; no fault-law special case | Late insertion/component-offset tests (coverage gap to select) |
 | `include/aspect/particle/property/initial_composition.h`; `source/particle/property/initial_composition.cc`: field selection/mapping, initialize/update/flags | Selected-field particles | Avoid duplicating stress/state properties; optionally refresh spatial strengthening | Particle manager and BP3 field layout | independent-PR / benchmark option review | Existing plugin with explicit empty-default refresh list | Selected/mixed fields, mapped names, restart and nonmutation |
 | `source/particle/integrator/rk_2.cc`: `local_integrate_step` diagnostic dt | Research experiment | Freeze motion without changing constitutive clock | BP5 stress-cycle tools | move/exclude from initial production contribution | Benchmark integrator option using existing plugin boundary; retain until qualified replacement | Frozen/advected A/B and normal RK2 |
 | `include/aspect/solution_evaluator.h`; `source/solution_evaluator.cc`: `SolutionEvaluator` phase member/index, reinit/evaluate/get values/gradients | Phase prerequisite | Evaluate added FE component at particles | Particle update and material sampling | keep prerequisite | Conditional phase component evaluation | Phase sampling and phase-disabled particles |
 | `include/aspect/postprocess/particles.h`; `source/postprocess/particles.cc`: request flag/API, `execute` gate | Output orchestration | Force/gate native output at accepted states | Benchmark scheduling signals | independent-PR / keep hook review | Generic output request/gate, no BP3 schedules | Output off/on, restart clocks, ordinary particles |
 | `include/aspect/postprocess/visualization.h`; `source/postprocess/visualization.cc`: phase metadata, request API, `execute` gate | Phase visualization / output | Correct component metadata; shared native schedule | Phase handler; benchmark output | keep phase metadata; independent-PR gate | Conditional scalar metadata and generic request/gate | Phase/ordinary VTU and output error paths |
-| `include/aspect/simulator.h`: handlers, canonical surface/coupling, driver declaration, assembly flag | Simulator ownership | One owner and explicit dispatch | Core constructor, assembly and solver | keep | Owner pointers, member entry point, scoped assembly control | Lifecycle and rollback |
+| `include/aspect/simulator.h`: handlers, canonical surface/coupling, driver declaration, assembly flag | Simulator ownership | One owner and explicit dispatch | Core constructor, assembly and solver | keep | Owner pointers, driver/two private operation declarations and scoped assembly control; nested Linearization requires condensed-system header include | R4/R5 and post-R6 lifecycle/rollback; no constness redesign |
 | Same header: `friend Postprocess::MomentCycle` | Research access | Snapshot/replay complete particle-to-FE transfer | `bp5/moment_cycle.cc` | exclude/move after research replacement | Test-only access boundary; no new public API | Moment replay snapshot/restore |
 | `include/aspect/simulator/assemblers/interface.h`; `source/simulator/assemblers/interface.cc`: scratch constructors/point evaluator, `local_frozen_fault_rhs` | Implicit prerequisite / fault residual | Particle-point gradients; avoid cancellation before distributed addition | `assembly.cc`, implicit/fault assemblers | keep minimal storage; independent prerequisite separately | Constructor flag and one assembly-lifetime vector | Scratch copy, residual consistency, disabled assembly |
 | `source/simulator/assembly.cc`: `set_stokes_assemblers`, preconditioner construction/material requests | Generic implicit support + coupled GMG | Select tangent assemblers; retain assembled blocks with GMG preconditioner | Newton handler, solver | keep dispatch; independent implicit support | Small selection/flag checks | Ordinary Newton, fault AMG/GMG |
-| Same file: `local_assemble_stokes_system`, `assemble_stokes_system`, audit global | Fault bulk residual | Constant-velocity removal, canonical coupling execution, separate frozen MPI load | Coupled driver and residual-audit channel | keep numerical hook; move diagnostics later | Call coupling and combine independently assembled loads; preserve operation order | Residual consistency, translation/pressure precision, rollback |
+| Same file: `local_assemble_stokes_system`, `assemble_stokes_system`, audit global | Fault bulk residual | Constant-velocity removal, canonical coupling execution, separate frozen MPI load | Coupled driver and residual-audit channel | keep numerical hook; retain residual-audit selector | Call canonical coupling and combine independently assembled loads; R6 did not extract this audit computation | Residual consistency, translation/pressure precision, rollback |
 | `source/simulator/checkpoint_restart.cc`: critical parameters save/load, `serialize` | Persistence | Store mode flags and generic fault registry | Snapshot/resume | keep | Conditional manager archive + mode checks | Baseline checkpoint read, split trajectory, ordinary checkpoint |
 | Same file: `create_snapshot`, `resume_from_snapshot` signals | Benchmark output / matched clock | Notify completed checkpoint; reduce pending dt safely | BP3 archive and BP5 matched-clock plugins | independent-PR / essential hook review | Post-publication notification and validated opt-in reduction | Restart clock positivity/MPI agreement, default restart |
 | `source/simulator/core.cc`: constructor, coupling/sparsity and preconditioner setup | Phase/fault ownership and backend setup | Allocate handlers, parse/init in order, keep assembled matrices for coupled GMG | Simulator lifecycle | keep | Conditional creation and initialization, phase sparsity call, backend guard | Disabled ordinary case; coupled init/GMG |
@@ -2393,21 +2527,25 @@ coverage, **not newly executed passing results**.
 | `source/simulator/newton.cc`: `NewtonHandler::set_assemblers` | Implicit prerequisite | Select implicit constitutive assemblers | Newton schemes | independent-PR | Existing assembler selection boundary | Ordinary Newton + implicit material |
 | `source/simulator/parameters.cc`: declare/parse formulation, phase/reconstruction dispatch, solver description, composition selection string | Configuration | Expose prerequisites and enforce enable dependencies | All input readers | keep active controls; review stale selection below | Existing parameter owners, no duplicates | Parse enabled/disabled/invalid combinations |
 | `include/aspect/simulator_access.h`; `source/simulator/simulator_access.cc`: five accessor families (six overloads) | Core-facing capability access | Reach canonical owners; diagnostic RHS | Material, phase, solver helpers, plugins and tests | keep required owners; review RHS exposure | Existing access class with assertions, no duplicate objects | Callers listed in §4; disabled guards |
-| `include/aspect/simulator_signals.h`: seven added signals | Setup/solve/output/restart observation | Correct timing for plugin setup and accepted output | Emitters and slots in §4 | keep essential hooks; independent-PR/research review | Synchronous narrow events; no constitutive ownership transfer | Failure timing, output/restart, frozen-solve tests |
-| `source/simulator/solver.cc`: `solve_reconstructed_fault_stokes`, `current_slip_rate` | Coupled nonlinear orchestration | Preparation, physical lift, residual/active-set solves, Armijo, commit/rollback | Newton dispatch; canonical algebra; material history | move R4a | Dedicated `source/simulator/solver/` implementation, retain Simulator member | Condensation, bound/Armijo, rollback, residuals, short trajectory |
+| `include/aspect/simulator_signals.h`: ten added signals | Setup/solve/output/restart observation | Correct timing for plugin setup and accepted output | Emitters and slots in §4 | keep essential hooks; independent-PR/research review | Synchronous narrow events; no constitutive ownership transfer | Failure timing, output/restart, frozen-solve tests |
+| `source/simulator/solver.cc`: shared `make_stokes_schur_preconditioner` and ordinary solve | Ordinary solver plus one shared construction | R4 removed fault driver; R4c shares BFBT/inverse-mass construction only | Ordinary and dedicated fault solver callers; installed stokes_operators.h | keep narrow shared operation | Fault driver and two private operations now in solver/reconstructed_fault_stokes.cc; callers retain numerical policies | R7b ordinary AMG/BFBT/melt and GMG match; retain historical R4c failure, repaired frozen AMG/GMG and post-R6 fault evidence |
 | `include/aspect/simulator/solver/stokes_matrix_free_local_smoothing.h`; `source/simulator/solver/stokes_matrix_free_local_smoothing.cc`: `with_velocity_preconditioner`, `preconditioner_only`, constraint callback gate | Existing GMG reuse | Borrow velocity V-cycle for assembled condensed operator | Fault driver only in production | independent-PR / keep narrow interface | Scoped consumer callback with numbering/constraint checks | Frozen matched solve and ordinary GMG |
 | `source/simulator/solver_schemes.cc`: phase evolution/reconstruction calls, coupled dispatch | Lifecycle | Evolve phase from committed H before mechanics | Selected solver schemes | keep | Short calls/dispatch only | Stage J; phase-only; ordinary solver |
 | Same file: pre-assembly signal and reordered `post_nonlinear_solver` calls | Generic nonlinear failure semantics | Observers see failure before exception; reset tolerance ordering | All changed schemes, rollback observers | independent-PR | Explicit event-order contract, not fault algorithm code | Failure callbacks and non-fault Newton (coverage gap) |
 | `tests/CMakeLists.txt`: `SHOULD_ENABLE_TEST` Voro gate | Test prerequisite | Skip unsupported domain tests | Test configure | keep | One capability gate | `ctest -N` plus capability configuration |
-| `unit_tests/CMakeLists.txt`: `phase_field_fault_ih_accuracy_mpi` | MPI verification | Unequal profile ownership | ASPECT Catch test binary | keep | Two-rank tagged test | Actual R1 execution required |
+| `unit_tests/CMakeLists.txt`: `phase_field_fault_ih_accuracy_mpi` | MPI verification | Unequal profile ownership | ASPECT Catch test binary | keep | Two-rank tagged test | R7b selected two-rank I_h accuracy/cache and slip-restart tags pass (7 cases per rank) |
 | `unit_tests/particles.cc`: CPDI/domain tests | Particle prerequisite | Constants, ownership, area, endpoint moments | Production particle-domain and fault quadrature utilities | keep; separate prerequisite/fault portions for PRs | Existing unit runner | Tags `particle_domain_constants`, `particle_domain_area`, `fault_domain_quadrature` |
 | `.gitignore`: `.benchmark-cleanup-*` | Local evidence preservation | Ignore recoverable local archives | Benchmark cleanup workflow | exclude from scientific contribution unless independently justified | Local workflow | No deletion or cleanup in R0 |
 
 No modified existing core file is classified solely from a likely-site list:
-the rows above follow the actual 42-file modified population. New feature files
+the refreshed rows above follow the actual 44-file modified population. New feature files
 are covered in §2 and the generated path inventory below.
 
 ## 4. Public interfaces, signals and shared state
+
+Refreshed by R7a; the broad aliases below were retained, not silently narrowed.
+Particle-manager archive version 1 is a separately accepted post-R6 lifecycle
+correction; refactoring itself did not introduce that format change.
 
 Added core accessors are `get_system_rhs()` (const vector reference),
 `get_phase_field_handler()` (const/nonconst overloads),
@@ -2420,8 +2558,9 @@ benchmark setup. Test plugins `phase_field_frozen_history.cc` and
 `phase_field_fault_stage_j.cc` cast away RHS constness for controlled failure
 injection; the RHS accessor is not needed to give normalization a new owner.
 
-Particle manager adds `particle_domains_requested()` and
-`get_particle_domain_handler()`. GMG adds the borrowed `VelocityCycle` callback.
+Particle manager adds `particle_domains_requested()`,
+`get_particle_domain_handler()`, RNG observation and local birth notification;
+generator interface adds RNG get/set for native replay. GMG adds the borrowed `VelocityCycle` callback.
 Particles/visualization add `request_output() const` backed by mutable flags;
 no invocation was found in the inspected source and reconstructed benchmark C++
 search, so verify all consumers before retaining that API in an upstream PR.
@@ -2435,6 +2574,8 @@ search, so verify all consumers before retaining that API in an upstream PR.
 | `post_resume_time_step` | After restored user data and clock, before physical update | BP5 matched-clock plugins; decrease-only pending interval, collective validation |
 | `post_checkpoint` | After complete checkpoint and last-good publication | BP3 metadata/archive output; callback error is after checkpoint publication |
 | `allow_native_output` | Native bulk/particle/fault writer gates | BP3 output scheduler; preserve empty-slot ordinary behavior and error semantics |
+| `post_particle_backup`, `post_particle_restore`, `post_particle_management` | Particle manager after the corresponding native operation/RNG handling | Maintained BP3 and lifecycle fixtures; audit bookkeeping only, not physical acceptance |
+| `Particle::Manager::post_particle_creation` (not a SimulatorSignals member) | Each fully initialized native count-management insertion, before subsequent management audit | Frozen-H birth tagging and reuse-aware audit; borrowed iterator, no MPI collective or particle mutation; startup/load are not births |
 
 New feature APIs that merit continued review, without widening them in R2:
 
@@ -2467,17 +2608,32 @@ New feature APIs that merit continued review, without widening them in R2:
 | `internal::fault_residual_audit_channel` | Process-global enum, defined in `assembly.cc` | Driver switches only between synchronous WorkStream calls; worker threads read it; extraction must retain restoration |
 | `FaultLinearTiming` recorder | Static thread-local timing storage in feature header | Observational counts/times; should not become another numerical state owner |
 | `benchmark_retained_stress`, surface observer/window, MomentCycle friends | Benchmark/test injection | Nonserialized borrowed setup/observation; isolate later without losing replay capability |
+| Manager/generator RNG backup and rank-indexed checkpoint streams | Particle system; per manager/rank | Generic ordinary-particle behavior too; same-rank/partition replay, explicit legacy/rank-change admission; collectives outside serialization |
 | Native `output_requested`, plugin schedule/archives | Writers / benchmark | Output clocks are persistent benchmark state, distinct from constitutive histories |
 
 Direct production `PhaseFieldFault` dependencies are in material implementation,
 Maxwell particle property, surface system, reconstructed Stokes assembler,
 simulator constructor, phase handler, nonlinear driver, condensed system and
 fault timestep plugin. The generic fault and manager implementation do **not**
-depend directly on that concrete material. R2 does not remove the header's
-manager/remote-evaluation dependencies or narrow a public API; it isolates
-implementation only. An abstract constitutive hierarchy is not proposed.
+depend directly on that concrete material. Completed R2–R6 retain the concrete material boundary and the header's
+manager/remote-evaluation dependencies. Public ownership was not transferred
+by moving implementation; the eight internal headers now use installed paths. An abstract constitutive hierarchy is not proposed.
 
 ## 5. Configuration and environment inventory
+
+R7a qualification note: the linked R6 reader snapshot is historical. Since then,
+maintained BP3 removed the stationary-profile, target-cell and bottom-completion
+runtime fixture dependencies: `fault.txt` supplies geometry, existing material
+APIs generate the profile/loading primitive, mesh policy retains the endpoint
+buffer, and core automatic completion supplies admission/integration. Legacy
+packages retain their version-pinned inputs; they are not current maintained
+parameter declarations. `Local state disturbance` is diagnostic-build-only.
+`Write bulk and particle visualization` is a current BP3 output gate (historical
+default true; production template false); it leaves profiles/checkpoints enabled.
+The user-revised PRM is an unqualified local input, not a new numerical baseline.
+`ASPECT_USE_TPETRA` is recorded in the R7a build assessment and §3, with no backend
+support inferred from its package checks. No switch migration is selected here.
+
 
 **R6a refresh against accepted post-R5 `3b4ae16dd`:** the current detailed
 [reader/API inventory](../../benchmarks/reconstructed_fault/refactoring_r6a/switch_inventory.md)
@@ -2506,7 +2662,7 @@ remain authoritative; no replacement controls are proposed.
 | Same material | Activation `0.1`, normal-lock threshold `0.5`, initial artificial dt `1`, adiabatic friction pressure `false`, evolve phase `true`, mode `cohesive` | Model/configuration choices; mature mode explicit |
 | Same material | I h backend `remote points`, quadrature/tail tolerances `1e-8`, surface subdivisions `1` | Normalization numerical controls; R2 preserves all |
 | Friction law in material subsection | Law `rate state`, V0 `1.e-6`, Vmin `1.e-20`, Dc `0.04`, reference/dynamic friction `0.6/0.4`, weakening rate `1.e-6`, a/b `0.025/0.013`, regularized `true` | Constitutive law, not geometry |
-| Reconstructed fault time step | Maximum logarithmic state change (largest finite double) | Optional controller; discrepancy §7 |
+| Reconstructed fault time step | Maximum logarithmic state change (largest finite double) | Optional controller; R1 resolved the historical §7 discrepancy with Patterns::Double() and finite positive validation |
 | Reconstructed faults output | Excluded properties (empty); native-output gate described in §4 | Observation; exclusions do not change registry |
 | Build | `ASPECT_WITH_VORO` requested ON, disabled if not found; `VORO_DIR` hint | Dependency capability |
 

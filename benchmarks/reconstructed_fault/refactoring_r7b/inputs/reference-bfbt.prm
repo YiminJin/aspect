@@ -1,0 +1,8 @@
+include $ASPECT_SOURCE_DIR/tests/nsinker_bfbt.prm
+set Output directory = /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/output-reference-bfbt
+set Additional shared libraries = /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/build/plugin/libnsinker_bfbt.release.so
+subsection Solver parameters
+ subsection Stokes solver parameters
+ set Stokes solver type = block AMG
+ end
+end

@@ -1,0 +1,3 @@
+include $ASPECT_SOURCE_DIR/tests/reconstructed_fault_particle_projection_cache.prm
+set Output directory = /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/output-candidate-cache
+set Additional shared libraries = /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/build/plugin/libcache_lifecycle.release.so

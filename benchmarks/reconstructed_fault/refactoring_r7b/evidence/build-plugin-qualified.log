@@ -1,0 +1,9 @@
+[ 14%] Built target nsinker_bfbt
+[ 28%] Built target melt_transport_compressible_iterative
+[ 42%] Built target phase_field_fault_stage_j_restart_create
+[ 57%] Built target cache_lifecycle
+[ 71%] Built target singular
+[ 85%] Built target solcx
+[ 92%] Building CXX object CMakeFiles/ordinary_audit.dir/ordinary_audit.cc.o
+[100%] Linking CXX shared library libordinary_audit.release.so
+[100%] Built target ordinary_audit

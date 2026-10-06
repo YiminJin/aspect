@@ -1,0 +1,10 @@
+[1;33mFilters: [phase_field_fault_ih_accuracy],[phase_field_fault_ih_cache],[fault_slip_restart]
+[1;33mFilters: [phase_field_fault_ih_accuracy],[phase_field_fault_ih_cache],[fault_slip_restart]
+[0mBoundary reproducer: integral=0.3305959528345101, exact=0.33059595283452059, relative error=-3.173543866085769e-14
+[0mBoundary reproducer: integral=0.3305959528345101, exact=0.33059595283452059, relative error=-3.173543866085769e-14
+[1;31m[0m[1;33m[0m[1;32m===============================================================================[0m
+[1;32mAll tests passed[0m (2556 assertions in 7 test cases)
+
+[1;31m[0m[1;33m[0m[1;32m===============================================================================[0m
+[1;32mAll tests passed[0m (59278 assertions in 7 test cases)
+

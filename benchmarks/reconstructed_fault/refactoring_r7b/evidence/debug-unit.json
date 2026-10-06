@@ -1,0 +1,17 @@
+{
+  "peak_aggregate_rss_kib": 225964,
+  "limit_reason": null,
+  "command": [
+    "benchmarks/reconstructed_fault/refactoring_r7b/build/debug/debug_fault"
+  ],
+  "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+  "exit_code": 0,
+  "seconds": 15.604035815998941,
+  "child_max_rss_kib": 272500,
+  "environment": {
+    "OMP_PROC_BIND": "spread",
+    "OMP_NUM_THREADS": "1",
+    "DEAL_II_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1"
+  }
+}

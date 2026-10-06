@@ -1,0 +1,79 @@
+[ 14%] Built target nsinker_bfbt
+[ 28%] Built target melt_transport_compressible_iterative
+[ 42%] Built target phase_field_fault_stage_j_restart_create
+[ 50%] Building CXX object CMakeFiles/cache_lifecycle.dir/cache_lifecycle.cc.o
+[ 57%] Building CXX object CMakeFiles/singular.dir/singular.cc.o
+In file included from /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/plugin/cache_lifecycle.cc:12:
+/home/ein/repository/aspect-pf-rsf-refactor/tests/phase_field_fault_ih.cc: In instantiation of ‘std::pair<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > aspect::Postprocess::VerifyPhaseFieldFaultIh<dim>::execute(dealii::TableHandler&) [with int dim = 2]’:
+/home/ein/repository/aspect-pf-rsf-refactor/tests/phase_field_fault_ih.cc:332:5:   required from here
+/home/ein/repository/aspect-pf-rsf-refactor/tests/phase_field_fault_ih.cc:169:23: warning: unused variable ‘composition_information’ [-Wunused-variable]
+  169 |           const auto &composition_information =
+      |                       ^~~~~~~~~~~~~~~~~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/tests/phase_field_fault_ih.cc: In instantiation of ‘std::pair<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > aspect::Postprocess::VerifyPhaseFieldFaultIh<dim>::execute(dealii::TableHandler&) [with int dim = 3]’:
+/home/ein/repository/aspect-pf-rsf-refactor/tests/phase_field_fault_ih.cc:332:5:   required from here
+/home/ein/repository/aspect-pf-rsf-refactor/tests/phase_field_fault_ih.cc:169:23: warning: unused variable ‘composition_information’ [-Wunused-variable]
+In file included from /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/build/plugin/singular.cc:1:
+/home/ein/repository/aspect-pf-rsf-refactor/tests/phase_field_fault_ih.cc: In instantiation of ‘std::pair<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > aspect::Postprocess::VerifyPhaseFieldFaultIh<dim>::execute(dealii::TableHandler&) [with int dim = 2]’:
+/home/ein/repository/aspect-pf-rsf-refactor/tests/phase_field_fault_ih.cc:332:5:   required from here
+/home/ein/repository/aspect-pf-rsf-refactor/tests/phase_field_fault_ih.cc:169:23: warning: unused variable ‘composition_information’ [-Wunused-variable]
+  169 |           const auto &composition_information =
+      |                       ^~~~~~~~~~~~~~~~~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/tests/phase_field_fault_ih.cc: In instantiation of ‘std::pair<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > aspect::Postprocess::VerifyPhaseFieldFaultIh<dim>::execute(dealii::TableHandler&) [with int dim = 3]’:
+/home/ein/repository/aspect-pf-rsf-refactor/tests/phase_field_fault_ih.cc:332:5:   required from here
+/home/ein/repository/aspect-pf-rsf-refactor/tests/phase_field_fault_ih.cc:169:23: warning: unused variable ‘composition_information’ [-Wunused-variable]
+In file included from /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/build/plugin/singular.cc:2:
+/home/ein/repository/aspect-pf-rsf-refactor/tests/phase_field_fault_surface_system.cc: In instantiation of ‘std::pair<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > aspect::Postprocess::VerifyPhaseFieldFaultSurfaceSystem<dim>::execute(dealii::TableHandler&) [with int dim = 2]’:
+/home/ein/repository/aspect-pf-rsf-refactor/tests/phase_field_fault_surface_system.cc:1454:5:   required from here
+/home/ein/repository/aspect-pf-rsf-refactor/tests/phase_field_fault_surface_system.cc:172:31: warning: loop variable ‘mode’ creates a copy from type ‘const std::__cxx11::basic_string<char>’ [-Wrange-loop-construct]
+  172 |               for (const auto mode : {std::string("projected"),std::string("helmholtz")})
+      |                               ^~~~
+/home/ein/repository/aspect-pf-rsf-refactor/tests/phase_field_fault_surface_system.cc:172:31: note: use reference type to prevent copying
+  172 |               for (const auto mode : {std::string("projected"),std::string("helmholtz")})
+      |                               ^~~~
+      |                               &
+/home/ein/repository/aspect-pf-rsf-refactor/tests/phase_field_fault_surface_system.cc: In instantiation of ‘std::pair<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > aspect::Postprocess::VerifyPhaseFieldFaultSurfaceSystem<dim>::execute(dealii::TableHandler&) [with int dim = 3]’:
+/home/ein/repository/aspect-pf-rsf-refactor/tests/phase_field_fault_surface_system.cc:1454:5:   required from here
+/home/ein/repository/aspect-pf-rsf-refactor/tests/phase_field_fault_surface_system.cc:172:31: warning: loop variable ‘mode’ creates a copy from type ‘const std::__cxx11::basic_string<char>’ [-Wrange-loop-construct]
+/home/ein/repository/aspect-pf-rsf-refactor/tests/phase_field_fault_surface_system.cc:172:31: note: use reference type to prevent copying
+  172 |               for (const auto mode : {std::string("projected"),std::string("helmholtz")})
+      |                               ^~~~
+      |                               &
+[ 64%] Linking CXX shared library libcache_lifecycle.release.so
+[ 64%] Built target cache_lifecycle
+[ 71%] Building CXX object CMakeFiles/solcx.dir/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/solcx/solcx.cc.o
+[ 78%] Linking CXX shared library libsingular.release.so
+[ 78%] Built target singular
+[ 85%] Building CXX object CMakeFiles/ordinary_audit.dir/ordinary_audit.cc.o
+[ 92%] Linking CXX shared library libsolcx.release.so
+[ 92%] Built target solcx
+/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/plugin/ordinary_audit.cc: In instantiation of ‘std::pair<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > aspect::Postprocess::OrdinaryAudit<dim>::execute(dealii::TableHandler&) [with int dim = 2]’:
+/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/plugin/ordinary_audit.cc:36:3:   required from here
+/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/plugin/ordinary_audit.cc:15:53: error: no matching function for call to ‘aspect::Postprocess::OrdinaryAudit<2>::get_particle_manager()’
+   15 |       const auto &manager=this->get_particle_manager();
+      |                           ~~~~~~~~~~~~~~~~~~~~~~~~~~^~
+In file included from /home/ein/repository/aspect-pf-rsf-refactor/include/aspect/simulator.h:46,
+                 from /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/plugin/ordinary_audit.cc:1:
+/home/ein/repository/aspect-pf-rsf-refactor/include/aspect/simulator_access.h:1007:7: note: candidate: ‘const aspect::Particle::Manager<dim>& aspect::SimulatorAccess<dim>::get_particle_manager(unsigned int) const [with int dim = 2]’
+ 1007 |       get_particle_manager(const unsigned int particle_manager_index) const;
+      |       ^~~~~~~~~~~~~~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/include/aspect/simulator_access.h:1007:7: note:   candidate expects 1 argument, 0 provided
+/home/ein/repository/aspect-pf-rsf-refactor/include/aspect/simulator_access.h:1016:7: note: candidate: ‘aspect::Particle::Manager<dim>& aspect::SimulatorAccess<dim>::get_particle_manager(unsigned int) [with int dim = 2]’
+ 1016 |       get_particle_manager(const unsigned int particle_manager_index);
+      |       ^~~~~~~~~~~~~~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/include/aspect/simulator_access.h:1016:7: note:   candidate expects 1 argument, 0 provided
+/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/plugin/ordinary_audit.cc: In instantiation of ‘std::pair<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > aspect::Postprocess::OrdinaryAudit<dim>::execute(dealii::TableHandler&) [with int dim = 3]’:
+/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/plugin/ordinary_audit.cc:36:3:   required from here
+/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/plugin/ordinary_audit.cc:15:53: error: no matching function for call to ‘aspect::Postprocess::OrdinaryAudit<3>::get_particle_manager()’
+   15 |       const auto &manager=this->get_particle_manager();
+      |                           ~~~~~~~~~~~~~~~~~~~~~~~~~~^~
+/home/ein/repository/aspect-pf-rsf-refactor/include/aspect/simulator_access.h:1007:7: note: candidate: ‘const aspect::Particle::Manager<dim>& aspect::SimulatorAccess<dim>::get_particle_manager(unsigned int) const [with int dim = 3]’
+ 1007 |       get_particle_manager(const unsigned int particle_manager_index) const;
+      |       ^~~~~~~~~~~~~~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/include/aspect/simulator_access.h:1007:7: note:   candidate expects 1 argument, 0 provided
+/home/ein/repository/aspect-pf-rsf-refactor/include/aspect/simulator_access.h:1016:7: note: candidate: ‘aspect::Particle::Manager<dim>& aspect::SimulatorAccess<dim>::get_particle_manager(unsigned int) [with int dim = 3]’
+ 1016 |       get_particle_manager(const unsigned int particle_manager_index);
+      |       ^~~~~~~~~~~~~~~~~~~~
+/home/ein/repository/aspect-pf-rsf-refactor/include/aspect/simulator_access.h:1016:7: note:   candidate expects 1 argument, 0 provided
+make[2]: *** [CMakeFiles/ordinary_audit.dir/build.make:79: CMakeFiles/ordinary_audit.dir/ordinary_audit.cc.o] Error 1
+make[1]: *** [CMakeFiles/Makefile2:297: CMakeFiles/ordinary_audit.dir/all] Error 2
+make: *** [Makefile:136: all] Error 2

@@ -1,0 +1,22 @@
+{
+  "peak_aggregate_rss_kib": 403920,
+  "limit_reason": null,
+  "command": [
+    "mpirun",
+    "-np",
+    "2",
+    "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/build/reference-aspect",
+    "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/inputs/reference-empty-fixed-cache.prm"
+  ],
+  "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+  "exit_code": 1,
+  "seconds": 2.5675376920007693,
+  "child_max_rss_kib": 220564,
+  "environment": {
+    "OMP_PROC_BIND": "spread",
+    "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "OMP_NUM_THREADS": "1",
+    "DEAL_II_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1"
+  }
+}

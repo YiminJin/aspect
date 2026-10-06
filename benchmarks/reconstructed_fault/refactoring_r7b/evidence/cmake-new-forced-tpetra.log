@@ -1,0 +1,2 @@
+-- Forcing ASPECT_USE_TPETRA=ON because Epetra support is unavailable.
+-- Using ASPECT_USE_TPETRA = 'ON'

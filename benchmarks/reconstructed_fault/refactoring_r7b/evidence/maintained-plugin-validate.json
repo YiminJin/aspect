@@ -1,0 +1,23 @@
+{
+  "peak_aggregate_rss_kib": 200080,
+  "limit_reason": null,
+  "command": [
+    "mpirun",
+    "-np",
+    "1",
+    "build-refactor-post-r6-gcc12-unity/aspect",
+    "--validate",
+    "benchmarks/reconstructed_fault/post_r6_cleanup/inputs/gcc12-unity-final-direct.prm"
+  ],
+  "cwd": "/home/ein/repository/aspect-pf-rsf-refactor",
+  "exit_code": 0,
+  "seconds": 2.0509443699993426,
+  "child_max_rss_kib": 195728,
+  "environment": {
+    "OMP_PROC_BIND": "spread",
+    "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-pf-rsf-refactor",
+    "OMP_NUM_THREADS": "1",
+    "DEAL_II_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1"
+  }
+}

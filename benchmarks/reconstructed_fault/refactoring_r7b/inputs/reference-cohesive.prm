@@ -1,0 +1,6 @@
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_stage_j_restart_create.prm
+set Output directory = /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/output-reference-cohesive
+set Additional shared libraries = /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/build/plugin/libphase_field_fault_stage_j_restart_create.release.so
+subsection Boundary velocity model
+ set Prescribed velocity boundary indicators = left:function, right:function, bottom:function
+end

@@ -87,8 +87,16 @@ parameters, switch semantics, ownership, checkpoint and observer lifetimes.
 R6c is accepted and R6 is closed. This R6c result changes documentation only. Verify source/artifact/local-edit
 preservation and relevant existing environment-guard coverage; reuse numerical
 qualification of the identical source. No new runtime campaign is implied by
-classification. No refactoring pass is currently selected. R7 and legacy compatibility
-migration require separate selection.
+classification. R7a's final interface review is accepted. The user-selected R7b
+(2026-10-05) closes bounded verification gaps without production-source or
+architecture changes. Record exact source/artifact identities and distinguish
+fresh checks from reused unchanged-source evidence. Qualify intended failure
+markers, not exit codes alone; distinguish configure-only probes from actual
+backend builds and focused Debug checks from a full Debug simulator. Keep
+unsupported cache-entry patterns and scientific nonconvergence explicit.
+R7b is complete for review; its results are in the rolling review and
+`benchmarks/reconstructed_fault/refactoring_r7b/README.md`. Legacy compatibility
+migration, a Tpetra guard/port and R8 still require separate selection.
 
 The separately selected post-R6 BP3 lifecycle correction is a numerical-state
 ownership fix, not a new refactoring stage. Native particle backups/checkpoints

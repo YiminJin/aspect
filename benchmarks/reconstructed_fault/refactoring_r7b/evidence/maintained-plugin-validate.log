@@ -1,0 +1,14 @@
+Loading shared library </home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/post_r6_cleanup/build-gcc12/maintained/libbp3_restore_150x50.release.so>
+Loading shared library </home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/post_r6_cleanup/build-gcc12/observer/libfrozen_birth_observer.release.so>
+
+The provided parameter file is valid.
+
+Note: This validation only checks parameter file syntax errors, like typos
+in keywords or parameter names, and that each parameter value satisfies a
+basic check by itself. However, it may miss more nuanced errors that
+are only checked when the model actually begins running. In particular,
+checks that involve two or more parameters can not be verified at this
+stage of an ASPECT run. Examples for such errors that can not already
+be reported here are: (i) That every boundary is assigned exactly one type
+of boundary condition; (ii) that parameters that take a list with values for
+each composition field receive a list of the correct size.

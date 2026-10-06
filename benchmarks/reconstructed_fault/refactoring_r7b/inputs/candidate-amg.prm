@@ -1,0 +1,8 @@
+include $ASPECT_SOURCE_DIR/tests/convection_box_particles.prm
+set Output directory = /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/output-candidate-amg
+set Additional shared libraries =
+subsection Solver parameters
+ subsection Stokes solver parameters
+ set Stokes solver type = block AMG
+ end
+end

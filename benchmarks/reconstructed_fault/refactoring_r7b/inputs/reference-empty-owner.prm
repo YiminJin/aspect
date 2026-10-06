@@ -1,0 +1,14 @@
+include $ASPECT_SOURCE_DIR/tests/reconstructed_fault_particle_projection_cache.prm
+set Output directory = /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/output-reference-empty-owner
+set Additional shared libraries = /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/build/plugin/libempty_owner.release.so
+subsection Mesh refinement
+ set Initial global refinement = 0
+end
+subsection Fault reconstruction
+ set Fit prescribed geometry to phase field = false
+ set Structural point spacing = 1
+end
+
+subsection Postprocess
+ set List of postprocessors = verify particle projection cold warm cache
+end

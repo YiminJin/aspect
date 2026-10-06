@@ -1,0 +1,3 @@
+include $ASPECT_SOURCE_DIR/tests/sol_cx_2_gmg.prm
+set Output directory = /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/output-reference-gmg
+set Additional shared libraries = /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/build/plugin/libsolcx.release.so

@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.16)
+find_package(deal.II 9.6 REQUIRED HINTS ${DEAL_II_DIR})
+DEAL_II_INITIALIZE_CACHED_VARIABLES()
+project(r7_debug LANGUAGES CXX)
+get_filename_component(REPO "${CMAKE_CURRENT_SOURCE_DIR}/../../../.." ABSOLUTE)
+add_executable(debug_fault main.cc ${REPO}/unit_tests/reconstructed_fault_boundary_contact.cc ${REPO}/source/reconstructed_fault/boundary_contact.cc ${REPO}/unit_tests/reconstructed_fault_condensation.cc)
+target_include_directories(debug_fault PRIVATE ${REPO}/include ${REPO}/build-refactor-post-r6-gcc12-unity/include ${REPO}/contrib/catch)
+DEAL_II_SETUP_TARGET(debug_fault)

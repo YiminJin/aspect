@@ -1,0 +1,17 @@
+include $ASPECT_SOURCE_DIR/tests/checkpoint_03_particles.prm
+set Output directory = /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/output-candidate-particles-cross-resume
+set Additional shared libraries = /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/build/plugin/libordinary_audit.release.so
+subsection Termination criteria
+ set Termination criteria = end step
+ set End step = 5
+end
+subsection Postprocess
+ set List of postprocessors = composition statistics, temperature statistics, velocity statistics, particles, visualization, r7 ordinary audit
+ subsection Visualization
+  set Time between graphical output = 0
+  set Output format = vtu
+  set Write in background thread = false
+ end
+end
+
+set Resume computation = true

@@ -1,0 +1,91 @@
+-----------------------------------------------------------------------------
+--                             This is ASPECT                              --
+-- The Advanced Solver for Planetary Evolution, Convection, and Tectonics. --
+-----------------------------------------------------------------------------
+--     . version 3.1.0-pre (pf-rsf-refactor, 423469d74)
+--     . using deal.II 9.6.2 (dealii-9.6, 6890ca740b)
+--     .       with 32 bit indices
+--     .       with vectorization level 2 (AVX, 4 doubles, 256 bits)
+--     . using Trilinos 14.2.0
+--     . using p4est 2.8.7
+--     . using Geodynamic World Builder 1.0.0
+--     . running in OPTIMIZED mode
+--     . running with 2 MPI processes
+-----------------------------------------------------------------------------
+
+Loading shared library </home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/build/plugin/libempty_owner.release.so>
+
+
+-----------------------------------------------------------------------------
+The output directory </home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/output-reference-empty-owner-qualified/> provided in the input file appears not to exist.
+ASPECT will create it for you.
+-----------------------------------------------------------------------------
+
+
+-----------------------------------------------------------------------------
+-- For information on how to cite ASPECT, see:
+--   https://aspect.geodynamics.org/citing.html?ver=3.1.0-pre&particles=1&sha=423469d74&src=code
+-----------------------------------------------------------------------------
+Number of active cells: 1 (on 1 levels)
+Number of degrees of freedom: 44 (18+4+9+9+4)
+
+*** Timestep 0:  t=0 seconds, dt=0 seconds
+   Phase-field residual target: initial=1.241865956470935e+17, roundoff=220.59970853997427, absolute target=1241865956470.9351
+   Solving phase field system:
+      Iteration  0: linear solver iterations =    1, line search iterations = 0, relative residual = 4.444e-01
+      Iteration  1: linear solver iterations =    1, line search iterations = 0, relative residual = 1.975e-01
+      Iteration  2: linear solver iterations =    1, line search iterations = 0, relative residual = 8.779e-02
+      Iteration  3: linear solver iterations =    1, line search iterations = 0, relative residual = 3.902e-02
+      Iteration  4: linear solver iterations =    1, line search iterations = 0, relative residual = 1.734e-02
+      Iteration  5: linear solver iterations =    1, line search iterations = 0, relative residual = 7.707e-03
+      Iteration  6: linear solver iterations =    1, line search iterations = 0, relative residual = 3.425e-03
+      Iteration  7: linear solver iterations =    1, line search iterations = 0, relative residual = 1.522e-03
+      Iteration  8: linear solver iterations =    1, line search iterations = 0, relative residual = 6.766e-04
+      Iteration  9: linear solver iterations =    1, line search iterations = 0, relative residual = 3.007e-04
+      Iteration 10: linear solver iterations =    1, line search iterations = 0, relative residual = 1.337e-04
+      Iteration 11: linear solver iterations =    1, line search iterations = 0, relative residual = 5.940e-05
+      Iteration 12: linear solver iterations =    1, line search iterations = 0, relative residual = 2.640e-05
+      Iteration 13: linear solver iterations =    1, line search iterations = 0, relative residual = 1.173e-05
+      Iteration 14: linear solver iterations =    1, line search iterations = 0, relative residual = 5.215e-06
+   Reconstruction initial faults... done.
+
+   Solving temperature system... 0 iterations.
+   Advecting particles...  done.
+
+   Postprocessing:
+     Number of advected particles:        9
+     Particle projection cold/warm cache: verified
+
+Termination requested by criterion: end time
+
+
++----------------------------------------------+------------+------------+
+| Total wallclock time elapsed since start     | 2.081e-01s |            |
+|                                              |            |            |
+| Section                          | no. calls |  wall time | % of total |
++----------------------------------+-----------+------------+------------+
+| Assemble temperature system      |         1 | 1.970e-03s |  9.47e-01% |
+| Build temperature preconditioner |         1 | 4.284e-04s |  2.06e-01% |
+| Fault: Cache build               |         3 | 1.896e-04s | 0.000e+00% |
+| Initialization                   |         1 | 9.250e-02s |  4.45e+01% |
+| Interpolate Stokes solution      |         1 | 2.016e-03s |  9.69e-01% |
+| Particles: Advect                |         2 | 2.697e-04s |  1.30e-01% |
+| Particles: Copy                  |         1 | 1.779e-05s | 0.000e+00% |
+| Particles: Exchange ghosts       |         2 | 4.058e-05s | 0.000e+00% |
+| Particles: Generate              |         1 | 8.026e-05s | 0.000e+00% |
+| Particles: Initialization        |         1 | 4.143e-05s | 0.000e+00% |
+| Particles: Initialize properties |         1 | 1.002e-04s | 0.000e+00% |
+| Particles: Interpolate           |         1 | 9.442e-04s |  4.54e-01% |
+| Particles: Sort                  |         2 | 1.083e-04s | 0.000e+00% |
+| Postprocessing                   |         1 | 9.533e-04s |  4.58e-01% |
+| Setup dof systems                |         1 | 3.699e-03s |  1.78e+00% |
+| Setup initial conditions         |         1 | 7.399e-03s |  3.56e+00% |
+| Setup matrices                   |         1 | 2.260e-02s |  1.09e+01% |
+| Solve temperature system         |         1 | 1.661e-03s |  7.98e-01% |
++----------------------------------+-----------+------------+------------+
+
+-- Total wallclock time elapsed including restarts: 0s
+-----------------------------------------------------------------------------
+-- For information on how to cite ASPECT, see:
+--   https://aspect.geodynamics.org/citing.html?ver=3.1.0-pre&particles=1&sha=423469d74&src=code
+-----------------------------------------------------------------------------
