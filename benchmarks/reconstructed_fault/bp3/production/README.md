@@ -1,5 +1,12 @@
 # Fresh BP3 production candidate
 
+The selected Section-6 [Stampede3 handoff](stampede3/README.md) packages the
+maintained plugin sources, sole fault fixture, fresh step-3 / restart step-4 /
+first-event PRMs, environment cleanup and build instructions for `intel/26.0`.
+Core/plugin source is pinned to `752c5bcbd`. These inputs pass local parser checks;
+no server build or simulation has been run. The user's revised scope is delivery
+of the launch package, with server execution left to the user.
+
 `bp3_fresh.prm` is a **fresh, unqualified candidate**, not a continuation of a
 historical checkpoint. Its only model data file is `fault.txt`. Build the single
 maintained source package in `../plugin/`; no geometry/profile/mesh preparation

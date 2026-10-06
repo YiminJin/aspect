@@ -5,9 +5,11 @@ phase field, core automatic endpoint completion, continuous Q2 stress fields,
 native LLS history interpolation and mechanical normal-traction feedback.
 Accepted output observes committed state; it never performs a constitutive update.
 
-Use the [fresh production candidate](../production/README.md). **Resolved graded
-runs remain blocked by the Section-3 automatic-completion boundary-lattice
-restriction.** The old `bp3_150x50_raw/filter20/filter40/first_event.prm` files and
+Use the [fresh production candidate](../production/README.md). The retained
+endpoint buffer passes boundary admission on the actual 60° production mesh;
+full normalization and mechanics startup remain unqualified. The
+[Stampede3 handoff](../production/stampede3/README.md) pins the corrected core/plugin.
+The old `bp3_150x50_raw/filter20/filter40/first_event.prm` files and
 `fixtures/` are historical, version-pinned inputs/evidence. In particular,
 `first_event` resumes an old checkpoint; it is not a fresh-run template.
 

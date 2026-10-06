@@ -53,6 +53,28 @@ new configure checks and selected ordinary-run/cache/history gaps; no R7b run,
 Tpetra port, production startup or R8 work has begun. Earlier entries below retain
 their historical scope and evidence.
 
+# BP3 Section 6 Stampede3 launch package prepared (2026-10-03)
+
+The user selected mesh A with its retained endpoint buffer, then narrowed the
+task to providing the plugin, fixture, PRMs and environment for their server
+launch. The [handoff](../../benchmarks/reconstructed_fault/bp3/production/stampede3/README.md)
+pins core/plugin source to `752c5bcbd96df5c9904387f74e2738cbf7e6bcac` and targets
+Stampede3 `intel/26.0`. Both must be rebuilt with the matching server dependency
+stack; the local GCC library is not a server artifact. No scientific source or
+physical/timestep settings changed. Inherited caps and provisional 0.1/0.5
+state-bound/cutback choices remain explicit.
+
+All three packaged PRMs pass local parser validation with the corrected core and
+maintained library. Their only differences from the production template are
+paths, resume/accepted-step stops and observational timing/memory output. Native
+default expansion and parameter diffs accompany the package. Fresh step 3 and
+restart step 4 use native accepted-state termination with full checkpoints;
+first-event continuation retains normal checkpoint/graceful-stop schedules.
+No production simulation, server build, startup interval, normalization completion,
+memory qualification or restart result is claimed. Prior local resource limits
+and the separate unbuffered 45° limitation remain as recorded below. Await server
+startup evidence before another correction or further scientific work.
+
 # BP3 birth identity corrected; production boundary admission checked (2026-10-03)
 
 The selected follow-up corrects retired-ID birth identification and retains the
