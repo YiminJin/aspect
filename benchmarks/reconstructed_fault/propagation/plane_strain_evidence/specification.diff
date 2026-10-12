@@ -1,0 +1,61 @@
+--- before/doc/reconstructed_fault/specification.tex
++++ corrected/doc/reconstructed_fault/specification.tex
+@@ -1914,7 +1914,7 @@
+ The explicitly selected \texttt{Bulk history representation = accepted FE strain}
+ is a separate default-off total-energy verification model. The authoritative
+ bulk internal state is an FE vector $d_R$, with
+-$\boldsymbol R=\operatorname{symgrad}d_R=\boldsymbol E^{\rm tot}-\boldsymbol E^{\rm in}$.
++$\boldsymbol R=D_3(\operatorname{symgrad}_2d_R)=\boldsymbol E^{\rm tot}-\boldsymbol E^{\rm in}$.
+ It is not a projection of particle stress or an accumulated total displacement.
+ For identical homogeneous bulk/fault $G,\eta$, let
+ \[
+@@ -1923,7 +1923,7 @@
+  d_R^{n+1}=\beta d_R^n+(\kappa/G)\boldsymbol u^{n+1}.
+ \]
+ At a phase trial, hold accepted $d_R^n,Z^n$ fixed and reconstruct
+-$\boldsymbol\tau(\phi)=2G[\operatorname{symgrad}d_R^n-(Z^n/G)\chi(\phi)\mathcal S]$.
++$\boldsymbol\tau(\phi)=2G[D_3(\operatorname{symgrad}_2d_R^n)-(Z^n/G)\chi(\phi)\mathcal S]$.
+ The same state supplies mechanical history and bulk energy
+ $\sum_a JxW_a\boldsymbol\tau_a:\boldsymbol\tau_a/(4G)$.
+ The phase functional also contains $\sum_b ds_b Z_b^2/(2G I_b)$ and the native
+@@ -1977,6 +1977,40 @@
+ particle-stress checkpoints; a registry marker also forbids resuming this option's
+ checkpoint through the particle-authoritative path. No implicit conversion is
+ defined. Existing defaults and the particle-authoritative path are unchanged.
++
++
++\paragraph{Audited plane-strain reduction in the selected FE option.}
++For raw in-plane symmetric $A$, use $D_2(A)=A-\operatorname{tr}_2(A)I_2/3$,
++with missing $zz=-\operatorname{tr}_2(A)/3$. Already deviatoric in-plane blocks
++$T,U$ have metric $\langle T,U\rangle_3=T:U+\operatorname{tr}_2T\operatorname{tr}_2U$.
++Do not apply \texttt{consistent\_deviator} again to such a block. The invariant
++helper is $-\langle T,T\rangle_3/2$ and requires an already deviatoric input.
++Reconstruct $\tau_2=2G D_2(\operatorname{symgrad}d_R)-2Z\chi S_2$;
++use $(\tau_2:\tau_2+(\operatorname{tr}_2\tau_2)^2)/(4G)$ for bulk storage
++and the same numerator divided by $2\eta$ for viscous power. Hold accepted
++$d_R,Z$ fixed in phase trials. The missing component is phase independent since
++$\operatorname{tr}S_2=0$; the normalization adjoint and direct phase gradient
++are unchanged by that trace-storage term.
++
++Momentum uses $\tau_2:\operatorname{symgrad}w-p\operatorname{div}w$.
++Its velocity tangent is
++$2\kappa[\operatorname{symgrad}w:\operatorname{symgrad}u-
++\operatorname{div}w\operatorname{div}u/3]$ at the same quadrature.
++Register the existing \texttt{StokesCompressibleStrainRateViscosityTerm} and its
++Newton variant at the corresponding assembler entry points, once
++also for this optional FE history representation, with the corresponding
++simplified preconditioner term when needed. Its viscosity output is $\kappa$,
++not $\eta$. The selected fixture uses Newton; its variant supplies both
++residual and tangent. This does not make the mass equation compressible. Do not subtract
++trace again from accepted deviatoric history or from the trace-free slip map.
++The coefficient recurrence $d_R^{n+1}=\beta d_R^n+(\kappa/G)u^{n+1}$ is unchanged
++and reproduces the full embedded Maxwell endpoint for general exponential beta.
++Pressure remains the physical incompressibility multiplier; no isotropic history
++is absorbed into it. The prescribed adiabatic friction mode still uses complete
++$p_{\rm ad}+\sigma_n^{\rm bg}$, without a stress correction; dynamic friction
++uses $p-\boldsymbol n\cdot\tau_2\boldsymbol n+\sigma_n^{\rm bg}$.
++Default particle-owned algorithms and generic tensor utilities remain unchanged.
++See \texttt{phase\_field\_native\_fe\_derivation.tex} for the complete embedding.
+ 
+ For particle-to-FE transfer, shared continuous DoFs receive the arithmetic
+ average of incident-cell interpolator proposals. Accumulate values and counts

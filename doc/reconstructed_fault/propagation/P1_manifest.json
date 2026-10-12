@@ -1,0 +1,31 @@
+{
+  "baseline": "de7beaa65846c7372711f7922abf1c5d9a745ee6",
+  "reference_core_revision": "6a3781277f2f594d52cd248d84f5b6fdc98fdeb1",
+  "production_source_and_headers_unchanged": true,
+  "core_builds": 0,
+  "simulation_runs": 2,
+  "stack": "GCC 12.4.0; OpenMPI 5.0.6; deal.II 9.6.2; Trilinos 14.2 Epetra; Voro; Release",
+  "plugin_flags": "-fno-finite-math-only -ffp-contract=off; other flags in CMakeFiles/phase_field_controlled_history.dir/flags.make",
+  "hashes": {
+    "AGENTS.md": "27fd567bdf8fb646ad86d0163a9d30465df23f0ceee915d2542062d1c1492878",
+    "tests/phase_field_controlled_history.cc": "17bb9d6c56b4e7a97e0392ad75ad5d0102b125068be5263cf562fe71752ff902",
+    "tests/phase_field_controlled_history.prm": "646c703347002d656e6d90db7275c7d7672f13fb06c3fb10ce00c85eddcbd6e6",
+    "tests/phase_field_controlled_history.sh": "3692f2367c9276618016a4a506d43ef27a9951c03c5e77f5f1d5500ae9e5328a",
+    "tests/phase_field_controlled_history_check.py": "c557d7b76f7aea71f88188462900420d919fe2a238a1b5cf53064297e1232e03",
+    "tests/phase_field_controlled_history/screen-output": "e546fdf89ac7a9f1761110afa382d40ca108b8e099ee373ace369d6bf421efcd",
+    "tests/phase_field_test_access.h": "1505258bc39793d99a758ed0b7a43a3a01a33ca1dbd6ec209f11cc5fbdfb0f37",
+    "tests/phase_field_fault_test_access.h": "295bf0ec92e3c82cfdec43c6057b959096f3af0cd9692cec7ecd28e316e58b0f",
+    "tests/phase_field_fault_ih.cc": "0f3883e6d02ba803c2cb467a97ad8c25ea310dc1244d8f729774d9d094aca537",
+    "tests/phase_field_fault_ih.prm": "ded103571ecd4b1984568e98663898a7ea3e7edb3fc7b81677e024471a1b97ad",
+    "tests/phase_field_fault_ih.txt": "664c45fdbed36d17474f8caebe8480b00389194b1172d026ea4d1917959a27fe",
+    "build-propagation-p1/coarse-source.cc": "3d2bac674ec492e0765e86a1f297ca308f6678c350b1821af5551ddfc5d66368",
+    "build-propagation-p1/coarse-plugin.so": "3e41048e47b4d3540c7c33efe2ce9a0124c4039b3b0443bf8d4fa55be84e7774",
+    "build-propagation-p1/libphase_field_controlled_history.release.so": "8ed09832a3ea0c494db80efc3a37a363ddf224d45c62c6bb52f55929de16313f",
+    "build-propagation-p1/refined.prm": "03208057a9d9c3bdb7ebe84312219a150e8b697a4fba4e8e414e89e1e180932f",
+    "build-propagation-p1/phase_field_controlled_history.x.prm": "821f614cf62e1f2dd77d60894a4463d107cba4a00b7ae5c6a06cc25cf4fb9c18",
+    "build-propagation-p1/CMakeCache.txt": "f5c6d9294b59cd8bdd5e35dd3138b8e6d7ac69ea5e0f3b5dd9204fcc09480e2f",
+    "build-propagation-p1/output-phase_field_controlled_history/parameters.prm": "111dc66704791be854035843ee3caaf33de83fb862b3ced7c526831719807dce",
+    "build-propagation-p1/output-refined/parameters.prm": "e68cf319262e1a55ac2da31fe0749591895b86558669aa2658cc860cfc4721f3",
+    "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/build/aspect-r7b-qualified": "ed74d4d4ad1cfa5d1bd4fbade496d9748ab298c24a259a4612a94d4df375b60d"
+  }
+}

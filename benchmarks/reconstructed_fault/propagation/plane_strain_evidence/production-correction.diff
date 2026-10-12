@@ -1,0 +1,115 @@
+--- before/source/simulator/assembly.cc
++++ corrected/source/simulator/assembly.cc
+@@ -91,7 +91,11 @@
+         assemblers->stokes_system.push_back(std::make_unique<aspect::Assemblers::StokesIncompressibleTerms<dim>>());
+       }
+ 
+-    if (material_model->is_compressible() || parameters.enable_prescribed_dilation)
++    // The optional FE owner uses a 3D plane-strain deviator even with an
++    // incompressible mass equation. Reuse the existing kappa trace term once.
++    const auto *fault_material = dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(material_model.get());
++    const bool fe_plane_strain = fault_material && fault_material->uses_fe_strain_history();
++    if (material_model->is_compressible() || parameters.enable_prescribed_dilation || fe_plane_strain)
+       {
+         // The compressible part of the preconditioner is only necessary if we use the simplified A block
+         if (parameters.use_full_A_block_preconditioner == false)
+--- before/source/simulator/newton.cc
++++ corrected/source/simulator/newton.cc
+@@ -20,6 +20,7 @@
+ 
+ 
+ #include <aspect/newton.h>
++#include <aspect/material_model/phase_field_fault.h>
+ #include <aspect/simulator/assemblers/advection.h>
+ #include <aspect/simulator/assemblers/stokes.h>
+ #include <aspect/simulator/assemblers/implicit_constitutive_stokes.h>
+@@ -59,8 +60,12 @@
+         assemblers.stokes_preconditioner.push_back(std::make_unique<aspect::Assemblers::NewtonStokesPreconditioner<dim>>());
+         assemblers.stokes_system.push_back(std::make_unique<aspect::Assemblers::NewtonStokesIncompressibleTerms<dim>>());
+ 
++        // Reuse the 3D trace term also for the optional incompressible FE
++        // owner. Newton's term corrects BOTH residual and Jacobian.
++        const auto *fault_material = dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(&this->get_material_model());
++        const bool fe_plane_strain = fault_material && fault_material->uses_fe_strain_history();
+         if (this->get_material_model().is_compressible() ||
+-            this->get_parameters().enable_prescribed_dilation)
++            this->get_parameters().enable_prescribed_dilation || fe_plane_strain)
+           {
+             // The compressible part of the preconditioner is only necessary if we use the simplified A block
+             if (this->get_parameters().use_full_A_block_preconditioner == false)
+--- before/source/material_model/phase_field_fault/fe_strain.cc
++++ corrected/source/material_model/phase_field_fault/fe_strain.cc
+@@ -4,6 +4,7 @@
+ #include <aspect/particle/manager.h>
+ #include <aspect/particle/particle_domain.h>
+ #include <aspect/plugins.h>
++#include <aspect/utilities.h>
+ #include <deal.II/base/quadrature_lib.h>
+ #include <deal.II/fe/fe_values.h>
+ #include <deal.II/lac/lapack_full_matrix.h>
+@@ -357,8 +358,9 @@
+               const double h=s.m*phi*(1+phi)/std::pow(1-phi,2);
+               const double hp=s.m*(4/std::pow(1-phi,3)-3/std::pow(1-phi,2));
+               const double hpp=s.m*(12/std::pow(1-phi,4)-6/std::pow(1-phi,3));
+-              const auto tau=2*s.G*R[q]-2*Z*h/I*S;
+-              result.bulk+=p.weight*(tau*tau)/(4*s.G);
++              // R[q] is a raw zero-zz plane-strain gradient. Deviate once.
++              const auto tau=2*s.G*Utilities::Tensors::consistent_deviator(R[q])-2*Z*h/I*S;
++              result.bulk+=p.weight*((tau*tau)+std::pow(trace(tau),2))/(4*s.G);
+               const double c=-Z/s.G*(tau*S);
+               const double positive_c=std::abs(Z/s.G)*(2*s.G*std::abs(R[q]*S)+std::abs(2*Z*h/I)*(S*S));
+               const double a=2*Z*Z/s.G*(S*S);
+@@ -476,7 +478,7 @@
+                             *fe[this->introspection().extractors.velocities].symmetric_gradient(i,0).norm();
+           *evaluation_scale=2*s.G*strain_scale+std::abs(2*Z*h/I)*S.norm();
+         }
+-      return 2*s.G*R[0]-2*Z*h/I*S;
++      return 2*s.G*Utilities::Tensors::consistent_deviator(R[0])-2*Z*h/I*S;
+     }
+ 
+     template<int dim> std::shared_ptr<typename PhaseFieldFault<dim>::FEStrainUpdate>
+--- before/source/material_model/phase_field_fault/constitutive.cc
++++ corrected/source/material_model/phase_field_fault/constitutive.cc
+@@ -20,6 +20,7 @@
+ 
+ #include <aspect/material_model/phase_field_fault.h>
+ #include <aspect/material_model/utilities.h>
++#include <aspect/utilities.h>
+ #include <aspect/phase_field.h>
+ #include <aspect/particle/manager.h>
+ #include <aspect/reconstructed_fault/manager.h>
+@@ -157,8 +158,13 @@
+         localization.previous_cohesive_traction, inputs.slip_rate,
+         localization.current_h, localization.previous_h, mature_frictional_fault);
+ 
++      // Inputs carry raw FE symmetric gradients; accepted old stress already
++      // is a 3D deviatoric block and must not be deviated a second time.
++      const auto strain_rate = fe_strain_history
++                               ? Utilities::Tensors::consistent_deviator(inputs.strain_rate)
++                               : inputs.strain_rate;
+       const SymmetricTensor<2,dim> trial_stress = compute_maxwell_stress(
+-        bulk_coefficients, inputs.strain_rate, inputs.old_maxwell_stress);
++        bulk_coefficients, strain_rate, inputs.old_maxwell_stress);
+       const SymmetricTensor<2,dim> stress_without_current_slip =
+         trial_stress
+         - 2.0 * bulk_coefficients.eta_ve * cohesive.history_correction
+@@ -216,7 +222,7 @@
+           // Report the terms from this incoming-history evaluation. Do not
+           // subtract two large stresses to infer a tiny current-step increment.
+           response.stress_components[0] = bulk_coefficients.beta * inputs.old_maxwell_stress;
+-          response.stress_components[1] = 2.0 * bulk_coefficients.eta_ve * inputs.strain_rate;
++          response.stress_components[1] = 2.0 * bulk_coefficients.eta_ve * strain_rate;
+           response.stress_components[2] =
+             -2.0 * bulk_coefficients.eta_ve * cohesive.history_correction * inputs.slip_tensor
+             -2.0 * bulk_coefficients.eta_ve * cohesive.localization_factor
+--- before/source/material_model/phase_field_fault/history.cc
++++ corrected/source/material_model/phase_field_fault/history.cc
+@@ -882,6 +882,8 @@
+ 
+               SymmetricTensor<2,dim> effective_strain_rate =
+                 symmetrize(velocity_gradients[particle_index]);
++              if (fe_strain_history)
++                effective_strain_rate = Utilities::Tensors::consistent_deviator(effective_strain_rate);
+               SymmetricTensor<2,dim> continued_crack;
+               double continued_chi=0., continued_V=0.;
+               double new_H = properties[H_position];

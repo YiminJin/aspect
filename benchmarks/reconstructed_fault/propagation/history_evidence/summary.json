@@ -1,0 +1,538 @@
+{
+  "native_steps": 560,
+  "native": {
+    "1e+08/loading": [
+      {
+        "dt": 0.125,
+        "H0": 106444.98000026576,
+        "H_final": 106444.98000026576,
+        "max_candidate": 12093.403150695427,
+        "min_candidate": 9326.82223478365,
+        "state_energy_final": 189235.52000047243,
+        "candidate_sum": 85655.04565809137,
+        "positive_candidate_sum": 85655.04565809137,
+        "signed_work_expected": 192152.90093381304,
+        "relative_sum_work_error": 0.0004967380843678866,
+        "potential_derivative_error": 9.869015528390592e-12,
+        "intact_final": 0.32020004166666555,
+        "near_intact_final": 0.020450122553135785
+      },
+      {
+        "dt": 0.0625,
+        "H0": 106444.98000026576,
+        "H_final": 106444.98000026576,
+        "max_candidate": 6098.3822102960385,
+        "min_candidate": 4615.8228218045815,
+        "state_energy_final": 189235.52000047243,
+        "candidate_sum": 85681.31030522639,
+        "positive_candidate_sum": 85681.31030522639,
+        "signed_work_expected": 192152.90093381304,
+        "relative_sum_work_error": 0.0002499942065922442,
+        "potential_derivative_error": 9.874795759560497e-12,
+        "intact_final": 0.32010001041666664,
+        "near_intact_final": 0.010312455299343897
+      },
+      {
+        "dt": 0.03125,
+        "H0": 106444.98000026576,
+        "H_final": 106444.98000026576,
+        "max_candidate": 3062.1284266064004,
+        "min_candidate": 2296.019812060828,
+        "state_energy_final": 189235.52000047243,
+        "candidate_sum": 85694.57235179457,
+        "positive_candidate_sum": 85694.57235179457,
+        "signed_work_expected": 192152.90093381304,
+        "relative_sum_work_error": 0.0001254035817628733,
+        "potential_derivative_error": 9.907595168937776e-12,
+        "intact_final": 0.32005000260416666,
+        "near_intact_final": 0.005178106168108168
+      }
+    ],
+    "1e+08/relaxation": [
+      {
+        "dt": 0.125,
+        "H0": 106444.98000026576,
+        "H_final": 106444.98000026576,
+        "max_candidate": 2.6673004287362214e-11,
+        "min_candidate": -5.341273277938269e-11,
+        "state_energy_final": 104337.2281764246,
+        "candidate_sum": -1.3359926585494316e-10,
+        "positive_candidate_sum": 2.6673004287362214e-11,
+        "signed_work_expected": 106444.98000026576,
+        "relative_sum_work_error": 1.2303749510308018e-15,
+        "potential_derivative_error": 5.341273277938269e-11,
+        "intact_final": 0.17654605651936878,
+        "near_intact_final": 1.4569930923092687e-09
+      },
+      {
+        "dt": 0.0625,
+        "H0": 106444.98000026576,
+        "H_final": 106444.98000026576,
+        "max_candidate": 2.681508299089739e-11,
+        "min_candidate": -8.009406977308471e-11,
+        "state_energy_final": 104337.2281764246,
+        "candidate_sum": -1.335574667831798e-10,
+        "positive_candidate_sum": 8.021113993520287e-11,
+        "signed_work_expected": 106444.98000026576,
+        "relative_sum_work_error": 1.2303749510308018e-15,
+        "potential_derivative_error": 3.999905672057999e-11,
+        "intact_final": 0.17649090311394106,
+        "near_intact_final": 1.4565379917772542e-09
+      },
+      {
+        "dt": 0.03125,
+        "H0": 106444.98000026576,
+        "H_final": 106444.98000026576,
+        "max_candidate": 2.6752309059023618e-11,
+        "min_candidate": -8.040755008037194e-11,
+        "state_energy_final": 104337.2281764246,
+        "candidate_sum": -8.818351071785932e-10,
+        "positive_candidate_sum": 5.338783242090572e-11,
+        "signed_work_expected": 106444.98000026576,
+        "relative_sum_work_error": 8.33920800143099e-15,
+        "potential_derivative_error": 6.701674184392023e-11,
+        "intact_final": 0.17646333071874062,
+        "near_intact_final": 1.4563104432723443e-09
+      }
+    ],
+    "1e+08/cycle": [
+      {
+        "dt": 0.125,
+        "H0": 106444.98000026576,
+        "H_final": 106444.98000026576,
+        "max_candidate": 22584.850317823402,
+        "min_candidate": -22159.550077534266,
+        "state_energy_final": 106444.98000026576,
+        "candidate_sum": 3014.0573144310383,
+        "positive_candidate_sum": 119705.41627496647,
+        "signed_work_expected": 109460.92110027329,
+        "relative_sum_work_error": 1.7697270237607187e-05,
+        "potential_derivative_error": 9.863624575591859e-12,
+        "intact_final": 0.18011252343749937,
+        "near_intact_final": 0.01756226442237448
+      },
+      {
+        "dt": 0.0625,
+        "H0": 106444.98000026576,
+        "H_final": 106444.98000026576,
+        "max_candidate": 11844.259919741107,
+        "min_candidate": -11644.836655846972,
+        "state_energy_final": 106444.98000026576,
+        "candidate_sum": 3014.998912877629,
+        "positive_candidate_sum": 119742.76633706226,
+        "signed_work_expected": 109460.92110027329,
+        "relative_sum_work_error": 8.851400318698706e-06,
+        "potential_derivative_error": 9.866373573196916e-12,
+        "intact_final": 0.180056255859375,
+        "near_intact_final": 0.004758935003990813
+      },
+      {
+        "dt": 0.03125,
+        "H0": 106444.98000026576,
+        "H_final": 106444.98000026576,
+        "max_candidate": 5928.088896359967,
+        "min_candidate": -5832.028138924662,
+        "state_energy_final": 106444.98000026576,
+        "candidate_sum": 3015.469932833042,
+        "positive_candidate_sum": 119761.46167207089,
+        "signed_work_expected": 109460.92110027329,
+        "relative_sum_work_error": 4.426391685985538e-06,
+        "potential_derivative_error": 9.892897252014986e-12,
+        "intact_final": 0.18002812646484373,
+        "near_intact_final": 0.0012629816539128263
+      }
+    ],
+    "1e+08/hold": [
+      {
+        "dt": 0.125,
+        "H0": 106444.98000026576,
+        "H_final": 106444.98000026576,
+        "max_candidate": 265.94623362626095,
+        "min_candidate": 265.94623362626095,
+        "state_energy_final": 106444.98000026576,
+        "candidate_sum": 2127.5698690100876,
+        "positive_candidate_sum": 2127.5698690100876,
+        "signed_work_expected": 108573.87960027107,
+        "relative_sum_work_error": 1.2492190756472682e-05,
+        "potential_derivative_error": 9.969914732797218e-12,
+        "intact_final": 0.18011252343749937,
+        "near_intact_final": 0.00044972041993566585
+      },
+      {
+        "dt": 0.0625,
+        "H0": 106444.98000026576,
+        "H_final": 106444.98000026576,
+        "max_candidate": 133.01465792107717,
+        "min_candidate": 133.01465792107717,
+        "state_energy_final": 106444.98000026576,
+        "candidate_sum": 2128.2345267372357,
+        "positive_candidate_sum": 2128.2345267372357,
+        "signed_work_expected": 108573.87960027107,
+        "relative_sum_work_error": 6.248047283063571e-06,
+        "potential_derivative_error": 9.988168432628905e-12,
+        "intact_final": 0.180056255859375,
+        "near_intact_final": 0.00022493119933199377
+      },
+      {
+        "dt": 0.03125,
+        "H0": 106444.98000026576,
+        "H_final": 106444.98000026576,
+        "max_candidate": 66.51771910662497,
+        "min_candidate": 66.51771910662497,
+        "state_energy_final": 106444.98000026576,
+        "candidate_sum": 2128.567011412,
+        "positive_candidate_sum": 2128.567011412,
+        "signed_work_expected": 108573.87960027107,
+        "relative_sum_work_error": 3.1245117742012746e-06,
+        "potential_derivative_error": 1.0280149819098345e-11,
+        "intact_final": 0.18002812646484373,
+        "near_intact_final": 0.0001124839123023813
+      }
+    ],
+    "1e+22/loading": [
+      {
+        "dt": 0.125,
+        "H0": 106444.98000026576,
+        "H_final": 106444.98000026576,
+        "max_candidate": 11642.419687529056,
+        "min_candidate": 9055.215312522598,
+        "state_energy_final": 189235.52000047243,
+        "candidate_sum": 82790.54000020651,
+        "positive_candidate_sum": 82790.54000020651,
+        "signed_work_expected": 189235.52000047246,
+        "relative_sum_work_error": 1.9139165904923584e-15,
+        "potential_derivative_error": 9.868494590838336e-12,
+        "intact_final": 0.32,
+        "near_intact_final": 0.019687502982408598
+      },
+      {
+        "dt": 0.0625,
+        "H0": 106444.98000026576,
+        "H_final": 106444.98000026576,
+        "max_candidate": 5867.4099218896445,
+        "min_candidate": 4481.407578136184,
+        "state_energy_final": 189235.52000047243,
+        "candidate_sum": 82790.54000020634,
+        "positive_candidate_sum": 82790.54000020634,
+        "signed_work_expected": 189235.52000047246,
+        "relative_sum_work_error": 3.554416525200094e-15,
+        "potential_derivative_error": 9.874724978884694e-12,
+        "intact_final": 0.32,
+        "near_intact_final": 0.009921877813001948
+      },
+      {
+        "dt": 0.03125,
+        "H0": 106444.98000026576,
+        "H_final": 106444.98000026576,
+        "max_candidate": 2945.254980476136,
+        "min_candidate": 2229.1537695368133,
+        "state_energy_final": 189235.52000047243,
+        "candidate_sum": 82790.5400002061,
+        "positive_candidate_sum": 82790.5400002061,
+        "signed_work_expected": 189235.52000047246,
+        "relative_sum_work_error": 5.741749771477076e-15,
+        "potential_derivative_error": 9.874560967314283e-12,
+        "intact_final": 0.32,
+        "near_intact_final": 0.004980471477282225
+      }
+    ],
+    "1e+22/relaxation": [
+      {
+        "dt": 0.125,
+        "H0": 106444.98000026576,
+        "H_final": 106444.98000026576,
+        "max_candidate": 0.0,
+        "min_candidate": -5.371402949101477e-11,
+        "state_energy_final": 106444.98000026571,
+        "candidate_sum": -1.342850737275369e-10,
+        "positive_candidate_sum": 0.0,
+        "signed_work_expected": 106444.98000026573,
+        "relative_sum_work_error": 9.569582952461792e-16,
+        "potential_derivative_error": 2.6857014745507384e-11,
+        "intact_final": 0.17999999999999994,
+        "near_intact_final": 1.4854976757639315e-09
+      },
+      {
+        "dt": 0.0625,
+        "H0": 106444.98000026576,
+        "H_final": 106444.98000026576,
+        "max_candidate": 0.0,
+        "min_candidate": -5.371402949101477e-11,
+        "state_energy_final": 106444.98000026571,
+        "candidate_sum": -2.4171313270956645e-10,
+        "positive_candidate_sum": 0.0,
+        "signed_work_expected": 106444.98000026573,
+        "relative_sum_work_error": 2.0506249183846697e-15,
+        "potential_derivative_error": 2.6857014745507384e-11,
+        "intact_final": 0.17999999999999994,
+        "near_intact_final": 1.4854976757639315e-09
+      },
+      {
+        "dt": 0.03125,
+        "H0": 106444.98000026576,
+        "H_final": 106444.98000026576,
+        "max_candidate": 0.0,
+        "min_candidate": -5.371402949101477e-11,
+        "state_energy_final": 106444.98000026571,
+        "candidate_sum": -4.297122359281181e-10,
+        "positive_candidate_sum": 0.0,
+        "signed_work_expected": 106444.98000026573,
+        "relative_sum_work_error": 3.827833180984717e-15,
+        "potential_derivative_error": 2.6857014745507384e-11,
+        "intact_final": 0.17999999999999994,
+        "near_intact_final": 1.4854976757639315e-09
+      }
+    ],
+    "1e+22/cycle": [
+      {
+        "dt": 0.125,
+        "H0": 106444.98000026576,
+        "H_final": 106444.98000026576,
+        "max_candidate": 22386.17116151879,
+        "min_candidate": -22386.17116151881,
+        "state_energy_final": 106444.98000026576,
+        "candidate_sum": -1.4551915228366852e-10,
+        "positive_candidate_sum": 118272.2000002952,
+        "signed_work_expected": 106444.98000026579,
+        "relative_sum_work_error": 1.6404999347077359e-15,
+        "potential_derivative_error": 9.864364741838073e-12,
+        "intact_final": 0.18,
+        "near_intact_final": 0.01714466272358283
+      },
+      {
+        "dt": 0.0625,
+        "H0": 106444.98000026576,
+        "H_final": 106444.98000026576,
+        "max_candidate": 11748.216929298782,
+        "min_candidate": -11748.21692929881,
+        "state_energy_final": 106444.98000026576,
+        "candidate_sum": -4.2291503632441163e-10,
+        "positive_candidate_sum": 118272.20000029507,
+        "signed_work_expected": 106444.98000026579,
+        "relative_sum_work_error": 4.237958164661651e-15,
+        "potential_derivative_error": 9.86788793298194e-12,
+        "intact_final": 0.18,
+        "near_intact_final": 0.004538257985693154
+      },
+      {
+        "dt": 0.03125,
+        "H0": 106444.98000026576,
+        "H_final": 106444.98000026576,
+        "max_candidate": 5880.977085340157,
+        "min_candidate": -5880.977085340157,
+        "state_energy_final": 106444.98000026576,
+        "candidate_sum": -6.330083124339581e-10,
+        "positive_candidate_sum": 118272.20000029494,
+        "signed_work_expected": 106444.98000026579,
+        "relative_sum_work_error": 6.288583083046321e-15,
+        "potential_derivative_error": 9.87761872699078e-12,
+        "intact_final": 0.18,
+        "near_intact_final": 0.001151038654025284
+      }
+    ],
+    "1e+22/hold": [
+      {
+        "dt": 0.125,
+        "H0": 106444.98000026576,
+        "H_final": 106444.98000026576,
+        "max_candidate": 0.0,
+        "min_candidate": 0.0,
+        "state_energy_final": 106444.98000026576,
+        "candidate_sum": 0.0,
+        "positive_candidate_sum": 0.0,
+        "signed_work_expected": 106444.98000026577,
+        "relative_sum_work_error": 1.3670832789231131e-16,
+        "potential_derivative_error": 0.0,
+        "intact_final": 0.18,
+        "near_intact_final": 1.4854976757639319e-09
+      },
+      {
+        "dt": 0.0625,
+        "H0": 106444.98000026576,
+        "H_final": 106444.98000026576,
+        "max_candidate": 0.0,
+        "min_candidate": 0.0,
+        "state_energy_final": 106444.98000026576,
+        "candidate_sum": 0.0,
+        "positive_candidate_sum": 0.0,
+        "signed_work_expected": 106444.98000026577,
+        "relative_sum_work_error": 1.3670832789231131e-16,
+        "potential_derivative_error": 0.0,
+        "intact_final": 0.18,
+        "near_intact_final": 1.4854976757639319e-09
+      },
+      {
+        "dt": 0.03125,
+        "H0": 106444.98000026576,
+        "H_final": 106444.98000026576,
+        "max_candidate": 0.0,
+        "min_candidate": 0.0,
+        "state_energy_final": 106444.98000026576,
+        "candidate_sum": 0.0,
+        "positive_candidate_sum": 0.0,
+        "signed_work_expected": 106444.98000026577,
+        "relative_sum_work_error": 1.3670832789231131e-16,
+        "potential_derivative_error": 0.0,
+        "intact_final": 0.18,
+        "near_intact_final": 1.4854976757639319e-09
+      }
+    ]
+  },
+  "repeats": {
+    "history_reference_repeat": {
+      "dt": 0.125,
+      "accepted_steps": 8,
+      "byte_identical_csv_count": 99,
+      "phase_gain": 0.002326043752974516,
+      "H_increase": 36.201385311597605,
+      "KKT": 7.37257477290143e-16,
+      "healing": 0.0,
+      "mechanical_residual": 4.369439168542235e-09,
+      "source_errors": {
+        "0": 8.832862219421145e-10,
+        "8": 0.0015625207097273996
+      }
+    },
+    "history_reference_repeat_half": {
+      "dt": 0.0625,
+      "accepted_steps": 16,
+      "byte_identical_csv_count": 187,
+      "phase_gain": 0.0,
+      "H_increase": 9.94215875104717e-07,
+      "KKT": 6.722053469410127e-16,
+      "healing": 0.0,
+      "mechanical_residual": 6.039202876873419e-09,
+      "source_errors": {
+        "0": 8.832862219421145e-10
+      }
+    }
+  },
+  "common_times": [
+    {
+      "time": 0.0,
+      "phi_coarse": 0.6035488376736221,
+      "phi_fine": 0.6035488376736221,
+      "H_growth_coarse": 0.0,
+      "H_growth_fine": 0.0
+    },
+    {
+      "time": 0.125,
+      "phi_coarse": 0.6035488376736221,
+      "phi_fine": 0.6035488376736221,
+      "H_growth_coarse": 0.0,
+      "H_growth_fine": 0.0
+    },
+    {
+      "time": 0.25,
+      "phi_coarse": 0.6035488376736221,
+      "phi_fine": 0.6035488376736221,
+      "H_growth_coarse": 0.0,
+      "H_growth_fine": 0.0
+    },
+    {
+      "time": 0.375,
+      "phi_coarse": 0.6035488376736221,
+      "phi_fine": 0.6035488376736221,
+      "H_growth_coarse": 0.0,
+      "H_growth_fine": 0.0
+    },
+    {
+      "time": 0.5,
+      "phi_coarse": 0.6035488376736221,
+      "phi_fine": 0.6035488376736221,
+      "H_growth_coarse": 0.0,
+      "H_growth_fine": 0.0
+    },
+    {
+      "time": 0.625,
+      "phi_coarse": 0.6035488376736221,
+      "phi_fine": 0.6035488376736221,
+      "H_growth_coarse": 0.0,
+      "H_growth_fine": 0.0
+    },
+    {
+      "time": 0.75,
+      "phi_coarse": 0.6035488376736221,
+      "phi_fine": 0.6035488376736221,
+      "H_growth_coarse": 1.1925122433412948e-05,
+      "H_growth_fine": 0.0
+    },
+    {
+      "time": 0.875,
+      "phi_coarse": 0.6035489788447146,
+      "phi_fine": 0.6035488376736221,
+      "H_growth_coarse": 4.369376343069838,
+      "H_growth_fine": 0.0
+    },
+    {
+      "time": 1.0,
+      "phi_coarse": 0.6058748814265966,
+      "phi_fine": 0.6035488376736221,
+      "H_growth_coarse": 36.201385311597605,
+      "H_growth_fine": 9.94215875104717e-07
+    }
+  ],
+  "common_slip": {
+    "0.0": {
+      "slip": 0.03329437192188799,
+      "values": [
+        {
+          "phi": 0.6055010093453387,
+          "q": 857.0243877336883,
+          "time": 0.9799071506600122,
+          "nearby_parent_H": 40413.78865437043,
+          "nearby_parent_H0": 29167.992587787645
+        },
+        {
+          "phi": 0.6035488376736221,
+          "q": 863.9643723801285,
+          "time": 1.0,
+          "nearby_parent_H": 29167.992587787645,
+          "nearby_parent_H0": 29167.992587787645
+        }
+      ]
+    },
+    "0.5": {
+      "slip": 0.0048308011460358735,
+      "values": [
+        {
+          "phi": 0.6035498773266812,
+          "q": 606.781938662819,
+          "time": 0.9691796008369292,
+          "nearby_parent_H": 29167.992587787645,
+          "nearby_parent_H0": 29167.992587787645
+        },
+        {
+          "phi": 0.6035488376736221,
+          "q": 606.6837234021601,
+          "time": 1.0,
+          "nearby_parent_H": 29167.992587787645,
+          "nearby_parent_H0": 29167.992587787645
+        }
+      ]
+    },
+    "1.0": {
+      "slip": 0.0332943719372813,
+      "values": [
+        {
+          "phi": 0.6055010093489596,
+          "q": 857.0243878558047,
+          "time": 0.9799071508546155,
+          "nearby_parent_H": 40413.788670851834,
+          "nearby_parent_H0": 29167.992587787645
+        },
+        {
+          "phi": 0.6035488376736221,
+          "q": 863.9643725178493,
+          "time": 1.0,
+          "nearby_parent_H": 29167.992587787645,
+          "nearby_parent_H0": 29167.992587787645
+        }
+      ]
+    }
+  },
+  "physical_definition_unresolved": true,
+  "production_law_changed": false,
+  "stress_scaling_run": false,
+  "feedback_refinement_pass": false
+}

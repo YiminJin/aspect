@@ -1,0 +1,174 @@
+{
+  "case": "onset-economical-resumed",
+  "completed": true,
+  "accepted_steps": 58,
+  "exact_schedule": true,
+  "minimum_normalization": 108.64889557673479,
+  "maximum_phase_increment": 0.0015739027790191429,
+  "recovery": {
+    "surface_components": 520,
+    "unchanged_nan_sentinels": 325,
+    "differences": 0,
+    "distinct_previous_phase_max_difference": 6.993730687142145e-07,
+    "retry_accepted": true,
+    "scope": "Forced complete outer solve before publication; no postpublication or restart claim."
+  },
+  "energy": {
+    "bulk_rate_work": {
+      "native_signed": 41.24103948556947,
+      "native_sum_absolute_step": 41.24103948556947,
+      "native_maximum_step": 2.5067689773616584,
+      "prototype_signed": 41.241039485504714,
+      "prototype_sum_absolute_step": 41.241039485504714,
+      "difference_signed": 6.474058355382395e-11,
+      "sum_absolute_step_difference": 1.0918453727942756e-10,
+      "maximum_step_difference": 8.232969861410311e-12
+    },
+    "lifting_work": {
+      "native_signed": 41.240898647002446,
+      "native_sum_absolute_step": 41.240898647002446,
+      "native_maximum_step": 2.5067690333832258,
+      "prototype_signed": 41.24089812128194,
+      "prototype_sum_absolute_step": 41.24089812128194,
+      "difference_signed": 5.257205018980248e-07,
+      "sum_absolute_step_difference": 7.921881980512747e-07,
+      "maximum_step_difference": 7.485822695052491e-08
+    },
+    "boundary_reaction_work": {
+      "native_signed": 41.240898799158984,
+      "native_sum_absolute_step": 41.240898799158984,
+      "native_maximum_step": 2.5067690496075645,
+      "prototype_signed": 41.240898121092,
+      "prototype_sum_absolute_step": 41.240898121092,
+      "difference_signed": 6.780669932430344e-07,
+      "sum_absolute_step_difference": 1.0217025474216351e-06,
+      "maximum_step_difference": 9.654139909720527e-08
+    },
+    "bulk_viscous": {
+      "native_signed": 0.005791448528610219,
+      "native_sum_absolute_step": 0.005791448528610219,
+      "native_maximum_step": 0.0002533236969940349,
+      "prototype_signed": 0.00579144836704645,
+      "prototype_sum_absolute_step": 0.00579144836704645,
+      "difference_signed": 1.615637676753384e-10,
+      "sum_absolute_step_difference": 2.236027912188177e-10,
+      "maximum_step_difference": 1.7713600470323568e-11
+    },
+    "cohesive_viscous": {
+      "native_signed": 0.011383478452657088,
+      "native_sum_absolute_step": 0.011383478452657088,
+      "native_maximum_step": 0.0012682777432265434,
+      "prototype_signed": 0.01138347846712972,
+      "prototype_sum_absolute_step": 0.01138347846712972,
+      "difference_signed": -1.447263152421893e-11,
+      "sum_absolute_step_difference": 2.35528951586802e-11,
+      "maximum_step_difference": 2.4364232961877896e-12
+    },
+    "friction": {
+      "native_signed": 34.807576593388724,
+      "native_sum_absolute_step": 34.807576593388724,
+      "native_maximum_step": 1.9506402478323248,
+      "prototype_signed": 34.807576593432316,
+      "prototype_sum_absolute_step": 34.807576593432316,
+      "difference_signed": -4.359021909633992e-11,
+      "sum_absolute_step_difference": 3.232692154720417e-06,
+      "maximum_step_difference": 2.0057763872038947e-07
+    },
+    "mechanical_residual_work": {
+      "native_signed": 0.00014068641044573095,
+      "native_sum_absolute_step": 0.00014249295646437854,
+      "native_maximum_step": 5.111389429962414e-05,
+      "prototype_signed": 0.0001413644127283972,
+      "prototype_sum_absolute_step": 0.00014147193727589405,
+      "difference_signed": -6.780022826662395e-07,
+      "sum_absolute_step_difference": 1.0216034782987803e-06,
+      "maximum_step_difference": 9.65337454572434e-08
+    },
+    "friction_residual_work": {
+      "native_signed": -3.0340811530944696e-06,
+      "native_sum_absolute_step": 0.0001237369111447354,
+      "native_maximum_step": 6.0297433156274584e-05,
+      "prototype_signed": -3.034080250846206e-06,
+      "prototype_sum_absolute_step": 0.00012373690865886944,
+      "difference_signed": -9.022482829458662e-13,
+      "sum_absolute_step_difference": 4.795770109917757e-12,
+      "maximum_step_difference": 1.069191837252707e-12
+    },
+    "phase_residual_work": {
+      "native_signed": -6.563533575436958e-05,
+      "native_sum_absolute_step": 6.577205768116927e-05,
+      "native_maximum_step": 2.8873419870500543e-05,
+      "prototype_signed": -6.563534490273146e-05,
+      "prototype_sum_absolute_step": 6.57720668491115e-05,
+      "difference_signed": 9.148361882924641e-12,
+      "sum_absolute_step_difference": 9.167942231498665e-12,
+      "maximum_step_difference": 7.155318323254483e-12
+    },
+    "profile_bulk_work": {
+      "native_signed": -7.771919949043297e-05,
+      "native_sum_absolute_step": 7.771919949043297e-05,
+      "native_maximum_step": 2.871421834873538e-05,
+      "prototype_signed": -7.771919885068992e-05,
+      "prototype_sum_absolute_step": 7.771919885068992e-05,
+      "difference_signed": -6.397430404398411e-13,
+      "sum_absolute_step_difference": 7.150107072440502e-12,
+      "maximum_step_difference": 3.25518201600033e-12
+    },
+    "profile_cohesive_work": {
+      "native_signed": -0.13177692090254733,
+      "native_sum_absolute_step": 0.13177692090254733,
+      "native_maximum_step": 0.0451175260616006,
+      "prototype_signed": -0.13177692037902652,
+      "prototype_sum_absolute_step": 0.13177692037902652,
+      "difference_signed": -5.235208194728887e-10,
+      "sum_absolute_step_difference": 2.5949710896758133e-09,
+      "maximum_step_difference": 1.0337838987628523e-09
+    },
+    "absolute_mechanical_work": {
+      "native_signed": 0.00014303353643682078,
+      "native_sum_absolute_step": 0.00014303353643682078,
+      "native_maximum_step": 5.111389429962414e-05,
+      "prototype_signed": 0.00014147193746968047,
+      "prototype_sum_absolute_step": 0.00014147193746968047,
+      "difference_signed": 1.561598967140315e-06,
+      "sum_absolute_step_difference": 1.561608547535801e-06,
+      "maximum_step_difference": 9.65337454572434e-08
+    },
+    "absolute_friction_work": {
+      "native_signed": 0.00012373691373609264,
+      "native_sum_absolute_step": 0.00012373691373609264,
+      "native_maximum_step": 6.0297433156274584e-05,
+      "prototype_signed": 0.00012373690880530285,
+      "prototype_sum_absolute_step": 0.00012373690880530285,
+      "difference_signed": 4.930789806619008e-12,
+      "sum_absolute_step_difference": 7.121834469308373e-12,
+      "maximum_step_difference": 1.069191837252707e-12
+    },
+    "absolute_phase_work": {
+      "native_signed": 7.043726906127328e-05,
+      "native_sum_absolute_step": 7.043726906127328e-05,
+      "native_maximum_step": 2.8873419870500543e-05,
+      "prototype_signed": 7.036561061778688e-05,
+      "prototype_sum_absolute_step": 7.036561061778688e-05,
+      "difference_signed": 7.165844348638837e-08,
+      "sum_absolute_step_difference": 7.167441686878457e-08,
+      "maximum_step_difference": 7.166643017758647e-08
+    },
+    "external_remainder": {
+      "native_signed": 7.201699412202481e-05,
+      "native_sum_absolute_step": 7.392689748352754e-05,
+      "native_maximum_step": 6.029743312161058e-05,
+      "prototype_signed": 7.269498751690684e-05,
+      "prototype_sum_absolute_step": 7.29058808590917e-05,
+      "difference_signed": -6.779933948820195e-07,
+      "sum_absolute_step_difference": 1.02160222963192e-06,
+      "maximum_step_difference": 9.65337807468103e-08
+    }
+  },
+  "identity_remainder": {
+    "signed": 5.837579113042422e-13,
+    "sum_absolute_step": 3.060263268834449e-12,
+    "maximum_step": 3.1147880735977237e-13
+  },
+  "scope": "Exact matching schedule and unaligned fields. Absolute power channels are separate from sums of absolute signed step work. Stress comparisons are limited to exported off-quadrature states; no full trajectory stability or energy-closure claim."
+}

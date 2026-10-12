@@ -1,0 +1,17 @@
+{
+  "cut": 0.3084921899671623,
+  "seed_points": 400001,
+  "seed_refinement_error": 9.673928325071302e-12,
+  "BVP_refinement_error": 8.569811527081583e-13,
+  "maximum_continuum_residual": 9.997180692787322e-11,
+  "nonnegative_initialization_correction": 0.0,
+  "core": 0.6000019377630632,
+  "minimum_raw": 1.5440432306151983e-10,
+  "boundary_residual": 0.0,
+  "meaning": "Common continuum seeded-H stationary definition; tiny nonnegativity correction if needed, protected unloaded seed thereafter",
+  "maximum_relaxation_change_from_physical_seed": 6.77422516085296e-05,
+  "maximum_change_y": 0.191436767578125,
+  "phi_at_H_transition": 6.870431259808469e-05,
+  "outside_H_Pa": 0.5,
+  "doubled_seed_stationary_field_error": 1.1370071550942384e-11
+}

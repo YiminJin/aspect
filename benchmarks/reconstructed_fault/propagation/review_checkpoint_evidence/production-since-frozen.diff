@@ -1,0 +1,1289 @@
+diff --git a/include/aspect/material_model/phase_field_fault.h b/include/aspect/material_model/phase_field_fault.h
+index 909fe7645..5e53c2c73 100644
+--- a/include/aspect/material_model/phase_field_fault.h
++++ b/include/aspect/material_model/phase_field_fault.h
+@@ -185,6 +185,14 @@ namespace aspect
+         /** Explicit constitutive selection, never inferred from a frozen phase. */
+         bool is_mature_frictional_fault() const;
+ 
++        /** Selected cohesive work pair; the legacy mature work mode is separate. */
++        bool uses_cohesive_work_measure() const { return cohesive_work_measure; }
++
++        /** Surface resistance at prescribed pressure; no bulk stress evaluation
++         * is used by the caller. Shares the native cohesive/friction law. */
++        ReconstructedFaultPointResponse evaluate_cohesive_surface_resistance(
++          unsigned int fault, unsigned int segment, double xi, double rate) const;
++
+         /** Select immutable, geometry-checked outside-profile integrals for a
+          * frozen mature through-boundary benchmark. Applied before the existing
+          * consistent I_h projection; no outside mechanical integration is added.
+@@ -255,6 +263,9 @@ namespace aspect
+          * @}
+          */
+ 
++        /** Prepare normalization and initial cohesive history without a mechanical update. */
++        void prepare_reconstructed_fault_phase_state();
++
+       private:
+         friend class internal::PhaseFieldFaultTestAccess<dim>;
+         friend class Postprocess::MomentCycle<dim>;
+@@ -315,6 +326,13 @@ namespace aspect
+                                   const double previous_h,
+                                   const bool mature = false);
+ 
++        /** Advance authoritative Q1 Z=I*q using nodal Maxwell coefficients.
++         * Requires uniform G and temperature-independent uniform viscosity.
++         * No particle transfer and no history writes occur here.
++         */
++        std::vector<std::vector<double>> compute_surface_cohesive_candidates(
++          const double time_step, const std::vector<std::vector<double>> &rates) const;
++
+         /** Surface mixture and cohesive-profile values shared by surface and bulk points. */
+         struct LocalizationResponse
+         {
+@@ -400,6 +418,11 @@ namespace aspect
+           const double previous_h,
+           const double current_cohesive_traction,
+           const double previous_cohesive_traction);
++
++        /** Recoverable energy coefficient multiplying g' at fixed elastic slip. */
++        static double compute_recoverable_phase_driving_force(
++          const double shear_modulus, const double degradation,
++          const double cohesive_traction);
+         /**
+          * @}
+          */
+@@ -593,6 +616,10 @@ namespace aspect
+         unsigned int background_traction_property = numbers::invalid_unsigned_int;
+         unsigned int background_shear_correction_property = numbers::invalid_unsigned_int;
+         bool mature_frictional_fault = false;
++        bool recoverable_phase_history = false;
++        bool surface_cohesive_history = false;
++        bool cohesive_work_measure = false;
++        bool unloaded_cohesive_initialization = false;
+ 
+         MaterialUtilities::CompositionalAveragingOperation viscosity_averaging;
+ 
+@@ -628,6 +655,9 @@ namespace aspect
+ 
+         double normalization_quadrature_tolerance;
+ 
++        // I_h only; immutable after parsing. Generic projections remain consistent.
++        bool lump_normalization_projection = false;
++
+         // Fixed per run: also defines completion-file profile IDs and cache layout.
+         unsigned int normalization_surface_subdivisions = 1;
+ 
+diff --git a/include/aspect/phase_field.h b/include/aspect/phase_field.h
+index c3a08c868..47f5bb763 100644
+--- a/include/aspect/phase_field.h
++++ b/include/aspect/phase_field.h
+@@ -264,6 +264,8 @@ namespace aspect
+ 
+     struct SolverParameters
+     {
++      bool use_bound_constraints = false;
++      bool enforce_irreversibility = false;
+       double linear_solver_tolerance;
+       unsigned int max_linear_solver_iterations;
+       double nonlinear_solver_tolerance;
+@@ -307,6 +309,8 @@ namespace aspect
+                          LinearAlgebra::BlockVector       &system_rhs,
+                          LinearAlgebra::BlockVector       &solution);
+ 
++      bool uses_bound_constraints() const { return solver_parameters.use_bound_constraints; }
++
+       double crack_surface_density(const double          phase_field_value,
+                                    const Tensor<1, dim> &phase_field_gradient) const;
+ 
+@@ -353,13 +357,26 @@ namespace aspect
+                                   LinearAlgebra::BlockVector       &system_rhs,
+                                   const LinearAlgebra::BlockVector &current_solution,
+                                   const bool assemble_system_jacobian,
+-                                  double *residual_roundoff_allowance = nullptr) const;
++                                  double *residual_roundoff_allowance = nullptr,
++                                  double *energy = nullptr) const;
+ 
+       unsigned int
+       solve_phase_field_system(const LinearAlgebra::BlockSparseMatrix &system_matrix,
+                                const LinearAlgebra::BlockVector       &system_rhs,
+                                LinearAlgebra::BlockVector             &solution_vector) const;
+ 
++      void solve_bound_constrained_phase(LinearAlgebra::BlockSparseMatrix &matrix,
++                                         LinearAlgebra::BlockVector &rhs,
++                                         LinearAlgebra::BlockVector &state,
++                                         const LinearAlgebra::BlockVector *lower_bound = nullptr) const;
++
++      void constrain_phase_newton_system(LinearAlgebra::BlockSparseMatrix &matrix,
++                                         LinearAlgebra::BlockVector &rhs,
++                                         const LinearAlgebra::BlockVector &state,
++                                         const LinearAlgebra::BlockVector *lower_bound = nullptr) const;
++
++      void initialize_phase_guess(LinearAlgebra::BlockVector &state) const;
++
+       PhaseField::SolverParameters solver_parameters;
+ 
+       std::unique_ptr<PhaseField::GeometricFunction> geometric_function;
+diff --git a/include/aspect/reconstructed_fault/manager.h b/include/aspect/reconstructed_fault/manager.h
+index 0c069111d..3a25e624b 100644
+--- a/include/aspect/reconstructed_fault/manager.h
++++ b/include/aspect/reconstructed_fault/manager.h
+@@ -517,6 +517,9 @@ namespace aspect
+       std::vector<bool> slip_rate_initialized;
+       std::vector<std::map<unsigned int, double>> prescribed_slip_rates;
+       bool fit_prescribed_geometry = true;
++
++      /** Fixed verification support covering a single straight Box cross-section. */
++      bool full_normal_cross_section = false;
+       bool slip_rate_nonlinear_solve_active = false;
+       bool slip_rate_trial_active = false;
+   };
+diff --git a/source/material_model/phase_field_fault.cc b/source/material_model/phase_field_fault.cc
+index 9b801992e..30b5066b4 100644
+--- a/source/material_model/phase_field_fault.cc
++++ b/source/material_model/phase_field_fault.cc
+@@ -424,6 +424,39 @@ namespace aspect
+                             "prescribed phase profile. Requires Evolve phase field=false, fixed "
+                             "reconstructed geometry and a fresh compatible initialization.");
+ 
++          prm.declare_entry("Phase driving history", "incremental work",
++                            Patterns::Selection("incremental work|recoverable energy"),
++                            "Recoverable energy uses the accepted state q^2/(2 G g^2) "
++                            "in the peak history. Viscous work is not accumulated. "
++                            "Incremental work retains the historical finite-step law. "
++                            "The selection cannot change on restart.");
++          prm.declare_entry("Initial cohesive state", "seeded energy",
++                            Patterns::Selection("seeded energy|unloaded"),
++                            "Unloaded initializes cohesive traction and elastic slip to zero "
++                            "while retaining initialized particle H and the relaxed phase. "
++                            "Seeded energy retains the historical projected preload.");
++
++          prm.declare_entry("Fault mechanical work measure", "particle volume",
++                            Patterns::Selection("particle volume|bulk conjugate"),
++                            "Bulk conjugate uses the adjoint of the Stokes-QP slip-strain map "
++                            "for shear exchange and surface quadrature for resistance. "
++                            "Requires surface elastic-slip history and prescribed friction pressure. "
++                            "Particle volume preserves the legacy surface assembly.");
++          prm.declare_entry("Cohesive history representation", "particle projection",
++                            Patterns::Selection("particle projection|surface elastic slip"),
++                            "Surface elastic slip advances Q1 Z=I*q on the fault without a "
++                            "particle round trip. Pointwise q is Z/I. Requires homogeneous "
++                            "G and temperature-independent viscosity; restart selection is fixed. "
++                            "Particle projection retains the legacy path.");
++
++          prm.declare_entry("I h projection", "consistent",
++                            Patterns::Selection("consistent|row sum lumped"),
++                            "Surface representation of I_h only. Row sum lumped uses the "
++                            "positive Q1 mass row sums with the same surface quadrature RHS. "
++                            "It preserves constants and the quadrature-defined integral, "
++                            "but does not establish spatial accuracy or finiteness of the "
++                            "underlying normalization. The choice cannot change on restart.");
++
+           prm.declare_entry("I h integration backend", "remote points",
+                             Patterns::Selection("remote points|cell intervals"),
+                             "Normal-profile integration backend. Cell intervals reuses affine "
+@@ -488,12 +521,24 @@ namespace aspect
+             initial_time_step *= year_in_seconds;
+ 
+           evolve_phase_field = prm.get_bool("Evolve phase field");
++          recoverable_phase_history = prm.get("Phase driving history") == "recoverable energy";
++          unloaded_cohesive_initialization = prm.get("Initial cohesive state") == "unloaded";
++          surface_cohesive_history = prm.get("Cohesive history representation") == "surface elastic slip";
+           mature_frictional_fault = prm.get("Fault constitutive mode") == "mature frictional";
++          AssertThrow(!(recoverable_phase_history || unloaded_cohesive_initialization || surface_cohesive_history)
++                      || (this->get_parameters().reconstruct_faults && !mature_frictional_fault),
++                      ExcMessage("Recoverable history and unloaded initialization require reconstructed cohesive faults."));
+           AssertThrow(!mature_frictional_fault || (!evolve_phase_field
+                         && this->get_parameters().reconstruct_faults),
+                       ExcMessage("Mature frictional mode requires reconstructed faults and Evolve phase field=false."));
+           use_adiabatic_pressure_in_fault_friction =
+             prm.get_bool("Use adiabatic pressure in fault friction");
++          cohesive_work_measure = prm.get("Fault mechanical work measure") == "bulk conjugate";
++          AssertThrow(!cohesive_work_measure || (surface_cohesive_history
++                      && use_adiabatic_pressure_in_fault_friction && dim==2),
++                      ExcMessage("Cohesive bulk-conjugate work requires 2-D surface elastic-slip "
++                                 "history and prescribed friction pressure."));
++          lump_normalization_projection = prm.get("I h projection") == "row sum lumped";
+           normalization_quadrature_tolerance =
+             prm.get_double("I h quadrature tolerance");
+           normalization_surface_subdivisions =
+diff --git a/source/material_model/phase_field_fault/constitutive.cc b/source/material_model/phase_field_fault/constitutive.cc
+index e131799d0..6a0473137 100644
+--- a/source/material_model/phase_field_fault/constitutive.cc
++++ b/source/material_model/phase_field_fault/constitutive.cc
+@@ -248,6 +248,27 @@ namespace aspect
+       return response;
+     }
+ 
++    template <int dim>
++    typename PhaseFieldFault<dim>::ReconstructedFaultPointResponse
++    PhaseFieldFault<dim>::evaluate_cohesive_surface_resistance(
++      const unsigned int f, const unsigned int s, const double xi, const double rate) const
++    {
++      AssertThrow(cohesive_work_measure && use_adiabatic_pressure_in_fault_friction,
++                  ExcMessage("Surface resistance requires prescribed normal pressure."));
++      const auto &fault = this->get_reconstructed_fault_manager().get_fault(f);
++      const auto l = evaluate_reconstructed_fault_localization(f,s,xi,0.,0.,"surface resistance");
++      ReconstructedFaultPointInputs in;
++      in.fault_index=f; in.segment_index=s; in.xi=xi; in.slip_rate=rate;
++      in.position=(1.-xi)*fault.vertex(s)+xi*fault.vertex(s+1);
++      in.phase_field=in.previous_phase_field=0.;
++      in.temperature=l.surface_temperature;
++      in.bulk_material_fractions=l.surface_material_fractions;
++      in.dynamic_pressure=0.;
++      // With h=0 and zero bulk tensors the returned derivative contains only
++      // q, friction and damping. These quantities do not depend on local phi.
++      return evaluate_reconstructed_fault_point(in);
++    }
++
+     template <int dim>
+     typename PhaseFieldFault<dim>::ReconstructedFaultBulkPointResponse
+     PhaseFieldFault<dim>::evaluate_reconstructed_fault_bulk_point(
+@@ -328,6 +349,22 @@ namespace aspect
+       return candidate;
+     }
+ 
++    template <int dim>
++    double
++    PhaseFieldFault<dim>::compute_recoverable_phase_driving_force(
++      const double shear_modulus, const double degradation,
++      const double cohesive_traction)
++    {
++      AssertThrow(std::isfinite(shear_modulus) && shear_modulus > 0.0
++                  && std::isfinite(degradation) && degradation > 0.0
++                  && degradation <= 1.0 && std::isfinite(cohesive_traction),
++                  ExcMessage("Recoverable phase driving requires G>0, 0<g<=1 and finite traction."));
++      const double effective_traction = cohesive_traction/degradation;
++      const double energy = effective_traction*effective_traction/(2.0*shear_modulus);
++      AssertThrow(std::isfinite(energy), ExcMessage("Nonfinite recoverable phase driving energy."));
++      return energy;
++    }
++
+     template <int dim>
+     typename PhaseFieldFault<dim>::LocalizationResponse
+     PhaseFieldFault<dim>::evaluate_reconstructed_fault_localization(
+@@ -385,6 +422,18 @@ namespace aspect
+         fault, segment_index, xi, cohesive_position,
+         "phase field fault cohesive traction");
+ 
++      if (surface_cohesive_history)
++        {
++          // Z is the Q1 internal variable. Multiplying interpolated q and I
++          // would introduce a spurious quadratic field and lose this history.
++          const auto left = fault.get_properties(segment_index);
++          const auto right = fault.get_properties(segment_index+1);
++          response.previous_cohesive_traction =
++            ((1.-xi)*left[previous_I_h_position]*left[cohesive_position]
++             + xi*right[previous_I_h_position]*right[cohesive_position])
++            / response.previous_I_h;
++        }
++
+       const double current_phi = normalization_effective_phase_field(
+         phase_field, context);
+       // The initial mechanical solve has no earlier physical profile. Use
+@@ -413,6 +462,35 @@ namespace aspect
+       return response;
+     }
+ 
++    template <int dim>
++    std::vector<std::vector<double>>
++    PhaseFieldFault<dim>::compute_surface_cohesive_candidates(
++      const double time_step, const std::vector<std::vector<double>> &rates) const
++    {
++      AssertThrow(surface_cohesive_history, ExcMessage("Surface history is not selected."));
++      const auto &faults = this->get_reconstructed_fault_manager().get_faults();
++      AssertDimension(rates.size(), faults.size());
++      std::vector<std::vector<double>> result(faults.size());
++      for (unsigned int f=0; f<faults.size(); ++f)
++        {
++          AssertDimension(rates[f].size(), faults[f].n_vertices());
++          result[f].resize(faults[f].n_vertices());
++          for (unsigned int j=0; j<faults[f].n_vertices(); ++j)
++            {
++              const unsigned int segment = std::min(j, faults[f].n_cells()-1);
++              const auto l = evaluate_reconstructed_fault_localization(
++                f, segment, j-segment, 0., 0., "surface history");
++              const auto c = compute_maxwell_coefficients(
++                compute_creep_viscosity(l.surface_material_fractions,l.surface_temperature),
++                MaterialUtilities::average_value(l.surface_material_fractions,
++                  elastic_shear_moduli,viscosity_averaging),time_step);
++              result[f][j] = compute_cohesive_response(c,l.current_I_h,l.previous_I_h,
++                l.previous_cohesive_traction,rates[f][j],0.,0.).cohesive_traction;
++            }
++        }
++      return result;
++    }
++
+     template <int dim>
+     typename PhaseFieldFault<dim>::CohesiveResponse
+     PhaseFieldFault<dim>::compute_cohesive_response(
+@@ -496,9 +574,12 @@ namespace aspect
+     template SymmetricTensor<2,dim> PhaseFieldFault<dim>::compute_maxwell_stress(const MaxwellCoefficients &, const SymmetricTensor<2,dim> &, const SymmetricTensor<2,dim> &); \
+     template SymmetricTensor<2,dim> PhaseFieldFault<dim>::evaluate_frozen_maxwell_stress(const double, const std::vector<double> &, const SymmetricTensor<2,dim> &) const; \
+     template PhaseFieldFault<dim>::ReconstructedFaultPointResponse PhaseFieldFault<dim>::evaluate_reconstructed_fault_point(const ReconstructedFaultPointInputs &) const; \
++    template PhaseFieldFault<dim>::ReconstructedFaultPointResponse PhaseFieldFault<dim>::evaluate_cohesive_surface_resistance(unsigned int, unsigned int, double, double) const; \
+     template PhaseFieldFault<dim>::ReconstructedFaultBulkPointResponse PhaseFieldFault<dim>::evaluate_reconstructed_fault_bulk_point(const ReconstructedFaultBulkPointInputs &) const; \
+     template double PhaseFieldFault<dim>::compute_crack_driving_force_candidate(const double, const MaxwellCoefficients &, const double, const double, const double, const double); \
++    template double PhaseFieldFault<dim>::compute_recoverable_phase_driving_force(const double, const double, const double); \
+     template PhaseFieldFault<dim>::LocalizationResponse PhaseFieldFault<dim>::evaluate_reconstructed_fault_localization(const unsigned int, const unsigned int, const double, const double, const double, const std::string &) const; \
++    template std::vector<std::vector<double>> PhaseFieldFault<dim>::compute_surface_cohesive_candidates(const double, const std::vector<std::vector<double>> &) const; \
+     template PhaseFieldFault<dim>::CohesiveResponse PhaseFieldFault<dim>::compute_cohesive_response(const MaxwellCoefficients &, const double, const double, const double, const double, const double, const double, const bool); \
+     template double PhaseFieldFault<dim>::compute_creep_viscosity(const std::vector<double> &, const double) const;
+ 
+diff --git a/source/material_model/phase_field_fault/history.cc b/source/material_model/phase_field_fault/history.cc
+index b987286e3..0d613072e 100644
+--- a/source/material_model/phase_field_fault/history.cc
++++ b/source/material_model/phase_field_fault/history.cc
+@@ -223,6 +223,13 @@ namespace aspect
+     {
+       if (!this->get_parameters().reconstruct_faults)
+         return;
++      if (surface_cohesive_history)
++        for (unsigned int c=0; c<elastic_shear_moduli.size(); ++c)
++          AssertThrow(elastic_shear_moduli[c] == elastic_shear_moduli[0]
++                      && reference_viscosities[c] == reference_viscosities[0]
++                      && thermal_viscosity_exponents[c] == 0.,
++                      ExcMessage("Surface elastic-slip history requires uniform G and "
++                                 "temperature-independent uniform viscosity."));
+       normalization_cell_cache.change_connection = this->get_triangulation().signals.any_change.connect(
+         [this]() { normalization_cell_cache.mesh_changed = true; });
+       normalization_cell_cache.create_connection = this->get_triangulation().signals.create.connect(
+@@ -235,6 +242,22 @@ namespace aspect
+         [this](parallel::distributed::Triangulation<dim> &)
+         {
+           invalidate_normalization_cache();
++          AssertThrow(this->get_reconstructed_fault_manager().has_property(
++                        "cohesive bulk conjugate work") == cohesive_work_measure,
++                      ExcMessage("Cannot change cohesive work measure on restart."));
++          AssertThrow(this->get_reconstructed_fault_manager().has_property(
++                        "surface elastic slip history") == surface_cohesive_history,
++                      ExcMessage("Cannot change cohesive history representation on restart."));
++          AssertThrow(this->get_reconstructed_fault_manager().has_property(
++                        "recoverable phase history") == recoverable_phase_history,
++                      ExcMessage("Cannot change phase-driving history on restart. Start fresh."));
++          AssertThrow(this->get_reconstructed_fault_manager().has_property(
++                        "unloaded cohesive initialization") == unloaded_cohesive_initialization,
++                      ExcMessage("Cannot change cohesive initialization provenance on restart."));
++          AssertThrow(this->get_reconstructed_fault_manager().has_property(
++                        "row sum lumped I h representation") == lump_normalization_projection,
++                      ExcMessage("Cannot change I_h projection on restart: stored previous "
++                                 "normalization belongs to another representation. Start fresh."));
+           restore_frozen_normalization_after_restart = mature_frictional_fault && !evolve_phase_field;
+           AssertThrow(this->get_reconstructed_fault_manager().has_property(
+                         "mature fault reference geometry") == mature_frictional_fault,
+@@ -284,6 +307,18 @@ namespace aspect
+             "phase field fault chemical composition " + chemical_field_names[c], 1));
+       if (mature_frictional_fault)
+         fault_manager.register_property("mature fault reference geometry", dim);
++      // Presence in the existing serialized property registry is provenance.
++      // The default layout remains unchanged, including old consistent checkpoints.
++      if (lump_normalization_projection)
++        fault_manager.register_property("row sum lumped I h representation", 1);
++      if (cohesive_work_measure)
++        fault_manager.register_property("cohesive bulk conjugate work", 1);
++      if (surface_cohesive_history)
++        fault_manager.register_property("surface elastic slip history", 1);
++      if (recoverable_phase_history)
++        fault_manager.register_property("recoverable phase history", 1);
++      if (unloaded_cohesive_initialization)
++        fault_manager.register_property("unloaded cohesive initialization", 1);
+     }
+ 
+     template <int dim>
+@@ -664,6 +699,14 @@ namespace aspect
+         diagnostics.open_source_history(this->get_output_directory(),
+                                         this->get_timestep_number(), this->get_mpi_communicator());
+ 
++      if (surface_cohesive_history)
++        {
++          std::vector<std::vector<double>> rates(faults.size());
++          for (unsigned int f=0; f<faults.size(); ++f)
++            rates[f] = fault_manager.get_slip_rate(f);
++          cohesive_projection.nodal_values = compute_surface_cohesive_candidates(time_step, rates);
++        }
++
+       // First evaluate the accepted cohesive traction samples. Projection is
+       // completed before any particle history candidate uses the new traction.
+       unsigned int particle_index = 0;
+@@ -676,7 +719,7 @@ namespace aspect
+             {
+               const auto &association = associations[particle_index];
+               Assert(particle.get_id() == association.particle_id, ExcInternalError());
+-              if (association.active)
++              if (association.active && !surface_cohesive_history)
+                 {
+                   const LocalizationResponse localization =
+                     evaluate_reconstructed_fault_localization(
+@@ -713,8 +756,8 @@ namespace aspect
+         }
+       throw_if_history_error(local_error, this->get_mpi_communicator());
+ 
+-      cohesive_projection =
+-        fault_manager.project_particle_scalar(cohesive_samples);
++      if (!surface_cohesive_history)
++        cohesive_projection = fault_manager.project_particle_scalar(cohesive_samples);
+ 
+       try
+         {
+@@ -860,13 +903,20 @@ namespace aspect
+                   if (evolve_phase_field)
+                     {
+                       const double xi = association.xi;
+-                      const double projected_traction =
+-                        (1.0-xi) * cohesive_projection.nodal_values[
++                      const double projected_traction = surface_cohesive_history
++                        ? cohesive.cohesive_traction
++                        : (1.0-xi) * cohesive_projection.nodal_values[
+                           association.fault_index][association.segment_index]
+                         + xi * cohesive_projection.nodal_values[
+                           association.fault_index][association.segment_index+1];
+                       const double H_candidate =
+-                        compute_crack_driving_force_candidate(
++                        recoverable_phase_history
++                        ? compute_recoverable_phase_driving_force(
++                            MaterialUtilities::average_value(
++                              localization.surface_material_fractions,
++                              elastic_shear_moduli, viscosity_averaging),
++                            localization.current_degradation, projected_traction)
++                        : compute_crack_driving_force_candidate(
+                           time_step, surface_coefficients,
+                           localization.current_degradation,
+                           localization.previous_h, projected_traction,
+@@ -1090,6 +1140,25 @@ namespace aspect
+           }
+     }
+ 
++    template <int dim>
++    void
++    PhaseFieldFault<dim>::prepare_reconstructed_fault_phase_state()
++    {
++      const auto &manager = this->get_reconstructed_fault_manager();
++      const auto &info = manager.get_property_information();
++      const bool initialized = cohesive_history_is_initialized(
++        manager.get_faults(), info[fault_property_indices.cohesive_traction].position,
++        info[fault_property_indices.previous_normalization_integral].position);
++      AssertThrow(initialized || (this->get_timestep_number() == 0
++                                  && !this->get_parameters().resume_computation),
++                  ExcMessage("Phase restart requires initialized cohesive history."));
++      if (!initialized)
++        initialize_cohesive_state_from_initial_fields();
++      else
++        compute_normalization_integrals();
++    }
++
++
+     template <int dim>
+     void
+     PhaseFieldFault<dim>::initialize_cohesive_state_from_initial_fields()
+@@ -1136,7 +1205,7 @@ namespace aspect
+     std::map<types::particle_index, double>
+     PhaseFieldFault<dim>::evaluate_initial_cohesive_particle_values()
+     {
+-      if (mature_frictional_fault)
++      if (mature_frictional_fault || unloaded_cohesive_initialization)
+         {
+           std::map<types::particle_index,double> zero;
+           for (const auto &p : this->get_reconstructed_fault_manager().get_locally_owned_particle_fault_associations())
+@@ -1274,6 +1343,7 @@ namespace aspect
+     template void PhaseFieldFault<dim>::commit_reconstructed_fault_mechanical_history(const LinearAlgebra::BlockVector &); \
+     template double PhaseFieldFault<dim>::compute_reconstructed_fault_time_step(const double) const; \
+     template void PhaseFieldFault<dim>::validate_cohesive_state_commit(const std::vector<std::vector<double>> &) const; \
++    template void PhaseFieldFault<dim>::prepare_reconstructed_fault_phase_state(); \
+     template void PhaseFieldFault<dim>::commit_cohesive_state(const std::vector<std::vector<double>> &) noexcept; \
+     template void PhaseFieldFault<dim>::initialize_cohesive_state_from_initial_fields(); \
+     template std::map<types::particle_index,double> PhaseFieldFault<dim>::evaluate_initial_cohesive_particle_values();
+diff --git a/source/material_model/phase_field_fault/normalization.cc b/source/material_model/phase_field_fault/normalization.cc
+index 0e352849a..8b24b671d 100644
+--- a/source/material_model/phase_field_fault/normalization.cc
++++ b/source/material_model/phase_field_fault/normalization.cc
+@@ -1667,9 +1667,10 @@ namespace aspect
+           local_systems[fault].rhs.assign(faults[fault].n_vertices(), 0.0);
+         }
+ 
+-      // Assemble the consistent Q1 surface mass projection from profiles owned
+-      // by this rank; positivity of the resulting nodal field is tested for the
+-      // intended profiles but is not assumed for arbitrary input data.
++      // Assemble the I_h-only Q1 surface system on profile owners. QGauss
++      // weights times segment arclength are positive, and the two Q1 basis
++      // functions form a nonnegative partition of unity. Generic particle
++      // projection matrices and their solvers are not involved here.
+       for (unsigned int profile_index = 0;
+            profile_index < profiles.size(); ++profile_index)
+         {
+@@ -1679,6 +1680,9 @@ namespace aspect
+                       ExcMessage("I_h profile " + Utilities::int_to_string(profile.id)
+                                  + " produced a non-positive or non-finite integral."));
+           FaultSystem &system = local_systems[profile.fault_index];
++          AssertThrow(std::isfinite(profile.xi) && profile.xi >= 0.0 && profile.xi <= 1.0
++                      && std::isfinite(profile.surface_weight) && profile.surface_weight > 0.0,
++                      ExcMessage("I_h projection requires nonnegative Q1 basis and positive surface weights."));
+           const double shape[2] = {1.0-profile.xi, profile.xi};
+           const unsigned int vertex = profile.segment_index;
+           system.diagonal[vertex] += profile.surface_weight * shape[0] * shape[0];
+@@ -1728,9 +1732,26 @@ namespace aspect
+           std::vector<double> rhs(global_values.begin()+position,
+                                   global_values.begin()+position+n_vertices);
+           position += n_vertices;
+-          current_normalization_integrals[fault] =
+-            ReconstructedFaultUtilities::solve_tridiagonal_system(
+-              diagonal, off_diagonal, rhs);
++          if (lump_normalization_projection)
++            {
++              std::vector<double> values(n_vertices);
++              for (unsigned int i = 0; i < n_vertices; ++i)
++                {
++                  const double row_sum = diagonal[i]
++                                         + (i > 0 ? off_diagonal[i-1] : 0.0)
++                                         + (i+1 < n_vertices ? off_diagonal[i] : 0.0);
++                  AssertThrow(std::isfinite(row_sum) && row_sum > 0.0,
++                              ExcMessage("I_h lumped projection has a non-positive nodal denominator."));
++                  values[i] = rhs[i] / row_sum;
++                  AssertThrow(std::isfinite(values[i]) && values[i] > 0.0,
++                              ExcMessage("I_h lumped projection produced an invalid nodal value."));
++                }
++              current_normalization_integrals[fault] = std::move(values);
++            }
++          else
++            current_normalization_integrals[fault] =
++              ReconstructedFaultUtilities::solve_tridiagonal_system(
++                diagonal, off_diagonal, rhs);
+         }
+     }
+ 
+diff --git a/source/reconstructed_fault/manager.cc b/source/reconstructed_fault/manager.cc
+index 0a8d25606..947a9fcb2 100644
+--- a/source/reconstructed_fault/manager.cc
++++ b/source/reconstructed_fault/manager.cc
+@@ -15,6 +15,7 @@
+ #include <aspect/particle/particle_domain.h>
+ #include <aspect/material_model/utilities.h>
+ #include <aspect/utilities.h>
++#include <aspect/geometry_model/box.h>
+ 
+ #include <deal.II/fe/fe_values.h>
+ 
+@@ -22,6 +23,7 @@
+ #include <cmath>
+ #include <cstdlib>
+ #include <iostream>
++#include <iomanip>
+ #include <limits>
+ #include <map>
+ #include <set>
+@@ -193,6 +195,12 @@ namespace aspect
+                         "Legacy retains existing boundary behavior. Automatic prescribed classifies every "
+                         "fault contact and requires a compatible fully prescribed frozen 2-D phase field, "
+                         "supported exterior Q1 data and paired mechanical work. Unsupported contacts fail.");
++      prm.declare_entry("Association support", "stationary profile",
++                        Patterns::Selection("stationary profile|full normal cross-section"),
++                        "Stationary profile retains the native support widths. Full normal cross-section "
++                        "is a fixed verification policy for one straight prescribed fault spanning a 2D Box. "
++                        "It derives a constant normal half-width from the domain vertices, including roundoff, "
++                        "before cohesive initialization. It does not extend sharp endpoints or change H.");
+       prm.declare_entry("Ridge coefficient", "1",
+                         Patterns::Double(0.0),
+                         "Dimensionless second-difference ridge coefficient applied after "
+@@ -216,7 +224,12 @@ namespace aspect
+     {
+       structural_spacing = prm.get_double("Structural point spacing");
+       fit_prescribed_geometry = prm.get_bool("Fit prescribed geometry to phase field");
++      full_normal_cross_section = prm.get("Association support") == "full normal cross-section";
+       automatic_boundary_completion = prm.get("Boundary completion") == "automatic prescribed";
++      AssertThrow(!full_normal_cross_section || (dim == 2 && !fit_prescribed_geometry
++                                                && !automatic_boundary_completion),
++                  ExcMessage("Full normal cross-section support requires fixed 2D prescribed geometry "
++                             "and legacy boundary completion."));
+       AssertThrow(!automatic_boundary_completion || (dim==2 && !fit_prescribed_geometry),
+                   ExcMessage("Automatic boundary completion requires 2D prescribed fixed geometry "
+                              "(Fit prescribed geometry to phase field=false); 3D contacts are unsupported."));
+@@ -441,11 +454,49 @@ namespace aspect
+ 
+     // Determine mesh-aware reconstruction support before changing any manager
+     // state; all faults use these radii when checking tubular-region overlap.
+-    const std::vector<InitialFaultSupport> fault_support =
++    std::vector<InitialFaultSupport> fault_support =
+       determine_initial_fault_support(phase_field_handler,
+                                       this->get_dof_handler(),
+                                       this->get_mpi_communicator(),
+                                       prescribed_faults);
++    if (full_normal_cross_section)
++      {
++        AssertThrow(prescribed_faults.size() == 1
++                    && dynamic_cast<const GeometryModel::Box<dim> *>(&this->get_geometry_model()) != nullptr,
++                    ExcMessage("Full normal cross-section support requires one straight fault in a Box."));
++        const auto &vertices = prescribed_faults.front().vertices;
++        const Tensor<1,dim> direction = vertices.back() - vertices.front();
++        const double length = direction.norm();
++        const Tensor<1,dim> tangent = direction / length;
++        Tensor<1,dim> normal;
++        normal[0] = -tangent[1];
++        normal[1] = tangent[0];
++        const double tolerance = 64 * std::numeric_limits<double>::epsilon()
++                                 * std::max({1.0, length, vertices.front().norm(), vertices.back().norm()});
++        for (const auto &vertex : vertices)
++          AssertThrow(std::abs((vertex - vertices.front()) * normal) <= tolerance,
++                      ExcMessage("Full normal cross-section support requires a straight prescribed fault."));
++        double local_width = 0, local_min = length, local_max = 0;
++        for (const auto &cell : this->get_dof_handler().active_cell_iterators())
++          if (cell->is_locally_owned())
++            for (const auto v : cell->vertex_indices())
++              {
++                const Tensor<1,dim> offset = cell->vertex(v) - vertices.front();
++                local_width = std::max(local_width, std::abs(offset * normal));
++                local_min = std::min(local_min, offset * tangent);
++                local_max = std::max(local_max, offset * tangent);
++              }
++        const auto comm = this->get_mpi_communicator();
++        AssertThrow(std::abs(Utilities::MPI::min(local_min, comm)) <= tolerance
++                    && std::abs(Utilities::MPI::max(local_max, comm) - length) <= tolerance,
++                    ExcMessage("The prescribed fault must span the full tangential extent of the Box; "
++                               "full normal support does not extend finite sharp endpoints."));
++        const double width = Utilities::MPI::max(local_width, comm) + tolerance;
++        std::fill(fault_support.front().prescribed_half_widths.begin(),
++                  fault_support.front().prescribed_half_widths.end(), width);
++        this->get_pcout() << "fixed normal association half-width=" << std::setprecision(17)
++                         << width << " ... " << std::flush;
++      }
+     std::vector<double> reconstruction_radii(fault_support.size());
+     for (unsigned int fault_index = 0;
+          fault_index < fault_support.size(); ++fault_index)
+@@ -485,6 +536,14 @@ namespace aspect
+     invalidate_particle_projection_cache();
+     initial_reconstruction_complete = true;
+ 
++    if (full_normal_cross_section)
++      {
++        // Establish the fixed eligibility region before any dependent cohesive
++        // projection. Both caches consume the same committed width metadata.
++        get_locally_owned_particle_fault_associations();
++        prepare_stokes_qp_projection_cache();
++      }
++
+     this->get_pcout() << "done." << std::endl << std::endl;
+   }
+ 
+diff --git a/source/reconstructed_fault/surface_system.cc b/source/reconstructed_fault/surface_system.cc
+index 6a107fe42..abd26f673 100644
+--- a/source/reconstructed_fault/surface_system.cc
++++ b/source/reconstructed_fault/surface_system.cc
+@@ -94,7 +94,7 @@ namespace aspect
+     const FaultVector &slip_rate,
+     const bool assemble_jacobian) const
+   {
+-    if (bulk_work_measure)
++    if (bulk_work_measure || phase_field_fault.uses_cohesive_work_measure())
+       return assemble_bulk_work_system(bulk_state, slip_rate, assemble_jacobian);
+     return assemble_particle_system(bulk_state, slip_rate, assemble_jacobian);
+   }
+diff --git a/source/reconstructed_fault/surface_system_bulk_work.cc b/source/reconstructed_fault/surface_system_bulk_work.cc
+index 8c75d88d7..8559c15e3 100644
+--- a/source/reconstructed_fault/surface_system_bulk_work.cc
++++ b/source/reconstructed_fault/surface_system_bulk_work.cc
+@@ -19,6 +19,8 @@
+ #include <aspect/reconstructed_fault/utilities.h>
+ 
+ #include <aspect/reconstructed_fault/normal_filter_internal.h>
++#include <aspect/reconstructed_fault/surface_direct_internal.h>
++#include <deal.II/base/quadrature_lib.h>
+ 
+ #include <deal.II/fe/fe_values.h>
+ 
+@@ -37,12 +39,28 @@ namespace aspect
+   {
+     TimerOutput::Scope timer(*performance_timer,"Fault: bulk work R/K");
+     phase_field_fault.validate_reconstructed_fault_constitutive_state();
++    const bool cohesive_work = phase_field_fault.uses_cohesive_work_measure();
+     const bool filtering=normal_filter_mode!="raw";
++    AssertThrow(!cohesive_work || (!filtering && !normal_diagnostic_window),
++                ExcMessage("Cohesive work does not select mature normal-stress filters."));
+     AssertThrow(!filtering || !phase_field_fault.uses_adiabatic_friction_pressure(),
+                 ExcMessage("Experimental normal filtering requires true normal stress."));
+     auto &manager=this->get_reconstructed_fault_manager();
+     const auto &faults=manager.get_faults();
+     AssertDimension(slip_rate.size(),faults.size());
++    if (cohesive_work)
++      {
++        AssertThrow(faults.size()==1,ExcMessage("Cohesive work currently supports one straight fault."));
++        const auto &f=faults[0];
++        auto tangent=f.vertex(1)-f.vertex(0);tangent/=tangent.norm();
++        const double length=f.vertex(f.n_vertices()-1).distance(f.vertex(0));
++        for (unsigned int j=0;j<f.n_vertices();++j)
++          {
++            const auto r=f.vertex(j)-f.vertex(0);
++            AssertThrow((r-(r*tangent)*tangent).norm()<1e-10*length,
++                        ExcMessage("Cohesive work requires a straight fault."));
++          }
++      }
+     SurfaceAssembly local;
+     for (auto *v:{&local.residual.values,&local.residual.shear_traction,
+                  &local.residual.cohesive_traction,&local.residual.friction_traction,
+@@ -85,7 +103,7 @@ namespace aspect
+     FEValues<dim> fe(this->get_mapping(),this->get_fe(),quadrature,
+                      update_values|update_gradients|update_quadrature_points|update_JxW_values);
+     const unsigned int nq=quadrature.size();
+-    std::vector<double> phase(nq),temperature(nq),pressure(nq);
++    std::vector<double> phase(nq),previous_phase(nq),temperature(nq),pressure(nq);
+     std::vector<SymmetricTensor<2,dim>> strain(nq);
+     std::vector<Tensor<2,dim>> diagnostic_gradients(nq);
+     std::vector<std::vector<double>> composition(intro.n_compositional_fields,std::vector<double>(nq));
+@@ -105,6 +123,7 @@ namespace aspect
+           const auto &associations=manager.get_stokes_qp_fault_associations(
+             cell->id(),quadrature,fe.get_quadrature_points());
+           fe[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)].get_function_values(bulk_state,phase);
++          fe[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)].get_function_values(this->get_old_solution(),previous_phase);
+           fe[intro.extractors.temperature].get_function_values(bulk_state,temperature);
+           fe[intro.extractors.pressure].get_function_values(bulk_state,pressure);
+           fe[intro.extractors.velocities].get_function_symmetric_gradients(bulk_state,strain);
+@@ -276,7 +295,7 @@ namespace aspect
+                 typename MaterialModel::PhaseFieldFault<dim>::ReconstructedFaultPointInputs input;
+                 input.fault_index=a.fault_index;input.segment_index=a.segment_index;input.xi=a.xi;
+                 input.position=fe.quadrature_point(q);
+-                input.phase_field=phase[q];input.previous_phase_field=phase[q];
++                input.phase_field=phase[q];input.previous_phase_field=cohesive_work ? previous_phase[q] : phase[q];
+                 input.temperature=temperature[q];input.dynamic_pressure=pressure[q];input.strain_rate=strain[q];
+                 input.slip_tensor=manager.get_shear_sense(a.fault_index)
+                                   *symmetrize(outer_product(a.tangent,a.normal));
+@@ -297,7 +316,16 @@ namespace aspect
+                 input.slip_rate=ReconstructedFaultUtilities::interpolate_slip_rate(
+                   V[a.segment_index],V[a.segment_index+1],a.shape_1);
+                 input.capture_stress_components = static_cast<bool>(local.normal_diagnostic);
+-                const auto response=phase_field_fault.evaluate_reconstructed_fault_point(input);
++                auto response=phase_field_fault.evaluate_reconstructed_fault_point(input);
++                if (cohesive_work)
++                  {
++                    // L* tau: resistance belongs to ds below, not JxW*chi.
++                    response.residual_density=response.shear_traction;
++                    response.minus_derivative_wrt_slip_rate=
++                      2.*response.eta_ve*response.localization_factor*(input.slip_tensor*input.slip_tensor);
++                    response.cohesive_traction=response.friction_traction=response.damping_traction=0.;
++                    response.friction_coefficient=0.;
++                  }
+                 const double weight=fe.JxW(q)*response.localization_factor;
+                 if (weight==0.) continue;
+                 AssertThrow(std::isfinite(weight) && weight>0.
+@@ -360,11 +388,11 @@ namespace aspect
+                     local.residual.friction_traction[f][j+i]+=weight*N[i]*response.friction_traction;
+                     local.residual.damping_traction[f][j+i]+=weight*N[i]*response.damping_traction;
+                     local.residual.normal_traction[f][j+i]+=weight*N[i]*response.normal_traction;
+-                    local.mass_diagonal[f][j+i]+=weight*N[i]*N[i];
++                    if (!cohesive_work) local.mass_diagonal[f][j+i]+=weight*N[i]*N[i];
+                     if (assemble_jacobian)
+                       local.diagonal[f][j+i]+=weight*N[i]*N[i]*response.minus_derivative_wrt_slip_rate;
+                   }
+-                local.mass_off_diagonal[f][j]+=weight*N[0]*N[1];
++                if (!cohesive_work) local.mass_off_diagonal[f][j]+=weight*N[0]*N[1];
+                 squared[f]+=weight*response.residual_density*response.residual_density;
+                 measure[f]+=weight;
+                 local.residual.minimum_normal_traction=std::min(local.residual.minimum_normal_traction,response.normal_traction);
+@@ -411,6 +439,32 @@ namespace aspect
+                  &local.diagonal,&local.off_diagonal,&local.mass_diagonal,&local.mass_off_diagonal})
+       for (auto &fault:*v)
+         { const auto copy=fault; Utilities::MPI::sum(copy,comm,fault); }
++    if (cohesive_work)
++      {
++        // Fault geometry is replicated. Add ds resistance ONCE after the bulk
++        // MPI reduction; the same quadrature assembles R, K and its mass.
++        const QGauss<1> surface_quadrature(3);
++        for (unsigned int f=0;f<faults.size();++f)
++          for (unsigned int j=0;j<faults[f].n_cells();++j)
++            for (unsigned int q=0;q<surface_quadrature.size();++q)
++              {
++                const double x=surface_quadrature.point(q)[0],N[2]={1.-x,x};
++                const double w=surface_quadrature.weight(q)*faults[f].vertex(j).distance(faults[f].vertex(j+1));
++                const double rate=ReconstructedFaultUtilities::interpolate_slip_rate(slip_rate[f][j],slip_rate[f][j+1],x);
++                const auto r=phase_field_fault.evaluate_cohesive_surface_resistance(f,j,x,rate);
++                for (unsigned int i=0;i<2;++i)
++                  {
++                    local.residual.values[f][j+i]-=w*N[i]*(r.cohesive_traction+r.friction_traction+r.damping_traction);
++                    local.residual.cohesive_traction[f][j+i]+=w*N[i]*r.cohesive_traction;
++                    local.residual.friction_traction[f][j+i]+=w*N[i]*r.friction_traction;
++                    local.residual.damping_traction[f][j+i]+=w*N[i]*r.damping_traction;
++                    local.mass_diagonal[f][j+i]+=w*N[i]*N[i];
++                    if (assemble_jacobian) local.diagonal[f][j+i]+=w*N[i]*N[i]*r.minus_derivative_wrt_slip_rate;
++                  }
++                local.mass_off_diagonal[f][j]+=w*N[0]*N[1];
++                if (assemble_jacobian) local.off_diagonal[f][j]+=w*N[0]*N[1]*r.minus_derivative_wrt_slip_rate;
++              }
++      }
+     if (filtering)
+       {
+         TimerOutput::Scope filter_timer(*performance_timer,"Fault: normal filter");
+@@ -488,6 +542,22 @@ namespace aspect
+         total_squared+=squared[f];total_measure+=measure[f];
+       }
+     local.residual.weighted_rms=std::sqrt(total_squared/total_measure);
++    if (cohesive_work)
++      {
++        double square=0.,length=0.;
++        for (unsigned int f=0;f<faults.size();++f)
++          {
++            internal::FaultSurfaceDirect mass(local.mass_diagonal[f],local.mass_off_diagonal[f],
++                                              std::vector<bool>(faults[f].n_vertices(),false),f);
++            std::vector<double> density;mass.solve(local.residual.values[f],density);
++            double dot=0.;
++            for (unsigned int j=0;j<density.size();++j) dot+=density[j]*local.residual.values[f][j];
++            const double L=faults[f].vertex(0).distance(faults[f].vertex(faults[f].n_vertices()-1));
++            local.residual.per_fault_weighted_rms[f]=std::sqrt(std::max(0.,dot)/L);
++            square+=dot;length+=L;
++          }
++        local.residual.weighted_rms=std::sqrt(std::max(0.,square)/length);
++      }
+     local.residual.mass_diagonal=local.mass_diagonal;local.residual.mass_off_diagonal=local.mass_off_diagonal;
+     local.residual.minimum_normal_traction=Utilities::MPI::min(local.residual.minimum_normal_traction,comm);
+     local.residual.maximum_normal_traction=Utilities::MPI::max(local.residual.maximum_normal_traction,comm);
+diff --git a/source/simulator/phase_field.cc b/source/simulator/phase_field.cc
+index edd915978..86270fbf9 100644
+--- a/source/simulator/phase_field.cc
++++ b/source/simulator/phase_field.cc
+@@ -26,6 +26,8 @@
+ #include <aspect/particle/particle_domain.h>
+ #include <aspect/material_model/phase_field_fault.h>
+ #include <aspect/plugins.h>
++#include <aspect/reconstructed_fault/manager.h>
++#include <aspect/reconstructed_fault/utilities.h>
+ 
+ #include <deal.II/grid/grid_tools.h>
+ #include <deal.II/dofs/dof_tools.h>
+@@ -491,6 +493,14 @@ namespace aspect
+     {
+       prm.enter_subsection("Phase field solver parameters");
+       {
++        prm.declare_entry("Use bound constraints", "false", Patterns::Bool(),
++                          "Solve the phase variational inequality on the material phase range. "
++                          "This imposes no previous-phase lower bound and does not change H. "
++                          "The default retains the equality solver.");
++        prm.declare_entry("Enforce phase irreversibility", "false", Patterns::Bool(),
++                          "With bound constraints, use an immutable copy of the last accepted phase "
++                          "as the lower bound during physical evolution. Initial relaxation remains "
++                          "on the material phase range; H is unchanged.");
+         prm.declare_entry("Linear solver tolerance", "1e-8",
+                           Patterns::Double(0., 1.),
+                           "A relative tolerance up to which the linearized phase field system "
+@@ -609,6 +619,15 @@ namespace aspect
+     {
+       prm.enter_subsection("Phase field solver parameters");
+       {
++        solver_parameters.use_bound_constraints = prm.get_bool("Use bound constraints");
++        solver_parameters.enforce_irreversibility = prm.get_bool("Enforce phase irreversibility");
++        AssertThrow(!solver_parameters.enforce_irreversibility || solver_parameters.use_bound_constraints,
++                    ExcMessage("Phase irreversibility requires Use bound constraints."));
++        AssertThrow(!solver_parameters.enforce_irreversibility
++                    || this->get_parameters().nonlinear_solver_failure_strategy
++                       != Parameters<dim>::NonlinearSolverFailureStrategy::continue_with_next_timestep,
++                    ExcMessage("Phase irreversibility cannot accept a failed physical step: "
++                               "do not use continue with next timestep."));
+         solver_parameters.linear_solver_tolerance            = prm.get_double("Linear solver tolerance");
+         solver_parameters.max_linear_solver_iterations       = prm.get_integer("Max linear solver iterations");
+         solver_parameters.nonlinear_solver_tolerance         = prm.get_double("Nonlinear solver tolerance");
+@@ -821,7 +840,8 @@ namespace aspect
+                               LinearAlgebra::BlockVector       &system_rhs,
+                               const LinearAlgebra::BlockVector &current_solution,
+                               const bool assemble_system_jacobian,
+-                              double *residual_roundoff_allowance) const
++                              double *residual_roundoff_allowance,
++                              double *energy) const
+   {
+     const Particles::ParticleHandler<dim> &particle_handler = particle_manager->get_particle_handler();
+     const Particle::ParticleDomainHandler<dim> &particle_domain_handler = particle_manager->get_particle_domain_handler();
+@@ -851,6 +871,7 @@ namespace aspect
+ 
+     std::vector<double> chemical_composition_values(C_property_indices.size());
+     bool locally_admissible = true;
++    double local_energy = 0;
+ 
+     // Vector storing the phase field DoF indices associated with a particle domain
+     std::vector<types::global_dof_index> particle_dof_indices;
+@@ -925,6 +946,7 @@ namespace aspect
+             const double d2a_dphi2 = geometric_function->second_derivative(phi);
+             const double l         = geometric_function->get_length_scale();
+ 
++            double potential = 0;
+             double F = 0;
+             double K = 0;
+             double dK_dphi = 0;
+@@ -937,6 +959,10 @@ namespace aspect
+                   const double dg_dphi   = degradation_functions[j]->first_derivative(phi);
+                   const double d2g_dphi2 = degradation_functions[j]->second_derivative(phi);
+ 
++                  if (energy != nullptr)
++                    potential += volume_fractions[j] *
++                      (H * degradation_functions[j]->value(phi)
++                       + Gc_over_c0l * geometric_function->value(phi));
+                   F += volume_fractions[j] * (2. * Gc_over_c0l * l * l);
+                   K += volume_fractions[j] * (H * dg_dphi + Gc_over_c0l * da_dphi);
+                   if (assemble_system_jacobian || residual_roundoff_allowance != nullptr)
+@@ -951,6 +977,8 @@ namespace aspect
+                 }
+ 
+             const double V_p = particle_domain.volume();
++            if (energy != nullptr)
++              local_energy += V_p * (potential + 0.5 * F * grad_phi.norm_square());
+             Vector<double> particle_scale(residual_roundoff_allowance != nullptr ? n_dofs : 0);
+ 
+             for (unsigned int i = 0; i < n_dofs; ++i)
+@@ -1011,6 +1039,8 @@ namespace aspect
+         *residual_roundoff_allowance = 8 * std::numeric_limits<double>::epsilon() *
+                                       rounding_scale.block(block_index).l2_norm();
+       }
++    if (energy != nullptr)
++      *energy = Utilities::MPI::sum(local_energy, this->get_mpi_communicator());
+     return Utilities::MPI::min(static_cast<unsigned int>(locally_admissible),
+                                this->get_mpi_communicator()) == 1;
+   }
+@@ -1089,6 +1119,189 @@ namespace aspect
+ 
+ 
+ 
++  template <int dim>
++  void PhaseFieldHandler<dim>::initialize_phase_guess(LinearAlgebra::BlockVector &state) const
++  {
++    LinearAlgebra::BlockVector owned(this->introspection().index_sets.system_partitioning,
++                                     this->get_mpi_communicator());
++    owned = state;
++    const auto &faults = this->get_reconstructed_fault_manager().get_prescribed_faults();
++    std::map<double, std::vector<std::unique_ptr<PhaseField::PhaseFieldProfile>>> profiles;
++    const unsigned int component = this->introspection().variable("phase_field").first_component_index;
++    for (const auto &cell : this->get_dof_handler().active_cell_iterators())
++      if (!cell->is_artificial())
++        for (unsigned int v=0; v<GeometryInfo<dim>::vertices_per_cell; ++v)
++          {
++            const auto i = cell->vertex_dof_index(v, component);
++            if (!owned.locally_owned_elements().is_element(i))
++              continue;
++            std::vector<double> compositions;
++            for (const auto c : this->introspection().chemical_composition_field_indices())
++              compositions.push_back(state[cell->vertex_dof_index(
++                v, this->introspection().component_indices.compositional_fields[c])]);
++            const auto fractions = MaterialModel::MaterialUtilities::compute_composition_fractions(compositions);
++            double guess = 0;
++            for (const auto &fault : faults)
++              {
++                const auto distance_and_core =
++                  ReconstructedFaultUtilities::closest_point_distance_and_core_phase_field(fault, cell->vertex(v));
++                const double core = distance_and_core.second;
++                if (profiles.find(core) == profiles.end())
++                  profiles.emplace(core, get_phase_field_profiles(core));
++                double phi = 0;
++                for (unsigned int m=0; m<fractions.size(); ++m)
++                  phi += fractions[m] * profiles.at(core)[m]->value(distance_and_core.first);
++                guess = std::max(guess, phi);
++              }
++            owned[i] = guess;
++          }
++    this->get_current_constraints().distribute(owned);
++    state = owned;
++  }
++
++
++  template <int dim>
++  void PhaseFieldHandler<dim>::constrain_phase_newton_system(
++    LinearAlgebra::BlockSparseMatrix &matrix, LinearAlgebra::BlockVector &rhs,
++    const LinearAlgebra::BlockVector &state,
++    const LinearAlgebra::BlockVector *lower_bound) const
++  {
++    const auto comm = this->get_mpi_communicator();
++    const auto b = this->introspection().variable("phase_field").block_index;
++    const auto offset = state.get_block_indices().block_start(b);
++    const auto range = dynamic_cast<const MaterialModel::PhaseFieldModel<dim>&>(
++      this->get_material_model()).get_phase_field_range();
++    const auto &constraints = this->get_current_constraints();
++    const auto &indices = rhs.block(b).locally_owned_elements();
++    // Import contact flags for every column used by locally owned rows.
++    // An active increment is zero, hence column elimination has no RHS lift.
++    IndexSet columns(indices.size());
++    columns.add_indices(indices);
++    for (const auto i : indices)
++      for (auto e=matrix.block(b,b).begin(i); e!=matrix.block(b,b).end(i); ++e)
++        columns.add_index(e->column());
++    columns.compress();
++    LinearAlgebra::Vector owned_flags(indices, comm), flags(indices, columns, comm);
++    for (const auto i : indices)
++      owned_flags[i] = !constraints.is_constrained(offset+i)
++        && ((state.block(b)[i] == (lower_bound ? lower_bound->block(b)[i] : range.first)
++             && rhs.block(b)[i] <= 0)
++            || (state.block(b)[i] == range.second && rhs.block(b)[i] >= 0));
++    owned_flags.compress(VectorOperation::insert);
++    flags = owned_flags;
++    for (const auto i : indices)
++      if (flags[i] != 0)
++        {
++          matrix.block(b,b).clear_row(i, 1);
++          rhs.block(b)[i] = 0;
++        }
++      else
++        for (auto e=matrix.block(b,b).begin(i); e!=matrix.block(b,b).end(i); ++e)
++          if (flags[e->column()] != 0)
++            e->value() = 0;
++    matrix.block(b,b).compress(VectorOperation::insert);
++    rhs.compress(VectorOperation::insert);
++  }
++
++
++  template <int dim>
++  void PhaseFieldHandler<dim>::solve_bound_constrained_phase(
++    LinearAlgebra::BlockSparseMatrix &matrix, LinearAlgebra::BlockVector &rhs,
++    LinearAlgebra::BlockVector &state,
++    const LinearAlgebra::BlockVector *lower_bound) const
++  {
++    const auto comm = this->get_mpi_communicator();
++    const auto b = this->introspection().variable("phase_field").block_index;
++    const auto offset = state.get_block_indices().block_start(b);
++    const auto range = dynamic_cast<const MaterialModel::PhaseFieldModel<dim>&>(
++      this->get_material_model()).get_phase_field_range();
++    const auto &constraints = this->get_current_constraints();
++    const auto &indices = rhs.block(b).locally_owned_elements();
++    LinearAlgebra::BlockVector owned(rhs), update(rhs), trial(state), raw_rhs(rhs);
++    owned = state;
++    constraints.distribute(owned);
++    state = owned;
++    const auto kkt = [&](const LinearAlgebra::BlockVector &u)
++    {
++      double defect = 0;
++      unsigned int invalid = 0;
++      for (const auto i : indices)
++        {
++          const double x = u.block(b)[i], r = rhs.block(b)[i];
++          const double lower = lower_bound ? lower_bound->block(b)[i] : range.first;
++          invalid |= !std::isfinite(lower) || lower < range.first || lower > range.second
++                     || !std::isfinite(x) || x < lower || x > range.second || !std::isfinite(r);
++          if (constraints.is_constrained(offset+i))
++            continue;
++          const double d = lower == range.second ? 0.0
++                           : x == lower ? std::max(r, 0.0)
++                           : x == range.second ? std::min(r, 0.0) : r;
++          defect = std::max(defect, std::abs(d));
++        }
++      AssertThrow(Utilities::MPI::max(invalid, comm) == 0,
++                  ExcMessage("Bound phase solve requires a finite feasible constrained state."));
++      return Utilities::MPI::max(defect, comm);
++    };
++
++    double target = 0;
++    for (unsigned int it=0; it<=solver_parameters.max_nonlinear_iterations; ++it)
++      {
++        double roundoff = 0, energy = 0;
++        AssertThrow(assemble_phase_field_system(matrix, rhs, state, true, &roundoff, &energy),
++                    ExcMessage("Undefined phase energy at a bounded iterate."));
++        const double defect = kkt(state);
++        if (it == 0)
++          {
++            target = std::max(solver_parameters.nonlinear_solver_tolerance * defect, roundoff);
++            AssertThrow(std::isfinite(target), ExcMessage("Nonfinite phase KKT target."));
++            this->get_pcout() << std::setprecision(17) << "   Phase box target: initial="
++                             << defect << " roundoff=" << roundoff << " target=" << target << '\n';
++          }
++        if (defect <= target)
++          {
++            this->get_pcout() << std::setprecision(17) << "   Phase box converged: iterations="
++                             << it << " KKT=" << defect << '\n';
++            return;
++          }
++        AssertThrow(it < solver_parameters.max_nonlinear_iterations, ExcNonlinearSolverNoConvergence());
++        raw_rhs = rhs;
++
++        constrain_phase_newton_system(matrix, rhs, state, lower_bound);
++        update = 0;
++        solve_phase_field_system(matrix, rhs, update);
++
++        bool accepted = false;
++        for (unsigned int ls=0; ls<solver_parameters.max_newton_line_search_iterations; ++ls)
++          {
++            const double alpha = std::ldexp(1.0, -static_cast<int>(ls));
++            owned = state;
++            for (const auto i : indices)
++              if (!constraints.is_constrained(offset+i))
++                owned.block(b)[i] = std::clamp(state.block(b)[i] + alpha * update.block(b)[i],
++                                              lower_bound ? lower_bound->block(b)[i] : range.first,
++                                              range.second);
++            constraints.distribute(owned);
++            trial = owned;
++            double local_slope = 0;
++            for (const auto i : indices)
++              local_slope -= raw_rhs.block(b)[i] * (trial.block(b)[i]-state.block(b)[i]);
++            const double slope = Utilities::MPI::sum(local_slope, comm);
++            double trial_energy = 0;
++            const bool admissible = assemble_phase_field_system(matrix, rhs, trial, false,
++                                                                 nullptr, &trial_energy);
++            if (admissible && (kkt(trial) < defect * (1-1e-4*alpha)
++                              || (slope < 0 && trial_energy < energy + 1e-4*slope)))
++              {
++                state = trial;
++                accepted = true;
++                break;
++              }
++          }
++        AssertThrow(accepted, ExcNonlinearSolverNoConvergence());
++      }
++  }
++
++
+   template <int dim>
+   void
+   PhaseFieldHandler<dim>::evolve_phase_field(LinearAlgebra::BlockSparseMatrix &system_matrix,
+@@ -1097,6 +1310,31 @@ namespace aspect
+   {
+     const unsigned int block_index = this->introspection().variable("phase_field").block_index;
+ 
++    const bool mature =
++      Plugins::plugin_type_matches<MaterialModel::PhaseFieldFault<dim>>(this->get_material_model())
++      && Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(
++           this->get_material_model()).is_mature_frictional_fault();
++    if (uses_bound_constraints() && !mature)
++      {
++        LinearAlgebra::BlockVector trial(solution);
++        // advance_time rotates the last completed solution into old_solution.
++        // The generic time predictor is not an admissible phase starting state.
++        if (this->get_timestep_number() > 0 || this->get_parameters().resume_computation)
++          trial.block(block_index) = this->get_old_solution().block(block_index);
++        else if (this->get_parameters().reconstruct_faults)
++          initialize_phase_guess(trial);
++        // A per-solve immutable snapshot: neither predictor nor Newton iterates
++        // can advance the accepted lower bound. No state is published on failure.
++        const LinearAlgebra::BlockVector accepted_phase(trial);
++        const bool physical_evolution = this->get_timestep_number() > 0
++                                        || this->get_parameters().resume_computation;
++        solve_bound_constrained_phase(system_matrix, system_rhs, trial,
++                                     solver_parameters.enforce_irreversibility && physical_evolution
++                                     ? &accepted_phase : nullptr);
++        solution.block(block_index) = trial.block(block_index);
++        return;
++      }
++
+     // Essential phase data are a physical state, not a Newton increment. Lift
+     // them before testing the entry residual (including a fully prescribed
+     // profile, where there are no free phase equations to trigger a solve).
+diff --git a/source/simulator/solver/reconstructed_fault_stokes.cc b/source/simulator/solver/reconstructed_fault_stokes.cc
+index b756d52cb..9b9f06805 100644
+--- a/source/simulator/solver/reconstructed_fault_stokes.cc
++++ b/source/simulator/solver/reconstructed_fault_stokes.cc
+@@ -152,7 +152,8 @@ namespace aspect
+     // Bound the continuity evaluation before cancellation, using the actual
+     // FE gradients, physical base iterate and constrained left-null test.
+     // The source/history/B terms have no pressure rows in this eligible path.
+-    auto pressure_assembly_scale = [&](const LinearAlgebra::BlockVector &q)
++    auto pressure_assembly_scale = [&](const LinearAlgebra::BlockVector &q,
++                                       const LinearAlgebra::BlockVector &velocity_state)
+     {
+       if (q.l2_norm()==0.)
+         return 0.;
+@@ -169,7 +170,7 @@ namespace aspect
+       for (const auto &cell:dof_handler.active_cell_iterators())
+         if (cell->is_locally_owned())
+           {
+-            fe.reinit(cell);cell->get_dof_values(working_x,u);cell->get_dof_values(test,p);
++            fe.reinit(cell);cell->get_dof_values(velocity_state,u);cell->get_dof_values(test,p);
+             double origin[dim]={};
+             for (unsigned int d=0;d<dim;++d)
+               for (unsigned int i=0;i<u.size();++i)
+@@ -200,7 +201,7 @@ namespace aspect
+     double right_null_error,left_null_error;
+     const auto q=linearization.verified_pressure_nullspace(right_null_error,left_null_error);
+     LinearAlgebra::BlockVector compatible_rhs(rhs),residual(rhs);
+-    const double assembly_scale=pressure_assembly_scale(q);
++    const double assembly_scale=pressure_assembly_scale(q,working_x);
+     // A worst-case serial chain also bounds parallel cell/constraint
+     // accumulation; the final dot product has at most two operations/row.
+     const double assembly_operations=6.*finite_element.n_dofs_per_cell()
+@@ -313,6 +314,24 @@ namespace aspect
+           const double fresh = internal::fault_true_linear_residual(
+             linearization, q, direction, rhs, residual,
+             raw_residual, residual_null_component);
++          // The RHS bound only accounts for the base iterate. The fresh
++          // residual C*direction-rhs also evaluates continuity on the nonzero
++          // correction, even when base velocity and continuity RHS are zero.
++          // Apply the same uncancelled assembly bound to both operations and
++          // retain the same nonlinear cap; do not impose an exact-zero test
++          // on the additional matrix-vector arithmetic.
++          LinearAlgebra::BlockVector owned_direction(direction);
++          current_constraints.distribute(owned_direction);
++          LinearAlgebra::BlockVector ghosted_direction(introspection.index_sets.system_partitioning,
++                                                       introspection.index_sets.system_relevant_partitioning,
++                                                       mpi_communicator);
++          ghosted_direction=owned_direction;
++          const double residual_reduction_scale=q.block(1).linfty_norm()
++            * (2.*rhs.block(1).l1_norm()+residual.block(1).l1_norm()
++               +std::abs(residual_null_component)*q.block(1).l1_norm());
++          const double residual_compatibility_tolerance=internal::fault_pressure_compatibility_bound(
++            assembly_scale+pressure_assembly_scale(q,ghosted_direction),assembly_operations,
++            residual_reduction_scale,reduction_operations,nonlinear_target);
+           std::ostringstream report;
+           report << std::setprecision(17)
+                  << "      Fault linear solve: iterations=" << iterations
+@@ -320,6 +339,7 @@ namespace aspect
+                  << ", target=" << tolerance << ", raw=" << raw_residual
+                  << ", rhs null=" << removed_rhs << ", residual null=" << residual_null_component
+                  << ", compatibility bound=" << compatibility_tolerance
++                 << ", residual compatibility bound=" << residual_compatibility_tolerance
+                  << ", pressure quotient=" << (q.l2_norm() > 0.)
+                  << ", right null=" << right_null_error << ", left null=" << left_null_error;
+           if (std::getenv("ASPECT_FAULT_NONLINEAR_DIAGNOSTIC"))
+@@ -332,7 +352,7 @@ namespace aspect
+                        << ", fresh=" << fresh << ", target=" << tolerance;
+               pcout << progress.str() << std::endl;
+             }
+-          AssertThrow(std::abs(residual_null_component) <= compatibility_tolerance,
++          AssertThrow(std::abs(residual_null_component) <= residual_compatibility_tolerance,
+                       ExcMessage("The full condensed residual has a significant pressure incompatibility."));
+           if (fresh <= tolerance)
+             {
+diff --git a/source/simulator/solver_schemes.cc b/source/simulator/solver_schemes.cc
+index 05cb0bac3..01880cd0b 100644
+--- a/source/simulator/solver_schemes.cc
++++ b/source/simulator/solver_schemes.cc
+@@ -26,6 +26,8 @@
+ #include <aspect/newton.h>
+ #include <aspect/melt.h>
+ #include <aspect/phase_field.h>
++#include <aspect/material_model/phase_field_fault.h>
++#include <aspect/plugins.h>
+ #include <aspect/reconstructed_fault/manager.h>
+ 
+ #include <deal.II/numerics/vector_tools.h>
+@@ -957,6 +959,11 @@ namespace aspect
+     if (parameters.enable_phase_field)
+       {
+         phase_field_handler->evolve_phase_field(system_matrix, system_rhs, solution);
++        if (phase_field_handler->uses_bound_constraints())
++          {
++            const unsigned int phase_block = introspection.variable("phase_field").block_index;
++            current_linearization_point.block(phase_block) = solution.block(phase_block);
++          }
+         if (parameters.reconstruct_faults && timestep_number == 0)
+           reconstructed_fault_manager->reconstruct_initial_faults();
+       }
+@@ -964,6 +971,11 @@ namespace aspect
+     assemble_and_solve_temperature();
+     assemble_and_solve_composition();
+ 
++    if (parameters.enable_phase_field && parameters.reconstruct_faults
++        && phase_field_handler->uses_bound_constraints())
++      Plugins::get_plugin_as_type<MaterialModel::PhaseFieldFault<dim>>(*material_model)
++        .prepare_reconstructed_fault_phase_state();
++
+     {
+       computing_timer.enter_subsection("Interpolate Stokes solution");
+ 
+@@ -1018,6 +1030,11 @@ namespace aspect
+     if (parameters.enable_phase_field)
+       {
+         phase_field_handler->evolve_phase_field(system_matrix, system_rhs, solution);
++        if (phase_field_handler->uses_bound_constraints())
++          {
++            const unsigned int phase_block = introspection.variable("phase_field").block_index;
++            current_linearization_point.block(phase_block) = solution.block(phase_block);
++          }
+         if (parameters.reconstruct_faults && timestep_number == 0)
+           reconstructed_fault_manager->reconstruct_initial_faults();
+       }
+@@ -1111,6 +1128,11 @@ namespace aspect
+     if (parameters.enable_phase_field)
+       {
+         phase_field_handler->evolve_phase_field(system_matrix, system_rhs, solution);
++        if (phase_field_handler->uses_bound_constraints())
++          {
++            const unsigned int phase_block = introspection.variable("phase_field").block_index;
++            current_linearization_point.block(phase_block) = solution.block(phase_block);
++          }
+         if (parameters.reconstruct_faults && timestep_number == 0)
+           reconstructed_fault_manager->reconstruct_initial_faults();
+       }

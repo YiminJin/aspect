@@ -1,0 +1,27 @@
+{
+  "kind": "Saved-field algebra/source audit; NOT a native FE or checkpoint test",
+  "accepted_R_update_error": {
+    "aligned_evolving_mean64": 1.1102230246251565e-16,
+    "aligned_evolving_mean128": 1.1102230246251565e-16,
+    "aligned_evolving_mean256": 1.3877787807814457e-16,
+    "aligned_evolving_endpoint64": 1.1102230246251565e-16,
+    "aligned_evolving_endpoint128": 1.1102230246251565e-16,
+    "aligned_evolving_endpoint256": 1.3877787807814457e-16,
+    "aligned_evolving_endpoint512": 1.3877787807814457e-16
+  },
+  "exact_scope": [
+    "Uniform identical bulk/fault G and eta; fixed shear tensor",
+    "Unloaded R0=0 and native FE velocity: R is symgrad of an FE vector",
+    "No rotation, transport, mesh changes or temperature/composition-dependent coefficients"
+  ],
+  "proposed_encoding": "d_R_new=beta*d_R_old+(kappa/G)*u_accepted",
+  "native_existing_hook": "benchmark_retained_stress; plugin-owned, default off, not serialized",
+  "native_state_implemented": false,
+  "inputs": {
+    "source/material_model/phase_field_fault/constitutive.cc": "ba388bcef552ec4b3a76c8416c02b6ff69a80ddc81d55d14f081587f6f778957",
+    "source/material_model/phase_field_fault/history.cc": "a0cd129f11f6a466205dfd1ab47b1347998bb33069f672da6152e4e3de5bd104",
+    "source/reconstructed_fault/surface_system_bulk_work.cc": "219d52dd14b41bff2a2aacab72773ef2b7fdf0c2935904bff514b099e72639d4",
+    "source/simulator/assemblers/reconstructed_fault_stokes.cc": "0c8873c1461e0b25a5a72a453d6207198303fc438669528b42f1e7702e12dcb9",
+    "include/aspect/material_model/phase_field_fault.h": "2ba43e2b597d50aa7fcd4faa4c45f0f0018b15d87f83c6c25da091f2c9ab6203"
+  }
+}

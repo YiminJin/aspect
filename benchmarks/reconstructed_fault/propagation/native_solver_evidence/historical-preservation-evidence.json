@@ -1,0 +1,24 @@
+{
+  "manifest": "benchmarks/reconstructed_fault/propagation/matched_initialization_evidence/preservation.json",
+  "evidence_files_checked": 471,
+  "missing": [],
+  "changed": [],
+  "authorized_source_changes_since_manifest": [
+    "include/aspect/material_model/phase_field_fault.h",
+    "include/aspect/phase_field.h",
+    "include/aspect/reconstructed_fault/linear_performance.h",
+    "include/aspect/simulator/solver/reconstructed_fault_condensed_system.h",
+    "include/aspect/simulator.h",
+    "source/material_model/phase_field_fault/fe_strain.cc",
+    "source/material_model/phase_field_fault.cc",
+    "source/reconstructed_fault/surface_system.cc",
+    "source/simulator/assemblers/reconstructed_fault_stokes.cc",
+    "source/simulator/assembly.cc",
+    "source/simulator/core.cc",
+    "source/simulator/phase_field.cc",
+    "source/simulator/solver/reconstructed_fault_condensed_system.cc",
+    "source/simulator/solver/reconstructed_fault_stokes.cc",
+    "source/simulator/solver_schemes.cc"
+  ],
+  "scope": "Scientific evidence and earlier diagnostic scripts only; source changes are explicitly authorized by later native tasks and are inventoried separately."
+}

@@ -1,0 +1,53 @@
+--- incoming/doc/reconstructed_fault/specification.tex
++++ current/doc/reconstructed_fault/specification.tex
+@@ -2245,13 +2245,38 @@
+ The explicitly selected P1 integration provides an opt-in box-constrained
+ projected-Newton solve, using the existing CPDI energy, residual, tangent and
+ CG/AMG solver. The physical interval is the existing material range $[0,1]$;
+-there is no previous-phase lower bound. The equality option remains the default
++the optional \texttt{Enforce phase irreversibility} selector (default false)
++restricts physical evolution to $[\phi_{\rm last\ accepted},1]$. Initial relaxation
++remains on $[0,1]$. The lower bound is an immutable per-solve copy of the accepted
++\texttt{old\_solution} phase, held fixed through Newton and line searches. It is
++never a predictor or an intermediate iterate. Failed solves publish nothing;
++the option rejects \texttt{continue with next timestep}, which accepts failed
++iterates as a new baseline. Physical rejected-step rollback remains a separate
++unqualified contract. This
++is a change of the phase admissible set, not a numerical tolerance. The
++recoverable maximum-history law is unchanged. The equality option remains the default
+ and the mature frozen-field path remains unchanged. For the assembled negative
+ gradient $r$, free entries satisfy $r=0$, lower contacts $r\leq0$, and upper
+ contacts $r\geq0$. Symmetric elimination of zero active increments must include
+ off-rank columns; all acceptance decisions are collective. Energy and all
+ phase-dependent evaluations use the supplied trial phase, with particle $H$
+ fixed for the entire solve. A failed solve must not publish a trial phase.
++
++For the selected fixed-mesh P2 comparison, the discrete energy and admissible set are
++\[
++ E_h(\phi;H)=\sum_p V_p\left[H_p g(\phi_p)
++ +\frac{G_c}{c_0\ell}\left(a(\phi_p)+\ell^2|\nabla\phi_p|^2\right)\right],
++ \qquad K_n=\{\phi_i:\phi^{n-1}_{i,\mathrm{accepted}}\leq\phi_i\leq1\}.
++\]
++The existing CPDI evaluations and particle representation of $H$ are retained.
++The variational inequality is $\nabla E_h(\phi)\cdot(v-\phi)\geq0$ for $v\in K_n$.
++At lower contacts $\mu_i=-r_i\geq0$ and
++$\mu_i(\phi_i-\phi^{n-1}_{i,\mathrm{accepted}})=0$; contact equality residuals need
++not vanish. A coincident lower and upper bound admits no increment. The projected
++line search enforces the same $K_n$ throughout; this is not post-solve clipping.
++On the selected Q1 fixed mesh, point values and positive CPDI averages inherit
++nodal monotonicity. This does not define an advected or changing-mesh lower bound.
++Normalization representation and evolving-profile work operators are unchanged.
+ 
+ Fresh initialization relaxes the rounded native profile at the initialized
+ particle $H$, accepts the converged phase, then initializes normalization and
+@@ -2273,7 +2298,9 @@
+ numerical tolerances. Initial P2 mechanical feedback subsequently exposes
+ negative nodal $I_h$ from consistent surface projection of positive transverse
+ integrals. This discrete admissibility failure blocks full coupled qualification;
+-no positivity floor, changed $H$ law or previous-phase constraint is selected.
++no positivity floor or changed $H$ law was selected at that historical stage.
++Its no-previous-phase-constraint restriction is superseded only by the explicit
++optional P2 admissible-set revision above.
+ See \texttt{propagation/P2\_report.md} for the partial trajectories and limits.
+ 
+ \paragraph{Selected fixed verification association policy.}

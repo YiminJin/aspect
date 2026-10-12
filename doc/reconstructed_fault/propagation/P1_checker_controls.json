@@ -1,0 +1,30 @@
+{
+  "actual": {
+    "exit_code": 2,
+    "expected": 2
+  },
+  "admissible_control": {
+    "exit_code": 0,
+    "expected": 0
+  },
+  "bound_control": {
+    "exit_code": 2,
+    "expected": 2
+  },
+  "healing_control": {
+    "exit_code": 2,
+    "expected": 2
+  },
+  "residual_control": {
+    "exit_code": 1,
+    "expected": 1
+  },
+  "unresolved_control": {
+    "exit_code": 2,
+    "expected": 2
+  },
+  "missing_restore_control": {
+    "exit_code": 1,
+    "expected": 1
+  }
+}

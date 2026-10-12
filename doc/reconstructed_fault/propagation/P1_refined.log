@@ -1,0 +1,132 @@
+[BEBOP:00003] opal_ifinit: socket() failed with errno=1
+[BEBOP:00003] pmix_ifinit: socket() failed with errno=1
+[1791269799.981605] [BEBOP:3    :0]            sock.c:114  UCX  WARN  getifaddrs error: Operation not permitted
+[1791269799.981610] [BEBOP:3    :0]            sock.c:114  UCX  WARN  getifaddrs error: Operation not permitted
+[1791269799.981611] [BEBOP:3    :0]            sock.c:114  UCX  WARN  getifaddrs error: Operation not permitted
+[1791269799.981611] [BEBOP:3    :0]            sock.c:114  UCX  WARN  getifaddrs error: Operation not permitted
+[1791269799.981612] [BEBOP:3    :0]            sock.c:114  UCX  WARN  getifaddrs error: Operation not permitted
+[1791269799.981612] [BEBOP:3    :0]            sock.c:114  UCX  WARN  getifaddrs error: Operation not permitted
+-----------------------------------------------------------------------------
+--                             This is ASPECT                              --
+-- The Advanced Solver for Planetary Evolution, Convection, and Tectonics. --
+-----------------------------------------------------------------------------
+--     . version 3.1.0-pre (pf-rsf-refactor, 6a3781277)
+--     . using deal.II 9.6.2 (dealii-9.6, 6890ca740b)
+--     .       with 32 bit indices
+--     .       with vectorization level 2 (AVX, 4 doubles, 256 bits)
+--     . using Trilinos 14.2.0
+--     . using p4est 2.8.7
+--     . using Geodynamic World Builder 1.0.0
+--     . running in OPTIMIZED mode
+--     . running with 1 MPI process
+-----------------------------------------------------------------------------
+
+Loading shared library </home/ein/repository/aspect-fault-propagation/build-propagation-p1/libphase_field_controlled_history.release.so>
+
+
+-----------------------------------------------------------------------------
+The output directory </home/ein/repository/aspect-fault-propagation/build-propagation-p1/output-refined/> provided in the input file appears not to exist.
+ASPECT will create it for you.
+-----------------------------------------------------------------------------
+
+
+-----------------------------------------------------------------------------
+-- For information on how to cite ASPECT, see:
+--   https://aspect.geodynamics.org/citing.html?ver=3.1.0-pre&particles=1&sha=6a3781277&src=code
+-----------------------------------------------------------------------------
+Number of active cells: 1,024 (on 6 levels)
+Number of degrees of freedom: 19,078 (8,450+1,089+4,225+4,225+1,089)
+
+*** Timestep 0:  t=0 seconds, dt=0 seconds
+   Phase-field residual target: initial=118083.53486635524, roundoff=2.0976022956641139e-10, absolute target=0.0011808353486635525
+   Solving phase field system:
+      Iteration  0: linear solver iterations =    1, line search iterations = 1, relative residual = 6.400e-01
+      Iteration  1: linear solver iterations =    1, line search iterations = 0, relative residual = 2.844e-01
+      Iteration  2: linear solver iterations =    1, line search iterations = 0, relative residual = 1.263e-01
+      Iteration  3: linear solver iterations =    1, line search iterations = 0, relative residual = 5.608e-02
+      Iteration  4: linear solver iterations =    1, line search iterations = 0, relative residual = 2.486e-02
+      Iteration  5: linear solver iterations =    1, line search iterations = 0, relative residual = 1.100e-02
+      Iteration  6: linear solver iterations =    1, line search iterations = 0, relative residual = 4.838e-03
+      Iteration  7: linear solver iterations =    1, line search iterations = 0, relative residual = 2.109e-03
+      Iteration  8: linear solver iterations =    1, line search iterations = 0, relative residual = 9.037e-04
+      Iteration  9: linear solver iterations =    1, line search iterations = 0, relative residual = 3.753e-04
+      Iteration 10: linear solver iterations =    1, line search iterations = 0, relative residual = 1.456e-04
+      Iteration 11: linear solver iterations =    1, line search iterations = 0, relative residual = 4.758e-05
+      Iteration 12: linear solver iterations =    1, line search iterations = 0, relative residual = 1.030e-05
+      Iteration 13: linear solver iterations =    1, line search iterations = 0, relative residual = 8.799e-07
+      Iteration 14: linear solver iterations =    1, line search iterations = 0, relative residual = 1.670e-08
+      Iteration 15: linear solver iterations =    1, line search iterations = 0, relative residual = 6.740e-11
+   Reconstruction initial faults... done.
+
+   Advecting particles...  done.
+
+   Postprocessing:
+P1 scratch residual/Jacobian/roundoff isolation verified
+P1 initialization profile difference=1.66092960274372092e-01 raw_min=-6.03794934506534688e-03 raw_max=8.07322372714945113e-01 cells=1024 particles=9216 masked=2792
+P1 solve hold
+   Phase-field residual target: initial=7.95834006317373054e-06, roundoff=3.94022673806899959e-13, absolute target=3.94022673806899959e-13
+   Solving phase field system:
+      Iteration  0: linear solver iterations =    1, line search iterations = 0, relative residual = 1.893e-05
+      Iteration  1: linear solver iterations =    1, line search iterations = 0, relative residual = 5.767e-10
+P1 result hold residual=4.58978438600841372e-15 target=3.94022673806899959e-13 phi_min=-6.03794811202643372e-03 phi_max=8.07322386676465054e-01 change=1.96936531818834616e-07 healing=4.31995207590988792e-10 uncertainty=1.03086162244839033e-14
+P1 solve hold_repeat
+   Phase-field residual target: initial=4.58978438600841372e-15, roundoff=3.94022687418334148e-13, absolute target=3.94022687418334148e-13
+   Skipping phase field solve: initial residual meets the absolute target.
+P1 result hold_repeat residual=4.58978438600841372e-15 target=3.94022687418334148e-13 phi_min=-6.03794811202643372e-03 phi_max=8.07322386676465054e-01 change=0.00000000000000000e+00 healing=0.00000000000000000e+00 uncertainty=1.03086162244839033e-14
+P1 solve ramp_05
+   Phase-field residual target: initial=8.34547503835619126e-02, roundoff=3.94406666285661619e-13, absolute target=8.34547503835619137e-10
+   Solving phase field system:
+      Iteration  0: linear solver iterations =    1, line search iterations = 0, relative residual = 1.155e-02
+      Iteration  1: linear solver iterations =    1, line search iterations = 0, relative residual = 7.539e-06
+      Iteration  2: linear solver iterations =    1, line search iterations = 0, relative residual = 3.213e-11
+P1 result ramp_05 residual=2.68102593148879934e-12 target=8.34547503835619137e-10 phi_min=-6.02645976344647061e-03 phi_max=8.08062734477877354e-01 change=5.96992337691670816e-03 healing=4.23115873147079165e-06 uncertainty=1.49219410109222134e-13
+P1 solve ramp_10
+   Phase-field residual target: initial=8.09225164803587110e-02, roundoff=3.96387406080240473e-13, absolute target=8.09225164803587076e-10
+   Solving phase field system:
+      Iteration  0: linear solver iterations =    1, line search iterations = 0, relative residual = 1.111e-02
+      Iteration  1: linear solver iterations =    1, line search iterations = 0, relative residual = 6.983e-06
+      Iteration  2: linear solver iterations =    1, line search iterations = 0, relative residual = 2.612e-11
+P1 result ramp_10 residual=2.11375540866939550e-12 target=8.09225164803587076e-10 phi_min=-6.01348816376641102e-03 phi_max=8.08791211552439826e-01 change=5.73740752600793158e-03 healing=4.08145804943600384e-06 uncertainty=1.19463513357304382e-13
+P1 solve unload
+   Phase-field residual target: initial=2.11375540866939550e-12, roundoff=3.97950409118989539e-13, absolute target=3.97950409118989539e-13
+   Solving phase field system:
+      Iteration  0: linear solver iterations =    1, line search iterations = 0, relative residual = 2.045e-03
+P1 result unload residual=4.32274768516858422e-15 target=3.97950409118989539e-13 phi_min=-6.01348816376281840e-03 phi_max=8.08791211552439826e-01 change=1.19463466896618797e-13 healing=2.26289256430312058e-15 uncertainty=1.08612482588188053e-14
+P1 normal restoration verified
+P1 exceptional restoration verified
+P1 assessment tolerance=1.49219410109222139e-12 repeat=1.19463466896618797e-13 uncertainty=1.49219410109222134e-13 repeat_resolved=1 evolution=1 admissible=0
+
+
+----------------------------------------------------
+Exception on MPI process <0> while running postprocessor <N6aspect11Postprocess22ControlledPhaseHistoryILi2EEE>: 
+
+--------------------------------------------------------
+An error occurred in line <327> of file </home/ein/repository/aspect-fault-propagation/tests/phase_field_controlled_history.cc> in function
+    std::pair<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > aspect::Postprocess::ControlledPhaseHistory<dim>::execute(dealii::TableHandler&) [with int dim = 2]
+The violated condition was: 
+    admissible
+Additional information: 
+    P1 equality solve converged but physical admissibility is not
+    qualified.
+
+Stacktrace:
+-----------
+#0  /home/ein/repository/aspect-fault-propagation/build-propagation-p1/libphase_field_controlled_history.release.so: aspect::Postprocess::ControlledPhaseHistory<2>::execute[abi:cxx11](dealii::TableHandler&)
+#1  /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/build/aspect-r7b-qualified: aspect::Postprocess::Manager<2>::execute[abi:cxx11](dealii::TableHandler&)
+#2  /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/build/aspect-r7b-qualified: aspect::Simulator<2>::postprocess()
+#3  /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/build/aspect-r7b-qualified: aspect::Simulator<2>::run()
+#4  /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/build/aspect-r7b-qualified: ) [0x1ef0e0c]
+#5  /home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/build/aspect-r7b-qualified: main
+--------------------------------------------------------
+
+Aborting!
+----------------------------------------------------
+--------------------------------------------------------------------------
+MPI_ABORT was invoked on rank 0 in communicator MPI_COMM_WORLD
+  Proc: [[29946,0],0]
+  Errorcode: 1
+
+NOTE: invoking MPI_ABORT causes Open MPI to kill all MPI processes.
+You may or may not see output from other processes, depending on
+exactly when Open MPI kills them.
+--------------------------------------------------------------------------

@@ -1,0 +1,255 @@
+--- before/doc/reconstructed_fault/phase_field_native_fe_derivation.tex
++++ corrected/doc/reconstructed_fault/phase_field_native_fe_derivation.tex
+@@ -59,8 +59,8 @@
+ minimization problem. Every derivation below specifies what is held fixed.
+ The current implementation satisfies constrained first-order phase conditions;
+ the latest report exhibits a saddle point, so local-minimum selection is not
+-established. This document describes the reported equations, not an independent
+-audit of the unavailable C++ source.
++established. The plane-strain subsection records a subsequent source audit and its
++consistent 3D embedding. Earlier raw-gradient results remain historical evidence.
+ \end{abstract}
+ 
+ {\small\setlength{\parskip}{0pt}\tableofcontents}
+@@ -91,8 +91,9 @@
+  \item The immutable lower bound is $\phi^a$. No healing is admitted.
+  \item Mechanics uses the \emph{endpoint} Maxwell stresses. Exact exponential
+  constitutive integration does not make the whole coupled step exact in time.
+- \item The optional native representation is $\R_h=\sym\nabla\bm d_{R,h}$
+- in the Q2 velocity space. Particle stress is a derived sample in this option.
++ \item The optional native representation is $\R_h=\mathcal D\bm d_{R,h}$
++ in the native velocity space (Q2 in the baseline, Q3 in the diagnostic
++ enrichment). Particle stress is a derived sample in this option.
+  \item Fracture energy still uses CPDI particle-domain integration. Consistent
+  surface normalization and its derivative remain part of the equations.
+ \end{enumerate}
+@@ -155,8 +156,8 @@
+ 
+ In the continuum,
+ \begin{equation}
+- \Etot=\dev\sym\nabla\bm d,\qquad
+- \dot{\Etot}=\strain=\dev\sym\nabla\bm u,
++ \Etot=\mathcal D\bm d,\qquad
++ \dot{\Etot}=\strain=\mathcal D\bm u,
+  \qquad \nabla\cdot\bm u=0.
+  \label{eq:strain-def}
+ \end{equation}
+@@ -199,6 +200,99 @@
+ floor is part of the current model. A fully intact normal line with $I=0$ also
+ requires a separate activation rule; this pre-existing-band model does not
+ resolve that nucleation issue.
++
++\subsection{Audited three-dimensional plane-strain embedding}
++\label{sec:plane-strain}
++
++This subsection is the source-audited correction to the original report's raw
++symmetric-gradient convention. Plane strain means zero out-of-plane displacement
++and rate, not zero out-of-plane deviatoric stress. For a raw in-plane symmetric
++block $A$, define
++\[
++ \widehat A=\begin{pmatrix}A&0\\0&0\end{pmatrix},\qquad
++ \theta=\operatorname{tr}_2 A,\qquad
++ D_3(A)=\widehat A-\frac\theta3\bm1_3.
++\]
++Its stored in-plane block is $D_2(A)=A-\theta\bm1_2/3$; its missing component is
++$D_{3,zz}=-\theta/3=-\operatorname{tr}_2 D_2(A)$. This is not the genuinely
++2D deviator $A-\theta\bm1_2/2$. For already deviatoric in-plane blocks $T,U$,
++use the reduced 3D metric
++\[
++ \langle T,U\rangle_3=T:U+\operatorname{tr}_2T\operatorname{tr}_2U,
++ \quad J_2(T)=-\tfrac12\langle T,T\rangle_3,
++ \quad\langle D_2(A),D_2(B)\rangle_3=A:B-\tfrac13\theta_A\theta_B.
++\]
++The utility \texttt{consistent\_deviator} expects a raw zero-$zz$ plane-strain
++block and returns $D_2(A)$. It is not idempotent on its 2D output; applying it
++again incorrectly subtracts $\operatorname{tr}_2D_2(A)/3$. The utility
++\texttt{consistent\_second\_invariant\_of\_deviatoric\_tensor} expects an
++already deviatoric block and reconstructs its $zz$ component. It does not first
++remove a raw tensor's trace. Neither helper is being numerically changed.
++
++In the remaining equations, symmetric stress/strain symbols and contractions
++mean the 3D embedding. When represented by two-dimensional blocks, use
++$\langle\cdot,\cdot\rangle_3$ for deviator--deviator contractions. Define
++$\mathcal D\bm v=D_3(\sym\nabla_2\bm v)$, $\R_h=\mathcal D\bm d_{R,h}$,
++and $\strain_h=\mathcal D\bm u_h$. The in-plane stress, bulk energy and
++viscous power reduce to
++\begin{align}
++ \tauv_2&=2G D_2(\sym\nabla\bm d_R)-2Z\chi\Smat_2,
++ &\tau_{zz}&=-\operatorname{tr}_2\tauv_2,\\
++ E_b&=\int_\B\frac{\tauv_2:\tauv_2+
++                    (\operatorname{tr}_2\tauv_2)^2}{4G}\dd A,
++ &\Dcal_b&=\int_\B\frac{\tauv_2:\tauv_2+
++                    (\operatorname{tr}_2\tauv_2)^2}{2\eta}\dd A.
++\end{align}
++The shear slip tensor has zero trace and zero $zz$. Consequently its contraction
++with stress needs no extra trace term. Normalization and its adjoint, cohesive
++storage/loss, and fracture energy are unchanged. At fixed accepted $\bm d_R,Z$,
++$\tau_{zz}$ is independent of $\phi$: the additional bulk trace contribution
++has no direct phase derivative. The mechanics and future accepted anchor still
++change for nonzero pointwise divergence.
++
++With physical Stokes pressure $p$, the reduced momentum residual and tangent are
++\begin{align}
++ r_u(\bm w)&=\int_\B[\tauv_2:\sym\nabla\bm w-p\nabla\cdot\bm w]\dd A
++              -\ell_{\rm ext}(\bm w),\\
++ K_{uu}(\bm w,\delta\bm u)&=2\kappa\int_\B
++   [\sym\nabla\bm w:\sym\nabla\delta\bm u
++    -\tfrac13(\nabla\cdot\bm w)(\nabla\cdot\delta\bm u)]\dd A.
++\end{align}
++No extra trace subtraction is applied to the accepted deviatoric history load.
++The bulk/slip cross blocks are unchanged because $\operatorname{tr}\Smat=0$.
++The FE coefficient update is still
++\[
++ \bm d_R^k=\beta\bm d_R^a+(\kappa/G)\bm u^k,
++ \quad Z^k=\beta Z^a+\kappa V^k,
++ \quad\beta=e^{-\Delta t/\lambda},\quad\kappa=\eta(1-\beta).
++\]
++Applying the linear $D_3\sym\nabla$ proves exactly
++$\tauv^k=\beta\tauv^*+2\kappa(\strain^k-\chi^kV^k\Smat)$, including its
++$zz$ component, for any $\Delta t/\lambda$. No projection, small-step assumption
++or additional accepted state is introduced.
++
++The source audit finds the generic trace-subtraction assembler already present,
++but previously registered only for compressible material or prescribed dilation.
++The selected incompressible fixture registered neither. Its coefficient is the
++material viscosity output $\kappa$, not creep viscosity $\eta$. Register the existing Picard and Newton variants at their respective entry
++points (and their matching simplified preconditioners when applicable)
++for the optional FE history path, once only. The actual fixture selects Newton;
++its trace-term assembler supplies both residual and Jacobian. A Picard-only
++registration is insufficient and is retained as a failed diagnostic attempt.
++Preserve the default particle path.
++The old raw-stress convention could formally absorb its isotropic part through
++$p_{\rm raw}=p+2G\operatorname{tr}_2(\sym\nabla\bm d_R)/3$, but no such pressure
++redefinition occurs in source, and this field generally lies outside continuous
++Q1 pressure. The correction therefore changes the explicit stress/operator;
++it does not silently shift the pressure or alter its boundary normalization.
++
++For dynamic-pressure friction, $\sigma_n=\sigma_n^{\rm bg}+p-
++\bm n\cdot\tauv_2\bm n$. In the selected prescribed adiabatic-pressure mode,
++$\sigma_n=\sigma_n^{\rm bg}+p_{\rm ad}$, with neither Stokes pressure nor
++normal deviatoric stress added. These are distinct implemented models; the
++selected fixture has $\sigma_n^{\rm bg}=0$, $p_{\rm ad}=10000$ Pa. A nonzero
++trace diagnostic does not authorize a compressible physical benchmark or a
++change of friction-pressure model.
+ 
+ \section{State variables, stored energy, and dissipation}
+ \label{sec:energy}
+@@ -392,18 +486,20 @@
+ 
+ For physical total stress $\bm\sigma=\tauv-p\bm 1$, compression-positive normal
+ traction is $\sigma_n=p-\bm e^n\cdot\tauv\bm e^n$.
+-The restricted tests instead use a prescribed background pressure
+-$P_{\rm bg}=10000$ Pa for the friction pressure contribution, with the existing
+-deviatoric normal-stress correction retained~\cite{localization}. Symbolically,
+-\begin{equation}
+- \sigma_{n,h}=P_{\rm bg}-\mathcal N_h[\tauv_h],
++The source-audited restricted fixture uses prescribed adiabatic pressure
++$P_{\rm bg}=p_{\rm ad}=10000$ Pa as the complete friction pressure contribution:
++\begin{equation}
++ \sigma_{n,h}=\sigma_n^{\rm bg}+p_{\rm ad},\qquad\sigma_n^{\rm bg}=0.
+  \label{eq:normal-discrete}
+ \end{equation}
+-where $\mathcal N_h$ denotes the implementation's normal-component evaluation.
+-It must not be silently replaced by the computed Stokes pressure or by a new
+-projection. The supplied reports do not completely specify its sampling and
+-lagging convention; those details require the current configuration/source.
+-In the exact one-dimensional shear reference the correction vanishes.
++The earlier reconstruction's retained deviatoric correction was incorrect for
++this selected mode. The implementation evaluates cohesive/friction resistance
++on sharp-fault surface quadrature with the prescribed pressure; bulk-conjugate
++shear driving uses bulk quadrature and the slip-map adjoint. There is no normal
++stress or Stokes-pressure feedback to friction in this mode and no such lag to
++specify. The default dynamic-pressure mode instead uses
++$\sigma_n^{\rm bg}+p-\bm n\cdot\tauv_2\bm n$ at its constitutive sample.
++Neither mode is silently substituted for the other.
+ 
+ The derivatives of \cref{eq:friction-potential} are taken with $\sigma_n$
+ and $\Theta$ fixed. If the actual mechanical solve updates normal traction
+@@ -730,7 +826,7 @@
+  \dot{\bm d}_R+\lambda^{-1}\bm d_R=\bm u
+ \end{equation}
+ and applying $\mathcal D$ gives \cref{eq:R-ode}. The unloaded seed admits
+-$\bm d_R(0)=0$. Since $\bm u_h$ and $\bm d_{R,h}$ share the native Q2 basis,
++$\bm d_R(0)=0$. Since $\bm u_h$ and $\bm d_{R,h}$ share the native velocity basis,
+ the exact constant-rate recurrence is
+ \begin{equation}
+  \boxed{\bm d_{R,h}^k=\beta\bm d_{R,h}^a+\frac\kappa G\bm u_h^k,
+@@ -738,7 +834,7 @@
+  \label{eq:FE-recurrence}
+ \end{equation}
+ This is a coefficient-wise update; it requires no projection of the strain
+-tensor into continuous Q1 fields. Derivatives of a continuous Q2 vector field
++tensor into continuous Q1 fields. Derivatives of a continuous velocity FE field
+ need not be continuous across elements. Such derivative jumps are allowed by
+ this representation and are not removed by the exact history update.
+ 
+@@ -757,18 +853,13 @@
+ \subsection{Symmetric versus deviatoric gradients in the native report}
+ \label{sec:trace}
+ 
+-The native reports literally use $\R_h=\sym\nabla\bm d_{R,h}$, whereas the
+-original manuscript defines $\strain=\dev\sym\nabla\bm u$. An incompressible
+-continuum solution makes these equivalent, but Q2/Q1 Stokes only enforces
+-divergence weakly, so the pointwise discrete operators need not coincide.
+-To reproduce the native report literally, use $\mathcal D_h=\sym\nabla$
+-consistently in history, stress, energy, and mechanical assembly. If production
+-actually takes a deviatoric part, use that same operator in all four places.
+-This is a specific source-audit item not resolved by the supplied reports.
+-It has no effect on the exactly one-dimensional shear derivation, whose trace
+-is zero. One must not silently switch operators in a claimed exact discrete
+-identity. The recurrence proof above is valid for either consistently chosen
+-linear operator.
++The historical native reports used raw symmetric gradients. The source audit
++in \cref{sec:plane-strain} distinguishes them from the 3D plane-strain deviator
++at nonzero discrete divergence. The selected correction uses $\mathcal D$
++in history, stress, energy and mechanics, with the reduced 3D metric. It leaves
++exact one-dimensional shear invariant. Weak Q2/Q1 incompressibility is not a
++reason to omit this distinction from pointwise energy or normal traction.
++A coefficient-wise recurrence remains exact because $\mathcal D$ is linear.
+ 
+ \subsection{What the FE history does and does not eliminate}
+ 
+@@ -1273,13 +1364,36 @@
+ 
+ This note is self-contained and requires no external figures or bibliography
+ files. To compile, run \texttt{pdflatex phase\_field\_native\_fe\_derivation.tex}
+-twice. Before treating it as a line-by-line production specification, reconcile
+-the following with current source/configuration: the precise symmetric versus
+-deviatoric gradient operator, the normal-traction evaluation/lagging operator,
+-and its within-step convention in frictional work. These are deliberately
+-identified rather than guessed. The supplied report references a new
+-\texttt{specification.diff}, but that new diff and the current C++ source were
+-not included among the attachments for this review.
++twice. The plane-strain and friction-pressure audit above supersedes the
++original attachment-only qualifications concerning those source definitions.
++The design authority remains current\_design.md and specification.tex; this
++note derives the scientific embedding and records the bounded source correction.
++General dynamic-normal-stress friction work, spatial convergence, minimum
++selection and native coupled temporal accuracy remain distinct qualifications.
++
++\subsection{Bounded post-audit accuracy and stability evidence}
++The corrected optional Newton matrix agrees with the explicit embedded operator
++to relative $4.92\times10^{-14}$; a compatible shear control is unchanged.
++Two compatible native controls with Q2/Q1 and Q3/Q2 mechanics finish to
++$0.625$ s with unchanged phase bounds and KKT tolerances, no measured healing,
++and an exact saved FE coefficient recurrence. Q3 enrichment improves common-time
++phase error against the rich one-dimensional reference from $0.03643$ to
++$0.01312$. This is not spatial convergence: the retained three-point normal
++quadrature gives nearly constant Q3 stress at its samples, while independent
++12/24-point frozen evaluation gives $409$ Pa transverse stress RMS and bulk
++storage $0.875859$ J/m instead of the native $0.792491$ J/m. Normalization
++representation error is negligible for these along-fault-uniform fields.
++
++At sampled loaded states, the free phase Hessians have positive minimum
++eigenvalues and feasible small-mode perturbations increase energy. This does
++not test the complete constrained critical cone or all states; the old affine
++negative-curvature evidence remains separate. In particular, a phase-independent
++trace-storage correction at a fixed accepted anchor cannot remove those modes.
++No quadrature or phase-branch correction is inserted on the strength of these
++checks. See \path{propagation/P2_plane_strain_report.md} for settings, profiles,
++the source-consumer inventory, separate energy errors, and actual source and
++specification diffs. Full spatial/stability/time qualification and P3 remain
++deferred.
+ 
+ \clearpage
+ \begin{thebibliography}{9}

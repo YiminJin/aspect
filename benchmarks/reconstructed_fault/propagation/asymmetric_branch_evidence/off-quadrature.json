@@ -1,0 +1,74 @@
+[
+  {
+    "n": 256,
+    "time": 0.625,
+    "independent": [
+      {
+        "order": 12,
+        "mean": 1189.0836267726745,
+        "minimum": 844.5652744643157,
+        "maximum": 1361.1240063338773,
+        "RMS_oscillation": 41.66379997679463,
+        "localized_RMS_oscillation": 99.95714595584029,
+        "bulk": 0.7078278718436819
+      },
+      {
+        "order": 24,
+        "mean": 1189.0836267726895,
+        "minimum": 829.5868861306226,
+        "maximum": 1366.8388808424934,
+        "RMS_oscillation": 41.663799976785796,
+        "localized_RMS_oscillation": 99.9571459557971,
+        "bulk": 0.7078278718436963
+      }
+    ]
+  },
+  {
+    "n": 511,
+    "time": 0.625,
+    "independent": [
+      {
+        "order": 12,
+        "mean": 1188.8364088444396,
+        "minimum": 1102.3138612589682,
+        "maximum": 1232.2468823018135,
+        "RMS_oscillation": 10.516595960358927,
+        "localized_RMS_oscillation": 25.26039940546429,
+        "bulk": 0.7067213028923661
+      },
+      {
+        "order": 24,
+        "mean": 1188.8364088444428,
+        "minimum": 1098.5834890099359,
+        "maximum": 1233.7579982346506,
+        "RMS_oscillation": 10.516595960359583,
+        "localized_RMS_oscillation": 25.26039940547298,
+        "bulk": 0.7067213028923713
+      }
+    ]
+  },
+  {
+    "n": 512,
+    "time": 0.625,
+    "independent": [
+      {
+        "order": 12,
+        "mean": 1188.8367156276572,
+        "minimum": 1102.6628289560904,
+        "maximum": 1232.0748535782914,
+        "RMS_oscillation": 10.477888485020364,
+        "localized_RMS_oscillation": 25.168535305796617,
+        "bulk": 0.7067212612857304
+      },
+      {
+        "order": 24,
+        "mean": 1188.8367156276668,
+        "minimum": 1098.9478883202537,
+        "maximum": 1233.5808604389313,
+        "RMS_oscillation": 10.477888484988359,
+        "localized_RMS_oscillation": 25.16853530572607,
+        "bulk": 0.706721261285736
+      }
+    ]
+  }
+]

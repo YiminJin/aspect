@@ -1,0 +1,22 @@
+{
+  "executable_sha": "b6a4bdef9a9d570c1f606dc4bfcd167a66ac49f91f87d81199c52d72fdfb1e99",
+  "plugin_sha": "e8a9dfe7540381cf3e8fc1b862e407d3de097b42e7d17bc7802883db1546134f",
+  "input_sha": "48b08df9c1f43ba29e9624750337efcf53f6fcd5491b39a8c37f4059e87e8d2e",
+  "initial_phi_sha": "5792b5323cfa162a231c4f1e4d5076e987d6dfc56005f1f427e577801b5b3356",
+  "initial_H_sha": "c205e0eda26d3042599a139dd668ca5cf339c6b4a7eba939400d174f35a6dc8b",
+  "configuration": "fresh shared initialization, fixed 16x512, full-normal association, frozen particles",
+  "output": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-endpoint-onset-economical-final",
+  "threads": 1,
+  "started_UTC": "2026-10-12T08:59:41.300856+00:00",
+  "max_wall_seconds": 5400.0,
+  "force_complete_failure": true,
+  "complete_failure_timestep": 55,
+  "source_input": "benchmarks/reconstructed_fault/propagation/native_solver_evidence/economical-onset-coarse.prm",
+  "wall_budget_reached": false,
+  "stop_reason": "Fixture schedule failure: inherited91% timestep growth cap prevents prescribed dyadic schedule; preserve prefix, no damage qualification.",
+  "returncode": -2,
+  "wall_seconds": 1092.248782136001,
+  "user_seconds": 1074.854385,
+  "system_seconds": 10.74207,
+  "peak_RSS_KiB": 1682108
+}

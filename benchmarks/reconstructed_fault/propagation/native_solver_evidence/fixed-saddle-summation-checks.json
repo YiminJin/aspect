@@ -1,0 +1,157 @@
+{
+  "case": "fixed-saddle-summation",
+  "provenance": {
+    "executable_sha": "b6a4bdef9a9d570c1f606dc4bfcd167a66ac49f91f87d81199c52d72fdfb1e99",
+    "plugin_sha": "e8a9dfe7540381cf3e8fc1b862e407d3de097b42e7d17bc7802883db1546134f",
+    "input_sha": "ff48c20c9747c323a44a5eb492d1d6d27e20af691aa355d6561f6d1afe84b982",
+    "initial_phi_sha": "5792b5323cfa162a231c4f1e4d5076e987d6dfc56005f1f427e577801b5b3356",
+    "initial_H_sha": "c205e0eda26d3042599a139dd668ca5cf339c6b4a7eba939400d174f35a6dc8b",
+    "configuration": "fresh shared initialization, fixed 16x512, full-normal association, frozen particles; scoped noncommitting fixed-entry references, not physical evolution",
+    "output": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-endpoint-fixed-saddle-summation",
+    "threads": 1,
+    "started_UTC": "2026-10-12T08:32:56.381451+00:00",
+    "max_wall_seconds": 3600.0,
+    "force_complete_failure": false,
+    "complete_failure_timestep": null,
+    "source_input": "benchmarks/reconstructed_fault/propagation/native_solver_evidence/saddle-coarse.prm",
+    "returncode": 0,
+    "wall_seconds": 1564.1350109390005,
+    "user_seconds": 1538.971676,
+    "system_seconds": 3.616431,
+    "peak_RSS_KiB": 1850724
+  },
+  "entries": [
+    {
+      "time": 0.5654296875,
+      "dt": 0.00390625,
+      "initial_potential": 22.89552055576558,
+      "final_potential": 22.895520546950145,
+      "KKT": 1.2016429518091343e-12,
+      "phase_error": 5.0534187945316944e-11,
+      "reflected_phase_error": 0.0008832402345376744,
+      "bulk_residual": 2.359510164867138e-10,
+      "contact_rms": 8.913610489078713e-12,
+      "increment": 0.006180320008451368,
+      "healing": 0.0,
+      "I_min": 149.5117656332438,
+      "centroid": 0.5001262241529784,
+      "reference_centroid": 0.5001262241390285,
+      "velocity_error_selected": 1.1661462160500458e-09,
+      "q_center": 264.7364584394659,
+      "V_interval": 0.145588710557829,
+      "slip_candidate": 0.039652533822258855,
+      "case": "symmetric-saddle.txt",
+      "physical_KKT_target": 3.4812720725722936e-11,
+      "KKT_pass": true,
+      "phase_equivalence_error": 5.0534187945316944e-11,
+      "global_reflection": false,
+      "energy_decrease": 8.815433716335974e-09,
+      "tangential_phase_variation": 2.0000667788622195e-13,
+      "energy_allowance_J_per_m": 4.547473508864641e-13,
+      "resolved_energy_departure": true,
+      "cost": {
+        "mechanical seconds": 349.28275614700004,
+        "tangent seconds": 1082.1128540919997,
+        "tangent calls": 355.0,
+        "difference calls": 3.0,
+        "line searches": 9.0,
+        "phase iterations": 9.0
+      }
+    }
+  ],
+  "intermediate_accuracy": [
+    {
+      "defect": 1.102486461198154e-06,
+      "reference": 1.102486461198154e-06,
+      "eta": 0.01,
+      "rhs": 6.138353827337809e-06,
+      "target": 6.138353827337809e-08
+    },
+    {
+      "defect": 9.214858084489162e-09,
+      "reference": 1.102486461198154e-06,
+      "eta": 0.009142346833569688,
+      "rhs": 5.696368051947533e-08,
+      "target": 5.207817242257006e-10
+    },
+    {
+      "defect": 6.492529405510778e-07,
+      "reference": 1.102486461198154e-06,
+      "eta": 0.01,
+      "rhs": 4.396408219541975e-06,
+      "target": 4.3964082195419754e-08
+    },
+    {
+      "defect": 1.5075329309823068e-06,
+      "reference": 1.102486461198154e-06,
+      "eta": 0.01,
+      "rhs": 6.5469878926297e-06,
+      "target": 6.5469878926297e-08
+    },
+    {
+      "defect": 5.141541322809491e-07,
+      "reference": 1.102486461198154e-06,
+      "eta": 0.01,
+      "rhs": 2.4429258482894342e-06,
+      "target": 2.4429258482894343e-08
+    },
+    {
+      "defect": 2.7074329622767075e-09,
+      "reference": 1.102486461198154e-06,
+      "eta": 0.0049555541209750425,
+      "rhs": 2.2725891181680556e-08,
+      "target": 1.1261938369820746e-10
+    },
+    {
+      "defect": 8.487435038638524e-12,
+      "reference": 1.102486461198154e-06,
+      "eta": 0.00027746077766414737,
+      "rhs": 9.105757041098001e-11,
+      "target": 5.43948761338741e-14
+    }
+  ],
+  "slow_directions": [
+    {
+      "iteration": 25.0,
+      "lumped tangential fraction": 0.0014942070535870482,
+      "translation overlap": 0.9978734660274315
+    },
+    {
+      "iteration": 50.0,
+      "lumped tangential fraction": 8.889964017348141e-05,
+      "translation overlap": 0.9991585642867483
+    },
+    {
+      "iteration": 25.0,
+      "lumped tangential fraction": 0.0021646049725209822,
+      "translation overlap": 0.9815929426190638
+    },
+    {
+      "iteration": 25.0,
+      "lumped tangential fraction": 0.00018276979622444553,
+      "translation overlap": 0.9990536744531667
+    },
+    {
+      "iteration": 25.0,
+      "lumped tangential fraction": 0.0019011175983833356,
+      "translation overlap": 0.9931099865726986
+    },
+    {
+      "iteration": 50.0,
+      "lumped tangential fraction": 0.0040625720556474905,
+      "translation overlap": 0.9844110285127059
+    },
+    {
+      "iteration": 25.0,
+      "lumped tangential fraction": 0.025996983567640308,
+      "translation overlap": 0.8638760654627452
+    },
+    {
+      "iteration": 50.0,
+      "lumped tangential fraction": 0.0004955182354822671,
+      "translation overlap": 0.9989603451602709
+    }
+  ],
+  "history_published": false,
+  "scope": "Scoped FE reference and immutable obstacle; numerical solver/escape diagnostic, not checkpoint conversion or fresh physical evolution. Mechanical residual norms are measured independently; production relative convergence remains unchanged."
+}

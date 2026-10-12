@@ -1,0 +1,574 @@
+[
+  {
+    "original": "build-propagation-integration/accuracy-energy-baseline",
+    "physical": "build-propagation-integration/archive/baselines/accuracy-energy-baseline"
+  },
+  {
+    "original": "build-propagation-integration/coupling-baseline",
+    "physical": "build-propagation-integration/archive/baselines/coupling-baseline"
+  },
+  {
+    "original": "build-propagation-integration/history-baseline",
+    "physical": "build-propagation-integration/archive/baselines/history-baseline"
+  },
+  {
+    "original": "build-propagation-integration/irreversibility-baseline",
+    "physical": "build-propagation-integration/archive/baselines/irreversibility-baseline"
+  },
+  {
+    "original": "build-propagation-integration/material-baseline",
+    "physical": "build-propagation-integration/archive/baselines/material-baseline"
+  },
+  {
+    "original": "build-propagation-integration/native-fe-baseline",
+    "physical": "build-propagation-integration/archive/baselines/native-fe-baseline"
+  },
+  {
+    "original": "build-propagation-integration/native-fe-first-curvature",
+    "physical": "build-propagation-integration/archive/executables/native-fe-first-curvature"
+  },
+  {
+    "original": "build-propagation-integration/native-fe-pdas",
+    "physical": "build-propagation-integration/archive/executables/native-fe-pdas"
+  },
+  {
+    "original": "build-propagation-integration/native-fe-uncached",
+    "physical": "build-propagation-integration/archive/executables/native-fe-uncached"
+  },
+  {
+    "original": "build-propagation-integration/normalization-baseline",
+    "physical": "build-propagation-integration/archive/baselines/normalization-baseline"
+  },
+  {
+    "original": "build-propagation-integration/output-accuracy_stress_final",
+    "physical": "build-propagation-integration/runs/output-accuracy_stress_final"
+  },
+  {
+    "original": "build-propagation-integration/output-accuracy_stress_native",
+    "physical": "build-propagation-integration/runs/output-accuracy_stress_native"
+  },
+  {
+    "original": "build-propagation-integration/output-baseline_ih",
+    "physical": "build-propagation-integration/runs/output-baseline_ih"
+  },
+  {
+    "original": "build-propagation-integration/output-compat_equality",
+    "physical": "build-propagation-integration/runs/output-compat_equality"
+  },
+  {
+    "original": "build-propagation-integration/output-compat_ih",
+    "physical": "build-propagation-integration/runs/output-compat_ih"
+  },
+  {
+    "original": "build-propagation-integration/output-compat_ih_budget",
+    "physical": "build-propagation-integration/runs/output-compat_ih_budget"
+  },
+  {
+    "original": "build-propagation-integration/output-compat_mature",
+    "physical": "build-propagation-integration/runs/output-compat_mature"
+  },
+  {
+    "original": "build-propagation-integration/output-compat_mature_optin",
+    "physical": "build-propagation-integration/runs/output-compat_mature_optin"
+  },
+  {
+    "original": "build-propagation-integration/output-coupled_continuity0125",
+    "physical": "build-propagation-integration/runs/output-coupled_continuity0125"
+  },
+  {
+    "original": "build-propagation-integration/output-coupled_continuity025",
+    "physical": "build-propagation-integration/runs/output-coupled_continuity025"
+  },
+  {
+    "original": "build-propagation-integration/output-coupled_diagnosed0125",
+    "physical": "build-propagation-integration/runs/output-coupled_diagnosed0125"
+  },
+  {
+    "original": "build-propagation-integration/output-coupled_diagnosed025",
+    "physical": "build-propagation-integration/runs/output-coupled_diagnosed025"
+  },
+  {
+    "original": "build-propagation-integration/output-coupled_final0125",
+    "physical": "build-propagation-integration/runs/output-coupled_final0125"
+  },
+  {
+    "original": "build-propagation-integration/output-coupled_final025",
+    "physical": "build-propagation-integration/runs/output-coupled_final025"
+  },
+  {
+    "original": "build-propagation-integration/output-coupled_observed0125",
+    "physical": "build-propagation-integration/runs/output-coupled_observed0125"
+  },
+  {
+    "original": "build-propagation-integration/output-coupled_observed025",
+    "physical": "build-propagation-integration/runs/output-coupled_observed025"
+  },
+  {
+    "original": "build-propagation-integration/output-coupled_quasistatic0125",
+    "physical": "build-propagation-integration/runs/output-coupled_quasistatic0125"
+  },
+  {
+    "original": "build-propagation-integration/output-coupled_quasistatic025",
+    "physical": "build-propagation-integration/runs/output-coupled_quasistatic025"
+  },
+  {
+    "original": "build-propagation-integration/output-coupled_registered0125",
+    "physical": "build-propagation-integration/runs/output-coupled_registered0125"
+  },
+  {
+    "original": "build-propagation-integration/output-coupled_registered025",
+    "physical": "build-propagation-integration/runs/output-coupled_registered025"
+  },
+  {
+    "original": "build-propagation-integration/output-coupled_report0125",
+    "physical": "build-propagation-integration/runs/output-coupled_report0125"
+  },
+  {
+    "original": "build-propagation-integration/output-coupled_report025",
+    "physical": "build-propagation-integration/runs/output-coupled_report025"
+  },
+  {
+    "original": "build-propagation-integration/output-coupled_startup_diagnosis",
+    "physical": "build-propagation-integration/runs/output-coupled_startup_diagnosis"
+  },
+  {
+    "original": "build-propagation-integration/output-coupling_consistency_v2_1",
+    "physical": "build-propagation-integration/runs/output-coupling_consistency_v2_1"
+  },
+  {
+    "original": "build-propagation-integration/output-coupling_consistency_v3_1",
+    "physical": "build-propagation-integration/runs/output-coupling_consistency_v3_1"
+  },
+  {
+    "original": "build-propagation-integration/output-coupling_consistency_v3_2",
+    "physical": "build-propagation-integration/runs/output-coupling_consistency_v3_2"
+  },
+  {
+    "original": "build-propagation-integration/output-coupling_diagnosis_dt03125",
+    "physical": "build-propagation-integration/runs/output-coupling_diagnosis_dt03125"
+  },
+  {
+    "original": "build-propagation-integration/output-coupling_diagnosis_dt0625",
+    "physical": "build-propagation-integration/runs/output-coupling_diagnosis_dt0625"
+  },
+  {
+    "original": "build-propagation-integration/output-coupling_diagnosis_dt125",
+    "physical": "build-propagation-integration/runs/output-coupling_diagnosis_dt125"
+  },
+  {
+    "original": "build-propagation-integration/output-coupling_evolving_dt03125",
+    "physical": "build-propagation-integration/runs/output-coupling_evolving_dt03125"
+  },
+  {
+    "original": "build-propagation-integration/output-coupling_evolving_dt0625",
+    "physical": "build-propagation-integration/runs/output-coupling_evolving_dt0625"
+  },
+  {
+    "original": "build-propagation-integration/output-coupling_evolving_dt125",
+    "physical": "build-propagation-integration/runs/output-coupling_evolving_dt125"
+  },
+  {
+    "original": "build-propagation-integration/output-coupling_final_local",
+    "physical": "build-propagation-integration/runs/output-coupling_final_local"
+  },
+  {
+    "original": "build-propagation-integration/output-coupling_legacy_check",
+    "physical": "build-propagation-integration/runs/output-coupling_legacy_check"
+  },
+  {
+    "original": "build-propagation-integration/output-coupling_local",
+    "physical": "build-propagation-integration/runs/output-coupling_local"
+  },
+  {
+    "original": "build-propagation-integration/output-coupling_pilot_a256",
+    "physical": "build-propagation-integration/runs/output-coupling_pilot_a256"
+  },
+  {
+    "original": "build-propagation-integration/output-coupling_surface_dt03125",
+    "physical": "build-propagation-integration/runs/output-coupling_surface_dt03125"
+  },
+  {
+    "original": "build-propagation-integration/output-coupling_surface_dt0625",
+    "physical": "build-propagation-integration/runs/output-coupling_surface_dt0625"
+  },
+  {
+    "original": "build-propagation-integration/output-coupling_surface_dt125",
+    "physical": "build-propagation-integration/runs/output-coupling_surface_dt125"
+  },
+  {
+    "original": "build-propagation-integration/output-coupling_work_dt03125",
+    "physical": "build-propagation-integration/runs/output-coupling_work_dt03125"
+  },
+  {
+    "original": "build-propagation-integration/output-coupling_work_dt0625",
+    "physical": "build-propagation-integration/runs/output-coupling_work_dt0625"
+  },
+  {
+    "original": "build-propagation-integration/output-coupling_work_dt125",
+    "physical": "build-propagation-integration/runs/output-coupling_work_dt125"
+  },
+  {
+    "original": "build-propagation-integration/output-coupling_work_local",
+    "physical": "build-propagation-integration/runs/output-coupling_work_local"
+  },
+  {
+    "original": "build-propagation-integration/output-coupling_work_zero",
+    "physical": "build-propagation-integration/runs/output-coupling_work_zero"
+  },
+  {
+    "original": "build-propagation-integration/output-history-native",
+    "physical": "build-propagation-integration/runs/output-history-native"
+  },
+  {
+    "original": "build-propagation-integration/output-history-native-v2",
+    "physical": "build-propagation-integration/runs/output-history-native-v2"
+  },
+  {
+    "original": "build-propagation-integration/output-history_reference_repeat",
+    "physical": "build-propagation-integration/runs/output-history_reference_repeat"
+  },
+  {
+    "original": "build-propagation-integration/output-history_reference_repeat_half",
+    "physical": "build-propagation-integration/runs/output-history_reference_repeat_half"
+  },
+  {
+    "original": "build-propagation-integration/output-irreversibility_dt03125",
+    "physical": "build-propagation-integration/runs/output-irreversibility_dt03125"
+  },
+  {
+    "original": "build-propagation-integration/output-irreversibility_dt0625",
+    "physical": "build-propagation-integration/runs/output-irreversibility_dt0625"
+  },
+  {
+    "original": "build-propagation-integration/output-irreversibility_dt125",
+    "physical": "build-propagation-integration/runs/output-irreversibility_dt125"
+  },
+  {
+    "original": "build-propagation-integration/output-irreversibility_mature_default",
+    "physical": "build-propagation-integration/runs/output-irreversibility_mature_default"
+  },
+  {
+    "original": "build-propagation-integration/output-irreversibility_mature_enabled",
+    "physical": "build-propagation-integration/runs/output-irreversibility_mature_enabled"
+  },
+  {
+    "original": "build-propagation-integration/output-irreversibility_reject_continue",
+    "physical": "build-propagation-integration/runs/output-irreversibility_reject_continue"
+  },
+  {
+    "original": "build-propagation-integration/output-irreversibility_reject_continue_final",
+    "physical": "build-propagation-integration/runs/output-irreversibility_reject_continue_final"
+  },
+  {
+    "original": "build-propagation-integration/output-irreversibility_reject_equality_final",
+    "physical": "build-propagation-integration/runs/output-irreversibility_reject_equality_final"
+  },
+  {
+    "original": "build-propagation-integration/output-irreversibility_replay_dt03125",
+    "physical": "build-propagation-integration/runs/output-irreversibility_replay_dt03125"
+  },
+  {
+    "original": "build-propagation-integration/output-irreversibility_replay_dt0625",
+    "physical": "build-propagation-integration/runs/output-irreversibility_replay_dt0625"
+  },
+  {
+    "original": "build-propagation-integration/output-irreversibility_replay_dt125",
+    "physical": "build-propagation-integration/runs/output-irreversibility_replay_dt125"
+  },
+  {
+    "original": "build-propagation-integration/output-irreversibility_replay_final_dt03125",
+    "physical": "build-propagation-integration/runs/output-irreversibility_replay_final_dt03125"
+  },
+  {
+    "original": "build-propagation-integration/output-irreversibility_replay_final_dt0625",
+    "physical": "build-propagation-integration/runs/output-irreversibility_replay_final_dt0625"
+  },
+  {
+    "original": "build-propagation-integration/output-irreversibility_replay_final_dt125",
+    "physical": "build-propagation-integration/runs/output-irreversibility_replay_final_dt125"
+  },
+  {
+    "original": "build-propagation-integration/output-irreversibility_replay_guard_dt03125",
+    "physical": "build-propagation-integration/runs/output-irreversibility_replay_guard_dt03125"
+  },
+  {
+    "original": "build-propagation-integration/output-irreversibility_replay_guard_dt0625",
+    "physical": "build-propagation-integration/runs/output-irreversibility_replay_guard_dt0625"
+  },
+  {
+    "original": "build-propagation-integration/output-irreversibility_replay_guard_dt125",
+    "physical": "build-propagation-integration/runs/output-irreversibility_replay_guard_dt125"
+  },
+  {
+    "original": "build-propagation-integration/output-irreversibility_zero",
+    "physical": "build-propagation-integration/runs/output-irreversibility_zero"
+  },
+  {
+    "original": "build-propagation-integration/output-material_primary_a016",
+    "physical": "build-propagation-integration/runs/output-material_primary_a016"
+  },
+  {
+    "original": "build-propagation-integration/output-material_reference_a004",
+    "physical": "build-propagation-integration/runs/output-material_reference_a004"
+  },
+  {
+    "original": "build-propagation-integration/output-material_reference_a008",
+    "physical": "build-propagation-integration/runs/output-material_reference_a008"
+  },
+  {
+    "original": "build-propagation-integration/output-material_reference_a016",
+    "physical": "build-propagation-integration/runs/output-material_reference_a016"
+  },
+  {
+    "original": "build-propagation-integration/output-material_reference_a016_half",
+    "physical": "build-propagation-integration/runs/output-material_reference_a016_half"
+  },
+  {
+    "original": "build-propagation-integration/output-native-fe-endpoint64",
+    "physical": "build-propagation-integration/runs/output-native-fe-endpoint64"
+  },
+  {
+    "original": "build-propagation-integration/output-native-fe-endpoint64-accurate-sum",
+    "physical": "build-propagation-integration/runs/output-native-fe-endpoint64-accurate-sum"
+  },
+  {
+    "original": "build-propagation-integration/output-native-fe-endpoint64-final",
+    "physical": "build-propagation-integration/runs/output-native-fe-endpoint64-final"
+  },
+  {
+    "original": "build-propagation-integration/output-native-fe-endpoint64-fixed",
+    "physical": "build-propagation-integration/runs/output-native-fe-endpoint64-fixed"
+  },
+  {
+    "original": "build-propagation-integration/output-native-fe-endpoint64-pdas",
+    "physical": "build-propagation-integration/runs/output-native-fe-endpoint64-pdas"
+  },
+  {
+    "original": "build-propagation-integration/output-native-fe-final-reject-heterogeneous",
+    "physical": "build-propagation-integration/runs/output-native-fe-final-reject-heterogeneous"
+  },
+  {
+    "original": "build-propagation-integration/output-native-fe-final-reject-resume",
+    "physical": "build-propagation-integration/runs/output-native-fe-final-reject-resume"
+  },
+  {
+    "original": "build-propagation-integration/output-native-fe-final-reject-transport",
+    "physical": "build-propagation-integration/runs/output-native-fe-final-reject-transport"
+  },
+  {
+    "original": "build-propagation-integration/output-native-fe-mature",
+    "physical": "build-propagation-integration/runs/output-native-fe-mature"
+  },
+  {
+    "original": "build-propagation-integration/output-native-fe-mature-final",
+    "physical": "build-propagation-integration/runs/output-native-fe-mature-final"
+  },
+  {
+    "original": "build-propagation-integration/output-native-fe-reject-heterogeneous",
+    "physical": "build-propagation-integration/runs/output-native-fe-reject-heterogeneous"
+  },
+  {
+    "original": "build-propagation-integration/output-native-fe-reject-resume",
+    "physical": "build-propagation-integration/runs/output-native-fe-reject-resume"
+  },
+  {
+    "original": "build-propagation-integration/output-native-fe-reject-transport",
+    "physical": "build-propagation-integration/runs/output-native-fe-reject-transport"
+  },
+  {
+    "original": "build-propagation-integration/output-native-fe-zero",
+    "physical": "build-propagation-integration/runs/output-native-fe-zero"
+  },
+  {
+    "original": "build-propagation-integration/output-native-fe-zero-final",
+    "physical": "build-propagation-integration/runs/output-native-fe-zero-final"
+  },
+  {
+    "original": "build-propagation-integration/output-normalization_capture0125",
+    "physical": "build-propagation-integration/runs/output-normalization_capture0125"
+  },
+  {
+    "original": "build-propagation-integration/output-normalization_capture025",
+    "physical": "build-propagation-integration/runs/output-normalization_capture025"
+  },
+  {
+    "original": "build-propagation-integration/output-normalization_compat_ih_budget",
+    "physical": "build-propagation-integration/runs/output-normalization_compat_ih_budget"
+  },
+  {
+    "original": "build-propagation-integration/output-normalization_compat_mature",
+    "physical": "build-propagation-integration/runs/output-normalization_compat_mature"
+  },
+  {
+    "original": "build-propagation-integration/output-normalization_consistent",
+    "physical": "build-propagation-integration/runs/output-normalization_consistent"
+  },
+  {
+    "original": "build-propagation-integration/output-normalization_legacy",
+    "physical": "build-propagation-integration/runs/output-normalization_legacy"
+  },
+  {
+    "original": "build-propagation-integration/output-normalization_lumped",
+    "physical": "build-propagation-integration/runs/output-normalization_lumped"
+  },
+  {
+    "original": "build-propagation-integration/output-normalization_lumped_mpi_allowed",
+    "physical": "build-propagation-integration/runs/output-normalization_lumped_mpi_allowed"
+  },
+  {
+    "original": "build-propagation-integration/output-normalization_lumped_padded",
+    "physical": "build-propagation-integration/runs/output-normalization_lumped_padded"
+  },
+  {
+    "original": "build-propagation-integration/output-normalization_lumped_spacing05",
+    "physical": "build-propagation-integration/runs/output-normalization_lumped_spacing05"
+  },
+  {
+    "original": "build-propagation-integration/output-normalization_reject_to_consistent",
+    "physical": "build-propagation-integration/runs/output-normalization_reject_to_consistent"
+  },
+  {
+    "original": "build-propagation-integration/output-normalization_reject_to_lumped",
+    "physical": "build-propagation-integration/runs/output-normalization_reject_to_lumped"
+  },
+  {
+    "original": "build-propagation-integration/output-padded_final",
+    "physical": "build-propagation-integration/runs/output-padded_final"
+  },
+  {
+    "original": "build-propagation-integration/output-padded_gcc12",
+    "physical": "build-propagation-integration/runs/output-padded_gcc12"
+  },
+  {
+    "original": "build-propagation-integration/output-padded_initial",
+    "physical": "build-propagation-integration/runs/output-padded_initial"
+  },
+  {
+    "original": "build-propagation-integration/output-padded_mpi",
+    "physical": "build-propagation-integration/runs/output-padded_mpi"
+  },
+  {
+    "original": "build-propagation-integration/output-padded_mpi_final",
+    "physical": "build-propagation-integration/runs/output-padded_mpi_final"
+  },
+  {
+    "original": "build-propagation-integration/output-padded_mpi_gcc12",
+    "physical": "build-propagation-integration/runs/output-padded_mpi_gcc12"
+  },
+  {
+    "original": "build-propagation-integration/output-padded_mpi_owned_norm",
+    "physical": "build-propagation-integration/runs/output-padded_mpi_owned_norm"
+  },
+  {
+    "original": "build-propagation-integration/output-padded_restore_final",
+    "physical": "build-propagation-integration/runs/output-padded_restore_final"
+  },
+  {
+    "original": "build-propagation-integration/output-recoverable_dt03125",
+    "physical": "build-propagation-integration/runs/output-recoverable_dt03125"
+  },
+  {
+    "original": "build-propagation-integration/output-recoverable_dt0625",
+    "physical": "build-propagation-integration/runs/output-recoverable_dt0625"
+  },
+  {
+    "original": "build-propagation-integration/output-recoverable_dt125",
+    "physical": "build-propagation-integration/runs/output-recoverable_dt125"
+  },
+  {
+    "original": "build-propagation-integration/output-recoverable_legacy_check",
+    "physical": "build-propagation-integration/runs/output-recoverable_legacy_check"
+  },
+  {
+    "original": "build-propagation-integration/output-recoverable_local",
+    "physical": "build-propagation-integration/runs/output-recoverable_local"
+  },
+  {
+    "original": "build-propagation-integration/output-recoverable_projection",
+    "physical": "build-propagation-integration/runs/output-recoverable_projection"
+  },
+  {
+    "original": "build-propagation-integration/output-recoverable_zero",
+    "physical": "build-propagation-integration/runs/output-recoverable_zero"
+  },
+  {
+    "original": "build-propagation-integration/output-straight_contact_fixed",
+    "physical": "build-propagation-integration/runs/output-straight_contact_fixed"
+  },
+  {
+    "original": "build-propagation-integration/output-straight_contact_trace",
+    "physical": "build-propagation-integration/runs/output-straight_contact_trace"
+  },
+  {
+    "original": "build-propagation-integration/output-straight_final",
+    "physical": "build-propagation-integration/runs/output-straight_final"
+  },
+  {
+    "original": "build-propagation-integration/output-straight_full",
+    "physical": "build-propagation-integration/runs/output-straight_full"
+  },
+  {
+    "original": "build-propagation-integration/output-straight_full_mpi",
+    "physical": "build-propagation-integration/runs/output-straight_full_mpi"
+  },
+  {
+    "original": "build-propagation-integration/output-straight_full_native",
+    "physical": "build-propagation-integration/runs/output-straight_full_native"
+  },
+  {
+    "original": "build-propagation-integration/output-straight_full_native_mpi",
+    "physical": "build-propagation-integration/runs/output-straight_full_native_mpi"
+  },
+  {
+    "original": "build-propagation-integration/output-straight_gcc12_support",
+    "physical": "build-propagation-integration/runs/output-straight_gcc12_support"
+  },
+  {
+    "original": "build-propagation-integration/output-straight_parse_fixed",
+    "physical": "build-propagation-integration/runs/output-straight_parse_fixed"
+  },
+  {
+    "original": "build-propagation-integration/output-straight_probes",
+    "physical": "build-propagation-integration/runs/output-straight_probes"
+  },
+  {
+    "original": "build-propagation-integration/output-straight_support_diagnosis",
+    "physical": "build-propagation-integration/runs/output-straight_support_diagnosis"
+  },
+  {
+    "original": "build-propagation-integration/output-straight_support_fixed",
+    "physical": "build-propagation-integration/runs/output-straight_support_fixed"
+  },
+  {
+    "original": "build-propagation-integration/output-straight_support_fixed_mpi",
+    "physical": "build-propagation-integration/runs/output-straight_support_fixed_mpi"
+  },
+  {
+    "original": "build-propagation-integration/output-straight_support_mass",
+    "physical": "build-propagation-integration/runs/output-straight_support_mass"
+  },
+  {
+    "original": "build-propagation-integration/recoverable-baseline",
+    "physical": "build-propagation-integration/archive/baselines/recoverable-baseline"
+  },
+  {
+    "original": "build-propagation-integration/review-checkpoint-baseline",
+    "physical": "build-propagation-integration/archive/baselines/review-checkpoint-baseline"
+  },
+  {
+    "original": "build-propagation-integration/support-baseline",
+    "physical": "build-propagation-integration/archive/baselines/support-baseline"
+  },
+  {
+    "original": "build-propagation-integration/total-energy-endpoint-baseline",
+    "physical": "build-propagation-integration/archive/baselines/total-energy-endpoint-baseline"
+  },
+  {
+    "original": "build-propagation-integration/total-energy-prototype-baseline",
+    "physical": "build-propagation-integration/archive/baselines/total-energy-prototype-baseline"
+  },
+  {
+    "original": "build-propagation-integration/total-energy-time-baseline",
+    "physical": "build-propagation-integration/archive/baselines/total-energy-time-baseline"
+  }
+]

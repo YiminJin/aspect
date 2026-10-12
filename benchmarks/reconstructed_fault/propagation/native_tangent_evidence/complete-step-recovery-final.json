@@ -1,0 +1,10 @@
+{
+  "case": "onset-cached-B-G-recovery",
+  "failure_step": 3,
+  "failure_time": 0.5283203125,
+  "checked_surface_components": 520,
+  "changed_surface_components": 0,
+  "unchanged_nan_sentinels": 325,
+  "restoration": "Complete outer solve_timestep failed after coupled convergence and before publication.\nAll solution/phase histories, accepted d_R, surface q/I/V, particle properties/positions, clock, pressure bookkeeping and statistics restored exactly.\nSurface property differences (including sentinel bytes): 0; unchanged NaN sentinel components: 325.\nNormal native driver retries the same physical timestep next; metrics.csv verifies its successful publication.\n",
+  "scope": "Complete solve_timestep failure before first publication; exact accepted fields and bookkeeping restored, successful retry accepted. Not postpublication rejection or transported/restart qualification."
+}

@@ -1,0 +1,6 @@
+{
+  "diagnosis": "Picard assembler registration alone does not reach the selected Newton fixture; observed matrix unchanged. Final correction also registers Newton residual/tangent term.",
+  "preserved_output": "build-propagation-integration/runs/output-plane-strain-after",
+  "preserved_log": "build-propagation-integration/plane-strain-after.log",
+  "core_sha": "571abef12134d9f11bbe800f74026f185a5045ebeb821d0074f813e3049b6f45"
+}

@@ -1,0 +1,91 @@
+{
+  "maximum": {
+    "bulk_error": 2.4694690736737357e-12,
+    "cohesive_error": 2.3092638912203256e-14,
+    "fracture_error": 1.751487843648647e-12,
+    "potential_error": 1.666222715357435e-12,
+    "gradient_max_error": 5.3681397434862665e-14,
+    "I_relative_error": 2.6645352591003757e-15,
+    "DI_error": 5.9117155615240335e-12,
+    "weak_force": 3.033281126274545e-10,
+    "contact": 5.552465154323727e-10,
+    "point_stress_error": 4.877988372118091e-10,
+    "full_gradient_error": 3.718921871842529e-15
+  },
+  "reduced_tangent": [
+    {
+      "case": "unloaded",
+      "epsilon": 1e-05,
+      "maximum_action_error": 4.586792629740488e-10,
+      "reference_scale": 0.011924475185246308
+    },
+    {
+      "case": "unloaded",
+      "epsilon": 5e-06,
+      "maximum_action_error": 7.52668148293334e-10,
+      "reference_scale": 0.011924475185246308,
+      "half_spacing_uncertainty": 1.1405806854547507e-09
+    },
+    {
+      "case": "growing",
+      "epsilon": 1e-05,
+      "maximum_action_error": 1.7011875866335124e-09,
+      "reference_scale": 0.03833244110437557
+    },
+    {
+      "case": "growing",
+      "epsilon": 5e-06,
+      "maximum_action_error": 2.8253800826716358e-09,
+      "reference_scale": 0.03833244110437557,
+      "half_spacing_uncertainty": 3.8530837617734015e-09
+    },
+    {
+      "case": "asymmetric",
+      "epsilon": 1e-05,
+      "maximum_action_error": 3.220846749030226e-09,
+      "reference_scale": 0.04396390032948929
+    },
+    {
+      "case": "asymmetric",
+      "epsilon": 5e-06,
+      "maximum_action_error": 5.438524949830104e-09,
+      "reference_scale": 0.04396390032948929,
+      "half_spacing_uncertainty": 8.485177623029916e-09
+    }
+  ],
+  "energy_adjoint_maximum_error": 1.983841451578118e-06,
+  "normalization_action_relative_error": 1.7847367183241991e-09,
+  "explicit_state_poisoning": true,
+  "accepted_history_restored": true,
+  "scope": "native energy and point constitutive law with native FE weak quadrature; fresh evolution separate",
+  "CPDI_quadratic_reuse": {
+    "energy_error": 8.739675649849232e-13,
+    "gradient_error": 2.1670165661902274e-14
+  },
+  "linearized_tangent": {
+    "inner-accuracy": {
+      "maximum_error": 6.699737986615162e-12,
+      "maximum_scale": 0.13026063255666676
+    },
+    "mixed-symmetry": {
+      "maximum_error": 1.0206235856458079e-10,
+      "maximum_scale": 95.92683342473276
+    },
+    "normal": {
+      "maximum_error": 2.464385545630776e-08,
+      "maximum_scale": 0.13026063255789425
+    },
+    "normal-prototype-exact": {
+      "maximum_error": 1.8213597990923702e-10,
+      "maximum_scale": 0.04396390032948929
+    },
+    "tangential-fixed-endpoint": {
+      "maximum_error": 7.120767406831874e-07,
+      "maximum_scale": 231.9908615804215
+    },
+    "tangential-reduced": {
+      "diagnostic_only": true,
+      "maximum_scale": 9.508397003432501
+    }
+  }
+}

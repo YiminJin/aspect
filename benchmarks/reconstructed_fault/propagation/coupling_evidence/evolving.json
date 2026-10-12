@@ -1,0 +1,2363 @@
+{
+  "cases": {
+    "coupling_evolving_dt125": {
+      "dt": 0.125,
+      "exit_code": 1,
+      "accepted_time": 0.875,
+      "accepted_steps": 7,
+      "phase_max_gain": 0.058371022530549266,
+      "max_nodal_gain": 0.058371022530549266,
+      "max_gain_location": [
+        0.0,
+        0.5
+      ],
+      "max_step_increment": 0.0570566154524752,
+      "phase_changing_steps": [
+        6,
+        7
+      ],
+      "max_healing": 0.0,
+      "max_KKT": 1.8546597146117047e-13,
+      "max_mechanical_residual": 4.369439168542235e-09,
+      "H_gain": 1781.572185543115,
+      "normalization": {
+        "0": {
+          "max_source_error": 8.832863329644169e-10,
+          "max_I_error": 8.832863329644169e-10,
+          "Q16_Q32_errors": [
+            4.440892098500626e-16,
+            4.440892098500626e-16
+          ]
+        },
+        "7": {
+          "max_source_error": 0.018737222518307783,
+          "max_I_error": 0.018926147804355198,
+          "Q16_Q32_errors": [
+            6.661338147750939e-16,
+            6.661338147750939e-16
+          ]
+        }
+      },
+      "phase_energy_derivative": {
+        "finite_difference": -29.678609250616997,
+        "discrete_derivative": -29.678609259850322,
+        "continuum_driver_derivative": -29.677747141464078,
+        "relative_projection_discrepancy": 2.9048476587843036e-05
+      },
+      "final_work": {
+        "step": 7.0,
+        "time": 0.875,
+        "old_FE_energy": 2089.564491343016,
+        "native_QP_energy": 3743.3363855971184,
+        "mapped_particle_energy": 3749.9143915147847,
+        "stress_transfer_relative": 0.07157597892789652,
+        "bulk_viscous": 7.191039511539845,
+        "bulk_work": 1660.439958839186,
+        "bulk_crack_work": -0.5229749264754546,
+        "bulk_identity_defect": 1.91384685876983e-11,
+        "cohesive_work": 3.614418652768364,
+        "friction_work": 10.810323977749231,
+        "time_integrated_exchange_defect": -0.465469910943316,
+        "endpoint_exchange_defect": -3.010791544966196e-07,
+        "chi_measure": 1.0001631347216302,
+        "work_adjoint_identity": 1.4210854715202004e-13,
+        "operator_adjoint_error": 3.935524180635342e-15,
+        "q_publication_error": 1.7053025658242404e-13,
+        "K_error": 3.531032359543098e-12,
+        "G_error": 1.143414204142122e-13,
+        "B_error": 2.949710864428145e-11,
+        "profile_work": -14.482247646049734,
+        "profile_integral": 6.641339820049839e-05,
+        "fault_phase_jump": -0.37835160670106327
+      },
+      "max_operator_error": 3.935524180635342e-15,
+      "max_publication_error": 2.2737367544323206e-13,
+      "max_bulk_identity_defect": 3.030198314490917e-11,
+      "cumulative_exchange_defect": 0.43786244072821456,
+      "cumulative_stress_transfer_energy": 10.426686826567115,
+      "final_energy": {
+        "step": 7.0,
+        "time": 0.875,
+        "bulk_stored": 3782.676498400963,
+        "fault_stored": 8.37659050805711,
+        "fracture": 15.000499163769112,
+        "fracture_change": 0.3743182014636819,
+        "bulk_viscous": 14.196690378247897,
+        "fault_viscous": 0.0328134687637583,
+        "friction": 43.91736934653926,
+        "bulk_input_work": 3827.0946795232867,
+        "cohesive_work": 8.791658527100996,
+        "phase_fault_jump": -0.3822545502798016,
+        "bulk_crack_work_step": -4.7497478175482035,
+        "exchange_defect_step": -19.174490448065796,
+        "energy_defect": -22.48753712956386,
+        "Ymax": 109802.69873023199,
+        "Y_over_H0_max": 3.764492822046496,
+        "Z_update_relative_error": 3.31605994417797e-16
+      },
+      "local_final": [
+        {
+          "step": 7.0,
+          "time": 0.875,
+          "dt": 0.125,
+          "x": 0.0,
+          "phi": 0.6619198602041714,
+          "q": 412.6789903129106,
+          "V": 0.0940461248572656,
+          "slip": 0.06336973197856868
+        },
+        {
+          "step": 7.0,
+          "time": 0.875,
+          "dt": 0.125,
+          "x": 0.5,
+          "phi": 0.6103541238521296,
+          "q": 410.78425142692976,
+          "V": 0.0936049957000512,
+          "slip": 0.04715403478599513
+        },
+        {
+          "step": 7.0,
+          "time": 0.875,
+          "dt": 0.125,
+          "x": 1.0,
+          "phi": 0.661919860204171,
+          "q": 412.6789903129119,
+          "V": 0.09404612485726598,
+          "slip": 0.06336973197856872
+        }
+      ]
+    },
+    "coupling_evolving_dt0625": {
+      "dt": 0.0625,
+      "exit_code": 1,
+      "accepted_time": 0.8125,
+      "accepted_steps": 13,
+      "phase_max_gain": 0.042489811283249024,
+      "max_nodal_gain": 0.042489811283249024,
+      "max_gain_location": [
+        0.0,
+        0.5
+      ],
+      "max_step_increment": 0.030582894052768483,
+      "phase_changing_steps": [
+        11,
+        12,
+        13
+      ],
+      "max_healing": 0.0,
+      "max_KKT": 1.9791082539256782e-13,
+      "max_mechanical_residual": 4.369439168542235e-09,
+      "H_gain": 466.40245126015725,
+      "normalization": {
+        "0": {
+          "max_source_error": 8.832863329644169e-10,
+          "max_I_error": 8.832863329644169e-10,
+          "Q16_Q32_errors": [
+            4.440892098500626e-16,
+            4.440892098500626e-16
+          ]
+        },
+        "13": {
+          "max_source_error": 0.014955394282258783,
+          "max_I_error": 0.015182453865997037,
+          "Q16_Q32_errors": [
+            6.661338147750939e-16,
+            6.661338147750939e-16
+          ]
+        }
+      },
+      "phase_energy_derivative": {
+        "finite_difference": -20.221963330932063,
+        "discrete_derivative": -20.22196333679802,
+        "continuum_driver_derivative": -20.222485095500346,
+        "relative_projection_discrepancy": 2.5801584823234666e-05
+      },
+      "final_work": {
+        "step": 13.0,
+        "time": 0.8125,
+        "old_FE_energy": 1800.9452591751142,
+        "native_QP_energy": 2462.767405765761,
+        "mapped_particle_energy": 2469.6852993033826,
+        "stress_transfer_relative": 0.06952570671302974,
+        "bulk_viscous": 2.6539481782529317,
+        "bulk_work": 663.9951162432408,
+        "bulk_crack_work": -0.480978525624206,
+        "bulk_identity_defect": -3.470246312531344e-11,
+        "cohesive_work": 1.4972780449746346,
+        "friction_work": 5.017388579960961,
+        "time_integrated_exchange_defect": -0.14794146240463135,
+        "endpoint_exchange_defect": -1.462840941712784e-07,
+        "chi_measure": 1.000031872983927,
+        "work_adjoint_identity": 2.7000623958883807e-13,
+        "operator_adjoint_error": 5.341548870158848e-15,
+        "q_publication_error": 1.7053025658242404e-13,
+        "K_error": 3.438481039710525e-12,
+        "G_error": 2.744631784826144e-13,
+        "B_error": 2.8601543848297957e-11,
+        "profile_work": -6.84770368815517,
+        "profile_integral": 5.383915312340878e-05,
+        "fault_phase_jump": -0.13200221658962313
+      },
+      "max_operator_error": 5.341548870158848e-15,
+      "max_publication_error": 1.7053025658242404e-13,
+      "max_bulk_identity_defect": 3.470246312531344e-11,
+      "cumulative_exchange_defect": 0.5180851638750384,
+      "cumulative_stress_transfer_energy": 20.041053364028073,
+      "final_energy": {
+        "step": 13.0,
+        "time": 0.8125,
+        "bulk_stored": 2499.0898122021354,
+        "fault_stored": 5.765841317733939,
+        "fracture": 14.819180551709453,
+        "fracture_change": 0.19299958940402284,
+        "bulk_viscous": 8.420333828841454,
+        "fault_viscous": 0.019938360111002383,
+        "friction": 35.78589844518764,
+        "bulk_input_work": 2535.7158596656736,
+        "cohesive_work": 5.95446794752802,
+        "phase_fault_jump": -0.16868826968334794,
+        "bulk_crack_work_step": -2.4019467872182556,
+        "exchange_defect_step": -8.91661341215385,
+        "energy_defect": -13.534652758020002,
+        "Ymax": 74154.64089018597,
+        "Y_over_H0_max": 2.652273360808504,
+        "Z_update_relative_error": 4.089206760258644e-16
+      },
+      "local_final": [
+        {
+          "step": 13.0,
+          "time": 0.8125,
+          "dt": 0.0625,
+          "x": 0.0,
+          "phi": 0.6460386489568711,
+          "q": 384.5373725468144,
+          "V": 0.08552050277877496,
+          "slip": 0.05299061084381627
+        },
+        {
+          "step": 13.0,
+          "time": 0.8125,
+          "dt": 0.0625,
+          "x": 0.5,
+          "phi": 0.603577687570363,
+          "q": 352.57164028116114,
+          "V": 0.0875478506839602,
+          "slip": 0.038382885681166296
+        },
+        {
+          "step": 13.0,
+          "time": 0.8125,
+          "dt": 0.0625,
+          "x": 1.0,
+          "phi": 0.646038648956871,
+          "q": 384.537372546815,
+          "V": 0.0855205027787751,
+          "slip": 0.05299061084381628
+        }
+      ]
+    },
+    "coupling_evolving_dt03125": {
+      "dt": 0.03125,
+      "exit_code": 1,
+      "accepted_time": 0.84375,
+      "accepted_steps": 27,
+      "phase_max_gain": 0.06592924603395744,
+      "max_nodal_gain": 0.06592924603395744,
+      "max_gain_location": [
+        1.0,
+        0.5
+      ],
+      "max_step_increment": 0.019070850309411136,
+      "phase_changing_steps": [
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27
+      ],
+      "max_healing": 0.0,
+      "max_KKT": 4.87178656791154e-14,
+      "max_mechanical_residual": 4.369439168542235e-09,
+      "H_gain": 641.8885073852472,
+      "normalization": {
+        "0": {
+          "max_source_error": 8.832863329644169e-10,
+          "max_I_error": 8.832863329644169e-10,
+          "Q16_Q32_errors": [
+            4.440892098500626e-16,
+            4.440892098500626e-16
+          ]
+        },
+        "27": {
+          "max_source_error": 0.021095419305017016,
+          "max_I_error": 0.02097723413075614,
+          "Q16_Q32_errors": [
+            7.771561172376096e-16,
+            7.771561172376096e-16
+          ]
+        }
+      },
+      "phase_energy_derivative": {
+        "finite_difference": -20.737059592993575,
+        "discrete_derivative": -20.73705959976925,
+        "continuum_driver_derivative": -20.73610475882404,
+        "relative_projection_discrepancy": 4.604514640153353e-05
+      },
+      "final_work": {
+        "step": 27.0,
+        "time": 0.84375,
+        "old_FE_energy": 2285.03582016449,
+        "native_QP_energy": 2660.0501766136294,
+        "mapped_particle_energy": 2669.215496157834,
+        "stress_transfer_relative": 0.06791781741835189,
+        "bulk_viscous": 1.5438071059512115,
+        "bulk_work": 372.53123652760974,
+        "bulk_crack_work": -4.026927027484461,
+        "bulk_identity_defect": 3.4585667663122877e-12,
+        "cohesive_work": 0.7527886292978346,
+        "friction_work": 2.5191545885292084,
+        "time_integrated_exchange_defect": -0.06797210640789153,
+        "endpoint_exchange_defect": 1.8239397974184612e-06,
+        "chi_measure": 1.000241625443723,
+        "work_adjoint_identity": 1.4210854715202004e-14,
+        "operator_adjoint_error": 6.283559148248997e-15,
+        "q_publication_error": 1.1368683772161603e-13,
+        "K_error": 5.37050516047086e-12,
+        "G_error": 5.632016434700314e-13,
+        "B_error": 2.9053816180814885e-11,
+        "profile_work": -7.230898138903612,
+        "profile_integral": 0.00022689341599038972,
+        "fault_phase_jump": -0.33272364825708883
+      },
+      "max_operator_error": 6.283559148248997e-15,
+      "max_publication_error": 1.7053025658242404e-13,
+      "max_bulk_identity_defect": 1.3965051337549994e-11,
+      "cumulative_exchange_defect": 0.09732242762321772,
+      "cumulative_stress_transfer_energy": 51.90109926930974,
+      "final_energy": {
+        "step": 27.0,
+        "time": 0.84375,
+        "bulk_stored": 2724.750975314755,
+        "fault_stored": 5.738121563281815,
+        "fracture": 15.17895668877968,
+        "fracture_change": 0.5527757264742501,
+        "bulk_viscous": 9.294891813341202,
+        "fault_viscous": 0.021579226014319733,
+        "friction": 37.02227397003231,
+        "bulk_input_work": 2750.8804623013502,
+        "cohesive_work": 6.281211204586444,
+        "phase_fault_jump": -0.5215104152899951,
+        "bulk_crack_work_step": -6.023578716450823,
+        "exchange_defect_step": -9.295521934277867,
+        "energy_defect": -26.468890001364343,
+        "Ymax": 81141.02976035135,
+        "Y_over_H0_max": 2.781851699808935,
+        "Z_update_relative_error": 5.801537285147923e-16
+      },
+      "local_final": [
+        {
+          "step": 27.0,
+          "time": 0.84375,
+          "dt": 0.03125,
+          "x": 0.0,
+          "phi": 0.6694780837075793,
+          "q": 336.16734262239726,
+          "V": 0.060976898866760894,
+          "slip": 0.05209519154639325
+        },
+        {
+          "step": 27.0,
+          "time": 0.84375,
+          "dt": 0.03125,
+          "x": 0.5,
+          "phi": 0.6230405906910513,
+          "q": 317.5411589547842,
+          "V": 0.08321006613013966,
+          "slip": 0.03961637817772977
+        },
+        {
+          "step": 27.0,
+          "time": 0.84375,
+          "dt": 0.03125,
+          "x": 1.0,
+          "phi": 0.6694780837075796,
+          "q": 336.1673426223972,
+          "V": 0.06097689886676056,
+          "slip": 0.05209519154639324
+        }
+      ]
+    }
+  },
+  "common_times": [
+    {
+      "time": 0.0,
+      "cases": {
+        "coupling_evolving_dt125": {
+          "feedback": {
+            "step": 0.0,
+            "time": 0.0,
+            "dt": 0.0,
+            "phase_kkt": 6.722053469410127e-16,
+            "mechanical_residual": 4.369439168542235e-09,
+            "newton": 0.0,
+            "krylov": 41.0,
+            "min_alpha": 1.0,
+            "trial_observations": 2.0,
+            "phi_min": 0.0,
+            "phi_max": 0.6035488376736221,
+            "phase_change": 0.0,
+            "phase_healing": 0.0,
+            "H_increment_integral": 0.0,
+            "H_cumulative_integral": 0.0,
+            "phase_cumulative_integral": 0.0,
+            "H_increases": 0.0,
+            "offband_H_increases": 0.0,
+            "offband_H_cumulative_max": 0.0,
+            "offband_phi_max": 0.0,
+            "candidate_commit_error": 0.0,
+            "Ih_min": 108.53139192830376,
+            "Ih_max": 108.53139192830383,
+            "q_min": 0.0,
+            "q_max": 0.0,
+            "V_max": 1e-20
+          },
+          "local": [
+            {
+              "step": 0.0,
+              "time": 0.0,
+              "dt": 0.0,
+              "x": 0.0,
+              "phi": 0.6035488376736221,
+              "q": 0.0,
+              "V": 1e-20,
+              "slip": 0.0
+            },
+            {
+              "step": 0.0,
+              "time": 0.0,
+              "dt": 0.0,
+              "x": 0.5,
+              "phi": 0.6035488376736221,
+              "q": 0.0,
+              "V": 1e-20,
+              "slip": 0.0
+            },
+            {
+              "step": 0.0,
+              "time": 0.0,
+              "dt": 0.0,
+              "x": 1.0,
+              "phi": 0.6035488376736221,
+              "q": 0.0,
+              "V": 1e-20,
+              "slip": 0.0
+            }
+          ]
+        },
+        "coupling_evolving_dt0625": {
+          "feedback": {
+            "step": 0.0,
+            "time": 0.0,
+            "dt": 0.0,
+            "phase_kkt": 6.722053469410127e-16,
+            "mechanical_residual": 4.369439168542235e-09,
+            "newton": 0.0,
+            "krylov": 41.0,
+            "min_alpha": 1.0,
+            "trial_observations": 2.0,
+            "phi_min": 0.0,
+            "phi_max": 0.6035488376736221,
+            "phase_change": 0.0,
+            "phase_healing": 0.0,
+            "H_increment_integral": 0.0,
+            "H_cumulative_integral": 0.0,
+            "phase_cumulative_integral": 0.0,
+            "H_increases": 0.0,
+            "offband_H_increases": 0.0,
+            "offband_H_cumulative_max": 0.0,
+            "offband_phi_max": 0.0,
+            "candidate_commit_error": 0.0,
+            "Ih_min": 108.53139192830376,
+            "Ih_max": 108.53139192830383,
+            "q_min": 0.0,
+            "q_max": 0.0,
+            "V_max": 1e-20
+          },
+          "local": [
+            {
+              "step": 0.0,
+              "time": 0.0,
+              "dt": 0.0,
+              "x": 0.0,
+              "phi": 0.6035488376736221,
+              "q": 0.0,
+              "V": 1e-20,
+              "slip": 0.0
+            },
+            {
+              "step": 0.0,
+              "time": 0.0,
+              "dt": 0.0,
+              "x": 0.5,
+              "phi": 0.6035488376736221,
+              "q": 0.0,
+              "V": 1e-20,
+              "slip": 0.0
+            },
+            {
+              "step": 0.0,
+              "time": 0.0,
+              "dt": 0.0,
+              "x": 1.0,
+              "phi": 0.6035488376736221,
+              "q": 0.0,
+              "V": 1e-20,
+              "slip": 0.0
+            }
+          ]
+        },
+        "coupling_evolving_dt03125": {
+          "feedback": {
+            "step": 0.0,
+            "time": 0.0,
+            "dt": 0.0,
+            "phase_kkt": 6.722053469410127e-16,
+            "mechanical_residual": 4.369439168542235e-09,
+            "newton": 0.0,
+            "krylov": 41.0,
+            "min_alpha": 1.0,
+            "trial_observations": 2.0,
+            "phi_min": 0.0,
+            "phi_max": 0.6035488376736221,
+            "phase_change": 0.0,
+            "phase_healing": 0.0,
+            "H_increment_integral": 0.0,
+            "H_cumulative_integral": 0.0,
+            "phase_cumulative_integral": 0.0,
+            "H_increases": 0.0,
+            "offband_H_increases": 0.0,
+            "offband_H_cumulative_max": 0.0,
+            "offband_phi_max": 0.0,
+            "candidate_commit_error": 0.0,
+            "Ih_min": 108.53139192830376,
+            "Ih_max": 108.53139192830383,
+            "q_min": 0.0,
+            "q_max": 0.0,
+            "V_max": 1e-20
+          },
+          "local": [
+            {
+              "step": 0.0,
+              "time": 0.0,
+              "dt": 0.0,
+              "x": 0.0,
+              "phi": 0.6035488376736221,
+              "q": 0.0,
+              "V": 1e-20,
+              "slip": 0.0
+            },
+            {
+              "step": 0.0,
+              "time": 0.0,
+              "dt": 0.0,
+              "x": 0.5,
+              "phi": 0.6035488376736221,
+              "q": 0.0,
+              "V": 1e-20,
+              "slip": 0.0
+            },
+            {
+              "step": 0.0,
+              "time": 0.0,
+              "dt": 0.0,
+              "x": 1.0,
+              "phi": 0.6035488376736221,
+              "q": 0.0,
+              "V": 1e-20,
+              "slip": 0.0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "time": 0.125,
+      "cases": {
+        "coupling_evolving_dt125": {
+          "feedback": {
+            "step": 1.0,
+            "time": 0.125,
+            "dt": 0.125,
+            "phase_kkt": 6.722053469410127e-16,
+            "mechanical_residual": 2.8500336725834296e-15,
+            "newton": 2.0,
+            "krylov": 49.0,
+            "min_alpha": 1.0,
+            "trial_observations": 3.0,
+            "phi_min": 0.0,
+            "phi_max": 0.6035488376736221,
+            "phase_change": 0.0,
+            "phase_healing": 0.0,
+            "H_increment_integral": 0.0,
+            "H_cumulative_integral": 0.0,
+            "phase_cumulative_integral": 0.0,
+            "H_increases": 0.0,
+            "offband_H_increases": 0.0,
+            "offband_H_cumulative_max": 0.0,
+            "offband_phi_max": 0.0,
+            "candidate_commit_error": 0.0,
+            "Ih_min": 108.53139192830376,
+            "Ih_max": 108.53139192830383,
+            "q_min": 6.674082192913145,
+            "q_max": 16.72325193057722,
+            "V_max": 0.014529059356416556
+          },
+          "local": [
+            {
+              "step": 1.0,
+              "time": 0.125,
+              "dt": 0.125,
+              "x": 0.0,
+              "phi": 0.6035488376736221,
+              "q": 16.72325193057722,
+              "V": 0.014529059356416556,
+              "slip": 0.0018161324195520696
+            },
+            {
+              "step": 1.0,
+              "time": 0.125,
+              "dt": 0.125,
+              "x": 0.5,
+              "phi": 0.6035488376736221,
+              "q": 11.76045710008452,
+              "V": 0.01021741345373733,
+              "slip": 0.0012771766817171663
+            },
+            {
+              "step": 1.0,
+              "time": 0.125,
+              "dt": 0.125,
+              "x": 1.0,
+              "phi": 0.6035488376736221,
+              "q": 16.72325193057709,
+              "V": 0.014529059356416433,
+              "slip": 0.0018161324195520542
+            }
+          ]
+        },
+        "coupling_evolving_dt0625": {
+          "feedback": {
+            "step": 2.0,
+            "time": 0.125,
+            "dt": 0.0625,
+            "phase_kkt": 6.722053469410127e-16,
+            "mechanical_residual": 5.200542073673356e-15,
+            "newton": 2.0,
+            "krylov": 49.0,
+            "min_alpha": 1.0,
+            "trial_observations": 3.0,
+            "phi_min": 0.0,
+            "phi_max": 0.6035488376736221,
+            "phase_change": 0.0,
+            "phase_healing": 0.0,
+            "H_increment_integral": 0.0,
+            "H_cumulative_integral": 0.0,
+            "phase_cumulative_integral": 0.0,
+            "H_increases": 0.0,
+            "offband_H_increases": 0.0,
+            "offband_H_cumulative_max": 0.0,
+            "offband_phi_max": 0.0,
+            "candidate_commit_error": 0.0,
+            "Ih_min": 108.53139192830376,
+            "Ih_max": 108.53139192830383,
+            "q_min": 4.445934850064368,
+            "q_max": 11.154091026875259,
+            "V_max": 0.019369436423652506
+          },
+          "local": [
+            {
+              "step": 2.0,
+              "time": 0.125,
+              "dt": 0.0625,
+              "x": 0.0,
+              "phi": 0.6035488376736221,
+              "q": 11.154091026875259,
+              "V": 0.019369436423652506,
+              "slip": 0.0012109475906325578
+            },
+            {
+              "step": 2.0,
+              "time": 0.125,
+              "dt": 0.0625,
+              "x": 0.5,
+              "phi": 0.6035488376736221,
+              "q": 7.8453909006636025,
+              "V": 0.013622026853273014,
+              "slip": 0.0008517375325996197
+            },
+            {
+              "step": 2.0,
+              "time": 0.125,
+              "dt": 0.0625,
+              "x": 1.0,
+              "phi": 0.6035488376736221,
+              "q": 11.154091026875054,
+              "V": 0.019369436423652072,
+              "slip": 0.001210947590632535
+            }
+          ]
+        },
+        "coupling_evolving_dt03125": {
+          "feedback": {
+            "step": 4.0,
+            "time": 0.125,
+            "dt": 0.03125,
+            "phase_kkt": 6.722053469410127e-16,
+            "mechanical_residual": 4.6223294634294375e-15,
+            "newton": 2.0,
+            "krylov": 49.0,
+            "min_alpha": 1.0,
+            "trial_observations": 3.0,
+            "phi_min": 0.0,
+            "phi_max": 0.6035488376736221,
+            "phase_change": 0.0,
+            "phase_healing": 0.0,
+            "H_increment_integral": 0.0,
+            "H_cumulative_integral": 0.0,
+            "phase_cumulative_integral": 0.0,
+            "H_increases": 0.0,
+            "offband_H_increases": 0.0,
+            "offband_H_cumulative_max": 0.0,
+            "offband_phi_max": 0.0,
+            "candidate_commit_error": 0.0,
+            "Ih_min": 108.53139192830376,
+            "Ih_max": 108.53139192830383,
+            "q_min": 3.31713449833176,
+            "q_max": 8.471797621376286,
+            "V_max": 0.019712048734510757
+          },
+          "local": [
+            {
+              "step": 4.0,
+              "time": 0.125,
+              "dt": 0.03125,
+              "x": 0.0,
+              "phi": 0.6035488376736221,
+              "q": 8.471797621376286,
+              "V": 0.019712048734510757,
+              "slip": 0.0009196945497071801
+            },
+            {
+              "step": 4.0,
+              "time": 0.125,
+              "dt": 0.03125,
+              "x": 0.5,
+              "phi": 0.6035488376736221,
+              "q": 5.89986626938507,
+              "V": 0.013649726925373539,
+              "slip": 0.0006404875975421162
+            },
+            {
+              "step": 4.0,
+              "time": 0.125,
+              "dt": 0.03125,
+              "x": 1.0,
+              "phi": 0.6035488376736221,
+              "q": 8.471797621376172,
+              "V": 0.019712048734510313,
+              "slip": 0.0009196945497071675
+            }
+          ]
+        }
+      }
+    },
+    {
+      "time": 0.25,
+      "cases": {
+        "coupling_evolving_dt125": {
+          "feedback": {
+            "step": 2.0,
+            "time": 0.25,
+            "dt": 0.125,
+            "phase_kkt": 6.722053469410127e-16,
+            "mechanical_residual": 5.60294966526408e-15,
+            "newton": 2.0,
+            "krylov": 49.0,
+            "min_alpha": 1.0,
+            "trial_observations": 3.0,
+            "phi_min": 0.0,
+            "phi_max": 0.6035488376736221,
+            "phase_change": 0.0,
+            "phase_healing": 0.0,
+            "H_increment_integral": 0.0,
+            "H_cumulative_integral": 0.0,
+            "phase_cumulative_integral": 0.0,
+            "H_increases": 0.0,
+            "offband_H_increases": 0.0,
+            "offband_H_cumulative_max": 0.0,
+            "offband_phi_max": 0.0,
+            "candidate_commit_error": 0.0,
+            "Ih_min": 108.53139192830376,
+            "Ih_max": 108.53139192830383,
+            "q_min": 24.409645177183965,
+            "q_max": 61.875682971352816,
+            "V_max": 0.03924630688210369
+          },
+          "local": [
+            {
+              "step": 2.0,
+              "time": 0.25,
+              "dt": 0.125,
+              "x": 0.0,
+              "phi": 0.6035488376736221,
+              "q": 61.875682971352816,
+              "V": 0.03924630688210369,
+              "slip": 0.006721920779815031
+            },
+            {
+              "step": 2.0,
+              "time": 0.25,
+              "dt": 0.125,
+              "x": 0.5,
+              "phi": 0.6035488376736221,
+              "q": 43.14199869303511,
+              "V": 0.027276855867042715,
+              "slip": 0.004686783665097506
+            },
+            {
+              "step": 2.0,
+              "time": 0.25,
+              "dt": 0.125,
+              "x": 1.0,
+              "phi": 0.6035488376736221,
+              "q": 61.87568297135209,
+              "V": 0.03924630688210316,
+              "slip": 0.00672192077981495
+            }
+          ]
+        },
+        "coupling_evolving_dt0625": {
+          "feedback": {
+            "step": 4.0,
+            "time": 0.25,
+            "dt": 0.0625,
+            "phase_kkt": 6.722053469410127e-16,
+            "mechanical_residual": 6.038022181157699e-15,
+            "newton": 2.0,
+            "krylov": 49.0,
+            "min_alpha": 1.0,
+            "trial_observations": 3.0,
+            "phi_min": 0.0,
+            "phi_max": 0.6035488376736221,
+            "phase_change": 0.0,
+            "phase_healing": 0.0,
+            "H_increment_integral": 0.0,
+            "H_cumulative_integral": 0.0,
+            "phase_cumulative_integral": 0.0,
+            "H_increases": 0.0,
+            "offband_H_increases": 0.0,
+            "offband_H_cumulative_max": 0.0,
+            "offband_phi_max": 0.0,
+            "candidate_commit_error": 0.0,
+            "Ih_min": 108.53139192830376,
+            "Ih_max": 108.53139192830383,
+            "q_min": 19.898521261887765,
+            "q_max": 51.195899067885094,
+            "V_max": 0.03985329351506782
+          },
+          "local": [
+            {
+              "step": 4.0,
+              "time": 0.25,
+              "dt": 0.0625,
+              "x": 0.0,
+              "phi": 0.6035488376736221,
+              "q": 51.195899067885094,
+              "V": 0.03985329351506782,
+              "slip": 0.005560773201747056
+            },
+            {
+              "step": 4.0,
+              "time": 0.25,
+              "dt": 0.0625,
+              "x": 0.5,
+              "phi": 0.6035488376736221,
+              "q": 35.36392774623168,
+              "V": 0.027338502086637673,
+              "slip": 0.003841160293227834
+            },
+            {
+              "step": 4.0,
+              "time": 0.25,
+              "dt": 0.0625,
+              "x": 1.0,
+              "phi": 0.6035488376736221,
+              "q": 51.195899067884454,
+              "V": 0.03985329351506755,
+              "slip": 0.0055607732017469835
+            }
+          ]
+        },
+        "coupling_evolving_dt03125": {
+          "feedback": {
+            "step": 8.0,
+            "time": 0.25,
+            "dt": 0.03125,
+            "phase_kkt": 6.722053469410127e-16,
+            "mechanical_residual": 4.541645377173643e-15,
+            "newton": 2.0,
+            "krylov": 51.0,
+            "min_alpha": 1.0,
+            "trial_observations": 3.0,
+            "phi_min": 0.0,
+            "phi_max": 0.6035488376736221,
+            "phase_change": 0.0,
+            "phase_healing": 0.0,
+            "H_increment_integral": 0.0,
+            "H_cumulative_integral": 0.0,
+            "phase_cumulative_integral": 0.0,
+            "H_increases": 0.0,
+            "offband_H_increases": 0.0,
+            "offband_H_cumulative_max": 0.0,
+            "offband_phi_max": 0.0,
+            "candidate_commit_error": 0.0,
+            "Ih_min": 108.53139192830376,
+            "Ih_max": 108.53139192830383,
+            "q_min": 17.651987715886783,
+            "q_max": 45.92879880677371,
+            "V_max": 0.04015854818172409
+          },
+          "local": [
+            {
+              "step": 8.0,
+              "time": 0.25,
+              "dt": 0.03125,
+              "x": 0.0,
+              "phi": 0.6035488376736221,
+              "q": 45.92879880677367,
+              "V": 0.04015854818172401,
+              "slip": 0.004988397999751329
+            },
+            {
+              "step": 8.0,
+              "time": 0.25,
+              "dt": 0.03125,
+              "x": 0.5,
+              "phi": 0.6035488376736221,
+              "q": 31.479799182889067,
+              "V": 0.027368364024332327,
+              "slip": 0.0034190819332370103
+            },
+            {
+              "step": 8.0,
+              "time": 0.25,
+              "dt": 0.03125,
+              "x": 1.0,
+              "phi": 0.6035488376736221,
+              "q": 45.92879880677371,
+              "V": 0.04015854818172409,
+              "slip": 0.004988397999751331
+            }
+          ]
+        }
+      }
+    },
+    {
+      "time": 0.375,
+      "cases": {
+        "coupling_evolving_dt125": {
+          "feedback": {
+            "step": 3.0,
+            "time": 0.375,
+            "dt": 0.125,
+            "phase_kkt": 6.722053469410127e-16,
+            "mechanical_residual": 5.0747247568157374e-15,
+            "newton": 2.0,
+            "krylov": 49.0,
+            "min_alpha": 1.0,
+            "trial_observations": 3.0,
+            "phi_min": 0.0,
+            "phi_max": 0.6035488376736221,
+            "phase_change": 0.0,
+            "phase_healing": 0.0,
+            "H_increment_integral": 0.0,
+            "H_cumulative_integral": 0.0,
+            "phase_cumulative_integral": 0.0,
+            "H_increases": 0.0,
+            "offband_H_increases": 0.0,
+            "offband_H_cumulative_max": 0.0,
+            "offband_phi_max": 0.0,
+            "candidate_commit_error": 0.0,
+            "Ih_min": 108.53139192830376,
+            "Ih_max": 108.53139192830383,
+            "q_min": 50.897445829653876,
+            "q_max": 130.3388004639818,
+            "V_max": 0.05954749376498547
+          },
+          "local": [
+            {
+              "step": 3.0,
+              "time": 0.375,
+              "dt": 0.125,
+              "x": 0.0,
+              "phi": 0.6035488376736221,
+              "q": 130.3388004639818,
+              "V": 0.05954749376498547,
+              "slip": 0.014165357500438215
+            },
+            {
+              "step": 3.0,
+              "time": 0.375,
+              "dt": 0.125,
+              "x": 0.5,
+              "phi": 0.6035488376736221,
+              "q": 90.26560175305988,
+              "V": 0.040987521752591745,
+              "slip": 0.009810223884171474
+            },
+            {
+              "step": 3.0,
+              "time": 0.375,
+              "dt": 0.125,
+              "x": 1.0,
+              "phi": 0.6035488376736221,
+              "q": 130.3388004639808,
+              "V": 0.059547493764985165,
+              "slip": 0.014165357500438095
+            }
+          ]
+        },
+        "coupling_evolving_dt0625": {
+          "feedback": {
+            "step": 6.0,
+            "time": 0.375,
+            "dt": 0.0625,
+            "phase_kkt": 6.722053469410127e-16,
+            "mechanical_residual": 7.059018413569674e-15,
+            "newton": 2.0,
+            "krylov": 50.0,
+            "min_alpha": 1.0,
+            "trial_observations": 3.0,
+            "phi_min": 0.0,
+            "phi_max": 0.6035488376736221,
+            "phase_change": 0.0,
+            "phase_healing": 0.0,
+            "H_increment_integral": 0.0,
+            "H_cumulative_integral": 0.0,
+            "phase_cumulative_integral": 0.0,
+            "H_increases": 0.0,
+            "offband_H_increases": 0.0,
+            "offband_H_cumulative_max": 0.0,
+            "offband_phi_max": 0.0,
+            "candidate_commit_error": 0.0,
+            "Ih_min": 108.53139192830376,
+            "Ih_max": 108.53139192830383,
+            "q_min": 44.14788893961293,
+            "q_max": 114.46555149187088,
+            "V_max": 0.060082705049890855
+          },
+          "local": [
+            {
+              "step": 6.0,
+              "time": 0.375,
+              "dt": 0.0625,
+              "x": 0.0,
+              "phi": 0.6035488376736221,
+              "q": 114.46555149187088,
+              "V": 0.06008270504989043,
+              "slip": 0.01243855703442387
+            },
+            {
+              "step": 6.0,
+              "time": 0.375,
+              "dt": 0.0625,
+              "x": 0.5,
+              "phi": 0.6035488376736221,
+              "q": 78.61476697002298,
+              "V": 0.04103885300602828,
+              "slip": 0.008542832296262777
+            },
+            {
+              "step": 6.0,
+              "time": 0.375,
+              "dt": 0.0625,
+              "x": 1.0,
+              "phi": 0.6035488376736221,
+              "q": 114.46555149187061,
+              "V": 0.060082705049890855,
+              "slip": 0.012438557034423833
+            }
+          ]
+        },
+        "coupling_evolving_dt03125": {
+          "feedback": {
+            "step": 12.0,
+            "time": 0.375,
+            "dt": 0.03125,
+            "phase_kkt": 6.722053469410127e-16,
+            "mechanical_residual": 8.585592554227704e-15,
+            "newton": 2.0,
+            "krylov": 50.0,
+            "min_alpha": 1.0,
+            "trial_observations": 3.0,
+            "phi_min": 0.0,
+            "phi_max": 0.6035488376736221,
+            "phase_change": 0.0,
+            "phase_healing": 0.0,
+            "H_increment_integral": 0.0,
+            "H_cumulative_integral": 0.0,
+            "phase_cumulative_integral": 0.0,
+            "H_increases": 0.0,
+            "offband_H_increases": 0.0,
+            "offband_H_cumulative_max": 0.0,
+            "offband_phi_max": 0.0,
+            "candidate_commit_error": 0.0,
+            "Ih_min": 108.53139192830376,
+            "Ih_max": 108.53139192830383,
+            "q_min": 40.81703465482249,
+            "q_max": 106.72935532368211,
+            "V_max": 0.06050869641895518
+          },
+          "local": [
+            {
+              "step": 12.0,
+              "time": 0.375,
+              "dt": 0.03125,
+              "x": 0.0,
+              "phi": 0.6035488376736221,
+              "q": 106.72935532368209,
+              "V": 0.060508696418955156,
+              "slip": 0.011597274472800102
+            },
+            {
+              "step": 12.0,
+              "time": 0.375,
+              "dt": 0.03125,
+              "x": 0.5,
+              "phi": 0.6035488376736221,
+              "q": 72.80739535813471,
+              "V": 0.04108067250864892,
+              "slip": 0.007911330678843668
+            },
+            {
+              "step": 12.0,
+              "time": 0.375,
+              "dt": 0.03125,
+              "x": 1.0,
+              "phi": 0.6035488376736221,
+              "q": 106.72935532368211,
+              "V": 0.06050869641895518,
+              "slip": 0.011597274472800099
+            }
+          ]
+        }
+      }
+    },
+    {
+      "time": 0.5,
+      "cases": {
+        "coupling_evolving_dt125": {
+          "feedback": {
+            "step": 4.0,
+            "time": 0.5,
+            "dt": 0.125,
+            "phase_kkt": 6.722053469410127e-16,
+            "mechanical_residual": 6.018938748438837e-15,
+            "newton": 2.0,
+            "krylov": 49.0,
+            "min_alpha": 1.0,
+            "trial_observations": 3.0,
+            "phi_min": 0.0,
+            "phi_max": 0.6035488376736221,
+            "phase_change": 0.0,
+            "phase_healing": 0.0,
+            "H_increment_integral": 0.0,
+            "H_cumulative_integral": 0.0,
+            "phase_cumulative_integral": 0.0,
+            "H_increases": 0.0,
+            "offband_H_increases": 0.0,
+            "offband_H_cumulative_max": 0.0,
+            "offband_phi_max": 0.0,
+            "candidate_commit_error": 0.0,
+            "Ih_min": 108.53139192830376,
+            "Ih_max": 108.53139192830383,
+            "q_min": 86.15828155792148,
+            "q_max": 221.95610600493984,
+            "V_max": 0.07973801520114845
+          },
+          "local": [
+            {
+              "step": 4.0,
+              "time": 0.5,
+              "dt": 0.125,
+              "x": 0.0,
+              "phi": 0.6035488376736221,
+              "q": 221.95610600493984,
+              "V": 0.07973801520114845,
+              "slip": 0.024132609400581772
+            },
+            {
+              "step": 4.0,
+              "time": 0.5,
+              "dt": 0.125,
+              "x": 0.5,
+              "phi": 0.6035488376736221,
+              "q": 153.09422895328393,
+              "V": 0.05468309491270651,
+              "slip": 0.016645610748259786
+            },
+            {
+              "step": 4.0,
+              "time": 0.5,
+              "dt": 0.125,
+              "x": 1.0,
+              "phi": 0.6035488376736221,
+              "q": 221.9561060049383,
+              "V": 0.079738015201148,
+              "slip": 0.024132609400581595
+            }
+          ]
+        },
+        "coupling_evolving_dt0625": {
+          "feedback": {
+            "step": 8.0,
+            "time": 0.5,
+            "dt": 0.0625,
+            "phase_kkt": 6.722053469410127e-16,
+            "mechanical_residual": 4.49199848390944e-15,
+            "newton": 2.0,
+            "krylov": 51.0,
+            "min_alpha": 1.0,
+            "trial_observations": 3.0,
+            "phi_min": 0.0,
+            "phi_max": 0.6035488376736221,
+            "phase_change": 0.0,
+            "phase_healing": 0.0,
+            "H_increment_integral": 0.0,
+            "H_cumulative_integral": 0.0,
+            "phase_cumulative_integral": 0.0,
+            "H_increases": 0.0,
+            "offband_H_increases": 0.0,
+            "offband_H_cumulative_max": 0.0,
+            "offband_phi_max": 0.0,
+            "candidate_commit_error": 0.0,
+            "Ih_min": 108.53139192830376,
+            "Ih_max": 108.53139192830383,
+            "q_min": 77.20163859680534,
+            "q_max": 200.98348203431863,
+            "V_max": 0.080361633243385
+          },
+          "local": [
+            {
+              "step": 8.0,
+              "time": 0.5,
+              "dt": 0.0625,
+              "x": 0.0,
+              "phi": 0.6035488376736221,
+              "q": 200.98348203431863,
+              "V": 0.08036163324338448,
+              "slip": 0.021849669108509644
+            },
+            {
+              "step": 8.0,
+              "time": 0.5,
+              "dt": 0.0625,
+              "x": 0.5,
+              "phi": 0.6035488376736221,
+              "q": 137.58558866663967,
+              "V": 0.054744420162834415,
+              "slip": 0.014957549965331083
+            },
+            {
+              "step": 8.0,
+              "time": 0.5,
+              "dt": 0.0625,
+              "x": 1.0,
+              "phi": 0.6035488376736221,
+              "q": 200.9834820343186,
+              "V": 0.080361633243385,
+              "slip": 0.021849669108509634
+            }
+          ]
+        },
+        "coupling_evolving_dt03125": {
+          "feedback": {
+            "step": 16.0,
+            "time": 0.5,
+            "dt": 0.03125,
+            "phase_kkt": 6.722053469410127e-16,
+            "mechanical_residual": 7.585622205275072e-15,
+            "newton": 2.0,
+            "krylov": 52.0,
+            "min_alpha": 1.0,
+            "trial_observations": 3.0,
+            "phi_min": 0.0,
+            "phi_max": 0.6035488376736221,
+            "phase_change": 0.0,
+            "phase_healing": 0.0,
+            "H_increment_integral": 0.0,
+            "H_cumulative_integral": 0.0,
+            "phase_cumulative_integral": 0.0,
+            "H_increases": 0.0,
+            "offband_H_increases": 0.0,
+            "offband_H_cumulative_max": 0.0,
+            "offband_phi_max": 0.0,
+            "candidate_commit_error": 0.0,
+            "Ih_min": 108.53139192830376,
+            "Ih_max": 108.53139192830383,
+            "q_min": 72.82313860904733,
+            "q_max": 190.933282841678,
+            "V_max": 0.08093522563853135
+          },
+          "local": [
+            {
+              "step": 16.0,
+              "time": 0.5,
+              "dt": 0.03125,
+              "x": 0.0,
+              "phi": 0.6035488376736221,
+              "q": 190.9332828416778,
+              "V": 0.08093522563853102,
+              "slip": 0.02075598675226289
+            },
+            {
+              "step": 16.0,
+              "time": 0.5,
+              "dt": 0.03125,
+              "x": 0.5,
+              "phi": 0.6035488376736221,
+              "q": 129.87137939575675,
+              "V": 0.05479957649100778,
+              "slip": 0.014118145756419006
+            },
+            {
+              "step": 16.0,
+              "time": 0.5,
+              "dt": 0.03125,
+              "x": 1.0,
+              "phi": 0.6035488376736221,
+              "q": 190.933282841678,
+              "V": 0.08093522563853135,
+              "slip": 0.020755986752262902
+            }
+          ]
+        }
+      }
+    },
+    {
+      "time": 0.625,
+      "cases": {
+        "coupling_evolving_dt125": {
+          "feedback": {
+            "step": 5.0,
+            "time": 0.625,
+            "dt": 0.125,
+            "phase_kkt": 6.722053469410127e-16,
+            "mechanical_residual": 6.501619172048948e-15,
+            "newton": 2.0,
+            "krylov": 49.0,
+            "min_alpha": 1.0,
+            "trial_observations": 3.0,
+            "phi_min": 0.0,
+            "phi_max": 0.6035488376736221,
+            "phase_change": 0.0,
+            "phase_healing": 0.0,
+            "H_increment_integral": 2.6083745081969156,
+            "H_cumulative_integral": 2.6083745081969156,
+            "phase_cumulative_integral": 0.0,
+            "H_increases": 148.0,
+            "offband_H_increases": 0.0,
+            "offband_H_cumulative_max": 0.0,
+            "offband_phi_max": 0.0,
+            "candidate_commit_error": 1.4551915228366852e-11,
+            "Ih_min": 108.53139192830376,
+            "Ih_max": 108.53139192830383,
+            "q_min": 130.19387886862054,
+            "q_max": 336.72365478694826,
+            "V_max": 0.09995023897536842
+          },
+          "local": [
+            {
+              "step": 5.0,
+              "time": 0.625,
+              "dt": 0.125,
+              "x": 0.0,
+              "phi": 0.6035488376736221,
+              "q": 336.72365478694826,
+              "V": 0.09995023897536817,
+              "slip": 0.03662638927250279
+            },
+            {
+              "step": 5.0,
+              "time": 0.625,
+              "dt": 0.125,
+              "x": 0.5,
+              "phi": 0.6035488376736221,
+              "q": 231.61200707051907,
+              "V": 0.06838192239455775,
+              "slip": 0.025193351047579506
+            },
+            {
+              "step": 5.0,
+              "time": 0.625,
+              "dt": 0.125,
+              "x": 1.0,
+              "phi": 0.6035488376736221,
+              "q": 336.723654786947,
+              "V": 0.09995023897536842,
+              "slip": 0.03662638927250265
+            }
+          ]
+        },
+        "coupling_evolving_dt0625": {
+          "feedback": {
+            "step": 10.0,
+            "time": 0.625,
+            "dt": 0.0625,
+            "phase_kkt": 6.722053469410127e-16,
+            "mechanical_residual": 6.72658888160481e-15,
+            "newton": 2.0,
+            "krylov": 50.0,
+            "min_alpha": 1.0,
+            "trial_observations": 3.0,
+            "phi_min": 0.0,
+            "phi_max": 0.6035488376736221,
+            "phase_change": 0.0,
+            "phase_healing": 0.0,
+            "H_increment_integral": 3.525109645618512e-05,
+            "H_cumulative_integral": 3.525109645618512e-05,
+            "phase_cumulative_integral": 0.0,
+            "H_increases": 28.0,
+            "offband_H_increases": 0.0,
+            "offband_H_cumulative_max": 0.0,
+            "offband_phi_max": 0.0,
+            "candidate_commit_error": 4.440892098500626e-16,
+            "Ih_min": 108.53139192830376,
+            "Ih_max": 108.53139192830383,
+            "q_min": 119.0615075153719,
+            "q_max": 310.77468798566446,
+            "V_max": 0.10068639313674445
+          },
+          "local": [
+            {
+              "step": 10.0,
+              "time": 0.625,
+              "dt": 0.0625,
+              "x": 0.0,
+              "phi": 0.6035488376736221,
+              "q": 310.7746879856644,
+              "V": 0.10068639313674439,
+              "slip": 0.033799978114347436
+            },
+            {
+              "step": 10.0,
+              "time": 0.625,
+              "dt": 0.0625,
+              "x": 0.5,
+              "phi": 0.6035488376736221,
+              "q": 212.2618851376294,
+              "V": 0.06845427915091123,
+              "slip": 0.023085870421357294
+            },
+            {
+              "step": 10.0,
+              "time": 0.625,
+              "dt": 0.0625,
+              "x": 1.0,
+              "phi": 0.6035488376736221,
+              "q": 310.77468798566446,
+              "V": 0.10068639313674445,
+              "slip": 0.03379997811434742
+            }
+          ]
+        },
+        "coupling_evolving_dt03125": {
+          "feedback": {
+            "step": 20.0,
+            "time": 0.625,
+            "dt": 0.03125,
+            "phase_kkt": 6.613633252161577e-16,
+            "mechanical_residual": 1.0479422233792573e-14,
+            "newton": 2.0,
+            "krylov": 52.0,
+            "min_alpha": 1.0,
+            "trial_observations": 3.0,
+            "phi_min": 0.0,
+            "phi_max": 0.6035488425646084,
+            "phase_change": 7.190500989490145e-07,
+            "phase_healing": 0.0,
+            "H_increment_integral": 1.109421942370058e-05,
+            "H_cumulative_integral": 1.1475118428757767e-05,
+            "phase_cumulative_integral": 9.314320498049144e-09,
+            "H_increases": 12.0,
+            "offband_H_increases": 0.0,
+            "offband_H_cumulative_max": 0.0,
+            "offband_phi_max": 0.0,
+            "candidate_commit_error": 2.7755575615628914e-17,
+            "Ih_min": 108.53139202511937,
+            "Ih_max": 108.5314105244884,
+            "q_min": 113.67747201844773,
+            "q_max": 298.5925806450725,
+            "V_max": 0.10142936443489556
+          },
+          "local": [
+            {
+              "step": 20.0,
+              "time": 0.625,
+              "dt": 0.03125,
+              "x": 0.0,
+              "phi": 0.6035488425646084,
+              "q": 298.5925806450721,
+              "V": 0.10142936443489524,
+              "slip": 0.03247336258023402
+            },
+            {
+              "step": 20.0,
+              "time": 0.625,
+              "dt": 0.03125,
+              "x": 0.5,
+              "phi": 0.6035488377682349,
+              "q": 202.65885560310363,
+              "V": 0.06852397033415006,
+              "slip": 0.022040261601267288
+            },
+            {
+              "step": 20.0,
+              "time": 0.625,
+              "dt": 0.03125,
+              "x": 1.0,
+              "phi": 0.6035488425646083,
+              "q": 298.5925806450725,
+              "V": 0.10142936443489556,
+              "slip": 0.03247336258023405
+            }
+          ]
+        }
+      }
+    },
+    {
+      "time": 0.75,
+      "cases": {
+        "coupling_evolving_dt125": {
+          "feedback": {
+            "step": 6.0,
+            "time": 0.75,
+            "dt": 0.125,
+            "phase_kkt": 6.1257422745431e-16,
+            "mechanical_residual": 7.094259964515455e-15,
+            "newton": 2.0,
+            "krylov": 50.0,
+            "min_alpha": 1.0,
+            "trial_observations": 3.0,
+            "phi_min": 0.0,
+            "phi_max": 0.6048632447516962,
+            "phase_change": 0.0014041647679848834,
+            "phase_healing": 0.0,
+            "H_increment_integral": 193.1900799965413,
+            "H_cumulative_integral": 195.79845450473834,
+            "phase_cumulative_integral": 7.296174318842097e-05,
+            "H_increases": 2768.0,
+            "offband_H_increases": 0.0,
+            "offband_H_cumulative_max": 0.0,
+            "offband_phi_max": 0.0,
+            "candidate_commit_error": 4.3655745685100555e-11,
+            "Ih_min": 108.53214986174989,
+            "Ih_max": 109.41520280997426,
+            "q_min": 182.96719424507535,
+            "q_max": 470.4798471552717,
+            "V_max": 0.11990061679126271
+          },
+          "local": [
+            {
+              "step": 6.0,
+              "time": 0.75,
+              "dt": 0.125,
+              "x": 0.0,
+              "phi": 0.6048632447516962,
+              "q": 470.4798471552715,
+              "V": 0.11990061679126159,
+              "slip": 0.05161396637141049
+            },
+            {
+              "step": 6.0,
+              "time": 0.75,
+              "dt": 0.125,
+              "x": 0.5,
+              "phi": 0.603549759830281,
+              "q": 325.7967444022239,
+              "V": 0.08208047420727378,
+              "slip": 0.03545341032348873
+            },
+            {
+              "step": 6.0,
+              "time": 0.75,
+              "dt": 0.125,
+              "x": 1.0,
+              "phi": 0.604863244751696,
+              "q": 470.4798471552717,
+              "V": 0.11990061679126271,
+              "slip": 0.05161396637141048
+            }
+          ]
+        },
+        "coupling_evolving_dt0625": {
+          "feedback": {
+            "step": 12.0,
+            "time": 0.75,
+            "dt": 0.0625,
+            "phase_kkt": 2.8449465006019636e-15,
+            "mechanical_residual": 8.41273409102192e-15,
+            "newton": 2.0,
+            "krylov": 50.0,
+            "min_alpha": 1.0,
+            "trial_observations": 3.0,
+            "phi_min": 0.0,
+            "phi_max": 0.6154557549041026,
+            "phase_change": 0.011906557738175838,
+            "phase_healing": 0.0,
+            "H_increment_integral": 80.530754231655,
+            "H_cumulative_integral": 103.92640123821289,
+            "phase_cumulative_integral": 0.0005083502293816919,
+            "H_increases": 924.0,
+            "offband_H_increases": 0.0,
+            "offband_H_cumulative_max": 0.0,
+            "offband_phi_max": 0.0,
+            "candidate_commit_error": 4.3655745685100555e-11,
+            "Ih_min": 108.53665110804774,
+            "Ih_max": 115.63581732579874,
+            "q_min": 170.3670537757611,
+            "q_max": 410.97665957770215,
+            "V_max": 0.11065547160770757
+          },
+          "local": [
+            {
+              "step": 12.0,
+              "time": 0.75,
+              "dt": 0.0625,
+              "x": 0.0,
+              "phi": 0.6154557549041026,
+              "q": 410.97665957770187,
+              "V": 0.11065547160770722,
+              "slip": 0.04764557942014283
+            },
+            {
+              "step": 12.0,
+              "time": 0.75,
+              "dt": 0.0625,
+              "x": 0.5,
+              "phi": 0.6035552865025856,
+              "q": 302.45602743123936,
+              "V": 0.08189337423543236,
+              "slip": 0.03291114501341878
+            },
+            {
+              "step": 12.0,
+              "time": 0.75,
+              "dt": 0.0625,
+              "x": 1.0,
+              "phi": 0.6154557549041025,
+              "q": 410.97665957770215,
+              "V": 0.11065547160770757,
+              "slip": 0.04764557942014284
+            }
+          ]
+        },
+        "coupling_evolving_dt03125": {
+          "feedback": {
+            "step": 24.0,
+            "time": 0.75,
+            "dt": 0.03125,
+            "phase_kkt": 5.909660781566739e-15,
+            "mechanical_residual": 1.2673336213324486e-14,
+            "newton": 2.0,
+            "krylov": 52.0,
+            "min_alpha": 1.0,
+            "trial_observations": 3.0,
+            "phi_min": 0.0,
+            "phi_max": 0.6236565967223844,
+            "phase_change": 0.012767403966068236,
+            "phase_healing": 0.0,
+            "H_increment_integral": 38.11133057069756,
+            "H_cumulative_integral": 79.94117317994701,
+            "phase_cumulative_integral": 0.0008299065349669914,
+            "H_increases": 692.0,
+            "offband_H_increases": 0.0,
+            "offband_H_cumulative_max": 0.0,
+            "offband_phi_max": 0.0,
+            "candidate_commit_error": 4.3655745685100555e-11,
+            "Ih_min": 108.54115668517915,
+            "Ih_max": 120.7148848699683,
+            "q_min": 164.6155894376005,
+            "q_max": 376.19662819409376,
+            "V_max": 0.09291213714173473
+          },
+          "local": [
+            {
+              "step": 24.0,
+              "time": 0.75,
+              "dt": 0.03125,
+              "x": 0.0,
+              "phi": 0.6236565967223843,
+              "q": 376.19662819409314,
+              "V": 0.09291213714173381,
+              "slip": 0.04552809016463075
+            },
+            {
+              "step": 24.0,
+              "time": 0.75,
+              "dt": 0.03125,
+              "x": 0.5,
+              "phi": 0.603559701720076,
+              "q": 290.8090199663036,
+              "V": 0.08138970490536232,
+              "slip": 0.03164348379358514
+            },
+            {
+              "step": 24.0,
+              "time": 0.75,
+              "dt": 0.03125,
+              "x": 1.0,
+              "phi": 0.6236565967223844,
+              "q": 376.19662819409376,
+              "V": 0.09291213714173473,
+              "slip": 0.0455280901646308
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "common_slips": {
+    "0": [
+      {
+        "slip": 0.0,
+        "cases": {
+          "coupling_evolving_dt125": {
+            "time": 0.0,
+            "phi": 0.6035488376736221,
+            "q": 0.0,
+            "V": 1e-20
+          },
+          "coupling_evolving_dt0625": {
+            "time": 0.0,
+            "phi": 0.6035488376736221,
+            "q": 0.0,
+            "V": 1e-20
+          },
+          "coupling_evolving_dt03125": {
+            "time": 0.0,
+            "phi": 0.6035488376736221,
+            "q": 0.0,
+            "V": 1e-20
+          }
+        }
+      },
+      {
+        "slip": 0.006511898943299156,
+        "cases": {
+          "coupling_evolving_dt125": {
+            "time": 0.24464862166147805,
+            "phi": 0.6035488376736221,
+            "q": 59.94266104012711,
+            "V": 0.03818813613812891
+          },
+          "coupling_evolving_dt0625": {
+            "time": 0.2690370453230773,
+            "phi": 0.6035488376736221,
+            "q": 59.94701819656471,
+            "V": 0.04293228210117742
+          },
+          "coupling_evolving_dt03125": {
+            "time": 0.2834319403633975,
+            "phi": 0.6035488376736221,
+            "q": 59.948391339171984,
+            "V": 0.04559339438858656
+          }
+        }
+      },
+      {
+        "slip": 0.013023797886598312,
+        "cases": {
+          "coupling_evolving_dt125": {
+            "time": 0.35582942636771137,
+            "phi": 0.6035488376736221,
+            "q": 119.83898258407403,
+            "V": 0.05643401058129637
+          },
+          "coupling_evolving_dt0625": {
+            "time": 0.38333484560616765,
+            "phi": 0.6035488376736221,
+            "q": 119.8466939333632,
+            "V": 0.061434077561613586
+          },
+          "coupling_evolving_dt03125": {
+            "time": 0.39674294540489513,
+            "phi": 0.6035488376736221,
+            "q": 119.84797768718995,
+            "V": 0.06405705261221901
+          }
+        }
+      },
+      {
+        "slip": 0.01953569682989747,
+        "cases": {
+          "coupling_evolving_dt125": {
+            "time": 0.4423497994138924,
+            "phi": 0.6035488376736221,
+            "q": 179.70205767218036,
+            "V": 0.07042611431528525
+          },
+          "coupling_evolving_dt0625": {
+            "time": 0.47120550957937796,
+            "phi": 0.6035488376736221,
+            "q": 179.71394338476102,
+            "V": 0.07568749350274866
+          },
+          "coupling_evolving_dt03125": {
+            "time": 0.48492263519699785,
+            "phi": 0.6035488376736221,
+            "q": 179.71665940497851,
+            "V": 0.07846820322915536
+          }
+        }
+      },
+      {
+        "slip": 0.026047595773196625,
+        "cases": {
+          "coupling_evolving_dt125": {
+            "time": 0.5191593976387269,
+            "phi": 0.6035488376736221,
+            "q": 239.5471228300317,
+            "V": 0.08283604746077408
+          },
+          "coupling_evolving_dt0625": {
+            "time": 0.5463764236205783,
+            "phi": 0.6035488376736221,
+            "q": 239.55759478554458,
+            "V": 0.08789829754018821
+          },
+          "coupling_evolving_dt03125": {
+            "time": 0.5597938407617238,
+            "phi": 0.6035488376736221,
+            "q": 239.56094719837256,
+            "V": 0.09073071710474528
+          }
+        }
+      },
+      {
+        "slip": 0.03255949471649578,
+        "cases": {
+          "coupling_evolving_dt125": {
+            "time": 0.5843108070806188,
+            "phi": 0.6035488376736221,
+            "q": 299.36526332074317,
+            "V": 0.09337088639553673
+          },
+          "coupling_evolving_dt0625": {
+            "time": 0.6126797314989034,
+            "phi": 0.6035488376736221,
+            "q": 299.3796959103984,
+            "V": 0.09868206440497782
+          },
+          "coupling_evolving_dt03125": {
+            "time": 0.6258082318899137,
+            "phi": 0.6035488459503419,
+            "q": 299.38361985112294,
+            "V": 0.10156228249415264
+          }
+        }
+      },
+      {
+        "slip": 0.03907139365979494,
+        "cases": {
+          "coupling_evolving_dt125": {
+            "time": 0.6453919250186071,
+            "phi": 0.6037632639982622,
+            "q": 358.5440247513421,
+            "V": 0.10320485184348481
+          },
+          "coupling_evolving_dt0625": {
+            "time": 0.672544135214932,
+            "phi": 0.603549111141634,
+            "q": 359.17875313317626,
+            "V": 0.10843628203034965
+          },
+          "coupling_evolving_dt03125": {
+            "time": 0.685369870305639,
+            "phi": 0.6037230909274612,
+            "q": 358.50634041471824,
+            "V": 0.11183255804883595
+          }
+        }
+      },
+      {
+        "slip": 0.04558329260309409,
+        "cases": {
+          "coupling_evolving_dt125": {
+            "time": 0.6997027293961684,
+            "phi": 0.6043343560437803,
+            "q": 416.65927593536986,
+            "V": 0.11187302037802423
+          },
+          "coupling_evolving_dt0625": {
+            "time": 0.7313629928363605,
+            "phi": 0.611905313274332,
+            "q": 400.07131616227707,
+            "V": 0.11072067956672466
+          },
+          "coupling_evolving_dt03125": {
+            "time": 0.7506901962186815,
+            "phi": 0.6239856016270833,
+            "q": 375.9876197157607,
+            "V": 0.092626531789366
+          }
+        }
+      },
+      {
+        "slip": 0.05209519154639325,
+        "cases": {
+          "coupling_evolving_dt125": {
+            "time": 0.7551169059407086,
+            "phi": 0.6071988714282202,
+            "q": 468.1137547732337,
+            "V": 0.11884225676429307
+          },
+          "coupling_evolving_dt0625": {
+            "time": 0.8020297704254699,
+            "phi": 0.6409152902082949,
+            "q": 388.96657902681903,
+            "V": 0.08973120508257625
+          },
+          "coupling_evolving_dt03125": {
+            "time": 0.84375,
+            "phi": 0.6694780837075793,
+            "q": 336.16734262239726,
+            "V": 0.060976898866760894
+          }
+        }
+      }
+    ],
+    "0.5": [
+      {
+        "slip": 0.0,
+        "cases": {
+          "coupling_evolving_dt125": {
+            "time": 0.0,
+            "phi": 0.6035488376736221,
+            "q": 0.0,
+            "V": 1e-20
+          },
+          "coupling_evolving_dt0625": {
+            "time": 0.0,
+            "phi": 0.6035488376736221,
+            "q": 0.0,
+            "V": 1e-20
+          },
+          "coupling_evolving_dt03125": {
+            "time": 0.0,
+            "phi": 0.6035488376736221,
+            "q": 0.0,
+            "V": 1e-20
+          }
+        }
+      },
+      {
+        "slip": 0.004797860710145787,
+        "cases": {
+          "coupling_evolving_dt125": {
+            "time": 0.2527100210088027,
+            "phi": 0.6035488376736221,
+            "q": 44.163646327460285,
+            "V": 0.027574105407798814
+          },
+          "coupling_evolving_dt0625": {
+            "time": 0.2779835978141795,
+            "phi": 0.6035488376736221,
+            "q": 44.16624559614947,
+            "V": 0.030405234401571727
+          },
+          "coupling_evolving_dt03125": {
+            "time": 0.2934173773876923,
+            "phi": 0.6035488376736221,
+            "q": 44.16703436161448,
+            "V": 0.03213040853875093
+          }
+        }
+      },
+      {
+        "slip": 0.009595721420291574,
+        "cases": {
+          "coupling_evolving_dt125": {
+            "time": 0.36976663982822194,
+            "phi": 0.6035488376736221,
+            "q": 88.29268345381979,
+            "V": 0.04041349893039984
+          },
+          "coupling_evolving_dt0625": {
+            "time": 0.39698508590407117,
+            "phi": 0.6035488376736221,
+            "q": 88.29569823968336,
+            "V": 0.04344919565061574
+          },
+          "coupling_evolving_dt03125": {
+            "time": 0.41237145138434694,
+            "phi": 0.6035488376736221,
+            "q": 88.29683114778175,
+            "V": 0.04518163148941587
+          }
+        }
+      },
+      {
+        "slip": 0.01439358213043736,
+        "cases": {
+          "coupling_evolving_dt125": {
+            "time": 0.4588167308120095,
+            "phi": 0.6035488376736221,
+            "q": 132.3943228196941,
+            "V": 0.05017086710361192
+          },
+          "coupling_evolving_dt0625": {
+            "time": 0.48969816771798425,
+            "phi": 0.6035488376736221,
+            "q": 132.4017859480549,
+            "V": 0.05361478591042085
+          },
+          "coupling_evolving_dt03125": {
+            "time": 0.5047301296692756,
+            "phi": 0.6035488376736221,
+            "q": 132.40269059818903,
+            "V": 0.055318849175632
+          }
+        }
+      },
+      {
+        "slip": 0.019191442840583148,
+        "cases": {
+          "coupling_evolving_dt125": {
+            "time": 0.5372296069366715,
+            "phi": 0.6035488376736221,
+            "q": 176.47971708804755,
+            "V": 0.05876311061384727
+          },
+          "coupling_evolving_dt0625": {
+            "time": 0.5681090703301591,
+            "phi": 0.6035488376736221,
+            "q": 176.4885050145391,
+            "V": 0.0622140896599539
+          },
+          "coupling_evolving_dt03125": {
+            "time": 0.5828816853979901,
+            "phi": 0.6035488376736221,
+            "q": 176.48918602751465,
+            "V": 0.06389905627445563
+          }
+        }
+      },
+      {
+        "slip": 0.023989303550728935,
+        "cases": {
+          "coupling_evolving_dt125": {
+            "time": 0.6073923128410559,
+            "phi": 0.6035488376736221,
+            "q": 220.55187528248973,
+            "V": 0.06645228504459948
+          },
+          "coupling_evolving_dt0625": {
+            "time": 0.636996028449993,
+            "phi": 0.6035488389944379,
+            "q": 220.55799034112127,
+            "V": 0.06977033753736794
+          },
+          "coupling_evolving_dt03125": {
+            "time": 0.6520865600244936,
+            "phi": 0.6035488399830939,
+            "q": 220.5594849087604,
+            "V": 0.07149879637860045
+          }
+        }
+      },
+      {
+        "slip": 0.02878716426087472,
+        "cases": {
+          "coupling_evolving_dt125": {
+            "time": 0.6687840210842342,
+            "phi": 0.6035491606794349,
+            "q": 264.60229927167444,
+            "V": 0.07318014384568922
+          },
+          "coupling_evolving_dt0625": {
+            "time": 0.6996420706675466,
+            "phi": 0.6035500960524448,
+            "q": 264.6102662885124,
+            "V": 0.07658979395024186
+          },
+          "coupling_evolving_dt03125": {
+            "time": 0.7147664807207834,
+            "phi": 0.6035524492620625,
+            "q": 264.60754681138087,
+            "V": 0.0781467453884934
+          }
+        }
+      },
+      {
+        "slip": 0.033585024971020505,
+        "cases": {
+          "coupling_evolving_dt125": {
+            "time": 0.7272371520691988,
+            "phi": 0.6035495919029866,
+            "q": 308.6454415759515,
+            "V": 0.07958592979299334
+          },
+          "coupling_evolving_dt0625": {
+            "time": 0.7576972758592826,
+            "phi": 0.6035580453377573,
+            "q": 308.62808658264504,
+            "V": 0.08258975927645852
+          },
+          "coupling_evolving_dt03125": {
+            "time": 0.7730725282728119,
+            "phi": 0.6035660886879852,
+            "q": 308.6052062717114,
+            "V": 0.08342730202186058
+          }
+        }
+      },
+      {
+        "slip": 0.038382885681166296,
+        "cases": {
+          "coupling_evolving_dt125": {
+            "time": 0.7812961432856085,
+            "phi": 0.6052533626414427,
+            "q": 347.07499398087873,
+            "V": 0.08496585881476207
+          },
+          "coupling_evolving_dt0625": {
+            "time": 0.8125,
+            "phi": 0.603577687570363,
+            "q": 352.57164028116114,
+            "V": 0.0875478506839602
+          },
+          "coupling_evolving_dt03125": {
+            "time": 0.8289261625254052,
+            "phi": 0.6140195065130287,
+            "q": 327.33538520076416,
+            "V": 0.08537458901743396
+          }
+        }
+      }
+    ],
+    "1.0": [
+      {
+        "slip": 0.0,
+        "cases": {
+          "coupling_evolving_dt125": {
+            "time": 0.0,
+            "phi": 0.6035488376736221,
+            "q": 0.0,
+            "V": 1e-20
+          },
+          "coupling_evolving_dt0625": {
+            "time": 0.0,
+            "phi": 0.6035488376736221,
+            "q": 0.0,
+            "V": 1e-20
+          },
+          "coupling_evolving_dt03125": {
+            "time": 0.0,
+            "phi": 0.6035488376736221,
+            "q": 0.0,
+            "V": 1e-20
+          }
+        }
+      },
+      {
+        "slip": 0.006511898943299155,
+        "cases": {
+          "coupling_evolving_dt125": {
+            "time": 0.24464862166148002,
+            "phi": 0.6035488376736221,
+            "q": 59.94266104012712,
+            "V": 0.03818813613812879
+          },
+          "coupling_evolving_dt0625": {
+            "time": 0.2690370453230787,
+            "phi": 0.6035488376736221,
+            "q": 59.947018196564734,
+            "V": 0.042932282101177506
+          },
+          "coupling_evolving_dt03125": {
+            "time": 0.28343194036339747,
+            "phi": 0.6035488376736221,
+            "q": 59.94839133917201,
+            "V": 0.04559339438858652
+          }
+        }
+      },
+      {
+        "slip": 0.01302379788659831,
+        "cases": {
+          "coupling_evolving_dt125": {
+            "time": 0.35582942636771325,
+            "phi": 0.6035488376736221,
+            "q": 119.83898258407409,
+            "V": 0.05643401058129634
+          },
+          "coupling_evolving_dt0625": {
+            "time": 0.38333484560616815,
+            "phi": 0.6035488376736221,
+            "q": 119.84669393336324,
+            "V": 0.061434077561614016
+          },
+          "coupling_evolving_dt03125": {
+            "time": 0.3967429454048951,
+            "phi": 0.6035488376736221,
+            "q": 119.84797768719001,
+            "V": 0.06405705261221917
+          }
+        }
+      },
+      {
+        "slip": 0.019535696829897465,
+        "cases": {
+          "coupling_evolving_dt125": {
+            "time": 0.4423497994138943,
+            "phi": 0.6035488376736221,
+            "q": 179.7020576721804,
+            "V": 0.07042611431528516
+          },
+          "coupling_evolving_dt0625": {
+            "time": 0.47120550957937823,
+            "phi": 0.6035488376736221,
+            "q": 179.71394338476105,
+            "V": 0.0756874935027489
+          },
+          "coupling_evolving_dt03125": {
+            "time": 0.48492263519699774,
+            "phi": 0.6035488376736221,
+            "q": 179.71665940497857,
+            "V": 0.07846820322915549
+          }
+        }
+      },
+      {
+        "slip": 0.02604759577319662,
+        "cases": {
+          "coupling_evolving_dt125": {
+            "time": 0.5191593976387285,
+            "phi": 0.6035488376736221,
+            "q": 239.54712283003175,
+            "V": 0.08283604746077401
+          },
+          "coupling_evolving_dt0625": {
+            "time": 0.5463764236205785,
+            "phi": 0.6035488376736221,
+            "q": 239.55759478554467,
+            "V": 0.08789829754018831
+          },
+          "coupling_evolving_dt03125": {
+            "time": 0.5597938407617237,
+            "phi": 0.6035488376736221,
+            "q": 239.56094719837265,
+            "V": 0.09073071710474499
+          }
+        }
+      },
+      {
+        "slip": 0.032559494716495774,
+        "cases": {
+          "coupling_evolving_dt125": {
+            "time": 0.5843108070806202,
+            "phi": 0.6035488376736221,
+            "q": 299.3652633207432,
+            "V": 0.09337088639553699
+          },
+          "coupling_evolving_dt0625": {
+            "time": 0.6126797314989035,
+            "phi": 0.6035488376736221,
+            "q": 299.37969591039854,
+            "V": 0.09868206440497786
+          },
+          "coupling_evolving_dt03125": {
+            "time": 0.6258082318899134,
+            "phi": 0.6035488459503418,
+            "q": 299.38361985112306,
+            "V": 0.10156228249415289
+          }
+        }
+      },
+      {
+        "slip": 0.03907139365979493,
+        "cases": {
+          "coupling_evolving_dt125": {
+            "time": 0.645391925018608,
+            "phi": 0.6037632639982622,
+            "q": 358.54402475134214,
+            "V": 0.10320485184348537
+          },
+          "coupling_evolving_dt0625": {
+            "time": 0.6725441352149321,
+            "phi": 0.603549111141634,
+            "q": 359.1787531331763,
+            "V": 0.1084362820303496
+          },
+          "coupling_evolving_dt03125": {
+            "time": 0.6853698703056388,
+            "phi": 0.6037230909274613,
+            "q": 358.50634041471824,
+            "V": 0.11183255804883563
+          }
+        }
+      },
+      {
+        "slip": 0.045583292603094086,
+        "cases": {
+          "coupling_evolving_dt125": {
+            "time": 0.6997027293961688,
+            "phi": 0.6043343560437802,
+            "q": 416.65927593537,
+            "V": 0.11187302037802507
+          },
+          "coupling_evolving_dt0625": {
+            "time": 0.7313629928363605,
+            "phi": 0.6119053132743318,
+            "q": 400.07131616227724,
+            "V": 0.11072067956672488
+          },
+          "coupling_evolving_dt03125": {
+            "time": 0.7506901962186807,
+            "phi": 0.6239856016270829,
+            "q": 375.9876197157615,
+            "V": 0.0926265317893672
+          }
+        }
+      },
+      {
+        "slip": 0.05209519154639324,
+        "cases": {
+          "coupling_evolving_dt125": {
+            "time": 0.7551169059407086,
+            "phi": 0.6071988714282199,
+            "q": 468.113754773234,
+            "V": 0.11884225676429416
+          },
+          "coupling_evolving_dt0625": {
+            "time": 0.8020297704254696,
+            "phi": 0.6409152902082946,
+            "q": 388.96657902681966,
+            "V": 0.08973120508257651
+          },
+          "coupling_evolving_dt03125": {
+            "time": 0.84375,
+            "phi": 0.6694780837075796,
+            "q": 336.1673426223972,
+            "V": 0.06097689886676056
+          }
+        }
+      }
+    ]
+  }
+}

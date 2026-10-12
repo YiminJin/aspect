@@ -1,0 +1,39 @@
+--- incoming/doc/reconstructed_fault/specification.tex
++++ current/doc/reconstructed_fault/specification.tex
+@@ -1943,9 +1943,21 @@
+ line-search safeguard. Primal-dual contact prediction uses the positive diagonal
+ metric, including the nonzero increment to a predicted bound and its symmetric
+ column lift; the residual, energy, constraints and KKT tolerances
+-remain those of the same functional. The arithmetic allowance uses the positive
++remain those of the same functional. In the restricted serial option, a final
++exact free-set Newton polish is permitted only when both the defect relative
++to its initial value and the correction relative to the phase scale are below
++$\sqrt{\epsilon_{\rm machine}}$, and the predicted active nodes are already
++on their bounds. It must reduce the exact KKT defect and change energy by no
++more than a separately scaled $32\epsilon_{\rm machine}$ arithmetic allowance.
++This does not change the convergence target or establish second-order stability.
++The arithmetic allowance uses the positive
+ pre-cancellation term scale, including the normalization adjoint. It is an
+ uncertainty estimate, not phase viscosity or a physical regularization.
++FE Maxwell publication checks use the absolute coefficient--basis-gradient
++products before strain cancellation, together with the profile stress operands.
++A nearly constant FE velocity/internal-strain encoding can have tiny net
++gradients while its differentiation arithmetic scale remains finite. The
++existing epsilon multiplier is retained; the state update is unchanged.
+ 
+ This initial option requires serial 2-D uniform Cartesian Box cells, one fixed
+ horizontal through-going fault with full normal association, homogeneous identical
+@@ -1954,6 +1966,13 @@
+ bulk-conjugate endpoint mechanics, direct phase irreversibility, and unloaded
+ initialization. Mesh/geometry changes, history transport, particle replenishment,
+ external retained-stress overrides and coefficient variation are rejected.
++The bounded localization comparison permits a unit tangential width and a
++normal Box extent derived from the actual domain, centered on the prescribed
++fault at $y=0.5$. Uniform cell sizes are checked against the Box origin and
++extents; the normal integration must cover that complete extent. Increasing
++normal extent keeps $\ell$, cell sizes and the physical shear-rate loading
++definition fixed. This is a geometry restriction extension, not a new support
++admission or profile-reconstruction algorithm.
+ The initial implementation is fresh-run only: resume is rejected, including
+ particle-stress checkpoints; a registry marker also forbids resuming this option's
+ checkpoint through the particle-authoritative path. No implicit conversion is

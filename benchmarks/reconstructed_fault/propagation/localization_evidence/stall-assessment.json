@@ -1,0 +1,42 @@
+{
+  "kkt": 1.207645095036014e-12,
+  "target": 1.1256351785606174e-12,
+  "worst": {
+    "i": 104,
+    "x": 0.875,
+    "y": 0.0625,
+    "phase": 0.05667457027707911
+  },
+  "free": 214,
+  "min_eigenvalue": -0.07577236533387907,
+  "max_eigenvalue": 56.36135555264859,
+  "negative_modes": 2,
+  "condition": 796.4081412188968,
+  "max_exact_correction": 1.4022206599011317e-11,
+  "max_search_correction": 1.6974885087709709e-12,
+  "max_correction_ulps": 101251716.23382585,
+  "active_changes_one_ulp": [
+    0,
+    0
+  ],
+  "independent_double_longdouble_max": 3.2291877505308264e-15,
+  "native_longdouble_difference": 1.3887328786932329e-14,
+  "free_native_longdouble_difference": 1.7867787327832674e-15,
+  "input_one_ulp_floor": 2.0112387702108264e-14,
+  "free_input_one_ulp_floor": 9.305391333725604e-15,
+  "independent_KKT": 1.2085683745010484e-12,
+  "longdouble_mantissa": 63,
+  "feasible_negative_curvature": [
+    {
+      "amplitude": -0.0001,
+      "energy_change": -3.787832270063518e-10,
+      "quadratic_prediction": -3.7886182666936234e-10
+    },
+    {
+      "amplitude": 0.0001,
+      "energy_change": -3.788542812799278e-10,
+      "quadratic_prediction": -3.7886182666936234e-10
+    }
+  ],
+  "newton_slope": 3.8707385149218355e-22
+}

@@ -1,0 +1,29 @@
+{
+  "preserved_incoming_artifacts": 272,
+  "partitions": [
+    64,
+    128,
+    256,
+    512,
+    1024
+  ],
+  "identical_initial_fields": true,
+  "total_boundary_displacement_m": 0.05,
+  "maximum_normalized_phase_KKT": 4.3843488952158985e-12,
+  "maximum_phase_healing": 0.0,
+  "prototype_accepted_state_replay_and_Maxwell_recurrence_pass": true,
+  "normalization_and_selected_incoming_derivatives_pass": true,
+  "endpoint_force_and_contact_pass": true,
+  "evolving_profile_work_identity_pass": true,
+  "frozen_control_work_errors": [
+    0.013522086598200034,
+    0.0008956568302919192,
+    0.0001877435657275348
+  ],
+  "provisional_temporal_accuracy_gate_pass": false,
+  "finest_reference_sufficiently_resolved": false,
+  "selected_native_timestep": null,
+  "new_native_run": false,
+  "production_sources_or_model_changed": false,
+  "P3_ready": false
+}

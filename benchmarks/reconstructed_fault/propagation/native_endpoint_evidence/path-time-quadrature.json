@@ -1,0 +1,212 @@
+{
+  "scope": "Frozen prototype paths, same spatial operators; no physical history advanced. This estimates time quadrature, not native spatial error or contact-path consistency.",
+  "input_sha256": "772eb4297a68841f3b3b15b1184adf7731d3a04669edd48ce4b6f6c248908d8d",
+  "allowance_J_per_m": 1e-10,
+  "rows": [
+    {
+      "time": 0.5,
+      "quadrature_differences": {
+        "8": {
+          "external_work": 2.291500322826323e-12,
+          "bulk_viscous": 1.1275702593849246e-17,
+          "cohesive_viscous": 0.0,
+          "friction": 7.105427357601002e-15,
+          "mechanical_power": 2.3556301160552524e-12,
+          "friction_residual_power": 1.0658141036401503e-14,
+          "phase_power": 0.0,
+          "bulk_profile_power": 0.0,
+          "normalization_power": 0.0,
+          "external_remainder": 2.284394895468722e-12
+        },
+        "16": {
+          "external_work": 8.23163759378076e-12,
+          "bulk_viscous": 2.949029909160572e-17,
+          "cohesive_viscous": 8.673617379884035e-18,
+          "friction": 1.0658141036401503e-14,
+          "mechanical_power": 8.221051101524702e-12,
+          "friction_residual_power": 1.7763568394002505e-14,
+          "phase_power": 0.0,
+          "bulk_profile_power": 0.0,
+          "normalization_power": 0.0,
+          "external_remainder": 8.242295734817162e-12
+        }
+      },
+      "reference": {
+        "external_work": 20.528970726458983,
+        "bulk_viscous": 0.0027426065524913668,
+        "cohesive_viscous": 0.014417533166729599,
+        "friction": 30.714800004301143,
+        "mechanical_power": 3.571291056934398e-09,
+        "friction_residual_power": 15.344602174147356,
+        "phase_power": 0.0,
+        "bulk_profile_power": 0.0,
+        "normalization_power": 0.0,
+        "external_remainder": -15.344602177718679
+      }
+    },
+    {
+      "time": 0.5283203125,
+      "quadrature_differences": {
+        "8": {
+          "external_work": 5.484501741648273e-14,
+          "bulk_viscous": 2.710505431213761e-20,
+          "cohesive_viscous": 2.710505431213761e-20,
+          "friction": 0.0,
+          "mechanical_power": 5.369785166859418e-14,
+          "friction_residual_power": 1.0067151633736788e-15,
+          "phase_power": 1.3333324293742253e-19,
+          "bulk_profile_power": 1.2843803330877346e-19,
+          "normalization_power": 1.6940658945086007e-21,
+          "external_remainder": 5.484501741648273e-14
+        },
+        "16": {
+          "external_work": 1.637578961322106e-14,
+          "bulk_viscous": 3.7269449679189215e-20,
+          "cohesive_viscous": 0.0,
+          "friction": 0.0,
+          "mechanical_power": 1.533697763847117e-14,
+          "friction_residual_power": 1.081110838063355e-15,
+          "phase_power": 2.5115023194457537e-19,
+          "bulk_profile_power": 3.026894616126221e-19,
+          "normalization_power": 8.470329472543003e-22,
+          "external_remainder": 1.637578961322106e-14
+        }
+      },
+      "reference": {
+        "external_work": 0.17356452517550944,
+        "bulk_viscous": 1.6894755516251497e-05,
+        "cohesive_viscous": 0.00010548162973046842,
+        "friction": 0.13074510648411636,
+        "mechanical_power": -9.569858145666099e-09,
+        "friction_residual_power": 9.596372932778206e-09,
+        "phase_power": 8.950657011140571e-09,
+        "bulk_profile_power": -9.12249485328795e-12,
+        "normalization_power": -4.060987931594541e-06,
+        "external_remainder": -8.977202314852661e-09
+      }
+    },
+    {
+      "time": 0.529296875,
+      "quadrature_differences": {
+        "8": {
+          "external_work": 2.405853294362714e-13,
+          "bulk_viscous": 4.743384504624082e-20,
+          "cohesive_viscous": 0.0,
+          "friction": 2.7755575615628914e-17,
+          "mechanical_power": 2.4363404157079667e-13,
+          "friction_residual_power": 2.87381338344439e-15,
+          "phase_power": 1.7207643730060562e-16,
+          "bulk_profile_power": 7.128968097271093e-17,
+          "normalization_power": 0.0,
+          "external_remainder": 2.4061308501188705e-13
+        },
+        "16": {
+          "external_work": 2.0011770018868447e-13,
+          "bulk_viscous": 3.3881317890172014e-21,
+          "cohesive_viscous": 2.710505431213761e-20,
+          "friction": 2.7755575615628914e-17,
+          "mechanical_power": 1.9748824564612757e-13,
+          "friction_residual_power": 2.1993871161156767e-15,
+          "phase_power": 4.328982105509388e-16,
+          "bulk_profile_power": 1.9189531420046174e-16,
+          "normalization_power": 1.3877787807814457e-17,
+          "external_remainder": 2.001454557643001e-13
+        }
+      },
+      "reference": {
+        "external_work": 0.17392067747281972,
+        "bulk_viscous": 1.6901564062492494e-05,
+        "cohesive_viscous": 0.0001059753941355822,
+        "friction": 0.1328593505521277,
+        "mechanical_power": 2.5612565354896427e-05,
+        "friction_residual_power": -1.402217220070127e-05,
+        "phase_power": 2.2932965404407942e-05,
+        "bulk_profile_power": -1.1486567488113298e-05,
+        "normalization_power": -0.03243110330926669,
+        "external_remainder": -3.4523358493188105e-05
+      }
+    },
+    {
+      "time": 0.53125,
+      "quadrature_differences": {
+        "8": {
+          "external_work": 2.5118795932144167e-14,
+          "bulk_viscous": 3.6591823321385775e-19,
+          "cohesive_viscous": 1.3552527156068805e-20,
+          "friction": 0.0,
+          "mechanical_power": 2.3453698564431663e-14,
+          "friction_residual_power": 1.6303520762161322e-15,
+          "phase_power": 1.479427745674361e-16,
+          "bulk_profile_power": 1.7176134104422702e-16,
+          "normalization_power": 1.3877787807814457e-17,
+          "external_remainder": 2.5118795932144167e-14
+        },
+        "16": {
+          "external_work": 1.8485213360008856e-14,
+          "bulk_viscous": 1.4907779871675686e-19,
+          "cohesive_viscous": 2.710505431213761e-20,
+          "friction": 0.0,
+          "mechanical_power": 1.6975339862078387e-14,
+          "friction_residual_power": 1.4143146289530284e-15,
+          "phase_power": 2.5160266665241737e-17,
+          "bulk_profile_power": 6.3358064454621665e-18,
+          "normalization_power": 1.3877787807814457e-17,
+          "external_remainder": 1.8485213360008856e-14
+        }
+      },
+      "reference": {
+        "external_work": 0.17424037545796126,
+        "bulk_viscous": 1.683914349940658e-05,
+        "cohesive_viscous": 0.00010597394854980074,
+        "friction": 0.13407392486017466,
+        "mechanical_power": 5.100838533572141e-05,
+        "friction_residual_power": -2.226109243436601e-05,
+        "phase_power": -2.8800079786369594e-05,
+        "bulk_profile_power": -2.8641087516991957e-05,
+        "normalization_power": -0.045133564126898104,
+        "external_remainder": 5.278693496202358e-08
+      }
+    },
+    {
+      "time": 0.625,
+      "quadrature_differences": {
+        "8": {
+          "external_work": 1.9137469386976136e-13,
+          "bulk_viscous": 3.2187251995663413e-19,
+          "cohesive_viscous": 1.3552527156068805e-20,
+          "friction": 2.7755575615628914e-17,
+          "mechanical_power": 1.9328283548322722e-13,
+          "friction_residual_power": 9.189968664530257e-17,
+          "phase_power": 1.2204863855669323e-15,
+          "bulk_profile_power": 1.6900543464704043e-15,
+          "normalization_power": 1.3877787807814457e-17,
+          "external_remainder": 1.91402449445377e-13
+        },
+        "16": {
+          "external_work": 2.612909888455306e-13,
+          "bulk_viscous": 5.082197683525802e-21,
+          "cohesive_viscous": 1.3552527156068805e-20,
+          "friction": 0.0,
+          "mechanical_power": 2.6062409608923476e-13,
+          "friction_residual_power": 2.4492262601719106e-15,
+          "phase_power": 3.1386297640739746e-15,
+          "bulk_profile_power": 3.167849012622459e-15,
+          "normalization_power": 0.0,
+          "external_remainder": 2.612909888455306e-13
+        }
+      },
+      "reference": {
+        "external_work": 0.18573347573049934,
+        "bulk_viscous": 1.3821407058653876e-05,
+        "cohesive_viscous": 8.999976321891892e-05,
+        "friction": 0.15729041614612807,
+        "mechanical_power": 0.000287250688005217,
+        "friction_residual_power": -8.735777688281933e-05,
+        "phase_power": -0.0001999478039281019,
+        "bulk_profile_power": -0.00019836338541865057,
+        "normalization_power": -0.043401406194754286,
+        "external_remainder": 5.489274923498044e-08
+      }
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "branch": "fault-propagation",
+  "head": "de7beaa65846c7372711f7922abf1c5d9a745ee6",
+  "python": "3.14.7 (main, Aug 10 2026, 07:46:56) [GCC 16.1.1 20260728]",
+  "numpy": "2.5.2",
+  "scipy": "1.18.1",
+  "platform": "Linux-6.18.49-1-MANJARO-x86_64-with-glibc2.44",
+  "new_sources": {
+    "benchmarks/reconstructed_fault/propagation/extend_coupled_branch.py": "7f4f4d22ccc3ee12f366495d97984f37d77295d9468f88b3a5e55dc1a651c413",
+    "doc/reconstructed_fault/propagation/P2_coupled_branch_extension_report.md": "667ee672927fba7c508c40a7e7ae67eb8f51e919638b431d1bd47890346f7982"
+  },
+  "dependencies": {
+    "benchmarks/reconstructed_fault/propagation/coupled_branch.py": "ce1d2820874eed159e6570d19c60276cffff8d78f904d5aaaf9a9cef1df74745",
+    "benchmarks/reconstructed_fault/propagation/assess_coupled_branch.py": "a7381fee4f6f41a43d67419d547ae34d08f148c6986906cbf9dfde275c8ee919",
+    "benchmarks/reconstructed_fault/propagation/localization_1d.py": "15dc4ba402423476e08757f0f7bde15a0387067b81f69fc16c6ce208894e9200",
+    "benchmarks/reconstructed_fault/propagation/total_energy_step.py": "9a0c0a000cbea4797905eb342305c8c2d6594f58e369fa93171e68c30253cbc9",
+    "benchmarks/reconstructed_fault/propagation/profile_temporal_diagnosis.py": "5b07efc8e9d62811053c0c9478ae5a2e703a5dcdfe1b7204602f0d28994fd251",
+    "benchmarks/reconstructed_fault/propagation/time_resolution.py": "56c28a5bd96c3ebdb75b4f49a50d90880d2c95833e4e591960386280d99bd975"
+  },
+  "configuration": {
+    "requested_final": 0.625,
+    "common_accepted_final": 0.59375,
+    "failed_time": 0.59765625,
+    "denominators": [
+      256,
+      512,
+      1024
+    ],
+    "normal_cells": 256,
+    "bulk_quadrature": 6,
+    "surface_segments": 64,
+    "G": 1000000.0,
+    "eta": 100000000.0,
+    "fracture_scale": 64.00000000008001,
+    "loading_amplitude": 0.256,
+    "BLAS_threads": 1,
+    "production_edits": false,
+    "native_build_or_run": false
+  },
+  "commands": [
+    "OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 python3 benchmarks/reconstructed_fault/propagation/extend_coupled_branch.py prepare",
+    "OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 python3 benchmarks/reconstructed_fault/propagation/extend_coupled_branch.py run --denominator 256",
+    "OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 python3 benchmarks/reconstructed_fault/propagation/extend_coupled_branch.py run --denominator 512",
+    "OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 python3 benchmarks/reconstructed_fault/propagation/extend_coupled_branch.py run --denominator 1024",
+    "OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MPLCONFIGDIR=/tmp/coupled-branch-extension-mpl python3 benchmarks/reconstructed_fault/propagation/extend_coupled_branch.py assess",
+    "OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 python3 benchmarks/reconstructed_fault/propagation/extend_coupled_branch.py check"
+  ],
+  "diagnostic_refresh": "Failed-entry diagnostics and plots refreshed after adding explicit bound/sign checks; all original trajectory and failed-trial files retained.",
+  "publication": "Each added accepted step commits once; saddle trials retained and never committed",
+  "decision": "Incomplete requested interval: genuine resolved discrete symmetric-branch saddle; existence/selection of alternative stable branch remains open"
+}

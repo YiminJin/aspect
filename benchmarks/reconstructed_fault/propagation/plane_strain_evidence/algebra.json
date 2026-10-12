@@ -1,0 +1,54 @@
+{
+  "cases": [
+    {
+      "case": "shear",
+      "raw_trace": 0.0,
+      "deviatoric_block_trace": 0.0,
+      "energy_derivative_relative_error": 2.8088305160104537e-12,
+      "phase_derivative_relative_error": 5.065317054686602e-10,
+      "raw_minus_3D_storage": 0.0,
+      "normal_traction_yy": 0.0,
+      "phase_independent_energy_offset_max_error": 0.0
+    },
+    {
+      "case": "extension",
+      "raw_trace": 0.0,
+      "deviatoric_block_trace": 0.0,
+      "energy_derivative_relative_error": 2.5061841712006858e-11,
+      "phase_derivative_relative_error": 3.605796217165391e-13,
+      "raw_minus_3D_storage": 0.0,
+      "normal_traction_yy": -1600000.0,
+      "phase_independent_energy_offset_max_error": 0.0
+    },
+    {
+      "case": "nonzero_trace",
+      "raw_trace": 1.0,
+      "deviatoric_block_trace": 0.3333333333333334,
+      "energy_derivative_relative_error": 3.7750756181343795e-12,
+      "phase_derivative_relative_error": 1.927624282416218e-09,
+      "raw_minus_3D_storage": 333333.3333333333,
+      "normal_traction_yy": -266666.6666666666,
+      "phase_independent_energy_offset_max_error": 5.820766091346741e-11
+    }
+  ],
+  "general_Maxwell": [
+    {
+      "dt_over_lambda": 0.00125,
+      "FE_recurrence_relative_error": 2.3612921540367925e-16,
+      "finite_step_bulk_work_relative_error": 2.7755575615628914e-17
+    },
+    {
+      "dt_over_lambda": 1.0,
+      "FE_recurrence_relative_error": 1.79818479397373e-16,
+      "finite_step_bulk_work_relative_error": 1.982342290166577e-16
+    },
+    {
+      "dt_over_lambda": 4.0,
+      "FE_recurrence_relative_error": 1.5739847646371751e-16,
+      "finite_step_bulk_work_relative_error": 1.792249564261272e-16
+    }
+  ],
+  "pressure_redefined": false,
+  "note": "Nonzero-trace tests are operator diagnostics; no compressible physical benchmark",
+  "helpers_checked_natively": "plane-strain-algebra.csv in before/after native fixtures"
+}

@@ -1,0 +1,35 @@
+--- before-assessment/specification.tex
++++ assessment/specification.tex
+@@ -973,6 +973,32 @@
+ does not remove particle/FE stress-transfer errors or endpoint-in-time splitting
+ errors in integrated work, and does not qualify the separate phase-energy
+ projection approximation.
++
++\subsection{P2 evolving-profile energy assessment (not a law revision)}
++Direct phase irreversibility is verified for the selected fixed-mesh fixture.
++All constitutive and coupling choices above remain unchanged. Consistent surface
++normalization at $0.025$ m still has $0.8569$--$0.9698\%$ maximum source spatial
++error on retained strongly damaged fields, above the provisional $0.5\%$ target.
++Native zero-input particle stress histories have exact Maxwell partitioning;
++FE representation error remains separate from repeated-transfer drift.
++
++On matched Stokes quadrature and exact native-step Maxwell time integration,
++profile work $W_C$ balances bulk storage and dissipation; it need not vanish.
++The elastic-limit kinematics at fixed displacement, committed viscous internal
++variables and elastic cohesive slip gives
++\[
++ \delta E_b=-\sum_a JxW_a\frac{Z_a}{G}(\boldsymbol\tau_a:\boldsymbol S_a)
++                  \delta\chi_a,\qquad
++ \delta\chi=\delta h/I_h-h\,\delta I_h/I_h^2.
++\]
++This is an additional variation beyond the selected reduced fault energy.
++A total-energy phase formulation would have to derive its treatment together
++with the normalization projection adjoint and peak-history dissipation. It is
++not implemented here and shall not be added to H as a compensating increment.
++The present assessment leaves the governing choices intact and records total
++profile-energy closure as unresolved. See
++\texttt{propagation/P2\_accuracy\_energy\_derivation.md} and its report.
++The conditional finer coupled comparison and P3 remain deferred.
+ 
+ \subsection{Explicit mature frictional specialization}
+ 

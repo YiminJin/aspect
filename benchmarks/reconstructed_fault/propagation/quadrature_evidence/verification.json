@@ -1,0 +1,18 @@
+{
+  "snapshot_files": 19,
+  "preserved_historical_artifacts": {
+    "plane": 525,
+    "localization": 2013
+  },
+  "new_manifest_files": 671,
+  "native_controls_completed": 3,
+  "selected_rule": 6,
+  "proper_incoming_anchor_checks": true,
+  "native_bounds_KKT_history_pass": true,
+  "physical_targets_met_by": "16x32 Q2",
+  "mature_default_identical_files": 2,
+  "stress_energy_spatial_qualification": false,
+  "full_stability_qualification": false,
+  "time_qualification": false,
+  "P3_ready": false
+}

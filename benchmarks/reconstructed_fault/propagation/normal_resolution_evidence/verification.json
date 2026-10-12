@@ -1,0 +1,12 @@
+{
+  "preserved_incoming_artifacts": 661,
+  "production_change": "Cached row-end iterators in phase constraint enforcement; rebuilt executable",
+  "physical_or_numerical_algorithm_change": false,
+  "selected_native_mesh": "16x256 Q2/Q1",
+  "normal_quadrature": 6,
+  "spatial_benchmark_targets_pass": true,
+  "proper_incoming_native_curvature_checked": true,
+  "time_qualification": false,
+  "full_energy_or_stability_qualification": false,
+  "P3_ready": false
+}

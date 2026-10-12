@@ -1,0 +1,28 @@
+[
+  {
+    "aligned": false,
+    "bulk_points": 2304,
+    "bulk_x_points": 48,
+    "surface_dofs": 65,
+    "evaluation_rank": 48,
+    "transverse_Q3_integral_of_chi": 0.9999969319985024,
+    "constant_load_max_relative_error": 0.7777777777777659,
+    "normalized_nodal_load_minmax": [
+      0.5008962905744776,
+      1.777777777777766
+    ]
+  },
+  {
+    "aligned": true,
+    "bulk_points": 9216,
+    "bulk_x_points": 192,
+    "surface_dofs": 65,
+    "evaluation_rank": 65,
+    "transverse_Q3_integral_of_chi": 0.9999969319984883,
+    "constant_load_max_relative_error": 7.771561172376096e-15,
+    "normalized_nodal_load_minmax": [
+      1.0000000000000067,
+      1.0000000000000078
+    ]
+  }
+]

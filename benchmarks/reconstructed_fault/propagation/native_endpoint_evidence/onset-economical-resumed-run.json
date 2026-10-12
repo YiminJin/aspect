@@ -1,0 +1,20 @@
+{
+  "executable_sha": "b6a4bdef9a9d570c1f606dc4bfcd167a66ac49f91f87d81199c52d72fdfb1e99",
+  "plugin_sha": "552653a505254351a6043289f85c5eea06dc166189a74065fa9d59381c761979",
+  "input_sha": "575c382ab8e2ee1bae941d700cdf14a758b1b972a2b7c76fe14ceb51bf877e9e",
+  "initial_phi_sha": "5792b5323cfa162a231c4f1e4d5076e987d6dfc56005f1f427e577801b5b3356",
+  "initial_H_sha": "c205e0eda26d3042599a139dd668ca5cf339c6b4a7eba939400d174f35a6dc8b",
+  "configuration": "fresh shared initialization, fixed 16x512, full-normal association, frozen particles",
+  "output": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-endpoint-onset-economical-resumed",
+  "threads": 1,
+  "started_UTC": "2026-10-12T18:32:56.960741+00:00",
+  "max_wall_seconds": 5400.0,
+  "force_complete_failure": true,
+  "complete_failure_timestep": 55,
+  "source_input": "benchmarks/reconstructed_fault/propagation/native_solver_evidence/economical-onset-coarse.prm",
+  "returncode": 0,
+  "wall_seconds": 5108.587470054999,
+  "user_seconds": 4738.739388,
+  "system_seconds": 30.90331,
+  "peak_RSS_KiB": 1725380
+}

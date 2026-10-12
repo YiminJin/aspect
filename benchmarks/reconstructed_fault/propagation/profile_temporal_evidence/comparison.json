@@ -1,0 +1,2398 @@
+{
+  "partitions": [
+    64,
+    128,
+    256,
+    512,
+    1024,
+    2048,
+    4096
+  ],
+  "comparison_to_4096": {
+    "64": {
+      "phi": 0.02229016986438148,
+      "q_Pa": 35.574057416908204,
+      "slip_relative": 0.0007294451605738855,
+      "V_common_relative": 0.011905661599330188,
+      "whole_stress_relative": 0.026697476630370934,
+      "localized_stress_relative": 0.0266991611471842,
+      "bulk_storage_relative": 0.05267770691525806,
+      "cohesive_storage": 0.7932644533339248,
+      "fracture_storage": 0.6786045530165197,
+      "mean_stress_Pa": 35.57391180191165,
+      "phase_error_time": 0.625,
+      "fixed_peak_common_rate": 0.15885488580616958
+    },
+    "128": {
+      "phi": 0.01525256658223939,
+      "q_Pa": 19.508572620190392,
+      "slip_relative": 0.0004003006094314311,
+      "V_common_relative": 0.004638054753509009,
+      "whole_stress_relative": 0.014767653817985435,
+      "localized_stress_relative": 0.015079242034270747,
+      "bulk_storage_relative": 0.027027345375354672,
+      "cohesive_storage": 0.47241781162086216,
+      "fracture_storage": 0.38256071732416075,
+      "mean_stress_Pa": 19.50699108078949,
+      "phase_error_time": 0.625,
+      "fixed_peak_common_rate": 0.15885488580616958
+    },
+    "256": {
+      "phi": 0.012498870924774808,
+      "q_Pa": 12.85615611851938,
+      "slip_relative": 0.00026376169024890285,
+      "V_common_relative": 0.002427917693836649,
+      "whole_stress_relative": 0.009823463565248988,
+      "localized_stress_relative": 0.010252989080695435,
+      "bulk_storage_relative": 0.017749472212654306,
+      "cohesive_storage": 0.31136672328275594,
+      "fracture_storage": 0.23153004265362043,
+      "mean_stress_Pa": 12.854648699458675,
+      "phase_error_time": 0.625,
+      "fixed_peak_common_rate": 0.15885488580616958
+    },
+    "512": {
+      "phi": 0.012122449571129068,
+      "q_Pa": 9.037077026849857,
+      "slip_relative": 0.0001853815899744243,
+      "V_common_relative": 0.0016049686281563915,
+      "whole_stress_relative": 0.00699496056611032,
+      "localized_stress_relative": 0.0075225515452375415,
+      "bulk_storage_relative": 0.012447601099255962,
+      "cohesive_storage": 0.2188888164883398,
+      "fracture_storage": 0.14914444805933513,
+      "mean_stress_Pa": 9.03567923892857,
+      "phase_error_time": 0.625,
+      "fixed_peak_common_rate": 0.15885488580616958
+    },
+    "1024": {
+      "phi": 0.00974672035482288,
+      "q_Pa": 6.211412902275242,
+      "slip_relative": 0.00012740219651647072,
+      "V_common_relative": 0.0006990931932320587,
+      "whole_stress_relative": 0.004882736770978331,
+      "localized_stress_relative": 0.00544732330868485,
+      "bulk_storage_relative": 0.008539025820288077,
+      "cohesive_storage": 0.15045667788971429,
+      "fracture_storage": 0.09579762148424464,
+      "mean_stress_Pa": 6.210221417335726,
+      "phase_error_time": 0.625,
+      "fixed_peak_common_rate": 0.15885488580616958
+    },
+    "2048": {
+      "phi": 0.005648858005919188,
+      "q_Pa": 3.401214646430759,
+      "slip_relative": 6.975616576161979e-05,
+      "V_common_relative": 0.00024108573419045473,
+      "whole_stress_relative": 0.002721451665926073,
+      "localized_stress_relative": 0.0031738787225560274,
+      "bulk_storage_relative": 0.004666632515406429,
+      "cohesive_storage": 0.0823911184310937,
+      "fracture_storage": 0.05034883277714286,
+      "mean_stress_Pa": 3.4004322155797806,
+      "phase_error_time": 0.625,
+      "fixed_peak_common_rate": 0.15885488580616958
+    },
+    "4096": {
+      "phi": 0.0,
+      "q_Pa": 0.0,
+      "slip_relative": 0.0,
+      "V_common_relative": 0.0,
+      "whole_stress_relative": 0.0,
+      "localized_stress_relative": 0.0,
+      "bulk_storage_relative": 0.0,
+      "cohesive_storage": 0.0,
+      "fracture_storage": 0.0,
+      "mean_stress_Pa": 0.0,
+      "phase_error_time": 0.0,
+      "fixed_peak_common_rate": 0.15885488580616958
+    }
+  },
+  "successive_halvings": [
+    {
+      "coarse": 64,
+      "fine": 128,
+      "common": {
+        "phi": 0.008695466938993146,
+        "q_Pa": 18.03788009289849,
+        "slip_relative": 0.00036999271063001146,
+        "V_common_relative": 0.0072700227708603,
+        "whole_stress_relative": 0.013536785569749077,
+        "localized_stress_relative": 0.013537174743521846,
+        "bulk_storage_relative": 0.02688902396388563,
+        "cohesive_storage": 0.3367408500163078,
+        "fracture_storage": 0.31288610131895744,
+        "mean_stress_Pa": 18.037831813482303,
+        "phase_error_time": 0.5625,
+        "fixed_peak_common_rate": 0.15880209621963015
+      },
+      "all_coarse_times": {
+        "phi": 0.008695466938993146,
+        "q_Pa": 18.03788009289849,
+        "slip_relative": 0.00036999271063001146,
+        "V_common_relative": 0.0072700227708603,
+        "whole_stress_relative": 0.013536785569749077,
+        "localized_stress_relative": 0.013537174743521846,
+        "bulk_storage_relative": 0.02688902396388563,
+        "cohesive_storage": 0.3367408500163078,
+        "fracture_storage": 0.31288610131895744,
+        "mean_stress_Pa": 18.037831813482303,
+        "phase_error_time": 0.5625,
+        "fixed_peak_common_rate": 0.15880209621963015
+      }
+    },
+    {
+      "coarse": 128,
+      "fine": 256,
+      "common": {
+        "phi": 0.00441619635372037,
+        "q_Pa": 8.902943321632847,
+        "slip_relative": 0.0001826092446403605,
+        "V_common_relative": 0.0035889631511560496,
+        "whole_stress_relative": 0.0066813558560265916,
+        "localized_stress_relative": 0.006681575534525968,
+        "bulk_storage_relative": 0.013136465537315069,
+        "cohesive_storage": 0.16288514858014125,
+        "fracture_storage": 0.15823892550836227,
+        "mean_stress_Pa": 8.902917276685901,
+        "phase_error_time": 0.546875,
+        "fixed_peak_common_rate": 0.158779292709188
+      },
+      "all_coarse_times": {
+        "phi": 0.00441619635372037,
+        "q_Pa": 8.965304206975588,
+        "slip_relative": 0.00018387393253539245,
+        "V_common_relative": 0.0035889631511560496,
+        "whole_stress_relative": 0.006728140345005894,
+        "localized_stress_relative": 0.006728331696494757,
+        "bulk_storage_relative": 0.01331265452633803,
+        "cohesive_storage": 0.16288514858014125,
+        "fracture_storage": 0.15823892550836227,
+        "mean_stress_Pa": 8.96528037596976,
+        "phase_error_time": 0.546875,
+        "fixed_peak_common_rate": 0.158779292709188
+      }
+    },
+    {
+      "coarse": 256,
+      "fine": 512,
+      "common": {
+        "phi": 0.0026643378387074534,
+        "q_Pa": 4.4093738487399605,
+        "slip_relative": 9.043770162992239e-05,
+        "V_common_relative": 0.0009542485785601328,
+        "whole_stress_relative": 0.0033091093520839646,
+        "localized_stress_relative": 0.003309257875507153,
+        "bulk_storage_relative": 0.006472997789885619,
+        "cohesive_storage": 0.09247790679441614,
+        "fracture_storage": 0.0823855945942853,
+        "mean_stress_Pa": 4.409358226093159,
+        "phase_error_time": 0.625,
+        "fixed_peak_common_rate": 0.15877759767523258
+      },
+      "all_coarse_times": {
+        "phi": 0.0026643378387074534,
+        "q_Pa": 4.521989131105499,
+        "slip_relative": 9.27364741236297e-05,
+        "V_common_relative": 0.0009542485785601328,
+        "whole_stress_relative": 0.0033935920997839306,
+        "localized_stress_relative": 0.0033936899308789348,
+        "bulk_storage_relative": 0.006701674900278976,
+        "cohesive_storage": 0.09247790679441614,
+        "fracture_storage": 0.0823855945942853,
+        "mean_stress_Pa": 4.52197699617784,
+        "phase_error_time": 0.625,
+        "fixed_peak_common_rate": 0.15877759767523258
+      }
+    },
+    {
+      "coarse": 512,
+      "fine": 1024,
+      "common": {
+        "phi": 0.0024110498026439497,
+        "q_Pa": 2.8256641245746152,
+        "slip_relative": 5.798678110123479e-05,
+        "V_common_relative": 0.0009062403238641516,
+        "whole_stress_relative": 0.0021405138484876466,
+        "localized_stress_relative": 0.002176393965900206,
+        "bulk_storage_relative": 0.0039085752789678845,
+        "cohesive_storage": 0.06843213859862551,
+        "fracture_storage": 0.05334682657509049,
+        "mean_stress_Pa": 2.825457821592828,
+        "phase_error_time": 0.625,
+        "fixed_peak_common_rate": 0.158790924416083
+      },
+      "all_coarse_times": {
+        "phi": 0.0024110498026439497,
+        "q_Pa": 2.8256641245746152,
+        "slip_relative": 5.798678110123479e-05,
+        "V_common_relative": 0.0009062403238641516,
+        "whole_stress_relative": 0.0021405138484876466,
+        "localized_stress_relative": 0.002176393965900206,
+        "bulk_storage_relative": 0.0039085752789678845,
+        "cohesive_storage": 0.06843213859862551,
+        "fracture_storage": 0.05334682657509049,
+        "mean_stress_Pa": 2.825457821592828,
+        "phase_error_time": 0.625,
+        "fixed_peak_common_rate": 0.158790924416083
+      }
+    },
+    {
+      "coarse": 1024,
+      "fine": 2048,
+      "common": {
+        "phi": 0.0041150671396324445,
+        "q_Pa": 2.810198255844483,
+        "slip_relative": 5.7650052201448464e-05,
+        "V_common_relative": 0.0004639424451119737,
+        "whole_stress_relative": 0.0021742757642018236,
+        "localized_stress_relative": 0.002320466283967611,
+        "bulk_storage_relative": 0.0038723933048816486,
+        "cohesive_storage": 0.06806555945862058,
+        "fracture_storage": 0.045448788707101784,
+        "mean_stress_Pa": 2.8097892017559176,
+        "phase_error_time": 0.625,
+        "fixed_peak_common_rate": 0.15881658815939526
+      },
+      "all_coarse_times": {
+        "phi": 0.0041150671396324445,
+        "q_Pa": 2.810198255844483,
+        "slip_relative": 5.7650052201448464e-05,
+        "V_common_relative": 0.0004639424451119737,
+        "whole_stress_relative": 0.0021742757642018236,
+        "localized_stress_relative": 0.002320466283967611,
+        "bulk_storage_relative": 0.0038723933048816486,
+        "cohesive_storage": 0.06806555945862058,
+        "fracture_storage": 0.045448788707101784,
+        "mean_stress_Pa": 2.8097892017559176,
+        "phase_error_time": 0.625,
+        "fixed_peak_common_rate": 0.15881658815939526
+      }
+    },
+    {
+      "coarse": 2048,
+      "fine": 4096,
+      "common": {
+        "phi": 0.005648858005919188,
+        "q_Pa": 3.401214646430759,
+        "slip_relative": 6.975616576161979e-05,
+        "V_common_relative": 0.00024108573419045473,
+        "whole_stress_relative": 0.002721451665926073,
+        "localized_stress_relative": 0.0031738787225560274,
+        "bulk_storage_relative": 0.004666632515406429,
+        "cohesive_storage": 0.0823911184310937,
+        "fracture_storage": 0.05034883277714286,
+        "mean_stress_Pa": 3.4004322155797806,
+        "phase_error_time": 0.625,
+        "fixed_peak_common_rate": 0.15885488580616958
+      },
+      "all_coarse_times": {
+        "phi": 0.005648858005919188,
+        "q_Pa": 3.401214646430759,
+        "slip_relative": 6.975616576161979e-05,
+        "V_common_relative": 0.00024108573419045473,
+        "whole_stress_relative": 0.002721451665926073,
+        "localized_stress_relative": 0.0031738787225560274,
+        "bulk_storage_relative": 0.004666632515406429,
+        "cohesive_storage": 0.0823911184310937,
+        "fracture_storage": 0.05034883277714286,
+        "mean_stress_Pa": 3.4004322155797806,
+        "phase_error_time": 0.625,
+        "fixed_peak_common_rate": 0.15885488580616958
+      }
+    }
+  ],
+  "last_common_orders": {
+    "phi": -0.45704326720727273,
+    "q_Pa": -0.2753781413086885,
+    "slip_relative": -0.27499882846364687,
+    "V_common_relative": 0.9443995567276473,
+    "whole_stress_relative": -0.323841483930513,
+    "localized_stress_relative": -0.4518322667260637,
+    "bulk_storage_relative": -0.2691563741379076
+  },
+  "targets": {
+    "phi": 0.001,
+    "q_Pa": 1.0,
+    "slip_relative": 0.001,
+    "V_common_relative": 0.005,
+    "whole_stress_relative": 0.01,
+    "localized_stress_relative": 0.01,
+    "bulk_storage_relative": 0.01
+  },
+  "evolving": {
+    "64": {
+      "maxima": {
+        "endpoint_phase_KKT": 0.0063124449988389494,
+        "delta_chi_rate_max": 0.1304254275789063,
+        "redistributed_interior_force_max": 6.444068414946344,
+        "pairing_absolute": 31.49662726972119
+      },
+      "endpoint_phase_final": 0.0063124449988389494,
+      "incoming_phase_KKT": 3.145921023680007e-14,
+      "relative_velocity_max": 0.0533063835446954,
+      "maximum_phase_increment": 0.017048704250723357,
+      "signed_release": 0.17991119119476195,
+      "release_absolute": 0.1799111911947726,
+      "final_phase_max": 0.6731092750128053,
+      "onset": {
+        "full_field": {
+          "time_bracket": [
+            0.53125,
+            0.546875
+          ],
+          "displacement_bracket": [
+            0.036125,
+            0.03828125
+          ]
+        },
+        "core": {
+          "time_bracket": [
+            0.53125,
+            0.546875
+          ],
+          "displacement_bracket": [
+            0.036125,
+            0.03828125
+          ]
+        }
+      },
+      "totals": {
+        "actual_work_difference": {
+          "signed": -0.02872255770921235,
+          "absolute": 0.03442987475855651,
+          "maximum": 0.017205263475084998
+        },
+        "bulk_work": {
+          "signed": 59.1904610181354,
+          "absolute": 59.1904610181354,
+          "maximum": 3.098067319324884
+        },
+        "affine_work": {
+          "signed": 59.21918357584462,
+          "absolute": 59.21918357584462,
+          "maximum": 3.115272582799969
+        },
+        "reaction_work": {
+          "signed": 59.219183578009044,
+          "absolute": 59.219183578009044,
+          "maximum": 3.1152725831887125
+        },
+        "alternative_lifting_work": {
+          "signed": 59.21918357584026,
+          "absolute": 59.21918357584026,
+          "maximum": 3.1152725827995384
+        },
+        "asymmetric_lifting_work": {
+          "signed": 59.02029240096511,
+          "absolute": 59.02029240096511,
+          "maximum": 3.0697370829690653
+        },
+        "reaction_work_residual": {
+          "signed": 0.17731163703558062,
+          "absolute": 0.2043558103680512,
+          "maximum": 0.039375914332219875
+        },
+        "alternative_work_residual": {
+          "signed": 0.17731163486679533,
+          "absolute": 0.20435580812412502,
+          "maximum": 0.03937591387306982
+        },
+        "asymmetric_work_residual": {
+          "signed": -0.02157954000835435,
+          "absolute": 0.06055188749092932,
+          "maximum": 0.014533393138797202
+        },
+        "lifting_reaction_difference": {
+          "signed": -2.164430616994565e-09,
+          "absolute": 2.244154879667889e-09,
+          "maximum": 4.5879078314214894e-10
+        },
+        "bulk_reaction_difference": {
+          "signed": -0.02872255987364297,
+          "absolute": 0.034429875033407505,
+          "maximum": 0.017205263863828257
+        }
+      },
+      "top_steps": [
+        {
+          "time": 0.625,
+          "dt": 0.015625,
+          "incoming_phase_KKT": 3.145921023680007e-14,
+          "endpoint_phase_KKT": 0.0063124449988389494,
+          "endpoint_phase_mass_scaled_Pa": 103.42309886110664,
+          "endpoint_phase_residual_y": 0.5,
+          "delta_chi_rate_max": 0.1304254275789063,
+          "delta_chi_rate_RMS": 0.057020534849023925,
+          "delta_chi_rate_y": 0.6469504280978188,
+          "redistributed_interior_force_max": 6.156800029707085,
+          "redistributed_force_y": 0.177734375,
+          "relative_velocity_max": 0.0533063835446954,
+          "relative_velocity_y": 0.619140625,
+          "pairing_signed": -2.2023310774117535,
+          "pairing_absolute": 31.49662726972119,
+          "predicted_work_difference": -0.017205263476895025,
+          "actual_work_difference": -0.017205263475084998,
+          "work_identity_error": 1.8100278220689603e-12,
+          "bulk_work": 3.098067319324884,
+          "affine_work": 3.115272582799969,
+          "reaction_work": 3.1152725831887125,
+          "alternative_lifting_work": 3.1152725827995384,
+          "asymmetric_lifting_work": 3.0697370829690653,
+          "lifting_reaction_difference": -3.88743259804869e-10,
+          "bulk_reaction_difference": -0.017205263863828257,
+          "endpoint_interior_force_max": 8.355669933735044e-09,
+          "dominant_work_y": 0.5014870719021812,
+          "maximum_phase_increment": 0.015862375188485434,
+          "reaction_work_residual": 0.033878827056294636,
+          "alternative_work_residual": 0.03387882666712061,
+          "asymmetric_work_residual": -0.011656673163352504
+        },
+        {
+          "time": 0.609375,
+          "dt": 0.015625,
+          "incoming_phase_KKT": 1.82284742855415e-14,
+          "endpoint_phase_KKT": 0.005485811214849837,
+          "endpoint_phase_mass_scaled_Pa": 89.87953094421209,
+          "endpoint_phase_residual_y": 0.5,
+          "delta_chi_rate_max": 0.12173026515352348,
+          "delta_chi_rate_RMS": 0.05497270233196253,
+          "delta_chi_rate_y": 0.6469504280978188,
+          "redistributed_interior_force_max": 6.37931808522967,
+          "redistributed_force_y": 0.181640625,
+          "relative_velocity_max": 0.05194772602926406,
+          "relative_velocity_y": 0.619140625,
+          "pairing_signed": -1.2964558382980231,
+          "pairing_absolute": 27.88741945915669,
+          "predicted_work_difference": -0.010128297472099803,
+          "actual_work_difference": -0.010128297470394898,
+          "work_identity_error": 1.7049053141482418e-12,
+          "bulk_work": 3.0602193823372783,
+          "affine_work": 3.070347679807673,
+          "reaction_work": 3.0703476802143816,
+          "alternative_lifting_work": 3.070347679807416,
+          "asymmetric_lifting_work": 3.0249013164506477,
+          "lifting_reaction_difference": -4.0670844470014345e-10,
+          "bulk_reaction_difference": -0.010128297877103343,
+          "endpoint_interior_force_max": 1.0147061857423978e-08,
+          "dominant_work_y": 0.4985129280978187,
+          "maximum_phase_increment": 0.01622306710504917,
+          "reaction_work_residual": 0.03534516589477743,
+          "alternative_work_residual": 0.03534516548781186,
+          "asymmetric_work_residual": -0.010101197868956469
+        },
+        {
+          "time": 0.59375,
+          "dt": 0.015625,
+          "incoming_phase_KKT": 1.7236212457284007e-14,
+          "endpoint_phase_KKT": 0.004673483083267253,
+          "endpoint_phase_mass_scaled_Pa": 76.5703468363464,
+          "endpoint_phase_residual_y": 0.5,
+          "delta_chi_rate_max": 0.10773428723105383,
+          "delta_chi_rate_RMS": 0.05097408529934134,
+          "delta_chi_rate_y": 0.6499245719021812,
+          "redistributed_interior_force_max": 6.444068414946344,
+          "redistributed_force_y": 0.814453125,
+          "relative_velocity_max": 0.05060005497521784,
+          "relative_velocity_y": 0.619140625,
+          "pairing_signed": -0.5430740196731528,
+          "pairing_absolute": 23.549508406704962,
+          "predicted_work_difference": -0.004242655290009395,
+          "actual_work_difference": -0.0042426552884045066,
+          "work_identity_error": 1.604888097417323e-12,
+          "bulk_work": 3.0216665016428923,
+          "affine_work": 3.025909156931297,
+          "reaction_work": 3.025909157355486,
+          "alternative_lifting_work": 3.025909156930992,
+          "asymmetric_lifting_work": 2.9832622367555044,
+          "lifting_reaction_difference": -4.2418912826747146e-10,
+          "bulk_reaction_difference": -0.004242655712593635,
+          "endpoint_interior_force_max": 9.709395953905187e-09,
+          "dominant_work_y": 0.5014870719021812,
+          "maximum_phase_increment": 0.016585383497134676,
+          "reaction_work_residual": 0.0368611646127186,
+          "alternative_work_residual": 0.036861164188224826,
+          "asymmetric_work_residual": -0.005785755987262942
+        },
+        {
+          "time": 0.5625,
+          "dt": 0.015625,
+          "incoming_phase_KKT": 2.096586793062948e-14,
+          "endpoint_phase_KKT": 0.0030944377887243205,
+          "endpoint_phase_mass_scaled_Pa": 50.69926873052265,
+          "endpoint_phase_residual_y": 0.5,
+          "delta_chi_rate_max": 0.06973127729985373,
+          "delta_chi_rate_RMS": 0.030280943965468574,
+          "delta_chi_rate_y": 0.23060064548007198,
+          "redistributed_interior_force_max": 4.952855865726917,
+          "redistributed_force_y": 0.193359375,
+          "relative_velocity_max": 0.04793750744438974,
+          "relative_velocity_y": 0.62109375,
+          "pairing_signed": 0.28412901569789784,
+          "pairing_absolute": 11.283953760826245,
+          "predicted_work_difference": 0.002219700128946237,
+          "actual_work_difference": 0.002219700130392077,
+          "work_identity_error": 1.4458399755223894e-12,
+          "bulk_work": 2.9397820741706875,
+          "affine_work": 2.9375623740402954,
+          "reaction_work": 2.937562374499086,
+          "alternative_lifting_work": 2.937562374039936,
+          "asymmetric_lifting_work": 2.9127198533056635,
+          "lifting_reaction_difference": -4.5879078314214894e-10,
+          "bulk_reaction_difference": 0.002219699671601294,
+          "endpoint_interior_force_max": 8.378947313758545e-09,
+          "dominant_work_y": 0.22898167809781875,
+          "maximum_phase_increment": 0.017048704250723357,
+          "reaction_work_residual": 0.039375914332219875,
+          "alternative_work_residual": 0.03937591387306982,
+          "asymmetric_work_residual": 0.014533393138797202
+        },
+        {
+          "time": 0.546875,
+          "dt": 0.015625,
+          "incoming_phase_KKT": 1.5411283360558687e-14,
+          "endpoint_phase_KKT": 0.002306938518474479,
+          "endpoint_phase_mass_scaled_Pa": 37.79688068673312,
+          "endpoint_phase_residual_y": 0.5,
+          "delta_chi_rate_max": 0.012517141415396393,
+          "delta_chi_rate_RMS": 0.005288329864643317,
+          "delta_chi_rate_y": 0.23060064548007198,
+          "redistributed_interior_force_max": 0.9585720500029993,
+          "redistributed_force_y": 0.193359375,
+          "relative_velocity_max": 0.04598686711931877,
+          "relative_velocity_y": 0.62109375,
+          "pairing_signed": 0.06919010998275336,
+          "pairing_absolute": 1.76222797746827,
+          "predicted_work_difference": 0.0005405336574769905,
+          "actual_work_difference": 0.0005405336588095722,
+          "work_identity_error": 1.3325816144993397e-12,
+          "bulk_work": 2.860022545743117,
+          "affine_work": 2.8594820120843076,
+          "reaction_work": 2.859482012164075,
+          "alternative_lifting_work": 2.8594820120839275,
+          "asymmetric_lifting_work": 2.855389594512336,
+          "lifting_reaction_difference": -7.976730387326825e-11,
+          "bulk_reaction_difference": 0.0005405335790422683,
+          "endpoint_interior_force_max": 9.767461506271502e-09,
+          "dominant_work_y": 0.23195582190218125,
+          "maximum_phase_increment": 0.003138524422050426,
+          "reaction_work_residual": 0.0069655613047476805,
+          "alternative_work_residual": 0.006965561224600236,
+          "asymmetric_work_residual": 0.002873143653008725
+        }
+      ],
+      "absolute_work_fraction_after_point6": 0.7938908037615491,
+      "center_work_fraction": {
+        "signed": -0.05447598071144565,
+        "absolute": 0.4553880193664838
+      },
+      "quadrature_region_decomposition_error": 4.714401785621547e-11
+    },
+    "128": {
+      "maxima": {
+        "endpoint_phase_KKT": 0.005625117738472469,
+        "delta_chi_rate_max": 0.19646595016192236,
+        "redistributed_interior_force_max": 4.760263142632482,
+        "pairing_absolute": 23.73199181449116
+      },
+      "endpoint_phase_final": 0.005625117738472469,
+      "incoming_phase_KKT": 4.929043284634338e-14,
+      "relative_velocity_max": 0.053860640556090106,
+      "maximum_phase_increment": 0.00861745188159263,
+      "signed_release": 0.09878702495113245,
+      "release_absolute": 0.09878702495117864,
+      "final_phase_max": 0.6796875481648884,
+      "onset": {
+        "full_field": {
+          "time_bracket": [
+            0.53125,
+            0.5390625
+          ],
+          "displacement_bracket": [
+            0.036125,
+            0.0371953125
+          ]
+        },
+        "core": {
+          "time_bracket": [
+            0.53125,
+            0.5390625
+          ],
+          "displacement_bracket": [
+            0.036125,
+            0.0371953125
+          ]
+        }
+      },
+      "totals": {
+        "actual_work_difference": {
+          "signed": -0.076220310986325,
+          "absolute": 0.07747805459608596,
+          "maximum": 0.01671579801393519
+        },
+        "bulk_work": {
+          "signed": 58.95537944289925,
+          "absolute": 58.95537944289925,
+          "maximum": 1.529727090722508
+        },
+        "affine_work": {
+          "signed": 59.03159975388557,
+          "absolute": 59.03159975388557,
+          "maximum": 1.5464428887364432
+        },
+        "reaction_work": {
+          "signed": 59.031599754987774,
+          "absolute": 59.031599754987774,
+          "maximum": 1.5464428888263089
+        },
+        "alternative_lifting_work": {
+          "signed": 59.03159975380606,
+          "absolute": 59.03159975380606,
+          "maximum": 1.54644288873352
+        },
+        "asymmetric_lifting_work": {
+          "signed": 58.9341650904098,
+          "absolute": 58.9341650904098,
+          "maximum": 1.5409393124129387
+        },
+        "reaction_work_residual": {
+          "signed": 0.09927378145784228,
+          "absolute": 0.10606201839170014,
+          "maximum": 0.00970689126559221
+        },
+        "alternative_work_residual": {
+          "signed": 0.09927378027612957,
+          "absolute": 0.10606201721147154,
+          "maximum": 0.009706891150439656
+        },
+        "asymmetric_work_residual": {
+          "signed": 0.0018391168798717217,
+          "absolute": 0.019503774813250035,
+          "maximum": 0.003423404043456202
+        },
+        "lifting_reaction_difference": {
+          "signed": -1.1021980157044234e-09,
+          "absolute": 1.1999089338099586e-09,
+          "maximum": 1.1301626301474244e-10
+        },
+        "bulk_reaction_difference": {
+          "signed": -0.076220312088523,
+          "absolute": 0.07747805548981931,
+          "maximum": 0.01671579810380086
+        }
+      },
+      "top_steps": [
+        {
+          "time": 0.625,
+          "dt": 0.0078125,
+          "incoming_phase_KKT": 2.852405811545098e-14,
+          "endpoint_phase_KKT": 0.005625117738472469,
+          "endpoint_phase_mass_scaled_Pa": 92.16192902724814,
+          "endpoint_phase_residual_y": 0.5,
+          "delta_chi_rate_max": 0.19646595016192236,
+          "delta_chi_rate_RMS": 0.08555773778950776,
+          "delta_chi_rate_y": 0.3608620719021813,
+          "redistributed_interior_force_max": 4.760263142632482,
+          "redistributed_force_y": 0.599609375,
+          "relative_velocity_max": 0.053860640556090106,
+          "relative_velocity_y": 0.3828125,
+          "pairing_signed": -4.279300011900809,
+          "pairing_absolute": 23.73199181449116,
+          "predicted_work_difference": -0.016715798015058618,
+          "actual_work_difference": -0.01671579801393519,
+          "work_identity_error": 1.123427739724292e-12,
+          "bulk_work": 1.529727090722508,
+          "affine_work": 1.5464428887364432,
+          "reaction_work": 1.5464428888263089,
+          "alternative_lifting_work": 1.54644288873352,
+          "asymmetric_lifting_work": 1.5409393124129387,
+          "lifting_reaction_difference": -8.986567046065375e-11,
+          "bulk_reaction_difference": -0.01671579810380086,
+          "endpoint_interior_force_max": 8.615131719125202e-09,
+          "dominant_work_y": 0.5014870719021812,
+          "maximum_phase_increment": 0.0077836835045768105,
+          "reaction_work_residual": 0.00827088063454684,
+          "alternative_work_residual": 0.008270880541757952,
+          "asymmetric_work_residual": 0.0027673042211766585
+        },
+        {
+          "time": 0.6171875,
+          "dt": 0.0078125,
+          "incoming_phase_KKT": 2.232762585926957e-14,
+          "endpoint_phase_KKT": 0.005204731521574313,
+          "endpoint_phase_mass_scaled_Pa": 85.27432124958014,
+          "endpoint_phase_residual_y": 0.5,
+          "delta_chi_rate_max": 0.19346481312007313,
+          "delta_chi_rate_RMS": 0.08353424652718387,
+          "delta_chi_rate_y": 0.3608620719021813,
+          "redistributed_interior_force_max": 4.423198689866467,
+          "redistributed_force_y": 0.599609375,
+          "relative_velocity_max": 0.053148787216166116,
+          "relative_velocity_y": 0.3828125,
+          "pairing_signed": -3.71481527529038,
+          "pairing_absolute": 22.588577435302504,
+          "predicted_work_difference": -0.014510808223849227,
+          "actual_work_difference": -0.014510808222756078,
+          "work_identity_error": 1.0931498761745928e-12,
+          "bulk_work": 1.5202856708204937,
+          "affine_work": 1.5347964790432498,
+          "reaction_work": 1.534796479134135,
+          "alternative_lifting_work": 1.534796479040437,
+          "asymmetric_lifting_work": 1.5281183664571065,
+          "lifting_reaction_difference": -9.088529928646949e-11,
+          "bulk_reaction_difference": -0.014510808313641377,
+          "endpoint_interior_force_max": 9.483301255386323e-09,
+          "dominant_work_y": 0.4985129280978187,
+          "maximum_phase_increment": 0.007875858029752492,
+          "reaction_work_residual": 0.008405592001557771,
+          "alternative_work_residual": 0.00840559190785961,
+          "asymmetric_work_residual": 0.001727479324529213
+        },
+        {
+          "time": 0.609375,
+          "dt": 0.0078125,
+          "incoming_phase_KKT": 4.929043284634338e-14,
+          "endpoint_phase_KKT": 0.004787618590108546,
+          "endpoint_phase_mass_scaled_Pa": 78.44034298043647,
+          "endpoint_phase_residual_y": 0.5,
+          "delta_chi_rate_max": 0.18972299303119655,
+          "delta_chi_rate_RMS": 0.08144735165303921,
+          "delta_chi_rate_y": 0.3608620719021813,
+          "redistributed_interior_force_max": 4.067003524942777,
+          "redistributed_force_y": 0.599609375,
+          "relative_velocity_max": 0.052438523863560293,
+          "relative_velocity_y": 0.380859375,
+          "pairing_signed": -3.147153063964424,
+          "pairing_absolute": 21.411998898666788,
+          "predicted_work_difference": -0.012293406583647014,
+          "actual_work_difference": -0.012293406582583932,
+          "work_identity_error": 1.0630819141654868e-12,
+          "bulk_work": 1.5109125573908258,
+          "affine_work": 1.5232059639734097,
+          "reaction_work": 1.5232059640667974,
+          "alternative_lifting_work": 1.523205963970613,
+          "asymmetric_lifting_work": 1.5152775606604298,
+          "lifting_reaction_difference": -9.338774198397459e-11,
+          "bulk_reaction_difference": -0.012293406675971674,
+          "endpoint_interior_force_max": 8.707743859304173e-09,
+          "dominant_work_y": 0.4985129280978187,
+          "maximum_phase_increment": 0.007969305581936315,
+          "reaction_work_residual": 0.008550123842424817,
+          "alternative_work_residual": 0.008550123746240423,
+          "asymmetric_work_residual": 0.0006217204360572381
+        },
+        {
+          "time": 0.6015625,
+          "dt": 0.0078125,
+          "incoming_phase_KKT": 2.2743959493503484e-14,
+          "endpoint_phase_KKT": 0.00437409782002449,
+          "endpoint_phase_mass_scaled_Pa": 71.66521868337082,
+          "endpoint_phase_residual_y": 0.5,
+          "delta_chi_rate_max": 0.1845103636901797,
+          "delta_chi_rate_RMS": 0.07907315250487956,
+          "delta_chi_rate_y": 0.3608620719021813,
+          "redistributed_interior_force_max": 3.690959767963818,
+          "redistributed_force_y": 0.400390625,
+          "relative_velocity_max": 0.05173211969353843,
+          "relative_velocity_y": 0.380859375,
+          "pairing_signed": -2.603859024891126,
+          "pairing_absolute": 20.15497836290244,
+          "predicted_work_difference": -0.010171191876877558,
+          "actual_work_difference": -0.010171191875846253,
+          "work_identity_error": 1.0313052495325437e-12,
+          "bulk_work": 1.5015000531135634,
+          "affine_work": 1.5116712449894096,
+          "reaction_work": 1.51167124508643,
+          "alternative_lifting_work": 1.5116712449867127,
+          "asymmetric_lifting_work": 1.5027264674654024,
+          "lifting_reaction_difference": -9.70203917205481e-11,
+          "bulk_reaction_difference": -0.010171191972866644,
+          "endpoint_interior_force_max": 8.287656783068087e-09,
+          "dominant_work_y": 0.4985129280978187,
+          "maximum_phase_increment": 0.00806484969441068,
+          "reaction_work_residual": 0.008700156033613071,
+          "alternative_work_residual": 0.008700155933895726,
+          "asymmetric_work_residual": -0.00024462158741456186
+        },
+        {
+          "time": 0.59375,
+          "dt": 0.0078125,
+          "incoming_phase_KKT": 3.6155106686263415e-14,
+          "endpoint_phase_KKT": 0.003964288016598027,
+          "endpoint_phase_mass_scaled_Pa": 64.95089486402327,
+          "endpoint_phase_residual_y": 0.5,
+          "delta_chi_rate_max": 0.17739164746939196,
+          "delta_chi_rate_RMS": 0.07624296369511842,
+          "delta_chi_rate_y": 0.3608620719021813,
+          "redistributed_interior_force_max": 3.3185613212851877,
+          "redistributed_force_y": 0.818359375,
+          "relative_velocity_max": 0.05103005671300272,
+          "relative_velocity_y": 0.380859375,
+          "pairing_signed": -2.0917118361238622,
+          "pairing_absolute": 18.79552202278122,
+          "predicted_work_difference": -0.0081706429699055,
+          "actual_work_difference": -0.008170642968903241,
+          "work_identity_error": 1.002259039650788e-12,
+          "bulk_work": 1.492017503244845,
+          "affine_work": 1.5001881462137483,
+          "reaction_work": 1.500188146311583,
+          "alternative_lifting_work": 1.5001881462111428,
+          "asymmetric_lifting_work": 1.4905258777675163,
+          "lifting_reaction_difference": -9.78346292868082e-11,
+          "bulk_reaction_difference": -0.00817064306673787,
+          "endpoint_interior_force_max": 6.875154667795869e-09,
+          "dominant_work_y": 0.4985129280978187,
+          "maximum_phase_increment": 0.008157231231032958,
+          "reaction_work_residual": 0.008853137140866219,
+          "alternative_work_residual": 0.008853137040426118,
+          "asymmetric_work_residual": -0.0008091314032003805
+        }
+      ],
+      "absolute_work_fraction_after_point6": 0.6929859684142589,
+      "center_work_fraction": {
+        "signed": -0.08822070282493362,
+        "absolute": 0.6456926383312407
+      },
+      "quadrature_region_decomposition_error": 5.800401825517554e-11
+    },
+    "256": {
+      "maxima": {
+        "endpoint_phase_KKT": 0.005319320311532596,
+        "delta_chi_rate_max": 0.3209864092787029,
+        "redistributed_interior_force_max": 4.577367889730965,
+        "pairing_absolute": 18.439212763758047
+      },
+      "endpoint_phase_final": 0.005319320311532596,
+      "incoming_phase_KKT": 1.6830009608149787e-12,
+      "relative_velocity_max": 0.05451442707540338,
+      "maximum_phase_increment": 0.004346378496408065,
+      "signed_release": 0.05410352431226961,
+      "release_absolute": 0.05410352431233356,
+      "final_phase_max": 0.6832184619818673,
+      "onset": {
+        "full_field": {
+          "time_bracket": [
+            0.53125,
+            0.53515625
+          ],
+          "displacement_bracket": [
+            0.036125,
+            0.036658203125000004
+          ]
+        },
+        "core": {
+          "time_bracket": [
+            0.53125,
+            0.53515625
+          ],
+          "displacement_bracket": [
+            0.036125,
+            0.036658203125000004
+          ]
+        }
+      },
+      "totals": {
+        "actual_work_difference": {
+          "signed": -0.11032996678251103,
+          "absolute": 0.11069280881651403,
+          "maximum": 0.010589132673407331
+        },
+        "bulk_work": {
+          "signed": 58.81988610273083,
+          "absolute": 58.81988610273083,
+          "maximum": 0.7599092259380555
+        },
+        "affine_work": {
+          "signed": 58.930216069513335,
+          "absolute": 58.930216069513335,
+          "maximum": 0.7704983586114629
+        },
+        "reaction_work": {
+          "signed": 58.93021606999323,
+          "absolute": 58.93021606999323,
+          "maximum": 0.7704983586315032
+        },
+        "alternative_lifting_work": {
+          "signed": 58.93021606951828,
+          "absolute": 58.93021606951828,
+          "maximum": 0.7704983586115457
+        },
+        "asymmetric_lifting_work": {
+          "signed": 58.911042232884505,
+          "absolute": 58.911042232884505,
+          "maximum": 0.7728309922661583
+        },
+        "reaction_work_residual": {
+          "signed": 0.05434419573925471,
+          "absolute": 0.056135509658754655,
+          "maximum": 0.002428418373385144
+        },
+        "alternative_work_residual": {
+          "signed": 0.05434419526430489,
+          "absolute": 0.056135509028982046,
+          "maximum": 0.0024284183472029763
+        },
+        "asymmetric_work_residual": {
+          "signed": 0.03517035863053421,
+          "absolute": 0.03774040623518607,
+          "maximum": 0.0046021420281945336
+        },
+        "lifting_reaction_difference": {
+          "signed": -4.798891513218365e-10,
+          "absolute": 6.322809824439076e-10,
+          "maximum": 2.7215341091846312e-11
+        },
+        "bulk_reaction_difference": {
+          "signed": -0.11032996726240019,
+          "absolute": 0.11069280935657277,
+          "maximum": 0.010589132693447634
+        }
+      },
+      "top_steps": [
+        {
+          "time": 0.625,
+          "dt": 0.00390625,
+          "incoming_phase_KKT": 3.628521094696151e-14,
+          "endpoint_phase_KKT": 0.005319320311532596,
+          "endpoint_phase_mass_scaled_Pa": 87.15174398425901,
+          "endpoint_phase_residual_y": 0.5,
+          "delta_chi_rate_max": 0.3209864092787029,
+          "delta_chi_rate_RMS": 0.14699101467660372,
+          "delta_chi_rate_y": 0.499868104519928,
+          "redistributed_interior_force_max": 4.577367889730965,
+          "redistributed_force_y": 0.408203125,
+          "relative_velocity_max": 0.05451442707540338,
+          "relative_velocity_y": 0.6171875,
+          "pairing_signed": -5.421671226589352,
+          "pairing_absolute": 18.439212763758047,
+          "predicted_work_difference": -0.01058913267430635,
+          "actual_work_difference": -0.010589132673407331,
+          "work_identity_error": 8.990187067015043e-13,
+          "bulk_work": 0.7599092259380555,
+          "affine_work": 0.7704983586114629,
+          "reaction_work": 0.7704983586315032,
+          "alternative_lifting_work": 0.7704983586115457,
+          "asymmetric_lifting_work": 0.7728309922661583,
+          "lifting_reaction_difference": -2.0040302750601313e-11,
+          "bulk_reaction_difference": -0.010589132693447634,
+          "endpoint_interior_force_max": 9.022812719194917e-09,
+          "dominant_work_y": 0.4985129280978187,
+          "maximum_phase_increment": 0.003848291062374165,
+          "reaction_work_residual": 0.0022695083935394544,
+          "alternative_work_residual": 0.0022695083735819743,
+          "asymmetric_work_residual": 0.0046021420281945336
+        },
+        {
+          "time": 0.62109375,
+          "dt": 0.00390625,
+          "incoming_phase_KKT": 2.655341224674379e-14,
+          "endpoint_phase_KKT": 0.005106009430218931,
+          "endpoint_phase_mass_scaled_Pa": 83.65685850481154,
+          "endpoint_phase_residual_y": 0.5,
+          "delta_chi_rate_max": 0.3127451971145092,
+          "delta_chi_rate_RMS": 0.14448586491102625,
+          "delta_chi_rate_y": 0.500131895480072,
+          "redistributed_interior_force_max": 4.437986370065801,
+          "redistributed_force_y": 0.591796875,
+          "relative_velocity_max": 0.05413180250340609,
+          "relative_velocity_y": 0.3828125,
+          "pairing_signed": -5.123756701770478,
+          "pairing_absolute": 17.952929565219975,
+          "predicted_work_difference": -0.010007272156199187,
+          "actual_work_difference": -0.010007272155313607,
+          "work_identity_error": 8.85579803933112e-13,
+          "bulk_work": 0.7575454256335833,
+          "affine_work": 0.7675526977888969,
+          "reaction_work": 0.767552697808487,
+          "alternative_lifting_work": 0.7675526977889865,
+          "asymmetric_lifting_work": 0.7694456822897413,
+          "lifting_reaction_difference": -1.9590107314115812e-11,
+          "bulk_reaction_difference": -0.010007272174903714,
+          "endpoint_interior_force_max": 7.90237209002953e-09,
+          "dominant_work_y": 0.5014870719021812,
+          "maximum_phase_increment": 0.003873513488480418,
+          "reaction_work_residual": 0.002269785727958884,
+          "alternative_work_residual": 0.0022697857084583717,
+          "asymmetric_work_residual": 0.004162770209213185
+        },
+        {
+          "time": 0.6171875,
+          "dt": 0.00390625,
+          "incoming_phase_KKT": 6.00549124318088e-13,
+          "endpoint_phase_KKT": 0.004893655121363847,
+          "endpoint_phase_mass_scaled_Pa": 80.1776455085255,
+          "endpoint_phase_residual_y": 0.5,
+          "delta_chi_rate_max": 0.3045495761714392,
+          "delta_chi_rate_RMS": 0.1417330697727278,
+          "delta_chi_rate_y": 0.499868104519928,
+          "redistributed_interior_force_max": 4.294991238819534,
+          "redistributed_force_y": 0.408203125,
+          "relative_velocity_max": 0.05375260738367448,
+          "relative_velocity_y": 0.6171875,
+          "pairing_signed": -4.84233104486533,
+          "pairing_absolute": 17.4245054087957,
+          "predicted_work_difference": -0.009457616248569185,
+          "actual_work_difference": -0.009457616247693146,
+          "work_identity_error": 8.760388248152395e-13,
+          "bulk_work": 0.7551561714566399,
+          "affine_work": 0.7646137877043331,
+          "reaction_work": 0.7646137877244268,
+          "alternative_lifting_work": 0.7646137877044137,
+          "asymmetric_lifting_work": 0.7661578544174419,
+          "lifting_reaction_difference": -2.0093704478085783e-11,
+          "bulk_reaction_difference": -0.00945761626778685,
+          "endpoint_interior_force_max": 7.84743292570056e-09,
+          "dominant_work_y": 0.4985129280978187,
+          "maximum_phase_increment": 0.003897220779934263,
+          "reaction_work_residual": 0.0022694132733867,
+          "alternative_work_residual": 0.0022694132533735978,
+          "asymmetric_work_residual": 0.0038134799664018004
+        },
+        {
+          "time": 0.61328125,
+          "dt": 0.00390625,
+          "incoming_phase_KKT": 3.715309310199163e-13,
+          "endpoint_phase_KKT": 0.004682133173055035,
+          "endpoint_phase_mass_scaled_Pa": 76.7120699074296,
+          "endpoint_phase_residual_y": 0.5,
+          "delta_chi_rate_max": 0.2967376077449444,
+          "delta_chi_rate_RMS": 0.13864234675651219,
+          "delta_chi_rate_y": 0.500131895480072,
+          "redistributed_interior_force_max": 4.148283257069977,
+          "redistributed_force_y": 0.591796875,
+          "relative_velocity_max": 0.05337836796114792,
+          "relative_velocity_y": 0.3828125,
+          "pairing_signed": -4.586748459070571,
+          "pairing_absolute": 16.877472072418154,
+          "predicted_work_difference": -0.008958434760589966,
+          "actual_work_difference": -0.008958434759724021,
+          "work_identity_error": 8.659444689085305e-13,
+          "bulk_work": 0.7527205844443028,
+          "affine_work": 0.7616790192040268,
+          "reaction_work": 0.761679019225143,
+          "alternative_lifting_work": 0.7616790192041173,
+          "asymmetric_lifting_work": 0.7630431099053048,
+          "lifting_reaction_difference": -2.1116219883765552e-11,
+          "bulk_reaction_difference": -0.008958434780840241,
+          "endpoint_interior_force_max": 8.887411695468472e-09,
+          "dominant_work_y": 0.5014870719021812,
+          "maximum_phase_increment": 0.003917679997826717,
+          "reaction_work_residual": 0.0022671358741311876,
+          "alternative_work_residual": 0.002267135853105451,
+          "asymmetric_work_residual": 0.0036312265542929323
+        },
+        {
+          "time": 0.609375,
+          "dt": 0.00390625,
+          "incoming_phase_KKT": 1.6830009608149787e-12,
+          "endpoint_phase_KKT": 0.004471164266938731,
+          "endpoint_phase_mass_scaled_Pa": 73.25555534961575,
+          "endpoint_phase_residual_y": 0.5,
+          "delta_chi_rate_max": 0.28662142182520256,
+          "delta_chi_rate_RMS": 0.13586227377664112,
+          "delta_chi_rate_y": 0.499868104519928,
+          "redistributed_interior_force_max": 3.9978382320450123,
+          "redistributed_force_y": 0.408203125,
+          "relative_velocity_max": 0.052995850463248256,
+          "relative_velocity_y": 0.6171875,
+          "pairing_signed": -4.283376258160237,
+          "pairing_absolute": 16.411354120141034,
+          "predicted_work_difference": -0.008365914788264619,
+          "actual_work_difference": -0.00836591478741,
+          "work_identity_error": 8.546184593338779e-13,
+          "bulk_work": 0.7503834963667,
+          "affine_work": 0.75874941115411,
+          "reaction_work": 0.7587494111758836,
+          "alternative_lifting_work": 0.7587494111541925,
+          "asymmetric_lifting_work": 0.7596589410278136,
+          "lifting_reaction_difference": -2.1773582936646108e-11,
+          "bulk_reaction_difference": -0.008365914809183583,
+          "endpoint_interior_force_max": 8.88087470229948e-09,
+          "dominant_work_y": 0.4985129280978187,
+          "maximum_phase_increment": 0.003943156709418694,
+          "reaction_work_residual": 0.002270544689854992,
+          "alternative_work_residual": 0.0022705446681638985,
+          "asymmetric_work_residual": 0.0031800745417850385
+        }
+      ],
+      "absolute_work_fraction_after_point6": 0.5640725230923449,
+      "center_work_fraction": {
+        "signed": -0.11133184011089793,
+        "absolute": 0.7800218000033609
+      },
+      "quadrature_region_decomposition_error": 9.498531128304677e-11
+    },
+    "512": {
+      "maxima": {
+        "endpoint_phase_KKT": 0.005213216579684092,
+        "delta_chi_rate_max": 0.6567319366922675,
+        "redistributed_interior_force_max": 4.370640627380851,
+        "pairing_absolute": 15.293005595747353
+      },
+      "endpoint_phase_final": 0.005213216579684092,
+      "incoming_phase_KKT": 2.3259033587989875e-12,
+      "relative_velocity_max": 0.05543979860087452,
+      "maximum_phase_increment": 0.002187209648708055,
+      "signed_release": 0.03177769255549556,
+      "release_absolute": 0.031777692555694514,
+      "final_phase_max": 0.6855166255267837,
+      "onset": {
+        "full_field": {
+          "time_bracket": [
+            0.529296875,
+            0.53125
+          ],
+          "displacement_bracket": [
+            0.03585986328125,
+            0.036125
+          ]
+        },
+        "core": {
+          "time_bracket": [
+            0.529296875,
+            0.53125
+          ],
+          "displacement_bracket": [
+            0.03585986328125,
+            0.036125
+          ]
+        }
+      },
+      "totals": {
+        "actual_work_difference": {
+          "signed": -0.12807457634657518,
+          "absolute": 0.1282074485964319,
+          "maximum": 0.00562840321542718
+        },
+        "bulk_work": {
+          "signed": 58.74647898598772,
+          "absolute": 58.74647898598772,
+          "maximum": 0.3787962935647293
+        },
+        "affine_work": {
+          "signed": 58.8745535623343,
+          "absolute": 58.8745535623343,
+          "maximum": 0.3844246967801565
+        },
+        "reaction_work": {
+          "signed": 58.87455356264086,
+          "absolute": 58.87455356264086,
+          "maximum": 0.38442469678562097
+        },
+        "alternative_lifting_work": {
+          "signed": 58.874553562342314,
+          "absolute": 58.874553562342314,
+          "maximum": 0.3844246967802417
+        },
+        "asymmetric_lifting_work": {
+          "signed": 58.89941292447945,
+          "absolute": 58.89941292447945,
+          "maximum": 0.38654342803218844
+        },
+        "reaction_work_residual": {
+          "signed": 0.03208072781087187,
+          "absolute": 0.03245621494798966,
+          "maximum": 0.0007841937902853258
+        },
+        "alternative_work_residual": {
+          "signed": 0.032080727512322056,
+          "absolute": 0.03245621463832308,
+          "maximum": 0.0007841937849060732
+        },
+        "asymmetric_work_residual": {
+          "signed": 0.05694008964945227,
+          "absolute": 0.05739095816886018,
+          "maximum": 0.0029029250368527992
+        },
+        "lifting_reaction_difference": {
+          "signed": -3.0656707659529185e-10,
+          "absolute": 3.1668759740355464e-10,
+          "maximum": 7.276845792603126e-12
+        },
+        "bulk_reaction_difference": {
+          "signed": -0.12807457665314226,
+          "absolute": 0.12820744889259086,
+          "maximum": 0.005628403220891642
+        }
+      },
+      "top_steps": [
+        {
+          "time": 0.625,
+          "dt": 0.001953125,
+          "incoming_phase_KKT": 1.0522312188219364e-13,
+          "endpoint_phase_KKT": 0.005213216579684092,
+          "endpoint_phase_mass_scaled_Pa": 85.41334044165094,
+          "endpoint_phase_residual_y": 0.5,
+          "delta_chi_rate_max": 0.6567319366922675,
+          "delta_chi_rate_RMS": 0.2661758867917693,
+          "delta_chi_rate_y": 0.499868104519928,
+          "redistributed_interior_force_max": 4.370640627380851,
+          "redistributed_force_y": 0.419921875,
+          "relative_velocity_max": 0.05543979860087452,
+          "relative_velocity_y": 0.38671875,
+          "pairing_signed": -5.763503654009355,
+          "pairing_absolute": 15.293005595747353,
+          "predicted_work_difference": -0.005628403215451293,
+          "actual_work_difference": -0.00562840321542718,
+          "work_identity_error": 2.411265631607762e-14,
+          "bulk_work": 0.3787962935647293,
+          "affine_work": 0.3844246967801565,
+          "reaction_work": 0.38442469678562097,
+          "alternative_lifting_work": 0.3844246967802417,
+          "asymmetric_lifting_work": 0.38654342803218844,
+          "lifting_reaction_difference": -5.464462216053789e-12,
+          "bulk_reaction_difference": -0.005628403220891642,
+          "endpoint_interior_force_max": 7.465246198989917e-09,
+          "dominant_work_y": 0.4985129280978187,
+          "maximum_phase_increment": 0.0019118518904769899,
+          "reaction_work_residual": 0.0007841937902853258,
+          "alternative_work_residual": 0.0007841937849060732,
+          "asymmetric_work_residual": 0.0029029250368527992
+        },
+        {
+          "time": 0.623046875,
+          "dt": 0.001953125,
+          "incoming_phase_KKT": 2.1151483342558766e-14,
+          "endpoint_phase_KKT": 0.0051044724845617515,
+          "endpoint_phase_mass_scaled_Pa": 83.63167718716429,
+          "endpoint_phase_residual_y": 0.5,
+          "delta_chi_rate_max": 0.6501742173732055,
+          "delta_chi_rate_RMS": 0.2638162009879589,
+          "delta_chi_rate_y": 0.499868104519928,
+          "redistributed_interior_force_max": 4.30645727039348,
+          "redistributed_force_y": 0.419921875,
+          "relative_velocity_max": 0.05523127185366615,
+          "relative_velocity_y": 0.61328125,
+          "pairing_signed": -5.6295041415156355,
+          "pairing_absolute": 15.063538376568678,
+          "predicted_work_difference": -0.005497544742504217,
+          "actual_work_difference": -0.005497544742480542,
+          "work_identity_error": 2.3674638638393475e-14,
+          "bulk_work": 0.3781929127828376,
+          "affine_work": 0.38369045752531816,
+          "reaction_work": 0.38369045753091235,
+          "alternative_lifting_work": 0.3836904575253891,
+          "asymmetric_lifting_work": 0.3857225332781635,
+          "lifting_reaction_difference": -5.594191776481239e-12,
+          "bulk_reaction_difference": -0.005497544748074734,
+          "endpoint_interior_force_max": 9.311634130426683e-09,
+          "dominant_work_y": 0.5014870719021812,
+          "maximum_phase_increment": 0.0019183365284470844,
+          "reaction_work_residual": 0.0007773722979529385,
+          "alternative_work_residual": 0.00077737229242969,
+          "asymmetric_work_residual": 0.0028094480452041104
+        },
+        {
+          "time": 0.62109375,
+          "dt": 0.001953125,
+          "incoming_phase_KKT": 3.4300687290446524e-14,
+          "endpoint_phase_KKT": 0.004995972200515877,
+          "endpoint_phase_mass_scaled_Pa": 81.85400853335446,
+          "endpoint_phase_residual_y": 0.5,
+          "delta_chi_rate_max": 0.6434537075419939,
+          "delta_chi_rate_RMS": 0.2613917452682036,
+          "delta_chi_rate_y": 0.499868104519928,
+          "redistributed_interior_force_max": 4.241495094451466,
+          "redistributed_force_y": 0.419921875,
+          "relative_velocity_max": 0.055023250280035775,
+          "relative_velocity_y": 0.38671875,
+          "pairing_signed": -5.496569169856288,
+          "pairing_absolute": 14.83153573421612,
+          "predicted_work_difference": -0.005367725856831626,
+          "actual_work_difference": -0.0053677258568093356,
+          "work_identity_error": 2.2290329304563983e-14,
+          "bulk_work": 0.37758929941009367,
+          "affine_work": 0.382957025266903,
+          "reaction_work": 0.38295702527306763,
+          "alternative_lifting_work": 0.38295702526698494,
+          "asymmetric_lifting_work": 0.3849046502471837,
+          "lifting_reaction_difference": -6.164624366533644e-12,
+          "bulk_reaction_difference": -0.00536772586297396,
+          "endpoint_interior_force_max": 8.131110007525422e-09,
+          "dominant_work_y": 0.4985129280978187,
+          "maximum_phase_increment": 0.0019248920678714976,
+          "reaction_work_residual": 0.00077064315374481,
+          "alternative_work_residual": 0.00077064314766212,
+          "asymmetric_work_residual": 0.0027182681278608567
+        },
+        {
+          "time": 0.619140625,
+          "dt": 0.001953125,
+          "incoming_phase_KKT": 2.9838978510239755e-14,
+          "endpoint_phase_KKT": 0.0048877162795243805,
+          "endpoint_phase_mass_scaled_Pa": 80.08034352382757,
+          "endpoint_phase_residual_y": 0.5,
+          "delta_chi_rate_max": 0.6365939212428202,
+          "delta_chi_rate_RMS": 0.25889386930524616,
+          "delta_chi_rate_y": 0.499868104519928,
+          "redistributed_interior_force_max": 4.175743823995276,
+          "redistributed_force_y": 0.580078125,
+          "relative_velocity_max": 0.0548158723385581,
+          "relative_velocity_y": 0.61328125,
+          "pairing_signed": -5.365088712730574,
+          "pairing_absolute": 14.595520764105059,
+          "predicted_work_difference": -0.005239327390884514,
+          "actual_work_difference": -0.005239327390860582,
+          "work_identity_error": 2.393224507457603e-14,
+          "bulk_work": 0.37698504648152453,
+          "affine_work": 0.3822243738723851,
+          "reaction_work": 0.382224373878321,
+          "alternative_lifting_work": 0.3822243738724578,
+          "asymmetric_lifting_work": 0.3840907810339833,
+          "lifting_reaction_difference": -5.935862912309631e-12,
+          "bulk_reaction_difference": -0.005239327396796445,
+          "endpoint_interior_force_max": 9.747665785653226e-09,
+          "dominant_work_y": 0.5014870719021812,
+          "maximum_phase_increment": 0.0019314031960815936,
+          "reaction_work_residual": 0.0007639852833681293,
+          "alternative_work_residual": 0.0007639852775049305,
+          "asymmetric_work_residual": 0.00263039243903046
+        },
+        {
+          "time": 0.6171875,
+          "dt": 0.001953125,
+          "incoming_phase_KKT": 4.300552969288726e-14,
+          "endpoint_phase_KKT": 0.004779702615289206,
+          "endpoint_phase_mass_scaled_Pa": 78.31064764899625,
+          "endpoint_phase_residual_y": 0.5,
+          "delta_chi_rate_max": 0.629642027709906,
+          "delta_chi_rate_RMS": 0.2563070125045585,
+          "delta_chi_rate_y": 0.499868104519928,
+          "redistributed_interior_force_max": 4.1091937261301155,
+          "redistributed_force_y": 0.419921875,
+          "relative_velocity_max": 0.05460938574907571,
+          "relative_velocity_y": 0.61328125,
+          "pairing_signed": -5.235771529258486,
+          "pairing_absolute": 14.352641748364622,
+          "predicted_work_difference": -0.005113041489987916,
+          "actual_work_difference": -0.00511304148996522,
+          "work_identity_error": 2.2696254597942556e-14,
+          "bulk_work": 0.37637941026221644,
+          "affine_work": 0.38149245175218166,
+          "reaction_work": 0.38149245175786206,
+          "alternative_lifting_work": 0.3814924517522488,
+          "asymmetric_lifting_work": 0.38328291655344043,
+          "lifting_reaction_difference": -5.680400594343382e-12,
+          "bulk_reaction_difference": -0.0051130414956456205,
+          "endpoint_interior_force_max": 8.233996595663484e-09,
+          "dominant_work_y": 0.4985129280978187,
+          "maximum_phase_increment": 0.0019378047583692437,
+          "reaction_work_residual": 0.0007573533116331244,
+          "alternative_work_residual": 0.0007573533060198367,
+          "asymmetric_work_residual": 0.002547818107211497
+        }
+      ],
+      "absolute_work_fraction_after_point6": 0.4933896043291377,
+      "center_work_fraction": {
+        "signed": -0.12244055063490884,
+        "absolute": 0.8544534208118066
+      },
+      "quadrature_region_decomposition_error": 1.6685264281335321e-12
+    },
+    "1024": {
+      "maxima": {
+        "endpoint_phase_KKT": 0.005245865533290183,
+        "delta_chi_rate_max": 1.274306924317898,
+        "redistributed_interior_force_max": 4.173226262194646,
+        "pairing_absolute": 13.132663550064295
+      },
+      "endpoint_phase_final": 0.005245865533290183,
+      "incoming_phase_KKT": 4.3843488952158985e-12,
+      "relative_velocity_max": 0.05675759370267297,
+      "maximum_phase_increment": 0.0010969385721689706,
+      "signed_release": 0.022969723996608238,
+      "release_absolute": 0.02296972399691377,
+      "final_phase_max": 0.6876221074412894,
+      "onset": {
+        "full_field": {
+          "time_bracket": [
+            0.529296875,
+            0.5302734375
+          ],
+          "displacement_bracket": [
+            0.03585986328125,
+            0.0359923095703125
+          ]
+        },
+        "core": {
+          "time_bracket": [
+            0.529296875,
+            0.5302734375
+          ],
+          "displacement_bracket": [
+            0.03585986328125,
+            0.0359923095703125
+          ]
+        }
+      },
+      "totals": {
+        "actual_work_difference": {
+          "signed": -0.132530054135712,
+          "absolute": 0.13259291371775853,
+          "maximum": 0.0027377288687749635
+        },
+        "bulk_work": {
+          "signed": 58.70847902935532,
+          "absolute": 58.70847902935532,
+          "maximum": 0.18912628570464107
+        },
+        "affine_work": {
+          "signed": 58.84100908349103,
+          "absolute": 58.84100908349103,
+          "maximum": 0.19186401457341604
+        },
+        "reaction_work": {
+          "signed": 58.84100908366025,
+          "absolute": 58.84100908366025,
+          "maximum": 0.19186401457500576
+        },
+        "alternative_lifting_work": {
+          "signed": 58.841009083494036,
+          "absolute": 58.841009083494036,
+          "maximum": 0.19186401457342644
+        },
+        "asymmetric_lifting_work": {
+          "signed": 58.88294799359207,
+          "absolute": 58.88294799359207,
+          "maximum": 0.19293537096956898
+        },
+        "reaction_work_residual": {
+          "signed": 0.023136238761672867,
+          "absolute": 0.02325683751745071,
+          "maximum": 0.00036950877502761603
+        },
+        "alternative_work_residual": {
+          "signed": 0.02313623859545758,
+          "absolute": 0.02325683734943646,
+          "maximum": 0.000369508773448296
+        },
+        "asymmetric_work_residual": {
+          "signed": 0.06507514869348943,
+          "absolute": 0.06522061913396114,
+          "maximum": 0.001440865169590827
+        },
+        "lifting_reaction_difference": {
+          "signed": -1.6922391229311403e-10,
+          "absolute": 1.7291574385579397e-10,
+          "maximum": 1.995403842158794e-12
+        },
+        "bulk_reaction_difference": {
+          "signed": -0.13253005430493592,
+          "absolute": 0.13259291388186345,
+          "maximum": 0.002737728870364692
+        }
+      },
+      "top_steps": [
+        {
+          "time": 0.625,
+          "dt": 0.0009765625,
+          "incoming_phase_KKT": 1.7178966582576845e-14,
+          "endpoint_phase_KKT": 0.005245865533290183,
+          "endpoint_phase_mass_scaled_Pa": 85.9482608975338,
+          "endpoint_phase_residual_y": 0.5,
+          "delta_chi_rate_max": 1.274306924317898,
+          "delta_chi_rate_RMS": 0.47387819314767476,
+          "delta_chi_rate_y": 0.499868104519928,
+          "redistributed_interior_force_max": 4.173226262194646,
+          "redistributed_force_y": 0.572265625,
+          "relative_velocity_max": 0.05675759370267297,
+          "relative_velocity_y": 0.609375,
+          "pairing_signed": -5.606877848982999,
+          "pairing_absolute": 13.132663550064295,
+          "predicted_work_difference": -0.0027377288688364915,
+          "actual_work_difference": -0.0027377288687749635,
+          "work_identity_error": 6.152803960768338e-14,
+          "bulk_work": 0.18912628570464107,
+          "affine_work": 0.19186401457341604,
+          "reaction_work": 0.19186401457500576,
+          "alternative_lifting_work": 0.19186401457342644,
+          "asymmetric_lifting_work": 0.19293537096956898,
+          "lifting_reaction_difference": -1.5897283489607617e-12,
+          "bulk_reaction_difference": -0.002737728870364692,
+          "endpoint_interior_force_max": 8.416520813625539e-09,
+          "dominant_work_y": 0.4985129280978187,
+          "maximum_phase_increment": 0.0009531408783571838,
+          "reaction_work_residual": 0.00036950877502761603,
+          "alternative_work_residual": 0.000369508773448296,
+          "asymmetric_work_residual": 0.001440865169590827
+        },
+        {
+          "time": 0.6240234375,
+          "dt": 0.0009765625,
+          "incoming_phase_KKT": 3.217391630890162e-14,
+          "endpoint_phase_KKT": 0.005189678195903354,
+          "endpoint_phase_mass_scaled_Pa": 85.02768756178685,
+          "endpoint_phase_residual_y": 0.5,
+          "delta_chi_rate_max": 1.2692926946629086,
+          "delta_chi_rate_RMS": 0.4720521509064696,
+          "delta_chi_rate_y": 0.499868104519928,
+          "redistributed_interior_force_max": 4.142765081962523,
+          "redistributed_force_y": 0.427734375,
+          "relative_velocity_max": 0.05664364254583834,
+          "relative_velocity_y": 0.609375,
+          "pairing_signed": -5.5499077903793195,
+          "pairing_absolute": 13.025675470518859,
+          "predicted_work_difference": -0.002709911502683796,
+          "actual_work_difference": -0.002709911502620621,
+          "work_identity_error": 6.317472586725437e-14,
+          "bulk_work": 0.18897337742037645,
+          "affine_work": 0.19168328892299707,
+          "reaction_work": 0.19168328892451136,
+          "alternative_lifting_work": 0.19168328892300746,
+          "asymmetric_lifting_work": 0.19274057339427625,
+          "lifting_reaction_difference": -1.5142886944374823e-12,
+          "bulk_reaction_difference": -0.0027099115041349098,
+          "endpoint_interior_force_max": 9.73633973444521e-09,
+          "dominant_work_y": 0.5014870719021812,
+          "maximum_phase_increment": 0.0009548239842834816,
+          "reaction_work_residual": 0.0003662983596637859,
+          "alternative_work_residual": 0.00036629835815987777,
+          "asymmetric_work_residual": 0.0014235828294286712
+        },
+        {
+          "time": 0.623046875,
+          "dt": 0.0009765625,
+          "incoming_phase_KKT": 2.0447185611313063e-14,
+          "endpoint_phase_KKT": 0.005133553160393676,
+          "endpoint_phase_mass_scaled_Pa": 84.10813497999513,
+          "endpoint_phase_residual_y": 0.5,
+          "delta_chi_rate_max": 1.2641964338972684,
+          "delta_chi_rate_RMS": 0.47019555719050193,
+          "delta_chi_rate_y": 0.499868104519928,
+          "redistributed_interior_force_max": 4.112145941859637,
+          "redistributed_force_y": 0.427734375,
+          "relative_velocity_max": 0.05652982587329528,
+          "relative_velocity_y": 0.390625,
+          "pairing_signed": -5.493091456382619,
+          "pairing_absolute": 12.91804656200175,
+          "predicted_work_difference": -0.0026821691972521845,
+          "actual_work_difference": -0.0026821691971905537,
+          "work_identity_error": 6.163082197363501e-14,
+          "bulk_work": 0.18882047067344887,
+          "affine_work": 0.19150263987063942,
+          "reaction_work": 0.1915026398720514,
+          "alternative_lifting_work": 0.19150263987066302,
+          "asymmetric_lifting_work": 0.1925460087373556,
+          "lifting_reaction_difference": -1.411981642718274e-12,
+          "bulk_reaction_difference": -0.0026821691986025353,
+          "endpoint_interior_force_max": 8.461256584268995e-09,
+          "dominant_work_y": 0.4985129280978187,
+          "maximum_phase_increment": 0.0009565065902745751,
+          "reaction_work_residual": 0.0003630966003503322,
+          "alternative_work_residual": 0.0003630965989619428,
+          "asymmetric_work_residual": 0.0014064654656545383
+        },
+        {
+          "time": 0.6220703125,
+          "dt": 0.0009765625,
+          "incoming_phase_KKT": 6.08280786850507e-14,
+          "endpoint_phase_KKT": 0.0050774907414036785,
+          "endpoint_phase_mass_scaled_Pa": 83.18960830726186,
+          "endpoint_phase_residual_y": 0.5,
+          "delta_chi_rate_max": 1.2590232623533666,
+          "delta_chi_rate_RMS": 0.4683073434193346,
+          "delta_chi_rate_y": 0.499868104519928,
+          "redistributed_interior_force_max": 4.081367569302813,
+          "redistributed_force_y": 0.572265625,
+          "relative_velocity_max": 0.05641617359997338,
+          "relative_velocity_y": 0.609375,
+          "pairing_signed": -5.43647406124579,
+          "pairing_absolute": 12.809677283380822,
+          "predicted_work_difference": -0.002654524029777645,
+          "actual_work_difference": -0.0026545240297178585,
+          "work_identity_error": 5.978637723780267e-14,
+          "bulk_work": 0.18866754196004967,
+          "affine_work": 0.19132206598976753,
+          "reaction_work": 0.19132206599123097,
+          "alternative_lifting_work": 0.19132206598978174,
+          "asymmetric_lifting_work": 0.19235172685857277,
+          "lifting_reaction_difference": -1.46344047990965e-12,
+          "bulk_reaction_difference": -0.002654524031181299,
+          "endpoint_interior_force_max": 8.84921291799401e-09,
+          "dominant_work_y": 0.4985129280978187,
+          "maximum_phase_increment": 0.0009581872622679288,
+          "reaction_work_residual": 0.0003599028114965874,
+          "alternative_work_residual": 0.0003599028100473578,
+          "asymmetric_work_residual": 0.0013895636788383847
+        },
+        {
+          "time": 0.62109375,
+          "dt": 0.0009765625,
+          "incoming_phase_KKT": 2.454460246156516e-14,
+          "endpoint_phase_KKT": 0.005021491072606255,
+          "endpoint_phase_mass_scaled_Pa": 82.27210973368372,
+          "endpoint_phase_residual_y": 0.5,
+          "delta_chi_rate_max": 1.2537810490903212,
+          "delta_chi_rate_RMS": 0.466385988276198,
+          "delta_chi_rate_y": 0.500131895480072,
+          "redistributed_interior_force_max": 4.050428832121042,
+          "redistributed_force_y": 0.427734375,
+          "relative_velocity_max": 0.056302728637008526,
+          "relative_velocity_y": 0.609375,
+          "pairing_signed": -5.380119794017954,
+          "pairing_absolute": 12.70044091877168,
+          "predicted_work_difference": -0.0026270073425183073,
+          "actual_work_difference": -0.00262700734246063,
+          "work_identity_error": 5.767738717188386e-14,
+          "bulk_work": 0.18851455788411575,
+          "affine_work": 0.19114156522657638,
+          "reaction_work": 0.19114156522806885,
+          "alternative_lifting_work": 0.1911415652265909,
+          "asymmetric_lifting_work": 0.1921578026506044,
+          "lifting_reaction_difference": -1.492472812003598e-12,
+          "bulk_reaction_difference": -0.0026270073439531028,
+          "endpoint_interior_force_max": 1.0242104053759249e-08,
+          "dominant_work_y": 0.5014870719021812,
+          "maximum_phase_increment": 0.0009598633669642975,
+          "reaction_work_residual": 0.0003567157113472663,
+          "alternative_work_residual": 0.00035671570986930967,
+          "asymmetric_work_residual": 0.0013729531338828038
+        }
+      ],
+      "absolute_work_fraction_after_point6": 0.469128150175032,
+      "center_work_fraction": {
+        "signed": -0.1238637552282288,
+        "absolute": 0.8920714546129196
+      },
+      "quadrature_region_decomposition_error": 4.692718436061227e-12
+    },
+    "2048": {
+      "maxima": {
+        "endpoint_phase_KKT": 0.005428545420938636,
+        "delta_chi_rate_max": 2.4168233582131506,
+        "redistributed_interior_force_max": 3.9851367088976986,
+        "pairing_absolute": 11.33169211747816
+      },
+      "endpoint_phase_final": 0.005428545420938636,
+      "incoming_phase_KKT": 5.219871410104962e-12,
+      "relative_velocity_max": 0.05860046596767942,
+      "maximum_phase_increment": 0.0005495945604951369,
+      "signed_release": 0.02199249882863441,
+      "release_absolute": 0.021992498829231266,
+      "final_phase_max": 0.6902806806764259,
+      "onset": {
+        "full_field": {
+          "time_bracket": [
+            0.52880859375,
+            0.529296875
+          ],
+          "displacement_bracket": [
+            0.03579373168945313,
+            0.03585986328125
+          ]
+        },
+        "core": {
+          "time_bracket": [
+            0.52880859375,
+            0.529296875
+          ],
+          "displacement_bracket": [
+            0.03579373168945313,
+            0.03585986328125
+          ]
+        }
+      },
+      "totals": {
+        "actual_work_difference": {
+          "signed": -0.12865728817011549,
+          "absolute": 0.12868577557564911,
+          "maximum": 0.001278697646981533
+        },
+        "bulk_work": {
+          "signed": 58.68707572314143,
+          "absolute": 58.68707572314143,
+          "maximum": 0.09445696637672438
+        },
+        "affine_work": {
+          "signed": 58.81573301131155,
+          "absolute": 58.81573301131155,
+          "maximum": 0.09573566402370591
+        },
+        "reaction_work": {
+          "signed": 58.81573301138335,
+          "absolute": 58.81573301138335,
+          "maximum": 0.095735664024094
+        },
+        "alternative_lifting_work": {
+          "signed": 58.815733011311934,
+          "absolute": 58.815733011311934,
+          "maximum": 0.0957356640237094
+        },
+        "asymmetric_lifting_work": {
+          "signed": 58.858758531614015,
+          "absolute": 58.858758531614015,
+          "maximum": 0.0961861138083819
+        },
+        "reaction_work_residual": {
+          "signed": 0.02213849349132764,
+          "absolute": 0.02214381253627744,
+          "maximum": 0.0002178214395957001
+        },
+        "alternative_work_residual": {
+          "signed": 0.022138493419910973,
+          "absolute": 0.022143812454182583,
+          "maximum": 0.0002178214392110911
+        },
+        "asymmetric_work_residual": {
+          "signed": 0.06516401372199261,
+          "absolute": 0.06518391976012027,
+          "maximum": 0.0006682712238836042
+        },
+        "lifting_reaction_difference": {
+          "signed": -7.179854174058241e-11,
+          "absolute": 8.559931429288749e-11,
+          "maximum": 5.431349814344344e-13
+        },
+        "bulk_reaction_difference": {
+          "signed": -0.12865728824191403,
+          "absolute": 0.1286857756570207,
+          "maximum": 0.0012786976473696254
+        }
+      },
+      "top_steps": [
+        {
+          "time": 0.625,
+          "dt": 0.00048828125,
+          "incoming_phase_KKT": 4.027854438865513e-14,
+          "endpoint_phase_KKT": 0.005428545420938636,
+          "endpoint_phase_mass_scaled_Pa": 88.9412881767698,
+          "endpoint_phase_residual_y": 0.5,
+          "delta_chi_rate_max": 2.4168233582131506,
+          "delta_chi_rate_RMS": 0.8174695420292764,
+          "delta_chi_rate_y": 0.500131895480072,
+          "redistributed_interior_force_max": 3.9851367088976986,
+          "redistributed_force_y": 0.560546875,
+          "relative_velocity_max": 0.05860046596767942,
+          "relative_velocity_y": 0.396484375,
+          "pairing_signed": -5.237549824402524,
+          "pairing_absolute": 11.33169211747816,
+          "predicted_work_difference": -0.0012786976469916088,
+          "actual_work_difference": -0.001278697646981533,
+          "work_identity_error": 1.007570762934229e-14,
+          "bulk_work": 0.09445696637672438,
+          "affine_work": 0.09573566402370591,
+          "reaction_work": 0.095735664024094,
+          "alternative_lifting_work": 0.0957356640237094,
+          "asymmetric_lifting_work": 0.0961861138083819,
+          "lifting_reaction_difference": -3.880923360455313e-13,
+          "bulk_reaction_difference": -0.0012786976473696254,
+          "endpoint_interior_force_max": 8.125709882733645e-09,
+          "dominant_work_y": 0.4985129280978187,
+          "maximum_phase_increment": 0.0004764688782886717,
+          "reaction_work_residual": 0.0002178214395957001,
+          "alternative_work_residual": 0.0002178214392110911,
+          "asymmetric_work_residual": 0.0006682712238836042
+        },
+        {
+          "time": 0.62451171875,
+          "dt": 0.00048828125,
+          "incoming_phase_KKT": 3.835647077727523e-14,
+          "endpoint_phase_KKT": 0.005398656506597808,
+          "endpoint_phase_mass_scaled_Pa": 88.45158820420906,
+          "endpoint_phase_residual_y": 0.5,
+          "delta_chi_rate_max": 2.414004378251775,
+          "delta_chi_rate_RMS": 0.816133328931881,
+          "delta_chi_rate_y": 0.499868104519928,
+          "redistributed_interior_force_max": 3.9709932541543367,
+          "redistributed_force_y": 0.439453125,
+          "relative_velocity_max": 0.05854281963056371,
+          "relative_velocity_y": 0.603515625,
+          "pairing_signed": -5.217369994814878,
+          "pairing_absolute": 11.272195242048726,
+          "predicted_work_difference": -0.0012737709347930557,
+          "actual_work_difference": -0.0012737709347855064,
+          "work_identity_error": 7.549299727016567e-15,
+          "bulk_work": 0.09441786359341339,
+          "affine_work": 0.0956916345281989,
+          "reaction_work": 0.09569163452854684,
+          "alternative_lifting_work": 0.09569163452819802,
+          "asymmetric_lifting_work": 0.09614293450480084,
+          "lifting_reaction_difference": -3.4794389591752406e-13,
+          "bulk_reaction_difference": -0.0012737709351334503,
+          "endpoint_interior_force_max": 9.96327287339227e-09,
+          "dominant_work_y": 0.5014870719021812,
+          "maximum_phase_increment": 0.00047648097071717466,
+          "reaction_work_residual": 0.00021661707795081475,
+          "alternative_work_residual": 0.00021661707760199655,
+          "asymmetric_work_residual": 0.0006679170542048113
+        },
+        {
+          "time": 0.6240234375,
+          "dt": 0.00048828125,
+          "incoming_phase_KKT": 3.0668176331755634e-14,
+          "endpoint_phase_KKT": 0.005368742946789157,
+          "endpoint_phase_mass_scaled_Pa": 87.96148444030351,
+          "endpoint_phase_residual_y": 0.5,
+          "delta_chi_rate_max": 2.4102682110333262,
+          "delta_chi_rate_RMS": 0.8147673711973307,
+          "delta_chi_rate_y": 0.499868104519928,
+          "redistributed_interior_force_max": 3.956820329281811,
+          "redistributed_force_y": 0.560546875,
+          "relative_velocity_max": 0.05848106608971728,
+          "relative_velocity_y": 0.396484375,
+          "pairing_signed": -5.193902414858259,
+          "pairing_absolute": 11.220853763754002,
+          "predicted_work_difference": -0.001268041549817794,
+          "actual_work_difference": -0.0012680415498087794,
+          "work_identity_error": 9.014707383347975e-15,
+          "bulk_work": 0.09437953184484331,
+          "affine_work": 0.09564757339465209,
+          "reaction_work": 0.09564757339495679,
+          "alternative_lifting_work": 0.0956475733946541,
+          "asymmetric_lifting_work": 0.09609766847509507,
+          "lifting_reaction_difference": -3.047007091083742e-13,
+          "bulk_reaction_difference": -0.00126804155011348,
+          "endpoint_interior_force_max": 9.076870810531545e-09,
+          "dominant_work_y": 0.5014870719021812,
+          "maximum_phase_increment": 0.0004767644096659307,
+          "reaction_work_residual": 0.00021542390623115193,
+          "alternative_work_residual": 0.0002154239059284635,
+          "asymmetric_work_residual": 0.0006655189863694344
+        },
+        {
+          "time": 0.62353515625,
+          "dt": 0.00048828125,
+          "incoming_phase_KKT": 8.548196872560227e-14,
+          "endpoint_phase_KKT": 0.00533883247257523,
+          "endpoint_phase_mass_scaled_Pa": 87.47143123078192,
+          "endpoint_phase_residual_y": 0.5,
+          "delta_chi_rate_max": 2.4060514274915477,
+          "delta_chi_rate_RMS": 0.8133840912118717,
+          "delta_chi_rate_y": 0.499868104519928,
+          "redistributed_interior_force_max": 3.942607828181849,
+          "redistributed_force_y": 0.560546875,
+          "relative_velocity_max": 0.05841730662316816,
+          "relative_velocity_y": 0.396484375,
+          "pairing_signed": -5.16881059717706,
+          "pairing_absolute": 11.173733566971233,
+          "predicted_work_difference": -0.0012619156227520116,
+          "actual_work_difference": -0.0012619156227452327,
+          "work_identity_error": 6.778865663248368e-15,
+          "bulk_work": 0.09434159319272867,
+          "affine_work": 0.0956035088154739,
+          "reaction_work": 0.09560350881583252,
+          "alternative_lifting_work": 0.09560350881547475,
+          "asymmetric_lifting_work": 0.09605131740517416,
+          "lifting_reaction_difference": -3.586159147417334e-13,
+          "bulk_reaction_difference": -0.0012619156231038486,
+          "endpoint_interior_force_max": 1.0931657357104996e-08,
+          "dominant_work_y": 0.5014870719021812,
+          "maximum_phase_increment": 0.00047720292869479763,
+          "reaction_work_residual": 0.00021423980144168187,
+          "alternative_work_residual": 0.0002142398010839125,
+          "asymmetric_work_residual": 0.0006620483907833208
+        },
+        {
+          "time": 0.623046875,
+          "dt": 0.00048828125,
+          "incoming_phase_KKT": 4.6245993146007886e-14,
+          "endpoint_phase_KKT": 0.0053089406276920405,
+          "endpoint_phase_mass_scaled_Pa": 86.98168324421513,
+          "endpoint_phase_residual_y": 0.5,
+          "delta_chi_rate_max": 2.401783294226334,
+          "delta_chi_rate_RMS": 0.8119867612777195,
+          "delta_chi_rate_y": 0.500131895480072,
+          "redistributed_interior_force_max": 3.9283507452926756,
+          "redistributed_force_y": 0.439453125,
+          "relative_velocity_max": 0.05835353411244362,
+          "relative_velocity_y": 0.603515625,
+          "pairing_signed": -5.143705469253168,
+          "pairing_absolute": 11.126654580444557,
+          "predicted_work_difference": -0.0012557864461179035,
+          "actual_work_difference": -0.001255786446109533,
+          "work_identity_error": 8.370474452457088e-15,
+          "bulk_work": 0.09430366450298777,
+          "affine_work": 0.0955594509490973,
+          "reaction_work": 0.09555945094941617,
+          "alternative_lifting_work": 0.09555945094909832,
+          "asymmetric_lifting_work": 0.09600497020697459,
+          "lifting_reaction_difference": -3.1886993046015277e-13,
+          "bulk_reaction_difference": -0.001255786446428403,
+          "endpoint_interior_force_max": 8.520572691850248e-09,
+          "dominant_work_y": 0.5014870719021812,
+          "maximum_phase_increment": 0.00047764157784824235,
+          "reaction_work_residual": 0.00021305593779472054,
+          "alternative_work_residual": 0.0002130559374768637,
+          "asymmetric_work_residual": 0.000658575195353131
+        }
+      ],
+      "absolute_work_fraction_after_point6": 0.45413155362427515,
+      "center_work_fraction": {
+        "signed": -0.11919253574056048,
+        "absolute": 0.9120362192177418
+      },
+      "quadrature_region_decomposition_error": 5.87979664956606e-12
+    },
+    "4096": {
+      "maxima": {
+        "endpoint_phase_KKT": 0.005786635070147582,
+        "delta_chi_rate_max": 4.548384469842858,
+        "redistributed_interior_force_max": 3.756225994384181,
+        "pairing_absolute": 9.792437895460683
+      },
+      "endpoint_phase_final": 0.005786635070147582,
+      "incoming_phase_KKT": 3.828954514557213e-12,
+      "relative_velocity_max": 0.061099626677083775,
+      "maximum_phase_increment": 0.0002752921738435332,
+      "signed_release": 0.0258842665662673,
+      "release_absolute": 0.02588426656741838,
+      "final_phase_max": 0.6942686006320875,
+      "onset": {
+        "full_field": {
+          "time_bracket": [
+            0.528564453125,
+            0.52880859375
+          ],
+          "displacement_bracket": [
+            0.035760688781738284,
+            0.03579373168945313
+          ]
+        },
+        "core": {
+          "time_bracket": [
+            0.528564453125,
+            0.52880859375
+          ],
+          "displacement_bracket": [
+            0.035760688781738284,
+            0.03579373168945313
+          ]
+        }
+      },
+      "totals": {
+        "actual_work_difference": {
+          "signed": -0.12091201225631457,
+          "absolute": 0.1209278542812992,
+          "maximum": 0.000586719154040953
+        },
+        "bulk_work": {
+          "signed": 58.66970491552958,
+          "absolute": 58.66970491552958,
+          "maximum": 0.04715398356253413
+        },
+        "affine_work": {
+          "signed": 58.7906169277859,
+          "absolute": 58.7906169277859,
+          "maximum": 0.04774070271657508
+        },
+        "reaction_work": {
+          "signed": 58.79061692782373,
+          "absolute": 58.79061692782373,
+          "maximum": 0.047740702716574934
+        },
+        "alternative_lifting_work": {
+          "signed": 58.790616927787354,
+          "absolute": 58.790616927787354,
+          "maximum": 0.04774070271657689
+        },
+        "asymmetric_lifting_work": {
+          "signed": 58.82723932439731,
+          "absolute": 58.82723932439731,
+          "maximum": 0.047909612724244516
+        },
+        "reaction_work_residual": {
+          "signed": 0.025980715416911288,
+          "absolute": 0.025983243189943796,
+          "maximum": 0.00013942267902712635
+        },
+        "alternative_work_residual": {
+          "signed": 0.025980715380540788,
+          "absolute": 0.02598324314733786,
+          "maximum": 0.00013942267902908312
+        },
+        "asymmetric_work_residual": {
+          "signed": 0.06260311199049942,
+          "absolute": 0.06261759534003658,
+          "maximum": 0.0003083326866967079
+        },
+        "lifting_reaction_difference": {
+          "signed": -3.7830226539745575e-11,
+          "absolute": 4.994057501907985e-11,
+          "maximum": 1.775801727887938e-13
+        },
+        "bulk_reaction_difference": {
+          "signed": -0.12091201229414479,
+          "absolute": 0.12092785432856329,
+          "maximum": 0.0005867191540408073
+        }
+      },
+      "top_steps": [
+        {
+          "time": 0.625,
+          "dt": 0.000244140625,
+          "incoming_phase_KKT": 1.2132482518619025e-13,
+          "endpoint_phase_KKT": 0.005786635070147582,
+          "endpoint_phase_mass_scaled_Pa": 94.8082289894165,
+          "endpoint_phase_residual_y": 0.5,
+          "delta_chi_rate_max": 4.548384469842858,
+          "delta_chi_rate_RMS": 1.3677171552466616,
+          "delta_chi_rate_y": 0.499868104519928,
+          "redistributed_interior_force_max": 3.756225994384181,
+          "redistributed_force_y": 0.548828125,
+          "relative_velocity_max": 0.061099626677083775,
+          "relative_velocity_y": 0.404296875,
+          "pairing_signed": -4.8064052656325975,
+          "pairing_absolute": 9.792437895460683,
+          "predicted_work_difference": -0.000586719154057988,
+          "actual_work_difference": -0.000586719154040953,
+          "work_identity_error": 1.7034984534092246e-14,
+          "bulk_work": 0.04715398356253413,
+          "affine_work": 0.04774070271657508,
+          "reaction_work": 0.047740702716574934,
+          "alternative_lifting_work": 0.04774070271657689,
+          "asymmetric_lifting_work": 0.047909612724244516,
+          "lifting_reaction_difference": 1.457167719820518e-16,
+          "bulk_reaction_difference": -0.0005867191540408073,
+          "endpoint_interior_force_max": 7.333369467232842e-09,
+          "dominant_work_y": 0.5014870719021812,
+          "maximum_phase_increment": 0.00023979164664977848,
+          "reaction_work_residual": 0.00013942267902712635,
+          "alternative_work_residual": 0.00013942267902908312,
+          "asymmetric_work_residual": 0.0003083326866967079
+        },
+        {
+          "time": 0.624755859375,
+          "dt": 0.000244140625,
+          "incoming_phase_KKT": 2.3027933726520533e-13,
+          "endpoint_phase_KKT": 0.005770258712964564,
+          "endpoint_phase_mass_scaled_Pa": 94.5399187533296,
+          "endpoint_phase_residual_y": 0.5,
+          "delta_chi_rate_max": 4.545121753926651,
+          "delta_chi_rate_RMS": 1.3668093859883574,
+          "delta_chi_rate_y": 0.500131895480072,
+          "redistributed_interior_force_max": 3.7496795935418277,
+          "redistributed_force_y": 0.451171875,
+          "relative_velocity_max": 0.06106436826897291,
+          "relative_velocity_y": 0.404296875,
+          "pairing_signed": -4.7955768040750595,
+          "pairing_absolute": 9.77193742142945,
+          "predicted_work_difference": -0.0005853973209095817,
+          "actual_work_difference": -0.0005853973208917937,
+          "work_identity_error": 1.778796294288343e-14,
+          "bulk_work": 0.04714470802275247,
+          "affine_work": 0.04773010534364426,
+          "reaction_work": 0.04773010534373212,
+          "alternative_lifting_work": 0.047730105343647,
+          "asymmetric_lifting_work": 0.04789869476646455,
+          "lifting_reaction_difference": -8.786027461127333e-14,
+          "bulk_reaction_difference": -0.000585397320979654,
+          "endpoint_interior_force_max": 9.498762665316463e-09,
+          "dominant_work_y": 0.4985129280978187,
+          "maximum_phase_increment": 0.00023991064890804825,
+          "reaction_work_residual": 0.00013904124536312512,
+          "alternative_work_residual": 0.0001390412452780057,
+          "asymmetric_work_residual": 0.0003076306680955543
+        },
+        {
+          "time": 0.62451171875,
+          "dt": 0.000244140625,
+          "incoming_phase_KKT": 3.132239259624995e-12,
+          "endpoint_phase_KKT": 0.005753888156163061,
+          "endpoint_phase_mass_scaled_Pa": 94.27170355069345,
+          "endpoint_phase_residual_y": 0.5,
+          "delta_chi_rate_max": 4.541835500825982,
+          "delta_chi_rate_RMS": 1.365895988876151,
+          "delta_chi_rate_y": 0.499868104519928,
+          "redistributed_interior_force_max": 3.7431230929371395,
+          "redistributed_force_y": 0.451171875,
+          "relative_velocity_max": 0.06102910440950046,
+          "relative_velocity_y": 0.404296875,
+          "pairing_signed": -4.784745440329001,
+          "pairing_absolute": 9.751496555727522,
+          "predicted_work_difference": -0.0005840751334902598,
+          "actual_work_difference": -0.0005840751334716537,
+          "work_identity_error": 1.860610190224099e-14,
+          "bulk_work": 0.047135433526504344,
+          "affine_work": 0.047719508659976,
+          "reaction_work": 0.047719508660050924,
+          "alternative_lifting_work": 0.04771950865997816,
+          "asymmetric_lifting_work": 0.04788777731710676,
+          "lifting_reaction_difference": -7.492617637439025e-14,
+          "bulk_reaction_difference": -0.0005840751335465799,
+          "endpoint_interior_force_max": 8.711992904864019e-09,
+          "dominant_work_y": 0.5014870719021812,
+          "maximum_phase_increment": 0.00024002964179825614,
+          "reaction_work_residual": 0.00013865966326041118,
+          "alternative_work_residual": 0.00013865966318764994,
+          "asymmetric_work_residual": 0.00030692832031624373
+        },
+        {
+          "time": 0.624267578125,
+          "dt": 0.000244140625,
+          "incoming_phase_KKT": 3.061934386590695e-12,
+          "endpoint_phase_KKT": 0.005737523416700562,
+          "endpoint_phase_mass_scaled_Pa": 94.00358365933951,
+          "endpoint_phase_residual_y": 0.5,
+          "delta_chi_rate_max": 4.538525670574018,
+          "delta_chi_rate_RMS": 1.3649769474855087,
+          "delta_chi_rate_y": 0.499868104519928,
+          "redistributed_interior_force_max": 3.7365564828122615,
+          "redistributed_force_y": 0.548828125,
+          "relative_velocity_max": 0.06099383536202231,
+          "relative_velocity_y": 0.595703125,
+          "pairing_signed": -4.773911274429657,
+          "pairing_absolute": 9.7310453850354,
+          "predicted_work_difference": -0.0005827526040113499,
+          "actual_work_difference": -0.0005827526039920566,
+          "work_identity_error": 1.9293269239162303e-14,
+          "bulk_work": 0.047126160056373725,
+          "affine_work": 0.04770891266036578,
+          "reaction_work": 0.04770891266046723,
+          "alternative_lifting_work": 0.0477089126603653,
+          "asymmetric_lifting_work": 0.04787686038366391,
+          "lifting_reaction_difference": -1.0144662887512368e-13,
+          "bulk_reaction_difference": -0.0005827526040935033,
+          "endpoint_interior_force_max": 9.332339345746732e-09,
+          "dominant_work_y": 0.4985129280978187,
+          "maximum_phase_increment": 0.00024014862590882036,
+          "reaction_work_residual": 0.00013827793514632758,
+          "alternative_work_residual": 0.00013827793504440217,
+          "asymmetric_work_residual": 0.0003062256583430123
+        },
+        {
+          "time": 0.6240234375,
+          "dt": 0.000244140625,
+          "incoming_phase_KKT": 9.90643331254409e-13,
+          "endpoint_phase_KKT": 0.005721164511589313,
+          "endpoint_phase_mass_scaled_Pa": 93.7355593579965,
+          "endpoint_phase_residual_y": 0.5,
+          "delta_chi_rate_max": 4.535192230789107,
+          "delta_chi_rate_RMS": 1.364052246763833,
+          "delta_chi_rate_y": 0.499868104519928,
+          "redistributed_interior_force_max": 3.729979764241648,
+          "redistributed_force_y": 0.451171875,
+          "relative_velocity_max": 0.060958561410414856,
+          "relative_velocity_y": 0.404296875,
+          "pairing_signed": -4.763074417824587,
+          "pairing_absolute": 9.710583480013076,
+          "predicted_work_difference": -0.0005814297460772848,
+          "actual_work_difference": -0.0005814297460570855,
+          "work_identity_error": 2.019922857449119e-14,
+          "bulk_work": 0.04711688759356758,
+          "affine_work": 0.047698317339624666,
+          "reaction_work": 0.047698317339700765,
+          "alternative_lifting_work": 0.04769831733962707,
+          "asymmetric_lifting_work": 0.04786594397469981,
+          "lifting_reaction_difference": -7.609884944415057e-14,
+          "bulk_reaction_difference": -0.0005814297461331844,
+          "endpoint_interior_force_max": 8.622976110927993e-09,
+          "dominant_work_y": 0.5014870719021812,
+          "maximum_phase_increment": 0.00024026760175821504,
+          "reaction_work_residual": 0.00013789606382420133,
+          "alternative_work_residual": 0.00013789606375050334,
+          "asymmetric_work_residual": 0.00030552269882324484
+        }
+      ],
+      "absolute_work_fraction_after_point6": 0.4417150404852825,
+      "center_work_fraction": {
+        "signed": -0.11187622341804843,
+        "absolute": 0.9229213570104339
+      },
+      "quadrature_region_decomposition_error": 5.925301915787884e-12
+    }
+  },
+  "smooth_controls": {
+    "64": {
+      "maxima": {
+        "endpoint_phase_KKT": 0.008123828244395708,
+        "delta_chi_rate_max": 13.152206432904677,
+        "redistributed_interior_force_max": 570.1354221541701,
+        "pairing_absolute": 1023.7716887274843
+      },
+      "relative_velocity_max": 0.05941510382461376,
+      "totals": {
+        "actual_work_difference": {
+          "signed": -17.38956189915497,
+          "absolute": 17.389561899202473,
+          "maximum": 4.5443379803329265
+        },
+        "bulk_work": {
+          "signed": 41.503144384450096,
+          "absolute": 48.18994307338562,
+          "maximum": 2.818362928682854
+        },
+        "affine_work": {
+          "signed": 58.892706283605065,
+          "absolute": 58.892706283605065,
+          "maximum": 3.123445529582644
+        },
+        "reaction_work": {
+          "signed": 58.892670101778066,
+          "absolute": 58.892670101778066,
+          "maximum": 3.123445149144927
+        },
+        "alternative_lifting_work": {
+          "signed": 58.892706283600816,
+          "absolute": 58.892706283600816,
+          "maximum": 3.1234455295822494
+        },
+        "asymmetric_lifting_work": {
+          "signed": 62.81042954563208,
+          "absolute": 62.81042954563208,
+          "maximum": 3.8245968730422484
+        },
+        "reaction_work_residual": {
+          "signed": 5.510509740400577,
+          "absolute": 5.537553913711749,
+          "maximum": 1.7059022293574926
+        },
+        "alternative_work_residual": {
+          "signed": 5.510545922223327,
+          "absolute": 5.537590095470155,
+          "maximum": 1.7059096855220495
+        },
+        "asymmetric_work_residual": {
+          "signed": 9.428269184254594,
+          "absolute": 9.45531335767015,
+          "maximum": 2.6231167386848053
+        },
+        "lifting_reaction_difference": {
+          "signed": 3.618182700050983e-05,
+          "absolute": 3.618182700050983e-05,
+          "maximum": 8.972137658602719e-06
+        },
+        "bulk_reaction_difference": {
+          "signed": -17.389525717327967,
+          "absolute": 17.389525717443714,
+          "maximum": 4.5443305241680765
+        }
+      }
+    },
+    "256": {
+      "maxima": {
+        "endpoint_phase_KKT": 0.008123861294507193,
+        "delta_chi_rate_max": 13.349017702461424,
+        "redistributed_interior_force_max": 147.55008176676222,
+        "pairing_absolute": 264.7881745651951
+      },
+      "relative_velocity_max": 0.059791295287018056,
+      "totals": {
+        "actual_work_difference": {
+          "signed": -4.463076259983963,
+          "absolute": 4.463076260080048,
+          "maximum": 0.2938642764636641
+        },
+        "bulk_work": {
+          "signed": 54.44228996405823,
+          "absolute": 54.44228996405823,
+          "maximum": 0.789389699649901
+        },
+        "affine_work": {
+          "signed": 58.9053662240422,
+          "absolute": 58.9053662240422,
+          "maximum": 0.7907780815484533
+        },
+        "reaction_work": {
+          "signed": 58.90535697854975,
+          "absolute": 58.90535697854975,
+          "maximum": 0.7907780797615993
+        },
+        "alternative_lifting_work": {
+          "signed": 58.90536622404699,
+          "absolute": 58.90536622404699,
+          "maximum": 0.7907780815485305
+        },
+        "asymmetric_lifting_work": {
+          "signed": 59.90608900620538,
+          "absolute": 59.90608900620538,
+          "maximum": 0.7911849110566567
+        },
+        "reaction_work_residual": {
+          "signed": 1.461253039076429,
+          "absolute": 1.4630443529593997,
+          "maximum": 0.11344264738634668
+        },
+        "alternative_work_residual": {
+          "signed": 1.4612622845736751,
+          "absolute": 1.4630535983222825,
+          "maximum": 0.11344314482848294
+        },
+        "asymmetric_work_residual": {
+          "signed": 2.461985066732063,
+          "absolute": 2.4637763808057573,
+          "maximum": 0.1726913410136084
+        },
+        "lifting_reaction_difference": {
+          "signed": 9.245492450159915e-06,
+          "absolute": 9.245492450159915e-06,
+          "maximum": 5.818473144403313e-07
+        },
+        "bulk_reaction_difference": {
+          "signed": -4.4630670144915126,
+          "absolute": 4.463067014716911,
+          "maximum": 0.2938638192271623
+        }
+      }
+    },
+    "1024": {
+      "maxima": {
+        "endpoint_phase_KKT": 0.008123863360055623,
+        "delta_chi_rate_max": 13.366965829385663,
+        "redistributed_interior_force_max": 37.10708051398791,
+        "pairing_absolute": 66.66695495422113
+      },
+      "relative_velocity_max": 0.059800039641745295,
+      "totals": {
+        "actual_work_difference": {
+          "signed": -1.122110341165021,
+          "absolute": 1.1221103411650217,
+          "maximum": 0.01851501912865433
+        },
+        "bulk_work": {
+          "signed": 57.784094226977004,
+          "absolute": 57.784094226977004,
+          "maximum": 0.19835180044717793
+        },
+        "affine_work": {
+          "signed": 58.90620456814202,
+          "absolute": 58.90620456814202,
+          "maximum": 0.1983574680813649
+        },
+        "reaction_work": {
+          "signed": 58.90620224414838,
+          "absolute": 58.90620224414838,
+          "maximum": 0.19835746807400034
+        },
+        "alternative_lifting_work": {
+          "signed": 58.906204568145164,
+          "absolute": 58.906204568145164,
+          "maximum": 0.1983574680813761
+        },
+        "asymmetric_lifting_work": {
+          "signed": 59.15773415425523,
+          "absolute": 59.15773415425523,
+          "maximum": 0.1983591347373601
+        },
+        "reaction_work_residual": {
+          "signed": 0.3697141777768459,
+          "absolute": 0.36983477653183977,
+          "maximum": 0.0071852432039584135
+        },
+        "alternative_work_residual": {
+          "signed": 0.36971650177362475,
+          "absolute": 0.36983710052760366,
+          "maximum": 0.007185273556819249
+        },
+        "asymmetric_work_residual": {
+          "signed": 0.6212460878836964,
+          "absolute": 0.6213666866375231,
+          "maximum": 0.0109072142135192
+        },
+        "lifting_reaction_difference": {
+          "signed": 2.3239936428058114e-06,
+          "absolute": 2.324008079319561e-06,
+          "maximum": 3.659123118393559e-08
+        },
+        "bulk_reaction_difference": {
+          "signed": -1.1221080171713782,
+          "absolute": 1.1221080171723334,
+          "maximum": 0.018514989410413935
+        }
+      }
+    }
+  },
+  "selected_native_timestep": null,
+  "native_gate_pass": false,
+  "reason": "Persistent endpoint phase lag and a failed energetic saved-entry correction require prototype/model-path review first.",
+  "core_pressure_and_material_unchanged": true
+}

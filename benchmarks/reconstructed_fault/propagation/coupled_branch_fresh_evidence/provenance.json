@@ -1,0 +1,38 @@
+{
+  "worktree": "/home/ein/repository/aspect-fault-propagation",
+  "head": "de7beaa65846c7372711f7922abf1c5d9a745ee6",
+  "branch": "fault-propagation",
+  "incoming_worktree_dirty": true,
+  "Python": "3.14.7 (main, Aug 10 2026, 07:46:56) [GCC 16.1.1 20260728]",
+  "NumPy": "2.5.2",
+  "SciPy": "1.18.1",
+  "OPENBLAS_NUM_THREADS": 1,
+  "OMP_NUM_THREADS": 1,
+  "native_build_or_run": false,
+  "commands": [
+    "OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 python3 benchmarks/reconstructed_fault/propagation/coupled_branch.py prepare",
+    "OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 python3 benchmarks/reconstructed_fault/propagation/coupled_branch.py run --denominator 256",
+    "OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 python3 benchmarks/reconstructed_fault/propagation/coupled_branch.py run --denominator 512",
+    "OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 python3 benchmarks/reconstructed_fault/propagation/coupled_branch.py run --denominator 1024",
+    "OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 python3 benchmarks/reconstructed_fault/propagation/assess_coupled_branch.py",
+    "OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 python3 benchmarks/reconstructed_fault/propagation/check_coupled_branch.py --record-arithmetic",
+    "OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 python3 benchmarks/reconstructed_fault/propagation/check_coupled_branch.py"
+  ],
+  "new_sources": {
+    "benchmarks/reconstructed_fault/propagation/coupled_branch.py": "ce1d2820874eed159e6570d19c60276cffff8d78f904d5aaaf9a9cef1df74745",
+    "benchmarks/reconstructed_fault/propagation/assess_coupled_branch.py": "a7381fee4f6f41a43d67419d547ae34d08f148c6986906cbf9dfde275c8ee919",
+    "benchmarks/reconstructed_fault/propagation/check_coupled_branch.py": "a2270e0a07677e4f91d9ef10b98e7a451163e859456bb05200000fa0c56a40f2",
+    "doc/reconstructed_fault/propagation/P2_coupled_branch_report.md": "70f1875a2ad60a8c304a9855090d72da355f9c4754cf461edd11e0b253189d5d",
+    "doc/reconstructed_fault/propagation/P2_coupled_branch_equations.md": "636ca82a365c6f5f0bad51686a954d1277a5c46a9fe05fe52bc97651a9bd7c34"
+  },
+  "starting_state": "Fresh unloaded fallback; LAST unchanged-seed checkpoint fails phase KKT",
+  "reused_replay_classification": "../coupled_branch_evidence/replay/classification.json",
+  "preserved_checkpoint_controls": "../coupled_branch_evidence/",
+  "checks": {
+    "final_numerical_and_preservation": "pass",
+    "syntax_and_scoped_whitespace": "pass",
+    "first_arithmetic_check": "ran before assessment file was ready; arithmetic saved, read-only checker rerun sequentially passes",
+    "whole_tree_whitespace": "incoming pf_rsf.tex trailing whitespace, left untouched"
+  },
+  "scope": "0 to .5625 s and short onset branch; no native integration, P3 or tuning"
+}

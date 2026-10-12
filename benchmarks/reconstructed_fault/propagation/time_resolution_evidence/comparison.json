@@ -1,0 +1,752 @@
+{
+  "reference_denominator": 1024,
+  "partitions": [
+    64,
+    128,
+    256,
+    512,
+    1024
+  ],
+  "targets": {
+    "phi": 0.001,
+    "q_Pa": 1.0,
+    "slip_relative": 0.001,
+    "V_common_relative": 0.005,
+    "whole_stress_relative": 0.01,
+    "localized_stress_relative": 0.01,
+    "bulk_storage_relative": 0.01
+  },
+  "errors": {
+    "64": {
+      "steps": 40,
+      "errors": {
+        "phi": 0.01661741701892616,
+        "q_Pa": 33.59339583987713,
+        "slip_relative": 0.0006889161019359166,
+        "V_common_relative": 0.01181142145629098,
+        "whole_stress_relative": 0.025210734119758754,
+        "localized_stress_relative": 0.02521162927881275,
+        "bulk_storage_relative": 0.04978301182954675,
+        "cohesive_storage": 0.6428077754442105,
+        "fracture_storage": 0.5937213546830087,
+        "mean_stress_Pa": 33.59329321025959,
+        "phase_error_time": 0.625,
+        "fixed_peak_common_rate": 0.158790924416083
+      },
+      "raw_target_pass": false,
+      "uncertainty_inclusive_pass": false,
+      "onset": {
+        "full_field": {
+          "time_bracket": [
+            0.53125,
+            0.546875
+          ],
+          "displacement_bracket": [
+            0.036125,
+            0.03828125
+          ]
+        },
+        "core": {
+          "time_bracket": [
+            0.53125,
+            0.546875
+          ],
+          "displacement_bracket": [
+            0.036125,
+            0.03828125
+          ]
+        }
+      },
+      "final": {
+        "phi_max": 0.6731092750128053,
+        "q_Pa": 255.0586900187188,
+        "slip": 0.04873845894519693,
+        "bulk": 0.7876970555522709,
+        "cohesive": 6.203142170441061,
+        "fracture": 17.683877997525073
+      },
+      "maximum_phase_increment": 0.017048704250723357
+    },
+    "128": {
+      "steps": 80,
+      "errors": {
+        "phi": 0.009033786836390001,
+        "q_Pa": 15.748441704945947,
+        "slip_relative": 0.00032295569262670424,
+        "V_common_relative": 0.00454088719986261,
+        "whole_stress_relative": 0.011818665216997145,
+        "localized_stress_relative": 0.011819043521496396,
+        "bulk_storage_relative": 0.023324759019555816,
+        "cohesive_storage": 0.3219611337311479,
+        "fracture_storage": 0.2867630958399161,
+        "mean_stress_Pa": 15.748396553099989,
+        "phase_error_time": 0.625,
+        "fixed_peak_common_rate": 0.158790924416083
+      },
+      "raw_target_pass": false,
+      "uncertainty_inclusive_pass": false,
+      "onset": {
+        "full_field": {
+          "time_bracket": [
+            0.53125,
+            0.5390625
+          ],
+          "displacement_bracket": [
+            0.036125,
+            0.0371953125
+          ]
+        },
+        "core": {
+          "time_bracket": [
+            0.53125,
+            0.5390625
+          ],
+          "displacement_bracket": [
+            0.036125,
+            0.0371953125
+          ]
+        }
+      },
+      "final": {
+        "phi_max": 0.6796875481648884,
+        "q_Pa": 241.8001966488374,
+        "slip": 0.04875172963122666,
+        "bulk": 0.7711467429291557,
+        "cohesive": 5.882295528727998,
+        "fracture": 17.979921833217432
+      },
+      "maximum_phase_increment": 0.00861745188159263
+    },
+    "256": {
+      "steps": 160,
+      "errors": {
+        "phi": 0.004997046472080657,
+        "q_Pa": 6.802703722113108,
+        "slip_relative": 0.00013950267601880133,
+        "V_common_relative": 0.0017295208755308087,
+        "whole_stress_relative": 0.0051051922615292815,
+        "localized_stress_relative": 0.0051053483215854675,
+        "bulk_storage_relative": 0.01007298497882958,
+        "cohesive_storage": 0.16091004539304166,
+        "fracture_storage": 0.13573242116937578,
+        "mean_stress_Pa": 6.802684764134011,
+        "phase_error_time": 0.625,
+        "fixed_peak_common_rate": 0.158790924416083
+      },
+      "raw_target_pass": false,
+      "uncertainty_inclusive_pass": false,
+      "onset": {
+        "full_field": {
+          "time_bracket": [
+            0.53125,
+            0.53515625
+          ],
+          "displacement_bracket": [
+            0.036125,
+            0.036658203125000004
+          ]
+        },
+        "core": {
+          "time_bracket": [
+            0.53125,
+            0.53515625
+          ],
+          "displacement_bracket": [
+            0.036125,
+            0.036658203125000004
+          ]
+        }
+      },
+      "final": {
+        "phi_max": 0.6832184619818673,
+        "q_Pa": 235.1477801471664,
+        "slip": 0.048758388805370256,
+        "bulk": 0.7629097784174966,
+        "cohesive": 5.721244440389892,
+        "fracture": 18.130952507887972
+      },
+      "maximum_phase_increment": 0.004346378496408065
+    },
+    "512": {
+      "steps": 320,
+      "errors": {
+        "phi": 0.0024110498026439497,
+        "q_Pa": 2.8256641245746152,
+        "slip_relative": 5.798678110123479e-05,
+        "V_common_relative": 0.0009062403238641516,
+        "whole_stress_relative": 0.0021405138484876466,
+        "localized_stress_relative": 0.002176393965900206,
+        "bulk_storage_relative": 0.0039085752789678845,
+        "cohesive_storage": 0.06843213859862551,
+        "fracture_storage": 0.05334682657509049,
+        "mean_stress_Pa": 2.825457821592828,
+        "phase_error_time": 0.625,
+        "fixed_peak_common_rate": 0.158790924416083
+      },
+      "raw_target_pass": false,
+      "uncertainty_inclusive_pass": false,
+      "onset": {
+        "full_field": {
+          "time_bracket": [
+            0.529296875,
+            0.53125
+          ],
+          "displacement_bracket": [
+            0.03585986328125,
+            0.036125
+          ]
+        },
+        "core": {
+          "time_bracket": [
+            0.529296875,
+            0.53125
+          ],
+          "displacement_bracket": [
+            0.03585986328125,
+            0.036125
+          ]
+        }
+      },
+      "final": {
+        "phi_max": 0.6855166255267837,
+        "q_Pa": 231.32870105549688,
+        "slip": 0.04876221150105472,
+        "bulk": 0.7582027379740011,
+        "cohesive": 5.628766533595476,
+        "fracture": 18.213338102482258
+      },
+      "maximum_phase_increment": 0.002187209648708055
+    },
+    "1024": {
+      "steps": 640,
+      "errors": {
+        "phi": 0.0,
+        "q_Pa": 0.0,
+        "slip_relative": 0.0,
+        "V_common_relative": 0.0,
+        "whole_stress_relative": 0.0,
+        "localized_stress_relative": 0.0,
+        "bulk_storage_relative": 0.0,
+        "cohesive_storage": 0.0,
+        "fracture_storage": 0.0,
+        "mean_stress_Pa": 0.0,
+        "phase_error_time": 0.0,
+        "fixed_peak_common_rate": 0.158790924416083
+      },
+      "raw_target_pass": true,
+      "uncertainty_inclusive_pass": false,
+      "onset": {
+        "full_field": {
+          "time_bracket": [
+            0.529296875,
+            0.5302734375
+          ],
+          "displacement_bracket": [
+            0.03585986328125,
+            0.0359923095703125
+          ]
+        },
+        "core": {
+          "time_bracket": [
+            0.529296875,
+            0.5302734375
+          ],
+          "displacement_bracket": [
+            0.03585986328125,
+            0.0359923095703125
+          ]
+        }
+      },
+      "final": {
+        "phi_max": 0.6876221074412894,
+        "q_Pa": 228.50303693092226,
+        "slip": 0.04876503922870987,
+        "bulk": 0.7547326758919456,
+        "cohesive": 5.5603343949968504,
+        "fracture": 18.266684929057348
+      },
+      "maximum_phase_increment": 0.0010969385721689706
+    }
+  },
+  "successive_halvings": [
+    {
+      "coarse": 64,
+      "fine": 128,
+      "common": {
+        "phi": 0.008695466938993146,
+        "q_Pa": 18.03788009289849,
+        "slip_relative": 0.00036999271063001146,
+        "V_common_relative": 0.0072700227708603,
+        "whole_stress_relative": 0.013536785569749077,
+        "localized_stress_relative": 0.013537174743521846,
+        "bulk_storage_relative": 0.02688902396388563,
+        "cohesive_storage": 0.3367408500163078,
+        "fracture_storage": 0.31288610131895744,
+        "mean_stress_Pa": 18.037831813482303,
+        "phase_error_time": 0.5625,
+        "fixed_peak_common_rate": 0.15880209621963015
+      },
+      "all_coarse_times": {
+        "phi": 0.008695466938993146,
+        "q_Pa": 18.03788009289849,
+        "slip_relative": 0.00036999271063001146,
+        "V_common_relative": 0.0072700227708603,
+        "whole_stress_relative": 0.013536785569749077,
+        "localized_stress_relative": 0.013537174743521846,
+        "bulk_storage_relative": 0.02688902396388563,
+        "cohesive_storage": 0.3367408500163078,
+        "fracture_storage": 0.31288610131895744,
+        "mean_stress_Pa": 18.037831813482303,
+        "phase_error_time": 0.5625,
+        "fixed_peak_common_rate": 0.15880209621963015
+      },
+      "smooth_pre_onset": {
+        "phi": 0.0,
+        "q_Pa": 0.0001832114645594629,
+        "slip_relative": 2.456373186227783e-08,
+        "V_common_relative": 4.826231075203344e-07,
+        "whole_stress_relative": 2.289317614454304e-06,
+        "localized_stress_relative": 2.2893176294811284e-06,
+        "bulk_storage_relative": 2.683719934463634e-06,
+        "cohesive_storage": 5.9859059566846895e-06,
+        "fracture_storage": 0.0,
+        "mean_stress_Pa": 0.0030505660285087438,
+        "phase_error_time": 0.0,
+        "fixed_peak_common_rate": 0.15880209621963015
+      },
+      "onset": {
+        "phi": 0.008695466938993146,
+        "q_Pa": 18.03788009289849,
+        "slip_relative": 0.00036999271063001146,
+        "V_common_relative": 0.0072700227708603,
+        "whole_stress_relative": 0.013536785569749077,
+        "localized_stress_relative": 0.013537174743521846,
+        "bulk_storage_relative": 0.02688902396388563,
+        "cohesive_storage": 0.3367408500163078,
+        "fracture_storage": 0.31288610131895744,
+        "mean_stress_Pa": 18.037831813482303,
+        "phase_error_time": 0.5625,
+        "fixed_peak_common_rate": 0.15880209621963015
+      },
+      "late": {
+        "phi": 0.008535576679640722,
+        "q_Pa": 16.220232769556958,
+        "slip_relative": 0.00033281967027228753,
+        "V_common_relative": 0.0004274170031635771,
+        "whole_stress_relative": 0.012172807570299045,
+        "localized_stress_relative": 0.012173352022536634,
+        "bulk_storage_relative": 0.0235800476791568,
+        "cohesive_storage": 0.33346413864352353,
+        "fracture_storage": 0.3096124401094915,
+        "mean_stress_Pa": 16.220174618546086,
+        "phase_error_time": 0.578125,
+        "fixed_peak_common_rate": 0.15880209621963015
+      }
+    },
+    {
+      "coarse": 128,
+      "fine": 256,
+      "common": {
+        "phi": 0.00441619635372037,
+        "q_Pa": 8.902943321632847,
+        "slip_relative": 0.0001826092446403605,
+        "V_common_relative": 0.0035889631511560496,
+        "whole_stress_relative": 0.0066813558560265916,
+        "localized_stress_relative": 0.006681575534525968,
+        "bulk_storage_relative": 0.013136465537315069,
+        "cohesive_storage": 0.16288514858014125,
+        "fracture_storage": 0.15823892550836227,
+        "mean_stress_Pa": 8.902917276685901,
+        "phase_error_time": 0.546875,
+        "fixed_peak_common_rate": 0.158779292709188
+      },
+      "all_coarse_times": {
+        "phi": 0.00441619635372037,
+        "q_Pa": 8.965304206975588,
+        "slip_relative": 0.00018387393253539245,
+        "V_common_relative": 0.0035889631511560496,
+        "whole_stress_relative": 0.006728140345005894,
+        "localized_stress_relative": 0.006728331696494757,
+        "bulk_storage_relative": 0.01331265452633803,
+        "cohesive_storage": 0.16288514858014125,
+        "fracture_storage": 0.15823892550836227,
+        "mean_stress_Pa": 8.96528037596976,
+        "phase_error_time": 0.546875,
+        "fixed_peak_common_rate": 0.158779292709188
+      },
+      "smooth_pre_onset": {
+        "phi": 0.0,
+        "q_Pa": 4.580287412636608e-05,
+        "slip_relative": 4.766527126144504e-09,
+        "V_common_relative": 9.367797858021937e-08,
+        "whole_stress_relative": 5.723294038776143e-07,
+        "localized_stress_relative": 5.723294432925463e-07,
+        "bulk_storage_relative": 6.709316233321066e-07,
+        "cohesive_storage": 1.4964773216163962e-06,
+        "fracture_storage": 0.0,
+        "mean_stress_Pa": 0.0007626415074790181,
+        "phase_error_time": 0.0,
+        "fixed_peak_common_rate": 0.158779292709188
+      },
+      "onset": {
+        "phi": 0.00441619635372037,
+        "q_Pa": 8.902943321632847,
+        "slip_relative": 0.0001826092446403605,
+        "V_common_relative": 0.0035889631511560496,
+        "whole_stress_relative": 0.0066813558560265916,
+        "localized_stress_relative": 0.006681575534525968,
+        "bulk_storage_relative": 0.013136465537315069,
+        "cohesive_storage": 0.16288514858014125,
+        "fracture_storage": 0.15823892550836227,
+        "mean_stress_Pa": 8.902917276685901,
+        "phase_error_time": 0.546875,
+        "fixed_peak_common_rate": 0.158779292709188
+      },
+      "late": {
+        "phi": 0.0042927397962386205,
+        "q_Pa": 7.876376967274837,
+        "slip_relative": 0.00016160864536697868,
+        "V_common_relative": 0.00018421571630704566,
+        "whole_stress_relative": 0.005911110189050691,
+        "localized_stress_relative": 0.005911548430803917,
+        "bulk_storage_relative": 0.011343091166851012,
+        "cohesive_storage": 0.16202248903382888,
+        "fracture_storage": 0.1563545277281122,
+        "mean_stress_Pa": 7.876338761418415,
+        "phase_error_time": 0.578125,
+        "fixed_peak_common_rate": 0.158779292709188
+      }
+    },
+    {
+      "coarse": 256,
+      "fine": 512,
+      "common": {
+        "phi": 0.0026643378387074534,
+        "q_Pa": 4.4093738487399605,
+        "slip_relative": 9.043770162992239e-05,
+        "V_common_relative": 0.0009542485785601328,
+        "whole_stress_relative": 0.0033091093520839646,
+        "localized_stress_relative": 0.003309257875507153,
+        "bulk_storage_relative": 0.006472997789885619,
+        "cohesive_storage": 0.09247790679441614,
+        "fracture_storage": 0.0823855945942853,
+        "mean_stress_Pa": 4.409358226093159,
+        "phase_error_time": 0.625,
+        "fixed_peak_common_rate": 0.15877759767523258
+      },
+      "all_coarse_times": {
+        "phi": 0.0026643378387074534,
+        "q_Pa": 4.521989131105499,
+        "slip_relative": 9.27364741236297e-05,
+        "V_common_relative": 0.0009542485785601328,
+        "whole_stress_relative": 0.0033935920997839306,
+        "localized_stress_relative": 0.0033936899308789348,
+        "bulk_storage_relative": 0.006701674900278976,
+        "cohesive_storage": 0.09247790679441614,
+        "fracture_storage": 0.0823855945942853,
+        "mean_stress_Pa": 4.52197699617784,
+        "phase_error_time": 0.625,
+        "fixed_peak_common_rate": 0.15877759767523258
+      },
+      "smooth_pre_onset": {
+        "phi": 0.0,
+        "q_Pa": 1.1450696490555856e-05,
+        "slip_relative": 2.0723432884539774e-09,
+        "V_common_relative": 4.073125800298836e-08,
+        "whole_stress_relative": 1.4308235128474364e-07,
+        "localized_stress_relative": 1.4308224192803872e-07,
+        "bulk_storage_relative": 1.6773300603113175e-07,
+        "cohesive_storage": 3.7411864539649287e-07,
+        "fracture_storage": 0.0,
+        "mean_stress_Pa": 0.00019066037728990607,
+        "phase_error_time": 0.0,
+        "fixed_peak_common_rate": 0.15877759767523258
+      },
+      "onset": {
+        "phi": 0.002238560948733259,
+        "q_Pa": 4.4093738487399605,
+        "slip_relative": 9.043770162992239e-05,
+        "V_common_relative": 0.0009542485785601328,
+        "whole_stress_relative": 0.0033091093520839646,
+        "localized_stress_relative": 0.003309257875507153,
+        "bulk_storage_relative": 0.006472997789885619,
+        "cohesive_storage": 0.08158264384953728,
+        "fracture_storage": 0.08042988801300766,
+        "mean_stress_Pa": 4.409358226093159,
+        "phase_error_time": 0.5625,
+        "fixed_peak_common_rate": 0.15877759767523258
+      },
+      "late": {
+        "phi": 0.0026643378387074534,
+        "q_Pa": 4.032356865615043,
+        "slip_relative": 8.273249900287843e-05,
+        "V_common_relative": 4.700795966145764e-05,
+        "whole_stress_relative": 0.0030266259230074663,
+        "localized_stress_relative": 0.0030274384459348766,
+        "bulk_storage_relative": 0.005779679368160278,
+        "cohesive_storage": 0.09247790679441614,
+        "fracture_storage": 0.0823855945942853,
+        "mean_stress_Pa": 4.032319624583453,
+        "phase_error_time": 0.625,
+        "fixed_peak_common_rate": 0.15877759767523258
+      }
+    },
+    {
+      "coarse": 512,
+      "fine": 1024,
+      "common": {
+        "phi": 0.0024110498026439497,
+        "q_Pa": 2.8256641245746152,
+        "slip_relative": 5.798678110123479e-05,
+        "V_common_relative": 0.0009062403238641516,
+        "whole_stress_relative": 0.0021405138484876466,
+        "localized_stress_relative": 0.002176393965900206,
+        "bulk_storage_relative": 0.0039085752789678845,
+        "cohesive_storage": 0.06843213859862551,
+        "fracture_storage": 0.05334682657509049,
+        "mean_stress_Pa": 2.825457821592828,
+        "phase_error_time": 0.625,
+        "fixed_peak_common_rate": 0.158790924416083
+      },
+      "all_coarse_times": {
+        "phi": 0.0024110498026439497,
+        "q_Pa": 2.8256641245746152,
+        "slip_relative": 5.798678110123479e-05,
+        "V_common_relative": 0.0009062403238641516,
+        "whole_stress_relative": 0.0021405138484876466,
+        "localized_stress_relative": 0.002176393965900206,
+        "bulk_storage_relative": 0.0039085752789678845,
+        "cohesive_storage": 0.06843213859862551,
+        "fracture_storage": 0.05334682657509049,
+        "mean_stress_Pa": 2.825457821592828,
+        "phase_error_time": 0.625,
+        "fixed_peak_common_rate": 0.158790924416083
+      },
+      "smooth_pre_onset": {
+        "phi": 0.0,
+        "q_Pa": 2.8626738526327244e-06,
+        "slip_relative": 5.344957445205847e-11,
+        "V_common_relative": 1.050413838929766e-09,
+        "whole_stress_relative": 3.577058665535048e-08,
+        "localized_stress_relative": 3.577057321016863e-08,
+        "bulk_storage_relative": 4.19332587608127e-08,
+        "cohesive_storage": 9.352965335551744e-08,
+        "fracture_storage": 0.0,
+        "mean_stress_Pa": 4.766509276897576e-05,
+        "phase_error_time": 0.0,
+        "fixed_peak_common_rate": 0.158790924416083
+      },
+      "onset": {
+        "phi": 0.0012774468246757875,
+        "q_Pa": 2.2484623171501994,
+        "slip_relative": 4.6108394915291135e-05,
+        "V_common_relative": 1.9815455731745147e-06,
+        "whole_stress_relative": 0.0016873899987994228,
+        "localized_stress_relative": 0.0016874364930412077,
+        "bulk_storage_relative": 0.003334247296639675,
+        "cohesive_storage": 0.043529165386162916,
+        "fracture_storage": 0.04277060881252126,
+        "mean_stress_Pa": 2.2484564598961856,
+        "phase_error_time": 0.5625,
+        "fixed_peak_common_rate": 0.158790924416083
+      },
+      "late": {
+        "phi": 0.0024110498026439497,
+        "q_Pa": 2.8256641245746152,
+        "slip_relative": 5.798678110123479e-05,
+        "V_common_relative": 8.392633835606636e-05,
+        "whole_stress_relative": 0.0021405138484876466,
+        "localized_stress_relative": 0.002176393965900206,
+        "bulk_storage_relative": 0.0039085752789678845,
+        "cohesive_storage": 0.06843213859862551,
+        "fracture_storage": 0.05334682657509049,
+        "mean_stress_Pa": 2.825457821592828,
+        "phase_error_time": 0.625,
+        "fixed_peak_common_rate": 0.158790924416083
+      }
+    }
+  ],
+  "observed_orders": [
+    {
+      "partitions": [
+        64,
+        128,
+        256
+      ],
+      "common": {
+        "phi": 0.9774591821680623,
+        "q_Pa": 1.0186755189822871,
+        "slip_relative": 1.0187370439451648,
+        "V_common_relative": 1.0183927722063877,
+        "whole_stress_relative": 1.0186723933410133,
+        "localized_stress_relative": 1.0186664352225168,
+        "bulk_storage_relative": 1.0334402280762203
+      },
+      "smooth_pre_onset": {
+        "phi": null,
+        "q_Pa": 1.9999997484418681,
+        "slip_relative": 2.365519347950477,
+        "V_common_relative": 2.365115141774713,
+        "whole_stress_relative": 1.9999999993344275,
+        "localized_stress_relative": 1.999999909449226,
+        "bulk_storage_relative": 1.9999964741365053
+      },
+      "onset": {
+        "phi": 0.9774591821680623,
+        "q_Pa": 1.0186755189822871,
+        "slip_relative": 1.0187370439451648,
+        "V_common_relative": 1.0183927722063877,
+        "whole_stress_relative": 1.0186723933410133,
+        "localized_stress_relative": 1.0186664352225168,
+        "bulk_storage_relative": 1.0334402280762203
+      },
+      "late": {
+        "phi": 0.9915899010423546,
+        "q_Pa": 1.0421904570987581,
+        "slip_relative": 1.0422363238760468,
+        "V_common_relative": 1.214248151524416,
+        "whole_stress_relative": 1.04216093439813,
+        "localized_stress_relative": 1.042118504762609,
+        "bulk_storage_relative": 1.0557527850140729
+      }
+    },
+    {
+      "partitions": [
+        128,
+        256,
+        512
+      ],
+      "common": {
+        "phi": 0.7290272908078652,
+        "q_Pa": 1.0137085702756456,
+        "slip_relative": 1.013763570747198,
+        "V_common_relative": 1.9111300731645693,
+        "whole_stress_relative": 1.0136979329312523,
+        "localized_stress_relative": 1.013680615677088,
+        "bulk_storage_relative": 1.0210712437590712
+      },
+      "smooth_pre_onset": {
+        "phi": null,
+        "q_Pa": 2.0000027769893536,
+        "slip_relative": 1.201675498169551,
+        "V_common_relative": 1.2015735718351161,
+        "whole_stress_relative": 1.9999999968204354,
+        "localized_stress_relative": 2.000001198816111,
+        "bulk_storage_relative": 1.999999138181829
+      },
+      "onset": {
+        "phi": 0.980232720240273,
+        "q_Pa": 1.0137085702756456,
+        "slip_relative": 1.013763570747198,
+        "V_common_relative": 1.9111300731645693,
+        "whole_stress_relative": 1.0136979329312523,
+        "localized_stress_relative": 1.013680615677088,
+        "bulk_storage_relative": 1.0210712437590712
+      },
+      "late": {
+        "phi": 0.6881216985964329,
+        "q_Pa": 0.9659088372596708,
+        "slip_relative": 0.9659783124213052,
+        "V_common_relative": 1.9704191816502754,
+        "whole_stress_relative": 0.9657187383924402,
+        "localized_stress_relative": 0.9654384423793642,
+        "bulk_storage_relative": 0.9727524849333055
+      }
+    },
+    {
+      "partitions": [
+        256,
+        512,
+        1024
+      ],
+      "common": {
+        "phi": 0.14411557654538837,
+        "q_Pa": 0.6419838125740691,
+        "slip_relative": 0.6412002729376816,
+        "V_common_relative": 0.07447144630599495,
+        "whole_stress_relative": 0.6284857980416516,
+        "localized_stress_relative": 0.6045679851215474,
+        "bulk_storage_relative": 0.7277911870106994
+      },
+      "smooth_pre_onset": {
+        "phi": null,
+        "q_Pa": 2.0000001360744064,
+        "slip_relative": 5.276940736634761,
+        "V_common_relative": 5.277106639592251,
+        "whole_stress_relative": 2.0000000470203347,
+        "localized_stress_relative": 1.9999994866491249,
+        "bulk_storage_relative": 1.9999997504627285
+      },
+      "onset": {
+        "phi": 0.809308360244933,
+        "q_Pa": 0.9716350955060312,
+        "slip_relative": 0.9718948833228925,
+        "V_common_relative": 8.911595174246743,
+        "whole_stress_relative": 0.9716495116859208,
+        "localized_stress_relative": 0.9716745116215315,
+        "bulk_storage_relative": 0.9570729002412312
+      },
+      "late": {
+        "phi": 0.14411557654538837,
+        "q_Pa": 0.5130333352690888,
+        "slip_relative": 0.5127301054116767,
+        "V_common_relative": -0.8362185754678483,
+        "whole_stress_relative": 0.49975320636378856,
+        "localized_stress_relative": 0.476157893640844,
+        "bulk_storage_relative": 0.564346636133448
+      }
+    }
+  ],
+  "finest_reference_uncertainty": {
+    "phi": {
+      "last_halving_difference": 0.0024110498026439497,
+      "observed_order": 0.14411557654538837,
+      "estimated_finest_error": 0.0024110498026439497,
+      "conditional_on_smooth_asymptotic_behavior": false
+    },
+    "q_Pa": {
+      "last_halving_difference": 2.8256641245746152,
+      "observed_order": 0.6419838125740691,
+      "estimated_finest_error": 5.041566407705171,
+      "conditional_on_smooth_asymptotic_behavior": true
+    },
+    "slip_relative": {
+      "last_halving_difference": 5.798678110123479e-05,
+      "observed_order": 0.6412002729376816,
+      "estimated_finest_error": 0.00010361699229795339,
+      "conditional_on_smooth_asymptotic_behavior": true
+    },
+    "V_common_relative": {
+      "last_halving_difference": 0.0009062403238641516,
+      "observed_order": 0.07447144630599495,
+      "estimated_finest_error": 0.0009062403238641516,
+      "conditional_on_smooth_asymptotic_behavior": false
+    },
+    "whole_stress_relative": {
+      "last_halving_difference": 0.0021405138484876466,
+      "observed_order": 0.6284857980416516,
+      "estimated_finest_error": 0.003920774572097055,
+      "conditional_on_smooth_asymptotic_behavior": true
+    },
+    "localized_stress_relative": {
+      "last_halving_difference": 0.002176393965900206,
+      "observed_order": 0.6045679851215474,
+      "estimated_finest_error": 0.004181164793616073,
+      "conditional_on_smooth_asymptotic_behavior": true
+    },
+    "bulk_storage_relative": {
+      "last_halving_difference": 0.0039085752789678845,
+      "observed_order": 0.7277911870106994,
+      "estimated_finest_error": 0.005957271333533756,
+      "conditional_on_smooth_asymptotic_behavior": true
+    }
+  },
+  "selected_denominator": null,
+  "common_interval": [
+    0.015625,
+    "rates from slip differences on forty identical intervals"
+  ],
+  "stress_scale_Pa": 1332.5219747788833,
+  "storage_scale_J_m": 0.8878074066343145,
+  "need_optional_refinement": false
+}

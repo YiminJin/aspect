@@ -1,0 +1,224 @@
+{
+  "64": {
+    "work_difference_prediction_signed": -0.028722557733212972,
+    "work_difference_measured_signed": -0.028722557709140308,
+    "maximum_prediction_error": 1.7874833557751657e-12,
+    "old_weak_force_Pa": 1.0142855444428278e-08,
+    "phase_redistributed_weak_force_Pa": 6.4440684164765685,
+    "coefficient_recurrence_error": 0.0,
+    "mechanical_replay_R_error": 0.0,
+    "mechanical_replay_Z_error": 0.0,
+    "direct_normalization_error": 1.9984014443252818e-15,
+    "selected_incoming_checks": [
+      {
+        "time": 0.5,
+        "incoming_time": 0.484375,
+        "bulk_energy_6_24": 2.8976820942716586e-14,
+        "bulk_energy_24_48": 1.3322676295501878e-15,
+        "gradient_error_6_24": 1.0907941216942163e-14,
+        "Hessian_relative_error_6_24": 1.043536486676117e-15,
+        "free_nodes": 0,
+        "minimum_free_curvature": null
+      },
+      {
+        "time": 0.546875,
+        "incoming_time": 0.53125,
+        "bulk_energy_6_24": 7.105427357601002e-15,
+        "bulk_energy_24_48": 5.440092820663267e-15,
+        "gradient_error_6_24": 1.623701173512262e-14,
+        "Hessian_relative_error_6_24": 1.3375551980016941e-15,
+        "free_nodes": 157,
+        "minimum_free_curvature": 0.04568050506399175
+      },
+      {
+        "time": 0.625,
+        "incoming_time": 0.609375,
+        "bulk_energy_6_24": 1.0547118733938987e-14,
+        "bulk_energy_24_48": 2.1649348980190553e-14,
+        "gradient_error_6_24": 2.4064084058720184e-14,
+        "Hessian_relative_error_6_24": 1.8968828440454137e-15,
+        "free_nodes": 167,
+        "minimum_free_curvature": 0.04193883274328673
+      }
+    ]
+  },
+  "128": {
+    "work_difference_prediction_signed": -0.07622031101571294,
+    "work_difference_measured_signed": -0.0762203109864406,
+    "maximum_prediction_error": 1.1029441249199579e-12,
+    "old_weak_force_Pa": 1.0534677130635828e-08,
+    "phase_redistributed_weak_force_Pa": 4.760263143112468,
+    "coefficient_recurrence_error": 0.0,
+    "mechanical_replay_R_error": 0.0,
+    "mechanical_replay_Z_error": 0.0,
+    "direct_normalization_error": 3.9968028886505635e-15,
+    "selected_incoming_checks": [
+      {
+        "time": 0.5,
+        "incoming_time": 0.4921875,
+        "bulk_energy_6_24": 2.220446049250313e-15,
+        "bulk_energy_24_48": 1.4876988529977098e-14,
+        "gradient_error_6_24": 1.379452108096757e-14,
+        "Hessian_relative_error_6_24": 1.6109007683621495e-15,
+        "free_nodes": 0,
+        "minimum_free_curvature": null
+      },
+      {
+        "time": 0.546875,
+        "incoming_time": 0.5390625,
+        "bulk_energy_6_24": 1.4432899320127035e-15,
+        "bulk_energy_24_48": 3.4416913763379853e-15,
+        "gradient_error_6_24": 2.3564483697639488e-14,
+        "Hessian_relative_error_6_24": 1.249978517677347e-15,
+        "free_nodes": 159,
+        "minimum_free_curvature": 0.04522805577207702
+      },
+      {
+        "time": 0.625,
+        "incoming_time": 0.6171875,
+        "bulk_energy_6_24": 1.3766765505351941e-14,
+        "bulk_energy_24_48": 1.5654144647214707e-14,
+        "gradient_error_6_24": 3.21409565628581e-14,
+        "Hessian_relative_error_6_24": 1.2326911200908317e-15,
+        "free_nodes": 169,
+        "minimum_free_curvature": 0.04152846038776617
+      }
+    ]
+  },
+  "256": {
+    "work_difference_prediction_signed": -0.11032996683017487,
+    "work_difference_measured_signed": -0.1103299667825427,
+    "maximum_prediction_error": 8.883623003885788e-13,
+    "old_weak_force_Pa": 1.137760818892275e-08,
+    "phase_redistributed_weak_force_Pa": 4.57736788980128,
+    "coefficient_recurrence_error": 0.0,
+    "mechanical_replay_R_error": 0.0,
+    "mechanical_replay_Z_error": 0.0,
+    "direct_normalization_error": 4.218847493575595e-15,
+    "selected_incoming_checks": [
+      {
+        "time": 0.5,
+        "incoming_time": 0.49609375,
+        "bulk_energy_6_24": 2.8199664825478976e-14,
+        "bulk_energy_24_48": 7.771561172376096e-16,
+        "gradient_error_6_24": 1.657007864253046e-14,
+        "Hessian_relative_error_6_24": 1.0870340403392338e-15,
+        "free_nodes": 0,
+        "minimum_free_curvature": null
+      },
+      {
+        "time": 0.546875,
+        "incoming_time": 0.54296875,
+        "bulk_energy_6_24": 2.7755575615628914e-15,
+        "bulk_energy_24_48": 1.2878587085651816e-14,
+        "gradient_error_6_24": 1.9095836023528818e-14,
+        "Hessian_relative_error_6_24": 1.896389757530207e-15,
+        "free_nodes": 159,
+        "minimum_free_curvature": 0.04499227125320084
+      },
+      {
+        "time": 0.625,
+        "incoming_time": 0.62109375,
+        "bulk_energy_6_24": 3.108624468950438e-14,
+        "bulk_energy_24_48": 3.885780586188048e-15,
+        "gradient_error_6_24": 3.463895836826158e-14,
+        "Hessian_relative_error_6_24": 2.3679586240443804e-15,
+        "free_nodes": 169,
+        "minimum_free_curvature": 0.04133805092912456
+      }
+    ]
+  },
+  "512": {
+    "work_difference_prediction_signed": -0.12807457634760977,
+    "work_difference_measured_signed": -0.12807457634656483,
+    "maximum_prediction_error": 3.2284938611404357e-14,
+    "old_weak_force_Pa": 1.0097792824126373e-08,
+    "phase_redistributed_weak_force_Pa": 4.370640628194906,
+    "coefficient_recurrence_error": 0.0,
+    "mechanical_replay_R_error": 0.0,
+    "mechanical_replay_Z_error": 0.0,
+    "direct_normalization_error": 5.995204332975845e-15,
+    "selected_incoming_checks": [
+      {
+        "time": 0.5,
+        "incoming_time": 0.498046875,
+        "bulk_energy_6_24": 3.3306690738754696e-16,
+        "bulk_energy_24_48": 9.769962616701378e-15,
+        "gradient_error_6_24": 1.3725132141928498e-14,
+        "Hessian_relative_error_6_24": 1.0732153453087455e-15,
+        "free_nodes": 0,
+        "minimum_free_curvature": null
+      },
+      {
+        "time": 0.546875,
+        "incoming_time": 0.544921875,
+        "bulk_energy_6_24": 1.9984014443252818e-14,
+        "bulk_energy_24_48": 3.552713678800501e-15,
+        "gradient_error_6_24": 2.145505995085433e-14,
+        "Hessian_relative_error_6_24": 1.5240751864415329e-15,
+        "free_nodes": 159,
+        "minimum_free_curvature": 0.04486082121353273
+      },
+      {
+        "time": 0.625,
+        "incoming_time": 0.623046875,
+        "bulk_energy_6_24": 1.5987211554602254e-14,
+        "bulk_energy_24_48": 7.327471962526033e-15,
+        "gradient_error_6_24": 4.551914400957451e-14,
+        "Hessian_relative_error_6_24": 1.8124241032304915e-15,
+        "free_nodes": 169,
+        "minimum_free_curvature": 0.04122160905702834
+      }
+    ]
+  },
+  "1024": {
+    "work_difference_prediction_signed": -0.1325300541353802,
+    "work_difference_measured_signed": -0.1325300541356802,
+    "maximum_prediction_error": 6.806881447385393e-14,
+    "old_weak_force_Pa": 1.026825202643522e-08,
+    "phase_redistributed_weak_force_Pa": 4.1732262632349375,
+    "coefficient_recurrence_error": 0.0,
+    "mechanical_replay_R_error": 0.0,
+    "mechanical_replay_Z_error": 0.0,
+    "direct_normalization_error": 5.10702591327572e-15,
+    "selected_incoming_checks": [
+      {
+        "time": 0.5,
+        "incoming_time": 0.4990234375,
+        "bulk_energy_6_24": 1.5210055437364645e-14,
+        "bulk_energy_24_48": 6.217248937900877e-15,
+        "gradient_error_6_24": 1.3558598688234724e-14,
+        "Hessian_relative_error_6_24": 1.184862235172757e-15,
+        "free_nodes": 0,
+        "minimum_free_curvature": null
+      },
+      {
+        "time": 0.546875,
+        "incoming_time": 0.5458984375,
+        "bulk_energy_6_24": 3.752553823233029e-14,
+        "bulk_energy_24_48": 1.27675647831893e-14,
+        "gradient_error_6_24": 1.9304002840645777e-14,
+        "Hessian_relative_error_6_24": 1.6774850370803135e-15,
+        "free_nodes": 159,
+        "minimum_free_curvature": 0.04478874768058416
+      },
+      {
+        "time": 0.625,
+        "incoming_time": 0.6240234375,
+        "bulk_energy_6_24": 5.10702591327572e-15,
+        "bulk_energy_24_48": 1.765254609153999e-14,
+        "gradient_error_6_24": 3.1252778143159086e-14,
+        "Hessian_relative_error_6_24": 1.929902538381568e-15,
+        "free_nodes": 169,
+        "minimum_free_curvature": 0.041117176049188804
+      }
+    ]
+  },
+  "separate_spatial_comparison": {
+    "purpose": "Matched finest timestep, separate exact-bulk spatial comparator",
+    "phi": 2.358436740124148e-06,
+    "q_Pa": 0.0019721407781219114,
+    "slip": 6.786032694106048e-09,
+    "bulk_storage": 0.00012524279668546523
+  }
+}

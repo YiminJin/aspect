@@ -1,0 +1,16 @@
+{
+  "incoming_hash_checks": 446,
+  "unique_preserved_files": 433,
+  "old_trajectories_unchanged": true,
+  "production_and_governing_specifications_unchanged": true,
+  "maximum_solved_phase_KKT": 5.219871410104962e-12,
+  "maximum_work_identity_error": 1.8100278220689603e-12,
+  "endpoint_phase_diagnostic_is_not_a_solver_failure": true,
+  "smooth_profile_first_order_work_scaling": true,
+  "boundary_reaction_and_lifting_dependence_audited": true,
+  "consistent_endpoint_derivative_and_saved_entry_KKT_pass": true,
+  "saved_entry_energy_path_is_not_admissible": true,
+  "native_gate_pass": false,
+  "new_native_run": false,
+  "P3_ready": false
+}

@@ -1,0 +1,1418 @@
+[
+  {
+    "denominator": 256,
+    "summary": {
+      "denominator": 256,
+      "dt": 0.00390625,
+      "start": 0.0,
+      "final": 0.5625,
+      "completed": true,
+      "accepted": 144,
+      "failures": [],
+      "onsets": {
+        "field": [
+          0.52734375,
+          0.53125
+        ],
+        "core": [
+          0.52734375,
+          0.53125
+        ]
+      },
+      "evaluations": 1530,
+      "runtime_seconds": 39.47897726300016,
+      "peak_RSS_KiB": 107440
+    },
+    "final": {
+      "time": 0.5625,
+      "phase_max": 0.6543671161173518,
+      "phase_increment": 0.0061650856528335796,
+      "phase_KKT": 4.183459134660438e-14,
+      "q": 268.75230571800677,
+      "V": 0.1448447463838637,
+      "slip": 0.03922557590913484,
+      "bulk": 0.8049929979427295,
+      "cohesive": 5.261553218766028,
+      "fracture": 16.152682086446415,
+      "force": 7.400245749522583e-09,
+      "contact_signed": 1.5006662579253316e-11,
+      "contact": 1.5006662579253316e-11,
+      "I": 145.6932949791656,
+      "stress_min": 1177.1531873962958,
+      "stress_max": 1315.9762171504553
+    },
+    "totals": {
+      "external_work": {
+        "signed": 46.883489128152725,
+        "absolute": 46.883489128152725,
+        "maximum": 0.7126847120975637
+      },
+      "bulk_work": {
+        "signed": 46.91968353795274,
+        "absolute": 46.91968353795274,
+        "maximum": 0.7180526706133843
+      },
+      "lifting_work": {
+        "signed": 46.88348912817937,
+        "absolute": 46.88348912817937,
+        "maximum": 0.7126847120983093
+      },
+      "bulk_change": {
+        "signed": 0.8049929979427295,
+        "absolute": 0.9241459144714639,
+        "maximum": 0.07581165559337599
+      },
+      "cohesive_change": {
+        "signed": 5.261553218766028,
+        "absolute": 5.586999285113355,
+        "maximum": 0.16228179057195202
+      },
+      "fracture_change": {
+        "signed": 1.5717485105798943,
+        "absolute": 1.5717485105798943,
+        "maximum": 0.18042926576471174
+      },
+      "bulk_viscous": {
+        "signed": 0.0063086825747779435,
+        "absolute": 0.0063086825747779435,
+        "maximum": 6.740453964583249e-05
+      },
+      "cohesive_viscous": {
+        "signed": 0.014722634222010401,
+        "absolute": 0.014722634222010401,
+        "maximum": 0.00042324516098294333
+      },
+      "friction": {
+        "signed": 39.22557590913483,
+        "absolute": 39.22557590913483,
+        "maximum": 0.5657997905619675
+      },
+      "external_remainder": {
+        "signed": -0.001412825067545964,
+        "absolute": 0.0014672762987603559,
+        "maximum": 0.0008956568286740962
+      },
+      "mechanical_power": {
+        "signed": 0.03619440980001207,
+        "absolute": 0.036194425494308104,
+        "maximum": 0.005367958515820633
+      },
+      "friction_residual_power": {
+        "signed": -0.014244312169476255,
+        "absolute": 0.01603564155446277,
+        "maximum": 0.002121607896868947
+      },
+      "phase_power": {
+        "signed": -0.020537272563013978,
+        "absolute": 0.020537278145670402,
+        "maximum": 0.0032497748252715316
+      },
+      "mechanical_power_absolute": {
+        "signed": 0.03619442549511564,
+        "absolute": 0.03619442549511564,
+        "maximum": 0.005367958515820633
+      },
+      "friction_residual_power_absolute": {
+        "signed": 0.016035641554558538,
+        "absolute": 0.016035641554558538,
+        "maximum": 0.002121607896868947
+      },
+      "phase_power_absolute": {
+        "signed": 0.020768971614003942,
+        "absolute": 0.020768971614003942,
+        "maximum": 0.0032497748252715316
+      },
+      "bulk_profile_power": {
+        "signed": -0.0209718919054857,
+        "absolute": 0.0209718919054857,
+        "maximum": 0.0032337733547291208
+      },
+      "normalization_power": {
+        "signed": -1.5713138912374172,
+        "absolute": 1.5713138912374172,
+        "maximum": 0.18043973511186495
+      },
+      "fracture_power": {
+        "signed": 1.5717485105798898,
+        "absolute": 1.5717485105798898,
+        "maximum": 0.18042926576472743
+      },
+      "signed_profile_cost": {
+        "signed": 2.824563099646646,
+        "absolute": 2.824563099646646,
+        "maximum": 0.4286140363905311
+      }
+    },
+    "onset_window_totals": {
+      "external_work": {
+        "signed": 7.028987730432168,
+        "absolute": 7.028987730432168,
+        "maximum": 0.7126847120975637
+      },
+      "bulk_work": {
+        "signed": 7.06518214018779,
+        "absolute": 7.06518214018779,
+        "maximum": 0.7180526706133843
+      },
+      "lifting_work": {
+        "signed": 7.028987730437495,
+        "absolute": 7.028987730437495,
+        "maximum": 0.7126847120983093
+      },
+      "bulk_change": {
+        "signed": -0.05330267470824035,
+        "absolute": 0.06585024182049404,
+        "maximum": 0.007271115578249443
+      },
+      "cohesive_change": {
+        "signed": 0.035644040805355104,
+        "absolute": 0.3610901071526822,
+        "maximum": 0.16228179057195202
+      },
+      "fracture_change": {
+        "signed": 1.5717485105798943,
+        "absolute": 1.5717485105798943,
+        "maximum": 0.18042926576471174
+      },
+      "bulk_viscous": {
+        "signed": 0.0006550698809920411,
+        "absolute": 0.0006550698809920411,
+        "maximum": 6.740453964583249e-05
+      },
+      "cohesive_viscous": {
+        "signed": 0.004182299952497242,
+        "absolute": 0.004182299952497242,
+        "maximum": 0.00042324516098294333
+      },
+      "friction": {
+        "signed": 5.470577652116045,
+        "absolute": 5.470577652116045,
+        "maximum": 0.5657997905619675
+      },
+      "external_remainder": {
+        "signed": -0.0005171681943754169,
+        "absolute": 0.0005716194255898088,
+        "maximum": 0.0005443910021000198
+      },
+      "mechanical_power": {
+        "signed": 0.036194409755622416,
+        "absolute": 0.03619442544991845,
+        "maximum": 0.005367958515820633
+      },
+      "friction_residual_power": {
+        "signed": -0.015139968998215196,
+        "absolute": 0.015139984725635677,
+        "maximum": 0.002121607896868947
+      },
+      "phase_power": {
+        "signed": -0.020537272563013978,
+        "absolute": 0.020537278145670402,
+        "maximum": 0.0032497748252715316
+      },
+      "mechanical_power_absolute": {
+        "signed": 0.03619442544991845,
+        "absolute": 0.03619442544991845,
+        "maximum": 0.005367958515820633
+      },
+      "friction_residual_power_absolute": {
+        "signed": 0.015139984725635677,
+        "absolute": 0.015139984725635677,
+        "maximum": 0.002121607896868947
+      },
+      "phase_power_absolute": {
+        "signed": 0.020768971614003942,
+        "absolute": 0.020768971614003942,
+        "maximum": 0.0032497748252715316
+      },
+      "bulk_profile_power": {
+        "signed": -0.0209718919054857,
+        "absolute": 0.0209718919054857,
+        "maximum": 0.0032337733547291208
+      },
+      "normalization_power": {
+        "signed": -1.5713138912374172,
+        "absolute": 1.5713138912374172,
+        "maximum": 0.18043973511186495
+      },
+      "fracture_power": {
+        "signed": 1.5717485105798898,
+        "absolute": 1.5717485105798898,
+        "maximum": 0.18042926576472743
+      },
+      "signed_profile_cost": {
+        "signed": 2.824563099646646,
+        "absolute": 2.824563099646646,
+        "maximum": 0.4286140363905311
+      }
+    },
+    "smooth_totals": {
+      "external_work": {
+        "signed": 5.644122546360343,
+        "absolute": 5.644122546360343,
+        "maximum": 0.7126847120975637
+      },
+      "bulk_work": {
+        "signed": 5.678586046159708,
+        "absolute": 5.678586046159708,
+        "maximum": 0.7180526706133843
+      },
+      "lifting_work": {
+        "signed": 5.644122546365596,
+        "absolute": 5.644122546365596,
+        "maximum": 0.7126847120983093
+      },
+      "bulk_change": {
+        "signed": -0.055991735126747155,
+        "absolute": 0.055991735126747155,
+        "maximum": 0.007271115578249443
+      },
+      "cohesive_change": {
+        "signed": -0.16272303317366354,
+        "absolute": 0.16272303317366354,
+        "maximum": 0.026501479006831197
+      },
+      "fracture_change": {
+        "signed": 1.440904848958116,
+        "absolute": 1.440904848958116,
+        "maximum": 0.18042926576471174
+      },
+      "bulk_viscous": {
+        "signed": 0.0005203660694693493,
+        "absolute": 0.0005203660694693493,
+        "maximum": 6.698054927545685e-05
+      },
+      "cohesive_viscous": {
+        "signed": 0.003345320443002474,
+        "absolute": 0.003345320443002474,
+        "maximum": 0.00042324516098294333
+      },
+      "friction": {
+        "signed": 4.418039553574558,
+        "absolute": 4.418039553574558,
+        "maximum": 0.5657997905619675
+      },
+      "external_remainder": {
+        "signed": 2.722561560719594e-05,
+        "absolute": 2.722561560719594e-05,
+        "maximum": 3.424206340363334e-06
+      },
+      "mechanical_power": {
+        "signed": 0.03446349979936605,
+        "absolute": 0.03446349979936605,
+        "maximum": 0.005367958515820633
+      },
+      "friction_residual_power": {
+        "signed": -0.014210552809796129,
+        "absolute": 0.014210552809796129,
+        "maximum": 0.002121607896868947
+      },
+      "phase_power": {
+        "signed": -0.020280172605158353,
+        "absolute": 0.020280172605158353,
+        "maximum": 0.0032497748252715316
+      },
+      "mechanical_power_absolute": {
+        "signed": 0.03446349979936605,
+        "absolute": 0.03446349979936605,
+        "maximum": 0.005367958515820633
+      },
+      "friction_residual_power_absolute": {
+        "signed": 0.014210552809796129,
+        "absolute": 0.014210552809796129,
+        "maximum": 0.002121607896868947
+      },
+      "phase_power_absolute": {
+        "signed": 0.020280172605158353,
+        "absolute": 0.020280172605158353,
+        "maximum": 0.0032497748252715316
+      },
+      "bulk_profile_power": {
+        "signed": -0.020177224338735242,
+        "absolute": 0.020177224338735242,
+        "maximum": 0.0032337733547291208
+      },
+      "normalization_power": {
+        "signed": -1.441007797224535,
+        "absolute": 1.441007797224535,
+        "maximum": 0.18043973511186495
+      },
+      "fracture_power": {
+        "signed": 1.4409048489581133,
+        "absolute": 1.4409048489581133,
+        "maximum": 0.18042926576472743
+      },
+      "signed_profile_cost": {
+        "signed": 2.7058379156471872,
+        "absolute": 2.7058379156471872,
+        "maximum": 0.4286140363905311
+      }
+    },
+    "onset_totals": {
+      "external_work": {
+        "signed": 41.23936658179239,
+        "absolute": 41.23936658179239,
+        "maximum": 0.6952669913450846
+      },
+      "bulk_work": {
+        "signed": 41.24109749179303,
+        "absolute": 41.24109749179303,
+        "maximum": 0.6969979091484892
+      },
+      "lifting_work": {
+        "signed": 41.23936658181377,
+        "absolute": 41.23936658181377,
+        "maximum": 0.6952669913453443
+      },
+      "bulk_change": {
+        "signed": 0.8609847330694766,
+        "absolute": 0.8681541793447167,
+        "maximum": 0.07581165559337599
+      },
+      "cohesive_change": {
+        "signed": 5.424276251939691,
+        "absolute": 5.424276251939691,
+        "maximum": 0.16228179057195202
+      },
+      "fracture_change": {
+        "signed": 0.1308436616217783,
+        "absolute": 0.1308436616217783,
+        "maximum": 0.13084345285380827
+      },
+      "bulk_viscous": {
+        "signed": 0.005788316505308594,
+        "absolute": 0.005788316505308594,
+        "maximum": 6.740453964583249e-05
+      },
+      "cohesive_viscous": {
+        "signed": 0.011377313779007928,
+        "absolute": 0.011377313779007928,
+        "maximum": 0.00042238233560107797
+      },
+      "friction": {
+        "signed": 34.80753635556027,
+        "absolute": 34.80753635556027,
+        "maximum": 0.5319775823486829
+      },
+      "external_remainder": {
+        "signed": -0.00144005068315316,
+        "absolute": 0.00144005068315316,
+        "maximum": 0.0008956568286740962
+      },
+      "mechanical_power": {
+        "signed": 0.0017309100006460182,
+        "absolute": 0.0017309256949420548,
+        "maximum": 0.001730917803404387
+      },
+      "friction_residual_power": {
+        "signed": -3.375935968012508e-05,
+        "absolute": 0.0018250887446666418,
+        "maximum": 0.0009294240521293081
+      },
+      "phase_power": {
+        "signed": -0.0002570999578556251,
+        "absolute": 0.0002571055405120497,
+        "maximum": 0.0002571027491838374
+      },
+      "mechanical_power_absolute": {
+        "signed": 0.0017309256957495924,
+        "absolute": 0.0017309256957495924,
+        "maximum": 0.001730917803404387
+      },
+      "friction_residual_power_absolute": {
+        "signed": 0.001825088744762409,
+        "absolute": 0.001825088744762409,
+        "maximum": 0.0009294240521293081
+      },
+      "phase_power_absolute": {
+        "signed": 0.0004887990088455896,
+        "absolute": 0.0004887990088455896,
+        "maximum": 0.0004887962175173773
+      },
+      "bulk_profile_power": {
+        "signed": -0.0007946675667504588,
+        "absolute": 0.0007946675667504588,
+        "maximum": 0.0007946675632116131
+      },
+      "normalization_power": {
+        "signed": -0.13030609401288207,
+        "absolute": 0.13030609401288207,
+        "maximum": 0.13030588803977916
+      },
+      "fracture_power": {
+        "signed": 0.13084366162177652,
+        "absolute": 0.13084366162177652,
+        "maximum": 0.13084345285380655
+      },
+      "signed_profile_cost": {
+        "signed": 0.11872518399945875,
+        "absolute": 0.11872518399945875,
+        "maximum": 0.11872517804634342
+      }
+    },
+    "phase_increment_max": 0.006281545868709992,
+    "endpoint_phase_KKT_max": 4.420595833826171e-14,
+    "endpoint_force_max": 9.235975539922947e-09,
+    "endpoint_contact_max": 3.433342499192804e-11,
+    "minimum_reduced_curvature": 1.5147455866030704e-05,
+    "weak_contacts_max": 0,
+    "intermediate_max": {
+      "mechanical": 2.9359564068403188,
+      "contact": 54.66725400905159,
+      "phase_KKT": 0.0033652384117619206,
+      "chi_rate": 29.660557891635733,
+      "identity_power": 1.3571366253017914e-12
+    },
+    "smooth_intermediate_max": {
+      "mechanical": 2.9359564068403188,
+      "contact": 5.581247151288153,
+      "phase_KKT": 0.0033652384117619206,
+      "chi_rate": 29.660557891635733,
+      "identity_power": 1.3571366253017914e-12
+    },
+    "critical_margin_note": "finite-step reduced margin, not uniform as dt tends to zero"
+  },
+  {
+    "denominator": 512,
+    "summary": {
+      "denominator": 512,
+      "dt": 0.001953125,
+      "start": 0.0,
+      "final": 0.5625,
+      "completed": true,
+      "accepted": 288,
+      "failures": [],
+      "onsets": {
+        "field": [
+          0.52734375,
+          0.529296875
+        ],
+        "core": [
+          0.52734375,
+          0.529296875
+        ]
+      },
+      "evaluations": 3020,
+      "runtime_seconds": 64.64984690499932,
+      "peak_RSS_KiB": 114340
+    },
+    "final": {
+      "time": 0.5625,
+      "phase_max": 0.6543671311457265,
+      "phase_increment": 0.0030802091971315892,
+      "phase_KKT": 3.859065844653181e-14,
+      "q": 268.7522928158998,
+      "V": 0.14509240151318326,
+      "slip": 0.03922557580555326,
+      "bulk": 0.8049929816091821,
+      "cohesive": 5.261553151925376,
+      "fracture": 16.152682524768053,
+      "force": 8.978418009064626e-09,
+      "contact_signed": 3.115019353572279e-11,
+      "contact": 3.115019353572279e-11,
+      "I": 145.69330711705823,
+      "stress_min": 1177.1531595662236,
+      "stress_max": 1315.9762119450897
+    },
+    "totals": {
+      "external_work": {
+        "signed": 46.88455373454996,
+        "absolute": 46.88455373454996,
+        "maximum": 0.3565903246325635
+      },
+      "bulk_work": {
+        "signed": 46.89366465999326,
+        "absolute": 46.89366465999326,
+        "maximum": 0.3572727333154335
+      },
+      "lifting_work": {
+        "signed": 46.88455373456412,
+        "absolute": 46.88455373456412,
+        "maximum": 0.35659032463283946
+      },
+      "bulk_change": {
+        "signed": 0.8049929816091821,
+        "absolute": 0.9243065870731797,
+        "maximum": 0.041994298579772715
+      },
+      "cohesive_change": {
+        "signed": 5.261553151925376,
+        "absolute": 5.599850778062841,
+        "maximum": 0.081601384994622
+      },
+      "fracture_change": {
+        "signed": 1.5717489489015328,
+        "absolute": 1.5717489489015328,
+        "maximum": 0.09022439414232508
+      },
+      "bulk_viscous": {
+        "signed": 0.00630920024091265,
+        "absolute": 0.00630920024091265,
+        "maximum": 3.377381448944678e-05
+      },
+      "cohesive_viscous": {
+        "signed": 0.014723224981444651,
+        "absolute": 0.014723224981444651,
+        "maximum": 0.0002120146890086378
+      },
+      "friction": {
+        "signed": 39.22557580555326,
+        "absolute": 39.22557580555326,
+        "maximum": 0.28338359670543606
+      },
+      "external_remainder": {
+        "signed": -0.0003495786617542175,
+        "absolute": 0.0003640378499743336,
+        "maximum": 0.00018774356296404754
+      },
+      "mechanical_power": {
+        "signed": 0.00911092544330244,
+        "absolute": 0.009110929381646909,
+        "maximum": 0.0006824086828699774
+      },
+      "friction_residual_power": {
+        "signed": -0.0036031253724509923,
+        "absolute": 0.0039786164456575126,
+        "maximum": 0.00026879365582706553
+      },
+      "phase_power": {
+        "signed": -0.005158221409178133,
+        "absolute": 0.0054394231383919625,
+        "maximum": 0.0004140433208444291
+      },
+      "mechanical_power_absolute": {
+        "signed": 0.009110929385507319,
+        "absolute": 0.009110929385507319,
+        "maximum": 0.0006824086828699774
+      },
+      "friction_residual_power_absolute": {
+        "signed": 0.003978616445780142,
+        "absolute": 0.003978616445780142,
+        "maximum": 0.00026879365582706553
+      },
+      "phase_power_absolute": {
+        "signed": 0.0054394231383919625,
+        "absolute": 0.0054394231383919625,
+        "maximum": 0.0004140433208444291
+      },
+      "bulk_profile_power": {
+        "signed": -0.005258986864615586,
+        "absolute": 0.005258986864615586,
+        "maximum": 0.00040828647057941165
+      },
+      "normalization_power": {
+        "signed": -1.5716481834460927,
+        "absolute": 1.5716481834460927,
+        "maximum": 0.0902270397077339
+      },
+      "fracture_power": {
+        "signed": 1.5717489489015295,
+        "absolute": 1.5717489489015295,
+        "maximum": 0.09022439414233062
+      },
+      "signed_profile_cost": {
+        "signed": 1.434906408473715,
+        "absolute": 1.434906408473715,
+        "maximum": 0.10989829751624569
+      }
+    },
+    "onset_window_totals": {
+      "external_work": {
+        "signed": 7.029343915660969,
+        "absolute": 7.029343915660969,
+        "maximum": 0.3565903246325635
+      },
+      "bulk_work": {
+        "signed": 7.038454841081684,
+        "absolute": 7.038454841081684,
+        "maximum": 0.3572727333154335
+      },
+      "lifting_work": {
+        "signed": 7.029343915664093,
+        "absolute": 7.029343915664093,
+        "maximum": 0.35659032463283946
+      },
+      "bulk_change": {
+        "signed": -0.05330270627472289,
+        "absolute": 0.06601089918927472,
+        "maximum": 0.0036650691185738937
+      },
+      "cohesive_change": {
+        "signed": 0.03564358225523634,
+        "absolute": 0.37394120839270073,
+        "maximum": 0.081601384994622
+      },
+      "fracture_change": {
+        "signed": 1.5717489489015328,
+        "absolute": 1.5717489489015328,
+        "maximum": 0.09022439414232508
+      },
+      "bulk_viscous": {
+        "signed": 0.0006551373450602839,
+        "absolute": 0.0006551373450602839,
+        "maximum": 3.377381448944678e-05
+      },
+      "cohesive_viscous": {
+        "signed": 0.004183138925221794,
+        "absolute": 0.004183138925221794,
+        "maximum": 0.0002120146890086378
+      },
+      "friction": {
+        "signed": 5.470577649584735,
+        "absolute": 5.470577649584735,
+        "maximum": 0.28338359670543606
+      },
+      "external_remainder": {
+        "signed": -0.00016183507609468517,
+        "absolute": 0.00017629426385434854,
+        "maximum": 0.00016906344502676252
+      },
+      "mechanical_power": {
+        "signed": 0.009110925420715071,
+        "absolute": 0.009110929358633023,
+        "maximum": 0.0006824086828699774
+      },
+      "friction_residual_power": {
+        "signed": -0.0037908689354667472,
+        "absolute": 0.0037908728825489907,
+        "maximum": 0.00026879365582706553
+      },
+      "phase_power": {
+        "signed": -0.005158221409178133,
+        "absolute": 0.0054394231383919625,
+        "maximum": 0.0004140433208444291
+      },
+      "mechanical_power_absolute": {
+        "signed": 0.00911092935863456,
+        "absolute": 0.00911092935863456,
+        "maximum": 0.0006824086828699774
+      },
+      "friction_residual_power_absolute": {
+        "signed": 0.003790872882552908,
+        "absolute": 0.003790872882552908,
+        "maximum": 0.00026879365582706553
+      },
+      "phase_power_absolute": {
+        "signed": 0.0054394231383919625,
+        "absolute": 0.0054394231383919625,
+        "maximum": 0.0004140433208444291
+      },
+      "bulk_profile_power": {
+        "signed": -0.005258986864615586,
+        "absolute": 0.005258986864615586,
+        "maximum": 0.00040828647057941165
+      },
+      "normalization_power": {
+        "signed": -1.5716481834460927,
+        "absolute": 1.5716481834460927,
+        "maximum": 0.0902270397077339
+      },
+      "fracture_power": {
+        "signed": 1.5717489489015295,
+        "absolute": 1.5717489489015295,
+        "maximum": 0.09022439414233062
+      },
+      "signed_profile_cost": {
+        "signed": 1.434906408473715,
+        "absolute": 1.434906408473715,
+        "maximum": 0.10989829751624569
+      }
+    },
+    "smooth_totals": {
+      "external_work": {
+        "signed": 5.6441019921743925,
+        "absolute": 5.6441019921743925,
+        "maximum": 0.3565903246325635
+      },
+      "bulk_work": {
+        "signed": 5.652718728014314,
+        "absolute": 5.652718728014314,
+        "maximum": 0.3572727333154335
+      },
+      "lifting_work": {
+        "signed": 5.644101992176091,
+        "absolute": 5.644101992176091,
+        "maximum": 0.35659032463283946
+      },
+      "bulk_change": {
+        "signed": -0.05599173361342491,
+        "absolute": 0.05599173361342491,
+        "maximum": 0.0036453797564895973
+      },
+      "cohesive_change": {
+        "signed": -0.1627230675655662,
+        "absolute": 0.1627230675655662,
+        "maximum": 0.013470171817574261
+      },
+      "fracture_change": {
+        "signed": 1.4409048467443597,
+        "absolute": 1.4409048467443597,
+        "maximum": 0.0902188250122542
+      },
+      "bulk_viscous": {
+        "signed": 0.0005203607024109302,
+        "absolute": 0.0005203607024109302,
+        "maximum": 3.356100146944604e-05
+      },
+      "cohesive_viscous": {
+        "signed": 0.003345225215181051,
+        "absolute": 0.003345225215181051,
+        "maximum": 0.00021175508495358783
+      },
+      "friction": {
+        "signed": 4.41803955357447,
+        "absolute": 4.41803955357447,
+        "maximum": 0.28338359670543606
+      },
+      "external_remainder": {
+        "signed": 6.807116961937698e-06,
+        "absolute": 6.807116961937698e-06,
+        "maximum": 4.2829381197151406e-07
+      },
+      "mechanical_power": {
+        "signed": 0.008616735839921933,
+        "absolute": 0.008616735839921933,
+        "maximum": 0.0006824086828699774
+      },
+      "friction_residual_power": {
+        "signed": -0.0035528614645291595,
+        "absolute": 0.0035528614645291595,
+        "maximum": 0.00026879365582706553
+      },
+      "phase_power": {
+        "signed": -0.005070681492368295,
+        "absolute": 0.005070681492368295,
+        "maximum": 0.0004140433208444291
+      },
+      "mechanical_power_absolute": {
+        "signed": 0.008616735839921933,
+        "absolute": 0.008616735839921933,
+        "maximum": 0.0006824086828699774
+      },
+      "friction_residual_power_absolute": {
+        "signed": 0.0035528614645291595,
+        "absolute": 0.0035528614645291595,
+        "maximum": 0.00026879365582706553
+      },
+      "phase_power_absolute": {
+        "signed": 0.005070681492368295,
+        "absolute": 0.005070681492368295,
+        "maximum": 0.0004140433208444291
+      },
+      "bulk_profile_power": {
+        "signed": -0.005006218347573595,
+        "absolute": 0.005006218347573595,
+        "maximum": 0.00040828647057941165
+      },
+      "normalization_power": {
+        "signed": -1.4409693098891485,
+        "absolute": 1.4409693098891485,
+        "maximum": 0.09022158405031673
+      },
+      "fracture_power": {
+        "signed": 1.4409048467443533,
+        "absolute": 1.4409048467443533,
+        "maximum": 0.09021882501225012
+      },
+      "signed_profile_cost": {
+        "signed": 1.3632116970159025,
+        "absolute": 1.3632116970159025,
+        "maximum": 0.10989829751624569
+      }
+    },
+    "onset_totals": {
+      "external_work": {
+        "signed": 41.24045174237557,
+        "absolute": 41.24045174237557,
+        "maximum": 0.34828284302452966
+      },
+      "bulk_work": {
+        "signed": 41.24094593197895,
+        "absolute": 41.24094593197895,
+        "maximum": 0.34868746977710846
+      },
+      "lifting_work": {
+        "signed": 41.24045174238803,
+        "absolute": 41.24045174238803,
+        "maximum": 0.3482828430248651
+      },
+      "bulk_change": {
+        "signed": 0.860984715222607,
+        "absolute": 0.8683148534597548,
+        "maximum": 0.041994298579772715
+      },
+      "cohesive_change": {
+        "signed": 5.424276219490943,
+        "absolute": 5.437127710497275,
+        "maximum": 0.081601384994622
+      },
+      "fracture_change": {
+        "signed": 0.13084410215717313,
+        "absolute": 0.13084410215717313,
+        "maximum": 0.09022439414232508
+      },
+      "bulk_viscous": {
+        "signed": 0.005788839538501719,
+        "absolute": 0.005788839538501719,
+        "maximum": 3.377381448944678e-05
+      },
+      "cohesive_viscous": {
+        "signed": 0.011377999766263601,
+        "absolute": 0.011377999766263601,
+        "maximum": 0.0002120146890086378
+      },
+      "friction": {
+        "signed": 34.807536251978796,
+        "absolute": 34.807536251978796,
+        "maximum": 0.267903122554883
+      },
+      "external_remainder": {
+        "signed": -0.0003563857787161552,
+        "absolute": 0.0003572307330123959,
+        "maximum": 0.00018774356296404754
+      },
+      "mechanical_power": {
+        "signed": 0.0004941896033805078,
+        "absolute": 0.000494193541724976,
+        "maximum": 0.000404626752578876
+      },
+      "friction_residual_power": {
+        "signed": -5.026390792183255e-05,
+        "absolute": 0.00042575498112835275,
+        "maximum": 0.0001877435629640165
+      },
+      "phase_power": {
+        "signed": -8.753991680983765e-05,
+        "absolute": 0.0003687416460236667,
+        "maximum": 0.00022814078141675218
+      },
+      "mechanical_power_absolute": {
+        "signed": 0.000494193545585387,
+        "absolute": 0.000494193545585387,
+        "maximum": 0.000404626752578876
+      },
+      "friction_residual_power_absolute": {
+        "signed": 0.0004257549812509825,
+        "absolute": 0.0004257549812509825,
+        "maximum": 0.0001877435629640165
+      },
+      "phase_power_absolute": {
+        "signed": 0.0003687416460236667,
+        "absolute": 0.0003687416460236667,
+        "maximum": 0.00022814078141675218
+      },
+      "bulk_profile_power": {
+        "signed": -0.00025276851704199164,
+        "absolute": 0.00025276851704199164,
+        "maximum": 0.00022549521601362377
+      },
+      "normalization_power": {
+        "signed": -0.13067887355694402,
+        "absolute": 0.13067887355694402,
+        "maximum": 0.0902270397077339
+      },
+      "fracture_power": {
+        "signed": 0.1308441021571763,
+        "absolute": 0.1308441021571763,
+        "maximum": 0.09022439414233062
+      },
+      "signed_profile_cost": {
+        "signed": 0.07169471145781259,
+        "absolute": 0.07169471145781259,
+        "maximum": 0.06225885748455795
+      }
+    },
+    "phase_increment_max": 0.0031461973384655506,
+    "endpoint_phase_KKT_max": 6.126522900099631e-14,
+    "endpoint_force_max": 9.380130450153956e-09,
+    "endpoint_contact_max": 4.888534022029489e-11,
+    "minimum_reduced_curvature": 1.2499195873823776e-05,
+    "weak_contacts_max": 0,
+    "intermediate_max": {
+      "mechanical": 0.7469421117980914,
+      "contact": 11.459103148965937,
+      "phase_KKT": 0.0008596648893295757,
+      "chi_rate": 29.723415935605544,
+      "identity_power": 1.7905676941154525e-12
+    },
+    "smooth_intermediate_max": {
+      "mechanical": 0.7469421117980914,
+      "contact": 1.4108766009701412,
+      "phase_KKT": 0.0008596648893295757,
+      "chi_rate": 29.723415935605544,
+      "identity_power": 1.7905676941154525e-12
+    },
+    "critical_margin_note": "finite-step reduced margin, not uniform as dt tends to zero"
+  },
+  {
+    "denominator": 1024,
+    "summary": {
+      "denominator": 1024,
+      "dt": 0.0009765625,
+      "start": 0.0,
+      "final": 0.5625,
+      "completed": true,
+      "accepted": 576,
+      "failures": [],
+      "onsets": {
+        "field": [
+          0.52734375,
+          0.5283203125
+        ],
+        "core": [
+          0.5283203125,
+          0.529296875
+        ]
+      },
+      "evaluations": 5589,
+      "runtime_seconds": 87.57683725799961,
+      "peak_RSS_KiB": 116020
+    },
+    "final": {
+      "time": 0.5625,
+      "phase_max": 0.6543671349027643,
+      "phase_increment": 0.0015395165128380128,
+      "phase_KKT": 2.8005375796134564e-14,
+      "q": 268.75228959040425,
+      "V": 0.14521622788962388,
+      "slip": 0.03922557579788716,
+      "bulk": 0.8049929775260521,
+      "cohesive": 5.261553135215734,
+      "fracture": 16.152682634347777,
+      "force": 7.45706074667396e-09,
+      "contact_signed": 1.887201506178826e-11,
+      "contact": 1.887201506178826e-11,
+      "I": 145.69331015151224,
+      "stress_min": 1177.1531526077888,
+      "stress_max": 1315.9762106435664
+    },
+    "totals": {
+      "external_work": {
+        "signed": 46.88483002989246,
+        "absolute": 46.88483002989246,
+        "maximum": 0.1783571538958243
+      },
+      "bulk_work": {
+        "signed": 46.8871194709582,
+        "absolute": 46.8871194709582,
+        "maximum": 0.1784431799668467
+      },
+      "lifting_work": {
+        "signed": 46.88483002989878,
+        "absolute": 46.88483002989878,
+        "maximum": 0.17835715389587928
+      },
+      "bulk_change": {
+        "signed": 0.8049929775260521,
+        "absolute": 0.9272972190849048,
+        "maximum": 0.021350912963985003
+      },
+      "cohesive_change": {
+        "signed": 5.261553135215734,
+        "absolute": 5.599850779623071,
+        "maximum": 0.041100732479108615
+      },
+      "fracture_change": {
+        "signed": 1.571749058481256,
+        "absolute": 1.571749058481256,
+        "maximum": 0.04511271742574863
+      },
+      "bulk_viscous": {
+        "signed": 0.006309299773120243,
+        "absolute": 0.006309299773120243,
+        "maximum": 1.690229174775165e-05
+      },
+      "cohesive_viscous": {
+        "signed": 0.014723522706104922,
+        "absolute": 0.014723522706104922,
+        "maximum": 0.00010605500584194534
+      },
+      "friction": {
+        "signed": 39.22557579788714,
+        "absolute": 39.22557579788714,
+        "maximum": 0.1418127225484608
+      },
+      "external_remainder": {
+        "signed": -7.376169694465547e-05,
+        "absolute": 7.737658843145513e-05,
+        "maximum": 6.0299376900012705e-05
+      },
+      "mechanical_power": {
+        "signed": 0.0022894410657344115,
+        "absolute": 0.00228965550354666,
+        "maximum": 8.602607102241156e-05
+      },
+      "friction_residual_power": {
+        "signed": -0.0008895235634469048,
+        "absolute": 0.0010103380107362994,
+        "maximum": 6.029937689583164e-05
+      },
+      "phase_power": {
+        "signed": -0.001326155805302414,
+        "absolute": 0.0013264656439134518,
+        "maximum": 5.225289420865229e-05
+      },
+      "mechanical_power_absolute": {
+        "signed": 0.0022896555103846267,
+        "absolute": 0.0022896555103846267,
+        "maximum": 8.602607102241156e-05
+      },
+      "friction_residual_power_absolute": {
+        "signed": 0.0010103380108524007,
+        "absolute": 0.0010103380108524007,
+        "maximum": 6.029937689583164e-05
+      },
+      "phase_power_absolute": {
+        "signed": 0.001334751258222351,
+        "absolute": 0.001334751258222351,
+        "maximum": 5.225289420865229e-05
+      },
+      "bulk_profile_power": {
+        "signed": -0.0012837927101512336,
+        "absolute": 0.0012837927101512336,
+        "maximum": 4.963437872792951e-05
+      },
+      "normalization_power": {
+        "signed": -1.5717914215763924,
+        "absolute": 1.5717914215763924,
+        "maximum": 0.04511372421274882
+      },
+      "fracture_power": {
+        "signed": 1.5717490584812415,
+        "absolute": 1.5717490584812415,
+        "maximum": 0.04511271742575548
+      },
+      "signed_profile_cost": {
+        "signed": 0.7246767162367433,
+        "absolute": 0.7246767162367433,
+        "maximum": 0.0278242304259102
+      }
+    },
+    "onset_window_totals": {
+      "external_work": {
+        "signed": 7.029492659405991,
+        "absolute": 7.029492659405991,
+        "maximum": 0.1783571538958243
+      },
+      "bulk_work": {
+        "signed": 7.0317821004606955,
+        "absolute": 7.0317821004606955,
+        "maximum": 0.1784431799668467
+      },
+      "lifting_work": {
+        "signed": 7.0294926594070555,
+        "absolute": 7.0294926594070555,
+        "maximum": 0.17835715389587928
+      },
+      "bulk_change": {
+        "signed": -0.05330271416624244,
+        "absolute": 0.06900152739261023,
+        "maximum": 0.0018349985727507123
+      },
+      "cohesive_change": {
+        "signed": 0.03564346761837722,
+        "absolute": 0.37394111202571434,
+        "maximum": 0.041100732479108615
+      },
+      "fracture_change": {
+        "signed": 1.571749058481256,
+        "absolute": 1.571749058481256,
+        "maximum": 0.04511271742574863
+      },
+      "bulk_viscous": {
+        "signed": 0.0006551665548786388,
+        "absolute": 0.0006551665548786388,
+        "maximum": 1.690229174775165e-05
+      },
+      "cohesive_viscous": {
+        "signed": 0.004183498701750647,
+        "absolute": 0.004183498701750647,
+        "maximum": 0.00010605500584194534
+      },
+      "friction": {
+        "signed": 5.470577644525036,
+        "absolute": 5.470577644525036,
+        "maximum": 0.1418127225484608
+      },
+      "external_remainder": {
+        "signed": -1.346230906440482e-05,
+        "absolute": 1.707719743998526e-05,
+        "maximum": 1.5114204509725226e-05
+      },
+      "mechanical_power": {
+        "signed": 0.0022894410547043185,
+        "absolute": 0.002289655489540702,
+        "maximum": 8.602607102241156e-05
+      },
+      "friction_residual_power": {
+        "signed": -0.0009498229403452985,
+        "absolute": 0.0009500386336949627,
+        "maximum": 3.382672868344437e-05
+      },
+      "phase_power": {
+        "signed": -0.001326155805302414,
+        "absolute": 0.0013264656439134518,
+        "maximum": 5.225289420865229e-05
+      },
+      "mechanical_power_absolute": {
+        "signed": 0.0022896554896743057,
+        "absolute": 0.0022896554896743057,
+        "maximum": 8.602607102241156e-05
+      },
+      "friction_residual_power_absolute": {
+        "signed": 0.0009500386336985079,
+        "absolute": 0.0009500386336985079,
+        "maximum": 3.382672868344437e-05
+      },
+      "phase_power_absolute": {
+        "signed": 0.001334751258222351,
+        "absolute": 0.001334751258222351,
+        "maximum": 5.225289420865229e-05
+      },
+      "bulk_profile_power": {
+        "signed": -0.0012837927101512336,
+        "absolute": 0.0012837927101512336,
+        "maximum": 4.963437872792951e-05
+      },
+      "normalization_power": {
+        "signed": -1.5717914215763924,
+        "absolute": 1.5717914215763924,
+        "maximum": 0.04511372421274882
+      },
+      "fracture_power": {
+        "signed": 1.5717490584812415,
+        "absolute": 1.5717490584812415,
+        "maximum": 0.04511271742575548
+      },
+      "signed_profile_cost": {
+        "signed": 0.7246767162367433,
+        "absolute": 0.7246767162367433,
+        "maximum": 0.0278242304259102
+      }
+    },
+    "smooth_totals": {
+      "external_work": {
+        "signed": 5.6440968536213365,
+        "absolute": 5.6440968536213365,
+        "maximum": 0.1783571538958243
+      },
+      "bulk_work": {
+        "signed": 5.646251091398238,
+        "absolute": 5.646251091398238,
+        "maximum": 0.1784431799668467
+      },
+      "lifting_work": {
+        "signed": 5.644096853621726,
+        "absolute": 5.644096853621726,
+        "maximum": 0.17835715389587928
+      },
+      "bulk_change": {
+        "signed": -0.05599173323503359,
+        "absolute": 0.05599173323503359,
+        "maximum": 0.0018251481921129908
+      },
+      "cohesive_change": {
+        "signed": -0.16272307616346993,
+        "absolute": 0.16272307616346993,
+        "maximum": 0.006789918491264757
+      },
+      "fracture_change": {
+        "signed": 1.4409048461908611,
+        "absolute": 1.4409048461908611,
+        "maximum": 0.045110284492583475
+      },
+      "bulk_viscous": {
+        "signed": 0.000520360022891176,
+        "absolute": 0.000520360022891176,
+        "maximum": 1.679828100735324e-05
+      },
+      "cohesive_viscous": {
+        "signed": 0.003345201408540865,
+        "absolute": 0.003345201408540865,
+        "maximum": 0.00010591033124839953
+      },
+      "friction": {
+        "signed": 4.4180395535743955,
+        "absolute": 4.4180395535743955,
+        "maximum": 0.1418127225484608
+      },
+      "external_remainder": {
+        "signed": 1.7018231516230387e-06,
+        "absolute": 1.7018231516230387e-06,
+        "maximum": 5.3551817258412626e-08
+      },
+      "mechanical_power": {
+        "signed": 0.0021542377769015295,
+        "absolute": 0.0021542377769015295,
+        "maximum": 8.602607102241156e-05
+      },
+      "friction_residual_power": {
+        "signed": -0.0008882293219531577,
+        "absolute": 0.0008882293219531577,
+        "maximum": 3.382672868344437e-05
+      },
+      "phase_power": {
+        "signed": -0.001267710278125492,
+        "absolute": 0.001267710278125492,
+        "maximum": 5.225289420865229e-05
+      },
+      "mechanical_power_absolute": {
+        "signed": 0.0021542377769015295,
+        "absolute": 0.0021542377769015295,
+        "maximum": 8.602607102241156e-05
+      },
+      "friction_residual_power_absolute": {
+        "signed": 0.0008882293219531577,
+        "absolute": 0.0008882293219531577,
+        "maximum": 3.382672868344437e-05
+      },
+      "phase_power_absolute": {
+        "signed": 0.001267710278125492,
+        "absolute": 0.001267710278125492,
+        "maximum": 5.225289420865229e-05
+      },
+      "bulk_profile_power": {
+        "signed": -0.0012128682904085366,
+        "absolute": 0.0012128682904085366,
+        "maximum": 4.963437872792951e-05
+      },
+      "normalization_power": {
+        "signed": -1.440959688178558,
+        "absolute": 1.440959688178558,
+        "maximum": 0.04511134732250923
+      },
+      "fracture_power": {
+        "signed": 1.440904846190841,
+        "absolute": 1.440904846190841,
+        "maximum": 0.04511028449258868
+      },
+      "signed_profile_cost": {
+        "signed": 0.6841656545441204,
+        "absolute": 0.6841656545441204,
+        "maximum": 0.0278242304259102
+      }
+    },
+    "onset_totals": {
+      "external_work": {
+        "signed": 41.24073317627113,
+        "absolute": 41.24073317627113,
+        "maximum": 0.17420907851500064
+      },
+      "bulk_work": {
+        "signed": 41.240868379559956,
+        "absolute": 41.240868379559956,
+        "maximum": 0.17426005674209008
+      },
+      "lifting_work": {
+        "signed": 41.240733176277054,
+        "absolute": 41.240733176277054,
+        "maximum": 0.1742090785152355
+      },
+      "bulk_change": {
+        "signed": 0.8609847107610857,
+        "absolute": 0.8713054858498712,
+        "maximum": 0.021350912963985003
+      },
+      "cohesive_change": {
+        "signed": 5.424276211379204,
+        "absolute": 5.437127703459601,
+        "maximum": 0.041100732479108615
+      },
+      "fracture_change": {
+        "signed": 0.13084421229039478,
+        "absolute": 0.13084421229039478,
+        "maximum": 0.04511271742574863
+      },
+      "bulk_viscous": {
+        "signed": 0.005788939750229067,
+        "absolute": 0.005788939750229067,
+        "maximum": 1.690229174775165e-05
+      },
+      "cohesive_viscous": {
+        "signed": 0.011378321297564057,
+        "absolute": 0.011378321297564057,
+        "maximum": 0.00010605500584194534
+      },
+      "friction": {
+        "signed": 34.80753624431274,
+        "absolute": 34.80753624431274,
+        "maximum": 0.13407251844143847
+      },
+      "external_remainder": {
+        "signed": -7.546352009627851e-05,
+        "absolute": 7.567476527983209e-05,
+        "maximum": 6.0299376900012705e-05
+      },
+      "mechanical_power": {
+        "signed": 0.0001352032888328822,
+        "absolute": 0.00013541772664513052,
+        "maximum": 5.09782270894624e-05
+      },
+      "friction_residual_power": {
+        "signed": -1.2942414937470944e-06,
+        "absolute": 0.0001221086887831416,
+        "maximum": 6.029937689583164e-05
+      },
+      "phase_power": {
+        "signed": -5.8445527176921935e-05,
+        "absolute": 5.8755365787959596e-05,
+        "maximum": 2.8777060358910357e-05
+      },
+      "mechanical_power_absolute": {
+        "signed": 0.00013541773348309737,
+        "absolute": 0.00013541773348309737,
+        "maximum": 5.09782270894624e-05
+      },
+      "friction_residual_power_absolute": {
+        "signed": 0.00012210868889924305,
+        "absolute": 0.00012210868889924305,
+        "maximum": 6.029937689583164e-05
+      },
+      "phase_power_absolute": {
+        "signed": 6.704098009685888e-05,
+        "absolute": 6.704098009685888e-05,
+        "maximum": 2.8777060358910357e-05
+      },
+      "bulk_profile_power": {
+        "signed": -7.092441974269701e-05,
+        "absolute": 7.092441974269701e-05,
+        "maximum": 2.7742699233655338e-05
+      },
+      "normalization_power": {
+        "signed": -0.1308317333978345,
+        "absolute": 0.1308317333978345,
+        "maximum": 0.04511372421274882
+      },
+      "fracture_power": {
+        "signed": 0.13084421229040064,
+        "absolute": 0.13084421229040064,
+        "maximum": 0.04511271742575548
+      },
+      "signed_profile_cost": {
+        "signed": 0.040511061692622974,
+        "absolute": 0.040511061692622974,
+        "maximum": 0.01576174223525939
+      }
+    },
+    "phase_increment_max": 0.0015735434434014373,
+    "endpoint_phase_KKT_max": 5.6002077974889257e-14,
+    "endpoint_force_max": 9.709552273307054e-09,
+    "endpoint_contact_max": 4.638422979041934e-11,
+    "minimum_reduced_curvature": 1.2499199145165143e-05,
+    "weak_contacts_max": 0,
+    "intermediate_max": {
+      "mechanical": 0.18838124050000715,
+      "contact": 11.45905010905949,
+      "phase_KKT": 0.00021725652861544458,
+      "chi_rate": 29.754917709558583,
+      "identity_power": 2.0250467969162855e-12
+    },
+    "smooth_intermediate_max": {
+      "mechanical": 0.18838124050000715,
+      "contact": 0.3546864425293279,
+      "phase_KKT": 0.00021725652861544458,
+      "chi_rate": 29.754917709558583,
+      "identity_power": 2.0250467969162855e-12
+    },
+    "critical_margin_note": "finite-step reduced margin, not uniform as dt tends to zero"
+  }
+]

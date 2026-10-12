@@ -1,0 +1,3976 @@
+{
+  "prototype_only": true,
+  "production_changed": false,
+  "loading": "gamma(t)=.256*t, 0<=t<=1 s",
+  "frozen_reference": "aligned_frozen_endpoint512",
+  "evolving_reference": "aligned_evolving_mean256",
+  "reference_notes": "Frozen reference additionally checked against endpoint256 and mean512; evolving reference sensitivity reported, not assumed negligible.",
+  "checks": {
+    "frozen_mean16": {
+      "summary": {
+        "scheme": "mean",
+        "phase_evolves": false,
+        "steps": 16,
+        "dt": 0.0625,
+        "final_time": 1.0,
+        "amplitude": 0.256,
+        "material": {
+          "G_Pa": 1000000.0,
+          "eta_Pa_s": 100000000.0,
+          "Gc_J_m2": 26.6666666667,
+          "ell_m": 0.15625,
+          "c0": 2.6666666666666665,
+          "m": 128.00000000016
+        },
+        "input_sha256": "dfda253ebad8c42dce964676d88837473d99966e69d2f86d31e38f269ab983db",
+        "initial_obstacle_kkt": 0.0,
+        "initial_phi_max": 0.6035488376736221,
+        "final_phi_max": 0.6035488376736221,
+        "max_phase_increment": 0.0,
+        "largest_phase_release": -0.0,
+        "final_local_q": [
+          839.6433630890901,
+          839.6433630890928,
+          839.6433630890926
+        ],
+        "final_local_slip": [
+          0.08683030440288976,
+          0.08683030440289,
+          0.08683030440289
+        ],
+        "final_stress_min": -119486.83868702235,
+        "final_stress_max": 150317.89421435937,
+        "endpoint_bulk_imbalance_max": 8.022027486731531e-11,
+        "mean_bulk_imbalance_max": 3.156941374982125e-11,
+        "endpoint_slip_condition_error_max": 6.092132289631351,
+        "mean_slip_condition_error_max": 6.572520305780927e-13,
+        "mechanical_kkt_max": 5.400124791776761e-13,
+        "phase_kkt_max": 0.0,
+        "min_I": 103.07197531730232,
+        "healing_max": 0.0,
+        "phase_path_error_max": 0.0,
+        "temporal_quadrature_error_max": 1.9539925233402755e-14,
+        "onset": null,
+        "sums": {
+          "phase_release": 0.0,
+          "fracture_expenditure": 0.0,
+          "bulk_viscous": 20.35186760460264,
+          "fault_viscous": 0.0315639402539131,
+          "friction": 33.67595717870269,
+          "prescribed_external_work": 5132.913413070675,
+          "mechanical_work_error": 8.318751485593556e-12,
+          "exchange_defect": 1.7763568394002505e-15,
+          "free_bulk_work": -2.894773948290389e-13,
+          "bulk_storage_change": 5070.957789877265,
+          "fault_storage_change": 7.896234469843115
+        },
+        "elapsed_seconds": 2.554101739999169
+      },
+      "endpoint_slip_condition_error_Pa": 389.8964665364065,
+      "mean_slip_condition_error_Pa": 4.2064129956997925e-11,
+      "largest_release_rate_J_m_s": -0.0,
+      "cumulative_absolute_mechanical_work_error_J_m": 1.0490367041600355e-10,
+      "endpoint_bulk_impulse_imbalance_Pa_m_s": 2.238384477770694e-11,
+      "stick_node_range": [
+        32,
+        65
+      ],
+      "final_phase_change_max": 0.0,
+      "end_center_q_difference_max_Pa": 2.6147972675971687e-12,
+      "final_fracture_J_m": 0.0,
+      "final_surface_source_representation_error": 8.881784197001252e-16,
+      "free_bulk_velocity_amplitude_max_m_s": 0.026115159264493884,
+      "final_q_minmax_Pa": [
+        0.0,
+        839.6433630890932
+      ],
+      "final_slip_minmax_m": [
+        0.0,
+        0.08683030440289002
+      ],
+      "smooth_loading_work_correction_J_m": 6.663480972351466,
+      "work_against_smooth_loading_J_m": 5139.576894043027,
+      "smooth_loading_ledger_error_J_m": 6.6634809723597845,
+      "largest_increment": {
+        "time": 0.0625,
+        "anchor_time": 0.0,
+        "anchor_displacement": 0.0,
+        "location": [
+          0.0,
+          0.0
+        ],
+        "increment": 0.0,
+        "release_J_m": -0.0
+      }
+    },
+    "frozen_mean32": {
+      "summary": {
+        "scheme": "mean",
+        "phase_evolves": false,
+        "steps": 32,
+        "dt": 0.03125,
+        "final_time": 1.0,
+        "amplitude": 0.256,
+        "material": {
+          "G_Pa": 1000000.0,
+          "eta_Pa_s": 100000000.0,
+          "Gc_J_m2": 26.6666666667,
+          "ell_m": 0.15625,
+          "c0": 2.6666666666666665,
+          "m": 128.00000000016
+        },
+        "input_sha256": "dfda253ebad8c42dce964676d88837473d99966e69d2f86d31e38f269ab983db",
+        "initial_obstacle_kkt": 0.0,
+        "initial_phi_max": 0.6035488376736221,
+        "final_phi_max": 0.6035488376736221,
+        "max_phase_increment": 0.0,
+        "largest_phase_release": -0.0,
+        "final_local_q": [
+          843.2998412723936,
+          843.299841272396,
+          843.2998412723958
+        ],
+        "final_local_slip": [
+          0.08720678616199924,
+          0.08720678616199941,
+          0.08720678616199945
+        ],
+        "final_stress_min": -119821.65299409654,
+        "final_stress_max": 150364.05101617854,
+        "endpoint_bulk_imbalance_max": 8.344613888766617e-11,
+        "mean_bulk_imbalance_max": 2.6126656393898884e-11,
+        "endpoint_slip_condition_error_max": 6.09202234124081,
+        "mean_slip_condition_error_max": 4.227729277772596e-13,
+        "mechanical_kkt_max": 4.121147867408581e-13,
+        "phase_kkt_max": 0.0,
+        "min_I": 103.07197531730232,
+        "healing_max": 0.0,
+        "phase_path_error_max": 0.0,
+        "temporal_quadrature_error_max": 3.197442310920451e-14,
+        "onset": null,
+        "sums": {
+          "phase_release": 0.0,
+          "fracture_expenditure": 0.0,
+          "bulk_viscous": 20.318925309242235,
+          "fault_viscous": 0.03151322817805365,
+          "friction": 33.79200358006345,
+          "prescribed_external_work": 5132.92994192895,
+          "mechanical_work_error": -8.201445244881919e-12,
+          "exchange_defect": -2.756128658631951e-14,
+          "free_bulk_work": -1.5489883263666301e-13,
+          "bulk_storage_change": 5070.831619655422,
+          "fault_storage_change": 7.9558801560524035
+        },
+        "elapsed_seconds": 6.247197786997276
+      },
+      "endpoint_slip_condition_error_Pa": 389.8894298394117,
+      "mean_slip_condition_error_Pa": 2.705746737774461e-11,
+      "largest_release_rate_J_m_s": -0.0,
+      "cumulative_absolute_mechanical_work_error_J_m": 1.4941252639317275e-10,
+      "endpoint_bulk_impulse_imbalance_Pa_m_s": 2.5591591346074694e-11,
+      "stick_node_range": [
+        32,
+        65
+      ],
+      "final_phase_change_max": 0.0,
+      "end_center_q_difference_max_Pa": 2.3874235921539366e-12,
+      "final_fracture_J_m": 0.0,
+      "final_surface_source_representation_error": 8.881784197001252e-16,
+      "free_bulk_velocity_amplitude_max_m_s": 0.02867261008199717,
+      "final_q_minmax_Pa": [
+        0.0,
+        843.299841272397
+      ],
+      "final_slip_minmax_m": [
+        0.0,
+        0.08720678616199949
+      ],
+      "smooth_loading_work_correction_J_m": 1.6626735098327017,
+      "work_against_smooth_loading_J_m": 5134.592615438783,
+      "smooth_loading_ledger_error_J_m": 1.6626735098245002,
+      "largest_increment": {
+        "time": 0.03125,
+        "anchor_time": 0.0,
+        "anchor_displacement": 0.0,
+        "location": [
+          0.0,
+          0.0
+        ],
+        "increment": 0.0,
+        "release_J_m": -0.0
+      }
+    },
+    "frozen_mean256": {
+      "summary": {
+        "scheme": "mean",
+        "phase_evolves": false,
+        "steps": 256,
+        "dt": 0.00390625,
+        "final_time": 1.0,
+        "amplitude": 0.256,
+        "material": {
+          "G_Pa": 1000000.0,
+          "eta_Pa_s": 100000000.0,
+          "Gc_J_m2": 26.6666666667,
+          "ell_m": 0.15625,
+          "c0": 2.6666666666666665,
+          "m": 128.00000000016
+        },
+        "input_sha256": "dfda253ebad8c42dce964676d88837473d99966e69d2f86d31e38f269ab983db",
+        "initial_obstacle_kkt": 0.0,
+        "initial_phi_max": 0.6035488376736221,
+        "final_phi_max": 0.6035488376736221,
+        "max_phase_increment": 0.0,
+        "largest_phase_release": -0.0,
+        "final_local_q": [
+          841.4411249878506,
+          841.4411249878538,
+          841.4411249878547
+        ],
+        "final_local_slip": [
+          0.08701508878564382,
+          0.08701508878564412,
+          0.0870150887856442
+        ],
+        "final_stress_min": -119656.82839949362,
+        "final_stress_max": 150341.53398613326,
+        "endpoint_bulk_imbalance_max": 1.5546675058430992e-10,
+        "mean_bulk_imbalance_max": 2.2602364424528787e-11,
+        "endpoint_slip_condition_error_max": 0.12514521505655019,
+        "mean_slip_condition_error_max": 4.583000645652646e-13,
+        "mechanical_kkt_max": 4.276579090856103e-13,
+        "phase_kkt_max": 0.0,
+        "min_I": 103.07197531730232,
+        "healing_max": 0.0,
+        "phase_path_error_max": 0.0,
+        "temporal_quadrature_error_max": 5.773159728050814e-15,
+        "onset": null,
+        "sums": {
+          "phase_release": 0.0,
+          "fracture_expenditure": 0.0,
+          "bulk_viscous": 20.308056472311936,
+          "fault_viscous": 0.031496151295089495,
+          "friction": 33.73312676952953,
+          "prescribed_external_work": 5132.925561000207,
+          "mechanical_work_error": 1.8278793565237782e-11,
+          "exchange_defect": -2.8982892474882505e-14,
+          "free_bulk_work": -1.3575028021786405e-14,
+          "bulk_storage_change": 5070.927278034583,
+          "fault_storage_change": 7.925603572470655
+        },
+        "elapsed_seconds": 64.33625746399775
+      },
+      "endpoint_slip_condition_error_Pa": 8.00929376361921,
+      "mean_slip_condition_error_Pa": 2.933120413217693e-11,
+      "largest_release_rate_J_m_s": -0.0,
+      "cumulative_absolute_mechanical_work_error_J_m": 1.3510137449669495e-09,
+      "endpoint_bulk_impulse_imbalance_Pa_m_s": 3.007669465960011e-11,
+      "stick_node_range": [
+        32,
+        65
+      ],
+      "final_phase_change_max": 0.0,
+      "end_center_q_difference_max_Pa": 3.183231456205249e-12,
+      "final_fracture_J_m": 0.0,
+      "final_surface_source_representation_error": 8.881784197001252e-16,
+      "free_bulk_velocity_amplitude_max_m_s": 0.027682919998985384,
+      "final_q_minmax_Pa": [
+        0.0,
+        841.441124987855
+      ],
+      "final_slip_minmax_m": [
+        0.0,
+        0.08701508878564428
+      ],
+      "smooth_loading_work_correction_J_m": 0.02600469580975959,
+      "work_against_smooth_loading_J_m": 5132.9515656960175,
+      "smooth_loading_ledger_error_J_m": 0.026004695828038386,
+      "largest_increment": {
+        "time": 0.00390625,
+        "anchor_time": 0.0,
+        "anchor_displacement": 0.0,
+        "location": [
+          0.0,
+          0.0
+        ],
+        "increment": 0.0,
+        "release_J_m": -0.0
+      }
+    },
+    "frozen_mean512": {
+      "summary": {
+        "scheme": "mean",
+        "phase_evolves": false,
+        "steps": 512,
+        "dt": 0.001953125,
+        "final_time": 1.0,
+        "amplitude": 0.256,
+        "material": {
+          "G_Pa": 1000000.0,
+          "eta_Pa_s": 100000000.0,
+          "Gc_J_m2": 26.6666666667,
+          "ell_m": 0.15625,
+          "c0": 2.6666666666666665,
+          "m": 128.00000000016
+        },
+        "input_sha256": "dfda253ebad8c42dce964676d88837473d99966e69d2f86d31e38f269ab983db",
+        "initial_obstacle_kkt": 0.0,
+        "initial_phi_max": 0.6035488376736221,
+        "final_phi_max": 0.6035488376736221,
+        "max_phase_increment": 0.0,
+        "largest_phase_release": -0.0,
+        "final_local_q": [
+          841.4411398476658,
+          841.4411398476684,
+          841.4411398476703
+        ],
+        "final_local_slip": [
+          0.08701508878604391,
+          0.08701508878604435,
+          0.08701508878604447
+        ],
+        "final_stress_min": -119650.5210554917,
+        "final_stress_max": 150341.08085555132,
+        "endpoint_bulk_imbalance_max": 1.9056756173085887e-10,
+        "mean_bulk_imbalance_max": 2.219735506514553e-11,
+        "endpoint_slip_condition_error_max": 0.11095763216947852,
+        "mean_slip_condition_error_max": 6.110667527536862e-13,
+        "mechanical_kkt_max": 6.03073146976385e-13,
+        "phase_kkt_max": 0.0,
+        "min_I": 103.07197531730232,
+        "healing_max": 0.0,
+        "phase_path_error_max": 0.0,
+        "temporal_quadrature_error_max": 2.3314683517128287e-15,
+        "onset": null,
+        "sums": {
+          "phase_release": 0.0,
+          "fracture_expenditure": 0.0,
+          "bulk_viscous": 20.30792790955264,
+          "fault_viscous": 0.03149595142484997,
+          "friction": 33.732871427953675,
+          "prescribed_external_work": 5132.925625703256,
+          "mechanical_work_error": -6.255006153401588e-11,
+          "exchange_defect": -2.6709103678745905e-14,
+          "free_bulk_work": -7.40520455336731e-15,
+          "bulk_storage_change": 5070.927805437525,
+          "fault_storage_change": 7.925524976861706
+        },
+        "elapsed_seconds": 130.72012297900073
+      },
+      "endpoint_slip_condition_error_Pa": 7.101288458846623,
+      "mean_slip_condition_error_Pa": 3.910827217623591e-11,
+      "largest_release_rate_J_m_s": -0.0,
+      "cumulative_absolute_mechanical_work_error_J_m": 2.7098740542595284e-09,
+      "endpoint_bulk_impulse_imbalance_Pa_m_s": 3.22093779539894e-11,
+      "stick_node_range": [
+        32,
+        65
+      ],
+      "final_phase_change_max": 0.0,
+      "end_center_q_difference_max_Pa": 3.296918293926865e-12,
+      "final_fracture_J_m": 0.0,
+      "final_surface_source_representation_error": 8.881784197001252e-16,
+      "free_bulk_velocity_amplitude_max_m_s": 0.028054138983368886,
+      "final_q_minmax_Pa": [
+        0.0,
+        841.4411398476703
+      ],
+      "final_slip_minmax_m": [
+        0.0,
+        0.08701508878604447
+      ],
+      "smooth_loading_work_correction_J_m": 0.006501211023157634,
+      "work_against_smooth_loading_J_m": 5132.932126914279,
+      "smooth_loading_ledger_error_J_m": 0.006501210960607572,
+      "largest_increment": {
+        "time": 0.001953125,
+        "anchor_time": 0.0,
+        "anchor_displacement": 0.0,
+        "location": [
+          0.0,
+          0.0
+        ],
+        "increment": 0.0,
+        "release_J_m": -0.0
+      }
+    },
+    "frozen_endpoint16": {
+      "summary": {
+        "scheme": "endpoint",
+        "phase_evolves": false,
+        "steps": 16,
+        "dt": 0.0625,
+        "final_time": 1.0,
+        "amplitude": 0.256,
+        "material": {
+          "G_Pa": 1000000.0,
+          "eta_Pa_s": 100000000.0,
+          "Gc_J_m2": 26.6666666667,
+          "ell_m": 0.15625,
+          "c0": 2.6666666666666665,
+          "m": 128.00000000016
+        },
+        "input_sha256": "dfda253ebad8c42dce964676d88837473d99966e69d2f86d31e38f269ab983db",
+        "initial_obstacle_kkt": 0.0,
+        "initial_phi_max": 0.6035488376736221,
+        "final_phi_max": 0.6035488376736221,
+        "max_phase_increment": 0.0,
+        "largest_phase_release": -0.0,
+        "final_local_q": [
+          841.4696678368638,
+          841.4696678368662,
+          841.4696678368659
+        ],
+        "final_local_slip": [
+          0.08701860424400568,
+          0.08701860424400584,
+          0.08701860424400587
+        ],
+        "final_stress_min": -119653.98931438592,
+        "final_stress_max": 150340.60939785288,
+        "endpoint_bulk_imbalance_max": 7.436540272465209e-11,
+        "mean_bulk_imbalance_max": 5.363176569517236e-11,
+        "endpoint_slip_condition_error_max": 1.2470025012589758e-12,
+        "mean_slip_condition_error_max": 3.0463834433700256,
+        "mechanical_kkt_max": 1.3642420526593924e-12,
+        "phase_kkt_max": 0.0,
+        "min_I": 103.07197531730232,
+        "healing_max": 0.0,
+        "phase_path_error_max": 0.0,
+        "temporal_quadrature_error_max": 1.6431300764452317e-14,
+        "onset": null,
+        "sums": {
+          "phase_release": 0.0,
+          "fracture_expenditure": 0.0,
+          "bulk_viscous": 20.35177387975651,
+          "fault_viscous": 0.03156421320869202,
+          "friction": 33.73399855033851,
+          "prescribed_external_work": 5132.855546149417,
+          "mechanical_work_error": -0.04803538486381468,
+          "exchange_defect": -0.04803538485278103,
+          "free_bulk_work": -5.163503186496612e-13,
+          "bulk_storage_change": 5070.860254279473,
+          "fault_storage_change": 7.9259906115037815
+        },
+        "elapsed_seconds": 1.8811866809992353
+      },
+      "endpoint_slip_condition_error_Pa": 7.980816008057444e-11,
+      "mean_slip_condition_error_Pa": 194.96854037568158,
+      "largest_release_rate_J_m_s": -0.0,
+      "cumulative_absolute_mechanical_work_error_J_m": 0.04803538490890418,
+      "endpoint_bulk_impulse_imbalance_Pa_m_s": 2.98124164244129e-11,
+      "stick_node_range": [
+        32,
+        65
+      ],
+      "final_phase_change_max": 0.0,
+      "end_center_q_difference_max_Pa": 2.3874235921539366e-12,
+      "final_fracture_J_m": 0.0,
+      "final_surface_source_representation_error": 8.881784197001252e-16,
+      "free_bulk_velocity_amplitude_max_m_s": 0.026823540614592536,
+      "final_q_minmax_Pa": [
+        0.0,
+        841.4696678368666
+      ],
+      "final_slip_minmax_m": [
+        0.0,
+        0.0870186042440059
+      ],
+      "smooth_loading_work_correction_J_m": 6.657070708060131,
+      "work_against_smooth_loading_J_m": 5139.512616857477,
+      "smooth_loading_ledger_error_J_m": 6.6090353231963155,
+      "largest_increment": {
+        "time": 0.0625,
+        "anchor_time": 0.0,
+        "anchor_displacement": 0.0,
+        "location": [
+          0.0,
+          0.0
+        ],
+        "increment": 0.0,
+        "release_J_m": -0.0
+      }
+    },
+    "frozen_endpoint32": {
+      "summary": {
+        "scheme": "endpoint",
+        "phase_evolves": false,
+        "steps": 32,
+        "dt": 0.03125,
+        "final_time": 1.0,
+        "amplitude": 0.256,
+        "material": {
+          "G_Pa": 1000000.0,
+          "eta_Pa_s": 100000000.0,
+          "Gc_J_m2": 26.6666666667,
+          "ell_m": 0.15625,
+          "c0": 2.6666666666666665,
+          "m": 128.00000000016
+        },
+        "input_sha256": "dfda253ebad8c42dce964676d88837473d99966e69d2f86d31e38f269ab983db",
+        "initial_obstacle_kkt": 0.0,
+        "initial_phi_max": 0.6035488376736221,
+        "final_phi_max": 0.6035488376736221,
+        "max_phase_increment": 0.0,
+        "largest_phase_release": -0.0,
+        "final_local_q": [
+          841.4737948662417,
+          841.4737948662438,
+          841.4737948662438
+        ],
+        "final_local_slip": [
+          0.08701860145087514,
+          0.08701860145087534,
+          0.08701860145087535
+        ],
+        "final_stress_min": -119654.57815512989,
+        "final_stress_max": 150341.34281424424,
+        "endpoint_bulk_imbalance_max": 4.312283863328048e-11,
+        "mean_bulk_imbalance_max": 3.916511559509672e-11,
+        "endpoint_slip_condition_error_max": 8.490985692333197e-13,
+        "mean_slip_condition_error_max": 3.0461698170352047,
+        "mechanical_kkt_max": 8.526512829121202e-13,
+        "phase_kkt_max": 0.0,
+        "min_I": 103.07197531730232,
+        "healing_max": 0.0,
+        "phase_path_error_max": 0.0,
+        "temporal_quadrature_error_max": 1.4654943925052066e-14,
+        "onset": null,
+        "sums": {
+          "phase_release": 0.0,
+          "fracture_expenditure": 0.0,
+          "bulk_viscous": 20.31884829792845,
+          "fault_viscous": 0.031512950314023964,
+          "friction": 33.733999805954575,
+          "prescribed_external_work": 5132.905834042672,
+          "mechanical_work_error": -0.01428641208067447,
+          "exchange_defect": -0.014286412109550617,
+          "free_bulk_work": -2.8837659551878163e-13,
+          "bulk_storage_change": 5070.909691064712,
+          "fault_storage_change": 7.926068335843311
+        },
+        "elapsed_seconds": 7.705316011000832
+      },
+      "endpoint_slip_condition_error_Pa": 5.434230843093245e-11,
+      "mean_slip_condition_error_Pa": 194.9548682902531,
+      "largest_release_rate_J_m_s": -0.0,
+      "cumulative_absolute_mechanical_work_error_J_m": 0.014286412326454556,
+      "endpoint_bulk_impulse_imbalance_Pa_m_s": 1.5104079445493745e-11,
+      "stick_node_range": [
+        32,
+        65
+      ],
+      "final_phase_change_max": 0.0,
+      "end_center_q_difference_max_Pa": 2.0463630789890885e-12,
+      "final_fracture_J_m": 0.0,
+      "final_surface_source_representation_error": 8.881784197001252e-16,
+      "free_bulk_velocity_amplitude_max_m_s": 0.027256190667771425,
+      "final_q_minmax_Pa": [
+        0.0,
+        841.4737948662447
+      ],
+      "final_slip_minmax_m": [
+        0.0,
+        0.0870186014508754
+      ],
+      "smooth_loading_work_correction_J_m": 1.6642757710621048,
+      "work_against_smooth_loading_J_m": 5134.570109813734,
+      "smooth_loading_ledger_error_J_m": 1.6499893589814303,
+      "largest_increment": {
+        "time": 0.03125,
+        "anchor_time": 0.0,
+        "anchor_displacement": 0.0,
+        "location": [
+          0.0,
+          0.0
+        ],
+        "increment": 0.0,
+        "release_J_m": -0.0
+      }
+    },
+    "frozen_endpoint256": {
+      "summary": {
+        "scheme": "endpoint",
+        "phase_evolves": false,
+        "steps": 256,
+        "dt": 0.00390625,
+        "final_time": 1.0,
+        "amplitude": 0.256,
+        "material": {
+          "G_Pa": 1000000.0,
+          "eta_Pa_s": 100000000.0,
+          "Gc_J_m2": 26.6666666667,
+          "ell_m": 0.15625,
+          "c0": 2.6666666666666665,
+          "m": 128.00000000016
+        },
+        "input_sha256": "dfda253ebad8c42dce964676d88837473d99966e69d2f86d31e38f269ab983db",
+        "initial_obstacle_kkt": 0.0,
+        "initial_phi_max": 0.6035488376736221,
+        "final_phi_max": 0.6035488376736221,
+        "max_phase_increment": 0.0,
+        "largest_phase_release": -0.0,
+        "final_local_q": [
+          841.4751490477664,
+          841.475149047769,
+          841.4751490477684
+        ],
+        "final_local_slip": [
+          0.08701859578141351,
+          0.08701859578141366,
+          0.08701859578141373
+        ],
+        "final_stress_min": -119654.77136850046,
+        "final_stress_max": 150341.5834664994,
+        "endpoint_bulk_imbalance_max": 2.2531310150952777e-11,
+        "mean_bulk_imbalance_max": 2.015099198615644e-11,
+        "endpoint_slip_condition_error_max": 6.288303211476887e-13,
+        "mean_slip_condition_error_max": 0.8695205537472663,
+        "mechanical_kkt_max": 5.400124791776761e-13,
+        "phase_kkt_max": 0.0,
+        "min_I": 103.07197531730232,
+        "healing_max": 0.0,
+        "phase_path_error_max": 0.0,
+        "temporal_quadrature_error_max": 3.497202527569243e-15,
+        "onset": null,
+        "sums": {
+          "phase_release": 0.0,
+          "fracture_expenditure": 0.0,
+          "bulk_viscous": 20.30805640783103,
+          "fault_viscous": 0.03149615125858515,
+          "friction": 33.7339984885387,
+          "prescribed_external_work": 5132.925504456736,
+          "mechanical_work_error": -5.29926606774807e-05,
+          "exchange_defect": -5.299266117820295e-05,
+          "free_bulk_work": -2.404924697593904e-14,
+          "bulk_storage_change": 5070.925912562543,
+          "fault_storage_change": 7.926093839225432
+        },
+        "elapsed_seconds": 63.23578519799776
+      },
+      "endpoint_slip_condition_error_Pa": 4.024514055345207e-11,
+      "mean_slip_condition_error_Pa": 55.64931543982503,
+      "largest_release_rate_J_m_s": -0.0,
+      "cumulative_absolute_mechanical_work_error_J_m": 5.299423043387002e-05,
+      "endpoint_bulk_impulse_imbalance_Pa_m_s": 3.5941415706656652e-12,
+      "stick_node_range": [
+        32,
+        65
+      ],
+      "final_phase_change_max": 0.0,
+      "end_center_q_difference_max_Pa": 2.6147972675971687e-12,
+      "final_fracture_J_m": 0.0,
+      "final_surface_source_representation_error": 8.881784197001252e-16,
+      "free_bulk_velocity_amplitude_max_m_s": 0.02763475946430295,
+      "final_q_minmax_Pa": [
+        0.0,
+        841.47514904777
+      ],
+      "final_slip_minmax_m": [
+        0.0,
+        0.08701859578141379
+      ],
+      "smooth_loading_work_correction_J_m": 0.026004350420645837,
+      "work_against_smooth_loading_J_m": 5132.951508807157,
+      "smooth_loading_ledger_error_J_m": 0.025951357759968357,
+      "largest_increment": {
+        "time": 0.00390625,
+        "anchor_time": 0.0,
+        "anchor_displacement": 0.0,
+        "location": [
+          0.0,
+          0.0
+        ],
+        "increment": 0.0,
+        "release_J_m": -0.0
+      }
+    },
+    "frozen_endpoint512": {
+      "summary": {
+        "scheme": "endpoint",
+        "phase_evolves": false,
+        "steps": 512,
+        "dt": 0.001953125,
+        "final_time": 1.0,
+        "amplitude": 0.256,
+        "material": {
+          "G_Pa": 1000000.0,
+          "eta_Pa_s": 100000000.0,
+          "Gc_J_m2": 26.6666666667,
+          "ell_m": 0.15625,
+          "c0": 2.6666666666666665,
+          "m": 128.00000000016
+        },
+        "input_sha256": "dfda253ebad8c42dce964676d88837473d99966e69d2f86d31e38f269ab983db",
+        "initial_obstacle_kkt": 0.0,
+        "initial_phi_max": 0.6035488376736221,
+        "final_phi_max": 0.6035488376736221,
+        "max_phase_increment": 0.0,
+        "largest_phase_release": -0.0,
+        "final_local_q": [
+          841.4751651689813,
+          841.4751651689833,
+          841.4751651689834
+        ],
+        "final_local_slip": [
+          0.08701859587747693,
+          0.08701859587747711,
+          0.08701859587747708
+        ],
+        "final_stress_min": -119654.77366866039,
+        "final_stress_max": 150341.58633140824,
+        "endpoint_bulk_imbalance_max": 2.19841922444175e-11,
+        "mean_bulk_imbalance_max": 2.6794566565513378e-11,
+        "endpoint_slip_condition_error_max": 5.613287612504791e-13,
+        "mean_slip_condition_error_max": 0.42885449911337226,
+        "mechanical_kkt_max": 5.204725539442734e-13,
+        "phase_kkt_max": 0.0,
+        "min_I": 103.07197531730232,
+        "healing_max": 0.0,
+        "phase_path_error_max": 0.0,
+        "temporal_quadrature_error_max": 3.191891195797325e-15,
+        "onset": null,
+        "sums": {
+          "phase_release": 0.0,
+          "fracture_expenditure": 0.0,
+          "bulk_viscous": 20.307927866164498,
+          "fault_viscous": 0.03149595136626645,
+          "friction": 33.733998526028714,
+          "prescribed_external_work": 5132.92559705935,
+          "mechanical_work_error": -2.510290357175998e-05,
+          "exchange_defect": -2.5102844140014146e-05,
+          "free_bulk_work": -1.5403494964401886e-14,
+          "bulk_storage_change": 5070.92610567586,
+          "fault_storage_change": 7.926094142837485
+        },
+        "elapsed_seconds": 149.60673166000197
+      },
+      "endpoint_slip_condition_error_Pa": 3.592504072003066e-11,
+      "mean_slip_condition_error_Pa": 27.446687943255817,
+      "largest_release_rate_J_m_s": -0.0,
+      "cumulative_absolute_mechanical_work_error_J_m": 2.5105665957264673e-05,
+      "endpoint_bulk_impulse_imbalance_Pa_m_s": 3.381538546389179e-12,
+      "stick_node_range": [
+        32,
+        65
+      ],
+      "final_phase_change_max": 0.0,
+      "end_center_q_difference_max_Pa": 2.2737367544323206e-12,
+      "final_fracture_J_m": 0.0,
+      "final_surface_source_representation_error": 8.881784197001252e-16,
+      "free_bulk_velocity_amplitude_max_m_s": 0.027661800092626667,
+      "final_q_minmax_Pa": [
+        0.0,
+        841.4751651689847
+      ],
+      "final_slip_minmax_m": [
+        0.0,
+        0.08701859587747719
+      ],
+      "smooth_loading_work_correction_J_m": 0.006501087728666823,
+      "work_against_smooth_loading_J_m": 5132.932098147079,
+      "smooth_loading_ledger_error_J_m": 0.006475984825095063,
+      "largest_increment": {
+        "time": 0.001953125,
+        "anchor_time": 0.0,
+        "anchor_displacement": 0.0,
+        "location": [
+          0.0,
+          0.0
+        ],
+        "increment": 0.0,
+        "release_J_m": -0.0
+      }
+    },
+    "frozen_mean8_checked": {
+      "summary": {
+        "scheme": "mean",
+        "phase_evolves": false,
+        "steps": 8,
+        "dt": 0.125,
+        "final_time": 1.0,
+        "amplitude": 0.256,
+        "material": {
+          "G_Pa": 1000000.0,
+          "eta_Pa_s": 100000000.0,
+          "Gc_J_m2": 26.6666666667,
+          "ell_m": 0.15625,
+          "c0": 2.6666666666666665,
+          "m": 128.00000000016
+        },
+        "input_sha256": "dfda253ebad8c42dce964676d88837473d99966e69d2f86d31e38f269ab983db",
+        "initial_obstacle_kkt": 0.0,
+        "initial_phi_max": 0.6035488376736221,
+        "final_phi_max": 0.6035488376736221,
+        "max_phase_increment": 0.0,
+        "largest_phase_release": -0.0,
+        "final_local_q": [
+          846.5851678120774,
+          846.5851678120799,
+          846.5851678120797
+        ],
+        "final_local_slip": [
+          0.08754728660007871,
+          0.08754728660007892,
+          0.08754728660007892
+        ],
+        "final_stress_min": -120788.63915400974,
+        "final_stress_max": 150449.73152563671,
+        "endpoint_bulk_imbalance_max": 1.7706724975141697e-10,
+        "mean_bulk_imbalance_max": 5.481126663653413e-11,
+        "endpoint_slip_condition_error_max": 15.618490939557233,
+        "mean_slip_condition_error_max": 1.2363443602225743e-12,
+        "mechanical_kkt_max": 1.0231815394945443e-12,
+        "phase_kkt_max": 0.0,
+        "min_I": 103.07197531730232,
+        "healing_max": 0.0,
+        "phase_path_error_max": 0.0,
+        "temporal_quadrature_error_max": 1.0835776720341528e-13,
+        "onset": null,
+        "sums": {
+          "phase_release": 0.0,
+          "fracture_expenditure": 0.0,
+          "bulk_viscous": 20.48465996594618,
+          "fault_viscous": 0.031776258349348725,
+          "friction": 33.923956786104625,
+          "prescribed_external_work": 5132.933238952871,
+          "mechanical_work_error": 1.336040399372131e-12,
+          "exchange_defect": -4.912736883966318e-13,
+          "free_bulk_work": -4.919100781740091e-13,
+          "bulk_storage_change": 5070.474855112609,
+          "fault_storage_change": 8.017990829861873
+        },
+        "elapsed_seconds": 0.9417221580006299
+      },
+      "endpoint_slip_condition_error_Pa": 999.5834201316627,
+      "mean_slip_condition_error_Pa": 7.912603905424474e-11,
+      "largest_release_rate_J_m_s": -0.0,
+      "cumulative_absolute_mechanical_work_error_J_m": 1.8430098096939225e-11,
+      "endpoint_bulk_impulse_imbalance_Pa_m_s": 5.667677438481178e-11,
+      "stick_node_range": [
+        32,
+        32
+      ],
+      "final_phase_change_max": 0.0,
+      "end_center_q_difference_max_Pa": 2.5011104298755527e-12,
+      "final_fracture_J_m": 0.0,
+      "final_surface_source_representation_error": 8.881784197001252e-16,
+      "free_bulk_velocity_amplitude_max_m_s": 0.02717472507265591,
+      "final_q_minmax_Pa": [
+        0.0,
+        846.5851678120808
+      ],
+      "final_slip_minmax_m": [
+        0.0,
+        0.08754728660007899
+      ],
+      "smooth_loading_work_correction_J_m": 26.539708570260327,
+      "work_against_smooth_loading_J_m": 5159.472947523132,
+      "smooth_loading_ledger_error_J_m": 26.539708570261663,
+      "largest_increment": {
+        "time": 0.125,
+        "anchor_time": 0.0,
+        "anchor_displacement": 0.0,
+        "location": [
+          0.0,
+          0.0
+        ],
+        "increment": 0.0,
+        "release_J_m": -0.0
+      }
+    },
+    "frozen_endpoint8": {
+      "summary": {
+        "scheme": "endpoint",
+        "phase_evolves": false,
+        "steps": 8,
+        "dt": 0.125,
+        "final_time": 1.0,
+        "amplitude": 0.256,
+        "material": {
+          "G_Pa": 1000000.0,
+          "eta_Pa_s": 100000000.0,
+          "Gc_J_m2": 26.6666666667,
+          "ell_m": 0.15625,
+          "c0": 2.6666666666666665,
+          "m": 128.00000000016
+        },
+        "input_sha256": "dfda253ebad8c42dce964676d88837473d99966e69d2f86d31e38f269ab983db",
+        "initial_obstacle_kkt": 0.0,
+        "initial_phi_max": 0.6035488376736221,
+        "final_phi_max": 0.6035488376736221,
+        "max_phase_increment": 0.0,
+        "largest_phase_release": -0.0,
+        "final_local_q": [
+          841.4531597197544,
+          841.4531597197562,
+          841.4531597197567
+        ],
+        "final_local_slip": [
+          0.08701865202728658,
+          0.08701865202728674,
+          0.0870186520272868
+        ],
+        "final_stress_min": -119651.63395146775,
+        "final_stress_max": 150337.67573235903,
+        "endpoint_bulk_imbalance_max": 1.0940937045234023e-10,
+        "mean_bulk_imbalance_max": 8.591882760811131e-11,
+        "endpoint_slip_condition_error_max": 2.1671553440683056e-12,
+        "mean_slip_condition_error_max": 7.810872395875803,
+        "mechanical_kkt_max": 2.2737367544323206e-12,
+        "phase_kkt_max": 0.0,
+        "min_I": 103.07197531730232,
+        "healing_max": 0.0,
+        "phase_path_error_max": 0.0,
+        "temporal_quadrature_error_max": 4.884981308350689e-14,
+        "onset": null,
+        "sums": {
+          "phase_release": 0.0,
+          "fracture_expenditure": 0.0,
+          "bulk_viscous": 20.483874030407478,
+          "fault_viscous": 0.031769796253636115,
+          "friction": 33.734021743962714,
+          "prescribed_external_work": 5132.6682434042095,
+          "mechanical_work_error": -0.1696114374003215,
+          "exchange_defect": -0.16961143739974635,
+          "free_bulk_work": -8.974598746271873e-13,
+          "bulk_storage_change": 5070.662509553022,
+          "fault_storage_change": 7.925679717964202
+        },
+        "elapsed_seconds": 1.9423577689995
+      },
+      "endpoint_slip_condition_error_Pa": 1.3869794202037153e-10,
+      "mean_slip_condition_error_Pa": 499.8958333360513,
+      "largest_release_rate_J_m_s": -0.0,
+      "cumulative_absolute_mechanical_work_error_J_m": 0.16961143742505358,
+      "endpoint_bulk_impulse_imbalance_Pa_m_s": 5.641020983659928e-11,
+      "stick_node_range": [
+        32,
+        32
+      ],
+      "final_phase_change_max": 0.0,
+      "end_center_q_difference_max_Pa": 1.8189894035458565e-12,
+      "final_fracture_J_m": 0.0,
+      "final_surface_source_representation_error": 8.881784197001252e-16,
+      "free_bulk_velocity_amplitude_max_m_s": 0.025958240508234757,
+      "final_q_minmax_Pa": [
+        0.0,
+        841.4531597197573
+      ],
+      "final_slip_minmax_m": [
+        0.0,
+        0.08701865202728683
+      ],
+      "smooth_loading_work_correction_J_m": 26.627764813253467,
+      "work_against_smooth_loading_J_m": 5159.296008217463,
+      "smooth_loading_ledger_error_J_m": 26.458153375853147,
+      "largest_increment": {
+        "time": 0.125,
+        "anchor_time": 0.0,
+        "anchor_displacement": 0.0,
+        "location": [
+          0.0,
+          0.0
+        ],
+        "increment": 0.0,
+        "release_J_m": -0.0
+      }
+    },
+    "evolving_mean8": {
+      "summary": {
+        "scheme": "mean",
+        "phase_evolves": true,
+        "steps": 8,
+        "dt": 0.125,
+        "final_time": 1.0,
+        "amplitude": 0.256,
+        "material": {
+          "G_Pa": 1000000.0,
+          "eta_Pa_s": 100000000.0,
+          "Gc_J_m2": 26.6666666667,
+          "ell_m": 0.15625,
+          "c0": 2.6666666666666665,
+          "m": 128.00000000016
+        },
+        "input_sha256": "dfda253ebad8c42dce964676d88837473d99966e69d2f86d31e38f269ab983db",
+        "initial_obstacle_kkt": 0.0,
+        "initial_phi_max": 0.6035488376736221,
+        "final_phi_max": 0.6035488376736221,
+        "max_phase_increment": 0.24199251586722437,
+        "largest_phase_release": 32.25282314328177,
+        "final_local_q": [
+          620.7793572498725,
+          620.7793572498747,
+          620.7793572498747
+        ],
+        "final_local_slip": [
+          0.23733131426363752,
+          0.23733131426363835,
+          0.2373313142636383
+        ],
+        "final_stress_min": -7821.204309931235,
+        "final_stress_max": 1242.5924584172044,
+        "endpoint_bulk_imbalance_max": 9455.418900827544,
+        "mean_bulk_imbalance_max": 1.256221793255463e-10,
+        "endpoint_slip_condition_error_max": 197.67956436500037,
+        "mean_slip_condition_error_max": 1.3358203432289883e-12,
+        "mechanical_kkt_max": 9.094947017729282e-13,
+        "phase_kkt_max": 6.38378239158667e-15,
+        "min_I": 103.07197531730232,
+        "healing_max": 0.0,
+        "phase_path_error_max": 7.531752999057062e-13,
+        "temporal_quadrature_error_max": 7.91033905045424e-16,
+        "onset": {
+          "publication_time": 0.375,
+          "anchor_time": 0.25,
+          "anchor_displacement": 0.008,
+          "publication_displacement": 0.018000000000000002
+        },
+        "sums": {
+          "phase_release": 74.25478918297038,
+          "fracture_expenditure": 16.078743183476725,
+          "bulk_viscous": 0.23842427580030623,
+          "fault_viscous": 0.06227975233092353,
+          "friction": 91.98233459941325,
+          "prescribed_external_work": 204.27638216444706,
+          "mechanical_work_error": 2.2630815930039687e-12,
+          "exchange_defect": -6.769029781139579e-13,
+          "free_bulk_work": -1.9785036762169255e-12,
+          "bulk_storage_change": 5.714683420665882,
+          "fault_storage_change": 15.945127749787373
+        },
+        "elapsed_seconds": 6.788493424999615
+      },
+      "endpoint_slip_condition_error_Pa": 12651.49211936002,
+      "mean_slip_condition_error_Pa": 8.549250196665524e-11,
+      "largest_release_rate_J_m_s": 258.0225851462542,
+      "cumulative_absolute_mechanical_work_error_J_m": 2.759541110015713e-12,
+      "endpoint_bulk_impulse_imbalance_Pa_m_s": 3701.771805930943,
+      "stick_node_range": [
+        32,
+        32
+      ],
+      "final_phase_change_max": 0.4689519599823782,
+      "end_center_q_difference_max_Pa": 2.1600499167107046e-12,
+      "final_fracture_J_m": 16.078743183476725,
+      "final_surface_source_representation_error": 4.440892098500626e-16,
+      "free_bulk_velocity_amplitude_max_m_s": 0.04685574802658246,
+      "final_q_minmax_Pa": [
+        0.0,
+        620.7793572498757
+      ],
+      "final_slip_minmax_m": [
+        0.0,
+        0.23733131426363852
+      ],
+      "smooth_loading_work_correction_J_m": -0.8251252315488772,
+      "work_against_smooth_loading_J_m": 203.4512569328982,
+      "smooth_loading_ledger_error_J_m": -0.8251252315466141,
+      "largest_increment": {
+        "time": 0.5,
+        "anchor_time": 0.375,
+        "anchor_displacement": 0.018000000000000002,
+        "location": [
+          0.25,
+          0.25
+        ],
+        "increment": 0.24199251586722437,
+        "release_J_m": 32.25282314328177
+      }
+    },
+    "evolving_mean16": {
+      "summary": {
+        "scheme": "mean",
+        "phase_evolves": true,
+        "steps": 16,
+        "dt": 0.0625,
+        "final_time": 1.0,
+        "amplitude": 0.256,
+        "material": {
+          "G_Pa": 1000000.0,
+          "eta_Pa_s": 100000000.0,
+          "Gc_J_m2": 26.6666666667,
+          "ell_m": 0.15625,
+          "c0": 2.6666666666666665,
+          "m": 128.00000000016
+        },
+        "input_sha256": "dfda253ebad8c42dce964676d88837473d99966e69d2f86d31e38f269ab983db",
+        "initial_obstacle_kkt": 0.0,
+        "initial_phi_max": 0.6035488376736221,
+        "final_phi_max": 0.6138962036206153,
+        "max_phase_increment": 0.20136185786453709,
+        "largest_phase_release": 14.084483602807524,
+        "final_local_q": [
+          555.7789443321493,
+          555.7789443321202,
+          555.778944332141
+        ],
+        "final_local_slip": [
+          0.23368430830339704,
+          0.23368430830339526,
+          0.2336843083033977
+        ],
+        "final_stress_min": -2978.6702309489033,
+        "final_stress_max": 1793.1349546309382,
+        "endpoint_bulk_imbalance_max": 5445.942876995521,
+        "mean_bulk_imbalance_max": 5.3019366674789126e-11,
+        "endpoint_slip_condition_error_max": 122.54182028639211,
+        "mean_slip_condition_error_max": 8.277822871605167e-13,
+        "mechanical_kkt_max": 7.673861546209082e-13,
+        "phase_kkt_max": 5.495580878381381e-12,
+        "min_I": 103.07197531730232,
+        "healing_max": 0.0,
+        "phase_path_error_max": 2.078337502098293e-13,
+        "temporal_quadrature_error_max": 1.43982048506075e-16,
+        "onset": {
+          "publication_time": 0.25,
+          "anchor_time": 0.1875,
+          "anchor_displacement": 0.0045000000000000005,
+          "publication_displacement": 0.008
+        },
+        "sums": {
+          "phase_release": 32.11608534130075,
+          "fracture_expenditure": 17.110736559291823,
+          "bulk_viscous": 0.09499496668275492,
+          "fault_viscous": 0.05912745708396103,
+          "friction": 90.59580302254432,
+          "prescribed_external_work": 155.0055606269652,
+          "mechanical_work_error": 2.407753365000412e-13,
+          "exchange_defect": -1.3589129821411916e-13,
+          "free_bulk_work": -7.546535424382962e-13,
+          "bulk_storage_change": 0.9681428979095803,
+          "fault_storage_change": 14.060670382151748
+        },
+        "elapsed_seconds": 20.16472935099955
+      },
+      "endpoint_slip_condition_error_Pa": 7842.676498329093,
+      "mean_slip_condition_error_Pa": 5.297806637827306e-11,
+      "largest_release_rate_J_m_s": 225.35173764492038,
+      "cumulative_absolute_mechanical_work_error_J_m": 1.0877647702450978e-12,
+      "endpoint_bulk_impulse_imbalance_Pa_m_s": 1457.589230307332,
+      "stick_node_range": [
+        32,
+        65
+      ],
+      "final_phase_change_max": 0.4835448129678599,
+      "end_center_q_difference_max_Pa": 2.5360122890560888e-09,
+      "final_fracture_J_m": 17.110736559291823,
+      "final_surface_source_representation_error": 6.661338147750939e-16,
+      "free_bulk_velocity_amplitude_max_m_s": 0.04565464154989335,
+      "final_q_minmax_Pa": [
+        0.0,
+        555.7789443321561
+      ],
+      "final_slip_minmax_m": [
+        0.0,
+        0.2336843083033977
+      ],
+      "smooth_loading_work_correction_J_m": -0.04277048140862624,
+      "work_against_smooth_loading_J_m": 154.96279014555657,
+      "smooth_loading_ledger_error_J_m": -0.04277048140838547,
+      "largest_increment": {
+        "time": 0.375,
+        "anchor_time": 0.3125,
+        "anchor_displacement": 0.0125,
+        "location": [
+          0.0,
+          0.25
+        ],
+        "increment": 0.20136185786453709,
+        "release_J_m": 14.084483602807524
+      }
+    },
+    "evolving_mean32": {
+      "summary": {
+        "scheme": "mean",
+        "phase_evolves": true,
+        "steps": 32,
+        "dt": 0.03125,
+        "final_time": 1.0,
+        "amplitude": 0.256,
+        "material": {
+          "G_Pa": 1000000.0,
+          "eta_Pa_s": 100000000.0,
+          "Gc_J_m2": 26.6666666667,
+          "ell_m": 0.15625,
+          "c0": 2.6666666666666665,
+          "m": 128.00000000016
+        },
+        "input_sha256": "dfda253ebad8c42dce964676d88837473d99966e69d2f86d31e38f269ab983db",
+        "initial_obstacle_kkt": 0.0,
+        "initial_phi_max": 0.6035488376736221,
+        "final_phi_max": 0.6407018347895362,
+        "max_phase_increment": 0.15555995899371805,
+        "largest_phase_release": 6.27794261960635,
+        "final_local_q": [
+          442.86184240105405,
+          442.86184240131047,
+          442.8618424010526
+        ],
+        "final_local_slip": [
+          0.23175964689863562,
+          0.23175964689863926,
+          0.23175964689863607
+        ],
+        "final_stress_min": -1271.8252542456298,
+        "final_stress_max": 2353.8761959633625,
+        "endpoint_bulk_imbalance_max": 3194.388930540588,
+        "mean_bulk_imbalance_max": 2.6003199593560566e-11,
+        "endpoint_slip_condition_error_max": 65.54408653067576,
+        "mean_slip_condition_error_max": 5.080380560684716e-13,
+        "mechanical_kkt_max": 4.973799150320701e-13,
+        "phase_kkt_max": 1.5276668818823057e-13,
+        "min_I": 103.07197531730232,
+        "healing_max": 0.0,
+        "phase_path_error_max": 1.412203687323199e-13,
+        "temporal_quadrature_error_max": 1.0755285551056204e-16,
+        "onset": {
+          "publication_time": 0.21875,
+          "anchor_time": 0.1875,
+          "anchor_displacement": 0.0045000000000000005,
+          "publication_displacement": 0.006125
+        },
+        "sums": {
+          "phase_release": 13.62696296270904,
+          "fracture_expenditure": 19.02470344789765,
+          "bulk_viscous": 0.051569929050865465,
+          "fault_viscous": 0.056226208433606956,
+          "friction": 89.81487258854268,
+          "prescribed_external_work": 134.37993208414636,
+          "mechanical_work_error": 6.418938311353395e-13,
+          "exchange_defect": -1.04638520070921e-14,
+          "free_bulk_work": -3.063851155904144e-13,
+          "bulk_storage_change": 0.700017412359532,
+          "fault_storage_change": 11.105579535152348
+        },
+        "elapsed_seconds": 46.52115750899975
+      },
+      "endpoint_slip_condition_error_Pa": 4194.8215379632475,
+      "mean_slip_condition_error_Pa": 3.251443558838218e-11,
+      "largest_release_rate_J_m_s": 200.8941638274032,
+      "cumulative_absolute_mechanical_work_error_J_m": 8.222662608118588e-13,
+      "endpoint_bulk_impulse_imbalance_Pa_m_s": 687.9809225682515,
+      "stick_node_range": [
+        32,
+        65
+      ],
+      "final_phase_change_max": 0.515739825723338,
+      "end_center_q_difference_max_Pa": 2.5642066248110496e-10,
+      "final_fracture_J_m": 19.02470344789765,
+      "final_surface_source_representation_error": 6.661338147750939e-16,
+      "free_bulk_velocity_amplitude_max_m_s": 0.0399268768188038,
+      "final_q_minmax_Pa": [
+        0.0,
+        442.86184240131047
+      ],
+      "final_slip_minmax_m": [
+        0.0,
+        0.23175964689863926
+      ],
+      "smooth_loading_work_correction_J_m": 0.012697686471782373,
+      "work_against_smooth_loading_J_m": 134.39262977061816,
+      "smooth_loading_ledger_error_J_m": 0.012697686472424268,
+      "largest_increment": {
+        "time": 0.3125,
+        "anchor_time": 0.28125,
+        "anchor_displacement": 0.010125,
+        "location": [
+          0.75,
+          0.25
+        ],
+        "increment": 0.15555995899371805,
+        "release_J_m": 6.27794261960635
+      }
+    },
+    "evolving_mean64": {
+      "summary": {
+        "scheme": "mean",
+        "phase_evolves": true,
+        "steps": 64,
+        "dt": 0.015625,
+        "final_time": 1.0,
+        "amplitude": 0.256,
+        "material": {
+          "G_Pa": 1000000.0,
+          "eta_Pa_s": 100000000.0,
+          "Gc_J_m2": 26.6666666667,
+          "ell_m": 0.15625,
+          "c0": 2.6666666666666665,
+          "m": 128.00000000016
+        },
+        "input_sha256": "dfda253ebad8c42dce964676d88837473d99966e69d2f86d31e38f269ab983db",
+        "initial_obstacle_kkt": 0.0,
+        "initial_phi_max": 0.6035488376736221,
+        "final_phi_max": 0.652915114895662,
+        "max_phase_increment": 0.10077220402483869,
+        "largest_phase_release": 1.8850863142901728,
+        "final_local_q": [
+          396.2564561568411,
+          396.25645615638433,
+          396.2564561568411
+        ],
+        "final_local_slip": [
+          0.23120565949461402,
+          0.2312056594946176,
+          0.23120565949461466
+        ],
+        "final_stress_min": -655.2831083581723,
+        "final_stress_max": 2197.8458150608853,
+        "endpoint_bulk_imbalance_max": 1519.340267554296,
+        "mean_bulk_imbalance_max": 1.1425305146417486e-11,
+        "endpoint_slip_condition_error_max": 35.6236818788134,
+        "mean_slip_condition_error_max": 6.821210263296962e-13,
+        "mechanical_kkt_max": 6.963318810448982e-13,
+        "phase_kkt_max": 2.236127949470348e-13,
+        "min_I": 103.07197531730232,
+        "healing_max": 0.0,
+        "phase_path_error_max": 9.828769742536991e-14,
+        "temporal_quadrature_error_max": 2.992397996059992e-17,
+        "onset": {
+          "publication_time": 0.203125,
+          "anchor_time": 0.1875,
+          "anchor_displacement": 0.0045000000000000005,
+          "publication_displacement": 0.00528125
+        },
+        "sums": {
+          "phase_release": 6.060592270230443,
+          "fracture_expenditure": 19.91813012302427,
+          "bulk_viscous": 0.038328751174144526,
+          "fault_viscous": 0.05460615220836287,
+          "friction": 89.61500281315979,
+          "prescribed_external_work": 126.36325644591824,
+          "mechanical_work_error": 8.707449607197223e-15,
+          "exchange_defect": -4.40845276949986e-14,
+          "free_bulk_work": -1.3710450075586116e-13,
+          "bulk_storage_change": 0.7614828775842185,
+          "fault_storage_change": 9.915113458537004
+        },
+        "elapsed_seconds": 93.7163643849999
+      },
+      "endpoint_slip_condition_error_Pa": 2279.915640244057,
+      "mean_slip_condition_error_Pa": 4.365574568510055e-11,
+      "largest_release_rate_J_m_s": 120.64552411457106,
+      "cumulative_absolute_mechanical_work_error_J_m": 7.054741441725864e-13,
+      "endpoint_bulk_impulse_imbalance_Pa_m_s": 347.1627274686773,
+      "stick_node_range": [
+        32,
+        65
+      ],
+      "final_phase_change_max": 0.5313985531723879,
+      "end_center_q_difference_max_Pa": 4.567937139654532e-10,
+      "final_fracture_J_m": 19.91813012302427,
+      "final_surface_source_representation_error": 8.881784197001252e-16,
+      "free_bulk_velocity_amplitude_max_m_s": 0.03623225366558964,
+      "final_q_minmax_Pa": [
+        0.0,
+        396.2564561568411
+      ],
+      "final_slip_minmax_m": [
+        0.0,
+        0.23120565949461852
+      ],
+      "smooth_loading_work_correction_J_m": 0.004628751649653309,
+      "work_against_smooth_loading_J_m": 126.36788519756789,
+      "smooth_loading_ledger_error_J_m": 0.004628751649662016,
+      "largest_increment": {
+        "time": 0.265625,
+        "anchor_time": 0.25,
+        "anchor_displacement": 0.008,
+        "location": [
+          0.5625,
+          0.25
+        ],
+        "increment": 0.10077220402483869,
+        "release_J_m": 1.8850863142901728
+      }
+    },
+    "evolving_mean128": {
+      "summary": {
+        "scheme": "mean",
+        "phase_evolves": true,
+        "steps": 128,
+        "dt": 0.0078125,
+        "final_time": 1.0,
+        "amplitude": 0.256,
+        "material": {
+          "G_Pa": 1000000.0,
+          "eta_Pa_s": 100000000.0,
+          "Gc_J_m2": 26.6666666667,
+          "ell_m": 0.15625,
+          "c0": 2.6666666666666665,
+          "m": 128.00000000016
+        },
+        "input_sha256": "dfda253ebad8c42dce964676d88837473d99966e69d2f86d31e38f269ab983db",
+        "initial_obstacle_kkt": 0.0,
+        "initial_phi_max": 0.6035488376736221,
+        "final_phi_max": 0.658043792773711,
+        "max_phase_increment": 0.06350312475157854,
+        "largest_phase_release": 0.5820049455096208,
+        "final_local_q": [
+          376.5971255073812,
+          376.59712550715204,
+          376.59712550737623
+        ],
+        "final_local_slip": [
+          0.23126412370561505,
+          0.23126412370561586,
+          0.23126412370561578
+        ],
+        "final_stress_min": -496.8222663568862,
+        "final_stress_max": 1891.229034728736,
+        "endpoint_bulk_imbalance_max": 720.3025851548481,
+        "mean_bulk_imbalance_max": 5.952682791132702e-12,
+        "endpoint_slip_condition_error_max": 21.015073695671965,
+        "mean_slip_condition_error_max": 5.506706202140776e-13,
+        "mechanical_kkt_max": 5.577760475716786e-13,
+        "phase_kkt_max": 2.284838984675716e-13,
+        "min_I": 103.07197531730232,
+        "healing_max": 0.0,
+        "phase_path_error_max": 1.0244409487381034e-13,
+        "temporal_quadrature_error_max": 1.1926223897340549e-17,
+        "onset": {
+          "publication_time": 0.1875,
+          "anchor_time": 0.1796875,
+          "anchor_displacement": 0.0041328125,
+          "publication_displacement": 0.0045000000000000005
+        },
+        "sums": {
+          "phase_release": 2.9088522253117484,
+          "fracture_expenditure": 20.330292472497575,
+          "bulk_viscous": 0.03331069325763532,
+          "fault_viscous": 0.05373393961634095,
+          "friction": 89.63948362259622,
+          "prescribed_external_work": 123.05198615280351,
+          "mechanical_work_error": 4.018818294125977e-14,
+          "exchange_defect": 7.576621621763202e-14,
+          "free_bulk_work": -6.246396842521481e-14,
+          "bulk_storage_change": 0.6605047483680042,
+          "fault_storage_change": 9.425808451155934
+        },
+        "elapsed_seconds": 198.56169931299883
+      },
+      "endpoint_slip_condition_error_Pa": 1344.9647165230056,
+      "mean_slip_condition_error_Pa": 3.524291969370096e-11,
+      "largest_release_rate_J_m_s": 74.49663302523146,
+      "cumulative_absolute_mechanical_work_error_J_m": 1.1576753820762419e-12,
+      "endpoint_bulk_impulse_imbalance_Pa_m_s": 180.6668408017894,
+      "stick_node_range": [
+        32,
+        65
+      ],
+      "final_phase_change_max": 0.5386510525367275,
+      "end_center_q_difference_max_Pa": 2.3777602109475993e-10,
+      "final_fracture_J_m": 20.330292472497575,
+      "final_surface_source_representation_error": 6.661338147750939e-16,
+      "free_bulk_velocity_amplitude_max_m_s": 0.03514022033457539,
+      "final_q_minmax_Pa": [
+        0.0,
+        376.5971255073925
+      ],
+      "final_slip_minmax_m": [
+        0.0,
+        0.23126412370561586
+      ],
+      "smooth_loading_work_correction_J_m": 0.0011117369977859573,
+      "work_against_smooth_loading_J_m": 123.0530978898013,
+      "smooth_loading_ledger_error_J_m": 0.0011117369978261454,
+      "largest_increment": {
+        "time": 0.2421875,
+        "anchor_time": 0.234375,
+        "anchor_displacement": 0.00703125,
+        "location": [
+          0.5,
+          0.3125
+        ],
+        "increment": 0.06350312475157854,
+        "release_J_m": 0.5820049455096208
+      }
+    },
+    "evolving_mean256": {
+      "summary": {
+        "scheme": "mean",
+        "phase_evolves": true,
+        "steps": 256,
+        "dt": 0.00390625,
+        "final_time": 1.0,
+        "amplitude": 0.256,
+        "material": {
+          "G_Pa": 1000000.0,
+          "eta_Pa_s": 100000000.0,
+          "Gc_J_m2": 26.6666666667,
+          "ell_m": 0.15625,
+          "c0": 2.6666666666666665,
+          "m": 128.00000000016
+        },
+        "input_sha256": "dfda253ebad8c42dce964676d88837473d99966e69d2f86d31e38f269ab983db",
+        "initial_obstacle_kkt": 0.0,
+        "initial_phi_max": 0.6035488376736221,
+        "final_phi_max": 0.6602830832923712,
+        "max_phase_increment": 0.03941185571357597,
+        "largest_phase_release": 0.16577779514183555,
+        "final_local_q": [
+          366.8217199755514,
+          366.8217199753487,
+          366.82171997554667
+        ],
+        "final_local_slip": [
+          0.23127769266560338,
+          0.2312776926656014,
+          0.231277692665604
+        ],
+        "final_stress_min": -375.81641595054305,
+        "final_stress_max": 1796.4435672545603,
+        "endpoint_bulk_imbalance_max": 301.8439397107107,
+        "mean_bulk_imbalance_max": 2.8912428007288327e-12,
+        "endpoint_slip_condition_error_max": 10.899697373083553,
+        "mean_slip_condition_error_max": 5.790923296444817e-13,
+        "mechanical_kkt_max": 5.790923296444817e-13,
+        "phase_kkt_max": 3.190364639134477e-13,
+        "min_I": 103.07197531730232,
+        "healing_max": 0.0,
+        "phase_path_error_max": 1.220070051932698e-13,
+        "temporal_quadrature_error_max": 9.215718466126788e-18,
+        "onset": {
+          "publication_time": 0.18359375,
+          "anchor_time": 0.1796875,
+          "anchor_displacement": 0.0041328125,
+          "publication_displacement": 0.004314453125
+        },
+        "sums": {
+          "phase_release": 1.4420705724853335,
+          "fracture_expenditure": 20.547542686194653,
+          "bulk_viscous": 0.031069639522850263,
+          "fault_viscous": 0.05325416487166131,
+          "friction": 89.64113363243779,
+          "prescribed_external_work": 121.5158210953081,
+          "mechanical_work_error": 1.271158933320156e-13,
+          "exchange_defect": -7.985799521659231e-15,
+          "free_bulk_work": -3.2017278671913503e-14,
+          "bulk_storage_change": 0.6195702533443557,
+          "fault_storage_change": 9.181180146451316
+        },
+        "elapsed_seconds": 210.65803047000009
+      },
+      "endpoint_slip_condition_error_Pa": 697.5806318773473,
+      "mean_slip_condition_error_Pa": 3.7061909097246826e-11,
+      "largest_release_rate_J_m_s": 42.4391155563099,
+      "cumulative_absolute_mechanical_work_error_J_m": 2.1090805929983e-12,
+      "endpoint_bulk_impulse_imbalance_Pa_m_s": 95.26398874991477,
+      "stick_node_range": [
+        32,
+        65
+      ],
+      "final_phase_change_max": 0.542348527385056,
+      "end_center_q_difference_max_Pa": 3.2787283998914063e-10,
+      "final_fracture_J_m": 20.547542686194653,
+      "final_surface_source_representation_error": 6.661338147750939e-16,
+      "free_bulk_velocity_amplitude_max_m_s": 0.03401595063572431,
+      "final_q_minmax_Pa": [
+        0.0,
+        366.82171997561716
+      ],
+      "final_slip_minmax_m": [
+        0.0,
+        0.23127769266560547
+      ],
+      "smooth_loading_work_correction_J_m": 0.00027766670662553,
+      "work_against_smooth_loading_J_m": 121.51609876201472,
+      "smooth_loading_ledger_error_J_m": 0.00027766670675264586,
+      "largest_increment": {
+        "time": 0.2265625,
+        "anchor_time": 0.22265625,
+        "anchor_displacement": 0.006345703125,
+        "location": [
+          0.5,
+          0.3125
+        ],
+        "increment": 0.03941185571357597,
+        "release_J_m": 0.16577779514183555
+      }
+    },
+    "aligned_evolving_mean128": {
+      "summary": {
+        "scheme": "mean",
+        "phase_evolves": true,
+        "steps": 128,
+        "dt": 0.0078125,
+        "aligned_bulk_quadrature": true,
+        "bulk_samples": 9216,
+        "final_time": 1.0,
+        "amplitude": 0.256,
+        "material": {
+          "G_Pa": 1000000.0,
+          "eta_Pa_s": 100000000.0,
+          "Gc_J_m2": 26.6666666667,
+          "ell_m": 0.15625,
+          "c0": 2.6666666666666665,
+          "m": 128.00000000016
+        },
+        "input_sha256": "dfda253ebad8c42dce964676d88837473d99966e69d2f86d31e38f269ab983db",
+        "initial_obstacle_kkt": 0.0,
+        "initial_phi_max": 0.6035488376736221,
+        "final_phi_max": 0.7048502574563043,
+        "max_phase_increment": 0.06603324987693338,
+        "largest_phase_release": 0.5885805103377204,
+        "final_local_q": [
+          138.93351665265797,
+          138.93351665244427,
+          138.93351665265178
+        ],
+        "final_local_slip": [
+          0.12684376520066484,
+          0.12684376520066656,
+          0.12684376520066465
+        ],
+        "final_stress_min": -187.56006475677776,
+        "final_stress_max": 2184.177630077905,
+        "endpoint_bulk_imbalance_max": 755.7325925139119,
+        "mean_bulk_imbalance_max": 9.985192186978686e-11,
+        "endpoint_slip_condition_error_max": 11.440937656832126,
+        "mean_slip_condition_error_max": 7.815970093361102e-14,
+        "mechanical_kkt_max": 5.3290705182007514e-14,
+        "phase_kkt_max": 8.318869031121593e-12,
+        "min_I": 103.07197531730232,
+        "healing_max": 0.0,
+        "phase_path_error_max": 1.375566327510569e-13,
+        "temporal_quadrature_error_max": 3.903127820947816e-17,
+        "onset": {
+          "publication_time": 0.1953125,
+          "anchor_time": 0.1875,
+          "anchor_displacement": 0.0045000000000000005,
+          "publication_displacement": 0.0048828125
+        },
+        "sums": {
+          "phase_release": 3.0701483741684448,
+          "fracture_expenditure": 23.777041361120446,
+          "bulk_viscous": 0.039800630813590206,
+          "fault_viscous": 0.0634447248890504,
+          "friction": 126.8437652006662,
+          "prescribed_external_work": 163.51550422450438,
+          "mechanical_work_error": -1.480768805637157e-12,
+          "exchange_defect": -4.399917929998054e-13,
+          "free_bulk_work": 7.515307503421047e-13,
+          "bulk_storage_change": 0.938501926112321,
+          "fault_storage_change": 8.782802006735752
+        },
+        "elapsed_seconds": 199.73117380199983
+      },
+      "endpoint_slip_condition_error_Pa": 732.220010037256,
+      "mean_slip_condition_error_Pa": 5.0022208597511045e-12,
+      "largest_release_rate_J_m_s": 75.33830532322821,
+      "cumulative_absolute_mechanical_work_error_J_m": 6.068037595969079e-12,
+      "endpoint_bulk_impulse_imbalance_Pa_m_s": 189.36421836874527,
+      "stick_node_range": [
+        0,
+        65
+      ],
+      "final_phase_change_max": 0.5931948651589438,
+      "end_center_q_difference_max_Pa": 1.917960901209881e-09,
+      "final_fracture_J_m": 23.777041361120446,
+      "final_surface_source_representation_error": 6.661338147750939e-16,
+      "free_bulk_velocity_amplitude_max_m_s": 0.03469575637415714,
+      "final_q_minmax_Pa": [
+        138.9335166524396,
+        138.93351665265797
+      ],
+      "final_slip_minmax_m": [
+        0.12684376520066465,
+        0.1268437652006673
+      ],
+      "smooth_loading_work_correction_J_m": 0.001487861956392639,
+      "work_against_smooth_loading_J_m": 163.5169920864608,
+      "smooth_loading_ledger_error_J_m": 0.00148786195491187,
+      "largest_increment": {
+        "time": 0.2421875,
+        "anchor_time": 0.234375,
+        "anchor_displacement": 0.00703125,
+        "location": [
+          0.125,
+          0.3125
+        ],
+        "increment": 0.06603324987693338,
+        "release_J_m": 0.49694999217511393
+      }
+    },
+    "aligned_evolving_mean16": {
+      "summary": {
+        "scheme": "mean",
+        "phase_evolves": true,
+        "steps": 16,
+        "dt": 0.0625,
+        "aligned_bulk_quadrature": true,
+        "bulk_samples": 9216,
+        "final_time": 1.0,
+        "amplitude": 0.256,
+        "material": {
+          "G_Pa": 1000000.0,
+          "eta_Pa_s": 100000000.0,
+          "Gc_J_m2": 26.6666666667,
+          "ell_m": 0.15625,
+          "c0": 2.6666666666666665,
+          "m": 128.00000000016
+        },
+        "input_sha256": "dfda253ebad8c42dce964676d88837473d99966e69d2f86d31e38f269ab983db",
+        "initial_obstacle_kkt": 0.0,
+        "initial_phi_max": 0.6035488376736221,
+        "final_phi_max": 0.6623730775068594,
+        "max_phase_increment": 0.20724225559911286,
+        "largest_phase_release": 14.74294216061082,
+        "final_local_q": [
+          209.42070063769646,
+          209.42070063769853,
+          209.42070063769998
+        ],
+        "final_local_slip": [
+          0.12820118566722055,
+          0.12820118566722039,
+          0.12820118566722036
+        ],
+        "final_stress_min": -3184.201605475503,
+        "final_stress_max": 2450.1523189272502,
+        "endpoint_bulk_imbalance_max": 5598.15745094496,
+        "mean_bulk_imbalance_max": 6.707970290342757e-11,
+        "endpoint_slip_condition_error_max": 72.12871695991576,
+        "mean_slip_condition_error_max": 8.881784197001252e-14,
+        "mechanical_kkt_max": 3.979039320256561e-13,
+        "phase_kkt_max": 4.840572387359631e-14,
+        "min_I": 103.07197531730232,
+        "healing_max": 0.0,
+        "phase_path_error_max": 5.311306949806749e-13,
+        "temporal_quadrature_error_max": 1.0477729794899915e-15,
+        "onset": {
+          "publication_time": 0.25,
+          "anchor_time": 0.1875,
+          "anchor_displacement": 0.0045000000000000005,
+          "publication_displacement": 0.008
+        },
+        "sums": {
+          "phase_release": 33.943376113960774,
+          "fracture_expenditure": 20.65238789709992,
+          "bulk_viscous": 0.10607138301006512,
+          "fault_viscous": 0.07181881346325651,
+          "friction": 128.20118566722033,
+          "prescribed_external_work": 197.4345312661174,
+          "mechanical_work_error": 6.499198625338599e-14,
+          "exchange_defect": 1.39194211712379e-13,
+          "free_bulk_work": 1.121247125862829e-14,
+          "bulk_storage_change": 1.0784796154502425,
+          "fault_storage_change": 13.381211775912792
+        },
+        "elapsed_seconds": 27.113979433997883
+      },
+      "endpoint_slip_condition_error_Pa": 4616.237885434608,
+      "mean_slip_condition_error_Pa": 6.366462912410496e-12,
+      "largest_release_rate_J_m_s": 235.88707456977312,
+      "cumulative_absolute_mechanical_work_error_J_m": 2.706423659067605e-12,
+      "endpoint_bulk_impulse_imbalance_Pa_m_s": 1508.09937251265,
+      "stick_node_range": [
+        0,
+        65
+      ],
+      "final_phase_change_max": 0.5382486189045295,
+      "end_center_q_difference_max_Pa": 3.922195901395753e-12,
+      "final_fracture_J_m": 20.65238789709992,
+      "final_surface_source_representation_error": 6.661338147750939e-16,
+      "free_bulk_velocity_amplitude_max_m_s": 0.04490724110714815,
+      "final_q_minmax_Pa": [
+        209.42070063767244,
+        209.42070063769998
+      ],
+      "final_slip_minmax_m": [
+        0.1282011856672198,
+        0.12820118566722064
+      ],
+      "smooth_loading_work_correction_J_m": -0.018253337597935758,
+      "work_against_smooth_loading_J_m": 197.41627792851946,
+      "smooth_loading_ledger_error_J_m": -0.018253337597870765,
+      "largest_increment": {
+        "time": 0.375,
+        "anchor_time": 0.3125,
+        "anchor_displacement": 0.0125,
+        "location": [
+          0.3125,
+          0.3125
+        ],
+        "increment": 0.20724225559911286,
+        "release_J_m": 12.856868628582
+      }
+    },
+    "aligned_evolving_mean256": {
+      "summary": {
+        "scheme": "mean",
+        "phase_evolves": true,
+        "steps": 256,
+        "dt": 0.00390625,
+        "aligned_bulk_quadrature": true,
+        "bulk_samples": 9216,
+        "final_time": 1.0,
+        "amplitude": 0.256,
+        "material": {
+          "G_Pa": 1000000.0,
+          "eta_Pa_s": 100000000.0,
+          "Gc_J_m2": 26.6666666667,
+          "ell_m": 0.15625,
+          "c0": 2.6666666666666665,
+          "m": 128.00000000016
+        },
+        "input_sha256": "dfda253ebad8c42dce964676d88837473d99966e69d2f86d31e38f269ab983db",
+        "initial_obstacle_kkt": 0.0,
+        "initial_phi_max": 0.6035488376736221,
+        "final_phi_max": 0.7066488682095716,
+        "max_phase_increment": 0.039715555977444195,
+        "largest_phase_release": 0.17633061336165112,
+        "final_local_q": [
+          135.53781155569854,
+          135.53781155576547,
+          135.53781155569615
+        ],
+        "final_local_slip": [
+          0.12684843962888231,
+          0.12684843962888304,
+          0.12684843962888245
+        ],
+        "final_stress_min": -56.04747396670956,
+        "final_stress_max": 2012.5859598678098,
+        "endpoint_bulk_imbalance_max": 326.2783621096852,
+        "mean_bulk_imbalance_max": 6.353148909732376e-11,
+        "endpoint_slip_condition_error_max": 6.322672909348379,
+        "mean_slip_condition_error_max": 7.105427357601002e-14,
+        "mechanical_kkt_max": 7.105427357601002e-14,
+        "phase_kkt_max": 7.589751093222079e-12,
+        "min_I": 103.07197531730232,
+        "healing_max": 0.0,
+        "phase_path_error_max": 2.039813359454995e-13,
+        "temporal_quadrature_error_max": 1.951563910473908e-17,
+        "onset": {
+          "publication_time": 0.19140625,
+          "anchor_time": 0.1875,
+          "anchor_displacement": 0.0045000000000000005,
+          "publication_displacement": 0.0046894531250000005
+        },
+        "sums": {
+          "phase_release": 1.5215720945776605,
+          "fracture_expenditure": 23.971056001037773,
+          "bulk_viscous": 0.03739790410763367,
+          "fault_viscous": 0.06277661886720273,
+          "friction": 126.84843962888323,
+          "prescribed_external_work": 161.9004747631361,
+          "mechanical_work_error": -8.288269762708092e-13,
+          "exchange_defect": -2.694719447582372e-14,
+          "free_bulk_work": 8.020090512857407e-13,
+          "bulk_storage_change": 0.8907906831365336,
+          "fault_storage_change": 8.5684418325269
+        },
+        "elapsed_seconds": 289.61770806300046
+      },
+      "endpoint_slip_condition_error_Pa": 404.6510661982961,
+      "mean_slip_condition_error_Pa": 4.54747350886464e-12,
+      "largest_release_rate_J_m_s": 45.14063702058269,
+      "cumulative_absolute_mechanical_work_error_J_m": 8.325831542545314e-12,
+      "endpoint_bulk_impulse_imbalance_Pa_m_s": 99.28042591638125,
+      "stick_node_range": [
+        0,
+        65
+      ],
+      "final_phase_change_max": 0.5964323263399824,
+      "end_center_q_difference_max_Pa": 1.57142920897968e-09,
+      "final_fracture_J_m": 23.971056001037773,
+      "final_surface_source_representation_error": 6.661338147750939e-16,
+      "free_bulk_velocity_amplitude_max_m_s": 0.03407499264837524,
+      "final_q_minmax_Pa": [
+        135.53781155569615,
+        135.53781155580123
+      ],
+      "final_slip_minmax_m": [
+        0.12684843962888206,
+        0.12684843962888448
+      ],
+      "smooth_loading_work_correction_J_m": 0.0003705164687000429,
+      "work_against_smooth_loading_J_m": 161.9008452796048,
+      "smooth_loading_ledger_error_J_m": 0.00037051646787121593,
+      "largest_increment": {
+        "time": 0.23046875,
+        "anchor_time": 0.2265625,
+        "anchor_displacement": 0.0065703125,
+        "location": [
+          0.0625,
+          0.3125
+        ],
+        "increment": 0.039715555977444195,
+        "release_J_m": 0.15729997608724622
+      }
+    },
+    "aligned_evolving_mean32_refined": {
+      "summary": {
+        "scheme": "mean",
+        "phase_evolves": true,
+        "steps": 32,
+        "dt": 0.03125,
+        "aligned_bulk_quadrature": true,
+        "bulk_samples": 9216,
+        "final_time": 1.0,
+        "amplitude": 0.256,
+        "material": {
+          "G_Pa": 1000000.0,
+          "eta_Pa_s": 100000000.0,
+          "Gc_J_m2": 26.6666666667,
+          "ell_m": 0.15625,
+          "c0": 2.6666666666666665,
+          "m": 128.00000000016
+        },
+        "input_sha256": "dfda253ebad8c42dce964676d88837473d99966e69d2f86d31e38f269ab983db",
+        "initial_obstacle_kkt": 0.0,
+        "initial_phi_max": 0.6035488376736221,
+        "final_phi_max": 0.6888788727450841,
+        "max_phase_increment": 0.15372545834816667,
+        "largest_phase_release": 5.928819890340751,
+        "final_local_q": [
+          164.0684223706445,
+          164.06842237053237,
+          164.0684223706441
+        ],
+        "final_local_slip": [
+          0.1271634597190084,
+          0.127163459719008,
+          0.1271634597190086
+        ],
+        "final_stress_min": -1170.7984323861215,
+        "final_stress_max": 2755.2327289425234,
+        "endpoint_bulk_imbalance_max": 3098.2744154872325,
+        "mean_bulk_imbalance_max": 8.194353529056286e-11,
+        "endpoint_slip_condition_error_max": 33.27213217284998,
+        "mean_slip_condition_error_max": 1.1368683772161603e-13,
+        "mechanical_kkt_max": 1.8474111129762605e-13,
+        "phase_kkt_max": 1.7977286326220373e-13,
+        "min_I": 103.07197531730232,
+        "healing_max": 0.0,
+        "phase_path_error_max": 5.089262344881718e-13,
+        "temporal_quadrature_error_max": 2.645453300864631e-16,
+        "onset": {
+          "publication_time": 0.21875,
+          "anchor_time": 0.1875,
+          "anchor_displacement": 0.0045000000000000005,
+          "publication_displacement": 0.006125
+        },
+        "sums": {
+          "phase_release": 14.229421032092926,
+          "fracture_expenditure": 22.55023607357588,
+          "bulk_viscous": 0.059333073249890116,
+          "fault_viscous": 0.06726715408010413,
+          "friction": 127.16345971900785,
+          "prescribed_external_work": 175.38305955723794,
+          "mechanical_work_error": -3.3032855600600145e-13,
+          "exchange_defect": 4.067302050714261e-13,
+          "free_bulk_work": 5.237541074261793e-14,
+          "bulk_storage_change": 0.9152752281864779,
+          "fault_storage_change": 10.398067277045163
+        },
+        "elapsed_seconds": 61.90508665199741
+      },
+      "endpoint_slip_condition_error_Pa": 2129.416459062398,
+      "mean_slip_condition_error_Pa": 7.275957614183424e-12,
+      "largest_release_rate_J_m_s": 189.72223649090404,
+      "cumulative_absolute_mechanical_work_error_J_m": 3.0249723837201796e-12,
+      "endpoint_bulk_impulse_imbalance_Pa_m_s": 716.5600781474021,
+      "stick_node_range": [
+        0,
+        65
+      ],
+      "final_phase_change_max": 0.5711989679671374,
+      "end_center_q_difference_max_Pa": 1.567741492181085e-10,
+      "final_fracture_J_m": 22.55023607357588,
+      "final_surface_source_representation_error": 9.992007221626409e-16,
+      "free_bulk_velocity_amplitude_max_m_s": 0.040001873165036485,
+      "final_q_minmax_Pa": [
+        164.06842237053237,
+        164.06842237064765
+      ],
+      "final_slip_minmax_m": [
+        0.12716345971900733,
+        0.1271634597190086
+      ],
+      "smooth_loading_work_correction_J_m": 0.017112444317327804,
+      "work_against_smooth_loading_J_m": 175.40017200155526,
+      "smooth_loading_ledger_error_J_m": 0.017112444316997474,
+      "largest_increment": {
+        "time": 0.3125,
+        "anchor_time": 0.28125,
+        "anchor_displacement": 0.010125,
+        "location": [
+          0.0,
+          0.25
+        ],
+        "increment": 0.15372545834816667,
+        "release_J_m": 5.928819890340751
+      }
+    },
+    "aligned_evolving_mean64": {
+      "summary": {
+        "scheme": "mean",
+        "phase_evolves": true,
+        "steps": 64,
+        "dt": 0.015625,
+        "aligned_bulk_quadrature": true,
+        "bulk_samples": 9216,
+        "final_time": 1.0,
+        "amplitude": 0.256,
+        "material": {
+          "G_Pa": 1000000.0,
+          "eta_Pa_s": 100000000.0,
+          "Gc_J_m2": 26.6666666667,
+          "ell_m": 0.15625,
+          "c0": 2.6666666666666665,
+          "m": 128.00000000016
+        },
+        "input_sha256": "dfda253ebad8c42dce964676d88837473d99966e69d2f86d31e38f269ab983db",
+        "initial_obstacle_kkt": 0.0,
+        "initial_phi_max": 0.6035488376736221,
+        "final_phi_max": 0.7003659443414751,
+        "max_phase_increment": 0.10517396857483519,
+        "largest_phase_release": 1.7459086871685008,
+        "final_local_q": [
+          146.12120097792618,
+          146.12120097807886,
+          146.1212009779264
+        ],
+        "final_local_slip": [
+          0.12682066947464204,
+          0.12682066947464107,
+          0.1268206694746424
+        ],
+        "final_stress_min": -398.6054930184546,
+        "final_stress_max": 2549.2815003030905,
+        "endpoint_bulk_imbalance_max": 1481.9304463983246,
+        "mean_bulk_imbalance_max": 9.905529174680794e-11,
+        "endpoint_slip_condition_error_max": 20.551603277574586,
+        "mean_slip_condition_error_max": 8.881784197001252e-14,
+        "mechanical_kkt_max": 9.592326932761353e-14,
+        "phase_kkt_max": 6.278016301256496e-13,
+        "min_I": 103.07197531730232,
+        "healing_max": 0.0,
+        "phase_path_error_max": 3.5571545708990016e-13,
+        "temporal_quadrature_error_max": 1.2923689896027213e-16,
+        "onset": {
+          "publication_time": 0.203125,
+          "anchor_time": 0.1875,
+          "anchor_displacement": 0.0045000000000000005,
+          "publication_displacement": 0.00528125
+        },
+        "sums": {
+          "phase_release": 6.441231058047191,
+          "fracture_expenditure": 23.400187748418702,
+          "bulk_viscous": 0.04526208467007835,
+          "fault_viscous": 0.06470879809241968,
+          "friction": 126.82066947464162,
+          "prescribed_external_work": 167.05882709852307,
+          "mechanical_work_error": 3.148123942342344e-13,
+          "exchange_defect": -4.3579029274098957e-13,
+          "free_bulk_work": 1.0182903425685467e-13,
+          "bulk_storage_change": 1.0512448937287238,
+          "fault_storage_change": 9.235523040924011
+        },
+        "elapsed_seconds": 64.97165270900223
+      },
+      "endpoint_slip_condition_error_Pa": 1315.3026097647733,
+      "mean_slip_condition_error_Pa": 5.6843418860808e-12,
+      "largest_release_rate_J_m_s": 111.73815597878405,
+      "cumulative_absolute_mechanical_work_error_J_m": 3.701668730570955e-12,
+      "endpoint_bulk_impulse_imbalance_Pa_m_s": 363.73034824722396,
+      "stick_node_range": [
+        0,
+        65
+      ],
+      "final_phase_change_max": 0.58648957739102,
+      "end_center_q_difference_max_Pa": 1.5268142306013033e-10,
+      "final_fracture_J_m": 23.400187748418702,
+      "final_surface_source_representation_error": 7.771561172376096e-16,
+      "free_bulk_velocity_amplitude_max_m_s": 0.035501879783971305,
+      "final_q_minmax_Pa": [
+        146.12120097789472,
+        146.12120097807886
+      ],
+      "final_slip_minmax_m": [
+        0.12682066947464088,
+        0.1268206694746424
+      ],
+      "smooth_loading_work_correction_J_m": 0.0060692108234332125,
+      "work_against_smooth_loading_J_m": 167.0648963093465,
+      "smooth_loading_ledger_error_J_m": 0.006069210823748025,
+      "largest_increment": {
+        "time": 0.265625,
+        "anchor_time": 0.25,
+        "anchor_displacement": 0.008,
+        "location": [
+          0.5,
+          0.3125
+        ],
+        "increment": 0.10517396857483519,
+        "release_J_m": 1.6726954389297504
+      }
+    },
+    "aligned_evolving_mean8_refined": {
+      "summary": {
+        "scheme": "mean",
+        "phase_evolves": true,
+        "steps": 8,
+        "dt": 0.125,
+        "aligned_bulk_quadrature": true,
+        "bulk_samples": 9216,
+        "final_time": 1.0,
+        "amplitude": 0.256,
+        "material": {
+          "G_Pa": 1000000.0,
+          "eta_Pa_s": 100000000.0,
+          "Gc_J_m2": 26.6666666667,
+          "ell_m": 0.15625,
+          "c0": 2.6666666666666665,
+          "m": 128.00000000016
+        },
+        "input_sha256": "dfda253ebad8c42dce964676d88837473d99966e69d2f86d31e38f269ab983db",
+        "initial_obstacle_kkt": 0.0,
+        "initial_phi_max": 0.6035488376736221,
+        "final_phi_max": 0.6149909034727906,
+        "max_phase_increment": 0.23864625067049444,
+        "largest_phase_release": 29.879175934315874,
+        "final_local_q": [
+          312.1860014806533,
+          312.1860014807016,
+          312.1860014806588
+        ],
+        "final_local_slip": [
+          0.13011487460447807,
+          0.13011487460449103,
+          0.13011487460447818
+        ],
+        "final_stress_min": -7367.297272047152,
+        "final_stress_max": 1591.5452781033327,
+        "endpoint_bulk_imbalance_max": 9702.249746980351,
+        "mean_bulk_imbalance_max": 4.910395007273749e-12,
+        "endpoint_slip_condition_error_max": 111.41702411551815,
+        "mean_slip_condition_error_max": 7.815970093361102e-14,
+        "mechanical_kkt_max": 8.526512829121202e-13,
+        "phase_kkt_max": 7.655395848478607e-12,
+        "min_I": 103.07197531730232,
+        "healing_max": 0.0,
+        "phase_path_error_max": 8.739675649849232e-13,
+        "temporal_quadrature_error_max": 1.2871648191747909e-15,
+        "onset": {
+          "publication_time": 0.375,
+          "anchor_time": 0.25,
+          "anchor_displacement": 0.008,
+          "publication_displacement": 0.018000000000000002
+        },
+        "sums": {
+          "phase_release": 72.6768128032799,
+          "fracture_expenditure": 16.953808580778436,
+          "bulk_viscous": 0.24558660586209735,
+          "fault_viscous": 0.08246380365313304,
+          "friction": 130.11487460445943,
+          "prescribed_external_work": 245.21624085749124,
+          "mechanical_work_error": 1.2522385526116254e-12,
+          "exchange_defect": 7.0921046813055e-13,
+          "free_bulk_work": 4.2333535805586425e-14,
+          "bulk_storage_change": 4.89603756310041,
+          "fault_storage_change": 20.246656896356587
+        },
+        "elapsed_seconds": 17.532624756000587
+      },
+      "endpoint_slip_condition_error_Pa": 7130.689543577264,
+      "mean_slip_condition_error_Pa": 5.0022208597511045e-12,
+      "largest_release_rate_J_m_s": 239.033407474527,
+      "cumulative_absolute_mechanical_work_error_J_m": 1.9964620938837714e-12,
+      "endpoint_bulk_impulse_imbalance_Pa_m_s": 3692.360961483547,
+      "stick_node_range": [
+        0,
+        65
+      ],
+      "final_phase_change_max": 0.4818974973457524,
+      "end_center_q_difference_max_Pa": 8.482373914375785e-09,
+      "final_fracture_J_m": 16.953808580778436,
+      "final_surface_source_representation_error": 8.881784197001252e-16,
+      "free_bulk_velocity_amplitude_max_m_s": 0.04682907284103647,
+      "final_q_minmax_Pa": [
+        312.1860014806533,
+        312.18600148080554
+      ],
+      "final_slip_minmax_m": [
+        0.1301148746044345,
+        0.13011487460449103
+      ],
+      "smooth_loading_work_correction_J_m": -0.7126052780723456,
+      "work_against_smooth_loading_J_m": 244.5036355794189,
+      "smooth_loading_ledger_error_J_m": -0.7126052780710934,
+      "largest_increment": {
+        "time": 0.5,
+        "anchor_time": 0.375,
+        "anchor_displacement": 0.018000000000000002,
+        "location": [
+          0.875,
+          0.25
+        ],
+        "increment": 0.23864625067049444,
+        "release_J_m": 29.879175934315874
+      }
+    },
+    "aligned_frozen_endpoint16": {
+      "summary": {
+        "scheme": "endpoint",
+        "phase_evolves": false,
+        "steps": 16,
+        "dt": 0.0625,
+        "aligned_bulk_quadrature": true,
+        "bulk_samples": 9216,
+        "final_time": 1.0,
+        "amplitude": 0.256,
+        "material": {
+          "G_Pa": 1000000.0,
+          "eta_Pa_s": 100000000.0,
+          "Gc_J_m2": 26.6666666667,
+          "ell_m": 0.15625,
+          "c0": 2.6666666666666665,
+          "m": 128.00000000016
+        },
+        "input_sha256": "dfda253ebad8c42dce964676d88837473d99966e69d2f86d31e38f269ab983db",
+        "initial_obstacle_kkt": 0.0,
+        "initial_phi_max": 0.6035488376736221,
+        "final_phi_max": 0.6035488376736221,
+        "max_phase_increment": 0.0,
+        "largest_phase_release": -0.0,
+        "final_local_q": [
+          461.127510409859,
+          461.12751040985916,
+          461.12751040985904
+        ],
+        "final_local_slip": [
+          0.04768593115812018,
+          0.04768593115812018,
+          0.04768593115812017
+        ],
+        "final_stress_min": -118337.64326715904,
+        "final_stress_max": 150234.85392510763,
+        "endpoint_bulk_imbalance_max": 3.389288849575678e-12,
+        "mean_bulk_imbalance_max": 5.496048061104375e-12,
+        "endpoint_slip_condition_error_max": 1.2434497875801753e-13,
+        "mean_slip_condition_error_max": 3.9070754000710313,
+        "mechanical_kkt_max": 1.2789769243681803e-12,
+        "phase_kkt_max": 0.0,
+        "min_I": 103.07197531730232,
+        "healing_max": 0.0,
+        "phase_path_error_max": 0.0,
+        "temporal_quadrature_error_max": 2.504663143554353e-13,
+        "onset": null,
+        "sums": {
+          "phase_release": 0.0,
+          "fracture_expenditure": 0.0,
+          "bulk_viscous": 20.354047966803535,
+          "fault_viscous": 0.04352245050773607,
+          "friction": 47.68593115812012,
+          "prescribed_external_work": 5149.999317721113,
+          "mechanical_work_error": -0.09383774430196049,
+          "exchange_defect": -0.09383774426367836,
+          "free_bulk_work": 1.1255618629429506e-14,
+          "bulk_storage_change": 5071.051114611195,
+          "fault_storage_change": 10.958539278788864
+        },
+        "elapsed_seconds": 0.2660943659975601
+      },
+      "endpoint_slip_condition_error_Pa": 7.958078640513122e-12,
+      "mean_slip_condition_error_Pa": 250.05282560454594,
+      "largest_release_rate_J_m_s": -0.0,
+      "cumulative_absolute_mechanical_work_error_J_m": 0.09383774469421806,
+      "endpoint_bulk_impulse_imbalance_Pa_m_s": 1.070808155687053e-12,
+      "stick_node_range": [
+        0,
+        65
+      ],
+      "final_phase_change_max": 0.0,
+      "end_center_q_difference_max_Pa": 1.7053025658242404e-13,
+      "final_fracture_J_m": 0.0,
+      "final_surface_source_representation_error": 8.881784197001252e-16,
+      "free_bulk_velocity_amplitude_max_m_s": 0.026795765470096947,
+      "final_q_minmax_Pa": [
+        461.12751040985887,
+        461.12751040985944
+      ],
+      "final_slip_minmax_m": [
+        0.04768593115812013,
+        0.047685931158120205
+      ],
+      "smooth_loading_work_correction_J_m": 6.6703658847933385,
+      "work_against_smooth_loading_J_m": 5156.669683605906,
+      "smooth_loading_ledger_error_J_m": 6.576528140491378,
+      "largest_increment": {
+        "time": 0.0625,
+        "anchor_time": 0.0,
+        "anchor_displacement": 0.0,
+        "location": [
+          0.0,
+          0.0
+        ],
+        "increment": 0.0,
+        "release_J_m": -0.0
+      }
+    },
+    "aligned_frozen_endpoint256": {
+      "summary": {
+        "scheme": "endpoint",
+        "phase_evolves": false,
+        "steps": 256,
+        "dt": 0.00390625,
+        "aligned_bulk_quadrature": true,
+        "bulk_samples": 9216,
+        "final_time": 1.0,
+        "amplitude": 0.256,
+        "material": {
+          "G_Pa": 1000000.0,
+          "eta_Pa_s": 100000000.0,
+          "Gc_J_m2": 26.6666666667,
+          "ell_m": 0.15625,
+          "c0": 2.6666666666666665,
+          "m": 128.00000000016
+        },
+        "input_sha256": "dfda253ebad8c42dce964676d88837473d99966e69d2f86d31e38f269ab983db",
+        "initial_obstacle_kkt": 0.0,
+        "initial_phi_max": 0.6035488376736221,
+        "final_phi_max": 0.6035488376736221,
+        "max_phase_increment": 0.0,
+        "largest_phase_release": -0.0,
+        "final_local_q": [
+          461.1305194454288,
+          461.13051944542906,
+          461.1305194454288
+        ],
+        "final_local_slip": [
+          0.04768591777842688,
+          0.04768591777842686,
+          0.04768591777842688
+        ],
+        "final_stress_min": -118338.42199151298,
+        "final_stress_max": 150235.82774029832,
+        "endpoint_bulk_imbalance_max": 9.908607268016567e-11,
+        "mean_bulk_imbalance_max": 1.0163692110154443e-10,
+        "endpoint_slip_condition_error_max": 1.8118839761882555e-13,
+        "mean_slip_condition_error_max": 0.429383247393881,
+        "mechanical_kkt_max": 7.638334409421077e-14,
+        "phase_kkt_max": 0.0,
+        "min_I": 103.07197531730232,
+        "healing_max": 0.0,
+        "phase_path_error_max": 0.0,
+        "temporal_quadrature_error_max": 2.4980018054066022e-14,
+        "onset": null,
+        "sums": {
+          "phase_release": 0.0,
+          "fracture_expenditure": 0.0,
+          "bulk_viscous": 20.310359801535682,
+          "fault_viscous": 0.04342847992082288,
+          "friction": 47.68591777842687,
+          "prescribed_external_work": 5150.114822594905,
+          "mechanical_work_error": -0.0003394075423290691,
+          "exchange_defect": -0.0003394075309874796,
+          "free_bulk_work": 7.897777455148103e-13,
+          "bulk_storage_change": 5071.116773645883,
+          "fault_storage_change": 10.958682296680113
+        },
+        "elapsed_seconds": 4.142191589999129
+      },
+      "endpoint_slip_condition_error_Pa": 1.1596057447604832e-11,
+      "mean_slip_condition_error_Pa": 27.48052783320849,
+      "largest_release_rate_J_m_s": -0.0,
+      "cumulative_absolute_mechanical_work_error_J_m": 0.0003394129249608958,
+      "endpoint_bulk_impulse_imbalance_Pa_m_s": 4.4937303999973734e-11,
+      "stick_node_range": [
+        0,
+        65
+      ],
+      "final_phase_change_max": 0.0,
+      "end_center_q_difference_max_Pa": 3.410605131648481e-13,
+      "final_fracture_J_m": 0.0,
+      "final_surface_source_representation_error": 8.881784197001252e-16,
+      "free_bulk_velocity_amplitude_max_m_s": 0.027606153957738216,
+      "final_q_minmax_Pa": [
+        461.13051944542843,
+        461.13051944542946
+      ],
+      "final_slip_minmax_m": [
+        0.047685917778426824,
+        0.047685917778426935
+      ],
+      "smooth_loading_work_correction_J_m": 0.02605628480854438,
+      "work_against_smooth_loading_J_m": 5150.1408788797135,
+      "smooth_loading_ledger_error_J_m": 0.02571687726621531,
+      "largest_increment": {
+        "time": 0.00390625,
+        "anchor_time": 0.0,
+        "anchor_displacement": 0.0,
+        "location": [
+          0.0,
+          0.0
+        ],
+        "increment": 0.0,
+        "release_J_m": -0.0
+      }
+    },
+    "aligned_frozen_endpoint32": {
+      "summary": {
+        "scheme": "endpoint",
+        "phase_evolves": false,
+        "steps": 32,
+        "dt": 0.03125,
+        "aligned_bulk_quadrature": true,
+        "bulk_samples": 9216,
+        "final_time": 1.0,
+        "amplitude": 0.256,
+        "material": {
+          "G_Pa": 1000000.0,
+          "eta_Pa_s": 100000000.0,
+          "Gc_J_m2": 26.6666666667,
+          "ell_m": 0.15625,
+          "c0": 2.6666666666666665,
+          "m": 128.00000000016
+        },
+        "input_sha256": "dfda253ebad8c42dce964676d88837473d99966e69d2f86d31e38f269ab983db",
+        "initial_obstacle_kkt": 0.0,
+        "initial_phi_max": 0.6035488376736221,
+        "final_phi_max": 0.6035488376736221,
+        "max_phase_increment": 0.0,
+        "largest_phase_release": -0.0,
+        "final_local_q": [
+          461.1297760366374,
+          461.1297760366377,
+          461.12977603663757
+        ],
+        "final_local_slip": [
+          0.04768591647822393,
+          0.04768591647822393,
+          0.04768591647822394
+        ],
+        "final_stress_min": -118338.22960078936,
+        "final_stress_max": 150235.58715066186,
+        "endpoint_bulk_imbalance_max": 7.682317004764627e-10,
+        "mean_bulk_imbalance_max": 7.740048602045135e-10,
+        "endpoint_slip_condition_error_max": 4.867217739956686e-13,
+        "mean_slip_condition_error_max": 3.9069738511729266,
+        "mechanical_kkt_max": 4.831690603168681e-13,
+        "phase_kkt_max": 0.0,
+        "min_I": 103.07197531730232,
+        "healing_max": 0.0,
+        "phase_path_error_max": 0.0,
+        "temporal_quadrature_error_max": 6.283862319378386e-14,
+        "onset": null,
+        "sums": {
+          "phase_release": 0.0,
+          "fracture_expenditure": 0.0,
+          "bulk_viscous": 20.32115433842417,
+          "fault_viscous": 0.04345166303640314,
+          "friction": 47.68591647822395,
+          "prescribed_external_work": 5150.098017915506,
+          "mechanical_work_error": -0.011703489213699878,
+          "exchange_defect": -0.011703489339689434,
+          "free_bulk_work": 7.2751098031420455e-12,
+          "bulk_storage_change": 5071.100551962274,
+          "fault_storage_change": 10.958646962761229
+        },
+        "elapsed_seconds": 0.49454426399825024
+      },
+      "endpoint_slip_condition_error_Pa": 3.1150193535722786e-11,
+      "mean_slip_condition_error_Pa": 250.0463264750673,
+      "largest_release_rate_J_m_s": -0.0,
+      "cumulative_absolute_mechanical_work_error_J_m": 0.011703490227018488,
+      "endpoint_bulk_impulse_imbalance_Pa_m_s": 4.009321236553981e-10,
+      "stick_node_range": [
+        0,
+        65
+      ],
+      "final_phase_change_max": 0.0,
+      "end_center_q_difference_max_Pa": 2.8421709430404007e-13,
+      "final_fracture_J_m": 0.0,
+      "final_surface_source_representation_error": 8.881784197001252e-16,
+      "free_bulk_velocity_amplitude_max_m_s": 0.027227972663506617,
+      "final_q_minmax_Pa": [
+        461.12977603663734,
+        461.129776036638
+      ],
+      "final_slip_minmax_m": [
+        0.04768591647822389,
+        0.047685916478223976
+      ],
+      "smooth_loading_work_correction_J_m": 1.6675995702465969,
+      "work_against_smooth_loading_J_m": 5151.765617485752,
+      "smooth_loading_ledger_error_J_m": 1.655896081032897,
+      "largest_increment": {
+        "time": 0.03125,
+        "anchor_time": 0.0,
+        "anchor_displacement": 0.0,
+        "location": [
+          0.0,
+          0.0
+        ],
+        "increment": 0.0,
+        "release_J_m": -0.0
+      }
+    },
+    "aligned_frozen_endpoint512": {
+      "summary": {
+        "scheme": "endpoint",
+        "phase_evolves": false,
+        "steps": 512,
+        "dt": 0.001953125,
+        "aligned_bulk_quadrature": true,
+        "bulk_samples": 9216,
+        "final_time": 1.0,
+        "amplitude": 0.256,
+        "material": {
+          "G_Pa": 1000000.0,
+          "eta_Pa_s": 100000000.0,
+          "Gc_J_m2": 26.6666666667,
+          "ell_m": 0.15625,
+          "c0": 2.6666666666666665,
+          "m": 128.00000000016
+        },
+        "input_sha256": "dfda253ebad8c42dce964676d88837473d99966e69d2f86d31e38f269ab983db",
+        "initial_obstacle_kkt": 0.0,
+        "initial_phi_max": 0.6035488376736221,
+        "final_phi_max": 0.6035488376736221,
+        "max_phase_increment": 0.0,
+        "largest_phase_release": -0.0,
+        "final_local_q": [
+          461.1305282955367,
+          461.1305282955369,
+          461.13052829553646
+        ],
+        "final_local_slip": [
+          0.04768591774014402,
+          0.047685917740144,
+          0.04768591774014401
+        ],
+        "final_stress_min": -118338.4242818796,
+        "final_stress_max": 150235.83060446172,
+        "endpoint_bulk_imbalance_max": 7.362066511973353e-11,
+        "mean_bulk_imbalance_max": 6.971401234068253e-11,
+        "endpoint_slip_condition_error_max": 1.5276668818842154e-13,
+        "mean_slip_condition_error_max": 0.09002461192298306,
+        "mechanical_kkt_max": 3.552713678800501e-14,
+        "phase_kkt_max": 0.0,
+        "min_I": 103.07197531730232,
+        "healing_max": 0.0,
+        "phase_path_error_max": 0.0,
+        "temporal_quadrature_error_max": 9.880984919163893e-15,
+        "onset": null,
+        "sums": {
+          "phase_release": 0.0,
+          "fracture_expenditure": 0.0,
+          "bulk_viscous": 20.310231447279158,
+          "fault_viscous": 0.043428203990963164,
+          "friction": 47.68591774014398,
+          "prescribed_external_work": 5150.115155710029,
+          "mechanical_work_error": -7.116010933082143e-05,
+          "exchange_defect": -7.116005750949783e-05,
+          "free_bulk_work": 4.73642223244381e-13,
+          "bulk_storage_change": 5071.116966761403,
+          "fault_storage_change": 10.958682717322517
+        },
+        "elapsed_seconds": 8.305793357998482
+      },
+      "endpoint_slip_condition_error_Pa": 9.777068044058977e-12,
+      "mean_slip_condition_error_Pa": 5.761575163071256,
+      "largest_release_rate_J_m_s": -0.0,
+      "cumulative_absolute_mechanical_work_error_J_m": 7.11716981585613e-05,
+      "endpoint_bulk_impulse_imbalance_Pa_m_s": 2.5412642442793794e-11,
+      "stick_node_range": [
+        0,
+        65
+      ],
+      "final_phase_change_max": 0.0,
+      "end_center_q_difference_max_Pa": 3.410605131648481e-13,
+      "final_fracture_J_m": 0.0,
+      "final_surface_source_representation_error": 8.881784197001252e-16,
+      "free_bulk_velocity_amplitude_max_m_s": 0.02763316690732874,
+      "final_q_minmax_Pa": [
+        461.1305282955362,
+        461.13052829553715
+      ],
+      "final_slip_minmax_m": [
+        0.04768591774014394,
+        0.04768591774014404
+      ],
+      "smooth_loading_work_correction_J_m": 0.006514071325717776,
+      "work_against_smooth_loading_J_m": 5150.121669781355,
+      "smooth_loading_ledger_error_J_m": 0.006442911216386955,
+      "largest_increment": {
+        "time": 0.001953125,
+        "anchor_time": 0.0,
+        "anchor_displacement": 0.0,
+        "location": [
+          0.0,
+          0.0
+        ],
+        "increment": 0.0,
+        "release_J_m": -0.0
+      }
+    },
+    "aligned_frozen_endpoint8": {
+      "summary": {
+        "scheme": "endpoint",
+        "phase_evolves": false,
+        "steps": 8,
+        "dt": 0.125,
+        "aligned_bulk_quadrature": true,
+        "bulk_samples": 9216,
+        "final_time": 1.0,
+        "amplitude": 0.256,
+        "material": {
+          "G_Pa": 1000000.0,
+          "eta_Pa_s": 100000000.0,
+          "Gc_J_m2": 26.6666666667,
+          "ell_m": 0.15625,
+          "c0": 2.6666666666666665,
+          "m": 128.00000000016
+        },
+        "input_sha256": "dfda253ebad8c42dce964676d88837473d99966e69d2f86d31e38f269ab983db",
+        "initial_obstacle_kkt": 0.0,
+        "initial_phi_max": 0.6035488376736221,
+        "final_phi_max": 0.6035488376736221,
+        "max_phase_increment": 0.0,
+        "largest_phase_release": -0.0,
+        "final_local_q": [
+          461.1184479029693,
+          461.1184479029695,
+          461.1184479029693
+        ],
+        "final_local_slip": [
+          0.047685931084426376,
+          0.04768593108442637,
+          0.04768593108442637
+        ],
+        "final_stress_min": -118335.29793269579,
+        "final_stress_max": 150231.9210229633,
+        "endpoint_bulk_imbalance_max": 8.142375662600898e-12,
+        "mean_bulk_imbalance_max": 9.300560321889861e-12,
+        "endpoint_slip_condition_error_max": 1.5631940186722204e-13,
+        "mean_slip_condition_error_max": 7.8108723958757285,
+        "mechanical_kkt_max": 2.3305801732931286e-12,
+        "phase_kkt_max": 0.0,
+        "min_I": 103.07197531730232,
+        "healing_max": 0.0,
+        "phase_path_error_max": 0.0,
+        "temporal_quadrature_error_max": 1.092459456231154e-13,
+        "onset": null,
+        "sums": {
+          "phase_release": 0.0,
+          "fracture_expenditure": 0.0,
+          "bulk_viscous": 20.48617865167466,
+          "fault_viscous": 0.043806142024971816,
+          "friction": 47.68593108442638,
+          "prescribed_external_work": 5149.839795334419,
+          "mechanical_work_error": -0.18759671293202962,
+          "exchange_defect": -0.18759671298115635,
+          "free_bulk_work": -2.5500369363740234e-14,
+          "bulk_storage_change": 5070.8533676210245,
+          "fault_storage_change": 10.95810854820096
+        },
+        "elapsed_seconds": 0.1346137029977399
+      },
+      "endpoint_slip_condition_error_Pa": 1.0004441719502209e-11,
+      "mean_slip_condition_error_Pa": 499.8958333360465,
+      "largest_release_rate_J_m_s": -0.0,
+      "cumulative_absolute_mechanical_work_error_J_m": 0.18759671317197676,
+      "endpoint_bulk_impulse_imbalance_Pa_m_s": 3.014621538510731e-12,
+      "stick_node_range": [
+        0,
+        0
+      ],
+      "final_phase_change_max": 0.0,
+      "end_center_q_difference_max_Pa": 1.7053025658242404e-13,
+      "final_fracture_J_m": 0.0,
+      "final_surface_source_representation_error": 8.881784197001252e-16,
+      "free_bulk_velocity_amplitude_max_m_s": 0.025931351083277737,
+      "final_q_minmax_Pa": [
+        461.1184479029692,
+        461.11844790296976
+      ],
+      "final_slip_minmax_m": [
+        0.047685931084426335,
+        0.04768593108442641
+      ],
+      "smooth_loading_work_correction_J_m": 26.68094520011098,
+      "work_against_smooth_loading_J_m": 5176.52074053453,
+      "smooth_loading_ledger_error_J_m": 26.49334848717895,
+      "largest_increment": {
+        "time": 0.125,
+        "anchor_time": 0.0,
+        "anchor_displacement": 0.0,
+        "location": [
+          0.0,
+          0.0
+        ],
+        "increment": 0.0,
+        "release_J_m": -0.0
+      }
+    },
+    "aligned_frozen_mean16": {
+      "summary": {
+        "scheme": "mean",
+        "phase_evolves": false,
+        "steps": 16,
+        "dt": 0.0625,
+        "aligned_bulk_quadrature": true,
+        "bulk_samples": 9216,
+        "final_time": 1.0,
+        "amplitude": 0.256,
+        "material": {
+          "G_Pa": 1000000.0,
+          "eta_Pa_s": 100000000.0,
+          "Gc_J_m2": 26.6666666667,
+          "ell_m": 0.15625,
+          "c0": 2.6666666666666665,
+          "m": 128.00000000016
+        },
+        "input_sha256": "dfda253ebad8c42dce964676d88837473d99966e69d2f86d31e38f269ab983db",
+        "initial_obstacle_kkt": 0.0,
+        "initial_phi_max": 0.6035488376736221,
+        "final_phi_max": 0.6035488376736221,
+        "max_phase_increment": 0.0,
+        "largest_phase_release": -0.0,
+        "final_local_q": [
+          459.3110364193849,
+          459.31103641938506,
+          459.31103641938495
+        ],
+        "final_local_slip": [
+          0.0474986449101846,
+          0.04749864491018459,
+          0.0474986449101846
+        ],
+        "final_stress_min": -117368.94955359468,
+        "final_stress_max": 150145.5865656646,
+        "endpoint_bulk_imbalance_max": 5.117115065012001e-11,
+        "mean_bulk_imbalance_max": 2.53051468668275e-11,
+        "endpoint_slip_condition_error_max": 7.813336910885823,
+        "mean_slip_condition_error_max": 8.171241461241152e-14,
+        "mechanical_kkt_max": 4.831690603168681e-13,
+        "phase_kkt_max": 0.0,
+        "min_I": 103.07197531730232,
+        "healing_max": 0.0,
+        "phase_path_error_max": 0.0,
+        "temporal_quadrature_error_max": 1.709743457922741e-13,
+        "onset": null,
+        "sums": {
+          "phase_release": 0.0,
+          "fracture_expenditure": 0.0,
+          "bulk_viscous": 20.35443861429871,
+          "fault_viscous": 0.04352224307386185,
+          "friction": 47.49864491018459,
+          "prescribed_external_work": 5150.14016278883,
+          "mechanical_work_error": 5.683659027207236e-11,
+          "exchange_defect": 2.9995450567810167e-13,
+          "free_bulk_work": 5.442334614176478e-15,
+          "bulk_storage_change": 5071.371183475117,
+          "fault_storage_change": 10.87237354609909
+        },
+        "elapsed_seconds": 0.2835025880012836
+      },
+      "endpoint_slip_condition_error_Pa": 500.0535622966926,
+      "mean_slip_condition_error_Pa": 5.2295945351943366e-12,
+      "largest_release_rate_J_m_s": -0.0,
+      "cumulative_absolute_mechanical_work_error_J_m": 3.1891172754823965e-10,
+      "endpoint_bulk_impulse_imbalance_Pa_m_s": 4.1343892719092334e-11,
+      "stick_node_range": [
+        0,
+        65
+      ],
+      "final_phase_change_max": 0.0,
+      "end_center_q_difference_max_Pa": 2.2737367544323206e-13,
+      "final_fracture_J_m": 0.0,
+      "final_surface_source_representation_error": 8.881784197001252e-16,
+      "free_bulk_velocity_amplitude_max_m_s": 0.026791459187553643,
+      "final_q_minmax_Pa": [
+        459.31103641938466,
+        459.31103641938535
+      ],
+      "final_slip_minmax_m": [
+        0.04749864491018456,
+        0.04749864491018463
+      ],
+      "smooth_loading_work_correction_J_m": 6.68596813368321,
+      "work_against_smooth_loading_J_m": 5156.826130922513,
+      "smooth_loading_ledger_error_J_m": 6.6859681337400465,
+      "largest_increment": {
+        "time": 0.0625,
+        "anchor_time": 0.0,
+        "anchor_displacement": 0.0,
+        "location": [
+          0.0,
+          0.0
+        ],
+        "increment": 0.0,
+        "release_J_m": -0.0
+      }
+    },
+    "aligned_frozen_mean256": {
+      "summary": {
+        "scheme": "mean",
+        "phase_evolves": false,
+        "steps": 256,
+        "dt": 0.00390625,
+        "aligned_bulk_quadrature": true,
+        "bulk_samples": 9216,
+        "final_time": 1.0,
+        "amplitude": 0.256,
+        "material": {
+          "G_Pa": 1000000.0,
+          "eta_Pa_s": 100000000.0,
+          "Gc_J_m2": 26.6666666667,
+          "ell_m": 0.15625,
+          "c0": 2.6666666666666665,
+          "m": 128.00000000016
+        },
+        "input_sha256": "dfda253ebad8c42dce964676d88837473d99966e69d2f86d31e38f269ab983db",
+        "initial_obstacle_kkt": 0.0,
+        "initial_phi_max": 0.6035488376736221,
+        "final_phi_max": 0.6035488376736221,
+        "max_phase_increment": 0.0,
+        "largest_phase_release": -0.0,
+        "final_local_q": [
+          461.2499814332047,
+          461.2499814332045,
+          461.24998143320437
+        ],
+        "final_local_slip": [
+          0.047698230720258125,
+          0.04769823072025809,
+          0.04769823072025809
+        ],
+        "final_stress_min": -118402.12897392729,
+        "final_stress_max": 150241.69848563196,
+        "endpoint_bulk_imbalance_max": 1.907398239353597e-09,
+        "mean_bulk_imbalance_max": 7.566480775267337e-11,
+        "endpoint_slip_condition_error_max": 0.5139111004433214,
+        "mean_slip_condition_error_max": 1.4210854715202004e-13,
+        "mechanical_kkt_max": 2.842170943040401e-14,
+        "phase_kkt_max": 0.0,
+        "min_I": 103.07197531730232,
+        "healing_max": 0.0,
+        "phase_path_error_max": 0.0,
+        "temporal_quadrature_error_max": 2.0317081350640365e-14,
+        "onset": null,
+        "sums": {
+          "phase_release": 0.0,
+          "fracture_expenditure": 0.0,
+          "bulk_viscous": 20.31036150432633,
+          "fault_viscous": 0.043428484694690885,
+          "friction": 47.69823072025812,
+          "prescribed_external_work": 5150.115365347585,
+          "mechanical_work_error": 5.0718344665077505e-11,
+          "exchange_defect": 8.253814298697648e-15,
+          "free_bulk_work": 4.737155070521091e-13,
+          "bulk_storage_change": 5071.0989836216,
+          "fault_storage_change": 10.96436101665715
+        },
+        "elapsed_seconds": 4.119393888999184
+      },
+      "endpoint_slip_condition_error_Pa": 32.890310428372565,
+      "mean_slip_condition_error_Pa": 9.09494701772928e-12,
+      "largest_release_rate_J_m_s": -0.0,
+      "cumulative_absolute_mechanical_work_error_J_m": 6.245633676830814e-09,
+      "endpoint_bulk_impulse_imbalance_Pa_m_s": 7.610732479271685e-10,
+      "stick_node_range": [
+        0,
+        65
+      ],
+      "final_phase_change_max": 0.0,
+      "end_center_q_difference_max_Pa": 2.2737367544323206e-13,
+      "final_fracture_J_m": 0.0,
+      "final_surface_source_representation_error": 8.881784197001252e-16,
+      "free_bulk_velocity_amplitude_max_m_s": 0.029420234255792224,
+      "final_q_minmax_Pa": [
+        461.24998143320425,
+        461.2499814332054
+      ],
+      "final_slip_minmax_m": [
+        0.04769823072025806,
+        0.04769823072025818
+      ],
+      "smooth_loading_work_correction_J_m": 0.02605227662323246,
+      "work_against_smooth_loading_J_m": 5150.141417624208,
+      "smooth_loading_ledger_error_J_m": 0.026052276673950808,
+      "largest_increment": {
+        "time": 0.00390625,
+        "anchor_time": 0.0,
+        "anchor_displacement": 0.0,
+        "location": [
+          0.0,
+          0.0
+        ],
+        "increment": 0.0,
+        "release_J_m": -0.0
+      }
+    },
+    "aligned_frozen_mean32_checked": {
+      "summary": {
+        "scheme": "mean",
+        "phase_evolves": false,
+        "steps": 32,
+        "dt": 0.03125,
+        "aligned_bulk_quadrature": true,
+        "bulk_samples": 9216,
+        "final_time": 1.0,
+        "amplitude": 0.256,
+        "material": {
+          "G_Pa": 1000000.0,
+          "eta_Pa_s": 100000000.0,
+          "Gc_J_m2": 26.6666666667,
+          "ell_m": 0.15625,
+          "c0": 2.6666666666666665,
+          "m": 128.00000000016
+        },
+        "input_sha256": "dfda253ebad8c42dce964676d88837473d99966e69d2f86d31e38f269ab983db",
+        "initial_obstacle_kkt": 0.0,
+        "initial_phi_max": 0.6035488376736221,
+        "final_phi_max": 0.6035488376736221,
+        "max_phase_increment": 0.0,
+        "largest_phase_release": -0.0,
+        "final_local_q": [
+          461.58243851638,
+          461.5824385163799,
+          461.58243851637985
+        ],
+        "final_local_slip": [
+          0.047732565981599126,
+          0.047732565981599105,
+          0.04773256598159911
+        ],
+        "final_stress_min": -118579.62656038924,
+        "final_stress_max": 150257.83243713304,
+        "endpoint_bulk_imbalance_max": 1.1948841915909725e-09,
+        "mean_bulk_imbalance_max": 4.2152592527600063e-10,
+        "endpoint_slip_condition_error_max": 1.9472741784531493,
+        "mean_slip_condition_error_max": 1.9184653865522705e-13,
+        "mechanical_kkt_max": 2.0605739337042905e-13,
+        "phase_kkt_max": 0.0,
+        "min_I": 103.07197531730232,
+        "healing_max": 0.0,
+        "phase_path_error_max": 0.0,
+        "temporal_quadrature_error_max": 5.1736392947532295e-14,
+        "onset": null,
+        "sums": {
+          "phase_release": 0.0,
+          "fracture_expenditure": 0.0,
+          "bulk_viscous": 20.321184559301148,
+          "fault_viscous": 0.04345180194354365,
+          "friction": 47.732565981599116,
+          "prescribed_external_work": 5150.11264299842,
+          "mechanical_work_error": -1.6509180562753553e-10,
+          "exchange_defect": -1.662558979376172e-13,
+          "free_bulk_work": 3.741514722967314e-12,
+          "bulk_storage_change": 5071.035268286,
+          "fault_storage_change": 10.980172369740771
+        },
+        "elapsed_seconds": 0.4840781089988013
+      },
+      "endpoint_slip_condition_error_Pa": 124.62554742100201,
+      "mean_slip_condition_error_Pa": 1.3187673175707456e-11,
+      "largest_release_rate_J_m_s": -0.0,
+      "cumulative_absolute_mechanical_work_error_J_m": 7.312034103112425e-10,
+      "endpoint_bulk_impulse_imbalance_Pa_m_s": 3.781632544001129e-10,
+      "stick_node_range": [
+        0,
+        65
+      ],
+      "final_phase_change_max": 0.0,
+      "end_center_q_difference_max_Pa": 2.8421709430404007e-13,
+      "final_fracture_J_m": 0.0,
+      "final_surface_source_representation_error": 8.881784197001252e-16,
+      "free_bulk_velocity_amplitude_max_m_s": 0.02808724548149852,
+      "final_q_minmax_Pa": [
+        461.5824385163795,
+        461.5824385163803
+      ],
+      "final_slip_minmax_m": [
+        0.04773256598159907,
+        0.04773256598159917
+      ],
+      "smooth_loading_work_correction_J_m": 1.6666275562316089,
+      "work_against_smooth_loading_J_m": 5151.779270554652,
+      "smooth_loading_ledger_error_J_m": 1.6666275560665171,
+      "largest_increment": {
+        "time": 0.03125,
+        "anchor_time": 0.0,
+        "anchor_displacement": 0.0,
+        "location": [
+          0.0,
+          0.0
+        ],
+        "increment": 0.0,
+        "release_J_m": -0.0
+      }
+    },
+    "aligned_frozen_mean512": {
+      "summary": {
+        "scheme": "mean",
+        "phase_evolves": false,
+        "steps": 512,
+        "dt": 0.001953125,
+        "aligned_bulk_quadrature": true,
+        "bulk_samples": 9216,
+        "final_time": 1.0,
+        "amplitude": 0.256,
+        "material": {
+          "G_Pa": 1000000.0,
+          "eta_Pa_s": 100000000.0,
+          "Gc_J_m2": 26.6666666667,
+          "ell_m": 0.15625,
+          "c0": 2.6666666666666665,
+          "m": 128.00000000016
+        },
+        "input_sha256": "dfda253ebad8c42dce964676d88837473d99966e69d2f86d31e38f269ab983db",
+        "initial_obstacle_kkt": 0.0,
+        "initial_phi_max": 0.6035488376736221,
+        "final_phi_max": 0.6035488376736221,
+        "max_phase_increment": 0.0,
+        "largest_phase_release": -0.0,
+        "final_local_q": [
+          461.08867481515085,
+          461.08867481515136,
+          461.08867481515074
+        ],
+        "final_local_slip": [
+          0.04768160377699047,
+          0.0476816037769905,
+          0.04768160377699047
+        ],
+        "final_stress_min": -118316.10455500655,
+        "final_stress_max": 150233.7737901626,
+        "endpoint_bulk_imbalance_max": 1.1124985377364283e-09,
+        "mean_bulk_imbalance_max": 4.4650949604374546e-11,
+        "endpoint_slip_condition_error_max": 0.18004863775012936,
+        "mean_slip_condition_error_max": 1.4921397450962104e-13,
+        "mechanical_kkt_max": 1.9095836023552692e-14,
+        "phase_kkt_max": 0.0,
+        "min_I": 103.07197531730232,
+        "healing_max": 0.0,
+        "phase_path_error_max": 0.0,
+        "temporal_quadrature_error_max": 1.1629586182948515e-14,
+        "onset": null,
+        "sums": {
+          "phase_release": 0.0,
+          "fracture_expenditure": 0.0,
+          "bulk_viscous": 20.310231682083504,
+          "fault_viscous": 0.04342820451168171,
+          "friction": 47.681603776990464,
+          "prescribed_external_work": 5150.115251842759,
+          "mechanical_work_error": -3.7671250222822204e-12,
+          "exchange_defect": -2.0448920334814602e-14,
+          "free_bulk_work": 2.358070515242858e-13,
+          "bulk_storage_change": 5071.123294652202,
+          "fault_storage_change": 10.95669352697644
+        },
+        "elapsed_seconds": 8.243859362999501
+      },
+      "endpoint_slip_condition_error_Pa": 11.523112816008846,
+      "mean_slip_condition_error_Pa": 9.549694368615745e-12,
+      "largest_release_rate_J_m_s": -0.0,
+      "cumulative_absolute_mechanical_work_error_J_m": 1.1339873109597337e-08,
+      "endpoint_bulk_impulse_imbalance_Pa_m_s": 4.748295898465313e-10,
+      "stick_node_range": [
+        0,
+        65
+      ],
+      "final_phase_change_max": 0.0,
+      "end_center_q_difference_max_Pa": 6.252776074688882e-13,
+      "final_fracture_J_m": 0.0,
+      "final_surface_source_representation_error": 8.881784197001252e-16,
+      "free_bulk_velocity_amplitude_max_m_s": 0.02885027038979568,
+      "final_q_minmax_Pa": [
+        461.08867481515034,
+        461.08867481515153
+      ],
+      "final_slip_minmax_m": [
+        0.047681603776990385,
+        0.047681603776990544
+      ],
+      "smooth_loading_work_correction_J_m": 0.006514422392422037,
+      "work_against_smooth_loading_J_m": 5150.121766265152,
+      "smooth_loading_ledger_error_J_m": 0.006514422388654913,
+      "largest_increment": {
+        "time": 0.001953125,
+        "anchor_time": 0.0,
+        "anchor_displacement": 0.0,
+        "location": [
+          0.0,
+          0.0
+        ],
+        "increment": 0.0,
+        "release_J_m": -0.0
+      }
+    },
+    "aligned_frozen_mean8_refined": {
+      "summary": {
+        "scheme": "mean",
+        "phase_evolves": false,
+        "steps": 8,
+        "dt": 0.125,
+        "aligned_bulk_quadrature": true,
+        "bulk_samples": 9216,
+        "final_time": 1.0,
+        "amplitude": 0.256,
+        "material": {
+          "G_Pa": 1000000.0,
+          "eta_Pa_s": 100000000.0,
+          "Gc_J_m2": 26.6666666667,
+          "ell_m": 0.15625,
+          "c0": 2.6666666666666665,
+          "m": 128.00000000016
+        },
+        "input_sha256": "dfda253ebad8c42dce964676d88837473d99966e69d2f86d31e38f269ab983db",
+        "initial_obstacle_kkt": 0.0,
+        "initial_phi_max": 0.6035488376736221,
+        "final_phi_max": 0.6035488376736221,
+        "max_phase_increment": 0.0,
+        "largest_phase_release": -0.0,
+        "final_local_q": [
+          464.7464456649645,
+          464.74644566496477,
+          464.74644566496454
+        ],
+        "final_local_slip": [
+          0.04805964153314371,
+          0.04805964153314371,
+          0.0480596415331437
+        ],
+        "final_stress_min": -120270.04549489623,
+        "final_stress_max": 150410.21247220892,
+        "endpoint_bulk_imbalance_max": 1.6217693854514437e-11,
+        "mean_bulk_imbalance_max": 3.1019631308026874e-12,
+        "endpoint_slip_condition_error_max": 15.605381070328294,
+        "mean_slip_condition_error_max": 1.1013412404281553e-13,
+        "mechanical_kkt_max": 1.3642420526593924e-12,
+        "phase_kkt_max": 0.0,
+        "min_I": 103.07197531730232,
+        "healing_max": 0.0,
+        "phase_path_error_max": 0.0,
+        "temporal_quadrature_error_max": 5.364597654988756e-13,
+        "onset": null,
+        "sums": {
+          "phase_release": 0.0,
+          "fracture_expenditure": 0.0,
+          "bulk_viscous": 20.487723128161136,
+          "fault_viscous": 0.04381971691431979,
+          "friction": 48.05964153314376,
+          "prescribed_external_work": 5150.214909476739,
+          "mechanical_work_error": -5.689776530760601e-11,
+          "exchange_defect": 4.3565151486291143e-13,
+          "free_bulk_work": -1.576760665404282e-14,
+          "bulk_storage_change": 5070.492505324813,
+          "fault_storage_change": 11.131219773764721
+        },
+        "elapsed_seconds": 0.1331182819994865
+      },
+      "endpoint_slip_condition_error_Pa": 998.7443885010106,
+      "mean_slip_condition_error_Pa": 7.048583938740192e-12,
+      "largest_release_rate_J_m_s": -0.0,
+      "cumulative_absolute_mechanical_work_error_J_m": 1.6203576175510536e-10,
+      "endpoint_bulk_impulse_imbalance_Pa_m_s": 5.5571172663526625e-12,
+      "stick_node_range": [
+        0,
+        65
+      ],
+      "final_phase_change_max": 0.0,
+      "end_center_q_difference_max_Pa": 2.8421709430404007e-13,
+      "final_fracture_J_m": 0.0,
+      "final_surface_source_representation_error": 8.881784197001252e-16,
+      "free_bulk_velocity_amplitude_max_m_s": 0.027653344401479915,
+      "final_q_minmax_Pa": [
+        464.7464456649644,
+        464.74644566496494
+      ],
+      "final_slip_minmax_m": [
+        0.04805964153314367,
+        0.048059641533143745
+      ],
+      "smooth_loading_work_correction_J_m": 26.556297287186432,
+      "work_against_smooth_loading_J_m": 5176.771206763926,
+      "smooth_loading_ledger_error_J_m": 26.556297287129535,
+      "largest_increment": {
+        "time": 0.125,
+        "anchor_time": 0.0,
+        "anchor_displacement": 0.0,
+        "location": [
+          0.0,
+          0.0
+        ],
+        "increment": 0.0,
+        "release_J_m": -0.0
+      }
+    }
+  },
+  "comparisons": {
+    "frozen_mean16": {
+      "reference": "frozen_endpoint512",
+      "phi_max_common_time_error": 0.0,
+      "phi_final_error": 0.0,
+      "tau_max_common_time_error": 584.4665546008312,
+      "tau_final_error": 583.4478494056384,
+      "slip_max_common_time_error": 0.000188841311818893,
+      "slip_final_error": 0.00018829147458723772,
+      "Z_max_common_time_error": 188.86181298394024,
+      "Z_final_error": 188.80745876477158,
+      "strain_max_common_time_error": 0.00013939108846464446,
+      "strain_final_error": 0.00013898525618555313,
+      "inelastic_max_common_time_error": 1.3452069476043793e-06,
+      "inelastic_final_error": 1.3452069476043793e-06,
+      "history_max_common_time_error": 241.0501338402173,
+      "history_final_error": 241.0501338402173,
+      "q_max_common_time_error_Pa": 1.8323294222560262,
+      "q_final_error_Pa": 1.8318020798915313,
+      "q_max_common_local_slip_error_Pa": 0.014045666614151742,
+      "phi_max_common_time_L2_error": 0.0,
+      "phi_max_equal_anchor_load_error": 0.0,
+      "release_total_difference_J_m": 0.0,
+      "prescribed_work_difference_J_m": -0.01218398867513315
+    },
+    "frozen_mean32": {
+      "reference": "frozen_endpoint512",
+      "phi_max_common_time_error": 0.0,
+      "phi_final_error": 0.0,
+      "tau_max_common_time_error": 584.3718046252222,
+      "tau_final_error": 582.396137597636,
+      "slip_max_common_time_error": 0.0001888075590768013,
+      "slip_final_error": 0.00018819028452238262,
+      "Z_max_common_time_error": 188.79693480865046,
+      "Z_final_error": 188.07297029309848,
+      "strain_max_common_time_error": 0.00013935258155344768,
+      "strain_final_error": 0.00013889418377422552,
+      "inelastic_max_common_time_error": 3.2761171988378475e-07,
+      "inelastic_final_error": 3.2761171988378475e-07,
+      "history_max_common_time_error": 240.63466474730376,
+      "history_final_error": 240.63466474730376,
+      "q_max_common_time_error_Pa": 1.831699976908832,
+      "q_final_error_Pa": 1.824676103413367,
+      "q_max_common_local_slip_error_Pa": 0.009835632481326684,
+      "phi_max_common_time_L2_error": 0.0,
+      "phi_max_equal_anchor_load_error": 0.0,
+      "release_total_difference_J_m": 0.0,
+      "prescribed_work_difference_J_m": 0.00434486959966307
+    },
+    "frozen_mean256": {
+      "reference": "frozen_endpoint512",
+      "phi_max_common_time_error": 0.0,
+      "phi_final_error": 0.0,
+      "tau_max_common_time_error": 11.562724336895485,
+      "tau_final_error": 11.529359544801991,
+      "slip_max_common_time_error": 3.517884902215715e-06,
+      "slip_final_error": 3.507091833110376e-06,
+      "Z_max_common_time_error": 3.517850548094627,
+      "Z_final_error": 3.508588709300966,
+      "strain_max_common_time_error": 1.922504465564929e-06,
+      "strain_final_error": 1.916606296947787e-06,
+      "inelastic_max_common_time_error": 3.92873180862785e-09,
+      "inelastic_final_error": 3.92873180862785e-09,
+      "history_max_common_time_error": 4.484198933838343,
+      "history_final_error": 4.484198933838343,
+      "q_max_common_time_error_Pa": 0.03413003910388913,
+      "q_final_error_Pa": 0.0340401811307629,
+      "q_max_common_local_slip_error_Pa": 0.0001828931917771115,
+      "phi_max_common_time_L2_error": 0.0,
+      "phi_max_equal_anchor_load_error": 0.0,
+      "release_total_difference_J_m": 0.0,
+      "prescribed_work_difference_J_m": -3.605914298532298e-05
+    },
+    "frozen_mean512": {
+      "reference": "frozen_endpoint512",
+      "phi_max_common_time_error": 0.0,
+      "phi_final_error": 0.0,
+      "tau_max_common_time_error": 10.740486434036939,
+      "tau_final_error": 10.707532473476022,
+      "slip_max_common_time_error": 3.517884902215715e-06,
+      "slip_final_error": 3.5070914332080427e-06,
+      "Z_max_common_time_error": 3.517850548094627,
+      "Z_final_error": 3.5070570789830526,
+      "strain_max_common_time_error": 2.7449394665411816e-06,
+      "strain_final_error": 2.736517525525617e-06,
+      "inelastic_max_common_time_error": 2.6806033087689585e-11,
+      "inelastic_final_error": 2.6806033087689585e-11,
+      "history_max_common_time_error": 4.482241452715243,
+      "history_final_error": 4.482241452715243,
+      "q_max_common_time_error_Pa": 0.03413003910388913,
+      "q_final_error_Pa": 0.03402532131724456,
+      "q_max_common_local_slip_error_Pa": 0.00016803724065539427,
+      "phi_max_common_time_L2_error": 0.0,
+      "phi_max_equal_anchor_load_error": 0.0,
+      "release_total_difference_J_m": 0.0,
+      "prescribed_work_difference_J_m": 2.8643905352510046e-05
+    },
+    "frozen_endpoint16": {
+      "reference": "frozen_endpoint512",
+      "phi_max_common_time_error": 0.0,
+      "phi_final_error": 0.0,
+      "tau_max_common_time_error": 0.9769335554155987,
+      "tau_final_error": 0.9769335554155987,
+      "slip_max_common_time_error": 8.366528803094297e-09,
+      "slip_final_error": 8.36652878921651e-09,
+      "Z_max_common_time_error": 0.5666208804032067,
+      "Z_final_error": 0.5666208804032067,
+      "strain_max_common_time_error": 2.0275587042650756e-09,
+      "strain_final_error": 2.0275586765095e-09,
+      "inelastic_max_common_time_error": 1.3887569557466265e-06,
+      "inelastic_final_error": 1.3887569557466265e-06,
+      "history_max_common_time_error": 0.7271315436446457,
+      "history_final_error": 0.7271315436446457,
+      "q_max_common_time_error_Pa": 0.0054973321182387735,
+      "q_final_error_Pa": 0.0054973321182387735,
+      "q_max_common_local_slip_error_Pa": 0.009421289920624076,
+      "phi_max_common_time_L2_error": 0.0,
+      "phi_max_equal_anchor_load_error": 0.0,
+      "release_total_difference_J_m": 0.0,
+      "prescribed_work_difference_J_m": -0.07005090993334306
+    },
+    "frozen_endpoint32": {
+      "reference": "frozen_endpoint512",
+      "phi_max_common_time_error": 0.0,
+      "phi_final_error": 0.0,
+      "tau_max_common_time_error": 0.24351716405362822,
+      "tau_final_error": 0.24351716405362822,
+      "slip_max_common_time_error": 5.5733983123085196e-09,
+      "slip_final_error": 5.573398284552944e-09,
+      "Z_max_common_time_error": 0.1412398101965664,
+      "Z_final_error": 0.1412398101965664,
+      "strain_max_common_time_error": 2.7072222658075518e-09,
+      "strain_final_error": 2.7072222172352944e-09,
+      "inelastic_max_common_time_error": 3.493837157793854e-07,
+      "inelastic_final_error": 3.493837157793854e-07,
+      "history_max_common_time_error": 0.18125024383334676,
+      "history_final_error": 0.18125024383334676,
+      "q_max_common_time_error_Pa": 0.0013703027400424617,
+      "q_final_error_Pa": 0.0013703027400424617,
+      "q_max_common_local_slip_error_Pa": 0.00242234785605433,
+      "phi_max_common_time_L2_error": 0.0,
+      "phi_max_equal_anchor_load_error": 0.0,
+      "release_total_difference_J_m": 0.0,
+      "prescribed_work_difference_J_m": -0.019763016678552958
+    },
+    "frozen_endpoint256": {
+      "reference": "frozen_endpoint512",
+      "phi_max_common_time_error": 0.0,
+      "phi_final_error": 0.0,
+      "tau_max_common_time_error": 0.002864908892661333,
+      "tau_final_error": 0.002864908892661333,
+      "slip_max_common_time_error": 9.606350437341149e-11,
+      "slip_final_error": 9.606350437341149e-11,
+      "Z_max_common_time_error": 0.0016616454813629389,
+      "Z_final_error": 0.0016616454813629389,
+      "strain_max_common_time_error": 9.620565455392693e-11,
+      "strain_final_error": 9.620557128720009e-11,
+      "inelastic_max_common_time_error": 3.98234164449094e-09,
+      "inelastic_final_error": 3.98234164449094e-09,
+      "history_max_common_time_error": 0.002132358444214333,
+      "history_final_error": 0.002132358444214333,
+      "q_max_common_time_error_Pa": 1.6121215026032587e-05,
+      "q_final_error_Pa": 1.6121215026032587e-05,
+      "q_max_common_local_slip_error_Pa": 3.1019098855722405e-05,
+      "phi_max_common_time_L2_error": 0.0,
+      "phi_max_equal_anchor_load_error": 0.0,
+      "release_total_difference_J_m": 0.0,
+      "prescribed_work_difference_J_m": -9.260261413146509e-05
+    },
+    "frozen_endpoint512": {
+      "reference": "frozen_endpoint512",
+      "phi_max_common_time_error": 0.0,
+      "phi_final_error": 0.0,
+      "tau_max_common_time_error": 0.0,
+      "tau_final_error": 0.0,
+      "slip_max_common_time_error": 0.0,
+      "slip_final_error": 0.0,
+      "Z_max_common_time_error": 0.0,
+      "Z_final_error": 0.0,
+      "strain_max_common_time_error": 0.0,
+      "strain_final_error": 0.0,
+      "inelastic_max_common_time_error": 0.0,
+      "inelastic_final_error": 0.0,
+      "history_max_common_time_error": 0.0,
+      "history_final_error": 0.0,
+      "q_max_common_time_error_Pa": 0.0,
+      "q_final_error_Pa": 0.0,
+      "q_max_common_local_slip_error_Pa": 0.0,
+      "phi_max_common_time_L2_error": 0.0,
+      "phi_max_equal_anchor_load_error": 0.0,
+      "release_total_difference_J_m": 0.0,
+      "prescribed_work_difference_J_m": 0.0
+    },
+    "frozen_mean8_checked": {
+      "reference": "frozen_endpoint512",
+      "phi_max_common_time_error": 0.0,
+      "phi_final_error": 0.0,
+      "tau_max_common_time_error": 1555.526413692531,
+      "tau_final_error": 1547.4770239952486,
+      "slip_max_common_time_error": 0.0005307867704693441,
+      "slip_final_error": 0.0005286907226018656,
+      "Z_max_common_time_error": 531.1725257489888,
+      "Z_final_error": 526.6980663006834,
+      "strain_max_common_time_error": 0.00047877759231688835,
+      "strain_final_error": 0.0004769064338834006,
+      "inelastic_max_common_time_error": 5.3284897125101e-06,
+      "inelastic_final_error": 5.3284897125101e-06,
+      "history_max_common_time_error": 675.2111166918912,
+      "history_final_error": 675.2111166918912,
+      "q_max_common_time_error_Pa": 5.153413661800869,
+      "q_final_error_Pa": 5.110002643097459,
+      "q_max_common_local_slip_error_Pa": 0.04101040496038877,
+      "phi_max_common_time_L2_error": 0.0,
+      "phi_max_equal_anchor_load_error": 0.0,
+      "release_total_difference_J_m": 0.0,
+      "prescribed_work_difference_J_m": 0.00764189352048561
+    },
+    "frozen_endpoint8": {
+      "reference": "frozen_endpoint512",
+      "phi_max_common_time_error": 0.0,
+      "phi_final_error": 0.0,
+      "tau_max_common_time_error": 3.9105990492389537,
+      "tau_final_error": 3.9105990492389537,
+      "slip_max_common_time_error": 5.614980974621986e-08,
+      "slip_final_error": 5.614980973234207e-08,
+      "Z_max_common_time_error": 2.268145119625842,
+      "Z_final_error": 2.268145119625842,
+      "strain_max_common_time_error": 6.042231770367161e-08,
+      "strain_final_error": 6.042231763536687e-08,
+      "inelastic_max_common_time_error": 5.627638813215019e-06,
+      "inelastic_final_error": 5.627638813215019e-06,
+      "history_max_common_time_error": 2.910629950085422,
+      "history_final_error": 2.910629950085422,
+      "q_max_common_time_error_Pa": 0.022005449227549434,
+      "q_final_error_Pa": 0.022005449227549434,
+      "q_max_common_local_slip_error_Pa": 0.03673977022231156,
+      "phi_max_common_time_L2_error": 0.0,
+      "phi_max_equal_anchor_load_error": 0.0,
+      "release_total_difference_J_m": 0.0,
+      "prescribed_work_difference_J_m": -0.2573536551408324
+    },
+    "evolving_mean8": {
+      "reference": "evolving_mean256",
+      "phi_max_common_time_error": 0.32810480588250446,
+      "phi_final_error": 0.20978817008077794,
+      "tau_max_common_time_error": 24443.042746653176,
+      "tau_final_error": 8350.83568890275,
+      "slip_max_common_time_error": 0.010510657516113117,
+      "slip_final_error": 0.006053621598036962,
+      "Z_max_common_time_error": 10499.559455777704,
+      "Z_final_error": 6065.230527011241,
+      "strain_max_common_time_error": 0.01833267906983005,
+      "strain_final_error": 0.01833267906983005,
+      "inelastic_max_common_time_error": 4.921761599035112e-05,
+      "inelastic_final_error": 4.921761599035112e-05,
+      "history_max_common_time_error": 6071.002793744934,
+      "history_final_error": 6071.002793744934,
+      "q_max_common_time_error_Pa": 253.957637274526,
+      "q_final_error_Pa": 253.957637274526,
+      "q_max_common_local_slip_error_Pa": 238.7912084406342,
+      "phi_max_common_time_L2_error": 0.19472863525593925,
+      "phi_max_equal_anchor_load_error": 0.18268014684503717,
+      "release_total_difference_J_m": 72.81271861048505,
+      "prescribed_work_difference_J_m": 82.76056106913896
+    },
+    "evolving_mean16": {
+      "reference": "evolving_mean256",
+      "phi_max_common_time_error": 0.2987949684928215,
+      "phi_final_error": 0.18574143829010809,
+      "tau_max_common_time_error": 16361.939990746967,
+      "tau_final_error": 3505.9999556970265,
+      "slip_max_common_time_error": 0.006487348019099278,
+      "slip_final_error": 0.002406615637793874,
+      "Z_max_common_time_error": 6481.932822823956,
+      "Z_final_error": 2413.02457460406,
+      "strain_max_common_time_error": 0.01276265454447112,
+      "strain_final_error": 0.01276265454447112,
+      "inelastic_max_common_time_error": 2.8878381011480914e-05,
+      "inelastic_final_error": 2.8878381011480914e-05,
+      "history_max_common_time_error": 3758.1214579775515,
+      "history_final_error": 3758.1214579775515,
+      "q_max_common_time_error_Pa": 188.95722435677152,
+      "q_final_error_Pa": 188.95722435677152,
+      "q_max_common_local_slip_error_Pa": 186.12848819247137,
+      "phi_max_common_time_L2_error": 0.1679502532383162,
+      "phi_max_equal_anchor_load_error": 0.1958532208114916,
+      "release_total_difference_J_m": 30.674014768815418,
+      "prescribed_work_difference_J_m": 33.48973953165711
+    },
+    "evolving_mean32": {
+      "reference": "evolving_mean256",
+      "phi_max_common_time_error": 0.24531178520748906,
+      "phi_final_error": 0.11639847538247113,
+      "tau_max_common_time_error": 9804.182244488307,
+      "tau_final_error": 1477.8409805999022,
+      "slip_max_common_time_error": 0.004904933447993339,
+      "slip_final_error": 0.00048195423303787344,
+      "Z_max_common_time_error": 4903.666741189934,
+      "Z_final_error": 484.8071396256564,
+      "strain_max_common_time_error": 0.007887373982782886,
+      "strain_final_error": 0.007887373982782886,
+      "inelastic_max_common_time_error": 1.7977945353694598e-05,
+      "inelastic_final_error": 1.7977945353694598e-05,
+      "history_max_common_time_error": 2117.582246810678,
+      "history_final_error": 2117.582246810678,
+      "q_max_common_time_error_Pa": 81.73576624966034,
+      "q_final_error_Pa": 76.04012242596178,
+      "q_max_common_local_slip_error_Pa": 82.9819490572429,
+      "phi_max_common_time_L2_error": 0.13977427350303348,
+      "phi_max_equal_anchor_load_error": 0.14290638254513463,
+      "release_total_difference_J_m": 12.184892390223707,
+      "prescribed_work_difference_J_m": 12.864110988838263
+    },
+    "evolving_mean64": {
+      "reference": "evolving_mean256",
+      "phi_max_common_time_error": 0.16189748498960924,
+      "phi_final_error": 0.06284161830230067,
+      "tau_max_common_time_error": 4175.542705738857,
+      "tau_final_error": 575.0876016328068,
+      "slip_max_common_time_error": 0.0028787092469352103,
+      "slip_final_error": 7.203317099008233e-05,
+      "Z_max_common_time_error": 2878.2833931836494,
+      "Z_final_error": 70.88392762991134,
+      "strain_max_common_time_error": 0.004454017751793077,
+      "strain_final_error": 0.004454017751793077,
+      "inelastic_max_common_time_error": 9.710085741102166e-06,
+      "inelastic_final_error": 9.710085741102166e-06,
+      "history_max_common_time_error": 1135.6814757309912,
+      "history_final_error": 1135.6814757309912,
+      "q_max_common_time_error_Pa": 36.78193020831225,
+      "q_final_error_Pa": 29.434736181294454,
+      "q_max_common_local_slip_error_Pa": 36.88713748694107,
+      "phi_max_common_time_L2_error": 0.08743599885641995,
+      "phi_max_equal_anchor_load_error": 0.09568620231233879,
+      "release_total_difference_J_m": 4.618521697745109,
+      "prescribed_work_difference_J_m": 4.847435350610141
+    },
+    "evolving_mean128": {
+      "reference": "evolving_mean256",
+      "phi_max_common_time_error": 0.07337326569606595,
+      "phi_final_error": 0.026209432491599488,
+      "tau_max_common_time_error": 1848.0578201794797,
+      "tau_final_error": 235.4489572202341,
+      "slip_max_common_time_error": 0.0012268798543203369,
+      "slip_final_error": 1.3568959992299456e-05,
+      "Z_max_common_time_error": 1226.7567173062753,
+      "Z_final_error": 13.191763257113053,
+      "strain_max_common_time_error": 0.0020086803809847287,
+      "strain_final_error": 0.0020086803809847287,
+      "inelastic_max_common_time_error": 3.960053142522185e-06,
+      "inelastic_final_error": 3.960053142522185e-06,
+      "history_max_common_time_error": 513.2980164160726,
+      "history_final_error": 513.2980164160726,
+      "q_max_common_time_error_Pa": 12.37419346955744,
+      "q_final_error_Pa": 9.77540553182979,
+      "q_max_common_local_slip_error_Pa": 12.393484107675533,
+      "phi_max_common_time_L2_error": 0.04043743519283445,
+      "phi_max_equal_anchor_load_error": 0.045663207611875645,
+      "release_total_difference_J_m": 1.4667816528264148,
+      "prescribed_work_difference_J_m": 1.5361650574954098
+    },
+    "evolving_mean256": {
+      "reference": "evolving_mean256",
+      "phi_max_common_time_error": 0.0,
+      "phi_final_error": 0.0,
+      "tau_max_common_time_error": 0.0,
+      "tau_final_error": 0.0,
+      "slip_max_common_time_error": 0.0,
+      "slip_final_error": 0.0,
+      "Z_max_common_time_error": 0.0,
+      "Z_final_error": 0.0,
+      "strain_max_common_time_error": 0.0,
+      "strain_final_error": 0.0,
+      "inelastic_max_common_time_error": 0.0,
+      "inelastic_final_error": 0.0,
+      "history_max_common_time_error": 0.0,
+      "history_final_error": 0.0,
+      "q_max_common_time_error_Pa": 0.0,
+      "q_final_error_Pa": 0.0,
+      "q_max_common_local_slip_error_Pa": 0.0,
+      "phi_max_common_time_L2_error": 0.0,
+      "phi_max_equal_anchor_load_error": 0.0,
+      "release_total_difference_J_m": 0.0,
+      "prescribed_work_difference_J_m": 0.0
+    },
+    "aligned_evolving_mean128": {
+      "reference": "aligned_evolving_mean256",
+      "phi_max_common_time_error": 0.07870368220834251,
+      "phi_final_error": 0.027649595655276082,
+      "tau_max_common_time_error": 1857.3156247716656,
+      "tau_final_error": 253.93010577643565,
+      "slip_max_common_time_error": 0.000718296331368465,
+      "slip_final_error": 4.674428218248705e-06,
+      "Z_max_common_time_error": 718.2116706520169,
+      "Z_final_error": 4.460015290504089,
+      "strain_max_common_time_error": 0.002100726367737199,
+      "strain_final_error": 0.002100726367737199,
+      "inelastic_max_common_time_error": 4.541667507006425e-06,
+      "inelastic_final_error": 4.541667507006425e-06,
+      "history_max_common_time_error": 526.1216062264248,
+      "history_final_error": 526.1216062264248,
+      "q_max_common_time_error_Pa": 5.999853346130749,
+      "q_final_error_Pa": 3.395705096959432,
+      "q_max_common_local_slip_error_Pa": 5.979841991578866,
+      "phi_max_common_time_L2_error": 0.041464241761598276,
+      "phi_max_equal_anchor_load_error": 0.04348054055478537,
+      "release_total_difference_J_m": 1.5485762795907843,
+      "prescribed_work_difference_J_m": 1.6150294613682945
+    },
+    "aligned_evolving_mean16": {
+      "reference": "aligned_evolving_mean256",
+      "phi_max_common_time_error": 0.3117470120935141,
+      "phi_final_error": 0.21435333111445126,
+      "tau_max_common_time_error": 18033.29621048672,
+      "tau_final_error": 3996.0015128680134,
+      "slip_max_common_time_error": 0.004030686105791636,
+      "slip_final_error": 0.0013527460383384038,
+      "Z_max_common_time_error": 4027.761605572372,
+      "Z_final_error": 1356.4529967067356,
+      "strain_max_common_time_error": 0.013576679625309701,
+      "strain_final_error": 0.013576679625309701,
+      "inelastic_max_common_time_error": 3.114821722923736e-05,
+      "inelastic_final_error": 3.114821722923736e-05,
+      "history_max_common_time_error": 3938.9850522211273,
+      "history_final_error": 3938.9850522211273,
+      "q_max_common_time_error_Pa": 73.88288908200383,
+      "q_final_error_Pa": 73.88288908200383,
+      "q_max_common_local_slip_error_Pa": 75.60915806175697,
+      "phi_max_common_time_L2_error": 0.1755924861715026,
+      "phi_max_equal_anchor_load_error": 0.19844852534524773,
+      "release_total_difference_J_m": 32.42180401938311,
+      "prescribed_work_difference_J_m": 35.534056502981315
+    },
+    "aligned_evolving_mean256": {
+      "reference": "aligned_evolving_mean256",
+      "phi_max_common_time_error": 0.0,
+      "phi_final_error": 0.0,
+      "tau_max_common_time_error": 0.0,
+      "tau_final_error": 0.0,
+      "slip_max_common_time_error": 0.0,
+      "slip_final_error": 0.0,
+      "Z_max_common_time_error": 0.0,
+      "Z_final_error": 0.0,
+      "strain_max_common_time_error": 0.0,
+      "strain_final_error": 0.0,
+      "inelastic_max_common_time_error": 0.0,
+      "inelastic_final_error": 0.0,
+      "history_max_common_time_error": 0.0,
+      "history_final_error": 0.0,
+      "q_max_common_time_error_Pa": 0.0,
+      "q_final_error_Pa": 0.0,
+      "q_max_common_local_slip_error_Pa": 0.0,
+      "phi_max_common_time_L2_error": 0.0,
+      "phi_max_equal_anchor_load_error": 0.0,
+      "release_total_difference_J_m": 0.0,
+      "prescribed_work_difference_J_m": 0.0
+    },
+    "aligned_evolving_mean32_refined": {
+      "reference": "aligned_evolving_mean256",
+      "phi_max_common_time_error": 0.2504402675517824,
+      "phi_final_error": 0.12993388335571818,
+      "tau_max_common_time_error": 8558.56597508704,
+      "tau_final_error": 1779.4060704283893,
+      "slip_max_common_time_error": 0.002703721961598524,
+      "slip_final_error": 0.00031502009012632226,
+      "Z_max_common_time_error": 2703.143043464438,
+      "Z_final_error": 316.6321281483979,
+      "strain_max_common_time_error": 0.008506428330450455,
+      "strain_final_error": 0.008506428330450455,
+      "inelastic_max_common_time_error": 1.9778752725614396e-05,
+      "inelastic_final_error": 1.9778752725614396e-05,
+      "history_max_common_time_error": 2279.685631081902,
+      "history_final_error": 2279.685631081902,
+      "q_max_common_time_error_Pa": 43.54413837983398,
+      "q_final_error_Pa": 28.53061081494795,
+      "q_max_common_local_slip_error_Pa": 44.26950890966225,
+      "phi_max_common_time_L2_error": 0.13866578850183434,
+      "phi_max_equal_anchor_load_error": 0.1489373297290409,
+      "release_total_difference_J_m": 12.707848937515266,
+      "prescribed_work_difference_J_m": 13.482584794101854
+    },
+    "aligned_evolving_mean64": {
+      "reference": "aligned_evolving_mean256",
+      "phi_max_common_time_error": 0.15655488810423804,
+      "phi_final_error": 0.06841865337801034,
+      "tau_max_common_time_error": 4960.415019547714,
+      "tau_final_error": 670.7727577751364,
+      "slip_max_common_time_error": 0.0014683674614848542,
+      "slip_final_error": 2.7770154243128564e-05,
+      "Z_max_common_time_error": 1468.2076123989746,
+      "Z_final_error": 27.107321027782746,
+      "strain_max_common_time_error": 0.004767803923924508,
+      "strain_final_error": 0.004767803923924508,
+      "inelastic_max_common_time_error": 1.0920307448448953e-05,
+      "inelastic_final_error": 1.0920307448448953e-05,
+      "history_max_common_time_error": 1205.0660967688164,
+      "history_final_error": 1205.0660967688164,
+      "q_max_common_time_error_Pa": 17.620347972074455,
+      "q_final_error_Pa": 10.583389422313388,
+      "q_max_common_local_slip_error_Pa": 17.63517617182285,
+      "phi_max_common_time_L2_error": 0.0887890288038964,
+      "phi_max_equal_anchor_load_error": 0.10100904471121741,
+      "release_total_difference_J_m": 4.919658963469531,
+      "prescribed_work_difference_J_m": 5.158352335386979
+    },
+    "aligned_evolving_mean8_refined": {
+      "reference": "aligned_evolving_mean256",
+      "phi_max_common_time_error": 0.3272381204256174,
+      "phi_final_error": 0.269626702995395,
+      "tau_max_common_time_error": 24930.472785669397,
+      "tau_final_error": 8179.097179439746,
+      "slip_max_common_time_error": 0.005818972864460335,
+      "slip_final_error": 0.003266434975607996,
+      "Z_max_common_time_error": 5813.131833269961,
+      "Z_final_error": 3272.7511763902876,
+      "strain_max_common_time_error": 0.019596386295102207,
+      "strain_final_error": 0.019596386295102207,
+      "inelastic_max_common_time_error": 5.199459871088098e-05,
+      "inelastic_final_error": 5.199459871088098e-05,
+      "history_max_common_time_error": 6262.133049964261,
+      "history_final_error": 6262.133049964261,
+      "q_max_common_time_error_Pa": 176.64818992504976,
+      "q_final_error_Pa": 176.64818992504976,
+      "q_max_common_local_slip_error_Pa": 170.90796959438038,
+      "phi_max_common_time_L2_error": 0.19373323469084922,
+      "phi_max_equal_anchor_load_error": 0.1684222722255153,
+      "release_total_difference_J_m": 71.15524070870224,
+      "prescribed_work_difference_J_m": 83.31576609435515
+    },
+    "aligned_frozen_endpoint16": {
+      "reference": "aligned_frozen_endpoint512",
+      "phi_max_common_time_error": 0.0,
+      "phi_final_error": 0.0,
+      "tau_max_common_time_error": 0.9766793540911749,
+      "tau_final_error": 0.9766793540911749,
+      "slip_max_common_time_error": 1.3417976238785934e-08,
+      "slip_final_error": 1.3417976223173422e-08,
+      "Z_max_common_time_error": 0.311059438099619,
+      "Z_final_error": 0.311059438099619,
+      "strain_max_common_time_error": 2.4235656703730513e-08,
+      "strain_final_error": 2.423565659270821e-08,
+      "inelastic_max_common_time_error": 1.414444485321742e-06,
+      "inelastic_final_error": 1.414444485321742e-06,
+      "history_max_common_time_error": 0.7223292579437839,
+      "history_final_error": 0.7223292579437839,
+      "q_max_common_time_error_Pa": 0.00301788567787753,
+      "q_final_error_Pa": 0.00301788567787753,
+      "q_max_common_local_slip_error_Pa": 0.005261329196571296,
+      "phi_max_common_time_L2_error": 0.0,
+      "phi_max_equal_anchor_load_error": 0.0,
+      "release_total_difference_J_m": 0.0,
+      "prescribed_work_difference_J_m": -0.1158379889166099
+    },
+    "aligned_frozen_endpoint256": {
+      "reference": "aligned_frozen_endpoint512",
+      "phi_max_common_time_error": 0.0,
+      "phi_final_error": 0.0,
+      "tau_max_common_time_error": 0.0028641634271480143,
+      "tau_final_error": 0.0028641634271480143,
+      "slip_max_common_time_error": 3.8282953196411285e-11,
+      "slip_final_error": 3.8282939318623477e-11,
+      "Z_max_common_time_error": 0.0009121981493080966,
+      "Z_final_error": 0.0009121981493080966,
+      "strain_max_common_time_error": 6.914704919758208e-11,
+      "strain_final_error": 6.9146910419704e-11,
+      "inelastic_max_common_time_error": 4.146005688071552e-09,
+      "inelastic_final_error": 4.146005688071552e-09,
+      "history_max_common_time_error": 0.0021182754207984544,
+      "history_final_error": 0.0021182754207984544,
+      "q_max_common_time_error_Pa": 8.850108315527905e-06,
+      "q_final_error_Pa": 8.850108315527905e-06,
+      "q_max_common_local_slip_error_Pa": 1.79386566969697e-05,
+      "phi_max_common_time_L2_error": 0.0,
+      "phi_max_equal_anchor_load_error": 0.0,
+      "release_total_difference_J_m": 0.0,
+      "prescribed_work_difference_J_m": -0.0003331151247039088
+    },
+    "aligned_frozen_endpoint32": {
+      "reference": "aligned_frozen_endpoint512",
+      "phi_max_common_time_error": 0.0,
+      "phi_final_error": 0.0,
+      "tau_max_common_time_error": 0.24345379992155358,
+      "tau_final_error": 0.24345379992155358,
+      "slip_max_common_time_error": 1.2619201011495273e-09,
+      "slip_final_error": 1.2619200892571847e-09,
+      "Z_max_common_time_error": 0.07753681070607854,
+      "Z_final_error": 0.07753681070607854,
+      "strain_max_common_time_error": 2.279290239838236e-09,
+      "strain_final_error": 2.2792898957124663e-09,
+      "inelastic_max_common_time_error": 3.442537039355679e-07,
+      "inelastic_final_error": 3.442537039355679e-07,
+      "history_max_common_time_error": 0.18005319133226294,
+      "history_final_error": 0.18005319133226294,
+      "q_max_common_time_error_Pa": 0.0007522588993538193,
+      "q_final_error_Pa": 0.0007522588993538193,
+      "q_max_common_local_slip_error_Pa": 0.0012889933330484382,
+      "phi_max_common_time_L2_error": 0.0,
+      "phi_max_equal_anchor_load_error": 0.0,
+      "release_total_difference_J_m": 0.0,
+      "prescribed_work_difference_J_m": -0.017137794523478078
+    },
+    "aligned_frozen_endpoint512": {
+      "reference": "aligned_frozen_endpoint512",
+      "phi_max_common_time_error": 0.0,
+      "phi_final_error": 0.0,
+      "tau_max_common_time_error": 0.0,
+      "tau_final_error": 0.0,
+      "slip_max_common_time_error": 0.0,
+      "slip_final_error": 0.0,
+      "Z_max_common_time_error": 0.0,
+      "Z_final_error": 0.0,
+      "strain_max_common_time_error": 0.0,
+      "strain_final_error": 0.0,
+      "inelastic_max_common_time_error": 0.0,
+      "inelastic_final_error": 0.0,
+      "history_max_common_time_error": 0.0,
+      "history_final_error": 0.0,
+      "q_max_common_time_error_Pa": 0.0,
+      "q_final_error_Pa": 0.0,
+      "q_max_common_local_slip_error_Pa": 0.0,
+      "phi_max_common_time_L2_error": 0.0,
+      "phi_max_equal_anchor_load_error": 0.0,
+      "release_total_difference_J_m": 0.0,
+      "prescribed_work_difference_J_m": 0.0
+    },
+    "aligned_frozen_endpoint8": {
+      "reference": "aligned_frozen_endpoint512",
+      "phi_max_common_time_error": 0.0,
+      "phi_final_error": 0.0,
+      "tau_max_common_time_error": 3.9095814984175377,
+      "tau_final_error": 3.9095814984175377,
+      "slip_max_common_time_error": 1.3344282432520282e-08,
+      "slip_final_error": 1.3344282429050836e-08,
+      "Z_max_common_time_error": 1.2451499245362356,
+      "Z_final_error": 1.2451499245362356,
+      "strain_max_common_time_error": 2.4102550399973666e-08,
+      "strain_final_error": 2.4102550288951363e-08,
+      "inelastic_max_common_time_error": 5.589014615083737e-06,
+      "inelastic_final_error": 5.589014615083737e-06,
+      "history_max_common_time_error": 2.891406827387982,
+      "history_final_error": 2.891406827387982,
+      "q_max_common_time_error_Pa": 0.01208039256749771,
+      "q_final_error_Pa": 0.01208039256749771,
+      "q_max_common_local_slip_error_Pa": 0.020017035997682342,
+      "phi_max_common_time_L2_error": 0.0,
+      "phi_max_equal_anchor_load_error": 0.0,
+      "release_total_difference_J_m": 0.0,
+      "prescribed_work_difference_J_m": -0.2753603756100347
+    },
+    "aligned_frozen_mean16": {
+      "reference": "aligned_frozen_endpoint512",
+      "phi_max_common_time_error": 0.0,
+      "phi_final_error": 0.0,
+      "tau_max_common_time_error": 971.6212490322381,
+      "tau_final_error": 969.4747282850294,
+      "slip_max_common_time_error": 0.00018781970748989502,
+      "slip_final_error": 0.00018727282995942285,
+      "Z_max_common_time_error": 187.8134925940387,
+      "Z_final_error": 187.5386217487685,
+      "strain_max_common_time_error": 0.0003392414672741188,
+      "strain_final_error": 0.00033825369267714844,
+      "inelastic_max_common_time_error": 1.3084460373159095e-06,
+      "inelastic_final_error": 1.3084460373159095e-06,
+      "history_max_common_time_error": 434.63662110927544,
+      "history_final_error": 434.63662110927544,
+      "q_max_common_time_error_Pa": 1.8221586616135323,
+      "q_final_error_Pa": 1.8194918761520285,
+      "q_max_common_local_slip_error_Pa": 0.011553564376015402,
+      "phi_max_common_time_L2_error": 0.0,
+      "phi_max_equal_anchor_load_error": 0.0,
+      "release_total_difference_J_m": 0.0,
+      "prescribed_work_difference_J_m": 0.025007078800626914
+    },
+    "aligned_frozen_mean256": {
+      "reference": "aligned_frozen_endpoint512",
+      "phi_max_common_time_error": 0.0,
+      "phi_final_error": 0.0,
+      "tau_max_common_time_error": 63.900760305608514,
+      "tau_final_error": 63.704692047889694,
+      "slip_max_common_time_error": 1.235079912241609e-05,
+      "slip_final_error": 1.231298011418469e-05,
+      "Z_max_common_time_error": 12.350678509928649,
+      "Z_final_error": 12.312270857371914,
+      "strain_max_common_time_error": 2.2308112776301932e-05,
+      "strain_final_error": 2.2239803779938727e-05,
+      "inelastic_max_common_time_error": 3.7103046831741746e-09,
+      "inelastic_final_error": 3.7103046831741746e-09,
+      "history_max_common_time_error": 28.59483878111496,
+      "history_final_error": 28.59483878111496,
+      "q_max_common_time_error_Pa": 0.11982576710990203,
+      "q_final_error_Pa": 0.11945313766881327,
+      "q_max_common_local_slip_error_Pa": 0.000578931130064575,
+      "phi_max_common_time_L2_error": 0.0,
+      "phi_max_equal_anchor_load_error": 0.0,
+      "release_total_difference_J_m": 0.0,
+      "prescribed_work_difference_J_m": 0.00020963755559932906
+    },
+    "aligned_frozen_mean32_checked": {
+      "reference": "aligned_frozen_endpoint512",
+      "phi_max_common_time_error": 0.0,
+      "phi_final_error": 0.0,
+      "tau_max_common_time_error": 242.14561628270155,
+      "tau_final_error": 241.20227850979427,
+      "slip_max_common_time_error": 4.680654598409165e-05,
+      "slip_final_error": 4.664824145517166e-05,
+      "Z_max_common_time_error": 46.80527355865284,
+      "Z_final_error": 46.579279128462076,
+      "strain_max_common_time_error": 8.454236006374396e-05,
+      "strain_final_error": 8.425642914986625e-05,
+      "inelastic_max_common_time_error": 3.310456921844186e-07,
+      "inelastic_final_error": 3.310456921844186e-07,
+      "history_max_common_time_error": 108.2178149030733,
+      "history_final_error": 108.2178149030733,
+      "q_max_common_time_error_Pa": 0.45410280936757985,
+      "q_final_error_Pa": 0.4519102208438994,
+      "q_max_common_local_slip_error_Pa": 0.0028109896693422343,
+      "phi_max_common_time_L2_error": 0.0,
+      "phi_max_equal_anchor_load_error": 0.0,
+      "release_total_difference_J_m": 0.0,
+      "prescribed_work_difference_J_m": -0.002512711609597318
+    },
+    "aligned_frozen_mean512": {
+      "reference": "aligned_frozen_endpoint512",
+      "phi_max_common_time_error": 0.0,
+      "phi_final_error": 0.0,
+      "tau_max_common_time_error": 22.387544491539757,
+      "tau_final_error": 22.31972687340749,
+      "slip_max_common_time_error": 4.3270708336057836e-06,
+      "slip_final_error": 4.31396315359045e-06,
+      "Z_max_common_time_error": 4.327028577329781,
+      "Z_final_error": 4.313920897337084,
+      "strain_max_common_time_error": 7.815590164681223e-06,
+      "strain_final_error": 7.791914967747449e-06,
+      "inelastic_max_common_time_error": 7.632362808169396e-11,
+      "inelastic_final_error": 7.632362808169396e-11,
+      "history_max_common_time_error": 10.01718541054288,
+      "history_final_error": 10.01718541054288,
+      "q_max_common_time_error_Pa": 0.041980650550348136,
+      "q_final_error_Pa": 0.041853480386464526,
+      "q_max_common_local_slip_error_Pa": 0.00020633241172163252,
+      "phi_max_common_time_L2_error": 0.0,
+      "phi_max_equal_anchor_load_error": 0.0,
+      "release_total_difference_J_m": 0.0,
+      "prescribed_work_difference_J_m": 9.613272959541064e-05
+    },
+    "aligned_frozen_mean8_refined": {
+      "reference": "aligned_frozen_endpoint512",
+      "phi_max_common_time_error": 0.0,
+      "phi_final_error": 0.0,
+      "tau_max_common_time_error": 1940.7913187653216,
+      "tau_final_error": 1931.6212130167696,
+      "slip_max_common_time_error": 0.00037525826326320627,
+      "slip_final_error": 0.0003737237929997625,
+      "Z_max_common_time_error": 375.1934860197954,
+      "Z_final_error": 372.6997458511323,
+      "strain_max_common_time_error": 0.0006777944952501996,
+      "strain_final_error": 0.0006750229227106275,
+      "inelastic_max_common_time_error": 5.1655544515709275e-06,
+      "inelastic_final_error": 5.1655544515709275e-06,
+      "history_max_common_time_error": 868.8639013117354,
+      "history_final_error": 868.8639013117354,
+      "q_max_common_time_error_Pa": 3.640111532400339,
+      "q_final_error_Pa": 3.6159173694284164,
+      "q_max_common_local_slip_error_Pa": 0.024434511070523968,
+      "phi_max_common_time_L2_error": 0.0,
+      "phi_max_equal_anchor_load_error": 0.0,
+      "release_total_difference_J_m": 0.0,
+      "prescribed_work_difference_J_m": 0.09975376670990954
+    }
+  }
+}

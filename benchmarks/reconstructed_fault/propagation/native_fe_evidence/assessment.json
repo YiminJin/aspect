@@ -1,0 +1,251 @@
+{
+  "qualification": {
+    "FE_representation_verified": true,
+    "frozen_normalization_target_met": true,
+    "coupled_completed": false,
+    "native_time_convergence_verified": false,
+    "P3_ready": false
+  },
+  "mechanical_relative_residual_max": [
+    1.185102e-14,
+    8.387104e-15
+  ],
+  "accepted_phase_targets": [
+    2.137990678736826e-13,
+    1.809836531852841e-13,
+    1.809836531852841e-13,
+    1.809836531852841e-13,
+    1.809836531852841e-13,
+    1.809836531852841e-13,
+    1.809836531852841e-13,
+    1.8130056178758392e-13,
+    1.8373643486294076e-13,
+    1.8924557915280069e-13,
+    1.9907114129338229e-13,
+    2.1471376246367335e-13,
+    2.379455569385552e-13,
+    2.7079334005178813e-13,
+    3.160753772629182e-13,
+    3.7708292570983296e-13,
+    4.582562579582201e-13,
+    5.652154228948566e-13,
+    7.063208910272096e-13,
+    8.907405225293563e-13
+  ],
+  "failed_phase_target": 1.1256351785606174e-12,
+  "completed_steps": 19,
+  "final_time": 0.296875,
+  "initial_phi_max": 0.6131766970494621,
+  "final_phi_max": 0.6131766970494621,
+  "largest_increment": 0.08216697315209098,
+  "healing": 0.0,
+  "phase_KKT": 1.1657341758564144e-13,
+  "nodal_recurrence_error_m": 0.0,
+  "nodal_recurrence_relative": 0.0,
+  "local_Maxwell": [
+    {
+      "file": "fe-local-0.csv",
+      "max_relative": 4.4858149098948426e-15,
+      "max_Pa": 5.0205901883650584e-11
+    },
+    {
+      "file": "fe-local-1.csv",
+      "max_relative": 2.4280955483906657e-14,
+      "max_Pa": 5.0335818319843285e-11
+    },
+    {
+      "file": "fe-local-8.csv",
+      "max_relative": 2.0809514251706028e-14,
+      "max_Pa": 6.337007974090531e-11
+    }
+  ],
+  "derivative": [
+    {
+      "file": "fe-derivative-0.csv",
+      "best_gradient": 0.0,
+      "best_hessian": 0.0
+    },
+    {
+      "file": "fe-derivative-1.csv",
+      "best_gradient": 4.5663309256003877e-26,
+      "best_hessian": 1.5135171446845437e-31
+    },
+    {
+      "file": "fe-derivative-8.csv",
+      "best_gradient": 7.070809215914409e-11,
+      "best_hessian": 6.288853744949443e-11
+    }
+  ],
+  "normalization": [
+    {
+      "step": 0,
+      "time": 0.0,
+      "source_error_max": 1.4432899320127035e-15,
+      "worst_x": 0.796,
+      "endpoint_error": 4.440892098500626e-16,
+      "positive": true,
+      "native_projection_error": 1.3105131250362116e-15,
+      "conservation": 7.656035878032734e-17,
+      "constant_error": 1.3322676295501878e-15
+    },
+    {
+      "step": 12,
+      "time": 0.1875,
+      "source_error_max": 3.807649751053077e-09,
+      "worst_x": 0.046875,
+      "endpoint_error": 3.3457687731441865e-09,
+      "positive": true,
+      "native_projection_error": 9.173591875253372e-16,
+      "conservation": 3.0487112452067005e-17,
+      "constant_error": 1.3322676295501878e-15
+    },
+    {
+      "step": 19,
+      "time": 0.296875,
+      "source_error_max": 0.00027627770525517903,
+      "worst_x": 0.0,
+      "endpoint_error": 0.00027627770525517903,
+      "positive": true,
+      "native_projection_error": 1.3024201174901023e-15,
+      "conservation": 1.4065008392001783e-16,
+      "constant_error": 1.3322676295501878e-15
+    }
+  ],
+  "final_q_Pa": [
+    106.32470662422219,
+    42.72812584774761,
+    106.32470662422223
+  ],
+  "final_slip_m": [
+    0.019536629904434014,
+    0.004830476292462372,
+    0.01953662990443405
+  ],
+  "onset_time": 0.1875,
+  "sums": {
+    "D_relax": 0.5638408596363025,
+    "mechanical_work_error": 0.8751240922338199,
+    "bulk_work": 41.01512930134218,
+    "boundary_work": 40.72912733546992,
+    "bulk_viscous": 0.04310938126377855,
+    "cohesive_viscous": 0.000101783814834294,
+    "friction": 5.059701021428332,
+    "bulk_profile_change": -2.2503688661068404,
+    "cohesive_profile_change": -0.011693545606105724,
+    "absolute_mechanical_work_error": 0.88612751370358,
+    "absolute_D_relax": 0.5638408596363096
+  },
+  "fracture_expenditure": 1.6982215520766388,
+  "prototype_comparison": {
+    "initial_phase_identical": true,
+    "fracture_measure_identical": true,
+    "mechanical_spaces_and_lateral_boundary_values_differ": true,
+    "full_phi_common_time_max": 0.2961272391540449,
+    "final_phi_max_difference": 0.2961272391540449,
+    "common_q_max_difference_Pa": 66.09129142190028,
+    "final_q_difference_Pa": 66.09129142190028,
+    "common_slip_max_difference_m": 0.010306509690517981,
+    "final_slip_difference_m": 0.010306509690517981,
+    "bulk": [
+      {
+        "step": 0,
+        "time": 0.0,
+        "shear_max_difference_Pa": 0.0,
+        "shear_rms_difference_Pa": 0.0,
+        "normal_stress_rms_Pa": 0.0
+      },
+      {
+        "step": 8,
+        "time": 0.125,
+        "shear_max_difference_Pa": 1000.7536998584321,
+        "shear_rms_difference_Pa": 531.8122059944694,
+        "normal_stress_rms_Pa": 395.9493581315468
+      },
+      {
+        "step": 16,
+        "time": 0.25,
+        "shear_max_difference_Pa": 8732.316090007804,
+        "shear_rms_difference_Pa": 3846.7560998294175,
+        "normal_stress_rms_Pa": 2877.9700141227613
+      }
+    ],
+    "reference": {
+      "scheme": "endpoint",
+      "phase_evolves": true,
+      "steps": 64,
+      "dt": 0.015625,
+      "aligned_bulk_quadrature": true,
+      "bulk_samples": 9216,
+      "final_time": 1.0,
+      "amplitude": 0.256,
+      "material": {
+        "G_Pa": 1000000.0,
+        "eta_Pa_s": 100000000.0,
+        "Gc_J_m2": 26.6666666667,
+        "ell_m": 0.15625,
+        "c0": 2.6666666666666665,
+        "m": 128.00000000016
+      },
+      "input_sha256": "1368c1c1b40bd2db4eb071a67cdd116bbec86ce845811d9863d74e7730678cdc",
+      "initial_obstacle_kkt": 0.0,
+      "initial_phi_max": 0.6131766970494621,
+      "final_phi_max": 0.6991618105270944,
+      "max_phase_increment": 0.08592788734433054,
+      "largest_phase_release": 1.3267128048157417,
+      "final_local_q": [
+        149.46573845658682,
+        149.4657384565633,
+        149.46573845658577
+      ],
+      "final_local_slip": [
+        0.12682742315432444,
+        0.12682742315432474,
+        0.1268274231543245
+      ],
+      "final_stress_min": -967.9530651163474,
+      "final_stress_max": 2819.7862796585896,
+      "endpoint_bulk_imbalance_max": 7.948247615630066e-11,
+      "mean_bulk_imbalance_max": 1101.8659857651198,
+      "endpoint_slip_condition_error_max": 5.684341886080802e-14,
+      "mean_slip_condition_error_max": 15.232997933419185,
+      "mechanical_kkt_max": 5.684341886080802e-14,
+      "phase_kkt_max": 1.7208279072512127e-12,
+      "min_I": 108.43733224578979,
+      "healing_max": 0.0,
+      "phase_path_error_max": 1.963984530561902e-13,
+      "temporal_quadrature_error_max": 1.0408340855860843e-16,
+      "onset": {
+        "publication_time": 0.203125,
+        "anchor_time": 0.1875,
+        "anchor_displacement": 0.0045000000000000005,
+        "publication_displacement": 0.00528125
+      },
+      "sums": {
+        "phase_release": 5.8675398243533685,
+        "fracture_expenditure": 23.041614023333878,
+        "bulk_viscous": 0.05256496359662345,
+        "fault_viscous": 0.06314525364248787,
+        "friction": 126.82742315432463,
+        "prescribed_external_work": 173.33215214909265,
+        "mechanical_work_error": 6.843063056977985,
+        "exchange_defect": 14.822643394558805,
+        "free_bulk_work": 7.979580337580503,
+        "bulk_storage_change": 1.1893205047097295,
+        "fault_storage_change": 9.44748136815392
+      },
+      "elapsed_seconds": 127.51805472599517
+    }
+  },
+  "prototype_same_accepted_interval": {
+    "phase_release": 3.5934870504472114,
+    "mechanical_work_error": 4.629701318641926,
+    "fracture_expenditure": 8.132501217132354,
+    "absolute_mechanical_work_error": 4.639727031609701
+  },
+  "largest_total_phase_gain": 0.24798382456875015,
+  "phase_gain_location_m": [
+    1.0,
+    0.3125
+  ],
+  "normal_boundary_phase_max": 3.0511018993914844e-20
+}

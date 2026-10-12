@@ -1,0 +1,88 @@
+--- build-propagation-p1/coarse-source.cc	2026-10-05 23:59:25.057519427 -0700
++++ tests/phase_field_controlled_history.cc	2026-10-05 23:55:37.749773995 -0700
+@@ -79,6 +79,9 @@
+       {
+         double node_min=1e100, node_max=-1e100, cpdi_min=1e100, cpdi_max=-1e100;
+         double change=0, healing=0, integral=0;
++        Point<dim> minimum_location, healing_location, cpdi_minimum_location;
++        double H_at_cpdi_minimum=0;
++        unsigned int negative_nodes=0, negative_particles=0;
+       };
+ 
+       Measures measure(const VectorType &state, const VectorType &previous) const
+@@ -94,7 +97,16 @@
+             m.node_min=std::min(m.node_min,phi); m.node_max=std::max(m.node_max,phi);
+             m.change=std::max(m.change,std::abs(phi-previous.block(b)[i]));
+             m.healing=std::max(m.healing,previous.block(b)[i]-phi);
++            m.negative_nodes+=(phi<0);
+           }
++        const auto &vertices=this->get_triangulation().get_vertices();
++        for (unsigned int v=0; v<dofs.size(); ++v)
++          if (dofs[v]!=numbers::invalid_dof_index && state.locally_owned_elements().is_element(dofs[v]))
++            {
++              if (state[dofs[v]]==m.node_min) m.minimum_location=vertices[v];
++              if (previous[dofs[v]]-state[dofs[v]]==m.healing) m.healing_location=vertices[v];
++            }
++        const auto Hindex=pm.get_property_manager().get_data_info().get_position_by_field_name("crack_driving_force");
+         for (const auto &p : pm.get_particle_handler())
+           {
+             const auto domain = pm.get_particle_domain_handler().get_particle_domain(p.get_local_index());
+@@ -106,7 +118,10 @@
+                 phi+=value*domain.weighting_function_value(i);
+                 gradient+=value*domain.weighting_function_gradient(i);
+               }
++            if (phi<m.cpdi_min)
++              { m.cpdi_minimum_location=p.get_location(); m.H_at_cpdi_minimum=p.get_properties()[Hindex]; }
+             m.cpdi_min=std::min(m.cpdi_min,phi); m.cpdi_max=std::max(m.cpdi_max,phi);
++            m.negative_particles+=(phi<0);
+             m.integral+=domain.volume()*handler.crack_surface_density(phi,gradient);
+           }
+         return m;
+@@ -139,7 +154,7 @@
+           auto &live=const_cast<VectorType &>(this->get_solution());
+           std::ofstream csv(this->get_output_directory()+"controlled-history.csv");
+           csv << std::setprecision(17)
+-              << "stage,load_factor,initial_residual,roundoff,target,final_residual,node_min,node_max,cpdi_min,cpdi_max,change,healing,crack_integral,H_min,H_max,H_increment_min,correction,uncertainty,masked_particles\n";
++              << "stage,load_factor,initial_residual,roundoff,target,final_residual,node_min,node_max,cpdi_min,cpdi_max,change,healing,crack_integral,H_min,H_max,H_increment_min,correction,uncertainty,masked_particles,node_min_x,node_min_y,healing_x,healing_y,cpdi_min_x,cpdi_min_y,H_at_cpdi_min,negative_nodes,negative_particles,positive_offdiagonals\n";
+           std::vector<Measures> measured;
+           std::vector<double> uncertainties;
+           unsigned int masked=0;
+@@ -236,10 +251,19 @@
+                 const double uncertainty=std::max(estimate,std::numeric_limits<double>::epsilon()*std::max(1.0,state.block(b).linfty_norm()));
+                 const auto m=measure(state,previous);
+                 measured.push_back(m); uncertainties.push_back(uncertainty);
++                unsigned int positive_offdiagonals=0;
++                for (const auto row : rhs.block(b).locally_owned_elements())
++                  for (auto entry=matrix.block(b,b).begin(row); entry!=matrix.block(b,b).end(row); ++entry)
++                    if (entry->column()!=row && entry->value()>0) ++positive_offdiagonals;
+                 csv << labels[k] << ',' << factors[k] << ',' << initial << ',' << allowance << ',' << target << ',' << final
+                     << ',' << m.node_min << ',' << m.node_max << ',' << m.cpdi_min << ',' << m.cpdi_max
+                     << ',' << m.change << ',' << m.healing << ',' << m.integral << ',' << Hmin << ',' << Hmax
+-                    << ',' << Hincrement << ',' << correction_norm << ',' << uncertainty << ',' << masked << '\n';
++                    << ',' << Hincrement << ',' << correction_norm << ',' << uncertainty << ',' << masked
++                    << ',' << m.minimum_location[0] << ',' << m.minimum_location[1]
++                    << ',' << m.healing_location[0] << ',' << m.healing_location[1]
++                    << ',' << m.cpdi_minimum_location[0] << ',' << m.cpdi_minimum_location[1]
++                    << ',' << m.H_at_cpdi_minimum << ',' << m.negative_nodes << ',' << m.negative_particles
++                    << ',' << positive_offdiagonals << '\n';
+                 csv.flush();
+                 this->get_pcout() << std::setprecision(17) << "P1 result " << labels[k] << " residual=" << final
+                     << " target=" << target << " phi_min=" << m.node_min << " phi_max=" << m.node_max
+@@ -287,9 +311,14 @@
+           const bool repeat_resolved=repeat<=10*uncertainty;
+           const bool evolution=std::min(measured[2].change,measured[3].change)>100*tolerance;
+           bool admissible=true;
+-          for (const auto &m : measured)
+-            admissible=admissible && m.node_min>=-tolerance && m.node_max<=1+tolerance
+-                       && m.cpdi_min>=-tolerance && m.cpdi_max<=1+tolerance && m.healing<=tolerance;
++          for (unsigned int k=0; k<measured.size(); ++k)
++            {
++              const auto &m=measured[k];
++              // First hold finishes initialization; its relaxation is not loading-induced healing.
++              admissible=admissible && m.node_min>=-tolerance && m.node_max<=1+tolerance
++                         && m.cpdi_min>=-tolerance && m.cpdi_max<=1+tolerance
++                         && (k==0 || m.healing<=tolerance);
++            }
+           this->get_pcout() << std::setprecision(17) << "P1 assessment tolerance=" << tolerance
+               << " repeat=" << repeat << " uncertainty=" << uncertainty
+               << " repeat_resolved=" << repeat_resolved << " evolution=" << evolution

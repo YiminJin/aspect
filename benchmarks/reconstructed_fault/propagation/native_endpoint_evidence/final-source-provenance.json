@@ -1,0 +1,21 @@
+{
+  "HEAD": "de7beaa65846c7372711f7922abf1c5d9a745ee6",
+  "branch": "fault-propagation",
+  "source_hashes": {
+    "source/simulator/solver/reconstructed_fault_endpoint_phase.cc": "2f4a3cf541c89dfadf74a92ef4b20d9971cafbf9a0ac28244a6c13c079eb2039",
+    "source/simulator/solver/reconstructed_fault_stokes.cc": "bfdcfbd6db89e4bd4cb906a545c3caa77993aa83512f3b92cfe7fe813a36e139",
+    "source/simulator/solver_schemes.cc": "df646d56b084d7eb7b9a4b186f3b65bf322b02a74840921bd6ab8afc2c6f6de1",
+    "source/simulator/phase_field.cc": "156139fb3439cfd97d23bc21088e7240188b2e2ce44f507078b1dc3d21313dce",
+    "source/simulator/assembly.cc": "f27fd2dfdebca10519e87cbdf4b2cb0f6f7be0ee7ae1448633b79095f1e3d194",
+    "source/material_model/phase_field_fault.cc": "a42569abe6b0f3ced6ac212c61d3e6a20f02118c9795dca5d7c2b6f12acd7a1b",
+    "source/material_model/phase_field_fault/fe_strain.cc": "75e8c5b5aed82d61045c7c6b9a6a2ae9b15245adacad5b4f62cb37bca2e6e835",
+    "include/aspect/simulator.h": "daeca6394ffe0e5a9edec54198add2f4ca510a569d7e3f6cedd0c7217e71cfc6",
+    "include/aspect/phase_field.h": "7a5ea95d869da6d53b4c94ba59378f0817a13b72e6afc3d4aea4fdfaa5bbfda0",
+    "include/aspect/material_model/phase_field_fault.h": "1faaadf14c91e9ec846c46cac1fb47b2171335e5ae956922f8c2979d00add47c",
+    "tests/phase_field_test_access.h": "468808d68f35864213f7d9c89491cdad6ca5f1248fd26b5bf786ab28ffa6fb8e"
+  },
+  "native_start_provenance": "onset-obstacle-search-start.json",
+  "executable_matches_start": true,
+  "plugin_matches_start": true,
+  "scope": "Current optional endpoint production files; incoming changes were preserved, not a clean-commit identity"
+}

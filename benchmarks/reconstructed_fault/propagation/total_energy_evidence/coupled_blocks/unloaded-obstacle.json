@@ -1,0 +1,9 @@
+{
+  "unconstrained_gradient_min_J_per_m": 0.014700853828780669,
+  "unconstrained_gradient_max_J_per_m": 0.9462511993663754,
+  "constrained_KKT": 0.0,
+  "saturated_trial_rejected": true,
+  "immutable_bound_array": true,
+  "immutable_profile": true,
+  "state_preserved": true
+}

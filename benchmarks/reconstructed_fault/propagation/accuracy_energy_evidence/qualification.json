@@ -1,0 +1,19 @@
+{
+  "direct_irreversibility_fixed_mesh": "verified",
+  "source_error_target": 0.005,
+  "accurate_RHS_strong_025_source_errors": {
+    "irreversibility_dt125": 0.00931219809927275,
+    "irreversibility_dt0625": 0.00969784031041987,
+    "irreversibility_dt03125": 0.00856877026238878
+  },
+  "normalization_accuracy_pass": false,
+  "stress_history_partitioning_pass": true,
+  "stress_FE_spatial_accuracy_qualified": false,
+  "profile_mechanical_identity_pass": true,
+  "total_evolving_profile_phase_energy_qualified": false,
+  "governing_revision_implemented": false,
+  "fresh_finer_coupled_runs": 0,
+  "P3_ready": false,
+  "controlling_uncertainty": "Evolving-profile governing energetics; independent failed surface-resolution gate",
+  "stress_scaling_qualified": false
+}

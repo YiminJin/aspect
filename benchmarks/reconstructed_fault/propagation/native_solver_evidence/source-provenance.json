@@ -1,0 +1,120 @@
+{
+  "HEAD": "de7beaa65846c7372711f7922abf1c5d9a745ee6",
+  "branch": "fault-propagation",
+  "files": [
+    {
+      "path": "source/simulator/solver/reconstructed_fault_endpoint_phase.cc",
+      "task_entry_sha256": "1aea54081ba9ec6934e769893ab1bccba03d6c85cfb9641d5295fb90a61cad0e",
+      "current_sha256": "d2123985072a68644397c65fd8004ddae6c30f436cce7e9493cfc52ce18beff1",
+      "changed": true
+    },
+    {
+      "path": "source/simulator/solver/reconstructed_fault_stokes.cc",
+      "task_entry_sha256": "9262babff7819bb2d6c9bdd71d86a4e95805d3955870a5c81b6f44780e6585f7",
+      "current_sha256": "c9c446a6ffa8475bd00ba9af083ccfc828032db38a443e85d8c7c81da779e130",
+      "changed": true
+    },
+    {
+      "path": "include/aspect/simulator.h",
+      "task_entry_sha256": "25a02fb93ca4bf79ddad6862d0a1ba991c73f1e785095a71c3569e33cb7437cd",
+      "current_sha256": "860c7cbaf4632cae338de67c7abd93d0c78fd7ab09e6d8635bafc2ffa765ff20",
+      "changed": true
+    },
+    {
+      "path": "include/aspect/phase_field.h",
+      "task_entry_sha256": "7a5ea95d869da6d53b4c94ba59378f0817a13b72e6afc3d4aea4fdfaa5bbfda0",
+      "current_sha256": "b0b54d3373d7ee8c63f56e39a40e19a068f19e1275f3790e6d06e7fcb88df09c",
+      "changed": true
+    },
+    {
+      "path": "source/simulator/phase_field.cc",
+      "task_entry_sha256": "156139fb3439cfd97d23bc21088e7240188b2e2ce44f507078b1dc3d21313dce",
+      "current_sha256": "1ccb420312b3bba6c281d8a8dc42fd255351a14bb3ec8002b1a451e69ca1754b",
+      "changed": true
+    },
+    {
+      "path": "tests/phase_field_test_access.h",
+      "task_entry_sha256": "84c0191bd06e1ff73b81c41f9bf4d0a7f530c8e3378029b22753914c751fdce4",
+      "current_sha256": "ffa6b3a217026dc9cfdc36660cac214f2a743cb6301747479d5cf6846b95c588",
+      "changed": true
+    },
+    {
+      "path": "tests/phase_field_fault_test_access.h",
+      "task_entry_sha256": "1158b4a8bf95542ba143905123edd86249f0dd928803b51ee7c661b9b3a718cb",
+      "current_sha256": "5f930bef9876198fa6d6f05fe48b15bbc6b0f8b8700d0838c40a8dc9b1bac658",
+      "changed": true
+    },
+    {
+      "path": "benchmarks/reconstructed_fault/propagation/native_endpoint_verification.cc",
+      "task_entry_sha256": "018a7a92ce177a3540f628ff2910d6baee366ab18faa83233fa7f79512354a87",
+      "current_sha256": "d7175c5669357cd36c98b30e435100c0728940c711a91384ed0940024d307758",
+      "changed": true
+    },
+    {
+      "path": "benchmarks/reconstructed_fault/propagation/run_native_endpoint.py",
+      "task_entry_sha256": "0d62646cae235304eba8cf8dc7b9c97afb4a4463521fdd7e20e323ecb096d3fa",
+      "current_sha256": "79f0ed3ec9fb2f835ab17c33b4bcb6ef98db61255841902fc31bbe24c1cf3835",
+      "changed": true
+    },
+    {
+      "path": "doc/reconstructed_fault/specification.tex",
+      "task_entry_sha256": "bebc43be46c4d476ad90e648763d970850127ff143f39ed8c65c3be6ff82dd9e",
+      "current_sha256": "d5d74c4e1c8bd1bca430659febbabb3455745dd90119018f81c323d43243a3dd",
+      "changed": true
+    },
+    {
+      "path": "doc/reconstructed_fault/phase_field_native_fe_derivation.tex",
+      "task_entry_sha256": "c37fba7f820a424a4fc7f729f68e83d6be9ece54663605030c87095ba67844c5",
+      "current_sha256": "f4f4bfbc83e4979e8e847033e16a43eb71896e13f3b76023c85dc0915ac07fc6",
+      "changed": true
+    },
+    {
+      "path": "source/material_model/phase_field_fault/fe_strain.cc",
+      "task_entry_sha256": null,
+      "current_sha256": "8e31b1f114a0fceeb717dfb7dade8a6f82ff472356bf9ca28abdfc76a5a83dc4",
+      "changed": "No entry hash; exact final source recorded"
+    },
+    {
+      "path": "include/aspect/material_model/phase_field_fault.h",
+      "task_entry_sha256": null,
+      "current_sha256": "8c75f410981d231d3648863d841fc3f7db46b082835df6368b98fe6632a9acc0",
+      "changed": "No entry hash; exact final source recorded"
+    },
+    {
+      "path": "benchmarks/reconstructed_fault/propagation/assess_native_solver_onset.py",
+      "task_entry_sha256": null,
+      "current_sha256": "c92c361b2e2de57235796a542a42e7743d222317dd8fa9d06276c591f25fa66d",
+      "changed": "No entry hash; exact final source recorded"
+    },
+    {
+      "path": "benchmarks/reconstructed_fault/propagation/assess_native_endpoint_run.py",
+      "task_entry_sha256": null,
+      "current_sha256": "3389948faf1e6911a244159aba5e060263c7608fbf5a3f58edee3a44253a0d45",
+      "changed": "No entry hash; exact final source recorded"
+    },
+    {
+      "path": "benchmarks/reconstructed_fault/propagation/assess_native_solver_cases.py",
+      "task_entry_sha256": null,
+      "current_sha256": "9cb8c448827c10d3e1dd39df65539401013b070c88eb816c52efd1315cfe4ea8",
+      "changed": "No entry hash; exact final source recorded"
+    },
+    {
+      "path": "benchmarks/reconstructed_fault/propagation/assess_native_tangent_cost.py",
+      "task_entry_sha256": null,
+      "current_sha256": "44dddaa4526b7d971d81b586275dc207511d17c6cf2162519df9d6485405a587",
+      "changed": "No entry hash; exact final source recorded"
+    },
+    {
+      "path": "benchmarks/reconstructed_fault/propagation/prepare_native_solver_cases.py",
+      "task_entry_sha256": null,
+      "current_sha256": "adeaae6b58c366ff2ee3b4b0253fcf42b88687a8a4c94cc586a280cf7eb7efb5",
+      "changed": "No entry hash; exact final source recorded"
+    },
+    {
+      "path": "benchmarks/reconstructed_fault/propagation/monitor_native_endpoint.py",
+      "task_entry_sha256": null,
+      "current_sha256": "a03ea88b81f1413080f9785bcae67b77eda8aff233732be9d0d8cee5f00e711f",
+      "changed": "No entry hash; exact final source recorded"
+    }
+  ]
+}

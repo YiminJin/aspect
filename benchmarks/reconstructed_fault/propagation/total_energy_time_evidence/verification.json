@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "preservation_artifacts": 240,
+  "common_path_trajectories": 32,
+  "original_controls_reproduced": true,
+  "new_links_pass": true,
+  "production_changed": false,
+  "native_run_or_build": false,
+  "preexisting_diff_check": "12 incoming pf_rsf.tex trailing-whitespace lines, unchanged",
+  "checker_output": "PASS: 240 incoming artifacts preserved; 32 common-path numerical gates; original 27-step controls reproduced.\nQualification remains isolated/discrete; production, native histories and P3 unchanged.\n",
+  "stage": "P2 isolated prototype; P3 not qualified"
+}

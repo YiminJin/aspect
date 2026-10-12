@@ -1,0 +1,584 @@
+{
+  "baseline": "de7beaa65846c7372711f7922abf1c5d9a745ee6",
+  "branch": "fault-propagation",
+  "production_integration_implemented": true,
+  "algebraic_phase_checks_pass": true,
+  "P1_production_gate": false,
+  "blocker": "Evolved transverse tail outside retained prescribed-profile support; scientific admission/truncation policy unresolved.",
+  "P2_executed": false,
+  "checker_exit_code": 2,
+  "historical_bounds_hashes_verified": 98,
+  "historical_path_mapping": {
+    "AGENTS.md": "build-propagation-integration/incoming-AGENTS.md",
+    "benchmarks/reconstructed_fault/propagation/CMakeLists.txt": "build-propagation-integration/incoming-benchmarks_reconstructed_fault_propagation_CMakeLists.txt",
+    "tests/phase_field_test_access.h": "build-propagation-integration/incoming-tests_phase_field_test_access.h",
+    "doc/reconstructed_fault/propagation/PLAN.md": "build-propagation-p1-bounds/PLAN.md.before-integration-plan",
+    "doc/reconstructed_fault/propagation/STATUS.md": "build-propagation-p1-bounds/STATUS.md.before-integration-plan"
+  },
+  "committed_AGENTS_prefix_preserved": true,
+  "selected_full_outputs": [
+    "straight_contact_fixed",
+    "straight_gcc12_support",
+    "padded_gcc12",
+    "padded_mpi_gcc12",
+    "padded_restore_final"
+  ],
+  "attempt_records": {
+    "padded_final": {
+      "command": [
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/padded_final.prm"
+      ],
+      "code": 0,
+      "seconds": 10.789250420999451,
+      "ranks": 1,
+      "rss_kib": 266916
+    },
+    "padded_mpi_gcc12_resume": {
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/padded_mpi_gcc12_resume.prm"
+      ],
+      "code": 0,
+      "seconds": 3.6707777049996366,
+      "ranks": 2,
+      "rss_kib": 234872
+    },
+    "padded_mpi": {
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/padded_mpi.prm"
+      ],
+      "code": 1,
+      "seconds": 5.023362902000372,
+      "ranks": 2,
+      "rss_kib": 233880
+    },
+    "straight_final": {
+      "command": [
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/straight_final.prm"
+      ],
+      "code": 1,
+      "seconds": 8.129692110000178,
+      "ranks": 1,
+      "rss_kib": 223024
+    },
+    "padded_mpi_final": {
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/padded_mpi_final.prm"
+      ],
+      "code": 0,
+      "seconds": 7.027636368000458,
+      "ranks": 2,
+      "rss_kib": 269564
+    },
+    "compat_mature": {
+      "command": [
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/compat_mature.prm"
+      ],
+      "code": 0,
+      "seconds": 2.0175806649986043,
+      "rss_kib": 238608
+    },
+    "padded_mpi_initial": {
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/padded_mpi_initial.prm"
+      ],
+      "code": 213,
+      "seconds": 2.0763227440002083,
+      "ranks": 2,
+      "rss_kib": 21872
+    },
+    "padded_mpi_gcc12": {
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/padded_mpi_gcc12.prm"
+      ],
+      "code": 0,
+      "seconds": 13.236570664999817,
+      "ranks": 2,
+      "rss_kib": 269880
+    },
+    "baseline_ih": {
+      "command": [
+        "/home/ein/repository/aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/refactoring_r7b/build/aspect-r7b-qualified",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/baseline_ih.prm"
+      ],
+      "code": 1,
+      "seconds": 4.572021152000161
+    },
+    "padded_initial": {
+      "command": [
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/padded_initial.prm"
+      ],
+      "code": 0,
+      "seconds": 9.533163420001074,
+      "ranks": 1,
+      "rss_kib": 266776
+    },
+    "straight_support_diagnosis": {
+      "command": [
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/straight_support_diagnosis.prm"
+      ],
+      "code": 1,
+      "seconds": 5.6244987329992,
+      "ranks": 1,
+      "rss_kib": 222516
+    },
+    "straight_support_mass": {
+      "command": [
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/straight_support_mass.prm"
+      ],
+      "code": 1,
+      "seconds": 5.824258482000005,
+      "ranks": 1,
+      "rss_kib": 222564
+    },
+    "compat_mature_optin": {
+      "command": [
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/compat_mature_optin.prm"
+      ],
+      "code": 0,
+      "seconds": 3.871377957999357
+    },
+    "padded_resume": {
+      "command": [
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/padded_resume.prm"
+      ],
+      "code": 0,
+      "seconds": 3.4711158080008317,
+      "ranks": 1,
+      "rss_kib": 227348
+    },
+    "compat_equality": {
+      "command": [
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/compat_equality.prm"
+      ],
+      "code": 1,
+      "seconds": 1.7174145000008139,
+      "rss_kib": 238608
+    },
+    "straight_initial": {
+      "command": [
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/straight_initial.prm"
+      ],
+      "code": 1,
+      "seconds": 3.3695585139994364,
+      "ranks": 1,
+      "rss_kib": 164400
+    },
+    "straight_parse_fixed": {
+      "command": [
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/straight_parse_fixed.prm"
+      ],
+      "code": 1,
+      "seconds": 4.975621319999846,
+      "ranks": 1,
+      "rss_kib": 217468
+    },
+    "straight_gcc12_support": {
+      "command": [
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/straight_gcc12_support.prm"
+      ],
+      "code": 1,
+      "seconds": 8.029009632000452,
+      "ranks": 1,
+      "rss_kib": 223056
+    },
+    "compat_ih_budget": {
+      "command": [
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/compat_ih_budget.prm"
+      ],
+      "code": 0,
+      "seconds": 4.32148283800052
+    },
+    "padded_restore_final": {
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/padded_restore_final.prm"
+      ],
+      "code": 0,
+      "seconds": 9.23189327199907,
+      "ranks": 2,
+      "rss_kib": 269228
+    },
+    "straight_contact_fixed": {
+      "command": [
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/straight_contact_fixed.prm"
+      ],
+      "code": 0,
+      "seconds": 7.377396578000116,
+      "ranks": 1,
+      "rss_kib": 236756
+    },
+    "straight_contact_trace": {
+      "command": [
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/straight_contact_trace.prm"
+      ],
+      "code": 1,
+      "seconds": 4.121694277999268,
+      "ranks": 1,
+      "rss_kib": 217148
+    },
+    "compat_ih": {
+      "command": [
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/compat_ih.prm"
+      ],
+      "code": 1,
+      "seconds": 4.722451356999954,
+      "rss_kib": 238608
+    },
+    "padded_gcc12": {
+      "command": [
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/padded_gcc12.prm"
+      ],
+      "code": 0,
+      "seconds": 10.633376822001082,
+      "ranks": 1,
+      "rss_kib": 267260
+    },
+    "straight_probes": {
+      "command": [
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/straight_probes.prm"
+      ],
+      "code": 1,
+      "seconds": 4.171848195999701,
+      "ranks": 1,
+      "rss_kib": 217472
+    },
+    "padded_mpi_owned_norm": {
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/padded_mpi_owned_norm.prm"
+      ],
+      "code": 0,
+      "seconds": 8.929512370001248,
+      "ranks": 2,
+      "rss_kib": 269788
+    },
+    "padded_final_resume": {
+      "command": [
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/padded_final_resume.prm"
+      ],
+      "code": 0,
+      "seconds": 5.373108595998929,
+      "ranks": 1,
+      "rss_kib": 228716
+    },
+    "padded_gcc12_resume": {
+      "command": [
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/padded_gcc12_resume.prm"
+      ],
+      "code": 0,
+      "seconds": 5.7763571180003055,
+      "ranks": 1,
+      "rss_kib": 227880
+    },
+    "padded_mpi_final_resume": {
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect",
+        "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/padded_mpi_final_resume.prm"
+      ],
+      "code": 0,
+      "seconds": 3.321281350999925,
+      "ranks": 2,
+      "rss_kib": 233404
+    }
+  },
+  "hashes": {
+    "AGENTS.md": "0e24a5a723ff9955914fe0d832c71c401d0005414280f2dedadcd28f276e66e0",
+    "benchmarks/reconstructed_fault/propagation/CMakeLists.txt": "178ebe27406a7df30e5c1c32da7697cc02d5f1cc3cc825530313f7d294fa7c8e",
+    "benchmarks/reconstructed_fault/propagation/INTEGRATION.md": "c18246f5cbe94f50b97faff745518a79ccf8e8cfc7d87e353bf9490ce747d8b6",
+    "benchmarks/reconstructed_fault/propagation/bounds_padded.prm": "8e1b46b671ef26e8751f845d1ee0c62bd348da3bc48307cf5265cfaa64ddf198",
+    "benchmarks/reconstructed_fault/propagation/bounds_straight.prm": "8a6c5e9a6bd51958907096c6569981f78d136bfc64d847c2104166d08a4175a1",
+    "benchmarks/reconstructed_fault/propagation/check_integration.py": "f58f659cc64e9774de7b48ea87082e5b1a31892d870a8c5cd78aa66bbf878444",
+    "benchmarks/reconstructed_fault/propagation/finite.prm": "de19f1617d6752a9b323e90158b8ab36a7e43dc1358f7f7eaf40259df666a499",
+    "benchmarks/reconstructed_fault/propagation/integration.prm": "9e7b30878d02f7e7fd54208ef05873bfbb7c28a6a55dc758c8cb711495a0d412",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/baseline_ih.json": "cb8a682d06921798ae86bd95de79e7cf09070f8dec5a2bdce7bacf2c25fcc388",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/baseline_ih.log": "980921b1f7150a0ea472d139fa5b59399a3d4c424e679188d18cfff8ff103de6",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/compat_equality.json": "e72e4f34fbb8a77db523e1a45bd4aa87464044d0093327da6486446d06a98d04",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/compat_equality.log": "87c59cbb41cc1dee14c0e45b9bc97b20faaeb9a83c64d8a4595897cf39446178",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/compat_ih.json": "cf41158340161d279a7ce57f70c67250810417c9cd00dc71da6b37dadba64b77",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/compat_ih.log": "5a72f73d4daf0bcc51558b912159419fa98e1a9534858ca993587e273a60eb25",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/compat_ih_budget.json": "6bd679c1ed2bc300fd0479df7aaec752515609e2a825ec0a53a671e7d447fcc4",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/compat_ih_budget.log": "a3eb36e64cc9e917a8524837c8899769bdf8dbec4293c4166e96e17cd1961448",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/compat_mature.json": "35767ccbd1747b5a9284ff110c037083ee5e420a4ae32f9454777cc284fddf9a",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/compat_mature.log": "168aa6700d8d3cf1967805311e078f7ecb37849c4d2bf0515bc0aeb2ca4ce3c2",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/compat_mature_optin.json": "6e00ebd2f7aef4152b1e39984c30bdd5c52497ae8d6d1cfa52c59fc30841944c",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/compat_mature_optin.log": "bbcc925256af713b54de8d8579e15613faed45f8997234b6ddf8aabf3175af92",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/final_checks.json": "78c1645e989fa9ce661d3b14d895ad2b1164c2ccfe1f2e64ae9455be6a19cb03",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/padded_final.json": "ed53eeb1dc2d6e5d5f6ccea6ce21a87c01ccb0d358e65d67d0de5d6c3d2f1fc5",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/padded_final.log": "e0e9b243e020ffe8606b605b28d90648b71237c6c84a2ce2ea0040bdcec75519",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/padded_final_resume.json": "bc12a91b1d50cdc0994ccc021c1cb40263c8f4d237464a4360ba9b75c0b06f86",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/padded_final_resume.log": "4a3b2d018fe13ac2aa52dab95a15d0e5bafff91f36a802bb616b6e055e58f701",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/padded_gcc12.json": "47143428ba18508cfc6e1fafb52bda1c30c40960fa5e36943540e6bd78cceddd",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/padded_gcc12.log": "36495ea73c6a1a7e0176455a578a00bd4d0290aafab9205a3f20b69c4e3bc544",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/padded_gcc12_resume.json": "95ccedd147576fde460f8b166c5917cd2bb0862b46f06ff0f851d3de2aae1b3f",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/padded_gcc12_resume.log": "26ee8cd677960568fd448d9f6edfc0a0f601d992b5cd5fda11be2d5e3739eb1b",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/padded_initial.json": "d88f50054c4e7a53f06ff77b250d150c75e7c6d6bb841dd27ad2b0c1cb81b9a7",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/padded_initial.log": "be5c4ff11e034b2e9a4476fd7ff7ca0babc9f2935c7a0958881dbef6a67f97cb",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/padded_mpi.json": "8d0ea47cdd17574be99767442fa36015627b23ac04bfd96e39d8608473237ced",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/padded_mpi.log": "b10daabe2d39516cd8c0f9cc9fccdeb5786e8c4ae58ea16a08c66039e4be9941",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/padded_mpi_final.json": "3b4d2be2ba7a988103381755ed9d3194d99cc906e7c5ba789bc1fe06153a5979",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/padded_mpi_final.log": "f14f7e4760218eafe993e746defafccdbddd787816fbc4e1b56699957269fa5e",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/padded_mpi_final_resume.json": "9d8bc05b4583fdc627326e083c30c30b7f465de99fab9c31132a0fb9295ac040",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/padded_mpi_final_resume.log": "08087a8b1f1bfa195edc65d59a563fcfedc378380fa0d05e2c680d4eae19cdd0",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/padded_mpi_gcc12.json": "b992cccefc4838bac2a98ccbee2c61d182c77c0dc1a77d6e5d8f280fa39d11d2",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/padded_mpi_gcc12.log": "0e11d5979bf3a81d7c2cdf4bb35695c8d55cac2e460bfe5f36c667ba01f482b5",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/padded_mpi_gcc12_resume.json": "a06166a9789ed2600f8b52a5d86075a480703a7cfcbe7f45680db7feae9d5997",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/padded_mpi_gcc12_resume.log": "f2f29e52e5ecbdf3dda0ec1b370fdba8c309e22cf24cacf76958dab261db9f50",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/padded_mpi_initial.json": "f6dac102f4919e29615b5c1e548a9c4b2098426ffbb262b6134c6a88a2c7aa12",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/padded_mpi_initial.log": "d4aee8687ab6b06fb85df5f36f54acff6b87137d0e8c752ccce3abc4a1772e2d",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/padded_mpi_owned_norm.json": "2a144431857d1f3768806dd6c7fca015f720b5278c8f236e104ea96909365168",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/padded_mpi_owned_norm.log": "385279be91a3eea64407d4899988bc911d8105add2ea6927cb2ec36670ccead1",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/padded_restore_final.json": "e965ed2d5fefc4729e28f3f501f8f6df0c96a40d8025c98a3444a3c900b5cf66",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/padded_restore_final.log": "8f8aec2c4d7da6be916f73a46edc62e1edb56d6ea35e0fba8700778cbd2d14a3",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/padded_resume.json": "55cdcf4f7eaf1c06398a1d4cf882a25f7629a3518871518415d1870f884a19f9",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/padded_resume.log": "ccb7463c54c71eea51fbf7735fd652f6dc3bec4ec5ffb18f1e2516f5701d81ab",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/straight_contact_fixed.json": "4ca3a30a0fc81f28e39091b71767017f6d4373acfb78222d1d63f760e221815e",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/straight_contact_fixed.log": "8cee7600e9337fdea982b65b027df8647c863dd8887259b3b6bc8ea689cba05c",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/straight_contact_trace.json": "0f373d186db077a02d823a32edc5e3bf0c7bce48f03f5df261f445b2cf06c486",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/straight_contact_trace.log": "20e9c22a6807c1e61ccb44702ebb59ba1c6c911ce4e68c429093705c70e68558",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/straight_final.json": "16768f42251ab094c85b92e9979539851384e1f874d104c3a59fe0b498a6c4c2",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/straight_final.log": "f62692975085a77449e12aeb35f2a3c1147178dbffa558c6758bc598b8771ca7",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/straight_gcc12_support.json": "35920373cce1d39c167ffef701651007294ac67d0c50a495d46d177259474614",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/straight_gcc12_support.log": "302017f61da0438b67c462bf023f686a2812686d1935df9a08b355d4b1fa07aa",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/straight_initial.json": "198c176c7727b1ca2a5c030fb5cf1fdd2d0832a2838cc582026d9c03be4affed",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/straight_initial.log": "a6e4f954e4c2b20ee79965064fcd0cfc291d394401c56081ef98aa27babdd781",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/straight_parse_fixed.json": "668ee0af5f794760acd1f3fedad93a6a366101e1a3df74fd61fbaf706341aa40",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/straight_parse_fixed.log": "540fe093f913e746623c0e36dcf0dfccd92cfe4bab490539c4f8d9063385fff3",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/straight_probes.json": "0bb64904c2101c90a382801a3fbec713375f95cdac07aebdec8d46944a78f560",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/straight_probes.log": "b6478a17ad93f8de0cce3f0edd08b631103d33926722887969b61ab738df0bec",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/straight_support_diagnosis.json": "fd3746f3faed72bc7a297ae9a248438b7a0613687d77c63f2865f94c75eecbad",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/straight_support_diagnosis.log": "1d768ca61f7203081545282d13682024ca1c1e250eb47b856e25b260467ee53c",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/straight_support_mass.json": "dc2f3073285631ee91f127878c67d18bc660b730296e446b0bfc93f99ce0d97f",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/straight_support_mass.log": "96b16a89b14bcce1bf7f40d96198a9d5b2a11ceb3f9dbdae934ef5f7a9e373ab",
+    "benchmarks/reconstructed_fault/propagation/integration_evidence/summary.json": "ec56ec783ab369f286774af1c99f54349e144e806b7b6311f5c37d6e2c226cb5",
+    "benchmarks/reconstructed_fault/propagation/padded.prm": "0351f6f8d418dd3cf1a99b650d0ec9a3e8ecde91be466a425d2d3f83398eca52",
+    "benchmarks/reconstructed_fault/propagation/production_integration.cc": "07b3db74d6a8cf76d16da88a573fe69a9ce8a3dd0b807ba23d8adb2febf0cbda",
+    "benchmarks/reconstructed_fault/propagation/reference32.prm": "df003b582401fed13615b806fd30c0c431942711b9370dd5ce5f294a87cbc237",
+    "benchmarks/reconstructed_fault/propagation/reference64.prm": "226be1d2615ac8f8299fe84eba503423c434c2fcb890cbbf35b5676572ad41cd",
+    "benchmarks/reconstructed_fault/propagation/run_integration.py": "3dc458d80e56c4af5123240ca00089d5e161a69fe678829c466faa59b9d1917b",
+    "benchmarks/reconstructed_fault/propagation/straight.prm": "48773fd627181d41a9ef3df81cd36a9f992d0c176072167e37287aa8a8b6e26d",
+    "benchmarks/reconstructed_fault/propagation/straight_fine.prm": "87643357b1809b8fc21a2299fb239a37e0eea5803c79c55ff803bb44081eaf57",
+    "build-propagation-integration/CMakeCache.txt": "907f6f5daa7b25d5c4794ced42414c409b366ea68a387b3b88ab2827cc0d0203",
+    "build-propagation-integration/aspect-release": "a26571143d2731e6f04e0b45e9ae365468d415a58e5998eaa9c66ed5f16a3325",
+    "build-propagation-integration/baseline_ih.prm": "4afa244c0bc733aa40ba2cbcc9aa8318636ca759bb2e87a5b97cb3c0629fca7a",
+    "build-propagation-integration/build-2.log": "e78e615cbea390f8847ecbbd86db3caca106aadd184403ae504daea7a42a70d3",
+    "build-propagation-integration/build.log": "16d39f79a13ddb616b155a24f47e2dfaf69fdb5992ac7c831ae4feabd0b394a9",
+    "build-propagation-integration/compat_equality.prm": "7be0b4a4ca647b879f39aafcdb0df2d6c99ded108a6b411dee198f9d8dbbae2d",
+    "build-propagation-integration/compat_ih.prm": "191a1842937371ae8d01968b63c8dc26b64b2621286b9cee70a9dafa2421cb6a",
+    "build-propagation-integration/compat_ih_budget.prm": "83c116654eb954c817e7270e08532c8eab6dd4fa90aa067c5d5a7a8c2af0807b",
+    "build-propagation-integration/compat_mature.prm": "af764841533e3f9017e455540c03e962f984d9cf1e12c0dc6b0842baaf6935f7",
+    "build-propagation-integration/compat_mature_optin.prm": "e7b7159b3634719d21bddf0557794587ee1eb97485fd265c04d71251f925c1ca",
+    "build-propagation-integration/detailed.log": "9b33c8d51a3e54d57daa79252f4da710116256258e26923595d48cc68a6ca3fd",
+    "build-propagation-integration/incoming-AGENTS.md": "8c8ac8c0cd4239fccf5b9fa331d156f389b68eb8a336905dd69b57183ee94172",
+    "build-propagation-integration/incoming-benchmarks_reconstructed_fault_propagation_CMakeLists.txt": "3ebe493648a689d2e470a5dbe6ade3608a908a3c726d632c10209775f38495f2",
+    "build-propagation-integration/incoming-doc_reconstructed_fault_propagation_P1_integration_plan.md": "15652ce7b2a757f8a071f6b0e4626f64e7edd8df91bb6d89d09bde74edf11df0",
+    "build-propagation-integration/incoming-doc_reconstructed_fault_propagation_PLAN.md": "dd4cac5f6992f17e52db613b4588b0f81cd12ddac50e36cd470bf9a7806c684f",
+    "build-propagation-integration/incoming-doc_reconstructed_fault_propagation_STATUS.md": "b40a037c47c607a6f67e9cfc249eb97c7bd9285c6a2a38c68de370db1539d13d",
+    "build-propagation-integration/incoming-tests_phase_field_test_access.h": "f7ba6d5b1d774d83576bf87f8532a83e5a686363487339ade1e9e13532feb0bd",
+    "build-propagation-integration/mature-build.log": "87e16857ac10eaf44f94ac2535bb4845d9ea26167f59682be27d47672647588f",
+    "build-propagation-integration/observer-final.cc": "40c60d0dac85d02c8972acaef966f9dfd426d3fcb7b809143d8d056b17685bd7",
+    "build-propagation-integration/observer-gcc16.so": "ffafeb2b21bd4c687a20a3d028eb8d3bcfdb3080efddbbe3816719e5b04e244e",
+    "build-propagation-integration/output-padded_gcc12/metrics-0.csv": "6ea7107a084fa8f862b04ff645f1c8cb06e48a645be6a75d4a117ff9acedefe0",
+    "build-propagation-integration/output-padded_gcc12/metrics-1.csv": "2720c2d313a2e65ed808c0752e1b80832b539880374514b1f44407be25d80354",
+    "build-propagation-integration/output-padded_gcc12/metrics-2.csv": "aea2c7172d716f5088b82092deba9227bdf52f93545a28e84bd4176f6d53f8aa",
+    "build-propagation-integration/output-padded_gcc12/metrics-3.csv": "4e3d849f43eff370e966673a13e5b55a4fd917d526f28e3ca2550019aec4283f",
+    "build-propagation-integration/output-padded_gcc12/metrics-4.csv": "e94e5cc971256b225a687448d2767a1a41e7e91fed99fceb32d80a8d281ec8b3",
+    "build-propagation-integration/output-padded_gcc12/metrics-resume-3.csv": "4e3d849f43eff370e966673a13e5b55a4fd917d526f28e3ca2550019aec4283f",
+    "build-propagation-integration/output-padded_gcc12/metrics-resume-4.csv": "e94e5cc971256b225a687448d2767a1a41e7e91fed99fceb32d80a8d281ec8b3",
+    "build-propagation-integration/output-padded_gcc12/phase-0-0.csv": "7d6c0ea4eb858f65d1694686b64bf1f98cdfadcdf457c290a5d7ea09b81f0161",
+    "build-propagation-integration/output-padded_gcc12/phase-1-0.csv": "8c91c6f63aeabf4679e1f7c8baec17669a3460061c52b79c7e7e1c9a2a08a4ec",
+    "build-propagation-integration/output-padded_gcc12/phase-2-0.csv": "01e01bae19b7b326dc7e75f7942bc4fb161a8921e604e6d22521e8f7c3e26fcc",
+    "build-propagation-integration/output-padded_gcc12/phase-3-0.csv": "5f151fd1d25972d5cc15459e3367bd11cff23344842aac20dbc220c65e6c196e",
+    "build-propagation-integration/output-padded_gcc12/phase-4-0.csv": "41066def68ad590b7d014d4e2bb41d68257e26915958a7aaa76a598bec3b6f67",
+    "build-propagation-integration/output-padded_gcc12/phase-resume-3-0.csv": "5f151fd1d25972d5cc15459e3367bd11cff23344842aac20dbc220c65e6c196e",
+    "build-propagation-integration/output-padded_gcc12/phase-resume-4-0.csv": "41066def68ad590b7d014d4e2bb41d68257e26915958a7aaa76a598bec3b6f67",
+    "build-propagation-integration/output-padded_gcc12/restart/01/mesh": "058c135f59d73b7607ebb8c29e300fdf61d221d309a0b9ee3b5ac484a7315d53",
+    "build-propagation-integration/output-padded_gcc12/restart/01/mesh.info": "0c7eec881b6ba982d6ef36588b8c7e6f2c6230d6ccdc491c4510f162553bcf8f",
+    "build-propagation-integration/output-padded_gcc12/restart/01/mesh_fixed.data": "38b81652ab12550e8374bc52d76cc1bff869bbc1383a3060fa954627b7c77f5b",
+    "build-propagation-integration/output-padded_gcc12/restart/01/mesh_variable.data": "12efa3b057f418e90a4ee7f576608fec24328da82909487c1a0843a863b1edc4",
+    "build-propagation-integration/output-padded_gcc12/restart/01/resume.z": "b5a243f3f39e79a36e25d1f86c88bc69a079985547fb67055e65719fa2f3ff00",
+    "build-propagation-integration/output-padded_gcc12/restart/last_good_checkpoint.txt": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+    "build-propagation-integration/output-padded_mpi_gcc12/metrics-0.csv": "89a191db1908094db386929ed378510106880de1b2baa036095e3696560e46fc",
+    "build-propagation-integration/output-padded_mpi_gcc12/metrics-1.csv": "4db1b980009b4c0a98bf8b13454f4267d0fe65b33307ecf6b3545d242b40edf5",
+    "build-propagation-integration/output-padded_mpi_gcc12/metrics-2.csv": "e637ce839a5f1b1fbfbe31972f3b3e721d975e7f14678842ad54478a203f117a",
+    "build-propagation-integration/output-padded_mpi_gcc12/metrics-3.csv": "7536a9304f1930b43543eec0de3722ce704693792f138b4aca84d34b6e4983fd",
+    "build-propagation-integration/output-padded_mpi_gcc12/metrics-4.csv": "17b33fd913062c2f2b84c6f7133e7107360ac58943d52d92e087b18ffc0ea962",
+    "build-propagation-integration/output-padded_mpi_gcc12/metrics-resume-3.csv": "7536a9304f1930b43543eec0de3722ce704693792f138b4aca84d34b6e4983fd",
+    "build-propagation-integration/output-padded_mpi_gcc12/metrics-resume-4.csv": "17b33fd913062c2f2b84c6f7133e7107360ac58943d52d92e087b18ffc0ea962",
+    "build-propagation-integration/output-padded_mpi_gcc12/phase-0-0.csv": "24d1ef81360fee19a916310a4276b13baeb53f19262be2fc9648f0b584cbac63",
+    "build-propagation-integration/output-padded_mpi_gcc12/phase-0-1.csv": "6e88f0935e94bb49dc7322deae6845948607fa0954bddfc780f8237e9b8109e8",
+    "build-propagation-integration/output-padded_mpi_gcc12/phase-1-0.csv": "e712a288674c634dce1e5ac72808e2d0f5c6533135352dd3339ed8ebbe55f068",
+    "build-propagation-integration/output-padded_mpi_gcc12/phase-1-1.csv": "a0347817bfe65735f95da3d6f2e26390b17f6871cf7c75b5a67e8291b018e4b7",
+    "build-propagation-integration/output-padded_mpi_gcc12/phase-2-0.csv": "61931ae89ef885c381d3a796ef4a46c79ab1aa720336361a956e26e93e8f265d",
+    "build-propagation-integration/output-padded_mpi_gcc12/phase-2-1.csv": "37cce802ecdd0578becb9dd534367234fd261250ae6c22747ada299d7e93d88c",
+    "build-propagation-integration/output-padded_mpi_gcc12/phase-3-0.csv": "3dc637202de8dfeec3c8bafc705dec320c44e01dcbd4468bf658ac8509731ce9",
+    "build-propagation-integration/output-padded_mpi_gcc12/phase-3-1.csv": "e031ae8492492d74d7e0ddb1be6a88bac3f5f4ef5eb835a74847587224b32429",
+    "build-propagation-integration/output-padded_mpi_gcc12/phase-4-0.csv": "13b94349d1c69b8ce27c0bf3771ba25b67671e7827388d6d310759a3d51a7f9f",
+    "build-propagation-integration/output-padded_mpi_gcc12/phase-4-1.csv": "f2dfcafa25564fd7c22314940c102c53a4cb5a328db85de4e92fc15f8bc8558a",
+    "build-propagation-integration/output-padded_mpi_gcc12/phase-resume-3-0.csv": "3dc637202de8dfeec3c8bafc705dec320c44e01dcbd4468bf658ac8509731ce9",
+    "build-propagation-integration/output-padded_mpi_gcc12/phase-resume-3-1.csv": "e031ae8492492d74d7e0ddb1be6a88bac3f5f4ef5eb835a74847587224b32429",
+    "build-propagation-integration/output-padded_mpi_gcc12/phase-resume-4-0.csv": "13b94349d1c69b8ce27c0bf3771ba25b67671e7827388d6d310759a3d51a7f9f",
+    "build-propagation-integration/output-padded_mpi_gcc12/phase-resume-4-1.csv": "f2dfcafa25564fd7c22314940c102c53a4cb5a328db85de4e92fc15f8bc8558a",
+    "build-propagation-integration/output-padded_mpi_gcc12/restart/01/mesh": "1e999611ded02a1edf9aea84c57780ee51bcefabb8b509a2dfcb521f0e9879de",
+    "build-propagation-integration/output-padded_mpi_gcc12/restart/01/mesh.info": "1214731ef88609cbf7057092307022d772f460ec104adee6f3ac4911eb71c31b",
+    "build-propagation-integration/output-padded_mpi_gcc12/restart/01/mesh_fixed.data": "3680cbaace43af9bc1dfa3697f8c009066ce1f95fb608e6ac21993d108e7b0b5",
+    "build-propagation-integration/output-padded_mpi_gcc12/restart/01/mesh_variable.data": "12efa3b057f418e90a4ee7f576608fec24328da82909487c1a0843a863b1edc4",
+    "build-propagation-integration/output-padded_mpi_gcc12/restart/01/resume.z": "e3aead74a0e748d0a3401bcdf7d67053320df4da23991aaf86e5b928a3552205",
+    "build-propagation-integration/output-padded_mpi_gcc12/restart/last_good_checkpoint.txt": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+    "build-propagation-integration/output-padded_restore_final/metrics-0.csv": "89a191db1908094db386929ed378510106880de1b2baa036095e3696560e46fc",
+    "build-propagation-integration/output-padded_restore_final/metrics-1.csv": "4db1b980009b4c0a98bf8b13454f4267d0fe65b33307ecf6b3545d242b40edf5",
+    "build-propagation-integration/output-padded_restore_final/metrics-2.csv": "e637ce839a5f1b1fbfbe31972f3b3e721d975e7f14678842ad54478a203f117a",
+    "build-propagation-integration/output-padded_restore_final/metrics-3.csv": "7536a9304f1930b43543eec0de3722ce704693792f138b4aca84d34b6e4983fd",
+    "build-propagation-integration/output-padded_restore_final/metrics-4.csv": "17b33fd913062c2f2b84c6f7133e7107360ac58943d52d92e087b18ffc0ea962",
+    "build-propagation-integration/output-padded_restore_final/phase-0-0.csv": "24d1ef81360fee19a916310a4276b13baeb53f19262be2fc9648f0b584cbac63",
+    "build-propagation-integration/output-padded_restore_final/phase-0-1.csv": "6e88f0935e94bb49dc7322deae6845948607fa0954bddfc780f8237e9b8109e8",
+    "build-propagation-integration/output-padded_restore_final/phase-1-0.csv": "e712a288674c634dce1e5ac72808e2d0f5c6533135352dd3339ed8ebbe55f068",
+    "build-propagation-integration/output-padded_restore_final/phase-1-1.csv": "a0347817bfe65735f95da3d6f2e26390b17f6871cf7c75b5a67e8291b018e4b7",
+    "build-propagation-integration/output-padded_restore_final/phase-2-0.csv": "61931ae89ef885c381d3a796ef4a46c79ab1aa720336361a956e26e93e8f265d",
+    "build-propagation-integration/output-padded_restore_final/phase-2-1.csv": "37cce802ecdd0578becb9dd534367234fd261250ae6c22747ada299d7e93d88c",
+    "build-propagation-integration/output-padded_restore_final/phase-3-0.csv": "3dc637202de8dfeec3c8bafc705dec320c44e01dcbd4468bf658ac8509731ce9",
+    "build-propagation-integration/output-padded_restore_final/phase-3-1.csv": "e031ae8492492d74d7e0ddb1be6a88bac3f5f4ef5eb835a74847587224b32429",
+    "build-propagation-integration/output-padded_restore_final/phase-4-0.csv": "13b94349d1c69b8ce27c0bf3771ba25b67671e7827388d6d310759a3d51a7f9f",
+    "build-propagation-integration/output-padded_restore_final/phase-4-1.csv": "f2dfcafa25564fd7c22314940c102c53a4cb5a328db85de4e92fc15f8bc8558a",
+    "build-propagation-integration/output-padded_restore_final/restart/01/mesh": "1e999611ded02a1edf9aea84c57780ee51bcefabb8b509a2dfcb521f0e9879de",
+    "build-propagation-integration/output-padded_restore_final/restart/01/mesh.info": "1214731ef88609cbf7057092307022d772f460ec104adee6f3ac4911eb71c31b",
+    "build-propagation-integration/output-padded_restore_final/restart/01/mesh_fixed.data": "3680cbaace43af9bc1dfa3697f8c009066ce1f95fb608e6ac21993d108e7b0b5",
+    "build-propagation-integration/output-padded_restore_final/restart/01/mesh_variable.data": "12efa3b057f418e90a4ee7f576608fec24328da82909487c1a0843a863b1edc4",
+    "build-propagation-integration/output-padded_restore_final/restart/01/resume.z": "5f995e8eedf550b20f516c1bbafe166ba670ce15029b86f7fd4fcf71420202ec",
+    "build-propagation-integration/output-padded_restore_final/restart/last_good_checkpoint.txt": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+    "build-propagation-integration/output-straight_contact_fixed/metrics-0.csv": "5baa93257c62edeab724cfbf797ca48aa740474f80d23dcce11e7eaf1f6434ee",
+    "build-propagation-integration/output-straight_contact_fixed/metrics-1.csv": "86d5d88de70ba3fd158eedae2e7fa581600b1fb9ae3377d6e00d921119dc9abe",
+    "build-propagation-integration/output-straight_contact_fixed/metrics-2.csv": "9962d26eef1e005eed7ee976627f1f47e3e05fb26ad59b3ce6c2fb93412a6a6e",
+    "build-propagation-integration/output-straight_contact_fixed/metrics-3.csv": "d9965b7c50a7c7a27b189af7cbe1fe142070a23f174593dfbcb11aefe01b9c6c",
+    "build-propagation-integration/output-straight_contact_fixed/metrics-4.csv": "7038829e88fd112176e6f865672dbd8b02b5166bcfa4ec6ab07d0d73594b3702",
+    "build-propagation-integration/output-straight_contact_fixed/phase-0-0.csv": "7ceb0c04a1afa614f451905533e3f76b55a75992d2ded81f04cd742f4eeed39a",
+    "build-propagation-integration/output-straight_contact_fixed/phase-1-0.csv": "4a6cdd98506d188461ddf1893abcd62553ff91a6c3c68f92175a3dad1e9ea151",
+    "build-propagation-integration/output-straight_contact_fixed/phase-2-0.csv": "f359a549d5a61eba8137e9ee2a93bee556980517a34cccc0a96f7526f5129df0",
+    "build-propagation-integration/output-straight_contact_fixed/phase-3-0.csv": "cea0dfa1ca815bcd04169d151c55635547ae7521ec64f307b4886b2ef0e39682",
+    "build-propagation-integration/output-straight_contact_fixed/phase-4-0.csv": "4f1a629deaa829fc839c10751ee86edf38e7e063d5ec21dc9d81125d085770e3",
+    "build-propagation-integration/output-straight_contact_fixed/restart/01/mesh": "e45e4ebade3bd56630cd34eb30021e79a1addbae9457be2480bd33b546dc6e2f",
+    "build-propagation-integration/output-straight_contact_fixed/restart/01/mesh.info": "3af4cd59f96607c2e7819651f9be305c691ab9da8ed28269d86aae2f25748430",
+    "build-propagation-integration/output-straight_contact_fixed/restart/01/mesh_fixed.data": "2df978cb26aded9bd24dfb2e1b6907f01cebfc9bd936533bc8ed3e82c184b0f7",
+    "build-propagation-integration/output-straight_contact_fixed/restart/01/mesh_variable.data": "5a766fa69e396a8e1d516ea6424c481eef139c66c0454912373ccb9dd866fdf6",
+    "build-propagation-integration/output-straight_contact_fixed/restart/01/resume.z": "3923fd9b3d1bdf7c11aa0283b3342abedacbf6eea80e9c8305025a25f2e430b4",
+    "build-propagation-integration/output-straight_contact_fixed/restart/last_good_checkpoint.txt": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+    "build-propagation-integration/output-straight_gcc12_support/metrics-0.csv": "5baa93257c62edeab724cfbf797ca48aa740474f80d23dcce11e7eaf1f6434ee",
+    "build-propagation-integration/output-straight_gcc12_support/metrics-1.csv": "86d5d88de70ba3fd158eedae2e7fa581600b1fb9ae3377d6e00d921119dc9abe",
+    "build-propagation-integration/output-straight_gcc12_support/phase-0-0.csv": "7ceb0c04a1afa614f451905533e3f76b55a75992d2ded81f04cd742f4eeed39a",
+    "build-propagation-integration/output-straight_gcc12_support/phase-1-0.csv": "4a6cdd98506d188461ddf1893abcd62553ff91a6c3c68f92175a3dad1e9ea151",
+    "build-propagation-integration/padded_final.prm": "89781803acd2ffad7419eb2e83f89dc312ec1f74ab540afc22845459b2065588",
+    "build-propagation-integration/padded_final_resume.prm": "f357d74a9ded20b1521bb0f5c7a5934bf13679299a99faf38420ad5ddf1bb558",
+    "build-propagation-integration/padded_gcc12.prm": "9ae3d785f06dd257eb110cffdb52163de0975ce158cb25dc33a088133ff9464c",
+    "build-propagation-integration/padded_gcc12_resume.prm": "9462d1f1342aed6f108d1e37a448d07edb536590549945f243697cce96be0846",
+    "build-propagation-integration/padded_initial.prm": "7079adbb4546341723dbaebd0f1ac875e3ba72e3762188908a31938a5f8d969e",
+    "build-propagation-integration/padded_mpi.prm": "0156b2844700225186e9e2baec208f318163dd9cba8fda5b5e4a151c0e5258ba",
+    "build-propagation-integration/padded_mpi_final.prm": "2eb408a8780f954e9a3d53759ae0454227bf5038da87f3b9f3ccddfca7170e97",
+    "build-propagation-integration/padded_mpi_final_resume.prm": "337ee5da82da7b9ac4df75f188e4c34e0f02e088a8383c0d0e5a85a0c1688541",
+    "build-propagation-integration/padded_mpi_gcc12.prm": "58e6962634ae806011eabb4c3263edfa5de98732ff76807f9b6efa2fe2a8d8e6",
+    "build-propagation-integration/padded_mpi_gcc12_resume.prm": "04d440699fc414e64f58eea8bb8e293221471e7e2d71aa1fcbd924888c6c5235",
+    "build-propagation-integration/padded_mpi_initial.prm": "9ebb110521e53382b0c44c19908f4b9dec0198864a440799d7106d5342f9159f",
+    "build-propagation-integration/padded_mpi_owned_norm.prm": "1be5ece6e4d6eab9ad8f6f40c62bbdb8dcb6e7ab5b34990beb3545dcb0240e4e",
+    "build-propagation-integration/padded_restore_final.prm": "5ddb28ff851a6a26322f62383836b1f382c49cb3e30db79e5924a4c49ca1d025",
+    "build-propagation-integration/padded_resume.prm": "fcec2dc4db2df886702cb81e30c4513b99a8cc28c2a27dae72aac63242c96e5f",
+    "build-propagation-integration/plugin/CMakeCache.txt": "3878de500134f5563ad3438883fd70652e9cd77d15698132e40ad7508f326c3e",
+    "build-propagation-integration/plugin/libmature_compat.release.so": "d914d7d7ae93de4917447fe66d3c2c22a4b85cd933a56c72b8525eb21f468dff",
+    "build-propagation-integration/plugin/libproduction_integration.release.so": "9a6d673f0c5c3d06011c5614dab07b444a048d16532f2462d615228898c6fb79",
+    "build-propagation-integration/plugin-build-10.log": "12b1cbc9730baf34ac467cc771eaa061f4b8b152fcfd7404217f3355b2667bd7",
+    "build-propagation-integration/plugin-build-11.log": "12b1cbc9730baf34ac467cc771eaa061f4b8b152fcfd7404217f3355b2667bd7",
+    "build-propagation-integration/plugin-build-2.log": "a9d54d2e627b70cdacdd1b6f35a8c6362bf3f0922ccbf051e4f35fb5cc048995",
+    "build-propagation-integration/plugin-build-3.log": "668fda9fac8a9db6922f15c8f5c561eb3312e2d4109790987ca971672231ec81",
+    "build-propagation-integration/plugin-build-4.log": "12b1cbc9730baf34ac467cc771eaa061f4b8b152fcfd7404217f3355b2667bd7",
+    "build-propagation-integration/plugin-build-5.log": "12b1cbc9730baf34ac467cc771eaa061f4b8b152fcfd7404217f3355b2667bd7",
+    "build-propagation-integration/plugin-build-6.log": "12b1cbc9730baf34ac467cc771eaa061f4b8b152fcfd7404217f3355b2667bd7",
+    "build-propagation-integration/plugin-build-7.log": "12b1cbc9730baf34ac467cc771eaa061f4b8b152fcfd7404217f3355b2667bd7",
+    "build-propagation-integration/plugin-build-8.log": "12b1cbc9730baf34ac467cc771eaa061f4b8b152fcfd7404217f3355b2667bd7",
+    "build-propagation-integration/plugin-build-9.log": "6a7413f02da11bc31e4a97fedf77e6b9a9cf3395273cf99d9cbc7897aea9cbf3",
+    "build-propagation-integration/plugin-build.log": "c10d8d0740f7309f02773805d791ae40a8953bd482b6cf3d370f498cfae279f0",
+    "build-propagation-integration/plugin-configure.log": "4a363a531fba18a74aa25b9aefa11aca1a8dd6cb59b31edb920b283b2abe2156",
+    "build-propagation-integration/plugin-final-build.log": "9dc0087fad6aa51931786924b4acb581130b9b307d26df0c85ed15928efe07b7",
+    "build-propagation-integration/plugin-gcc12-build.log": "191c3e7b6b2655aed824f52e825afa7b96d5ea9c49269cfff9c8a86198776237",
+    "build-propagation-integration/plugin-gcc12-configure.log": "0a4f110a2c0bc2663e8f8ef0fd02fd3072e0ce914a2b2b06b4b2608dd67ba296",
+    "build-propagation-integration/plugin-gcc12-reconfigure.log": "daf75b62c200fe2b5a3afed8b20c086a2fa3a4efcbcf41ad18bb47f8e3c8a846",
+    "build-propagation-integration/production-integration-at-first-run.cc": "a50a641f30a7f25e8ec0a7b34a1f53fac42c58475b6fc122814f86b1256f42af",
+    "build-propagation-integration/production-integration-at-first-run.so": "2fc9eeae449b45b6277fa0cbf20c214364277dd651b9b3ec509ba83b999564d1",
+    "build-propagation-integration/straight_contact_fixed.prm": "446420abfee62011a3b38e6d7162d83f6111162c63bac787816cfb7cd6b51a7d",
+    "build-propagation-integration/straight_contact_trace.prm": "3ef6aa615ea9fea0c07db63b19f4af67d7a564679336b9f2dbd16edf16269d28",
+    "build-propagation-integration/straight_final.prm": "e3031b6c550f326d189865061e61395c8981e19457c0609a087b724082eef551",
+    "build-propagation-integration/straight_gcc12_support.prm": "6e1e51c5c7b3ded9acecff87276eba7243b1bc8d3e2bdb24b1aeb142043586dc",
+    "build-propagation-integration/straight_initial.prm": "637bf352db4aa792d0d774ff9606937f2e9efbbd67260ff4647c934794a818f0",
+    "build-propagation-integration/straight_parse_fixed.prm": "a59e18d0bf221fc2a466a6342965670e1a1eaf2aebd4cc5b6ecb21c73b3da46d",
+    "build-propagation-integration/straight_probes.prm": "c68a4b12b97247e850b9170d9171d1cda1b17cbf8e3e17dfafa27be527eeabd5",
+    "build-propagation-integration/straight_support_diagnosis.prm": "1cb3e3a2019ddf0ba7198eba7ad8267dad17d77766291d1addc4156b0010600c",
+    "build-propagation-integration/straight_support_mass.prm": "56922530c9362c8bd935d5a438d36ae21feb8bc1b72cf89dcaebfd0f7017f3a4",
+    "doc/reconstructed_fault/current_design.md": "df048ef5329ae2b59e62da318595797426fcc638d5522c0ef9f5d02b43513c42",
+    "doc/reconstructed_fault/propagation/P0_report.md": "433dc9be640086bfe278d2bf751cf7a236a007dd014c6d5c72712ced70babc1e",
+    "doc/reconstructed_fault/propagation/P1_bounds_report.md": "3b0056832b32da92fa360b7a60b912d1bdd1402c7a8744ae426966239e97e839",
+    "doc/reconstructed_fault/propagation/P1_integration_plan.md": "1323d09a7dda6539a4dea7eac6927a6796fb9a8c6475a093f5c7bb61afbf46c3",
+    "doc/reconstructed_fault/propagation/P1_integration_report.md": "6eb08e465e558d5105e592b77fb37c5426ce060c72bad9ae053b7421540441c3",
+    "doc/reconstructed_fault/propagation/P1_report.md": "a634a04287380a60e2c5c915b614ccaf942075b27f84e3130c41c87e3e09352f",
+    "doc/reconstructed_fault/propagation/P1_tail_report.md": "26e713d11e3362b72cff7b1996dc5a3a1750811a583ffff33681bda6a030d50b",
+    "doc/reconstructed_fault/propagation/P2_report.md": "0a0f97b623ddf13c2792e1d9d17feca9c82a6c977007f0bd7d3852e9e6803823",
+    "doc/reconstructed_fault/propagation/PLAN.md": "e1d4a1efa9dbb846bebb36ccfd7ab318c1432152fb07c43ada81c8bd08ae7dea",
+    "doc/reconstructed_fault/propagation/START_HERE.md": "64c6d6aa46e9a8fcabda422914f3b931daf2924a6171d2ea4ab14253c6bcd60b",
+    "doc/reconstructed_fault/propagation/STATUS.md": "3b5400a92f1c76b4214290a4f0ba3a656f8f33eeac7aac1d76b02ac172adb8f3",
+    "doc/reconstructed_fault/specification.tex": "f0c3e9cde368cbf37734cf65ce9b54655bc6b8b69156cb26eeb8acf692d124d3",
+    "include/aspect/material_model/phase_field_fault.h": "a1187bb5d5e3be01939287756d070e9fb8d8ddaab269fb7218faf40a15b534cb",
+    "include/aspect/phase_field.h": "dd56393eb2b93429f65bfb2742c35bd18097114267e41cf40eac065b19e9570e",
+    "source/material_model/phase_field_fault/history.cc": "e1feefbda47bc1b4acd7725076c887dd93e55be08e10fa2b56bed18c4f4ea672",
+    "source/simulator/phase_field.cc": "44931e3d5d0b7fcbad7578b3daaa780b7aa9dd3f406187fd58d3b07dcc8c7bec",
+    "source/simulator/solver_schemes.cc": "1ba44c85b93265452a3f50992a784f17c11b905b3a92c788046e1268e7dbe188",
+    "tests/phase_field_controlled_history.prm": "646c703347002d656e6d90db7275c7d7672f13fb06c3fb10ce00c85eddcbd6e6",
+    "tests/phase_field_fault_boundary_completion.prm": "7a7093a6ff2565a46cf30667ba354dbdca6171fbc475bfaa3885bb9923da2182",
+    "tests/phase_field_fault_ih.prm": "ded103571ecd4b1984568e98663898a7ea3e7edb3fc7b81677e024471a1b97ad",
+    "tests/phase_field_fault_ih.txt": "664c45fdbed36d17474f8caebe8480b00389194b1172d026ea4d1917959a27fe",
+    "tests/phase_field_test_access.h": "c2ab474a5eb9b7b25ce228bd2f88b7e68f208da9d8b973f6d1389753a8526b80"
+  }
+}

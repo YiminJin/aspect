@@ -1,0 +1,258 @@
+{
+  "q2": {
+    "steps": 40,
+    "time": 0.625,
+    "onset": 0.390625,
+    "phi_max": 0.6574361521656444,
+    "maximum_increment": 0.015957713072538793,
+    "healing": 0.0,
+    "phase_spread_x": 2.6645352591003757e-15,
+    "local": [
+      {
+        "x": 0.0,
+        "phi_max": 0.6574361521656437,
+        "q": 301.68808871182694,
+        "V_interval": 0.15823919589642618,
+        "slip": 0.04851880288507516,
+        "phi_FWHM": 0.27885000000000004,
+        "chi_FWHM": 0.11914999999999998,
+        "chi_95_width": 0.30001216665469255,
+        "chi_centroid": 0.5000000000000001,
+        "chi_two_sigma": 0.14544194450663714
+      },
+      {
+        "x": 0.5,
+        "phi_max": 0.6574361521656441,
+        "q": 301.6880887118261,
+        "V_interval": 0.15823919589642868,
+        "slip": 0.04851880288507508,
+        "phi_FWHM": 0.27885000000000004,
+        "chi_FWHM": 0.11914999999999998,
+        "chi_95_width": 0.3000121666546918,
+        "chi_centroid": 0.4999999999999999,
+        "chi_two_sigma": 0.1454419445066369
+      },
+      {
+        "x": 1.0,
+        "phi_max": 0.6574361521656433,
+        "q": 301.6880887118278,
+        "V_interval": 0.15823919589642996,
+        "slip": 0.048518802885075145,
+        "phi_FWHM": 0.27885000000000004,
+        "chi_FWHM": 0.11914999999999998,
+        "chi_95_width": 0.3000121666546916,
+        "chi_centroid": 0.5000000000000001,
+        "chi_two_sigma": 0.14544194450663683
+      }
+    ],
+    "recurrence_error": 0.0,
+    "source_error": 1.2212453270876722e-15,
+    "phase_release": 0.369647935936964,
+    "absolute_mechanical_error": 0.4291880903593829,
+    "fracture_expenditure": 2.2243128277822315,
+    "native_bulk": 5.271184626203364,
+    "frozen_normal_quadrature": {
+      "3": {
+        "bulk": 5.271184626203335,
+        "shear_mean": 1474.513044408108,
+        "stress_rms": 2892.7807615298125,
+        "source_integral": 0.9999959624692152
+      },
+      "6": {
+        "bulk": 5.417641016043395,
+        "shear_mean": 1474.3175406606636,
+        "stress_rms": 2943.0714944403057,
+        "source_integral": 0.9999999999971391
+      },
+      "12": {
+        "bulk": 5.417641482028275,
+        "shear_mean": 1474.317540522116,
+        "stress_rms": 2943.071652842547,
+        "source_integral": 0.9999999999999994
+      },
+      "24": {
+        "bulk": 5.417641482028279,
+        "shear_mean": 1474.3175405221164,
+        "stress_rms": 2943.0716528425505,
+        "source_integral": 1.0000000000000007
+      }
+    },
+    "curvature": [
+      {
+        "time": 0.5,
+        "free_above_healing_allowance": 102.0,
+        "strict_free": 102.0,
+        "min_eigenvalue": 9.136121387520665,
+        "negative_count": 0.0,
+        "amplitude": 0.0001,
+        "energy_minus": 4.568055445020036e-08,
+        "energy_plus": 4.5680543792059325e-08,
+        "quadratic_prediction": 4.5680606937603326e-08,
+        "energy_arithmetic": 1.5001555291651937e-13
+      },
+      {
+        "time": 0.625,
+        "free_above_healing_allowance": 153.0,
+        "strict_free": 153.0,
+        "min_eigenvalue": 2.4502489896608615,
+        "negative_count": 0.0,
+        "amplitude": 0.0001,
+        "energy_minus": 1.2251707204313789e-08,
+        "energy_plus": 1.2250868763885592e-08,
+        "quadratic_prediction": 1.2251244948304307e-08,
+        "energy_arithmetic": 2.0227231496657413e-13
+      }
+    ],
+    "mechanical_residuals": [
+      3.278327e-14,
+      7.918059e-15
+    ],
+    "dense_stress_range": [
+      -13422.43256199261,
+      7976.601841492782
+    ],
+    "chi_max": 7.405185107717126,
+    "fine_reference_common_time_errors": {
+      "phi": 0.03642610043587735,
+      "q": 46.63044926605653,
+      "V_interval": 0.002549441926869539,
+      "slip": 0.0002196614552303633
+    },
+    "matching_phase_grid_exact_bulk_reference": {
+      "phi": 0.02594781002168922,
+      "q": 42.73526682275286
+    }
+  },
+  "q3": {
+    "steps": 40,
+    "time": 0.625,
+    "onset": 0.515625,
+    "phi_max": 0.6833839582236622,
+    "maximum_increment": 0.016801949798966986,
+    "healing": 0.0,
+    "phase_spread_x": 4.468647674116255e-15,
+    "local": [
+      {
+        "x": 0.0,
+        "phi_max": 0.6833839582236616,
+        "q": 258.95282490184184,
+        "V_interval": 0.15884560092206276,
+        "slip": 0.048734861596314655,
+        "phi_FWHM": 0.27795,
+        "chi_FWHM": 0.10864999999999997,
+        "chi_95_width": 0.2979230609066945,
+        "chi_centroid": 0.49999999999999856,
+        "chi_two_sigma": 0.1429699219396418
+      },
+      {
+        "x": 0.5,
+        "phi_max": 0.6833839582236618,
+        "q": 258.9528249018398,
+        "V_interval": 0.15884560092206237,
+        "slip": 0.048734861596314336,
+        "phi_FWHM": 0.27795,
+        "chi_FWHM": 0.10864999999999997,
+        "chi_95_width": 0.2979230609066952,
+        "chi_centroid": 0.49999999999999856,
+        "chi_two_sigma": 0.14296992193964195
+      },
+      {
+        "x": 1.0,
+        "phi_max": 0.683383958223661,
+        "q": 258.95282490184053,
+        "V_interval": 0.1588456009220615,
+        "slip": 0.04873486159631416,
+        "phi_FWHM": 0.27795,
+        "chi_FWHM": 0.10864999999999997,
+        "chi_95_width": 0.29792306090669574,
+        "chi_centroid": 0.49999999999999856,
+        "chi_two_sigma": 0.1429699219396422
+      }
+    ],
+    "recurrence_error": 0.0,
+    "source_error": 1.1102230246251565e-15,
+    "phase_release": 0.1817220474937944,
+    "absolute_mechanical_error": 0.20515518931443977,
+    "fracture_expenditure": 3.060868232867989,
+    "native_bulk": 0.792491014477804,
+    "frozen_normal_quadrature": {
+      "3": {
+        "bulk": 0.7924910144778704,
+        "shear_mean": 1258.960693967743,
+        "stress_rms": 1.0779760462851716e-09,
+        "source_integral": 0.9999937495539569
+      },
+      "6": {
+        "bulk": 0.8758581435380806,
+        "shear_mean": 1258.6566894632185,
+        "stress_rms": 409.26718063589317,
+        "source_integral": 0.9999999999926585
+      },
+      "12": {
+        "bulk": 0.8758591069344586,
+        "shear_mean": 1258.656689106203,
+        "stress_rms": 409.2695356817179,
+        "source_integral": 0.9999999999999999
+      },
+      "24": {
+        "bulk": 0.8758591069344532,
+        "shear_mean": 1258.6566891061993,
+        "stress_rms": 409.26953568172047,
+        "source_integral": 1.0
+      }
+    },
+    "curvature": [
+      {
+        "time": 0.5,
+        "free_above_healing_allowance": 0.0,
+        "strict_free": 0.0,
+        "min_eigenvalue": NaN,
+        "negative_count": 0.0,
+        "amplitude": 0.0,
+        "energy_minus": 0.0,
+        "energy_plus": 0.0,
+        "quadratic_prediction": 0.0,
+        "energy_arithmetic": 0.0
+      },
+      {
+        "time": 0.625,
+        "free_above_healing_allowance": 153.0,
+        "strict_free": 153.0,
+        "min_eigenvalue": 2.242548812398639,
+        "negative_count": 0.0,
+        "amplitude": 0.0001,
+        "energy_minus": 1.1213021622324959e-08,
+        "energy_plus": 1.1212350159439666e-08,
+        "quadratic_prediction": 1.1212744061993194e-08,
+        "energy_arithmetic": 1.7271350589728879e-13
+      }
+    ],
+    "mechanical_residuals": [
+      3.486765e-14,
+      8.419052e-15
+    ],
+    "dense_stress_range": [
+      -1701.0644802485476,
+      3050.6925582146287
+    ],
+    "chi_max": 7.820656988380324,
+    "fine_reference_common_time_errors": {
+      "phi": 0.01311955648059493,
+      "q": 3.8951854560712604,
+      "V_interval": 0.00014949119196860927,
+      "slip": 3.60274399128363e-06
+    },
+    "matching_phase_grid_exact_bulk_reference": {
+      "phi": 7.443566762965759e-09,
+      "q": 1.067550266498074e-05
+    }
+  },
+  "raw_vs_plane_q2_phase_difference": 1.915134717478395e-15,
+  "raw_vs_plane_q2_surface_difference": {
+    "q": 2.6147972675971687e-12,
+    "V_interval": 5.467848396278896e-15,
+    "slip": 1.3183898417423734e-16,
+    "I": 9.947598300641403e-13,
+    "Z": 1.3096723705530167e-10
+  }
+}

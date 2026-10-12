@@ -1,0 +1,33 @@
+{
+  "kind": "Analytical rank bound for a proposed projected-parent-stress energy; NOT a defect of current Stokes",
+  "measured_config": {
+    "active_cells": 1024,
+    "velocity_degree": 2,
+    "velocity_dofs": 8450,
+    "pressure_dofs": 1089,
+    "mapped_stress_interpolator": "cell average",
+    "dimension": 2
+  },
+  "derived": {
+    "all_Dirichlet_velocity_boundary_dofs": 512,
+    "free_velocity_dofs": 7938,
+    "divergence_free_dimension_lower_bound": 6849,
+    "per_cell_symmetric_stress_components": 3,
+    "projected_stress_image_rank_upper_bound": 3072,
+    "projected_energy_velocity_kernel_dimension_lower_bound": 3777
+  },
+  "assumptions": [
+    "Fixed mesh/particles, one cell average per stress component",
+    "Linear incident-cell averaging and FE evaluation cannot increase rank",
+    "Matching mechanical Hessian from projected stress energy, with fixed profile and delta V=0",
+    "Use ALL pressure equations as upper bound, without assuming their independence"
+  ],
+  "native_model_implemented": false,
+  "native_eigenvalue_run": false,
+  "inputs": {
+    "build-propagation-integration/output-irreversibility_dt03125/parameters.prm": "d7da8571834cfd87904568ab745f00f803d6937c453c5461e9093bcae0b2daae",
+    "build-propagation-integration/output-irreversibility_dt03125/log.txt": "30bc8016d446bcc75218914cc78a04a1430c1ce8c93377e64e5297cbc2afdc65",
+    "source/particle/interpolator/cell_average.cc": "2f1a690c14b73e8651539098edd429a4a2f99bc79a1f36af5ce1ec8b242dcabf",
+    "source/simulator/parameters.cc": "b6dc63687ee5254dfde239cddd9c5677ab020ca41ac26b109a1e519a9b3f872b"
+  }
+}

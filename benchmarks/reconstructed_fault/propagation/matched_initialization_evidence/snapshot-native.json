@@ -1,0 +1,182 @@
+{
+  "returncode": 0,
+  "runtime_seconds": 6.190265039999986,
+  "peak_RSS_KiB": 330800,
+  "compiler": "/opt/gcc/12.4.0/bin/g++",
+  "deal_II": "9.6-local",
+  "executable_sha": "d07e7cdfe08032890c4011d0f7885d94c90d0c6db23f7ad206f80b80ab22241d",
+  "plugin_sha": "f48700be4ee755985b40c9ac776debd96d1901b146021fa3876835051e642598",
+  "input_sha": "680ef814ad0c37b59d71d7e687034d1c04c01941640c483be21e0bf368d54cc4",
+  "meaning": "Actual ASPECT postprocessor: accepted exact-bulk n512 reference-initialization snapshots on native 16x512 mesh; output-only, no history import or physical advancement.",
+  "display_only_velocity_quadrature": [
+    {
+      "time": 0.53125,
+      "upper_boundary_error": 7.986499517276258e-09
+    },
+    {
+      "time": 0.5625,
+      "upper_boundary_error": 1.2281633238186984e-08
+    },
+    {
+      "time": 0.59375,
+      "upper_boundary_error": 1.966190069091489e-08
+    },
+    {
+      "time": 0.625,
+      "upper_boundary_error": 3.320180258503669e-08
+    }
+  ],
+  "frames": [
+    {
+      "file": "accepted-0.vtu",
+      "bytes": 152120,
+      "cells": 8192,
+      "points": 32768,
+      "fields": [
+        "phase",
+        "localization",
+        "shear_stress",
+        "cohesive_traction",
+        "cumulative_slip",
+        "velocity_x",
+        "velocity_y"
+      ]
+    },
+    {
+      "file": "accepted-1.vtu",
+      "bytes": 157045,
+      "cells": 8192,
+      "points": 32768,
+      "fields": [
+        "phase",
+        "localization",
+        "shear_stress",
+        "cohesive_traction",
+        "cumulative_slip",
+        "velocity_x",
+        "velocity_y"
+      ]
+    },
+    {
+      "file": "accepted-2.vtu",
+      "bytes": 157112,
+      "cells": 8192,
+      "points": 32768,
+      "fields": [
+        "phase",
+        "localization",
+        "shear_stress",
+        "cohesive_traction",
+        "cumulative_slip",
+        "velocity_x",
+        "velocity_y"
+      ]
+    },
+    {
+      "file": "accepted-3.vtu",
+      "bytes": 157145,
+      "cells": 8192,
+      "points": 32768,
+      "fields": [
+        "phase",
+        "localization",
+        "shear_stress",
+        "cohesive_traction",
+        "cumulative_slip",
+        "velocity_x",
+        "velocity_y"
+      ]
+    },
+    {
+      "file": "accepted-4.vtu",
+      "bytes": 157183,
+      "cells": 8192,
+      "points": 32768,
+      "fields": [
+        "phase",
+        "localization",
+        "shear_stress",
+        "cohesive_traction",
+        "cumulative_slip",
+        "velocity_x",
+        "velocity_y"
+      ]
+    }
+  ],
+  "total_VTU_bytes": 780605,
+  "decoded_payload_checks": [
+    {
+      "time": 0.0,
+      "errors": {
+        "phase": 2.9556831537824735e-08,
+        "localization": 2.2508825292533174e-07,
+        "shear_stress": 0.0,
+        "cohesive_traction": 0.0,
+        "cumulative_slip": 0.0,
+        "velocity_x": 0.0,
+        "velocity_y": 0.0
+      },
+      "bytes": 152120,
+      "sha256": "f66ecd98f81df08a792958611732f462dc07bf823263af5484e577dc261c269f"
+    },
+    {
+      "time": 0.53125,
+      "errors": {
+        "phase": 2.971556312125756e-08,
+        "localization": 2.186533629711107e-07,
+        "shear_stress": 4.208239261060953e-06,
+        "cohesive_traction": 4.208190773624665e-06,
+        "cumulative_slip": 2.776082280719905e-10,
+        "velocity_x": 3.7214295950382947e-09,
+        "velocity_y": 0.0
+      },
+      "bytes": 157045,
+      "sha256": "02d60aed56bbd32e89b20c82600727a376b240e40965e306d0efc9c23841e9cb"
+    },
+    {
+      "time": 0.5625,
+      "errors": {
+        "phase": 2.9030399750773483e-08,
+        "localization": 2.3573734964088544e-07,
+        "shear_stress": 2.6331254048272967e-05,
+        "cohesive_traction": 4.186229318747792e-06,
+        "cumulative_slip": 1.4659951100282065e-09,
+        "velocity_x": 3.721268557188573e-09,
+        "velocity_y": 0.0
+      },
+      "bytes": 157112,
+      "sha256": "9e0813624b9d1cb01dfb6d93e8d841caafc7c91e076bb9708be40bab2ae3c54f"
+    },
+    {
+      "time": 0.59375,
+      "errors": {
+        "phase": 2.924530317915952e-08,
+        "localization": 4.5791361991120993e-07,
+        "shear_stress": 3.570364788174629e-05,
+        "cohesive_traction": 5.186183415162304e-06,
+        "cumulative_slip": 1.8206450930202678e-10,
+        "velocity_x": 3.7108134759433753e-09,
+        "velocity_y": 0.0
+      },
+      "bytes": 157145,
+      "sha256": "c2210faf6699135cc468075dbd4e5435466c305b75212d1152007720f7273fb2"
+    },
+    {
+      "time": 0.625,
+      "errors": {
+        "phase": 2.9142117496938624e-08,
+        "localization": 4.633424008915199e-07,
+        "shear_stress": 5.225109634920955e-05,
+        "cohesive_traction": 6.474834833625209e-06,
+        "cumulative_slip": 8.266695453174044e-10,
+        "velocity_x": 3.7183297552090266e-09,
+        "velocity_y": 0.0
+      },
+      "bytes": 157183,
+      "sha256": "cdd4daadcd08baab215a228227f928fd63220b4629ee71133cb969b1945aaee9"
+    }
+  ],
+  "accepted_input_sha256": "4a52bce236dfcf85cb0b2f614b5fd040e3547e332e22260734868e793ee218d3",
+  "scalar_storage": "Compressed Float32 display output; accepted solver fields remain Float64",
+  "scope": "Output-only ASPECT postprocessing on native mesh, not native coupled-solver qualification"
+}

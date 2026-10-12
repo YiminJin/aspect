@@ -1,0 +1,10 @@
+{
+  "material": "unchanged reference",
+  "initialization": "retained continuum seed, immutable previous physical phase",
+  "stage": "fixed-state operator tests; no accepted history is imported",
+  "points": [
+    "unloaded",
+    "growing .546875 s",
+    "asymmetric .59375 s"
+  ]
+}

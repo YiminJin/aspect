@@ -1,0 +1,82 @@
+{
+  "candidates": [
+    3,
+    4,
+    6,
+    12
+  ],
+  "selected": 6,
+  "selection_criteria": {
+    "normalized_gradient": 1e-05,
+    "Hessian_relative": 0.0001,
+    "bulk_energy_J_per_m": 1e-05,
+    "force_Pa": 0.01,
+    "common_time_phase_difference": 1e-05
+  },
+  "measured": [
+    {
+      "rule": 4,
+      "degree": 2,
+      "gradient": 0.0005044814290727028,
+      "Hessian": 6.38542710111712e-05,
+      "energy": 0.0024331774935824058,
+      "force": 0.22490880542733294
+    },
+    {
+      "rule": 4,
+      "degree": 3,
+      "gradient": 0.0009134909512031568,
+      "Hessian": 8.244592183560708e-05,
+      "energy": 0.002948343737759651,
+      "force": 3.950620814211142
+    },
+    {
+      "rule": 6,
+      "degree": 2,
+      "gradient": 1.900047656986215e-07,
+      "Hessian": 1.572531520843807e-08,
+      "energy": 4.25751605526159e-07,
+      "force": 2.0152913521087612e-05
+    },
+    {
+      "rule": 6,
+      "degree": 3,
+      "gradient": 3.79775012104369e-07,
+      "Hessian": 3.042358617685485e-08,
+      "energy": 9.280310472314923e-07,
+      "force": 0.0005378223783694125
+    },
+    {
+      "rule": 12,
+      "degree": 2,
+      "gradient": 4.529709940470639e-14,
+      "Hessian": 2.457486880793426e-15,
+      "energy": 3.108624468950438e-14,
+      "force": 3.409574844681629e-10
+    },
+    {
+      "rule": 12,
+      "degree": 3,
+      "gradient": 7.904787935321233e-14,
+      "Hessian": 3.146459020447513e-15,
+      "energy": 2.6867397195928788e-14,
+      "force": 8.866187783951318e-10
+    }
+  ],
+  "independent_rules": [
+    24,
+    48
+  ],
+  "physical_comparison_targets": {
+    "full_phi": 0.01,
+    "cohesive_q_Pa": 10,
+    "slip_relative_to_reference_final": 0.005
+  },
+  "native_refined_comparator": {
+    "nx": 16,
+    "ny": 32,
+    "degree": 2,
+    "normal_points": 6
+  },
+  "note": "Physical targets concern phase/traction/slip; stress spatial error is reported separately, not qualified by these targets. All unchanged KKT/bounds/history gates remain required."
+}

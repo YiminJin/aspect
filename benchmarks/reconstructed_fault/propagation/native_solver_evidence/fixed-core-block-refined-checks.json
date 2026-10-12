@@ -1,0 +1,278 @@
+{
+  "case": "fixed-core-block-refined",
+  "provenance": {
+    "executable_sha": "ab25b61f5e6a6b254d7a96d8fcc79fb9b4fb2221ac6c4ced158f8147d8084002",
+    "plugin_sha": "e8a9dfe7540381cf3e8fc1b862e407d3de097b42e7d17bc7802883db1546134f",
+    "input_sha": "9548d798c3cf7d903ac86d444e1b90045a78533b1c44a34b9a2be56217fec34b",
+    "initial_phi_sha": "5792b5323cfa162a231c4f1e4d5076e987d6dfc56005f1f427e577801b5b3356",
+    "initial_H_sha": "c205e0eda26d3042599a139dd668ca5cf339c6b4a7eba939400d174f35a6dc8b",
+    "configuration": "fresh shared initialization, fixed 16x512, full-normal association, frozen particles; scoped noncommitting fixed-entry references, not physical evolution",
+    "output": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-endpoint-fixed-core-block-refined",
+    "threads": 1,
+    "started_UTC": "2026-10-12T06:16:15.348124+00:00",
+    "max_wall_seconds": 3600.0,
+    "force_complete_failure": false,
+    "complete_failure_timestep": null,
+    "source_input": "benchmarks/reconstructed_fault/propagation/native_solver_evidence/core-all-coarse.prm",
+    "returncode": 0,
+    "wall_seconds": 2489.7556288820006,
+    "user_seconds": 2471.688576,
+    "system_seconds": 4.499335,
+    "peak_RSS_KiB": 1859360
+  },
+  "entries": [
+    {
+      "time": 0.529296875,
+      "dt": 0.0009765625,
+      "initial_potential": 21.04108255968242,
+      "final_potential": 21.040993631409698,
+      "KKT": 2.608784716029433e-11,
+      "phase_error": 1.1761513984964722e-10,
+      "reflected_phase_error": 2.047878533417702e-10,
+      "bulk_residual": 5.7765148496981035e-11,
+      "contact_rms": 8.608983566230611e-12,
+      "increment": 0.0011112918293781915,
+      "healing": 0.0,
+      "I_min": 109.30032329289462,
+      "centroid": 0.4999999999860978,
+      "reference_centroid": 0.4999999999501124,
+      "velocity_error_selected": 9.10064639012692e-09,
+      "q_center": 315.23100439852226,
+      "V_interval": 0.13604797497502552,
+      "slip_candidate": 0.03454104374917848,
+      "case": "core-4.txt",
+      "physical_KKT_target": 2.6525036688958553e-11,
+      "KKT_pass": true,
+      "phase_equivalence_error": 1.1761513984964722e-10,
+      "global_reflection": false,
+      "energy_decrease": 8.892827272077852e-05,
+      "tangential_phase_variation": 5.450279116914203e-12,
+      "cost": {
+        "mechanical seconds": 272.423752303,
+        "tangent seconds": 632.3998148520003,
+        "tangent calls": 189.0,
+        "difference calls": 1.0,
+        "line searches": 12.0,
+        "phase iterations": 8.0
+      }
+    },
+    {
+      "time": 0.5302734375,
+      "dt": 0.0009765625,
+      "initial_potential": 21.08228770751902,
+      "final_potential": 21.082116183054254,
+      "KKT": 1.9393514572030313e-13,
+      "phase_error": 1.7245660455245115e-10,
+      "reflected_phase_error": 2.1470925037903044e-10,
+      "bulk_residual": 5.959030595539277e-11,
+      "contact_rms": 7.0799002245351385e-12,
+      "increment": 0.0015746643355326606,
+      "healing": 0.0,
+      "I_min": 110.21277707500607,
+      "centroid": 0.49999999999336614,
+      "reference_centroid": 0.4999999999392378,
+      "velocity_error_selected": 1.3649250457767315e-08,
+      "q_center": 313.8324474773191,
+      "V_interval": 0.13704397297490714,
+      "slip_candidate": 0.03467487575402736,
+      "case": "core-5.txt",
+      "physical_KKT_target": 2.667145517959369e-11,
+      "KKT_pass": true,
+      "phase_equivalence_error": 1.7245660455245115e-10,
+      "global_reflection": false,
+      "energy_decrease": 0.0001715244647648717,
+      "tangential_phase_variation": 4.413136522884997e-14,
+      "cost": {
+        "mechanical seconds": 254.543078353,
+        "tangent seconds": 511.82510510500015,
+        "tangent calls": 194.0,
+        "difference calls": 1.0,
+        "line searches": 11.0,
+        "phase iterations": 8.0
+      }
+    },
+    {
+      "time": 0.53125,
+      "dt": 0.0009765625,
+      "initial_potential": 21.122572872794297,
+      "final_potential": 21.122401686593577,
+      "KKT": 2.931613285461765e-13,
+      "phase_error": 1.733588272934128e-10,
+      "reflected_phase_error": 3.081084831713099e-10,
+      "bulk_residual": 5.857293809026596e-11,
+      "contact_rms": 1.078854344872804e-11,
+      "increment": 0.0015737832155549025,
+      "healing": 0.0,
+      "I_min": 111.13337519579542,
+      "centroid": 0.49999999997890066,
+      "reference_centroid": 0.49999999992650274,
+      "velocity_error_selected": 1.3327842060453093e-08,
+      "q_center": 312.4361246711091,
+      "V_interval": 0.13729169908580843,
+      "slip_candidate": 0.03480894967891585,
+      "case": "core-6.txt",
+      "physical_KKT_target": 2.6849285813625285e-11,
+      "KKT_pass": true,
+      "phase_equivalence_error": 1.733588272934128e-10,
+      "global_reflection": false,
+      "energy_decrease": 0.00017118620072054114,
+      "tangential_phase_variation": 6.45039577307216e-14,
+      "cost": {
+        "mechanical seconds": 227.737680866,
+        "tangent seconds": 363.31950875699994,
+        "tangent calls": 135.0,
+        "difference calls": 1.0,
+        "line searches": 9.0,
+        "phase iterations": 7.0
+      }
+    }
+  ],
+  "intermediate_accuracy": [
+    {
+      "defect": 7.278226486049527e-07,
+      "eta": 0.01,
+      "rhs": 0.009899896649258963,
+      "target": 9.899896649258963e-05
+    },
+    {
+      "defect": 2.8860147535504828e-05,
+      "eta": 0.01,
+      "rhs": 0.0001616688374589478,
+      "target": 1.616688374589478e-06
+    },
+    {
+      "defect": 1.2065866780556524e-07,
+      "eta": 0.01,
+      "rhs": 1.5333246025525118e-06,
+      "target": 1.5333246025525118e-08
+    },
+    {
+      "defect": 1.2764037972184603e-09,
+      "eta": 0.0021065720637748297,
+      "rhs": 1.1946512559903377e-08,
+      "target": 2.516618961822758e-11
+    },
+    {
+      "defect": 1.6356360168189032e-12,
+      "eta": 7.540942153605238e-05,
+      "rhs": 1.681211155018371e-11,
+      "target": 4.144536982644594e-14
+    },
+    {
+      "defect": 8.188977382479756e-13,
+      "eta": 5.335770143009514e-05,
+      "rhs": 8.410579773507174e-12,
+      "target": 4.144536982644594e-14
+    },
+    {
+      "defect": 4.128566865960876e-05,
+      "eta": 0.01,
+      "rhs": 0.01348837677780788,
+      "target": 0.0001348837677780788
+    },
+    {
+      "defect": 4.802825180775067e-05,
+      "eta": 0.01,
+      "rhs": 0.00022249801977841823,
+      "target": 2.224980197784182e-06
+    },
+    {
+      "defect": 1.5849790444634514e-07,
+      "eta": 0.01,
+      "rhs": 1.956126643061302e-06,
+      "target": 1.956126643061302e-08
+    },
+    {
+      "defect": 1.5548686787972624e-09,
+      "eta": 0.001952818695827317,
+      "rhs": 1.2961176014271874e-08,
+      "target": 2.5310826840578705e-11
+    },
+    {
+      "defect": 1.4997465075383687e-12,
+      "eta": 6.0649049128828306e-05,
+      "rhs": 1.561859110510255e-11,
+      "target": 4.1674148718063055e-14
+    },
+    {
+      "defect": 7.500922626080264e-13,
+      "eta": 4.289161602703278e-05,
+      "rhs": 7.815932635678548e-12,
+      "target": 4.1674148718063055e-14
+    },
+    {
+      "defect": 4.000526412673558e-05,
+      "eta": 0.01,
+      "rhs": 0.013473583052911764,
+      "target": 0.00013473583052911765
+    },
+    {
+      "defect": 4.653570568003913e-05,
+      "eta": 0.01,
+      "rhs": 0.0002224135226882215,
+      "target": 2.224135226882215e-06
+    },
+    {
+      "defect": 1.5085889974264608e-07,
+      "eta": 0.01,
+      "rhs": 1.6521942903404216e-06,
+      "target": 1.6521942903404216e-08
+    },
+    {
+      "defect": 1.066887801736728e-09,
+      "eta": 0.0016154342724002996,
+      "rhs": 9.542862181192633e-09,
+      "target": 1.5415866624291256e-11
+    },
+    {
+      "defect": 8.168652386453257e-13,
+      "eta": 4.4699753197489e-05,
+      "rhs": 1.0370306888653022e-11,
+      "target": 4.195200908373707e-14
+    }
+  ],
+  "slow_directions": [
+    {
+      "iteration": 25.0,
+      "lumped tangential fraction": 0.3219307982505809,
+      "translation overlap": 0.12376525668245533
+    },
+    {
+      "iteration": 25.0,
+      "lumped tangential fraction": 0.28120959895766034,
+      "translation overlap": 0.13308364526533198
+    },
+    {
+      "iteration": 25.0,
+      "lumped tangential fraction": 0.18710306216332917,
+      "translation overlap": 0.6157619503398309
+    },
+    {
+      "iteration": 25.0,
+      "lumped tangential fraction": 0.5803444825094176,
+      "translation overlap": 0.01332524143086768
+    },
+    {
+      "iteration": 25.0,
+      "lumped tangential fraction": 0.467101016255862,
+      "translation overlap": 0.18810651888001048
+    },
+    {
+      "iteration": 25.0,
+      "lumped tangential fraction": 0.2968425416594825,
+      "translation overlap": 0.6136768500809969
+    },
+    {
+      "iteration": 25.0,
+      "lumped tangential fraction": 0.7421396484824478,
+      "translation overlap": 0.18205916616433884
+    },
+    {
+      "iteration": 25.0,
+      "lumped tangential fraction": 0.3776895449305424,
+      "translation overlap": 0.7231140903163794
+    }
+  ],
+  "history_published": false,
+  "scope": "Scoped FE reference and immutable obstacle; numerical solver/escape diagnostic, not checkpoint conversion or fresh physical evolution. Mechanical residual norms are measured independently; production relative convergence remains unchanged."
+}

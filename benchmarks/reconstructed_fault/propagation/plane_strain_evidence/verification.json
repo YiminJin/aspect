@@ -1,0 +1,15 @@
+{
+  "snapshot_files": 18,
+  "preserved_historical_artifacts": 2015,
+  "consumer_sites": 35,
+  "native_helper_operator_general_Maxwell_pass": true,
+  "small_shear_identical_files": 10,
+  "mature_default_identical_files": 2,
+  "loaded_controls_completed": 2,
+  "unchanged_KKT_and_healing_allowances": true,
+  "FE_recurrence_exact": true,
+  "quadrature_aliasing_quantified": true,
+  "full_constrained_stability_verified": false,
+  "native_spatial_time_convergence_verified": false,
+  "P3_ready": false
+}

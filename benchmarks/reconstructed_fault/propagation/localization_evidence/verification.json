@@ -1,0 +1,15 @@
+{
+  "snapshot_files": 18,
+  "preserved_historical_artifacts": 514,
+  "final_native_controls_completed": 3,
+  "unchanged_KKT_targets": true,
+  "bounds_and_irreversibility_pass": true,
+  "affine_repeat_identical_files": 195,
+  "transfer_bypass_identical_files": 16,
+  "mature_default_identical_files": 2,
+  "reference_checks_pass": true,
+  "negative_curvature_separately_reported": true,
+  "native_spatial_time_convergence_verified": false,
+  "energy_minimum_selection_verified": false,
+  "P3_ready": false
+}

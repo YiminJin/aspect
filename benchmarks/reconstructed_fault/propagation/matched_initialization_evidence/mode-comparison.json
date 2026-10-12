@@ -1,0 +1,113 @@
+[
+  {
+    "n": 511,
+    "time": 0.5498046875,
+    "symmetric": {
+      "KKT": 1.7613879105238448e-12,
+      "free": 316,
+      "weak": 0,
+      "centroid": {
+        "phase": 0.4999999999997496,
+        "localization": 0.49999999999974715
+      },
+      "minimum": -0.477863789054328,
+      "second": 345.1667867384191,
+      "admissible_negative": true,
+      "stable": false,
+      "translation_cosine": 0.9999731161088012,
+      "antisymmetry": 2.5077481757840303e-11,
+      "amplitude_two_sided": 2.5697386414466587e-06,
+      "mass_norm": 0.9999999999999996
+    },
+    "finite_differences": [
+      {
+        "epsilon": 1e-05,
+        "curvature_Pa": -0.47786145602304714,
+        "error": 2.3330312808877984e-06
+      },
+      {
+        "epsilon": 2e-05,
+        "curvature_Pa": -0.47785449414881354,
+        "error": 9.294905514489749e-06
+      }
+    ],
+    "accepted_minimum": 0.18252708559439768,
+    "accepted_phase_difference": 1.726502770471594e-05,
+    "endpoint_energy_reduction": 1.6679457814916532e-09,
+    "purpose": "Replay saved physical entry only; no further near-release amplitudes or gains are searched"
+  },
+  {
+    "n": 512,
+    "time": 0.5625,
+    "symmetric": {
+      "KKT": 2.010886249179373e-12,
+      "free": 317,
+      "weak": 0,
+      "centroid": {
+        "phase": 0.5000000000007978,
+        "localization": 0.5000000000007936
+      },
+      "minimum": -0.4743656876100675,
+      "second": 341.346921459153,
+      "admissible_negative": true,
+      "stable": false,
+      "translation_cosine": 0.9999722936259111,
+      "antisymmetry": 7.147217348259734e-11,
+      "amplitude_two_sided": 3.0114739985678727e-06,
+      "mass_norm": 0.9999999999999986
+    },
+    "finite_differences": [
+      {
+        "epsilon": 1e-05,
+        "curvature_Pa": -0.4743632167064426,
+        "error": 2.470903624873788e-06
+      },
+      {
+        "epsilon": 2e-05,
+        "curvature_Pa": -0.47435584061055514,
+        "error": 9.846999512341803e-06
+      }
+    ],
+    "accepted_minimum": 0.1574133919611886,
+    "accepted_phase_difference": 2.249415371252672e-05,
+    "endpoint_energy_reduction": 2.004451715720279e-09,
+    "purpose": "Replay saved physical entry only; no further near-release amplitudes or gains are searched"
+  },
+  {
+    "n": 1024,
+    "time": 0.5458984375,
+    "symmetric": {
+      "KKT": 8.07870263740507e-13,
+      "free": 633,
+      "weak": 0,
+      "centroid": {
+        "phase": 0.5000000000011622,
+        "localization": 0.500000000001163
+      },
+      "minimum": -0.15236605982028265,
+      "second": 347.6639386066664,
+      "admissible_negative": true,
+      "stable": false,
+      "translation_cosine": 0.9999937732114653,
+      "antisymmetry": 1.0500617312637618e-10,
+      "amplitude_two_sided": 2.6342136237064805e-05,
+      "mass_norm": 0.9999999999999992
+    },
+    "finite_differences": [
+      {
+        "epsilon": 1e-05,
+        "curvature_Pa": -0.15236380212147815,
+        "error": 2.2576988044920032e-06
+      },
+      {
+        "epsilon": 2e-05,
+        "curvature_Pa": -0.15235687732174039,
+        "error": 9.182498542259498e-06
+      }
+    ],
+    "accepted_minimum": 0.18212312319716267,
+    "accepted_phase_difference": 8.973794930594581e-05,
+    "endpoint_energy_reduction": 2.7228992394157103e-09,
+    "purpose": "Replay saved physical entry only; no further near-release amplitudes or gains are searched"
+  }
+]

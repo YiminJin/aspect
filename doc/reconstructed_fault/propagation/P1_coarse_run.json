@@ -1,0 +1,22 @@
+{
+  "command": [
+    "ctest",
+    "--test-dir",
+    "build-propagation-p1",
+    "-R",
+    "^phase_field_controlled_history$",
+    "--output-on-failure",
+    "-j1"
+  ],
+  "cwd": "/home/ein/repository/aspect-fault-propagation",
+  "exit_code": 8,
+  "seconds": 11.193898870999874,
+  "child_max_rss_kib": 204184,
+  "environment": {
+    "ASPECT_SOURCE_DIR": "/home/ein/repository/aspect-fault-propagation",
+    "OMP_NUM_THREADS": "1",
+    "DEAL_II_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1"
+  },
+  "runtime_output_bytes": 2154719
+}

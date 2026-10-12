@@ -1,0 +1,936 @@
+{
+  "q2": {
+    "initial_max": 0.6131766970494621,
+    "initial_H_max": 28010.57843758846,
+    "phi_max": 0.655706200034023,
+    "maximum_increment": 0.015847024960202016,
+    "healing": 0.0,
+    "phase_spread_x": 2.824129818890242e-15,
+    "onset": 0.390625,
+    "q": 305.22940109741756,
+    "V_interval": 0.15821568685454956,
+    "slip": 0.048511817877695006,
+    "widths": {
+      "phi_FWHM": 0.27885000000000004,
+      "chi_FWHM": 0.11924999999999997,
+      "chi_95_width": 0.3002076243748522,
+      "chi_centroid": 0.5,
+      "chi_two_sigma": 0.1456227049801046
+    },
+    "dense_stress_range": [
+      -13190.634637580079,
+      7951.6663470566855
+    ],
+    "independent_stress_RMS": 2919.585245976408,
+    "uniform_reference_stress": 1255.05763944577,
+    "fine_errors": {
+      "phi": 0.03823056661800606,
+      "phase_change": 0.030523153115276647,
+      "q": 50.171761651647216,
+      "V_interval": 0.002545845820968562,
+      "slip": 0.0002266464626106135,
+      "initial_phi": 0.01311955648059493,
+      "slip_relative": 0.004650258593050966
+    },
+    "matched_prototype_errors": {
+      "phi": 7.443566762965759e-09,
+      "phase_change": 5.906326538962503e-09,
+      "q": 1.2959598620909674e-05,
+      "V_interval": 8.127915562816668e-10,
+      "slip": 1.5347133286436332e-11,
+      "initial_phi": 7.443566762965759e-09,
+      "slip_relative": 3.163586516172981e-10
+    },
+    "normalization": [
+      {
+        "step": 0,
+        "source_error": 1.4432899320127035e-15,
+        "I_min": 108.43733224578978
+      },
+      {
+        "step": 32,
+        "source_error": 9.992007221626409e-16,
+        "I_min": 110.14880071255716
+      },
+      {
+        "step": 40,
+        "source_error": 1.2212453270876722e-15,
+        "I_min": 158.61732849628274
+      }
+    ],
+    "frozen_quadrature": {
+      "6": {
+        "bulk": 5.359100476021377,
+        "shear_mean": 1481.2912594745278,
+        "stress_rms": 2919.5851000865036,
+        "source_integral": 0.9999999999973995
+      },
+      "12": {
+        "bulk": 5.359100901772899,
+        "shear_mean": 1481.2912593486571,
+        "stress_rms": 2919.5852459764005,
+        "source_integral": 0.9999999999999997
+      },
+      "24": {
+        "bulk": 5.3591009017729325,
+        "shear_mean": 1481.2912593486608,
+        "stress_rms": 2919.585245976408,
+        "source_integral": 0.9999999999999998
+      }
+    },
+    "incoming_anchor_audits": [
+      {
+        "step": 32,
+        "incoming_step": 31,
+        "bulk_energy_error": 9.640151654721762e-08,
+        "phase_gradient_error": 3.6037264394783076e-08,
+        "phase_Hessian_relative_error": 1.0367268143345949e-08,
+        "native_derivatives": [
+          {
+            "epsilon": 1e-05,
+            "energy_derivative_relative_error": 5.908865619019821e-10,
+            "Hessian_direction_relative_error": 1.691449199502527e-09
+          },
+          {
+            "epsilon": 1e-06,
+            "energy_derivative_relative_error": 2.35615194021932e-10,
+            "Hessian_direction_relative_error": 3.3447850219071703e-10
+          },
+          {
+            "epsilon": 1e-07,
+            "energy_derivative_relative_error": 5.707903405482995e-08,
+            "Hessian_direction_relative_error": 5.465279520344863e-09
+          }
+        ]
+      },
+      {
+        "step": 40,
+        "incoming_step": 39,
+        "bulk_energy_error": 3.8344109931642834e-07,
+        "phase_gradient_error": 1.9000473172579695e-07,
+        "phase_Hessian_relative_error": 1.5725312409431315e-08,
+        "native_derivatives": [
+          {
+            "epsilon": 1e-05,
+            "energy_derivative_relative_error": 1.297368541831638e-08,
+            "Hessian_direction_relative_error": 2.4923868131977615e-09
+          },
+          {
+            "epsilon": 1e-06,
+            "energy_derivative_relative_error": 5.48104065382419e-09,
+            "Hessian_direction_relative_error": 4.4279072151941573e-10
+          },
+          {
+            "epsilon": 1e-07,
+            "energy_derivative_relative_error": 1.655275575004681e-07,
+            "Hessian_direction_relative_error": 4.3388482465156824e-09
+          }
+        ]
+      }
+    ],
+    "independent_force": {
+      "bulk_max_Pa": 2.0152895842784346e-05,
+      "fault_Pa": 1.869893037564907e-05
+    },
+    "curvature": [
+      {
+        "time": 0.5,
+        "free_above_healing_allowance": 102.0,
+        "strict_free": 102.0,
+        "min_eigenvalue": 9.148810775605599,
+        "negative_count": 0.0,
+        "amplitude": 0.0001,
+        "energy_minus": 4.574403078549949e-08,
+        "energy_plus": 4.5744016574644775e-08,
+        "quadratic_prediction": 4.5744053878027997e-08,
+        "energy_arithmetic": 1.5033946368846824e-13
+      },
+      {
+        "time": 0.625,
+        "free_above_healing_allowance": 153.0,
+        "strict_free": 153.0,
+        "min_eigenvalue": 2.480657094134665,
+        "negative_count": 0.0,
+        "amplitude": 0.0001,
+        "energy_minus": 1.240352531794997e-08,
+        "energy_plus": 1.2402711746517525e-08,
+        "quadratic_prediction": 1.2403285470673324e-08,
+        "energy_arithmetic": 2.0295312289653536e-13
+      }
+    ],
+    "cost": {
+      "label": "q2",
+      "returncode": 0,
+      "wall_seconds": 75.88910080499772,
+      "user_seconds": 71.669542,
+      "system_seconds": 2.380524,
+      "peak_memory_kib": 271472,
+      "input_sha": "1bd53f1e46c621182c9f4927c8b22f0e6dfeadf9d2c9aac224820de7a323e0dd",
+      "executable_sha": "0963b3aee8fac8fb35d5f15926549b2237d426544f03a359687a64c394d65a18",
+      "plugin_sha": "940094b29c2843f66dc9d41829444cf4023e93b2a163609499c73e39eb4bad80",
+      "threads": 1,
+      "cost_includes_diagnostics": true,
+      "resource_measurement": "POSIX wait4, individual native child",
+      "timers": {
+        "Assemble Stokes system Picard": {
+          "calls": 123,
+          "seconds": 7.09
+        },
+        "Assemble Stokes system rhs": {
+          "calls": 164,
+          "seconds": 12.2
+        },
+        "Build Stokes preconditioner": {
+          "calls": 123,
+          "seconds": 3.64
+        },
+        "Fault: Cache build": {
+          "calls": 42,
+          "seconds": 0.28
+        },
+        "Fault: FE phase energy": {
+          "calls": 368,
+          "seconds": 2.89
+        },
+        "Fault: I_h": {
+          "calls": 41,
+          "seconds": 0.666
+        },
+        "Fault: Property preparation": {
+          "calls": 41,
+          "seconds": 0.703
+        },
+        "Fault: Stokes QP cache build": {
+          "calls": 1,
+          "seconds": 0.00486
+        },
+        "Fault: Surface-property projection": {
+          "calls": 1,
+          "seconds": 0.00614
+        },
+        "Fault: condensed linear solve": {
+          "calls": 106,
+          "seconds": 28.1
+        },
+        "Initialization": {
+          "calls": 1,
+          "seconds": 0.157
+        },
+        "Particles: Advect": {
+          "calls": 82,
+          "seconds": 0.0326
+        },
+        "Particles: Copy": {
+          "calls": 41,
+          "seconds": 0.00643
+        },
+        "Particles: Generate": {
+          "calls": 1,
+          "seconds": 0.00021
+        },
+        "Particles: Initialization": {
+          "calls": 1,
+          "seconds": 7.5e-05
+        },
+        "Particles: Initialize properties": {
+          "calls": 1,
+          "seconds": 0.00122
+        },
+        "Particles: Interpolate": {
+          "calls": 41,
+          "seconds": 0.0244
+        },
+        "Particles: Sort": {
+          "calls": 82,
+          "seconds": 0.00425
+        },
+        "Phase: bounded solve": {
+          "calls": 41,
+          "seconds": 3.77
+        },
+        "Phase: linear solve": {
+          "calls": 57,
+          "seconds": 0.45
+        },
+        "Postprocessing": {
+          "calls": 41,
+          "seconds": 4.63
+        },
+        "Setup dof systems": {
+          "calls": 1,
+          "seconds": 0.00272
+        },
+        "Setup initial conditions": {
+          "calls": 1,
+          "seconds": 0.0852
+        },
+        "Setup matrices": {
+          "calls": 1,
+          "seconds": 0.0153
+        }
+      },
+      "phase_iterations": 60,
+      "mechanical_linear_iterations": 3020,
+      "mechanical_nonlinear_evaluations": 123,
+      "degree": 2,
+      "bulk_dofs": 2178
+    },
+    "phase_release": 0.3822351717555268,
+    "absolute_boundary_mechanical_error": 0.4448482320331122,
+    "fracture_expenditure": 2.161578018950884,
+    "bulk_profile_change": -0.044884827055170495,
+    "cohesive_profile_change": -2.4989283636512543,
+    "bulk_viscous": 0.01940449664468832,
+    "cohesive_viscous": 0.023569414131224188,
+    "friction": 48.511817877694924,
+    "bulk_work": 66.89445179589386,
+    "boundary_work": 64.26441676798557,
+    "absolute_internal_mechanical_error": 3.074883259939463,
+    "prototype_work": {
+      "absolute_boundary_error": 0.444848267665867,
+      "absolute_internal_error": 3.0748836329806397,
+      "boundary_work": 64.26441698050363,
+      "legacy_internal_error": 3.074883632980596
+    },
+    "recurrence_error": 0.0,
+    "KKT_target_range": [
+      1.809836531852841e-13,
+      9.154977073330747e-11
+    ],
+    "mechanical_residuals": [
+      3.573561e-14,
+      1.454214e-14
+    ],
+    "physical_target_pass": false,
+    "maximum_growth_onset": 0.578125,
+    "three_point_changes": {
+      "phi_final": -0.001729952131621415,
+      "q_final": 3.541312385591482,
+      "initial_phase_identical": true
+    }
+  },
+  "q3": {
+    "initial_max": 0.6131766970494621,
+    "initial_H_max": 28010.57843758846,
+    "phi_max": 0.6824422965639241,
+    "maximum_increment": 0.01674961196018998,
+    "healing": 0.0,
+    "phase_spread_x": 7.716050021144838e-15,
+    "onset": 0.515625,
+    "q": 260.8450147087788,
+    "V_interval": 0.1588126416270578,
+    "slip": 0.048729303411278534,
+    "widths": {
+      "phi_FWHM": 0.27775,
+      "chi_FWHM": 0.10864999999999997,
+      "chi_95_width": 0.29786710414184675,
+      "chi_centroid": 0.49999999999999933,
+      "chi_two_sigma": 0.14298624907371915
+    },
+    "dense_stress_range": [
+      -1401.0237177295785,
+      3266.9709744813517
+    ],
+    "independent_stress_RMS": 404.4147546075082,
+    "uniform_reference_stress": 1255.05763944577,
+    "fine_errors": {
+      "phi": 0.013744102850391737,
+      "phase_change": 0.004308825664005311,
+      "q": 5.787375263011029,
+      "V_interval": 0.0002327139569931469,
+      "slip": 9.160929026988396e-06,
+      "initial_phi": 0.01311955648059493,
+      "slip_relative": 0.0001879609698620017
+    },
+    "matched_prototype_errors": {
+      "phi": 7.443566762965759e-09,
+      "phase_change": 3.941677317875758e-09,
+      "q": 1.067570974555565e-05,
+      "V_interval": 4.99150887289801e-10,
+      "slip": 1.0383000015323773e-11,
+      "initial_phi": 7.443566762965759e-09,
+      "slip_relative": 2.1307507573464886e-10
+    },
+    "normalization": [
+      {
+        "step": 0,
+        "source_error": 1.4432899320127035e-15,
+        "I_min": 108.43733224578978
+      },
+      {
+        "step": 32,
+        "source_error": 1.4432899320127035e-15,
+        "I_min": 108.43733224578978
+      },
+      {
+        "step": 40,
+        "source_error": 1.6653345369377348e-15,
+        "I_min": 186.43927491779036
+      }
+    ],
+    "frozen_quadrature": {
+      "6": {
+        "bulk": 0.8808856925690761,
+        "shear_mean": 1264.2080320598232,
+        "stress_rms": 404.41245877641046,
+        "source_integral": 0.9999999999929319
+      },
+      "12": {
+        "bulk": 0.8808866205999132,
+        "shear_mean": 1264.20803171613,
+        "stress_rms": 404.41475460751343,
+        "source_integral": 0.9999999999999994
+      },
+      "24": {
+        "bulk": 0.880886620599915,
+        "shear_mean": 1264.2080317161333,
+        "stress_rms": 404.4147546075082,
+        "source_integral": 0.9999999999999992
+      }
+    },
+    "incoming_anchor_audits": [
+      {
+        "step": 32,
+        "incoming_step": 31,
+        "bulk_energy_error": 1.0964701591120729e-07,
+        "phase_gradient_error": 4.22294142987667e-08,
+        "phase_Hessian_relative_error": 1.1811365295015818e-08,
+        "native_derivatives": [
+          {
+            "epsilon": 1e-05,
+            "energy_derivative_relative_error": 3.921984959021074e-10,
+            "Hessian_direction_relative_error": 1.6945018121219773e-09
+          },
+          {
+            "epsilon": 1e-06,
+            "energy_derivative_relative_error": 1.5912393624972765e-09,
+            "Hessian_direction_relative_error": 5.476347025061793e-10
+          },
+          {
+            "epsilon": 1e-07,
+            "energy_derivative_relative_error": 1.0028934349648466e-08,
+            "Hessian_direction_relative_error": 2.6859171005615804e-09
+          }
+        ]
+      },
+      {
+        "step": 40,
+        "incoming_step": 39,
+        "bulk_energy_error": 8.379203711994521e-07,
+        "phase_gradient_error": 3.7977491507087665e-07,
+        "phase_Hessian_relative_error": 3.0423578635774526e-08,
+        "native_derivatives": [
+          {
+            "epsilon": 1e-05,
+            "energy_derivative_relative_error": 2.4947442270447115e-08,
+            "Hessian_direction_relative_error": 2.7756799898537832e-09
+          },
+          {
+            "epsilon": 1e-06,
+            "energy_derivative_relative_error": 2.2360587523177314e-09,
+            "Hessian_direction_relative_error": 2.9285695503483034e-10
+          },
+          {
+            "epsilon": 1e-07,
+            "energy_derivative_relative_error": 2.487772389079003e-09,
+            "Hessian_direction_relative_error": 3.1220833388401133e-09
+          }
+        ]
+      }
+    ],
+    "independent_force": {
+      "bulk_max_Pa": 0.0005378236664057567,
+      "fault_Pa": 4.470943281376094e-05
+    },
+    "curvature": [
+      {
+        "time": 0.5,
+        "free_above_healing_allowance": 0.0,
+        "strict_free": 0.0,
+        "min_eigenvalue": NaN,
+        "negative_count": 0.0,
+        "amplitude": 0.0,
+        "energy_minus": 0.0,
+        "energy_plus": 0.0,
+        "quadratic_prediction": 0.0,
+        "energy_arithmetic": 0.0
+      },
+      {
+        "time": 0.625,
+        "free_above_healing_allowance": 153.0,
+        "strict_free": 153.0,
+        "min_eigenvalue": 2.261616181344252,
+        "negative_count": 0.0,
+        "amplitude": 0.0001,
+        "energy_minus": 1.1308404879173395e-08,
+        "energy_plus": 1.1307683678296598e-08,
+        "quadratic_prediction": 1.1308080906721261e-08,
+        "energy_arithmetic": 1.732802408093688e-13
+      }
+    ],
+    "cost": {
+      "label": "q3",
+      "returncode": 0,
+      "wall_seconds": 159.8977301749983,
+      "user_seconds": 155.062906,
+      "system_seconds": 2.5137650000000002,
+      "peak_memory_kib": 283296,
+      "input_sha": "509aaf34bc655bd1d79d0bbe9fc21546db9396505f7237e326a647cdbe0b2532",
+      "executable_sha": "0963b3aee8fac8fb35d5f15926549b2237d426544f03a359687a64c394d65a18",
+      "plugin_sha": "940094b29c2843f66dc9d41829444cf4023e93b2a163609499c73e39eb4bad80",
+      "threads": 1,
+      "cost_includes_diagnostics": true,
+      "resource_measurement": "POSIX wait4, individual native child",
+      "timers": {
+        "Assemble Stokes system Picard": {
+          "calls": 123,
+          "seconds": 19.2
+        },
+        "Assemble Stokes system rhs": {
+          "calls": 164,
+          "seconds": 21.0
+        },
+        "Build Stokes preconditioner": {
+          "calls": 123,
+          "seconds": 10.9
+        },
+        "Fault: Cache build": {
+          "calls": 42,
+          "seconds": 0.279
+        },
+        "Fault: FE phase energy": {
+          "calls": 314,
+          "seconds": 2.88
+        },
+        "Fault: I_h": {
+          "calls": 41,
+          "seconds": 0.719
+        },
+        "Fault: Property preparation": {
+          "calls": 41,
+          "seconds": 0.761
+        },
+        "Fault: Stokes QP cache build": {
+          "calls": 1,
+          "seconds": 0.00645
+        },
+        "Fault: Surface-property projection": {
+          "calls": 1,
+          "seconds": 0.00629
+        },
+        "Fault: condensed linear solve": {
+          "calls": 106,
+          "seconds": 77.4
+        },
+        "Initialization": {
+          "calls": 1,
+          "seconds": 0.15
+        },
+        "Particles: Advect": {
+          "calls": 82,
+          "seconds": 0.0381
+        },
+        "Particles: Copy": {
+          "calls": 41,
+          "seconds": 0.00689
+        },
+        "Particles: Generate": {
+          "calls": 1,
+          "seconds": 0.00022
+        },
+        "Particles: Initialization": {
+          "calls": 1,
+          "seconds": 8.21e-05
+        },
+        "Particles: Initialize properties": {
+          "calls": 1,
+          "seconds": 0.00126
+        },
+        "Particles: Interpolate": {
+          "calls": 41,
+          "seconds": 0.0256
+        },
+        "Particles: Sort": {
+          "calls": 82,
+          "seconds": 0.00419
+        },
+        "Phase: bounded solve": {
+          "calls": 41,
+          "seconds": 2.84
+        },
+        "Phase: linear solve": {
+          "calls": 34,
+          "seconds": 0.279
+        },
+        "Postprocessing": {
+          "calls": 41,
+          "seconds": 6.96
+        },
+        "Setup dof systems": {
+          "calls": 1,
+          "seconds": 0.00316
+        },
+        "Setup initial conditions": {
+          "calls": 1,
+          "seconds": 0.0896
+        },
+        "Setup matrices": {
+          "calls": 1,
+          "seconds": 0.0245
+        }
+      },
+      "phase_iterations": 34,
+      "mechanical_linear_iterations": 3872,
+      "mechanical_nonlinear_evaluations": 123,
+      "degree": 3,
+      "bulk_dofs": 4802
+    },
+    "phase_release": 0.18009313819622363,
+    "absolute_boundary_mechanical_error": 0.20237628474335434,
+    "fracture_expenditure": 3.020144870335411,
+    "bulk_profile_change": 0.022286050222504517,
+    "cohesive_profile_change": -3.222524058754132,
+    "bulk_viscous": 0.007548192003613229,
+    "cohesive_viscous": 0.022568465705923878,
+    "friction": 48.729303411278586,
+    "bulk_work": 59.448719165949086,
+    "boundary_work": 59.35855317978896,
+    "absolute_internal_mechanical_error": 0.2925422709054627,
+    "prototype_work": {
+      "absolute_boundary_error": 0.20237627578570072,
+      "absolute_internal_error": 0.2925423684434525,
+      "boundary_work": 59.358552958311506,
+      "legacy_internal_error": 0.2925423684434769
+    },
+    "recurrence_error": 0.0,
+    "KKT_target_range": [
+      1.809836531852841e-13,
+      1.0048383800646618e-10
+    ],
+    "mechanical_residuals": [
+      3.776847e-14,
+      1.115866e-14
+    ],
+    "physical_target_pass": false,
+    "maximum_growth_onset": 0.546875,
+    "three_point_changes": {
+      "phi_final": -0.00094166165973808,
+      "q_final": 1.8921898069390295,
+      "initial_phase_identical": true
+    }
+  },
+  "q2-refined": {
+    "initial_max": 0.6035488376736222,
+    "initial_H_max": 29167.992587787645,
+    "phi_max": 0.6739583454619543,
+    "maximum_increment": 0.017032502926727422,
+    "healing": 0.0,
+    "phase_spread_x": 2.6645352591003757e-15,
+    "onset": 0.515625,
+    "q": 260.1047347596624,
+    "V_interval": 0.15876317498703496,
+    "slip": 0.04871643295786926,
+    "widths": {
+      "phi_FWHM": 0.27585,
+      "chi_FWHM": 0.11605000000000004,
+      "chi_95_width": 0.2919647605103963,
+      "chi_centroid": 0.5,
+      "chi_two_sigma": 0.13985916818580788
+    },
+    "dense_stress_range": [
+      -5179.182782884745,
+      4257.884377302864
+    ],
+    "independent_stress_RMS": 907.7721484607459,
+    "uniform_reference_stress": 1255.05763944577,
+    "fine_errors": {
+      "phi": 0.0064782754363427175,
+      "phase_change": 0.00319273303267531,
+      "q": 5.047095313893635,
+      "V_interval": 0.0002784744595225874,
+      "slip": 2.2031382436213387e-05,
+      "initial_phi": 0.004310417171632608,
+      "slip_relative": 0.00045203275758514213
+    },
+    "matched_prototype_errors": {
+      "phi": 1.3112943952897638e-08,
+      "phase_change": 5.892476395708002e-09,
+      "q": 1.5559922303509666e-05,
+      "V_interval": 7.497015508395322e-10,
+      "slip": 1.3451163793920529e-11,
+      "initial_phi": 1.3112943952897638e-08,
+      "slip_relative": 2.761114264142279e-10
+    },
+    "normalization": [
+      {
+        "step": 0,
+        "source_error": 8.881784197001252e-16,
+        "I_min": 108.5313918324395
+      },
+      {
+        "step": 32,
+        "source_error": 8.881784197001252e-16,
+        "I_min": 108.5313918324395
+      },
+      {
+        "step": 40,
+        "source_error": 1.3322676295501878e-15,
+        "I_min": 186.92050945498227
+      }
+    ],
+    "frozen_quadrature": {
+      "6": {
+        "bulk": 1.227458476906972,
+        "shear_mean": 1277.0539070120708,
+        "stress_rms": 907.7721478428106,
+        "source_integral": 0.999999999999997
+      },
+      "12": {
+        "bulk": 1.2274584774677346,
+        "shear_mean": 1277.0539070119319,
+        "stress_rms": 907.7721484607425,
+        "source_integral": 0.9999999999999997
+      },
+      "24": {
+        "bulk": 1.2274584774677446,
+        "shear_mean": 1277.053907011937,
+        "stress_rms": 907.7721484607459,
+        "source_integral": 0.9999999999999999
+      }
+    },
+    "incoming_anchor_audits": [
+      {
+        "step": 32,
+        "incoming_step": 31,
+        "bulk_energy_error": 8.017775332547217e-11,
+        "phase_gradient_error": 5.722966545107511e-11,
+        "phase_Hessian_relative_error": 2.6415047236119156e-11,
+        "native_derivatives": [
+          {
+            "epsilon": 1e-05,
+            "energy_derivative_relative_error": 1.763649226660391e-10,
+            "Hessian_direction_relative_error": 1.7501217800855425e-09
+          },
+          {
+            "epsilon": 1e-06,
+            "energy_derivative_relative_error": 4.4281844857607666e-10,
+            "Hessian_direction_relative_error": 4.0874498534808624e-10
+          },
+          {
+            "epsilon": 1e-07,
+            "energy_derivative_relative_error": 4.8851083844780874e-08,
+            "Hessian_direction_relative_error": 5.593463604903434e-09
+          }
+        ]
+      },
+      {
+        "step": 40,
+        "incoming_step": 39,
+        "bulk_energy_error": 5.051050688820169e-10,
+        "phase_gradient_error": 3.1252489485172685e-10,
+        "phase_Hessian_relative_error": 5.807508394977684e-11,
+        "native_derivatives": [
+          {
+            "epsilon": 1e-05,
+            "energy_derivative_relative_error": 2.1692669480057903e-08,
+            "Hessian_direction_relative_error": 2.816611754915305e-09
+          },
+          {
+            "epsilon": 1e-06,
+            "energy_derivative_relative_error": 1.5374598695621926e-09,
+            "Hessian_direction_relative_error": 3.868082960084131e-10
+          },
+          {
+            "epsilon": 1e-07,
+            "energy_derivative_relative_error": 1.3088917869087497e-08,
+            "Hessian_direction_relative_error": 4.140292383624052e-09
+          }
+        ]
+      }
+    ],
+    "independent_force": {
+      "bulk_max_Pa": 4.585101009979553e-08,
+      "fault_Pa": 2.4483597371727228e-08
+    },
+    "curvature": [
+      {
+        "time": 0.5,
+        "free_above_healing_allowance": 0.0,
+        "strict_free": 0.0,
+        "min_eigenvalue": NaN,
+        "negative_count": 0.0,
+        "amplitude": 0.0,
+        "energy_minus": 0.0,
+        "energy_plus": 0.0,
+        "quadratic_prediction": 0.0,
+        "energy_arithmetic": 0.0
+      },
+      {
+        "time": 0.625,
+        "free_above_healing_allowance": 357.0,
+        "strict_free": 357.0,
+        "min_eigenvalue": 1.1239733823363542,
+        "negative_count": 0.0,
+        "amplitude": 0.0001,
+        "energy_minus": 5.6196256537077716e-09,
+        "energy_plus": 5.619845921955857e-09,
+        "quadratic_prediction": 5.619866911681771e-09,
+        "energy_arithmetic": 1.743245031433068e-13
+      }
+    ],
+    "cost": {
+      "label": "q2-refined",
+      "returncode": 0,
+      "wall_seconds": 156.70845038900006,
+      "user_seconds": 151.430394,
+      "system_seconds": 3.045105,
+      "peak_memory_kib": 347536,
+      "input_sha": "6b930e9ed54041855946d6be111e59fe03526c03b00261f3ecd6fee7eb0784ab",
+      "executable_sha": "0963b3aee8fac8fb35d5f15926549b2237d426544f03a359687a64c394d65a18",
+      "plugin_sha": "940094b29c2843f66dc9d41829444cf4023e93b2a163609499c73e39eb4bad80",
+      "threads": 1,
+      "cost_includes_diagnostics": true,
+      "resource_measurement": "POSIX wait4, individual native child",
+      "timers": {
+        "Assemble Stokes system Picard": {
+          "calls": 123,
+          "seconds": 14.4
+        },
+        "Assemble Stokes system rhs": {
+          "calls": 164,
+          "seconds": 24.9
+        },
+        "Build Stokes preconditioner": {
+          "calls": 123,
+          "seconds": 7.1
+        },
+        "Fault: Cache build": {
+          "calls": 42,
+          "seconds": 0.566
+        },
+        "Fault: FE phase energy": {
+          "calls": 332,
+          "seconds": 6.28
+        },
+        "Fault: I_h": {
+          "calls": 41,
+          "seconds": 1.26
+        },
+        "Fault: Property preparation": {
+          "calls": 41,
+          "seconds": 1.32
+        },
+        "Fault: Stokes QP cache build": {
+          "calls": 1,
+          "seconds": 0.00951
+        },
+        "Fault: Surface-property projection": {
+          "calls": 1,
+          "seconds": 0.0133
+        },
+        "Fault: condensed linear solve": {
+          "calls": 106,
+          "seconds": 57.6
+        },
+        "Initialization": {
+          "calls": 1,
+          "seconds": 0.151
+        },
+        "Particles: Advect": {
+          "calls": 82,
+          "seconds": 0.0605
+        },
+        "Particles: Copy": {
+          "calls": 41,
+          "seconds": 0.013
+        },
+        "Particles: Generate": {
+          "calls": 1,
+          "seconds": 0.000491
+        },
+        "Particles: Initialization": {
+          "calls": 1,
+          "seconds": 5.98e-05
+        },
+        "Particles: Initialize properties": {
+          "calls": 1,
+          "seconds": 0.00255
+        },
+        "Particles: Interpolate": {
+          "calls": 41,
+          "seconds": 0.0423
+        },
+        "Particles: Sort": {
+          "calls": 82,
+          "seconds": 0.00827
+        },
+        "Phase: bounded solve": {
+          "calls": 41,
+          "seconds": 13.3
+        },
+        "Phase: linear solve": {
+          "calls": 41,
+          "seconds": 1.64
+        },
+        "Postprocessing": {
+          "calls": 41,
+          "seconds": 9.66
+        },
+        "Setup dof systems": {
+          "calls": 1,
+          "seconds": 0.00416
+        },
+        "Setup initial conditions": {
+          "calls": 1,
+          "seconds": 0.159
+        },
+        "Setup matrices": {
+          "calls": 1,
+          "seconds": 0.0379
+        }
+      },
+      "phase_iterations": 42,
+      "mechanical_linear_iterations": 2859,
+      "mechanical_nonlinear_evaluations": 123,
+      "degree": 2,
+      "bulk_dofs": 4290
+    },
+    "phase_release": 0.17871798686791607,
+    "absolute_boundary_mechanical_error": 0.20038762510868496,
+    "fracture_expenditure": 3.0086470469528113,
+    "bulk_profile_change": 0.037140030405241165,
+    "cohesive_profile_change": -3.224505064225963,
+    "bulk_viscous": 0.008373461805453121,
+    "cohesive_viscous": 0.022524988769037167,
+    "friction": 48.71643295786936,
+    "bulk_work": 59.81663745587951,
+    "boundary_work": 59.658511254370076,
+    "absolute_internal_mechanical_error": 0.3585138266260781,
+    "prototype_work": {
+      "absolute_boundary_error": 0.20038761135452324,
+      "absolute_internal_error": 0.3585139201199906,
+      "boundary_work": 59.65851098868596,
+      "legacy_internal_error": 0.3585139201198222
+    },
+    "recurrence_error": 0.0,
+    "KKT_target_range": [
+      3.1848022660491613e-13,
+      7.666263699997604e-11
+    ],
+    "mechanical_residuals": [
+      2.718491e-14,
+      1.470684e-14
+    ],
+    "physical_target_pass": true,
+    "maximum_growth_onset": 0.546875
+  },
+  "recommendation": "q2-refined",
+  "targets": {
+    "full_phi": 0.01,
+    "cohesive_q_Pa": 10,
+    "slip_relative_to_reference_final": 0.005
+  },
+  "stress_accuracy_qualified": false,
+  "time_accuracy_qualified": false,
+  "P3_ready": false
+}

@@ -1,0 +1,26 @@
+{
+  "case": "onset-economical-matched",
+  "status": "interrupted; no final run provenance or recoverable physical checkpoint",
+  "last_accepted_step": 54,
+  "last_accepted_time": 0.52734375,
+  "last_progress_seconds": 1854.612825139,
+  "physical_failure_classification": null,
+  "exit_status": null,
+  "wall_seconds": null,
+  "peak_memory": null,
+  "accepted_field_targets": {
+    "phase": true,
+    "q": true,
+    "slip": true,
+    "interval_rate": true,
+    "whole_stress": true,
+    "localized_stress": true,
+    "bulk_storage": true
+  },
+  "stress_comparison_times": [
+    0.5,
+    0.52734375
+  ],
+  "next_case": "onset-economical-resumed",
+  "scope": "Preserved accepted prefix; fresh identical build/configuration rerun required. No uncommitted step55 state is accepted."
+}

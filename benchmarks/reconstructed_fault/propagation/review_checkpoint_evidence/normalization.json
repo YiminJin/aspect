@@ -1,0 +1,478 @@
+{
+  "source_target": 0.005,
+  "spacings_tested": [
+    0.0125,
+    0.00625
+  ],
+  "selected_spacing": 0.00625,
+  "all_frozen_fields_pass": true,
+  "qualification": "six frozen accepted fields only",
+  "coupled_model_qualified": false,
+  "runtime_m": 128.00000000016001,
+  "records": [
+    {
+      "min_I": 108.53245710081174,
+      "max_source_error": 6.573940379073218e-05,
+      "worst_x": 0.03125,
+      "signed_worst": -6.573940379073218e-05,
+      "interior_worst_x": 0.03125,
+      "endpoint_errors": [
+        5.502101346976929e-06,
+        5.502101346754884e-06
+      ],
+      "constant_error_bound": 2e-14,
+      "label": "irreversibility_dt125",
+      "step": 6,
+      "time": 0.75,
+      "state": "onset",
+      "spacing": 0.0125,
+      "phi_max": 0.6048632447516962,
+      "constant_error": 4.440892098500626e-16,
+      "conservation_error": 0.0,
+      "reference_projection": {
+        "min_I": 108.53245724279856,
+        "max_source_error": 7.030019626563799e-05,
+        "worst_x": 0.03125,
+        "signed_worst": -7.030019626563799e-05,
+        "interior_worst_x": 0.03125,
+        "endpoint_errors": [
+          4.851841216346742e-06,
+          4.8518412170128755e-06
+        ],
+        "constant_error_bound": 2e-14
+      },
+      "reference_constant_error": 1.9984014443252818e-15,
+      "reference_conservation_error": 0.0,
+      "projection_quadrature_uncertainty": 2.6645352591003757e-15,
+      "native_Q3_vs_split_Q32": 4.564422194541784e-06,
+      "source_target": 0.005,
+      "frozen_field_target_pass": true
+    },
+    {
+      "min_I": 142.68202697537868,
+      "max_source_error": 0.006555507706537345,
+      "worst_x": 0.96875,
+      "signed_worst": 0.006555507706537345,
+      "interior_worst_x": 0.96875,
+      "endpoint_errors": [
+        -0.0001944889449614351,
+        -0.00019448894496187918
+      ],
+      "constant_error_bound": 2e-14,
+      "label": "irreversibility_dt125",
+      "step": 8,
+      "time": 1.0,
+      "state": "strong",
+      "spacing": 0.0125,
+      "phi_max": 0.7316116394344222,
+      "constant_error": 4.440892098500626e-16,
+      "conservation_error": 0.0,
+      "reference_projection": {
+        "min_I": 142.68886865944057,
+        "max_source_error": 0.007034268376894914,
+        "worst_x": 0.96875,
+        "signed_worst": 0.007034268376894914,
+        "interior_worst_x": 0.96875,
+        "endpoint_errors": [
+          -0.00013486305122112352,
+          -0.00013486305122134556
+        ],
+        "constant_error_bound": 2e-14
+      },
+      "reference_constant_error": 1.9984014443252818e-15,
+      "reference_conservation_error": 0.0,
+      "projection_quadrature_uncertainty": 2.220446049250313e-15,
+      "native_Q3_vs_split_Q32": 0.0004944806124191903,
+      "source_target": 0.005,
+      "frozen_field_target_pass": false
+    },
+    {
+      "min_I": 108.53140006044198,
+      "max_source_error": 2.4685186783557356e-08,
+      "worst_x": 0.03125,
+      "signed_worst": -2.4685186783557356e-08,
+      "interior_worst_x": 0.03125,
+      "endpoint_errors": [
+        2.008452737456423e-09,
+        2.008453181545633e-09
+      ],
+      "constant_error_bound": 2e-14,
+      "label": "irreversibility_dt0625",
+      "step": 11,
+      "time": 0.6875,
+      "state": "onset",
+      "spacing": 0.0125,
+      "phi_max": 0.6035491971659268,
+      "constant_error": 4.440892098500626e-16,
+      "conservation_error": 1.3093738975713311e-16,
+      "reference_projection": {
+        "min_I": 108.5314000614566,
+        "max_source_error": 2.640179319612912e-08,
+        "worst_x": 0.96875,
+        "signed_worst": -2.640179319612912e-08,
+        "interior_worst_x": 0.96875,
+        "endpoint_errors": [
+          1.7632140192347379e-09,
+          1.7632140192347379e-09
+        ],
+        "constant_error_bound": 2e-14
+      },
+      "reference_constant_error": 1.9984014443252818e-15,
+      "reference_conservation_error": 0.0,
+      "projection_quadrature_uncertainty": 3.4416913763379853e-15,
+      "native_Q3_vs_split_Q32": 1.7166796872913892e-09,
+      "source_target": 0.005,
+      "frozen_field_target_pass": true
+    },
+    {
+      "min_I": 154.46899390977856,
+      "max_source_error": 0.006530731622012675,
+      "worst_x": 0.09375,
+      "signed_worst": -0.006530731622012675,
+      "interior_worst_x": 0.09375,
+      "endpoint_errors": [
+        -0.00023274975662357367,
+        -0.00023274975662435082
+      ],
+      "constant_error_bound": 2e-14,
+      "label": "irreversibility_dt0625",
+      "step": 16,
+      "time": 1.0,
+      "state": "strong",
+      "spacing": 0.0125,
+      "phi_max": 0.7409356550024263,
+      "constant_error": 4.440892098500626e-16,
+      "conservation_error": 0.0,
+      "reference_projection": {
+        "min_I": 154.47638709485284,
+        "max_source_error": 0.006971587271838775,
+        "worst_x": 0.90625,
+        "signed_worst": -0.006971587271838775,
+        "interior_worst_x": 0.90625,
+        "endpoint_errors": [
+          -0.00017526143537249794,
+          -0.00017526143537305305
+        ],
+        "constant_error_bound": 2e-14
+      },
+      "reference_constant_error": 1.9984014443252818e-15,
+      "reference_conservation_error": 0.0,
+      "projection_quadrature_uncertainty": 2.6645352591003757e-15,
+      "native_Q3_vs_split_Q32": 0.00046723196784070886,
+      "source_target": 0.005,
+      "frozen_field_target_pass": false
+    },
+    {
+      "min_I": 108.5313919455896,
+      "max_source_error": 8.97203866756513e-10,
+      "worst_x": 0.03125,
+      "signed_worst": -8.97203866756513e-10,
+      "interior_worst_x": 0.03125,
+      "endpoint_errors": [
+        7.290235082280105e-11,
+        7.290235082280105e-11
+      ],
+      "constant_error_bound": 2e-14,
+      "label": "irreversibility_dt03125",
+      "step": 20,
+      "time": 0.625,
+      "state": "onset",
+      "spacing": 0.0125,
+      "phi_max": 0.6035488425646083,
+      "constant_error": 4.440892098500626e-16,
+      "conservation_error": 0.0,
+      "reference_projection": {
+        "min_I": 108.53139194560347,
+        "max_source_error": 9.594859351480522e-10,
+        "worst_x": 0.03125,
+        "signed_worst": -9.594859351480522e-10,
+        "interior_worst_x": 0.03125,
+        "endpoint_errors": [
+          6.398659380124627e-11,
+          6.398748197966597e-11
+        ],
+        "constant_error_bound": 2e-14
+      },
+      "reference_constant_error": 1.9984014443252818e-15,
+      "reference_conservation_error": 0.0,
+      "projection_quadrature_uncertainty": 2.6645352591003757e-15,
+      "native_Q3_vs_split_Q32": 6.240985506167362e-11,
+      "source_target": 0.005,
+      "frozen_field_target_pass": true
+    },
+    {
+      "min_I": 163.0441622491842,
+      "max_source_error": 0.005844022952967043,
+      "worst_x": 0.96875,
+      "signed_worst": 0.005844022952967043,
+      "interior_worst_x": 0.96875,
+      "endpoint_errors": [
+        -0.00026178926834263816,
+        -0.0002617892683427492
+      ],
+      "constant_error_bound": 2e-14,
+      "label": "irreversibility_dt03125",
+      "step": 32,
+      "time": 1.0,
+      "state": "strong",
+      "spacing": 0.0125,
+      "phi_max": 0.7462178832935353,
+      "constant_error": 4.440892098500626e-16,
+      "conservation_error": 0.0,
+      "reference_projection": {
+        "min_I": 163.0516035851692,
+        "max_source_error": 0.006266333713087047,
+        "worst_x": 0.03125,
+        "signed_worst": 0.006266333713087047,
+        "interior_worst_x": 0.03125,
+        "endpoint_errors": [
+          -0.00020750507299460708,
+          -0.00020750507299360788
+        ],
+        "constant_error_bound": 2e-14
+      },
+      "reference_constant_error": 1.9984014443252818e-15,
+      "reference_conservation_error": 0.0,
+      "projection_quadrature_uncertainty": 2.6645352591003757e-15,
+      "native_Q3_vs_split_Q32": 0.00043279168273713253,
+      "source_target": 0.005,
+      "frozen_field_target_pass": false
+    },
+    {
+      "min_I": 108.53245826181649,
+      "max_source_error": 4.9734861784500595e-08,
+      "worst_x": 0.9750000000000001,
+      "signed_worst": 4.9734861784500595e-08,
+      "interior_worst_x": 0.9750000000000001,
+      "endpoint_errors": [
+        4.6520653329551465e-08,
+        4.652065355159607e-08
+      ],
+      "constant_error_bound": 2e-14,
+      "label": "irreversibility_dt125",
+      "step": 6,
+      "time": 0.75,
+      "state": "onset",
+      "spacing": 0.00625,
+      "phi_max": 0.6048632447516962,
+      "constant_error": 4.440892098500626e-16,
+      "conservation_error": 1.3078892731929282e-16,
+      "reference_projection": {
+        "min_I": 108.53245826181652,
+        "max_source_error": 4.97348620065452e-08,
+        "worst_x": 0.025,
+        "signed_worst": 4.97348620065452e-08,
+        "interior_worst_x": 0.025,
+        "endpoint_errors": [
+          4.652065355159607e-08,
+          4.65206548838637e-08
+        ],
+        "constant_error_bound": 2e-14
+      },
+      "reference_constant_error": 1.3322676295501878e-15,
+      "reference_conservation_error": 0.0,
+      "projection_quadrature_uncertainty": 2.220446049250313e-15,
+      "native_Q3_vs_split_Q32": 1.9984014443252818e-15,
+      "source_target": 0.005,
+      "frozen_field_target_pass": true
+    },
+    {
+      "min_I": 142.7414315356761,
+      "max_source_error": 0.00025072186095043136,
+      "worst_x": 0.9625,
+      "signed_worst": 0.00025072186095043136,
+      "interior_worst_x": 0.9625,
+      "endpoint_errors": [
+        7.222507013970869e-05,
+        7.222507013970869e-05
+      ],
+      "constant_error_bound": 2e-14,
+      "label": "irreversibility_dt125",
+      "step": 8,
+      "time": 1.0,
+      "state": "strong",
+      "spacing": 0.00625,
+      "phi_max": 0.7316116394344222,
+      "constant_error": 4.440892098500626e-16,
+      "conservation_error": 0.0,
+      "reference_projection": {
+        "min_I": 142.74143153567553,
+        "max_source_error": 0.00025072186760688453,
+        "worst_x": 0.037500000000000006,
+        "signed_worst": 0.00025072186760688453,
+        "interior_worst_x": 0.037500000000000006,
+        "endpoint_errors": [
+          7.222506802562201e-05,
+          7.22250680260661e-05
+        ],
+        "constant_error_bound": 2e-14
+      },
+      "reference_constant_error": 1.3322676295501878e-15,
+      "reference_conservation_error": 0.0,
+      "projection_quadrature_uncertainty": 2.6645352591003757e-15,
+      "native_Q3_vs_split_Q32": 1.759703494030873e-11,
+      "source_target": 0.005,
+      "frozen_field_target_pass": true
+    },
+    {
+      "min_I": 108.53140006873801,
+      "max_source_error": 8.741896095898483e-13,
+      "worst_x": 0.025,
+      "signed_worst": 8.741896095898483e-13,
+      "interior_worst_x": 0.025,
+      "endpoint_errors": [
+        7.984723993104126e-13,
+        7.984723993104126e-13
+      ],
+      "constant_error_bound": 2e-14,
+      "label": "irreversibility_dt0625",
+      "step": 11,
+      "time": 0.6875,
+      "state": "onset",
+      "spacing": 0.00625,
+      "phi_max": 0.6035491971659268,
+      "constant_error": 4.440892098500626e-16,
+      "conservation_error": 0.0,
+      "reference_projection": {
+        "min_I": 108.53140006873808,
+        "max_source_error": 8.748557434046234e-13,
+        "worst_x": 0.025,
+        "signed_worst": 8.748557434046234e-13,
+        "interior_worst_x": 0.025,
+        "endpoint_errors": [
+          7.986944439153376e-13,
+          7.984723993104126e-13
+        ],
+        "constant_error_bound": 2e-14
+      },
+      "reference_constant_error": 1.3322676295501878e-15,
+      "reference_conservation_error": 0.0,
+      "projection_quadrature_uncertainty": 2.4424906541753444e-15,
+      "native_Q3_vs_split_Q32": 1.5543122344752192e-15,
+      "source_target": 0.005,
+      "frozen_field_target_pass": true
+    },
+    {
+      "min_I": 154.53404701391173,
+      "max_source_error": 0.00022028583262523327,
+      "worst_x": 0.037500000000000006,
+      "signed_worst": 0.00022028583262523327,
+      "interior_worst_x": 0.037500000000000006,
+      "endpoint_errors": [
+        5.825460898734036e-05,
+        5.825460898711832e-05
+      ],
+      "constant_error_bound": 2e-14,
+      "label": "irreversibility_dt0625",
+      "step": 16,
+      "time": 1.0,
+      "state": "strong",
+      "spacing": 0.00625,
+      "phi_max": 0.7409356550024263,
+      "constant_error": 4.440892098500626e-16,
+      "conservation_error": 1.3902925050127123e-16,
+      "reference_projection": {
+        "min_I": 154.5340470139103,
+        "max_source_error": 0.00022028583809996505,
+        "worst_x": 0.037500000000000006,
+        "signed_worst": 0.00022028583809996505,
+        "interior_worst_x": 0.037500000000000006,
+        "endpoint_errors": [
+          5.825460758690504e-05,
+          5.8254607586238905e-05
+        ],
+        "constant_error_bound": 2e-14
+      },
+      "reference_constant_error": 1.3322676295501878e-15,
+      "reference_conservation_error": 0.0,
+      "projection_quadrature_uncertainty": 2.6645352591003757e-15,
+      "native_Q3_vs_split_Q32": 1.4623191546547787e-11,
+      "source_target": 0.005,
+      "frozen_field_target_pass": true
+    },
+    {
+      "min_I": 108.53139194570362,
+      "max_source_error": 1.2212453270876722e-15,
+      "worst_x": 0.5303381523591788,
+      "signed_worst": -1.2212453270876722e-15,
+      "interior_worst_x": 0.5303381523591788,
+      "endpoint_errors": [
+        8.881784197001252e-16,
+        2.220446049250313e-16
+      ],
+      "constant_error_bound": 2e-14,
+      "label": "irreversibility_dt03125",
+      "step": 20,
+      "time": 0.625,
+      "state": "onset",
+      "spacing": 0.00625,
+      "phi_max": 0.6035488425646083,
+      "constant_error": 4.440892098500626e-16,
+      "conservation_error": 0.0,
+      "reference_projection": {
+        "min_I": 108.53139194570355,
+        "max_source_error": 1.9984014443252818e-15,
+        "worst_x": 0.9623442352531273,
+        "signed_worst": -1.9984014443252818e-15,
+        "interior_worst_x": 0.9623442352531273,
+        "endpoint_errors": [
+          8.881784197001252e-16,
+          4.440892098500626e-16
+        ],
+        "constant_error_bound": 2e-14
+      },
+      "reference_constant_error": 1.3322676295501878e-15,
+      "reference_conservation_error": 0.0,
+      "projection_quadrature_uncertainty": 3.3306690738754696e-15,
+      "native_Q3_vs_split_Q32": 1.7763568394002505e-15,
+      "source_target": 0.005,
+      "frozen_field_target_pass": true
+    },
+    {
+      "min_I": 163.10986771510935,
+      "max_source_error": 0.00018377863815577378,
+      "worst_x": 0.9625,
+      "signed_worst": 0.00018377863815577378,
+      "interior_worst_x": 0.9625,
+      "endpoint_errors": [
+        4.449189987343338e-05,
+        4.449189987365543e-05
+      ],
+      "constant_error_bound": 2e-14,
+      "label": "irreversibility_dt03125",
+      "step": 32,
+      "time": 1.0,
+      "state": "strong",
+      "spacing": 0.00625,
+      "phi_max": 0.7462178832935353,
+      "constant_error": 4.440892098500626e-16,
+      "conservation_error": 0.0,
+      "reference_projection": {
+        "min_I": 163.10986771510767,
+        "max_source_error": 0.00018377864180818548,
+        "worst_x": 0.037500000000000006,
+        "signed_worst": 0.00018377864180818548,
+        "interior_worst_x": 0.037500000000000006,
+        "endpoint_errors": [
+          4.4491899118925815e-05,
+          4.4491899119813993e-05
+        ],
+        "constant_error_bound": 2e-14
+      },
+      "reference_constant_error": 1.3322676295501878e-15,
+      "reference_conservation_error": 0.0,
+      "projection_quadrature_uncertainty": 2.4424906541753444e-15,
+      "native_Q3_vs_split_Q32": 9.955813951023629e-12,
+      "source_target": 0.005,
+      "frozen_field_target_pass": true
+    }
+  ],
+  "input_hashes": {
+    "build-propagation-integration/output-irreversibility_dt03125/material-phase-accepted-20.csv": "d390e7d1c0f6f15ec738eb0c01011fdfcec269da660c710f00610428bb7de6bd",
+    "build-propagation-integration/output-irreversibility_dt03125/material-phase-accepted-32.csv": "3aa339f0a35805e67daa89659890a62220518edfd3b0fe6bfbea3ae46d94960b",
+    "build-propagation-integration/output-irreversibility_dt0625/material-phase-accepted-11.csv": "d1955f2eebbcea29fca1b6b2b153eccda0d2a2cd8ad877ed9dab44865255da89",
+    "build-propagation-integration/output-irreversibility_dt0625/material-phase-accepted-16.csv": "a6d25a3475ef16cb0017ecf912870368f21165edf9733754b07dbe17eab7dc86",
+    "build-propagation-integration/output-irreversibility_dt125/material-phase-accepted-6.csv": "c228ffeaaa38a89740e21e67fd36872add59de16c5fcc7e49a892f358e29bcac",
+    "build-propagation-integration/output-irreversibility_dt125/material-phase-accepted-8.csv": "0c2675107e87a62c3e7b3efa5cf9daa0fd25dafc9f08d3996b5d406f915da424"
+  }
+}

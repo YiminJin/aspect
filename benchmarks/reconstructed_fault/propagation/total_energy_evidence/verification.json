@@ -1,0 +1,22 @@
+{
+  "new_whitespace_errors": [],
+  "new_local_link_errors": [],
+  "preserved_incoming_whitespace_findings": [
+    "doc/reconstructed_fault/pf_rsf.tex:150: trailing whitespace.",
+    "doc/reconstructed_fault/pf_rsf.tex:303: trailing whitespace.",
+    "doc/reconstructed_fault/pf_rsf.tex:447: trailing whitespace.",
+    "doc/reconstructed_fault/pf_rsf.tex:464: trailing whitespace.",
+    "doc/reconstructed_fault/pf_rsf.tex:510: trailing whitespace.",
+    "doc/reconstructed_fault/pf_rsf.tex:540: trailing whitespace.",
+    "doc/reconstructed_fault/pf_rsf.tex:543: trailing whitespace.",
+    "doc/reconstructed_fault/pf_rsf.tex:548: trailing whitespace.",
+    "doc/reconstructed_fault/pf_rsf.tex:583: trailing whitespace.",
+    "doc/reconstructed_fault/pf_rsf.tex:598: trailing whitespace.",
+    "doc/reconstructed_fault/pf_rsf.tex:657: trailing whitespace.",
+    "doc/reconstructed_fault/pf_rsf.tex:666: trailing whitespace."
+  ],
+  "source_changed_this_task": false,
+  "native_runs": 0,
+  "syntax_exit": 0,
+  "numerical_and_preservation_exit": 0
+}

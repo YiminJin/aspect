@@ -1,0 +1,299 @@
+{
+  "provenance": {
+    "executable_sha": "a4fc27c9e2271c82253ece3dad6ca483b3eb016fac9fc742e55c85791e325d9c",
+    "plugin_sha": "6e6a59e0db5c70780f84d7e71404274e2c6e9496c91c58733c83da9b7f3622cf",
+    "input_sha": "39a3d3f4854e40de95936c48a5cb3931f766889c31b1998b7ce77e11c3c20046",
+    "initial_phi_sha": "5792b5323cfa162a231c4f1e4d5076e987d6dfc56005f1f427e577801b5b3356",
+    "initial_H_sha": "c205e0eda26d3042599a139dd668ca5cf339c6b4a7eba939400d174f35a6dc8b",
+    "configuration": "fresh shared initialization, fixed 16x512, full-normal association, frozen particles",
+    "output": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-endpoint-onset-obstacle-search",
+    "threads": 1,
+    "started_UTC": "2026-10-11T07:27:30.529769+00:00",
+    "max_wall_seconds": 3600.0,
+    "wall_budget_reached": true,
+    "stop_reason": "wall budget",
+    "returncode": -2,
+    "wall_seconds": 3600.6867998599996,
+    "user_seconds": 3534.309025,
+    "system_seconds": 21.795451,
+    "peak_RSS_KiB": 1345740
+  },
+  "live_snapshot": false,
+  "completed": false,
+  "initialization_phase_error": 0.0,
+  "maximum_phase_growth": 5.625663783545912e-06,
+  "maximum_healing": 0.0,
+  "maximum_FE_recurrence": 1.734723475976807e-18,
+  "maximum": {
+    "phase": 3.2782457304314505e-13,
+    "tangential_phase_variation": 6.496643500941701e-13,
+    "phase_centroid": 0.5000000000000017,
+    "centroid_difference": 3.219646771412954e-15,
+    "q": 1.4911620382918045e-08,
+    "slip": 1.624179957193661e-12,
+    "interval_rate": 6.098080373995174e-11,
+    "tangential_q_variation": 2.3278914795810124e-08,
+    "tangential_slip_variation": 2.535551629767596e-12,
+    "normalization_relative_error": 5.3734794391857577e-14,
+    "bulk_storage": 3.0057956124096563e-10,
+    "cohesive_storage": 6.613554148771073e-11,
+    "fracture_storage": 7.815970093361102e-14,
+    "whole_stress": 6.828411274225635e-07,
+    "localized_stress": 8.362652267078387e-07,
+    "normal_stress_max": 4.3670598817514e-06
+  },
+  "rows": [
+    {
+      "step": 1,
+      "time": 0.5,
+      "phase": 0.0,
+      "phase_worst_location": [
+        0.0,
+        0.0
+      ],
+      "tangential_phase_variation": 0.0,
+      "phase_centroid": 0.5,
+      "centroid_difference": -3.1086244689504383e-15,
+      "q": 1.4911620382918045e-08,
+      "slip": 1.624179957193661e-12,
+      "interval_rate": 3.248359914387322e-12,
+      "tangential_q_variation": 2.3278914795810124e-08,
+      "tangential_slip_variation": 2.535551629767596e-12,
+      "normalization_relative_error": 1.5543122344752192e-15,
+      "bulk_storage": 3.0057956124096563e-10,
+      "cohesive_storage": 6.613554148771073e-11,
+      "fracture_storage": 5.684341886080802e-14,
+      "whole_stress": 6.828411274225635e-07,
+      "localized_stress": 8.362652267078387e-07,
+      "normal_stress_max": 4.3331618776902446e-06
+    },
+    {
+      "step": 2,
+      "time": 0.52734375,
+      "phase": 4.567288387768986e-14,
+      "phase_worst_location": [
+        0.3125,
+        0.205078125
+      ],
+      "tangential_phase_variation": 5.721963701466048e-14,
+      "phase_centroid": 0.5000000000000001,
+      "centroid_difference": -3.219646771412954e-15,
+      "q": 1.0111875781149138e-09,
+      "slip": 1.0944717354632871e-13,
+      "interval_rate": 6.098080373995174e-11,
+      "tangential_q_variation": 1.6116246115416288e-09,
+      "tangential_slip_variation": 1.7280621378290562e-13,
+      "normalization_relative_error": 2.886579864025407e-15,
+      "bulk_storage": 1.4846901486009756e-11,
+      "cohesive_storage": 3.6202152386977104e-12,
+      "fracture_storage": 8.881784197001252e-15,
+      "whole_stress": 1.447496594988425e-07,
+      "localized_stress": 7.537327240116074e-08,
+      "normal_stress_max": 4.3669819498878366e-06
+    },
+    {
+      "step": 3,
+      "time": 0.5283203125,
+      "phase": 3.2782457304314505e-13,
+      "phase_worst_location": [
+        0.3125,
+        0.244140625
+      ],
+      "tangential_phase_variation": 6.496643500941701e-13,
+      "phase_centroid": 0.5000000000000017,
+      "centroid_difference": -1.4432899320127035e-15,
+      "q": 8.697043085703626e-10,
+      "slip": 9.371670106617103e-14,
+      "interval_rate": 3.1946001399774104e-11,
+      "tangential_q_variation": 1.541081928735366e-09,
+      "tangential_slip_variation": 1.647362801726615e-13,
+      "normalization_relative_error": 5.3734794391857577e-14,
+      "bulk_storage": 3.091971123581061e-13,
+      "cohesive_storage": 1.4566126083082054e-13,
+      "fracture_storage": 7.815970093361102e-14,
+      "whole_stress": 1.4328276044993946e-07,
+      "localized_stress": 7.36535275267047e-08,
+      "normal_stress_max": 4.3670598817514e-06
+    }
+  ],
+  "global_reflection": false,
+  "aligned": false,
+  "native_stress_sampling": "12 off-assembly normal points in three tangential sections; RMS uses positive embedded J2 of the full deviatoric stress difference",
+  "targets": {
+    "phase": 0.001,
+    "q": 1.0,
+    "slip": 4.880473011414721e-05,
+    "interval_rate": 0.0008056326530806073,
+    "whole_stress": 13.325219750000002,
+    "localized_stress": 13.325219750000002,
+    "bulk_storage": 0.00887807407
+  },
+  "passes": {
+    "phase": true,
+    "q": true,
+    "slip": true,
+    "interval_rate": true,
+    "whole_stress": true,
+    "localized_stress": true,
+    "bulk_storage": true
+  },
+  "accepted_interval_targets_pass": true,
+  "resolved_phase_growth": true,
+  "qualification_interval": [
+    0.0,
+    0.5283203125
+  ],
+  "published_KKT": [
+    {
+      "step": 1,
+      "residual": 0.0,
+      "target": 2.437910428372813e-11,
+      "passes": true
+    },
+    {
+      "step": 2,
+      "residual": 5.1130540773547395e-14,
+      "target": 2.637019519441841e-11,
+      "passes": true
+    },
+    {
+      "step": 3,
+      "residual": 3.178208564380558e-14,
+      "target": 2.644740616704743e-11,
+      "passes": true
+    }
+  ],
+  "growing_path_energy": {
+    "storage_change": {
+      "signed": 0.04269705127219581,
+      "absolute": 0.04269705127219581,
+      "maximum": 0.04269705127219581
+    },
+    "bulk_rate_work": {
+      "signed": 0.17356451560563763,
+      "absolute": 0.17356451560563763,
+      "maximum": 0.17356451560563763
+    },
+    "lifting_work": {
+      "signed": 0.17356452517738713,
+      "absolute": 0.17356452517738713,
+      "maximum": 0.17356452517738713
+    },
+    "boundary_reaction_work": {
+      "signed": 0.17356452517724338,
+      "absolute": 0.17356452517724338,
+      "maximum": 0.17356452517724338
+    },
+    "bulk_viscous": {
+      "signed": 1.6894755516372887e-05,
+      "absolute": 1.6894755516372887e-05,
+      "maximum": 1.6894755516372887e-05
+    },
+    "cohesive_viscous": {
+      "signed": 0.00010548162973043168,
+      "absolute": 0.00010548162973043168,
+      "maximum": 0.00010548162973043168
+    },
+    "friction": {
+      "signed": 0.13074510649516607,
+      "absolute": 0.13074510649516607,
+      "maximum": 0.13074510649516607
+    },
+    "mechanical_residual_work": {
+      "signed": -9.571605761454771e-09,
+      "absolute": 9.571605761454771e-09,
+      "maximum": 9.571605761454771e-09
+    },
+    "friction_residual_work": {
+      "signed": 9.59638503383875e-09,
+      "absolute": 9.59638503383875e-09,
+      "maximum": 9.59638503383875e-09
+    },
+    "phase_residual_work": {
+      "signed": 8.950656865136342e-09,
+      "absolute": 8.950656865136342e-09,
+      "maximum": 8.950656865136342e-09
+    },
+    "profile_bulk_work": {
+      "signed": -9.122691901979868e-12,
+      "absolute": 9.122691901979868e-12,
+      "maximum": 9.122691901979868e-12
+    },
+    "profile_cohesive_work": {
+      "signed": -4.060987935991555e-06,
+      "absolute": 4.060987935991555e-06,
+      "maximum": 4.060987935991555e-06
+    },
+    "external_remainder": {
+      "signed": 8.975365284324965e-09,
+      "absolute": 8.975365284324965e-09,
+      "maximum": 8.975365284324965e-09
+    },
+    "identity_remainder": {
+      "signed": -7.085319535594397e-14,
+      "absolute": 7.085319535594397e-14,
+      "maximum": 7.085319535594397e-14
+    },
+    "absolute_mechanical_work": {
+      "signed": 9.571605761454771e-09,
+      "absolute": 9.571605761454771e-09,
+      "maximum": 9.571605761454771e-09
+    },
+    "absolute_friction_work": {
+      "signed": 9.59638503383875e-09,
+      "absolute": 9.59638503383875e-09,
+      "maximum": 9.59638503383875e-09
+    },
+    "absolute_phase_work": {
+      "signed": 8.950656865136342e-09,
+      "absolute": 8.950656865136342e-09,
+      "maximum": 8.950656865136342e-09
+    }
+  },
+  "matching_growing_prototype_energy": {
+    "bulk_change": {
+      "signed": 0.0015784572353974013,
+      "absolute": 0.0015784572353974013
+    },
+    "cohesive_change": {
+      "signed": 0.041114524100237304,
+      "absolute": 0.041114524100237304
+    },
+    "fracture_change": {
+      "signed": 4.0699477139582996e-06,
+      "absolute": 4.0699477139582996e-06
+    },
+    "bulk_viscous": {
+      "signed": 1.689475551625146e-05,
+      "absolute": 1.689475551625146e-05
+    },
+    "cohesive_viscous": {
+      "signed": 0.00010548162973046842,
+      "absolute": 0.00010548162973046842
+    },
+    "friction": {
+      "signed": 0.13074510648411636,
+      "absolute": 0.13074510648411636
+    },
+    "mechanical_power": {
+      "signed": -9.569873482643737e-09,
+      "absolute": 9.569873482643737e-09
+    },
+    "friction_residual_power": {
+      "signed": 9.596371851667368e-09,
+      "absolute": 9.596371851667368e-09
+    },
+    "phase_power": {
+      "signed": 8.950657011391721e-09,
+      "absolute": 8.950657011391721e-09
+    },
+    "external_remainder": {
+      "signed": -8.977185939063048e-09,
+      "absolute": 8.977185939063048e-09
+    }
+  },
+  "external_remainder_conventions": {
+    "native": "storage change - boundary reaction work + losses",
+    "prototype": "boundary reaction work - storage change - losses"
+  }
+}

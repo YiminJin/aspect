@@ -1,0 +1,14 @@
+{
+  "compared_steps": 55,
+  "interval": [
+    0,
+    0.52734375
+  ],
+  "maximum_differences": {
+    "phase": 0.0,
+    "surface": 0.0
+  },
+  "same_executable": true,
+  "same_plugin": true,
+  "scope": "Fresh repeat of the preserved interrupted prefix; not checkpoint resume."
+}

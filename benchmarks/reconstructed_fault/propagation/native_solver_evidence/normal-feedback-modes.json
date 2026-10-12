@@ -1,0 +1,197 @@
+[
+  {
+    "mode": "adaptive-translation",
+    "time": 0.529296875,
+    "KKT": 9.678455953331502e-14,
+    "phase_error": 4.427602728895863e-11,
+    "iterations": 6,
+    "tangent_calls": 20,
+    "trace": [
+      {
+        "iteration": 0,
+        "KKT": 4.602093407430625e-05,
+        "eta": 2e-07,
+        "linear_target": 0.0,
+        "tangent_calls": 0,
+        "line_search": 2,
+        "recycled_slow_overlap": null
+      },
+      {
+        "iteration": 1,
+        "KKT": 1.164516235057004e-05,
+        "eta": 0.05030313582788986,
+        "linear_target": 0.0020238571413476883,
+        "tangent_calls": 2,
+        "line_search": 1,
+        "recycled_slow_overlap": 0.28323642147675304
+      },
+      {
+        "iteration": 2,
+        "KKT": 0.0004617623587902819,
+        "eta": 0.25,
+        "linear_target": 0.00016425570307238607,
+        "tangent_calls": 3,
+        "line_search": 0,
+        "recycled_slow_overlap": null
+      },
+      {
+        "iteration": 3,
+        "KKT": 5.093315858467235e-05,
+        "eta": 0.10520165938310991,
+        "linear_target": 7.827298551329634e-06,
+        "tangent_calls": 4,
+        "line_search": 0,
+        "recycled_slow_overlap": 0.9999739727513268
+      },
+      {
+        "iteration": 4,
+        "KKT": 1.6487430506943594e-06,
+        "eta": 0.018927740556737932,
+        "linear_target": 4.5995384672151004e-08,
+        "tangent_calls": 5,
+        "line_search": 0,
+        "recycled_slow_overlap": 0.9999773442591755
+      },
+      {
+        "iteration": 5,
+        "KKT": 1.2461181253515773e-09,
+        "eta": 0.0005203575880008279,
+        "linear_target": 1.1273565874296973e-12,
+        "tangent_calls": 6,
+        "line_search": 0,
+        "recycled_slow_overlap": 0.999977292279051
+      }
+    ],
+    "published": false
+  },
+  {
+    "mode": "adaptive-translation",
+    "time": 0.5302734375,
+    "KKT": 6.221290409911256e-12,
+    "phase_error": 2.745093041767177e-11,
+    "iterations": 6,
+    "tangent_calls": 18,
+    "trace": [
+      {
+        "iteration": 0,
+        "KKT": 6.523637933354522e-05,
+        "eta": 2e-07,
+        "linear_target": 0.0,
+        "tangent_calls": 0,
+        "line_search": 2,
+        "recycled_slow_overlap": null
+      },
+      {
+        "iteration": 1,
+        "KKT": 0.0006605706985487257,
+        "eta": 0.25,
+        "linear_target": 0.013704204510494832,
+        "tangent_calls": 2,
+        "line_search": 1,
+        "recycled_slow_overlap": 0.27740116889226685
+      },
+      {
+        "iteration": 2,
+        "KKT": 0.0007684520288569083,
+        "eta": 0.25,
+        "linear_target": 0.0002260582140685698,
+        "tangent_calls": 3,
+        "line_search": 0,
+        "recycled_slow_overlap": null
+      },
+      {
+        "iteration": 3,
+        "KKT": 8.507083487339084e-05,
+        "eta": 0.11419456191768798,
+        "linear_target": 1.4183289641170787e-05,
+        "tangent_calls": 4,
+        "line_search": 0,
+        "recycled_slow_overlap": 0.9999656208535869
+      },
+      {
+        "iteration": 4,
+        "KKT": 1.6263397454504558e-06,
+        "eta": 0.01578922134889566,
+        "linear_target": 3.943250631365815e-08,
+        "tangent_calls": 4,
+        "line_search": 0,
+        "recycled_slow_overlap": 0.9999715434328185
+      },
+      {
+        "iteration": 5,
+        "KKT": 1.8895179607567008e-08,
+        "eta": 0.0017018864773584539,
+        "linear_target": 4.876868562216254e-11,
+        "tangent_calls": 5,
+        "line_search": 0,
+        "recycled_slow_overlap": 0.9999714663287463
+      }
+    ],
+    "published": false
+  },
+  {
+    "mode": "adaptive-translation",
+    "time": 0.53125,
+    "KKT": 6.185246759208324e-12,
+    "phase_error": 7.799422219179064e-11,
+    "iterations": 6,
+    "tangent_calls": 18,
+    "trace": [
+      {
+        "iteration": 0,
+        "KKT": 6.541240957808381e-05,
+        "eta": 2e-07,
+        "linear_target": 0.0,
+        "tangent_calls": 0,
+        "line_search": 2,
+        "recycled_slow_overlap": null
+      },
+      {
+        "iteration": 1,
+        "KKT": 0.0006400842260238525,
+        "eta": 0.25,
+        "linear_target": 0.013689174070959048,
+        "tangent_calls": 2,
+        "line_search": 1,
+        "recycled_slow_overlap": 0.2774952290705017
+      },
+      {
+        "iteration": 2,
+        "KKT": 0.0007445712908718962,
+        "eta": 0.25,
+        "linear_target": 0.0002259723649345516,
+        "tangent_calls": 3,
+        "line_search": 0,
+        "recycled_slow_overlap": null
+      },
+      {
+        "iteration": 3,
+        "KKT": 8.517439952727468e-05,
+        "eta": 0.11411019999912625,
+        "linear_target": 1.4195511483778465e-05,
+        "tangent_calls": 4,
+        "line_search": 0,
+        "recycled_slow_overlap": 0.9999588333571645
+      },
+      {
+        "iteration": 4,
+        "KKT": 1.615460327651096e-06,
+        "eta": 0.015715133505585524,
+        "linear_target": 3.9046375583995966e-08,
+        "tangent_calls": 4,
+        "line_search": 0,
+        "recycled_slow_overlap": 0.9999651350595444
+      },
+      {
+        "iteration": 5,
+        "KKT": 1.843886691160533e-08,
+        "eta": 0.0016789472100228152,
+        "linear_target": 4.69750150241128e-11,
+        "tangent_calls": 5,
+        "line_search": 0,
+        "recycled_slow_overlap": 0.999965049834674
+      }
+    ],
+    "published": false
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "deleted_files": 121,
+  "deleted_bytes": 1154955320,
+  "duplicate_groups": 1462,
+  "duplicate_bytes_shared": 650795880,
+  "relocated_directories": 143,
+  "protected_files_verified": 9875,
+  "executables_verified": 16,
+  "build_bytes_before": 3480694784,
+  "build_bytes_after": 1655205888,
+  "build_allocated_bytes_freed": 1825488896,
+  "disk_free_bytes_before": 16876384256,
+  "disk_free_bytes_after": 18698162176
+}

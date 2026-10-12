@@ -1,0 +1,93 @@
+{
+  "equality_converged": true,
+  "resolved_evolution": true,
+  "repeats_resolved": true,
+  "uncertainty_estimate": 8.91420901808641e-14,
+  "repeat_drift": 5.501133402974201e-14,
+  "tolerance": 8.91420901808641e-13,
+  "violations": [
+    {
+      "stage": "hold",
+      "quantity": "negative_node",
+      "value": 0.0071837745488251776,
+      "tolerance": 8.91420901808641e-13
+    },
+    {
+      "stage": "hold",
+      "quantity": "negative_cpdi",
+      "value": 0.005398819910366421,
+      "tolerance": 8.91420901808641e-13
+    },
+    {
+      "stage": "hold_repeat",
+      "quantity": "negative_node",
+      "value": 0.0071837745488251776,
+      "tolerance": 8.91420901808641e-13
+    },
+    {
+      "stage": "hold_repeat",
+      "quantity": "negative_cpdi",
+      "value": 0.005398819910366421,
+      "tolerance": 8.91420901808641e-13
+    },
+    {
+      "stage": "ramp_05",
+      "quantity": "negative_node",
+      "value": 0.007160566498107914,
+      "tolerance": 8.91420901808641e-13
+    },
+    {
+      "stage": "ramp_05",
+      "quantity": "negative_cpdi",
+      "value": 0.005362791066651979,
+      "tolerance": 8.91420901808641e-13
+    },
+    {
+      "stage": "ramp_05",
+      "quantity": "healing",
+      "value": 1.7797293229456076e-05,
+      "tolerance": 8.91420901808641e-13
+    },
+    {
+      "stage": "ramp_10",
+      "quantity": "negative_node",
+      "value": 0.007131195629725781,
+      "tolerance": 8.91420901808641e-13
+    },
+    {
+      "stage": "ramp_10",
+      "quantity": "negative_cpdi",
+      "value": 0.00532131039424306,
+      "tolerance": 8.91420901808641e-13
+    },
+    {
+      "stage": "ramp_10",
+      "quantity": "healing",
+      "value": 1.7437562699050267e-05,
+      "tolerance": 8.91420901808641e-13
+    },
+    {
+      "stage": "unload",
+      "quantity": "negative_node",
+      "value": 0.007131195629685439,
+      "tolerance": 8.91420901808641e-13
+    },
+    {
+      "stage": "unload",
+      "quantity": "negative_cpdi",
+      "value": 0.005321310394211144,
+      "tolerance": 8.91420901808641e-13
+    }
+  ],
+  "physically_admissible": false,
+  "qualified": false,
+  "production_mechanical_H_update_qualified": false,
+  "physical_restart_and_rollback_tested": false,
+  "nonlinear_iterations": {
+    "hold": 2,
+    "hold_repeat": 0,
+    "ramp_05": 3,
+    "ramp_10": 3,
+    "unload": 1
+  }
+}

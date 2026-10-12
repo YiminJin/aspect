@@ -1,0 +1,37 @@
+{
+  "status": "prepared; not launched",
+  "fresh": true,
+  "steps": 154,
+  "final_time": 0.625,
+  "prefix_steps": 58,
+  "remaining_growth_steps": 96,
+  "source_input": "benchmarks/reconstructed_fault/propagation/native_solver_evidence/economical-full-planned.prm",
+  "schedule": "benchmarks/reconstructed_fault/propagation/native_solver_evidence/full-planned-schedule.txt",
+  "cost_estimate": {
+    "observed_growth_seconds": [
+      940.8563674080006,
+      973.0563607080003,
+      1005.4361057000006
+    ],
+    "mean_growth_seconds": 973.1162779386672,
+    "remaining_steps": 96,
+    "extrapolated_hours": 26.55788925509751,
+    "expected_hours_with_saddle_and_overhead": 27.0,
+    "planning_range_hours": [
+      27.0,
+      35.0
+    ],
+    "proposed_wall_budget_hours": 36.0,
+    "measured_peak_RSS_MiB": 1684.94140625,
+    "recommended_memory_GiB": 2.5,
+    "scope": "Measured onset steps, not measured late branch cost; no guarantee of fresh first-release convergence. Native .625-s run remains unlaunched."
+  },
+  "restrictions": [
+    "No conversion of particle or diagnostic-output histories",
+    "Same physical model, true-energy/KKT/obstacle criteria and time schedule",
+    "Report all native tangential modes and one consistently followed reflected branch if selected",
+    "Stop on unresolved descent, residual, bounds, normalization, history or energy comparison; preserve failed entry",
+    "No tolerance relaxation or microscopic near-release search"
+  ],
+  "qualification": "A successful fixed-entry diagnostic is not qualification of fresh first-release evolution or full angular stability."
+}

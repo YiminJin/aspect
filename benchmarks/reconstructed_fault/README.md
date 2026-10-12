@@ -1,4 +1,62 @@
+Current P2 numerical task completed: [native solver accuracy, onset and saddle escape](../../doc/reconstructed_fault/propagation/P2_native_solver_report.md).
+Fresh58-step economical onset reaches .53125s in85min9s/1684.9MiB, with core
+phase .60457720, zero healing, all seven unaligned field targets, complete-prefix
+energy accounting and exact complete-step failure/retry. Default-false numerical
+options retain governing energy, actual Hessian and final KKT. The resolved
+saddle replay is noncommitting, not fresh continuation. One full154-step native
+run is prepared at27–35h estimated and is not launched; full native/P3 remains
+unqualified. [Field charts](propagation/native_endpoint_evidence/onset-economical-resumed-comparison.png) and [separate energy charts](propagation/native_solver_evidence/onset-economical-resumed-energy.png).
+
 # Reconstructed-fault benchmarks and checks
+
+Current propagation P2: [native tangent/onset and recovery](../../doc/reconstructed_fault/propagation/P2_native_tangent_report.md).
+The fresh native run completes .53125s in54min18s /1719.9MiB, with three accepted
+core-growth increments, zero healing, original KKT/history checks and all seven
+unaligned prototype targets passing. Complete-step failure restores accepted
+state exactly and retries. The154-step economical prototype reaches .625s and
+passes separate field/residual-work gates. The original coarse-prefix energy
+failure remains explicit; complete native .625s and P3 remain unqualified.
+[Native charts](propagation/native_endpoint_evidence/onset-linearized-obstacle-recovery-comparison.png)
+and [economical-schedule charts](propagation/native_tangent_evidence/economical-schedule.png).
+
+Historical propagation P2: [optional native consistent-endpoint verification](../../doc/reconstructed_fault/propagation/P2_native_endpoint_report.md).
+The full matching 512-cell FE prototype passes the unaligned temporal targets;
+default-off native fixed-state operators pass, and a bounded fresh native onset
+comparison verifies flank growth through .52832s and measures tangential
+variation/cost. Its one-hour budget stops before core growth. The coarse
+loading prefix qualifies endpoint fields only, with a separately reported
+contact-path energy error. Full native evolution and P3 remain unqualified.
+
+Historical propagation P2: [translation-mode and reflected branches](../../doc/reconstructed_fault/propagation/P2_asymmetric_branch_report.md).
+Fourteen diagnostic continuations reach .625s with numerical checks passing.
+Centroid motion/release are mesh dependent; exact-bulk control also becomes
+unstable. Separate work errors decrease. Physical branch selection, native
+adoption and P3 remain unqualified;512-cell-only new figures and old failures
+are retained. No production change.
+
+Historical propagation P2: [coupled continuation stability stop](../../doc/reconstructed_fault/propagation/P2_coupled_branch_extension_report.md).
+All three partitions reach an admissible antisymmetric saddle at .59765625s,
+before the requested .625s endpoint. Incoming/equilibrium checks pass and stable
+interval energy errors decrease, but no unstable trial is published. Production
+and prior evidence remain unchanged; branch selection, native adoption and P3
+remain unresolved.
+
+Previous propagation P2: [consistent-endpoint short branch](../../doc/reconstructed_fault/propagation/P2_coupled_branch_report.md).
+The short consistent-start coupled prototype grows smoothly and its same-path
+energy/residual contributions converge. Production is unchanged; full-interval,
+native and P3 qualification remain deferred. Preserve all historical failures.
+
+Historical P2: [accuracy and energy assessment](../../doc/reconstructed_fault/propagation/P2_accuracy_energy_report.md).
+Direct irreversibility is verified for the fixed-mesh fixture. Consistent I at
+.025 m still fails the .5% accuracy target; native bulk stress histories have no
+additional transfer drift, but evolving-profile energy needs a governing review.
+No production source change or P3. Earlier results below remain historical.
+
+
+
+Historical coupling-repair result: [P2 coupling repair](../../doc/reconstructed_fault/propagation/P2_coupling_report.md).
+Fixed-phase checks pass; evolving feedback remains unqualified because all
+three timestep paths exhibit resolved tail healing. Historical failures remain.
 
 Use [BP3's maintained entry point](bp3/README.md) for the current frozen-fault
 model and [uniform shear](uniform_shear/README.md) for independent constitutive
@@ -11,6 +69,7 @@ revision. R8 is deferred. Cleanup is not new production/scientific qualification
 |---|---|
 | [bp3/plugin](bp3/plugin/README.md), [production PRM](bp3/production/README.md) | Maintained runtime and single `fault.txt`; buffered 60° boundary admission qualified, full production normalization/mechanics and Intel server run unqualified |
 | [uniform_shear](uniform_shear/README.md) | Independent reference, pilot and spatial/time comparisons; `python3 -m unittest discover -s benchmarks/reconstructed_fault/uniform_shear -p test_reference.py -v` |
+| [propagation](propagation/README.md) | P1 production checks and fixed-geometry P2; direct irreversibility verified, surface accuracy/profile energetics block P3 |
 | [bp3_birth_completion](bp3_birth_completion/README.md), [bp3_local_tests](bp3_local_tests/README.md) | PD-reuse birth identification, buffered completion, velocity oscillation/refinement and transport/retry; preserve their recorded scientific limitations |
 | [bp3_geometry](bp3_geometry/README.md), [bp3_runtime](bp3_runtime/README.md), [bp3_packaging](bp3_packaging/README.md) | Endpoint/filter derivative, single-file geometry, removal of runtime fixtures, output/restart identity; scripts/inputs remain at existing paths |
 | [particle_lifecycle](particle_lifecycle/README.md), [frozen_particle_H](frozen_particle_H/README.md) | RNG/particle retry/restart, frozen newborn H and evolving-history guard |

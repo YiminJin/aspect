@@ -1,0 +1,44 @@
+{
+  "normalization_runner_exit": 0,
+  "syntax_exit": 0,
+  "numerical_and_preservation_checker_exit": 0,
+  "new_whitespace_errors": [],
+  "new_local_link_errors": [],
+  "full_worktree_git_diff_check_exit": 2,
+  "preserved_incoming_whitespace_errors": [
+    "doc/reconstructed_fault/pf_rsf.tex:150: trailing whitespace.",
+    "doc/reconstructed_fault/pf_rsf.tex:303: trailing whitespace.",
+    "doc/reconstructed_fault/pf_rsf.tex:447: trailing whitespace.",
+    "doc/reconstructed_fault/pf_rsf.tex:464: trailing whitespace.",
+    "doc/reconstructed_fault/pf_rsf.tex:510: trailing whitespace.",
+    "doc/reconstructed_fault/pf_rsf.tex:540: trailing whitespace.",
+    "doc/reconstructed_fault/pf_rsf.tex:543: trailing whitespace.",
+    "doc/reconstructed_fault/pf_rsf.tex:548: trailing whitespace.",
+    "doc/reconstructed_fault/pf_rsf.tex:583: trailing whitespace.",
+    "doc/reconstructed_fault/pf_rsf.tex:598: trailing whitespace.",
+    "doc/reconstructed_fault/pf_rsf.tex:657: trailing whitespace.",
+    "doc/reconstructed_fault/pf_rsf.tex:666: trailing whitespace."
+  ],
+  "preserved_incoming_missing_historical_links": {
+    "doc/reconstructed_fault/CURRENT_STATUS.md": [
+      "../../benchmarks/reconstructed_fault/bp3/production/stampede3/README.md",
+      "../../benchmarks/reconstructed_fault/bp3/output-cleanup-evidence/comparison.txt",
+      "../../benchmarks/reconstructed_fault/bp3/output-cleanup-evidence/sizes.csv",
+      "../../benchmarks/reconstructed_fault/server_gmg/verification-coarse-local/",
+      "../../benchmarks/reconstructed_fault/bp3/filter-test/comparison/summary.json",
+      "../../benchmarks/reconstructed_fault/bp3/filter-test/output-150x50-filter20/accepted_steps.csv",
+      "../../benchmarks/reconstructed_fault/bp3/filter-test/output-150x50-filter20/log.txt",
+      "../../benchmarks/reconstructed_fault/bp3/filter-test/output-150x50-filter20/velocity_constraints.csv",
+      "../../benchmarks/reconstructed_fault/bp3/restore-150x50-verification/",
+      "../../benchmarks/reconstructed_fault/bp3/plugin-cleanup-evidence/",
+      "../../benchmarks/reconstructed_fault/bp5/interpolation-inclined/comparison.json",
+      "../../benchmarks/reconstructed_fault/bp5/interpolation-inclined/cleanup_comparison.json",
+      "../../benchmarks/reconstructed_fault/bp3/filter-test/output-150x50-filter20/timestep_selection.csv",
+      "../../benchmarks/reconstructed_fault/bp3/filter-test/output-150x50-filter20/state_startup_predictor.csv",
+      "../../benchmarks/reconstructed_fault/checkpoints/bp3-execution-cleanup-4qkx63tj/"
+    ]
+  },
+  "production_changes_this_task": false,
+  "native_coupled_runs_this_task": 0,
+  "qualification": "six retained frozen fields only"
+}

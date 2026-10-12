@@ -1,0 +1,135 @@
+--- incoming/include/aspect/phase_field.h
++++ current/include/aspect/phase_field.h
+@@ -265,6 +265,7 @@
+     struct SolverParameters
+     {
+       bool use_bound_constraints = false;
++      bool enforce_irreversibility = false;
+       double linear_solver_tolerance;
+       unsigned int max_linear_solver_iterations;
+       double nonlinear_solver_tolerance;
+@@ -366,11 +367,13 @@
+ 
+       void solve_bound_constrained_phase(LinearAlgebra::BlockSparseMatrix &matrix,
+                                          LinearAlgebra::BlockVector &rhs,
+-                                         LinearAlgebra::BlockVector &state) const;
++                                         LinearAlgebra::BlockVector &state,
++                                         const LinearAlgebra::BlockVector *lower_bound = nullptr) const;
+ 
+       void constrain_phase_newton_system(LinearAlgebra::BlockSparseMatrix &matrix,
+                                          LinearAlgebra::BlockVector &rhs,
+-                                         const LinearAlgebra::BlockVector &state) const;
++                                         const LinearAlgebra::BlockVector &state,
++                                         const LinearAlgebra::BlockVector *lower_bound = nullptr) const;
+ 
+       void initialize_phase_guess(LinearAlgebra::BlockVector &state) const;
+ 
+--- incoming/source/simulator/phase_field.cc
++++ current/source/simulator/phase_field.cc
+@@ -497,6 +497,10 @@
+                           "Solve the phase variational inequality on the material phase range. "
+                           "This imposes no previous-phase lower bound and does not change H. "
+                           "The default retains the equality solver.");
++        prm.declare_entry("Enforce phase irreversibility", "false", Patterns::Bool(),
++                          "With bound constraints, use an immutable copy of the last accepted phase "
++                          "as the lower bound during physical evolution. Initial relaxation remains "
++                          "on the material phase range; H is unchanged.");
+         prm.declare_entry("Linear solver tolerance", "1e-8",
+                           Patterns::Double(0., 1.),
+                           "A relative tolerance up to which the linearized phase field system "
+@@ -616,6 +620,14 @@
+       prm.enter_subsection("Phase field solver parameters");
+       {
+         solver_parameters.use_bound_constraints = prm.get_bool("Use bound constraints");
++        solver_parameters.enforce_irreversibility = prm.get_bool("Enforce phase irreversibility");
++        AssertThrow(!solver_parameters.enforce_irreversibility || solver_parameters.use_bound_constraints,
++                    ExcMessage("Phase irreversibility requires Use bound constraints."));
++        AssertThrow(!solver_parameters.enforce_irreversibility
++                    || this->get_parameters().nonlinear_solver_failure_strategy
++                       != Parameters<dim>::NonlinearSolverFailureStrategy::continue_with_next_timestep,
++                    ExcMessage("Phase irreversibility cannot accept a failed physical step: "
++                               "do not use continue with next timestep."));
+         solver_parameters.linear_solver_tolerance            = prm.get_double("Linear solver tolerance");
+         solver_parameters.max_linear_solver_iterations       = prm.get_integer("Max linear solver iterations");
+         solver_parameters.nonlinear_solver_tolerance         = prm.get_double("Nonlinear solver tolerance");
+@@ -1151,7 +1163,8 @@
+   template <int dim>
+   void PhaseFieldHandler<dim>::constrain_phase_newton_system(
+     LinearAlgebra::BlockSparseMatrix &matrix, LinearAlgebra::BlockVector &rhs,
+-    const LinearAlgebra::BlockVector &state) const
++    const LinearAlgebra::BlockVector &state,
++    const LinearAlgebra::BlockVector *lower_bound) const
+   {
+     const auto comm = this->get_mpi_communicator();
+     const auto b = this->introspection().variable("phase_field").block_index;
+@@ -1171,7 +1184,8 @@
+     LinearAlgebra::Vector owned_flags(indices, comm), flags(indices, columns, comm);
+     for (const auto i : indices)
+       owned_flags[i] = !constraints.is_constrained(offset+i)
+-        && ((state.block(b)[i] == range.first && rhs.block(b)[i] <= 0)
++        && ((state.block(b)[i] == (lower_bound ? lower_bound->block(b)[i] : range.first)
++             && rhs.block(b)[i] <= 0)
+             || (state.block(b)[i] == range.second && rhs.block(b)[i] >= 0));
+     owned_flags.compress(VectorOperation::insert);
+     flags = owned_flags;
+@@ -1193,7 +1207,8 @@
+   template <int dim>
+   void PhaseFieldHandler<dim>::solve_bound_constrained_phase(
+     LinearAlgebra::BlockSparseMatrix &matrix, LinearAlgebra::BlockVector &rhs,
+-    LinearAlgebra::BlockVector &state) const
++    LinearAlgebra::BlockVector &state,
++    const LinearAlgebra::BlockVector *lower_bound) const
+   {
+     const auto comm = this->get_mpi_communicator();
+     const auto b = this->introspection().variable("phase_field").block_index;
+@@ -1213,10 +1228,13 @@
+       for (const auto i : indices)
+         {
+           const double x = u.block(b)[i], r = rhs.block(b)[i];
+-          invalid |= !std::isfinite(x) || x < range.first || x > range.second || !std::isfinite(r);
++          const double lower = lower_bound ? lower_bound->block(b)[i] : range.first;
++          invalid |= !std::isfinite(lower) || lower < range.first || lower > range.second
++                     || !std::isfinite(x) || x < lower || x > range.second || !std::isfinite(r);
+           if (constraints.is_constrained(offset+i))
+             continue;
+-          const double d = x == range.first ? std::max(r, 0.0)
++          const double d = lower == range.second ? 0.0
++                           : x == lower ? std::max(r, 0.0)
+                            : x == range.second ? std::min(r, 0.0) : r;
+           defect = std::max(defect, std::abs(d));
+         }
+@@ -1248,7 +1266,7 @@
+         AssertThrow(it < solver_parameters.max_nonlinear_iterations, ExcNonlinearSolverNoConvergence());
+         raw_rhs = rhs;
+ 
+-        constrain_phase_newton_system(matrix, rhs, state);
++        constrain_phase_newton_system(matrix, rhs, state, lower_bound);
+         update = 0;
+         solve_phase_field_system(matrix, rhs, update);
+ 
+@@ -1260,7 +1278,8 @@
+             for (const auto i : indices)
+               if (!constraints.is_constrained(offset+i))
+                 owned.block(b)[i] = std::clamp(state.block(b)[i] + alpha * update.block(b)[i],
+-                                              range.first, range.second);
++                                              lower_bound ? lower_bound->block(b)[i] : range.first,
++                                              range.second);
+             constraints.distribute(owned);
+             trial = owned;
+             double local_slope = 0;
+@@ -1304,7 +1323,14 @@
+           trial.block(block_index) = this->get_old_solution().block(block_index);
+         else if (this->get_parameters().reconstruct_faults)
+           initialize_phase_guess(trial);
+-        solve_bound_constrained_phase(system_matrix, system_rhs, trial);
++        // A per-solve immutable snapshot: neither predictor nor Newton iterates
++        // can advance the accepted lower bound. No state is published on failure.
++        const LinearAlgebra::BlockVector accepted_phase(trial);
++        const bool physical_evolution = this->get_timestep_number() > 0
++                                        || this->get_parameters().resume_computation;
++        solve_bound_constrained_phase(system_matrix, system_rhs, trial,
++                                     solver_parameters.enforce_irreversibility && physical_evolution
++                                     ? &accepted_phase : nullptr);
+         solution.block(block_index) = trial.block(block_index);
+         return;
+       }

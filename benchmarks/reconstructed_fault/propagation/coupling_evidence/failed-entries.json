@@ -1,0 +1,148 @@
+{
+  "failed": {
+    "125": {
+      "dt": 0.125,
+      "last_accepted_time": 0.875,
+      "entry": {
+        "time": 1.0,
+        "min": 0.0,
+        "max": 0.7316116394344221,
+        "max_x": 0.0,
+        "max_y": 0.5,
+        "increment": 0.08774615783175477,
+        "healing": 1.8480082898949941e-09,
+        "cpdi_min": 8.344880858346348e-12,
+        "cpdi_max": 0.7215338486755294
+      },
+      "worst_node": {
+        "x": 0.03125,
+        "y": 0.0625,
+        "phi": 0.0,
+        "old": 1.8480082898949941e-09,
+        "g": 1.0
+      },
+      "diagnosis": {
+        "time": 1.0,
+        "healing": 1.8480082898949941e-09,
+        "KKT": 7.919012667834124e-16,
+        "correction_inf": 1.059434796364905e-16,
+        "repeat1": 0.0,
+        "repeat2": 0.0,
+        "repeated_healing": 1.8480082898949941e-09,
+        "positive_offdiagonals": 1560.0,
+        "negative_offdiagonals": 6760.0
+      },
+      "identical_replay_csvs": 92
+    },
+    "0625": {
+      "dt": 0.0625,
+      "last_accepted_time": 0.8125,
+      "entry": {
+        "time": 0.875,
+        "min": 0.0,
+        "max": 0.6789585870250424,
+        "max_x": 0.0,
+        "max_y": 0.5,
+        "increment": 0.032919938068171284,
+        "healing": 1.5766455007763693e-07,
+        "cpdi_min": 3.302166880061828e-13,
+        "cpdi_max": 0.6696908419617151
+      },
+      "worst_node": {
+        "x": 0.9375,
+        "y": 0.125,
+        "phi": 0.0,
+        "old": 1.5766455007763693e-07,
+        "g": 1.0
+      },
+      "diagnosis": {
+        "time": 0.875,
+        "healing": 1.5766455007763693e-07,
+        "KKT": 6.522560269672795e-16,
+        "correction_inf": 7.050575758867145e-17,
+        "repeat1": 0.0,
+        "repeat2": 0.0,
+        "repeated_healing": 1.5766455007763693e-07,
+        "positive_offdiagonals": 1624.0,
+        "negative_offdiagonals": 6696.0
+      },
+      "identical_replay_csvs": 158
+    },
+    "03125": {
+      "dt": 0.03125,
+      "last_accepted_time": 0.84375,
+      "entry": {
+        "time": 0.875,
+        "min": 0.0,
+        "max": 0.6851074808645503,
+        "max_x": 1.0,
+        "max_y": 0.5,
+        "increment": 0.02302960984092972,
+        "healing": 7.357453741643651e-07,
+        "cpdi_min": 4.2649111142924506e-13,
+        "cpdi_max": 0.6752431722456835
+      },
+      "worst_node": {
+        "x": 0.96875,
+        "y": 0.15625,
+        "phi": 2.5331322682746687e-06,
+        "old": 3.268877642439034e-06,
+        "g": 0.9996758617053154
+      },
+      "diagnosis": {
+        "time": 0.875,
+        "healing": 7.357453741643651e-07,
+        "KKT": 6.441249884976367e-16,
+        "correction_inf": 7.943246473351176e-17,
+        "repeat1": 0.0,
+        "repeat2": 0.0,
+        "repeated_healing": 7.357453741643651e-07,
+        "positive_offdiagonals": 1592.0,
+        "negative_offdiagonals": 6728.0
+      },
+      "identical_replay_csvs": 312
+    }
+  },
+  "lag_comparison": [
+    {
+      "history_time": 0.625,
+      "cases": {
+        "125": {
+          "phase_time": 0.75,
+          "consumed_H_through": 0.625,
+          "phi_max": 0.6048632447516962
+        },
+        "0625": {
+          "phase_time": 0.6875,
+          "consumed_H_through": 0.625,
+          "phi_max": 0.6035491971659268
+        },
+        "03125": {
+          "phase_time": 0.65625,
+          "consumed_H_through": 0.625,
+          "phi_max": 0.6035489734727953
+        }
+      }
+    },
+    {
+      "history_time": 0.75,
+      "cases": {
+        "125": {
+          "phase_time": 0.875,
+          "consumed_H_through": 0.75,
+          "phi_max": 0.6619198602041714
+        },
+        "0625": {
+          "phase_time": 0.8125,
+          "consumed_H_through": 0.75,
+          "phi_max": 0.6460386489568711
+        },
+        "03125": {
+          "phase_time": 0.78125,
+          "consumed_H_through": 0.75,
+          "phi_max": 0.6385529450267611
+        }
+      }
+    }
+  ]
+}

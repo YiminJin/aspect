@@ -1,0 +1,58 @@
+--- incoming/doc/reconstructed_fault/specification.tex
++++ current/doc/reconstructed_fault/specification.tex
+@@ -1909,6 +1909,55 @@
+ history; do not read an older FE timestep or evolve that history in a trial.
+ The slip-only residual and $B$ actions remain unchanged. Timestep-zero history
+ retention and terminal history publication retain their established semantics.
++
++\paragraph{Restricted native P2 accepted FE strain option.}
++The explicitly selected \texttt{Bulk history representation = accepted FE strain}
++is a separate default-off total-energy verification model. The authoritative
++bulk internal state is an FE vector $d_R$, with
++$\boldsymbol R=\operatorname{symgrad}d_R=\boldsymbol E^{\rm tot}-\boldsymbol E^{\rm in}$.
++It is not a projection of particle stress or an accumulated total displacement.
++For identical homogeneous bulk/fault $G,\eta$, let
++\[
++ \beta=\exp(-\Delta t G/\eta),\quad
++ \kappa=\eta(1-\beta),\quad
++ d_R^{n+1}=\beta d_R^n+(\kappa/G)\boldsymbol u^{n+1}.
++\]
++At a phase trial, hold accepted $d_R^n,Z^n$ fixed and reconstruct
++$\boldsymbol\tau(\phi)=2G[\operatorname{symgrad}d_R^n-(Z^n/G)\chi(\phi)\mathcal S]$.
++The same state supplies mechanical history and bulk energy
++$\sum_a JxW_a\boldsymbol\tau_a:\boldsymbol\tau_a/(4G)$.
++The phase functional also contains $\sum_b ds_b Z_b^2/(2G I_b)$ and the native
++CPDI fracture functional, including the exact consistent-normalization adjoint;
++$\mathcal H^+$ is diagnostic rather than a phase driver in this option.
++Initial relaxation retains the existing native seeded-H procedure. The accepted
++seed is then protected by the previous-phase lower bound, with unloaded $d_R=Z=0$.
++Endpoint mechanics follows instantaneous elastic profile redistribution.
++Prepare and validate the complete step before publishing $d_R,Z$, derived
++particle samples and diagnostic H. Phase and mechanical trials never change
++accepted $d_R$. Particle samples are not reprojected into this mechanical history.
++
++The phase assembly differentiates in independent nodal $(\phi,I)$ coordinates
++and pulls back through $D I=P D b$ once. Its full Hessian contains the second
++normalization derivative as well as the cross terms. A positive Gauss--Newton
++search metric may replace negative free-set curvature, with a projected-gradient
++line-search safeguard. Primal-dual contact prediction uses the positive diagonal
++metric, including the nonzero increment to a predicted bound and its symmetric
++column lift; the residual, energy, constraints and KKT tolerances
++remain those of the same functional. The arithmetic allowance uses the positive
++pre-cancellation term scale, including the normalization adjoint. It is an
++uncertainty estimate, not phase viscosity or a physical regularization.
++
++This initial option requires serial 2-D uniform Cartesian Box cells, one fixed
++horizontal through-going fault with full normal association, homogeneous identical
++bulk/fault coefficients ($\lambda=\eta/G$, 100 s in the reference fixture), AT1
++and Lorentz $p=1$, consistent normalization, surface elastic-slip history,
++bulk-conjugate endpoint mechanics, direct phase irreversibility, and unloaded
++initialization. Mesh/geometry changes, history transport, particle replenishment,
++external retained-stress overrides and coefficient variation are rejected.
++The initial implementation is fresh-run only: resume is rejected, including
++particle-stress checkpoints; a registry marker also forbids resuming this option's
++checkpoint through the particle-authoritative path. No implicit conversion is
++defined. Existing defaults and the particle-authoritative path are unchanged.
+ 
+ For particle-to-FE transfer, shared continuous DoFs receive the arithmetic
+ average of incident-cell interpolator proposals. Accumulate values and counts

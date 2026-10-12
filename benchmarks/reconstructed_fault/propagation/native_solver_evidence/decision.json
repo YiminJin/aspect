@@ -1,0 +1,61 @@
+{
+  "stage": "P2 bounded intermediate accuracy/preconditioning/onset/escape",
+  "completed": true,
+  "model_changed": false,
+  "final_acceptance_changed": false,
+  "defaults_changed": false,
+  "fresh_onset_completed": true,
+  "field_targets": {
+    "phase": true,
+    "q": true,
+    "slip": true,
+    "interval_rate": true,
+    "whole_stress": true,
+    "localized_stress": true,
+    "bulk_storage": true
+  },
+  "published_KKT_pass": true,
+  "zero_healing": true,
+  "controlled_recovery": {
+    "surface_components": 520,
+    "unchanged_nan_sentinels": 325,
+    "differences": 0,
+    "distinct_previous_phase_max_difference": 6.993730687142145e-07,
+    "retry_accepted": true,
+    "scope": "Forced complete outer solve before publication; no postpublication or restart claim."
+  },
+  "retained_core_and_saddle_checks": [
+    "fixed-core-block-refined-checks.json",
+    "fixed-saddle-summation-checks.json"
+  ],
+  "operators": "operator-summation-checks.json",
+  "compatibility": "21,105 assertions / 54 ASPECT cases",
+  "full_native_run_launched": false,
+  "full_native_cost": {
+    "observed_growth_seconds": [
+      940.8563674080006,
+      973.0563607080003,
+      1005.4361057000006
+    ],
+    "mean_growth_seconds": 973.1162779386672,
+    "remaining_steps": 96,
+    "extrapolated_hours": 26.55788925509751,
+    "expected_hours_with_saddle_and_overhead": 27.0,
+    "planning_range_hours": [
+      27.0,
+      35.0
+    ],
+    "proposed_wall_budget_hours": 36.0,
+    "measured_peak_RSS_MiB": 1684.94140625,
+    "recommended_memory_GiB": 2.5,
+    "scope": "Measured onset steps, not measured late branch cost; no guarantee of fresh first-release convergence. Native .625-s run remains unlaunched."
+  },
+  "remaining": [
+    "Fresh first saddle release and continuation to .625s",
+    "Full native angular critical-cone stability",
+    "Positional/spatial selection",
+    "Coupled restart and postpublication rollback",
+    "Transport/birth histories",
+    "P3 qualification"
+  ]
+}

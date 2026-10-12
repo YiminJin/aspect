@@ -1,0 +1,68 @@
+--- incoming/doc/reconstructed_fault/specification.tex
++++ current/doc/reconstructed_fault/specification.tex
+@@ -854,7 +854,7 @@
+ \subsection{Selected recoverable-energy P2 revision}
+ An explicit \texttt{Phase driving history = recoverable energy} selection uses
+ $Y=q^2/(2G_\Gamma g^2)$ and $H_k=\max(H_{k-1},Y_k)$, evaluated with accepted
+-phase, projected cohesive traction and surface modulus. This is a governing-model
++phase, accepted cohesive traction and surface modulus. This is a governing-model
+ revision, not a rescaling of the incremental candidate. The default
+ \texttt{incremental work} retains the historical formula. With $Z=I_hq$, the
+ reduced stored energy is $Z^2/(2G_\Gamma I_h)$. Its variation at fixed elastic
+@@ -923,6 +923,56 @@
+ \]
+ The previous pointwise \(h_{k-1}\) is evaluated from ASPECT's previous FE
+ phase-field solution. It is not duplicated as fault history.
++
++\subsection{Selected surface-owned cohesive history}
++The optional \texttt{Cohesive history representation = surface elastic slip}
++uses $Z_h=\sum_i N_i I_{h,i}^{\rm old}q_i^{\rm old}$ as the authoritative
++Q1 internal variable. At a point, $q^{\rm old}=Z_h/I_h^{\rm old}$; the product
++of separately interpolated $I_h$ and $q$ is not used. With uniform $G_\Gamma$
++and temperature-independent uniform viscosity, advance
++\[
++ Z_i^{\rm new}=\beta Z_i^{\rm old}+\kappa V_i,\qquad
++ q_i^{\rm new}=Z_i^{\rm new}/I_{h,i}^{\rm new}.
++\]
++The pointwise trial law, its derivative, and accepted publication are therefore
++identical in this representation. No surface--particle--surface transfer occurs.
++Nonuniform coefficients are rejected for this option; multiplication would
++otherwise leave Q1. The existing q and previous-I property slots retain the
++nodal data, with a representation marker that forbids switching on restart.
++The default \texttt{particle projection} and generic projector are unchanged.
++Changing phase retains the profile correction
++$C=\beta Z_h^{\rm old}(h/I_h-h^{\rm old}/I_h^{\rm old})/\kappa$.
++This repair does not establish bulk/fault work conjugacy or phase-energy
++consistency. See \texttt{propagation/P2\_coupling\_derivation.md}.
++
++\subsection{Selected cohesive work-conjugate pair}
++The separate optional \texttt{Fault mechanical work measure = bulk conjugate}
++requires one straight two-dimensional cohesive fault, the surface elastic-slip
++representation, and prescribed friction pressure. Define
++$(LV)_a=\chi_a\sum_iN_i(s_a)V_i\boldsymbol S_a$ on the actual owned Stokes
++quadrature points, with their actual phase and incoming FE stress. Then
++\[
++ R_i=\sum_a JxW_a\chi_aN_i(s_a)(\boldsymbol\tau_a:\boldsymbol S_a+
++ \tau_{{\rm bg},a})-
++ \sum_b ds_bN_i(s_b)(q_b+\mu_bP_b+\eta^d_bV_b).
++\]
++The unchanged bulk slip source is $L$; its surface shear partner is its
++$JxW$ adjoint, not a particle-volume average. Current and previous phase are
++sampled separately, retaining the common profile correction $C$ in both blocks.
++The corresponding $G$ is the derivative of this shear load, and
++\[
++ K_{ij}=\sum_a JxW_a\,2\kappa_{{\rm bulk},a}\chi_a^2N_iN_j
++ (\boldsymbol S_a:\boldsymbol S_a)
++ +\sum_b ds_bN_iN_j(\kappa_\Gamma/I_h+P\mu_V+\eta^d).
++\]
++Resistance and its derivative use the same three-point surface Gauss rule;
++the residual mass uses $ds$. This avoids weighting cohesive energy by the
++approximately normalized bulk quadrature of $\chi$. The default particle-volume
++path and the separately guarded frozen-mature bulk-work option remain intact.
++The selected work representation is fixed through restart. Discrete adjointness
++does not remove particle/FE stress-transfer errors or endpoint-in-time splitting
++errors in integrated work, and does not qualify the separate phase-energy
++projection approximation.
+ 
+ \subsection{Explicit mature frictional specialization}
+ 
