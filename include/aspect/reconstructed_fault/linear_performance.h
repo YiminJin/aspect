@@ -63,12 +63,12 @@ namespace aspect
     {
       public:
         FaultLinearProfile(ConditionalOStream &output, const unsigned int step,
-                           const unsigned int iteration)
+                           const unsigned int iteration, const bool force=false)
           : output(output), step(step), iteration(iteration)
         {
           auto &t=FaultLinearTiming::get();
           t=FaultLinearTiming();
-          t.active=std::getenv("ASPECT_FAULT_LINEAR_PERFORMANCE");
+          t.active=force || std::getenv("ASPECT_FAULT_LINEAR_PERFORMANCE");
           t.last=FaultLinearTiming::Clock::now();
         }
         ~FaultLinearProfile() { report(); }

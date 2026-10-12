@@ -20,6 +20,7 @@
 
 
 #include <aspect/newton.h>
+#include <aspect/material_model/phase_field_fault.h>
 #include <aspect/simulator/assemblers/advection.h>
 #include <aspect/simulator/assemblers/stokes.h>
 #include <aspect/simulator/assemblers/implicit_constitutive_stokes.h>
@@ -59,8 +60,12 @@ namespace aspect
         assemblers.stokes_preconditioner.push_back(std::make_unique<aspect::Assemblers::NewtonStokesPreconditioner<dim>>());
         assemblers.stokes_system.push_back(std::make_unique<aspect::Assemblers::NewtonStokesIncompressibleTerms<dim>>());
 
+        // Reuse the 3D trace term also for the optional incompressible FE
+        // owner. Newton's term corrects BOTH residual and Jacobian.
+        const auto *fault_material = dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(&this->get_material_model());
+        const bool fe_plane_strain = fault_material && fault_material->uses_fe_strain_history();
         if (this->get_material_model().is_compressible() ||
-            this->get_parameters().enable_prescribed_dilation)
+            this->get_parameters().enable_prescribed_dilation || fe_plane_strain)
           {
             // The compressible part of the preconditioner is only necessary if we use the simplified A block
             if (this->get_parameters().use_full_A_block_preconditioner == false)

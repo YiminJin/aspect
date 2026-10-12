@@ -1038,6 +1038,30 @@ TEST_CASE("Stage-I compatibility uses uncancelled operations and still rejects p
   REQUIRE(fault_pressure_compatibility_bound(0.,64.,0.,12.,cap)==0.);
 }
 
+TEST_CASE("Stage-I fresh continuity accounts for a nonzero correction at zero base velocity")
+{
+  using namespace dealii;
+  using namespace aspect::internal;
+  FullMatrix<double> C(3);
+  Vector<double> q(3),direction(3),rhs(3),residual(3);
+  q[1]=q[2]=1./std::sqrt(2.);
+  // A represented left-null defect at roundoff, acting on a nonzero update.
+  C(1,0)=1.; C(2,0)=-1.+std::numeric_limits<double>::epsilon();
+  direction[0]=1.;
+  double raw,component;
+  fault_true_linear_residual(C,q,direction,rhs,residual,raw,component);
+  const double rhs_bound=fault_pressure_compatibility_bound(0.,64.,0.,6.,1e-10);
+  REQUIRE(rhs_bound==0.);
+  REQUIRE(std::abs(component)>rhs_bound);
+  const double action_bound=fault_pressure_compatibility_bound(2.,64.,2.,6.,1e-10);
+  REQUIRE(std::abs(component)<action_bound);
+  // A physical continuity incompatibility still exceeds the unchanged cap.
+  C(2,0)=-1.+1e-6;
+  fault_true_linear_residual(C,q,direction,rhs,residual,raw,component);
+  REQUIRE(std::abs(component)>action_bound);
+  REQUIRE(std::abs(component)>1e-10);
+}
+
 TEST_CASE("Stage-I nonsymmetric pressure compatibility requires the left nullspace")
 {
   using namespace dealii;

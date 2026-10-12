@@ -26,6 +26,8 @@
 #include <aspect/newton.h>
 #include <aspect/melt.h>
 #include <aspect/phase_field.h>
+#include <aspect/material_model/phase_field_fault.h>
+#include <aspect/plugins.h>
 #include <aspect/reconstructed_fault/manager.h>
 
 #include <deal.II/numerics/vector_tools.h>
@@ -957,12 +959,22 @@ namespace aspect
     if (parameters.enable_phase_field)
       {
         phase_field_handler->evolve_phase_field(system_matrix, system_rhs, solution);
+        if (phase_field_handler->uses_bound_constraints())
+          {
+            const unsigned int phase_block = introspection.variable("phase_field").block_index;
+            current_linearization_point.block(phase_block) = solution.block(phase_block);
+          }
         if (parameters.reconstruct_faults && timestep_number == 0)
           reconstructed_fault_manager->reconstruct_initial_faults();
       }
 
     assemble_and_solve_temperature();
     assemble_and_solve_composition();
+
+    if (parameters.enable_phase_field && parameters.reconstruct_faults
+        && phase_field_handler->uses_bound_constraints())
+      Plugins::get_plugin_as_type<MaterialModel::PhaseFieldFault<dim>>(*material_model)
+        .prepare_reconstructed_fault_phase_state();
 
     {
       computing_timer.enter_subsection("Interpolate Stokes solution");
@@ -1018,6 +1030,11 @@ namespace aspect
     if (parameters.enable_phase_field)
       {
         phase_field_handler->evolve_phase_field(system_matrix, system_rhs, solution);
+        if (phase_field_handler->uses_bound_constraints())
+          {
+            const unsigned int phase_block = introspection.variable("phase_field").block_index;
+            current_linearization_point.block(phase_block) = solution.block(phase_block);
+          }
         if (parameters.reconstruct_faults && timestep_number == 0)
           reconstructed_fault_manager->reconstruct_initial_faults();
       }
@@ -1099,6 +1116,17 @@ namespace aspect
   template <int dim>
   void Simulator<dim>::solve_single_advection_iterated_newton_stokes (const bool use_newton_iterations)
   {
+    if (parameters.reconstruct_faults && timestep_number>0)
+      {
+        auto &fault=Plugins::get_plugin_as_type<MaterialModel::PhaseFieldFault<dim>>(*material_model);
+        if (fault.uses_consistent_endpoint_phase())
+          {
+            assemble_and_solve_temperature();
+            assemble_and_solve_composition();
+            solve_reconstructed_fault_endpoint_phase();
+            return;
+          }
+      }
     if (parameters.reconstruct_faults)
       {
         AssertThrow(use_newton_iterations,
@@ -1111,6 +1139,11 @@ namespace aspect
     if (parameters.enable_phase_field)
       {
         phase_field_handler->evolve_phase_field(system_matrix, system_rhs, solution);
+        if (phase_field_handler->uses_bound_constraints())
+          {
+            const unsigned int phase_block = introspection.variable("phase_field").block_index;
+            current_linearization_point.block(phase_block) = solution.block(phase_block);
+          }
         if (parameters.reconstruct_faults && timestep_number == 0)
           reconstructed_fault_manager->reconstruct_initial_faults();
       }

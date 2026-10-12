@@ -25,6 +25,7 @@
 #include <aspect/melt.h>
 #include <aspect/phase_field.h>
 #include <aspect/plugins.h>
+#include <aspect/material_model/phase_field_fault.h>
 #include <aspect/reconstructed_fault/manager.h>
 #include <aspect/reconstructed_fault/surface_system.h>
 #include <aspect/simulator/assemblers/reconstructed_fault_stokes.h>
@@ -1986,6 +1987,24 @@ namespace aspect
   void
   Simulator<dim>::solve_timestep ()
   {
+    // The restricted endpoint option publishes only at complete convergence.
+    // Restore outer-step scratch/bookkeeping too if an exception escapes after
+    // advection or predictor setup. Legacy failure policies are unchanged.
+    const auto *endpoint_model=parameters.reconstruct_faults
+      ? dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(material_model.get()) : nullptr;
+    const bool endpoint_step=endpoint_model && endpoint_model->uses_consistent_endpoint_phase() && timestep_number>0;
+    std::unique_ptr<LinearAlgebra::BlockVector> entry_solution,entry_linearization;
+    std::unique_ptr<TableHandler> entry_statistics;
+    const double entry_pressure=last_pressure_normalization_adjustment;
+    const unsigned int entry_iteration=nonlinear_iteration;
+    if(endpoint_step)
+      {
+        entry_solution=std::make_unique<LinearAlgebra::BlockVector>(solution);
+        entry_linearization=std::make_unique<LinearAlgebra::BlockVector>(current_linearization_point);
+        entry_statistics=std::make_unique<TableHandler>(statistics);
+      }
+    try
+      {
     // start any scheme with an extrapolated value from the previous
     // two time steps if those are available
     initialize_current_linearization_point();
@@ -2170,6 +2189,21 @@ namespace aspect
             default:
               AssertThrow(false, ExcNotImplemented());
           }
+      }
+      }
+    catch(...)
+      {
+        if(endpoint_step)
+          {
+            solution=*entry_solution;current_linearization_point=*entry_linearization;
+            statistics=*entry_statistics;
+            last_pressure_normalization_adjustment=entry_pressure;
+            nonlinear_iteration=entry_iteration;
+            rebuild_stokes_matrix=rebuild_stokes_preconditioner=true;
+            auto &model=Plugins::get_plugin_as_type<MaterialModel::PhaseFieldFault<dim>>(*material_model);
+            model.prepare_reconstructed_fault_mechanical_solve();
+          }
+        throw;
       }
   }
 

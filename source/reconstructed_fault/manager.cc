@@ -15,6 +15,7 @@
 #include <aspect/particle/particle_domain.h>
 #include <aspect/material_model/utilities.h>
 #include <aspect/utilities.h>
+#include <aspect/geometry_model/box.h>
 
 #include <deal.II/fe/fe_values.h>
 
@@ -22,6 +23,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
+#include <iomanip>
 #include <limits>
 #include <map>
 #include <set>
@@ -193,6 +195,12 @@ namespace aspect
                         "Legacy retains existing boundary behavior. Automatic prescribed classifies every "
                         "fault contact and requires a compatible fully prescribed frozen 2-D phase field, "
                         "supported exterior Q1 data and paired mechanical work. Unsupported contacts fail.");
+      prm.declare_entry("Association support", "stationary profile",
+                        Patterns::Selection("stationary profile|full normal cross-section"),
+                        "Stationary profile retains the native support widths. Full normal cross-section "
+                        "is a fixed verification policy for one straight prescribed fault spanning a 2D Box. "
+                        "It derives a constant normal half-width from the domain vertices, including roundoff, "
+                        "before cohesive initialization. It does not extend sharp endpoints or change H.");
       prm.declare_entry("Ridge coefficient", "1",
                         Patterns::Double(0.0),
                         "Dimensionless second-difference ridge coefficient applied after "
@@ -216,7 +224,12 @@ namespace aspect
     {
       structural_spacing = prm.get_double("Structural point spacing");
       fit_prescribed_geometry = prm.get_bool("Fit prescribed geometry to phase field");
+      full_normal_cross_section = prm.get("Association support") == "full normal cross-section";
       automatic_boundary_completion = prm.get("Boundary completion") == "automatic prescribed";
+      AssertThrow(!full_normal_cross_section || (dim == 2 && !fit_prescribed_geometry
+                                                && !automatic_boundary_completion),
+                  ExcMessage("Full normal cross-section support requires fixed 2D prescribed geometry "
+                             "and legacy boundary completion."));
       AssertThrow(!automatic_boundary_completion || (dim==2 && !fit_prescribed_geometry),
                   ExcMessage("Automatic boundary completion requires 2D prescribed fixed geometry "
                              "(Fit prescribed geometry to phase field=false); 3D contacts are unsupported."));
@@ -441,11 +454,49 @@ namespace aspect
 
     // Determine mesh-aware reconstruction support before changing any manager
     // state; all faults use these radii when checking tubular-region overlap.
-    const std::vector<InitialFaultSupport> fault_support =
+    std::vector<InitialFaultSupport> fault_support =
       determine_initial_fault_support(phase_field_handler,
                                       this->get_dof_handler(),
                                       this->get_mpi_communicator(),
                                       prescribed_faults);
+    if (full_normal_cross_section)
+      {
+        AssertThrow(prescribed_faults.size() == 1
+                    && dynamic_cast<const GeometryModel::Box<dim> *>(&this->get_geometry_model()) != nullptr,
+                    ExcMessage("Full normal cross-section support requires one straight fault in a Box."));
+        const auto &vertices = prescribed_faults.front().vertices;
+        const Tensor<1,dim> direction = vertices.back() - vertices.front();
+        const double length = direction.norm();
+        const Tensor<1,dim> tangent = direction / length;
+        Tensor<1,dim> normal;
+        normal[0] = -tangent[1];
+        normal[1] = tangent[0];
+        const double tolerance = 64 * std::numeric_limits<double>::epsilon()
+                                 * std::max({1.0, length, vertices.front().norm(), vertices.back().norm()});
+        for (const auto &vertex : vertices)
+          AssertThrow(std::abs((vertex - vertices.front()) * normal) <= tolerance,
+                      ExcMessage("Full normal cross-section support requires a straight prescribed fault."));
+        double local_width = 0, local_min = length, local_max = 0;
+        for (const auto &cell : this->get_dof_handler().active_cell_iterators())
+          if (cell->is_locally_owned())
+            for (const auto v : cell->vertex_indices())
+              {
+                const Tensor<1,dim> offset = cell->vertex(v) - vertices.front();
+                local_width = std::max(local_width, std::abs(offset * normal));
+                local_min = std::min(local_min, offset * tangent);
+                local_max = std::max(local_max, offset * tangent);
+              }
+        const auto comm = this->get_mpi_communicator();
+        AssertThrow(std::abs(Utilities::MPI::min(local_min, comm)) <= tolerance
+                    && std::abs(Utilities::MPI::max(local_max, comm) - length) <= tolerance,
+                    ExcMessage("The prescribed fault must span the full tangential extent of the Box; "
+                               "full normal support does not extend finite sharp endpoints."));
+        const double width = Utilities::MPI::max(local_width, comm) + tolerance;
+        std::fill(fault_support.front().prescribed_half_widths.begin(),
+                  fault_support.front().prescribed_half_widths.end(), width);
+        this->get_pcout() << "fixed normal association half-width=" << std::setprecision(17)
+                         << width << " ... " << std::flush;
+      }
     std::vector<double> reconstruction_radii(fault_support.size());
     for (unsigned int fault_index = 0;
          fault_index < fault_support.size(); ++fault_index)
@@ -484,6 +535,14 @@ namespace aspect
     ++projection_metadata_version;
     invalidate_particle_projection_cache();
     initial_reconstruction_complete = true;
+
+    if (full_normal_cross_section)
+      {
+        // Establish the fixed eligibility region before any dependent cohesive
+        // projection. Both caches consume the same committed width metadata.
+        get_locally_owned_particle_fault_associations();
+        prepare_stokes_qp_projection_cache();
+      }
 
     this->get_pcout() << "done." << std::endl << std::endl;
   }
@@ -1044,7 +1103,7 @@ namespace aspect
     // Build associations from the exact velocity quadrature used by the Stokes
     // assembler; cell id and QP order are part of the cache identity.
     const Quadrature<dim> &quadrature =
-      this->introspection().quadratures.velocities;
+      fault_mechanical_quadrature(*this);
     FEValues<dim> fe_values(this->get_mapping(), this->get_fe(), quadrature,
                             update_quadrature_points);
     std::map<CellId, std::vector<StokesQPFaultAssociation>> candidate;

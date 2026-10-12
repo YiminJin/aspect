@@ -223,6 +223,13 @@ namespace aspect
     {
       if (!this->get_parameters().reconstruct_faults)
         return;
+      if (surface_cohesive_history)
+        for (unsigned int c=0; c<elastic_shear_moduli.size(); ++c)
+          AssertThrow(elastic_shear_moduli[c] == elastic_shear_moduli[0]
+                      && reference_viscosities[c] == reference_viscosities[0]
+                      && thermal_viscosity_exponents[c] == 0.,
+                      ExcMessage("Surface elastic-slip history requires uniform G and "
+                                 "temperature-independent uniform viscosity."));
       normalization_cell_cache.change_connection = this->get_triangulation().signals.any_change.connect(
         [this]() { normalization_cell_cache.mesh_changed = true; });
       normalization_cell_cache.create_connection = this->get_triangulation().signals.create.connect(
@@ -234,7 +241,25 @@ namespace aspect
       this->get_signals().post_resume_load_user_data.connect(
         [this](parallel::distributed::Triangulation<dim> &)
         {
+          AssertThrow(!fe_strain_history && !this->get_reconstructed_fault_manager().has_property("accepted FE strain history"),
+                      ExcMessage("Accepted FE strain is fresh-run only; checkpoint conversion is forbidden."));
           invalidate_normalization_cache();
+          AssertThrow(this->get_reconstructed_fault_manager().has_property(
+                        "cohesive bulk conjugate work") == cohesive_work_measure,
+                      ExcMessage("Cannot change cohesive work measure on restart."));
+          AssertThrow(this->get_reconstructed_fault_manager().has_property(
+                        "surface elastic slip history") == surface_cohesive_history,
+                      ExcMessage("Cannot change cohesive history representation on restart."));
+          AssertThrow(this->get_reconstructed_fault_manager().has_property(
+                        "recoverable phase history") == recoverable_phase_history,
+                      ExcMessage("Cannot change phase-driving history on restart. Start fresh."));
+          AssertThrow(this->get_reconstructed_fault_manager().has_property(
+                        "unloaded cohesive initialization") == unloaded_cohesive_initialization,
+                      ExcMessage("Cannot change cohesive initialization provenance on restart."));
+          AssertThrow(this->get_reconstructed_fault_manager().has_property(
+                        "row sum lumped I h representation") == lump_normalization_projection,
+                      ExcMessage("Cannot change I_h projection on restart: stored previous "
+                                 "normalization belongs to another representation. Start fresh."));
           restore_frozen_normalization_after_restart = mature_frictional_fault && !evolve_phase_field;
           AssertThrow(this->get_reconstructed_fault_manager().has_property(
                         "mature fault reference geometry") == mature_frictional_fault,
@@ -284,6 +309,20 @@ namespace aspect
             "phase field fault chemical composition " + chemical_field_names[c], 1));
       if (mature_frictional_fault)
         fault_manager.register_property("mature fault reference geometry", dim);
+      // Presence in the existing serialized property registry is provenance.
+      // The default layout remains unchanged, including old consistent checkpoints.
+      if (lump_normalization_projection)
+        fault_manager.register_property("row sum lumped I h representation", 1);
+      if (cohesive_work_measure)
+        fault_manager.register_property("cohesive bulk conjugate work", 1);
+      if (surface_cohesive_history)
+        fault_manager.register_property("surface elastic slip history", 1);
+      if (recoverable_phase_history)
+        fault_manager.register_property("recoverable phase history", 1);
+      if (unloaded_cohesive_initialization)
+        fault_manager.register_property("unloaded cohesive initialization", 1);
+      if (fe_strain_history)
+        fault_manager.register_property("accepted FE strain history", 1);
     }
 
     template <int dim>
@@ -338,6 +377,7 @@ namespace aspect
       else
         compute_normalization_integrals();
       compute_fault_surface_temperatures();
+      prepare_fe_strain_history();
 
       // Rate-and-state friction needs one complete positive Theta field. On a
       // fresh model it is projected from the user-mapped particle field;
@@ -588,7 +628,36 @@ namespace aspect
       compute_history_candidates(samples, time_step, stress_position, H_position,
                                  chemical_positions, candidates);
       validate_history_candidates(candidates);
+      const auto fe_update = fe_strain_history
+                             ? prepare_fe_strain_commit(accepted_bulk_state, candidates.cohesive_projection.nodal_values)
+                             : std::shared_ptr<FEStrainUpdate>();
+      double fe_publication_error=0.,fe_publication_bound=0.,fe_publication_net_bound=0.;
+      if (fe_update)
+        for (const auto &particle : particle_manager.get_particle_handler())
+          {
+            auto &candidate = candidates.particle_candidates.at(particle.get_id());
+            double evaluation_scale=0.;
+            const auto stress = candidate_fe_strain_stress(
+              fe_update, particle.get_surrounding_cell()->id(), particle.get_location(),&evaluation_scale);
+            const double error=(stress-candidate.stress).norm();
+            const double bound=128*std::numeric_limits<double>::epsilon()
+                               *std::max(1.,evaluation_scale);
+            fe_publication_error=std::max(fe_publication_error,error);
+            fe_publication_bound=std::max(fe_publication_bound,bound);
+            fe_publication_net_bound=std::max(fe_publication_net_bound,
+              128*std::numeric_limits<double>::epsilon()*std::max({1.,stress.norm(),candidate.stress.norm()}));
+            AssertThrow(error <= bound,
+                        ExcMessage("Accepted FE strain does not reproduce the native Maxwell publication."));
+            // Publish a sample of the single staged FE state, not a second
+            // independently evolving particle history. Difference is roundoff.
+            candidate.stress = stress;
+          }
+      if(fe_update)this->get_pcout()<<std::setprecision(17)
+        <<"   FE Maxwell publication: error="<<fe_publication_error
+        <<" evaluation allowance="<<fe_publication_bound
+        <<" net-stress allowance="<<fe_publication_net_bound<<'\n';
       publish_history_candidates(candidates, stress_position, H_position);
+      if (fe_update) publish_fe_strain_commit(fe_update);
     }
 
     template <int dim>
@@ -624,7 +693,7 @@ namespace aspect
         point_cache, this->get_dof_handler(), accepted_bulk_state,
         VectorTools::EvaluationFlags::avg, phase_field_component);
       samples.previous_phase_fields = VectorTools::point_values<1>(
-        point_cache, this->get_dof_handler(), this->get_old_solution(),
+        point_cache, this->get_dof_handler(), fe_strain_history ? accepted_fe_strain_state() : this->get_old_solution(),
         VectorTools::EvaluationFlags::avg, phase_field_component);
     }
 
@@ -664,6 +733,14 @@ namespace aspect
         diagnostics.open_source_history(this->get_output_directory(),
                                         this->get_timestep_number(), this->get_mpi_communicator());
 
+      if (surface_cohesive_history)
+        {
+          std::vector<std::vector<double>> rates(faults.size());
+          for (unsigned int f=0; f<faults.size(); ++f)
+            rates[f] = fault_manager.get_slip_rate(f);
+          cohesive_projection.nodal_values = compute_surface_cohesive_candidates(time_step, rates);
+        }
+
       // First evaluate the accepted cohesive traction samples. Projection is
       // completed before any particle history candidate uses the new traction.
       unsigned int particle_index = 0;
@@ -676,7 +753,7 @@ namespace aspect
             {
               const auto &association = associations[particle_index];
               Assert(particle.get_id() == association.particle_id, ExcInternalError());
-              if (association.active)
+              if (association.active && !surface_cohesive_history)
                 {
                   const LocalizationResponse localization =
                     evaluate_reconstructed_fault_localization(
@@ -713,8 +790,8 @@ namespace aspect
         }
       throw_if_history_error(local_error, this->get_mpi_communicator());
 
-      cohesive_projection =
-        fault_manager.project_particle_scalar(cohesive_samples);
+      if (!surface_cohesive_history)
+        cohesive_projection = fault_manager.project_particle_scalar(cohesive_samples);
 
       try
         {
@@ -781,14 +858,14 @@ namespace aspect
                 }
               const ArrayView<const double> properties = particle.get_properties();
               SymmetricTensor<2,dim> old_stress;
-              for (unsigned int component = 0;
-                   component < SymmetricTensor<2,dim>::n_independent_components;
-                   ++component)
-                old_stress[SymmetricTensor<2,dim>::unrolled_to_component_indices(
-                  component)] = properties[stress_position+component];
-              if (benchmark_retained_stress)
-                old_stress = benchmark_retained_stress(
-                  particle.get_surrounding_cell()->id(), particle.get_location());
+              if (!fe_strain_history)
+                for (unsigned int component = 0;
+                     component < SymmetricTensor<2,dim>::n_independent_components;
+                     ++component)
+                  old_stress[SymmetricTensor<2,dim>::unrolled_to_component_indices(
+                    component)] = properties[stress_position+component];
+              old_stress = retained_history_stress(
+                particle.get_surrounding_cell()->id(), particle.get_location(), old_stress);
 
               std::vector<double> bulk_compositions(chemical_positions.size());
               for (unsigned int c = 0; c < chemical_positions.size(); ++c)
@@ -805,6 +882,8 @@ namespace aspect
 
               SymmetricTensor<2,dim> effective_strain_rate =
                 symmetrize(velocity_gradients[particle_index]);
+              if (fe_strain_history)
+                effective_strain_rate = Utilities::Tensors::consistent_deviator(effective_strain_rate);
               SymmetricTensor<2,dim> continued_crack;
               double continued_chi=0., continued_V=0.;
               double new_H = properties[H_position];
@@ -860,13 +939,20 @@ namespace aspect
                   if (evolve_phase_field)
                     {
                       const double xi = association.xi;
-                      const double projected_traction =
-                        (1.0-xi) * cohesive_projection.nodal_values[
+                      const double projected_traction = surface_cohesive_history
+                        ? cohesive.cohesive_traction
+                        : (1.0-xi) * cohesive_projection.nodal_values[
                           association.fault_index][association.segment_index]
                         + xi * cohesive_projection.nodal_values[
                           association.fault_index][association.segment_index+1];
                       const double H_candidate =
-                        compute_crack_driving_force_candidate(
+                        recoverable_phase_history
+                        ? compute_recoverable_phase_driving_force(
+                            MaterialUtilities::average_value(
+                              localization.surface_material_fractions,
+                              elastic_shear_moduli, viscosity_averaging),
+                            localization.current_degradation, projected_traction)
+                        : compute_crack_driving_force_candidate(
                           time_step, surface_coefficients,
                           localization.current_degradation,
                           localization.previous_h, projected_traction,
@@ -1092,6 +1178,26 @@ namespace aspect
 
     template <int dim>
     void
+    PhaseFieldFault<dim>::prepare_reconstructed_fault_phase_state()
+    {
+      const auto &manager = this->get_reconstructed_fault_manager();
+      const auto &info = manager.get_property_information();
+      const bool initialized = cohesive_history_is_initialized(
+        manager.get_faults(), info[fault_property_indices.cohesive_traction].position,
+        info[fault_property_indices.previous_normalization_integral].position);
+      AssertThrow(initialized || (this->get_timestep_number() == 0
+                                  && !this->get_parameters().resume_computation),
+                  ExcMessage("Phase restart requires initialized cohesive history."));
+      if (!initialized)
+        initialize_cohesive_state_from_initial_fields();
+      else
+        compute_normalization_integrals();
+      prepare_fe_strain_history();
+    }
+
+
+    template <int dim>
+    void
     PhaseFieldFault<dim>::initialize_cohesive_state_from_initial_fields()
     {
       AssertThrow(dim == 2, ExcNotImplemented());
@@ -1136,7 +1242,7 @@ namespace aspect
     std::map<types::particle_index, double>
     PhaseFieldFault<dim>::evaluate_initial_cohesive_particle_values()
     {
-      if (mature_frictional_fault)
+      if (mature_frictional_fault || unloaded_cohesive_initialization)
         {
           std::map<types::particle_index,double> zero;
           for (const auto &p : this->get_reconstructed_fault_manager().get_locally_owned_particle_fault_associations())
@@ -1274,6 +1380,7 @@ namespace aspect
     template void PhaseFieldFault<dim>::commit_reconstructed_fault_mechanical_history(const LinearAlgebra::BlockVector &); \
     template double PhaseFieldFault<dim>::compute_reconstructed_fault_time_step(const double) const; \
     template void PhaseFieldFault<dim>::validate_cohesive_state_commit(const std::vector<std::vector<double>> &) const; \
+    template void PhaseFieldFault<dim>::prepare_reconstructed_fault_phase_state(); \
     template void PhaseFieldFault<dim>::commit_cohesive_state(const std::vector<std::vector<double>> &) noexcept; \
     template void PhaseFieldFault<dim>::initialize_cohesive_state_from_initial_fields(); \
     template std::map<types::particle_index,double> PhaseFieldFault<dim>::evaluate_initial_cohesive_particle_values();

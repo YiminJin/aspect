@@ -19,6 +19,8 @@
 #include <aspect/reconstructed_fault/utilities.h>
 
 #include <aspect/reconstructed_fault/normal_filter_internal.h>
+#include <aspect/reconstructed_fault/surface_direct_internal.h>
+#include <deal.II/base/quadrature_lib.h>
 
 #include <deal.II/fe/fe_values.h>
 
@@ -37,12 +39,28 @@ namespace aspect
   {
     TimerOutput::Scope timer(*performance_timer,"Fault: bulk work R/K");
     phase_field_fault.validate_reconstructed_fault_constitutive_state();
+    const bool cohesive_work = phase_field_fault.uses_cohesive_work_measure();
     const bool filtering=normal_filter_mode!="raw";
+    AssertThrow(!cohesive_work || (!filtering && !normal_diagnostic_window),
+                ExcMessage("Cohesive work does not select mature normal-stress filters."));
     AssertThrow(!filtering || !phase_field_fault.uses_adiabatic_friction_pressure(),
                 ExcMessage("Experimental normal filtering requires true normal stress."));
     auto &manager=this->get_reconstructed_fault_manager();
     const auto &faults=manager.get_faults();
     AssertDimension(slip_rate.size(),faults.size());
+    if (cohesive_work)
+      {
+        AssertThrow(faults.size()==1,ExcMessage("Cohesive work currently supports one straight fault."));
+        const auto &f=faults[0];
+        auto tangent=f.vertex(1)-f.vertex(0);tangent/=tangent.norm();
+        const double length=f.vertex(f.n_vertices()-1).distance(f.vertex(0));
+        for (unsigned int j=0;j<f.n_vertices();++j)
+          {
+            const auto r=f.vertex(j)-f.vertex(0);
+            AssertThrow((r-(r*tangent)*tangent).norm()<1e-10*length,
+                        ExcMessage("Cohesive work requires a straight fault."));
+          }
+      }
     SurfaceAssembly local;
     for (auto *v:{&local.residual.values,&local.residual.shear_traction,
                  &local.residual.cohesive_traction,&local.residual.friction_traction,
@@ -81,11 +99,11 @@ namespace aspect
         d.friction_mass_off_diagonal=local.mass_off_diagonal;
       }
     const auto &intro=this->introspection();
-    const auto &quadrature=intro.quadratures.velocities;
+    const auto &quadrature=fault_mechanical_quadrature(*this);
     FEValues<dim> fe(this->get_mapping(),this->get_fe(),quadrature,
                      update_values|update_gradients|update_quadrature_points|update_JxW_values);
     const unsigned int nq=quadrature.size();
-    std::vector<double> phase(nq),temperature(nq),pressure(nq);
+    std::vector<double> phase(nq),previous_phase(nq),temperature(nq),pressure(nq);
     std::vector<SymmetricTensor<2,dim>> strain(nq);
     std::vector<Tensor<2,dim>> diagnostic_gradients(nq);
     std::vector<std::vector<double>> composition(intro.n_compositional_fields,std::vector<double>(nq));
@@ -105,6 +123,7 @@ namespace aspect
           const auto &associations=manager.get_stokes_qp_fault_associations(
             cell->id(),quadrature,fe.get_quadrature_points());
           fe[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)].get_function_values(bulk_state,phase);
+          fe[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)].get_function_values(phase_field_fault.uses_fe_strain_history() ? phase_field_fault.accepted_fe_strain_state() : this->get_old_solution(),previous_phase);
           fe[intro.extractors.temperature].get_function_values(bulk_state,temperature);
           fe[intro.extractors.pressure].get_function_values(bulk_state,pressure);
           fe[intro.extractors.velocities].get_function_symmetric_gradients(bulk_state,strain);
@@ -246,8 +265,7 @@ namespace aspect
                         const auto index=SymmetricTensor<2,dim>::unrolled_to_component_indices(c);
                         input.old_maxwell_stress[index]=fields[stress_fields[c]][q];particle_stress[index]=particle_values[q][sp+c];
                       }
-                    if (phase_field_fault.benchmark_retained_stress)
-                      input.old_maxwell_stress = phase_field_fault.benchmark_retained_stress(cell->id(),x);
+                    input.old_maxwell_stress = phase_field_fault.retained_history_stress(cell->id(),x,input.old_maxwell_stress);
                     std::vector<double> chemical;
                     for (const auto c:intro.chemical_composition_field_indices()) chemical.push_back(fields[c][q]);
                     input.bulk_material_fractions=MaterialModel::MaterialUtilities::compute_composition_fractions(chemical);
@@ -276,20 +294,20 @@ namespace aspect
                 typename MaterialModel::PhaseFieldFault<dim>::ReconstructedFaultPointInputs input;
                 input.fault_index=a.fault_index;input.segment_index=a.segment_index;input.xi=a.xi;
                 input.position=fe.quadrature_point(q);
-                input.phase_field=phase[q];input.previous_phase_field=phase[q];
+                input.phase_field=phase[q];input.previous_phase_field=cohesive_work ? previous_phase[q] : phase[q];
                 input.temperature=temperature[q];input.dynamic_pressure=pressure[q];input.strain_rate=strain[q];
                 input.slip_tensor=manager.get_shear_sense(a.fault_index)
                                   *symmetrize(outer_product(a.tangent,a.normal));
                 input.normal_tensor=symmetrize(outer_product(a.normal,a.normal));
-                for (unsigned int c=0;c<stress_fields.size();++c)
-                  {
-                    AssertIndexRange(stress_fields[c],composition.size());
-                    input.old_maxwell_stress[SymmetricTensor<2,dim>::unrolled_to_component_indices(c)]
-                      =composition[stress_fields[c]][q];
-                  }
-                if (phase_field_fault.benchmark_retained_stress)
-                  input.old_maxwell_stress = phase_field_fault.benchmark_retained_stress(
-                    cell->id(), fe.quadrature_point(q));
+                if (!phase_field_fault.uses_fe_strain_history())
+                  for (unsigned int c=0;c<stress_fields.size();++c)
+                    {
+                      AssertIndexRange(stress_fields[c],composition.size());
+                      input.old_maxwell_stress[SymmetricTensor<2,dim>::unrolled_to_component_indices(c)]
+                        =composition[stress_fields[c]][q];
+                    }
+                input.old_maxwell_stress = phase_field_fault.retained_history_stress(
+                    cell->id(), fe.quadrature_point(q), input.old_maxwell_stress);
                 std::vector<double> chemical;
                 for (const auto c:intro.chemical_composition_field_indices()) chemical.push_back(composition[c][q]);
                 input.bulk_material_fractions=MaterialModel::MaterialUtilities::compute_composition_fractions(chemical);
@@ -297,7 +315,16 @@ namespace aspect
                 input.slip_rate=ReconstructedFaultUtilities::interpolate_slip_rate(
                   V[a.segment_index],V[a.segment_index+1],a.shape_1);
                 input.capture_stress_components = static_cast<bool>(local.normal_diagnostic);
-                const auto response=phase_field_fault.evaluate_reconstructed_fault_point(input);
+                auto response=phase_field_fault.evaluate_reconstructed_fault_point(input);
+                if (cohesive_work)
+                  {
+                    // L* tau: resistance belongs to ds below, not JxW*chi.
+                    response.residual_density=response.shear_traction;
+                    response.minus_derivative_wrt_slip_rate=
+                      2.*response.eta_ve*response.localization_factor*(input.slip_tensor*input.slip_tensor);
+                    response.cohesive_traction=response.friction_traction=response.damping_traction=0.;
+                    response.friction_coefficient=0.;
+                  }
                 const double weight=fe.JxW(q)*response.localization_factor;
                 if (weight==0.) continue;
                 AssertThrow(std::isfinite(weight) && weight>0.
@@ -360,11 +387,11 @@ namespace aspect
                     local.residual.friction_traction[f][j+i]+=weight*N[i]*response.friction_traction;
                     local.residual.damping_traction[f][j+i]+=weight*N[i]*response.damping_traction;
                     local.residual.normal_traction[f][j+i]+=weight*N[i]*response.normal_traction;
-                    local.mass_diagonal[f][j+i]+=weight*N[i]*N[i];
+                    if (!cohesive_work) local.mass_diagonal[f][j+i]+=weight*N[i]*N[i];
                     if (assemble_jacobian)
                       local.diagonal[f][j+i]+=weight*N[i]*N[i]*response.minus_derivative_wrt_slip_rate;
                   }
-                local.mass_off_diagonal[f][j]+=weight*N[0]*N[1];
+                if (!cohesive_work) local.mass_off_diagonal[f][j]+=weight*N[0]*N[1];
                 squared[f]+=weight*response.residual_density*response.residual_density;
                 measure[f]+=weight;
                 local.residual.minimum_normal_traction=std::min(local.residual.minimum_normal_traction,response.normal_traction);
@@ -411,6 +438,32 @@ namespace aspect
                  &local.diagonal,&local.off_diagonal,&local.mass_diagonal,&local.mass_off_diagonal})
       for (auto &fault:*v)
         { const auto copy=fault; Utilities::MPI::sum(copy,comm,fault); }
+    if (cohesive_work)
+      {
+        // Fault geometry is replicated. Add ds resistance ONCE after the bulk
+        // MPI reduction; the same quadrature assembles R, K and its mass.
+        const QGauss<1> surface_quadrature(3);
+        for (unsigned int f=0;f<faults.size();++f)
+          for (unsigned int j=0;j<faults[f].n_cells();++j)
+            for (unsigned int q=0;q<surface_quadrature.size();++q)
+              {
+                const double x=surface_quadrature.point(q)[0],N[2]={1.-x,x};
+                const double w=surface_quadrature.weight(q)*faults[f].vertex(j).distance(faults[f].vertex(j+1));
+                const double rate=ReconstructedFaultUtilities::interpolate_slip_rate(slip_rate[f][j],slip_rate[f][j+1],x);
+                const auto r=phase_field_fault.evaluate_cohesive_surface_resistance(f,j,x,rate);
+                for (unsigned int i=0;i<2;++i)
+                  {
+                    local.residual.values[f][j+i]-=w*N[i]*(r.cohesive_traction+r.friction_traction+r.damping_traction);
+                    local.residual.cohesive_traction[f][j+i]+=w*N[i]*r.cohesive_traction;
+                    local.residual.friction_traction[f][j+i]+=w*N[i]*r.friction_traction;
+                    local.residual.damping_traction[f][j+i]+=w*N[i]*r.damping_traction;
+                    local.mass_diagonal[f][j+i]+=w*N[i]*N[i];
+                    if (assemble_jacobian) local.diagonal[f][j+i]+=w*N[i]*N[i]*r.minus_derivative_wrt_slip_rate;
+                  }
+                local.mass_off_diagonal[f][j]+=w*N[0]*N[1];
+                if (assemble_jacobian) local.off_diagonal[f][j]+=w*N[0]*N[1]*r.minus_derivative_wrt_slip_rate;
+              }
+      }
     if (filtering)
       {
         TimerOutput::Scope filter_timer(*performance_timer,"Fault: normal filter");
@@ -488,6 +541,22 @@ namespace aspect
         total_squared+=squared[f];total_measure+=measure[f];
       }
     local.residual.weighted_rms=std::sqrt(total_squared/total_measure);
+    if (cohesive_work)
+      {
+        double square=0.,length=0.;
+        for (unsigned int f=0;f<faults.size();++f)
+          {
+            internal::FaultSurfaceDirect mass(local.mass_diagonal[f],local.mass_off_diagonal[f],
+                                              std::vector<bool>(faults[f].n_vertices(),false),f);
+            std::vector<double> density;mass.solve(local.residual.values[f],density);
+            double dot=0.;
+            for (unsigned int j=0;j<density.size();++j) dot+=density[j]*local.residual.values[f][j];
+            const double L=faults[f].vertex(0).distance(faults[f].vertex(faults[f].n_vertices()-1));
+            local.residual.per_fault_weighted_rms[f]=std::sqrt(std::max(0.,dot)/L);
+            square+=dot;length+=L;
+          }
+        local.residual.weighted_rms=std::sqrt(std::max(0.,square)/length);
+      }
     local.residual.mass_diagonal=local.mass_diagonal;local.residual.mass_off_diagonal=local.mass_off_diagonal;
     local.residual.minimum_normal_traction=Utilities::MPI::min(local.residual.minimum_normal_traction,comm);
     local.residual.maximum_normal_traction=Utilities::MPI::max(local.residual.maximum_normal_traction,comm);

@@ -1,0 +1,1586 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=25mm]{geometry}
+\usepackage{amsmath,amssymb,mathtools,bm,mathrsfs}
+\usepackage{booktabs,longtable,array,enumitem}
+\usepackage{xcolor,microtype}
+\usepackage{tocloft}
+\usepackage{hyperref}
+\usepackage[capitalize,nameinlink]{cleveref}
+\hypersetup{colorlinks=true,linkcolor=blue!45!black,urlcolor=blue!45!black,citecolor=blue!45!black,pdftitle={Phase-field fault model: total energy and native FE strain}}
+\setlength{\parskip}{4pt}
+\setlength{\parindent}{0pt}
+\setcounter{tocdepth}{1}
+\setlength{\cftbeforesecskip}{2pt}
+\setlist{nosep,leftmargin=*}
+\allowdisplaybreaks[2]
+\newcommand{\B}{\mathcal B}
+\newcommand{\F}{\mathcal F}
+\newcommand{\Smat}{\bm{\mathcal S}}
+\newcommand{\strain}{\bm\varepsilon}
+\newcommand{\tauv}{\bm\tau}
+\newcommand{\R}{\bm R}
+\newcommand{\Ein}{\bm E^{\rm in}}
+\newcommand{\Etot}{\bm E^{\rm tot}}
+\newcommand{\Eb}{\bm E^{\rm e}_b}
+\newcommand{\Ev}{\bm E^{\rm v}_b}
+\newcommand{\qcoh}{\tau^{\rm coh}}
+\newcommand{\Gc}{\mathcal G_c}
+\newcommand{\dd}{\,\mathrm d}
+\newcommand{\sym}{\operatorname{sym}}
+\newcommand{\dev}{\operatorname{dev}}
+\newcommand{\diag}{\operatorname{diag}}
+\newcommand{\Ecal}{\mathscr E}
+\newcommand{\Dcal}{\mathscr D}
+\newcommand{\vect}[1]{\boldsymbol{#1}}
+\newcommand{\note}[1]{\par\smallskip\noindent\textbf{Interpretation.} #1\par\smallskip}
+\newcommand{\caution}[1]{\par\smallskip\noindent\textbf{Qualification.} #1\par\smallskip}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\title{The current phase-field fault model\\
+\large From stored energy to governing equations and the native FE strain algorithm}
+\author{Technical reconstruction for Yimin Jin}
+\date{Model snapshot: 9 October 2026}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+This note reconstructs the restricted P2 model documented in the native
+localization report, the native FE strain report, and the endpoint comparison.
+The phase step uses total recoverable bulk and cohesive energy plus fracture
+energy, with direct phase irreversibility. It holds the accepted bulk strain
+state and surface elastic slip fixed while redistributing their elastic stresses.
+The following mechanical step enforces endpoint equilibrium and integrates
+the fixed-profile Maxwell equations exactly for interval-constant rates.
+A vector field in the native velocity FE space stores the accepted bulk history.
+These are three distinct constructions: stored energy, dissipative constitutive
+laws, and a sequential time discretization. They are not a single global
+minimization problem. Every derivation below specifies what is held fixed.
+The current implementation satisfies constrained first-order phase conditions;
+the latest report exhibits a saddle point, so local-minimum selection is not
+established. The plane-strain subsection records a subsequent source audit and its
+consistent 3D embedding. Earlier raw-gradient results remain historical evidence.
+\end{abstract}
+
+{\small\setlength{\parskip}{0pt}\tableofcontents}
+\clearpage
+
+\section{What is currently selected}
+\label{sec:status}
+
+The operative state and step are
+\begin{equation}
+ \underbrace{(\phi^a,\bm d_R^a,Z^a)}_{\text{accepted state}}
+ \ \longrightarrow\ 
+ \underbrace{\phi^k,\tauv^*}_{\text{phase relaxation at fixed }\bm d_R^a,Z^a}
+ \ \longrightarrow\ 
+ \underbrace{(\bm u^k,p^k,V^k)}_{\text{endpoint mechanics}}
+ \ \longrightarrow\ 
+ (\phi^k,\bm d_R^k,Z^k).
+ \label{eq:overview}
+\end{equation}
+Here $a=k-1$ is the last \emph{accepted} step, not a predictor or a nonlinear
+iterate. The quantities $Z$ and $\bm d_R$ are defined below. The governing choices
+in this snapshot are:
+\begin{enumerate}
+ \item $\Ecal=E_b+E_c+F$ drives phase evolution. The old maximum-history field
+ $\mathcal H^+$ is diagnostic after initialization; it is not an additional driver.
+ \item Phase trials preserve $\R^a$ and $Z^a$, but update $I$, $\chi$, bulk
+ stress, and cohesive traction consistently with the trial phase.
+ \item The immutable lower bound is $\phi^a$. No healing is admitted.
+ \item Mechanics uses the \emph{endpoint} Maxwell stresses. Exact exponential
+ constitutive integration does not make the whole coupled step exact in time.
+ \item The optional native representation is $\R_h=\mathcal D\bm d_{R,h}$
+ in the native velocity space (Q2 in the baseline, Q3 in the diagnostic
+ enrichment). Particle stress is a derived sample in this option.
+ \item Fracture energy still uses CPDI particle-domain integration. Consistent
+ surface normalization and its derivative remain part of the equations.
+\end{enumerate}
+
+The latest report~\cite{localization} resolves the former nonlinear stall with
+a small exact free-set Newton correction at the existing tolerance. Compatible
+side conditions recover a localized band and reproduce the corresponding
+coarse one-dimensional discretization. The unresolved issues are spatial stress
+accuracy, selection of stable phase branches, and coupled time/energy accuracy.
+P3 propagation is not yet qualified.
+
+\subsection{Scope of the derivation}
+
+Unless explicitly labeled otherwise, assume a straight fixed fault in a
+two-dimensional, small-strain, incompressible body; fixed mesh and material
+coordinates; no stress rotation or transport; constant and identical bulk and
+cohesive parameters $G>0$, $\eta>0$; and a fixed normal association region.
+The present native option is a fresh serial run with frozen particles and no
+restart, geometry evolution, or RSF state evolution. The selected friction
+coefficient is $\mu=0.1$ and radiation damping is zero. We retain symbolic
+friction and radiation terms to show their location, while clearly distinguishing
+them from tested capabilities.
+
+The exact FE history reduction requires more than equality of relaxation
+times: its cancellation below uses the same $G$ and the same $\eta$ for both
+constituents. It is not yet a prescription for heterogeneous lithospheric
+rheology, a rotating/advecting fault, or the full BP3 problem.
+
+\section{Notation and normal localization}
+\label{sec:notation}
+
+The domain is $\B$, the sharp reconstructed fault is $\F$, the tangential
+coordinate is $\xi$, and the normal coordinate is $\zeta$. For the selected
+straight geometry, $\mathrm dA=\mathrm d\xi\,\mathrm d\zeta$.
+Surface fields are extended constantly along each associated normal line.
+Let
+\begin{equation}
+ \Smat=\frac{\bm e^n\otimes\bm e^s+\bm e^s\otimes\bm e^n}{2},
+ \qquad \operatorname{tr}\Smat=0,\qquad \Smat:\Smat=\frac12.
+\end{equation}
+In particular, for a horizontal fault, $\tauv:\Smat=\tau_{xy}$.
+
+\begin{longtable}{L{.20\textwidth}L{.55\textwidth}L{.15\textwidth}}
+\toprule Symbol & Meaning & Units\\\midrule\endhead
+$\bm u$, $\bm d$ & Velocity and physical total displacement & m/s, m\\
+$\strain$ & Strain rate; no extra overdot is used on this symbol & s$^{-1}$\\
+$\Etot$, $\Ein$, $\R$ & Total strain, committed inelastic strain, and their difference & 1\\
+$\bm d_R$ & FE vector encoding $\R$; not total displacement & m\\
+$\tauv$, $p$ & Bulk stress variable and Stokes pressure & Pa\\
+$s$, $V=\dot s$ & Accumulated scalar slip and slip rate & m, m/s\\
+$s^e$, $s^v$ & Elastic and viscous cohesive slip, $s=s^e+s^v$ & m\\
+$Z=Gs^e$ & Authoritative surface elastic-slip history & Pa m\\
+$\qcoh=Z/I$ & Scalar cohesive traction; called $q$ in reports & Pa\\
+$\phi$, $g$, $h$ & Phase, degradation, and $h=g^{-1}-1$ & 1\\
+$I$, $\chi=h/I$ & Normal integral and normalized slip distribution & m, m$^{-1}$\\
+$\Gc$, $\ell$ & Critical fracture energy and regularization length & J/m$^2$, m\\
+$\lambda=\eta/G$ & Maxwell relaxation time & s\\
+\bottomrule
+\end{longtable}
+
+In the continuum,
+\begin{equation}
+ \Etot=\mathcal D\bm d,\qquad
+ \dot{\Etot}=\strain=\mathcal D\bm u,
+ \qquad \nabla\cdot\bm u=0.
+ \label{eq:strain-def}
+\end{equation}
+With an initially trace-free displacement, symmetric and deviatoric symmetric
+gradients coincide for the exact incompressible solution. The discrete distinction
+is addressed explicitly in \cref{sec:trace}.
+
+\subsection{Degradation and normalization}
+
+The selected AT1/Lorentz functions are
+\begin{align}
+ \alpha(\phi)&=\phi,\qquad c_0=4\int_0^1\sqrt{\alpha(z)}\dd z=\frac83,\\
+ g(\phi)&=\frac{(1-\phi)^2}{(1-\phi)^2+m\phi(1+p\phi)},
+ &h(\phi)&=\frac1{g(\phi)}-1
+ =\frac{m\phi(1+p\phi)}{(1-\phi)^2}.
+ \label{eq:g-h}
+\end{align}
+The current $p=1$ gives
+\begin{equation}
+ h'(\phi)=\frac{m(1+3\phi)}{(1-\phi)^3},\qquad
+ h''(\phi)=\frac{6m(1+\phi)}{(1-\phi)^4}.
+ \label{eq:h-derivatives}
+\end{equation}
+For the direct continuum normal integral,
+\begin{equation}
+ I(\xi;\phi)=\int_{\mathcal T_\xi}h(\phi(\xi,\zeta))\dd\zeta,
+ \qquad \chi(\xi,\zeta;\phi)=\frac{h(\phi(\xi,\zeta))}{I(\xi;\phi)},
+ \qquad \int_{\mathcal T_\xi}\chi\dd\zeta=1.
+ \label{eq:normalization}
+\end{equation}
+The native code instead uses a consistent surface representation $I_h$ of the
+direct integrals. The last equality is then an accuracy property, not an exact
+pointwise identity for every normal line. The discrete energy must be differentiated
+through this representation; see \cref{sec:discrete-phase}.
+
+Finite, positive $I$ and positive evaluated $I_h$ are required. Since
+$h\sim(1-\phi)^{-2}$ near saturation, a Q1 normal profile reaching exactly
+$\phi=1$ can have a divergent integral. The formal bound $\phi\leq1$ does not
+authorize such an inadmissible normalization. No arbitrary cap or denominator
+floor is part of the current model. A fully intact normal line with $I=0$ also
+requires a separate activation rule; this pre-existing-band model does not
+resolve that nucleation issue.
+
+\subsection{Audited three-dimensional plane-strain embedding}
+\label{sec:plane-strain}
+
+This subsection is the source-audited correction to the original report's raw
+symmetric-gradient convention. Plane strain means zero out-of-plane displacement
+and rate, not zero out-of-plane deviatoric stress. For a raw in-plane symmetric
+block $A$, define
+\[
+ \widehat A=\begin{pmatrix}A&0\\0&0\end{pmatrix},\qquad
+ \theta=\operatorname{tr}_2 A,\qquad
+ D_3(A)=\widehat A-\frac\theta3\bm1_3.
+\]
+Its stored in-plane block is $D_2(A)=A-\theta\bm1_2/3$; its missing component is
+$D_{3,zz}=-\theta/3=-\operatorname{tr}_2 D_2(A)$. This is not the genuinely
+2D deviator $A-\theta\bm1_2/2$. For already deviatoric in-plane blocks $T,U$,
+use the reduced 3D metric
+\[
+ \begin{aligned}
+ \langle T,U\rangle_3&=T:U+\operatorname{tr}_2T\operatorname{tr}_2U,\\
+ \mathrm{II}(T)&=-\tfrac12\langle T,T\rangle_3,
+ \qquad J_2(T)=\tfrac12\langle T,T\rangle_3,\\
+ \langle D_2(A),D_2(B)\rangle_3&=A:B-\tfrac13\theta_A\theta_B.
+ \end{aligned}
+\]
+The utility \texttt{consistent\_deviator} expects a raw zero-$zz$ plane-strain
+block and returns $D_2(A)$. It is not idempotent on its 2D output; applying it
+again incorrectly subtracts $\operatorname{tr}_2D_2(A)/3$. The utility
+\texttt{consistent\_second\_invariant\_of\_deviatoric\_tensor} expects an
+already deviatoric block and reconstructs its $zz$ component. It does not first
+remove a raw tensor's trace. Neither helper is being numerically changed.
+Here $\mathrm{II}$ is the helper's signed second invariant; $J_2$ is the
+positive deviatoric invariant. This is a notation clarification only.
+
+In the remaining equations, symmetric stress/strain symbols and contractions
+mean the 3D embedding. When represented by two-dimensional blocks, use
+$\langle\cdot,\cdot\rangle_3$ for deviator--deviator contractions. Define
+$\mathcal D\bm v=D_3(\sym\nabla_2\bm v)$, $\R_h=\mathcal D\bm d_{R,h}$,
+and $\strain_h=\mathcal D\bm u_h$. The in-plane stress, bulk energy and
+viscous power reduce to
+\begin{align}
+ \tauv_2&=2G D_2(\sym\nabla\bm d_R)-2Z\chi\Smat_2,
+ &\tau_{zz}&=-\operatorname{tr}_2\tauv_2,\\
+ E_b&=\int_\B\frac{\tauv_2:\tauv_2+
+                    (\operatorname{tr}_2\tauv_2)^2}{4G}\dd A,
+ &\Dcal_b&=\int_\B\frac{\tauv_2:\tauv_2+
+                    (\operatorname{tr}_2\tauv_2)^2}{2\eta}\dd A.
+\end{align}
+The shear slip tensor has zero trace and zero $zz$. Consequently its contraction
+with stress needs no extra trace term. Normalization and its adjoint, cohesive
+storage/loss, and fracture energy are unchanged. At fixed accepted $\bm d_R,Z$,
+$\tau_{zz}$ is independent of $\phi$: the additional bulk trace contribution
+has no direct phase derivative. The mechanics and future accepted anchor still
+change for nonzero pointwise divergence.
+
+With physical Stokes pressure $p$, the reduced momentum residual and tangent are
+\begin{align}
+ r_u(\bm w)&=\int_\B[\tauv_2:\sym\nabla\bm w-p\nabla\cdot\bm w]\dd A
+              -\ell_{\rm ext}(\bm w),\\
+ K_{uu}(\bm w,\delta\bm u)&=2\kappa\int_\B
+   [\sym\nabla\bm w:\sym\nabla\delta\bm u
+    -\tfrac13(\nabla\cdot\bm w)(\nabla\cdot\delta\bm u)]\dd A.
+\end{align}
+No extra trace subtraction is applied to the accepted deviatoric history load.
+The bulk/slip cross blocks are unchanged because $\operatorname{tr}\Smat=0$.
+The FE coefficient update is still
+\[
+ \bm d_R^k=\beta\bm d_R^a+(\kappa/G)\bm u^k,
+ \quad Z^k=\beta Z^a+\kappa V^k,
+ \quad\beta=e^{-\Delta t/\lambda},\quad\kappa=\eta(1-\beta).
+\]
+Applying the linear $D_3\sym\nabla$ proves exactly
+$\tauv^k=\beta\tauv^*+2\kappa(\strain^k-\chi^kV^k\Smat)$, including its
+$zz$ component, for any $\Delta t/\lambda$. No projection, small-step assumption
+or additional accepted state is introduced.
+
+The source audit finds the generic trace-subtraction assembler already present,
+but previously registered only for compressible material or prescribed dilation.
+The selected incompressible fixture registered neither. Its coefficient is the
+material viscosity output $\kappa$, not creep viscosity $\eta$. Register the existing Picard and Newton variants at their respective entry
+points (and their matching simplified preconditioners when applicable)
+for the optional FE history path, once only. The actual fixture selects Newton;
+its trace-term assembler supplies both residual and Jacobian. A Picard-only
+registration is insufficient and is retained as a failed diagnostic attempt.
+Preserve the default particle path.
+The old raw-stress convention could formally absorb its isotropic part through
+$p_{\rm raw}=p+2G\operatorname{tr}_2(\sym\nabla\bm d_R)/3$, but no such pressure
+redefinition occurs in source, and this field generally lies outside continuous
+Q1 pressure. The correction therefore changes the explicit stress/operator;
+it does not silently shift the pressure or alter its boundary normalization.
+
+For dynamic-pressure friction, $\sigma_n=\sigma_n^{\rm bg}+p-
+\bm n\cdot\tauv_2\bm n$. In the selected prescribed adiabatic-pressure mode,
+$\sigma_n=\sigma_n^{\rm bg}+p_{\rm ad}$, with neither Stokes pressure nor
+normal deviatoric stress added. These are distinct implemented models; the
+selected fixture has $\sigma_n^{\rm bg}=0$, $p_{\rm ad}=10000$ Pa. A nonzero
+trace diagnostic does not authorize a compressible physical benchmark or a
+change of friction-pressure model.
+
+\subsection{One coupled bulk quadrature}
+In the restricted FE option, \texttt{FE bulk normal quadrature points} selects
+the Gauss rule on each normal bulk cell (default three for retained comparisons).
+Tangential integration splits at actual bulk/fault cell intersections and uses
+at least velocity degree plus one Gauss points on each panel, so the polynomial
+Stokes products are resolved. The same tensor-product point/weight list is used
+for the momentum residual and Jacobian, bulk--fault map and its transpose,
+incoming-anchor bulk phase energy/gradient/Hessian, and bulk work/storage/loss
+diagnostics. Geometry/association caches are built from this list at fresh
+initialization; the setting is fixed during a trajectory. Raising only a
+postprocessing rule does not define this updated discrete functional.
+Consistent normalization (analytic transverse rays and its projection/adjoint),
+sharp-surface quadrature and CPDI fracture integration are unchanged.
+The particle-authoritative path retains its native quadrature and defaults.
+
+\section{State variables, stored energy, and dissipation}
+\label{sec:energy}
+
+\subsection{The strain decomposition}
+
+Define
+\begin{equation}
+ \boxed{\R=\Etot-\Ein,\qquad
+ \Eb=\R-s^e\chi\Smat,\qquad
+ \tauv=2G\Eb=2G\R-2Z\chi\Smat.}
+ \label{eq:state-reconstruction}
+\end{equation}
+The inelastic strain is committed through the rate rule
+\begin{equation}
+ \dot{\Ein}=\dot{\Ev}+\chi\dot s^v\Smat,
+ \qquad \dot s^e=V-\dot s^v.
+ \label{eq:inelastic-kinematics}
+\end{equation}
+Thus it collects bulk viscous strain and the \emph{deposited cohesive viscous
+slip strain}. Explicitly,
+\begin{equation}
+ \Ein(t)=\Ein(0)+\int_0^t
+       [\dot{\Ev}(r)+\chi(r)\dot s^v(r)\Smat]\dd r.
+ \label{eq:inelastic-memory}
+\end{equation}
+For an evolving profile this is not $\Ev+\chi(t)s^v(t)\Smat$.
+Old inelastic slip is not redistributed whenever the phase changes.
+Likewise, adding another $\chi V\Smat$ to \cref{eq:inelastic-kinematics}
+would double-count slip. Friction acts on the same $V$ as a dissipative resistance;
+it is not a second additive strain channel here.
+
+\subsection{Recoverable and fracture energy}
+
+The cohesive reduction can be obtained from the local rheological choice
+\begin{equation}
+ \widetilde G=\frac G{h(\phi)},\qquad
+ \widetilde\eta=\frac\eta{h(\phi)},\qquad
+ \widetilde\lambda=\frac{\widetilde\eta}{\widetilde G}=\lambda.
+ \label{eq:local-cohesive-rheology}
+\end{equation}
+For a normal profile sharing one elastic slip $s^e$, the cohesive elastic strain
+is $\chi s^e\Smat$. Its local elastic energy integrates to
+\begin{equation}
+ \int_{\mathcal T_\xi}\widetilde G|\chi s^e\Smat|^2\dd\zeta
+ =\frac{G(s^e)^2}{2I^2}\int_{\mathcal T_\xi}h\dd\zeta
+ =\frac{G(s^e)^2}{2I}.
+ \label{eq:cohesive-reduction}
+\end{equation}
+Similarly, integrating $\widetilde\eta|\chi\dot s^v\Smat|^2$ gives
+$\eta(\dot s^v)^2/(2I)$. These expressions use their continuous zero-damage
+limits where $h=0$; no division by zero is performed in a local intact region.
+The local cohesive stress is $2\widetilde G\chi s^e\Smat=2\qcoh\Smat$.
+Equation~\eqref{eq:local-cohesive-rheology} is a constitutive choice, not a
+consequence of energy balance alone. For projected $I_h$, the surface energy
+below is the defined discrete energy; one must not assume that integrating
+the local density with unrelated quadrature reproduces it exactly.
+
+The three parts of the state energy are
+\begin{align}
+ E_b[\R,s^e,\phi]
+ &=\int_\B G|\R-s^e\chi(\phi)\Smat|^2\dd A
+ =\int_\B\frac{\tauv:\tauv}{4G}\dd A,\label{eq:bulk-energy}\\
+ E_c[s^e,\phi]
+ &=\int_\F\frac{G(s^e)^2}{2I(\phi)}\dd\xi
+ =\int_\F\frac{Z^2}{2G I(\phi)}\dd\xi,\label{eq:coh-energy}\\
+ F[\phi]&=\int_\B\frac{\Gc}{c_0\ell}
+       [\alpha(\phi)+\ell^2|\nabla\phi|^2]\dd A,\label{eq:fracture-energy}\\
+ \boxed{\Ecal=E_b+E_c+F.}\label{eq:total-energy}
+\end{align}
+In the two-dimensional setting these integrals have units J/m per unit
+out-of-plane length; the powers below have units W/m.
+The cohesive spring stiffness per unit area is $G/I$, so its traction is
+$\partial [G(s^e)^2/(2I)]/\partial s^e=Gs^e/I=\qcoh$.
+Pressure is an incompressibility multiplier, not an additional compressive
+storage energy in this model. External mechanical loads enter virtual power;
+they do not enter the fixed-displacement phase variation.
+
+\subsection{Constitutive choices beyond stored energy}
+
+Stored energy alone does not determine viscosity or friction. The Maxwell
+dashpots and interface resistance are additional constitutive choices.
+Introduce the viscous dissipation potential
+\begin{equation}
+ \mathcal R_v(\dot\Ev,\dot s^v;\phi)
+  =\int_\B\eta|\dot\Ev|^2\dd A
+   +\int_\F\frac{\eta}{2I}(\dot s^v)^2\dd\xi.
+ \label{eq:viscous-potential}
+\end{equation}
+For the positive-slip branch $V\geq0$, define a friction potential at \emph{fixed}
+normal stress and state by
+\begin{equation}
+ \mathcal R_f(V;\sigma_n,\Theta)
+   =\int_\F\left[\int_0^V r_f(v;\sigma_n,\Theta)\dd v
+                  +\frac12\eta^{\rm dpr}V^2\right]\dd\xi,
+ \qquad r_f=\mu(V,\Theta)\sigma_n.
+ \label{eq:friction-potential}
+\end{equation}
+For the tested constant coefficient, the inner integral is $\mu\sigma_n V$.
+The physical dissipated power is $r_f V+\eta^{\rm dpr}V^2$, not generally
+the value of the potential. For reverse slip one would use the appropriate
+signed friction law/subdifferential; that extension is not verified here.
+
+\section{Deriving the continuous mechanical equations}
+\label{sec:continuous}
+
+\subsection{Differentiate the energy before imposing constitutive laws}
+
+Let $\tau_s=\tauv:\Smat$ and define its work-conjugate fault average
+\begin{equation}
+ \mathcal T_\chi[\tauv](\xi)
+      =\int_{\mathcal T_\xi}\chi\tau_s\dd\zeta.
+ \label{eq:traction-average}
+\end{equation}
+At a fixed phase, \cref{eq:inelastic-kinematics,eq:state-reconstruction} give
+\begin{align}
+ \dot\Eb
+ &=\strain-\dot\Ev-\chi\dot s^v\Smat
+              -\chi(V-\dot s^v)\Smat
+  =\strain-\dot\Ev-\chi V\Smat,\\
+ \dot E_b+\dot E_c
+ &=\int_\B\tauv:\strain\dd A
+   -\int_\F\mathcal T_\chi[\tauv]V\dd\xi
+   +\int_\F\qcoh V\dd\xi\nonumber\\
+ &\quad-\int_\B\tauv:\dot\Ev\dd A
+       -\int_\F\qcoh\dot s^v\dd\xi.
+ \label{eq:energy-rate-preflow}
+\end{align}
+If phase evolves, add the variation $D_\phi\Ecal[\dot\phi]$ at fixed
+$\Etot,\Ein,s^e$ to the right-hand side, and include $\dot F$ on the left.
+
+The stationarity of this energy rate plus the dissipation potentials, minus
+external power and the incompressibility constraint, with respect to the
+independent rates produces the following equations. This is a rate-level
+derivation at a fixed state, not a joint minimum of $\Ecal$ over all variables.
+
+\subsection{Dashpots and cohesive history}
+
+Variations of $\dot\Ev$ and $\dot s^v$ yield
+\begin{equation}
+ -\tauv+2\eta\dot\Ev=0,
+ \qquad -\qcoh+\frac\eta I\dot s^v=0.
+\end{equation}
+Consequently,
+\begin{equation}
+ \boxed{\dot\Ev=\frac{\tauv}{2\eta},\qquad
+ \dot s^v=\frac Z\eta,\qquad
+ \dot s^e=V-\frac{s^e}{\lambda},\qquad
+ \dot Z+\frac Z\lambda=GV,\quad\lambda=\frac\eta G.}
+ \label{eq:flow-laws}
+\end{equation}
+The actual viscous powers are
+\begin{equation}
+ \Dcal_b=\int_\B\frac{\tauv:\tauv}{2\eta}\dd A,
+ \qquad
+ \Dcal_c=\int_\F\frac{Z^2}{\eta I}\dd\xi.
+ \label{eq:viscous-power}
+\end{equation}
+
+\subsection{Bulk equilibrium and slip balance}
+
+Let $\ell_{\rm ext}(\bm w)$ denote prescribed body-force and traction power.
+Variations of velocity and pressure give, for admissible homogeneous velocity
+tests $\bm w$ and pressure tests $q_p$,
+\begin{align}
+ \int_\B\tauv:\strain(\bm w)\dd A
+ -\int_\B p\,\nabla\cdot\bm w\dd A&=\ell_{\rm ext}(\bm w),
+ \label{eq:stokes-weak}\\
+ \int_\B q_p\nabla\cdot\bm u\dd A&=0.
+\end{align}
+Their strong form is $-\nabla\cdot(\tauv-p\bm 1)=\bm b$ and
+$\nabla\cdot\bm u=0$, with the chosen velocity/traction conditions.
+
+Use the resistance-minus-drive sign convention
+\begin{equation}
+ r_V=\qcoh+r_f(V;\sigma_n,\Theta)+\eta^{\rm dpr}V
+              -\mathcal T_\chi[\tauv].
+\end{equation}
+For one-direction friction with sticking,
+\begin{equation}
+ \boxed{V\geq0,\qquad r_V\geq0,\qquad Vr_V=0.}
+ \label{eq:slip-kkt}
+\end{equation}
+At sliding points, $\mathcal T_\chi[\tauv]=\qcoh+\mu\sigma_n+
+\eta^{\rm dpr}V$. At a sticking point, the equality need not hold.
+In the native discrete equations the fault drive is assembled by the adjoint
+of the bulk slip-strain map, not by sampling $\tau_s$ at the fault center.
+
+\subsection{Normal stress and the limits of a scalar potential}
+\label{sec:normal}
+
+For physical total stress $\bm\sigma=\tauv-p\bm 1$, compression-positive normal
+traction is $\sigma_n=p-\bm e^n\cdot\tauv\bm e^n$.
+The source-audited restricted fixture uses prescribed adiabatic pressure
+$P_{\rm bg}=p_{\rm ad}=10000$ Pa as the complete friction pressure contribution:
+\begin{equation}
+ \sigma_{n,h}=\sigma_n^{\rm bg}+p_{\rm ad},\qquad\sigma_n^{\rm bg}=0.
+ \label{eq:normal-discrete}
+\end{equation}
+The earlier reconstruction's retained deviatoric correction was incorrect for
+this selected mode. The implementation evaluates cohesive/friction resistance
+on sharp-fault surface quadrature with the prescribed pressure; bulk-conjugate
+shear driving uses bulk quadrature and the slip-map adjoint. There is no normal
+stress or Stokes-pressure feedback to friction in this mode and no such lag to
+specify. The default dynamic-pressure mode instead uses
+$\sigma_n^{\rm bg}+p-\bm n\cdot\tauv_2\bm n$ at its constitutive sample.
+Neither mode is silently substituted for the other.
+
+The derivatives of \cref{eq:friction-potential} are taken with $\sigma_n$
+and $\Theta$ fixed. If the actual mechanical solve updates normal traction
+with $\bm u$ or $p$, the slip residual gains the corresponding Jacobian terms.
+Differentiating $\mu\sigma_n(\bm u,p)V$ as a joint potential with respect to
+all unknowns would add reciprocal terms to bulk equilibrium that the stated
+model does not contain. Therefore no global scalar mechanical potential is
+claimed for the fully normal-stress-coupled friction problem. The weak residuals
+remain the governing definition.
+
+\subsection{Evolution of stress when the profile changes}
+
+Differentiating \cref{eq:state-reconstruction} with the rate laws gives
+\begin{align}
+ \dot\Eb&=\strain-\chi V\Smat-\frac{\tauv}{2\eta}
+                       -s^e\dot\chi\Smat,\\
+ \boxed{\dot\tauv+\frac{\tauv}\lambda
+    =2G(\strain-\chi V\Smat)-2Z\dot\chi\Smat.}
+ \label{eq:stress-evolving}
+\end{align}
+The last term is elastic redistribution at fixed committed inelastic strain.
+It is signed work, not a positive frictional or viscous loss. The selected
+time discretization treats it as an instantaneous phase-stage jump, rather
+than spreading an additional correction strain rate over the mechanical step.
+
+\section{Deriving the phase equation from total energy}
+\label{sec:phase}
+
+\subsection{What is held fixed}
+
+During a phase trial, fix $\Etot$, $\Ein$, $s^e$, geometry, and material
+parameters. Equivalently fix $\R$ and $Z$. Neither bulk stress nor cohesive
+traction is fixed:
+\begin{equation}
+ \delta\tauv=-2Z\,\delta\chi\Smat,
+ \quad \delta\qcoh=-\frac Z{I^2}\delta I,
+ \quad \delta I=\int_{\mathcal T_\xi}h'(\phi)\delta\phi\dd\zeta,
+ \quad \delta\chi=\frac{h'}I\delta\phi-\frac h{I^2}\delta I.
+ \label{eq:phase-variations}
+\end{equation}
+The three variations are
+\begin{align}
+ \delta E_b&=-\int_\B\frac ZG(\tauv:\Smat)\delta\chi\dd A,
+ \label{eq:bulk-var}\\
+ \delta E_c&=-\int_\F\frac{Z^2}{2GI^2}\delta I\dd\xi,
+ \label{eq:coh-var}\\
+ \delta F&=\int_\B A\,[\alpha'(\phi)\delta\phi
+                   +2\ell^2\nabla\phi\cdot\nabla\delta\phi]\dd A,
+ \quad A=\frac{\Gc}{c_0\ell}.
+ \label{eq:fracture-var}
+\end{align}
+In particular, the factor in \cref{eq:bulk-var} is $Z/G=s^e$, not $Z$.
+The term involving $\delta I$ in $\delta\chi$ is essential.
+
+\subsection{Continuum strong equation for direct normalization}
+
+Define the normalized transverse average
+$\langle\tau_s\rangle_\chi=\int\chi\tau_s\dd\zeta$.
+Because $Z$ and $I$ are constant along each normal line,
+\begin{align}
+ \delta E_b
+ &=-\int_\F\frac Z{GI}\int_{\mathcal T_\xi}
+     h'(\phi)\bigl(\tau_s-\langle\tau_s\rangle_\chi\bigr)
+     \delta\phi\dd\zeta\dd\xi,\\
+ \delta E_c
+ &=-\int_\B\frac{(\qcoh)^2}{2G}h'(\phi)\delta\phi\dd A.
+\end{align}
+For constant $A,\ell$, integration by parts in $\delta F$ yields
+\begin{equation}
+ \boxed{f_\phi=A\,[\alpha'(\phi)-2\ell^2\Delta\phi]
+ -h'(\phi)\left[
+       \frac{(\qcoh)^2}{2G}
+      +\frac{\qcoh}G(\tau_s-\langle\tau_s\rangle_\chi)
+        \right].}
+ \label{eq:phase-strong}
+\end{equation}
+The homogeneous natural phase condition is
+$\nabla\phi\cdot\bm n_{\partial\B}=0$.
+Equation~\eqref{eq:phase-strong} is the direct-normalization continuum
+expression. It must not be substituted for the native discrete derivative of
+the projected $I_h$; that derivative is given in \cref{sec:discrete-phase}.
+
+The first bracketed driving contribution is cohesive storage release.
+The second measures the benefit or cost of redistributing slip across a
+nonuniform transverse bulk stress. It can have either sign.
+At uniform transverse shear stress and exact normalization the bulk term
+cancels. It does not cancel in a general two-dimensional field.
+
+\subsection{Irreversibility and stability}
+
+For the step from the accepted state $a$, define the admissible set
+\begin{equation}
+ K_a=\{\phi:\ \phi^a\leq\phi\leq1,\quad
+             \text{all required normalizations are finite and positive}\}.
+\end{equation}
+The intended constrained relaxation is associated with
+\begin{equation}
+ \Ecal_a(\phi)=\Ecal[\R^a,Z^a,\phi].
+\end{equation}
+Its first-order variational inequality is
+\begin{equation}
+ D\Ecal_a(\phi^k)[\psi-\phi^k]\geq0
+ \quad\text{for admissible variations toward }\psi\in K_a.
+ \label{eq:phase-vi}
+\end{equation}
+For the positive energy-gradient residual $r_{\phi,i}=\partial\Ecal_a/
+\partial\phi_i$, the nodal conditions are
+\begin{equation}
+ \begin{cases}
+ r_{\phi,i}=0,&\phi_i^a<\phi_i<1,\\
+ r_{\phi,i}\geq0,&\phi_i=\phi_i^a<1,\\
+ r_{\phi,i}\leq0,&\phi_i=1>\phi_i^a\quad\text{if normalization permits}.
+ \end{cases}
+ \label{eq:phase-kkt}
+\end{equation}
+The opposite residual convention reverses these signs. At coincident lower
+and upper bounds the nodal value is fixed and there is no free variation.
+
+\caution{KKT stationarity and a decrease from the incoming energy do not prove
+a local minimum for this nonconvex functional. A local minimum additionally
+requires a nonnegative second variation on its critical cone; a negative
+eigenvalue on a genuinely free set already disproves this condition. The latest
+affine-side trial has two negative free-curvature modes, and feasible
+perturbations reduce its energy. The current solver therefore must be described
+as a constrained stationary relaxation algorithm, not as a qualified
+energy-minimizing branch-selection algorithm.}
+
+In a smooth ideal quasistatic limit, phase irreversibility is expressed by
+$\dot\phi\geq0$, $f_\phi\geq0$, $f_\phi\dot\phi=0$ away from the upper bound.
+This local-in-time statement does not select the branch or determine the
+physical dissipation of a finite damage jump.
+
+\subsection{Why the old maximum-history equation is different}
+
+Since $h'=-g'/g^2$, the direct-normalization cohesive variation alone can be
+written
+\begin{equation}
+ -\frac{(\qcoh)^2}{2G}h'
+     =g'(\phi)Y,\qquad
+ Y=\frac{(\qcoh)^2}{2Gg(\phi)^2}.
+\end{equation}
+This explains the earlier recoverable driver, but it omits the bulk-profile
+variation unless the cancellation conditions hold. Replacing $Y$ by
+$\mathcal H^+(t)=\max_{r\leq t}Y(r)$ changes the phase potential again.
+The selected total-energy model makes neither replacement. The initialized
+particle $H$ prepares the seed, and accepted diagnostic $\mathcal H^+$ may be
+recorded afterward; neither is an independent evolving source in
+\cref{eq:phase-vi}.
+
+\section{The stationary one-dimensional band}
+\label{sec:stationary}
+
+This calculation links the current energy back to the analytical profile.
+Take $\phi=\phi(y)$, a horizontal fault, and uniform shear stress
+$\tau_{xy}=T$. Then the bulk term in \cref{eq:phase-strong} cancels and the
+free AT1 phase equation is
+\begin{equation}
+ A(1-2\ell^2\phi_{yy})-\frac{(\qcoh)^2}{2G}h'(\phi)=0.
+ \label{eq:stationary-ode}
+\end{equation}
+Multiplying by $\phi_y$ and using a compact support edge with
+$\phi=\phi_y=0$ gives the first integral
+\begin{equation}
+ \boxed{\ell^2\phi_y^2=\phi-\frac{(\qcoh)^2}{2GA}h(\phi).}
+ \label{eq:stationary-first}
+\end{equation}
+At the center, $\phi=\widehat\phi$ and $\phi_y=0$, hence
+\begin{equation}
+ \frac{(\qcoh)^2}{2GA}=\frac{\widehat\phi}{h(\widehat\phi)}.
+ \label{eq:stationary-core}
+\end{equation}
+The half support width follows by quadrature:
+\begin{equation}
+ b_\phi=\ell\int_0^{\widehat\phi}
+ \left[z-\frac{\widehat\phi}{h(\widehat\phi)}h(z)\right]^{-1/2}\dd z.
+\end{equation}
+This is a stationary \emph{family}; the initial profile is not supposed to
+remain unchanged under arbitrary subsequent loading.
+
+The cohesion calibration $m=2GA/c^2$ gives
+\begin{equation}
+ \qcoh=c\frac{1-\widehat\phi}{\sqrt{1+p\widehat\phi}}.
+ \label{eq:q-profile}
+\end{equation}
+The link to the original degradation relation is especially transparent here.
+Let $\tau_s^{\rm tr}=(2G\R):\Smat=T+Z\chi=T+\qcoh h$.
+With $T-\mu P=\qcoh$ and zero radiation damping,
+\begin{equation}
+ T-\mu P=g(\phi)(\tau_s^{\rm tr}-\mu P).
+\end{equation}
+This pointwise reduction uses uniform transverse equilibrium. In a general
+field the governing friction balance is the work-conjugate surface equation,
+not an additional independently imposed pointwise degradation equation.
+
+For $p=1$, $c=1000$ Pa, and $\widehat\phi=0.6$,
+$\qcoh=316.227766$ Pa. With $\mu P=1000$ Pa, the steady shear stress is
+$T=1316.227766$ Pa. An exactly maintained stationary Maxwell sliding state is
+\begin{equation}
+ Z=I\qcoh,\qquad V=\frac Z\eta,\qquad
+ u_{x,y}=\frac{T+Z\chi(y)}\eta,\qquad
+ 2R_{xy}=\frac{T+Z\chi(y)}G.
+ \label{eq:stationary-maxwell}
+\end{equation}
+Both stress and $Z$ then have zero time derivative; the prescribed profile
+remains a stationary constrained state. This is a \emph{loaded stationary
+control}. It is distinct from the unloaded native seed with $\R=Z=0$.
+
+The localization report verifies the stationary profile and Maxwell maintenance
+to high accuracy. Its loaded reference begins instead with an unloaded seed,
+then evolves to $\phi_{\max}\simeq0.85645$ at 1 s. Its phase FWHM is about
+$0.38675$ m while its $\chi$ FWHM is only $0.11825$ m. A wide visible phase
+profile does not imply an equally wide slip distribution.
+
+\section{Exact Maxwell integration and endpoint equilibrium}
+\label{sec:time}
+
+\subsection{Phase redistribution at zero elapsed time}
+
+Given $\phi^k$ from the phase step, reconstruct once from the immutable anchor:
+\begin{equation}
+ \boxed{\tauv^*=2G\R^a-2Z^a\chi^k\Smat
+   =\tauv^a-2Z^a(\chi^k-\chi^a)\Smat,\qquad
+ \qcoh{}^*=\frac{Z^a}{I^k}.}
+ \label{eq:jump}
+\end{equation}
+The elastic cohesive slip $Z^a/G$ is unchanged. Displacement and committed
+inelastic strain are unchanged. No viscous or frictional dissipation is assigned
+to a zero-duration stage. Its finite energy decrease is recorded separately.
+
+\subsection{Fixed-profile constitutive step}
+
+Over an interval of length $\Delta t$, hold $\phi^k$, geometry, $\bm u^k$, and
+$V^k$ fixed. Define
+\begin{equation}
+ \beta=\exp(-\Delta t/\lambda),\qquad
+ \kappa=\eta(1-\beta),\qquad
+ \bm B^k=\strain(\bm u^k)-\chi^k V^k\Smat.
+\end{equation}
+Solving the linear ODEs at an elapsed time $r\in[0,\Delta t]$ yields
+\begin{align}
+ \tauv(r)&=e^{-r/\lambda}\tauv^*
+            +2\eta(1-e^{-r/\lambda})\bm B^k,\\
+ Z(r)&=e^{-r/\lambda}Z^a+\eta(1-e^{-r/\lambda})V^k.
+\end{align}
+Therefore
+\begin{equation}
+ \boxed{\tauv^k=\beta\tauv^*+2\kappa\bm B^k,
+ \qquad Z^k=\beta Z^a+\kappa V^k,
+ \qquad\qcoh{}^k=\frac{Z^k}{I^k}.}
+ \label{eq:endpoints}
+\end{equation}
+These identities hold for arbitrary positive $\Delta t/\lambda$ under the
+stated constant-rate/material assumptions. The approximation
+$1-\beta\simeq\Delta t/\lambda$ is not used in the model.
+
+\subsection{Which forces are equilibrated}
+
+The selected mechanics substitutes $\tauv^k$ and $\qcoh{}^k$ into
+\cref{eq:stokes-weak,eq:slip-kkt}. It does \emph{not} substitute time means.
+Nevertheless, $V^k$ and $\bm u^k$ are used as constant interval rates for slip,
+deformation, and constitutive integration. Thus $V^k$ is an endpoint-force-selected
+interval rate, not a reconstructed instantaneous slip rate of the exact
+continuous solution. With time-dependent imposed boundary velocity, the fixtures
+use its exact interval mean so that imposed displacement is correct.
+
+For comparison, the exact mean stresses on this same constitutive path are
+\begin{equation}
+ r_\beta=\frac{\lambda(1-\beta)}{\Delta t},\quad
+ \bar\kappa=\eta(1-r_\beta),\qquad
+ \overline\tauv=r_\beta\tauv^*+2\bar\kappa\bm B^k,
+ \quad\overline{\qcoh}=\frac{r_\beta Z^a+\bar\kappa V^k}{I^k}.
+ \label{eq:mean-stress}
+\end{equation}
+Equilibrating these means defines the earlier mean scheme, not the selected
+endpoint scheme. Neither choice should be substituted into the other scheme's
+work ledger without the associated correction.
+
+\subsection{An endpoint stress potential under frozen friction data}
+
+For fixed $\sigma_n,\Theta$, the endpoint residuals can be generated by the
+rate potential
+\begin{align}
+ \Pi_{\rm ep}(\bm u,p,V)
+ &=\int_\B[\kappa|\strain-\chi V\Smat|^2
+       +\beta\tauv^*:(\strain-\chi V\Smat)]\dd A\nonumber\\
+ &\quad+\int_\F\left[\frac{\kappa V^2}{2I}
+       +\frac{\beta Z^a V}{I}\right]\dd\xi
+       +\mathcal R_f(V;\sigma_n,\Theta)\nonumber\\
+ &\quad-\int_\B p\nabla\cdot\bm u\dd A-\ell_{\rm ext}(\bm u).
+ \label{eq:endpoint-potential}
+\end{align}
+Its velocity derivative returns $\tauv^k$; its slip derivative returns the
+resistance-minus-drive equation. This potential has units of power and is an
+\emph{algorithmic stress potential}. It is not $\Ecal$, and it is not the
+time-integrated physical work. Do not derive the phase equation by varying it
+in place of \cref{eq:total-energy}. The normal-stress qualification in
+\cref{sec:normal} applies when friction data are updated in the coupled solve.
+
+\section{Derivation of the native FE strain history}
+\label{sec:native}
+
+Substitute \cref{eq:flow-laws} into the inelastic-strain rate:
+\begin{align}
+ \dot\R
+ &=\strain-\frac{\tauv}{2\eta}-\chi\frac Z\eta\Smat\nonumber\\
+ &=\strain-\frac{2G\R-2Z\chi\Smat}{2\eta}
+                      -\chi\frac Z\eta\Smat
+ =\strain-\frac G\eta\R.
+\end{align}
+Thus
+\begin{equation}
+ \boxed{\dot\R+\lambda^{-1}\R=\strain.}
+ \label{eq:R-ode}
+\end{equation}
+This is an algebraic consequence of the selected constitutive state definition
+and matching material parameters. It does not follow from projecting particle
+stress, and it does not say that actual elastic strain is independent of damage:
+$\Eb=\R-(Z/G)\chi\Smat$ still depends strongly on phase and slip.
+
+For spatially constant $\lambda$ and a compatible initial $\R$, introduce
+$\bm d_R$ with $\R=\mathcal D\bm d_R$, where $\mathcal D$ is the chosen
+linear strain operator. Taking
+\begin{equation}
+ \dot{\bm d}_R+\lambda^{-1}\bm d_R=\bm u
+\end{equation}
+and applying $\mathcal D$ gives \cref{eq:R-ode}. The unloaded seed admits
+$\bm d_R(0)=0$. Since $\bm u_h$ and $\bm d_{R,h}$ share the native velocity basis,
+the exact constant-rate recurrence is
+\begin{equation}
+ \boxed{\bm d_{R,h}^k=\beta\bm d_{R,h}^a+\frac\kappa G\bm u_h^k,
+ \qquad\R_h^k=\beta\R_h^a+\frac\kappa G\strain_h(\bm u_h^k).}
+ \label{eq:FE-recurrence}
+\end{equation}
+This is a coefficient-wise update; it requires no projection of the strain
+tensor into continuous Q1 fields. Derivatives of a continuous velocity FE field
+need not be continuous across elements. Such derivative jumps are allowed by
+this representation and are not removed by the exact history update.
+
+Substituting \cref{eq:FE-recurrence,eq:endpoints} back into the stress gives
+\begin{align}
+ 2G\R_h^k-2Z_h^k\chi_h^k\Smat
+ &=\beta[2G\R_h^a-2Z_h^a\chi_h^k\Smat]
+      +2\kappa[\strain_h(\bm u_h^k)-\chi_h^k V_h^k\Smat]\nonumber\\
+ &=\beta\tauv_h^*+2\kappa\bm B_h^k.
+ \label{eq:FE-Maxwell-equivalence}
+\end{align}
+This identity holds at every evaluation point using the same FE operator and
+surface extension. It proves exact reproduction of the \emph{discrete}
+Maxwell recurrence, not spatial accuracy of its stress field.
+
+\subsection{Symmetric versus deviatoric gradients in the native report}
+\label{sec:trace}
+
+The historical native reports used raw symmetric gradients. The source audit
+in \cref{sec:plane-strain} distinguishes them from the 3D plane-strain deviator
+at nonzero discrete divergence. The selected correction uses $\mathcal D$
+in history, stress, energy and mechanics, with the reduced 3D metric. It leaves
+exact one-dimensional shear invariant. Weak Q2/Q1 incompressibility is not a
+reason to omit this distinction from pointwise energy or normal traction.
+A coefficient-wise recurrence remains exact because $\mathcal D$ is linear.
+
+\subsection{What the FE history does and does not eliminate}
+
+Particles no longer own the mechanical stress history in this option. Their
+published stresses are evaluations of \cref{eq:state-reconstruction} after
+acceptance and never project back into $\bm d_R$. Surface $Z$ remains a direct
+surface history. Particle-domain fracture integration, material interfaces,
+normalization, and geometry associations remain. The generic particle
+mapping still serves diagnostics and the legacy particle-owned option.
+The localization task bypassed three redundant reads; it did not remove the
+generic projector or change normalization.
+
+Spatially variable $\lambda$ prevents commuting $\mathcal D$ through
+$\lambda^{-1}\bm d_R$ without additional terms. Unequal constituent parameters,
+arbitrary incompatible initial strains, moving geometry, rotation, and
+advection likewise require a new derivation. The current formula must not be
+extended to these cases just by changing input parameters.
+
+\section{The actual discrete phase functional and its derivatives}
+\label{sec:discrete-phase}
+
+\subsection{Evaluation and consistent normalization}
+
+Let $\vect\phi$ be Q1 phase coefficients. Define:
+\begin{itemize}
+ \item $B$: evaluation of phase at bulk mechanical/energy quadrature points;
+ \item $T$: evaluation of surface Q1 coefficients at the associated bulk points;
+ \item $N$: evaluation of surface Q1 coefficients at surface quadrature points;
+ \item $W_b,W_s$: positive diagonal bulk and surface quadrature weights;
+ \item $i(\vect\phi)$: direct normal integrals at the surface quadrature abscissae.
+\end{itemize}
+For fixed geometry and quadrature,
+\begin{equation}
+ M=N^TW_sN,\quad P=M^{-1}N^TW_s,\quad
+ c=P\,i(\vect\phi),\quad I_b=Tc,\quad I_s=Nc.
+ \label{eq:projection}
+\end{equation}
+Here $c$ is a vector of normalization coefficients, not material cohesion.
+Let $J_i=D_{\vect\phi}i$. Then
+\begin{equation}
+ \delta c=P J_i\delta\vect\phi,\qquad
+ P^T=W_sNM^{-T}.
+ \label{eq:projection-adjoint}
+\end{equation}
+The superscript $T$ on $P$ denotes its algebraic adjoint, not a replacement
+normalization method. $M$ and $P$ are fixed, while $i$, $J_i$, and their second
+derivatives depend on the supplied trial phase.
+
+\subsection{Discrete energy}
+
+Let $Z_b=T\vect Z^a$, $Z_s=N\vect Z^a$ and $h_b=h(B\vect\phi)$.
+With the accepted $\R_b^a$ evaluated directly from its FE coefficients,
+\begin{equation}
+ \chi_b=\frac{h_b}{I_b},\qquad
+ \tauv_b^*=2G\R_b^a-2Z_b\chi_b\Smat_b.
+\end{equation}
+All component-wise divisions here and below are at the corresponding quadrature
+points. The actual discrete functional is
+\begin{equation}
+ \Ecal_{a,h}(\vect\phi)=
+ \sum_b w_b\frac{\tauv_b^*:\tauv_b^*}{4G}
+ +\sum_j w_{s,j}\frac{Z_{s,j}^2}{2G I_{s,j}}+F_h(\vect\phi),
+ \label{eq:discrete-energy}
+\end{equation}
+with the native CPDI fracture measure
+\begin{equation}
+ F_h=\sum_p V_p A_p
+       [\alpha(w_p\vect\phi)+\ell_p^2|D_p\vect\phi|^2].
+ \label{eq:CPDI}
+\end{equation}
+The fixed row $w_p$ averages phase over a particle domain; $D_p$ evaluates its
+domain-averaged phase gradient. $V_p$ is its physical volume/area. This expression
+is not silently replaced by nodal or ordinary FE fracture quadrature.
+
+\subsection{Exact gradient and the normalization adjoint}
+
+Define the bulk dual load $v$ and the dual load $t$ on normalization coefficients:
+\begin{align}
+ v_b&=-w_b\frac{Z_b}G(\tauv_b^*:\Smat_b),\\
+ t&=-T^T\diag(h_b/I_b^2)v
+          -N^TW_s\frac{Z_s^2}{2G I_s^2}.
+\end{align}
+The positive energy-gradient residual is
+\begin{equation}
+ \boxed{r_\phi=F_h'
+        +B^T\diag(h_b'/I_b)v+J_i^TP^Tt.}
+ \label{eq:discrete-gradient}
+\end{equation}
+The first bulk term differentiates the numerator of $\chi$. Both denominator
+effects---bulk and cohesive---pass through $P^T$ and $J_i^T$. Freezing $I_h$
+inside a phase derivative, omitting $P^T$, or inserting a generic particle-to-fault
+projection gives a different equation.
+For AT1 with constant parameters,
+\begin{equation}
+ F_h'=\sum_p V_p A\,[w_p^T+2\ell^2D_p^TD_p\vect\phi],
+ \qquad F_h''=2A\ell^2\sum_pV_pD_p^TD_p.
+\end{equation}
+
+\subsection{Exact second variation}
+
+For any phase direction $d$, let $\delta\phi_b=Bd$ and
+$\delta^2 c=P D^2i[d,d]$. Then
+\begin{align}
+ \delta\chi_b&=\frac{h_b'\delta\phi_b}{I_b}
+                    -\frac{h_b\delta I_b}{I_b^2},\\
+ \delta^2\chi_b&=\frac{h_b''(\delta\phi_b)^2}{I_b}
+ -\frac{2h_b'\delta\phi_b\delta I_b}{I_b^2}
+ -\frac{h_b\delta^2I_b}{I_b^2}
+ +\frac{2h_b(\delta I_b)^2}{I_b^3}.
+\end{align}
+The directional Hessian is
+\begin{align}
+ D^2\Ecal_{a,h}[d,d]
+ &=D^2F_h[d,d]\nonumber\\
+ &+\sum_b w_b\left[
+ \frac{2Z_b^2}{G}(\Smat_b:\Smat_b)(\delta\chi_b)^2
+ -\frac{Z_b}G(\tauv_b^*:\Smat_b)\delta^2\chi_b\right]\nonumber\\
+ &+\sum_j w_{s,j}\frac{Z_{s,j}^2}{G}
+ \left[\frac{(\delta I_{s,j})^2}{I_{s,j}^3}
+             -\frac{\delta^2I_{s,j}}{2I_{s,j}^2}\right].
+ \label{eq:discrete-hessian}
+\end{align}
+The terms containing second derivatives of $\chi$ and $I$ make this Hessian
+potentially indefinite. A positive search metric may help solve the equations,
+but it does not turn the underlying energy into a convex function.
+
+\section{Discrete endpoint mechanical system}
+\label{sec:discrete-mechanics}
+
+Let $E\vect u$ evaluate the selected FE strain operator at bulk quadrature.
+Let $L(\vect\phi)$ spread surface slip coefficients into the same bulk measure:
+\begin{equation}
+ (L\vect V)_b=\chi_b(T\vect V)_b\Smat_b.
+ \label{eq:spread-map}
+\end{equation}
+The bulk and surface endpoint fields are
+\begin{equation}
+ \vect\tau^k=\beta\vect\tau^*+2\kappa(E\vect u-L\vect V),
+ \qquad \vect q_s^k=\frac{\beta N\vect Z^a+\kappa N\vect V}{I_s}.
+\end{equation}
+Tensor inner products are understood in $W_b$. If $D$ is the discrete divergence
+matrix with pressure integration absorbed, the residuals have the form
+\begin{align}
+ r_u&=E^TW_b\vect\tau^k-D^T\vect p-\vect f,\\
+ r_p&=-D\vect u,\\
+ r_V&=-L^TW_b\vect\tau^k
+       +N^TW_s[\vect q_s^k+\vect r_f+\eta^{\rm dpr}N\vect V].
+ \label{eq:mechanical-residuals}
+\end{align}
+The $V$ equations are imposed as equalities on sliding/free degrees of freedom
+and with the selected sticking complementarity at contacts. Prescribed slip
+degrees of freedom instead have reactions.
+
+For frozen normal stress and state, the principal coupled Jacobian blocks are
+\begin{align}
+ K_{uu}&=2\kappa E^TW_bE,&
+ K_{uV}&=-2\kappa E^TW_bL,\\
+ K_{Vu}&=-2\kappa L^TW_bE,&
+ K_{VV}&=2\kappa L^TW_bL+
+ N^TW_s\diag\!\left(\frac\kappa{I_s}
+              +\partial_Vr_f+\eta^{\rm dpr}\right)N.
+\end{align}
+Normal-stress/state feedback adds its actual chain-rule terms to the slip
+rows. No symmetry claim applies to those additions. In particular,
+work conjugacy requires the \emph{same} $L$ and $L^T$ and the same bulk
+quadrature, whether or not friction makes the full tangent nonsymmetric.
+
+The restricted native quadrature splits bulk cells at surface-Q1 intersections,
+uses Q3 on the resulting tangential intervals and Q3 normally, and uses the
+same selected points for the associated mechanical blocks and bulk energy.
+Correct history ownership and exact normalization cannot compensate for an
+underresolved velocity space.
+
+\section{One accepted native step: the algorithm}
+\label{sec:algorithm}
+
+The following is a mathematical specification of the selected order.
+\begin{enumerate}[label=\textbf{\arabic*.},itemsep=6pt]
+ \item \textbf{Initialize once.} Prepare the nominal phase band using the native
+ prescribed-$H$ relaxation on $[0,1]$. Commit its result as pre-existing damage.
+ Set $\bm d_R^0=0$, $Z^0=0$, stress and accumulated slip to zero. Compute the
+ consistent normalization. The unloaded seed is protected by the phase obstacle;
+ it is not declared an unconstrained minimum of the unloaded total energy.
+
+ \item \textbf{Snapshot the accepted state.} Fix $\phi^a$, $\bm d_R^a$, $Z^a$,
+ mesh, particle domains, geometry, and associations. Compute $\beta,\kappa$.
+ Use $\phi^a$ as the immutable lower bound for every phase trial. Generic
+ extrapolated \texttt{current\_linearization\_point}, \texttt{old\_solution},
+ and \texttt{old\_old\_solution} do not replace this owner or its phase anchor.
+
+ \item \textbf{Solve the phase stationarity problem.} For each supplied trial
+ $\vect\phi$, recompute direct normal integrals, their consistent projection,
+ $\chi$, reconstructed $\tauv^*$, the actual energy, gradient, and tangent.
+ Enforce admissibility and \cref{eq:phase-kkt}. Use the native constrained
+ search and unchanged convergence target. The new exact free-set Newton
+ polish is a small numerical correction near a root, not a new physical law
+ or a minimum-selection criterion. Record $\phi^k$ only as staged data.
+
+ \item \textbf{Record instantaneous redistribution.} Form $\tauv^*$ using
+ \cref{eq:jump}; compute the bulk and cohesive storage jumps, fracture
+ expenditure, and phase-release quantity in \cref{sec:ledger}. Do not
+ dissipate these jumps through an invented viscous time interval.
+
+ \item \textbf{Solve endpoint mechanics.} Hold $\phi^k,I_h^k,\chi_h^k$
+ fixed and solve \cref{eq:mechanical-residuals} for the interval rates
+ $\bm u_h^k,V_h^k$ and pressure. All nonlinear candidates reconstruct the
+ same $\tauv^*,Z^a$; iterating the solve must not repeatedly advance history.
+ Use the configured normal-stress/friction convention and slip constraints.
+
+ \item \textbf{Stage history updates.} Apply
+ \[
+ \bm d_R^k=\beta\bm d_R^a+(\kappa/G)\bm u^k,\qquad
+ Z^k=\beta Z^a+\kappa V^k,\qquad
+ s^k=s^a+\Delta t V^k.
+ \]
+ Reconstruct stress and cohesive traction directly from these staged fields.
+ When displacement is recorded, $\bm d^k=\bm d^a+\Delta t\bm u^k$;
+ it is a different field from $\bm d_R^k$.
+
+ \item \textbf{Validate and publish once.} Check phase inequalities,
+ normalization, the actual selected residuals, FE recurrence, Maxwell
+ consistency, and separate energy quantities. Prepare derived particle
+ stress and diagnostic histories. Publish the staged FE/surface/phase state
+ only at terminal acceptance. Failed phase or mechanical trials must not
+ become an accepted owner. This local ownership discipline does not by
+ itself qualify full simulator rollback, restart, or transported histories.
+\end{enumerate}
+
+The final accepted mechanical state has not yet driven a phase solve. Solving
+phase again with that new $\R^k,Z^k$ generally produces another change.
+This is the stated one-step splitting lag, not evidence that the recorded
+phase solve failed its own earlier-anchor residual. The localization report's
+additional final-anchor phase change is about $0.00928$ in the rich reference.
+
+\section{Energy accounting: what closes and what does not}
+\label{sec:ledger}
+
+\subsection{Continuous smooth identity}
+
+With compatible bulk/slip equilibrium, \cref{eq:energy-rate-preflow} gives
+\begin{equation}
+ \dot\Ecal+\Dcal_b+\Dcal_c+\Dcal_f+\Dcal_r
+  =\mathcal P_{\rm ext}+D_\phi\Ecal[\dot\phi],
+\end{equation}
+where $\Dcal_f=\int_\F r_f V\dd\xi$ and
+$\Dcal_r=\int_\F\eta^{\rm dpr}V^2\dd\xi$.
+Smooth phase complementarity makes the last term zero. This is not a proof
+that a finite-step sequential scheme, or a finite phase jump, has zero
+unaccounted energy.
+
+\subsection{Phase relaxation release}
+
+At fixed accepted $\R^a,Z^a$, let
+\begin{align}
+ J_b&=E_b(\R^a,Z^a,\phi^k)-E_b(\R^a,Z^a,\phi^a),\\
+ J_c&=\int_\F\frac{(Z^a)^2}{2G}
+             \left(\frac1{I^k}-\frac1{I^a}\right)\dd\xi,\\
+ \Delta F&=F(\phi^k)-F(\phi^a),\\
+ \boxed{D_{\rm relax}=-(J_b+J_c+\Delta F).}
+ \label{eq:Drelax}
+\end{align}
+A decreasing-energy phase step has $D_{\rm relax}\geq0$ up to its arithmetic
+allowance. It is the finite-drop slack \emph{after} fracture expenditure has
+already been counted. It is neither an additional fracture energy nor a
+prescribed material damage viscosity. Its physical interpretation or vanishing
+limit is an unresolved qualification when it is appreciable.
+
+\subsection{Exact fixed-profile constituent identities}
+
+Using the same spatial quadratures as the equations, integrate the constitutive
+paths exactly or by independently verified temporal quadrature. Define
+\begin{align}
+ W_{\rm int}&=\int_0^{\Delta t}\int_\B\tauv(r):\strain\dd A\dd r,\\
+ W_{\rm slip}&=\int_0^{\Delta t}\int_\B\tau_s(r)\chi^k V^k\dd A\dd r,\\
+ W_q&=\int_0^{\Delta t}\int_\F\qcoh(r)V^k\dd\xi\dd r.
+\end{align}
+The local ODEs guarantee
+\begin{equation}
+ \Delta E_b^{\rm mech}+D_b=W_{\rm int}-W_{\rm slip},\qquad
+ \Delta E_c^{\rm mech}+D_c=W_q.
+ \label{eq:constituent-ledgers}
+\end{equation}
+Here $D_b=\int\Dcal_b\dd r$ and $D_c=\int\Dcal_c\dd r$.
+With constant interval resistance, $D_f=\Delta t\int r_f^k V^k\dd\xi$;
+if resistance is instead reevaluated on the Maxwell path, its actual time
+integral must be used and that choice must be stated. This matters when the
+normal-stress correction is nonzero. The formulas below are valid for either
+explicitly specified convention.
+
+\subsection{The extra endpoint mechanical discrepancy}
+
+Let $W_{\rm boundary}$ include all actual external work, including reactions
+on prescribed velocity boundaries and any other prescribed-rate work.
+Define
+\begin{align}
+ E_{\rm exchange}&=W_{\rm slip}-W_q-D_f-D_r,\\
+ W_{\rm free}&=W_{\rm int}-W_{\rm boundary},\\
+ \boxed{E_{\rm mech}=E_{\rm exchange}-W_{\rm free}.}
+ \label{eq:mechanical-error}
+\end{align}
+Combining the phase and mechanical stages gives the exact accounting identity
+\begin{equation}
+ \boxed{W_{\rm boundary}
+  -\Delta(E_b+E_c+F)-D_b-D_c-D_f-D_r
+  =D_{\rm relax}+E_{\rm mech}.}
+ \label{eq:full-ledger}
+\end{equation}
+Endpoint force balance sets the appropriate end-of-interval residuals to zero.
+It does not force their integrals over the Maxwell path to vanish. Therefore
+$E_{\rm mech}$ generally remains nonzero. Equating all bulk internal work to
+external boundary work would hide $W_{\rm free}$; adding $E_{\rm mech}$ to
+phase dissipation would hide a different error. Report signed and accumulated
+absolute discrepancies separately.
+
+Exact Maxwell integration, a small nonlinear residual, and accurate $I_h$
+are each valuable but none implies that \cref{eq:full-ledger} has a negligible
+right-hand side. The endpoint comparison shows decreasing discrepancies under
+time refinement; the latest native localization tests are at one timestep and
+do not establish native time convergence.
+
+\section{Interpreting the latest localization report}
+\label{sec:report}
+
+The physical setup uses $G=10^6$ Pa, $\eta=10^8$ Pa s, $\Gc=26.6666666667$
+J/m$^2$, $\ell=0.15625$ m, $m=128$, and $\Delta t=1/64$ s. These are dimensional
+verification parameters, not nondimensionalized rock properties.
+
+\subsection{Boundary conditions explain the gross delocalization}
+
+The all-affine control prescribes $u_x=0.256t(y-0.5)$ and $u_y=0$ on all
+four sides. This forbids the non-affine $u_x(y)$ needed to accommodate a
+localized slip band at the side walls. It reaches nearly full-height phase
+and slip-distribution widths at 1 s.
+
+The compatible control prescribes both components only on top and bottom;
+on vertical sides it prescribes $u_y=0$ and leaves $u_x$ free. The associated
+natural normal traction fixes Stokes pressure, so the old arbitrary pressure
+normalization is disabled. The background friction pressure remains prescribed.
+This control retains a localized band and is constant along the fault to roundoff.
+
+\begin{center}\small
+\begin{tabular}{L{.30\textwidth}rrrr}
+\toprule
+Case at 1 s & $\phi_{\max}$ & $\phi$ FWHM & $\chi$ FWHM & $\qcoh$ center\\
+ & & m & m & Pa\\\midrule
+Affine sides, height 1 & .65836 & 1.00000 & 1.00000 & 143.13\\
+Compatible, height 1 & .82144 & .38795 & .13305 & 141.58\\
+Compatible, height 2 & .88743 & .44950 & .13670 & 97.17\\
+Rich 1D, height 1 & .85645 & .38675 & .11825 & 91.04\\
+\bottomrule
+\end{tabular}\end{center}
+
+Doubling the height while keeping the same local imposed shear-rate function
+also doubles the imposed boundary velocity difference and final relative
+displacement. That comparison changes physical compliance/loading distance;
+it is not a pure boundary-artifact test.
+
+\subsection{Correct native equations are not yet accurate native stresses}
+
+The compatible native run matches the \emph{same coarse} Q1-phase/Q2-velocity
+reference to about $8.72\times10^{-9}$ in phase. Against the rich reference,
+however, the maximum common-time phase error is $0.04642$ and the cohesive
+traction error is $51.83$ Pa. Bulk shear stress oscillates by tens of kPa around
+a mean of order 1 kPa. Enriching only the velocity representation substantially
+improves onset and phase response. The exact FE history recurrence has removed
+one transfer inconsistency; it has not removed approximation error in
+$2G\R_h-2Z_h\chi_h\Smat$.
+
+\subsection{Stationarity is a separate issue from stability}
+
+The former failed phase entry was not limited by the measured arithmetic floor.
+An exact free-set Newton correction reduced its residual without changing the
+target. But its free Hessian has two negative modes. The implemented polish
+repairs equation solving; it does not repair the energy landscape or select a
+stable branch. The appropriate next mathematical work is therefore native
+spatial accuracy and a declared stability/branch-selection policy, followed by
+coupled time/energy qualification. Changing $G$, weakening normalization
+accuracy, or adding a damage cap would not address the identified causes.
+
+\section{Current equations versus superseded interpretations}
+
+\begin{longtable}{L{.29\textwidth}L{.61\textwidth}}
+\toprule Earlier interpretation & Current restricted P2 definition\\\midrule\endhead
+Maximum single-step work increment drives phase & Full instantaneous state
+energy $E_b+E_c+F$ is differentiated. No timestep-sized work maximum drives phase.\\
+Recoverable peak $\mathcal H^+$ alone drives phase & Retained only as diagnostic
+after seeded initialization; direct irreversibility is the phase constraint.\\
+Only fault cohesive energy changes with $\phi$ & Bulk stress changes through
+$\chi$ at fixed $\R,Z$; both storage variations enter the phase derivative.\\
+Mean forces are the selected mechanical equations & Endpoint forces are selected;
+mean stresses remain necessary for exact work diagnostics.\\
+Particle stress is authoritative everywhere & Optional native FE state owns
+$\R$; legacy particle ownership remains the default outside this option.\\
+$\bm d_R$ is displacement or ordinary viscous strain & It encodes
+$\Etot-\Ein$ and has its own exponential recurrence.\\
+A KKT pass proves phase energy minimization & It proves first-order constrained
+stationarity only; negative curvature has actually been observed.\\
+Accurate normalization implies accurate traction & Velocity-space stress errors
+can remain very large with accurate $I_h$ and exact history updates.\\
+\bottomrule
+\end{longtable}
+
+\appendix
+\section{Analytic normal integral for Q1 phase, \texorpdfstring{$p=1$}{p=1}}
+
+On a normal segment of length $L$, let phase vary linearly from $a$ to $b$.
+Set $u=1-a$, $v=1-b$, and $z=(v-u)/u$. Since
+$h=m(2/(1-\phi)^2-3/(1-\phi)+1)$,
+\begin{equation}
+ \int_0^L h(\phi(\zeta))\dd\zeta
+ =mL\left[\frac2{uv}-\frac{3\log(1+z)}{uz}+1\right].
+ \label{eq:analytic-I}
+\end{equation}
+The $z=0$ limit is $Lh(a)$. A stable implementation uses
+\texttt{log1p} and its continuous small-$z$ limit. Differentiating this same
+integral with respect to its endpoint values supplies $J_i$ and $D^2i$.
+This removes normal quadrature error for the represented Q1 field, not phase
+interpolation error or surface projection error. Nonintegrable saturated
+segments remain invalid.
+
+\section{Exact time kernels for work and viscous losses}
+
+Let $x=\Delta t/\lambda$ and
+\begin{align}
+ J_{ee}&=\frac\lambda2(1-e^{-2x}),\\
+ J_{e1}&=\frac\lambda2(1-e^{-x})^2,\\
+ J_{11}&=\Delta t-2\lambda(1-e^{-x})+J_{ee}.
+\end{align}
+For $A(r)=e^{-r/\lambda}A_0+\eta(1-e^{-r/\lambda})b$,
+\begin{equation}
+ \int_0^{\Delta t}|A(r)|^2\dd r
+ =J_{ee}|A_0|^2+2\eta J_{e1}A_0:b+\eta^2J_{11}|b|^2.
+\end{equation}
+Use $A_0=\tauv^*$, $b=2\bm B^k$ for bulk stress and $A_0=Z^a$, $b=V^k$
+for cohesive history; divide by $2\eta$ and $\eta I^k$, respectively, to obtain
+the viscous losses. Integrated stresses are
+\begin{align}
+ \int_0^{\Delta t}\tauv\dd r
+   &=\lambda(1-\beta)\tauv^*
+      +2\eta[\Delta t-\lambda(1-\beta)]\bm B^k,\\
+ \int_0^{\Delta t}Z\dd r
+   &=\lambda(1-\beta)Z^a
+      +\eta[\Delta t-\lambda(1-\beta)]V^k.
+\end{align}
+Stable \texttt{expm1} or series evaluations near zero prevent cancellation;
+using a numerical series to evaluate these kernels does not change the
+general-Maxwell constitutive law into a small-step physical approximation.
+
+\section{Direct one-dimensional endpoint reference}
+
+Let $r(y)=2R_{xy}(y)$, domain height $L_y$, mean imposed shear rate
+$\dot\gamma=(u_x^{\rm top}-u_x^{\rm bottom})/L_y$, and a newly fixed profile.
+Set $\tau_0(y)=G r^a(y)-Z^a\chi(y)$. A uniform endpoint stress $T$ obeys
+\begin{equation}
+ T=\beta\tau_0(y)+\kappa[u_{x,y}(y)-\chi(y)V].
+\end{equation}
+Integrating across the height gives
+\begin{equation}
+ T=\beta\overline\tau_0+\kappa(\dot\gamma-C_QV/L_y),
+ \qquad C_Q=\sum_q w_q\chi_q,
+ \qquad \overline\tau_0=\frac1{L_y}\sum_q w_q\tau_{0,q}.
+\end{equation}
+Retain the sampled $C_Q$ rather than assuming it is exactly one. With constant
+friction resistance $\mu P$, zero radiation damping, and a positive-slip branch,
+the work-conjugate equation is
+$C_QT=(\beta Z^a+\kappa V)/I+\mu P$. Therefore
+\begin{equation}
+ V=\max\left\{0,
+ \frac{C_Q(\beta\overline\tau_0+\kappa\dot\gamma)
+                -\beta Z^a/I-\mu P}
+      {\kappa(C_Q^2/L_y+1/I)}\right\},\qquad
+ u_{x,y}=\frac{T-\beta\tau_0}{\kappa}+\chi V.
+\end{equation}
+The accepted continuous reference is $r^k(y)=[T+Z^k\chi(y)]/G$.
+Its nonpolynomial profile is retained directly, rather than forcing it into
+coarse Q2 derivatives. This is why it can distinguish constitutive/history
+correctness from velocity-space approximation error.
+
+\section{Where a future RSF law would enter}
+
+The current controls have no evolving $\Theta$. A later RSF test would replace
+$r_f$ in the same slip residual by the selected rate-and-state resistance and
+add its state equation, for example the aging-law update
+\begin{equation}
+ \dot\Theta=1-\frac{V\Theta}{D_c},\qquad
+ \Theta^k=\frac{\Theta^a+\Delta t}{1+\Delta t V^k/D_c}
+\end{equation}
+if backward Euler is the selected state integrator. The chosen regularized
+friction function, state lag/coupling, normal-traction evaluation, reverse-slip
+handling, and Jacobian must then be specified and tested. This is an extension
+location, not evidence that native FE history has already qualified BP3, RSF
+instability, or a general energy-minimization formulation for stateful friction.
+
+\section{Source hierarchy and remaining documentation gaps}
+
+The most recent localization report controls the interpretation of the current
+native option. The native FE and endpoint reports supply the state ownership
+and time scheme. The older total-energy algorithm note supplies the energy
+derivative derivation but described a mean-force prototype; its choice of mean
+equilibrium is superseded here. The original manuscript supplies notation and
+historical context; its incremental-work phase driver is not restored.
+
+This note is self-contained and requires no external figures or bibliography
+files. To compile, run \texttt{pdflatex phase\_field\_native\_fe\_derivation.tex}
+twice. The plane-strain and friction-pressure audit above supersedes the
+original attachment-only qualifications concerning those source definitions.
+The design authority remains current\_design.md and specification.tex; this
+note derives the scientific embedding and records the bounded source correction.
+General dynamic-normal-stress friction work, spatial convergence, minimum
+selection and native coupled temporal accuracy remain distinct qualifications.
+
+\subsection{Bounded post-audit accuracy and stability evidence}
+The corrected optional Newton matrix agrees with the explicit embedded operator
+to relative $4.92\times10^{-14}$; a compatible shear control is unchanged.
+Two compatible native controls with Q2/Q1 and Q3/Q2 mechanics finish to
+$0.625$ s with unchanged phase bounds and KKT tolerances, no measured healing,
+and an exact saved FE coefficient recurrence. Q3 enrichment improves common-time
+phase error against the rich one-dimensional reference from $0.03643$ to
+$0.01312$. This is not spatial convergence: the retained three-point normal
+quadrature gives nearly constant Q3 stress at its samples, while independent
+12/24-point frozen evaluation gives $409$ Pa transverse stress RMS and bulk
+storage $0.875859$ J/m instead of the native $0.792491$ J/m. Normalization
+representation error is negligible for these along-fault-uniform fields.
+
+At sampled loaded states, the free phase Hessians have positive minimum
+eigenvalues and feasible small-mode perturbations increase energy. This does
+not test the complete constrained critical cone or all states; the old affine
+negative-curvature evidence remains separate. In particular, a phase-independent
+trace-storage correction at a fixed accepted anchor cannot remove those modes.
+No quadrature or phase-branch correction is inserted on the strength of these
+checks. See \path{propagation/P2_plane_strain_report.md} for settings, profiles,
+the source-consumer inventory, separate energy errors, and actual source and
+specification diffs. Full spatial/stability/time qualification and P3 remain
+deferred.
+
+The subsequent coupled-quadrature assessment uses six normal points throughout
+the native calculation, selected by inexpensive four/six/twelve-point controls
+and independent 24/48-point evaluation. It retains the physical settings and
+consistent normalization/CPDI integrations. Q3 reduces the common-time phase
+error by about $2.8$ and transverse stress RMS by $7.2$ at $2.11$ times native
+runtime. A normal-refined $16\times32$ Q2 comparator meets the declared restricted
+phase/traction/slip targets at similar cost; both still have substantial stress
+and bulk-storage spatial error. New sampled curvature checks use the proper
+incoming anchors. These results supersede the three-point accuracy assessment,
+whose fields and failed evidence remain preserved; they do not establish full
+stability, time accuracy or P3 readiness. See
+\path{propagation/P2_bulk_quadrature_report.md} for definitions, costs and limits.
+
+\clearpage
+\begin{thebibliography}{9}
+\small
+\bibitem{localization}
+Codex project report, \emph{P2 native localization and numerical diagnosis},
+9 October 2026. Supplied file: \path{P2_native_localization_report.md}.
+
+\bibitem{native}
+Codex project report, \emph{Restricted native P2: accepted FE strain}.
+Supplied file: \path{P2_native_FE_strain_report(1).md}.
+
+\bibitem{endpoint}
+Codex project report, \emph{Evolving endpoint/mean comparison},
+8 October 2026. Supplied file: \path{P2_total_energy_endpoint_comparison.md}.
+
+\bibitem{algorithm}
+Codex derivation, \emph{One total-energy candidate step},
+8 October 2026. Supplied file: \path{P2_total_energy_algorithm.md}.
+
+\bibitem{manuscript}
+Yimin Jin, \emph{Phase-Field Model for Rate-State-Friction Law in Stokes System}.
+Supplied manuscript: \path{pf_rsf(20261007-203939).tex}.
+\end{thebibliography}
+
+\section{Optional native consistent-endpoint reduced action}
+This default-off solution algorithm retains the energy and constitutive laws.
+For every trial, fix the incoming $(\bm d_R^a,\vect Z^a,\vect\phi^a)$;
+solve momentum, incompressibility and contact at the trial phase and reconstruct
+$\bm d_R^b=\beta\bm d_R^a+(\kappa/G)\bm u$ and
+$\vect Z^b=\beta\vect Z^a+\kappa\vect V$. The obstacle is the previous physical
+phase, not a predictor or a Newton iterate. Publication occurs once.
+
+For a direction $d$, evaluate $\delta c_I=P J_i d$ (normalization coefficients),
+$\delta I_b=T\delta c_I$ and $\delta I_s=N\delta c_I$, with the actual projection
+in \cref{eq:projection}. Define
+\[
+ \delta\chi=h'Bd/I_b-h\delta I_b/I_b^2,\qquad
+ \delta\tau_{\rm partial}=-2Z_b\delta\chi\Smat.
+\]
+In the native residual convention the mechanical perturbation system is
+\[
+ \begin{pmatrix}A&-B\\G&-K_V\end{pmatrix}
+ \binom{\delta(\bm u,p)}{\delta\vect V}
+ =\binom{2E^TW_b(Z_b\delta\chi\Smat)}{-f_\Gamma},
+\]
+with zero continuity forcing, homogeneous perturbation boundary conditions,
+and zero increments at sticking/prescribed surface degrees of freedom. Here
+\[
+ f_\Gamma=T^TW_b\{\delta\chi[\tau:\Smat-2Z_b\chi(\Smat:\Smat)]\}
+              +N^TW_s Z_s\delta I_s/I_s^2.
+\]
+Retain the full native velocity and pressure spaces, all free slip coefficients,
+and tangential modes. With $\delta Z=\kappa\delta V$,
+\[
+ \delta\tau=2\kappa D_3(\operatorname{symgrad}\delta\bm u)
+             -2(\delta Z\chi+Z\delta\chi)\Smat.
+\]
+Let $c_b=-Z_b(\tau:\Smat)/G$ (an unweighted bulk coefficient) and
+$\delta c_b=-[\delta Z_b(\tau:\Smat)+Z_b(\delta\tau:\Smat)]/G$.
+The directional phase gradient is
+\begin{align*}
+ \delta r_\phi={}&K_Fd+
+ B^TW_b\left\{\delta c_b h'/I_b+
+ c_b[h''Bd/I_b-h'\delta I_b/I_b^2]\right\}\\
+ &+J_i^TP^T\delta t+(D J_i[d])^TP^Tt,\\
+ \delta t={}&-T^TW_b\left\{\delta c_b h/I_b^2+c_bh'Bd/I_b^2
+                      -2c_bh\delta I_b/I_b^3\right\}\\
+ &-N^TW_s\left\{Z_s\delta Z_s/(GI_s^2)
+                         -Z_s^2\delta I_s/(GI_s^3)\right\}.
+\end{align*}
+The analytic normal-ray Hessians implement the final adjoint term without a
+dense native phase Hessian. $K_F$ remains the actual native CPDI fracture block.
+Only the homogeneous bulk matrix and preconditioners are reused within a step;
+phase-dependent $B,G,K_V$ are refreshed at a new trial.
+The restricted native option stores the existing exact sparse assembly of $B$
+to avoid repeated quadrature actions; the integration and constraints are the
+same. It also reuses the existing exact sparse $G$ assembly, with the same
+normal-filter guard, constitutive coefficients and remote-point averaging.
+This stores the current linear map, rather than replacing it by $B^T$ or
+changing the pressure convention. Rebuild at every surface linearization;
+physical pressure scaling and homogeneous constraints remain in the condensed
+solver. A homogeneous sparse velocity factor serves as a within-step
+preconditioner, without eliminating pressure, slip or tangential modes.
+
+Fresh uncondensed residual corrections refine the mechanical tangent on this
+same operator. Each solve retains the configured Stokes linear tolerance.
+The change in the resulting elastic phase action is compared against the
+configured phase linear tolerance times its norm; unresolved accuracy fails.
+This is an action-uncertainty estimate, checked against finite differences and
+independent tighter-inner repeats. It does not replace the true outer KKT,
+actual-energy line search, physical obstacle, or terminal history checks.
+
+
+\paragraph{Obstacle-aware Newton search (numerical correction).}
+At each nonstationary iterate $x$, predict a search active set with the existing
+positive fracture-plus-mass metric $P$, using
+\[
+ \widehat s=\arg\min_{s\ge\phi^a-x}
+       \{r_\phi(x)^Ts+\tfrac12s^TPs\}.
+\]
+This inexpensive auxiliary solve is not a phase equation. With its proposed
+active set $\mathcal A$ and free set $\mathcal F$, solve the actual reduced
+Newton system
+\[
+ d_{\mathcal A}=\phi^a_{\mathcal A}-x_{\mathcal A},\qquad
+ (\mathsf H_{\rm red})_{\mathcal F\mathcal F}d_{\mathcal F}
+ =-(r_\phi)_{\mathcal F}
+  -(\mathsf H_{\rm red})_{\mathcal F\mathcal A}d_{\mathcal A}.
+\]
+Compute the active-column term with the same linearized mechanical/normalization
+pullback, keeping the current trial and incoming accepted histories fixed.
+Use the configured relative linear tolerance on this free right-hand side.
+The initial feasible metric step and a descent fallback remain search guesses;
+publication still requires the original true KKT, actual-energy line search,
+physical bounds and curvature checks. This avoids admitting one normal layer
+per nonlinear iteration after a clipped step. It changes neither the governing
+energy nor its Hessian, and does not advance history or physical time.
+
+\paragraph{Intermediate numerical accuracy and profile-translation inverse.}
+The optional adaptive search changes intermediate Newton stopping, not the
+physical admissible set or final KKT. For projected defects $d_k,d_0$, the
+unchanged entry target $t_\phi$ and configured linear accuracy $\eta_{\min}$,
+use
+\[
+ \eta_k=\min\{.01,\max\{\eta_{\min},.1\sqrt{d_k/\max(d_0,t_\phi)}\}\},
+ \qquad t_{\rm lin}=\max\{\eta_k\|b_{\mathcal F}\|_2,.1t_\phi\}.
+\]
+The actual energy line search and independent original CPDI KKT remain unchanged.
+Mechanical tangent-action refinement retains $\eta_{\min}$.
+
+One targeted preconditioning block uses $-\partial_y\phi$ with independent
+tangential nodal amplitudes, masked to the proposed free set. Early adaptive
+searches use one global column; when $\eta_k<.01$, expand to the 17 columns of
+this fixed fixture. This addresses measured tangential late directions without
+restricting any native unknown. Evaluate every image with the actual coupled
+Hessian and diagonalize only its small symmetric coarse matrix. Resolved positive
+eigenpairs give $Q=\sum_j u_ju_j^T/\lambda_j$; numerical positivity uses the
+existing action-accuracy scale. The balanced inverse is
+\[
+ C_{\rm prof}=(I-Q\mathsf H_{\rm red})C(I-\mathsf H_{\rm red}Q)+Q,
+\]
+with the left factor implemented as the transpose of the right for the inexact
+action. Omitting negative coarse modes modifies the preconditioner only. The
+physical Hessian, actual negative-curvature checks, accepted reference and
+publication rules remain fixed. No centering or additional dissipation is implied.
+
+After a resolved saddle departure, restart the intermediate forcing reference
+from the new defect if larger. The physical entry target is never restarted;
+accepted histories and the obstacle remain fixed.
+
+Near a soft branch, sum CPDI fracture increments before adding their fixed
+reference. Extended accumulation of the same storage and friction integrands
+reduces summation noise in the true-energy line search; gradients, Hessians,
+quadrature and acceptance allowances remain unchanged.
+
+\end{document}

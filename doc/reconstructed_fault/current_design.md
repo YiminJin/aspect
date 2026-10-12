@@ -11,6 +11,201 @@ algorithms, architecture, ownership, and MPI design. They are maintained as a
 consistent pair: this file records the concise settled decisions and the
 specification gives their detailed contract.
 
+### Optional native consistent-endpoint P2 algorithm (2026-10-10)
+
+The current numerical follow-up adds default-false adaptive intermediate linear
+accuracy and one balanced normal-translation preconditioner. These change search
+accuracy/inversion only; actual energy, coupled Hessian, accepted histories and
+final physical KKT remain fixed. Retained core/operator checks and a fresh
+58-step energy-qualified-prefix onset to .53125s pass: phase .60457720, zero
+healing, all seven unaligned field targets and complete-step failure/retry.
+Runtime85min9s/1684.9MiB; growing steps15.7–16.8min. A resolved noncommitting
+saddle escapes to the matching stable prototype branch; full native angular
+stability and fresh first release remain unqualified. Extended accumulation of
+the same energy resolves arithmetic line-search losses without new allowances.
+The prepared full economical run costs27–35h estimated and is not launched.
+See [P2_native_solver_report.md](propagation/P2_native_solver_report.md).
+
+The selected follow-up uses an analytic reduced action: solve the current native
+mechanical/contact Jacobian for the phase perturbation, then pull back the full
+endpoint gradient including consistent normalization first/second derivatives.
+Phase-dependent coupling blocks refresh at each trial. Linear residual correction
+measures action uncertainty at the configured phase linear accuracy without
+relaxing outer KKT. A sparse homogeneous velocity factor is reused only within
+one restricted serial physical step, inside the existing coupled solver; legacy
+AMG/GMG paths and defaults are preserved. The selected endpoint option reuses
+the existing exact sparse B/G assemblies, rebuilding at every new linearization
+with identical integration, constraints, pressure convention and point averaging.
+The G normal-filter guard is retained. Fixed-state comparisons and fresh
+onset through .53125 s pass, including accepted core growth and exact complete-step
+failure/retry. Native wall time is 54 min 18 s /1719.9 MiB peak RSS; the coarse
+prefix energy error and full native .625-s gate remain separate. The 154-step
+economical prototype passes field and separate residual-work gates. All-iterate positive-metric obstacle prediction
+selects a search set; true Newton active-column forcing retains the physical
+Hessian and actual-energy line search, avoiding layerwise node admission. See
+[P2_native_tangent_report.md](propagation/P2_native_tangent_report.md).
+
+The latest selected implementation adds a default-false endpoint solution option
+for restricted homogeneous, fixed-mesh/geometry, serial fresh FE histories.
+Accepted d_R (R=D3(symgrad d_R)), surface Z and last physical phase are immutable
+through all trials. Mechanical stationarity reduces the actual total-energy
+phase gradient including consistent-normalization adjoint; projected matrix-free
+Newton and admissible translation escape change the solution algorithm, not
+energy, dissipation or bounds. Complete terminal publication occurs once.
+Shared prescribed pre-existing phase may be supplied from a fresh profile file;
+particle H is not regenerated. Bulk preconditioners are reused only within one
+homogeneous endpoint step; actual coupled operators are always reassembled.
+The native AT1 fracture quadratic is reused with independent original-residual
+checks. A sparse fracture-plus-mass factorization and obstacle-aware
+search only generate numerical directions; true energy and reduced-Hessian
+checks determine acceptance. Configured physical bounds/tolerances are retained.
+Full matching512 FE prototype time targets and native fixed-state operators pass.
+The initial cost-gated native control verifies flank growth through .52832s,
+but its one-hour budget interrupts the first core-changing entry. That
+historical control is retained separately from the follow-up above. Keep this
+option experimental/default off. The later fixed-entry saddle diagnostic
+passes as recorded above; fresh full native/P3 qualification remains unresolved. The coarse loading prefix qualifies
+fields only; its reconstructed contact-path energy error is separately retained.
+[Algorithm and qualifications](propagation/P2_native_endpoint_report.md).
+
+### Restricted P2 matched initialization / positional assessment (2026-10-10)
+
+One continuum physical seed/H reference isolates initialization from Q1 sampling.
+Fresh511/512/1024 exact-bulk controls complete .625s; the retained512 FE prototype
+passes practical full-interval spatial targets. Centroid excursion and curvature
+weaken with refinement, while position/recentering remain mesh sensitive. No
+unique physical asymmetric branch or unrestricted neutral translation is settled.
+Separate work errors remain finite at this dt. Production/defaults/specification
+are unchanged; recommend separately selected optional consistent-endpoint native
+P2 integration, retaining positional limitations. Compact ASPECT VTU output is
+accepted-prototype rendering only, not native coupled qualification. No P3.
+[Report](propagation/P2_matched_initialization_report.md).
+
+### Restricted P2 translation-mode diagnostic result (2026-10-10)
+
+The selected constrained-descent prototype resolves stable reflected equilibria
+and completes14 diagnostic paths to .625s. Their translation-like mode is
+neutral in the continuum only where boundaries and the fixed obstacle allow
+translation. Mesh refinement/placement change release and centroid; the exact-
+bulk control retains the instability. Physical band position and branch
+selection remain unqualified despite decreasing separate time-path work errors.
+Nearest-release uncertainty is retained; no jump law is inferred. This is
+isolated prototype evidence, not a native algorithm or governing change.
+Production/defaults/specification equations and failed evidence are unchanged;
+no kinetics, centering constraint, material tuning or P3 is adopted.
+[Report](propagation/P2_asymmetric_branch_report.md).
+
+### Restricted P2 full-interval continuation limitation (2026-10-10)
+
+The same coupled prototype at three nested dt loses admissible stability on its
+symmetric stationary branch at .59765625s, before the requested .625s endpoint.
+Incoming states and trial equilibrium/bounds pass; an independently confirmed
+antisymmetric reduced mode becomes negative when two outer phase nodes release.
+Trials are not committed. Common accepted fields and separate residual works
+converge through .59375s. Existence/selection of a stable asymmetric branch and
+possible discrete pinning remain open. This is prototype evidence; no native
+equation, ownership, default, tolerance or physical-model change. No new
+branch-selection rule or P3 qualification is adopted.
+[Report](propagation/P2_coupled_branch_extension_report.md).
+
+### Restricted P2 consistent-endpoint prototype evidence (2026-10-10)
+
+The selected continuous discrete energy audit and identical-start short coupled
+family (fresh unloaded fallback because the last pre-damage checkpoint fails
+phase KKT) establish a locally stable onset branch through .5625s. Reconstructed
+intermediate mechanical/friction/phase residual powers are exposed and decrease;
+the former replay's incoming phase inconsistency is separated from profile cost
+and stability. This is prototype evidence, not an adopted native algorithm:
+the native fixed-incoming-history phase solve, accepted-state ownership, energy,
+normalization, physical parameters and defaults remain unchanged. Full .625s,
+fast-tail, native transfer and P3 remain unqualified. No compensating loss or
+kinetics is added. [Report and proposed equations](propagation/P2_coupled_branch_report.md).
+
+### Restricted P2 evolving-profile diagnostic (2026-10-10)
+
+The selected two further prototype refinements and smooth-profile control expose
+persistent completed-state phase lag/profile-work uncertainty in the tested range.
+The unchanged fixed-history solves pass. True boundary reactions identify external
+work; lifting integrals require equilibrium or an explicit interior-force audit.
+A proposed consistent-endpoint saved-entry solve removes KKT lag but incurs a large
+positive incoming profile-energy cost. It is not an adopted algorithm: the current
+fixed-history phase→Maxwell path, production ownership and defaults remain intact.
+A work-consistent redistribution/finite-transition derivation is needed before a
+new native run. No temporal/full energetic/P3 qualification follows.
+[Diagnostic and proposed candidate](propagation/P2_profile_temporal_report.md).
+
+### Restricted P2 temporal assessment (2026-10-09)
+
+The unchanged endpoint algorithm on the selected16×256 Q2/Q1 spatial model was
+assessed throughdt=1/1024,T=.625 with identical fresh initial states and interval-
+mean loading. No timestep meets the selected phase/traction targets with resolved
+reference uncertainty; no new native confirmation is selected. Direct
+irreversibility and accepted FE ownership remain verified for the restricted
+fixture. Phase release and boundary-work error decrease with unresolved limits;
+bulk-rate work has a quantified intermediate evolving-profile imbalance.
+This is a numerical assessment, not an algorithm/model change or P3 gate pass.
+[Temporal decision and preserved evidence](propagation/P2_time_resolution_report.md).
+
+### Restricted P2 working spatial configuration (2026-10-09)
+
+Q2/Q1 on16×256 cells (16 tangential,256 normal),64 unchanged fault segments,
+and six normal coupled bulk Gauss points meets the selected practical spatial
+stress/storage and phase/traction/slip targets atdt=1/64 s,T=.625 s. Retain the
+corrected plane-strain total-energy formulation, accepted FE history, consistent
+normalization/CPDI, fixed geometry/particles, homogeneous physics, loading and
+accepted-phase bounds. This is a restricted verification choice, not a default
+change or general spatial/time/energy/P3 qualification. A performance-only
+row-end iterator cache preserves phase constraint algebra. The observer reuses
+the existing coefficient/basis arithmetic estimate; solver tolerances are fixed.
+[Measured decision, initialization limits and cost](propagation/P2_Q2_normal_resolution_report.md).
+
+### Selected restricted native P2 FE strain (2026-10-08)
+
+The user selects a default-off `Bulk history representation = accepted FE strain`.
+The authoritative FE vector d_R represents R=dev_3(symgrad_2 d_R)=E_tot-E_in, with exact
+update d_R_new=beta d_R_old+(kappa/G)u_accepted for matching uniform bulk/fault
+coefficients. Phase trials, mechanical history, energy and derived particle
+publication consume this one accepted state. Hold it fixed throughout all trials;
+commit only after the complete step passes validation. Particle stress projection
+does not feed this option. Retain existing native seeded-H initial relaxation,
+then protect the unloaded accepted seed using the accepted-phase lower bound.
+The option uses the full discrete bulk/cohesive/fracture energy and normalization
+adjoint; H+ remains diagnostic.
+
+Initial scope: fresh serial 2-D fixed uniform Cartesian Box, one horizontal
+through-going fault, full normal association, identical homogeneous G/eta, AT1
+and Lorentz p=1, consistent I, surface elastic slip, bulk-conjugate endpoint
+mechanics and direct irreversibility. Reject coefficient variation, mesh/geometry
+changes, transport/replenishment and resume; never convert particle checkpoints.
+The reference relaxation time is 100 s and general exponential beta is retained.
+The existing particle-authoritative path and defaults remain intact.
+
+The source-audited FE option embeds raw plane-strain gradients in 3D before
+subtracting trace/3 once. Stored in-plane deviators reconstruct zz=-trace_2;
+energy/dissipation include its square. Momentum uses the existing trace-subtraction
+assembler (Picard and Newton residual/tangent variants) with kappa=eta(1-beta), also for the incompressible FE option, once only.
+The FE coefficient recurrence, consistent normalization and phase bounds stay
+fixed. Pressure is not redefined. Selected prescribed adiabatic friction uses
+its complete pressure without a deviatoric normal correction; the historical
+localization report's contrary description is superseded by this source audit.
+
+The restricted FE bulk rule is explicit through `FE bulk normal quadrature
+points` (default3). Tangential panels resolve bulk/fault intersections with at
+least velocity degree+1 points. One rule feeds Stokes residual/Jacobian and
+preconditioning, bulk-slip coupling and transpose, phase bulk energy/gradient/
+Hessian and energy diagnostics. Build fixed associations/caches from that rule;
+there is no runtime rule switch. Analytic consistent normalization, surface
+integrations, CPDI fracture and the particle-authoritative path are unchanged.
+
+The bounded localization task permits actual centered normal Box extents at
+unit tangential width, with uniform cell sizes and full normal coverage checked.
+It retains fixed geometry and the same support policy; no support reconstruction
+or admission event is added. A gated tiny exact free-set polish may resolve a
+remaining KKT defect at the unchanged target with only an arithmetic energy
+allowance. Publication uncertainty uses positive coefficient/basis-gradient
+operands before FE strain cancellation. These are numerical safeguards, not
+new physics or a second-order minimum-selection rule.
+
 Older reconstructed-fault redesign notes and `pf_rsf.tex` remain useful
 derivation history but are not architectural authorities. An isolated
 continuum equation may be promoted from them only by recording the approved
@@ -19,6 +214,82 @@ equation in both authoritative documents before implementation.
 - If this file conflicts with the current implementation in a way that affects architecture or scientific behavior, report the conflict rather than silently redesigning the method.
 
 ## 1. Current scope
+
+Current selected result: [coupled quadrature accuracy/cost](propagation/P2_bulk_quadrature_report.md).
+Six normal points resolve coupled quadrature below spatial error; all three
+native controls finish to .625s. Q3 improves phase/q/stress at2.11x measured
+runtime. Normal-refined16x32 Q2 alone meets the declared phase/q/slip targets at
+similar cost; stress/storage and full stability/time/P3 remain unqualified.
+Original three-point/failed fields and defaults are retained. No new physics.
+
+Previous selected result: [plane-strain audit and spatial/stability follow-up](propagation/P2_plane_strain_report.md).
+Helpers are correct; selected FE stress/energy/Maxwell publication and Newton/
+Picard operator now use the3D plane-strain embedding with unchanged pressure,
+friction and defaults. Two short compatible runs pass numerical/history checks.
+Q3 improves phase agreement but3-point native integration aliases the stress and
+underestimates frozen bulk storage9.52%; full spatial/stability qualification
+remains open. No P3. The following localization findings are historical evidence.
+
+Previous selected result: [native localization assessment](propagation/P2_native_localization_report.md).
+The original stall is repaired without target relaxation; three native boundary/
+normal-domain controls finish to1 s. Compatible sides match a coarse Q2 1D
+reference and retain a band. Native velocity-space accuracy remains inadequate
+against the rich reference, and the original affine trial has two feasible
+negative-curvature modes. Stationary KKT does not establish a minimum. No native
+spatial/time convergence or P3 follows. The [previous incomplete FE checkpoint](propagation/P2_native_FE_strain_report.md)
+and particle-owned/reduced-energy results below remain historical evidence.
+
+Current result: [P2 recoverable report](propagation/P2_recoverable_report.md).
+Local state-history and unloaded initialization checks pass. Three coupled runs
+remain unqualified: repeated Q1/particle traction transfer is not identity, and
+particle-volume surface balance does not enforce localized bulk work. The measured
+internal-work discrepancy is not an independently integrated boundary-work balance.
+No change to generic projection or mature-only work-measure scope is approved by
+this result. Feedback convergence/scaling remain open; no P3.
+
+The user now selects the recoverable-energy P2 governing revision in
+[propagation/P2_recoverable_derivation.md](propagation/P2_recoverable_derivation.md).
+Optional `Phase driving history = recoverable energy` uses
+Y=q²/(2Gg²), H_new=max(H_old,Y), with accepted q/phase and surface G. Accumulated
+viscous/frictional work is not an additional phase driver. Default `incremental
+work` retains historical behavior. `Initial cohesive state = unloaded` initializes
+q=Z=0 after phase relaxation and commits current/previous normalization together;
+default `seeded energy` retains historical preload. Particle H is never regenerated.
+The reduced energy is Z²/(2G I_h), varied at fixed Z/G. Discrete projection and
+bulk/fault work-exchange discrepancies are measured separately; no exact discrete
+energy identity or evolving-damage qualification is inferred from this revision.
+
+The selected P2 history diagnosis is recorded in
+[propagation/P2_history_report.md](propagation/P2_history_report.md). The specified
+candidate is a single-step work-potential derivative; max-over-increments loses
+smooth-path feedback as dt shrinks, including in the elastic limit. Native tests
+and identical reference reruns confirm the issue. No replacement physical law is
+selected: recoverable-energy versus signed-work driving and its projected initial
+state require review. The formulas in §25 remain the implemented contract, with
+this unresolved limitation; no timestep qualification or P3 follows. The 1 s
+initial mechanical interval does not enter the native q_p=g sqrt(2GH_p) initializer
+or advance timestep-zero H.
+
+The subsequent bounded core=0.6 P2 material comparison is documented in
+[propagation/P2_material_report.md](propagation/P2_material_report.md).
+It changes benchmark inputs only. Consistent normalization is finite and
+positive with measured source error <=0.15625%, but fourfold Gc does not reach
+damage onset and half-dt reference feedback nearly vanishes. In the fixed-phase
+partially damaged branch, the existing mechanical candidate is O(dt) and is
+compared with the committed max history. This is a diagnosed scientific
+question, not authorization to alter the H law. No gradual-damage material
+choice or P2 timestep qualification follows from solver convergence.
+
+
+The 2026-10-06 normalization follow-up adds optional I_h-only row-sum lumping
+(default consistent projection unchanged). Its restricted P1 lifecycle checks
+pass, but it is not qualified for the concentrated P2 fields: the finite coarse
+field is poorly resolved at both tested fault spacings, while exact fine-field
+endpoint saturation makes both transverse and surface normalization divergent.
+See [the normalization report](propagation/normalization_report.md). Positive
+quadrature samples alone cannot establish integrability. Further coupled work
+requires a reviewed fully damaged-state treatment and adequate surface accuracy.
+
 
 The framework is intended to support a sharp reconstructed fault derived from a phase-field model.
 
@@ -54,6 +325,71 @@ The reconstructed sharp fault is **not required to coincide exactly with the pre
 Because the initial graph already provides topology and length, the initialization does **not** need to discover a seed point, trace an unknown curve, or estimate the number of structural points from the number of active phase-field nodes.
 
 The final structural spacing should be approximately uniform in physical arc length. The exact reconstruction/resampling algorithm is deferred to a later implementation stage.
+
+### Selected P1 production box solve (2026-10-06)
+
+The optional `Use bound constraints` phase-solver selector integrates projected
+Newton on the existing CPDI operator and CG/AMG solve; equality remains the
+default and mature frozen-field behavior is unchanged. Bounds use the material
+phase range [0,1]. The selected P2 `Enforce phase irreversibility` option
+(default false, requiring box constraints) changes physical evolution to
+[phi_last_accepted,1]. It snapshots old_solution once per solve and holds that
+bound fixed through Newton and line searches. Initial relaxation stays [0,1],
+H is unchanged, and unsuccessful solves publish nothing. This does not qualify
+physical mechanical-step rollback. The option rejects `continue with next
+timestep`, which would rotate a failed iterate into accepted history.
+Residual, tangent, energy and convergence use the supplied trial field with
+particle H fixed. Only convergence publishes the accepted phase.
+
+Fresh initialization relaxes the native rounded guess at initialized H before
+normalization and cohesive-history initialization; it never reconstructs H from
+the result. Later solves start from the accepted old_solution phase, not generic
+time extrapolation. The simulator refreshes only current_linearization_point's
+phase block after convergence, preserving old vector rotation and the existing
+timestep-zero localization special case. By default, fixed-geometry projection widths
+remain prescribed-profile widths; they are not inferred from relaxed phi.
+Coverage is a verification requirement. The implementation is not qualified
+until the production serial/restart/MPI gate passes.
+
+The initial integration's narrow-strip support failure (omitted normalized-source
+fraction about 7.26e-7 after +5%) is retained in the historical P1 report. The
+explicit fixed-region policy below resolves it for the straight verification
+case: full P1 phase-only bounds/equilibrium/hold/restart/MPI checks pass. This
+qualifies the sampled prescribed-H problem only, not mechanical feedback.
+The initial P2 trajectories then expose nonpositive current I_h after consistent
+surface projection of positive transverse integrals. Coupled admissibility and
+full-interval feedback refinement remain unqualified; see `propagation/P2_report.md`.
+No positivity floor, H-law change or general support-admission algorithm was added.
+
+### Selected fixed verification association region (2026-10-06)
+
+The user resolves the support-policy choice above for one prescribed straight
+through-going fault. `Fault reconstruction / Association support = full normal
+cross-section` derives a constant half-width from maximum normal distance of
+actual Box mesh vertices to that fault, plus 64 double-epsilon coordinate-scale
+roundoff. In the unit-height centered fixture this covers distance 0.5 and its
+boundary samples. This opt-in requires 2D fixed prescribed geometry, one straight
+fault spanning the Box's tangential extent and legacy boundary completion. The
+default remains `stationary profile`; finite-seed and mature defaults are unchanged.
+No sharp endpoint, phase boundary, guessed profile or particle-H initialization
+changes. Particle and mechanical-QP caches are constructed from committed width
+metadata before dependent cohesive initialization. Existing manager serialization
+preserves widths; ordinary resume invalidation rebuilds caches against them.
+There is no runtime admission or support reconstruction. All particles in this
+fixed cross-section are eligible for the unchanged associated-particle update.
+This policy does not qualify multiple faults, nucleation or propagating tips.
+
+### Fresh linear continuity check correction (P2 entry)
+
+The zero-initial-velocity P2 control exposed an exact-zero compatibility bound
+for a nonzero computed Newton correction: the old fresh-residual check reused
+only the RHS/base-iterate arithmetic scale. Fresh `C*direction-rhs` now includes
+the native continuity scale of the constrained correction as well as the base
+iterate, and a triangle bound for the pressure dot-product inputs. It uses the
+same gamma operation count and unchanged mixed nonlinear cap. The RHS admission
+check, actual residual convergence targets, pressure gauge and physical laws are
+unchanged. This corrects the arithmetic being bounded, rather than introducing
+a fitted tolerance; evidence and qualification are in the P2 report.
 
 ## 3. `ReconstructedFault<dim>` responsibility
 
@@ -959,10 +1295,19 @@ as an `I_h` singularity rather than a phase-field range violation. A tail value
 \(\phi_h=0\) is admissible. Current \(I_h\) is private transient material-model
 data in this stage and is not connected to the mechanical solve.
 
-The consistent Q1 projection of positive quadrature-point normalization
-integrals is retained. Because consistent projection is not positivity
-preserving in general, positive nodal coefficients are a tested property of
-the smooth intended profiles, not a generic mathematical guarantee.
+The default consistent Q1 normalization projection is retained as a comparator.
+The explicitly selected optional row-sum lumped representation applies to
+$I_h$ alone: $I_i=b_i/\sum_j M_{ij}$. It uses the same positive arclength
+quadrature and nonnegative Q1 partition of unity, with positive nodal row sums.
+It reproduces constants and conserves the quadrature-defined surface integral;
+positivity does not establish spatial accuracy or integrability. Generic
+projection operators remain unchanged. The representation is fixed throughout
+a trajectory, including initial/current/committed previous normalization.
+An optional property-registry marker preserves its identity through native
+checkpointing; switching representation on restart is rejected. Existing
+consistent checkpoints and defaults retain their layout. No floor or upper
+phase cap is introduced. A saturated field must be checked for a mathematical
+normalization singularity, even if Gauss samples miss the saturated point.
 
 Stage C accuracy is checked separately from fault reconstruction: the adaptive
 kernel is compared with an analytic profile integral under quadrature- and
@@ -1003,8 +1348,8 @@ $\partial\upsilon_k/\partial V_k=h_k/I_{h,k}$. The previous pointwise
 $h_{k-1}$ is derived from the previous FE phase-field solution; it is not an
 additional persistent fault property.
 
-For an initially reconstructed pre-existing fault, the committed state is not
-zeroed. At each associated particle, form
+For the default `Initial cohesive state = seeded energy`, an initially
+reconstructed pre-existing fault retains the historical nonzero preload. At each associated particle, form
 
 \[
 q_p=\bar g(\phi_{\rm eff,p},\mathbf f_\Gamma(s_p))
@@ -1826,7 +2171,9 @@ coefficients are used consistently in cohesive mechanics and history, while
 bulk Maxwell, $B$, and $G$ retain bulk coefficients.
 
 The accepted particle cohesive-traction samples are consistently projected to
-the replicated fault Q1 space. This projected traction, interpolated back to a
+the replicated fault Q1 space. The following candidate formula describes the
+default `Phase driving history = incremental work`; the optional recoverable
+selection is defined in the current-scope governing revision above. This projected traction, interpolated back to a
 particle's cached fault coordinate, enters the exact finite-step driving-force
 candidate. For $g_k<1$, evaluate it deliberately as
 
@@ -1977,3 +2324,139 @@ not a blocker for an independently qualified 60-degree configuration. See the
 [birth/completion report](../../benchmarks/reconstructed_fault/bp3_birth_completion/README.md)
 for the distinction between full-mesh boundary/material preparation and a full
 production mechanics solve.
+
+
+### P2 selected cohesive coupling repair (2026-10-07)
+
+The explicit `Cohesive history representation = surface elastic slip` advances
+Q1 Z=I*q without particle transfer; point q=Z/I, using nodal products before
+interpolation. Uniform G and temperature-independent uniform eta are required.
+`Fault mechanical work measure = bulk conjugate` uses the Stokes-QP adjoint of
+the bulk slip-strain map for shear and ds surface quadrature for resistance,
+with matching derivatives. It requires a single straight 2-D cohesive fault
+and prescribed friction pressure. Defaults and the guarded mature-only option
+remain unchanged. Both selections have restart provenance markers. See
+[propagation/P2_coupling_derivation.md](propagation/P2_coupling_derivation.md)
+for equations, changing-profile terms, and remaining discrete approximations.
+Fixed-phase history/work, tangent and small distributed checks pass; the three
+stronger evolving trajectories stop on resolved tail healing despite improving
+lag-aligned feedback. Consistent-normalization spatial accuracy and full profile
+energetic closure remain separate limitations. See
+[propagation/P2_coupling_report.md](propagation/P2_coupling_report.md). No qualified
+evolving baseline or P3 follows this result.
+
+### Direct P2 phase irreversibility (2026-10-07)
+
+The explicit physical evolution option enforces the accepted nodal phase as the
+lower bound in the existing projected-Newton variational inequality. It does not
+clip a converged equality solution. With r=-dE/dphi, lower contacts require r<=0,
+upper contacts r>=0, and free nodes r=0. Contact increments are eliminated
+symmetrically, importing off-rank contact flags. Newton release decisions,
+projected line search, energy and KKT all refer to the same immutable bound.
+The accepted snapshot is local to the solve; no new transported or checkpointed
+phase-history variable is introduced. Initial relaxation still uses [0,1].
+The default is false and mature frozen behavior is retained. This fixed-mesh,
+frozen-position comparison does not qualify advected histories, rejected-step
+rollback, spatial convergence or a complete evolving-profile energy balance.
+
+### P2 accuracy and energy assessment (2026-10-07)
+
+Direct irreversibility is successfully verified for the fixed-mesh P2 fixture;
+its implementation and every selected constitutive/coupling option are retained.
+Frozen consistent-normalization comparisons at .1/.05/.025 m show .025 m still
+has .8569–.9698% maximum source spatial error with accurate integration, above
+the provisional .5% target. Native zero-input stress publication/FE transfer gives
+exact Maxwell partitioning and <1.6e-12 Pa additional drift, but a mesh-scale Q1
+stress has 5.24% FE representation error. No generic projector is modified.
+
+Profile work is accounted in native bulk storage/dissipation. The reduced fault
+phase-energy driver nevertheless omits the bulk variation implied by changing
+chi=h/I at fixed displacement and elastic slip: delta E_bulk=-sum JxW (Z/G)
+(tau:S) delta chi. A controlled nonuniform field makes it 87.26% of the opposing
+fault variation. This assessment does not adopt that term or change peak H;
+closure of total evolving-profile energy is a governing decision. See
+[propagation/P2_accuracy_energy_report.md](propagation/P2_accuracy_energy_report.md)
+and [derivation](propagation/P2_accuracy_energy_derivation.md). Conditional finer
+coupled runs were not launched; P3 is not ready.
+
+
+### Bounded P2 review checkpoint (2026-10-08)
+
+[Formulation comparison](propagation/P2_formulation_comparison.md) uses the
+pf_rsf.tex notation to distinguish selected peak fault-energy driving from a
+proposed total-energy phase variation; no governing revision is adopted.
+[Implementation checkpoint](propagation/P2_implementation_checkpoint.md) records
+current dimensional synthetic settings and all production changes since the
+frozen baseline. Consistent I at .00625 m passes the provisional .5% source-error
+target on six retained frozen fields (worst .0250722%); .0125 m does not.
+Coupled runs retain .1 m and all selected options. Direct irreversibility remains
+successfully verified for the fixed-mesh fixture; evolving-profile energy and
+FE stress representation remain separate limitations. Stop for user review:
+new phase law, further coupled refinement, material tuning and P3 are deferred.
+
+
+### Isolated total-energy candidate (2026-10-08; not production adoption)
+
+The user selected a complete time-step derivation and small isolated prototype.
+[Algorithm](propagation/P2_total_energy_algorithm.md) fixes accepted internal
+variables during phase trials, differentiates the actual bulk/fault/fracture
+energy with consistent normalization's adjoint, and uses the accepted phase
+lower bound. It selects instantaneous elastic redistribution then general
+Maxwell relaxation with averaged mechanical work balance. Peak H is diagnostic.
+[Verification](propagation/P2_total_energy_verification.md) checks derivatives,
+irreversibility, immutable publication and finite-step energy accounting. The
+explicit finite phase-release slack is substantial in unstable preload controls;
+its physical interpretation and mean-equilibrium temporal accuracy remain open.
+Production equations/options and earlier qualifications stay unchanged. No P3.
+
+### Loaded total-energy prototype comparison (2026-10-08)
+
+[Common-path report](propagation/P2_total_energy_time_comparison.md) retains the
+isolated energy/inelastic-strain formulation and all production equations.
+Endpoint/mean mechanical balance is compared first from an unloaded admissible
+state, then the constrained seed evolves with one free bulk mode and surface
+slip. A diagnosed 77.78% constant-load sampling error is removed by prototype
+intersection quadrature; no generic projector or physical parameter changes.
+Corrected release and phase increments decrease under refinement, supporting
+mean-integrated mechanics as the native implementation candidate. Onset/full-field
+and endpoint-force errors remain measurable; no native model adoption, spatial
+qualification, kinetics/limiter, optimization or P3 is inferred. Prior unstable
+preloads/failed native trajectories remain preserved.
+
+### Evolving endpoint comparison and native entry (2026-10-08)
+
+[Evolving comparison](propagation/P2_total_energy_endpoint_comparison.md) adds the
+previously missing endpoint family and a focused finer reference, reusing all
+matching mean histories. Endpoint is now the preferred implementation direction;
+mean retains its exact-work diagnostic role. Phase release and independent
+mechanical discrepancy decrease under refinement. The reference's work error is
+.467% of boundary work / 3.14% of fracture expenditure, with appreciable fast-event
+field differences still present. No resolved timestep/full Stokes qualification
+follows. Final phase at both normal boundaries is .26950 in the reference;
+this is widening of a prescribed band with one free bulk velocity mode, not
+fault propagation. Earlier mean selection is historical.
+
+The authorized native entry audit identifies a governing discrete-state decision.
+Native parent stress publication and its FE transfer do not commute with the
+prototype's authoritative QP elastic profile redistribution. The report derives
+the transfer-plus-normalization adjoint for a projected parent-state energy and
+the matching mechanical-operator consequences, versus adopting QP-history
+ownership. These are alternatives for review, **not adopted native equations**.
+Source and current specification remain consistent. No generic projector,
+accepted internal-strain reset, extra loss/driver, production default or native
+history ownership is changed; implementation stops before an unreviewed choice.
+The formal projected-parent-energy pullback is not qualified: the actual
+cell-average stress transfer bounds its mechanical image rank by 3072 while
+the native divergence-free velocity space has dimension at least 6849. This
+rank obstruction belongs to that proposed operator, not current native Stokes.
+This obstruction does not rule out all native routes. The homogeneous unloaded
+fixture also admits exact FE internal strain R=symgrad d_R, with
+d_R_new=beta d_R_old+(kappa/G)u_accepted. Matching uniform bulk/fault Maxwell
+coefficients cancel the slip/profile terms in this evolution, without a small-dt
+assumption. It is the recommended restricted native-state proposal. Saved-field
+recurrence checks agree to 1.39e-16; native FE/publication/checkpoint behavior is
+not thereby verified. The existing benchmark retained-stress callback is
+plugin-owned and unarchived. Accepted ownership for d_R would replace mapped
+particle stress as authoritative mechanical history in this option; it is not
+assigned here. Native implementation is not complete. The report states the
+concrete alternatives and limits before source changes.

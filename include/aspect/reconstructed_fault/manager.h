@@ -517,6 +517,9 @@ namespace aspect
       std::vector<bool> slip_rate_initialized;
       std::vector<std::map<unsigned int, double>> prescribed_slip_rates;
       bool fit_prescribed_geometry = true;
+
+      /** Fixed verification support covering a single straight Box cross-section. */
+      bool full_normal_cross_section = false;
       bool slip_rate_nonlinear_solve_active = false;
       bool slip_rate_trial_active = false;
   };

@@ -26,6 +26,8 @@
 #include <aspect/particle/particle_domain.h>
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/plugins.h>
+#include <aspect/reconstructed_fault/manager.h>
+#include <aspect/reconstructed_fault/utilities.h>
 
 #include <deal.II/grid/grid_tools.h>
 #include <deal.II/dofs/dof_tools.h>
@@ -34,6 +36,7 @@
 #include <deal.II/lac/solver_cg.h>
 
 #include <iomanip>
+#include <fstream>
 
 namespace aspect
 {
@@ -491,10 +494,26 @@ namespace aspect
     {
       prm.enter_subsection("Phase field solver parameters");
       {
+        prm.declare_entry("Use bound constraints", "false", Patterns::Bool(),
+                          "Solve the phase variational inequality on the material phase range. "
+                          "This imposes no previous-phase lower bound and does not change H. "
+                          "The default retains the equality solver.");
+        prm.declare_entry("Enforce phase irreversibility", "false", Patterns::Bool(),
+                          "With bound constraints, use an immutable copy of the last accepted phase "
+                          "as the lower bound during physical evolution. Initial relaxation remains "
+                          "on the material phase range; H is unchanged.");
         prm.declare_entry("Linear solver tolerance", "1e-8",
                           Patterns::Double(0., 1.),
                           "A relative tolerance up to which the linearized phase field system "
                           "in each nonlinear step should be solved.");
+        prm.declare_entry("Adaptive endpoint linear accuracy", "false", Patterns::Bool(),
+                          "In the optional consistent-endpoint solver, adapt intermediate Newton "
+                          "linear accuracy to the current projected defect. Final physical KKT, "
+                          "bounds, energy line search and mechanical action accuracy are unchanged.");
+        prm.declare_entry("Endpoint translation preconditioner", "false", Patterns::Bool(),
+                          "In the optional endpoint solver, add one balanced normal-profile coarse "
+                          "correction to the phase search inverse. The actual coupled Hessian and "
+                          "negative-curvature checks remain unchanged.");
 
         prm.declare_entry("Max linear solver iterations", "1000",
                           Patterns::Integer(0),
@@ -609,7 +628,18 @@ namespace aspect
     {
       prm.enter_subsection("Phase field solver parameters");
       {
+        solver_parameters.use_bound_constraints = prm.get_bool("Use bound constraints");
+        solver_parameters.enforce_irreversibility = prm.get_bool("Enforce phase irreversibility");
+        AssertThrow(!solver_parameters.enforce_irreversibility || solver_parameters.use_bound_constraints,
+                    ExcMessage("Phase irreversibility requires Use bound constraints."));
+        AssertThrow(!solver_parameters.enforce_irreversibility
+                    || this->get_parameters().nonlinear_solver_failure_strategy
+                       != Parameters<dim>::NonlinearSolverFailureStrategy::continue_with_next_timestep,
+                    ExcMessage("Phase irreversibility cannot accept a failed physical step: "
+                               "do not use continue with next timestep."));
         solver_parameters.linear_solver_tolerance            = prm.get_double("Linear solver tolerance");
+        solver_parameters.adaptive_endpoint_linear_accuracy = prm.get_bool("Adaptive endpoint linear accuracy");
+        solver_parameters.endpoint_translation_preconditioner = prm.get_bool("Endpoint translation preconditioner");
         solver_parameters.max_linear_solver_iterations       = prm.get_integer("Max linear solver iterations");
         solver_parameters.nonlinear_solver_tolerance         = prm.get_double("Nonlinear solver tolerance");
         solver_parameters.max_nonlinear_iterations           = prm.get_integer("Max nonlinear iterations");
@@ -821,14 +851,21 @@ namespace aspect
                               LinearAlgebra::BlockVector       &system_rhs,
                               const LinearAlgebra::BlockVector &current_solution,
                               const bool assemble_system_jacobian,
-                              double *residual_roundoff_allowance) const
+                              double *residual_roundoff_allowance,
+                              double *energy,
+                              bool omit_fe_elastic_energy) const
   {
     const Particles::ParticleHandler<dim> &particle_handler = particle_manager->get_particle_handler();
     const Particle::ParticleDomainHandler<dim> &particle_domain_handler = particle_manager->get_particle_domain_handler();
 
+    const auto *fault_material = dynamic_cast<const MaterialModel::PhaseFieldFault<dim>*>(&this->get_material_model());
+    const bool total_energy = fault_material && fault_material->uses_fe_strain_history()
+                              && fault_material->has_fe_strain_history();
+
     // Initialize the corresponding block of the system matrix and the system rhs
     const unsigned int block_index = this->introspection().variable("phase_field").block_index;
-    system_matrix.block(block_index, block_index) = 0;
+    if (assemble_system_jacobian)
+      system_matrix.block(block_index, block_index) = 0;
     system_rhs.block(block_index) = 0;
 
     // Compute the positive, pre-cancellation weak-load scale only at the
@@ -851,6 +888,7 @@ namespace aspect
 
     std::vector<double> chemical_composition_values(C_property_indices.size());
     bool locally_admissible = true;
+    double local_energy = 0;
 
     // Vector storing the phase field DoF indices associated with a particle domain
     std::vector<types::global_dof_index> particle_dof_indices;
@@ -901,7 +939,7 @@ namespace aspect
 
             // Get the crack driving force
             const ArrayView<const double> particle_properties = particle.get_properties();
-            const double H = particle_properties[H_property_index];
+            const double H = total_energy ? 0. : particle_properties[H_property_index];
 
             // Compute the volume fractions
             for (unsigned int c = 0; c < chemical_composition_values.size(); ++c)
@@ -925,6 +963,7 @@ namespace aspect
             const double d2a_dphi2 = geometric_function->second_derivative(phi);
             const double l         = geometric_function->get_length_scale();
 
+            double potential = 0;
             double F = 0;
             double K = 0;
             double dK_dphi = 0;
@@ -937,6 +976,10 @@ namespace aspect
                   const double dg_dphi   = degradation_functions[j]->first_derivative(phi);
                   const double d2g_dphi2 = degradation_functions[j]->second_derivative(phi);
 
+                  if (energy != nullptr)
+                    potential += volume_fractions[j] *
+                      (H * degradation_functions[j]->value(phi)
+                       + Gc_over_c0l * geometric_function->value(phi));
                   F += volume_fractions[j] * (2. * Gc_over_c0l * l * l);
                   K += volume_fractions[j] * (H * dg_dphi + Gc_over_c0l * da_dphi);
                   if (assemble_system_jacobian || residual_roundoff_allowance != nullptr)
@@ -951,6 +994,8 @@ namespace aspect
                 }
 
             const double V_p = particle_domain.volume();
+            if (energy != nullptr)
+              local_energy += V_p * (potential + 0.5 * F * grad_phi.norm_square());
             Vector<double> particle_scale(residual_roundoff_allowance != nullptr ? n_dofs : 0);
 
             for (unsigned int i = 0; i < n_dofs; ++i)
@@ -999,6 +1044,26 @@ namespace aspect
                                                                          system_rhs);
           }
 
+    AssertThrow(!omit_fe_elastic_energy || total_energy,
+                ExcMessage("Fracture-only evaluation requires initialized accepted FE history."));
+    if (total_energy && !omit_fe_elastic_energy)
+      {
+        const auto elastic = fault_material->evaluate_fe_phase_energy(current_solution, assemble_system_jacobian);
+        locally_admissible = locally_admissible && elastic.admissible;
+        if (elastic.admissible)
+          {
+            local_energy += elastic.energy;
+            for (unsigned int i=0; i<elastic.gradient.size(); ++i)
+              {
+                system_rhs.block(block_index)[i] -= elastic.gradient[i];
+                if (residual_roundoff_allowance)
+                  rounding_scale.block(block_index)[i] += elastic.roundoff_scale[i];
+                if (assemble_system_jacobian)
+                  for (unsigned int j=0; j<elastic.gradient.size(); ++j)
+                    system_matrix.block(block_index, block_index).add(i, j, elastic.hessian(i,j));
+              }
+          }
+      }
     system_rhs.compress(VectorOperation::add);
     if (assemble_system_jacobian)
       system_matrix.compress(VectorOperation::add);
@@ -1011,8 +1076,17 @@ namespace aspect
         *residual_roundoff_allowance = 8 * std::numeric_limits<double>::epsilon() *
                                       rounding_scale.block(block_index).l2_norm();
       }
+    if (energy != nullptr)
+      *energy = Utilities::MPI::sum(local_energy, this->get_mpi_communicator());
     return Utilities::MPI::min(static_cast<unsigned int>(locally_admissible),
                                this->get_mpi_communicator()) == 1;
+  }
+
+  template<int dim> bool PhaseFieldHandler<dim>::evaluate_fe_fracture(
+    LinearAlgebra::BlockSparseMatrix &matrix,LinearAlgebra::BlockVector &rhs,
+    const LinearAlgebra::BlockVector &trial,double &energy,double &arithmetic_allowance) const
+  {
+    return assemble_phase_field_system(matrix,rhs,trial,false,&arithmetic_allowance,&energy,true);
   }
 
 
@@ -1024,6 +1098,7 @@ namespace aspect
                            const LinearAlgebra::BlockVector       &system_rhs,
                            LinearAlgebra::BlockVector             &solution_vector) const
   {
+    TimerOutput::Scope timer(this->get_computing_timer(), "Phase: linear solve");
     const auto &variable = this->introspection().variable("phase_field");
     const unsigned int component_index = variable.first_component_index;
     const unsigned int block_index     = variable.block_index;
@@ -1090,12 +1165,395 @@ namespace aspect
 
 
   template <int dim>
+  void PhaseFieldHandler<dim>::initialize_phase_guess(LinearAlgebra::BlockVector &state) const
+  {
+    LinearAlgebra::BlockVector owned(this->introspection().index_sets.system_partitioning,
+                                     this->get_mpi_communicator());
+    owned = state;
+    const auto &faults = this->get_reconstructed_fault_manager().get_prescribed_faults();
+    std::map<double, std::vector<std::unique_ptr<PhaseField::PhaseFieldProfile>>> profiles;
+    const unsigned int component = this->introspection().variable("phase_field").first_component_index;
+    for (const auto &cell : this->get_dof_handler().active_cell_iterators())
+      if (!cell->is_artificial())
+        for (unsigned int v=0; v<GeometryInfo<dim>::vertices_per_cell; ++v)
+          {
+            const auto i = cell->vertex_dof_index(v, component);
+            if (!owned.locally_owned_elements().is_element(i))
+              continue;
+            std::vector<double> compositions;
+            for (const auto c : this->introspection().chemical_composition_field_indices())
+              compositions.push_back(state[cell->vertex_dof_index(
+                v, this->introspection().component_indices.compositional_fields[c])]);
+            const auto fractions = MaterialModel::MaterialUtilities::compute_composition_fractions(compositions);
+            double guess = 0;
+            for (const auto &fault : faults)
+              {
+                const auto distance_and_core =
+                  ReconstructedFaultUtilities::closest_point_distance_and_core_phase_field(fault, cell->vertex(v));
+                const double core = distance_and_core.second;
+                if (profiles.find(core) == profiles.end())
+                  profiles.emplace(core, get_phase_field_profiles(core));
+                double phi = 0;
+                for (unsigned int m=0; m<fractions.size(); ++m)
+                  phi += fractions[m] * profiles.at(core)[m]->value(distance_and_core.first);
+                guess = std::max(guess, phi);
+              }
+            owned[i] = guess;
+          }
+    this->get_current_constraints().distribute(owned);
+    state = owned;
+  }
+
+
+  template <int dim>
+  void PhaseFieldHandler<dim>::constrain_phase_newton_system(
+    LinearAlgebra::BlockSparseMatrix &matrix, LinearAlgebra::BlockVector &rhs,
+    const LinearAlgebra::BlockVector &state,
+    const LinearAlgebra::BlockVector *lower_bound) const
+  {
+    const auto comm = this->get_mpi_communicator();
+    const auto b = this->introspection().variable("phase_field").block_index;
+    const auto offset = state.get_block_indices().block_start(b);
+    const auto range = dynamic_cast<const MaterialModel::PhaseFieldModel<dim>&>(
+      this->get_material_model()).get_phase_field_range();
+    const auto &constraints = this->get_current_constraints();
+    const auto &indices = rhs.block(b).locally_owned_elements();
+    const auto *fault = dynamic_cast<const MaterialModel::PhaseFieldFault<dim>*>(&this->get_material_model());
+    if(fault && fault->uses_fe_strain_history() && fault->has_fe_strain_history())
+      {
+        // Primal-dual contact prediction for the nonlocal energy. A node
+        // slightly above its bound can already require contact. Its Newton
+        // increment is bound-x, so symmetric column elimination needs a lift.
+        std::vector<bool> contact(rhs.block(b).size(),false);
+        std::vector<double> lift(rhs.block(b).size(),0.);
+        for(const auto i:indices)
+          {
+            const double diagonal=std::abs(matrix.block(b,b).diag_element(i));
+            AssertThrow(diagonal>0 && std::isfinite(diagonal),ExcMessage("FE phase contact metric must be finite and positive."));
+            const double x=state.block(b)[i],projected=x+rhs.block(b)[i]/diagonal;
+            const double lower=lower_bound?lower_bound->block(b)[i]:range.first;
+            if(projected<=lower){contact[i]=true;lift[i]=lower-x;}
+            else if(projected>=range.second){contact[i]=true;lift[i]=range.second-x;}
+          }
+        for(const auto i:indices)
+          if(!contact[i])
+            {
+              const auto row_end = matrix.block(b,b).end(i);
+              for(auto e=matrix.block(b,b).begin(i);e!=row_end;++e)
+                if(contact[e->column()])
+                  {rhs.block(b)[i]-=e->value()*lift[e->column()];e->value()=0.;}
+            }
+        for(const auto i:indices)if(contact[i])
+          {matrix.block(b,b).clear_row(i,1.);rhs.block(b)[i]=lift[i];}
+        matrix.block(b,b).compress(VectorOperation::insert);rhs.compress(VectorOperation::insert);
+        return;
+      }
+    // Import contact flags for every column used by locally owned rows.
+    // An active increment is zero, hence column elimination has no RHS lift.
+    IndexSet columns(indices.size());
+    columns.add_indices(indices);
+    for (const auto i : indices)
+      {
+        // Constructing a Trilinos row iterator extracts that row. Reuse its
+        // end marker instead of repeating the extraction for every entry.
+        const auto row_end = matrix.block(b,b).end(i);
+        for (auto e=matrix.block(b,b).begin(i); e!=row_end; ++e)
+          columns.add_index(e->column());
+      }
+    columns.compress();
+    LinearAlgebra::Vector owned_flags(indices, comm), flags(indices, columns, comm);
+    for (const auto i : indices)
+      owned_flags[i] = !constraints.is_constrained(offset+i)
+        && ((state.block(b)[i] == (lower_bound ? lower_bound->block(b)[i] : range.first)
+             && rhs.block(b)[i] <= 0)
+            || (state.block(b)[i] == range.second && rhs.block(b)[i] >= 0));
+    owned_flags.compress(VectorOperation::insert);
+    flags = owned_flags;
+    for (const auto i : indices)
+      if (flags[i] != 0)
+        {
+          matrix.block(b,b).clear_row(i, 1);
+          rhs.block(b)[i] = 0;
+        }
+      else
+        {
+          const auto row_end = matrix.block(b,b).end(i);
+          for (auto e=matrix.block(b,b).begin(i); e!=row_end; ++e)
+            if (flags[e->column()] != 0)
+              e->value() = 0;
+        }
+    matrix.block(b,b).compress(VectorOperation::insert);
+    rhs.compress(VectorOperation::insert);
+  }
+
+
+  template <int dim>
+  void PhaseFieldHandler<dim>::solve_bound_constrained_phase(
+    LinearAlgebra::BlockSparseMatrix &matrix, LinearAlgebra::BlockVector &rhs,
+    LinearAlgebra::BlockVector &state,
+    const LinearAlgebra::BlockVector *lower_bound) const
+  {
+    TimerOutput::Scope timer(this->get_computing_timer(), "Phase: bounded solve");
+    const auto comm = this->get_mpi_communicator();
+    const auto b = this->introspection().variable("phase_field").block_index;
+    const auto offset = state.get_block_indices().block_start(b);
+    const auto range = dynamic_cast<const MaterialModel::PhaseFieldModel<dim>&>(
+      this->get_material_model()).get_phase_field_range();
+    const auto &constraints = this->get_current_constraints();
+    const auto &indices = rhs.block(b).locally_owned_elements();
+    LinearAlgebra::BlockVector owned(rhs), update(rhs), trial(state), raw_rhs(rhs);
+    owned = state;
+    constraints.distribute(owned);
+    state = owned;
+    const auto kkt = [&](const LinearAlgebra::BlockVector &u)
+    {
+      double defect = 0;
+      unsigned int invalid = 0;
+      for (const auto i : indices)
+        {
+          const double x = u.block(b)[i], r = rhs.block(b)[i];
+          const double lower = lower_bound ? lower_bound->block(b)[i] : range.first;
+          invalid |= !std::isfinite(lower) || lower < range.first || lower > range.second
+                     || !std::isfinite(x) || x < lower || x > range.second || !std::isfinite(r);
+          if (constraints.is_constrained(offset+i))
+            continue;
+          const double d = lower == range.second ? 0.0
+                           : x == lower ? std::max(r, 0.0)
+                           : x == range.second ? std::min(r, 0.0) : r;
+          defect = std::max(defect, std::abs(d));
+        }
+      AssertThrow(Utilities::MPI::max(invalid, comm) == 0,
+                  ExcMessage("Bound phase solve requires a finite feasible constrained state."));
+      return Utilities::MPI::max(defect, comm);
+    };
+
+    double target = 0, initial_defect = 0;
+    for (unsigned int it=0; it<=solver_parameters.max_nonlinear_iterations; ++it)
+      {
+        double roundoff = 0, energy = 0;
+        AssertThrow(assemble_phase_field_system(matrix, rhs, state, true, &roundoff, &energy),
+                    ExcMessage("Undefined phase energy at a bounded iterate."));
+        const double defect = kkt(state);
+        if (it == 0)
+          {
+            initial_defect = defect;
+            target = std::max(solver_parameters.nonlinear_solver_tolerance * defect, roundoff);
+            AssertThrow(std::isfinite(target), ExcMessage("Nonfinite phase KKT target."));
+            this->get_pcout() << std::setprecision(17) << "   Phase box target: initial="
+                             << defect << " roundoff=" << roundoff << " target=" << target << '\n';
+          }
+        if (defect <= target)
+          {
+            this->get_pcout() << std::setprecision(17) << "   Phase box converged: iterations="
+                             << it << " KKT=" << defect << '\n';
+            return;
+          }
+        AssertThrow(it < solver_parameters.max_nonlinear_iterations, ExcNonlinearSolverNoConvergence());
+        raw_rhs = rhs;
+
+        const auto *fault = dynamic_cast<const MaterialModel::PhaseFieldFault<dim>*>(&this->get_material_model());
+        if (fault && fault->uses_fe_strain_history() && fault->has_fe_strain_history())
+          {
+            if(it%5==0)this->get_pcout()<<"   FE phase iteration "<<it<<": KKT="<<defect<<" target="<<target<<std::endl;
+            // Use the actual Hessian when positive on the free set. For
+            // negative curvature, a positive Gauss-Newton search metric gives
+            // a descent direction for the SAME exact energy/residual.
+            std::vector<unsigned int> free;
+            for (const auto i:indices)
+              {
+                const double x=state.block(b)[i],r=rhs.block(b)[i];
+                const double lower=lower_bound ? lower_bound->block(b)[i] : range.first;
+                const double diagonal=std::abs(matrix.block(b,b).diag_element(i));
+                AssertThrow(diagonal>0 && std::isfinite(diagonal),ExcMessage("FE phase contact metric must be finite and positive."));
+                const double projected=x+r/diagonal;
+                if (!constraints.is_constrained(offset+i) && lower!=range.second
+                    && projected>lower && projected<range.second) free.push_back(i);
+              }
+            // Near a root, the positive search metric can lose the tiny
+            // correction in energy cancellation. Polish the SAME residual
+            // using its exact free tangent; no target or bounds are changed.
+            const double small=std::sqrt(std::numeric_limits<double>::epsilon());
+            bool fixed_contacts=true;
+            for(const auto i:indices)
+              if(std::find(free.begin(),free.end(),i)==free.end())
+                fixed_contacts &= state.block(b)[i]==(lower_bound?lower_bound->block(b)[i]:range.first)
+                                  || state.block(b)[i]==range.second;
+            if(it>0 && defect<=small*initial_defect && fixed_contacts && !free.empty())
+              {
+                FullMatrix<double> inverse(free.size(),free.size());
+                Vector<double> force(free.size()), correction(free.size());
+                for(unsigned int i=0;i<free.size();++i)
+                  {force[i]=raw_rhs.block(b)[free[i]];
+                   for(unsigned int j=0;j<free.size();++j)
+                     inverse(i,j)=matrix.block(b,b).el(free[i],free[j]);}
+                inverse.gauss_jordan();inverse.vmult(correction,force);
+                if(correction.linfty_norm()<=small*std::max(1.,state.block(b).linfty_norm()))
+                  {
+                    owned=state;
+                    for(unsigned int i=0;i<free.size();++i)
+                      owned.block(b)[free[i]]=std::clamp(state.block(b)[free[i]]+correction[i],
+                                                         lower_bound?lower_bound->block(b)[free[i]]:range.first,
+                                                         range.second);
+                    trial=owned;double trial_energy=0.;
+                    const bool admissible=assemble_phase_field_system(matrix,rhs,trial,false,nullptr,&trial_energy);
+                    const double arithmetic=32*std::numeric_limits<double>::epsilon()*std::max(1.,std::abs(energy));
+                    if(admissible && kkt(trial)<defect && trial_energy<=energy+arithmetic)
+                      {
+                        this->get_pcout()<<std::setprecision(17)<<"   FE phase exact polish: KKT="<<kkt(trial)
+                                         <<" correction="<<correction.linfty_norm()<<" energy change="<<trial_energy-energy
+                                         <<" arithmetic="<<arithmetic<<'\n';
+                        state=trial;continue;
+                      }
+                    // Restore the exact base system before the ordinary path.
+                    assemble_phase_field_system(matrix,rhs,state,true);raw_rhs=rhs;
+                  }
+              }
+            FullMatrix<double> L(free.size(),free.size());bool positive=true;
+            for (unsigned int i=0; i<free.size() && positive; ++i)
+              for (unsigned int j=0; j<=i; ++j)
+                {
+                  double value=matrix.block(b,b).el(free[i],free[j]);
+                  for (unsigned int k=0;k<j;++k)value-=L(i,k)*L(j,k);
+                  if (i==j)
+                    {if (!(value>0.) || !std::isfinite(value)) {positive=false;break;}
+                     L(i,j)=std::sqrt(value);}
+                  else L(i,j)=value/L(j,j);
+                }
+            if (!positive)
+              {
+                const auto exact=fault->evaluate_fe_phase_energy(state,true);
+                const auto metric=fault->evaluate_fe_phase_energy(state,true,true);
+                for (unsigned int i=0;i<exact.gradient.size();++i)
+                  for (unsigned int j=0;j<exact.gradient.size();++j)
+                    matrix.block(b,b).add(i,j,metric.hessian(i,j)-exact.hessian(i,j));
+                matrix.block(b,b).compress(VectorOperation::add);
+                this->get_pcout()<<"   FE energy: positive search metric for nonpositive free Hessian\n";
+              }
+          }
+
+        constrain_phase_newton_system(matrix, rhs, state, lower_bound);
+        update = 0;
+        solve_phase_field_system(matrix, rhs, update);
+
+        bool accepted = false;
+        for (unsigned int ls=0; ls<solver_parameters.max_newton_line_search_iterations; ++ls)
+          {
+            const double alpha = std::ldexp(1.0, -static_cast<int>(ls));
+            owned = state;
+            for (const auto i : indices)
+              if (!constraints.is_constrained(offset+i))
+                owned.block(b)[i] = std::clamp(state.block(b)[i] + alpha * update.block(b)[i],
+                                              lower_bound ? lower_bound->block(b)[i] : range.first,
+                                              range.second);
+            constraints.distribute(owned);
+            trial = owned;
+            double local_slope = 0;
+            for (const auto i : indices)
+              local_slope -= raw_rhs.block(b)[i] * (trial.block(b)[i]-state.block(b)[i]);
+            const double slope = Utilities::MPI::sum(local_slope, comm);
+            double trial_energy = 0;
+            const bool admissible = assemble_phase_field_system(matrix, rhs, trial, false,
+                                                                 nullptr, &trial_energy);
+            if (admissible && (kkt(trial) < defect * (1-1e-4*alpha)
+                              || (slope < 0 && trial_energy < energy + 1e-4*slope)))
+              {
+                state = trial;
+                accepted = true;
+                break;
+              }
+          }
+        if(!accepted && fault && fault->uses_fe_strain_history() && fault->has_fe_strain_history())
+          {
+            this->get_pcout()<<"   FE phase: projected-gradient line-search safeguard; KKT="<<defect<<std::endl;
+            for(unsigned int ls=0;ls<solver_parameters.max_newton_line_search_iterations;++ls)
+              {
+                const double alpha=std::ldexp(1.,-static_cast<int>(ls));owned=state;
+                for(const auto i:indices)
+                  if(!constraints.is_constrained(offset+i))
+                    owned.block(b)[i]=std::clamp(state.block(b)[i]+alpha*raw_rhs.block(b)[i]
+                                                 /matrix.block(b,b).diag_element(i),
+                                                 lower_bound?lower_bound->block(b)[i]:range.first,range.second);
+                trial=owned;double slope=0.;
+                for(const auto i:indices)slope-=raw_rhs.block(b)[i]*(trial.block(b)[i]-state.block(b)[i]);
+                double trial_energy=0.;
+                const bool admissible=assemble_phase_field_system(matrix,rhs,trial,false,nullptr,&trial_energy);
+                if(admissible && (kkt(trial)<defect*(1-1e-4*alpha)
+                                   || (slope<0 && trial_energy<energy+1e-4*slope)))
+                  {state=trial;accepted=true;break;}
+              }
+          }
+        if (!accepted && fault && fault->uses_fe_strain_history() && fault->has_fe_strain_history())
+          {
+            // Preserve the exact failed trial and tangent for a bounded
+            // arithmetic/conditioning diagnosis. This publishes no history.
+            assemble_phase_field_system(matrix, rhs, state, true);
+            const auto prefix=this->get_output_directory()+"phase-stall-"+
+                              std::to_string(this->get_timestep_number());
+            std::ofstream values(prefix+".csv"), tangent(prefix+"-jacobian.csv");
+            values<<std::setprecision(17)<<"i,x,y,phase,lower,rhs,search_update,target\n";
+            tangent<<std::setprecision(17);
+            for (unsigned int v=0;v<vertex_to_dof_indices.size();++v)
+              if(vertex_to_dof_indices[v]!=numbers::invalid_dof_index)
+                {
+                  const auto i=vertex_to_dof_indices[v]-offset;
+                  const auto x=this->get_triangulation().get_vertices()[v];
+                  values<<i<<','<<x[0]<<','<<x[1]<<','<<state.block(b)[i]<<','
+                        <<(lower_bound?lower_bound->block(b)[i]:range.first)<<','
+                        <<rhs.block(b)[i]<<','<<update.block(b)[i]<<','<<target<<'\n';
+                }
+            for(unsigned int i=0;i<rhs.block(b).size();++i)
+              {for(unsigned int j=0;j<rhs.block(b).size();++j)
+                 tangent<<(j?",":"")<<matrix.block(b,b).el(i,j);
+               tangent<<'\n';}
+          }
+        AssertThrow(accepted, ExcNonlinearSolverNoConvergence());
+      }
+  }
+
+
+  template <int dim>
   void
   PhaseFieldHandler<dim>::evolve_phase_field(LinearAlgebra::BlockSparseMatrix &system_matrix,
                                              LinearAlgebra::BlockVector       &system_rhs,
                                              LinearAlgebra::BlockVector       &solution)
   {
     const unsigned int block_index = this->introspection().variable("phase_field").block_index;
+
+    const bool mature =
+      Plugins::plugin_type_matches<MaterialModel::PhaseFieldFault<dim>>(this->get_material_model())
+      && Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(
+           this->get_material_model()).is_mature_frictional_fault();
+    if (uses_bound_constraints() && !mature)
+      {
+        LinearAlgebra::BlockVector trial(solution);
+        bool shared_initialization=false;
+        // advance_time rotates the last completed solution into old_solution.
+        // The generic time predictor is not an admissible phase starting state.
+        if (this->get_timestep_number() > 0 || this->get_parameters().resume_computation)
+          {
+            const auto *fault = dynamic_cast<const MaterialModel::PhaseFieldFault<dim>*>(&this->get_material_model());
+            if(fault && fault->uses_fe_strain_history() && fault->has_fe_strain_history())
+              trial.block(block_index)=fault->accepted_fe_strain_state().block(block_index);
+            else
+              trial.block(block_index) = this->get_old_solution().block(block_index);
+          }
+        else if (this->get_parameters().reconstruct_faults)
+          {
+            const auto *fault=dynamic_cast<const MaterialModel::PhaseFieldFault<dim>*>(&this->get_material_model());
+            shared_initialization=fault && fault->initialize_fe_shared_phase(trial);
+            if(!shared_initialization)initialize_phase_guess(trial);
+          }
+        // A per-solve immutable snapshot: neither predictor nor Newton iterates
+        // can advance the accepted lower bound. No state is published on failure.
+        const LinearAlgebra::BlockVector accepted_phase(trial);
+        const bool physical_evolution = this->get_timestep_number() > 0
+                                        || this->get_parameters().resume_computation;
+        if(!shared_initialization)solve_bound_constrained_phase(system_matrix, system_rhs, trial,
+                                     solver_parameters.enforce_irreversibility && physical_evolution
+                                     ? &accepted_phase : nullptr);
+        solution.block(block_index) = trial.block(block_index);
+        return;
+      }
 
     // Essential phase data are a physical state, not a Newton increment. Lift
     // them before testing the entry residual (including a fully prescribed
@@ -1240,6 +1698,16 @@ namespace aspect
   PhaseFieldHandler<dim>::
   make_sparsity_pattern(LinearAlgebra::BlockDynamicSparsityPattern &sp)
   {
+    const auto *fault = dynamic_cast<const MaterialModel::PhaseFieldFault<dim>*>(&this->get_material_model());
+    if (fault && fault->uses_fe_strain_history() && !fault->uses_consistent_endpoint_phase())
+      {
+        // The exact normalization adjoint couples normal columns. This
+        // restricted serial verification uses a complete phase block.
+        const auto b=this->introspection().variable("phase_field").block_index;
+        for (unsigned int i=0; i<sp.block(b,b).n_rows(); ++i)
+          for (unsigned int j=0; j<sp.block(b,b).n_cols(); ++j)
+            sp.block(b,b).add(i,j);
+      }
     // Create the vertex-to-cell map
     const auto &vertex_to_cell_map = grid_cache->get_vertex_to_cell_map();
 

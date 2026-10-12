@@ -126,6 +126,7 @@ namespace aspect
 
   namespace internal
   {
+    template <int dim> class PhaseFieldTestAccess;
     namespace Assembly
     {
       namespace Scratch
@@ -595,10 +596,31 @@ namespace aspect
       void solve_single_advection_iterated_newton_stokes (bool use_newton_iterations);
 
       /** Solve the Stage-I coupled bulk/reconstructed-fault mechanical system. */
-      void solve_reconstructed_fault_stokes ();
+      void solve_reconstructed_fault_stokes (bool publish_history = true,
+                                             ReconstructedFaultVector *trial_slip_rate = nullptr,
+                                             bool reuse_endpoint_bulk_preconditioner = false);
+      void solve_reconstructed_fault_endpoint_phase (bool publish_history = true,
+                                                     const LinearAlgebra::BlockVector *initial_trial = nullptr,
+                                                     ReconstructedFaultVector *trial_slip_rate = nullptr);
+      /** Test-access-only, noncommitting complete-step failure injection. */
+      std::function<void()> benchmark_endpoint_precommit;
+      /** Fixed-step serial velocity inverse used only as an endpoint
+       * mechanical preconditioner. Rebuilt with the homogeneous A block. */
+      std::function<void(LinearAlgebra::Vector &,const LinearAlgebra::Vector &)>
+        endpoint_velocity_inverse;
+      /** One fixed-trial mechanical linearization and its matrix-free reduced
+       * elastic phase tangent. Invalid after another mechanical/phase trial. */
+      std::function<Vector<double>(const Vector<double> &)>
+      make_reconstructed_fault_endpoint_tangent(const LinearAlgebra::BlockVector &,
+                                                const ReconstructedFaultVector &,
+                                                const LinearAlgebra::BlockVector &endpoint_strain,
+                                                const std::vector<double> &endpoint_Z);
 
       /** Bulk norm and surface residual returned by one coupled evaluation. */
       struct ReconstructedFaultCoupledResidual;
+      /** Test-access-only norms of a noncommitting explicit mechanical endpoint. */
+      std::pair<double,double> endpoint_mechanical_defects(const LinearAlgebra::BlockVector &,
+                                                         const ReconstructedFaultVector &);
 
       /**
        * Evaluate with the supplied physical bulk state and absolute trial V.
@@ -2153,6 +2175,7 @@ namespace aspect
 
       friend class boost::serialization::access;
       friend class SimulatorAccess<dim>;
+      friend class internal::PhaseFieldTestAccess<dim>;
       // Test-only access to the complete production particle transfer, with
       // snapshot/restore in the fixed-mesh moment-consistency benchmark.
       friend class Postprocess::MomentCycle<dim>;

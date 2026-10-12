@@ -412,6 +412,14 @@ namespace aspect
       const LinearAlgebra::BlockVector &bulk_newton_rhs,
       LinearAlgebra::BlockVector &result) const
     {
+      build_condensed_rhs(bulk_newton_rhs, surface_residual().values, result);
+    }
+
+    template <int dim>
+    void ReconstructedFaultCondensedSystem<dim>::Linearization::build_condensed_rhs(
+      const LinearAlgebra::BlockVector &bulk_newton_rhs,
+      const FaultVector &surface_rhs, LinearAlgebra::BlockVector &result) const
+    {
       assert_is_current();
       Assert(bulk_newton_rhs.n_blocks() >= 2, ExcInternalError());
 
@@ -420,7 +428,7 @@ namespace aspect
       result.block(1) = bulk_newton_rhs.block(1);
 
       FaultVector surface_solution;
-      surface_solve.solve(surface_residual().values, surface_solution);
+      surface_solve.solve(surface_rhs, surface_solution);
       LinearAlgebra::BlockVector bulk_correction(
         owner.introspection().index_sets.system_partitioning,
         owner.get_mpi_communicator());
@@ -439,6 +447,14 @@ namespace aspect
       const LinearAlgebra::BlockVector &bulk_increment,
       FaultVector &slip_rate_increment) const
     {
+      recover_slip_rate_increment(bulk_increment, surface_residual().values, slip_rate_increment);
+    }
+
+    template <int dim>
+    void ReconstructedFaultCondensedSystem<dim>::Linearization::recover_slip_rate_increment(
+      const LinearAlgebra::BlockVector &bulk_increment,
+      const FaultVector &surface_rhs, FaultVector &slip_rate_increment) const
+    {
       assert_is_current();
 
       // Recover dV=K_V^{-1}(R_Gamma+G*dx); a restricted semantic solve
@@ -447,7 +463,6 @@ namespace aspect
         make_constrained_solver_direction(bulk_increment);
       FaultVector rhs;
       owner.surface_system.apply_G(make_physical_bulk_direction(constrained), rhs);
-      const FaultVector &surface_rhs = surface_residual().values;
       AssertDimension(rhs.size(), surface_rhs.size());
       for (unsigned int fault = 0; fault < rhs.size(); ++fault)
         {

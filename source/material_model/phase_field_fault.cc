@@ -424,6 +424,68 @@ namespace aspect
                             "prescribed phase profile. Requires Evolve phase field=false, fixed "
                             "reconstructed geometry and a fresh compatible initialization.");
 
+          prm.declare_entry("Phase driving history", "incremental work",
+                            Patterns::Selection("incremental work|recoverable energy"),
+                            "Recoverable energy uses the accepted state q^2/(2 G g^2) "
+                            "in the peak history. Viscous work is not accumulated. "
+                            "Incremental work retains the historical finite-step law. "
+                            "The selection cannot change on restart.");
+          prm.declare_entry("Bulk history representation", "particle stress",
+                            Patterns::Selection("particle stress|accepted FE strain"),
+                            "Accepted FE strain is the restricted fresh serial P2 total-energy "
+                            "option. It retains d_R with R=dev_3(symgrad(d_R)), matching uniform "
+                            "bulk/fault Maxwell coefficients, fixed Cartesian mesh and horizontal "
+                            "geometry, no transport/birth, surface elastic slip, consistent I_h, "
+                            "unloaded initialization and direct phase irreversibility. "
+                            "Particle stresses are derived samples. Resume/conversion is rejected. "
+                            "Particle stress retains the established default.");
+          prm.declare_entry("FE bulk normal quadrature points", "3",
+                            Patterns::Integer(3),
+                            "Gauss points per normal cell in the restricted accepted FE strain "
+                            "option. Stokes residual/tangent, bulk-slip coupling and transpose, "
+                            "phase bulk energy/derivatives and diagnostics use this one rule. "
+                            "Tangential panels resolve fault and bulk cell intersections and "
+                            "use at least velocity degree+1 points. The default normal rule "
+                            "retains three points; particle history, normalization and CPDI "
+                            "fracture quadrature are unaffected.");
+          prm.declare_entry("Consistent endpoint phase solve", "false", Patterns::Bool(),
+                            "Restricted fixed-mesh accepted-FE P2 option. Solve phase and "
+                            "mechanical/contact conditions at the same endpoint, with all "
+                            "trials anchored to one accepted state and one terminal publication. "
+                            "The existing sequential algorithm remains the default.");
+          prm.declare_entry("FE initial phase profile file", "", Patterns::FileName(),
+                            "Optional two-column y/phi nodal data for the restricted fresh "
+                            "consistent-endpoint verification. This supplies prescribed "
+                            "pre-existing damage, not a stress/history checkpoint. Empty "
+                            "retains the existing seeded-H initial relaxation. Particle H "
+                            "is initialized natively and is never regenerated from this field.");
+          prm.declare_entry("Initial cohesive state", "seeded energy",
+                            Patterns::Selection("seeded energy|unloaded"),
+                            "Unloaded initializes cohesive traction and elastic slip to zero "
+                            "while retaining initialized particle H and the relaxed phase. "
+                            "Seeded energy retains the historical projected preload.");
+
+          prm.declare_entry("Fault mechanical work measure", "particle volume",
+                            Patterns::Selection("particle volume|bulk conjugate"),
+                            "Bulk conjugate uses the adjoint of the Stokes-QP slip-strain map "
+                            "for shear exchange and surface quadrature for resistance. "
+                            "Requires surface elastic-slip history and prescribed friction pressure. "
+                            "Particle volume preserves the legacy surface assembly.");
+          prm.declare_entry("Cohesive history representation", "particle projection",
+                            Patterns::Selection("particle projection|surface elastic slip"),
+                            "Surface elastic slip advances Q1 Z=I*q on the fault without a "
+                            "particle round trip. Pointwise q is Z/I. Requires homogeneous "
+                            "G and temperature-independent viscosity; restart selection is fixed. "
+                            "Particle projection retains the legacy path.");
+
+          prm.declare_entry("I h projection", "consistent",
+                            Patterns::Selection("consistent|row sum lumped"),
+                            "Surface representation of I_h only. Row sum lumped uses the "
+                            "positive Q1 mass row sums with the same surface quadrature RHS. "
+                            "It preserves constants and the quadrature-defined integral, "
+                            "but does not establish spatial accuracy or finiteness of the "
+                            "underlying normalization. The choice cannot change on restart.");
+
           prm.declare_entry("I h integration backend", "remote points",
                             Patterns::Selection("remote points|cell intervals"),
                             "Normal-profile integration backend. Cell intervals reuses affine "
@@ -488,12 +550,28 @@ namespace aspect
             initial_time_step *= year_in_seconds;
 
           evolve_phase_field = prm.get_bool("Evolve phase field");
+          fe_strain_history = prm.get("Bulk history representation") == "accepted FE strain";
+          fe_bulk_normal_quadrature_points = prm.get_integer("FE bulk normal quadrature points");
+          consistent_endpoint_phase = prm.get_bool("Consistent endpoint phase solve");
+          fe_initial_phase_profile = prm.get("FE initial phase profile file");
+          recoverable_phase_history = prm.get("Phase driving history") == "recoverable energy";
+          unloaded_cohesive_initialization = prm.get("Initial cohesive state") == "unloaded";
+          surface_cohesive_history = prm.get("Cohesive history representation") == "surface elastic slip";
           mature_frictional_fault = prm.get("Fault constitutive mode") == "mature frictional";
+          AssertThrow(!(recoverable_phase_history || unloaded_cohesive_initialization || surface_cohesive_history)
+                      || (this->get_parameters().reconstruct_faults && !mature_frictional_fault),
+                      ExcMessage("Recoverable history and unloaded initialization require reconstructed cohesive faults."));
           AssertThrow(!mature_frictional_fault || (!evolve_phase_field
                         && this->get_parameters().reconstruct_faults),
                       ExcMessage("Mature frictional mode requires reconstructed faults and Evolve phase field=false."));
           use_adiabatic_pressure_in_fault_friction =
             prm.get_bool("Use adiabatic pressure in fault friction");
+          cohesive_work_measure = prm.get("Fault mechanical work measure") == "bulk conjugate";
+          AssertThrow(!cohesive_work_measure || (surface_cohesive_history
+                      && use_adiabatic_pressure_in_fault_friction && dim==2),
+                      ExcMessage("Cohesive bulk-conjugate work requires 2-D surface elastic-slip "
+                                 "history and prescribed friction pressure."));
+          lump_normalization_projection = prm.get("I h projection") == "row sum lumped";
           normalization_quadrature_tolerance =
             prm.get_double("I h quadrature tolerance");
           normalization_surface_subdivisions =
@@ -562,6 +640,58 @@ namespace aspect
         prm.leave_subsection();
       }
       prm.leave_subsection();
+      if (fe_strain_history)
+        {
+          AssertThrow(dim == 2 && Utilities::MPI::n_mpi_processes(this->get_mpi_communicator()) == 1
+                      && !this->get_parameters().resume_computation
+                      && !this->get_parameters().mesh_deformation_enabled
+                      && surface_cohesive_history && cohesive_work_measure
+                      && unloaded_cohesive_initialization && recoverable_phase_history
+                      && !mature_frictional_fault && !lump_normalization_projection
+                      && !fault_friction.has_state_variable(),
+                      ExcMessage("Accepted FE strain requires the fresh serial fixed-mesh "
+                                 "unloaded cohesive P2 configuration; restart is unsupported."));
+          for (unsigned int j=0; j<elastic_shear_moduli.size(); ++j)
+            AssertThrow(elastic_shear_moduli[j] == elastic_shear_moduli[0]
+                        && reference_viscosities[j] == reference_viscosities[0]
+                        && thermal_viscosity_exponents[j] == 0.
+                        && critical_energy_release_rates[j] == critical_energy_release_rates[0]
+                        && cohesions[j] == cohesions[0],
+                        ExcMessage("Accepted FE strain requires identical homogeneous G, eta, "
+                                   "Gc and cohesion, and zero temperature dependence."));
+          AssertThrow(minimum_viscosity <= reference_viscosities[0]
+                      && maximum_viscosity >= reference_viscosities[0],
+                      ExcMessage("Accepted FE strain requires the configured uniform viscosity without clipping."));
+          prm.enter_subsection("Phase field model");
+          AssertThrow(prm.get("Geometric function type") == "AT1"
+                      && prm.get_double("Degradation curvature parameter") == 1.,
+                      ExcMessage("Accepted FE strain currently requires AT1 and Lorentz p=1."));
+          prm.leave_subsection();
+          prm.enter_subsection("Solver parameters");
+          prm.enter_subsection("Phase field solver parameters");
+          AssertThrow(prm.get_bool("Use bound constraints") && prm.get_bool("Enforce phase irreversibility"),
+                      ExcMessage("Accepted FE strain requires bounded direct phase irreversibility."));
+          prm.leave_subsection();
+          prm.leave_subsection();
+          prm.enter_subsection("Fault reconstruction");
+          AssertThrow(prm.get("Association support")=="full normal cross-section",
+                      ExcMessage("Accepted FE strain requires fixed full-normal association."));
+          prm.leave_subsection();
+          prm.enter_subsection("Particles");
+          AssertThrow(prm.get("Load balancing strategy") == "none",
+                      ExcMessage("Accepted FE strain prohibits particle replenishment/repartitioning."));
+          prm.leave_subsection();
+        }
+      AssertThrow(!consistent_endpoint_phase || (fe_strain_history && evolve_phase_field
+                  && use_adiabatic_pressure_in_fault_friction),
+                  ExcMessage("Consistent endpoint phase requires evolving accepted FE strain and prescribed friction pressure."));
+      AssertThrow(fe_initial_phase_profile.empty() || consistent_endpoint_phase,
+                  ExcMessage("Shared FE initialization requires the fresh consistent-endpoint option."));
+      if(consistent_endpoint_phase)
+        for(unsigned int j=0;j<initial_friction_coefficients.size();++j)
+          AssertThrow(initial_friction_coefficients[j]==initial_friction_coefficients[0]
+                      && radiation_damping_coefficients[j]==0.,
+                      ExcMessage("Endpoint verification requires homogeneous fixed friction and zero radiation damping."));
     }
   }
 }

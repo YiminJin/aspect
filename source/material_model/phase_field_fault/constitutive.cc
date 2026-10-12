@@ -20,6 +20,7 @@
 
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/material_model/utilities.h>
+#include <aspect/utilities.h>
 #include <aspect/phase_field.h>
 #include <aspect/particle/manager.h>
 #include <aspect/reconstructed_fault/manager.h>
@@ -157,8 +158,13 @@ namespace aspect
         localization.previous_cohesive_traction, inputs.slip_rate,
         localization.current_h, localization.previous_h, mature_frictional_fault);
 
+      // Inputs carry raw FE symmetric gradients; accepted old stress already
+      // is a 3D deviatoric block and must not be deviated a second time.
+      const auto strain_rate = fe_strain_history
+                               ? Utilities::Tensors::consistent_deviator(inputs.strain_rate)
+                               : inputs.strain_rate;
       const SymmetricTensor<2,dim> trial_stress = compute_maxwell_stress(
-        bulk_coefficients, inputs.strain_rate, inputs.old_maxwell_stress);
+        bulk_coefficients, strain_rate, inputs.old_maxwell_stress);
       const SymmetricTensor<2,dim> stress_without_current_slip =
         trial_stress
         - 2.0 * bulk_coefficients.eta_ve * cohesive.history_correction
@@ -216,7 +222,7 @@ namespace aspect
           // Report the terms from this incoming-history evaluation. Do not
           // subtract two large stresses to infer a tiny current-step increment.
           response.stress_components[0] = bulk_coefficients.beta * inputs.old_maxwell_stress;
-          response.stress_components[1] = 2.0 * bulk_coefficients.eta_ve * inputs.strain_rate;
+          response.stress_components[1] = 2.0 * bulk_coefficients.eta_ve * strain_rate;
           response.stress_components[2] =
             -2.0 * bulk_coefficients.eta_ve * cohesive.history_correction * inputs.slip_tensor
             -2.0 * bulk_coefficients.eta_ve * cohesive.localization_factor
@@ -246,6 +252,27 @@ namespace aspect
       response.uses_adiabatic_friction_pressure =
         use_adiabatic_pressure_in_fault_friction;
       return response;
+    }
+
+    template <int dim>
+    typename PhaseFieldFault<dim>::ReconstructedFaultPointResponse
+    PhaseFieldFault<dim>::evaluate_cohesive_surface_resistance(
+      const unsigned int f, const unsigned int s, const double xi, const double rate) const
+    {
+      AssertThrow(cohesive_work_measure && use_adiabatic_pressure_in_fault_friction,
+                  ExcMessage("Surface resistance requires prescribed normal pressure."));
+      const auto &fault = this->get_reconstructed_fault_manager().get_fault(f);
+      const auto l = evaluate_reconstructed_fault_localization(f,s,xi,0.,0.,"surface resistance");
+      ReconstructedFaultPointInputs in;
+      in.fault_index=f; in.segment_index=s; in.xi=xi; in.slip_rate=rate;
+      in.position=(1.-xi)*fault.vertex(s)+xi*fault.vertex(s+1);
+      in.phase_field=in.previous_phase_field=0.;
+      in.temperature=l.surface_temperature;
+      in.bulk_material_fractions=l.surface_material_fractions;
+      in.dynamic_pressure=0.;
+      // With h=0 and zero bulk tensors the returned derivative contains only
+      // q, friction and damping. These quantities do not depend on local phi.
+      return evaluate_reconstructed_fault_point(in);
     }
 
     template <int dim>
@@ -329,6 +356,22 @@ namespace aspect
     }
 
     template <int dim>
+    double
+    PhaseFieldFault<dim>::compute_recoverable_phase_driving_force(
+      const double shear_modulus, const double degradation,
+      const double cohesive_traction)
+    {
+      AssertThrow(std::isfinite(shear_modulus) && shear_modulus > 0.0
+                  && std::isfinite(degradation) && degradation > 0.0
+                  && degradation <= 1.0 && std::isfinite(cohesive_traction),
+                  ExcMessage("Recoverable phase driving requires G>0, 0<g<=1 and finite traction."));
+      const double effective_traction = cohesive_traction/degradation;
+      const double energy = effective_traction*effective_traction/(2.0*shear_modulus);
+      AssertThrow(std::isfinite(energy), ExcMessage("Nonfinite recoverable phase driving energy."));
+      return energy;
+    }
+
+    template <int dim>
     typename PhaseFieldFault<dim>::LocalizationResponse
     PhaseFieldFault<dim>::evaluate_reconstructed_fault_localization(
       const unsigned int fault_index,
@@ -385,6 +428,18 @@ namespace aspect
         fault, segment_index, xi, cohesive_position,
         "phase field fault cohesive traction");
 
+      if (surface_cohesive_history)
+        {
+          // Z is the Q1 internal variable. Multiplying interpolated q and I
+          // would introduce a spurious quadratic field and lose this history.
+          const auto left = fault.get_properties(segment_index);
+          const auto right = fault.get_properties(segment_index+1);
+          response.previous_cohesive_traction =
+            ((1.-xi)*left[previous_I_h_position]*left[cohesive_position]
+             + xi*right[previous_I_h_position]*right[cohesive_position])
+            / response.previous_I_h;
+        }
+
       const double current_phi = normalization_effective_phase_field(
         phase_field, context);
       // The initial mechanical solve has no earlier physical profile. Use
@@ -411,6 +466,35 @@ namespace aspect
             phase_field_handler.energetic_degradation(
               response.surface_material_fractions, previous_phi), context + " history");
       return response;
+    }
+
+    template <int dim>
+    std::vector<std::vector<double>>
+    PhaseFieldFault<dim>::compute_surface_cohesive_candidates(
+      const double time_step, const std::vector<std::vector<double>> &rates) const
+    {
+      AssertThrow(surface_cohesive_history, ExcMessage("Surface history is not selected."));
+      const auto &faults = this->get_reconstructed_fault_manager().get_faults();
+      AssertDimension(rates.size(), faults.size());
+      std::vector<std::vector<double>> result(faults.size());
+      for (unsigned int f=0; f<faults.size(); ++f)
+        {
+          AssertDimension(rates[f].size(), faults[f].n_vertices());
+          result[f].resize(faults[f].n_vertices());
+          for (unsigned int j=0; j<faults[f].n_vertices(); ++j)
+            {
+              const unsigned int segment = std::min(j, faults[f].n_cells()-1);
+              const auto l = evaluate_reconstructed_fault_localization(
+                f, segment, j-segment, 0., 0., "surface history");
+              const auto c = compute_maxwell_coefficients(
+                compute_creep_viscosity(l.surface_material_fractions,l.surface_temperature),
+                MaterialUtilities::average_value(l.surface_material_fractions,
+                  elastic_shear_moduli,viscosity_averaging),time_step);
+              result[f][j] = compute_cohesive_response(c,l.current_I_h,l.previous_I_h,
+                l.previous_cohesive_traction,rates[f][j],0.,0.).cohesive_traction;
+            }
+        }
+      return result;
     }
 
     template <int dim>
@@ -496,9 +580,12 @@ namespace aspect
     template SymmetricTensor<2,dim> PhaseFieldFault<dim>::compute_maxwell_stress(const MaxwellCoefficients &, const SymmetricTensor<2,dim> &, const SymmetricTensor<2,dim> &); \
     template SymmetricTensor<2,dim> PhaseFieldFault<dim>::evaluate_frozen_maxwell_stress(const double, const std::vector<double> &, const SymmetricTensor<2,dim> &) const; \
     template PhaseFieldFault<dim>::ReconstructedFaultPointResponse PhaseFieldFault<dim>::evaluate_reconstructed_fault_point(const ReconstructedFaultPointInputs &) const; \
+    template PhaseFieldFault<dim>::ReconstructedFaultPointResponse PhaseFieldFault<dim>::evaluate_cohesive_surface_resistance(unsigned int, unsigned int, double, double) const; \
     template PhaseFieldFault<dim>::ReconstructedFaultBulkPointResponse PhaseFieldFault<dim>::evaluate_reconstructed_fault_bulk_point(const ReconstructedFaultBulkPointInputs &) const; \
     template double PhaseFieldFault<dim>::compute_crack_driving_force_candidate(const double, const MaxwellCoefficients &, const double, const double, const double, const double); \
+    template double PhaseFieldFault<dim>::compute_recoverable_phase_driving_force(const double, const double, const double); \
     template PhaseFieldFault<dim>::LocalizationResponse PhaseFieldFault<dim>::evaluate_reconstructed_fault_localization(const unsigned int, const unsigned int, const double, const double, const double, const std::string &) const; \
+    template std::vector<std::vector<double>> PhaseFieldFault<dim>::compute_surface_cohesive_candidates(const double, const std::vector<std::vector<double>> &) const; \
     template PhaseFieldFault<dim>::CohesiveResponse PhaseFieldFault<dim>::compute_cohesive_response(const MaxwellCoefficients &, const double, const double, const double, const double, const double, const double, const bool); \
     template double PhaseFieldFault<dim>::compute_creep_viscosity(const std::vector<double> &, const double) const;
 

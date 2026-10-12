@@ -264,11 +264,15 @@ namespace aspect
 
     struct SolverParameters
     {
+      bool use_bound_constraints = false;
+      bool enforce_irreversibility = false;
       double linear_solver_tolerance;
       unsigned int max_linear_solver_iterations;
       double nonlinear_solver_tolerance;
       unsigned int max_nonlinear_iterations;
       unsigned int max_newton_line_search_iterations;
+      bool adaptive_endpoint_linear_accuracy = false;
+      bool endpoint_translation_preconditioner = false;
     };
   }
 
@@ -306,6 +310,16 @@ namespace aspect
       evolve_phase_field(LinearAlgebra::BlockSparseMatrix &system_matrix,
                          LinearAlgebra::BlockVector       &system_rhs,
                          LinearAlgebra::BlockVector       &solution);
+
+      bool uses_bound_constraints() const { return solver_parameters.use_bound_constraints; }
+
+      /** Native CPDI fracture part for the restricted endpoint minimizer.
+       * Mechanical energy is evaluated with an explicit non-committing FE endpoint. */
+      bool evaluate_fe_fracture(LinearAlgebra::BlockSparseMatrix &,
+                                LinearAlgebra::BlockVector &,
+                                const LinearAlgebra::BlockVector &,
+                                double &energy, double &arithmetic_allowance) const;
+      const PhaseField::SolverParameters &get_solver_parameters() const { return solver_parameters; }
 
       double crack_surface_density(const double          phase_field_value,
                                    const Tensor<1, dim> &phase_field_gradient) const;
@@ -347,18 +361,33 @@ namespace aspect
 
     private:
       friend class internal::PhaseFieldTestAccess<dim>;
+      friend class Simulator<dim>;
 
       bool
       assemble_phase_field_system(LinearAlgebra::BlockSparseMatrix &system_matrix,
                                   LinearAlgebra::BlockVector       &system_rhs,
                                   const LinearAlgebra::BlockVector &current_solution,
                                   const bool assemble_system_jacobian,
-                                  double *residual_roundoff_allowance = nullptr) const;
+                                  double *residual_roundoff_allowance = nullptr,
+                                  double *energy = nullptr,
+                                  bool omit_fe_elastic_energy = false) const;
 
       unsigned int
       solve_phase_field_system(const LinearAlgebra::BlockSparseMatrix &system_matrix,
                                const LinearAlgebra::BlockVector       &system_rhs,
                                LinearAlgebra::BlockVector             &solution_vector) const;
+
+      void solve_bound_constrained_phase(LinearAlgebra::BlockSparseMatrix &matrix,
+                                         LinearAlgebra::BlockVector &rhs,
+                                         LinearAlgebra::BlockVector &state,
+                                         const LinearAlgebra::BlockVector *lower_bound = nullptr) const;
+
+      void constrain_phase_newton_system(LinearAlgebra::BlockSparseMatrix &matrix,
+                                         LinearAlgebra::BlockVector &rhs,
+                                         const LinearAlgebra::BlockVector &state,
+                                         const LinearAlgebra::BlockVector *lower_bound = nullptr) const;
+
+      void initialize_phase_guess(LinearAlgebra::BlockVector &state) const;
 
       PhaseField::SolverParameters solver_parameters;
 

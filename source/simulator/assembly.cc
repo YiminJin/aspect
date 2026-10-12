@@ -20,6 +20,7 @@
 
 
 #include <aspect/simulator.h>
+#include <aspect/material_model/phase_field_fault.h>
 #include <aspect/utilities.h>
 #include <aspect/simulator_access.h>
 
@@ -90,7 +91,11 @@ namespace aspect
         assemblers->stokes_system.push_back(std::make_unique<aspect::Assemblers::StokesIncompressibleTerms<dim>>());
       }
 
-    if (material_model->is_compressible() || parameters.enable_prescribed_dilation)
+    // The optional FE owner uses a 3D plane-strain deviator even with an
+    // incompressible mass equation. Reuse the existing kappa trace term once.
+    const auto *fault_material = dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(material_model.get());
+    const bool fe_plane_strain = fault_material && fault_material->uses_fe_strain_history();
+    if (material_model->is_compressible() || parameters.enable_prescribed_dilation || fe_plane_strain)
       {
         // The compressible part of the preconditioner is only necessary if we use the simplified A block
         if (parameters.use_full_A_block_preconditioner == false)
@@ -402,7 +407,7 @@ namespace aspect
 
     system_preconditioner_matrix = 0;
 
-    const Quadrature<dim> &quadrature_formula = introspection.quadratures.velocities;
+    const Quadrature<dim> &quadrature_formula = fault_mechanical_quadrature(*material_model,introspection.quadratures.velocities);
 
     using CellFilter = FilteredIterator<typename DoFHandler<dim>::active_cell_iterator>;
 
@@ -868,14 +873,17 @@ namespace aspect
     // we will update the right-hand side with boundary information in
     // StokesMatrixFreeHandler::correct_stokes_rhs().
     if (!stokes_matrix_free)
-      Assert(rebuild_stokes_matrix || boundary_velocity_manager.get_prescribed_boundary_velocity_indicators().empty(),
+      Assert(rebuild_stokes_matrix || boundary_velocity_manager.get_prescribed_boundary_velocity_indicators().empty()
+             || (assemble_reconstructed_fault_stokes_terms && assemble_newton_stokes_system
+                 && Plugins::get_plugin_as_type<MaterialModel::PhaseFieldFault<dim>>(*material_model)
+                    .uses_consistent_endpoint_phase() && !current_constraints.has_inhomogeneities()),
              ExcInternalError("If we have inhomogeneous constraints, we must re-assemble the system matrix."));
 
     system_rhs = 0;
     if (do_pressure_rhs_compatibility_modification)
       pressure_shape_function_integrals = 0;
 
-    const Quadrature<dim>   &quadrature_formula = introspection.quadratures.velocities;
+    const Quadrature<dim>   &quadrature_formula = fault_mechanical_quadrature(*material_model,introspection.quadratures.velocities);
     const Quadrature<dim-1> &face_quadrature_formula = introspection.face_quadratures.velocities;
 
     using CellFilter = FilteredIterator<typename DoFHandler<dim>::active_cell_iterator>;

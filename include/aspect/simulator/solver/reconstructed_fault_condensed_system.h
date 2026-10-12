@@ -63,12 +63,18 @@ namespace aspect
             void
             build_condensed_rhs(const LinearAlgebra::BlockVector &bulk_newton_rhs,
                                 LinearAlgebra::BlockVector &result) const;
+            void build_condensed_rhs(const LinearAlgebra::BlockVector &,
+                                     const FaultVector &surface_rhs,
+                                     LinearAlgebra::BlockVector &) const;
 
             /** Recover K_V^{-1}(R_Gamma+G delta_x) without changing fault state. */
             void
             recover_slip_rate_increment(
               const LinearAlgebra::BlockVector &bulk_increment,
               FaultVector &slip_rate_increment) const;
+            void recover_slip_rate_increment(const LinearAlgebra::BlockVector &,
+                                             const FaultVector &surface_rhs,
+                                             FaultVector &) const;
 
             /** Apply the complete uncondensed block Jacobian for verification. */
             void

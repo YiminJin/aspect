@@ -24,6 +24,7 @@
 #include <aspect/newton.h>
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/plugins.h>
+#include <aspect/phase_field.h>
 #include <aspect/reconstructed_fault/manager.h>
 #include <aspect/reconstructed_fault/surface_system.h>
 #include <aspect/simulator/solver/block_stokes_preconditioner.h>
@@ -39,6 +40,7 @@
 
 #include <deal.II/base/signaling_nan.h>
 #include <deal.II/fe/fe_values.h>
+#include <deal.II/lac/trilinos_solver.h>
 #include <deal.II/lac/solver_gmres.h>
 
 #include <cstdlib>
@@ -75,6 +77,38 @@ namespace aspect
     ReconstructedFaultSurfaceResidual surface;
   };
 
+  template<int dim> std::pair<double,double> Simulator<dim>::endpoint_mechanical_defects(
+    const LinearAlgebra::BlockVector &bulk,const ReconstructedFaultVector &rates)
+  {
+    auto &manager=*reconstructed_fault_manager;
+    const AffineConstraints<double> saved_constraints(current_constraints);
+    const bool saved_fault=assemble_reconstructed_fault_stokes_terms;
+    const bool saved_newton=assemble_newton_stokes_system;
+    auto restore=[&]()
+      {
+        current_constraints.copy_from(saved_constraints);
+        assemble_reconstructed_fault_stokes_terms=saved_fault;
+        assemble_newton_stokes_system=saved_newton;
+      };
+    // The supplied state already contains its physical boundary lift.
+    // Evaluate the same coupled Newton residual used inside the actual solve.
+    assemble_reconstructed_fault_stokes_terms=true;assemble_newton_stokes_system=true;
+    const auto stokes_size=bulk.block(introspection.block_indices.velocities).size()
+                         +bulk.block(introspection.block_indices.pressure).size();
+    for(const auto &line:current_constraints.get_lines())
+      if(line.index<stokes_size)current_constraints.set_inhomogeneity(line.index,0.);
+    manager.begin_slip_rate_nonlinear_solve();
+    try
+      {
+        const auto r=evaluate_reconstructed_fault_coupled_residual(bulk,rates);
+        const double surface=reconstructed_fault_surface_system->surface_residual_rms(r.surface,manager.prescribed_slip_rate_mask());
+        manager.rollback_slip_rate_nonlinear_solve();
+        restore();
+        return {r.bulk_norm,surface};
+      }
+    catch(...){manager.rollback_slip_rate_nonlinear_solve();restore();throw;}
+  }
+
 
   template <int dim>
   typename Simulator<dim>::ReconstructedFaultCoupledResidual
@@ -96,8 +130,9 @@ namespace aspect
         assemble_newton_stokes_matrix = false;
         rebuild_stokes_preconditioner = false;
         rebuild_stokes_matrix =
-          !boundary_velocity_manager
-             .get_prescribed_boundary_velocity_indicators().empty();
+          !boundary_velocity_manager.get_prescribed_boundary_velocity_indicators().empty()
+          && !(Plugins::get_plugin_as_type<MaterialModel::PhaseFieldFault<dim>>(*material_model)
+                 .uses_consistent_endpoint_phase() && !current_constraints.has_inhomogeneities());
         assemble_stokes_system();
 
         const double velocity_residual =
@@ -152,7 +187,8 @@ namespace aspect
     // Bound the continuity evaluation before cancellation, using the actual
     // FE gradients, physical base iterate and constrained left-null test.
     // The source/history/B terms have no pressure rows in this eligible path.
-    auto pressure_assembly_scale = [&](const LinearAlgebra::BlockVector &q)
+    auto pressure_assembly_scale = [&](const LinearAlgebra::BlockVector &q,
+                                       const LinearAlgebra::BlockVector &velocity_state)
     {
       if (q.l2_norm()==0.)
         return 0.;
@@ -162,14 +198,14 @@ namespace aspect
       LinearAlgebra::BlockVector test(introspection.index_sets.system_partitioning,
                                      introspection.index_sets.system_relevant_partitioning,mpi_communicator);
       test=owned;
-      FEValues<dim> fe(*mapping,finite_element,introspection.quadratures.velocities,
+      FEValues<dim> fe(*mapping,finite_element,fault_mechanical_quadrature(*material_model,introspection.quadratures.velocities),
                        update_values|update_gradients|update_JxW_values);
       Vector<double> u(finite_element.n_dofs_per_cell()),p(u.size());
       double local=0.;
       for (const auto &cell:dof_handler.active_cell_iterators())
         if (cell->is_locally_owned())
           {
-            fe.reinit(cell);cell->get_dof_values(working_x,u);cell->get_dof_values(test,p);
+            fe.reinit(cell);cell->get_dof_values(velocity_state,u);cell->get_dof_values(test,p);
             double origin[dim]={};
             for (unsigned int d=0;d<dim;++d)
               for (unsigned int i=0;i<u.size();++i)
@@ -200,11 +236,11 @@ namespace aspect
     double right_null_error,left_null_error;
     const auto q=linearization.verified_pressure_nullspace(right_null_error,left_null_error);
     LinearAlgebra::BlockVector compatible_rhs(rhs),residual(rhs);
-    const double assembly_scale=pressure_assembly_scale(q);
+    const double assembly_scale=pressure_assembly_scale(q,working_x);
     // A worst-case serial chain also bounds parallel cell/constraint
     // accumulation; the final dot product has at most two operations/row.
     const double assembly_operations=6.*finite_element.n_dofs_per_cell()
-      +2.*introspection.quadratures.velocities.size()+4.*dim+16.
+      +2.*fault_mechanical_quadrature(*material_model,introspection.quadratures.velocities).size()+4.*dim+16.
       +triangulation.n_global_active_cells();
     const double reduction_operations=2.*rhs.block(1).size();
     const double reduction_scale=q.block(1).linfty_norm()*rhs.block(1).l1_norm();
@@ -313,6 +349,24 @@ namespace aspect
           const double fresh = internal::fault_true_linear_residual(
             linearization, q, direction, rhs, residual,
             raw_residual, residual_null_component);
+          // The RHS bound only accounts for the base iterate. The fresh
+          // residual C*direction-rhs also evaluates continuity on the nonzero
+          // correction, even when base velocity and continuity RHS are zero.
+          // Apply the same uncancelled assembly bound to both operations and
+          // retain the same nonlinear cap; do not impose an exact-zero test
+          // on the additional matrix-vector arithmetic.
+          LinearAlgebra::BlockVector owned_direction(direction);
+          current_constraints.distribute(owned_direction);
+          LinearAlgebra::BlockVector ghosted_direction(introspection.index_sets.system_partitioning,
+                                                       introspection.index_sets.system_relevant_partitioning,
+                                                       mpi_communicator);
+          ghosted_direction=owned_direction;
+          const double residual_reduction_scale=q.block(1).linfty_norm()
+            * (2.*rhs.block(1).l1_norm()+residual.block(1).l1_norm()
+               +std::abs(residual_null_component)*q.block(1).l1_norm());
+          const double residual_compatibility_tolerance=internal::fault_pressure_compatibility_bound(
+            assembly_scale+pressure_assembly_scale(q,ghosted_direction),assembly_operations,
+            residual_reduction_scale,reduction_operations,nonlinear_target);
           std::ostringstream report;
           report << std::setprecision(17)
                  << "      Fault linear solve: iterations=" << iterations
@@ -320,6 +374,7 @@ namespace aspect
                  << ", target=" << tolerance << ", raw=" << raw_residual
                  << ", rhs null=" << removed_rhs << ", residual null=" << residual_null_component
                  << ", compatibility bound=" << compatibility_tolerance
+                 << ", residual compatibility bound=" << residual_compatibility_tolerance
                  << ", pressure quotient=" << (q.l2_norm() > 0.)
                  << ", right null=" << right_null_error << ", left null=" << left_null_error;
           if (std::getenv("ASPECT_FAULT_NONLINEAR_DIAGNOSTIC"))
@@ -332,7 +387,7 @@ namespace aspect
                        << ", fresh=" << fresh << ", target=" << tolerance;
               pcout << progress.str() << std::endl;
             }
-          AssertThrow(std::abs(residual_null_component) <= compatibility_tolerance,
+          AssertThrow(std::abs(residual_null_component) <= residual_compatibility_tolerance,
                       ExcMessage("The full condensed residual has a significant pressure incompatibility."));
           if (fresh <= tolerance)
             {
@@ -353,7 +408,18 @@ namespace aspect
     };
 
     if (parameters.stokes_solver_type == Parameters<dim>::StokesSolverType::block_amg)
-      solve_with_velocity_preconditioner(*Amg_preconditioner);
+      {
+        if(endpoint_velocity_inverse)
+          {
+            struct Adapter
+            {
+              const std::function<void(LinearAlgebra::Vector &,const LinearAlgebra::Vector &)> &apply;
+              void vmult(LinearAlgebra::Vector &dst,const LinearAlgebra::Vector &src) const {apply(dst,src);}
+            } inverse{endpoint_velocity_inverse};
+            solve_with_velocity_preconditioner(inverse);
+          }
+        else solve_with_velocity_preconditioner(*Amg_preconditioner);
+      }
     else
       {
         AssertThrow(parameters.stokes_velocity_degree==2 && stokes_A_block_is_symmetric(),
@@ -384,10 +450,127 @@ namespace aspect
   }
 
 
+  template<int dim> std::function<Vector<double>(const Vector<double> &)>
+  Simulator<dim>::make_reconstructed_fault_endpoint_tangent(
+    const LinearAlgebra::BlockVector &bulk, const ReconstructedFaultVector &slip,
+    const LinearAlgebra::BlockVector &endpoint_strain, const std::vector<double> &endpoint_Z)
+  {
+    TimerOutput::Scope timer(computing_timer,"Fault: endpoint tangent setup");
+    auto &material=Plugins::get_plugin_as_type<MaterialModel::PhaseFieldFault<dim>>(*material_model);
+    AssertThrow(material.uses_consistent_endpoint_phase() && Amg_preconditioner && Mp_preconditioner,
+                ExcMessage("Endpoint tangent requires the current homogeneous mechanical operator."));
+    current_linearization_point=bulk;solution=bulk;
+    material.prepare_reconstructed_fault_mechanical_solve();
+    auto owner=std::make_shared<StokesSolver::ReconstructedFaultCondensedSystem<dim>>(*this);
+    using Linearization=typename StokesSolver::ReconstructedFaultCondensedSystem<dim>::Linearization;
+    auto linearization=std::make_shared<Linearization>(owner->linearize(system_matrix,bulk,slip));
+    auto active=reconstructed_fault_manager->prescribed_slip_rate_mask();
+    const auto &residual=linearization->surface_residual();
+    for(unsigned int f=0;f<slip.size();++f)for(unsigned int i=0;i<slip[f].size();++i)
+      if(slip[f][i]<=material.minimum_fault_slip_rate() && residual.values[f][i]<=0.)active[f][i]=true;
+    std::shared_ptr<ReconstructedFaultSurfaceLinearSolve<dim>> restricted;
+    if(std::any_of(active.begin(),active.end(),[](const auto &values){return std::any_of(values.begin(),values.end(),[](bool value){return value;});}))
+      {
+        restricted=reconstructed_fault_surface_system->create_restricted_linear_solve(active);
+        linearization=std::make_shared<Linearization>(linearization->with_surface_solve(*restricted));
+      }
+    typename MaterialModel::PhaseFieldFault<dim>::FEEndpointTrial endpoint;
+    endpoint.strain.reinit(endpoint_strain);endpoint.strain=endpoint_strain;endpoint.Z=endpoint_Z;
+    return [this,&material,owner,linearization,restricted,active,bulk,endpoint](const Vector<double> &direction)
+    {
+      TimerOutput::Scope timer(computing_timer,"Fault: endpoint linear tangent");
+      const auto started=std::chrono::steady_clock::now();
+      internal::FaultLinearProfile linear_profile(pcout,timestep_number,nonlinear_iteration,true);
+      const AffineConstraints<double> saved_constraints(current_constraints);
+      for(const auto &line:current_constraints.get_lines())current_constraints.set_inhomogeneity(line.index,0.);
+      try
+        {
+          std::vector<double>d(direction.size());for(unsigned int i=0;i<d.size();++i)d[i]=direction[i];
+          const auto forcing=material.evaluate_fe_endpoint_action(bulk,endpoint,d,nullptr,nullptr,true);
+          LinearAlgebra::BlockVector rhs(introspection.index_sets.stokes_partitioning,mpi_communicator),correction(rhs);
+          linearization->build_condensed_rhs(forcing.bulk_rhs,forcing.surface_rhs,rhs);
+          const double norm=rhs.l2_norm();
+          const ReconstructedFaultLinearSolveScales scales{norm,norm,norm,0.,norm};
+          unsigned int iterations=0;
+          solve_reconstructed_fault_condensed_system(*linearization,active,rhs,bulk,scales,false,0.,correction,iterations);
+          ReconstructedFaultVector dv;
+          linearization->recover_slip_rate_increment(correction,forcing.surface_rhs,dv);
+          LinearAlgebra::BlockVector bulk_error(rhs);
+          ReconstructedFaultVector surface_error;
+          auto residual=[&]()
+          {
+            linearization->apply_uncondensed_jacobian(correction,dv,bulk_error,surface_error);
+            bulk_error.block(0)-=forcing.bulk_rhs.block(0);
+            bulk_error.block(1)-=forcing.bulk_rhs.block(1);
+            for(unsigned int f=0;f<dv.size();++f)for(unsigned int i=0;i<dv[f].size();++i)
+              surface_error[f][i]=active[f][i]?0.:surface_error[f][i]+forcing.surface_rhs[f][i];
+          };
+          auto gradient=[&]()
+          {
+            const auto du=linearization->make_physical_bulk_direction(correction);
+            const auto a=material.evaluate_fe_endpoint_action(bulk,endpoint,d,&du,&dv);
+            Vector<double>result(a.gradient.size());
+            for(unsigned int i=0;i<result.size();++i)result[i]=a.gradient[i];
+            return result;
+          };
+          Vector<double>result=gradient();
+          double uncertainty=0.;unsigned int linear_calls=1;
+          if(norm>0.)
+            {
+              bool accurate=false;
+              // Correct the freshly evaluated full-system residual, always
+              // using the same Jacobian, anchor and contact set. Configured
+              // Stokes tolerances are unchanged. Measure the action correction
+              // itself against the existing phase linear accuracy requirement.
+              for(unsigned int repeat=0;repeat<4;++repeat)
+                {
+                  residual();
+                  LinearAlgebra::BlockVector load(forcing.bulk_rhs);
+                  load.block(0)=bulk_error.block(0);load.block(1)=bulk_error.block(1);
+                  load.block(0)*=-1.;load.block(1)*=-1.;
+                  linearization->build_condensed_rhs(load,surface_error,rhs);
+                  const double correction_norm=rhs.l2_norm();
+                  const ReconstructedFaultLinearSolveScales refined_scales{
+                    correction_norm,correction_norm,correction_norm,0.,correction_norm};
+                  LinearAlgebra::BlockVector delta(correction);delta=0.;
+                  solve_reconstructed_fault_condensed_system(*linearization,active,rhs,bulk,
+                    refined_scales,false,0.,delta,iterations);++linear_calls;
+                  ReconstructedFaultVector deltaV;
+                  linearization->recover_slip_rate_increment(delta,surface_error,deltaV);
+                  correction+=delta;
+                  for(unsigned int f=0;f<dv.size();++f)for(unsigned int i=0;i<dv[f].size();++i)dv[f][i]+=deltaV[f][i];
+                  Vector<double>updated=gradient(),change(updated);change-=result;
+                  uncertainty=change.l2_norm();result=updated;
+                  if(uncertainty<=phase_field_handler->solver_parameters.linear_solver_tolerance*result.l2_norm())
+                    {accurate=true;break;}
+                }
+              AssertThrow(accurate,ExcMessage("Mechanical residual corrections did not resolve the endpoint tangent at the configured phase linear accuracy."));
+            }
+          residual();double contact_error=0.;
+          for(const auto &values:surface_error)for(const double value:values)contact_error=std::max(contact_error,std::abs(value));
+          pcout<<std::setprecision(17)<<"   Endpoint linear tangent: seconds="
+               <<std::chrono::duration<double>(std::chrono::steady_clock::now()-started).count()
+               <<", Krylov="<<iterations<<", rhs="<<norm<<", inner target="
+               <<parameters.linear_stokes_solver_tolerance*norm<<", action norm="<<result.l2_norm()
+               <<", linear calls="<<linear_calls<<", action correction="<<uncertainty
+               <<", action target="<<phase_field_handler->solver_parameters.linear_solver_tolerance*result.l2_norm()<<std::endl;
+          pcout<<"   Endpoint tangent uncondensed check: bulk="<<bulk_error.l2_norm()
+               <<", free contact="<<contact_error<<std::endl;
+          current_constraints.copy_from(saved_constraints);
+          return result;
+        }
+      catch(...){current_constraints.copy_from(saved_constraints);throw;}
+    };
+  }
+
   template <int dim>
   void
-  Simulator<dim>::solve_reconstructed_fault_stokes ()
+  Simulator<dim>::solve_reconstructed_fault_stokes (const bool publish_history,
+                                                    ReconstructedFaultVector *trial_slip_rate,
+                                                    const bool reuse_endpoint_bulk_preconditioner)
   {
+    AssertThrow(publish_history || trial_slip_rate!=nullptr,
+                ExcMessage("A non-committing mechanics trial must return its slip field."));
     unsigned int total_fault_krylov_iterations = 0;
     double minimum_fault_accepted_alpha = 1.0;
     AssertThrow(dim == 2, ExcNotImplemented());
@@ -398,6 +581,10 @@ namespace aspect
     auto &phase_field_fault =
       Plugins::get_plugin_as_type<MaterialModel::PhaseFieldFault<dim>>(
         *material_model);
+    AssertThrow(!reuse_endpoint_bulk_preconditioner
+                || (!publish_history && phase_field_fault.uses_consistent_endpoint_phase()
+                    && Amg_preconditioner != nullptr && Mp_preconditioner != nullptr),
+                ExcMessage("Bulk preconditioner reuse requires an initialized, non-committing homogeneous endpoint trial."));
 
     // Complete all frozen constitutive histories before opening the nonlinear
     // V lifecycle. Only a fresh timestep-zero model may initialize missing state.
@@ -464,6 +651,15 @@ namespace aspect
         // geometry used throughout this mechanical solve.
         fault_manager.begin_slip_rate_nonlinear_solve();
         nonlinear_state_is_active = true;
+        if (!publish_history && !trial_slip_rate->empty())
+          {
+            // Non-committing endpoint calls may supply a private rate guess
+            // in the output vector. It is a nonlinear unknown, not Z or any
+            // accepted history; the manager rolls it back on return/failure.
+            fault_manager.begin_slip_rate_trial();
+            fault_manager.set_slip_rate_trial_values(*trial_slip_rate);
+            fault_manager.accept_slip_rate_trial();
+          }
         fault_manager.prepare_stokes_qp_projection_cache();
 
         assemble_reconstructed_fault_stokes_terms = true;
@@ -531,10 +727,36 @@ namespace aspect
             // Assemble mutually consistent A, R_bulk, frozen B, G, K_V, and
             // R_Gamma at the current accepted pair (working_x,current V).
             current_linearization_point = working_x;
-            assemble_newton_stokes_matrix = true;
-            rebuild_stokes_matrix = true;
-            rebuild_stokes_preconditioner = true;
+            const bool rebuild_homogeneous_bulk =
+              !phase_field_fault.uses_consistent_endpoint_phase()
+              || (!reuse_endpoint_bulk_preconditioner && nonlinear_iteration == 0);
+            assemble_newton_stokes_matrix = rebuild_homogeneous_bulk;
+            rebuild_stokes_matrix = rebuild_homogeneous_bulk;
+            // In the restricted homogeneous FE endpoint option, A and the
+            // pressure mass preconditioner depend on the fixed dt and material
+            // coefficients, not phi, R, Z or the surface active set. Reuse only
+            // within this physical step; the endpoint caller rebuilds at its
+            // first trial. A is identical for these homogeneous trials; the
+            // phase-dependent B/G/K blocks and actual residuals still assemble.
+            rebuild_stokes_preconditioner = rebuild_homogeneous_bulk;
             assemble_stokes_system();
+            if(rebuild_homogeneous_bulk && phase_field_fault.uses_consistent_endpoint_phase()
+               && parameters.stokes_solver_type==Parameters<dim>::StokesSolverType::block_amg)
+              {
+                const auto factor_start=std::chrono::steady_clock::now();
+                auto inverse=std::make_shared<TrilinosWrappers::SolverDirect>();
+                inverse->initialize(system_matrix.block(0,0));
+                const auto step=timestep_number;const double dt=time_step,scaling=pressure_scaling;
+                endpoint_velocity_inverse=[this,inverse,step,dt,scaling](auto &dst,const auto &src)
+                  {
+                    AssertThrow(timestep_number==step && time_step==dt && pressure_scaling==scaling,
+                                ExcMessage("Stale endpoint velocity preconditioner."));
+                    inverse->vmult(dst,src);
+                  };
+                pcout<<"   Endpoint sparse velocity factor: seconds="
+                     <<std::chrono::duration<double>(std::chrono::steady_clock::now()-factor_start).count()
+                     <<", DoFs="<<system_matrix.block(0,0).m()<<std::endl;
+              }
             const auto preconditioner_start=internal::FaultLinearTiming::Clock::now();
             build_stokes_preconditioner();
             fault_preconditioner_setup_seconds=std::chrono::duration<double>(
@@ -795,6 +1017,19 @@ namespace aspect
                   std::max(relative_bulk_residual,
                            relative_surface_residual));
                 restore_simulator_state();
+
+                if (!publish_history)
+                  {
+                    *trial_slip_rate=slip_rate;
+                    fault_manager.rollback_slip_rate_nonlinear_solve();
+                    nonlinear_state_is_active=false;
+                    solution.swap(accepted_solution);
+                    current_linearization_point.swap(accepted_linearization);
+                    last_pressure_normalization_adjustment=working_pressure_adjustment;
+                    // All accepted constitutive and surface histories remain
+                    // untouched. The caller owns this complete scratch result.
+                    return;
+                  }
 
                 // The history operation performs all failure-capable work
                 // before its writes. Everything that follows is a fixed-size,
@@ -1151,7 +1386,9 @@ namespace aspect
 namespace aspect
 {
 #define INSTANTIATE(dim) \
-  template void Simulator<dim>::solve_reconstructed_fault_stokes (); \
+  template std::pair<double,double> Simulator<dim>::endpoint_mechanical_defects(const LinearAlgebra::BlockVector &,const ReconstructedFaultVector &); \
+  template std::function<Vector<double>(const Vector<double> &)> Simulator<dim>::make_reconstructed_fault_endpoint_tangent(const LinearAlgebra::BlockVector &,const ReconstructedFaultVector &,const LinearAlgebra::BlockVector &,const std::vector<double> &); \
+  template void Simulator<dim>::solve_reconstructed_fault_stokes (bool,ReconstructedFaultVector *,bool); \
   template Simulator<dim>::ReconstructedFaultCoupledResidual \
   Simulator<dim>::evaluate_reconstructed_fault_coupled_residual( \
     const LinearAlgebra::BlockVector &, const ReconstructedFaultVector &); \

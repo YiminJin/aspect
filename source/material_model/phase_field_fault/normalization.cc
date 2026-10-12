@@ -278,6 +278,14 @@ namespace aspect
           return;
         }
 
+      if (fe_strain_history && fe_strain_state)
+        {
+          const auto trial = evaluate_fe_phase_energy(this->get_solution(), false);
+          AssertThrow(trial.admissible, ExcMessage("Accepted FE strain normalization is undefined."));
+          current_normalization_integrals = {trial.normalization};
+          return;
+        }
+
       const PhaseFieldHandler<dim> &phase_field_handler =
         this->get_phase_field_handler();
 
@@ -1667,9 +1675,10 @@ namespace aspect
           local_systems[fault].rhs.assign(faults[fault].n_vertices(), 0.0);
         }
 
-      // Assemble the consistent Q1 surface mass projection from profiles owned
-      // by this rank; positivity of the resulting nodal field is tested for the
-      // intended profiles but is not assumed for arbitrary input data.
+      // Assemble the I_h-only Q1 surface system on profile owners. QGauss
+      // weights times segment arclength are positive, and the two Q1 basis
+      // functions form a nonnegative partition of unity. Generic particle
+      // projection matrices and their solvers are not involved here.
       for (unsigned int profile_index = 0;
            profile_index < profiles.size(); ++profile_index)
         {
@@ -1679,6 +1688,9 @@ namespace aspect
                       ExcMessage("I_h profile " + Utilities::int_to_string(profile.id)
                                  + " produced a non-positive or non-finite integral."));
           FaultSystem &system = local_systems[profile.fault_index];
+          AssertThrow(std::isfinite(profile.xi) && profile.xi >= 0.0 && profile.xi <= 1.0
+                      && std::isfinite(profile.surface_weight) && profile.surface_weight > 0.0,
+                      ExcMessage("I_h projection requires nonnegative Q1 basis and positive surface weights."));
           const double shape[2] = {1.0-profile.xi, profile.xi};
           const unsigned int vertex = profile.segment_index;
           system.diagonal[vertex] += profile.surface_weight * shape[0] * shape[0];
@@ -1728,9 +1740,26 @@ namespace aspect
           std::vector<double> rhs(global_values.begin()+position,
                                   global_values.begin()+position+n_vertices);
           position += n_vertices;
-          current_normalization_integrals[fault] =
-            ReconstructedFaultUtilities::solve_tridiagonal_system(
-              diagonal, off_diagonal, rhs);
+          if (lump_normalization_projection)
+            {
+              std::vector<double> values(n_vertices);
+              for (unsigned int i = 0; i < n_vertices; ++i)
+                {
+                  const double row_sum = diagonal[i]
+                                         + (i > 0 ? off_diagonal[i-1] : 0.0)
+                                         + (i+1 < n_vertices ? off_diagonal[i] : 0.0);
+                  AssertThrow(std::isfinite(row_sum) && row_sum > 0.0,
+                              ExcMessage("I_h lumped projection has a non-positive nodal denominator."));
+                  values[i] = rhs[i] / row_sum;
+                  AssertThrow(std::isfinite(values[i]) && values[i] > 0.0,
+                              ExcMessage("I_h lumped projection produced an invalid nodal value."));
+                }
+              current_normalization_integrals[fault] = std::move(values);
+            }
+          else
+            current_normalization_integrals[fault] =
+              ReconstructedFaultUtilities::solve_tridiagonal_system(
+                diagonal, off_diagonal, rhs);
         }
     }
 

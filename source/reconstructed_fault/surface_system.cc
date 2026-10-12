@@ -94,7 +94,7 @@ namespace aspect
     const FaultVector &slip_rate,
     const bool assemble_jacobian) const
   {
-    if (bulk_work_measure)
+    if (bulk_work_measure || phase_field_fault.uses_cohesive_work_measure())
       return assemble_bulk_work_system(bulk_state, slip_rate, assemble_jacobian);
     return assemble_particle_system(bulk_state, slip_rate, assemble_jacobian);
   }
@@ -309,7 +309,13 @@ namespace aspect
     TimerOutput::Scope lookup_timer(*performance_timer, "Fault: G lookup build");
     candidate->point_cache->reinit(grid_cache, points);
     lookup_timer.stop();
-    if (std::getenv("ASPECT_FAULT_EXPLICIT_G") && candidate->normal_filters.empty())
+    // The restricted endpoint phase solver repeatedly applies this frozen map.
+    // Reuse the existing exact assembly (including remote-point averaging),
+    // rebuilding with every surface linearization. Keep the normal-filter
+    // restriction and all legacy activation defaults unchanged.
+    if ((std::getenv("ASPECT_FAULT_EXPLICIT_G")
+         || phase_field_fault.uses_consistent_endpoint_phase())
+        && candidate->normal_filters.empty())
       {
         internal::FaultLinearSection timing(internal::FaultLinearTiming::G_setup);
         using Coefficient=std::pair<SymmetricTensor<2,dim>,double>;

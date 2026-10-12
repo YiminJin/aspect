@@ -30,6 +30,7 @@
 #include <aspect/reconstructed_fault/manager.h>
 #include <deal.II/base/mpi_remote_point_evaluation.h>
 #include <deal.II/base/timer.h>
+#include <deal.II/lac/full_matrix.h>
 
 #include <functional>
 #include <array>
@@ -185,6 +186,14 @@ namespace aspect
         /** Explicit constitutive selection, never inferred from a frozen phase. */
         bool is_mature_frictional_fault() const;
 
+        /** Selected cohesive work pair; the legacy mature work mode is separate. */
+        bool uses_cohesive_work_measure() const { return cohesive_work_measure; }
+
+        /** Surface resistance at prescribed pressure; no bulk stress evaluation
+         * is used by the caller. Shares the native cohesive/friction law. */
+        ReconstructedFaultPointResponse evaluate_cohesive_surface_resistance(
+          unsigned int fault, unsigned int segment, double xi, double rate) const;
+
         /** Select immutable, geometry-checked outside-profile integrals for a
          * frozen mature through-boundary benchmark. Applied before the existing
          * consistent I_h projection; no outside mechanical integration is added.
@@ -255,9 +264,107 @@ namespace aspect
          * @}
          */
 
+        /** Prepare normalization and initial cohesive history without a mechanical update. */
+        void prepare_reconstructed_fault_phase_state();
+
+        /** Restricted, fresh-run total-energy P2 option. The accepted FE vector
+         * represents the 3D plane-strain deviator of symgrad(d_R), not a
+         * projection of particle stress. */
+        bool uses_fe_strain_history() const { return fe_strain_history; }
+        bool has_fe_strain_history() const { return bool(fe_strain_state); }
+        bool uses_consistent_endpoint_phase() const { return consistent_endpoint_phase; }
+        bool initialize_fe_shared_phase(LinearAlgebra::BlockVector &) const;
+
+        /** Same quadrature in bulk energy, Stokes and the slip adjoint. */
+        Quadrature<dim> mechanical_quadrature() const;
+
+        /** One authoritative incoming stress for all mechanical consumers. */
+        SymmetricTensor<2,dim> retained_history_stress(
+          const CellId &, const Point<dim> &,
+          const SymmetricTensor<2,dim> &particle_representation) const;
+
+        struct FEPhaseEnergy
+        {
+          bool admissible = true;
+          double energy = 0, bulk = 0, cohesive = 0;
+          std::vector<double> gradient, normalization, normalization_action, roundoff_scale;
+          FullMatrix<double> hessian;
+        };
+
+        /** Explicit trial phase, immutable accepted R/Z, actual consistent-I
+         * adjoint. Fracture remains in the native CPDI phase assembly. */
+        FEPhaseEnergy evaluate_fe_phase_energy(
+          const LinearAlgebra::BlockVector &, bool tangent,
+          bool positive_search = false) const;
+
+        /** Non-committing mechanical endpoint reconstructed from the one
+         * accepted anchor. This scratch state never supplies mechanical history. */
+        struct FEEndpointTrial
+        {
+          LinearAlgebra::BlockVector strain;
+          std::vector<double> Z;
+          double friction_potential = 0.;
+        };
+        FEEndpointTrial make_fe_endpoint_trial(const LinearAlgebra::BlockVector &,
+                                               const std::vector<std::vector<double>> &) const;
+        FEPhaseEnergy evaluate_fe_endpoint_energy(const LinearAlgebra::BlockVector &,
+                                                  const FEEndpointTrial &,
+                                                  const std::vector<double> *phase_direction = nullptr) const;
+        SymmetricTensor<2,dim> evaluate_fe_endpoint_stress(const FEEndpointTrial &,
+                                                         const std::vector<double> &normalization,
+                                                         const CellId &,const Point<dim> &) const;
+
+        /** Directional derivative of the actual normalization pullback and
+         * elastic phase gradient. Optional mechanical directions differentiate
+         * the endpoint, never the accepted reference state. With assemble_rhs,
+         * also return the partial phase forcing of the native mechanical rows. */
+        struct FEEndpointAction
+        {
+          std::vector<double> gradient;
+          LinearAlgebra::BlockVector bulk_rhs;
+          std::vector<std::vector<double>> surface_rhs;
+        };
+        FEEndpointAction evaluate_fe_endpoint_action(
+          const LinearAlgebra::BlockVector &, const FEEndpointTrial &,
+          const std::vector<double> &phase_direction,
+          const LinearAlgebra::BlockVector *velocity_direction = nullptr,
+          const std::vector<std::vector<double>> *slip_direction = nullptr,
+          bool assemble_rhs = false) const;
+
+        const LinearAlgebra::BlockVector &accepted_fe_strain_state() const;
+
       private:
         friend class internal::PhaseFieldFaultTestAccess<dim>;
         friend class Postprocess::MomentCycle<dim>;
+
+        struct FEStrainState;
+        struct FEStrainUpdate;
+        std::shared_ptr<FEStrainState> fe_strain_state;
+        bool fe_strain_history = false;
+        bool consistent_endpoint_phase = false;
+        std::string fe_initial_phase_profile;
+        unsigned int fe_bulk_normal_quadrature_points = 3;
+        void prepare_fe_strain_history();
+        /** Test-access-only fixed-entry reference; no checkpoint conversion or particle writes. */
+        void set_fe_diagnostic_reference(const LinearAlgebra::BlockVector &,
+                                        const std::vector<double> &,const std::vector<double> &);
+        FEPhaseEnergy evaluate_fe_phase_energy_at(const LinearAlgebra::BlockVector &,
+                                                  bool, bool,
+                                                  const LinearAlgebra::BlockVector &,
+                                                  const std::vector<double> &,
+                                                  const std::vector<double> * = nullptr) const;
+        void validate_fe_strain_restrictions() const;
+        std::shared_ptr<FEStrainUpdate> prepare_fe_strain_commit(
+          const LinearAlgebra::BlockVector &,
+          const std::vector<std::vector<double>> &tractions) const;
+        void publish_fe_strain_commit(const std::shared_ptr<FEStrainUpdate> &) noexcept;
+        SymmetricTensor<2,dim> candidate_fe_strain_stress(
+          const std::shared_ptr<FEStrainUpdate> &, const CellId &, const Point<dim> &,
+          double *evaluation_scale = nullptr) const;
+        SymmetricTensor<2,dim> evaluate_fe_strain_stress(
+          const LinearAlgebra::BlockVector &, const std::vector<double> &,
+          const std::vector<double> &, const CellId &, const Point<dim> &,
+          double *evaluation_scale = nullptr) const;
 
         /**
          * @name Maxwell constitutive helpers
@@ -314,6 +421,13 @@ namespace aspect
                                   const double current_h,
                                   const double previous_h,
                                   const bool mature = false);
+
+        /** Advance authoritative Q1 Z=I*q using nodal Maxwell coefficients.
+         * Requires uniform G and temperature-independent uniform viscosity.
+         * No particle transfer and no history writes occur here.
+         */
+        std::vector<std::vector<double>> compute_surface_cohesive_candidates(
+          const double time_step, const std::vector<std::vector<double>> &rates) const;
 
         /** Surface mixture and cohesive-profile values shared by surface and bulk points. */
         struct LocalizationResponse
@@ -400,6 +514,11 @@ namespace aspect
           const double previous_h,
           const double current_cohesive_traction,
           const double previous_cohesive_traction);
+
+        /** Recoverable energy coefficient multiplying g' at fixed elastic slip. */
+        static double compute_recoverable_phase_driving_force(
+          const double shear_modulus, const double degradation,
+          const double cohesive_traction);
         /**
          * @}
          */
@@ -593,6 +712,10 @@ namespace aspect
         unsigned int background_traction_property = numbers::invalid_unsigned_int;
         unsigned int background_shear_correction_property = numbers::invalid_unsigned_int;
         bool mature_frictional_fault = false;
+        bool recoverable_phase_history = false;
+        bool surface_cohesive_history = false;
+        bool cohesive_work_measure = false;
+        bool unloaded_cohesive_initialization = false;
 
         MaterialUtilities::CompositionalAveragingOperation viscosity_averaging;
 
@@ -627,6 +750,9 @@ namespace aspect
         bool evolve_phase_field;
 
         double normalization_quadrature_tolerance;
+
+        // I_h only; immutable after parsing. Generic projections remain consistent.
+        bool lump_normalization_projection = false;
 
         // Fixed per run: also defines completion-file profile IDs and cache layout.
         unsigned int normalization_surface_subdivisions = 1;
@@ -739,6 +865,14 @@ namespace aspect
     };
 
   }
+
+  /** Return the native rule unless the explicitly restricted FE-strain model
+   * selects the bulk/surface intersection rule. Shared by actual consumers. */
+  template <int dim>
+  Quadrature<dim> fault_mechanical_quadrature(const SimulatorAccess<dim> &);
+  template <int dim>
+  Quadrature<dim> fault_mechanical_quadrature(
+    const MaterialModel::Interface<dim> &,const Quadrature<dim> &);
 }
 
 #endif

@@ -75,7 +75,7 @@ namespace aspect
         introspection.variable("phase_field").first_component_index);
       fe_values[phase_field_extractor].get_function_values(bulk_state, phase_field);
       fe_values[phase_field_extractor].get_function_values(
-        simulator.get_old_solution(), previous_phase_field);
+        phase_field_fault.uses_fe_strain_history() ? phase_field_fault.accepted_fe_strain_state() : simulator.get_old_solution(), previous_phase_field);
 
       const std::vector<unsigned int> &chemical_fields =
         introspection.chemical_composition_field_indices();
@@ -178,8 +178,13 @@ namespace aspect
       const LinearAlgebra::BlockVector &bulk_linearization_point)
     {
       TimerOutput::Scope timer(*performance_timer, "Fault: B linearization");
+      // The restricted endpoint minimizer applies this frozen map many times.
+      // Reuse its existing sparse assembly with identical quadrature and
+      // constraints; rebuild at every new phase/mechanical linearization.
+      const bool assemble_matrix = std::getenv("ASPECT_FAULT_EXPLICIT_B")
+                                   || phase_field_fault.uses_consistent_endpoint_phase();
       aspect::internal::FaultLinearSection setup_timing(
-        aspect::internal::FaultLinearTiming::B_setup,std::getenv("ASPECT_FAULT_EXPLICIT_B"));
+        aspect::internal::FaultLinearTiming::B_setup,assemble_matrix);
       AssertThrow(bulk_linearization_point.size()
                   == this->get_dof_handler().n_dofs(),
                   ExcMessage("The reconstructed-fault B linearization point has "
@@ -194,8 +199,7 @@ namespace aspect
       candidate->geometry_cache_rebuild_count =
         fault_manager.get_stokes_qp_cache_diagnostics().rebuild_count;
       const Quadrature<dim> &quadrature =
-        this->introspection().quadratures.velocities;
-      const bool assemble_matrix = std::getenv("ASPECT_FAULT_EXPLICIT_B");
+        fault_mechanical_quadrature(*this);
       FEValues<dim> fe_values(this->get_mapping(), this->get_fe(), quadrature,
                               update_values | update_quadrature_points
                               | (assemble_matrix ? update_gradients | update_JxW_values : update_default));
@@ -292,7 +296,7 @@ namespace aspect
       std::map<std::pair<unsigned int,unsigned int>,std::array<double,8>> transfer_moments;
 
       const Quadrature<dim> &quadrature =
-        this->introspection().quadratures.velocities;
+        fault_mechanical_quadrature(*this);
       FEValues<dim> fe_values(this->get_mapping(), this->get_fe(), quadrature,
                               update_values | update_gradients
                               | update_quadrature_points | update_JxW_values);
@@ -432,7 +436,7 @@ namespace aspect
       // The geometry generation is fixed with the coefficient cache. This
       // prevents applying a frozen B linearization to reordered quadrature data.
       const Quadrature<dim> &quadrature =
-        this->introspection().quadratures.velocities;
+        fault_mechanical_quadrature(*this);
       FEValues<dim> fe_values(this->get_mapping(), this->get_fe(), quadrature,
                               update_gradients | update_quadrature_points
                               | update_JxW_values);
@@ -497,7 +501,7 @@ namespace aspect
       ReconstructedFaultManager<dim> &fault_manager =
         this->get_reconstructed_fault_manager();
       const Quadrature<dim> &quadrature =
-        this->introspection().quadratures.velocities;
+        fault_mechanical_quadrature(*this);
       const auto &associations = fault_manager.get_stokes_qp_fault_associations(
         scratch.cell->id(), quadrature,
         scratch.finite_element_values.get_quadrature_points());
@@ -527,12 +531,14 @@ namespace aspect
       for (unsigned int q = 0; q < quadrature.size(); ++q)
         {
           SymmetricTensor<2,dim> old_stress;
-          for (unsigned int c=0; c<stress_composition_indices.size(); ++c)
-            old_stress[SymmetricTensor<2,dim>::unrolled_to_component_indices(c)] =
-              compositions[stress_composition_indices[c]][q];
-          if (phase_field_fault.benchmark_retained_stress)
-            old_stress = phase_field_fault.benchmark_retained_stress(
-              scratch.cell->id(), scratch.finite_element_values.quadrature_point(q));
+          // FE strain is authoritative in the restricted option. Do not
+          // sample an unused projected particle history before replacing it.
+          if (!phase_field_fault.uses_fe_strain_history())
+            for (unsigned int c=0; c<stress_composition_indices.size(); ++c)
+              old_stress[SymmetricTensor<2,dim>::unrolled_to_component_indices(c)] =
+                compositions[stress_composition_indices[c]][q];
+          old_stress = phase_field_fault.retained_history_stress(
+              scratch.cell->id(), scratch.finite_element_values.quadrature_point(q), old_stress);
           std::vector<double> composition(compositions.size());
           for (unsigned int c=0; c<composition.size(); ++c)
             composition[c] = compositions[c][q];
