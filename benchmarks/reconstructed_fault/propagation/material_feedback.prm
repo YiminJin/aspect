@@ -1,0 +1,19 @@
+# Fresh native initialization for every material case; unchanged P2 mechanics.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/propagation/coupled.prm
+set Maximum time step = 0.125
+subsection Fault reconstruction
+  set Prescribed faults file = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/propagation/straight_core06.txt
+end
+subsection Material model
+  subsection Phase field fault
+    set I h projection = consistent
+  end
+end
+subsection Boundary velocity model
+  subsection Function
+    set Function expression = 0.004*t*(y-0.5); 0
+  end
+end
+subsection Postprocess
+  set List of postprocessors = particles, P2 material feedback
+end

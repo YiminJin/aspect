@@ -1,0 +1,17 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/propagation/straight.prm
+set End time = 4
+set Maximum time step = 1
+subsection Solver parameters
+  subsection Phase field solver parameters
+    set Use bound constraints = true
+    set Nonlinear solver tolerance = 1e-12
+    set Max nonlinear iterations = 100
+    set Max Newton line search iterations = 35
+  end
+end
+subsection Checkpointing
+  set Steps between checkpoint = 3
+end
+subsection Postprocess
+  set List of postprocessors = particles, P1 production integration
+end

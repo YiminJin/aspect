@@ -1,0 +1,5 @@
+# Through-going band: no radial cap inside the computational domain.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/propagation/finite.prm
+subsection Fault reconstruction
+  set Prescribed faults file = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/propagation/straight.txt
+end

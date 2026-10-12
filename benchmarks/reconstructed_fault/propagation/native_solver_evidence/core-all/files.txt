@@ -1,0 +1,3 @@
+core-4.txt
+core-5.txt
+core-6.txt

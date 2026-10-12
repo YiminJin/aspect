@@ -1,0 +1,5 @@
+# Conditional tail-resolution repeat, h=1/64, otherwise identical straight band.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/propagation/straight.prm
+subsection Mesh refinement
+  set Initial global refinement = 6
+end

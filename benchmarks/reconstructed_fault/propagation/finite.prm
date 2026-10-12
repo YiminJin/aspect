@@ -1,0 +1,5 @@
+# Original finite seed; repeat with initialization diagnostics at h=1/32.
+include $ASPECT_SOURCE_DIR/tests/phase_field_controlled_history.prm
+subsection Mesh refinement
+  set Initial global refinement = 5
+end

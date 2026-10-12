@@ -1,0 +1,4 @@
+P1 scratch residual/Jacobian/roundoff isolation verified
+P1 normal restoration verified
+P1 exceptional restoration verified
+P1 controlled phase history: qualified for prescribed H only

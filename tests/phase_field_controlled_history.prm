@@ -1,0 +1,41 @@
+# Controlled particle-H diagnostic: no mechanical evolution or transport.
+# Enable if: ASPECT_WITH_VORO
+# MPI: 1
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_ih.prm
+set Nonlinear solver failure strategy = abort program
+subsection Initial composition model
+  subsection Function
+    set Function expression = 0.5
+  end
+end
+subsection Temperature field
+  set Temperature method = static
+end
+subsection Material model
+  subsection Phase field fault
+    set Fault constitutive mode = cohesive
+    set Evolve phase field = true
+    set Reference viscosities = 1e8, 1e8
+    set Minimum viscosity = 1e6
+    set Maximum viscosity = 1e10
+    set Elastic shear moduli = 1e6, 1e6
+    set Cohesions = 1000, 1000
+    set Critical energy release rates = 26.666666666666667, 26.666666666666667
+  end
+end
+subsection Fault reconstruction
+  set Fit prescribed geometry to phase field = false
+end
+subsection Mesh refinement
+  set Initial global refinement = 4
+end
+subsection Solver parameters
+  subsection Phase field solver parameters
+    set Linear solver tolerance = 2e-7
+    set Nonlinear solver tolerance = 1e-8
+    set Max nonlinear iterations = 50
+  end
+end
+subsection Postprocess
+  set List of postprocessors = particles, controlled phase history
+end

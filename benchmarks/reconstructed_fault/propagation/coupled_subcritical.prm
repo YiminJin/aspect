@@ -1,0 +1,65 @@
+# Initial P2: fixed through-going fault, full cross-section association.
+# Native mechanical H; no transport/birth under the explicitly recorded RK2 control.
+include $ASPECT_SOURCE_DIR/tests/phase_field_fault_stage_i.prm
+set End time = 1
+set Maximum time step = 0.25
+set Nonlinear solver failure strategy = abort program
+set Max nonlinear iterations = 30
+set Nonlinear solver tolerance = 1e-8
+set Surface pressure = 10000
+subsection Temperature field
+  set Temperature method = static
+end
+subsection Initial composition model
+  subsection Function
+    set Function expression = 0; 0; 0; 0.5
+  end
+end
+subsection Material model
+  subsection Phase field fault
+    set Fault constitutive mode = cohesive
+    set Evolve phase field = true
+    set Initial time step = 1
+    set Reference viscosities = 1e8, 1e8
+    set Minimum viscosity = 1e6
+    set Maximum viscosity = 1e10
+    set Elastic shear moduli = 1e6, 1e6
+    set Cohesions = 1000, 1000
+    set Critical energy release rates = 26.666666666666667, 26.666666666666667
+    set Friction law = rate dependent
+    set Reference friction coefficients = 0.1, 0.1
+    set Dynamic friction coefficients = 0.1, 0.1
+    set Radiation damping coefficients = 1e7, 1e7
+    set Use adiabatic pressure in fault friction = true
+  end
+end
+subsection Fault reconstruction
+  set Fit prescribed geometry to phase field = false
+  set Association support = full normal cross-section
+  set Prescribed faults file = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/propagation/straight.txt
+end
+subsection Mesh refinement
+  set Initial global refinement = 5
+end
+subsection Solver parameters
+  subsection Phase field solver parameters
+    set Use bound constraints = true
+    set Linear solver tolerance = 2e-7
+    set Nonlinear solver tolerance = 1e-12
+    set Max nonlinear iterations = 100
+    set Max Newton line search iterations = 35
+  end
+end
+subsection Boundary velocity model
+  subsection Function
+    # Smooth shear-rate ramp, identical physical function at both timesteps.
+    set Variable names = x,y,t
+    set Function expression = 0.004*t*(y-0.5); 0
+  end
+end
+subsection Particles
+  set Integration scheme = rk2
+end
+subsection Postprocess
+  set List of postprocessors = particles, P2 coupled feedback
+end

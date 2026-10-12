@@ -1,0 +1,13 @@
+# Initialization-only native history diagnosis. Use a fresh output directory on repeats.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/propagation/material_feedback.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/build-propagation-integration/plugin/libmaterial_feedback.release.so, $ASPECT_SOURCE_DIR/build-propagation-integration/plugin/libhistory_driving.release.so
+set Output directory = $ASPECT_SOURCE_DIR/build-propagation-integration/output-history-native-v2
+set End time = 0
+subsection Material model
+ subsection Phase field fault
+  set Critical energy release rates = 26.6666666667, 26.6666666667
+ end
+end
+subsection Postprocess
+ set List of postprocessors = particles, P2 material feedback, P2 history driving
+end

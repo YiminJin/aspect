@@ -1,0 +1,31 @@
+# Fresh restricted FE history; interval-mean representation of a*t, a=.256 s^-2.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/propagation/recoverable.prm
+set Maximum time step = 0.015625
+set End time = 1
+set Additional shared libraries = $ASPECT_SOURCE_DIR/build-propagation-integration/plugin/libnative_fe_strain.release.so
+subsection Mesh refinement
+ set Initial global refinement = 4
+end
+subsection Fault reconstruction
+ set Structural point spacing = 0.015625
+end
+subsection Material model
+ subsection Phase field fault
+  set Bulk history representation = accepted FE strain
+  set Cohesive history representation = surface elastic slip
+  set Fault mechanical work measure = bulk conjugate
+ end
+end
+subsection Solver parameters
+ subsection Phase field solver parameters
+  set Enforce phase irreversibility = true
+ end
+end
+subsection Boundary velocity model
+ subsection Function
+  set Function expression = 0.256*max(0,t-0.0078125)*(y-0.5); 0
+ end
+end
+subsection Postprocess
+ set List of postprocessors = particles, P2 native FE strain
+end

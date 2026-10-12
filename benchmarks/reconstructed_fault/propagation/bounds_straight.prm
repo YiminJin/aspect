@@ -1,0 +1,7 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/propagation/straight.prm
+subsection Postprocess
+  set List of postprocessors = particles, P1 bound diagnostic
+  subsection P1 bound diagnostic
+    set Reference only = false
+  end
+end

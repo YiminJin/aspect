@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.16)
+find_package(Aspect REQUIRED HINTS ${Aspect_DIR})
+DEAL_II_INITIALIZE_CACHED_VARIABLES()
+project(p2_snapshot_visualization)
+add_library(snapshot_visualization SHARED snapshot_visualization.cc)
+ASPECT_SETUP_PLUGIN(snapshot_visualization)
+target_compile_options(snapshot_visualization PRIVATE -fno-finite-math-only -ffp-contract=off)

@@ -1,0 +1,17 @@
+# Explicit governing revision; fresh unloaded pre-existing fault.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/propagation/material_feedback.prm
+subsection Material model
+ subsection Phase field fault
+  set Phase driving history = recoverable energy
+  set Initial cohesive state = unloaded
+  set Critical energy release rates = 26.6666666667, 26.6666666667
+ end
+end
+subsection Boundary velocity model
+ subsection Function
+  set Function expression = 0.016*t*(y-0.5); 0
+ end
+end
+subsection Postprocess
+ set List of postprocessors = particles, P2 recoverable feedback
+end
