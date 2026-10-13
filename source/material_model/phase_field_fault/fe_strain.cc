@@ -460,6 +460,7 @@ namespace aspect
   {
 #define INSTANTIATE(dim) \
   template bool PhaseFieldFault<dim>::initialize_fe_shared_phase(LinearAlgebra::BlockVector &) const; \
+  template void PhaseFieldFault<dim>::set_fe_diagnostic_reference(const LinearAlgebra::BlockVector &,const std::vector<double> &,const std::vector<double> &); \
   template Quadrature<dim> PhaseFieldFault<dim>::mechanical_quadrature() const; \
   template void PhaseFieldFault<dim>::prepare_fe_strain_history(); \
   template void PhaseFieldFault<dim>::validate_fe_strain_restrictions() const; \
