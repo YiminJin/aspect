@@ -28,12 +28,12 @@ namespace aspect
           const auto old_solution=simulator.old_solution;
           const auto old_statistics=simulator.statistics;
           simulator.time=time;simulator.time_step=dt;simulator.timestep_number=1;simulator.nonlinear_iteration=0;
-          simulator.endpoint_velocity_inverse={};simulator.rebuild_stokes_matrix=true;simulator.rebuild_stokes_preconditioner=true;
+          simulator.endpoint_velocity_inverse={};simulator.endpoint_bulk_direct.reset();simulator.rebuild_stokes_matrix=true;simulator.rebuild_stokes_preconditioner=true;
           return [&simulator,old_time,old_dt,old_step,old_iteration,old_pressure,old_solution,old_statistics]()
             {
               simulator.time=old_time;simulator.time_step=old_dt;simulator.timestep_number=old_step;
               simulator.nonlinear_iteration=old_iteration;simulator.last_pressure_normalization_adjustment=old_pressure;
-              simulator.old_solution=old_solution;simulator.endpoint_velocity_inverse={};
+              simulator.old_solution=old_solution;simulator.endpoint_velocity_inverse={};simulator.endpoint_bulk_direct.reset();
               simulator.statistics=old_statistics;
               simulator.rebuild_stokes_matrix=true;simulator.rebuild_stokes_preconditioner=true;
             };
@@ -60,6 +60,26 @@ namespace aspect
         static double set_stokes_tolerance(Simulator<dim> &simulator,double value)
         { const double old=simulator.parameters.linear_stokes_solver_tolerance;
           simulator.parameters.linear_stokes_solver_tolerance=value;return old; }
+        static void mechanical_trial(Simulator<dim> &simulator,ReconstructedFaultVector &rates)
+        {simulator.compute_current_constraints();simulator.solve_reconstructed_fault_stokes(false,&rates);}
+        static unsigned int endpoint_linear_solve(Simulator<dim> &simulator,
+          const typename StokesSolver::ReconstructedFaultCondensedSystem<dim>::Linearization &linearization,
+          const ReconstructedFaultActiveSet &active,const LinearAlgebra::BlockVector &rhs,
+          const LinearAlgebra::BlockVector &bulk,LinearAlgebra::BlockVector &direction,bool direct)
+        {
+          const bool previous=simulator.phase_field_handler->solver_parameters.endpoint_direct_mechanics;
+          simulator.phase_field_handler->solver_parameters.endpoint_direct_mechanics=direct;
+          const AffineConstraints<double> saved(simulator.current_constraints);
+          for(const auto &line:simulator.current_constraints.get_lines())simulator.current_constraints.set_inhomogeneity(line.index,0.);
+          const double norm=rhs.l2_norm();
+          typename Simulator<dim>::ReconstructedFaultLinearSolveScales scales{norm,norm,norm,0.,norm};
+          unsigned int iterations=0;
+          try{simulator.solve_reconstructed_fault_condensed_system(linearization,active,rhs,bulk,scales,false,0.,direction,iterations);}
+          catch(...){simulator.current_constraints.copy_from(saved);simulator.phase_field_handler->solver_parameters.endpoint_direct_mechanics=previous;throw;}
+          simulator.current_constraints.copy_from(saved);
+          simulator.phase_field_handler->solver_parameters.endpoint_direct_mechanics=previous;
+          return iterations;
+        }
         // Native material functions for the independent integration reference.
         // Caller supplies actual particle fractions; no constitutive formula is copied.
         struct Coefficients

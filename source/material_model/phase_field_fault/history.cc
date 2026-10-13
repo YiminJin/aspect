@@ -632,7 +632,10 @@ namespace aspect
                              ? prepare_fe_strain_commit(accepted_bulk_state, candidates.cohesive_projection.nodal_values)
                              : std::shared_ptr<FEStrainUpdate>();
       double fe_publication_error=0.,fe_publication_bound=0.,fe_publication_net_bound=0.;
+      std::string fe_publication_failure;
       if (fe_update)
+        try
+        {
         for (const auto &particle : particle_manager.get_particle_handler())
           {
             auto &candidate = candidates.particle_candidates.at(particle.get_id());
@@ -652,6 +655,19 @@ namespace aspect
             // independently evolving particle history. Difference is roundoff.
             candidate.stress = stress;
           }
+        }
+        catch (const std::exception &exception)
+        {
+          fe_publication_failure=exception.what();
+        }
+      if(fe_update)
+        {
+          // No rank may publish while another rejects a local FE sample.
+          throw_if_history_error(fe_publication_failure,this->get_mpi_communicator());
+          fe_publication_error=Utilities::MPI::max(fe_publication_error,this->get_mpi_communicator());
+          fe_publication_bound=Utilities::MPI::max(fe_publication_bound,this->get_mpi_communicator());
+          fe_publication_net_bound=Utilities::MPI::max(fe_publication_net_bound,this->get_mpi_communicator());
+        }
       if(fe_update)this->get_pcout()<<std::setprecision(17)
         <<"   FE Maxwell publication: error="<<fe_publication_error
         <<" evaluation allowance="<<fe_publication_bound
@@ -1006,18 +1022,15 @@ namespace aspect
       const auto &particle_candidates = candidates.particle_candidates;
       const auto &cohesive_projection = candidates.cohesive_projection;
       // Finish the existing collective and local checks before publication.
-      const unsigned int local_valid =
+      unsigned int local_valid =
         particle_candidates.size() == particle_handler.n_locally_owned_particles()
         ? 1u : 0u;
+      for(const auto &particle:particle_handler)
+        if(particle_candidates.find(particle.get_id())==particle_candidates.end())local_valid=0;
       AssertThrow(Utilities::MPI::min(local_valid, this->get_mpi_communicator()) == 1,
                   ExcMessage("Stage-J history candidates are incomplete."));
 
       validate_cohesive_state_commit(cohesive_projection.nodal_values);
-      for (const auto &particle : particle_handler)
-        AssertThrow(particle_candidates.find(particle.get_id())
-                    != particle_candidates.end(),
-                    ExcMessage("Stage-J history candidates do not match the locally "
-                               "owned particle IDs."));
 
       for (unsigned int fault = 0;
            fault < cohesive_projection.diagnostics.size(); ++fault)

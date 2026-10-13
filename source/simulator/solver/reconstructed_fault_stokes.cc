@@ -37,6 +37,7 @@
 #include <aspect/simulator/solver/reconstructed_fault_bound_diagnostics.h>
 #include <aspect/simulator/reconstructed_fault_residual_audit.h>
 #include <aspect/simulator/reconstructed_fault_interface_preconditioner.h>
+#include <aspect/simulator/solver/reconstructed_fault_surface_schur.h>
 
 #include <deal.II/base/signaling_nan.h>
 #include <deal.II/fe/fe_values.h>
@@ -159,17 +160,6 @@ namespace aspect
 
 
   template <int dim>
-  struct Simulator<dim>::ReconstructedFaultLinearSolveScales
-  {
-    double initial_bulk_residual;
-    double aspect_bulk_reference;
-    double bulk_scale;
-    double bulk_precision;
-    double bulk_convergence_scale;
-  };
-
-
-  template <int dim>
   void
   Simulator<dim>::solve_reconstructed_fault_condensed_system(
     const typename StokesSolver::ReconstructedFaultCondensedSystem<dim>::Linearization &linearization,
@@ -277,6 +267,43 @@ namespace aspect
 
     const double tolerance =
       parameters.linear_stokes_solver_tolerance*rhs_norm;
+    if(phase_field_handler->solver_parameters.endpoint_direct_mechanics)
+      {
+        AssertThrow(Plugins::get_plugin_as_type<MaterialModel::PhaseFieldFault<dim>>(*material_model)
+                      .uses_consistent_endpoint_phase(),
+                    ExcMessage("Direct surface Schur requires the restricted endpoint option."));
+        const auto started=std::chrono::steady_clock::now();
+        if(!endpoint_bulk_direct)
+          {
+            endpoint_bulk_direct=std::make_shared<internal::EndpointBulkDirect>(
+              system_matrix,rhs,current_constraints,q,mpi_communicator);
+            pcout<<std::setprecision(17)<<"   Endpoint bulk Schur factor: seconds="
+                 <<endpoint_bulk_direct->setup_seconds<<", DoFs="<<rhs.size()<<std::endl;
+          }
+        linearization.solve_surface_schur(compatible_rhs,direction,endpoint_bulk_direct,active,pcout);
+        internal::project_fault_pressure(q,direction);
+        double raw_residual,residual_null_component;
+        const double fresh=internal::fault_true_linear_residual(linearization,q,direction,rhs,residual,
+                                                                raw_residual,residual_null_component);
+        LinearAlgebra::BlockVector owned(direction);current_constraints.distribute(owned);
+        LinearAlgebra::BlockVector ghosted(introspection.index_sets.system_partitioning,
+                                           introspection.index_sets.system_relevant_partitioning,mpi_communicator);
+        ghosted=owned;
+        const double reduction=q.block(1).linfty_norm()*(2.*rhs.block(1).l1_norm()+residual.block(1).l1_norm()
+                               +std::abs(residual_null_component)*q.block(1).l1_norm());
+        const double compatibility=internal::fault_pressure_compatibility_bound(
+          assembly_scale+pressure_assembly_scale(q,ghosted),assembly_operations,reduction,
+          reduction_operations,nonlinear_target);
+        pcout<<std::setprecision(17)<<"   Endpoint direct solve: seconds="
+             <<std::chrono::duration<double>(std::chrono::steady_clock::now()-started).count()
+             <<", fresh="<<fresh<<", raw="<<raw_residual<<", target="<<tolerance
+             <<", pressure quotient="<<(q.l2_norm()>0.)<<", residual null="<<residual_null_component
+             <<", compatibility bound="<<compatibility<<std::endl;
+        AssertThrow(std::abs(residual_null_component)<=compatibility,
+                    ExcMessage("Direct Schur residual has significant pressure incompatibility."));
+        AssertThrow(fresh<=tolerance,ExcMessage("Direct Schur solve failed the original true linear residual target."));
+        return;
+      }
     const unsigned int budget = std::max(1U,
       parameters.n_cheap_stokes_solver_steps + parameters.n_expensive_stokes_solver_steps);
     PrimitiveVectorMemory<LinearAlgebra::BlockVector> memory;
@@ -740,6 +767,7 @@ namespace aspect
             // phase-dependent B/G/K blocks and actual residuals still assemble.
             rebuild_stokes_preconditioner = rebuild_homogeneous_bulk;
             assemble_stokes_system();
+            if(rebuild_homogeneous_bulk)endpoint_bulk_direct.reset();
             if(rebuild_homogeneous_bulk && phase_field_fault.uses_consistent_endpoint_phase()
                && parameters.stokes_solver_type==Parameters<dim>::StokesSolverType::block_amg)
               {
@@ -753,7 +781,7 @@ namespace aspect
                                 ExcMessage("Stale endpoint velocity preconditioner."));
                     inverse->vmult(dst,src);
                   };
-                pcout<<"   Endpoint sparse velocity factor: seconds="
+                pcout<<"   Endpoint collective Amesos velocity factor: seconds="
                      <<std::chrono::duration<double>(std::chrono::steady_clock::now()-factor_start).count()
                      <<", DoFs="<<system_matrix.block(0,0).m()<<std::endl;
               }

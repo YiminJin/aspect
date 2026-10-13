@@ -21,6 +21,11 @@
 
 namespace aspect
 {
+  namespace internal
+  {
+    class EndpointBulkDirect;
+    template<int dim> class EndpointSurfaceSchur;
+  }
   namespace Assemblers
   {
     template <int dim>
@@ -94,6 +99,13 @@ namespace aspect
              * a small interface preconditioner without exposing matrix state. */
             void apply_B(const FaultVector &source, LinearAlgebra::BlockVector &result) const;
             void apply_G(const LinearAlgebra::BlockVector &source, FaultVector &result) const;
+            /** Reuse an exact surface Schur factor only in this current view.
+             * The supplied bulk factor must correspond to this same A. */
+            void solve_surface_schur(const LinearAlgebra::BlockVector &rhs,
+                                     LinearAlgebra::BlockVector &result,
+                                     const std::shared_ptr<internal::EndpointBulkDirect> &bulk,
+                                     const ReconstructedFaultActiveSet &active,
+                                     ConditionalOStream &output) const;
 
             /** Unit algebraic constant-pressure null vector, or zero outside
              * eligible prescribed-pressure closed domains. Verify both sides
@@ -130,6 +142,8 @@ namespace aspect
             const unsigned int B_generation;
             const std::shared_ptr<const AffineConstraints<double>> homogeneous_system_constraints;
             const std::shared_ptr<const AffineConstraints<double>> homogeneous_stokes_constraints;
+            mutable std::shared_ptr<internal::EndpointSurfaceSchur<dim>> direct_surface;
+            mutable std::shared_ptr<internal::EndpointBulkDirect> direct_bulk;
         };
 
         explicit ReconstructedFaultCondensedSystem(const Simulator<dim> &simulator);

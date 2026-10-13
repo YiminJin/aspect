@@ -432,7 +432,7 @@ namespace aspect
                             "The selection cannot change on restart.");
           prm.declare_entry("Bulk history representation", "particle stress",
                             Patterns::Selection("particle stress|accepted FE strain"),
-                            "Accepted FE strain is the restricted fresh serial P2 total-energy "
+                            "Accepted FE strain is the restricted fresh P2 total-energy "
                             "option. It retains d_R with R=dev_3(symgrad(d_R)), matching uniform "
                             "bulk/fault Maxwell coefficients, fixed Cartesian mesh and horizontal "
                             "geometry, no transport/birth, surface elastic slip, consistent I_h, "
@@ -642,14 +642,15 @@ namespace aspect
       prm.leave_subsection();
       if (fe_strain_history)
         {
-          AssertThrow(dim == 2 && Utilities::MPI::n_mpi_processes(this->get_mpi_communicator()) == 1
+          AssertThrow(dim == 2 && (Utilities::MPI::n_mpi_processes(this->get_mpi_communicator()) == 1
+                      || consistent_endpoint_phase)
                       && !this->get_parameters().resume_computation
                       && !this->get_parameters().mesh_deformation_enabled
                       && surface_cohesive_history && cohesive_work_measure
                       && unloaded_cohesive_initialization && recoverable_phase_history
                       && !mature_frictional_fault && !lump_normalization_projection
                       && !fault_friction.has_state_variable(),
-                      ExcMessage("Accepted FE strain requires the fresh serial fixed-mesh "
+                      ExcMessage("Accepted FE strain requires the fresh fixed-mesh "
                                  "unloaded cohesive P2 configuration; restart is unsupported."));
           for (unsigned int j=0; j<elastic_shear_moduli.size(); ++j)
             AssertThrow(elastic_shear_moduli[j] == elastic_shear_moduli[0]

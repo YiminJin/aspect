@@ -19,6 +19,7 @@
  */
 
 #include <aspect/phase_field.h>
+#include <aspect/reconstructed_fault/endpoint_mpi.h>
 #include <aspect/simulator.h>
 #include <aspect/utilities.h>
 #include <aspect/simulator_signals.h>
@@ -514,6 +515,17 @@ namespace aspect
                           "In the optional endpoint solver, add one balanced normal-profile coarse "
                           "correction to the phase search inverse. The actual coupled Hessian and "
                           "negative-curvature checks remain unchanged.");
+        prm.declare_entry("Endpoint quasi-Newton search", "false", Patterns::Bool(),
+                          "Use a limited-memory inverse BFGS search in the optional endpoint solver. "
+                          "The sparse fracture-plus-mass inverse supplies the positive base metric. "
+                          "The true endpoint energy, KKT acceptance, mechanical accuracy, physical "
+                          "history anchors and resolved saddle checks remain unchanged. This changes "
+                          "search directions only; the default retains the reduced-Newton search.");
+        prm.declare_entry("Endpoint direct mechanics", "false", Patterns::Bool(),
+                          "Use an exact sparse velocity/pressure inverse and surface Schur complement "
+                          "in restricted consistent-endpoint mechanical and sensitivity solves. "
+                          "Currently serial only; physical equations, outer Newton, residual checks, "
+                          "history and tolerances are unchanged. Reuse only unchanged operators.");
 
         prm.declare_entry("Max linear solver iterations", "1000",
                           Patterns::Integer(0),
@@ -640,6 +652,8 @@ namespace aspect
         solver_parameters.linear_solver_tolerance            = prm.get_double("Linear solver tolerance");
         solver_parameters.adaptive_endpoint_linear_accuracy = prm.get_bool("Adaptive endpoint linear accuracy");
         solver_parameters.endpoint_translation_preconditioner = prm.get_bool("Endpoint translation preconditioner");
+        solver_parameters.endpoint_quasi_newton_search = prm.get_bool("Endpoint quasi-Newton search");
+        solver_parameters.endpoint_direct_mechanics = prm.get_bool("Endpoint direct mechanics");
         solver_parameters.max_linear_solver_iterations       = prm.get_integer("Max linear solver iterations");
         solver_parameters.nonlinear_solver_tolerance         = prm.get_double("Nonlinear solver tolerance");
         solver_parameters.max_nonlinear_iterations           = prm.get_integer("Max nonlinear iterations");
@@ -889,6 +903,7 @@ namespace aspect
     std::vector<double> chemical_composition_values(C_property_indices.size());
     bool locally_admissible = true;
     double local_energy = 0;
+    long double extended_particle_energy=0.;double global_elastic_energy=0.;
 
     // Vector storing the phase field DoF indices associated with a particle domain
     std::vector<types::global_dof_index> particle_dof_indices;
@@ -995,7 +1010,10 @@ namespace aspect
 
             const double V_p = particle_domain.volume();
             if (energy != nullptr)
-              local_energy += V_p * (potential + 0.5 * F * grad_phi.norm_square());
+              {
+                local_energy += V_p * (potential + 0.5 * F * grad_phi.norm_square());
+                extended_particle_energy += static_cast<long double>(V_p) * (potential + 0.5 * F * grad_phi.norm_square());
+              }
             Vector<double> particle_scale(residual_roundoff_allowance != nullptr ? n_dofs : 0);
 
             for (unsigned int i = 0; i < n_dofs; ++i)
@@ -1052,8 +1070,8 @@ namespace aspect
         locally_admissible = locally_admissible && elastic.admissible;
         if (elastic.admissible)
           {
-            local_energy += elastic.energy;
-            for (unsigned int i=0; i<elastic.gradient.size(); ++i)
+            global_elastic_energy=elastic.energy;
+            for (const auto i:system_rhs.block(block_index).locally_owned_elements())
               {
                 system_rhs.block(block_index)[i] -= elastic.gradient[i];
                 if (residual_roundoff_allowance)
@@ -1077,7 +1095,9 @@ namespace aspect
                                       rounding_scale.block(block_index).l2_norm();
       }
     if (energy != nullptr)
-      *energy = Utilities::MPI::sum(local_energy, this->get_mpi_communicator());
+      *energy = total_energy
+        ?internal::endpoint_energy_sum(extended_particle_energy,this->get_mpi_communicator())+global_elastic_energy
+        :Utilities::MPI::sum(local_energy, this->get_mpi_communicator());
     return Utilities::MPI::min(static_cast<unsigned int>(locally_admissible),
                                this->get_mpi_communicator()) == 1;
   }

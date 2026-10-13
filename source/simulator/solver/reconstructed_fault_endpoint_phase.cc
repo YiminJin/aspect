@@ -4,6 +4,7 @@
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/plugins.h>
 #include <aspect/reconstructed_fault/manager.h>
+#include <aspect/reconstructed_fault/endpoint_mpi.h>
 #include <aspect/particle/manager.h>
 #include <deal.II/fe/fe_values.h>
 #include <deal.II/lac/trilinos_solver.h>
@@ -23,8 +24,8 @@ namespace aspect
     auto &phase=*phase_field_handler;
     auto &manager=*reconstructed_fault_manager;
     AssertThrow(material.uses_consistent_endpoint_phase() && material.has_fe_strain_history()
-                && timestep_number>0 && Utilities::MPI::n_mpi_processes(mpi_communicator)==1,
-                ExcMessage("Endpoint minimization requires initialized serial accepted FE history."));
+                && timestep_number>0,
+                ExcMessage("Endpoint minimization requires initialized accepted FE history."));
     const unsigned int b=introspection.variable("phase_field").block_index;
     const LinearAlgebra::BlockVector saved_solution(solution),saved_linearization(current_linearization_point);
     const double saved_pressure_adjustment=last_pressure_normalization_adjustment;
@@ -55,26 +56,36 @@ namespace aspect
     std::vector<bool> contact(n),previous_contact(n);
     bool preconditioner_ready=false;
     std::vector<Point<dim>> points(n);
-    for(unsigned int i=0;i<n;++i)x[i]=lower[i]=anchor.block(b)[i];
+    lower=internal::endpoint_values(anchor.block(b),mpi_communicator);x=lower;
     if(initial_trial)
+      {
+      x=internal::endpoint_values(initial_trial->block(b),mpi_communicator);
       for(unsigned int i=0;i<n;++i)
         {
-          x[i]=initial_trial->block(b)[i];
           AssertThrow(x[i]>=lower[i] && x[i]<1.,ExcMessage("Diagnostic starting guess violates the physical obstacle."));
         }
+      }
     const unsigned int component=introspection.variable("phase_field").first_component_index;
     std::vector<types::global_dof_index> local_indices(finite_element.n_dofs_per_cell());
+    std::vector<double> coordinates(dim*n,0.),counts(n,0.);
     for(const auto &cell:dof_handler.active_cell_iterators())
+      if(cell->is_locally_owned())
       {
       cell->get_dof_indices(local_indices);
       for(unsigned int v=0;v<GeometryInfo<dim>::vertices_per_cell;++v)
         {
           const auto global=local_indices[finite_element.component_to_system_index(component,v)];
           const auto i=global-anchor.get_block_indices().block_start(b);
-          points[i]=cell->vertex(v);mass[i]+=cell->measure()/GeometryInfo<dim>::vertices_per_cell;
+          counts[i]+=1.;
+          for(unsigned int d=0;d<dim;++d)coordinates[dim*i+d]+=cell->vertex(v)[d];
+          mass[i]+=cell->measure()/GeometryInfo<dim>::vertices_per_cell;
         }
       }
-    for(unsigned int i=0;i<n;++i)AssertThrow(mass[i]>0,ExcInternalError());
+    internal::endpoint_sum(coordinates,mpi_communicator);internal::endpoint_sum(counts,mpi_communicator);
+    std::vector<double> local_mass(mass.begin(),mass.end());internal::endpoint_sum(local_mass,mpi_communicator);
+    for(unsigned int i=0;i<n;++i)
+      {mass[i]=local_mass[i];AssertThrow(mass[i]>0 && counts[i]>0,ExcInternalError());
+       for(unsigned int d=0;d<dim;++d)points[i][d]=coordinates[dim*i+d]/counts[i];}
     struct Evaluation
     {
       double value,allowance,pressure_adjustment;
@@ -86,6 +97,8 @@ namespace aspect
     unsigned int mechanical_trials=0;
     unsigned int tangent_calls=0,finite_difference_calls=0,line_search_calls=0,phase_iterations=0;
     double mechanical_seconds=0.,tangent_seconds=0.;
+    unsigned int quasi_newton_pairs=0,search_inverse_calls=0;
+    std::vector<std::pair<Vector<double>,Vector<double>>> secants;
     Evaluation *current_base=nullptr;
     std::function<Vector<double>(const Vector<double> &)> linearized_action;
     ReconstructedFaultVector warm_slip;
@@ -99,8 +112,9 @@ namespace aspect
       for(unsigned int i=0;i<n;++i)
         {
           AssertThrow(phi[i]>=0 && phi[i]<1.,ExcMessage("Undefined endpoint trial normalization."));
-          owned.block(b)[i]=phi[i];
+
         }
+      internal::endpoint_assign(owned.block(b),phi);
       solution=owned;current_linearization_point=solution;
       // This solve rolls manager V back and never publishes R,Z,H or q.
       // Like the scratch bulk solution, the previous trial rate is only a
@@ -118,8 +132,9 @@ namespace aspect
       // CPDI fracture functional. Reuse its actual sparse operator; no
       // particle projection, surrogate stiffness or integration change.
       LinearAlgebra::Vector delta(introspection.index_sets.system_partitioning[b],mpi_communicator),kd(delta);
-      for(unsigned int i=0;i<n;++i)delta[i]=phi[i]-lower[i];
+      Vector<double> increment(phi);increment-=lower;internal::endpoint_assign(delta,increment);
       fracture_matrix.vmult(kd,delta);
+      const auto global_kd=internal::endpoint_values(kd,mpi_communicator);
       const double naive_fracture_start=fracture_anchor+.5*(delta*kd);
       double naive_fracture=naive_fracture_start;
       long double linear_fracture=0.,quadratic_fracture=0.;
@@ -130,11 +145,11 @@ namespace aspect
           // Sum increments before adding the large reference constant. This
           // is the same exact quadratic functional, with less cancellation
           // in the true-energy line search near a soft branch.
-          linear_fracture+=static_cast<long double>(fracture_gradient[i])*delta[i];
-          quadratic_fracture+=static_cast<long double>(delta[i])*kd[i];
-          naive_fracture+=fracture_gradient[i]*delta[i];
+          linear_fracture+=static_cast<long double>(fracture_gradient[i])*increment[i];
+          quadratic_fracture+=static_cast<long double>(increment[i])*global_kd[i];
+          naive_fracture+=fracture_gradient[i]*increment[i];
           e.elastic_gradient[i]=elastic.gradient[i]/scale;
-          e.gradient[i]=e.elastic_gradient[i]+(fracture_gradient[i]+kd[i])/scale;
+          e.gradient[i]=e.elastic_gradient[i]+(fracture_gradient[i]+global_kd[i])/scale;
           positive+=elastic.roundoff_scale[i]*elastic.roundoff_scale[i];
         }
       const long double fracture=fracture_anchor+linear_fracture+.5L*quadratic_fracture;
@@ -170,8 +185,9 @@ namespace aspect
       if(relative==1e-5)
         {
           AssertThrow(current_base!=nullptr,ExcInternalError());
+          const auto base_phase=internal::endpoint_values(current_base->bulk.block(b),mpi_communicator);
           for(unsigned int i=0;i<n;++i)
-            AssertThrow(phi[i]==current_base->bulk.block(b)[i],ExcMessage("Tangent base differs from the explicit trial."));
+            AssertThrow(phi[i]==base_phase[i],ExcMessage("Tangent base differs from the explicit trial."));
           if(!linearized_action)
             {
               const auto endpoint=material.make_fe_endpoint_trial(current_base->bulk,current_base->slip);
@@ -180,9 +196,10 @@ namespace aspect
           const auto started=std::chrono::steady_clock::now();
           Vector<double>result=linearized_action(direction);result/=scale;
           LinearAlgebra::Vector d(introspection.index_sets.system_partitioning[b],mpi_communicator),kd(d);
-          for(unsigned int i=0;i<n;++i)d[i]=direction[i];
+          internal::endpoint_assign(d,direction);
           fracture_matrix.vmult(kd,d);
-          for(unsigned int i=0;i<n;++i)result[i]+=kd[i]/scale;
+          const auto global_kd=internal::endpoint_values(kd,mpi_communicator);
+          for(unsigned int i=0;i<n;++i)result[i]+=global_kd[i]/scale;
           ++tangent_calls;
           tangent_seconds+=std::chrono::duration<double>(std::chrono::steady_clock::now()-started).count();
           return result;
@@ -200,9 +217,10 @@ namespace aspect
       const auto ep=evaluate(plus),em=evaluate(minus);
       Vector<double> result(ep.elastic_gradient);result-=em.elastic_gradient;result/=2*eps;
       LinearAlgebra::Vector d(introspection.index_sets.system_partitioning[b],mpi_communicator),kd(d);
-      for(unsigned int i=0;i<n;++i)d[i]=direction[i];
+      internal::endpoint_assign(d,direction);
       fracture_matrix.vmult(kd,d);
-      for(unsigned int i=0;i<n;++i)result[i]+=kd[i]/scale;
+      const auto global_kd=internal::endpoint_values(kd,mpi_communicator);
+          for(unsigned int i=0;i<n;++i)result[i]+=global_kd[i]/scale;
       return result;
     };
     try
@@ -212,18 +230,21 @@ namespace aspect
         solution.block(b)=anchor.block(b);
         phase.assemble_phase_field_system(system_matrix,system_rhs,solution,true,&fracture_arithmetic,&fracture_anchor,true);
         fracture_matrix.copy_from(system_matrix.block(b,b));
-        for(unsigned int i=0;i<n;++i)fracture_gradient[i]=-system_rhs.block(b)[i];
-        for(unsigned int i=0;i<n;++i)
-          diagonal[i]=std::abs(system_matrix.block(b,b).diag_element(i))/scale+mass[i];
+        fracture_gradient=internal::endpoint_values(system_rhs.block(b),mpi_communicator);fracture_gradient*=-1.;
+        std::vector<double> local_diagonal(n,0.);
+        for(const auto i:system_rhs.block(b).locally_owned_elements())
+          local_diagonal[i]=std::abs(system_matrix.block(b,b).diag_element(i))/scale+mass[i];
+        internal::endpoint_sum(local_diagonal,mpi_communicator);
+        std::copy(local_diagonal.begin(),local_diagonal.end(),diagonal.begin());
         search_matrix.copy_from(system_matrix.block(b,b));
-        for(unsigned int i=0;i<n;++i)search_matrix.add(i,i,scale*mass[i]);
+        for(const auto i:system_rhs.block(b).locally_owned_elements())search_matrix.add(i,i,scale*mass[i]);
         search_matrix.compress(VectorOperation::add);
         auto factor_preconditioner=[&]()
           {
             if(preconditioner_ready && contact==previous_contact)return;
             search_preconditioner.reset();
             restricted_search_matrix.copy_from(search_matrix);
-            for(unsigned int i=0;i<n;++i)
+            for(const auto i:system_rhs.block(b).locally_owned_elements())
               if(contact[i])restricted_search_matrix.clear_row(i,1.);
               else
                 {
@@ -232,12 +253,16 @@ namespace aspect
                     if(contact[entry->column()])entry->value()=0.;
                 }
             restricted_search_matrix.compress(VectorOperation::insert);
-            // This restricted serial option can factor its small sparse
+            // Collective Amesos_Klu may gather/factor on rank zero internally.
+            const auto factor_started=std::chrono::steady_clock::now();
+            // This restricted option can factor its small sparse
             // fracture search operator. Exact application avoids spending
             // many expensive mechanical tangent actions on AMG error in an
             // anisotropic mesh. It is not the physical reduced Hessian.
             search_preconditioner=std::make_unique<TrilinosWrappers::SolverDirect>();
             search_preconditioner->initialize(restricted_search_matrix);
+            pcout<<"   Endpoint phase Amesos factor: ranks="<<Utilities::MPI::n_mpi_processes(mpi_communicator)
+                 <<", seconds="<<std::chrono::duration<double>(std::chrono::steady_clock::now()-factor_started).count()<<std::endl;
             previous_contact=contact;preconditioner_ready=true;
           };
         auto update_preconditioner=[&](const Vector<double>&gradient)
@@ -247,10 +272,11 @@ namespace aspect
           };
         auto precondition=[&](const Vector<double>&r,Vector<double>&z)
           {
+            ++search_inverse_calls;
             LinearAlgebra::Vector src(introspection.index_sets.system_partitioning[b],mpi_communicator),dst(src);
-            for(unsigned int i=0;i<n;++i)src[i]=r[i];
+            internal::endpoint_assign(src,r);
             search_preconditioner->vmult(dst,src);
-            for(unsigned int i=0;i<n;++i)z[i]=scale*dst[i];
+            z=internal::endpoint_values(dst,mpi_communicator);z*=scale;
           };
         Evaluation base=evaluate(x);
         current_base=&base;
@@ -276,10 +302,11 @@ namespace aspect
                 const auto endpoint=material.make_fe_endpoint_trial(base.bulk,base.slip);
                 const auto elastic=material.evaluate_fe_endpoint_energy(base.bulk,endpoint);
                 const double energy_error=std::abs(base.value-(actual_fracture+elastic.energy+endpoint.friction_potential)/scale);
+                const auto actual_rhs=internal::endpoint_values(system_rhs.block(b),mpi_communicator);
                 double gradient_error=0.;
                 for(unsigned int i=0;i<n;++i)
                   {
-                    const double actual=(elastic.gradient[i]-system_rhs.block(b)[i])/scale;
+                    const double actual=(elastic.gradient[i]-actual_rhs[i])/scale;
                     gradient_error=std::max(gradient_error,std::abs(actual-base.gradient[i]));
                     base.gradient[i]=actual;
                   }
@@ -310,14 +337,17 @@ namespace aspect
                 Vector<double> difference(hd);difference-=hf;
                 const double curvature=step*hf,uncertainty=std::abs(step*difference);
                 LinearAlgebra::BlockVector direction(introspection.index_sets.system_partitioning,mpi_communicator);
-                for(unsigned int i=0;i<n;++i)direction.block(b)[i]=step[i];
+                internal::endpoint_assign(direction.block(b),step);
+                LinearAlgebra::BlockVector ghost_direction(solution);ghost_direction=direction;
                 FEValues<dim> values(*mapping,finite_element,QGauss<dim>(2),update_values|update_JxW_values);
                 std::vector<double> sampled(values.n_quadrature_points);double mass_norm=0.;
                 for(const auto &cell:dof_handler.active_cell_iterators())
+                  if(cell->is_locally_owned())
                   {
-                    values.reinit(cell);values[FEValuesExtractors::Scalar(component)].get_function_values(direction,sampled);
+                    values.reinit(cell);values[FEValuesExtractors::Scalar(component)].get_function_values(ghost_direction,sampled);
                     for(unsigned int q=0;q<sampled.size();++q)mass_norm+=values.JxW(q)*sampled[q]*sampled[q];
                   }
+                mass_norm=Utilities::MPI::sum(mass_norm,mpi_communicator);
                 pcout<<"   Endpoint translation curvature="<<scale*curvature
                      <<", action uncertainty="<<scale*uncertainty
                      <<", L2 Rayleigh quotient="<<scale*curvature/mass_norm<<std::endl;
@@ -340,38 +370,72 @@ namespace aspect
                   }
                 AssertThrow(found,ExcMessage("Resolved negative endpoint curvature has no resolved admissible descent; retain entry for diagnosis."));
                 x=best;base=std::move(selected);escape=true;
+                secants.clear();
                 // A stationary saddle has a tiny entry residual. Restart only
                 // intermediate forcing after departure; the physical entry
                 // target above remains immutable.
                 forcing_reference=std::max(forcing_reference,projected(x,base.gradient).linfty_norm());
               }
             if(escape)continue;
+            bool obstacle_ready=false;
+            Vector<double> obstacle_step(n);
+            if(settings.endpoint_quasi_newton_search)
+              {
+                // Approximate the inverse only. Each gradient is the actual
+                // mechanically reduced endpoint gradient at the same immutable
+                // incoming histories. Keep all native tangential modes.
+                update_preconditioner(base.gradient);
+                std::vector<Vector<double>> s,y;
+                std::vector<double> rho,alpha;
+                for(const auto &pair:secants)
+                  {
+                    Vector<double> restricted_s(pair.first),restricted_y(pair.second);
+                    for(unsigned int i=0;i<n;++i)if(contact[i])
+                      {restricted_s[i]=0.;restricted_y[i]=0.;}
+                    const double pairing=restricted_s*restricted_y;
+                    if(pairing>1e-12*restricted_s.l2_norm()*restricted_y.l2_norm())
+                      {s.push_back(std::move(restricted_s));y.push_back(std::move(restricted_y));rho.push_back(1./pairing);}
+                  }
+                Vector<double> q(g),z(n);
+                for(unsigned int j=s.size();j>0;--j)
+                  {const double a=rho[j-1]*(s[j-1]*q);alpha.push_back(a);q.add(-a,y[j-1]);}
+                precondition(q,z);
+                for(unsigned int j=0;j<s.size();++j)
+                  z.add(alpha[s.size()-1-j]-rho[j]*(y[j]*z),s[j]);
+                step=z;step*=-1.;
+                pcout<<"   Endpoint quasi-Newton search: stored pairs="<<secants.size()
+                     <<", positive restricted pairs="<<s.size()
+                     <<", free="<<std::count(contact.begin(),contact.end(),false)<<std::endl;
+              }
+            else
+              {
             // Predict the obstacle at every iterate with the existing positive
             // search metric. Otherwise a clipped Newton step can subsequently
             // admit only one layer per iteration. This metric selects a search
             // set; the physical Hessian, energy and convergence test stay exact.
-            bool obstacle_ready=false;
-            Vector<double> obstacle_step(n),bound_step(n);
+            Vector<double> bound_step(n);
             for(unsigned int i=0;i<n;++i)bound_step[i]=lower[i]-x[i];
             for(unsigned int i=0;i<n;++i)contact[i]=base.gradient[i]>=0.;
             for(unsigned int k=0;k<settings.max_linear_solver_iterations;++k)
               {
                 factor_preconditioner();
                 LinearAlgebra::Vector d(introspection.index_sets.system_partitioning[b],mpi_communicator),pd(d);
-                for(unsigned int i=0;i<n;++i)d[i]=contact[i]?bound_step[i]:0.;
-                search_matrix.vmult(pd,d);
+                Vector<double> prescribed(n);for(unsigned int i=0;i<n;++i)prescribed[i]=contact[i]?bound_step[i]:0.;
+                internal::endpoint_assign(d,prescribed);search_matrix.vmult(pd,d);
+                auto global_pd=internal::endpoint_values(pd,mpi_communicator);
                 Vector<double> rhs(base.gradient);rhs*=-1.;
-                for(unsigned int i=0;i<n;++i)rhs[i]-=pd[i]/scale;
+                for(unsigned int i=0;i<n;++i)rhs[i]-=global_pd[i]/scale;
                 for(unsigned int i=0;i<n;++i)if(contact[i])rhs[i]=0.;
                 precondition(rhs,obstacle_step);
-                for(unsigned int i=0;i<n;++i)d[i]=contact[i]?bound_step[i]:obstacle_step[i];
-                search_matrix.vmult(pd,d);
+                for(unsigned int i=0;i<n;++i)prescribed[i]=contact[i]?bound_step[i]:obstacle_step[i];
+                internal::endpoint_assign(d,prescribed);search_matrix.vmult(pd,d);
+                global_pd=internal::endpoint_values(pd,mpi_communicator);
                 std::vector<bool> next=contact;
                 double free_residual=0.;
                 for(unsigned int i=0;i<n;++i)
                   {
-                    obstacle_step[i]=d[i];
-                    const double multiplier=base.gradient[i]+pd[i]/scale;
+                    obstacle_step[i]=prescribed[i];
+                    const double multiplier=base.gradient[i]+global_pd[i]/scale;
                     if(contact[i] && multiplier<-target)next[i]=false;
                     if(!contact[i] && obstacle_step[i]<bound_step[i])next[i]=true;
                     if(!contact[i])free_residual=std::max(free_residual,std::abs(multiplier));
@@ -536,6 +600,7 @@ namespace aspect
                     const double next=residual*z;p*=next/rz;p+=z;rz=next;
                   }
               }
+              }
             if(base.gradient*step>=0. || step.linfty_norm()==0.)
               {
                 if(obstacle_ready)step=obstacle_step;
@@ -547,11 +612,25 @@ namespace aspect
                 Vector<double> trial(x);
                 for(unsigned int i=0;i<n;++i)trial[i]=std::max(lower[i],std::min(1.,x[i]+std::ldexp(1.,-int(ls))*step[i]));
                 if(trial.linfty_norm()>=1.)continue;
+                Vector<double> change(trial);change-=x;
+                if(settings.endpoint_quasi_newton_search
+                   && (change.linfty_norm()==0. || base.gradient*change>=0.))continue;
                 ++line_search_calls;
-                auto e=evaluate(trial);Vector<double> change(trial);change-=x;
+                auto e=evaluate(trial);
                 const double allowance=32*std::numeric_limits<double>::epsilon()*std::max(1.,std::abs(base.value));
                 if(e.value<=base.value+1e-4*std::min(0.,base.gradient*change)+allowance)
-                  {x=trial;base=std::move(e);accepted=true;break;}
+                  {
+                    if(settings.endpoint_quasi_newton_search)
+                      {
+                        Vector<double> gradient_change(e.gradient);gradient_change-=base.gradient;
+                        if(change*gradient_change>1e-12*change.l2_norm()*gradient_change.l2_norm())
+                          {
+                            secants.emplace_back(change,std::move(gradient_change));++quasi_newton_pairs;
+                            if(secants.size()>30)secants.erase(secants.begin());
+                          }
+                      }
+                    x=trial;base=std::move(e);accepted=true;break;
+                  }
               }
             AssertThrow(accepted,ExcMessage("Endpoint phase line search failed; no history published."));
             pcout<<"   Endpoint phase iteration "<<iteration<<": KKT="<<projected(x,base.gradient).linfty_norm()
@@ -566,7 +645,15 @@ namespace aspect
         if(trial_slip_rate)*trial_slip_rate=base.slip;
         if(publish_history)
           {
-            if(benchmark_endpoint_precommit)benchmark_endpoint_precommit();
+            std::string precommit_error;
+            try {if(benchmark_endpoint_precommit)benchmark_endpoint_precommit();}
+            catch(const std::exception &e){precommit_error=e.what();}
+            catch(...){precommit_error="Unknown prepublication failure";}
+            const auto errors=Utilities::MPI::all_gather(mpi_communicator,precommit_error);
+            for(unsigned int rank=0;rank<errors.size();++rank)
+              if(!errors[rank].empty())
+                {pcout<<"   Coordinated endpoint prepublication failure: rank="<<rank<<std::endl;
+                 throw std::runtime_error(errors[rank]);}
             manager.begin_slip_rate_nonlinear_solve();
             try
               {
@@ -583,6 +670,9 @@ namespace aspect
              <<", tangent seconds="<<tangent_seconds<<", tangent calls="<<tangent_calls
              <<", finite-difference calls="<<finite_difference_calls<<", line searches="<<line_search_calls
              <<", phase iterations="<<phase_iterations<<std::endl;
+        if(settings.endpoint_quasi_newton_search)
+          pcout<<"   Endpoint quasi-Newton cost: secant updates="<<quasi_newton_pairs
+               <<", search inverse calls="<<search_inverse_calls<<std::endl;
       }
     catch (...)
       {

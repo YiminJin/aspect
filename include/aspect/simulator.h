@@ -127,6 +127,7 @@ namespace aspect
   namespace internal
   {
     template <int dim> class PhaseFieldTestAccess;
+    class EndpointBulkDirect;
     namespace Assembly
     {
       namespace Scratch
@@ -608,6 +609,9 @@ namespace aspect
        * mechanical preconditioner. Rebuilt with the homogeneous A block. */
       std::function<void(LinearAlgebra::Vector &,const LinearAlgebra::Vector &)>
         endpoint_velocity_inverse;
+      /** Default-off serial full Stokes factor. Rebuilt with the homogeneous
+       * bulk operator; surface factors live with their exact linearization. */
+      std::shared_ptr<internal::EndpointBulkDirect> endpoint_bulk_direct;
       /** One fixed-trial mechanical linearization and its matrix-free reduced
        * elastic phase tangent. Invalid after another mechanical/phase trial. */
       std::function<Vector<double>(const Vector<double> &)>
@@ -633,7 +637,11 @@ namespace aspect
         const ReconstructedFaultVector &slip_rate);
 
       /** Related residual scales supplied to one condensed solve. */
-      struct ReconstructedFaultLinearSolveScales;
+      struct ReconstructedFaultLinearSolveScales
+      {
+        double initial_bulk_residual, aspect_bulk_reference, bulk_scale,
+               bulk_precision, bulk_convergence_scale;
+      };
 
       /**
        * Solve the current restricted condensed system without publishing state.

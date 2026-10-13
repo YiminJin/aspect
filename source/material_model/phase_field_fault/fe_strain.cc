@@ -1,5 +1,6 @@
 /* Restricted native P2 total-energy model. Existing particle history is unchanged. */
 #include <aspect/material_model/phase_field_fault.h>
+#include <aspect/reconstructed_fault/endpoint_mpi.h>
 #include <aspect/geometry_model/box.h>
 #include <aspect/particle/manager.h>
 #include <aspect/particle/particle_domain.h>
@@ -97,11 +98,14 @@ namespace aspect
       const auto component=this->introspection().variable("phase_field").first_component_index;
       std::vector<types::global_dof_index> indices(this->get_fe().n_dofs_per_cell());
       for(const auto &cell:this->get_dof_handler().active_cell_iterators())
+        if(!cell->is_artificial())
         {
         cell->get_dof_indices(indices);
         for(unsigned int v=0;v<GeometryInfo<dim>::vertices_per_cell;++v)
           {
-            const auto i=indices[this->get_fe().component_to_system_index(component,v)];const double yy=cell->vertex(v)[1];
+            const auto i=indices[this->get_fe().component_to_system_index(component,v)];
+            if(!owned.locally_owned_elements().is_element(i))continue;
+            const double yy=cell->vertex(v)[1];
             AssertThrow(yy>=data.front().first && yy<=data.back().first,
                         ExcMessage("Shared phase profile does not cover the domain."));
             auto right=std::upper_bound(data.begin(),data.end(),yy,[](double x,const auto &p){return x<p.first;});
@@ -121,7 +125,9 @@ namespace aspect
       {
         std::array<types::global_dof_index,GeometryInfo<dim>::vertices_per_cell> dofs;
         std::array<std::array<double,GeometryInfo<dim>::vertices_per_cell>,2> shape;
-        double length;
+        double length,lower;
+        template<class Archive> void serialize(Archive &archive,const unsigned int)
+        {archive & dofs & shape & length & lower;}
       };
       struct Profile
       {
@@ -140,7 +146,8 @@ namespace aspect
       std::vector<Profile> profiles;
       std::vector<BulkPoint> bulk;
       FullMatrix<double> projection;
-      std::map<CellId,typename DoFHandler<dim>::active_cell_iterator> cells;
+      std::map<CellId,typename DoFHandler<dim>::active_cell_iterator> cells,evaluation_cells;
+      unsigned long long n_cells_global=0,n_particles_global=0;
       std::map<types::particle_index,Point<dim>> particles;
       std::vector<Point<dim>> vertices;
       std::vector<Point<dim>> mesh_vertices;
@@ -179,7 +186,9 @@ namespace aspect
       AssertThrow(dim==2,ExcNotImplemented());
       const auto &box=Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(this->get_geometry_model());
       const auto extent=box.get_extents();
-      const auto cell=this->get_dof_handler().begin_active();
+      auto cell=this->get_dof_handler().begin_active();
+      while(cell!=this->get_dof_handler().end() && !cell->is_locally_owned())++cell;
+      AssertThrow(cell!=this->get_dof_handler().end(),ExcMessage("Endpoint rank owns no bulk cells."));
       const double dx=cell->vertex(1)[0]-cell->vertex(0)[0];
       const double dy=cell->vertex(2)[1]-cell->vertex(0)[1];
       const unsigned int n=std::lround(extent[0]/dx), ny=std::lround(extent[1]/dy);
@@ -215,17 +224,19 @@ namespace aspect
       const auto&s=*fe_strain_state;const auto &faults=this->get_reconstructed_fault_manager().get_faults();
       AssertThrow(this->get_dof_handler().n_dofs()==s.n_dofs && faults.size()==1
                   && faults[0].geometry_version()==s.geometry_version && faults[0].n_vertices()==s.vertices.size()
-                  && this->get_triangulation().n_global_active_cells()==s.cells.size(),
+                  && this->get_triangulation().n_global_active_cells()==s.n_cells_global,
                   ExcMessage("Accepted FE strain rejects mesh/geometry changes."));
       for(unsigned int i=0;i<s.vertices.size();++i)
         AssertThrow(faults[0].vertex(i)==s.vertices[i],ExcMessage("Accepted FE strain geometry changed."));
       AssertThrow(this->get_triangulation().get_vertices()==s.mesh_vertices,
                   ExcMessage("Accepted FE strain rejects mesh motion."));
       const auto &particles=this->get_phase_field_handler().get_associated_particle_manager().get_particle_handler();
-      AssertThrow(particles.n_global_particles()==s.particles.size(),ExcMessage("Accepted FE strain rejects particle birth/deletion."));
+      AssertThrow(particles.n_global_particles()==s.n_particles_global,ExcMessage("Accepted FE strain rejects particle birth/deletion."));
+      unsigned int fixed_particles=1;
       for(const auto&p:particles)
-        AssertThrow(s.particles.count(p.get_id()) && s.particles.at(p.get_id())==p.get_location(),
-                    ExcMessage("Accepted FE strain rejects history transport."));
+        if(!s.particles.count(p.get_id()) || s.particles.at(p.get_id())!=p.get_location())fixed_particles=0;
+      AssertThrow(Utilities::MPI::min(fixed_particles,this->get_mpi_communicator())==1,
+                  ExcMessage("Accepted FE strain rejects history transport."));
     }
 
     template<int dim> void PhaseFieldFault<dim>::prepare_fe_strain_history()
@@ -247,6 +258,7 @@ namespace aspect
       state->mesh_vertices=this->get_triangulation().get_vertices();
       state->G=elastic_shear_moduli[0];state->eta=reference_viscosities[0];
       state->n_dofs=this->get_dof_handler().n_dofs();
+      state->n_cells_global=this->get_triangulation().n_global_active_cells();
       const auto &fault=this->get_reconstructed_fault_manager().get_fault(0);
       state->geometry_version=fault.geometry_version();
       const unsigned int ns=fault.n_cells();
@@ -258,6 +270,7 @@ namespace aspect
         }
       const auto &pm=this->get_phase_field_handler().get_associated_particle_manager();
       const auto sp=pm.get_property_manager().get_data_info().get_position_by_field_name("maxwell stress");
+      state->n_particles_global=pm.get_particle_handler().n_global_particles();
       for(const auto&p:pm.get_particle_handler())
         {
           for(unsigned int c=0;c<SymmetricTensor<2,dim>::n_independent_components;++c)
@@ -282,7 +295,7 @@ namespace aspect
           double covered=0.;
           for(const auto &cell:normalization_cell_cache.profiles[k].intervals)
             {
-              typename FEStrainState::Ray ray;ray.length=cell.upper-cell.lower;covered+=ray.length;
+              typename FEStrainState::Ray ray;ray.length=cell.upper-cell.lower;ray.lower=cell.lower;covered+=ray.length;
               for(unsigned int v=0;v<ray.dofs.size();++v)
                 {
                   ray.dofs[v]=cell.phase_dofs[v]-offset;
@@ -295,9 +308,21 @@ namespace aspect
                 }
               p.rays.push_back(ray);
             }
-          AssertThrow(std::abs(covered-extent[1])<1.e-12*std::max(1.,extent[1]),
-                      ExcMessage("FE strain normal integration must cover the full Box cross-section."));
           state->profiles.push_back(p);
+        }
+      // Gather only immutable ray geometry from uniquely owned bulk cells.
+      // Profile integration/adjoints are replicated; FE histories are not.
+      std::vector<std::vector<typename FEStrainState::Ray>> local_rays;
+      for(auto &profile:state->profiles){local_rays.push_back(std::move(profile.rays));profile.rays.clear();}
+      const auto rank_rays=Utilities::MPI::all_gather(this->get_mpi_communicator(),local_rays);
+      for(const auto &rank:rank_rays)for(unsigned int k=0;k<rank.size();++k)
+        state->profiles[k].rays.insert(state->profiles[k].rays.end(),rank[k].begin(),rank[k].end());
+      for(auto &profile:state->profiles)
+        {
+          std::sort(profile.rays.begin(),profile.rays.end(),[](const auto &a,const auto &b){return a.lower<b.lower;});
+          double covered=0.;for(const auto &ray:profile.rays)covered+=ray.length;
+          AssertThrow(std::abs(covered-extent[1])<1.e-12*std::max(1.,extent[1]),
+                      ExcMessage("FE strain normal integration must cover the full Box exactly once."));
         }
       FullMatrix<double>mass(ns+1,ns+1),rhs(ns+1,profiles.size());
       for(unsigned int k=0;k<profiles.size();++k)
@@ -312,13 +337,17 @@ namespace aspect
       FEValues<dim>fe(this->get_mapping(),this->get_fe(),quad,update_values|update_quadrature_points|update_JxW_values);
       std::vector<types::global_dof_index>ids(this->get_fe().dofs_per_cell);
       const auto pc=intro.variable("phase_field").first_component_index;
-      const auto first=this->get_dof_handler().begin_active();
+      auto first=this->get_dof_handler().begin_active();
+      while(first!=this->get_dof_handler().end() && !first->is_locally_owned())++first;
+      AssertThrow(first!=this->get_dof_handler().end(),ExcMessage("Endpoint rank owns no bulk cells."));
       std::array<double,dim> spacing{};
       spacing[0]=first->vertex(1)[0]-first->vertex(0)[0];
       spacing[1]=first->vertex(2)[1]-first->vertex(0)[1];
       for(const auto &cell:this->get_dof_handler().active_cell_iterators())
         {
-          AssertThrow(cell->is_locally_owned(),ExcMessage("FE strain is serial."));
+          if(cell->is_artificial())continue;
+          state->evaluation_cells.emplace(cell->id(),cell);
+          if(!cell->is_locally_owned())continue;
           fe.reinit(cell);cell->get_dof_indices(ids);state->cells.emplace(cell->id(),cell);
           for(const auto v:cell->vertex_indices())for(unsigned int d=0;d<dim;++d)
             {
@@ -390,12 +419,16 @@ namespace aspect
       const auto &s=*fe_strain_state;
       const auto c=compute_maxwell_coefficients(s.eta,s.G,this->get_timestep());
       FEEndpointTrial endpoint;
-      endpoint.strain.reinit(s.accepted);endpoint.strain=s.accepted;
+      LinearAlgebra::BlockVector owned(this->introspection().index_sets.system_partitioning,this->get_mpi_communicator());
+      owned=s.accepted;
       const unsigned int vb=this->introspection().block_indices.velocities;
-      endpoint.strain.block(vb)*=c.beta;
-      endpoint.strain.block(vb).add(c.eta_ve/s.G,bulk.block(vb));
+      LinearAlgebra::BlockVector owned_bulk(this->introspection().index_sets.system_partitioning,this->get_mpi_communicator());
+      owned_bulk=bulk;
+      owned.block(vb)*=c.beta;
+      owned.block(vb).add(c.eta_ve/s.G,owned_bulk.block(vb));
       const auto pb=this->introspection().variable("phase_field").block_index;
-      endpoint.strain.block(pb)=bulk.block(pb);
+      owned.block(pb)=bulk.block(pb);
+      endpoint.strain.reinit(s.accepted);endpoint.strain=owned;
       endpoint.Z=s.Z;
       long double friction_potential=0.;
       AssertDimension(V.size(),1);AssertDimension(V[0].size(),s.Z.size());
@@ -434,10 +467,13 @@ namespace aspect
       const unsigned int pb=this->introspection().variable("phase_field").block_index;
       const unsigned int n=trial.block(pb).size(),ns=Z_reference.size();
       AssertDimension(ns,s.Z.size());
+      const auto phase_values=aspect::internal::endpoint_values(trial.block(pb),this->get_mpi_communicator());
+      AssertThrow(!tangent || Utilities::MPI::n_mpi_processes(this->get_mpi_communicator())==1,
+                  ExcMessage("Dense FE Hessians are serial diagnostics; MPI endpoint solves use the full matrix-free action."));
       result.gradient.assign(n,0.);result.normalization.assign(ns,0.);result.roundoff_scale.assign(n,0.);
       if(tangent)result.hessian.reinit(n,n);
       for(unsigned int i=0;i<n;++i)
-        if(!std::isfinite(trial.block(pb)[i]) || trial.block(pb)[i]<0 || trial.block(pb)[i]>=1.)
+        if(!std::isfinite(phase_values[i]) || phase_values[i]<0 || phase_values[i]>=1.)
           {result.admissible=false;return result;}
       FullMatrix<double>A(s.profiles.size(),n),Iderivative(ns,n),positive_A(s.profiles.size(),n),positive_DI(ns,n);
       std::vector<std::vector<RayJet>>integrals(s.profiles.size());
@@ -448,7 +484,7 @@ namespace aspect
             {
               double endpoint[2]={0.,0.};
               for(unsigned int v=0;v<ray.dofs.size();++v)for(unsigned int e=0;e<2;++e)
-                endpoint[e]+=ray.shape[e][v]*trial.block(pb)[ray.dofs[v]];
+                endpoint[e]+=ray.shape[e][v]*phase_values[ray.dofs[v]];
               const auto f=ray_integral(endpoint[0],endpoint[1],ray.length,s.m);
               integrals[k].push_back(f);direct+=f.v;
               for(unsigned int v=0;v<ray.dofs.size();++v)
@@ -489,7 +525,7 @@ namespace aspect
             {
               const auto&p=s.bulk[point];AssertThrow(p.cell==entry.first,ExcInternalError());
               double phi=0.;
-              for(unsigned int v=0;v<p.dofs.size();++v)phi+=p.shape[v]*trial.block(pb)[p.dofs[v]];
+              for(unsigned int v=0;v<p.dofs.size();++v)phi+=p.shape[v]*phase_values[p.dofs[v]];
               const double w[2]={1-p.xi,p.xi};
               const double I=w[0]*result.normalization[p.segment]+w[1]*result.normalization[p.segment+1];
               const double Z=w[0]*Z_reference[p.segment]+w[1]*Z_reference[p.segment+1];
@@ -530,6 +566,11 @@ namespace aspect
                 }
             }
         }
+      aspect::internal::endpoint_sum(result.gradient,this->get_mpi_communicator());
+      aspect::internal::endpoint_sum(result.roundoff_scale,this->get_mpi_communicator());
+      aspect::internal::endpoint_sum(forceI,this->get_mpi_communicator());
+      aspect::internal::endpoint_sum(scaleI,this->get_mpi_communicator());
+      bulk_energy=aspect::internal::endpoint_energy_sum(bulk_energy,this->get_mpi_communicator());
       for(const auto&p:s.profiles)
         {
           const double w[2]={1-p.xi,p.xi};
@@ -570,7 +611,12 @@ namespace aspect
                     result.hessian(ray.dofs[v],ray.dofs[u])+=adjoint*f.h[a][b]*ray.shape[a][v]*ray.shape[b][u];
               }
           }
-      this->get_pcout()<<"   FE energy summation: bulk old-new="<<static_cast<double>(result.bulk-bulk_energy)
+      // The ordinary bulk subtotal is local; only its extended sum is global.
+      // Retain the serial roundoff diagnostic without mislabelling the MPI one.
+      this->get_pcout()<<(Utilities::MPI::n_mpi_processes(this->get_mpi_communicator())==1
+                         ?"   FE energy summation: bulk old-new="
+                         :"   FE energy summation: local bulk double minus global extended=")
+                       <<static_cast<double>(result.bulk-bulk_energy)
                        <<", cohesive old-new="<<static_cast<double>(result.cohesive-cohesive_energy)<<std::endl;
       result.bulk=bulk_energy;result.cohesive=cohesive_energy;
       result.energy=result.bulk+result.cohesive;
@@ -593,6 +639,7 @@ namespace aspect
       const unsigned int pb=intro.variable("phase_field").block_index;
       const unsigned int n=trial.block(pb).size(),ns=s.Z.size();
       AssertDimension(direction.size(),n);
+      const auto phase_values=aspect::internal::endpoint_values(trial.block(pb),this->get_mpi_communicator());
       AssertThrow((velocity_direction==nullptr)==(slip_direction==nullptr),ExcInternalError());
       const auto coefficients=compute_maxwell_coefficients(s.eta,s.G,this->get_timestep());
       FEEndpointAction result;result.gradient.assign(n,0.);
@@ -605,7 +652,7 @@ namespace aspect
             {
               double phi[2]={},dphi[2]={};
               for(unsigned int e=0;e<2;++e)for(unsigned int v=0;v<ray.dofs.size();++v)
-                {phi[e]+=ray.shape[e][v]*trial.block(pb)[ray.dofs[v]];
+                {phi[e]+=ray.shape[e][v]*phase_values[ray.dofs[v]];
                  dphi[e]+=ray.shape[e][v]*direction[ray.dofs[v]];}
               const auto jet=ray_integral(phi[0],phi[1],ray.length,s.m);
               jets[k].push_back(jet);integral+=jet.v;
@@ -637,7 +684,7 @@ namespace aspect
               const auto &p=s.bulk[point];AssertThrow(p.cell==entry.first,ExcInternalError());
               double phi=0.,dp=0.;
               for(unsigned int v=0;v<p.dofs.size();++v)
-                {phi+=p.shape[v]*trial.block(pb)[p.dofs[v]];dp+=p.shape[v]*direction[p.dofs[v]];}
+                {phi+=p.shape[v]*phase_values[p.dofs[v]];dp+=p.shape[v]*direction[p.dofs[v]];}
               const double w[2]={1-p.xi,p.xi};
               const double ii=w[0]*I[p.segment]+w[1]*I[p.segment+1];
               const double di=w[0]*dI[p.segment]+w[1]*dI[p.segment+1];
@@ -668,7 +715,12 @@ namespace aspect
             {entry.second->get_dof_indices(indices);
              constraints.distribute_local_to_global(cell_rhs,indices,result.bulk_rhs);}
         }
-      if(assemble_rhs)result.bulk_rhs.compress(VectorOperation::add);
+      if(assemble_rhs)
+        {result.bulk_rhs.compress(VectorOperation::add);
+         aspect::internal::endpoint_sum(result.surface_rhs[0],this->get_mpi_communicator());}
+      aspect::internal::endpoint_sum(result.gradient,this->get_mpi_communicator());
+      aspect::internal::endpoint_sum(force,this->get_mpi_communicator());
+      aspect::internal::endpoint_sum(dforce,this->get_mpi_communicator());
       for(const auto &p:s.profiles)
         {
           const double w[2]={1-p.xi,p.xi};
@@ -726,7 +778,7 @@ namespace aspect
       const LinearAlgebra::BlockVector &state,const std::vector<double>&Znodes,
       const std::vector<double>&Inodes,const CellId&id,const Point<dim>&x,double *evaluation_scale) const
     {
-      const auto&s=*fe_strain_state;const auto cell=s.cells.at(id);
+      const auto&s=*fe_strain_state;const auto cell=s.evaluation_cells.at(id);
       const auto unit=this->get_mapping().transform_real_to_unit_cell(cell,x);
       FEValues<dim>fe(this->get_mapping(),this->get_fe(),Quadrature<dim>({unit}),update_values|update_gradients);
       fe.reinit(cell);std::vector<SymmetricTensor<2,dim>>R(1);std::vector<double>phi(1);
@@ -758,12 +810,16 @@ namespace aspect
       validate_fe_strain_restrictions();const auto&s=*fe_strain_state;
       AssertThrow(s.committed_step!=this->get_timestep_number(),ExcMessage("FE strain cannot commit twice in a physical step."));
       const auto c=compute_maxwell_coefficients(s.eta,s.G,this->get_timestep());
-      auto update=std::make_shared<FEStrainUpdate>();update->accepted.reinit(s.accepted);update->accepted=s.accepted;
+      auto update=std::make_shared<FEStrainUpdate>();
+      LinearAlgebra::BlockVector owned(this->introspection().index_sets.system_partitioning,this->get_mpi_communicator());owned=s.accepted;
       const auto vb=this->introspection().block_indices.velocities;
-      update->accepted.block(vb)*=c.beta;
-      update->accepted.block(vb).add(c.eta_ve/s.G,bulk.block(vb));
-      update->accepted.block(this->introspection().variable("phase_field").block_index)=
+      LinearAlgebra::BlockVector owned_bulk(this->introspection().index_sets.system_partitioning,this->get_mpi_communicator());
+      owned_bulk=bulk;
+      owned.block(vb)*=c.beta;
+      owned.block(vb).add(c.eta_ve/s.G,owned_bulk.block(vb));
+      owned.block(this->introspection().variable("phase_field").block_index)=
         bulk.block(this->introspection().variable("phase_field").block_index);
+      update->accepted.reinit(s.accepted);update->accepted=owned;
       update->I=current_normalization_integrals.at(0);update->Z.resize(s.Z.size());
       const auto&V=this->get_reconstructed_fault_manager().get_slip_rate(0);
       for(unsigned int j=0;j<s.Z.size();++j)

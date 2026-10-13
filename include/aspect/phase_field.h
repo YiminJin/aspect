@@ -273,6 +273,8 @@ namespace aspect
       unsigned int max_newton_line_search_iterations;
       bool adaptive_endpoint_linear_accuracy = false;
       bool endpoint_translation_preconditioner = false;
+      bool endpoint_quasi_newton_search = false;
+      bool endpoint_direct_mechanics = false;
     };
   }
 

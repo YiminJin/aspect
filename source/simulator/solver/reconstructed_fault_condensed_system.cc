@@ -17,6 +17,8 @@
 #include <aspect/geometry_model/interface.h>
 #include <aspect/plugins.h>
 #include <aspect/reconstructed_fault/linear_performance.h>
+#include <aspect/simulator/solver/reconstructed_fault_surface_schur.h>
+#include <iomanip>
 
 namespace aspect
 {
@@ -348,6 +350,28 @@ namespace aspect
       return residual;
     }
 
+
+    template <int dim>
+    void ReconstructedFaultCondensedSystem<dim>::Linearization::solve_surface_schur(
+      const LinearAlgebra::BlockVector &rhs, LinearAlgebra::BlockVector &result,
+      const std::shared_ptr<internal::EndpointBulkDirect> &bulk,
+      const ReconstructedFaultActiveSet &active,ConditionalOStream &output) const
+    {
+      assert_is_current();
+      AssertThrow(bulk!=nullptr,ExcMessage("Missing endpoint bulk factor."));
+      if(!direct_surface)
+        {
+          direct_bulk=bulk;
+          direct_surface=std::make_shared<internal::EndpointSurfaceSchur<dim>>(
+            *this,owner.surface_system,active,rhs,bulk);
+          output<<std::setprecision(17)<<"   Endpoint surface Schur setup: seconds="<<direct_surface->setup_seconds
+                <<", free="<<direct_surface->size()<<", condition="<<direct_surface->condition
+                <<", bulk solves="<<bulk->solves<<std::endl;
+        }
+      AssertThrow(direct_bulk==bulk,ExcMessage("Bulk factor changed during a surface Schur linearization."));
+      AssertThrow(direct_surface->matches(active),ExcMessage("Surface Schur active set changed without relinearization."));
+      direct_surface->vmult(result,rhs);
+    }
 
     template <int dim>
     void
