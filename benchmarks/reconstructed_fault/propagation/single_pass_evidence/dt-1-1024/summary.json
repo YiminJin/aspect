@@ -1,0 +1,22 @@
+{
+  "n": 512,
+  "dt": 0.0009765625,
+  "completed": true,
+  "accepted": 640,
+  "last_accepted": 0.625,
+  "failures": [],
+  "runtime_seconds": 40.461939486998745,
+  "cpu_seconds": 37.850879510999995,
+  "peak_RSS_KiB": 142140,
+  "timing": {
+    "phase_seconds": 19.2855508779503,
+    "mechanics_seconds": 3.2589465309902153,
+    "diagnostics_seconds": 15.22857853602909,
+    "phase_objective_calls": 23630,
+    "phase_hessian_calls": 101,
+    "mechanical_calls": 640
+  },
+  "physical_history": "Fresh shared initialization; incoming phase first, one endpoint mechanical solve, commit once.",
+  "endpoint_defect_is_splitting_error": true,
+  "initial_fields_identical": true
+}

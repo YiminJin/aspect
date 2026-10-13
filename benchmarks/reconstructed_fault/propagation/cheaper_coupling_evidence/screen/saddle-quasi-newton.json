@@ -1,0 +1,250 @@
+{
+  "method": "quasi-newton",
+  "seconds": 1.0758091600000625,
+  "counts": {
+    "mechanical_evaluations": 63,
+    "objective_calls": 97,
+    "reduced_hessians": 2,
+    "bulk_factor_calls": 67,
+    "bulk_rhs": 1154,
+    "phase_linear_solves": 0,
+    "metric_factors": 11,
+    "metric_solves": 25,
+    "line_trials": 61
+  },
+  "timing": {
+    "mechanics": 0.25144559096952435,
+    "hessian": 0.7668446879979456,
+    "phase_linear": 0.0,
+    "metric": 0.016694246991391992,
+    "stability": 0.8004400819991133
+  },
+  "KKT": 5.558464794120842e-12,
+  "stability": {
+    "KKT": 5.558464794120842e-12,
+    "free": 312,
+    "weak": 0,
+    "centroid": {
+      "phase": 0.5001262241416634,
+      "localization": 0.5001262397500222
+    },
+    "minimum": 2.82220020282198,
+    "second": 353.6802499829678,
+    "admissible_negative": false,
+    "stable": true,
+    "translation_cosine": 0.999616863596883,
+    "antisymmetry": 0.1005806548380226,
+    "amplitude_two_sided": 9.975404076152506e-06,
+    "mass_norm": 0.9999999999999992
+  },
+  "escapes": 1,
+  "trace": [
+    {
+      "iterations": 0,
+      "before_polish": 4.492456753818421e-14,
+      "trace": []
+    },
+    {
+      "iterations": 25,
+      "before_polish": 5.558464794120842e-12,
+      "trace": [
+        {
+          "iteration": 0,
+          "KKT": 5.257460139109304e-09,
+          "free": 317,
+          "line_search": 0,
+          "potential": 0.3577425086652871
+        },
+        {
+          "iteration": 1,
+          "KKT": 9.236684885687961e-09,
+          "free": 317,
+          "line_search": 0,
+          "potential": 0.35774250866528773
+        },
+        {
+          "iteration": 2,
+          "KKT": 8.74536517160868e-09,
+          "free": 317,
+          "line_search": 0,
+          "potential": 0.3577425086651983
+        },
+        {
+          "iteration": 3,
+          "KKT": 1.5676132031330723e-08,
+          "free": 317,
+          "line_search": 0,
+          "potential": 0.35774250866507684
+        },
+        {
+          "iteration": 4,
+          "KKT": 3.404961887438958e-08,
+          "free": 317,
+          "line_search": 0,
+          "potential": 0.3577425086646207
+        },
+        {
+          "iteration": 5,
+          "KKT": 6.098250654097008e-08,
+          "free": 317,
+          "line_search": 0,
+          "potential": 0.3577425086635332
+        },
+        {
+          "iteration": 6,
+          "KKT": 1.1517206451545393e-07,
+          "free": 317,
+          "line_search": 0,
+          "potential": 0.3577425086601444
+        },
+        {
+          "iteration": 7,
+          "KKT": 2.566967227543831e-07,
+          "free": 317,
+          "line_search": 3,
+          "potential": 0.35774250864751034
+        },
+        {
+          "iteration": 8,
+          "KKT": 1.3213659082163112e-05,
+          "free": 316,
+          "line_search": 0,
+          "potential": 0.3577425086411684
+        },
+        {
+          "iteration": 9,
+          "KKT": 5.0867695432650174e-06,
+          "free": 316,
+          "line_search": 0,
+          "potential": 0.3577425086281054
+        },
+        {
+          "iteration": 10,
+          "KKT": 1.2602981006952706e-05,
+          "free": 309,
+          "line_search": 6,
+          "potential": 0.3577425085807574
+        },
+        {
+          "iteration": 11,
+          "KKT": 4.011442527408063e-05,
+          "free": 310,
+          "line_search": 7,
+          "potential": 0.3577425085705189
+        },
+        {
+          "iteration": 12,
+          "KKT": 3.576706215527486e-05,
+          "free": 311,
+          "line_search": 7,
+          "potential": 0.35774250856620854
+        },
+        {
+          "iteration": 13,
+          "KKT": 3.3154659767063575e-05,
+          "free": 312,
+          "line_search": 7,
+          "potential": 0.3577425085653733
+        },
+        {
+          "iteration": 14,
+          "KKT": 3.18712862386083e-05,
+          "free": 313,
+          "line_search": 4,
+          "potential": 0.35774250856516776
+        },
+        {
+          "iteration": 15,
+          "KKT": 3.205695432810839e-05,
+          "free": 311,
+          "line_search": 0,
+          "potential": 0.3577425085637197
+        },
+        {
+          "iteration": 16,
+          "KKT": 1.4999365464441318e-05,
+          "free": 312,
+          "line_search": 0,
+          "potential": 0.35774250855135875
+        },
+        {
+          "iteration": 17,
+          "KKT": 2.409898614039794e-06,
+          "free": 312,
+          "line_search": 0,
+          "potential": 0.35774250854644335
+        },
+        {
+          "iteration": 18,
+          "KKT": 1.7207245821526543e-06,
+          "free": 313,
+          "line_search": 4,
+          "potential": 0.3577425085458095
+        },
+        {
+          "iteration": 19,
+          "KKT": 1.0003201149677302e-06,
+          "free": 312,
+          "line_search": 0,
+          "potential": 0.3577425085458121
+        },
+        {
+          "iteration": 20,
+          "KKT": 2.686419588594782e-07,
+          "free": 312,
+          "line_search": 0,
+          "potential": 0.3577425085456621
+        },
+        {
+          "iteration": 21,
+          "KKT": 7.656060741776362e-09,
+          "free": 312,
+          "line_search": 0,
+          "potential": 0.3577425085456553
+        },
+        {
+          "iteration": 22,
+          "KKT": 1.736026140239072e-08,
+          "free": 312,
+          "line_search": 0,
+          "potential": 0.35774250854565653
+        },
+        {
+          "iteration": 23,
+          "KKT": 3.592652675133581e-09,
+          "free": 312,
+          "line_search": 0,
+          "potential": 0.3577425085456543
+        },
+        {
+          "iteration": 24,
+          "KKT": 2.774136691573085e-10,
+          "free": 312,
+          "line_search": 0,
+          "potential": 0.3577425085456557
+        }
+      ]
+    }
+  ],
+  "minimum_increment": 0.0,
+  "maximum": 0.6590120921546494,
+  "potential_J_per_m": 22.895520546950657,
+  "q": 264.7364584366078,
+  "V": 0.14558871056100886,
+  "slip": 0.039652533822271276,
+  "bulk": 0.7997878096604163,
+  "cohesive": 5.239295383382964,
+  "fracture": 16.28774256067083,
+  "force": 1.50744199345354e-08,
+  "contact_signed": 1.1596057447604835e-11,
+  "contact": 1.1596057447604835e-11,
+  "I": 149.51176563498476,
+  "stress_min": 1240.7212036034325,
+  "stress_max": 1277.1166592145455,
+  "accepted": true,
+  "entry": "saddle",
+  "source": "native_solver_evidence/saddle-entry.npz",
+  "time": 0.5654296875,
+  "dt": 0.00390625,
+  "phase_reference_error": 1.1074363648333474e-11
+}

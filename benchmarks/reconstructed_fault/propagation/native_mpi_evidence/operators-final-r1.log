@@ -1,0 +1,251 @@
+[BEBOP:13731] Rank 0 bound to package[0][core:L0]
+-----------------------------------------------------------------------------
+--                             This is ASPECT                              --
+-- The Advanced Solver for Planetary Evolution, Convection, and Tectonics. --
+-----------------------------------------------------------------------------
+--     . version 3.1.0-pre (fault-propagation, 33c0adba5)
+--     . using deal.II 9.6.2 (dealii-9.6, 6890ca740b)
+--     .       with 32 bit indices
+--     .       with vectorization level 2 (AVX, 4 doubles, 256 bits)
+--     . using Trilinos 14.2.0
+--     . using p4est 2.8.7
+--     . using Geodynamic World Builder 1.0.0
+--     . running in OPTIMIZED mode
+--     . running with 1 MPI process
+-----------------------------------------------------------------------------
+
+Loading shared library </home/ein/repository/aspect-fault-propagation/build-propagation-integration/plugin/libnative_endpoint_verification.release.so>
+
+
+-----------------------------------------------------------------------------
+The output directory </home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-operators-final-r1/> provided in the input file appears not to exist.
+ASPECT will create it for you.
+-----------------------------------------------------------------------------
+
+
+-----------------------------------------------------------------------------
+-- For information on how to cite ASPECT, see:
+--   https://aspect.geodynamics.org/citing.html?ver=3.1.0-pre&NewtonSolver=1&particles=1&sha=33c0adba5&src=code
+-----------------------------------------------------------------------------
+Number of active cells: 8,192 (on 5 levels)
+Number of degrees of freedom: 254,217 (67,650+8,721+33,825+33,825+33,825+33,825+33,825+8,721)
+
+*** Timestep 0:  t=0 seconds, dt=0 seconds
+   Accepted supplied continuum phase seed; native particle H retained, unloaded FE histories constructed afterward.
+   Reconstruction initial faults... fixed normal association half-width=0.50000000000001588 ... done.
+
+   Advecting particles...  done.
+   Initial cohesive q profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa, normalized RMS=0, normalized maximum=0
+   FE energy summation: bulk old-new=0, cohesive old-new=0
+   Accepted FE strain: G=1000000 eta=100000000 lambda=100 m=128.00000000016001 bulk QPs=589824 phase DoFs=8721
+   Endpoint collective Amesos velocity factor: seconds=0.21753423399999999, DoFs=67650
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=12, fresh=3.063262e-05, target=4.672166e-05
+      Fault linear solve: iterations=11, fresh=2.253770e-05, target=4.657565e-05
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.999973e-01, 0.000000e+00
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Fault linear solve: iterations=3, fresh=9.770583e-07, target=3.690891e-06
+      Fault linear solve: iterations=10, fresh=1.514090e-12, target=2.253770e-12
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 4.838931e-08, 0.000000e+00
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Fault linear solve: iterations=1, fresh=1.156277e-09, target=3.690891e-06
+      Fault linear solve: iterations=10, fresh=1.474352e-19, target=1.514090e-19
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  2: 3.250810e-15, 0.000000e+00
+
+   Postprocessing:
+   FE energy summation: bulk old-new=0, cohesive old-new=0
+     Number of advected particles: 73728
+     Native endpoint P2            compact fields, interval rates, accepted-state and operator checks
+
+*** Timestep 1:  t=0.0009765625 seconds, dt=0.0009765625 seconds
+   Advecting particles...  done.
+   FE energy summation: bulk old-new=0, cohesive old-new=0
+   Endpoint collective Amesos velocity factor: seconds=0.20348340400000001, DoFs=67650
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=2, fresh=8.998044e-10, target=3.690891e-06
+      Fault linear solve: iterations=10, fresh=3.315631e-19, target=3.985622e-19
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.999969e-01, 0.000000e+00
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Fault linear solve: iterations=1, fresh=9.023412e-10, target=3.690891e-06
+      Fault linear solve: iterations=10, fresh=2.339495e-26, target=3.315631e-26
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 8.318954e-08, 0.000000e+00
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Fault linear solve: iterations=1, fresh=9.023411e-10, target=3.690891e-06
+      Fault linear solve: iterations=11, fresh=5.131650e-34, target=2.339495e-33
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  2: 5.869818e-15, 0.000000e+00
+   FE energy summation: bulk old-new=8.5644621142480634e-55, cohesive old-new=2.0924888871808089e-58
+   Endpoint fracture summation: old-new=0, addition estimate=2.8233702040149428e-11
+   Endpoint phase target: initial=0, target=2.5394542647418749e-13
+   FE energy summation: bulk old-new=8.5644621142480634e-55, cohesive old-new=2.0924888871808089e-58
+   Endpoint CPDI reuse check: energy=0, gradient=0
+   FE energy summation: bulk old-new=0, cohesive old-new=0
+   FE Maxwell publication: error=3.638893182553413e-30 evaluation allowance=2.8421709430404007e-14 net-stress allowance=2.8421709430404007e-14
+   Endpoint complete state committed once; mechanical trials=1
+   Endpoint cost: mechanical seconds=25.460001265999999, tangent seconds=0, tangent calls=0, finite-difference calls=0, line searches=0, phase iterations=1
+
+   Postprocessing:
+   FE energy summation: bulk old-new=8.5644621142480634e-55, cohesive old-new=2.0924888871808089e-58
+   FE energy summation: bulk old-new=0, cohesive old-new=0
+   FE energy summation: bulk old-new=0, cohesive old-new=0
+   FE energy summation: bulk old-new=8.5644621142480634e-55, cohesive old-new=2.0924888871808089e-58
+   FE energy summation: bulk old-new=8.5644621142480634e-55, cohesive old-new=2.0924888871808089e-58
+   Endpoint linear tangent: seconds=0.45328201899999998, Krylov=0, rhs=0, inner target=0, action norm=0, linear calls=1, action correction=0, action target=0
+   Endpoint tangent uncondensed check: bulk=0, free contact=0
+Fault linear profile: step=1, newton=2, factor_s=0, factor_calls=0, inverse_s=1.9590000000000002e-06, inverse_calls=2, A_s=0.0025443620000000001, A_calls=1, B_s=0, B_calls=0, G_s=0, G_calls=0, preconditioner_s=0, preconditioner_calls=0, FGMRES_vectors_s=0, FGMRES_vectors_calls=0, other_s=0.44362028499999995, other_calls=0, B_setup_s=0, B_setup_calls=0, G_setup_s=0, G_setup_calls=0, B_sparse_s=0.0015245689999999999, B_sparse_calls=2, G_sparse_s=0.0058023329999999998, G_sparse_calls=2, interface_setup_s=0, interface_setup_calls=0, interface_apply_s=0, interface_apply_calls=0, elapsed=0.45349350799999993
+   Endpoint linear tangent: seconds=0.455840674, Krylov=0, rhs=0, inner target=0, action norm=0, linear calls=1, action correction=0, action target=0
+   Endpoint tangent uncondensed check: bulk=0, free contact=0
+Fault linear profile: step=1, newton=2, factor_s=0, factor_calls=0, inverse_s=1.9100000000000003e-06, inverse_calls=2, A_s=0.0024820020000000001, A_calls=1, B_s=0, B_calls=0, G_s=0, G_calls=0, preconditioner_s=0, preconditioner_calls=0, FGMRES_vectors_s=0, FGMRES_vectors_calls=0, other_s=0.44610048499999999, other_calls=0, B_setup_s=0, B_setup_calls=0, G_setup_s=0, G_setup_calls=0, B_sparse_s=0.001816256, B_sparse_calls=2, G_sparse_s=0.0056245940000000001, G_sparse_calls=2, interface_setup_s=0, interface_setup_calls=0, interface_apply_s=0, interface_apply_calls=0, elapsed=0.45602524699999997
+   FE energy summation: bulk old-new=0, cohesive old-new=0
+   FE energy summation: bulk old-new=0, cohesive old-new=0
+   FE energy summation: bulk old-new=0, cohesive old-new=0
+   FE energy summation: bulk old-new=0, cohesive old-new=0
+   FE energy summation: bulk old-new=0, cohesive old-new=0
+   Endpoint linear tangent: seconds=0.45734586700000002, Krylov=0, rhs=0, inner target=0, action norm=0, linear calls=1, action correction=0, action target=0
+   Endpoint tangent uncondensed check: bulk=0, free contact=0
+Fault linear profile: step=1, newton=2, factor_s=0, factor_calls=0, inverse_s=1.8369999999999999e-06, inverse_calls=2, A_s=0.0025335840000000002, A_calls=1, B_s=0, B_calls=0, G_s=0, G_calls=0, preconditioner_s=0, preconditioner_calls=0, FGMRES_vectors_s=0, FGMRES_vectors_calls=0, other_s=0.44743602700000001, other_calls=0, B_setup_s=0, B_setup_calls=0, G_setup_s=0, G_setup_calls=0, B_sparse_s=0.001901079, B_sparse_calls=2, G_sparse_s=0.0056504210000000001, G_sparse_calls=2, interface_setup_s=0, interface_setup_calls=0, interface_apply_s=0, interface_apply_calls=0, elapsed=0.45752294800000004
+   FE energy summation: bulk old-new=0, cohesive old-new=0
+   FE energy summation: bulk old-new=0, cohesive old-new=0
+   FE energy summation: bulk old-new=0, cohesive old-new=0
+   FE energy summation: bulk old-new=0, cohesive old-new=0
+   FE energy summation: bulk old-new=0, cohesive old-new=0
+   FE energy summation: bulk old-new=0, cohesive old-new=0
+   FE energy summation: bulk old-new=0, cohesive old-new=0
+   FE energy summation: bulk old-new=2.6509049401244006e-55, cohesive old-new=7.5492954089552975e-59
+   FE energy summation: bulk old-new=0, cohesive old-new=0
+   FE energy summation: bulk old-new=0, cohesive old-new=0
+   FE energy summation: bulk old-new=-1.1215367054372464e-54, cohesive old-new=6.5361107340285304e-58
+   FE energy summation: bulk old-new=0, cohesive old-new=0
+   FE energy summation: bulk old-new=0, cohesive old-new=0
+   FE energy summation: bulk old-new=6.0155150564361398e-55, cohesive old-new=9.85181106176392e-58
+   FE energy summation: bulk old-new=0, cohesive old-new=0
+   FE energy summation: bulk old-new=0, cohesive old-new=0
+   FE energy summation: bulk old-new=-6.1174729387486167e-56, cohesive old-new=-6.5139412421011501e-58
+   FE energy summation: bulk old-new=4.2377212849942225e-13, cohesive old-new=-7.8374806644632145e-15
+   FE energy summation: bulk old-new=-1.287081552447944e-12, cohesive old-new=-1.0240506359560086e-14
+   FE energy summation: bulk old-new=-3.0587364693743084e-55, cohesive old-new=-1.0532453357779982e-57
+   FE energy summation: bulk old-new=-3.0587364693743084e-55, cohesive old-new=-1.0532453357779982e-57
+      Fault linear solve: iterations=2, fresh=9.564399e-08, target=1.592822e-03
+      Fault linear solve: iterations=35, fresh=8.581503e-15, target=9.564398e-15
+   Endpoint linear tangent: seconds=1.5969714500000001, Krylov=37, rhs=15928.224605292758, inner target=0.0015928224605292758, action norm=3.849701233899518, linear calls=2, action correction=4.2519201883258678e-10, action target=7.6994024677990359e-07
+   Endpoint tangent uncondensed check: bulk=1.1023534343406649e-08, free contact=2.5465851649641991e-11
+Fault linear profile: step=1, newton=2, factor_s=0, factor_calls=0, inverse_s=0.00019362299999999997, inverse_calls=43, A_s=0.098213435999999973, A_calls=41, B_s=0, B_calls=0, G_s=0, G_calls=0, preconditioner_s=0.50850915199999991, preconditioner_calls=37, FGMRES_vectors_s=0.096684137000000017, FGMRES_vectors_calls=2, other_s=0.7283739339999995, other_calls=74, B_setup_s=0, B_setup_calls=0, G_setup_s=0, G_setup_calls=0, B_sparse_s=0.040420272000000007, B_sparse_calls=43, G_sparse_s=0.12474863699999998, G_sparse_calls=43, interface_setup_s=0, interface_setup_calls=0, interface_apply_s=0, interface_apply_calls=0, elapsed=1.5971431909999994
+      Fault linear solve: iterations=3, fresh=9.548130e-08, target=1.592822e-06
+      Fault linear solve: iterations=46, fresh=4.895759e-18, target=9.548130e-18
+   Endpoint linear tangent: seconds=1.95592342, Krylov=49, rhs=15928.224605292758, inner target=1.5928224605292759e-06, action norm=3.849701233901385, linear calls=2, action correction=3.1285077932974255e-10, action target=7.6994024678027692e-07
+   Endpoint tangent uncondensed check: bulk=1.0795904387836546e-08, free contact=1.8189894035458565e-11
+Fault linear profile: step=1, newton=2, factor_s=0, factor_calls=0, inverse_s=0.00024669500000000001, inverse_calls=55, A_s=0.12615234399999997, A_calls=53, B_s=0, B_calls=0, G_s=0, G_calls=0, preconditioner_s=0.67314318699999987, preconditioner_calls=49, FGMRES_vectors_s=0.16982457100000001, FGMRES_vectors_calls=2, other_s=0.76965283800000028, other_calls=98, B_setup_s=0, B_setup_calls=0, G_setup_s=0, G_setup_calls=0, B_sparse_s=0.051452665999999987, B_sparse_calls=55, G_sparse_s=0.16563128400000002, G_sparse_calls=55, interface_setup_s=0, interface_setup_calls=0, interface_apply_s=0, interface_apply_calls=0, elapsed=1.9561035850000001
+   FE energy summation: bulk old-new=1.17039711255984e-12, cohesive old-new=-1.7146006836554761e-14
+   FE energy summation: bulk old-new=-1.6519008383397704e-12, cohesive old-new=3.6381488099923587e-15
+   FE energy summation: bulk old-new=8.8840046430505026e-13, cohesive old-new=2.0508768294735802e-15
+   FE energy summation: bulk old-new=-8.6253226783128412e-13, cohesive old-new=2.1727411536609509e-16
+   FE energy summation: bulk old-new=4.2377212849942225e-13, cohesive old-new=-7.8374806644632145e-15
+      Fault linear solve: iterations=27, fresh=1.074829e-03, target=1.130580e-03
+      Fault linear solve: iterations=30, fresh=3.931604e-11, target=1.074829e-10
+      Fault linear solve: iterations=36, fresh=3.815984e-16, target=6.702198e-16
+   Endpoint linear tangent: seconds=3.1679800619999998, Krylov=93, rhs=11305.801065563495, inner target=0.0011305801065563494, action norm=51.691877699046898, linear calls=3, action correction=1.9657492147692701e-11, action target=1.0338375539809378e-05
+   Endpoint tangent uncondensed check: bulk=6.7113068743829881e-09, free contact=8.6401996668428183e-12
+Fault linear profile: step=1, newton=2, factor_s=0, factor_calls=0, inverse_s=0.00046160999999999994, inverse_calls=102, A_s=0.236040534, A_calls=99, B_s=0, B_calls=0, G_s=0, G_calls=0, preconditioner_s=1.2780510809999999, preconditioner_calls=93, FGMRES_vectors_s=0.231494064, FGMRES_vectors_calls=3, other_s=1.0352740900000013, other_calls=186, B_setup_s=0, B_setup_calls=0, G_setup_s=0, G_setup_calls=0, B_sparse_s=0.089550239999999989, B_sparse_calls=102, G_sparse_s=0.29728108500000011, G_sparse_calls=102, interface_setup_s=0, interface_setup_calls=0, interface_apply_s=0, interface_apply_calls=0, elapsed=3.1681527040000015
+   FE energy summation: bulk old-new=2.212674488077937e-13, cohesive old-new=-4.0419056990259605e-16
+   FE energy summation: bulk old-new=-3.6748382115092681e-14, cohesive old-new=1.1045851733282319e-15
+   FE energy summation: bulk old-new=2.3936408410918375e-13, cohesive old-new=1.6089560239684886e-15
+   FE energy summation: bulk old-new=1.5099033134902129e-14, cohesive old-new=-3.1424515767319861e-15
+   FE energy summation: bulk old-new=4.2377212849942225e-13, cohesive old-new=-7.8374806644632145e-15
+   FE energy summation: bulk old-new=1.17039711255984e-12, cohesive old-new=-1.7146006836554761e-14
+   FE energy summation: bulk old-new=-1.287081552447944e-12, cohesive old-new=-1.0240506359560086e-14
+   FE energy summation: bulk old-new=2.0391576462495389e-55, cohesive old-new=2.4833720343214619e-58
+   FE energy summation: bulk old-new=-1.6519008383397704e-12, cohesive old-new=3.6381488099923587e-15
+   FE energy summation: bulk old-new=-1.287081552447944e-12, cohesive old-new=-1.0240506359560086e-14
+   FE energy summation: bulk old-new=-1.600738752305888e-54, cohesive old-new=1.3492663937767554e-57
+   FE energy summation: bulk old-new=8.8840046430505026e-13, cohesive old-new=2.0508768294735802e-15
+   FE energy summation: bulk old-new=-1.287081552447944e-12, cohesive old-new=-1.0240506359560086e-14
+   FE energy summation: bulk old-new=1.0195788231247695e-56, cohesive old-new=-8.5500340533263424e-58
+   FE energy summation: bulk old-new=-8.6253226783128412e-13, cohesive old-new=2.1727411536609509e-16
+   FE energy summation: bulk old-new=-1.287081552447944e-12, cohesive old-new=-1.0240506359560086e-14
+   FE energy summation: bulk old-new=2.3450312931869698e-55, cohesive old-new=4.4132846473681484e-58
+   FE energy summation: bulk old-new=4.6296300126869028e-13, cohesive old-new=4.6104613182773591e-15
+   FE energy summation: bulk old-new=-5.7187587998441813e-13, cohesive old-new=4.2847669856627135e-16
+   FE energy summation: bulk old-new=3.772441645561647e-55, cohesive old-new=-4.4107565474115173e-58
+   FE energy summation: bulk old-new=3.772441645561647e-55, cohesive old-new=-4.4107565474115173e-58
+      Fault linear solve: iterations=2, fresh=1.796951e-07, target=2.970578e-03
+      Fault linear solve: iterations=33, fresh=1.531491e-14, target=1.796951e-14
+   Endpoint linear tangent: seconds=1.545628161, Krylov=35, rhs=29705.784539185152, inner target=0.0029705784539185149, action norm=4.1709933801640622, linear calls=2, action correction=2.1691011553230634e-09, action target=8.3419867603281242e-07
+   Endpoint tangent uncondensed check: bulk=1.3936918012804178e-08, free contact=2.0918378140777349e-11
+Fault linear profile: step=1, newton=2, factor_s=0, factor_calls=0, inverse_s=0.000181779, inverse_calls=41, A_s=0.093218583999999993, A_calls=39, B_s=0, B_calls=0, G_s=0, G_calls=0, preconditioner_s=0.48116774600000006, preconditioner_calls=35, FGMRES_vectors_s=0.089345144999999987, FGMRES_vectors_calls=2, other_s=0.72679986399999963, other_calls=70, B_setup_s=0, B_setup_calls=0, G_setup_s=0, G_setup_calls=0, B_sparse_s=0.038758310000000004, B_sparse_calls=41, G_sparse_s=0.11634046900000002, G_sparse_calls=41, interface_setup_s=0, interface_setup_calls=0, interface_apply_s=0, interface_apply_calls=0, elapsed=1.5458118969999999
+      Fault linear solve: iterations=3, fresh=1.792033e-07, target=2.970578e-06
+      Fault linear solve: iterations=46, fresh=9.999551e-18, target=1.792034e-17
+   Endpoint linear tangent: seconds=1.968392991, Krylov=49, rhs=29705.784539185152, inner target=2.9705784539185154e-06, action norm=4.170993380155898, linear calls=2, action correction=1.4482864399929498e-09, action target=8.3419867603117955e-07
+   Endpoint tangent uncondensed check: bulk=1.3819634988399776e-08, free contact=2.6830093702301383e-11
+Fault linear profile: step=1, newton=2, factor_s=0, factor_calls=0, inverse_s=0.00024990899999999998, inverse_calls=55, A_s=0.12758999000000001, A_calls=53, B_s=0, B_calls=0, G_s=0, G_calls=0, preconditioner_s=0.67794699500000011, preconditioner_calls=49, FGMRES_vectors_s=0.17065773000000004, FGMRES_vectors_calls=2, other_s=0.7732525520000002, other_calls=98, B_setup_s=0, B_setup_calls=0, G_setup_s=0, G_setup_calls=0, B_sparse_s=0.056662021999999986, B_sparse_calls=55, G_sparse_s=0.16222973399999999, G_sparse_calls=55, interface_setup_s=0, interface_setup_calls=0, interface_apply_s=0, interface_apply_calls=0, elapsed=1.9685889320000005
+   FE energy summation: bulk old-new=-1.7476020630624589e-12, cohesive old-new=4.4690813549852493e-15
+   FE energy summation: bulk old-new=-5.5133675402885274e-13, cohesive old-new=1.2195539716985948e-14
+   FE energy summation: bulk old-new=1.2403411631112249e-12, cohesive old-new=3.5362338057787213e-15
+   FE energy summation: bulk old-new=-2.3907542612278121e-12, cohesive old-new=1.2195973397854942e-14
+   FE energy summation: bulk old-new=4.6296300126869028e-13, cohesive old-new=4.6104613182773591e-15
+      Fault linear solve: iterations=27, fresh=1.792578e-03, target=2.105503e-03
+      Fault linear solve: iterations=30, fresh=7.630330e-11, target=1.792578e-10
+      Fault linear solve: iterations=35, fresh=8.461971e-16, target=9.377532e-16
+   Endpoint linear tangent: seconds=3.1610052510000002, Krylov=92, rhs=21055.030096884537, inner target=0.0021055030096884535, action norm=98.186217015975231, linear calls=3, action correction=3.6572948294683945e-11, action target=1.9637243403195045e-05
+   Endpoint tangent uncondensed check: bulk=8.9837911003068799e-09, free contact=1.2278178473934531e-11
+Fault linear profile: step=1, newton=2, factor_s=0, factor_calls=0, inverse_s=0.00044871999999999967, inverse_calls=101, A_s=0.23374340699999999, A_calls=98, B_s=0, B_calls=0, G_s=0, G_calls=0, preconditioner_s=1.2646957599999999, preconditioner_calls=92, FGMRES_vectors_s=0.22967741000000003, FGMRES_vectors_calls=3, other_s=1.0326327550000005, other_calls=184, B_setup_s=0, B_setup_calls=0, G_setup_s=0, G_setup_calls=0, B_sparse_s=0.10343505800000001, B_sparse_calls=101, G_sparse_s=0.29655079299999992, G_sparse_calls=101, interface_setup_s=0, interface_setup_calls=0, interface_apply_s=0, interface_apply_calls=0, elapsed=3.1611839030000004
+   FE energy summation: bulk old-new=-8.4265927569049381e-14, cohesive old-new=4.3329055621210699e-15
+   FE energy summation: bulk old-new=1.9662049766111522e-13, cohesive old-new=9.9529759434169307e-16
+   FE energy summation: bulk old-new=-5.4622972811557702e-14, cohesive old-new=-4.7921736023859296e-16
+   FE energy summation: bulk old-new=2.3936408410918375e-13, cohesive old-new=-1.1405806854547507e-15
+   FE energy summation: bulk old-new=4.6296300126869028e-13, cohesive old-new=4.6104613182773591e-15
+   FE energy summation: bulk old-new=-1.7476020630624589e-12, cohesive old-new=4.4690813549852493e-15
+   FE energy summation: bulk old-new=-5.7187587998441813e-13, cohesive old-new=4.2847669856627135e-16
+   FE energy summation: bulk old-new=-9.6859988196853098e-55, cohesive old-new=-1.4468510521027154e-58
+   FE energy summation: bulk old-new=-5.5133675402885274e-13, cohesive old-new=1.2195539716985948e-14
+   FE energy summation: bulk old-new=-5.7187587998441813e-13, cohesive old-new=4.2847669856627135e-16
+   FE energy summation: bulk old-new=-5.607683527186232e-55, cohesive old-new=2.826026813058691e-58
+   FE energy summation: bulk old-new=1.2403411631112249e-12, cohesive old-new=3.5362338057787213e-15
+   FE energy summation: bulk old-new=-5.7187587998441813e-13, cohesive old-new=4.2847669856627135e-16
+   FE energy summation: bulk old-new=1.2744735289059618e-54, cohesive old-new=2.5946084324132298e-58
+   FE energy summation: bulk old-new=-2.3907542612278121e-12, cohesive old-new=1.2195973397854942e-14
+   FE energy summation: bulk old-new=-5.7187587998441813e-13, cohesive old-new=4.2847669856627135e-16
+   FE energy summation: bulk old-new=-1.8046545169308419e-54, cohesive old-new=-4.0321249615991535e-58
+   FE energy summation: bulk old-new=8.5644621142480634e-55, cohesive old-new=2.0924888871808089e-58
+     Number of advected particles: 73728
+     Native endpoint P2            compact fields, interval rates, accepted-state and operator checks
+
+Termination requested by criterion: end time
+
+
++------------------------------------------------+------------+------------+
+| Total wallclock time elapsed since start       |       129s |            |
+|                                                |            |            |
+| Section                            | no. calls |  wall time | % of total |
++------------------------------------+-----------+------------+------------+
+| Assemble Stokes system Picard      |         2 |      4.11s |       3.2% |
+| Assemble Stokes system rhs         |        12 |      21.6s |        17% |
+| Build Stokes preconditioner        |         2 |      1.85s |       1.4% |
+| Fault: Cache build                 |         3 |     0.627s |      0.48% |
+| Fault: FE phase energy             |        86 |      15.9s |        12% |
+| Fault: FE tangent pullback         |        29 |      5.32s |       4.1% |
+| Fault: I_h                         |        22 |      9.17s |       7.1% |
+| Fault: Property preparation        |         6 |      6.54s |         5% |
+| Fault: Stokes QP cache build       |         1 |     0.168s |      0.13% |
+| Fault: Surface-property projection |         1 |     0.209s |      0.16% |
+| Fault: condensed linear solve      |        26 |      11.5s |       8.9% |
+| Fault: endpoint linear tangent     |         9 |      14.8s |        11% |
+| Fault: endpoint phase solve        |         1 |      28.6s |        22% |
+| Fault: endpoint tangent setup      |         3 |      16.8s |        13% |
+| Initialization                     |         1 |    0.0874s |         0% |
+| Particles: Advect                  |         4 |    0.0384s |         0% |
+| Particles: Copy                    |         2 |    0.0057s |         0% |
+| Particles: Generate                |         1 |   0.00353s |         0% |
+| Particles: Initialization          |         1 |  3.42e-05s |         0% |
+| Particles: Initialize properties   |         1 |    0.0251s |         0% |
+| Particles: Interpolate             |         2 |    0.0269s |         0% |
+| Particles: Sort                    |         4 |    0.0103s |         0% |
+| Postprocessing                     |         2 |      60.1s |        46% |
+| Setup dof systems                  |         1 |    0.0385s |         0% |
+| Setup initial conditions           |         1 |      1.51s |       1.2% |
+| Setup matrices                     |         1 |     0.232s |      0.18% |
++------------------------------------+-----------+------------+------------+
+
+-- Total wallclock time elapsed including restarts: 1.3e+02s
+-----------------------------------------------------------------------------
+-- For information on how to cite ASPECT, see:
+--   https://aspect.geodynamics.org/citing.html?ver=3.1.0-pre&NewtonSolver=1&particles=1&sha=33c0adba5&src=code
+-----------------------------------------------------------------------------

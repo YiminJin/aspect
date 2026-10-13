@@ -1,0 +1,25 @@
+{
+  "baseline_files": 1505,
+  "missing": [],
+  "unexpected_changes": [],
+  "serial_binary_hashes_match": {
+    "build-propagation-integration/serial-reference/aspect-release": true,
+    "build-propagation-integration/serial-reference/libnative_endpoint_verification.release.so": true
+  },
+  "intentional_tracked_changes": [
+    "AGENTS.md",
+    "benchmarks/reconstructed_fault/propagation/README.md",
+    "benchmarks/reconstructed_fault/propagation/native_endpoint_verification.cc",
+    "doc/reconstructed_fault/CURRENT_STATUS.md",
+    "doc/reconstructed_fault/current_design.md",
+    "doc/reconstructed_fault/propagation/PLAN.md",
+    "doc/reconstructed_fault/propagation/STATUS.md",
+    "doc/reconstructed_fault/specification.tex",
+    "source/material_model/phase_field_fault.cc",
+    "source/material_model/phase_field_fault/fe_strain.cc",
+    "source/material_model/phase_field_fault/history.cc",
+    "source/simulator/phase_field.cc",
+    "source/simulator/solver/reconstructed_fault_endpoint_phase.cc",
+    "source/simulator/solver/reconstructed_fault_stokes.cc"
+  ]
+}

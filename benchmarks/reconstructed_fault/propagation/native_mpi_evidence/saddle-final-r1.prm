@@ -1,0 +1,373 @@
+# Fresh restricted FE history; interval-mean representation of a*t, a=.256 s^-2.
+# Explicit governing revision; fresh unloaded pre-existing fault.
+# Fresh native initialization for every material case; unchanged P2 mechanics.
+# Initial P2: fixed through-going fault, full cross-section association.
+# Native mechanical H; no transport/birth under the explicitly recorded RK2 control.
+# Stage-I coupled nonlinear lifecycle with the rate-dependent friction branch.
+# The inherited low activation threshold only bootstraps a prescribed fault;
+# reconstruction behavior is not under test.
+# Enable if: ASPECT_WITH_VORO
+
+set Dimension                    = 2
+set End time                     = 0
+set Use years instead of seconds = false
+set Nonlinear solver scheme = single Advection, iterated Newton Stokes
+set Max nonlinear iterations = 12
+set Nonlinear solver tolerance = 1e-6
+
+subsection Formulation
+  set Enable phase field                  = true
+  set Reconstruct faults from phase field = true
+end
+
+subsection Geometry model
+  set Model name = box
+end
+
+subsection Gravity model
+  set Model name = vertical
+  subsection Vertical
+    set Magnitude = 0
+  end
+end
+
+subsection Initial temperature model
+  set Model name = function
+  subsection Function
+    set Function expression = 293
+  end
+end
+
+subsection Compositional fields
+  set Number of fields            = 4
+  set Names of fields             = tau_xx, tau_yy, tau_xy, rock
+  set Types of fields             = stress, stress, stress, chemical composition
+  set Compositional field methods = particles, particles, particles, particles
+  set Mapped particle properties  = tau_xx:maxwell stress[0], tau_yy:maxwell stress[1], tau_xy:maxwell stress[2], rock:initial composition[0]
+end
+
+subsection Initial composition model
+  set Model name = function
+  subsection Function
+    set Variable names      = x,y
+    set Function expression = 4e6; -4e6+8e6*x; 1e6; 0.1+0.8*y
+  end
+end
+
+subsection Material model
+  set Model name = phase field fault
+  subsection Phase field fault
+    set Evolve phase field                    = false
+    set Phase field activation threshold      = 1e-6
+    set Viscosity averaging scheme            = arithmetic
+    set Reference viscosities                 = 1e21, 1e21
+    set Elastic shear moduli                  = 1e10, 4e10
+    set Cohesions                             = 1e5, 2e5
+    set Critical energy release rates         = 1e5, 1e5
+    set Friction law                         = rate dependent
+    set Reference friction coefficients     = 0.1, 0.1
+    set Dynamic friction coefficients       = 0.1, 0.1
+    set Characteristic weakening slip rates = 2e-6, 2e-6
+    set Radiation damping coefficients      = 1e7, 1e7
+    set Use adiabatic pressure in fault friction = false
+  end
+end
+
+subsection Phase field model
+  set Length scale                    = 0.15625
+  set Geometric function type         = AT1
+  set Degradation curvature parameter = 1
+end
+
+subsection Fault reconstruction
+  set Structural point spacing = 0.1
+  set Ridge coefficient        = 1
+  set Prescribed faults file   = /home/ein/repository/aspect-fault-propagation/tests/phase_field_fault_ih.txt
+end
+
+subsection Mesh refinement
+  set Initial global refinement          = 6
+  set Initial adaptive refinement        = 0
+  set Time steps between mesh refinement = 0
+end
+
+subsection Solver parameters
+  subsection Stokes solver parameters
+    set Stokes solver type = block AMG
+  end
+  subsection Phase field solver parameters
+    set Linear solver tolerance = 2e-7
+    # Converge initialization at the original accuracy instead of silently
+    # exhausting the old ten-iteration budget.
+    set Max nonlinear iterations = 50
+  end
+end
+
+subsection Boundary velocity model
+  set Prescribed velocity boundary indicators = left:function, right:function, bottom:function, top:function
+  subsection Function
+    set Function expression = 0; 0
+  end
+end
+
+subsection Particles
+  set Particle generator name                 = reference cell
+  set List of particle properties             = crack driving force, initial composition, maxwell stress
+  set Generate particle domains               = true
+  set Generate CPDI data for particle domains = true
+  set Load balancing strategy                 = none
+  subsection Generator
+    subsection Reference cell
+      set Number of particles per cell per direction = 3
+    end
+  end
+  subsection Initial composition
+    set List of field names = rock
+  end
+end
+
+subsection Postprocess
+ set List of postprocessors = particles, P2 native endpoint
+  subsection Particles
+    set Data output format = none
+  end
+end
+set End time = 1
+set Maximum time step = 0.25
+set Nonlinear solver failure strategy = abort program
+set Max nonlinear iterations = 30
+set Nonlinear solver tolerance = 1e-8
+set Surface pressure = 10000
+subsection Temperature field
+  set Temperature method = static
+end
+subsection Initial composition model
+  subsection Function
+    set Function expression = 0; 0; 0; 0.5
+  end
+end
+subsection Material model
+  subsection Phase field fault
+    set Fault constitutive mode = cohesive
+    set Evolve phase field = true
+    set Initial time step = 1
+    set Reference viscosities = 1e8, 1e8
+    set Minimum viscosity = 1e6
+    set Maximum viscosity = 1e10
+    set Elastic shear moduli = 1e6, 1e6
+    set Cohesions = 1000, 1000
+    set Critical energy release rates = 26.666666666666667, 26.666666666666667
+    set Friction law = rate dependent
+    set Reference friction coefficients = 0.1, 0.1
+    set Dynamic friction coefficients = 0.1, 0.1
+    set Radiation damping coefficients = 0, 0
+    set Use adiabatic pressure in fault friction = true
+  end
+end
+subsection Fault reconstruction
+  set Fit prescribed geometry to phase field = false
+  set Association support = full normal cross-section
+  set Prescribed faults file = /home/ein/repository/aspect-fault-propagation/benchmarks/reconstructed_fault/propagation/straight.txt
+end
+subsection Mesh refinement
+  set Initial global refinement = 5
+end
+subsection Solver parameters
+  subsection Phase field solver parameters
+    set Use bound constraints = true
+    set Linear solver tolerance = 2e-7
+    set Nonlinear solver tolerance = 1e-12
+    set Max nonlinear iterations = 100
+    set Max Newton line search iterations = 35
+  end
+end
+subsection Boundary velocity model
+  subsection Function
+    # Quasistatic verification ramp: total imposed shear displacement 0.2 at t=1.
+    # Sized against G/I_h = 2731 per unit slip; identical function at both timesteps.
+    set Variable names = x,y,t
+    set Function expression = 0.4*t*(y-0.5); 0
+  end
+end
+subsection Particles
+  set Integration scheme = rk2
+end
+subsection Postprocess
+ set List of postprocessors = particles, P2 native endpoint
+end
+set Maximum time step = 0.125
+subsection Fault reconstruction
+  set Prescribed faults file = /home/ein/repository/aspect-fault-propagation/benchmarks/reconstructed_fault/propagation/straight_core06.txt
+end
+subsection Material model
+  subsection Phase field fault
+    set I h projection = consistent
+  end
+end
+subsection Boundary velocity model
+  subsection Function
+    set Function expression = 0.004*t*(y-0.5); 0
+  end
+end
+subsection Postprocess
+ set List of postprocessors = particles, P2 native endpoint
+end
+subsection Material model
+ subsection Phase field fault
+  set Phase driving history = recoverable energy
+  set Initial cohesive state = unloaded
+  set Critical energy release rates = 26.6666666667, 26.6666666667
+ end
+end
+subsection Boundary velocity model
+ subsection Function
+  set Function expression = 0.016*t*(y-0.5); 0
+ end
+end
+subsection Postprocess
+ set List of postprocessors = particles, P2 native endpoint
+end
+set Maximum time step = 0.015625
+set End time = 1
+set Additional shared libraries = /home/ein/repository/aspect-fault-propagation/build-propagation-integration/plugin/libnative_fe_strain.release.so
+subsection Mesh refinement
+ set Initial global refinement = 4
+end
+subsection Fault reconstruction
+ set Structural point spacing = 0.015625
+end
+subsection Material model
+ subsection Phase field fault
+  set Bulk history representation = accepted FE strain
+  set Cohesive history representation = surface elastic slip
+  set Fault mechanical work measure = bulk conjugate
+ end
+end
+subsection Solver parameters
+ subsection Phase field solver parameters
+  set Enforce phase irreversibility = true
+ end
+end
+subsection Boundary velocity model
+ subsection Function
+  set Function expression = 0.256*max(0,t-0.0078125)*(y-0.5); 0
+ end
+end
+subsection Postprocess
+ set List of postprocessors = particles, P2 native endpoint
+end
+set Output directory = /home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-localization-compatible-operator-check
+set End time = 1
+subsection Boundary velocity model
+ set Prescribed velocity boundary indicators = left y:function, right y:function, bottom:function, top:function
+end
+set Pressure normalization = no
+set End time = 0.625
+set Output directory = /home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-quadrature-q2-refined
+subsection Discretization
+ set Stokes velocity polynomial degree = 2
+end
+subsection Material model
+ subsection Phase field fault
+  set FE bulk normal quadrature points = 6
+ end
+end
+subsection Geometry model
+ subsection Box
+  set Y repetitions = 2
+ end
+end
+set Output directory = /home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-normal-resolution-q2-n256
+subsection Geometry model
+ subsection Box
+  set Y repetitions = 16
+ end
+end
+set Additional shared libraries = /home/ein/repository/aspect-fault-propagation/build-propagation-integration/plugin/libnative_endpoint_verification.release.so
+subsection Geometry model
+ subsection Box
+  set X repetitions = 1
+  set Y repetitions = 32
+ end
+end
+subsection Material model
+ subsection Phase field fault
+  set Consistent endpoint phase solve = true
+  set FE initial phase profile file = /home/ein/repository/aspect-fault-propagation/benchmarks/reconstructed_fault/propagation/native_endpoint_evidence/shared-initial-phase.txt
+ end
+end
+subsection Time stepping
+ set List of model names = function
+ subsection Function
+  set Variable names = time
+  set Function expression = if(time<0.5,0.015625,0.0009765625)
+ end
+end
+subsection Postprocess
+ set List of postprocessors = particles, P2 native endpoint
+ subsection P2 native endpoint
+  set Initial history file = /home/ein/repository/aspect-fault-propagation/benchmarks/reconstructed_fault/propagation/native_endpoint_evidence/shared-initial-H.txt
+ end
+end
+set Output directory = /home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-endpoint-prefix
+set End time = 0.53125
+set Maximum time step = 0.015625
+subsection Boundary velocity model
+ subsection Function
+  set Function expression = 0.256*max(0,t-if(t<=0.5,0.0078125,0.00048828125))*(y-0.5); 0
+ end
+end
+set Maximum time step = 0.5
+subsection Time stepping
+ subsection Function
+  set Function expression = if(time<0.5,0.5,if(time<0.52734375,0.02734375,0.0009765625))
+ end
+end
+subsection Boundary velocity model
+ subsection Function
+  set Function expression = 0.256*max(0,t-if(t<=0.5,0.25,if(t<=0.52734375,0.013671875,0.00048828125)))*(y-0.5); 0
+ end
+end
+
+subsection Solver parameters
+ subsection Phase field solver parameters
+  set Adaptive endpoint linear accuracy = true
+  set Endpoint translation preconditioner = true
+ end
+end
+set End time = 0
+subsection Postprocess
+ subsection P2 native endpoint
+  set Fixed entry input directory = /home/ein/repository/aspect-fault-propagation/benchmarks/reconstructed_fault/propagation/native_solver_evidence/saddle
+ end
+end
+subsection Boundary velocity model
+ subsection Function
+  set Function expression = 0.256*max(0,t-0.001953125)*(y-0.5); 0
+ end
+end
+
+subsection Postprocess
+ subsection P2 native endpoint
+  set Fixed entry input directory = /home/ein/repository/aspect-fault-propagation/benchmarks/reconstructed_fault/propagation/native_solver_evidence/saddle
+  set Verify complete fixed entry = false
+ end
+end
+
+set Output directory = /home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-saddle-final-r1
+subsection Geometry model
+ subsection Box
+  set X repetitions = 1
+  set Y repetitions = 32
+ end
+end
+subsection Mesh refinement
+ set Initial global refinement = 4
+end
+subsection Particles
+ subsection Generator
+ subsection Reference cell
+  set Number of particles per cell per direction = 3, 3
+ end
+end
+end

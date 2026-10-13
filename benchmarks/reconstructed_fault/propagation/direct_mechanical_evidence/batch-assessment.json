@@ -1,0 +1,103 @@
+{
+  "tag": "batch-n1-local",
+  "completed": true,
+  "groups": {
+    "0": {
+      "FGMRES": {
+        "batch_seconds_including_first_setup": 10.09734593,
+        "linear_calls": 14,
+        "Krylov": 254,
+        "max_bulk_residual": 9.51646949242256e-06,
+        "max_free_contact": 8.640199666842818e-12,
+        "max_action_relative_difference": 0.0,
+        "max_velocity_difference": 0.0,
+        "max_solver_pressure_difference": 0.0,
+        "max_rate_difference": 0.0,
+        "max_RSS_MiB": 1789.390625,
+        "peak_RSS_MiB": 1789.61328125
+      },
+      "direct": {
+        "batch_seconds_including_first_setup": 5.88199174,
+        "linear_calls": 8,
+        "Krylov": 0,
+        "max_bulk_residual": 6.136200885037429e-08,
+        "max_free_contact": 1.1368683772161603e-13,
+        "max_action_relative_difference": 2.3723819840438845e-10,
+        "max_velocity_difference": 1.2687587544575135e-08,
+        "max_solver_pressure_difference": 3.012219964076506e-08,
+        "max_rate_difference": 1.1816649345224051e-07,
+        "max_RSS_MiB": 1789.390625,
+        "peak_RSS_MiB": 1789.61328125
+      }
+    },
+    "1": {
+      "FGMRES": {
+        "batch_seconds_including_first_setup": 19.132364288999998,
+        "linear_calls": 16,
+        "Krylov": 484,
+        "max_bulk_residual": 1.0032121087511393e-05,
+        "max_free_contact": 6.849339193883323e-12,
+        "max_action_relative_difference": 0.0,
+        "max_velocity_difference": 0.0,
+        "max_solver_pressure_difference": 0.0,
+        "max_rate_difference": 0.0,
+        "max_RSS_MiB": 1789.390625,
+        "peak_RSS_MiB": 1789.61328125
+      },
+      "direct": {
+        "batch_seconds_including_first_setup": 3.519796242,
+        "linear_calls": 8,
+        "Krylov": 0,
+        "max_bulk_residual": 5.969587279386848e-08,
+        "max_free_contact": 1.1368683772161603e-13,
+        "max_action_relative_difference": 3.12415551323756e-10,
+        "max_velocity_difference": 1.3117643556449481e-08,
+        "max_solver_pressure_difference": 3.1129800442308645e-08,
+        "max_rate_difference": 1.1889743837487652e-07,
+        "max_RSS_MiB": 1789.390625,
+        "peak_RSS_MiB": 1789.61328125
+      }
+    }
+  },
+  "prototype": {
+    "0": {
+      "maximum_error": 3.1651383736175376e-09,
+      "scale": 2.24863507507184,
+      "relative": 1.4075820521995624e-09
+    },
+    "1": {
+      "maximum_error": 6.925588214024003e-09,
+      "scale": 0.5478630525576577,
+      "relative": 1.264109375817992e-08
+    }
+  },
+  "bulk_setup_seconds": [
+    2.291346615
+  ],
+  "surface_setup": [
+    [
+      "2.1526558850000002",
+      "65",
+      "13.784283177730943"
+    ],
+    [
+      "2.1224634180000002",
+      "64",
+      "13.64327957227651"
+    ]
+  ],
+  "shared_velocity_factor_seconds": 0.410418089,
+  "setup_inclusive_reference_seconds": 10.507764019,
+  "setup_inclusive_direct_seconds": 6.292409829,
+  "setup_inclusive_speedup": 1.6699109410471933,
+  "process_seconds": 115.43500186099982,
+  "cost_gate_pass": true,
+  "memory_increment": {
+    "before_RSS_MiB": 1687.1484375,
+    "after_RSS_MiB": 1789.390625,
+    "retained_increment_MiB": 102.2421875,
+    "pre_direct_peak_MiB": 1763.90234375,
+    "post_direct_peak_MiB": 1789.61328125,
+    "note": "Paired runs share one process; later FGMRES rows retain direct factors. Peak includes initialization."
+  }
+}

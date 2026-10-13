@@ -1,0 +1,9 @@
+{
+  "Newton_executable_retained": "build-propagation-integration/aspect-newton-before-schur-release",
+  "unchanged_physics_outer_Newton": {
+    "source/simulator/solver/reconstructed_fault_endpoint_phase.cc": true,
+    "source/material_model/phase_field_fault/fe_strain.cc": true,
+    "source/material_model/phase_field_fault/history.cc": true,
+    "source/material_model/phase_field_fault.cc": true
+  }
+}

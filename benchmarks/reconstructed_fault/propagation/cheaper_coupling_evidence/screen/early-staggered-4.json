@@ -1,0 +1,80 @@
+{
+  "method": "staggered-4",
+  "seconds": 0.9082169050016091,
+  "counts": {
+    "mechanical_evaluations": 5,
+    "objective_calls": 17,
+    "reduced_hessians": 1,
+    "bulk_factor_calls": 7,
+    "bulk_rhs": 524,
+    "phase_linear_solves": 4,
+    "metric_factors": 0,
+    "metric_solves": 0,
+    "line_trials": 0
+  },
+  "timing": {
+    "mechanics": 0.025506420999590773,
+    "hessian": 0.378149192998535,
+    "phase_linear": 0.00970898499872419,
+    "metric": 0.0,
+    "stability": 0.3946706270035065
+  },
+  "KKT": 1.5925157520681402e-05,
+  "stability": {
+    "KKT": 1.5925157520681402e-05,
+    "free": 315,
+    "weak": 0,
+    "centroid": {
+      "phase": 0.500000000000002,
+      "localization": 0.5000000000000004
+    },
+    "minimum": -0.44387634698693046,
+    "second": 354.5076923545362,
+    "admissible_negative": true,
+    "stable": false,
+    "translation_cosine": 0.9999740307347295,
+    "antisymmetry": 2.2544570637759595e-10,
+    "amplitude_two_sided": 0.0003384649749545797,
+    "mass_norm": 1.000000000000001
+  },
+  "escapes": 0,
+  "trace": [
+    {
+      "KKT": 1.657594855273256e-05,
+      "subproblem_KKT": 1.0063130884128877e-14
+    },
+    {
+      "KKT": 1.599465321008241e-05,
+      "subproblem_KKT": 2.6236478267683227e-13
+    },
+    {
+      "KKT": 1.594371937349832e-05,
+      "subproblem_KKT": 9.68409380462842e-15
+    },
+    {
+      "KKT": 1.5925157520681402e-05,
+      "subproblem_KKT": 3.1270125377918835e-14
+    }
+  ],
+  "minimum_increment": 0.0,
+  "maximum": 0.6007213921798205,
+  "potential_J_per_m": 21.041003529417928,
+  "q": 315.460287673531,
+  "V": 0.13581318972009582,
+  "slip": 0.03454081446670296,
+  "bulk": 0.8652209459930748,
+  "cohesive": 5.434532391077826,
+  "fracture": 14.608620771866644,
+  "force": 1.6893409338081256e-08,
+  "contact_signed": 3.183231456205249e-12,
+  "contact": 3.183231456205249e-12,
+  "I": 109.22015466859966,
+  "stress_min": 1302.379741207813,
+  "stress_max": 1322.2034636985336,
+  "accepted": false,
+  "entry": "early",
+  "source": "native_solver_evidence/core-all/core-4.txt",
+  "time": 0.529296875,
+  "dt": 0.0009765625,
+  "phase_reference_error": 0.0003918373918401219
+}

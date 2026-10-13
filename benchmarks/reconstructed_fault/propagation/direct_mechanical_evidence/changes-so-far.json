@@ -1,0 +1,18 @@
+[
+  "AGENTS.md",
+  "benchmarks/reconstructed_fault/propagation/native_endpoint_verification.cc",
+  "doc/reconstructed_fault/CURRENT_STATUS.md",
+  "doc/reconstructed_fault/current_design.md",
+  "doc/reconstructed_fault/propagation/PLAN.md",
+  "doc/reconstructed_fault/propagation/STATUS.md",
+  "doc/reconstructed_fault/specification.tex",
+  "include/aspect/phase_field.h",
+  "include/aspect/simulator.h",
+  "include/aspect/simulator/solver/reconstructed_fault_condensed_system.h",
+  "source/simulator/phase_field.cc",
+  "source/simulator/solver/reconstructed_fault_condensed_system.cc",
+  "source/simulator/solver/reconstructed_fault_stokes.cc",
+  "tests/phase_field_test_access.h",
+  "build-propagation-integration/aspect-release",
+  "build-propagation-integration/plugin/libnative_endpoint_verification.release.so"
+]

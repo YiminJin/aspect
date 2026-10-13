@@ -1,0 +1,29 @@
+{
+  "n": 512,
+  "dt": 0.00048828125,
+  "last_accepted": 0.625,
+  "completed": true,
+  "accepted": 1280,
+  "failures": [],
+  "first_escape": 0.5625,
+  "runtime_seconds": 136.5110905399997,
+  "counts": {
+    "mechanical_evaluations": 4226,
+    "objective_calls": 13341,
+    "reduced_hessians": 204,
+    "bulk_factor_calls": 4634,
+    "bulk_rhs": 113308,
+    "phase_linear_solves": 0,
+    "metric_factors": 286,
+    "metric_solves": 2509,
+    "line_trials": 2945
+  },
+  "timing": {
+    "mechanics": 18.75923395778591,
+    "hessian": 80.05455499400705,
+    "phase_linear": 0.0,
+    "metric": 0.4676825650749379,
+    "stability": 84.2391032919295
+  },
+  "peak_RSS_KiB": 186488
+}

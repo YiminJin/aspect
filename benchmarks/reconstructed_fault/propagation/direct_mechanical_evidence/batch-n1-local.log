@@ -1,0 +1,159 @@
+[BEBOP:05067] Rank 0 bound to package[0][core:L0]
+-----------------------------------------------------------------------------
+--                             This is ASPECT                              --
+-- The Advanced Solver for Planetary Evolution, Convection, and Tectonics. --
+-----------------------------------------------------------------------------
+--     . version 3.1.0-pre (fault-propagation, 33c0adba5)
+--     . using deal.II 9.6.2 (dealii-9.6, 6890ca740b)
+--     .       with 32 bit indices
+--     .       with vectorization level 2 (AVX, 4 doubles, 256 bits)
+--     . using Trilinos 14.2.0
+--     . using p4est 2.8.7
+--     . using Geodynamic World Builder 1.0.0
+--     . running in OPTIMIZED mode
+--     . running with 1 MPI process
+-----------------------------------------------------------------------------
+
+Loading shared library </home/ein/repository/aspect-fault-propagation/build-propagation-integration/plugin/libnative_endpoint_verification.release.so>
+
+
+-----------------------------------------------------------------------------
+The output directory </home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-batch-n1-local/> provided in the input file appears not to exist.
+ASPECT will create it for you.
+-----------------------------------------------------------------------------
+
+
+-----------------------------------------------------------------------------
+-- For information on how to cite ASPECT, see:
+--   https://aspect.geodynamics.org/citing.html?ver=3.1.0-pre&NewtonSolver=1&particles=1&sha=33c0adba5&src=code
+-----------------------------------------------------------------------------
+Number of active cells: 8,192 (on 5 levels)
+Number of degrees of freedom: 254,217 (67,650+8,721+33,825+33,825+33,825+33,825+33,825+8,721)
+
+*** Timestep 0:  t=0 seconds, dt=0 seconds
+   Accepted supplied continuum phase seed; native particle H retained, unloaded FE histories constructed afterward.
+   Reconstruction initial faults... fixed normal association half-width=0.50000000000001588 ... done.
+
+   Advecting particles...  done.
+   Initial cohesive q profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa, normalized RMS=0, normalized maximum=0
+   FE energy summation: bulk old-new=0, cohesive old-new=0
+   Accepted FE strain: G=1000000 eta=100000000 lambda=100 m=128.00000000016001 bulk QPs=589824 phase DoFs=8721
+   Endpoint collective Amesos velocity factor: seconds=0.208942934, DoFs=67650
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=12, fresh=3.063262e-05, target=4.672166e-05
+      Fault linear solve: iterations=11, fresh=2.253770e-05, target=4.657565e-05
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.999973e-01, 0.000000e+00
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Fault linear solve: iterations=3, fresh=9.770583e-07, target=3.690891e-06
+      Fault linear solve: iterations=10, fresh=1.514090e-12, target=2.253770e-12
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 4.838931e-08, 0.000000e+00
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Fault linear solve: iterations=1, fresh=1.156277e-09, target=3.690891e-06
+      Fault linear solve: iterations=10, fresh=1.474352e-19, target=1.514090e-19
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  2: 3.250810e-15, 0.000000e+00
+
+   Postprocessing:
+   FE energy summation: bulk old-new=0, cohesive old-new=0
+   FE energy summation: bulk old-new=2.8643754035329039e-13, cohesive old-new=7.4970411823027661e-15
+   FE energy summation: bulk old-new=9.0150109599562711e-13, cohesive old-new=-7.3253035581810622e-15
+Fixed-entry diagnostic: core-6.txt, time=0.53125, dt=0.0009765625
+   FE energy summation: bulk old-new=-8.3044682241961709e-14, cohesive old-new=-7.3838504754952794e-15
+   Endpoint collective Amesos velocity factor: seconds=0.20147515499999999, DoFs=67650
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=21, fresh=8.471937e-16, target=1.126243e-15
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 1.245859e-07, 1.042983e-13
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 6.484070e-10, 7.758263e-15
+      Fault linear solve: iterations=2, fresh=4.962198e-08, target=8.569141e-04
+      Fault linear solve: iterations=37, fresh=2.770028e-15, target=4.962199e-15
+   Endpoint bulk Schur factor: seconds=2.2913466150000001, DoFs=76371
+   Endpoint surface Schur setup: seconds=2.1526558850000002, free=65, condition=13.784283177730943, bulk solves=65
+   Endpoint direct solve: seconds=4.4997113710000001, fresh=1.7359771288106998e-08, raw=1.7359771288106998e-08, target=0.00085691405875907276, pressure quotient=0, residual null=0, compatibility bound=0
+      Fault linear solve: iterations=2, fresh=6.257300e-07, target=1.196845e-03
+      Fault linear solve: iterations=26, fresh=6.142533e-14, target=6.257300e-14
+   Endpoint direct solve: seconds=0.036094366000000003, fresh=6.1362022189039838e-08, raw=6.1362022189039838e-08, target=0.0011968453469385473, pressure quotient=0, residual null=0, compatibility bound=0
+      Fault linear solve: iterations=23, fresh=4.133980e-04, target=6.065742e-04
+      Fault linear solve: iterations=29, fresh=1.120413e-11, target=4.133980e-11
+   Endpoint direct solve: seconds=0.034908712000000001, fresh=8.3463589736797542e-09, raw=8.3463589736797542e-09, target=0.00060657421929195831, pressure quotient=0, residual null=0, compatibility bound=0
+      Fault linear solve: iterations=8, fresh=9.516469e-06, target=1.246263e-05
+   Endpoint direct solve: seconds=0.033063182000000003, fresh=9.1258816021093654e-14, raw=9.1258816021093654e-14, target=1.2462630293446537e-05, pressure quotient=0, residual null=0, compatibility bound=0
+      Fault linear solve: iterations=2, fresh=4.962198e-08, target=8.569141e-04
+      Fault linear solve: iterations=37, fresh=2.770028e-15, target=4.962199e-15
+   Endpoint direct solve: seconds=0.034934352000000002, fresh=1.7359771288106998e-08, raw=1.7359771288106998e-08, target=0.00085691405875907276, pressure quotient=0, residual null=0, compatibility bound=0
+      Fault linear solve: iterations=2, fresh=6.257300e-07, target=1.196845e-03
+      Fault linear solve: iterations=26, fresh=6.142533e-14, target=6.257300e-14
+   Endpoint direct solve: seconds=0.03238605, fresh=6.1362022189039838e-08, raw=6.1362022189039838e-08, target=0.0011968453469385473, pressure quotient=0, residual null=0, compatibility bound=0
+      Fault linear solve: iterations=23, fresh=4.133980e-04, target=6.065742e-04
+      Fault linear solve: iterations=29, fresh=1.120413e-11, target=4.133980e-11
+   Endpoint direct solve: seconds=0.033964600999999997, fresh=8.3463589736797542e-09, raw=8.3463589736797542e-09, target=0.00060657421929195831, pressure quotient=0, residual null=0, compatibility bound=0
+      Fault linear solve: iterations=8, fresh=9.516469e-06, target=1.246263e-05
+   Endpoint direct solve: seconds=0.035628891000000003, fresh=9.1258816021093654e-14, raw=9.1258816021093654e-14, target=1.2462630293446537e-05, pressure quotient=0, residual null=0, compatibility bound=0
+      Fault linear solve: iterations=39, fresh=4.004147e-04, target=8.576372e-04
+      Fault linear solve: iterations=41, fresh=1.769316e-11, target=4.004147e-11
+      Fault linear solve: iterations=35, fresh=5.394291e-16, target=5.795813e-16
+   Endpoint surface Schur setup: seconds=2.1224634180000002, free=64, condition=13.64327957227651, bulk solves=137
+   Endpoint direct solve: seconds=2.1727949999999998, fresh=1.6928618604204959e-08, raw=1.6928618604204959e-08, target=0.00085763717888429102, pressure quotient=0, residual null=0, compatibility bound=0
+      Fault linear solve: iterations=1, fresh=7.860330e-07, target=1.196845e-03
+      Fault linear solve: iterations=41, fresh=6.313358e-14, target=7.860330e-14
+   Endpoint direct solve: seconds=0.033436805999999999, fresh=5.9695856123791312e-08, raw=5.9695856123791312e-08, target=0.0011968453469385467, pressure quotient=0, residual null=0, compatibility bound=0
+      Fault linear solve: iterations=36, fresh=3.056517e-04, target=6.076001e-04
+      Fault linear solve: iterations=41, fresh=1.924375e-11, target=3.056517e-11
+   Endpoint direct solve: seconds=0.033713240999999998, fresh=8.6471123046300151e-09, raw=8.6471123046300151e-09, target=0.00060760007705503057, pressure quotient=0, residual null=0, compatibility bound=0
+      Fault linear solve: iterations=8, fresh=1.003212e-05, target=1.246263e-05
+   Endpoint direct solve: seconds=0.033253089999999999, fresh=9.1462704620644056e-14, raw=9.1462704620644056e-14, target=1.2462630293446511e-05, pressure quotient=0, residual null=0, compatibility bound=0
+      Fault linear solve: iterations=39, fresh=4.004147e-04, target=8.576372e-04
+      Fault linear solve: iterations=41, fresh=1.769316e-11, target=4.004147e-11
+      Fault linear solve: iterations=35, fresh=5.394291e-16, target=5.795813e-16
+   Endpoint direct solve: seconds=0.034618102999999997, fresh=1.6928618604204959e-08, raw=1.6928618604204959e-08, target=0.00085763717888429102, pressure quotient=0, residual null=0, compatibility bound=0
+      Fault linear solve: iterations=1, fresh=7.860330e-07, target=1.196845e-03
+      Fault linear solve: iterations=41, fresh=6.313358e-14, target=7.860330e-14
+   Endpoint direct solve: seconds=0.031180092, fresh=5.9695856123791312e-08, raw=5.9695856123791312e-08, target=0.0011968453469385467, pressure quotient=0, residual null=0, compatibility bound=0
+      Fault linear solve: iterations=36, fresh=3.056517e-04, target=6.076001e-04
+      Fault linear solve: iterations=41, fresh=1.924375e-11, target=3.056517e-11
+   Endpoint direct solve: seconds=0.034994718000000001, fresh=8.6471123046300151e-09, raw=8.6471123046300151e-09, target=0.00060760007705503057, pressure quotient=0, residual null=0, compatibility bound=0
+      Fault linear solve: iterations=8, fresh=1.003212e-05, target=1.246263e-05
+   Endpoint direct solve: seconds=0.034819068000000002, fresh=9.1462704620644056e-14, raw=9.1462704620644056e-14, target=1.2462630293446511e-05, pressure quotient=0, residual null=0, compatibility bound=0
+   Fixed-entry whole-step seconds=69.272633158999994, complete publication=0
+   FE energy summation: bulk old-new=5.6887827781793021e-13, cohesive old-new=-4.0510129972748388e-15
+   FE energy summation: bulk old-new=5.6887827781793021e-13, cohesive old-new=-4.0510129972748388e-15
+     Number of advected particles: 73728
+     Native endpoint P2            compact fields, interval rates, accepted-state and operator checks
+
+Termination requested by criterion: end time
+
+
++------------------------------------------------+------------+------------+
+| Total wallclock time elapsed since start       |       111s |            |
+|                                                |            |            |
+| Section                            | no. calls |  wall time | % of total |
++------------------------------------+-----------+------------+------------+
+| Assemble Stokes system Picard      |         2 |      3.59s |       3.2% |
+| Assemble Stokes system rhs         |        11 |      25.4s |        23% |
+| Build Stokes preconditioner        |         2 |      1.78s |       1.6% |
+| Fault: Cache build                 |         2 |     0.374s |      0.34% |
+| Fault: FE phase energy             |         7 |      1.24s |       1.1% |
+| Fault: FE tangent pullback         |        62 |      10.8s |       9.7% |
+| Fault: I_h                         |         2 |      4.61s |       4.1% |
+| Fault: Property preparation        |         2 |      5.21s |       4.7% |
+| Fault: Stokes QP cache build       |         1 |     0.156s |      0.14% |
+| Fault: Surface-property projection |         1 |     0.188s |      0.17% |
+| Fault: condensed linear solve      |        53 |      33.9s |        30% |
+| Initialization                     |         1 |     0.172s |      0.15% |
+| Particles: Advect                  |         2 |    0.0446s |         0% |
+| Particles: Copy                    |         1 |   0.00278s |         0% |
+| Particles: Generate                |         1 |   0.00544s |         0% |
+| Particles: Initialization          |         1 |   0.00012s |         0% |
+| Particles: Initialize properties   |         1 |    0.0278s |         0% |
+| Particles: Interpolate             |         1 |    0.0117s |         0% |
+| Particles: Sort                    |         2 |   0.00936s |         0% |
+| Postprocessing                     |         1 |      72.7s |        65% |
+| Setup dof systems                  |         1 |    0.0859s |         0% |
+| Setup initial conditions           |         1 |      1.54s |       1.4% |
+| Setup matrices                     |         1 |     0.232s |      0.21% |
++------------------------------------+-----------+------------+------------+
+
+-- Total wallclock time elapsed including restarts: 1.1e+02s
+-----------------------------------------------------------------------------
+-- For information on how to cite ASPECT, see:
+--   https://aspect.geodynamics.org/citing.html?ver=3.1.0-pre&NewtonSolver=1&particles=1&sha=33c0adba5&src=code
+-----------------------------------------------------------------------------

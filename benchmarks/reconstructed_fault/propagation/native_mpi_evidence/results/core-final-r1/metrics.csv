@@ -1,0 +1,2 @@
+step,time,dt,phase_max,increment,healing,KKT,bulk,cohesive,fracture,FE_recurrence
+0,0,0,0.60000193776306321,0,0,0,0,0,14.580127277526268,0

@@ -1,0 +1,63 @@
+{
+  "method": "endpoint",
+  "seconds": 1.5985059489976265,
+  "counts": {
+    "mechanical_evaluations": 4,
+    "objective_calls": 16,
+    "reduced_hessians": 4,
+    "bulk_factor_calls": 12,
+    "bulk_rhs": 2064,
+    "phase_linear_solves": 3,
+    "metric_factors": 0,
+    "metric_solves": 0,
+    "line_trials": 0
+  },
+  "timing": {
+    "mechanics": 0.025555927019013325,
+    "hessian": 1.5470868900010828,
+    "phase_linear": 0.007715792999078985,
+    "metric": 0.0,
+    "stability": 0.4055110640001658
+  },
+  "KKT": 8.081087882184535e-13,
+  "stability": {
+    "KKT": 8.081087882184535e-13,
+    "free": 315,
+    "weak": 0,
+    "centroid": {
+      "phase": 0.5000565256138196,
+      "localization": 0.5000565396266581
+    },
+    "minimum": 1.3830469996570756,
+    "second": 334.3781165017808,
+    "admissible_negative": false,
+    "stable": true,
+    "translation_cosine": 0.9999006228455304,
+    "antisymmetry": 0.03636342486456059,
+    "amplitude_two_sided": 1.0732530129490519e-05,
+    "mass_norm": 1.0000000000000009
+  },
+  "escapes": 0,
+  "trace": [],
+  "minimum_increment": 0.0,
+  "maximum": 0.7501916740569197,
+  "potential_J_per_m": 24.448358584746476,
+  "q": 188.83431361206925,
+  "V": 0.16106464477114618,
+  "slip": 0.04880473012360165,
+  "bulk": 0.7067210778889431,
+  "cohesive": 4.59879148742547,
+  "fracture": 18.985557095286314,
+  "force": 1.8676075796975056e-08,
+  "contact_signed": -1.5916157281026244e-11,
+  "contact": 1.5916157281026244e-11,
+  "I": 257.93595594330145,
+  "stress_min": 1115.6253827423789,
+  "stress_max": 1226.5749654545216,
+  "accepted": true,
+  "entry": "late",
+  "source": "native_endpoint_evidence/dt-1-1024",
+  "time": 0.625,
+  "dt": 0.0009765625,
+  "phase_reference_error": 2.655993758260422e-09
+}

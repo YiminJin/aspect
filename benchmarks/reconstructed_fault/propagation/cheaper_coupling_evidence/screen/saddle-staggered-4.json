@@ -1,0 +1,80 @@
+{
+  "method": "staggered-4",
+  "seconds": 1.2715179699989676,
+  "counts": {
+    "mechanical_evaluations": 5,
+    "objective_calls": 17,
+    "reduced_hessians": 1,
+    "bulk_factor_calls": 7,
+    "bulk_rhs": 524,
+    "phase_linear_solves": 4,
+    "metric_factors": 0,
+    "metric_solves": 0,
+    "line_trials": 0
+  },
+  "timing": {
+    "mechanics": 0.028693513999314746,
+    "hessian": 0.3809926380017714,
+    "phase_linear": 0.010389800001576077,
+    "metric": 0.0,
+    "stability": 0.3978734469965275
+  },
+  "KKT": 3.846315627104767e-14,
+  "stability": {
+    "KKT": 3.846315627104767e-14,
+    "free": 317,
+    "weak": 0,
+    "centroid": {
+      "phase": 0.5000000001370709,
+      "localization": 0.5000000001366661
+    },
+    "minimum": -0.4212755142093707,
+    "second": 340.7190318802967,
+    "admissible_negative": true,
+    "stable": false,
+    "translation_cosine": 0.9999727202347185,
+    "antisymmetry": 1.2408703844680755e-08,
+    "amplitude_two_sided": 0.00014828252728250798,
+    "mass_norm": 0.9999999999999999
+  },
+  "escapes": 0,
+  "trace": [
+    {
+      "KKT": 5.683214315814312e-14,
+      "subproblem_KKT": 1.612598943266024e-14
+    },
+    {
+      "KKT": 4.289017058173495e-14,
+      "subproblem_KKT": 2.6261978702780053e-14
+    },
+    {
+      "KKT": 5.871171604436164e-14,
+      "subproblem_KKT": 2.120872921726593e-14
+    },
+    {
+      "KKT": 3.846315627104767e-14,
+      "subproblem_KKT": 1.4575146645138914e-14
+    }
+  ],
+  "minimum_increment": 0.0,
+  "maximum": 0.6590130626075973,
+  "potential_J_per_m": 22.895520555764655,
+  "q": 264.7364905861605,
+  "V": 0.14558870232935123,
+  "slip": 0.039652533790116365,
+  "bulk": 0.7997878504208448,
+  "cohesive": 5.239296015385944,
+  "fracture": 16.287741928875704,
+  "force": 1.8107698451785836e-08,
+  "contact_signed": 4.75210981676355e-11,
+  "contact": 4.75210981676355e-11,
+  "I": 149.5117473568446,
+  "stress_min": 1240.7225984587276,
+  "stress_max": 1277.1159895867168,
+  "accepted": false,
+  "entry": "saddle",
+  "source": "native_solver_evidence/saddle-entry.npz",
+  "time": 0.5654296875,
+  "dt": 0.00390625,
+  "phase_reference_error": 0.0004419003825814616
+}

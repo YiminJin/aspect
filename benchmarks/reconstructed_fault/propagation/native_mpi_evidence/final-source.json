@@ -1,0 +1,31 @@
+{
+  "HEAD": "33c0adba59132890b386f3e984b3e1650feffe44",
+  "branch": "fault-propagation",
+  "time_UTC": "2026-10-13T01:49:49.882886+00:00",
+  "files": {
+    "AGENTS.md": "1ce5811c7ddfda0521639f73e09777fb37f4777ebf80a970a9984b4009fa90f2",
+    "benchmarks/reconstructed_fault/propagation/README.md": "356de99cc05871a465550cadeb5a58d21b313987d3f6cdcd76918895d9716cd3",
+    "benchmarks/reconstructed_fault/propagation/assess_native_mpi.py": "4a85322e9f4db82d78a49171e6123d461c89c7b072bbc7f679d18af9693d760c",
+    "benchmarks/reconstructed_fault/propagation/native_endpoint_verification.cc": "3e97fc013241d39a999b45fccf590676d4ffba92ec5129725785bc8a14124734",
+    "benchmarks/reconstructed_fault/propagation/native_mpi_profile.cc": "032d187142a54a6a322971e6fd824340ecfe1590c9afafee3d838cf83bb320fa",
+    "benchmarks/reconstructed_fault/propagation/plot_native_mpi.py": "099589742e0b65379ec3b54725a00ab03bcf91066b58f5b47997c4821e43b3f7",
+    "benchmarks/reconstructed_fault/propagation/prepare_native_mpi.py": "64b7979137d9d13699c11de7f4cb9112f0d4f310b53ecb17f106f4e88e2bb00a",
+    "benchmarks/reconstructed_fault/propagation/run_native_mpi.py": "6c9a0db7041b6d189d218cbcdd1ba98ef6a1788030d624f4df157fbc31b65e57",
+    "doc/reconstructed_fault/CURRENT_STATUS.md": "b6c7a0457d118e3e69fcaed5f863465240a02fa77fa343e94c2da67b2133638e",
+    "doc/reconstructed_fault/current_design.md": "5f1277dab07216ba71a7427b037e14ace8c9735b4b39c3b53993acff63f956da",
+    "doc/reconstructed_fault/propagation/P2_native_MPI_report.md": "e7c8c0b971cd6330a54ab237d69ca2c0e8c055e411ca1dfa3330843e5209a47e",
+    "doc/reconstructed_fault/propagation/PLAN.md": "ea871f3ad39382887a8587a8a5184f3089e04184efd3acd64e34d4ab065ba14f",
+    "doc/reconstructed_fault/propagation/STATUS.md": "780f8ba32b83993b183666bdca404e322fe6d4f32f744410e143021b0f5a6fa2",
+    "doc/reconstructed_fault/specification.tex": "d5e35d1886d648f6dc859f9b68cb01639381689d1c297507fadfd31311eaa256",
+    "include/aspect/reconstructed_fault/endpoint_mpi.h": "036cf6c3a651ce887568143ae8dee2e58cb4c356ed67cc352c991529cee5c25e",
+    "source/material_model/phase_field_fault.cc": "9c74ca04bec8a7c6bdfa7960a4782df5b12fe5c2f078ea48aef28db348cddbfd",
+    "source/material_model/phase_field_fault/fe_strain.cc": "29cfb172ad5e774803ec888a4a2f547c11944eeb553d75e4088c62daa535c471",
+    "source/material_model/phase_field_fault/history.cc": "f968215ce88f3b639b96a82f1574a0a7baf6c5416b3acb64b9f0fe33dbf9b037",
+    "source/simulator/phase_field.cc": "3303f592b6991e608f5deb5cdd762a9b6e51357c49591f361f839ccb0c7cde70",
+    "source/simulator/solver/reconstructed_fault_endpoint_phase.cc": "a60d025952316a72f8d37500e391e936789aa670c056e7910b53612f459f8122",
+    "source/simulator/solver/reconstructed_fault_stokes.cc": "d8909d2f4c83a9db030ec61f6f96f3678f8264cbda90e4e9e7ddea6cc26babf3"
+  },
+  "executable": "8fba047bd33d212ec4c007b2fa5d287362634f60d1b41b236012c9b65bdd2f83",
+  "observer": "8d0060654edb260326357fb59a6b91cc43e99b8793b70e64a30f193d9f03858e",
+  "qualification": "Tasks 1\u20133 only; nine matched original-mesh MPI controls, 54 compatibility cases, and final label-only four-rank check passed; no full trajectory."
+}

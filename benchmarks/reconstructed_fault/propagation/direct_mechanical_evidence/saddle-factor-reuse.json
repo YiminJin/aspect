@@ -1,0 +1,21 @@
+{
+  "bulk_setups": 1,
+  "bulk_setup_seconds": [
+    2.352595937
+  ],
+  "surface_setups": 25,
+  "surface_setup_seconds": 52.914519624,
+  "surface_sizes": [
+    65
+  ],
+  "direct_condensed_calls": 649,
+  "direct_call_seconds_inclusive_setup": 78.193212175,
+  "repeated_solve_seconds_including_fresh_check": {
+    "calls": 624,
+    "total": 21.620258772,
+    "minimum": 0.031734793,
+    "median": 0.0343153655,
+    "maximum": 0.051080853
+  },
+  "note": "Setup timers include sparse construction/factor or interface columns/small factor; pure factorization not captured."
+}

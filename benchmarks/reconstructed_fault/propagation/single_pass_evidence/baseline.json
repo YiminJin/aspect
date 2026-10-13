@@ -1,0 +1,57 @@
+{
+  "HEAD": "33c0adba59132890b386f3e984b3e1650feffe44",
+  "branch": "fault-propagation",
+  "time_UTC": "2026-10-13T02:12:25.650858+00:00",
+  "preserved_incoming_files": {
+    "AGENTS.md": "1ce5811c7ddfda0521639f73e09777fb37f4777ebf80a970a9984b4009fa90f2",
+    "benchmarks/reconstructed_fault/propagation/README.md": "356de99cc05871a465550cadeb5a58d21b313987d3f6cdcd76918895d9716cd3",
+    "benchmarks/reconstructed_fault/propagation/native_endpoint_verification.cc": "3e97fc013241d39a999b45fccf590676d4ffba92ec5129725785bc8a14124734",
+    "doc/reconstructed_fault/CURRENT_STATUS.md": "b6c7a0457d118e3e69fcaed5f863465240a02fa77fa343e94c2da67b2133638e",
+    "doc/reconstructed_fault/current_design.md": "5f1277dab07216ba71a7427b037e14ace8c9735b4b39c3b53993acff63f956da",
+    "doc/reconstructed_fault/propagation/PLAN.md": "ea871f3ad39382887a8587a8a5184f3089e04184efd3acd64e34d4ab065ba14f",
+    "doc/reconstructed_fault/propagation/STATUS.md": "780f8ba32b83993b183666bdca404e322fe6d4f32f744410e143021b0f5a6fa2",
+    "doc/reconstructed_fault/specification.tex": "d5e35d1886d648f6dc859f9b68cb01639381689d1c297507fadfd31311eaa256",
+    "source/material_model/phase_field_fault.cc": "9c74ca04bec8a7c6bdfa7960a4782df5b12fe5c2f078ea48aef28db348cddbfd",
+    "source/material_model/phase_field_fault/fe_strain.cc": "29cfb172ad5e774803ec888a4a2f547c11944eeb553d75e4088c62daa535c471",
+    "source/material_model/phase_field_fault/history.cc": "f968215ce88f3b639b96a82f1574a0a7baf6c5416b3acb64b9f0fe33dbf9b037",
+    "source/simulator/phase_field.cc": "3303f592b6991e608f5deb5cdd762a9b6e51357c49591f361f839ccb0c7cde70",
+    "source/simulator/solver/reconstructed_fault_endpoint_phase.cc": "a60d025952316a72f8d37500e391e936789aa670c056e7910b53612f459f8122",
+    "source/simulator/solver/reconstructed_fault_stokes.cc": "d8909d2f4c83a9db030ec61f6f96f3678f8264cbda90e4e9e7ddea6cc26babf3",
+    "include/aspect/reconstructed_fault/endpoint_mpi.h": "036cf6c3a651ce887568143ae8dee2e58cb4c356ed67cc352c991529cee5c25e",
+    "doc/reconstructed_fault/propagation/P2_native_MPI_report.md": "e7c8c0b971cd6330a54ab237d69ca2c0e8c055e411ca1dfa3330843e5209a47e",
+    "benchmarks/reconstructed_fault/propagation/native_mpi_profile.cc": "032d187142a54a6a322971e6fd824340ecfe1590c9afafee3d838cf83bb320fa",
+    "benchmarks/reconstructed_fault/propagation/run_native_mpi.py": "6c9a0db7041b6d189d218cbcdd1ba98ef6a1788030d624f4df157fbc31b65e57",
+    "benchmarks/reconstructed_fault/propagation/prepare_native_mpi.py": "64b7979137d9d13699c11de7f4cb9112f0d4f310b53ecb17f106f4e88e2bb00a",
+    "benchmarks/reconstructed_fault/propagation/assess_native_mpi.py": "4a85322e9f4db82d78a49171e6123d461c89c7b072bbc7f679d18af9693d760c",
+    "benchmarks/reconstructed_fault/propagation/plot_native_mpi.py": "099589742e0b65379ec3b54725a00ab03bcf91066b58f5b47997c4821e43b3f7"
+  },
+  "driver": "16aba80429e5d47df7cc93ac6d7fd58522183e5e81465640ff9f279b9892248e",
+  "reused_references": {
+    "benchmarks/reconstructed_fault/propagation/native_endpoint_evidence/dt-1-1024/initialization.npz": "f01afd0236ebebe3833bf6dac4b1e0536984279e398d6dc26f399730cda3ba9a",
+    "benchmarks/reconstructed_fault/propagation/native_endpoint_evidence/dt-1-1024/fields.npz": "c385730a780b790df56b11aca80f6e095a498e96e611fefb88e9b0b7abc5867e",
+    "benchmarks/reconstructed_fault/propagation/native_endpoint_evidence/dt-1-1024/history.json": "6b35040e00426f5ed360506594f57532242eff1dfe14e468c86967f42934a677",
+    "benchmarks/reconstructed_fault/propagation/native_endpoint_evidence/dt-1-1024/energy.json": "8d4ef9c6f6ff7c500ceb162a5e6f1738b4681fd85602f444948343c18c2df1ed",
+    "benchmarks/reconstructed_fault/propagation/native_endpoint_evidence/dt-1-1024/summary.json": "d705cb51a7fa0781f178b2ce1c31aeb9e1db4a55ba7afe0eadf75942ca2b3b35",
+    "benchmarks/reconstructed_fault/propagation/native_endpoint_evidence/dt-1-2048/initialization.npz": "f01afd0236ebebe3833bf6dac4b1e0536984279e398d6dc26f399730cda3ba9a",
+    "benchmarks/reconstructed_fault/propagation/native_endpoint_evidence/dt-1-2048/fields.npz": "f7e9390f98f53be9ce51fc48097466618a54189c3cc2aa1510396e6191b02dab",
+    "benchmarks/reconstructed_fault/propagation/native_endpoint_evidence/dt-1-2048/history.json": "c21f3b04588ce46084bb6d60b3b73c4a69d085dc7dec22de9105c79d73610610",
+    "benchmarks/reconstructed_fault/propagation/native_endpoint_evidence/dt-1-2048/energy.json": "489cb4d83576ae499f534169f7d1a962d859a1a13c146acbb24e780a448155de",
+    "benchmarks/reconstructed_fault/propagation/native_endpoint_evidence/dt-1-2048/summary.json": "f32c0e1a6b760881235744ea757745f22dc71dc1227b2a8343f378f083b4e8b5"
+  },
+  "settings": {
+    "normal_cells": 512,
+    "velocity_degree": 2,
+    "phase_degree": 1,
+    "normal_quadrature": 6,
+    "surface_segments": 64,
+    "dt_denominators": [
+      1024,
+      2048
+    ],
+    "T": 0.625,
+    "amplitude": 0.256,
+    "stress_scale_Pa": 1332.521975,
+    "storage_scale_J_per_m": 0.887807407,
+    "continuous_path_time_points": 16
+  }
+}

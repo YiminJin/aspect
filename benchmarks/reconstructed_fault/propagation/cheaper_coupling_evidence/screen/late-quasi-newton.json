@@ -1,0 +1,203 @@
+{
+  "method": "quasi-newton",
+  "seconds": 0.5028459509994718,
+  "counts": {
+    "mechanical_evaluations": 22,
+    "objective_calls": 47,
+    "reduced_hessians": 1,
+    "bulk_factor_calls": 24,
+    "bulk_rhs": 558,
+    "phase_linear_solves": 0,
+    "metric_factors": 7,
+    "metric_solves": 19,
+    "line_trials": 21
+  },
+  "timing": {
+    "mechanics": 0.08665227900200989,
+    "hessian": 0.38528850600050646,
+    "phase_linear": 0.0,
+    "metric": 0.010572259001492057,
+    "stability": 0.40188831699924776
+  },
+  "KKT": 7.287146363753932e-12,
+  "stability": {
+    "KKT": 7.287146363753932e-12,
+    "free": 315,
+    "weak": 0,
+    "centroid": {
+      "phase": 0.5000565256318308,
+      "localization": 0.5000565396434177
+    },
+    "minimum": 1.3830469722053143,
+    "second": 334.3781164956008,
+    "admissible_negative": false,
+    "stable": true,
+    "translation_cosine": 0.9999006228449058,
+    "antisymmetry": 0.036363424860338674,
+    "amplitude_two_sided": 1.0732552419760963e-05,
+    "mass_norm": 1.0000000000000004
+  },
+  "escapes": 0,
+  "trace": [
+    {
+      "iterations": 19,
+      "before_polish": 7.287146363753932e-12,
+      "trace": [
+        {
+          "iteration": 0,
+          "KKT": 9.221520029662364e-05,
+          "free": 315,
+          "line_search": 2,
+          "potential": 0.3820077682947518
+        },
+        {
+          "iteration": 1,
+          "KKT": 0.00023673601564802547,
+          "free": 316,
+          "line_search": 0,
+          "potential": 0.38200627919162117
+        },
+        {
+          "iteration": 2,
+          "KKT": 4.2122405283494476e-05,
+          "free": 317,
+          "line_search": 0,
+          "potential": 0.3820056485243868
+        },
+        {
+          "iteration": 3,
+          "KKT": 1.0242304211033024e-05,
+          "free": 317,
+          "line_search": 0,
+          "potential": 0.3820056121821923
+        },
+        {
+          "iteration": 4,
+          "KKT": 1.1092221361920554e-05,
+          "free": 316,
+          "line_search": 0,
+          "potential": 0.3820056029243156
+        },
+        {
+          "iteration": 5,
+          "KKT": 1.82360041462703e-07,
+          "free": 316,
+          "line_search": 0,
+          "potential": 0.3820056028923395
+        },
+        {
+          "iteration": 6,
+          "KKT": 3.238580924987953e-08,
+          "free": 316,
+          "line_search": 0,
+          "potential": 0.38200560289211366
+        },
+        {
+          "iteration": 7,
+          "KKT": 1.0657344547401219e-08,
+          "free": 316,
+          "line_search": 0,
+          "potential": 0.38200560289209623
+        },
+        {
+          "iteration": 8,
+          "KKT": 2.147045905540441e-07,
+          "free": 316,
+          "line_search": 0,
+          "potential": 0.38200560289185115
+        },
+        {
+          "iteration": 9,
+          "KKT": 4.209980042496642e-07,
+          "free": 316,
+          "line_search": 0,
+          "potential": 0.382005602891461
+        },
+        {
+          "iteration": 10,
+          "KKT": 7.290880436151461e-07,
+          "free": 316,
+          "line_search": 0,
+          "potential": 0.3820056028904275
+        },
+        {
+          "iteration": 11,
+          "KKT": 9.053579748659894e-07,
+          "free": 316,
+          "line_search": 0,
+          "potential": 0.38200560288879964
+        },
+        {
+          "iteration": 12,
+          "KKT": 7.093872350255701e-07,
+          "free": 316,
+          "line_search": 0,
+          "potential": 0.38200560288707314
+        },
+        {
+          "iteration": 13,
+          "KKT": 1.5630628306250438e-06,
+          "free": 315,
+          "line_search": 0,
+          "potential": 0.3820056028863816
+        },
+        {
+          "iteration": 14,
+          "KKT": 1.66975092891928e-06,
+          "free": 316,
+          "line_search": 0,
+          "potential": 0.3820056028862495
+        },
+        {
+          "iteration": 15,
+          "KKT": 8.602912235071936e-07,
+          "free": 315,
+          "line_search": 0,
+          "potential": 0.3820056028862078
+        },
+        {
+          "iteration": 16,
+          "KKT": 1.6190871887307307e-08,
+          "free": 315,
+          "line_search": 0,
+          "potential": 0.3820056028861887
+        },
+        {
+          "iteration": 17,
+          "KKT": 5.97428545094464e-09,
+          "free": 315,
+          "line_search": 0,
+          "potential": 0.3820056028861879
+        },
+        {
+          "iteration": 18,
+          "KKT": 1.1157578992114953e-10,
+          "free": 315,
+          "line_search": 0,
+          "potential": 0.3820056028861882
+        }
+      ]
+    }
+  ],
+  "minimum_increment": 0.0,
+  "maximum": 0.7501916740465528,
+  "potential_J_per_m": 24.448358584746547,
+  "q": 188.83431362853324,
+  "V": 0.1610646447542705,
+  "slip": 0.04880473012358517,
+  "bulk": 0.7067210779085279,
+  "cohesive": 4.598791487824871,
+  "fracture": 18.98555709488388,
+  "force": 1.7490719983470626e-08,
+  "contact_signed": -3.888089850079268e-11,
+  "contact": 3.888089850079268e-11,
+  "I": 257.9359559207254,
+  "stress_min": 1115.6253827543696,
+  "stress_max": 1226.5749654735555,
+  "accepted": true,
+  "entry": "late",
+  "source": "native_endpoint_evidence/dt-1-1024",
+  "time": 0.625,
+  "dt": 0.0009765625,
+  "phase_reference_error": 2.713798519238253e-09
+}

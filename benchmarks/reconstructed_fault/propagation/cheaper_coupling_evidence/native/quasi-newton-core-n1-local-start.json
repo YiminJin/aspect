@@ -1,0 +1,30 @@
+{
+  "command": [
+    "mpirun",
+    "--map-by",
+    "core",
+    "--bind-to",
+    "core",
+    "--rank-by",
+    "slot",
+    "--report-bindings",
+    "-np",
+    "1",
+    "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect-release",
+    "/home/ein/repository/aspect-fault-propagation/benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/native/quasi-newton-core-n1-local.prm"
+  ],
+  "output": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-quasi-newton-core-n1-local",
+  "input": "/home/ein/repository/aspect-fault-propagation/benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/native/quasi-newton-core-n1-local.prm",
+  "source_input": "/home/ein/repository/aspect-fault-propagation/benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/native/core.prm",
+  "ranks": 1,
+  "threads_per_rank": 1,
+  "tangential_cells": 16,
+  "normal_cells": 512,
+  "surface_segments": 64,
+  "wall_cap_seconds": 3600.0,
+  "executable_sha256": "3257574451ef5db3a733ebfd72656563939179be5eb8fd3963d4ff8b32bfbc11",
+  "plugin_sha256": "8d0060654edb260326357fb59a6b91cc43e99b8793b70e64a30f193d9f03858e",
+  "input_sha256": "001932f8c2ca8ecc904bf70aa2702cc25ff5969a6523229a44e741bbaadfc1b9",
+  "physical_history": "fresh driver; retained fixed-entry diagnostics when selected; no checkpoint conversion",
+  "mpi_profiler_sha256": "e2c23bcf11be5033f66a2aa1262d26bcb37d53412924401b786b80c8a3ed14eb"
+}

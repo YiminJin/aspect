@@ -1,0 +1,80 @@
+{
+  "method": "staggered-4",
+  "seconds": 1.7566834809986176,
+  "counts": {
+    "mechanical_evaluations": 5,
+    "objective_calls": 17,
+    "reduced_hessians": 1,
+    "bulk_factor_calls": 7,
+    "bulk_rhs": 524,
+    "phase_linear_solves": 4,
+    "metric_factors": 0,
+    "metric_solves": 0,
+    "line_trials": 0
+  },
+  "timing": {
+    "mechanics": 0.028718962988932617,
+    "hessian": 0.38395353500163765,
+    "phase_linear": 0.0099370669995551,
+    "metric": 0.0,
+    "stability": 0.4010491560002265
+  },
+  "KKT": 5.246452489664244e-05,
+  "stability": {
+    "KKT": 5.246452489664244e-05,
+    "free": 317,
+    "weak": 0,
+    "centroid": {
+      "phase": 0.5000704225554488,
+      "localization": 0.500070666874796
+    },
+    "minimum": -1.5945080518517745,
+    "second": 329.6833935938264,
+    "admissible_negative": true,
+    "stable": false,
+    "translation_cosine": 0.9999554697372529,
+    "antisymmetry": 0.008508904687067467,
+    "amplitude_two_sided": 0.0004730127606974855,
+    "mass_norm": 1.0000000000000007
+  },
+  "escapes": 0,
+  "trace": [
+    {
+      "KKT": 5.298332962223494e-05,
+      "subproblem_KKT": 8.542194729333354e-13
+    },
+    {
+      "KKT": 5.2524368538665094e-05,
+      "subproblem_KKT": 8.531716999538467e-14
+    },
+    {
+      "KKT": 5.247241599331263e-05,
+      "subproblem_KKT": 5.5904933460234675e-14
+    },
+    {
+      "KKT": 5.246452489664244e-05,
+      "subproblem_KKT": 2.8483500280582694e-12
+    }
+  ],
+  "minimum_increment": 0.0,
+  "maximum": 0.7493979373509904,
+  "potential_J_per_m": 24.448401539857862,
+  "q": 189.39132890469287,
+  "V": 0.16049431880586745,
+  "slip": 0.04880417316465118,
+  "bulk": 0.7073819239459433,
+  "cohesive": 4.61230406235144,
+  "fracture": 18.97198358564568,
+  "force": 2.2116921627457486e-08,
+  "contact_signed": -9.777068044058979e-12,
+  "contact": 9.777068044058979e-12,
+  "I": 257.17440456160415,
+  "stress_min": 1117.3958998566377,
+  "stress_max": 1226.5063965164009,
+  "accepted": false,
+  "entry": "late",
+  "source": "native_endpoint_evidence/dt-1-1024",
+  "time": 0.625,
+  "dt": 0.0009765625,
+  "phase_reference_error": 0.0007949003781534403
+}

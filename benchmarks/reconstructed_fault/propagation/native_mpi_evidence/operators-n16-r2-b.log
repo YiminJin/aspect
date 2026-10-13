@@ -1,0 +1,147 @@
+[BEBOP:09558] Rank 0 bound to package[0][core:L0]
+[BEBOP:09558] Rank 1 bound to package[0][core:L1]
+-----------------------------------------------------------------------------
+--                             This is ASPECT                              --
+-- The Advanced Solver for Planetary Evolution, Convection, and Tectonics. --
+-----------------------------------------------------------------------------
+--     . version 3.1.0-pre (fault-propagation, 33c0adba5)
+--     . using deal.II 9.6.2 (dealii-9.6, 6890ca740b)
+--     .       with 32 bit indices
+--     .       with vectorization level 2 (AVX, 4 doubles, 256 bits)
+--     . using Trilinos 14.2.0
+--     . using p4est 2.8.7
+--     . using Geodynamic World Builder 1.0.0
+--     . running in OPTIMIZED mode
+--     . running with 2 MPI processes
+-----------------------------------------------------------------------------
+
+Loading shared library </home/ein/repository/aspect-fault-propagation/build-propagation-integration/plugin/libnative_endpoint_verification.release.so>
+
+
+-----------------------------------------------------------------------------
+The output directory </home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-operators-n16-r2-b/> provided in the input file appears not to exist.
+ASPECT will create it for you.
+-----------------------------------------------------------------------------
+
+
+-----------------------------------------------------------------------------
+-- For information on how to cite ASPECT, see:
+--   https://aspect.geodynamics.org/citing.html?ver=3.1.0-pre&NewtonSolver=1&particles=1&sha=33c0adba5&src=code
+-----------------------------------------------------------------------------
+Number of active cells: 8,192 (on 5 levels)
+Number of degrees of freedom: 254,217 (67,650+8,721+33,825+33,825+33,825+33,825+33,825+8,721)
+
+*** Timestep 0:  t=0 seconds, dt=0 seconds
+   Accepted supplied continuum phase seed; native particle H retained, unloaded FE histories constructed afterward.
+   Reconstruction initial faults... fixed normal association half-width=0.50000000000001588 ... done.
+
+   Advecting particles...  done.
+   Initial cohesive q profile variation for fault 0: weighted RMS=0 Pa, maximum=0 Pa, normalized RMS=0, normalized maximum=0
+   FE energy summation: bulk old-new=0, cohesive old-new=0
+   Accepted FE strain: G=1000000 eta=100000000 lambda=100 m=128.00000000016001 bulk QPs=294912 phase DoFs=8721
+   Endpoint collective Amesos velocity factor: seconds=0.285519945, DoFs=67650
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=12, fresh=3.063287e-05, target=4.672166e-05
+      Fault linear solve: iterations=11, fresh=2.253770e-05, target=4.657565e-05
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.999973e-01, 0.000000e+00
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Fault linear solve: iterations=3, fresh=9.942077e-07, target=3.690891e-06
+      Fault linear solve: iterations=10, fresh=1.517616e-12, target=2.253770e-12
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 4.838931e-08, 0.000000e+00
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Fault linear solve: iterations=1, fresh=1.154516e-09, target=3.690891e-06
+      Fault linear solve: iterations=10, fresh=1.474123e-19, target=1.517616e-19
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  2: 3.258380e-15, 0.000000e+00
+
+   Postprocessing:
+   FE energy summation: bulk old-new=0, cohesive old-new=0
+     Number of advected particles: 73728
+     Native endpoint P2            compact fields, interval rates, accepted-state and operator checks
+
+*** Timestep 1:  t=0.0009765625 seconds, dt=0.0009765625 seconds
+   Advecting particles...  done.
+   FE energy summation: bulk old-new=0, cohesive old-new=0
+   Endpoint collective Amesos velocity factor: seconds=0.31301079399999998, DoFs=67650
+   Rebuilding Stokes preconditioner...
+      Fault linear solve: iterations=2, fresh=9.047364e-10, target=3.690891e-06
+      Fault linear solve: iterations=10, fresh=3.327941e-19, target=3.991582e-19
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  0: 9.999969e-01, 0.000000e+00
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Fault linear solve: iterations=1, fresh=9.014040e-10, target=3.690891e-06
+      Fault linear solve: iterations=10, fresh=2.304398e-26, target=3.327941e-26
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  1: 8.337374e-08, 0.000000e+00
+      Reconstructed-fault line search accepted after 0 rejected candidates; alpha=1.
+      Fault linear solve: iterations=1, fresh=9.014040e-10, target=3.690891e-06
+      Fault linear solve: iterations=11, fresh=5.682203e-34, target=2.304399e-33
+      Relative nonlinear residuals (bulk, fault) after nonlinear iteration  2: 5.773128e-15, 0.000000e+00
+   FE energy summation: bulk old-new=0, cohesive old-new=0
+   FE energy summation: bulk old-new=0, cohesive old-new=0
+
+
+----------------------------------------------------
+Exception 'ExcTrilinosError(ierr)' on rank 0 on processing: 
+
+
+----------------------------------------------------
+Exception 'ExcTrilinosError(ierr)' on rank 1 on processing: 
+
+--------------------------------------------------------
+An error occurred in line <2078> of file </opt/dealii/9.6-local/include/deal.II/lac/trilinos_vector.h> in function
+    void dealii::TrilinosWrappers::MPI::Vector::add(dealii::TrilinosScalar, const dealii::TrilinosWrappers::MPI::Vector&)
+The violated condition was: 
+    ierr == 0
+Additional information: 
+    An error with error number -2 occurred while calling a Trilinos
+    function
+
+Stacktrace:
+-----------
+#0  /home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect-release: aspect::MaterialModel::PhaseFieldFault<2>::make_fe_endpoint_trial(dealii::TrilinosWrappers::MPI::BlockVector const&, std::vector<std::vector<double, std::allocator<double> >, std::allocator<std::vector<double, std::allocator<double> > > > const&) const
+#1  /home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect-release: aspect::Simulator<2>::solve_reconstructed_fault_endpoint_phase(bool, dealii::TrilinosWrappers::MPI::BlockVector const*, std::vector<std::vector<double, std::allocator<double> >, std::allocator<std::vector<double, std::allocator<double> > > >*)::{lambda(dealii::Vector<double> const&)#1}::operator()(dealii::Vector<double> const&) const
+#2  /home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect-release: aspect::Simulator<2>::solve_reconstructed_fault_endpoint_phase(bool, dealii::TrilinosWrappers::MPI::BlockVector const*, std::vector<std::vector<double, std::allocator<double> >, std::allocator<std::vector<double, std::allocator<double> > > >*)
+#3  /home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect-release: aspect::Simulator<2>::solve_timestep()
+#4  /home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect-release: aspect::Simulator<2>::run()
+#5  /home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect-release: ) [0x1fbf2dc]
+#6  /home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect-release: main
+--------------------------------------------------------
+
+Aborting!
+----------------------------------------------------
+--------------------------------------------------------------------------
+MPI_ABORT was invoked on rank 1 in communicator MPI_COMM_WORLD
+  Proc: [[65073,1],1]
+  Errorcode: 1
+
+NOTE: invoking MPI_ABORT causes Open MPI to kill all MPI processes.
+You may or may not see output from other processes, depending on
+exactly when Open MPI kills them.
+--------------------------------------------------------------------------
+
+--------------------------------------------------------
+An error occurred in line <2078> of file </opt/dealii/9.6-local/include/deal.II/lac/trilinos_vector.h> in function
+    void dealii::TrilinosWrappers::MPI::Vector::add(dealii::TrilinosScalar, const dealii::TrilinosWrappers::MPI::Vector&)
+The violated condition was: 
+    ierr == 0
+Additional information: 
+    An error with error number -2 occurred while calling a Trilinos
+    function
+
+Stacktrace:
+-----------
+#0  /home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect-release: aspect::MaterialModel::PhaseFieldFault<2>::make_fe_endpoint_trial(dealii::TrilinosWrappers::MPI::BlockVector const&, std::vector<std::vector<double, std::allocator<double> >, std::allocator<std::vector<double, std::allocator<double> > > > const&) const
+#1  /home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect-release: aspect::Simulator<2>::solve_reconstructed_fault_endpoint_phase(bool, dealii::TrilinosWrappers::MPI::BlockVector const*, std::vector<std::vector<double, std::allocator<double> >, std::allocator<std::vector<double, std::allocator<double> > > >*)::{lambda(dealii::Vector<double> const&)#1}::operator()(dealii::Vector<double> const&) const
+#2  /home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect-release: aspect::Simulator<2>::solve_reconstructed_fault_endpoint_phase(bool, dealii::TrilinosWrappers::MPI::BlockVector const*, std::vector<std::vector<double, std::allocator<double> >, std::allocator<std::vector<double, std::allocator<double> > > >*)
+#3  /home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect-release: aspect::Simulator<2>::solve_timestep()
+#4  /home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect-release: aspect::Simulator<2>::run()
+#5  /home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect-release: ) [0x1fbf2dc]
+#6  /home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect-release: main
+--------------------------------------------------------
+
+Aborting!
+----------------------------------------------------
+--------------------------------------------------------------------------
+prterun has exited due to process rank 0 with PID 0 on node BEBOP calling
+"abort". This may have caused other processes in the application to be
+terminated by signals sent by prterun (as reported here).
+--------------------------------------------------------------------------
+ 

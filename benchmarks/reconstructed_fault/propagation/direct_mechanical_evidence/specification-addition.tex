@@ -1,0 +1,32 @@
+\paragraph{Optional direct mechanical inversion (bounded P2 test).}
+\texttt{Endpoint direct mechanics = false} retains the existing FGMRES path.
+The selected test changes only inversion of the current Newton Jacobian,
+whose actual uncondensed signs are
+\[
+ \begin{pmatrix}A&-B\\G&-K\end{pmatrix}
+ \binom{\Delta x}{\Delta V}=\binom{f}{-r}.
+\]
+For the current free surface indices $F$, form $W=A^{-1}B_F$ and
+$S=K_{FF}-G_FW$, using the native homogeneous/scaled $B$ and $G$ actions
+independently. For an already condensed right-hand side
+$b=f+B_FK_{FF}^{-1}r_F$, solve
+\[
+ x_0=A^{-1}b,\quad z=S^{-1}G_Fx_0,\quad
+ \Delta x=x_0+Wz,\qquad
+ \Delta V_F=K_{FF}^{-1}(r_F+G_F\Delta x),\quad\Delta V_A=0.
+\]
+Retain all native velocity/pressure/tangential modes, original compatibility,
+fresh condensed and uncondensed residual checks, action uncertainty, and outer
+Newton/energy/KKT criteria. Only a verified two-sided constant-pressure null
+mode permits algebraic pinning of an independent pressure coefficient; project
+back to the original pressure complement. Open boundaries receive no pin.
+The existing physical pressure normalization remains separate.
+Use installed Amesos sparse factors and small LAPACK surface LU; the initial
+option is explicitly serial. Bulk factors are rebuilt with the homogeneous
+operator at each physical step; current surface factors belong to one
+linearization/free set and are invalid after any $B,G,K$ refresh. No history
+is advanced by setup, sensitivity solves or mechanical trials. Setup and
+representative repeated solves must show a clear total cost gain before a
+complete growth entry, followed by a retained saddle diagnostic, is authorized.
+No trajectory is part of this test.
+

@@ -1,0 +1,12 @@
+[BEBOP:00002] opal_ifinit: socket() failed with errno=1
+[BEBOP:00002] pmix_ifinit: socket() failed with errno=1
+[1791872476.898433] [BEBOP:2    :0]            sock.c:114  UCX  WARN  getifaddrs error: Operation not permitted
+[1791872476.898440] [BEBOP:2    :0]            sock.c:114  UCX  WARN  getifaddrs error: Operation not permitted
+[1791872476.898442] [BEBOP:2    :0]            sock.c:114  UCX  WARN  getifaddrs error: Operation not permitted
+[1791872476.898443] [BEBOP:2    :0]            sock.c:114  UCX  WARN  getifaddrs error: Operation not permitted
+[1791872476.898444] [BEBOP:2    :0]            sock.c:114  UCX  WARN  getifaddrs error: Operation not permitted
+[1791872476.898445] [BEBOP:2    :0]            sock.c:114  UCX  WARN  getifaddrs error: Operation not permitted
+Filters: *Fault*,*fault*,Stage-I*
+===============================================================================
+All tests passed (21112 assertions in 55 test cases)
+

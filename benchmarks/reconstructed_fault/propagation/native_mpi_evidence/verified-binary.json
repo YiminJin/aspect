@@ -1,0 +1,5 @@
+{
+  "path": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect-mpi-verified-release",
+  "sha256": "e9c8b1423d21a4e2a2903a579eb9703e4b3d54231cfdb0e17bee2ad320d55fb2",
+  "purpose": "Frozen executable used by all nine matched MPI timing controls; before log-label-only correction."
+}

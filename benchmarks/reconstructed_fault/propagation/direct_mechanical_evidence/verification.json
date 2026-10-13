@@ -1,0 +1,37 @@
+{
+  "completed": [
+    "batch-n1-local",
+    "growth-direct-n1",
+    "saddle-direct-n1"
+  ],
+  "simulation_reruns_for_missing_metrics": 0,
+  "missing_metrics": [
+    "pure bulk factorization",
+    "pure small-surface factorization",
+    "standalone entry peak RSS"
+  ],
+  "recorded_peak": "paired batch process 1789.61328125 MiB",
+  "compatibility": "21112 assertions /55 cases passed",
+  "physical_outer_criteria": "unchanged",
+  "direct_scope": "serial restricted fixture only",
+  "sha256": {
+    "include/aspect/simulator/solver/reconstructed_fault_surface_schur.h": "061afb8da2e742594ff3b87e5b57f2c50f404be98687d29d2175b100355f73f5",
+    "include/aspect/simulator/solver/reconstructed_fault_condensed_system.h": "f58883db77912264c01e4a7a11e525bb7c470dbfb79949f16c892dc2f8896a26",
+    "source/simulator/solver/reconstructed_fault_condensed_system.cc": "13741ee1380332359a1fa15d2a5a1a2aaae9a02f01457421c3fd56e39e56215b",
+    "source/simulator/solver/reconstructed_fault_stokes.cc": "32f7ca2a9004afba54cec6626865c056960c0a2bb400b0ac3016f7c06de49aa9",
+    "include/aspect/simulator.h": "d4c4288a77f11b9241b6ad58be4822161196a22713bcd000e4ea7f0c16c58474",
+    "include/aspect/phase_field.h": "0f56639f635579571e00a97734d689024c75aa375e8ea031d1bc95033866846b",
+    "source/simulator/phase_field.cc": "7e5f5fc5f0193a7ca8eda49340c0884a2bf28314d87d3944cd99c7c087fc43a5",
+    "unit_tests/reconstructed_fault_surface_schur.cc": "3412d90060ed45fb702a60037cea26c5f7e4c4d56e305b17b4df63fe2d771c03",
+    "tests/phase_field_test_access.h": "4fdc2368762073c3d48579d8c0f2385425d0c75d6ba74e7c94e5984833b445c2",
+    "benchmarks/reconstructed_fault/propagation/native_endpoint_verification.cc": "e2389b6a7b09a2cef8c7b2d96a3c6da1e28a3d1ad1f48e94280f6b5bcbcab56c",
+    "benchmarks/reconstructed_fault/propagation/run_direct_mechanical.py": "a72ee88b09ca6df87a78c7f064df1cd46e717874fac57ae111492c188208e24e",
+    "benchmarks/reconstructed_fault/propagation/assess_direct_mechanical.py": "a8798a19674009ab0c8f411098b30fe51c2cdd3614abffce2c00be12ec91ba69",
+    "benchmarks/reconstructed_fault/propagation/assess_direct_entries.py": "e5b5789f2927c426a26c3dbdaf112c28ade789830be41642de830b873798ba9e",
+    "doc/reconstructed_fault/propagation/P2_direct_mechanical_report.md": "dd93e6ecbffc1fc3bc504204ae2285b010ad4da1a514ff3216465f6acc1cd046",
+    "doc/reconstructed_fault/specification.tex": "2b57af74ad4c49aa4a2f1c28358b417c76c78ddc2c22188a83a95cecb84c75a1",
+    "build-propagation-integration/aspect-release": "e78821a5b12b5070c1e0f7f626ed631d8f030a50ed23bc2a895f4b1713214898",
+    "build-propagation-integration/plugin/libnative_endpoint_verification.release.so": "f5b7567699a85d305a1b9eb30824fe7d5ae75a58d3596602015e1402cbbbcc57"
+  },
+  "run_provenance_consistent": true
+}

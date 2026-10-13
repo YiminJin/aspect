@@ -1,0 +1,98 @@
+{
+  "stage": "saddle",
+  "tag": "saddle-direct-n1",
+  "pass": true,
+  "row": {
+    "time": 0.5654296875,
+    "dt": 0.00390625,
+    "initial_potential": 22.89552055576418,
+    "final_potential": 22.895520546950095,
+    "KKT": 2.8792940254263044e-13,
+    "phase_error": 5.032219085876477e-11,
+    "reflected_phase_error": 0.0008832402343209589,
+    "bulk_residual": 2.388555348051164e-10,
+    "contact_rms": 8.749403420696028e-12,
+    "increment": 0.00618032000790536,
+    "healing": 0.0,
+    "I_min": 149.51176563313467,
+    "centroid": 0.500126224152879,
+    "reference_centroid": 0.5001262241390291,
+    "velocity_error_selected": 1.156987247327712e-09,
+    "q_center": 264.7364584398479,
+    "V_interval": 0.14558871055964928,
+    "slip_candidate": 0.03965253382226596,
+    "bulk": 0.7997878096672143,
+    "cohesive": 5.23929538344624,
+    "fracture": 16.287742560605654
+  },
+  "differences": {
+    "phase": {
+      "phase": 1.2141398997300712e-12,
+      "lower": 0.0,
+      "reference": 0.0
+    },
+    "surface": {
+      "I": 2.4490987016179133e-10,
+      "q": 5.920810508541763e-10,
+      "V_interval": 7.29954985345671e-12,
+      "slip": 2.85119150511548e-14
+    },
+    "stress": {
+      "phase": 1.111610803405938e-12,
+      "chi": 3.339017951020651e-11,
+      "tau_xx": 1.1941172528065846e-08,
+      "tau_xy": 1.800799509510398e-08,
+      "tau_yy": 1.748441556011453e-08,
+      "R_xx": 3.2147637998726466e-15,
+      "R_xy": 6.71435129717679e-13,
+      "R_yy": 1.1562567646983301e-14,
+      "rate_xx": 8.025370459046686e-13,
+      "rate_xy": 1.717624931174555e-10,
+      "rate_yy": 2.9600751308422475e-12
+    }
+  },
+  "original_KKT_target": 3.4812720725722936e-11,
+  "energy_differences": {
+    "final_potential": -2.842170943040401e-14,
+    "bulk": -3.8813396940895473e-13,
+    "cohesive": -5.848654893725325e-12,
+    "fracture": 5.9259264162392356e-12
+  },
+  "cost": {
+    "mechanical seconds": 314.460535691,
+    "tangent seconds": 231.83729964999986,
+    "tangent calls": 316.0,
+    "finite-difference calls": 3.0,
+    "line searches": 8.0,
+    "phase iterations": 8.0,
+    "entry_seconds": 615.705425398,
+    "mechanical_trials_final": null,
+    "mechanical_trials_last_KKT_log": 15,
+    "direct_linear_calls": 653,
+    "bulk_setups": 2,
+    "surface_setups": 29
+  },
+  "reference_cost": {
+    "mechanical seconds": 367.68712919300003,
+    "tangent seconds": 1207.0538184990007,
+    "tangent calls": 363.0,
+    "finite-difference calls": 3.0,
+    "line searches": 9.0,
+    "phase iterations": 9.0,
+    "entry_seconds": 1655.606503053,
+    "mechanical_trials_final": null,
+    "mechanical_trials_last_KKT_log": 16,
+    "direct_linear_calls": 0,
+    "bulk_setups": 0,
+    "surface_setups": 0
+  },
+  "retained_reference": "saddle-final-r1",
+  "curvature": [
+    -0.2802021917102122,
+    15.992243940591703
+  ],
+  "process_seconds": 661.0791405679997,
+  "reference_process_seconds": 1703.5682187869988,
+  "entry_speedup": 2.6889587695005197,
+  "timing_note": "FGMRES complete-entry timing is retained and PMPI instrumented; fixed-state paired batch is the current controlled comparison."
+}

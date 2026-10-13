@@ -1,0 +1,31 @@
+{
+  "command": [
+    "mpirun",
+    "--map-by",
+    "core",
+    "--bind-to",
+    "core",
+    "--rank-by",
+    "slot",
+    "--report-bindings",
+    "-np",
+    "1",
+    "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect-release",
+    "/home/ein/repository/aspect-fault-propagation/benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/batch-n1-local.prm"
+  ],
+  "output": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-batch-n1-local",
+  "input": "/home/ein/repository/aspect-fault-propagation/benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/batch-n1-local.prm",
+  "source_input": "/home/ein/repository/aspect-fault-propagation/benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/batch.prm",
+  "ranks": 1,
+  "threads_per_rank": 1,
+  "tangential_cells": 16,
+  "normal_cells": 512,
+  "surface_segments": 64,
+  "wall_cap_seconds": 600.0,
+  "executable_sha256": "e78821a5b12b5070c1e0f7f626ed631d8f030a50ed23bc2a895f4b1713214898",
+  "plugin_sha256": "f5b7567699a85d305a1b9eb30824fe7d5ae75a58d3596602015e1402cbbbcc57",
+  "input_sha256": "8cf507ffbaec5299561acee5a9115e7ea5e8c079f4c63e33d100ba1ee53a81df",
+  "physical_history": "fresh driver; retained fixed-entry diagnostics when selected; no checkpoint conversion",
+  "returncode": 0,
+  "wall_seconds": 115.43500186099982
+}

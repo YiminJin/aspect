@@ -1,0 +1,20 @@
+{
+  "HEAD": "33c0adba59132890b386f3e984b3e1650feffe44",
+  "branch": "fault-propagation",
+  "files": {
+    "include/aspect/reconstructed_fault/endpoint_mpi.h": "036cf6c3a651ce887568143ae8dee2e58cb4c356ed67cc352c991529cee5c25e",
+    "benchmarks/reconstructed_fault/propagation/native_endpoint_verification.cc": "3e97fc013241d39a999b45fccf590676d4ffba92ec5129725785bc8a14124734",
+    "benchmarks/reconstructed_fault/propagation/native_mpi_profile.cc": "032d187142a54a6a322971e6fd824340ecfe1590c9afafee3d838cf83bb320fa",
+    "benchmarks/reconstructed_fault/propagation/run_native_mpi.py": "6c9a0db7041b6d189d218cbcdd1ba98ef6a1788030d624f4df157fbc31b65e57",
+    "benchmarks/reconstructed_fault/propagation/prepare_native_mpi.py": "64b7979137d9d13699c11de7f4cb9112f0d4f310b53ecb17f106f4e88e2bb00a",
+    "benchmarks/reconstructed_fault/propagation/assess_native_mpi.py": "7fd58833707ad10a5d1c29f4a6b2b9ac1860e71fd4202c98dae4903738542e27",
+    "source/material_model/phase_field_fault.cc": "9c74ca04bec8a7c6bdfa7960a4782df5b12fe5c2f078ea48aef28db348cddbfd",
+    "source/material_model/phase_field_fault/fe_strain.cc": "b5919f58ac6826beb68f05ae2b1294033556abbb1fe93774161b8da331c83c1b",
+    "source/material_model/phase_field_fault/history.cc": "f968215ce88f3b639b96a82f1574a0a7baf6c5416b3acb64b9f0fe33dbf9b037",
+    "source/simulator/phase_field.cc": "3303f592b6991e608f5deb5cdd762a9b6e51357c49591f361f839ccb0c7cde70",
+    "source/simulator/solver/reconstructed_fault_endpoint_phase.cc": "a60d025952316a72f8d37500e391e936789aa670c056e7910b53612f459f8122",
+    "source/simulator/solver/reconstructed_fault_stokes.cc": "d8909d2f4c83a9db030ec61f6f96f3678f8264cbda90e4e9e7ddea6cc26babf3"
+  },
+  "executable": "e9c8b1423d21a4e2a2903a579eb9703e4b3d54231cfdb0e17bee2ad320d55fb2",
+  "observer": "8d0060654edb260326357fb59a6b91cc43e99b8793b70e64a30f193d9f03858e"
+}

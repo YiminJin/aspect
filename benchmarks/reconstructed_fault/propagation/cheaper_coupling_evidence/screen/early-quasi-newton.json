@@ -1,0 +1,126 @@
+{
+  "method": "quasi-newton",
+  "seconds": 0.4572270729986485,
+  "counts": {
+    "mechanical_evaluations": 11,
+    "objective_calls": 25,
+    "reduced_hessians": 1,
+    "bulk_factor_calls": 13,
+    "bulk_rhs": 536,
+    "phase_linear_solves": 0,
+    "metric_factors": 1,
+    "metric_solves": 8,
+    "line_trials": 10
+  },
+  "timing": {
+    "mechanics": 0.04626743199696648,
+    "hessian": 0.3798314159976144,
+    "phase_linear": 0.0,
+    "metric": 0.01345943300111685,
+    "stability": 0.3959626819996629
+  },
+  "KKT": 3.671988928195386e-13,
+  "stability": {
+    "KKT": 3.671988928195386e-13,
+    "free": 315,
+    "weak": 0,
+    "centroid": {
+      "phase": 0.49999999999979255,
+      "localization": 0.4999999999997972
+    },
+    "minimum": 0.18073861730205806,
+    "second": 354.5102104711327,
+    "admissible_negative": false,
+    "stable": true,
+    "translation_cosine": 0.9999769117310765,
+    "antisymmetry": 2.0006304491970185e-10,
+    "amplitude_two_sided": 9.788002975393784e-05,
+    "mass_norm": 1.0000000000000007
+  },
+  "escapes": 0,
+  "trace": [
+    {
+      "iterations": 8,
+      "before_polish": 3.671988928195386e-13,
+      "trace": [
+        {
+          "iteration": 0,
+          "KKT": 4.602093407430625e-05,
+          "free": 315,
+          "line_search": 2,
+          "potential": 0.32876691499463245
+        },
+        {
+          "iteration": 1,
+          "KKT": 1.1645162343167974e-05,
+          "free": 315,
+          "line_search": 0,
+          "potential": 0.3287657808455098
+        },
+        {
+          "iteration": 2,
+          "KKT": 5.078395490568343e-06,
+          "free": 315,
+          "line_search": 0,
+          "potential": 0.3287655375857089
+        },
+        {
+          "iteration": 3,
+          "KKT": 2.7853257176298785e-06,
+          "free": 315,
+          "line_search": 0,
+          "potential": 0.3287655280934584
+        },
+        {
+          "iteration": 4,
+          "KKT": 1.1919854918023363e-07,
+          "free": 315,
+          "line_search": 0,
+          "potential": 0.3287655254941067
+        },
+        {
+          "iteration": 5,
+          "KKT": 1.0429331249298964e-08,
+          "free": 315,
+          "line_search": 0,
+          "potential": 0.32876552549037363
+        },
+        {
+          "iteration": 6,
+          "KKT": 8.345901053575359e-10,
+          "free": 315,
+          "line_search": 0,
+          "potential": 0.3287655254903522
+        },
+        {
+          "iteration": 7,
+          "KKT": 1.1148197989738148e-10,
+          "free": 315,
+          "line_search": 0,
+          "potential": 0.3287655254903523
+        }
+      ]
+    }
+  ],
+  "minimum_increment": 0.0,
+  "maximum": 0.6011132295952292,
+  "potential_J_per_m": 21.040993631408842,
+  "q": 315.2310043830681,
+  "V": 0.13604797500589183,
+  "slip": 0.03454104374920862,
+  "bulk": 0.8649193945085428,
+  "cohesive": 5.430618594894201,
+  "fracture": 14.612596940139593,
+  "force": 1.5761457916596555e-08,
+  "contact_signed": 1.3642420526593924e-11,
+  "contact": 1.3642420526593924e-11,
+  "I": 109.30032329884864,
+  "stress_min": 1302.0555682741397,
+  "stress_max": 1322.0230973523867,
+  "accepted": true,
+  "entry": "early",
+  "source": "native_solver_evidence/core-all/core-4.txt",
+  "time": 0.529296875,
+  "dt": 0.0009765625,
+  "phase_reference_error": 1.7100992844021334e-10
+}

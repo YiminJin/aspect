@@ -1,0 +1,29 @@
+{
+  "command": [
+    "mpirun",
+    "--map-by",
+    "core",
+    "--bind-to",
+    "core",
+    "--rank-by",
+    "slot",
+    "--report-bindings",
+    "-np",
+    "2",
+    "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/aspect-release",
+    "/home/ein/repository/aspect-fault-propagation/benchmarks/reconstructed_fault/propagation/native_mpi_evidence/operators-n16-r2-a.prm"
+  ],
+  "output": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-operators-n16-r2-a",
+  "input": "/home/ein/repository/aspect-fault-propagation/benchmarks/reconstructed_fault/propagation/native_mpi_evidence/operators-n16-r2-a.prm",
+  "source_input": "benchmarks/reconstructed_fault/propagation/native_endpoint_evidence/operators-solver-summation.prm",
+  "ranks": 2,
+  "threads_per_rank": 1,
+  "tangential_cells": 16,
+  "normal_cells": 512,
+  "surface_segments": 64,
+  "wall_cap_seconds": 1800.0,
+  "executable_sha256": "01edabd4935a72acb5699f5d4653f360e39748b5dfb2a7ba2e52cd81215d853d",
+  "plugin_sha256": "0ab5010abab4e24ee9a5b193ff332b617f70ab0f7b2e77e1ad4f75bcb4a7d99c",
+  "input_sha256": "2b2a08434e9a457da1c9459e831923dd05ef83f9ca7ec8ab5ad09e8ad54c5fb5",
+  "physical_history": "fresh; no checkpoint conversion"
+}
