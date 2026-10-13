@@ -1,3 +1,154 @@
+# P2 checkpoint disposition (2026-10-13)
+
+Close the bounded P2 implementation/diagnostic task with the existing evidence;
+see [P2_CLOSEOUT.md](P2_CLOSEOUT.md). Preserve reduced Newton/FGMRES, original
+physical acceptance and accepted histories. Direct mechanics remains experimental,
+serial and default off; quasi-Newton and unsuccessful staggered/single-pass
+alternatives are inactive. Commit reusable source, fixtures, evidence and docs.
+No new trajectory, arc-length, quasi-Newton or scalability work is selected.
+
+Full native evolution and native temporal/spatial qualification, coupled restart,
+transport/birth histories, broader stability/localization and P3 require a later
+user selection. Earlier cost plans and suggested next tasks below are historical
+context, not active authorization. No roadmap qualification is promoted here.
+
+---
+# Completed bounded P2 direct mechanical inversion (2026-10-13)
+
+The default-off serial Endpoint direct mechanics option retains interchangeable
+FGMRES and exact native surface Schur inversion with the original outer Newton,
+physics, histories, bounds and final energy/KKT criteria. The paired batch and
+cost-gated complete growth / retained saddle pass. No trajectory or P3 is run.
+
+| Result | Measured evidence |
+|---|---|
+| Eight-RHS setup-inclusive cost | FGMRES 10.51 s; direct 6.29 s (1.67×) |
+| Setup / repeat / surface size | Bulk construction + KLU 2.291 s; 65-node surface setup 2.153 s; reused solve median .03429 s; active control 64 nodes |
+| Factorization-only / memory | Pure factorization timing unavailable; batch peak RSS 1789.6 MiB, retained increment 102.2 MiB; standalone entry peaks unavailable, no reruns for missing data |
+| Original operators / actions | Full uncondensed checks pass; resolved action differences ≤3.13e-10 relative; independent prototype normal/translation differences ≤6.93e-9 J/m |
+| Complete growth | 374.11 s versus retained 664.10 s; same 135 actions /7 iterations /9 searches; KKT 2.81e-13 J/m, zero healing, publication once |
+| Known saddle | 615.71 s versus retained 1655.61 s; 316 versus 363 actions; curvature −.280202→+15.992244 Pa, same branch, no history publication |
+| Operator reuse | Growth: 1 bulk /18 surface setups, 282 direct RHS; saddle: 1 /25, 649 RHS; refresh each new linearization, retain all native modes |
+| Compatibility | 21,112 assertions /55 cases pass; old physics/outer Newton sources retained |
+
+The original MPI FGMRES path and incoming manual/evidence work are preserved.
+Direct inversion is qualified only for these restricted serial controls.
+FGMRES complete-entry timings are retained and PMPI instrumented; the present
+paired batch is the controlled cost comparison. The full trajectory, direct
+MPI and broader physical stability remain unqualified. FE energy/normalization
+evaluations and mechanical preparation dominate remaining cost. Stop here.
+
+Baseline 33c0adba59132890b386f3e984b3e1650feffe44 in the existing fault-propagation
+worktree. Tested executable e78821a5b12b, observer f5b7567699a8. Prior Newton
+executable and serial/MPI evidence retained. Commands, input/output identities,
+actual tolerances, separate cost/reuse tables, missing metrics and source purposes:
+[P2_direct_mechanical_report.md](P2_direct_mechanical_report.md). Evidence:
+benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/.
+
+---
+# Completed bounded P2 cheaper-coupling assessment — native screen stopped (2026-10-12)
+
+Latest scope ends with the user's instruction to terminate the expensive current
+native test and report retained data. No remaining native/rank/saddle run or full
+trajectory is launched. Physics, mesh, normalization, immutable histories,
+irreversibility and final KKT/energy criteria remain fixed; P3 is deferred.
+
+| Result | Evidence / qualification |
+|---|---|
+| Prototype early/saddle/late QN |Pass at original KKT and admissible curvature;0.46/1.08/.50s versus1.17/3.64/1.60s |
+| Four staggered correctors |Growth KKT fails; saddle tiny KKT but negative curvature, not accepted |
+| Fresh QN prototype1024/2048 |.625s completed in67.34/136.51s; all7field targets pass; same-dt phase errors3.85e-8/8.14e-9 |
+| Separate energy ledgers |Storage/loss/residual-work totals differ<1e-9J/m; incoming profile-cost diagnostic4.09e-7/5.80e-8J/m |
+| Native1rank core6 |Interrupted at user request after2208.99s;90completed mechanical trials,169logged inner solves/5802iterations; KKT5.24e-8 versus4.20e-13 |
+| Native acceptance /remaining tests |No complete state accepted/published; final fields/stability unavailable;4rank growth and1/4rank saddle not run |
+| Compatibility /cleanup |21,105assertions/54cases pass; isolated interruption regression passes; launcher/ASPECT child stopped and verified absent |
+
+QN is promising in the prototype but has no demonstrated native cost/accuracy
+qualification. Retain the Newton endpoint reference. The new default-false
+Endpoint quasi-Newton search changes numerical directions only; no physical
+operator, parameter, bound, H law or publication rule changes. The MPI runner's
+interruption handler prevents orphaned tests. Preserve all incoming MPI/manual
+work and references:868source/reference hashes plus391MPI evidence/output hashes.
+Baseline33c0adba59132890b386f3e984b3e1650feffe44, existing fault-propagation worktree.
+Executable3257574451ef, observer8d0060654edb; commands, inputs, logs, charts,
+interrupted counts and verification under cheaper_coupling_evidence/.
+
+[Settings, algorithm, cost/energy/field tables and source purposes](P2_cheaper_coupling_report.md).
+Next proposed task (not started): bounded native search-set/conditioning and
+reduced directional energy-gradient diagnosis at core6. No acceptance relaxation,
+new material/physical model, extra MPI campaign, full run or P3.
+
+---
+# Completed P2 single-pass / endpoint comparison (2026-10-12)
+
+The selected prototype comparison uses identical shared initialization, matching
+512-cell Q2 normal mechanics/Q1 phase, six-point bulk integration, 64-segment
+consistent normalization, physical loading and immutable accepted histories.
+Fresh phase-first runs at dt=1/1024 and1/2048 reach .625s; matching retained
+endpoint references are reused. Native coupled/MPI source and evidence remain
+unchanged; no native trajectory or task-4 mesh study is launched.
+
+| Result | Single 1/1024 / 1/2048 |
+|---|---|
+| Whole prototype cost | 40.46 /71.75s; retained endpoint279.94 /383.92s |
+| Maximum phase / q errors vs fine endpoint | .06261 /.05994;39.66 /36.84Pa, fail .001/1Pa targets |
+| Common-interval rate / stress / storage | Fine errors1.391% /2.822% whole RMS /5.004%, fail selected targets |
+| Cumulative slip | Fine .07552% error, passes .1% target |
+| Incoming phase convergence / bounds / recurrence | Pass at unchanged tolerances; no healing; I≥108.64890m |
+| Endpoint phase defect (splitting diagnostic) |86.1 /89.1Pa in nodal-measure scale, despite converged incoming subproblem |
+| Phase release / raw external remainder | .022997 /.022035J/m; .046160 /.044216J/m; no compensating dissipation |
+
+Single-pass is cheaper per run but does not reach the required physical accuracy
+at either tested level. Retain the coupled reference; the qualified single-pass
+timestep and native cost remain unresolved. Stop after this bounded comparison.
+No governing change, tolerance relaxation, material tuning, native replacement,
+further MPI work or P3. Details, equations, source purposes and charts:
+[P2_single_pass_report.md](P2_single_pass_report.md). Evidence: single_pass_evidence/.
+
+---
+# Completed bounded P2 MPI verification: tasks 1–3 (2026-10-12)
+
+The selected original 16×512 Q2/Q1 fixture passes fixed operators, the complete
+retained core-growth entry and noncommitting known-saddle escape at 1/2/4 ranks.
+Four-rank failure on rank 3 before publication restores all tested histories and
+bookkeeping exactly; retry publishes once. Governing laws, defaults, physical
+bounds, normalization, immutable accepted FE/surface anchors and final KKT/energy
+criteria are unchanged. No substantial growth-step speedup is established.
+
+| Check | 1 / 2 / 4 ranks |
+|---|---|
+| 15 fixed operators, whole suite | 133 / 105 / 79 s; max rank energy error 3.55e−15 J/m versus 4.55e−13 allowance |
+| Complete growing entry | 664 / 850 / 717 s; 135 / 136 / 140 tangent actions; zero healing, original KKT passes |
+| Known saddle, scoped noncommitting entry | 1656 / 2190 / 1466 s; 363 / 342 / 260 actions; same branch, known-mode curvature positive |
+| Four-rank recovery | 713 s failed attempt +717 s successful retry; all tested state bytes restored |
+| Compatibility / final label-only build | 21,105 assertions in 54 cases; all 15 four-rank operators/gradients unchanged |
+
+Baseline `33c0adba59132890b386f3e984b3e1650feffe44`, branch `fault-propagation`,
+existing worktree. Serial binaries and 1505 baseline files are preserved. Matched
+MPI executable e9c8b1423d21 is saved as build-propagation-integration/aspect-mpi-verified-release;
+final label-only build is 8fba047bd33d. Exact hashes, inputs, commands, measured
+costs/communication/memory and plots are in native_mpi_evidence/ and
+[P2_native_MPI_report.md](P2_native_MPI_report.md).
+
+**Stop after task 3.** Tangential-mesh screening, further optimization and the
+fresh .625-s trajectory are deferred. This qualifies the original-mesh retained
+controls, not a complete MPI trajectory, full angular stability, restart,
+transport/birth, physical jump selection or P3. Earlier broader authorization
+below is historical and does not authorize deferred tasks.
+
+---
+# Historical MPI/cost request (narrowed to tasks 1–3) (2026-10-12)
+
+The current user selection authorizes MPI correctness, matched 1/2/4-rank costs,
+16/8/4 by 512 tangential-mesh screening and one conditional four-rank full run.
+Reuse the qualified 154-step schedule. Keep normal resolution, surface segments,
+particles, quadrature, physical model and final acceptance fixed. Establish
+correctness before optimization; launch only after measured cost fits the
+proposed 12-hour bound. If it does not, report the bottleneck and estimate.
+The serial results below remain the reproducible reference, not superseded
+qualifications. This authorization extends P2 only.
+
+---
 # Completed P2 native solver accuracy / escape task (2026-10-12)
 
 The bounded task passes without changing governing laws, physical settings,

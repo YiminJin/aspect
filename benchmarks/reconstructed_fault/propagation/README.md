@@ -1,4 +1,60 @@
-Current P2 numerical task completed: [native solver accuracy, onset and saddle escape](../../../doc/reconstructed_fault/propagation/P2_native_solver_report.md).
+# P2 checkpoint
+
+[Current bounded closeout](../../../doc/reconstructed_fault/propagation/P2_CLOSEOUT.md)
+and [reproducibility index](p2_checkpoint/README.md) are the entry points.
+Reduced Newton/FGMRES is the reference; direct mechanics is experimental and
+serial, and unsuccessful coupling alternatives remain inactive. Native
+operator/entry/MPI/recovery checks and fresh onset to .53125 s are distinct
+from full prototype paths to .625 s. Full native evolution and P3 are deferred.
+Raw local outputs are preserved; only reusable inputs, summaries, compact
+diagnostics and provenance are committed. No experiments run for closeout.
+The dated task entries below retain their original results and limitations.
+
+---
+
+Previous P2 assessment completed: [cheaper endpoint search](../../../doc/reconstructed_fault/propagation/P2_cheaper_coupling_report.md).
+QN passes retained early/saddle/late and fresh1024/2048prototype comparisons
+at unchanged accuracy in67/137s, but the native1rank growth test is interrupted
+per user after36min49s without KKT acceptance. Retain the Newton native reference;
+remaining rank/saddle controls and any full trajectory are deferred. All previous
+MPI/manual work and reference data remain intact. Default-false Endpoint
+quasi-Newton search changes directions only. Runner interruption now stops its
+child session; an isolated process-control regression passes without ASPECT/MPI.
+Scripts: cheaper_coupling.py, assess_cheaper_coupling.py,
+run_cheaper_coupling_native.py, check_native_mpi_cancellation.py.
+Evidence/charts/interrupted counts: cheaper_coupling_evidence/. No P3 or full run.
+
+---
+
+Current P2 comparison completed: [phase-first single pass versus endpoint](../../../doc/reconstructed_fault/propagation/P2_single_pass_report.md).
+Fresh shared-init512-cell single-pass runs at1/1024 and1/2048s complete .625s
+in40/72s, but fail phase, traction, common-interval rate, stress and storage
+targets against the reused endpoint reference. Converged incoming phase KKT
+is distinct from completed-state splitting error. Actual phase-release/fixed-
+profile mechanics and common continuous-path ledgers retain separate terms.
+Native coupled/MPI source is unchanged. Scripts: single_pass_comparison.py,
+assess_single_pass.py. Evidence/charts: single_pass_evidence/. No native run or P3.
+
+---
+
+Previous task: [bounded native MPI correctness and rank comparison](../../../doc/reconstructed_fault/propagation/P2_native_MPI_report.md).
+The completed scope stops after 1/2/4-rank checks on the original 16×512 mesh.
+Operators and the complete growing entry pass at all rank counts; the four-rank
+controlled failure/retry restores accepted state and publishes once. The final
+saddle comparison passes at all ranks, reaching the same branch. Smaller meshes and the full trajectory are
+deferred. Physics, defaults and final energy/KKT acceptance remain unchanged.
+Evidence and exact run/build hashes: native_mpi_evidence/. The saved serial
+executable and observer are in build-propagation-integration/serial-reference/.
+run_native_mpi.py refuses existing outputs, binds one thread per rank to physical
+cores and runs the task-3 timing controls sequentially; --task3-suite is a
+one-shot evidence run. Repeat individual controls with a fresh --tag rather
+than overwriting the retained suite. assess_native_mpi.py compares
+physical coordinates and preserves unaligned fields; native_mpi_profile.cc is
+a benchmark-only PMPI timing shim. No ASPECT visualization output is generated.
+
+---
+
+Previous P2 numerical task completed: [native solver accuracy, onset and saddle escape](../../../doc/reconstructed_fault/propagation/P2_native_solver_report.md).
 Fresh58-step economical onset reaches .53125s in85min9s/1684.9MiB, with core
 phase .60457720, zero healing, all seven unaligned field targets, complete-prefix
 energy accounting and exact complete-step failure/retry. Default-false numerical
@@ -447,3 +503,24 @@ Actual runs took 2.8–6.9 s and 208–258 MiB RSS. No core rebuild, cluster run
 restart, physical rollback, KKT constraints, H-law change or propagation.
 Exact commands, environment, binary identity, logs and compact CSV cuts are
 in `evidence/`; [manifest](evidence/manifest.json) records source/input hashes.
+
+
+## Reusable native direct mechanics (bounded serial P2)
+
+The default-false `Endpoint direct mechanics` setting in Phase field solver
+parameters selects the actual native surface Schur inverse for the existing
+outer Newton. FGMRES remains available and the default; direct currently rejects
+MPI >1. Physical equations, histories, bounds and final checks are unchanged.
+One retained-state paired batch gates one complete growth entry then the saddle:
+10.51→6.29 s batch, 664→374 s growth, 1656→616 s saddle. Growth outer counts
+match; saddle also uses fewer actions. No trajectory follows.
+
+Evidence in `direct_mechanical_evidence/` includes inputs, provenance, logs,
+independent prototype actions, assessments and separate factor-reuse summaries.
+`run_direct_mechanical.py batch|growth|saddle --tag NAME` uses sequential bound-core
+screens; later stages require saved passing cost/growth gates. The corresponding
+assessment scripts only read retained outputs. Do not rerun completed cases to
+fill unrecorded pure-factorization or standalone-entry peak-memory measurements.
+Batch peak RSS and inclusive setup/repeated-solve data are recorded.
+
+[Detailed algorithm, metrics and source purposes](../../../doc/reconstructed_fault/propagation/P2_direct_mechanical_report.md).

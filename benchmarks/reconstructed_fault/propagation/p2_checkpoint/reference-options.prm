@@ -1,0 +1,19 @@
+# Fragment for an existing qualified restricted native-FE endpoint fixture.
+# This is not a standalone run input. Preserve that fixture's physics,
+# histories, initialization, mesh, loading, tolerances and evidence identity.
+subsection Material model
+  subsection Phase field fault
+    set Consistent endpoint phase solve = true
+  end
+end
+subsection Solver parameters
+  subsection Phase field solver parameters
+    set Use bound constraints = true
+    set Enforce phase irreversibility = true
+    set Adaptive endpoint linear accuracy = true
+    set Endpoint translation preconditioner = true
+    # P2 reference: reduced Newton with default FGMRES mechanics.
+    set Endpoint quasi-Newton search = false
+    set Endpoint direct mechanics = false
+  end
+end

@@ -496,3 +496,90 @@ obstacle and final KKT remain fixed. The bounded task completes; full-run input
 is prepared but not launched. No physical tolerance relaxation, compensating
 loss, material optimization or P3 is selected. Future work follows the user's
 selection, not automatic execution of the cost plan. See P2_native_solver_report.md.
+
+
+## Bounded native MPI correctness and rank comparison (current selection)
+
+The latest user instruction selects tasks 1–3 of the local MPI/cost request:
+preserve the committed serial reference, establish endpoint MPI correctness,
+and measure matched 1/2/4-rank fixed-state and complete-step controls, including
+saddle escape and coordinated four-rank prepublication failure/retry. Keep the
+16×512 mesh, physics, true energy/KKT acceptance, immutable FE/surface anchors,
+irreversibility and defaults fixed. Correctness precedes MPI qualification.
+Stop and report after task 3. Tangential-mesh screening, additional performance
+optimization and the fresh full .625-s trajectory are deferred. No P3,
+transport or checkpoint conversion is selected.
+
+Tasks 1–3 are complete: original-mesh operator/growth/saddle controls pass on
+1/2/4 ranks and coordinated four-rank prepublication failure/retry passes.
+Qualification is restricted to these controls; substantial growth-step speedup
+is not established. See P2_native_MPI_report.md. Stop here; the deferred mesh,
+optimization and full-run tasks require a subsequent user selection.
+
+## P2 single-pass comparison (latest selection)
+
+The user selects a prototype-only comparison of the original fixed-incoming-
+history phase-first update with the current consistent-endpoint reference,
+using identical shared initialization, 512-cell Q2 mechanics, physical loading
+and accepted histories at two successive dt. Retain separate incoming-phase KKT
+and endpoint splitting defects, actual phase-release/fixed-profile work and
+common reconstructed-path residual powers. No compensating dissipation, physical
+law or acceptance change is authorized. The bounded comparison completes at
+1/1024 and1/2048s: single-pass is cheaper but fails required field accuracy.
+Native coupled/MPI work is preserved unchanged. See P2_single_pass_report.md.
+Stop here; no native replacement, material tuning, extra MPI work or P3.
+
+
+## Bounded cheaper endpoint search (latest selection)
+
+The user selects retained early/saddle/late prototype screening with quasi-Newton
+preferred and a fixed small staggered baseline; only a promising candidate proceeds
+to fresh .625-s prototype paths at the two retained timesteps, then native growth
+and saddle controls at1/4ranks. Preserve energy, physical equations, initialization,
+mesh, actual coupled modes/Hessian, original KKT/energy acceptance and immutable
+incoming d_R/Z/previous physical obstacle. Approximate inverse secants change
+search only. Keep authoritative saddle checks and publish once. Preserve endpoint
+references and incoming MPI/manual work. No full native launch, physical change,
+material search or P3 is selected.
+
+
+## Cheaper endpoint task — user stop (latest instruction)
+
+The user terminates the expensive native screen and requests a report from data
+at hand. Prototype fixed entries and full1024/2048families pass; native1rank core6
+is interrupted before KKT acceptance/publication. The new search remains default
+false and unqualified natively. Preserve all evidence and the Newton reference.
+Do not launch the remaining4rank/growth/saddle checks or a full trajectory on
+this selection. Stop after updating the report/status; no P3.
+
+
+## Bounded reusable direct mechanics (latest selection)
+
+The user selects a serial retained growing-state native surface Schur inverse,
+using actual independent B/G, consistent pressure gauge and active constraints,
+setup-inclusive batch cost/residual/action comparisons against FGMRES, and
+operator-valid factor reuse. Keep the original outer Newton and all physics,
+histories/bounds/acceptance unchanged. Complete growth then saddle only if the
+measured cost is clearly favorable. No trajectory, QN experiment or P3.
+
+The direct-mechanics task is complete: the cost gate, original-Newton growth
+and retained saddle pass, with the default-off serial choice retained. The
+latest clarification requests separate setup/repeat/reuse/memory/size metrics
+and no reruns for missing data. Pure factorization and standalone entry peak
+RSS were not recorded; report them as unavailable. Stop after this bounded
+report; no trajectory, further MPI optimization or P3 is selected.
+
+## P2 checkpoint and bounded closeout (latest user selection)
+
+The user selects inspection/preservation, a concise evidence-based P2 closeout,
+and commits of all ASPECT source/CMake changes plus necessary reusable
+benchmarks/tests/docs. Preserve manual work and full local reproducibility.
+Retain reduced Newton as the restricted P2 reference and FGMRES as default;
+direct mechanics remains experimental, serial and default off. Unsuccessful
+coupling experiments remain documented and inactive. Distinguish native
+operators/retained entries/MPI/prepublication recovery from full prototype paths
+and the shorter fresh native onset. Full native evolution, temporal/spatial
+qualification, coupled restart, transport and propagation remain deferred.
+No new quasi-Newton, arc-length, full-trajectory or scalability work is selected.
+See doc/reconstructed_fault/propagation/P2_CLOSEOUT.md. Historical selections
+above do not authorize automatic continuation after this checkpoint.

@@ -1984,6 +1984,47 @@ particle-stress checkpoints; a registry marker also forbids resuming this option
 checkpoint through the particle-authoritative path. No implicit conversion is
 defined. Existing defaults and the particle-authoritative path are unchanged.
 
+\paragraph{Selected bounded MPI extension, restricted verification complete.}
+The user selects one/two/four-rank local verification of the restricted endpoint
+path, preserving the serial reference and all governing equations and acceptance
+criteria. Accepted FE histories have unique distributed ownership and refreshed
+ghost values. Owned cells and particles contribute once. Phase search vectors
+and normal-ray geometry may be replicated with explicit collectives; their
+energies and adjoints must agree with the distributed physical operators.
+Use extended local accumulation and extended collective energy reduction;
+retain the original line-search allowance. Surface/coarse systems may be
+replicated, and collective Amesos direct factors must be identified as root
+bottlenecks. Trials retain one incoming anchor and publication is collective,
+once, after convergence; coordinated failure restores accepted state on all
+ranks. Fixed-state operators, one complete retained growth entry and the known
+saddle diagnostic pass at one/two/four ranks on the original mesh; four-rank
+prepublication failure/retry restores tested histories and publishes once.
+Qualification is limited to these controls, not a full fresh trajectory,
+exhaustive angular stability, coupled restart or transported histories.
+Growth-step times are 664/850/717 seconds; substantial MPI speedup is not
+established. See \texttt{P2\_native\_MPI\_report.md} for costs and uncertainty.
+The selected task stops after the original $16\times512$ one/two/four-rank
+comparisons; smaller tangential meshes, optimization and the full trajectory
+are deferred. The following serial implementation remains the reproducible reference.
+
+\paragraph{Bounded phase-first comparison (prototype only).}
+The current total-energy comparison uses the same accepted
+$(\phi^a,d_R^a,Z^a)$ and physical obstacle. Phase-first minimizes
+$E_h(\phi,d_R^a,Z^a)$, then solves mechanics once; consistent endpoint imposes
+the phase condition at its mechanically updated state. Their governing storage,
+normalization, Maxwell law and publication definitions remain identical.
+For phase-first, record
+$\Delta E_\phi=E_h(\phi^b,d_R^a,Z^a)-E_h(\phi^a,d_R^a,Z^a)$ before
+fixed-profile Maxwell evolution. Its negative is a measured release, not an
+additional constitutive dissipation. With signed interior-force and friction
+residual works $M,C$, retain the raw external remainder
+$W_{\rm ext}-(\Delta E+D)=-\Delta E_\phi-M-C$.
+Completed-state phase defect measures splitting, independently of convergence
+of the fixed-history subproblem. Matched shared-init 512-cell Q2 controls at
+$\Delta t=1/1024,1/2048$ s complete 0--.625 s but single-pass fails the selected
+field targets despite lower cost. No native algorithm or governing equation is
+changed. See \texttt{P2\_single\_pass\_report.md}; MPI work remains preserved.
+
 \paragraph{Optional consistent-endpoint solution algorithm (restricted P2).}
 \texttt{Consistent endpoint phase solve = false} is the default. When enabled,
 the governing storage, viscous law and friction law above are unchanged; the
@@ -2005,11 +2046,75 @@ $\mathcal H^+$. The reduced potential is
        (\kappa/G)\int_\Gamma\mu P V(\phi)\,ds .
 \]
 Mechanical stationarity makes its gradient the explicit fixed-endpoint phase
-gradient, including $D I=P D b$ and its adjoint. Projected Newton descent and
+gradient, including $D I=P D b$ and its adjoint. Projected descent and
 an actual-energy line search enforce the previous physical obstacle and box.
 Convection predictors and rotated older phase blocks are not physical anchors.
 All publication occurs once, after the complete endpoint conditions converge;
 normal simulator history rotation is retained.
+
+\paragraph{P2 checkpoint disposition.}
+The restricted consistent-endpoint reduced-Newton solver with FGMRES remains
+the P2 reference; the endpoint option itself is default off. The bounded native
+operator, growth/saddle, MPI and prepublication failure/retry checks do not
+qualify a complete native trajectory or coupled restart. Full-interval prototype
+results remain separately identified. Direct mechanics below is experimental,
+serial and default off. Quasi-Newton and unsuccessful coupling alternatives
+remain inactive; no governing equation or final acceptance changes for closeout.
+Full native evolution, spatial/temporal qualification, transport and propagation
+are deferred. See \texttt{propagation/P2\_CLOSEOUT.md} for the evidence boundary.
+
+\paragraph{Optional direct mechanical inversion (bounded P2 test).}
+\texttt{Endpoint direct mechanics = false} retains the existing FGMRES path.
+The selected test changes only inversion of the current Newton Jacobian,
+whose actual uncondensed signs are
+\[
+ \begin{pmatrix}A&-B\\G&-K\end{pmatrix}
+ \binom{\Delta x}{\Delta V}=\binom{f}{-r}.
+\]
+For the current free surface indices $F$, form $W=A^{-1}B_F$ and
+$S=K_{FF}-G_FW$, using the native homogeneous/scaled $B$ and $G$ actions
+independently. For an already condensed right-hand side
+$b=f+B_FK_{FF}^{-1}r_F$, solve
+\[
+ x_0=A^{-1}b,\quad z=S^{-1}G_Fx_0,\quad
+ \Delta x=x_0+Wz,\qquad
+ \Delta V_F=K_{FF}^{-1}(r_F+G_F\Delta x),\quad\Delta V_A=0.
+\]
+Retain all native velocity/pressure/tangential modes, original compatibility,
+fresh condensed and uncondensed residual checks, action uncertainty, and outer
+Newton/energy/KKT criteria. Only a verified two-sided constant-pressure null
+mode permits algebraic pinning of an independent pressure coefficient; project
+back to the original pressure complement. Open boundaries receive no pin.
+The existing physical pressure normalization remains separate.
+Use installed Amesos sparse factors and small LAPACK surface LU; the initial
+option is explicitly serial. Bulk factors are rebuilt with the homogeneous
+operator at each physical step; current surface factors belong to one
+linearization/free set and are invalid after any $B,G,K$ refresh. No history
+is advanced by setup, sensitivity solves or mechanical trials. Setup and
+representative repeated solves must show a clear total cost gain before a
+complete growth entry, followed by a retained saddle diagnostic, is authorized.
+No trajectory is part of this test.
+
+\paragraph{Selected cheaper endpoint search (bounded P2).}
+\texttt{Endpoint quasi-Newton search = false} retains the reduced-Newton default.
+When explicitly enabled, use a 30-pair limited-memory inverse BFGS direction
+from the actual reduced gradients of $J$, with sparse positive base inverse
+$(K_F/\mathcal A+\operatorname{diag}(m))^{-1}$ on the current free search set,
+where $\mathcal A=G_c/(c_0\ell)$ and $m$ is the existing nodal measure.
+Restrict stored secants $(s,y)$ to that set and retain only
+$s^Ty>10^{-12}\|s\|_2\|y\|_2$. Rebuild the restricted inverse when the
+search set changes. This approximates an inverse for search only: the physical
+energy, normalization adjoints, actual coupled Hessian and all native modes
+are unchanged. Clear secant memory after an admissible saddle departure.
+Retain the true-energy line search, original physical KKT target, independent
+CPDI residual check and resolved negative-curvature tests. Every mechanical
+evaluation still starts from the same accepted $(d_R^a,Z_a)$; the obstacle
+remains $\phi^a$ and publication occurs once. Prototype entry and two full
+trajectory comparisons pass. The one-rank native growth screen is interrupted
+on user instruction after 36 minutes 49 seconds without KKT acceptance or
+complete-state publication. Native cost/branch qualification is incomplete;
+remaining rank/saddle tests and any full run are deferred. The option remains
+experimental and default off; retain the reduced-Newton reference.
 
 For fixed particle domains, homogeneous fracture coefficients and AT1, the
 native CPDI fracture functional is quadratic. Assemble its actual sparse
@@ -2030,7 +2135,7 @@ current full velocity/pressure/free-slip Jacobian with the corresponding phase
 forcing, then differentiate the endpoint phase gradient. Include both
 $DI^T\delta t$ and $(D DI[d])^Tt$, using analytic transverse-ray second
 derivatives and the actual projection adjoint. The accepted reference is fixed.
-In this restricted serial option, reuse the existing sparse assembly of the
+In this restricted endpoint option, reuse the existing sparse assembly of the
 frozen bulk--fault $B$ map with identical quadrature, association and constraint
 weights. The existing sparse $G$ representation may also be reused when its
 normal-filter guard permits: preserve the same constitutive coefficients,
@@ -2043,7 +2148,7 @@ step; the full pressure/slip system and fresh residual checks remain unchanged.
 Central differences at $10^{-5}$ and $5\,10^{-6}$ phase amplitude remain
 independent uncertainty checks against the matching prototype. A mass-shifted
 sparse fracture operator, restricted by active row/column elimination and
-factored with the existing serial sparse direct solver,
+factored with the existing collective sparse direct solver (root factorization),
 is only a positive search preconditioner. It does
 not modify $E$, the physical Hessian or the convergence residual. Fresh uncondensed mechanical residual corrections use the same Jacobian and
 contact set. Each inner solve retains its configured Stokes tolerance; measure

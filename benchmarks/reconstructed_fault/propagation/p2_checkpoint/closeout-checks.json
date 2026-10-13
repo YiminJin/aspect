@@ -1,0 +1,15 @@
+{
+  "date": "2026-10-13",
+  "source_behaviour_unchanged": true,
+  "source_file_hashes_checked": 14,
+  "curated_benchmarks": 260,
+  "curated_MiB": 9.050995826721191,
+  "Python_syntax": 13,
+  "JSON_parse_checks": 70,
+  "byte_identical_native_table_copies": 61,
+  "new_checkpoint_links": 26,
+  "numerical_runs": "none",
+  "last_retained_compatibility": "21112 assertions in 55 cases",
+  "all_ASPECT_source_and_CMake_changes_committed": true,
+  "CMake_changes_since_entry": 0
+}

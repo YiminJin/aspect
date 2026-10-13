@@ -1,0 +1,14 @@
+include/aspect/phase_field.h
+include/aspect/reconstructed_fault/endpoint_mpi.h
+include/aspect/simulator.h
+include/aspect/simulator/solver/reconstructed_fault_condensed_system.h
+include/aspect/simulator/solver/reconstructed_fault_surface_schur.h
+source/material_model/phase_field_fault.cc
+source/material_model/phase_field_fault/fe_strain.cc
+source/material_model/phase_field_fault/history.cc
+source/simulator/phase_field.cc
+source/simulator/solver/reconstructed_fault_condensed_system.cc
+source/simulator/solver/reconstructed_fault_endpoint_phase.cc
+source/simulator/solver/reconstructed_fault_stokes.cc
+tests/phase_field_test_access.h
+unit_tests/reconstructed_fault_surface_schur.cc

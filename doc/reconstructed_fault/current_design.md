@@ -11,6 +11,88 @@ algorithms, architecture, ownership, and MPI design. They are maintained as a
 consistent pair: this file records the concise settled decisions and the
 specification gives their detailed contract.
 
+### P2 checkpoint disposition (2026-10-13)
+
+The restricted P2 reference is the consistent-endpoint reduced-Newton option
+with FGMRES mechanics. The option itself remains default off. Preserve the
+governing energy, normalization, immutable accepted FE/surface histories,
+physical phase obstacle and original final acceptance. Direct mechanics stays
+experimental, serial and default off; quasi-Newton, phase-first and unsuccessful
+staggered comparisons are inactive. Native operator/entry/MPI/recovery evidence
+is distinct from complete prototype trajectories and the shorter fresh native
+onset. Full native evolution, physical qualification, coupled restart, transport
+and propagation remain deferred. No further experiment is selected by closeout.
+See [P2_CLOSEOUT.md](propagation/P2_CLOSEOUT.md) and its checkpoint provenance.
+
+### Selected reusable direct mechanical inversion (bounded P2)
+
+The default-off serial surface Schur option inverts the same native Newton
+operator using installed Amesos/LAPACK. Form K_FF - G_F A^{-1} B_F from the
+actual constrained/scaled actions; do not identify G with B transpose. Bulk
+factors follow homogeneous-operator rebuilds; surface factors belong to one
+valid linearization/free set. Keep the pressure-complement verification, full
+residual/action accuracy and original outer Newton/energy/KKT/history rules.
+Setup-inclusive retained-state cost is the gate for complete growth then saddle;
+no trajectory is selected. The paired batch and cost-gated growth/saddle pass:
+setup-inclusive batch 10.51→6.29 s, complete growth 664→374 s with identical
+outer counts, saddle 1656→616 s with fewer actions. Keep the solver choice
+interchangeable/default off; direct MPI is unqualified. Separate setup, reused
+solve, memory and surface-size data (including unavailable pure factorization
+timing) are in propagation/P2_direct_mechanical_report.md. No rerun is used
+to obtain missing metrics.
+
+### Cheaper endpoint search (selected bounded P2, 2026-10-12)
+
+The selected numerical comparison preserves the endpoint equations and accepted
+reference. Sparse-metric limited-memory inverse BFGS passes early/saddle/late
+prototype entries and fresh .625-s trajectories at1/1024 and1/2048; unchanged
+KKT, bounds, histories and actual reduced-curvature checks apply. A default-off
+`Endpoint quasi-Newton search` option changes only search directions. Its positive
+fracture-plus-mass inverse and secant updates do not modify physical energy or
+the Hessian. Retain all native modes, true-energy search, original independent
+CPDI acceptance and saddle checks; every trial uses one incoming d_R,Z and the
+previous physical obstacle. The one-rank native growth screen is interrupted on
+user instruction after36min49s, with90completed mechanical trials and KKT5.24e-8
+versus4.20e-13; no complete state is accepted/published. This is not a demonstrated
+native cost gain. Retain Newton; remaining rank/saddle tests and any full trajectory
+are deferred to a new selection. No material change or P3 is selected.
+See `propagation/P2_cheaper_coupling_report.md`.
+
+### P2 phase-first comparison (completed, 2026-10-12)
+
+The current total-energy prototype compares incoming-history phase-first and
+consistent endpoint with identical shared initialization and 512-cell Q2
+mechanics at1/1024 and1/2048s to .625s. Both single-pass runs complete with
+converged incoming phase, admissible bounds and correct history recurrence;
+the completed-state phase defect is a splitting diagnostic. Single-pass is
+cheaper but fails phase, traction, interval-rate, stress and storage targets.
+Phase-release and fixed-profile mechanical residual works remain separate from
+the common continuous-path audit; no compensating loss is defined. Retain the
+coupled reference and native/MPI implementation unchanged. This is a comparison,
+not an algorithm adoption or P3 qualification. See
+`propagation/P2_single_pass_report.md`.
+
+### Bounded local endpoint MPI verification (completed tasks 1–3, 2026-10-12)
+
+The user selects correctness and cost verification at one, two and four ranks
+on the original 16×512 mesh, then a stop after task 3. Tangential-mesh screening,
+further optimization and the full trajectory are deferred. Physical acceptance
+is unchanged. The committed serial reference is `33c0adba5`; its inputs,
+evidence, executable and observer are preserved. Distributed FE history remains
+authoritative. Only phase search vectors and normalization-ray geometry are
+replicated; owned cells/particles contribute once. Accurate energy reduction,
+normalization adjoints, immutable anchors and coordinated prepublication rollback
+pass for the retained fixed states and complete growth entry on 1/2/4 ranks.
+The known-saddle diagnostic reaches the same reference branch at all ranks;
+four-rank prepublication failure/retry restores accepted state and publishes once.
+Existing serial sparse
+factors may be collective Amesos solves with a root bottleneck, explicitly timed.
+This extends ownership/solution machinery, not governing laws or tolerances.
+MPI qualification is limited to these original-mesh controls, not a full fresh
+trajectory, exhaustive angular stability, restart or transport. Growth-step
+times are 664/850/717 s; substantial MPI speedup is not established. See
+`propagation/P2_native_MPI_report.md`. The selected task ends here.
+
 ### Optional native consistent-endpoint P2 algorithm (2026-10-10)
 
 The current numerical follow-up adds default-false adaptive intermediate linear

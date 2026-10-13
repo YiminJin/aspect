@@ -1,0 +1,1586 @@
+{
+  "date": "2026-10-13",
+  "scope": "P2 preservation and bounded closeout; no new numerical runs or source-behavior edits",
+  "branch": "fault-propagation",
+  "worktree": "/home/ein/repository/aspect-fault-propagation",
+  "head_before_checkpoint": "33c0adba59132890b386f3e984b3e1650feffe44",
+  "staged_diff_on_entry": "",
+  "reference": {
+    "outer_solver": "consistent-endpoint reduced Newton",
+    "mechanics": "FGMRES",
+    "direct_mechanics": "experimental serial, default false",
+    "quasi_newton": "inactive, default false",
+    "publication": "once after complete-step convergence; immutable incoming FE/surface history and previous physical phase"
+  },
+  "source_files_preserved_from_entry": [
+    "include/aspect/phase_field.h",
+    "include/aspect/reconstructed_fault/endpoint_mpi.h",
+    "include/aspect/simulator.h",
+    "include/aspect/simulator/solver/reconstructed_fault_condensed_system.h",
+    "include/aspect/simulator/solver/reconstructed_fault_surface_schur.h",
+    "source/material_model/phase_field_fault.cc",
+    "source/material_model/phase_field_fault/fe_strain.cc",
+    "source/material_model/phase_field_fault/history.cc",
+    "source/simulator/phase_field.cc",
+    "source/simulator/solver/reconstructed_fault_condensed_system.cc",
+    "source/simulator/solver/reconstructed_fault_endpoint_phase.cc",
+    "source/simulator/solver/reconstructed_fault_stokes.cc",
+    "tests/phase_field_test_access.h",
+    "unit_tests/reconstructed_fault_surface_schur.cc"
+  ],
+  "files": {
+    "AGENTS.md": {
+      "bytes": 38333,
+      "sha256": "5734e4d34f44a9cdb2486418c45009bded74f533a7a91d38cdd318e308ba9c0e"
+    },
+    "benchmarks/reconstructed_fault/propagation/README.md": {
+      "bytes": 32880,
+      "sha256": "de008df17242c6354bc4636578464b61c05d33a3f2bd4ba4b06a564f557407bb"
+    },
+    "benchmarks/reconstructed_fault/propagation/assess_cheaper_coupling.py": {
+      "bytes": 4281,
+      "sha256": "d51aee54a7bfd79e120d2fcde5184ba81cd39c47f1823f6bd60d045a0fdb01e8"
+    },
+    "benchmarks/reconstructed_fault/propagation/assess_direct_entries.py": {
+      "bytes": 4587,
+      "sha256": "e5b5789f2927c426a26c3dbdaf112c28ade789830be41642de830b873798ba9e"
+    },
+    "benchmarks/reconstructed_fault/propagation/assess_direct_mechanical.py": {
+      "bytes": 4711,
+      "sha256": "a8798a19674009ab0c8f411098b30fe51c2cdd3614abffce2c00be12ec91ba69"
+    },
+    "benchmarks/reconstructed_fault/propagation/assess_native_mpi.py": {
+      "bytes": 8431,
+      "sha256": "4a85322e9f4db82d78a49171e6123d461c89c7b072bbc7f679d18af9693d760c"
+    },
+    "benchmarks/reconstructed_fault/propagation/assess_single_pass.py": {
+      "bytes": 16842,
+      "sha256": "47d05caed136eb4c24dd18979e6390356bad9d4538cab44a30f5441ae28a4f6a"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling.py": {
+      "bytes": 15184,
+      "sha256": "8a161280055c466f7c828c4a2afa80053de452304c366e1c086d2ccf78d8e1c6"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/assessment.json": {
+      "bytes": 1001338,
+      "sha256": "b828a04644419b634297f291256e0aebd2a20bf4ce5ea6378c4dda6aa092ee62"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/baseline.json": {
+      "bytes": 108140,
+      "sha256": "4b1a614fc704c2642a76ec2f2083028109bbf5ea4f4e00dd5b492d771ba793f4"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/cancellation-check-final.log": {
+      "bytes": 87,
+      "sha256": "4ff00cceb96e9ef5304e329938edce2da24d54cbe66707468c342b16709931be"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/compatibility.log": {
+      "bytes": 952,
+      "sha256": "be50398106a716a638328e3f9f830b1302cdaf8405c80dbf352cf12838c32e2d"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/dt-1-1024/initialization.npz": {
+      "bytes": 11416,
+      "sha256": "f01afd0236ebebe3833bf6dac4b1e0536984279e398d6dc26f399730cda3ba9a"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/dt-1-1024/summary.json": {
+      "bytes": 671,
+      "sha256": "30c301347ba1c8d9201bb7a166d7bdeab9e505af9b7b793f58adc809a1f5bed1"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/dt-1-2048/initialization.npz": {
+      "bytes": 11416,
+      "sha256": "f01afd0236ebebe3833bf6dac4b1e0536984279e398d6dc26f399730cda3ba9a"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/dt-1-2048/summary.json": {
+      "bytes": 674,
+      "sha256": "ba6fb68c854a0ec277f09e0b2331f26674f285eedbc9702dcdf8b76771bad31b"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/mpi-preservation.json": {
+      "bytes": 62952,
+      "sha256": "7dbe538e2f92b49d6678f165f032db32433291a76036d93e663c941e0365865b"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/native-source.json": {
+      "bytes": 345,
+      "sha256": "fab9cbebccabf47c1b7937422fef294be709014affbaa81e74325503d836a4f2"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/native/core.prm": {
+      "bytes": 12198,
+      "sha256": "3e489960f3bbac332fcc7605f2c3b1a277abb73c5f38ade9b5f1971c9c9ac3e3"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/native/quasi-newton-core-n1-local-epoch-0-rank-0.csv": {
+      "bytes": 355,
+      "sha256": "e194761036fc6e6b7c53dba483fa397178576595ff68022017b777383741f8e5"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/native/quasi-newton-core-n1-local-interrupted.json": {
+      "bytes": 2362,
+      "sha256": "5a2adbc2a42e5ad59822ebda5bceb171f1025cd46793e872e6aaad199155bbef"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/native/quasi-newton-core-n1-local-start.json": {
+      "bytes": 1498,
+      "sha256": "823773cb3acdeeeec75ae25428562c9d7d9833a5dec311e54fd6d2be3ce4116c"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/native/quasi-newton-core-n1-local.log": {
+      "bytes": 89708,
+      "sha256": "fe5fca59c28477d39f231e142e5a3f089bae097f606902547b639f2c06583e1b"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/native/quasi-newton-core-n1-local.prm": {
+      "bytes": 12653,
+      "sha256": "001932f8c2ca8ecc904bf70aa2702cc25ff5969a6523229a44e741bbaadfc1b9"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/native/quasi-newton-core-n1-run.json": {
+      "bytes": 1538,
+      "sha256": "0d318e0235045963dc63e511c1a16a4874921d2d52c7aacea6919f5eb6260e7f"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/native/quasi-newton-core-n1-start.json": {
+      "bytes": 1480,
+      "sha256": "8db3081641483715e27ff4188d1f15d6cb95ca2f9963daf80789ca3c0c151aad"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/native/quasi-newton-core-n1.log": {
+      "bytes": 557,
+      "sha256": "d4aee8687ab6b06fb85df5f36f54acff6b87137d0e8c752ccce3abc4a1772e2d"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/native/quasi-newton-core-n1.prm": {
+      "bytes": 12647,
+      "sha256": "8c2fe9cd44113faf4c150f8db63a7aa08d9e1b42f706f5bfa664e1e06ef165cb"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/native/saddle.prm": {
+      "bytes": 12200,
+      "sha256": "142a3bd10b234e7401e8a9085a2b27adbab8a16494b271305c944885b0a5ca86"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/physical-comparison.png": {
+      "bytes": 242637,
+      "sha256": "3c21f0843ce2152b8db3bd3d99561ad091d0d0d558c7ea8aecfbc39825743276"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/screen/early-endpoint.json": {
+      "bytes": 1749,
+      "sha256": "dc66074d6f5568d8cd0df7b58ae5a6189de718225ca9beabe003e16a86fe438d"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/screen/early-endpoint.npz": {
+      "bytes": 19667,
+      "sha256": "d7ae6cdfcf43a26bf6b4f8d0827cf797872b944fdaaf1bc40b56cf08ff6e95ef"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/screen/early-quasi-newton.json": {
+      "bytes": 3312,
+      "sha256": "844b886e6ee8fc3b93ba2ccc6f4482c231f3bc7c114231923a1e37c70eb4fb64"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/screen/early-quasi-newton.npz": {
+      "bytes": 19044,
+      "sha256": "c1ef9c06c969fbb313491337c0092423b9a60fbcc95f398b38b2f10ebec64d4d"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/screen/early-staggered-4.json": {
+      "bytes": 2134,
+      "sha256": "cf65f041f686c3a5671b7ac426259e39420455ee56f7d862ef9193ef0e4d408b"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/screen/early-staggered-4.npz": {
+      "bytes": 18431,
+      "sha256": "d4a251f806c84e535b572901861a118ccfde90b74c84ef16076079a49b6713ad"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/screen/late-endpoint.json": {
+      "bytes": 1735,
+      "sha256": "d3523c2f76bf68861f7cd5e20028bb42861c325a5b681c0f934729d5236207a9"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/screen/late-endpoint.npz": {
+      "bytes": 21431,
+      "sha256": "abe16c77232aaf5be9d8fb8ae240c549f9c1489378e4bee22de734678071f8c3"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/screen/late-quasi-newton.json": {
+      "bytes": 5287,
+      "sha256": "5ea0af0a9da887e438cc43f4c2f591fd533010e4132f183f16d055c76f99619e"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/screen/late-quasi-newton.npz": {
+      "bytes": 21420,
+      "sha256": "cc6d84d21249c402547fcb49c664dc7abe48eb746326f12495e8cad49a89092d"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/screen/late-staggered-4.json": {
+      "bytes": 2118,
+      "sha256": "c52b1dd65e613c367735fbdbccc84de2733b781d724d5ef851c52d4b6a357944"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/screen/late-staggered-4.npz": {
+      "bytes": 21408,
+      "sha256": "f839a305caffcee92e13f7f3cc2568c9269ed430a05c75baffaaa42cccc65dfa"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/screen/saddle-endpoint.json": {
+      "bytes": 7635,
+      "sha256": "f0b4df6d3e70d353882f2f0502400100b74f7a4b8c49dd6c6e79331b86f5acd3"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/screen/saddle-endpoint.npz": {
+      "bytes": 21121,
+      "sha256": "150ebb8c840ea5a54a72fe9578b34b0c1843bd363bd6533bc8367267855b2874"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/screen/saddle-quasi-newton.json": {
+      "bytes": 6486,
+      "sha256": "7027e852038d41f4a15b394e5f751d7c7ddea5dff357e5614431831a096a9de1"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/screen/saddle-quasi-newton.npz": {
+      "bytes": 21111,
+      "sha256": "8aefb3229617d551c7f96088922a957cb5c03f12366b5850478082e752cc7504"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/screen/saddle-staggered-4.json": {
+      "bytes": 2132,
+      "sha256": "d142835c0fc7c59088ef28af901c2853356ca1f467a98b6c9bcde60bceffbffc"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/screen/saddle-staggered-4.npz": {
+      "bytes": 20462,
+      "sha256": "365143cac0aa9af78ed1b7ae6777afdc55c25dc3ef5377586f7526a2dd8fee90"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/separate-energy.png": {
+      "bytes": 190693,
+      "sha256": "95aaa98a93d85b2ea63e721e20a170ba06a56361e49548486d0990837f616738"
+    },
+    "benchmarks/reconstructed_fault/propagation/cheaper_coupling_evidence/verification.json": {
+      "bytes": 2042,
+      "sha256": "682e8777e7aaf38bfe18033dfd9158c72f0cc178673e3f9187c6160753483fd2"
+    },
+    "benchmarks/reconstructed_fault/propagation/check_native_mpi_cancellation.py": {
+      "bytes": 1912,
+      "sha256": "4655ed87a1a15ad54f74bf90c9562bc847af6407b4687f35e0fc2a606c4d3764"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/batch-assessment.json": {
+      "bytes": 3334,
+      "sha256": "b3c7223d1701cde3763c0cae0aaac653da732ec63109cbe7410f0710b92a5bb9"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/batch-factor-reuse.json": {
+      "bytes": 571,
+      "sha256": "8306f8f2665385e6c23915ca8add573f45ccce6eb6b25767dd5244ae8608847c"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/batch-n1-local-run.json": {
+      "bytes": 1408,
+      "sha256": "e15aeed51d986c895eaa87e889211ec17ae50579db58bc4938d2f48ab4324d16"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/batch-n1-local-start.json": {
+      "bytes": 1351,
+      "sha256": "cba7b34c52bd2dfc973e17d7476062e50abfa68f17c876e8a2e75294f5f3022e"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/batch-n1-local.log": {
+      "bytes": 13505,
+      "sha256": "f10294f4b840cfd9e7e38bba1702d6140b3b937c39839a2c16a4c09928161193"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/batch-n1-local.prm": {
+      "bytes": 12830,
+      "sha256": "8cf507ffbaec5299561acee5a9115e7ea5e8c079f4c63e33d100ba1ee53a81df"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/batch-n1-run.json": {
+      "bytes": 1392,
+      "sha256": "9ded4ac17885808243a1781174e2517f898f998dc48ba40a933651d51d771e30"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/batch-n1-start.json": {
+      "bytes": 1333,
+      "sha256": "440ca3943eacbb2d0ced65ad758c28b11df4cd5df949f4257edb706f8266cf12"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/batch-n1.log": {
+      "bytes": 557,
+      "sha256": "d4aee8687ab6b06fb85df5f36f54acff6b87137d0e8c752ccce3abc4a1772e2d"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/batch-n1.prm": {
+      "bytes": 12824,
+      "sha256": "32c3ab9fcaf86bb6f490e3fb9f88b9ef057748cf00d2ddad5a6537ef473504fe"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/batch.prm": {
+      "bytes": 12387,
+      "sha256": "5fe6e8b4a9bd9b68ebf06ab936e59e8e75b3c49e75219a1557db85dad2b93195"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/changes-so-far.json": {
+      "bytes": 818,
+      "sha256": "f37caa297d961c927c3937481c3305563bf5946eef709a51c01346ac950ec81e"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/compatibility.log": {
+      "bytes": 952,
+      "sha256": "c1dd7ef4ac1c6765b8743e500db242671fe538afe5039364e2e39a3dfdadcdf3"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/growth-assessment.json": {
+      "bytes": 3070,
+      "sha256": "cee0cd1dd82702fcaae6033adb48b453a5481b7c81f19ef7de2c85485f666993"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/growth-direct-n1-run.json": {
+      "bytes": 1414,
+      "sha256": "10721228f6cd0a828e970e0b4349468ec7a3bb8e6a960bfa438d3350000a95f9"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/growth-direct-n1-start.json": {
+      "bytes": 1358,
+      "sha256": "2f6ffec13e480d357a231bbfc6d18427d4dbb15e61f728c94e1f0c1197168343"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/growth-direct-n1.log": {
+      "bytes": 248655,
+      "sha256": "125cbc195c041717f2a43423398a995ff9772c8d5420e59c980a9347b3c1d1d9"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/growth-direct-n1.prm": {
+      "bytes": 12790,
+      "sha256": "c4f6fd8c3cac2fd282e500d527c2785aa14914a8286b144d5ad9504858d9cc00"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/growth-factor-reuse.json": {
+      "bytes": 575,
+      "sha256": "68fee9693a7d699d7c807d5663b7504a6cc3f131370cf5da2551fb9cbeba0d66"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/growth.prm": {
+      "bytes": 12345,
+      "sha256": "8b559e7ee0fb500213e6bea66eda0d41af99973609577dc2ae815f2ee7a9519c"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/preservation.json": {
+      "bytes": 406,
+      "sha256": "447c023ab6662b0b62150588e69cd69bc263917fda227ce89e2f288bb2912976"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/prototype-actions.npz": {
+      "bytes": 17093,
+      "sha256": "1ca033d21b27a74e7d5d66bb7d6f5f22e6630b7ebb26318338e7274f9b2a9e45"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/results/batch-n1-local/fixed-entries.csv": {
+      "bytes": 629,
+      "sha256": "84bdcd991771ca485cb8a42eccaaa691110f7266206c93e8cfc3c0e45a4195a1"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/results/batch-n1-local/initial-H-correction.txt": {
+      "bytes": 22,
+      "sha256": "3c2ee3ab08ab03dc309b7dea322cf7b764db9b286c1c40b1ad89d28b9fe0109a"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/results/batch-n1-local/metrics.csv": {
+      "bytes": 139,
+      "sha256": "12e1ccd14a6bfdf8061d87833d79887fcd31ad5437c0673b06005a1d97226f30"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/results/batch-n1-local/mpi-memory.csv": {
+      "bytes": 66,
+      "sha256": "439b7ef8a4a833b0b2c866460b56e0f98294e944303f2079cf2251ae203d4c5c"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/results/batch-n1-local/surface-schur.csv": {
+      "bytes": 6213,
+      "sha256": "07655a1746966b4f4d5371fd9b4bb2880f7f792182f0efcc31cabcf84f3a7750"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/results/growth-direct-n1/fixed-entries.csv": {
+      "bytes": 649,
+      "sha256": "0cf3a075518ac2e933d65454a9a1686bbec913eeb811aa3a35428d970c1a2eee"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/results/growth-direct-n1/initial-H-correction.txt": {
+      "bytes": 22,
+      "sha256": "3c2ee3ab08ab03dc309b7dea322cf7b764db9b286c1c40b1ad89d28b9fe0109a"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/results/growth-direct-n1/metrics.csv": {
+      "bytes": 139,
+      "sha256": "12e1ccd14a6bfdf8061d87833d79887fcd31ad5437c0673b06005a1d97226f30"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/results/growth-direct-n1/mpi-memory.csv": {
+      "bytes": 66,
+      "sha256": "ef231bb8ef4032049fbd1ebe1cc0a81d8765d679a5597a03fbe75d0d2b68edf4"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/results/saddle-direct-n1/fixed-entries.csv": {
+      "bytes": 660,
+      "sha256": "5ae3e6db79e74f610710b4f458a61daa185a7dd6bf304bd7bc8eefa616148ff7"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/results/saddle-direct-n1/initial-H-correction.txt": {
+      "bytes": 22,
+      "sha256": "3c2ee3ab08ab03dc309b7dea322cf7b764db9b286c1c40b1ad89d28b9fe0109a"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/results/saddle-direct-n1/metrics.csv": {
+      "bytes": 139,
+      "sha256": "12e1ccd14a6bfdf8061d87833d79887fcd31ad5437c0673b06005a1d97226f30"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/results/saddle-direct-n1/mpi-memory.csv": {
+      "bytes": 66,
+      "sha256": "654241ce0c88c18fa8336a5f3dbd8e1b548e985d8eb2bd7bab7f7b5b4ed864a9"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/saddle-assessment.json": {
+      "bytes": 3097,
+      "sha256": "66c21e2cf1992abb60296c8aaa953b9e79605451634001d1192fe64524d73fd4"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/saddle-direct-n1-run.json": {
+      "bytes": 1415,
+      "sha256": "3a8b6d8eb56fe77501304f538dd5451bd95fec66222018ba649f1db806ea2e41"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/saddle-direct-n1-start.json": {
+      "bytes": 1359,
+      "sha256": "d37100bfb397dfc52c817729333a161a04c145b6cc9ddbc03450a5f2c18bba55"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/saddle-direct-n1.log": {
+      "bytes": 520008,
+      "sha256": "4c60ce13fa04343249e90ed4a3e7ae8196e1d9468ae84c1e1b8de5b8dc43e52a"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/saddle-direct-n1.prm": {
+      "bytes": 12792,
+      "sha256": "7d8d0337757382fbf207499eddabc8a7c0226f73c80e8e38b57c4086052cbe4f"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/saddle-factor-reuse.json": {
+      "bytes": 570,
+      "sha256": "0311f4cf832500f04b362004c50b363bb3a6db691a5091b229cefcb160237c8e"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/saddle.prm": {
+      "bytes": 12347,
+      "sha256": "abc44d2c7ea31907c01b97a129ae03bbb157f5e5d6c3b96364d1ec213b5f6c87"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/specification-addition.tex": {
+      "bytes": 1710,
+      "sha256": "ec5aeb969041f848eead425771067326a8bbc05a80f76206a0ce996c0ac1ae1d"
+    },
+    "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/verification.json": {
+      "bytes": 2753,
+      "sha256": "cdb0bd6e12565e62f78b4b5ebfe3a2c5a23a475dff9c3004d62f5ae35d69051d"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_endpoint_verification.cc": {
+      "bytes": 77717,
+      "sha256": "e2389b6a7b09a2cef8c7b2d96a3c6da1e28a3d1ad1f48e94280f6b5bcbcab56c"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/assessment.json": {
+      "bytes": 205704,
+      "sha256": "8c288a64f5830b2b83442133ea5890fc50ee9413c6bd392cb03eeedbbf30380e"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/baseline.json": {
+      "bytes": 203448,
+      "sha256": "3939da67c5beb8e7e415f0075cdc2b7ac530bce81be98b88cc985afa0c72bed6"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/compatibility.log": {
+      "bytes": 952,
+      "sha256": "9ce1cd665f18719fcde95c7af99cc5e9b3ebd818fbd246c67043a24a277f1472"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r1-epoch-0-rank-0.csv": {
+      "bytes": 355,
+      "sha256": "bff8f2e67ae1d835edaa34c7ede50178d1ea276f1cfd1018f24ad0071d0306b4"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r1-epoch-1-rank-0.csv": {
+      "bytes": 334,
+      "sha256": "e34f4e3861942d7e76d6bfc0a7f825fb9d2547f645e63804958b9c14bbf9bb67"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r1-epoch-2-rank-0.csv": {
+      "bytes": 347,
+      "sha256": "77b1dcfdd9fa2f8935422848a1b66a0afa847e9e7fedeeb1d74362f7799bc7bf"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r1-run.json": {
+      "bytes": 1474,
+      "sha256": "f8c6490d3abec5b2e01f05f9d1f1c74b52d03881101cae35cb7983b9c46a621d"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r1-start.json": {
+      "bytes": 1418,
+      "sha256": "ec331c8ea28de3599bfaddf2684428b4fe91edf0e923b699775553a8f50f3d81"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r1.log": {
+      "bytes": 223239,
+      "sha256": "17dfdc36aae077c6ea70d290b0f91adec3d060750bef31c9e8d671ec3252e828"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r1.prm": {
+      "bytes": 12517,
+      "sha256": "ae27a8d35e1f372ae31b0498f2c97f568311d6ca9a9fe11f915590b9de1c68a3"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r2-epoch-0-rank-0.csv": {
+      "bytes": 481,
+      "sha256": "e50b3e220724779bf1f60f0f7c5c97280a25586bc369a268015e3c2759b4c4ac"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r2-epoch-0-rank-1.csv": {
+      "bytes": 486,
+      "sha256": "8cdfb404bf6436e82e3086e9ce473a141168b036e6fda040b402cb1d3499c1fb"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r2-epoch-1-rank-0.csv": {
+      "bytes": 484,
+      "sha256": "9e6b87776748929af16e5b45df54f9c2bb6a050695583d9a2357a6e3b417265f"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r2-epoch-1-rank-1.csv": {
+      "bytes": 487,
+      "sha256": "7dd2fc87717a74ba8fa31c6f9952785175b3d36cd7d23aaea5f6206fb33bd30d"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r2-epoch-2-rank-0.csv": {
+      "bytes": 440,
+      "sha256": "a81df6250773ac8d7207d45ff6c3e0697c948077b6526d2314b290df31aeb9db"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r2-epoch-2-rank-1.csv": {
+      "bytes": 438,
+      "sha256": "e72b2c2a394e216dd6a2bc825c2255ec9a3aa966d908e4a8263c6797ea53aa87"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r2-run.json": {
+      "bytes": 1474,
+      "sha256": "a35b19e820e60049db30adab73f734080b23481144736fa50ed7052369f75f08"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r2-start.json": {
+      "bytes": 1418,
+      "sha256": "f0df8c3b9803e6e38c3e373a00d7abab0359db5fb93fa34d4737545149245f06"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r2.log": {
+      "bytes": 225341,
+      "sha256": "16511f84d971e427925cb75c719dd4b73c28dfd626467bf047a07406492b0ba7"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r2.prm": {
+      "bytes": 12517,
+      "sha256": "30ba3fc5075f4b9fd23e04497e43a22f0e950e73cce52d859d60f6cfc04b7b0e"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r4-epoch-0-rank-0.csv": {
+      "bytes": 486,
+      "sha256": "561453ad5233a51235a450ffcba687f93e454dbadc868a3f3cdb86524cc35951"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r4-epoch-0-rank-1.csv": {
+      "bytes": 484,
+      "sha256": "00ca4155678615f8a4e922526bf4c90a4f53033671aacf64cb537ca7b3cdc0e4"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r4-epoch-0-rank-2.csv": {
+      "bytes": 485,
+      "sha256": "396efefbfdf12a1e5dd0313ddfb2000173f193448b799e28e3eea524c0a166f0"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r4-epoch-0-rank-3.csv": {
+      "bytes": 486,
+      "sha256": "01f554ed3a4353fa5fbf8f89d3606da04503d1bbb30cc5d6a1ca0d4a77d576a8"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r4-epoch-1-rank-0.csv": {
+      "bytes": 485,
+      "sha256": "7d492a914679c53625d61480478a4b529686562b9933cec458a19bb26a9eddb6"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r4-epoch-1-rank-1.csv": {
+      "bytes": 487,
+      "sha256": "5c620aeaa7b7a39bd53e85224ae79a3dbea61098fd043c78ee4e2c5d4d3febf2"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r4-epoch-1-rank-2.csv": {
+      "bytes": 486,
+      "sha256": "14d46b3192c572d7b5929965a90c1499417b4709690baa0d7147f1bac3c63e07"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r4-epoch-1-rank-3.csv": {
+      "bytes": 487,
+      "sha256": "b0385a2c0a9565510dfe6845042efa3c0c86db8587c8be54d415a9c50411cd1b"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r4-epoch-2-rank-0.csv": {
+      "bytes": 485,
+      "sha256": "b306e83d93eab9a4d5c25e48bacd445fe30cba987795a76f59dab2dd7bd97de2"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r4-epoch-2-rank-1.csv": {
+      "bytes": 484,
+      "sha256": "9ca6a08d53ba0b1cfa016305173a9a985a63973844c1e4bc727b48beb08e7b8f"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r4-epoch-2-rank-2.csv": {
+      "bytes": 485,
+      "sha256": "c752690b570bc2e3e83577decaf45195403ed478776324bd51e898a42655df7a"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r4-epoch-2-rank-3.csv": {
+      "bytes": 487,
+      "sha256": "ff709649ec36ed9d393d15d65768311ee95043069f9d5d94777fd101c1119764"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r4-epoch-3-rank-0.csv": {
+      "bytes": 436,
+      "sha256": "d7eb26b432bac92d79b60be1f63051bdf69b13cb85dfda1168d20b8959826c85"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r4-epoch-3-rank-1.csv": {
+      "bytes": 436,
+      "sha256": "e3c32db4a169c33be9142d49b030cb76de0d66a6fba882975e1f8bd384007f7b"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r4-epoch-3-rank-2.csv": {
+      "bytes": 437,
+      "sha256": "c1fafec6c7692216318169d715b3d2b34dd5a10c7c5089054bad80c7beb76ba2"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r4-epoch-3-rank-3.csv": {
+      "bytes": 436,
+      "sha256": "2929f69a17b026d1534f450e5417306781c72d3f713b69ddced2722c8a9b65bd"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r4-run.json": {
+      "bytes": 1475,
+      "sha256": "ee810cec0e0f2b0498cd287b9e011189b0d94175d5d4ca04c05b920c9a32fd4b"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r4-start.json": {
+      "bytes": 1418,
+      "sha256": "22ba9e2058e8b7611b72e47c29b7183773f1346429ca75d57d3b351533a2c75e"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r4.log": {
+      "bytes": 452619,
+      "sha256": "767688fd43433088fd54fd3f229f6322769acde17bbaf3eb2f3716ee544e2b43"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core-final-r4.prm": {
+      "bytes": 12667,
+      "sha256": "44713ccf737d8c86a753174a1fe743eba7dc414d8173b4e9b161d088bcdf4e88"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core.prm": {
+      "bytes": 12075,
+      "sha256": "c52d0aa303e3ec3600562c0816cae51bb92df44521916d1a0279e1dc21049908"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core/core-6.txt": {
+      "bytes": 98920,
+      "sha256": "8ef72c80a6822e8723e1f1cfd789363aa2cf989fc7e6fc4d5e17c39e2473c972"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/core/files.txt": {
+      "bytes": 11,
+      "sha256": "054fd171c4504c22366f280ce90e90366a0a72ca945afb5b372d7d9daa62c09e"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/final-source.json": {
+      "bytes": 3147,
+      "sha256": "da45257caeb48455ce0177bca75ce5be31c85b2fc002a6c13ab2a9e140a6abc7"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/growth-rank-profiles.png": {
+      "bytes": 133398,
+      "sha256": "4c87229ec453dc57b8a6168e8f61aecc98f71246795a8cf8f570b69dba46b764"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/operators-final-r1-epoch-0-rank-0.csv": {
+      "bytes": 375,
+      "sha256": "5086dd6ced9f74dd6a585a6a26757a407b2ec1afc3305ddb41b233aeb8d159b6"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/operators-final-r1-run.json": {
+      "bytes": 1517,
+      "sha256": "ff4e0463951108748c3029bda47003680096b2697848bf700709190d3a68bcd5"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/operators-final-r1-start.json": {
+      "bytes": 1460,
+      "sha256": "7bcb9e8aa75acdbee5649ccca0da954144272dbc6fd1c96e1030cb8ef8946e63"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/operators-final-r1.log": {
+      "bytes": 25699,
+      "sha256": "fd3f40b12b41aaabb92259b4df2e1301e48f1a24d744ac6f555dbcb00ef6ddce"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/operators-final-r1.prm": {
+      "bytes": 11705,
+      "sha256": "2cd66c7735197b150a136f6c7140c288e57d04cbc82c0f93f30a5c5950f66b9f"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/operators-final-r2-epoch-0-rank-0.csv": {
+      "bytes": 492,
+      "sha256": "ccc57a073710a8e93acf7504ed55966c3a20943117532ccba04e05bb733aa2ef"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/operators-final-r2-epoch-0-rank-1.csv": {
+      "bytes": 490,
+      "sha256": "e0171cb99c7cef45515c869d64f31eaae835b45b1d4e8a857a2de5e22d806ca5"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/operators-final-r2-run.json": {
+      "bytes": 1517,
+      "sha256": "5ef42a5be56fa876128060ca39559f28c5c5d5e9421ce3a42e1b48f08e51e17d"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/operators-final-r2-start.json": {
+      "bytes": 1460,
+      "sha256": "aa68976563a94fcaef15c4303591834884c67f4cafbd80d3b900ab64814a7cdb"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/operators-final-r2.log": {
+      "bytes": 25757,
+      "sha256": "f94f33fce3a70a6f9cd2cad16817d4305f329c9aa5023da4fec9f62aef3ec8bc"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/operators-final-r2.prm": {
+      "bytes": 11705,
+      "sha256": "9b983ccc73b4c07d8e6c0a7c5d65c349944b7f207945fdaff6ffbe749180bfbd"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/operators-final-r4-epoch-0-rank-0.csv": {
+      "bytes": 490,
+      "sha256": "144294556980c0bce49891e02a1e0e1481b0b731c29a9488024cda70d1ebbee9"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/operators-final-r4-epoch-0-rank-1.csv": {
+      "bytes": 488,
+      "sha256": "9a9600f2df5e7e8b0e9b03e0937f52b65d609217dfbff67d55dbced040af8353"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/operators-final-r4-epoch-0-rank-2.csv": {
+      "bytes": 486,
+      "sha256": "d5311921b9914cb90191f5fffa81decc9a0ee4935ff19e668e7130a3089abc84"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/operators-final-r4-epoch-0-rank-3.csv": {
+      "bytes": 485,
+      "sha256": "22ca8b7b3abece898985b2f741f7cfc69c59a8f9162e8b5a8cda17ca6c5ac682"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/operators-final-r4-run.json": {
+      "bytes": 1516,
+      "sha256": "d40853979cd755e9d27d22c8ffeda2123471ced11874a7e5041b483f79a6d435"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/operators-final-r4-start.json": {
+      "bytes": 1460,
+      "sha256": "398433fb493d3847e65a387f14c2ce50213daa51febc8e236bf9e8609d995d8b"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/operators-final-r4.log": {
+      "bytes": 25815,
+      "sha256": "e9df4bea2479580dc4efe72ea53b75e70cee265387b5cf6e6ca4fce8dce9f33b"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/operators-final-r4.prm": {
+      "bytes": 11705,
+      "sha256": "499d27d60fd8ec8de09dfd9ed14cb968d83a2572a17212738dbff4d799e6f2af"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/operators-n16-r2-a-run.json": {
+      "bytes": 1323,
+      "sha256": "f96e9845dda90293fe06a7824e81bb16a7df38d903e6c0501e7e916ab4afb358"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/operators-n16-r2-a-start.json": {
+      "bytes": 1268,
+      "sha256": "f2650527e9461abd3b5b384420e5966c8197cedcab916af8f5b589c03b9d1200"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/operators-n16-r2-a.log": {
+      "bytes": 7296,
+      "sha256": "094604709bbbbf875d093d5b62466d38a4897a9003e60c5cf363078cceefe66c"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/operators-n16-r2-a.prm": {
+      "bytes": 11705,
+      "sha256": "2b2a08434e9a457da1c9459e831923dd05ef83f9ca7ec8ab5ad09e8ad54c5fb5"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/operators-n16-r2-b-run.json": {
+      "bytes": 1324,
+      "sha256": "3d11da0598900c7c3c493debfb695acef50ba809eea81d9c8f2d557740882ba2"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/operators-n16-r2-b-start.json": {
+      "bytes": 1268,
+      "sha256": "bdea55ce522f8739534577a1d1db4cbfa6df2e1ad8b5b12e9fe72184541956ac"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/operators-n16-r2-b.log": {
+      "bytes": 10512,
+      "sha256": "2cad3737e6ff963f9a89689812e1d21aa2301771d518672af8ec87fc2dd07906"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/operators-n16-r2-b.prm": {
+      "bytes": 11705,
+      "sha256": "392cece3eb6d2564021f0dec8527fed2bb67b1c99c5f7e83ed64cf28b9cae2bf"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/preservation.json": {
+      "bytes": 1076,
+      "sha256": "6fc10005ef7df8f6ca18f81118a599b7c5dcda8c73c01a59e4d37660491a8317"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/rank-cost.png": {
+      "bytes": 67681,
+      "sha256": "4ffa06a865eb4931c55567b5df186eeabcfbe37b3c5449ff562beadac6987f8e"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/core-final-r1/fixed-entries.csv": {
+      "bytes": 651,
+      "sha256": "b9cf3fcf68d5c6ddc3e7aea2e62c749de530807823cafaf3125f2416c12eef57"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/core-final-r1/initial-H-correction.txt": {
+      "bytes": 22,
+      "sha256": "3c2ee3ab08ab03dc309b7dea322cf7b764db9b286c1c40b1ad89d28b9fe0109a"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/core-final-r1/metrics.csv": {
+      "bytes": 139,
+      "sha256": "12e1ccd14a6bfdf8061d87833d79887fcd31ad5437c0673b06005a1d97226f30"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/core-final-r1/mpi-memory.csv": {
+      "bytes": 66,
+      "sha256": "ff0a5a51760535a76cc0c2158b08253cdb63e8b2f0b6d3ab82d5ffe0a3e020bb"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/core-final-r2/fixed-entries.csv": {
+      "bytes": 651,
+      "sha256": "a12e5d588fe14eaeffbf517439c6b70a645c4624d568b8b76a1b4f0998dae6a7"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/core-final-r2/initial-H-correction.txt": {
+      "bytes": 22,
+      "sha256": "3c2ee3ab08ab03dc309b7dea322cf7b764db9b286c1c40b1ad89d28b9fe0109a"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/core-final-r2/metrics.csv": {
+      "bytes": 139,
+      "sha256": "12e1ccd14a6bfdf8061d87833d79887fcd31ad5437c0673b06005a1d97226f30"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/core-final-r2/mpi-memory.csv": {
+      "bytes": 88,
+      "sha256": "95fe56d9d430040bd1d8aa2eb4ed778fd1cbd32b84f3c9f9d4c0dc16e6a6dd27"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/core-final-r4/fixed-entries.csv": {
+      "bytes": 651,
+      "sha256": "f90d689ebaa91183e6486859b523f18ac2f82642e9fad62f3f65accd155292de"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/core-final-r4/initial-H-correction.txt": {
+      "bytes": 22,
+      "sha256": "3c2ee3ab08ab03dc309b7dea322cf7b764db9b286c1c40b1ad89d28b9fe0109a"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/core-final-r4/metrics.csv": {
+      "bytes": 139,
+      "sha256": "12e1ccd14a6bfdf8061d87833d79887fcd31ad5437c0673b06005a1d97226f30"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/core-final-r4/mpi-memory.csv": {
+      "bytes": 124,
+      "sha256": "dd2b301082757da5546ca6532963b04bf541ae5f60209148e7d4febc6d76c375"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r1/initial-H-correction.txt": {
+      "bytes": 22,
+      "sha256": "3c2ee3ab08ab03dc309b7dea322cf7b764db9b286c1c40b1ad89d28b9fe0109a"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r1/metrics.csv": {
+      "bytes": 260,
+      "sha256": "d432dfbeac26c2d3151179f8835058d8cb1c90783d899fab666bddccdf948423"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r1/mpi-memory.csv": {
+      "bytes": 99,
+      "sha256": "fc0300451cb31b4fe717a93bfff96098eb0dfb7df12adbf6485031096333bce1"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r1/operator-adjoint.csv": {
+      "bytes": 842,
+      "sha256": "4e81aedd05da75f89afb2c7b0ad8f203f323cd3afac287f891b9d09492dd8643"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r1/operator-fracture-quadratic.csv": {
+      "bytes": 486,
+      "sha256": "27eccbe68831a726a89c32d8d4bc7dd511e13bb4b00c00f24f7a0fd8ccad99a6"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r1/operator-linear-tangent.csv": {
+      "bytes": 1925,
+      "sha256": "63abb0726b5d5a690c85497a79b70dbd4a40f86eaf34d02728c7d71ab1884c92"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r1/operators.csv": {
+      "bytes": 3941,
+      "sha256": "79d3e8b2152afa36145a9d782d3e7596660d946948bdf23a1928183d94f2f509"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r1/tangential-curvature.csv": {
+      "bytes": 265,
+      "sha256": "3bbd06fc74134a58c9c6cace5f12a2835a7c33dc195ad1cdc0697d83daf7961c"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r2/initial-H-correction.txt": {
+      "bytes": 22,
+      "sha256": "3c2ee3ab08ab03dc309b7dea322cf7b764db9b286c1c40b1ad89d28b9fe0109a"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r2/metrics.csv": {
+      "bytes": 260,
+      "sha256": "d432dfbeac26c2d3151179f8835058d8cb1c90783d899fab666bddccdf948423"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r2/mpi-memory.csv": {
+      "bytes": 150,
+      "sha256": "08d6282799ef352847b8ea3108bbfed0cf9ec535d035bc551ea87a8ceffd43fc"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r2/operator-adjoint.csv": {
+      "bytes": 843,
+      "sha256": "cee4f2382f9fc4ced0f8b1aa7d62e970c4bc5523bb61011168559531cfc24400"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r2/operator-fracture-quadratic.csv": {
+      "bytes": 486,
+      "sha256": "27eccbe68831a726a89c32d8d4bc7dd511e13bb4b00c00f24f7a0fd8ccad99a6"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r2/operator-linear-tangent.csv": {
+      "bytes": 1923,
+      "sha256": "5a70af99b629dc18fcd60e7a526561624f293b074aed568b4b532f7ec6723a85"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r2/operators.csv": {
+      "bytes": 3943,
+      "sha256": "8bcd456b82b509038867ed3ec676d500e17f495fd688cc3efab92dde77114ebd"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r2/tangential-curvature.csv": {
+      "bytes": 264,
+      "sha256": "9d3b094c614a05d4f47e95fb0321c55f0a1b9ad3a26921ab106a3af2f4914a04"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r4/initial-H-correction.txt": {
+      "bytes": 22,
+      "sha256": "3c2ee3ab08ab03dc309b7dea322cf7b764db9b286c1c40b1ad89d28b9fe0109a"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r4/metrics.csv": {
+      "bytes": 260,
+      "sha256": "d432dfbeac26c2d3151179f8835058d8cb1c90783d899fab666bddccdf948423"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r4/mpi-memory.csv": {
+      "bytes": 248,
+      "sha256": "83604896f9dfebaa8c4da9578fdf7089d86371b2cbc0de44e792b631f97fe87a"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r4/operator-adjoint.csv": {
+      "bytes": 843,
+      "sha256": "db9e5c1f084a9fcd6831aa533022602f518e52b72a40e11159f00c2e69d49f8e"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r4/operator-fracture-quadratic.csv": {
+      "bytes": 486,
+      "sha256": "27eccbe68831a726a89c32d8d4bc7dd511e13bb4b00c00f24f7a0fd8ccad99a6"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r4/operator-linear-tangent.csv": {
+      "bytes": 1921,
+      "sha256": "9df6a33ea66e6bb4d38f463ac96261f3f9aaa44af9cb96f34cc61e0da373b869"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r4/operators.csv": {
+      "bytes": 3942,
+      "sha256": "8450445aba81b71b09d5eecb94d598dccd72abc7050a6166ffc0ca2cddf1e8ce"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r4/tangential-curvature.csv": {
+      "bytes": 265,
+      "sha256": "9b575571006c2319f8b2d31e62164c917b6bf33f35289df79af6854fd2340b3b"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/saddle-final-r1/fixed-entries.csv": {
+      "bytes": 666,
+      "sha256": "e45dc4baad5bdfa0adb993d4f780293d37be1f9895c5f76ab05ba3cf064dbe4c"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/saddle-final-r1/initial-H-correction.txt": {
+      "bytes": 22,
+      "sha256": "3c2ee3ab08ab03dc309b7dea322cf7b764db9b286c1c40b1ad89d28b9fe0109a"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/saddle-final-r1/metrics.csv": {
+      "bytes": 139,
+      "sha256": "12e1ccd14a6bfdf8061d87833d79887fcd31ad5437c0673b06005a1d97226f30"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/saddle-final-r1/mpi-memory.csv": {
+      "bytes": 66,
+      "sha256": "3606f576e9848e325925f5393f860de9864ae16a2f905144231a77e1809cf4fe"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/saddle-final-r2/fixed-entries.csv": {
+      "bytes": 665,
+      "sha256": "b858a11f913756e8bb46d4afc63b8dc54c8a341c7cd5af474ff6cd017e7ae407"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/saddle-final-r2/initial-H-correction.txt": {
+      "bytes": 22,
+      "sha256": "3c2ee3ab08ab03dc309b7dea322cf7b764db9b286c1c40b1ad89d28b9fe0109a"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/saddle-final-r2/metrics.csv": {
+      "bytes": 139,
+      "sha256": "12e1ccd14a6bfdf8061d87833d79887fcd31ad5437c0673b06005a1d97226f30"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/saddle-final-r2/mpi-memory.csv": {
+      "bytes": 88,
+      "sha256": "75095898d7cec8af8b764169d8640a145ed6e60b2fa4f5e518bab50ac598e4fd"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/saddle-final-r4/fixed-entries.csv": {
+      "bytes": 666,
+      "sha256": "c9c9dfc7be461150e202519fd4f1fcccc94f045eb5e23c23bfa2bb7c23e8c9aa"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/saddle-final-r4/initial-H-correction.txt": {
+      "bytes": 22,
+      "sha256": "3c2ee3ab08ab03dc309b7dea322cf7b764db9b286c1c40b1ad89d28b9fe0109a"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/saddle-final-r4/metrics.csv": {
+      "bytes": 139,
+      "sha256": "12e1ccd14a6bfdf8061d87833d79887fcd31ad5437c0673b06005a1d97226f30"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/saddle-final-r4/mpi-memory.csv": {
+      "bytes": 124,
+      "sha256": "29b85d4ec2769b78b4362cdd401a0669cfa96e4bed1166407686198413bb6c00"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/saddle-final-r1-epoch-0-rank-0.csv": {
+      "bytes": 376,
+      "sha256": "4b6564cfb1b9abed3d85e5f1db39d4f737287412b625c2c63f7e1241accc41c7"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/saddle-final-r1-run.json": {
+      "bytes": 1483,
+      "sha256": "19f4dea01e5627f40a1e843f3e4d2b26809f4c83963c4ab5d93788843bedf0da"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/saddle-final-r1-start.json": {
+      "bytes": 1426,
+      "sha256": "1edf9e5d4e6ae3c4924787e998e52d286928ef4b90a4fedb0f2ed156b44d7424"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/saddle-final-r1.log": {
+      "bytes": 545339,
+      "sha256": "bea5f3f6c82b7172b89b085f5d09a99a7d8cde4f78c73e1151c848322ccfbeba"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/saddle-final-r1.prm": {
+      "bytes": 12521,
+      "sha256": "f25b063fb29fb394e3182023177c3ba4575c470d51649df6b9ab46dfd4ffe21c"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/saddle-final-r2-epoch-0-rank-0.csv": {
+      "bytes": 490,
+      "sha256": "02c6c4415b60a03c5a69e8cc6b42197c3700e538525720235547f858ca8f316e"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/saddle-final-r2-epoch-0-rank-1.csv": {
+      "bytes": 492,
+      "sha256": "511a5f593b675db3a18a2fd2151e4447bab15c6a74f11a75d2382dc41e124ced"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/saddle-final-r2-run.json": {
+      "bytes": 1483,
+      "sha256": "1ccb54783e45754c687dcb84277544e5977b356d4691d6ea29648f9b0655c0f1"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/saddle-final-r2-start.json": {
+      "bytes": 1426,
+      "sha256": "bf94bf8272aeede9e41e7110a60b8d3c91a519ecc009838af00985c9810abeee"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/saddle-final-r2.log": {
+      "bytes": 519151,
+      "sha256": "deb75034c59b733ee1ba62040c47e2d4970b383d0ad9b22e599ea4faa8256d79"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/saddle-final-r2.prm": {
+      "bytes": 12521,
+      "sha256": "67be1602c7253d60957cc457a8fee0e6d34fddd737e15944b2bbd3e344c702d2"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/saddle-final-r4-epoch-0-rank-0.csv": {
+      "bytes": 489,
+      "sha256": "72f65b32ea7f206fbe3c9bd8ac0ffa4ba7eeaf2bc712604ec46478f056586df9"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/saddle-final-r4-epoch-0-rank-1.csv": {
+      "bytes": 490,
+      "sha256": "424260b45853069af26a1ed551bd9eb8ae3cf6df3d811e8b0f657766f065869f"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/saddle-final-r4-epoch-0-rank-2.csv": {
+      "bytes": 493,
+      "sha256": "e4dc7da043fd4944934e6be2254b651901ea113739052d404f9b68d77e412909"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/saddle-final-r4-epoch-0-rank-3.csv": {
+      "bytes": 486,
+      "sha256": "538dd8ac5c6836562b7725a9d25a603e1a226c61384af135ef1704d5fb1c5fc4"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/saddle-final-r4-run.json": {
+      "bytes": 1483,
+      "sha256": "167abaa932d4db1705f1e23eaa0a667316e41a22a13173c7ec5815e16c391b84"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/saddle-final-r4-start.json": {
+      "bytes": 1426,
+      "sha256": "ad852ffecba9fa3fa88e30573503e5801d2a5c5f7ad9720b70538c6d9e102228"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/saddle-final-r4.log": {
+      "bytes": 394445,
+      "sha256": "be02cca81568068003a5466b0e684a4868a8ef1e9266a834aab1315483923287"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/saddle-final-r4.prm": {
+      "bytes": 12521,
+      "sha256": "048f52ba12b6547c2a7e7e3d0f555f50a5bb86efecf2b11321cc0d7e1e30431c"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/saddle-rank-profiles.png": {
+      "bytes": 134783,
+      "sha256": "2650c6c966a7c6aabc4ff59710bee5f9a03ba2f32eb847dd7a8bbc4150049ec3"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/saddle.prm": {
+      "bytes": 12077,
+      "sha256": "376a9939e259f19d2f0ecc25a0b415241146ab6e8b40f28c51c0a9db6842fad6"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/verification-build.json": {
+      "bytes": 1848,
+      "sha256": "8058c0995b4ee20362024ea37c73621c00bbdc24c6ad288f8101a22b65e2c8a0"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/verified-binary.json": {
+      "bytes": 314,
+      "sha256": "7773a8e1f2dcbbc182fccf5bd9ba6d51536183120b5d821f31fc1224ebcea109"
+    },
+    "benchmarks/reconstructed_fault/propagation/native_mpi_profile.cc": {
+      "bytes": 3522,
+      "sha256": "032d187142a54a6a322971e6fd824340ecfe1590c9afafee3d838cf83bb320fa"
+    },
+    "benchmarks/reconstructed_fault/propagation/plot_native_mpi.py": {
+      "bytes": 3004,
+      "sha256": "099589742e0b65379ec3b54725a00ab03bcf91066b58f5b47997c4821e43b3f7"
+    },
+    "benchmarks/reconstructed_fault/propagation/prepare_native_mpi.py": {
+      "bytes": 1039,
+      "sha256": "64b7979137d9d13699c11de7f4cb9112f0d4f310b53ecb17f106f4e88e2bb00a"
+    },
+    "benchmarks/reconstructed_fault/propagation/run_cheaper_coupling_native.py": {
+      "bytes": 841,
+      "sha256": "33d4299e5c3815c410f439e03a37d1b98e4049ca58ee622449481054df77bf9f"
+    },
+    "benchmarks/reconstructed_fault/propagation/run_direct_mechanical.py": {
+      "bytes": 1237,
+      "sha256": "a72ee88b09ca6df87a78c7f064df1cd46e717874fac57ae111492c188208e24e"
+    },
+    "benchmarks/reconstructed_fault/propagation/run_native_mpi.py": {
+      "bytes": 7709,
+      "sha256": "7a99dd04dfe6ab2464ca26896665098621a2f4729ed0003192a174c2a697a524"
+    },
+    "benchmarks/reconstructed_fault/propagation/single_pass_comparison.py": {
+      "bytes": 9689,
+      "sha256": "15212b59188a668a527c4940bd4d3e5bf486f8912838ae1c7e5e6301400501e4"
+    },
+    "benchmarks/reconstructed_fault/propagation/single_pass_evidence/assessment.json": {
+      "bytes": 1750879,
+      "sha256": "dab4fcd3e25bb18fc6a70ebb227a631b1950141ea8fcabbccf60c2a379d0981b"
+    },
+    "benchmarks/reconstructed_fault/propagation/single_pass_evidence/baseline.json": {
+      "bytes": 4964,
+      "sha256": "15372fb0edb3fccb9597bad9fdee51cfe0b9347f3cf37ecdde4a5cd598890800"
+    },
+    "benchmarks/reconstructed_fault/propagation/single_pass_evidence/continuous-energy.png": {
+      "bytes": 144321,
+      "sha256": "fa429c69110b9be8fccd24b69914dfd38bbfaead3513a763969ef4488d514fed"
+    },
+    "benchmarks/reconstructed_fault/propagation/single_pass_evidence/defect-and-cost.png": {
+      "bytes": 121614,
+      "sha256": "4dd1f6c78e556e0d40b54840d40ee4b4cb945f511637c4d844a219852d6bbaa2"
+    },
+    "benchmarks/reconstructed_fault/propagation/single_pass_evidence/dt-1-1024/initialization.npz": {
+      "bytes": 11416,
+      "sha256": "f01afd0236ebebe3833bf6dac4b1e0536984279e398d6dc26f399730cda3ba9a"
+    },
+    "benchmarks/reconstructed_fault/propagation/single_pass_evidence/dt-1-1024/summary.json": {
+      "bytes": 672,
+      "sha256": "234d72fbee455d587dd426d0d26c72e94e1c9488b5c1288ac3e6b40d0441401e"
+    },
+    "benchmarks/reconstructed_fault/propagation/single_pass_evidence/dt-1-2048/initialization.npz": {
+      "bytes": 11416,
+      "sha256": "f01afd0236ebebe3833bf6dac4b1e0536984279e398d6dc26f399730cda3ba9a"
+    },
+    "benchmarks/reconstructed_fault/propagation/single_pass_evidence/dt-1-2048/summary.json": {
+      "bytes": 673,
+      "sha256": "91f6a52b9dd51c1e004c9d97a3595afa92bea835ea80be5ac314e07543572606"
+    },
+    "benchmarks/reconstructed_fault/propagation/single_pass_evidence/onset-comparison.png": {
+      "bytes": 121842,
+      "sha256": "e0dbab3006adcc690791636c8f8d0a9fd65f28a2d5061bab3b1b6d8db2f78a63"
+    },
+    "benchmarks/reconstructed_fault/propagation/single_pass_evidence/phase-profiles.png": {
+      "bytes": 168975,
+      "sha256": "7af41254983d92ff41dc45037c1438f08abcd76f01d0a774d9cd0d513e077831"
+    },
+    "benchmarks/reconstructed_fault/propagation/single_pass_evidence/physical-comparison.png": {
+      "bytes": 213732,
+      "sha256": "e0da77bb46c80cfb45ba8d831029cbea218b34ef4411bed116e903e9b96550a9"
+    },
+    "benchmarks/reconstructed_fault/propagation/single_pass_evidence/split-energy.png": {
+      "bytes": 138172,
+      "sha256": "923ea33bc39dfae78c1434eecce4ef64dcf569294cc486b876fe116409b17d6c"
+    },
+    "benchmarks/reconstructed_fault/propagation/single_pass_evidence/stress-profiles.png": {
+      "bytes": 172113,
+      "sha256": "dee3aeca955df76e5c5eb4300471e3ddc2ff605447eac858926f3acf1d8e49a0"
+    },
+    "benchmarks/reconstructed_fault/propagation/single_pass_evidence/verification.json": {
+      "bytes": 2880,
+      "sha256": "aa7856da9087d6ab20ebb49b3e20fb11869c17f210b271e05aaff6ed38ef1237"
+    },
+    "doc/reconstructed_fault/CURRENT_STATUS.md": {
+      "bytes": 165116,
+      "sha256": "d6cc129dd9bf1096ac501e5964a103bd7354f3dc864b13d33afcc97a22e3ecda"
+    },
+    "doc/reconstructed_fault/current_design.md": {
+      "bytes": 153009,
+      "sha256": "3904a4972e54f911b57bfb41e32359a6bda7fe86646b7c919099ebfd13a0149e"
+    },
+    "doc/reconstructed_fault/propagation/P2_CLOSEOUT.md": {
+      "bytes": 8421,
+      "sha256": "cc7f3cb9f7eba31f91fe1b64317d3a92b8c1fe305ad0527e310ea0544310d78a"
+    },
+    "doc/reconstructed_fault/propagation/P2_cheaper_coupling_report.md": {
+      "bytes": 15591,
+      "sha256": "002f5dd0307785b263f22d6378610b254001a3ef80b103112bec542fdd5c6744"
+    },
+    "doc/reconstructed_fault/propagation/P2_direct_mechanical_report.md": {
+      "bytes": 16000,
+      "sha256": "dd93e6ecbffc1fc3bc504204ae2285b010ad4da1a514ff3216465f6acc1cd046"
+    },
+    "doc/reconstructed_fault/propagation/P2_native_MPI_report.md": {
+      "bytes": 20252,
+      "sha256": "e7c8c0b971cd6330a54ab237d69ca2c0e8c055e411ca1dfa3330843e5209a47e"
+    },
+    "doc/reconstructed_fault/propagation/P2_single_pass_report.md": {
+      "bytes": 18174,
+      "sha256": "6546de1d7c689d61c42a8b7fa3575feb7a7e23e2ffb82175d0a9a59a964836ee"
+    },
+    "doc/reconstructed_fault/propagation/PLAN.md": {
+      "bytes": 70171,
+      "sha256": "f28bb84a103aa437db44c535879b07f4461b728a1f44b9bdd153ec77d45b72ec"
+    },
+    "doc/reconstructed_fault/propagation/STATUS.md": {
+      "bytes": 79103,
+      "sha256": "03a8d37a7c6a1d8cc19bde7c39d2be908f42f196c164b1580df26c4a23cf41a3"
+    },
+    "doc/reconstructed_fault/specification.tex": {
+      "bytes": 163145,
+      "sha256": "c3e7a64bb597b5fd59fd8cb33f114ea4a325fa34731d1074a47dcfa7a94aa5e5"
+    },
+    "include/aspect/phase_field.h": {
+      "bytes": 14014,
+      "sha256": "0f56639f635579571e00a97734d689024c75aa375e8ea031d1bc95033866846b"
+    },
+    "include/aspect/reconstructed_fault/endpoint_mpi.h": {
+      "bytes": 1983,
+      "sha256": "036cf6c3a651ce887568143ae8dee2e58cb4c356ed67cc352c991529cee5c25e"
+    },
+    "include/aspect/simulator.h": {
+      "bytes": 96990,
+      "sha256": "d4c4288a77f11b9241b6ad58be4822161196a22713bcd000e4ea7f0c16c58474"
+    },
+    "include/aspect/simulator/solver/reconstructed_fault_condensed_system.h": {
+      "bytes": 7697,
+      "sha256": "f58883db77912264c01e4a7a11e525bb7c470dbfb79949f16c892dc2f8896a26"
+    },
+    "include/aspect/simulator/solver/reconstructed_fault_surface_schur.h": {
+      "bytes": 7604,
+      "sha256": "061afb8da2e742594ff3b87e5b57f2c50f404be98687d29d2175b100355f73f5"
+    },
+    "source/material_model/phase_field_fault.cc": {
+      "bytes": 40097,
+      "sha256": "9c74ca04bec8a7c6bdfa7960a4782df5b12fe5c2f078ea48aef28db348cddbfd"
+    },
+    "source/material_model/phase_field_fault/fe_strain.cc": {
+      "bytes": 53718,
+      "sha256": "29cfb172ad5e774803ec888a4a2f547c11944eeb553d75e4088c62daa535c471"
+    },
+    "source/material_model/phase_field_fault/history.cc": {
+      "bytes": 71109,
+      "sha256": "f968215ce88f3b639b96a82f1574a0a7baf6c5416b3acb64b9f0fe33dbf9b037"
+    },
+    "source/simulator/phase_field.cc": {
+      "bytes": 88024,
+      "sha256": "7e5f5fc5f0193a7ca8eda49340c0884a2bf28314d87d3944cd99c7c087fc43a5"
+    },
+    "source/simulator/solver/reconstructed_fault_condensed_system.cc": {
+      "bytes": 23648,
+      "sha256": "13741ee1380332359a1fa15d2a5a1a2aaae9a02f01457421c3fd56e39e56215b"
+    },
+    "source/simulator/solver/reconstructed_fault_endpoint_phase.cc": {
+      "bytes": 42661,
+      "sha256": "8c285ae87379538852141a5ebb058d718383ea2ed22ca2036349e1a23ea3d6ed"
+    },
+    "source/simulator/solver/reconstructed_fault_stokes.cc": {
+      "bytes": 80589,
+      "sha256": "32f7ca2a9004afba54cec6626865c056960c0a2bb400b0ac3016f7c06de49aa9"
+    },
+    "tests/phase_field_test_access.h": {
+      "bytes": 10461,
+      "sha256": "4fdc2368762073c3d48579d8c0f2385425d0c75d6ba74e7c94e5984833b445c2"
+    },
+    "unit_tests/reconstructed_fault_surface_schur.cc": {
+      "bytes": 2659,
+      "sha256": "3412d90060ed45fb702a60037cea26c5f7e4c4d56e305b17b4df63fe2d771c03"
+    },
+    "benchmarks/reconstructed_fault/propagation/p2_checkpoint/README.md": {
+      "bytes": 6061,
+      "sha256": "c4f4b5448ed51adf4cd7aac0b9d9527f4da76a2065506ea12bf90926b6e69449"
+    },
+    "benchmarks/reconstructed_fault/propagation/p2_checkpoint/reference-options.prm": {
+      "bytes": 756,
+      "sha256": "b89a8fefb30b7b8b1254b822c3ff835f10124aaa20055c2e3210bd86ce3707a7"
+    },
+    "benchmarks/reconstructed_fault/propagation/p2_checkpoint/selected-benchmarks.txt": {
+      "bytes": 24470,
+      "sha256": "04f89f922ca0f1d58d7cb8d42a6c7100fa73c698cd14f5fcaa46f60441300566"
+    },
+    "benchmarks/reconstructed_fault/propagation/p2_checkpoint/source-paths.txt": {
+      "bytes": 684,
+      "sha256": "f318e080cba8207f23104ba25d6407081a6fbe250dbb4c117a8f9ae983ab0bd5"
+    },
+    "benchmarks/reconstructed_fault/propagation/p2_checkpoint/documentation-paths.txt": {
+      "bytes": 1117,
+      "sha256": "a9f6d49b8eb38aa34e93111e28959e63abd0fefbc97d2591796390a4c363741f"
+    },
+    "benchmarks/reconstructed_fault/propagation/p2_checkpoint/closeout-checks.json": {
+      "bytes": 474,
+      "sha256": "7c14351535dacbe69864422ff35a1a6c98d4ffdf369d11f7aa7eb210d36cce3a"
+    }
+  },
+  "local_preservation": {
+    "benchmarks/reconstructed_fault/propagation/p2_checkpoint/incoming-status.txt": {
+      "bytes": 247164,
+      "sha256": "e4e266c577fdd17c58292629f771c18abf7d15c795be7ba95a0d332f0dc7934f"
+    },
+    "benchmarks/reconstructed_fault/propagation/p2_checkpoint/incoming.patch": {
+      "bytes": 181610,
+      "sha256": "086f10e2152e01b1ab8c51366e0c69adba4b26da2aea6cc7a6345992aef855eb"
+    },
+    "benchmarks/reconstructed_fault/propagation/p2_checkpoint/incoming-manifest.json": {
+      "bytes": 2621948,
+      "sha256": "1474717b7a6fba38ca7f88ae1efd77ea0f478ca5d91c888f982ce7baf3b9e788"
+    },
+    "benchmarks/reconstructed_fault/propagation/p2_checkpoint/incoming-source-docs.tar.gz": {
+      "bytes": 395070,
+      "sha256": "73c19839205342c80df52dfc5b142301263ede7f3c400693fae4009dbaa59680"
+    }
+  },
+  "local_build_artifacts": {
+    "build-propagation-integration/aspect-release": {
+      "bytes": 45267792,
+      "sha256": "e78821a5b12b5070c1e0f7f626ed631d8f030a50ed23bc2a895f4b1713214898"
+    },
+    "build-propagation-integration/plugin/libnative_endpoint_verification.release.so": {
+      "bytes": 1223224,
+      "sha256": "f5b7567699a85d305a1b9eb30824fe7d5ae75a58d3596602015e1402cbbbcc57"
+    },
+    "build-propagation-integration/aspect-newton-before-schur-release": {
+      "bytes": 45153456,
+      "sha256": "3257574451ef5db3a733ebfd72656563939179be5eb8fd3963d4ff8b32bfbc11"
+    },
+    "build-propagation-integration/aspect-mpi-verified-release": {
+      "bytes": 45148432,
+      "sha256": "e9c8b1423d21a4e2a2903a579eb9703e4b3d54231cfdb0e17bee2ad320d55fb2"
+    },
+    "build-propagation-integration/serial-reference/aspect-release": {
+      "bytes": 44700176,
+      "sha256": "b6a4bdef9a9d570c1f606dc4bfcd167a66ac49f91f87d81199c52d72fdfb1e99"
+    },
+    "build-propagation-integration/serial-reference/libnative_endpoint_verification.release.so": {
+      "bytes": 777704,
+      "sha256": "552653a505254351a6043289f85c5eea06dc166189a74065fa9d59381c761979"
+    }
+  },
+  "local_build_cache": {
+    "file": "build-propagation-integration/CMakeCache.txt",
+    "bytes": 32881,
+    "sha256": "34f697da792e187edf741b9a7d08635f6681fd2caf66ce2936902b967fad9dc5",
+    "selected_settings": {
+      "CMAKE_BUILD_TYPE:STRING": "Release",
+      "CMAKE_CXX_COMPILER:STRING": "/opt/gcc/12.4.0/bin/g++",
+      "CMAKE_CXX_FLAGS_RELEASE:STRING": "-O3 -DNDEBUG",
+      "DEAL_II_DIR:UNINITIALIZED": "/opt/dealii/9.6-local"
+    }
+  },
+  "native_table_copies": [
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/core-final-r1/fixed-entries.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-core-final-r1/fixed-entries.csv",
+      "sha256": "b9cf3fcf68d5c6ddc3e7aea2e62c749de530807823cafaf3125f2416c12eef57"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/core-final-r1/initial-H-correction.txt",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-core-final-r1/initial-H-correction.txt",
+      "sha256": "3c2ee3ab08ab03dc309b7dea322cf7b764db9b286c1c40b1ad89d28b9fe0109a"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/core-final-r1/metrics.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-core-final-r1/metrics.csv",
+      "sha256": "12e1ccd14a6bfdf8061d87833d79887fcd31ad5437c0673b06005a1d97226f30"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/core-final-r1/mpi-memory.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-core-final-r1/mpi-memory.csv",
+      "sha256": "ff0a5a51760535a76cc0c2158b08253cdb63e8b2f0b6d3ab82d5ffe0a3e020bb"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/core-final-r2/fixed-entries.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-core-final-r2/fixed-entries.csv",
+      "sha256": "a12e5d588fe14eaeffbf517439c6b70a645c4624d568b8b76a1b4f0998dae6a7"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/core-final-r2/initial-H-correction.txt",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-core-final-r2/initial-H-correction.txt",
+      "sha256": "3c2ee3ab08ab03dc309b7dea322cf7b764db9b286c1c40b1ad89d28b9fe0109a"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/core-final-r2/metrics.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-core-final-r2/metrics.csv",
+      "sha256": "12e1ccd14a6bfdf8061d87833d79887fcd31ad5437c0673b06005a1d97226f30"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/core-final-r2/mpi-memory.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-core-final-r2/mpi-memory.csv",
+      "sha256": "95fe56d9d430040bd1d8aa2eb4ed778fd1cbd32b84f3c9f9d4c0dc16e6a6dd27"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/core-final-r4/fixed-entries.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-core-final-r4/fixed-entries.csv",
+      "sha256": "f90d689ebaa91183e6486859b523f18ac2f82642e9fad62f3f65accd155292de"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/core-final-r4/initial-H-correction.txt",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-core-final-r4/initial-H-correction.txt",
+      "sha256": "3c2ee3ab08ab03dc309b7dea322cf7b764db9b286c1c40b1ad89d28b9fe0109a"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/core-final-r4/metrics.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-core-final-r4/metrics.csv",
+      "sha256": "12e1ccd14a6bfdf8061d87833d79887fcd31ad5437c0673b06005a1d97226f30"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/core-final-r4/mpi-memory.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-core-final-r4/mpi-memory.csv",
+      "sha256": "dd2b301082757da5546ca6532963b04bf541ae5f60209148e7d4febc6d76c375"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r1/initial-H-correction.txt",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-operators-final-r1/initial-H-correction.txt",
+      "sha256": "3c2ee3ab08ab03dc309b7dea322cf7b764db9b286c1c40b1ad89d28b9fe0109a"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r1/metrics.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-operators-final-r1/metrics.csv",
+      "sha256": "d432dfbeac26c2d3151179f8835058d8cb1c90783d899fab666bddccdf948423"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r1/mpi-memory.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-operators-final-r1/mpi-memory.csv",
+      "sha256": "fc0300451cb31b4fe717a93bfff96098eb0dfb7df12adbf6485031096333bce1"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r1/operator-adjoint.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-operators-final-r1/operator-adjoint.csv",
+      "sha256": "4e81aedd05da75f89afb2c7b0ad8f203f323cd3afac287f891b9d09492dd8643"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r1/operator-fracture-quadratic.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-operators-final-r1/operator-fracture-quadratic.csv",
+      "sha256": "27eccbe68831a726a89c32d8d4bc7dd511e13bb4b00c00f24f7a0fd8ccad99a6"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r1/operator-linear-tangent.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-operators-final-r1/operator-linear-tangent.csv",
+      "sha256": "63abb0726b5d5a690c85497a79b70dbd4a40f86eaf34d02728c7d71ab1884c92"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r1/operators.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-operators-final-r1/operators.csv",
+      "sha256": "79d3e8b2152afa36145a9d782d3e7596660d946948bdf23a1928183d94f2f509"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r1/tangential-curvature.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-operators-final-r1/tangential-curvature.csv",
+      "sha256": "3bbd06fc74134a58c9c6cace5f12a2835a7c33dc195ad1cdc0697d83daf7961c"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r2/initial-H-correction.txt",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-operators-final-r2/initial-H-correction.txt",
+      "sha256": "3c2ee3ab08ab03dc309b7dea322cf7b764db9b286c1c40b1ad89d28b9fe0109a"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r2/metrics.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-operators-final-r2/metrics.csv",
+      "sha256": "d432dfbeac26c2d3151179f8835058d8cb1c90783d899fab666bddccdf948423"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r2/mpi-memory.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-operators-final-r2/mpi-memory.csv",
+      "sha256": "08d6282799ef352847b8ea3108bbfed0cf9ec535d035bc551ea87a8ceffd43fc"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r2/operator-adjoint.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-operators-final-r2/operator-adjoint.csv",
+      "sha256": "cee4f2382f9fc4ced0f8b1aa7d62e970c4bc5523bb61011168559531cfc24400"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r2/operator-fracture-quadratic.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-operators-final-r2/operator-fracture-quadratic.csv",
+      "sha256": "27eccbe68831a726a89c32d8d4bc7dd511e13bb4b00c00f24f7a0fd8ccad99a6"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r2/operator-linear-tangent.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-operators-final-r2/operator-linear-tangent.csv",
+      "sha256": "5a70af99b629dc18fcd60e7a526561624f293b074aed568b4b532f7ec6723a85"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r2/operators.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-operators-final-r2/operators.csv",
+      "sha256": "8bcd456b82b509038867ed3ec676d500e17f495fd688cc3efab92dde77114ebd"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r2/tangential-curvature.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-operators-final-r2/tangential-curvature.csv",
+      "sha256": "9d3b094c614a05d4f47e95fb0321c55f0a1b9ad3a26921ab106a3af2f4914a04"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r4/initial-H-correction.txt",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-operators-final-r4/initial-H-correction.txt",
+      "sha256": "3c2ee3ab08ab03dc309b7dea322cf7b764db9b286c1c40b1ad89d28b9fe0109a"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r4/metrics.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-operators-final-r4/metrics.csv",
+      "sha256": "d432dfbeac26c2d3151179f8835058d8cb1c90783d899fab666bddccdf948423"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r4/mpi-memory.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-operators-final-r4/mpi-memory.csv",
+      "sha256": "83604896f9dfebaa8c4da9578fdf7089d86371b2cbc0de44e792b631f97fe87a"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r4/operator-adjoint.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-operators-final-r4/operator-adjoint.csv",
+      "sha256": "db9e5c1f084a9fcd6831aa533022602f518e52b72a40e11159f00c2e69d49f8e"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r4/operator-fracture-quadratic.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-operators-final-r4/operator-fracture-quadratic.csv",
+      "sha256": "27eccbe68831a726a89c32d8d4bc7dd511e13bb4b00c00f24f7a0fd8ccad99a6"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r4/operator-linear-tangent.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-operators-final-r4/operator-linear-tangent.csv",
+      "sha256": "9df6a33ea66e6bb4d38f463ac96261f3f9aaa44af9cb96f34cc61e0da373b869"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r4/operators.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-operators-final-r4/operators.csv",
+      "sha256": "8450445aba81b71b09d5eecb94d598dccd72abc7050a6166ffc0ca2cddf1e8ce"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/operators-final-r4/tangential-curvature.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-operators-final-r4/tangential-curvature.csv",
+      "sha256": "9b575571006c2319f8b2d31e62164c917b6bf33f35289df79af6854fd2340b3b"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/saddle-final-r1/fixed-entries.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-saddle-final-r1/fixed-entries.csv",
+      "sha256": "e45dc4baad5bdfa0adb993d4f780293d37be1f9895c5f76ab05ba3cf064dbe4c"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/saddle-final-r1/initial-H-correction.txt",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-saddle-final-r1/initial-H-correction.txt",
+      "sha256": "3c2ee3ab08ab03dc309b7dea322cf7b764db9b286c1c40b1ad89d28b9fe0109a"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/saddle-final-r1/metrics.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-saddle-final-r1/metrics.csv",
+      "sha256": "12e1ccd14a6bfdf8061d87833d79887fcd31ad5437c0673b06005a1d97226f30"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/saddle-final-r1/mpi-memory.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-saddle-final-r1/mpi-memory.csv",
+      "sha256": "3606f576e9848e325925f5393f860de9864ae16a2f905144231a77e1809cf4fe"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/saddle-final-r2/fixed-entries.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-saddle-final-r2/fixed-entries.csv",
+      "sha256": "b858a11f913756e8bb46d4afc63b8dc54c8a341c7cd5af474ff6cd017e7ae407"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/saddle-final-r2/initial-H-correction.txt",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-saddle-final-r2/initial-H-correction.txt",
+      "sha256": "3c2ee3ab08ab03dc309b7dea322cf7b764db9b286c1c40b1ad89d28b9fe0109a"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/saddle-final-r2/metrics.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-saddle-final-r2/metrics.csv",
+      "sha256": "12e1ccd14a6bfdf8061d87833d79887fcd31ad5437c0673b06005a1d97226f30"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/saddle-final-r2/mpi-memory.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-saddle-final-r2/mpi-memory.csv",
+      "sha256": "75095898d7cec8af8b764169d8640a145ed6e60b2fa4f5e518bab50ac598e4fd"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/saddle-final-r4/fixed-entries.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-saddle-final-r4/fixed-entries.csv",
+      "sha256": "c9c9dfc7be461150e202519fd4f1fcccc94f045eb5e23c23bfa2bb7c23e8c9aa"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/saddle-final-r4/initial-H-correction.txt",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-saddle-final-r4/initial-H-correction.txt",
+      "sha256": "3c2ee3ab08ab03dc309b7dea322cf7b764db9b286c1c40b1ad89d28b9fe0109a"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/saddle-final-r4/metrics.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-saddle-final-r4/metrics.csv",
+      "sha256": "12e1ccd14a6bfdf8061d87833d79887fcd31ad5437c0673b06005a1d97226f30"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/native_mpi_evidence/results/saddle-final-r4/mpi-memory.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-saddle-final-r4/mpi-memory.csv",
+      "sha256": "29b85d4ec2769b78b4362cdd401a0669cfa96e4bed1166407686198413bb6c00"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/results/batch-n1-local/fixed-entries.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-batch-n1-local/fixed-entries.csv",
+      "sha256": "84bdcd991771ca485cb8a42eccaaa691110f7266206c93e8cfc3c0e45a4195a1"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/results/batch-n1-local/initial-H-correction.txt",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-batch-n1-local/initial-H-correction.txt",
+      "sha256": "3c2ee3ab08ab03dc309b7dea322cf7b764db9b286c1c40b1ad89d28b9fe0109a"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/results/batch-n1-local/metrics.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-batch-n1-local/metrics.csv",
+      "sha256": "12e1ccd14a6bfdf8061d87833d79887fcd31ad5437c0673b06005a1d97226f30"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/results/batch-n1-local/mpi-memory.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-batch-n1-local/mpi-memory.csv",
+      "sha256": "439b7ef8a4a833b0b2c866460b56e0f98294e944303f2079cf2251ae203d4c5c"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/results/batch-n1-local/surface-schur.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-batch-n1-local/surface-schur.csv",
+      "sha256": "07655a1746966b4f4d5371fd9b4bb2880f7f792182f0efcc31cabcf84f3a7750"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/results/growth-direct-n1/fixed-entries.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-growth-direct-n1/fixed-entries.csv",
+      "sha256": "0cf3a075518ac2e933d65454a9a1686bbec913eeb811aa3a35428d970c1a2eee"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/results/growth-direct-n1/initial-H-correction.txt",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-growth-direct-n1/initial-H-correction.txt",
+      "sha256": "3c2ee3ab08ab03dc309b7dea322cf7b764db9b286c1c40b1ad89d28b9fe0109a"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/results/growth-direct-n1/metrics.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-growth-direct-n1/metrics.csv",
+      "sha256": "12e1ccd14a6bfdf8061d87833d79887fcd31ad5437c0673b06005a1d97226f30"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/results/growth-direct-n1/mpi-memory.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-growth-direct-n1/mpi-memory.csv",
+      "sha256": "ef231bb8ef4032049fbd1ebe1cc0a81d8765d679a5597a03fbe75d0d2b68edf4"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/results/saddle-direct-n1/fixed-entries.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-saddle-direct-n1/fixed-entries.csv",
+      "sha256": "5ae3e6db79e74f610710b4f458a61daa185a7dd6bf304bd7bc8eefa616148ff7"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/results/saddle-direct-n1/initial-H-correction.txt",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-saddle-direct-n1/initial-H-correction.txt",
+      "sha256": "3c2ee3ab08ab03dc309b7dea322cf7b764db9b286c1c40b1ad89d28b9fe0109a"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/results/saddle-direct-n1/metrics.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-saddle-direct-n1/metrics.csv",
+      "sha256": "12e1ccd14a6bfdf8061d87833d79887fcd31ad5437c0673b06005a1d97226f30"
+    },
+    {
+      "file": "benchmarks/reconstructed_fault/propagation/direct_mechanical_evidence/results/saddle-direct-n1/mpi-memory.csv",
+      "original": "/home/ein/repository/aspect-fault-propagation/build-propagation-integration/runs/output-native-mpi-saddle-direct-n1/mpi-memory.csv",
+      "sha256": "654241ce0c88c18fa8336a5f3dbd8e1b548e985d8eb2bd7bab7f7b5b4ed864a9"
+    }
+  ],
+  "selection_file": "selected-benchmarks.txt",
+  "verification": {
+    "source_hashes_equal_incoming": true,
+    "Python_syntax_and_selected_JSON": "checked without running scripts",
+    "Git_whitespace": "git diff --check for source/docs; staged code checks exclude untouched raw numerical logs",
+    "retained_compatibility": "21112 assertions /55 cases; direct_mechanical_evidence/compatibility.log",
+    "numerical_reruns": false
+  },
+  "deferred": [
+    "full fresh native evolution to 0.625 s",
+    "native temporal/spatial qualification and localization",
+    "coupled restart",
+    "transport and particle birth",
+    "general support admission",
+    "evolving RSF",
+    "scalability work",
+    "P3 and propagation"
+  ],
+  "commits": {
+    "source": "89ed05aa0de6da26e51b1afffc11d606cacd34c0",
+    "benchmarks_and_evidence": "2b61e801ca9df68ae549a4e72cefe5cef3969ec1",
+    "documentation": "the commit containing this checkpoint; intentionally no self-referential hash"
+  }
+}
