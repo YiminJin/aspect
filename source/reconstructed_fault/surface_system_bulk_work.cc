@@ -153,134 +153,15 @@ namespace aspect
                   selected |= overlaps;
                 }
               if (selected)
-                {
-                  const auto &pm=this->get_particle_manager(0);
-                  const auto &handler=pm.get_particle_handler();
-                  const auto sp=pm.get_property_manager().get_data_info().get_position_by_field_name("maxwell stress");
-                  ComponentMask mask(handler.n_properties_per_particle(),false);
-                  for (unsigned int c=0;c<SymmetricTensor<2,dim>::n_independent_components;++c) mask.set(sp+c,true);
-                  const auto values=pm.get_interpolator().properties_at_points(handler,fe.get_quadrature_points(),mask,cell);
-                  particle_interpolated.resize(nq);
-                  for (unsigned int q=0;q<nq;++q)
-                    for (unsigned int c=0;c<SymmetricTensor<2,dim>::n_independent_components;++c)
-                      particle_interpolated[q][SymmetricTensor<2,dim>::unrolled_to_component_indices(c)]=values[q][sp+c];
-                  // Include vertex-neighbour stencils used by distance-weighted
-                  // interpolation. Ghost copies are labeled, never counted as
-                  // independent owners; each ID appears once per rank snapshot.
-                  const auto &vertex_cells=this->get_phase_field_handler().get_grid_cache().get_vertex_to_cell_map();
-                  std::set<typename Triangulation<dim>::active_cell_iterator> neighbours;
-                  for (const auto v:cell->vertex_indices())
-                    neighbours.insert(vertex_cells[cell->vertex_index(v)].begin(),vertex_cells[cell->vertex_index(v)].end());
-                  for (const auto &neighbour:neighbours)
-                    if (!neighbour->is_artificial())
-                      for (const auto &particle:handler.particles_in_cell(neighbour))
-                        if (diagnostic_particle_ids.insert(particle.get_id()).second)
-                          {
-                            SymmetricTensor<2,dim> stress;
-                            for (unsigned int c=0;c<SymmetricTensor<2,dim>::n_independent_components;++c)
-                              stress[SymmetricTensor<2,dim>::unrolled_to_component_indices(c)]=particle.get_properties()[sp+c];
-                            local.normal_diagnostic->particles.push_back({neighbour->id().to_string(),particle.get_id(),neighbour->subdomain_id(),particle.get_location(),stress});
-                          }
-                }
+                particle_interpolated=sample_normal_diagnostic_particles(
+                  cell,fe.get_quadrature_points(),*local.normal_diagnostic,diagnostic_particle_ids);
             }
           // Count unsupported positive-phase samples without inventing a map.
           // Optional native centerline evaluation in the same frozen working
           // state. Axis-aligned cell clipping retains both one-sided cell
           // traces; these points never enter quadrature or mechanical assembly.
           if (local.normal_diagnostic && !normal_diagnostic_lines.empty())
-            for (const auto &line:normal_diagnostic_lines)
-              {
-                const auto box=cell->bounding_box();
-                const auto ends=box.get_boundary_points();
-                const auto direction=line.second-line.first;
-                double enter=0.,leave=1.;
-                for (unsigned int c=0;c<dim;++c)
-                  if (direction[c]!=0.)
-                    {
-                      double a=(ends.first[c]-line.first[c])/direction[c];
-                      double b=(ends.second[c]-line.first[c])/direction[c];
-                      if (a>b) std::swap(a,b);
-                      enter=std::max(enter,a);leave=std::min(leave,b);
-                    }
-                  else if (line.first[c]<ends.first[c] || line.first[c]>ends.second[c]) enter=2.;
-                if (enter>leave) continue;
-                // Restrict the diagnostic geometry, not the production model.
-                for (const auto v:cell->vertex_indices())
-                  for (unsigned int c=0;c<dim;++c)
-                    AssertThrow(cell->vertex(v)[c]==ends.first[c] || cell->vertex(v)[c]==ends.second[c],
-                                ExcMessage("Native diagnostic line requires axis-aligned Box cells."));
-                std::vector<double> coordinates={enter,leave};
-                const unsigned int panels=static_cast<unsigned int>(std::ceil(direction.norm()/2.));
-                for (unsigned int i=static_cast<unsigned int>(std::ceil(enter*panels));i<=panels && i<=leave*panels;++i)
-                  coordinates.push_back(double(i)/panels);
-                std::sort(coordinates.begin(),coordinates.end());
-                coordinates.erase(std::unique(coordinates.begin(),coordinates.end()),coordinates.end());
-                std::vector<Point<dim>> reference_points;
-                for (const auto t:coordinates)
-                  {
-                    auto unit=this->get_mapping().transform_real_to_unit_cell(cell,line.first+t*direction);
-                    AssertThrow(GeometryInfo<dim>::distance_to_unit_cell(unit)<1e-9,
-                                ExcMessage("Clipped diagnostic line is outside its reference cell."));
-                    for (unsigned int c=0;c<dim;++c) unit[c]=std::max(0.,std::min(1.,unit[c]));
-                    reference_points.push_back(unit);
-                  }
-                FEValues<dim> line_fe(this->get_mapping(),this->get_fe(),Quadrature<dim>(reference_points),
-                                     update_values|update_gradients|update_quadrature_points);
-                line_fe.reinit(cell);
-                const unsigned int n=reference_points.size();
-                std::vector<double> phi(n),temp(n),p(n);
-                std::vector<SymmetricTensor<2,dim>> eps(n);
-                std::vector<Tensor<2,dim>> gradients(n);
-                std::vector<std::vector<double>> fields(intro.n_compositional_fields,std::vector<double>(n));
-                line_fe[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)].get_function_values(bulk_state,phi);
-                line_fe[intro.extractors.temperature].get_function_values(bulk_state,temp);
-                line_fe[intro.extractors.pressure].get_function_values(bulk_state,p);
-                line_fe[intro.extractors.velocities].get_function_symmetric_gradients(bulk_state,eps);
-                line_fe[intro.extractors.velocities].get_function_gradients(bulk_state,gradients);
-                for (unsigned int c=0;c<fields.size();++c)
-                  line_fe[intro.extractors.compositional_fields[c]].get_function_values(bulk_state,fields[c]);
-                const auto &pm=this->get_particle_manager(0);
-                const auto sp=pm.get_property_manager().get_data_info().get_position_by_field_name("maxwell stress");
-                ComponentMask mask(pm.get_particle_handler().n_properties_per_particle(),false);
-                for (unsigned int c=0;c<SymmetricTensor<2,dim>::n_independent_components;++c) mask.set(sp+c,true);
-                const auto particle_values=pm.get_interpolator().properties_at_points(pm.get_particle_handler(),line_fe.get_quadrature_points(),mask,cell);
-                for (unsigned int q=0;q<n;++q)
-                  {
-                    const auto x=line_fe.quadrature_point(q);
-                    const auto a=manager.project_to_normal_profiles(x);
-                    AssertThrow(a.active,ExcMessage("Native centerline has no fault association."));
-                    auto tangent=faults[a.fault_index].vertex(a.segment_index+1)-faults[a.fault_index].vertex(a.segment_index);
-                    tangent/=tangent.norm();
-                    Tensor<1,dim> normal;normal[0]=-tangent[1];normal[1]=tangent[0];
-                    typename MaterialModel::PhaseFieldFault<dim>::ReconstructedFaultPointInputs input;
-                    input.position=x; input.fault_index=a.fault_index;input.segment_index=a.segment_index;input.xi=a.xi;
-                    input.phase_field=input.previous_phase_field=phi[q];input.temperature=temp[q];
-                    input.dynamic_pressure=p[q];input.strain_rate=eps[q];input.capture_stress_components=true;
-                    input.slip_tensor=manager.get_shear_sense(a.fault_index)
-                                      *symmetrize(outer_product(tangent,normal));
-                    input.normal_tensor=symmetrize(outer_product(normal,normal));
-                    SymmetricTensor<2,dim> particle_stress;
-                    for (unsigned int c=0;c<stress_fields.size();++c)
-                      {
-                        const auto index=SymmetricTensor<2,dim>::unrolled_to_component_indices(c);
-                        input.old_maxwell_stress[index]=fields[stress_fields[c]][q];particle_stress[index]=particle_values[q][sp+c];
-                      }
-                    input.old_maxwell_stress = phase_field_fault.retained_history_stress(cell->id(),x,input.old_maxwell_stress);
-                    std::vector<double> chemical;
-                    for (const auto c:intro.chemical_composition_field_indices()) chemical.push_back(fields[c][q]);
-                    input.bulk_material_fractions=MaterialModel::MaterialUtilities::compute_composition_fractions(chemical);
-                    input.slip_rate=ReconstructedFaultUtilities::interpolate_slip_rate(
-                      slip_rate[a.fault_index][a.segment_index],slip_rate[a.fault_index][a.segment_index+1],a.xi);
-                    const auto response=phase_field_fault.evaluate_reconstructed_fault_point(input);
-                    const auto foot=(1.-a.xi)*faults[a.fault_index].vertex(a.segment_index)+a.xi*faults[a.fault_index].vertex(a.segment_index+1);
-                    local.normal_diagnostic->line_samples.push_back({cell->id().to_string(),q,static_cast<unsigned int>(cell->level()),
-                      a.fault_index,a.segment_index,x,foot,normal,response.stress,cell->diameter(),a.xi,p[q],
-                      -(response.stress*input.normal_tensor),response.background_normal_traction,response.normal_traction,
-                      phi[q],response.normalization_integral,response.localization_factor,0.,0.,input.old_maxwell_stress,
-                      response.stress_components,reference_points[q],particle_stress,
-                      gradients[q],response.stress_time_step,response.stress_beta,response.eta_ve});
-                  }
-              }
+            sample_normal_diagnostic_lines(cell,bulk_state,slip_rate,stress_fields,*local.normal_diagnostic);
           if (local.normal_diagnostic)
             for (unsigned int q=0;q<nq;++q)
               if (!associations[q].active && phase[q]>0.

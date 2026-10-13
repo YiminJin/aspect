@@ -103,13 +103,15 @@ namespace aspect
     // Disposable history-representation audit. Sample the complete frozen FE
     // tensor at the same parent points; stress components are not Newton unknowns.
     const bool history_audit=std::getenv("ASPECT_FAULT_HISTORY_AUDIT");
+    ParticleDiagnosticData diagnostic;
+    diagnostic.write_history=history_audit && assemble_jacobian;
     std::vector<std::vector<double>> fe_history(SymmetricTensor<2,dim>::n_independent_components);
     if (history_audit)
       for (const auto &m:this->get_parameters().mapped_particle_properties)
         if (m.second.first=="maxwell stress")
           fe_history[m.second.second]=VectorTools::point_values<1>(point_cache,this->get_dof_handler(),bulk_state,
             VectorTools::EvaluationFlags::avg,this->introspection().component_indices.compositional_fields[m.first]);
-    std::vector<std::vector<std::array<double,22>>> history_moments(faults.size());
+    auto &history_moments=diagnostic.history_moments;history_moments.resize(faults.size());
     if (history_audit && assemble_jacobian)
       for (unsigned int f=0;f<faults.size();++f) history_moments[f].resize(faults[f].n_vertices(),{});
     TimerOutput::Scope assembly_timer(*performance_timer, "Fault: Surface R/K integrate");
@@ -163,9 +165,11 @@ namespace aspect
       && std::getenv("ASPECT_FAULT_STRESS_SAMPLE_DIAGNOSTIC");
     // Keep only 20 low/high samples per support class per rank. All samples
     // still contribute to weak moments, including tensile ones on mixed rows.
-    std::array<std::multimap<double,std::string>,3> lowest_samples, highest_samples;
-    std::vector<std::vector<std::array<double,10>>> stress_audit_moments;
-    std::vector<std::vector<bool>> prescribed;
+    diagnostic.write_normal=record_normal_stress;diagnostic.write_samples=record_samples;
+    auto &lowest_samples=diagnostic.lowest_samples;
+    auto &highest_samples=diagnostic.highest_samples;
+    auto &stress_audit_moments=diagnostic.stress_moments;
+    auto &prescribed=diagnostic.prescribed;
     if (record_samples)
       {
         prescribed = fault_manager.prescribed_slip_rate_mask();
@@ -173,7 +177,7 @@ namespace aspect
         for (unsigned int f=0; f<faults.size(); ++f)
           stress_audit_moments[f].resize(faults[f].n_vertices(), {});
       }
-    std::vector<std::vector<std::array<double,10>>> normal_stress_moments;
+    auto &normal_stress_moments=diagnostic.normal_moments;
     if (record_normal_stress)
       {
         AssertThrow(!phase_field_fault.uses_adiabatic_friction_pressure(),
@@ -532,67 +536,7 @@ namespace aspect
       local.residual.minimum_normal_traction, this->get_mpi_communicator());
     local.residual.maximum_normal_traction = Utilities::MPI::max(
       local.residual.maximum_normal_traction, this->get_mpi_communicator());
-    if (record_samples)
-      {
-        // Rank-local files are replaced on each linearization, never on an
-        // unrelated trial evaluation. Use only after final convergence and
-        // compare the saved nodal V against the accepted state's rate vector.
-        const auto rank=Utilities::MPI::this_mpi_process(this->get_mpi_communicator());
-        const auto tag=std::to_string(this->get_timestep_number())+"_rank"+std::to_string(rank)+".csv";
-        std::ofstream samples(this->get_output_directory()+"stress_samples_"+tag);
-        samples.exceptions(std::ios::failbit | std::ios::badbit);
-        samples<<"step,time,rank,selection,support,fault,particle,cell,domain_q,segment,xi,parent_x,parent_y,surface_x,surface_y,signed_normal_distance,weight,domain_volume,free_shape,parent_touches_free,parent_touches_prescribed,V,delta_p,delta_tau_N,sigma_bg,sigma_n,q,mu,mu_sigma,phi,chi\n";
-        for (unsigned int c=0; c<3; ++c)
-          for (unsigned int side=0; side<2; ++side)
-            for (const auto &entry : (side==0 ? lowest_samples[c] : highest_samples[c]))
-              samples<<std::setprecision(17)<<this->get_timestep_number()<<','<<this->get_time()<<','
-                     <<rank<<','<<(side==0 ? "minimum" : "maximum")<<','<<c<<','<<entry.second<<'\n';
-        std::ofstream moments(this->get_output_directory()+"stress_weak_moments_"+tag);
-        moments.exceptions(std::ios::failbit | std::ios::badbit);
-        moments<<"step,time,rank,fault,node,x,y,prescribed,V,weight,p_load,tauN_load,bg_load,sigma_load,friction_load,abs_friction_load,tensile_weight,tensile_friction_load,tensile_abs_friction_load\n";
-        for (unsigned int f=0; f<faults.size(); ++f)
-          for (unsigned int i=0; i<faults[f].n_vertices(); ++i)
-            {
-              moments<<std::setprecision(17)<<this->get_timestep_number()<<','<<this->get_time()<<','<<rank<<','
-                     <<f<<','<<i<<','<<faults[f].vertex(i)[0]<<','<<faults[f].vertex(i)[1]<<','
-                     <<prescribed[f][i]<<','<<slip_rate[f][i];
-              for (double value:stress_audit_moments[f][i]) moments<<','<<value;
-              moments<<'\n';
-            }
-      }
-    if (history_audit && assemble_jacobian)
-      {
-        std::ofstream out(this->get_output_directory()+"history_surface_rank"+
-                          std::to_string(Utilities::MPI::this_mpi_process(this->get_mpi_communicator()))+".csv");
-        out.exceptions(std::ios::failbit|std::ios::badbit);
-        out<<"fault,node,x,y,V,weight,p,particle_q,particle_sigma,particle_C,particle_friction,particle_damping,particle_R,particle_Kdiag,particle_Koff_sum,particle_tensile_weight,particle_tensile_friction,fe_q,fe_sigma,fe_C,fe_friction,fe_damping,fe_R,fe_Kdiag,fe_Koff_sum,fe_tensile_weight,fe_tensile_friction\n";
-        for (unsigned int f=0;f<faults.size();++f)
-          for (unsigned int v=0;v<faults[f].n_vertices();++v)
-            {
-              out<<std::setprecision(17)<<f<<','<<v<<','<<faults[f].vertex(v)[0]<<','<<faults[f].vertex(v)[1]<<','<<slip_rate[f][v];
-              for (double x:history_moments[f][v]) out<<','<<x;
-              out<<'\n';
-            }
-      }
-    if (record_normal_stress)
-      {
-        // Replace only this step/rank's diagnostic on each new linearization.
-        // A final file is accepted evidence only if the solve actually converges.
-        std::ofstream output(this->get_output_directory()+"constitutive_normal_"
-          + std::to_string(this->get_timestep_number())+"_rank"
-          + std::to_string(Utilities::MPI::this_mpi_process(this->get_mpi_communicator()))+".csv");
-        output.exceptions(std::ios::failbit | std::ios::badbit);
-        output << std::setprecision(17)
-               << "step,time,fault,node,weight,p_load,sigma_load,tauN_load,p_min,p_max,sigma_min,sigma_max,tauN_min,tauN_max\n";
-        for (unsigned int f=0; f<faults.size(); ++f)
-          for (unsigned int i=0; i<faults[f].n_vertices(); ++i)
-            {
-              output << this->get_timestep_number() << ',' << this->get_time() << ',' << f << ',' << i;
-              for (const double value : normal_stress_moments[f][i])
-                output << ',' << value;
-              output << '\n';
-            }
-      }
+    write_particle_diagnostics(slip_rate,diagnostic);
     return local;
   }
 

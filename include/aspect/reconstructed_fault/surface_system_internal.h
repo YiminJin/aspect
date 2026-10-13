@@ -16,9 +16,21 @@
 
 #include <memory>
 #include <vector>
+#include <map>
+#include <string>
 
 namespace aspect
 {
+  template <int dim>
+  struct ReconstructedFaultSurfaceSystem<dim>::ParticleDiagnosticData
+  {
+    bool write_history=false,write_normal=false,write_samples=false;
+    std::array<std::multimap<double,std::string>,3> lowest_samples,highest_samples;
+    std::vector<std::vector<std::array<double,22>>> history_moments;
+    std::vector<std::vector<std::array<double,10>>> stress_moments,normal_moments;
+    std::vector<std::vector<bool>> prescribed;
+  };
+
   template <int dim>
   struct ReconstructedFaultSurfaceSystem<dim>::SurfaceAssembly
   {

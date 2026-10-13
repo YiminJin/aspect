@@ -22,6 +22,7 @@
 #include <functional>
 #include <array>
 #include <vector>
+#include <set>
 
 namespace aspect
 {
@@ -217,6 +218,15 @@ namespace aspect
     private:
       struct SurfaceAssembly;
       struct SurfaceLinearization;
+      struct ParticleDiagnosticData;
+      void write_particle_diagnostics(const FaultVector &,const ParticleDiagnosticData &) const;
+      std::vector<SymmetricTensor<2,dim>> sample_normal_diagnostic_particles(
+        const typename DoFHandler<dim>::active_cell_iterator &,const std::vector<Point<dim>> &,
+        NormalTractionDiagnostic &,std::set<types::particle_index> &) const;
+      void sample_normal_diagnostic_lines(
+        const typename DoFHandler<dim>::active_cell_iterator &,const LinearAlgebra::BlockVector &,
+        const FaultVector &,const std::array<unsigned int,SymmetricTensor<2,dim>::n_independent_components> &,
+        NormalTractionDiagnostic &) const;
 
       SurfaceAssembly
       assemble_surface_system(const LinearAlgebra::BlockVector &bulk_state,
