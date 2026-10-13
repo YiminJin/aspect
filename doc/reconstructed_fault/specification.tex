@@ -2053,6 +2053,16 @@ All publication occurs once, after the complete endpoint conditions converge;
 normal simulator history rotation is retained.
 
 \paragraph{P2 checkpoint disposition.}
+The subsequent bounded implementation cleanup retains these equations and
+ownership. Accepted FE history, stress, recurrence and mechanical quadrature
+remain in \texttt{fe\_strain.cc}; fixed normal geometry, analytic normal
+integration, projection and its derivatives reside in
+\texttt{fe\_normalization.cc}; bulk/cohesive phase energy, endpoint potential
+and tangent actions reside in \texttt{fe\_phase\_energy.cc}. Their shared private
+implementation data is defined in \texttt{fe\_strain\_internal.h}, without a new
+material plugin or state owner. This preserves the existing horizontal,
+unit-tangential-domain restrictions; it does not extend them to BP3.
+
 The restricted consistent-endpoint reduced-Newton solver with FGMRES remains
 the P2 reference; the endpoint option itself is default off. The bounded native
 operator, growth/saddle, MPI and prepublication failure/retry checks do not

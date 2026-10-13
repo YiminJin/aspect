@@ -583,3 +583,15 @@ qualification, coupled restart, transport and propagation remain deferred.
 No new quasi-Newton, arc-length, full-trajectory or scalability work is selected.
 See doc/reconstructed_fault/propagation/P2_CLOSEOUT.md. Historical selections
 above do not authorize automatic continuation after this checkpoint.
+
+## Bounded P2 implementation cleanup (latest user selection)
+
+The user selects doc/reconstructed_fault/propagation/P2_cleanup.md from the
+reviewed 41272d263 checkpoint. Use its exact FE file layout, direct
+normalization-only operation, association/projection preparation separation,
+explicit-zero cohesive initialization, shared accepted-FE recurrence and bounded
+diagnostic extraction. Preserve all scientific algorithms, defaults, serialized
+properties, MPI/history/publication rules and retained evidence. Keep FE
+consistent-deviator and legacy full-gradient histories distinct. Verify the
+changed responsibilities with existing local controls, then report and stop.
+No BP3 implementation, new experiment, solver redesign or P3 is selected.

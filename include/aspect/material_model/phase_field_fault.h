@@ -345,6 +345,8 @@ namespace aspect
         std::string fe_initial_phase_profile;
         unsigned int fe_bulk_normal_quadrature_points = 3;
         void prepare_fe_strain_history();
+        /** Build fixed normal rays and their consistent surface projection once. */
+        void prepare_fe_normalization_geometry(FEStrainState &);
         /** Test-access-only fixed-entry reference; no checkpoint conversion or particle writes. */
         void set_fe_diagnostic_reference(const LinearAlgebra::BlockVector &,
                                         const std::vector<double> &,const std::vector<double> &);

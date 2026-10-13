@@ -13,6 +13,17 @@ specification gives their detailed contract.
 
 ### P2 checkpoint disposition (2026-10-13)
 
+The subsequent selected [P2 cleanup](propagation/P2_cleanup.md) changes
+implementation responsibilities only. Accepted FE history/stress/recurrence
+and mechanical quadrature remain in `fe_strain.cc`; fixed normal geometry,
+analytic integrals and consistent projection/derivatives belong in
+`fe_normalization.cc`; bulk/cohesive phase energy and endpoint potential/actions
+belong in `fe_phase_energy.cc`. Only their genuinely shared private data is
+defined in `fe_strain_internal.h`. The existing material class and registration
+remain the sole owners. Generic normalization and particle history remain
+separate. Cleanup does not generalize the horizontal/unit-width restrictions or
+qualify BP3.
+
 The restricted P2 reference is the consistent-endpoint reduced-Newton option
 with FGMRES mechanics. The option itself remains default off. Preserve the
 governing energy, normalization, immutable accepted FE/surface histories,
