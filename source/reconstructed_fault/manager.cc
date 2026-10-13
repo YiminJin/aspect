@@ -14,6 +14,7 @@
 #include <aspect/particle/manager.h>
 #include <aspect/particle/particle_domain.h>
 #include <aspect/material_model/utilities.h>
+#include <aspect/material_model/phase_field_fault.h>
 #include <aspect/utilities.h>
 #include <aspect/geometry_model/box.h>
 
