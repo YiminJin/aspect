@@ -39,6 +39,13 @@ namespace aspect
             const auto entry = counts.find("Fault: Cache build");
             return entry == counts.end() ? 0.0 : entry->second;
           };
+          const auto factor_count = [this]()
+          {
+            const auto counts = this->get_computing_timer().get_summary_data(TimerOutput::n_calls);
+            const auto entry = counts.find("Fault: Projection preparation");
+            return entry == counts.end() ? 0.0 : entry->second;
+          };
+          const double factors_before = factor_count();
           const double before = build_count();
 
           // Every rank deliberately invalidates and enters preparation together.
@@ -52,6 +59,35 @@ namespace aspect
           const double after_warm = build_count();
           AssertThrow(after_cold == before + 1.0 && after_warm == after_cold,
                       ExcMessage("Cold interpolation must rebuild once; warm interpolation must reuse."));
+          AssertThrow(factor_count() == factors_before,
+                      ExcMessage("Association interpolation unnecessarily prepared projection factors."));
+          std::map<types::particle_index,double> constant_samples;
+          for(const auto &a:manager.get_locally_owned_particle_fault_associations())
+            if(a.active)constant_samples.emplace(a.particle_id,1.);
+          const auto first_projection=manager.project_particle_scalar(constant_samples);
+          AssertThrow(factor_count() == factors_before+1.,ExcMessage("First projection must prepare its factors once."));
+          const auto repeat_projection=manager.project_particle_scalar(constant_samples);
+          AssertThrow(factor_count() == factors_before+1.
+                      && first_projection.nodal_values == repeat_projection.nodal_values,
+                      ExcMessage("Repeated projection did not reuse its factors/results."));
+          for(const auto &fault:first_projection.nodal_values)
+            for(const double value:fault)
+              AssertThrow(std::abs(value-1.)<1e-12,ExcMessage("Lazy projection lost constant reproduction."));
+          manager.invalidate_particle_projection_cache();
+          manager.get_locally_owned_particle_fault_associations();
+          AssertThrow(factor_count() == factors_before+1.,ExcMessage("Association rebuilding unexpectedly prepared factors."));
+          const auto rebuilt_projection=manager.project_particle_scalar(constant_samples);
+          AssertThrow(factor_count() == factors_before+2.
+                      && rebuilt_projection.nodal_values == first_projection.nodal_values,
+                      ExcMessage("Projection factors did not follow association invalidation."));
+          auto incomplete=constant_samples;
+          if(Utilities::MPI::this_mpi_process(this->get_mpi_communicator())==1)incomplete.clear();
+          bool rejected=false;
+          try{manager.project_particle_scalar(incomplete);}
+          catch(const std::exception &error){rejected=std::string(error.what()).find("No scalar projection value")!=std::string::npos;}
+          AssertThrow(rejected,ExcMessage("Missing owner values did not reject collectively."));
+          AssertThrow(manager.project_particle_scalar(constant_samples).nodal_values==first_projection.nodal_values,
+                      ExcMessage("Failed projection changed valid factors or subsequent results."));
           AssertThrow(cold == expected && warm == expected,
                       ExcMessage("Cold/warm reverse interpolation changed particle values."));
           const auto &rebuilt_diagnostics = manager.get_particle_projection_diagnostics();

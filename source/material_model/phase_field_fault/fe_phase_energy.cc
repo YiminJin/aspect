@@ -18,63 +18,6 @@
 
 namespace aspect
 {
-  namespace
-  {
-    // Second derivatives of the two endpoint values of a linear normal ray.
-    // This small jet differentiates the analytic integral, not quadrature samples.
-    struct RayJet
-    {
-      double v;
-      std::array<double,2> d{};
-      std::array<std::array<double,2>,2> h{};
-      RayJet(double value=0.) : v(value) {}
-      static RayJet variable(double value,unsigned int i)
-      { RayJet x(value);x.d[i]=1.;return x; }
-    };
-    RayJet operator+(const RayJet &a,const RayJet &b)
-    {
-      RayJet r(a.v+b.v);
-      for(unsigned int i=0;i<2;++i) {r.d[i]=a.d[i]+b.d[i];
-        for(unsigned int j=0;j<2;++j)r.h[i][j]=a.h[i][j]+b.h[i][j];}
-      return r;
-    }
-    RayJet operator*(const RayJet &a,const RayJet &b)
-    {
-      RayJet r(a.v*b.v);
-      for(unsigned int i=0;i<2;++i) {r.d[i]=a.d[i]*b.v+a.v*b.d[i];
-        for(unsigned int j=0;j<2;++j)r.h[i][j]=a.h[i][j]*b.v+a.v*b.h[i][j]
-          +a.d[i]*b.d[j]+b.d[i]*a.d[j];}
-      return r;
-    }
-    RayJet compose(const RayJet &x,double v,double first,double second)
-    {
-      RayJet r(v);
-      for(unsigned int i=0;i<2;++i) {r.d[i]=first*x.d[i];
-        for(unsigned int j=0;j<2;++j)r.h[i][j]=first*x.h[i][j]+second*x.d[i]*x.d[j];}
-      return r;
-    }
-    RayJet inverse(const RayJet &x)
-    {return compose(x,1./x.v,-1./(x.v*x.v),2./(x.v*x.v*x.v));}
-    RayJet operator-(const RayJet &a,const RayJet &b) {return a+RayJet(-1.)*b;}
-    RayJet operator/(const RayJet &a,const RayJet &b) {return a*inverse(b);}
-    RayJet ray_integral(double left,double right,double length,double m)
-    {
-      const auto a=RayJet(1.)-RayJet::variable(left,0);
-      const auto b=RayJet(1.)-RayJet::variable(right,1);
-      const auto z=(b-a)/a;
-      RayJet ratio;
-      if(std::abs(z.v)<1.e-3)
-        {
-          RayJet power(1.);
-          for(unsigned int k=0;k<13;++k) {ratio=ratio+RayJet((k%2?-1.:1.)/(k+1))*power;power=power*z;}
-        }
-      else
-        ratio=compose(z,std::log1p(z.v),1./(1.+z.v),-1./std::pow(1.+z.v,2))/z;
-      return RayJet(m*length)*(RayJet(2.)/(a*b)-RayJet(3.)*ratio/a+RayJet(1.));
-    }
-
-  }
-
   namespace MaterialModel
   {
     template<int dim> typename PhaseFieldFault<dim>::FEPhaseEnergy
@@ -83,7 +26,7 @@ namespace aspect
     {
       validate_fe_strain_restrictions();
       return evaluate_fe_phase_energy_at(trial,tangent,positive_search,
-                                         fe_strain_state->accepted,fe_strain_state->Z);
+                                         fe_strain_state->displacement_history,fe_strain_state->Z);
     }
 
     template<int dim> typename PhaseFieldFault<dim>::FEPhaseEnergy
@@ -102,16 +45,7 @@ namespace aspect
       const auto &s=*fe_strain_state;
       const auto c=compute_maxwell_coefficients(s.eta,s.G,this->get_timestep());
       FEEndpointTrial endpoint;
-      LinearAlgebra::BlockVector owned(this->introspection().index_sets.system_partitioning,this->get_mpi_communicator());
-      owned=s.accepted;
-      const unsigned int vb=this->introspection().block_indices.velocities;
-      LinearAlgebra::BlockVector owned_bulk(this->introspection().index_sets.system_partitioning,this->get_mpi_communicator());
-      owned_bulk=bulk;
-      owned.block(vb)*=c.beta;
-      owned.block(vb).add(c.eta_ve/s.G,owned_bulk.block(vb));
-      const auto pb=this->introspection().variable("phase_field").block_index;
-      owned.block(pb)=bulk.block(pb);
-      endpoint.strain.reinit(s.accepted);endpoint.strain=owned;
+      update_fe_strain_trial(bulk,c,endpoint.strain);
       endpoint.Z=s.Z;
       long double friction_potential=0.;
       AssertDimension(V.size(),1);AssertDimension(V[0].size(),s.Z.size());
@@ -150,48 +84,18 @@ namespace aspect
       const unsigned int pb=this->introspection().variable("phase_field").block_index;
       const unsigned int n=trial.block(pb).size(),ns=Z_reference.size();
       AssertDimension(ns,s.Z.size());
-      const auto phase_values=aspect::internal::endpoint_values(trial.block(pb),this->get_mpi_communicator());
+      const auto normalization=evaluate_fe_normalization(trial,true,phase_direction);
+      const auto &phase_values=normalization.phase_values;
       AssertThrow(!tangent || Utilities::MPI::n_mpi_processes(this->get_mpi_communicator())==1,
                   ExcMessage("Dense FE Hessians are serial diagnostics; MPI endpoint solves use the full matrix-free action."));
-      result.gradient.assign(n,0.);result.normalization.assign(ns,0.);result.roundoff_scale.assign(n,0.);
+      result.gradient.assign(n,0.);result.roundoff_scale.assign(n,0.);
+      result.normalization=normalization.values;
+      result.normalization_action=normalization.action;
       if(tangent)result.hessian.reinit(n,n);
-      for(unsigned int i=0;i<n;++i)
-        if(!std::isfinite(phase_values[i]) || phase_values[i]<0 || phase_values[i]>=1.)
-          {result.admissible=false;return result;}
-      FullMatrix<double>A(s.profiles.size(),n),Iderivative(ns,n),positive_A(s.profiles.size(),n),positive_DI(ns,n);
-      std::vector<std::vector<RayJet>>integrals(s.profiles.size());
-      for(unsigned int k=0;k<s.profiles.size();++k)
-        {
-          double direct=0.;const auto&p=s.profiles[k];
-          for(const auto&ray:p.rays)
-            {
-              double endpoint[2]={0.,0.};
-              for(unsigned int v=0;v<ray.dofs.size();++v)for(unsigned int e=0;e<2;++e)
-                endpoint[e]+=ray.shape[e][v]*phase_values[ray.dofs[v]];
-              const auto f=ray_integral(endpoint[0],endpoint[1],ray.length,s.m);
-              integrals[k].push_back(f);direct+=f.v;
-              for(unsigned int v=0;v<ray.dofs.size();++v)
-                {
-                  A(k,ray.dofs[v])+=f.d[0]*ray.shape[0][v]+f.d[1]*ray.shape[1][v];
-                  positive_A(k,ray.dofs[v])+=std::abs(f.d[0]*ray.shape[0][v])+std::abs(f.d[1]*ray.shape[1][v]);
-                }
-            }
-          for(unsigned int i=0;i<ns;++i)result.normalization[i]+=s.projection(i,k)*direct;
-        }
-      for(const auto I:result.normalization)
-        if(!(I>0) || !std::isfinite(I)) {result.admissible=false;return result;}
-      s.projection.mmult(Iderivative,A);
-      if(phase_direction)
-        {
-          AssertDimension(phase_direction->size(),n);result.normalization_action.assign(ns,0.);
-          for(unsigned int i=0;i<ns;++i)for(unsigned int j=0;j<n;++j)
-            result.normalization_action[i]+=Iderivative(i,j)*(*phase_direction)[j];
-        }
+      if(!normalization.admissible){result.admissible=false;return result;}
       // Assemble first in independent nodal (phi,I) coordinates, then apply
       // the normalization pullback once. This is the same full Hessian as
       // per-QP dense rank updates, without repeating nonlocal dense work.
-      for(unsigned int i=0;i<ns;++i)for(unsigned int k=0;k<s.profiles.size();++k)
-        for(unsigned int j=0;j<n;++j)positive_DI(i,j)+=std::abs(s.projection(i,k))*positive_A(k,j);
       std::vector<double>forceI(ns,0.),scaleI(ns,0.);
       FullMatrix<double>cross,II;
       if(tangent){cross.reinit(n,ns);II.reinit(ns,ns);}
@@ -269,31 +173,8 @@ namespace aspect
                 II(p.segment+i,p.segment+j)+=p.weight*Z*Z/(s.G*I*I*I)*w[i]*w[j];
             }
         }
-      for(unsigned int j=0;j<n;++j)for(unsigned int i=0;i<ns;++i)
-        {
-          result.gradient[j]+=Iderivative(i,j)*forceI[i];
-          result.roundoff_scale[j]+=positive_DI(i,j)*scaleI[i];
-        }
-      if(tangent)
-        {
-          FullMatrix<double>product(n,n),II_DI(ns,n),pullback(n,n);
-          cross.mmult(product,Iderivative);II.mmult(II_DI,Iderivative);Iderivative.Tmmult(pullback,II_DI);
-          for(unsigned int i=0;i<n;++i)for(unsigned int j=0;j<n;++j)
-            result.hessian(i,j)+=product(i,j)+product(j,i)+pullback(i,j);
-        }
-      if(tangent && !positive_search)
-        for(unsigned int k=0;k<s.profiles.size();++k)
-          {
-            double adjoint=0.;for(unsigned int i=0;i<ns;++i)adjoint+=s.projection(i,k)*forceI[i];
-            unsigned int j=0;
-            for(const auto&ray:s.profiles[k].rays)
-              {
-                const auto&f=integrals[k][j++];
-                for(unsigned int v=0;v<ray.dofs.size();++v)for(unsigned int u=0;u<ray.dofs.size();++u)
-                  for(unsigned int a=0;a<2;++a)for(unsigned int b=0;b<2;++b)
-                    result.hessian(ray.dofs[v],ray.dofs[u])+=adjoint*f.h[a][b]*ray.shape[a][v]*ray.shape[b][u];
-              }
-          }
+      add_fe_normalization_energy_pullback(normalization,forceI,scaleI,
+                                            cross,II,tangent,positive_search,result);
       // The ordinary bulk subtotal is local; only its extended sum is global.
       // Retain the serial roundoff diagnostic without mislabelling the MPI one.
       this->get_pcout()<<(Utilities::MPI::n_mpi_processes(this->get_mpi_communicator())==1
@@ -322,29 +203,15 @@ namespace aspect
       const unsigned int pb=intro.variable("phase_field").block_index;
       const unsigned int n=trial.block(pb).size(),ns=s.Z.size();
       AssertDimension(direction.size(),n);
-      const auto phase_values=aspect::internal::endpoint_values(trial.block(pb),this->get_mpi_communicator());
       AssertThrow((velocity_direction==nullptr)==(slip_direction==nullptr),ExcInternalError());
       const auto coefficients=compute_maxwell_coefficients(s.eta,s.G,this->get_timestep());
+      const auto normalization=evaluate_fe_normalization(trial,false,&direction);
+      AssertThrow(normalization.admissible,ExcMessage("Undefined tangent normalization."));
+      const auto &phase_values=normalization.phase_values;
+      const auto &I=normalization.values;
+      const auto &dI=normalization.action;
       FEEndpointAction result;result.gradient.assign(n,0.);
-      std::vector<double>I(ns,0.),dI(ns,0.),force(ns,0.),dforce(ns,0.);
-      std::vector<std::vector<RayJet>> jets(s.profiles.size());
-      for(unsigned int k=0;k<s.profiles.size();++k)
-        {
-          double integral=0.,derivative=0.;
-          for(const auto &ray:s.profiles[k].rays)
-            {
-              double phi[2]={},dphi[2]={};
-              for(unsigned int e=0;e<2;++e)for(unsigned int v=0;v<ray.dofs.size();++v)
-                {phi[e]+=ray.shape[e][v]*phase_values[ray.dofs[v]];
-                 dphi[e]+=ray.shape[e][v]*direction[ray.dofs[v]];}
-              const auto jet=ray_integral(phi[0],phi[1],ray.length,s.m);
-              jets[k].push_back(jet);integral+=jet.v;
-              derivative+=jet.d[0]*dphi[0]+jet.d[1]*dphi[1];
-            }
-          for(unsigned int i=0;i<ns;++i)
-            {I[i]+=s.projection(i,k)*integral;dI[i]+=s.projection(i,k)*derivative;}
-        }
-      for(const double value:I)AssertThrow(value>0. && std::isfinite(value),ExcMessage("Undefined tangent normalization."));
+      std::vector<double>force(ns,0.),dforce(ns,0.);
       SymmetricTensor<2,dim>S;S[0][1]=.5*this->get_reconstructed_fault_manager().get_shear_sense(0);
       const auto quadrature=mechanical_quadrature();
       FEValues<dim>fe(this->get_mapping(),this->get_fe(),quadrature,update_gradients);
@@ -418,26 +285,7 @@ namespace aspect
               if(assemble_rhs)result.surface_rhs[0][p.segment+i]+=p.weight*w[i]*Z*di/(ii*ii);
             }
         }
-      // Matrix-free pullback DI^T dforce + (D DI[d])^T force. In particular,
-      // the second term differentiates the analytic rays through P^T.
-      for(unsigned int k=0;k<s.profiles.size();++k)
-        {
-          double adjoint=0.,dadjoint=0.;
-          for(unsigned int i=0;i<ns;++i)
-            {adjoint+=s.projection(i,k)*force[i];dadjoint+=s.projection(i,k)*dforce[i];}
-          unsigned int j=0;
-          for(const auto &ray:s.profiles[k].rays)
-            {
-              const auto &jet=jets[k][j++];double dp[2]={};
-              for(unsigned int a=0;a<2;++a)for(unsigned int v=0;v<ray.dofs.size();++v)
-                dp[a]+=ray.shape[a][v]*direction[ray.dofs[v]];
-              for(unsigned int v=0;v<ray.dofs.size();++v)for(unsigned int a=0;a<2;++a)
-                {
-                  double second=0.;for(unsigned int b=0;b<2;++b)second+=jet.h[a][b]*dp[b];
-                  result.gradient[ray.dofs[v]]+=ray.shape[a][v]*(dadjoint*jet.d[a]+adjoint*second);
-                }
-            }
-        }
+      add_fe_normalization_action_pullback(normalization,direction,force,dforce,result.gradient);
       return result;
     }
 

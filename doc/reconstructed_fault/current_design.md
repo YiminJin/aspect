@@ -24,6 +24,21 @@ remain the sole owners. Generic normalization and particle history remain
 separate. Cleanup does not generalize the horizontal/unit-width restrictions or
 qualify BP3.
 
+Normalization-only FE requests evaluate the same analytic normal integrals and
+consistent projection without bulk energy, gradients or derivative matrices.
+Fixed geometry/projection data is reused; normalization values are recomputed
+from the explicit phase on each request. Particle associations retain coverage
+and support validation; particle projection matrices/factors are prepared only
+for an actual projection and follow the association generation. Their existing
+singularity checks remain part of projection preparation. Explicitly zero
+cohesive initialization still prepares normalization and associations and uses
+native validation/publication, without projecting zero particle values.
+
+The FE stress reconstruction applies `consistent_deviator` to the raw symmetric
+gradient. The legacy particle recurrence consumes the full symmetric gradient.
+Cleanup preserves this constitutive distinction; a future BP3 comparison must
+separate it from history representation and integration/transfer differences.
+
 The restricted P2 reference is the consistent-endpoint reduced-Newton option
 with FGMRES mechanics. The option itself remains default off. Preserve the
 governing energy, normalization, immutable accepted FE/surface histories,

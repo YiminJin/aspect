@@ -12,7 +12,7 @@
 #ifndef _aspect_tests_phase_field_fault_test_access_h
 #define _aspect_tests_phase_field_fault_test_access_h
 
-#include <aspect/material_model/phase_field_fault.h>
+#include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
 
 namespace aspect
 {
@@ -35,6 +35,17 @@ namespace aspect
           {
             model.compute_normalization_integrals();
             return model.current_normalization_integrals;
+          }
+
+          /** Value-only FE request must not allocate derivative data or consume mechanics. */
+          static std::vector<double> fe_normalization_only(
+            const PhaseFieldFault<dim> &model,const LinearAlgebra::BlockVector &trial)
+          {
+            const auto result=model.evaluate_fe_normalization(trial,false);
+            AssertThrow(result.admissible && result.derivative.m()==0
+                        && result.derivative_scale.m()==0 && result.integrals.empty()
+                        && result.action.empty(),ExcMessage("Normalization-only request prepared derivatives."));
+            return result.values;
           }
 
           static auto normalization_cache_status(const PhaseFieldFault<dim> &model)

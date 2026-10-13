@@ -448,8 +448,9 @@ namespace aspect
 
       using FaultNodalValues = std::vector<std::vector<double>>;
 
-      bool particle_projection_cache_is_valid() const;
-      void rebuild_particle_projection_cache();
+      bool particle_association_cache_is_valid() const;
+      void rebuild_particle_association_cache();
+      void prepare_particle_projection_systems();
       std::vector<unsigned int> fault_vertex_offsets() const;
       std::vector<FaultNodalValues>
       reduce_and_solve_projection_rhs(
@@ -479,14 +480,17 @@ namespace aspect
       unsigned int n_property_components = 0;
       std::vector<FaultReconstructionDiagnostics> diagnostics;
 
-      // Particle/fault projection cache. These members are reconstructible.
+      // Particle/fault associations and lazy projection factors, both reconstructible.
       // Local loop/validation timings must never synchronize MPI ranks.
       std::unique_ptr<TimerOutput> performance_timer;
-      bool particle_projection_cache_valid = false;
+      bool particle_association_cache_valid = false;
+      // Factors depend on the complete association/quadrature generation.
+      std::uint64_t particle_association_generation = 0;
+      std::uint64_t projection_systems_generation = 0;
       std::uint64_t cached_domain_geometry_version = 0;
       std::uint64_t cached_projection_metadata_version = 0;
       std::vector<std::uint64_t> cached_fault_geometry_versions;
-      std::vector<ParticleFaultAssociation> particle_projection_cache;
+      std::vector<ParticleFaultAssociation> particle_association_cache;
       std::vector<ProjectionSystem> projection_systems;
       std::vector<ParticleProjectionDiagnostics> particle_projection_diagnostics;
 

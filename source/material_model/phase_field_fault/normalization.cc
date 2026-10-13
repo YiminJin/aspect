@@ -18,7 +18,7 @@
   <http://www.gnu.org/licenses/>.
 */
 
-#include <aspect/material_model/phase_field_fault.h>
+#include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
 #include <aspect/material_model/utilities.h>
 #include <aspect/phase_field.h>
 #include <aspect/reconstructed_fault/manager.h>
@@ -280,9 +280,9 @@ namespace aspect
 
       if (fe_strain_history && fe_strain_state)
         {
-          const auto trial = evaluate_fe_phase_energy(this->get_solution(), false);
+          const auto trial = evaluate_fe_normalization(this->get_solution(), false);
           AssertThrow(trial.admissible, ExcMessage("Accepted FE strain normalization is undefined."));
-          current_normalization_integrals = {trial.normalization};
+          current_normalization_integrals = {trial.values};
           return;
         }
 

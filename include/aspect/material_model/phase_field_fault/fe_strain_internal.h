@@ -8,6 +8,24 @@ namespace aspect
 {
   namespace MaterialModel
   {
+    namespace internal
+    {
+      struct FENormalIntegral
+      {
+        double v=0.;
+        std::array<double,2> d{};
+        std::array<std::array<double,2>,2> h{};
+      };
+    }
+    template<int dim> struct PhaseFieldFault<dim>::FENormalization
+    {
+      Vector<double> phase_values;
+      std::vector<double> values,action;
+      FullMatrix<double> derivative,derivative_scale;
+      std::vector<std::vector<internal::FENormalIntegral>> integrals;
+      bool admissible=true;
+    };
+
     template<int dim> struct PhaseFieldFault<dim>::FEStrainState
     {
       struct Ray
@@ -30,7 +48,10 @@ namespace aspect
         std::array<types::global_dof_index,GeometryInfo<dim>::vertices_per_cell> dofs;
         std::array<double,GeometryInfo<dim>::vertices_per_cell> shape;
       };
-      LinearAlgebra::BlockVector accepted;
+      // The velocity block is the authoritative accepted d_R; its symmetric
+      // gradient is deviated once during stress reconstruction. The phase block
+      // records the accepted profile. Particle stress stores derived samples.
+      LinearAlgebra::BlockVector displacement_history;
       std::vector<double> Z,I;
       std::vector<Profile> profiles;
       std::vector<BulkPoint> bulk;
@@ -51,7 +72,7 @@ namespace aspect
 
     template<int dim> struct PhaseFieldFault<dim>::FEStrainUpdate
     {
-      LinearAlgebra::BlockVector accepted;
+      LinearAlgebra::BlockVector displacement_history;
       std::vector<double>Z,I;
     };
 

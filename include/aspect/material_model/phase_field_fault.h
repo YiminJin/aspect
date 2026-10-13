@@ -339,6 +339,8 @@ namespace aspect
 
         struct FEStrainState;
         struct FEStrainUpdate;
+        struct FENormalization;
+        struct MaxwellCoefficients;
         std::shared_ptr<FEStrainState> fe_strain_state;
         bool fe_strain_history = false;
         bool consistent_endpoint_phase = false;
@@ -347,6 +349,18 @@ namespace aspect
         void prepare_fe_strain_history();
         /** Build fixed normal rays and their consistent surface projection once. */
         void prepare_fe_normalization_geometry(FEStrainState &);
+        /** Values only unless dense derivatives or a directional action is requested.
+         * No mechanical history, bulk integration or energy reduction is consumed. */
+        FENormalization evaluate_fe_normalization(
+          const LinearAlgebra::BlockVector &, bool assemble_dense_derivatives,
+          const std::vector<double> *phase_direction = nullptr) const;
+        void add_fe_normalization_energy_pullback(
+          const FENormalization &, const std::vector<double> &, const std::vector<double> &,
+          const FullMatrix<double> &, const FullMatrix<double> &, bool, bool,
+          FEPhaseEnergy &) const;
+        void add_fe_normalization_action_pullback(
+          const FENormalization &, const std::vector<double> &, const std::vector<double> &,
+          const std::vector<double> &, std::vector<double> &) const;
         /** Test-access-only fixed-entry reference; no checkpoint conversion or particle writes. */
         void set_fe_diagnostic_reference(const LinearAlgebra::BlockVector &,
                                         const std::vector<double> &,const std::vector<double> &);
@@ -356,6 +370,10 @@ namespace aspect
                                                   const std::vector<double> &,
                                                   const std::vector<double> * = nullptr) const;
         void validate_fe_strain_restrictions() const;
+        /** Exact noncommitting recurrence from the immutable accepted FE anchor. */
+        void update_fe_strain_trial(const LinearAlgebra::BlockVector &,
+                                    const MaxwellCoefficients &,
+                                    LinearAlgebra::BlockVector &) const;
         std::shared_ptr<FEStrainUpdate> prepare_fe_strain_commit(
           const LinearAlgebra::BlockVector &,
           const std::vector<std::vector<double>> &tractions) const;

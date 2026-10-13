@@ -570,7 +570,8 @@ namespace aspect
       std::map<types::particle_index, double> cohesive_samples;
       std::map<types::particle_index, ParticleCandidate> particle_candidates;
       aspect::internal::FaultHistoryDiagnostics<dim> diagnostics;
-      typename ReconstructedFaultManager<dim>::ParticleScalarProjectionResult cohesive_projection;
+      std::vector<std::vector<double>> cohesive_nodal_values;
+      std::vector<typename ReconstructedFaultManager<dim>::ParticleScalarProjectionDiagnostics> cohesive_projection_diagnostics;
       std::vector<std::vector<double>> state_candidates;
     };
 
@@ -629,7 +630,7 @@ namespace aspect
                                  chemical_positions, candidates);
       validate_history_candidates(candidates);
       const auto fe_update = fe_strain_history
-                             ? prepare_fe_strain_commit(accepted_bulk_state, candidates.cohesive_projection.nodal_values)
+                             ? prepare_fe_strain_commit(accepted_bulk_state, candidates.cohesive_nodal_values)
                              : std::shared_ptr<FEStrainUpdate>();
       double fe_publication_error=0.,fe_publication_bound=0.,fe_publication_net_bound=0.;
       std::string fe_publication_failure;
@@ -739,7 +740,7 @@ namespace aspect
       auto &cohesive_samples = candidates.cohesive_samples;
       auto &particle_candidates = candidates.particle_candidates;
       auto &diagnostics = candidates.diagnostics;
-      auto &cohesive_projection = candidates.cohesive_projection;
+      auto &cohesive_values = candidates.cohesive_nodal_values;
       auto &state_candidates = candidates.state_candidates;
 
       if (std::getenv("ASPECT_STRESS_CYCLE_TRACE"))
@@ -754,7 +755,7 @@ namespace aspect
           std::vector<std::vector<double>> rates(faults.size());
           for (unsigned int f=0; f<faults.size(); ++f)
             rates[f] = fault_manager.get_slip_rate(f);
-          cohesive_projection.nodal_values = compute_surface_cohesive_candidates(time_step, rates);
+          cohesive_values = compute_surface_cohesive_candidates(time_step, rates);
         }
 
       // First evaluate the accepted cohesive traction samples. Projection is
@@ -807,7 +808,11 @@ namespace aspect
       throw_if_history_error(local_error, this->get_mpi_communicator());
 
       if (!surface_cohesive_history)
-        cohesive_projection = fault_manager.project_particle_scalar(cohesive_samples);
+        {
+          const auto projection = fault_manager.project_particle_scalar(cohesive_samples);
+          cohesive_values = projection.nodal_values;
+          candidates.cohesive_projection_diagnostics = projection.diagnostics;
+        }
 
       try
         {
@@ -957,9 +962,9 @@ namespace aspect
                       const double xi = association.xi;
                       const double projected_traction = surface_cohesive_history
                         ? cohesive.cohesive_traction
-                        : (1.0-xi) * cohesive_projection.nodal_values[
+                        : (1.0-xi) * cohesive_values[
                           association.fault_index][association.segment_index]
-                        + xi * cohesive_projection.nodal_values[
+                        + xi * cohesive_values[
                           association.fault_index][association.segment_index+1];
                       const double H_candidate =
                         recoverable_phase_history
@@ -1020,7 +1025,7 @@ namespace aspect
       auto &particle_handler = this->get_phase_field_handler()
                                .get_associated_particle_manager().get_particle_handler();
       const auto &particle_candidates = candidates.particle_candidates;
-      const auto &cohesive_projection = candidates.cohesive_projection;
+      const auto &cohesive_values = candidates.cohesive_nodal_values;
       // Finish the existing collective and local checks before publication.
       unsigned int local_valid =
         particle_candidates.size() == particle_handler.n_locally_owned_particles()
@@ -1030,16 +1035,16 @@ namespace aspect
       AssertThrow(Utilities::MPI::min(local_valid, this->get_mpi_communicator()) == 1,
                   ExcMessage("Stage-J history candidates are incomplete."));
 
-      validate_cohesive_state_commit(cohesive_projection.nodal_values);
+      validate_cohesive_state_commit(cohesive_values);
 
       for (unsigned int fault = 0;
-           fault < cohesive_projection.diagnostics.size(); ++fault)
+           fault < candidates.cohesive_projection_diagnostics.size(); ++fault)
         this->get_pcout()
           << "   Cohesive traction profile variation for fault " << fault
           << ": weighted RMS="
-          << cohesive_projection.diagnostics[fault].weighted_rms_residual
+          << candidates.cohesive_projection_diagnostics[fault].weighted_rms_residual
           << " Pa, maximum="
-          << cohesive_projection.diagnostics[fault].maximum_absolute_residual
+          << candidates.cohesive_projection_diagnostics[fault].maximum_absolute_residual
           << " Pa" << std::endl;
     }
 
@@ -1057,9 +1062,9 @@ namespace aspect
                                .get_associated_particle_manager().get_particle_handler();
       using ParticleCandidate = typename HistoryCandidates::ParticleCandidate;
       const auto &particle_candidates = candidates.particle_candidates;
-      const auto &cohesive_projection = candidates.cohesive_projection;
+      const auto &cohesive_values = candidates.cohesive_nodal_values;
       const auto &state_candidates = candidates.state_candidates;
-      commit_cohesive_state(cohesive_projection.nodal_values);
+      commit_cohesive_state(cohesive_values);
 
       if (fault_friction.has_state_variable())
         {
@@ -1231,6 +1236,20 @@ namespace aspect
                                           cohesive_position,
                                           normalization_position))
         return;
+      if (mature_frictional_fault || unloaded_cohesive_initialization)
+        {
+          // Preserve association/support validation, without constructing or
+          // solving a projection whose right-hand side is identically zero.
+          fault_manager.get_locally_owned_particle_fault_associations();
+          std::vector<std::vector<double>> zero_traction(faults.size());
+          for (unsigned int f=0;f<faults.size();++f)
+            zero_traction[f].assign(faults[f].n_vertices(),0.);
+          initial_cohesive_projection_diagnostics.clear();
+          validate_cohesive_state_commit(zero_traction);
+          commit_cohesive_state(zero_traction);
+          this->get_pcout()<<"   Initial cohesive traction set directly to zero; normalization and associations prepared."<<std::endl;
+          return;
+        }
       const auto projection = fault_manager.project_particle_scalar(
         evaluate_initial_cohesive_particle_values());
       initial_cohesive_projection_diagnostics = projection.diagnostics;
@@ -1255,13 +1274,8 @@ namespace aspect
     std::map<types::particle_index, double>
     PhaseFieldFault<dim>::evaluate_initial_cohesive_particle_values()
     {
-      if (mature_frictional_fault || unloaded_cohesive_initialization)
-        {
-          std::map<types::particle_index,double> zero;
-          for (const auto &p : this->get_reconstructed_fault_manager().get_locally_owned_particle_fault_associations())
-            if (p.active) zero.emplace(p.particle_id,0.0);
-          return zero;
-        }
+      AssertThrow(!mature_frictional_fault && !unloaded_cohesive_initialization,
+                  ExcMessage("Particle cohesive initialization is only needed for a nonzero seed."));
       const PhaseFieldHandler<dim> &phase_field_handler =
         this->get_phase_field_handler();
       const Particle::Manager<dim> &particle_manager =

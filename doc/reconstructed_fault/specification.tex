@@ -2063,6 +2063,25 @@ implementation data is defined in \texttt{fe\_strain\_internal.h}, without a new
 material plugin or state owner. This preserves the existing horizontal,
 unit-tangential-domain restrictions; it does not extend them to BP3.
 
+Value-only FE normalization requests use the same analytic integrals and
+consistent projection, with no bulk integration, derivative assembly or energy
+reduction. Geometry/projection data is fixed; values are recomputed at the
+supplied phase. Particle associations retain their collective coverage/support
+checks; projection factors are prepared lazily from that association generation,
+including the existing finite-matrix and singularity checks. Explicitly zero
+cohesive initialization uses native validation/publication after normalization
+and association preparation, without a zero particle-to-surface projection.
+The shared FE recurrence constructs scratch state from the immutable accepted
+anchor; it does not replace the independent surface $q I_h$ versus Maxwell $Z$
+publication check.
+
+For the later BP3 comparison, retain a separate constitutive distinction:
+FE stress reconstruction uses $D_3$ of the raw symmetric gradient, while the
+legacy particle history recurrence consumes the full symmetric gradient.
+Cleanup does not remove its trace or silently unify these paths. This
+distinction is separate from history representation, particle-volume versus
+bulk-conjugate integration, generic transfer, and FE normalization/coupling.
+
 The restricted consistent-endpoint reduced-Newton solver with FGMRES remains
 the P2 reference; the endpoint option itself is default off. The bounded native
 operator, growth/saddle, MPI and prepublication failure/retry checks do not

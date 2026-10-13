@@ -96,10 +96,10 @@ namespace aspect
 
   template <int dim>
   bool
-  ReconstructedFaultManager<dim>::particle_projection_cache_is_valid() const
+  ReconstructedFaultManager<dim>::particle_association_cache_is_valid() const
   {
     TimerOutput::Scope timer(*performance_timer, "Fault: Cache validation");
-    if (!particle_projection_cache_valid
+    if (!particle_association_cache_valid
         || cached_projection_metadata_version != projection_metadata_version
         || cached_fault_geometry_versions.size() != reconstructed_faults.size())
       return false;
@@ -117,7 +117,7 @@ namespace aspect
     const auto &particle_domain_handler = particle_manager.get_particle_domain_handler();
     if (cached_domain_geometry_version != particle_domain_handler.geometry_version())
       return false;
-    if (particle_handler.n_locally_owned_particles() != particle_projection_cache.size())
+    if (particle_handler.n_locally_owned_particles() != particle_association_cache.size())
       return false;
 
     unsigned int particle_index = 0;
@@ -125,19 +125,19 @@ namespace aspect
       {
         const double volume = particle_domain_handler
                               .get_particle_domain(particle.get_local_index()).volume();
-        const ParticleFaultAssociation &entry = particle_projection_cache[particle_index++];
+        const ParticleFaultAssociation &entry = particle_association_cache[particle_index++];
         if (entry.particle_id != particle.get_id()
             || entry.position != particle.get_location()
             || entry.particle_domain_volume != volume)
           return false;
       }
-    return particle_index == particle_projection_cache.size();
+    return particle_index == particle_association_cache.size();
   }
 
 
   template <int dim>
   void
-  ReconstructedFaultManager<dim>::rebuild_particle_projection_cache()
+  ReconstructedFaultManager<dim>::rebuild_particle_association_cache()
   {
     TimerOutput::Scope coarse_timer(this->get_computing_timer(), "Fault: Cache build");
     TimerOutput::Scope timer(*performance_timer, "Fault: Cache build total");
@@ -155,25 +155,21 @@ namespace aspect
     validate_normal_profile_projection_geometry(reconstructed_faults,
                                                 projection_half_widths);
 
-    // Initialize the local fault-sized Q1 systems and coverage diagnostics.
-    projection_systems.clear();
-    projection_systems.resize(reconstructed_faults.size());
+    // Association geometry/support and projection factors have separate lifetimes.
+    particle_association_cache_valid=false;
+    projection_systems.clear();projection_systems_generation=0;
     particle_projection_diagnostics.clear();
     particle_projection_diagnostics.resize(reconstructed_faults.size());
     for (unsigned int fault = 0; fault < reconstructed_faults.size(); ++fault)
       {
-        projection_systems[fault].diagonal.assign(
-          reconstructed_faults[fault].n_vertices(), 0.0);
-        projection_systems[fault].off_diagonal.assign(
-          reconstructed_faults[fault].n_cells(), 0.0);
         particle_projection_diagnostics[fault].weighted_support.assign(
           reconstructed_faults[fault].n_vertices(), 0.0);
       }
 
-    // Associate each locally owned particle once and assemble the local mass
-    // matrices with particle-domain volume as the sampling measure.
-    particle_projection_cache.clear();
-    particle_projection_cache.reserve(particle_handler.n_locally_owned_particles());
+    // Associate each locally owned particle once; retain domain quadrature
+    // and its support measure for later projection requests.
+    particle_association_cache.clear();
+    particle_association_cache.reserve(particle_handler.n_locally_owned_particles());
     std::vector<unsigned int> local_contributing_particles(reconstructed_faults.size(), 0);
     std::string local_geometry_error;
     try
@@ -225,16 +221,12 @@ namespace aspect
                 partition_timer.stop();
                 integration_points += entry.quadrature.size();
                 double integrated_volume = 0.0;
-                ProjectionSystem &system = projection_systems[entry.fault_index];
                 auto &support =
                   particle_projection_diagnostics[entry.fault_index].weighted_support;
                 for (const auto &q : entry.quadrature)
                   {
                     const double shape[2] = {1.0-q.xi, q.xi};
                     const unsigned int first_vertex = q.segment_index;
-                    system.diagonal[first_vertex] += q.weight * shape[0] * shape[0];
-                    system.diagonal[first_vertex+1] += q.weight * shape[1] * shape[1];
-                    system.off_diagonal[first_vertex] += q.weight * shape[0] * shape[1];
                     support[first_vertex] += q.weight * shape[0];
                     support[first_vertex+1] += q.weight * shape[1];
                     integrated_volume += q.weight;
@@ -243,7 +235,7 @@ namespace aspect
                             ExcMessage("Surface domain quadrature does not cover the full parent volume."));
                 ++local_contributing_particles[entry.fault_index];
               }
-            particle_projection_cache.push_back(std::move(entry));
+            particle_association_cache.push_back(std::move(entry));
           }
       }
     catch (const std::exception &exception)
@@ -260,21 +252,14 @@ namespace aspect
     AssertThrow(error_rank==n_ranks,ExcMessage(geometry_error));
 
     // The replicated fault ordering gives every rank the same packed layout,
-    // so one collective reduction assembles all matrices and diagnostics.
+    // so one collective reduction assembles the support and coverage diagnostics.
     unsigned int packed_size = 0;
     for (const ReconstructedFault<dim> &fault : reconstructed_faults)
-      packed_size += 3 * fault.n_vertices();
+      packed_size += fault.n_vertices()+1;
     std::vector<double> local_values(packed_size, 0.0);
     unsigned int position = 0;
     for (unsigned int fault = 0; fault < reconstructed_faults.size(); ++fault)
       {
-        const ProjectionSystem &system = projection_systems[fault];
-        std::copy(system.diagonal.begin(), system.diagonal.end(),
-                  local_values.begin() + position);
-        position += system.diagonal.size();
-        std::copy(system.off_diagonal.begin(), system.off_diagonal.end(),
-                  local_values.begin() + position);
-        position += system.off_diagonal.size();
         const auto &support = particle_projection_diagnostics[fault].weighted_support;
         std::copy(support.begin(), support.end(), local_values.begin() + position);
         position += support.size();
@@ -282,18 +267,10 @@ namespace aspect
       }
     std::vector<double> global_values(packed_size);
     Utilities::MPI::sum(local_values, this->get_mpi_communicator(), global_values);
-    // Validate global support and retain one factorization per fault for all
-    // subsequent projected quantities.
+    // Validate global association support even when no quantity is projected.
     position = 0;
     for (unsigned int fault = 0; fault < reconstructed_faults.size(); ++fault)
       {
-        ProjectionSystem &system = projection_systems[fault];
-        std::copy_n(global_values.begin() + position, system.diagonal.size(),
-                    system.diagonal.begin());
-        position += system.diagonal.size();
-        std::copy_n(global_values.begin() + position, system.off_diagonal.size(),
-                    system.off_diagonal.begin());
-        position += system.off_diagonal.size();
         auto &diagnostic = particle_projection_diagnostics[fault];
         std::copy_n(global_values.begin() + position, diagnostic.weighted_support.size(),
                     diagnostic.weighted_support.begin());
@@ -304,7 +281,7 @@ namespace aspect
         const double support_scale = *std::max_element(diagnostic.weighted_support.begin(),
                                                        diagnostic.weighted_support.end());
         const double support_tolerance = std::numeric_limits<double>::epsilon()
-                                         * std::max(1.0, static_cast<double>(system.diagonal.size()))
+                                         * std::max(1.0, static_cast<double>(reconstructed_faults[fault].n_vertices()))
                                          * support_scale;
         for (unsigned int vertex = 0; vertex < diagnostic.weighted_support.size(); ++vertex)
           AssertThrow(std::isfinite(diagnostic.weighted_support[vertex])
@@ -313,9 +290,6 @@ namespace aspect
                                  + Utilities::int_to_string(vertex)
                                  + " has insufficient particle projection support."));
 
-        const auto factors = factor_tridiagonal(system.diagonal, system.off_diagonal);
-        system.factor_diagonal = factors.first;
-        system.factor_lower = factors.second;
       }
 
     // Record exactly which geometry and projection metadata this cache uses.
@@ -324,7 +298,8 @@ namespace aspect
       cached_fault_geometry_versions[fault] = reconstructed_faults[fault].geometry_version();
     cached_projection_metadata_version = projection_metadata_version;
     cached_domain_geometry_version = particle_domain_handler.geometry_version();
-    particle_projection_cache_valid = true;
+    ++particle_association_generation;
+    particle_association_cache_valid = true;
     if (std::getenv("ASPECT_FAULT_PERFORMANCE") != nullptr)
       {
         const auto mpi = this->get_mpi_communicator();
@@ -340,6 +315,66 @@ namespace aspect
                          << ", segment tests=" << tests << ", candidates=" << candidates
                          << std::endl;
       }
+  }
+
+
+  template <int dim>
+  void ReconstructedFaultManager<dim>::prepare_particle_projection_systems()
+  {
+    AssertThrow(particle_association_cache_valid && particle_association_generation!=0,
+                ExcMessage("Projection factors require prepared particle associations."));
+    if(projection_systems_generation==particle_association_generation)return;
+    TimerOutput::Scope timer(this->get_computing_timer(),"Fault: Projection preparation");
+    std::vector<ProjectionSystem> candidate(reconstructed_faults.size());
+    unsigned int packed_size=0;
+    for(unsigned int f=0;f<reconstructed_faults.size();++f)
+      {
+        candidate[f].diagonal.assign(reconstructed_faults[f].n_vertices(),0.);
+        candidate[f].off_diagonal.assign(reconstructed_faults[f].n_cells(),0.);
+        packed_size+=candidate[f].diagonal.size()+candidate[f].off_diagonal.size();
+      }
+    for(const auto &entry:particle_association_cache)
+      if(entry.active)
+        for(const auto &q:entry.quadrature)
+          {
+            auto &system=candidate[entry.fault_index];
+            const double shape[2]={1.-q.xi,q.xi};
+            system.diagonal[q.segment_index]+=q.weight*shape[0]*shape[0];
+            system.diagonal[q.segment_index+1]+=q.weight*shape[1]*shape[1];
+            system.off_diagonal[q.segment_index]+=q.weight*shape[0]*shape[1];
+          }
+    std::vector<double> local(packed_size,0.),global(packed_size,0.);
+    unsigned int position=0;
+    for(const auto &system:candidate)
+      {
+        std::copy(system.diagonal.begin(),system.diagonal.end(),local.begin()+position);
+        position+=system.diagonal.size();
+        std::copy(system.off_diagonal.begin(),system.off_diagonal.end(),local.begin()+position);
+        position+=system.off_diagonal.size();
+      }
+    Utilities::MPI::sum(local,this->get_mpi_communicator(),global);
+    position=0;
+    std::string local_error;
+    try
+      {
+        for(auto &system:candidate)
+          {
+            std::copy_n(global.begin()+position,system.diagonal.size(),system.diagonal.begin());
+            position+=system.diagonal.size();
+            std::copy_n(global.begin()+position,system.off_diagonal.size(),system.off_diagonal.begin());
+            position+=system.off_diagonal.size();
+            const auto factors=factor_tridiagonal(system.diagonal,system.off_diagonal);
+            system.factor_diagonal=factors.first;system.factor_lower=factors.second;
+          }
+      }
+    catch(const std::exception &error){local_error=error.what();}
+    const unsigned int rank=Utilities::MPI::this_mpi_process(this->get_mpi_communicator());
+    const unsigned int n_ranks=Utilities::MPI::n_mpi_processes(this->get_mpi_communicator());
+    const unsigned int error_rank=Utilities::MPI::min(local_error.empty()?n_ranks:rank,this->get_mpi_communicator());
+    const std::string error=error_rank<n_ranks ? Utilities::MPI::broadcast(this->get_mpi_communicator(),local_error,error_rank):std::string();
+    AssertThrow(error_rank==n_ranks,ExcMessage(error));
+    projection_systems.swap(candidate);
+    projection_systems_generation=particle_association_generation;
   }
 
 
@@ -388,9 +423,10 @@ namespace aspect
   void
   ReconstructedFaultManager<dim>::invalidate_particle_projection_cache()
   {
-    particle_projection_cache_valid = false;
-    particle_projection_cache.clear();
+    particle_association_cache_valid = false;
+    particle_association_cache.clear();
     projection_systems.clear();
+    projection_systems_generation=0;
     particle_projection_diagnostics.clear();
     cached_fault_geometry_versions.clear();
   }
@@ -462,8 +498,8 @@ namespace aspect
           }
       }
 
-    if (!particle_projection_cache_is_valid())
-      rebuild_particle_projection_cache();
+    get_locally_owned_particle_fault_associations();
+    prepare_particle_projection_systems();
 
     const std::vector<unsigned int> vertex_offsets = fault_vertex_offsets();
     const unsigned int n_fault_vertices = vertex_offsets.back();
@@ -473,7 +509,7 @@ namespace aspect
     unsigned int cache_index = 0;
     for (const auto &particle : particle_handler)
       {
-        const ParticleFaultAssociation &entry = particle_projection_cache[cache_index++];
+        const ParticleFaultAssociation &entry = particle_association_cache[cache_index++];
         if (!entry.active)
           continue;
         const ArrayView<const double> particle_properties = particle.get_properties();
@@ -515,12 +551,11 @@ namespace aspect
     AssertThrow(!reconstructed_faults.empty(),
                 ExcMessage("Fault-property interpolation requires reconstructed fault geometry."));
 
-    if (!particle_projection_cache_is_valid())
-      rebuild_particle_projection_cache();
+    get_locally_owned_particle_fault_associations();
 
     const PropertyInformation &property = property_information[property_index];
     std::map<types::particle_index, std::vector<double>> values;
-    for (const ParticleFaultAssociation &entry : particle_projection_cache)
+    for (const ParticleFaultAssociation &entry : particle_association_cache)
       if (entry.active)
         {
           const ReconstructedFault<dim> &fault = reconstructed_faults[entry.fault_index];
@@ -559,8 +594,8 @@ namespace aspect
     AssertThrow(!reconstructed_faults.empty(),
                 ExcMessage("Particle projection requires reconstructed fault geometry."));
 
-    if (!particle_projection_cache_is_valid())
-      rebuild_particle_projection_cache();
+    get_locally_owned_particle_fault_associations();
+    prepare_particle_projection_systems();
 
     const std::vector<unsigned int> vertex_offsets = fault_vertex_offsets();
     const unsigned int n_fault_vertices = vertex_offsets.back();
@@ -573,7 +608,7 @@ namespace aspect
     unsigned int cache_index = 0;
     for (const auto &particle : particle_handler)
       {
-        const ParticleFaultAssociation &entry = particle_projection_cache[cache_index++];
+        const ParticleFaultAssociation &entry = particle_association_cache[cache_index++];
         if (!entry.active)
           continue;
 
@@ -624,7 +659,7 @@ namespace aspect
     cache_index = 0;
     for (const auto &particle : particle_handler)
       {
-        const ParticleFaultAssociation &entry = particle_projection_cache[cache_index++];
+        const ParticleFaultAssociation &entry = particle_association_cache[cache_index++];
         if (!entry.active)
           continue;
         const double value = locally_owned_values.find(particle.get_id())->second;
@@ -678,9 +713,9 @@ namespace aspect
   const std::vector<typename ReconstructedFaultManager<dim>::ParticleFaultAssociation> &
   ReconstructedFaultManager<dim>::get_locally_owned_particle_fault_associations()
   {
-    if (!particle_projection_cache_is_valid())
-      rebuild_particle_projection_cache();
-    return particle_projection_cache;
+    if (!particle_association_cache_is_valid())
+      rebuild_particle_association_cache();
+    return particle_association_cache;
   }
 
 
@@ -701,8 +736,9 @@ namespace aspect
 namespace aspect
 {
 #define INSTANTIATE(dim) \
-  template bool ReconstructedFaultManager<dim>::particle_projection_cache_is_valid() const; \
-  template void ReconstructedFaultManager<dim>::rebuild_particle_projection_cache(); \
+  template bool ReconstructedFaultManager<dim>::particle_association_cache_is_valid() const; \
+  template void ReconstructedFaultManager<dim>::rebuild_particle_association_cache(); \
+  template void ReconstructedFaultManager<dim>::prepare_particle_projection_systems(); \
   template std::vector<unsigned int> ReconstructedFaultManager<dim>::fault_vertex_offsets() const; \
   template std::vector<ReconstructedFaultManager<dim>::FaultNodalValues> ReconstructedFaultManager<dim>::reduce_and_solve_projection_rhs(const std::vector<double> &, const unsigned int) const; \
   template void ReconstructedFaultManager<dim>::invalidate_particle_projection_cache(); \

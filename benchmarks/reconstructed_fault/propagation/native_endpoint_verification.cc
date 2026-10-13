@@ -397,6 +397,14 @@ template<int dim> class NativeEndpoint : public Interface<dim>, public Simulator
   quadratic<<std::setprecision(17)<<"case,eps,energy_error,gradient_error\n";
   std::ofstream tangent(root_file(this->get_output_directory()+"operator-linear-tangent.csv"));
   tangent<<std::setprecision(17)<<"case,direction,eps,maximum_error,action_scale\n";
+  std::ofstream normalization_only(root_file(this->get_output_directory()+"normalization-only.csv"));
+  normalization_only<<std::setprecision(17)<<"case,relative_difference,phase_energy_calls\n";
+  const auto energy_calls=[this]()
+  {
+    const auto counts=this->get_computing_timer().get_summary_data(TimerOutput::n_calls);
+    const auto entry=counts.find("Fault: FE phase energy");
+    return entry==counts.end() ? 0. : entry->second;
+  };
   try {
    while(names>>name) {
     std::ifstream in(input+"/"+name);unsigned int n;double time,dt,Za,Zb,V,Iexpected,eb,ec,fracture,potential,DIexpected;
@@ -411,7 +419,17 @@ template<int dim> class NativeEndpoint : public Interface<dim>, public Simulator
     for(unsigned int i=0;i<vector.size();++i)vector[i]=direction[std::lround(coordinates[i][1]*n)];
     const auto e=model().evaluate_fe_endpoint_energy(state,endpoint,&vector);
     const auto ea=model().evaluate_fe_endpoint_energy(incoming,old);
-    set_phase(state);const auto actual_I=F::compute_normalization_integrals(model()).at(0);
+    set_phase(state);
+    const double energy_calls_before=energy_calls();
+    const auto only_I=F::fe_normalization_only(model(),state);
+    const auto actual_I=F::compute_normalization_integrals(model()).at(0);
+    const double energy_call_difference=energy_calls()-energy_calls_before;
+    double only_error=0.;
+    for(unsigned int i=0;i<only_I.size();++i)
+      only_error=std::max(only_error,std::abs(only_I[i]/e.normalization[i]-1.));
+    AssertThrow(only_error<1e-12 && energy_call_difference==0.,
+                ExcMessage("Normalization-only values differ or entered phase energy."));
+    normalization_only<<name<<','<<only_error<<','<<energy_call_difference<<'\n';
     auto synthetic=history;
     for(unsigned int i=0;i<65;++i){synthetic.Ivalue[i]=ea.normalization[i];synthetic.qvalue[i]=Za/ea.normalization[i];}
     set_surface(synthetic);
