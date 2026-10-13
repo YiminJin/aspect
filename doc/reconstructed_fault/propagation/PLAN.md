@@ -1,3 +1,19 @@
+# Completed bounded P2 cleanup
+
+Execute only [P2_cleanup.md](P2_cleanup.md): requested FE layout, direct
+normalization, lazy particle-projection preparation, explicit-zero initialization,
+shared FE recurrence and substantial diagnostics extraction, followed by bounded
+existing verification and a compact review. Reference `41272d263`, physics and
+final acceptance unchanged. Stop afterward; BP3 implementation, full evolution,
+new experiments and P3 remain subsequent selections.
+
+Recovery verification is complete: the missing retained-entry template export
+was corrected; accepted growth and matching-rank operators are byte-identical.
+No scientific roadmap change follows. See [the cleanup review](P2_cleanup_report.md)
+and STATUS.md for actual passes, baseline fixture failures and the proposed
+bounded stationary BP3 geometry port.
+
+---
 # P2 checkpoint disposition (2026-10-13)
 
 Close the bounded P2 implementation/diagnostic task with the existing evidence;

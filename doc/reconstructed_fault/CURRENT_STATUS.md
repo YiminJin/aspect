@@ -1,3 +1,19 @@
+# Completed bounded P2 implementation cleanup
+
+The [cleanup review](propagation/P2_cleanup_report.md) completes the selected
+[P2_cleanup.md](propagation/P2_cleanup.md) scope from `41272d263`. Recovery
+preserved the committed FE split, normalization-only path, lazy projection,
+zero initialization, shared recurrence and diagnostics extraction; one missing
+retained-entry export was corrected. Build/independent compilation, 21,112
+assertions, history/legacy restart/cache/MPI checks and retained P2 growth pass.
+Accepted growth fields and matching-rank operator CSVs are byte-identical to
+retained evidence. Three older initialization fixtures fail before reconstruction;
+the pinned serial checkpoint reproduces that failure. Physics, defaults,
+checkpoint layouts and tolerances remain unchanged. No cleanup work remains.
+Stop for review; the bounded stationary BP3 geometry port is proposed, not begun.
+Historical P2 qualification and failures remain recorded below.
+
+---
 # P2 checkpoint / closeout (2026-10-13)
 
 [P2_CLOSEOUT.md](propagation/P2_CLOSEOUT.md) is the current concise overview.

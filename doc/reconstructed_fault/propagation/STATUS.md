@@ -1,3 +1,32 @@
+# Completed bounded P2 cleanup — recovery note, 2026-10-13
+
+Recovered `fault-propagation` at `f9aa96199` from reviewed `41272d263`.
+Preserved the five completed movement/cleanup/style/include commits, three
+incoming status-document edits, all 2301 untracked files and pinned binaries.
+The remaining source correction is one explicit 2D/3D instantiation for the
+moved retained-entry method; its failed first launch remains preserved.
+
+| Actual verification | Result |
+|---|---|
+| Final build / independent compilation / observer exports | Pass; all 154 required symbols available |
+| Compatibility | 21,112 assertions /55 cases pass |
+| Serial/two-rank normalization, derivatives, adjoints, actions | Exact normalization-only comparisons, zero phase-energy calls; matching-rank CSVs byte-identical |
+| History, legacy restart, temperature, lazy cache and one-owner failure | Six CTests pass; mature-zero test also passes; two-rank history CSVs byte-identical to checkpoint |
+| Retained P2 growth | 761.55 s; all accepted phase/surface/stress fields and metrics byte-identical; KKT 2.88e-13 ≤2.68e-11 J/m, zero healing, publication once |
+| Older I_h fixtures | Three fail before reconstruction at the unchanged initialization budget; pinned serial reference reproduces the same residual/error |
+
+No selected cleanup work remains. Physics, defaults, serialized properties and
+acceptance tolerances are preserved. FE checkpoint conversion, transport, full
+native evolution/stability and BP3 remain unqualified. Next proposed task: a
+bounded stationary BP3 FE-history/normalization geometry port with a frozen
+profile comparison against the particle backend. Await selection; no BP3 tests
+or implementation started. [Compact review, helper rationale and evidence](P2_cleanup_report.md).
+Recovery diff, hashes, actual commands/results and field comparisons:
+`benchmarks/reconstructed_fault/propagation/p2_cleanup_evidence/`.
+The source correction and review documents are left for review; no new commit
+or push was made during recovery. Historical status follows.
+
+---
 # P2 checkpoint / closeout (2026-10-13)
 
 [Current closeout](P2_CLOSEOUT.md) distinguishes native operators, retained
