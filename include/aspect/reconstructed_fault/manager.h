@@ -75,16 +75,28 @@ namespace aspect
       void reconstruct_initial_faults();
 
       /** Explicit opt-in; legacy boundary selectors retain their existing behavior. */
-      bool uses_automatic_boundary_completion() const { return automatic_boundary_completion; }
+      bool uses_automatic_boundary_completion() const
+      {
+        return automatic_boundary_completion;
+      }
       /** Rebuild replicated geometry records only after geometry/mesh invalidation. */
       void prepare_boundary_contacts();
       const std::vector<FaultBoundaryContact<dim>> &get_boundary_contacts() const
-      { return boundary_contacts; }
+      {
+        return boundary_contacts;
+      }
       const std::vector<FaultBoundaryFace<dim>> &get_boundary_faces() const
-      { return boundary_faces; }
+      {
+        return boundary_faces;
+      }
       const std::vector<PrescribedInitialFault<dim>> &get_prescribed_faults() const
-      { return prescribed_faults; }
-      unsigned int get_boundary_contact_generation() const { return boundary_contact_generation; }
+      {
+        return prescribed_faults;
+      }
+      unsigned int get_boundary_contact_generation() const
+      {
+        return boundary_contact_generation;
+      }
       /** Admit paired source associations using a verified full Q1 support enclosure. */
       void enable_automatic_source_continuation(const std::vector<double> &transverse_extents,
                                                 const std::vector<double> &branch_extents);

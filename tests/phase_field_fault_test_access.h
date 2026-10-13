@@ -56,7 +56,9 @@ namespace aspect
           }
 
           static auto normalization_profiles(const PhaseFieldFault<dim> &model)
-          { return model.build_owned_normalization_profiles(); }
+          {
+            return model.build_owned_normalization_profiles();
+          }
 
           /** Reproject independent samples with either representation, restoring state. */
           static std::vector<double> probe_normalization_projection(
@@ -118,7 +120,7 @@ namespace aspect
             const std::string &context = "test profile")
           {
             return PhaseFieldFault<dim>::normalization_effective_phase_field(
-              raw_phase_field, context);
+                     raw_phase_field, context);
           }
 
           static void
@@ -142,7 +144,7 @@ namespace aspect
                                   const std::string &context = "test profile")
           {
             return PhaseFieldFault<dim>::normalization_integrand(
-              phase_field, degradation, context);
+                     phase_field, degradation, context);
           }
 
           static std::vector<double>
@@ -173,20 +175,20 @@ namespace aspect
                              const double zeta,
                              const Point<dim> &,
                              const typename PhaseFieldFault<dim>::NormalizationPointSample &sample)
-              {
-                const std::string context =
-                  "test profile " + Utilities::int_to_string(profile.id)
-                  + ", side " + Utilities::int_to_string(side)
-                  + ", zeta=" + Utilities::to_string(zeta);
-                const double phi = PhaseFieldFault<dim>::normalization_effective_phase_field(
-                  sample.phase_field, context);
-                return PhaseFieldFault<dim>::normalization_integrand(
-                  phi, degradation(phi), context);
-              };
+            {
+              const std::string context =
+                "test profile " + Utilities::int_to_string(profile.id)
+                + ", side " + Utilities::int_to_string(side)
+                + ", zeta=" + Utilities::to_string(zeta);
+              const double phi = PhaseFieldFault<dim>::normalization_effective_phase_field(
+                                   sample.phase_field, context);
+              return PhaseFieldFault<dim>::normalization_integrand(
+                       phi, degradation(phi), context);
+            };
 
             return PhaseFieldFault<dim>::integrate_normalization_profiles(
-              profiles, length_scale, quadrature_tolerance, tail_tolerance,
-              communicator, evaluate_points, integrand);
+                     profiles, length_scale, quadrature_tolerance, tail_tolerance,
+                     communicator, evaluate_points, integrand);
           }
 
           static CohesiveResponse
@@ -201,9 +203,9 @@ namespace aspect
                                     const bool mature = false)
           {
             return PhaseFieldFault<dim>::compute_cohesive_response(
-              {beta, eta_ve}, current_normalization_integral,
-              previous_normalization_integral, previous_cohesive_traction,
-              slip_rate, current_h, previous_h, mature);
+            {beta, eta_ve}, current_normalization_integral,
+            previous_normalization_integral, previous_cohesive_traction,
+            slip_rate, current_h, previous_h, mature);
           }
 
           static double
@@ -217,22 +219,29 @@ namespace aspect
             const double previous_cohesive_traction)
           {
             return PhaseFieldFault<dim>::compute_crack_driving_force_candidate(
-              time_step, {beta, eta_ve}, current_degradation, previous_h,
-              current_cohesive_traction, previous_cohesive_traction);
+                     time_step, {beta, eta_ve}, current_degradation, previous_h,
+                     current_cohesive_traction, previous_cohesive_traction);
           }
 
           /** Native coefficients for isolated prescribed-traction path tests. */
           static double recoverable_phase_driving_force(const double G, const double g, const double q)
-          { return PhaseFieldFault<dim>::compute_recoverable_phase_driving_force(G,g,q); }
+          {
+            return PhaseFieldFault<dim>::compute_recoverable_phase_driving_force(G,g,q);
+          }
 
           static bool uses_surface_history(const PhaseFieldFault<dim> &m)
-          { return m.surface_cohesive_history; }
+          {
+            return m.surface_cohesive_history;
+          }
           static std::function<void()> diagnostic_fe_reference(PhaseFieldFault<dim> &m,
-             const LinearAlgebra::BlockVector &reference,const std::vector<double> &Z,const std::vector<double> &I)
+                                                               const LinearAlgebra::BlockVector &reference,const std::vector<double> &Z,const std::vector<double> &I)
           {
             const auto saved=m.fe_strain_state;
             m.set_fe_diagnostic_reference(reference,Z,I);
-            return [&m,saved](){m.fe_strain_state=saved;};
+            return [&m,saved]()
+            {
+              m.fe_strain_state=saved;
+            };
           }
 
           /** Stage-only native FE representation probe; publishes no history. */
@@ -240,7 +249,7 @@ namespace aspect
                                         const LinearAlgebra::BlockVector &bulk)
           {
             std::vector<std::vector<double>> rates(1,
-              model.get_reconstructed_fault_manager().get_slip_rate(0));
+                                                    model.get_reconstructed_fault_manager().get_slip_rate(0));
             const auto q=model.compute_surface_cohesive_candidates(model.get_timestep(),rates);
             return model.prepare_fe_strain_commit(bulk,q);
           }
@@ -250,33 +259,50 @@ namespace aspect
                                          const Update &update,const CellId &cell,
                                          const Point<dim> &point,
                                          double *evaluation_scale = nullptr)
-          { return model.candidate_fe_strain_stress(update,cell,point,evaluation_scale); }
+          {
+            return model.candidate_fe_strain_stress(update,cell,point,evaluation_scale);
+          }
           static bool evolves_history(const PhaseFieldFault<dim> &m)
-          { return m.evolve_phase_field; }
+          {
+            return m.evolve_phase_field;
+          }
           static double committed_q(const PhaseFieldFault<dim> &m,unsigned int f,unsigned int s,double xi)
-          { return m.evaluate_reconstructed_fault_localization(f,s,xi,0.,0.,"test").previous_cohesive_traction; }
+          {
+            return m.evaluate_reconstructed_fault_localization(f,s,xi,0.,0.,"test").previous_cohesive_traction;
+          }
           static auto surface_candidates(const PhaseFieldFault<dim> &m, double dt,
                                          const std::vector<std::vector<double>> &v)
-          { return m.compute_surface_cohesive_candidates(dt,v); }
+          {
+            return m.compute_surface_cohesive_candidates(dt,v);
+          }
           static void set_uniform_viscosity(PhaseFieldFault<dim> &m,double eta)
-          { std::fill(m.reference_viscosities.begin(),m.reference_viscosities.end(),eta);
-            m.maximum_viscosity=std::max(m.maximum_viscosity,eta); }
+          {
+            std::fill(m.reference_viscosities.begin(),m.reference_viscosities.end(),eta);
+            m.maximum_viscosity=std::max(m.maximum_viscosity,eta);
+          }
           static auto viscosity_state(const PhaseFieldFault<dim> &m)
-          { return std::make_pair(m.reference_viscosities,m.maximum_viscosity); }
+          {
+            return std::make_pair(m.reference_viscosities,m.maximum_viscosity);
+          }
           static void restore_viscosity(PhaseFieldFault<dim> &m,
                                         const std::pair<std::vector<double>,double> &v)
-          { m.reference_viscosities=v.first; m.maximum_viscosity=v.second; }
+          {
+            m.reference_viscosities=v.first;
+            m.maximum_viscosity=v.second;
+          }
 
           static bool uses_recoverable_history(const PhaseFieldFault<dim> &model)
-          { return model.recoverable_phase_history; }
+          {
+            return model.recoverable_phase_history;
+          }
 
           static double surface_shear_modulus(const PhaseFieldFault<dim> &model,
-                                             const unsigned int fault, const unsigned int segment,
-                                             const double xi)
+                                              const unsigned int fault, const unsigned int segment,
+                                              const double xi)
           {
             const auto state=surface_material_state_at_projection(model,fault,segment,xi);
             return MaterialUtilities::average_value(state.first,model.elastic_shear_moduli,
-                                                     model.viscosity_averaging);
+                                                    model.viscosity_averaging);
           }
 
           static std::pair<double,double>
@@ -284,7 +310,7 @@ namespace aspect
                                const double dt)
           {
             const auto c = PhaseFieldFault<dim>::compute_maxwell_coefficients(
-              viscosity, modulus, dt);
+                             viscosity, modulus, dt);
             return {c.beta, c.eta_ve};
           }
 
@@ -297,9 +323,9 @@ namespace aspect
           {
             const auto state = surface_material_state_at_projection(model, fault, segment, xi);
             const auto coefficients = model.compute_maxwell_coefficients(
-              model.compute_creep_viscosity(state.first, state.second),
-              MaterialUtilities::average_value(state.first, model.elastic_shear_moduli,
-                                               model.viscosity_averaging), dt);
+                                        model.compute_creep_viscosity(state.first, state.second),
+                                        MaterialUtilities::average_value(state.first, model.elastic_shear_moduli,
+                                                                         model.viscosity_averaging), dt);
             return {coefficients.beta, coefficients.eta_ve};
           }
 
@@ -329,7 +355,7 @@ namespace aspect
           }
 
           static const std::vector<typename ReconstructedFaultManager<dim>::
-                                   ParticleScalarProjectionDiagnostics> &
+          ParticleScalarProjectionDiagnostics> &
           initial_cohesive_projection_diagnostics(const PhaseFieldFault<dim> &model)
           {
             return model.initial_cohesive_projection_diagnostics;
@@ -362,7 +388,7 @@ namespace aspect
             for (unsigned int c = 0; c < compositions.size(); ++c)
               {
                 const auto &property = fault_manager.get_property_information()[
-                  model.fault_property_indices.chemical_compositions[c]];
+                                         model.fault_property_indices.chemical_compositions[c]];
                 compositions[c] = fault.get_properties(vertex)[property.position];
               }
             return MaterialUtilities::compute_composition_fractions(compositions);

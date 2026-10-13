@@ -26,7 +26,10 @@
 
 namespace aspect
 {
-  namespace internal { class FaultNormalFilter; }
+  namespace internal
+  {
+    class FaultNormalFilter;
+  }
   namespace MaterialModel
   {
     template <int dim>
@@ -41,7 +44,7 @@ namespace aspect
     std::vector<double> per_fault_weighted_rms;
     /** Weak terms from this evaluation, before any history publication. */
     std::vector<std::vector<double>> shear_traction, cohesive_traction,
-      friction_traction, damping_traction, normal_traction;
+        friction_traction, damping_traction, normal_traction;
     /** Actual constitutive sample extrema, not extrema of a projected field. */
     double minimum_normal_traction = std::numeric_limits<double>::infinity();
     double maximum_normal_traction = -std::numeric_limits<double>::infinity();
@@ -150,7 +153,7 @@ namespace aspect
        * All fault rows are captured regardless of the sample window.
        */
       void set_normal_traction_diagnostic(std::function<bool(const Point<dim> &)> window,
-                                         std::vector<std::pair<Point<dim>,Point<dim>>> lines = {});
+                                          std::vector<std::pair<Point<dim>,Point<dim>>> lines = {});
       const NormalTractionDiagnostic &get_normal_traction_diagnostic() const;
 
       /** Opt-in, read-only observer of a completed linearization, before any

@@ -110,10 +110,12 @@ namespace aspect
       for (const auto &m:this->get_parameters().mapped_particle_properties)
         if (m.second.first=="maxwell stress")
           fe_history[m.second.second]=VectorTools::point_values<1>(point_cache,this->get_dof_handler(),bulk_state,
-            VectorTools::EvaluationFlags::avg,this->introspection().component_indices.compositional_fields[m.first]);
-    auto &history_moments=diagnostic.history_moments;history_moments.resize(faults.size());
+                                                                   VectorTools::EvaluationFlags::avg,this->introspection().component_indices.compositional_fields[m.first]);
+    auto &history_moments=diagnostic.history_moments;
+    history_moments.resize(faults.size());
     if (history_audit && assemble_jacobian)
-      for (unsigned int f=0;f<faults.size();++f) history_moments[f].resize(faults[f].n_vertices(),{});
+      for (unsigned int f=0; f<faults.size(); ++f)
+        history_moments[f].resize(faults[f].n_vertices(), {});
     TimerOutput::Scope assembly_timer(*performance_timer, "Fault: Surface R/K integrate");
 
     const Particle::Manager<dim> &particle_manager =
@@ -160,12 +162,13 @@ namespace aspect
     // Opt-in pilot evidence from the actual pre-publication linearization.
     // Keep rank-local moments separate from the residual and its MPI reduction.
     const bool record_normal_stress = assemble_jacobian
-      && std::getenv("ASPECT_FAULT_NORMAL_STRESS_DIAGNOSTIC");
+                                      && std::getenv("ASPECT_FAULT_NORMAL_STRESS_DIAGNOSTIC");
     const bool record_samples = assemble_jacobian
-      && std::getenv("ASPECT_FAULT_STRESS_SAMPLE_DIAGNOSTIC");
+                                && std::getenv("ASPECT_FAULT_STRESS_SAMPLE_DIAGNOSTIC");
     // Keep only 20 low/high samples per support class per rank. All samples
     // still contribute to weak moments, including tensile ones on mixed rows.
-    diagnostic.write_normal=record_normal_stress;diagnostic.write_samples=record_samples;
+    diagnostic.write_normal=record_normal_stress;
+    diagnostic.write_samples=record_samples;
     auto &lowest_samples=diagnostic.lowest_samples;
     auto &highest_samples=diagnostic.highest_samples;
     auto &stress_audit_moments=diagnostic.stress_moments;
@@ -185,10 +188,14 @@ namespace aspect
         normal_stress_moments.resize(faults.size());
         for (unsigned int f=0; f<faults.size(); ++f)
           normal_stress_moments[f].resize(faults[f].n_vertices(),
-            {{0,0,0,0, std::numeric_limits<double>::infinity(),
+          {
+            {
+              0,0,0,0, std::numeric_limits<double>::infinity(),
               -std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity(),
               -std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity(),
-              -std::numeric_limits<double>::infinity()}});
+              -std::numeric_limits<double>::infinity()
+            }
+          });
       }
     for (unsigned int fault = 0; fault < faults.size(); ++fault)
       {
@@ -270,35 +277,40 @@ namespace aspect
             // Tip partitions evaluate exact endpoint basis functions. Reading
             // the absolute node avoids losing lower contact by cancellation.
             inputs.slip_rate = ReconstructedFaultUtilities::interpolate_slip_rate(
-              left_slip_rate, right_slip_rate, q.xi);
+                                 left_slip_rate, right_slip_rate, q.xi);
             const auto particle_response =
               phase_field_fault.evaluate_reconstructed_fault_point(inputs);
             const auto &response=particle_response;
             if (history_audit)
               {
                 auto fe_inputs=inputs;
-                for (unsigned int c=0;c<fe_history.size();++c)
+                for (unsigned int c=0; c<fe_history.size(); ++c)
                   fe_inputs.old_maxwell_stress[SymmetricTensor<2,dim>::unrolled_to_component_indices(c)]
                     =fe_history[c][point_index];
                 const auto fe_response=phase_field_fault.evaluate_reconstructed_fault_point(fe_inputs);
                 if (assemble_jacobian)
-                  for (unsigned int i=0;i<2;++i)
+                  for (unsigned int i=0; i<2; ++i)
                     {
                       const double Ni=i==0 ? 1-q.xi : q.xi;
                       auto &m=history_moments[association.fault_index][q.segment_index+i];
                       m[0]+=q.weight*Ni;
                       m[1]+=q.weight*Ni*inputs.dynamic_pressure;
-                      for (unsigned int mode=0;mode<2;++mode)
+                      for (unsigned int mode=0; mode<2; ++mode)
                         {
                           const auto &r=mode==0 ? particle_response : fe_response;
                           const unsigned int k=2+10*mode;
-                          const double values[]={r.shear_traction,r.normal_traction,r.cohesive_traction,
-                            r.friction_traction,r.damping_traction,r.residual_density};
-                          for (unsigned int j=0;j<6;++j) m[k+j]+=q.weight*Ni*values[j];
+                          const double values[]= {r.shear_traction,r.normal_traction,r.cohesive_traction,
+                                                  r.friction_traction,r.damping_traction,r.residual_density
+                                                 };
+                          for (unsigned int j=0; j<6; ++j)
+                            m[k+j]+=q.weight*Ni*values[j];
                           m[k+6]+=q.weight*Ni*Ni*r.minus_derivative_wrt_slip_rate;
                           m[k+7]+=q.weight*Ni*(1-Ni)*r.minus_derivative_wrt_slip_rate;
                           if (r.normal_traction<0.)
-                            {m[k+8]+=q.weight*Ni; m[k+9]+=q.weight*Ni*r.friction_traction;}
+                            {
+                              m[k+8]+=q.weight*Ni;
+                              m[k+9]+=q.weight*Ni*r.friction_traction;
+                            }
                         }
                     }
               }
@@ -323,7 +335,8 @@ namespace aspect
                 double free_shape=0.;
                 for (unsigned int i=0; i<2; ++i)
                   {
-                    if (!prescribed[f][vertex+i]) free_shape+=shape[i];
+                    if (!prescribed[f][vertex+i])
+                      free_shape+=shape[i];
                     auto &m=stress_audit_moments[f][vertex+i];
                     const double w=weight*shape[i];
                     m[0]+=w;
@@ -360,8 +373,10 @@ namespace aspect
                        <<response.friction_traction<<','<<inputs.phase_field<<','<<response.localization_factor;
                     low.emplace(sigma,row.str());
                     high.emplace(sigma,row.str());
-                    if (low.size()>20) low.erase(std::prev(low.end()));
-                    if (high.size()>20) high.erase(high.begin());
+                    if (low.size()>20)
+                      low.erase(std::prev(low.end()));
+                    if (high.size()>20)
+                      high.erase(high.begin());
                   }
               }
             ++domain_q_index;
@@ -373,8 +388,9 @@ namespace aspect
                             ExcMessage("Normal-stress diagnostic requires positive friction coefficient."));
                 const double sigma = response.normal_traction;
                 const double values[3] = {inputs.dynamic_pressure, sigma,
-                                         inputs.dynamic_pressure
-                                         -(sigma-response.background_normal_traction)};
+                                          inputs.dynamic_pressure
+                                          -(sigma-response.background_normal_traction)
+                                         };
                 for (unsigned int i=0; i<2; ++i)
                   if (weight*shape[i] > 0.0)
                     {
@@ -394,15 +410,15 @@ namespace aspect
             for (unsigned int i=0; i<2; ++i)
               {
                 local.residual.shear_traction[association.fault_index][vertex+i]
-                  += weight*shape[i]*response.shear_traction;
+                += weight*shape[i]*response.shear_traction;
                 local.residual.cohesive_traction[association.fault_index][vertex+i]
-                  += weight*shape[i]*response.cohesive_traction;
+                += weight*shape[i]*response.cohesive_traction;
                 local.residual.friction_traction[association.fault_index][vertex+i]
-                  += weight*shape[i]*response.friction_traction;
+                += weight*shape[i]*response.friction_traction;
                 local.residual.damping_traction[association.fault_index][vertex+i]
-                  += weight*shape[i]*response.damping_traction;
+                += weight*shape[i]*response.damping_traction;
                 local.residual.normal_traction[association.fault_index][vertex+i]
-                  += weight*shape[i]*response.normal_traction;
+                += weight*shape[i]*response.normal_traction;
               }
             local_squared_residual[association.fault_index]
             += weight*response.residual_density*response.residual_density;
@@ -459,15 +475,18 @@ namespace aspect
         std::copy(local.residual.values[fault].begin(),
                   local.residual.values[fault].end(), local_values.begin()+position);
         position += local.residual.values[fault].size();
-        for (const auto *term : {&local.residual.shear_traction,
-                                &local.residual.cohesive_traction,
-                                &local.residual.friction_traction,
-                                &local.residual.damping_traction,
-                                &local.residual.normal_traction})
-          {
-            std::copy((*term)[fault].begin(), (*term)[fault].end(), local_values.begin()+position);
-            position += (*term)[fault].size();
-          }
+        for (const auto *term :
+        {
+          &local.residual.shear_traction,
+          &local.residual.cohesive_traction,
+          &local.residual.friction_traction,
+          &local.residual.damping_traction,
+          &local.residual.normal_traction
+        })
+        {
+          std::copy((*term)[fault].begin(), (*term)[fault].end(), local_values.begin()+position);
+          position += (*term)[fault].size();
+        }
         std::copy(local.diagonal[fault].begin(), local.diagonal[fault].end(),
                   local_values.begin()+position);
         position += local.diagonal[fault].size();
@@ -495,11 +514,14 @@ namespace aspect
                     local.residual.values[fault].size(),
                     local.residual.values[fault].begin());
         position += local.residual.values[fault].size();
-        for (auto *term : {&local.residual.shear_traction,
-                          &local.residual.cohesive_traction,
-                          &local.residual.friction_traction,
-                          &local.residual.damping_traction,
-                          &local.residual.normal_traction})
+        for (auto *term :
+             {
+               &local.residual.shear_traction,
+               &local.residual.cohesive_traction,
+               &local.residual.friction_traction,
+               &local.residual.damping_traction,
+               &local.residual.normal_traction
+             })
           {
             std::copy_n(global_values.begin()+position, (*term)[fault].size(), (*term)[fault].begin());
             position += (*term)[fault].size();
@@ -533,9 +555,9 @@ namespace aspect
     local.residual.mass_diagonal = local.mass_diagonal;
     local.residual.mass_off_diagonal = local.mass_off_diagonal;
     local.residual.minimum_normal_traction = Utilities::MPI::min(
-      local.residual.minimum_normal_traction, this->get_mpi_communicator());
+                                               local.residual.minimum_normal_traction, this->get_mpi_communicator());
     local.residual.maximum_normal_traction = Utilities::MPI::max(
-      local.residual.maximum_normal_traction, this->get_mpi_communicator());
+                                               local.residual.maximum_normal_traction, this->get_mpi_communicator());
     write_particle_diagnostics(slip_rate,diagnostic);
     return local;
   }

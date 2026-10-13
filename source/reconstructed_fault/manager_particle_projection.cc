@@ -157,7 +157,8 @@ namespace aspect
 
     // Association geometry/support and projection factors have separate lifetimes.
     particle_association_cache_valid=false;
-    projection_systems.clear();projection_systems_generation=0;
+    projection_systems.clear();
+    projection_systems_generation=0;
     particle_projection_diagnostics.clear();
     particle_projection_diagnostics.resize(reconstructed_faults.size());
     for (unsigned int fault = 0; fault < reconstructed_faults.size(); ++fault)
@@ -208,13 +209,14 @@ namespace aspect
                     const auto append = [&](const std::vector<Point<dim>> &polygon)
                     {
                       const auto quadrature = ReconstructedFaultUtilities::domain_quadrature(
-                        polygon, reconstructed_faults[entry.fault_index], 3, &quadrature_statistics);
+                                                polygon, reconstructed_faults[entry.fault_index], 3, &quadrature_statistics);
                       entry.quadrature.insert(entry.quadrature.end(), quadrature.begin(), quadrature.end());
                     };
                     if (domain.periodic_fragments().empty())
                       append(domain.vertices());
                     else
-                      for (const auto &fragment : domain.periodic_fragments()) append(fragment);
+                      for (const auto &fragment : domain.periodic_fragments())
+                        append(fragment);
                   }
                 else
                   AssertThrow(false, ExcNotImplemented());
@@ -246,9 +248,9 @@ namespace aspect
     const unsigned int rank=Utilities::MPI::this_mpi_process(this->get_mpi_communicator());
     const unsigned int n_ranks=Utilities::MPI::n_mpi_processes(this->get_mpi_communicator());
     const unsigned int error_rank=Utilities::MPI::min(
-      local_geometry_error.empty() ? n_ranks : rank,this->get_mpi_communicator());
+                                    local_geometry_error.empty() ? n_ranks : rank,this->get_mpi_communicator());
     const std::string geometry_error=error_rank<n_ranks ? Utilities::MPI::broadcast(
-      this->get_mpi_communicator(),local_geometry_error,error_rank) : std::string();
+                                       this->get_mpi_communicator(),local_geometry_error,error_rank) : std::string();
     AssertThrow(error_rank==n_ranks,ExcMessage(geometry_error));
 
     // The replicated fault ordering gives every rank the same packed layout,
@@ -304,16 +306,18 @@ namespace aspect
       {
         const auto mpi = this->get_mpi_communicator();
         const auto sum = [mpi](const unsigned long long value)
-        { return Utilities::MPI::sum(value, mpi); };
+        {
+          return Utilities::MPI::sum(value, mpi);
+        };
         const auto points = sum(integration_points);
         const auto straight = sum(quadrature_statistics.straight_calls);
         const auto general = sum(quadrature_statistics.general_calls);
         const auto tests = sum(quadrature_statistics.segment_tests);
         const auto candidates = sum(quadrature_statistics.candidate_segments);
         this->get_pcout() << "Fault quadrature work: points=" << points
-                         << ", straight calls=" << straight << ", general calls=" << general
-                         << ", segment tests=" << tests << ", candidates=" << candidates
-                         << std::endl;
+                          << ", straight calls=" << straight << ", general calls=" << general
+                          << ", segment tests=" << tests << ", candidates=" << candidates
+                          << std::endl;
       }
   }
 
@@ -323,29 +327,30 @@ namespace aspect
   {
     AssertThrow(particle_association_cache_valid && particle_association_generation!=0,
                 ExcMessage("Projection factors require prepared particle associations."));
-    if(projection_systems_generation==particle_association_generation)return;
+    if (projection_systems_generation==particle_association_generation)
+      return;
     TimerOutput::Scope timer(this->get_computing_timer(),"Fault: Projection preparation");
     std::vector<ProjectionSystem> candidate(reconstructed_faults.size());
     unsigned int packed_size=0;
-    for(unsigned int f=0;f<reconstructed_faults.size();++f)
+    for (unsigned int f=0; f<reconstructed_faults.size(); ++f)
       {
         candidate[f].diagonal.assign(reconstructed_faults[f].n_vertices(),0.);
         candidate[f].off_diagonal.assign(reconstructed_faults[f].n_cells(),0.);
         packed_size+=candidate[f].diagonal.size()+candidate[f].off_diagonal.size();
       }
-    for(const auto &entry:particle_association_cache)
-      if(entry.active)
-        for(const auto &q:entry.quadrature)
+    for (const auto &entry:particle_association_cache)
+      if (entry.active)
+        for (const auto &q:entry.quadrature)
           {
             auto &system=candidate[entry.fault_index];
-            const double shape[2]={1.-q.xi,q.xi};
+            const double shape[2]= {1.-q.xi,q.xi};
             system.diagonal[q.segment_index]+=q.weight*shape[0]*shape[0];
             system.diagonal[q.segment_index+1]+=q.weight*shape[1]*shape[1];
             system.off_diagonal[q.segment_index]+=q.weight*shape[0]*shape[1];
           }
     std::vector<double> local(packed_size,0.),global(packed_size,0.);
     unsigned int position=0;
-    for(const auto &system:candidate)
+    for (const auto &system:candidate)
       {
         std::copy(system.diagonal.begin(),system.diagonal.end(),local.begin()+position);
         position+=system.diagonal.size();
@@ -357,17 +362,21 @@ namespace aspect
     std::string local_error;
     try
       {
-        for(auto &system:candidate)
+        for (auto &system:candidate)
           {
             std::copy_n(global.begin()+position,system.diagonal.size(),system.diagonal.begin());
             position+=system.diagonal.size();
             std::copy_n(global.begin()+position,system.off_diagonal.size(),system.off_diagonal.begin());
             position+=system.off_diagonal.size();
             const auto factors=factor_tridiagonal(system.diagonal,system.off_diagonal);
-            system.factor_diagonal=factors.first;system.factor_lower=factors.second;
+            system.factor_diagonal=factors.first;
+            system.factor_lower=factors.second;
           }
       }
-    catch(const std::exception &error){local_error=error.what();}
+    catch (const std::exception &error)
+      {
+        local_error=error.what();
+      }
     const unsigned int rank=Utilities::MPI::this_mpi_process(this->get_mpi_communicator());
     const unsigned int n_ranks=Utilities::MPI::n_mpi_processes(this->get_mpi_communicator());
     const unsigned int error_rank=Utilities::MPI::min(local_error.empty()?n_ranks:rank,this->get_mpi_communicator());

@@ -1,3 +1,23 @@
+/*
+  Copyright (C) 2026 - by the authors of the ASPECT code.
+
+  This file is part of ASPECT.
+
+  ASPECT is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2, or (at your option)
+  any later version.
+
+  ASPECT is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with ASPECT; see the file LICENSE.  If not see
+  <http://www.gnu.org/licenses/>.
+*/
+
 /* Internal implementation data for the restricted accepted FE-history path. */
 #ifndef _aspect_material_model_phase_field_fault_fe_strain_internal_h
 #define _aspect_material_model_phase_field_fault_fe_strain_internal_h
@@ -13,8 +33,8 @@ namespace aspect
       struct FENormalIntegral
       {
         double v=0.;
-        std::array<double,2> d{};
-        std::array<std::array<double,2>,2> h{};
+        std::array<double,2> d {};
+        std::array<std::array<double,2>,2> h {};
       };
     }
     template<int dim> struct PhaseFieldFault<dim>::FENormalization
@@ -34,16 +54,21 @@ namespace aspect
         std::array<std::array<double,GeometryInfo<dim>::vertices_per_cell>,2> shape;
         double length,lower;
         template<class Archive> void serialize(Archive &archive,const unsigned int)
-        {archive & dofs & shape & length & lower;}
+        {
+          archive &dofs &shape &length &lower;
+        }
       };
       struct Profile
       {
-        unsigned int segment;double xi,weight;
+        unsigned int segment;
+        double xi,weight;
         std::vector<Ray> rays;
       };
       struct BulkPoint
       {
-        CellId cell;Point<dim> x;double weight,xi;
+        CellId cell;
+        Point<dim> x;
+        double weight,xi;
         unsigned int segment;
         std::array<types::global_dof_index,GeometryInfo<dim>::vertices_per_cell> dofs;
         std::array<double,GeometryInfo<dim>::vertices_per_cell> shape;

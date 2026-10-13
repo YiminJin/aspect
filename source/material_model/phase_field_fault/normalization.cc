@@ -77,7 +77,10 @@ namespace aspect
           if (cell->is_locally_owned())
             {
               if (cell->reference_cell() != ReferenceCells::get_hypercube<dim>())
-                { supported = false; break; }
+                {
+                  supported = false;
+                  break;
+                }
               const auto vertices = mapping.get_vertices(cell);
               const auto &lo = vertices[0];
               const auto &hi = vertices[GeometryInfo<dim>::vertices_per_cell-1];
@@ -86,7 +89,8 @@ namespace aspect
                   if (!(hi[d] > lo[d])
                       || vertices[v][d] != ((v & (1u<<d)) ? hi[d] : lo[d]))
                     supported = false;
-              if (!supported) break;
+              if (!supported)
+                break;
               for (unsigned int d=0; d<dim; ++d)
                 {
                   // Enclose [-tol,1+tol]^dim with an outward arithmetic guard.
@@ -96,9 +100,9 @@ namespace aspect
                   const double padding = tolerance*width + 64*std::numeric_limits<double>::epsilon()
                                          *std::max({std::abs(lo[d]), std::abs(hi[d]), width});
                   lower[d] = std::min(lower[d], std::nextafter(lo[d]-padding,
-                                                            -std::numeric_limits<double>::infinity()));
+                                                               -std::numeric_limits<double>::infinity()));
                   upper[d] = std::max(upper[d], std::nextafter(hi[d]+padding,
-                                                            std::numeric_limits<double>::infinity()));
+                                                               std::numeric_limits<double>::infinity()));
                 }
             }
       const auto communicator = grid.get_triangulation().get_communicator();
@@ -206,10 +210,15 @@ namespace aspect
       // then affect friction but not degradation. This is a conservative test;
       // differing-but-equivalent parameterizations simply miss the cache.
       const auto uniform = [](const std::vector<double> &values)
-      { return std::all_of(values.begin(), values.end(),
-                          [&](const double value) { return value == values.front(); }); };
+      {
+        return std::all_of(values.begin(), values.end(),
+                           [&](const double value)
+        {
+          return value == values.front();
+        });
+      };
       const bool composition_independent = uniform(elastic_shear_moduli)
-        && uniform(cohesions) && uniform(critical_energy_release_rates);
+                                           && uniform(cohesions) && uniform(critical_energy_release_rates);
       for (const auto &fault : faults)
         {
           fault_versions.push_back(fault.geometry_version());
@@ -219,28 +228,29 @@ namespace aspect
               if (!composition_independent)
                 for (const auto property : fault_property_indices.chemical_compositions)
                   surface_compositions.push_back(fault.get_properties(v)[
-                    fault_manager.get_property_information()[property].position]);
+                                                   fault_manager.get_property_information()[property].position]);
             }
         }
       const bool local_hit = previous_cache_valid
-        && !std::getenv("ASPECT_DISABLE_IH_VALUE_CACHE")
-        && !this->get_parameters().mesh_deformation_enabled
-        && ((use_cell_normalization_profiles && normalization_cell_cache.supported
-             && !normalization_cell_cache.mesh_changed)
-            || (!normalization_point_lookups.batches.empty()
-                && normalization_point_lookups.batches.front().lookup->is_ready()))
-        && normalization_value_cache.owned_phase_indices == owned_indices
-        && normalization_value_cache.phase_values == phase_values
-        && normalization_value_cache.fault_versions == fault_versions
-        && normalization_value_cache.fault_vertices == fault_vertices
-        && normalization_value_cache.surface_compositions == surface_compositions
-        && normalization_value_cache.degradation_revision == phase_field_handler.get_degradation_revision();
+                             && !std::getenv("ASPECT_DISABLE_IH_VALUE_CACHE")
+                             && !this->get_parameters().mesh_deformation_enabled
+                             && ((use_cell_normalization_profiles && normalization_cell_cache.supported
+                                  && !normalization_cell_cache.mesh_changed)
+                                 || (!normalization_point_lookups.batches.empty()
+                                     && normalization_point_lookups.batches.front().lookup->is_ready()))
+                             && normalization_value_cache.owned_phase_indices == owned_indices
+                             && normalization_value_cache.phase_values == phase_values
+                             && normalization_value_cache.fault_versions == fault_versions
+                             && normalization_value_cache.fault_vertices == fault_vertices
+                             && normalization_value_cache.surface_compositions == surface_compositions
+                             && normalization_value_cache.degradation_revision == phase_field_handler.get_degradation_revision();
       const auto key_end = Clock::now();
       const bool global_hit = Utilities::MPI::min(static_cast<unsigned int>(local_hit), this->get_mpi_communicator());
       const auto key_mpi_end = Clock::now();
       return {phase_block, owned_indices, std::move(phase_values), std::move(fault_versions),
               std::move(fault_vertices), std::move(surface_compositions),
-              composition_independent, global_hit, key_end, key_mpi_end};
+              composition_independent, global_hit, key_end, key_mpi_end
+             };
     }
 
 
@@ -296,7 +306,7 @@ namespace aspect
 
       auto [phase_block, owned_indices, phase_values, fault_versions, fault_vertices,
             surface_compositions, composition_independent, global_hit, key_end, key_mpi_end] =
-        prepare_normalization_reuse(previous_cache_valid);
+              prepare_normalization_reuse(previous_cache_valid);
       if (global_hit)
         {
           normalization_value_cache.valid = true;
@@ -328,13 +338,13 @@ namespace aspect
 
       const auto evaluate_points =
         [&](const std::vector<Point<dim>> &points)
-        {
-          const auto begin = Clock::now();
-          normalization_value_cache.last_requested_points += points.size();
-          auto values = evaluate_normalization_points(points);
-          fe_seconds += std::chrono::duration<double>(Clock::now()-begin).count();
-          return values;
-        };
+      {
+        const auto begin = Clock::now();
+        normalization_value_cache.last_requested_points += points.size();
+        auto values = evaluate_normalization_points(points);
+        fe_seconds += std::chrono::duration<double>(Clock::now()-begin).count();
+        return values;
+      };
 
       const auto integrand =
         [&](const NormalizationProfile &profile,
@@ -342,68 +352,70 @@ namespace aspect
             const double zeta,
             const Point<dim> &point,
             const NormalizationPointSample &sample)
-        {
-          const auto begin = detailed_timing ? Clock::now() : Clock::time_point();
-          // Profile overlap is unsupported. Small negative FE undershoot is
-          // diagnosed globally and evaluated at phi_eff=max(phi_h,0), whereas
-          // the upper singular limit is deliberately never clipped.
-          // With one fault, another-fault overlap is impossible. Retain the
-          // geometric check for multiple faults and the opt-in comparison path.
-          if (faults.size() > 1 || baseline_guards)
-            {
-              const auto projection = fault_manager.project_to_normal_profiles(point);
-              AssertThrow(!projection.active
-                      || projection.fault_index == profile.fault_index,
-                      ExcMessage("Unsupported reconstructed-fault overlap during I_h evaluation: "
-                                 "profile " + Utilities::int_to_string(profile.id)
-                                 + " encountered fault "
-                                 + Utilities::int_to_string(projection.fault_index)
-                                 + " before its local tail terminated."));
-            }
-          const auto support_end = detailed_timing ? Clock::now() : Clock::time_point();
+      {
+        const auto begin = detailed_timing ? Clock::now() : Clock::time_point();
+        // Profile overlap is unsupported. Small negative FE undershoot is
+        // diagnosed globally and evaluated at phi_eff=max(phi_h,0), whereas
+        // the upper singular limit is deliberately never clipped.
+        // With one fault, another-fault overlap is impossible. Retain the
+        // geometric check for multiple faults and the opt-in comparison path.
+        if (faults.size() > 1 || baseline_guards)
+          {
+            const auto projection = fault_manager.project_to_normal_profiles(point);
+            AssertThrow(!projection.active
+                        || projection.fault_index == profile.fault_index,
+                        ExcMessage("Unsupported reconstructed-fault overlap during I_h evaluation: "
+                                   "profile " + Utilities::int_to_string(profile.id)
+                                   + " encountered fault "
+                                   + Utilities::int_to_string(projection.fault_index)
+                                   + " before its local tail terminated."));
+          }
+        const auto support_end = detailed_timing ? Clock::now() : Clock::time_point();
 
-          // Formatting coordinates is expensive compared with the constitutive
-          // law. Keep the same context, but create it only for a new minimum or
-          // an actual inadmissible sample; successful checks need no message.
-          const auto make_context = [&]()
-          { return "fault " + Utilities::int_to_string(profile.fault_index)
-            + ", segment " + Utilities::int_to_string(profile.segment_index)
-            + ", profile " + Utilities::int_to_string(profile.id)
-            + ", side " + (side == 0 ? std::string("+n") : std::string("-n"))
-            + ", zeta=" + Utilities::to_string(zeta)
-            + ", point=(" + Utilities::to_string(point[0])
-            + "," + Utilities::to_string(point[1]) + ")"; };
-          std::string context;
-          if (baseline_guards || sample.phase_field < local_minimum_raw_phase_field
-              || !std::isfinite(sample.phase_field) || sample.phase_field > 1.)
-            context = make_context();
-          if (sample.phase_field < local_minimum_raw_phase_field)
-            {
-              local_minimum_raw_phase_field = sample.phase_field;
-              local_minimum_raw_phase_field_context = context;
-            }
-          const auto context_end = detailed_timing ? Clock::now() : Clock::time_point();
-          const double effective_phase_field =
-            this->normalization_effective_phase_field(sample.phase_field, context);
-          const auto phase_end = detailed_timing ? Clock::now() : Clock::time_point();
-          const double degradation = phase_field_handler.energetic_degradation(
-            profile.material_fractions, effective_phase_field);
-          if (!(degradation >= std::numeric_limits<double>::min()) || !std::isfinite(degradation))
-            context = make_context();
-          const auto degradation_end = detailed_timing ? Clock::now() : Clock::time_point();
-          const double value = this->normalization_integrand(effective_phase_field, degradation, context);
-          if (detailed_timing)
-            {
-              const auto end = Clock::now();
-              support_seconds += std::chrono::duration<double>(support_end-begin).count();
-              context_seconds += std::chrono::duration<double>(context_end-support_end).count();
-              phase_seconds += std::chrono::duration<double>(phase_end-context_end).count();
-              degradation_seconds += std::chrono::duration<double>(degradation_end-phase_end).count();
-              integrand_guard_seconds += std::chrono::duration<double>(end-degradation_end).count();
-              material_seconds += std::chrono::duration<double>(end-begin).count();
-            }
-          return value;
+        // Formatting coordinates is expensive compared with the constitutive
+        // law. Keep the same context, but create it only for a new minimum or
+        // an actual inadmissible sample; successful checks need no message.
+        const auto make_context = [&]()
+        {
+          return "fault " + Utilities::int_to_string(profile.fault_index)
+                 + ", segment " + Utilities::int_to_string(profile.segment_index)
+                 + ", profile " + Utilities::int_to_string(profile.id)
+                 + ", side " + (side == 0 ? std::string("+n") : std::string("-n"))
+                 + ", zeta=" + Utilities::to_string(zeta)
+                 + ", point=(" + Utilities::to_string(point[0])
+                 + "," + Utilities::to_string(point[1]) + ")";
         };
+        std::string context;
+        if (baseline_guards || sample.phase_field < local_minimum_raw_phase_field
+            || !std::isfinite(sample.phase_field) || sample.phase_field > 1.)
+          context = make_context();
+        if (sample.phase_field < local_minimum_raw_phase_field)
+          {
+            local_minimum_raw_phase_field = sample.phase_field;
+            local_minimum_raw_phase_field_context = context;
+          }
+        const auto context_end = detailed_timing ? Clock::now() : Clock::time_point();
+        const double effective_phase_field =
+          this->normalization_effective_phase_field(sample.phase_field, context);
+        const auto phase_end = detailed_timing ? Clock::now() : Clock::time_point();
+        const double degradation = phase_field_handler.energetic_degradation(
+                                     profile.material_fractions, effective_phase_field);
+        if (!(degradation >= std::numeric_limits<double>::min()) || !std::isfinite(degradation))
+          context = make_context();
+        const auto degradation_end = detailed_timing ? Clock::now() : Clock::time_point();
+        const double value = this->normalization_integrand(effective_phase_field, degradation, context);
+        if (detailed_timing)
+          {
+            const auto end = Clock::now();
+            support_seconds += std::chrono::duration<double>(support_end-begin).count();
+            context_seconds += std::chrono::duration<double>(context_end-support_end).count();
+            phase_seconds += std::chrono::duration<double>(phase_end-context_end).count();
+            degradation_seconds += std::chrono::duration<double>(degradation_end-phase_end).count();
+            integrand_guard_seconds += std::chrono::duration<double>(end-degradation_end).count();
+            material_seconds += std::chrono::duration<double>(end-begin).count();
+          }
+        return value;
+      };
 
       const auto integration_begin = Clock::now();
       std::vector<double> profile_integrals;
@@ -412,43 +424,43 @@ namespace aspect
         {
           const auto all_profiles = build_owned_normalization_profiles(true);
           const auto all_integrals = integrate_cell_normalization_profiles(
-            all_profiles, integrand, fe_seconds, mpi_seconds);
+                                       all_profiles, integrand, fe_seconds, mpi_seconds);
           if (normalization_cell_cache.supported)
             for (const auto &profile : profiles)
               profile_integrals.push_back(all_integrals[profile.id]);
           if (normalization_cell_cache.supported && std::getenv("ASPECT_IH_COMPARE_CELL"))
             {
               const auto reference_begin=Clock::now();
-              Utilities::System::MemoryStats cell_memory{};
+              Utilities::System::MemoryStats cell_memory {};
               Utilities::System::get_memory_stats(cell_memory);
               const double reference_factor=std::getenv("ASPECT_IH_REFERENCE_FACTOR")
                                             ? std::stod(std::getenv("ASPECT_IH_REFERENCE_FACTOR")) : 1.;
               AssertThrow(reference_factor>0. && reference_factor<=1.,
                           ExcMessage("The diagnostic I_h reference may only tighten tolerances."));
               reference_integrals=integrate_normalization_profiles(profiles, length_scale,
-                reference_factor*normalization_quadrature_tolerance,
-                reference_factor*normalization_tail_tolerance,
-                this->get_mpi_communicator(), evaluate_points, integrand, &mpi_seconds);
-              Utilities::System::MemoryStats reference_memory{};
+                                                                   reference_factor*normalization_quadrature_tolerance,
+                                                                   reference_factor*normalization_tail_tolerance,
+                                                                   this->get_mpi_communicator(), evaluate_points, integrand, &mpi_seconds);
+              Utilities::System::MemoryStats reference_memory {};
               Utilities::System::get_memory_stats(reference_memory);
               this->get_pcout() << "Cell I_h comparison: cell seconds="
-                               << std::chrono::duration<double>(reference_begin-integration_begin).count()
-                               << ", remote reference seconds="
-                               << std::chrono::duration<double>(Clock::now()-reference_begin).count()
-                               << ", reference tolerance factor=" << reference_factor
-                               << ", RSS before remote KiB=" << cell_memory.VmRSS
-                               << ", RSS after remote KiB=" << reference_memory.VmRSS << std::endl;
+                                << std::chrono::duration<double>(reference_begin-integration_begin).count()
+                                << ", remote reference seconds="
+                                << std::chrono::duration<double>(Clock::now()-reference_begin).count()
+                                << ", reference tolerance factor=" << reference_factor
+                                << ", RSS before remote KiB=" << cell_memory.VmRSS
+                                << ", RSS after remote KiB=" << reference_memory.VmRSS << std::endl;
             }
         }
       if (!use_cell_normalization_profiles || !normalization_cell_cache.supported)
         profile_integrals = integrate_normalization_profiles(profiles,
-                                         length_scale,
-                                         normalization_quadrature_tolerance,
-                                         normalization_tail_tolerance,
-                                         this->get_mpi_communicator(),
-                                         evaluate_points,
-                                         integrand,
-                                         &mpi_seconds);
+                                                             length_scale,
+                                                             normalization_quadrature_tolerance,
+                                                             normalization_tail_tolerance,
+                                                             this->get_mpi_communicator(),
+                                                             evaluate_points,
+                                                             integrand,
+                                                             &mpi_seconds);
       const double integration_seconds = std::chrono::duration<double>(Clock::now()-integration_begin).count();
       normalization_point_lookups.batches.resize(normalization_point_lookups.next_batch);
       if (std::getenv("ASPECT_FAULT_PERFORMANCE") != nullptr)
@@ -462,12 +474,12 @@ namespace aspect
           const auto points = Utilities::MPI::sum(local_points, this->get_mpi_communicator());
           const auto rejected = Utilities::MPI::sum(local_rejected, this->get_mpi_communicator());
           this->get_pcout() << "Fault I_h lookup work: hits=" << normalization_point_lookups.hits
-                           << ", rebuilds=" << normalization_point_lookups.rebuilds
-                           << ", stored points=" << points
-                           << ", rejected requests=" << rejected
-                           << ", mapping=" << typeid(phase_field_handler.get_grid_cache().get_mapping()).name()
-                           << ", rejection eligible=" << normalization_point_lookups.rejection_supported
-                           << ", preparation seconds=" << preparation_timer.wall_time() << std::endl;
+                            << ", rebuilds=" << normalization_point_lookups.rebuilds
+                            << ", stored points=" << points
+                            << ", rejected requests=" << rejected
+                            << ", mapping=" << typeid(phase_field_handler.get_grid_cache().get_mapping()).name()
+                            << ", rejection eligible=" << normalization_point_lookups.rejection_supported
+                            << ", preparation seconds=" << preparation_timer.wall_time() << std::endl;
         }
       if (this->get_parameters().mesh_deformation_enabled)
         normalization_point_lookups.batches.clear();
@@ -475,16 +487,16 @@ namespace aspect
       // Reduce the raw minimum and its owning-rank context before applying the
       // empirical excessive-undershoot guard, so every rank reports one diagnosis.
       current_minimum_raw_normalization_phase_field = Utilities::MPI::min(
-        local_minimum_raw_phase_field, this->get_mpi_communicator());
+                                                        local_minimum_raw_phase_field, this->get_mpi_communicator());
       const unsigned int minimum_rank = Utilities::MPI::min(
-        local_minimum_raw_phase_field
-          == current_minimum_raw_normalization_phase_field
-        ? mpi_rank
-        : n_mpi_processes,
-        this->get_mpi_communicator());
+                                          local_minimum_raw_phase_field
+                                          == current_minimum_raw_normalization_phase_field
+                                          ? mpi_rank
+                                          : n_mpi_processes,
+                                          this->get_mpi_communicator());
       const std::string minimum_context = Utilities::MPI::broadcast(
-        this->get_mpi_communicator(), local_minimum_raw_phase_field_context,
-        minimum_rank);
+                                            this->get_mpi_communicator(), local_minimum_raw_phase_field_context,
+                                            minimum_rank);
       validate_normalization_phase_field_minimum(
         current_minimum_raw_normalization_phase_field, minimum_context);
 
@@ -505,8 +517,8 @@ namespace aspect
         {
           double error=0.;
           std::ofstream profile_comparison(this->get_output_directory()+"ih_profile_comparison_"
-            +std::to_string(this->get_timestep_number())+"_"+std::to_string(normalization_value_cache.integrations)
-            +"_rank"+std::to_string(mpi_rank)+".csv");
+                                           +std::to_string(this->get_timestep_number())+"_"+std::to_string(normalization_value_cache.integrations)
+                                           +"_rank"+std::to_string(mpi_rank)+".csv");
           profile_comparison << std::setprecision(17) << "profile,fault,segment,xi,x,y,remote,cell\n";
           for (unsigned int p=0; p<profiles.size(); ++p)
             profile_comparison << profiles[p].id << ',' << profiles[p].fault_index << ','
@@ -546,11 +558,11 @@ namespace aspect
           bool phase_unchanged=true;
           for (const auto i : owned_indices)
             phase_unchanged &= this->get_solution().block(phase_block)[i]
-                              == this->get_old_solution().block(phase_block)[i];
+                               == this->get_old_solution().block(phase_block)[i];
           AssertThrow(Utilities::MPI::min(static_cast<unsigned int>(phase_unchanged),this->get_mpi_communicator()),
                       ExcMessage("Frozen restart phase field differs from its retained history."));
           const auto position=fault_manager.get_property_information()[
-            fault_property_indices.previous_normalization_integral].position;
+                                fault_property_indices.previous_normalization_integral].position;
           double discrepancy=0.;
           for (unsigned int f=0; f<faults.size(); ++f)
             for (unsigned int v=0; v<faults[f].n_vertices(); ++v)
@@ -579,22 +591,22 @@ namespace aspect
       if (detailed_timing)
         {
           this->get_pcout() << "Fault I_h phases (rank 0 seconds): adaptive/requests="
-                         << integration_seconds-fe_seconds-material_seconds-mpi_seconds
-                         << ", FE/lookup=" << fe_seconds << ", material/guards=" << material_seconds
-                         << ", adaptive MPI=" << mpi_seconds << std::endl;
+                            << integration_seconds-fe_seconds-material_seconds-mpi_seconds
+                            << ", FE/lookup=" << fe_seconds << ", material/guards=" << material_seconds
+                            << ", adaptive MPI=" << mpi_seconds << std::endl;
           this->get_pcout() << "Fault I_h cold detail (rank 0 seconds): surface composition projection="
-                           << std::chrono::duration<double>(projection_end-preparation_begin).count()
-                           << ", key comparison/copies=" << std::chrono::duration<double>(key_end-projection_end).count()
-                           << ", key MPI=" << std::chrono::duration<double>(key_mpi_end-key_end).count()
-                           << ", profile geometry/mixtures=" << std::chrono::duration<double>(profiles_end-key_mpi_end).count()
-                           << ", support geometry=" << support_seconds
-                           << ", coordinate/context=" << context_seconds
-                           << ", phase admissibility=" << phase_seconds
-                           << ", degradation/mixture=" << degradation_seconds
-                           << ", integrand guards=" << integrand_guard_seconds
-                           << ", final projection/reduction/key publication="
-                           << std::chrono::duration<double>(Clock::now()-integration_begin).count()-integration_seconds
-                           << std::endl;
+                            << std::chrono::duration<double>(projection_end-preparation_begin).count()
+                            << ", key comparison/copies=" << std::chrono::duration<double>(key_end-projection_end).count()
+                            << ", key MPI=" << std::chrono::duration<double>(key_mpi_end-key_end).count()
+                            << ", profile geometry/mixtures=" << std::chrono::duration<double>(profiles_end-key_mpi_end).count()
+                            << ", support geometry=" << support_seconds
+                            << ", coordinate/context=" << context_seconds
+                            << ", phase admissibility=" << phase_seconds
+                            << ", degradation/mixture=" << degradation_seconds
+                            << ", integrand guards=" << integrand_guard_seconds
+                            << ", final projection/reduction/key publication="
+                            << std::chrono::duration<double>(Clock::now()-integration_begin).count()-integration_seconds
+                            << std::endl;
         }
     }
 
@@ -621,8 +633,8 @@ namespace aspect
       // Q1 projection. They add no physical quadrature or mass weight. The
       // benchmark selector is reconstructible; completed values remain cached.
       const char *completion_path=boundary_normalization_completion_file.empty()
-        ? std::getenv("ASPECT_IH_BOTTOM_COMPLETION_DIAGNOSTIC")
-        : boundary_normalization_completion_file.c_str();
+                                  ? std::getenv("ASPECT_IH_BOTTOM_COMPLETION_DIAGNOSTIC")
+                                  : boundary_normalization_completion_file.c_str();
       if (completion_path)
         {
           AssertThrow(dim==2 && mature_frictional_fault && !evolve_phase_field
@@ -641,7 +653,7 @@ namespace aspect
           AssertThrow(n==expected,ExcMessage("Normalization completion profile count mismatch."));
           std::vector<Point<dim>> origins(n);
           std::vector<double> outside(n);
-          for (unsigned int i=0;i<n;++i)
+          for (unsigned int i=0; i<n; ++i)
             {
               unsigned int id;
               AssertThrow(input>>id>>origins[i][0]>>origins[i][1]>>outside[i],
@@ -657,9 +669,10 @@ namespace aspect
           std::ofstream out(this->get_output_directory()+"ih_bottom_completion_rank"+std::to_string(mpi_rank)+".csv");
           out.exceptions(std::ios::failbit|std::ios::badbit);
           out<<std::setprecision(17)<<"id,segment,xi,x,y,surface_weight,inside,outside,completed\n";
-          for (unsigned int i=0;i<profiles.size();++i)
+          for (unsigned int i=0; i<profiles.size(); ++i)
             {
-              const auto &p=profiles[i];const double inside=profile_integrals[i];
+              const auto &p=profiles[i];
+              const double inside=profile_integrals[i];
               profile_integrals[i]+=outside[p.id];
               out<<p.id<<','<<p.segment_index<<','<<p.xi<<','<<p.origin[0]<<','<<p.origin[1]<<','
                  <<p.surface_weight<<','<<inside<<','<<outside[p.id]<<','<<profile_integrals[i]<<'\n';
@@ -713,12 +726,12 @@ namespace aspect
                              + Utilities::to_string(minimum_raw_phase_field)
                              + ", threshold="
                              + Utilities::to_string(
-                                 normalization_phase_field_undershoot_tolerance)
+                               normalization_phase_field_undershoot_tolerance)
                              + " at " + context
                              + ". Bounded negative samples are evaluated with "
-                               "phi_eff=max(phi_h,0); the activation threshold is not used. "
-                               "This guard is not a physical parameter, solver tolerance, "
-                               "or convergence-control parameter."));
+                             "phi_eff=max(phi_h,0); the activation threshold is not used. "
+                             "This guard is not a physical parameter, solver tolerance, "
+                             "or convergence-control parameter."));
     }
 
 
@@ -735,7 +748,7 @@ namespace aspect
                              + Utilities::to_string(phase_field) + ", g="
                              + Utilities::to_string(degradation)
                              + ". I_h requires a finite, strictly positive "
-                               "degradation function."));
+                             "degradation function."));
       const double value = 1.0 / degradation - 1.0;
       AssertThrow(std::isfinite(value),
                   ExcMessage("I_h singularity at " + context + ": phi="
@@ -775,7 +788,10 @@ namespace aspect
             {
               Point<dim> lower, upper;
               for (unsigned int d=0; d<dim; ++d)
-                { lower[d] = std::numeric_limits<double>::max(); upper[d] = -lower[d]; }
+                {
+                  lower[d] = std::numeric_limits<double>::max();
+                  upper[d] = -lower[d];
+                }
               for (const auto &cell : tria.active_cell_iterators())
                 if (cell->is_locally_owned())
                   for (unsigned int d=0; d<dim; ++d)
@@ -816,8 +832,10 @@ namespace aspect
             {
               double a=(bounds.first[d]-profile.origin[d])/profile.normal[d];
               double b=(bounds.second[d]-profile.origin[d])/profile.normal[d];
-              if (b<a) std::swap(a,b);
-              lo=std::max(lo,a); hi=std::min(hi,b);
+              if (b<a)
+                std::swap(a,b);
+              lo=std::max(lo,a);
+              hi=std::min(hi,b);
             }
         return std::make_pair(lo,hi);
       };
@@ -836,16 +854,22 @@ namespace aspect
                       ExcMessage("Cell I_h profile origin lies outside the physical Box."));
           geometry.ends[p] = {{limits.second,-limits.first}};
           if (p<old_size && traversal.origin == profile.origin && traversal.normal == profile.normal)
-            { ++geometry.reused; geometry.intervals += traversal.intervals.size(); continue; }
+            {
+              ++geometry.reused;
+              geometry.intervals += traversal.intervals.size();
+              continue;
+            }
           ++geometry.rebuilt;
-          traversal.origin=profile.origin; traversal.normal=profile.normal;
+          traversal.origin=profile.origin;
+          traversal.normal=profile.normal;
           traversal.intervals.clear();
           Point<dim> lower, upper;
           for (unsigned int d=0; d<dim; ++d)
             {
               const double a=profile.origin[d]+limits.first*profile.normal[d];
               const double b=profile.origin[d]+limits.second*profile.normal[d];
-              lower[d]=std::min(a,b); upper[d]=std::max(a,b);
+              lower[d]=std::min(a,b);
+              upper[d]=std::max(a,b);
             }
           using Entry = typename std::decay_t<decltype(tree)>::value_type;
           std::vector<Entry> cells;
@@ -855,9 +879,11 @@ namespace aspect
           for (const auto &entry : cells)
             {
               const auto range = clip(profile, entry.first);
-              if (!(range.second > range.first)) continue;
+              if (!(range.second > range.first))
+                continue;
               typename NormalizationCellCache::Interval interval;
-              interval.lower=range.first; interval.upper=range.second;
+              interval.lower=range.first;
+              interval.upper=range.second;
               const auto &bounds=entry.first.get_boundary_points();
               interval.diameter=entry.second->diameter();
               for (unsigned int d=0; d<dim; ++d)
@@ -875,7 +901,10 @@ namespace aspect
               traversal.intervals.push_back(interval);
             }
           std::sort(traversal.intervals.begin(),traversal.intervals.end(),
-                    [](const auto &a,const auto &b) { return a.lower<b.lower; });
+                    [](const auto &a,const auto &b)
+          {
+            return a.lower<b.lower;
+          });
           geometry.intervals += traversal.intervals.size();
         }
       return geometry;
@@ -927,13 +956,15 @@ namespace aspect
                 for (unsigned int side=0; side<2; ++side)
                   {
                     const unsigned int index=2*p+side;
-                    if (done[index]) continue;
+                    if (done[index])
+                      continue;
                     const double start=window*ell, end=std::min((window+1)*ell,ends[p][side]);
                     for (const auto &cell : cache.profiles[p].intervals)
                       {
                         const double left=std::max(start,side==0 ? cell.lower : -cell.upper);
                         const double right=std::min(end,side==0 ? cell.upper : -cell.lower);
-                        if (!(right>left)) continue;
+                        if (!(right>left))
+                          continue;
                         local[totals.size()+index] += right-left;
                         std::array<double,GeometryInfo<dim>::vertices_per_cell> phase;
                         for (unsigned int v=0; v<phase.size(); ++v)
@@ -957,18 +988,27 @@ namespace aspect
                         const double f0=phase_at(left), fm=phase_at(.5*(left+right)), f1=phase_at(right);
                         const double a=2.*(f0+f1-2.*fm), b=f1-f0-a;
                         const auto roots=boost::math::tools::quadratic_roots(a,b,f0);
-                        std::vector<double> cuts{left,right};
-                        for (const double root : {roots.first,roots.second})
-                          if (root>0. && root<1.) cuts.push_back(left+root*(right-left));
+                        std::vector<double> cuts {left,right};
+                        for (const double root :
+                        {
+                          roots.first,roots.second
+                        })
+                        if (root>0. && root<1.)
+                          cuts.push_back(left+root*(right-left));
                         std::sort(cuts.begin(),cuts.end());
                         cuts.erase(std::unique(cuts.begin(),cuts.end()),cuts.end());
-                        struct Panel { double left,right; unsigned int depth; };
+                        struct Panel
+                        {
+                          double left,right;
+                          unsigned int depth;
+                        };
                         std::vector<Panel> panels;
                         for (unsigned int i=1; i<cuts.size(); ++i)
                           panels.push_back({cuts[i-1],cuts[i],0});
                         while (!panels.empty())
                           {
-                            const auto panel=panels.back(); panels.pop_back();
+                            const auto panel=panels.back();
+                            panels.pop_back();
                             const double width=panel.right-panel.left;
                             const auto quadrature=[&](const QGauss<1> &rule)
                             {
@@ -979,7 +1019,8 @@ namespace aspect
                                   const double z=panel.left+width*rule.point(q)[0];
                                   const double signed_z=side==0 ? z : -z;
                                   NormalizationPointSample sample;
-                                  sample.found=true; sample.cell_diameter=cell.diameter;
+                                  sample.found=true;
+                                  sample.cell_diameter=cell.diameter;
                                   sample.phase_field=phase_at(z);
                                   ++samples;
                                   if (compare_samples)
@@ -990,11 +1031,12 @@ namespace aspect
                                   if (timing)
                                     sampling_seconds += std::chrono::duration<double>(Clock::now()-sample_begin).count();
                                   const double h=integrand(profiles[p],side,z,
-                                    profiles[p].origin+signed_z*profiles[p].normal,sample);
+                                                           profiles[p].origin+signed_z*profiles[p].normal,sample);
                                   result += rule.weight(q)*h;
                                   if (compare_samples)
                                     {
-                                      diagnostic_h.push_back(h); diagnostic_weights.push_back(0.);
+                                      diagnostic_h.push_back(h);
+                                      diagnostic_weights.push_back(0.);
                                       diagnostic_profiles.push_back(p);
                                     }
                                 }
@@ -1020,7 +1062,10 @@ namespace aspect
                       }
                   }
             }
-          catch (const std::exception &exception) { error=exception.what(); }
+          catch (const std::exception &exception)
+            {
+              error=exception.what();
+            }
           const auto mpi_begin=Clock::now();
           throw_if_history_error(error,communicator);
           Utilities::MPI::sum(local,communicator,global);
@@ -1044,7 +1089,8 @@ namespace aspect
           ++window;
         }
       std::vector<double> result(profiles.size());
-      for (unsigned int p=0; p<profiles.size(); ++p) result[p]=totals[2*p]+totals[2*p+1];
+      for (unsigned int p=0; p<profiles.size(); ++p)
+        result[p]=totals[2*p]+totals[2*p+1];
       if (std::getenv("ASPECT_IH_VERIFY_CELL_QUADRATURE"))
         {
           // Independent diagnostic: fixed 8-panel x 32-point integration on
@@ -1077,16 +1123,19 @@ namespace aspect
                   local_reference[p] += weights[q]*integrand(profiles[p],0,0.,points[q],values[q]);
                 }
             }
-          catch (const std::exception &exception) { error=exception.what(); }
+          catch (const std::exception &exception)
+            {
+              error=exception.what();
+            }
           throw_if_history_error(error,communicator);
           Utilities::MPI::sum(local_reference,communicator,reference);
           double maximum=0.;
           for (unsigned int p=0; p<profiles.size(); ++p)
             maximum=std::max(maximum,std::abs(result[p]/reference[p]-1.));
           this->get_pcout() << std::setprecision(17)
-                           << "Cell I_h independent fixed quadrature: maximum profile relative difference=" << maximum
-                           << ", first origin=" << profiles.front().origin
-                           << ", first normal=" << profiles.front().normal << std::endl;
+                            << "Cell I_h independent fixed quadrature: maximum profile relative difference=" << maximum
+                            << ", first origin=" << profiles.front().origin
+                            << ", first normal=" << profiles.front().normal << std::endl;
         }
       if (compare_samples)
         {
@@ -1098,15 +1147,18 @@ namespace aspect
             {
               missing+=!reference[i].found;
               if (reference[i].found && std::abs(reference[i].phase_field-diagnostic_phase[i])>error)
-                { error=std::abs(reference[i].phase_field-diagnostic_phase[i]); worst=i; }
+                {
+                  error=std::abs(reference[i].phase_field-diagnostic_phase[i]);
+                  worst=i;
+                }
               maximum=std::max(maximum,diagnostic_phase[i]);
               if (reference[i].found && diagnostic_weights[i]!=0.)
                 {
                   const double phi=normalization_effective_phase_field(reference[i].phase_field,"common-point comparison");
                   const double g=this->get_phase_field_handler().energetic_degradation(
-                    profiles[diagnostic_profiles[i]].material_fractions,phi);
+                                   profiles[diagnostic_profiles[i]].material_fractions,phi);
                   local_difference[diagnostic_profiles[i]] += diagnostic_weights[i]
-                    *(normalization_integrand(phi,g,"common-point comparison")-diagnostic_h[i]);
+                                                              *(normalization_integrand(phi,g,"common-point comparison")-diagnostic_h[i]);
                 }
             }
           Utilities::MPI::sum(local_difference,communicator,difference);
@@ -1114,26 +1166,26 @@ namespace aspect
           for (unsigned int p=0; p<profiles.size(); ++p)
             integral_difference=std::max(integral_difference,std::abs(difference[p]/result[p]));
           this->get_pcout() << "Cell I_h sample diagnostic: max absolute phase difference="
-                           << Utilities::MPI::max(error,communicator)
-                           << ", max phase=" << Utilities::MPI::max(maximum,communicator)
-                           << ", same-quadrature integral relative difference=" << integral_difference
-                           << ", missing=" << Utilities::MPI::sum(missing,communicator) << std::endl;
+                            << Utilities::MPI::max(error,communicator)
+                            << ", max phase=" << Utilities::MPI::max(maximum,communicator)
+                            << ", same-quadrature integral relative difference=" << integral_difference
+                            << ", missing=" << Utilities::MPI::sum(missing,communicator) << std::endl;
           if (!reference.empty())
             {
               const auto &batch=normalization_point_lookups.batches[normalization_point_lookups.next_batch-1];
               const auto request=std::find(batch.request_indices.begin(),batch.request_indices.end(),worst)-batch.request_indices.begin();
               const auto &ptrs=batch.lookup->get_point_ptrs();
               this->get_pcout() << std::setprecision(17) << "Cell I_h worst sample: point=" << diagnostic_points[worst]
-                               << ", direct=" << diagnostic_phase[worst] << ", remote=" << reference[worst].phase_field
-                               << ", owners=" << ptrs[request+1]-ptrs[request] << std::endl;
+                                << ", direct=" << diagnostic_phase[worst] << ", remote=" << reference[worst].phase_field
+                                << ", owners=" << ptrs[request+1]-ptrs[request] << std::endl;
             }
         }
       this->get_pcout() << "Cell I_h: rebuilt profiles=" << geometry.rebuilt << ", reused profiles=" << geometry.reused
-                       << ", local intervals=" << geometry.intervals << ", cell candidates=" << geometry.candidates
-                       << ", FE samples=" << samples << ", remote requests=0, windows=" << window
-                       << ", geometry seconds=" << geometry_seconds
-                       << ", local interval bytes=" << geometry.intervals*sizeof(typename NormalizationCellCache::Interval)
-                       << std::endl;
+                        << ", local intervals=" << geometry.intervals << ", cell candidates=" << geometry.candidates
+                        << ", FE samples=" << samples << ", remote requests=0, windows=" << window
+                        << ", geometry seconds=" << geometry_seconds
+                        << ", local interval bytes=" << geometry.intervals *sizeof(typename NormalizationCellCache::Interval)
+                        << std::endl;
       return result;
     }
 
@@ -1204,7 +1256,7 @@ namespace aspect
                       0.5 * (state.boundary_low + state.boundary_high);
                     request.zeta.push_back(midpoint);
                     points.push_back(normalization_profile_point<dim>(
-                      profiles[p], side, midpoint));
+                                       profiles[p], side, midpoint));
                   }
                 else
                   {
@@ -1219,7 +1271,7 @@ namespace aspect
                     request.zeta.push_back(state.panel_start + state.panel_width);
                     for (const double zeta : request.zeta)
                       points.push_back(normalization_profile_point<dim>(
-                        profiles[p], side, zeta));
+                                         profiles[p], side, zeta));
                   }
                 requests.push_back(std::move(request));
               }
@@ -1258,8 +1310,8 @@ namespace aspect
                   if (std::nextafter(state.boundary_low, state.boundary_high)
                       == state.boundary_high
                       || state.boundary_high-state.boundary_low
-                         <= 16.0 * std::numeric_limits<double>::epsilon()
-                            * coordinate_scale)
+                      <= 16.0 * std::numeric_limits<double>::epsilon()
+                      * coordinate_scale)
                     {
                       state.boundary_search = false;
                       if (state.boundary_low > state.panel_start)
@@ -1282,7 +1334,9 @@ namespace aspect
               std::iota(order.begin(), order.end(), 0);
               std::sort(order.begin(), order.end(),
                         [&zeta](const unsigned int a, const unsigned int b)
-                        { return zeta[a] < zeta[b]; });
+              {
+                return zeta[a] < zeta[b];
+              });
               for (const unsigned int i : order)
                 if (!samples[request.first_point+i].found)
                   {
@@ -1330,7 +1384,7 @@ namespace aspect
 
               if (std::abs(integral_8-integral_4)
                   > quadrature_tolerance
-                    * std::max(std::abs(integral_8), length_scale))
+                  * std::max(std::abs(integral_8), length_scale))
                 {
                   ++state.refinement_depth;
                   AssertThrow(state.refinement_depth <= 64,
@@ -1381,10 +1435,11 @@ namespace aspect
                   state.panel_width =
                     std::min({2.0*state.panel_width,
                               0.5*length_scale,
-                              0.5*panel_cell_diameter});
+                              0.5*panel_cell_diameter
+                             });
                   if (state.boundary_final_panel)
                     state.panel_width = std::min(state.panel_width,
-                                                state.boundary_low-state.panel_start);
+                                                 state.boundary_low-state.panel_start);
                   state.refinement_depth = 0;
                 }
             }
@@ -1422,7 +1477,7 @@ namespace aspect
         this->get_reconstructed_fault_manager();
 
       std::vector<typename ReconstructedFaultManager<dim>::ParticlePropertyProjection>
-        projections;
+      projections;
       projections.reserve(chemical_field_indices.size());
       for (unsigned int c = 0; c < chemical_field_indices.size(); ++c)
         {
@@ -1475,7 +1530,7 @@ namespace aspect
       // Even a change confined to one requesting rank changes the distributed
       // lookup. All ranks must take the same reinit/communication branch.
       if (Utilities::MPI::min(static_cast<unsigned int>(local_hit),
-                             grid.get_triangulation().get_communicator()) == 0)
+                              grid.get_triangulation().get_communicator()) == 0)
         {
           if (!batch.lookup)
             batch.lookup = std::make_unique<Utilities::MPI::RemotePointEvaluation<dim>>();
@@ -1524,16 +1579,16 @@ namespace aspect
         cache.template evaluate_and_process<double>(
           [](const ArrayView<double> &values,
              const typename Utilities::MPI::RemotePointEvaluation<dim>::CellData &cell_data)
+      {
+        for (const unsigned int cell_index : cell_data.cell_indices())
           {
-            for (const unsigned int cell_index : cell_data.cell_indices())
-              {
-                const double diameter =
-                  cell_data.get_active_cell_iterator(cell_index)->diameter();
-                ArrayView<double> cell_values =
-                  cell_data.get_data_view(cell_index, values);
-                std::fill(cell_values.begin(), cell_values.end(), diameter);
-              }
-          });
+            const double diameter =
+              cell_data.get_active_cell_iterator(cell_index)->diameter();
+            ArrayView<double> cell_values =
+              cell_data.get_data_view(cell_index, values);
+            std::fill(cell_values.begin(), cell_values.end(), diameter);
+          }
+      });
 
       const std::vector<unsigned int> &point_ptrs = cache.get_point_ptrs();
       std::vector<NormalizationPointSample> samples(points.size());
@@ -1547,7 +1602,7 @@ namespace aspect
             for (unsigned int entry = point_ptrs[request];
                  entry < point_ptrs[request+1]; ++entry)
               samples[point].cell_diameter = std::min(
-                samples[point].cell_diameter, cell_diameters[entry]);
+                                               samples[point].cell_diameter, cell_diameters[entry]);
           }
       return samples;
     }
@@ -1566,7 +1621,7 @@ namespace aspect
       // Resolve tangential variation of the bulk FE column integral without
       // changing the Q1 field or its consistent (exact) mass matrix.
       const QIterated<1> surface_quadrature(QGauss<1>(3),
-                                           normalization_surface_subdivisions);
+                                            normalization_surface_subdivisions);
 
       unsigned int n_profiles = 0;
       for (const ReconstructedFault<dim> &fault : faults)
@@ -1768,37 +1823,37 @@ namespace aspect
     // The plugin registration instantiates the class in phase_field_fault.cc.
     // Instantiate the moved members here, including the private/static test paths.
 #define INSTANTIATE(dim) \
-    template void PhaseFieldFault<dim>::compute_normalization_integrals(); \
-    template PhaseFieldFault<dim>::NormalizationReuseDecision \
-      PhaseFieldFault<dim>::prepare_normalization_reuse(const bool) const; \
-    template void PhaseFieldFault<dim>::apply_boundary_normalization_completion( \
-      const std::vector<NormalizationProfile> &, std::vector<double> &) const; \
-    template void PhaseFieldFault<dim>::invalidate_normalization_cache(); \
-    template double PhaseFieldFault<dim>::normalization_effective_phase_field( \
-      const double, const std::string &); \
-    template void PhaseFieldFault<dim>::validate_normalization_phase_field_minimum( \
-      const double, const std::string &); \
-    template double PhaseFieldFault<dim>::normalization_integrand( \
-      const double, const double, const std::string &); \
-    template PhaseFieldFault<dim>::NormalizationCellGeometry \
-      PhaseFieldFault<dim>::prepare_cell_normalization_geometry(const std::vector<NormalizationProfile> &); \
-    template std::vector<double> PhaseFieldFault<dim>::integrate_cell_normalization_profiles( \
+  template void PhaseFieldFault<dim>::compute_normalization_integrals(); \
+  template PhaseFieldFault<dim>::NormalizationReuseDecision \
+  PhaseFieldFault<dim>::prepare_normalization_reuse(const bool) const; \
+  template void PhaseFieldFault<dim>::apply_boundary_normalization_completion( \
+                                                                               const std::vector<NormalizationProfile> &, std::vector<double> &) const; \
+  template void PhaseFieldFault<dim>::invalidate_normalization_cache(); \
+  template double PhaseFieldFault<dim>::normalization_effective_phase_field( \
+                                                                             const double, const std::string &); \
+  template void PhaseFieldFault<dim>::validate_normalization_phase_field_minimum( \
+                                                                                  const double, const std::string &); \
+  template double PhaseFieldFault<dim>::normalization_integrand( \
+                                                                 const double, const double, const std::string &); \
+  template PhaseFieldFault<dim>::NormalizationCellGeometry \
+  PhaseFieldFault<dim>::prepare_cell_normalization_geometry(const std::vector<NormalizationProfile> &); \
+  template std::vector<double> PhaseFieldFault<dim>::integrate_cell_normalization_profiles( \
       const std::vector<NormalizationProfile> &, const NormalizationIntegrandEvaluator &, \
       double &, double &); \
-    template std::vector<double> PhaseFieldFault<dim>::integrate_normalization_profiles( \
+  template std::vector<double> PhaseFieldFault<dim>::integrate_normalization_profiles( \
       const std::vector<NormalizationProfile> &, const double, const double, const double, \
       const MPI_Comm, const NormalizationPointEvaluator &, \
       const NormalizationIntegrandEvaluator &, double *); \
-    template void PhaseFieldFault<dim>::project_surface_chemical_compositions(); \
-    template const PhaseFieldFault<dim>::NormalizationPointLookupCache::Batch & \
-      PhaseFieldFault<dim>::NormalizationPointLookupCache::get( \
-        const GridTools::Cache<dim> &, const std::vector<Point<dim>> &); \
-    template std::vector<PhaseFieldFault<dim>::NormalizationPointSample> \
-      PhaseFieldFault<dim>::evaluate_normalization_points(const std::vector<Point<dim>> &) const; \
-    template std::vector<PhaseFieldFault<dim>::NormalizationProfile> \
-      PhaseFieldFault<dim>::build_owned_normalization_profiles(const bool) const; \
-    template void PhaseFieldFault<dim>::project_normalization_integrals_to_fault( \
-      const std::vector<NormalizationProfile> &, const std::vector<double> &);
+  template void PhaseFieldFault<dim>::project_surface_chemical_compositions(); \
+  template const PhaseFieldFault<dim>::NormalizationPointLookupCache::Batch & \
+  PhaseFieldFault<dim>::NormalizationPointLookupCache::get( \
+                                                            const GridTools::Cache<dim> &, const std::vector<Point<dim>> &); \
+  template std::vector<PhaseFieldFault<dim>::NormalizationPointSample> \
+  PhaseFieldFault<dim>::evaluate_normalization_points(const std::vector<Point<dim>> &) const; \
+  template std::vector<PhaseFieldFault<dim>::NormalizationProfile> \
+  PhaseFieldFault<dim>::build_owned_normalization_profiles(const bool) const; \
+  template void PhaseFieldFault<dim>::project_normalization_integrals_to_fault( \
+                                                                                const std::vector<NormalizationProfile> &, const std::vector<double> &);
 
     ASPECT_INSTANTIATE(INSTANTIATE)
 #undef INSTANTIATE

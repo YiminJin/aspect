@@ -60,7 +60,7 @@ namespace aspect
          * @name Material-model interface
          * @{
          */
-        void 
+        void
         evaluate(const MaterialModel::MaterialModelInputs<dim> &in,
                  MaterialModel::MaterialModelOutputs<dim> &out) const override;
 
@@ -69,7 +69,7 @@ namespace aspect
 
         std::vector<double>
         get_critical_energy_release_rates() const override;
-        
+
         double
         get_phase_field_activation_threshold() const override;
 
@@ -187,7 +187,10 @@ namespace aspect
         bool is_mature_frictional_fault() const;
 
         /** Selected cohesive work pair; the legacy mature work mode is separate. */
-        bool uses_cohesive_work_measure() const { return cohesive_work_measure; }
+        bool uses_cohesive_work_measure() const
+        {
+          return cohesive_work_measure;
+        }
 
         /** Surface resistance at prescribed pressure; no bulk stress evaluation
          * is used by the caller. Shares the native cohesive/friction law. */
@@ -209,8 +212,8 @@ namespace aspect
          * Composition contains all compositional fields in introspection order. */
         SymmetricTensor<2,dim>
         evaluate_frozen_maxwell_stress(const double temperature,
-                                      const std::vector<double> &composition,
-                                      const SymmetricTensor<2,dim> &old_stress) const;
+                                       const std::vector<double> &composition,
+                                       const SymmetricTensor<2,dim> &old_stress) const;
 
         /** Default-off, fixed-mesh benchmark hook. Returns unrelaxed retained
          * stress in the specified cell trace, never an additional RHS force.
@@ -218,7 +221,7 @@ namespace aspect
          * Not serialized and not supported by the particle-domain surface rule.
          */
         std::function<SymmetricTensor<2,dim>(const CellId &, const Point<dim> &)>
-          benchmark_retained_stress;
+        benchmark_retained_stress;
 
         double minimum_fault_slip_rate() const;
 
@@ -270,9 +273,18 @@ namespace aspect
         /** Restricted, fresh-run total-energy P2 option. The accepted FE vector
          * represents the 3D plane-strain deviator of symgrad(d_R), not a
          * projection of particle stress. */
-        bool uses_fe_strain_history() const { return fe_strain_history; }
-        bool has_fe_strain_history() const { return bool(fe_strain_state); }
-        bool uses_consistent_endpoint_phase() const { return consistent_endpoint_phase; }
+        bool uses_fe_strain_history() const
+        {
+          return fe_strain_history;
+        }
+        bool has_fe_strain_history() const
+        {
+          return bool(fe_strain_state);
+        }
+        bool uses_consistent_endpoint_phase() const
+        {
+          return consistent_endpoint_phase;
+        }
         bool initialize_fe_shared_phase(LinearAlgebra::BlockVector &) const;
 
         /** Same quadrature in bulk energy, Stokes and the slip adjoint. */
@@ -311,8 +323,8 @@ namespace aspect
                                                   const FEEndpointTrial &,
                                                   const std::vector<double> *phase_direction = nullptr) const;
         SymmetricTensor<2,dim> evaluate_fe_endpoint_stress(const FEEndpointTrial &,
-                                                         const std::vector<double> &normalization,
-                                                         const CellId &,const Point<dim> &) const;
+                                                           const std::vector<double> &normalization,
+                                                           const CellId &,const Point<dim> &) const;
 
         /** Directional derivative of the actual normalization pullback and
          * elastic phase gradient. Optional mechanical directions differentiate
@@ -363,7 +375,7 @@ namespace aspect
           const std::vector<double> &, std::vector<double> &) const;
         /** Test-access-only fixed-entry reference; no checkpoint conversion or particle writes. */
         void set_fe_diagnostic_reference(const LinearAlgebra::BlockVector &,
-                                        const std::vector<double> &,const std::vector<double> &);
+                                         const std::vector<double> &,const std::vector<double> &);
         FEPhaseEnergy evaluate_fe_phase_energy_at(const LinearAlgebra::BlockVector &,
                                                   bool, bool,
                                                   const LinearAlgebra::BlockVector &,
@@ -872,8 +884,8 @@ namespace aspect
         bool use_adiabatic_pressure_in_fault_friction = false;
 
         std::vector<typename ReconstructedFaultManager<dim>::
-                    ParticleScalarProjectionDiagnostics>
-          initial_cohesive_projection_diagnostics;
+        ParticleScalarProjectionDiagnostics>
+        initial_cohesive_projection_diagnostics;
 
         std::unique_ptr<SolutionEvaluator<dim>> solution_evaluator;
 
