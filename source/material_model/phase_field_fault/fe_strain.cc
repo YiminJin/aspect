@@ -18,7 +18,7 @@
   <http://www.gnu.org/licenses/>.
 */
 
-/* Restricted native P2 total-energy model. Existing particle history is unchanged. */
+/* Accepted FE history. Existing particle-authoritative history is unchanged. */
 #include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
 #include <aspect/reconstructed_fault/endpoint_mpi.h>
 #include <aspect/geometry_model/box.h>
@@ -117,6 +117,11 @@ namespace aspect
       if (!fe_strain_history)
         return this->introspection().quadratures.velocities;
       AssertThrow(dim==2,ExcNotImplemented());
+      // One tensor-product rule is used by every mature bulk operator, also
+      // on dipping graded cells. Do not rotate P2's horizontal panel rule.
+      if (mature_frictional_fault)
+        return QGauss<dim>(std::max(fe_bulk_normal_quadrature_points,
+                                    this->get_fe().degree+1));
       const auto &box=Plugins::get_plugin_as_type<const GeometryModel::Box<dim>>(this->get_geometry_model());
       const auto extent=box.get_extents();
       auto cell=this->get_dof_handler().begin_active();
@@ -173,6 +178,16 @@ namespace aspect
         AssertThrow(faults[0].vertex(i)==s.vertices[i],ExcMessage("Accepted FE strain geometry changed."));
       AssertThrow(this->get_triangulation().get_vertices()==s.mesh_vertices,
                   ExcMessage("Accepted FE strain rejects mesh motion."));
+      if (mature_frictional_fault)
+        {
+          AssertThrow(this->get_reconstructed_fault_manager().get_shear_sense(0)==s.shear_sense,
+                      ExcMessage("Mature FE history rejects slip orientation changes."));
+          const unsigned int phase_block=this->introspection().variable("phase_field").block_index;
+          AssertThrow(s.displacement_history.block(phase_block)==this->get_solution().block(phase_block),
+                      ExcMessage("Mature FE history requires the unchanged accepted phase profile."));
+          AssertThrow(current_normalization_integrals.at(0)==s.I,
+                      ExcMessage("Mature FE history requires unchanged BP3 normalization."));
+        }
       const auto &particles=this->get_phase_field_handler().get_associated_particle_manager().get_particle_handler();
       AssertThrow(particles.n_global_particles()==s.n_particles_global,ExcMessage("Accepted FE strain rejects particle birth/deletion."));
       unsigned int fixed_particles=1;
@@ -194,7 +209,8 @@ namespace aspect
         }
       AssertThrow(this->get_timestep_number()==0 && !this->get_parameters().resume_computation
                   && Plugins::plugin_type_matches<GeometryModel::Box<dim>>(this->get_geometry_model())
-                  && !benchmark_retained_stress && normalization_surface_subdivisions==1,
+                  && !benchmark_retained_stress
+                  && (mature_frictional_fault || normalization_surface_subdivisions==1),
                   ExcMessage("FE strain initializes only on a fresh fixed Cartesian Box without stress overrides."));
       auto state=std::make_shared<FEStrainState>();
       state->displacement_history.reinit(this->get_solution());
@@ -203,9 +219,10 @@ namespace aspect
       const unsigned int b=intro.variable("phase_field").block_index;
       state->displacement_history.block(b)=this->get_solution().block(b);
       const auto phase_offset=state->displacement_history.get_block_indices().block_start(b);
-      for (auto i:state->displacement_history.block(b).locally_owned_elements())
-        AssertThrow(!this->get_current_constraints().is_constrained(phase_offset+i),
-                    ExcMessage("Accepted FE strain currently requires unconstrained Q1 phase degrees of freedom."));
+      if (!mature_frictional_fault)
+        for (auto i:state->displacement_history.block(b).locally_owned_elements())
+          AssertThrow(!this->get_current_constraints().is_constrained(phase_offset+i),
+                      ExcMessage("P2 accepted FE strain requires unconstrained Q1 phase degrees of freedom."));
       state->mesh_vertices=this->get_triangulation().get_vertices();
       state->G=elastic_shear_moduli[0];
       state->eta=reference_viscosities[0];
@@ -213,11 +230,13 @@ namespace aspect
       state->n_cells_global=this->get_triangulation().n_global_active_cells();
       const auto &fault=this->get_reconstructed_fault_manager().get_fault(0);
       state->geometry_version=fault.geometry_version();
+      state->shear_sense=this->get_reconstructed_fault_manager().get_shear_sense(0);
       const unsigned int ns=fault.n_cells();
       for (unsigned int i=0; i<fault.n_vertices(); ++i)
         {
-          AssertThrow(std::abs(fault.vertex(i)[0]-double(i)/ns)<1.e-13
-                      && fault.vertex(i)[1]==.5,ExcMessage("FE strain requires a unit horizontal through-going fault."));
+          if (!mature_frictional_fault)
+            AssertThrow(std::abs(fault.vertex(i)[0]-double(i)/ns)<1.e-13
+                        && fault.vertex(i)[1]==.5,ExcMessage("P2 FE strain requires a unit horizontal through-going fault."));
           state->vertices.push_back(fault.vertex(i));
         }
       const auto &pm=this->get_phase_field_handler().get_associated_particle_manager();
@@ -228,6 +247,34 @@ namespace aspect
           for (unsigned int c=0; c<SymmetricTensor<2,dim>::n_independent_components; ++c)
             AssertThrow(p.get_properties()[sp+c]==0.,ExcMessage("FE strain requires unloaded initial particle stress; no conversion is performed."));
           state->particles[p.get_id()]=p.get_location();
+        }
+      if (mature_frictional_fault)
+        {
+          AssertThrow(this->get_reconstructed_fault_manager().get_faults().size()==1
+                      && ns>0,ExcMessage("Mature FE history requires one straight fault."));
+          Tensor<1,dim> tangent=fault.vertex(ns)-fault.vertex(0);
+          const double length=tangent.norm();
+          AssertThrow(std::isfinite(length) && length>0.,ExcMessage("Invalid mature fault length."));
+          tangent/=length;
+          for (const auto &vertex:state->vertices)
+            {
+              const auto offset=vertex-fault.vertex(0);
+              AssertThrow((offset-(offset*tangent)*tangent).norm()<=1.e-10*length,
+                          ExcMessage("Mature FE history requires straight fixed geometry."));
+            }
+          for (const auto &cell:this->get_dof_handler().active_cell_iterators())
+            if (!cell->is_artificial())
+              state->evaluation_cells.emplace(cell->id(),cell);
+          state->Z.assign(fault.n_vertices(),0.);
+          state->I=current_normalization_integrals.at(0);
+          AssertDimension(state->I.size(),state->Z.size());
+          for (const double I:state->I)
+            AssertThrow(std::isfinite(I) && I>0.,ExcMessage("Mature FE normalization is undefined."));
+          fe_strain_state=std::move(state);
+          validate_fe_strain_restrictions();
+          this->get_pcout()<<"   Accepted mature FE history: fixed geometry/mesh/particles, "
+                           <<"BP3 normalization retained; zero perturbation strain and slip memory."<<std::endl;
+          return;
         }
       const auto fractions=std::vector<double>(elastic_shear_moduli.size(),1./elastic_shear_moduli.size());
       state->m=(1./this->get_phase_field_handler().energetic_degradation(fractions,.5)-1.)/3.;
@@ -349,13 +396,45 @@ namespace aspect
       std::vector<double>phi(1);
       fe[this->introspection().extractors.velocities].get_function_symmetric_gradients(state,R);
       fe[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)].get_function_values(state,phi);
-      const auto ns=Znodes.size()-1;
-      const auto j=std::min<unsigned int>(ns-1,x[0]*ns);
-      const double t=x[0]*ns-j;
-      const double Z=(1-t)*Znodes[j]+t*Znodes[j+1],I=(1-t)*Inodes[j]+t*Inodes[j+1];
-      const double h=s.m*phi[0]*(1+phi[0])/std::pow(1-phi[0],2);
+      double profile_stress=0.;
       SymmetricTensor<2,dim>S;
-      S[0][1]=.5*this->get_reconstructed_fault_manager().get_shear_sense(0);
+      const auto &manager=this->get_reconstructed_fault_manager();
+      if (mature_frictional_fault)
+        {
+          // The identical bulk-source map supplies mechanics and particle
+          // publication, including constant endpoint continuation. It does
+          // not admit additional particles to surface projection.
+          const auto source=manager.project_to_bulk_source(x);
+          if (source.active)
+            {
+              const auto &fault=manager.get_fault(source.fault_index);
+              const auto j=source.segment_index;
+              const double t=source.xi;
+              const double Z=(1-t)*Znodes.at(j)+t*Znodes.at(j+1);
+              const double I=(1-t)*Inodes.at(j)+t*Inodes.at(j+1);
+              AssertThrow(std::isfinite(Z) && std::isfinite(I) && I>0.,
+                          ExcMessage("Mature FE stress requires finite slip memory and positive normalization."));
+              Tensor<1,dim> tangent=fault.vertex(j+1)-fault.vertex(j);
+              tangent/=tangent.norm();
+              Tensor<1,dim> normal;
+              normal[0]=-tangent[1];
+              normal[1]=tangent[0];
+              S=manager.get_shear_sense(source.fault_index)*symmetrize(outer_product(tangent,normal));
+              const auto localization=evaluate_reconstructed_fault_localization(
+                                        source.fault_index,j,t,phi[0],phi[0],"mature FE stress");
+              profile_stress=2*Z*localization.current_h/I;
+            }
+        }
+      else
+        {
+          const auto ns=Znodes.size()-1;
+          const auto j=std::min<unsigned int>(ns-1,x[0]*ns);
+          const double t=x[0]*ns-j;
+          const double Z=(1-t)*Znodes[j]+t*Znodes[j+1],I=(1-t)*Inodes[j]+t*Inodes[j+1];
+          const double h=s.m*phi[0]*(1+phi[0])/std::pow(1-phi[0],2);
+          S[0][1]=.5*manager.get_shear_sense(0);
+          profile_stress=2*Z*h/I;
+        }
       if (evaluation_scale)
         {
           // Bound differentiation before cancellation of nearby FE values.
@@ -367,9 +446,9 @@ namespace aspect
             if (this->get_fe().system_to_component_index(i).first<dim)
               strain_scale+=std::abs(values[i])
                             *fe[this->introspection().extractors.velocities].symmetric_gradient(i,0).norm();
-          *evaluation_scale=2*s.G*strain_scale+std::abs(2*Z*h/I)*S.norm();
+          *evaluation_scale=2*s.G*strain_scale+std::abs(profile_stress)*S.norm();
         }
-      return 2*s.G*Utilities::Tensors::consistent_deviator(R[0])-2*Z*h/I*S;
+      return 2*s.G*Utilities::Tensors::consistent_deviator(R[0])-profile_stress*S;
     }
 
     template <int dim>
@@ -406,12 +485,21 @@ namespace aspect
       const auto &V=this->get_reconstructed_fault_manager().get_slip_rate(0);
       for (unsigned int j=0; j<s.Z.size(); ++j)
         {
-          update->Z[j]=tractions.at(0).at(j)*update->I[j];
           const double expected=c.beta*s.Z[j]+c.eta_ve*V[j];
+          if (mature_frictional_fault)
+            {
+              AssertThrow(tractions.at(0).at(j)==0.,
+                          ExcMessage("Mature cohesive traction must remain zero independently of slip memory."));
+              update->Z[j]=expected;
+            }
+          else
+            update->Z[j]=tractions.at(0).at(j)*update->I[j];
           AssertThrow(std::isfinite(update->Z[j]) && std::abs(update->Z[j]-expected)
                       <=64*std::numeric_limits<double>::epsilon()*std::max({1.,std::abs(expected),std::abs(update->Z[j])}),
                       ExcMessage("FE strain surface history and accepted Maxwell state disagree."));
         }
+      AssertThrow(std::isfinite(update->displacement_history.linfty_norm()),
+                  ExcMessage("FE strain candidate contains non-finite coefficients."));
       return update;
     }
 

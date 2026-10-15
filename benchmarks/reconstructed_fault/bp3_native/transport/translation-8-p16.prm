@@ -1,0 +1,14 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_native/transport/base.prm
+set Output directory = $ASPECT_SOURCE_DIR/build-bp3-native/transport-checks/runs/translation-8-p16
+set Maximum time step = 0.0625
+set Maximum first time step = 0.0625
+subsection Mesh refinement
+  set Initial global refinement = 3
+end
+subsection Particles
+  subsection Generator
+    subsection Reference cell
+      set Number of particles per cell per direction = 16
+    end
+  end
+end

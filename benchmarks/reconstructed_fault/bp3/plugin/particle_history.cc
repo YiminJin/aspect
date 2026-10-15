@@ -1,6 +1,7 @@
 #include "runtime.h"
 #include "particle_initialization.h"
 
+#include <aspect/particle/integrator/interface.h>
 #include <aspect/particle/manager.h>
 #include <aspect/phase_field.h>
 #include <aspect/particle/interpolator/linear_least_squares.h>
@@ -12,6 +13,7 @@ namespace aspect
 {
   namespace BP3Benchmark
   {
+    bool stationary_samples=false;
     // Only current owned/ghost particles and one timestep backup are retained.
     // Native MPI transfer carries baselines; checkpoint capture is separate.
     std::map<types::particle_index,double> work_initial_H;
@@ -30,28 +32,28 @@ namespace aspect
         pm.get_particle_handler().register_additional_store_load_functions(
           []() -> std::size_t { return sizeof(double)+sizeof(unsigned char); },
           [](const auto &particle, void *buffer) -> void *
-          {
-            const auto found = work_initial_H.find(particle->get_id());
-            const double H = found==work_initial_H.end()
-                             ? std::numeric_limits<double>::quiet_NaN() : found->second;
-            std::memcpy(buffer, &H, sizeof(H));
-            const unsigned char born = attempt_births.count(particle->get_id()) != 0;
-            auto *next = static_cast<char *>(buffer)+sizeof(H);
-            std::memcpy(next, &born, sizeof(born));
-            return next+sizeof(born);
-          },
-          [](const auto &particle, const void *buffer) -> const void *
-          {
-            double H;
-            std::memcpy(&H, buffer, sizeof(H));
-            unsigned char born;
-            const auto *next = static_cast<const char *>(buffer)+sizeof(H);
-            std::memcpy(&born, next, sizeof(born));
-            if (std::isfinite(H)) work_initial_H[particle->get_id()] = H;
-            if (born) attempt_births.insert(particle->get_id());
-            else attempt_births.erase(particle->get_id());
-            return next+sizeof(born);
-          });
+        {
+          const auto found = work_initial_H.find(particle->get_id());
+          const double H = found==work_initial_H.end()
+          ? std::numeric_limits<double>::quiet_NaN() : found->second;
+          std::memcpy(buffer, &H, sizeof(H));
+          const unsigned char born = attempt_births.count(particle->get_id()) != 0;
+          auto *next = static_cast<char *>(buffer)+sizeof(H);
+          std::memcpy(next, &born, sizeof(born));
+          return next+sizeof(born);
+        },
+        [](const auto &particle, const void *buffer) -> const void *
+        {
+          double H;
+          std::memcpy(&H, buffer, sizeof(H));
+          unsigned char born;
+          const auto *next = static_cast<const char *>(buffer)+sizeof(H);
+          std::memcpy(&born, next, sizeof(born));
+          if (std::isfinite(H)) work_initial_H[particle->get_id()] = H;
+          if (born) attempt_births.insert(particle->get_id());
+          else attempt_births.erase(particle->get_id());
+          return next+sizeof(born);
+        });
       }
 
       template <int dim>
@@ -80,7 +82,7 @@ namespace aspect
                 if (properties.template has_matching_active_plugin<Particle::Property::BP3FrozenCrackDrivingForce<dim>>())
                   {
                     const auto &initializer = properties.template get_matching_active_plugin<Particle::Property::BP3FrozenCrackDrivingForce<dim>>();
-                    if (initializer.uses_stationary_initialization())
+                    if (stationary_samples && initializer.uses_stationary_initialization())
                       valid = valid && value==initializer.initial_H(particle.get_location());
                   }
                 current.emplace(particle.get_id(), value);
@@ -113,7 +115,7 @@ namespace aspect
       // This setup signal exposes const simulator access; registration changes
       // auxiliary particle transport callbacks, not physical particle state.
       auto &pm = const_cast<Particle::Manager<dim> &>(
-        sim.get_phase_field_handler().get_associated_particle_manager());
+                   sim.get_phase_field_handler().get_associated_particle_manager());
       attach_transfer(pm);
       pm.post_particle_creation.connect([](const auto &particle)
       {
@@ -178,22 +180,27 @@ namespace aspect
     template void connect_particle_history_audit(const SimulatorAccess<3> &);
   }
 
-  namespace Particle { namespace Interpolator {
-    /** BP3 policy only; all fitting, fallback and limiting remain native LLS. */
-    template <int dim>
-    class BP3HistoryLLS : public LinearLeastSquares<dim>
+  namespace Particle
+  {
+    namespace Interpolator
     {
-      public:
-        static void declare_parameters(ParameterHandler &) {}
-        void parse_parameters(ParameterHandler &prm) override
-        {
-          const auto &info = this->get_particle_manager(this->get_particle_manager_index())
-                             .get_property_manager().get_data_info();
-          const unsigned int internal = info.get_position_by_field_name("internal: integrator properties");
-          AssertThrow(internal+info.get_components_by_field_name("internal: integrator properties")==info.n_components(),
-                      ExcMessage("BP3 LLS requires native integrator properties at the end of the layout."));
-          std::vector<bool> mask(internal, false);
-          for (const std::string name : {"crack_driving_force", "maxwell stress"})
+      /** BP3 policy only; all fitting, fallback and limiting remain native LLS. */
+      template <int dim>
+      class BP3HistoryLLS : public LinearLeastSquares<dim>
+      {
+        public:
+          static void declare_parameters(ParameterHandler &) {}
+          void parse_parameters(ParameterHandler &prm) override
+          {
+            const auto &info = this->get_particle_manager(this->get_particle_manager_index())
+                               .get_property_manager().get_data_info();
+            const unsigned int internal = info.get_position_by_field_name("internal: integrator properties");
+            AssertThrow(internal+info.get_components_by_field_name("internal: integrator properties")==info.n_components(),
+                        ExcMessage("BP3 LLS requires native integrator properties at the end of the layout."));
+            std::vector<bool> mask(internal, false);
+            for (const std::string name :
+            {"crack_driving_force", "maxwell stress"
+            })
             {
               AssertThrow(info.fieldname_exists(name), ExcMessage("BP3 LLS requires particle field "+name));
               const unsigned int start = info.get_position_by_field_name(name);
@@ -202,19 +209,63 @@ namespace aspect
                           ExcMessage("Unexpected BP3 history component count for "+name));
               for (unsigned int k=0; k<count; ++k) mask.at(start+k)=true;
               this->get_pcout() << "BP3 native LLS limiter: " << name << " components " << start
-                               << ".." << start+count-1 << "; boundary extrapolation disabled." << std::endl;
+                                << ".." << start+count-1 << "; boundary extrapolation disabled." << std::endl;
             }
-          std::string list;
-          for (const bool selected : mask) { if (!list.empty()) list += ','; list += selected ? "true" : "false"; }
-          prm.enter_subsection("Interpolator");
-          prm.enter_subsection("Linear least squares");
-          prm.set("Use linear least squares limiter", list);
-          prm.set("Use boundary extrapolation", "false");
-          prm.leave_subsection(); prm.leave_subsection();
-          LinearLeastSquares<dim>::parse_parameters(prm);
-        }
-    };
-    ASPECT_REGISTER_PARTICLE_INTERPOLATOR(BP3HistoryLLS, "BP3 history linear least squares",
-                                        "Native LLS with runtime-named H/Maxwell limiting and no boundary extrapolation.")
-  }}
+            std::string list;
+            for (const bool selected : mask)
+              {
+                if (!list.empty()) list += ',';
+                list += selected ? "true" : "false";
+              }
+            prm.enter_subsection("Interpolator");
+            prm.enter_subsection("Linear least squares");
+            prm.set("Use linear least squares limiter", list);
+            prm.set("Use boundary extrapolation", "false");
+            prm.leave_subsection();
+            prm.leave_subsection();
+            LinearLeastSquares<dim>::parse_parameters(prm);
+          }
+      };
+      ASPECT_REGISTER_PARTICLE_INTERPOLATOR(BP3HistoryLLS, "BP3 history linear least squares",
+                                            "Native LLS with runtime-named H/Maxwell limiting and no boundary extrapolation.")
+    }
+  }
+
+  namespace Particle
+  {
+    namespace Integrator
+    {
+      /** Explicit stationary-history diagnostic, shared by both backends. */
+      template <int dim>
+      class BP3StationarySamples : public Interface<dim>, public SimulatorAccess<dim>
+      {
+        public:
+          static constexpr unsigned int n_integrator_properties = 0;
+
+          void initialize() override
+          {
+            const auto &p=this->get_parameters();
+            AssertThrow(!p.mesh_deformation_enabled && p.adaptive_refinement_interval==0
+                        && p.additional_refinement_times.empty(),
+                        ExcMessage("BP3 stationary samples require a fixed mesh without transport."));
+            BP3Benchmark::stationary_samples=true;
+          }
+
+          void local_integrate_step(
+            const typename ParticleHandler<dim>::particle_iterator &,
+            const typename ParticleHandler<dim>::particle_iterator &,
+            const std::vector<Tensor<1,dim>> &,
+            const std::vector<Tensor<1,dim>> &, const double) override
+          {}
+
+          std::array<bool,3> required_solution_vectors() const override
+          {
+            return {{false,false,false}};
+          }
+      };
+      ASPECT_REGISTER_PARTICLE_INTEGRATOR(BP3StationarySamples,"BP3 stationary samples",
+                                          "Diagnostic fixed Eulerian samples: no particle movement. Use with no particle "
+                                          "addition/removal and a fixed mesh. This does not implement material-history transport.")
+    }
+  }
 }

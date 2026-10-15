@@ -85,31 +85,31 @@ namespace aspect
           equation_of_state.evaluate(in, i, eos_outputs);
 
           out.densities[i] = MaterialUtilities::average_value(
-            volume_fractions, eos_outputs.densities, MaterialUtilities::arithmetic);
+                               volume_fractions, eos_outputs.densities, MaterialUtilities::arithmetic);
           out.thermal_expansion_coefficients[i] = MaterialUtilities::average_value(
-            volume_fractions, eos_outputs.thermal_expansion_coefficients,
-            MaterialUtilities::arithmetic);
+                                                    volume_fractions, eos_outputs.thermal_expansion_coefficients,
+                                                    MaterialUtilities::arithmetic);
           out.specific_heat[i] = MaterialUtilities::average_value(
-            volume_fractions, eos_outputs.specific_heat_capacities,
-            MaterialUtilities::arithmetic);
+                                   volume_fractions, eos_outputs.specific_heat_capacities,
+                                   MaterialUtilities::arithmetic);
           out.thermal_conductivities[i] = MaterialUtilities::average_value(
-            volume_fractions, thermal_conductivities, MaterialUtilities::arithmetic);
+                                            volume_fractions, thermal_conductivities, MaterialUtilities::arithmetic);
           out.compressibilities[i] = MaterialUtilities::average_value(
-            volume_fractions, eos_outputs.compressibilities,
-            MaterialUtilities::arithmetic);
+                                       volume_fractions, eos_outputs.compressibilities,
+                                       MaterialUtilities::arithmetic);
           out.entropy_derivative_pressure[i] = MaterialUtilities::average_value(
-            volume_fractions, eos_outputs.entropy_derivative_pressure,
-            MaterialUtilities::arithmetic);
+                                                 volume_fractions, eos_outputs.entropy_derivative_pressure,
+                                                 MaterialUtilities::arithmetic);
           out.entropy_derivative_temperature[i] = MaterialUtilities::average_value(
-            volume_fractions, eos_outputs.entropy_derivative_temperature,
-            MaterialUtilities::arithmetic);
+                                                    volume_fractions, eos_outputs.entropy_derivative_temperature,
+                                                    MaterialUtilities::arithmetic);
 
           if (in.requests_property(MaterialProperties::viscosity))
             {
               // The ordinary Stokes assembler uses eta_ve for the current strain
               // rate; the reconstructed-fault assembler supplies the frozen stress.
               const double G = MaterialUtilities::average_value(
-                volume_fractions, elastic_shear_moduli, viscosity_averaging);
+                                 volume_fractions, elastic_shear_moduli, viscosity_averaging);
               const double eta = compute_creep_viscosity(volume_fractions, in.temperature[i]);
               const double time_step = (this->get_timestep_number() > 0
                                         ? this->get_timestep()
@@ -144,7 +144,7 @@ namespace aspect
     }
 
 
-    
+
     template <int dim>
     std::vector<double>
     PhaseFieldFault<dim>::get_critical_energy_release_rates() const
@@ -220,7 +220,10 @@ namespace aspect
       const auto &manager=this->get_reconstructed_fault_manager();
       const auto &fault=manager.get_fault(f);
       const auto left=fault.get_properties(segment), right=fault.get_properties(segment+1);
-      const auto interpolate=[&](const unsigned int i) {return (1-xi)*left[i]+xi*right[i];};
+      const auto interpolate=[&](const unsigned int i)
+      {
+        return (1-xi)*left[i]+xi*right[i];
+      };
       const auto position=manager.get_property_information()[background_traction_property].position;
       double shear=interpolate(position);
       if (background_shear_correction_property != numbers::invalid_unsigned_int)
@@ -432,20 +435,30 @@ namespace aspect
                             "The selection cannot change on restart.");
           prm.declare_entry("Bulk history representation", "particle stress",
                             Patterns::Selection("particle stress|accepted FE strain"),
-                            "Accepted FE strain is the restricted fresh P2 total-energy "
+                            "Accepted FE strain supports fresh stationary mature faults and the restricted P2 total-energy "
                             "option. It retains d_R with R=dev_3(symgrad(d_R)), matching uniform "
-                            "bulk/fault Maxwell coefficients, fixed Cartesian mesh and horizontal "
-                            "geometry, no transport/birth, surface elastic slip, consistent I_h, "
-                            "unloaded initialization and direct phase irreversibility. "
+                            "bulk/fault Maxwell coefficients and no transport/birth. Mature faults "
+                            "retain frozen straight geometry (including dipping faults), graded fixed "
+                            "meshes, native consistent I_h/completion and independent slip memory. "
+                            "The evolving P2 option retains its horizontal uniform-mesh, surface elastic slip, "
+                            "unloaded initialization and direct phase irreversibility restrictions. "
                             "Particle stresses are derived samples. Resume/conversion is rejected. "
                             "Particle stress retains the established default.");
+          prm.declare_entry("Particle stress strain convention", "legacy symmetric gradient",
+                            Patterns::Selection("legacy symmetric gradient|three dimensional deviator"),
+                            "The optional three dimensional deviator uses the same plane-strain "
+                            "constitutive convention in particle-owned stress, bulk assembly and "
+                            "fault tangents. The legacy particle default is unchanged. The new "
+                            "selection currently requires fresh frozen mature 2-D runs; restart "
+                            "conversion is not supported. Accepted FE strain always uses the deviator.");
           prm.declare_entry("FE bulk normal quadrature points", "3",
                             Patterns::Integer(3),
-                            "Gauss points per normal cell in the restricted accepted FE strain "
+                            "Gauss points per coordinate in stationary mature accepted FE strain, "
+                            "or per normal cell in the restricted evolving accepted FE strain "
                             "option. Stokes residual/tangent, bulk-slip coupling and transpose, "
                             "phase bulk energy/derivatives and diagnostics use this one rule. "
-                            "Tangential panels resolve fault and bulk cell intersections and "
-                            "use at least velocity degree+1 points. The default normal rule "
+                            "Only evolving P2 uses tangential panels to resolve fault and bulk "
+                            "cell intersections, with at least velocity degree+1 points. The default normal rule "
                             "retains three points; particle history, normalization and CPDI "
                             "fracture quadrature are unaffected.");
           prm.declare_entry("Consistent endpoint phase solve", "false", Patterns::Bool(),
@@ -551,6 +564,7 @@ namespace aspect
 
           evolve_phase_field = prm.get_bool("Evolve phase field");
           fe_strain_history = prm.get("Bulk history representation") == "accepted FE strain";
+          consistent_particle_strain = prm.get("Particle stress strain convention") == "three dimensional deviator";
           fe_bulk_normal_quadrature_points = prm.get_integer("FE bulk normal quadrature points");
           consistent_endpoint_phase = prm.get_bool("Consistent endpoint phase solve");
           fe_initial_phase_profile = prm.get("FE initial phase profile file");
@@ -562,13 +576,13 @@ namespace aspect
                       || (this->get_parameters().reconstruct_faults && !mature_frictional_fault),
                       ExcMessage("Recoverable history and unloaded initialization require reconstructed cohesive faults."));
           AssertThrow(!mature_frictional_fault || (!evolve_phase_field
-                        && this->get_parameters().reconstruct_faults),
+                                                   && this->get_parameters().reconstruct_faults),
                       ExcMessage("Mature frictional mode requires reconstructed faults and Evolve phase field=false."));
           use_adiabatic_pressure_in_fault_friction =
             prm.get_bool("Use adiabatic pressure in fault friction");
           cohesive_work_measure = prm.get("Fault mechanical work measure") == "bulk conjugate";
           AssertThrow(!cohesive_work_measure || (surface_cohesive_history
-                      && use_adiabatic_pressure_in_fault_friction && dim==2),
+                                                 && use_adiabatic_pressure_in_fault_friction && dim==2),
                       ExcMessage("Cohesive bulk-conjugate work requires 2-D surface elastic-slip "
                                  "history and prescribed friction pressure."));
           lump_normalization_projection = prm.get("I h projection") == "row sum lumped";
@@ -640,56 +654,69 @@ namespace aspect
         prm.leave_subsection();
       }
       prm.leave_subsection();
+      AssertThrow(!consistent_particle_strain || (dim == 2 && mature_frictional_fault && !evolve_phase_field
+                                                  && !this->get_parameters().resume_computation),
+                  ExcMessage("Deviatoric particle stress currently requires fresh frozen mature 2-D mechanics."));
       if (fe_strain_history)
         {
           AssertThrow(dim == 2 && (Utilities::MPI::n_mpi_processes(this->get_mpi_communicator()) == 1
-                      || consistent_endpoint_phase)
+                                   || consistent_endpoint_phase || mature_frictional_fault)
                       && !this->get_parameters().resume_computation
                       && !this->get_parameters().mesh_deformation_enabled
-                      && surface_cohesive_history && cohesive_work_measure
-                      && unloaded_cohesive_initialization && recoverable_phase_history
-                      && !mature_frictional_fault && !lump_normalization_projection
-                      && !fault_friction.has_state_variable(),
+                      && !lump_normalization_projection,
                       ExcMessage("Accepted FE strain requires the fresh fixed-mesh "
-                                 "unloaded cohesive P2 configuration; restart is unsupported."));
+                                 "consistent-normalization configuration; restart is unsupported."));
+          AssertThrow(mature_frictional_fault
+                      ? (!evolve_phase_field && !consistent_endpoint_phase
+                         && this->get_parameters().adaptive_refinement_interval==0
+                         && this->get_parameters().additional_refinement_times.empty())
+                      : (surface_cohesive_history && cohesive_work_measure
+                         && unloaded_cohesive_initialization && recoverable_phase_history
+                         && !fault_friction.has_state_variable()),
+                      ExcMessage("Accepted FE strain requires stationary frozen mature faults "
+                                 "or the unloaded cohesive P2 configuration."));
           for (unsigned int j=0; j<elastic_shear_moduli.size(); ++j)
             AssertThrow(elastic_shear_moduli[j] == elastic_shear_moduli[0]
                         && reference_viscosities[j] == reference_viscosities[0]
                         && thermal_viscosity_exponents[j] == 0.
-                        && critical_energy_release_rates[j] == critical_energy_release_rates[0]
-                        && cohesions[j] == cohesions[0],
-                        ExcMessage("Accepted FE strain requires identical homogeneous G, eta, "
-                                   "Gc and cohesion, and zero temperature dependence."));
+                        && (mature_frictional_fault
+                            || (critical_energy_release_rates[j] == critical_energy_release_rates[0]
+                                && cohesions[j] == cohesions[0])),
+                        ExcMessage("Accepted FE strain requires homogeneous G, eta and zero temperature "
+                                   "dependence; evolving P2 also requires homogeneous Gc and cohesion."));
           AssertThrow(minimum_viscosity <= reference_viscosities[0]
                       && maximum_viscosity >= reference_viscosities[0],
                       ExcMessage("Accepted FE strain requires the configured uniform viscosity without clipping."));
-          prm.enter_subsection("Phase field model");
-          AssertThrow(prm.get("Geometric function type") == "AT1"
-                      && prm.get_double("Degradation curvature parameter") == 1.,
-                      ExcMessage("Accepted FE strain currently requires AT1 and Lorentz p=1."));
-          prm.leave_subsection();
-          prm.enter_subsection("Solver parameters");
-          prm.enter_subsection("Phase field solver parameters");
-          AssertThrow(prm.get_bool("Use bound constraints") && prm.get_bool("Enforce phase irreversibility"),
-                      ExcMessage("Accepted FE strain requires bounded direct phase irreversibility."));
-          prm.leave_subsection();
-          prm.leave_subsection();
-          prm.enter_subsection("Fault reconstruction");
-          AssertThrow(prm.get("Association support")=="full normal cross-section",
-                      ExcMessage("Accepted FE strain requires fixed full-normal association."));
-          prm.leave_subsection();
+          if (!mature_frictional_fault)
+            {
+              prm.enter_subsection("Phase field model");
+              AssertThrow(prm.get("Geometric function type") == "AT1"
+                          && prm.get_double("Degradation curvature parameter") == 1.,
+                          ExcMessage("Accepted FE strain currently requires AT1 and Lorentz p=1."));
+              prm.leave_subsection();
+              prm.enter_subsection("Solver parameters");
+              prm.enter_subsection("Phase field solver parameters");
+              AssertThrow(prm.get_bool("Use bound constraints") && prm.get_bool("Enforce phase irreversibility"),
+                          ExcMessage("Accepted FE strain requires bounded direct phase irreversibility."));
+              prm.leave_subsection();
+              prm.leave_subsection();
+              prm.enter_subsection("Fault reconstruction");
+              AssertThrow(prm.get("Association support")=="full normal cross-section",
+                          ExcMessage("Accepted FE strain requires fixed full-normal association."));
+              prm.leave_subsection();
+            }
           prm.enter_subsection("Particles");
           AssertThrow(prm.get("Load balancing strategy") == "none",
                       ExcMessage("Accepted FE strain prohibits particle replenishment/repartitioning."));
           prm.leave_subsection();
         }
       AssertThrow(!consistent_endpoint_phase || (fe_strain_history && evolve_phase_field
-                  && use_adiabatic_pressure_in_fault_friction),
+                                                 && use_adiabatic_pressure_in_fault_friction),
                   ExcMessage("Consistent endpoint phase requires evolving accepted FE strain and prescribed friction pressure."));
       AssertThrow(fe_initial_phase_profile.empty() || consistent_endpoint_phase,
                   ExcMessage("Shared FE initialization requires the fresh consistent-endpoint option."));
-      if(consistent_endpoint_phase)
-        for(unsigned int j=0;j<initial_friction_coefficients.size();++j)
+      if (consistent_endpoint_phase)
+        for (unsigned int j=0; j<initial_friction_coefficients.size(); ++j)
           AssertThrow(initial_friction_coefficients[j]==initial_friction_coefficients[0]
                       && radiation_damping_coefficients[j]==0.,
                       ExcMessage("Endpoint verification requires homogeneous fixed friction and zero radiation damping."));
@@ -699,7 +726,7 @@ namespace aspect
 
 namespace aspect
 {
-namespace MaterialModel
+  namespace MaterialModel
   {
 
     // Material-model registration

@@ -1,0 +1,42 @@
+{
+  "0": {
+    "all_columns_bit_identical": true,
+    "columns": [
+      "node",
+      "s_m",
+      "time_s",
+      "V_m_s",
+      "theta_s",
+      "Omega",
+      "slip_m",
+      "shear_Pa",
+      "raw_normal_Pa",
+      "filtered_normal_Pa",
+      "pressure_Pa",
+      "deviatoric_Pa",
+      "background_Pa",
+      "I_h_m",
+      "Z_Pa_m"
+    ]
+  },
+  "1": {
+    "all_columns_bit_identical": true,
+    "columns": [
+      "node",
+      "s_m",
+      "time_s",
+      "V_m_s",
+      "theta_s",
+      "Omega",
+      "slip_m",
+      "shear_Pa",
+      "raw_normal_Pa",
+      "filtered_normal_Pa",
+      "pressure_Pa",
+      "deviatoric_Pa",
+      "background_Pa",
+      "I_h_m",
+      "Z_Pa_m"
+    ]
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "scope": "Checkpoint/copy/syntax verification only; no numerical rerun",
+  "source_and_incoming_status_preserved": 28,
+  "original_reusable_files_preserved": 109,
+  "compact_artifacts_verified": 59,
+  "local_only_files_preserved": 2333,
+  "python_syntax_files": 11,
+  "json_files": 64,
+  "parameter_includes_verified": 38,
+  "whitespace": {
+    "source_check": "pass",
+    "full_diff_exit": 2,
+    "preserved_literal_input_warnings": [
+      {
+        "path": "benchmarks/reconstructed_fault/bp3_native/history-graded-q6.prm",
+        "warning": "trailing whitespace.",
+        "count": 2
+      },
+      {
+        "path": "benchmarks/reconstructed_fault/bp3_native/history-graded-q8.prm",
+        "warning": "trailing whitespace.",
+        "count": 2
+      },
+      {
+        "path": "benchmarks/reconstructed_fault/bp3_native/history-uniform-q6.prm",
+        "warning": "trailing whitespace.",
+        "count": 2
+      },
+      {
+        "path": "benchmarks/reconstructed_fault/bp3_native/section7b-common.prm",
+        "warning": "trailing whitespace.",
+        "count": 2
+      },
+      {
+        "path": "benchmarks/reconstructed_fault/bp3_native/section7b-common.prm",
+        "warning": "new blank line at EOF.",
+        "count": 1
+      },
+      {
+        "path": "benchmarks/reconstructed_fault/bp3_native/section7cd-transition.prm",
+        "warning": "trailing whitespace.",
+        "count": 2
+      },
+      {
+        "path": "benchmarks/reconstructed_fault/bp3_native/server/dealii-9.7-prm.patch",
+        "warning": "trailing whitespace.",
+        "count": 1
+      },
+      {
+        "path": "benchmarks/reconstructed_fault/bp3_native/server/dealii-9.7-prm.patch",
+        "warning": "new blank line at EOF.",
+        "count": 1
+      },
+      {
+        "path": "benchmarks/reconstructed_fault/bp3_native/server/parameters.prm",
+        "warning": "trailing whitespace.",
+        "count": 2
+      }
+    ],
+    "csv_line_endings": "original CRLF preserved with scoped Git attributes"
+  },
+  "builds_run": 0,
+  "simulations_run": 0,
+  "scientific_task": "open"
+}

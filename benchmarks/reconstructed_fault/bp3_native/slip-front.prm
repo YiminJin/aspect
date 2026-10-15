@@ -1,0 +1,41 @@
+# LOCAL ACCELERATION DIAGNOSTIC, NOT OFFICIAL BP3 INITIAL DATA.
+# Same physical Vp; theta0=(Dc/Vinit)*exp(log(10)*exp(-((s/L-.35)/.25)^2)).
+# Diagnostic fixed shear is the nodal live-law resistance at Vinit and theta0.
+# It is prescribed once, without recalibration to the computed FE solution.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_native/managed-particles.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/build-bp3-native/slip-front/plugin/libbp3_restore_150x50.release.so, $ASPECT_SOURCE_DIR/build-bp3-native/slip-front/observer/libbp3_coupled_checks.release.so
+set Output directory = $ASPECT_SOURCE_DIR/build-bp3-native/slip-front/runs/primary
+set End time = 20000000
+set Maximum first time step = 200000
+set Maximum time step = 2000000
+set Maximum relative increase in time step = 91
+subsection Material model
+  subsection Phase field fault
+    set Direct effect parameters = 0.010, 0.025
+  end
+end
+subsection Time stepping
+  set List of model names = convection time step, reconstructed fault time step
+  subsection Reconstructed fault time step
+    set Maximum logarithmic state change = 0.2
+  end
+end
+subsection Postprocess
+  subsection BP3
+    # Ordinary horizontal transition starts at the top. The truncated local
+    # fault has a<b for s<1000 m and a>b for its final ~155 m.
+    set Weakening region length = 0
+    set Allow truncated transition = true
+    set Last accepted step = 120
+    set Graceful wall seconds = 1200
+    set Profile time interval = 0
+  end
+  subsection BP3 restored monitor
+    set Local state disturbance = 2.302585092994046
+    set Friction normal input = helmholtz
+    set Normal filter length = 20
+  end
+  subsection BP3 coupled checks
+    set Population event audit = false
+  end
+end

@@ -13,6 +13,7 @@
 
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/material_model/utilities.h>
+#include <aspect/utilities.h>
 #include <aspect/particle/manager.h>
 #include <aspect/phase_field.h>
 #include <aspect/plugins.h>
@@ -380,9 +381,15 @@ namespace aspect
                       const bool pressure=component==this->introspection().component_indices.pressure;
                       if (!velocity && !pressure) continue;
                       for (const auto &row : data[p])
-                        entries[{row.first,indices[i]}]+=velocity
-                          ? row.second.first*fe_values[this->introspection().extractors.velocities].symmetric_gradient(i,p)
-                          : row.second.second*fe_values[this->introspection().extractors.pressure].value(i,p);
+                        if (velocity)
+                          {
+                            auto strain = fe_values[this->introspection().extractors.velocities].symmetric_gradient(i,p);
+                            if (phase_field_fault.uses_deviatoric_strain_rate())
+                              strain = Utilities::Tensors::consistent_deviator(strain);
+                            entries[{row.first,indices[i]}] += row.second.first*strain;
+                          }
+                        else
+                          entries[{row.first,indices[i]}] += row.second.second*fe_values[this->introspection().extractors.pressure].value(i,p);
                     }
               }
           });
@@ -617,8 +624,10 @@ namespace aspect
         normal_direction=result;
         for (const auto &p:surface_linearization->coupling_points)
           {
-            const double dsigma=pressures[p.parent_index]
-              -2.*p.eta_ve*(symmetrize(velocity_gradients[p.parent_index])*p.normal_tensor);
+            const auto strain=symmetrize(velocity_gradients[p.parent_index]);
+            const auto effective = phase_field_fault.uses_deviatoric_strain_rate()
+                                   ? Utilities::Tensors::consistent_deviator(strain) : strain;
+            const double dsigma = pressures[p.parent_index]-2.*p.eta_ve*(effective*p.normal_tensor);
             normal_direction[p.fault_index][p.segment_index]+=p.particle_domain_volume*(1.-p.xi)*dsigma;
             normal_direction[p.fault_index][p.segment_index+1]+=p.particle_domain_volume*p.xi*dsigma;
           }
@@ -638,8 +647,10 @@ namespace aspect
          p < surface_linearization->coupling_points.size(); ++p)
       {
         const auto &point = surface_linearization->coupling_points[p];
-        const SymmetricTensor<2,dim> strain_rate =
+        SymmetricTensor<2,dim> strain_rate =
           symmetrize(velocity_gradients[point.parent_index]);
+        if (phase_field_fault.uses_deviatoric_strain_rate())
+          strain_rate=Utilities::Tensors::consistent_deviator(strain_rate);
         const SymmetricTensor<2,dim> stress_direction =
           (point.uses_adiabatic_friction_pressure || filtering)
           ? 2.0 * point.eta_ve * point.slip_tensor

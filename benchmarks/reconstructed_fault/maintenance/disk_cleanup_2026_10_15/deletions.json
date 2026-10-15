@@ -1,0 +1,3494 @@
+[
+  {
+    "path": "benchmarks/reconstructed_fault/bp3_native/__pycache__/analyze_section7cd.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791946400693217966,
+    "bytes": 27020,
+    "allocated_bytes": 28672,
+    "sha256": "5031669c5baeeb5ff7e12c8c994cd738ab9f4f738e3cb475c8e4dce84d144356"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/bp3_native/__pycache__/analyze_slip_front.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1792048955770642623,
+    "bytes": 28749,
+    "allocated_bytes": 32768,
+    "sha256": "8e04e6c2f30ba1261ea6a7d89761751addd88d148f3e9a97f95b7efae95043ad"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/bp3_native/__pycache__/analyze_managed_particles.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1792041426585369001,
+    "bytes": 19601,
+    "allocated_bytes": 20480,
+    "sha256": "7b4077b8b71257bf73fc8c3611f6120499ad17064159454053371b552fbf89a8"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/bp3_native/__pycache__/analyze_section7b.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791941902729275062,
+    "bytes": 18599,
+    "allocated_bytes": 20480,
+    "sha256": "1162ad1b13b14d17ab8685d312ad2608388ae275b2b0a485040a87131739b82a"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/bp3_native/__pycache__/analyze_managed_event.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1792045812162477387,
+    "bytes": 21979,
+    "allocated_bytes": 24576,
+    "sha256": "378da24e338857be62438a6c379be0493f8a6a92d46850c8fac3a33bd4f6a776"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/bp3_native/__pycache__/plot_section7b.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791941881781468858,
+    "bytes": 3519,
+    "allocated_bytes": 4096,
+    "sha256": "a1db71e6f234b7f789967d0601e8b99807f730e7329cf789fb61c9b009d78211"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/bp3_native/__pycache__/analyze_section8.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791952878347184313,
+    "bytes": 24242,
+    "allocated_bytes": 24576,
+    "sha256": "66ec7d03ca751a937f9885d1f611965e0b9aa62cb2911e17fc967ad01a6c281b"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/bp3_native/transport/__pycache__/analyze.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1792036658066166928,
+    "bytes": 24765,
+    "allocated_bytes": 28672,
+    "sha256": "f5d97a0f98ec75faa504e8fedfa193152f3b309fa0391892a2cff002e548bde6"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/bp3_runtime/__pycache__/prepare_inputs.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791934951812109749,
+    "bytes": 5409,
+    "allocated_bytes": 8192,
+    "sha256": "3a78451ab77313c0f96027a802e6406881c9749e5703b2dc7d485f483ff61f8f"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/check_localization_continuum.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046301508915,
+    "bytes": 8421,
+    "allocated_bytes": 12288,
+    "sha256": "c96e99e861d69f00a431880a99151408dfd59c8d721ed0475fb33b337ed0a22a"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/quadrature_1d.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046368296783,
+    "bytes": 12906,
+    "allocated_bytes": 16384,
+    "sha256": "f7db9ec26d348659b124d365f54ace260cf64b0196ab73713f54730fe657c197"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/assess_native_solver_cases.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791836058672632654,
+    "bytes": 5883,
+    "allocated_bytes": 8192,
+    "sha256": "fb1301e2cae02fe289adf0f97c793ea5d22907e9c3fa5ba8fe110d4669910a1e"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/accuracy_normalization.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046220398154,
+    "bytes": 12920,
+    "allocated_bytes": 16384,
+    "sha256": "110b890c66ec4012cf21b83844e591e652def1b770a216d7619c64aa89feece9"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/check_total_energy_step.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046323955119,
+    "bytes": 11141,
+    "allocated_bytes": 12288,
+    "sha256": "efaae4baca3b82f45a695275ba097f3f754c46f7bf5b658890458e747721dfa6"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/check_profile_temporal.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046315809209,
+    "bytes": 16951,
+    "allocated_bytes": 20480,
+    "sha256": "41d2fdeaa86201db2c2cbafbcf80cc5a4b4fd686ec9e3e67df00924181e1663d"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/assess_native_endpoint_run.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791836058678100664,
+    "bytes": 27081,
+    "allocated_bytes": 28672,
+    "sha256": "fc6e7740d8ba22236779dd7a5ba1d1a9930c902d37b974965d4a3479c830aefd"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/assess_plane_strain.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046268595757,
+    "bytes": 24970,
+    "allocated_bytes": 28672,
+    "sha256": "1aa23b656ca9d5fc4f0be22c5b1aa86f8bddf02261fb79c6172cf8d73d005a05"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/prepare_native_solver_cases.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791836058679324376,
+    "bytes": 7810,
+    "allocated_bytes": 8192,
+    "sha256": "3704d200675266303bd53f424e3c61cff900df44814c77a59b575241fde6c7df"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/plot_native_mpi.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791856189605443707,
+    "bytes": 5758,
+    "allocated_bytes": 8192,
+    "sha256": "6fae7ca8a33634e216646a1ef61cb05316845b8f210fa40cd3d4533ad095c32c"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/check_bound_evidence.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046292363986,
+    "bytes": 10571,
+    "allocated_bytes": 12288,
+    "sha256": "5329eec2a6323c9b882a6430e3e68345b5cf67a1875d387aadc276c6dd904010"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/run_material.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046377397981,
+    "bytes": 6149,
+    "allocated_bytes": 8192,
+    "sha256": "6a98a74b2284a09e475ad2109891d34f3985ba4e174a006291f2b98d6b591b63"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/check_time_resolution.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046321584765,
+    "bytes": 17727,
+    "allocated_bytes": 20480,
+    "sha256": "c981a4aed639b4557a9bdf86d772d5c03eb08aa4ae376c5a7156f62a60cddbcc"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/check_support.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046319529270,
+    "bytes": 4524,
+    "allocated_bytes": 8192,
+    "sha256": "44996d3d1a5144342aa64af2ee2849fb564cde7b8129abd402d60a2a1733dc63"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/asymmetric_branch.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046288751374,
+    "bytes": 52416,
+    "allocated_bytes": 53248,
+    "sha256": "034f1340a5947c4c83983d108c109cc34c4b0980f492b3ebefaed8f42e3fbd58"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/check_localization_reference.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046302526607,
+    "bytes": 9064,
+    "allocated_bytes": 12288,
+    "sha256": "0f534317b396c4c09050f839caad3276589d4c00469c3d4d04e015626cf3076d"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/assess_native_fe.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046261382458,
+    "bytes": 28706,
+    "allocated_bytes": 32768,
+    "sha256": "38535b2a045df619b0aa8dc66483eff6831ea9d3e549a27d81c7935386e7671f"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/assess_time_resolution.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046275511003,
+    "bytes": 17700,
+    "allocated_bytes": 20480,
+    "sha256": "34e8a3fb20682c43d5118d7cd745872d11a20c28ea37c3b5da566b663a4043dd"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/assess_quadrature.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046273328798,
+    "bytes": 33328,
+    "allocated_bytes": 36864,
+    "sha256": "bab46290fabf5f509b7b9633f02fa3fc22e11b32f641e84152f6efc2e2fef356"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/accuracy_profile_energy.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046222823695,
+    "bytes": 25309,
+    "allocated_bytes": 28672,
+    "sha256": "cc393996e2ae5677af4c9be3d115cf2e017f19d1d2da5bb6ce249af35b800699"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/test_bound_checks.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046382272023,
+    "bytes": 3590,
+    "allocated_bytes": 4096,
+    "sha256": "d1d8e0a6099b5e7c0885670b3d853b59f49057fcc5b8d516ae1b9697321e4fdb"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/single_pass_comparison.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791859652520122515,
+    "bytes": 17564,
+    "allocated_bytes": 20480,
+    "sha256": "8049c358576077d97082c2235afd86e5d5afbaec046a7e9ca7738e82f5619f99"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/render_matched_snapshot.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046369606578,
+    "bytes": 12348,
+    "allocated_bytes": 16384,
+    "sha256": "a1fb491235784100763d218240aa7afa97350b8badf6e90baafb656620038d7a"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/check_plane_strain_algebra.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046313895599,
+    "bytes": 13202,
+    "allocated_bytes": 16384,
+    "sha256": "645756477fd779723106563116d1bcd6e0097be494ebc3f1eb4c97df2f2f9585"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/run_case.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046373021370,
+    "bytes": 6674,
+    "allocated_bytes": 8192,
+    "sha256": "4ee7868c8341cc77f9017e5582fc79822e405f70d6071680259c345ee2003269"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/run_native_endpoint.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791836058680701715,
+    "bytes": 9261,
+    "allocated_bytes": 12288,
+    "sha256": "96a27a7a2670884d166c416e607ab1902f0f1b8997f844de9c5d3b35f6d18851"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/assess_direct_mechanical.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791875447842249323,
+    "bytes": 8504,
+    "allocated_bytes": 12288,
+    "sha256": "a9399f7aa2dcca1739394d1ea0c3650a594c4143359173ced52859bc616744c6"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/check_coupled_branch.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046295101914,
+    "bytes": 16534,
+    "allocated_bytes": 20480,
+    "sha256": "23c30ae1225ca71effef792144b2f624a76c49df44a8a0a139288b9cbaf28fd6"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/assess_normal_resolution.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046265590052,
+    "bytes": 31041,
+    "allocated_bytes": 32768,
+    "sha256": "3a8c13a233e680f1215a22d7962be0784b85744935e6858b7359538d67e562d1"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/analyze_recoverable.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046237543094,
+    "bytes": 29335,
+    "allocated_bytes": 32768,
+    "sha256": "1f69c187f1d4f32aaeca7387af0275c7b25e7b0c51efe8adf0dda02e50b2c0a2"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/run_normalization_compat.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046379885664,
+    "bytes": 3046,
+    "allocated_bytes": 4096,
+    "sha256": "068f2667eae5f8846f0db2e86c5f1e28e61af57c301234770a6354272da9769c"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/coupled_branch.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046329011788,
+    "bytes": 40673,
+    "allocated_bytes": 40960,
+    "sha256": "7c78c124f7616537f83fbe28d32a4270a2a9b3e4c5a9e0050330e5df76b682cb"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/assess_total_energy_endpoint.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046279090479,
+    "bytes": 29301,
+    "allocated_bytes": 32768,
+    "sha256": "764ec21bdbfc2d1489b9c129721bf12c9476757a00c5e166df312a5525d82e97"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/total_energy_time_comparison.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046392926950,
+    "bytes": 16326,
+    "allocated_bytes": 16384,
+    "sha256": "66beab9cefc011a8d3fdeef6b9e3dcbe46be5e9ea52609f6f9ef0d9dd7431cc6"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/plot_native_economical_schedule.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791762594746055916,
+    "bytes": 3620,
+    "allocated_bytes": 4096,
+    "sha256": "48e7eb8f0eec9b2d45a6ac6938ac86a20e5164b9dc3adb5910e13aa649ba6dfe"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/time_resolution.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046384229790,
+    "bytes": 19926,
+    "allocated_bytes": 20480,
+    "sha256": "63898bdfe737978601633456da8a8d21eb1751f7534cb5d15f978f416d8403d6"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/check_review_checkpoint.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046318808244,
+    "bytes": 8584,
+    "allocated_bytes": 12288,
+    "sha256": "343483a9e0061d17b46a866c3cf7c4c89ed2254a0f37314270383dccf77563e8"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/assess_total_energy_time.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046283190997,
+    "bytes": 34696,
+    "allocated_bytes": 36864,
+    "sha256": "3271e3324f9ea52a027faa247919fff9b04ac7e584282076952d3554ee8d7e02"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/cheaper_coupling.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791863307829484411,
+    "bytes": 28114,
+    "allocated_bytes": 28672,
+    "sha256": "26fa79b36f376f2646d7da46a0efdb3993a00fecfd262a4b1448d5acca599bd7"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/verify_profile_endpoint.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046393584177,
+    "bytes": 4563,
+    "allocated_bytes": 8192,
+    "sha256": "0d30e45080121bbb4fa6c9554240617a421865d9199487160bdad5b0fe2a076d"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/run_direct_mechanical.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791875447840659871,
+    "bytes": 2295,
+    "allocated_bytes": 4096,
+    "sha256": "25d1ac3b1bffee0cf4ec9a06b1ffc6596dce93a23c0c0e4e236c35011aa1b22f"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/run_quadrature.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046381187901,
+    "bytes": 4221,
+    "allocated_bytes": 8192,
+    "sha256": "b690ea8406e4b02ea770ce4f4e3d46a6da75281aaaa0c07f9591164944af3111"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/prepare_native_endpoint.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046362219215,
+    "bytes": 8764,
+    "allocated_bytes": 12288,
+    "sha256": "83138a5fd48352995627a622755c0f734ad6e35d0260e8f05cad968eb8af416e"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/assess_native_solver_onset.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791836058671460759,
+    "bytes": 12725,
+    "allocated_bytes": 16384,
+    "sha256": "131528a1bf7e4ea856de32713f86087842547e6bd6674e7a694731a54215f7c5"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/run_irreversibility.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046376320625,
+    "bytes": 6225,
+    "allocated_bytes": 8192,
+    "sha256": "7d0bb7528b071229808a0a9bc7fbbbdc4573790c98236131e37315464a372774"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/assess_localization.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046249462840,
+    "bytes": 32612,
+    "allocated_bytes": 32768,
+    "sha256": "ad8ae2e14f108b8dc36bd4075eb4bf4aa219b656f8580070d2d7645397bb95d8"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/plot_bounds.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046358998377,
+    "bytes": 4392,
+    "allocated_bytes": 8192,
+    "sha256": "fc30870bf8a62a20d2ac4113dc346fd4f0e43574540ac53b708e8b401ab9b137"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/analyze_accuracy_stress.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046223589426,
+    "bytes": 6401,
+    "allocated_bytes": 8192,
+    "sha256": "d9ed4443ed904519d4e3f6ad414f54be4252d9f4ed88dbf474dd9882eba2685b"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/check_native_endpoint_path_quadrature.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046306406994,
+    "bytes": 4449,
+    "allocated_bytes": 8192,
+    "sha256": "d766d8b2ba1a4bd13f2288c3468f2e4b424ed274908cff212ae358b7551c2a00"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/check_normal_resolution.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046309656121,
+    "bytes": 13324,
+    "allocated_bytes": 16384,
+    "sha256": "89fc1defba69d9e60453523f1381a1e080b87138ce290b127e4d6546935bbd1e"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/run_irreversibility_compat.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046376749857,
+    "bytes": 3500,
+    "allocated_bytes": 4096,
+    "sha256": "8630b070d23f5d6a24369ab803fd30c1785ad1b2cc0c14c0aba07c2d51fea5cf"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/native_endpoint.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791762594739720364,
+    "bytes": 11111,
+    "allocated_bytes": 12288,
+    "sha256": "76b5ae6684c72d5afa803185445e7b373f5119700f7e88ec964e43581d7d251a"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/check_normalization.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046310706608,
+    "bytes": 8174,
+    "allocated_bytes": 8192,
+    "sha256": "2445fb26a6b28918b490424ffb97e842f6639b308e54ed0a11eff8e22cd24bea"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/assess_native_tangent_cost.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791836058673705197,
+    "bytes": 5834,
+    "allocated_bytes": 8192,
+    "sha256": "142e8a1a8291256ef1071260e261e02ec52a4f78c175cab819ff30863ddcb427"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/monitor_native_endpoint.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791836058681299422,
+    "bytes": 2731,
+    "allocated_bytes": 4096,
+    "sha256": "efea662e9ec38892709d5f447c59415ed2e677526d6b9e27bc044635febe179b"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/diagnose_phase_stall.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046331081610,
+    "bytes": 19627,
+    "allocated_bytes": 20480,
+    "sha256": "874a6657e2f670904d5553aa1bc747358a3118457bcd18914417f64385f681b2"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/check_native_fe.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046307859653,
+    "bytes": 5857,
+    "allocated_bytes": 8192,
+    "sha256": "2c5dd97206dcad32b1f7edbdbf823b2f86bb856cb37854989e1293a544a17697"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/finish_coupling_analysis.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046339918899,
+    "bytes": 9307,
+    "allocated_bytes": 12288,
+    "sha256": "c1ad66504e6df6b23ad897fd96ac5c94d7d30ff780dc76b26555c5013cfb52fd"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/total_energy_step.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046390969043,
+    "bytes": 62237,
+    "allocated_bytes": 65536,
+    "sha256": "b866b92ffbcc2bd4ef694397b82a8eb7dea59ad6f5be6950ff2537129914746f"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/check_irreversibility_evidence.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046298770721,
+    "bytes": 11533,
+    "allocated_bytes": 12288,
+    "sha256": "506e04c077f8656617e5bdc8cb3edd06671ca419e6fc7984658bebe3d63e32e4"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/check_evidence.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046296240043,
+    "bytes": 8608,
+    "allocated_bytes": 12288,
+    "sha256": "52a45e504d4b22ea3a5d4532b16286d57ed88dc0d40cb6d01912bea6cfd077ca"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/analyze_history.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046227715893,
+    "bytes": 14973,
+    "allocated_bytes": 16384,
+    "sha256": "67eb97844db58105d8b811bb63d1fb1f42e165dadf8712a7e88ffb42472cbf38"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/analyze_material.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046233971274,
+    "bytes": 23590,
+    "allocated_bytes": 24576,
+    "sha256": "20a602a2afb589003e818567007a00e22152d95739021ca0e0ba19c150228a9c"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/assess_single_pass.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791859652526724472,
+    "bytes": 37328,
+    "allocated_bytes": 40960,
+    "sha256": "41f3e5d6ee20583307f5e9992cdb5fcc093e92e167973bce144849703aec5e38"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/assess_direct_entries.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791875447843626314,
+    "bytes": 7634,
+    "allocated_bytes": 8192,
+    "sha256": "4d1b466dec982aaf51b0fcfd77e79f82e63bdec39723e383cdb81a74d8d37331"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/write_profile_temporal_report.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046394736208,
+    "bytes": 33521,
+    "allocated_bytes": 36864,
+    "sha256": "151bc7a9da2061d9d7531671984b40e3dcf4a6d47e0afbdfd08b5a809d24aee7"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/match_irreversibility_work.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046348622887,
+    "bytes": 7136,
+    "allocated_bytes": 8192,
+    "sha256": "c6893b77291c274c9262fb815e6609d11be83268eec532183f790782f9993227"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/run_profile_temporal.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046380671444,
+    "bytes": 6636,
+    "allocated_bytes": 8192,
+    "sha256": "1bba53d3ba6e5417fc0f5c11e579447bd66210b6def341c7a24f7f194c5454fb"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/run_normal_resolution.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046379424558,
+    "bytes": 5913,
+    "allocated_bytes": 8192,
+    "sha256": "e9bae8b594949670465138cec0e9427ce05e3b9a6547d04c79fcee20b79fef87"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/probe_asymmetric_release.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046362902347,
+    "bytes": 5566,
+    "allocated_bytes": 8192,
+    "sha256": "9ace510e8f45d062a4865937ff721561e449d8aa236a388046a10c057c5c4277"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/analyze_irreversibility.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046230102975,
+    "bytes": 24451,
+    "allocated_bytes": 24576,
+    "sha256": "564b9dff92c26ea0a85a16c262bf98dec9cc0513c4f23e4f199b3e04e2356944"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/finish_irreversibility_analysis.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046342730657,
+    "bytes": 24555,
+    "allocated_bytes": 24576,
+    "sha256": "ee2ab9666a73d545d1d7ab4cea321193470aea50242b43e7bf5a14e12a56a074"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/run_coupling_consistency.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046374915020,
+    "bytes": 4540,
+    "allocated_bytes": 8192,
+    "sha256": "57a547ede0fa274e2bebb58a9d48b2331d8d5caefb4ca798ae3431d84f84698d"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/assess_coupled_branch.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046245952203,
+    "bytes": 23248,
+    "allocated_bytes": 24576,
+    "sha256": "5420d7674e82818c4b1c40626b02886bc014a6e158b443e3a33cffdf95ab8770"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/analyze_coupling.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046225931270,
+    "bytes": 24287,
+    "allocated_bytes": 24576,
+    "sha256": "3b15480447d6755bd16165edbd3888d6da499431e75435f4a5b799574fbd823b"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/run_coupled.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046373668581,
+    "bytes": 5298,
+    "allocated_bytes": 8192,
+    "sha256": "ff1b162a0e0344352f60fbe3993e4ebf346712755aa3281d95da1ae58ad9ce39"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/normalization_frozen.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046358227380,
+    "bytes": 12813,
+    "allocated_bytes": 16384,
+    "sha256": "eb7df2bbdf69655c05e7f86204e7a61a43c8a8d16ef56a0f393c5458e6bffe65"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/native_economical_schedule.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791762594744666753,
+    "bytes": 1807,
+    "allocated_bytes": 4096,
+    "sha256": "d3a4fb788caf46f0e24c7a1088a38d7fae732aaff5e160b198eccbf9ccf779c6"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/review_normalization.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046371020153,
+    "bytes": 10946,
+    "allocated_bytes": 12288,
+    "sha256": "79d27798d01096da5b2f83c79b02e5c006a2c3f8434c9dc1b9168fc7f04dfe4b"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/profile_endpoint_replay.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046364158712,
+    "bytes": 13188,
+    "allocated_bytes": 16384,
+    "sha256": "4abb9d5f7396a733392446d8bf283dcbd801ec915ff302fc78d6703a406980f7"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/check_matched_modes.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046303235591,
+    "bytes": 5481,
+    "allocated_bytes": 8192,
+    "sha256": "0e54710a5345304b9b3c1e11643c2057b724d7636ae1cbb47925130ff9d26b30"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/assess_matched_initialization.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046252379043,
+    "bytes": 28207,
+    "allocated_bytes": 28672,
+    "sha256": "c0675649ebd734fd89a3811b629ac2b32e794af86c31ca9a56a314c47f257528"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/check_native_tangent_conditioning.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791762594746407004,
+    "bytes": 2726,
+    "allocated_bytes": 4096,
+    "sha256": "d782f6bf9f427780ed79d8e185f92352fd2b432dfe67cd1479cbf243873f127c"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/prepare_native_mpi.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791856189600858394,
+    "bytes": 1835,
+    "allocated_bytes": 4096,
+    "sha256": "f7f650fec69e903b7b66a3e3959a8f108d265bc281eec93e2cbeeeb486e710d8"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/run_recoverable.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046381805106,
+    "bytes": 5237,
+    "allocated_bytes": 8192,
+    "sha256": "8f29614b628e3f2bfea13dfe791bf05efadec41ecd2abd953bc0ae5b71b15613"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/localization_1d.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046346836782,
+    "bytes": 43429,
+    "allocated_bytes": 45056,
+    "sha256": "77a7c2aad48f6d1419634221a2020b5fe9e2c76db960818de8f50c5bb59fa78a"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/check_native_endpoint_active_search.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791771183636941881,
+    "bytes": 8330,
+    "allocated_bytes": 12288,
+    "sha256": "314fbc8ad098df61cc0dbf32dc1bab7ef2de65d4280c0d189ea795c99b8635d3"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/check_matched_visualization.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046304056194,
+    "bytes": 6057,
+    "allocated_bytes": 8192,
+    "sha256": "e14fcb14adb54a8bec7b635835fe5fccc2c79297cfed7a0429e370339d1c5fc0"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/check_plane_strain.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046312377729,
+    "bytes": 14677,
+    "allocated_bytes": 16384,
+    "sha256": "e94392a9642b070300d08d6075f0c157410a249a63ead42194adb8ebae869e30"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/check_native_solver_accuracy.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791787599263949300,
+    "bytes": 10981,
+    "allocated_bytes": 12288,
+    "sha256": "b53760ec38e8136aba988ea74c1f1dac516a6a9d254a39cc2e9d38b96962d597"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/run_integration.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046375648434,
+    "bytes": 7184,
+    "allocated_bytes": 8192,
+    "sha256": "215e17ac596c88474e278841eb9818c78b11deb635fcf9768f9d9c60b2a6a41d"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/check_integration.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046297517975,
+    "bytes": 8511,
+    "allocated_bytes": 12288,
+    "sha256": "5dfeb92f8de05966f4ee73960bf75c30d4e19e7777ae606979cbdebde2eb4eb7"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/run_accuracy_stress.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046371526227,
+    "bytes": 4368,
+    "allocated_bytes": 8192,
+    "sha256": "cfc7e54b848bb0f81a8324c42b9d79ba79cf7005ab6152db2c3248c16e04a849"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/plot_tail.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046360263814,
+    "bytes": 4477,
+    "allocated_bytes": 8192,
+    "sha256": "21d6a7d5a3bbf96113246947decfa9613f010e947067eba83fc938a274134382"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/run_coupling.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046374349343,
+    "bytes": 6038,
+    "allocated_bytes": 8192,
+    "sha256": "0a4515dd097a98730300866fa0d1ed693bfbf63fb9c91e66f965c22852a07875"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/run_native_fe.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046378784795,
+    "bytes": 3552,
+    "allocated_bytes": 4096,
+    "sha256": "d983cd4396bd6d72facb30475b971d8648fe0099b33538229b76dd8b9df3b34a"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/check_coupled.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046293307169,
+    "bytes": 6674,
+    "allocated_bytes": 8192,
+    "sha256": "441c03ceb4d02db8ebb5d31155e91f5ff2eb578c86a79477a8cd98264cb9fb59"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/check_total_energy_endpoint.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046322617871,
+    "bytes": 7538,
+    "allocated_bytes": 8192,
+    "sha256": "60a83c6090ea2d1eaaacae5e6b24b77bac18b9be865543a5c9ae1d30338c337b"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/check_accuracy_evidence.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046290948600,
+    "bytes": 4491,
+    "allocated_bytes": 8192,
+    "sha256": "f07ff51d7c902bcb68abfb0f6cba8b800b40c2379a20e59eabf32e81ccd9a3c1"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/finalize_irreversibility_evidence.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046338632498,
+    "bytes": 9493,
+    "allocated_bytes": 12288,
+    "sha256": "1e9a1ad963922d2dfa61b241e76eee46d9bdd59596fb8d0db95c6da367041576"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/extend_coupled_branch.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046337454730,
+    "bytes": 55693,
+    "allocated_bytes": 57344,
+    "sha256": "85f1afb98799a1f53c95df444c558515e315d10663954882160c7bf395eeba18"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/assess_native_endpoint.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046255661463,
+    "bytes": 15443,
+    "allocated_bytes": 16384,
+    "sha256": "f8a2b822a96315198bed7ab192259bf3e4d8cd03d192d475442499760dedbaa5"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/run_native_mpi.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791867565567480305,
+    "bytes": 11593,
+    "allocated_bytes": 12288,
+    "sha256": "99feecd70cb1516d95a0115dca6d32f3b8abcf2fa1b90ac7745d93b6a4d6d0ae"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/match_coupling_work.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046347783866,
+    "bytes": 7127,
+    "allocated_bytes": 8192,
+    "sha256": "904fc67cdeeb6dfc8294d78037fa128a8faf84bd53f5a8c1868d7510304ee233"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/assess_asymmetric_branch.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046243046085,
+    "bytes": 44905,
+    "allocated_bytes": 45056,
+    "sha256": "1033648512b54069fe0082a6b9d8678bbd28da50aa3c06d68b86219ec5570dce"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/run_bound_case.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046372248752,
+    "bytes": 5619,
+    "allocated_bytes": 8192,
+    "sha256": "f316bb87961706115a4111cf7b9386c90ef52df8c5bb75aee828fcc618c76532"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/analyze_irreversibility_replays.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046231238836,
+    "bytes": 9830,
+    "allocated_bytes": 12288,
+    "sha256": "1c03131338c96dc4b85f1d2462cb24975508b880db48520907e3a9a5ebfd6408"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/normal_resolution.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046356754952,
+    "bytes": 22177,
+    "allocated_bytes": 24576,
+    "sha256": "655803b264402cb7192b6f336c7ab185686a9a29eb03bc7dfd12c133648251a2"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/matched_initialization.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046352001325,
+    "bytes": 34350,
+    "allocated_bytes": 36864,
+    "sha256": "3691825bad3c15a6341ebbc363809e95269f619c3d0df3bbc94fcbcb061ca0d9"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/assess_native_mpi.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791856189604266945,
+    "bytes": 17737,
+    "allocated_bytes": 20480,
+    "sha256": "2d634ed7cff5276e8c2ae82e6807a9e3aa42066e51d571a0a08368eeae62f0a9"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/check_native_endpoint.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791762594741905422,
+    "bytes": 13260,
+    "allocated_bytes": 16384,
+    "sha256": "bd6574aa6c232fa3f0e9db4ffb0f56a693c1ed4797c4b687c3df6d6e1a68aab7"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/plot_time_resolution.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046361332843,
+    "bytes": 8354,
+    "allocated_bytes": 12288,
+    "sha256": "18ad2fbc11bc556d4caa6be87b2e8251901efe73da0d91a3f18dcada8aa281ec"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/check_quadrature.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046317635235,
+    "bytes": 15904,
+    "allocated_bytes": 16384,
+    "sha256": "874b632816ed90a9f03a0b2b4282366fc5d9c96cde4d968ae5ac0ed7a080345c"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/native_fe_prototype.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046354467196,
+    "bytes": 2336,
+    "allocated_bytes": 4096,
+    "sha256": "521ddf1faba999bcf4c14164174682314f0f3f539e12154dec0596ad7d53224d"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/check_native_endpoint_search.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046307147727,
+    "bytes": 5222,
+    "allocated_bytes": 8192,
+    "sha256": "b764b40f1a4b8645f89dd8032bacfb9967afd470ac6e23b2e432bd630abe4e4c"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/assess_profile_temporal.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046269623520,
+    "bytes": 7402,
+    "allocated_bytes": 8192,
+    "sha256": "5b66a7cbdf80c889e1ca7170a10b3e1a13ef8dbe5cdd1014cc9998c0de8d3070"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/profile_temporal_plots.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046366922362,
+    "bytes": 6661,
+    "allocated_bytes": 8192,
+    "sha256": "eac4f6b8ae0e94c818d202de7e0b206828f546386e1ac6606a6825bb89dd45e9"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/check_total_energy_time.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046324665964,
+    "bytes": 5573,
+    "allocated_bytes": 8192,
+    "sha256": "efc7606ea97230c14a88ad2972aea558adeb88182045d45f0346ea1ad94e0d9e"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/audit_time_resolution.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046290322343,
+    "bytes": 12166,
+    "allocated_bytes": 12288,
+    "sha256": "a3cfefe8c73474ecc75f04037d56d98e8e98b9f8094ab9795624a24e0e5400eb"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/check_localization.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046300530558,
+    "bytes": 15114,
+    "allocated_bytes": 16384,
+    "sha256": "4de3dc3caab0252d03381990f7dcc1b5a89de95ca773420a9e341fa468edfb9a"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/profile_temporal_diagnosis.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791760046365979389,
+    "bytes": 16562,
+    "allocated_bytes": 20480,
+    "sha256": "d313e40caca41b204d11ea229af6f91d008588b550c6312df1e3361b4358546e"
+  },
+  {
+    "path": "benchmarks/reconstructed_fault/propagation/__pycache__/assess_native_economical_schedule.cpython-314.pyc",
+    "reason": "regenerable Python bytecode",
+    "mode": 420,
+    "mtime_ns": 1791762594745544651,
+    "bytes": 8921,
+    "allocated_bytes": 12288,
+    "sha256": "aec759429d897cac5a3efb528a5a8f0fccbb065f30b326fbb885dabe8272c082"
+  },
+  {
+    "path": "build-bp3-native/history-plugin/CMakeFiles/bp3_native_checks.dir/history_checks.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791936890496114691,
+    "bytes": 458160,
+    "allocated_bytes": 458752,
+    "sha256": "9a94fc60c56d512c1e398716026266ed0aa82209915c36ba0f0e968692993d16"
+  },
+  {
+    "path": "build-bp3-native/history-plugin/CMakeFiles/legacy_history_checks.dir/home/ein/repository/aspect-fault-propagation/tests/phase_field_fault_stage_j.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935589216251011,
+    "bytes": 1059712,
+    "allocated_bytes": 1060864,
+    "sha256": "d72e8432dfb5407f920d7826124defbb05c293c0d54a8c83be242af692148881"
+  },
+  {
+    "path": "build-bp3-native/history-plugin/CMakeFiles/legacy_history_checks.dir/home/ein/repository/aspect-fault-propagation/tests/phase_field_fault_stage_i.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935577631147283,
+    "bytes": 483744,
+    "allocated_bytes": 487424,
+    "sha256": "46fc90ee2c2e1ecf00ffb9fda5342ec73daa8b2f5c9d82672d1646075f4ade03"
+  },
+  {
+    "path": "build-bp3-native/history-plugin/CMakeFiles/boundary_completion_checks.dir/home/ein/repository/aspect-fault-propagation/tests/phase_field_fault_boundary_completion.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935576231134746,
+    "bytes": 435136,
+    "allocated_bytes": 438272,
+    "sha256": "1750c759e026586e2c42ab687a636cf3a658f06845b5012043835fabd5fae3d4"
+  },
+  {
+    "path": "build-bp3-native/history-plugin/CMakeFiles/bp3_coupled_checks.dir/coupled_checks.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791940510523139712,
+    "bytes": 707888,
+    "allocated_bytes": 708608,
+    "sha256": "f17d1b8d678a354d3a7bcd617dcf4846c8a66e8a550b57e3a769e670d6ad1340"
+  },
+  {
+    "path": "build-bp3-native/server-package-check/plugin/CMakeFiles/bp3_restore_150x50.dir/output.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792006673235307624,
+    "bytes": 1484384,
+    "allocated_bytes": 1490944,
+    "sha256": "505faaa805cba5005be9a3cc2449b7348c52e1b579f1e86d861c5fe9d6b0e5ca"
+  },
+  {
+    "path": "build-bp3-native/server-package-check/plugin/CMakeFiles/bp3_restore_150x50.dir/bottom_constraint.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792006684691403800,
+    "bytes": 157448,
+    "allocated_bytes": 159744,
+    "sha256": "d32b209c50f42e6d779baa203e07f5e121e1e97c0c9aea92574a296d2e0ecd8b"
+  },
+  {
+    "path": "build-bp3-native/server-package-check/plugin/CMakeFiles/bp3_restore_150x50.dir/profile.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792006658804189879,
+    "bytes": 169744,
+    "allocated_bytes": 172032,
+    "sha256": "bc47d09e7a0eec1212f1b27b5d7764955b46f0e69bfdafd959dfea9125d8a776"
+  },
+  {
+    "path": "build-bp3-native/server-package-check/plugin/CMakeFiles/bp3_restore_150x50.dir/mesh.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792006658841190175,
+    "bytes": 150344,
+    "allocated_bytes": 151552,
+    "sha256": "325182167b881b58268bd4efca0bc46f79f19a888cde3b653d3934bb3fd3817a"
+  },
+  {
+    "path": "build-bp3-native/server-package-check/plugin/CMakeFiles/bp3_restore_150x50.dir/bp3.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792006657255177475,
+    "bytes": 982496,
+    "allocated_bytes": 987136,
+    "sha256": "9c5895a83a3941d17f844b85ed2949bc2b22b30221ffcd8bb207d5939696ba82"
+  },
+  {
+    "path": "build-bp3-native/server-package-check/plugin/CMakeFiles/bp3_restore_150x50.dir/particle_history.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792006685604411565,
+    "bytes": 1516856,
+    "allocated_bytes": 1523712,
+    "sha256": "ee391972c220ed38dc82b80701581b8bb8a3255f765df12e37c084644c8c029a"
+  },
+  {
+    "path": "build-bp3-native/server-package-check/plugin/CMakeFiles/bp3_restore_150x50.dir/monitor.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792006670888288210,
+    "bytes": 1025984,
+    "allocated_bytes": 1032192,
+    "sha256": "e18b2c9f2a357dc884d5fcfc251cd4b10890312d38152709ac7f4e7817530f3a"
+  },
+  {
+    "path": "build-bp3-native/server-package-check/plugin/CMakeFiles/bp3_restore_150x50.dir/work_audit.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792006678533351813,
+    "bytes": 1172136,
+    "allocated_bytes": 1179648,
+    "sha256": "4a2b49f3f8bf8ee73b7bafcda4797a7f238f681e1cfa1b71763515ca49ae0050"
+  },
+  {
+    "path": "build-bp3-native/server-package-check/plugin/CMakeFiles/bp3_restore_150x50.dir/geometry.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792006651634132853,
+    "bytes": 159880,
+    "allocated_bytes": 163840,
+    "sha256": "216e2ac01512dc7bc916a1cfa0dbac825aca2b5384168e5ea59f7ed959ce986a"
+  },
+  {
+    "path": "build-bp3-native/server-package-check/plugin/CMakeFiles/bp3_restore_150x50.dir/particle_initialization.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792006680418367655,
+    "bytes": 167272,
+    "allocated_bytes": 167936,
+    "sha256": "b0a7486aa3ec1f4b989680f9e999df15b79158445353f626d6d32d0fc98972ef"
+  },
+  {
+    "path": "build-bp3-native/server-package-check/plugin/CMakeFiles/bp3_restore_150x50.dir/configuration.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792006651348130599,
+    "bytes": 328912,
+    "allocated_bytes": 331776,
+    "sha256": "55b6bea374dfeb18583f24b5056f2faa9ca3f1cfedfe02629baa784257d3e7ac"
+  },
+  {
+    "path": "build-bp3-native/section7cd/mpi-plugin/CMakeFiles/bp3_coupled_checks.dir/coupled_checks.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791945301931045591,
+    "bytes": 883328,
+    "allocated_bytes": 888832,
+    "sha256": "092446cea39cacc2c737000dac4c4b5243195128a066f41ce1e06cca93af3e52"
+  },
+  {
+    "path": "build-bp3-native/section7cd/transition-bp3/CMakeFiles/bp3_restore_150x50.dir/output.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791944305141066058,
+    "bytes": 1484296,
+    "allocated_bytes": 1490944,
+    "sha256": "41282925782caa99f436c7ec09f3e9a529167324b7db5a62579b697832b32f60"
+  },
+  {
+    "path": "build-bp3-native/section7cd/transition-bp3/CMakeFiles/bp3_restore_150x50.dir/bottom_constraint.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791944325227240535,
+    "bytes": 157416,
+    "allocated_bytes": 159744,
+    "sha256": "0f2942c72ff3aca22a2618e49cff00ce6c493407486ed91fcfc6b91060b6995d"
+  },
+  {
+    "path": "build-bp3-native/section7cd/transition-bp3/CMakeFiles/bp3_restore_150x50.dir/profile.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791944288568922469,
+    "bytes": 169656,
+    "allocated_bytes": 172032,
+    "sha256": "fe97a6d91a379349109f42bd5a8f8d522a700dc06dd61447957d93d36af28df1"
+  },
+  {
+    "path": "build-bp3-native/section7cd/transition-bp3/CMakeFiles/bp3_restore_150x50.dir/mesh.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791944290900942655,
+    "bytes": 150328,
+    "allocated_bytes": 151552,
+    "sha256": "9fb87abde37cda6f0c415d2e02c720eb69878d80f65e4c6404f038fba026bf09"
+  },
+  {
+    "path": "build-bp3-native/section7cd/transition-bp3/CMakeFiles/bp3_restore_150x50.dir/bp3.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791944281689862965,
+    "bytes": 982352,
+    "allocated_bytes": 987136,
+    "sha256": "5cccb8843f1fce3b8a666570a8ee4572c2bd7e8058c18b63f8890e47160484df"
+  },
+  {
+    "path": "build-bp3-native/section7cd/transition-bp3/CMakeFiles/bp3_restore_150x50.dir/particle_history.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791944319218188288,
+    "bytes": 1516840,
+    "allocated_bytes": 1523712,
+    "sha256": "428661db816c48de1e2f516d31938451ffbbd31014dce01d27527f3d4a27192e"
+  },
+  {
+    "path": "build-bp3-native/section7cd/transition-bp3/CMakeFiles/bp3_restore_150x50.dir/monitor.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791944300771028161,
+    "bytes": 1025872,
+    "allocated_bytes": 1032192,
+    "sha256": "4776f2ff4a32c0f0594f474b03d9c1e25db52d3f5bdd757b9beee34091856a8f"
+  },
+  {
+    "path": "build-bp3-native/section7cd/transition-bp3/CMakeFiles/bp3_restore_150x50.dir/work_audit.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791944318116178711,
+    "bytes": 1166488,
+    "allocated_bytes": 1171456,
+    "sha256": "f2e8f2bdaf536d47273458feaa15e264f2f8d7a404b80d076a0c847564ee2967"
+  },
+  {
+    "path": "build-bp3-native/section7cd/transition-bp3/CMakeFiles/bp3_restore_150x50.dir/geometry.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791944276847821118,
+    "bytes": 159848,
+    "allocated_bytes": 163840,
+    "sha256": "5056bf9f136ae202e4938f5ee9654939b0c9ab66d5786edc0cd0c20d905b35f3"
+  },
+  {
+    "path": "build-bp3-native/section7cd/transition-bp3/CMakeFiles/bp3_restore_150x50.dir/particle_initialization.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791944324897237664,
+    "bytes": 167256,
+    "allocated_bytes": 167936,
+    "sha256": "554cde53a2419d30fd7ec51d6245cf8def542c6a930278026a0800893a94b36d"
+  },
+  {
+    "path": "build-bp3-native/section7cd/transition-bp3/CMakeFiles/bp3_restore_150x50.dir/configuration.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791944284086883693,
+    "bytes": 328912,
+    "allocated_bytes": 331776,
+    "sha256": "55b6bea374dfeb18583f24b5056f2faa9ca3f1cfedfe02629baa784257d3e7ac"
+  },
+  {
+    "path": "build-bp3-native/section7cd/serial-plugin/CMakeFiles/bp3_coupled_checks.dir/coupled_checks.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791943859910366545,
+    "bytes": 738824,
+    "allocated_bytes": 745472,
+    "sha256": "4297d721f36585b887b1b513d3df54725c1b0fe400caa3b06ce99f5b937a70e3"
+  },
+  {
+    "path": "build-bp3-native/section7cd/transition-observer/CMakeFiles/bp3_coupled_checks.dir/coupled_checks.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791945301372040566,
+    "bytes": 923712,
+    "allocated_bytes": 929792,
+    "sha256": "e0be2f5624c89fd54adb6abea409a33c9b8c001655359aaf12bdaf79618775b0"
+  },
+  {
+    "path": "build-bp3-native/transport-geometry/plugin/CMakeFiles/prescribed_transport.dir/transport.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792036059975815784,
+    "bytes": 692296,
+    "allocated_bytes": 696320,
+    "sha256": "e3934634406b0bbf3c4cb4ea9fa554801a50ea0b390c07b8d18a50f899804d85"
+  },
+  {
+    "path": "build-bp3-native/managed-event-audit/observer/CMakeFiles/bp3_coupled_checks.dir/coupled_checks.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792044606891236597,
+    "bytes": 2681696,
+    "allocated_bytes": 2682880,
+    "sha256": "6e72eb878496b0e53f57e181b6cb9f1779bdb8b018dc14fd7964f6f2b6c844d1"
+  },
+  {
+    "path": "build-bp3-native/managed-event-audit/observer-final/CMakeFiles/bp3_coupled_checks.dir/coupled_checks.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792045600534037708,
+    "bytes": 2681696,
+    "allocated_bytes": 2686976,
+    "sha256": "c9f248be274f6cb25b8a3e6b0b492f8243f6e2dfeecf25d542319223fb7e04ae"
+  },
+  {
+    "path": "build-bp3-native/world_builder_release/tests/CMakeFiles/unit_tests.dir/unit_tests/main.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791934588487494350,
+    "bytes": 1274592,
+    "allocated_bytes": 1277952,
+    "sha256": "2fb8200518c4d906acef316bddfa8bbb756202c3cffd73496540e0d36da2455b"
+  },
+  {
+    "path": "build-bp3-native/world_builder_release/tests/CMakeFiles/unit_tests.dir/unit_tests/unit_test_world_builder.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791934590029735550,
+    "bytes": 1089568,
+    "allocated_bytes": 1093632,
+    "sha256": "70b66594facf6d8fceb412dce0b32c898861e2f4d4cd650d79ef2df31443bcf8"
+  },
+  {
+    "path": "build-bp3-native/world_builder_release/tests/CMakeFiles/unit_tests.dir/unit_tests/kd_tree.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791934580151356845,
+    "bytes": 48168,
+    "allocated_bytes": 49152,
+    "sha256": "d27507628d3cbb1e2c1c98c3b5d36e4b68660bb00dae83c09737766b6970e821"
+  },
+  {
+    "path": "build-bp3-native/world_builder_release/tests/CMakeFiles/unit_tests.dir/unit_tests/bounding_box.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791934579138731260,
+    "bytes": 29424,
+    "allocated_bytes": 32768,
+    "sha256": "af78d3b3333509d365b713854683c8f5e5626f2d38ceaec720fae344f4245733"
+  },
+  {
+    "path": "build-bp3-native/world_builder_release/tests/CMakeFiles/unit_tests.dir/unit_tests/utilities.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791934588933430169,
+    "bytes": 16264,
+    "allocated_bytes": 16384,
+    "sha256": "2cd5b5aeabcf7e607e474fd554230d1c3fc38f917bf5f847b4607b94d125495f"
+  },
+  {
+    "path": "build-bp3-native/world_builder_release/tests/CMakeFiles/unit_tests.dir/unit_tests/unit_test_wb_glm.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791934582509358395,
+    "bytes": 58088,
+    "allocated_bytes": 61440,
+    "sha256": "5a7aeff41299121ef8ec34ce28eb87fe77afa17e8422a53c54bc3c847226eacf"
+  },
+  {
+    "path": "build-bp3-native/world_builder_release/tests/CMakeFiles/unit_tests.dir/unit_tests/gwb_gravity.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791934579661489997,
+    "bytes": 22832,
+    "allocated_bytes": 24576,
+    "sha256": "95b04bcc67c462afcb08bb7ebfb08da6b8ed450d703c116fc5adba56bdc3cf9c"
+  },
+  {
+    "path": "build-bp3-native/world_builder_release/CMakeFiles/gwb-dat.dir/source/gwb-dat/main.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791934578704344769,
+    "bytes": 50936,
+    "allocated_bytes": 53248,
+    "sha256": "313d0dc0fc4fc7e6e33d8d94d7791825ce9ff8184273e74148cd3fef61bb47e7"
+  },
+  {
+    "path": "build-bp3-native/world_builder_release/CMakeFiles/gwb-grid.dir/source/gwb-grid/main.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791934581794370558,
+    "bytes": 334584,
+    "allocated_bytes": 335872,
+    "sha256": "2c57f815c7d909f670b4740039d560d6c9f5507fc4c9ad1bf274a7b493a780fd"
+  },
+  {
+    "path": "build-bp3-native/world_builder_release/CMakeFiles/WorldBuilderRelease.dir/Unity/unity_0_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935261479299868,
+    "bytes": 2188352,
+    "allocated_bytes": 2191360,
+    "sha256": "80945e8c8dbe894f4e521818f0253f556976e06b15137143b2f7e46e4c1c5e8e"
+  },
+  {
+    "path": "build-bp3-native/world_builder_release/CMakeFiles/WorldBuilderRelease.dir/source/world_builder/point.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935213933868081,
+    "bytes": 32400,
+    "allocated_bytes": 32768,
+    "sha256": "f3e88ab6cddf364d7c2e1f57ec47adc440747cbe4a9b092173ea4d6a63da679a"
+  },
+  {
+    "path": "build-bp3-native/world_builder_release/CMakeFiles/WorldBuilderRelease.dir/source/world_builder/wrapper_fortran.f90.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791934563493217937,
+    "bytes": 984,
+    "allocated_bytes": 4096,
+    "sha256": "ab11b60ee7902174d133d9d9149e23358c481dbaaa89634e4cb60b585c739587"
+  },
+  {
+    "path": "build-bp3-native/world_builder_release/CMakeFiles/WorldBuilderRelease.dir/source/world_builder/parameters.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935225971977516,
+    "bytes": 1606888,
+    "allocated_bytes": 1609728,
+    "sha256": "156856195fd6bce8d57c96fefca63ad251eb1ee3dffb3baeb31b973a71cff213"
+  },
+  {
+    "path": "build-bp3-native/section7b/bp3-plugin/CMakeFiles/bp3_restore_150x50.dir/output.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791939188890838290,
+    "bytes": 1484968,
+    "allocated_bytes": 1490944,
+    "sha256": "84e889e7932b87b9cb76167e522340173ec8e9da2cb94b5e670d01a2494709a5"
+  },
+  {
+    "path": "build-bp3-native/section7b/bp3-plugin/CMakeFiles/bp3_restore_150x50.dir/bottom_constraint.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791939209354956585,
+    "bytes": 157416,
+    "allocated_bytes": 159744,
+    "sha256": "0f2942c72ff3aca22a2618e49cff00ce6c493407486ed91fcfc6b91060b6995d"
+  },
+  {
+    "path": "build-bp3-native/section7b/bp3-plugin/CMakeFiles/bp3_restore_150x50.dir/profile.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791939172033743315,
+    "bytes": 169656,
+    "allocated_bytes": 172032,
+    "sha256": "fe97a6d91a379349109f42bd5a8f8d522a700dc06dd61447957d93d36af28df1"
+  },
+  {
+    "path": "build-bp3-native/section7b/bp3-plugin/CMakeFiles/bp3_restore_150x50.dir/mesh.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791939174371756352,
+    "bytes": 150328,
+    "allocated_bytes": 151552,
+    "sha256": "9fb87abde37cda6f0c415d2e02c720eb69878d80f65e4c6404f038fba026bf09"
+  },
+  {
+    "path": "build-bp3-native/section7b/bp3-plugin/CMakeFiles/bp3_restore_150x50.dir/bp3.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791939165207705510,
+    "bytes": 981608,
+    "allocated_bytes": 987136,
+    "sha256": "d6ae086827faf37547291cbd45c595e1ca7fc6e0ed9e5f1d03da46b5fc6b0af3"
+  },
+  {
+    "path": "build-bp3-native/section7b/bp3-plugin/CMakeFiles/bp3_restore_150x50.dir/particle_history.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791939203449922120,
+    "bytes": 1516840,
+    "allocated_bytes": 1523712,
+    "sha256": "428661db816c48de1e2f516d31938451ffbbd31014dce01d27527f3d4a27192e"
+  },
+  {
+    "path": "build-bp3-native/section7b/bp3-plugin/CMakeFiles/bp3_restore_150x50.dir/monitor.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791939185049816450,
+    "bytes": 1026968,
+    "allocated_bytes": 1028096,
+    "sha256": "b23bd57d485df1754dd685ac3222c82ca1c2ead65e6333d524ccf24272de5399"
+  },
+  {
+    "path": "build-bp3-native/section7b/bp3-plugin/CMakeFiles/bp3_restore_150x50.dir/work_audit.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791939203361921608,
+    "bytes": 1166488,
+    "allocated_bytes": 1171456,
+    "sha256": "f2e8f2bdaf536d47273458feaa15e264f2f8d7a404b80d076a0c847564ee2967"
+  },
+  {
+    "path": "build-bp3-native/section7b/bp3-plugin/CMakeFiles/bp3_restore_150x50.dir/geometry.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791939159545674442,
+    "bytes": 159848,
+    "allocated_bytes": 163840,
+    "sha256": "5a29797adabbe6c11dd2399ae36c96f1aac5412dd11e3d9a3eb0cad189950066"
+  },
+  {
+    "path": "build-bp3-native/section7b/bp3-plugin/CMakeFiles/bp3_restore_150x50.dir/particle_initialization.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791939210830965241,
+    "bytes": 166656,
+    "allocated_bytes": 167936,
+    "sha256": "39f000b1293ec2f5c55ced550975b7ca729fbec7d443f55eb6027c15d7659591"
+  },
+  {
+    "path": "build-bp3-native/section7b/bp3-plugin/CMakeFiles/bp3_restore_150x50.dir/configuration.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791939167212716575,
+    "bytes": 328912,
+    "allocated_bytes": 331776,
+    "sha256": "55b6bea374dfeb18583f24b5056f2faa9ca3f1cfedfe02629baa784257d3e7ac"
+  },
+  {
+    "path": "build-bp3-native/managed-coupled/observer/CMakeFiles/bp3_coupled_checks.dir/coupled_checks.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792039212521662638,
+    "bytes": 1882080,
+    "allocated_bytes": 1884160,
+    "sha256": "5e96c140ed027f50897f6dcee8c54450acacd23297f9a2bcefa63ba22bd1728d"
+  },
+  {
+    "path": "build-bp3-native/managed-coupled/observer-final/CMakeFiles/bp3_coupled_checks.dir/coupled_checks.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792039655027832088,
+    "bytes": 1882080,
+    "allocated_bytes": 1888256,
+    "sha256": "30beec68e1220d4ecbe827bf3978c039964d920f5afc51a9d44b8a942c08af49"
+  },
+  {
+    "path": "build-bp3-native/managed-coupled/bp3-plugin/CMakeFiles/bp3_restore_150x50.dir/output.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792037755120309218,
+    "bytes": 1438552,
+    "allocated_bytes": 1445888,
+    "sha256": "814dad9802dc82451706314011fc792024ec01c4e983ad2e214f1c5767f9f5d4"
+  },
+  {
+    "path": "build-bp3-native/managed-coupled/bp3-plugin/CMakeFiles/bp3_restore_150x50.dir/bottom_constraint.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792037763931386434,
+    "bytes": 161016,
+    "allocated_bytes": 163840,
+    "sha256": "a256d49e35beddeb31f9bc0717e65deb5b0c6bdf645ed010ddfed91d8054d9f0"
+  },
+  {
+    "path": "build-bp3-native/managed-coupled/bp3-plugin/CMakeFiles/bp3_restore_150x50.dir/profile.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792037736846149137,
+    "bytes": 161088,
+    "allocated_bytes": 163840,
+    "sha256": "916f5ae940154a1470304da0d084163037456aebe02008ba172e5d42426bd5d3"
+  },
+  {
+    "path": "build-bp3-native/managed-coupled/bp3-plugin/CMakeFiles/bp3_restore_150x50.dir/mesh.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792037745425224278,
+    "bytes": 142560,
+    "allocated_bytes": 143360,
+    "sha256": "a95561ed749efa355701a6c2828340e6201f0a70a1b827d0224d2da2921ed70c"
+  },
+  {
+    "path": "build-bp3-native/managed-coupled/bp3-plugin/CMakeFiles/bp3_restore_150x50.dir/bp3.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792037741930193664,
+    "bytes": 909096,
+    "allocated_bytes": 913408,
+    "sha256": "ae10a49fb392258158ac826dc309403ee1670dc14ede8886b881e795a8bddd50"
+  },
+  {
+    "path": "build-bp3-native/managed-coupled/bp3-plugin/CMakeFiles/bp3_restore_150x50.dir/particle_history.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792037833859999972,
+    "bytes": 1378512,
+    "allocated_bytes": 1384448,
+    "sha256": "cd8a9662b45c2cbf6084a044d2d6afbf6043597808edd1d6ba29c4506936918b"
+  },
+  {
+    "path": "build-bp3-native/managed-coupled/bp3-plugin/CMakeFiles/bp3_restore_150x50.dir/monitor.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792037752930290029,
+    "bytes": 997272,
+    "allocated_bytes": 1003520,
+    "sha256": "fff85da341d4a3bd6ae436992d7a1f1e5b7502f6e7763f3829e5395150c51acb"
+  },
+  {
+    "path": "build-bp3-native/managed-coupled/bp3-plugin/CMakeFiles/bp3_restore_150x50.dir/work_audit.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792037840103054803,
+    "bytes": 1246576,
+    "allocated_bytes": 1249280,
+    "sha256": "b1f550a3cd8bff8f99e030b9ba9961992357be5a04c156afac3a2d2f796e0b9f"
+  },
+  {
+    "path": "build-bp3-native/managed-coupled/bp3-plugin/CMakeFiles/bp3_restore_150x50.dir/geometry.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792037735660138751,
+    "bytes": 154920,
+    "allocated_bytes": 155648,
+    "sha256": "343f1fc888b203de71a4590313208e48a5b2d26fa6df19fa1c5316739f1f4de2"
+  },
+  {
+    "path": "build-bp3-native/managed-coupled/bp3-plugin/CMakeFiles/bp3_restore_150x50.dir/particle_initialization.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792037826296933559,
+    "bytes": 162440,
+    "allocated_bytes": 163840,
+    "sha256": "fca3454b96bec29376525bf7cde7790bd2fc0b994a8d91b8a43c1a8284c886a0"
+  },
+  {
+    "path": "build-bp3-native/managed-coupled/bp3-plugin/CMakeFiles/bp3_restore_150x50.dir/configuration.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792037735563137902,
+    "bytes": 313056,
+    "allocated_bytes": 315392,
+    "sha256": "65e96af3a6962dd05f6d8b0cc1db812c85d0f47f59b7c2e05c0f05f2064b7848"
+  },
+  {
+    "path": "build-bp3-native/bp3-plugin/CMakeFiles/bp3_restore_150x50.dir/output.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935986706988439,
+    "bytes": 1438184,
+    "allocated_bytes": 1441792,
+    "sha256": "3df80a675acd3fb6e75e502d33acf7e9cf5b808524d0aa64b305f267a3314d15"
+  },
+  {
+    "path": "build-bp3-native/bp3-plugin/CMakeFiles/bp3_restore_150x50.dir/bottom_constraint.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935964712959370,
+    "bytes": 161016,
+    "allocated_bytes": 163840,
+    "sha256": "a256d49e35beddeb31f9bc0717e65deb5b0c6bdf645ed010ddfed91d8054d9f0"
+  },
+  {
+    "path": "build-bp3-native/bp3-plugin/CMakeFiles/bp3_restore_150x50.dir/profile.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935994533743349,
+    "bytes": 161088,
+    "allocated_bytes": 163840,
+    "sha256": "916f5ae940154a1470304da0d084163037456aebe02008ba172e5d42426bd5d3"
+  },
+  {
+    "path": "build-bp3-native/bp3-plugin/CMakeFiles/bp3_restore_150x50.dir/mesh.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935972152128992,
+    "bytes": 142560,
+    "allocated_bytes": 143360,
+    "sha256": "a95561ed749efa355701a6c2828340e6201f0a70a1b827d0224d2da2921ed70c"
+  },
+  {
+    "path": "build-bp3-native/bp3-plugin/CMakeFiles/bp3_restore_150x50.dir/bp3.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791937572835201752,
+    "bytes": 907560,
+    "allocated_bytes": 909312,
+    "sha256": "459fd6c953b892a2106b8b8254b68ab34bde15c78b021f87507a7b1903e35336"
+  },
+  {
+    "path": "build-bp3-native/bp3-plugin/CMakeFiles/bp3_restore_150x50.dir/particle_history.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935998183938411,
+    "bytes": 1378488,
+    "allocated_bytes": 1380352,
+    "sha256": "fcaf6e66d0defdaa57dd58cae71e02b7f8f58ba0f638e4558f05004ab2eafdd5"
+  },
+  {
+    "path": "build-bp3-native/bp3-plugin/CMakeFiles/bp3_restore_150x50.dir/monitor.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935983818920555,
+    "bytes": 995624,
+    "allocated_bytes": 999424,
+    "sha256": "0fdc96ca45a3e93f2fcd5bc7462335b9be1846fe7715ea2d2b1ee1892179105e"
+  },
+  {
+    "path": "build-bp3-native/bp3-plugin/CMakeFiles/bp3_restore_150x50.dir/work_audit.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791936012345870454,
+    "bytes": 1245832,
+    "allocated_bytes": 1249280,
+    "sha256": "58ee384e5fbf9dfc137f66bf44424bc8d3449b5896a7a9417a0d3d5ca6265d41"
+  },
+  {
+    "path": "build-bp3-native/bp3-plugin/CMakeFiles/bp3_restore_150x50.dir/geometry.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935372607482921,
+    "bytes": 154936,
+    "allocated_bytes": 155648,
+    "sha256": "45521e382354d51f5ab3871dd2e3ef1695f9cf1900e2b69da44cd0f95b2d278e"
+  },
+  {
+    "path": "build-bp3-native/bp3-plugin/CMakeFiles/bp3_restore_150x50.dir/particle_initialization.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935399113427662,
+    "bytes": 162832,
+    "allocated_bytes": 163840,
+    "sha256": "4600275759946ea9c4af8d0c02282073e8fa68b32aafa2bfe928609a1ca7f4f4"
+  },
+  {
+    "path": "build-bp3-native/bp3-plugin/CMakeFiles/bp3_restore_150x50.dir/configuration.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935364905280750,
+    "bytes": 313056,
+    "allocated_bytes": 315392,
+    "sha256": "65e96af3a6962dd05f6d8b0cc1db812c85d0f47f59b7c2e05c0f05f2064b7848"
+  },
+  {
+    "path": "build-bp3-native/transport-checks/plugin/CMakeFiles/prescribed_transport.dir/transport.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792033570263698952,
+    "bytes": 632624,
+    "allocated_bytes": 638976,
+    "sha256": "0f70beed97e8626b23c10eae1b3ed194ff272980e9a740a02790374674bb150d"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/cmake_pch.hxx.gch",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935278899457789,
+    "bytes": 854126285,
+    "allocated_bytes": 854142976,
+    "sha256": "fdf1b114bd218304c0d720257819d219f53923de9e4c81d4c043f6a912d4814c"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_28_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935349324094816,
+    "bytes": 516512,
+    "allocated_bytes": 520192,
+    "sha256": "a9f29c63ec476c378c01ef1a9768e87cec4843c1bccb7bd34dbd5fa7713572b4"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_29_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935355981154923,
+    "bytes": 757896,
+    "allocated_bytes": 761856,
+    "sha256": "1ed864d13c87b1cc457b5e8352254d4bdfb579efc623a36541d487bd50b3cceb"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_39_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935416946704580,
+    "bytes": 1588712,
+    "allocated_bytes": 1589248,
+    "sha256": "ae12716c49883d18488040fb8991a8a186d27138d976c48eb29aae7e9cb214bb"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_36_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935406031606274,
+    "bytes": 2113880,
+    "allocated_bytes": 2117632,
+    "sha256": "c4a797dc027b65b2a70fd6e4621e2857447e131f838873c92ac03e0590439db0"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_25_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935342286031249,
+    "bytes": 699440,
+    "allocated_bytes": 700416,
+    "sha256": "00f79037f790aaf62082079c6ee5847f8d2eb2c8cfda942b15ac10342fa88d61"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_5_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935542182829673,
+    "bytes": 878352,
+    "allocated_bytes": 880640,
+    "sha256": "7f2cb148e9e374d68a99f593faf2a95ecaba537183d85cc4525924c8068df1a9"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_49_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935464296130548,
+    "bytes": 5940344,
+    "allocated_bytes": 5947392,
+    "sha256": "1b13c9cbbf611da273e5c2699fdcc293951f2fd1efbfbb4d3642e7620aad144b"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_24_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935393167490357,
+    "bytes": 5926064,
+    "allocated_bytes": 5926912,
+    "sha256": "475fe1b4e98516b26b9dd6acc6ce85b0dd4494d9b11002b6a639d286af4a7a21"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_0_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935306530707988,
+    "bytes": 3321600,
+    "allocated_bytes": 3325952,
+    "sha256": "f78d0a203962608e92ad888eb85fdb141db228ba53696fa2ef0e8a97948fed15"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_56_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935536143775530,
+    "bytes": 125616,
+    "allocated_bytes": 126976,
+    "sha256": "4be02a9eac1722f495c601850891152eb4c0bc68eef25d5bf4ce80a594529725"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_6_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935547006872916,
+    "bytes": 711584,
+    "allocated_bytes": 712704,
+    "sha256": "9765ae236519a1da20a83f60c73bc4deaeb21a172750d07aa2dcc578a6fa26c5"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_16_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935298182632434,
+    "bytes": 943400,
+    "allocated_bytes": 946176,
+    "sha256": "c415dc070fa8e5b801074154c43fddf25a4e707604a974de4d8e7917d66893bb"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_26_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935345475060054,
+    "bytes": 557368,
+    "allocated_bytes": 561152,
+    "sha256": "5f52f09f5e7f853b416d61c2d5aeb937ae83dced638db8c13c7004c8713b4e39"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_41_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935420156733483,
+    "bytes": 580920,
+    "allocated_bytes": 581632,
+    "sha256": "ff6aea2ad0360d57e2215d2493ea092f718d1f17f84591734de0616547e0ccf3"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_53_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935534770763218,
+    "bytes": 4090864,
+    "allocated_bytes": 4091904,
+    "sha256": "fc37931948ce6ab2a9e1846b0e27027fe7cda3a182d810358bf30b0990c2d8c5"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_52_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935565649039964,
+    "bytes": 12110920,
+    "allocated_bytes": 12115968,
+    "sha256": "3d442762d3656f8c17a802f344adcb8edb59cf239c365e735e76b6cc3a83d9fb"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_47_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935444361951308,
+    "bytes": 2161816,
+    "allocated_bytes": 2162688,
+    "sha256": "9fbe541fdf4377477228f8b3f16d0a7008848754dd77bd87552a397a94c3bc44"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_19_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935336748981225,
+    "bytes": 3188200,
+    "allocated_bytes": 3194880,
+    "sha256": "6eeb27a2b3a9ce479f14a9c65e40fc3f0cd3c88a7bd60588f66aafb8facc97f9"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_31_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935371836298008,
+    "bytes": 1005008,
+    "allocated_bytes": 1007616,
+    "sha256": "1257b22bc929b079e5a6be75d8f0ec418e0f09daf992f20efd9c6db439acbd27"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_40_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935424983776938,
+    "bytes": 2018672,
+    "allocated_bytes": 2019328,
+    "sha256": "3e2744b534c882b5127bd708b69d8fc4175e774b3b71c5eb3b1e533aefdf8865"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_45_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935429409816776,
+    "bytes": 460400,
+    "allocated_bytes": 462848,
+    "sha256": "dddb8f2dfb7707bd9ddaacdcf1454d9172302d9356a4984c9a871b062fc6dda2"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_32_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935731626523518,
+    "bytes": 573616,
+    "allocated_bytes": 577536,
+    "sha256": "a1332eae027b234990ffdd7255a778b6feeffb641107304a812fecad70ad0eef"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_27_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935348790089993,
+    "bytes": 609512,
+    "allocated_bytes": 610304,
+    "sha256": "e731d48484edc08ac4f71d5249109a877b1ccc5509c358c239ba0318f29cfb4d"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_9_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935562879015148,
+    "bytes": 1170488,
+    "allocated_bytes": 1171456,
+    "sha256": "1d5377870d900962613cb6c1cb377a221974303783cb4b6b92657850f054e223"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_2_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935359398185768,
+    "bytes": 1174104,
+    "allocated_bytes": 1175552,
+    "sha256": "0f49dbda44d7785d41bcaa4a65791415d4dbb76a26a613f9cb2f996b2288481a"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_23_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935336801981704,
+    "bytes": 882392,
+    "allocated_bytes": 884736,
+    "sha256": "e239ee5e0a5d4e4b090235dc0a97777071bff0c77f12d5efbe441bcc281362b2"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_51_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791937412492930999,
+    "bytes": 6786592,
+    "allocated_bytes": 6791168,
+    "sha256": "411f6fb7fe352650b0e8a44d906aef42324ccd2b34636fb27e39f0e38a9cd1c7"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_15_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935293600590950,
+    "bytes": 722032,
+    "allocated_bytes": 724992,
+    "sha256": "99f39bac9277774b2da5fb1e6159b200892a5e3163c94a3a843b82004e391ff9"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_21_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935328595907542,
+    "bytes": 1197264,
+    "allocated_bytes": 1200128,
+    "sha256": "ccdd548637935e988ee7bacbc0dbcbdbee34cf177dff095118953e1669db7300"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_13_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935288186541922,
+    "bytes": 758536,
+    "allocated_bytes": 761856,
+    "sha256": "379aa64407e688ac8ea3b92c1af1b3e91ebdf93db5fddb32185b21c3fe3276e0"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_12_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935287287533780,
+    "bytes": 485656,
+    "allocated_bytes": 487424,
+    "sha256": "a1d5b863f9734a493c5e1432c4b0c17953eb466d17b6fbc49de18882c8a71d43"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_35_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935407529619768,
+    "bytes": 3330800,
+    "allocated_bytes": 3338240,
+    "sha256": "6a4b5bb48c3f56359a49f13d096f0e6fce2c9352e4e406860785980f323e09f1"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_11_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935283209496839,
+    "bytes": 458216,
+    "allocated_bytes": 458752,
+    "sha256": "a1d6ce62e841603c9f9f099b6508fa144688db6344a07944427adb051ccc9ed8"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_1_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935329780918253,
+    "bytes": 2855344,
+    "allocated_bytes": 2863104,
+    "sha256": "b9150375cc68686fd25c17c105550764bf538a636d5ca768239f536edcac2957"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_34_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935389884460765,
+    "bytes": 607984,
+    "allocated_bytes": 610304,
+    "sha256": "42d7b7aed7393fd9977c7506e67c73f976eb4fd1a33d0f0fc06dcd1fa275ac1b"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_10_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935283707501351,
+    "bytes": 564392,
+    "allocated_bytes": 565248,
+    "sha256": "f1c7bd7ea77537ae00058da458baf6e44ca015c03654f6e2e8ae3332e4019c75"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_44_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935426963794761,
+    "bytes": 541528,
+    "allocated_bytes": 544768,
+    "sha256": "650a1d729996c0421c07ae5e990da470e6d6b807fb4b5556858159065f0d6733"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_37_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935400753558721,
+    "bytes": 575344,
+    "allocated_bytes": 577536,
+    "sha256": "8a1c5a66691b8257cb8eb5244b0b639accfdc6e6508c2efd7534c1fca80fb009"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_17_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935311533753254,
+    "bytes": 2097808,
+    "allocated_bytes": 2101248,
+    "sha256": "12ed32e8db14d5912ad27b2a06114777a540b4d59e42305121906307657b459f"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_55_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935549905898899,
+    "bytes": 2550960,
+    "allocated_bytes": 2551808,
+    "sha256": "f6c52b5bfe95cc0dcf3ffff766d728945ddcad865ad96fab0e45ddbda5cbe053"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_33_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935383732405300,
+    "bytes": 501128,
+    "allocated_bytes": 503808,
+    "sha256": "aa98b0c2afa13bf34653132d448c2d703f63a39317b21b0ca49d6321f2cebb96"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_43_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935425086777865,
+    "bytes": 525744,
+    "allocated_bytes": 528384,
+    "sha256": "fc9ff504b4ff47464bf432fc89c78dce1a13121705f9596bd5c05fea3d0d9daf"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_50_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935492845387026,
+    "bytes": 5840040,
+    "allocated_bytes": 5844992,
+    "sha256": "eee35315801fac7e1faef7e93d1ef27f2c30801468138dc52d1e7de6f883e432"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_4_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935449303995757,
+    "bytes": 729256,
+    "allocated_bytes": 733184,
+    "sha256": "b2b8219a13f3729598be9f8bc77f63928e7d2a155d2b25c52e63f8fd971c3254"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_7_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935556621959086,
+    "bytes": 1196216,
+    "allocated_bytes": 1200128,
+    "sha256": "e5998ba5860d8b03dec280769be560c43a4000fe7cf0e828ae39681ac6ef6c05"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_38_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935414867685859,
+    "bytes": 2684760,
+    "allocated_bytes": 2686976,
+    "sha256": "276af4a6c939974fc495c7b9ad8295214770d9d1e09041d58d6acc78ec982695"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_42_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935422563755153,
+    "bytes": 582096,
+    "allocated_bytes": 585728,
+    "sha256": "35a589d84ab277a815f2827b02f262a4075ee1a0c6c10276cac0607898078dc4"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_3_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935412512664650,
+    "bytes": 667368,
+    "allocated_bytes": 667648,
+    "sha256": "bc0c67e96919dcf348885420063148ef2866ec099f2ef144d56f5fdeacafebcb"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_20_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935316382797115,
+    "bytes": 667256,
+    "allocated_bytes": 667648,
+    "sha256": "213bc591067bd5c80d5656f9aeaf73b6f8e592f8df1dbd3c94ed2ce696cb9a09"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_46_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935430750828845,
+    "bytes": 616856,
+    "allocated_bytes": 618496,
+    "sha256": "27a832dd2d4afb6cf1a9c73b7c61976420a044c75501bf94b95d83e31a504529"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_48_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935456541060833,
+    "bytes": 2990680,
+    "allocated_bytes": 2998272,
+    "sha256": "8db2a12313c93986392d59cf08cd1722a76154887825ce72dd20a389544d0515"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_22_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935340425014437,
+    "bytes": 1275584,
+    "allocated_bytes": 1282048,
+    "sha256": "0fc3ca14912bb0cdcbe158996983559f618af5f3448f480aa033eec9ae9304ae"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_14_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935291646573257,
+    "bytes": 717624,
+    "allocated_bytes": 720896,
+    "sha256": "8d31032754a5f724e0849c59e0f3838932f235aea2f54c15efc1f6d4212ab901"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_54_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935528870710309,
+    "bytes": 622808,
+    "allocated_bytes": 626688,
+    "sha256": "c2c27926d5bf206eef0f5bffd13a4f595fbaf3a0b4757f33e0f046bed70e02e4"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_18_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791937362485204660,
+    "bytes": 1941928,
+    "allocated_bytes": 1945600,
+    "sha256": "50144d5b4e7df7a7f8c371761c05021f3fcab1ce2d809acd98b9f3aae23162b7"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_8_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935555255946845,
+    "bytes": 877632,
+    "allocated_bytes": 880640,
+    "sha256": "5950e822efb88cf7db027efdf6a314b8441881d4e7cfaec4e43da02ceca39841"
+  },
+  {
+    "path": "build-bp3-native/CMakeFiles/aspect.exe.release.dir/Unity/unity_30_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791935386441429725,
+    "bytes": 3328408,
+    "allocated_bytes": 3330048,
+    "sha256": "5af5e2d4ad0a4495c6a8255b2d4f81f5d156d70d275442b2b61fd755ebe03ac8"
+  },
+  {
+    "path": "build-bp3-native/section8/local-observer/CMakeFiles/bp3_coupled_checks.dir/coupled_checks.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791950180435122429,
+    "bytes": 946576,
+    "allocated_bytes": 950272,
+    "sha256": "8e6e56846e0e109083d103bc3c4dcc9286f54cf1cb592f042d8e75ed2075037d"
+  },
+  {
+    "path": "build-bp3-native/section8/ordinary-observer/CMakeFiles/bp3_coupled_checks.dir/coupled_checks.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791951887620184244,
+    "bytes": 985008,
+    "allocated_bytes": 991232,
+    "sha256": "332ccf42bf1885672de43d2bff564f33a3ea2d938192bbc47a81a0d4ed549776"
+  },
+  {
+    "path": "build-bp3-native/section8/profile-observer/CMakeFiles/bp3_coupled_checks.dir/coupled_checks.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791951843447907224,
+    "bytes": 945072,
+    "allocated_bytes": 950272,
+    "sha256": "3de98776746b604506ee5ab465f45d131bb995a84756a9f84a921e2f353d5409"
+  },
+  {
+    "path": "build-bp3-native/slip-front/observer/CMakeFiles/bp3_coupled_checks.dir/coupled_checks.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792046768661288482,
+    "bytes": 2718448,
+    "allocated_bytes": 2719744,
+    "sha256": "ba02a0e5b201d4cbb02868f347740005a1f092ac013172aa49d78e1096850dea"
+  },
+  {
+    "path": "build-bp3-native/slip-front/observer-final/CMakeFiles/bp3_coupled_checks.dir/coupled_checks.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792047969577806735,
+    "bytes": 2718448,
+    "allocated_bytes": 2719744,
+    "sha256": "ba02a0e5b201d4cbb02868f347740005a1f092ac013172aa49d78e1096850dea"
+  },
+  {
+    "path": "build-bp3-native/slip-front/plugin-final/CMakeFiles/bp3_restore_150x50.dir/output.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792047839729817373,
+    "bytes": 1435496,
+    "allocated_bytes": 1437696,
+    "sha256": "366c2d7a59d88f2be695429f45aad41befa8c27b45d444a140a64c25cd405a6d"
+  },
+  {
+    "path": "build-bp3-native/slip-front/plugin-final/CMakeFiles/bp3_restore_150x50.dir/bottom_constraint.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792047865931014775,
+    "bytes": 161016,
+    "allocated_bytes": 163840,
+    "sha256": "a256d49e35beddeb31f9bc0717e65deb5b0c6bdf645ed010ddfed91d8054d9f0"
+  },
+  {
+    "path": "build-bp3-native/slip-front/plugin-final/CMakeFiles/bp3_restore_150x50.dir/profile.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792047818234656357,
+    "bytes": 161088,
+    "allocated_bytes": 163840,
+    "sha256": "916f5ae940154a1470304da0d084163037456aebe02008ba172e5d42426bd5d3"
+  },
+  {
+    "path": "build-bp3-native/slip-front/plugin-final/CMakeFiles/bp3_restore_150x50.dir/mesh.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792047821741682569,
+    "bytes": 142560,
+    "allocated_bytes": 143360,
+    "sha256": "a95561ed749efa355701a6c2828340e6201f0a70a1b827d0224d2da2921ed70c"
+  },
+  {
+    "path": "build-bp3-native/slip-front/plugin-final/CMakeFiles/bp3_restore_150x50.dir/bp3.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792047808443583303,
+    "bytes": 912488,
+    "allocated_bytes": 913408,
+    "sha256": "2cbfacab3035fa80aaafb8b98e497977de86a84af094da338ee2e9b9b52134ce"
+  },
+  {
+    "path": "build-bp3-native/slip-front/plugin-final/CMakeFiles/bp3_restore_150x50.dir/particle_history.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792047857495951092,
+    "bytes": 1378512,
+    "allocated_bytes": 1380352,
+    "sha256": "cd8a9662b45c2cbf6084a044d2d6afbf6043597808edd1d6ba29c4506936918b"
+  },
+  {
+    "path": "build-bp3-native/slip-front/plugin-final/CMakeFiles/bp3_restore_150x50.dir/monitor.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792047833633771622,
+    "bytes": 997520,
+    "allocated_bytes": 999424,
+    "sha256": "7fcd2405019710688691550b19f862c391363037638f0071cf06766f201e644e"
+  },
+  {
+    "path": "build-bp3-native/slip-front/plugin-final/CMakeFiles/bp3_restore_150x50.dir/work_audit.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792047854962931993,
+    "bytes": 1246576,
+    "allocated_bytes": 1249280,
+    "sha256": "b1f550a3cd8bff8f99e030b9ba9961992357be5a04c156afac3a2d2f796e0b9f"
+  },
+  {
+    "path": "build-bp3-native/slip-front/plugin-final/CMakeFiles/bp3_restore_150x50.dir/geometry.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792047802610539868,
+    "bytes": 154936,
+    "allocated_bytes": 155648,
+    "sha256": "45521e382354d51f5ab3871dd2e3ef1695f9cf1900e2b69da44cd0f95b2d278e"
+  },
+  {
+    "path": "build-bp3-native/slip-front/plugin-final/CMakeFiles/bp3_restore_150x50.dir/particle_initialization.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792047864428003419,
+    "bytes": 162968,
+    "allocated_bytes": 163840,
+    "sha256": "5ec03a75e9218517a128bda4201273f77815daad4d10764a4f25702aa4b8dd3e"
+  },
+  {
+    "path": "build-bp3-native/slip-front/plugin-final/CMakeFiles/bp3_restore_150x50.dir/configuration.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792047811598606823,
+    "bytes": 311288,
+    "allocated_bytes": 311296,
+    "sha256": "6c0f1834304508f959be6ec0e1efadd12a2cce02a30ef79c4fbe03f88545b132"
+  },
+  {
+    "path": "build-bp3-native/slip-front/plugin/CMakeFiles/bp3_restore_150x50.dir/output.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792046882090276568,
+    "bytes": 1435496,
+    "allocated_bytes": 1437696,
+    "sha256": "366c2d7a59d88f2be695429f45aad41befa8c27b45d444a140a64c25cd405a6d"
+  },
+  {
+    "path": "build-bp3-native/slip-front/plugin/CMakeFiles/bp3_restore_150x50.dir/bottom_constraint.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792046724054901682,
+    "bytes": 161016,
+    "allocated_bytes": 163840,
+    "sha256": "a256d49e35beddeb31f9bc0717e65deb5b0c6bdf645ed010ddfed91d8054d9f0"
+  },
+  {
+    "path": "build-bp3-native/slip-front/plugin/CMakeFiles/bp3_restore_150x50.dir/profile.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792046880141259541,
+    "bytes": 161088,
+    "allocated_bytes": 163840,
+    "sha256": "916f5ae940154a1470304da0d084163037456aebe02008ba172e5d42426bd5d3"
+  },
+  {
+    "path": "build-bp3-native/slip-front/plugin/CMakeFiles/bp3_restore_150x50.dir/mesh.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792046695056650828,
+    "bytes": 142560,
+    "allocated_bytes": 143360,
+    "sha256": "a95561ed749efa355701a6c2828340e6201f0a70a1b827d0224d2da2921ed70c"
+  },
+  {
+    "path": "build-bp3-native/slip-front/plugin/CMakeFiles/bp3_restore_150x50.dir/bp3.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792046871570184681,
+    "bytes": 912488,
+    "allocated_bytes": 917504,
+    "sha256": "2cbfacab3035fa80aaafb8b98e497977de86a84af094da338ee2e9b9b52134ce"
+  },
+  {
+    "path": "build-bp3-native/slip-front/plugin/CMakeFiles/bp3_restore_150x50.dir/particle_history.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792046723738898946,
+    "bytes": 1378512,
+    "allocated_bytes": 1384448,
+    "sha256": "cd8a9662b45c2cbf6084a044d2d6afbf6043597808edd1d6ba29c4506936918b"
+  },
+  {
+    "path": "build-bp3-native/slip-front/plugin/CMakeFiles/bp3_restore_150x50.dir/monitor.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792046871490183983,
+    "bytes": 997520,
+    "allocated_bytes": 999424,
+    "sha256": "7fcd2405019710688691550b19f862c391363037638f0071cf06766f201e644e"
+  },
+  {
+    "path": "build-bp3-native/slip-front/plugin/CMakeFiles/bp3_restore_150x50.dir/work_audit.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792046900325435950,
+    "bytes": 1246576,
+    "allocated_bytes": 1249280,
+    "sha256": "b1f550a3cd8bff8f99e030b9ba9961992357be5a04c156afac3a2d2f796e0b9f"
+  },
+  {
+    "path": "build-bp3-native/slip-front/plugin/CMakeFiles/bp3_restore_150x50.dir/geometry.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792046685702570016,
+    "bytes": 154936,
+    "allocated_bytes": 155648,
+    "sha256": "45521e382354d51f5ab3871dd2e3ef1695f9cf1900e2b69da44cd0f95b2d278e"
+  },
+  {
+    "path": "build-bp3-native/slip-front/plugin/CMakeFiles/bp3_restore_150x50.dir/particle_initialization.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792046880304260965,
+    "bytes": 162968,
+    "allocated_bytes": 163840,
+    "sha256": "5ec03a75e9218517a128bda4201273f77815daad4d10764a4f25702aa4b8dd3e"
+  },
+  {
+    "path": "build-bp3-native/slip-front/plugin/CMakeFiles/bp3_restore_150x50.dir/configuration.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1792046865254129537,
+    "bytes": 311288,
+    "allocated_bytes": 311296,
+    "sha256": "6c0f1834304508f959be6ec0e1efadd12a2cce02a30ef79c4fbe03f88545b132"
+  },
+  {
+    "path": "build-propagation-integration/snapshot-visualization/CMakeFiles/snapshot_visualization.dir/snapshot_visualization.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791686303605700585,
+    "bytes": 321896,
+    "allocated_bytes": 323584,
+    "sha256": "1f4f011b3475b3e435916edaf616c57998ce6eb7196976a7d03e45cb2996b92f"
+  },
+  {
+    "path": "build-propagation-integration/world_builder_release/CMakeFiles/WorldBuilderRelease.dir/Unity/unity_0_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791585857960111417,
+    "bytes": 2188352,
+    "allocated_bytes": 2191360,
+    "sha256": "80945e8c8dbe894f4e521818f0253f556976e06b15137143b2f7e46e4c1c5e8e"
+  },
+  {
+    "path": "build-propagation-integration/world_builder_release/CMakeFiles/WorldBuilderRelease.dir/source/world_builder/point.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791585854833013184,
+    "bytes": 32400,
+    "allocated_bytes": 32768,
+    "sha256": "f3e88ab6cddf364d7c2e1f57ec47adc440747cbe4a9b092173ea4d6a63da679a"
+  },
+  {
+    "path": "build-propagation-integration/world_builder_release/CMakeFiles/WorldBuilderRelease.dir/source/world_builder/parameters.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791585854556024292,
+    "bytes": 1606888,
+    "allocated_bytes": 1609728,
+    "sha256": "156856195fd6bce8d57c96fefca63ad251eb1ee3dffb3baeb31b973a71cff213"
+  },
+  {
+    "path": "build-propagation-integration/plugin/CMakeFiles/bound_diagnostic.dir/bound_diagnostic.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791796739461052341,
+    "bytes": 1096048,
+    "allocated_bytes": 1101824,
+    "sha256": "14bf13588b4645d57856d51b5bb3112a67c8634de95f8b6bcddf1caf7b279e44"
+  },
+  {
+    "path": "build-propagation-integration/plugin/CMakeFiles/irreversibility_feedback.dir/irreversibility_feedback.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791796782309424556,
+    "bytes": 2158576,
+    "allocated_bytes": 2162688,
+    "sha256": "1ef0f4f2bd9b02de24fb9c744b54d8b39b71b424029f58dac51ec0570a3762b9"
+  },
+  {
+    "path": "build-propagation-integration/plugin/CMakeFiles/material_feedback.dir/material_feedback.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791796756842203266,
+    "bytes": 1644800,
+    "allocated_bytes": 1650688,
+    "sha256": "56642130a2cae0d1f4977ef1e8ccd5d971be2099a80f70946e8837ab7036eeea"
+  },
+  {
+    "path": "build-propagation-integration/plugin/CMakeFiles/history_driving.dir/history_driving.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791796747861125270,
+    "bytes": 149984,
+    "allocated_bytes": 151552,
+    "sha256": "f45ed90f08b5ee7f001720f8c538b3f35fe56a921314b3acf11608e997f7ea17"
+  },
+  {
+    "path": "build-propagation-integration/plugin/CMakeFiles/coupling_feedback.dir/coupling_local.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791796783256432788,
+    "bytes": 177248,
+    "allocated_bytes": 180224,
+    "sha256": "a1f525c5c1719b6b6f645b78a1c31c7a7d3ff43e55b360f66de1f88e86b3b143"
+  },
+  {
+    "path": "build-propagation-integration/plugin/CMakeFiles/coupling_feedback.dir/coupling_feedback.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791796775588366139,
+    "bytes": 2063616,
+    "allocated_bytes": 2068480,
+    "sha256": "6157c2476030ae5f3d8376249874eba489b026e4de1f837399d07fafa08ba6e3"
+  },
+  {
+    "path": "build-propagation-integration/plugin/CMakeFiles/accuracy_stress.dir/accuracy_stress.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791796796995552246,
+    "bytes": 1966792,
+    "allocated_bytes": 1974272,
+    "sha256": "0770836410bdaa04ced5a26d6dad75a6430ffd87dd0df15f4b5fa839b0cd8ca5"
+  },
+  {
+    "path": "build-propagation-integration/plugin/CMakeFiles/native_endpoint_verification.dir/native_endpoint_verification.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791926049266256987,
+    "bytes": 1695392,
+    "allocated_bytes": 1695744,
+    "sha256": "680fa385dde6486b63ef7a2fbb09a4d1748f887ac4ae7ee6530e413aa21739ad"
+  },
+  {
+    "path": "build-propagation-integration/plugin/CMakeFiles/native_fe_strain.dir/native_fe_strain.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791796796504547976,
+    "bytes": 712648,
+    "allocated_bytes": 712704,
+    "sha256": "0721138e5305b6e15896c8789256e36ac64e18225fb5abf5caf38f42856bae00"
+  },
+  {
+    "path": "build-propagation-integration/plugin/CMakeFiles/coupled_feedback.dir/coupled_feedback.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791796751078153206,
+    "bytes": 1455440,
+    "allocated_bytes": 1462272,
+    "sha256": "7a78204b04c3cea622420cec2c54aaff4761f4cb544aa6db72975f6f765a4936"
+  },
+  {
+    "path": "build-propagation-integration/plugin/CMakeFiles/production_integration.dir/production_integration.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791796742188076015,
+    "bytes": 2005632,
+    "allocated_bytes": 2011136,
+    "sha256": "9a672b9adee37092838d34ba6a071056d25b7ff37f61a23d112e7284285e69d6"
+  },
+  {
+    "path": "build-propagation-integration/plugin/CMakeFiles/controlled_history.dir/home/ein/repository/aspect-fault-propagation/tests/phase_field_controlled_history.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791796736114023288,
+    "bytes": 857152,
+    "allocated_bytes": 864256,
+    "sha256": "2aa54db88635ef195c0f4b6269c40931adeafe5eb13fa306794957da8d431e75"
+  },
+  {
+    "path": "build-propagation-integration/plugin/CMakeFiles/mature_compat.dir/home/ein/repository/aspect-fault-propagation/tests/phase_field_fault_boundary_completion.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791796731492983181,
+    "bytes": 435136,
+    "allocated_bytes": 438272,
+    "sha256": "dd5acad9814de89af0ac55a58d66ca7ab7bbc656ba5c5ace87bdbc7dce1c7365"
+  },
+  {
+    "path": "build-propagation-integration/plugin/CMakeFiles/recoverable_projection.dir/recoverable_projection.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791796756123197021,
+    "bytes": 140000,
+    "allocated_bytes": 143360,
+    "sha256": "40f258a56b76c0be3568347a17748470a9bc2fddfc4b7a54b0d3f0aa4dd7cdd1"
+  },
+  {
+    "path": "build-propagation-integration/plugin/CMakeFiles/recoverable_feedback.dir/recoverable_local.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791796773591348783,
+    "bytes": 166048,
+    "allocated_bytes": 167936,
+    "sha256": "fc11c1507b5d2ccf1c59a7d2630ddc52bad0f2d78ec30f6e62f1f883decfc53c"
+  },
+  {
+    "path": "build-propagation-integration/plugin/CMakeFiles/recoverable_feedback.dir/recoverable_feedback.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791796765534278773,
+    "bytes": 1923008,
+    "allocated_bytes": 1929216,
+    "sha256": "a816af876d80955635c39144e0ce45be5a3a18b3b2dda5961c128ce7707cdaa4"
+  },
+  {
+    "path": "build-propagation-integration/plugin/CMakeFiles/coupling_consistency.dir/coupling_consistency.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791796782148423157,
+    "bytes": 2087600,
+    "allocated_bytes": 2093056,
+    "sha256": "50e525dcc2230dceeb6ee4fc349656629edd1c6bd183a22835acd15e009c1d3b"
+  },
+  {
+    "path": "build-propagation-integration/tests/cmake_install.cmake",
+    "reason": "oversized generated CMake install script; reconfigure before installation",
+    "mode": 420,
+    "mtime_ns": 1791926058069704912,
+    "bytes": 162335692,
+    "allocated_bytes": 162340864,
+    "sha256": "1186cf1831c145251054f967691b0a6ee9e4acb3a115825bf1a065472c8625f0"
+  },
+  {
+    "path": "build-propagation-integration/tests/CMakeFiles/phase_field_fault_boundary_completion.dir/phase_field_fault_boundary_completion.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791929569997732129,
+    "bytes": 435136,
+    "allocated_bytes": 438272,
+    "sha256": "1750c759e026586e2c42ab687a636cf3a658f06845b5012043835fabd5fae3d4"
+  },
+  {
+    "path": "build-propagation-integration/tests/CMakeFiles/phase_field_fault_stage_j.dir/phase_field_fault_stage_j.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791926092598523194,
+    "bytes": 1059712,
+    "allocated_bytes": 1060864,
+    "sha256": "d72e8432dfb5407f920d7826124defbb05c293c0d54a8c83be242af692148881"
+  },
+  {
+    "path": "build-propagation-integration/tests/CMakeFiles/phase_field_fault_ih.dir/phase_field_fault_ih.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791929447630683778,
+    "bytes": 650952,
+    "allocated_bytes": 651264,
+    "sha256": "31e3fffb341eb94ce5745809ca46e75dd5af949e6a9008fc0bceea7189972def"
+  },
+  {
+    "path": "build-propagation-integration/tests/CMakeFiles/phase_field_fault_ih_no_composition.dir/phase_field_fault_ih_no_composition.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791929489133906773,
+    "bytes": 650984,
+    "allocated_bytes": 651264,
+    "sha256": "82bbd4840c2e41fa9b6b4e53aade99002be43be3e5dfca67cbc0ceebd3a1503a"
+  },
+  {
+    "path": "build-propagation-integration/tests/CMakeFiles/reconstructed_fault_particle_projection_cache.dir/reconstructed_fault_particle_projection_cache.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791926075652099702,
+    "bytes": 712552,
+    "allocated_bytes": 712704,
+    "sha256": "a9577d8e7ca32514c02799e18dab7669970084c24512b6aab86b7da8c1ef63ab"
+  },
+  {
+    "path": "build-propagation-integration/tests/CMakeFiles/phase_field_fault_stage_j_restart_create.dir/phase_field_fault_stage_j_restart_create.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791929519083640919,
+    "bytes": 1176672,
+    "allocated_bytes": 1183744,
+    "sha256": "4ec2414a1287f7cfaa3272645760d8bacf079183195878ff556bf7d1ac7894f9"
+  },
+  {
+    "path": "build-propagation-integration/tests/CMakeFiles/phase_field_fault_stage_j_restart_resume.dir/phase_field_fault_stage_j_restart_resume.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791929618638749980,
+    "bytes": 1182864,
+    "allocated_bytes": 1187840,
+    "sha256": "934054b0e521ebc71e78689e96d94a292fe406f7afa46be675fca5d3c97c848f"
+  },
+  {
+    "path": "build-propagation-integration/tests/CMakeFiles/phase_field_fault_stage_j_temperature.dir/phase_field_fault_stage_j_temperature.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791929653416229924,
+    "bytes": 944728,
+    "allocated_bytes": 950272,
+    "sha256": "00271382faddca2b932990c362da2cb8589cef8ebba60fc8b5671e557c2b1855"
+  },
+  {
+    "path": "build-propagation-integration/tests/CMakeFiles/phase_field_fault_stage_j_temperature_mpi.dir/phase_field_fault_stage_j_temperature_mpi.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791929682711129415,
+    "bytes": 944736,
+    "allocated_bytes": 950272,
+    "sha256": "e92601feaec8dd18ea09984fa9646e1c3c8a72a5bea3c40b79bc669c5966b6f4"
+  },
+  {
+    "path": "build-propagation-integration/tests/CMakeFiles/phase_field_fault_ih_mpi.dir/phase_field_fault_ih_mpi.cc.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791929469135415831,
+    "bytes": 650960,
+    "allocated_bytes": 651264,
+    "sha256": "9930beeef45f67771a5093e8c189afb02611b20a1ed4fa29694dfe674ab7420a"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/cmake_pch.hxx.gch",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925290591763261,
+    "bytes": 854126977,
+    "allocated_bytes": 854134784,
+    "sha256": "73713a0db09dd0c9098500bc088a3bd07785974667dd8102cdcb35ff4a2d9473"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_28_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925383591486564,
+    "bytes": 516512,
+    "allocated_bytes": 520192,
+    "sha256": "a9f29c63ec476c378c01ef1a9768e87cec4843c1bccb7bd34dbd5fa7713572b4"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_29_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925389514912873,
+    "bytes": 757896,
+    "allocated_bytes": 761856,
+    "sha256": "1ed864d13c87b1cc457b5e8352254d4bdfb579efc623a36541d487bd50b3cceb"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_39_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925454445298080,
+    "bytes": 1588712,
+    "allocated_bytes": 1589248,
+    "sha256": "ae12716c49883d18488040fb8991a8a186d27138d976c48eb29aae7e9cb214bb"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_36_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925440832144214,
+    "bytes": 2113880,
+    "allocated_bytes": 2121728,
+    "sha256": "c4a797dc027b65b2a70fd6e4621e2857447e131f838873c92ac03e0590439db0"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_25_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925371131891359,
+    "bytes": 699440,
+    "allocated_bytes": 700416,
+    "sha256": "00f79037f790aaf62082079c6ee5847f8d2eb2c8cfda942b15ac10342fa88d61"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_5_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925686465734946,
+    "bytes": 878352,
+    "allocated_bytes": 880640,
+    "sha256": "7f2cb148e9e374d68a99f593faf2a95ecaba537183d85cc4525924c8068df1a9"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_49_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925565879026856,
+    "bytes": 5940344,
+    "allocated_bytes": 5947392,
+    "sha256": "1b13c9cbbf611da273e5c2699fdcc293951f2fd1efbfbb4d3642e7620aad144b"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_24_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925410557837273,
+    "bytes": 5926064,
+    "allocated_bytes": 5931008,
+    "sha256": "475fe1b4e98516b26b9dd6acc6ce85b0dd4494d9b11002b6a639d286af4a7a21"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_0_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925313782832402,
+    "bytes": 3267880,
+    "allocated_bytes": 3272704,
+    "sha256": "d30fdf312346356f4410491de38abb39db0c6cf447030a5da5f77aea6c58896c"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_56_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925700137381959,
+    "bytes": 125616,
+    "allocated_bytes": 126976,
+    "sha256": "4be02a9eac1722f495c601850891152eb4c0bc68eef25d5bf4ce80a594529725"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_6_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925690445921723,
+    "bytes": 711584,
+    "allocated_bytes": 712704,
+    "sha256": "9765ae236519a1da20a83f60c73bc4deaeb21a172750d07aa2dcc578a6fa26c5"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_16_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925319419553551,
+    "bytes": 943400,
+    "allocated_bytes": 946176,
+    "sha256": "c415dc070fa8e5b801074154c43fddf25a4e707604a974de4d8e7917d66893bb"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_26_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925375192386701,
+    "bytes": 557368,
+    "allocated_bytes": 561152,
+    "sha256": "5f52f09f5e7f853b416d61c2d5aeb937ae83dced638db8c13c7004c8713b4e39"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_41_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925459290127454,
+    "bytes": 580920,
+    "allocated_bytes": 581632,
+    "sha256": "ff6aea2ad0360d57e2215d2493ea092f718d1f17f84591734de0616547e0ccf3"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_53_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925665632569336,
+    "bytes": 4050392,
+    "allocated_bytes": 4055040,
+    "sha256": "523894cd9d013c879437b63bc82a4b86c9ff74bfd0e7eb5b294e82d4f52f821d"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_52_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925681421965123,
+    "bytes": 12110920,
+    "allocated_bytes": 12115968,
+    "sha256": "3d442762d3656f8c17a802f344adcb8edb59cf239c365e735e76b6cc3a83d9fb"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_47_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925551099547411,
+    "bytes": 2161816,
+    "allocated_bytes": 2162688,
+    "sha256": "9fbe541fdf4377477228f8b3f16d0a7008848754dd77bd87552a397a94c3bc44"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_19_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791929769927183637,
+    "bytes": 3153680,
+    "allocated_bytes": 3158016,
+    "sha256": "36b65da96acb9d9e7ea6b86638b4fadd5517e57ddd3a6e977169213b4ce2ba27"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_31_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925419677421022,
+    "bytes": 1005008,
+    "allocated_bytes": 1007616,
+    "sha256": "1257b22bc929b079e5a6be75d8f0ec418e0f09daf992f20efd9c6db439acbd27"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_40_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925464501305155,
+    "bytes": 2018672,
+    "allocated_bytes": 2023424,
+    "sha256": "3e2744b534c882b5127bd708b69d8fc4175e774b3b71c5eb3b1e533aefdf8865"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_45_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925471345349007,
+    "bytes": 460400,
+    "allocated_bytes": 462848,
+    "sha256": "dddb8f2dfb7707bd9ddaacdcf1454d9172302d9356a4984c9a871b062fc6dda2"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_32_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925424548454228,
+    "bytes": 573432,
+    "allocated_bytes": 573440,
+    "sha256": "42a6d64da1b8d2691c3e5ad4daa8bb51ee978da204e91a0abd49e74ccfd7ab2c"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_27_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925380630246211,
+    "bytes": 609512,
+    "allocated_bytes": 610304,
+    "sha256": "e731d48484edc08ac4f71d5249109a877b1ccc5509c358c239ba0318f29cfb4d"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_9_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791929760835196776,
+    "bytes": 1170488,
+    "allocated_bytes": 1175552,
+    "sha256": "878a6ad27397eca961584a716e1c9b5434fb28341d90d580f702f0207e13eb60"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_2_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925396868128050,
+    "bytes": 1174104,
+    "allocated_bytes": 1179648,
+    "sha256": "0f49dbda44d7785d41bcaa4a65791415d4dbb76a26a613f9cb2f996b2288481a"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_23_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925366740078867,
+    "bytes": 882392,
+    "allocated_bytes": 884736,
+    "sha256": "e239ee5e0a5d4e4b090235dc0a97777071bff0c77f12d5efbe441bcc281362b2"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_51_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925627632171861,
+    "bytes": 6785680,
+    "allocated_bytes": 6787072,
+    "sha256": "005733b3ca03ddf41e481178a4ee333a05ff2a37fcb436cc66372c2221f8f98b"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_15_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925314270375747,
+    "bytes": 722032,
+    "allocated_bytes": 724992,
+    "sha256": "99f39bac9277774b2da5fb1e6159b200892a5e3163c94a3a843b82004e391ff9"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_21_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925360257170417,
+    "bytes": 1197264,
+    "allocated_bytes": 1200128,
+    "sha256": "ccdd548637935e988ee7bacbc0dbcbdbee34cf177dff095118953e1669db7300"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_13_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925305763943384,
+    "bytes": 758536,
+    "allocated_bytes": 761856,
+    "sha256": "379aa64407e688ac8ea3b92c1af1b3e91ebdf93db5fddb32185b21c3fe3276e0"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_12_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925301745766032,
+    "bytes": 485656,
+    "allocated_bytes": 487424,
+    "sha256": "a1d5b863f9734a493c5e1432c4b0c17953eb466d17b6fbc49de18882c8a71d43"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_35_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925440463328854,
+    "bytes": 3330800,
+    "allocated_bytes": 3338240,
+    "sha256": "6a4b5bb48c3f56359a49f13d096f0e6fce2c9352e4e406860785980f323e09f1"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_11_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925298263238354,
+    "bytes": 458216,
+    "allocated_bytes": 458752,
+    "sha256": "a1d6ce62e841603c9f9f099b6508fa144688db6344a07944427adb051ccc9ed8"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_1_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925346149764700,
+    "bytes": 2855344,
+    "allocated_bytes": 2859008,
+    "sha256": "b9150375cc68686fd25c17c105550764bf538a636d5ca768239f536edcac2957"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_34_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925428937967414,
+    "bytes": 607984,
+    "allocated_bytes": 610304,
+    "sha256": "42d7b7aed7393fd9977c7506e67c73f976eb4fd1a33d0f0fc06dcd1fa275ac1b"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_10_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925294840409724,
+    "bytes": 564392,
+    "allocated_bytes": 565248,
+    "sha256": "f1c7bd7ea77537ae00058da458baf6e44ca015c03654f6e2e8ae3332e4019c75"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_44_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925468190192565,
+    "bytes": 541528,
+    "allocated_bytes": 544768,
+    "sha256": "650a1d729996c0421c07ae5e990da470e6d6b807fb4b5556858159065f0d6733"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_37_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925446006533245,
+    "bytes": 575344,
+    "allocated_bytes": 577536,
+    "sha256": "8a1c5a66691b8257cb8eb5244b0b639accfdc6e6508c2efd7534c1fca80fb009"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_17_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925329393618481,
+    "bytes": 2097808,
+    "allocated_bytes": 2105344,
+    "sha256": "12ed32e8db14d5912ad27b2a06114777a540b4d59e42305121906307657b459f"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_55_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925689825409354,
+    "bytes": 2550960,
+    "allocated_bytes": 2555904,
+    "sha256": "f6c52b5bfe95cc0dcf3ffff766d728945ddcad865ad96fab0e45ddbda5cbe053"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_33_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925424882153843,
+    "bytes": 501128,
+    "allocated_bytes": 503808,
+    "sha256": "aa98b0c2afa13bf34653132d448c2d703f63a39317b21b0ca49d6321f2cebb96"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_43_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925467759868197,
+    "bytes": 525744,
+    "allocated_bytes": 528384,
+    "sha256": "fc9ff504b4ff47464bf432fc89c78dce1a13121705f9596bd5c05fea3d0d9daf"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_50_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925592826987034,
+    "bytes": 5840040,
+    "allocated_bytes": 5844992,
+    "sha256": "eee35315801fac7e1faef7e93d1ef27f2c30801468138dc52d1e7de6f883e432"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_4_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925555216489256,
+    "bytes": 729256,
+    "allocated_bytes": 733184,
+    "sha256": "b2b8219a13f3729598be9f8bc77f63928e7d2a155d2b25c52e63f8fd971c3254"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_7_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791929752852696053,
+    "bytes": 1196216,
+    "allocated_bytes": 1204224,
+    "sha256": "426801f3bda0c2ef16f47219348344ad038a3a20a3ad53b8f6e0cab7868a350c"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_38_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925451392467242,
+    "bytes": 2684760,
+    "allocated_bytes": 2691072,
+    "sha256": "276af4a6c939974fc495c7b9ad8295214770d9d1e09041d58d6acc78ec982695"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_42_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925463693277888,
+    "bytes": 582096,
+    "allocated_bytes": 585728,
+    "sha256": "35a589d84ab277a815f2827b02f262a4075ee1a0c6c10276cac0607898078dc4"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_3_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925455226375458,
+    "bytes": 667368,
+    "allocated_bytes": 667648,
+    "sha256": "bc0c67e96919dcf348885420063148ef2866ec099f2ef144d56f5fdeacafebcb"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_20_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925350604398577,
+    "bytes": 667256,
+    "allocated_bytes": 667648,
+    "sha256": "213bc591067bd5c80d5656f9aeaf73b6f8e592f8df1dbd3c94ed2ce696cb9a09"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_46_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925472976818259,
+    "bytes": 616856,
+    "allocated_bytes": 618496,
+    "sha256": "27a832dd2d4afb6cf1a9c73b7c61976420a044c75501bf94b95d83e31a504529"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_48_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925495402328353,
+    "bytes": 2990680,
+    "allocated_bytes": 2998272,
+    "sha256": "8db2a12313c93986392d59cf08cd1722a76154887825ce72dd20a389544d0515"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_22_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925365241197791,
+    "bytes": 1275584,
+    "allocated_bytes": 1277952,
+    "sha256": "0fc3ca14912bb0cdcbe158996983559f618af5f3448f480aa033eec9ae9304ae"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_14_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925309686970994,
+    "bytes": 717624,
+    "allocated_bytes": 720896,
+    "sha256": "8d31032754a5f724e0849c59e0f3838932f235aea2f54c15efc1f6d4212ab901"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_54_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925670573795780,
+    "bytes": 622808,
+    "allocated_bytes": 626688,
+    "sha256": "c2c27926d5bf206eef0f5bffd13a4f595fbaf3a0b4757f33e0f046bed70e02e4"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_18_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925329867053031,
+    "bytes": 1939840,
+    "allocated_bytes": 1945600,
+    "sha256": "b0bfafa3e66228ae29633f334a08017f692b1421905694f5ac8139d61e280c8b"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_8_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925695520510037,
+    "bytes": 877632,
+    "allocated_bytes": 880640,
+    "sha256": "5950e822efb88cf7db027efdf6a314b8441881d4e7cfaec4e43da02ceca39841"
+  },
+  {
+    "path": "build-propagation-integration/CMakeFiles/aspect.exe.release.dir/Unity/unity_30_cxx.cxx.o",
+    "reason": "regenerable compiler object/precompiled header",
+    "mode": 420,
+    "mtime_ns": 1791925421005825076,
+    "bytes": 3328408,
+    "allocated_bytes": 3334144,
+    "sha256": "5af5e2d4ad0a4495c6a8255b2d4f81f5d156d70d275442b2b61fd755ebe03ac8"
+  }
+]

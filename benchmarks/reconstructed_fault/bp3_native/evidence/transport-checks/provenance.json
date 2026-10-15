@@ -1,0 +1,609 @@
+{
+  "date": "2026-10-14",
+  "branch": "fault-propagation",
+  "head": "c33edaaeb145e5d3dce155bb815552ef80efc5f9",
+  "incoming_dirty_state": "Preserved; see incoming.diff and incoming.json. Only current task source delta is the test-access Maxwell wrapper.",
+  "native_core": {
+    "build-bp3-native/aspect-release": {
+      "incoming": "1ba2f7f43b37b75b1462d9cd5e48998fc8cc58b891e943829be8240f70776d12",
+      "current": "1ba2f7f43b37b75b1462d9cd5e48998fc8cc58b891e943829be8240f70776d12"
+    },
+    "build-bp3-native/server-package/bp3-native-fe-server-20261014.tar.gz": {
+      "incoming": "b41ad311d0ca693122843e9fa0f26dc6ed6484bb5bbc8a17882e9196e42fa984",
+      "current": "b41ad311d0ca693122843e9fa0f26dc6ed6484bb5bbc8a17882e9196e42fa984"
+    }
+  },
+  "compiler": "/opt/gcc/12.4.0/bin/g++",
+  "compiler_version": "g++ (GCC) 12.4.0",
+  "mpi": "mpicxx: Open MPI 5.0.10 (Language: C++)",
+  "deal_ii": "9.6.2 (dealii-9.6, 6890ca740b), /opt/dealii/9.6-local",
+  "trilinos": "14.2.0",
+  "p4est": "2.8.7",
+  "voro": "/home/ein/local/voro++/0.4.6; provider tolerance=1e-11; no provider changes",
+  "build_type": "Release",
+  "build_logs_note": "Initial compile failure (unavailable tensor norm_square API) is retained. Subsequent builds pass. Diagnostic variants add only failure output and preserve the same strict guard.",
+  "file_sha256": {
+    "benchmarks/reconstructed_fault/bp3_native/transport/translation-16-p8.prm": "898419a789566aeb4800a7a21393f204265246bcacdc7c66c045c6f50d025f23",
+    "benchmarks/reconstructed_fault/bp3_native/transport/base.prm": "8a5f6eb13166a3a5f8040075f7049bf670bf5366ae329d80bac6901cda561a95",
+    "benchmarks/reconstructed_fault/bp3_native/transport/shear-dt125.prm": "185d87dbe5f2cdd9f0e202196540076ef2b21ff3865f6a27caed38f9bae7245d",
+    "benchmarks/reconstructed_fault/bp3_native/transport/translation-8-p4.prm": "fe0a5ef03be6af85418ca75f852a0f86ecca511d672595b2ca272ce2815badf3",
+    "benchmarks/reconstructed_fault/bp3_native/transport/shear-dt03125.prm": "287fa3bb5cb4092640b58c2c5c6b96e3d3097f427d8ad1aa1d5c15438815aeda",
+    "benchmarks/reconstructed_fault/bp3_native/transport/translation-8-p8.prm": "a48452f55732b2d7bc80dcdb8108b2eafbb28f433e551fe70f50ac433b5c2d20",
+    "benchmarks/reconstructed_fault/bp3_native/transport/shear-dt0625.prm": "9a21c60a6e1f894ff940338266f05b783e518c9df7f3f94fa498f898865848bd",
+    "benchmarks/reconstructed_fault/bp3_native/transport/shear-dt03125-p16.prm": "a44638f16c286a077ffab7821e04c347d0d2aac8b59809b94fd79f71b2a3e318",
+    "benchmarks/reconstructed_fault/bp3_native/transport/translation-8-p16.prm": "303a70bb1d802fc5b679001da823db8e23848fb5597dc97e1480af17c64ffbb5",
+    "benchmarks/reconstructed_fault/bp3_native/transport/CMakeLists.txt": "98a363f49fb70c0227788e5772b0dc1bc3137ca38ab6646343e96317a5ca6626",
+    "benchmarks/reconstructed_fault/bp3_native/transport/transport.cc": "1429a89cd4274e082a40d6baab565224cb66f753235c99c81e01254d9f1421d6",
+    "benchmarks/reconstructed_fault/bp3_native/transport/analyze.py": "18c5697dcc7d67d21797a1845e24e0375be769cc57361f2a54c6d1f7b42a00c0",
+    "tests/phase_field_fault_test_access.h": "293449580efb435435bf7f3d9c42edafcb0dd1110ce473b946edae1b0c90ae0f",
+    "build-bp3-native/transport-checks/base-parse-failure.prm": "36ba92579163bc1baa32b7c3cfc29e998a88a6dad7ca95be199db29f503d1119",
+    "build-bp3-native/transport-checks/shear-dt03125-p16-failed.prm": "dac1074ea319ff17e7cf52ecf0f7477d515e242c367e7d3e4d03587998416b86",
+    "build-bp3-native/transport-checks/plugin/CMakeCache.txt": "1dd8b2f1eaf895d91de9327c089d605f97adbcd8cb13b4f353b821c83a63e758",
+    "build-bp3-native/transport-checks/plugin/CMakeFiles/prescribed_transport.dir/flags.make": "3eeb54a69b62f953e43a1e322619c0761e118db5105c256c2593623d5fec8e49",
+    "build-bp3-native/transport-checks/assessment-resumed.json": "64679bf0656242e575f48128a369c5729683da2aa6c3df5a90eaf0a4f0584637",
+    "build-bp3-native/transport-checks/assessment-final-with-diagnosis.json": "64679bf0656242e575f48128a369c5729683da2aa6c3df5a90eaf0a4f0584637",
+    "build-bp3-native/transport-checks/failed-domain-independent.json": "5400c4eeb9e22e6fac8209d22e46a1627fd8da86c0111d018e59d4722a71cf28",
+    "build-bp3-native/transport-checks/preservation.json": "e41646018c490d32e6fce93b76f1d74c6d2b37c953d65adf98315987ee1deea7",
+    "build-bp3-native/transport-checks/build-final.log": "050baf694d45a439143f914f380541498e60c99d6693d95d72e09277a4d7b595",
+    "build-bp3-native/transport-checks/build-v2.log": "050baf694d45a439143f914f380541498e60c99d6693d95d72e09277a4d7b595",
+    "build-bp3-native/transport-checks/build-domain-v2.log": "050baf694d45a439143f914f380541498e60c99d6693d95d72e09277a4d7b595",
+    "build-bp3-native/transport-checks/build-domain-diagnostic.log": "050baf694d45a439143f914f380541498e60c99d6693d95d72e09277a4d7b595",
+    "build-bp3-native/transport-checks/build.log": "d61eaac9783cd6aa184bfe7d2d85f61857aac2ff59464090a26bc51f54377f06",
+    "build-bp3-native/transport-checks/runs/shear-dt03125-p16-domain-v2/failed_domain.csv": "e46b729585c764a0047874fd5d50d59cfc12aad0daac7d9894bcbfe1fe69c265",
+    "source/particle/particle_domain.cc": "ed9e9d7493de744e75300eee85bd8b1c966307f5d58b918bcbdf548033a6ab22",
+    "benchmarks/reconstructed_fault/refactoring_boundary/run_logged.py": "c6e4421f0304df276d7b51b0d14c7164c9b4f0a1305875c6c357f6b6da82f891"
+  },
+  "launches": [
+    {
+      "label": "bp3-transport-shear-dt03125-p16-v1",
+      "record": "benchmarks/reconstructed_fault/refactoring_boundary/evidence/bp3-transport-shear-dt03125-p16-v1.json",
+      "record_sha256": "f062a630ef90ed94f3166b094b34eda746c3f13b04ec1429c6ca88aa31bcdf1d",
+      "log": "benchmarks/reconstructed_fault/refactoring_boundary/evidence/bp3-transport-shear-dt03125-p16-v1.log",
+      "log_sha256": "1d42929c53797d3e18b426c88858a09bbc022f9e9865dec74ff2f311d61a20c8",
+      "metadata": {
+        "command": [
+          "/usr/bin/env",
+          "ASPECT_SOURCE_DIR=/home/ein/repository/aspect-fault-propagation",
+          "build-bp3-native/aspect-release",
+          "benchmarks/reconstructed_fault/bp3_native/transport/shear-dt03125-p16.prm"
+        ],
+        "cwd": "/home/ein/repository/aspect-fault-propagation",
+        "exit_code": 1,
+        "seconds": 4.826120019002701,
+        "environment": {
+          "OMP_PROC_BIND": "spread",
+          "OMP_NUM_THREADS": "1",
+          "DEAL_II_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1"
+        }
+      },
+      "wrapper_command": [
+        "python3",
+        "benchmarks/reconstructed_fault/refactoring_boundary/run_logged.py",
+        "bp3-transport-shear-dt03125-p16-v1",
+        "300",
+        "/usr/bin/env",
+        "ASPECT_SOURCE_DIR=/home/ein/repository/aspect-fault-propagation",
+        "build-bp3-native/aspect-release",
+        "benchmarks/reconstructed_fault/bp3_native/transport/shear-dt03125-p16.prm"
+      ],
+      "external_wall_limit_s": 300,
+      "mpi_ranks": 1,
+      "requested_end_time_s": 1,
+      "output_directory": "build-bp3-native/transport-checks/runs/shear-dt03125-p16",
+      "plugin_snapshot": "build-bp3-native/transport-checks/libprescribed_transport-before-domain-diagnostic.so",
+      "plugin_sha256": "9da8857dd81439d6ecae72aa5c90e46c57a1ef3f080ad483fb0ced3e22ea36ae",
+      "plugin_source_snapshot": "build-bp3-native/transport-checks/transport-before-domain-diagnostic.cc",
+      "plugin_source_sha256": "92778ed241bd3b87a6d177e88b9c68119d660364e1a048574077f398735ebd7a",
+      "saved_input_sha256": {
+        "build-bp3-native/transport-checks/runs/shear-dt03125-p16/original.prm": "5741026f36d0aac05add5152de907a3d1f5bac6785ba7ba6c486972b6268bef8",
+        "build-bp3-native/transport-checks/runs/shear-dt03125-p16/parameters.prm": "dc8a445a8ac384c44649d9dada33cc3163e38c9af64111727a6e352023a73c74"
+      },
+      "outcome": "Strict CPDI coverage guard fails at step 2, t=.0625; last complete diagnostic row t=.03125. No rollback claim."
+    },
+    {
+      "label": "bp3-transport-shear-dt03125-v1",
+      "record": "benchmarks/reconstructed_fault/refactoring_boundary/evidence/bp3-transport-shear-dt03125-v1.json",
+      "record_sha256": "ad928951672105a2ed5dd3f5cecac1321973057e503cbe97035ec5fe645cf30c",
+      "log": "benchmarks/reconstructed_fault/refactoring_boundary/evidence/bp3-transport-shear-dt03125-v1.log",
+      "log_sha256": "4104ee1d0f568489331ea6c9f67e7817b05127b6b0c60d6b7a886af433961eb8",
+      "metadata": {
+        "command": [
+          "/usr/bin/env",
+          "ASPECT_SOURCE_DIR=/home/ein/repository/aspect-fault-propagation",
+          "build-bp3-native/aspect-release",
+          "benchmarks/reconstructed_fault/bp3_native/transport/shear-dt03125.prm"
+        ],
+        "cwd": "/home/ein/repository/aspect-fault-propagation",
+        "exit_code": 0,
+        "seconds": 9.936365663001197,
+        "environment": {
+          "OMP_PROC_BIND": "spread",
+          "OMP_NUM_THREADS": "1",
+          "DEAL_II_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1"
+        }
+      },
+      "wrapper_command": [
+        "python3",
+        "benchmarks/reconstructed_fault/refactoring_boundary/run_logged.py",
+        "bp3-transport-shear-dt03125-v1",
+        "300",
+        "/usr/bin/env",
+        "ASPECT_SOURCE_DIR=/home/ein/repository/aspect-fault-propagation",
+        "build-bp3-native/aspect-release",
+        "benchmarks/reconstructed_fault/bp3_native/transport/shear-dt03125.prm"
+      ],
+      "external_wall_limit_s": 300,
+      "mpi_ranks": 1,
+      "requested_end_time_s": 1,
+      "output_directory": "build-bp3-native/transport-checks/runs/shear-dt03125",
+      "plugin_snapshot": "build-bp3-native/transport-checks/libprescribed_transport-before-domain-diagnostic.so",
+      "plugin_sha256": "9da8857dd81439d6ecae72aa5c90e46c57a1ef3f080ad483fb0ced3e22ea36ae",
+      "plugin_source_snapshot": "build-bp3-native/transport-checks/transport-before-domain-diagnostic.cc",
+      "plugin_source_sha256": "92778ed241bd3b87a6d177e88b9c68119d660364e1a048574077f398735ebd7a",
+      "saved_input_sha256": {
+        "build-bp3-native/transport-checks/runs/shear-dt03125/original.prm": "55745a431d0893ac45caf9c8b3a556b717e5ef924b28a9afddb487b87ca9e9cd",
+        "build-bp3-native/transport-checks/runs/shear-dt03125/parameters.prm": "4c333138920ca59c3c782dada55661cea52027be930bbacc0a456518a51a087f"
+      },
+      "outcome": "Completed prescribed accepted sequence to t=1."
+    },
+    {
+      "label": "bp3-transport-shear-dt0625-v1",
+      "record": "benchmarks/reconstructed_fault/refactoring_boundary/evidence/bp3-transport-shear-dt0625-v1.json",
+      "record_sha256": "644faaf2899dca474b5ea7193cf6e43d99afd1c3d588a91222c0c8b30fc3871c",
+      "log": "benchmarks/reconstructed_fault/refactoring_boundary/evidence/bp3-transport-shear-dt0625-v1.log",
+      "log_sha256": "cbdd9cded5156e875a55390e420d67b5398368f3a28a649fb0639c7b4289a8c3",
+      "metadata": {
+        "command": [
+          "/usr/bin/env",
+          "ASPECT_SOURCE_DIR=/home/ein/repository/aspect-fault-propagation",
+          "build-bp3-native/aspect-release",
+          "benchmarks/reconstructed_fault/bp3_native/transport/shear-dt0625.prm"
+        ],
+        "cwd": "/home/ein/repository/aspect-fault-propagation",
+        "exit_code": 0,
+        "seconds": 7.831893095000851,
+        "environment": {
+          "OMP_PROC_BIND": "spread",
+          "OMP_NUM_THREADS": "1",
+          "DEAL_II_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1"
+        }
+      },
+      "wrapper_command": [
+        "python3",
+        "benchmarks/reconstructed_fault/refactoring_boundary/run_logged.py",
+        "bp3-transport-shear-dt0625-v1",
+        "300",
+        "/usr/bin/env",
+        "ASPECT_SOURCE_DIR=/home/ein/repository/aspect-fault-propagation",
+        "build-bp3-native/aspect-release",
+        "benchmarks/reconstructed_fault/bp3_native/transport/shear-dt0625.prm"
+      ],
+      "external_wall_limit_s": 300,
+      "mpi_ranks": 1,
+      "requested_end_time_s": 1,
+      "output_directory": "build-bp3-native/transport-checks/runs/shear-dt0625",
+      "plugin_snapshot": "build-bp3-native/transport-checks/libprescribed_transport-before-domain-diagnostic.so",
+      "plugin_sha256": "9da8857dd81439d6ecae72aa5c90e46c57a1ef3f080ad483fb0ced3e22ea36ae",
+      "plugin_source_snapshot": "build-bp3-native/transport-checks/transport-before-domain-diagnostic.cc",
+      "plugin_source_sha256": "92778ed241bd3b87a6d177e88b9c68119d660364e1a048574077f398735ebd7a",
+      "saved_input_sha256": {
+        "build-bp3-native/transport-checks/runs/shear-dt0625/original.prm": "f20e04a78b67be83d8a96ddd86c55696b2b5dd91e3b07200967632495b048ecc",
+        "build-bp3-native/transport-checks/runs/shear-dt0625/parameters.prm": "238496b7ebbc706f5e6bdf4b57fb91425b2ee75a2735defd5707298168e0388a"
+      },
+      "outcome": "Completed prescribed accepted sequence to t=1."
+    },
+    {
+      "label": "bp3-transport-shear-dt125-v1",
+      "record": "benchmarks/reconstructed_fault/refactoring_boundary/evidence/bp3-transport-shear-dt125-v1.json",
+      "record_sha256": "15b75b76d7e062c26156720e11bea3e53fe1d469428c8edb3e03e136dddec02c",
+      "log": "benchmarks/reconstructed_fault/refactoring_boundary/evidence/bp3-transport-shear-dt125-v1.log",
+      "log_sha256": "92df4170dd05059f677af42d46c67a1a7479a1a50b12cc5a7f82f4cd63ca59f9",
+      "metadata": {
+        "command": [
+          "/usr/bin/env",
+          "ASPECT_SOURCE_DIR=/home/ein/repository/aspect-fault-propagation",
+          "build-bp3-native/aspect-release",
+          "benchmarks/reconstructed_fault/bp3_native/transport/shear-dt125.prm"
+        ],
+        "cwd": "/home/ein/repository/aspect-fault-propagation",
+        "exit_code": 0,
+        "seconds": 6.28467633299806,
+        "environment": {
+          "OMP_PROC_BIND": "spread",
+          "OMP_NUM_THREADS": "1",
+          "DEAL_II_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1"
+        }
+      },
+      "wrapper_command": [
+        "python3",
+        "benchmarks/reconstructed_fault/refactoring_boundary/run_logged.py",
+        "bp3-transport-shear-dt125-v1",
+        "300",
+        "/usr/bin/env",
+        "ASPECT_SOURCE_DIR=/home/ein/repository/aspect-fault-propagation",
+        "build-bp3-native/aspect-release",
+        "benchmarks/reconstructed_fault/bp3_native/transport/shear-dt125.prm"
+      ],
+      "external_wall_limit_s": 300,
+      "mpi_ranks": 1,
+      "requested_end_time_s": 1,
+      "output_directory": "build-bp3-native/transport-checks/runs/shear-dt125",
+      "plugin_snapshot": "build-bp3-native/transport-checks/libprescribed_transport-before-domain-diagnostic.so",
+      "plugin_sha256": "9da8857dd81439d6ecae72aa5c90e46c57a1ef3f080ad483fb0ced3e22ea36ae",
+      "plugin_source_snapshot": "build-bp3-native/transport-checks/transport-before-domain-diagnostic.cc",
+      "plugin_source_sha256": "92778ed241bd3b87a6d177e88b9c68119d660364e1a048574077f398735ebd7a",
+      "saved_input_sha256": {
+        "build-bp3-native/transport-checks/runs/shear-dt125/original.prm": "7447b00d562249accce751fdef915c883cc0c359d9df027f10544b622f6cea81",
+        "build-bp3-native/transport-checks/runs/shear-dt125/parameters.prm": "697a04a34b2e1d690ee0c80a7ea7fc5f1fda46047e6bea2b607ddbf4ac2b6bd4"
+      },
+      "outcome": "Completed prescribed accepted sequence to t=1."
+    },
+    {
+      "label": "bp3-transport-shear-p16-domain-diagnostic-v1",
+      "record": "benchmarks/reconstructed_fault/refactoring_boundary/evidence/bp3-transport-shear-p16-domain-diagnostic-v1.json",
+      "record_sha256": "29702f401527e5aabdecdcca5a7af468f26976db8a33bdf6a2879799ce0a5ffc",
+      "log": "benchmarks/reconstructed_fault/refactoring_boundary/evidence/bp3-transport-shear-p16-domain-diagnostic-v1.log",
+      "log_sha256": "fef6b6ecb0ec88871ef66399d7387b47ed23864ff55f406794f30ee4b2ccf59c",
+      "metadata": {
+        "command": [
+          "/usr/bin/env",
+          "ASPECT_SOURCE_DIR=/home/ein/repository/aspect-fault-propagation",
+          "build-bp3-native/aspect-release",
+          "benchmarks/reconstructed_fault/bp3_native/transport/shear-dt03125-p16.prm"
+        ],
+        "cwd": "/home/ein/repository/aspect-fault-propagation",
+        "exit_code": 1,
+        "seconds": 4.876645140000619,
+        "environment": {
+          "OMP_PROC_BIND": "spread",
+          "OMP_NUM_THREADS": "1",
+          "DEAL_II_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1"
+        }
+      },
+      "wrapper_command": [
+        "python3",
+        "benchmarks/reconstructed_fault/refactoring_boundary/run_logged.py",
+        "bp3-transport-shear-p16-domain-diagnostic-v1",
+        "300",
+        "/usr/bin/env",
+        "ASPECT_SOURCE_DIR=/home/ein/repository/aspect-fault-propagation",
+        "build-bp3-native/aspect-release",
+        "benchmarks/reconstructed_fault/bp3_native/transport/shear-dt03125-p16.prm"
+      ],
+      "external_wall_limit_s": 300,
+      "mpi_ranks": 1,
+      "requested_end_time_s": 1,
+      "output_directory": "build-bp3-native/transport-checks/runs/shear-dt03125-p16-diagnostic",
+      "plugin_snapshot": "build-bp3-native/transport-checks/libprescribed_transport-domain-diagnostic-v1.so",
+      "plugin_sha256": "1e125c5fca1b8c42da4dbb545330ef34b889e87454b372976f961b5274c1b6c8",
+      "plugin_source_snapshot": "build-bp3-native/transport-checks/transport-domain-diagnostic-v1.cc",
+      "plugin_source_sha256": "549bd897dbdb4db7080754c265bba0f8d06088b8c8023a6dfb22a86afbd3240d",
+      "saved_input_sha256": {
+        "build-bp3-native/transport-checks/runs/shear-dt03125-p16-diagnostic/original.prm": "55d52e623a37b4a51b680c1a9052f92ee899170bcf82813312af2325c91814cb",
+        "build-bp3-native/transport-checks/runs/shear-dt03125-p16-diagnostic/parameters.prm": "c68b14b1c087f37a54802538646f38258c7d76d53b7d53d0ca9424db86e42a7b"
+      },
+      "outcome": "Strict CPDI coverage guard fails at step 2, t=.0625; last complete diagnostic row t=.03125. No rollback claim."
+    },
+    {
+      "label": "bp3-transport-shear-p16-domain-diagnostic-v2",
+      "record": "benchmarks/reconstructed_fault/refactoring_boundary/evidence/bp3-transport-shear-p16-domain-diagnostic-v2.json",
+      "record_sha256": "8c688b8c6847cf0f58070e5a96cb25ed9f416e7a6e9403d7f5e4279181a63660",
+      "log": "benchmarks/reconstructed_fault/refactoring_boundary/evidence/bp3-transport-shear-p16-domain-diagnostic-v2.log",
+      "log_sha256": "13952ccfd810cf84c2708e83cf55e2a0683fe333e53c2b68066742ce71bb591d",
+      "metadata": {
+        "command": [
+          "/usr/bin/env",
+          "ASPECT_SOURCE_DIR=/home/ein/repository/aspect-fault-propagation",
+          "build-bp3-native/aspect-release",
+          "benchmarks/reconstructed_fault/bp3_native/transport/shear-dt03125-p16.prm"
+        ],
+        "cwd": "/home/ein/repository/aspect-fault-propagation",
+        "exit_code": 1,
+        "seconds": 4.878407726002479,
+        "environment": {
+          "OMP_PROC_BIND": "spread",
+          "OMP_NUM_THREADS": "1",
+          "DEAL_II_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1"
+        }
+      },
+      "wrapper_command": [
+        "python3",
+        "benchmarks/reconstructed_fault/refactoring_boundary/run_logged.py",
+        "bp3-transport-shear-p16-domain-diagnostic-v2",
+        "300",
+        "/usr/bin/env",
+        "ASPECT_SOURCE_DIR=/home/ein/repository/aspect-fault-propagation",
+        "build-bp3-native/aspect-release",
+        "benchmarks/reconstructed_fault/bp3_native/transport/shear-dt03125-p16.prm"
+      ],
+      "external_wall_limit_s": 300,
+      "mpi_ranks": 1,
+      "requested_end_time_s": 1,
+      "output_directory": "build-bp3-native/transport-checks/runs/shear-dt03125-p16-domain-v2",
+      "plugin_snapshot": "build-bp3-native/transport-checks/plugin/libprescribed_transport.release.so",
+      "plugin_sha256": "46639b5412bc36be9ab564ec7aeef6131ccd3a86b4900bb48f1f7990f0a8a72c",
+      "plugin_source_snapshot": "benchmarks/reconstructed_fault/bp3_native/transport/transport.cc",
+      "plugin_source_sha256": "1429a89cd4274e082a40d6baab565224cb66f753235c99c81e01254d9f1421d6",
+      "saved_input_sha256": {
+        "build-bp3-native/transport-checks/runs/shear-dt03125-p16-domain-v2/original.prm": "7f403a2c2389982f364c812bacf971127925bfe6d3d30bb1aeac280a7b0f3e67",
+        "build-bp3-native/transport-checks/runs/shear-dt03125-p16-domain-v2/parameters.prm": "606c0e5f684c2e01d96a9c56cce2c702ef8a8989f85285d5f01bcb9c36877947"
+      },
+      "outcome": "Strict CPDI coverage guard fails at step 2, t=.0625; last complete diagnostic row t=.03125. No rollback claim."
+    },
+    {
+      "label": "bp3-transport-translation-16-p8-v1",
+      "record": "benchmarks/reconstructed_fault/refactoring_boundary/evidence/bp3-transport-translation-16-p8-v1.json",
+      "record_sha256": "13e1c91443d0c453a03d267bbbaf2022aacd51610eff0469af921e22387f8ff4",
+      "log": "benchmarks/reconstructed_fault/refactoring_boundary/evidence/bp3-transport-translation-16-p8-v1.log",
+      "log_sha256": "b629b16bb88b3346fc17b74ed821e48bbc474b1079e89ceb1f26d45b9ae149f9",
+      "metadata": {
+        "command": [
+          "/usr/bin/env",
+          "ASPECT_SOURCE_DIR=/home/ein/repository/aspect-fault-propagation",
+          "build-bp3-native/aspect-release",
+          "benchmarks/reconstructed_fault/bp3_native/transport/translation-16-p8.prm"
+        ],
+        "cwd": "/home/ein/repository/aspect-fault-propagation",
+        "exit_code": 0,
+        "seconds": 12.093504376000055,
+        "environment": {
+          "OMP_PROC_BIND": "spread",
+          "OMP_NUM_THREADS": "1",
+          "DEAL_II_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1"
+        }
+      },
+      "wrapper_command": [
+        "python3",
+        "benchmarks/reconstructed_fault/refactoring_boundary/run_logged.py",
+        "bp3-transport-translation-16-p8-v1",
+        "300",
+        "/usr/bin/env",
+        "ASPECT_SOURCE_DIR=/home/ein/repository/aspect-fault-propagation",
+        "build-bp3-native/aspect-release",
+        "benchmarks/reconstructed_fault/bp3_native/transport/translation-16-p8.prm"
+      ],
+      "external_wall_limit_s": 300,
+      "mpi_ranks": 1,
+      "requested_end_time_s": 1,
+      "output_directory": "build-bp3-native/transport-checks/runs/translation-16-p8",
+      "plugin_snapshot": "build-bp3-native/transport-checks/libprescribed_transport-before-domain-diagnostic.so",
+      "plugin_sha256": "9da8857dd81439d6ecae72aa5c90e46c57a1ef3f080ad483fb0ced3e22ea36ae",
+      "plugin_source_snapshot": "build-bp3-native/transport-checks/transport-before-domain-diagnostic.cc",
+      "plugin_source_sha256": "92778ed241bd3b87a6d177e88b9c68119d660364e1a048574077f398735ebd7a",
+      "saved_input_sha256": {
+        "build-bp3-native/transport-checks/runs/translation-16-p8/original.prm": "6abc97b77c046b28afa7195603fd9fe947148c7b4eda40d7c99e5ce073467aed",
+        "build-bp3-native/transport-checks/runs/translation-16-p8/parameters.prm": "fc50eb678f846a1a64ea872525c6d7305762c7bcb8a563a8247bb49c532cd7e9"
+      },
+      "outcome": "Completed prescribed accepted sequence to t=1."
+    },
+    {
+      "label": "bp3-transport-translation-8-p16-v1",
+      "record": "benchmarks/reconstructed_fault/refactoring_boundary/evidence/bp3-transport-translation-8-p16-v1.json",
+      "record_sha256": "c43789eedae2ed3868cda9c9c8ce3352968b5cf1650659502726a9a25d3f4d70",
+      "log": "benchmarks/reconstructed_fault/refactoring_boundary/evidence/bp3-transport-translation-8-p16-v1.log",
+      "log_sha256": "fbce3a353d80b672392c1e0776c10a7432a75dcf7c7cb512e43a93a5a5652735",
+      "metadata": {
+        "command": [
+          "/usr/bin/env",
+          "ASPECT_SOURCE_DIR=/home/ein/repository/aspect-fault-propagation",
+          "build-bp3-native/aspect-release",
+          "benchmarks/reconstructed_fault/bp3_native/transport/translation-8-p16.prm"
+        ],
+        "cwd": "/home/ein/repository/aspect-fault-propagation",
+        "exit_code": 0,
+        "seconds": 10.14452457600055,
+        "environment": {
+          "OMP_PROC_BIND": "spread",
+          "OMP_NUM_THREADS": "1",
+          "DEAL_II_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1"
+        }
+      },
+      "wrapper_command": [
+        "python3",
+        "benchmarks/reconstructed_fault/refactoring_boundary/run_logged.py",
+        "bp3-transport-translation-8-p16-v1",
+        "300",
+        "/usr/bin/env",
+        "ASPECT_SOURCE_DIR=/home/ein/repository/aspect-fault-propagation",
+        "build-bp3-native/aspect-release",
+        "benchmarks/reconstructed_fault/bp3_native/transport/translation-8-p16.prm"
+      ],
+      "external_wall_limit_s": 300,
+      "mpi_ranks": 1,
+      "requested_end_time_s": 1,
+      "output_directory": "build-bp3-native/transport-checks/runs/translation-8-p16",
+      "plugin_snapshot": "build-bp3-native/transport-checks/libprescribed_transport-before-domain-diagnostic.so",
+      "plugin_sha256": "9da8857dd81439d6ecae72aa5c90e46c57a1ef3f080ad483fb0ced3e22ea36ae",
+      "plugin_source_snapshot": "build-bp3-native/transport-checks/transport-before-domain-diagnostic.cc",
+      "plugin_source_sha256": "92778ed241bd3b87a6d177e88b9c68119d660364e1a048574077f398735ebd7a",
+      "saved_input_sha256": {
+        "build-bp3-native/transport-checks/runs/translation-8-p16/original.prm": "62512f68508fff21d2c93169fc5a88952a36b808bc82c43071fe74b4bb9ec4b9",
+        "build-bp3-native/transport-checks/runs/translation-8-p16/parameters.prm": "2d525614e358a6cee2e7ee63a9d355ba1a6b45845f296f9019fe5d9b9efcb196"
+      },
+      "outcome": "Completed prescribed accepted sequence to t=1."
+    },
+    {
+      "label": "bp3-transport-translation-8-p4-v1",
+      "record": "benchmarks/reconstructed_fault/refactoring_boundary/evidence/bp3-transport-translation-8-p4-v1.json",
+      "record_sha256": "99ce377eb7edc06336ccfd335dccca40a31c9685b4502244a8604e2a7df18422",
+      "log": "benchmarks/reconstructed_fault/refactoring_boundary/evidence/bp3-transport-translation-8-p4-v1.log",
+      "log_sha256": "981efb24af0bc1c0c251d66f11cd6d5e2c1e146d84970235f7f892cfe84388f6",
+      "metadata": {
+        "command": [
+          "/usr/bin/env",
+          "ASPECT_SOURCE_DIR=/home/ein/repository/aspect-fault-propagation",
+          "build-bp3-native/aspect-release",
+          "benchmarks/reconstructed_fault/bp3_native/transport/translation-8-p4.prm"
+        ],
+        "cwd": "/home/ein/repository/aspect-fault-propagation",
+        "exit_code": 1,
+        "seconds": 3.8731885890010744,
+        "environment": {
+          "OMP_PROC_BIND": "spread",
+          "OMP_NUM_THREADS": "1",
+          "DEAL_II_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1"
+        }
+      },
+      "wrapper_command": [
+        "python3",
+        "benchmarks/reconstructed_fault/refactoring_boundary/run_logged.py",
+        "bp3-transport-translation-8-p4-v1",
+        "300",
+        "/usr/bin/env",
+        "ASPECT_SOURCE_DIR=/home/ein/repository/aspect-fault-propagation",
+        "build-bp3-native/aspect-release",
+        "benchmarks/reconstructed_fault/bp3_native/transport/translation-8-p4.prm"
+      ],
+      "external_wall_limit_s": 300,
+      "mpi_ranks": 1,
+      "requested_end_time_s": 1,
+      "output_directory": "build-bp3-native/transport-checks/runs/translation-8-p4",
+      "plugin_snapshot": "build-bp3-native/transport-checks/libprescribed_transport-before-domain-diagnostic.so",
+      "plugin_sha256": "9da8857dd81439d6ecae72aa5c90e46c57a1ef3f080ad483fb0ced3e22ea36ae",
+      "plugin_source_snapshot": "build-bp3-native/transport-checks/transport-before-domain-diagnostic.cc",
+      "plugin_source_sha256": "92778ed241bd3b87a6d177e88b9c68119d660364e1a048574077f398735ebd7a",
+      "saved_input_sha256": {},
+      "outcome": "Parameter parse failure before simulation; pre-fix base saved."
+    },
+    {
+      "label": "bp3-transport-translation-8-p4-v2",
+      "record": "benchmarks/reconstructed_fault/refactoring_boundary/evidence/bp3-transport-translation-8-p4-v2.json",
+      "record_sha256": "cad1317e567ed1d485e67a91dff3d4bb80a81bb380d20879f76cc2f55ee6aa7b",
+      "log": "benchmarks/reconstructed_fault/refactoring_boundary/evidence/bp3-transport-translation-8-p4-v2.log",
+      "log_sha256": "bad189c10b40ba727a117d767995fdb866ded467268437aa38925c91ae4faedf",
+      "metadata": {
+        "command": [
+          "/usr/bin/env",
+          "ASPECT_SOURCE_DIR=/home/ein/repository/aspect-fault-propagation",
+          "build-bp3-native/aspect-release",
+          "benchmarks/reconstructed_fault/bp3_native/transport/translation-8-p4.prm"
+        ],
+        "cwd": "/home/ein/repository/aspect-fault-propagation",
+        "exit_code": 0,
+        "seconds": 4.726579885002138,
+        "environment": {
+          "OMP_PROC_BIND": "spread",
+          "OMP_NUM_THREADS": "1",
+          "DEAL_II_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1"
+        }
+      },
+      "wrapper_command": [
+        "python3",
+        "benchmarks/reconstructed_fault/refactoring_boundary/run_logged.py",
+        "bp3-transport-translation-8-p4-v2",
+        "300",
+        "/usr/bin/env",
+        "ASPECT_SOURCE_DIR=/home/ein/repository/aspect-fault-propagation",
+        "build-bp3-native/aspect-release",
+        "benchmarks/reconstructed_fault/bp3_native/transport/translation-8-p4.prm"
+      ],
+      "external_wall_limit_s": 300,
+      "mpi_ranks": 1,
+      "requested_end_time_s": 1,
+      "output_directory": "build-bp3-native/transport-checks/runs/translation-8-p4-v2",
+      "plugin_snapshot": "build-bp3-native/transport-checks/libprescribed_transport-before-domain-diagnostic.so",
+      "plugin_sha256": "9da8857dd81439d6ecae72aa5c90e46c57a1ef3f080ad483fb0ced3e22ea36ae",
+      "plugin_source_snapshot": "build-bp3-native/transport-checks/transport-before-domain-diagnostic.cc",
+      "plugin_source_sha256": "92778ed241bd3b87a6d177e88b9c68119d660364e1a048574077f398735ebd7a",
+      "saved_input_sha256": {
+        "build-bp3-native/transport-checks/runs/translation-8-p4-v2/original.prm": "5b360a175c0293bb560fb67c3c9b5285d1e10ab184ec13ba41979fe891a1da21",
+        "build-bp3-native/transport-checks/runs/translation-8-p4-v2/parameters.prm": "5385875eccbd4c7f74c56ba080673f27d9235ccb6a06e95d77df1ae0486d589c"
+      },
+      "outcome": "Completed prescribed accepted sequence to t=1."
+    },
+    {
+      "label": "bp3-transport-translation-8-p8-v1",
+      "record": "benchmarks/reconstructed_fault/refactoring_boundary/evidence/bp3-transport-translation-8-p8-v1.json",
+      "record_sha256": "968860fcf272da2f2b4a729b8dbae6f3f969e9c7f7b4deceace1bb28e504a90f",
+      "log": "benchmarks/reconstructed_fault/refactoring_boundary/evidence/bp3-transport-translation-8-p8-v1.log",
+      "log_sha256": "222924b20575d126e4ddafd68fd336d3f5309b3ad72dc53c03e6454c1d79ba3a",
+      "metadata": {
+        "command": [
+          "/usr/bin/env",
+          "ASPECT_SOURCE_DIR=/home/ein/repository/aspect-fault-propagation",
+          "build-bp3-native/aspect-release",
+          "benchmarks/reconstructed_fault/bp3_native/transport/translation-8-p8.prm"
+        ],
+        "cwd": "/home/ein/repository/aspect-fault-propagation",
+        "exit_code": 0,
+        "seconds": 7.28660864700214,
+        "environment": {
+          "OMP_PROC_BIND": "spread",
+          "OMP_NUM_THREADS": "1",
+          "DEAL_II_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1"
+        }
+      },
+      "wrapper_command": [
+        "python3",
+        "benchmarks/reconstructed_fault/refactoring_boundary/run_logged.py",
+        "bp3-transport-translation-8-p8-v1",
+        "300",
+        "/usr/bin/env",
+        "ASPECT_SOURCE_DIR=/home/ein/repository/aspect-fault-propagation",
+        "build-bp3-native/aspect-release",
+        "benchmarks/reconstructed_fault/bp3_native/transport/translation-8-p8.prm"
+      ],
+      "external_wall_limit_s": 300,
+      "mpi_ranks": 1,
+      "requested_end_time_s": 1,
+      "output_directory": "build-bp3-native/transport-checks/runs/translation-8-p8",
+      "plugin_snapshot": "build-bp3-native/transport-checks/libprescribed_transport-before-domain-diagnostic.so",
+      "plugin_sha256": "9da8857dd81439d6ecae72aa5c90e46c57a1ef3f080ad483fb0ced3e22ea36ae",
+      "plugin_source_snapshot": "build-bp3-native/transport-checks/transport-before-domain-diagnostic.cc",
+      "plugin_source_sha256": "92778ed241bd3b87a6d177e88b9c68119d660364e1a048574077f398735ebd7a",
+      "saved_input_sha256": {
+        "build-bp3-native/transport-checks/runs/translation-8-p8/original.prm": "a0c72a6678fde86ba7b5253624a97813e91b2d101eea0bfa9c34eb2ee56db35d",
+        "build-bp3-native/transport-checks/runs/translation-8-p8/parameters.prm": "f4f1c005afbba6d74eeebb420ccdf6f912d8cc85f36ddf6e153b684abb255d5d"
+      },
+      "outcome": "Completed prescribed accepted sequence to t=1."
+    }
+  ],
+  "total_simulation_launch_wall_s": 76.75851404901186,
+  "launch_count": 11,
+  "completed_control_count": 7,
+  "analysis_command": [
+    "python3",
+    "benchmarks/reconstructed_fault/bp3_native/transport/analyze.py",
+    "--output",
+    "build-bp3-native/transport-checks/assessment-resumed.json"
+  ],
+  "analysis_exit_code": 1,
+  "analysis_result": "Completed-family refinement gates pass; overall false for preserved incomplete dense-shear control. Recovery analysis is byte-identical to original final analysis.",
+  "style_verification": "astyle 2.04 with contrib/utilities/astyle.rc on a temporary copy; source unchanged.",
+  "limits": [
+    "Prescribed no-Stokes harness calls production Maxwell kernel once via test-access wrapper; actual coupled terminal history publication is not tested.",
+    "Trace-free controls do not qualify general D3/G consistency.",
+    "Written law excludes objective rotation; no corotational constitutive law introduced.",
+    "Serial fixed mesh, no births/deletion; no MPI transport, restart or cutback qualification.",
+    "Retained dense-shear failure occurs after history-kernel update; last CSV row is not proof of rollback.",
+    "No full BP3 or first-event trajectory launched."
+  ],
+  "reproduction_configure_command": [
+    "cmake",
+    "-S",
+    "benchmarks/reconstructed_fault/bp3_native/transport",
+    "-B",
+    "build-bp3-native/transport-checks/plugin",
+    "-DAspect_DIR=/home/ein/repository/aspect-fault-propagation/build-bp3-native",
+    "-DCMAKE_CXX_COMPILER=/opt/gcc/12.4.0/bin/g++",
+    "-DCMAKE_BUILD_TYPE=Release"
+  ],
+  "reproduction_build_command": [
+    "cmake",
+    "--build",
+    "build-bp3-native/transport-checks/plugin",
+    "-j2"
+  ],
+  "build_command_provenance": "CMake reproduction commands from the retained cache; original build outcomes are in the retained build logs. Exact simulation commands are in each launch record."
+}

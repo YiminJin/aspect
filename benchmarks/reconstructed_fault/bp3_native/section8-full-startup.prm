@@ -1,0 +1,25 @@
+# COARSE FULL-GEOMETRY INTEGRATION CHECK ONLY, not a resolved BP3 trajectory.
+# Physical ell, geometry, profile, friction, state, loading and controller unchanged.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_native/bp3-fresh-fe.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/build-bp3-native/section7cd/transition-bp3/libbp3_restore_150x50.release.so, $ASPECT_SOURCE_DIR/build-bp3-native/section8/ordinary-observer/libbp3_coupled_checks.release.so
+set Output directory = $ASPECT_SOURCE_DIR/build-bp3-native/runs/8-full-startup
+set End time = 1000000
+subsection Mesh refinement
+  # 31.25 m finest cells instead of 3.90625 m; native grading/completion retained.
+  set Initial global refinement = 6
+end
+subsection Fault reconstruction
+  # Actual surface resolution reduced for this integration check only.
+  set Structural point spacing = 40
+end
+subsection Postprocess
+  set List of postprocessors = memory statistics, reconstructed fault BP3, particles, BP3 output complete, BP3 restored monitor, BP3 serial coupled checks
+  subsection BP3 coupled checks
+    set Prescribed schedule check = false
+  end
+  subsection BP3
+    set Stop after first event = false
+    set Last accepted step = 2
+    set Graceful wall seconds = 1190
+  end
+end

@@ -1,0 +1,9 @@
+{
+  "build-bp3-native/aspect-release": "1ba2f7f43b37b75b1462d9cd5e48998fc8cc58b891e943829be8240f70776d12",
+  "build-bp3-native/section7b/bp3-plugin/libbp3_restore_150x50.release.so": "676177bc1935cdee156227b9aeae1a2990a5ed0ddbf5bc34955b57a82e8dcd76",
+  "build-bp3-native/history-plugin/libbp3_coupled_checks.release.so": "ec028e17382d642d166f0528368c7947632fcd592577886f6a94bd65895c06da",
+  "build-bp3-native/section7cd/serial-plugin/libbp3_coupled_checks.release.so": "15d43018033aba03387bdf0a3d1b013a42c95bb8de56185ad8101bbc861afa3b",
+  "build-bp3-native/section7cd/mpi-plugin/libbp3_coupled_checks.release.so": "a370ff83e96c4c937fc6b71f2a032aea709ca7fb8bd3f6b70413e5f07cf49673",
+  "build-bp3-native/section7cd/transition-bp3/libbp3_restore_150x50.release.so": "d8a151bbdd339df11e4113274b955281100a2d9df530788538c230581fac62e0",
+  "build-bp3-native/section7cd/transition-observer/libbp3_coupled_checks.release.so": "5fac63c45bb064d5959b6d2fee6819d07d256f2d3020c02e6c685aab05339413"
+}

@@ -1719,7 +1719,8 @@ namespace aspect
   make_sparsity_pattern(LinearAlgebra::BlockDynamicSparsityPattern &sp)
   {
     const auto *fault = dynamic_cast<const MaterialModel::PhaseFieldFault<dim>*>(&this->get_material_model());
-    if (fault && fault->uses_fe_strain_history() && !fault->uses_consistent_endpoint_phase())
+    if (fault && fault->uses_fe_strain_history() && !fault->is_mature_frictional_fault()
+        && !fault->uses_consistent_endpoint_phase())
       {
         // The exact normalization adjoint couples normal columns. This
         // restricted serial verification uses a complete phase block.

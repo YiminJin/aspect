@@ -1,0 +1,126 @@
+# Isolated prescribed transport/Maxwell/CPDI diagnostic, no mechanics or phase solve.
+set Additional shared libraries = $ASPECT_SOURCE_DIR/build-bp3-native/transport-checks/plugin/libprescribed_transport.release.so
+set Dimension = 2
+set Use years instead of seconds = false
+set End time = 1
+set Nonlinear solver scheme = single Advection, no Stokes
+set Nonlinear solver failure strategy = abort program
+set Resume computation = false
+set Maximum time step = 0.0625
+set Maximum first time step = 0.0625
+
+subsection Formulation
+  set Enable phase field = false
+  set Reconstruct faults from phase field = false
+end
+subsection Geometry model
+  set Model name = box
+  subsection Box
+    set X extent = 1
+    set Y extent = 1
+    set X periodic = true
+  end
+end
+subsection Mesh refinement
+  set Initial global refinement = 3
+  set Initial adaptive refinement = 0
+  set Time steps between mesh refinement = 0
+end
+subsection Gravity model
+  set Model name = vertical
+  subsection Vertical
+    set Magnitude = 0
+  end
+end
+subsection Boundary velocity model
+  set Prescribed velocity boundary indicators =
+end
+subsection Prescribed Stokes solution
+  set Model name = function
+  subsection Velocity function
+    set Function expression = 0.4; 0
+  end
+  subsection Pressure function
+    set Function expression = 0
+  end
+end
+subsection Initial temperature model
+  set Model name = function
+  subsection Function
+    set Function expression = 293
+  end
+end
+subsection Temperature field
+  set Temperature method = static
+end
+subsection Compositional fields
+  set Number of fields = 4
+  set Names of fields = tau_xx, tau_yy, tau_xy, passive_H
+  set Types of fields = stress, stress, stress, generic
+  set Compositional field methods = particles
+  set Mapped particle properties = tau_xx:maxwell stress[0], tau_yy:maxwell stress[1], tau_xy:maxwell stress[2], passive_H:crack_driving_force
+end
+subsection Initial composition model
+  set Model name = function
+  subsection Function
+    set Function constants = pi=3.14159265358979323846
+    set Function expression = 1+0.2*sin(2*pi*x)*cos(2*pi*y); -1-0.2*sin(2*pi*x)*cos(2*pi*y); 0.3+0.15*cos(2*pi*x)*sin(2*pi*y); 0
+  end
+end
+subsection Material model
+  set Model name = phase field fault
+  subsection Phase field fault
+    set Evolve phase field = false
+    set Bulk history representation = particle stress
+    set Reference viscosities = 4
+    set Minimum viscosity = 0.01
+    set Maximum viscosity = 100
+    set Elastic shear moduli = 2
+    set Cohesions = 1
+    set Critical energy release rates = 1
+    set Reference friction coefficients = 0.6
+    set Direct effect parameters = 0.025
+    set Evolution effect parameters = 0.015
+    set Radiation damping coefficients = 0
+  end
+end
+subsection Time stepping
+  set List of model names = function
+  subsection Function
+    set Function expression = 1
+  end
+end
+subsection Particles
+  set Particle generator name = reference cell
+  set Integration scheme = rk2
+  set Interpolation scheme = linear least squares
+  set List of particle properties = transport passive pulse, maxwell stress
+  set Generate particle domains = true
+  set Generate CPDI data for particle domains = true
+  set Load balancing strategy = none
+  subsection Generator
+    subsection Reference cell
+      set Number of particles per cell per direction = 4
+    end
+  end
+  subsection Interpolator
+    subsection Linear least squares
+      set Use linear least squares limiter = true
+      set Use boundary extrapolation = false
+    end
+  end
+end
+subsection Postprocess
+  set List of postprocessors = particles, prescribed transport checks
+  subsection Particles
+    set Data output format = none
+  end
+end
+subsection Termination criteria
+  set Termination criteria = end time
+  set Checkpoint on termination = false
+end
+subsection Checkpointing
+  set Time between checkpoint = 0
+  set Steps between checkpoint = 0
+end

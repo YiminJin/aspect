@@ -2,10 +2,15 @@
 
 ## Start here
 
+- [Current status](CURRENT_STATUS.md): latest completed tasks, measured evidence
+  and unresolved accuracy questions. The current BP3 entry is
+  [the local slip-front diagnostic](../../benchmarks/reconstructed_fault/bp3_native/slip_front_report.md).
+- [Benchmark/build directory guide](../../benchmarks/reconstructed_fault/README.md):
+  maintained inputs, P2 evidence, BP3 diagnostics and manual server handoff.
 - [Current design](current_design.md) and [specification](specification.tex):
   authoritative scientific, architectural and lifecycle contracts.
 - [Refactoring guidelines](refactoring.md): code quality and responsibility boundaries.
-- Current small stress-history experiment:
+- Historical small stress-history experiment:
   [completed moment-consistency qualification](../../benchmarks/reconstructed_fault/bp5/moment-qualified-final/report.md).
   A/B/C pass four real steps and C passes the two-rank replay after the pressure
   compatibility correction. This qualifies the narrow horizontal fixture, not

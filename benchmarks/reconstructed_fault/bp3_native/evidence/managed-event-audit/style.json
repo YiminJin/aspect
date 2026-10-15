@@ -1,0 +1,14 @@
+[
+  {
+    "path": "benchmarks/reconstructed_fault/bp3_native/coupled_checks.cc",
+    "new_line_count": 220,
+    "format_hunks": 13,
+    "non_whitespace_unchanged": true
+  },
+  {
+    "path": "include/aspect/particle/manager.h",
+    "new_line_count": 9,
+    "format_hunks": 0,
+    "non_whitespace_unchanged": true
+  }
+]

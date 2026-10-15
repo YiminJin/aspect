@@ -1,5 +1,6 @@
 #include "particle_initialization.h"
 #include "bp3_model.h"
+#include "runtime.h"
 
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/plugins.h>
@@ -79,7 +80,7 @@ namespace aspect
       {
         // Native property initialization runs before particle insertion. Other
         // properties, including Maxwell stress, keep their own transfer modes.
-        return uses_stationary_initialization() ? Property::initialize
+        return uses_stationary_initialization() && BP3Benchmark::stationary_samples ? Property::initialize
                : CrackDrivingForce<dim>::late_initialization_mode();
       }
 

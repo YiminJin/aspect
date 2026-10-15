@@ -1,0 +1,90 @@
+{
+  "head": "c33edaaeb145e5d3dce155bb815552ef80efc5f9",
+  "branch": "fault-propagation",
+  "incoming_paths": 14376,
+  "incoming_hashed_files": 5863,
+  "missing": [],
+  "changed_incoming": {
+    "benchmarks/reconstructed_fault/bp3_native/STATUS.md": {
+      "before": "a10d249000190e62aac5fffd19ff683b2f1f43d757e77eb3353fadbd7e96d6dd",
+      "after": "4e8f1dfd77785ddedc617aa8d3dba8a4aa042ad7fee11bb6dde06a57acc28042"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/coupled_checks.cc": {
+      "before": "34eabcbda66352332b7c0cb047409d10e3e44d542ae5febe2369a666a6376727",
+      "after": "baad106c85ec87b635a6e3af9055b095ad06166f71e41bc58a4d82afd346fa63"
+    },
+    "benchmarks/reconstructed_fault/bp3/plugin/particle_history.cc": {
+      "before": "a05d6e7e3dcedcc0f37a6af1e3b95cdb8afc067e7a2834392bddd9d35235bd2f",
+      "after": "d1d666a2d8697edf54d32ce1aa31f9eaf186463faba585fd71ce113669395eaa"
+    },
+    "benchmarks/reconstructed_fault/bp3/plugin/particle_initialization.cc": {
+      "before": "24f2152c179c26b252781a9d01a74e4dd48a237461b290215de93a997be24423",
+      "after": "4700edf04b3a487320a74308cf1835f16143eecf0fc7c98db30370e866665c3d"
+    },
+    "benchmarks/reconstructed_fault/bp3/plugin/work_audit.cc": {
+      "before": "e1dcd566b7accbba088f62f65046d36c2652ef785a1f4d22f0fca1cf8f92f270",
+      "after": "4b21fc4887b027f86eaf2444a41f4e72ce860e7a0e35e7fe9850a6777ed56687"
+    },
+    "doc/reconstructed_fault/CURRENT_STATUS.md": {
+      "before": "84ffc06c5537304f47bc78b73ec0aa6c02dd319c95156043be675f8bd9191375",
+      "after": "5f8b9e3a9bc039ce841e722c39fa99b5802af6eed9825213866e491bbd406af3"
+    },
+    "doc/reconstructed_fault/current_design.md": {
+      "before": "70f323679c2ee9ac6f39ccdc86f95881bb6619e92777e5120d4893efe0b2b908",
+      "after": "6b5c448af6a7a4f5f4fa603026ae8472408faa32ef447b13c028aff4b6786d7c"
+    },
+    "doc/reconstructed_fault/specification.tex": {
+      "before": "d45d8a12c3eabc404bc0027fc2316621f0ff32dac90596a48890226a800c60f4",
+      "after": "432400f8c6cf52dad83afac1c84542bea048a07b41d9d8b2276626480480051a"
+    },
+    "include/aspect/material_model/phase_field_fault.h": {
+      "before": "464b5f68f29cb6a55f6bd1528ac93e9816561ea1727098a89e3ae8db54af62c6",
+      "after": "298f09fd4e64f97a8e11703c029e5776f2bb07b870dfd84fc95715543d8a3eea"
+    },
+    "source/material_model/phase_field_fault.cc": {
+      "before": "60455e69e88163383cee66c4e154f3d222c0cf1dbce5d49bbd9efabcb36403e4",
+      "after": "1c9427c93c99b83a7e45bac1c33b843a74c0be1b32610fc6c0d154af4f666a37"
+    },
+    "source/material_model/phase_field_fault/constitutive.cc": {
+      "before": "90008234ec0805b3cba1708eaf63fb549b3aead57ab326fece9ff0b99cb1d84c",
+      "after": "6fd311e4985001635d3c1537dab67f6452d3bcce6533231bec84b8da03ad91b2"
+    },
+    "source/material_model/phase_field_fault/history.cc": {
+      "before": "8c7ca4ce369a9a3f4180b8f36420519691322170f4855211f0cdd87417262761",
+      "after": "f5983821149c6758bf7db171a63651051bdf3a08c7612c36e55a59d2ada85730"
+    },
+    "source/reconstructed_fault/surface_system.cc": {
+      "before": "1b5f64bf7d5160907db34a74f8a01376625438d85f49bd1b4a1ab94c83b4de61",
+      "after": "a46f4d9544856421beb6f4a4ba7a694aa9bceb36fc6f8adddfe30aedbd4914ec"
+    },
+    "source/simulator/assembly.cc": {
+      "before": "f27fd2dfdebca10519e87cbdf4b2cb0f6f7be0ee7ae1448633b79095f1e3d194",
+      "after": "47608a98d9c1f16579ee4b3f062ab1ec31dd8d537655173765a4aec39402f51f"
+    },
+    "source/simulator/newton.cc": {
+      "before": "160467520e7eed7c168c418de6a2840d4bad358bb53284dd3184fc3e339c51ed",
+      "after": "61e5eca36fcae73d1ca1173e17a25c47484908a906ceb73e8fee6d65d16d889a"
+    }
+  },
+  "preserved_artifacts": {
+    "build-bp3-native/aspect-release": {
+      "before": "1ba2f7f43b37b75b1462d9cd5e48998fc8cc58b891e943829be8240f70776d12",
+      "after": "1ba2f7f43b37b75b1462d9cd5e48998fc8cc58b891e943829be8240f70776d12"
+    },
+    "build-bp3-native/transport-geometry/aspect-release": {
+      "before": "8cf0bf11efd5ea88a16ce8b6e23d299657b6fe25055faebe9eb84abc2e6de604",
+      "after": "8cf0bf11efd5ea88a16ce8b6e23d299657b6fe25055faebe9eb84abc2e6de604"
+    },
+    "build-bp3-native/server-package/bp3-native-fe-server-20261014.tar.gz": {
+      "before": "b41ad311d0ca693122843e9fa0f26dc6ed6484bb5bbc8a17882e9196e42fa984",
+      "after": "b41ad311d0ca693122843e9fa0f26dc6ed6484bb5bbc8a17882e9196e42fa984"
+    }
+  },
+  "new_task_files": [
+    "benchmarks/reconstructed_fault/bp3_native/managed-particles.prm",
+    "benchmarks/reconstructed_fault/bp3_native/managed-particles-gate.prm",
+    "benchmarks/reconstructed_fault/bp3_native/managed-particles-p5.prm",
+    "benchmarks/reconstructed_fault/bp3_native/analyze_managed_particles.py",
+    "benchmarks/reconstructed_fault/bp3_native/managed_particles_report.md"
+  ]
+}

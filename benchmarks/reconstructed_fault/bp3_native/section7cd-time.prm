@@ -1,0 +1,17 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_native/section7b-fe-perturbed.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/build-bp3-native/section7b/bp3-plugin/libbp3_restore_150x50.release.so, $ASPECT_SOURCE_DIR/build-bp3-native/section7cd/serial-plugin/libbp3_coupled_checks.release.so
+set Output directory = $ASPECT_SOURCE_DIR/build-bp3-native/runs/7cd-time
+set Maximum time step = 100000
+set Maximum first time step = 100000
+subsection Time stepping
+  subsection Function
+    set Function expression = 100000
+  end
+end
+subsection Postprocess
+  subsection BP3
+    set Last accepted step = 20
+    set Graceful wall seconds = 390
+  end
+end
+# Initial time step remains 200000: step zero has identical constitutive inputs.

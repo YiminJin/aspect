@@ -788,6 +788,14 @@ namespace aspect
           gradient += N[v] * faces[v];
 
         gradient *= normalization_factor;
+        if constexpr (dim == 2)
+          {
+            // The edge normals carry the simplex orientation. Integrating a
+            // gradient, like a value, uses positive physical area in either
+            // ordering of the polygon vertices.
+            if (signed_volume < 0)
+              gradient *= -1;
+          }
 
         return std::make_pair(value, gradient);
       }
@@ -1717,12 +1725,33 @@ namespace aspect
                                                         n_particles);
             const double diameter = corner2.distance(corner1);
 
-            voro::container container(corner1[0],                                // ax
-                                      corner2[0],                                // bx
-                                      corner1[1],                                // ay
-                                      corner2[1],                                // by
-                                      (dim > 2 ? corner1[2] : -diameter * 0.01), // az
-                                      (dim > 2 ? corner2[2] :  diameter * 0.01), // bz
+            // Voro++ uses absolute geometric tolerances. In 2-D, supply a
+            // centered chart measured in typical particle spacings so changing
+            // physical length units does not change its small-face decisions.
+            // All stored domains and CPDI calculations remain in physical units.
+            Point<dim> voro_origin;
+            double voro_length = 1.0;
+            if constexpr (dim == 2)
+              {
+                AssertThrow(n_particles > 0, ExcMessage("A particle-domain patch must contain particles."));
+                for (unsigned int d = 0; d < dim; ++d)
+                  voro_origin[d] = 0.5 * (corner1[d] + corner2[d]);
+                voro_length = std::sqrt((corner2[0]-corner1[0]) * (corner2[1]-corner1[1]) / n_particles);
+              }
+            const auto to_voro = [&](Point<dim> point)
+            {
+              for (unsigned int d = 0; d < dim; ++d)
+                point[d] = (point[d]-voro_origin[d]) / voro_length;
+              return point;
+            };
+            const Point<dim> voro_lower = to_voro(corner1), voro_upper = to_voro(corner2);
+
+            voro::container container(voro_lower[0],                                // ax
+                                      voro_upper[0],                                // bx
+                                      voro_lower[1],                                // ay
+                                      voro_upper[1],                                // by
+                                      (dim > 2 ? corner1[2] : -diameter * 0.01 / voro_length), // az
+                                      (dim > 2 ? corner2[2] :  diameter * 0.01 / voro_length), // bz
                                       n_blocks[0],                               // nx
                                       n_blocks[1],                               // ny
                                       n_blocks[2],                               // nz
@@ -1735,7 +1764,7 @@ namespace aspect
             for (const auto &neighbor : neighbor_cells)
               for (const auto &particle : particle_handler->particles_in_cell(neighbor))
                 {
-                  const Point<dim> &location = particle.get_location();
+                  const Point<dim> location = to_voro(particle.get_location());
                   container.put(particle.get_local_index(), location[0], location[1], (dim > 2 ? location[2] : 0.0));
                 }
 
@@ -1747,6 +1776,7 @@ namespace aspect
                 {
                   Point<dim> location=particle.get_location();
                   location[periodic_axis]+=image.second*periodic_length;
+                  location = to_voro(location);
                   container.put(image_id++,location[0],location[1],0.0);
                 }
             for (const auto &image : image_cells) neighbor_cells.insert(image.first);
@@ -1773,6 +1803,13 @@ namespace aspect
                 double x, y, z;
                 loop.pos(x, y, z);
                 voro_cell.vertices(x, y, z, voro_vertices);
+                if constexpr (dim == 2)
+                  for (unsigned int v = 0; v < voro_vertices.size(); v += 3)
+                    {
+                      voro_vertices[v] = voro_origin[0] + voro_length * voro_vertices[v];
+                      voro_vertices[v+1] = voro_origin[1] + voro_length * voro_vertices[v+1];
+                      voro_vertices[v+2] *= voro_length;
+                    }
                 voro_cell.face_vertices(voro_face_vertices);
                 voro_cell.neighbors(voro_neighbors);
 

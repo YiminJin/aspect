@@ -1,0 +1,55 @@
+{
+  "resolved_candidate": {
+    "cells": 552084,
+    "particles": 8833344,
+    "finest_m": 3.90625,
+    "coarsest_m": 1000,
+    "surface_nodes_estimate": 5778,
+    "dofs_estimate_range": [
+      18000000,
+      21000000
+    ],
+    "memory_GiB_estimate_range": [
+      35,
+      100
+    ],
+    "startup_serial_seconds_estimate_range": [
+      2000,
+      10000
+    ],
+    "basis": "Maintained measured buffered mesh; 35.58 total DoFs/cell from local Q2/Q1 plus five Q2 composition, temperature, Q1 phase; conservative memory/cost scaling, not a launch."
+  },
+  "coarse_integration": {
+    "finest_m": 31.25,
+    "coarsest_m": 1000,
+    "surface_spacing_request_m": 40,
+    "cells_estimate_range": [
+      25000,
+      50000
+    ],
+    "particles_estimate_range": [
+      400000,
+      800000
+    ],
+    "dofs_estimate_range": [
+      900000,
+      1800000
+    ],
+    "memory_GiB_estimate_range": [
+      3,
+      10
+    ],
+    "wall_limit_s": 1200,
+    "positive_step_limit": 2,
+    "basis": "Band-area/exterior-grading estimate; same physical profile support 39.5292 m, 20 m ell, protected endpoint strip; native counts checked at setup."
+  },
+  "budget_s": 3600,
+  "coarse_native_mesh_before_mechanics": {
+    "cells": 41226,
+    "dofs": 1492632,
+    "particles_from_fixed_4x4": 659616,
+    "finest_m": 31.25,
+    "coarsest_m": 1000,
+    "area_m2": 7500000000.0
+  }
+}

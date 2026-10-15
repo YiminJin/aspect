@@ -28,6 +28,7 @@
 /benchmarks/tangurnis/*/*csv
 /benchmarks/tangurnis/*/solution*
 /build*/
+/build-bp3-native-configure.log
 /cmake_install.cmake
 /cookbooks/**/*.prm.out
 /cookbooks/**/lib*.so

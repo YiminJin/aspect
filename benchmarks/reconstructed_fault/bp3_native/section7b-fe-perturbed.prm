@@ -1,0 +1,12 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_native/section7b-common.prm
+set Output directory = $ASPECT_SOURCE_DIR/build-bp3-native/runs/7b-fe-perturbed
+subsection Material model
+  subsection Phase field fault
+    set Bulk history representation = accepted FE strain
+  end
+end
+subsection Postprocess
+  subsection BP3 restored monitor
+    set Local state disturbance = 0.02
+  end
+end

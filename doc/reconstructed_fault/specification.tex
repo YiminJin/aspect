@@ -1910,6 +1910,64 @@ history; do not read an older FE timestep or evolve that history in a trial.
 The slip-only residual and $B$ actions remain unchanged. Timestep-zero history
 retention and terminal history publication retain their established semantics.
 
+\paragraph{Selected stationary mature BP3 accepted FE history.}
+For one straight dipping fault in a fixed two-dimensional graded Box mesh,
+the selected fresh-run mature option retains
+\[
+ \boldsymbol\tau=2G D_3(\operatorname{symgrad}d_R)-2\chi Z\mathcal S,
+ \quad d_R^{n+1}=\beta d_R^n+(\kappa/G)\boldsymbol u^{n+1},
+ \quad Z^{n+1}=\beta Z^n+\kappa V^{n+1}.
+\]
+Here $\kappa=\eta_{\rm ve}=-\eta\operatorname{expm1}(-\Delta t G/\eta)$,
+$\beta=\exp(-\Delta t G/\eta)$, and homogeneous matching bulk/surface
+coefficients make Q1 interpolation commute with the recurrence. Geometry,
+phase and $\chi=h/I_h$ are fixed. The actual segment tangent, its rotated
+normal and stored shear sense define $\mathcal S$; the native bulk-source map
+also supplies constant endpoint continuation. Thus the representation exactly
+reproduces $\beta\boldsymbol\tau^n+2\kappa[D_3(\operatorname{symgrad}\boldsymbol u^{n+1})
+-\chi V^{n+1}\mathcal S]$. In mature mode $\tau^{\rm coh}=0$ independently
+of nonzero $Z$; never reconstruct this memory from $I_h\tau^{\rm coh}$.
+The cohesive P2 identity remains unchanged. Background tractions stay on the
+surface; initial bulk perturbation strain and slip memory are zero.
+
+Retain the existing general oblique Q1 cell-interval integration, consistent
+normalization projection and paired boundary completion. The mature FE
+consumer uses these accepted nodal values without P2 analytic-ray replacement,
+floor or lumping. One tensor-product Gauss rule serves all mature bulk operators,
+including graded cells with hanging constraints. Frozen mature mode does not
+allocate or solve P2 phase-energy matrices. Every trial anchors the same
+accepted FE state; validate complete candidates and derived particle samples
+before publishing once. Fixed Eulerian samples require unchanged positions,
+population, mesh, geometry, profile and normalization. Reject FE resume and
+checkpoint conversion; no history transport or birth rule is defined. Native
+RSF integration and legacy particle history/defaults are retained. Initial
+verification of BP3 task sections 1--6 is complete. The subsequent selection
+permits only fresh serial paired stationary-history section 7B, uniform
+strengthening, full bottom loading, filter20 and a common prescribed schedule.
+Both backends use the identical existing three-point tensor rule; the particle
+default remains unchanged. Both positive-time coupled gates and the four
+ten-step creep/common smooth-state-perturbation trajectories pass. This verifies
+the restricted lifecycle at one resolution; endpoint normal roughness and
+perturbation-scaled differences remain accuracy questions. The compiled benchmark
+perturbation retains physical loading $10^{-9}$ m/s. The subsequently selected
+bounded sections 7C--7D retain these physical settings: one timestep halving
+with the same step-zero constitutive interval, coupled quadrature sensitivity,
+actual surface/band refinement, an ordinary transition material check and a
+selected MPI/in-memory candidate rejection/retry. These controls pass, including
+three positive-time one-/two-rank steps and one-owner native history-candidate
+rejection with unchanged accepted physical histories and identical-dt retry.
+The retry matches clean exported fields exactly. No accuracy qualification follows
+from MPI reproducibility; bulk-profile/normalization and endpoint traction
+sensitivities remain unresolved. The subsequently selected section 8 completes
+a ten-step raw-normal control and one further initialization-only bulk refinement.
+Both pass, while peak-scaled localization sensitivity remains 3.7\%.
+A fresh ordinary $150\times50$ km stationary-FE candidate retains the filter
+and actual spatial friction/state/loading. Its coarse full-geometry integration
+check accepts initialization and two physical steps under the native unweighted
+state limiter; the fine candidate is not launched. This does not qualify spatial
+accuracy, FE restart, automatic cutback or material-history transport.
+No long first-event or cluster run follows.
+
 \paragraph{Restricted native P2 accepted FE strain option.}
 The explicitly selected \texttt{Bulk history representation = accepted FE strain}
 is a separate default-off total-energy verification model. The authoritative
@@ -2963,6 +3021,17 @@ name without changing mechanics.
 Add the particle Maxwell-stress property and private non-rotational
 time-discrete Maxwell operations. Keep particle history frozen until a future
 post-convergence update.
+
+The optional fresh frozen mature two-dimensional moving-particle BP3 control
+selects the in-plane three-dimensional deviator of the FE symmetric velocity
+gradient, independently of the history owner. Its bulk residual, tangent,
+filtered and unfiltered $G$ actions, point response and terminal particle update
+use that same convention. The legacy symmetric-gradient particle default is
+retained; accepted FE history already selects the three-dimensional deviator.
+Old particle stress is neither deviated again nor replaced by reconstructed FE
+stress. Moving late samples interpolate existing particle $H$ and stress; fresh
+prescribed $H$ initialization and the stationary-sample birth policy remain
+distinct. Objective rotation and restart conversion are not added.
 
 \subsection*{Stage C: distributed adaptive \(I_h\)}
 Compute transient current \(I_h\) from distributed Q1 phase field, fixed

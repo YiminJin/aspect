@@ -77,7 +77,10 @@ namespace aspect
       // gradient is deviated once during stress reconstruction. The phase block
       // records the accepted profile. Particle stress stores derived samples.
       LinearAlgebra::BlockVector displacement_history;
+      // Z is slip memory in mature mode, independently of zero cohesive
+      // traction. In the cohesive P2 option Z = I_h * tau_coh.
       std::vector<double> Z,I;
+      double shear_sense=1.;
       std::vector<Profile> profiles;
       std::vector<BulkPoint> bulk;
       FullMatrix<double> projection;

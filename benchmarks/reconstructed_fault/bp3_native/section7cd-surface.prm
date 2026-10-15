@@ -1,0 +1,5 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_native/section7cd-q6.prm
+set Output directory = $ASPECT_SOURCE_DIR/build-bp3-native/runs/7cd-surface
+subsection Fault reconstruction
+  set Structural point spacing = 10
+end

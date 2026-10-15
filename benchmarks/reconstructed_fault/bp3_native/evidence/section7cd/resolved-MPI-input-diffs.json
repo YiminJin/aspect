@@ -1,0 +1,37 @@
+{
+  "serial_vs_mpi": [
+    "--- serial\n",
+    "+++ mpi\n",
+    "@@ -181,7 +181,7 @@\n",
+    " # may be an absolute or a relative path. ASPECT will write output such as",
+    " # statistics files or visualization files into this directory or into",
+    " # directories further nested within.",
+    "-set Output directory                           = /home/ein/repository/aspect-fault-propagation/build-bp3-native/runs/7cd-serial                                                                                                                                                              # default: output",
+    "+set Output directory                           = /home/ein/repository/aspect-fault-propagation/build-bp3-native/runs/7cd-mpi                                                                                                                                                                 # default: output",
+    " ",
+    " # Many large clusters use the Lustre file system (LFS) that allows to 'stripe'",
+    " # files, i.e., to use multiple file servers to store a single file. This is"
+  ],
+  "mpi_vs_retry": [
+    "--- mpi\n",
+    "+++ retry\n",
+    "@@ -181,7 +181,7 @@\n",
+    " # may be an absolute or a relative path. ASPECT will write output such as",
+    " # statistics files or visualization files into this directory or into",
+    " # directories further nested within.",
+    "-set Output directory                           = /home/ein/repository/aspect-fault-propagation/build-bp3-native/runs/7cd-mpi                                                                                                                                                                 # default: output",
+    "+set Output directory                           = /home/ein/repository/aspect-fault-propagation/build-bp3-native/runs/7cd-retry                                                                                                                                                               # default: output",
+    " ",
+    " # Many large clusters use the Lustre file system (LFS) that allows to 'stripe'",
+    " # files, i.e., to use multiple file servers to store a single file. This is",
+    "@@ -13832,7 +13832,7 @@\n",
+    "     # Arm the collective fixed-sample registry guard on the last rank at step",
+    "     # two, verify rejection after native history candidates and retry",
+    "     # unchanged dt.",
+    "-    set Inject candidate failure  = false",
+    "+    set Inject candidate failure  = true  # default: false",
+    " ",
+    "     # Initialization-only ordinary BP3 material/assignment probes across its",
+    "     # complete 15--18 km transition."
+  ]
+}

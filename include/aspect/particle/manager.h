@@ -56,6 +56,11 @@ namespace aspect
   template <int dim>
   struct SimulatorSignals;
 
+  namespace Postprocess
+  {
+    template <int dim> class MomentCycle;
+  }
+
   namespace Particle
   {
     using namespace dealii::Particles;
@@ -325,6 +330,10 @@ namespace aspect
         parse_parameters (ParameterHandler &prm, const unsigned int particle_manager);
 
       private:
+        // The existing coupled test observer can wrap the native RK2 terminal
+        // stage to observe a fixed-state population event. No runtime hook or
+        // change to the manager layout/algorithm is introduced.
+        friend class Postprocess::MomentCycle<dim>;
         struct ParticleLoadBalancing
         {
           enum Kind

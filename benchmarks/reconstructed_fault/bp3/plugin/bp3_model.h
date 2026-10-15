@@ -19,7 +19,7 @@ namespace BP3
   constexpr double Vp = 1e-9, Vinit = 1e-9, Vref = 1e-6;
 #endif
   constexpr double a0 = .010, amax = .025, b = .015, f0 = .6;
-#ifdef ASPECT_BP3_LOCAL_BOTTOM_TEST
+#if defined(ASPECT_BP3_LOCAL_BOTTOM_TEST) || defined(ASPECT_BP3_LOCAL_FRONT_TEST)
   extern double local_state_disturbance;
 #endif
   inline const double tau0 = sigma0*amax*std::asinh(Vinit/(2*Vref)
@@ -56,6 +56,16 @@ namespace BP3
   template <class Friction>
   double configured_initial_state(double xd, const Friction &law)
   {
+#ifdef ASPECT_BP3_LOCAL_FRONT_TEST
+    // Diagnostic initial data, not the official BP3 state: an overstated
+    // aging variable weakens locally as sliding begins. Plate velocity and
+    // the live friction law are unchanged. Both particle initialization and
+    // surface initialization call this same function before the explicitly
+    // prescribed diagnostic prestress is initialized.
+    const double coordinate = (xd / geometry().length - .35) / .25;
+    return law.get_characteristic_slip_distance() / Vinit
+           * std::exp(local_state_disturbance * std::exp(-coordinate * coordinate));
+#else
     const double target=law.friction_coefficient({0.,1.}, Vinit,
                          law.get_characteristic_slip_distance()/Vinit);
     const double f=fraction(xd);
@@ -65,6 +75,7 @@ namespace BP3
     return steady*std::exp(local_state_disturbance*std::pow(std::sin(std::acos(-1.)*(y-geometry().origin[1])/geometry().extent[1]),2));
 #else
     return steady;
+#endif
 #endif
   }
 

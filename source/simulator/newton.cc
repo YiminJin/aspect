@@ -60,10 +60,10 @@ namespace aspect
         assemblers.stokes_preconditioner.push_back(std::make_unique<aspect::Assemblers::NewtonStokesPreconditioner<dim>>());
         assemblers.stokes_system.push_back(std::make_unique<aspect::Assemblers::NewtonStokesIncompressibleTerms<dim>>());
 
-        // Reuse the 3D trace term also for the optional incompressible FE
-        // owner. Newton's term corrects BOTH residual and Jacobian.
+        // The constitutive convention is independent of history ownership.
+        // Newton's trace term corrects BOTH residual and Jacobian.
         const auto *fault_material = dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(&this->get_material_model());
-        const bool fe_plane_strain = fault_material && fault_material->uses_fe_strain_history();
+        const bool fe_plane_strain = fault_material && fault_material->uses_deviatoric_strain_rate();
         if (this->get_material_model().is_compressible() ||
             this->get_parameters().enable_prescribed_dilation || fe_plane_strain)
           {

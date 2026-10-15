@@ -1,3 +1,320 @@
+# Worktree checkpoint — scientific task remains open, 2026-10-15
+
+The user requests a clean committed branch for a new worktree, not scientific
+closeout. Preserve the existing BP3/P2 implementation, fixtures, failed controls,
+reports and production defaults. The accelerating pulse's temporal sensitivity,
+endpoint spatial accuracy and population/near-face reconstruction sensitivities
+remain unresolved. [Handoff and artifact locations](../../benchmarks/reconstructed_fault/bp3_native/CHECKPOINT.md)
+distinguish portable source/compact evidence from original local raw outputs and
+matching binaries. All local data remain in this worktree; no simulation or build
+is launched for the checkpoint. Continue only a subsequently selected scope.
+
+---
+
+# Requested disk cleanup — completed, 2026-10-15
+
+Preserved the dirty `fault-propagation` checkout at `c33edaaeb145e5d3dce155bb815552ef80efc5f9`.
+Removed regenerable compiler/Python products and an oversized generated install
+script; losslessly archived eight older P2 bulk CSVs. Four baseline directories
+now share the existing archive layout, with compatibility links at old paths.
+Available space increased 9.77→12.09 GiB (2.32 GiB reclaimed). Source, native
+histories/checkpoints, failed controls, current BP3/P2 binaries, particle-event
+states and server package remain preserved. Scientific qualification is unchanged.
+
+Actual checks: 109127 retained file hashes, all 28 incoming modified files and 278
+existing link targets pass before the explicit index/note updates. All eight
+archive members verify; a real CSV restoration and refusal to overwrite a
+differing file pass. Five executable/plugin dependency checks pass. No build or
+scientific run was launched. Six pre-existing dangling P1 links into another
+checkout are recorded, not repaired. Full record and recovery commands:
+[disk cleanup](../../benchmarks/reconstructed_fault/CLEANUP.md).
+
+No cleanup work remains. Next compilation regenerates removed objects/PCHs;
+reconfigure the P2 build before installation. Restore the archived bulk CSVs
+before analyses that need them. Await selection of further scientific work;
+the completed slip-front sensitivity and endpoint limitations below remain open.
+
+---
+
+# Local accelerating slip-front diagnostic — completed bounded task, 2026-10-15
+
+[Report](../../benchmarks/reconstructed_fault/bp3_native/slip_front_report.md): coupled correctness passes41/67 positive steps toT=2e7s,
+using physicalVp, filter20 and4×4/min12/max24. The isolated diagnostic selects
+ordinary spatial weakening/strengthening, a Gaussian log-Omega state pulse and
+explicit fixed nodal initial shear. These are not official BP3 initial data.
+Peak V=21.253/20.106Vp; moving2/5/10Vp contours establish a finite slip pulse
+on fixed geometry. All recurrence/state/slip/publication, phase/I_h, domain/cache,
+residual and selected tangent gates pass. No crossings, births, removals or
+multiple-trace events occur; population effects cannot explain this trajectory.
+
+**Accuracy exit remains open.** Tightening predictive state bound.2→.1 advances
+the peak by1.022e6s; common-time V difference reaches43% of the primary pulse
+peak. Final V/theta/slip sensitivities are35.1%Vp/10.0% ofDc/Vp/1.86% of peak slip.
+Actual max log-state changes.272/.146 exceed predictive bounds during acceleration.
+No growing alternating slip-rate wave is observed; the sharp lower-end pressure
+feature persists (raw/filtered chord3.686/.260 versus3.690/.264MPa). Endpoint
+spatial accuracy is unqualified, and absence of a short-test wave is no cure.
+
+Four plugin files change only behind the diagnostic compile definition, plus two
+inputs, analysis/report and recovery notes. The coupled observer/core and all
+production defaults/laws are retained. Initial/final plugin+observer builds,
+exact step0/1 final-source gate,12 legacy preprocessing comparisons, ASPECT style,
+Python analysis/syntax and whitespace checks pass. Three launches exit0, total
+2050.86s excluding compilation; at most two ASPECT processes overlap. All incoming
+work, original binaries and5×5 evidence remain; preservation checks cover6628 files.
+Evidence/provenance: `build-bp3-native/slip-front/` and
+`refactoring_boundary/evidence/bp3-slip-front-*`.
+
+Next proposed scope: resolve this pulse's temporal sensitivity with consistently
+tighter active restrictions, retaining sparse states for a later endpoint audit.
+No extra variation, density sweep, production/full-model, unfiltered, MPI,
+restart/cutback or first-event campaign is launched. Stop at this selection.
+
+---
+# Managed BP3 fixed-state event / short timestep audit — completed 2026-10-14
+
+[Report](../../benchmarks/reconstructed_fault/bp3_native/managed_event_report.md): keep 4×4/min12/max24; retain the completed 5×5 control.
+One baseline-only replay through step44 acquires previously unsaved complete
+particle/FE/RNG snapshots. All 45 accepted surface profiles match the retained
+trajectory exactly. No second long density trajectory was run.
+
+At fixed u/p/phase/V/theta/I_h, 316 births and 236 removals preserve all 65445
+survivors exactly but change lower-window reconstructed history by 19.868 MPa
+maximum (.333 MPa weighted RMS). Maximum nodal shear/raw/filtered load changes
+are 159.32/92.37/29.57 kPa; pressure is unchanged. Native weak loads are measured
+separately. A real 3.232-MPa near-face event reproduces eligible-trace jumps;
+independent FEValues agrees with the average, while a one-particle substitution
+changes the assembled residual by 1.027e5 Pa m. That probe is in the interior;
+worst older lower-end 5.35/10.38-MPa events are not claimed reproduced.
+
+The short native-controller pair completes T=2e7 s in 3 versus10 positive steps,
+with identical step-zero initialization and one publication per accepted step.
+Final maximum V/theta/slip sensitivities are .522/.444/.407% on stated scales;
+all residual/history/state/domain checks pass. There are no population events
+in this short early interval; late management temporal accuracy remains open.
+Both observer builds and exact one-step gates pass; source changes are diagnostic
+only (manager test friendship, existing observer, three fixtures and analysis).
+Original binaries, physical settings, sampling rule, completed evidence and all
+unrelated work are preserved. At most three serial simulations overlap.
+
+Evidence/provenance: `build-bp3-native/managed-event-audit/assessment.json`,
+`incoming.json`, `run-artifacts.json`, `final-artifacts.json`, `preservation.json`,
+and `refactoring_boundary/evidence/bp3-event-*`. No selected work remains.
+Next proposed scope: use saved fixed states to resolve lower-end reconstruction/
+trace-gradient spatial sensitivity before increasing particle density. The
+controlled-error exit remains open; no first-event, full-model, MPI, restart or
+cutback run starts. Future long runs retain the at-most-four-process preference.
+
+---
+# Coupled managed-particle BP3 — completed bounded test, 2026-10-14
+
+[Report](../../benchmarks/reconstructed_fault/bp3_native/managed_particles_report.md): both strengthening trajectories complete80 positive steps to
+T=14071021411.032413 s with identical accepted schedules. Native RK2 and12–24
+management from16/cell exercise60001 crossings,1161 insertions,1087 deliberate
+removals and830 outflows; the25/cell control exercises90275/1775/1366/1351.
+All survivor/birth/history, geometry/cache, residual and once-only stress/state/
+slip checks pass.700 assertions/11 unit cases, final builds and bit-identical
+one-step gates also pass. All incoming P2/BP3 work and original artifacts remain.
+
+The controlled-error exit remains open: final maximum V/slip density sensitivities
+are5.97%/.270%; peak transient V is16.79%. Final raw/filtered normal sensitivities
+are27.20%/9.57% of50 MPa, concentrated at the lower endpoint. Near-Nyquist roughness
+and pressure/tensor cancellation remain unresolved.16/cell is not accuracy-qualified.
+Next proposed task: isolate lower-endpoint weak-load/reconstruction changes across
+population events and targeted particle/bulk/surface refinement. Await selection;
+no full-model, first-event, unfiltered, MPI transport, restart or cutback campaign.
+Future long tests: parallel execution with at most four processes.
+
+The default-preserving common D3 selector keeps stress particle-owned; moving
+birth H now interpolates. Stationary results/default strain selection remain.
+The host-cell-only step21 diagnostic failure is preserved and resolved by checking
+the native averaged FE sampling rule, with no production tolerance change.
+Complete evidence, source changes and restrictions are in the linked report and
+`build-bp3-native/managed-coupled/assessment.json`. Exact run commands/results are
+in `refactoring_boundary/evidence/bp3-managed-*.{json,log}`. Stop at this scope.
+
+---
+# Moving-particle domain/operator follow-up — 2026-10-14
+
+[Report](../../benchmarks/reconstructed_fault/bp3_native/geometry_report.md): the
+previously failing dense shear now reaches T=1 in 32 positive steps, retaining
+the 1e-10 coverage guard and all physical/transport inputs. Reconstructing the
+actual full patch under translation/rescaling identifies Voro++ absolute-scale
+sensitivity. A centered chart in typical particle spacings fixes the 2-D polygon
+error; native geometry, periodic images and CPDI return to physical coordinates.
+
+Independent operator checks expose a second numerical defect: old simplex
+gradient integration reverses sign with polygon orientation. 8,011/16,384 domains
+give d(y)/dy=-1 at the failing entry. A 2-D positive-area orientation factor fixes
+this without changing basis values or a physical law. Every corrected rebuild
+passes independent moments, symmetric-difference, CPDI and weak-vector checks;
+maximum local area/gradient errors are 2.18e-14/8.42e-14. Absolute local sums
+exclude cancellation. The matched p8/p16 pulse error decreases .607266% → .160968%
+at T=1 and 2.180573% → .543435% in its temporal maximum.
+
+Actual checks: 841 assertions/12 native cases pass; the original implementation
+fails the new linear-gradient assertion. Five native scale/translation controls
+also pass. Isolated native compilation/relink, diagnostic plugin build, style,
+Python syntax, whitespace and analysis pass. Six bounded test launches total
+46.32 s excluding compilation. All earlier evidence, incoming work, original
+core/plugin binaries and server archive remain; corrected executables are
+separate under `build-bp3-native/transport-geometry/` with provenance/preservation.
+No full core rebuild, complete P2 campaign or physical requalification is claimed.
+The serial prescribed-flow gate is resolved; general D3/G consistency and actual
+coupled moving publication remain the next proposed scope. No subsequent BP3,
+MPI transport, birth/restart/cutback or first-event campaign starts automatically.
+
+---
+# Prescribed moving-particle transport checks — 2026-10-14
+
+The resumed bounded task retains the `fault-propagation`/`c33edaaeb` baseline,
+all incoming edits, completed P2/stationary BP3 evidence, core executable and
+server archive. [Report](../../benchmarks/reconstructed_fault/bp3_native/transport_report.md)
+separates seven passing prescribed-flow controls from one failed denser shear
+extension. Particles cross cells; translation stress is at roundoff, bulk
+refinement reduces FE reconstruction RMS .004648 → .001199 Pa, and the narrow
+passive pulse's native CPDI weak-vector error decreases 11.5768% → 1.51648% →
+.359093% with particle density. Particle pulse values remain exact. Shear-ramp
+stress errors nearly halve under timestep halving; particle and transfer errors
+are measured separately.
+
+The complete gate remains open: the denser shear control stops at t=.0625 s
+with a 6.24544e-9 global Voronoi-area deficit versus the new test's 1e-10 guard
+(native Debug guard is 1e-6). CPDI partition error is only 4.44e-16. Two diagnostic
+replays and independent half-plane clipping identify a saved polygon discrepancy;
+no guard or geometry algorithm is changed. Last complete CSV is t=.03125 s;
+this postprocessing failure is not a rollback test. Eleven launches total
+76.76 s excluding compilation. Plugin build/style/whitespace checks pass;
+analysis intentionally exits 1 for the incomplete control.
+
+New isolated fixtures/observer/analysis call the existing Maxwell kernel via a
+narrow test-access wrapper; no production source algorithm/default changes.
+The no-Stokes harness does not exercise complete coupled terminal publication.
+The selected law excludes objective rotation. General D3/G consistency, coupled
+moving publication, population/MPI/restart and full BP3 remain open. Next proposed
+scope is the localized frozen-entry domain precision diagnosis, followed by the
+separately scoped constitutive/tangent and coupled-publication gates. Stop here;
+no later campaign is selected. Recovery/provenance: `build-bp3-native/transport-checks/`.
+
+---
+# Moving-particle BP3 formulation audit — 2026-10-14
+
+The latest selected task audits ownership/equations and necessary changes before
+implementation. [One note](../../benchmarks/reconstructed_fault/bp3_native/moving_particle_formulation.md)
+traces actual pre-mechanics particle motion, old-stress reconstruction, bulk/fault
+assembly and once-only publication. Existing RK2, particle/CPDI storage, population
+management, fixed profile and surface theta/slip are reusable; accepted FE d_R
+does not belong in the proposed particle-owned branch. All completed stationary
+BP3/P2 results, source edits, binaries and server package remain preserved.
+
+The custom Maxwell path implements the written non-rotational law, not ASPECT's
+separate elastic rotation. An objective extension needs an explicit law/time
+level and perturbation-versus-total-background definition; none is invented.
+One common plane-strain 3D deviator is required independently of history owner.
+The audit also identifies raw symgrad in G where the FE response uses D3,
+including filtered-normal and explicit paths: a nonzero-trace arithmetic
+direction gives derivative .8 versus 2.4. This source/algebra gap requires a
+focused correction/gate before new mechanics; it does not replace prior measured
+trajectory evidence. Only documentation changes; no build or simulation runs.
+Next scope must resolve that model decision and select the bounded implementation.
+The prepared server configuration is still stationary and is not moving-history
+qualification. Historical packaging and scientific evidence follow.
+
+---
+# Fine full-mesh BP3 manual server package — 2026-10-14
+
+The subsequent user selection prepares a complete current ASPECT source snapshot,
+ordinary BP3 plugin, standalone fine-mesh first-event input, fault data and a
+module-neutral environment file. Manual build/run commands use the requested
+WORK/SCRATCH paths and CMake-generated aspect-release link. No server action or
+fine-mesh evolution is launched. Source configuration, plugin rebuild, relocated
+parameter validation/query and environment checks pass. All prior physical
+qualification limits remain: spatial accuracy, FE restart, cutback and transport
+are open. The packaged model is fresh/frozen/stationary, filter20/full bottom;
+checkpointing and automatic recovery are disabled. [Manual handoff](../../benchmarks/reconstructed_fault/bp3_native/server/README.md).
+Historical evidence and section-8 results follow.
+
+---
+# BP3 section 8 — bounded diagnostics and fresh preparation complete
+
+The ten-step raw-normal FE control passes at the retained q6/refined-band/surface 10
+settings and unchanged dt/tolerances; max final V difference is .56945%Vp while
+endpoint slip-rate roughness increases. A further initialization-only bulk
+halving passes with identical physical profile/surface/normalization settings,
+but peak-scaled localization still changes 3.7%; full resolution is provisional.
+Fresh ordinary 150×50 km BP3 FE input restores actual transition/state/loading,
+retains filter 20/full bottom, and prominently enforces stationary/no-birth samples.
+Its coarse full-geometry integration check passes step zero and two physical steps,
+including direct Maxwell, frozen fields and once-only terminal publication.
+The native .2 unweighted state bound selects 1772.48/2166.15 s; the local fixed
+200000 s schedule is not copied. FE checkpoint/resume is disabled and failures
+abort. All launches cost 1382.60 s (23.04 min), excluding compilation.
+
+No production source/default or incoming evidence changes. Fine full-model,
+first-event and cluster runs remain unlaunched; spatial accuracy, FE restart,
+automatic cutback and transport remain open. Fixed Eulerian FE memory with
+stationary derived samples is the current restriction, not an advected-history
+qualification. [Section-8 report](../../benchmarks/reconstructed_fault/bp3_native/section8_report.md)
+and [recovery note](../../benchmarks/reconstructed_fault/bp3_native/STATUS.md).
+Next proposed decision is a coupled spatial accuracy gate and explicit long-run
+recovery/transport scope. Section 8 is complete; no later stage starts.
+Historical evidence follows.
+
+---
+# BP3 sections 7C–7D — bounded sensitivity / MPI recovery complete
+
+On `fault-propagation` at `c33edaaeb`, the perturbed FE temporal halving,
+coupled q3/q6, actual surface and band/endpoint bulk refinement controls pass.
+The initial constitutive interval stays 200000 s; halving positive dt preserves
+byte-identical step-zero profiles. Ordinary BP3 transition material/state checks
+pass. Refined q6/surface10 one-/two-rank three-step controls and a one-owner
+candidate-stage rejection/identical-dt retry pass; exported clean/retry fields
+are identical. All 7B evidence and production sources/binaries are preserved.
+
+Spatial accuracy remains open: bulk representation changes sampled phase by
+.02197 and min I_h by 5.24%; normal-traction/pressure sensitivities remain large
+despite a sharp reduction in short-wave content. MPI agreement is correctness,
+not physical accuracy. The gates support a subsequent bounded unfiltered
+diagnostic and restricted fresh-input preparation, with resolution still to be
+selected from further bulk/profile evidence. Neither later stage is launched.
+FE restart/conversion/transport/birth and general cutback recovery remain unqualified.
+All launches including diagnostic failures cost 1567.88 s (26.13 min).
+[One report, fields, settings, limits and actual results](../../benchmarks/reconstructed_fault/bp3_native/section7cd_report.md)
+and [recovery note](../../benchmarks/reconstructed_fault/bp3_native/STATUS.md).
+Historical 7B, first-pass and P2 evidence follows.
+
+---
+# BP3 section 7B — bounded paired coupled verification complete
+
+The selected serial stationary-history comparison passes both positive-step gates
+and all four ten-step creep/perturbed trajectories to 2000000 s, dt=200000 s.
+Both backends use the same current executable/maintained plugin and exactly
+matched Gauss3, mesh, phase, I_h and physical initialization. Accepted FE stress,
+independent mature Z, zero cohesive traction and once-only state/slip publication
+pass; production source and incoming work are preserved. Final max V differences
+are .190% of Vp, but normal perturbation RMS differences are 10–13% and both paths
+show endpoint roughness. No accuracy or MPI qualification follows. See the
+[7B report](../../benchmarks/reconstructed_fault/bp3_native/section7b_report.md)
+and [recovery note](../../benchmarks/reconstructed_fault/bp3_native/STATUS.md).
+Next proposed issue is a targeted endpoint spatial/quadrature comparison;
+7C/7D, unfiltered, full-model, FE restart/transport and later campaigns are deferred.
+Historical first-pass and P2 evidence follows.
+
+---
+# BP3 stationary accepted FE history — first pass recovery
+
+The selected sections 1–6 are complete on `fault-propagation` at `c33edaaeb`.
+Incoming mature FE recurrence/geometry/normalization/lifecycle edits are retained;
+recovery corrected two diagnostic-fixture defects and completed three controls
+(36 manufactured increments), independent oblique/completed normalization and
+the tensor-convention comparison. Compatibility passes 21,112 assertions/55
+cases. Coupled BP3, native FE restart/transport and the later campaign remain
+unqualified. See the [short recovery note](../../benchmarks/reconstructed_fault/bp3_native/STATUS.md)
+and [implementation/results report](../../benchmarks/reconstructed_fault/bp3_native/report.md).
+Next proposed task is the small paired coupled dipping-fault comparison (7B);
+no later stage is started. Historical P2 evidence follows.
+
+---
 # Completed bounded P2 implementation cleanup
 
 The [cleanup review](propagation/P2_cleanup_report.md) completes the selected

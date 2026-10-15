@@ -1,0 +1,40 @@
+{
+  "baseline": "c33edaaeb145e5d3dce155bb815552ef80efc5f9",
+  "branch": "fault-propagation",
+  "incoming_files": 2385,
+  "changed_incoming_files": [
+    "benchmarks/reconstructed_fault/bp3_native/STATUS.md",
+    "benchmarks/reconstructed_fault/bp3_native/coupled_checks.cc",
+    "doc/reconstructed_fault/CURRENT_STATUS.md",
+    "doc/reconstructed_fault/current_design.md",
+    "doc/reconstructed_fault/specification.tex"
+  ],
+  "new_files": [
+    "benchmarks/reconstructed_fault/bp3_native/section8-raw.prm",
+    "benchmarks/reconstructed_fault/bp3_native/section8-filtered-gate.prm",
+    "benchmarks/reconstructed_fault/bp3_native/section8-profile.prm",
+    "benchmarks/reconstructed_fault/bp3_native/section8-profile-fine.prm",
+    "benchmarks/reconstructed_fault/bp3_native/bp3-fresh-fe.prm",
+    "benchmarks/reconstructed_fault/bp3_native/section8-full-startup.prm",
+    "benchmarks/reconstructed_fault/bp3_native/analyze_section8.py",
+    "benchmarks/reconstructed_fault/bp3_native/section8_report.md"
+  ],
+  "retained_binary_hashes_preserved": true,
+  "all_section8_binary_hashes_preserved": true,
+  "staged_changes": false,
+  "reference_tracked_clean": true,
+  "reference_inputs_unchanged": true,
+  "simulation_seconds": 1382.596735811,
+  "final_analysis_passed": true,
+  "style": "ASPECT astyle2.04 idempotence passes",
+  "diff_check": "pass",
+  "production_source_and_defaults": "unchanged",
+  "fine_full_mesh_launched": false,
+  "first_event_or_cluster_launched": false,
+  "remaining": [
+    "coupled spatial/profile accuracy",
+    "FE checkpoint/restart/conversion",
+    "automatic cutback",
+    "explicit supported history transport"
+  ]
+}

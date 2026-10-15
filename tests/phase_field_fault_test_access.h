@@ -55,9 +55,39 @@ namespace aspect
                                    cache.last_requested_points);
           }
 
-          static auto normalization_profiles(const PhaseFieldFault<dim> &model)
+          static auto normalization_profiles(const PhaseFieldFault<dim> &model, const bool all = false)
           {
-            return model.build_owned_normalization_profiles();
+            return model.build_owned_normalization_profiles(all);
+          }
+
+          static const auto &normalization_cells(const PhaseFieldFault<dim> &model)
+          {
+            return model.normalization_cell_cache;
+          }
+
+          static const auto &normalization_continuations(const PhaseFieldFault<dim> &model)
+          {
+            return model.boundary_continuations;
+          }
+
+          static const std::vector<double> &fe_slip_memory(const PhaseFieldFault<dim> &model)
+          {
+            return model.fe_strain_state->Z;
+          }
+
+          static auto fe_material_coefficients(const PhaseFieldFault<dim> &model)
+          {
+            return std::make_pair(model.fe_strain_state->G,model.fe_strain_state->eta);
+          }
+
+          /** Restore a controlled published history path, including derived caches. */
+          static std::function<void()> save_fe_history(PhaseFieldFault<dim> &model)
+          {
+            const auto saved=std::make_shared<typename PhaseFieldFault<dim>::FEStrainState>(*model.fe_strain_state);
+            return [&model,saved]()
+            {
+              model.fe_strain_state=std::make_shared<typename PhaseFieldFault<dim>::FEStrainState>(*saved);
+            };
           }
 
           /** Reproject independent samples with either representation, restoring state. */
@@ -312,6 +342,17 @@ namespace aspect
             const auto c = PhaseFieldFault<dim>::compute_maxwell_coefficients(
                              viscosity, modulus, dt);
             return {c.beta, c.eta_ve};
+          }
+
+          /** Exercise the production constitutive update in prescribed-flow tests. */
+          static SymmetricTensor<2,dim>
+          maxwell_stress(const double viscosity, const double modulus, const double dt,
+                         const SymmetricTensor<2,dim> &strain_rate,
+                         const SymmetricTensor<2,dim> &old_stress)
+          {
+            return PhaseFieldFault<dim>::compute_maxwell_stress(
+                     PhaseFieldFault<dim>::compute_maxwell_coefficients(viscosity, modulus, dt),
+                     strain_rate, old_stress);
           }
 
           /** Read native surface coefficients without changing any history. */

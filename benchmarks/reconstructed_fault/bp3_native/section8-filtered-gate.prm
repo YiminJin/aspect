@@ -1,0 +1,11 @@
+# Observer-only replay: the physical filtered trajectory is reused unchanged.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_native/section7cd-bulk.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/build-bp3-native/section7b/bp3-plugin/libbp3_restore_150x50.release.so, $ASPECT_SOURCE_DIR/build-bp3-native/section8/local-observer/libbp3_coupled_checks.release.so
+set Output directory = $ASPECT_SOURCE_DIR/build-bp3-native/runs/8-filtered-gate
+set End time = 0
+subsection Postprocess
+  subsection BP3
+    set Last accepted step = 0
+    set Graceful wall seconds = 190
+  end
+end

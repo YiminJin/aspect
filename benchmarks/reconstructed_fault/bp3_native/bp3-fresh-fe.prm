@@ -1,0 +1,59 @@
+# PREPARED CANDIDATE ONLY: spatial accuracy and long-run recovery are unqualified.
+# STATIONARY FE HISTORY: fixed mesh/geometry/phase, no particle motion or births.
+# Fresh zero bulk perturbation; surface background tractions remain native BP3.
+# No FE checkpoint/restart/conversion or automatic cutback qualification.
+# Do not launch the resolved mesh or a first-event campaign without review.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/production/bp3_fresh.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/build-bp3-native/section7cd/transition-bp3/libbp3_restore_150x50.release.so
+set Output directory = $ASPECT_SOURCE_DIR/build-bp3-native/runs/full-fe-PREPARED-NOT-RUN
+set Resume computation = false
+set Nonlinear solver failure strategy = abort program
+# Latest local revised fresh input and executed output-first-event/original.prm:
+# 4e6/4e7 caps, unweighted logarithmic-state bound .2, initialization interval 4e6.
+# These are proposed long-run settings, distinct from the fixed local 7B/7C dt.
+set Maximum first time step = 4e6
+set Maximum time step = 4e7
+set Maximum relative increase in time step = 91
+subsection Material model
+  subsection Phase field fault
+    set Bulk history representation = accepted FE strain
+    set Consistent endpoint phase solve = false
+    set FE bulk normal quadrature points = 6
+    set Initial time step = 4e6
+    set Evolve phase field = false
+  end
+end
+subsection Fault reconstruction
+  # Provisional, matching the finest tested local surface discretization.
+  set Structural point spacing = 10
+  set Prescribed faults file = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3/production/fault.txt
+end
+subsection Time stepping
+  set List of model names = convection time step, reconstructed fault time step
+  subsection Reconstructed fault time step
+    set Maximum logarithmic state change = 0.2
+  end
+end
+subsection Particles
+  set Integration scheme = BP3 stationary samples
+  set Load balancing strategy = none
+end
+subsection Termination criteria
+  set Checkpoint on termination = false
+end
+subsection Checkpointing
+  set Steps between checkpoint = 0
+  set Time between checkpoint = 0
+end
+subsection Postprocess
+  # Native compact surface outputs; bulk/particle dumps stay disabled.
+  set List of postprocessors = reconstructed fault BP3, particles, BP3 output complete, BP3 restored monitor
+  subsection Particles
+    set Data output format = none
+  end
+  subsection BP3 restored monitor
+    set Bottom velocity constraint = full
+    set Friction normal input = helmholtz
+    set Normal filter length = 20
+  end
+end

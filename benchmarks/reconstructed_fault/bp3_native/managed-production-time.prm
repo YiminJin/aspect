@@ -1,0 +1,24 @@
+# Short physical interval: production controller selection/caps, strengthening.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_native/managed-event.prm
+set Output directory = $ASPECT_SOURCE_DIR/build-bp3-native/managed-event-audit/runs/production-time
+set End time = 20000000
+set Maximum first time step = 4000000
+set Maximum time step = 40000000
+set Maximum relative increase in time step = 91
+# Keep Initial time step=200000: changing the step-zero model is not a dt test.
+subsection Time stepping
+  set List of model names = convection time step, reconstructed fault time step
+  subsection Reconstructed fault time step
+    set Maximum logarithmic state change = 0.2
+  end
+end
+subsection Postprocess
+  subsection BP3
+    set Last accepted step = 50
+    set Graceful wall seconds = 600
+    set Profile time interval = 0
+  end
+  subsection BP3 coupled checks
+    set Population event audit = false
+  end
+end

@@ -67,6 +67,12 @@ namespace aspect
                           "The latter requires bottom absent from ordinary velocity boundary lists.");
 #ifdef ASPECT_BP3_LOCAL_BOTTOM_TEST
         prm.declare_entry("Local state disturbance","0",Patterns::Double(0,.02));
+#elif defined(ASPECT_BP3_LOCAL_FRONT_TEST)
+          prm.declare_entry("Local state disturbance", "0", Patterns::Double(0, 6),
+                            "Diagnostic only: peak log(Vinit Theta0/Dc) of a Gaussian pulse, "
+                            "centered at .35 fault length with width .25 fault length. "
+                            "Outside the pulse the state tends to Dc/Vinit. "
+                            "This is not the official BP3 initial condition.");
 #endif
         prm.declare_entry("Write detailed diagnostics","false",Patterns::Bool(),
                           "Write per-step fault, quadrature, particle and work-replay CSVs, plus the initial mesh. "
@@ -80,7 +86,7 @@ namespace aspect
         BP3Restore::filter_mode=prm.get("Friction normal input");
         BP3Restore::filter_length=prm.get_double("Normal filter length");
         BP3Restore::bottom_velocity_constraint=prm.get("Bottom velocity constraint");
-#ifdef ASPECT_BP3_LOCAL_BOTTOM_TEST
+#if defined(ASPECT_BP3_LOCAL_BOTTOM_TEST) || defined(ASPECT_BP3_LOCAL_FRONT_TEST)
         BP3::local_state_disturbance=prm.get_double("Local state disturbance");
 #endif
         detailed_diagnostics=prm.get_bool("Write detailed diagnostics");

@@ -1,0 +1,407 @@
+{
+  "initial": {
+    "time_s": 0,
+    "fields": {
+      "V_m_s": {
+        "max_abs": 7.225651793136535e-13,
+        "rms_abs": 3.998595225058721e-14,
+        "scale": 1e-09,
+        "max_relative": 0.0007225651793136534,
+        "rms_relative": 3.998595225058721e-05,
+        "signed_mean": 4.289390623115703e-16,
+        "oscillatory_rms": 3.998365151742727e-14
+      },
+      "theta_s": {
+        "max_abs": 0.0,
+        "rms_abs": 0.0,
+        "scale": 8000000.0,
+        "max_relative": 0.0,
+        "rms_relative": 0.0,
+        "signed_mean": 0.0,
+        "oscillatory_rms": 0.0
+      },
+      "Omega": {
+        "max_abs": 0.0007225651793135723,
+        "rms_abs": 3.998616878636396e-05,
+        "scale": 1.0,
+        "max_relative": 0.0007225651793135723,
+        "rms_relative": 3.998616878636396e-05,
+        "signed_mean": 4.2911077278222916e-07,
+        "oscillatory_rms": 3.998386622321896e-05
+      },
+      "slip_m": {
+        "max_abs": 0.0,
+        "rms_abs": 0.0,
+        "scale": 0.002,
+        "max_relative": 0.0,
+        "rms_relative": 0.0,
+        "signed_mean": 0.0,
+        "oscillatory_rms": 0.0
+      },
+      "shear_Pa": {
+        "max_abs": 85.23040913045406,
+        "rms_abs": 4.655481928247599,
+        "scale": 26546122.365133367,
+        "max_relative": 3.2106538182163564e-06,
+        "rms_relative": 1.7537333190184779e-07,
+        "signed_mean": -0.007771262963261199,
+        "oscillatory_rms": 4.655475442069471,
+        "perturbation_scale": 156.99717525325704,
+        "rms_relative_to_perturbation": 0.02965328465775066
+      },
+      "raw_normal_Pa": {
+        "max_abs": 71.53951875120401,
+        "rms_abs": 5.180939898105616,
+        "scale": 50000000.0,
+        "max_relative": 1.4307903750240804e-06,
+        "rms_relative": 1.0361879796211233e-07,
+        "signed_mean": 0.5319385630046594,
+        "oscillatory_rms": 5.153559895157052,
+        "perturbation_scale": 118.8133348524105,
+        "rms_relative_to_perturbation": 0.0436057106261798
+      },
+      "filtered_normal_Pa": {
+        "max_abs": 1861.36438459903,
+        "rms_abs": 102.6746516915159,
+        "scale": 50000000.0,
+        "max_relative": 3.72272876919806e-05,
+        "rms_relative": 2.053493033830318e-06,
+        "signed_mean": -1.0217850411244807,
+        "oscillatory_rms": 102.66956732792754,
+        "perturbation_scale": 118.8133348524105,
+        "rms_relative_to_perturbation": 0.8641677453044979
+      },
+      "pressure_Pa": {
+        "max_abs": 44.988264191918006,
+        "rms_abs": 3.6562322526733895,
+        "scale": 144.0472577269222,
+        "max_relative": 0.31231600588471164,
+        "rms_relative": 0.0253821718675457,
+        "signed_mean": 0.5404633306363502,
+        "oscillatory_rms": 3.6160660494142793
+      },
+      "deviatoric_Pa": {
+        "max_abs": 26.55125438629807,
+        "rms_abs": 1.8155041491842678,
+        "scale": 44.169051628893236,
+        "max_relative": 0.6011280162721342,
+        "rms_relative": 0.0411035347654296,
+        "signed_mean": -0.008524773388550004,
+        "oscillatory_rms": 1.8154841348642974
+      },
+      "I_h_m": {
+        "max_abs": 0.0,
+        "rms_abs": 0.0,
+        "scale": 12818.629170016638,
+        "max_relative": 0.0,
+        "rms_relative": 0.0,
+        "signed_mean": 0.0,
+        "oscillatory_rms": 0.0
+      },
+      "Z_Pa_m": {
+        "max_abs": 0.0,
+        "rms_abs": 0.0,
+        "scale": 1.0,
+        "max_relative": 0.0,
+        "rms_relative": 0.0,
+        "signed_mean": 0.0,
+        "oscillatory_rms": 0.0
+      }
+    }
+  },
+  "final": {
+    "time_s": 2000000,
+    "fields": {
+      "V_m_s": {
+        "max_abs": 5.69447473115905e-12,
+        "rms_abs": 2.99114690680703e-13,
+        "scale": 1e-09,
+        "max_relative": 0.00569447473115905,
+        "rms_relative": 0.00029911469068070296,
+        "signed_mean": -2.722184630705952e-15,
+        "oscillatory_rms": 2.9910230338773554e-13
+      },
+      "theta_s": {
+        "max_abs": 6207.200619284064,
+        "rms_abs": 330.461539668716,
+        "scale": 8000000.0,
+        "max_relative": 0.000775900077410508,
+        "rms_relative": 4.13076924585895e-05,
+        "signed_mean": 0.87094573227041,
+        "oscillatory_rms": 330.4603919590815
+      },
+      "Omega": {
+        "max_abs": 0.0049202525368836625,
+        "rms_abs": 0.00025782854876667336,
+        "scale": 1.0,
+        "max_relative": 0.0049202525368836625,
+        "rms_relative": 0.00025782854876667336,
+        "signed_mean": -2.6552871211485586e-06,
+        "oscillatory_rms": 0.0002578148754618963
+      },
+      "slip_m": {
+        "max_abs": 6.787840527726699e-06,
+        "rms_abs": 3.6174693648410963e-07,
+        "scale": 0.002,
+        "max_relative": 0.0033939202638633495,
+        "rms_relative": 0.00018087346824205482,
+        "signed_mean": -8.048601420539112e-10,
+        "oscillatory_rms": 3.617460411058982e-07
+      },
+      "shear_Pa": {
+        "max_abs": 4064.359649337828,
+        "rms_abs": 212.14968342427437,
+        "scale": 26546122.365133367,
+        "max_relative": 0.0001531055870772337,
+        "rms_relative": 7.991739076096454e-06,
+        "signed_mean": 2.6097197473085654,
+        "oscillatory_rms": 212.133631326719,
+        "perturbation_scale": 1269.4359924353002,
+        "rms_relative_to_perturbation": 0.16712121342745612
+      },
+      "raw_normal_Pa": {
+        "max_abs": 3410.9602207019925,
+        "rms_abs": 243.7767848300415,
+        "scale": 50000000.0,
+        "max_relative": 6.821920441403985e-05,
+        "rms_relative": 4.87553569660083e-06,
+        "signed_mean": 25.968815494072267,
+        "oscillatory_rms": 242.389647971829,
+        "perturbation_scale": 1202.9283975105911,
+        "rms_relative_to_perturbation": 0.20265278077608537
+      },
+      "filtered_normal_Pa": {
+        "max_abs": 20145.273948691785,
+        "rms_abs": 1047.7534241171113,
+        "scale": 50000000.0,
+        "max_relative": 0.0004029054789738357,
+        "rms_relative": 2.0955068482342225e-05,
+        "signed_mean": 11.453113317973354,
+        "oscillatory_rms": 1047.6908245968643,
+        "perturbation_scale": 1202.9283975105911,
+        "rms_relative_to_perturbation": 0.8710023192447632
+      },
+      "pressure_Pa": {
+        "max_abs": 2232.592820548227,
+        "rms_abs": 174.87103390819158,
+        "scale": 1409.7101688769815,
+        "max_relative": 1.583724704438203,
+        "rms_relative": 0.1240475083239977,
+        "signed_mean": 26.273721819560784,
+        "oscillatory_rms": 172.88600302473372
+      },
+      "deviatoric_Pa": {
+        "max_abs": 1178.3674005266994,
+        "rms_abs": 81.17156892237544,
+        "scale": 407.25965605199593,
+        "max_relative": 2.893405676245658,
+        "rms_relative": 0.19931158835927526,
+        "signed_mean": -0.3049063209348125,
+        "oscillatory_rms": 81.17099625762518
+      },
+      "I_h_m": {
+        "max_abs": 0.0,
+        "rms_abs": 0.0,
+        "scale": 12818.629170016638,
+        "max_relative": 0.0,
+        "rms_relative": 0.0,
+        "signed_mean": 0.0,
+        "oscillatory_rms": 0.0
+      },
+      "Z_Pa_m": {
+        "max_abs": 217469.65148926526,
+        "rms_abs": 11589.691873725786,
+        "scale": 63725875.912981436,
+        "max_relative": 0.003412580029283914,
+        "rms_relative": 0.00018186791013358013,
+        "signed_mean": -25.786206076937845,
+        "oscillatory_rms": 11589.663187490896
+      }
+    }
+  },
+  "profile": {
+    "cases": {
+      "base": {
+        "summary": {
+          "cells": 11528.0,
+          "dofs": 410198.0,
+          "particles": 184448.0,
+          "vertices": 117.0,
+          "contacts": 2.0,
+          "min_I_m": 12818.607952868297,
+          "max_I_m": 12818.658049469897,
+          "zero_FE_history": 1.0
+        },
+        "points": 2651,
+        "exterior_points": 514,
+        "max_physical_phase_error": 0.007733393043441894
+      },
+      "fine": {
+        "summary": {
+          "cells": 35342.0,
+          "dofs": 1238854.0,
+          "particles": 565472.0,
+          "vertices": 117.0,
+          "contacts": 2.0,
+          "min_I_m": 12993.675192701936,
+          "max_I_m": 12993.677310036026,
+          "zero_FE_history": 1.0
+        },
+        "points": 2651,
+        "exterior_points": 514,
+        "max_physical_phase_error": 0.001970621860338362
+      }
+    },
+    "common_points": {
+      "all": {
+        "points": 2651,
+        "fields": {
+          "phi": {
+            "max_abs": 0.007200649752749921,
+            "RMS": 0.0013286065589882083,
+            "scale": 0.6,
+            "max_relative": 0.01200108292124987
+          },
+          "physical_phi": {
+            "max_abs": 0.0,
+            "RMS": 0.0,
+            "scale": 0.6,
+            "max_relative": 0.0
+          },
+          "I_h_m": {
+            "max_abs": 175.06935716772568,
+            "RMS": 175.04382699375145,
+            "scale": 12993.677310036026,
+            "max_relative": 0.013473426574362134
+          },
+          "h": {
+            "max_abs": 36.38039839992655,
+            "RMS": 5.0826654204729795,
+            "scale": 720.8577071999998,
+            "max_relative": 0.050468210350746674
+          },
+          "chi_per_m": {
+            "max_abs": 0.0020863179919446417,
+            "RMS": 0.00024165784439313361,
+            "scale": 0.05623503680479332,
+            "max_relative": 0.037099966684236436
+          }
+        }
+      },
+      "endpoint_50m": {
+        "points": 1928,
+        "fields": {
+          "phi": {
+            "max_abs": 0.007200649752749921,
+            "RMS": 0.0013260583838244438,
+            "scale": 0.5997065089962196,
+            "max_relative": 0.01200695614393492
+          },
+          "physical_phi": {
+            "max_abs": 0.0,
+            "RMS": 0.0,
+            "scale": 0.6,
+            "max_relative": 0.0
+          },
+          "I_h_m": {
+            "max_abs": 175.06935716772568,
+            "RMS": 175.05323074183764,
+            "scale": 12993.677310036026,
+            "max_relative": 0.013473426574362134
+          },
+          "h": {
+            "max_abs": 36.38039839992655,
+            "RMS": 5.086991836500984,
+            "scale": 719.3169822792121,
+            "max_relative": 0.050576309605053965
+          },
+          "chi_per_m": {
+            "max_abs": 0.0020863179919446417,
+            "RMS": 0.00024126425102217246,
+            "scale": 0.05572424491183529,
+            "max_relative": 0.03744004060073909
+          }
+        }
+      },
+      "exterior_completion": {
+        "points": 514,
+        "fields": {
+          "phi": {
+            "max_abs": 0.005885273503390631,
+            "RMS": 0.0010498223704274148,
+            "scale": 0.5978009083367459,
+            "max_relative": 0.009844872132705778
+          },
+          "physical_phi": {
+            "max_abs": 0.0,
+            "RMS": 0.0,
+            "scale": 0.5994731577174782,
+            "max_relative": 0.0
+          },
+          "I_h_m": {
+            "max_abs": 175.06935716772568,
+            "RMS": 175.0588092373302,
+            "scale": 12993.677310036026,
+            "max_relative": 0.013473426574362134
+          },
+          "h": {
+            "max_abs": 27.921848920462594,
+            "RMS": 3.5884928089481534,
+            "scale": 709.406819834778,
+            "max_relative": 0.039359431203333566
+          },
+          "chi_per_m": {
+            "max_abs": 0.0014692971346142447,
+            "RMS": 0.0001682634483094753,
+            "scale": 0.05459630887453612,
+            "max_relative": 0.026912023264992722
+          }
+        }
+      },
+      "interior": {
+        "points": 723,
+        "fields": {
+          "phi": {
+            "max_abs": 0.006201277484187195,
+            "RMS": 0.0013353779210349157,
+            "scale": 0.6,
+            "max_relative": 0.010335462473645326
+          },
+          "physical_phi": {
+            "max_abs": 0.0,
+            "RMS": 0.0,
+            "scale": 0.6,
+            "max_relative": 0.0
+          },
+          "I_h_m": {
+            "max_abs": 175.01935274597417,
+            "RMS": 175.01874786201424,
+            "scale": 12993.6757089649,
+            "max_relative": 0.01346957986839865
+          },
+          "h": {
+            "max_abs": 29.463255160340054,
+            "RMS": 5.071110265815177,
+            "scale": 720.8577071999998,
+            "max_relative": 0.04087249795078568
+          },
+          "chi_per_m": {
+            "max_abs": 0.0015880652893266248,
+            "RMS": 0.00024270430620666582,
+            "scale": 0.05623503680479332,
+            "max_relative": 0.02823978394180161
+          }
+        }
+      }
+    },
+    "nodal_I": {
+      "max_abs": 175.06935716772568,
+      "rms_abs": 175.0466344460139,
+      "scale": 12993.677310036026,
+      "max_relative": 0.013473426574362134,
+      "rms_relative": 0.01347167782216754,
+      "signed_mean": 175.0466342719212,
+      "oscillatory_rms": 0.007806964737266402
+    }
+  }
+}

@@ -1,0 +1,8 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_native/transport/shear-dt03125-p16.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/build-bp3-native/transport-geometry/plugin/libprescribed_transport.release.so
+set Output directory = $ASPECT_SOURCE_DIR/build-bp3-native/transport-geometry/runs/shear-conditioned
+subsection Postprocess
+  subsection Prescribed transport
+    set Audit particle domains = true
+  end
+end

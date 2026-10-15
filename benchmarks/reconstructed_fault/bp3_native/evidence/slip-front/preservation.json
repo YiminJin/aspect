@@ -1,0 +1,39 @@
+{
+  "head": "c33edaaeb145e5d3dce155bb815552ef80efc5f9",
+  "branch": "fault-propagation",
+  "existing_files_checked": 6628,
+  "changed_existing": [
+    "doc/reconstructed_fault/CURRENT_STATUS.md",
+    "benchmarks/reconstructed_fault/bp3_native/STATUS.md",
+    "benchmarks/reconstructed_fault/bp3/plugin/monitor.cc",
+    "benchmarks/reconstructed_fault/bp3/plugin/configuration.cc",
+    "benchmarks/reconstructed_fault/bp3/plugin/bp3.cc",
+    "benchmarks/reconstructed_fault/bp3/plugin/bp3_model.h"
+  ],
+  "missing": [],
+  "original_artifacts_unchanged": {
+    "build-bp3-native/managed-coupled/final/aspect-release": true,
+    "build-bp3-native/managed-coupled/bp3-plugin/libbp3_restore_150x50.release.so": true,
+    "build-bp3-native/managed-event-audit/observer-final/libbp3_coupled_checks.release.so": true
+  },
+  "index_unchanged": true,
+  "final_source_non_whitespace_identical_to_tested": true,
+  "new_code_style": {
+    "benchmarks/reconstructed_fault/bp3/plugin/bp3_model.h": true,
+    "benchmarks/reconstructed_fault/bp3/plugin/bp3.cc": true,
+    "benchmarks/reconstructed_fault/bp3/plugin/monitor.cc": true,
+    "benchmarks/reconstructed_fault/bp3/plugin/configuration.cc": true
+  },
+  "changed_file_hashes": {
+    "benchmarks/reconstructed_fault/bp3/plugin/bp3.cc": "807fae6792767c5750b717991c0e7b6f03b243dc7d0c0b8e8c591efe3eadb728",
+    "benchmarks/reconstructed_fault/bp3/plugin/bp3_model.h": "bd053c39be1dbf7ea0c2f54d4fae77a768147043b8cd171c74e120de16446d93",
+    "benchmarks/reconstructed_fault/bp3/plugin/configuration.cc": "52af33a47c473fedbf6868b80341b3f7657a13128c2754360948bef0cdc658c2",
+    "benchmarks/reconstructed_fault/bp3/plugin/monitor.cc": "1d95c0e56fb88819aa27be62765f4950917f5ddec9737f6690730d2b047f8435",
+    "benchmarks/reconstructed_fault/bp3_native/STATUS.md": "da265ef65ddb94b7e50f74d6709182c6d87a4b29f7fdcfe10fcc1de2912b09da",
+    "doc/reconstructed_fault/CURRENT_STATUS.md": "3da3a1ce18b5e8909ef43de72f9c6e6bcc9c1984283416bfc4e386720e1e7e5f",
+    "benchmarks/reconstructed_fault/bp3_native/slip-front.prm": "7fbcf95986d4bd73720f12dfacfcba5080c615d1d2d9135c9c77eae3147224b2",
+    "benchmarks/reconstructed_fault/bp3_native/slip-front-time.prm": "9177b87b014a1a86ae0ddfbcf952631e24202cc2a5f2da74dfa09cfde93e63c4",
+    "benchmarks/reconstructed_fault/bp3_native/analyze_slip_front.py": "275c88441d92652b26c47f1e6dbaea0c0814d55171db4dceb79308383e7a76ea",
+    "benchmarks/reconstructed_fault/bp3_native/slip_front_report.md": "9df7ef634a1508eac81bdf3ee704659726e384b660dfe6145d44e3e68501ffa1"
+  }
+}

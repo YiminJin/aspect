@@ -1,0 +1,7 @@
+{
+  "HEAD": "c33edaaeb145e5d3dce155bb815552ef80efc5f9",
+  "reference_inputs": {
+    "../aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3/production/bp3_fresh.prm": "3096f0995801ce27331ad05aa33a1110fcf2a93ed606b5bccd85a42cd0aa5cbc",
+    "../aspect-pf-rsf-refactor/benchmarks/reconstructed_fault/bp3/bp3_150x50_first_event.prm": "23743000ec027177562699c93e7e49682273eb822b5e8463608bc7ee792075c4"
+  }
+}

@@ -1,0 +1,2285 @@
+{
+  "Additional shared libraries": "./plugin/build/libbp3_restore_150x50.release.so",
+  "Adiabatic surface temperature": "0.",
+  "CFL number": "0.5",
+  "Dimension": "2",
+  "End time": "47336400000",
+  "Max nonlinear iterations": "30",
+  "Max nonlinear iterations in pre-refinement": "2147483647",
+  "Maximum first time step": "4e6",
+  "Maximum relative increase in time step": "91",
+  "Maximum time step": "4e7",
+  "Nonlinear solver failure strategy": "abort program",
+  "Nonlinear solver scheme": "single Advection, iterated Newton Stokes",
+  "Nonlinear solver tolerance": "1e-8",
+  "Output directory": "./output",
+  "Output directory LFS stripe count": "0",
+  "Pressure normalization": "no",
+  "Resume computation": "false",
+  "Start time": "0.",
+  "Surface pressure": "0",
+  "Timing output frequency": "100",
+  "Use conduction timestep": "false",
+  "Use operator splitting": "false",
+  "Use years in output instead of seconds": {
+    "alias": "Use years instead of seconds",
+    "deprecation_status": "true"
+  },
+  "Use years instead of seconds": "false",
+  "World builder file": "",
+  "Adiabatic conditions model": {
+    "Model name": "compute profile",
+    "Ascii data model": {
+      "Data directory": "$ASPECT_SOURCE_DIR/tests/adiabatic-conditions/ascii-data/test/",
+      "Data file name": "",
+      "Scale factor": "1."
+    },
+    "Compute entropy profile": {
+      "Number of points": "1000",
+      "Surface entropy": "0"
+    },
+    "Compute profile": {
+      "Composition reference profile": "initial composition",
+      "Function constants": "",
+      "Function expression": "0",
+      "Number of points": "1000",
+      "Use surface condition function": "false",
+      "Variable names": "x,t",
+      "Surface condition function": {
+        "Function constants": "",
+        "Function expression": "0; 0",
+        "Variable names": "x,t"
+      }
+    },
+    "Function": {
+      "Function constants": "",
+      "Function expression": "0.0; 0.0; 1.0",
+      "Variable names": "depth"
+    }
+  },
+  "Boundary composition model": {
+    "Allow fixed composition on outflow boundaries": "false for models without melt",
+    "Fixed composition boundary indicators": "",
+    "List of model names": "",
+    "List of model operators": "add",
+    "Model name": "unspecified",
+    "Ascii data model": {
+      "Data directory": "$ASPECT_SOURCE_DIR/data/boundary-composition/ascii-data/test/",
+      "Data file name": "box_2d_%s.%d.txt",
+      "Data file time step": "1e6",
+      "Decreasing file order": "false",
+      "First data file model time": "0",
+      "First data file number": "0",
+      "Scale factor": "1."
+    },
+    "Box": {
+      "Bottom composition": "",
+      "Left composition": "",
+      "Right composition": "",
+      "Top composition": ""
+    },
+    "Box with lithosphere boundary indicators": {
+      "Bottom composition": "",
+      "Left composition": "",
+      "Left composition lithosphere": "",
+      "Right composition": "",
+      "Right composition lithosphere": "",
+      "Top composition": ""
+    },
+    "Function": {
+      "Coordinate system": "cartesian",
+      "Function constants": "",
+      "Function expression": "0",
+      "Variable names": "x,y,t"
+    },
+    "Initial composition": {
+      "Maximal composition": "1.",
+      "Minimal composition": "0."
+    },
+    "Spherical constant": {
+      "Inner composition": "1.",
+      "Outer composition": "0."
+    }
+  },
+  "Boundary convective heating model": {
+    "Convective heating boundary indicators": "",
+    "List of boundary heat flux model names": "",
+    "List of boundary temperature model names": "",
+    "List of heat transfer coefficient model names": "",
+    "Function": {
+      "Coordinate system": "cartesian",
+      "Function constants": "",
+      "Function expression": "0",
+      "Variable names": "x,y,t"
+    }
+  },
+  "Boundary fluid pressure model": {
+    "Plugin name": "density",
+    "Density": {
+      "Density formulation": "solid density"
+    }
+  },
+  "Boundary heat flux model": {
+    "Fixed heat flux boundary indicators": "",
+    "Model name": "function",
+    "Function": {
+      "Coordinate system": "cartesian",
+      "Function constants": "",
+      "Function expression": "0",
+      "Variable names": "x,y,t"
+    }
+  },
+  "Boundary temperature model": {
+    "Allow fixed temperature on outflow boundaries": "true",
+    "Fixed temperature boundary indicators": "",
+    "List of model names": "",
+    "List of model operators": "add",
+    "Model name": "unspecified",
+    "Ascii data model": {
+      "Data directory": "$ASPECT_SOURCE_DIR/data/boundary-temperature/ascii-data/test/",
+      "Data file name": "box_2d_%s.%d.txt",
+      "Data file time step": "1e6",
+      "Decreasing file order": "false",
+      "First data file model time": "0",
+      "First data file number": "0",
+      "Scale factor": "1."
+    },
+    "Box": {
+      "Bottom temperature": "0.",
+      "Left temperature": "1.",
+      "Right temperature": "0.",
+      "Top temperature": "0."
+    },
+    "Box with lithosphere boundary indicators": {
+      "Bottom temperature": "0.",
+      "Left temperature": "1.",
+      "Left temperature lithosphere": "0.",
+      "Right temperature": "0.",
+      "Right temperature lithosphere": "0.",
+      "Top temperature": "0."
+    },
+    "Constant": {
+      "Boundary indicator to temperature mappings": ""
+    },
+    "Dynamic core": {
+      "Alpha": "1.35e-5",
+      "Beta composition": "1.1",
+      "CMB pressure": "0.14e12",
+      "Core conductivity": "60.",
+      "Core density": "12.5e3",
+      "Core heat capacity": "840.",
+      "Delta": "0.5",
+      "Gravity acceleration": "9.8",
+      "Initial light composition": "0.01",
+      "Inner temperature": "6000.",
+      "K0": "4.111e11",
+      "Lh": "750e3",
+      "Max iteration": "30000",
+      "Outer temperature": "0.",
+      "Rh": "-27.7e6",
+      "Rho0": "7.019e3",
+      "dR over dt": "0.",
+      "dT over dt": "0.",
+      "dX over dt": "0.",
+      "Geotherm parameters": {
+        "Composition dependency": "true",
+        "Theta": "0.11",
+        "Tm0": "1695.",
+        "Tm1": "10.9",
+        "Tm2": "-8.0",
+        "Use BW11": "false"
+      },
+      "Other energy source": {
+        "File name": ""
+      },
+      "Radioactive heat source": {
+        "Half life times": "",
+        "Heating rates": "",
+        "Initial concentrations": "",
+        "Number of radioactive heating elements": "0"
+      }
+    },
+    "Function": {
+      "Coordinate system": "cartesian",
+      "Function constants": "",
+      "Function expression": "0",
+      "Maximal temperature": "3773.",
+      "Minimal temperature": "273.",
+      "Variable names": "x,y,t"
+    },
+    "Initial temperature": {
+      "Maximal temperature": "3773.",
+      "Minimal temperature": "0."
+    },
+    "Spherical constant": {
+      "Inner temperature": "6000.",
+      "Outer temperature": "0."
+    }
+  },
+  "Boundary traction model": {
+    "Prescribed traction boundary indicators": "",
+    "Ascii data model": {
+      "Data directory": "$ASPECT_SOURCE_DIR/data/boundary-traction/ascii-data/test/",
+      "Data file name": "box_2d_%s.%d.txt",
+      "Data file time step": "1e6",
+      "Decreasing file order": "false",
+      "First data file model time": "0",
+      "First data file number": "0",
+      "Prescribe pressure instead of full traction": "true",
+      "Scale factor": "1.",
+      "Use spherical unit vectors": "false"
+    },
+    "Function": {
+      "Coordinate system": "cartesian",
+      "Function constants": "",
+      "Function expression": "0; 0",
+      "Use spherical unit vectors": "false",
+      "Variable names": "x,y,t"
+    },
+    "Initial lithostatic pressure": {
+      "Number of integration points": "1000",
+      "Representative point": ""
+    }
+  },
+  "Boundary velocity model": {
+    "Prescribed velocity boundary indicators": "left:reconstructed fault BP3, right:reconstructed fault BP3, bottom:reconstructed fault BP3",
+    "Tangential velocity boundary indicators": "",
+    "Zero velocity boundary indicators": "",
+    "Ascii data model": {
+      "Data directory": "$ASPECT_SOURCE_DIR/data/boundary-velocity/ascii-data/test/",
+      "Data file name": "box_2d_%s.%d.txt",
+      "Data file time step": "1e6",
+      "Decreasing file order": "false",
+      "First data file model time": "0",
+      "First data file number": "0",
+      "Scale factor": "1.",
+      "Use spherical unit vectors": "false"
+    },
+    "Function": {
+      "Coordinate system": "cartesian",
+      "Function constants": "",
+      "Function expression": "0; 0",
+      "Use spherical unit vectors": "false",
+      "Variable names": "x,y,t"
+    },
+    "GPlates model": {
+      "Data directory": "$ASPECT_SOURCE_DIR/data/boundary-velocity/gplates/",
+      "Data file time step": "1e6",
+      "Decreasing file order": "false",
+      "First data file model time": "0.",
+      "First data file number": "0",
+      "Lithosphere thickness": "100000.",
+      "Point one": "1.570796,0.0",
+      "Point two": "1.570796,1.570796",
+      "Scale factor": "1.",
+      "Velocity file name": "phi.%d"
+    }
+  },
+  "Checkpointing": {
+    "Steps between checkpoint": "0",
+    "Time between checkpoint": "0"
+  },
+  "Compositional fields": {
+    "Compositional field methods": "particles, particles, particles, particles, particles",
+    "List of normalized fields": "",
+    "Mapped particle properties": "tau_xx:maxwell stress[0], tau_yy:maxwell stress[1], tau_xy:maxwell stress[2], theta_initial:phase field fault state[0], strengthening:initial strengthening[0]",
+    "Names of fields": "tau_xx, tau_yy, tau_xy, theta_initial, strengthening",
+    "Number of fields": "5",
+    "Types of fields": "stress, stress, stress, generic, chemical composition"
+  },
+  "Discretization": {
+    "Composition polynomial degree": "2",
+    "Stokes velocity polynomial degree": "2",
+    "Temperature polynomial degree": "2",
+    "Use discontinuous composition discretization": "false",
+    "Use discontinuous temperature discretization": "false",
+    "Use equal order interpolation for Stokes": "false",
+    "Use locally conservative discretization": "false",
+    "Stabilization parameters": {
+      "Discontinuous penalty": "10.",
+      "Global composition maximum": "1.7976931348623157e+308",
+      "Global composition minimum": "-1.7976931348623157e+308",
+      "Global temperature maximum": "1.7976931348623157e+308",
+      "Global temperature minimum": "-1.7976931348623157e+308",
+      "List of compositional fields with disabled boundary entropy viscosity": "",
+      "Stabilization method": "entropy viscosity",
+      "Use artificial viscosity smoothing": "false",
+      "Use limiter for discontinuous composition solution": "false",
+      "Use limiter for discontinuous temperature solution": "false",
+      "alpha": "2",
+      "beta": "0.052",
+      "cR": "0.11",
+      "gamma": "0.0"
+    }
+  },
+  "Fault reconstruction": {
+    "Association support": "stationary profile",
+    "Boundary completion": "automatic prescribed",
+    "Fit prescribed geometry to phase field": "false",
+    "Prescribed faults file": "./fault.txt",
+    "Ridge coefficient": "1",
+    "Structural point spacing": "10"
+  },
+  "Formulation": {
+    "Enable additional Stokes RHS": "false",
+    "Enable elasticity": "false",
+    "Enable phase field": "true",
+    "Enable prescribed dilation": "false",
+    "Formulation": "custom",
+    "Mass conservation": "ask material model",
+    "Reconstruct faults from phase field": "true",
+    "Temperature equation": "real density",
+    "Use implicit constitutive model": "false"
+  },
+  "Geometry model": {
+    "Model name": "box",
+    "Box": {
+      "Box origin X coordinate": "-60000",
+      "Box origin Y coordinate": "0.",
+      "Box origin Z coordinate": "0.",
+      "X extent": "150000",
+      "X periodic": "false",
+      "X repetitions": "75",
+      "Y extent": "50000",
+      "Y periodic": "false",
+      "Y repetitions": "25",
+      "Z extent": "1.",
+      "Z periodic": "false",
+      "Z repetitions": "1"
+    },
+    "Box with lithosphere boundary indicators": {
+      "Box origin X coordinate": "0.",
+      "Box origin Y coordinate": "0.",
+      "Box origin Z coordinate": "0.",
+      "Lithospheric thickness": "0.2",
+      "Use merged grids": "true",
+      "X extent": "1.",
+      "X periodic": "false",
+      "X periodic lithosphere": "false",
+      "X repetitions": "1",
+      "Y extent": "1.",
+      "Y periodic": "false",
+      "Y periodic lithosphere": "false",
+      "Y repetitions": "1",
+      "Y repetitions lithosphere": "1",
+      "Z extent": "1.",
+      "Z periodic": "false",
+      "Z repetitions": "1",
+      "Z repetitions lithosphere": "1"
+    },
+    "Chunk": {
+      "Chunk inner radius": "0.",
+      "Chunk maximum latitude": "1.",
+      "Chunk maximum longitude": "1.",
+      "Chunk minimum latitude": "0.",
+      "Chunk minimum longitude": "0.",
+      "Chunk outer radius": "1.",
+      "Latitude repetitions": "1",
+      "Longitude repetitions": "1",
+      "Radius repetitions": "1"
+    },
+    "Chunk with lithosphere boundary indicators": {
+      "Chunk inner radius": "0.",
+      "Chunk maximum latitude": "1.",
+      "Chunk maximum longitude": "1.",
+      "Chunk middle boundary radius": "1",
+      "Chunk minimum latitude": "0.",
+      "Chunk minimum longitude": "0.",
+      "Chunk outer radius": "1.",
+      "Inner chunk radius repetitions": "1",
+      "Latitude repetitions": "1",
+      "Longitude repetitions": "1",
+      "Outer chunk radius repetitions": "1",
+      "Use merged grids": "true"
+    },
+    "Ellipsoidal chunk": {
+      "Depth": "500000.0",
+      "Depth subdivisions": "1",
+      "East-West subdivisions": "1",
+      "Eccentricity": "8.1819190842622e-2",
+      "NE corner": "",
+      "NW corner": "",
+      "North-South subdivisions": "1",
+      "SE corner": "",
+      "SW corner": "",
+      "Semi-major axis": "6378137.0"
+    },
+    "Initial topography model": {
+      "Model name": "zero topography",
+      "Ascii data model": {
+        "Data directory": "$ASPECT_SOURCE_DIR/data/geometry-model/initial-topography-model/ascii-data/test/",
+        "Data file name": "box_2d_%s.0.txt",
+        "Scale factor": "1."
+      },
+      "Function": {
+        "Coordinate system": "cartesian",
+        "Function constants": "",
+        "Function expression": "0",
+        "Maximum topography value": "2000.",
+        "Variable names": "x,y,t"
+      },
+      "Prm polygon": {
+        "Topography parameters": ""
+      }
+    },
+    "Sphere": {
+      "Radius": "6371000."
+    },
+    "Spherical shell": {
+      "Cells along circumference": "0",
+      "Custom mesh subdivision": "none",
+      "Initial lateral refinement": "0",
+      "Inner radius": "3481000.",
+      "List of radial values": "",
+      "Number of slices": "1",
+      "Opening angle": "360.",
+      "Outer radius": "6336000.",
+      "Phi periodic": "false"
+    }
+  },
+  "Gravity model": {
+    "Model name": "vertical",
+    "Ascii data model": {
+      "Data directory": "$ASPECT_SOURCE_DIR/data/gravity-model/",
+      "Data file name": "prem.txt",
+      "Scale factor": "1."
+    },
+    "Function": {
+      "Coordinate system": "cartesian",
+      "Function constants": "",
+      "Function expression": "0; 0",
+      "Variable names": "x,y,t"
+    },
+    "Radial constant": {
+      "Magnitude": "9.81"
+    },
+    "Radial linear": {
+      "Magnitude at bottom": "10.7",
+      "Magnitude at surface": "9.8"
+    },
+    "Vertical": {
+      "Magnitude": "0"
+    }
+  },
+  "Heating model": {
+    "List of model names": "",
+    "Adiabatic heating": {
+      "Use simplified adiabatic heating": "false"
+    },
+    "Adiabatic heating of melt": {
+      "Use simplified adiabatic heating": "false"
+    },
+    "Compositional heating": {
+      "Compositional heating values": "0.",
+      "Use compositional field for heat production averaging": "1"
+    },
+    "Constant heating": {
+      "Radiogenic heating rate": "0."
+    },
+    "Function": {
+      "Coordinate system": "cartesian",
+      "Function constants": "",
+      "Function expression": "0",
+      "Variable names": "x,y,t"
+    },
+    "Latent heat melt": {
+      "Melting entropy change": "-300.",
+      "Retrieve entropy change from material model": "false"
+    },
+    "Radioactive decay": {
+      "Crust composition number": "0",
+      "Crust defined by composition": "false",
+      "Crust depth": "0.",
+      "Half decay times": "",
+      "Heating rates": "",
+      "Initial concentrations crust": "",
+      "Initial concentrations mantle": "",
+      "Number of elements": "0"
+    },
+    "Shear heating": {
+      "Cohesion for maximum shear stress": "2e7",
+      "Friction angle for maximum shear stress": "0",
+      "Limit stress contribution to shear heating": "false"
+    },
+    "Tidal heating": {
+      "Constant tidal strain rate": "2e-10",
+      "Custom distribution of tidal strain rate": "constant",
+      "Elastic shear modulus": "3.3e9",
+      "Maximum tidal strain rate": "2.81e-10",
+      "Minimum tidal strain rate": "1.67e-10",
+      "Tidal frequency": "2.048e-5"
+    }
+  },
+  "Initial composition model": {
+    "List of model names": "",
+    "List of model operators": "add",
+    "Model name": "reconstructed fault BP3",
+    "Volume of fluid initialization type": "",
+    "Ascii data model": {
+      "Data directory": "$ASPECT_SOURCE_DIR/data/initial-composition/ascii-data/test/",
+      "Data file name": "initial_composition_top_mantle_box_3d.txt",
+      "Data file names": "initial_composition_top_mantle_box_3d.txt",
+      "First point on slice": "0.0,1.0,0.0",
+      "Interpolation scheme": "linear",
+      "Scale factor": "1.",
+      "Second point on slice": "1.0,0.0,0.0",
+      "Slice dataset in 2D plane": "false"
+    },
+    "Entropy table lookup": {
+      "Data directory": "$ASPECT_SOURCE_DIR/data/material-model/entropy-table/pyrtable/",
+      "Material file name": "material_table_temperature_pressure.txt"
+    },
+    "Function": {
+      "Coordinate system": "cartesian",
+      "Function constants": "",
+      "Function expression": "0",
+      "Variable names": "x,y,t"
+    },
+    "Slab model": {
+      "Data directory": "$ASPECT_SOURCE_DIR/data/initial-composition/slab-model/",
+      "Data file name": "shell_3d.txt",
+      "Scale factor": "1."
+    },
+    "World builder": {
+      "List of relevant compositions": ""
+    }
+  },
+  "Initial temperature model": {
+    "List of model names": "",
+    "List of model operators": "add",
+    "Model name": "function",
+    "Adiabatic": {
+      "Age bottom boundary layer": "0.",
+      "Age top boundary layer": "0.",
+      "Amplitude": "0.",
+      "Cooling model": "half-space cooling",
+      "Data directory": "$ASPECT_SOURCE_DIR/data/initial-temperature/adiabatic/",
+      "Data file name": "adiabatic.txt",
+      "Lithosphere thickness": "125e3",
+      "Position": "center",
+      "Radius": "0.",
+      "Scale factor": "1.",
+      "Subadiabaticity": "0.",
+      "Top boundary layer age model": "constant",
+      "Age function": {
+        "Coordinate system": "cartesian",
+        "Function constants": "",
+        "Function expression": "0",
+        "Variable names": "x,y,t"
+      },
+      "Function": {
+        "Function constants": "",
+        "Function expression": "0",
+        "Variable names": "x,t"
+      }
+    },
+    "Adiabatic boundary": {
+      "Adiabatic temperature gradient": "0.0005",
+      "Data directory": "$ASPECT_SOURCE_DIR/data/initial-temperature/adiabatic-boundary/",
+      "Data file name": "adiabatic_boundary.txt",
+      "Isotherm temperature": "1673.15",
+      "Scale factor": "1.",
+      "Surface temperature": "273.15"
+    },
+    "Ascii data model": {
+      "Data directory": "$ASPECT_SOURCE_DIR/data/initial-temperature/ascii-data/test/",
+      "Data file name": "initial_isotherm_500K_box_3d.txt",
+      "Data file names": "initial_isotherm_500K_box_3d.txt",
+      "First point on slice": "0.0,1.0,0.0",
+      "Interpolation scheme": "linear",
+      "Scale factor": "1.",
+      "Second point on slice": "1.0,0.0,0.0",
+      "Slice dataset in 2D plane": "false"
+    },
+    "Ascii profile": {
+      "Data directory": "$ASPECT_SOURCE_DIR/data/initial-temperature/ascii-profile/tests/",
+      "Data file name": "simple_test.txt",
+      "Scale factor": "1."
+    },
+    "Continental geotherm": {
+      "Layer thicknesses": "30000.",
+      "Lithosphere-Asthenosphere boundary isotherm": "1673.15",
+      "Surface temperature": "273.15"
+    },
+    "Function": {
+      "Coordinate system": "cartesian",
+      "Function constants": "",
+      "Function expression": "293",
+      "Variable names": "x,y,t"
+    },
+    "Harmonic perturbation": {
+      "Lateral wave number one": "3",
+      "Lateral wave number two": "2",
+      "Magnitude": "1.0",
+      "Reference temperature": "1600.0",
+      "Vertical wave number": "1"
+    },
+    "Inclusion shape perturbation": {
+      "Ambient temperature": "1.0",
+      "Center X": "0.5",
+      "Center Y": "0.5",
+      "Center Z": "0.5",
+      "Inclusion gradient": "constant",
+      "Inclusion shape": "circle",
+      "Inclusion temperature": "0.0",
+      "Shape radius": "1.0"
+    },
+    "Lithosphere Mask": {
+      "Data directory": "$ASPECT_SOURCE_DIR/data/initial-temperature/lithosphere-mask/",
+      "Depth specification method": "Value",
+      "LAB depth filename": "LAB_CAM2016.txt",
+      "Lithosphere temperature": "1600.",
+      "Maximum lithosphere depth": "200000.0"
+    },
+    "Patch on S40RTS": {
+      "Maximum grid depth": "700000.0",
+      "Remove temperature heterogeneity down to specified depth": "-1.7976931348623157e+308",
+      "Smoothing length scale": "200000.0",
+      "Ascii data model": {
+        "Data directory": "$ASPECT_SOURCE_DIR/data/initial-temperature/patch-on-S40RTS/test/",
+        "Data file name": "upper_shell_3d.txt",
+        "Scale factor": "1."
+      }
+    },
+    "Random Gaussian perturbation": {
+      "Maximum magnitude": "25.0",
+      "Number of perturbations": "100",
+      "Width": "1000.0"
+    },
+    "S40RTS perturbation": {
+      "Data directory": "$ASPECT_SOURCE_DIR/data/initial-temperature/S40RTS/",
+      "Initial condition file name": "S40RTS.sph",
+      "Maximum degree": "20",
+      "Reference temperature": "1600.0",
+      "Remove degree 0 from perturbation": "true",
+      "Remove temperature heterogeneity down to specified depth": "-1.7976931348623157e+308",
+      "Specify a lower maximum degree": "false",
+      "Spline knots depth file name": "Spline_knots.txt",
+      "Thermal expansion coefficient in initial temperature scaling": "2e-5",
+      "Use thermal expansion coefficient from material model": "false",
+      "Vs to density scaling": "0.25",
+      "Vs to density scaling method": "constant",
+      "Ascii data vs to density model": {
+        "Data directory": "$ASPECT_SOURCE_DIR/data/initial-temperature/S40RTS/",
+        "Data file name": "vs_to_density_Steinberger.txt",
+        "Scale factor": "1."
+      }
+    },
+    "SAVANI perturbation": {
+      "Data directory": "$ASPECT_SOURCE_DIR/data/initial-temperature/SAVANI/",
+      "Initial condition file name": "savani.dlnvs.60.m.ab",
+      "Maximum degree": "20",
+      "Reference temperature": "1600.0",
+      "Remove degree 0 from perturbation": "true",
+      "Remove temperature heterogeneity down to specified depth": "-1.7976931348623157e+308",
+      "Specify a lower maximum degree": "false",
+      "Spline knots depth file name": "Spline_knots.txt",
+      "Thermal expansion coefficient in initial temperature scaling": "2e-5",
+      "Use thermal expansion coefficient from material model": "false",
+      "Vs to density scaling": "0.25",
+      "Vs to density scaling method": "constant",
+      "Ascii data vs to density model": {
+        "Data directory": "$ASPECT_SOURCE_DIR/data/initial-temperature/S40RTS/",
+        "Data file name": "vs_to_density_Steinberger.txt",
+        "Scale factor": "1."
+      }
+    },
+    "Spherical gaussian perturbation": {
+      "Amplitude": "0.01",
+      "Angle": "0.",
+      "Filename for initial geotherm table": "initial-geotherm-table",
+      "Non-dimensional depth": "0.7",
+      "Sigma": "0.2",
+      "Sign": "1."
+    },
+    "Spherical hexagonal perturbation": {
+      "Angular mode": "6",
+      "Rotation offset": "-45."
+    }
+  },
+  "Material model": {
+    "Material averaging": "default averaging",
+    "Model name": "phase field fault",
+    "Ascii reference profile": {
+      "Thermal conductivity": "4.0",
+      "Thermal viscosity exponent": "0.",
+      "Transition depths": "1.5e5, 4.1e5, 6.6e5",
+      "Use TALA": "false",
+      "Viscosity": "1e21",
+      "Viscosity prefactors": "10., 0.1, 1., 10.",
+      "Ascii data model": {
+        "Data directory": "$ASPECT_SOURCE_DIR/data/adiabatic-conditions/ascii-data/",
+        "Data file name": "",
+        "Scale factor": "1."
+      }
+    },
+    "Averaging": {
+      "Averaging operation": "none",
+      "Base model": "simple",
+      "Bell shape limit": "1."
+    },
+    "Compositing": {
+      "Compressibility": "unspecified",
+      "Density": "unspecified",
+      "Entropy derivative pressure": "unspecified",
+      "Entropy derivative temperature": "unspecified",
+      "Reaction terms": "unspecified",
+      "Specific heat": "unspecified",
+      "Thermal conductivity": "unspecified",
+      "Thermal expansion coefficient": "unspecified",
+      "Viscosity": "unspecified"
+    },
+    "Composition reaction model": {
+      "Composition viscosity prefactor 1": "1.0",
+      "Composition viscosity prefactor 2": "1.0",
+      "Density differential for compositional field 1": "0.",
+      "Density differential for compositional field 2": "0.",
+      "Reaction depth": "0.",
+      "Reference density": "3300.",
+      "Reference specific heat": "1250.",
+      "Reference temperature": "293.",
+      "Thermal conductivity": "4.7",
+      "Thermal expansion coefficient": "2e-5",
+      "Thermal viscosity exponent": "0.0",
+      "Viscosity": "5e24"
+    },
+    "Depth dependent model": {
+      "Base model": "simple",
+      "Data directory": "$ASPECT_SOURCE_DIR/data/material-model/rheology/",
+      "Data file name": "ascii_depth_profile.txt",
+      "Depth dependence method": "None",
+      "Depth list": "",
+      "Reference viscosity": "1.7976931348623157e+308",
+      "Scale factor": "1.",
+      "Viscosity depth file": {
+        "alias": "Data file name",
+        "deprecation_status": "false"
+      },
+      "Viscosity list": "",
+      "Viscosity depth function": {
+        "Function constants": "",
+        "Function expression": "1.0e21",
+        "Variable names": "x,t"
+      }
+    },
+    "Depth dependent viscosity": {
+      "Data directory": "$ASPECT_SOURCE_DIR/data/material-model/rheology/",
+      "Data file name": "ascii_depth_profile.txt",
+      "Scale factor": "1."
+    },
+    "Diffusion dislocation": {
+      "Activation energies for diffusion creep": "375e3",
+      "Activation energies for dislocation creep": "530e3",
+      "Activation volumes for diffusion creep": "6e-6",
+      "Activation volumes for dislocation creep": "1.4e-5",
+      "Densities": "3300.",
+      "Effective viscosity coefficient": "1.0",
+      "Grain size": "1e-3",
+      "Grain size exponents for diffusion creep": "3.",
+      "Heat capacity": "1.25e3",
+      "Maximum strain rate ratio iterations": "40",
+      "Maximum viscosity": "1e28",
+      "Minimum strain rate": "1.4e-20",
+      "Minimum viscosity": "1e17",
+      "Prefactors for diffusion creep": "1.5e-15",
+      "Prefactors for dislocation creep": "1.1e-16",
+      "Reference temperature": "293.",
+      "Strain rate residual tolerance": "1e-10",
+      "Stress exponents for diffusion creep": "1.",
+      "Stress exponents for dislocation creep": "3.5",
+      "Thermal diffusivity": "0.8e-6",
+      "Thermal expansivities": "3.5e-5",
+      "Viscosity averaging scheme": "harmonic"
+    },
+    "Drucker Prager": {
+      "Reference density": "3300.",
+      "Reference specific heat": "1250.",
+      "Reference temperature": "293.",
+      "Thermal conductivity": "4.7",
+      "Thermal expansion coefficient": "2e-5",
+      "Viscosity": {
+        "Angle of internal friction": "0.",
+        "Cohesion": "2e7",
+        "Maximum viscosity": "1e24",
+        "Minimum viscosity": "1e19",
+        "Reference strain rate": "1e-15"
+      }
+    },
+    "Entropy model": {
+      "Angle of internal friction": "0.",
+      "Cohesion": "1e20",
+      "Data directory": "$ASPECT_SOURCE_DIR/data/material-model/entropy-table/opxtable/",
+      "Lateral viscosity file name": "constant_lateral_vis_prefactor.txt",
+      "Material file name": "material_table.txt",
+      "Maximum iteration for multicomponent equilibration": "50",
+      "Maximum lateral viscosity variation": "1e2",
+      "Maximum thermal conductivity": "1000",
+      "Maximum viscosity": "1e23",
+      "Minimum viscosity": "1e19",
+      "Multicomponent equilibration tolerance": "1e-7",
+      "Pressure dependencies of thermal conductivity": "3.3e-10, 3.4e-10, 3.6e-10, 1.05e-10",
+      "Reference temperatures for thermal conductivity": "300, 300, 300, 1200",
+      "Reference thermal conductivities": "2.47, 3.81, 3.52, 4.9",
+      "Reference viscosity": "1e22",
+      "Saturation prefactors": "0, 0, 0, 1",
+      "Thermal conductivity": "4.7",
+      "Thermal conductivity exponents": "0.48, 0.56, 0.61, 1.0",
+      "Thermal conductivity formulation": "constant",
+      "Thermal conductivity transition depths": "410000, 520000, 660000"
+    },
+    "Grain size model": {
+      "ARKode initial step size": "1e-3",
+      "ARKode minimum step size": "1e-6",
+      "Advect logarithm of grain size": "false",
+      "Angles of dilation": "0.",
+      "Angles of internal friction": "0.",
+      "Average specific grain boundary energy": "1.0",
+      "Bilinear interpolation": "true",
+      "Cohesions": "1e20",
+      "Data directory": "$ASPECT_SOURCE_DIR/data/material-model/steinberger/",
+      "Define transition by depth instead of pressure": "true",
+      "Derivatives file names": "",
+      "Diffusion activation energy": "3.35e5",
+      "Diffusion activation volume": "4e-6",
+      "Diffusion creep exponent": "1.",
+      "Diffusion creep grain size exponent": "3.",
+      "Diffusion creep prefactor": "7.4e-15",
+      "Dislocation activation energy": "4.8e5",
+      "Dislocation activation volume": "1.1e-5",
+      "Dislocation creep exponent": "3.5",
+      "Dislocation creep prefactor": "4.5e-15",
+      "Dislocation viscosity iteration number": "100",
+      "Dislocation viscosity iteration threshold": "1e-3",
+      "Geometric constant": "3.",
+      "Grain growth activation energy": "3.5e5",
+      "Grain growth activation volume": "8e-6",
+      "Grain growth exponent": "3.",
+      "Grain growth rate constant": "1.5e-5",
+      "Grain size evolution formulation": "paleowattmeter",
+      "Lower mantle grain size scaling": "1.0",
+      "Material file format": "perplex",
+      "Material file names": "pyr-ringwood88.txt",
+      "Maximum latent heat substeps": "1",
+      "Maximum specific heat": "6000.",
+      "Maximum temperature dependence of viscosity": "100.",
+      "Maximum thermal expansivity": "1e-3",
+      "Maximum viscosity": "1e26",
+      "Maximum yield stress": "1e12",
+      "Minimum grain size": "1e-5",
+      "Minimum specific heat": "500.",
+      "Minimum thermal expansivity": "1e-5",
+      "Minimum viscosity": "1e18",
+      "Phase transition Clapeyron slopes": "",
+      "Phase transition depths": "",
+      "Phase transition pressure widths": "",
+      "Phase transition pressures": "",
+      "Phase transition temperature lower limits": "-1.7976931348623157e+308",
+      "Phase transition temperature upper limits": "1.7976931348623157e+308",
+      "Phase transition temperatures": "",
+      "Phase transition widths": "",
+      "Phase volume fraction": "0.4",
+      "Plastic damper viscosity": "0.0",
+      "Prefactors for yield stress": "1.0",
+      "Reciprocal required strain": "10.",
+      "Recrystallized grain size": "",
+      "Reference compressibility": "4e-12",
+      "Reference density": "3300",
+      "Reference specific heat": "1250.",
+      "Reference temperature": "293.",
+      "Thermal conductivity": "4.7",
+      "Thermal expansion coefficient": "2e-5",
+      "Use Drucker-Prager rheology": "false",
+      "Use adiabatic pressure for yield stress": "false",
+      "Use enthalpy for material properties": "true",
+      "Use paleowattmeter": "default",
+      "Use plastic damper": "false",
+      "Use table properties": "false",
+      "Viscosity": "5e24",
+      "Work fraction for boundary area change": "0.1",
+      "Grain damage partitioning": {
+        "Grain size reduction work fraction exponent": "10",
+        "Maximum grain size reduction work fraction": "1e-1",
+        "Minimum grain size reduction work fraction": "1e-12",
+        "Temperature for maximum grain damage partitioning": "283",
+        "Temperature for minimum grain damage partitioning": "1600"
+      }
+    },
+    "Latent heat": {
+      "Composition viscosity prefactor": "1.0",
+      "Compressibility": "5.124e-12",
+      "Corresponding phase for density jump": "",
+      "Define transition by depth instead of pressure": "true",
+      "Density differential for compositional field 1": "0.",
+      "Maximum viscosity": "1e24",
+      "Minimum viscosity": "1e19",
+      "Phase transition Clapeyron slopes": "",
+      "Phase transition density jumps": "",
+      "Phase transition depths": "",
+      "Phase transition pressure widths": "",
+      "Phase transition pressures": "",
+      "Phase transition temperature lower limits": "-1.7976931348623157e+308",
+      "Phase transition temperature upper limits": "1.7976931348623157e+308",
+      "Phase transition temperatures": "",
+      "Phase transition widths": "",
+      "Reference density": "3300.",
+      "Reference specific heat": "1250.",
+      "Reference temperature": "293.",
+      "Thermal conductivity": "2.38",
+      "Thermal expansion coefficient": "4e-5",
+      "Thermal viscosity exponent": "0.0",
+      "Viscosity": "5e24",
+      "Viscosity prefactors": "all:1"
+    },
+    "Latent heat melt": {
+      "A1": "1085.7",
+      "A2": "1.329e-7",
+      "A3": "-5.1e-18",
+      "B1": "1475.0",
+      "B2": "8.0e-8",
+      "B3": "-3.2e-18",
+      "C1": "1780.0",
+      "C2": "4.50e-8",
+      "C3": "-2.0e-18",
+      "Composition viscosity prefactor": "1.0",
+      "Compressibility": "5.124e-12",
+      "D1": "976.0",
+      "D2": "1.329e-7",
+      "D3": "-5.1e-18",
+      "Density differential for compositional field 1": "0.",
+      "E1": "663.8",
+      "E2": "-611.4",
+      "Mass fraction cpx": "0.15",
+      "Maximum pyroxenite melt fraction": "0.5429",
+      "Peridotite melting entropy change": "-300.",
+      "Pyroxenite melting entropy change": "-400.",
+      "Reference density": "3300.",
+      "Reference specific heat": "1250.",
+      "Reference temperature": "293.",
+      "Relative density of melt": "0.9",
+      "Thermal conductivity": "2.38",
+      "Thermal expansion coefficient": "4e-5",
+      "Thermal expansion coefficient of melt": "6.8e-5",
+      "Thermal viscosity exponent": "0.0",
+      "Viscosity": "5e24",
+      "beta": "1.5",
+      "r1": "0.5",
+      "r2": "8e-11"
+    },
+    "Melt boukare": {
+      "Einstein temperatures": "418.1, 561.0, 297.6, 540.2, 505.75, 558.1, 558.1",
+      "Endmember names": "FeSiO3_bridgmanite, MgSiO3_bridgmanite, FeO_periclase, MgO_periclase, FeO_melt, MgO_melt, SiO2_melt",
+      "Endmember states": "solid, solid, solid, solid, melt, melt, melt",
+      "Exponential melt weakening factor": "27",
+      "Fe mantle melting temperature": "3424.5",
+      "Fe number of moles": "0.48",
+      "First derivatives of the bulk modulus": "4.14, 4.14, 4.9, 3.95, 5.0802472229003905, 4.25, 4.25",
+      "Include melting and freezing": "true",
+      "Linear coefficients for specific heat polynomial": "6.36191292e-03, -3.31714290e-03, 3.36163516e-03, -6.35318887e-03, -2.41909947e-03, -2.41909947e-03, -2.41909947e-03",
+      "Melting time scale for operator splitting": "1e3",
+      "Mg mantle melting temperature": "4821.2",
+      "Mg number of moles": "0.62",
+      "Molar masses": "0.1319287, 0.1003887, 0.0718444, 0.0403044, 0.0707624708, 0.048592178, 0.048592178",
+      "Number of atoms": "5.0, 5.0, 2.0, 2.0, 2.092, 2.419, 2.419",
+      "Reference bulk moduli": "2.81e11, 2.51e+11, 1.52e11, 1.616e11, 166652774642.11273, 2.317e11, 2.317e11",
+      "Reference bulk viscosity": "1e22",
+      "Reference enthalpies": "-1082910.0, -1442310.0, -262240.0, -601570.0, -195245.49100022088, -538009.8, -538009.8",
+      "Reference entropies": "95.0, 62.6, 58.6, 26.5, 95.0299295525918, 64.9, 64.9",
+      "Reference melt viscosity": "10",
+      "Reference permeability": "1e-8",
+      "Reference pressure": "1e11",
+      "Reference shear viscosity": "5e20",
+      "Reference specific heat capacities": "139.546209, 161.546581, 52.0016403, 73.1147154, 79.5326013, 79.5326013, 79.5326013",
+      "Reference temperature": "298.15",
+      "Reference thermal expansivities": "1.87e-05, 1.87e-05, 3.22e-05, 3.11e-05, 2.9614332469401705e-05, 2.06e-05, 2.06e-05",
+      "Reference volumes": "2.534e-05, 2.445e-05, 1.206e-05, 1.125e-05, 1.2325484447664221e-05, 1.218e-05, 1.218e-05",
+      "Second coefficients for specific heat polynomial": "-4.13886524e+06, -3.57533814e+06, -1.19540964e+06, -7.33679285e+05, -1.61692272e+06, -1.61692272e+06, -1.61692272e+06",
+      "Second derivatives of the bulk modulus": "-1.6e-11, -1.6e-11, -3.2e-11, -2.4e-11, -3.9742163085937504e-11, -2.14e-11, -2.14e-11",
+      "Thermal bulk viscosity exponent": "0.0",
+      "Thermal conductivity": "4.7",
+      "Thermal viscosity exponent": "0.0",
+      "Third coefficients for specific heat polynomial": "-464.775577, -1112.54791, 25.5067110, -592.994207, -562.222634, -562.222634, -562.222634"
+    },
+    "Melt global": {
+      "Depletion density change": "0.0",
+      "Depletion solidus change": "200.0",
+      "Exponential depletion strengthening factor": "0.0",
+      "Exponential melt weakening factor": "27.",
+      "Include melting and freezing": "true",
+      "Maximum Depletion viscosity change": "1.0e3",
+      "Melt bulk modulus derivative": "0.0",
+      "Melt compressibility": "0.0",
+      "Melting time scale for operator splitting": "1e3",
+      "Pressure solidus change": "6e-8",
+      "Reference bulk viscosity": "1e22",
+      "Reference melt density": "2500.",
+      "Reference melt viscosity": "10.",
+      "Reference permeability": "1e-8",
+      "Reference shear viscosity": "5e20",
+      "Reference solid density": "3000.",
+      "Reference specific heat": "1250.",
+      "Reference temperature": "293.",
+      "Solid compressibility": "0.0",
+      "Surface solidus": "1300.",
+      "Thermal bulk viscosity exponent": "0.0",
+      "Thermal conductivity": "4.7",
+      "Thermal expansion coefficient": "2e-5",
+      "Thermal viscosity exponent": "0.0"
+    },
+    "Melt simple": {
+      "A1": "1085.7",
+      "A2": "1.329e-7",
+      "A3": "-5.1e-18",
+      "B1": "1475.0",
+      "B2": "8.0e-8",
+      "B3": "-3.2e-18",
+      "C1": "1780.0",
+      "C2": "4.50e-8",
+      "C3": "-2.0e-18",
+      "Depletion density change": "0.0",
+      "Depletion solidus change": "200.0",
+      "Exponential melt weakening factor": "27.",
+      "Freezing rate": "0.0",
+      "Mass fraction cpx": "0.15",
+      "Melt bulk modulus derivative": "0.0",
+      "Melt compressibility": "0.0",
+      "Melt extraction depth": "1000.0",
+      "Melting time scale for operator splitting": "1e3",
+      "Peridotite melting entropy change": "-300.",
+      "Reference bulk viscosity": "1e22",
+      "Reference melt density": "2500.",
+      "Reference melt viscosity": "10.",
+      "Reference permeability": "1e-8",
+      "Reference shear viscosity": "5e20",
+      "Reference solid density": "3000.",
+      "Reference specific heat": "1250.",
+      "Reference temperature": "293.",
+      "Solid compressibility": "0.0",
+      "Thermal bulk viscosity exponent": "0.0",
+      "Thermal conductivity": "4.7",
+      "Thermal expansion coefficient": "2e-5",
+      "Thermal viscosity exponent": "0.0",
+      "Use fractional melting": "false",
+      "Use full compressibility": "false",
+      "beta": "1.5",
+      "r1": "0.5",
+      "r2": "8e-11"
+    },
+    "Modified Tait model": {
+      "Einstein temperature": "600.",
+      "Reference bulk modulus derivative": "4.",
+      "Reference density": "3300.",
+      "Reference isothermal bulk modulus": "125e9",
+      "Reference pressure": "1e5",
+      "Reference temperature": "298.15",
+      "Reference thermal expansivity": "2e-5",
+      "Thermal conductivity": "4.7",
+      "Viscosity": "1e21",
+      "Reference heat capacity function": {
+        "Function constants": "",
+        "Function expression": "1.25e3",
+        "Variable names": "x,t"
+      }
+    },
+    "Multicomponent": {
+      "Densities": "3300.",
+      "Heat capacities": "1250.",
+      "Reference temperature": "293.",
+      "Specific heats": {
+        "alias": "Heat capacities",
+        "deprecation_status": "false"
+      },
+      "Thermal conductivities": "4.7",
+      "Thermal expansivities": "0.000040",
+      "Viscosities": "1.e21",
+      "Viscosity averaging scheme": "harmonic"
+    },
+    "Multicomponent compressible": {
+      "Define transition by depth instead of pressure": "true",
+      "Enable phase transitions": "false",
+      "Isochoric specific heats": "1250.",
+      "Isothermal bulk modulus pressure derivatives": "4.",
+      "Phase transition Clapeyron slopes": "",
+      "Phase transition depths": "",
+      "Phase transition pressure widths": "",
+      "Phase transition pressures": "",
+      "Phase transition temperature lower limits": "-1.7976931348623157e+308",
+      "Phase transition temperature upper limits": "1.7976931348623157e+308",
+      "Phase transition temperatures": "",
+      "Phase transition widths": "",
+      "Reference densities": "3300.",
+      "Reference isothermal compressibilities": "4e-12",
+      "Reference temperatures": "298.15",
+      "Reference thermal expansivities": "4.e-5",
+      "Thermal conductivities": "4.7",
+      "Viscosities": "1.e21",
+      "Viscosity averaging scheme": "harmonic"
+    },
+    "Nondimensional model": {
+      "Di": "0.0",
+      "Ra": "1e4",
+      "Reference density": "1.0",
+      "Reference specific heat": "1.0",
+      "Use TALA": "false",
+      "Viscosity depth prefactor": "0.0",
+      "Viscosity temperature prefactor": "0.0",
+      "gamma": "1.0"
+    },
+    "PerpleX lookup model": {
+      "Maximum material pressure": "1.e12",
+      "Maximum material temperature": "6000.",
+      "Minimum material pressure": "1.e5",
+      "Minimum material temperature": "0.",
+      "PerpleX input file name": "rock.dat",
+      "Thermal conductivity": "4.7",
+      "Viscosity": "5e24"
+    },
+    "Phase field fault": {
+      "Bulk history representation": "accepted FE strain",
+      "Characteristic slip distance": "0.008",
+      "Characteristic weakening slip rates": "1.e-6",
+      "Cohesions": "1e6",
+      "Cohesive history representation": "particle projection",
+      "Consistent endpoint phase solve": "false",
+      "Critical energy release rates": "1e5",
+      "Densities": "3300.",
+      "Direct effect parameters": "0.010, 0.025",
+      "Dynamic friction coefficients": "0.4",
+      "Elastic shear moduli": "32038120320",
+      "Evolution effect parameters": "0.015",
+      "Evolve phase field": "false",
+      "FE bulk normal quadrature points": "6",
+      "FE initial phase profile file": "",
+      "Fault constitutive mode": "mature frictional",
+      "Fault mechanical work measure": "particle volume",
+      "Friction law": "rate state",
+      "Heat capacities": "1250.",
+      "I h integration backend": "cell intervals",
+      "I h projection": "consistent",
+      "I h quadrature tolerance": "1e-10",
+      "I h surface quadrature subdivisions": "8",
+      "I h tail tolerance": "1e-10",
+      "Initial cohesive state": "seeded energy",
+      "Initial friction coefficients": "0.6",
+      "Initial time step": "4e6",
+      "Maximum viscosity": "1e30",
+      "Minimum slip rate": "1e-20",
+      "Minimum viscosity": "1e6",
+      "Phase driving history": "incremental work",
+      "Phase field activation threshold": "0.1",
+      "Phase field normal lock threshold": "0.5",
+      "Radiation damping coefficients": "4624440",
+      "Reference friction coefficients": "0.6",
+      "Reference slip rate": "1e-6",
+      "Reference temperature": "293",
+      "Reference viscosities": "1e26",
+      "Specific heats": {
+        "alias": "Heat capacities",
+        "deprecation_status": "false"
+      },
+      "Thermal conductivities": "3.0",
+      "Thermal expansivities": "0.000035",
+      "Thermal viscosity exponents": "0.0",
+      "Use adiabatic pressure in fault friction": "false",
+      "Use regularized formulation": "true",
+      "Viscosity averaging scheme": "harmonic"
+    },
+    "Prescribed viscosity": {
+      "Base model": "simple",
+      "Indicator function": {
+        "Function constants": "",
+        "Function expression": "0; 0; 0",
+        "Variable names": "x,y,t"
+      },
+      "Viscosity function": {
+        "Function constants": "",
+        "Function expression": "0; 0; 0",
+        "Variable names": "x,y,t"
+      }
+    },
+    "Reactive Fluid Transport Model": {
+      "Base model": "visco plastic",
+      "Exponential fluid weakening factor": "27",
+      "Fluid compressibility": "0.0",
+      "Fluid reaction time scale for operator splitting": "1e3",
+      "Fluid-solid reaction scheme": "no reaction",
+      "Maximum compaction viscosity": "1.7976931348623157e+308",
+      "Minimum compaction viscosity": "0",
+      "Reference fluid density": "2500",
+      "Reference fluid viscosity": "10",
+      "Reference permeability": "1e-8",
+      "Reference temperature": "293.",
+      "Shear to bulk viscosity ratio": "0.1",
+      "Katz 2003 model": {
+        "A1": "1085.7",
+        "A2": "1.329e-7",
+        "A3": "-5.1e-18",
+        "B1": "1475.0",
+        "B2": "8.0e-8",
+        "B3": "-3.2e-18",
+        "C1": "1780.0",
+        "C2": "4.50e-8",
+        "C3": "-2.0e-18",
+        "Depletion solidus change": "200.0",
+        "Exponential melt weakening factor": "27.",
+        "Freezing rate": "0.0",
+        "Mass fraction cpx": "0.15",
+        "Melt bulk modulus derivative": "0.0",
+        "Melt compressibility": "0.0",
+        "Melt extraction depth": "1000.0",
+        "Melting time scale for operator splitting": "1e3",
+        "Peridotite melting entropy change": "-300.",
+        "Reference bulk viscosity": "1e22",
+        "Reference melt density": "2500.",
+        "Reference melt viscosity": "10.",
+        "Reference permeability": "1e-8",
+        "Thermal bulk viscosity exponent": "0.0",
+        "Use fractional melting": "false",
+        "beta": "1.5",
+        "r1": "0.5",
+        "r2": "8e-11"
+      },
+      "Tian 2019 model": {
+        "Maximum weight percent water in MORB": "2",
+        "Maximum weight percent water in gabbro": "1",
+        "Maximum weight percent water in peridotite": "8",
+        "Maximum weight percent water in sediment": "3",
+        "Use adiabatic pressure for reactions": "false"
+      }
+    },
+    "Replace lithosphere viscosity": {
+      "Base model": "simple",
+      "Data directory": "$ASPECT_SOURCE_DIR/data/initial-temperature/lithosphere-mask/",
+      "Depth specification method": "Value",
+      "LAB depth filename": "LAB_CAM2016.txt",
+      "Lithosphere viscosity": "1e23",
+      "Maximum lithosphere depth": "200000.0"
+    },
+    "Simple compressible model": {
+      "Reference compressibility": "4e-12",
+      "Reference density": "3300.",
+      "Reference specific heat": "1250.",
+      "Thermal conductivity": "4.7",
+      "Thermal expansion coefficient": "2e-5",
+      "Viscosity": "1000000000000000000000.000000"
+    },
+    "Simple model": {
+      "Composition viscosity prefactor": "1.0",
+      "Density differential for compositional field 1": "0.",
+      "Maximum thermal prefactor": "1.0e2",
+      "Minimum thermal prefactor": "1.0e-2",
+      "Reference density": "3300.",
+      "Reference specific heat": "1250.",
+      "Reference temperature": "293.",
+      "Thermal conductivity": "4.7",
+      "Thermal expansion coefficient": "2e-5",
+      "Thermal viscosity exponent": "0.0",
+      "Viscosity": "5e24"
+    },
+    "Simpler model": {
+      "Reference density": "3300.",
+      "Reference specific heat": "1250.",
+      "Reference temperature": "293.",
+      "Thermal conductivity": "4.7",
+      "Thermal expansion coefficient": "2e-5",
+      "Viscosity": "5000000000000000452984832.000000"
+    },
+    "Steinberger model": {
+      "Angles of dilation": "0.",
+      "Angles of internal friction": "0.",
+      "Bilinear interpolation": "true",
+      "Cohesions": "1e20",
+      "Composition viscosity prefactors": "1",
+      "Data directory": "$ASPECT_SOURCE_DIR/data/material-model/steinberger/",
+      "Derivatives file names": "",
+      "Latent heat": "false",
+      "Lateral viscosity file name": "temp-viscosity-prefactor.txt",
+      "Material file format": "perplex",
+      "Material file names": "pyr-ringwood88.txt",
+      "Maximum latent heat substeps": "1",
+      "Maximum lateral viscosity variation": "1e2",
+      "Maximum thermal conductivity": "1000",
+      "Maximum viscosity": "1e23",
+      "Maximum yield stress": "1e12",
+      "Minimum viscosity": "1e19",
+      "Number lateral average bands": "10",
+      "Plastic damper viscosity": "0.0",
+      "Prefactors for yield stress": "1.0",
+      "Pressure dependencies of thermal conductivity": "3.3e-10, 3.4e-10, 3.6e-10, 1.05e-10",
+      "Radial viscosity file name": "radial-visc.txt",
+      "Reference temperatures for thermal conductivity": "300, 300, 300, 1200",
+      "Reference thermal conductivities": "2.47, 3.81, 3.52, 4.9",
+      "Saturation prefactors": "0, 0, 0, 1",
+      "Thermal conductivity": "4.7",
+      "Thermal conductivity exponents": "0.48, 0.56, 0.61, 1.0",
+      "Thermal conductivity formulation": "constant",
+      "Thermal conductivity transition depths": "410000, 520000, 660000",
+      "Use Drucker-Prager rheology": "false",
+      "Use lateral average temperature for viscosity": "true",
+      "Use plastic damper": "false",
+      "Viscosity averaging scheme": "harmonic"
+    },
+    "Visco Plastic": {
+      "Activation energies for Peierls creep": "320e3",
+      "Activation energies for diffusion creep": "375e3",
+      "Activation energies for dislocation creep": "530e3",
+      "Activation volumes for Peierls creep": "1.4e-5",
+      "Activation volumes for diffusion creep": "6e-6",
+      "Activation volumes for dislocation creep": "1.4e-5",
+      "Adiabat temperature gradient for viscosity": "0.0",
+      "Allow negative pressures in plasticity": "false",
+      "Angles of dilation": "0.",
+      "Angles of internal friction": "0.",
+      "Apply strict stress cutoff for Peierls creep": "false",
+      "Cohesion strain weakening factors": "1.",
+      "Cohesions": "1e20",
+      "Constant viscosity prefactors": "1.0",
+      "Cutoff stresses for Peierls creep": "0.0",
+      "Data directory": "$ASPECT_SOURCE_DIR/data/material-model/entropy-table/pyrtable",
+      "Define thermal conductivities": "false",
+      "Define transition by depth instead of pressure": "true",
+      "Densities": "3300.",
+      "Dynamic angles of internal friction": "2",
+      "Dynamic characteristic strain rate": "1e-12",
+      "Dynamic friction smoothness exponent": "1",
+      "Elastic damper viscosity": "0.0",
+      "Elastic shear moduli": "75.0e9",
+      "End plasticity strain weakening intervals": "1.",
+      "End prefactor strain weakening intervals": "1.",
+      "Fixed elastic time step": "1.e3",
+      "Friction mechanism": "none",
+      "Friction strain weakening factors": "1.",
+      "Grain size": "1e-3",
+      "Grain size exponents for diffusion creep": "3.",
+      "Heat capacities": "1250.",
+      "Include Grain Boundary Sliding": "false",
+      "Include Peierls creep": "false",
+      "Lower temperature for maximum strain weakening": "923.",
+      "Lower temperature for onset of strain weakening": "823.",
+      "Material file names": "material_table_temperature_pressure_small.txt",
+      "Maximum Peierls strain rate iterations": "40",
+      "Maximum viscosity": "1e28",
+      "Maximum yield stress": "1e12",
+      "Minimum mass fraction bound water content for fugacity": "6.15e-6",
+      "Minimum strain rate": "1.0e-20",
+      "Minimum viscosity": "1e17",
+      "Peierls creep flow law": "viscosity approximation",
+      "Peierls fitting parameters": "0.17",
+      "Peierls glide parameters p": "0.5",
+      "Peierls glide parameters q": "1.0",
+      "Peierls strain rate residual tolerance": "1e-10",
+      "Peierls stresses": "5.e9",
+      "Phase transition Clapeyron slopes": "",
+      "Phase transition depths": "",
+      "Phase transition indicators": "",
+      "Phase transition pressure widths": "",
+      "Phase transition pressures": "",
+      "Phase transition temperature lower limits": "-1.7976931348623157e+308",
+      "Phase transition temperature upper limits": "1.7976931348623157e+308",
+      "Phase transition temperatures": "",
+      "Phase transition widths": "",
+      "Plastic damper viscosity": "0.0",
+      "Prefactor strain weakening factors": "1.",
+      "Prefactors for Frank Kamenetskii": "1.e21",
+      "Prefactors for Peierls creep": "1.4e-19",
+      "Prefactors for diffusion creep": "1.5e-15",
+      "Prefactors for dislocation creep": "1.1e-16",
+      "Prefactors for yield stress": "1.0",
+      "Pressure prefactors for Frank Kamenetskii": "0.0",
+      "Reference pressures for Frank Kamenetskii": "1.7976931348623157e+308",
+      "Reference strain rate": "1.0e-15",
+      "Reference temperature": "293.",
+      "Reference temperatures for Frank Kamenetskii": "1.7976931348623157e+308",
+      "Specific heats": {
+        "alias": "Heat capacities",
+        "deprecation_status": "false"
+      },
+      "Stabilization time scale factor": "1.",
+      "Start plasticity strain weakening intervals": "0.",
+      "Start prefactor strain weakening intervals": "0.",
+      "Strain healing mechanism": "no healing",
+      "Strain healing temperature dependent prefactor": "15.",
+      "Strain healing temperature dependent recovery rate": "1.e-15",
+      "Strain weakening mechanism": "default",
+      "Stress exponents for Peierls creep": "2.0",
+      "Stress exponents for diffusion creep": "1.",
+      "Stress exponents for dislocation creep": "3.5",
+      "Stress limiter exponents": "1.0",
+      "Thermal conductivities": "3.0",
+      "Thermal diffusivities": "0.8e-6",
+      "Thermal expansivities": "0.000035",
+      "Upper temperature for maximum strain weakening": "1023.",
+      "Upper temperature for onset of strain weakening": "1123.",
+      "Use adiabatic pressure in creep viscosity": "false",
+      "Use adiabatic pressure in plasticity": "false",
+      "Use dominant phase for viscosity": "false",
+      "Use fixed elastic time step": "unspecified",
+      "Use plastic damper": "false",
+      "Use temperature activated strain softening": "false",
+      "Viscosity averaging scheme": "harmonic",
+      "Viscosity prefactor scheme": "none",
+      "Viscosity ratios for Frank Kamenetskii": "15.",
+      "Viscous flow law": "composite",
+      "Water fugacity exponents for diffusion creep": "0.0",
+      "Water fugacity exponents for dislocation creep": "0.0",
+      "Yield mechanism": "drucker",
+      "Friction function": {
+        "Coordinate system": "cartesian",
+        "Function constants": "",
+        "Function expression": "0",
+        "Variable names": "x,y,t"
+      },
+      "Grain boundary sliding": {
+        "Activation energies for grain boundary sliding": "49",
+        "Activation volumes for grain boundary sliding": "13e-6",
+        "Grain size": "26e-6",
+        "Grain size exponents for grain boundary sliding": "1.4.",
+        "Prefactors for grain boundary sliding": "3.9e-19.2",
+        "Stress exponents for grain boundary sliding": "1.8"
+      }
+    },
+    "Viscoelastic": {
+      "Densities": "3300.",
+      "Elastic damper viscosity": "0.0",
+      "Elastic shear moduli": "75.0e9",
+      "Fixed elastic time step": "1.e3",
+      "Heat capacities": "1250.",
+      "Reference temperature": "293.",
+      "Specific heats": {
+        "alias": "Heat capacities",
+        "deprecation_status": "false"
+      },
+      "Stabilization time scale factor": "1.",
+      "Thermal conductivities": "4.7",
+      "Thermal expansivities": "0.000035",
+      "Use fixed elastic time step": "unspecified",
+      "Viscosities": "1.e21",
+      "Viscosity averaging scheme": "harmonic"
+    }
+  },
+  "Melt settings": {
+    "Average melt velocity": "true",
+    "Heat advection by melt": "false",
+    "Include melt transport": "false",
+    "Melt scaling factor threshold": "1e-7",
+    "Use discontinuous compaction pressure": "true"
+  },
+  "Mesh deformation": {
+    "Additional tangential mesh velocity boundary indicators": "",
+    "Mesh deformation boundary indicators": "",
+    "Ascii data model": {
+      "Data directory": "$ASPECT_SOURCE_DIR/data/geometry-model/initial-topography-model/ascii-data/test/",
+      "Data file name": "box_3d_%s.0.txt",
+      "Scale factor": "1."
+    },
+    "Boundary function": {
+      "Function constants": "",
+      "Function expression": "0; 0",
+      "Variable names": "x,y,t"
+    },
+    "Diffusion": {
+      "Hillslope transport coefficient": "1e-6",
+      "Time steps between diffusion": "1"
+    },
+    "Free surface": {
+      "Free surface stabilization theta": "0.5",
+      "Surface velocity projection": "normal"
+    }
+  },
+  "Mesh refinement": {
+    "Adapt by fraction of cells": "false",
+    "Additional refinement times": "",
+    "Coarsening fraction": "0.05",
+    "Initial adaptive refinement": "0",
+    "Initial global refinement": "9",
+    "Minimum refinement level": "1",
+    "Normalize individual refinement criteria": "true",
+    "Refinement criteria merge operation": "max",
+    "Refinement criteria scaling factors": "",
+    "Refinement fraction": "0.3",
+    "Run postprocessors on initial refinement": "false",
+    "Skip setup initial conditions on initial refinement": "false",
+    "Skip solvers on initial refinement": "true",
+    "Strategy": "BP3 fault support",
+    "Time steps between mesh refinement": "0",
+    "Artificial viscosity": {
+      "Compositional field scaling factors": "",
+      "Temperature scaling factor": "0.0"
+    },
+    "Boundary": {
+      "Boundary refinement indicators": ""
+    },
+    "Compaction length": {
+      "Mesh cells per compaction length": "1.0"
+    },
+    "Composition": {
+      "Compositional field scaling factors": ""
+    },
+    "Composition approximate gradient": {
+      "Compositional field scaling factors": ""
+    },
+    "Composition gradient": {
+      "Compositional field scaling factors": ""
+    },
+    "Composition threshold": {
+      "Compositional field thresholds": ""
+    },
+    "Isosurfaces": {
+      "Isosurfaces": ""
+    },
+    "Maximum refinement function": {
+      "Coordinate system": "depth",
+      "Function constants": "",
+      "Function expression": "0",
+      "Variable names": "x,y,t"
+    },
+    "Minimum refinement function": {
+      "Coordinate system": "depth",
+      "Function constants": "",
+      "Function expression": "0",
+      "Variable names": "x,y,t"
+    },
+    "Nonadiabatic temperature threshold": {
+      "Temperature anomaly type": "absolute value",
+      "Threshold": "100"
+    },
+    "Volume of fluid interface": {
+      "Strict coarsening": "false"
+    }
+  },
+  "Nullspace removal": {
+    "Remove nullspace": ""
+  },
+  "Particles": {
+    "Addition histogram granularity": "3",
+    "Addition point density function granularity": "6",
+    "Allow cells without particles": "false",
+    "Bandwidth": "0.3",
+    "Generate CPDI data for particle domains": "true",
+    "Generate face data for particle domains": "false",
+    "Generate particle domains": "true",
+    "Integration scheme": "BP3 stationary samples",
+    "Interpolation scheme": "BP3 history linear least squares",
+    "List of particle properties": "BP3 frozen crack driving force, initial composition, maxwell stress",
+    "Load balancing strategy": "none",
+    "Maximum particles per cell": "24",
+    "Minimum particles per cell": "12",
+    "Number of particle systems": "1",
+    "Particle addition algorithm": "point density function",
+    "Particle generator name": "reference cell",
+    "Particle removal algorithm": "point density function",
+    "Particle weight": "10",
+    "Point density kernel function": "cutoff c1 dealii",
+    "Update ghost particles": "true",
+    "CPO Bingham Average": {
+      "Number of samples": "0",
+      "Random number seed": "1",
+      "Use rotation matrix": "true"
+    },
+    "Composition reaction": {
+      "List of products": "",
+      "List of reactants": "",
+      "List of reaction times": "",
+      "Reaction area function": {
+        "Coordinate system": "cartesian",
+        "Function constants": "",
+        "Function expression": "0",
+        "Variable names": "x,y,t"
+      },
+      "Reaction rate function": {
+        "Function constants": "",
+        "Function expression": "1.",
+        "Variable names": "reactant,product,t"
+      }
+    },
+    "Crust and lithosphere formation": {
+      "Crustal thickness": "7000",
+      "Lithosphere thickness": "63000"
+    },
+    "Crystal Preferred Orientation": {
+      "CPO derivatives algorithm": "Spin tensor",
+      "Number of grains per particle": "50",
+      "Property advection max iterations": "100",
+      "Property advection method": "Backward Euler",
+      "Property advection tolerance": "1e-10",
+      "Random number seed": "1",
+      "D-Rex 2004": {
+        "Exponents p": "1.5",
+        "Mobility": "50",
+        "Nucleation efficiency": "5",
+        "Stress exponents": "3.5",
+        "Threshold GBS": "0.3",
+        "Volume fractions minerals": "0.5, 0.5"
+      },
+      "Initial grains": {
+        "CPX RRSS": "1,5,5,1.5",
+        "Minerals": "Olivine: Karato 2008, Enstatite",
+        "Model name": "Uniform grains and random uniform rotations",
+        "OlivineD RRSS": "3.,5.,1.e60,1.",
+        "Volume fractions minerals": "0.7, 0.3"
+      }
+    },
+    "Elastic stress": {
+      "Particle stress value weight": "1.0"
+    },
+    "Function": {
+      "Function constants": "",
+      "Function expression": "0",
+      "Number of components": "1",
+      "Variable names": "x,y,t"
+    },
+    "Generator": {
+      "Ascii file": {
+        "Data directory": "$ASPECT_SOURCE_DIR/data/particle/generator/ascii/",
+        "Data file name": "particle.dat"
+      },
+      "Probability density function": {
+        "Function constants": "",
+        "Function expression": "1.0",
+        "Number of particles": "1000",
+        "Random cell selection": "true",
+        "Random number seed": "5432",
+        "Variable names": "x,y,t"
+      },
+      "Random uniform": {
+        "Number of particles": "1000",
+        "Random cell selection": "true",
+        "Random number seed": "5432"
+      },
+      "Reference cell": {
+        "Number of particles per cell per direction": "4"
+      },
+      "Uniform box": {
+        "Maximum x": "1.",
+        "Maximum y": "1.",
+        "Maximum z": "1.",
+        "Minimum x": "0.",
+        "Minimum y": "0.",
+        "Minimum z": "0.",
+        "Number of particles": "1000"
+      },
+      "Uniform radial": {
+        "Center x": "0.",
+        "Center y": "0.",
+        "Center z": "0.",
+        "Maximum latitude": "180.",
+        "Maximum longitude": "360.",
+        "Maximum radius": "1.",
+        "Minimum latitude": "0.",
+        "Minimum longitude": "0.",
+        "Minimum radius": "0.",
+        "Number of particles": "1000",
+        "Radial layers": "1"
+      }
+    },
+    "Initial composition": {
+      "List of field names": "theta_initial, strengthening",
+      "Spatially refreshed field names": "strengthening"
+    },
+    "Integrator": {
+      "RK2": {
+        "Higher order accurate in time": "true"
+      }
+    },
+    "Interpolator": {
+      "Distance weighted average": {
+        "Distance regularization factor": "0.1",
+        "Weight type": "linear"
+      },
+      "Linear least squares": {
+        "Use boundary extrapolation": "false",
+        "Use linear least squares limiter": "true, false, false, true, true, true"
+      },
+      "Quadratic least squares": {
+        "Use boundary extrapolation": "false",
+        "Use quadratic least squares limiter": "true"
+      }
+    },
+    "Melt particle": {
+      "Threshold for melt presence": "1e-3"
+    }
+  },
+  "Particles 2": {
+    "Addition histogram granularity": "3",
+    "Addition point density function granularity": "6",
+    "Allow cells without particles": "false",
+    "Bandwidth": "0.3",
+    "Generate CPDI data for particle domains": "false",
+    "Generate face data for particle domains": "false",
+    "Generate particle domains": "false",
+    "Integration scheme": "rk2",
+    "Interpolation scheme": "cell average",
+    "List of particle properties": "",
+    "Load balancing strategy": "repartition",
+    "Maximum particles per cell": "100",
+    "Minimum particles per cell": "0",
+    "Particle addition algorithm": "random",
+    "Particle generator name": "random uniform",
+    "Particle removal algorithm": "random",
+    "Particle weight": "10",
+    "Point density kernel function": "cutoff c1 dealii",
+    "Update ghost particles": "true",
+    "CPO Bingham Average": {
+      "Number of samples": "0",
+      "Random number seed": "1",
+      "Use rotation matrix": "true"
+    },
+    "Composition reaction": {
+      "List of products": "",
+      "List of reactants": "",
+      "List of reaction times": "",
+      "Reaction area function": {
+        "Coordinate system": "cartesian",
+        "Function constants": "",
+        "Function expression": "0",
+        "Variable names": "x,y,t"
+      },
+      "Reaction rate function": {
+        "Function constants": "",
+        "Function expression": "1.",
+        "Variable names": "reactant,product,t"
+      }
+    },
+    "Crust and lithosphere formation": {
+      "Crustal thickness": "7000",
+      "Lithosphere thickness": "63000"
+    },
+    "Crystal Preferred Orientation": {
+      "CPO derivatives algorithm": "Spin tensor",
+      "Number of grains per particle": "50",
+      "Property advection max iterations": "100",
+      "Property advection method": "Backward Euler",
+      "Property advection tolerance": "1e-10",
+      "Random number seed": "1",
+      "D-Rex 2004": {
+        "Exponents p": "1.5",
+        "Mobility": "50",
+        "Nucleation efficiency": "5",
+        "Stress exponents": "3.5",
+        "Threshold GBS": "0.3",
+        "Volume fractions minerals": "0.5, 0.5"
+      },
+      "Initial grains": {
+        "CPX RRSS": "1,5,5,1.5",
+        "Minerals": "Olivine: Karato 2008, Enstatite",
+        "Model name": "Uniform grains and random uniform rotations",
+        "OlivineD RRSS": "3.,5.,1.e60,1.",
+        "Volume fractions minerals": "0.7, 0.3"
+      }
+    },
+    "Elastic stress": {
+      "Particle stress value weight": "1.0"
+    },
+    "Function": {
+      "Function constants": "",
+      "Function expression": "0",
+      "Number of components": "1",
+      "Variable names": "x,y,t"
+    },
+    "Generator": {
+      "Ascii file": {
+        "Data directory": "$ASPECT_SOURCE_DIR/data/particle/generator/ascii/",
+        "Data file name": "particle.dat"
+      },
+      "Probability density function": {
+        "Function constants": "",
+        "Function expression": "1.0",
+        "Number of particles": "1000",
+        "Random cell selection": "true",
+        "Random number seed": "5432",
+        "Variable names": "x,y,t"
+      },
+      "Random uniform": {
+        "Number of particles": "1000",
+        "Random cell selection": "true",
+        "Random number seed": "5432"
+      },
+      "Reference cell": {
+        "Number of particles per cell per direction": "2"
+      },
+      "Uniform box": {
+        "Maximum x": "1.",
+        "Maximum y": "1.",
+        "Maximum z": "1.",
+        "Minimum x": "0.",
+        "Minimum y": "0.",
+        "Minimum z": "0.",
+        "Number of particles": "1000"
+      },
+      "Uniform radial": {
+        "Center x": "0.",
+        "Center y": "0.",
+        "Center z": "0.",
+        "Maximum latitude": "180.",
+        "Maximum longitude": "360.",
+        "Maximum radius": "1.",
+        "Minimum latitude": "0.",
+        "Minimum longitude": "0.",
+        "Minimum radius": "0.",
+        "Number of particles": "1000",
+        "Radial layers": "1"
+      }
+    },
+    "Initial composition": {
+      "List of field names": "",
+      "Spatially refreshed field names": ""
+    },
+    "Integrator": {
+      "RK2": {
+        "Higher order accurate in time": "true"
+      }
+    },
+    "Interpolator": {
+      "Distance weighted average": {
+        "Distance regularization factor": "0.1",
+        "Weight type": "linear"
+      },
+      "Linear least squares": {
+        "Use boundary extrapolation": "false",
+        "Use linear least squares limiter": "true"
+      },
+      "Quadratic least squares": {
+        "Use boundary extrapolation": "false",
+        "Use quadratic least squares limiter": "true"
+      }
+    },
+    "Melt particle": {
+      "Threshold for melt presence": "1e-3"
+    }
+  },
+  "Phase field model": {
+    "Degradation curvature parameter": "1",
+    "Geometric function type": "AT1",
+    "Length scale": "20"
+  },
+  "Postprocess": {
+    "List of postprocessors": "memory statistics, reconstructed fault BP3, particles, BP3 output complete, BP3 restored monitor",
+    "Run postprocessors on nonlinear iterations": "false",
+    "BP3": {
+      "Allow truncated transition": "false",
+      "Audit full state every step": "false",
+      "Graceful wall seconds": "82800",
+      "Heavy output slip interval": "0.1",
+      "Heavy output time interval": "31557600",
+      "Last accepted step": "2147483647",
+      "Profile slip interval": "0.1",
+      "Profile time interval": "31557600",
+      "Stop after first event": "true",
+      "Weakening region length": "15000",
+      "Write bulk and particle visualization": "false"
+    },
+    "BP3 restored monitor": {
+      "Bottom velocity constraint": "full",
+      "Friction normal input": "helmholtz",
+      "Normal filter length": "20",
+      "Write detailed diagnostics": "false"
+    },
+    "Boundary strain rate residual statistics": {
+      "Data directory": "$ASPECT_SOURCE_DIR/data/postprocess/boundary-strain-rate-residual/",
+      "Data file name": "box_3d_boundary_strain_rate.txt",
+      "Scale factor": "1."
+    },
+    "Boundary velocity residual statistics": {
+      "Data directory": "$ASPECT_SOURCE_DIR/data/boundary-velocity/gplates/",
+      "Data file name": "current_day.gpml",
+      "Scale factor": "1.",
+      "Use ascii data": "false",
+      "Use spherical unit vectors": "false"
+    },
+    "Command": {
+      "Command": "",
+      "Run on all processes": "false",
+      "Terminate on failure": "false"
+    },
+    "Composition velocity statistics": {
+      "Names of selected compositional fields": ""
+    },
+    "Crystal Preferred Orientation": {
+      "Compress cpo data files": "true",
+      "Random number seed": "1",
+      "Temporary output location": "",
+      "Time between data output": "1e8",
+      "Write in background thread": "false",
+      "Write out draw volume weighted cpo data": "olivine Euler angles,enstatite Euler angles",
+      "Write out raw cpo data": "olivine volume fraction,olivine Euler angles,enstatite volume fraction,enstatite Euler angles"
+    },
+    "Depth average": {
+      "Depth boundaries of zones": "",
+      "List of output variables": "all",
+      "Number of zones": "10",
+      "Output format": "gnuplot, txt",
+      "Time between graphical output": "1e8"
+    },
+    "Dynamic core statistics": {
+      "Excess entropy only": "false"
+    },
+    "Dynamic topography": {
+      "Density above": "0.",
+      "Density below": "9900.",
+      "Output bottom": "true",
+      "Output surface": "true"
+    },
+    "Geoid": {
+      "Also output the gravity anomaly": {
+        "alias": "Output gravity anomaly",
+        "deprecation_status": "false"
+      },
+      "Also output the spherical harmonic coefficients of CMB dynamic topography contribution": {
+        "alias": "Output CMB topography contribution coefficients",
+        "deprecation_status": "false"
+      },
+      "Also output the spherical harmonic coefficients of density anomaly contribution": {
+        "alias": "Output density anomaly contribution coefficients",
+        "deprecation_status": "false"
+      },
+      "Also output the spherical harmonic coefficients of geoid anomaly": {
+        "alias": "Output geoid anomaly coefficients",
+        "deprecation_status": "false"
+      },
+      "Also output the spherical harmonic coefficients of surface dynamic topography contribution": {
+        "alias": "Output surface topography contribution coefficients",
+        "deprecation_status": "false"
+      },
+      "Density above": "0.",
+      "Density below": "9900.",
+      "Include CMB topography contribution": "true",
+      "Include surface topography contribution": "true",
+      "Maximum degree": "20",
+      "Minimum degree": "2",
+      "Output CMB topography contribution coefficients": "false",
+      "Output data in geographical coordinates": "false",
+      "Output density anomaly contribution coefficients": "false",
+      "Output geoid anomaly coefficients": "false",
+      "Output gravity anomaly": "false",
+      "Output surface topography contribution coefficients": "false"
+    },
+    "Global statistics": {
+      "Write statistics for each nonlinear iteration": "false"
+    },
+    "Gravity calculation": {
+      "List of latitude": "",
+      "List of longitude": "",
+      "List of radius": "",
+      "Maximum latitude": "90",
+      "Maximum longitude": "180.",
+      "Maximum radius": "0.",
+      "Minimum latitude": "-90.",
+      "Minimum longitude": "-180.",
+      "Minimum radius": "0.",
+      "Number points fibonacci spiral": "200",
+      "Number points latitude": "1",
+      "Number points longitude": "1",
+      "Number points radius": "1",
+      "Precision in gravity output": "12",
+      "Quadrature degree increase": "0",
+      "Reference density": "3300.",
+      "Sampling scheme": "map",
+      "Time between gravity output": "1e8",
+      "Time steps between gravity output": "2147483647"
+    },
+    "Memory statistics": {
+      "Output peak virtual memory (VmPeak)": "true"
+    },
+    "Particle distribution score": {
+      "Granularity": "2"
+    },
+    "Particle distribution statistics": {
+      "KDE granularity": "2",
+      "Kernel bandwidth": "0.3",
+      "Kernel function": "Uniform",
+      "Use KDE per particle": "false"
+    },
+    "Particles": {
+      "Data output format": "none",
+      "Exclude output properties": "",
+      "Number of grouped files": "4",
+      "Temporary output location": "",
+      "Time between data output": "0",
+      "Write in background thread": "false"
+    },
+    "Point values": {
+      "Evaluation points": "",
+      "Time between point values output": "0.",
+      "Use natural coordinates": "false"
+    },
+    "Reconstructed faults": {
+      "Excluded properties": "BP3 fixed shear correction, mature fault reference geometry"
+    },
+    "Rotation statistics": {
+      "Output full moment of inertia tensor": "false",
+      "Use constant density of one": "false"
+    },
+    "Sea level": {
+      "Data directory ice height": "$ASPECT_SOURCE_DIR/data/postprocess/sea-level/",
+      "Data directory topography": "$ASPECT_SOURCE_DIR/data/postprocess/sea-level/",
+      "Data file name ice height": "shell_3d_ice_top.0.txt",
+      "Data file name topography": "shell_3d_topo_top.0.txt",
+      "Ice density": "931",
+      "Output to file": "false",
+      "Time between text output": "0.",
+      "Water density": "1000"
+    },
+    "Topography": {
+      "Output to file": "false",
+      "Time between text output": "0."
+    },
+    "Visualization": {
+      "Filter output": "false",
+      "Interpolate output": "true",
+      "List of output variables": "",
+      "Number of grouped files": "4",
+      "Output base variables on mesh surface": "false",
+      "Output format": "vtu",
+      "Output mesh displacement": "false",
+      "Output mesh velocity": "false",
+      "Output undeformed mesh": "false",
+      "Point-wise stress and strain": "false",
+      "Temporary output location": "",
+      "Time between graphical output": "0",
+      "Time steps between graphical output": "2147483647",
+      "Write higher order output": "true",
+      "Write in background thread": "false",
+      "Artificial viscosity composition": {
+        "Name of compositional field": ""
+      },
+      "Compositional fields as vectors": {
+        "Names of fields": "",
+        "Names of vectors": ""
+      },
+      "Density anomaly": {
+        "Average density scheme": "reference profile",
+        "Number of depth slices": "20"
+      },
+      "Heat flux map": {
+        "Output point wise heat flux": "false"
+      },
+      "Material properties": {
+        "List of material properties": "density,thermal expansivity,specific heat,viscosity"
+      },
+      "Melt fraction": {
+        "A1": "1085.7",
+        "A2": "1.329e-7",
+        "A3": "-5.1e-18",
+        "B1": "1475.0",
+        "B2": "8.0e-8",
+        "B3": "-3.2e-18",
+        "C1": "1780.0",
+        "C2": "4.50e-8",
+        "C3": "-2.0e-18",
+        "D1": "976.0",
+        "D2": "1.329e-7",
+        "D3": "-5.1e-18",
+        "E1": "663.8",
+        "E2": "-611.4",
+        "Mass fraction cpx": "0.15",
+        "beta": "1.5",
+        "r1": "0.5",
+        "r2": "8e-11"
+      },
+      "Melt material properties": {
+        "List of properties": "compaction viscosity,permeability"
+      },
+      "Principal stress": {
+        "Use deviatoric stress": "false"
+      },
+      "Temperature anomaly": {
+        "Number of depth slices": "20",
+        "Use maximal temperature for bottom": "true",
+        "Use minimal temperature for surface": "true"
+      },
+      "Volume of Fluid": {
+        "Output interface normals": "false",
+        "Output interface reconstruction contour": "false"
+      },
+      "Vp anomaly": {
+        "Average velocity scheme": "reference profile",
+        "Number of depth slices": "50"
+      },
+      "Vs anomaly": {
+        "Average velocity scheme": "reference profile",
+        "Number of depth slices": "50"
+      }
+    }
+  },
+  "Prescribed Stokes solution": {
+    "Model name": "unspecified",
+    "Ascii data model": {
+      "Data directory": "$ASPECT_SOURCE_DIR/data/prescribed-stokes-solution/",
+      "Data file name": "box_2d.txt",
+      "First point on slice": "0.0,1.0,0.0",
+      "Scale factor": "1.",
+      "Second point on slice": "1.0,0.0,0.0",
+      "Slice dataset in 2D plane": "false"
+    },
+    "Compaction pressure function": {
+      "Function constants": "",
+      "Function expression": "0",
+      "Variable names": "x,y,t"
+    },
+    "Fluid pressure function": {
+      "Function constants": "",
+      "Function expression": "0",
+      "Variable names": "x,y,t"
+    },
+    "Fluid velocity function": {
+      "Function constants": "",
+      "Function expression": "0; 0",
+      "Variable names": "x,y,t"
+    },
+    "Pressure function": {
+      "Function constants": "",
+      "Function expression": "0",
+      "Variable names": "x,y,t"
+    },
+    "Velocity function": {
+      "Function constants": "",
+      "Function expression": "0; 0",
+      "Variable names": "x,y,t"
+    }
+  },
+  "Prescribed solution": {
+    "List of model names": "",
+    "Temperature function": {
+      "Coordinate system": "cartesian",
+      "Function": {
+        "Function constants": "",
+        "Function expression": "0",
+        "Variable names": "x,y,t"
+      },
+      "Indicator function": {
+        "Function constants": "",
+        "Function expression": "0",
+        "Variable names": "x,y,t"
+      }
+    },
+    "Velocity function": {
+      "Coordinate system": "cartesian",
+      "Use spherical unit vectors": "false",
+      "Function": {
+        "Function constants": "",
+        "Function expression": "0; 0",
+        "Variable names": "x,y,t"
+      },
+      "Indicator function": {
+        "Function constants": "",
+        "Function expression": "0; 0",
+        "Variable names": "x,y,t"
+      }
+    }
+  },
+  "Solver parameters": {
+    "Composition solver tolerance": "1e-12",
+    "Temperature solver tolerance": "1e-12",
+    "AMG parameters": {
+      "AMG aggregation threshold": "0.001",
+      "AMG output details": "false",
+      "AMG smoother sweeps": "2",
+      "AMG smoother type": "Chebyshev"
+    },
+    "Advection solver parameters": {
+      "GMRES solver restart length": "50"
+    },
+    "Diffusion solver parameters": {
+      "Diffusion length scale": "1.e4"
+    },
+    "Matrix Free": {
+      "Execute solver timings": "false",
+      "Output details": "false"
+    },
+    "Newton solver parameters": {
+      "Max Newton line search iterations": "5",
+      "Max pre-Newton nonlinear iterations": "10",
+      "Maximum linear Stokes solver tolerance": "1e-2",
+      "Nonlinear Newton solver switch tolerance": "1e-5",
+      "SPD safety factor": "0.9",
+      "Stabilization preconditioner": "SPD",
+      "Stabilization velocity block": "SPD",
+      "Use Eisenstat Walker method for Picard iterations": "false",
+      "Use Newton failsafe": "false",
+      "Use Newton residual scaling method": "false"
+    },
+    "Operator splitting parameters": {
+      "Reaction solver relative tolerance": "1e-6",
+      "Reaction solver type": "ARKode",
+      "Reaction time step": "1000.0",
+      "Reaction time steps per advection step": "0"
+    },
+    "Phase field solver parameters": {
+      "Adaptive endpoint linear accuracy": "false",
+      "Endpoint direct mechanics": "false",
+      "Endpoint quasi-Newton search": "false",
+      "Endpoint translation preconditioner": "false",
+      "Enforce phase irreversibility": "false",
+      "Linear solver tolerance": "2e-7",
+      "Max Newton line search iterations": "3",
+      "Max linear solver iterations": "1000",
+      "Max nonlinear iterations": "50",
+      "Nonlinear solver tolerance": "1e-8",
+      "Use bound constraints": "false"
+    },
+    "Stokes solver parameters": {
+      "Force nonsymmetric A block solver": "false",
+      "GMRES solver restart length": "100",
+      "IDR(s) parameter": "2",
+      "Krylov method for cheap solver steps": "GMRES",
+      "Linear solver A block tolerance": "1e-2",
+      "Linear solver S block tolerance": "1e-6",
+      "Linear solver tolerance": "1e-9",
+      "Maximum number of expensive Stokes solver steps": "1000",
+      "Number of cheap Stokes solver steps": "1000",
+      "Stokes GMG type": "local smoothing",
+      "Stokes solver type": "block AMG",
+      "Use direct solver for Stokes system": "false",
+      "Use full A block as preconditioner": "false",
+      "Use weighted BFBT for Schur complement": "false"
+    }
+  },
+  "Temperature field": {
+    "Temperature method": "static"
+  },
+  "Termination criteria": {
+    "Checkpoint on termination": "false",
+    "End step": "100",
+    "Termination criteria": "end time, BP3 long run complete",
+    "Wall time": "24.",
+    "Steady state heat flux": {
+      "Boundary indicators": "",
+      "Maximum relative deviation": "0.05",
+      "Time in steady state": "1e7"
+    },
+    "Steady state temperature": {
+      "Maximum relative deviation": "0.05",
+      "Time in steady state": "1e7"
+    },
+    "Steady state velocity": {
+      "Maximum relative deviation": "0.05",
+      "Time in steady state": "1e7"
+    },
+    "User request": {
+      "File name": "terminate-aspect"
+    }
+  },
+  "Time stepping": {
+    "List of model names": "convection time step, reconstructed fault time step",
+    "Minimum time step size": "0.",
+    "Function": {
+      "Function constants": "",
+      "Function expression": "1.0",
+      "Variable names": "time"
+    },
+    "Reconstructed fault time step": {
+      "Maximum logarithmic state change": "0.2"
+    },
+    "Repeat on cutback": {
+      "Cut back amount": "0.5",
+      "Relative repeat threshold": "0.2"
+    },
+    "Repeat on nonlinear solver failure": {
+      "Cut back factor": "0.5"
+    }
+  },
+  "Volume of Fluid": {
+    "Number initialization samples": "3",
+    "Volume fraction threshold": "1e-6",
+    "Volume of Fluid solver tolerance": "1e-12"
+  }
+}

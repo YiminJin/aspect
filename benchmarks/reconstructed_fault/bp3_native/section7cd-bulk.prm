@@ -1,0 +1,10 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_native/section7cd-surface.prm
+set Output directory = $ASPECT_SOURCE_DIR/build-bp3-native/runs/7cd-bulk
+subsection Mesh refinement
+  set Initial global refinement = 7
+end
+subsection Postprocess
+  subsection BP3
+    set Graceful wall seconds = 1190
+  end
+end

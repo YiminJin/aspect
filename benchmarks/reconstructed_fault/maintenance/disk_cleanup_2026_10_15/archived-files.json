@@ -1,0 +1,66 @@
+[
+  {
+    "path": "build-propagation-integration/runs/output-normal-resolution-q2-n256/fe-bulk-8.csv",
+    "mode": 420,
+    "mtime_ns": 1791608212362139821,
+    "bytes": 57230909,
+    "allocated_bytes": 57237504,
+    "sha256": "694c605a08ef6bb8b39bf789487bc0784d74b0d252ac5a7a996c57550966af1f"
+  },
+  {
+    "path": "build-propagation-integration/runs/output-normal-resolution-q2-n256/fe-bulk-1.csv",
+    "mode": 420,
+    "mtime_ns": 1791607878898744831,
+    "bytes": 57340722,
+    "allocated_bytes": 57348096,
+    "sha256": "384bb1c001ac79da37ce0da8120153d60409d75a84f72db1ebc1597fd33ed3d1"
+  },
+  {
+    "path": "build-propagation-integration/runs/output-normal-resolution-q2-n256/fe-bulk-16.csv",
+    "mode": 420,
+    "mtime_ns": 1791608491877247201,
+    "bytes": 57164344,
+    "allocated_bytes": 57171968,
+    "sha256": "177850631694e6a078c67610f027b02062933bd4d93dcf60f4ee73470ecee8fc"
+  },
+  {
+    "path": "build-propagation-integration/runs/output-normal-resolution-q2-n256/fe-bulk-32.csv",
+    "mode": 420,
+    "mtime_ns": 1791609054507620861,
+    "bytes": 57120454,
+    "allocated_bytes": 57126912,
+    "sha256": "68659da34bec93af713c3354aa6d62a34c3c178b543b7fa67d624d478019a47c"
+  },
+  {
+    "path": "build-propagation-integration/runs/output-normal-resolution-q2-n256/fe-bulk-24.csv",
+    "mode": 420,
+    "mtime_ns": 1791608770309396792,
+    "bytes": 57140235,
+    "allocated_bytes": 57147392,
+    "sha256": "b45c142abd46cc8e2e52b29fe07940b7f53657d4e8c58f0cdcaf7a718a43fa3e"
+  },
+  {
+    "path": "build-propagation-integration/runs/output-normal-resolution-q2-n256/fe-bulk-0.csv",
+    "mode": 420,
+    "mtime_ns": 1791607784735105202,
+    "bytes": 40032515,
+    "allocated_bytes": 40038400,
+    "sha256": "c5f73f36dd8ece2c39419d4bc67916a76d35044e9055463077d51f3b62aff135"
+  },
+  {
+    "path": "build-propagation-integration/runs/output-normal-resolution-q2-n256/fe-bulk-40.csv",
+    "mode": 420,
+    "mtime_ns": 1791609623185142652,
+    "bytes": 57201142,
+    "allocated_bytes": 57208832,
+    "sha256": "e2702b0cf6a01cdcd49bca1d9298f90440dcd6cc8fc9056ef668571dbda725b6"
+  },
+  {
+    "path": "build-propagation-integration/runs/output-normal-resolution-q2-n256-probe-failed/fe-bulk-0.csv",
+    "mode": 420,
+    "mtime_ns": 1791607362353585047,
+    "bytes": 40032515,
+    "allocated_bytes": 40038400,
+    "sha256": "c5f73f36dd8ece2c39419d4bc67916a76d35044e9055463077d51f3b62aff135"
+  }
+]

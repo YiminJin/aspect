@@ -1,0 +1,12 @@
+[
+  [
+    "/Postprocess/BP3 restored monitor/Friction normal input",
+    "helmholtz",
+    "raw"
+  ],
+  [
+    "/Postprocess/BP3 restored monitor/Normal filter length",
+    "20",
+    "0"
+  ]
+]

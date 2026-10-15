@@ -1,0 +1,21 @@
+{
+  "retained_files_sha256_verified": 109127,
+  "symlinks_verified": 278,
+  "existing_broken_symlinks": [
+    "build-propagation-p1/aspect-release",
+    "build-propagation-p1/aspect",
+    "build-propagation-p1-bounds/aspect-release",
+    "build-propagation-p1-bounds/aspect",
+    "build-propagation-p1-tail/aspect-release",
+    "build-propagation-p1-tail/aspect"
+  ],
+  "incoming_modified_files_verified": 28,
+  "deleted_files": 388,
+  "deleted_allocated_bytes": 2194993152,
+  "archived_files": 8,
+  "archived_original_bytes": 423262836,
+  "archive_bytes": 122490942,
+  "relocated_directories": 4,
+  "free_bytes_before": 10494951424,
+  "free_bytes_after": 12984360960
+}

@@ -1,0 +1,8 @@
+{
+  "analysis_exit_code": 0,
+  "final_analysis_matches": true,
+  "manifest_hashes_match": true,
+  "diff_check_exit_code": 0,
+  "staged_diff_empty": true,
+  "note": "No new simulation or source edit after final provenance."
+}

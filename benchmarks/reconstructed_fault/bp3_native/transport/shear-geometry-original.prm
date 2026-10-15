@@ -1,0 +1,3 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_native/transport/shear-geometry.prm
+set End time = 0.0625
+set Output directory = $ASPECT_SOURCE_DIR/build-bp3-native/transport-geometry/runs/shear-original

@@ -1,0 +1,24 @@
+{
+  "initial-mesh.csv": {
+    "7b-fe-gate-v5": "82449bee133b3799d9fef5108f55a1f0cd0c8c742239ea90b387fbb867bba1bd",
+    "7b-particle-gate": "82449bee133b3799d9fef5108f55a1f0cd0c8c742239ea90b387fbb867bba1bd"
+  },
+  "initial-phase.csv": {
+    "7b-fe-gate-v5": "99754fb086ef3bc507044f59ed2aadc50c1bf91467f8d5f9b20102c8a34c9b02",
+    "7b-particle-gate": "99754fb086ef3bc507044f59ed2aadc50c1bf91467f8d5f9b20102c8a34c9b02"
+  },
+  "mechanical-quadrature.csv": {
+    "7b-fe-gate-v5": "8dc027472431fdc8fcb3ae5847a811bcf0a65e56506af9398040608c80057c89",
+    "7b-particle-gate": "8dc027472431fdc8fcb3ae5847a811bcf0a65e56506af9398040608c80057c89"
+  },
+  "initial-particle-identity.csv": {
+    "7b-fe-gate-v5": "63d2e5194d0fdb612adc958fb5912d0972637d8fa1baf63cdc46d1f03de40605",
+    "7b-particle-gate": "63d2e5194d0fdb612adc958fb5912d0972637d8fa1baf63cdc46d1f03de40605"
+  },
+  "identical_initial_fields": [
+    "I_h",
+    "theta",
+    "background normal",
+    "surface coordinates"
+  ]
+}

@@ -11,6 +11,54 @@ algorithms, architecture, ownership, and MPI design. They are maintained as a
 consistent pair: this file records the concise settled decisions and the
 specification gives their detailed contract.
 
+### Selected stationary mature BP3 accepted FE history
+
+The bounded BP3 task extends accepted FE history to one straight dipping 2D
+fault, frozen phase/geometry, a fixed graded Box mesh with hanging nodes, and
+homogeneous matching bulk/surface G and eta. Mature slip memory is independent
+of zero cohesive traction: `Z_new = beta Z_old + eta_ve V_new`; bulk
+`d_R_new = beta d_R_old + (eta_ve/G) u_new` retains the consistent 3D deviator.
+Background tractions remain surface data; fresh bulk perturbation histories are
+zero. Native consistent normalization, general oblique Q1 cell integration and
+paired automatic boundary completion remain authoritative. The FE consumer
+does not replace them with P2 analytic normal rays or a dense inverse.
+
+One tensor-product bulk rule supplies all mature FE mechanical operators.
+Frozen mature mode allocates no P2 total-energy phase block or Hessian. Trials
+read immutable incoming histories; complete candidates and derived fixed
+particle samples are validated before terminal publication. Moving/born/deleted
+particles, mesh/geometry/profile changes and FE restart/conversion remain
+rejected. The BP3 stationary integrator is an explicitly named diagnostic
+shared by both history backends; it does not implement material transport.
+Legacy defaults/particle checkpoint behavior and the independent cohesive P2
+identity `Z = I_h tau_coh` are unchanged. Sections 1–6 and the subsequent
+section 7B selection are complete: fresh serial paired stationary-history coupled
+BP3, uniform strengthening, full bottom loading, filter20, and one common
+prescribed schedule. Both positive-time gates and four ten-step trajectories pass.
+The identical existing three-point tensor rule is verified in both backends, retaining
+the production particle quadrature default. The historical smooth-state
+perturbation is a compiled benchmark control; physical loading remains 1e-9 m/s.
+This establishes the restricted lifecycle at one resolution; endpoint normal
+roughness and perturbation-scaled differences remain accuracy questions.
+The subsequent bounded 7C/7D selection permits one temporal halving with the
+same step-zero constitutive interval, coupled quadrature sensitivity, actual
+surface/band refinement, a transition material check and selected MPI/in-memory
+candidate rejection/retry. Physical settings and acceptance remain unchanged;
+MPI reproducibility is distinct from accuracy. These controls now pass, including
+three positive-time one-/two-rank steps and one-owner native history-candidate
+rejection with unchanged accepted physical histories and identical-dt retry.
+The retry matches clean exported fields exactly. Bulk-profile/I_h and endpoint
+traction sensitivities remain unresolved accuracy questions. The subsequently
+selected section 8 completes a ten-step raw-normal control and one further
+initialization-only bulk refinement. Both pass, while peak-scaled localization
+sensitivity remains 3.7%. A fresh ordinary 150 by 50 km stationary-FE candidate
+retains the filter and actual spatial friction/state/loading. Its coarse
+full-geometry integration check accepts initialization and two physical steps
+under the native unweighted state limiter; the fine candidate is not launched.
+This does not qualify spatial accuracy, FE restart, automatic cutback or
+material-history transport. No long first-event/cluster run follows. See
+`benchmarks/reconstructed_fault/bp3_native/STATUS.md` and the 7B report for evidence.
+
 ### P2 checkpoint disposition (2026-10-13)
 
 The subsequent selected [P2 cleanup](propagation/P2_cleanup.md) changes
@@ -1200,6 +1248,19 @@ The `expm1` expression is the authoritative evaluation of
 The effective bulk strain rate will later include the reconstructed-fault slip
 correction. Stage 2 only provides the constitutive operation and does not add a
 Stokes or surface coupling.
+
+The optional fresh, frozen mature 2-D moving-particle BP3 control selects
+`Particle stress strain convention = three dimensional deviator`. It applies
+the in-plane block of `dev_3(symgrad(u_h))` consistently in point stresses,
+bulk residuals/tangents, normal/shear G actions and terminal particle updates.
+The legacy particle symmetric-gradient default is retained; accepted FE history
+always uses the same 3-D deviator. This convention is independent of history
+ownership. Old particle tensors are not deviated again or replaced by FE samples;
+the once-only update uses each moved particle's own incoming tensor. The law
+still omits objective rotation. New moving BP3 samples interpolate transported
+H and stress through native late initialization; this is distinct from fresh
+prescribed H initialization and the retained stationary-sample birth policy.
+The current optional moving selection rejects restart conversion.
 
 There is no separate Maxwell-stress transaction. Particle stress remains
 unchanged throughout the nonlinear solve, including rejected Newton and line-

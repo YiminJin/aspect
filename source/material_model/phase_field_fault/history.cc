@@ -637,14 +637,13 @@ namespace aspect
       compute_history_candidates(samples, time_step, stress_position, H_position,
                                  chemical_positions, candidates);
       validate_history_candidates(candidates);
-      const auto fe_update = fe_strain_history
-                             ? prepare_fe_strain_commit(accepted_bulk_state, candidates.cohesive_nodal_values)
-                             : std::shared_ptr<FEStrainUpdate>();
+      std::shared_ptr<FEStrainUpdate> fe_update;
       double fe_publication_error=0.,fe_publication_bound=0.,fe_publication_net_bound=0.;
       std::string fe_publication_failure;
-      if (fe_update)
+      if (fe_strain_history)
         try
           {
+            fe_update=prepare_fe_strain_commit(accepted_bulk_state, candidates.cohesive_nodal_values);
             for (const auto &particle : particle_manager.get_particle_handler())
               {
                 auto &candidate = candidates.particle_candidates.at(particle.get_id());
@@ -669,7 +668,7 @@ namespace aspect
           {
             fe_publication_failure=exception.what();
           }
-      if (fe_update)
+      if (fe_strain_history)
         {
           // No rank may publish while another rejects a local FE sample.
           throw_if_history_error(fe_publication_failure,this->get_mpi_communicator());
@@ -752,6 +751,8 @@ namespace aspect
       auto &diagnostics = candidates.diagnostics;
       auto &cohesive_values = candidates.cohesive_nodal_values;
       auto &state_candidates = candidates.state_candidates;
+      const bool nodal_cohesive_history = surface_cohesive_history
+                                          || (fe_strain_history && mature_frictional_fault);
 
       if (std::getenv("ASPECT_STRESS_CYCLE_TRACE"))
         diagnostics.open_stress_cycle(this->get_output_directory(),
@@ -760,7 +761,7 @@ namespace aspect
         diagnostics.open_source_history(this->get_output_directory(),
                                         this->get_timestep_number(), this->get_mpi_communicator());
 
-      if (surface_cohesive_history)
+      if (nodal_cohesive_history)
         {
           std::vector<std::vector<double>> rates(faults.size());
           for (unsigned int f=0; f<faults.size(); ++f)
@@ -780,7 +781,7 @@ namespace aspect
             {
               const auto &association = associations[particle_index];
               Assert(particle.get_id() == association.particle_id, ExcInternalError());
-              if (association.active && !surface_cohesive_history)
+              if (association.active && !nodal_cohesive_history)
                 {
                   const LocalizationResponse localization =
                     evaluate_reconstructed_fault_localization(
@@ -817,7 +818,7 @@ namespace aspect
         }
       throw_if_history_error(local_error, this->get_mpi_communicator());
 
-      if (!surface_cohesive_history)
+      if (!nodal_cohesive_history)
         {
           const auto projection = fault_manager.project_particle_scalar(cohesive_samples);
           cohesive_values = projection.nodal_values;
@@ -913,7 +914,7 @@ namespace aspect
 
               SymmetricTensor<2,dim> effective_strain_rate =
                 symmetrize(velocity_gradients[particle_index]);
-              if (fe_strain_history)
+              if (uses_deviatoric_strain_rate())
                 effective_strain_rate = Utilities::Tensors::consistent_deviator(effective_strain_rate);
               SymmetricTensor<2,dim> continued_crack;
               double continued_chi=0., continued_V=0.;

@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.13.4)
+find_package(Aspect REQUIRED HINTS ${Aspect_DIR})
+DEAL_II_INITIALIZE_CACHED_VARIABLES()
+project(prescribed_particle_transport)
+add_library(prescribed_transport SHARED transport.cc)
+ASPECT_SETUP_PLUGIN(prescribed_transport)
+target_compile_options(prescribed_transport PRIVATE -fno-finite-math-only -ffp-contract=off)

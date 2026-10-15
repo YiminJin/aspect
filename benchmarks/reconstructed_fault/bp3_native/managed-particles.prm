@@ -1,0 +1,36 @@
+# Coupled transport/population diagnostic at physical BP3 loading. Fixed phase/mesh.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_native/section7b-common.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/build-bp3-native/managed-coupled/bp3-plugin/libbp3_restore_150x50.release.so, $ASPECT_SOURCE_DIR/build-bp3-native/managed-coupled/observer/libbp3_coupled_checks.release.so
+set Output directory = $ASPECT_SOURCE_DIR/build-bp3-native/managed-coupled/runs/managed-v3
+# Initial constitutive interval and first positive dt remain 200000 s.
+# Later dt=2e8 s gives several particle spacings of movement at physical Vp.
+set Maximum time step = 200000000
+set Maximum first time step = 200000
+set End time = 15800200000
+subsection Material model
+  subsection Phase field fault
+    set Bulk history representation = particle stress
+    set Particle stress strain convention = three dimensional deviator
+  end
+end
+subsection Time stepping
+  subsection Function
+    set Function expression = 200000000
+  end
+end
+subsection Particles
+  set Integration scheme = rk2
+  set Interpolation scheme = BP3 managed history probe
+  set Load balancing strategy = remove and add particles
+end
+subsection Postprocess
+  subsection BP3
+    set Last accepted step = 80
+    set Graceful wall seconds = 1800
+    set Profile time interval = 200000000
+  end
+  subsection BP3 coupled checks
+    set Moving particle check = true
+    set Prescribed schedule check = false
+  end
+end

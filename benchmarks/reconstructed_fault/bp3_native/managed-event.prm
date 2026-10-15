@@ -1,0 +1,13 @@
+# One 4x4 replay only, capped at the first large population event.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_native/managed-particles.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/build-bp3-native/managed-coupled/bp3-plugin/libbp3_restore_150x50.release.so, $ASPECT_SOURCE_DIR/build-bp3-native/managed-event-audit/observer/libbp3_coupled_checks.release.so
+set Output directory = $ASPECT_SOURCE_DIR/build-bp3-native/managed-event-audit/runs/event
+subsection Postprocess
+  subsection BP3
+    set Last accepted step = 44
+    set Graceful wall seconds = 1200
+  end
+  subsection BP3 coupled checks
+    set Population event audit = true
+  end
+end

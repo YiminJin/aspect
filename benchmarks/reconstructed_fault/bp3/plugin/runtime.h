@@ -18,6 +18,7 @@ namespace aspect
     // Observations shared by initialization callbacks and accepted-state output.
     // Constitutive history remains simulator/manager owned and is never stored here.
     extern bool converged, long_run_stop, restored_history, detailed_diagnostics;
+    extern bool stationary_samples;
     extern unsigned int newton_updates, krylov_iterations;
     extern double minimum_alpha, accepted_nonlinear_residual;
     extern std::vector<std::vector<bool>> final_active;

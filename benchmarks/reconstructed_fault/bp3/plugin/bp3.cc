@@ -17,7 +17,7 @@
 #include <iomanip>
 
 
-#ifdef ASPECT_BP3_LOCAL_BOTTOM_TEST
+#if defined(ASPECT_BP3_LOCAL_BOTTOM_TEST) || defined(ASPECT_BP3_LOCAL_FRONT_TEST)
 namespace BP3 { double local_state_disturbance = 0.; }
 #endif
 
@@ -40,7 +40,18 @@ namespace aspect
       for (unsigned int v=0;v<fault.n_vertices();++v)
         {
           auto data=fault.get_properties(v);
-#ifdef ASPECT_BP3_LOCAL_OSCILLATION_TEST
+#ifdef ASPECT_BP3_LOCAL_FRONT_TEST
+          // Explicit diagnostic initial data, frozen after this initialization.
+          // Represent the live law's resistance at Vinit by its nodal values;
+          // do not recalibrate it against the computed velocity or during time
+          // stepping. This is not the official uniform BP3 prestress.
+          const double s = BP3::down_dip(fault.vertex(v)[0], fault.vertex(v)[1]);
+          const double f = BP3::fraction(s);
+          const auto &law = model.get_fault_friction();
+          data[p] = BP3::sigma0 * law.friction_coefficient(
+          {1 - f, f}, BP3::Vinit, BP3::configured_initial_state(s, law))
+          + BP3::damping *BP3::Vinit;
+#elif defined(ASPECT_BP3_LOCAL_OSCILLATION_TEST)
           // Uniform strengthening diagnostic: use the live regularized law and
           // the fixed BP3 damping, consistently with the shared state initializer.
           const auto &law=model.get_fault_friction();
@@ -54,6 +65,23 @@ namespace aspect
           data[c]=data[c+1]=0.; data[c+2]=1.;
         }
       model.set_reconstructed_fault_background_traction_property(background,correction);
+#ifdef ASPECT_BP3_LOCAL_FRONT_TEST
+      if (sim.get_pcout().is_active())
+        {
+          std::ofstream out(sim.get_output_directory() + "diagnostic-initial-state.csv");
+          out << std::setprecision(17)
+              << "s_m,fraction,theta_s,Omega,background_shear_Pa,background_normal_Pa\n";
+          for (unsigned int v = 0; v < fault.n_vertices(); ++v)
+            {
+              const double s = BP3::down_dip(fault.vertex(v)[0], fault.vertex(v)[1]);
+              const double theta = BP3::configured_initial_state(s, model.get_fault_friction());
+              out << s << ',' << BP3::fraction(s) << ',' << theta << ','
+                  << BP3::Vinit *theta / model.characteristic_fault_slip_distance() << ','
+                  << fault.get_properties(v)[p] << ',' << fault.get_properties(v)[p + 1] << '\n';
+            }
+          AssertThrow(out, ExcMessage("Cannot write diagnostic initial state."));
+        }
+#endif
 
     }
 
@@ -222,7 +250,12 @@ namespace aspect
       if (sim.get_timestep_number () != 0 || restored_history)
         return;
       verify_paired_mesh (sim);
-      verify_velocity_constraints (sim);
+      // The named stationary history fixture prescribes zero diagnostic fields
+      // with no mechanical solve. ASPECT requires empty velocity boundary lists
+      // for that scheme. Ordinary coupled BP3 retains the complete lift check.
+      if (!(stationary_samples && sim.get_parameters().nonlinear_solver
+            == Parameters<dim>::NonlinearSolver::single_Advection_no_Stokes))
+        verify_velocity_constraints (sim);
       manager.initialize_slip_rate (0, std::vector<double> (fault.n_vertices (), BP3::Vinit));
       // Mesh verification above is mandatory; its per-cell dump is diagnostic.
       if (detailed_diagnostics)

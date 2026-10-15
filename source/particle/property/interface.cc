@@ -422,6 +422,10 @@ namespace aspect
           n_integrator_properties = Particle::Integrator::RK4<dim>::n_integrator_properties;
         else if (name == "euler")
           n_integrator_properties = Particle::Integrator::Euler<dim>::n_integrator_properties;
+        else if (name == "BP3 stationary samples")
+          // The explicitly selected benchmark integrator never moves particles
+          // or stores intermediate stages. Existing layouts remain unchanged.
+          n_integrator_properties = 0;
         else
           AssertThrow(false,
                       ExcMessage("Unknown integrator scheme. The particle property 'Integrator properties' "

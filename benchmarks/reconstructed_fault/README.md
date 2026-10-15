@@ -1,4 +1,30 @@
-Current P2 numerical task completed: [native solver accuracy, onset and saddle escape](../../doc/reconstructed_fault/propagation/P2_native_solver_report.md).
+# Directory guide — 2026-10-15
+
+Start with [CURRENT_STATUS](../../doc/reconstructed_fault/CURRENT_STATUS.md) for
+the latest scientific results and limitations. The dated task notes below are
+historical evidence, not instructions to launch another experiment.
+The [worktree checkpoint](bp3_native/CHECKPOINT.md) preserves the open scientific
+task and explains what follows into a new checkout and what remains local.
+
+| Location | Contents |
+|---|---|
+| [bp3_native/STATUS.md](bp3_native/STATUS.md) | Stationary FE, moving-particle transport, population-event and accelerating slip-front checks |
+| [bp3/plugin](bp3/plugin/README.md) | Maintained BP3 plugin source shared by the diagnostic and ordinary configurations |
+| [bp3_native/server](bp3_native/server/README.md) | Manual fine-mesh server handoff, environment and deal.II 9.7 compatibility patch |
+| [propagation](propagation/README.md) | Preserved P1/P2 inputs, prototypes, reports and evidence; no new propagation stage selected |
+| [uniform_shear](uniform_shear/README.md), [bp5](bp5/README.md), `refactoring_*` | Independent and historical verification families |
+| [maintenance](maintenance/disk_cleanup_2026_10_15/README.md) | Cleanup manifests, preservation checks and restoration instructions |
+| [build-bp3-native](../../build-bp3-native/ARTIFACTS_AFTER_CLEANUP.md) | Current BP3 build and retained diagnostic families, organized by task |
+| [build-propagation-integration](../../build-propagation-integration/ARTIFACTS_AFTER_CLEANUP.md) | P2 build, `runs/`, `archive/baselines/` and pinned serial reference |
+
+[Disk cleanup](CLEANUP.md) freed 2.32 GiB. Sources and compact evidence keep their
+existing paths. Eight older P2 bulk CSVs require the documented restoration;
+latest BP3 trajectories, particle-event states, checkpoints and server files
+remain directly available.
+
+---
+
+Historical P2 numerical task completed: [native solver accuracy, onset and saddle escape](../../doc/reconstructed_fault/propagation/P2_native_solver_report.md).
 Fresh58-step economical onset reaches .53125s in85min9s/1684.9MiB, with core
 phase .60457720, zero healing, all seven unaligned field targets, complete-prefix
 energy accounting and exact complete-step failure/retry. Default-false numerical

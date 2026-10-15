@@ -1,0 +1,28 @@
+# Initialization only: same physical profile, no Stokes solve or history evolution.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_native/section7cd-bulk.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/build-bp3-native/section7b/bp3-plugin/libbp3_restore_150x50.release.so, $ASPECT_SOURCE_DIR/build-bp3-native/section8/profile-observer/libbp3_coupled_checks.release.so
+set Output directory = $ASPECT_SOURCE_DIR/build-bp3-native/runs/8-profile-base-v2
+set End time = 0
+set Nonlinear solver scheme = single Advection, no Stokes
+subsection Boundary velocity model
+  set Prescribed velocity boundary indicators =
+end
+subsection Prescribed Stokes solution
+  set Model name = function
+  subsection Velocity function
+    set Function expression = 0; 0
+  end
+  subsection Pressure function
+    set Function expression = 0
+  end
+end
+subsection Postprocess
+  set List of postprocessors = memory statistics, particles, BP3 serial coupled checks
+  subsection BP3 coupled checks
+    set Profile initialization check = true
+  end
+  subsection BP3
+    set Last accepted step = 0
+    set Graceful wall seconds = 440
+  end
+end

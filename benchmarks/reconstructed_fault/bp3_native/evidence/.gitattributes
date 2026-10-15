@@ -1,0 +1,2 @@
+# Preserve native csv.writer CRLF bytes and recognize the line terminator.
+*.csv -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

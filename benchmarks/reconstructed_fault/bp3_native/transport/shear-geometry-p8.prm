@@ -1,0 +1,9 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_native/transport/shear-geometry.prm
+set Output directory = $ASPECT_SOURCE_DIR/build-bp3-native/transport-geometry/runs/shear-conditioned-p8
+subsection Particles
+  subsection Generator
+    subsection Reference cell
+      set Number of particles per cell per direction = 8
+    end
+  end
+end

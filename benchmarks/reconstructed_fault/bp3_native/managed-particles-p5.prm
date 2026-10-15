@@ -1,0 +1,12 @@
+# One particle-density control: same mechanics, loading, initialization and schedule.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_native/managed-particles.prm
+set Output directory = $ASPECT_SOURCE_DIR/build-bp3-native/managed-coupled/runs/managed-p5
+subsection Particles
+  set Minimum particles per cell = 19
+  set Maximum particles per cell = 38
+  subsection Generator
+    subsection Reference cell
+      set Number of particles per cell per direction = 5
+    end
+  end
+end

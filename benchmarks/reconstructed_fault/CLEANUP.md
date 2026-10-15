@@ -1,3 +1,58 @@
+# Propagation-worktree disk cleanup — 2026-10-15
+
+This cleanup applies to `/home/ein/repository/aspect-fault-propagation`, branch
+`fault-propagation`, at `c33edaaeb145e5d3dce155bb815552ef80efc5f9` with its
+incoming local edits. It freed **2.32 GiB**, increasing available space from
+**9.77 to 12.09 GiB** at the end of the preservation check. No scientific
+source, input, accepted history, failed evidence or checkpoint was discarded.
+
+| Material | Action |
+|---|---|
+| 256 compiler objects/precompiled headers, 1.89 GiB | Removed from the two current build trees; regenerable |
+| 131 Python bytecode files | Removed; regenerable |
+| 155 MiB generated `build-propagation-integration/tests/cmake_install.cmake` | Removed; reconfigure that build before installation |
+| Eight older P2 normal-resolution `fe-bulk-*.csv` files, 404 MiB | Losslessly archived to 117 MiB; every member SHA256-verified before removal |
+| Four historical P2 baseline directories | Grouped under `build-propagation-integration/archive/baselines/`; original paths remain compatibility links |
+| Latest BP3/P2 results, particle-event snapshots, tested executables/plugins, server package and source snapshots | Preserved directly accessible |
+| Scientific documents and maintained inputs/scripts | Kept at their canonical paths; entry-point indexes updated |
+
+The archive is local recoverable storage:
+
+```text
+build-propagation-integration/archive/cleanup-20261015/P2-bulk-fields.tar.zst
+```
+
+Only the large bulk CSVs in `output-normal-resolution-q2-n256` and
+`output-normal-resolution-q2-n256-probe-failed` require restoration. Their other
+fields, logs, summaries and failed controls remain. Before rerunning an analysis
+that consumes those bulk CSVs, restore them from the repository root:
+
+```sh
+tar -I zstd -tf build-propagation-integration/archive/cleanup-20261015/P2-bulk-fields.tar.zst
+tar -I zstd --keep-old-files -xf build-propagation-integration/archive/cleanup-20261015/P2-bulk-fields.tar.zst
+```
+
+The second command restores all eight original paths and refuses to overwrite
+existing files. It needs about 404 MiB of additional space. The exact member list,
+archive checksum, original hashes, incoming diff/status, relocations and checks
+are in [the cleanup record](maintenance/disk_cleanup_2026_10_15/README.md).
+
+All **109,127 retained regular files** passed SHA256 preservation checks before
+the documented index/recovery-note edits; all 28 incoming modified files were
+unchanged at that point. All 278 existing links retained their targets. The six
+already dangling P1 executable links into another checkout remain unchanged.
+Actual extraction of a 57,230,909-byte CSV reproduced its hash, and a second
+extraction refused to overwrite a deliberately different temporary file. Five
+retained executable/plugin dependency checks passed. No simulation or build ran.
+
+Both current builds retain their executable/plugin binaries, configurations and
+makefiles. Their next compilation must regenerate removed objects and PCHs;
+rebuilding against today's source does not recreate a historical binary. The
+ordinary server tarball, unpacked source, deal.II 9.7 patch and manual build
+instructions are unchanged. No other worktree or old external archive was touched.
+
+---
+
 # Refactoring-worktree cleanup — 2026-10-02
 
 This cleanup applies to **`/home/ein/repository/aspect-pf-rsf-refactor`**, at

@@ -1,0 +1,13 @@
+{
+  "vertices": 1446,
+  "theta_min": 7999.999999999982,
+  "theta_max": 7999999.999999999,
+  "max_theta_initial_relative_error": 1.532107773982716e-14,
+  "background_normal_max_error": 1.7136335372924805e-07,
+  "initial_I_range": [
+    5519.687344777507,
+    9368.347227279897
+  ],
+  "min_initial_V": 6.393266387079448e-10,
+  "max_initial_V": 1.010841289208836e-09
+}

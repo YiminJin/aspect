@@ -2,6 +2,21 @@
 build/
 __pycache__/
 
+# Full historical P2 runs and original-source snapshots remain local. Curated
+# replay inputs, assessments and tables already tracked here remain in Git.
+# Explicitly add any newly selected reusable evidence from these directories.
+/propagation/*_evidence/
+/propagation/evidence/
+/propagation/material_study/
+/propagation/*.log
+/propagation/p2_checkpoint/incoming-*
+/propagation/p2_checkpoint/incoming.patch
+
+# Local preservation inventories/patches are not portable build inputs. Keep
+# cleanup scripts, deletion/relocation manifests and verification results.
+/maintenance/disk_cleanup_*/before.json*
+/maintenance/disk_cleanup_*/incoming*
+
 # Completed campaign exports; exact retired paths/recovery are in maintenance/.
 /bp3/bottom-completion-50-local4/*.csv
 /bp3/bottom-source-complete-wedge-50-local4/*.csv

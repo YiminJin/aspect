@@ -1,0 +1,10 @@
+# Target the weak-pulse spatial floor at the retained finest physical timestep.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_native/transport/shear-dt03125.prm
+set Output directory = $ASPECT_SOURCE_DIR/build-bp3-native/transport-checks/runs/shear-dt03125-p16-domain-v2
+subsection Particles
+  subsection Generator
+    subsection Reference cell
+      set Number of particles per cell per direction = 16
+    end
+  end
+end

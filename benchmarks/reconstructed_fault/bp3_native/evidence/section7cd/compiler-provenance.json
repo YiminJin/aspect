@@ -1,0 +1,5 @@
+{
+  "build-bp3-native": "12.4.0",
+  "build-bp3-native/section7cd/mpi-plugin": "16.2.1",
+  "build-bp3-native/section7cd/transition-bp3": "16.2.1"
+}

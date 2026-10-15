@@ -1,0 +1,14 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_native/section7b-common.prm
+set Output directory = $ASPECT_SOURCE_DIR/build-bp3-native/runs/7b-particle-gate
+subsection Material model
+  subsection Phase field fault
+    set Bulk history representation = particle stress
+  end
+end
+set End time = 200000
+subsection Postprocess
+  subsection BP3
+    set Last accepted step = 1
+    set Graceful wall seconds = 390
+  end
+end

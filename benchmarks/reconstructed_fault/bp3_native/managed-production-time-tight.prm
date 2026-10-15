@@ -1,0 +1,5 @@
+# Same controllers/initialization, tighter effective cap; no forced function dt.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_native/managed-production-time.prm
+set Output directory = $ASPECT_SOURCE_DIR/build-bp3-native/managed-event-audit/runs/production-time-tight
+set Maximum first time step = 2000000
+set Maximum time step = 2000000

@@ -1,0 +1,9 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_native/managed-particles.prm
+set Output directory = $ASPECT_SOURCE_DIR/build-bp3-native/managed-coupled/runs/gate-v2
+set End time = 200000
+subsection Postprocess
+  subsection BP3
+    set Last accepted step = 1
+    set Graceful wall seconds = 300
+  end
+end

@@ -1,0 +1,56 @@
+{
+  "HEAD": "c33edaaeb145e5d3dce155bb815552ef80efc5f9",
+  "branch": "fault-propagation",
+  "staged_changes": false,
+  "incoming_files": 2374,
+  "missing": [],
+  "changed_incoming_files": [
+    "benchmarks/reconstructed_fault/bp3_native/CMakeLists.txt",
+    "benchmarks/reconstructed_fault/bp3_native/STATUS.md",
+    "benchmarks/reconstructed_fault/bp3_native/coupled_checks.cc",
+    "doc/reconstructed_fault/CURRENT_STATUS.md",
+    "doc/reconstructed_fault/current_design.md",
+    "doc/reconstructed_fault/specification.tex"
+  ],
+  "preserved_7B_inputs_and_binaries": true,
+  "artifacts": {
+    "build-bp3-native/aspect-release": "1ba2f7f43b37b75b1462d9cd5e48998fc8cc58b891e943829be8240f70776d12",
+    "build-bp3-native/section7b/bp3-plugin/libbp3_restore_150x50.release.so": "676177bc1935cdee156227b9aeae1a2990a5ed0ddbf5bc34955b57a82e8dcd76",
+    "build-bp3-native/history-plugin/libbp3_coupled_checks.release.so": "ec028e17382d642d166f0528368c7947632fcd592577886f6a94bd65895c06da",
+    "build-bp3-native/section7cd/serial-plugin/libbp3_coupled_checks.release.so": "15d43018033aba03387bdf0a3d1b013a42c95bb8de56185ad8101bbc861afa3b",
+    "build-bp3-native/section7cd/mpi-plugin/libbp3_coupled_checks.release.so": "a370ff83e96c4c937fc6b71f2a032aea709ca7fb8bd3f6b70413e5f07cf49673",
+    "build-bp3-native/section7cd/transition-bp3/libbp3_restore_150x50.release.so": "d8a151bbdd339df11e4113274b955281100a2d9df530788538c230581fac62e0",
+    "build-bp3-native/section7cd/transition-observer/libbp3_coupled_checks.release.so": "5fac63c45bb064d5959b6d2fee6819d07d256f2d3020c02e6c685aab05339413"
+  },
+  "unchanged_production_sources": true,
+  "reference": {
+    "HEAD": "8f126905c559df106f08af4079f678401fec4d06",
+    "tracked_changes": false,
+    "mode": "read-only"
+  },
+  "analysis": "pass: common-time sensitivity, physical-coordinate MPI fields, coordinated rejection and identical-dt retry",
+  "style": "pass: astyle2.04 GNU repository options",
+  "git_diff_check": "pass",
+  "simulation_seconds": 1567.8789257980025,
+  "sources": {
+    "benchmarks/reconstructed_fault/bp3_native/CMakeLists.txt": "4142c6efed969a885f7b328824213a2a430c833e439dd96271222bf8d47688c4",
+    "benchmarks/reconstructed_fault/bp3_native/section7cd-bulk.prm": "adf49087b6e316f3b631977f81a35505f7918f970d60b560d3b8572b3fdeef7d",
+    "benchmarks/reconstructed_fault/bp3_native/section7cd_report.md": "bfb2d2dbba9a0ef5f49f6e05540c5758417ae87b72ee83875c954925d0b859f9",
+    "benchmarks/reconstructed_fault/bp3_native/section7cd-time.prm": "267979c75762995b9daef66822cb130148d0413a75c5049e8a7b4e273df45ae9",
+    "benchmarks/reconstructed_fault/bp3_native/coupled_checks.cc": "7af852d6f29ce9782006e09d874584495e0e815d5dec87cc654730e8d08d75f3",
+    "benchmarks/reconstructed_fault/bp3_native/section7cd-retry.prm": "61faf6e9f1d878fc990b653fbd2274fc49fd14dc9f60c425f3c623fa4dd76843",
+    "benchmarks/reconstructed_fault/bp3_native/section7cd-surface.prm": "7c45dcbbbb33ae56098b4e7ac3807abe653bbfe295a67f37afe9e795d597d91d",
+    "benchmarks/reconstructed_fault/bp3_native/section7cd-q6.prm": "25951584d2471942113403cd24620140f227660f0ecef9649e1e4048ccb65263",
+    "benchmarks/reconstructed_fault/bp3_native/section7cd-transition.prm": "6b1da786cc6e9062d652b6e0c5a94a06afed724a9ed056ec74511a5d0dac317a",
+    "benchmarks/reconstructed_fault/bp3_native/STATUS.md": "91eba815ecbc65373bb16f9bdf396a227a65e71395cd1643c1a1e4376a4199fd",
+    "benchmarks/reconstructed_fault/bp3_native/analyze_section7cd.py": "14fe291be2316ec9045ac26867be2b37e6e8721c481393b06bb0b8c6b2a9bedc",
+    "benchmarks/reconstructed_fault/bp3_native/SECTION7CD.md": "28a71cbee7616b77a9b16fab9c4b31f8565bcc47df4888c5b69cad6be6cc231e",
+    "benchmarks/reconstructed_fault/bp3_native/section7cd-mpi.prm": "30e0a97221a6df177fcec5359d9d64803a4aa5bda719cfa994d61278524f7686",
+    "benchmarks/reconstructed_fault/bp3_native/section7cd-serial.prm": "9c6b00dff1d36ff205e047cc3cda6208257934eedcc1d1626535608303f54c0f"
+  },
+  "documentation": {
+    "doc/reconstructed_fault/CURRENT_STATUS.md": "f11e1ff6d219a755d99d84f2559d5f84765e785edbb4d9e8d394ec025b1309e1",
+    "doc/reconstructed_fault/current_design.md": "f7a61e268ae099bf8d7623ffb55f6eaa5017ef5b3e77d6068eec39fa468b0db1",
+    "doc/reconstructed_fault/specification.tex": "6d37618b18365faad92d374eb89ca14665a43f72a9a1177d6558e65e3bad55b2"
+  }
+}

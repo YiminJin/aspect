@@ -1,0 +1,18 @@
+[
+  {
+    "original": "build-propagation-integration/localization-baseline",
+    "physical": "build-propagation-integration/archive/baselines/localization-baseline"
+  },
+  {
+    "original": "build-propagation-integration/normal-resolution-baseline",
+    "physical": "build-propagation-integration/archive/baselines/normal-resolution-baseline"
+  },
+  {
+    "original": "build-propagation-integration/plane-strain-baseline",
+    "physical": "build-propagation-integration/archive/baselines/plane-strain-baseline"
+  },
+  {
+    "original": "build-propagation-integration/quadrature-baseline",
+    "physical": "build-propagation-integration/archive/baselines/quadrature-baseline"
+  }
+]

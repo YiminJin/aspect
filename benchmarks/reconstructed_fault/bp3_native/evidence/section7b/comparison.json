@@ -1,0 +1,3497 @@
+{
+  "identity": {
+    "creep": {
+      "initial-mesh.csv": "82449bee133b3799d9fef5108f55a1f0cd0c8c742239ea90b387fbb867bba1bd",
+      "initial-phase.csv": "99754fb086ef3bc507044f59ed2aadc50c1bf91467f8d5f9b20102c8a34c9b02",
+      "mechanical-quadrature.csv": "8dc027472431fdc8fcb3ae5847a811bcf0a65e56506af9398040608c80057c89",
+      "initial-particle-identity.csv": "63d2e5194d0fdb612adc958fb5912d0972637d8fa1baf63cdc46d1f03de40605"
+    },
+    "perturbed": {
+      "initial-mesh.csv": "82449bee133b3799d9fef5108f55a1f0cd0c8c742239ea90b387fbb867bba1bd",
+      "initial-phase.csv": "99754fb086ef3bc507044f59ed2aadc50c1bf91467f8d5f9b20102c8a34c9b02",
+      "mechanical-quadrature.csv": "8dc027472431fdc8fcb3ae5847a811bcf0a65e56506af9398040608c80057c89",
+      "initial-particle-identity.csv": "b410031063528debb7eaf74fa379754dd79a7bc3d3676212d9185ff5031dadc4"
+    }
+  },
+  "checks": {
+    "creep": {
+      "fe": {
+        "positive_steps": 10,
+        "maximum_stress_error_Pa": 8.848028192940149e-09,
+        "maximum_stress_error_fraction_of_allowance": 0.0033417985616340028,
+        "maximum_sample_stress_scale_Pa": 156049.97933794712,
+        "maximum_instant_tensor_normal_difference_Pa": 5459.2001344754435,
+        "maximum_sample_divergence_per_s": 1.2779776279296274e-12,
+        "maximum_normal_split_error_Pa": 2.3096799850463867e-07,
+        "minimum_I_m": 12188.324108911092,
+        "minimum_theta_s": 7986678.886968053,
+        "final_Z_max_Pa_m": 64544496.07879275,
+        "maximum_normalized_residual": 7.389587621263395e-10,
+        "positive_newton_updates": [
+          0.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0
+        ],
+        "positive_krylov_iterations": [
+          0.0,
+          69.0,
+          68.0,
+          69.0,
+          69.0,
+          70.0,
+          70.0,
+          69.0,
+          68.0,
+          70.0
+        ],
+        "maximum_surface_RMS_Pa": 1.1761797873598076e-06,
+        "maximum_Theta_relative_error": 2.220446049250313e-16,
+        "wall_seconds": 106.64453279099689
+      },
+      "particle": {
+        "positive_steps": 10,
+        "maximum_stress_error_Pa": 9.886337096178026e-10,
+        "maximum_stress_error_fraction_of_allowance": 0.011603301566974452,
+        "maximum_sample_stress_scale_Pa": 192672.80663317593,
+        "maximum_instant_tensor_normal_difference_Pa": 4974.403990546699,
+        "maximum_sample_divergence_per_s": 1.1644887264814268e-12,
+        "maximum_normal_split_error_Pa": 2.4586915969848633e-07,
+        "minimum_I_m": 12188.324108911092,
+        "minimum_theta_s": 7984805.649666263,
+        "final_Z_max_Pa_m": 0.0,
+        "maximum_normalized_residual": 6.840605154087765e-10,
+        "positive_newton_updates": [
+          0.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0
+        ],
+        "positive_krylov_iterations": [
+          0.0,
+          46.0,
+          46.0,
+          46.0,
+          47.0,
+          47.0,
+          47.0,
+          47.0,
+          47.0,
+          47.0
+        ],
+        "maximum_surface_RMS_Pa": 1.7115100049463682e-07,
+        "maximum_Theta_relative_error": 2.220446049250313e-16,
+        "wall_seconds": 62.80971454600149
+      }
+    },
+    "perturbed": {
+      "fe": {
+        "positive_steps": 10,
+        "maximum_stress_error_Pa": 9.569221054071778e-09,
+        "maximum_stress_error_fraction_of_allowance": 0.0031105838285832095,
+        "maximum_sample_stress_scale_Pa": 152674.35083176455,
+        "maximum_instant_tensor_normal_difference_Pa": 5450.193363712535,
+        "maximum_sample_divergence_per_s": 1.2758691777443706e-12,
+        "maximum_normal_split_error_Pa": 2.384185791015625e-07,
+        "minimum_I_m": 12188.324108911092,
+        "minimum_theta_s": 7987516.092308232,
+        "final_Z_max_Pa_m": 64515120.90418856,
+        "maximum_normalized_residual": 7.539830189894545e-10,
+        "positive_newton_updates": [
+          0.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0
+        ],
+        "positive_krylov_iterations": [
+          0.0,
+          71.0,
+          71.0,
+          71.0,
+          71.0,
+          71.0,
+          70.0,
+          69.0,
+          71.0,
+          71.0
+        ],
+        "maximum_surface_RMS_Pa": 1.1159073730007356e-06,
+        "maximum_Theta_relative_error": 2.220446049250313e-16,
+        "wall_seconds": 106.44486215399957
+      },
+      "particle": {
+        "positive_steps": 10,
+        "maximum_stress_error_Pa": 1.0075281140302431e-09,
+        "maximum_stress_error_fraction_of_allowance": 0.011786248094700195,
+        "maximum_sample_stress_scale_Pa": 188954.48338621543,
+        "maximum_instant_tensor_normal_difference_Pa": 4967.676803100095,
+        "maximum_sample_divergence_per_s": 1.1629139179300132e-12,
+        "maximum_normal_split_error_Pa": 2.3096799850463867e-07,
+        "minimum_I_m": 12188.324108911092,
+        "minimum_theta_s": 7986042.882235722,
+        "final_Z_max_Pa_m": 0.0,
+        "maximum_normalized_residual": 1.2624751034217793e-09,
+        "positive_newton_updates": [
+          0.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0,
+          2.0
+        ],
+        "positive_krylov_iterations": [
+          0.0,
+          45.0,
+          46.0,
+          45.0,
+          45.0,
+          46.0,
+          46.0,
+          46.0,
+          46.0,
+          46.0
+        ],
+        "maximum_surface_RMS_Pa": 0.0014265618411737656,
+        "maximum_Theta_relative_error": 2.220446049250313e-16,
+        "wall_seconds": 62.242405758999666
+      }
+    }
+  },
+  "comparisons": {
+    "creep": [
+      {
+        "step": 0,
+        "time_s": 0.0,
+        "fields": {
+          "V_m_s": {
+            "max_abs": 4.528433914659153e-14,
+            "rms_abs": 3.634449882154428e-14,
+            "scale": 1e-09,
+            "rms_relative_to_scale": 3.634449882154428e-05,
+            "maximum_relative_to_scale": 4.528433914659152e-05,
+            "signed_mean": 3.622227826985349e-14,
+            "oscillatory_rms": 2.9781120748777974e-15
+          },
+          "theta_s": {
+            "max_abs": 0.0,
+            "rms_abs": 0.0,
+            "scale": 8000000.0,
+            "rms_relative_to_scale": 0.0,
+            "maximum_relative_to_scale": 0.0,
+            "signed_mean": 0.0,
+            "oscillatory_rms": 0.0
+          },
+          "Omega": {
+            "max_abs": 4.528433914663399e-05,
+            "rms_abs": 3.634449882155864e-05,
+            "scale": 1.0,
+            "rms_relative_to_scale": 3.634449882155864e-05,
+            "maximum_relative_to_scale": 4.528433914663399e-05,
+            "signed_mean": 3.622227826986742e-05,
+            "oscillatory_rms": 2.9781120748836314e-06
+          },
+          "slip_m": {
+            "max_abs": 0.0,
+            "rms_abs": 0.0,
+            "scale": 0.002,
+            "rms_relative_to_scale": 0.0,
+            "maximum_relative_to_scale": 0.0,
+            "signed_mean": 0.0,
+            "oscillatory_rms": 0.0
+          },
+          "shear_Pa": {
+            "max_abs": 46.64967413619161,
+            "rms_abs": 35.82392111321311,
+            "scale": 26546122.365133367,
+            "rms_relative_to_scale": 1.349497324711557e-06,
+            "maximum_relative_to_scale": 1.7573065284089463e-06,
+            "signed_mean": 35.70870720193689,
+            "oscillatory_rms": 2.87081066809648,
+            "perturbation_scale": 392.2251982588981,
+            "rms_relative_to_perturbation": 0.09133508319260669
+          },
+          "raw_normal_Pa": {
+            "max_abs": 35.70419819653034,
+            "rms_abs": 19.272513491728784,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 3.8545026983457566e-07,
+            "maximum_relative_to_scale": 7.140839639306069e-07,
+            "signed_mean": -18.023048557212636,
+            "oscillatory_rms": 6.826382423599166,
+            "perturbation_scale": 256.4324044197636,
+            "rms_relative_to_perturbation": 0.07515631082326436
+          },
+          "filtered_normal_Pa": {
+            "max_abs": 22.42868374288082,
+            "rms_abs": 18.13216339905909,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 3.6264326798118175e-07,
+            "maximum_relative_to_scale": 4.4857367485761645e-07,
+            "signed_mean": -18.035280073639647,
+            "oscillatory_rms": 1.8719033617029224,
+            "perturbation_scale": 57.73670717069399,
+            "rms_relative_to_perturbation": 0.31404914286941904
+          },
+          "pressure_Pa": {
+            "max_abs": 33.14731897497337,
+            "rms_abs": 7.9614949922071,
+            "scale": 447.8006662515485,
+            "rms_relative_to_scale": 0.01777910483888113,
+            "maximum_relative_to_scale": 0.07402248695260567,
+            "signed_mean": -7.552616274102212,
+            "oscillatory_rms": 2.518608728466007
+          },
+          "deviatoric_Pa": {
+            "max_abs": 28.595744261219494,
+            "rms_abs": 12.649135657701784,
+            "scale": 258.4040330566898,
+            "rms_relative_to_scale": 0.048950999363569385,
+            "maximum_relative_to_scale": 0.11066291776857072,
+            "signed_mean": -10.470432283502843,
+            "oscillatory_rms": 7.0972304938986
+          }
+        }
+      },
+      {
+        "step": 1,
+        "time_s": 200000.0,
+        "fields": {
+          "V_m_s": {
+            "max_abs": 4.528433914659153e-14,
+            "rms_abs": 3.634449882154428e-14,
+            "scale": 1e-09,
+            "rms_relative_to_scale": 3.634449882154428e-05,
+            "maximum_relative_to_scale": 4.528433914659152e-05,
+            "signed_mean": 3.622227826985349e-14,
+            "oscillatory_rms": 2.9781120748777974e-15
+          },
+          "theta_s": {
+            "max_abs": 8.944629491306841,
+            "rms_abs": 7.17881724326925,
+            "scale": 8000000.0,
+            "rms_relative_to_scale": 8.973521554086562e-07,
+            "maximum_relative_to_scale": 1.1180786864133552e-06,
+            "signed_mean": -7.154674089377232,
+            "oscillatory_rms": 0.5882649803056429
+          },
+          "Omega": {
+            "max_abs": 4.4166611453566595e-05,
+            "rms_abs": 3.544741034407183e-05,
+            "scale": 1.0,
+            "rms_relative_to_scale": 3.544741034407183e-05,
+            "maximum_relative_to_scale": 4.4166611453566595e-05,
+            "signed_mean": 3.532818695450569e-05,
+            "oscillatory_rms": 2.9048419248738917e-06
+          },
+          "slip_m": {
+            "max_abs": 9.056867829299433e-09,
+            "rms_abs": 7.268899764309885e-09,
+            "scale": 0.002,
+            "rms_relative_to_scale": 3.6344498821549424e-06,
+            "maximum_relative_to_scale": 4.528433914649716e-06,
+            "signed_mean": 7.244455653971757e-09,
+            "oscillatory_rms": 5.95622414975254e-10
+          },
+          "shear_Pa": {
+            "max_abs": 46.64967413619161,
+            "rms_abs": 35.82392111321311,
+            "scale": 26546122.365133367,
+            "rms_relative_to_scale": 1.349497324711557e-06,
+            "maximum_relative_to_scale": 1.7573065284089463e-06,
+            "signed_mean": 35.70870720193689,
+            "oscillatory_rms": 2.87081066809648,
+            "perturbation_scale": 392.2251982588981,
+            "rms_relative_to_perturbation": 0.09133508319260669
+          },
+          "raw_normal_Pa": {
+            "max_abs": 35.70419819653034,
+            "rms_abs": 19.272513491728784,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 3.8545026983457566e-07,
+            "maximum_relative_to_scale": 7.140839639306069e-07,
+            "signed_mean": -18.023048557212636,
+            "oscillatory_rms": 6.826382423599166,
+            "perturbation_scale": 256.4324044197636,
+            "rms_relative_to_perturbation": 0.07515631082326436
+          },
+          "filtered_normal_Pa": {
+            "max_abs": 22.42868374288082,
+            "rms_abs": 18.13216339905909,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 3.6264326798118175e-07,
+            "maximum_relative_to_scale": 4.4857367485761645e-07,
+            "signed_mean": -18.035280073639647,
+            "oscillatory_rms": 1.8719033617029224,
+            "perturbation_scale": 57.73670717069399,
+            "rms_relative_to_perturbation": 0.31404914286941904
+          },
+          "pressure_Pa": {
+            "max_abs": 33.14731897497337,
+            "rms_abs": 7.9614949922071,
+            "scale": 447.8006662515485,
+            "rms_relative_to_scale": 0.01777910483888113,
+            "maximum_relative_to_scale": 0.07402248695260567,
+            "signed_mean": -7.552616274102212,
+            "oscillatory_rms": 2.518608728466007
+          },
+          "deviatoric_Pa": {
+            "max_abs": 28.595744261219494,
+            "rms_abs": 12.649135657701784,
+            "scale": 258.4040330566898,
+            "rms_relative_to_scale": 0.048950999363569385,
+            "maximum_relative_to_scale": 0.11066291776857072,
+            "signed_mean": -10.470432283502843,
+            "oscillatory_rms": 7.0972304938986
+          }
+        }
+      },
+      {
+        "step": 2,
+        "time_s": 400000.0,
+        "fields": {
+          "V_m_s": {
+            "max_abs": 2.4578736075176993e-13,
+            "rms_abs": 1.2842468253425646e-13,
+            "scale": 1e-09,
+            "rms_relative_to_scale": 0.00012842468253425646,
+            "maximum_relative_to_scale": 0.0002457873607517699,
+            "signed_mean": -1.2529938476695086e-13,
+            "oscillatory_rms": 2.8159603353885607e-14
+          },
+          "theta_s": {
+            "max_abs": 43.650621408596635,
+            "rms_abs": 18.714829999511363,
+            "scale": 8000000.0,
+            "rms_relative_to_scale": 2.33935374993892e-06,
+            "maximum_relative_to_scale": 5.456327676074579e-06,
+            "signed_mean": 17.77124099244749,
+            "oscillatory_rms": 5.867525500495444
+          },
+          "Omega": {
+            "max_abs": 0.0002402821115996545,
+            "rms_abs": 0.000126096692332155,
+            "scale": 1.0,
+            "rms_relative_to_scale": 0.000126096692332155,
+            "maximum_relative_to_scale": 0.0002402821115996545,
+            "signed_mean": -0.0001230783441780564,
+            "oscillatory_rms": 2.742438716722856e-05
+          },
+          "slip_m": {
+            "max_abs": 4.407866152991453e-08,
+            "rms_abs": 1.8782771011023743e-08,
+            "scale": 0.002,
+            "rms_relative_to_scale": 9.391385505511872e-06,
+            "maximum_relative_to_scale": 2.2039330764957264e-05,
+            "signed_mean": -1.7815421299417703e-08,
+            "oscillatory_rms": 5.950063090153567e-09
+          },
+          "shear_Pa": {
+            "max_abs": 337.29292391613126,
+            "rms_abs": 174.07168409831164,
+            "scale": 26546122.365133367,
+            "rms_relative_to_scale": 6.557329982285611e-06,
+            "maximum_relative_to_scale": 1.2705920634161768e-05,
+            "signed_mean": -170.4825870913357,
+            "oscillatory_rms": 35.16587413199814,
+            "perturbation_scale": 722.49270385373,
+            "rms_relative_to_perturbation": 0.24093209961820292
+          },
+          "raw_normal_Pa": {
+            "max_abs": 138.47802305221558,
+            "rms_abs": 30.917822416786453,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 6.183564483357291e-07,
+            "maximum_relative_to_scale": 2.7695604610443114e-06,
+            "signed_mean": -24.84198372367898,
+            "oscillatory_rms": 18.406183408529092,
+            "perturbation_scale": 498.65472894885386,
+            "rms_relative_to_perturbation": 0.06200246507630661
+          },
+          "filtered_normal_Pa": {
+            "max_abs": 57.650504268705845,
+            "rms_abs": 26.052003340015773,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 5.210400668003154e-07,
+            "maximum_relative_to_scale": 1.153010085374117e-06,
+            "signed_mean": -24.823736058419637,
+            "oscillatory_rms": 7.904998806458468,
+            "perturbation_scale": 106.31973937257551,
+            "rms_relative_to_perturbation": 0.24503449212494702
+          },
+          "pressure_Pa": {
+            "max_abs": 105.17091503602751,
+            "rms_abs": 12.98278122568708,
+            "scale": 875.2916411915387,
+            "rms_relative_to_scale": 0.014832520516263081,
+            "maximum_relative_to_scale": 0.12015528320692957,
+            "signed_mean": -4.952899750034836,
+            "oscillatory_rms": 12.000891317737937
+          },
+          "deviatoric_Pa": {
+            "max_abs": 94.10025210868943,
+            "rms_abs": 25.85039505507172,
+            "scale": 515.5455065979119,
+            "rms_relative_to_scale": 0.05014182981762103,
+            "maximum_relative_to_scale": 0.18252559842807592,
+            "signed_mean": -19.889083972320645,
+            "oscillatory_rms": 16.512639499645548
+          }
+        }
+      },
+      {
+        "step": 3,
+        "time_s": 600000.0,
+        "fields": {
+          "V_m_s": {
+            "max_abs": 5.003697369482338e-13,
+            "rms_abs": 2.9228428378299474e-13,
+            "scale": 1e-09,
+            "rms_relative_to_scale": 0.00029228428378299474,
+            "maximum_relative_to_scale": 0.0005003697369482338,
+            "signed_mean": -2.877563056646582e-13,
+            "oscillatory_rms": 5.12485228739918e-14
+          },
+          "theta_s": {
+            "max_abs": 141.37678871117532,
+            "rms_abs": 75.83410914198176,
+            "scale": 8000000.0,
+            "rms_relative_to_scale": 9.47926364274772e-06,
+            "maximum_relative_to_scale": 1.7672098588896917e-05,
+            "signed_mean": 74.1705814396786,
+            "oscillatory_rms": 15.796738848825903
+          },
+          "Omega": {
+            "max_abs": 0.0004824891205237325,
+            "rms_abs": 0.00028280973384143675,
+            "scale": 1.0,
+            "rms_relative_to_scale": 0.00028280973384143675,
+            "maximum_relative_to_scale": 0.0004824891205237325,
+            "signed_mean": -0.00027848687178102214,
+            "oscillatory_rms": 4.925858098935482e-05
+          },
+          "slip_m": {
+            "max_abs": 1.4415260891963242e-07,
+            "rms_abs": 7.707790397661012e-08,
+            "scale": 0.002,
+            "rms_relative_to_scale": 3.853895198830506e-05,
+            "maximum_relative_to_scale": 7.207630445981621e-05,
+            "signed_mean": -7.536668243235475e-08,
+            "oscillatory_rms": 1.615136095095768e-08
+          },
+          "shear_Pa": {
+            "max_abs": 669.2490370795131,
+            "rms_abs": 379.3496814600098,
+            "scale": 26546122.365133367,
+            "rms_relative_to_scale": 1.4290210684716096e-05,
+            "maximum_relative_to_scale": 2.5210802085299238e-05,
+            "signed_mean": -374.09837871558705,
+            "oscillatory_rms": 62.90138206891861,
+            "perturbation_scale": 1036.4979573969956,
+            "rms_relative_to_perturbation": 0.3659917308594489
+          },
+          "raw_normal_Pa": {
+            "max_abs": 320.0377525612712,
+            "rms_abs": 47.78669347386741,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 9.557338694773481e-07,
+            "maximum_relative_to_scale": 6.400755051225424e-06,
+            "signed_mean": -30.314332084280665,
+            "oscillatory_rms": 36.94061915357286,
+            "perturbation_scale": 736.6463572235242,
+            "rms_relative_to_perturbation": 0.06487060311270536
+          },
+          "filtered_normal_Pa": {
+            "max_abs": 95.8940504193306,
+            "rms_abs": 33.477930644604704,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 6.695586128920941e-07,
+            "maximum_relative_to_scale": 1.917881008386612e-06,
+            "signed_mean": -30.219446646113852,
+            "oscillatory_rms": 14.406834650527545,
+            "perturbation_scale": 154.1320402628844,
+            "rms_relative_to_perturbation": 0.2172029293033781
+          },
+          "pressure_Pa": {
+            "max_abs": 287.9932351892494,
+            "rms_abs": 30.14401458177132,
+            "scale": 1297.702323442785,
+            "rms_relative_to_scale": 0.023228759043753346,
+            "maximum_relative_to_scale": 0.2219254986191345,
+            "signed_mean": -1.6470963704597648,
+            "oscillatory_rms": 30.098981521846554
+          },
+          "deviatoric_Pa": {
+            "max_abs": 199.61733709661343,
+            "rms_abs": 40.43497125526898,
+            "scale": 771.5373234966421,
+            "rms_relative_to_scale": 0.052408315221894715,
+            "maximum_relative_to_scale": 0.2587267407776705,
+            "signed_mean": -28.667235715700503,
+            "oscillatory_rms": 28.51624969793353
+          }
+        }
+      },
+      {
+        "step": 4,
+        "time_s": 800000.0,
+        "fields": {
+          "V_m_s": {
+            "max_abs": 7.399553315340367e-13,
+            "rms_abs": 4.562160293997218e-13,
+            "scale": 1e-09,
+            "rms_relative_to_scale": 0.0004562160293997217,
+            "maximum_relative_to_scale": 0.0007399553315340367,
+            "signed_mean": -4.5063269066665353e-13,
+            "oscillatory_rms": 7.115647253609387e-14
+          },
+          "theta_s": {
+            "max_abs": 283.96267685480416,
+            "rms_abs": 164.0088087343142,
+            "scale": 8000000.0,
+            "rms_relative_to_scale": 2.0501101091789273e-05,
+            "maximum_relative_to_scale": 3.549533460685052e-05,
+            "signed_mean": 161.34935507019338,
+            "oscillatory_rms": 29.41555644351314
+          },
+          "Omega": {
+            "max_abs": 0.0007039435471152267,
+            "rms_abs": 0.0004357195119386653,
+            "scale": 1.0,
+            "rms_relative_to_scale": 0.0004357195119386653,
+            "maximum_relative_to_scale": 0.0007039435471152267,
+            "signed_mean": -0.00043046875951629175,
+            "oscillatory_rms": 6.74399003897075e-05
+          },
+          "slip_m": {
+            "max_abs": 2.9214367522638254e-07,
+            "rms_abs": 1.682516191138143e-07,
+            "scale": 0.002,
+            "rms_relative_to_scale": 8.412580955690715e-05,
+            "maximum_relative_to_scale": 0.00014607183761319127,
+            "signed_mean": -1.6549322056568957e-07,
+            "oscillatory_rms": 3.034141198454783e-08
+          },
+          "shear_Pa": {
+            "max_abs": 974.342520520091,
+            "rms_abs": 581.1222867787119,
+            "scale": 26546122.365133367,
+            "rms_relative_to_scale": 2.1891042269208357e-05,
+            "maximum_relative_to_scale": 3.670376061401072e-05,
+            "signed_mean": -574.748976701967,
+            "oscillatory_rms": 85.82963340805641,
+            "perturbation_scale": 1323.1798632917844,
+            "rms_relative_to_perturbation": 0.43918616274359384
+          },
+          "raw_normal_Pa": {
+            "max_abs": 530.4105591550469,
+            "rms_abs": 69.10811846383564,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 1.3821623692767128e-06,
+            "maximum_relative_to_scale": 1.0608211183100938e-05,
+            "signed_mean": -34.787324883236465,
+            "oscillatory_rms": 59.714102731931725,
+            "perturbation_scale": 968.1727484541607,
+            "rms_relative_to_perturbation": 0.07137994595920776
+          },
+          "filtered_normal_Pa": {
+            "max_abs": 128.892805442214,
+            "rms_abs": 40.02971924948818,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 8.005943849897636e-07,
+            "maximum_relative_to_scale": 2.5778561088442805e-06,
+            "signed_mean": -34.585705372344314,
+            "oscillatory_rms": 20.154587742998817,
+            "perturbation_scale": 202.52001537935496,
+            "rms_relative_to_perturbation": 0.1976580891251939
+          },
+          "pressure_Pa": {
+            "max_abs": 589.929238186156,
+            "rms_abs": 53.62022994756291,
+            "scale": 1711.2524992488811,
+            "rms_relative_to_scale": 0.031333908918232935,
+            "maximum_relative_to_scale": 0.34473535521209947,
+            "signed_mean": 2.9518818274102174,
+            "oscillatory_rms": 53.538915316865804
+          },
+          "deviatoric_Pa": {
+            "max_abs": 312.9214506026118,
+            "rms_abs": 56.057916203988164,
+            "scale": 1026.4822381184774,
+            "rms_relative_to_scale": 0.05461167677556824,
+            "maximum_relative_to_scale": 0.3048483831305166,
+            "signed_mean": -37.73920671259491,
+            "oscillatory_rms": 41.45168568149418
+          }
+        }
+      },
+      {
+        "step": 5,
+        "time_s": 1000000.0,
+        "fields": {
+          "V_m_s": {
+            "max_abs": 9.660192465239725e-13,
+            "rms_abs": 6.200806976220653e-13,
+            "scale": 1e-09,
+            "rms_relative_to_scale": 0.0006200806976220652,
+            "maximum_relative_to_scale": 0.0009660192465239725,
+            "signed_mean": -6.137857914713598e-13,
+            "oscillatory_rms": 8.813100334923823e-14
+          },
+          "theta_s": {
+            "max_abs": 467.5970030706376,
+            "rms_abs": 282.3804228311966,
+            "scale": 8000000.0,
+            "rms_relative_to_scale": 3.529755285389957e-05,
+            "maximum_relative_to_scale": 5.84496253838297e-05,
+            "signed_mean": 278.6026259694522,
+            "oscillatory_rms": 46.0356383821373
+          },
+          "Omega": {
+            "max_abs": 0.000906569466713858,
+            "rms_abs": 0.0005847904045359916,
+            "scale": 1.0,
+            "rms_relative_to_scale": 0.0005847904045359916,
+            "maximum_relative_to_scale": 0.000906569466713858,
+            "signed_mean": -0.0005789700484257199,
+            "oscillatory_rms": 8.230127740982109e-05
+          },
+          "slip_m": {
+            "max_abs": 4.853475245312263e-07,
+            "rms_abs": 2.9220605618461155e-07,
+            "scale": 0.002,
+            "rms_relative_to_scale": 0.00014610302809230576,
+            "maximum_relative_to_scale": 0.00024267376226561315,
+            "signed_mean": -2.882503788599628e-07,
+            "oscillatory_rms": 4.791762053829739e-08
+          },
+          "shear_Pa": {
+            "max_abs": 1255.3274003788829,
+            "rms_abs": 779.4338590771857,
+            "scale": 26546122.365133367,
+            "rms_relative_to_scale": 2.93614957528005e-05,
+            "maximum_relative_to_scale": 4.728854117043004e-05,
+            "signed_mean": -772.3881036257372,
+            "oscillatory_rms": 104.56461185980486,
+            "perturbation_scale": 1585.350026298804,
+            "rms_relative_to_perturbation": 0.49164780404796193
+          },
+          "raw_normal_Pa": {
+            "max_abs": 761.3289620131254,
+            "rms_abs": 94.17498566617051,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 1.8834997133234103e-06,
+            "maximum_relative_to_scale": 1.5226579240262508e-05,
+            "signed_mean": -38.37083461315469,
+            "oscillatory_rms": 86.00352885965408,
+            "perturbation_scale": 1193.9457157024538,
+            "rms_relative_to_perturbation": 0.07887710842093268
+          },
+          "filtered_normal_Pa": {
+            "max_abs": 157.30646750330925,
+            "rms_abs": 45.811222617729534,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 9.162244523545906e-07,
+            "maximum_relative_to_scale": 3.146129350066185e-06,
+            "signed_mean": -38.04082423647673,
+            "oscillatory_rms": 25.525747964372336,
+            "perturbation_scale": 252.45295578418106,
+            "rms_relative_to_perturbation": 0.18146439393204405
+          },
+          "pressure_Pa": {
+            "max_abs": 957.1541217685335,
+            "rms_abs": 81.56695508869146,
+            "scale": 2116.808242924299,
+            "rms_relative_to_scale": 0.03853299199931755,
+            "maximum_relative_to_scale": 0.45216855374970455,
+            "signed_mean": 9.031063430382869,
+            "oscillatory_rms": 81.06545537870622
+          },
+          "deviatoric_Pa": {
+            "max_abs": 433.71922484595416,
+            "rms_abs": 72.55379534703043,
+            "scale": 1280.4738315849004,
+            "rms_relative_to_scale": 0.056661677542622885,
+            "maximum_relative_to_scale": 0.3387177575578567,
+            "signed_mean": -47.40189804179729,
+            "oscillatory_rms": 54.928255764167766
+          }
+        }
+      },
+      {
+        "step": 6,
+        "time_s": 1200000.0,
+        "fields": {
+          "V_m_s": {
+            "max_abs": 1.177578545369148e-12,
+            "rms_abs": 7.838556349342905e-13,
+            "scale": 1e-09,
+            "rms_relative_to_scale": 0.0007838556349342904,
+            "maximum_relative_to_scale": 0.001177578545369148,
+            "signed_mean": -7.771518053408954e-13,
+            "oscillatory_rms": 1.0229725252237593e-13
+          },
+          "theta_s": {
+            "max_abs": 688.3647098131478,
+            "rms_abs": 430.17237428721705,
+            "scale": 8000000.0,
+            "rms_relative_to_scale": 5.377154678590213e-05,
+            "maximum_relative_to_scale": 8.604558872664348e-05,
+            "signed_mean": 425.2304241712092,
+            "oscillatory_rms": 65.01813561672616
+          },
+          "Omega": {
+            "max_abs": 0.0010898579974825129,
+            "rms_abs": 0.0007300981641621659,
+            "scale": 1.0,
+            "rms_relative_to_scale": 0.0007300981641621659,
+            "maximum_relative_to_scale": 0.0010898579974825129,
+            "signed_mean": -0.0007240153237576092,
+            "oscillatory_rms": 9.404860592868713e-05
+          },
+          "slip_m": {
+            "max_abs": 7.20863233605101e-07,
+            "rms_abs": 4.489086164699984e-07,
+            "scale": 0.002,
+            "rms_relative_to_scale": 0.0002244543082349992,
+            "maximum_relative_to_scale": 0.0003604316168025505,
+            "signed_mean": -4.436807399281586e-07,
+            "oscillatory_rms": 6.83106650370921e-08
+          },
+          "shear_Pa": {
+            "max_abs": 1512.64250812307,
+            "rms_abs": 974.4447672652127,
+            "scale": 26546122.365133367,
+            "rms_relative_to_scale": 3.6707612278058494e-05,
+            "maximum_relative_to_scale": 5.698167466107325e-05,
+            "signed_mean": -967.0847399999419,
+            "oscillatory_rms": 119.53957549614758,
+            "perturbation_scale": 1825.5877401165944,
+            "rms_relative_to_perturbation": 0.5337704377895187
+          },
+          "raw_normal_Pa": {
+            "max_abs": 1014.9527787417173,
+            "rms_abs": 121.61913019774211,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 2.4323826039548423e-06,
+            "maximum_relative_to_scale": 2.0299055574834346e-05,
+            "signed_mean": -41.20278223539737,
+            "oscillatory_rms": 114.4270228840975,
+            "perturbation_scale": 1414.6012346266973,
+            "rms_relative_to_perturbation": 0.08597414396420804
+          },
+          "filtered_normal_Pa": {
+            "max_abs": 183.30364130437374,
+            "rms_abs": 51.08720921974135,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 1.021744184394827e-06,
+            "maximum_relative_to_scale": 3.6660728260874746e-06,
+            "signed_mean": -40.73351336103575,
+            "oscillatory_rms": 30.833161289883137,
+            "perturbation_scale": 304.53654095788056,
+            "rms_relative_to_perturbation": 0.1677539551052005
+          },
+          "pressure_Pa": {
+            "max_abs": 1361.3212303351647,
+            "rms_abs": 112.2525655274725,
+            "scale": 2515.1592310930178,
+            "rms_relative_to_scale": 0.044630401184854875,
+            "maximum_relative_to_scale": 0.5412465395853179,
+            "signed_mean": 16.486664480263325,
+            "oscillatory_rms": 111.03525729161315
+          },
+          "deviatoric_Pa": {
+            "max_abs": 561.8463530347162,
+            "rms_abs": 89.81193451667683,
+            "scale": 1533.597384955562,
+            "rms_relative_to_scale": 0.0585629157937559,
+            "maximum_relative_to_scale": 0.36635844488675656,
+            "signed_mean": -57.689446715881445,
+            "oscillatory_rms": 68.83394016939116
+          }
+        }
+      },
+      {
+        "step": 7,
+        "time_s": 1400000.0,
+        "fields": {
+          "V_m_s": {
+            "max_abs": 1.3745431756530015e-12,
+            "rms_abs": 9.475638878520105e-13,
+            "scale": 1e-09,
+            "rms_relative_to_scale": 0.0009475638878520105,
+            "maximum_relative_to_scale": 0.0013745431756530015,
+            "signed_mean": -9.40703554489677e-13,
+            "oscillatory_rms": 1.1381627358029595e-13
+          },
+          "theta_s": {
+            "max_abs": 942.4278460359201,
+            "rms_abs": 606.639069839696,
+            "scale": 8000000.0,
+            "rms_relative_to_scale": 7.582988372996201e-05,
+            "maximum_relative_to_scale": 0.00011780348075449,
+            "signed_mean": 600.5448944238739,
+            "oscillatory_rms": 85.77173682157716
+          },
+          "Omega": {
+            "max_abs": 0.0012541927676030795,
+            "rms_abs": 0.0008717611091736633,
+            "scale": 1.0,
+            "rms_relative_to_scale": 0.0008717611091736633,
+            "maximum_relative_to_scale": 0.0012541927676030795,
+            "signed_mean": -0.0008656644573802389,
+            "oscillatory_rms": 0.00010291976824824448
+          },
+          "slip_m": {
+            "max_abs": 9.957718687357564e-07,
+            "rms_abs": 6.383387090486733e-07,
+            "scale": 0.002,
+            "rms_relative_to_scale": 0.00031916935452433665,
+            "maximum_relative_to_scale": 0.0004978859343678782,
+            "signed_mean": -6.318214508260999e-07,
+            "oscillatory_rms": 9.09833047648238e-08
+          },
+          "shear_Pa": {
+            "max_abs": 1746.839201387018,
+            "rms_abs": 1166.2873175099069,
+            "scale": 26546122.365133367,
+            "rms_relative_to_scale": 4.3934375856029e-05,
+            "maximum_relative_to_scale": 6.580393088526479e-05,
+            "signed_mean": -1158.896887514965,
+            "oscillatory_rms": 131.08818059833197,
+            "perturbation_scale": 2046.255843988078,
+            "rms_relative_to_perturbation": 0.5699616306223251
+          },
+          "raw_normal_Pa": {
+            "max_abs": 1371.5082078576088,
+            "rms_abs": 150.69957659428422,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 3.0139915318856845e-06,
+            "maximum_relative_to_scale": 2.7430164157152176e-05,
+            "signed_mean": -43.324348212316146,
+            "oscillatory_rms": 144.33767088904585,
+            "perturbation_scale": 1630.7069649959392,
+            "rms_relative_to_perturbation": 0.09241364624616018
+          },
+          "filtered_normal_Pa": {
+            "max_abs": 207.19689900428057,
+            "rms_abs": 55.917150469207215,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 1.1183430093841443e-06,
+            "maximum_relative_to_scale": 4.143937980085612e-06,
+            "signed_mean": -42.70743501109296,
+            "oscillatory_rms": 36.09435844241081,
+            "perturbation_scale": 359.07072449305355,
+            "rms_relative_to_perturbation": 0.1557274003558844
+          },
+          "pressure_Pa": {
+            "max_abs": 1796.686382901229,
+            "rms_abs": 145.2414134293581,
+            "scale": 2907.0252311151235,
+            "rms_relative_to_scale": 0.04996221287478955,
+            "maximum_relative_to_scale": 0.6180498069540412,
+            "signed_mean": 25.274350488843517,
+            "oscillatory_rms": 143.02543613750953
+          },
+          "deviatoric_Pa": {
+            "max_abs": 695.6632335007445,
+            "rms_abs": 107.80486632759485,
+            "scale": 1785.9306617750763,
+            "rms_relative_to_scale": 0.06036341087309918,
+            "maximum_relative_to_scale": 0.38952421188026937,
+            "signed_mean": -68.59869870679944,
+            "oscillatory_rms": 83.1631393084962
+          }
+        }
+      },
+      {
+        "step": 8,
+        "time_s": 1600000.0,
+        "fields": {
+          "V_m_s": {
+            "max_abs": 1.5593755758954986e-12,
+            "rms_abs": 1.1112454021910628e-12,
+            "scale": 1e-09,
+            "rms_relative_to_scale": 0.0011112454021910626,
+            "maximum_relative_to_scale": 0.0015593755758954984,
+            "signed_mean": -1.1044278127708943e-12,
+            "oscillatory_rms": 1.229046389233342e-13
+          },
+          "theta_s": {
+            "max_abs": 1226.5288157351315,
+            "rms_abs": 811.0632077184499,
+            "scale": 8000000.0,
+            "rms_relative_to_scale": 0.00010138290096480625,
+            "maximum_relative_to_scale": 0.00015331610196689144,
+            "signed_mean": 803.8727805760514,
+            "oscillatory_rms": 107.75935951679104
+          },
+          "Omega": {
+            "max_abs": 0.0014024411662458824,
+            "rms_abs": 0.001009911211379991,
+            "scale": 1.0,
+            "rms_relative_to_scale": 0.001009911211379991,
+            "maximum_relative_to_scale": 0.0014024411662458824,
+            "signed_mean": -0.0010039895759946604,
+            "oscillatory_rms": 0.00010920433217168482
+          },
+          "slip_m": {
+            "max_abs": 1.307646983914881e-06,
+            "rms_abs": 8.604854374521342e-07,
+            "scale": 0.002,
+            "rms_relative_to_scale": 0.0004302427187260671,
+            "maximum_relative_to_scale": 0.0006538234919574405,
+            "signed_mean": -8.52707013380274e-07,
+            "oscillatory_rms": 1.1543802406176322e-07
+          },
+          "shear_Pa": {
+            "max_abs": 1961.087039206177,
+            "rms_abs": 1355.0744884985784,
+            "scale": 26546122.365133367,
+            "rms_relative_to_scale": 5.104604242608261e-05,
+            "maximum_relative_to_scale": 7.387470803577472e-05,
+            "signed_mean": -1347.8655491233,
+            "oscillatory_rms": 139.58986663160402,
+            "perturbation_scale": 2249.515402357351,
+            "rms_relative_to_perturbation": 0.6023850679477657
+          },
+          "raw_normal_Pa": {
+            "max_abs": 1756.1207097396255,
+            "rms_abs": 181.39650174422223,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 3.6279300348844446e-06,
+            "maximum_relative_to_scale": 3.512241419479251e-05,
+            "signed_mean": -44.71772393308069,
+            "oscillatory_rms": 175.79822527911483,
+            "perturbation_scale": 1842.7691805574232,
+            "rms_relative_to_perturbation": 0.09843690878819192
+          },
+          "filtered_normal_Pa": {
+            "max_abs": 228.32981007546186,
+            "rms_abs": 60.327798268017325,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 1.2065559653603465e-06,
+            "maximum_relative_to_scale": 4.566596201509238e-06,
+            "signed_mean": -43.94430641836391,
+            "oscillatory_rms": 41.332084114831844,
+            "perturbation_scale": 416.2293549056148,
+            "rms_relative_to_perturbation": 0.14493883614166858
+          },
+          "pressure_Pa": {
+            "max_abs": 2264.128146928837,
+            "rms_abs": 180.4961481880985,
+            "scale": 3293.0621051448916,
+            "rms_relative_to_scale": 0.054811036787341984,
+            "maximum_relative_to_scale": 0.6875449276803778,
+            "signed_mean": 35.38678098792489,
+            "oscillatory_rms": 176.99331976674333
+          },
+          "deviatoric_Pa": {
+            "max_abs": 835.0591774090258,
+            "rms_abs": 126.49825063081943,
+            "scale": 2037.5446101463078,
+            "rms_relative_to_scale": 0.06208367169037644,
+            "maximum_relative_to_scale": 0.4098360218719646,
+            "signed_mean": -80.10450492324087,
+            "oscillatory_rms": 97.90339985751305
+          }
+        }
+      },
+      {
+        "step": 9,
+        "time_s": 1800000.0,
+        "fields": {
+          "V_m_s": {
+            "max_abs": 1.73328841024833e-12,
+            "rms_abs": 1.2749372237036608e-12,
+            "scale": 1e-09,
+            "rms_relative_to_scale": 0.0012749372237036607,
+            "maximum_relative_to_scale": 0.00173328841024833,
+            "signed_mean": -1.268317503620281e-12,
+            "oscillatory_rms": 1.2975220381795997e-13
+          },
+          "theta_s": {
+            "max_abs": 1537.730243072845,
+            "rms_abs": 1042.7535580143444,
+            "scale": 8000000.0,
+            "rms_relative_to_scale": 0.00013034419475179305,
+            "maximum_relative_to_scale": 0.00019221628038410563,
+            "signed_mean": 1034.5563004984008,
+            "oscillatory_rms": 130.49231337759866
+          },
+          "Omega": {
+            "max_abs": 0.0015361858558671226,
+            "rms_abs": 0.0011446743825095824,
+            "scale": 1.0,
+            "rms_relative_to_scale": 0.0011446743825095824,
+            "maximum_relative_to_scale": 0.0015361858558671226,
+            "signed_mean": -0.0011390671165367545,
+            "oscillatory_rms": 0.00011316159241693625
+          },
+          "slip_m": {
+            "max_abs": 1.6543046659645705e-06,
+            "rms_abs": 1.1153459651079515e-06,
+            "scale": 0.002,
+            "rms_relative_to_scale": 0.0005576729825539757,
+            "maximum_relative_to_scale": 0.0008271523329822852,
+            "signed_mean": -1.1063705141043334e-06,
+            "oscillatory_rms": 1.4121227780579328e-07
+          },
+          "shear_Pa": {
+            "max_abs": 2157.0423276647925,
+            "rms_abs": 1540.9187060901595,
+            "scale": 26546122.365133367,
+            "rms_relative_to_scale": 5.804684710238726e-05,
+            "maximum_relative_to_scale": 8.125639963514707e-05,
+            "signed_mean": -1534.042585252752,
+            "oscillatory_rms": 145.40909672239857,
+            "perturbation_scale": 2437.339312215712,
+            "rms_relative_to_perturbation": 0.6322134543874224
+          },
+          "raw_normal_Pa": {
+            "max_abs": 2169.186616189778,
+            "rms_abs": 213.6743563429788,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 4.273487126859576e-06,
+            "maximum_relative_to_scale": 4.338373232379556e-05,
+            "signed_mean": -45.37364287327593,
+            "oscillatory_rms": 208.80125260877793,
+            "perturbation_scale": 2051.2391229010063,
+            "rms_relative_to_perturbation": 0.10416842871092744
+          },
+          "filtered_normal_Pa": {
+            "max_abs": 265.77129653841257,
+            "rms_abs": 64.40271809401368,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 1.2880543618802736e-06,
+            "maximum_relative_to_scale": 5.315425930768251e-06,
+            "signed_mean": -44.43520555362618,
+            "oscillatory_rms": 46.61783569948294,
+            "perturbation_scale": 476.1014533311513,
+            "rms_relative_to_perturbation": 0.1352709966403285
+          },
+          "pressure_Pa": {
+            "max_abs": 2762.141380841953,
+            "rms_abs": 217.88847164417902,
+            "scale": 3673.867351875177,
+            "rms_relative_to_scale": 0.059307658871506796,
+            "maximum_relative_to_scale": 0.7518348150028142,
+            "signed_mean": 46.82430779560352,
+            "oscillatory_rms": 212.79772149837225
+          },
+          "deviatoric_Pa": {
+            "max_abs": 980.0334174161839,
+            "rms_abs": 145.8178160348993,
+            "scale": 2288.5039933279,
+            "rms_relative_to_scale": 0.06371752745899899,
+            "maximum_relative_to_scale": 0.4282419520671395,
+            "signed_mean": -92.19795066208016,
+            "oscillatory_rms": 112.97067480944058
+          }
+        }
+      },
+      {
+        "step": 10,
+        "time_s": 2000000.0,
+        "fields": {
+          "V_m_s": {
+            "max_abs": 1.896629894202405e-12,
+            "rms_abs": 1.4386541999019544e-12,
+            "scale": 1e-09,
+            "rms_relative_to_scale": 0.0014386541999019543,
+            "maximum_relative_to_scale": 0.001896629894202405,
+            "signed_mean": -1.4323543938986893e-12,
+            "oscillatory_rms": 1.3448716360549422e-13
+          },
+          "theta_s": {
+            "max_abs": 1873.2373017901555,
+            "rms_abs": 1301.0391977675026,
+            "scale": 8000000.0,
+            "rms_relative_to_scale": 0.00016262989972093783,
+            "maximum_relative_to_scale": 0.00023415466272376943,
+            "signed_mean": 1291.9505820069785,
+            "oscillatory_rms": 153.5144546267139
+          },
+          "Omega": {
+            "max_abs": 0.0016561320652046518,
+            "rms_abs": 0.0012761521759992258,
+            "scale": 1.0,
+            "rms_relative_to_scale": 0.0012761521759992258,
+            "maximum_relative_to_scale": 0.0016561320652046518,
+            "signed_mean": -0.0012709608524969533,
+            "oscillatory_rms": 0.00011499081584098928
+          },
+          "slip_m": {
+            "max_abs": 2.0336306448052836e-06,
+            "rms_abs": 1.4029202499588646e-06,
+            "scale": 0.002,
+            "rms_relative_to_scale": 0.0007014601249794323,
+            "maximum_relative_to_scale": 0.0010168153224026418,
+            "signed_mean": -1.3928413928840672e-06,
+            "oscillatory_rms": 1.6786328369663054e-07
+          },
+          "shear_Pa": {
+            "max_abs": 2335.513053789735,
+            "rms_abs": 1723.9076836151537,
+            "scale": 26546122.365133367,
+            "rms_relative_to_scale": 6.494009407111738e-05,
+            "maximum_relative_to_scale": 8.79794427851083e-05,
+            "signed_mean": -1717.4669324690158,
+            "oscillatory_rms": 148.8792715687272,
+            "perturbation_scale": 2611.524943423641,
+            "rms_relative_to_perturbation": 0.660115342936436
+          },
+          "raw_normal_Pa": {
+            "max_abs": 2609.6052990034223,
+            "rms_abs": 247.47226567760427,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 4.949445313552085e-06,
+            "maximum_relative_to_scale": 5.219210598006845e-05,
+            "signed_mean": -45.288094906329114,
+            "oscillatory_rms": 243.29305526332246,
+            "perturbation_scale": 2256.5188009585686,
+            "rms_relative_to_perturbation": 0.1096699329837084
+          },
+          "filtered_normal_Pa": {
+            "max_abs": 351.4358539953828,
+            "rms_abs": 68.25045855439048,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 1.3650091710878096e-06,
+            "maximum_relative_to_scale": 7.028717079907656e-06,
+            "signed_mean": -44.17595119581654,
+            "oscillatory_rms": 52.02509422220595,
+            "perturbation_scale": 538.6587059755872,
+            "rms_relative_to_perturbation": 0.12670445645314363
+          },
+          "pressure_Pa": {
+            "max_abs": 3290.368325351301,
+            "rms_abs": 257.3804762036451,
+            "scale": 4049.9852098780175,
+            "rms_relative_to_scale": 0.06355096694572798,
+            "maximum_relative_to_scale": 0.8124395904770241,
+            "signed_mean": 59.38943208072687,
+            "oscillatory_rms": 250.43483161881431
+          },
+          "deviatoric_Pa": {
+            "max_abs": 1119.822554659202,
+            "rms_abs": 165.35624199359538,
+            "scale": 2538.8679568119082,
+            "rms_relative_to_scale": 0.065129910182976,
+            "maximum_relative_to_scale": 0.4410716010868792,
+            "signed_mean": -104.67752698779032,
+            "oscillatory_rms": 128.00508626599535
+          }
+        }
+      }
+    ],
+    "perturbed": [
+      {
+        "step": 0,
+        "time_s": 0.0,
+        "fields": {
+          "V_m_s": {
+            "max_abs": 4.5274420216450866e-14,
+            "rms_abs": 3.590552276205821e-14,
+            "scale": 1e-09,
+            "rms_relative_to_scale": 3.5905522762058206e-05,
+            "maximum_relative_to_scale": 4.527442021645086e-05,
+            "signed_mean": 3.57879126803581e-14,
+            "oscillatory_rms": 2.903768379148634e-15
+          },
+          "theta_s": {
+            "max_abs": 0.0,
+            "rms_abs": 0.0,
+            "scale": 8000000.0,
+            "rms_relative_to_scale": 0.0,
+            "maximum_relative_to_scale": 0.0,
+            "signed_mean": 0.0,
+            "oscillatory_rms": 0.0
+          },
+          "Omega": {
+            "max_abs": 4.527442021640127e-05,
+            "rms_abs": 3.6273248015421565e-05,
+            "scale": 1.0,
+            "rms_relative_to_scale": 3.6273248015421565e-05,
+            "maximum_relative_to_scale": 4.527442021640127e-05,
+            "signed_mean": 3.6151787096513996e-05,
+            "oscillatory_rms": 2.965941893666964e-06
+          },
+          "slip_m": {
+            "max_abs": 0.0,
+            "rms_abs": 0.0,
+            "scale": 0.002,
+            "rms_relative_to_scale": 0.0,
+            "maximum_relative_to_scale": 0.0,
+            "signed_mean": 0.0,
+            "oscillatory_rms": 0.0
+          },
+          "shear_Pa": {
+            "max_abs": 46.61944875493646,
+            "rms_abs": 35.59320848392342,
+            "scale": 26546122.365133367,
+            "rms_relative_to_scale": 1.340806314170872e-06,
+            "maximum_relative_to_scale": 1.756167929677297e-06,
+            "signed_mean": 35.4804809738657,
+            "oscillatory_rms": 2.830540592040974,
+            "perturbation_scale": 364.80280276195515,
+            "rms_relative_to_perturbation": 0.09756835258513369
+          },
+          "raw_normal_Pa": {
+            "max_abs": 35.699817791581154,
+            "rms_abs": 19.1792158609683,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 3.8358431721936596e-07,
+            "maximum_relative_to_scale": 7.139963558316231e-07,
+            "signed_mean": -17.93739291543847,
+            "oscillatory_rms": 6.789127811346296,
+            "perturbation_scale": 267.2771013994742,
+            "rms_relative_to_perturbation": 0.0717577965360486
+          },
+          "filtered_normal_Pa": {
+            "max_abs": 22.412500828504562,
+            "rms_abs": 18.044951851782766,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 3.6089903703565533e-07,
+            "maximum_relative_to_scale": 4.4825001657009125e-07,
+            "signed_mean": -17.949633504810006,
+            "oscillatory_rms": 1.852280857796819,
+            "perturbation_scale": 83.54302120619263,
+            "rms_relative_to_perturbation": 0.21599592151744187
+          },
+          "pressure_Pa": {
+            "max_abs": 33.1803306073029,
+            "rms_abs": 7.943476210081286,
+            "scale": 464.9176084520941,
+            "rms_relative_to_scale": 0.017085771899516676,
+            "maximum_relative_to_scale": 0.07136819514703724,
+            "signed_mean": -7.532076224420677,
+            "oscillatory_rms": 2.5232205709458113
+          },
+          "deviatoric_Pa": {
+            "max_abs": 28.54645679696847,
+            "rms_abs": 12.573489807609887,
+            "scale": 252.7970139876283,
+            "rms_relative_to_scale": 0.04973749337175804,
+            "maximum_relative_to_scale": 0.11292244456006713,
+            "signed_mean": -10.405316689575171,
+            "oscillatory_rms": 7.058472251962042
+          }
+        }
+      },
+      {
+        "step": 1,
+        "time_s": 200000.0,
+        "fields": {
+          "V_m_s": {
+            "max_abs": 4.5274420216450866e-14,
+            "rms_abs": 3.590552276205821e-14,
+            "scale": 1e-09,
+            "rms_relative_to_scale": 3.5905522762058206e-05,
+            "maximum_relative_to_scale": 4.527442021645086e-05,
+            "signed_mean": 3.57879126803581e-14,
+            "oscillatory_rms": 2.903768379148634e-15
+          },
+          "theta_s": {
+            "max_abs": 8.942678831517696,
+            "rms_abs": 7.1649203649889905,
+            "scale": 8000000.0,
+            "rms_relative_to_scale": 8.956150456236238e-07,
+            "maximum_relative_to_scale": 1.1178348539397121e-06,
+            "signed_mean": -7.140925134387638,
+            "oscillatory_rms": 0.5858942410579526
+          },
+          "Omega": {
+            "max_abs": 4.415702205706751e-05,
+            "rms_abs": 3.537967029647543e-05,
+            "scale": 1.0,
+            "rms_relative_to_scale": 3.537967029647543e-05,
+            "maximum_relative_to_scale": 4.415702205706751e-05,
+            "signed_mean": 3.5261166752423196e-05,
+            "oscillatory_rms": 2.8933008044637385e-06
+          },
+          "slip_m": {
+            "max_abs": 9.054884043306968e-09,
+            "rms_abs": 7.18110455241025e-09,
+            "scale": 0.002,
+            "rms_relative_to_scale": 3.5905522762051248e-06,
+            "maximum_relative_to_scale": 4.527442021653484e-06,
+            "signed_mean": 7.15758253607023e-09,
+            "oscillatory_rms": 5.807536758296639e-10
+          },
+          "shear_Pa": {
+            "max_abs": 46.61944875493646,
+            "rms_abs": 35.59320848392342,
+            "scale": 26546122.365133367,
+            "rms_relative_to_scale": 1.340806314170872e-06,
+            "maximum_relative_to_scale": 1.756167929677297e-06,
+            "signed_mean": 35.4804809738657,
+            "oscillatory_rms": 2.830540592040974,
+            "perturbation_scale": 364.80280276195515,
+            "rms_relative_to_perturbation": 0.09756835258513369
+          },
+          "raw_normal_Pa": {
+            "max_abs": 35.699817791581154,
+            "rms_abs": 19.1792158609683,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 3.8358431721936596e-07,
+            "maximum_relative_to_scale": 7.139963558316231e-07,
+            "signed_mean": -17.93739291543847,
+            "oscillatory_rms": 6.789127811346296,
+            "perturbation_scale": 267.2771013994742,
+            "rms_relative_to_perturbation": 0.0717577965360486
+          },
+          "filtered_normal_Pa": {
+            "max_abs": 22.412500828504562,
+            "rms_abs": 18.044951851782766,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 3.6089903703565533e-07,
+            "maximum_relative_to_scale": 4.4825001657009125e-07,
+            "signed_mean": -17.949633504810006,
+            "oscillatory_rms": 1.852280857796819,
+            "perturbation_scale": 83.54302120619263,
+            "rms_relative_to_perturbation": 0.21599592151744187
+          },
+          "pressure_Pa": {
+            "max_abs": 33.1803306073029,
+            "rms_abs": 7.943476210081286,
+            "scale": 464.9176084520941,
+            "rms_relative_to_scale": 0.017085771899516676,
+            "maximum_relative_to_scale": 0.07136819514703724,
+            "signed_mean": -7.532076224420677,
+            "oscillatory_rms": 2.5232205709458113
+          },
+          "deviatoric_Pa": {
+            "max_abs": 28.54645679696847,
+            "rms_abs": 12.573489807609887,
+            "scale": 252.7970139876283,
+            "rms_relative_to_scale": 0.04973749337175804,
+            "maximum_relative_to_scale": 0.11292244456006713,
+            "signed_mean": -10.405316689575171,
+            "oscillatory_rms": 7.058472251962042
+          }
+        }
+      },
+      {
+        "step": 2,
+        "time_s": 400000.0,
+        "fields": {
+          "V_m_s": {
+            "max_abs": 2.460576035546775e-13,
+            "rms_abs": 1.2716422955639937e-13,
+            "scale": 1e-09,
+            "rms_relative_to_scale": 0.00012716422955639937,
+            "maximum_relative_to_scale": 0.0002460576035546775,
+            "signed_mean": -1.2391185196049339e-13,
+            "oscillatory_rms": 2.857611279361499e-14
+          },
+          "theta_s": {
+            "max_abs": 43.709247045218945,
+            "rms_abs": 18.690185731643652,
+            "scale": 8000000.0,
+            "rms_relative_to_scale": 2.3362732164554566e-06,
+            "maximum_relative_to_scale": 5.463655880652368e-06,
+            "signed_mean": 17.73753410762433,
+            "oscillatory_rms": 5.890918982994042
+          },
+          "Omega": {
+            "max_abs": 0.0002405623044232641,
+            "rms_abs": 0.00012589969494895245,
+            "scale": 1.0,
+            "rms_relative_to_scale": 0.00012589969494895245,
+            "maximum_relative_to_scale": 0.0002405623044232641,
+            "signed_mean": -0.00012284674269787753,
+            "oscillatory_rms": 2.755741273706131e-05
+          },
+          "slip_m": {
+            "max_abs": 4.4135181103061635e-08,
+            "rms_abs": 1.8620715624376702e-08,
+            "scale": 0.002,
+            "rms_relative_to_scale": 9.31035781218835e-06,
+            "maximum_relative_to_scale": 2.2067590551530817e-05,
+            "signed_mean": -1.7624787856026405e-08,
+            "oscillatory_rms": 6.008153076775831e-09
+          },
+          "shear_Pa": {
+            "max_abs": 337.4126723706722,
+            "rms_abs": 173.12925678623233,
+            "scale": 26546122.365133367,
+            "rms_relative_to_scale": 6.521828476675242e-06,
+            "maximum_relative_to_scale": 1.2710431592594563e-05,
+            "signed_mean": -169.4492379353093,
+            "oscillatory_rms": 35.50627153752027,
+            "perturbation_scale": 697.939970675472,
+            "rms_relative_to_perturbation": 0.2480575179247528
+          },
+          "raw_normal_Pa": {
+            "max_abs": 138.51882918924093,
+            "rms_abs": 30.68575184271311,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 6.137150368542622e-07,
+            "maximum_relative_to_scale": 2.770376583784819e-06,
+            "signed_mean": -24.575504369841052,
+            "oscillatory_rms": 18.375525873304806,
+            "perturbation_scale": 517.2429339999409,
+            "rms_relative_to_perturbation": 0.05932560857895957
+          },
+          "filtered_normal_Pa": {
+            "max_abs": 57.1022357493639,
+            "rms_abs": 25.787780491039157,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 5.157556098207832e-07,
+            "maximum_relative_to_scale": 1.142044714987278e-06,
+            "signed_mean": -24.55682610418519,
+            "oscillatory_rms": 7.872224230979985,
+            "perturbation_scale": 156.75910407841056,
+            "rms_relative_to_perturbation": 0.1645057914986562
+          },
+          "pressure_Pa": {
+            "max_abs": 105.13849194826616,
+            "rms_abs": 12.973328421285835,
+            "scale": 909.9016205335278,
+            "rms_relative_to_scale": 0.014257946275201515,
+            "maximum_relative_to_scale": 0.11554929629273263,
+            "signed_mean": -4.826383180307273,
+            "oscillatory_rms": 12.042145810585
+          },
+          "deviatoric_Pa": {
+            "max_abs": 94.34476057294205,
+            "rms_abs": 25.706434727900984,
+            "scale": 504.5332269364721,
+            "rms_relative_to_scale": 0.05095092524230875,
+            "maximum_relative_to_scale": 0.18699414733456474,
+            "signed_mean": -19.749121185961243,
+            "oscillatory_rms": 16.455789218449855
+          }
+        }
+      },
+      {
+        "step": 3,
+        "time_s": 600000.0,
+        "fields": {
+          "V_m_s": {
+            "max_abs": 5.007739452533024e-13,
+            "rms_abs": 2.8929851243125994e-13,
+            "scale": 1e-09,
+            "rms_relative_to_scale": 0.0002892985124312599,
+            "maximum_relative_to_scale": 0.0005007739452533023,
+            "signed_mean": -2.8455493663183695e-13,
+            "oscillatory_rms": 5.2173914300070795e-14
+          },
+          "theta_s": {
+            "max_abs": 141.521297079511,
+            "rms_abs": 75.71609901504641,
+            "scale": 8000000.0,
+            "rms_relative_to_scale": 9.464512376880801e-06,
+            "maximum_relative_to_scale": 1.7690162134938872e-05,
+            "signed_mean": 74.0338267471304,
+            "oscillatory_rms": 15.871992541334874
+          },
+          "Omega": {
+            "max_abs": 0.0004829167342104146,
+            "rms_abs": 0.0002823590240277783,
+            "scale": 1.0,
+            "rms_relative_to_scale": 0.0002823590240277783,
+            "maximum_relative_to_scale": 0.0004829167342104146,
+            "signed_mean": -0.00027798378105308797,
+            "oscillatory_rms": 4.9513997226524995e-05
+          },
+          "slip_m": {
+            "max_abs": 1.4428997015378166e-07,
+            "rms_abs": 7.631774492107124e-08,
+            "scale": 0.002,
+            "rms_relative_to_scale": 3.815887246053562e-05,
+            "maximum_relative_to_scale": 7.214498507689083e-05,
+            "signed_mean": -7.453577518238925e-08,
+            "oscillatory_rms": 1.639562160450234e-08
+          },
+          "shear_Pa": {
+            "max_abs": 669.3629943318665,
+            "rms_abs": 377.2100430567041,
+            "scale": 26546122.365133367,
+            "rms_relative_to_scale": 1.420960989587486e-05,
+            "maximum_relative_to_scale": 2.5215094887494077e-05,
+            "signed_mean": -371.8054821724393,
+            "oscillatory_rms": 63.62468081932071,
+            "perturbation_scale": 1020.7306246448296,
+            "rms_relative_to_perturbation": 0.3695490602018108
+          },
+          "raw_normal_Pa": {
+            "max_abs": 320.4903390929103,
+            "rms_abs": 47.51734587276598,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 9.503469174553196e-07,
+            "maximum_relative_to_scale": 6.409806781858206e-06,
+            "signed_mean": -29.826894777088338,
+            "oscillatory_rms": 36.9899243950102,
+            "perturbation_scale": 764.3599557700136,
+            "rms_relative_to_perturbation": 0.06216618952113624
+          },
+          "filtered_normal_Pa": {
+            "max_abs": 94.78272633999586,
+            "rms_abs": 33.00907376986191,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 6.601814753972381e-07,
+            "maximum_relative_to_scale": 1.8956545267999173e-06,
+            "signed_mean": -29.730898945303316,
+            "oscillatory_rms": 14.34129000642367,
+            "perturbation_scale": 225.66035432968076,
+            "rms_relative_to_perturbation": 0.14627768297144908
+          },
+          "pressure_Pa": {
+            "max_abs": 292.06604527122545,
+            "rms_abs": 30.296097051792618,
+            "scale": 1350.3309245547118,
+            "rms_relative_to_scale": 0.022436053637580083,
+            "maximum_relative_to_scale": 0.21629219916409587,
+            "signed_mean": -1.376579898826215,
+            "oscillatory_rms": 30.264806696124545
+          },
+          "deviatoric_Pa": {
+            "max_abs": 200.120699971759,
+            "rms_abs": 40.22678376826725,
+            "scale": 755.3157229825189,
+            "rms_relative_to_scale": 0.053258236978602214,
+            "maximum_relative_to_scale": 0.26494973410793227,
+            "signed_mean": -28.450314882331107,
+            "oscillatory_rms": 28.43894715764173
+          }
+        }
+      },
+      {
+        "step": 4,
+        "time_s": 800000.0,
+        "fields": {
+          "V_m_s": {
+            "max_abs": 7.403918243278363e-13,
+            "rms_abs": 4.5149750826233936e-13,
+            "scale": 1e-09,
+            "rms_relative_to_scale": 0.0004514975082623393,
+            "maximum_relative_to_scale": 0.0007403918243278362,
+            "signed_mean": -4.456304418455813e-13,
+            "oscillatory_rms": 7.255004664101313e-14
+          },
+          "theta_s": {
+            "max_abs": 284.20300090126693,
+            "rms_abs": 163.74919434218657,
+            "scale": 8000000.0,
+            "rms_relative_to_scale": 2.046864929277332e-05,
+            "maximum_relative_to_scale": 3.5525375112658366e-05,
+            "signed_mean": 161.05881554580392,
+            "oscillatory_rms": 29.561065317371302
+          },
+          "Omega": {
+            "max_abs": 0.0007044232224799885,
+            "rms_abs": 0.00043503138163681975,
+            "scale": 1.0,
+            "rms_relative_to_scale": 0.00043503138163681975,
+            "maximum_relative_to_scale": 0.0007044232224799885,
+            "signed_mean": -0.00042971756234817565,
+            "oscillatory_rms": 6.778731163265019e-05
+          },
+          "slip_m": {
+            "max_abs": 2.9236833501932163e-07,
+            "rms_abs": 1.6654695716934538e-07,
+            "scale": 0.002,
+            "rms_relative_to_scale": 8.327347858467269e-05,
+            "maximum_relative_to_scale": 0.00014618416750966081,
+            "signed_mean": -1.6366186355149546e-07,
+            "oscillatory_rms": 3.086556918670771e-08
+          },
+          "shear_Pa": {
+            "max_abs": 974.3743696063757,
+            "rms_abs": 577.7695429176032,
+            "scale": 26546122.365133367,
+            "rms_relative_to_scale": 2.1764743451814512e-05,
+            "maximum_relative_to_scale": 3.670496037817388e-05,
+            "signed_mean": -571.19636330988,
+            "oscillatory_rms": 86.90431096777408,
+            "perturbation_scale": 1317.3509640387192,
+            "rms_relative_to_perturbation": 0.4385843702169421
+          },
+          "raw_normal_Pa": {
+            "max_abs": 531.6861298531294,
+            "rms_abs": 68.92204328929522,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 1.3784408657859044e-06,
+            "maximum_relative_to_scale": 1.0633722597062587e-05,
+            "signed_mean": -34.03820701572917,
+            "oscillatory_rms": 59.930363876134194,
+            "perturbation_scale": 1004.8625799446569,
+            "rms_relative_to_perturbation": 0.06858852609785819
+          },
+          "filtered_normal_Pa": {
+            "max_abs": 127.2427093014121,
+            "rms_abs": 39.3431709584585,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 7.868634191691701e-07,
+            "maximum_relative_to_scale": 2.5448541860282422e-06,
+            "signed_mean": -33.83436883562084,
+            "oscillatory_rms": 20.077863097492756,
+            "perturbation_scale": 291.5916828154889,
+            "rms_relative_to_perturbation": 0.13492555953097524
+          },
+          "pressure_Pa": {
+            "max_abs": 597.1091642250794,
+            "rms_abs": 54.00342198665682,
+            "scale": 1782.2734834886758,
+            "rms_relative_to_scale": 0.030300300423562885,
+            "maximum_relative_to_scale": 0.3350266778677984,
+            "signed_mean": 3.401286991421814,
+            "oscillatory_rms": 53.89620425476097
+          },
+          "deviatoric_Pa": {
+            "max_abs": 313.4502922675724,
+            "rms_abs": 55.78605368107016,
+            "scale": 1005.2416556200643,
+            "rms_relative_to_scale": 0.05549516712641557,
+            "maximum_relative_to_scale": 0.31181586090781976,
+            "signed_mean": -37.439494004458844,
+            "oscillatory_rms": 41.35659649919624
+          }
+        }
+      },
+      {
+        "step": 5,
+        "time_s": 1000000.0,
+        "fields": {
+          "V_m_s": {
+            "max_abs": 9.663308572362577e-13,
+            "rms_abs": 6.136327606995051e-13,
+            "scale": 1e-09,
+            "rms_relative_to_scale": 0.0006136327606995051,
+            "maximum_relative_to_scale": 0.0009663308572362576,
+            "signed_mean": -6.070027093470859e-13,
+            "oscillatory_rms": 8.996041267687372e-14
+          },
+          "theta_s": {
+            "max_abs": 467.91349429730326,
+            "rms_abs": 281.9349619841697,
+            "scale": 8000000.0,
+            "rms_relative_to_scale": 3.524187024802121e-05,
+            "maximum_relative_to_scale": 5.848918678716291e-05,
+            "signed_mean": 278.112906333597,
+            "oscillatory_rms": 46.26590666673602
+          },
+          "Omega": {
+            "max_abs": 0.0009069556364518228,
+            "rms_abs": 0.0005838860289140391,
+            "scale": 1.0,
+            "rms_relative_to_scale": 0.0005838860289140391,
+            "maximum_relative_to_scale": 0.0009069556364518228,
+            "signed_mean": -0.0005779965377962301,
+            "oscillatory_rms": 8.272180520622846e-05
+          },
+          "slip_m": {
+            "max_abs": 4.85634506466404e-07,
+            "rms_abs": 2.892108644170748e-07,
+            "scale": 0.002,
+            "rms_relative_to_scale": 0.0001446054322085374,
+            "maximum_relative_to_scale": 0.00024281725323320198,
+            "signed_mean": -2.8506240542090764e-07,
+            "oscillatory_rms": 4.8809313788637716e-08
+          },
+          "shear_Pa": {
+            "max_abs": 1255.093695230782,
+            "rms_abs": 774.8729043342652,
+            "scale": 26546122.365133367,
+            "rms_relative_to_scale": 2.9189683286927477e-05,
+            "maximum_relative_to_scale": 4.727973743085232e-05,
+            "signed_mean": -767.5935537064256,
+            "oscillatory_rms": 105.96298495116142,
+            "perturbation_scale": 1587.3323726356818,
+            "rms_relative_to_perturbation": 0.48816046197535146
+          },
+          "raw_normal_Pa": {
+            "max_abs": 763.8977913111448,
+            "rms_abs": 94.18630512663692,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 1.8837261025327385e-06,
+            "maximum_relative_to_scale": 1.5277955826222898e-05,
+            "signed_mean": -37.34332868765142,
+            "oscillatory_rms": 86.46696407260974,
+            "perturbation_scale": 1239.443053452734,
+            "rms_relative_to_perturbation": 0.07599082899715386
+          },
+          "filtered_normal_Pa": {
+            "max_abs": 155.0855694040656,
+            "rms_abs": 44.9211206607491,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 8.98422413214982e-07,
+            "maximum_relative_to_scale": 3.1017113880813123e-06,
+            "signed_mean": -37.009911299907955,
+            "oscillatory_rms": 25.459252679340853,
+            "perturbation_scale": 355.53887345808613,
+            "rms_relative_to_perturbation": 0.1263465798376187
+          },
+          "pressure_Pa": {
+            "max_abs": 968.2409743090793,
+            "rms_abs": 82.24031742813752,
+            "scale": 2206.5273737840466,
+            "rms_relative_to_scale": 0.03727137873077952,
+            "maximum_relative_to_scale": 0.4388075968659346,
+            "signed_mean": 9.689708419096942,
+            "oscillatory_rms": 81.66749268487249
+          },
+          "deviatoric_Pa": {
+            "max_abs": 434.58056391331,
+            "rms_abs": 72.24696313098684,
+            "scale": 1254.3992223334124,
+            "rms_relative_to_scale": 0.05759487238567818,
+            "maximum_relative_to_scale": 0.3464451796334109,
+            "signed_mean": -47.03303710844102,
+            "oscillatory_rms": 54.840834257022216
+          }
+        }
+      },
+      {
+        "step": 6,
+        "time_s": 1200000.0,
+        "fields": {
+          "V_m_s": {
+            "max_abs": 1.1773687932254384e-12,
+            "rms_abs": 7.756841995887403e-13,
+            "scale": 1e-09,
+            "rms_relative_to_scale": 0.0007756841995887402,
+            "maximum_relative_to_scale": 0.0011773687932254383,
+            "signed_mean": -7.686100147056722e-13,
+            "oscillatory_rms": 1.045209203258902e-13
+          },
+          "theta_s": {
+            "max_abs": 688.6618206929415,
+            "rms_abs": 429.5007068997054,
+            "scale": 8000000.0,
+            "rms_relative_to_scale": 5.368758836246318e-05,
+            "maximum_relative_to_scale": 8.60827275866177e-05,
+            "signed_mean": 424.5011676203074,
+            "oscillatory_rms": 65.34229806444127
+          },
+          "Omega": {
+            "max_abs": 0.0010897762383410559,
+            "rms_abs": 0.0007289970000098249,
+            "scale": 1.0,
+            "rms_relative_to_scale": 0.0007289970000098249,
+            "maximum_relative_to_scale": 0.0010897762383410559,
+            "signed_mean": -0.0007228438066231397,
+            "oscillatory_rms": 9.451696805279716e-05
+          },
+          "slip_m": {
+            "max_abs": 7.211082651114708e-07,
+            "rms_abs": 4.4427785313238797e-07,
+            "scale": 0.002,
+            "rms_relative_to_scale": 0.00022213892656619398,
+            "maximum_relative_to_scale": 0.0003605541325557354,
+            "signed_mean": -4.3878440836202174e-07,
+            "oscillatory_rms": 6.964950654752858e-08
+          },
+          "shear_Pa": {
+            "max_abs": 1511.7183494009078,
+            "rms_abs": 968.6844820570232,
+            "scale": 26546122.365133367,
+            "rms_relative_to_scale": 3.6490620691530004e-05,
+            "maximum_relative_to_scale": 5.6946861338454954e-05,
+            "signed_mean": -961.0688725646648,
+            "oscillatory_rms": 121.22808241231485,
+            "perturbation_scale": 1832.5421441572553,
+            "rms_relative_to_perturbation": 0.5286014759035729
+          },
+          "raw_normal_Pa": {
+            "max_abs": 1032.3612206727266,
+            "rms_abs": 121.89287767270618,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 2.4378575534541236e-06,
+            "maximum_relative_to_scale": 2.0647224413454532e-05,
+            "signed_mean": -39.8865639769055,
+            "oscillatory_rms": 115.18218456623201,
+            "perturbation_scale": 1468.723229732719,
+            "rms_relative_to_perturbation": 0.08299240810325338
+          },
+          "filtered_normal_Pa": {
+            "max_abs": 180.59704279899597,
+            "rms_abs": 50.01781097205518,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 1.0003562194411035e-06,
+            "maximum_relative_to_scale": 3.6119408559799195e-06,
+            "signed_mean": -39.4123402061262,
+            "oscillatory_rms": 30.796896822777637,
+            "perturbation_scale": 418.4093472437119,
+            "rms_relative_to_perturbation": 0.11954276667466796
+          },
+          "pressure_Pa": {
+            "max_abs": 1375.806584228525,
+            "rms_abs": 113.19424298321539,
+            "scale": 2623.8204724183483,
+            "rms_relative_to_scale": 0.04314100151786887,
+            "maximum_relative_to_scale": 0.5243524085169052,
+            "signed_mean": 17.337858563787464,
+            "oscillatory_rms": 111.85855043297008
+          },
+          "deviatoric_Pa": {
+            "max_abs": 562.6630722714234,
+            "rms_abs": 89.43129828957865,
+            "scale": 1502.868535243536,
+            "rms_relative_to_scale": 0.05950706678085222,
+            "maximum_relative_to_scale": 0.3743927423300837,
+            "signed_mean": -57.22442254400109,
+            "oscillatory_rms": 68.72643289350331
+          }
+        }
+      },
+      {
+        "step": 7,
+        "time_s": 1400000.0,
+        "fields": {
+          "V_m_s": {
+            "max_abs": 1.374056398986723e-12,
+            "rms_abs": 9.376792422710137e-13,
+            "scale": 1e-09,
+            "rms_relative_to_scale": 0.0009376792422710135,
+            "maximum_relative_to_scale": 0.0013740563989867228,
+            "signed_mean": -9.304270358840677e-13,
+            "oscillatory_rms": 1.1639541349181232e-13
+          },
+          "theta_s": {
+            "max_abs": 942.6625893395394,
+            "rms_abs": 605.7048066129432,
+            "scale": 8000000.0,
+            "rms_relative_to_scale": 7.57131008266179e-05,
+            "maximum_relative_to_scale": 0.00011783282366744243,
+            "signed_mean": 599.5405261932775,
+            "oscillatory_rms": 86.19437456070266
+          },
+          "Omega": {
+            "max_abs": 0.0012539026609634796,
+            "rms_abs": 0.0008704830015313769,
+            "scale": 1.0,
+            "rms_relative_to_scale": 0.0008704830015313769,
+            "maximum_relative_to_scale": 0.0012539026609634796,
+            "signed_mean": -0.000864317987995839,
+            "oscillatory_rms": 0.00010341697917605224
+          },
+          "slip_m": {
+            "max_abs": 9.959195449089128e-07,
+            "rms_abs": 6.317291938958588e-07,
+            "scale": 0.002,
+            "rms_relative_to_scale": 0.0003158645969479294,
+            "maximum_relative_to_scale": 0.0004979597724544564,
+            "signed_mean": -6.248698155388134e-07,
+            "oscillatory_rms": 9.284119801467959e-08
+          },
+          "shear_Pa": {
+            "max_abs": 1745.531426448375,
+            "rms_abs": 1159.3402274353066,
+            "scale": 26546122.365133367,
+            "rms_relative_to_scale": 4.367267699172614e-05,
+            "maximum_relative_to_scale": 6.57546666303708e-05,
+            "signed_mean": -1151.6822951703236,
+            "oscillatory_rms": 133.03252963453681,
+            "perturbation_scale": 2054.9201456975848,
+            "rms_relative_to_perturbation": 0.5641777515601438
+          },
+          "raw_normal_Pa": {
+            "max_abs": 1395.8353318423033,
+            "rms_abs": 151.3906462706873,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 3.027812925413746e-06,
+            "maximum_relative_to_scale": 2.7916706636846065e-05,
+            "signed_mean": -41.713696387178956,
+            "oscillatory_rms": 145.53039308671788,
+            "perturbation_scale": 1693.2613655622924,
+            "rms_relative_to_perturbation": 0.0894077248496212
+          },
+          "filtered_normal_Pa": {
+            "max_abs": 203.9714668765664,
+            "rms_abs": 54.70048494349806,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 1.0940096988699611e-06,
+            "maximum_relative_to_scale": 4.079429337531328e-06,
+            "signed_mean": -41.08949159355513,
+            "oscillatory_rms": 36.10812559019119,
+            "perturbation_scale": 480.738498176529,
+            "rms_relative_to_perturbation": 0.1137842822053578
+          },
+          "pressure_Pa": {
+            "max_abs": 1814.2098076604525,
+            "rms_abs": 146.45011949279706,
+            "scale": 3034.816465018035,
+            "rms_relative_to_scale": 0.04825666434227901,
+            "maximum_relative_to_scale": 0.5977988549135116,
+            "signed_mean": 26.3247489383666,
+            "oscillatory_rms": 144.06472535907773
+          },
+          "deviatoric_Pa": {
+            "max_abs": 696.5323534161519,
+            "rms_abs": 107.32350762315991,
+            "scale": 1750.7223995842446,
+            "rms_relative_to_scale": 0.06130241302027478,
+            "maximum_relative_to_scale": 0.3978542535250374,
+            "signed_mean": -68.03844532859203,
+            "oscillatory_rms": 83.00063400846201
+          }
+        }
+      },
+      {
+        "step": 8,
+        "time_s": 1600000.0,
+        "fields": {
+          "V_m_s": {
+            "max_abs": 1.5586946434159008e-12,
+            "rms_abs": 1.0996695381311318e-12,
+            "scale": 1e-09,
+            "rms_relative_to_scale": 0.0010996695381311316,
+            "maximum_relative_to_scale": 0.0015586946434159006,
+            "signed_mean": -1.0924477982768133e-12,
+            "oscillatory_rms": 1.2582090896858049e-13
+          },
+          "theta_s": {
+            "max_abs": 1226.6775967543945,
+            "rms_abs": 809.8356455906365,
+            "scale": 8000000.0,
+            "rms_relative_to_scale": 0.00010122945569882957,
+            "maximum_relative_to_scale": 0.0001533346995942993,
+            "signed_mean": 802.5633670333452,
+            "oscillatory_rms": 108.28580130978908
+          },
+          "Omega": {
+            "max_abs": 0.0014020384356947524,
+            "rms_abs": 0.0010084836539129248,
+            "scale": 1.0,
+            "rms_relative_to_scale": 0.0010084836539129248,
+            "maximum_relative_to_scale": 0.0014020384356947524,
+            "signed_mean": -0.0010024954654311675,
+            "oscillatory_rms": 0.00010973660282472165
+          },
+          "slip_m": {
+            "max_abs": 1.3076584735921461e-06,
+            "rms_abs": 8.515583484202324e-07,
+            "scale": 0.002,
+            "rms_relative_to_scale": 0.0004257791742101162,
+            "maximum_relative_to_scale": 0.0006538292367960731,
+            "signed_mean": -8.433593751941925e-07,
+            "oscillatory_rms": 1.1788377766365924e-07
+          },
+          "shear_Pa": {
+            "max_abs": 1959.4931071288884,
+            "rms_abs": 1346.9652867469772,
+            "scale": 26546122.365133367,
+            "rms_relative_to_scale": 5.074056648349251e-05,
+            "maximum_relative_to_scale": 7.381466415986077e-05,
+            "signed_mean": -1339.4824029778229,
+            "oscillatory_rms": 141.7828473903812,
+            "perturbation_scale": 2256.326125112344,
+            "rms_relative_to_perturbation": 0.5969727832140892
+          },
+          "raw_normal_Pa": {
+            "max_abs": 1787.7014285475016,
+            "rms_abs": 182.53994054550182,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 3.6507988109100365e-06,
+            "maximum_relative_to_scale": 3.575402857095003e-05,
+            "signed_mean": -42.80814371803971,
+            "oscillatory_rms": 177.44940891919305,
+            "perturbation_scale": 1913.558370218772,
+            "rms_relative_to_perturbation": 0.09539293046212774
+          },
+          "filtered_normal_Pa": {
+            "max_abs": 224.55461165308952,
+            "rms_abs": 59.006978524337676,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 1.1801395704867535e-06,
+            "maximum_relative_to_scale": 4.49109223306179e-06,
+            "signed_mean": -42.02470480027641,
+            "oscillatory_rms": 41.42158496510332,
+            "perturbation_scale": 542.9068894514763,
+            "rms_relative_to_perturbation": 0.10868710578337867
+          },
+          "pressure_Pa": {
+            "max_abs": 2286.88559773819,
+            "rms_abs": 182.11122110415894,
+            "scale": 3440.1203904280533,
+            "rms_relative_to_scale": 0.052937455796859156,
+            "maximum_relative_to_scale": 0.6647690598565458,
+            "signed_mean": 36.66643893176016,
+            "oscillatory_rms": 178.38180711079076
+          },
+          "deviatoric_Pa": {
+            "max_abs": 835.5338586061848,
+            "rms_abs": 125.94769655776005,
+            "scale": 1998.0270104819688,
+            "rms_relative_to_scale": 0.06303603299505879,
+            "maximum_relative_to_scale": 0.4181794611498447,
+            "signed_mean": -79.47458265632959,
+            "oscillatory_rms": 97.70677038879053
+          }
+        }
+      },
+      {
+        "step": 9,
+        "time_s": 1800000.0,
+        "fields": {
+          "V_m_s": {
+            "max_abs": 1.7325304105047708e-12,
+            "rms_abs": 1.2616954949374123e-12,
+            "scale": 1e-09,
+            "rms_relative_to_scale": 0.0012616954949374122,
+            "maximum_relative_to_scale": 0.0017325304105047707,
+            "signed_mean": -1.2546669561551337e-12,
+            "oscillatory_rms": 1.3299004127292137e-13
+          },
+          "theta_s": {
+            "max_abs": 1537.7950615203008,
+            "rms_abs": 1041.2076195558113,
+            "scale": 8000000.0,
+            "rms_relative_to_scale": 0.00013015095244447642,
+            "maximum_relative_to_scale": 0.0001922243826900376,
+            "signed_mean": 1032.9173250277847,
+            "oscillatory_rms": 131.13011354576264
+          },
+          "Omega": {
+            "max_abs": 0.001535796744099871,
+            "rms_abs": 0.0011431244552556842,
+            "scale": 1.0,
+            "rms_relative_to_scale": 0.0011431244552556842,
+            "maximum_relative_to_scale": 0.001535796744099871,
+            "signed_mean": -0.0011374515860341006,
+            "oscillatory_rms": 0.00011374273441461583
+          },
+          "slip_m": {
+            "max_abs": 1.6541645556930953e-06,
+            "rms_abs": 1.1037675309126412e-06,
+            "scale": 0.002,
+            "rms_relative_to_scale": 0.0005518837654563206,
+            "maximum_relative_to_scale": 0.0008270822778465477,
+            "signed_mean": -1.094292766425209e-06,
+            "oscillatory_rms": 1.443125207542712e-07
+          },
+          "shear_Pa": {
+            "max_abs": 2155.2678619250655,
+            "rms_abs": 1531.6717742128667,
+            "scale": 26546122.365133367,
+            "rms_relative_to_scale": 5.7698512541500956e-05,
+            "maximum_relative_to_scale": 8.118955500468392e-05,
+            "signed_mean": -1524.5195164953134,
+            "oscillatory_rms": 147.84677116963587,
+            "perturbation_scale": 2438.575550874713,
+            "rms_relative_to_perturbation": 0.6281010131769175
+          },
+          "raw_normal_Pa": {
+            "max_abs": 2209.3422567993402,
+            "rms_abs": 215.36819888219912,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 4.307363977643983e-06,
+            "maximum_relative_to_scale": 4.418684513598681e-05,
+            "signed_mean": -43.15787754021587,
+            "oscillatory_rms": 210.9996651560997,
+            "perturbation_scale": 2130.0635289845063,
+            "rms_relative_to_perturbation": 0.10110881480838954
+          },
+          "filtered_normal_Pa": {
+            "max_abs": 278.46590357273817,
+            "rms_abs": 63.029755526537585,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 1.2605951105307518e-06,
+            "maximum_relative_to_scale": 5.569318071454764e-06,
+            "signed_mean": -42.20628446674552,
+            "oscillatory_rms": 46.81217398548428,
+            "perturbation_scale": 605.2375729760215,
+            "rms_relative_to_perturbation": 0.10414051992280181
+          },
+          "pressure_Pa": {
+            "max_abs": 2792.2545330240973,
+            "rms_abs": 220.05505948261666,
+            "scale": 3840.2837463675287,
+            "rms_relative_to_scale": 0.057301770914913175,
+            "maximum_relative_to_scale": 0.7270958911995116,
+            "signed_mean": 48.37425057034786,
+            "oscillatory_rms": 214.67221777783718
+          },
+          "deviatoric_Pa": {
+            "max_abs": 980.206624277321,
+            "rms_abs": 145.26009085366675,
+            "scale": 2244.84257730091,
+            "rms_relative_to_scale": 0.06470836410645794,
+            "maximum_relative_to_scale": 0.4366482684304189,
+            "signed_mean": -91.5321281085565,
+            "oscillatory_rms": 112.7934551236654
+          }
+        }
+      },
+      {
+        "step": 10,
+        "time_s": 2000000.0,
+        "fields": {
+          "V_m_s": {
+            "max_abs": 1.8963176130027444e-12,
+            "rms_abs": 1.4237808513706669e-12,
+            "scale": 1e-09,
+            "rms_relative_to_scale": 0.0014237808513706668,
+            "maximum_relative_to_scale": 0.0018963176130027443,
+            "signed_mean": -1.4170735307459747e-12,
+            "oscillatory_rms": 1.380381149861085e-13
+          },
+          "theta_s": {
+            "max_abs": 1873.3249661140144,
+            "rms_abs": 1299.1566060474595,
+            "scale": 8000000.0,
+            "rms_relative_to_scale": 0.00016239457575593244,
+            "maximum_relative_to_scale": 0.0002341656207642518,
+            "signed_mean": 1289.9638346162594,
+            "oscillatory_rms": 154.27635080876811
+          },
+          "Omega": {
+            "max_abs": 0.0016562737519225657,
+            "rms_abs": 0.0012745120557944465,
+            "scale": 1.0,
+            "rms_relative_to_scale": 0.0012745120557944465,
+            "maximum_relative_to_scale": 0.0016562737519225657,
+            "signed_mean": -0.001269254530577339,
+            "oscillatory_rms": 0.00011564565263893169
+          },
+          "slip_m": {
+            "max_abs": 2.0334280782939758e-06,
+            "rms_abs": 1.3883636577642004e-06,
+            "scale": 0.002,
+            "rms_relative_to_scale": 0.0006941818288821002,
+            "maximum_relative_to_scale": 0.001016714039146988,
+            "signed_mean": -1.377707472574426e-06,
+            "oscillatory_rms": 1.716850785973477e-07
+          },
+          "shear_Pa": {
+            "max_abs": 2334.178646747023,
+            "rms_abs": 1713.561806979209,
+            "scale": 26546122.365133367,
+            "rms_relative_to_scale": 6.455036194777218e-05,
+            "maximum_relative_to_scale": 8.7929175291259e-05,
+            "signed_mean": -1706.8450527856899,
+            "oscillatory_rms": 151.57187113336306,
+            "perturbation_scale": 2603.3803329903544,
+            "rms_relative_to_perturbation": 0.658206480729974
+          },
+          "raw_normal_Pa": {
+            "max_abs": 2657.6199962943792,
+            "rms_abs": 249.70655461660192,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 4.9941310923320385e-06,
+            "maximum_relative_to_scale": 5.315239992588759e-05,
+            "signed_mean": -42.768741140206345,
+            "oscillatory_rms": 246.0166624433719,
+            "perturbation_scale": 2343.179726333553,
+            "rms_relative_to_perturbation": 0.10656739293631805
+          },
+          "filtered_normal_Pa": {
+            "max_abs": 366.4759978726506,
+            "rms_abs": 66.89148318147143,
+            "scale": 50000000.0,
+            "rms_relative_to_scale": 1.3378296636294285e-06,
+            "maximum_relative_to_scale": 7.329519957453013e-06,
+            "signed_mean": -41.64066152910477,
+            "oscillatory_rms": 52.35003180166761,
+            "perturbation_scale": 668.005990968201,
+            "rms_relative_to_perturbation": 0.10013605279874752
+          },
+          "pressure_Pa": {
+            "max_abs": 3327.0901892721013,
+            "rms_abs": 260.0286938576425,
+            "scale": 4235.809181820127,
+            "rms_relative_to_scale": 0.061388198262960506,
+            "maximum_relative_to_scale": 0.7854674387958266,
+            "signed_mean": 61.2207360973327,
+            "oscillatory_rms": 252.71909920109385
+          },
+          "deviatoric_Pa": {
+            "max_abs": 1119.7514465283061,
+            "rms_abs": 164.8307024009345,
+            "scale": 2491.2238837338,
+            "rms_relative_to_scale": 0.06616454806698839,
+            "maximum_relative_to_scale": 0.4494784486611631,
+            "signed_mean": -103.98947724034176,
+            "oscillatory_rms": 127.88803336225746
+          }
+        }
+      }
+    ]
+  },
+  "oscillations": {
+    "creep": {
+      "fe": {
+        "0": {
+          "V_m_s": {
+            "upper_200m": 4.793617828137148e-14,
+            "interior": 3.158106638827552e-14,
+            "lower_200m": 6.897652169864445e-13,
+            "short_wave_amplitude": 7.486760747062996e-15,
+            "short_wave_wavelength_m": 65.25606490840599,
+            "minimum_resolvable_wavelength_m": 39.81725994411212
+          },
+          "raw_normal_Pa": {
+            "upper_200m": 89.9527443870902,
+            "interior": 32.49525881558657,
+            "lower_200m": 3845.6489858552814,
+            "short_wave_amplitude": 19.418318268755595,
+            "short_wave_wavelength_m": 73.41307302195673,
+            "minimum_resolvable_wavelength_m": 39.81725994411212
+          },
+          "filtered_normal_Pa": {
+            "upper_200m": 8.382740214467049,
+            "interior": 6.3818349391222,
+            "lower_200m": 422.08488446474075,
+            "short_wave_amplitude": 4.05284778986828,
+            "short_wave_wavelength_m": 73.41307302195673,
+            "minimum_resolvable_wavelength_m": 39.81725994411212
+          }
+        },
+        "10": {
+          "V_m_s": {
+            "upper_200m": 3.8847636346265436e-13,
+            "interior": 2.3178449028189586e-13,
+            "lower_200m": 4.618148668673236e-12,
+            "short_wave_amplitude": 5.342568532530025e-14,
+            "short_wave_wavelength_m": 65.25606490840599,
+            "minimum_resolvable_wavelength_m": 39.81725994411212
+          },
+          "raw_normal_Pa": {
+            "upper_200m": 979.5486772954464,
+            "interior": 324.62175630778074,
+            "lower_200m": 34141.84832787514,
+            "short_wave_amplitude": 193.9586335865747,
+            "short_wave_wavelength_m": 73.41307302195673,
+            "minimum_resolvable_wavelength_m": 39.81725994411212
+          },
+          "filtered_normal_Pa": {
+            "upper_200m": 93.08884732425213,
+            "interior": 63.72883089631796,
+            "lower_200m": 3820.121628679335,
+            "short_wave_amplitude": 40.50819423437676,
+            "short_wave_wavelength_m": 73.41307302195673,
+            "minimum_resolvable_wavelength_m": 39.81725994411212
+          }
+        }
+      },
+      "particle": {
+        "0": {
+          "V_m_s": {
+            "upper_200m": 3.727012732850128e-14,
+            "interior": 3.449317389862073e-14,
+            "lower_200m": 6.90094813719168e-13,
+            "short_wave_amplitude": 7.780616571364545e-15,
+            "short_wave_wavelength_m": 65.25606490840599,
+            "minimum_resolvable_wavelength_m": 39.81725994411212
+          },
+          "raw_normal_Pa": {
+            "upper_200m": 66.87742871791124,
+            "interior": 34.236052975058556,
+            "lower_200m": 3855.159362204373,
+            "short_wave_amplitude": 28.646312832345846,
+            "short_wave_wavelength_m": 73.41307302195673,
+            "minimum_resolvable_wavelength_m": 39.81725994411212
+          },
+          "filtered_normal_Pa": {
+            "upper_200m": 7.583453044295311,
+            "interior": 7.119198456406593,
+            "lower_200m": 424.1720305159688,
+            "short_wave_amplitude": 5.988971417181598,
+            "short_wave_wavelength_m": 73.41307302195673,
+            "minimum_resolvable_wavelength_m": 39.81725994411212
+          }
+        },
+        "10": {
+          "V_m_s": {
+            "upper_200m": 2.363831647043035e-13,
+            "interior": 8.262245321291945e-14,
+            "lower_200m": 5.0606648002457525e-12,
+            "short_wave_amplitude": 2.9028600805595816e-14,
+            "short_wave_wavelength_m": 73.41307302195673,
+            "minimum_resolvable_wavelength_m": 39.81725994411212
+          },
+          "raw_normal_Pa": {
+            "upper_200m": 615.2267965599895,
+            "interior": 374.6866384372115,
+            "lower_200m": 30511.887711644173,
+            "short_wave_amplitude": 249.93871852586022,
+            "short_wave_wavelength_m": 73.41307302195673,
+            "minimum_resolvable_wavelength_m": 39.81725994411212
+          },
+          "filtered_normal_Pa": {
+            "upper_200m": 81.38160117715597,
+            "interior": 68.56517072767019,
+            "lower_200m": 3426.7183603048325,
+            "short_wave_amplitude": 52.41166842686894,
+            "short_wave_wavelength_m": 73.41307302195673,
+            "minimum_resolvable_wavelength_m": 39.81725994411212
+          }
+        }
+      }
+    },
+    "perturbed": {
+      "fe": {
+        "0": {
+          "V_m_s": {
+            "upper_200m": 6.516083948526394e-14,
+            "interior": 6.478246099807453e-14,
+            "lower_200m": 7.120176662498952e-13,
+            "short_wave_amplitude": 7.204234397950109e-15,
+            "short_wave_wavelength_m": 61.82153517638462,
+            "minimum_resolvable_wavelength_m": 39.81725994411212
+          },
+          "raw_normal_Pa": {
+            "upper_200m": 115.18239632993937,
+            "interior": 32.302506275475025,
+            "lower_200m": 3874.969749957323,
+            "short_wave_amplitude": 19.25270657238469,
+            "short_wave_wavelength_m": 73.41307302195673,
+            "minimum_resolvable_wavelength_m": 39.81725994411212
+          },
+          "filtered_normal_Pa": {
+            "upper_200m": 8.078788988292217,
+            "interior": 6.359725587069988,
+            "lower_200m": 417.9524355456233,
+            "short_wave_amplitude": 4.017943332543345,
+            "short_wave_wavelength_m": 73.41307302195673,
+            "minimum_resolvable_wavelength_m": 39.81725994411212
+          }
+        },
+        "10": {
+          "V_m_s": {
+            "upper_200m": 2.998272844638182e-13,
+            "interior": 2.523054808106267e-13,
+            "lower_200m": 4.5931717826546e-12,
+            "short_wave_amplitude": 5.229836863780473e-14,
+            "short_wave_wavelength_m": 65.25606490840599,
+            "minimum_resolvable_wavelength_m": 39.81725994411212
+          },
+          "raw_normal_Pa": {
+            "upper_200m": 1322.540656156838,
+            "interior": 322.97444977611303,
+            "lower_200m": 34822.13422976434,
+            "short_wave_amplitude": 192.47085012725498,
+            "short_wave_wavelength_m": 73.41307302195673,
+            "minimum_resolvable_wavelength_m": 39.81725994411212
+          },
+          "filtered_normal_Pa": {
+            "upper_200m": 80.27675864845514,
+            "interior": 63.72399760782719,
+            "lower_200m": 3823.140738531947,
+            "short_wave_amplitude": 40.191553560080045,
+            "short_wave_wavelength_m": 73.41307302195673,
+            "minimum_resolvable_wavelength_m": 39.81725994411212
+          }
+        }
+      },
+      "particle": {
+        "0": {
+          "V_m_s": {
+            "upper_200m": 6.548375974423768e-14,
+            "interior": 6.762702589523771e-14,
+            "lower_200m": 7.123437467877611e-13,
+            "short_wave_amplitude": 7.313417525242777e-15,
+            "short_wave_wavelength_m": 61.82153517638462,
+            "minimum_resolvable_wavelength_m": 39.81725994411212
+          },
+          "raw_normal_Pa": {
+            "upper_200m": 92.10550887137651,
+            "interior": 34.03258281946182,
+            "lower_200m": 3884.503148622811,
+            "short_wave_amplitude": 28.396760808743693,
+            "short_wave_wavelength_m": 73.41307302195673,
+            "minimum_resolvable_wavelength_m": 39.81725994411212
+          },
+          "filtered_normal_Pa": {
+            "upper_200m": 11.318241715431213,
+            "interior": 7.21589669585228,
+            "lower_200m": 420.0417446568608,
+            "short_wave_amplitude": 5.936605663453917,
+            "short_wave_wavelength_m": 73.41307302195673,
+            "minimum_resolvable_wavelength_m": 39.81725994411212
+          }
+        },
+        "10": {
+          "V_m_s": {
+            "upper_200m": 1.5103456412131583e-13,
+            "interior": 1.004571779560993e-13,
+            "lower_200m": 5.040072734598221e-12,
+            "short_wave_amplitude": 2.8558235656815784e-14,
+            "short_wave_wavelength_m": 73.41307302195673,
+            "minimum_resolvable_wavelength_m": 39.81725994411212
+          },
+          "raw_normal_Pa": {
+            "upper_200m": 957.2826490700245,
+            "interior": 375.4420645684004,
+            "lower_200m": 31148.652615852654,
+            "short_wave_amplitude": 248.4175854680056,
+            "short_wave_wavelength_m": 73.41307302195673,
+            "minimum_resolvable_wavelength_m": 39.81725994411212
+          },
+          "filtered_normal_Pa": {
+            "upper_200m": 93.73051729053259,
+            "interior": 68.0495193824172,
+            "lower_200m": 3425.486380070448,
+            "short_wave_amplitude": 52.10538460516558,
+            "short_wave_wavelength_m": 73.41307302195673,
+            "minimum_resolvable_wavelength_m": 39.81725994411212
+          }
+        }
+      }
+    }
+  },
+  "bulk_cut_jumps": {
+    "creep": {
+      "fe": {
+        "0": {
+          "graded_interfaces": 12,
+          "maximum_jumps": {
+            "pressure_Pa": 4.440892098500626e-16,
+            "deviatoric_Pa": 0.4175979307426224,
+            "normal_Pa": 0.4175979271531105
+          },
+          "interface_positions": [
+            [
+              2,
+              -144.3375673,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              3,
+              -130.58227484,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              3,
+              125.0,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              1,
+              -125.0,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              1,
+              130.58227484,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              2,
+              144.3375673,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              2,
+              -62.5,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              3,
+              -62.5,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              3,
+              67.88188019,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              1,
+              -67.88188019,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              1,
+              62.5,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              2,
+              62.5,
+              [
+                7.8125,
+                15.625
+              ]
+            ]
+          ]
+        },
+        "10": {
+          "graded_interfaces": 12,
+          "maximum_jumps": {
+            "pressure_Pa": 1.4210854715202004e-14,
+            "deviatoric_Pa": 4.429026778108874,
+            "normal_Pa": 4.429026775062084
+          },
+          "interface_positions": [
+            [
+              2,
+              -144.3375673,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              3,
+              -130.58227484,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              3,
+              125.0,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              1,
+              -125.0,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              1,
+              130.58227484,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              2,
+              144.3375673,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              2,
+              -62.5,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              3,
+              -62.5,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              3,
+              67.88188019,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              1,
+              -67.88188019,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              1,
+              62.5,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              2,
+              62.5,
+              [
+                7.8125,
+                15.625
+              ]
+            ]
+          ]
+        }
+      },
+      "particle": {
+        "0": {
+          "graded_interfaces": 12,
+          "maximum_jumps": {
+            "pressure_Pa": 1.1102230246251565e-16,
+            "deviatoric_Pa": 0.25477019318548866,
+            "normal_Pa": 0.2547701895236969
+          },
+          "interface_positions": [
+            [
+              2,
+              -144.3375673,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              3,
+              -130.58227484,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              3,
+              125.0,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              1,
+              -125.0,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              1,
+              130.58227484,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              2,
+              144.3375673,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              2,
+              -62.5,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              3,
+              -62.5,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              3,
+              67.88188019,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              1,
+              -67.88188019,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              1,
+              62.5,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              2,
+              62.5,
+              [
+                7.8125,
+                15.625
+              ]
+            ]
+          ]
+        },
+        "10": {
+          "graded_interfaces": 12,
+          "maximum_jumps": {
+            "pressure_Pa": 1.4210854715202004e-14,
+            "deviatoric_Pa": 0.6513336486079027,
+            "normal_Pa": 0.6513336524367332
+          },
+          "interface_positions": [
+            [
+              2,
+              -144.3375673,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              3,
+              -130.58227484,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              3,
+              125.0,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              1,
+              -125.0,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              1,
+              130.58227484,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              2,
+              144.3375673,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              2,
+              -62.5,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              3,
+              -62.5,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              3,
+              67.88188019,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              1,
+              -67.88188019,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              1,
+              62.5,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              2,
+              62.5,
+              [
+                7.8125,
+                15.625
+              ]
+            ]
+          ]
+        }
+      }
+    },
+    "perturbed": {
+      "fe": {
+        "0": {
+          "graded_interfaces": 12,
+          "maximum_jumps": {
+            "pressure_Pa": 2.842170943040401e-14,
+            "deviatoric_Pa": 0.34082673972180544,
+            "normal_Pa": 0.34082673490047455
+          },
+          "interface_positions": [
+            [
+              2,
+              -144.3375673,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              3,
+              -130.58227484,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              3,
+              125.0,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              1,
+              -125.0,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              1,
+              130.58227484,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              2,
+              144.3375673,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              2,
+              -62.5,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              3,
+              -62.5,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              3,
+              67.88188019,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              1,
+              -67.88188019,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              1,
+              62.5,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              2,
+              62.5,
+              [
+                7.8125,
+                15.625
+              ]
+            ]
+          ]
+        },
+        "10": {
+          "graded_interfaces": 12,
+          "maximum_jumps": {
+            "pressure_Pa": 2.2737367544323206e-13,
+            "deviatoric_Pa": 3.7700638169672516,
+            "normal_Pa": 3.770063817501068
+          },
+          "interface_positions": [
+            [
+              2,
+              -144.3375673,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              3,
+              -130.58227484,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              3,
+              125.0,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              1,
+              -125.0,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              1,
+              130.58227484,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              2,
+              144.3375673,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              2,
+              -62.5,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              3,
+              -62.5,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              3,
+              67.88188019,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              1,
+              -67.88188019,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              1,
+              62.5,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              2,
+              62.5,
+              [
+                7.8125,
+                15.625
+              ]
+            ]
+          ]
+        }
+      },
+      "particle": {
+        "0": {
+          "graded_interfaces": 12,
+          "maximum_jumps": {
+            "pressure_Pa": 2.842170943040401e-14,
+            "deviatoric_Pa": 0.3225645800215844,
+            "normal_Pa": 0.32256457954645157
+          },
+          "interface_positions": [
+            [
+              2,
+              -144.3375673,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              3,
+              -130.58227484,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              3,
+              125.0,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              1,
+              -125.0,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              1,
+              130.58227484,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              2,
+              144.3375673,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              2,
+              -62.5,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              3,
+              -62.5,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              3,
+              67.88188019,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              1,
+              -67.88188019,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              1,
+              62.5,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              2,
+              62.5,
+              [
+                7.8125,
+                15.625
+              ]
+            ]
+          ]
+        },
+        "10": {
+          "graded_interfaces": 12,
+          "maximum_jumps": {
+            "pressure_Pa": 2.2737367544323206e-13,
+            "deviatoric_Pa": 0.7005773562520972,
+            "normal_Pa": 0.7005773559212685
+          },
+          "interface_positions": [
+            [
+              2,
+              -144.3375673,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              3,
+              -130.58227484,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              3,
+              125.0,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              1,
+              -125.0,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              1,
+              130.58227484,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              2,
+              144.3375673,
+              [
+                15.625,
+                31.25
+              ]
+            ],
+            [
+              2,
+              -62.5,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              3,
+              -62.5,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              3,
+              67.88188019,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              1,
+              -67.88188019,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              1,
+              62.5,
+              [
+                7.8125,
+                15.625
+              ]
+            ],
+            [
+              2,
+              62.5,
+              [
+                7.8125,
+                15.625
+              ]
+            ]
+          ]
+        }
+      }
+    }
+  },
+  "run_results": {
+    "bp3-native-7b-fe-creep": {
+      "command": [
+        "env",
+        "ASPECT_SOURCE_DIR=/home/ein/repository/aspect-fault-propagation",
+        "build-bp3-native/aspect",
+        "benchmarks/reconstructed_fault/bp3_native/section7b-fe-creep.prm"
+      ],
+      "cwd": "/home/ein/repository/aspect-fault-propagation",
+      "exit_code": 0,
+      "seconds": 106.64453279099689,
+      "environment": {
+        "OMP_PROC_BIND": "spread",
+        "OMP_NUM_THREADS": "1",
+        "DEAL_II_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1"
+      }
+    },
+    "bp3-native-7b-fe-gate-v2": {
+      "command": [
+        "env",
+        "ASPECT_SOURCE_DIR=/home/ein/repository/aspect-fault-propagation",
+        "build-bp3-native/aspect",
+        "build-bp3-native/section7b/fe-gate-v2.prm"
+      ],
+      "cwd": "/home/ein/repository/aspect-fault-propagation",
+      "exit_code": 1,
+      "seconds": 14.898642970001674,
+      "environment": {
+        "OMP_PROC_BIND": "spread",
+        "OMP_NUM_THREADS": "1",
+        "DEAL_II_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1"
+      }
+    },
+    "bp3-native-7b-fe-gate-v3": {
+      "command": [
+        "env",
+        "ASPECT_SOURCE_DIR=/home/ein/repository/aspect-fault-propagation",
+        "build-bp3-native/aspect",
+        "build-bp3-native/section7b/fe-gate-v3.prm"
+      ],
+      "cwd": "/home/ein/repository/aspect-fault-propagation",
+      "exit_code": 1,
+      "seconds": 15.09282269599862,
+      "environment": {
+        "OMP_PROC_BIND": "spread",
+        "OMP_NUM_THREADS": "1",
+        "DEAL_II_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1"
+      }
+    },
+    "bp3-native-7b-fe-gate-v4": {
+      "command": [
+        "env",
+        "ASPECT_SOURCE_DIR=/home/ein/repository/aspect-fault-propagation",
+        "build-bp3-native/aspect",
+        "build-bp3-native/section7b/fe-gate-v4.prm"
+      ],
+      "cwd": "/home/ein/repository/aspect-fault-propagation",
+      "exit_code": 1,
+      "seconds": 15.545332920999499,
+      "environment": {
+        "OMP_PROC_BIND": "spread",
+        "OMP_NUM_THREADS": "1",
+        "DEAL_II_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1"
+      }
+    },
+    "bp3-native-7b-fe-gate-v5": {
+      "command": [
+        "env",
+        "ASPECT_SOURCE_DIR=/home/ein/repository/aspect-fault-propagation",
+        "build-bp3-native/aspect",
+        "build-bp3-native/section7b/fe-gate-v5.prm"
+      ],
+      "cwd": "/home/ein/repository/aspect-fault-propagation",
+      "exit_code": 0,
+      "seconds": 19.810085831002652,
+      "environment": {
+        "OMP_PROC_BIND": "spread",
+        "OMP_NUM_THREADS": "1",
+        "DEAL_II_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1"
+      }
+    },
+    "bp3-native-7b-fe-gate": {
+      "command": [
+        "env",
+        "ASPECT_SOURCE_DIR=/home/ein/repository/aspect-fault-propagation",
+        "build-bp3-native/aspect",
+        "benchmarks/reconstructed_fault/bp3_native/section7b-fe-gate.prm"
+      ],
+      "cwd": "/home/ein/repository/aspect-fault-propagation",
+      "exit_code": 127,
+      "seconds": 7.277650345000438,
+      "environment": {
+        "OMP_PROC_BIND": "spread",
+        "OMP_NUM_THREADS": "1",
+        "DEAL_II_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1"
+      }
+    },
+    "bp3-native-7b-fe-perturbed": {
+      "command": [
+        "env",
+        "ASPECT_SOURCE_DIR=/home/ein/repository/aspect-fault-propagation",
+        "build-bp3-native/aspect",
+        "benchmarks/reconstructed_fault/bp3_native/section7b-fe-perturbed.prm"
+      ],
+      "cwd": "/home/ein/repository/aspect-fault-propagation",
+      "exit_code": 0,
+      "seconds": 106.44486215399957,
+      "environment": {
+        "OMP_PROC_BIND": "spread",
+        "OMP_NUM_THREADS": "1",
+        "DEAL_II_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1"
+      }
+    },
+    "bp3-native-7b-particle-creep": {
+      "command": [
+        "env",
+        "ASPECT_SOURCE_DIR=/home/ein/repository/aspect-fault-propagation",
+        "build-bp3-native/aspect",
+        "benchmarks/reconstructed_fault/bp3_native/section7b-particle-creep.prm"
+      ],
+      "cwd": "/home/ein/repository/aspect-fault-propagation",
+      "exit_code": 0,
+      "seconds": 62.80971454600149,
+      "environment": {
+        "OMP_PROC_BIND": "spread",
+        "OMP_NUM_THREADS": "1",
+        "DEAL_II_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1"
+      }
+    },
+    "bp3-native-7b-particle-gate": {
+      "command": [
+        "env",
+        "ASPECT_SOURCE_DIR=/home/ein/repository/aspect-fault-propagation",
+        "build-bp3-native/aspect",
+        "benchmarks/reconstructed_fault/bp3_native/section7b-particle-gate.prm"
+      ],
+      "cwd": "/home/ein/repository/aspect-fault-propagation",
+      "exit_code": 0,
+      "seconds": 12.991257932000735,
+      "environment": {
+        "OMP_PROC_BIND": "spread",
+        "OMP_NUM_THREADS": "1",
+        "DEAL_II_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1"
+      }
+    },
+    "bp3-native-7b-particle-perturbed": {
+      "command": [
+        "env",
+        "ASPECT_SOURCE_DIR=/home/ein/repository/aspect-fault-propagation",
+        "build-bp3-native/aspect",
+        "benchmarks/reconstructed_fault/bp3_native/section7b-particle-perturbed.prm"
+      ],
+      "cwd": "/home/ein/repository/aspect-fault-propagation",
+      "exit_code": 0,
+      "seconds": 62.242405758999666,
+      "environment": {
+        "OMP_PROC_BIND": "spread",
+        "OMP_NUM_THREADS": "1",
+        "DEAL_II_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1"
+      }
+    }
+  },
+  "total_simulation_seconds": 423.75730794500123,
+  "qualifications": [
+    "Fixed spatial rule and timestep only; no accuracy/refinement qualification.",
+    "RMS norms use Q1 interpolation of exported nodal fields, including nodal Omega.",
+    "Instant tensor shift is evaluated on each own velocity path, not a unique causal decomposition.",
+    "Legacy tensor-load column is named deviatoric by the API but uses the retained full-gradient law."
+  ]
+}

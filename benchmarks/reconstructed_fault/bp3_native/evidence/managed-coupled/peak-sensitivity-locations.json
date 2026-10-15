@@ -1,0 +1,62 @@
+{
+  "V_m_s": {
+    "step": 64,
+    "node": 58,
+    "s_m": 1154.7005383792516,
+    "from_lower_endpoint_m": 0.0,
+    "primary": 8.572150693351738e-10,
+    "control": 1.0250738831155726e-09,
+    "primary_population": {
+      "births": "1",
+      "removed": "0",
+      "outflow": "0",
+      "crossings": "54"
+    },
+    "control_population": {
+      "births": "145",
+      "removed": "16",
+      "outflow": "21",
+      "crossings": "3873"
+    }
+  },
+  "raw_normal_Pa": {
+    "step": 67,
+    "node": 58,
+    "s_m": 1154.7005383792516,
+    "from_lower_endpoint_m": 0.0,
+    "primary": 110046016.95745134,
+    "control": 91226688.38226667,
+    "primary_population": {
+      "births": "391",
+      "removed": "479",
+      "outflow": "231",
+      "crossings": "5387"
+    },
+    "control_population": {
+      "births": "2",
+      "removed": "0",
+      "outflow": "1",
+      "crossings": "209"
+    }
+  },
+  "filtered_normal_Pa": {
+    "step": 69,
+    "node": 58,
+    "s_m": 1154.7005383792516,
+    "from_lower_endpoint_m": 0.0,
+    "primary": 36499221.942778334,
+    "control": 30993728.579565052,
+    "primary_population": {
+      "births": "348",
+      "removed": "3",
+      "outflow": "3",
+      "crossings": "6858"
+    },
+    "control_population": {
+      "births": "18",
+      "removed": "0",
+      "outflow": "1",
+      "crossings": "230"
+    }
+  }
+}

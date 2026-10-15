@@ -1,0 +1,32 @@
+[
+  {
+    "step": 0,
+    "s_m": 1134.7919084071955,
+    "signed_chords": {
+      "raw_normal_Pa": -4736.074774764478,
+      "filtered_normal_Pa": -477.85575722903013,
+      "pressure_Pa": -6034.475239612215,
+      "deviatoric_Pa": 1298.4004647854638
+    }
+  },
+  {
+    "step": 22,
+    "s_m": 1134.7919084071955,
+    "signed_chords": {
+      "raw_normal_Pa": 804670.6699248254,
+      "filtered_normal_Pa": 36510.75095626712,
+      "pressure_Pa": 752529.0271136495,
+      "deviatoric_Pa": 52141.64281113056
+    }
+  },
+  {
+    "step": 41,
+    "s_m": 1134.7919084071955,
+    "signed_chords": {
+      "raw_normal_Pa": 3685946.923923984,
+      "filtered_normal_Pa": 218677.6498992294,
+      "pressure_Pa": 3627744.8007682376,
+      "deviatoric_Pa": 58202.123155680194
+    }
+  }
+]

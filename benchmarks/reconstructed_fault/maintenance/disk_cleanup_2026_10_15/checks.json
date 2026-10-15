@@ -1,0 +1,82 @@
+{
+  "restoration": {
+    "member": "build-propagation-integration/runs/output-normal-resolution-q2-n256/fe-bulk-8.csv",
+    "bytes": 57230909,
+    "sha256": "694c605a08ef6bb8b39bf789487bc0784d74b0d252ac5a7a996c57550966af1f",
+    "restore_exit": 0,
+    "differing_file_refusal_exit": 2,
+    "refusal_stderr": "tar: build-propagation-integration/runs/output-normal-resolution-q2-n256/fe-bulk-8.csv: Cannot open: File exists\ntar: Exiting with failure status due to previous errors",
+    "differing_file_preserved": true
+  },
+  "dependency_checks": [
+    {
+      "path": "build-bp3-native/managed-coupled/final/aspect-release",
+      "returncode": 0,
+      "unresolved": []
+    },
+    {
+      "path": "build-bp3-native/managed-coupled/bp3-plugin/libbp3_restore_150x50.release.so",
+      "returncode": 0,
+      "unresolved": []
+    },
+    {
+      "path": "build-bp3-native/slip-front/plugin/libbp3_restore_150x50.release.so",
+      "returncode": 0,
+      "unresolved": []
+    },
+    {
+      "path": "build-propagation-integration/serial-reference/aspect-release",
+      "returncode": 0,
+      "unresolved": []
+    },
+    {
+      "path": "build-propagation-integration/serial-reference/libnative_endpoint_verification.release.so",
+      "returncode": 0,
+      "unresolved": []
+    }
+  ],
+  "preexisting_dangling_links": [
+    {
+      "path": "build-propagation-p1/aspect-release",
+      "target": "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-post-r6-gcc12-unity/aspect-release"
+    },
+    {
+      "path": "build-propagation-p1/aspect",
+      "target": "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-post-r6-gcc12-unity/aspect"
+    },
+    {
+      "path": "build-propagation-p1-bounds/aspect-release",
+      "target": "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-post-r6-gcc12-unity/aspect-release"
+    },
+    {
+      "path": "build-propagation-p1-bounds/aspect",
+      "target": "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-post-r6-gcc12-unity/aspect"
+    },
+    {
+      "path": "build-propagation-p1-tail/aspect-release",
+      "target": "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-post-r6-gcc12-unity/aspect-release"
+    },
+    {
+      "path": "build-propagation-p1-tail/aspect",
+      "target": "/home/ein/repository/aspect-pf-rsf-refactor/build-refactor-post-r6-gcc12-unity/aspect"
+    }
+  ],
+  "cleanup_script_syntax": "pass",
+  "simulations_run": 0,
+  "builds_run": 0,
+  "final_note_checks": {
+    "incoming_modified_content_preserved": 28,
+    "intentional_document_updates": [
+      "benchmarks/reconstructed_fault/CLEANUP.md",
+      "benchmarks/reconstructed_fault/README.md",
+      "doc/reconstructed_fault/README.md",
+      "doc/reconstructed_fault/CURRENT_STATUS.md"
+    ],
+    "compatibility_links_verified": 4,
+    "new_index_links": "pass",
+    "git_diff_check": "pass",
+    "staged_changes": "none",
+    "head_and_branch": "unchanged",
+    "final_free_bytes": 12981846016
+  }
+}

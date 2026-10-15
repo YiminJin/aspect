@@ -91,10 +91,10 @@ namespace aspect
         assemblers->stokes_system.push_back(std::make_unique<aspect::Assemblers::StokesIncompressibleTerms<dim>>());
       }
 
-    // The optional FE owner uses a 3D plane-strain deviator even with an
+    // Either history owner can select the 3D plane-strain deviator with an
     // incompressible mass equation. Reuse the existing kappa trace term once.
     const auto *fault_material = dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(material_model.get());
-    const bool fe_plane_strain = fault_material && fault_material->uses_fe_strain_history();
+    const bool fe_plane_strain = fault_material && fault_material->uses_deviatoric_strain_rate();
     if (material_model->is_compressible() || parameters.enable_prescribed_dilation || fe_plane_strain)
       {
         // The compressible part of the preconditioner is only necessary if we use the simplified A block

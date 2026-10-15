@@ -1,0 +1,69 @@
+{
+  "HEAD": "c33edaaeb145e5d3dce155bb815552ef80efc5f9",
+  "branch": "fault-propagation",
+  "staged_changes": false,
+  "unchanged_incoming_production_files": [
+    "benchmarks/reconstructed_fault/bp3/plugin/bp3.cc",
+    "benchmarks/reconstructed_fault/bp3/plugin/particle_history.cc",
+    "benchmarks/reconstructed_fault/bp3/plugin/runtime.h",
+    "benchmarks/reconstructed_fault/bp3/plugin/work_audit.cc",
+    "include/aspect/material_model/phase_field_fault/fe_strain_internal.h",
+    "source/material_model/phase_field_fault.cc",
+    "source/material_model/phase_field_fault/constitutive.cc",
+    "source/material_model/phase_field_fault/fe_strain.cc",
+    "source/material_model/phase_field_fault/history.cc",
+    "source/material_model/phase_field_fault/normalization.cc",
+    "source/particle/property/interface.cc",
+    "source/simulator/phase_field.cc",
+    "tests/phase_field_fault_test_access.h"
+  ],
+  "changed_incoming_tracked": [
+    "doc/reconstructed_fault/CURRENT_STATUS.md",
+    "doc/reconstructed_fault/current_design.md",
+    "doc/reconstructed_fault/specification.tex"
+  ],
+  "missing_incoming_untracked": [],
+  "changed_incoming_untracked": [
+    "benchmarks/reconstructed_fault/bp3_native/CMakeLists.txt",
+    "benchmarks/reconstructed_fault/bp3_native/STATUS.md"
+  ],
+  "preserved_incoming_untracked_count": 2346,
+  "unchanged_artifacts": {
+    "build-bp3-native/aspect-release": "1ba2f7f43b37b75b1462d9cd5e48998fc8cc58b891e943829be8240f70776d12",
+    "build-bp3-native/section7b/bp3-plugin/libbp3_restore_150x50.release.so": "676177bc1935cdee156227b9aeae1a2990a5ed0ddbf5bc34955b57a82e8dcd76",
+    "build-bp3-native/history-plugin/libbp3_coupled_checks.release.so": "ec028e17382d642d166f0528368c7947632fcd592577886f6a94bd65895c06da"
+  },
+  "unchanged_inputs": {
+    "benchmarks/reconstructed_fault/bp3_native/section7b-fe-perturbed.prm": "ad05bbab1ea46d78b2de4057acd5c20472cf622a0f5e890d6031ef8539b9d5da",
+    "benchmarks/reconstructed_fault/bp3_native/section7b-common.prm": "1da3021f516ab38046c25af6748e6e59446ac8e186a44030396b707d486f5964",
+    "benchmarks/reconstructed_fault/bp3_native/section7b-particle-perturbed.prm": "916a967654bfb1f2eab1520f696fff9189dda1d90eaeca83cccf176f345069a9",
+    "benchmarks/reconstructed_fault/bp3_native/section7b-fe-gate.prm": "0c4a13513f3c4c4afdaaa85afdc91458b525ea956e54004cf91425e27fe893a4",
+    "benchmarks/reconstructed_fault/bp3_native/section7b-fe-creep.prm": "7acef6553d745cb85d6c515b9d768e58bace56973005c5a5113df00987d55689",
+    "benchmarks/reconstructed_fault/bp3_native/section7b-particle-gate.prm": "ed67b2ca786441994a6bf9d2228277d16780db3b7ad8740c8239905b68d8c0e0",
+    "benchmarks/reconstructed_fault/bp3_native/section7b-particle-creep.prm": "425533e48fc964bd323931f59f1f7d29d59ad7ad9e26dc17a75ce98a30a44b14"
+  },
+  "reference": {
+    "HEAD": "8f126905c559df106f08af4079f678401fec4d06",
+    "tracked_changes": false,
+    "mode": "read-only"
+  },
+  "git_diff_check": "pass",
+  "analysis": "pass: exact pair identities, resolved input differences, 11 common states, full profiles and metrics",
+  "plot": "pass: two retained-profile PDF pages",
+  "sources": {
+    "benchmarks/reconstructed_fault/bp3_native/CMakeLists.txt": "879c127679c8ca4b1a42da0d607e8cce7deb4eb867ff34620988e259faa70cbd",
+    "benchmarks/reconstructed_fault/bp3_native/SECTION7B.md": "e1325412dbb2035e8cdaa829e510a1a0ab6a917ce59081cf6962a34c738ff808",
+    "benchmarks/reconstructed_fault/bp3_native/STATUS.md": "e3c358c5a22a18f623323a3808f681e3f08cd6457438db391919c466cd3ec309",
+    "benchmarks/reconstructed_fault/bp3_native/analyze_section7b.py": "9d4952b27cd6a0f034f2bdfeb8c1b648f48667fd26612802e13276d1c97eb4c3",
+    "benchmarks/reconstructed_fault/bp3_native/coupled_checks.cc": "bc0f4fe0c2e5147ffff9030235fff93cb0a4bce21f79fc4acbc53f326d811fe5",
+    "benchmarks/reconstructed_fault/bp3_native/plot_section7b.py": "ffdacc5d017ee44fc6956560b3193a9c62f96b33e2268ed7227086c8fc0493ce",
+    "benchmarks/reconstructed_fault/bp3_native/section7b-common.prm": "1da3021f516ab38046c25af6748e6e59446ac8e186a44030396b707d486f5964",
+    "benchmarks/reconstructed_fault/bp3_native/section7b-fe-creep.prm": "7acef6553d745cb85d6c515b9d768e58bace56973005c5a5113df00987d55689",
+    "benchmarks/reconstructed_fault/bp3_native/section7b-fe-gate.prm": "0c4a13513f3c4c4afdaaa85afdc91458b525ea956e54004cf91425e27fe893a4",
+    "benchmarks/reconstructed_fault/bp3_native/section7b-fe-perturbed.prm": "ad05bbab1ea46d78b2de4057acd5c20472cf622a0f5e890d6031ef8539b9d5da",
+    "benchmarks/reconstructed_fault/bp3_native/section7b-particle-creep.prm": "425533e48fc964bd323931f59f1f7d29d59ad7ad9e26dc17a75ce98a30a44b14",
+    "benchmarks/reconstructed_fault/bp3_native/section7b-particle-gate.prm": "ed67b2ca786441994a6bf9d2228277d16780db3b7ad8740c8239905b68d8c0e0",
+    "benchmarks/reconstructed_fault/bp3_native/section7b-particle-perturbed.prm": "916a967654bfb1f2eab1520f696fff9189dda1d90eaeca83cccf176f345069a9",
+    "benchmarks/reconstructed_fault/bp3_native/section7b_report.md": "8d99975afff441d6d92f9b97237f5bea4758a55a63c46cec41b5e646f665721f"
+  }
+}

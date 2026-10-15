@@ -45,6 +45,10 @@ namespace BP3
     model.put("BP3.loading","stationary symmetric primitive; physical top-to-bottom thrust; full Q1 completion remains core-owned");
     model.put("BP3.loading_rate_m_per_s",Vp);
     model.put("BP3.initial_slip_rate_m_per_s",Vinit);
+#ifdef ASPECT_BP3_LOCAL_FRONT_TEST
+    model.put("BP3.initial_state_policy", "DIAGNOSTIC Gaussian log-Omega pulse; center .35 L, width .25 L; not official BP3");
+    model.put("BP3.initial_log_Omega_peak", all.get<std::string>("Postprocess.BP3 restored monitor.Local state disturbance"));
+#endif
     model.put("BP3.background_normal_stress_Pa",sigma0);
     model.put("BP3.refinement_policy","support band max(2 ell,R+2 h_fine); exterior min(h_coarse,2 h_fine+(d-band)/4); native startup tagging v2; endpoint strip (R+h_coarse*(abs(nx)+abs(ny)))/sin(dip), plus h_fine margin, depth 2 h_fine");
 #ifdef ASPECT_BP3_LOCAL_OSCILLATION_TEST

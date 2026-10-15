@@ -1,0 +1,62 @@
+[
+  {
+    "file": "bp3_model.h",
+    "mode": "ordinary",
+    "non_include_tokens_identical": true
+  },
+  {
+    "file": "bp3.cc",
+    "mode": "ordinary",
+    "non_include_tokens_identical": true
+  },
+  {
+    "file": "monitor.cc",
+    "mode": "ordinary",
+    "non_include_tokens_identical": true
+  },
+  {
+    "file": "configuration.cc",
+    "mode": "ordinary",
+    "non_include_tokens_identical": true
+  },
+  {
+    "file": "bp3_model.h",
+    "mode": "ASPECT_BP3_LOCAL_BOTTOM_TEST",
+    "non_include_tokens_identical": true
+  },
+  {
+    "file": "bp3.cc",
+    "mode": "ASPECT_BP3_LOCAL_BOTTOM_TEST",
+    "non_include_tokens_identical": true
+  },
+  {
+    "file": "monitor.cc",
+    "mode": "ASPECT_BP3_LOCAL_BOTTOM_TEST",
+    "non_include_tokens_identical": true
+  },
+  {
+    "file": "configuration.cc",
+    "mode": "ASPECT_BP3_LOCAL_BOTTOM_TEST",
+    "non_include_tokens_identical": true
+  },
+  {
+    "file": "bp3_model.h",
+    "mode": "ASPECT_BP3_LOCAL_OSCILLATION_TEST",
+    "non_include_tokens_identical": true
+  },
+  {
+    "file": "bp3.cc",
+    "mode": "ASPECT_BP3_LOCAL_OSCILLATION_TEST",
+    "non_include_tokens_identical": true
+  },
+  {
+    "file": "monitor.cc",
+    "mode": "ASPECT_BP3_LOCAL_OSCILLATION_TEST",
+    "non_include_tokens_identical": true
+  },
+  {
+    "file": "configuration.cc",
+    "mode": "ASPECT_BP3_LOCAL_OSCILLATION_TEST",
+    "non_include_tokens_identical": true
+  }
+]

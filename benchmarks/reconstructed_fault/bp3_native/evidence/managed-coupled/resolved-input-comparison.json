@@ -1,0 +1,9 @@
+{
+  "identical_except": [
+    "Output directory",
+    "Minimum particles per cell",
+    "Maximum particles per cell",
+    "Number of particles per cell per direction"
+  ],
+  "pass": true
+}

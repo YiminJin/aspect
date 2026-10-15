@@ -277,6 +277,11 @@ namespace aspect
         {
           return fe_strain_history;
         }
+        /** Constitutive convention, independent of the authoritative history owner. */
+        bool uses_deviatoric_strain_rate() const
+        {
+          return fe_strain_history || consistent_particle_strain;
+        }
         bool has_fe_strain_history() const
         {
           return bool(fe_strain_state);
@@ -355,6 +360,7 @@ namespace aspect
         struct MaxwellCoefficients;
         std::shared_ptr<FEStrainState> fe_strain_state;
         bool fe_strain_history = false;
+        bool consistent_particle_strain = false;
         bool consistent_endpoint_phase = false;
         std::string fe_initial_phase_profile;
         unsigned int fe_bulk_normal_quadrature_points = 3;

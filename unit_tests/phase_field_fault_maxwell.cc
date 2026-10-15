@@ -121,7 +121,7 @@ TEST_CASE("FaultFriction declares the Stage E friction-law defaults")
   REQUIRE(parameters.get("Characteristic weakening slip rates") == "1.e-6");
   std::ostringstream parameter_text;
   parameters.print_parameters(parameter_text,
-                              dealii::ParameterHandler::OutputStyle::Text);
+                              dealii::ParameterHandler::PRM);
   REQUIRE(parameter_text.str().find("Maximum slip rate") == std::string::npos);
 }
 

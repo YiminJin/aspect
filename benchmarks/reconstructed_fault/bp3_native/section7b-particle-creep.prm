@@ -1,0 +1,7 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_native/section7b-common.prm
+set Output directory = $ASPECT_SOURCE_DIR/build-bp3-native/runs/7b-particle-creep
+subsection Material model
+  subsection Phase field fault
+    set Bulk history representation = particle stress
+  end
+end

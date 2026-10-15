@@ -1,0 +1,307 @@
+{
+  "scope": "Work-in-progress checkpoint for a new worktree; scientific task remains open",
+  "worktree": "/home/ein/repository/aspect-fault-propagation",
+  "branch": "fault-propagation",
+  "head_before_checkpoint": "c33edaaeb145e5d3dce155bb815552ef80efc5f9",
+  "portable_evidence": {
+    "benchmarks/reconstructed_fault/bp3_native/evidence/section7b/comparison.json": {
+      "original": "build-bp3-native/section7b/comparison.json",
+      "bytes": 122707,
+      "sha256": "fe71b4754ee4ef47ef69a239075f0082df7a86439b69a397156784e3f451f437"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/section7b/final-verification.json": {
+      "original": "build-bp3-native/section7b/final-verification.json",
+      "bytes": 5074,
+      "sha256": "756611529ba4faecf01d61962beda6a542f4a19cb42b64cd98491a30e81ce3ad"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/section7b/gate-identity.json": {
+      "original": "build-bp3-native/section7b/gate-identity.json",
+      "bytes": 974,
+      "sha256": "dcf5a5668b88019b11c528508ef422c0ef164beb784908f7d8504283236187a8"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/section7b/provenance.json": {
+      "original": "build-bp3-native/section7b/provenance.json",
+      "bytes": 1775,
+      "sha256": "eb3100c6e36ca20a7fc72aec6b03f899743a538cec8ed1dcdeffa2df34fefe4a"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/section7b/resolved-pair-diff.json": {
+      "original": "build-bp3-native/section7b/resolved-pair-diff.json",
+      "bytes": 3393,
+      "sha256": "ea75324e398af0369023bf597aca7c002930f4b08fc5eae149f04c5305e6daa3"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/section7cd/artifact-provenance.json": {
+      "original": "build-bp3-native/section7cd/artifact-provenance.json",
+      "bytes": 986,
+      "sha256": "3054d122cd9b583a88246279f977ef377ca60bdb8b2f17cff886c00ad1a9713e"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/section7cd/compiler-provenance.json": {
+      "original": "build-bp3-native/section7cd/compiler-provenance.json",
+      "bytes": 147,
+      "sha256": "856c74c5e1891cabd91a7cbc58197f3792c117f5f3bf9f346a9888e774edb563"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/section7cd/comparison.json": {
+      "original": "build-bp3-native/section7cd/comparison.json",
+      "bytes": 268107,
+      "sha256": "8861fee66d7466c2a515f4f93948c288b2f56293e4291b019ec20546408d27a7"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/section7cd/final-verification.json": {
+      "original": "build-bp3-native/section7cd/final-verification.json",
+      "bytes": 4318,
+      "sha256": "00048d551efacdcc54f23816bcca1052873b864b92db812b82c18487ebebf749"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/section7cd/resolved-MPI-input-diffs.json": {
+      "original": "build-bp3-native/section7cd/resolved-MPI-input-diffs.json",
+      "bytes": 2678,
+      "sha256": "362c33960a616459e31a9502997dca32d6f857eef4585f5cde51aec35a18158a"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/section8/artifact-provenance.json": {
+      "original": "build-bp3-native/section8/artifact-provenance.json",
+      "bytes": 1560,
+      "sha256": "165aec6312feeaef67a7f91a78ca18d2a477de11bead3f245bb05f0725dfe92e"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/section8/comparison.json": {
+      "original": "build-bp3-native/section8/comparison.json",
+      "bytes": 63280,
+      "sha256": "4c33ab2139f71d54ad64329d593ba5fdbacf08bd568498de477c6cb3ffd5f01d"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/section8/filter-settings-difference.json": {
+      "original": "build-bp3-native/section8/filter-settings-difference.json",
+      "bytes": 191,
+      "sha256": "58e22cf806f2c344fb3e0ddfa0a90ab8f34c622c08d9910a3f3cfee7cb214948"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/section8/final-verification.json": {
+      "original": "build-bp3-native/section8/final-verification.json",
+      "bytes": 1652,
+      "sha256": "3b6d0f380dc78dbb61242ade5a3305155ff1c4cc39a1d02a555da73773fa4fc9"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/section8/full-effective-settings.json": {
+      "original": "build-bp3-native/section8/full-effective-settings.json",
+      "bytes": 6858,
+      "sha256": "79a3300249c818254338de5e9bf22ea135718802a1f6106564ae64326b90f3f0"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/section8/full-initialization.json": {
+      "original": "build-bp3-native/section8/full-initialization.json",
+      "bytes": 366,
+      "sha256": "8c659fde8053e35a4f1deadb8021903c1adea999884c5430e96ef46ea2de11dd"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/section8/full-input-provenance.json": {
+      "original": "build-bp3-native/section8/full-input-provenance.json",
+      "bytes": 538,
+      "sha256": "d5b2a85f787606a5cd061a92bd414c0f62810ebf916703f904f98d113468ffcf"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/section8/report-values.json": {
+      "original": "build-bp3-native/section8/report-values.json",
+      "bytes": 12877,
+      "sha256": "336613b0ba9cf69e6df7b65130ea814388006f1cff3536f87ad4c639d42aab1d"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/section8/resource-preflight.json": {
+      "original": "build-bp3-native/section8/resource-preflight.json",
+      "bytes": 1369,
+      "sha256": "09b518ec6260bd6a2be3343f3ebcb6a0f60074cadf557d337bba8452af780df1"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/section8/timestep-provenance.json": {
+      "original": "build-bp3-native/section8/timestep-provenance.json",
+      "bytes": 840,
+      "sha256": "9f673b117414f6ca026c7cab8f931b34d46be14e3a3edacd79fabf4b542f6b1b"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/section8/common-time-differences.csv": {
+      "original": "build-bp3-native/section8/common-time-differences.csv",
+      "bytes": 12855,
+      "sha256": "b4024a284169620636e45f7e756d0d6160965dd3850feb41f1267c44bdccd478"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/section8/profiles.pdf": {
+      "original": "build-bp3-native/section8/profiles.pdf",
+      "bytes": 110326,
+      "sha256": "5ef3ec97ceb6ffbdf6aa6e97e3b081653e4c587ad893c4e4598e1c3705c3666b"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/transport-checks/assessment-final-with-diagnosis.json": {
+      "original": "build-bp3-native/transport-checks/assessment-final-with-diagnosis.json",
+      "bytes": 17476,
+      "sha256": "64679bf0656242e575f48128a369c5729683da2aa6c3df5a90eaf0a4f0584637"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/transport-checks/failed-domain-independent.json": {
+      "original": "build-bp3-native/transport-checks/failed-domain-independent.json",
+      "bytes": 1268,
+      "sha256": "5400c4eeb9e22e6fac8209d22e46a1627fd8da86c0111d018e59d4722a71cf28"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/transport-checks/preservation.json": {
+      "original": "build-bp3-native/transport-checks/preservation.json",
+      "bytes": 1892,
+      "sha256": "e41646018c490d32e6fce93b76f1d74c6d2b37c953d65adf98315987ee1deea7"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/transport-checks/provenance.json": {
+      "original": "build-bp3-native/transport-checks/provenance.json",
+      "bytes": 34564,
+      "sha256": "5b592bd50f0c51a14dd4ef20b184467921077b773bc80d3369c7055bc1aed503"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/transport-geometry/assessment-final.json": {
+      "original": "build-bp3-native/transport-geometry/assessment-final.json",
+      "bytes": 76318,
+      "sha256": "182ed7c629171c02b43d02e05bc7394d2c3fac5c7913ee992134910c6978267b"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/transport-geometry/final-checks.json": {
+      "original": "build-bp3-native/transport-geometry/final-checks.json",
+      "bytes": 225,
+      "sha256": "34cac303d8b1d1343a82968eb83b5b11495c357ea3ec38fc389687817f61aff7"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/transport-geometry/preservation.json": {
+      "original": "build-bp3-native/transport-geometry/preservation.json",
+      "bytes": 1677,
+      "sha256": "d1e27022a7e0fbcf717749ee0691c0227a6a6e04260edf1d0d83ec127ec59278"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/transport-geometry/provenance.json": {
+      "original": "build-bp3-native/transport-geometry/provenance.json",
+      "bytes": 69735,
+      "sha256": "74f7cdde6198dd22415d355942b770b8b4e4fe7c18c905389554ce60b41f75a7"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/transport-geometry/core-build-command.json": {
+      "original": "build-bp3-native/transport-geometry/core-build-command.json",
+      "bytes": 1837,
+      "sha256": "e015088a2a04933922ab365e01afdb6de75bc0bdcafac84d7d86453ac16d2a98"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/transport-geometry/core-build-result.json": {
+      "original": "build-bp3-native/transport-geometry/core-build-result.json",
+      "bytes": 17,
+      "sha256": "e89df0eae5ec7db81135aed16463968955c578bcc4f2ec43172eff351f080c17"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/transport-geometry/unit-build-final-result.json": {
+      "original": "build-bp3-native/transport-geometry/unit-build-final-result.json",
+      "bytes": 17,
+      "sha256": "e89df0eae5ec7db81135aed16463968955c578bcc4f2ec43172eff351f080c17"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/managed-coupled/assessment.json": {
+      "original": "build-bp3-native/managed-coupled/assessment.json",
+      "bytes": 203667,
+      "sha256": "9d2343bd164030b96ebf60b94efb4dd32b3175f22954b04ee14dd327404c3fb4"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/managed-coupled/peak-sensitivity-locations.json": {
+      "original": "build-bp3-native/managed-coupled/peak-sensitivity-locations.json",
+      "bytes": 1347,
+      "sha256": "02e8851e229089b68298a7ba07e888a9dae0c87173215d3adda13da0a9f6406b"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/managed-coupled/preservation.json": {
+      "original": "build-bp3-native/managed-coupled/preservation.json",
+      "bytes": 4782,
+      "sha256": "3ac45d00de52b4389afcc635b3fffd231f22634e22b041ccdae06e8e70b9f5c2"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/managed-coupled/primary-v3-artifacts.json": {
+      "original": "build-bp3-native/managed-coupled/primary-v3-artifacts.json",
+      "bytes": 692,
+      "sha256": "c8b019ab2f38b2d60da2f68cdb609d9e25e70008e14d3a64b420ba8d5bb566da"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/managed-coupled/primary-checks.json": {
+      "original": "build-bp3-native/managed-coupled/primary-checks.json",
+      "bytes": 5397,
+      "sha256": "94374222fe2aa6dd1307965b3e9c28880bdc3e9622e87125642b405c714bce04"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/managed-coupled/resolved-input-comparison.json": {
+      "original": "build-bp3-native/managed-coupled/resolved-input-comparison.json",
+      "bytes": 189,
+      "sha256": "4eadcfe5644c18aaca2785817e21b3a1496abe2df0f878d21d7b6c030562040d"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/managed-coupled/native-build-commands.json": {
+      "original": "build-bp3-native/managed-coupled/native-build-commands.json",
+      "bytes": 21736,
+      "sha256": "f99306a5be4bee3c93e017db0c2b59af0a7b83f67633b90ae679f8139a38dc79"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/managed-coupled/native-build-results-v2.json": {
+      "original": "build-bp3-native/managed-coupled/native-build-results-v2.json",
+      "bytes": 327,
+      "sha256": "21e7853e7be6d6a7a99c6af891c38393b59729859ae287ff8ded68ef56fc2f43"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/managed-event-audit/assessment.json": {
+      "original": "build-bp3-native/managed-event-audit/assessment.json",
+      "bytes": 50260,
+      "sha256": "1938ef7c4e6459ac19c016e85ca8e2c77bddfcd845c3d0b6f948e119610320c3"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/managed-event-audit/final-artifacts.json": {
+      "original": "build-bp3-native/managed-event-audit/final-artifacts.json",
+      "bytes": 401,
+      "sha256": "7aee155aac6d1b4c7bc9be3c1019ba6ba2962fd6aebf7b74206e64beed8070c7"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/managed-event-audit/gate-final-equivalence.json": {
+      "original": "build-bp3-native/managed-event-audit/gate-final-equivalence.json",
+      "bytes": 699,
+      "sha256": "44572dec703eb57e7c217c47f75c702670e12a0ff6ca85e37eeeda58f88b5d9e"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/managed-event-audit/preservation.json": {
+      "original": "build-bp3-native/managed-event-audit/preservation.json",
+      "bytes": 2100,
+      "sha256": "a880ce18e4fff4091b4feda1000e8cdb947fb63dced904d2cfc7abc17265691f"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/managed-event-audit/run-artifacts.json": {
+      "original": "build-bp3-native/managed-event-audit/run-artifacts.json",
+      "bytes": 565,
+      "sha256": "fc8bb266e0bb7fad34423028ef7f13160ae81db3387c3fbe25f05cff9000dfbd"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/managed-event-audit/style.json": {
+      "original": "build-bp3-native/managed-event-audit/style.json",
+      "bytes": 318,
+      "sha256": "8503321f35457f1ec0da0fe36ccd315c770bde15be0d6ba53d5b7e6be39f054f"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/slip-front/assessment.json": {
+      "original": "build-bp3-native/slip-front/assessment.json",
+      "bytes": 629552,
+      "sha256": "1ad1319671241d84489f8671963280259728b63d1a059f5401cf227b08fd7f56"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/slip-front/final-artifacts.json": {
+      "original": "build-bp3-native/slip-front/final-artifacts.json",
+      "bytes": 299,
+      "sha256": "54403a7b1e89f8d7ec38ad0b65884381cc7872f5e9ab067e3025eb4ce07aef30"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/slip-front/gate-final-equivalence.json": {
+      "original": "build-bp3-native/slip-front/gate-final-equivalence.json",
+      "bytes": 107,
+      "sha256": "c2d6f2eb6f8cc66acafb660f86e06e3b748ced42073403ac7ea750d39df5b0fc"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/slip-front/legacy-preprocessing.json": {
+      "original": "build-bp3-native/slip-front/legacy-preprocessing.json",
+      "bytes": 1392,
+      "sha256": "805e6c2e8ef495ff0ae2cd074bd488e7fa8d1747caf8b80410f4aeac27154bab"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/slip-front/lower-end-decomposition.json": {
+      "original": "build-bp3-native/slip-front/lower-end-decomposition.json",
+      "bytes": 774,
+      "sha256": "850bc3e690e03eb5f19729dce548a6d218d2f7dd87d7bddc13234f17f351986b"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/slip-front/preservation.json": {
+      "original": "build-bp3-native/slip-front/preservation.json",
+      "bytes": 2530,
+      "sha256": "b8687296204de4df54e3afeb35235d807bd029b125e66367fbb588067d64e568"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/slip-front/run-artifacts.json": {
+      "original": "build-bp3-native/slip-front/run-artifacts.json",
+      "bytes": 1051,
+      "sha256": "a757597b21a5c9512cbffc77b189429b027ac0a9fa48e09fc483d897961e8d68"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/slip-front/style.json": {
+      "original": "build-bp3-native/slip-front/style.json",
+      "bytes": 636,
+      "sha256": "c78972a6729e8f92c2f37fa1f1539965f39887115c03c922e2fc86a8eb91c667"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/slip-front/endpoint-profiles.csv": {
+      "original": "build-bp3-native/slip-front/endpoint-profiles.csv",
+      "bytes": 13994,
+      "sha256": "c8b776e572bd67fb3c4d78aaf0eed90584c9456dcb07816bee80ec8bfb209b5d"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/slip-front/disturbances.csv": {
+      "original": "build-bp3-native/slip-front/disturbances.csv",
+      "bytes": 34184,
+      "sha256": "58f7736f165085e0ddc1d0d5e7d192dc7607124a4b243415db24f1d614309134"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/slip-front/front-and-timestep.pdf": {
+      "original": "build-bp3-native/slip-front/front-and-timestep.pdf",
+      "bytes": 140265,
+      "sha256": "a1ffc51cb5c0cd7604c2bd8012a31bffde5bf7097dfed5bed7e88d98be0460da"
+    },
+    "benchmarks/reconstructed_fault/bp3_native/evidence/slip-front/fields.pdf": {
+      "original": "build-bp3-native/slip-front/fields.pdf",
+      "bytes": 51338,
+      "sha256": "0404d6eb54a8a20294b26dc8897b624dde27005e66b27b75477e320b7e0571d9"
+    }
+  },
+  "local_only_files_manifest": "benchmarks/reconstructed_fault/bp3_native/local-only-files.json",
+  "local_only_files": 2333,
+  "local_only_bytes": 610560453,
+  "builds_and_simulations_run": 0
+}

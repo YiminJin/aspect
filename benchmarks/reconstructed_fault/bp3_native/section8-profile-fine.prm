@@ -1,0 +1,10 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_native/section8-profile.prm
+set Output directory = $ASPECT_SOURCE_DIR/build-bp3-native/runs/8-profile-fine
+subsection Mesh refinement
+  set Initial global refinement = 8
+end
+subsection Postprocess
+  subsection BP3
+    set Graceful wall seconds = 590
+  end
+end

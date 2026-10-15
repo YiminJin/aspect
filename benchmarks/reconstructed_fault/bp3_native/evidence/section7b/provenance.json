@@ -1,0 +1,25 @@
+{
+  "HEAD": "c33edaaeb145e5d3dce155bb815552ef80efc5f9",
+  "branch": "fault-propagation",
+  "artifacts": {
+    "build-bp3-native/aspect-release": "1ba2f7f43b37b75b1462d9cd5e48998fc8cc58b891e943829be8240f70776d12",
+    "build-bp3-native/section7b/bp3-plugin/libbp3_restore_150x50.release.so": "676177bc1935cdee156227b9aeae1a2990a5ed0ddbf5bc34955b57a82e8dcd76",
+    "build-bp3-native/history-plugin/libbp3_coupled_checks.release.so": "ec028e17382d642d166f0528368c7947632fcd592577886f6a94bd65895c06da"
+  },
+  "inputs": {
+    "benchmarks/reconstructed_fault/bp3_native/section7b-fe-perturbed.prm": "ad05bbab1ea46d78b2de4057acd5c20472cf622a0f5e890d6031ef8539b9d5da",
+    "benchmarks/reconstructed_fault/bp3_native/section7b-common.prm": "1da3021f516ab38046c25af6748e6e59446ac8e186a44030396b707d486f5964",
+    "benchmarks/reconstructed_fault/bp3_native/section7b-particle-perturbed.prm": "916a967654bfb1f2eab1520f696fff9189dda1d90eaeca83cccf176f345069a9",
+    "benchmarks/reconstructed_fault/bp3_native/section7b-fe-gate.prm": "0c4a13513f3c4c4afdaaa85afdc91458b525ea956e54004cf91425e27fe893a4",
+    "benchmarks/reconstructed_fault/bp3_native/section7b-fe-creep.prm": "7acef6553d745cb85d6c515b9d768e58bace56973005c5a5113df00987d55689",
+    "benchmarks/reconstructed_fault/bp3_native/section7b-particle-gate.prm": "ed67b2ca786441994a6bf9d2228277d16780db3b7ad8740c8239905b68d8c0e0",
+    "benchmarks/reconstructed_fault/bp3_native/section7b-particle-creep.prm": "425533e48fc964bd323931f59f1f7d29d59ad7ad9e26dc17a75ce98a30a44b14"
+  },
+  "loading": 1e-09,
+  "dt": 200000,
+  "T": 2000000,
+  "common_quadrature": "native QGauss3 tensor, 9 points",
+  "plugin_test_definition": "ASPECT_BP3_LOCAL_BOTTOM_TEST; OSCILLATION_TEST off",
+  "stage": "7B only",
+  "simulation_budget_seconds": 3600
+}

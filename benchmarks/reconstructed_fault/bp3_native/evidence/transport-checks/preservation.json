@@ -1,0 +1,55 @@
+{
+  "branch": "fault-propagation",
+  "head": "c33edaaeb145e5d3dce155bb815552ef80efc5f9",
+  "incoming_manifest": "build-bp3-native/transport-checks/incoming.json",
+  "incoming_paths": 14429,
+  "missing_incoming_paths": [],
+  "source_config_hashes_checked": 5876,
+  "source_config_changed": [
+    "tests/phase_field_fault_test_access.h"
+  ],
+  "test_wrapper_removal_restores_exact_incoming_header": true,
+  "all_other_incoming_source_config_unchanged": true,
+  "artifacts": {
+    "build-bp3-native/aspect-release": {
+      "incoming": "1ba2f7f43b37b75b1462d9cd5e48998fc8cc58b891e943829be8240f70776d12",
+      "current": "1ba2f7f43b37b75b1462d9cd5e48998fc8cc58b891e943829be8240f70776d12"
+    },
+    "build-bp3-native/server-package/bp3-native-fe-server-20261014.tar.gz": {
+      "incoming": "b41ad311d0ca693122843e9fa0f26dc6ed6484bb5bbc8a17882e9196e42fa984",
+      "current": "b41ad311d0ca693122843e9fa0f26dc6ed6484bb5bbc8a17882e9196e42fa984"
+    }
+  },
+  "staged_changes": false,
+  "no_commit_reset_clean_or_branch_change": true,
+  "verification": [
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-m",
+        "py_compile",
+        "benchmarks/reconstructed_fault/bp3_native/transport/analyze.py"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "resumed_analysis_matches_original_final_analysis_byte_for_byte": true,
+  "documentation_changes": [
+    "benchmarks/reconstructed_fault/bp3_native/transport_report.md",
+    "benchmarks/reconstructed_fault/bp3_native/STATUS.md",
+    "doc/reconstructed_fault/CURRENT_STATUS.md"
+  ],
+  "scope": "New isolated prescribed-flow fixture and one test-access wrapper; no production numerical algorithm/default change; no new simulation launched during recovery."
+}

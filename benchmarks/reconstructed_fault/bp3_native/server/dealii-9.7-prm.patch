@@ -1,0 +1,13 @@
+diff --git a/unit_tests/phase_field_fault_maxwell.cc b/unit_tests/phase_field_fault_maxwell.cc
+index 8c80b2657..4dd75aa8a 100644
+--- a/unit_tests/phase_field_fault_maxwell.cc
++++ b/unit_tests/phase_field_fault_maxwell.cc
+@@ -121,7 +121,7 @@ TEST_CASE("FaultFriction declares the Stage E friction-law defaults")
+   REQUIRE(parameters.get("Characteristic weakening slip rates") == "1.e-6");
+   std::ostringstream parameter_text;
+   parameters.print_parameters(parameter_text,
+-                              dealii::ParameterHandler::OutputStyle::Text);
++                              dealii::ParameterHandler::PRM);
+   REQUIRE(parameter_text.str().find("Maximum slip rate") == std::string::npos);
+ }
+ 

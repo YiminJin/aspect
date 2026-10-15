@@ -1,0 +1,11 @@
+# Section 8: identical to the retained filtered refined-band trajectory.
+# The existing API requires length=0 with the explicit raw-input selector.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_native/section7cd-bulk.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/build-bp3-native/section7b/bp3-plugin/libbp3_restore_150x50.release.so, $ASPECT_SOURCE_DIR/build-bp3-native/section8/local-observer/libbp3_coupled_checks.release.so
+set Output directory = $ASPECT_SOURCE_DIR/build-bp3-native/runs/8-raw-v3
+subsection Postprocess
+  subsection BP3 restored monitor
+    set Friction normal input = raw
+    set Normal filter length = 0
+  end
+end

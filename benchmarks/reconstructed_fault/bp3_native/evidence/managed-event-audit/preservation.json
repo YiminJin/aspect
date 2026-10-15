@@ -1,0 +1,33 @@
+{
+  "head": "c33edaaeb145e5d3dce155bb815552ef80efc5f9",
+  "branch": "fault-propagation",
+  "checked_existing_files": 3042,
+  "changed_existing": [
+    "include/aspect/particle/manager.h",
+    "doc/reconstructed_fault/CURRENT_STATUS.md",
+    "benchmarks/reconstructed_fault/bp3_native/coupled_checks.cc",
+    "benchmarks/reconstructed_fault/bp3_native/STATUS.md"
+  ],
+  "missing": [],
+  "original_artifacts_unchanged": {
+    "build-bp3-native/managed-coupled/final/aspect-release": true,
+    "build-bp3-native/managed-coupled/observer/libbp3_coupled_checks.release.so": true,
+    "build-bp3-native/managed-coupled/bp3-plugin/libbp3_restore_150x50.release.so": true
+  },
+  "tested_source_non_whitespace_identical": true,
+  "ASPECT_new_code_style": {
+    "benchmarks/reconstructed_fault/bp3_native/coupled_checks.cc": true,
+    "include/aspect/particle/manager.h": true
+  },
+  "changed_files": {
+    "include/aspect/particle/manager.h": "2bc2a0607f605774c7c40e88be79aa338b2f38a9c80dcd42e72753e710c26b06",
+    "benchmarks/reconstructed_fault/bp3_native/coupled_checks.cc": "40d4d11bbfb35847340a62fde94ee8afe8496dbc2edb55e373ec7c91e19453fa",
+    "benchmarks/reconstructed_fault/bp3_native/analyze_managed_event.py": "1e206f63de770e42e78e3ae72bf1e57344058645da244749483de6c56bd17325",
+    "benchmarks/reconstructed_fault/bp3_native/managed-event.prm": "c2d3c1c357a9a40577b94a7053e7029102d58e617d9de62d9761a461ad92b247",
+    "benchmarks/reconstructed_fault/bp3_native/managed-production-time.prm": "d93a3b2e1311514e45811b430b98360daf08b4acdb87c1b64aa9a95582963082",
+    "benchmarks/reconstructed_fault/bp3_native/managed-production-time-tight.prm": "767489649deefe3df17333226951870f9df1c5266b4ca94e89dad74f9c03c285",
+    "benchmarks/reconstructed_fault/bp3_native/managed_event_report.md": "ab9ab57ec7e1933a0b48612e873d388f5633aeb0ce32b36570026c5f0047f2c1",
+    "benchmarks/reconstructed_fault/bp3_native/STATUS.md": "a3618a435b177361bbb1b83166a9298dfaf59ddb664199486e7fe68251150708",
+    "doc/reconstructed_fault/CURRENT_STATUS.md": "6283fbb6dfbd2a3085906b522ca3e0ce14be5a2a769930cf4622c8b83c841d47"
+  }
+}

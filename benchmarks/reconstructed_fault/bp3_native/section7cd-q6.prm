@@ -1,0 +1,8 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/bp3_native/section7b-fe-perturbed.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/build-bp3-native/section7b/bp3-plugin/libbp3_restore_150x50.release.so, $ASPECT_SOURCE_DIR/build-bp3-native/section7cd/serial-plugin/libbp3_coupled_checks.release.so
+set Output directory = $ASPECT_SOURCE_DIR/build-bp3-native/runs/7cd-q6
+subsection Material model
+  subsection Phase field fault
+    set FE bulk normal quadrature points = 6
+  end
+end

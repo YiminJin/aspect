@@ -86,7 +86,7 @@ TEST_CASE("CPDI face samples have one supported owner", "[particle_domain_consta
                    Point<2>(-0.01,0), cells, mapping, 1.e-12));
 }
 
-TEST_CASE("CPDI domains reproduce constants across shared faces", "[particle_domain_constants]")
+TEST_CASE("CPDI domains reproduce constants and linear gradients across shared faces", "[particle_domain_constants]")
 {
   using namespace dealii;
   parallel::distributed::Triangulation<2> triangulation(MPI_COMM_WORLD);
@@ -124,17 +124,26 @@ TEST_CASE("CPDI domains reproduce constants across shared faces", "[particle_dom
   aspect::Particle::ParticleDomainHandler<2> domains(particles, triangulation, mapping, false, true);
 #endif
   domains.generate_particle_domains();
-  double area = 0.0, value_error = 0.0, gradient_error = 0.0;
+  double area = 0.0, value_error = 0.0, gradient_error = 0.0, linear_error = 0.0;
   for (const auto &particle : particles)
     {
       const auto domain = domains.get_particle_domain(particle.get_local_index());
       double sum = 0.0;
       Tensor<1,2> gradient;
+      Tensor<2,2> linear_gradient;
       for (unsigned int i=0; i<domain.n_relevant_vertices(); ++i)
         {
           sum += domain.weighting_function_value(i);
           gradient += domain.weighting_function_gradient(i);
+          Tensor<1,2> coordinate = triangulation.get_vertices()[domain.relevant_vertex_index(i)]
+                                   - particle.get_location();
+          coordinate[0] = std::remainder(coordinate[0], 0.25);
+          for (unsigned int d=0; d<2; ++d)
+            linear_gradient[d] += coordinate[d] * domain.weighting_function_gradient(i);
         }
+      for (unsigned int d=0; d<2; ++d)
+        linear_gradient[d][d] -= 1.0;
+      linear_error = std::max(linear_error, linear_gradient.norm());
       value_error = std::max(value_error, std::abs(sum-1.0));
       gradient_error = std::max(gradient_error, gradient.norm());
       area += domain.volume();
@@ -143,9 +152,11 @@ TEST_CASE("CPDI domains reproduce constants across shared faces", "[particle_dom
   area = Utilities::MPI::sum(area, MPI_COMM_WORLD);
   value_error = Utilities::MPI::max(value_error, MPI_COMM_WORLD);
   gradient_error = Utilities::MPI::max(gradient_error, MPI_COMM_WORLD);
+  linear_error = Utilities::MPI::max(linear_error, MPI_COMM_WORLD);
   REQUIRE(area == Approx(0.25).margin(1.e-12));
   REQUIRE(value_error < 1.e-12);
   REQUIRE(gradient_error < 1.e-10);
+  REQUIRE(linear_error < 1.e-10);
 }
 
 TEST_CASE("Production domains integrate nonconstant endpoint moments", "[fault_domain_quadrature]")
@@ -288,6 +299,101 @@ TEST_CASE("Advected Voronoi domains conserve area", "[particle_domain_area]")
   for (const auto &particle : particles)
     area += domains.get_particle_domain(particle.get_local_index()).volume();
   REQUIRE(Utilities::MPI::sum(area, MPI_COMM_WORLD) == Approx(1.0).margin(1.e-10));
+}
+
+TEST_CASE("Periodic particle domains are invariant under coordinate units", "[particle_domain_area]")
+{
+  using namespace dealii;
+  struct Reference
+  {
+    double area;
+    std::vector<Point<2>> vertices;
+    std::map<unsigned int,std::array<double,3>> operators;
+  };
+  std::map<types::particle_index,Reference> reference;
+  const std::array<std::array<double,3>,5> configurations =
+  {{{{1,0,0}},{{.001,-.002,.003}},{{1,1000,-2000}},{{1000,1.e6,-2.e6}},{{.001,1,-2}}}};
+  double maximum_area_error=0, maximum_vertex_error=0, maximum_operator_error=0;
+  for (unsigned int configuration=0; configuration<configurations.size(); ++configuration)
+    {
+      const double scale=configurations[configuration][0];
+      const Point<2> origin(configurations[configuration][1],configurations[configuration][2]);
+      parallel::distributed::Triangulation<2> triangulation(MPI_COMM_WORLD);
+      GridGenerator::subdivided_hyper_rectangle(triangulation,std::vector<unsigned int> {4,4},
+                                                origin,origin+Point<2>(scale,scale),true);
+      std::vector<GridTools::PeriodicFacePair<Triangulation<2>::cell_iterator>> periodic_faces;
+      GridTools::collect_periodic_faces(triangulation,0,1,0,periodic_faces);
+      triangulation.add_periodicity(periodic_faces);
+      MappingQ1<2> mapping;
+      Particles::ParticleHandler<2> particles(triangulation,mapping,0);
+      for (const auto &cell : triangulation.active_cell_iterators())
+        if (cell->is_locally_owned())
+          for (unsigned int i=0; i<8; ++i)
+            for (unsigned int j=0; j<8; ++j)
+              {
+                Point<2> unit((i+.5)/8,(j+.5)/8);
+                Point<2> position=mapping.transform_unit_to_real_cell(cell,unit);
+                position[0]+=scale*.00029296875*((position[1]-origin[1])/scale-.5);
+                unit=mapping.transform_real_to_unit_cell(cell,position);
+                const types::particle_index id=cell->global_active_cell_index()*64+i*8+j;
+                particles.insert_particle(Particles::Particle<2>(position,unit,id),cell);
+              }
+      particles.update_cached_numbers();
+      particles.exchange_ghost_particles();
+#if DEAL_II_VERSION_GTE(9,8,0)
+      aspect::Particle::ParticleDomainHandler<2> domains(particles,false,true);
+#else
+      aspect::Particle::ParticleDomainHandler<2> domains(particles,triangulation,mapping,false,true);
+#endif
+      domains.generate_particle_domains();
+      for (const auto &particle : particles)
+        {
+          const auto domain=domains.get_particle_domain(particle.get_local_index());
+          Reference current;
+          current.area=domain.volume()/(scale*scale);
+          for (const auto &vertex : domain.vertices())
+            current.vertices.emplace_back((vertex-origin)/scale);
+          for (unsigned int i=0; i<domain.n_relevant_vertices(); ++i)
+            {
+              const auto vertex=(triangulation.get_vertices()[domain.relevant_vertex_index(i)]-origin)/scale;
+              const unsigned int node=std::lround(4*vertex[1])*4+std::lround(4*vertex[0])%4;
+              const auto gradient=domain.weighting_function_gradient(i);
+              auto &entry=current.operators[node];
+              entry[0]+=domain.weighting_function_value(i);
+              entry[1]+=scale*gradient[0]/4; entry[2]+=scale*gradient[1]/4;
+            }
+          if (configuration==0)
+            reference[particle.get_id()]=current;
+          else
+            {
+              const auto &expected=reference.at(particle.get_id());
+              maximum_area_error=std::max(maximum_area_error,std::abs(current.area/expected.area-1));
+              for (unsigned int direction=0; direction<2; ++direction)
+                {
+                  const auto &vertices=direction==0 ? current.vertices : expected.vertices;
+                  const auto &other_vertices=direction==0 ? expected.vertices : current.vertices;
+                  for (const auto &vertex : vertices)
+                    {
+                      double distance=std::numeric_limits<double>::max();
+                      for (const auto &other : other_vertices) distance=std::min(distance,vertex.distance(other));
+                      maximum_vertex_error=std::max(maximum_vertex_error,32*distance);
+                    }
+                }
+              for (const auto &entry : expected.operators)
+                for (unsigned int k=0; k<3; ++k) current.operators[entry.first][k]-=entry.second[k];
+              for (const auto &entry : current.operators)
+                for (const auto value : entry.second) maximum_operator_error=std::max(maximum_operator_error,std::abs(value));
+            }
+        }
+    }
+  maximum_area_error=Utilities::MPI::max(maximum_area_error,MPI_COMM_WORLD);
+  maximum_vertex_error=Utilities::MPI::max(maximum_vertex_error,MPI_COMM_WORLD);
+  maximum_operator_error=Utilities::MPI::max(maximum_operator_error,MPI_COMM_WORLD);
+  std::cout<<"native coordinate invariance: area="<<maximum_area_error<<" vertex/h="<<maximum_vertex_error
+           <<" CPDI="<<maximum_operator_error<<std::endl;
+  REQUIRE(maximum_area_error<1.e-10);
+  REQUIRE(maximum_vertex_error<1.e-10);
+  REQUIRE(maximum_operator_error<1.e-10);
 }
 #endif
 
