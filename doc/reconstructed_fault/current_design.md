@@ -11,6 +11,173 @@ algorithms, architecture, ownership, and MPI design. They are maintained as a
 consistent pair: this file records the concise settled decisions and the
 specification gives their detailed contract.
 
+### Selected PF2 fixed-profile cohesive DG history
+
+The default-off `Bulk history representation = DG trial stress` experiment uses
+an independently stored three-component DGQ2 trial tensor, full 3D plane-strain
+deviators and the existing physical surface elastic slip `Z=G s_elas=I_h q`.
+For matched constant G/eta, fixed phase/geometry and no transport or spin,
+`tau_tr_new=beta tau_tr_old+2 kappa D3(symgrad u_new)` and
+`Z_new=beta Z_old+kappa V_new`; physical stress is
+`tau=tau_tr-2(h/I_h)Z S`. This is the established cohesive law under frozen
+localization, not a new redistribution or mature-fault law.
+
+DG coefficients are authoritative in bulk and surface mechanics. Mapped FE and
+particle stress are bypassed; terminal particle publication contains derived
+samples only. Existing FE phase/geometry/normalization data and surface Z/I
+storage are reused, but their displacement-history velocity block stays zero
+and is not read by DG stress evaluation. Scalar DGQ2 mass/source integration
+uses Gauss3 on affine Cartesian Q2 cells; the established shared six-point
+normal mechanical rule and consistent normalization remain separate.
+The initial CPDI relaxation uses the same phase sparsity graph as the FE
+control, preserving its accepted seed and normalization without a different
+CG/AMG arithmetic path. Subsequent DG phase solves remain prohibited.
+
+This selected verification is fresh, serial, unloaded cohesive initialization,
+one horizontal unit-width through-going fault, homogeneous coefficients, fixed
+Cartesian mesh/profile and fixed particles. Every trial anchors accepted DG/Z/I;
+publication occurs once after complete validation. Phase stepping, FE phase
+energy evaluation, mesh/geometry/population changes, transport and resume or
+checkpoint conversion are rejected. The diagnostic fixture freezes the accepted
+initialized phase and drives bounded native mechanical steps without an outer
+phase/advection loop. Existing selections/defaults and CPDI initialization are
+unchanged. This is a particle-free bulk-history prototype, not an end-to-end
+particle-free model. See `particle_free/STATUS.md` for measured qualification.
+
+### Selected PF3 fixed-surface DG phase operator
+
+PF3 extends the preceding experiment with a noncommitting phase operator at
+immutable accepted DG trial stress T and physical surface Z. It permits explicit
+trial phase energy evaluations and controlled native box solves; the PF2 guard
+against a changed *published* phase/normalization and the outer physical DG phase
+stepping/restart/transport restrictions remain. No coupled phase-first time
+integrator is adopted; retained P2 endpoint/default behavior is unchanged.
+
+The discrete energy is the shared-quadrature bulk norm of
+`T - 2 Z (h(phi_h)/I_h) S`, plus surface `Z^2/(2 G I_h)`, plus ordinary Q1 FE
+fracture `Gc/(c0 ell) [alpha(phi_h) + ell^2 |grad phi_h|^2]` on that same fixed
+bulk rule. The phase handler supplies existing homogeneous AT1 coefficients.
+After DG initialization this operator reads no particle H/composition/stress or
+CPDI domains. Startup CPDI relaxation and the retained FE-history fracture
+functional are preserved as distinct discretizations.
+
+Consistent normalization remains `I_h = P b(phi_h)` with fixed normal-ray
+geometry and `P=M_F^{-1} B_F`. Derivatives include P, its transpose pullback and
+second normal-integral derivatives, not a frozen I. The exact energy, residual
+and Hessian use one quadrature partition per solve. The existing native box
+solver uses the immutable accepted phase as lower bound with no advection.
+Positive search metrics change only the Newton search, never the true gradient,
+KKT target or physical energy. Inactive/nonpositive I and phase at exact
+saturation are inadmissible; no floor/cap/filter is added. Near-saturated
+profiles require separately resolved quadrature. Fixed-T/Z physical trial
+redistribution is `delta tau=-2 Z delta(h/I_h) S`; Z/G stays physical elastic slip.
+Trials and bounded diagnostic solutions publish no accepted state.
+
+PF3 also groups symmetric mixed-derivative products before addition in the
+shared analytic normal-integral jet. This changes floating-point association
+only, preserves values/first derivatives and the equations, and avoids different
+cancellation paths in transposed Hessian entries. See `particle_free/PF3_REPORT.md`
+for measured derivative, quadrature, representation and compatibility evidence.
+
+### Selected PF4 prescribed DG material transport
+
+PF4 adds a noncommitting transport operator for the existing independent DGQ2
+space on the same fixed serial Cartesian mesh. Native continuous Q2 FE velocity
+supplies volume velocity/divergence and a single face normal flux. The weak
+material operator is
+`M A_dot = (A, v.grad(test)) - <v.n A_up,test> + ((div v-r)A+f,test)`.
+Explicit prescribed boundary tensors supply inflow; outflow uses the interior
+trace. Gauss3 mass is full rank; Gauss4 volume/face integration retains native
+Q2 products, including transverse degree6. Nonpolynomial source/inflow accuracy
+is checked separately. The reaction control is zero or existing G/eta, with no
+new physical coefficient. The audited non-objective law has no added spin.
+
+A spatial matrix belongs to the explicit fixed FE velocity and mesh used to
+build it. SSPRK3 evaluates prescribed loads at t, t+dt, t+dt/2. Every step returns
+a separate candidate; no stage changes accepted histories. Its diagnostic
+restriction is `dt*(max_cell sum_d sampled_max|v_d|/h_d + r) <= .125` and finite positive
+dt. This bounded serial operator is not automatic timestep selection for a
+coupled production trajectory. Periodic/hanging/changed faces and MPI transport
+are unsupported. The original PF4 control and production default are unlimited.
+The separately selected bounded limiter comparison permits optional private
+stage-candidate limiting only, as specified in
+`particle_free/PF4_LIMITER_HANDOFF.md`: immediate-neighbor complete-Q2 compact
+WENO with common full-tensor weights, target-cell mean restoration and immutable
+stage reads. It compares KXRCF-style tensor detection with an experimental
+RMS-normalized Fu–Shu-style mean indicator plus polynomial-discrepancy safeguard.
+Gauss3 integrates reconstruction polynomials; existing transport/source rules
+remain unchanged. No component bounds, clipping or localization filtering.
+This does not authorize accepted-state publication or coupled deployment; see
+`particle_free/PF4_LIMITER_REPORT.md` for measured limitations and recommendation.
+
+The selected follow-up retains unlimited DG as the smooth baseline and both WENO
+paths as experiments. Optional direct-call diagnostics integrate the exact squared
+tensor norm before/after limiting; raw stage-call sums are distinct from complete
+SSPRK3 transport changes. A separate scalar-envelope scaling experiment uses one
+cellwise factor on all tensor deviations from the original mean. Its envelope
+belongs only to the prescribed proportional signed-pulse benchmark, not a general
+stress admissible set; inadmissible means are rejected rather than clipped.
+Fixed-mesh timestep comparisons and a prescribed tanh-pulse control use the
+existing phase-field length as a fixed physical transition-width proxy. This
+does not assert that the constitutive law determines that tangential stress width.
+No production default, physical law, accepted publication or scope guard changes.
+Measured timestep, direct norm, scaling and finite-width results are recorded in
+`particle_free/PF4_STABILIZATION_REPORT.md`; they do not authorize further
+stabilization or coupled integration.
+
+Prescribed characteristic surface histories and localization distinguish bulk
+material motion from surface labels in the commutator checks. Co-moving profiles
+are named diagnostic fields, not geometry motion or surface birth. Mature tests
+retain direct stress or the residual tensor; cohesive tests retain redistribution.
+An externally forced rotating-tensor identity is labeled objective; it does not
+change the native rate. Surface Z/phase-bound transport and coupled publication
+are not implemented here. Existing particle/FE defaults, outer physical DG
+stepping, restart/mesh-change guards and PF3 scope remain unchanged. See
+`particle_free/PF4_REPORT.md` for measured tests and remaining dependencies.
+
+### Selected PF5 prescribed accepted DG history and persistence
+
+The default-off `Enable prescribed DG accepted history` extends PF4 only for a
+serial prescribed driver on its fixed Cartesian mesh and horizontal cohesive
+fault. Unlimited upwind DGQ2 remains the experimental baseline. Each candidate
+composes a native exact Maxwell/source half step, a pure-transport SSPRK3 full
+step, and a second native half step. Native FE strain is evaluated at the supplied
+midpoint bulk field. The transport operator must have zero reaction and no inflow
+loads (closed boundaries); it receives zero source. Thus relaxation and native
+forcing are not also applied by transport or terminal publication. This Strang
+composition is second order overall, despite the third-order transport substep.
+
+Surface Z advances once with the existing full-step cohesive law. This bounded
+fixture requires spatially uniform prescribed V and Z, fixed phase/I/geometry,
+matching constant G/eta and stationary surface labels. It does not implement
+general surface transport. Physical stress remains `tau=T-2 chi Z S`. In
+particular, bulk motion across a fixed profile retains the implied term
+`Q_geo=-2 Z (v.grad chi) S`; this is not a mature `Q_geo=0` experiment. The audited
+full-3D deviator and non-objective component rate are unchanged.
+
+Trials hold the accepted tensor anchor and return separate candidates. A guarded
+terminal routine validates context, every tensor/surface value, and all derived
+particle samples before the existing history publisher and noexcept state swaps.
+Rejected/discarded trials write no persistent history; the parent/step checks
+reject stale or duplicate publication. Particle stress is a derived output and
+never feedback into tensor evolution or mechanical/fault loads. H stays frozen
+under the existing `Evolve phase field=false` rule.
+
+Persistence extends the existing Simulator checkpoint archive after the native
+fault manager: a selected-mode registry marker gates a versioned, CellId-keyed
+material payload for DG coefficients, Z/I, phase anchor and fixed-geometry/material
+metadata. The unselected path adds no archive bytes. Native mesh/solution,
+manager/committed V and particle/RNG infrastructure retain their ownership.
+Restore runs after all native userdata have loaded, rebuilds transient FE/DG,
+normalization, association and surface-temperature data, validates fixed metadata,
+then restores accepted coefficients without applying an update. Same-mode serial
+restart is covered; conversion, AMR/MPI, periodic/open boundaries, moving geometry,
+surface/phase transfers, outer coupled stepping and birth remain unsupported.
+The prescribed benchmark advances accepted clocks inside an observer, not through
+a coupled solver. See `particle_free/PF5_REPORT.md` for measured scope and the
+separately proposed transfer task. Earlier PF2/PF4 prohibitions are superseded
+only for this explicitly selected experiment; production defaults are unchanged.
+
 ### Selected stationary mature BP3 accepted FE history
 
 The bounded BP3 task extends accepted FE history to one straight dipping 2D

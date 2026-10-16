@@ -73,8 +73,11 @@ namespace aspect
         {
           r.d[i]=a.d[i]*b.v+a.v*b.d[i];
           for (unsigned int j=0; j<2; ++j)
+            // Group the symmetric pair before adding it to the Hessians.
+            // Left-associated addition makes the two mixed entries follow
+            // different cancellation paths for nearly constant normal rays.
             r.h[i][j]=a.h[i][j]*b.v+a.v*b.h[i][j]
-                      +a.d[i]*b.d[j]+b.d[i]*a.d[j];
+                      +(a.d[i]*b.d[j]+b.d[i]*a.d[j]);
         }
       return r;
     }
@@ -85,7 +88,7 @@ namespace aspect
         {
           r.d[i]=first*x.d[i];
           for (unsigned int j=0; j<2; ++j)
-            r.h[i][j]=first*x.h[i][j]+second*x.d[i]*x.d[j];
+            r.h[i][j]=first*x.h[i][j]+second*(x.d[i]*x.d[j]);
         }
       return r;
     }

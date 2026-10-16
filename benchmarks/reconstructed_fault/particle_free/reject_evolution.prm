@@ -1,0 +1,6 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_free/fixed_profile_dg.prm
+subsection Material model
+  subsection Phase field fault
+    set Evolve phase field = true
+  end
+end

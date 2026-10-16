@@ -433,8 +433,12 @@ namespace aspect
                             "in the peak history. Viscous work is not accumulated. "
                             "Incremental work retains the historical finite-step law. "
                             "The selection cannot change on restart.");
+          prm.declare_entry("Enable prescribed DG accepted history", "false", Patterns::Bool(),
+                            "Experimental PF5 accepted upwind DGQ2 history and same-mode serial fixed-mesh "
+                            "restart for a prescribed closed-boundary driver. No coupled stepping, phase "
+                            "evolution, surface transport, AMR or MPI. Default is false.");
           prm.declare_entry("Bulk history representation", "particle stress",
-                            Patterns::Selection("particle stress|accepted FE strain"),
+                            Patterns::Selection("particle stress|accepted FE strain|DG trial stress"),
                             "Accepted FE strain supports fresh stationary mature faults and the restricted P2 total-energy "
                             "option. It retains d_R with R=dev_3(symgrad(d_R)), matching uniform "
                             "bulk/fault Maxwell coefficients and no transport/birth. Mature faults "
@@ -443,7 +447,11 @@ namespace aspect
                             "The evolving P2 option retains its horizontal uniform-mesh, surface elastic slip, "
                             "unloaded initialization and direct phase irreversibility restrictions. "
                             "Particle stresses are derived samples. Resume/conversion is rejected. "
-                            "Particle stress retains the established default.");
+                            "Particle stress retains the established default. DG trial stress is a "
+                            "fresh serial fixed-profile cohesive DGQ2 history experiment with the same "
+                            "surface elastic slip, normalization and three-dimensional deviator. "
+                            "It rejects phase stepping and mesh changes. Transport/restart require the "
+                            "separate prescribed accepted-history experiment.");
           prm.declare_entry("Particle stress strain convention", "legacy symmetric gradient",
                             Patterns::Selection("legacy symmetric gradient|three dimensional deviator"),
                             "The optional three dimensional deviator uses the same plane-strain "
@@ -564,6 +572,8 @@ namespace aspect
 
           evolve_phase_field = prm.get_bool("Evolve phase field");
           fe_strain_history = prm.get("Bulk history representation") == "accepted FE strain";
+          dg_trial_stress_history = prm.get("Bulk history representation") == "DG trial stress";
+          dg_accepted_history = prm.get_bool("Enable prescribed DG accepted history");
           consistent_particle_strain = prm.get("Particle stress strain convention") == "three dimensional deviator";
           fe_bulk_normal_quadrature_points = prm.get_integer("FE bulk normal quadrature points");
           consistent_endpoint_phase = prm.get_bool("Consistent endpoint phase solve");
@@ -657,11 +667,11 @@ namespace aspect
       AssertThrow(!consistent_particle_strain || (dim == 2 && mature_frictional_fault && !evolve_phase_field
                                                   && !this->get_parameters().resume_computation),
                   ExcMessage("Deviatoric particle stress currently requires fresh frozen mature 2-D mechanics."));
-      if (fe_strain_history)
+      if (uses_independent_bulk_history())
         {
           AssertThrow(dim == 2 && (Utilities::MPI::n_mpi_processes(this->get_mpi_communicator()) == 1
                                    || consistent_endpoint_phase || mature_frictional_fault)
-                      && !this->get_parameters().resume_computation
+                      && (!this->get_parameters().resume_computation || dg_accepted_history)
                       && !this->get_parameters().mesh_deformation_enabled
                       && !lump_normalization_projection,
                       ExcMessage("Accepted FE strain requires the fresh fixed-mesh "
@@ -710,6 +720,16 @@ namespace aspect
                       ExcMessage("Accepted FE strain prohibits particle replenishment/repartitioning."));
           prm.leave_subsection();
         }
+      AssertThrow(!dg_accepted_history || (dg_trial_stress_history
+                  && this->get_parameters().initial_adaptive_refinement==0),
+                  ExcMessage("PF5 accepted history requires DG trial stress representation and no initial AMR."));
+      AssertThrow(!dg_trial_stress_history
+                  || (!mature_frictional_fault && !evolve_phase_field && !consistent_endpoint_phase
+                      && Utilities::MPI::n_mpi_processes(this->get_mpi_communicator())==1
+                      && this->get_parameters().adaptive_refinement_interval==0
+                      && this->get_parameters().additional_refinement_times.empty()),
+                  ExcMessage("DG trial stress is restricted to fresh serial fixed-profile cohesive "
+                             "history checks without phase/H evolution, mesh adaptation or transport."));
       AssertThrow(!consistent_endpoint_phase || (fe_strain_history && evolve_phase_field
                                                  && use_adiabatic_pressure_in_fault_friction),
                   ExcMessage("Consistent endpoint phase requires evolving accepted FE strain and prescribed friction pressure."));

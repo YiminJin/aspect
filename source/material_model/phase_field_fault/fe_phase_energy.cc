@@ -54,6 +54,8 @@ namespace aspect
                                                       const FEEndpointTrial &endpoint,
                                                       const std::vector<double> *phase_direction) const
     {
+      AssertThrow(!dg_trial_stress_history,
+                  ExcMessage("PF3 DG phase trials use immutable accepted tensor/Z, not an FE mechanical endpoint."));
       return evaluate_fe_phase_energy_at(trial,false,false,endpoint.strain,endpoint.Z,phase_direction);
     }
 
@@ -140,7 +142,10 @@ namespace aspect
       for (const auto &entry:s.cells)
         {
           fe.reinit(entry.second);
-          fe[this->introspection().extractors.velocities].get_function_symmetric_gradients(strain,R);
+          if (dg_trial_stress_history)
+            R=evaluate_dg_trial_tensor(*s.dg_history,entry.first,quad);
+          else
+            fe[this->introspection().extractors.velocities].get_function_symmetric_gradients(strain,R);
           for (unsigned int q=0; q<quad.size(); ++q,++point)
             {
               const auto &p=s.bulk[point];
@@ -154,12 +159,16 @@ namespace aspect
               const double h=s.m*phi*(1+phi)/std::pow(1-phi,2);
               const double hp=s.m*(4/std::pow(1-phi,3)-3/std::pow(1-phi,2));
               const double hpp=s.m*(12/std::pow(1-phi,4)-6/std::pow(1-phi,3));
-              // R[q] is a raw zero-zz plane-strain gradient. Deviate once.
-              const auto tau=2*s.G*Utilities::Tensors::consistent_deviator(R[q])-2*Z*h/I*S;
+              // DG R[q] already is a full-3D deviatoric trial stress in Pa.
+              // The FE owner instead supplies a raw zero-zz strain gradient.
+              const auto trial_tensor=dg_trial_stress_history ? R[q]
+                                      : 2*s.G*Utilities::Tensors::consistent_deviator(R[q]);
+              const auto tau=trial_tensor-2*Z*h/I*S;
               result.bulk+=p.weight*((tau*tau)+std::pow(trace(tau),2))/(4*s.G);
               bulk_energy+=static_cast<long double>(p.weight)*((tau*tau)+std::pow(trace(tau),2))/(4*s.G);
               const double c=-Z/s.G*(tau*S);
-              const double positive_c=std::abs(Z/s.G)*(2*s.G*std::abs(R[q]*S)+std::abs(2*Z*h/I)*(S*S));
+              const double trial_scale=dg_trial_stress_history ? std::abs(R[q]*S) : 2*s.G*std::abs(R[q]*S);
+              const double positive_c=std::abs(Z/s.G)*(trial_scale+std::abs(2*Z*h/I)*(S*S));
               const double a=2*Z*Z/s.G*(S*S);
               for (unsigned int v=0; v<p.dofs.size(); ++v)
                 {
@@ -237,6 +246,8 @@ namespace aspect
       const std::vector<std::vector<double>> *slip_direction, bool assemble_rhs) const
     {
       TimerOutput::Scope timer(this->get_computing_timer(),"Fault: FE tangent pullback");
+      AssertThrow(!dg_trial_stress_history,
+                  ExcMessage("PF3 does not implement a DG coupled-endpoint tangent."));
       validate_fe_strain_restrictions();
       const auto &s=*fe_strain_state;
       const auto &intro=this->introspection();

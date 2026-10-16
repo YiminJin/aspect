@@ -73,10 +73,11 @@ namespace aspect
         std::array<types::global_dof_index,GeometryInfo<dim>::vertices_per_cell> dofs;
         std::array<double,GeometryInfo<dim>::vertices_per_cell> shape;
       };
-      // The velocity block is the authoritative accepted d_R; its symmetric
-      // gradient is deviated once during stress reconstruction. The phase block
-      // records the accepted profile. Particle stress stores derived samples.
+      // The FE option's velocity block is authoritative d_R. In the fixed-profile
+      // DG option that block stays zero: only the phase/geometry/Z/I data are
+      // shared, and the independent DG tensor below owns bulk history.
       LinearAlgebra::BlockVector displacement_history;
+      std::shared_ptr<DGHistory> dg_history;
       // Z is slip memory in mature mode, independently of zero cohesive
       // traction. In the cohesive P2 option Z = I_h * tau_coh.
       std::vector<double> Z,I;
@@ -96,12 +97,19 @@ namespace aspect
       types::global_dof_index n_dofs;
       double m,G,eta,initial_fracture=0.;
       unsigned int committed_step=0;
+      std::uint64_t accepted_publications=0;
     };
 
     template<int dim> struct PhaseFieldFault<dim>::FEStrainUpdate
     {
       LinearAlgebra::BlockVector displacement_history;
+      std::shared_ptr<DGHistory> dg_history;
       std::vector<double>Z,I;
+      // Only PF5 candidates use these publication preconditions.
+      std::shared_ptr<const DGHistory> dg_parent;
+      std::vector<double> dg_cohesive,dg_rates;
+      unsigned int dg_step=0;
+      double dg_time=0.,dg_dt=0.;
     };
 
   }

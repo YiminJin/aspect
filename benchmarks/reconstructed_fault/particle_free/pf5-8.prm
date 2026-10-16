@@ -1,0 +1,16 @@
+# PF5 closed-boundary prescribed accepted histories; no coupled evolution.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_free/fixed_profile_dg.prm
+subsection Mesh refinement
+  set Initial global refinement = 2
+end
+subsection Material model
+  subsection Phase field fault
+    set Enable prescribed DG accepted history = true
+  end
+end
+subsection Postprocess
+  set List of postprocessors = particles, PF5 accepted history
+  subsection PF5 checks
+    set Steps = 8
+  end
+end

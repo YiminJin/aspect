@@ -19,6 +19,8 @@
 */
 
 #include <aspect/material_model/phase_field_fault.h>
+#include <aspect/material_model/phase_field_fault/fe_strain_internal.h>
+#include <aspect/material_model/phase_field_fault/dg_history_internal.h>
 #include <aspect/material_model/phase_field_fault/history_diagnostics.h>
 #include <aspect/material_model/utilities.h>
 #include <aspect/phase_field.h>
@@ -247,8 +249,10 @@ namespace aspect
       this->get_signals().post_resume_load_user_data.connect(
         [this](parallel::distributed::Triangulation<dim> &)
       {
-        AssertThrow(!fe_strain_history && !this->get_reconstructed_fault_manager().has_property("accepted FE strain history"),
-                    ExcMessage("Accepted FE strain is fresh-run only; checkpoint conversion is forbidden."));
+        AssertThrow(dg_accepted_history || (!uses_independent_bulk_history()
+                    && !this->get_reconstructed_fault_manager().has_property("accepted FE strain history")
+                    && !this->get_reconstructed_fault_manager().has_property("DG trial stress history")),
+                    ExcMessage("Native bulk history is fresh-run only; checkpoint conversion is forbidden."));
         invalidate_normalization_cache();
         AssertThrow(this->get_reconstructed_fault_manager().has_property(
                       "cohesive bulk conjugate work") == cohesive_work_measure,
@@ -329,6 +333,10 @@ namespace aspect
         fault_manager.register_property("unloaded cohesive initialization", 1);
       if (fe_strain_history)
         fault_manager.register_property("accepted FE strain history", 1);
+      if (dg_trial_stress_history)
+        fault_manager.register_property("DG trial stress history", 1);
+      if (dg_accepted_history)
+        fault_manager.register_property("PF5 accepted DG history v1", 1);
     }
 
     template <int dim>
@@ -596,6 +604,8 @@ namespace aspect
       if (this->get_timestep_number() == 0)
         return;
 
+      AssertThrow(!dg_accepted_history,
+                  ExcMessage("PF5 prescribed accepted history does not enable coupled mechanical publication."));
       const double time_step = this->get_timestep();
       AssertThrow(std::isfinite(time_step) && time_step > 0.0,
                   ExcMessage("Later-time reconstructed-fault history requires a "
@@ -640,7 +650,7 @@ namespace aspect
       std::shared_ptr<FEStrainUpdate> fe_update;
       double fe_publication_error=0.,fe_publication_bound=0.,fe_publication_net_bound=0.;
       std::string fe_publication_failure;
-      if (fe_strain_history)
+      if (uses_independent_bulk_history())
         try
           {
             fe_update=prepare_fe_strain_commit(accepted_bulk_state, candidates.cohesive_nodal_values);
@@ -668,7 +678,7 @@ namespace aspect
           {
             fe_publication_failure=exception.what();
           }
-      if (fe_strain_history)
+      if (uses_independent_bulk_history())
         {
           // No rank may publish while another rejects a local FE sample.
           throw_if_history_error(fe_publication_failure,this->get_mpi_communicator());
@@ -678,12 +688,57 @@ namespace aspect
         }
       if (fe_update)
         this->get_pcout()<<std::setprecision(17)
-                         <<"   FE Maxwell publication: error="<<fe_publication_error
+                         <<(dg_trial_stress_history ? "   DG Maxwell publication: error=" : "   FE Maxwell publication: error=")<<fe_publication_error
                          <<" evaluation allowance="<<fe_publication_bound
                          <<" net-stress allowance="<<fe_publication_net_bound<<'\n';
       publish_history_candidates(candidates, stress_position, H_position);
       if (fe_update)
         publish_fe_strain_commit(fe_update);
+    }
+
+    template <int dim>
+    void PhaseFieldFault<dim>::commit_dg_accepted_step(const std::shared_ptr<FEStrainUpdate> &update)
+    {
+      validate_fe_strain_restrictions();
+      AssertThrow(dg_accepted_history && update && update->dg_parent==fe_strain_state->dg_history
+                  && update->dg_step==this->get_timestep_number()
+                  && update->dg_step!=fe_strain_state->committed_step
+                  && update->dg_dt==this->get_timestep()
+                  && update->dg_time+update->dg_dt==this->get_time()
+                  && update->dg_rates==this->get_reconstructed_fault_manager().get_slip_rate(0),
+                  ExcMessage("PF5 rejects stale/repeated or changed-context history publication."));
+      AssertThrow(update->dg_history && update->dg_history->space==fe_strain_state->dg_history->space
+                  && update->I==fe_strain_state->I && update->Z.size()==fe_strain_state->Z.size()
+                  && update->dg_cohesive.size()==update->Z.size(),ExcMessage("PF5 staged history layout changed."));
+      for (const auto &component:update->dg_history->trial_stress)
+        for (const auto i:component.locally_owned_elements())
+          AssertThrow(std::isfinite(component[i]),ExcMessage("Nonfinite PF5 DG candidate."));
+      for (unsigned int j=0;j<update->Z.size();++j)
+        AssertThrow(std::isfinite(update->Z[j]) && update->Z[j]>=0.
+                    && std::abs(update->Z[j]-update->dg_cohesive[j]*update->I[j])
+                    <=64*std::numeric_limits<double>::epsilon()*std::max(1.,std::abs(update->Z[j])),
+                    ExcMessage("PF5 staged surface histories disagree."));
+      HistoryCandidates candidates;
+      candidates.cohesive_nodal_values={update->dg_cohesive};
+      auto &manager=this->get_phase_field_handler().get_associated_particle_manager();
+      const auto &info=manager.get_property_manager().get_data_info();
+      const unsigned int stress_position=info.get_position_by_field_name("maxwell stress");
+      const unsigned int H_position=info.get_position_by_field_name("crack_driving_force");
+      // H is frozen by the existing Evolve phase field=false law. Particle
+      // stresses are derived samples of the candidate, never incoming history.
+      for (const auto &particle:manager.get_particle_handler())
+        {
+          typename HistoryCandidates::ParticleCandidate sample;
+          sample.stress=candidate_fe_strain_stress(update,particle.get_surrounding_cell()->id(),particle.get_location());
+          sample.crack_driving_force=particle.get_properties()[H_position];
+          AssertThrow(std::isfinite(sample.stress.norm()) && std::isfinite(sample.crack_driving_force)
+                      && sample.crack_driving_force>=0.,ExcMessage("Nonfinite PF5 publication candidate."));
+          candidates.particle_candidates.emplace(particle.get_id(),sample);
+        }
+      validate_history_candidates(candidates);
+      // Every allocation, reconstruction and validity check precedes writes.
+      publish_history_candidates(candidates,stress_position,H_position);
+      publish_fe_strain_commit(update);
     }
 
     template <int dim>
@@ -719,7 +774,7 @@ namespace aspect
                                point_cache, this->get_dof_handler(), accepted_bulk_state,
                                VectorTools::EvaluationFlags::avg, phase_field_component);
       samples.previous_phase_fields = VectorTools::point_values<1>(
-                                        point_cache, this->get_dof_handler(), fe_strain_history ? accepted_fe_strain_state() : this->get_old_solution(),
+                                        point_cache, this->get_dof_handler(), uses_independent_bulk_history() ? accepted_fe_strain_state() : this->get_old_solution(),
                                         VectorTools::EvaluationFlags::avg, phase_field_component);
     }
 
@@ -890,7 +945,7 @@ namespace aspect
                 }
               const ArrayView<const double> properties = particle.get_properties();
               SymmetricTensor<2,dim> old_stress;
-              if (!fe_strain_history)
+              if (!uses_independent_bulk_history())
                 for (unsigned int component = 0;
                      component < SymmetricTensor<2,dim>::n_independent_components;
                      ++component)
@@ -1416,6 +1471,7 @@ namespace aspect
   template void PhaseFieldFault<dim>::prepare_reconstructed_fault_mechanical_solve(); \
   template void PhaseFieldFault<dim>::compute_fault_surface_temperatures(); \
   template void PhaseFieldFault<dim>::validate_reconstructed_fault_constitutive_state() const; \
+  template void PhaseFieldFault<dim>::commit_dg_accepted_step(const std::shared_ptr<FEStrainUpdate>&); \
   template void PhaseFieldFault<dim>::commit_reconstructed_fault_mechanical_history(const LinearAlgebra::BlockVector &); \
   template double PhaseFieldFault<dim>::compute_reconstructed_fault_time_step(const double) const; \
   template void PhaseFieldFault<dim>::validate_cohesive_state_commit(const std::vector<std::vector<double>> &) const; \

@@ -24,6 +24,7 @@
 #include <aspect/mesh_deformation/interface.h>
 #include <aspect/melt.h>
 #include <aspect/reconstructed_fault/manager.h>
+#include <aspect/material_model/phase_field_fault.h>
 
 #include <deal.II/base/mpi.h>
 #include <deal.II/base/utilities.h>
@@ -590,6 +591,11 @@ namespace aspect
       }
 
     signals.post_resume_load_user_data(triangulation);
+    // Material slots are connected before particle deserialization slots.
+    // Rebuild the restricted native owner only after all mesh/particle data.
+    if (parameters.reconstruct_faults)
+      if (auto *fault=dynamic_cast<MaterialModel::PhaseFieldFault<dim>*>(material_model.get()))
+        fault->restore_dg_accepted_history();
 
     // Only the pending interval may be reduced. In particular, old_time_step
     // describes the last committed history update and must not be changed.
@@ -670,7 +676,11 @@ namespace aspect
     ar &boundary_traction_manager;
 
     if (parameters.reconstruct_faults)
-      ar &(*reconstructed_fault_manager);
+      {
+        ar &(*reconstructed_fault_manager);
+        if (auto *fault=dynamic_cast<MaterialModel::PhaseFieldFault<dim>*>(material_model.get()))
+          fault->serialize_dg_accepted_history(ar);
+      }
 
 // The following are not manager classes but straight up plugins and so don't
 // currently have the ability to serialize themselves. We should add those later.

@@ -75,7 +75,7 @@ namespace aspect
         introspection.variable("phase_field").first_component_index);
       fe_values[phase_field_extractor].get_function_values(bulk_state, phase_field);
       fe_values[phase_field_extractor].get_function_values(
-        phase_field_fault.uses_fe_strain_history() ? phase_field_fault.accepted_fe_strain_state() : simulator.get_old_solution(), previous_phase_field);
+        phase_field_fault.uses_independent_bulk_history() ? phase_field_fault.accepted_fe_strain_state() : simulator.get_old_solution(), previous_phase_field);
 
       const std::vector<unsigned int> &chemical_fields =
         introspection.chemical_composition_field_indices();
@@ -533,7 +533,7 @@ namespace aspect
           SymmetricTensor<2,dim> old_stress;
           // FE strain is authoritative in the restricted option. Do not
           // sample an unused projected particle history before replacing it.
-          if (!phase_field_fault.uses_fe_strain_history())
+          if (!phase_field_fault.uses_independent_bulk_history())
             for (unsigned int c=0; c<stress_composition_indices.size(); ++c)
               old_stress[SymmetricTensor<2,dim>::unrolled_to_component_indices(c)] =
                 compositions[stress_composition_indices[c]][q];

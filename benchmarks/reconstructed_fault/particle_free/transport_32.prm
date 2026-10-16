@@ -1,0 +1,5 @@
+# PF4 prescribed transport only; no coupled history or phase publication.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_free/fixed_profile_dg.prm
+subsection Mesh refinement
+  set Initial global refinement = 5
+end

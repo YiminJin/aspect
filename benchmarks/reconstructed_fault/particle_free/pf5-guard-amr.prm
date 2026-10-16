@@ -1,0 +1,5 @@
+# Negative PF5 scope/provenance control.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_free/pf5-8.prm
+subsection Mesh refinement
+  set Initial adaptive refinement = 1
+end

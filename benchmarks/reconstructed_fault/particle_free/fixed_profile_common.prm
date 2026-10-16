@@ -1,0 +1,62 @@
+# PF2: native seed initialization followed by observer-driven frozen-profile
+# mechanical steps. No outer physical phase/particle-advection loop is run.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/propagation/recoverable.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/build-particle-free/plugin/libfixed_profile_checks.release.so
+set Output directory = $ASPECT_SOURCE_DIR/build-particle-free/runs/fixed-profile
+set End time = 0
+set Resume computation = false
+set Nonlinear solver scheme = single Advection, iterated Newton Stokes
+set Nonlinear solver failure strategy = abort program
+set Nonlinear solver tolerance = 1e-8
+set Max nonlinear iterations = 30
+set Maximum time step = 0.125
+set Maximum first time step = 0.125
+set Pressure normalization = no
+subsection Geometry model
+  subsection Box
+    set Y repetitions = 2
+  end
+end
+subsection Mesh refinement
+  set Initial global refinement = 3
+  set Initial adaptive refinement = 0
+  set Time steps between mesh refinement = 0
+end
+subsection Fault reconstruction
+  set Structural point spacing = 0.0625
+end
+subsection Material model
+  subsection Phase field fault
+    set Evolve phase field = false
+    set Bulk history representation = accepted FE strain
+    set Cohesive history representation = surface elastic slip
+    set Fault mechanical work measure = bulk conjugate
+    set FE bulk normal quadrature points = 6
+  end
+end
+subsection Solver parameters
+  subsection Stokes solver parameters
+    set Linear solver tolerance = 1e-9
+  end
+  subsection Phase field solver parameters
+    set Enforce phase irreversibility = true
+  end
+end
+subsection Boundary velocity model
+  subsection Function
+    set Function expression = 0.256*t*(t<0.3)*(y-0.5); 0
+  end
+end
+subsection Postprocess
+  set List of postprocessors = particles, PF2 fixed profile checks
+  subsection Particles
+    set Data output format = none
+  end
+end
+subsection Checkpointing
+  set Steps between checkpoint = 0
+  set Time between checkpoint = 0
+end
+subsection Termination criteria
+  set Checkpoint on termination = false
+end

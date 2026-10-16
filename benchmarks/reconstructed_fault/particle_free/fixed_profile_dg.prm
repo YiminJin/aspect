@@ -1,0 +1,7 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_free/fixed_profile_common.prm
+set Output directory = $ASPECT_SOURCE_DIR/build-particle-free/runs/fixed-profile-dg
+subsection Material model
+  subsection Phase field fault
+    set Bulk history representation = DG trial stress
+  end
+end

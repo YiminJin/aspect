@@ -1,0 +1,7 @@
+# Selected local scaling/norm invariants only; no transport.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_free/transport_4.prm
+subsection Postprocess
+ subsection PF4 stabilization checks
+  set Local only = true
+ end
+end

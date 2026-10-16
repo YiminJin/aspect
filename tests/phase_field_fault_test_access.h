@@ -75,6 +75,34 @@ namespace aspect
             return model.fe_strain_state->Z;
           }
 
+          static std::vector<double> dg_history_values(const PhaseFieldFault<dim> &model)
+          {
+            return model.dg_history_values();
+          }
+
+          static void clear_native_stress_samples(PhaseFieldFault<dim> &model)
+          {
+            model.fe_strain_state->stress_samples.clear();
+          }
+
+          static void validate_native_history(const PhaseFieldFault<dim> &model)
+          {
+            model.validate_fe_strain_restrictions();
+          }
+
+          static double cohesive_storage(const PhaseFieldFault<dim> &model)
+          {
+            const auto &s=*model.fe_strain_state;
+            double energy=0.;
+            for (const auto &p : s.profiles)
+              {
+                const double Z=(1-p.xi)*s.Z[p.segment]+p.xi*s.Z[p.segment+1];
+                const double I=(1-p.xi)*s.I[p.segment]+p.xi*s.I[p.segment+1];
+                energy+=p.weight*Z*Z/(2*s.G*I);
+              }
+            return energy;
+          }
+
           static auto fe_material_coefficients(const PhaseFieldFault<dim> &model)
           {
             return std::make_pair(model.fe_strain_state->G,model.fe_strain_state->eta);

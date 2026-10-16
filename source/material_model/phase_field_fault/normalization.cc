@@ -291,7 +291,7 @@ namespace aspect
       // Frozen mature faults retain the general cell-interval calculation,
       // consistent surface projection and paired boundary completion. The P2
       // analytic normal-ray restriction is not valid for oblique Q1 cells.
-      if (fe_strain_history && fe_strain_state && !mature_frictional_fault)
+      if (uses_independent_bulk_history() && fe_strain_state && !mature_frictional_fault)
         {
           const auto trial = evaluate_fe_normalization(this->get_solution(), false);
           AssertThrow(trial.admissible, ExcMessage("Accepted FE strain normalization is undefined."));

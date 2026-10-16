@@ -135,7 +135,7 @@ namespace aspect
           const auto &associations=manager.get_stokes_qp_fault_associations(
                                      cell->id(),quadrature,fe.get_quadrature_points());
           fe[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)].get_function_values(bulk_state,phase);
-          fe[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)].get_function_values(phase_field_fault.uses_fe_strain_history() ? phase_field_fault.accepted_fe_strain_state() : this->get_old_solution(),previous_phase);
+          fe[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)].get_function_values(phase_field_fault.uses_independent_bulk_history() ? phase_field_fault.accepted_fe_strain_state() : this->get_old_solution(),previous_phase);
           fe[intro.extractors.temperature].get_function_values(bulk_state,temperature);
           fe[intro.extractors.pressure].get_function_values(bulk_state,pressure);
           fe[intro.extractors.velocities].get_function_symmetric_gradients(bulk_state,strain);
@@ -197,7 +197,7 @@ namespace aspect
                 input.slip_tensor=manager.get_shear_sense(a.fault_index)
                                   *symmetrize(outer_product(a.tangent,a.normal));
                 input.normal_tensor=symmetrize(outer_product(a.normal,a.normal));
-                if (!phase_field_fault.uses_fe_strain_history())
+                if (!phase_field_fault.uses_independent_bulk_history())
                   for (unsigned int c=0; c<stress_fields.size(); ++c)
                     {
                       AssertIndexRange(stress_fields[c],composition.size());

@@ -27,6 +27,7 @@
 #include <aspect/material_model/interface.h>
 
 #include <deal.II/grid/grid_tools.h>
+#include <deal.II/lac/full_matrix.h>
 #include <deal.II/particles/particle_handler.h>
 
 namespace aspect
@@ -321,6 +322,19 @@ namespace aspect
                                 LinearAlgebra::BlockVector &,
                                 const LinearAlgebra::BlockVector &,
                                 double &energy, double &arithmetic_allowance) const;
+
+      /** Ordinary FE fracture functional for the restricted DG phase operator.
+       * Coefficients come from this handler, not particles or duplicate inputs.
+       * Nodal derivatives are unconstrained; the native box solver applies the
+       * physical bounds. The retained evaluate_fe_fracture is CPDI integration. */
+      struct CellFractureEnergy
+      {
+        double energy = 0.;
+        std::vector<double> gradient, roundoff_scale;
+        FullMatrix<double> hessian;
+      };
+      CellFractureEnergy evaluate_cell_fracture(
+        const LinearAlgebra::BlockVector &, bool tangent) const;
       const PhaseField::SolverParameters &get_solver_parameters() const { return solver_parameters; }
 
       double crack_surface_density(const double          phase_field_value,

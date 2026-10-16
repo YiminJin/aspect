@@ -1,0 +1,3 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_free/pf5-16.prm
+set Resume computation = true
+set Nonlinear solver scheme = no Advection, no Stokes

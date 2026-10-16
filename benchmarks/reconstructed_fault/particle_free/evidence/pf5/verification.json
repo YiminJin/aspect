@@ -1,0 +1,75 @@
+{
+  "passed": true,
+  "PF5_fresh_gates": 280,
+  "PF5_restart_gates": 18,
+  "negative_scope_provenance_controls": 4,
+  "native_unit_tests": {
+    "command": "timeout 180 env OMP_NUM_THREADS=1 DEAL_II_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 build-particle-free/native/aspect --test '[phase_field_fault_cohesive],*Maxwell*'",
+    "passed": true,
+    "assertions": 628,
+    "cases": 8
+  },
+  "PF1": {
+    "passed": true,
+    "checks": 94
+  },
+  "disabled_regression": "disabled-regression.json",
+  "same_build_FE_DG": "fixed-profile-assessment.json",
+  "operator": "operator-verification.json",
+  "replay": {
+    "directory": "/tmp/pf5-history-replay-i_d8vf5r",
+    "command": [
+      "/usr/bin/python3",
+      "/tmp/pf5-history-replay-i_d8vf5r/source/assess_pf5.py",
+      "/tmp/pf5-history-replay-i_d8vf5r/pf5-verified-8",
+      "/tmp/pf5-history-replay-i_d8vf5r/pf5-verified-16",
+      "/tmp/pf5-history-replay-i_d8vf5r/pf5-verified-32",
+      "/tmp/pf5-history-replay-i_d8vf5r/pf5-verified-64",
+      "--restart-parent",
+      "/tmp/pf5-history-replay-i_d8vf5r/pf5-verified-16",
+      "--restart",
+      "/tmp/pf5-history-replay-i_d8vf5r/pf5-verified-restart-16",
+      "--output",
+      "/tmp/pf5-history-replay-i_d8vf5r/assessment.json"
+    ],
+    "payload_hashes_verified": 468,
+    "assessment_byte_identical": true
+  },
+  "preservation": {
+    "incoming_files": 1312,
+    "modified_incoming_files": [
+      "source/material_model/phase_field_fault.cc",
+      "source/simulator/checkpoint_restart.cc",
+      "source/material_model/phase_field_fault/history.cc",
+      "source/material_model/phase_field_fault/fe_strain.cc",
+      "source/material_model/phase_field_fault/dg_history.cc",
+      "include/aspect/material_model/phase_field_fault.h",
+      "include/aspect/material_model/phase_field_fault/fe_strain_internal.h",
+      "doc/reconstructed_fault/specification.tex",
+      "doc/reconstructed_fault/current_design.md",
+      "doc/reconstructed_fault/particle_free/SOURCE_AUDIT.md",
+      "doc/reconstructed_fault/particle_free/STATUS.md",
+      "benchmarks/reconstructed_fault/particle_free/CMakeLists.txt",
+      "benchmarks/reconstructed_fault/particle_free/run_fixed_profile.py"
+    ],
+    "AGENTS_unchanged": true,
+    "prior_evidence_unchanged": true,
+    "PF1_PF4_reports_unchanged": true,
+    "DG_transport_limiter_phase_operators_unchanged": true
+  },
+  "whitespace_diff_check_passed": true,
+  "source_count": 880,
+  "concurrent_native_limit": 2,
+  "seconds_per_run_limit": 180,
+  "ranks": 1,
+  "threads": 1,
+  "no_default_or_limiter_change": true,
+  "no_coupled_outer_steps_AMR_MPI_moving_geometry_birth_or_PF6": true,
+  "preliminary_failures_preserved": [
+    "NaN-marker equality assertion",
+    "missing restored surface temperature cache",
+    "temporary formatter stream-token compile error",
+    "wrong observer name in first PF4 control invocation"
+  ],
+  "source_identity_note": "New production source SHA values match all final selected run records and rebuilt native core. The retained incoming binary is explicitly distinguished in provenance; its runner records launch-time hashes, not its old build sources."
+}

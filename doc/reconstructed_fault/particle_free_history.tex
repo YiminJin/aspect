@@ -1,0 +1,509 @@
+\documentclass[10pt,letterpaper]{article}
+\usepackage[margin=0.85in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,bm,booktabs,array,enumitem,xcolor,mathrsfs}
+\usepackage[colorlinks=true,linkcolor=blue!45!black,urlcolor=blue!45!black]{hyperref}
+\usepackage{microtype,needspace}
+\setlength{\parskip}{5pt}
+\setlength{\parindent}{0pt}
+\setlist{nosep,leftmargin=*}
+\newcommand{\B}{\mathcal B}
+\newcommand{\F}{\mathcal F}
+\newcommand{\LL}{\mathscr L}
+\newcommand{\CC}{\bm{\mathcal C}}
+\newcommand{\SSS}{\bm{\mathcal S}}
+\newcommand{\ta}{\bm\tau}
+\newcommand{\tat}{\bm\tau^{\rm tr}}
+\newcommand{\tar}{\bm\tau^{\rm res}}
+\newcommand{\Qgeo}{\bm Q^{\rm geo}}
+\newcommand{\vel}{\dot{\bm u}}
+\newcommand{\erate}{\dot{\bm\varepsilon}}
+\newcommand{\sel}{s^{\rm elas}}
+\newcommand{\smem}{s^{\rm mem}}
+\newcommand{\Z}{\widetilde\tau_s^{\rm coh}}
+\newcommand{\qcoh}{\tau_s^{\rm coh}}
+\newcommand{\dt}{D_t}
+\newcommand{\ds}{D_{\F}}
+\newcommand{\rr}{\mathring}
+\newcommand{\tr}{\operatorname{tr}}
+\newcommand{\dev}{\operatorname{dev}_3}
+\newcommand{\sym}{\operatorname{sym}}
+\newcommand{\skw}{\operatorname{skw}}
+\title{Phase-field rate-state friction in a Stokes system\\[4pt]\large A particle-free history formulation}
+\author{Revised derivation using Yimin Jin's notation}
+\date{15 October 2026}
+\begin{document}
+\maketitle
+\begin{abstract}
+The cohesive model can be represented by an independently evolved bulk trial-stress history and a physical surface elastic slip, with the narrow stress correction reconstructed from the current phase profile. This simple history equation implies a specific stress-redistribution law when the localization evolves. A mature Maxwell/RSF model without that law remains particle-free, but generally requires direct stress transport or a residual bulk history. This revision adopts the notation and kinematics--rheology--phase ordering of the supplied unfinished draft, makes tensor types explicit, and corrects the evolving-profile product rule. General moving-surface energetics and production-code equivalence remain to be established.
+\end{abstract}
+
+\section{Notation and scope}
+We use $\B\subset\mathbb R^2$ for the body, $\F(t)$ for the fault curve, $\vel$ for velocity, and $\erate$ for deviatoric strain rate. The planar calculation uses three-dimensional plane-strain tensor conventions. The baseline derivation assumes constant $G,\eta$ and a common relaxation time $\lambda=\eta/G$. The symbol $\alpha(\phi)$ is reserved for the crack-density function; $a,b$ remain the RSF parameters.
+
+\begin{center}
+\begin{tabular}{p{0.20\linewidth}p{0.30\linewidth}p{0.40\linewidth}}
+\toprule
+Previous note & Revised notation & Meaning\\
+\midrule
+$\Omega,\Gamma,u,\mathsf D u$ & $\B,\F,\vel,\erate$ & Body, fault, velocity, strain rate\\
+$S,m,n$ & $\SSS,\bm e^s,\bm e^n$ & Slip tensor, tangent, normal\\
+$\alpha=G/\eta$ & $\lambda^{-1}=G/\eta$ & Maxwell relaxation rate\\
+$Z,q^{\rm coh},I$ & $\Z,\qcoh,I_h$ & Cohesive moment, traction, normalization\\
+$e$ & $\sel=\Z/G$ & Physical surface elastic slip\\
+$a$ in mature branch & $\smem$ & Auxiliary surface slip memory\\
+$2GR$ & $\tat$ & Bulk trial-stress history\\
+$2GK$ & $\tar$ & Residual stress history, mature branch\\
+$F_{\rm geo}$ & $\Qgeo$ & Constitutive stress-rate source\\
+$a^\ell=a\circ\pi_t$ & $s^{\rm ext}(\bm x,t)=s(\bm\pi_t(\bm x),t)$ & Scalar extension, not a power\\
+\bottomrule
+\end{tabular}
+\end{center}
+Here ``trial stress'' is a persistent history driven by the total strain rate; it is not merely a temporary Newton-iteration predictor. In the cohesive construction it equals $2GR$ from the preceding note. A generic transformed stress introduced below need not obey its simple evolution equation.
+
+This is a revision of the previous derivation, not a repository implementation. The earlier source audit and its bounded checks are retained. The uploaded notation draft is the basis for the revised symbols; its missing rheology image is not required to compile this self-contained document.
+
+\clearpage
+\section{Model kinematics}
+Let $\mathcal C_{\F}$ be a tubular neighborhood with a unique smooth nearest-point association $\bm\pi_t:\mathcal C_{\F}\to\F(t)$. Locally, $\xi$ is distance along the fault and $\zeta$ is the signed normal coordinate. Write $\mathcal T_{\bm x_{\F}}$ for a normal profile. More general associations are possible but must be specified, particularly at branches, overlapping tubes, and newly created surface segments.
+
+For the ideal sharp interface, a piecewise sufficiently regular velocity with no normal opening satisfies
+\begin{equation}
+ [\![\vel]\!]=V\bm e^s,\qquad [\![\vel]\!]\cdot\bm e^n=0,\qquad
+ \bm\ell^{\rm frac}=\delta_{\F}V\bm e^s\otimes\bm e^n.
+\end{equation}
+The last equation describes the singular part of the \emph{distributional} velocity gradient. Locally $\delta_{\F}=\delta(\zeta)$. For one slip direction, choose an oriented unit tangent $\bm e^s$ and a signed $V$; alternatively restrict the discussion to $V\geq0$. A direction defined by dividing the jump by its norm is undefined at zero slip. The equations below use the $V\geq0$ branch unless stated otherwise.
+
+With the plane-strain embedding understood, define
+\begin{equation}
+ \bm\ell=\nabla\vel,\qquad
+ \erate=\sym\bm\ell-\tfrac13\tr(\bm\ell)\bm I_3,\qquad
+ \SSS=\tfrac12(\bm e^n\otimes\bm e^s+\bm e^s\otimes\bm e^n).
+\end{equation}
+Thus $\tr\SSS=0$, $\SSS:\SSS=1/2$, and
+\begin{equation}
+ \erate=\erate^{\rm bulk}+\erate^{\rm frac},\qquad
+ \erate^{\rm frac}=\delta_{\F}V\SSS.
+\end{equation}
+The deviator uses $\tr\bm\ell$ times the identity, not $\nabla\cdot\bm\ell$.
+
+At finite phase-field width, the regularized $C^0$ bulk velocity has no actual jump at the centerline. The sharp-interface jump motivates $V$; it does not define $V$ as the zero-width jump of that continuous discrete velocity. In the diffuse formulation $V$ is a surface unknown coupled through the regularized fracture strain rate and mechanical work.
+
+Define material and objective derivatives by
+\begin{equation}
+ \dt=\partial_t+\vel\cdot\nabla,\qquad
+ \bm W=\skw\nabla\vel,\qquad
+ \boxed{\rr{\bm A}=\dt\bm A+\bm A\bm W-\bm W\bm A.} \label{eq:jaumann}
+\end{equation}
+The superscript circle in the previous note meant this \emph{Jaumann corotational rate}, not tensor order or function composition. It remains a second-order tensor when $\bm A$ is second-order. A circle between two functions, as in $a\circ\pi_t$, instead meant composition; explicit extension notation now avoids that ambiguity. The spin sign agrees with the official ASPECT convention. To recover a specified non-objective stress law, replace every corotational rate consistently by $\dt$; adding spin is a constitutive extension, not a numerical correction. Neglecting spin alone does not remove material advection.
+
+\section{Rheology and mechanical coupling}
+For fixed localization, the small-elastic-strain Maxwell relation is
+\begin{equation}
+ \erate^{\rm bulk}=\frac{\rr\ta}{2G}+\frac{\ta}{2\eta},\qquad \lambda=\frac\eta G.
+ \label{eq:maxwell}
+\end{equation}
+Its continuation to evolving localization is the model choice examined below.
+Separate friction and radiation damping:
+\begin{equation}
+ \tau_s^{\rm fric}=\mu(V,\Theta)\sigma_n,\qquad
+ \tau_s^{\rm rad}=\eta^{\rm rad}V, \label{eq:fric}
+\end{equation}
+\begin{equation}
+ \mu=a\operatorname{asinh}\!\left[\frac{V}{2V_0}
+ \exp\!\left(\frac{\mu_0+b\ln(\Theta V_0/D_c)}a\right)\right],\qquad
+ \ds\Theta=1-\frac{V\Theta}{D_c}. \label{eq:rsf}
+\end{equation}
+Here $\Theta>0$ is the aging state in seconds and $\ds$ follows the chosen surface material labels, defined in Section~\ref{sec:extension}. A signed-slip generalization uses the appropriate signed friction and $|V|$ in the aging law. Radiation is included once. For compression-positive pressure and tension-positive total Cauchy stress,
+\begin{equation}
+ \bm\sigma=\ta-p\bm I_3,\qquad
+ \sigma_n=-\bm e^n\cdot\bm\sigma\bm e^n
+          =p-\bm e^n\cdot\ta\bm e^n. \label{eq:normal}
+\end{equation}
+If pressure is dynamic or pore pressure/background loading is prescribed separately, use the intended total/effective normal stress. A deviatoric normal component alone is not the compression-positive contact pressure.
+
+The surface cohesive traction is denoted $\qcoh$. It will be tied to recoverable surface storage in the cohesive model. The surface balance is
+\begin{equation}
+ \tau_s^{\rm drv}=\qcoh+\tau_s^{\rm fric}+\tau_s^{\rm rad}. \label{eq:sliding}
+\end{equation}
+The work-conjugate driving traction $\tau_s^{\rm drv}=\LL_t^*\ta$ is derived below; it equals $\ta:\SSS$ under a suitable normal isostress approximation. The mature branch sets $\qcoh=0$. Calling cohesion a regularization remainder does not remove its stored-energy and evolution requirements when it is retained.
+
+\section{Phase regularization and the product rule}
+\subsection{Two different normalizations}
+For $\phi:\B\to[0,1]$, use the diffuse fracture energy
+\begin{equation}
+ \mathscr E_{\rm surf}=\int_{\B}\mathcal G_{\rm II}\gamma(\phi,\nabla\phi)\,dA,
+ \qquad \gamma=\frac{\alpha(\phi)+\ell^2|\nabla\phi|^2}{c_0\ell}. \label{eq:fractureenergy}
+\end{equation}
+The usual $c_0=4\int_0^1\sqrt{\alpha(r)}\,dr$ normalizes an optimal, fully developed, flat one-dimensional crack profile under the standard two-sided convention. It does \emph{not} give $\int_{\mathcal T}\gamma\,d\zeta=1$ for every partially damaged or evolving profile. Accordingly, \eqref{eq:fractureenergy} is a diffuse approximation to sharp surface energy, not an exact equality for arbitrary $\phi$.
+
+The slip-localization kernel is separately normalized. For a flat profile define
+\begin{equation}
+ h(\phi)=g(\phi)^{-1}-1,\qquad
+ I_h(\xi,t)=\int_{\mathcal T_\xi}h(\phi)\,d\zeta,\qquad
+ \chi=\frac{h(\phi)}{I_h},\qquad \int_{\mathcal T_\xi}\chi\,d\zeta=1. \label{eq:chi}
+\end{equation}
+Here $\chi$ has units $\mathrm m^{-1}$ and $I_h$ has units $\mathrm m$. The formula applies to active profiles with finite positive $I_h$ and admissible $g>0$. At an intact profile $I_h=0$, or at singular fully damaged states for a vanishing $g$, the limiting/regularization and activation rules must be supplied; neither division is silently valid. Delta convergence additionally requires concentrating normalized profiles as $\ell\to0$.
+
+For a selected curved generalization, include the normal-coordinate Jacobian $J$: for example $I_h=\int hJ\,d\zeta$ and $\int\chi J\,d\zeta=1$. The implemented projected $I_h$ and its derivatives must be used consistently. The crack-density $\gamma$ and slip kernel $\chi$ have different roles.
+
+\subsection{What follows from the degradation relation}
+The draft's local degradation assumption gives, algebraically,
+\begin{equation}
+ (\tat-\ta):\SSS=h(\phi)\qcoh. \label{eq:degradation}
+\end{equation}
+This pointwise relation uses a local traction interpretation. Carrying a single surface $\qcoh$ across a profile is an isostress modeling approximation, not a consequence of normalization. For nonuniform stresses, use the adjoint driving traction in \eqref{eq:sliding}.
+
+To see the differentiation issue, temporarily take fixed coordinates and fixed $\SSS$, and impose the unmodified Maxwell equations for both stresses:
+\begin{equation}
+ \dot{\tat}+\lambda^{-1}\tat=2G\erate,\qquad
+ \dot\ta+\lambda^{-1}\ta=2G(\erate-\chi V\SSS).
+\end{equation}
+Subtract and contract with $\SSS$. The exact scalar result is
+\begin{equation}
+ \boxed{h\dot\qcoh+\dot h\qcoh+\lambda^{-1}h\qcoh=G\chi V.} \label{eq:productrule}
+\end{equation}
+The draft omitted $\dot h\qcoh$. For $\dot h=0$, $\chi=h/I_h$ yields the proposed Maxwell law with $\Z=I_h\qcoh$. With evolving $h$, however, putting $\Z=I_h\qcoh$ into the exact equation gives
+\begin{equation}
+ \dot\Z+\lambda^{-1}\Z+
+ \left(\frac{\dot h}{h}-\frac{\dot I_h}{I_h}\right)\Z=GV
+ \qquad(h>0). \label{eq:productruleZ}
+\end{equation}
+The extra coefficient is $\dot\chi/\chi$. It can vary across the profile, obstructing a single surface-moment equation under the same local assumptions. Even when $\dot h\ne0$, a pure amplitude change with fixed normalized $\chi$ is a special cancellation. Material transport and changing orientation require the full tensor product rule in the next section.
+
+Consequently, the compact evolving-profile law $\ds\Z+\Z/\lambda=GV$ cannot be obtained from the unmodified bulk Maxwell law by dropping derivatives. One must either retain the resulting history terms or explicitly select the cohesive stress-redistribution law. This is the substantive model distinction behind the particle-free construction.
+
+\section{Surface extension and tensor types}\label{sec:extension}
+Let $\bm v_{\F}$ be the velocity of selected surface material labels, with the correct surface-normal motion. For a scalar surface field $s$, $\ds s$ denotes its derivative along those labels. Define
+\begin{equation}
+ s^{\rm ext}(\bm x,t)=s(\bm\pi_t(\bm x),t),\qquad
+ \LL_t[s]=\chi s^{\rm ext}\SSS,\qquad
+ \erate^{\rm frac,reg}=\LL_t[V]. \label{eq:L}
+\end{equation}
+$\LL_t$ maps a scalar surface slip to a bulk symmetric deviatoric strain tensor. The same linear expression maps a scalar slip rate to a strain rate. Its coefficients depend on the current phase and geometry.
+
+Define the transport--extension defect (previously called the commutator)
+\begin{equation}
+ \boxed{\CC[s]=\big(\LL_t[s]\big)^{\circ}-\LL_t[\ds s].} \label{eq:C}
+\end{equation}
+This is the difference between transporting/rotating the extended tensor and extending the transported scalar. With
+\begin{equation}
+ \bm b=\dt\bm\pi_t-\bm v_{\F}^{\rm ext},\qquad
+ \dt s^{\rm ext}=(\ds s)^{\rm ext}+\bm b\cdot(\nabla_{\F}s)^{\rm ext},
+\end{equation}
+its local expansion is
+\begin{equation}
+ \boxed{\CC[s]=s^{\rm ext}\big[(\dt\chi)\SSS+\chi\rr\SSS\big]
+       +\chi\SSS\big[\bm b\cdot(\nabla_{\F}s)^{\rm ext}\big].}
+ \label{eq:Cextended}
+\end{equation}
+Both velocities in the definition of $\bm b$ follow points on the same moving surface, so their difference is tangential. If the association is only piecewise smooth, use the operator definition with appropriate interface/remap treatment; do not assume a classical derivative everywhere.
+
+\begin{center}
+\begin{tabular}{p{0.31\linewidth}p{0.43\linewidth}p{0.16\linewidth}}
+\toprule
+Quantity & Type & Units for slip $s$\\
+\midrule
+$s$, $s^{\rm ext}$ (formerly $a,a^\ell$) & Scalar & $\mathrm m$\\
+$\bm\pi_t(\bm x)$ & Point/vector-valued map into $\F$ & $\mathrm m$\\
+$\nabla\bm\pi_t$ & Second-order Jacobian & $1$\\
+$\bm b$ & Tangent vector & $\mathrm{m/s}$\\
+$\nabla_{\F}s$ & Tangent gradient vector & $1$\\
+$\SSS$, $\LL_t[s]$ & Second-order symmetric deviators & $1$\\
+$\CC[s]$ & Second-order symmetric deviator & $\mathrm{s^{-1}}$\\
+$\Qgeo$ & Second-order stress-rate tensor & $\mathrm{Pa/s}$\\
+\bottomrule
+\end{tabular}
+\end{center}
+The operator $\CC$ itself is not a pointwise tensor of a single rank. In components it has the form
+\begin{equation}
+ \CC[s]_{ij}=A_{ij}s^{\rm ext}+B_{ijk}(\nabla_{\F}s)^{\rm ext}_k,\qquad
+ B_{ijk}=\chi\mathcal S_{ij}b_k. \label{eq:rank}
+\end{equation}
+Thus the \emph{gradient coefficient} $B_{ijk}$ is third-order, but the evaluated $\CC[s]$ is second-order. This distinction explains why describing the whole expression as a third-order tensor is misleading.
+
+A stationary surface alone does not make $\CC$ vanish: a fixed spatial $\chi$ contributes $\vel\cdot\nabla\chi$. Sufficient compatibility conditions are $\dt\chi=0$, $\rr\SSS=0$, and $\bm b=0$. A suitably co-moving rigid profile satisfies them. Frozen geometry with arbitrary material flow need not.
+
+\section{Master transformation and the meaning of the geometric source}
+Consider the explicitly selected stress law
+\begin{equation}
+ \rr\ta+\lambda^{-1}\ta=2G\big(\erate-\LL_t[V]\big)+\Qgeo. \label{eq:masterstress}
+\end{equation}
+Here $\Qgeo$, formerly $F_{\rm geo}$, is a \emph{constitutive stress-redistribution rate}. It is not a body force, a separate imposed load, or a limiter. Its physical role is to specify whether and how stored elastic stress changes when its localization/association changes relative to material transport.
+
+For a generic scalar surface memory $s$, define
+\begin{equation}
+ \ds s+\lambda^{-1}s=V,\qquad
+ \bm T=\ta+2G\LL_t[s]. \label{eq:transform}
+\end{equation}
+Constant $G,\lambda$ and linearity of $\LL_t$ give
+\begin{align}
+ \rr{\bm T}+\lambda^{-1}\bm T
+ &=2G(\erate-\LL_t[V])+\Qgeo
+   +2G\big(\big(\LL_t[s]\big)^{\circ}+\lambda^{-1}\LL_t[s]\big)\notag\\
+ &=2G\erate+2G\CC[s]+\Qgeo. \label{eq:masterT}
+\end{align}
+The previous $B$ is $\bm T/(2G)$. The transformed $\bm T$ is the simple trial history $\tat$ only when $2G\CC[s]+\Qgeo=0$ with compatible initial data. A change of variables establishes this identity; it does not establish the physical choice of $\Qgeo$.
+
+The scalar $s$ can be physical elastic slip in the cohesive branch. In the mature branch it is an auxiliary memory. Equal evolution equations and units do not imply equal physical roles. The original symbol $a$ in the general transformation therefore did not unconditionally mean the cohesive $e$.
+
+\section{Cohesive branch: physical elastic slip and trial-stress history}
+Select the state relations and rates
+\begin{align}
+ \Z&=I_h\qcoh=G\sel,\qquad
+ \ta=\tat-2G\LL_t[\sel]
+     =\tat-2\chi(\Z)^{\rm ext}\SSS, \label{eq:p2state}\\
+ \rr{\tat}+\lambda^{-1}\tat&=2G\erate,\qquad
+        \ds\sel+\lambda^{-1}\sel=V. \label{eq:trialrate}
+\end{align}
+The units of $\Z$ are $\mathrm{Pa\,m}$: it is a traction moment, not a stress. These equations imply
+\begin{equation}
+ \ds\Z+\lambda^{-1}\Z=GV,\qquad
+ V=V^{\rm elas}+V^{\rm visc},\quad
+ V^{\rm elas}=\ds\sel=\frac{\ds\Z}{G},\quad
+ V^{\rm visc}=\frac{\sel}{\lambda}=\frac{\Z}{\eta}. \label{eq:cohesivelaw}
+\end{equation}
+This adopts the draft's useful Maxwell interpretation while stating the evolving-profile constitutive choice explicitly. Here the previous $a$ may be identified with $e=\sel$, provided their initial values agree.
+
+Differentiate \eqref{eq:p2state} using \eqref{eq:trialrate}:
+\begin{equation}
+ \boxed{\rr\ta+\lambda^{-1}\ta
+ =2G\big(\erate-\LL_t[V]\big)-2G\CC[\sel],\qquad
+ \Qgeo=-2G\CC[\sel].} \label{eq:p2stress}
+\end{equation}
+For fixed geometry without transport or spin, $\CC[\sel]=\sel\,\dot\chi\SSS$ and
+\begin{equation}
+ \Qgeo=-2\Z\dot\chi\SSS. \label{eq:Qsimple}
+\end{equation}
+For a physical phase change at fixed $\tat,\sel$ this integrates to
+\begin{equation}
+ \ta^+-\ta^-=-2G\big(\LL_t^+-\LL_t^-\big)[\sel]. \label{eq:phasejump}
+\end{equation}
+It expresses the change of stress caused by changing the spatial representation of the stored fracture slip, even without additional slip during that substep. For example, if the same moment becomes more concentrated, the subtracted stress correction becomes more concentrated. This is part of the selected damage/localization constitutive response. It is \emph{not} justified merely because cancellation makes the numerics convenient.
+
+The pointwise scalar relation $(\tat-\ta):\SSS=\chi(\Z)^{\rm ext}=h(\qcoh)^{\rm ext}$ holds for this aligned reconstruction. Identifying that surface traction with a local frictional remainder everywhere still invokes the earlier isostress approximation. The energy-based weak coupling instead uses $\LL_t^*\ta$.
+
+\subsection{Energy and phase driving}
+At fixed geometry and transported incoming histories $\bm\tau^{\rm tr,-},s^{\rm elas,-}$, the cohesive energy is
+\begin{align}
+ \mathscr E_{\rm bulk}
+ &=\int_\B\frac{1}{4G}\left|\bm\tau^{\rm tr,-} -2G\LL_t(\phi)[s^{\rm elas,-}]\right|_3^2\,dA,\notag\\
+ \mathscr E_{\rm coh}
+ &=\int_\F\frac{G(s^{\rm elas,-})^2}{2I_h(\phi)}\,d\xi
+   =\int_\F\frac{(\widetilde\tau_s^{\rm coh,-})^2}{2GI_h(\phi)}\,d\xi,\notag\\
+ \mathscr E&=\mathscr E_{\rm bulk}+\mathscr E_{\rm coh}+\mathscr E_{\rm surf}.
+ \label{eq:energy}
+\end{align}
+The variation holding those histories and geometry fixed is
+\begin{equation}
+ \delta\mathscr E=-\int_\B\ta:\delta\LL_t[s^{\rm elas,-}]\,dA
+ -\int_\F\frac{G(s^{\rm elas,-})^2}{2I_h^2}\delta I_h\,d\xi
+ +\delta\mathscr E_{\rm surf}. \label{eq:phasevar}
+\end{equation}
+Differentiate through the implemented normalization and its projection/mass solve. There is no independently transported sharp driving field $H$ in this phase variation. Enforce phase irreversibility by a variational inequality with the \emph{materially transported accepted phase} as lower bound. On an Eulerian mesh, using the old value at the same spatial point is generally different. Bounded transfer of that lower bound is part of the discretization, not automatically an exact irreversibility proof.
+
+For fixed geometry and phase, the rates yield the energy balance
+\begin{align}
+ \frac{d}{dt}(\mathscr E_{\rm bulk}+\mathscr E_{\rm coh})
+ &=\int_\B\ta:\erate\,dA
+ -\int_\B\frac{|\ta|_3^2}{2\eta}\,dA\notag\\
+ &\quad-\int_\F\left[(\tau_s^{\rm fric}+\tau_s^{\rm rad})V
+             +\frac{G(\sel)^2}{\lambda I_h}\right]d\xi. \label{eq:fixedenergy}
+\end{align}
+Here transport is absent, or the corresponding material integration and boundary fluxes are accounted for. This checks the cohesive storage and dissipation for the restricted setting; it is not a proof for arbitrary evolving geometry.
+
+For a moving current-area surface, $\psi_c=G(\sel)^2/(2I_h)$ also generates
+\begin{equation}
+ \frac{d}{dt}\int_\F\psi_c\,d\xi
+ =\int_\F\left[\frac{G\sel}{I_h}\ds\sel
+ -\frac{G(\sel)^2}{2I_h^2}\ds I_h
+ +\psi_c\nabla_\F\cdot\bm v_\F\right]d\xi. \label{eq:movingenergy}
+\end{equation}
+Bulk localization, fracture work, and current/reference measure conventions must also be included. Equations \eqref{eq:p2state}--\eqref{eq:p2stress} are a proposed corotational extension of restricted P2, not a completed finite-strain or moving-surface thermodynamic theory. Nonconvex phase stationarity alone does not prove stable minimum selection.
+
+\subsection{What is and is not eliminated}
+The independent bulk history is $\tat$ and the physical surface histories include $\sel,\Theta$. The narrow factor $\chi$ is evaluated from the current phase and geometry. No particle interpolation is needed for this representation. Nevertheless, initial data, deformation and $\erate$ can make $\tat$ spatially sharp. Its initialization is
+$\tat_0=\ta_0+2G\LL_0[\sel_0]$; arbitrary initial stress can therefore require subcell representation.
+
+The earlier native displacement construction is the special case
+$\tat=2G\dev\sym\nabla\bm d_R$ with compatible data and fixed-coordinate evolution. It does not hold generically under material transport, since
+\begin{equation}
+ \dt\nabla\bm d_R=\nabla(\dt\bm d_R)-(\nabla\bm d_R)(\nabla\vel).
+\end{equation}
+An independent symmetric deviatoric DG tensor avoids imposing that extra compatibility.
+
+\section{Mature branch: auxiliary memory and residual stress}
+The mature law with no cohesion or redistribution is
+\begin{equation}
+ \rr\ta+\lambda^{-1}\ta=2G(\erate-\LL_t[V]),\qquad
+ \qcoh=0,\quad\Qgeo=0. \label{eq:mature}
+\end{equation}
+The previously reported moving BP3 law is non-objective: replace the circle by $\dt$ when preserving that exact law. The same arguments apply. The simplest particle-free method transports $\ta_h$ directly in a DG space. Its space must resolve whatever narrow stress memory the actual equation generates.
+
+An exact separated alternative is
+\begin{align}
+ \rr{\tat}+\lambda^{-1}\tat&=2G\erate,\qquad
+ \ds\smem+\lambda^{-1}\smem=V,\notag\\
+ \boxed{\ta=\tat-2G\LL_t[\smem]-\tar,\qquad
+        \rr{\tar}+\lambda^{-1}\tar=-2G\CC[\smem].} \label{eq:residual}
+\end{align}
+The scalar $\smem$ is the old auxiliary $a$. It has units of slip but contributes \emph{no} cohesive traction and no new surface stored energy. In particular $G\smem/I_h$ must not be added to mature frictional resistance. The residual $\tar$ is the old $2GK$; it may contain narrow historical structures.
+
+Initialization $\smem_0=0$, $\tar_0=\bm0$, $\tat_0=\ta_0$ is always available. More general initial states must satisfy \eqref{eq:residual}. Omitting $\tar$ is exact only when it is initially zero and $\CC[\smem]=0$ throughout the evolution. It is not enough to start with zero residual or freeze the reconstructed surface.
+
+At fixed material state, a purely numerical change of representation must preserve stress. With $\tat$ unchanged, use
+\begin{equation}
+ \boxed{\bm\tau^{\rm res,+}=\bm\tau^{\rm res,-}+2G\LL^-[s^{\rm mem,-}]-2G\LL^+[s^{\rm mem,+}].} \label{eq:remap}
+\end{equation}
+For an actual transport remap, use the transported old fields. This numerical identity is distinct from the physical cohesive phase redistribution \eqref{eq:phasejump}. A coordinate relabeling that leaves the physical extension unchanged produces neither change.
+
+Along a material trajectory without spin, the mature law contains the memory integral
+\begin{equation}
+ \ta(t)=e^{-t/\lambda}\ta_0+
+ 2G\int_0^t e^{-(t-r)/\lambda}\erate(r)\,dr
+ -2G\int_0^t e^{-(t-r)/\lambda}\LL_r[V(r)]\,dr. \label{eq:memoryintegral}
+\end{equation}
+The last term retains old profiles along their trajectories. Two independent past profiles generally cannot be represented by one scalar times the current profile. A residual tensor, an enriched profile basis, or adequate bulk resolution is required. Adaptive quadrature resolves a known kernel; it does not add missing history degrees of freedom. Particles are not mandatory, but universal coarse-mesh closure does not follow from a change of variables.
+
+\section{Nonuniform material coefficients}
+The clean cancellation assumes constant $G$ and equal bulk/surface relaxation. For the \emph{stated} stress law with bulk rate $\lambda_b^{-1}$, surface rate $\lambda_\F^{-1}$, and materially varying $G$, define $\bm T=\ta+2G\LL_t[s]$ as before. Direct differentiation yields
+\begin{align}
+ \rr{\bm T}+\lambda_b^{-1}\bm T
+ &=2G\erate+\Qgeo+2G\CC[s]+2(\dt G)\LL_t[s]\notag\\
+ &\quad+2G\left\{\lambda_b^{-1}\LL_t[s]
+                   -\LL_t[\lambda_\F^{-1}s]\right\}. \label{eq:variableG}
+\end{align}
+Even the same material relaxation law need not commute with extension if its value varies normally across the band. Some varying-modulus spring laws add $(\dt G/G)\ta$ to the original stress equation; that changes this result and must be derived from the selected constitutive model. Likewise $\Z=G_\F\sel$ produces a $\ds G_\F$ term when the surface modulus varies. The constant-parameter formulas must not silently decide these physical choices.
+
+\section{DG discretization and particle-free coupling}
+For a selected second-order history $\bm A$ satisfying
+$\rr{\bm A}+\lambda^{-1}\bm A=\bm f_A$, write the Eulerian material equation as
+\begin{equation}
+ \partial_t\bm A+\nabla\cdot(\vel\bm A)
+ =\bm f_A+\bm W\bm A-\bm A\bm W-\lambda^{-1}\bm A
+ +(\nabla\cdot\vel)\bm A.
+\end{equation}
+On a cell $T$, with tensor test $\bm\Psi$ and a single consistent numerical normal velocity $\widehat v_n$, the upwind DG weak form is
+\begin{align}
+ (\partial_t\bm A_h,\bm\Psi)_T-(\bm A_h,\vel_h\cdot\nabla\bm\Psi)_T
+ +\langle\widehat v_n\bm A_h^{\rm up},\bm\Psi\rangle_{\partial T}
+ =\big(\bm f_A+\bm W_h\bm A_h-\bm A_h\bm W_h
+ -\lambda^{-1}\bm A_h+(\nabla\cdot\vel_h)\bm A_h,\bm\Psi\big)_T.
+ \label{eq:DG}
+\end{align}
+With continuous Q2 velocity, $\widehat v_n=\vel_h\cdot\bm n$. Specify history inflow data. The divergence correction preserves the intended material equation when discrete velocity is not pointwise divergence-free; dropping it instead transports a tensor density. This is not a claim of conservation for the material equation under arbitrary discrete velocity.
+
+The forward localization and its adjoint must use the same quadrature, association and measures:
+\begin{equation}
+ \tau_s^{\rm drv}(\xi)=\LL_t^*\ta
+ =\int_{\mathcal T_\xi}\chi(\xi,\zeta)[\ta:\SSS](\xi,\zeta)J(\xi,\zeta)\,d\zeta,
+\end{equation}
+\begin{equation}
+ \int_\B\ta:\LL_t[V]\,dA=\int_\F\tau_s^{\rm drv}V\,d\xi.
+\end{equation}
+This is the coupling used in \eqref{eq:sliding} and the energy balance. Centerline sampling is an approximation, not an interchangeable exact adjoint. Stokes mechanics uses
+\begin{equation}
+ \int_\B[\ta:\dev\sym\nabla\bm w-p\nabla\cdot\bm w]\,dA
+ =\mathcal P_{\rm ext}(\bm w).
+\end{equation}
+Surface $\sel$ or $\smem$ and $\Theta$ use the selected material/ALE surface derivative. Surface mesh motion and material motion need not coincide; new segment initialization is a constitutive decision.
+
+\subsection{Native strain resolution and plane strain}
+On affine Cartesian Q2 velocity cells, $\erate_h$ lies in tensor DGQ2, generally not DGQ1: derivatives include mixed degrees such as $Q_{1,2}$. DGQ2 or a suitable derivative-enriched space can represent the native source exactly with adequate quadrature. On non-affine mapped cells, physical gradients need not be polynomial DGQ2. Any source projection must be explicit and used consistently in constitutive response and accepted history.
+
+For a symmetric deviator store the in-plane components and reconstruct $A_{zz}=-(A_{xx}+A_{yy})$. Then
+\begin{equation}
+ |\bm A|_3^2=A_{xx}^2+A_{yy}^2+(A_{xx}+A_{yy})^2+2A_{xy}^2.
+\end{equation}
+Do not apply the plane-strain deviator operation again to an already deviatoric in-plane block.
+
+\subsection{A first-order cohesive step}
+A minimal split for constant parameters is:
+\begin{enumerate}
+\item Transport/rotate accepted $\tat$ and transfer surface $\sel,\Theta$ along their selected labels. Construct the transported phase lower bound. Apply any transport limiter before the new mechanics solve.
+\item Freeze geometry and incoming histories $\bm\tau^{\rm tr,-},s^{\rm elas,-}$ during the phase variational inequality based on \eqref{eq:energy}. Differentiate the normalization consistently and maintain finite positive denominators on active profiles.
+\item Freeze accepted phase/geometry for endpoint mechanics. Set $\beta=e^{-\Delta t/\lambda}$ and $\kappa=\eta(1-\beta)$. The frozen-source exponential Maxwell update is
+\begin{equation}
+ \bm\tau^{{\rm tr},n+1}=\beta\bm\tau^{\rm tr,-}+2\kappa\erate^{n+1},\qquad
+ s^{{\rm elas},n+1}=\beta s^{\rm elas,-}+\frac{\kappa}{G}V^{n+1},
+\end{equation}
+\begin{equation}
+ \ta^{n+1}=\beta\big(\bm\tau^{\rm tr,-} -2G\LL_t[s^{\rm elas,-}]\big)
+ +2\kappa\big(\erate^{n+1}-\LL_t[V^{n+1}]\big).
+\end{equation}
+Use this same stress in Stokes and its adjoint fault traction; use $\qcoh=Gs^{{\rm elas},n+1}/I_h$ in the cohesive balance.
+\item Publish histories once after acceptance. A further limiter changing converged constitutive stress requires its mechanical effect to be accounted for.
+\end{enumerate}
+This is a first-order split, not a globally second-order scheme. SSP Runge--Kutta transport and exponential relaxation do not change that statement by themselves. For mature BP3, use direct stress DG or retain $\tar$ and its consistent source/remap; the cohesive phase energy is not automatically a mature growing-damage model.
+
+Evaluate phase, geometry, $\chi$, surface values and reconstructed stress directly at integration points. Refine integration where needed, with the same discretization in energy, residual and tangent. A fixed adequately refined quadrature partition during Newton iterations avoids inconsistent residual/Jacobian changes. Ordinary FE fracture integration defines a different discrete functional from CPDI fracture integration unless equivalence is shown. Accurate quadrature resolves narrow known functions; it cannot resolve a missing independent history field.
+
+\section{Assessment of the supplied WENO reference}
+Zhu et al. (2008) reconstruct troubled cells while retaining cell averages. They distinguish higher-order reconstruction from merely imposing fixed global scalar bounds, and explicitly address potentially negative linear weights. Their numerical results support WENO as a useful candidate; they do not prove a tensor invariant-domain or thermodynamic guarantee for the present constitutive system.
+
+The supplied code has appropriate building blocks: a dedicated tensor FE field, DG face transport, rotation terms, neighbor stencils, and integral-based reconstruction. It deserves reuse as a reference, not unchanged insertion. Static inspection identifies these concrete points:
+\begin{enumerate}
+\item In \texttt{apply\_weno\_limiter}, the troubled-cell detector and its skip condition are commented out. Every locally owned cell reaching the reconstruction is processed.
+\item The interior linear-weight solve forms a square matrix from the already reconstructed small-stencil polynomials and calls \texttt{A3.gauss\_jordan()}. For constant data all candidates are identical constants: the matrix has rank at most one (zero for zero data). There is no visible rank-aware fallback on this path. It therefore does not define a robust constant-state-preserving weight calculation.
+\item The limiter fixes \texttt{QGauss<dim>(2)} and inverts the resulting local mass matrix. In 2D a DGQ2 scalar has nine DoFs but only four quadrature points; the mass matrix has rank at most four. Quadrature and reconstruction order must be redesigned before using the proposed DGQ2 history space. The existing candidate polynomials are multilinear, so changing quadrature alone does not make this a high-order DGQ2 limiter.
+\item Interior nonlinear weights are component-dependent, and no negative-weight treatment is visible in this routine. Constant/affine preservation, bounded weights, near-degenerate stencils and tensor-coordinate covariance require explicit checks. The AMR stencil machinery also needs parallel ghost-availability verification.
+\end{enumerate}
+The repeated summation over $j$ in the nonlinear-weight denominator uses the same $i$ each time. This introduces a common stencil-count factor, which cancels during normalization; it is not by itself the substantive weight error. Likewise, the variables called cell averages are integrated moments paired with integrated polynomial rows, so absence of division by volume there is not automatically a bug.
+
+A tensor adaptation should preserve the mean, use scaled smoothness indicators and a coherent weight choice across tensor components. For example, use common weights obtained from sums of 3D tensor norms of scaled derivatives of each candidate, and reconstruct in a symmetric trace-free basis. This preserves linear tensor constraints and covariance under changes of tensor basis, subject to consistent stencil operations. It does not establish invariance under arbitrary changes of spatial mesh, nor prevent all overshoots. Limit the independent DG history, not the analytically reconstructed $\chi$ peak.
+
+For scalar composition, additional physical-bound preservation can be appropriate. For stress, arbitrary fixed component bounds are not a substitute for an oscillation detector. For phase, the irreversibility and admissibility constraints belong to the phase solve. None of these roles should be merged into one universal clipping operation.
+
+\clearpage
+\section{Verification and repository handoff}
+This revision rederived the evolving-profile product rule, variable-coefficient stress transformation, and fixed-profile cohesive power balance; each also passed 100 exact-rational algebraic checks. The earlier independent numerical checks remain applicable under $\tat=2GR$ and $\tar=2GK$:
+\begin{center}
+\begin{tabular}{p{0.69\linewidth}p{0.22\linewidth}}
+\toprule
+Previous algebraic check & Result\\
+\midrule
+100 random tensor product-rule tests with spin and residual sign & Maximum residual $1.07\times10^{-14}$\\
+Stress-preserving representation remap & Defect $5.03\times10^{-16}$\\
+Constant-state WENO weight matrix in 2D & Rank $1$ of $4$\\
+DGQ2 mass matrix with $2\times2$ Gauss quadrature & Rank $4$ of $9$\\
+\bottomrule
+\end{tabular}
+\end{center}
+These are small algebraic/rank checks, not a production compilation, convergence study, or coupled ASPECT validation. The tensor form and the physical assumptions must be matched to source before implementation.
+
+\Needspace{5\baselineskip}
+\textbf{Instructions for the repository Codex session.}
+\begin{enumerate}
+\item Read repository instructions, record branch/commit/dirty state, and preserve existing work. Start with a source-to-equation audit; do not run a full benchmark, delete particles, or alter physical parameters as part of this derivation task.
+\item Locate accepted histories: particle stress, native $\bm d_R$, cohesive moment $\Z$ (old $Z$), RSF state, phase lower bounds, diagnostic/initialization $H$, surface association and transfers. Record update/publication order and whether mature zero cohesion suppresses the moment evolution or only its resistance.
+\item Identify actual transport, spin, relaxation/modulus variation, phase redistribution, normal-stress convention and geometry remap. Preserve the distinction between reported non-objective BP3 and a proposed Jaumann extension.
+\item Instantiate $\LL_t,\ds,\CC$ from the actual association and surface-label velocities. Decide whether $\CC=0$ is an identity, a controlled approximation, or false. Check finite remaps and surface birth rules, not only infinitesimal equations.
+\item Select histories per branch: cohesive $\tat,\sel$ with the stated redistribution; mature direct $\ta$; or mature $\tat,\smem,\tar$. Do not add cohesive energy to auxiliary memory or omit residual history merely because it starts at zero.
+\item Choose a tensor space retaining the native strain source, or quantify its projection. Check plane-strain conventions, DG divergence correction, inflow data, AMR transfer, and weak-load adjoint. Define any replacement of CPDI fracture integration as a consistent FE energy/residual/tangent.
+\item Review the historical WENO code using constant/affine states, smooth accuracy, near-degenerate weights, tensor-basis rotations, and AMR/MPI mean preservation. Keep a smooth no-limiter control and use degree-appropriate quadrature/reconstruction.
+\item Verify, in order: fixed-profile/no-transport equivalence; compatible rigid translation/rotation with zero commutator; material passage through a fixed narrow profile; changing-profile direct stress versus residual representation; cohesive phase redistribution and its energy derivatives. Check normal/shear traction and slip-rate noise only after these identities are resolved.
+\item Deliver the source-to-equation mapping, selected histories and equations, remaining noncommuting/material terms, minimal implementation plan, and bounded verification cases. End this audit before production implementation or server submission.
+\end{enumerate}
+
+\clearpage
+\section*{Changes relative to the unfinished notation draft}
+The body/fault notation, velocity and strain-rate notation, slip tensor, trial stress, cohesive moment, and kinematics--rheology--phase ordering are adopted. The following changes are substantive rather than stylistic:
+\begin{enumerate}
+\item Separate the sharp-interface jump motivation from the finite-width continuous-velocity formulation; define the tangent at zero slip and use the correct plane-strain deviator.
+\item Count radiation damping once, use a consistent $\Theta$, and obtain compression from total/effective normal stress.
+\item Distinguish optimal-profile crack-density normalization from exact normalization of the selected slip kernel, including curved-coordinate measures and admissible denominators.
+\item Retain the evolving-profile product rule. State the stress-redistribution choice needed for the simple cohesive moment and trial-stress equations, rather than deriving it by omitting $\dot h$ or $\dot I_h$.
+\item Use a work-conjugate surface driving traction; mark the pointwise isostress degradation relation as a modeling approximation.
+\item Keep physical elastic slip and auxiliary mature memory distinct. Describe tensor orders and remaining moving-geometry energetic assumptions explicitly.
+\end{enumerate}
+
+\section*{References and provenance}
+\begin{enumerate}
+\item Yimin Jin, \emph{Phase-Field Model for Rate-State-Friction Law in Stokes System}, unfinished uploaded LaTeX draft \path{pf_rsf(20261015-213330).tex}. Basis for this notation revision and the product-rule review.
+\item \emph{The current phase-field fault model: From stored energy to governing equations and the native FE strain algorithm}, model snapshot 9 October 2026; and \emph{Coupled BP3 moving particles and population management}, 14 October 2026. Previously reviewed derivation/report underlying the preceding note; not re-audited against a repository here.
+\item J. Zhu, J. Qiu, C.-W. Shu and M. Dumbser, ``Runge--Kutta discontinuous Galerkin method using WENO limiters II: Unstructured meshes'', \emph{Journal of Computational Physics} 227 (2008), 4330--4353.\\ DOI: \href{https://doi.org/10.1016/j.jcp.2007.12.024}{10.1016/j.jcp.2007.12.024}. Supplied PDF, especially Section 2.
+\item Supplied \texttt{elasticity.cc}, inspected 15 October 2026. Routines:\\ \path{local_assemble_deviatoric_stress_system},\\ \path{assemble_and_solve_deviatoric_stress}, \path{apply_weno_limiter}. Historical reference and static analysis, not the current branch.
+\item \href{https://aspect-documentation.readthedocs.io/en/latest/doxygen/classaspect_1_1MaterialModel_1_1Viscoelastic.html}{ASPECT official viscoelastic material documentation}, checked 15 October 2026. Cross-check for the Jaumann-rate convention, not evidence of the user's branch implementation.
+\end{enumerate}
+\end{document}

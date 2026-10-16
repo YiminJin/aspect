@@ -277,10 +277,20 @@ namespace aspect
         {
           return fe_strain_history;
         }
+        /** Restricted PF2 tensor history; fixed localization and no transport. */
+        bool uses_dg_trial_stress_history() const
+        {
+          return dg_trial_stress_history;
+        }
+        /** Both native representations bypass all particle-stress input. */
+        bool uses_independent_bulk_history() const
+        {
+          return fe_strain_history || dg_trial_stress_history;
+        }
         /** Constitutive convention, independent of the authoritative history owner. */
         bool uses_deviatoric_strain_rate() const
         {
-          return fe_strain_history || consistent_particle_strain;
+          return uses_independent_bulk_history() || consistent_particle_strain;
         }
         bool has_fe_strain_history() const
         {
@@ -308,8 +318,9 @@ namespace aspect
           FullMatrix<double> hessian;
         };
 
-        /** Explicit trial phase, immutable accepted R/Z, actual consistent-I
-         * adjoint. Fracture remains in the native CPDI phase assembly. */
+        /** Explicit FE trial phase, immutable accepted R/Z or DG tensor/Z, and
+         * the actual consistent-I adjoint. Returns bulk/cohesive energy only;
+         * the phase handler owns the selected fracture integration. */
         FEPhaseEnergy evaluate_fe_phase_energy(
           const LinearAlgebra::BlockVector &, bool tangent,
           bool positive_search = false) const;
@@ -350,21 +361,71 @@ namespace aspect
 
         const LinearAlgebra::BlockVector &accepted_fe_strain_state() const;
 
+        /** Restricted PF5 checkpoint routing. Default/legacy archives add no data. */
+        template <class Archive> void serialize_dg_accepted_history(Archive &);
+        void restore_dg_accepted_history();
+
       private:
         friend class internal::PhaseFieldFaultTestAccess<dim>;
         friend class Postprocess::MomentCycle<dim>;
 
         struct FEStrainState;
         struct FEStrainUpdate;
+        struct DGHistory;
+        struct DGTransport;
+        struct DGCheckpoint;
+        struct DGLimiter;
+        struct DGLimiterStats;
         struct FENormalization;
         struct MaxwellCoefficients;
         std::shared_ptr<FEStrainState> fe_strain_state;
         bool fe_strain_history = false;
+        bool dg_trial_stress_history = false;
+        bool dg_accepted_history = false;
+        std::shared_ptr<DGCheckpoint> dg_checkpoint;
         bool consistent_particle_strain = false;
         bool consistent_endpoint_phase = false;
         std::string fe_initial_phase_profile;
         unsigned int fe_bulk_normal_quadrature_points = 3;
-        void prepare_fe_strain_history();
+        void prepare_fe_strain_history(bool restoring = false);
+        /** DGQ2 trial stress has its own space and accepted coefficients.
+         * The existing FE state supplies only fixed phase/geometry and Z/I. */
+        void initialize_dg_history(FEStrainState &) const;
+        std::shared_ptr<DGHistory> make_dg_history_trial(
+          const LinearAlgebra::BlockVector &, const MaxwellCoefficients &) const;
+        std::shared_ptr<DGHistory> make_dg_history_trial(
+          const DGHistory &,const LinearAlgebra::BlockVector &,const MaxwellCoefficients &) const;
+        /** Prescribed PF5 Strang candidate; closed boundaries and uniform V/Z. */
+        std::shared_ptr<FEStrainUpdate> prepare_dg_accepted_step(
+          const DGTransport &,const LinearAlgebra::BlockVector &,double time) const;
+        void commit_dg_accepted_step(const std::shared_ptr<FEStrainUpdate> &);
+        /** Independent tensor values, before any phase/localization correction. */
+        std::vector<SymmetricTensor<2,dim>> evaluate_dg_trial_tensor(
+          const DGHistory &, const CellId &, const Quadrature<dim> &) const;
+        SymmetricTensor<2,dim> evaluate_dg_history_stress(
+          const DGHistory &, const std::vector<double> &, const std::vector<double> &,
+          const CellId &, const Point<dim> &, double *evaluation_scale = nullptr,
+          const LinearAlgebra::BlockVector *phase_trial = nullptr) const;
+        std::vector<double> dg_history_values() const;
+        /** Restricted PF4 noncommitting operators. Native fixed Q2 velocity,
+         * upwind material advection and explicit prescribed source/inflow.
+         * Relaxation, when selected, uses the existing G/eta. No spin. */
+        using DGField = std::function<SymmetricTensor<2,dim>(const Point<dim> &,double)>;
+        using DGComponents = std::array<Vector<double>,SymmetricTensor<2,dim>::n_independent_components>;
+        std::shared_ptr<DGTransport> make_dg_transport(
+          const LinearAlgebra::BlockVector &,unsigned int quadrature_order,
+          bool include_relaxation) const;
+        std::shared_ptr<DGHistory> project_dg_transport_field(
+          const DGTransport &,const DGField &,double time,unsigned int quadrature_order) const;
+        std::shared_ptr<DGHistory> advance_dg_transport(
+          const DGTransport &,const DGHistory &,const DGField &inflow,
+          const DGField &source,double time,double dt,
+          const DGLimiter *limiter = nullptr,DGLimiterStats *statistics = nullptr) const;
+        /** Optional scratch-only PF4 comparison. No runtime/default selector. */
+        std::shared_ptr<DGLimiter> make_dg_limiter(
+          const DGTransport &,const LinearAlgebra::BlockVector &) const;
+        void limit_dg_transport(const DGLimiter &,const DGComponents &,DGComponents &,
+                                const DGField &,double,DGLimiterStats &) const;
         /** Build fixed normal rays and their consistent surface projection once. */
         void prepare_fe_normalization_geometry(FEStrainState &);
         /** Values only unless dense derivatives or a directional action is requested.
@@ -394,7 +455,8 @@ namespace aspect
                                     LinearAlgebra::BlockVector &) const;
         std::shared_ptr<FEStrainUpdate> prepare_fe_strain_commit(
           const LinearAlgebra::BlockVector &,
-          const std::vector<std::vector<double>> &tractions) const;
+          const std::vector<std::vector<double>> &tractions,
+          const std::shared_ptr<DGHistory> &transported = nullptr) const;
         void publish_fe_strain_commit(const std::shared_ptr<FEStrainUpdate> &) noexcept;
         SymmetricTensor<2,dim> candidate_fe_strain_stress(
           const std::shared_ptr<FEStrainUpdate> &, const CellId &, const Point<dim> &,

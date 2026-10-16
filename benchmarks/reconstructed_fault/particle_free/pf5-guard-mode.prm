@@ -1,0 +1,8 @@
+# Negative PF5 scope/provenance control.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_free/pf5-restart-8.prm
+subsection Material model
+  subsection Phase field fault
+    set Enable prescribed DG accepted history = false
+    set Bulk history representation = particle stress
+  end
+end

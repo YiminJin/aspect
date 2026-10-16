@@ -1,0 +1,83 @@
+# Native ASPECT scalar composition paths, fixed prescribed transport only.
+set Dimension = 2
+set Use years instead of seconds = false
+set End time = .2
+set Nonlinear solver scheme = single Advection, no Stokes
+set Pressure normalization = no
+subsection Time stepping
+  set List of model names = function
+  subsection Function
+    set Function expression = 0.00097087378640776706
+  end
+end
+subsection Prescribed Stokes solution
+  set Model name = function
+  subsection Velocity function
+    set Function expression = .4; 0
+  end
+end
+subsection Geometry model
+  set Model name = box
+  subsection Box
+    set X extent = 1
+    set Y extent = 1
+    set Y repetitions = 2
+  end
+end
+subsection Mesh refinement
+  set Initial global refinement = 5
+  set Initial adaptive refinement = 0
+  set Time steps between mesh refinement = 0
+end
+subsection Discretization
+  set Composition polynomial degree = 2
+  subsection Stabilization parameters
+    set Stabilization method = entropy viscosity
+  end
+end
+subsection Compositional fields
+  set Number of fields = 2
+  set Names of fields = sharp, finite
+end
+subsection Initial composition model
+  set Model name = PF4 transport methods
+end
+subsection Boundary composition model
+  set Fixed composition boundary indicators = left
+  set List of model names = PF4 transport methods
+end
+subsection Initial temperature model
+  set Model name = function
+  subsection Function
+    set Function expression = 0
+  end
+end
+subsection Material model
+  set Model name = simple
+  subsection Simple model
+    set Reference density = 1
+    set Reference specific heat = 1
+    set Thermal conductivity = 0
+    set Thermal expansion coefficient = 0
+    set Viscosity = 1
+  end
+end
+subsection Gravity model
+  set Model name = vertical
+  subsection Vertical
+    set Magnitude = 0
+  end
+end
+subsection Solver parameters
+  set Composition solver tolerance = 1e-11
+end
+subsection Postprocess
+  set List of postprocessors = PF4 scalar methods
+end
+subsection Checkpointing
+  set Steps between checkpoint = 0
+  set Time between checkpoint = 0
+end
+subsection Termination criteria
+  set Checkpoint on termination = false
+end

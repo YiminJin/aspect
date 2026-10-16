@@ -114,7 +114,7 @@ namespace aspect
 
     template<int dim> Quadrature<dim> PhaseFieldFault<dim>::mechanical_quadrature() const
     {
-      if (!fe_strain_history)
+      if (!uses_independent_bulk_history())
         return this->introspection().quadratures.velocities;
       AssertThrow(dim==2,ExcNotImplemented());
       // One tensor-product rule is used by every mature bulk operator, also
@@ -178,15 +178,15 @@ namespace aspect
         AssertThrow(faults[0].vertex(i)==s.vertices[i],ExcMessage("Accepted FE strain geometry changed."));
       AssertThrow(this->get_triangulation().get_vertices()==s.mesh_vertices,
                   ExcMessage("Accepted FE strain rejects mesh motion."));
-      if (mature_frictional_fault)
+      if (mature_frictional_fault || dg_trial_stress_history)
         {
           AssertThrow(this->get_reconstructed_fault_manager().get_shear_sense(0)==s.shear_sense,
-                      ExcMessage("Mature FE history rejects slip orientation changes."));
+                      ExcMessage("Fixed-profile native history rejects slip orientation changes."));
           const unsigned int phase_block=this->introspection().variable("phase_field").block_index;
           AssertThrow(s.displacement_history.block(phase_block)==this->get_solution().block(phase_block),
-                      ExcMessage("Mature FE history requires the unchanged accepted phase profile."));
+                      ExcMessage("Fixed-profile native history requires the unchanged accepted phase profile."));
           AssertThrow(current_normalization_integrals.at(0)==s.I,
-                      ExcMessage("Mature FE history requires unchanged BP3 normalization."));
+                      ExcMessage("Fixed-profile native history requires unchanged normalization."));
         }
       const auto &particles=this->get_phase_field_handler().get_associated_particle_manager().get_particle_handler();
       AssertThrow(particles.n_global_particles()==s.n_particles_global,ExcMessage("Accepted FE strain rejects particle birth/deletion."));
@@ -198,16 +198,17 @@ namespace aspect
                   ExcMessage("Accepted FE strain rejects history transport."));
     }
 
-    template<int dim> void PhaseFieldFault<dim>::prepare_fe_strain_history()
+    template<int dim> void PhaseFieldFault<dim>::prepare_fe_strain_history(const bool restoring)
     {
-      if (!fe_strain_history)
+      if (!uses_independent_bulk_history())
         return;
       if (fe_strain_state)
         {
           validate_fe_strain_restrictions();
           return;
         }
-      AssertThrow(this->get_timestep_number()==0 && !this->get_parameters().resume_computation
+      AssertThrow(((this->get_timestep_number()==0 && !this->get_parameters().resume_computation)
+                   || (restoring && dg_accepted_history && this->get_parameters().resume_computation))
                   && Plugins::plugin_type_matches<GeometryModel::Box<dim>>(this->get_geometry_model())
                   && !benchmark_retained_stress
                   && (mature_frictional_fault || normalization_surface_subdivisions==1),
@@ -245,7 +246,7 @@ namespace aspect
       for (const auto &p:pm.get_particle_handler())
         {
           for (unsigned int c=0; c<SymmetricTensor<2,dim>::n_independent_components; ++c)
-            AssertThrow(p.get_properties()[sp+c]==0.,ExcMessage("FE strain requires unloaded initial particle stress; no conversion is performed."));
+            AssertThrow(restoring || p.get_properties()[sp+c]==0.,ExcMessage("FE strain requires unloaded initial particle stress; no conversion is performed."));
           state->particles[p.get_id()]=p.get_location();
         }
       if (mature_frictional_fault)
@@ -348,10 +349,20 @@ namespace aspect
       validate_fe_strain_restrictions();
       const auto initial=evaluate_fe_normalization(this->get_solution(),false);
       AssertThrow(initial.admissible,ExcMessage("Initial FE strain normalization is undefined."));
-      current_normalization_integrals[0]=initial.values;
-      state->I=initial.values;
-      validate_cohesive_state_commit({state->Z});
-      commit_cohesive_state({state->Z});
+      if (!restoring)
+        {
+          current_normalization_integrals[0]=initial.values;
+          state->I=initial.values;
+          validate_cohesive_state_commit({state->Z});
+          commit_cohesive_state({state->Z});
+        }
+      else
+        for (unsigned int j=0;j<state->I.size();++j)
+          AssertThrow(std::abs(initial.values[j]-state->I[j])
+                      <=1.e-12*std::max(1.,std::abs(state->I[j])),
+                      ExcMessage("PF5 restored I_h disagrees with the fixed native profile."));
+      if (dg_trial_stress_history)
+        initialize_dg_history(*state);
       this->get_pcout()<<std::setprecision(17)<<"   Accepted FE strain: G="<<state->G
                        <<" eta="<<state->eta<<" lambda="<<state->eta/state->G<<" m="<<state->m
                        <<" bulk QPs="<<state->bulk.size()<<" phase DoFs="<<state->displacement_history.block(b).size()<<'\n';
@@ -367,7 +378,7 @@ namespace aspect
     template<int dim> SymmetricTensor<2,dim> PhaseFieldFault<dim>::retained_history_stress(
       const CellId &id,const Point<dim> &x,const SymmetricTensor<2,dim> &legacy) const
     {
-      if (!fe_strain_history)
+      if (!uses_independent_bulk_history())
         return benchmark_retained_stress?benchmark_retained_stress(id,x):legacy;
       AssertThrow(fe_strain_state && !benchmark_retained_stress,ExcMessage("FE strain needs its single accepted history."));
       const auto &s=*fe_strain_state;
@@ -378,7 +389,9 @@ namespace aspect
       const auto cached=s.stress_samples.find(key);
       if (cached!=s.stress_samples.end())
         return cached->second;
-      const auto stress=evaluate_fe_strain_stress(s.displacement_history,s.Z,s.I,id,x);
+      const auto stress=dg_trial_stress_history
+                        ? evaluate_dg_history_stress(*s.dg_history,s.Z,s.I,id,x)
+                        : evaluate_fe_strain_stress(s.displacement_history,s.Z,s.I,id,x);
       s.stress_samples.emplace(key,stress);
       return stress;
     }
@@ -456,6 +469,8 @@ namespace aspect
       const LinearAlgebra::BlockVector &bulk,const MaxwellCoefficients &coefficients,
       LinearAlgebra::BlockVector &trial) const
     {
+      AssertThrow(!dg_trial_stress_history,
+                  ExcMessage("DG history cannot use the displacement-history recurrence."));
       const auto &s=*fe_strain_state;
       LinearAlgebra::BlockVector owned(this->introspection().index_sets.system_partitioning,this->get_mpi_communicator());
       owned=s.displacement_history;
@@ -472,14 +487,25 @@ namespace aspect
 
     template<int dim> std::shared_ptr<typename PhaseFieldFault<dim>::FEStrainUpdate>
     PhaseFieldFault<dim>::prepare_fe_strain_commit(const LinearAlgebra::BlockVector &bulk,
-                                                   const std::vector<std::vector<double>> &tractions) const
+                                                   const std::vector<std::vector<double>> &tractions,
+                                                   const std::shared_ptr<DGHistory> &transported) const
     {
       validate_fe_strain_restrictions();
       const auto &s=*fe_strain_state;
       AssertThrow(s.committed_step!=this->get_timestep_number(),ExcMessage("FE strain cannot commit twice in a physical step."));
       const auto c=compute_maxwell_coefficients(s.eta,s.G,this->get_timestep());
       auto update=std::make_shared<FEStrainUpdate>();
-      update_fe_strain_trial(bulk,c,update->displacement_history);
+      if (dg_trial_stress_history)
+        {
+          // The shared vector holds only the fixed phase anchor in DG mode.
+          // The independent tensor is projected from the native FE source.
+          update->displacement_history=s.displacement_history;
+          AssertThrow(!transported || (dg_accepted_history && transported->space==s.dg_history->space),
+                      ExcMessage("Only PF5 may supply an independently transported native candidate."));
+          update->dg_history=transported ? transported : make_dg_history_trial(bulk,c);
+        }
+      else
+        update_fe_strain_trial(bulk,c,update->displacement_history);
       update->I=current_normalization_integrals.at(0);
       update->Z.resize(s.Z.size());
       const auto &V=this->get_reconstructed_fault_manager().get_slip_rate(0);
@@ -507,12 +533,17 @@ namespace aspect
       const std::shared_ptr<FEStrainUpdate> &update,const CellId &id,const Point<dim> &x,double *evaluation_scale) const
     {
       double current_scale=0.;
-      const auto stress=evaluate_fe_strain_stress(update->displacement_history,update->Z,update->I,id,x,&current_scale);
+      const auto stress=dg_trial_stress_history
+                        ? evaluate_dg_history_stress(*update->dg_history,update->Z,update->I,id,x,&current_scale)
+                        : evaluate_fe_strain_stress(update->displacement_history,update->Z,update->I,id,x,&current_scale);
       if (evaluation_scale)
         {
           double old_scale=0.;
           const auto &s=*fe_strain_state;
-          evaluate_fe_strain_stress(s.displacement_history,s.Z,s.I,id,x,&old_scale);
+          if (dg_trial_stress_history)
+            evaluate_dg_history_stress(*s.dg_history,s.Z,s.I,id,x,&old_scale);
+          else
+            evaluate_fe_strain_stress(s.displacement_history,s.Z,s.I,id,x,&old_scale);
           const auto c=compute_maxwell_coefficients(s.eta,s.G,this->get_timestep());
           // The triangle inequality also bounds kappa*epsilon by the old
           // and new R terms. Count both endpoint evaluations and forcing.
@@ -525,10 +556,14 @@ namespace aspect
       const std::shared_ptr<FEStrainUpdate> &update) noexcept
     {
       fe_strain_state->displacement_history.swap(update->displacement_history);
+      if (dg_trial_stress_history)
+        fe_strain_state->dg_history.swap(update->dg_history);
       fe_strain_state->Z.swap(update->Z);
       fe_strain_state->I.swap(update->I);
       fe_strain_state->stress_samples.clear();
       fe_strain_state->committed_step=this->get_timestep_number();
+      if (dg_accepted_history)
+        ++fe_strain_state->accepted_publications;
     }
   }
 
@@ -550,14 +585,14 @@ namespace aspect
   template bool PhaseFieldFault<dim>::initialize_fe_shared_phase(LinearAlgebra::BlockVector &) const; \
   template void PhaseFieldFault<dim>::set_fe_diagnostic_reference(const LinearAlgebra::BlockVector &,const std::vector<double> &,const std::vector<double> &); \
   template Quadrature<dim> PhaseFieldFault<dim>::mechanical_quadrature() const; \
-  template void PhaseFieldFault<dim>::prepare_fe_strain_history(); \
+  template void PhaseFieldFault<dim>::prepare_fe_strain_history(const bool restoring); \
   template void PhaseFieldFault<dim>::validate_fe_strain_restrictions() const; \
   template void PhaseFieldFault<dim>::update_fe_strain_trial(const LinearAlgebra::BlockVector &,const MaxwellCoefficients &,LinearAlgebra::BlockVector &) const; \
   template const LinearAlgebra::BlockVector &PhaseFieldFault<dim>::accepted_fe_strain_state() const; \
   template SymmetricTensor<2,dim> PhaseFieldFault<dim>::evaluate_fe_endpoint_stress(const FEEndpointTrial &,const std::vector<double>&,const CellId&,const Point<dim>&) const; \
   template SymmetricTensor<2,dim> PhaseFieldFault<dim>::retained_history_stress(const CellId &,const Point<dim>&,const SymmetricTensor<2,dim>&) const; \
   template SymmetricTensor<2,dim> PhaseFieldFault<dim>::evaluate_fe_strain_stress(const LinearAlgebra::BlockVector &,const std::vector<double>&,const std::vector<double>&,const CellId&,const Point<dim>&,double*) const; \
-  template std::shared_ptr<PhaseFieldFault<dim>::FEStrainUpdate> PhaseFieldFault<dim>::prepare_fe_strain_commit(const LinearAlgebra::BlockVector &,const std::vector<std::vector<double>>&) const; \
+  template std::shared_ptr<PhaseFieldFault<dim>::FEStrainUpdate> PhaseFieldFault<dim>::prepare_fe_strain_commit(const LinearAlgebra::BlockVector &,const std::vector<std::vector<double>>&,const std::shared_ptr<DGHistory>&) const; \
   template SymmetricTensor<2,dim> PhaseFieldFault<dim>::candidate_fe_strain_stress(const std::shared_ptr<FEStrainUpdate>&,const CellId&,const Point<dim>&,double*) const; \
   template void PhaseFieldFault<dim>::publish_fe_strain_commit(const std::shared_ptr<FEStrainUpdate>&) noexcept;
     INSTANTIATE(2)

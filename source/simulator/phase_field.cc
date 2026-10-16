@@ -869,11 +869,8 @@ namespace aspect
                               double *energy,
                               bool omit_fe_elastic_energy) const
   {
-    const Particles::ParticleHandler<dim> &particle_handler = particle_manager->get_particle_handler();
-    const Particle::ParticleDomainHandler<dim> &particle_domain_handler = particle_manager->get_particle_domain_handler();
-
     const auto *fault_material = dynamic_cast<const MaterialModel::PhaseFieldFault<dim>*>(&this->get_material_model());
-    const bool total_energy = fault_material && fault_material->uses_fe_strain_history()
+    const bool total_energy = fault_material && fault_material->uses_independent_bulk_history()
                               && fault_material->has_fe_strain_history();
 
     // Initialize the corresponding block of the system matrix and the system rhs
@@ -881,6 +878,38 @@ namespace aspect
     if (assemble_system_jacobian)
       system_matrix.block(block_index, block_index) = 0;
     system_rhs.block(block_index) = 0;
+
+    if (total_energy && fault_material->uses_dg_trial_stress_history() && !omit_fe_elastic_energy)
+      {
+        // PF3 is a fixed-incoming-history phase operator. No CPDI/domain,
+        // particle H/composition or projected stress enters this functional.
+        // Its trials never replace the accepted phase, tensor or surface Z.
+        const auto elastic=fault_material->evaluate_fe_phase_energy(current_solution,assemble_system_jacobian);
+        if (!elastic.admissible)
+          return false;
+        const auto fracture=evaluate_cell_fracture(current_solution,assemble_system_jacobian);
+        double scale_squared=0.;
+        for (const auto i:system_rhs.block(block_index).locally_owned_elements())
+          {
+            system_rhs.block(block_index)[i]=-elastic.gradient[i]-fracture.gradient[i];
+            const double scale=elastic.roundoff_scale[i]+fracture.roundoff_scale[i];
+            scale_squared+=scale*scale;
+            if (assemble_system_jacobian)
+              for (unsigned int j=0; j<elastic.gradient.size(); ++j)
+                system_matrix.block(block_index,block_index).add(i,j,elastic.hessian(i,j)+fracture.hessian(i,j));
+          }
+        system_rhs.compress(VectorOperation::insert);
+        if (assemble_system_jacobian)
+          system_matrix.compress(VectorOperation::add);
+        if (residual_roundoff_allowance)
+          *residual_roundoff_allowance=8*std::numeric_limits<double>::epsilon()*std::sqrt(scale_squared);
+        if (energy)
+          *energy=elastic.energy+fracture.energy;
+        return true;
+      }
+
+    const Particles::ParticleHandler<dim> &particle_handler = particle_manager->get_particle_handler();
+    const Particle::ParticleDomainHandler<dim> &particle_domain_handler = particle_manager->get_particle_domain_handler();
 
     // Compute the positive, pre-cancellation weak-load scale only at the
     // nonlinear solve's entry. It follows the same owned-parent measure and
@@ -1107,6 +1136,86 @@ namespace aspect
     const LinearAlgebra::BlockVector &trial,double &energy,double &arithmetic_allowance) const
   {
     return assemble_phase_field_system(matrix,rhs,trial,false,&arithmetic_allowance,&energy,true);
+  }
+
+
+  template <int dim>
+  typename PhaseFieldHandler<dim>::CellFractureEnergy
+  PhaseFieldHandler<dim>::evaluate_cell_fracture(
+    const LinearAlgebra::BlockVector &trial,const bool tangent) const
+  {
+    const auto &material=Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(this->get_material_model());
+    AssertThrow(material.uses_dg_trial_stress_history() && material.has_fe_strain_history()
+                && Utilities::MPI::n_mpi_processes(this->get_mpi_communicator())==1,
+                ExcMessage("Cell fracture integration is restricted to the serial PF3 DG phase operator."));
+    for (const double coefficient:critical_energy_densities)
+      AssertThrow(coefficient==critical_energy_densities[0],ExcMessage("PF3 requires homogeneous fracture coefficients."));
+    const auto &variable=this->introspection().variable("phase_field");
+    const unsigned int block=variable.block_index,component=variable.first_component_index;
+    const auto offset=trial.get_block_indices().block_start(block);
+    const unsigned int n=trial.block(block).size();
+    CellFractureEnergy result;
+    result.gradient.assign(n,0.);
+    result.roundoff_scale.assign(n,0.);
+    if (tangent)
+      result.hessian.reinit(n,n);
+    const double A=critical_energy_densities[0];
+    const double ell=geometric_function->get_length_scale();
+    const auto quadrature=material.mechanical_quadrature();
+    FEValues<dim> fe(this->get_mapping(),this->get_fe(),quadrature,
+                     update_values|update_gradients|update_JxW_values);
+    std::vector<double> phi(quadrature.size());
+    std::vector<Tensor<1,dim>> grad_phi(quadrature.size());
+    std::vector<types::global_dof_index> indices(this->get_fe().n_dofs_per_cell());
+    long double energy=0.;
+    for (const auto &cell:this->get_dof_handler().active_cell_iterators())
+      if (cell->is_locally_owned())
+        {
+          fe.reinit(cell);
+          cell->get_dof_indices(indices);
+          fe[FEValuesExtractors::Scalar(component)].get_function_values(trial,phi);
+          fe[FEValuesExtractors::Scalar(component)].get_function_gradients(trial,grad_phi);
+          for (unsigned int q=0; q<quadrature.size(); ++q)
+            {
+              energy+=static_cast<long double>(fe.JxW(q))*A*
+                      (geometric_function->value(phi[q])+ell*ell*grad_phi[q].norm_square());
+              Tensor<1,dim> absolute_gradient;
+              double absolute_phi=0.;
+              for (const auto v:cell->vertex_indices())
+                {
+                  const unsigned int i=this->get_fe().component_to_system_index(component,v);
+                  const double value=trial[indices[i]];
+                  absolute_phi+=std::abs(value*fe.shape_value_component(i,q,component));
+                  const auto gradient=fe.shape_grad_component(i,q,component);
+                  for (unsigned int d=0; d<dim; ++d)
+                    absolute_gradient[d]+=std::abs(value*gradient[d]);
+                }
+              for (const auto v:cell->vertex_indices())
+                {
+                  const unsigned int i=this->get_fe().component_to_system_index(component,v);
+                  const auto row=indices[i]-offset;
+                  const double shape=fe.shape_value_component(i,q,component);
+                  const auto gradient=fe.shape_grad_component(i,q,component);
+                  result.gradient[row]+=fe.JxW(q)*A*
+                                        (geometric_function->first_derivative(phi[q])*shape+2*ell*ell*(grad_phi[q]*gradient));
+                  double scale=std::abs(shape)*(std::abs(geometric_function->first_derivative(phi[q]))
+                                                +std::abs(geometric_function->second_derivative(phi[q]))*absolute_phi);
+                  for (unsigned int d=0; d<dim; ++d)
+                    scale+=2*ell*ell*std::abs(gradient[d])*absolute_gradient[d];
+                  result.roundoff_scale[row]+=fe.JxW(q)*A*scale;
+                  if (tangent)
+                    for (const auto u:cell->vertex_indices())
+                      {
+                        const unsigned int j=this->get_fe().component_to_system_index(component,u);
+                        result.hessian(row,indices[j]-offset)+=fe.JxW(q)*A*
+                                                              (geometric_function->second_derivative(phi[q])*shape*fe.shape_value_component(j,q,component)
+                                                               +2*ell*ell*(gradient*fe.shape_grad_component(j,q,component)));
+                      }
+                }
+            }
+        }
+    result.energy=energy;
+    return result;
   }
 
 
@@ -1372,7 +1481,7 @@ namespace aspect
         raw_rhs = rhs;
 
         const auto *fault = dynamic_cast<const MaterialModel::PhaseFieldFault<dim>*>(&this->get_material_model());
-        if (fault && fault->uses_fe_strain_history() && fault->has_fe_strain_history())
+        if (fault && fault->uses_independent_bulk_history() && fault->has_fe_strain_history())
           {
             if(it%5==0)this->get_pcout()<<"   FE phase iteration "<<it<<": KKT="<<defect<<" target="<<target<<std::endl;
             // Use the actual Hessian when positive on the free set. For
@@ -1482,7 +1591,7 @@ namespace aspect
                 break;
               }
           }
-        if(!accepted && fault && fault->uses_fe_strain_history() && fault->has_fe_strain_history())
+        if(!accepted && fault && fault->uses_independent_bulk_history() && fault->has_fe_strain_history())
           {
             this->get_pcout()<<"   FE phase: projected-gradient line-search safeguard; KKT="<<defect<<std::endl;
             for(unsigned int ls=0;ls<solver_parameters.max_newton_line_search_iterations;++ls)
@@ -1502,7 +1611,7 @@ namespace aspect
                   {state=trial;accepted=true;break;}
               }
           }
-        if (!accepted && fault && fault->uses_fe_strain_history() && fault->has_fe_strain_history())
+        if (!accepted && fault && fault->uses_independent_bulk_history() && fault->has_fe_strain_history())
           {
             // Preserve the exact failed trial and tangent for a bounded
             // arithmetic/conditioning diagnosis. This publishes no history.
@@ -1539,6 +1648,11 @@ namespace aspect
   {
     const unsigned int block_index = this->introspection().variable("phase_field").block_index;
 
+    const auto *history_material = dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(&this->get_material_model());
+    AssertThrow(!history_material || !history_material->uses_dg_trial_stress_history()
+                || this->get_timestep_number()==0,
+                ExcMessage("PF2 DG history supports initialization and fixed-profile mechanics only; "
+                           "physical phase stepping is not implemented."));
     const bool mature =
       Plugins::plugin_type_matches<MaterialModel::PhaseFieldFault<dim>>(this->get_material_model())
       && Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(
@@ -1719,11 +1833,14 @@ namespace aspect
   make_sparsity_pattern(LinearAlgebra::BlockDynamicSparsityPattern &sp)
   {
     const auto *fault = dynamic_cast<const MaterialModel::PhaseFieldFault<dim>*>(&this->get_material_model());
-    if (fault && fault->uses_fe_strain_history() && !fault->is_mature_frictional_fault()
+    if (fault && fault->uses_independent_bulk_history() && !fault->is_mature_frictional_fault()
         && !fault->uses_consistent_endpoint_phase())
       {
         // The exact normalization adjoint couples normal columns. This
-        // restricted serial verification uses a complete phase block.
+        // restricted serial verification uses a complete phase block. PF2 DG
+        // retains this same initial CPDI solve graph so its accepted seed does
+        // not acquire a different arithmetic path through CG/AMG. DG does not
+        // use this block for subsequent phase evolution.
         const auto b=this->introspection().variable("phase_field").block_index;
         for (unsigned int i=0; i<sp.block(b,b).n_rows(); ++i)
           for (unsigned int j=0; j<sp.block(b,b).n_cols(); ++j)
