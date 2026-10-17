@@ -20,6 +20,7 @@
 
 #include <aspect/particle/property/initial_composition.h>
 #include <aspect/initial_composition/interface.h>
+#include <aspect/material_model/phase_field_fault.h>
 
 namespace aspect
 {
@@ -164,8 +165,13 @@ namespace aspect
               for (const auto &name : field_names)
                 {
                   const unsigned int index = this->introspection().compositional_index_for_name(name);
+                  const auto *material=dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(&this->get_material_model());
                   AssertThrow(this->introspection().compositional_field_methods[index]
-                              == Parameters<dim>::AdvectionFieldMethod::particles,
+                              == Parameters<dim>::AdvectionFieldMethod::particles
+                              || (material && material->uses_homogeneous_mesh_data()
+                                  && material->is_mature_frictional_fault()
+                                  && this->introspection().compositional_field_methods[index]
+                                     == Parameters<dim>::AdvectionFieldMethod::static_field),
                               ExcMessage("Compositional field '" + name + "' is included in the list of "
                                          "fields to be handled by particle property 'initial composition', "
                                          "by this field is not advected by particles."));

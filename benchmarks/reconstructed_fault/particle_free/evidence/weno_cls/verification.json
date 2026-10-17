@@ -1,0 +1,489 @@
+{
+  "implementation_checks_passed": true,
+  "temporal_qualification_passed": false,
+  "adoption_recommended": false,
+  "final_native_jobs": 30,
+  "production_sources_verified": 880,
+  "baseline_reproduction": {
+    "compared_files": 63,
+    "different": [],
+    "retained": "pf4-stabilization-final-32-1",
+    "new": "weno-cls-baseline-verified-32-1"
+  },
+  "instrumentation_compatibility": {
+    "signed_jump-unlimited": {
+      "relative_L2": 0.0,
+      "maximum_coefficient_difference_Pa": 0.0
+    },
+    "signed_jump-kxrcf": {
+      "relative_L2": 3.606587987625542e-15,
+      "maximum_coefficient_difference_Pa": 2.7398527890909463e-11
+    },
+    "signed_jump-fu_shu": {
+      "relative_L2": 4.2265653225833795e-15,
+      "maximum_coefficient_difference_Pa": 4.2518877307884395e-11
+    },
+    "finite_width-unlimited": {
+      "relative_L2": 0.0,
+      "maximum_coefficient_difference_Pa": 0.0
+    },
+    "finite_width-kxrcf": {
+      "relative_L2": 1.397256525833581e-16,
+      "maximum_coefficient_difference_Pa": 1.1368683772161603e-12
+    },
+    "finite_width-fu_shu": {
+      "relative_L2": 5.2543499330099835e-17,
+      "maximum_coefficient_difference_Pa": 5.684341886080801e-13
+    }
+  },
+  "regression": {
+    "limiter": {
+      "affine": {
+        "indicator_error": 5.289470324943237e-16,
+        "weight_error": 1.1492543028346347e-17,
+        "reconstruction_error": 1.1368683772161603e-16,
+        "physical_mean_error_scaled": 8.684411214845671e-17,
+        "max_mean": 7.247237179675967e-16,
+        "max_poly": 3.1746418844885646e-16
+      },
+      "background": {
+        "indicator_error": 3.972055484010768e-16,
+        "weight_error": 4.336808689942018e-19,
+        "reconstruction_error": 1.4901161007583143e-16,
+        "physical_mean_error_scaled": 1.986821467667814e-16,
+        "max_mean": 3.9103405695323916e-08,
+        "max_poly": 4.6719017676377214e-08
+      },
+      "constant": {
+        "indicator_error": 0.0,
+        "weight_error": 0.0,
+        "reconstruction_error": 1.1368683772161603e-16,
+        "physical_mean_error_scaled": 2.273736754432321e-16,
+        "max_mean": 0.0,
+        "max_poly": 0.0
+      },
+      "huge": {
+        "indicator_error": 1.3322676295501878e-15,
+        "weight_error": 8.326672684688674e-16,
+        "reconstruction_error": 1.0065528097628266e-15,
+        "physical_mean_error_scaled": 2.0503852643387615e-16,
+        "max_mean": 2.634931584345349,
+        "max_poly": 3.1616052823453975
+      },
+      "mixed_xy": {
+        "indicator_error": 1.899241756048861e-16,
+        "weight_error": 6.505213034913027e-19,
+        "reconstruction_error": 1.8189894035458566e-16,
+        "physical_mean_error_scaled": 7.073847680456108e-17,
+        "max_mean": 8.99590316437802e-16,
+        "max_poly": 0.2876779808912305
+      },
+      "near_constant": {
+        "indicator_error": 7.367185597303882e-16,
+        "weight_error": 0.0,
+        "reconstruction_error": 1.1368683772150234e-16,
+        "physical_mean_error_scaled": 2.021099337271153e-16,
+        "max_mean": 2.358886281362445e-15,
+        "max_poly": 8.472488150165378e-16
+      },
+      "nonproportional": {
+        "indicator_error": 1.3322676295501878e-15,
+        "weight_error": 1.1102230246251565e-15,
+        "reconstruction_error": 1.4449053119894746e-15,
+        "physical_mean_error_scaled": 1.708502902690257e-16,
+        "max_mean": 2.634931584345349,
+        "max_poly": 3.1616052823453975
+      },
+      "orientation": {
+        "indicator_error": 8.881784197001252e-16,
+        "weight_error": 1.1384122811097797e-18,
+        "reconstruction_error": 1.1102230246251565e-16,
+        "physical_mean_error_scaled": 9.252649102627075e-17,
+        "max_mean": 2.261594992338778,
+        "max_poly": 1.4885861782132406
+      },
+      "piecewise_constant": {
+        "indicator_error": 4.440892098500626e-16,
+        "weight_error": 0.0,
+        "reconstruction_error": 1.1368683772161603e-16,
+        "physical_mean_error_scaled": 2.273736754432321e-16,
+        "max_mean": 1.7000000000000006,
+        "max_poly": 1.7000000000000002
+      },
+      "q2": {
+        "indicator_error": 4.3481662721698476e-16,
+        "weight_error": 1.1102230246251565e-16,
+        "reconstruction_error": 3.637978807091713e-16,
+        "physical_mean_error_scaled": 7.579122514774402e-17,
+        "max_mean": 7.37736178958115e-16,
+        "max_poly": 4.3596343285548243e-16
+      },
+      "tiny": {
+        "indicator_error": 8.881784197001252e-16,
+        "weight_error": 8.881784197001252e-16,
+        "reconstruction_error": 9.817790660374565e-16,
+        "physical_mean_error_scaled": 2.0908256804157085e-16,
+        "max_mean": 2.6349315843453485,
+        "max_poly": 3.1616052823453975
+      },
+      "zero": {
+        "indicator_error": 0.0,
+        "weight_error": 0.0,
+        "reconstruction_error": 0.0,
+        "physical_mean_error_scaled": 0.0,
+        "max_mean": 0.0,
+        "max_poly": 0.0
+      },
+      "zero_crossing": {
+        "indicator_error": 6.661338147750939e-16,
+        "weight_error": 4.7704895589362195e-18,
+        "reconstruction_error": 1.1368683772161603e-16,
+        "physical_mean_error_scaled": 7.411606051110909e-17,
+        "max_mean": 1.0295945555744037,
+        "max_poly": 1.053931506472056
+      },
+      "quadrature": {
+        "gauss3_mass_rank": 9,
+        "gauss2_mass_rank": 4,
+        "mass_error": 1.1102230246251565e-16
+      },
+      "boundary": {
+        "max_error": 1.3944855271411907e-15,
+        "mixed_cells": 4,
+        "no_inflow_cells": 0
+      }
+    },
+    "limiter_checks": [
+      [
+        "affine: independent indicators",
+        true
+      ],
+      [
+        "affine: independent weights",
+        true
+      ],
+      [
+        "affine: full Q2 reconstruction",
+        true
+      ],
+      [
+        "affine: physical target means",
+        true
+      ],
+      [
+        "background: independent indicators",
+        true
+      ],
+      [
+        "background: independent weights",
+        true
+      ],
+      [
+        "background: full Q2 reconstruction",
+        true
+      ],
+      [
+        "background: physical target means",
+        true
+      ],
+      [
+        "constant: independent indicators",
+        true
+      ],
+      [
+        "constant: independent weights",
+        true
+      ],
+      [
+        "constant: full Q2 reconstruction",
+        true
+      ],
+      [
+        "constant: physical target means",
+        true
+      ],
+      [
+        "huge: independent indicators",
+        true
+      ],
+      [
+        "huge: independent weights",
+        true
+      ],
+      [
+        "huge: full Q2 reconstruction",
+        true
+      ],
+      [
+        "huge: physical target means",
+        true
+      ],
+      [
+        "mixed_xy: independent indicators",
+        true
+      ],
+      [
+        "mixed_xy: independent weights",
+        true
+      ],
+      [
+        "mixed_xy: full Q2 reconstruction",
+        true
+      ],
+      [
+        "mixed_xy: physical target means",
+        true
+      ],
+      [
+        "near_constant: independent indicators",
+        true
+      ],
+      [
+        "near_constant: independent weights",
+        true
+      ],
+      [
+        "near_constant: full Q2 reconstruction",
+        true
+      ],
+      [
+        "near_constant: physical target means",
+        true
+      ],
+      [
+        "nonproportional: independent indicators",
+        true
+      ],
+      [
+        "nonproportional: independent weights",
+        true
+      ],
+      [
+        "nonproportional: full Q2 reconstruction",
+        true
+      ],
+      [
+        "nonproportional: physical target means",
+        true
+      ],
+      [
+        "orientation: independent indicators",
+        true
+      ],
+      [
+        "orientation: independent weights",
+        true
+      ],
+      [
+        "orientation: full Q2 reconstruction",
+        true
+      ],
+      [
+        "orientation: physical target means",
+        true
+      ],
+      [
+        "piecewise_constant: independent indicators",
+        true
+      ],
+      [
+        "piecewise_constant: independent weights",
+        true
+      ],
+      [
+        "piecewise_constant: full Q2 reconstruction",
+        true
+      ],
+      [
+        "piecewise_constant: physical target means",
+        true
+      ],
+      [
+        "q2: independent indicators",
+        true
+      ],
+      [
+        "q2: independent weights",
+        true
+      ],
+      [
+        "q2: full Q2 reconstruction",
+        true
+      ],
+      [
+        "q2: physical target means",
+        true
+      ],
+      [
+        "tiny: independent indicators",
+        true
+      ],
+      [
+        "tiny: independent weights",
+        true
+      ],
+      [
+        "tiny: full Q2 reconstruction",
+        true
+      ],
+      [
+        "tiny: physical target means",
+        true
+      ],
+      [
+        "zero: independent indicators",
+        true
+      ],
+      [
+        "zero: independent weights",
+        true
+      ],
+      [
+        "zero: full Q2 reconstruction",
+        true
+      ],
+      [
+        "zero: physical target means",
+        true
+      ],
+      [
+        "zero_crossing: independent indicators",
+        true
+      ],
+      [
+        "zero_crossing: independent weights",
+        true
+      ],
+      [
+        "zero_crossing: full Q2 reconstruction",
+        true
+      ],
+      [
+        "zero_crossing: physical target means",
+        true
+      ],
+      [
+        "symmetry and trace",
+        true
+      ],
+      [
+        "full tensor metric",
+        true
+      ],
+      [
+        "mixed xy mean blind spot / polynomial detection",
+        true
+      ],
+      [
+        "direction changes detected as tensor differences",
+        true
+      ],
+      [
+        "nonproportional: KXRCF tensor basis covariance",
+        true
+      ],
+      [
+        "nonproportional: independent tensor KXRCF",
+        true
+      ],
+      [
+        "orientation: KXRCF tensor basis covariance",
+        true
+      ],
+      [
+        "orientation: independent tensor KXRCF",
+        true
+      ],
+      [
+        "constant background normalization sensitivity exposed",
+        true
+      ],
+      [
+        "cell/stencil traversal independence",
+        true
+      ],
+      [
+        "in-plane tensor basis covariance",
+        true
+      ],
+      [
+        "finite normalized nonnegative weights",
+        true
+      ],
+      [
+        "tiny: amplitude invariant",
+        true
+      ],
+      [
+        "huge: amplitude invariant",
+        true
+      ],
+      [
+        "Gauss3 full rank and exact Q2 mass",
+        true
+      ],
+      [
+        "pointwise mixed inflow and boundary/no-inflow",
+        true
+      ],
+      [
+        "limited repeated trials and late rejection preserve incoming",
+        true
+      ]
+    ],
+    "operator": {
+      "matrix_scaled_error": 1.488933635194183e-15,
+      "correction_scaled_error": 1.5543122344752192e-15,
+      "boundary_scaled_error": 5.921189464667504e-16,
+      "constant_defect": 1.099120794378905e-14,
+      "polynomial_defect": 4.3298697960381105e-15,
+      "uncorrected_constant_defect": 0.3000000000000007
+    },
+    "operator_compatibility": {
+      "retained": "build-particle-free/runs/pf5-transport-verified",
+      "compared": 23,
+      "different": []
+    },
+    "passed": true
+  },
+  "PF1_checks": 94,
+  "native_assertions": 628,
+  "native_cases": 8,
+  "preservation": {
+    "incoming_files": 6293,
+    "changed_incoming_files": [
+      "source/material_model/phase_field_fault/dg_limiter.cc",
+      "include/aspect/material_model/phase_field_fault.h",
+      "include/aspect/material_model/phase_field_fault/dg_history_internal.h",
+      "benchmarks/reconstructed_fault/particle_free/README.md",
+      "benchmarks/reconstructed_fault/particle_free/stabilization_checks.cc",
+      "doc/reconstructed_fault/specification.tex",
+      "doc/reconstructed_fault/current_design.md",
+      "doc/reconstructed_fault/particle_free/SOURCE_AUDIT.md",
+      "doc/reconstructed_fault/particle_free/STATUS.md"
+    ],
+    "deleted_incoming_files": [],
+    "prior_evidence_unchanged": true,
+    "AGENTS_unchanged": true,
+    "passed": true
+  },
+  "strict_cache_equivalence": {
+    "relative_L2": 1.8547050864982892e-10,
+    "max_coefficient_difference_Pa": 3.159957032342238e-06,
+    "strict_1e_12_final_field_target_passed": false,
+    "note": "Local KKT maps pass independently; translation-dependent quadrature roundoff is amplified in nonlinear transport. Keep the failed strict end-field target explicit; fields are not bitwise or roundoff identical."
+  },
+  "replay": {
+    "payload_files": 1307,
+    "assessment_byte_identical": true,
+    "independent_limiter_checks": 69,
+    "operator_CSVs": 23,
+    "original_baseline_CSVs": 63,
+    "PF1_checks": 94,
+    "native_execution": false,
+    "note": "Mathematical replay only; native unit results are retained logs, not rerun here."
+  },
+  "physical_mean_gate_Pa": 1e-09,
+  "maximum_measured_mean_change_Pa": 1.306162322757252e-12,
+  "style_and_python_syntax_passed": true
+}

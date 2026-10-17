@@ -502,7 +502,10 @@ namespace aspect
         linearization=std::make_shared<Linearization>(linearization->with_surface_solve(*restricted));
       }
     typename MaterialModel::PhaseFieldFault<dim>::FEEndpointTrial endpoint;
-    endpoint.strain.reinit(endpoint_strain);endpoint.strain=endpoint_strain;endpoint.Z=endpoint_Z;
+    if (material.uses_dg_trial_stress_history())
+      endpoint=material.make_fe_endpoint_trial(bulk,slip);
+    else
+      {endpoint.strain.reinit(endpoint_strain);endpoint.strain=endpoint_strain;endpoint.Z=endpoint_Z;}
     return [this,&material,owner,linearization,restricted,active,bulk,endpoint](const Vector<double> &direction)
     {
       TimerOutput::Scope timer(computing_timer,"Fault: endpoint linear tangent");
@@ -1056,6 +1059,44 @@ namespace aspect
                     last_pressure_normalization_adjustment=working_pressure_adjustment;
                     // All accepted constitutive and surface histories remain
                     // untouched. The caller owns this complete scratch result.
+                    return;
+                  }
+
+                // Fixed-profile mature DG uses the same outer acceptance gate
+                // as native endpoint history. A completed mechanical trial must
+                // not become the accepted anchor when the timestep manager
+                // subsequently requests rejection/cutback.
+                if (timestep_number>0 && phase_field_fault.is_mature_frictional_fault()
+                    && phase_field_fault.uses_dg_trial_stress_history())
+                  {
+                    AssertThrow(!pending_dg_endpoint_publication,ExcInternalError());
+                    fault_manager.rollback_slip_rate_nonlinear_solve();
+                    nonlinear_state_is_active=false;
+                    solution.swap(accepted_solution);
+                    current_linearization_point.swap(accepted_linearization);
+                    last_pressure_normalization_adjustment=working_pressure_adjustment;
+                    pending_dg_endpoint_publication=[this,bulk=solution,rates=slip_rate,
+                      active_set,control=nonlinear_solver_control,iterations=nonlinear_iteration,total_fault_krylov_iterations,
+                      minimum_fault_accepted_alpha](const bool accept)
+                    {
+                      if (!accept) return;
+                      auto &manager=*reconstructed_fault_manager;
+                      auto &model=Plugins::get_plugin_as_type<MaterialModel::PhaseFieldFault<dim>>(*material_model);
+                      manager.begin_slip_rate_nonlinear_solve();
+                      try
+                        {
+                          manager.begin_slip_rate_trial();
+                          manager.set_slip_rate_trial_values(rates);
+                          manager.accept_slip_rate_trial();
+                          manager.validate_slip_rate_nonlinear_commit();
+                          model.commit_reconstructed_fault_mechanical_history(bulk);
+                        }
+                      catch(...){manager.rollback_slip_rate_nonlinear_solve();throw;}
+                      manager.commit_slip_rate_nonlinear_solve();
+                      signals.post_reconstructed_fault_solver(iterations,total_fault_krylov_iterations,
+                                                               minimum_fault_accepted_alpha,active_set);
+                      signals.post_nonlinear_solver(control);
+                    };
                     return;
                   }
 

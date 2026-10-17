@@ -47,6 +47,13 @@ namespace aspect
                            && static_cast<const MappingQ<dim> &> (mapping).get_degree () == 1)),
                    ExcMessage ("Automatic exterior data require an axis-aligned affine Box Q1 lattice; "
                                "other boundary mappings need a specified exterior mesh."));
+      if (benchmark_phase_reference)
+        AssertThrow (benchmark_phase_reference->value
+                     && !this->get_parameters ().resume_computation
+                     && this->get_parameters ().adaptive_refinement_interval == 0
+                     && this->get_parameters ().additional_refinement_times.empty ()
+                     && Utilities::MPI::n_mpi_processes (this->get_mpi_communicator ()) == 1,
+                     ExcMessage ("Explicit frozen phase reference requires fresh serial fixed-mesh mechanics."));
       manager.prepare_boundary_contacts ();
       const auto &contacts = manager.get_boundary_contacts ();
       const auto &faces = manager.get_boundary_faces ();
@@ -101,6 +108,16 @@ namespace aspect
                   }
               AssertThrow (found,
                            ExcMessage ("No exterior Q1 lattice at the detected boundary contact."));
+              if (benchmark_phase_reference)
+                for (unsigned int d = 0; d < dim; ++d)
+                  {
+                    const double spacing = benchmark_phase_reference->exterior_spacing[d];
+                    const double ratio = spacing / data.spacing[d];
+                    AssertThrow (std::isfinite (spacing) && ratio >= 1.
+                                 && std::abs (ratio - std::round (ratio)) <= 1e-12,
+                                 ExcMessage ("Exterior reference must be aligned with a refinement of its Q1 grid."));
+                    data.spacing[d] = spacing;
+                  }
               double padding = 0.;
               for (const auto &cell : this->get_triangulation ().active_cell_iterators ())
                 if (cell->is_locally_owned ())
@@ -140,17 +157,44 @@ namespace aspect
                     if (std::min (x, y) > data.extent / a || std::max (x, y) < -data.extent / a)
                       continue;
                     for (unsigned int d = 0; d < dim; ++d)
-                      AssertThrow (
-                        std::abs (face.cell_upper[d] - face.cell_lower[d] - data.spacing[d])
-                        <= tolerance
-                        && std::abs ((face.cell_lower[d] - data.lattice_origin[d])
-                                     / data.spacing[d]
-                                     - std::round ((face.cell_lower[d] - data.lattice_origin[d])
-                                                   / data.spacing[d]))
-                        <= tolerance / data.spacing[d],
-                        ExcMessage ("Nonuniform or misaligned boundary ghost-Q1 lattice at fault "
-                                    + std::to_string (contact.fault_index)
-                                    + "; exterior mesh data are required."));
+                      {
+                        const double h = face.cell_upper[d] - face.cell_lower[d];
+                        const double ratio = data.spacing[d] / h;
+                        AssertThrow (
+                          (benchmark_phase_reference
+                           ? ratio >= 1. && std::abs (ratio - std::round (ratio)) <= 1e-12
+                           : std::abs (h - data.spacing[d]) <= tolerance)
+                          && std::abs ((face.cell_lower[d] - data.lattice_origin[d]) / h
+                                       - std::round ((face.cell_lower[d] - data.lattice_origin[d]) / h))
+                             <= tolerance / h,
+                          ExcMessage ("Nonuniform or misaligned boundary ghost-Q1 lattice at fault "
+                                      + std::to_string (contact.fault_index)
+                                      + "; exterior mesh data are required."));
+                      }
+                    if (benchmark_phase_reference)
+                      for (const auto &point : face.vertices)
+                        {
+                          Point<dim> lower;
+                          Tensor<1,dim> fraction;
+                          for (unsigned int d=0; d<dim; ++d)
+                            {
+                              lower[d]=data.lattice_origin[d]+data.spacing[d]
+                                *std::floor((point[d]-data.lattice_origin[d])/data.spacing[d]);
+                              fraction[d]=(point[d]-lower[d])/data.spacing[d];
+                            }
+                          double expected=0.;
+                          for (unsigned int v=0; v<GeometryInfo<dim>::vertices_per_cell; ++v)
+                            {
+                              auto node=lower;
+                              double weight=1.;
+                              for (unsigned int d=0; d<dim; ++d)
+                                if (v & (1u<<d)) { node[d]+=data.spacing[d]; weight*=fraction[d]; }
+                                else weight*=1.-fraction[d];
+                              expected+=weight*data.profile->value(std::abs((node-contact.position)*contact.normal));
+                            }
+                          AssertThrow(std::abs(benchmark_phase_reference->value(point)-expected)<=2e-11,
+                                      ExcMessage("Explicit phase reference does not match its exterior Q1 trace."));
+                        }
                   }
             }
           double cell_padding = 0.;
@@ -255,6 +299,10 @@ namespace aspect
                     active += value > 0.;
                     expected = std::max (expected, value);
                   }
+                // The explicit immutable reference is a representation of the
+                // prescribed field, not a new normalization or phase law.
+                if (benchmark_phase_reference)
+                  expected = benchmark_phase_reference->value (cell->vertex (v));
                 // No superposition law is introduced for overlapping profiles.
                 compatible &= active <= 1;
                 const double actual

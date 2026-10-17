@@ -1,0 +1,118 @@
+{
+  "passed": true,
+  "scope": "Selected bounded PF6a only; unresolved spatial accuracy, not full PF5 or propagation.",
+  "final_executable_sha256": "c994b6b809bde83f456ebdf2d0c573ea2ff8dbf69427add898982a3b573a9693",
+  "final_observer_sha256": "172dabb46f0d1fb17aad2943fdb4592e97bf3946aeeb3210bab8d0519398ebc7",
+  "final_source_hashes_match_all_terminal_native_runs": true,
+  "native_current_source_files": 880,
+  "terminal_native_runs": [
+    "pf6a-terminal-final-coarse",
+    "pf6a-terminal-final-cutback",
+    "pf6a-terminal-final-resumed",
+    "pf6a-terminal-archive-control"
+  ],
+  "terminal_coarse_gates": 110,
+  "native_manager_archive_gates": 5,
+  "actual_cutback_accepted_states_byte_identical": 22,
+  "restart_steps": [
+    35,
+    36
+  ],
+  "independent_assessment_passed": true,
+  "mathematical_replay": {
+    "payload_files_verified": 6992,
+    "archive_sha256": "ae42f8938aee70a6be9a0bea8326dfa59ef4862b694091b35258f664ff337321",
+    "assessment_byte_identical": true,
+    "lifecycle_value_and_byte_checks_identical": true,
+    "native_archive_check": "Replayed byte/value checks; complete manager load/resave is a separately recorded native test."
+  },
+  "final_package_mathematical_input_and_reference_hashes_unchanged": 3629,
+  "final_package_extraction_and_hash_check": {
+    "payload_files_verified": 7856,
+    "archive_sha256": "d04271616e774ca7f05895739de3a1f7670f1a67b2faac3236bc71e0d1796248"
+  },
+  "final_lifecycle_replay_identical": true,
+  "native_unit_command": [
+    "build-particle-free/native/aspect-release",
+    "--test",
+    "[phase_field_fault_cohesive],*Maxwell*"
+  ],
+  "native_assertions": 628,
+  "native_test_cases": 8,
+  "dependency_assertions": 2625,
+  "dependency_test_cases": 55,
+  "independent_PF1_checks": 94,
+  "retained_operator_CSVs_byte_identical": 23,
+  "mode_conversion_rejected": true,
+  "deferred_validation_regression_fails_prior_core": true,
+  "preservation": {
+    "incoming_files": 10371,
+    "selected_changed_paths": [
+      "benchmarks/reconstructed_fault/particle_free/CMakeLists.txt",
+      "benchmarks/reconstructed_fault/particle_free/README.md",
+      "doc/reconstructed_fault/current_design.md",
+      "doc/reconstructed_fault/particle_free/SOURCE_AUDIT.md",
+      "doc/reconstructed_fault/particle_free/STATUS.md",
+      "doc/reconstructed_fault/specification.tex",
+      "include/aspect/material_model/phase_field_fault.h",
+      "include/aspect/simulator.h",
+      "source/material_model/phase_field_fault.cc",
+      "source/material_model/phase_field_fault/dg_accepted.cc",
+      "source/material_model/phase_field_fault/dg_transport.cc",
+      "source/material_model/phase_field_fault/fe_phase_energy.cc",
+      "source/material_model/phase_field_fault/fe_strain.cc",
+      "source/material_model/phase_field_fault/history.cc",
+      "source/simulator/core.cc",
+      "source/simulator/phase_field.cc",
+      "source/simulator/solver/reconstructed_fault_endpoint_phase.cc",
+      "source/simulator/solver/reconstructed_fault_stokes.cc"
+    ],
+    "unchanged_files": 10353,
+    "unexpected_changes": [],
+    "passed": true,
+    "note": "Incoming WENO source/evidence, phase reports, manual AGENTS and root CMake retain their hashes. PF6a files are additional."
+  },
+  "failures_retained": [
+    "Missed particle-freeze diagnostic startup rejection",
+    "Original automatic checkpoint clock assertion",
+    "First spatial 180 s timeout at step 71",
+    "Wrong historical transport observer name",
+    "Initial Python manager comparison used raw instead of canonical reference",
+    "Initial lifecycle script assumed historical persistence exports existed",
+    "Initial operator reference invocation passed a Path instead of Entry; corrected replay passed",
+    "Standalone dependency tests initially invoked in place of embedded ASPECT tests; both now recorded separately and passed",
+    "Deferred-validation regression intentionally fails on pinned previous core"
+  ],
+  "production_defaults_changed": false,
+  "limiter_settings_changed": false,
+  "WENO_sweeps": false,
+  "git_diff_check_passed": true,
+  "python_compile_passed": true,
+  "source_review": "Selected 18-path delta reconstructed and checked against incoming hashes; native equations remain endpoint/reduced Newton, with independent DG trial, fixed-endpoint phase partial, normalization adjoints and native terminal publication.",
+  "limitations": [
+    "Normal spatial stress difference .42237 relative L2",
+    "Higher-rule KKT sensitivity at six-point quadrature",
+    "Only serial fixed grid/reference surface and no advection",
+    "Particle startup/material/support/sampling/persistence dependencies remain",
+    "No general AMR/MPI/surface-phase transfer, moving geometry, birth, RSF evolution or propagation"
+  ],
+  "public_artifact_sha256": {
+    "README.md": "0800555ff6141532d4db3573870f19e02f87a5c527724fbac198daf43bda0559",
+    "assessment.json": "74e41dd2fc5b82441343127323a620892575ad4a3fb2343806acc75fb8433826",
+    "comparison.png": "e389c1014049c3d18b4a9a1d75081f3137e59bdc09554d995faff1c7f9b223c7",
+    "contact-verification.json": "57ee4f01bc7f1113caeb40aa5ab32040800a1ac0f081ab0db0b9d4bd132704c6",
+    "cutback-assessment.json": "785fa4410be578f3386b6315f1bd98752dcfe823b5db99784c82b3dd642e81cf",
+    "fixed-profile-assessment.json": "d65c703ff9e52b06bbc7b637e3013b3fcd21138e1808964f85f4fc1178650f85",
+    "lifecycle.json": "85ea956c765c51de0302e773e16265cc476eeba788dd2051dd37bbd395b31178",
+    "pf1.json": "6137b10b6a6bde6aec000d1dbef4bbf211a9fee7ea2528836e2f2db80e7b1ba8",
+    "preservation.json": "5e2ffe7b1531f3a39ad093d561341e68870923f228a58becb74eb972fdcf7f22",
+    "provenance.json": "be755d04e553604fe9a1068e1cf5581f2eaa7695038ef41c7cba6047ce5ad5f7",
+    "reference.tar.xz": "d04271616e774ca7f05895739de3a1f7670f1a67b2faac3236bc71e0d1796248",
+    "regression.json": "ae87a964b05f4564e940b6a7a781de6639188d2770d000b8236852ed4a7b866f",
+    "replay.py": "c88d757188ae73de9ef8dc1ea0c65dca273733db967536f71d7b9a9770436c8a",
+    "restart-assessment.json": "e424bd1d145858b84c544c40b7c781f91a93f5f14c5d14338f49d84735089b6b",
+    "source-delta.patch": "963067c37c233b6d5efb2404848b618b81a21fb9d428ccc9b2907185653d57c0",
+    "units.log": "34da58f99f078e00d5c9a1922102195d7b15cd39233d24ab80988ff625ab0221",
+    "upstream-units.log": "98bb36061d53f1ee95d217882787f8fb2e47de9b2ad7965540e8c9b00d7d4af4"
+  }
+}

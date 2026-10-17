@@ -1,0 +1,506 @@
+{
+  "base_revision": "a8707307008401ac9cff702a369e2e2a611fa0f7",
+  "branch": "pf-rsf-particle-free",
+  "scope": "Fixed reference surface; uniform Cartesian serial/1/2/4-rank transfers; no transport",
+  "production_source_matches_all_final_records": true,
+  "native_gates_per_full_case": {
+    "1": 70,
+    "2": 70,
+    "4": 70
+  },
+  "serial_all_mode_and_projection_checks_passed": true,
+  "representable_phase_and_lower_obstacle_transfer_passed": true,
+  "nonrepresentable_phase_coarsening_rejected": true,
+  "accepted_history_rollback_publication_passed": true,
+  "matching_cell_trace_and_averaged_trace_negative_control_passed": true,
+  "mpi_ownership_and_restart_passed": true,
+  "particles_fixed": {
+    "integrator": "RK2",
+    "environment": "ASPECT_DIAGNOSTIC_FREEZE_PARTICLE_ADVECTION=1",
+    "advection_dt": 0,
+    "constitutive_dt": 0.125,
+    "unique_ids": 144,
+    "physical_coordinate_change": 0,
+    "face_particles": 80
+  },
+  "comparison_maxima": {
+    "rank-1-2": {
+      "tensor_relative_L2": 1.3468813053670839e-15,
+      "stress_relative_L2": 1.0717240947621058e-14,
+      "native-fields_relative_max_error": 1.738283389054061e-13,
+      "phase_Linf": 3.400058012914542e-16,
+      "surface_relative_max_error": 6.61871011581651e-16
+    },
+    "rank-1-4": {
+      "tensor_relative_L2": 1.367370882173593e-15,
+      "stress_relative_L2": 9.521916578798414e-15,
+      "native-fields_relative_max_error": 5.158355957017925e-11,
+      "phase_Linf": 5.412337245047638e-16,
+      "surface_relative_max_error": 1.158487178956544e-15
+    },
+    "restart-r1": {
+      "tensor_relative_L2": 0.0,
+      "stress_relative_L2": 0.0,
+      "native-fields_relative_max_error": 0.0,
+      "phase_Linf": 0.0,
+      "surface_relative_max_error": 0.0
+    },
+    "restart-r2": {
+      "tensor_relative_L2": 0.0,
+      "stress_relative_L2": 0.0,
+      "native-fields_relative_max_error": 0.0,
+      "phase_Linf": 0.0,
+      "surface_relative_max_error": 0.0
+    },
+    "restart-r4": {
+      "tensor_relative_L2": 0.0,
+      "stress_relative_L2": 0.0,
+      "native-fields_relative_max_error": 0.0,
+      "phase_Linf": 0.0,
+      "surface_relative_max_error": 0.0
+    },
+    "cross-1-to-4": {
+      "tensor_relative_L2": 1.3673708821735928e-15,
+      "stress_relative_L2": 1.1550975427155224e-14,
+      "native-fields_relative_max_error": 5.158355957017925e-11,
+      "phase_Linf": 6.106226635438361e-16,
+      "surface_relative_max_error": 1.1584871789565438e-15
+    }
+  },
+  "native_rule_vs_high_rule_screen_passed": false,
+  "quadrature": {
+    "1": {
+      "global-complete-Q2-before": {
+        "native_minus_q24_energy": [
+          -1.6940658945086007e-21,
+          0.0,
+          5.329070518200751e-15
+        ],
+        "native_minus_q24_shear": [
+          -3.8268266333574275e-10,
+          -6.701272037279438e-10,
+          -5.820411097534617e-10,
+          -5.669827940479877e-10,
+          -6.249525341672779e-10,
+          -7.559504133780592e-10,
+          -9.599760986134243e-10,
+          -1.2370303670294902e-09,
+          -7.29123705855983e-10
+        ],
+        "energy_scaled_error": 3.7717152037484155e-16,
+        "shear_scaled_error": 1.2370303670294902e-09,
+        "q24_q32_energy_uncertainty": 1.6940658945086007e-21,
+        "q24_q32_shear_uncertainty": 5.551115123125783e-17,
+        "native_fault_KKT_raw": 0.0,
+        "high_rule_fault_KKT_raw": 0.0
+      },
+      "global-complete-Q2-refined": {
+        "native_minus_q24_energy": [
+          -1.6940658945086007e-21,
+          0.0,
+          5.329070518200751e-15
+        ],
+        "native_minus_q24_shear": [
+          -3.1483149420807877e-13,
+          -5.509759315458496e-13,
+          -4.786726570671362e-13,
+          -4.661826480401032e-13,
+          -5.138389713721381e-13,
+          -6.211697822777751e-13,
+          -7.887024366937112e-13,
+          -1.0161871344394058e-12,
+          -5.98965321785272e-13
+        ],
+        "energy_scaled_error": 3.7717152037484155e-16,
+        "shear_scaled_error": 1.0161871344394058e-12,
+        "q24_q32_energy_uncertainty": 0.0,
+        "q24_q32_shear_uncertainty": 5.551115123125783e-17,
+        "native_fault_KKT_raw": 0.0,
+        "high_rule_fault_KKT_raw": 0.0
+      },
+      "accepted-step-1-before": {
+        "native_minus_q24_energy": [
+          -3.084611455150821e-10,
+          1.734723475976807e-18,
+          3.552713678800501e-15
+        ],
+        "native_minus_q24_shear": [
+          4.205092807296751e-08,
+          8.410162877225957e-08,
+          8.410168561567843e-08,
+          8.410169982653315e-08,
+          8.410160035055014e-08,
+          8.410169982653315e-08,
+          8.410167140482372e-08,
+          8.410167140482372e-08,
+          4.205092807296751e-08
+        ],
+        "energy_scaled_error": 3.084611455150821e-10,
+        "shear_scaled_error": 6.657030447348045e-10,
+        "q24_q32_energy_uncertainty": 1.7763568394002505e-15,
+        "q24_q32_shear_uncertainty": 4.263256414560601e-14,
+        "native_fault_KKT_raw": 3.694822225952521e-13,
+        "high_rule_fault_KKT_raw": 8.41020266761916e-08
+      },
+      "accepted-step-1-refined": {
+        "native_minus_q24_energy": [
+          -1.4499512701604544e-13,
+          0.0,
+          3.552713678800501e-15
+        ],
+        "native_minus_q24_shear": [
+          1.965361207112437e-11,
+          3.9037217902659904e-11,
+          3.9051428757375106e-11,
+          3.8980374483799096e-11,
+          3.8966163629083894e-11,
+          3.8980374483799096e-11,
+          3.9037217902659904e-11,
+          3.89945853385143e-11,
+          1.9603874079621164e-11
+        ],
+        "energy_scaled_error": 1.4499512701604544e-13,
+        "shear_scaled_error": 3.0910974544687195e-13,
+        "q24_q32_energy_uncertainty": 1.7763568394002505e-15,
+        "q24_q32_shear_uncertainty": 2.842170943040401e-14,
+        "native_fault_KKT_raw": 8.406293261487008e-08,
+        "high_rule_fault_KKT_raw": 8.410191298935388e-08
+      },
+      "state-2": {
+        "native_minus_q24_energy": [
+          -1.5202188285989848e-08,
+          0.0,
+          5.329070518200751e-15
+        ],
+        "native_minus_q24_shear": [
+          2.950965978243403e-07,
+          5.901929966967145e-07,
+          5.901928830098768e-07,
+          5.901931956486806e-07,
+          5.901927977447485e-07,
+          5.901929966967145e-07,
+          5.901927409013297e-07,
+          5.90192627214492e-07,
+          2.9509618570955354e-07
+        ],
+        "energy_scaled_error": 1.5202188285989848e-08,
+        "shear_scaled_error": 4.3930826113275245e-09,
+        "q24_q32_energy_uncertainty": 2.220446049250313e-16,
+        "q24_q32_shear_uncertainty": 2.5579538487363607e-13,
+        "native_fault_KKT_raw": 1.1510792319313623e-12,
+        "high_rule_fault_KKT_raw": 5.901940340891088e-07
+      },
+      "native_rule_vs_high_rule_screen_passed": false
+    },
+    "2": {
+      "global-complete-Q2-before": {
+        "native_minus_q24_energy": [
+          -1.6940658945086007e-21,
+          0.0,
+          5.329070518200751e-15
+        ],
+        "native_minus_q24_shear": [
+          -3.82682718846894e-10,
+          -6.701272869946706e-10,
+          -5.820409154644324e-10,
+          -5.669827662924121e-10,
+          -6.249524509005511e-10,
+          -7.559504688892105e-10,
+          -9.599763206580292e-10,
+          -1.237030311518339e-09,
+          -7.291235948336805e-10
+        ],
+        "energy_scaled_error": 3.7717152037484155e-16,
+        "shear_scaled_error": 1.237030311518339e-09,
+        "q24_q32_energy_uncertainty": 1.6940658945086007e-21,
+        "q24_q32_shear_uncertainty": 5.551115123125783e-17,
+        "native_fault_KKT_raw": 0.0,
+        "high_rule_fault_KKT_raw": 0.0
+      },
+      "global-complete-Q2-refined": {
+        "native_minus_q24_energy": [
+          -1.6940658945086007e-21,
+          0.0,
+          5.329070518200751e-15
+        ],
+        "native_minus_q24_shear": [
+          -3.146927163300006e-13,
+          -5.509481759702339e-13,
+          -4.788114349452144e-13,
+          -4.662381591913345e-13,
+          -5.137557046452912e-13,
+          -6.212252934290063e-13,
+          -7.887579478449425e-13,
+          -1.0161316232881745e-12,
+          -5.987987883315782e-13
+        ],
+        "energy_scaled_error": 3.7717152037484155e-16,
+        "shear_scaled_error": 1.0161316232881745e-12,
+        "q24_q32_energy_uncertainty": 0.0,
+        "q24_q32_shear_uncertainty": 5.551115123125783e-17,
+        "native_fault_KKT_raw": 0.0,
+        "high_rule_fault_KKT_raw": 0.0
+      },
+      "accepted-step-1-before": {
+        "native_minus_q24_energy": [
+          -3.084611455150821e-10,
+          8.673617379884035e-19,
+          3.552713678800501e-15
+        ],
+        "native_minus_q24_shear": [
+          4.205095649467694e-08,
+          8.410187035678973e-08,
+          8.410185614593502e-08,
+          8.410191298935388e-08,
+          8.410187035678973e-08,
+          8.410187035678973e-08,
+          8.410179930251616e-08,
+          8.410182772422559e-08,
+          4.205094938924958e-08
+        ],
+        "energy_scaled_error": 3.084611455150821e-10,
+        "shear_scaled_error": 6.657047320150743e-10,
+        "q24_q32_energy_uncertainty": 3.552713678800501e-15,
+        "q24_q32_shear_uncertainty": 5.684341886080802e-14,
+        "native_fault_KKT_raw": 1.7053025658242404e-13,
+        "high_rule_fault_KKT_raw": 8.41020266761916e-08
+      },
+      "accepted-step-1-refined": {
+        "native_minus_q24_energy": [
+          -1.4510614931850796e-13,
+          -8.673617379884035e-19,
+          3.552713678800501e-15
+        ],
+        "native_minus_q24_shear": [
+          1.9674928353197174e-11,
+          3.929301328753354e-11,
+          3.9250380723387934e-11,
+          3.930722414224874e-11,
+          3.9250380723387934e-11,
+          3.9250380723387934e-11,
+          3.913669388566632e-11,
+          3.9193537304527126e-11,
+          1.964650664376677e-11
+        ],
+        "energy_scaled_error": 1.4510614931850796e-13,
+        "shear_scaled_error": 3.1113448177075974e-13,
+        "q24_q32_energy_uncertainty": 3.552713678800501e-15,
+        "q24_q32_shear_uncertainty": 4.263256414560601e-14,
+        "native_fault_KKT_raw": 8.406266260863049e-08,
+        "high_rule_fault_KKT_raw": 8.410191298935388e-08
+      },
+      "state-2": {
+        "native_minus_q24_energy": [
+          -1.5202188285989848e-08,
+          0.0,
+          5.329070518200751e-15
+        ],
+        "native_minus_q24_shear": [
+          2.950966404569044e-07,
+          5.901931388052617e-07,
+          5.90193025118424e-07,
+          5.901931103835523e-07,
+          5.901925987927825e-07,
+          5.901927977447485e-07,
+          5.901927409013297e-07,
+          5.90192826166458e-07,
+          2.9509621413126297e-07
+        ],
+        "energy_scaled_error": 1.5202188285989848e-08,
+        "shear_scaled_error": 4.393082188215497e-09,
+        "q24_q32_energy_uncertainty": 2.220446049250313e-16,
+        "q24_q32_shear_uncertainty": 3.126388037344441e-13,
+        "native_fault_KKT_raw": 9.947598300641403e-13,
+        "high_rule_fault_KKT_raw": 5.901937925045786e-07
+      },
+      "native_rule_vs_high_rule_screen_passed": false
+    },
+    "4": {
+      "global-complete-Q2-before": {
+        "native_minus_q24_energy": [
+          -1.6940658945086007e-21,
+          0.0,
+          5.329070518200751e-15
+        ],
+        "native_minus_q24_shear": [
+          -3.82682718846894e-10,
+          -6.701272314835194e-10,
+          -5.820409154644324e-10,
+          -5.669827107812608e-10,
+          -6.249524509005511e-10,
+          -7.559504688892105e-10,
+          -9.599763761691804e-10,
+          -1.2370303670294902e-09,
+          -7.291235948336805e-10
+        ],
+        "energy_scaled_error": 3.7717152037484155e-16,
+        "shear_scaled_error": 1.2370303670294902e-09,
+        "q24_q32_energy_uncertainty": 1.6940658945086007e-21,
+        "q24_q32_shear_uncertainty": 5.551115123125783e-17,
+        "native_fault_KKT_raw": 0.0,
+        "high_rule_fault_KKT_raw": 0.0
+      },
+      "global-complete-Q2-refined": {
+        "native_minus_q24_energy": [
+          -1.6940658945086007e-21,
+          0.0,
+          5.329070518200751e-15
+        ],
+        "native_minus_q24_shear": [
+          -3.1472047190561625e-13,
+          -5.51170220575159e-13,
+          -4.787836793695988e-13,
+          -4.662936703425657e-13,
+          -5.138112157965224e-13,
+          -6.211697822777751e-13,
+          -7.888134589961737e-13,
+          -1.0161316232881745e-12,
+          -5.987432771803469e-13
+        ],
+        "energy_scaled_error": 3.7717152037484155e-16,
+        "shear_scaled_error": 1.0161316232881745e-12,
+        "q24_q32_energy_uncertainty": 0.0,
+        "q24_q32_shear_uncertainty": 5.551115123125783e-17,
+        "native_fault_KKT_raw": 0.0,
+        "high_rule_fault_KKT_raw": 0.0
+      },
+      "accepted-step-1-before": {
+        "native_minus_q24_energy": [
+          -3.084611455150821e-10,
+          0.0,
+          3.552713678800501e-15
+        ],
+        "native_minus_q24_shear": [
+          4.205092096754015e-08,
+          8.410192720020859e-08,
+          8.410189877849916e-08,
+          8.410191298935388e-08,
+          8.410187035678973e-08,
+          8.410191298935388e-08,
+          8.410187035678973e-08,
+          8.410191298935388e-08,
+          4.2050935178394866e-08
+        ],
+        "energy_scaled_error": 3.084611455150821e-10,
+        "shear_scaled_error": 6.65704844500426e-10,
+        "q24_q32_energy_uncertainty": 3.552713678800501e-15,
+        "q24_q32_shear_uncertainty": 4.263256414560601e-14,
+        "native_fault_KKT_raw": 1.3500311979441904e-13,
+        "high_rule_fault_KKT_raw": 8.41020266761916e-08
+      },
+      "accepted-step-1-refined": {
+        "native_minus_q24_energy": [
+          -1.4488410471358293e-13,
+          -1.734723475976807e-18,
+          3.552713678800501e-15
+        ],
+        "native_minus_q24_shear": [
+          1.9660717498481972e-11,
+          3.936406756110955e-11,
+          3.9321434996963944e-11,
+          3.9335645851679146e-11,
+          3.923616986867273e-11,
+          3.9250380723387934e-11,
+          3.9250380723387934e-11,
+          3.927880243281834e-11,
+          1.963940121640917e-11
+        ],
+        "energy_scaled_error": 1.4488410471358293e-13,
+        "shear_scaled_error": 3.1158442317606816e-13,
+        "q24_q32_energy_uncertainty": 1.7763568394002505e-15,
+        "q24_q32_shear_uncertainty": 2.842170943040401e-14,
+        "native_fault_KKT_raw": 8.406263418692106e-08,
+        "high_rule_fault_KKT_raw": 8.410194141106331e-08
+      },
+      "state-2": {
+        "native_minus_q24_energy": [
+          -1.5202188063945243e-08,
+          0.0,
+          5.329070518200751e-15
+        ],
+        "native_minus_q24_shear": [
+          2.950965978243403e-07,
+          5.901931956486806e-07,
+          5.901929114315863e-07,
+          5.90193025118424e-07,
+          5.901927693230391e-07,
+          5.901930535401334e-07,
+          5.901924851059448e-07,
+          5.90192826166458e-07,
+          2.9509638466151955e-07
+        ],
+        "energy_scaled_error": 1.5202188063945243e-08,
+        "shear_scaled_error": 4.393082611327531e-09,
+        "q24_q32_energy_uncertainty": 2.220446049250313e-16,
+        "q24_q32_shear_uncertainty": 2.8421709430404007e-13,
+        "native_fault_KKT_raw": 7.247535904753022e-13,
+        "high_rule_fault_KKT_raw": 5.901935793417579e-07
+      },
+      "native_rule_vs_high_rule_screen_passed": false
+    }
+  },
+  "strict_reference_match_passed": false,
+  "strict_reference_note": "Unchanged original publication/reference evidence; not reclassified by transfer checks",
+  "full_run_seconds": {
+    "1": 12.390605300999596,
+    "2": 35.38693193700237,
+    "4": 47.67424707600003
+  },
+  "focused_regressions": {
+    "fe_identical_csvs": 21,
+    "pf4_operator_identical_csvs": 23,
+    "pf1_checks": 94
+  },
+  "preservation": {
+    "incoming_files": 6406,
+    "changed_existing_files": [
+      "source/material_model/phase_field_fault.cc",
+      "source/simulator/core.cc",
+      "source/simulator/phase_field.cc",
+      "source/material_model/phase_field_fault/history.cc",
+      "source/material_model/phase_field_fault/fe_strain.cc",
+      "source/material_model/phase_field_fault/dg_accepted.cc",
+      "include/aspect/material_model/phase_field_fault.h",
+      "doc/reconstructed_fault/specification.tex",
+      "doc/reconstructed_fault/current_design.md",
+      "doc/reconstructed_fault/particle_free/SOURCE_AUDIT.md",
+      "doc/reconstructed_fault/particle_free/STATUS.md",
+      "benchmarks/reconstructed_fault/particle_free/CMakeLists.txt",
+      "benchmarks/reconstructed_fault/particle_free/README.md"
+    ],
+    "unexpected_changes": [],
+    "all_other_incoming_files_unchanged": true,
+    "historical_payloads": {
+      "doc/reconstructed_fault/particle_free/STATUS.md": {
+        "incoming_body_sha256": "13bb8e472f0a296770071985384de3dad528ff294575e52004099b15ec0dc6fd",
+        "historical_body_retained_verbatim": true
+      },
+      "doc/reconstructed_fault/particle_free/SOURCE_AUDIT.md": {
+        "incoming_body_sha256": "c3ac0e849c431332db04dfb06c8d31cc751ee7984fc12569b744bbfbef7ffab6",
+        "historical_body_retained_verbatim": true
+      }
+    },
+    "original_publication_evidence_unchanged": true
+  },
+  "limitations": [
+    "Native physical quadrature misses declared 1e-9 screen",
+    "Lossy coarsening is not generally accurate",
+    "No local nonuniform AMR, surface transfer, moving geometry, transport or propagation qualification"
+  ],
+  "portable_replay": {
+    "archive_members_verified": 1593,
+    "independent_transfer_checks_passed": true,
+    "ownership_restart_comparisons_passed": true,
+    "native_rule_vs_high_rule_screen_passed": false,
+    "strict_reference_match_passed": false,
+    "strict_reference_note": "Unchanged prior publication result, not rerun or repaired by this transfer study"
+  },
+  "archive_sha256": "506b1146370c32fab71d0fc169a9f07adbc1d74a93af37d1249740f8bb8502f3",
+  "archive_bytes": 19395304,
+  "final_checks": {
+    "diff_check_passed": true,
+    "python_compile_passed": true,
+    "head": "a8707307008401ac9cff702a369e2e2a611fa0f7",
+    "branch": "pf-rsf-particle-free"
+  }
+}

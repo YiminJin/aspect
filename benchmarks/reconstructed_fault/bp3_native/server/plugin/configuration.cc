@@ -51,6 +51,9 @@ namespace BP3
     model.put("BP3.local_comparison_policy",all.get<std::string>("Mesh refinement.BP3 local comparison.Policy"));
     model.put("BP3.local_comparison_buffer","R+coarse projected width; same maintained boundary strip on A/B and production");
 #endif
+    const auto phase_reference=all.get<std::string>("Initial composition model.BP3.Fixed phase reference file", "");
+    if(!phase_reference.empty())
+      model.put("BP3.fixed_phase_reference_file",phase_reference);
     report=model;
     report.put_child("Time stepping",all.get_child("Time stepping"));
     report.put_child("Solver parameters",all.get_child("Solver parameters"));

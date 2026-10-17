@@ -1,0 +1,12 @@
+{
+  "FF_cells": 11528,
+  "fine_cells": 35342,
+  "overlay_cells": 35342,
+  "overlay_vertices": 36575,
+  "complete_Q1_overlay_vertex_Linf": 0.0,
+  "I_Linf_m": 1.0913936421275139e-11,
+  "I_relative_Linf": 8.514108650871409e-16,
+  "DGQ2_modes": 9,
+  "exterior_reference_spacing_m": 3.90625,
+  "mechanical_finest_m": 1.953125
+}

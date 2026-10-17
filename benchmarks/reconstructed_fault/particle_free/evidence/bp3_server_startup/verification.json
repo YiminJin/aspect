@@ -1,0 +1,53 @@
+{
+  "base_head": "a8707307008401ac9cff702a369e2e2a611fa0f7",
+  "branch": "pf-rsf-particle-free",
+  "native_unit_cases": 124,
+  "native_unit_assertions": 118034,
+  "native_unit_passed": true,
+  "all_four_parameter_parser_checks_passed": true,
+  "parameter_names": [
+    "parameters.prm",
+    "resume.prm",
+    "startup.prm",
+    "startup-resume.prm"
+  ],
+  "native_adaptive_controls_preserved": true,
+  "ordinary_server_plugin_has_no_test_macro": true,
+  "native_binary_sha256": "8bc5b99ad5bfcd725d6b9e9405434a0b2cbfae19e5701b458b81e38fb5b08398",
+  "runtime_cpp_changes": [
+    "benchmarks/reconstructed_fault/bp3_native/server/plugin/output.cc",
+    "benchmarks/reconstructed_fault/bp3_native/coupled_checks.cc",
+    "source/simulator/checkpoint_restart.cc"
+  ],
+  "checkpoint_format_and_storage_unchanged": true,
+  "physical_laws_defaults_tolerances_unchanged": true,
+  "original_archive_preserved": true,
+  "server_job_launched": false,
+  "full_geometry_mechanical_run_launched": false,
+  "server_startup_status": "prepared, unexecuted",
+  "first_event_status": "unqualified experiment",
+  "local_cells": 4136,
+  "native_solution_DoFs": 149538,
+  "independent_DG_history_DoFs": 111672,
+  "fixed_diagnostic_particles": 66176,
+  "nonroot_only_wall_request": true,
+  "collective_stop_all_ranks": true,
+  "ordinary_outputs_not_due": true,
+  "terminal_diagnostics_and_checkpoint": true,
+  "once_only_publication": true,
+  "accepted_timestep_sequence_identical": true,
+  "comparisons": {
+    "wall-resume": {
+      "max_persistent_difference": 0.0,
+      "stress_difference": 0.0,
+      "particle_and_bulk_audit_byte_identical": true
+    },
+    "scheduled-resume": {
+      "max_persistent_difference": 0.0,
+      "stress_difference": 0.0,
+      "particle_and_bulk_audit_byte_identical": true
+    }
+  },
+  "scheduled_output_restart_retained": true,
+  "strict_reference_match_passed": false
+}

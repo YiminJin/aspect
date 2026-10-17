@@ -1,0 +1,161 @@
+{
+  "operator_and_publication_checks_passed": true,
+  "strict_reference_match_passed": false,
+  "strict_reference_target": 1e-06,
+  "strict_reference_targets": {
+    "whole_stress": false,
+    "localized_stress": false,
+    "phase_L2": false,
+    "phase_Linf": false,
+    "q": true,
+    "slip": true,
+    "energy": true,
+    "driving": false
+  },
+  "gate_count": 372,
+  "core_sha256": "7c76461c54b07f705683d4e4b572043ad1f70c6377cb1de018d3e458d699445f",
+  "observer_sha256": "c39e5eb7d68cc0c1baecca76474ecf24a8b1bd62c62644a2185d219d0339286e",
+  "native_seconds": 879.915280180001,
+  "maximum_RSS_KiB": 587856,
+  "publication": {
+    "samples": 663552,
+    "accepted_publications": 72,
+    "maximum_error_Pa": 1.238308056873764e-09,
+    "maximum_allowance_Pa": 8.764780817300857e-05,
+    "maximum_error_over_bound": 0.0004657915661392865,
+    "old_allowance_full_tensor_failures": 3275
+  },
+  "native_reference_maximum": {
+    "whole_stress": 1.499173665541632e-06,
+    "localized_stress": 3.652740600152377e-06,
+    "phase_L2": 0.00011527520202700741,
+    "phase_Linf": 5.9085114797297056e-05,
+    "q": 7.916865563124697e-10,
+    "slip": 6.847331728422027e-10,
+    "energy": 1.5748650682558648e-10,
+    "driving": 0.00023833147203112777
+  },
+  "independent_checks": {
+    "source_recurrence_Pa": 6.01630745222792e-10,
+    "source_recurrence_scaled": 3.976920794067055e-13,
+    "same_field_energy_scaled": 1.2880456070250443e-15,
+    "same_field_shear_weak_load_scaled": 3.540836122982598e-14,
+    "same_field_cohesive_weak_load_scaled": 5.425982516812539e-16,
+    "Z_recurrence_Pa_m": 1.000444171950221e-11,
+    "mechanical_bulk": 7.430346905825053e-06,
+    "mechanical_fault": 992.1878051676462,
+    "fault_KKT_Pa": 2.1696781112185986e-11,
+    "KKT": 1.4466616272967858e-11,
+    "healing": 0.0,
+    "shear_weak_load_Pa_m": 2.3665734261157922e-08,
+    "cohesive_weak_load_Pa_m": 2.366505924555895e-08
+  },
+  "quadrature": {
+    "1": {
+      "energy": 14.580157792720685,
+      "energy_error": 0.0,
+      "gradient_error": 3.569367024169878e-14,
+      "normalization_error": 1.5695535207901343e-15,
+      "physical_stress_error": 6.821476517119934e-16,
+      "localization_error": 2.7642970188109737e-15,
+      "quadrature_energy_error": 0.0,
+      "quadrature_load_error": 1.5432100042289676e-14,
+      "independent_quadrature_uncertainty": 1.965094753586527e-14,
+      "high_rule_KKT": 0.0,
+      "native_source_recurrence_error": 3.9769207940671144e-13,
+      "cohesive_recurrence_error_Pa_m": 0.0,
+      "native_weak_load_error": {
+        "shear": 1.2212453270876722e-15,
+        "normal": 7.457856554537955e-15,
+        "cohesive": 1.2037062152420224e-34,
+        "friction": 5.684341886080802e-17
+      },
+      "mechanical": {
+        "bulk_norm": 1.8752546729711153e-07,
+        "surface_rms": 992.1878051676462
+      },
+      "assessment_seconds": 2.418623318997561
+    },
+    "68": {
+      "energy": 20.996352174370063,
+      "energy_error": 0.0,
+      "gradient_error": 1.6153745008296028e-13,
+      "normalization_error": 1.0212695946677537e-15,
+      "physical_stress_error": 4.1884938687751754e-13,
+      "localization_error": 2.2410254945358197e-15,
+      "quadrature_energy_error": 1.692062339827413e-16,
+      "quadrature_load_error": 3.032443431861486e-14,
+      "independent_quadrature_uncertainty": 2.963130439133166e-14,
+      "high_rule_KKT": 3.619882171790323e-13,
+      "native_source_recurrence_error": 2.1121606305273723e-15,
+      "cohesive_recurrence_error_Pa_m": 3.410605131648481e-12,
+      "native_weak_load_error": {
+        "shear": 1.0968781099246848e-13,
+        "normal": 1.4915713109076125e-14,
+        "cohesive": 1.0925958222439505e-15,
+        "friction": 5.684341886080802e-17
+      },
+      "mechanical": {
+        "bulk_norm": 1.269136109455036e-09,
+        "surface_rms": 7.664020872726776e-12
+      },
+      "assessment_seconds": 2.376109467000788
+    },
+    "72": {
+      "energy": 22.21828528220331,
+      "energy_error": 0.0,
+      "gradient_error": 4.068412273738886e-13,
+      "normalization_error": 1.56028144002885e-15,
+      "physical_stress_error": 9.079451769187063e-13,
+      "localization_error": 3.3467267955786126e-15,
+      "quadrature_energy_error": 0.0,
+      "quadrature_load_error": 4.9464425123358253e-14,
+      "independent_quadrature_uncertainty": 6.344350178865656e-14,
+      "high_rule_KKT": 9.410785518915166e-12,
+      "native_source_recurrence_error": 1.9220623715285847e-15,
+      "cohesive_recurrence_error_Pa_m": 5.4569682106375694e-12,
+      "native_weak_load_error": {
+        "shear": 2.005459844675643e-13,
+        "normal": 1.800799509510394e-14,
+        "cohesive": 1.4808908094550817e-15,
+        "friction": 5.684341886080802e-17
+      },
+      "mechanical": {
+        "bulk_norm": 1.3178910469916684e-09,
+        "surface_rms": 5.52122893875452e-12
+      },
+      "ledger": {
+        "storage_change": 0.2945988980862424,
+        "external_remainder": -2.7233187105846213e-05,
+        "identity_remainder": 6.2276572787567375e-15,
+        "boundary_work": 1.4233158173790244,
+        "free_mechanical_work": 0.041712964550862916,
+        "pressure_work": 1.7571037792998137e-25,
+        "bulk_viscous": 0.00012682691970965007,
+        "cohesive_viscous": 0.0008261697765679255,
+        "friction": 1.1277366894093985,
+        "contact_residual_work": -0.016571857384342473,
+        "phase_work": -0.025168340353632516,
+        "absolute_free_mechanical_work": 0.041712964550862916,
+        "absolute_contact_work": 0.016571857384342473,
+        "absolute_phase_work": 0.025168340353632516
+      },
+      "ledger_time_quadrature_uncertainty": 1.5834555888716295e-14,
+      "assessment_seconds": 11.061887600000773
+    }
+  },
+  "batch_point_comparison": {
+    "steps": [
+      0.0,
+      1.0,
+      68.0,
+      72.0
+    ],
+    "maximum_error_Pa": 1.1524528889697587e-09,
+    "maximum_scaled_error": 6.355616238430223e-13,
+    "batch_seconds": 0.703693635,
+    "point_verification_seconds": 4.875150769000018,
+    "points_per_snapshot": 147456
+  },
+  "scope": "serial fixed 2x512, fixed reference surface, no advection; original equations/defaults/limiter settings"
+}

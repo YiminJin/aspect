@@ -1,0 +1,30 @@
+{
+  "build-particle-free/mature-pilot/surface-full-final/run": {
+    "nodes": 1446,
+    "native_GP_mu_independent_Linf": 2.220446049250313e-16,
+    "nodal_fraction_Linf": 2.4424906541753444e-15,
+    "nodal_theta_independent_relative_Linf": 1.0436096431476471e-14,
+    "fraction_interpolation_Linf": 2.6645352591003757e-15,
+    "theta_GP_relative_Linf": 0.0010605670361767405,
+    "nodal_prestress_balance_Linf_Pa": 1.862645149230957e-08,
+    "GP_prestress_balance_Linf_Pa": 795.0037742257118,
+    "min_a": 0.01,
+    "max_a": 0.025,
+    "min_I_h_m": 5519.687344777675,
+    "max_I_h_m": 9368.347227279897
+  },
+  "build-particle-free/mature-pilot/surface-full-intended/run": {
+    "nodes": 5776,
+    "native_GP_mu_independent_Linf": 2.220446049250313e-16,
+    "nodal_fraction_Linf": 2.4424906541753444e-15,
+    "nodal_theta_independent_relative_Linf": 1.1546319456101628e-14,
+    "fraction_interpolation_Linf": 3.774758283725532e-15,
+    "theta_GP_relative_Linf": 6.627445843654378e-05,
+    "nodal_prestress_balance_Linf_Pa": 1.862645149230957e-08,
+    "GP_prestress_balance_Linf_Pa": 49.7041967920959,
+    "min_a": 0.01,
+    "max_a": 0.025,
+    "min_I_h_m": 5425.290377340208,
+    "max_I_h_m": 12176.463265275479
+  }
+}

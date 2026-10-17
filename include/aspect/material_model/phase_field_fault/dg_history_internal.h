@@ -6,6 +6,7 @@
 #include <deal.II/dofs/dof_tools.h>
 #include <deal.II/fe/fe_dgq.h>
 #include <deal.II/lac/sparse_matrix.h>
+#include <set>
 
 namespace aspect
 {
@@ -35,6 +36,14 @@ namespace aspect
       std::shared_ptr<Space> space;
       // In 2D these are xx, yy, xy in Pa. zz=-(xx+yy), never zero.
       std::array<LinearAlgebra::Vector,SymmetricTensor<2,dim>::n_independent_components> trial_stress;
+      /** Scratch forward-error bounds for the native source in a trial only.
+       * Not constitutive uncertainty, persistent history, or a limiter. */
+      struct SourceRoundoff
+      {
+        SymmetricTensor<2,dim> projection;
+        Tensor<2,dim> gradient_scale;
+      };
+      std::map<CellId,SourceRoundoff> source_roundoff;
     };
 
 
@@ -68,11 +77,18 @@ namespace aspect
      * Neighbor polynomials are extrapolated to every target support point. */
     template <int dim> struct PhaseFieldFault<dim>::DGLimiter
     {
-      enum class Detector { fu_shu, kxrcf, force, scaling };
+      enum class Detector
+      {
+        fu_shu, kxrcf, force, scaling
+      };
       struct Candidate
       {
         std::vector<types::global_dof_index> indices;
         FullMatrix<double> extrapolate;
+        // Neighbor-basis averages on every cell in the compact patch and
+        // precomputed KKT corrections, indexed by the useful-neighbor mask.
+        std::vector<Vector<double>> patch_means;
+        std::vector<FullMatrix<double>> constrained_corrections;
       };
       struct FacePoint
       {
@@ -98,6 +114,8 @@ namespace aspect
       std::vector<double> quadrature_weights;
       Detector detector=Detector::fu_shu;
       double threshold=.1;
+      // Diagnostic Q2 adaptation of constrained neighbor-cell fitting.
+      bool constrained_candidates=false;
       // Diagnostic scalar envelope for the selected proportional tensor pulse.
       // No production stress bound: scalar = <A,reference>_3/|reference|_3^2.
       SymmetricTensor<2,dim> scaling_reference;
@@ -111,6 +129,9 @@ namespace aspect
         double mean=0.,polynomial=0.,kxrcf=0.,mean_error=0.;
         bool limited=false;
         std::vector<double> weights,beta;
+        std::vector<unsigned int> useful_masks;
+        std::vector<std::vector<SymmetricTensor<2,dim>>> candidate_values;
+        SymmetricTensor<2,dim> physical_mean_before,physical_mean_after;
         double theta=1.;
       };
       struct NormChange
@@ -119,6 +140,8 @@ namespace aspect
         unsigned int positive_cells=0,negative_cells=0;
         unsigned int means_outside_envelope=0;
         double maximum_mean_excess=0.;
+        double maximum_physical_mean_change=0.;
+        SymmetricTensor<2,dim> integral_mean_change;
       };
       std::vector<Indicator> last;
       unsigned long long visits=0,limited=0,mean_flagged=0,safeguard_only=0;
@@ -128,6 +151,12 @@ namespace aspect
       double norm_measurement_seconds=0.;
       std::vector<NormChange> norm_changes;
       DGComponents first_incoming,first_outgoing;
+      bool measure_physical_means=false;
+      std::set<unsigned int> trace_cells;
+      // Called after all cells are reconstructed, so neighbor flux changes
+      // use the complete separate output rather than partially written data.
+      std::function<void(const DGComponents &,const DGComponents &,double,
+                         const std::vector<Indicator> &)> stage_observer;
     };
   }
 }

@@ -1,0 +1,13 @@
+{
+  "stage": "After frozen 32/64 diagnostics, before 128-cell native runs",
+  "passed": true,
+  "stress_errors": [
+    783.6527578432671,
+    200.261459688016
+  ],
+  "native_1D_max_Pa": 6.657458584413689e-07,
+  "decision": "Use only n128 as new normal level; then four real native endpoint steps from identical imported t=.53125 physical entry through .5625, with one n128 half-dt control.",
+  "reason": "Mechanics, rather than field evaluation/history backend/fracture, generates the measured projection remainder; normal refinement reduces stress error near factor four and phase-gradient bias near factor sixteen.",
+  "half_step_divisor": 256,
+  "step_divisor": 128
+}

@@ -1,0 +1,29 @@
+{
+  "particles": 144,
+  "fixed_global_ids_coordinates": true,
+  "generations": [
+    [
+      7,
+      7
+    ],
+    [
+      7,
+      7
+    ],
+    [
+      7,
+      7
+    ],
+    [
+      7,
+      7
+    ]
+  ],
+  "changed_or_missing_old_slot_owners": 81,
+  "zero_slots": 20,
+  "out_of_old_storage": 7,
+  "domains_rebuilt": false,
+  "independent_cartesian_Voronoi_volume_error": null,
+  "total_volume": null,
+  "domain_check_passed": false
+}

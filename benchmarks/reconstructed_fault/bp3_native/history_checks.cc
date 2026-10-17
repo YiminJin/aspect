@@ -2,6 +2,8 @@
 #include <aspect/simulator.h>
 #include <aspect/postprocess/interface.h>
 #include <aspect/material_model/phase_field_fault.h>
+#include <aspect/material_model/phase_field_fault/dg_history_internal.h>
+#include <aspect/reconstructed_fault/surface_system.h>
 #include <aspect/geometry_model/box.h>
 #include <aspect/phase_field.h>
 #include <aspect/utilities.h>
@@ -189,6 +191,13 @@ namespace aspect
           const auto [G,eta]=F::fe_material_coefficients(model);
           const double lambda=eta/G;
           unsigned int path_step=0;
+          auto fe_reference=std::make_shared<typename Model::FEStrainState>(*model.fe_strain_state);
+          std::ofstream paired;
+          if (model.uses_dg_trial_stress_history())
+            {
+              paired.open(this->get_output_directory()+"paired-history-"+std::to_string(mode)+".csv");
+              paired<<std::setprecision(17)<<"step,dt_over_lambda,stress_error_Pa,stress_scale_Pa,weak_error,weak_scale,source_roundoff_bound_Pa\n";
+            }
           for (const double ratio:
           {
             1.e-12,1.e-6,.1,1.,4.,.25
@@ -197,16 +206,60 @@ namespace aspect
             sim.timestep_number=++path_step;
             sim.time_step=ratio*lambda;
             const bool relax=path_step==6;
+            // Alternate the independent normal components within a path, and
+            // vary the spatial slip forcing. This develops non-proportional
+            // tensor history instead of merely rescaling one fixed tensor.
+            velocity.mode=(mode+path_step)%2;
+            VectorTools::interpolate(this->get_mapping(),this->get_dof_handler(),velocity,prescribed,
+                                     this->introspection().component_masks.velocities);
+            owned=prescribed;hanging.distribute(owned);prescribed=owned;
+            prescribed.block(phase_block)=this->get_solution().block(phase_block);
             if (relax) prescribed.block(this->introspection().block_indices.velocities)=0.;
             for (unsigned int j=0; j<rates.size(); ++j)
               // The terminal relaxation control retains the RSF admissible
               // minimum rate; exact zero is outside the existing aging law.
               rates[j]=relax ? model.get_fault_friction().get_minimum_slip_rate()
-                       : 1.e-9*(1.+.35*std::sin(2.3*j/(rates.size()-1)));
+                       : 1.e-9*(1.+.35*std::sin(2.3*j/(rates.size()-1)+.2*path_step));
             const auto incoming_Z=F::fe_slip_memory(model);
             const BV incoming(model.accepted_fe_strain_state());
+            const auto incoming_dg=model.uses_dg_trial_stress_history() ? model.dg_history_values() : std::vector<double>();
             const auto coefficients=F::maxwell_coefficients(eta,G,sim.time_step);
             const auto candidate=F::prepared_fe_state(model,prescribed);
+            std::shared_ptr<typename Model::FEStrainUpdate> fe_candidate;
+            double paired_error=0.,paired_scale=1.,weak_error=0.,weak_scale=1.,source_bound=0.;
+            if (model.uses_dg_trial_stress_history())
+              {
+                const auto saved=model.fe_strain_state;
+                ReconstructedFaultSurfaceSystem<dim> probe(sim);
+                probe.enable_bulk_work_measure();
+                const ReconstructedFaultVector trial_rates{rates};
+                const auto dg_weak=probe.evaluate_surface_residual(prescribed,trial_rates);
+                model.dg_trial_stress_history=false;
+                model.fe_strain_history=true;
+                model.fe_strain_state=fe_reference;
+                try
+                  {
+                    fe_candidate=F::prepared_fe_state(model,prescribed);
+                    const auto fe_weak=probe.evaluate_surface_residual(prescribed,trial_rates);
+                    const auto compare=[&](const auto &a,const auto &b)
+                    {
+                      for (unsigned int j=0;j<a.at(0).size();++j)
+                        {
+                          weak_error=std::max(weak_error,std::abs(a[0][j]-b[0][j]));
+                          weak_scale=std::max(weak_scale,std::abs(b[0][j]));
+                        }
+                    };
+                    compare(dg_weak.shear_traction,fe_weak.shear_traction);
+                    compare(dg_weak.normal_traction,fe_weak.normal_traction);
+                    compare(dg_weak.values,fe_weak.values);
+                  }
+                catch (...)
+                  {
+                    model.fe_strain_state=saved;model.dg_trial_stress_history=true;model.fe_strain_history=false;
+                    throw;
+                  }
+                model.fe_strain_state=saved;model.dg_trial_stress_history=true;model.fe_strain_history=false;
+              }
             // A rejected candidate is entirely scratch. Retry the original
             // rates and prove that both accepted histories remained immutable.
             const double first_rate=rates.front();
@@ -222,6 +275,7 @@ namespace aspect
               }
             rates.front()=first_rate;
             AssertThrow(invalid_rejected && model.accepted_fe_strain_state()==incoming
+                        && (!model.uses_dg_trial_stress_history() || model.dg_history_values()==incoming_dg)
                         && F::fe_slip_memory(model)==incoming_Z,ExcMessage("Rejected FE candidate changed accepted history."));
             double error=0.,allowance=0.,error_fraction=0.,trace_error=0.,trace_signal=0.,max_trace=0.;
             double slip_work=0.,bulk_form=0.;
@@ -265,11 +319,26 @@ namespace aspect
                                       *(Utilities::Tensors::consistent_deviator(strain[q])-chiV*S);
                   double scale=0.;
                   const auto actual=F::prepared_fe_stress(model,candidate,cell->id(),x,&scale);
+                  if (fe_candidate)
+                    {
+                      const auto reference=model.evaluate_fe_strain_stress(fe_candidate->displacement_history,
+                        fe_candidate->Z,fe_candidate->I,cell->id(),x);
+                      const auto difference=actual-reference;
+                      paired_error=std::max(paired_error,std::sqrt(difference*difference+trace(difference)*trace(difference)));
+                      paired_scale=std::max(paired_scale,std::sqrt(reference*reference+trace(reference)*trace(reference)));
+                      source_bound=std::max(source_bound,model.dg_source_publication_allowance(*candidate->dg_history,cell->id(),x));
+                    }
+                  // DG projection/differentiation has an operand-derived
+                  // allowance separate from history point evaluation, exactly
+                  // as in the retained native publication check.
+                  const double bound=128*std::numeric_limits<double>::epsilon()*std::max(1.,scale)
+                    +(model.uses_dg_trial_stress_history()
+                      ? model.dg_source_publication_allowance(*candidate->dg_history,cell->id(),x) : 0.);
                   error=std::max(error,(actual-expected).norm());
-                  allowance=std::max(allowance,128*std::numeric_limits<double>::epsilon()*std::max(1.,scale));
+                  allowance=std::max(allowance,bound);
                   error_fraction=std::max(error_fraction,(actual-expected).norm()
-                                          /(128*std::numeric_limits<double>::epsilon()*std::max(1.,scale)));
-                  if ((actual-expected).norm()>128*std::numeric_limits<double>::epsilon()*std::max(1.,scale))
+                                          /bound);
+                  if ((actual-expected).norm()>bound)
                     {
                       std::ostringstream detail;
                       detail<<std::setprecision(17)<<"Recurrence mismatch: mode="<<mode
@@ -280,7 +349,7 @@ namespace aspect
                             <<" phi="<<phase[q]<<" chiV="<<chiV<<" S="<<S;
                       this->get_pcout()<<detail.str()<<std::endl;
                     }
-                  AssertThrow((actual-expected).norm()<=128*std::numeric_limits<double>::epsilon()*std::max(1.,scale),
+                  AssertThrow((actual-expected).norm()<=bound,
                               ExcMessage("Mature FE recurrence differs from direct Maxwell evaluation."));
                   const auto full=coefficients.first*old+2*coefficients.second*(strain[q]-chiV*S);
                   const auto difference=actual-full;
@@ -288,7 +357,7 @@ namespace aspect
                   trace_error=std::max(trace_error,(difference-predicted).norm());
                   trace_signal=std::max(trace_signal,predicted.norm());
                   max_trace=std::max(max_trace,std::abs(trace(strain[q])));
-                  AssertThrow((difference-predicted).norm()<=2*128*std::numeric_limits<double>::epsilon()*std::max(1.,scale),
+                  AssertThrow((difference-predicted).norm()<=2*bound,
                               ExcMessage("Tensor convention difference is not the derived trace term."));
                   if (weights)
                     {
@@ -326,8 +395,18 @@ namespace aspect
                   &this->get_triangulation(),cell->level(),cell->index(),&this->get_dof_handler());
                 check(dof_cell, {particle.get_location()},nullptr);
               }
-            AssertThrow(model.accepted_fe_strain_state()==incoming && F::fe_slip_memory(model)==incoming_Z,
+            AssertThrow(model.accepted_fe_strain_state()==incoming && F::fe_slip_memory(model)==incoming_Z
+                        && (!model.uses_dg_trial_stress_history() || model.dg_history_values()==incoming_dg),
                         ExcMessage("Preparing FE trials advanced accepted history."));
+            if (fe_candidate)
+              {
+                AssertThrow(paired_error<=1.e-10*paired_scale && weak_error<=1.e-10*weak_scale,
+                            ExcMessage("Matched DG/FE mature stress or weak coupling differs."));
+                paired<<path_step<<','<<ratio<<','<<paired_error<<','<<paired_scale<<','<<weak_error<<','<<weak_scale<<','<<source_bound<<std::endl;
+                fe_reference->displacement_history=fe_candidate->displacement_history;
+                fe_reference->Z=fe_candidate->Z;fe_reference->I=fe_candidate->I;
+                fe_reference->stress_samples.clear();
+              }
             model.commit_reconstructed_fault_mechanical_history(prescribed);
             double memory_error=0.,memory_scale=1.;
             for (unsigned int j=0; j<rates.size(); ++j)
@@ -371,6 +450,30 @@ namespace aspect
           auto &sim=const_cast<Simulator<dim>&>(this->get_simulator());
           model.prepare_reconstructed_fault_mechanical_solve();
           const auto I=F::current_normalization_integrals(model).at(0);
+          // Export the actual native physical initialization prescription,
+          // separately from its oblique Q1 mesh representation.
+          const auto prescribed_profiles=this->get_phase_field_handler().get_phase_field_profiles(.6);
+          const auto &physical=*prescribed_profiles.at(0);
+          std::vector<double> fractions(prescribed_profiles.size(),0.);fractions[0]=1.;
+          std::ofstream physical_profile(this->get_output_directory()+"prescribed-profile.csv");
+          physical_profile<<std::setprecision(17)<<"r_m,phi,g,h\n";
+          for (const double r:physical.get_coordinate_values())
+            {
+              const double phi=physical.value(r),g=this->get_phase_field_handler().energetic_degradation(fractions,phi);
+              physical_profile<<r<<','<<phi<<','<<g<<','<<(1/g-1)<<'\n';
+            }
+          double physical_I=0.;
+          const QGauss<1> physical_rule(32);
+          const auto &radii=physical.get_coordinate_values();
+          for (unsigned int i=1;i<radii.size();++i)
+            for (unsigned int q=0;q<physical_rule.size();++q)
+              {
+                const double r=radii[i-1]+(radii[i]-radii[i-1])*physical_rule.point(q)[0];
+                const double g=this->get_phase_field_handler().energetic_degradation(fractions,physical.value(r));
+                physical_I+=2*(radii[i]-radii[i-1])*physical_rule.weight(q)*(1/g-1);
+              }
+          std::ofstream physical_normalization(this->get_output_directory()+"prescribed-normalization.csv");
+          physical_normalization<<std::setprecision(17)<<"I_m,support_m,core\n"<<physical_I<<','<<radii.back()<<','<<physical.value(0.)<<'\n';
           double outside16=0.,outside32=0.;
           const auto I16=independent_normalization(model,16,outside16);
           const auto I32=independent_normalization(model,32,outside32);

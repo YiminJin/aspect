@@ -1755,6 +1755,12 @@ namespace aspect
   void
   Simulator<dim>::refine_mesh (const unsigned int max_grid_level)
   {
+    const auto *dg_model=dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(material_model.get());
+    const bool transfer_older=dg_model && dg_model->uses_dg_trial_stress_history() && dg_model->has_fe_strain_history();
+    const bool native_dg_transfer=transfer_older && dg_model->uses_consistent_endpoint_phase();
+    AssertThrow(!transfer_older || !pending_dg_endpoint_publication,
+                ExcMessage("DG transfer rejects an unpublished endpoint."));
+
 
 #if !DEAL_II_VERSION_GTE(9,7,0)
     parallel::distributed::SolutionTransfer<dim,LinearAlgebra::BlockVector>
@@ -1829,6 +1835,7 @@ namespace aspect
       // to new mesh:
       std::vector<const LinearAlgebra::BlockVector *> x_system
         = { &solution, &old_solution };
+      if (transfer_older)x_system.push_back(&old_old_solution);
 
       if (parameters.mesh_deformation_enabled)
         x_system.push_back(&mesh_deformation->mesh_velocity);
@@ -1851,8 +1858,15 @@ namespace aspect
         }
 
 
-      // Possibly store data of plugins associated with cells
-      signals.pre_refinement_store_user_data(triangulation);
+      // Keep the legacy hook order. For accepted DG, first finalize smoothing
+      // flags: a canceled isolated tag must not leave a prepared history owner
+      // or particle transfer attached to an unchanged mesh.
+      if (!native_dg_transfer)
+        {
+          if (auto *fault=dynamic_cast<MaterialModel::PhaseFieldFault<dim> *>(material_model.get()))
+            fault->prepare_dg_history_transfer();
+          signals.pre_refinement_store_user_data(triangulation);
+        }
 
       exchange_refinement_flags();
 
@@ -1876,6 +1890,15 @@ namespace aspect
           return;
         }
 
+      if (native_dg_transfer)
+        {
+          // This precheck is still before particle/userdata preparation and
+          // mesh mutation, including rejection of a nonrepresentable obstacle.
+          Plugins::get_plugin_as_type<MaterialModel::PhaseFieldFault<dim>>(*material_model)
+          .prepare_dg_history_transfer();
+          signals.pre_refinement_store_user_data(triangulation);
+        }
+
       system_trans.prepare_for_coarsening_and_refinement(x_system);
 
       if (parameters.mesh_deformation_enabled)
@@ -1895,15 +1918,18 @@ namespace aspect
 
       LinearAlgebra::BlockVector distributed_system;
       LinearAlgebra::BlockVector old_distributed_system;
+      LinearAlgebra::BlockVector older_distributed_system;
       LinearAlgebra::BlockVector distributed_mesh_velocity;
 
       distributed_system.reinit(introspection.index_sets.system_partitioning, mpi_communicator);
       old_distributed_system.reinit(introspection.index_sets.system_partitioning, mpi_communicator);
+      if (transfer_older)older_distributed_system.reinit(introspection.index_sets.system_partitioning, mpi_communicator);
       if (parameters.mesh_deformation_enabled)
         distributed_mesh_velocity.reinit(introspection.index_sets.system_partitioning, mpi_communicator);
 
       std::vector<LinearAlgebra::BlockVector *> system_tmp
         = { &distributed_system, &old_distributed_system};
+      if (transfer_older)system_tmp.push_back(&older_distributed_system);
 
       if (parameters.mesh_deformation_enabled)
         system_tmp.push_back(&distributed_mesh_velocity);
@@ -1929,6 +1955,11 @@ namespace aspect
 
       constraints.distribute (old_distributed_system);
       old_solution = old_distributed_system;
+      if (transfer_older)
+        {
+          constraints.distribute(older_distributed_system);
+          old_old_solution=older_distributed_system;
+        }
 
       // We need the current linearization point at the start of the new time step
       // when we set the boundary conditions for advected fields (to determine parts
@@ -1973,6 +2004,14 @@ namespace aspect
 
       // Possibly load data of plugins associated with cells
       signals.post_refinement_load_user_data(triangulation);
+      if (auto *fault=dynamic_cast<MaterialModel::PhaseFieldFault<dim> *>(material_model.get()))
+        {
+          // Endpoint active constraints still carry the old DoF numbering.
+          // Rebuild them before constructing accepted history on the new mesh.
+          if (fault->uses_dg_trial_stress_history() && fault->has_fe_strain_history())
+            compute_current_constraints();
+          fault->finish_dg_history_transfer();
+        }
 
       // calculate global volume after refining mesh
       global_volume = GridTools::volume (triangulation, *mapping);
@@ -1987,12 +2026,14 @@ namespace aspect
   void
   Simulator<dim>::solve_timestep ()
   {
-    // The restricted endpoint option publishes only at complete convergence.
+    // Restricted accepted histories publish only after complete outer acceptance.
     // Restore outer-step scratch/bookkeeping too if an exception escapes after
     // advection or predictor setup. Legacy failure policies are unchanged.
     const auto *endpoint_model=parameters.reconstruct_faults
       ? dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(material_model.get()) : nullptr;
-    const bool endpoint_step=endpoint_model && endpoint_model->uses_consistent_endpoint_phase() && timestep_number>0;
+    const bool endpoint_step=endpoint_model && timestep_number>0
+      && (endpoint_model->uses_consistent_endpoint_phase()
+          || (endpoint_model->is_mature_frictional_fault() && endpoint_model->uses_dg_trial_stress_history()));
     std::unique_ptr<LinearAlgebra::BlockVector> entry_solution,entry_linearization;
     std::unique_ptr<TableHandler> entry_statistics;
     const double entry_pressure=last_pressure_normalization_adjustment;
@@ -2003,6 +2044,7 @@ namespace aspect
         entry_linearization=std::make_unique<LinearAlgebra::BlockVector>(current_linearization_point);
         entry_statistics=std::make_unique<TableHandler>(statistics);
       }
+    AssertThrow(!pending_dg_endpoint_publication,ExcMessage("Unresolved DG endpoint at step entry."));
     try
       {
     // start any scheme with an extrapolated value from the previous
@@ -2195,6 +2237,7 @@ namespace aspect
       {
         if(endpoint_step)
           {
+            pending_dg_endpoint_publication={};
             solution=*entry_solution;current_linearization_point=*entry_linearization;
             statistics=*entry_statistics;
             last_pressure_normalization_adjustment=entry_pressure;
@@ -2204,6 +2247,27 @@ namespace aspect
             model.prepare_reconstructed_fault_mechanical_solve();
           }
         throw;
+      }
+    if (pending_dg_endpoint_publication)
+      {
+        AssertThrow(endpoint_step,ExcInternalError());
+        auto candidate=std::move(pending_dg_endpoint_publication);
+        pending_dg_endpoint_publication=[this,candidate,bulk=*entry_solution,
+          linear=*entry_linearization,stats=*entry_statistics,entry_pressure,entry_iteration](const bool accept)
+        {
+          auto restore_entry=[&]()
+            {
+              solution=bulk;current_linearization_point=linear;statistics=stats;
+              last_pressure_normalization_adjustment=entry_pressure;
+              nonlinear_iteration=entry_iteration;
+              rebuild_stokes_matrix=rebuild_stokes_preconditioner=true;
+              auto &model=Plugins::get_plugin_as_type<MaterialModel::PhaseFieldFault<dim>>(*material_model);
+              model.prepare_reconstructed_fault_mechanical_solve();
+            };
+          if(!accept){restore_entry();return;}
+          try {candidate(true);}
+          catch(...){restore_entry();throw;}
+        };
       }
   }
 
@@ -2309,6 +2373,18 @@ namespace aspect
     // Start the principal loop over time steps. At this point, everything
     // is completely initialized, so set that status as well
     simulator_is_past_initialization = true;
+    if (parameters.resume_computation)
+      if (const auto *fault=dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(material_model.get()))
+        if (fault->uses_dg_trial_stress_history() && fault->uses_consistent_endpoint_phase()
+            && time_stepping_manager.should_simulation_terminate_now())
+          {
+            // A completed native endpoint checkpoint stores the next-step
+            // clock. Respect the existing termination manager before the
+            // do-while loop; a restore-only control must not advance once more.
+            pcout << "Restored accepted DG endpoint already satisfies termination criteria; no physical advancement." << std::endl;
+            computing_timer.print_summary();
+            return;
+          }
     do
       {
         // During pre-refinement, do not solve if we are asked to skip it:
@@ -2351,6 +2427,17 @@ namespace aspect
         time_stepping_manager.update();
 
         const double new_time_step_size = time_stepping_manager.get_next_time_step_size();
+
+        // Accepted DG histories defer publication beyond the actual outer rejection
+        // decision. Rejected endpoints never become the next history anchor.
+        if (pending_dg_endpoint_publication)
+          {
+            AssertThrow(!time_stepping_manager.should_refine_mesh(),ExcMessage("PF6a cannot transfer a pending endpoint."));
+            auto publish=std::move(pending_dg_endpoint_publication);
+            pending_dg_endpoint_publication={};
+            publish(!time_stepping_manager.should_repeat_time_step());
+          }
+
 
         // if we postprocess nonlinear iterations, this function is called within
         // solve_timestep () in the individual solver schemes

@@ -24,6 +24,8 @@
 #include <deal.II/fe/fe_q.h>
 
 #include <boost/functional/hash.hpp>
+#include <iomanip>
+#include <sstream>
 
 #ifdef ASPECT_WITH_VORO
 #include <voro++.hh>
@@ -1744,7 +1746,39 @@ namespace aspect
                 point[d] = (point[d]-voro_origin[d]) / voro_length;
               return point;
             };
-            const Point<dim> voro_lower = to_voro(corner1), voro_upper = to_voro(corner2);
+            const Point<dim> voro_lower = to_voro(corner1);
+            Point<dim> voro_upper = to_voro(corner2);
+            unsigned int padded_axes=0;
+            if constexpr (dim==2)
+              if (!periodic)
+                {
+                  // The neighbor patch is closed, whereas Voro's bin locator
+                  // excludes its upper bound. Include boundary candidates by
+                  // moving only an artificial container wall, never a particle
+                  // or a physical-box wall. Four rounded operations locate a
+                  // bin. gamma_8 also covers constructing its outward endpoint;
+                  // the operand norm bounds subtraction/reciprocal arithmetic.
+                  Point<dim> largest;
+                  for (unsigned int d=0;d<dim;++d)largest[d]=-std::numeric_limits<double>::max();
+                  for (const auto &neighbor:neighbor_cells)
+                    for (const auto &particle:particle_handler->particles_in_cell(neighbor))
+                      {
+                        const auto x=to_voro(particle.get_location());
+                        for (unsigned int d=0;d<dim;++d)largest[d]=std::max(largest[d],x[d]);
+                      }
+                  const long double u=std::numeric_limits<double>::epsilon()/2.;
+                  const long double gamma=8*u/(1-8*u);
+                  for (unsigned int d=0;d<dim;++d)
+                    {
+                      const long double a=voro_lower[d],b=voro_upper[d];
+                      const long double pad=gamma*(std::abs(a)+std::abs(b)+std::abs(b-a));
+                      if (corner2[d]<bounding_box.get_boundary_points().second[d] && b-largest[d]<=pad)
+                        {
+                          voro_upper[d]=std::nextafter(static_cast<double>(b+pad),std::numeric_limits<double>::infinity());
+                          ++padded_axes;
+                        }
+                    }
+                }
 
             voro::container container(voro_lower[0],                                // ax
                                       voro_upper[0],                                // bx
@@ -1781,6 +1815,11 @@ namespace aspect
                 }
             for (const auto &image : image_cells) neighbor_cells.insert(image.first);
 
+            if constexpr (dim==2)
+              if (!periodic)
+                AssertThrow(container.total_particles()==static_cast<int>(n_particles),
+                            ExcMessage("Voro container did not retain every closed-patch candidate; CellId="+cell->id().to_string()));
+
             // Collect the local indices of the particles in the current cell
             std::set<types::particle_index> particle_indices;
             for (const auto &particle : particle_handler->particles_in_cell(cell))
@@ -1813,11 +1852,28 @@ namespace aspect
                 voro_cell.face_vertices(voro_face_vertices);
                 voro_cell.neighbors(voro_neighbors);
 
-                voronoi_cell.reinit(particle_index, 
-                                    voro_vertices,
-                                    voro_face_vertices,
-                                    voro_neighbors,
-                                    bounding_box);
+                try
+                  {
+                    voronoi_cell.reinit(particle_index,
+                                        voro_vertices,
+                                        voro_face_vertices,
+                                        voro_neighbors,
+                                        bounding_box);
+                  }
+                catch (const std::exception &exception)
+                  {
+                    std::ostringstream context;
+                    context << std::setprecision(17)
+                            << "Particle-domain local index " << particle_index
+                            << ", CellId " << cell->id().to_string()
+                            << ", neighborhood box [" << corner1 << "] to [" << corner2 << "]"
+                            << ", candidates " << n_particles << ", inserted " << container.total_particles()
+                            << ", padded axes " << padded_axes;
+                    for (const auto &particle:particle_handler->particles_in_cell(cell))
+                      if (particle.get_local_index()==particle_index)
+                        context << ", particle ID " << particle.get_id() << ", position [" << particle.get_location() << "]";
+                    AssertThrow(false,ExcMessage(context.str()+"\n"+exception.what()));
+                  }
 
                 if constexpr (dim==2)
                   volumes[particle_index]=internal::compute_voronoi_cell(

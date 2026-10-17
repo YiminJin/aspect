@@ -448,9 +448,21 @@ namespace aspect
         {
           const double elapsed
               = std::chrono::duration<double> (std::chrono::steady_clock::now () - wall_start).count ();
-          BP3Benchmark::long_run_stop = this->get_time () >= this->get_parameters ().end_time
-                                        || this->get_timestep_number () >= last_requested_step
-                                        || elapsed >= wall_seconds || (stop_after_event && event.complete);
+          bool wall_requested = elapsed >= wall_seconds;
+#ifdef ASPECT_BP3_TEST_NONROOT_WALL_STOP
+          // Regression binary only: no sleep, environment switch or production
+          // parameter. At a positive accepted step only rank 1 requests a stop.
+          wall_requested |= this->get_timestep_number () == 2
+                            && Utilities::MPI::this_mpi_process (this->get_mpi_communicator ()) == 1;
+#endif
+          const bool other_requested = this->get_time () >= this->get_parameters ().end_time
+                                       || this->get_timestep_number () >= last_requested_step
+                                       || (stop_after_event && event.complete);
+          // A process-local wall clock must never gate collective writers.
+          // Reduce the COMPLETE request before any dependent output decision;
+          // native writers, diagnostic observers and termination share it.
+          BP3Benchmark::long_run_stop = Utilities::MPI::max (
+              static_cast<unsigned int> (wall_requested || other_requested), this->get_mpi_communicator ());
           const bool milestone_now = (!started_before && event.started)
                                      || (event.below == 1 && previous_below == 0)
                                      || (!previous_complete && event.complete);
@@ -458,6 +470,25 @@ namespace aspect
           const double increment
               = Utilities::MPI::max (heavy.increment (slip), this->get_mpi_communicator ());
           heavy_pending |= increment >= heavy.slip_interval;
+          heavy_pending = Utilities::MPI::max (static_cast<unsigned int> (heavy_pending),
+                                               this->get_mpi_communicator ());
+          const bool profile_pending = Utilities::MPI::max (
+              static_cast<unsigned int> (heavy_pending || profiles.due (
+                  this->get_time (), slip, milestone_now || BP3Benchmark::long_run_stop)),
+              this->get_mpi_communicator ());
+#ifdef ASPECT_BP3_TEST_NONROOT_WALL_STOP
+          const auto rank = Utilities::MPI::this_mpi_process (this->get_mpi_communicator ());
+          std::ofstream trace (this->get_output_directory () + "wall-stop-rank-" + std::to_string (rank) + ".csv",
+                               std::ios::app);
+          if (trace.tellp () == 0)
+            trace << "step,wall_request,other_request,collective_stop,ordinary_heavy,ordinary_profile,heavy,profile\n";
+          trace << last_step << ',' << wall_requested << ',' << other_requested << ','
+                << BP3Benchmark::long_run_stop << ',' << heavy.due (this->get_time (), slip, false) << ','
+                << profiles.due (this->get_time (), slip, false) << ',' << heavy_pending << ',' << profile_pending << '\n';
+          trace.close ();
+          AssertThrow (Utilities::MPI::min (static_cast<unsigned int> (bool (trace)), this->get_mpi_communicator ()),
+                       ExcMessage ("Cannot write collective wall-stop regression trace."));
+#endif
           auto &mutable_manager = this->get_reconstructed_fault_manager ();
           const auto slip_position = mutable_manager
                                          .get_property_information ()[mutable_manager.get_property_index (
@@ -465,8 +496,7 @@ namespace aspect
                                          .position;
           for (unsigned int j = 0; j < n; ++j)
             mutable_manager.get_fault (0).get_properties (j)[slip_position] = slip[j];
-          if (heavy_pending
-              || profiles.due (this->get_time (), slip, milestone_now || BP3Benchmark::long_run_stop))
+          if (profile_pending)
             write_long_profile (V, qfield, normal_field, state);
           if (BP3Benchmark::long_run_stop)
             this->get_pcout () << "BP3 LONG RUN GRACEFUL STOP at accepted step " << last_step

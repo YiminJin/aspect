@@ -55,6 +55,8 @@ namespace aspect
       public PhaseFieldModel<dim>,
       public SimulatorAccess<dim>
     {
+      private:
+        struct DGHistory;
       public:
         /**
          * @name Material-model interface
@@ -223,6 +225,19 @@ namespace aspect
         std::function<SymmetricTensor<2,dim>(const CellId &, const Point<dim> &)>
         benchmark_retained_stress;
 
+        /** Default-off fresh serial frozen-mature benchmark input. The caller
+         * owns an immutable physical Q1 reference and its exterior lattice.
+         * Refining mechanics must not resample the phase prescription. The
+         * normalizer still verifies every physical phase DoF and boundary trace;
+         * its integrand, projection and derivatives are unchanged. Not serialized.
+         */
+        struct BenchmarkPhaseReference
+        {
+          std::function<double(const Point<dim> &)> value;
+          Tensor<1,dim> exterior_spacing;
+        };
+        std::shared_ptr<const BenchmarkPhaseReference> benchmark_phase_reference;
+
         double minimum_fault_slip_rate() const;
 
         /** Read-only configured law for constitutively consistent initialization. */
@@ -300,6 +315,12 @@ namespace aspect
         {
           return consistent_endpoint_phase;
         }
+        /** Fixed homogeneous DG experiment: mesh/fault geometry and configured
+         * materials replace CPDI setup/projection. Particles are check points. */
+        bool uses_homogeneous_mesh_data() const
+        {
+          return homogeneous_mesh_data;
+        }
         bool initialize_fe_shared_phase(LinearAlgebra::BlockVector &) const;
 
         /** Same quadrature in bulk energy, Stokes and the slip adjoint. */
@@ -330,6 +351,7 @@ namespace aspect
         struct FEEndpointTrial
         {
           LinearAlgebra::BlockVector strain;
+          std::shared_ptr<DGHistory> dg_history;
           std::vector<double> Z;
           double friction_potential = 0.;
         };
@@ -364,6 +386,10 @@ namespace aspect
         /** Restricted PF5 checkpoint routing. Default/legacy archives add no data. */
         template <class Archive> void serialize_dg_accepted_history(Archive &);
         void restore_dg_accepted_history();
+        /** Accepted-state-only, uniform fixed-reference Cartesian transfers.
+         * Automatic AMR remains guarded; no physical history update occurs. */
+        void prepare_dg_history_transfer();
+        void finish_dg_history_transfer();
 
       private:
         friend class internal::PhaseFieldFaultTestAccess<dim>;
@@ -371,9 +397,9 @@ namespace aspect
 
         struct FEStrainState;
         struct FEStrainUpdate;
-        struct DGHistory;
         struct DGTransport;
         struct DGCheckpoint;
+        struct DGTransfer;
         struct DGLimiter;
         struct DGLimiterStats;
         struct FENormalization;
@@ -383,30 +409,35 @@ namespace aspect
         bool dg_trial_stress_history = false;
         bool dg_accepted_history = false;
         std::shared_ptr<DGCheckpoint> dg_checkpoint;
+        std::shared_ptr<DGTransfer> dg_transfer;
         bool consistent_particle_strain = false;
         bool consistent_endpoint_phase = false;
         std::string fe_initial_phase_profile;
         unsigned int fe_bulk_normal_quadrature_points = 3;
-        void prepare_fe_strain_history(bool restoring = false);
+        void prepare_fe_strain_history(bool restoring = false, bool transferring = false);
         /** DGQ2 trial stress has its own space and accepted coefficients.
          * The existing FE state supplies only fixed phase/geometry and Z/I. */
         void initialize_dg_history(FEStrainState &) const;
         std::shared_ptr<DGHistory> make_dg_history_trial(
           const LinearAlgebra::BlockVector &, const MaxwellCoefficients &) const;
         std::shared_ptr<DGHistory> make_dg_history_trial(
-          const DGHistory &,const LinearAlgebra::BlockVector &,const MaxwellCoefficients &) const;
+          const DGHistory &,const LinearAlgebra::BlockVector &,const MaxwellCoefficients &,
+          bool estimate_source_roundoff = false) const;
         /** Prescribed PF5 Strang candidate; closed boundaries and uniform V/Z. */
         std::shared_ptr<FEStrainUpdate> prepare_dg_accepted_step(
           const DGTransport &,const LinearAlgebra::BlockVector &,double time) const;
         void commit_dg_accepted_step(const std::shared_ptr<FEStrainUpdate> &);
         /** Independent tensor values, before any phase/localization correction. */
         std::vector<SymmetricTensor<2,dim>> evaluate_dg_trial_tensor(
-          const DGHistory &, const CellId &, const Quadrature<dim> &) const;
+                                           const DGHistory &, const CellId &, const Quadrature<dim> &) const;
         SymmetricTensor<2,dim> evaluate_dg_history_stress(
           const DGHistory &, const std::vector<double> &, const std::vector<double> &,
           const CellId &, const Point<dim> &, double *evaluation_scale = nullptr,
           const LinearAlgebra::BlockVector *phase_trial = nullptr) const;
         std::vector<double> dg_history_values() const;
+        /** Forward error from native Q2 differentiation and DG source projection. */
+        double dg_source_publication_allowance(const DGHistory &,const CellId &,const Point<dim> &) const;
+        static void validate_fe_strain_publication(double error,double bound);
         /** Restricted PF4 noncommitting operators. Native fixed Q2 velocity,
          * upwind material advection and explicit prescribed source/inflow.
          * Relaxation, when selected, uses the existing G/eta. No spin. */
@@ -423,7 +454,8 @@ namespace aspect
           const DGLimiter *limiter = nullptr,DGLimiterStats *statistics = nullptr) const;
         /** Optional scratch-only PF4 comparison. No runtime/default selector. */
         std::shared_ptr<DGLimiter> make_dg_limiter(
-          const DGTransport &,const LinearAlgebra::BlockVector &) const;
+          const DGTransport &,const LinearAlgebra::BlockVector &,
+          bool constrained_candidates = false) const;
         void limit_dg_transport(const DGLimiter &,const DGComponents &,DGComponents &,
                                 const DGField &,double,DGLimiterStats &) const;
         /** Build fixed normal rays and their consistent surface projection once. */
@@ -447,7 +479,8 @@ namespace aspect
                                                   bool, bool,
                                                   const LinearAlgebra::BlockVector &,
                                                   const std::vector<double> &,
-                                                  const std::vector<double> * = nullptr) const;
+                                                  const std::vector<double> * = nullptr,
+                                                  const DGHistory * = nullptr) const;
         void validate_fe_strain_restrictions() const;
         /** Exact noncommitting recurrence from the immutable accepted FE anchor. */
         void update_fe_strain_trial(const LinearAlgebra::BlockVector &,
@@ -527,7 +560,7 @@ namespace aspect
          * No particle transfer and no history writes occur here.
          */
         std::vector<std::vector<double>> compute_surface_cohesive_candidates(
-          const double time_step, const std::vector<std::vector<double>> &rates) const;
+                                        const double time_step, const std::vector<std::vector<double>> &rates) const;
 
         /** Surface mixture and cohesive-profile values shared by surface and bulk points. */
         struct LocalizationResponse
@@ -816,6 +849,7 @@ namespace aspect
         bool surface_cohesive_history = false;
         bool cohesive_work_measure = false;
         bool unloaded_cohesive_initialization = false;
+        bool homogeneous_mesh_data = false;
 
         MaterialUtilities::CompositionalAveragingOperation viscosity_averaging;
 

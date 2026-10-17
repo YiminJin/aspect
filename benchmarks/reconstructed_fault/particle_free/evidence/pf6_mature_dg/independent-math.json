@@ -1,0 +1,10 @@
+{
+  "mass_Gauss3_vs_Gauss8_max": 6.661338147750939e-16,
+  "complete_Q2_reproduction_max": 6.661338147750939e-16,
+  "number_of_Q2_modes": 9,
+  "mature_recurrence_70_digit_error": "1E-69",
+  "convention": "xx,yy,zz=-(xx+yy),xy; full tensor norm counts xy twice",
+  "cohesive_resistance": 0,
+  "cohesive_storage": 0,
+  "auxiliary_Z_is_nonzero": true
+}

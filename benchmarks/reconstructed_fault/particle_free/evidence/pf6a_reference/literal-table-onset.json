@@ -1,0 +1,36 @@
+{
+  "physical_seed": "unchanged supplied piecewise-linear table",
+  "rows": [
+    {
+      "n": 256,
+      "unloaded_KKT": 0.0,
+      "max_phase_growth": 0.05438845406366777,
+      "growth_at_1_step": 0.0,
+      "growth_at_half_time": 0.0,
+      "onset": 0.53125,
+      "onset_y": 0.5
+    },
+    {
+      "n": 512,
+      "unloaded_KKT": 0.0,
+      "max_phase_growth": 0.05439905872598738,
+      "growth_at_1_step": 0.0,
+      "growth_at_half_time": 0.0,
+      "onset": 0.53125,
+      "onset_y": 0.5
+    },
+    {
+      "n": 1024,
+      "unloaded_KKT": 0.0007840643969604711,
+      "max_phase_growth": 0.054425066300736846,
+      "growth_at_1_step": 7.840643969604725e-06,
+      "growth_at_half_time": 2.425023562357964e-05,
+      "onset": 0.4453125,
+      "onset_y": 0.4990234375
+    }
+  ],
+  "onset_target_step_seconds": 0.0078125,
+  "selected_vs_reference_onset_difference": 0.0859375,
+  "onset_target_pass": false,
+  "all_practical_targets_pass": false
+}

@@ -27,6 +27,12 @@ namespace aspect
                 && timestep_number>0,
                 ExcMessage("Endpoint minimization requires initialized accepted FE history."));
     const unsigned int b=introspection.variable("phase_field").block_index;
+    const auto phase_offset=solution.get_block_indices().block_start(b);
+    unsigned int hanging_phase=0;
+    for(const auto &line:constraints.get_lines())
+      if(line.index>=phase_offset && line.index<phase_offset+solution.block(b).size() && !line.entries.empty())hanging_phase=1;
+    AssertThrow(Utilities::MPI::max(hanging_phase,mpi_communicator)==0,
+                ExcMessage("The bounded local DG remap does not admit coupled hanging-node phase evolution; constrained variations and obstacle KKT remain unqualified."));
     const LinearAlgebra::BlockVector saved_solution(solution),saved_linearization(current_linearization_point);
     const double saved_pressure_adjustment=last_pressure_normalization_adjustment;
     const LinearAlgebra::BlockVector anchor(material.accepted_fe_strain_state());
@@ -654,16 +660,43 @@ namespace aspect
               if(!errors[rank].empty())
                 {pcout<<"   Coordinated endpoint prepublication failure: rank="<<rank<<std::endl;
                  throw std::runtime_error(errors[rank]);}
-            manager.begin_slip_rate_nonlinear_solve();
-            try
+            if(material.uses_dg_trial_stress_history())
               {
-                manager.begin_slip_rate_trial();manager.set_slip_rate_trial_values(base.slip);manager.accept_slip_rate_trial();
-                manager.validate_slip_rate_nonlinear_commit();
-                material.commit_reconstructed_fault_mechanical_history(solution);
-                manager.commit_slip_rate_nonlinear_solve();
+                AssertThrow(!pending_dg_endpoint_publication,ExcMessage("A DG endpoint is already pending."));
+                pending_dg_endpoint_publication=[this,slip=base.slip,bulk=base.bulk,step=timestep_number,
+                                               endpoint_time=time,dt=time_step](const bool accept)
+                {
+                  if(!accept)return;
+                  AssertThrow(timestep_number==step && time==endpoint_time && time_step==dt
+                              && solution==bulk,ExcMessage("Stale PF6a endpoint publication context."));
+                  auto &model=Plugins::get_plugin_as_type<MaterialModel::PhaseFieldFault<dim>>(*material_model);
+                  auto &surface=*reconstructed_fault_manager;
+                  model.prepare_reconstructed_fault_mechanical_solve();
+                  surface.begin_slip_rate_nonlinear_solve();
+                  try
+                    {
+                      surface.begin_slip_rate_trial();surface.set_slip_rate_trial_values(slip);surface.accept_slip_rate_trial();
+                      surface.validate_slip_rate_nonlinear_commit();
+                      model.commit_reconstructed_fault_mechanical_history(bulk);
+                      surface.commit_slip_rate_nonlinear_solve();
+                    }
+                  catch (...){surface.rollback_slip_rate_nonlinear_solve();throw;}
+                };
+                pcout<<"   DG endpoint staged for the outer timestep decision."<<std::endl;
               }
-            catch (...){manager.rollback_slip_rate_nonlinear_solve();throw;}
-            pcout<<"   Endpoint complete state committed once; mechanical trials="<<mechanical_trials<<std::endl;
+            else
+              {
+                manager.begin_slip_rate_nonlinear_solve();
+                try
+                  {
+                    manager.begin_slip_rate_trial();manager.set_slip_rate_trial_values(base.slip);manager.accept_slip_rate_trial();
+                    manager.validate_slip_rate_nonlinear_commit();
+                    material.commit_reconstructed_fault_mechanical_history(solution);
+                    manager.commit_slip_rate_nonlinear_solve();
+                  }
+                catch (...){manager.rollback_slip_rate_nonlinear_solve();throw;}
+                pcout<<"   Endpoint complete state committed once; mechanical trials="<<mechanical_trials<<std::endl;
+              }
           }
         else pcout<<"   Endpoint fixed-entry diagnostic converged; no history published."<<std::endl;
         pcout<<"   Endpoint cost: mechanical seconds="<<mechanical_seconds
@@ -676,6 +709,7 @@ namespace aspect
       }
     catch (...)
       {
+        pending_dg_endpoint_publication={};
         solution=saved_solution;current_linearization_point=saved_linearization;
         last_pressure_normalization_adjustment=saved_pressure_adjustment;
         material.prepare_reconstructed_fault_mechanical_solve();

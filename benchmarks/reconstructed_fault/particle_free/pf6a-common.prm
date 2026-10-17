@@ -1,0 +1,50 @@
+# PF6a: actual native consistent-endpoint loop, no history advection.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_free/fixed_profile_dg.prm
+set End time = 0.5625
+set Maximum time step = 0.03125
+set Maximum first time step = 0.03125
+set Maximum relative increase in time step = 0
+set Surface pressure = 10000
+subsection Geometry model
+ subsection Box
+  set X repetitions = 1
+  set Y repetitions = 16
+ end
+end
+subsection Mesh refinement
+ set Initial global refinement = 1
+end
+subsection Fault reconstruction
+ set Structural point spacing = 0.125
+end
+subsection Material model
+ subsection Phase field fault
+  set Evolve phase field = true
+  set Enable prescribed DG accepted history = true
+  set Consistent endpoint phase solve = true
+  set FE initial phase profile file = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_free/pf6a-initial-phase.txt
+  set FE bulk normal quadrature points = 6
+ end
+end
+subsection Boundary velocity model
+ set Prescribed velocity boundary indicators = left y:function, right y:function, bottom:function, top:function
+ subsection Function
+  set Function expression = 0.256*max(0,t-0.015625)*(y-0.5); 0
+ end
+end
+subsection Solver parameters
+ subsection Phase field solver parameters
+  set Adaptive endpoint linear accuracy = true
+  set Endpoint translation preconditioner = true
+ end
+end
+subsection Time stepping
+ set List of model names = function
+ subsection Function
+  set Variable names = time
+  set Function expression = 0.03125
+ end
+end
+subsection Postprocess
+ set List of postprocessors = particles, PF6a cohesive endpoint
+end

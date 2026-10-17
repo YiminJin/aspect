@@ -476,7 +476,7 @@ namespace aspect
     PhaseFieldFault<dim>::compute_surface_cohesive_candidates(
       const double time_step, const std::vector<std::vector<double>> &rates) const
     {
-      AssertThrow(surface_cohesive_history || (fe_strain_history && mature_frictional_fault),
+      AssertThrow(surface_cohesive_history || (uses_independent_bulk_history() && mature_frictional_fault),
                   ExcMessage("Surface history or mature FE history is not selected."));
       const auto &faults = this->get_reconstructed_fault_manager().get_faults();
       AssertDimension(rates.size(), faults.size());
@@ -560,6 +560,8 @@ namespace aspect
     compute_creep_viscosity(const std::vector<double> &volume_fractions,
                             const double               temperature) const
     {
+      if (homogeneous_mesh_data)
+        return reference_viscosities[0];
       const unsigned int n_compositions = volume_fractions.size();
 
       const double dT_over_Tref =

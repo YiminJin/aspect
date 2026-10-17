@@ -25,6 +25,7 @@
 #include <aspect/reconstructed_fault/utilities.h>
 #include <aspect/geometry_model/box.h>
 #include <aspect/plugins.h>
+#include <aspect/initial_composition/interface.h>
 
 #include <boost/math/tools/roots.hpp>
 
@@ -1478,6 +1479,30 @@ namespace aspect
 
       ReconstructedFaultManager<dim> &fault_manager =
         this->get_reconstructed_fault_manager();
+
+      if (homogeneous_mesh_data)
+        {
+          // Bulk G/eta/profile coefficients are homogeneous, but mature RSF
+          // parameters may vary along the fixed surface. Sample the configured
+          // physical initial composition directly, once during initialization.
+          // Later steps/restarts retain the manager-owned, checkpointed values.
+          // No particle support or projection enters this branch.
+          if (!mature_frictional_fault || (this->get_timestep_number()==0
+                                          && !this->get_parameters().resume_computation))
+            for (unsigned int f = 0; f < fault_manager.get_faults().size(); ++f)
+              for (unsigned int v = 0; v < fault_manager.get_fault(f).n_vertices(); ++v)
+                for (unsigned int c=0;c<fault_property_indices.chemical_compositions.size();++c)
+                  {
+                    const double value=mature_frictional_fault
+                      ? this->get_initial_composition_manager().initial_composition(
+                          fault_manager.get_fault(f).vertex(v),chemical_field_indices[c]) : 0.;
+                    AssertThrow(std::isfinite(value) && value>=0. && value<=1.,
+                                ExcMessage("Inadmissible prescribed surface material fraction."));
+                    const auto property=fault_property_indices.chemical_compositions[c];
+                    fault_manager.get_fault(f).get_properties(v)[fault_manager.get_property_information()[property].position]=value;
+                  }
+          return;
+        }
 
       std::vector<typename ReconstructedFaultManager<dim>::ParticlePropertyProjection>
       projections;

@@ -1,0 +1,9 @@
+{
+  "G12_gate_passed": true,
+  "local_transfer_stage_authorized_by_conditional_user_instruction": true,
+  "physical_screens": {
+    "energy_and_load": 1e-09,
+    "normalization": 1e-11
+  },
+  "scope": "Frozen accepted local remaps, hanging-node evaluation and native restart; no coupled phase evolution on local meshes"
+}

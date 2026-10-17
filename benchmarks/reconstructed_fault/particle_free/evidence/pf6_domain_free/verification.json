@@ -1,0 +1,92 @@
+{
+  "revision": "a8707307008401ac9cff702a369e2e2a611fa0f7",
+  "branch": "pf-rsf-particle-free",
+  "selected_mode": "Use homogeneous mesh data=true; all domain flags=false; static bulk fields",
+  "native_cases": 17,
+  "native_successes": 10,
+  "expected_rejections": 7,
+  "legacy_FE_CSVs_byte_identical": 21,
+  "executable_sha256": "76289837b28b3523910ce9adbfd9e67afab7b4e30e71358f78970a24a6d8c8e1",
+  "observer_sha256": "7130520fd891123809b72006dc83fb82cf06d22228d30fe86647ac5d1c0af2f0",
+  "production_source_files_same_as_all_records": 857,
+  "domain_free_deep_remap_passed": true,
+  "domain_objects_present": 0,
+  "fixed_points": 144,
+  "native_gates_per_rank": {
+    "1": 100,
+    "2": 100,
+    "4": 100
+  },
+  "same_count_restart_exact": true,
+  "continued_restart_exact": true,
+  "cross_rank_persistent_physical_history_exact": true,
+  "cross_rank_weak_load_absolute_error": 1.7053025658242404e-13,
+  "changed_rank_RNG_replay_available": false,
+  "population_changes_enabled": false,
+  "legacy_CPDI_deep_support_passed": false,
+  "native_Gauss6_failure_retained": true,
+  "strict_reference_match_passed": false,
+  "production_defaults_limiter_and_laws_unchanged": true,
+  "normalization_derivatives_unchanged": true,
+  "publication_check_retained": true,
+  "representable_phase_coarsening_restriction_retained": true,
+  "scope": "homogeneous fixed-reference geometry, prescribed seed, no transport; 64-to-256-to-64; no automatic AMR or hanging phase evolution",
+  "git_diff_check_passed": true,
+  "preservation": {
+    "incoming_files": 6483,
+    "intentional_changed_existing_files": [
+      "benchmarks/reconstructed_fault/particle_free/README.md",
+      "benchmarks/reconstructed_fault/particle_free/pf6_transfer_checks.cc",
+      "doc/reconstructed_fault/current_design.md",
+      "doc/reconstructed_fault/particle_free/PF6_PARTICLE_READ_AUDIT.md",
+      "doc/reconstructed_fault/particle_free/SOURCE_AUDIT.md",
+      "doc/reconstructed_fault/particle_free/STATUS.md",
+      "doc/reconstructed_fault/specification.tex",
+      "include/aspect/material_model/phase_field_fault.h",
+      "include/aspect/reconstructed_fault/manager.h",
+      "source/material_model/phase_field_fault.cc",
+      "source/material_model/phase_field_fault/constitutive.cc",
+      "source/material_model/phase_field_fault/fe_strain.cc",
+      "source/material_model/phase_field_fault/history.cc",
+      "source/material_model/phase_field_fault/normalization.cc",
+      "source/particle/property/crack_driving_force.cc",
+      "source/particle/property/maxwell_stress.cc",
+      "source/reconstructed_fault/manager.cc",
+      "source/reconstructed_fault/manager_particle_projection.cc",
+      "source/simulator/phase_field.cc"
+    ],
+    "unchanged_incoming_files": 6464,
+    "prior_evidence_unchanged": 247,
+    "historical_payloads": {
+      "doc/reconstructed_fault/particle_free/STATUS.md": {
+        "sha256": "41f27ab387e97e6c98a5e873d1d259982f707821ad947c28ff1721075858a1fb",
+        "first_line": "# Gauss12 and bounded local-transfer qualification complete",
+        "retained_verbatim": true
+      },
+      "doc/reconstructed_fault/particle_free/SOURCE_AUDIT.md": {
+        "sha256": "8a136eb821634b54308f997cc67453fa17260b1844075be7e2801ccaa73391d5",
+        "first_line": "# Gauss12/local-transfer followup audit \u2014 16 October 2026",
+        "retained_verbatim": true
+      },
+      "doc/reconstructed_fault/particle_free/PF6_PARTICLE_READ_AUDIT.md": {
+        "sha256": "be3ec0286de03b23036980a608c42b113bc9c9a30e7d2ae4cccce0d82d39d9fe",
+        "first_line": "# Local-transfer particle-dependency update \u2014 16 October 2026",
+        "retained_verbatim": true
+      }
+    }
+  },
+  "portable_replay": {
+    "archive_members_verified": 1537,
+    "independent_replay_passed": true,
+    "legacy_FE_identical_CSVs": 21,
+    "domain_free_deep_remap_passed": true,
+    "original_CPDI_deep_failure_retained": true,
+    "native_Gauss6_failure_retained": true,
+    "strict_reference_match_passed": false,
+    "changed_rank_RNG_replay_available": false,
+    "native_jobs_launched": 0
+  },
+  "archive_sha256": "aad666529a70a6aba4d3aae9e3a6c203198e0bebcef58dc3532786313c229e8e",
+  "archive_bytes": 21488308,
+  "final_checks": "final-checks.json"
+}

@@ -1,0 +1,94 @@
+{
+  "source_files_per_case": 1031,
+  "same_core_and_plugins": true,
+  "same_native_sources": true,
+  "matched_controls": {
+    "dg-cc__particle-cc": {
+      "initial-mesh.csv": "byte identical",
+      "initial-phase.csv": "byte identical",
+      "mechanical-quadrature.csv": "byte identical",
+      "initial-particle-identity.csv": "byte identical"
+    },
+    "dg-fc-final__particle-fc": {
+      "initial-mesh.csv": "byte identical",
+      "initial-phase.csv": "byte identical",
+      "mechanical-quadrature.csv": "byte identical",
+      "initial-particle-identity.csv": "byte identical"
+    },
+    "dg-ff__particle-ff": {
+      "initial-mesh.csv": "byte identical",
+      "initial-phase.csv": "byte identical",
+      "mechanical-quadrature.csv": "byte identical",
+      "initial-particle-identity.csv": "byte identical"
+    }
+  },
+  "regressions": {
+    "dg-cc": {
+      "baseline": "dg-q6",
+      "byte_identical_field_files": 16
+    },
+    "dg-ff": {
+      "baseline": "dg-fine",
+      "byte_identical_field_files": 16
+    },
+    "particle_default_Gauss3": {
+      "0": {
+        "node": 0.0,
+        "s_m": 0.0,
+        "time_s": 0.0,
+        "V_m_s": 0.0,
+        "theta_s": 0.0,
+        "Omega": 0.0,
+        "slip_m": 0.0,
+        "shear_Pa": 0.0,
+        "raw_normal_Pa": 0.0,
+        "filtered_normal_Pa": 0.0,
+        "pressure_Pa": 0.0,
+        "deviatoric_Pa": 0.0,
+        "background_Pa": 0.0,
+        "I_h_m": 0.0,
+        "Z_Pa_m": 0.0
+      },
+      "1": {
+        "node": 0.0,
+        "s_m": 0.0,
+        "time_s": 0.0,
+        "V_m_s": 0.0,
+        "theta_s": 0.0,
+        "Omega": 0.0,
+        "slip_m": 0.0,
+        "shear_Pa": 0.0,
+        "raw_normal_Pa": 0.0,
+        "filtered_normal_Pa": 0.0,
+        "pressure_Pa": 0.0,
+        "deviatoric_Pa": 0.0,
+        "background_Pa": 0.0,
+        "I_h_m": 0.0,
+        "Z_Pa_m": 0.0
+      }
+    }
+  },
+  "unchanged_material_defaults": 34,
+  "missing_entry_files": [],
+  "changed_entry_files": [
+    "benchmarks/reconstructed_fault/particle_free/run_pf6_mature.py",
+    "benchmarks/reconstructed_fault/bp3_native/coupled_checks.cc",
+    "benchmarks/reconstructed_fault/bp3_native/server/plugin/CMakeLists.txt",
+    "benchmarks/reconstructed_fault/bp3_native/server/plugin/bp3.cc",
+    "benchmarks/reconstructed_fault/bp3_native/server/plugin/configuration.cc",
+    "benchmarks/reconstructed_fault/particle_free/README.md",
+    "doc/reconstructed_fault/current_design.md",
+    "doc/reconstructed_fault/particle_free/SOURCE_AUDIT.md",
+    "doc/reconstructed_fault/particle_free/STATUS.md",
+    "doc/reconstructed_fault/specification.tex",
+    "include/aspect/material_model/phase_field_fault.h",
+    "source/material_model/phase_field_fault.cc",
+    "source/material_model/phase_field_fault/boundary_completion.cc",
+    "source/material_model/phase_field_fault/fe_strain.cc"
+  ],
+  "total_native_attempts": 8,
+  "total_native_seconds": 743.682018725,
+  "prior_mature_archive_sha256": "eec5f1d5465026977aa4a08c7264f2e9e5695addb632b3b5327800b3558b3881",
+  "prior_domain_free_archive_sha256": "aad666529a70a6aba4d3aae9e3a6c203198e0bebcef58dc3532786313c229e8e",
+  "strict_reference_match_passed": false
+}

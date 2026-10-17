@@ -1,0 +1,79 @@
+{
+  "task_executed": true,
+  "publication_repair_verified": true,
+  "native_trajectory_completed": true,
+  "native_seconds": 879.915280180001,
+  "native_accepted_steps": 72,
+  "native_gates": 372,
+  "operator_and_publication_checks_passed": true,
+  "strict_reference_match_passed": false,
+  "strict_reference_target": 1e-06,
+  "strict_reference_targets": {
+    "whole_stress": false,
+    "localized_stress": false,
+    "phase_L2": false,
+    "phase_Linf": false,
+    "q": true,
+    "slip": true,
+    "energy": true,
+    "driving": false
+  },
+  "practical_reference_screens": {
+    "whole_stress": true,
+    "localized_stress": true,
+    "phase_L2": true,
+    "phase_Linf": true,
+    "q": true,
+    "slip": true,
+    "energy": true,
+    "driving": true
+  },
+  "original_failed_guard_preserved": true,
+  "failed_strict_comparison_preserved": true,
+  "capped_attempts_preserved": 2,
+  "independent_80_digit_replay_passed": true,
+  "focused_unit_assertions": 628,
+  "focused_unit_cases": 8,
+  "independent_PF1_checks": 94,
+  "frozen_compatibility_passed": true,
+  "PF4_operator_CSV_byte_matches": 23,
+  "production_defaults_and_physical_equations_unchanged": true,
+  "scope": "serial fixed grid/reference surface, no advection; strict phase branch equivalence remains open; no general PF5/AMR/MPI/propagation claim",
+  "preservation": {
+    "passed": true,
+    "incoming_files": 4480,
+    "changed": [
+      "source/material_model/phase_field_fault/history.cc",
+      "source/material_model/phase_field_fault/fe_strain.cc",
+      "source/material_model/phase_field_fault/dg_history.cc",
+      "include/aspect/material_model/phase_field_fault.h",
+      "include/aspect/material_model/phase_field_fault/dg_history_internal.h",
+      "benchmarks/reconstructed_fault/particle_free/run_pf6a_reference.py",
+      "benchmarks/reconstructed_fault/particle_free/pf6a_checks.cc",
+      "benchmarks/reconstructed_fault/particle_free/README.md",
+      "doc/reconstructed_fault/particle_free/PF6A_REFERENCE_REPORT.md",
+      "doc/reconstructed_fault/particle_free/SOURCE_AUDIT.md",
+      "doc/reconstructed_fault/particle_free/STATUS.md"
+    ],
+    "missing": [],
+    "original_status_audit_payloads_preserved": {
+      "doc/reconstructed_fault/particle_free/STATUS.md": true,
+      "doc/reconstructed_fault/particle_free/SOURCE_AUDIT.md": true
+    },
+    "unrelated_source_and_prior_evidence_unchanged": true,
+    "original_reference_report_payload_preserved": true
+  },
+  "archive_members": 3402,
+  "archive_bytes": 126150224,
+  "portable_replay_status": "passed",
+  "portable_replay": {
+    "evidence_replay_passed": true,
+    "strict_reference_match_passed": false,
+    "archive_hashes": true,
+    "independent_diagnosis": true,
+    "native_common_time_replay": true,
+    "native_runs_launched": 0
+  },
+  "final_head": "a8707307008401ac9cff702a369e2e2a611fa0f7",
+  "final_branch": "pf-rsf-particle-free"
+}

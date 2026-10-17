@@ -2049,6 +2049,37 @@ stepping, coupled publication, mesh/geometry transfer and restart remain guarded
 or unimplemented. The earlier transport prohibition is superseded only for
 this explicit noncommitting operator. Existing defaults and physical laws remain.
 
+\paragraph{Selected pre-PF7 constrained-candidate comparison.}
+A separate private diagnostic option replaces only the mean-shifted neighbor
+candidates in the bounded compact WENO experiment. For each genuine face
+neighbor $J$ of target $K$, minimize over all nine tensor-product Q2 coefficients
+\[
+ \langle|q-A_J|_3^2\rangle_J+
+ \rho\sum_{I\in\mathcal U_J}|\langle q\rangle_I-\mu_I|_3^2,
+ \qquad \langle q\rangle_K=\mu_K,
+ \qquad \rho=|J|/|\text{reference Box}|.
+\]
+Here $\mu_I$ is the unmodified own-cell mean. The useful set consists of other
+face neighbors with strictly smaller tensor mean discrepancy from $K$ than the
+farthest; roundoff ties are excluded. The center polynomial remains unchanged.
+This is a controlled Q2/tensor adaptation motivated by Zhu--Zhong--Shu--Qiu
+(2016), not a complete implementation of its polynomial spaces, detectors,
+smoothness or characteristic-system procedure. The full tensor metric gives a
+common spatial KKT system for every component; correction maps are precomputed
+for the fixed uniform geometry. No mixed Q2 modes are discarded.
+
+Retain both existing detectors and thresholds, unmodified-patch RMS amplitude,
+common tensor weights, epsilon, first/second derivative smoothness, quadrature,
+transport operator and SSPRK3 schedule. Detection precedes candidate fitting.
+Reads remain immutable and reconstruction writes a separate vector. Optional
+diagnostics compare physical cell means before/after limiting and inspect full
+candidate/beta/weight traces and subsequent native mean-flux changes only after
+the complete stage output exists. No accepted state is published. Unlimited
+remains the experimental baseline, and defaults/unsupported-path guards remain.
+See \texttt{particle\_free/WENO\_CLS\_FORMULATION.md} and
+\texttt{particle\_free/WENO\_CLS\_REPORT.md}. This bounded comparison does not
+select PF7, mesh transfer or coupled propagation.
+
 \paragraph{Selected PF5 prescribed accepted DG history and persistence.}
 The default-off \texttt{Enable prescribed DG accepted history} permits a bounded
 serial driver on the existing fixed Cartesian mesh and horizontal cohesive fault.
@@ -2102,6 +2133,130 @@ surface/phase transfers, outer coupled stepping and birth are not qualified.
 The observer drives accepted clocks explicitly; it is not a coupled integrator.
 Earlier prohibitions are superseded only for this selected experiment.
 See \texttt{particle\_free/PF5\_REPORT.md} for evidence and the next proposed task.
+
+\paragraph{Selected PF6a fixed-reference cohesive endpoint experiment.}
+The explicitly selected serial fixed-Cartesian-mesh, fixed straight reference
+surface experiment combines independent DGQ2 trial history with the retained
+consistent-endpoint/reduced-Newton design and the PF3 ordinary FE fracture
+functional. Bulk and surface advection are absent. Existing opt-in selectors
+choose this mode; production and limiter defaults remain unchanged.
+For every nonlinear trial, accepted $T_n,Z_n,p_n$ remain immutable and
+\[
+ T_e=\beta T_n+2\kappa D_3(\operatorname{symgrad}u_h),\qquad
+ Z_e=\beta Z_n+\kappa V_h,\qquad
+ \tau_e=T_e-2\chi(p_h)Z_e\mathcal S,\qquad q_e=Z_e/I_h(p_h).
+\]
+Here $\beta=e^{-G\Delta t/\eta}$ and
+$\kappa=-\eta\operatorname{expm1}(-G\Delta t/\eta)$; native Q2 strain fits
+exactly in this DGQ2 space. Preserve the full three-dimensional plane-strain
+metric and the established component-rate convention. The phase row is the
+partial derivative at fixed endpoint $T_e,Z_e$ of
+\[
+ E=\int_\Omega\frac{|\tau_e|_3^2}{4G}
+   +\int_\Gamma\frac{Z_e^2}{2G I_h(p_h)}+F_{\rm FE}(p_h).
+\]
+Mechanics is equilibrated at each phase trial. The reduced tangent includes
+$\delta T_e=2\kappa D_3(\operatorname{symgrad}\delta u_h)$,
+$\delta Z_e=\kappa\delta V_h$, both normalization pullbacks and the FE fracture
+Hessian. Retain the endpoint friction potential in the reduced line-search
+energy, physical $p_n\le p_h<1$, native active-set/KKT/stability acceptance and
+all existing constitutive/material conventions. No one-pass phase-first update
+is defined by this experiment.
+
+The simulator stages the complete endpoint until the actual outer timestep
+manager accepts. Only then do existing validated material/manager publishers
+commit it, once, before postprocessing. Rejection discards the staged endpoint
+and restores native trial bookkeeping; particle backup/restore remains native.
+The legacy FE endpoint path is unchanged. The selected version-2 DG checkpoint
+payload separates the accepted constitutive step from the native next-step clock
+because automatic checkpoints follow \texttt{advance\_time}. Require a canonical
+accepted solution, phase anchor and publication count. Restore native
+solution/old/older, manager, particle and RNG histories without advancing them.
+PF5 version-1 prescribed snapshots remain unchanged and mode conversion is
+forbidden. See \texttt{particle\_free/PF6A\_FORMULATION.md} and
+\texttt{particle\_free/PF6A\_REPORT.md}. Large remaining spatial sensitivity
+precludes spatial or propagation qualification; general PF5 transfer/MPI,
+transport coupling, moving geometry and fault birth remain subsequent tasks.
+
+\paragraph{Selected bounded stationary mature DG companion.}
+The default-off homogeneous mesh-data selection admits stationary mature DGQ2
+and fresh serial native-FE controls on a fixed two-dimensional graded Cartesian
+mesh with one straight oblique fault and fully prescribed frozen physical phase.
+The accepted-DG option also enables native mature outer acceptance, same-mode
+restart and distributed ownership, qualified on the bounded strengthening
+fixture with one, two and four ranks. Configured homogeneous bulk/profile
+coefficients, bulk-cell margins/native stationary-profile support, fixed
+prescribed geometry and directly prescribed positive nodal $\Theta$ replace
+particle-domain phase/material/state projections. Fresh mature surface chemical
+fractions evaluate the configured physical initial composition at fixed surface
+nodes; subsequent steps/restarts retain the manager-owned values. Thus native
+friction parameters can vary along the surface without particle material
+projection, even though bulk and degradation/profile coefficients are homogeneous. Every later phase
+callback must preserve the accepted physical phase exactly. Retain general
+oblique cell-interval normalization and paired boundary completion, including
+exterior Q1 contributions and constant endpoint source continuation.
+
+For fixed $\chi$ and geometry, independent DG history obeys
+\[
+ T^{n+1}=\beta T^n+2\kappa D_3(\operatorname{symgrad}u^{n+1}),\qquad
+ Z^{n+1}=\beta Z^n+\kappa V^{n+1},\qquad
+ \tau^{n+1}=T^{n+1}-2\chi Z^{n+1}\mathcal S.
+\]
+Here $Z=G s_{\rm mem}$ is auxiliary Maxwell/slip memory, not cohesive elastic
+storage; mature cohesive traction and cohesive resistance/storage remain zero.
+The native-FE companion below gives the same representation on matching fields.
+Retain all nine DGQ2 modes and Gauss3 native-source integration, separately from
+the shared selected bulk mechanical quadrature. No adaptive anisotropic rule
+is introduced. Preserve native rate/state and tensor conventions and validate
+both native evaluation paths before a single terminal publication. Fixed
+matching-cell particles remain independent validation/diagnostic points without
+accepted mechanical stress feedback. The mature commit owner now shares the
+existing outer accepted-history publication gate: a converged mechanical trial
+is nonpublishing until the timestep manager accepts it. Rejection/cutback leaves
+all DG coefficients, $Z/I$, physical phase, surface state/rates and diagnostic
+point properties unchanged; successful acceptance publishes exactly once.
+Timestep zero retains its separate native kinematic/initialization convention.
+The prescribed PF5 transport/split-commit API rejects mature mode.
+
+Checkpoint version 4 reuses the global uniquely owned CellId payload: physical
+corners/phase anchors and all 27 DG coefficients per cell, fixed geometry/material
+metadata, $Z/I$, accepted step/publication count and the separate native next-step
+clock. Preserve mature auxiliary $Z$ independently of exactly zero cohesive
+traction; the cohesive relation $Z=I_h\tau^{\rm coh}$ is inapplicable here.
+Native manager/particle/solution checkpoint ownership remains unchanged; versions
+1--3 retain their earlier modes. Frozen phase guards compare every uniquely owned
+physical DoF exactly and reduce the result, independent of owned/ghosted layouts.
+
+Reject conversion, mesh/geometry/population changes and mature transport. The
+explicit phase-reference diagnostic remains fresh and serial. Bounded results
+verify functional ownership/rejection/restart, not converged spatial accuracy or
+full-geometry weakening evolution. See
+\texttt{particle\_free/PF6\_MATURE\_DG\_REPORT.md} and
+\texttt{particle\_free/PF6\_MATURE\_PILOT\_REPORT.md}.
+Hanging-node phase evolution, automatic AMR and first-event runs are deferred.
+
+\paragraph{Bounded frozen mature resolution diagnostic.}
+A default-empty immutable benchmark reference supplies the physical coarse Q1
+phase and explicit exterior lattice spacing for fresh serial fixed-mesh mature
+mechanics. Fine vertices evaluate complete coarse polynomials, including hanging
+values; the native completion validator checks constrained physical data and the
+coarse exterior trace. Retain the native normalization integrand, consistent
+projection and derivatives; no $I_h$ or constitutive history is imported.
+Reject reference use on restart, AMR or MPI. An explicit existing bulk quadrature
+value above three also selects the shared mature tensor rule for particle
+controls; default three preserves the native particle rule. Retain unlimited
+DGQ2 and established physical equations/defaults.
+
+The native bulk-work mass $M$ depends on localization and bulk quadrature
+partition even when the surface is fixed. Compare $b-M\boldsymbol 1t_{\rm bg}$
+using each case's own $M$, report background-measure effects separately, and
+also evaluate the common diagnostic functional
+$M_{\rm geom}(M^{-1}b-\boldsymbol 1t_{\rm bg})$. Do not replace the solver's
+native measure. Separate mechanical and represented-profile effects and report
+particle--DG differences without treating either as an accuracy truth. The
+bounded measurements and unresolved temporal/spatial limitations are in
+\texttt{particle\_free/PF6\_MATURE\_RESOLUTION\_REPORT.md}; they do not select
+phase evolution, a limiter change or a first-event run.
 
 \paragraph{Selected stationary mature BP3 accepted FE history.}
 For one straight dipping fault in a fixed two-dimensional graded Box mesh,
@@ -3328,5 +3483,111 @@ production default.
 
 \section*{Reference}
 Y. Xu, T. You, and Q. Zhu, ``Reconstruct lower-dimensional crack paths from phase-field point cloud,'' \emph{International Journal for Numerical Methods in Engineering}, 124 (2023), 3329--3351, DOI: 10.1002/nme.7249.
+
+\subsection{Bounded fixed-reference independent-history transfers (2026-10-16)}
+
+The selected followup to the serial PF6a experiment admits the measured uniform
+Cartesian, fixed-surface 1/2/4-rank transfer fixture. It retains the complete
+DGQ2 independent tensor, the consistent-endpoint/reduced-Newton equations,
+physical phase irreversibility, existing limiter settings and production
+defaults. It does not enable automatic nonuniform AMR, moving geometry, birth,
+transport or propagation. The scope, branch rules and evidence are recorded in
+\texttt{particle\_free/PF6\_TRANSFER\_FORMULATION.md} and the companion report.
+
+At fixed physical time, transfer the three DG tensor components with deal.II's
+distributed solution transfer. Each scalar cell polynomial has nine coefficients,
+including the mixed biquadratic mode. Refine by polynomial restriction and
+coarsen by the cell $L^2$ projection. Measure its tensor, physical-stress, energy
+and weak-load defects; a norm loss under coarsening is a numerical representation
+change, not an added constitutive dissipation. Transfer the accepted Q1 physical
+phase and its next lower obstacle as the identical physical function. Reject
+native coarsening before mutation when the child nodal field is not representable
+by the parent Q1 interpolant. No lossy obstacle rule or phase cap is selected.
+The surface mesh, $Z$, accepted $I_h$, properties and committed rates remain
+fixed. Rebuild dependent bulk/association/quadrature caches and transfer all
+three native solution time levels. A pending physical endpoint prohibits remap;
+remap increments neither time nor physical publication count.
+
+For DG publication, use the particle's surrounding CellId for both the native
+FE velocity gradient and the DG value. A matching-face average of gradients is
+not this one-sided discrete source. Propagate local ownership/sampling errors
+collectively before any further collective evaluation or publisher. Preserve
+the independently checked Maxwell/DG guard and its operand-based arithmetic
+budget. Sum ordinary FE fracture contributions from uniquely owned cells into
+the replicated endpoint energy, gradient and Hessian; sum the arithmetic-scale
+norm over uniquely owned rows.
+
+The endpoint archive's version 3 stores complete tensor coefficients keyed by
+uniquely owned CellId, physical corners and Q1 phase values, surface histories,
+fixed metadata and both accepted/native clocks. It reuses native mesh, solution,
+surface, particle and RNG persistence. Existing serial version-1/2 readers remain;
+backend conversion is forbidden. Unregistered trajectory errors and the prior
+false strict-reference flag remain unchanged by this remapping qualification.
+
+Common high-order physical evaluation verifies exact remaps. The unchanged
+native six-point normal rule misses the declared $10^{-9}$ functional screen
+on the coarse evolved fixture (bulk energy $1.52\,10^{-8}$ J/m and weak load
+$5.90\,10^{-7}$ Pa m). This quadrature error is retained separately from transfer
+error; automatic coupled AMR is not qualified by the bounded checks.
+
+\subsection{Bounded Gauss12 and frozen local remaps (2026-10-16)}
+
+The selected fixed-surface followup checks physical Gauss12 against Gauss24/32
+at identical retained fields and on matched short trajectories. Analytic normal
+integration and consistent surface projection are measured separately. The old
+Gauss6 failure and strict-reference false flag remain unchanged. This is an
+experimental fixture input, not an adaptive rule or production-default change.
+
+The measured manual Cartesian $64\to67$-cell transfer retains all nine modes of
+each DG tensor component, physical Q1 phase/next obstacle, native time levels and
+fixed surface histories. Complete coarsening families must satisfy the retained
+parent-representability screen; no genuinely lossy obstacle transfer is selected.
+Finalize smoothing flags before preparing selected histories/particles, so a
+canceled tag leaves no pending transfer. Rebuild domains after ownership/ghost
+changes. Include all closed-patch Voro candidates through an operand-based outward
+artificial upper bound; preserve physical walls, particle coordinates and existing
+volume/coverage guards. Genuine sparse-neighborhood failure and arbitrary
+postmutation AMR recovery remain unqualified.
+
+Completed accepted-DG checkpoint restores consult the existing termination
+manager before entering another physical iteration. Larger-End-time continuation,
+same-count restart and deterministic serial-to-four fixed-population redistribution
+are separate checks. Changed-count native RNG replay is unavailable; population
+changes remain guarded by the existing replay-compatibility rule.
+
+Coupled hanging-node phase evolution is explicitly rejected. It requires a
+selected independent-master formulation $\phi=C\psi$, reduced gradient $C^Tg$,
+tangent $C^THC$, and physical obstacle/KKT acceptance, rather than treating slave
+coordinates independently. Frozen evaluation is not that qualification.
+See \texttt{particle\_free/PF6\_LOCAL\_REPORT.md}. Automatic AMR, adaptive
+quadrature, surface remeshing, transport, moving geometry and propagation remain
+subsequent work.
+
+\subsection{Homogeneous DG configuration without particle domains (2026-10-16)}
+
+The default-off homogeneous mesh-data selection requires accepted DG consistent
+endpoint history, prescribed physical phase seed, static bulk fields, homogeneous
+configured materials/EOS, fixed full-normal reference geometry and disabled
+particle domains/CPDI. Initialize the Q1 physical seed directly with unloaded
+$\bm T,Z$. Use configured background materials and direct surface background
+labels, without particle material projection. Bulk mesh/fixed fault geometry own
+support. Preserve the existing normal integration, consistent $I_h$ mass solve,
+all derivatives/adjoints, constitutive equations and physical acceptance rules.
+
+Temporary fixed diagnostic particles carry geometry-only fault associations,
+NaN domain volume and no quadrature; particle projection operators reject these
+associations. Retain the independent native FE/DG Maxwell publication check with
+matching CellId traces and the existing operand-derived allowance. No domain
+object is created, and its accessor would throw. Record the configuration in the
+existing property registry and reject checkpoint conversion between modes.
+
+The restored $64\to256\to64$ diagnostic, bounded 1/2/4-rank ownership/lifecycle,
+same-count and continued restart pass without adding particles or relaxing any
+coverage test. Legacy CPDI retains its domains, checks and deep coverage failure.
+See \texttt{particle\_free/PF6\_DOMAIN\_FREE\_REPORT.md}. Unlimited DG/default
+settings, old Gauss6 and strict-reference failures, representable-phase coarsening
+and the hanging-node phase-evolution guard remain. This does not qualify
+heterogeneous material transfer, automatic AMR, lossy obstacle transfer, transport,
+moving geometry or propagation.
 
 \end{document}

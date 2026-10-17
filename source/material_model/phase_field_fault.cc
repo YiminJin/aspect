@@ -76,10 +76,13 @@ namespace aspect
 
       for (unsigned int i = 0; i < in.n_evaluation_points(); ++i)
         {
-          const std::vector<double> volume_fractions =
-            MaterialUtilities::compute_only_composition_fractions(
-              in.composition[i],
-              this->introspection().chemical_composition_field_indices());
+          std::vector<double> volume_fractions(elastic_shear_moduli.size(), 0.0);
+          if (homogeneous_mesh_data)
+            volume_fractions[0] = 1.0;
+          else
+            volume_fractions = MaterialUtilities::compute_only_composition_fractions(
+                                 in.composition[i],
+                                 this->introspection().chemical_composition_field_indices());
 
           // Fill in the equation-of-state outputs
           equation_of_state.evaluate(in, i, eos_outputs);
@@ -108,8 +111,9 @@ namespace aspect
             {
               // The ordinary Stokes assembler uses eta_ve for the current strain
               // rate; the reconstructed-fault assembler supplies the frozen stress.
-              const double G = MaterialUtilities::average_value(
-                                 volume_fractions, elastic_shear_moduli, viscosity_averaging);
+              const double G = homogeneous_mesh_data ? elastic_shear_moduli[0]
+                               : MaterialUtilities::average_value(
+                                   volume_fractions, elastic_shear_moduli, viscosity_averaging);
               const double eta = compute_creep_viscosity(volume_fractions, in.temperature[i]);
               const double time_step = (this->get_timestep_number() > 0
                                         ? this->get_timestep()
@@ -435,8 +439,8 @@ namespace aspect
                             "The selection cannot change on restart.");
           prm.declare_entry("Enable prescribed DG accepted history", "false", Patterns::Bool(),
                             "Experimental PF5 accepted upwind DGQ2 history and same-mode serial fixed-mesh "
-                            "restart for a prescribed closed-boundary driver. No coupled stepping, phase "
-                            "evolution, surface transport, AMR or MPI. Default is false.");
+                            "restart for a prescribed closed-boundary driver or the separately selected "
+                            "consistent-endpoint DG phase experiment. No surface transport, AMR or MPI. Default is false.");
           prm.declare_entry("Bulk history representation", "particle stress",
                             Patterns::Selection("particle stress|accepted FE strain|DG trial stress"),
                             "Accepted FE strain supports fresh stationary mature faults and the restricted P2 total-energy "
@@ -448,10 +452,10 @@ namespace aspect
                             "unloaded initialization and direct phase irreversibility restrictions. "
                             "Particle stresses are derived samples. Resume/conversion is rejected. "
                             "Particle stress retains the established default. DG trial stress is a "
-                            "fresh serial fixed-profile cohesive DGQ2 history experiment with the same "
-                            "surface elastic slip, normalization and three-dimensional deviator. "
-                            "It rejects phase stepping and mesh changes. Transport/restart require the "
-                            "separate prescribed accepted-history experiment.");
+                            "fixed-profile DGQ2 history experiment with the same "
+                            "normalization and three-dimensional deviator. Cohesive mode retains surface elastic slip; frozen homogeneous mature mode retains zero cohesive resistance and auxiliary slip memory. "
+                            "It rejects phase stepping and mesh changes. Mature MPI/restart require the "
+                            "accepted-history option; prescribed transport remains a separate experiment.");
           prm.declare_entry("Particle stress strain convention", "legacy symmetric gradient",
                             Patterns::Selection("legacy symmetric gradient|three dimensional deviator"),
                             "The optional three dimensional deviator uses the same plane-strain "
@@ -461,14 +465,15 @@ namespace aspect
                             "conversion is not supported. Accepted FE strain always uses the deviator.");
           prm.declare_entry("FE bulk normal quadrature points", "3",
                             Patterns::Integer(3),
-                            "Gauss points per coordinate in stationary mature accepted FE strain, "
+                            "Gauss points per coordinate in stationary mature independent history, "
                             "or per normal cell in the restricted evolving accepted FE strain "
                             "option. Stokes residual/tangent, bulk-slip coupling and transpose, "
                             "phase bulk energy/derivatives and diagnostics use this one rule. "
                             "Only evolving P2 uses tangential panels to resolve fault and bulk "
                             "cell intersections, with at least velocity degree+1 points. The default normal rule "
-                            "retains three points; particle history, normalization and CPDI "
-                            "fracture quadrature are unaffected.");
+                            "retains three points and native particle quadrature. An explicit value above "
+                            "three also selects this shared tensor rule in mature particle controls. "
+                            "Normalization and CPDI fracture quadrature are unaffected.");
           prm.declare_entry("Consistent endpoint phase solve", "false", Patterns::Bool(),
                             "Restricted fixed-mesh accepted-FE P2 option. Solve phase and "
                             "mechanical/contact conditions at the same endpoint, with all "
@@ -480,6 +485,12 @@ namespace aspect
                             "pre-existing damage, not a stress/history checkpoint. Empty "
                             "retains the existing seeded-H initial relaxation. Particle H "
                             "is initialized natively and is never regenerated from this field.");
+          prm.declare_entry("Use homogeneous mesh data", "false", Patterns::Bool(),
+                            "Experimental fixed-geometry accepted-DG endpoint configuration, or frozen mature independent FE/DG history (MPI/restart only with accepted DG). "
+                            "Use the prescribed physical phase seed and homogeneous configured materials "
+                            "without CPDI initialization, particle domains or material projection. "
+                            "Requires static fields, fixed prescribed fault geometry and no particle domains. "
+                            "Fixed particles remain independent publication check points. Default is false.");
           prm.declare_entry("Initial cohesive state", "seeded energy",
                             Patterns::Selection("seeded energy|unloaded"),
                             "Unloaded initializes cohesive traction and elastic slip to zero "
@@ -578,6 +589,7 @@ namespace aspect
           fe_bulk_normal_quadrature_points = prm.get_integer("FE bulk normal quadrature points");
           consistent_endpoint_phase = prm.get_bool("Consistent endpoint phase solve");
           fe_initial_phase_profile = prm.get("FE initial phase profile file");
+          homogeneous_mesh_data = prm.get_bool("Use homogeneous mesh data");
           recoverable_phase_history = prm.get("Phase driving history") == "recoverable energy";
           unloaded_cohesive_initialization = prm.get("Initial cohesive state") == "unloaded";
           surface_cohesive_history = prm.get("Cohesive history representation") == "surface elastic slip";
@@ -660,13 +672,28 @@ namespace aspect
 
           options.property_name = "Radiation damping coefficients";
           radiation_damping_coefficients = Utilities::MapParsing::parse_map_to_double_array(prm.get("Radiation damping coefficients"), options);
+          if (homogeneous_mesh_data)
+            {
+              // Check the configured EOS too: choosing a background label must
+              // not silently replace a heterogeneous material by another law.
+              for (const std::string name : {"Densities", "Thermal expansivities", "Heat capacities"})
+                {
+                  options.property_name = name;
+                  const auto values = Utilities::MapParsing::parse_map_to_double_array(prm.get(name), options);
+                  AssertThrow(std::all_of(values.begin(), values.end(), [&](double value) { return value == values[0]; }),
+                              ExcMessage("Homogeneous mesh data requires homogeneous " + name + "."));
+                }
+              AssertThrow(std::all_of(thermal_conductivities.begin(), thermal_conductivities.end(),
+                                     [&](double value) { return value == thermal_conductivities[0]; }),
+                          ExcMessage("Homogeneous mesh data requires homogeneous thermal conductivities."));
+            }
         }
         prm.leave_subsection();
       }
       prm.leave_subsection();
       AssertThrow(!consistent_particle_strain || (dim == 2 && mature_frictional_fault && !evolve_phase_field
-                                                  && !this->get_parameters().resume_computation),
-                  ExcMessage("Deviatoric particle stress currently requires fresh frozen mature 2-D mechanics."));
+                                                  && (!this->get_parameters().resume_computation || (dg_trial_stress_history && dg_accepted_history))),
+                  ExcMessage("Deviatoric particle stress requires frozen mature 2-D mechanics; restart is restricted to accepted DG samples."));
       if (uses_independent_bulk_history())
         {
           AssertThrow(dim == 2 && (Utilities::MPI::n_mpi_processes(this->get_mpi_communicator()) == 1
@@ -724,17 +751,49 @@ namespace aspect
                   && this->get_parameters().initial_adaptive_refinement==0),
                   ExcMessage("PF5 accepted history requires DG trial stress representation and no initial AMR."));
       AssertThrow(!dg_trial_stress_history
-                  || (!mature_frictional_fault && !evolve_phase_field && !consistent_endpoint_phase
-                      && Utilities::MPI::n_mpi_processes(this->get_mpi_communicator())==1
+                  || ((mature_frictional_fault
+                       ? (homogeneous_mesh_data && !evolve_phase_field && !consistent_endpoint_phase
+                          && (dg_accepted_history || (!this->get_parameters().resume_computation
+                              && Utilities::MPI::n_mpi_processes(this->get_mpi_communicator())==1)))
+                       : (((!evolve_phase_field && !consistent_endpoint_phase)
+                           || (evolve_phase_field && consistent_endpoint_phase && dg_accepted_history))
+                          && (Utilities::MPI::n_mpi_processes(this->get_mpi_communicator())==1
+                              || (consistent_endpoint_phase && dg_accepted_history))))
                       && this->get_parameters().adaptive_refinement_interval==0
                       && this->get_parameters().additional_refinement_times.empty()),
-                  ExcMessage("DG trial stress is restricted to fresh serial fixed-profile cohesive "
-                             "history checks without phase/H evolution, mesh adaptation or transport."));
-      AssertThrow(!consistent_endpoint_phase || (fe_strain_history && evolve_phase_field
+                  ExcMessage("DG trial stress requires fixed-reference cohesive history or homogeneous frozen mature history; MPI/restart require accepted DG; phase evolution "
+                             "requires consistent endpoint and accepted-history publication."));
+      AssertThrow(!consistent_endpoint_phase || (uses_independent_bulk_history() && evolve_phase_field
                                                  && use_adiabatic_pressure_in_fault_friction),
-                  ExcMessage("Consistent endpoint phase requires evolving accepted FE strain and prescribed friction pressure."));
+                  ExcMessage("Consistent endpoint phase requires evolving independent history and prescribed friction pressure."));
       AssertThrow(fe_initial_phase_profile.empty() || consistent_endpoint_phase,
                   ExcMessage("Shared FE initialization requires the fresh consistent-endpoint option."));
+      if (homogeneous_mesh_data)
+        {
+          AssertThrow((dg_trial_stress_history && dg_accepted_history && consistent_endpoint_phase
+                       && !fe_initial_phase_profile.empty())
+                      || (mature_frictional_fault && uses_independent_bulk_history()
+                          && !evolve_phase_field && !consistent_endpoint_phase
+                          && ((dg_trial_stress_history && dg_accepted_history)
+                              || (!this->get_parameters().resume_computation
+                                  && Utilities::MPI::n_mpi_processes(this->get_mpi_communicator())==1))),
+                      ExcMessage("Homogeneous mesh data requires accepted DG endpoint history with a prescribed seed, or frozen mature independent history with explicitly prescribed phase/state; MPI/restart require accepted DG."));
+          AssertThrow(this->get_parameters().temperature_method == Parameters<dim>::AdvectionFieldMethod::static_field
+                      && std::all_of(this->get_parameters().compositional_field_methods.begin(),
+                                     this->get_parameters().compositional_field_methods.end(),
+                                     [](const auto method) { return method == Parameters<dim>::AdvectionFieldMethod::static_field; }),
+                      ExcMessage("Homogeneous mesh data requires static bulk fields; particle material/stress mapping is prohibited."));
+          prm.enter_subsection("Particles");
+          AssertThrow(!prm.get_bool("Generate particle domains")
+                      && !prm.get_bool("Generate CPDI data for particle domains")
+                      && !prm.get_bool("Generate face data for particle domains"),
+                      ExcMessage("Homogeneous mesh data requires particle domains and CPDI data disabled."));
+          prm.leave_subsection();
+          prm.enter_subsection("Fault reconstruction");
+          AssertThrow(!prm.get_bool("Fit prescribed geometry to phase field"),
+                      ExcMessage("Homogeneous mesh data requires fixed prescribed fault geometry."));
+          prm.leave_subsection();
+        }
       if (consistent_endpoint_phase)
         for (unsigned int j=0; j<initial_friction_coefficients.size(); ++j)
           AssertThrow(initial_friction_coefficients[j]==initial_friction_coefficients[0]

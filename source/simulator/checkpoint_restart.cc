@@ -440,6 +440,9 @@ namespace aspect
   template <int dim>
   void Simulator<dim>::resume_from_snapshot()
   {
+    // Include deserialization, mesh/vector restoration and user history in the
+    // existing native timer report, so startup can measure checkpoint reading.
+    TimerOutput::Scope timer(computing_timer, "Resume snapshot");
     // By definition, a checkpoint is past the first time step. As a consequence,
     // the Simulator object will not need the initial conditions objects, and
     // we can release the pointers to these objects that we have created in

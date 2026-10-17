@@ -335,8 +335,11 @@ namespace aspect
       particle_data_info.get_position_by_field_name("crack_driving_force");
 
     std::vector<unsigned int> chemical_property_indices;
-    for (const unsigned int field_index :
-         this->introspection().chemical_composition_field_indices())
+    const auto *fault_material = dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(&this->get_material_model());
+    const bool mesh_data = fault_material && fault_material->uses_homogeneous_mesh_data();
+    const auto chemical_fields = mesh_data ? std::vector<unsigned int>()
+                                 : this->introspection().chemical_composition_field_indices();
+    for (const unsigned int field_index : chemical_fields)
       {
         AssertThrow(this->get_parameters().compositional_field_methods[field_index]
                     == Parameters<dim>::AdvectionFieldMethod::particles,
@@ -362,8 +365,11 @@ namespace aspect
         const ArrayView<double> properties = particle.get_properties();
         for (unsigned int c = 0; c < chemical_property_indices.size(); ++c)
           chemical_compositions[c] = properties[chemical_property_indices[c]];
-        const std::vector<double> volume_fractions =
-          MaterialModel::MaterialUtilities::compute_composition_fractions(chemical_compositions);
+        std::vector<double> volume_fractions(this->introspection().n_chemical_composition_fields()+1, 0.0);
+        if (mesh_data)
+          volume_fractions[0] = 1.0;
+        else
+          volume_fractions = MaterialModel::MaterialUtilities::compute_composition_fractions(chemical_compositions);
 
         unsigned int contributing_faults = 0;
         double prescribed_crack_driving_force = numbers::signaling_nan<double>();
@@ -455,11 +461,23 @@ namespace aspect
 
     // Determine mesh-aware reconstruction support before changing any manager
     // state; all faults use these radii when checking tubular-region overlap.
-    std::vector<InitialFaultSupport> fault_support =
-      determine_initial_fault_support(phase_field_handler,
-                                      this->get_dof_handler(),
-                                      this->get_mpi_communicator(),
-                                      prescribed_faults);
+    const auto *material = dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(&this->get_material_model());
+    const bool mesh_data = material && material->uses_homogeneous_mesh_data()
+                           && !material->is_mature_frictional_fault();
+    std::vector<InitialFaultSupport> fault_support;
+    if (mesh_data)
+      {
+        AssertThrow(full_normal_cross_section && !fit_prescribed_geometry,
+                    ExcMessage("Homogeneous mesh support requires fixed full-normal geometry."));
+        fault_support.resize(prescribed_faults.size());
+        for (unsigned int f = 0; f < prescribed_faults.size(); ++f)
+          fault_support[f].prescribed_half_widths.resize(prescribed_faults[f].vertices.size());
+      }
+    else
+      fault_support = determine_initial_fault_support(phase_field_handler,
+                                                      this->get_dof_handler(),
+                                                      this->get_mpi_communicator(),
+                                                      prescribed_faults);
     if (full_normal_cross_section)
       {
         AssertThrow(prescribed_faults.size() == 1
@@ -493,6 +511,8 @@ namespace aspect
                     ExcMessage("The prescribed fault must span the full tangential extent of the Box; "
                                "full normal support does not extend finite sharp endpoints."));
         const double width = Utilities::MPI::max(local_width, comm) + tolerance;
+        if (mesh_data)
+          fault_support.front().reconstruction_radius = width;
         std::fill(fault_support.front().prescribed_half_widths.begin(),
                   fault_support.front().prescribed_half_widths.end(), width);
         this->get_pcout() << "fixed normal association half-width=" << std::setprecision(17)

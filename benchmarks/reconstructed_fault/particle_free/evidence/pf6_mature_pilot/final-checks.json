@@ -1,0 +1,23 @@
+{
+  "functional_checks_passed": true,
+  "strict_reference_match_passed": false,
+  "fixed_FF_phase_preserved": true,
+  "stationary_history_ownership_ranks": [
+    1,
+    2,
+    4
+  ],
+  "native_rejection_cutback_restart_passed": true,
+  "all_positive_acceptances_single_publication": true,
+  "temporal_endpoint_one_percent_screen_passed": false,
+  "continuum_spatial_accuracy_qualified": false,
+  "server_pilot_prepared": true,
+  "server_pilot_parser_checks_passed": true,
+  "server_mechanics_launched": false,
+  "limiter_filter_and_production_defaults_unchanged": true,
+  "particle_controls_remain_comparison_evidence": true,
+  "archive_sha256": "1dd3910246fe529884a9c6efcf45fb9353d9b84c4c9d3fc98f17bd7c8f667f29",
+  "portable_replay_passed": true,
+  "official_unit_cases": 124,
+  "official_unit_assertions": 118034
+}

@@ -1,0 +1,22 @@
+{
+  "nonroot_only_wall_request": true,
+  "collective_stop_all_ranks": true,
+  "ordinary_outputs_not_due": true,
+  "terminal_diagnostics_and_checkpoint": true,
+  "once_only_publication": true,
+  "accepted_timestep_sequence_identical": true,
+  "comparisons": {
+    "wall-resume": {
+      "max_persistent_difference": 0.0,
+      "stress_difference": 0.0,
+      "particle_and_bulk_audit_byte_identical": true
+    },
+    "scheduled-resume": {
+      "max_persistent_difference": 0.0,
+      "stress_difference": 0.0,
+      "particle_and_bulk_audit_byte_identical": true
+    }
+  },
+  "scheduled_output_restart_retained": true,
+  "strict_reference_match_passed": false
+}

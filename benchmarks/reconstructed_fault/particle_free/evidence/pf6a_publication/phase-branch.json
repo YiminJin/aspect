@@ -1,0 +1,30 @@
+{
+  "primary_unregistered_errors_retained": true,
+  "no_native_state_or_reference_modified": true,
+  "native_along_fault_phase_spread": 3.295078238041427e-10,
+  "phase_centroid_difference": 1.7016569937411408e-05,
+  "mirrored_profile_Linf_diagnostic_only": 2.0081625251577861e-10,
+  "unregistered_profile_Linf": 5.9085088051635815e-05,
+  "energy_difference_same_incoming_J_per_m": -4.121147867408581e-13,
+  "states": {
+    "native_x_average": {
+      "phase_centroid": 0.5000085083137509,
+      "potential_J_per_m": 23.345977920545124,
+      "KKT_dimensionless": 2.961978806753407e-13,
+      "minimum_gap_to_reference_incoming_phase": 0.0,
+      "translation_curvature_J_per_m": 0.14054992716592468
+    },
+    "selected_reference": {
+      "phase_centroid": 0.49999149174381347,
+      "potential_J_per_m": 23.345977920545536,
+      "KKT_dimensionless": 8.078607227613892e-15,
+      "minimum_gap_to_reference_incoming_phase": 0.0,
+      "translation_curvature_J_per_m": 0.14054993825102605
+    }
+  },
+  "comparison_rules": {
+    "native": "second candidate must improve current best by the retained arithmetic allowance",
+    "independent_reference": "candidate must improve entry by the allowance; best-candidate comparison is strict without that allowance"
+  },
+  "limitation": "The x-averaged reduced 1D curvature is a branch diagnostic, not a full 2D stability qualification; reflection is never used in primary errors."
+}

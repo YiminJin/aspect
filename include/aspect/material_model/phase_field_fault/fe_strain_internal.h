@@ -95,7 +95,7 @@ namespace aspect
       mutable std::map<std::pair<CellId,std::array<double,dim>>,SymmetricTensor<2,dim>> stress_samples;
       std::uint64_t geometry_version;
       types::global_dof_index n_dofs;
-      double m,G,eta,initial_fracture=0.;
+      double m=0.,G=0.,eta=0.,initial_fracture=0.;
       unsigned int committed_step=0;
       std::uint64_t accepted_publications=0;
     };

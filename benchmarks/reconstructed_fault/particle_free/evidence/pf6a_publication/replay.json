@@ -1,0 +1,127 @@
+{
+  "precision_digits": 80,
+  "error": 8.290154976891864e-13,
+  "old_bound": 6.63366717421583e-13,
+  "ratio": 1.2497092119897992,
+  "point": [
+    0.16666666666666666,
+    0.16666666666666666
+  ],
+  "independent_source_allowance_exact_inverse": 4.258927591021882e-07,
+  "gradient_operand_upper": [
+    0.03592968750003524,
+    9.19800000000902,
+    8.16485468750465e-12,
+    2.0902028000011905e-09
+  ],
+  "projection_coefficient_bound": [
+    6.70185336155372e-14,
+    3.35092697328705e-14,
+    1.2867567072588042e-11
+  ],
+  "native_point_strain_bound": [
+    2.71251778934867e-16,
+    1.35625901302449e-16,
+    5.2080340040658705e-14
+  ],
+  "beta_vs_exact": -2.6700655932485356e-17,
+  "kappa_vs_exact": 3.0073961296557295e-13,
+  "exact_gradient": [
+    -5.068837903422619e-15,
+    0.0009999999999185166,
+    -3.1610275816626594e-13,
+    -1.0777860693880786e-10
+  ],
+  "remote_gradient": [
+    -5.068791624052109e-15,
+    0.000999999999918437,
+    -3.1610275816626594e-13,
+    -1.0777860693880787e-10
+  ],
+  "local_shape_gradient": [
+    -5.0687687313240154e-15,
+    0.0009999999999185346,
+    -3.16102758166266e-13,
+    -1.0777860693880787e-10
+  ],
+  "remote_minus_exact_gradient": [
+    4.627937051020531e-20,
+    -7.967681298695596e-17,
+    2.527753331096431e-30,
+    -8.078853312433377e-27
+  ],
+  "local_minus_exact_gradient": [
+    6.91720986038498e-20,
+    1.7943979635640226e-17,
+    -4.7969534969221884e-29,
+    -7.062316329474237e-27
+  ],
+  "DG_source_minus_exact_point": [
+    -1.5965344621038844e-19,
+    7.982671345734973e-20,
+    -2.3366244758949645e-18
+  ],
+  "exported_operand_projection_minus_exact_point": [
+    -5.077544537422489e-20,
+    2.5387708204010552e-20,
+    -9.644747804413948e-18
+  ],
+  "exact_polynomial_projection_minus_exact_point": [
+    6.850796125946178e-27,
+    -1.370269442116477e-26,
+    9.835285103331664e-20
+  ],
+  "DG_coefficients_minus_exported_operand_projection_max": 5.925423040162868e-17,
+  "DG_coefficients_minus_exact_polynomial_projection_max": 7.806253121300033e-17,
+  "DG_stress": [
+    5.612721832700751e-07,
+    -1.1226235677804302e-06,
+    7.812194829059824
+  ],
+  "native_stress": [
+    5.612721862466208e-07,
+    -1.122623569268703e-06,
+    7.812194829059238
+  ],
+  "exact_polynomial_stress": [
+    5.612721857645628e-07,
+    -1.122623569027674e-06,
+    7.8121948290598615
+  ],
+  "DG_stress_error": [
+    -2.494487663167599e-15,
+    1.2472437309768516e-15,
+    -3.6986895248940286e-14
+  ],
+  "native_stress_error": [
+    4.820580054054109e-16,
+    -2.410291562492123e-16,
+    -6.231846522510229e-13
+  ],
+  "physical_correction_Pa": 1.423392291562425e-26,
+  "same_timestep": true,
+  "incoming_zero": true,
+  "phase_change": 0.0,
+  "local_minus_remote_phase": 1.0698287256757035e-26,
+  "max_I_change": 0.0,
+  "surface_recurrence_error": 3.343678242924205e-33,
+  "gradient_operand_abs_sum": [
+    0.006510416666670431,
+    1.6667037037045005,
+    6.484080457476216e-13,
+    1.6686714570195742e-10
+  ],
+  "checks": {
+    "original_guard_rejects": true,
+    "same_physical_points": true,
+    "same_reference_points": true,
+    "same_phase": true,
+    "same_I": true,
+    "actual_Maxwell_recurrence": true,
+    "native_point_differentiation_bounded": true,
+    "projection_coefficients_bounded": true,
+    "discrepancy_bounded": true,
+    "actual_point_differentiation_dominates": true
+  },
+  "passed": true
+}

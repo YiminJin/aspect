@@ -1,0 +1,412 @@
+{
+  "r1": {
+    "gates": 100,
+    "domain_absence": {
+      "snapshots": 11,
+      "domain_objects_present": 0,
+      "fixed_particles": 144,
+      "point_associations_have_no_integration_measure": true,
+      "successful_domain_reads_impossible_without_object": true
+    },
+    "normalization_derivatives": {
+      "native_reference_max_error": [
+        5.684341886080802e-14,
+        1.1368683772161603e-13,
+        3.410605131648481e-13
+      ],
+      "native_reference_scaled_error": [
+        6.187057492337568e-16,
+        6.468193668016553e-16,
+        9.618807995357094e-16
+      ],
+      "Gauss24_32_uncertainty": [
+        0.0,
+        5.684341886080802e-14,
+        1.1368683772161603e-13
+      ]
+    },
+    "deep": [
+      {
+        "tensor_relative_L2": 3.3606672205976227e-16,
+        "stress_L2_Pa": 1.9633598794955176e-12,
+        "stress_relative_L2": 1.3602132516650125e-15,
+        "localized_stress_L2": 4.510318149346219e-12,
+        "phase_Linf": 3.3306690738754696e-16,
+        "gradient_Linf": 4.440892098500626e-15,
+        "maximum_moment_defect": 1.7677386234702056e-13,
+        "energy_before": [
+          0.5208657845304688,
+          0.005240972416247402,
+          14.096059627391403
+        ],
+        "energy_after": [
+          0.5208657845304691,
+          0.005240972416247402,
+          14.096059627391401
+        ],
+        "energy_defect": [
+          2.220446049250313e-16,
+          0.0,
+          -1.7763568394002505e-15
+        ],
+        "quadratic_norm_change": 2.2424669006399204e-09,
+        "weak_shear_defect": [
+          1.4210854715202004e-14,
+          5.684341886080802e-14,
+          8.526512829121202e-14,
+          1.4210854715202004e-14,
+          5.684341886080802e-14,
+          5.684341886080802e-14,
+          8.526512829121202e-14,
+          1.4210854715202004e-14,
+          4.973799150320701e-14
+        ]
+      },
+      {
+        "tensor_relative_L2": 2.7813663254394427e-16,
+        "stress_L2_Pa": 1.044236241528085e-12,
+        "stress_relative_L2": 7.234455529163271e-16,
+        "localized_stress_L2": 2.2412652930984124e-12,
+        "phase_Linf": 0.0,
+        "gradient_Linf": 0.0,
+        "maximum_moment_defect": 1.1869063838124246e-13,
+        "energy_before": [
+          0.5208657845304688,
+          0.005240972416247402,
+          14.096059627391401
+        ],
+        "energy_after": [
+          0.5208657845304688,
+          0.005240972416247402,
+          14.096059627391401
+        ],
+        "energy_defect": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "quadratic_norm_change": -2.3824807472075272e-09,
+        "weak_shear_defect": [
+          -8.526512829121202e-14,
+          -4.263256414560601e-14,
+          -1.4210854715202004e-13,
+          -2.842170943040401e-14,
+          -7.105427357601002e-14,
+          1.4210854715202004e-14,
+          -1.1368683772161603e-13,
+          0.0,
+          -2.1316282072803006e-14
+        ]
+      }
+    ],
+    "seconds": 13.19356556099956
+  },
+  "r2": {
+    "gates": 100,
+    "domain_absence": {
+      "snapshots": 11,
+      "domain_objects_present": 0,
+      "fixed_particles": 144,
+      "point_associations_have_no_integration_measure": true,
+      "successful_domain_reads_impossible_without_object": true
+    },
+    "normalization_derivatives": {
+      "native_reference_max_error": [
+        5.684341886080802e-14,
+        1.1368683772161603e-13,
+        3.410605131648481e-13
+      ],
+      "native_reference_scaled_error": [
+        6.187057492337568e-16,
+        6.468193668016553e-16,
+        9.618807995357094e-16
+      ],
+      "Gauss24_32_uncertainty": [
+        0.0,
+        5.684341886080802e-14,
+        1.1368683772161603e-13
+      ]
+    },
+    "deep": [
+      {
+        "tensor_relative_L2": 3.366916972751438e-16,
+        "stress_L2_Pa": 1.9673061171416087e-12,
+        "stress_relative_L2": 1.3629472001359402e-15,
+        "localized_stress_L2": 4.515055022101572e-12,
+        "phase_Linf": 3.3306690738754696e-16,
+        "gradient_Linf": 4.440892098500626e-15,
+        "maximum_moment_defect": 1.7680721184592772e-13,
+        "energy_before": [
+          0.5208657845304707,
+          0.005240972416247381,
+          14.096059627391403
+        ],
+        "energy_after": [
+          0.5208657845304709,
+          0.005240972416247381,
+          14.096059627391401
+        ],
+        "energy_defect": [
+          2.220446049250313e-16,
+          0.0,
+          -1.7763568394002505e-15
+        ],
+        "quadratic_norm_change": 2.146638950925612e-09,
+        "weak_shear_defect": [
+          -1.4210854715202004e-14,
+          2.842170943040401e-14,
+          7.105427357601002e-14,
+          1.4210854715202004e-14,
+          7.105427357601002e-14,
+          8.526512829121202e-14,
+          1.1368683772161603e-13,
+          4.263256414560601e-14,
+          4.973799150320701e-14
+        ]
+      },
+      {
+        "tensor_relative_L2": 2.931505056205671e-16,
+        "stress_L2_Pa": 1.1004846222801502e-12,
+        "stress_relative_L2": 7.624143602565863e-16,
+        "localized_stress_L2": 2.3606898844623566e-12,
+        "phase_Linf": 0.0,
+        "gradient_Linf": 0.0,
+        "maximum_moment_defect": 9.72871315237665e-14,
+        "energy_before": [
+          0.5208657845304707,
+          0.005240972416247381,
+          14.096059627391401
+        ],
+        "energy_after": [
+          0.5208657845304707,
+          0.005240972416247381,
+          14.096059627391401
+        ],
+        "energy_defect": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "quadratic_norm_change": -1.865636726687969e-09,
+        "weak_shear_defect": [
+          -1.2079226507921703e-13,
+          -5.684341886080802e-14,
+          -8.526512829121202e-14,
+          -1.4210854715202004e-14,
+          -5.684341886080802e-14,
+          5.684341886080802e-14,
+          -5.684341886080802e-14,
+          -1.4210854715202004e-14,
+          -2.1316282072803006e-14
+        ]
+      }
+    ],
+    "seconds": 40.68873045800137
+  },
+  "r4": {
+    "gates": 100,
+    "domain_absence": {
+      "snapshots": 11,
+      "domain_objects_present": 0,
+      "fixed_particles": 144,
+      "point_associations_have_no_integration_measure": true,
+      "successful_domain_reads_impossible_without_object": true
+    },
+    "normalization_derivatives": {
+      "native_reference_max_error": [
+        4.263256414560601e-14,
+        1.1368683772161603e-13,
+        3.979039320256561e-13
+      ],
+      "native_reference_scaled_error": [
+        4.640293119253176e-16,
+        6.468193668016554e-16,
+        1.1221942661249944e-15
+      ],
+      "Gauss24_32_uncertainty": [
+        1.4210854715202004e-14,
+        5.684341886080802e-14,
+        1.1368683772161603e-13
+      ]
+    },
+    "deep": [
+      {
+        "tensor_relative_L2": 3.4064279358158864e-16,
+        "stress_L2_Pa": 1.982194580316942e-12,
+        "stress_relative_L2": 1.3732619086718071e-15,
+        "localized_stress_L2": 4.571550137245297e-12,
+        "phase_Linf": 3.3306690738754696e-16,
+        "gradient_Linf": 4.440892098500626e-15,
+        "maximum_moment_defect": 1.794276399516895e-13,
+        "energy_before": [
+          0.5208657845304723,
+          0.0052409724162473656,
+          14.096059627391401
+        ],
+        "energy_after": [
+          0.5208657845304724,
+          0.0052409724162473656,
+          14.096059627391401
+        ],
+        "energy_defect": [
+          1.1102230246251565e-16,
+          0.0,
+          0.0
+        ],
+        "quadratic_norm_change": 2.5003423696363657e-09,
+        "weak_shear_defect": [
+          7.105427357601002e-15,
+          4.263256414560601e-14,
+          8.526512829121202e-14,
+          4.263256414560601e-14,
+          5.684341886080802e-14,
+          5.684341886080802e-14,
+          9.947598300641403e-14,
+          8.526512829121202e-14,
+          6.394884621840902e-14
+        ]
+      },
+      {
+        "tensor_relative_L2": 3.0493714171626847e-16,
+        "stress_L2_Pa": 1.144955831226642e-12,
+        "stress_relative_L2": 7.932239578032788e-16,
+        "localized_stress_L2": 2.5058614376156554e-12,
+        "phase_Linf": 0.0,
+        "gradient_Linf": 0.0,
+        "maximum_moment_defect": 1.4531988871075393e-13,
+        "energy_before": [
+          0.5208657845304723,
+          0.0052409724162473656,
+          14.096059627391401
+        ],
+        "energy_after": [
+          0.5208657845304722,
+          0.0052409724162473656,
+          14.096059627391401
+        ],
+        "energy_defect": [
+          -1.1102230246251565e-16,
+          0.0,
+          0.0
+        ],
+        "quadratic_norm_change": -2.5987734808987155e-09,
+        "weak_shear_defect": [
+          -6.394884621840902e-14,
+          -2.842170943040401e-14,
+          -1.4210854715202004e-13,
+          -8.526512829121202e-14,
+          -1.2789769243681803e-13,
+          -2.842170943040401e-14,
+          -8.526512829121202e-14,
+          1.4210854715202004e-14,
+          -1.4210854715202004e-14
+        ]
+      }
+    ],
+    "seconds": 50.66534201600007
+  },
+  "restart-r1": {
+    "tensor_error": 0.0,
+    "tensor_scaled_error": 0.0,
+    "surface_error": 0.0,
+    "surface_scaled_error": 0.0,
+    "native-fields_error": 0.0,
+    "native-fields_scaled_error": 0.0,
+    "particles_error": 0.0,
+    "particles_scaled_error": 0.0,
+    "weak-loads_error": 0.0,
+    "weak-loads_scaled_error": 0.0,
+    "energy_error": 0.0,
+    "energy_scaled_error": 0.0,
+    "fracture-operator_error": 0.0,
+    "fracture-operator_scaled_error": 0.0,
+    "rng_counts": [
+      1,
+      1
+    ],
+    "rng_equal_per_rank": true
+  },
+  "restart-r2": {
+    "tensor_error": 0.0,
+    "tensor_scaled_error": 0.0,
+    "surface_error": 0.0,
+    "surface_scaled_error": 0.0,
+    "native-fields_error": 0.0,
+    "native-fields_scaled_error": 0.0,
+    "particles_error": 0.0,
+    "particles_scaled_error": 0.0,
+    "weak-loads_error": 0.0,
+    "weak-loads_scaled_error": 0.0,
+    "energy_error": 0.0,
+    "energy_scaled_error": 0.0,
+    "fracture-operator_error": 0.0,
+    "fracture-operator_scaled_error": 0.0,
+    "rng_counts": [
+      2,
+      2
+    ],
+    "rng_equal_per_rank": true
+  },
+  "restart-r4": {
+    "tensor_error": 0.0,
+    "tensor_scaled_error": 0.0,
+    "surface_error": 0.0,
+    "surface_scaled_error": 0.0,
+    "native-fields_error": 0.0,
+    "native-fields_scaled_error": 0.0,
+    "particles_error": 0.0,
+    "particles_scaled_error": 0.0,
+    "weak-loads_error": 0.0,
+    "weak-loads_scaled_error": 0.0,
+    "energy_error": 0.0,
+    "energy_scaled_error": 0.0,
+    "fracture-operator_error": 0.0,
+    "fracture-operator_scaled_error": 0.0,
+    "rng_counts": [
+      4,
+      4
+    ],
+    "rng_equal_per_rank": true
+  },
+  "cross-1-to-4": {
+    "tensor_error": 0.0,
+    "tensor_scaled_error": 0.0,
+    "surface_error": 0.0,
+    "surface_scaled_error": 0.0,
+    "native-fields_error": 0.0,
+    "native-fields_scaled_error": 0.0,
+    "particles_error": 0.0,
+    "particles_scaled_error": 0.0,
+    "weak-loads_error": 1.7053025658242404e-13,
+    "weak-loads_scaled_error": 1.2693360532843628e-15,
+    "energy_error": 0.0,
+    "energy_scaled_error": 0.0,
+    "fracture-operator_error": 2.1316282072803006e-14,
+    "fracture-operator_scaled_error": 7.370789418254602e-16,
+    "rng_counts": [
+      1,
+      4
+    ],
+    "rng_equal_per_rank": false
+  },
+  "rank-1-2": {
+    "stress_relative_L2": 1.0299794630149585e-14,
+    "phase_Linf": 4.787836793695988e-16,
+    "native-fields_relative_max_error": 7.7601937011342e-13,
+    "tensor_relative_L2": 1.8763579013430723e-15
+  },
+  "rank-1-4": {
+    "stress_relative_L2": 1.1959814641948459e-14,
+    "phase_Linf": 5.273559366969494e-16,
+    "native-fields_relative_max_error": 5.1788428683889194e-11,
+    "tensor_relative_L2": 3.176422399098964e-15
+  },
+  "legacy_comparison_maxima": {
+    "stress_relative_L2": 9.727311526814089e-15,
+    "phase_Linf": 5.620504062164855e-16,
+    "Z_scaled_Linf": 1.5060333335978786e-15,
+    "I_scaled_Linf": 1.5464662039475867e-16,
+    "native_velocity_pressure_temperature_phase_scaled_error": 1.3507640741057344e-13,
+    "unmatched_non_authoritative_stress_chemical_slot_max_difference": 1207.2139318338118
+  }
+}

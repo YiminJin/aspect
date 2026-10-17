@@ -605,6 +605,8 @@ namespace aspect
                                                      ReconstructedFaultVector *trial_slip_rate = nullptr);
       /** Test-access-only, noncommitting complete-step failure injection. */
       std::function<void()> benchmark_endpoint_precommit;
+      /** PF6a publishes only after the native timestep manager accepts. */
+      std::function<void(bool)> pending_dg_endpoint_publication;
       /** Fixed-step serial velocity inverse used only as an endpoint
        * mechanical preconditioner. Rebuilt with the homogeneous A block. */
       std::function<void(LinearAlgebra::Vector &,const LinearAlgebra::Vector &)>

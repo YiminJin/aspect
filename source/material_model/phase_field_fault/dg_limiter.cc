@@ -19,7 +19,8 @@ namespace aspect
     template <int dim>
     std::shared_ptr<typename PhaseFieldFault<dim>::DGLimiter>
     PhaseFieldFault<dim>::make_dg_limiter(const DGTransport &op,
-                                          const LinearAlgebra::BlockVector &velocity) const
+                                          const LinearAlgebra::BlockVector &velocity,
+                                          const bool constrained_candidates) const
     {
       AssertThrow(dim==2 && Utilities::MPI::n_mpi_processes(this->get_mpi_communicator())==1,
                   ExcMessage("PF4 limiting requires serial fixed Cartesian 2D DGQ2."));
@@ -27,6 +28,7 @@ namespace aspect
       auto &data=*result;
       data.space=op.space;
       data.mesh_vertices=op.mesh_vertices;
+      data.constrained_candidates=constrained_candidates;
       const auto &element=op.space->element;
       const auto &support=element.get_unit_support_points();
       const unsigned int n=element.n_dofs_per_cell();
@@ -63,6 +65,7 @@ namespace aspect
             hi[d]=std::max(hi[d],p[d]);
           }
       const double reference_length=lo.distance(hi);
+      const double reference_area=(hi[0]-lo[0])*(hi[1]-lo[1]);
       const QGauss<dim-1> face_rule(op.quadrature_order);
       FEFaceValues<dim> face(this->get_mapping(),element,face_rule,
                              update_values|update_quadrature_points|update_normal_vectors|update_JxW_values);
@@ -76,14 +79,19 @@ namespace aspect
           r[d]=(p[d]-cell->vertex(0)[d])/(cell->vertex(1U<<d)[d]-cell->vertex(0)[d]);
         return r;
       };
+      // The admitted mesh is uniform Cartesian. Translation-equivalent
+      // stencils have identical reference-coordinate KKT maps.
+      std::map<std::vector<int>,typename DGLimiter::Candidate> constrained_cache;
       for (const auto &cell:op.cells)
         {
           const auto target=op.space->cells.at(cell.id);
           typename DGLimiter::Cell stencil;
           stencil.h_power=std::pow(target->diameter()/reference_length,1.5);
           stencil.measure=target->measure();
+          std::vector<CellId> patch_ids;
           const auto append=[&](const auto &neighbor)
           {
+            patch_ids.push_back(neighbor->id());
             typename DGLimiter::Candidate candidate;
             candidate.indices.resize(n);
             neighbor->get_dof_indices(candidate.indices);
@@ -133,6 +141,82 @@ namespace aspect
                     stencil.inflow.push_back(std::move(point));
                   }
             }
+          if (constrained_candidates)
+            {
+              // Work in the neighbor's own nodal basis. The dimensionless
+              // objective is <|q-p_j|^2>_j + rho sum_l |<q>_l-<p_l>_l|^2,
+              // with rho=|K|/|domain|, and <q>_K=<p_K>_K. This retains the
+              // physical-integral relative weighting on the unit-square test.
+              FullMatrix<double> mass(n,n);
+              for (unsigned int q=0; q<rule.size(); ++q)
+                for (unsigned int i=0; i<n; ++i)
+                  for (unsigned int j=0; j<n; ++j)
+                    mass(i,j)+=rule.weight(q)*data.values(q,i)*data.values(q,j);
+              const unsigned int count=stencil.candidates.size();
+              const double rho=stencil.measure/reference_area;
+              for (unsigned int j=1; j<count; ++j)
+                {
+                  auto &candidate=stencil.candidates[j];
+                  const auto neighbor=op.space->cells.at(patch_ids[j]);
+                  std::vector<int> key= {static_cast<int>(count),static_cast<int>(j)};
+                  for (const auto &id:patch_ids)
+                    {
+                      const auto p=reference_point(target,op.space->cells.at(id)->center());
+                      for (unsigned int d=0; d<dim; ++d) key.push_back(std::lround(2*p[d]));
+                    }
+                  const auto cached=constrained_cache.find(key);
+                  if (cached!=constrained_cache.end())
+                    {
+                      candidate.patch_means=cached->second.patch_means;
+                      candidate.constrained_corrections=cached->second.constrained_corrections;
+                      continue;
+                    }
+                  candidate.patch_means.assign(count,Vector<double>(n));
+                  for (unsigned int l=0; l<count; ++l)
+                    {
+                      const auto other=op.space->cells.at(patch_ids[l]);
+                      for (unsigned int q=0; q<rule.size(); ++q)
+                        {
+                          Point<dim> physical=other->vertex(0);
+                          for (unsigned int d=0; d<dim; ++d)
+                            physical[d]+=rule.point(q)[d]*(other->vertex(1U<<d)[d]-other->vertex(0)[d]);
+                          const auto r=reference_point(neighbor,physical);
+                          for (unsigned int i=0; i<n; ++i)
+                            candidate.patch_means[l][i]+=rule.weight(q)*element.shape_value(i,r);
+                        }
+                    }
+                  const auto &a=candidate.patch_means[0];
+                  candidate.constrained_corrections.resize(1U<<count);
+                  for (unsigned int mask=0; mask<(1U<<count); ++mask)
+                    {
+                      if (mask & (1U | (1U<<j))) continue;
+                      FullMatrix<double> inverse(mass);
+                      for (unsigned int l=1; l<count; ++l)
+                        if (mask & (1U<<l))
+                          for (unsigned int r=0; r<n; ++r)
+                            for (unsigned int s=0; s<n; ++s)
+                              inverse(r,s)+=rho*candidate.patch_means[l][r]*candidate.patch_means[l][s];
+                      inverse.gauss_jordan();
+                      Vector<double> h(n),direction(n),target_direction(n);
+                      inverse.vmult(h,a);
+                      const double denominator=a*h;
+                      AssertThrow(std::isfinite(denominator) && denominator>0.,ExcMessage("Invalid constrained Q2 mass/mean system."));
+                      auto &correction=candidate.constrained_corrections[mask];
+                      correction.reinit(n,count);
+                      candidate.extrapolate.vmult(target_direction,h);
+                      for (unsigned int i=0; i<n; ++i) correction(i,0)=target_direction[i]/denominator;
+                      for (unsigned int l=1; l<count; ++l)
+                        if (mask & (1U<<l))
+                          {
+                            inverse.vmult(direction,candidate.patch_means[l]);
+                            direction.add(-(a*direction)/denominator,h);
+                            candidate.extrapolate.vmult(target_direction,direction);
+                            for (unsigned int i=0; i<n; ++i) correction(i,l)=rho*target_direction[i];
+                          }
+                    }
+                  constrained_cache.emplace(std::move(key),candidate);
+                }
+            }
           data.cells.push_back(std::move(stencil));
         }
       return result;
@@ -173,6 +257,7 @@ namespace aspect
       typename DGLimiterStats::NormChange norm_change;
       norm_change.time=time;
       const unsigned int n=data.mean.size(),nq=data.quadrature_weights.size();
+      unsigned int cell_index=0;
       for (const auto &cell:data.cells)
         {
           const auto begin=now();
@@ -343,6 +428,49 @@ namespace aspect
                 {
                   const auto reconstruction_begin=now();
                   ++statistics.limited;
+                  if (data.constrained_candidates)
+                    {
+                      std::vector<TensorType> own_means(count);
+                      for (unsigned int j=0; j<count; ++j)
+                        for (unsigned int i=0; i<n; ++i) own_means[j]+=data.mean[i]*own[j][i];
+                      indicator.useful_masks.assign(count,0);
+                      for (unsigned int j=1; j<count; ++j)
+                        {
+                          const auto &construction=cell.candidates[j];
+                          double farthest=0.;
+                          for (unsigned int l=1; l<count; ++l)
+                            if (l!=j) farthest=std::max(farthest,norm_square(own_means[l]-own_means[0]));
+                          unsigned int mask=0;
+                          for (unsigned int l=1; l<count; ++l)
+                            if (l!=j && norm_square(own_means[l]-own_means[0])
+                                <farthest*(1.-64*std::numeric_limits<double>::epsilon())) mask|=1U<<l;
+                          indicator.useful_masks[j]=mask;
+                          std::vector<TensorType> discrepancy(count);
+                          discrepancy[0]=means[0]-means[j];
+                          for (unsigned int l=1; l<count; ++l)
+                            if (mask & (1U<<l))
+                              {
+                                TensorType extrapolated=own[j][0];
+                                for (unsigned int i=0; i<n; ++i)
+                                  extrapolated+=construction.patch_means[l][i]*(own[j][i]-own[j][0]);
+                                discrepancy[l]=own_means[l]-extrapolated;
+                              }
+                          const auto &correction=construction.constrained_corrections[mask];
+                          means[j]=TensorType();
+                          for (unsigned int i=0; i<n; ++i)
+                            {
+                              for (unsigned int l=0; l<count; ++l) candidate[j][i]+=correction(i,l)*discrepancy[l];
+                              means[j]+=data.mean[i]*candidate[j][i];
+                            }
+                        }
+                    }
+                  if (statistics.trace_cells.count(cell_index))
+                    {
+                      indicator.candidate_values=candidate;
+                      // Export the actual mean-corrected candidates in Pa.
+                      for (unsigned int j=0; j<count; ++j)
+                        for (auto &a:indicator.candidate_values[j]) a=scale*(a-means[j]+means[0]);
+                    }
                   indicator.beta.assign(count,0.);
                   indicator.weights.assign(count,.001);
                   indicator.weights[0]=1.-.001*(count-1);
@@ -382,6 +510,20 @@ namespace aspect
                   statistics.reconstruction_seconds+=seconds(reconstruction_begin,now());
                 }
             }
+          if (statistics.measure_physical_means)
+            {
+              for (unsigned int i=0; i<n; ++i)
+                for (unsigned int c=0; c<incoming.size(); ++c)
+                  {
+                    const auto component=TensorType::unrolled_to_component_indices(c);
+                    const auto index=cell.candidates[0].indices[i];
+                    indicator.physical_mean_before[component]+=data.mean[i]*incoming[c][index];
+                    indicator.physical_mean_after[component]+=data.mean[i]*result[c][index];
+                  }
+              const auto difference=indicator.physical_mean_after-indicator.physical_mean_before;
+              norm_change.maximum_physical_mean_change=std::max(norm_change.maximum_physical_mean_change,std::sqrt(norm_square(difference)));
+              norm_change.integral_mean_change+=cell.measure*difference;
+            }
           if (statistics.measure_norm_changes)
             {
               const auto measurement_begin=now();
@@ -409,6 +551,7 @@ namespace aspect
               statistics.norm_measurement_seconds+=seconds(measurement_begin,now());
             }
           statistics.last.push_back(std::move(indicator));
+          ++cell_index;
         }
       if (statistics.measure_norm_changes)
         {
@@ -418,10 +561,11 @@ namespace aspect
           statistics.norm_changes.push_back(norm_change);
         }
       if (capture) statistics.first_outgoing=result;
+      if (statistics.stage_observer) statistics.stage_observer(incoming,result,time,statistics.last);
     }
 
 #define INSTANTIATE(dim) \
-  template std::shared_ptr<PhaseFieldFault<dim>::DGLimiter> PhaseFieldFault<dim>::make_dg_limiter(const DGTransport &,const LinearAlgebra::BlockVector &) const; \
+  template std::shared_ptr<PhaseFieldFault<dim>::DGLimiter> PhaseFieldFault<dim>::make_dg_limiter(const DGTransport &,const LinearAlgebra::BlockVector &,bool) const; \
   template void PhaseFieldFault<dim>::limit_dg_transport(const DGLimiter &,const DGComponents &,DGComponents &,const DGField &,double,DGLimiterStats &) const;
     ASPECT_INSTANTIATE(INSTANTIATE)
 #undef INSTANTIATE

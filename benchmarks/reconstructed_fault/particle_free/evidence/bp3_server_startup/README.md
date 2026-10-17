@@ -1,0 +1,2 @@
+Current source-package review: completed bounded two-rank wall-stop and scheduled-output/restart comparisons. Native runs timeout after 240 s. Replay source: benchmarks/reconstructed_fault/bp3_native/tests/collective_stop/. Full native outputs remain under build-particle-free/bp3-startup-review/verified; compact inputs, logs, result JSON, native-child RSS and hashes are retained here.
+No server job was launched. strict_reference_match_passed=false. See doc/reconstructed_fault/particle_free/BP3_DG_STARTUP_REVIEW.md.

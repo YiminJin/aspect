@@ -1,0 +1,17 @@
+cmake_minimum_required(VERSION 3.13.4)
+find_package(Aspect REQUIRED HINTS ${Aspect_DIR})
+DEAL_II_INITIALIZE_CACHED_VARIABLES()
+project(bp3_collective_stop_regression CXX)
+
+# Dedicated bounded strengthening fixture; never used by the server adapter.
+add_subdirectory(../../server/plugin native)
+target_compile_definitions(bp3_restore_150x50 PRIVATE ASPECT_BP3_LOCAL_BOTTOM_TEST)
+option(BP3_TEST_NONROOT_WALL_STOP "Inject rank-1 wall request at accepted step 2" ON)
+if(BP3_TEST_NONROOT_WALL_STOP)
+  target_compile_definitions(bp3_restore_150x50 PRIVATE ASPECT_BP3_TEST_NONROOT_WALL_STOP)
+endif()
+add_library(bp3_coupled_checks SHARED ../../coupled_checks.cc)
+ASPECT_SETUP_PLUGIN(bp3_coupled_checks)
+target_compile_definitions(bp3_coupled_checks PRIVATE ASPECT_BP3_LOCAL_BOTTOM_TEST)
+target_compile_options(bp3_coupled_checks PRIVATE -fno-finite-math-only -ffp-contract=off)
+target_link_libraries(bp3_coupled_checks bp3_restore_150x50)

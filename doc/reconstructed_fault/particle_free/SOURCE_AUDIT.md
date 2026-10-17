@@ -1,4 +1,651 @@
+# BP3 server startup review audit — 17 October 2026
+
+[Report](BP3_DG_STARTUP_REVIEW.md). Task entry: base
+`a8707307008401ac9cff702a369e2e2a611fa0f7` plus preserved worktree. Scientific
+source, independent publication allowance, defaults and prior failures remain.
+
+- `bp3_native/server/plugin/output.cc` reduces the complete local stop request
+  with integer MPI maximum before scheduling any output. Heavy/profile flags
+  are also collective before native output gates and root-write collectives.
+  Output completion and termination consume the same shared decision.
+- `bp3_native/coupled_checks.cc` retains its native-output dependency and makes
+  the scheduled field flag collective before exports/index writing. Two native
+  timer scopes label dense stress/coefficient costs; equations/checks unchanged.
+- `source/simulator/checkpoint_restart.cc` adds only a native `Resume snapshot`
+  timer covering read/restoration. Storage, payload, rotation and state unchanged.
+- `bp3_native/tests/collective_stop/` is a separate bounded test build. A compile
+  definition injects a rank-1-only wall request at accepted step 2 and exports
+  request/decision traces. The ordinary server adapter defines no test macro.
+- `startup.prm`/`startup-resume.prm` change only accepted-step bounds (5/8),
+  checkpoint cadence (1), graceful budget (7200 s) and resume mode relative to
+  first-event inputs. Native adaptive timestep/physical inputs are identical.
+- DG checkpoint serialization is not redesigned: all_gather still replicates
+  39 doubles/cell plus containers, buffers and packed histories on every rank.
+  Resource collection is an explicit server startup gate, not a memory claim.
+
+Current two-rank wall-stop/restart fields match the uninterrupted control exactly;
+all four parameter files validate and the rebuilt unit suite passes 124/118034.
+Prepared server startup and unqualified first-event evolution remain distinct.
+`strict_reference_match_passed=false`; detailed commands/results and retained
+accuracy limitations are in the report and package qualification records.
+
+---
+
+# First-event source-distribution audit — 17 October 2026
+
+[Package report](BP3_DG_FIRST_EVENT_PACKAGE.md). ASPECT core, headers, unit tests
+and build inputs match task entry exactly. All earlier science failures and
+particle controls remain. No publication allowance or physical check was removed.
+
+- `bp3_native/coupled_checks.cc` adds default-off `Scheduled field output`, using
+  existing BP3 OutputSchedule/FirstEvent helpers and Heavy-output parameters.
+  Dense tensor/coefficients/cut exports observe accepted states only; scalar
+  checks, profile/weak loads and native history publication still occur every
+  accepted step. Root writes the replicated weak loads in this selected mode.
+- The selected output schedule/event state uses its own optional checkpoint key;
+  inactive/default diagnostics retain their original serialization. Reuse of an
+  older unscheduled checkpoint with the selected schedule is explicitly rejected.
+- Per-step CSVs use existing `BP3::needs_header` for fresh restart branches. This
+  repairs missing observer headers without changing history/state or old data.
+- The new first-event CMake adapter compiles maintained BP3/observer sources from
+  the supplied ASPECT tree; no local test/loading macros are defined. It exposes
+  runtime libraries/executable in `plugin/`, leaving objects in `plugin/build`.
+- Standalone fresh/resume inputs select the previously qualified homogeneous
+  stationary mature DG route, native adaptive BP3 time controls and native
+  first-event termination. Phase, transport, mesh and geometry remain fixed.
+  Environment setup changes variables only; build and `ibrun` are manual.
+
+Default two-rank fields reproduce 36 retained files byte for byte; scheduled
+fields match 20 corresponding files. Split restart to step five is bit identical
+in all compared histories/tensors/loads and does not emit a spurious step-four
+snapshot. Full first-event accuracy, cost and larger-rank behavior remain server
+questions. `strict_reference_match_passed=false` remains in the distribution.
+
+---
+
+# Mature native acceptance / pilot audit — 17 October 2026
+
+[Scope](PF6_MATURE_PILOT_FORMULATION.md), [measured report](PF6_MATURE_PILOT_REPORT.md).
+Entry is `a8707307008401ac9cff702a369e2e2a611fa0f7` plus the preserved incoming
+worktree (12597 entry file hashes). Earlier audits, failed evidence and
+`strict_reference_match_passed=false` remain below and in their original files.
+
+## Equations and initialization
+
+This extends the **fixed-chi**, fixed-geometry native mature experiment; it does
+not extend its equations to evolving/transported localization. Retain
+`T_new=beta*T_old+2*kappa*D3(symgrad u_new)`,
+`Z_new=beta*Z_old+kappa*V_new`, `tau=T-2*chi*Z*S`, with
+`beta=exp(-G*dt/eta)`, `kappa=-eta*expm1(-G*dt/eta)`. Z=G*s_mem has no cohesive
+energy/resistance. The native source, full 3D plane-strain convention, RSF aging,
+physical initial state, normalization/projection/derivatives, active association
+selector and paired/constant endpoint completion are unchanged.
+
+`normalization.cc::project_surface_chemical_compositions()` previously assigned
+zero/background labels throughout homogeneous mesh-data mode. That was harmless
+for the local uniform-a fixture but would erase the intended BP3 transition.
+The mature branch now evaluates the **configured InitialComposition manager**
+directly at fixed surface nodes during fresh initialization and retains the
+manager-owned values on subsequent steps/restart. Bulk G/eta/density/thermal and
+profile coefficients remain configured homogeneous values; surface a may vary.
+No particle projection, new material parameter, alternative friction law or
+prestress compensation is introduced. Cohesive homogeneous initialization keeps
+its previous branch. The full ordinary BP3 initializer/independent regularized
+law checks both actual surface nodes and interpolated interior values.
+
+## Source and ownership changes
+
+| Source | Change / retained contract |
+|---|---|
+| `phase_field_fault.cc` | Existing accepted-DG flag admits fixed frozen homogeneous mature MPI/restart. FE and particle conversion restrictions remain. The D3 diagnostic-sample convention can resume only through accepted DG; particle-authoritative D3 restart remains guarded. All 34 material defaults match entry. |
+| `fe_strain_internal.h` | Initialize the mature branch's unused cohesive m to zero, making checkpoint metadata deterministic; the actual phase-handler degradation law is unchanged. |
+| `reconstructed_fault_stokes.cc`, `core.cc` | Reuse the existing deferred outer-publication callback for mature DG. A converged mechanical trial returns staged u/V with manager trials rolled back. The actual timestep decision drops it on repeat or performs the validated native commit once on acceptance. No Newton/tangent, residual scaling, FGMRES or physical phase ordering changes. |
+| `history.cc` | Permit the mature native commit owner under the accepted-DG flag. The separate prescribed PF5 split-commit API explicitly rejects mature mode. Every source contribution still reads the same accepted T/Z/Theta and is applied once. |
+| `dg_accepted.cc` | Version 4 reuses version-3 global owned CellIds, physical corners/phase anchors and all 27 coefficients/cell; retains Z/I, geometry/material metadata, accepted counter and separate native next-step clock. Mature restore requires exactly zero cohesive traction, independently of nonzero Z. Versions 1–3 retain their old routing. The prescribed transport API rejects mature mode. |
+| `phase_field.cc` | Same-mode mature restart may retain fully prescribed phase. Owned candidate versus ghosted-anchor vector equality gave a false MPI failure: the guarded reproduction measured zero changed owned values / zero error. The replacement compares **every owned physical value exactly**, then MPI-mins the result. No tolerance/floor was added. |
+| `dg_history.cc` | Initialization log names the accepted lifecycle rather than implying the PF5 prescribed-transport path. Projection/reconstruction and source-roundoff arithmetic are unchanged. |
+| `coupled_checks.cc` | Default-off lifecycle diagnostics admit restart/repeated trials, prepare transient boundary associations before diagnostic point reads, deep-compare all DG coefficients, and compare all property bytes (NaN registry sentinels included). Preserve step-zero slip semantics. Existing one-owner guard injection is supplemented by actual outer rejection and native nonlinear failure/cutback controls. Save diagnostic progress through native postprocessor checkpoints. |
+
+Native checkpoints follow `advance_time`: accepted constitutive step n coexists
+with next native clock n+1. Restore does not advance T/Z/state. Existing frozen
+normalization restart validation compares a cold solve with stored I, then retains
+the checkpointed I; no new normalization allowance or derivative rule is added.
+The serial phase-reference import remains fresh-only, fixed-grid and MPI1.
+No AMR, moving geometry, phase evolution, mature transport or conversion was enabled.
+
+The independent publication comparison remains mandatory on every rank before
+terminal writes. `fe_strain.cc`, including its validator and operand-derived
+allowance, is byte unchanged from entry. No failed comparison was removed or
+empirically rescaled. `dg_limiter.cc`, `dg_transport.cc`, particle manager/domain
+sources and native fault-manager source also match entry. Old CPDI/domain and
+quadrature failures remain evidence for their original branches.
+
+## Remaining particle reads in the selected path
+
+- Native initial-composition/H properties are still created for the fixed points;
+  they include inert initial theta/strengthening as well as H. Prescribed mesh
+  phase, configured bulk coefficients and surface initialization do not read
+  these point fields. Generic initialization/checkpoint compatibility still
+  allocates them.
+- `fe_strain` restrictions read IDs, coordinates, local ownership and population
+  counts to enforce stationary sampling; stress evaluation uses matching native
+  CellIds. Mesh/fault data provide physical geometric support, not Voronoi domains.
+- Native history candidate/publication code reads old point stress and H for the
+  independent Maxwell consistency calculation and frozen-H bookkeeping. Accepted
+  mechanical assembly and fault weak loads read authoritative DG T/Z and native
+  FE forcing/localization. Point stress is overwritten only with accepted derived
+  samples, never transferred back to mechanics.
+- Benchmark/native audit and checkpoint writers read point properties, IDs and
+  next-ID bookkeeping. The existing native particle checkpoint owner remains.
+  Domains, CPDI and face-data generation are disabled; no selected material or
+  mechanical branch calls a particle-domain accessor.
+
+Effective motion is disabled by `BP3 stationary samples`; the RK2 freeze variable
+is unset. Full point audits compare IDs/coordinates before/after, including
+rejection and restart: motion, births and deletions are zero. Fresh MPI generators
+may number identical physical points differently; restart retains IDs exactly.
+A subsequent removal should first implement deterministic mesh-cell validation
+points using independent native FE gradients and preserve negative consistency
+controls. Only then remove diagnostic point history/initial-property/checkpoint
+requirements. Keep the separate legacy CPDI backend and its known domain defects.
+
+---
+
+# Mature resolution-separation audit — 17 October 2026
+
+[Formulation](PF6_MATURE_RESOLUTION_FORMULATION.md),
+[measurements](PF6_MATURE_RESOLUTION_REPORT.md). All earlier audits/failures remain.
+
+- `phase_field_fault.h` adds an empty-by-default immutable benchmark phase
+  reference (physical evaluator plus explicit exterior lattice spacing), with
+  no constitutive history or imported I. `boundary_completion.cc` restricts it
+  to fresh serial fixed-mesh frozen mature mechanics, verifies every phase
+  constraint/physical vertex and the refined boundary trace, and retains the
+  coarse exterior Q1 spacing. The original no-reference admission, integrand,
+  consistent normalization projection/derivatives and paired completion remain.
+- `fe_strain.cc` applies an explicit existing FE quadrature value above three
+  to mature particle comparisons as well. Default three retains the native
+  particle rule exactly; independent history is unchanged. Description only
+  in `phase_field_fault.cc`; no new material parameter or changed default.
+  All actual points/weights are compared; selected controls use 36 bulk points.
+- Maintained BP3 `phase_reference.{h,cc}` reads an immutable admissible, aligned,
+  nonoverlapping dyadic Q1 snapshot. `bp3.cc` prescribes its complete polynomial
+  on fine vertices and attaches its exterior data before preparation. Default
+  empty input retains the original physical seed. Configuration identity records
+  an explicitly selected reference; CMake adds only this maintained source.
+  Boundary loading, profile law, physical initial state and geometry are unchanged.
+- `coupled_checks.cc` exports actual native surface weak loads/mass, optional
+  common physical-point stress and DG support nodes. It reads accepted DG stress
+  and immutable incoming particle transfer plus native accepted forcing, with
+  explicit cell trace ownership; no second Maxwell update. Original exports
+  remain byte-identical in the reproduced CC/FF controls.
+- Drivers pin the same core/plugins and 1031 native source hashes, actual inputs,
+  logs/cost/output hashes. The reduction uses the full 3D tensor metric and
+  Cauchy pressure, common physical-profile weights, fixed endpoint windows and
+  neutral backend differences. The bulk-work mass is measured, not assumed
+  geometric: subtract each native M*1 background and separately evaluate a
+  shared geometric surface functional. No native mass/operator is replaced.
+- Independent all-vertex/nonnodal Q1 checks and saved all-nine-mode DG evaluation
+  pass. Native fixed phase/I/point population, state/Maxwell/work and once-only
+  publication checks pass; old CC/FF fields and default particle fields reproduce.
+  No acceptance allowance or failing validator was removed or relaxed.
+
+DG constitutive/source/transport/limiter/accepted-transfer/checkpoint kernels,
+normalization integration/projection/derivatives, phase-energy, particle manager
+and particle domains are byte-identical to task entry. Mature restart/MPI and
+phase evolution remain unsupported or unqualified. The selected physical seed
+representation and mechanics still show large differences; temporal-load failure,
+`strict_reference_match_passed=false` and all prior evidence remain unchanged.
+
+---
+
+# Stationary mature DG extension audit — 16 October 2026
+
+[Declared scope](PF6_MATURE_DG_FORMULATION.md), [measured report](PF6_MATURE_DG_REPORT.md).
+The earlier audits and all failed evidence remain below.
+
+- `phase_field_fault.cc` extends the existing default-off homogeneous mesh-data
+  selection to fresh serial frozen mature independent DG/FE histories. Require
+  static fields, configured homogeneous materials, no domains/CPDI, fixed geometry,
+  fixed mesh, and no restart/conversion. Mature DG does not enable the separate
+  PF5 prescribed-transport/checkpoint flag. Existing cohesive selections stay intact.
+- `fe_strain.cc` reuses the mature history owner, phase/I/geometry and auxiliary Z,
+  adds owned Cartesian source-cell lookup and initializes all nine DGQ2 modes.
+  DG owns T; its displacement-history velocity block remains zero. The mature
+  DG publication count advances through the existing native commit owner.
+- `dg_history.cc` reconstructs mature stress with the actual oblique segment,
+  shear sense and native source map, including constant endpoint continuation:
+  tau=T-2(h/I) Z S. General native localization replaces only the old horizontal
+  assumption for this selected mode. The cohesive branch is retained. The
+  Gauss3 native-source projection and its operand-derived allowance are unchanged.
+- `constitutive.cc`/`history.cc` generalize the existing mature FE zero-cohesion
+  path to independent history. C=0 and Q_geo=0; Z evolves independently by
+  beta*Z+kappa*V and is never reconstructed from I*C. Native stress, RSF, loading,
+  normalization and rate/spin conventions are preserved. Complete validation
+  still precedes publication; the stress validator and its allowance are unchanged.
+- The domain-free mature phase route in `simulator/phase_field.cc` requires every
+  physical phase DoF prescribed and admissible. At later callbacks it requires
+  exact equality with the accepted physical phase. It performs no CPDI projection
+  or phase solve. The first positive-step gate caught and repaired an erroneous
+  initialization-only callback guard; its original failure is retained.
+- `manager.cc` reuses mature support from bulk-cell margins and native stationary
+  profile widths, plus fixed prescribed geometry and paired boundary completion.
+  General normalization, its projection and derivatives are unchanged.
+- The maintained BP3 callback provides the existing positive nodal Theta function
+  before domain-free preparation. Missing state rejects rather than falling back
+  to particle projection. `initial_composition.cc` permits diagnostic static-field
+  initialization only for this explicit homogeneous mature selection. Legacy
+  particle field requirements are retained.
+- Benchmark work/trajectory observers recognize both independent backends and
+  the selected common D3 particle convention. They export accepted reconstructed
+  stress, complete DG coefficients, frozen phase, raw/filtered traction and native
+  recurrence/publication checks. For particle control the stress export evaluates
+  the actual accepted native operator from its frozen incoming transferred FE
+  fields, not a second update of newly published particle samples.
+- The stage-only operator observer compares parallel native-FE and DG histories,
+  actual surface weak loads, endpoint continuation and normalization. Its old
+  FE-only test allowance omitted DG source-projection roundoff; the diagnostic
+  now adds the existing derived DG allowance. Production tolerances were not
+  multiplied or otherwise changed. Original failed run is retained.
+
+No transport, limiter, phase-energy, checkpoint or mesh-transfer algorithm is
+changed in this task. Remaining particle dependencies and measured limits are
+reported separately; this is not propagation, mature restart or PF5 completion.
+
+---
+
+# Homogeneous mesh-data replacement audit — 16 October 2026
+
+[Measured results](PF6_DOMAIN_FREE_REPORT.md), [rules](PF6_DOMAIN_FREE_FORMULATION.md).
+All incoming audit text and failed evidence are retained below.
+
+- `phase_field_fault.{h,cc}` adds default-off `Use homogeneous mesh data`, restricted
+  to accepted DG consistent endpoint, prescribed physical seed, static fields,
+  homogeneous configured coefficients and fixed prescribed geometry. Reject
+  domains/CPDI/face-data requests. Bulk material uses the configured background
+  fractions; viscosity returns the validated constant without material projection.
+- `simulator/phase_field.cc` permits domain-free diagnostic points on this selected
+  configuration, uses the cell FE graph, and prohibits CPDI assembly fallback.
+  Existing supplied-profile initialization bypasses H-driven phase relaxation.
+  `fe_strain.cc` changes only its initialization message; its publication validator
+  is identical to the accepted preceding implementation.
+- `normalization.cc::project_surface_chemical_compositions` sets background labels
+  directly for this homogeneous selection. Normal integration, consistent mass
+  projection and every normalization derivative/pullback are unchanged. Independent
+  Gauss24/32 I/DI/D²I and FD action checks pass. `fe_normalization.cc` and
+  `fe_phase_energy.cc` are byte-identical to task entry.
+- `reconstructed_fault/manager.cc` obtains selected support from bulk vertices and
+  fixed full-normal fault geometry. H initialization retains native analytic
+  diagnostic values using configured background material; it no longer reads
+  particle chemistry and does not initialize the selected physical phase.
+- `manager_particle_projection.cc` caches geometry-only point associations with
+  NaN volume and empty quadrature; cache validation uses ID/position/fault metadata.
+  Particle projection-factor construction explicitly rejects this mode. Matching
+  CellId traces still come from the native particle owner in `history.cc`.
+- `history.cc` uses the configured background material for the independent native
+  Maxwell check, skips chemical particle mappings, and records/rejects changes of
+  mode through the existing surface property registry. No physical law, source
+  allowance, stress validator, publication ordering or time-level rule is changed.
+- `particle/property/maxwell_stress.cc` initializes selected diagnostic samples to
+  the same unloaded zero as independent DG; `crack_driving_force.cc` reads the
+  configured homogeneous threshold. Static FE fields need no particle mapping.
+  The selected fixture removes its unused particle chemical property.
+- `particle_domain.cc`, `particle/manager.cc`, DG projection/transport/limiter,
+  accepted-history checkpoint packing and native transfer operators are unchanged
+  in this task. Legacy domain coverage still fails on the fresh deep negative
+  control; all 21 frozen FE/CPDI CSVs reproduce exactly.
+
+Runtime private-pointer checks establish no domain object at every exported selected
+point state. Since construction is solely request-driven and access throws without
+an object, no successful domain read occurs; the evidence does not invent access
+counters. Every point ID/coordinate remains fixed. The 1/2/4-rank full cases retain
+the original source/averaged-trace negative check, outer rejection/retry and single
+publication. Same-count and continued restart match exactly; serial-to-four differs
+only by native functional summation roundoff, with the retained RNG restriction.
+
+---
+
+# Gauss12/local-transfer followup audit — 16 October 2026
+
+[Measured report](PF6_LOCAL_REPORT.md) and [formulation/amendments](PF6_LOCAL_FORMULATION.md).
+Preserve all incoming audit text and evidence below.
+
+- Physical Gauss12 is selected in fixture inputs through the existing parameter;
+  the production default is unchanged. Analytic ray normalization, its surface
+  mass projection, DG Gauss3 source/mass, constitutive laws and limiter are unchanged.
+- `fe_strain.cc` accepts the selected affine Cartesian local geometry and convex
+  homogeneous Q1 hanging constraints. Local physical rules conservatively split
+  fixed-surface knots; every physical consumer uses the same rule, without MPI
+  collectives inside cell assembly. Uniform rules retain their existing layout.
+- `dg_transfer.cc` checks complete flagged coarsening families and the same
+  256-epsilon physical phase/obstacle representability condition. Native distributed
+  SolutionTransfer retains all nine modes of each tensor component. Source/point
+  caches rebuild; physical clocks, Z/I, rates and publication counts stay fixed.
+- `core.cc` finalizes selected refinement flags before preparing histories or
+  particle data, preventing stale ownership after canceled/no-op flags. Phase
+  rejection remains before userdata preparation and mutation; legacy hook order stays.
+  Restored accepted DG endpoints check the existing termination manager before the
+  do-while loop, avoiding an extra physical iteration after a completed checkpoint.
+- `particle/manager.cc` rebuilds selected endpoint domains after unpacking, bounds
+  handling and final ghost exchange. Fixed coordinates do not imply stable indices.
+- `particle/particle_domain.cc` retains nonperiodic 2D closed-patch candidates at
+  artificial upper container walls using a derived floating-point bound and outward
+  rounding, keeps physical walls/particle coordinates fixed, and verifies insertion
+  count. Existing positive-volume/coverage guards remain. Failure context now names
+  particle/index/CellId/box/candidate count. Genuine deep-neighborhood insufficiency
+  remains guarded; no new neighbors or fabricated volumes are supplied.
+- `reconstructed_fault_endpoint_phase.cc` explicitly rejects hanging-node phase
+  evolution. The current minimizer's independent nodal variations are not silently
+  reused as constrained variations. Frozen local evaluation/restart is the qualified
+  subset; no phase-first composition or altered physical KKT/energy acceptance.
+
+All 13 final cases use one source/build/observer set. Native 1/2/4-rank transfers,
+restore-only and continued restart, independent geometry/quadrature references,
+and the frozen FE control pass; all 21 control CSVs are byte-identical. Cross-rank RNG replay remains
+unavailable with population changes disabled. The original strict-reference false
+flag and Gauss6 failure remain unchanged; numerical remapping does not resolve them.
+
+---
+
+# Fixed-reference transfer and matching-cell ownership audit
+
+16 October 2026; base `a8707307008401ac9cff702a369e2e2a611fa0f7` plus preserved
+incoming work. [Rules](PF6_TRANSFER_FORMULATION.md), [measured report](PF6_TRANSFER_REPORT.md),
+[remaining particle reads and replacements](PF6_PARTICLE_READ_AUDIT.md).
+
+- `dg_transfer.cc` adds accepted-state-only uniform Cartesian remapping with
+  native distributed SolutionTransfer. Every scalar DG component retains all
+  nine coefficients. Coarsening is L2 projection; phase/lower-obstacle coarsening
+  is admitted only when the parent Q1 interpolant reproduces the child field.
+  The collective precheck runs before particle/userdata preparation and mesh
+  mutation. New history clears source-roundoff and derived point caches.
+- `simulator/core.cc` routes those pre/post operations through native refinement,
+  transfers the older native solution buffer on this DG path, rebuilds constraints
+  before accepted-cache construction, and rejects pending endpoints before remap.
+  The existing physical outer acceptance/publication mechanism is retained.
+- `history.cc` selects the particle CellId for native DG consistency gradients,
+  checks association ID/order/position, and propagates local sampling failures
+  before later collective evaluations. Continuous temperature/phase sampling and
+  the legacy gradient path retain their existing conventions. No unused averaged
+  gradient is computed for DG. The historical failure CSV key `remote_gradient`
+  remains replay-compatible; new `matching_cell_gradient_trace` identifies the
+  changed selected trace convention. Original failure CSVs/errors are untouched.
+  Publication allowance and validator are unchanged; statistics now reduce
+  error/bound ratios and old-allowance failure counts over ranks.
+- `dg_accepted.cc` adds version-3 endpoint payload packing by uniquely owned
+  CellId with physical corners/phase, complete coefficients and clocks. Restore
+  checks global ownership and physical phase/geometry collectively, creates owned
+  vectors, then refreshes ghosts. Old serial v1/v2 branches remain readable;
+  new backend conversion is not admitted. Native particle/RNG/manager persistence
+  stays in its existing owner.
+- `simulator/phase_field.cc` reduces ordinary FE fracture's owned-cell energy,
+  gradient, Hessian and arithmetic scales for the selected MPI endpoint. The
+  residual arithmetic norm uses the sum of squared uniquely owned global rows.
+  The cell integrand, quadrature, phase variations and native KKT/energy tests
+  are unchanged. `phase_field_fault.cc` admits MPI only through the selected
+  accepted DG consistent-endpoint mode; other DG MPI/transport/automatic-AMR
+  restrictions remain.
+
+Measured uniform serial/1/2/4 transfers and restart pass independent common-rule
+checks. The unchanged native Gauss6 physical quadrature misses the declared 1e-9
+functional screen on the coarse evolved fixture; this is reported separately as
+`native_rule_vs_high_rule_screen_passed=false`. No quadrature or physical
+acceptance rule is changed. See the measured report and portable replay.
+
+Native laws remain T_e=beta*T_n+2*kappa*D3(symgrad u), Z_e=beta*Z_n+kappa*V,
+tau=T-2*chi*Z*S and q=Z/I, with the full 3D plane-strain metric and the audited
+rate convention. Transfer applies none of these updates. `constitutive.cc`,
+`dg_history.cc`'s projection/recurrence, transport, limiter, physical inputs and
+all preceding evidence are preserved. The source audit below is historical
+provenance, including every original strict error and false flag.
+
+---
+
+# PF6a publication-consistency repair — 16 October 2026
+
+[Detailed derivation and measured evidence](PF6A_PUBLICATION_REPORT.md).
+`history.cc` captures both prepublication paths on failure: actual native
+remote-point velocity gradient/Maxwell operands, full local FE coefficients,
+DG incoming/trial coefficients, phase/I/Z, geometry/point coordinates and error
+budget. The reproduced original guard fails by 1.24971. Independent 80-digit
+polynomial differentiation identifies native point-gradient cancellation; state,
+Maxwell recurrence and localization agree. The original stress-evaluation budget
+omits differentiation/source-projection conditioning.
+
+`dg_history.cc` preserves its Gauss3 mass/source projection and recurrence, adding
+scratch forward-error data from velocity coefficients and widths, explicit Q2
+value/derivative operation bounds, and the computed inverse defect against the
+analytic tensor-product Q2 mass. `dg_source_publication_allowance` combines both
+evaluation paths in the embedded 3D plane-strain metric. `fe_strain.cc` requests
+this data only for a publication candidate; ordinary Newton trial coefficients
+are bit-identical without it. Stable positive error-factor products avoid
+near-unit subtraction. `history.cc` adds this derived source budget to the old
+history/localization budget and retains the throwing comparison before terminal
+writes. Default FE/particle paths retain the old allowance; no physical law,
+constitutive rate, limiter, source quadrature or production selection changes.
+Scratch bounds are never read as accepted constitutive history or serialized.
+
+`pf6a_checks.cc` adds default-off postpublication batch stress output, using the
+same complete DG coefficients, FE phase and surface Z/I on the unchanged rule.
+Full pointwise comparisons at startup/onset/end and byte-equal accepted states
+verify this diagnostic-only cost correction. The production particle-position
+guard still uses the original independent point paths and rejects inconsistent
+incoming/staged histories. Actual outer rejection, rollback/RNG, cutback, retry
+and once-only publication are verified. Fresh full run: 72 accepted steps,
+879.915 s under the 900 s cap; original failed/capped artifacts remain intact.
+
+The original selected 1D reference is retained. Final native/reference phase
+profiles choose opposite mirror branches; primary unregistered strict errors
+remain failed. Native compares departure candidates with an allowance relative
+to the current best; the independent reference's between-candidate comparison
+is strict. Both pass their original KKT and tested translation-curvature checks;
+energies differ below the native arithmetic screen. No algorithm is retuned or
+reference silently replaced. This limits trajectory equivalence, not the
+verified Maxwell/source/publication identities.
+
+Particle dependencies remain startup H/CPDI/domains, material projection,
+association/support, derived samples/publication validation and persistence.
+Independent DG stress still bypasses particle-stress feedback. The proof assumes
+unique interior samples on fixed affine Cartesian cells. `point_gradients(avg)`
+may average adjacent cells at faces, whereas DG evaluation selects a CellId
+trace; AMR/MPI must establish matching evaluation/ownership separately. Current
+unsupported-path guards and prior general-PF5/propagation limitations remain.
+
+---
+
+# Matched evolving spatial-reference addendum — 16 October 2026
+
+Scope/revision: `a8707307008401ac9cff702a369e2e2a611fa0f7` plus preserved incoming
+work; serial fixed geometry, no transport. [Report](PF6A_REFERENCE_REPORT.md)
+and [formulation](PF6A_REFERENCE_FORMULATION.md) retain unlimited DGQ2 and all
+physical/default/acceptance settings. **No production source change.**
+
+- `pf6a_spatial_reference.py` reuses retained `Reference.direct/refine`, the
+  existing `matched_initialization` continuum BVP, material constants and the
+  consistent-endpoint phase partial. It algebraically eliminates the retained
+  1D Q2 mechanical equations using P1 projection; zero-start compatible history
+  makes its mean authoritative in this reduction. It does not change native
+  DG ownership, drop native Q2 modes, or call the historical split time driver.
+  Independent full Q2 matrix and directional derivative checks pass.
+- Native `initialize_fe_shared_phase` interpolates the prescribed seed file at
+  native nodes. Source-origin audit proves exact table/BVP nodal identity for
+  the selected 512 mesh. Main finer phase references evaluate that same
+  documented continuum definition at additional nodes. Literal table-interpolant
+  refinement is preserved separately: identical-field representation at 1024
+  does not imply unchanged obstacle-space stability. No seed fitting, loaded
+  import or mesh-dependent H relaxation is used as the primary reference.
+- `run_pf6a_reference.py` reuses the existing PF6a observer and exact source-
+  pinned core, one fresh 512-cell trajectory with fixed quadrature 12 and dt.
+  The serial DG guard in `phase_field_fault.cc` remains; permission for eight
+  processes does not supply an MPI implementation. No production API/hook added.
+- The actual first positive native endpoint fails in
+  `history.cc::commit_reconstructed_fault_mechanical_history` at the particle-
+  position consistency test `error <= 128 eps max(1,evaluation_scale)`. Candidate
+  DG stress is compared with independently computed Maxwell stress; both read
+  independent accepted history, not particle stress feedback. Terminal
+  `publish_history_candidates` / accepted FE/DG swaps follow this check and are
+  not reached. Initial exports have zero publications; rollback byte equality
+  after this process-level failure was not measured. The error text alone does
+  not establish the numerical cause or justify accepting the candidate.
+- Existing `prepare_fe_strain_commit`, `candidate_fe_strain_stress`, source
+  projection and sampling retain their audited equations. The exception does
+  not export failing components/error/bound/position; capturing those is the
+  concrete next diagnosis. No constitutive compensation or tolerance change.
+
+Particle dependencies include this publication validation as well as startup
+H/CPDI/domains, material projection, association/support, derived samples and
+persistence. No particle-authoritative comparison, coupled transport, AMR/MPI,
+surface transfer, moving geometry, birth or propagation is qualified. Main
+1D targets pass at 512; the native confirmation fails and is preserved as such.
+
+---
+
+The previous audits retain their original scope and evidence.
+
+# PF6a spatial diagnostic addendum — 16 October 2026
+
+Revision `a8707307008401ac9cff702a369e2e2a611fa0f7` plus preserved incoming
+PF6a/WENO/manual work. [Spatial formulation](PF6A_SPATIAL_FORMULATION.md) and
+[measured report](PF6A_SPATIAL_REPORT.md) separate identical-field evaluation,
+frozen native mechanical resolution, compatible-history storage and fracture
+quadrature. No production implementation or constitutive/default change.
+
+- `pf6a_spatial_checks.cc` is a separate benchmark DSO using the existing test
+  friendship and endpoint diagnostic clock/trial APIs. Frozen trials use
+  immutable imported physical phase/T/Z, actually solve native mechanics,
+  export the explicit endpoint and restore clocks/state/manager fields. Gates
+  assert unchanged histories and zero publication. Native weak residuals,
+  actual reconstructed stress, complete cell moments and traces are exported.
+- `prepare_pf6a_spatial.py` uses all saved Q2 velocities and the native audited
+  Maxwell coefficients to recover the compatible accepted FE displacement.
+  Nine unisolvent points check all complete tensor modes before comparing DG
+  and FE on common fields/ordinary-FE energy. This is a fixture compatibility
+  construction, not a general history or checkpoint conversion.
+- The same observer calls the actual retained CPDI fracture assembler on FE
+  separately. Native FE+CPDI equations remain distinct from the common FE
+  diagnostic. No unmatched particle-authoritative stress or transferred
+  particle values are substituted as a reference.
+- Independent `localization_1d.py::Reference` and `normal_resolution.py` are
+  reused with imported physical fields and their mechanical equations; no
+  historical initialization/evolution is run. Independent local moments verify
+  tau = mean(tau) + (1-P)(beta Tn) - Ze(1-P)chi, including the mean/load changes.
+  The full plane-strain metric, native normalization and rate are retained.
+- The conditional event imports a common physical entry once at native step 0,
+  then observes the existing actual coupled outer loop. A benchmark-only
+  boundary plugin supplies the same linear ramp's exact interval mean at each
+  selected dt. It does not integrate phase or histories. Initial enriched-space
+  KKT defects and omitted matching accumulated-slip/H imports are explicit;
+  no restart/AMR or general RSF transfer qualification follows from this setup.
+- The source/transport rules, consistent phase partial/reduced tangent,
+  irreversibility, accepted-history ownership and final native publication
+  remain owned by the prior PF6a implementation below. New independent checks
+  differentiate all Q2 velocity modes and verify T/Z advancement once per step.
+
+All normal meshes are fixed and serial; only 128 is a new normal level after
+32/64 diagnosis. Remaining particle dependencies and unsupported stages are
+unchanged. The evidence records exact native/observer hashes, inputs, common
+physical points, costs, mathematical checks and preservation of incoming work.
+
+---
+
+The prior audits retain their original implementation/evidence scope.
+
+# PF6a source addendum — 16 October 2026
+
+Selected source root/branch/HEAD: `aspect-pf-rsf-particle-free`,
+`pf-rsf-particle-free`, `a8707307008401ac9cff702a369e2e2a611fa0f7` plus
+preserved incoming work. [Formulation](PF6A_FORMULATION.md) and
+[measured report](PF6A_REPORT.md) describe the bounded serial fixed-grid,
+fixed-reference-surface, no-advection coupled experiment. The existing
+consistent-endpoint/reduced-Newton solver governs; the derivation's split
+proposal is not adopted. PF3 FE fracture replaces CPDI only in this selected
+DG endpoint functional. No constitutive, limiter or production-default change.
+
+| Source owner | Audited implementation / contract |
+|---|---|
+| `fe_phase_energy.cc::make_fe_endpoint_trial` | Reconstruct T_e from accepted DGQ2 T_n and native exact Maxwell/Q2 source, Z_e from accepted Z_n and solved V; explicit phase carried in the existing shared vector. No trial updates its parent |
+| `evaluate_fe_endpoint_energy/action` | Fixed-endpoint phase partial and first/second consistent I/chi pullbacks; explicit DG tensor supplied, full plane-strain metric and native rate preserved |
+| `reconstructed_fault_stokes.cc::make_reconstructed_fault_endpoint_tangent` | Preserve the DG endpoint while solving native mechanical response; dT_e and dZ_e enter the reduced tangent, no frozen-physical-stress substitution |
+| `phase_field.cc` | Ordinary FE fracture-only gradient/Hessian used with explicit endpoint elastic/cohesive energy; no double accepted-history elastic term |
+| `fe_strain.cc`, `history.cc` | Selected phase/I evolution and new phase anchor allowed; fixed mesh/surface/material/particle guards retained. Existing candidate validation/sampling/terminal swaps still own publication |
+| `reconstructed_fault_endpoint_phase.cc`, `core.cc` | DG candidate staged through native timestep-manager reaction. Accept once before postprocessing; discard/restore trial bookkeeping on exception or repeat. Old FE publication branch unchanged |
+| `dg_accepted.cc` | Reuse native checkpoint marker/ownership. Version 2 records accepted step and native next-step clock separately, checks canonical accepted vectors/anchor/publications, and restores without update. PF5 manual v1 remains unchanged; conversion rejected |
+| `dg_transport.cc`, `prepare_dg_accepted_step` | Explicitly reject this coupled mode, preventing the prescribed PF5 transport composition from being mistaken for PF6a |
+| `pf6a_checks.cc` | Observe real native advancement and expose immutable diagnostics; actual solve exception, actual manager cutback, automatic filesystem restart and canonical full-manager comparisons. It does not integrate coupled physics |
+
+The late audit found publication inside `solve_timestep` preceded a second,
+real outer rejection point in `TimeStepping::Manager::update`. PF6a now delays
+DG publication through that decision. A native `repeat on cutback` fixture
+verifies unchanged anchor bytes/phase and identical accepted-schedule results.
+A final error-path audit also found that a failed deferred context check needed
+entry-bookkeeping restoration. The narrow catch/restore correction is verified
+by a stale-context regression that fails on the pinned previous core, followed
+by unchanged accepted coarse/cutback/restart exports.
+Another correction distinguishes automatic post-`advance_time` checkpoints from
+PF5's observer-prescribed endpoint clock. Both old failures are retained.
+
+Native source projection uses Gauss3; existing split mechanical six-normal-point
+quadrature is compared to twelve and independent 24/32-point integration.
+Transport quadrature/operator and all WENO code/settings are unchanged. Fresh
+final-source dt/dt2 controls reproduce all primary physical exports; historical
+build groups and observer changes are identified separately in evidence.
+
+Particle dependencies remain startup H/CPDI/domain initialization, surface
+material mixture projection, support/associations, fixed-particle guards,
+derived stress/H samples and particle/RNG persistence. Particle stress is never
+incoming DG tensor or mechanical/fault-load feedback. Physical phase p_n, not H,
+is the accepted obstacle/driver convention in the endpoint solve. No bulk or
+surface advection, AMR/MPI, moving geometry, surface transfer, birth or general
+propagation is enabled or qualified. Large normal spatial stress sensitivity
+remains despite verified operators and native KKT; see the report's next task.
+
+---
+
+The original audits below retain their historical scope and findings.
+
 # PF0 source audit — 15 October 2026
+
+## Pre-PF7 candidate-construction audit — 16 October 2026
+
+The newly selected comparison is documented in
+[WENO_CLS_FORMULATION.md](WENO_CLS_FORMULATION.md) and
+[WENO_CLS_REPORT.md](WENO_CLS_REPORT.md). Earlier phase reports and original
+evidence remain historical. `dg_limiter.cc` originally implements complete
+neighbor-polynomial extrapolation plus a target-cell mean shift; this is the
+compact whole-polynomial construction, not the 2016 constrained-neighbor fit.
+The new private `make_dg_limiter(..., constrained_candidates)` option builds
+neighbor-own-cell Q2 mass/patch-average rows and constrained correction maps.
+The common full-tensor useful set and all nine coefficients are retained.
+Uniform translation-equivalent maps are cached within construction; this changes
+no physical model or transport equation.
+
+Detection still precedes fitting and uses unmodified polynomials. Thresholds,
+patch RMS normalization, epsilon/zero-beta branch, derivative smoothness,
+nonlinear weight formula, Gauss3 mass/reconstruction and Gauss4 transport remain
+unchanged. Physical means are now optionally measured directly in Pa, not only
+as the previous normalized reconstruction residual. A post-stage observational
+callback runs after the complete separate output is available; benchmark code
+checks interface flux changes against the existing material matrix and traces
+SSPRK3 mean balances. The callback has no accepted-state access or publication.
+
+The `stabilization_checks` observer gains candidate/case/path/trace selection
+with its previous defaults. `run_candidate_case.py` creates bounded unique
+fixtures; `assess_candidates.py` independently solves Legendre-coordinate KKT
+systems and evaluates errors, widths, norm changes, mean/flux traces and held
+limiting. This is a controlled Q2/tensor adaptation motivated by the primary
+2016 manuscript, not a full published-method implementation. No detector tuning,
+stress envelope, chi limiting, history backend, restart or constitutive change
+is introduced. Existing serial/fixed-grid and AMR/MPI/periodic/moving/coupled
+guards remain. Particle dependencies are unchanged from PF5.
+
+All 30 final same-build transport records pass execution/nonpublication and the
+independent local KKT checks pass. The constrained construction improves sharp
+pulse error relative to mean shifting, but all WENO temporal screens fail and
+x-only scalar fields acquire transverse variation. The cached/uncached strict
+final-field equivalence failure is retained. This is diagnostic evidence, not
+adoption or authorization to begin PF7; unlimited DGQ2 remains the baseline.
+
+---
 
 ## PF5 accepted-history/persistence addendum — 16 October 2026
 

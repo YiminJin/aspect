@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "native_runs": 15,
+  "native_gates": 182,
+  "frozen_assessment": true,
+  "event_assessment": true,
+  "portable_replay": {
+    "passed": true,
+    "archive_hashes": true,
+    "common_data_byte_identical": true,
+    "independent_frozen_and_event_checks": true,
+    "numeric_replay_tolerance": "1e-10 absolute/relative",
+    "native_runs_launched": false
+  },
+  "source_preservation": true,
+  "incoming_files": 10423,
+  "native_core_unchanged": true,
+  "observer_compiled_and_style_idempotent": true,
+  "python_compilation_passed": true,
+  "git_diff_check": true,
+  "old_unit_operator_and_lifecycle_evidence": "unchanged source; retained original PF6a evidence, not rerun or relabeled"
+}

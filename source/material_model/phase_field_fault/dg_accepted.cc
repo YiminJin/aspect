@@ -6,6 +6,7 @@
 #include <aspect/particle/manager.h>
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/string.hpp>
+#include <boost/serialization/map.hpp>
 #include <set>
 
 namespace aspect
@@ -14,7 +15,8 @@ namespace aspect
   {
     template <int dim> struct PhaseFieldFault<dim>::DGCheckpoint
     {
-      unsigned int version=1,step=0,quadrature=0;
+      unsigned int version=1,step=0,quadrature=0,clock_step=0;
+      double clock_time=0.,clock_dt=0.;
       std::uint64_t publications=0,geometry=0;
       double G=0.,eta=0.,m=0.,sense=0.;
       std::vector<double> Z,I,phase,coefficients;
@@ -28,7 +30,7 @@ namespace aspect
       const DGTransport &op,const LinearAlgebra::BlockVector &midpoint_bulk,const double time) const
     {
       validate_fe_strain_restrictions();
-      AssertThrow(dg_accepted_history && op.space==fe_strain_state->dg_history->space
+      AssertThrow(dg_accepted_history && !mature_frictional_fault && !consistent_endpoint_phase && op.space==fe_strain_state->dg_history->space
                   && op.relaxation_rate==0. && op.inflow.empty(),
                   ExcMessage("PF5 requires closed-boundary pure transport; relaxation/source are applied by native half steps."));
       const auto &state=*fe_strain_state;
@@ -73,11 +75,28 @@ namespace aspect
         {
           validate_fe_strain_restrictions();
           const auto &s=*fe_strain_state;
-          AssertThrow(s.committed_step==this->get_timestep_number(),
+          // Native outer checkpoints follow advance_time: their clock is one
+          // step ahead of the accepted constitutive endpoint. PF5 manual
+          // prescribed snapshots retain their existing at-endpoint contract.
+          AssertThrow((consistent_endpoint_phase || mature_frictional_fault)
+                      ? s.committed_step+1==this->get_timestep_number()
+                      : s.committed_step==this->get_timestep_number(),
                       ExcMessage("PF5 checkpoints require an accepted history endpoint."));
+          if (consistent_endpoint_phase || mature_frictional_fault)
+            {
+              const unsigned int block=this->introspection().variable("phase_field").block_index;
+              AssertThrow(this->get_solution()==this->get_old_solution()
+                          && s.displacement_history.block(block)==this->get_solution().block(block)
+                          && s.accepted_publications==s.committed_step,
+                          ExcMessage("PF6a checkpoints require the canonical accepted state after advance_time, not a trial."));
+            }
           dg_checkpoint=std::make_shared<DGCheckpoint>();
           auto &p=*dg_checkpoint;
+          p.version=mature_frictional_fault ? 4 : (consistent_endpoint_phase ? 3 : 1);
           p.step=s.committed_step;
+          p.clock_step=this->get_timestep_number();
+          p.clock_time=this->get_time();
+          p.clock_dt=this->get_timestep();
           p.publications=s.accepted_publications;
           p.G=s.G;
           p.eta=s.eta;
@@ -90,15 +109,54 @@ namespace aspect
           p.geometry=s.geometry_version;
           p.quadrature=fe_bulk_normal_quadrature_points;
           const unsigned int block=this->introspection().variable("phase_field").block_index;
-          for (unsigned int i=0; i<s.displacement_history.block(block).size(); ++i)
-            p.phase.push_back(s.displacement_history.block(block)[i]);
           std::vector<types::global_dof_index> indices(9);
-          for (const auto &entry:s.dg_history->space->cells)
+          if(p.version>=3)
             {
-              p.cells.push_back(entry.first.to_string());
-              entry.second->get_dof_indices(indices);
-              for (const auto &component:s.dg_history->trial_stress)
-                for (const auto i:indices) p.coefficients.push_back(component[i]);
+              // Only uniquely owned CellIds contribute. Physical phase values
+              // and corners avoid partition-dependent native DoF numbering.
+              std::map<std::string,std::vector<double>> local,global;
+              const auto pc=this->introspection().variable("phase_field").first_component_index;
+              for(const auto &entry:s.cells)
+                {
+                  auto &values=local[entry.first.to_string()];
+                  for(const auto v:entry.second->vertex_indices())
+                    {
+                      for(unsigned int d=0;d<dim;++d)values.push_back(entry.second->vertex(v)[d]);
+                      values.push_back(s.displacement_history[entry.second->vertex_dof_index(v,pc)]);
+                    }
+                  s.dg_history->space->cells.at(entry.first)->get_dof_indices(indices);
+                  for(const auto &component:s.dg_history->trial_stress)
+                    for(const auto i:indices)values.push_back(component[i]);
+                }
+              for(const auto &part:Utilities::MPI::all_gather(this->get_mpi_communicator(),local))
+                for(const auto &entry:part)
+                  AssertThrow(global.emplace(entry).second,ExcMessage("Duplicate DG checkpoint CellId owner."));
+              p.mesh.clear();
+              for(const auto &entry:global)
+                {
+                  p.cells.push_back(entry.first);
+                  unsigned int offset=0;
+                  for(unsigned int v=0;v<GeometryInfo<dim>::vertices_per_cell;++v)
+                    {
+                      Point<dim> x;
+                      for(unsigned int d=0;d<dim;++d)x[d]=entry.second[offset++];
+                      p.mesh.push_back(x);
+                      p.phase.push_back(entry.second[offset++]);
+                    }
+                  p.coefficients.insert(p.coefficients.end(),entry.second.begin()+offset,entry.second.end());
+                }
+            }
+          else
+            {
+              for (unsigned int i=0; i<s.displacement_history.block(block).size(); ++i)
+                p.phase.push_back(s.displacement_history.block(block)[i]);
+              for (const auto &entry:s.dg_history->space->cells)
+                {
+                  p.cells.push_back(entry.first.to_string());
+                  entry.second->get_dof_indices(indices);
+                  for (const auto &component:s.dg_history->trial_stress)
+                    for (const auto i:indices) p.coefficients.push_back(component[i]);
+                }
             }
         }
       else
@@ -106,7 +164,8 @@ namespace aspect
       auto &p=*dg_checkpoint;
       archive &p.version &p.step &p.publications &p.geometry &p.G &p.eta &p.m &p.sense
       &p.quadrature &p.Z &p.I &p.phase &p.mesh &p.fault &p.cells &p.coefficients;
-      AssertThrow(p.version==1 && p.G==elastic_shear_moduli[0] && p.eta==reference_viscosities[0]
+      if (p.version>=2) archive &p.clock_step &p.clock_time &p.clock_dt;
+      AssertThrow((mature_frictional_fault ? p.version==4 : (consistent_endpoint_phase ? (p.version==2 || p.version==3) : p.version==1)) && p.G==elastic_shear_moduli[0] && p.eta==reference_viscosities[0]
                   && p.quadrature==fe_bulk_normal_quadrature_points,
                   ExcMessage("PF5 checkpoint version/material/quadrature mismatch."));
     }
@@ -115,14 +174,17 @@ namespace aspect
     void PhaseFieldFault<dim>::restore_dg_accepted_history()
     {
       if (!dg_accepted_history) return;
-      AssertThrow(dg_checkpoint && !fe_strain_state
-                  && Utilities::MPI::n_mpi_processes(this->get_mpi_communicator())==1,
-                  ExcMessage("PF5 restore requires a same-mode serial native checkpoint."));
+      AssertThrow(dg_checkpoint && !fe_strain_state,
+                  ExcMessage("DG restore requires a same-mode native checkpoint."));
       const auto &p=*dg_checkpoint;
-      AssertThrow(p.mesh==this->get_triangulation().get_vertices()
+      AssertThrow((p.version>=3 || (Utilities::MPI::n_mpi_processes(this->get_mpi_communicator())==1
+                                      && p.mesh==this->get_triangulation().get_vertices()))
                   && p.cells.size()==this->get_triangulation().n_global_active_cells()
                   && std::set<std::string>(p.cells.begin(),p.cells.end()).size()==p.cells.size()
-                  && p.step==this->get_timestep_number()
+                  && ((consistent_endpoint_phase || mature_frictional_fault)
+                      ? (p.step+1==this->get_timestep_number() && p.clock_step==this->get_timestep_number()
+                         && p.clock_time==this->get_time() && p.clock_dt==this->get_timestep())
+                      : p.step==this->get_timestep_number())
                   && p.coefficients.size()==27*p.cells.size(),
                   ExcMessage("PF5 restore rejects changed fixed mesh or malformed DG history."));
       current_normalization_integrals= {p.I};
@@ -133,25 +195,50 @@ namespace aspect
                   && p.Z.size()==s.Z.size() && p.I.size()==s.I.size(),
                   ExcMessage("PF5 restore rejects changed geometry/localization/orientation."));
       const unsigned int block=this->introspection().variable("phase_field").block_index;
-      AssertThrow(p.phase.size()==s.displacement_history.block(block).size(),ExcMessage("PF5 phase layout mismatch."));
-      for (unsigned int i=0; i<p.phase.size(); ++i)
-        AssertThrow(p.phase[i]==s.displacement_history.block(block)[i],ExcMessage("PF5 accepted phase anchor mismatch."));
+      const auto pc=this->introspection().variable("phase_field").first_component_index;
+      if(p.version>=3)
+        AssertThrow(p.phase.size()==4*p.cells.size() && p.mesh.size()==p.phase.size(),
+                    ExcMessage("DG checkpoint physical phase/corner layout mismatch."));
+      else
+        {
+          AssertThrow(p.phase.size()==s.displacement_history.block(block).size(),ExcMessage("PF5 phase layout mismatch."));
+          for (unsigned int i=0; i<p.phase.size(); ++i)
+            AssertThrow(p.phase[i]==s.displacement_history.block(block)[i],ExcMessage("PF5 accepted phase anchor mismatch."));
+        }
+      std::array<LinearAlgebra::Vector,SymmetricTensor<2,dim>::n_independent_components> owned;
+      for(auto &component:owned)component.reinit(s.dg_history->space->dofs.locally_owned_dofs(),this->get_mpi_communicator());
       std::vector<types::global_dof_index> indices(9);
-      unsigned int offset=0;
+      unsigned int offset=0,cell_number=0,matching_cells=0;
+      unsigned int matching_phase=1;
       for (const auto &id:p.cells)
         {
           const auto entry=s.dg_history->space->cells.find(CellId(id));
-          AssertThrow(entry!=s.dg_history->space->cells.end(),ExcMessage("PF5 DG CellId mismatch."));
-          entry->second->get_dof_indices(indices);
-          for (auto &component:s.dg_history->trial_stress)
-            for (const auto i:indices)
+          if(p.version<3)AssertThrow(entry!=s.dg_history->space->cells.end(),ExcMessage("PF5 DG CellId mismatch."));
+          const auto native=s.cells.find(CellId(id));
+          if(native!=s.cells.end())++matching_cells;
+          if(p.version>=3 && native!=s.cells.end())
+            for(const auto v:native->second->vertex_indices())
+              {
+                const unsigned int i=4*cell_number+v;
+                if(p.mesh[i]!=native->second->vertex(v)
+                   || p.phase[i]!=s.displacement_history[native->second->vertex_dof_index(v,pc)])
+                  matching_phase=0;
+              }
+          const bool local=entry!=s.dg_history->space->cells.end() && entry->second->is_locally_owned();
+          if(local)entry->second->get_dof_indices(indices);
+          for(auto &component:owned)for(unsigned int i=0;i<9;++i)
               {
                 const double value=p.coefficients[offset++];
                 AssertThrow(std::isfinite(value),ExcMessage("Nonfinite checkpoint DG history."));
-                component[i]=value;
+                if(local)component[indices[i]]=value;
               }
+          ++cell_number;
         }
-      for (auto &component:s.dg_history->trial_stress) component.compress(VectorOperation::insert);
+      AssertThrow(Utilities::MPI::min(matching_phase,this->get_mpi_communicator())==1
+                  && Utilities::MPI::sum(matching_cells,this->get_mpi_communicator())==p.cells.size(),
+                  ExcMessage("DG checkpoint physical mesh/phase anchor or CellId ownership mismatch."));
+      for(unsigned int c=0;c<owned.size();++c)
+        {owned[c].compress(VectorOperation::insert);s.dg_history->trial_stress[c]=owned[c];}
       for (unsigned int j=0; j<p.I.size(); ++j)
         AssertThrow(std::isfinite(p.I[j]) && p.I[j]>0. && std::isfinite(p.Z[j]) && p.Z[j]>=0.,
                     ExcMessage("Invalid PF5 checkpoint surface history."));
@@ -170,8 +257,10 @@ namespace aspect
       const auto ip=manager.get_property_information()[fault_property_indices.previous_normalization_integral].position;
       for (unsigned int j=0; j<s.Z.size(); ++j)
         AssertThrow(manager.get_fault(0).get_properties(j)[ip]==s.I[j]
-                    && std::abs(manager.get_fault(0).get_properties(j)[cp]*s.I[j]-s.Z[j])
-                    <=64*std::numeric_limits<double>::epsilon()*std::max(1.,std::abs(s.Z[j])),
+                    && (mature_frictional_fault
+                        ? manager.get_fault(0).get_properties(j)[cp]==0.
+                        : std::abs(manager.get_fault(0).get_properties(j)[cp]*s.I[j]-s.Z[j])
+                          <=64*std::numeric_limits<double>::epsilon()*std::max(1.,std::abs(s.Z[j]))),
                     ExcMessage("PF5 checkpoint bulk/surface histories disagree."));
       this->get_pcout()<<"   Restored PF5 accepted DG history at step "<<p.step<<", publications "<<p.publications<<'.'<<std::endl;
     }

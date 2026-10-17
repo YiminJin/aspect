@@ -1,0 +1,45 @@
+{
+  "common_settings_unchanged": true,
+  "differences_from_parameters": {
+    "parameters.prm": {},
+    "resume.prm": {
+      "Resume computation": [
+        "false",
+        "true"
+      ]
+    },
+    "startup.prm": {
+      "Postprocess/BP3/Last accepted step": [
+        "2147483647",
+        "5"
+      ],
+      "Checkpointing/Steps between checkpoint": [
+        "10",
+        "1"
+      ],
+      "Postprocess/BP3/Graceful wall seconds": [
+        "82800",
+        "7200"
+      ]
+    },
+    "startup-resume.prm": {
+      "Postprocess/BP3/Last accepted step": [
+        "2147483647",
+        "8"
+      ],
+      "Resume computation": [
+        "false",
+        "true"
+      ],
+      "Checkpointing/Steps between checkpoint": [
+        "10",
+        "1"
+      ],
+      "Postprocess/BP3/Graceful wall seconds": [
+        "82800",
+        "7200"
+      ]
+    }
+  },
+  "parameter_entries": 148
+}

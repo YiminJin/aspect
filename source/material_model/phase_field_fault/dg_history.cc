@@ -19,12 +19,22 @@ namespace aspect
 {
   namespace MaterialModel
   {
+    namespace
+    {
+      long double q2_roundoff_product(std::initializer_list<long double> factors)
+      {
+        long double result=0.;
+        for (const auto error:factors)result+=error+result*error;
+        return result;
+      }
+    }
+
     template <int dim>
     void PhaseFieldFault<dim>::initialize_dg_history(FEStrainState &state) const
     {
       AssertThrow(dg_trial_stress_history && dim==2 && this->get_parameters().stokes_velocity_degree==2
                   && state.Z==std::vector<double>(state.Z.size(),0.),
-                  ExcMessage("PF2 DG history initializes only the unloaded cohesive seed."));
+                  ExcMessage("Independent DG history initializes only an unloaded seed."));
       auto history=std::make_shared<DGHistory>();
       history->space=std::make_shared<typename DGHistory::Space>(this->get_triangulation());
       for (auto &component : history->trial_stress)
@@ -35,7 +45,7 @@ namespace aspect
         }
       state.dg_history=std::move(history);
       this->get_pcout()<<"   Accepted DGQ2 trial stress: independent native source; fixed phase/geometry; "
-                       <<(dg_accepted_history ? "PF5 prescribed transport/restart." : "no transport/restart.")<<std::endl;
+                       <<(dg_accepted_history ? "accepted-history lifecycle/restart." : "no transport/restart.")<<std::endl;
     }
 
 
@@ -54,7 +64,7 @@ namespace aspect
     std::shared_ptr<typename PhaseFieldFault<dim>::DGHistory>
     PhaseFieldFault<dim>::make_dg_history_trial(
       const DGHistory &incoming,const LinearAlgebra::BlockVector &bulk,
-      const MaxwellCoefficients &coefficients) const
+      const MaxwellCoefficients &coefficients,const bool estimate_source_roundoff) const
     {
       const auto &state=*fe_strain_state;
       AssertThrow(dg_trial_stress_history && incoming.space==state.dg_history->space,
@@ -75,6 +85,7 @@ namespace aspect
       FEValues<dim> dg(this->get_mapping(),space.element,quadrature,update_values|update_JxW_values);
       const unsigned int n=space.element.n_dofs_per_cell();
       std::vector<types::global_dof_index> indices(n);
+      std::vector<types::global_dof_index> native_indices(this->get_fe().n_dofs_per_cell());
       std::vector<SymmetricTensor<2,dim>> gradient(quadrature.size());
       for (const auto &entry : state.cells)
         {
@@ -82,6 +93,7 @@ namespace aspect
           const auto dg_cell=space.cells.at(entry.first);
           dg.reinit(dg_cell);
           dg_cell->get_dof_indices(indices);
+          entry.second->get_dof_indices(native_indices);
           source[this->introspection().extractors.velocities].get_function_symmetric_gradients(bulk,gradient);
           FullMatrix<double> mass(n,n);
           std::array<Vector<double>,SymmetricTensor<2,dim>::n_independent_components> rhs;
@@ -100,12 +112,113 @@ namespace aspect
                 }
             }
           mass.gauss_jordan();
+          const auto gamma=[](unsigned int count)
+          {
+            const long double u=std::numeric_limits<double>::epsilon()/2.;
+            return count*u/(1-count*u);
+          };
+          SymmetricTensor<2,dim> strain_scale;
+          std::vector<long double> projection_factor;
+          if (estimate_source_roundoff)
+            {
+              // Absolute operands of Q2 differentiation, rather than the small
+              // resulting gradient. |L_i|<=1, |L_i'|<=4 on [0,1]. In particular,
+              // a nearly constant velocity in a thin cell is ill conditioned.
+              auto &roundoff=trial->source_roundoff[entry.first];
+              std::array<long double,dim> velocity_sum {};
+              for (unsigned int i=0; i<native_indices.size(); ++i)
+                {
+                  const auto c=this->get_fe().system_to_component_index(i).first;
+                  for (unsigned int a=0; a<dim; ++a)
+                    if (c==this->introspection().component_indices.velocities[a])
+                      velocity_sum[a]+=std::abs(bulk[native_indices[i]]);
+                }
+              long double volume=1.;
+              for (unsigned int b=0; b<dim; ++b)
+                {
+                  const long double width=static_cast<long double>(entry.second->vertex(1u<<b)[b])-entry.second->vertex(0)[b];
+                  volume*=width;
+                  for (unsigned int a=0; a<dim; ++a)
+                    roundoff.gradient_scale[a][b]=std::nextafter(static_cast<double>(4*velocity_sum[a]/width
+                                                                                     *(1+2*n*std::numeric_limits<long double>::epsilon())),std::numeric_limits<double>::infinity());
+                }
+              for (unsigned int a=0; a<dim; ++a)
+                for (unsigned int b=0; b<dim; ++b)
+                  if (a!=b)strain_scale[a][b]=.5*(roundoff.gradient_scale[a][b]+roundoff.gradient_scale[b][a]);
+                  else
+                    for (unsigned int d=0; d<dim; ++d)
+                      strain_scale[a][a]+=(a==d ? 2./3. : 1./3.)*roundoff.gradient_scale[d][d];
+
+              // A posteriori inverse defect against the analytic tensor-product
+              // Q2 mass (not against its rounded assembly). This accounts for
+              // assembly/inversion without assuming a backward-stable inverse.
+              const auto gamma_long=[](unsigned int count)
+              {
+                const long double u=std::numeric_limits<long double>::epsilon()/2.;
+                return count*u/(1-count*u);
+              };
+              const int mass_1d[3][3]= {{4,2,-1},{2,16,2},{-1,2,4}};
+              FullMatrix<long double> exact_mass(n,n),defect(n,n);
+              const auto &support=space.element.get_unit_support_points();
+              for (unsigned int i=0; i<n; ++i)
+                for (unsigned int j=0; j<n; ++j)
+                  {
+                    long double value=volume;
+                    for (unsigned int d=0; d<dim; ++d)
+                      value*=mass_1d[std::lround(2*support[i][d])][std::lround(2*support[j][d])]/30.L;
+                    exact_mass(i,j)=value;
+                  }
+              for (unsigned int i=0; i<n; ++i)
+                for (unsigned int j=0; j<n; ++j)
+                  {
+                    long double product=0.,absolute_product=0.;
+                    for (unsigned int k=0; k<n; ++k)
+                      {
+                        product+=mass(i,k)*exact_mass(k,j);
+                        absolute_product+=std::abs(mass(i,k)*exact_mass(k,j));
+                      }
+                    defect(i,j)=std::abs(product-(i==j ? 1.L : 0.L))
+                                +gamma_long(2*n+2*dim+4)*absolute_product;
+                  }
+              std::vector<long double> rhs_weight(n,0.);
+              projection_factor.assign(n,0.);
+              // Monomial absolute coefficient sums are <=8 for L and <=12
+              // for L'; |L|<=1, |L'|<=4, |L''|<=8. Six operations bound the
+              // quadratic Horner/product evaluations (also the simultaneous
+              // derivative recurrence). Include rounded Gauss abscissae here.
+              const long double value_error=8*gamma(6)+4*gamma(4);
+              const long double derivative_relative_error=3*gamma(6)+2*gamma(4);
+              const long double gradient_relative_error=q2_roundoff_product({gamma(2*n+10),value_error,derivative_relative_error});
+              const long double shape_error=q2_roundoff_product({value_error,value_error});
+              const long double accumulation=gamma(2*quadrature.size()+10);
+              const long double rhs_relative_error=q2_roundoff_product({gradient_relative_error,accumulation});
+              long double weight_total=0.;
+              for (unsigned int q=0; q<quadrature.size(); ++q)weight_total+=std::abs(dg.JxW(q));
+              for (unsigned int j=0; j<n; ++j)
+                for (unsigned int q=0; q<quadrature.size(); ++q)
+                  rhs_weight[j]+=std::abs(dg.JxW(q)*dg.shape_value(j,q));
+              for (unsigned int i=0; i<n; ++i)
+                for (unsigned int j=0; j<n; ++j)
+                  projection_factor[i]+=defect(i,j)+std::abs(mass(i,j))
+                                        *(rhs_relative_error*rhs_weight[j]+weight_total*shape_error*(1+rhs_relative_error));
+            }
           Vector<double> projected(n);
           for (unsigned int c=0; c<rhs.size(); ++c)
             {
               mass.vmult(projected,rhs[c]);
+              const auto ij=SymmetricTensor<2,dim>::unrolled_to_component_indices(c);
               for (unsigned int i=0; i<n; ++i)
                 {
+                  if (estimate_source_roundoff)
+                    {
+                      long double multiply_scale=0.;
+                      for (unsigned int j=0; j<n; ++j)
+                        multiply_scale+=std::abs(mass(i,j)*rhs[c][j]);
+                      // Inverse defect, RHS operand errors, and inverse/RHS dot.
+                      const long double projection_error=projection_factor[i]*strain_scale[ij]+gamma(2*n)*multiply_scale;
+                      trial->source_roundoff.at(entry.first).projection[ij]=std::max(trial->source_roundoff.at(entry.first).projection[ij],std::nextafter(static_cast<double>(projection_error
+                                                                                     *(1+4*n*std::numeric_limits<long double>::epsilon())),std::numeric_limits<double>::infinity()));
+                    }
                   const double value=coefficients.beta*incoming.trial_stress[c][indices[i]]
                                      +2*coefficients.eta_ve*projected[i];
                   AssertThrow(std::isfinite(value),ExcMessage("Nonfinite DG trial-stress candidate."));
@@ -125,8 +238,50 @@ namespace aspect
 
 
     template <int dim>
+    double PhaseFieldFault<dim>::dg_source_publication_allowance(
+      const DGHistory &trial,const CellId &id,const Point<dim> &point) const
+    {
+      const auto &source=trial.source_roundoff.at(id);
+      const auto cell=trial.space->cells.at(id);
+      const auto unit=this->get_mapping().transform_real_to_unit_cell(cell,point);
+      const auto &element=trial.space->element;
+      long double lebesgue=0.;
+      for (unsigned int i=0; i<element.n_dofs_per_cell(); ++i)lebesgue+=std::abs(element.shape_value(i,unit));
+      const long double u=std::numeric_limits<double>::epsilon()/2.;
+      const auto gamma=[&](unsigned int count)
+      {
+        return count*u/(1-count*u);
+      };
+      const long double gradient_relative_error=q2_roundoff_product({gamma(2*element.n_dofs_per_cell()+10),8*gamma(6),3*gamma(6)});
+      Tensor<2,dim> native_error;
+      for (unsigned int a=0; a<dim; ++a)
+        for (unsigned int b=0; b<dim; ++b)
+          {
+            long double coordinate_error=0.;
+            for (unsigned int d=0; d<dim; ++d)
+              {
+                const long double width=static_cast<long double>(cell->vertex(1u<<d)[d])-cell->vertex(0)[d];
+                // Subtraction/division in both real-to-unit maps;
+                // |L_i''|<=8, |L_i' L_j'|<=16.
+                coordinate_error+=(d==b ? 2 : 4)*gamma(4)
+                                  *(std::abs(point[d])+std::abs(cell->vertex(0)[d]))/width;
+              }
+            native_error[a][b]=(gradient_relative_error+2*coordinate_error)*source.gradient_scale[a][b];
+          }
+      SymmetricTensor<2,dim> strain_error;
+      for (unsigned int a=0; a<dim; ++a)
+        for (unsigned int b=0; b<dim; ++b)
+          if (a!=b)strain_error[a][b]=.5*(native_error[a][b]+native_error[b][a]);
+          else
+            for (unsigned int d=0; d<dim; ++d)strain_error[a][a]+=(a==d ? 2./3. : 1./3.)*native_error[d][d];
+      const auto source_error=2*compute_maxwell_coefficients(fe_strain_state->eta,fe_strain_state->G,this->get_timestep()).eta_ve*(strain_error+static_cast<double>(lebesgue)*source.projection);
+      return std::sqrt(std::pow(source_error.norm(),2)+std::pow(trace(source_error),2));
+    }
+
+
+    template <int dim>
     std::vector<SymmetricTensor<2,dim>> PhaseFieldFault<dim>::evaluate_dg_trial_tensor(
-      const DGHistory &history,const CellId &id,const Quadrature<dim> &quadrature) const
+                                       const DGHistory &history,const CellId &id,const Quadrature<dim> &quadrature) const
     {
       FEValues<dim> fe(this->get_mapping(),history.space->element,quadrature,update_values);
       fe.reinit(history.space->cells.at(id));
@@ -177,6 +332,36 @@ namespace aspect
       std::vector<double> phi(1);
       phase[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)]
       .get_function_values(phase_trial ? *phase_trial : state.displacement_history,phi);
+      if (mature_frictional_fault)
+        {
+          // General oblique map, including the retained constant endpoint
+          // continuation. Z is auxiliary Maxwell/slip memory, not I*C.
+          const auto &manager=this->get_reconstructed_fault_manager();
+          const auto source=manager.project_to_bulk_source(point);
+          SymmetricTensor<2,dim> correction;
+          if (source.active)
+            {
+              const auto &fault=manager.get_fault(source.fault_index);
+              const auto j=source.segment_index;
+              const double t=source.xi;
+              const double z=(1-t)*Z.at(j)+t*Z.at(j+1);
+              const double normalization=(1-t)*I.at(j)+t*I.at(j+1);
+              AssertThrow(std::isfinite(z) && std::isfinite(normalization) && normalization>0.,
+                          ExcMessage("Mature DG stress requires finite memory and positive native normalization."));
+              auto tangent=fault.vertex(j+1)-fault.vertex(j);
+              tangent/=tangent.norm();
+              Tensor<1,dim> normal;
+              normal[0]=-tangent[1];
+              normal[1]=tangent[0];
+              const auto S=manager.get_shear_sense(source.fault_index)*symmetrize(outer_product(tangent,normal));
+              const auto localization=evaluate_reconstructed_fault_localization(
+                                        source.fault_index,j,t,phi[0],phi[0],"mature DG stress");
+              correction=(2*z*localization.current_h/normalization)*S;
+            }
+          if (evaluation_scale)
+            *evaluation_scale=scale+correction.norm();
+          return trial-correction;
+        }
       const unsigned int segment=std::min<unsigned int>(Z.size()-2,point[0]*(Z.size()-1));
       const double xi=point[0]*(Z.size()-1)-segment;
       const double z=(1-xi)*Z[segment]+xi*Z[segment+1];
@@ -209,9 +394,10 @@ namespace aspect
 #define INSTANTIATE(dim) \
   template void PhaseFieldFault<dim>::initialize_dg_history(FEStrainState &) const; \
   template std::shared_ptr<PhaseFieldFault<dim>::DGHistory> PhaseFieldFault<dim>::make_dg_history_trial(const LinearAlgebra::BlockVector &,const MaxwellCoefficients &) const; \
-  template std::shared_ptr<PhaseFieldFault<dim>::DGHistory> PhaseFieldFault<dim>::make_dg_history_trial(const DGHistory &,const LinearAlgebra::BlockVector &,const MaxwellCoefficients &) const; \
+  template std::shared_ptr<PhaseFieldFault<dim>::DGHistory> PhaseFieldFault<dim>::make_dg_history_trial(const DGHistory &,const LinearAlgebra::BlockVector &,const MaxwellCoefficients &,bool) const; \
   template std::vector<SymmetricTensor<2,dim>> PhaseFieldFault<dim>::evaluate_dg_trial_tensor(const DGHistory &,const CellId &,const Quadrature<dim> &) const; \
   template SymmetricTensor<2,dim> PhaseFieldFault<dim>::evaluate_dg_history_stress(const DGHistory &,const std::vector<double> &,const std::vector<double> &,const CellId &,const Point<dim> &,double *,const LinearAlgebra::BlockVector *) const; \
+  template double PhaseFieldFault<dim>::dg_source_publication_allowance(const DGHistory &,const CellId &,const Point<dim> &) const; \
   template std::vector<double> PhaseFieldFault<dim>::dg_history_values() const;
     ASPECT_INSTANTIATE(INSTANTIATE)
 #undef INSTANTIATE

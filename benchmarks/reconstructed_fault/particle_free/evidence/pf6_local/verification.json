@@ -1,0 +1,534 @@
+{
+  "base_revision": "a8707307008401ac9cff702a369e2e2a611fa0f7",
+  "branch": "pf-rsf-particle-free",
+  "scope": "Manual affine Cartesian frozen 64-to-67-cell remap, fixed surface/population; 1/2/4 ranks; no coupled hanging phase evolution",
+  "final_same_build_cases": 13,
+  "executable_sha256": "d0641c616b037027a9c61b3a329a4f2133fd35fd94eebe8fca917bba2d8019ca",
+  "observer_sha256": "41f287736398eca82d2106c384f95f6978086acf9413418182717df967037c91",
+  "physical_G12_gate_passed": true,
+  "retained_G6_native_rule_vs_high_rule_screen_passed": false,
+  "strict_reference_match_passed": false,
+  "deep_256_total_cell_particle_neighborhood_supported": false,
+  "native_gate_counts": {
+    "1": 107,
+    "2": 107,
+    "4": 107
+  },
+  "local_transfer_ownership_restart_passed": true,
+  "restore_only_started_physical_steps": 0,
+  "restore_only_publications": 0,
+  "uniform_continued_restart_passed": true,
+  "same_rank_RNG_replay_passed": true,
+  "changed_rank_RNG_replay_available": false,
+  "changed_rank_population_changes_enabled": false,
+  "cross_rank_streams_match_fresh_four_rank_layout": true,
+  "particles_fixed": 144,
+  "local_phase_hanging_nodes": 4,
+  "local_surface_vertices": 9,
+  "representable_phase_coarsening_restriction_retained": true,
+  "local_coarse_fine_faces": 8,
+  "legacy_FE_identical_CSVs": 21,
+  "frozen_quadrature": {
+    "frozen-G6": {
+      "native_minus_reference_energy": [
+        -1.5202188063945243e-08,
+        0.0,
+        5.329070518200751e-15
+      ],
+      "native_minus_reference_load": [
+        2.9509658361348556e-07,
+        5.901932524920994e-07,
+        5.901930535401334e-07,
+        5.90193423022356e-07,
+        5.901930535401334e-07,
+        5.901931672269711e-07,
+        5.901929682750051e-07,
+        5.90192826166458e-07,
+        2.9509629939639126e-07
+      ],
+      "energy_scaled_error": 1.5202188063945243e-08,
+      "load_scaled_error": 4.39308430377561e-09,
+      "q24_q32_energy_uncertainty": 2.220446049250313e-16,
+      "q24_q32_load_uncertainty": 2.5579538487363607e-13,
+      "native_I_error": 5.684341886080802e-14,
+      "native_I_scaled_error": 6.185864815850989e-16,
+      "q24_q32_I_uncertainty": 4.263256414560601e-14,
+      "normalization_only_energy_change": [
+        1.6653345369377348e-15,
+        -5.551115123125783e-17,
+        0.0
+      ],
+      "normalization_only_load_change": [
+        3.410605131648481e-13,
+        7.673861546209082e-13,
+        5.115907697472721e-13,
+        1.3642420526593924e-12,
+        -1.9895196601282805e-13,
+        9.094947017729282e-13,
+        1.7053025658242404e-12,
+        7.958078640513122e-13,
+        2.5579538487363607e-13
+      ],
+      "surface_projection_RMS": 1.7857533863760886e-14,
+      "surface_projection_Linf": 4.263256414560601e-14,
+      "native_I_vs_unprojected_ray_Linf": 7.105427357601002e-14,
+      "physical_rule_passed": false,
+      "normalization_passed": true
+    },
+    "frozen-G12": {
+      "native_minus_reference_energy": [
+        6.661338147750939e-16,
+        0.0,
+        5.329070518200751e-15
+      ],
+      "native_minus_reference_load": [
+        2.8421709430404007e-13,
+        -8.526512829121202e-14,
+        -2.842170943040401e-14,
+        1.1368683772161603e-13,
+        -2.842170943040401e-14,
+        1.1368683772161603e-13,
+        1.4210854715202004e-13,
+        -2.5579538487363607e-13,
+        -1.4210854715202004e-14
+      ],
+      "energy_scaled_error": 6.661338147750939e-16,
+      "load_scaled_error": 2.115560098006201e-15,
+      "q24_q32_energy_uncertainty": 2.220446049250313e-16,
+      "q24_q32_load_uncertainty": 2.5579538487363607e-13,
+      "native_I_error": 5.684341886080802e-14,
+      "native_I_scaled_error": 6.185864815850989e-16,
+      "q24_q32_I_uncertainty": 4.263256414560601e-14,
+      "normalization_only_energy_change": [
+        1.6653345369377348e-15,
+        -5.551115123125783e-17,
+        0.0
+      ],
+      "normalization_only_load_change": [
+        3.410605131648481e-13,
+        7.673861546209082e-13,
+        5.115907697472721e-13,
+        1.3642420526593924e-12,
+        -1.9895196601282805e-13,
+        9.094947017729282e-13,
+        1.7053025658242404e-12,
+        7.958078640513122e-13,
+        2.5579538487363607e-13
+      ],
+      "surface_projection_RMS": 1.7857533863760886e-14,
+      "surface_projection_Linf": 4.263256414560601e-14,
+      "native_I_vs_unprojected_ray_Linf": 7.105427357601002e-14,
+      "physical_rule_passed": true,
+      "normalization_passed": true
+    },
+    "frozen-G24": {
+      "native_minus_reference_energy": [
+        0.0,
+        0.0,
+        5.329070518200751e-15
+      ],
+      "native_minus_reference_load": [
+        3.126388037344441e-13,
+        4.547473508864641e-13,
+        7.105427357601002e-13,
+        5.115907697472721e-13,
+        3.979039320256561e-13,
+        5.115907697472721e-13,
+        6.821210263296962e-13,
+        1.7053025658242404e-13,
+        5.684341886080802e-14
+      ],
+      "energy_scaled_error": 3.780523363683607e-16,
+      "load_scaled_error": 5.288900245015502e-15,
+      "q24_q32_energy_uncertainty": 2.220446049250313e-16,
+      "q24_q32_load_uncertainty": 2.5579538487363607e-13,
+      "native_I_error": 5.684341886080802e-14,
+      "native_I_scaled_error": 6.185864815850989e-16,
+      "q24_q32_I_uncertainty": 4.263256414560601e-14,
+      "normalization_only_energy_change": [
+        1.6653345369377348e-15,
+        -5.551115123125783e-17,
+        0.0
+      ],
+      "normalization_only_load_change": [
+        3.410605131648481e-13,
+        7.673861546209082e-13,
+        5.115907697472721e-13,
+        1.3642420526593924e-12,
+        -1.9895196601282805e-13,
+        9.094947017729282e-13,
+        1.7053025658242404e-12,
+        7.958078640513122e-13,
+        2.5579538487363607e-13
+      ],
+      "surface_projection_RMS": 1.7857533863760886e-14,
+      "surface_projection_Linf": 4.263256414560601e-14,
+      "native_I_vs_unprojected_ray_Linf": 7.105427357601002e-14,
+      "physical_rule_passed": true,
+      "normalization_passed": true
+    },
+    "frozen-G32": {
+      "native_minus_reference_energy": [
+        4.440892098500626e-16,
+        0.0,
+        5.329070518200751e-15
+      ],
+      "native_minus_reference_load": [
+        2.2737367544323206e-13,
+        6.536993168992922e-13,
+        5.115907697472721e-13,
+        9.663381206337363e-13,
+        6.821210263296962e-13,
+        9.379164112033322e-13,
+        7.105427357601002e-13,
+        5.400124791776761e-13,
+        -1.1368683772161603e-13
+      ],
+      "energy_scaled_error": 4.440892098500626e-16,
+      "load_scaled_error": 7.192904333221083e-15,
+      "q24_q32_energy_uncertainty": 2.220446049250313e-16,
+      "q24_q32_load_uncertainty": 2.5579538487363607e-13,
+      "native_I_error": 5.684341886080802e-14,
+      "native_I_scaled_error": 6.185864815850989e-16,
+      "q24_q32_I_uncertainty": 4.263256414560601e-14,
+      "normalization_only_energy_change": [
+        1.6653345369377348e-15,
+        -5.551115123125783e-17,
+        0.0
+      ],
+      "normalization_only_load_change": [
+        3.410605131648481e-13,
+        7.673861546209082e-13,
+        5.115907697472721e-13,
+        1.3642420526593924e-12,
+        -1.9895196601282805e-13,
+        9.094947017729282e-13,
+        1.7053025658242404e-12,
+        7.958078640513122e-13,
+        2.5579538487363607e-13
+      ],
+      "surface_projection_RMS": 1.7857533863760886e-14,
+      "surface_projection_Linf": 4.263256414560601e-14,
+      "native_I_vs_unprojected_ray_Linf": 7.105427357601002e-14,
+      "physical_rule_passed": true,
+      "normalization_passed": true
+    }
+  },
+  "quadrature_trajectory_comparisons": {
+    "24": {
+      "stress_relative_L2": 1.2280860423435393e-14,
+      "phase_Linf": 8.396061623727746e-16
+    },
+    "32": {
+      "stress_relative_L2": 1.645353919990714e-14,
+      "phase_Linf": 4.649058915617843e-16
+    }
+  },
+  "local_comparison_maxima": {
+    "local-rank-1-2": {
+      "tensor_relative_L2": 9.728538248363872e-16,
+      "stress_L2_Pa": 2.0812949519433352e-11,
+      "stress_relative_L2": 1.1699974912485011e-14,
+      "localized_stress_L2": 2.6248900198469372e-11,
+      "phase_Linf": 2.7755575615628914e-16,
+      "gradient_Linf": 4.440892098500626e-15,
+      "maximum_moment_defect": 1.364907929023753e-12,
+      "energy_before": [
+        0.791110974827378,
+        0.25685254458491347,
+        14.096118461784904
+      ],
+      "energy_after": [
+        0.7911109748273764,
+        0.2568525445849135,
+        14.096118461784904
+      ],
+      "energy_defect": [
+        -1.6653345369377348e-15,
+        5.551115123125783e-17,
+        0.0
+      ],
+      "quadratic_norm_change": 2.1224707423622223e-09,
+      "weak_shear_defect": [
+        2.4158453015843406e-13,
+        -6.536993168992922e-13,
+        -8.810729923425242e-13,
+        -9.379164112033322e-13,
+        -7.958078640513122e-13,
+        -3.979039320256561e-13,
+        2.8421709430404007e-13,
+        -1.4495071809506044e-12,
+        -4.689582056016661e-13
+      ],
+      "tensor_error": 9.822542779147625e-11,
+      "tensor_scaled_error": 1.7992711256750566e-15,
+      "surface_error": 4.547473508864641e-12,
+      "surface_scaled_error": 6.618710120019721e-16,
+      "native-fields_error": 3.417579933165392e-11,
+      "native-fields_scaled_error": 2.830964622793854e-14,
+      "particles_error": 4.7975845518521965e-11,
+      "particles_scaled_error": 2.0031478403330675e-15,
+      "weak-loads_error": 1.5631940186722204e-12,
+      "weak-loads_scaled_error": 1.1635580488440048e-14,
+      "energy_error": 1.6653345369377348e-15,
+      "energy_scaled_error": 1.181413551150636e-16,
+      "fracture-operator_error": 2.6645352591003757e-14,
+      "fracture-operator_scaled_error": 9.21348677281826e-16,
+      "rng_counts": [
+        1,
+        2
+      ],
+      "rng_equal_per_rank": false,
+      "case_label": "pf6-local-final-r1",
+      "comparison_case_label": "pf6-local-final-r2"
+    },
+    "local-rank-1-4": {
+      "tensor_relative_L2": 8.817506095708973e-16,
+      "stress_L2_Pa": 1.821181811389866e-11,
+      "stress_relative_L2": 1.023775197476939e-14,
+      "localized_stress_L2": 2.424255403824481e-11,
+      "phase_Linf": 5.412337245047638e-16,
+      "gradient_Linf": 5.662137425588298e-15,
+      "maximum_moment_defect": 4.821853611521412e-13,
+      "energy_before": [
+        0.791110974827378,
+        0.25685254458491347,
+        14.096118461784904
+      ],
+      "energy_after": [
+        0.7911109748273776,
+        0.25685254458491347,
+        14.096118461784904
+      ],
+      "energy_defect": [
+        -4.440892098500626e-16,
+        0.0,
+        0.0
+      ],
+      "quadratic_norm_change": -1.4997640890116933e-07,
+      "weak_shear_defect": [
+        -2.5579538487363607e-13,
+        -1.0800249583553523e-12,
+        -1.2789769243681803e-12,
+        -9.094947017729282e-13,
+        -5.115907697472721e-13,
+        -6.821210263296962e-13,
+        -5.684341886080801e-13,
+        -6.536993168992922e-13,
+        -4.263256414560601e-14
+      ],
+      "tensor_error": 8.731149137020111e-11,
+      "tensor_scaled_error": 1.5993521117111614e-15,
+      "surface_error": 2.7284841053187847e-12,
+      "surface_scaled_error": 3.9712260720118324e-16,
+      "native-fields_error": 2.615066335377872e-11,
+      "native-fields_scaled_error": 2.1661995992752252e-14,
+      "particles_error": 7.139533408917487e-11,
+      "particles_scaled_error": 2.980987781348735e-15,
+      "weak-loads_error": 7.389644451905042e-13,
+      "weak-loads_scaled_error": 5.500456230898932e-15,
+      "energy_error": 5.551115123125783e-16,
+      "energy_scaled_error": 3.93804517050212e-17,
+      "fracture-operator_error": 2.6645352591003757e-14,
+      "fracture-operator_scaled_error": 9.21348677281826e-16,
+      "rng_counts": [
+        1,
+        4
+      ],
+      "rng_equal_per_rank": false,
+      "case_label": "pf6-local-final-r1",
+      "comparison_case_label": "pf6-local-final-r4"
+    },
+    "local-cross-1-to-4": {
+      "tensor_relative_L2": 0.0,
+      "stress_L2_Pa": 0.0,
+      "stress_relative_L2": 0.0,
+      "localized_stress_L2": 0.0,
+      "phase_Linf": 0.0,
+      "gradient_Linf": 0.0,
+      "maximum_moment_defect": 0.0,
+      "energy_before": [
+        0.791110974827378,
+        0.25685254458491347,
+        14.096118461784904
+      ],
+      "energy_after": [
+        0.791110974827378,
+        0.25685254458491347,
+        14.096118461784904
+      ],
+      "energy_defect": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "quadratic_norm_change": 0.0,
+      "weak_shear_defect": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "tensor_error": 0.0,
+      "tensor_scaled_error": 0.0,
+      "surface_error": 0.0,
+      "surface_scaled_error": 0.0,
+      "native-fields_error": 0.0,
+      "native-fields_scaled_error": 0.0,
+      "particles_error": 0.0,
+      "particles_scaled_error": 0.0,
+      "weak-loads_error": 1.3073986337985843e-12,
+      "weak-loads_scaled_error": 9.731576408513494e-15,
+      "energy_error": 0.0,
+      "energy_scaled_error": 0.0,
+      "fracture-operator_error": 2.6645352591003757e-14,
+      "fracture-operator_scaled_error": 9.21348677281826e-16,
+      "rng_counts": [
+        1,
+        4
+      ],
+      "rng_equal_per_rank": false,
+      "case_label": "pf6-local-final-r1",
+      "comparison_case_label": "pf6-local-final-cross-1-to-4"
+    },
+    "local-cross-vs-fresh4": {
+      "tensor_relative_L2": 8.817506095708976e-16,
+      "stress_L2_Pa": 1.821181811389866e-11,
+      "stress_relative_L2": 1.0237751974769395e-14,
+      "localized_stress_L2": 2.424255403824481e-11,
+      "phase_Linf": 5.412337245047638e-16,
+      "gradient_Linf": 5.662137425588298e-15,
+      "maximum_moment_defect": 4.821853611521412e-13,
+      "energy_before": [
+        0.7911109748273776,
+        0.25685254458491347,
+        14.096118461784904
+      ],
+      "energy_after": [
+        0.791110974827378,
+        0.25685254458491347,
+        14.096118461784904
+      ],
+      "energy_defect": [
+        4.440892098500626e-16,
+        0.0,
+        0.0
+      ],
+      "quadratic_norm_change": 1.4997640890116933e-07,
+      "weak_shear_defect": [
+        2.5579538487363607e-13,
+        1.0800249583553523e-12,
+        1.2789769243681803e-12,
+        9.094947017729282e-13,
+        5.115907697472721e-13,
+        6.821210263296962e-13,
+        5.684341886080801e-13,
+        6.536993168992922e-13,
+        4.263256414560601e-14
+      ],
+      "tensor_error": 8.731149137020111e-11,
+      "tensor_scaled_error": 1.599352111711161e-15,
+      "surface_error": 2.7284841053187847e-12,
+      "surface_scaled_error": 3.9712260720118324e-16,
+      "native-fields_error": 2.615066335377872e-11,
+      "native-fields_scaled_error": 2.1661995992752277e-14,
+      "particles_error": 7.139533408917487e-11,
+      "particles_scaled_error": 2.980987781348735e-15,
+      "weak-loads_error": 1.4779288903810084e-12,
+      "weak-loads_scaled_error": 1.1000912461797822e-14,
+      "energy_error": 5.551115123125783e-16,
+      "energy_scaled_error": 3.93804517050212e-17,
+      "fracture-operator_error": 3.552713678800501e-15,
+      "fracture-operator_scaled_error": 1.228464903042435e-16,
+      "rng_counts": [
+        4,
+        4
+      ],
+      "rng_equal_per_rank": true,
+      "case_label": "pf6-local-final-r4",
+      "comparison_case_label": "pf6-local-final-cross-1-to-4"
+    }
+  },
+  "native_seconds": {
+    "final-frozen-q": 3.9214815589984937,
+    "final-q12": 12.788203197000257,
+    "trajectory-q24": 16.894228470002417,
+    "trajectory-q32": 20.104590035,
+    "uniform-half": 10.835717291000037,
+    "uniform-continued": 3.9210560270003043,
+    "r1": 14.540955563999887,
+    "r2": 39.19482573499772,
+    "r4": 51.32487825499993,
+    "restart-r1": 1.9676607749970572,
+    "restart-r2": 1.9677057090011658,
+    "restart-r4": 1.91741213700152,
+    "cross-1-to-4": 1.9174742409995815
+  },
+  "preservation": {
+    "incoming_files": 6435,
+    "intentional_changed_existing_files": [
+      "benchmarks/reconstructed_fault/particle_free/README.md",
+      "benchmarks/reconstructed_fault/particle_free/pf6_transfer_checks.cc",
+      "doc/reconstructed_fault/current_design.md",
+      "doc/reconstructed_fault/particle_free/PF6_PARTICLE_READ_AUDIT.md",
+      "doc/reconstructed_fault/particle_free/SOURCE_AUDIT.md",
+      "doc/reconstructed_fault/particle_free/STATUS.md",
+      "doc/reconstructed_fault/specification.tex",
+      "source/material_model/phase_field_fault/dg_transfer.cc",
+      "source/material_model/phase_field_fault/fe_strain.cc",
+      "source/particle/manager.cc",
+      "source/particle/particle_domain.cc",
+      "source/simulator/core.cc",
+      "source/simulator/solver/reconstructed_fault_endpoint_phase.cc"
+    ],
+    "unexpected_changes": [],
+    "unchanged_incoming_files": 6422,
+    "prior_evidence_files_unchanged": 207,
+    "history_laws_publication_guard_source_unchanged": [
+      "source/material_model/phase_field_fault/history.cc",
+      "source/material_model/phase_field_fault/dg_history.cc",
+      "source/material_model/phase_field_fault/fe_phase_energy.cc",
+      "source/material_model/phase_field_fault/constitutive.cc",
+      "source/material_model/phase_field_fault/dg_transport.cc",
+      "source/material_model/phase_field_fault/dg_limiter.cc"
+    ],
+    "historical_payloads": {
+      "doc/reconstructed_fault/particle_free/STATUS.md": {
+        "incoming_sha256": "f827deb4e08df79b08e4d97c86bc47c94486698c21c962c66cc8618a7fb15e5d",
+        "retained_verbatim": true
+      },
+      "doc/reconstructed_fault/particle_free/SOURCE_AUDIT.md": {
+        "incoming_sha256": "52dd4ce2b079bcd7f34787b1b8ff25f1df770800fba15395160bfdf0f6544fb0",
+        "retained_verbatim": true
+      },
+      "doc/reconstructed_fault/particle_free/PF6_PARTICLE_READ_AUDIT.md": {
+        "incoming_sha256": "ce0b41bb0ac6dd07bcda28ba0836cae7541b741e69aded338b3a37b2e9b13121",
+        "retained_verbatim": true
+      }
+    }
+  },
+  "limitations": [
+    "G6 screen failed and original strict reference false retained",
+    "Sparse fixed-particle one-ring support fails on 256 total cells",
+    "No coupled hanging-node phase solve or general postmutation AMR recovery",
+    "No automatic AMR, adaptive quadrature or lossy obstacle transfer",
+    "Cross-rank stochastic replay unavailable"
+  ],
+  "portable_replay": {
+    "archive_members_verified": 2066,
+    "independent_replay_passed": true,
+    "retained_G6_native_quadrature_passed": false,
+    "strict_reference_match_passed": false,
+    "legacy_FE_identical_CSVs": 21,
+    "changed_rank_RNG_replay_available": false,
+    "native_jobs_launched": 0
+  },
+  "archive_sha256": "8acc19bc17168fa90c71aa5a0c4bf09dfa32bdb43984de6bb6cd533f98a93a78",
+  "archive_bytes": 22473812,
+  "final_checks": "final-checks.json"
+}

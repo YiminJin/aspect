@@ -1,0 +1,51 @@
+{
+  "PF5_v1_restart": {
+    "mid_restored": {
+      "field": 0.0,
+      "surface": 0.0,
+      "properties": 0.0,
+      "shared": 0.0,
+      "particles": 0.0,
+      "clock": 0.0,
+      "stress": 0.0,
+      "loads": 0.0,
+      "persistent_bitwise": true,
+      "rng_bitwise": true,
+      "manager_bitwise": true
+    },
+    "mid_restored_raw_manager": {
+      "bitwise": false,
+      "size_difference": 13,
+      "reason": "Native load makes omitted default shear sense explicitly +1; canonical archives above include every persistent manager field."
+    },
+    "final_final": {
+      "field": 0.0,
+      "surface": 0.0,
+      "properties": 0.0,
+      "shared": 0.0,
+      "particles": 0.0,
+      "clock": 0.0,
+      "stress": 0.0,
+      "loads": 0.0,
+      "persistent_bitwise": true,
+      "rng_bitwise": true,
+      "manager_bitwise": true
+    },
+    "final_final_raw_manager": {
+      "bitwise": false,
+      "size_difference": 13,
+      "reason": "Native load makes omitted default shear sense explicitly +1; canonical archives above include every persistent manager field."
+    }
+  },
+  "PF4_operator_CSVs": 23,
+  "different": [],
+  "operator": {
+    "matrix_scaled_error": 1.488933635194183e-15,
+    "correction_scaled_error": 1.5543122344752192e-15,
+    "boundary_scaled_error": 5.921189464667504e-16,
+    "constant_defect": 1.099120794378905e-14,
+    "polynomial_defect": 4.3298697960381105e-15,
+    "uncorrected_constant_defect": 0.3000000000000007
+  },
+  "passed": true
+}

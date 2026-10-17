@@ -1,0 +1,276 @@
+# Fresh full-geometry BP3 FIRST-EVENT experiment: unlimited domain-free DGQ2.
+# Native adaptive time stepping. Run from $SCRATCH/bp3_dg:
+#   ibrun ./plugin/aspect-release parameters.prm
+# Frozen physical phase, mesh and geometry; stationary diagnostic particles.
+# Gauss6/source3, Helmholtz20; no transport, AMR or phase evolution.
+# Surface profiles/weak loads and invariant checks every accepted step.
+# Dense authoritative tensors/all nine modes: 100 yr or 1 m slip, event milestones,
+# and graceful stop. Output scheduling does not affect constitutive updates.
+# Native checkpoints every 10 accepted steps and on graceful termination.
+# Strict continuum/spatial reference matching remains unpassed; see README.md.
+
+set Additional shared libraries = ./plugin/libbp3_restore_150x50.release.so, ./plugin/libbp3_coupled_checks.release.so
+set Output directory = ./output
+set Dimension = 2
+set Use years instead of seconds = false
+set End time = 47336400000
+set Nonlinear solver scheme = single Advection, iterated Newton Stokes
+set Nonlinear solver tolerance = 1e-8
+set Max nonlinear iterations = 30
+set Nonlinear solver failure strategy = cut timestep size
+set CFL number = 0.5
+set Pressure normalization = no
+set Surface pressure = 0
+set Resume computation = false
+set Maximum time step = 4e7
+set Maximum first time step = 4e6
+subsection Termination criteria
+  set Termination criteria = end time, BP3 long run complete
+  set Checkpoint on termination = true
+end
+
+subsection Formulation
+  set Enable phase field = true
+  set Reconstruct faults from phase field = true
+end
+
+subsection Geometry model
+  set Model name = box
+  subsection Box
+    set X extent = 150000
+    set Y extent = 50000
+    set Box origin X coordinate = -60000
+    set X repetitions = 75
+    set Y repetitions = 25
+  end
+
+end
+
+subsection Mesh refinement
+  set Initial global refinement = 9
+  set Initial adaptive refinement = 0
+  set Skip solvers on initial refinement = true
+  set Time steps between mesh refinement = 0
+  set Strategy = BP3 fault support
+  set Minimum refinement level = 1
+end
+
+subsection Boundary velocity model
+  set Prescribed velocity boundary indicators = left:reconstructed fault BP3, right:reconstructed fault BP3, bottom:reconstructed fault BP3
+end
+
+subsection Boundary traction model
+  set Prescribed traction boundary indicators =
+end
+
+subsection Gravity model
+  set Model name = vertical
+  subsection Vertical
+    set Magnitude = 0
+  end
+
+end
+
+subsection Initial temperature model
+  set Model name = function
+  subsection Function
+    set Function expression = 293
+  end
+
+end
+
+subsection Temperature field
+  set Temperature method = static
+end
+
+subsection Compositional fields
+  set Number of fields = 5
+  set Names of fields = tau_xx, tau_yy, tau_xy, theta_initial, strengthening
+  set Types of fields = stress, stress, stress, generic, chemical composition
+  set Compositional field methods = static, static, static, static, static
+  set Mapped particle properties =
+end
+
+subsection Initial composition model
+  set Model name = reconstructed fault BP3
+end
+
+subsection Material model
+  set Model name = phase field fault
+  subsection Phase field fault
+    set Evolve phase field = false
+    set Reference viscosities = 1e26
+    set Minimum viscosity = 1e6
+    set Maximum viscosity = 1e30
+    set Elastic shear moduli = 32038120320
+    set Cohesions = 1e6
+    set Critical energy release rates = 1e5
+    set Initial time step = 4e6
+    set Phase field activation threshold = 0.1
+    set Friction law = rate state
+    set Reference friction coefficients = 0.6
+    set Direct effect parameters = 0.010, 0.025
+    set Evolution effect parameters = 0.015
+    set Characteristic slip distance = 0.008
+    set Reference slip rate = 1e-6
+    set Minimum slip rate = 1e-20
+    set Radiation damping coefficients = 4624440
+    set Use regularized formulation = true
+    set Use adiabatic pressure in fault friction = false
+    set I h quadrature tolerance = 1e-10
+    set I h tail tolerance = 1e-10
+    set I h integration backend = cell intervals
+    set Fault constitutive mode = mature frictional
+    set I h surface quadrature subdivisions = 8
+    set Bulk history representation = DG trial stress
+    set Consistent endpoint phase solve = false
+    set Use homogeneous mesh data = true
+    set Enable prescribed DG accepted history = true
+    set Particle stress strain convention = three dimensional deviator
+    set FE bulk normal quadrature points = 6
+  end
+
+end
+
+subsection Phase field model
+  set Length scale = 20
+  set Geometric function type = AT1
+  set Degradation curvature parameter = 1
+end
+
+subsection Fault reconstruction
+  set Structural point spacing = 10
+  set Fit prescribed geometry to phase field = false
+  set Prescribed faults file = ./fault.txt
+  set Boundary completion = automatic prescribed
+end
+
+subsection Solver parameters
+  subsection Stokes solver parameters
+    set Stokes solver type = block AMG
+    set Linear solver tolerance = 1e-9
+  end
+
+  subsection Phase field solver parameters
+    set Linear solver tolerance = 2e-7
+    set Nonlinear solver tolerance = 1e-8
+    set Max nonlinear iterations = 50
+  end
+
+end
+
+subsection Time stepping
+  set List of model names = convection time step, reconstructed fault time step, repeat on nonlinear solver failure
+  subsection Reconstructed fault time step
+    set Maximum logarithmic state change = 0.2
+  end
+
+  subsection Repeat on nonlinear solver failure
+    set Cut back factor = 0.5
+  end
+
+end
+
+subsection Particles
+  set Particle generator name = reference cell
+  set Interpolation scheme = BP3 history linear least squares
+  set Integration scheme = BP3 stationary samples
+  set List of particle properties = BP3 frozen crack driving force, initial composition, maxwell stress
+  set Generate particle domains = false
+  set Generate CPDI data for particle domains = false
+  set Generate face data for particle domains = false
+  set Load balancing strategy = none
+  subsection Generator
+    subsection Reference cell
+      set Number of particles per cell per direction = 4
+    end
+
+  end
+
+  subsection Initial composition
+    set List of field names = theta_initial, strengthening
+    set Spatially refreshed field names = strengthening
+  end
+
+  subsection Interpolator
+    subsection Linear least squares
+      set Use linear least squares limiter = true, false, false, true, true, true
+      set Use boundary extrapolation = false
+    end
+
+  end
+
+  set Minimum particles per cell = 12
+  set Maximum particles per cell = 24
+  set Particle addition algorithm = point density function
+  set Particle removal algorithm = point density function
+  set Point density kernel function = cutoff c1 dealii
+  set Bandwidth = 0.3
+  set Addition point density function granularity = 6
+end
+
+subsection Postprocess
+  set List of postprocessors = memory statistics, reconstructed fault BP3, particles, BP3 output complete, BP3 restored monitor, BP3 serial coupled checks
+  subsection Reconstructed faults
+    set Excluded properties = BP3 fixed shear correction, mature fault reference geometry
+  end
+
+  subsection Particles
+    set Data output format = none
+    set Time between data output = 0
+    set Number of grouped files = 4
+  end
+
+  subsection Visualization
+    set Time between graphical output = 0
+    set Output format = vtu
+    set Number of grouped files = 4
+    set Interpolate output = true
+    set Write in background thread = false
+    set List of output variables =
+    set Write higher order output = true
+  end
+
+  subsection BP3
+    set Stop after first event = true
+    set Audit full state every step = false
+    set Heavy output slip interval = 1
+    set Heavy output time interval = 3155760000
+    set Profile slip interval = 0.1
+    set Profile time interval = 31557600
+    set Graceful wall seconds = 82800
+    set Last accepted step = 2147483647
+    set Write bulk and particle visualization = false
+    set Weakening region length = 15000
+  end
+
+  subsection BP3 coupled checks
+    set Mature lifecycle checks = true
+    set Prescribed schedule check = false
+    set Write authoritative stress = true
+    set Write FE coefficients = true
+    set Scheduled field output = true
+    set Inject candidate failure = false
+    set Inject nonlinear failure = false
+  end
+
+  subsection BP3 restored monitor
+    set Write detailed diagnostics = false
+    set Friction normal input = helmholtz
+    set Normal filter length = 20
+    set Bottom velocity constraint = full
+  end
+
+end
+
+subsection Checkpointing
+  set Steps between checkpoint = 10
+  set Time between checkpoint = 0
+end
+
+subsection Discretization
+  set Composition polynomial degree = 2
+  set Use discontinuous composition discretization = false
+end
+
+set Maximum relative increase in time step = 91

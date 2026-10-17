@@ -1,0 +1,47 @@
+{
+  "reference_trace_defect": 0.0,
+  "native": {
+    "dg-cc": {
+      "common_point_phase_Linf": 2.220446049250313e-16,
+      "all_vertex_phase_Linf": 0.0,
+      "saved_DG_coefficient_defect_Pa": 6.402842700481415e-09,
+      "saved_DG_coefficient_scaled_defect": 6.806165344131972e-15,
+      "reconstructed_tau_component_defect_Pa": 6.51925802230835e-09,
+      "modes": 9
+    },
+    "dg-fc": {
+      "common_point_phase_Linf": 2.220446049250313e-16,
+      "all_vertex_phase_Linf": 0.0,
+      "saved_DG_coefficient_defect_Pa": 6.51925802230835e-09,
+      "saved_DG_coefficient_scaled_defect": 7.144277081904731e-15,
+      "reconstructed_tau_component_defect_Pa": 6.6356733441352844e-09,
+      "modes": 9
+    },
+    "particle-cc": {
+      "common_point_phase_Linf": 2.220446049250313e-16,
+      "all_vertex_phase_Linf": 0.0
+    },
+    "particle-fc": {
+      "common_point_phase_Linf": 2.220446049250313e-16,
+      "all_vertex_phase_Linf": 0.0
+    },
+    "dg-ff": {
+      "saved_DG_coefficient_defect_Pa": 6.28642737865448e-09,
+      "saved_DG_coefficient_scaled_defect": 6.817368824687895e-15,
+      "reconstructed_tau_component_defect_Pa": 6.402842700481415e-09,
+      "modes": 9
+    }
+  },
+  "dg_unchanged_localization": {
+    "chi_Linf_per_m": 1.1102230246251565e-16,
+    "chi_relative_Linf": 1.9617772551681463e-15,
+    "I_Linf_m": 9.094947017729282e-12,
+    "I_relative_Linf": 7.460281422578067e-16
+  },
+  "particle_unchanged_localization": {
+    "chi_Linf_per_m": 1.1102230246251565e-16,
+    "chi_relative_Linf": 1.9617772551681463e-15,
+    "I_Linf_m": 9.094947017729282e-12,
+    "I_relative_Linf": 7.460281422578067e-16
+  }
+}

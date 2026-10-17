@@ -252,7 +252,9 @@ namespace aspect
         std::vector<ParticleScalarProjectionDiagnostics> diagnostics;
       };
 
-      /** Geometry and weight of one locally owned particle/fault association. */
+      /** Geometry and optional domain measure of one locally owned particle.
+       * Homogeneous mesh-data check points have NaN volume and no quadrature;
+       * they cannot be used by particle projection operators. */
       struct ParticleFaultAssociation
       {
         types::particle_index particle_id = numbers::invalid_unsigned_int;

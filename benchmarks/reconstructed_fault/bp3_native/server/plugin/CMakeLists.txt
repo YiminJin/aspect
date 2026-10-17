@@ -10,6 +10,7 @@ add_library(bp3_restore_150x50 SHARED
   geometry.cc
   configuration.cc
   profile.cc
+  phase_reference.cc
   mesh.cc
   monitor.cc
   output.cc

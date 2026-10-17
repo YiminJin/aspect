@@ -21,6 +21,7 @@
 #include <aspect/particle/property/crack_driving_force.h>
 #include <aspect/initial_composition/interface.h>
 #include <aspect/phase_field.h>
+#include <aspect/material_model/phase_field_fault.h>
 
 namespace aspect
 {
@@ -47,6 +48,14 @@ namespace aspect
       {
         const auto &material_model =
           dynamic_cast<const MaterialModel::PhaseFieldModel<dim> &>(this->get_material_model());
+        const auto *fault = dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(&this->get_material_model());
+        if (fault && fault->uses_homogeneous_mesh_data())
+          {
+            // H is a diagnostic in this configuration. Its native threshold
+            // value needs no particle/material interpolation to initialize.
+            data.push_back(material_model.get_critical_crack_driving_forces()[0]);
+            return;
+          }
 
         std::vector<double> initial_composition(this->introspection().n_compositional_fields);
         for (unsigned int j = 0; j < initial_composition.size(); ++j)

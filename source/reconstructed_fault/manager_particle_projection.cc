@@ -13,6 +13,7 @@
 #include <aspect/phase_field.h>
 #include <aspect/particle/manager.h>
 #include <aspect/particle/particle_domain.h>
+#include <aspect/material_model/phase_field_fault.h>
 #include <aspect/utilities.h>
 
 #include <algorithm>
@@ -111,6 +112,22 @@ namespace aspect
 
     const Particle::Manager<dim> &particle_manager =
       this->get_phase_field_handler().get_associated_particle_manager();
+    const auto *material = dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(&this->get_material_model());
+    if (material && material->uses_homogeneous_mesh_data())
+      {
+        const auto &particles = particle_manager.get_particle_handler();
+        if (particle_manager.particle_domains_requested()
+            || particles.n_locally_owned_particles() != particle_association_cache.size())
+          return false;
+        unsigned int index = 0;
+        for (const auto &particle : particles)
+          {
+            const auto &entry = particle_association_cache[index++];
+            if (entry.particle_id != particle.get_id() || entry.position != particle.get_location())
+              return false;
+          }
+        return true;
+      }
     if (!particle_manager.particle_domains_requested())
       return false;
     const auto &particle_handler = particle_manager.get_particle_handler();
@@ -145,6 +162,40 @@ namespace aspect
     unsigned long long integration_points = 0;
     Particle::Manager<dim> &particle_manager =
       this->get_phase_field_handler().get_associated_particle_manager();
+    const auto *material = dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(&this->get_material_model());
+    if (material && material->uses_homogeneous_mesh_data())
+      {
+        AssertThrow(!particle_manager.particle_domains_requested(),
+                    ExcMessage("Homogeneous mesh associations are diagnostic points without domains."));
+        // Geometry alone is sufficient for matching-cell publication samples.
+        // Leave volume as NaN and quadrature empty: these points carry no
+        // material/integration measure and cannot feed a particle projection.
+        particle_association_cache_valid = false;
+        particle_association_cache.clear();
+        projection_systems.clear();
+        projection_systems_generation = 0;
+        particle_projection_diagnostics.clear();
+        for (const auto &particle : particle_manager.get_particle_handler())
+          {
+            const auto projection = project_to_normal_profiles(particle.get_location());
+            ParticleFaultAssociation entry;
+            entry.particle_id = particle.get_id();
+            entry.position = particle.get_location();
+            entry.active = projection.active;
+            entry.fault_index = projection.fault_index;
+            entry.segment_index = projection.segment_index;
+            entry.xi = projection.xi;
+            particle_association_cache.push_back(std::move(entry));
+          }
+        cached_fault_geometry_versions.clear();
+        for (const auto &fault : reconstructed_faults)
+          cached_fault_geometry_versions.push_back(fault.geometry_version());
+        cached_projection_metadata_version = projection_metadata_version;
+        cached_domain_geometry_version = 0;
+        ++particle_association_generation;
+        particle_association_cache_valid = true;
+        return;
+      }
     AssertThrow(particle_manager.particle_domains_requested(),
                 ExcMessage("Particle-to-fault projection requires particle-domain volumes."));
     const auto &particle_handler = particle_manager.get_particle_handler();
@@ -325,6 +376,9 @@ namespace aspect
   template <int dim>
   void ReconstructedFaultManager<dim>::prepare_particle_projection_systems()
   {
+    const auto *material = dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(&this->get_material_model());
+    AssertThrow(!material || !material->uses_homogeneous_mesh_data(),
+                ExcMessage("Diagnostic point associations cannot supply particle projection weights."));
     AssertThrow(particle_association_cache_valid && particle_association_generation!=0,
                 ExcMessage("Projection factors require prepared particle associations."));
     if (projection_systems_generation==particle_association_generation)

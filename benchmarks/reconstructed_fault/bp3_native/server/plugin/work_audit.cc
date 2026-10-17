@@ -61,7 +61,10 @@ namespace aspect
       const auto &info=pm.get_property_manager().get_data_info();
       const auto H=info.get_position_by_field_name("crack_driving_force");
       const auto stress_position=info.get_position_by_field_name("maxwell stress");
-      std::array<unsigned int,3> fields;
+      std::array<unsigned int,3> fields{};
+      const auto stress_fields=intro.get_indices_for_fields_of_type(CompositionalFieldDescription::stress);
+      AssertThrow(stress_fields.size()==fields.size(),ExcMessage("BP3 work audit requires three stress fields."));
+      std::copy(stress_fields.begin(),stress_fields.end(),fields.begin());
       for (const auto &m:sim.get_parameters().mapped_particle_properties)
         if (m.second.first=="maxwell stress") fields[m.second.second]=m.first;
       const auto I=manager.get_property_information()[manager.get_property_index("phase field fault previous I h")].position;
@@ -121,10 +124,10 @@ namespace aspect
         old[0][0]=all[fields[0]];
         old[1][1]=all[fields[1]];
         old[0][1]=all[fields[2]];
-        const auto strain=model.uses_fe_strain_history() ? Utilities::Tensors::consistent_deviator(eps) : eps;
+        const auto strain=model.uses_deviatoric_strain_rate() ? Utilities::Tensors::consistent_deviator(eps) : eps;
         // This observer runs after terminal publication. FE samples already
         // contain this Maxwell interval; never advance that state a second time.
-        result.tau=model.uses_fe_strain_history() && step>0 ? published_fe_stress
+        result.tau=model.uses_independent_bulk_history() && step>0 ? published_fe_stress
                    : 2*r.eta_ve*(strain-result.chi*result.rate*S)+model.evaluate_frozen_maxwell_stress(temp,all,old);
         const auto bg=model.reconstructed_fault_background_tractions(0,segment,xi);
         result.bg=bg.first;
@@ -177,7 +180,7 @@ namespace aspect
                 for (unsigned int c=0; c<all.size(); ++c) all[c]=composition[c][q];
                 const auto j=a[q].active ? a[q].segment_index : 0u;
                 const auto xi=a[q].active ? a[q].xi : 0.;
-                const auto published=model.uses_fe_strain_history()
+                const auto published=model.uses_independent_bulk_history()
                                      ? model.retained_history_stress(cell->id(),p, {}) : SymmetricTensor<2,dim>();
                 const auto s=evaluate(j,xi,a[q].active,phi[q],temp[q],pressure[q],eps[q],all,published);
                 if (a[q].active && s.chi>0.) accumulate(native,j,a[q].shape_1,fe.JxW(q)*s.chi,pressure[q],s,s.tau*N);
@@ -225,7 +228,7 @@ namespace aspect
               if (write_files)
                 for (const auto &q:associations[k].quadrature)
                   {
-                    const auto published=model.uses_fe_strain_history()
+                    const auto published=model.uses_independent_bulk_history()
                                          ? model.retained_history_stress(particle.get_surrounding_cell()->id(),particle.get_location(), {})
                                          : SymmetricTensor<2,dim>();
                     const auto s=evaluate(q.segment_index,q.xi,true,ph[k],T[k],p[k],symmetrize(gradients[k]),all,published);
@@ -238,7 +241,7 @@ namespace aspect
                                         ph[k],T[k],p[k],symmetrize(gradients[k]),all, {});
                   // Timestep zero retained zero particle stress. This independent
                   // first finite-step formula must match the newly committed array.
-                  const auto strain=model.uses_fe_strain_history()
+                  const auto strain=model.uses_deviatoric_strain_rate()
                                     ? Utilities::Tensors::consistent_deviator(symmetrize(gradients[k])) : symmetrize(gradients[k]);
                   const auto expected=2*s.eta_ve*(strain-s.chi*s.rate*S);
                   for (unsigned int c=0; c<3; ++c)

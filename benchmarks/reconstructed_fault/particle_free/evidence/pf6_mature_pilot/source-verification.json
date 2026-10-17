@@ -1,0 +1,34 @@
+{
+  "entry_files": 12597,
+  "missing_entry_files": [],
+  "changed_entry_files": [
+    "benchmarks/reconstructed_fault/bp3_native/coupled_checks.cc",
+    "benchmarks/reconstructed_fault/particle_free/README.md",
+    "benchmarks/reconstructed_fault/particle_free/run_pf6_mature.py",
+    "doc/reconstructed_fault/current_design.md",
+    "doc/reconstructed_fault/particle_free/SOURCE_AUDIT.md",
+    "doc/reconstructed_fault/particle_free/STATUS.md",
+    "doc/reconstructed_fault/specification.tex",
+    "include/aspect/material_model/phase_field_fault/fe_strain_internal.h",
+    "source/material_model/phase_field_fault.cc",
+    "source/material_model/phase_field_fault/dg_accepted.cc",
+    "source/material_model/phase_field_fault/dg_history.cc",
+    "source/material_model/phase_field_fault/history.cc",
+    "source/material_model/phase_field_fault/normalization.cc",
+    "source/simulator/core.cc",
+    "source/simulator/phase_field.cc",
+    "source/simulator/solver/reconstructed_fault_stokes.cc"
+  ],
+  "unchanged_material_defaults": 34,
+  "publication_allowance_source_unchanged": true,
+  "particle_domain_and_WENO_sources_unchanged": true,
+  "prior_archives": {
+    "pf6_mature_resolution": "92a1e76500b3da0222802ca0ba9b4b0a4f0e5777104bab48c1a7374ce552f2a6",
+    "pf6_mature_dg": "eec5f1d5465026977aa4a08c7264f2e9e5695addb632b3b5327800b3558b3881",
+    "pf6_domain_free": "aad666529a70a6aba4d3aae9e3a6c203198e0bebcef58dc3532786313c229e8e"
+  },
+  "strict_reference_match_passed": false,
+  "official_unit_cases": 124,
+  "official_unit_assertions": 118034,
+  "functional_checks_passed": true
+}

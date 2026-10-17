@@ -29,6 +29,9 @@ namespace aspect
                       &this->get_material_model()) != nullptr,
                     ExcMessage("Particle property 'maxwell stress' can only be used with "
                                "the 'phase field fault' material model."));
+        if (dynamic_cast<const MaterialModel::PhaseFieldFault<dim> &>(
+              this->get_material_model()).uses_homogeneous_mesh_data())
+          return;
         AssertThrow(this->get_parameters().mapped_particle_properties.size() > 0,
                     ExcMessage("Particle property 'maxwell stress' requires an explicit map "
                                "between particle-advected compositional fields and particle "
@@ -88,6 +91,14 @@ namespace aspect
         const Point<dim> &position,
         std::vector<double> &particle_properties) const
       {
+        if (dynamic_cast<const MaterialModel::PhaseFieldFault<dim> &>(
+              this->get_material_model()).uses_homogeneous_mesh_data())
+          {
+            // Derived diagnostic samples start unloaded, just like the
+            // authoritative DG history. No mapped stress field initializes it.
+            particle_properties.insert(particle_properties.end(), SymmetricTensor<2,dim>::n_independent_components, 0.0);
+            return;
+          }
         for (const unsigned int field_index : initial_stress_field_indices)
           particle_properties.push_back(
             this->get_initial_composition_manager().initial_composition(position,

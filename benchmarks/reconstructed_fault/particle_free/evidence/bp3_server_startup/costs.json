@@ -1,0 +1,953 @@
+{
+  "control": {
+    "record": {
+      "command": [
+        "mpirun",
+        "--map-by",
+        "core",
+        "--bind-to",
+        "core",
+        "-n",
+        "2",
+        "/usr/bin/python3",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/bp3_native/tests/collective_stop/regression.py",
+        "--rank",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/bp3-startup-review/verified/runs/control",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release"
+      ],
+      "seconds": 100.55332104300032,
+      "exit_code": 0,
+      "timeout_seconds": 240,
+      "sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release": "8bc5b99ad5bfcd725d6b9e9405434a0b2cbfae19e5701b458b81e38fb5b08398",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/bp3-startup-review/verified/runs/control/input.prm": "51cfc9c5ce70660e465da8735c828cf6665d54c965e89f749d185f282b1fce6d",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/bp3-startup-review/verified/control/libbp3_coupled_checks.release.so": "28cbfbe2976fb942a24002e85f39ef2c0846baf0fa0571ea62b4c67fbd65872a",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/bp3-startup-review/verified/control/native/libbp3_restore_150x50.release.so": "c9986073dde19bd1a6570452622aa51236234c1a1f2df591eefd4996fd5d7ddf"
+      }
+    },
+    "timers": {
+      "Assemble Stokes system Picard": {
+        "calls": 16,
+        "seconds": 9.57
+      },
+      "Assemble Stokes system rhs": {
+        "calls": 22,
+        "seconds": 12.6
+      },
+      "BP3 dense coefficient output": {
+        "calls": 2,
+        "seconds": 0.153
+      },
+      "BP3 dense stress output": {
+        "calls": 2,
+        "seconds": 1.44
+      },
+      "Build Stokes preconditioner": {
+        "calls": 16,
+        "seconds": 5.5
+      },
+      "Create snapshot": {
+        "calls": 1,
+        "seconds": 0.636
+      },
+      "Fault: Cache build": {
+        "calls": 1,
+        "seconds": 0.0323
+      },
+      "Fault: I_h": {
+        "calls": 13,
+        "seconds": 0.144
+      },
+      "Fault: Property preparation": {
+        "calls": 13,
+        "seconds": 0.28
+      },
+      "Fault: Stokes QP cache build": {
+        "calls": 1,
+        "seconds": 0.0684
+      },
+      "Fault: Surface-property projection": {
+        "calls": 13,
+        "seconds": 4.77e-05
+      },
+      "Fault: condensed linear solve": {
+        "calls": 10,
+        "seconds": 38.8
+      },
+      "Initialization": {
+        "calls": 1,
+        "seconds": 0.255
+      },
+      "Particles: Advect": {
+        "calls": 6,
+        "seconds": 0.00498
+      },
+      "Particles: Copy": {
+        "calls": 6,
+        "seconds": 0.00827
+      },
+      "Particles: Exchange ghosts": {
+        "calls": 7,
+        "seconds": 0.00587
+      },
+      "Particles: Generate": {
+        "calls": 1,
+        "seconds": 0.00326
+      },
+      "Particles: Initialization": {
+        "calls": 1,
+        "seconds": 0.000172
+      },
+      "Particles: Initialize properties": {
+        "calls": 1,
+        "seconds": 0.0209
+      },
+      "Particles: Sort": {
+        "calls": 6,
+        "seconds": 0.0109
+      },
+      "Particles: Update properties": {
+        "calls": 6,
+        "seconds": 0.0344
+      },
+      "Postprocessing": {
+        "calls": 6,
+        "seconds": 10.4
+      },
+      "Setup dof systems": {
+        "calls": 1,
+        "seconds": 0.0778
+      },
+      "Setup initial conditions": {
+        "calls": 1,
+        "seconds": 0.401
+      },
+      "Setup matrices": {
+        "calls": 1,
+        "seconds": 0.534
+      }
+    },
+    "per_rank_resources": {
+      "1": {
+        "native_max_rss_KiB": 424684,
+        "seconds": 99.56303210900114,
+        "user_seconds": 89.980073,
+        "system_seconds": 4.873551,
+        "exit_code": 0
+      },
+      "0": {
+        "native_max_rss_KiB": 437376,
+        "seconds": 99.58089409599961,
+        "user_seconds": 88.150028,
+        "system_seconds": 9.773873,
+        "exit_code": 0
+      }
+    },
+    "checkpoint_slot_bytes": {
+      "01": 14929538
+    },
+    "dense_all_rank_snapshot_bytes": {
+      "0": 7137020,
+      "5": 13839258
+    },
+    "global_particles": [
+      66176,
+      66176,
+      66176,
+      66176,
+      66176,
+      66176
+    ],
+    "cells": 4136,
+    "DG_history_DoFs": 111672,
+    "native_solution_DoFs": 149538
+  },
+  "scheduled-control": {
+    "record": {
+      "command": [
+        "mpirun",
+        "--map-by",
+        "core",
+        "--bind-to",
+        "core",
+        "-n",
+        "2",
+        "/usr/bin/python3",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/bp3_native/tests/collective_stop/regression.py",
+        "--rank",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/bp3-startup-review/verified/runs/scheduled-control",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release"
+      ],
+      "seconds": 101.81151412200052,
+      "exit_code": 0,
+      "timeout_seconds": 240,
+      "sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release": "8bc5b99ad5bfcd725d6b9e9405434a0b2cbfae19e5701b458b81e38fb5b08398",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/bp3-startup-review/verified/runs/scheduled-control/input.prm": "bac115d7c549aab136ed4d56f023c973b3d4a70b6045ac2d377810e21cc13a51",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/bp3-startup-review/verified/control/libbp3_coupled_checks.release.so": "28cbfbe2976fb942a24002e85f39ef2c0846baf0fa0571ea62b4c67fbd65872a",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/bp3-startup-review/verified/control/native/libbp3_restore_150x50.release.so": "c9986073dde19bd1a6570452622aa51236234c1a1f2df591eefd4996fd5d7ddf"
+      }
+    },
+    "timers": {
+      "Assemble Stokes system Picard": {
+        "calls": 16,
+        "seconds": 9.62
+      },
+      "Assemble Stokes system rhs": {
+        "calls": 22,
+        "seconds": 13.2
+      },
+      "BP3 dense coefficient output": {
+        "calls": 3,
+        "seconds": 0.17
+      },
+      "BP3 dense stress output": {
+        "calls": 3,
+        "seconds": 1.88
+      },
+      "Build Stokes preconditioner": {
+        "calls": 16,
+        "seconds": 5.37
+      },
+      "Create snapshot": {
+        "calls": 1,
+        "seconds": 0.438
+      },
+      "Fault: Cache build": {
+        "calls": 1,
+        "seconds": 0.0309
+      },
+      "Fault: I_h": {
+        "calls": 13,
+        "seconds": 0.145
+      },
+      "Fault: Property preparation": {
+        "calls": 13,
+        "seconds": 0.277
+      },
+      "Fault: Stokes QP cache build": {
+        "calls": 1,
+        "seconds": 0.0634
+      },
+      "Fault: Surface-property projection": {
+        "calls": 13,
+        "seconds": 4.76e-05
+      },
+      "Fault: condensed linear solve": {
+        "calls": 10,
+        "seconds": 38.0
+      },
+      "Initialization": {
+        "calls": 1,
+        "seconds": 0.251
+      },
+      "Particles: Advect": {
+        "calls": 6,
+        "seconds": 0.0058
+      },
+      "Particles: Copy": {
+        "calls": 6,
+        "seconds": 0.00913
+      },
+      "Particles: Exchange ghosts": {
+        "calls": 7,
+        "seconds": 0.00673
+      },
+      "Particles: Generate": {
+        "calls": 1,
+        "seconds": 0.00284
+      },
+      "Particles: Initialization": {
+        "calls": 1,
+        "seconds": 0.00024
+      },
+      "Particles: Initialize properties": {
+        "calls": 1,
+        "seconds": 0.0202
+      },
+      "Particles: Sort": {
+        "calls": 6,
+        "seconds": 0.0118
+      },
+      "Particles: Update properties": {
+        "calls": 6,
+        "seconds": 0.0409
+      },
+      "Postprocessing": {
+        "calls": 6,
+        "seconds": 11.0
+      },
+      "Setup dof systems": {
+        "calls": 1,
+        "seconds": 0.0734
+      },
+      "Setup initial conditions": {
+        "calls": 1,
+        "seconds": 0.368
+      },
+      "Setup matrices": {
+        "calls": 1,
+        "seconds": 0.503
+      }
+    },
+    "per_rank_resources": {
+      "1": {
+        "native_max_rss_KiB": 425372,
+        "seconds": 99.65239420100079,
+        "user_seconds": 91.672229,
+        "system_seconds": 5.725306,
+        "exit_code": 0
+      },
+      "0": {
+        "native_max_rss_KiB": 436444,
+        "seconds": 99.62769663899962,
+        "user_seconds": 89.287242,
+        "system_seconds": 8.749651,
+        "exit_code": 0
+      }
+    },
+    "checkpoint_slot_bytes": {
+      "01": 14929758
+    },
+    "dense_all_rank_snapshot_bytes": {
+      "0": 7137020,
+      "3": 13844628,
+      "5": 13839258
+    },
+    "global_particles": [
+      66176,
+      66176,
+      66176,
+      66176,
+      66176,
+      66176
+    ],
+    "cells": 4136,
+    "DG_history_DoFs": 111672,
+    "native_solution_DoFs": 149538
+  },
+  "scheduled-resume": {
+    "record": {
+      "command": [
+        "mpirun",
+        "--map-by",
+        "core",
+        "--bind-to",
+        "core",
+        "-n",
+        "2",
+        "/usr/bin/python3",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/bp3_native/tests/collective_stop/regression.py",
+        "--rank",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/bp3-startup-review/verified/runs/scheduled-resume",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release"
+      ],
+      "seconds": 30.160425039000984,
+      "exit_code": 0,
+      "timeout_seconds": 240,
+      "sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release": "8bc5b99ad5bfcd725d6b9e9405434a0b2cbfae19e5701b458b81e38fb5b08398",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/bp3-startup-review/verified/runs/scheduled-resume/input.prm": "614bc0eb0fc803ce597f0b3e724e266157d34b5fe4a87c9cc7509ce0e6618938",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/bp3-startup-review/verified/control/libbp3_coupled_checks.release.so": "28cbfbe2976fb942a24002e85f39ef2c0846baf0fa0571ea62b4c67fbd65872a",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/bp3-startup-review/verified/control/native/libbp3_restore_150x50.release.so": "c9986073dde19bd1a6570452622aa51236234c1a1f2df591eefd4996fd5d7ddf"
+      }
+    },
+    "timers": {
+      "Assemble Stokes system Picard": {
+        "calls": 6,
+        "seconds": 2.2
+      },
+      "Assemble Stokes system rhs": {
+        "calls": 8,
+        "seconds": 3.52
+      },
+      "BP3 dense coefficient output": {
+        "calls": 1,
+        "seconds": 0.0367
+      },
+      "BP3 dense stress output": {
+        "calls": 1,
+        "seconds": 0.411
+      },
+      "Build Stokes preconditioner": {
+        "calls": 6,
+        "seconds": 1.28
+      },
+      "Create snapshot": {
+        "calls": 1,
+        "seconds": 0.434
+      },
+      "Fault: Cache build": {
+        "calls": 1,
+        "seconds": 0.0103
+      },
+      "Fault: I_h": {
+        "calls": 4,
+        "seconds": 0.0597
+      },
+      "Fault: Property preparation": {
+        "calls": 4,
+        "seconds": 0.0785
+      },
+      "Fault: Stokes QP cache build": {
+        "calls": 1,
+        "seconds": 0.0285
+      },
+      "Fault: Surface-property projection": {
+        "calls": 4,
+        "seconds": 6.06e-06
+      },
+      "Fault: condensed linear solve": {
+        "calls": 4,
+        "seconds": 10.7
+      },
+      "Initialization": {
+        "calls": 1,
+        "seconds": 0.139
+      },
+      "Particles: Advect": {
+        "calls": 2,
+        "seconds": 0.00113
+      },
+      "Particles: Copy": {
+        "calls": 2,
+        "seconds": 0.00193
+      },
+      "Particles: Exchange ghosts": {
+        "calls": 2,
+        "seconds": 0.00127
+      },
+      "Particles: Initialization": {
+        "calls": 1,
+        "seconds": 0.000137
+      },
+      "Particles: Sort": {
+        "calls": 2,
+        "seconds": 0.00367
+      },
+      "Particles: Update properties": {
+        "calls": 2,
+        "seconds": 0.00855
+      },
+      "Postprocessing": {
+        "calls": 2,
+        "seconds": 2.69
+      },
+      "Resume snapshot": {
+        "calls": 1,
+        "seconds": 0.134
+      },
+      "Setup dof systems": {
+        "calls": 1,
+        "seconds": 0.0407
+      },
+      "Setup matrices": {
+        "calls": 1,
+        "seconds": 0.257
+      }
+    },
+    "per_rank_resources": {
+      "1": {
+        "native_max_rss_KiB": 434092,
+        "seconds": 28.020929922000505,
+        "user_seconds": 25.258661,
+        "system_seconds": 1.097604,
+        "exit_code": 0
+      },
+      "0": {
+        "native_max_rss_KiB": 440000,
+        "seconds": 27.9692559239993,
+        "user_seconds": 22.377231,
+        "system_seconds": 4.394535,
+        "exit_code": 0
+      }
+    },
+    "checkpoint_slot_bytes": {
+      "01": 14927374,
+      "02": 14926577
+    },
+    "dense_all_rank_snapshot_bytes": {
+      "5": 13839258
+    },
+    "global_particles": [
+      66176,
+      66176
+    ],
+    "cells": 4136,
+    "DG_history_DoFs": 111672,
+    "native_solution_DoFs": 149538
+  },
+  "scheduled-split": {
+    "record": {
+      "command": [
+        "mpirun",
+        "--map-by",
+        "core",
+        "--bind-to",
+        "core",
+        "-n",
+        "2",
+        "/usr/bin/python3",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/bp3_native/tests/collective_stop/regression.py",
+        "--rank",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/bp3-startup-review/verified/runs/scheduled-split",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release"
+      ],
+      "seconds": 76.95395204399938,
+      "exit_code": 0,
+      "timeout_seconds": 240,
+      "sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release": "8bc5b99ad5bfcd725d6b9e9405434a0b2cbfae19e5701b458b81e38fb5b08398",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/bp3-startup-review/verified/runs/scheduled-split/input.prm": "6500d7790f2238fb5b59830d53e3f1e9b3bf9ebe2092617d68cae4624228582c",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/bp3-startup-review/verified/control/libbp3_coupled_checks.release.so": "28cbfbe2976fb942a24002e85f39ef2c0846baf0fa0571ea62b4c67fbd65872a",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/bp3-startup-review/verified/control/native/libbp3_restore_150x50.release.so": "c9986073dde19bd1a6570452622aa51236234c1a1f2df591eefd4996fd5d7ddf"
+      }
+    },
+    "timers": {
+      "Assemble Stokes system Picard": {
+        "calls": 10,
+        "seconds": 7.47
+      },
+      "Assemble Stokes system rhs": {
+        "calls": 14,
+        "seconds": 10.1
+      },
+      "BP3 dense coefficient output": {
+        "calls": 2,
+        "seconds": 0.145
+      },
+      "BP3 dense stress output": {
+        "calls": 2,
+        "seconds": 1.51
+      },
+      "Build Stokes preconditioner": {
+        "calls": 10,
+        "seconds": 4.38
+      },
+      "Create snapshot": {
+        "calls": 1,
+        "seconds": 0.643
+      },
+      "Fault: Cache build": {
+        "calls": 1,
+        "seconds": 0.023
+      },
+      "Fault: I_h": {
+        "calls": 9,
+        "seconds": 0.122
+      },
+      "Fault: Property preparation": {
+        "calls": 9,
+        "seconds": 0.221
+      },
+      "Fault: Stokes QP cache build": {
+        "calls": 1,
+        "seconds": 0.0576
+      },
+      "Fault: Surface-property projection": {
+        "calls": 9,
+        "seconds": 4.11e-05
+      },
+      "Fault: condensed linear solve": {
+        "calls": 6,
+        "seconds": 27.8
+      },
+      "Initialization": {
+        "calls": 1,
+        "seconds": 0.242
+      },
+      "Particles: Advect": {
+        "calls": 4,
+        "seconds": 0.00435
+      },
+      "Particles: Copy": {
+        "calls": 4,
+        "seconds": 0.00606
+      },
+      "Particles: Exchange ghosts": {
+        "calls": 5,
+        "seconds": 0.00521
+      },
+      "Particles: Generate": {
+        "calls": 1,
+        "seconds": 0.0033
+      },
+      "Particles: Initialization": {
+        "calls": 1,
+        "seconds": 0.000182
+      },
+      "Particles: Initialize properties": {
+        "calls": 1,
+        "seconds": 0.0237
+      },
+      "Particles: Sort": {
+        "calls": 4,
+        "seconds": 0.00869
+      },
+      "Particles: Update properties": {
+        "calls": 4,
+        "seconds": 0.029
+      },
+      "Postprocessing": {
+        "calls": 4,
+        "seconds": 8.57
+      },
+      "Setup dof systems": {
+        "calls": 1,
+        "seconds": 0.0649
+      },
+      "Setup initial conditions": {
+        "calls": 1,
+        "seconds": 0.347
+      },
+      "Setup matrices": {
+        "calls": 1,
+        "seconds": 0.477
+      }
+    },
+    "per_rank_resources": {
+      "1": {
+        "native_max_rss_KiB": 424012,
+        "seconds": 75.9502371669987,
+        "user_seconds": 69.267159,
+        "system_seconds": 5.031372,
+        "exit_code": 0
+      },
+      "0": {
+        "native_max_rss_KiB": 431444,
+        "seconds": 75.9642560730008,
+        "user_seconds": 67.669819,
+        "system_seconds": 6.758215,
+        "exit_code": 0
+      }
+    },
+    "checkpoint_slot_bytes": {
+      "01": 14927374
+    },
+    "dense_all_rank_snapshot_bytes": {
+      "0": 7137020,
+      "3": 13844628
+    },
+    "global_particles": [
+      66176,
+      66176,
+      66176,
+      66176
+    ],
+    "cells": 4136,
+    "DG_history_DoFs": 111672,
+    "native_solution_DoFs": 149538
+  },
+  "wall": {
+    "record": {
+      "command": [
+        "mpirun",
+        "--map-by",
+        "core",
+        "--bind-to",
+        "core",
+        "-n",
+        "2",
+        "/usr/bin/python3",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/bp3_native/tests/collective_stop/regression.py",
+        "--rank",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/bp3-startup-review/verified/runs/wall",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release"
+      ],
+      "seconds": 56.71747976700135,
+      "exit_code": 0,
+      "timeout_seconds": 240,
+      "sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release": "8bc5b99ad5bfcd725d6b9e9405434a0b2cbfae19e5701b458b81e38fb5b08398",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/bp3-startup-review/verified/runs/wall/input.prm": "129004d74f8d275b8f16eb427bafc59e3ee0d74d763c7e2590e1fb298a991dc6",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/bp3-startup-review/verified/injected/libbp3_coupled_checks.release.so": "a2c38345ff1953e7faaf36c09278450be23f36e3fa9b2eea36e81a98cf25bec6",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/bp3-startup-review/verified/injected/native/libbp3_restore_150x50.release.so": "a0dbcc053832977cae9f64fe89179536950552ee4008698c8f48d0f0089d371b"
+      }
+    },
+    "timers": {
+      "Assemble Stokes system Picard": {
+        "calls": 7,
+        "seconds": 5.27
+      },
+      "Assemble Stokes system rhs": {
+        "calls": 10,
+        "seconds": 7.52
+      },
+      "BP3 dense coefficient output": {
+        "calls": 2,
+        "seconds": 0.148
+      },
+      "BP3 dense stress output": {
+        "calls": 2,
+        "seconds": 1.47
+      },
+      "Build Stokes preconditioner": {
+        "calls": 7,
+        "seconds": 3.01
+      },
+      "Create snapshot": {
+        "calls": 1,
+        "seconds": 0.64
+      },
+      "Fault: Cache build": {
+        "calls": 1,
+        "seconds": 0.0262
+      },
+      "Fault: I_h": {
+        "calls": 7,
+        "seconds": 0.13
+      },
+      "Fault: Property preparation": {
+        "calls": 7,
+        "seconds": 0.225
+      },
+      "Fault: Stokes QP cache build": {
+        "calls": 1,
+        "seconds": 0.0617
+      },
+      "Fault: Surface-property projection": {
+        "calls": 7,
+        "seconds": 4.14e-05
+      },
+      "Fault: condensed linear solve": {
+        "calls": 4,
+        "seconds": 18.9
+      },
+      "Initialization": {
+        "calls": 1,
+        "seconds": 0.25
+      },
+      "Particles: Advect": {
+        "calls": 3,
+        "seconds": 0.00318
+      },
+      "Particles: Copy": {
+        "calls": 3,
+        "seconds": 0.004
+      },
+      "Particles: Exchange ghosts": {
+        "calls": 4,
+        "seconds": 0.00425
+      },
+      "Particles: Generate": {
+        "calls": 1,
+        "seconds": 0.0035
+      },
+      "Particles: Initialization": {
+        "calls": 1,
+        "seconds": 0.000175
+      },
+      "Particles: Initialize properties": {
+        "calls": 1,
+        "seconds": 0.0215
+      },
+      "Particles: Sort": {
+        "calls": 3,
+        "seconds": 0.00867
+      },
+      "Particles: Update properties": {
+        "calls": 3,
+        "seconds": 0.0245
+      },
+      "Postprocessing": {
+        "calls": 3,
+        "seconds": 6.45
+      },
+      "Setup dof systems": {
+        "calls": 1,
+        "seconds": 0.0739
+      },
+      "Setup initial conditions": {
+        "calls": 1,
+        "seconds": 0.386
+      },
+      "Setup matrices": {
+        "calls": 1,
+        "seconds": 0.518
+      }
+    },
+    "per_rank_resources": {
+      "1": {
+        "native_max_rss_KiB": 418068,
+        "seconds": 54.54987739600074,
+        "user_seconds": 49.717072,
+        "system_seconds": 3.373541,
+        "exit_code": 0
+      },
+      "0": {
+        "native_max_rss_KiB": 431840,
+        "seconds": 54.55871150599887,
+        "user_seconds": 47.176792,
+        "system_seconds": 6.043248,
+        "exit_code": 0
+      }
+    },
+    "checkpoint_slot_bytes": {
+      "01": 14926133
+    },
+    "dense_all_rank_snapshot_bytes": {
+      "0": 7137020,
+      "2": 13850088
+    },
+    "global_particles": [
+      66176,
+      66176,
+      66176
+    ],
+    "cells": 4136,
+    "DG_history_DoFs": 111672,
+    "native_solution_DoFs": 149538
+  },
+  "wall-resume": {
+    "record": {
+      "command": [
+        "mpirun",
+        "--map-by",
+        "core",
+        "--bind-to",
+        "core",
+        "-n",
+        "2",
+        "/usr/bin/python3",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/bp3_native/tests/collective_stop/regression.py",
+        "--rank",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/bp3-startup-review/verified/runs/wall-resume",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release"
+      ],
+      "seconds": 47.76484192300086,
+      "exit_code": 0,
+      "timeout_seconds": 240,
+      "sha256": {
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/native/aspect-release": "8bc5b99ad5bfcd725d6b9e9405434a0b2cbfae19e5701b458b81e38fb5b08398",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/bp3-startup-review/verified/runs/wall-resume/input.prm": "9bdbd4ae9126291464aa0e4fc109a82a7c8850dc3c1ca016b2a7822aa194d0bc",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/bp3-startup-review/verified/injected/libbp3_coupled_checks.release.so": "a2c38345ff1953e7faaf36c09278450be23f36e3fa9b2eea36e81a98cf25bec6",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/bp3-startup-review/verified/injected/native/libbp3_restore_150x50.release.so": "a0dbcc053832977cae9f64fe89179536950552ee4008698c8f48d0f0089d371b"
+      }
+    },
+    "timers": {
+      "Assemble Stokes system Picard": {
+        "calls": 9,
+        "seconds": 4.21
+      },
+      "Assemble Stokes system rhs": {
+        "calls": 12,
+        "seconds": 6.1
+      },
+      "BP3 dense coefficient output": {
+        "calls": 1,
+        "seconds": 0.0369
+      },
+      "BP3 dense stress output": {
+        "calls": 1,
+        "seconds": 0.41
+      },
+      "Build Stokes preconditioner": {
+        "calls": 9,
+        "seconds": 2.45
+      },
+      "Create snapshot": {
+        "calls": 1,
+        "seconds": 0.437
+      },
+      "Fault: Cache build": {
+        "calls": 1,
+        "seconds": 0.0224
+      },
+      "Fault: I_h": {
+        "calls": 6,
+        "seconds": 0.115
+      },
+      "Fault: Property preparation": {
+        "calls": 6,
+        "seconds": 0.146
+      },
+      "Fault: Stokes QP cache build": {
+        "calls": 1,
+        "seconds": 0.0555
+      },
+      "Fault: Surface-property projection": {
+        "calls": 6,
+        "seconds": 1.04e-05
+      },
+      "Fault: condensed linear solve": {
+        "calls": 6,
+        "seconds": 19.2
+      },
+      "Initialization": {
+        "calls": 1,
+        "seconds": 0.268
+      },
+      "Particles: Advect": {
+        "calls": 3,
+        "seconds": 0.00216
+      },
+      "Particles: Copy": {
+        "calls": 3,
+        "seconds": 0.00497
+      },
+      "Particles: Exchange ghosts": {
+        "calls": 3,
+        "seconds": 0.00226
+      },
+      "Particles: Initialization": {
+        "calls": 1,
+        "seconds": 0.000194
+      },
+      "Particles: Sort": {
+        "calls": 3,
+        "seconds": 0.00598
+      },
+      "Particles: Update properties": {
+        "calls": 3,
+        "seconds": 0.0159
+      },
+      "Postprocessing": {
+        "calls": 3,
+        "seconds": 3.47
+      },
+      "Resume snapshot": {
+        "calls": 1,
+        "seconds": 0.222
+      },
+      "Setup dof systems": {
+        "calls": 1,
+        "seconds": 0.0705
+      },
+      "Setup matrices": {
+        "calls": 1,
+        "seconds": 0.461
+      }
+    },
+    "per_rank_resources": {
+      "1": {
+        "native_max_rss_KiB": 431596,
+        "seconds": 47.47439087800012,
+        "user_seconds": 42.11672,
+        "system_seconds": 2.5661579999999997,
+        "exit_code": 0
+      },
+      "0": {
+        "native_max_rss_KiB": 436392,
+        "seconds": 47.420244382999954,
+        "user_seconds": 42.773013,
+        "system_seconds": 3.351267,
+        "exit_code": 0
+      }
+    },
+    "checkpoint_slot_bytes": {
+      "01": 14926133,
+      "02": 14927381
+    },
+    "dense_all_rank_snapshot_bytes": {
+      "5": 13839258
+    },
+    "global_particles": [
+      66176,
+      66176,
+      66176
+    ],
+    "cells": 4136,
+    "DG_history_DoFs": 111672,
+    "native_solution_DoFs": 149538
+  }
+}

@@ -1,4 +1,5 @@
 #include "runtime.h"
+#include "phase_reference.h"
 #include "particle_initialization.h"
 #include "bp3_model.h"
 
@@ -172,7 +173,8 @@ namespace aspect
                       cell, fe.get_unit_support_points ()[j]);
                   constraints.add_line (dofs[j]);
                   constraints.set_inhomogeneity (dofs[j],
-                                                 profiles[0]->value (BP3::normal_distance (p[0], p[1])));
+                                                 BP3::has_phase_reference() ? BP3::phase_reference_value(p[0],p[1])
+                                                   : profiles[0]->value (BP3::normal_distance (p[0], p[1])));
                 }
           }
     }
@@ -249,6 +251,15 @@ namespace aspect
       }
       // The simulator owns a mutable material object. This initialization-only
       // callback precedes the particle-to-FE transfer; no assembly loop casts.
+      if (model.uses_homogeneous_mesh_data())
+        {
+          // The same prescribed physical state used below, supplied before
+          // preparation so domain-free mechanics never projects particle Theta.
+          const auto state=manager.get_property_information()[manager.get_property_index("phase field fault state")].position;
+          for (unsigned int v=0;v<fault.n_vertices();++v)
+            manager.get_fault(0).get_properties(v)[state]=BP3::configured_initial_state(
+              BP3::down_dip(fault.vertex(v)[0],fault.vertex(v)[1]),model.get_fault_friction());
+        }
       model.prepare_reconstructed_fault_mechanical_solve ();
       const auto &contacts=manager.get_boundary_contacts();
       AssertThrow(contacts.size()==2 && contacts[0].endpoint!=contacts[1].endpoint,
@@ -324,13 +335,35 @@ namespace aspect
     template <int dim> class BP3Initial : public Interface<dim>, public SimulatorAccess<dim>
     {
     public:
+      static void declare_parameters(ParameterHandler &prm)
+      {
+        prm.enter_subsection("Initial composition model");
+        prm.enter_subsection("BP3");
+        prm.declare_entry("Fixed phase reference file", "", Patterns::Anything(),
+                          "Optional immutable physical Q1 reference for fresh serial fixed-mesh mature resolution controls. Empty retains the native physical seed.");
+        prm.leave_subsection();prm.leave_subsection();
+      }
       void parse_parameters(ParameterHandler &prm) override
-      { BP3::configure_geometry(*this,prm); }
+      {
+        BP3::configure_geometry(*this,prm);
+        prm.enter_subsection("Initial composition model");prm.enter_subsection("BP3");
+        BP3::read_phase_reference(prm.get("Fixed phase reference file"));
+        prm.leave_subsection();prm.leave_subsection();
+      }
 
       void initialize () override
       {
         friction = &Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>> (
                  this->get_material_model ()).get_fault_friction ();
+        if(BP3::has_phase_reference())
+          {
+            auto &model=const_cast<MaterialModel::PhaseFieldFault<dim> &>(
+              Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(this->get_material_model()));
+            auto reference=std::make_shared<typename MaterialModel::PhaseFieldFault<dim>::BenchmarkPhaseReference>();
+            reference->value=[](const Point<dim> &p) { return BP3::phase_reference_value(p[0],p[1]); };
+            for(unsigned int d=0;d<dim;++d) reference->exterior_spacing[d]=BP3::phase_reference_spacing();
+            model.benchmark_phase_reference=reference;
+          }
       }
 
       double

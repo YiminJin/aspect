@@ -1,0 +1,24 @@
+{
+  "base": "a8707307008401ac9cff702a369e2e2a611fa0f7",
+  "branch": "pf-rsf-particle-free",
+  "core_sha256": "9f246a95e2cdb1dbf9c0b02991d4fc8d0477d2a04d926523b2af9ec9ab19cda2",
+  "scope": "Fresh serial, fixed graded mesh, fixed 60-degree mature fault, prescribed frozen phase, homogeneous coefficients, stationary history; no advection",
+  "number_of_native_cases": 18,
+  "original_failed_cases": [
+    "operator-dg",
+    "gate-dg"
+  ],
+  "native_seconds": 1278.6054606420003,
+  "native_budget_seconds": 3600,
+  "same_core_DG_FE_particle_and_controls": true,
+  "matching_initial_physical_point_identity": true,
+  "DG_FE_compatibility_passed": true,
+  "cohesive_traction_zero_with_nonzero_auxiliary_Z": true,
+  "native_publication_and_fixed_points_passed": true,
+  "Gauss6_Gauss8_screen_passed": true,
+  "time_perturbation_load_screen_passed": false,
+  "spatial_accuracy_qualified": false,
+  "strict_reference_match_passed": false,
+  "original_strict_reference_errors_preserved": true,
+  "phase_evolution_MPI_restart_transport_or_first_event_qualified": false
+}

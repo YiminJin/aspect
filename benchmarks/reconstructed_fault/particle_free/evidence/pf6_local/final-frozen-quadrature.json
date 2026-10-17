@@ -1,0 +1,212 @@
+{
+  "physical_and_normalization": {
+    "frozen-G6": {
+      "native_minus_reference_energy": [
+        -1.5202188063945243e-08,
+        0.0,
+        5.329070518200751e-15
+      ],
+      "native_minus_reference_load": [
+        2.9509658361348556e-07,
+        5.901932524920994e-07,
+        5.901930535401334e-07,
+        5.90193423022356e-07,
+        5.901930535401334e-07,
+        5.901931672269711e-07,
+        5.901929682750051e-07,
+        5.90192826166458e-07,
+        2.9509629939639126e-07
+      ],
+      "energy_scaled_error": 1.5202188063945243e-08,
+      "load_scaled_error": 4.39308430377561e-09,
+      "q24_q32_energy_uncertainty": 2.220446049250313e-16,
+      "q24_q32_load_uncertainty": 2.5579538487363607e-13,
+      "native_I_error": 5.684341886080802e-14,
+      "native_I_scaled_error": 6.185864815850989e-16,
+      "q24_q32_I_uncertainty": 4.263256414560601e-14,
+      "normalization_only_energy_change": [
+        1.6653345369377348e-15,
+        -5.551115123125783e-17,
+        0.0
+      ],
+      "normalization_only_load_change": [
+        3.410605131648481e-13,
+        7.673861546209082e-13,
+        5.115907697472721e-13,
+        1.3642420526593924e-12,
+        -1.9895196601282805e-13,
+        9.094947017729282e-13,
+        1.7053025658242404e-12,
+        7.958078640513122e-13,
+        2.5579538487363607e-13
+      ],
+      "surface_projection_RMS": 1.7857533863760886e-14,
+      "surface_projection_Linf": 4.263256414560601e-14,
+      "native_I_vs_unprojected_ray_Linf": 7.105427357601002e-14,
+      "physical_rule_passed": false,
+      "normalization_passed": true
+    },
+    "frozen-G12": {
+      "native_minus_reference_energy": [
+        6.661338147750939e-16,
+        0.0,
+        5.329070518200751e-15
+      ],
+      "native_minus_reference_load": [
+        2.8421709430404007e-13,
+        -8.526512829121202e-14,
+        -2.842170943040401e-14,
+        1.1368683772161603e-13,
+        -2.842170943040401e-14,
+        1.1368683772161603e-13,
+        1.4210854715202004e-13,
+        -2.5579538487363607e-13,
+        -1.4210854715202004e-14
+      ],
+      "energy_scaled_error": 6.661338147750939e-16,
+      "load_scaled_error": 2.115560098006201e-15,
+      "q24_q32_energy_uncertainty": 2.220446049250313e-16,
+      "q24_q32_load_uncertainty": 2.5579538487363607e-13,
+      "native_I_error": 5.684341886080802e-14,
+      "native_I_scaled_error": 6.185864815850989e-16,
+      "q24_q32_I_uncertainty": 4.263256414560601e-14,
+      "normalization_only_energy_change": [
+        1.6653345369377348e-15,
+        -5.551115123125783e-17,
+        0.0
+      ],
+      "normalization_only_load_change": [
+        3.410605131648481e-13,
+        7.673861546209082e-13,
+        5.115907697472721e-13,
+        1.3642420526593924e-12,
+        -1.9895196601282805e-13,
+        9.094947017729282e-13,
+        1.7053025658242404e-12,
+        7.958078640513122e-13,
+        2.5579538487363607e-13
+      ],
+      "surface_projection_RMS": 1.7857533863760886e-14,
+      "surface_projection_Linf": 4.263256414560601e-14,
+      "native_I_vs_unprojected_ray_Linf": 7.105427357601002e-14,
+      "physical_rule_passed": true,
+      "normalization_passed": true
+    },
+    "frozen-G24": {
+      "native_minus_reference_energy": [
+        0.0,
+        0.0,
+        5.329070518200751e-15
+      ],
+      "native_minus_reference_load": [
+        3.126388037344441e-13,
+        4.547473508864641e-13,
+        7.105427357601002e-13,
+        5.115907697472721e-13,
+        3.979039320256561e-13,
+        5.115907697472721e-13,
+        6.821210263296962e-13,
+        1.7053025658242404e-13,
+        5.684341886080802e-14
+      ],
+      "energy_scaled_error": 3.780523363683607e-16,
+      "load_scaled_error": 5.288900245015502e-15,
+      "q24_q32_energy_uncertainty": 2.220446049250313e-16,
+      "q24_q32_load_uncertainty": 2.5579538487363607e-13,
+      "native_I_error": 5.684341886080802e-14,
+      "native_I_scaled_error": 6.185864815850989e-16,
+      "q24_q32_I_uncertainty": 4.263256414560601e-14,
+      "normalization_only_energy_change": [
+        1.6653345369377348e-15,
+        -5.551115123125783e-17,
+        0.0
+      ],
+      "normalization_only_load_change": [
+        3.410605131648481e-13,
+        7.673861546209082e-13,
+        5.115907697472721e-13,
+        1.3642420526593924e-12,
+        -1.9895196601282805e-13,
+        9.094947017729282e-13,
+        1.7053025658242404e-12,
+        7.958078640513122e-13,
+        2.5579538487363607e-13
+      ],
+      "surface_projection_RMS": 1.7857533863760886e-14,
+      "surface_projection_Linf": 4.263256414560601e-14,
+      "native_I_vs_unprojected_ray_Linf": 7.105427357601002e-14,
+      "physical_rule_passed": true,
+      "normalization_passed": true
+    },
+    "frozen-G32": {
+      "native_minus_reference_energy": [
+        4.440892098500626e-16,
+        0.0,
+        5.329070518200751e-15
+      ],
+      "native_minus_reference_load": [
+        2.2737367544323206e-13,
+        6.536993168992922e-13,
+        5.115907697472721e-13,
+        9.663381206337363e-13,
+        6.821210263296962e-13,
+        9.379164112033322e-13,
+        7.105427357601002e-13,
+        5.400124791776761e-13,
+        -1.1368683772161603e-13
+      ],
+      "energy_scaled_error": 4.440892098500626e-16,
+      "load_scaled_error": 7.192904333221083e-15,
+      "q24_q32_energy_uncertainty": 2.220446049250313e-16,
+      "q24_q32_load_uncertainty": 2.5579538487363607e-13,
+      "native_I_error": 5.684341886080802e-14,
+      "native_I_scaled_error": 6.185864815850989e-16,
+      "q24_q32_I_uncertainty": 4.263256414560601e-14,
+      "normalization_only_energy_change": [
+        1.6653345369377348e-15,
+        -5.551115123125783e-17,
+        0.0
+      ],
+      "normalization_only_load_change": [
+        3.410605131648481e-13,
+        7.673861546209082e-13,
+        5.115907697472721e-13,
+        1.3642420526593924e-12,
+        -1.9895196601282805e-13,
+        9.094947017729282e-13,
+        1.7053025658242404e-12,
+        7.958078640513122e-13,
+        2.5579538487363607e-13
+      ],
+      "surface_projection_RMS": 1.7857533863760886e-14,
+      "surface_projection_Linf": 4.263256414560601e-14,
+      "native_I_vs_unprojected_ray_Linf": 7.105427357601002e-14,
+      "physical_rule_passed": true,
+      "normalization_passed": true
+    }
+  },
+  "snapshot_particle_domains": {
+    "frozen-G12-particles": {
+      "volume_error": 2.3418766925686896e-17,
+      "box_error": 1.734723475976807e-16,
+      "total_volume": 0.9999999999999979
+    },
+    "frozen-G24-particles": {
+      "volume_error": 2.3418766925686896e-17,
+      "box_error": 1.734723475976807e-16,
+      "total_volume": 0.9999999999999979
+    },
+    "frozen-G32-particles": {
+      "volume_error": 2.3418766925686896e-17,
+      "box_error": 1.734723475976807e-16,
+      "total_volume": 0.9999999999999979
+    },
+    "frozen-G6-particles": {
+      "volume_error": 2.3418766925686896e-17,
+      "box_error": 1.734723475976807e-16,
+      "total_volume": 0.9999999999999979
+    }
+  },
+  "G12_gate_passed": true,
+  "original_G6_failure_retained": true
+}

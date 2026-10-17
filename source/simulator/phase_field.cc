@@ -716,13 +716,21 @@ namespace aspect
                 ExcMessage("The phase field method requires one of the particle sets to include a "
                            "particle property named 'crack_driving_force'."));
 
-    AssertThrow(particle_manager->particle_domains_requested(),
-                ExcMessage("The phase field method requires the particle manager to generate "
-                           "particle domains."));
+    const auto *fault = dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(&this->get_material_model());
+    const bool mesh_data = fault && fault->uses_homogeneous_mesh_data();
+    if (mesh_data)
+      AssertThrow(!particle_manager->particle_domains_requested(),
+                  ExcMessage("Homogeneous mesh data uses diagnostic particles without domains."));
+    else
+      {
+        AssertThrow(particle_manager->particle_domains_requested(),
+                    ExcMessage("The phase field method requires the particle manager to generate "
+                               "particle domains."));
 
-    AssertThrow(particle_manager->get_particle_domain_handler().cpdi_data_requested(),
-                ExcMessage("The phase field method requires the particle domain handler to "
-                           "generate CPDI data."));
+        AssertThrow(particle_manager->get_particle_domain_handler().cpdi_data_requested(),
+                    ExcMessage("The phase field method requires the particle domain handler to "
+                               "generate CPDI data."));
+      }
 
     const auto &advection_methods = this->get_parameters().compositional_field_methods;
     if (std::find(advection_methods.begin(), advection_methods.end(), 
@@ -879,12 +887,23 @@ namespace aspect
       system_matrix.block(block_index, block_index) = 0;
     system_rhs.block(block_index) = 0;
 
-    if (total_energy && fault_material->uses_dg_trial_stress_history() && !omit_fe_elastic_energy)
+    if (total_energy && fault_material->uses_dg_trial_stress_history()
+        && (!omit_fe_elastic_energy || fault_material->uses_consistent_endpoint_phase()))
       {
-        // PF3 is a fixed-incoming-history phase operator. No CPDI/domain,
-        // particle H/composition or projected stress enters this functional.
+        // PF3 uses fixed incoming history; PF6a requests this same FE fracture
+        // block separately from its explicit mechanical endpoint energy.
+        // No CPDI/domain, particle H/composition or projected stress enters.
         // Its trials never replace the accepted phase, tensor or surface Z.
-        const auto elastic=fault_material->evaluate_fe_phase_energy(current_solution,assemble_system_jacobian);
+        typename MaterialModel::PhaseFieldFault<dim>::FEPhaseEnergy elastic;
+        if (!omit_fe_elastic_energy)
+          elastic=fault_material->evaluate_fe_phase_energy(current_solution,assemble_system_jacobian);
+        else
+          {
+            const unsigned int n=system_rhs.block(block_index).size();
+            elastic.gradient.assign(n,0.);
+            elastic.roundoff_scale.assign(n,0.);
+            if (assemble_system_jacobian) elastic.hessian.reinit(n,n);
+          }
         if (!elastic.admissible)
           return false;
         const auto fracture=evaluate_cell_fracture(current_solution,assemble_system_jacobian);
@@ -902,12 +921,15 @@ namespace aspect
         if (assemble_system_jacobian)
           system_matrix.compress(VectorOperation::add);
         if (residual_roundoff_allowance)
-          *residual_roundoff_allowance=8*std::numeric_limits<double>::epsilon()*std::sqrt(scale_squared);
+          *residual_roundoff_allowance=8*std::numeric_limits<double>::epsilon()
+                                      *std::sqrt(Utilities::MPI::sum(scale_squared,this->get_mpi_communicator()));
         if (energy)
           *energy=elastic.energy+fracture.energy;
         return true;
       }
 
+    AssertThrow(!fault_material || !fault_material->uses_homogeneous_mesh_data(),
+                ExcMessage("Homogeneous mesh data cannot fall back to CPDI phase assembly."));
     const Particles::ParticleHandler<dim> &particle_handler = particle_manager->get_particle_handler();
     const Particle::ParticleDomainHandler<dim> &particle_domain_handler = particle_manager->get_particle_domain_handler();
 
@@ -1146,8 +1168,9 @@ namespace aspect
   {
     const auto &material=Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(this->get_material_model());
     AssertThrow(material.uses_dg_trial_stress_history() && material.has_fe_strain_history()
-                && Utilities::MPI::n_mpi_processes(this->get_mpi_communicator())==1,
-                ExcMessage("Cell fracture integration is restricted to the serial PF3 DG phase operator."));
+                && (Utilities::MPI::n_mpi_processes(this->get_mpi_communicator())==1
+                    || material.uses_consistent_endpoint_phase()),
+                ExcMessage("Cell fracture integration requires DG history; MPI requires the native endpoint."));
     for (const double coefficient:critical_energy_densities)
       AssertThrow(coefficient==critical_energy_densities[0],ExcMessage("PF3 requires homogeneous fracture coefficients."));
     const auto &variable=this->introspection().variable("phase_field");
@@ -1214,6 +1237,22 @@ namespace aspect
                 }
             }
         }
+    if (Utilities::MPI::n_mpi_processes(this->get_mpi_communicator())>1)
+      {
+        // Each physical cell contributes once. The endpoint's phase search
+        // vectors/matrices are replicated; only their uniquely owned rows are
+        // inserted into the distributed linear system by the caller.
+        aspect::internal::endpoint_sum(result.gradient,this->get_mpi_communicator());
+        aspect::internal::endpoint_sum(result.roundoff_scale,this->get_mpi_communicator());
+        energy=aspect::internal::endpoint_energy_sum(energy,this->get_mpi_communicator());
+        if (tangent)
+          {
+            std::vector<double> entries(n*n);
+            for(unsigned int i=0;i<n;++i)for(unsigned int j=0;j<n;++j)entries[i*n+j]=result.hessian(i,j);
+            aspect::internal::endpoint_sum(entries,this->get_mpi_communicator());
+            for(unsigned int i=0;i<n;++i)for(unsigned int j=0;j<n;++j)result.hessian(i,j)=entries[i*n+j];
+          }
+      }
     result.energy=energy;
     return result;
   }
@@ -1649,6 +1688,38 @@ namespace aspect
     const unsigned int block_index = this->introspection().variable("phase_field").block_index;
 
     const auto *history_material = dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(&this->get_material_model());
+    if (history_material && history_material->uses_homogeneous_mesh_data()
+        && history_material->is_mature_frictional_fault())
+      {
+        LinearAlgebra::BlockVector prescribed(this->introspection().index_sets.system_partitioning,
+                                             this->get_mpi_communicator());
+        prescribed=solution;
+        this->get_current_constraints().distribute(prescribed);
+        const auto offset=prescribed.get_block_indices().block_start(block_index);
+        unsigned int fully_prescribed=1;
+        for (const auto i:prescribed.block(block_index).locally_owned_elements())
+          if (!this->get_current_constraints().is_constrained(offset+i)
+              || !std::isfinite(prescribed.block(block_index)[i])
+              || prescribed.block(block_index)[i]<0. || prescribed.block(block_index)[i]>=1.)
+            fully_prescribed=0;
+        AssertThrow(Utilities::MPI::min(fully_prescribed,this->get_mpi_communicator())==1,
+                    ExcMessage("Domain-free mature history requires every physical phase DoF prescribed and admissible."));
+        if (this->get_timestep_number()>0)
+          {
+            AssertThrow(history_material->has_fe_strain_history(),ExcMessage("Missing frozen mature phase anchor."));
+            // The candidate is owned, while the accepted anchor is ghosted.
+            // Trilinos vector equality also compares their different local
+            // layouts. Compare every uniquely owned physical DoF exactly.
+            unsigned int unchanged=1;
+            for(const auto i:prescribed.block(block_index).locally_owned_elements())
+              if(prescribed.block(block_index)[i]!=history_material->accepted_fe_strain_state().block(block_index)[i])
+                unchanged=0;
+            AssertThrow(Utilities::MPI::min(unchanged,this->get_mpi_communicator())==1,
+                        ExcMessage("Frozen domain-free mature phase changed from its accepted physical prescription."));
+          }
+        solution.block(block_index)=prescribed.block(block_index);
+        return;
+      }
     AssertThrow(!history_material || !history_material->uses_dg_trial_stress_history()
                 || this->get_timestep_number()==0,
                 ExcMessage("PF2 DG history supports initialization and fixed-profile mechanics only; "
@@ -1862,26 +1933,30 @@ namespace aspect
     const auto &fe = this->get_dof_handler().get_fe();
     std::vector<types::global_dof_index> local_dof_indices(fe.dofs_per_cell);
 
-    // Loop over the locally owned cells and add the nonzero entries of CPDI system
+    // Mesh-data fracture uses the cell graph. Legacy CPDI requires the wider
+    // vertex patch, including periodic partners.
     for (const auto &cell : this->get_dof_handler().active_cell_iterators())
       if (cell->is_locally_owned())
         {
           // All the phase-field DoFs in the one-layer-patch around a cell are
           // possible to be coupled
           std::set<typename Triangulation<dim>::active_cell_iterator> cell_patch;
-          for (const unsigned int v : cell->vertex_indices())
-            {
-              const unsigned int vertex_index = cell->vertex_index(v);
-              cell_patch.insert(vertex_to_cell_map[vertex_index].begin(),
-                                vertex_to_cell_map[vertex_index].end());
-              // Full periodic CPDI domains couple across the bulk seam. This
-              // is a sparsity completion, not a change of phase weak form.
-              const auto group=vertex_group.find(vertex_index);
-              if (group!=vertex_group.end())
-                for (const auto partner : periodic_groups.at(group->second))
-                  for (const auto &neighbor : vertex_to_cell_map[partner])
-                    if (!neighbor->is_artificial()) cell_patch.insert(neighbor);
-            }
+          if (fault && fault->uses_homogeneous_mesh_data())
+            cell_patch.insert(cell);
+          else
+            for (const unsigned int v : cell->vertex_indices())
+              {
+                const unsigned int vertex_index = cell->vertex_index(v);
+                cell_patch.insert(vertex_to_cell_map[vertex_index].begin(),
+                                  vertex_to_cell_map[vertex_index].end());
+                // Full periodic CPDI domains couple across the bulk seam. This
+                // is a sparsity completion, not a change of phase weak form.
+                const auto group=vertex_group.find(vertex_index);
+                if (group!=vertex_group.end())
+                  for (const auto partner : periodic_groups.at(group->second))
+                    for (const auto &neighbor : vertex_to_cell_map[partner])
+                      if (!neighbor->is_artificial()) cell_patch.insert(neighbor);
+              }
 
           // Since the CPDI method requires the fields to be discretized by FE_Q(1) element,
           // we only need to loop over the vertices and extract the DoFs corresponding to

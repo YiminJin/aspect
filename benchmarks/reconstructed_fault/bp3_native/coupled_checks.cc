@@ -2,11 +2,13 @@
 #include <aspect/postprocess/interface.h>
 #include <aspect/simulator.h>
 #include <aspect/material_model/phase_field_fault.h>
+#include <aspect/material_model/phase_field_fault/dg_history_internal.h>
 #include <aspect/particle/manager.h>
 #include <aspect/particle/integrator/rk_2.h>
 #include <aspect/particle/particle_domain.h>
 #include <aspect/particle/interpolator/interface.h>
 #include <aspect/phase_field.h>
+#include <aspect/time_stepping/interface.h>
 #include <aspect/initial_composition/interface.h>
 #include <aspect/reconstructed_fault/manager.h>
 #include <aspect/reconstructed_fault/surface_system.h>
@@ -15,15 +17,39 @@
 #include "../../../tests/phase_field_fault_test_access.h"
 #include "../bp3/plugin/bp3_model.h"
 #include "../bp3/plugin/runtime.h"
+#include "server/plugin/first_event.h"
+#include "server/plugin/output_schedule.h"
+#include "server/plugin/output_files.h"
 #include <deal.II/fe/fe_values.h>
 #include <deal.II/numerics/vector_tools_evaluate.h>
 #include <fstream>
 #include <iomanip>
 #include <cstring>
 #include <set>
+#include <sstream>
 
 namespace aspect
 {
+  namespace TimeStepping
+  {
+    template<int dim> class BP3OneRejection : public Interface<dim>, public SimulatorAccess<dim>
+    {
+      bool rejected=false;
+    public:
+      double execute() override {return std::numeric_limits<double>::max();}
+      std::pair<Reaction,double> determine_reaction(const TimeStepInfo &) override
+      {
+        if(this->get_timestep_number()==2 && !rejected)
+          {
+            rejected=true;
+            return {Reaction::repeat_step,.5*this->get_timestep()};
+          }
+        return {Reaction::advance,std::numeric_limits<double>::max()};
+      }
+    };
+    ASPECT_REGISTER_TIME_STEPPING_MODEL(BP3OneRejection,"BP3 one outer rejection",
+      "Bounded mature-history test: reject the completed step-two trial once and halve its dt.")
+  }
   namespace Particle
   {
     namespace Interpolator
@@ -93,14 +119,32 @@ namespace aspect
           SymmetricTensor<2,dim> stress;
         };
         BV initial_phase, incoming_fe;
+        std::shared_ptr<typename Model::DGHistory> incoming_dg, incoming_dg_snapshot;
         std::vector<double> initial_I, incoming_Z, previous_slip;
         std::map<types::particle_index, std::pair<Point<dim>,double> > fixed_particles;
         std::vector<ParticleAnchor> anchors;
         unsigned int incoming_step = numbers::invalid_unsigned_int;
         unsigned int solver_publications = 0;
         unsigned int last_output = numbers::invalid_unsigned_int;
+        bool write_authoritative_stress = false;
+        struct CommonPoints
+        {
+          std::vector<Point<dim>> physical;
+          std::vector<double> weights;
+          std::vector<unsigned int> ids;
+        };
+        std::string common_points_file;
+        std::map<std::string,CommonPoints> common_points;
         bool write_coefficients = false, inject_failure = false, failure_done = false, material_only = false;
-        bool profile_only = false, prescribed_schedule = true;
+        bool profile_only = false, prescribed_schedule = true, lifecycle = false, nonlinear_failure = false;
+        bool scheduled_fields = false;
+        BP3::OutputSchedule field_schedule;
+        BP3::FirstEvent field_event;
+        std::vector<std::vector<double>> incoming_surface;
+        std::map<types::particle_index,std::vector<double>> incoming_particles;
+        double incoming_dt=0.,incoming_time=0.;
+        std::uint64_t incoming_publications=0;
+        std::vector<double> incoming_rates;
         bool moving_particles = false, moving_attempt = false;
         bool population_event_audit = false;
         std::string audit_filter_mode;
@@ -511,6 +555,9 @@ namespace aspect
           const auto saved_Z=Access::fe_slip_memory(model);
           const auto saved_I=Access::current_normalization_integrals(model);
           const auto saved_step=model.fe_strain_state->committed_step;
+          const auto saved_publications=model.fe_strain_state->accepted_publications;
+          const auto saved_dg=model.uses_dg_trial_stress_history()
+            ? std::make_shared<typename Model::DGHistory>(*model.fe_strain_state->dg_history) : nullptr;
           const auto saved_V=manager.get_timestep_committed_slip_rate(0);
           const auto saved_pressure=sim.last_pressure_normalization_adjustment;
           const auto saved_iteration=sim.nonlinear_iteration;
@@ -582,6 +629,10 @@ namespace aspect
               const auto &saved=particles.at(p.get_id());
               unchanged &= data.size()==saved.size() && std::memcmp(data.data(),saved.data(),data.size()*sizeof(double))==0;
             }
+          unchanged=unchanged && model.fe_strain_state->accepted_publications==saved_publications;
+          if(saved_dg)for(unsigned int c=0;c<saved_dg->trial_stress.size();++c)
+            for(const auto i:saved_dg->trial_stress[c].locally_owned_elements())
+              unchanged=unchanged && model.fe_strain_state->dg_history->trial_stress[c][i]==saved_dg->trial_stress[c][i];
           AssertThrow(Utilities::MPI::min(static_cast<unsigned int>(unchanged),comm)==1,
                       ExcMessage("Rejected candidate changed an accepted history."));
           manager.rollback_slip_rate_nonlinear_solve();
@@ -646,6 +697,8 @@ namespace aspect
           const auto state=manager.get_property_information()[manager.get_property_index("phase field fault state")].position;
           const auto background=manager.get_property_information()[manager.get_property_index("background tractions")].position;
           const auto correction=manager.get_property_information()[manager.get_property_index("BP3 fixed shear correction")].position;
+          std::ofstream surface(this->get_output_directory()+"surface-initialization.csv");
+          surface<<std::setprecision(17)<<"node,s_m,fraction,a,theta_s,friction,balance_Pa,I_h_m\n";
           for (unsigned int j=0; j<fault.n_vertices(); ++j)
             {
               const auto p=fault.get_properties(j);
@@ -657,18 +710,50 @@ namespace aspect
               const auto composition=model.fault_property_indices.chemical_compositions.at(0);
               const auto pos=manager.get_property_information()[composition].position;
               AssertThrow(std::abs(p[pos]-BP3::fraction(xd))<1.e-13,ExcMessage("Surface material fractions do not match the native bulk assignment."));
+              const std::vector<double> fractions{1-p[pos],p[pos]};
+              const double mu=law.friction_coefficient(fractions,BP3::Vinit,p[state]);
+              const double a=BP3::Vinit*law.friction_coefficient_derivative_wrt_slip_rate(fractions,BP3::Vinit,p[state]);
+              const double balance=BP3::sigma0*mu+BP3::damping*BP3::Vinit-BP3::tau0;
+              AssertThrow(std::abs(balance)<1e-7 && std::abs(a-BP3::direct_effect(xd))<1e-14,
+                          ExcMessage("Initialized native surface law does not balance BP3 prestress."));
+              surface<<j<<','<<xd<<','<<p[pos]<<','<<a<<','<<p[state]<<','<<mu<<','<<balance<<','
+                     <<Access::current_normalization_integrals(model).at(0)[j]<<'\n';
             }
+          std::ofstream interior(this->get_output_directory()+"surface-initialization-interior.csv");
+          interior<<std::setprecision(17)<<"segment,xi,s_m,fraction,fraction_analytic,theta_s,theta_analytic_s,a,friction,balance_Pa\n";
+          const QGauss<1> gauss(3);
+          const auto composition=model.fault_property_indices.chemical_compositions.at(0);
+          const auto pos=manager.get_property_information()[composition].position;
+          for(unsigned int j=0;j<fault.n_cells();++j)
+            for(unsigned int q=0;q<gauss.size();++q)
+              {
+                const double xi=gauss.point(q)[0];
+                const auto point=(1-xi)*fault.vertex(j)+xi*fault.vertex(j+1);
+                const double xd=BP3::down_dip(point[0],point[1]);
+                const double fraction=(1-xi)*fault.get_properties(j)[pos]+xi*fault.get_properties(j+1)[pos];
+                const double theta=(1-xi)*fault.get_properties(j)[state]+xi*fault.get_properties(j+1)[state];
+                const std::vector<double> fractions{1-fraction,fraction};
+                const double mu=law.friction_coefficient(fractions,BP3::Vinit,theta);
+                const double a=BP3::Vinit*law.friction_coefficient_derivative_wrt_slip_rate(fractions,BP3::Vinit,theta);
+                interior<<j<<','<<xi<<','<<xd<<','<<fraction<<','<<BP3::fraction(xd)<<','<<theta<<','
+                        <<BP3::configured_initial_state(xd,law)<<','<<a<<','<<mu<<','
+                        <<BP3::sigma0*mu+BP3::damping*BP3::Vinit-BP3::tau0<<'\n';
+              }
           const auto &pm=this->get_phase_field_handler().get_associated_particle_manager();
           const auto &info=pm.get_property_manager().get_data_info();
           const auto bulk_fraction=info.get_position_by_field_name("initial strengthening");
-          const auto bulk_state=info.get_position_by_field_name("phase field fault state");
+          const bool has_particle_state=info.fieldname_exists("phase field fault state");
+          AssertThrow(model.uses_homogeneous_mesh_data() || has_particle_state,
+                      ExcMessage("Legacy transition control requires particle state."));
+          const auto bulk_state=has_particle_state ? info.get_position_by_field_name("phase field fault state") : 0;
           const auto stress=info.get_position_by_field_name("maxwell stress");
           for (const auto &p:pm.get_particle_handler())
             {
               const auto data=p.get_properties();
               const double xd=(g.upper[1]-p.get_location()[1])/g.sine;
               const double expected=BP3::configured_initial_state(xd,law);
-              max_state_error=std::max(max_state_error,std::abs(data[bulk_state]-expected)/expected);
+              if(has_particle_state)
+                max_state_error=std::max(max_state_error,std::abs(data[bulk_state]-expected)/expected);
               AssertThrow(std::abs(data[bulk_fraction]-BP3::depth_fraction(p.get_location()[1]))<1.e-14,
                           ExcMessage("Bulk strengthening was not initialized from the ordinary BP3 transition."));
               for (unsigned int c=0; c<SymmetricTensor<2,dim>::n_independent_components; ++c)
@@ -813,10 +898,12 @@ namespace aspect
           if (!temperature)
             return;
           const auto step = this->get_timestep_number();
-          AssertThrow(incoming_step != step, ExcMessage("7B requires one incoming anchor per physical step."));
-          incoming_step = step;
-          solver_publications = 0;
-          const auto &model = Plugins::get_plugin_as_type<const Model>(this->get_material_model());
+          AssertThrow(incoming_step != step || lifecycle, ExcMessage("7B requires one incoming anchor per physical step."));
+          auto &model = const_cast<Model &>(Plugins::get_plugin_as_type<const Model>(this->get_material_model()));
+          // A restart rebuilds transient boundary associations after the
+          // material's start-step update. Point diagnostics require the same
+          // preparation that the native mechanical solve performs later.
+          if(lifecycle)model.prepare_reconstructed_fault_mechanical_solve();
           const auto &manager = this->get_reconstructed_fault_manager();
           const auto &fault = manager.get_fault(0);
           const auto &pm = this->get_phase_field_handler().get_associated_particle_manager();
@@ -824,20 +911,69 @@ namespace aspect
           const auto stress_position = info.get_position_by_field_name("maxwell stress");
           const auto H_position = info.get_position_by_field_name("crack_driving_force");
           const auto phase_block = this->introspection().variable("phase_field").block_index;
+          if (lifecycle && incoming_step==step)
+            {
+              bool same=model.fe_strain_state->dg_history==incoming_dg
+                && model.fe_strain_state->Z==incoming_Z
+                && model.fe_strain_state->accepted_publications==incoming_publications
+                && model.accepted_fe_strain_state()==incoming_fe;
+              same=same && model.fe_strain_state->I==initial_I
+                && model.fe_strain_state->committed_step+1==step
+                && manager.get_timestep_committed_slip_rate(0)==incoming_rates
+                && manager.get_slip_rate(0)==incoming_rates;
+              for(unsigned int c=0;c<incoming_dg_snapshot->trial_stress.size();++c)
+                for(const auto i:incoming_dg_snapshot->trial_stress[c].locally_owned_elements())
+                  same=same && model.fe_strain_state->dg_history->trial_stress[c][i]==incoming_dg_snapshot->trial_stress[c][i];
+              for(unsigned int j=0;j<fault.n_vertices();++j)
+                {
+                  const auto values=fault.get_properties(j);
+                  // Registry-only provenance markers retain NaN sentinels.
+                  // Bitwise equality checks unchanged storage, including NaNs.
+                  same=same && values.size()==incoming_surface[j].size()
+                    && std::memcmp(values.data(),incoming_surface[j].data(),values.size()*sizeof(double))==0;
+                }
+              for(const auto &particle:pm.get_particle_handler())
+                {
+                  const auto values=particle.get_properties();
+                  const auto &saved=incoming_particles.at(particle.get_id());
+                  same=same && values.size()==saved.size()
+                    && std::memcmp(values.data(),saved.data(),values.size()*sizeof(double))==0;
+                }
+              AssertThrow(Utilities::MPI::min(static_cast<unsigned int>(same),this->get_mpi_communicator())==1
+                          && solver_publications==0 && this->get_timestep()<incoming_dt
+                          && this->get_time()==incoming_time-incoming_dt+this->get_timestep(),
+                          ExcMessage("Outer mature rejection mutated an accepted history or failed to cut dt."));
+              std::ofstream out(local_file("outer-cutback.csv"));
+              out<<std::setprecision(17)<<"step,rejected_time,rejected_dt,retry_time,retry_dt,publications,accepted_unchanged\n"
+                 <<step<<','<<incoming_time<<','<<incoming_dt<<','<<this->get_time()<<','<<this->get_timestep()<<','<<incoming_publications<<",1\n";
+            }
+          incoming_step=step;solver_publications=0;
+          incoming_dt=this->get_timestep();incoming_time=this->get_time();
+          incoming_surface.clear();incoming_particles.clear();
+          if(lifecycle)
+            {
+              incoming_publications=model.fe_strain_state->accepted_publications;
+              incoming_rates=manager.get_timestep_committed_slip_rate(0);
+              for(unsigned int j=0;j<fault.n_vertices();++j)
+                {const auto values=fault.get_properties(j);incoming_surface.emplace_back(values.begin(),values.end());}
+              for(const auto &particle:pm.get_particle_handler())
+                {const auto values=particle.get_properties();incoming_particles[particle.get_id()]={values.begin(),values.end()};}
+            }
           const auto rule = fault_mechanical_quadrature(*this);
-          const auto &native = this->introspection().quadratures.velocities;
-          const QGauss<dim> expected(model.uses_fe_strain_history()
-                                     ? std::max(model.fe_bulk_normal_quadrature_points,this->get_fe().degree+1) : 3);
-          AssertThrow(rule.get_points() == expected.get_points() && rule.get_weights() == expected.get_weights()
-                      && (model.uses_fe_strain_history() ||
-                          (rule.get_points() == native.get_points() && rule.get_weights() == native.get_weights())),
-                      ExcMessage("BP3 operators must use the selected tensor rule; particle history retains its native rule."));
-          if (step == 0)
+          const QGauss<dim> expected(std::max(model.fe_bulk_normal_quadrature_points,this->get_fe().degree+1));
+          AssertThrow(rule.get_points() == expected.get_points() && rule.get_weights() == expected.get_weights(),
+                      ExcMessage("BP3 operators must use the selected shared tensor rule."));
+          if (initial_phase.n_blocks()==0)
             {
               initial_phase.reinit(this->get_solution());
               initial_phase = this->get_solution();
               initial_I = Access::current_normalization_integrals(model).at(0);
-              previous_slip.assign(fault.n_vertices(),0.);
+              if(step==0)previous_slip.assign(fault.n_vertices(),0.);
+              else if(previous_slip.empty())
+                {
+                  const auto property=manager.get_property_information()[manager.get_property_index("cumulative_signed_slip_m")].position;
+                  for(unsigned int j=0;j<fault.n_vertices();++j)previous_slip.push_back(fault.get_properties(j)[property]);
+                }
               std::ofstream mesh(local_file("initial-mesh.csv"));
               mesh << std::setprecision(17) << "cell,level,x,y,edge\n";
               for (const auto &cell : this->get_dof_handler().active_cell_iterators())
@@ -861,11 +997,13 @@ namespace aspect
           AssertThrow(this->get_solution().block(phase_block) == initial_phase.block(phase_block)
                       && Access::current_normalization_integrals(model).at(0) == initial_I,
                       ExcMessage("7B phase or normalization changed."));
-          if (model.uses_fe_strain_history())
+          if (model.uses_independent_bulk_history())
             {
               incoming_fe.reinit(model.accepted_fe_strain_state());
               incoming_fe = model.accepted_fe_strain_state();
               incoming_Z = Access::fe_slip_memory(model);
+              incoming_dg = model.fe_strain_state->dg_history;
+              if(lifecycle)incoming_dg_snapshot=std::make_shared<typename Model::DGHistory>(*incoming_dg);
             }
           anchors.clear();
           if (moving_particles)
@@ -875,11 +1013,12 @@ namespace aspect
               const auto position=manager.get_property_information()[manager.get_property_index("phase field fault state")].position;
               for (unsigned int j=0; j<fault.n_vertices(); ++j) incoming_theta.push_back(fault.get_properties(j)[position]);
             }
+          const bool first_particle_capture=fixed_particles.empty();
           unsigned int index = 0;
           // Compact deterministic point controls; no domain-wide particle dump.
           for (const auto &p : pm.get_particle_handler())
             {
-              if (step == 0 || moving_particles)
+              if (first_particle_capture || step == 0 || moving_particles)
                 fixed_particles.emplace(p.get_id(),std::make_pair(p.get_location(),p.get_properties()[H_position]));
               AssertThrow(fixed_particles.at(p.get_id()).first == p.get_location()
                           && fixed_particles.at(p.get_id()).second == p.get_properties()[H_position],
@@ -914,10 +1053,17 @@ namespace aspect
                   for (const std::string field :
                   {"crack_driving_force","maxwell stress","initial strengthening","phase field fault state"
                   })
-                  if (info.fieldname_exists(field))
                     {
-                      const auto pos = info.get_position_by_field_name(field);
-                      for (unsigned int c=0; c<info.get_components_by_field_name(field); ++c) bytes(p.get_properties()[pos+c]);
+                      // Static diagnostic composition has its native initial-*
+                      // name; hash the same physical Theta field in both modes.
+                      const std::string name=field=="phase field fault state" && !info.fieldname_exists(field)
+                                               && info.fieldname_exists("initial theta_initial")
+                                             ? "initial theta_initial" : field;
+                      if (info.fieldname_exists(name))
+                        {
+                          const auto pos = info.get_position_by_field_name(name);
+                          for (unsigned int c=0; c<info.get_components_by_field_name(name); ++c) bytes(p.get_properties()[pos+c]);
+                        }
                     }
                 }
               std::ofstream out(local_file("initial-particle-identity.csv"));
@@ -937,7 +1083,12 @@ namespace aspect
           prm.declare_entry("Transition material check", "false", Patterns::Bool(), "Initialization-only ordinary BP3 material/assignment probes across its complete 15--18 km transition.");
           prm.declare_entry("Profile initialization check", "false", Patterns::Bool(), "Serial initialization-only Q1 phase/localization cuts, including the native exterior completion lattice.");
           prm.declare_entry("Prescribed schedule check", "true", Patterns::Bool(), "Require the fixed local comparison schedule. Disable only for the ordinary BP3 controller startup check.");
+          prm.declare_entry("Common stress points file", "", Patterns::Anything(), "Optional serial fixed-mesh physical quadrature points with explicit native cell-trace ownership; diagnostic only.");
+          prm.declare_entry("Write authoritative stress", "false", Patterns::Bool(), "Export accepted full tensor stress on common bulk Gauss3 points and independent history coefficients at selected bounded steps.");
           prm.declare_entry("Write FE coefficients", "false", Patterns::Bool(), "Compact physical-coordinate FE fields for the selected MPI comparison.");
+          prm.declare_entry("Scheduled field output", "false", Patterns::Bool(), "Use BP3 heavy-output time/slip intervals for dense authoritative tensors, coefficients and normal cuts. Force initial/event milestones and graceful stop; retain per-step checks, profiles and root weak loads. False preserves all bounded-comparison exports.");
+          prm.declare_entry("Inject nonlinear failure", "false", Patterns::Bool(), "Throw native nonlinear nonconvergence once inside step-two mechanics, for the actual outer cutback control.");
+          prm.declare_entry("Mature lifecycle checks", "false", Patterns::Bool(), "Permit same-mode mature DG restart/retry and verify accepted-state invariance across an actual outer cutback.");
           prm.declare_entry("Inject candidate failure", "false", Patterns::Bool(), "Arm the collective fixed-sample registry guard on the last rank at step two, verify rejection after native history candidates and retry unchanged dt.");
           prm.leave_subsection();
           prm.leave_subsection();
@@ -952,9 +1103,25 @@ namespace aspect
           profile_only = prm.get_bool("Profile initialization check");
           prescribed_schedule = prm.get_bool("Prescribed schedule check");
           write_coefficients = prm.get_bool("Write FE coefficients");
+          write_authoritative_stress = prm.get_bool("Write authoritative stress");
+          scheduled_fields = prm.get_bool("Scheduled field output");
+          common_points_file = prm.get("Common stress points file");
           inject_failure = prm.get_bool("Inject candidate failure");
+          lifecycle = prm.get_bool("Mature lifecycle checks");
+          nonlinear_failure = prm.get_bool("Inject nonlinear failure");
+          AssertThrow(!nonlinear_failure || lifecycle,ExcMessage("Nonlinear failure injection requires mature lifecycle checks."));
+          AssertThrow(!scheduled_fields || lifecycle,ExcMessage("Scheduled first-event fields require the restart-aware mature lifecycle observer."));
           prm.leave_subsection();
           prm.leave_subsection();
+          if (scheduled_fields)
+            {
+              prm.enter_subsection("Postprocess");
+              prm.enter_subsection("BP3");
+              field_schedule.slip_interval = prm.get_double("Heavy output slip interval");
+              field_schedule.time_interval = prm.get_double("Heavy output time interval");
+              prm.leave_subsection();
+              prm.leave_subsection();
+            }
           prm.enter_subsection("Postprocess");
           prm.enter_subsection("BP3 restored monitor");
           audit_filter_mode = prm.get("Friction normal input");
@@ -968,13 +1135,35 @@ namespace aspect
         }
         std::list<std::string> required_other_postprocessors() const override
         {
-          return material_only || profile_only ? std::list<std::string> {} :
-                 std::list<std::string> {"reconstructed fault BP3", "BP3 restored monitor"};
+          if (material_only || profile_only) return {};
+          std::list<std::string> required{"reconstructed fault BP3", "BP3 restored monitor"};
+          if (scheduled_fields) required.push_back("BP3 output complete");
+          return required;
         }
 
         void initialize() override
         {
           const auto &parameters = this->get_parameters();
+          if (!common_points_file.empty())
+            {
+              AssertThrow(Utilities::MPI::n_mpi_processes(this->get_mpi_communicator())==1,
+                          ExcMessage("Common stress export requires serial ownership."));
+              std::ifstream input(common_points_file);
+              std::string line;
+              std::getline(input,line);
+              AssertThrow(input && line=="point,cell,x,y,JxW",ExcMessage("Invalid common stress point header."));
+              while(std::getline(input,line))
+                {
+                  for(auto &c:line) if(c==',') c=' ';
+                  std::istringstream row(line);
+                  unsigned int id;std::string cell;Point<dim> x;double weight;
+                  row>>id>>cell>>x[0]>>x[1]>>weight;
+                  AssertThrow(row && weight>0. && std::isfinite(weight),ExcMessage("Malformed common stress point."));
+                  auto &points=common_points[cell];
+                  points.physical.push_back(x);points.weights.push_back(weight);points.ids.push_back(id);
+                }
+              AssertThrow(!common_points.empty(),ExcMessage("Empty common stress points."));
+            }
           if (material_only || profile_only)
             {
               initial_composition=this->get_initial_composition_manager_pointer();
@@ -985,7 +1174,7 @@ namespace aspect
               return;
             }
           AssertThrow(dim == 2
-                      && !parameters.resume_computation && !parameters.mesh_deformation_enabled
+                      && (!parameters.resume_computation || lifecycle) && !parameters.mesh_deformation_enabled
                       && parameters.adaptive_refinement_interval == 0 && parameters.additional_refinement_times.empty()
                       && parameters.nonlinear_solver == Parameters<dim>::NonlinearSolver::single_Advection_iterated_Newton_Stokes,
                       ExcMessage("7B requires fresh fixed stationary coupled Newton mechanics."));
@@ -1064,12 +1253,46 @@ namespace aspect
                 });
               });
             }
+          this->get_signals().post_reconstructed_fault_linear_solver.connect(
+            [this](const auto &,const auto &,const auto &,const auto &,const auto &,const auto &,double,unsigned int,double)
+            {
+              if(nonlinear_failure && !failure_done && this->get_timestep_number()==2)
+                {failure_done=true;throw ExcNonlinearSolverNoConvergence();}
+            });
           this->get_signals().post_reconstructed_fault_solver.connect([this](unsigned int,unsigned int,double,const std::vector<std::vector<bool> > &)
           {
             ++solver_publications;
           });
         }
 
+        void save(std::map<std::string,std::string> &status) const override
+        {
+          if(!lifecycle)return;
+          std::ostringstream out;aspect::oarchive archive(out);
+          archive &last_output &previous_slip &failure_done;
+          status["BP3 mature diagnostic progress"]=out.str();
+          if (scheduled_fields)
+            {
+              std::ostringstream schedule;aspect::oarchive saved(schedule);
+              saved &field_schedule &field_event;
+              status["BP3 scheduled diagnostic output"]=schedule.str();
+            }
+        }
+        void load(const std::map<std::string,std::string> &status) override
+        {
+          if(!lifecycle)return;
+          std::istringstream in(status.at("BP3 mature diagnostic progress"));aspect::iarchive archive(in);
+          archive &last_output &previous_slip &failure_done;
+          if (scheduled_fields)
+            {
+              const auto entry=status.find("BP3 scheduled diagnostic output");
+              AssertThrow(entry!=status.end(),ExcMessage("Checkpoint lacks the selected BP3 diagnostic output schedule."));
+              const double slip=field_schedule.slip_interval,time=field_schedule.time_interval;
+              std::istringstream schedule(entry->second);aspect::iarchive saved(schedule);
+              saved &field_schedule &field_event;
+              field_schedule.slip_interval=slip;field_schedule.time_interval=time;
+            }
+        }
         std::pair<std::string,std::string> execute(TableHandler &) override
         {
           if (profile_only)
@@ -1087,6 +1310,9 @@ namespace aspect
                       && (last_output == numbers::invalid_unsigned_int || step == last_output+1),
                       ExcMessage("7B requires one accepted mechanical solve and one output per physical step."));
           last_output = step;
+          if(lifecycle)
+            AssertThrow(model.fe_strain_state->committed_step==step && model.fe_strain_state->accepted_publications==step,
+                        ExcMessage("Mature DG did not publish exactly once per accepted positive step."));
           const auto &intro = this->introspection();
           const auto phase_block = intro.variable("phase_field").block_index;
           AssertThrow(this->get_solution().block(phase_block) == initial_phase.block(phase_block)
@@ -1110,6 +1336,23 @@ namespace aspect
           const auto slip_position = property("cumulative_signed_slip_m");
           const auto cohesive_position = property("phase field fault cohesive traction");
           const auto &V = manager.get_timestep_committed_slip_rate(0);
+          bool emit_fields=true;
+          std::vector<double> accepted_slip;
+          if (scheduled_fields)
+            {
+              for(unsigned int j=0;j<V.size();++j) accepted_slip.push_back(fault.get_properties(j)[slip_position]);
+              const auto maximum=std::max_element(V.begin(),V.end());
+              const bool started=field_event.started,complete=field_event.complete;
+              const auto below=field_event.below;
+              field_event.observe(this->get_time(),*maximum,
+                                  BP3::down_dip(fault.vertex(maximum-V.begin())[0],fault.vertex(maximum-V.begin())[1]));
+              const bool milestone=(!started && field_event.started) || (!complete && field_event.complete)
+                                   || (below==0 && field_event.below==1);
+              emit_fields=field_schedule.due(this->get_time(),accepted_slip,milestone || BP3Benchmark::long_run_stop);
+              // The native output dependency has already reduced the complete
+              // stop request. Keep every rank in the same export/index branch.
+              emit_fields=Utilities::MPI::max(static_cast<unsigned int>(emit_fields),this->get_mpi_communicator());
+            }
           const double dt = step ? this->get_timestep() : model.initial_time_step;
           const auto coefficients = Model::compute_maxwell_coefficients(model.reference_viscosities[0],model.elastic_shear_moduli[0],dt);
           const double Dc = model.characteristic_fault_slip_distance();
@@ -1134,7 +1377,7 @@ namespace aspect
               theta_min = std::min(theta_min,theta);
               normal_split_error = std::max(normal_split_error,std::abs(raw[j]-(pressure[j]+deviatoric[j]+background[j])));
               double Z = 0.;
-              if (model.uses_fe_strain_history())
+              if (model.uses_independent_bulk_history())
                 {
                   const auto &s = *model.fe_strain_state;
                   AssertThrow(s.committed_step == step, ExcMessage("7B FE history was not committed at this physical step."));
@@ -1150,9 +1393,24 @@ namespace aspect
                       << ',' << background[j] << ',' << initial_I[j] << ',' << Z << '\n';
             }
           AssertThrow(Z_error <= 64*std::numeric_limits<double>::epsilon()*Z_scale
-                      && (!model.uses_fe_strain_history() || step == 0 || Z_max > 0.)
+                      && (!model.uses_independent_bulk_history() || step == 0 || Z_max > 0.)
                       && normal_split_error <= 1.e-6+1.e-11*BP3::sigma0,
                       ExcMessage("7B FE memory or normal-traction decomposition failed."));
+
+          if (write_authoritative_stress)
+            {
+              std::ofstream loads(!scheduled_fields || Utilities::MPI::this_mpi_process(this->get_mpi_communicator())==0
+                                  ? local_file("surface-weak-"+std::to_string(step)+".csv") : "/dev/null");
+              loads<<std::setprecision(17)<<"node,s_m,mass_diagonal,mass_edge,shear,raw_normal,filtered_normal,friction,residual,pressure,deviatoric,background\n";
+              for(unsigned int j=0;j<V.size();++j)
+                loads<<j<<','<<BP3::down_dip(fault.vertex(j)[0],fault.vertex(j)[1])
+                     <<','<<weak.mass_diagonal[0][j]<<','<<(j+1<V.size()?weak.mass_off_diagonal[0][j]:0.)
+                     <<','<<weak.shear_traction[0][j]<<','<<weak.raw_normal_traction[0][j]
+                     <<','<<weak.normal_traction[0][j]<<','<<weak.friction_traction[0][j]<<','<<weak.values[0][j]
+                     <<','<<diagnostic.pressure_load[0][j]<<','<<diagnostic.deviatoric_load[0][j]
+                     <<','<<diagnostic.background_load[0][j]<<'\n';
+              AssertThrow(bool(loads),ExcMessage("Cannot export actual surface weak loads."));
+            }
 
           double stress_error = 0.,stress_fraction = 0.,stress_scale = 0.,maximum_divergence = 0.,trace_increment = 0.;
           // Bound FE differentiation before cancellation, as in the production
@@ -1190,16 +1448,27 @@ namespace aspect
               double scale = coefficients.beta*q.incoming_stress.norm()+2*coefficients.eta_ve*(strain.norm()+std::abs(q.chi*rate)*S.norm());
               scale = std::max(scale,coefficients.beta*q.incoming_stress.norm()
                                +2*coefficients.eta_ve*(gradient_operand(CellId(q.cell),q.reference_position)+std::abs(q.chi*rate)*S.norm()));
-              if (step && model.uses_fe_strain_history())
+              if (step && model.uses_independent_bulk_history())
                 {
                   const auto &s = *model.fe_strain_state;
                   double new_scale = 0.,old_scale = 0.;
-                  actual = model.evaluate_fe_strain_stress(s.displacement_history,s.Z,s.I,CellId(q.cell),q.position,&new_scale);
-                  model.evaluate_fe_strain_stress(incoming_fe,incoming_Z,initial_I,CellId(q.cell),q.position,&old_scale);
+                  if (model.uses_dg_trial_stress_history())
+                    {
+                      actual=model.evaluate_dg_history_stress(*s.dg_history,s.Z,s.I,CellId(q.cell),q.position,&new_scale);
+                      model.evaluate_dg_history_stress(*incoming_dg,incoming_Z,initial_I,CellId(q.cell),q.position,&old_scale);
+                    }
+                  else
+                    {
+                      actual = model.evaluate_fe_strain_stress(s.displacement_history,s.Z,s.I,CellId(q.cell),q.position,&new_scale);
+                      model.evaluate_fe_strain_stress(incoming_fe,incoming_Z,initial_I,CellId(q.cell),q.position,&old_scale);
+                    }
                   scale = std::max(scale,2*(new_scale+coefficients.beta*old_scale));
                 }
               const double error = (actual-expected).norm();
-              const double bound = 128*std::numeric_limits<double>::epsilon()*std::max(1.,scale);
+              const double bound = 128*std::numeric_limits<double>::epsilon()*std::max(1.,scale)
+                                   +(step && model.uses_dg_trial_stress_history()
+                                     ? model.dg_source_publication_allowance(*model.fe_strain_state->dg_history,
+                                                                            CellId(q.cell),q.position) : 0.);
               if (error > bound)
                 this->get_pcout() << std::setprecision(17) << "7B QP mismatch: step=" << step
                                   << ", x=" << q.position << ", error=" << error << ", bound=" << bound
@@ -1285,12 +1554,20 @@ namespace aspect
               double scale = coefficients.beta*a.stress.norm()+2*coefficients.eta_ve*(strain[0].norm()+std::abs(chiV)*S.norm());
               scale = std::max(scale,coefficients.beta*a.stress.norm()
                                +2*coefficients.eta_ve*(gradient_operand(a.cell,unit)+std::abs(chiV)*S.norm()));
-              if (step && model.uses_fe_strain_history())
+              if (step && model.uses_independent_bulk_history())
                 {
                   const auto &s = *model.fe_strain_state;
                   double new_scale = 0.,old_scale = 0.;
-                  model.evaluate_fe_strain_stress(s.displacement_history,s.Z,s.I,a.cell,a.position,&new_scale);
-                  model.evaluate_fe_strain_stress(incoming_fe,incoming_Z,initial_I,a.cell,a.position,&old_scale);
+                  if (model.uses_dg_trial_stress_history())
+                    {
+                      model.evaluate_dg_history_stress(*s.dg_history,s.Z,s.I,a.cell,a.position,&new_scale);
+                      model.evaluate_dg_history_stress(*incoming_dg,incoming_Z,initial_I,a.cell,a.position,&old_scale);
+                    }
+                  else
+                    {
+                      model.evaluate_fe_strain_stress(s.displacement_history,s.Z,s.I,a.cell,a.position,&new_scale);
+                      model.evaluate_fe_strain_stress(incoming_fe,incoming_Z,initial_I,a.cell,a.position,&old_scale);
+                    }
                   scale = std::max(scale,2*(new_scale+coefficients.beta*old_scale));
                 }
               if (moving_particles)
@@ -1316,7 +1593,9 @@ namespace aspect
                   ++particle_index;
                 }
               const double error = (published.at(a.id)-expected).norm();
-              const double bound = 128*std::numeric_limits<double>::epsilon()*std::max(1.,scale);
+              const double bound = 128*std::numeric_limits<double>::epsilon()*std::max(1.,scale)
+                                   +(step && model.uses_dg_trial_stress_history()
+                                     ? model.dg_source_publication_allowance(*model.fe_strain_state->dg_history,a.cell,a.position) : 0.);
               AssertThrow(error <= bound, ExcMessage("7B published particle sample has an incorrect Maxwell increment."));
               stress_error = std::max(stress_error,error);
               stress_fraction = std::max(stress_fraction,error/bound);
@@ -1331,8 +1610,8 @@ namespace aspect
             }
           // Three short normal cuts cross the graded interfaces. Retain both
           // cell traces at a shared face: a stress jump is not a point average.
-          std::ofstream bulk(local_file("bulk-normal-cuts-"+std::to_string(step)+".csv"));
-          bulk << std::setprecision(17) << "station,r_m,cell,edge_m,pressure_Pa,deviatoric_Pa,normal_Pa,phi,divergence_per_s,instant_tensor_normal_difference_Pa\n";
+          std::ofstream bulk(emit_fields ? local_file("bulk-normal-cuts-"+std::to_string(step)+".csv") : "/dev/null");
+          bulk << std::setprecision(17) << "station,r_m,cell,edge_m,pressure_Pa,deviatoric_Pa,normal_Pa,phi,divergence_per_s,instant_tensor_normal_difference_Pa,tau_xx,tau_yy,tau_zz,tau_xy\n";
           Tensor<1,dim> normal,tangent;
           for (unsigned int d=0; d<2; ++d)
             {
@@ -1345,6 +1624,12 @@ namespace aspect
           mapped_stress.fill(numbers::invalid_unsigned_int);
           for (const auto &entry : this->get_parameters().mapped_particle_properties)
             if (entry.second.first == "maxwell stress") mapped_stress[entry.second.second] = entry.first;
+          if (model.uses_homogeneous_mesh_data())
+            {
+              const auto fields=intro.get_indices_for_fields_of_type(CompositionalFieldDescription::stress);
+              AssertThrow(fields.size()==mapped_stress.size(),ExcMessage("Mature diagnostic needs three stress labels."));
+              std::copy(fields.begin(),fields.end(),mapped_stress.begin());
+            }
           const auto &working = this->get_current_linearization_point();
           for (const auto &cell : this->get_dof_handler().active_cell_iterators())
             if (cell->is_locally_owned())
@@ -1384,7 +1669,7 @@ namespace aspect
                   fe[intro.extractors.pressure].get_function_values(working,p);
                   fe[intro.extractors.velocities].get_function_symmetric_gradients(working,strain);
                   fe[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)].get_function_values(working,phi);
-                  if (!model.uses_fe_strain_history())
+                  if (!model.uses_independent_bulk_history())
                     for (unsigned int c=0; c<old.size(); ++c)
                       {
                         old[c].resize(radii.size());
@@ -1394,11 +1679,11 @@ namespace aspect
                     {
                       const auto x = fe.quadrature_point(q);
                       SymmetricTensor<2,dim> stress;
-                      if (step && model.uses_fe_strain_history())
+                      if (step && model.uses_independent_bulk_history())
                         stress = model.retained_history_stress(cell->id(),x, {});
                       else
                         {
-                          if (!model.uses_fe_strain_history())
+                          if (!model.uses_independent_bulk_history())
                             for (unsigned int c=0; c<old.size(); ++c)
                               stress[SymmetricTensor<2,dim>::unrolled_to_component_indices(c)] = coefficients.beta*old[c][q];
                           double chiV = 0.;
@@ -1414,15 +1699,120 @@ namespace aspect
                       const double deviatoric = -(stress*N);
                       bulk << station << ',' << radii[q] << ',' << cell->id() << ',' << cell->diameter()/std::sqrt(double(dim))
                            << ',' << p[q] << ',' << deviatoric << ',' << BP3::sigma0+p[q]+deviatoric << ',' << phi[q]
-                           << ',' << trace(strain[q]) << ',' << 2*coefficients.eta_ve *trace(strain[q])/3. << '\n';
+                           << ',' << trace(strain[q]) << ',' << 2*coefficients.eta_ve *trace(strain[q])/3.
+                           << ',' << stress[0][0] << ',' << stress[1][1] << ',' << -stress[0][0]-stress[1][1]
+                           << ',' << stress[0][1] << '\n';
                     }
                 }
-          if (write_coefficients)
+          if (write_authoritative_stress && emit_fields)
             {
+              TimerOutput::Scope timer(this->get_computing_timer(),"BP3 dense stress output");
+              // Same physical points for all backends. Particle history follows
+              // its actual frozen mapped FE input and native Maxwell operator;
+              // independent history is read directly after accepted publication.
+              for(unsigned int dataset=0;dataset<(common_points.empty()?1u:2u);++dataset)
+                {
+                  const bool common=dataset==1;
+                  std::ofstream out(local_file((common?"common-stress-":"authoritative-stress-")+std::to_string(step)+".csv"));
+                  out<<std::setprecision(17)<<"cell,qp,x,y,JxW,phi,chi,Z,T_xx,T_yy,T_xy,tau_xx,tau_yy,tau_zz,tau_xy,p\n";
+                  for (const auto &cell:this->get_dof_handler().active_cell_iterators())
+                    if (cell->is_locally_owned())
+                      {
+                        std::vector<Point<dim>> units;
+                        const CommonPoints *physical=nullptr;
+                        if(common)
+                          {
+                            const auto found=common_points.find(cell->id().to_string());
+                            AssertThrow(found!=common_points.end(),ExcMessage("Common points omit a native cell."));
+                            physical=&found->second;
+                            for(const auto &x:physical->physical)
+                              {
+                                const auto unit=this->get_mapping().transform_real_to_unit_cell(cell,x);
+                                AssertThrow(GeometryInfo<dim>::is_inside_unit_cell(unit),ExcMessage("Wrong common-point cell trace."));
+                                units.push_back(unit);
+                              }
+                          }
+                        const Quadrature<dim> points=common ? Quadrature<dim>(units) : Quadrature<dim>(QGauss<dim>(3));
+                        FEValues<dim> fe(this->get_mapping(),this->get_fe(),points,
+                          update_values|update_gradients|update_quadrature_points|update_JxW_values);
+                        std::vector<double> phase(points.size()),pressure(points.size());
+                        std::vector<SymmetricTensor<2,dim>> strain(points.size());
+                        std::array<std::vector<double>,3> old;
+                    fe.reinit(cell);
+                    fe[intro.extractors.pressure].get_function_values(working,pressure);
+                    fe[intro.extractors.velocities].get_function_symmetric_gradients(working,strain);
+                    fe[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)].get_function_values(working,phase);
+                    if (!model.uses_independent_bulk_history())
+                      for (unsigned int c=0;c<old.size();++c)
+                        {
+                          old[c].resize(points.size());
+                          fe[intro.extractors.compositional_fields[mapped_stress[c]]].get_function_values(working,old[c]);
+                        }
+                    for (unsigned int q=0;q<points.size();++q)
+                      {
+                        const auto x=common ? physical->physical[q] : fe.quadrature_point(q);
+                        const auto source=manager.project_to_bulk_source(x);
+                        double chi=0.,Z=0.,rate=0.;
+                        if (source.active)
+                          {
+                            const auto l=model.evaluate_reconstructed_fault_localization(0,source.segment_index,source.xi,phase[q],phase[q],"authoritative export");
+                            chi=l.current_h/l.current_I_h;
+                            rate=manager.interpolate_slip_rate(0,source.segment_index,source.xi);
+                            if (model.uses_independent_bulk_history())
+                              Z=(1-source.xi)*model.fe_strain_state->Z[source.segment_index]+source.xi*model.fe_strain_state->Z[source.segment_index+1];
+                          }
+                        SymmetricTensor<2,dim> tau,T;
+                        if (model.uses_independent_bulk_history())
+                          {
+                            tau=model.retained_history_stress(cell->id(),x,{});
+                            T=tau+2*chi*Z*S;
+                          }
+                        else if (step)
+                          {
+                            for (unsigned int c=0;c<old.size();++c)
+                              tau[SymmetricTensor<2,dim>::unrolled_to_component_indices(c)]=coefficients.beta*old[c][q];
+                            tau+=2*coefficients.eta_ve*(Utilities::Tensors::consistent_deviator(strain[q])-chi*rate*S);
+                            // Particle path does not own independent T/Z.
+                            Z=std::numeric_limits<double>::quiet_NaN();T=tau;
+                          }
+                        out<<cell->id()<<','<<(common?physical->ids[q]:q)<<','<<x[0]<<','<<x[1]<<','<<(common?physical->weights[q]:fe.JxW(q))<<','<<phase[q]<<','<<chi<<','<<Z
+                           <<','<<T[0][0]<<','<<T[1][1]<<','<<T[0][1]<<','<<tau[0][0]<<','<<tau[1][1]
+                           <<','<<-tau[0][0]-tau[1][1]<<','<<tau[0][1]<<','<<pressure[q]<<'\n';
+                      }
+                  }
+                  AssertThrow(bool(out),ExcMessage("Cannot export authoritative stress."));
+                }
+              if (model.uses_dg_trial_stress_history())
+                {
+                  const auto &history=*model.fe_strain_state->dg_history;
+                  if(step==0)
+                    {
+                      std::ofstream support(local_file("dg-support.csv"));
+                      support<<std::setprecision(17)<<"mode,xi,eta\n";
+                      const auto &nodes=history.space->element.get_unit_support_points();
+                      for(unsigned int j=0;j<nodes.size();++j)
+                        support<<j<<','<<nodes[j][0]<<','<<nodes[j][1]<<'\n';
+                    }
+                  std::ofstream coefficients_file(local_file("dg-coefficients-"+std::to_string(step)+".csv"));
+                  coefficients_file<<std::setprecision(17)<<"cell,mode,xx,yy,xy\n";
+                  std::vector<types::global_dof_index> indices(history.space->element.n_dofs_per_cell());
+                  for (const auto &cell:history.space->dofs.active_cell_iterators())
+                    if (cell->is_locally_owned())
+                      {
+                        cell->get_dof_indices(indices);
+                        for (unsigned int j=0;j<indices.size();++j)
+                          coefficients_file<<cell->id()<<','<<j<<','<<history.trial_stress[0][indices[j]]<<','
+                            <<history.trial_stress[1][indices[j]]<<','<<history.trial_stress[2][indices[j]]<<'\n';
+                      }
+                }
+            }
+          if (write_coefficients && emit_fields)
+            {
+              TimerOutput::Scope timer(this->get_computing_timer(),"BP3 dense coefficient output");
               std::ofstream coefficients_file(local_file("physical-fe-"+std::to_string(step)+".csv"));
               coefficients_file<<std::setprecision(17)<<"component,x,y,accepted,history\n";
               const auto &fe=this->get_fe();
-              const auto &history=model.accepted_fe_strain_state();
+              const auto &history=model.uses_independent_bulk_history() ? model.accepted_fe_strain_state() : this->get_solution();
               std::set<types::global_dof_index> written;
               std::vector<types::global_dof_index> indices(fe.dofs_per_cell);
               for (const auto &cell:this->get_dof_handler().active_cell_iterators())
@@ -1438,14 +1828,15 @@ namespace aspect
                           {
                             const auto x=this->get_mapping().transform_unit_to_real_cell(cell,fe.get_unit_support_points()[j]);
                             coefficients_file<<c<<','<<x[0]<<','<<x[1]<<','<<this->get_solution()[indices[j]]<<','
-                                             <<(c<dim ? history[indices[j]] : 0.)<<'\n';
+                                             <<(c<dim ? (model.uses_independent_bulk_history() ? history[indices[j]]
+                                                  : std::numeric_limits<double>::quiet_NaN()) : 0.)<<'\n';
                           }
                       }
                   }
               AssertThrow(bool(coefficients_file),ExcMessage("Cannot write physical-coordinate FE comparison."));
             }
           const auto path = local_file("coupled-checks.csv");
-          const bool header = step == 0;
+          const bool header = BP3::needs_header(path);
           std::ofstream out(path,std::ios::app);
           out << std::setprecision(17);
           if (header)
@@ -1456,6 +1847,18 @@ namespace aspect
               << ',' << stress_error << ',' << stress_fraction << ',' << stress_scale << ',' << normal_split_error
               << ',' << maximum_divergence << ',' << trace_increment << ',' << solver_publications << '\n';
           AssertThrow(out && profile && bulk, ExcMessage("Cannot write compact 7B results."));
+          if (scheduled_fields && emit_fields)
+            {
+              BP3::collective_root_write(this->get_mpi_communicator(),[&]()
+                {
+                  const auto path=this->get_output_directory()+"field-outputs.csv";
+                  const bool header=BP3::needs_header(path);
+                  std::ofstream fields(path,std::ios::app);fields.exceptions(std::ios::failbit|std::ios::badbit);
+                  if(header)fields<<"step,time_s,max_V_m_s\n";
+                  fields<<std::setprecision(17)<<step<<','<<this->get_time()<<','<<*std::max_element(V.begin(),V.end())<<'\n';
+                });
+              field_schedule.written(this->get_time(),accepted_slip);
+            }
           this->get_pcout() << "   BP3 7B accepted check: step=" << step << ", stress error=" << stress_error
                             << ", allowance fraction=" << stress_fraction << ", stress scale=" << stress_scale << " Pa." << std::endl;
           if (moving_particles) write_moving_check();

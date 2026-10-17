@@ -54,9 +54,9 @@ namespace aspect
                                                       const FEEndpointTrial &endpoint,
                                                       const std::vector<double> *phase_direction) const
     {
-      AssertThrow(!dg_trial_stress_history,
-                  ExcMessage("PF3 DG phase trials use immutable accepted tensor/Z, not an FE mechanical endpoint."));
-      return evaluate_fe_phase_energy_at(trial,false,false,endpoint.strain,endpoint.Z,phase_direction);
+      AssertThrow(!dg_trial_stress_history || endpoint.dg_history,
+                  ExcMessage("A DG mechanical endpoint requires its explicit trial tensor."));
+      return evaluate_fe_phase_energy_at(trial,false,false,endpoint.strain,endpoint.Z,phase_direction,endpoint.dg_history.get());
     }
 
     template<int dim> typename PhaseFieldFault<dim>::FEEndpointTrial
@@ -67,7 +67,14 @@ namespace aspect
       const auto &s=*fe_strain_state;
       const auto c=compute_maxwell_coefficients(s.eta,s.G,this->get_timestep());
       FEEndpointTrial endpoint;
-      update_fe_strain_trial(bulk,c,endpoint.strain);
+      if (dg_trial_stress_history)
+        {
+          endpoint.dg_history=make_dg_history_trial(bulk,c);
+          endpoint.strain=s.displacement_history;
+          endpoint.strain.block(this->introspection().variable("phase_field").block_index)=bulk.block(this->introspection().variable("phase_field").block_index);
+        }
+      else
+        update_fe_strain_trial(bulk,c,endpoint.strain);
       endpoint.Z=s.Z;
       long double friction_potential=0.;
       AssertDimension(V.size(),1);
@@ -98,7 +105,8 @@ namespace aspect
                                                       bool tangent,bool positive_search,
                                                       const LinearAlgebra::BlockVector &strain,
                                                       const std::vector<double> &Z_reference,
-                                                      const std::vector<double> *phase_direction) const
+                                                      const std::vector<double> *phase_direction,
+                                                      const DGHistory *endpoint_history) const
     {
       TimerOutput::Scope timer(this->get_computing_timer(), "Fault: FE phase energy");
       validate_fe_strain_restrictions();
@@ -143,7 +151,7 @@ namespace aspect
         {
           fe.reinit(entry.second);
           if (dg_trial_stress_history)
-            R=evaluate_dg_trial_tensor(*s.dg_history,entry.first,quad);
+            R=evaluate_dg_trial_tensor(endpoint_history ? *endpoint_history : *s.dg_history,entry.first,quad);
           else
             fe[this->introspection().extractors.velocities].get_function_symmetric_gradients(strain,R);
           for (unsigned int q=0; q<quad.size(); ++q,++point)
@@ -246,8 +254,8 @@ namespace aspect
       const std::vector<std::vector<double>> *slip_direction, bool assemble_rhs) const
     {
       TimerOutput::Scope timer(this->get_computing_timer(),"Fault: FE tangent pullback");
-      AssertThrow(!dg_trial_stress_history,
-                  ExcMessage("PF3 does not implement a DG coupled-endpoint tangent."));
+      AssertThrow(!dg_trial_stress_history || endpoint.dg_history,
+                  ExcMessage("A DG tangent requires its explicit endpoint tensor."));
       validate_fe_strain_restrictions();
       const auto &s=*fe_strain_state;
       const auto &intro=this->introspection();
@@ -285,7 +293,10 @@ namespace aspect
         {
           fe.reinit(entry.second);
           cell_rhs=0.;
-          fe[intro.extractors.velocities].get_function_symmetric_gradients(endpoint.strain,R);
+          if (dg_trial_stress_history)
+            R=evaluate_dg_trial_tensor(*endpoint.dg_history,entry.first,quadrature);
+          else
+            fe[intro.extractors.velocities].get_function_symmetric_gradients(endpoint.strain,R);
           if (velocity_direction)
             fe[intro.extractors.velocities].get_function_symmetric_gradients(*velocity_direction,du);
           for (unsigned int q=0; q<quadrature.size(); ++q,++point)
@@ -307,7 +318,7 @@ namespace aspect
               const double hp=s.m*(4/std::pow(1-phi,3)-3/std::pow(1-phi,2));
               const double hpp=s.m*(12/std::pow(1-phi,4)-6/std::pow(1-phi,3));
               const double chi=h/ii,dchi=hp*dp/ii-h*di/(ii*ii);
-              const auto tau=2*s.G*Utilities::Tensors::consistent_deviator(R[q])-2*Z*chi*S;
+              const auto tau=(dg_trial_stress_history ? R[q] : 2*s.G*Utilities::Tensors::consistent_deviator(R[q]))-2*Z*chi*S;
               const auto dtau=(velocity_direction?2*coefficients.eta_ve*Utilities::Tensors::consistent_deviator(du[q]):SymmetricTensor<2,dim>())
                               -2*(dZ*chi+Z*dchi)*S;
               const double c=-Z/s.G*(tau*S),dc=-(dZ*(tau*S)+Z*(dtau*S))/s.G;
@@ -360,7 +371,7 @@ namespace aspect
 #define INSTANTIATE(dim) \
   template PhaseFieldFault<dim>::FEEndpointAction PhaseFieldFault<dim>::evaluate_fe_endpoint_action(const LinearAlgebra::BlockVector &,const FEEndpointTrial &,const std::vector<double> &,const LinearAlgebra::BlockVector *,const std::vector<std::vector<double>> *,bool) const; \
   template PhaseFieldFault<dim>::FEPhaseEnergy PhaseFieldFault<dim>::evaluate_fe_phase_energy(const LinearAlgebra::BlockVector &,bool,bool) const; \
-  template PhaseFieldFault<dim>::FEPhaseEnergy PhaseFieldFault<dim>::evaluate_fe_phase_energy_at(const LinearAlgebra::BlockVector &,bool,bool,const LinearAlgebra::BlockVector &,const std::vector<double>&,const std::vector<double>*) const; \
+  template PhaseFieldFault<dim>::FEPhaseEnergy PhaseFieldFault<dim>::evaluate_fe_phase_energy_at(const LinearAlgebra::BlockVector &,bool,bool,const LinearAlgebra::BlockVector &,const std::vector<double>&,const std::vector<double>*,const DGHistory*) const; \
   template PhaseFieldFault<dim>::FEPhaseEnergy PhaseFieldFault<dim>::evaluate_fe_endpoint_energy(const LinearAlgebra::BlockVector &,const FEEndpointTrial &,const std::vector<double>*) const; \
   template PhaseFieldFault<dim>::FEEndpointTrial PhaseFieldFault<dim>::make_fe_endpoint_trial(const LinearAlgebra::BlockVector &,const std::vector<std::vector<double>> &) const;
     INSTANTIATE(2)

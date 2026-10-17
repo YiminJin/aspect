@@ -17,7 +17,7 @@ namespace aspect
                                             const bool include_relaxation) const
     {
       validate_fe_strain_restrictions();
-      AssertThrow(dim==2 && dg_trial_stress_history && quadrature_order>=4
+      AssertThrow(dim==2 && dg_trial_stress_history && !consistent_endpoint_phase && quadrature_order>=4
                   && Utilities::MPI::n_mpi_processes(this->get_mpi_communicator())==1,
                   ExcMessage("PF4 transport requires fixed serial Cartesian DGQ2 and at least Gauss4."));
       auto result=std::make_shared<DGTransport>();

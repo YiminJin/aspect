@@ -20,6 +20,7 @@
 
 #include <aspect/particle/manager.h>
 #include <aspect/particle/particle_domain.h>
+#include <aspect/material_model/phase_field_fault.h>
 #include <aspect/global.h>
 #include <aspect/utilities.h>
 #include <aspect/simulator.h>
@@ -259,6 +260,20 @@ namespace aspect
         [&] (typename parallel::distributed::Triangulation<dim> &)
       {
         this->apply_particle_per_cell_bounds();
+        // Accepted DG remaps consume the association/CPDI cache immediately,
+        // before another particle timestep. Repartitioning changes local
+        // particle indices even when IDs and positions are fixed. Rebuild only
+        // after both unpacking and the final ghost exchange have settled them.
+        // Preserve the established unselected particle paths.
+        const auto *fault=dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(&this->get_material_model());
+        if (particle_domain_handler && fault && fault->uses_dg_trial_stress_history()
+            && fault->uses_consistent_endpoint_phase() && fault->has_fe_strain_history())
+          {
+            if (Utilities::MPI::n_mpi_processes(this->get_mpi_communicator())>1)
+              particle_handler->exchange_ghost_particles();
+            TimerOutput::Scope timer(*domain_timer,"Particles: Domains/CPDI");
+            particle_domain_handler->generate_particle_domains();
+          }
       });
 
       signals.post_resume_load_user_data.connect(

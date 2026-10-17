@@ -1,0 +1,30 @@
+{
+  "study_completed": true,
+  "main_1D_cases": 13,
+  "accepted_1D_steps": 1152,
+  "main_1D_operators_passed": true,
+  "main_512_practical_targets": {
+    "whole_stress": true,
+    "localized_stress": true,
+    "phase_L2": true,
+    "phase_Linf": true,
+    "q": true,
+    "slip": true,
+    "energy": true,
+    "driving": true,
+    "onset": true
+  },
+  "native_confirmation_passed": false,
+  "native_attempts": 1,
+  "native_accepted_positive_steps": 0,
+  "native_initialization_checks_passed": true,
+  "native_failure": "unchanged publication consistency assertion",
+  "failure_cause_resolved": false,
+  "portable_replay_passed": true,
+  "source_and_prior_evidence_preservation_passed": true,
+  "native_core_source_unchanged": true,
+  "production_defaults_and_acceptance_unchanged": true,
+  "python_syntax_checks_passed": true,
+  "git_diff_check_passed": true,
+  "full_PF5_or_propagation_qualification": false
+}
