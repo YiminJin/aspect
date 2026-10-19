@@ -1,0 +1,89 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "phase_cells": 32,
+      "mechanical_cells": 32,
+      "derivatives": [
+        {
+          "energy": 1.1698493736223003e-12,
+          "tangent": 7.81904896732244e-11
+        },
+        {
+          "energy": 7.730409194717236e-13,
+          "tangent": 1.4085037476629925e-10
+        },
+        {
+          "energy": 1.5880304341485407e-11,
+          "tangent": 6.807146625889549e-10
+        }
+      ]
+    },
+    {
+      "phase_cells": 64,
+      "mechanical_cells": 32,
+      "derivatives": [
+        {
+          "energy": 2.144196062023318e-12,
+          "tangent": 6.028741134783688e-11
+        },
+        {
+          "energy": 6.252789085114951e-14,
+          "tangent": 4.2199571094470034e-10
+        },
+        {
+          "energy": 1.083092726833837e-10,
+          "tangent": 1.4593861188960666e-09
+        }
+      ]
+    },
+    {
+      "phase_cells": 32,
+      "mechanical_cells": 64,
+      "derivatives": [
+        {
+          "energy": 5.4431216478523226e-12,
+          "tangent": 7.384064453636041e-11
+        },
+        {
+          "energy": 2.362302367608926e-11,
+          "tangent": 5.18373026794916e-10
+        },
+        {
+          "energy": 1.0633463901066342e-10,
+          "tangent": 6.875818707799408e-10
+        }
+      ]
+    },
+    {
+      "phase_cells": 64,
+      "mechanical_cells": null,
+      "derivatives": [
+        {
+          "energy": 2.0396049215873346e-12,
+          "tangent": 8.486978697944125e-12
+        },
+        {
+          "energy": 1.2069376531184672e-12,
+          "tangent": 1.9531613522708047e-11
+        },
+        {
+          "energy": 1.1889057815496484e-10,
+          "tangent": 2.1140081823750254e-10
+        }
+      ]
+    },
+    {
+      "matrix_equivalence_cells": 16,
+      "stress_max_error_Pa": 1.4483703125733882e-09,
+      "Z_error": 7.421476766467094e-10,
+      "V_error": 9.531264666406969e-14
+    },
+    {
+      "matrix_equivalence_cells": 32,
+      "stress_max_error_Pa": 6.366462912410498e-09,
+      "Z_error": 2.786691766232252e-09,
+      "V_error": 3.5685343569014094e-13
+    }
+  ]
+}

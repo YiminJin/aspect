@@ -396,12 +396,13 @@ packing and same-count RNG replay are reused. Changed-count RNG replay remains
 unavailable with population changes disabled; deterministic fixed-population
 serial-to-four histories are checked separately.
 
-The endpoint minimizer still assumes independent phase coordinates. Its entry
-guard rejects hanging-node phase evolution; frozen transfer/evaluation/restart
-does not qualify that solve. A selected extension must define phi=C*psi, pull back
-gradient/tangent with C^T and C, and verify physical obstacle/KKT and native
-acceptance. No lossy obstacle rule, automatic AMR, surface remeshing, transport,
-moving geometry, birth or propagation follows from the bounded tests.
+At that stage the endpoint minimizer assumed independent physical phase
+coordinates and rejected hanging-node evolution. Frozen transfer/evaluation/
+restart alone did not qualify that solve. The separately selected serial
+independent-master extension below supplies the missing qualification; this
+historical transfer evidence remains unchanged. No lossy obstacle rule,
+automatic AMR, surface remeshing, transport, moving geometry, birth or propagation
+follows from the bounded tests.
 
 ### Selected homogeneous DG configuration without domains (2026-10-16)
 
@@ -3049,3 +3050,38 @@ plugin-owned and unarchived. Accepted ownership for d_R would replace mapped
 particle stress as authoritative mechanical history in this option; it is not
 assigned here. Native implementation is not complete. The report states the
 concrete alternatives and limits before source changes.
+
+
+### Serial fixed-mesh hanging-node cohesive phase (2026-10-19)
+
+The bounded domain-free homogeneous DG cohesive route now represents physical
+phase as `phi=C psi` using closed native homogeneous convex Q1 hanging rows.
+Masters are independent physical phase nodes. `AffineConstraints::distribute`
+expands primal trials and variations; raw physical-node duals reduce by `C^T`
+once. Both fracture and the complete consistent-endpoint response use
+`H_master dpsi=C^T H_physical C dpsi`, retaining normalization derivatives and
+the mechanical/slip response. Already condensed mechanical loads are not
+condensed again. The local fracture pullback uses raw cell derivatives, never
+artificial constrained-row diagonals in the system matrix. Uniform `C=Id`
+retains the previous assembly/operation order.
+
+Require exact native consistency of the accepted lower phase. Convex homogeneous
+rows and physical-node masters make `psi>=psi_n` equivalent to physical nodal
+irreversibility; convexity preserves the physical upper bound. Verify the
+expanded accepted phase explicitly. KKT, active sets, phase linear accuracy and
+stability use master coordinates; positive arithmetic scales pull back by
+`|C|^T`. The search metric is the raw fracture pullback plus the pullback of the
+existing physical nodal mass lump. These are coordinate/preconditioner choices,
+not energy or constitutive changes. Native outer rollback/staging/once-only
+publication and checkpoint history format remain unchanged.
+
+The manually prepared 67-cell fixed mesh exercises growing and active hanging
+interfaces in the short retained cohesive event; the complete ten-dimensional
+free-master Hessian is positive, with all other masters strictly active.
+Independent geometric/energy/action checks, uniform identity, rejection/cutback
+and same-count serial restart are reported in
+`particle_free/PF6_HANGING_REPORT.md`. This admission is serial, nonperiodic,
+2D homogeneous domain-free cohesive DG only. No phase lifting, MPI local-phase
+solve, runtime mesh change, lossy obstacle transfer, transport, moving geometry,
+birth, propagation or general accuracy qualification is added. Prior spatial,
+temporal, quadrature and mirror-branch failures remain evidence.

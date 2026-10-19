@@ -18,6 +18,8 @@ p.add_argument('--snapshot', action='store_true')
 p.add_argument('--local', action='store_true')
 p.add_argument('--deep-uniform', action='store_true', help='Retained 64-to-256 particle-support negative control.')
 p.add_argument('--no-deep-uniform', dest='deep_uniform', action='store_false')
+p.add_argument('--binary', type=Path)
+p.add_argument('--plugin', type=Path)
 a = p.parse_args()
 root = Path(__file__).resolve().parents[3]
 runner = Path(__file__).with_name('run_pf6_transfer.py')
@@ -28,6 +30,9 @@ if a.action == 'finalize':
 args += ['--ranks', str(a.ranks), '--end', str(a.end), '--checkpoint']
 if a.restart:
     args += ['--restart', str(a.restart)]
+for option in ['binary', 'plugin']:
+    if getattr(a, option):
+        args += ['--'+option, str(getattr(a, option))]
 if a.snapshot:
     assert a.restart and a.quadrature == 6 and not a.local
 subprocess.run(args, check=True, stdout=subprocess.DEVNULL)
@@ -55,7 +60,8 @@ end
 (out/'input.prm').write_text(text)
 r = json.loads((out/'record.json').read_text())
 r['input_sha256'] = hashlib.sha256((out/'input.prm').read_bytes()).hexdigest()
-r['local_case'] = vars(a) | {'restart': str(a.restart) if a.restart else None}
+r['local_case'] = {key: str(value) if isinstance(value, Path) else value
+                   for key, value in vars(a).items()}
 r['scope'] = 'G12 physical quadrature and conditional frozen fixed-surface local remap'
 (out/'record.json').write_text(json.dumps(r, indent=2)+'\n')
 print((out/'command.json').read_text())

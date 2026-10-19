@@ -1,10 +1,14 @@
-/* Restricted, default-off consistent-endpoint P2 minimization. */
+/* Restricted fixed-reference cohesive endpoint minimization. Accepted bulk
+ * history is native FE (P2) or independent DG (PF6a); trials never publish it. */
 #include <aspect/simulator.h>
+#include <aspect/geometry_model/interface.h>
 #include <aspect/phase_field.h>
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/plugins.h>
 #include <aspect/reconstructed_fault/manager.h>
 #include <aspect/reconstructed_fault/endpoint_mpi.h>
+#include <aspect/reconstructed_fault/endpoint_phase_constraints.h>
+#include <deal.II/lac/dynamic_sparsity_pattern.h>
 #include <aspect/particle/manager.h>
 #include <deal.II/fe/fe_values.h>
 #include <deal.II/lac/trilinos_solver.h>
@@ -25,13 +29,18 @@ namespace aspect
     auto &manager=*reconstructed_fault_manager;
     AssertThrow(material.uses_consistent_endpoint_phase() && material.has_fe_strain_history()
                 && timestep_number>0,
-                ExcMessage("Endpoint minimization requires initialized accepted FE history."));
+                ExcMessage("Endpoint minimization requires initialized independent bulk history."));
     const unsigned int b=introspection.variable("phase_field").block_index;
     const auto phase_offset=solution.get_block_indices().block_start(b);
     unsigned int hanging_phase=0;
     for(const auto &line:constraints.get_lines())
       if(line.index>=phase_offset && line.index<phase_offset+solution.block(b).size() && !line.entries.empty())hanging_phase=1;
-    AssertThrow(Utilities::MPI::max(hanging_phase,mpi_communicator)==0,
+    const bool constrained_phase=Utilities::MPI::max(hanging_phase,mpi_communicator)!=0;
+    AssertThrow(!constrained_phase
+                || (dim==2 && Utilities::MPI::n_mpi_processes(mpi_communicator)==1
+                    && material.uses_dg_trial_stress_history() && material.uses_homogeneous_mesh_data()
+                    && geometry_model->get_periodic_boundary_pairs().empty()
+                    && !material.is_mature_frictional_fault()),
                 ExcMessage("The bounded local DG remap does not admit coupled hanging-node phase evolution; constrained variations and obstacle KKT remain unqualified."));
     const LinearAlgebra::BlockVector saved_solution(solution),saved_linearization(current_linearization_point);
     const double saved_pressure_adjustment=last_pressure_normalization_adjustment;
@@ -51,7 +60,16 @@ namespace aspect
     AssertThrow(settings.use_bound_constraints && settings.enforce_irreversibility,
                 ExcMessage("Endpoint minimization requires the selected box and previous-physical-phase bounds."));
     const double scale=material.get_critical_energy_release_rates()[0]/((8./3.)*phase.get_length_scale());
-    const unsigned int n=anchor.block(b).size();
+    const unsigned int physical_size=anchor.block(b).size();
+    const internal::EndpointPhaseConstraints phase_coordinates(current_constraints,phase_offset,physical_size);
+    const unsigned int n=phase_coordinates.size();
+    IndexSet phase_partition=introspection.index_sets.system_partitioning[b];
+    if (!phase_coordinates.identity())
+      {
+        phase_partition=IndexSet(n);
+        phase_partition.add_range(0,n);
+        pcout<<"   Endpoint phase coordinates: physical="<<physical_size<<", masters="<<n<<std::endl;
+      }
     Vector<double> lower(n),x(n),mass(n),diagonal(n);
     LinearAlgebra::SparseMatrix search_matrix;
     LinearAlgebra::SparseMatrix fracture_matrix;
@@ -62,10 +80,16 @@ namespace aspect
     std::vector<bool> contact(n),previous_contact(n);
     bool preconditioner_ready=false;
     std::vector<Point<dim>> points(n);
-    lower=internal::endpoint_values(anchor.block(b),mpi_communicator);x=lower;
+    const auto physical_lower=internal::endpoint_values(anchor.block(b),mpi_communicator);
+    lower=phase_coordinates.select(physical_lower);x=lower;
+    AssertThrow(phase_coordinates.expand(lower)==physical_lower,
+                ExcMessage("The accepted physical phase must satisfy its native hanging constraints exactly."));
     if(initial_trial)
       {
-      x=internal::endpoint_values(initial_trial->block(b),mpi_communicator);
+      const auto full_guess=internal::endpoint_values(initial_trial->block(b),mpi_communicator);
+      x=phase_coordinates.select(full_guess);
+      AssertThrow(phase_coordinates.expand(x)==full_guess,
+                  ExcMessage("Endpoint starting phase violates native hanging constraints."));
       for(unsigned int i=0;i<n;++i)
         {
           AssertThrow(x[i]>=lower[i] && x[i]<1.,ExcMessage("Diagnostic starting guess violates the physical obstacle."));
@@ -73,7 +97,9 @@ namespace aspect
       }
     const unsigned int component=introspection.variable("phase_field").first_component_index;
     std::vector<types::global_dof_index> local_indices(finite_element.n_dofs_per_cell());
-    std::vector<double> coordinates(dim*n,0.),counts(n,0.);
+    std::vector<double> coordinates(dim*physical_size,0.),counts(physical_size,0.);
+    Vector<double> physical_mass(physical_size);
+    std::vector<Point<dim>> physical_points(physical_size);
     for(const auto &cell:dof_handler.active_cell_iterators())
       if(cell->is_locally_owned())
       {
@@ -84,14 +110,41 @@ namespace aspect
           const auto i=global-anchor.get_block_indices().block_start(b);
           counts[i]+=1.;
           for(unsigned int d=0;d<dim;++d)coordinates[dim*i+d]+=cell->vertex(v)[d];
-          mass[i]+=cell->measure()/GeometryInfo<dim>::vertices_per_cell;
+          physical_mass[i]+=cell->measure()/GeometryInfo<dim>::vertices_per_cell;
         }
       }
     internal::endpoint_sum(coordinates,mpi_communicator);internal::endpoint_sum(counts,mpi_communicator);
-    std::vector<double> local_mass(mass.begin(),mass.end());internal::endpoint_sum(local_mass,mpi_communicator);
-    for(unsigned int i=0;i<n;++i)
-      {mass[i]=local_mass[i];AssertThrow(mass[i]>0 && counts[i]>0,ExcInternalError());
-       for(unsigned int d=0;d<dim;++d)points[i][d]=coordinates[dim*i+d]/counts[i];}
+    std::vector<double> local_mass(physical_mass.begin(),physical_mass.end());internal::endpoint_sum(local_mass,mpi_communicator);
+    for(unsigned int i=0;i<physical_size;++i)
+      {physical_mass[i]=local_mass[i];AssertThrow(physical_mass[i]>0 && counts[i]>0,ExcInternalError());
+       for(unsigned int d=0;d<dim;++d)physical_points[i][d]=coordinates[dim*i+d]/counts[i];}
+    mass=phase_coordinates.transpose(physical_mass);
+    for(unsigned int i=0;i<n;++i)points[i]=physical_points[phase_coordinates.physical_index(i)];
+
+    // This lookup belongs to the fixed point layout of one solve. Only phase
+    // values change during trials. The caller retains its own free-set mask:
+    // the stability probe and search preconditioner use different masks.
+    std::map<std::pair<double,double>,unsigned int> phase_nodes;
+    for (unsigned int i=0; i<physical_size; ++i)
+      phase_nodes.emplace(std::make_pair(physical_points[i][0],physical_points[i][1]),i);
+    const auto negative_normal_derivative = [&](const Vector<double> &phi)
+    {
+      const auto physical_phase=phase_coordinates.expand(phi);
+      Vector<double> derivative(physical_size);
+      for (unsigned int i=0; i<physical_size; ++i)
+        {
+          auto node=phase_nodes.find({physical_points[i][0],physical_points[i][1]});
+          auto left=node,right=node;
+          if (left!=phase_nodes.begin()) --left;
+          ++right;
+          if (left->first.first==physical_points[i][0] && right!=phase_nodes.end()
+              && right->first.first==physical_points[i][0])
+            derivative[i]=-(physical_phase[right->second]-physical_phase[left->second])
+                          /(right->first.second-left->first.second);
+        }
+      return phase_coordinates.select(derivative);
+    };
+
     struct Evaluation
     {
       double value,allowance,pressure_adjustment;
@@ -120,7 +173,7 @@ namespace aspect
           AssertThrow(phi[i]>=0 && phi[i]<1.,ExcMessage("Undefined endpoint trial normalization."));
 
         }
-      internal::endpoint_assign(owned.block(b),phi);
+      internal::endpoint_assign(owned.block(b),phase_coordinates.expand(phi));
       solution=owned;current_linearization_point=solution;
       // This solve rolls manager V back and never publishes R,Z,H or q.
       // Like the scratch bulk solution, the previous trial rate is only a
@@ -134,10 +187,11 @@ namespace aspect
       const auto endpoint=material.make_fe_endpoint_trial(e.bulk,e.slip);
       const auto elastic=material.evaluate_fe_endpoint_energy(e.bulk,endpoint);
       AssertThrow(elastic.admissible,ExcMessage("Endpoint trial energy is undefined."));
-      // AT1 at fixed domains and homogeneous Gc has exactly a quadratic
-      // CPDI fracture functional. Reuse its actual sparse operator; no
-      // particle projection, surrogate stiffness or integration change.
-      LinearAlgebra::Vector delta(introspection.index_sets.system_partitioning[b],mpi_communicator),kd(delta);
+      // At fixed geometry and homogeneous Gc, AT1 fracture is quadratic.
+      // Reuse the actual selected operator: ordinary cell FE for DG history,
+      // legacy CPDI for FE history. Neither elastic energy nor a surrogate
+      // stiffness belongs in this fracture-only block.
+      LinearAlgebra::Vector delta(phase_partition,mpi_communicator),kd(delta);
       Vector<double> increment(phi);increment-=lower;internal::endpoint_assign(delta,increment);
       fracture_matrix.vmult(kd,delta);
       const auto global_kd=internal::endpoint_values(kd,mpi_communicator);
@@ -145,6 +199,8 @@ namespace aspect
       double naive_fracture=naive_fracture_start;
       long double linear_fracture=0.,quadratic_fracture=0.;
       e.elastic_gradient.reinit(n);
+      const auto elastic_gradient=phase_coordinates.transpose(Vector<double>(elastic.gradient.begin(),elastic.gradient.end()));
+      const auto elastic_scale=phase_coordinates.transpose(Vector<double>(elastic.roundoff_scale.begin(),elastic.roundoff_scale.end()));
       double positive=0.;
       for(unsigned int i=0;i<n;++i)
         {
@@ -154,9 +210,9 @@ namespace aspect
           linear_fracture+=static_cast<long double>(fracture_gradient[i])*increment[i];
           quadratic_fracture+=static_cast<long double>(increment[i])*global_kd[i];
           naive_fracture+=fracture_gradient[i]*increment[i];
-          e.elastic_gradient[i]=elastic.gradient[i]/scale;
+          e.elastic_gradient[i]=elastic_gradient[i]/scale;
           e.gradient[i]=e.elastic_gradient[i]+(fracture_gradient[i]+global_kd[i])/scale;
-          positive+=elastic.roundoff_scale[i]*elastic.roundoff_scale[i];
+          positive+=elastic_scale[i]*elastic_scale[i];
         }
       const long double fracture=fracture_anchor+linear_fracture+.5L*quadratic_fracture;
       e.value=(fracture+elastic.bulk+elastic.cohesive+endpoint.friction_potential)/scale;
@@ -186,12 +242,21 @@ namespace aspect
         if(phi[i]==lower[i] && out[i]>0.)out[i]=0.;
       return out;
     };
+    const auto add_fracture_action = [&](const Vector<double> &direction,Vector<double> &result)
+    {
+      LinearAlgebra::Vector d(phase_partition,mpi_communicator),kd(d);
+      internal::endpoint_assign(d,direction);
+      fracture_matrix.vmult(kd,d);
+      const auto global_kd=internal::endpoint_values(kd,mpi_communicator);
+      for (unsigned int i=0; i<n; ++i)
+        result[i]+=global_kd[i]/scale;
+    };
     auto action=[&](const Vector<double> &phi,const Vector<double> &direction,const double relative)
     {
       if(relative==1e-5)
         {
           AssertThrow(current_base!=nullptr,ExcInternalError());
-          const auto base_phase=internal::endpoint_values(current_base->bulk.block(b),mpi_communicator);
+          const auto base_phase=phase_coordinates.select(internal::endpoint_values(current_base->bulk.block(b),mpi_communicator));
           for(unsigned int i=0;i<n;++i)
             AssertThrow(phi[i]==base_phase[i],ExcMessage("Tangent base differs from the explicit trial."));
           if(!linearized_action)
@@ -200,12 +265,8 @@ namespace aspect
               linearized_action=make_reconstructed_fault_endpoint_tangent(current_base->bulk,current_base->slip,endpoint.strain,endpoint.Z);
             }
           const auto started=std::chrono::steady_clock::now();
-          Vector<double>result=linearized_action(direction);result/=scale;
-          LinearAlgebra::Vector d(introspection.index_sets.system_partitioning[b],mpi_communicator),kd(d);
-          internal::endpoint_assign(d,direction);
-          fracture_matrix.vmult(kd,d);
-          const auto global_kd=internal::endpoint_values(kd,mpi_communicator);
-          for(unsigned int i=0;i<n;++i)result[i]+=global_kd[i]/scale;
+          Vector<double>result=phase_coordinates.transpose(linearized_action(phase_coordinates.expand(direction)));result/=scale;
+          add_fracture_action(direction,result);
           ++tangent_calls;
           tangent_seconds+=std::chrono::duration<double>(std::chrono::steady_clock::now()-started).count();
           return result;
@@ -222,35 +283,68 @@ namespace aspect
       Vector<double> plus(phi),minus(phi);plus.add(eps,direction);minus.add(-eps,direction);
       const auto ep=evaluate(plus),em=evaluate(minus);
       Vector<double> result(ep.elastic_gradient);result-=em.elastic_gradient;result/=2*eps;
-      LinearAlgebra::Vector d(introspection.index_sets.system_partitioning[b],mpi_communicator),kd(d);
-      internal::endpoint_assign(d,direction);
-      fracture_matrix.vmult(kd,d);
-      const auto global_kd=internal::endpoint_values(kd,mpi_communicator);
-          for(unsigned int i=0;i<n;++i)result[i]+=global_kd[i]/scale;
+      add_fracture_action(direction,result);
       return result;
     };
     try
       {
-        // Assemble only the sparse native CPDI fracture block. Its shifted
+        // Assemble only the selected sparse fracture block. Its shifted
         // diagonal is a search preconditioner, never an energy/Hessian change.
         solution.block(b)=anchor.block(b);
-        phase.assemble_phase_field_system(system_matrix,system_rhs,solution,true,&fracture_arithmetic,&fracture_anchor,true);
-        fracture_matrix.copy_from(system_matrix.block(b,b));
-        fracture_gradient=internal::endpoint_values(system_rhs.block(b),mpi_communicator);fracture_gradient*=-1.;
-        std::vector<double> local_diagonal(n,0.);
-        for(const auto i:system_rhs.block(b).locally_owned_elements())
-          local_diagonal[i]=std::abs(system_matrix.block(b,b).diag_element(i))/scale+mass[i];
-        internal::endpoint_sum(local_diagonal,mpi_communicator);
-        std::copy(local_diagonal.begin(),local_diagonal.end(),diagonal.begin());
-        search_matrix.copy_from(system_matrix.block(b,b));
-        for(const auto i:system_rhs.block(b).locally_owned_elements())search_matrix.add(i,i,scale*mass[i]);
-        search_matrix.compress(VectorOperation::add);
+        if (phase_coordinates.identity())
+          {
+            // Retain the existing arithmetic, MPI layout and legacy CPDI path.
+            phase.assemble_phase_field_system(system_matrix,system_rhs,solution,true,&fracture_arithmetic,&fracture_anchor,true);
+            fracture_matrix.copy_from(system_matrix.block(b,b));
+            fracture_gradient=internal::endpoint_values(system_rhs.block(b),mpi_communicator);fracture_gradient*=-1.;
+            std::vector<double> local_diagonal(n,0.);
+            for(const auto i:phase_partition)
+              local_diagonal[i]=std::abs(system_matrix.block(b,b).diag_element(i))/scale+mass[i];
+            internal::endpoint_sum(local_diagonal,mpi_communicator);
+            std::copy(local_diagonal.begin(),local_diagonal.end(),diagonal.begin());
+            search_matrix.copy_from(system_matrix.block(b,b));
+            for(const auto i:phase_partition)search_matrix.add(i,i,scale*mass[i]);
+            search_matrix.compress(VectorOperation::add);
+          }
+        else
+          {
+            // Raw physical-node DG fracture derivatives: reduce exactly once.
+            // Do not condense a system block containing artificial row diagonals.
+            const auto fracture=phase.evaluate_cell_fracture(solution,true);
+            fracture_anchor=fracture.energy;
+            fracture_gradient=phase_coordinates.transpose(Vector<double>(fracture.gradient.begin(),fracture.gradient.end()));
+            const auto positive=phase_coordinates.transpose(Vector<double>(fracture.roundoff_scale.begin(),fracture.roundoff_scale.end()));
+            fracture_arithmetic=8*std::numeric_limits<double>::epsilon()*positive.l2_norm();
+            const auto reduced=phase_coordinates.pull_back(fracture.hessian);
+            FullMatrix<double> reduced_mass(n,n);
+            for(unsigned int i=0;i<physical_size;++i)
+              for(const auto &a:phase_coordinates.weights()[i])
+                for(const auto &b:phase_coordinates.weights()[i])
+                  reduced_mass(a.first,b.first)+=a.second*physical_mass[i]*b.second;
+            DynamicSparsityPattern graph(n,n);
+            for(unsigned int i=0;i<n;++i)for(unsigned int j=0;j<n;++j)
+              if(reduced(i,j)!=0. || reduced_mass(i,j)!=0.)graph.add(i,j);
+            fracture_matrix.reinit(phase_partition,graph,mpi_communicator);
+            search_matrix.reinit(phase_partition,graph,mpi_communicator);
+            for(unsigned int i=0;i<n;++i)
+              {
+                diagonal[i]=std::abs(reduced(i,i))/scale+reduced_mass(i,i);
+                for(unsigned int j=0;j<n;++j)
+                  if(graph.exists(i,j))
+                    {
+                      fracture_matrix.set(i,j,reduced(i,j));
+                      search_matrix.set(i,j,reduced(i,j)+scale*reduced_mass(i,j));
+                    }
+              }
+            fracture_matrix.compress(VectorOperation::insert);
+            search_matrix.compress(VectorOperation::insert);
+          }
         auto factor_preconditioner=[&]()
           {
             if(preconditioner_ready && contact==previous_contact)return;
             search_preconditioner.reset();
             restricted_search_matrix.copy_from(search_matrix);
-            for(const auto i:system_rhs.block(b).locally_owned_elements())
+            for(const auto i:phase_partition)
               if(contact[i])restricted_search_matrix.clear_row(i,1.);
               else
                 {
@@ -279,7 +373,7 @@ namespace aspect
         auto precondition=[&](const Vector<double>&r,Vector<double>&z)
           {
             ++search_inverse_calls;
-            LinearAlgebra::Vector src(introspection.index_sets.system_partitioning[b],mpi_communicator),dst(src);
+            LinearAlgebra::Vector src(phase_partition,mpi_communicator),dst(src);
             internal::endpoint_assign(src,r);
             search_preconditioner->vmult(dst,src);
             z=internal::endpoint_values(dst,mpi_communicator);z*=scale;
@@ -300,50 +394,54 @@ namespace aspect
             bool escape=false;
             if(defect<=target)
               {
-                // Independently reassemble the original CPDI integral at
+                // Independently reassemble the selected fracture integral at
                 // every stationary candidate. Qualification and publication
                 // use this actual residual, at the original entry target.
                 double actual_fracture=0.,actual_arithmetic=0.;
-                phase.evaluate_fe_fracture(system_matrix,system_rhs,base.bulk,actual_fracture,actual_arithmetic);
+                Vector<double> actual_rhs(n);
+                if (phase_coordinates.identity())
+                  {
+                    phase.evaluate_fe_fracture(system_matrix,system_rhs,base.bulk,actual_fracture,actual_arithmetic);
+                    actual_rhs=internal::endpoint_values(system_rhs.block(b),mpi_communicator);
+                  }
+                else
+                  {
+                    const auto actual=phase.evaluate_cell_fracture(base.bulk,false);
+                    actual_fracture=actual.energy;
+                    actual_rhs=phase_coordinates.transpose(Vector<double>(actual.gradient.begin(),actual.gradient.end()));
+                    actual_rhs*=-1.;
+                  }
                 const auto endpoint=material.make_fe_endpoint_trial(base.bulk,base.slip);
                 const auto elastic=material.evaluate_fe_endpoint_energy(base.bulk,endpoint);
+                const auto actual_elastic=phase_coordinates.transpose(Vector<double>(elastic.gradient.begin(),elastic.gradient.end()));
                 const double energy_error=std::abs(base.value-(actual_fracture+elastic.energy+endpoint.friction_potential)/scale);
-                const auto actual_rhs=internal::endpoint_values(system_rhs.block(b),mpi_communicator);
                 double gradient_error=0.;
                 for(unsigned int i=0;i<n;++i)
                   {
-                    const double actual=(elastic.gradient[i]-actual_rhs[i])/scale;
+                    const double actual=(actual_elastic[i]-actual_rhs[i])/scale;
                     gradient_error=std::max(gradient_error,std::abs(actual-base.gradient[i]));
                     base.gradient[i]=actual;
                   }
                 // Keep the one reference energy offset throughout this solve.
                 // The quadratic form gives consistent energy differences;
-                // replacing its offset by a differently rounded particle sum
+                // replacing its offset by a differently rounded physical sum
                 // here would bias subsequent tiny line-search comparisons.
-                pcout<<"   Endpoint CPDI reuse check: energy="<<energy_error
+                pcout<<"   Endpoint fracture reuse check: energy="<<energy_error
                      <<", gradient="<<gradient_error<<std::endl;
                 if(projected(x,base.gradient).linfty_norm()>target)continue;
                 // The first instability of this restricted horizontal-band
                 // fixture is translational. Probe the full FE derivative of
                 // the current phase, without identifying/reflection of frames.
-                std::map<std::pair<double,double>,unsigned int> nodes;
-                for(unsigned int i=0;i<n;++i)nodes.emplace(std::make_pair(points[i][0],points[i][1]),i);
+                step=negative_normal_derivative(x);
                 for(unsigned int i=0;i<n;++i)
-                  if(x[i]>lower[i]+1e-13)
-                    {
-                      auto it=nodes.find({points[i][0],points[i][1]});auto left=it,right=it;
-                      if(left!=nodes.begin())--left;
-                      ++right;
-                      if(left->first.first==points[i][0] && right!=nodes.end() && right->first.first==points[i][0])
-                        step[i]=-(x[right->second]-x[left->second])/(right->first.second-left->first.second);
-                    }
+                  if(!(x[i]>lower[i]+1e-13))step[i]=0.;
                 if(step.linfty_norm()==0.){converged=true;break;}
                 step/=step.linfty_norm();
                 const auto hd=action(x,step,1e-5),hf=action(x,step,5e-6);
                 Vector<double> difference(hd);difference-=hf;
                 const double curvature=step*hf,uncertainty=std::abs(step*difference);
                 LinearAlgebra::BlockVector direction(introspection.index_sets.system_partitioning,mpi_communicator);
-                internal::endpoint_assign(direction.block(b),step);
+                internal::endpoint_assign(direction.block(b),phase_coordinates.expand(step));
                 LinearAlgebra::BlockVector ghost_direction(solution);ghost_direction=direction;
                 FEValues<dim> values(*mapping,finite_element,QGauss<dim>(2),update_values|update_JxW_values);
                 std::vector<double> sampled(values.n_quadrature_points);double mass_norm=0.;
@@ -425,7 +523,7 @@ namespace aspect
             for(unsigned int k=0;k<settings.max_linear_solver_iterations;++k)
               {
                 factor_preconditioner();
-                LinearAlgebra::Vector d(introspection.index_sets.system_partitioning[b],mpi_communicator),pd(d);
+                LinearAlgebra::Vector d(phase_partition,mpi_communicator),pd(d);
                 Vector<double> prescribed(n);for(unsigned int i=0;i<n;++i)prescribed[i]=contact[i]?bound_step[i]:0.;
                 internal::endpoint_assign(d,prescribed);search_matrix.vmult(pd,d);
                 auto global_pd=internal::endpoint_values(pd,mpi_communicator);
@@ -484,16 +582,8 @@ namespace aspect
                 Vector<double> coarse_eigenvalues;
                 if(settings.endpoint_translation_preconditioner)
                   {
-                    std::map<std::pair<double,double>,unsigned int> nodes;
-                    for(unsigned int i=0;i<n;++i)nodes.emplace(std::make_pair(points[i][0],points[i][1]),i);
-                    for(unsigned int i=0;i<n;++i)if(!contact[i])
-                      {
-                        auto it=nodes.find({points[i][0],points[i][1]});auto left=it,right=it;
-                        if(left!=nodes.begin())--left;
-                        ++right;
-                        if(left->first.first==points[i][0] && right!=nodes.end() && right->first.first==points[i][0])
-                          coarse[i]=-(x[right->second]-x[left->second])/(right->first.second-left->first.second);
-                      }
+                    coarse=negative_normal_derivative(x);
+                    for(unsigned int i=0;i<n;++i)if(contact[i])coarse[i]=0.;
                     // One profile-translation block with independent nodal
                     // tangential amplitudes. It is a small search inverse,
                     // never a restriction of the actual phase/mechanical space.
@@ -643,6 +733,11 @@ namespace aspect
                  <<", mechanical trials="<<mechanical_trials<<std::endl;
           }
         AssertThrow(converged,ExcMessage("Endpoint phase iteration budget exhausted; no history published."));
+        const auto selected_phase=internal::endpoint_values(base.bulk.block(b),mpi_communicator);
+        AssertThrow(selected_phase==phase_coordinates.expand(x),ExcMessage("Selected phase is not the native master expansion."));
+        for(unsigned int i=0;i<physical_size;++i)
+          AssertThrow(selected_phase[i]>=physical_lower[i] && selected_phase[i]<1.,
+                      ExcMessage("Selected endpoint violates the physical phase obstacle."));
         solution=base.bulk;current_linearization_point=base.bulk;
         last_pressure_normalization_adjustment=base.pressure_adjustment;
         // Tangent probes may have left a different trial normalization in the

@@ -9,6 +9,10 @@
 #include <aspect/particle/manager.h>
 #include <aspect/particle/particle_domain.h>
 #include <aspect/phase_field.h>
+#include <aspect/reconstructed_fault/surface_system.h>
+#include <filesystem>
+#include <aspect/reconstructed_fault/endpoint_phase_constraints.h>
+#include <deal.II/lac/lapack_full_matrix.h>
 #include <aspect/utilities.h>
 #include <deal.II/base/mpi_remote_point_evaluation.h>
 #include <deal.II/numerics/vector_tools_evaluate.h>
@@ -26,6 +30,7 @@ namespace aspect
   namespace
   {
     int transfer_direction=0;
+    bool phase_evolution_patch=false;
   }
   namespace MeshRefinement
   {
@@ -45,7 +50,7 @@ namespace aspect
                 cell->clear_refine_flag();
                 cell->clear_coarsen_flag();
                 const auto x=(transfer_direction<0 && cell->level()>0 ? cell->parent()->center() : cell->center());
-                const bool patch=x[0]>.5 && x[0]<.75 && x[1]>.375 && x[1]<.4375;
+                const bool patch=x[0]>.5 && x[0]<.75 && (phase_evolution_patch ? x[1]>.1875 && x[1]<.25 : x[1]>.375 && x[1]<.4375);
                 if (std::abs(transfer_direction)==2 && (!patch || (transfer_direction<0 && cell->level()!=3)))continue;
                 if (transfer_direction>0)cell->set_refine_flag();
                 else if (cell->level()>0)cell->set_coarsen_flag();
@@ -64,6 +69,12 @@ namespace aspect
         using Records=std::map<std::string,std::vector<double>>;
         using Particles=std::map<types::particle_index,Point<dim>>;
         bool initialized=false,recovery_done=false,transfer_checks=true,snapshot_quadrature=false,local_checks=false,deep_uniform=true;
+        bool fixed_local_phase=false,operator_checks_enabled=false,operators_done=false;
+        unsigned int attempt_step=0;
+        double attempt_time=0.,attempt_dt=0.;
+        std::vector<double> attempt_snapshot;
+        std::shared_ptr<typename Model::FEStrainState> incoming;
+        std::vector<std::vector<double>> incoming_surface;
         unsigned int last_step=0;
         Particles initial_particles;
         Model &model() const
@@ -425,6 +436,249 @@ namespace aspect
               std::ofstream f(this->get_output_directory()+label+"-energy.csv");
               f<<std::setprecision(17)<<"bulk,cohesive,fracture,step,publications\n"<<E.bulk<<','<<E.cohesive<<','<<F.energy<<','<<model().fe_strain_state->committed_step<<','<<model().fe_strain_state->accepted_publications<<'\n';
             }
+        }
+        void export_endpoint_reference(const std::string &directory,const BV &phase,const BV &d1,const BV &d2,
+                              const typename Model::FEEndpointTrial *endpoint=nullptr) const
+        {
+          auto &model=this->model();
+          const auto block=this->introspection().variable("phase_field").block_index;
+          std::filesystem::create_directories(this->get_output_directory()+directory);
+          const auto output=[&](const std::string &name){std::ofstream f(this->get_output_directory()+directory+"/"+name);f<<std::setprecision(17);return f;};
+          const auto &s=*model.fe_strain_state;
+          const auto component=this->introspection().variable("phase_field").first_component_index;
+          const auto offset=phase.get_block_indices().block_start(block);
+          std::map<types::global_dof_index,Point<dim>> nodes;
+          auto cells=output("cells.csv"),tensor=output("tensor.csv");
+          cells << "cell,x0,y0,dx,dy,i0,i1,i2,i3\n";
+          tensor << "cell,r,s,xx,yy,xy\n";
+          const QGaussLobatto<dim> samples(3);
+          unsigned int c=0;
+          for (const auto &entry:s.cells)
+            {
+              const auto &cell=entry.second;
+              const auto stress=model.evaluate_dg_trial_tensor(endpoint ? *endpoint->dg_history : *s.dg_history,entry.first,samples);
+              cells << c << ',' << cell->vertex(0)[0] << ',' << cell->vertex(0)[1] << ','
+                    << cell->vertex(1)[0]-cell->vertex(0)[0] << ',' << cell->vertex(2)[1]-cell->vertex(0)[1];
+              for (const auto v:cell->vertex_indices())
+                {
+                  const auto i=cell->vertex_dof_index(v,component)-offset;
+                  nodes[i]=cell->vertex(v);
+                  cells << ',' << i;
+                }
+              cells << '\n';
+              for (unsigned int q=0; q<samples.size(); ++q)
+                tensor << c << ',' << samples.point(q)[0] << ',' << samples.point(q)[1] << ','
+                       << stress[q][0][0] << ',' << stress[q][1][1] << ',' << stress[q][0][1] << '\n';
+              ++c;
+            }
+          auto nodal=output("nodes.csv");
+          nodal << "i,x,y,accepted,phase,d1,d2\n";
+          for (const auto &node:nodes)
+            nodal << node.first << ',' << node.second[0] << ',' << node.second[1] << ','
+                  << s.displacement_history.block(block)[node.first] << ',' << phase.block(block)[node.first] << ','
+                  << d1.block(block)[node.first] << ',' << d2.block(block)[node.first] << '\n';
+          auto surface=output("surface.csv"),profiles=output("profiles.csv"),rule=output("rule.csv");
+          surface << "i,x,Z,I_accepted\n";
+          for (unsigned int i=0; i<s.Z.size(); ++i)
+            surface << i << ',' << s.vertices[i][0] << ',' << (endpoint ? endpoint->Z[i] : s.Z[i]) << ',' << s.I[i] << '\n';
+          profiles << "segment,xi,weight\n";
+          for (const auto &p:s.profiles) profiles << p.segment << ',' << p.xi << ',' << p.weight << '\n';
+          rule << "r,s,weight\n";
+          const auto quadrature=model.mechanical_quadrature();
+          for (unsigned int q=0; q<quadrature.size(); ++q)
+            rule << quadrature.point(q)[0] << ',' << quadrature.point(q)[1] << ',' << quadrature.weight(q) << '\n';
+          const auto coefficient=Access::coefficients(this->get_phase_field_handler(), {.5,.5},.3,0.);
+          auto constants=output("constants.csv");
+          constants << "G,m,A,ell\n" << s.G << ',' << s.m << ',' << coefficient.reaction << ','
+                    << std::sqrt(coefficient.diffusion/(2*coefficient.reaction)) << '\n';
+        }
+
+        unsigned int phase_block() const {return this->introspection().variable("phase_field").block_index;}
+        Vector<double> s_phase() const {return aspect::internal::endpoint_values(this->get_solution().block(phase_block()),this->get_mpi_communicator());}
+        Vector<double> accepted_phase() const {return aspect::internal::endpoint_values(model().fe_strain_state->displacement_history.block(phase_block()),this->get_mpi_communicator());}
+        aspect::internal::EndpointPhaseConstraints master_coordinates() const
+        {return {sim().current_constraints,this->get_solution().get_block_indices().block_start(phase_block()),this->get_solution().block(phase_block()).size()};}
+        void put_phase(BV &v,const Vector<double> &p) const
+        {aspect::internal::endpoint_assign(v.block(phase_block()),p);}
+        Vector<double> endpoint_gradient(const BV &bulk,const typename Model::FEEndpointTrial &endpoint) const
+        {
+          const auto e=model().evaluate_fe_endpoint_energy(bulk,endpoint);
+          const auto f=this->get_phase_field_handler().evaluate_cell_fracture(bulk,false);
+          Vector<double> g(e.gradient.begin(),e.gradient.end());
+          for(unsigned int i=0;i<g.size();++i)g[i]+=f.gradient[i];
+          return g;
+        }
+        void constrained_operators()
+        {
+          auto &s=sim();auto &m=model();
+          const auto before=persistent();const auto random=rng();
+          const auto saved=s.solution,linear=s.current_linearization_point;
+          const auto pressure=s.last_pressure_normalization_adjustment;
+          const auto statistics=s.statistics;const auto iteration=s.nonlinear_iteration;
+          const auto C=master_coordinates();
+          ReconstructedFaultVector rates;
+          Access::endpoint_trial(s,saved,rates);
+          const BV base=s.solution;
+          const auto endpoint=m.make_fe_endpoint_trial(base,rates);
+          const auto repeat=m.make_fe_endpoint_trial(base,rates);
+          bool identical=endpoint.Z==repeat.Z;
+          for(unsigned int c=0;c<3;++c)identical=identical && endpoint.dg_history->trial_stress[c]==repeat.dg_history->trial_stress[c];
+          check("local repeated endpoint trials unpublished",identical && same(before,persistent()));
+          const auto p=C.select(s_phase()),lower=C.select(accepted_phase());
+          const auto f=this->get_phase_field_handler().evaluate_cell_fracture(base,true);
+          const auto fixed=m.evaluate_fe_phase_energy_at(base,true,false,endpoint.strain,endpoint.Z,nullptr,endpoint.dg_history.get());
+          FullMatrix<double> raw(f.hessian);raw.add(1.,fixed.hessian);
+          const auto Hfixed=C.pull_back(raw);
+          const auto reduced=Access::endpoint_tangent(s,base,rates,endpoint.strain,endpoint.Z);
+          const auto apply=[&](const Vector<double> &v)
+          {
+            const auto physical=C.expand(v);auto h=reduced(physical);
+            Vector<double> frac(h.size());f.hessian.vmult(frac,physical);h+=frac;
+            return C.transpose(h);
+          };
+          const auto g=C.transpose(endpoint_gradient(base,endpoint));
+          std::vector<Point<dim>> points(C.physical_size());
+          const auto offset=base.get_block_indices().block_start(phase_block());
+          const auto component=this->introspection().variable("phase_field").first_component_index;
+          for(const auto &cell:this->get_dof_handler().active_cell_iterators())for(const auto v:cell->vertex_indices())points[cell->vertex_dof_index(v,component)-offset]=cell->vertex(v);
+          Vector<double> directions[2]={Vector<double>(C.size()),Vector<double>(C.size())};
+          for(unsigned int i=0;i<C.size();++i)
+            {
+              const auto x=points[C.physical_index(i)];
+              directions[0][i]=p[i]*(1-p[i])*std::exp(-40*std::pow(x[1]-.5,2))*(1+.1*std::cos(2*numbers::PI*x[0]));
+              directions[1][i]=p[i]*(1-p[i])*std::exp(-40*std::pow(x[1]-.5,2))*(x[1]-.5+.05*std::sin(2*numbers::PI*x[0]));
+            }
+          BV d1(base),d2(base);d1=0.;d2=0.;put_phase(d1,C.expand(directions[0]));put_phase(d2,C.expand(directions[1]));
+          export_endpoint_reference("constrained-operators",base,d1,d2,&endpoint);
+          const auto folder=this->get_output_directory()+"constrained-operators/";
+          std::ofstream map(folder+"C.csv");map<<std::setprecision(17)<<"physical,master,weight\n";
+          for(unsigned int i=0;i<C.physical_size();++i)for(const auto &a:C.weights()[i])map<<i<<','<<a.first<<','<<a.second<<'\n';
+          std::ofstream native(folder+"native.csv"),actions(folder+"actions.csv"),fd(folder+"fd.csv");
+          native<<std::setprecision(17)<<"master,physical,phase,lower,gradient\n";
+          actions<<std::setprecision(17)<<"kind,direction,master,value\n";
+          fd<<std::setprecision(17)<<"direction,epsilon,energy_relative,action_relative\n";
+          for(unsigned int i=0;i<C.size();++i)native<<i<<','<<C.physical_index(i)<<','<<p[i]<<','<<lower[i]<<','<<g[i]<<'\n';
+          Vector<double> reduced_actions[2];
+          for(unsigned int j=0;j<2;++j)
+            {
+              const auto d=directions[j];Vector<double> h(d.size());Hfixed.vmult(h,d);
+              reduced_actions[j]=apply(d);
+              for(unsigned int i=0;i<C.size();++i){actions<<"fixed,"<<j<<','<<i<<','<<h[i]<<'\n';actions<<"reduced,"<<j<<','<<i<<','<<reduced_actions[j][i]<<'\n';}
+            }
+          measure("local constrained action symmetry",std::abs(directions[1]*reduced_actions[0]-directions[0]*reduced_actions[1]),std::max({1.,std::abs(directions[1]*reduced_actions[0]),std::abs(directions[0]*reduced_actions[1])}));
+          // Complete free-master Hessian, without hanging rows or their fake diagonals.
+          std::vector<unsigned int> free;unsigned int strict=0,weak=0;
+          for(unsigned int i=0;i<C.size();++i)
+            {if(p[i]>lower[i])free.push_back(i);else if(g[i]>1e-8)++strict;else ++weak;}
+          LAPACKFullMatrix<double> hessian(free.size(),free.size());
+          double asymmetry=0.,matrix_scale=1.;
+          for(unsigned int j=0;j<free.size();++j)
+            {
+              Vector<double> d(C.size());d[free[j]]=1.;const auto h=apply(d);
+              for(unsigned int i=0;i<free.size();++i){hessian(i,j)=h[free[i]];matrix_scale=std::max(matrix_scale,std::abs(h[free[i]]));}
+            }
+          std::ofstream free_matrix(folder+"free-hessian.csv");free_matrix<<std::setprecision(17)<<"i,j,master_i,master_j,value\n";
+          for(unsigned int i=0;i<free.size();++i)for(unsigned int j=0;j<free.size();++j)
+            free_matrix<<i<<','<<j<<','<<free[i]<<','<<free[j]<<','<<hessian(i,j)<<'\n';
+          check("local measurable free-master space",!free.empty());
+          for(unsigned int i=0;i<free.size();++i)for(unsigned int j=0;j<i;++j)
+            {asymmetry=std::max(asymmetry,std::abs(hessian(i,j)-hessian(j,i)));const double a=.5*(hessian(i,j)+hessian(j,i));hessian(i,j)=hessian(j,i)=a;}
+          Vector<double> eigenvalues;FullMatrix<double> eigenvectors;
+          hessian.compute_eigenvalues_symmetric(-2*std::max(1.,hessian.linfty_norm()),2*std::max(1.,hessian.linfty_norm()),0.,eigenvalues,eigenvectors);
+          const double minimum=free.empty()?0.:eigenvalues[0];
+          std::ofstream stability(folder+"stability.csv");stability<<std::setprecision(17)<<"physical,masters,free,strict_active,weak_active,minimum_free_eigenvalue,symmetry_scaled\n"<<C.physical_size()<<','<<C.size()<<','<<free.size()<<','<<strict<<','<<weak<<','<<minimum<<','<<asymmetry/matrix_scale<<'\n';
+          check("local free-master Hessian symmetric",asymmetry/matrix_scale<1e-9);
+          check("local critical space strict active classification",weak==0);
+          check("local free-master stability",minimum>=-1e-8*matrix_scale);
+          // Complete every action of the frozen native linearization before
+          // FD mechanics rebuilds it. Generation guards remain fully active.
+          for(unsigned int j=0;j<2;++j)
+            {
+              const auto d=directions[j];
+              double best_energy=1.,best_action=1.;
+              for(double eps:{1e-4,1e-5,1e-6})
+                {
+                  double energy[2];Vector<double> gradients[2];
+                  for(unsigned int side=0;side<2;++side)
+                    {
+                      auto trial_phase=p;trial_phase.add(side ? -eps:eps,d);
+                      BV trial(base);put_phase(trial,C.expand(trial_phase));
+                      const auto en=m.evaluate_fe_phase_energy_at(trial,false,false,endpoint.strain,endpoint.Z,nullptr,endpoint.dg_history.get());
+                      energy[side]=en.energy+this->get_phase_field_handler().evaluate_cell_fracture(trial,false).energy;
+                      s.solution=trial;s.current_linearization_point=trial;
+                      ReconstructedFaultVector V;Access::mechanical_trial(s,V);
+                      const auto et=m.make_fe_endpoint_trial(s.solution,V);
+                      gradients[side]=C.transpose(endpoint_gradient(s.solution,et));
+                    }
+                  auto difference=gradients[0];difference-=gradients[1];difference/=2*eps;difference-=reduced_actions[j];
+                  const double energy_error=std::abs((energy[0]-energy[1])/(2*eps)-g*d)/std::max(1.,std::abs(g*d));
+                  const double action_error=difference.linfty_norm()/std::max(1.,reduced_actions[j].linfty_norm());
+                  best_energy=std::min(best_energy,energy_error);best_action=std::min(best_action,action_error);
+                  fd<<j<<','<<eps<<','<<energy_error<<','<<action_error<<'\n';
+                }
+              measure("local constrained energy FD "+std::to_string(j),best_energy);
+              measure("local constrained equilibrated action FD "+std::to_string(j),best_action);
+              check("local constrained energy derivative "+std::to_string(j),best_energy<1e-6);
+              check("local constrained full mechanical action "+std::to_string(j),best_action<1e-6);
+            }
+          s.solution=saved;s.current_linearization_point=linear;s.last_pressure_normalization_adjustment=pressure;
+          s.statistics=statistics;s.nonlinear_iteration=iteration;
+          s.endpoint_velocity_inverse={};s.endpoint_bulk_direct.reset();s.rebuild_stokes_matrix=true;s.rebuild_stokes_preconditioner=true;
+          m.prepare_reconstructed_fault_mechanical_solve();
+          check("local operator checks preserve accepted state RNG",same(before,persistent()) && random==rng());
+        }
+        void accepted_master_checks()
+        {
+          auto &s=sim();auto &m=model();const auto &state=*m.fe_strain_state;
+          const unsigned int step=this->get_timestep_number();const auto label="state-"+std::to_string(step);
+          hanging_constraints(label);check(label+" fixed 67 cells",this->get_triangulation().n_global_active_cells()==67);
+          const auto C=master_coordinates();const auto physical=s_phase(),p=C.select(physical);
+          check(label+" exact native phase expansion",C.expand(p)==physical && physical==accepted_phase());
+          const auto energy=m.evaluate_fe_phase_energy_at(s.solution,true,false,state.displacement_history,state.Z,nullptr,state.dg_history.get());
+          const auto fracture=this->get_phase_field_handler().evaluate_cell_fracture(s.solution,true);
+          Vector<double> raw(energy.gradient.begin(),energy.gradient.end());for(unsigned int i=0;i<raw.size();++i)raw[i]+=fracture.gradient[i];
+          const auto g=C.transpose(raw);
+          const auto lower=incoming ? aspect::internal::endpoint_values(incoming->displacement_history.block(phase_block()),this->get_mpi_communicator()):physical;
+          const auto master_lower=C.select(lower);
+          double growth=0.,healing=0.,kkt=0.,interface_growth=0.;unsigned int interface_active=0;
+          for(unsigned int i=0;i<physical.size();++i)
+            {
+              growth=std::max(growth,physical[i]-lower[i]);healing=std::max(healing,lower[i]-physical[i]);
+              if(C.weights()[i].size()>1)
+                {interface_growth=std::max(interface_growth,physical[i]-lower[i]);if(physical[i]==lower[i])++interface_active;}
+            }
+          for(unsigned int i=0;i<C.size();++i)kkt=std::max(kkt,std::abs(p[i]==master_lower[i]?std::min(0.,g[i]):g[i]));
+          check(label+" physical irreversibility",healing==0.);
+          if(step)check(label+" physical master KKT",kkt<1e-9);
+          const auto V=this->get_reconstructed_fault_manager().get_slip_rate(0);
+          BV d1(s.solution),d2(s.solution);d1=0.;d2=0.;export_endpoint_reference(label+"-reference",s.solution,d1,d2);
+          double zerror=0.,bulk_defect=0.,surface_defect=0.,surface_kkt=0.;
+          unsigned int contact_active=0;
+          if(step && incoming)
+            {
+              for(unsigned int i=0;i<V.size();++i)zerror=std::max(zerror,std::abs(state.Z[i]-std::exp(-this->get_timestep()/100.)*incoming->Z[i]+1e8*std::expm1(-this->get_timestep()/100.)*V[i]));
+              const auto before=persistent();const auto final=m.fe_strain_state;
+              const auto linear=s.current_linearization_point;const auto pressure=s.last_pressure_normalization_adjustment;
+              auto &fault=s.reconstructed_fault_manager->get_fault(0);std::vector<std::vector<double>> saved;
+              for(unsigned int i=0;i<fault.n_vertices();++i){auto row=fault.get_properties(i);saved.emplace_back(row.begin(),row.end());std::copy(incoming_surface[i].begin(),incoming_surface[i].end(),row.begin());}
+              m.fe_strain_state=incoming;m.prepare_reconstructed_fault_mechanical_solve();
+              const auto residual=s.reconstructed_fault_surface_system->evaluate_surface_residual(s.solution,{V});
+              const auto defects=Access::endpoint_defects(s,s.solution,{V});bulk_defect=defects.first;surface_defect=defects.second;
+              auto contact=this->get_reconstructed_fault_manager().prescribed_slip_rate_mask();
+              for(unsigned int i=0;i<V.size();++i)
+                if(V[i]<=m.minimum_fault_slip_rate() && residual.values[0][i]<=0.)
+                  {contact[0][i]=true;++contact_active;}
+              surface_kkt=s.reconstructed_fault_surface_system->surface_residual_rms(residual,contact);
+              std::ofstream loads(this->get_output_directory()+label+"-reference/native-loads.csv");loads<<std::setprecision(17)<<"i,shear,normal,cohesive,friction,residual\n";
+              for(unsigned int i=0;i<V.size();++i)loads<<i<<','<<residual.shear_traction[0][i]<<','<<residual.normal_traction[0][i]<<','<<residual.cohesive_traction[0][i]<<','<<residual.friction_traction[0][i]<<','<<residual.values[0][i]<<'\n';
+              m.fe_strain_state=final;for(unsigned int i=0;i<fault.n_vertices();++i)std::copy(saved[i].begin(),saved[i].end(),fault.get_properties(i).begin());
+              s.current_linearization_point=linear;s.last_pressure_normalization_adjustment=pressure;m.prepare_reconstructed_fault_mechanical_solve();
+              check(label+" residual probe unpublished",same(before,persistent()));
+              check(label+" surface recurrence",zerror<1e-8);
+            }
+          std::ofstream f(this->get_output_directory()+"local-evolution.csv",std::ios::app);
+          if(f.tellp()==0)f<<"step,time,dt,physical,masters,growth,healing,interface_growth,interface_active,KKT_J_per_m,Zerror,bulk_defect,surface_defect,surface_KKT,contact_active,bulk,cohesive,fracture,publications\n";
+          f<<std::setprecision(17)<<step<<','<<this->get_time()<<','<<this->get_timestep()<<','<<C.physical_size()<<','<<C.size()<<','<<growth<<','<<healing<<','<<interface_growth<<','<<interface_active<<','<<kkt<<','<<zerror<<','<<bulk_defect<<','<<surface_defect<<','<<surface_kkt<<','<<contact_active<<','<<energy.bulk<<','<<energy.cohesive<<','<<fracture.energy<<','<<state.accepted_publications<<'\n';
         }
         void compare(const std::string &label,const Records &before,const Records &after,double bound) const
         {
@@ -1060,6 +1314,8 @@ namespace aspect
           p.declare_entry("Snapshot quadrature control","false",Patterns::Bool());
           p.declare_entry("Local transfer checks","false",Patterns::Bool());
           p.declare_entry("Deep uniform roundtrip","true",Patterns::Bool());
+          p.declare_entry("Fixed local phase evolution","false",Patterns::Bool());
+          p.declare_entry("Constrained operator checks","false",Patterns::Bool());
           p.leave_subsection();
           p.leave_subsection();
         }
@@ -1071,6 +1327,8 @@ namespace aspect
           snapshot_quadrature=p.get_bool("Snapshot quadrature control");
           local_checks=p.get_bool("Local transfer checks");
           deep_uniform=p.get_bool("Deep uniform roundtrip");
+          fixed_local_phase=p.get_bool("Fixed local phase evolution");
+          operator_checks_enabled=p.get_bool("Constrained operator checks");
           p.leave_subsection();
           p.leave_subsection();
         }
@@ -1084,7 +1342,7 @@ namespace aspect
                 particles("mesh-restored");
                 export_state("mesh-restored");
               }
-            if (local_checks)
+            if (local_checks || fixed_local_phase)
               {
                 sim().triangulation.set_mesh_smoothing(Triangulation<dim>::limit_level_difference_at_vertices);
                 hanging_constraints("local-restored");
@@ -1099,7 +1357,7 @@ namespace aspect
                 particles("mesh-checkpoint");
                 export_state("mesh-checkpoint");
               }
-            if (local_checks)
+            if (local_checks || fixed_local_phase)
               {
                 hanging_constraints("local-checkpoint");
                 particles("local-checkpoint");
@@ -1114,7 +1372,29 @@ namespace aspect
             const auto label="before-step-"+std::to_string(this->get_timestep_number());
             check(label+" particles fixed",particles(label)==initial_particles);
             export_state(label);
+            if(fixed_local_phase)
+              {
+                if(attempt_step==this->get_timestep_number())
+                  {
+                    check("local actual cutback preserves accepted histories",same(attempt_snapshot,persistent()));
+                    check("local actual cutback restores accepted phase",s_phase()==accepted_phase());
+                    std::ofstream f(this->get_output_directory()+"cutback.csv",std::ios::app);
+                    if(f.tellp()==0)f<<"step,rejected_time,rejected_dt,retry_time,retry_dt,publications\n";
+                    f<<std::setprecision(17)<<attempt_step<<','<<attempt_time<<','<<attempt_dt<<','<<this->get_time()<<','<<this->get_timestep()<<','<<model().fe_strain_state->accepted_publications<<'\n';
+                  }
+                attempt_step=this->get_timestep_number();attempt_snapshot=persistent();
+                attempt_time=this->get_time();attempt_dt=this->get_timestep();
+              }
             if (!recovery_done)rejection();
+            if(fixed_local_phase && operator_checks_enabled && !operators_done && this->get_timestep_number()==2)
+              {constrained_operators();operators_done=true;}
+            if(fixed_local_phase)
+              {
+                incoming=std::make_shared<typename Model::FEStrainState>(*model().fe_strain_state);
+                incoming_surface.clear();
+                for(unsigned int i=0;i<this->get_reconstructed_fault_manager().get_fault(0).n_vertices();++i)
+                  {const auto p=this->get_reconstructed_fault_manager().get_fault(0).get_properties(i);incoming_surface.emplace_back(p.begin(),p.end());}
+              }
           });
         }
         void save(std::map<std::string,std::string> &status) const override
@@ -1125,12 +1405,15 @@ namespace aspect
             a &initialized &recovery_done &last_step &initial_particles;
           }
           status["PF6 transfer observer"]=out.str();
+          status["PF6 constrained operators"]=operators_done ? "true":"false";
         }
         void load(const std::map<std::string,std::string> &status) override
         {
           std::istringstream in(status.at("PF6 transfer observer"));
           aspect::iarchive a(in);
           a &initialized &recovery_done &last_step &initial_particles;
+          const auto entry=status.find("PF6 constrained operators");
+          operators_done=entry!=status.end() && entry->second=="true";
         }
         std::pair<std::string,std::string> execute(TableHandler &) override
         {
@@ -1147,12 +1430,21 @@ namespace aspect
               initial_particles=particles("initial");
               export_state("prescribed-initial");
               if (transfer_checks)startup();
+              if(fixed_local_phase)
+                {
+                  check("local phase serial domain-free scope",dim==2 && Utilities::MPI::n_mpi_processes(this->get_mpi_communicator())==1 && model().uses_homogeneous_mesh_data() && !deep_uniform && !local_checks);
+                  sim().triangulation.set_mesh_smoothing(Triangulation<dim>::limit_level_difference_at_vertices);
+                  phase_evolution_patch=true;mesh(2);phase_evolution_patch=false;
+                  check("local phase fixed 67 cells",this->get_triangulation().n_global_active_cells()==67);
+                  hanging_constraints("local-initial");
+                }
               initialized=true;
             }
           check("accepted publication "+std::to_string(step),model().fe_strain_state->committed_step==step && model().fe_strain_state->accepted_publications==step);
           check("accepted fixed IDs coordinates "+std::to_string(step),particles("state-"+std::to_string(step))==initial_particles);
           export_state("state-"+std::to_string(step));
-          if(step==1 && transfer_checks)normalization_derivatives();
+          if(step==1 && transfer_checks && !fixed_local_phase)normalization_derivatives();
+          if(fixed_local_phase)accepted_master_checks();
           if (step==1 && transfer_checks && deep_uniform)roundtrip("accepted-step-1");
           if (step==2 && local_checks)local_transfer_checks();
           last_step=step;
@@ -1162,3 +1454,5 @@ namespace aspect
     ASPECT_REGISTER_POSTPROCESSOR(MomentCycle,"PF6 fixed reference transfer","Bounded native accepted-history transfer and ownership checks.")
   }
 }
+
+#include "pf6_interval_ramp.h"

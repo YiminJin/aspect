@@ -31,7 +31,7 @@ namespace aspect
         bool initialized=false,operators_done=false,recovery_done=false,diagnostics=true;
         bool publication_checks=false,publication_checked=false;
         bool batch_snapshots=false,verify_batch=false;
-        std::vector<double> previous_phase,previous_Z,slip,attempt_snapshot;
+        std::vector<double> previous_phase,previous_Z,slip,attempt_snapshot,full_snapshot_times;
         unsigned int attempt_step=numbers::invalid_unsigned_int;
         double attempt_time=0.,attempt_dt=0.;
         std::shared_ptr<typename Model::FEStrainState> incoming;
@@ -459,6 +459,8 @@ namespace aspect
           p.declare_entry("Batch diagnostic stress evaluation","false",Patterns::Bool());
           p.declare_entry("Verify batched diagnostic stress","false",Patterns::Bool());
           p.declare_entry("Archive pairs file","",Patterns::FileName());
+          p.declare_entry("Full snapshot times","",Patterns::List(Patterns::Double(0.)),
+                          "Optional benchmark times for dense physical/state diagnostics. Empty retains every step; compact endpoint fields and metrics are always written.");
           p.leave_subsection();
           p.leave_subsection();
         }
@@ -471,6 +473,7 @@ namespace aspect
           batch_snapshots=p.get_bool("Batch diagnostic stress evaluation");
           verify_batch=p.get_bool("Verify batched diagnostic stress");
           archive_pairs_file=p.get("Archive pairs file");
+          full_snapshot_times=Utilities::string_to_double(Utilities::split_string_list(p.get("Full snapshot times")));
           p.leave_subsection();
           p.leave_subsection();
         }
@@ -621,6 +624,11 @@ namespace aspect
               for (unsigned int q=0; q<nodes.size(); ++q)velocity<<cellnum<<','<<nodes.point(q)[0]<<','<<nodes.point(q)[1]<<','<<u[q][0]<<','<<u[q][1]<<','<<p[q]<<'\n';
               ++cellnum;
             }
+          const bool full_snapshot=full_snapshot_times.empty() || step==0
+            || std::any_of(full_snapshot_times.begin(),full_snapshot_times.end(),[&](double time)
+                 {return std::abs(this->get_time()-time)<=16*std::numeric_limits<double>::epsilon()*std::max(1.,std::abs(time));});
+          if (full_snapshot)
+          {
           auto points=output("physical.csv");
           points<<"cell,x,y,weight,phi,chi,xx,yy,xy\n";
           const auto quad=m.mechanical_quadrature();
@@ -680,7 +688,8 @@ namespace aspect
               check("batched stress agrees with point evaluator step "+std::to_string(step),batch_error/batch_scale<1e-9);
               check("batched diagnostics preserve accepted state step "+std::to_string(step),same(before_batch,persistent()));
             }
-          if (step && incoming)
+          }
+          if (step && incoming && full_snapshot)
             {
               const auto stored=persistent();
               const auto final=m.fe_strain_state;
@@ -708,12 +717,15 @@ namespace aspect
               m.prepare_reconstructed_fault_mechanical_solve();
               check("incoming-anchor residual probe does not publish step "+std::to_string(step),same(stored,persistent()));
             }
+          if (full_snapshot)
+          {
           const auto stored=persistent();
           {std::ofstream out(this->get_output_directory()+prefix+"persistent.bin",std::ios::binary);out.write(reinterpret_cast<const char*>(stored.data()),stored.size()*sizeof(double));}
           {std::ofstream out(this->get_output_directory()+prefix+"rng.bin",std::ios::binary);aspect::oarchive archive(out);archive<<this->get_particle_manager(0).get_random_number_state();}
           {std::ofstream out(this->get_output_directory()+prefix+"manager.bin",std::ios::binary);aspect::oarchive archive(out);archive<<this->get_reconstructed_fault_manager();}
           auto shared=output("shared.csv");shared<<"i,anchor,solution,old,oldold\n";
           for(unsigned int i=0;i<state.size();++i)shared<<i<<','<<s.displacement_history[i]<<','<<state[i]<<','<<sim.old_solution[i]<<','<<sim.old_old_solution[i]<<'\n';
+          }
           auto clocks=output("clock.csv");clocks<<"time,dt,step,committed,publications\n"<<this->get_time()<<','<<this->get_timestep()<<','<<step<<','<<s.committed_step<<','<<s.accepted_publications<<'\n';
           prefix="";
           auto metrics=std::ofstream(this->get_output_directory()+"metrics.csv",step?std::ios::app:std::ios::out);
@@ -731,17 +743,4 @@ namespace aspect
   }
 }
 
-namespace aspect { namespace BoundaryVelocity {
-  template<int dim> class PF6aIntervalRamp: public Interface<dim>,public SimulatorAccess<dim>
-  {
-  public:
-    Tensor<1,dim> boundary_velocity(const types::boundary_id,const Point<dim> &x) const override
-    {
-      Tensor<1,dim> velocity;
-      velocity[0]=.256*std::max(0.,this->get_time()-.5*this->get_timestep())*(x[1]-.5);
-      return velocity;
-    }
-  };
-  ASPECT_REGISTER_BOUNDARY_VELOCITY_MODEL(PF6aIntervalRamp,"PF6a interval ramp",
-    "Fixed verification ramp with its exact interval mean, including native cutbacks.")
-}}
+#include "pf6_interval_ramp.h"

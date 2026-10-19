@@ -1,0 +1,26 @@
+{
+  "initialization": [
+    {
+      "cells": 512,
+      "relative_L2": 2.7691149754843105e-05,
+      "Linf": 3.294364067951694e-05,
+      "gradient_L2_error": 0.01150048803355718,
+      "fracture_energy_error_J_per_m": -0.00020659432640278197,
+      "unloaded_KKT": 0.0
+    },
+    {
+      "cells": 1024,
+      "relative_L2": 6.922776437348127e-06,
+      "Linf": 8.237935048449607e-06,
+      "gradient_L2_error": 0.005750210503401962,
+      "fracture_energy_error_J_per_m": -5.165048776180889e-05,
+      "unloaded_KKT": 0.0
+    }
+  ],
+  "native_table_equals_continuum_at_every_node": true,
+  "maximum_phase": 0.6000019377630632,
+  "minimum_phase": 1.5440432306151983e-10,
+  "I": 108.64889557673484,
+  "seed_sha256": "5792b5323cfa162a231c4f1e4d5076e987d6dfc56005f1f427e577801b5b3356",
+  "selection_report_sha256": "67028e99272bc4870138a03e27cc6de98e2156b1bfbabc266cfc69e959f91c5e"
+}

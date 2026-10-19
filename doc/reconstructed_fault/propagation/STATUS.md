@@ -1,3 +1,13 @@
+Current evolving-phase continuation (19 October 2026): use the cohesive,
+domain-free PF6a independent-DG/ordinary-FE-fracture endpoint route in
+[particle-free STATUS](../particle_free/STATUS.md). This file and
+[P2 closeout](P2_CLOSEOUT.md) preserve the older FE/CPDI development line;
+their historical launch instructions do not select new runs or propagation.
+The bounded matched-initialization P2 physical response now passes on the DG/FE
+route; see [its report](../particle_free/P2_PHYSICAL_RESPONSE_REPORT.md). Original
+errors and strict mirror-branch failure remain. The next synthetic P3 extension
+is recommended and has not begun.
+
 # Completed bounded P2 cleanup — recovery note, 2026-10-13
 
 Recovered `fault-propagation` at `f9aa96199` from reviewed `41272d263`.

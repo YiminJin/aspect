@@ -16,6 +16,8 @@ p.add_argument('--restart', type=Path)
 p.add_argument('--legacy', action='store_true', help='Retained domain-backed homogeneous control.')
 p.add_argument('--no-deep', action='store_true')
 p.add_argument('--negative', choices=['domains', 'heterogeneous', 'missing-seed', 'particle-fields', 'fit-geometry'])
+p.add_argument('--binary', type=Path)
+p.add_argument('--plugin', type=Path)
 a = p.parse_args()
 root = Path(__file__).resolve().parents[3]
 runner = Path(__file__).with_name('run_pf6_local.py')
@@ -28,6 +30,9 @@ if not a.no_deep:
     args += ['--deep-uniform']
 if a.restart:
     args += ['--restart', str(a.restart)]
+for option in ['binary', 'plugin']:
+    if getattr(a, option):
+        args += ['--'+option, str(getattr(a, option))]
 subprocess.run(args, check=True, stdout=subprocess.DEVNULL)
 out = root/'build-particle-free/runs'/a.label
 text = (out/'input.prm').read_text()
@@ -62,7 +67,8 @@ if a.negative:
 (out/'input.prm').write_text(text)
 r = json.loads((out/'record.json').read_text())
 r['input_sha256'] = hashlib.sha256((out/'input.prm').read_bytes()).hexdigest()
-r['domain_free_case'] = vars(a) | {'restart': str(a.restart) if a.restart else None}
+r['domain_free_case'] = {key: str(value) if isinstance(value, Path) else value
+                         for key, value in vars(a).items()}
 r['scope'] = 'Homogeneous mesh-data DG endpoint; prescribed phase seed; fixed diagnostic points; restored deep uniform remap'
 (out/'record.json').write_text(json.dumps(r, indent=2)+'\n')
 print((out/'command.json').read_text())

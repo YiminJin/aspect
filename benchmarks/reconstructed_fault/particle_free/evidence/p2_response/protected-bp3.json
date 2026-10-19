@@ -1,0 +1,141 @@
+{
+  "head": "612b75d3570d81763407875f3a12c12999b9fa8e",
+  "files": {
+    "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/BP3.e3610007": {
+      "sha256": "59b1e0f34063a5e54598e6b7851af5773218bff647449ec2794bbf4ab8ec83cc",
+      "bytes": 150724
+    },
+    "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/BP3.e3613912": {
+      "sha256": "c0625a382ef411f9adcfc9f8a36a988f26b9bd0a071bdf72ee27ccf698c418ae",
+      "bytes": 49259
+    },
+    "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/BP3.o3610007": {
+      "sha256": "4803b06f217383c15652d97e475f80ecc4e3e0f413e29d608c14118cc232f012",
+      "bytes": 1558849
+    },
+    "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/BP3.o3613912": {
+      "sha256": "2c89b6764e8bee5f567385a9fb74adc20faba1e23e63f4d874412f889020a118",
+      "bytes": 31855
+    },
+    "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/ENVIRONMENT.md": {
+      "sha256": "d72c635b09218f8b0ef0c1fe8db22300f00248df524de44e0d7f9ae87eca07e8",
+      "bytes": 1224
+    },
+    "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/README.md": {
+      "sha256": "220fe0e91381300713357fb7408a672ff4de27c610d531fa64a0a34a84b170c4",
+      "bytes": 16558
+    },
+    "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/RESOURCES.md": {
+      "sha256": "1233969802e2f38195bd36127738778c52d87468ef511014a3d78bc1aafa0fb1",
+      "bytes": 8434
+    },
+    "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/VERIFICATION.md": {
+      "sha256": "b5f0f4ac20c300b10857a308e430e8e391619d71229596642de007db3e630939",
+      "bytes": 12381
+    },
+    "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/environment.sh": {
+      "sha256": "438966abdd4e6977c26abaa77de5fe756fe8bb7799c6c7c613cdf364a9816fbf",
+      "bytes": 896
+    },
+    "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/fault.txt": {
+      "sha256": "5460e34da479ef16e7dcc95f62669250a891ee8c969df5064dd3e4320bea4a24",
+      "bytes": 117
+    },
+    "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/log.txt": {
+      "sha256": "d583baf568dbe6e08d2b1d941e1072dc2eb88d285e5b2f4d9f46f1e02e80f0a1",
+      "bytes": 15986
+    },
+    "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/parameters.prm": {
+      "sha256": "476c746a2b40b7597cf9cb8ca966ecb7e1c75ba3a4b91c34d70f0e9598bf681d",
+      "bytes": 8786
+    },
+    "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/plugin/CMakeLists.txt": {
+      "sha256": "35322afa0b4da36feb09861ba49bd5f88a7305100a85c6a26a5967f2e574934d",
+      "bytes": 2210
+    },
+    "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/resume.prm": {
+      "sha256": "d63df9f684f5d9b99f5c265c2a316ac37ab1fc7c82b5b082eafa99617d5c0628",
+      "bytes": 8786
+    },
+    "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/startup-resume.prm": {
+      "sha256": "68617736f0b2be3e89475b01bef3cbdc4ee00e04a7679431d59e99d4092082e7",
+      "bytes": 8851
+    },
+    "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/startup.prm": {
+      "sha256": "89dbec9fd0d20b93ffd32b994f261fe2a4d116b5ce826174be431791784835ca",
+      "bytes": 8844
+    },
+    "build-particle-free/bp3-optimization/baseline/aspect-release": {
+      "sha256": "8bc5b99ad5bfcd725d6b9e9405434a0b2cbfae19e5701b458b81e38fb5b08398",
+      "bytes": 46456576
+    },
+    "build-particle-free/bp3-optimization/plugins/aspect-release": {
+      "sha256": "d62541e3fc2a191965f31d26bf85260dc8922ac47c3b648b8256c96df143b23a",
+      "bytes": 46634432
+    },
+    "build-particle-free/bp3-optimization/plugins/libbp3_coupled_checks.release.so": {
+      "sha256": "a22008421eb44d3a43bb61b3e123e68f5d0431023f900c2e761298e833ecd6e7",
+      "bytes": 2307368
+    },
+    "build-particle-free/first-event-package/check-observer/aspect-release": {
+      "sha256": "d62541e3fc2a191965f31d26bf85260dc8922ac47c3b648b8256c96df143b23a",
+      "bytes": 46634432
+    },
+    "build-particle-free/first-event-package/check-observer/libbp3_coupled_checks.release.so": {
+      "sha256": "0699e213d0895dc8110308b16d9f5b1cb927bb6adce43a6470f952b18c32f53a",
+      "bytes": 2250784
+    },
+    "build-particle-free/native/aspect-release": {
+      "sha256": "d62541e3fc2a191965f31d26bf85260dc8922ac47c3b648b8256c96df143b23a",
+      "bytes": 46634432
+    },
+    "build-particle-free/plugin/aspect-release": {
+      "sha256": "d62541e3fc2a191965f31d26bf85260dc8922ac47c3b648b8256c96df143b23a",
+      "bytes": 46634432
+    },
+    "build-particle-free/plugin/libfixed_profile_checks.release.so": {
+      "sha256": "101808e7d7ff23cbd95422e88a11e87de295765a839736c2339b831c35692e9f",
+      "bytes": 548904
+    },
+    "build-particle-free/plugin/liblimiter_checks.release.so": {
+      "sha256": "e7ee7f41cced85765081f91fd333f9151cc3bb308bcb23256caf08598fe09278",
+      "bytes": 406544
+    },
+    "build-particle-free/plugin/libnative_method_checks.release.so": {
+      "sha256": "df05537908a94686fd00cf9da1cf130ed863d09e262279ffd42b133259a1e52b",
+      "bytes": 231792
+    },
+    "build-particle-free/plugin/libpf5_checks.release.so": {
+      "sha256": "98e67931797ba07a84814193189455ce6a300df28e8e932a4e06500fc2d08ec1",
+      "bytes": 1089976
+    },
+    "build-particle-free/plugin/libpf6_transfer_checks.release.so": {
+      "sha256": "7130520fd891123809b72006dc83fb82cf06d22228d30fe86647ac5d1c0af2f0",
+      "bytes": 2195504
+    },
+    "build-particle-free/plugin/libpf6a_checks.release.so": {
+      "sha256": "b23602972c69111cedbcb4c715ddd23af678457ad8199ac9ce5ed12f6a319505",
+      "bytes": 1462840
+    },
+    "build-particle-free/plugin/libpf6a_spatial_checks.release.so": {
+      "sha256": "d45b894498f56dc11812a2df6d08c77d6e31d7198409065a14bb1bb025ff0269",
+      "bytes": 468912
+    },
+    "build-particle-free/plugin/libphase_energy_checks.release.so": {
+      "sha256": "906872a0a25443f870f104d84fcd8c239110bbb64a593a82903107d0c782eb26",
+      "bytes": 335792
+    },
+    "build-particle-free/plugin/libscalar_method_checks.release.so": {
+      "sha256": "5757b987847b42c634d9e37226aa590eb0e516920f05d50d898528df57b2fb28",
+      "bytes": 271512
+    },
+    "build-particle-free/plugin/libstabilization_checks.release.so": {
+      "sha256": "cba0563d1638192b2a0b183765897544da0a38fd50d8f720c86917b000517b2e",
+      "bytes": 469304
+    },
+    "build-particle-free/plugin/libtransport_checks.release.so": {
+      "sha256": "e29116b060657d85db8cbc8b35a5cc1cc155b3ee2ea730c1d70553508df6dcf6",
+      "bytes": 340208
+    }
+  }
+}

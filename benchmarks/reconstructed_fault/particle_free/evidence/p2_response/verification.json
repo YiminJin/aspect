@@ -1,0 +1,84 @@
+{
+  "passed": true,
+  "native": {
+    "unloaded": {
+      "accepted_steps": 2,
+      "native_gates": 14,
+      "healing": 0.0,
+      "phase_growth": 0.0,
+      "maximum_x_spread": 0.0
+    },
+    "primary": {
+      "accepted_steps": 76,
+      "native_gates": 318,
+      "healing": 0.0,
+      "phase_growth": 0.054397268098592355,
+      "maximum_x_spread": 3.2469010813329646e-10
+    },
+    "half": {
+      "accepted_steps": 152,
+      "native_gates": 622,
+      "healing": 0.0,
+      "phase_growth": 0.05439732820364929,
+      "maximum_x_spread": 1.6205757569220935e-10
+    }
+  },
+  "raw_csv_identities": 2666,
+  "protected_bp3_identities": 34,
+  "independent_snapshots": 8,
+  "practical_comparisons": {
+    "temporal_native": {
+      "whole_stress": true,
+      "localized_stress": true,
+      "phase_L2": true,
+      "phase_Linf": true,
+      "q_Pa": true,
+      "q": true,
+      "slip": true,
+      "rate": true,
+      "energy": true,
+      "driving": true,
+      "onset": true
+    },
+    "spatial_reference": {
+      "whole_stress": true,
+      "localized_stress": true,
+      "phase_L2": true,
+      "phase_Linf": true,
+      "q": true,
+      "slip": true,
+      "energy": true,
+      "driving": true,
+      "onset": true
+    },
+    "native_reference_primary": {
+      "whole_stress": true,
+      "localized_stress": true,
+      "phase_L2": true,
+      "phase_Linf": true,
+      "q": true,
+      "slip": true,
+      "energy": true,
+      "driving": true,
+      "onset": true
+    },
+    "native_reference_half": {
+      "whole_stress": true,
+      "localized_stress": true,
+      "phase_L2": true,
+      "phase_Linf": true,
+      "q": true,
+      "slip": true,
+      "energy": true,
+      "driving": true,
+      "onset": true
+    },
+    "physical_work": {
+      "loading_bound": true,
+      "halving_bound": true,
+      "decreases": true
+    }
+  },
+  "strict_reference_match_passed": false,
+  "scope": "bounded serial fixed-geometry cohesive physical response; no P3 or general propagation"
+}

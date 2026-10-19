@@ -75,14 +75,15 @@ class Endpoint:
         self.last = None
         self.evaluations = 0
 
-    def incoming(self, phase, mean, Z, slip, time_end, dt):
+    def incoming(self, phase, mean, Z, slip, time_end, dt, mean_velocity=None):
         self.lower = phase.copy()
         self.lower.flags.writeable = False
         self.mean_n, self.Zn, self.slip_n = mean, Z, slip
         self.time, self.dt = time_end, dt
         self.beta = np.exp(-G*dt/ETA)
         self.kappa = -ETA*np.expm1(-G*dt/ETA)
-        self.mean = self.beta*mean+self.kappa*.256*(time_end-dt/2)
+        self.mean = (self.beta*mean+self.kappa*.256*(time_end-dt/2) if mean_velocity is None
+                     else self.beta*mean+self.kappa*mean_velocity)
         self.last = None
 
     def integrals(self, phase, second=False):
@@ -258,7 +259,7 @@ class Endpoint:
 
 
 
-def run(output, n, nm, divisor=128, order=12):
+def run(output, n, nm, divisor=128, order=12, end_time=.5625, load_stop=None):
     output.mkdir(parents=True, exist_ok=False)
     model = Endpoint(n, nm, order)
     phase = model.initial.copy()
@@ -271,8 +272,13 @@ def run(output, n, nm, divisor=128, order=12):
         coefficients.append(np.zeros((0, 2)))
     started = time.perf_counter()
     previous = np.zeros_like(phase)
-    for step in range(1, round(.5625*divisor)+1):
-        model.incoming(phase, mean, Z, slip, step/divisor, 1/divisor)
+    for step in range(1, round(end_time*divisor)+1):
+        t,dt=step/divisor,1/divisor
+        # Optional prescribed-motion hold; accepted Maxwell/cohesive histories
+        # continue unchanged. This is an exact interval average of the ramp.
+        velocity=(None if load_stop is None else
+                  .128*(min(t,load_stop)**2-min(max(0.,t-dt),load_stop)**2)/dt)
+        model.incoming(phase, mean, Z, slip, t, dt, velocity)
         try:
             x, kkt, stability = model.solve(phase+previous)
         except Exception as error:
@@ -299,6 +305,7 @@ def run(output, n, nm, divisor=128, order=12):
     write(output/'history.json', rows)
     write(output/'summary.json', dict(phase_cells=n, mechanical_cells=nm, divisor=divisor,
                                      quadrature=order, completed=True, steps=len(rows),
+                                     end_time=end_time, load_stop=load_stop,
                                      seed_sha256=hashlib.sha256(SEED.read_bytes()).hexdigest(),
                                      seed_definition='retained continuum seeded-H BVP; native nodal identity checked',
                                      seed_BVP_sha256=hashlib.sha256((PROP/'matched_initialization_evidence/reference.npz').read_bytes()).hexdigest(),
@@ -346,6 +353,8 @@ if __name__ == '__main__':
     p.add_argument('action',choices=['run','verify']);p.add_argument('output',type=Path)
     p.add_argument('--phase-cells',type=int,default=256);p.add_argument('--mechanical-cells',type=int)
     p.add_argument('--divisor',type=int,default=128);p.add_argument('--quadrature',type=int,default=12)
+    p.add_argument('--end-time',type=float,default=.5625)
+    p.add_argument('--load-stop',type=float)
     a=p.parse_args()
     if a.action=='verify':verify(a.output)
-    else:run(a.output,a.phase_cells,a.mechanical_cells,a.divisor,a.quadrature)
+    else:run(a.output,a.phase_cells,a.mechanical_cells,a.divisor,a.quadrature,a.end_time,a.load_stop)

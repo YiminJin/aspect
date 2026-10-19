@@ -27,6 +27,8 @@ def main():
     p.add_argument('--restart', type=Path)
     p.add_argument('--no-transfer', action='store_true')
     p.add_argument('--checkpoint', action='store_true')
+    p.add_argument('--binary', type=Path, help='Use a separate core build; retain the worktree build by default.')
+    p.add_argument('--plugin', type=Path, help='Use the matching observer build.')
     a = p.parse_args()
     root = Path(__file__).resolve().parents[3]
     out = root/'build-particle-free/runs'/a.label
@@ -41,8 +43,8 @@ def main():
         print(json.dumps({k: r[k] for k in ['exit_code', 'seconds', 'ranks']}))
         return
     out.mkdir(parents=True, exist_ok=False)
-    binary = root/'build-particle-free/native/aspect-release'
-    dso = root/'build-particle-free/plugin/libpf6_transfer_checks.release.so'
+    binary = (a.binary or root/'build-particle-free/native/aspect-release').resolve()
+    dso = (a.plugin or root/'build-particle-free/plugin/libpf6_transfer_checks.release.so').resolve()
     for f in [binary, dso]:
         shutil.copy2(f, out/f.name)
     observer = Path(__file__).with_name('pf6_transfer_checks.cc')
@@ -99,10 +101,12 @@ end
                                     'source', 'include'], cwd=root, text=True).splitlines()
     r = dict(head=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip(),
              ranks=a.ranks, threads=1, budget_seconds=180,
+             binary_source=str(binary), plugin_source=str(dso),
              executable_sha256=sha(out/binary.name), plugin_sha256=sha(out/dso.name),
              input_sha256=sha(out/'input.prm'), observer_sha256=sha(observer),
              source_hashes={s: sha(root/s) for s in sorted(set(paths)) if (root/s).is_file()},
-             case=vars(a) | {'restart': str(a.restart) if a.restart else None},
+             case=vars(a) | {'restart': str(a.restart) if a.restart else None,
+                             'binary': str(binary), 'plugin': str(dso)},
              scope='fixed reference surface; no transport; prescribed uniform mesh transfers; native endpoint lifecycle')
     (out/'record.json').write_text(json.dumps(r, indent=2)+'\n')
     (out/'source.patch').write_bytes(subprocess.check_output(['git', 'diff', '--', 'source', 'include'], cwd=root))

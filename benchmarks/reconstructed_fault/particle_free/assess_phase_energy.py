@@ -74,6 +74,15 @@ class Reference:
             normal_indices.append(np.concatenate(ni))
             normal_shapes.append(np.concatenate(nn))
             normal_weights.append(np.concatenate(nw))
+        # A fixed locally refined mesh has different cell counts along each
+        # normal ray. Pad with zero-weight, zero-shape entries; retain exactly
+        # the original arrays/arithmetic on uniform grids.
+        sizes = [len(a) for a in normal_indices]
+        if len(set(sizes)) > 1:
+            width = max(sizes)
+            normal_indices = [np.pad(a, ((0, width-len(a)), (0, 0))) for a in normal_indices]
+            normal_shapes = [np.pad(a, ((0, width-len(a)), (0, 0))) for a in normal_shapes]
+            normal_weights = [np.pad(a, (0, width-len(a))) for a in normal_weights]
         self.ni = np.array(normal_indices)
         self.nn = np.array(normal_shapes)
         self.nw = np.array(normal_weights)

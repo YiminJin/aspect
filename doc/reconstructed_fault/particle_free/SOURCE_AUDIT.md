@@ -1,3 +1,333 @@
+# P2 physical-response audit — 19 October 2026
+
+The selected bounded experiment is in [P2_PHYSICAL_RESPONSE_REPORT.md](P2_PHYSICAL_RESPONSE_REPORT.md).
+Entry revision remains `612b75d3570d81763407875f3a12c12999b9fa8e`; the complete
+incoming patch and source copies are preserved under `build-particle-free/p2-response/`.
+This task changes no production source, constitutive equation, solver tolerance,
+acceptance rule, normalization, history owner, limiter or default.
+
+- `fe_strain.cc::initialize_fe_shared_phase` reads the retained pre-existing
+  damage prescription only for fresh step zero, forbids history conversion,
+  interpolates onto native phase vertices, and leaves particle H diagnostic.
+  At every selected 512-normal-cell vertex its table equals the original
+  continuum BVP exactly. The finer 1D reference samples that same BVP at its
+  new vertices; it does not interpolate/prolong the coarse solution or relax
+  independently. Unloaded equilibrium is fracture KKT under this obstacle,
+  not an unconstrained zero-damage minimization or a seeded-H evolution law.
+- Existing domain-free geometry/material entry and DG source, endpoint reduced
+  Newton, physical ordinary-FE fracture, pressure/plane-strain convention and
+  native outer acceptance/publication remain unchanged. The selected fixed
+  uniform mesh uses the identity master map. Lifecycle/derivative evidence
+  from the completed hanging-node task is reused within its reported scope.
+  The retained constitutive normal-friction branch uses prescribed adiabatic
+  pressure (10 kPa here); the native dynamic pressure remains a distinct field
+  and enters the mechanical/work diagnostics. Neither pressure is substituted
+  for the other in the reference.
+- `pf6a_checks.cc` gains an optional **benchmark-only** full-snapshot schedule.
+  The empty default retains every-step dense exports. Phase/gradient, full
+  27-coefficient DG tensor, native velocity/pressure, surface histories, clocks,
+  metrics and native gates remain every-step; only dense point samples,
+  residual probes and redundant flat state exports are scheduled. The residual
+  probe retains its incoming anchor and explicit no-publication check.
+- `pf6a_spatial_reference.py` gains an optional interval-mean boundary drive
+  and finite hold. Its original default update expression is unchanged. The
+  hold keeps all incoming histories and applies the same beta/kappa, contact
+  complementarity, obstacle and reduced mechanical/phase equations.
+- `run_p2_response.py` prepares three explicit fixtures and immutable command,
+  input/source/executable identities; the native integrator controls advancement.
+  `assess_p2_response.py` reuses the independent PF6a physical reference and
+  work path. It samples complete native DG polynomials, uses the embedded 3D
+  tensor norm and fixed peak scales, never aligns branches, and compares
+  interval-average rates on common physical intervals. Fixed-phase work uses
+  scalar Maxwell time moments, independently checked against the original
+  full path before use. The evolving-phase path is the retained diagnostic
+  linear-physical-phase/exact-Maxwell path, not a new advancement scheme.
+
+The completed bounded response passes all predeclared practical screens:
+unloaded native growth/KKT zero, loaded growth .0543973, phase temporal Linf
+6.31e-8, targeted whole/localized spatial stress differences .294%/.609%, and
+absolute loading work remainder .006033→.001461 J/m under one dt halving.
+Separate free/contact/phase path works remain explicit and decrease; ledger
+closure alone is not the criterion. All 14/318/622 native gates and 2/76/152
+accepted publications pass. Same initial phase/history exports agree exactly;
+all 858 production source/header and 34 protected BP3 identities match entry.
+The opposite reference mirror branch remains unregistered, with phase Linf
+5.91e-5 and `strict_reference_match_passed=false`. See the report and its
+replayable raw/derived evidence for commands, units, thresholds and limits.
+Only the next bounded P3 extension is recommended; no geometry change is begun.
+
+# Fixed-mesh hanging-node cohesive phase — 19 October 2026
+
+User-selected extension of the independent-master formulation below. Worktree
+and branch remain `aspect-pf-rsf-particle-free` / `pf-rsf-particle-free`, revision
+`612b75d3570d81763407875f3a12c12999b9fa8e`, with the incoming consolidation
+preserved in `build-particle-free/hanging-phase/entry.patch` and `entry-source/`.
+No BP3 artifacts, defaults, physical inputs or numerical acceptance tolerances
+are replaced. Detailed measured evidence and reproducible commands are in
+[PF6_HANGING_REPORT.md](PF6_HANGING_REPORT.md) and its compact verification link.
+
+## Source ownership and discrete reduction
+
+| Source | Change and retained contract |
+|---|---|
+| `include/aspect/reconstructed_fault/endpoint_phase_constraints.h` | Small coordinate helper copies closed native phase hanging rows, admits homogeneous convex within-phase partitions of unity, identifies independent physical masters, expands with native `AffineConstraints::distribute`, and applies sparse `C^T` to raw duals / `C^T H C` to raw Hessians. No histories, global dense C or acceptance owner. |
+| `source/simulator/solver/reconstructed_fault_endpoint_phase.cc` | Serial, nonperiodic, homogeneous domain-free cohesive DG extension only. Expand every phase trial/action, pull back elastic and cell-fracture derivatives once. Canonical accepted lower obstacle is mandatory. KKT, active sets, positive arithmetic scales, search vectors and stability probes use masters; physical feasibility and physical L2 Rayleigh denominator use the expansion. Uniform identity retains the former assembly and arithmetic order. |
+| `source/simulator/solver/reconstructed_fault_stokes.cc` | Endpoint mechanical response still returns raw physical-node phase duals. Its residual-correction action accuracy is measured after `C^T` in the same master norm as the outer solver. The outer solver alone reduces the returned action. Bulk RHS is already mechanically constrained and is not reduced a second time. Pressure scaling, constraints, actual residuals, condensation, tolerances and native publication are unchanged. |
+| `benchmarks/.../pf6_transfer_checks.cc`, `pf6_interval_ramp.h`, `pf6a_checks.cc` | Reuse the existing transfer/lifecycle observer for a fixed local evolving mesh. Optional benchmark checks default off. Share the existing exact interval-mean boundary ramp without changing its formula. Keep the old frozen local patch and original observer archive record; store one optional completion flag separately. Export raw/full-master diagnostics, actual cutback and native histories. |
+| `unit_tests/reconstructed_fault_phase_constraints.cc` | Native closed-chain expansion, independent dense adjoint/pullback, nonlinear constrained finite differences, obstacle preservation, exact identity and invalid-row rejection. |
+| `benchmarks/.../assess_phase_energy.py`, `assess_pf6_hanging.py` | Existing independent physical energy/normalization reference gains zero-weight padding for rays crossing different numbers of local cells. Uniform arrays stay unchanged. Independently derive C from coarse physical edges, verify complex-step complete fixed-history actions and re-equilibrated native endpoint actions, master KKT, physical tensor reconstruction and Gauss24/32 controls. |
+
+For `phi=C psi`, the new local fracture/search matrices use **raw**
+`evaluate_cell_fracture()` derivatives. They do not reuse the physical system
+block with its constrained-row entries. Assemble `K_F=C^T H_F C`,
+`g_F=C^T g_F,physical` and the search metric
+`K_F + scale*C^T diag(m_physical) C`. This is the existing physical cell-volume
+mass lump expressed in master coordinates; it adds no energy or dissipation.
+The old identity branch still uses its original assembled FE/CPDI block.
+
+The endpoint response includes the full native mechanical/slip response and
+normalization first/second derivatives. All its physical inputs are expanded
+before evaluation; the returned physical dual is reduced once. For raw positive
+roundoff majorant r, `|C^T delta_g| <= |C|^T r = C^T r`; use that positive
+majorant with the original arithmetic factor and nonlinear/linear criteria.
+The helper rejects inhomogeneous/nonconvex/cross-field rows; the selected local
+entry excludes MPI, periodicity and legacy/mature routes. Existing mesh,
+geometry, stationary population and no-transport guards remain.
+
+All physical steps retain accepted T_n, Z_n and the same physical phase lower
+anchor during every trial. Native outer pending publication, rollback, accepted
+clock and checkpoint ownership are unchanged. The local mesh is prepared once
+at t=0 by exact prolongation of the retained coarse sampled seed. Its growing
+flank patch is `0.5<x<0.75, 0.1875<y<0.25`; 67 cells, 90 physical phase nodes,
+86 masters, 8 fixed surface segments and 144 stationary diagnostic particles.
+One hanging edge remains obstacle-active while others grow. This is a solver
+qualification, not a new physical initialization or a spatial reference.
+
+The complete ten-free-master Hessian is positive at the nonzero-history endpoint;
+76 other masters have strict obstacle multipliers. Native symmetry defect is
+9.28e-17, minimum eigenvalue 7.3572 J/m in the nodal master coordinates.
+Independent gradient/action errors are at most 1.27e-14; re-equilibrated central
+FD actions agree to 2.33e-9 using the established scaled error definition.
+Uniform 162-file identity, actual rejected trials, native cutback, once-only
+publication and same-count serial restart are recorded in the report. Native
+mechanical generation guards caught an initially stale diagnostic action;
+normalization guards caught an inadmissible diagnostic tail perturbation.
+Both failed runs remain evidence, and only the diagnostic ordering/directions
+were corrected. No guard or tolerance was bypassed.
+
+The previously proposed formulation in the consolidation section is now
+implemented only within this bounded serial admission. Its final sentence that
+no implementation was included describes the earlier consolidation. Keep
+`strict_reference_match_passed=false`, all previous mirror/branch differences,
+Gauss6 failure and spatial/endpoint temporal findings. No AMR, transport, MPI
+local-phase evolution, geometry motion, surface change or propagation follows.
+
+---
+
+# Evolving-phase consolidation — 19 October 2026
+
+Selected by `../introspection.md`. Entry is `612b75d3570d81763407875f3a12c12999b9fa8e`
+on `pf-rsf-particle-free` in the intended worktree; tracked files were clean.
+Untracked instructions/plans and existing raw evidence were preserved. Scientific
+authority remains `../current_design.md` / `../specification.tex`; the actual
+derivation path is `../particle_free_history.tex`. AGENTS now fixes that path
+and no longer requires an untracked PLAN file. The three development lines and
+accepted-state owners are mapped in [current STATUS](STATUS.md).
+
+## Small structural changes
+
+Only two runtime translation units change; neither changes an equation,
+selector, tolerance, checkpoint layout or publisher:
+
+- `simulator/solver/reconstructed_fault_endpoint_phase.cc` shares the existing
+  fracture-Hessian matrix application between analytic and finite-difference
+  reduced actions. Matrix, scaling, operations and MPI participation remain the
+  same. This is the fracture-only block, not a second elastic-energy term.
+- The same solver builds its fixed phase-node lookup once per solve and shares
+  the original negative normal profile derivative. The stability probe retains
+  `phi>lower+1e-13`; the search retains `!contact`. They are **different masks**.
+  No translation mode is imposed on the solution, and branch/tie selection is
+  untouched. The new helper is restricted to the existing horizontal fixture.
+- Comments and the reuse-check label identify the selected fracture backend:
+  ordinary cell FE for independent DG, CPDI for the older FE-history path. The
+  entry message says independent bulk history. `dg_history.cc` corrects only
+  the endpoint initialization label; the stationary BP3 label remains identical.
+
+`run_pf6_transfer.py` and its local/domain-free wrappers accept explicit core
+and observer paths, record their identities, and retain original defaults.
+These are build-artifact arguments, not numerical configuration switches.
+The old derivative/FD, direct-mechanics and quasi-Newton references remain:
+callers, benchmark checks and retained reproductions still use them. No unique
+diagnostic or legacy backend was removed. No numerical defect was found or
+silently repaired within this consolidation.
+
+The previous 1,077-line STATUS is preserved exactly as
+`STATUS_THROUGH_20261019.md` (SHA256
+`75196219a4e3bf11b102515526d96f643a50ce7bd7e444ed1d8c589ec086129c`).
+Current STATUS is a short handoff, rather than several contradictory historical
+next actions. Older propagation STATUS and CURRENT_STATUS point to it. Existing
+reports, archives and failed results are unchanged; no BP3 package is regenerated.
+
+## Shared-cache and lifecycle audit
+
+| Data / entry points | Valid lifetime and behavior in the selected cohesive route |
+|---|---|
+| `FEStrainState` / `dg_history` | Material owns accepted T,Z,I and physical phase; DG velocity-history block is unused/zero. `make_fe_endpoint_trial` reads that same anchor for every trial. Surface property storage/committed V remains manager-owned. |
+| `fe_normalization.cc` | Ray intersections, shapes and consistent projection belong to fixed geometry/mesh. `evaluate_fe_normalization` reads the **supplied trial phase**, recomputing I and requested first/second derivatives and transpose pullbacks. It does not reuse accepted I as a trial value. |
+| `history.cc`, `normalization.cc` | Mechanical preparation refreshes current normalization and surface material data. Shared value reuse requires its collective phase/geometry/material identity; geometric reuse alone is insufficient. |
+| `fe_phase_energy.cc` | Explicit endpoint T_e,Z_e enter the partial phase gradient; the mechanical-response action adds their variations. Physical chi is not an independent history or a limited field. |
+| `dg_history.cc` | Source geometry/mass reuse, fixed-phase point samples and Stokes-QP stress caches require `uses_stationary_mature_dg_optimizations()`. That predicate excludes consistent endpoint. Explicit trial phase also bypasses fixed-phase point samples. Gauss3/all-nine-mode projection and the operand-derived publication check remain intact. |
+| `fe_strain.cc` | Accepted point-stress cache uses accepted T/Z/I/phase only and clears on publication; endpoint stress evaluation takes explicit trial phase. Remap/restart reconstructs mesh-dependent state. |
+| Coupling / condensed solver | Each `linearize()` refreshes B,G,K_V. Endpoint unfiltered sparse B/G remain phase-dependent linearizations; stationary filtered-G geometry/friction caches are ineligible. The operator remains C=A-B K_V^-1 G. Homogeneous within-attempt A reuse does not freeze localization, B/G, residuals or active sets. |
+| Endpoint solve | Every energy evaluation clears its tangent closure; final preparation restores the chosen endpoint normalization after probes. The new node map caches coordinates only, for one solve; derivative values use the current phase. |
+| `core.cc`, endpoint publisher, `dg_accepted.cc` | A complete DG endpoint is pending through the real timestep-manager repeat decision. Accepted state publishes once; rejection/cutback restores entry solution/linearization/statistics and keeps the physical obstacle/history. Native checkpoint clocks, versioned CellId coefficients, surface state and particle/RNG persistence are unchanged. |
+
+Thus the BP3 fixed-phase optimization is not enabled for evolving phase merely
+to reuse accelerated paths. No accepted-value cache is made valid by a geometry
+hit during a phase trial. The remaining particles are fixed diagnostic and
+publication-check/persistence points, with matching-cell traces and no domains;
+they do not supply selected material coefficients, mechanics or FE fracture.
+
+## Fresh bounded evidence and commands
+
+All commands run from the repository root. Separate native build:
+
+```sh
+cmake -S . -B build-particle-free/evolving-phase/native -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=/opt/gcc/12.4.0/bin/g++ -DCMAKE_C_COMPILER=/opt/gcc/12.4.0/bin/gcc -DDEAL_II_DIR=/opt/dealii/9.6-local -DASPECT_WITH_VORO=ON -DVORO_DIR=/home/ein/local/voro++/0.4.6 -DASPECT_USE_FP_EXCEPTIONS=OFF -DASPECT_INSTALL_EXAMPLES=OFF
+cmake --build build-particle-free/evolving-phase/native -j 2
+cmake -S benchmarks/reconstructed_fault/particle_free -B build-particle-free/evolving-phase/plugin -DAspect_DIR="$PWD/build-particle-free/evolving-phase/native" -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=/opt/gcc/12.4.0/bin/g++
+cmake --build build-particle-free/evolving-phase/plugin --target pf6_transfer_checks -j 1
+```
+
+The first configure lacked the Voro hint and was corrected **before building**;
+the fresh baseline has the retained Voro/deal.II/compiler configuration. Entry
+build/observer cost 432.98/27.98 s; the two changed units rebuild in 64.79 s.
+Build logs use `refactoring_boundary/run_logged.py`, labels
+`evolving-entry-build-20261019`, `evolving-entry-observer-20261019`, and
+`evolving-consolidated-build-20261019`. Native case budgets are 180 s each,
+one rank/thread, sequential. Preparation pins executable/plugin/input/source
+hashes and refuses existing run directories. For a new label:
+
+```sh
+python3 benchmarks/reconstructed_fault/particle_free/run_pf6_domain_free.py prepare NEW --binary build-particle-free/evolving-phase/native/aspect-release --plugin build-particle-free/evolving-phase/plugin/libpf6_transfer_checks.release.so
+python3 benchmarks/reconstructed_fault/refactoring_boundary/run_logged.py NEW 180 env ASPECT_DIAGNOSTIC_FREEZE_PARTICLE_ADVECTION=1 OMP_PROC_BIND=false /opt/openmpi/5.0.6/bin/mpirun --map-by core --bind-to core --rank-by slot --report-bindings -n 1 build-particle-free/runs/NEW/aspect-release build-particle-free/runs/NEW/input.prm
+python3 benchmarks/reconstructed_fault/particle_free/run_pf6_domain_free.py finalize NEW
+```
+
+Actual full labels are `evolving-baseline-20261019` (before runtime edits) and
+`evolving-consolidated-20261019`. The existing domain-free fixture uses the
+supplied physical seed, unloaded histories, fixed homogeneous laws/loading,
+Gauss12 physical / Gauss3 source and dt=.125 s through .25 s. Startup and the
+64→256→64 identity diagnostic are retained; physical evolution takes place on
+64 cells with fixed surface and 144 stationary points. This is not a new mesh
+or timestep study. Initial seed representation is inherited, not a new accuracy
+reference. The source change is isolated from diagnostic/build-path changes.
+
+Both full cases pass 100 native gates, including independent complete-Q2
+transfer, normalization derivatives, actual rejection/retry and terminal
+inconsistent-source rejection. All 162 compared CSVs except transfer timing
+are byte-identical; full tensor/phase/gradient/energy/weak-load differences are
+zero. Native mechanical residual and phase-search traces agree exactly. Phase
+flank growth is .0189269852885, healing zero, final peak .600001937763 and
+Z_max=6870.63404561 Pa m. Final native scaled phase KKT=9.27535e-17 versus
+target 6.03877e-14. Last mechanical relative bulk/fault residuals are
+6.167123e-10 / 1.307184e-16; final integrated surface residual Linf is
+4.12115e-13 Pa m. Original acceptance and stability checks pass.
+
+Independent physical Gauss24/32 checks use the retained reference routines:
+maximum scaled energy/load errors 6.66e-16 / 3.15e-15 (existing 1e-9 screen);
+I/DI/D²I errors 6.19e-16 / 6.47e-16 / 9.62e-16 (existing screens unchanged).
+Seed nodal error is zero; its initial physical representation error is
+.08019663797 relative L2 and .04702055839 sampled Linf. Final bulk/cohesive/
+fracture energies are .791110974827 / .256852544585 / 14.096118461785 J/m.
+This checks integration/acceptance and equivalence, not a new global work-balance
+or spatial/temporal qualification; retained work evidence is in PF6A_REPORT.
+
+`evolving-half-20261019` uses `--end .125`; `evolving-continued-20261019` uses
+`--restart build-particle-free/runs/evolving-half-20261019/run/restart` and the
+same explicit binary/plugin. Native filesystem restore advances to step 2,
+passes 19 gates and matches all 24 common pre-step/final exports and RNG exactly.
+Publication is 2 at step 2. Half/continued cost 10.99/5.83 s; full baseline/
+candidate cost 14.49/14.24 s. No speedup is inferred. Finalization must finish
+before assessment reads `run.log`; one premature assessment was rerun in that
+order, with no native rerun or numerical change.
+
+Fresh native `--test` passes 127 cases / 165094 assertions, label
+`evolving-units-20261019`, budget 120 s, elapsed 6.23 s. The complete command is
+`run_logged.py evolving-units-20261019 120 env LD_LIBRARY_PATH=/opt/openmpi/5.0.6/lib OMP_PROC_BIND=false build-particle-free/evolving-phase/native/aspect-release --test`.
+Candidate core SHA256 is `4b36efad2177deea24bd1aeae81b113644a2e730cca6bd623b04e8600cec6e5b`;
+observer SHA256 is `4fd39189b51ff017480b0067936a5f221df75fd3e6662a358a3bf7ac4cfa9ade`.
+The unchanged observer is used before/after. Existing 34-file BP3/package/live
+build identity hashes pass; server inputs, outputs, checkpoints and packages
+were not modified or regenerated. No server action was taken.
+
+[Compact verification and field/source identities](../../../benchmarks/reconstructed_fault/particle_free/evidence/evolving_phase_consolidation/verification.json)
+are regenerated without launching ASPECT by:
+
+```sh
+OPENBLAS_NUM_THREADS=1 python3 benchmarks/reconstructed_fault/particle_free/evidence/evolving_phase_consolidation/verify.py build-particle-free/runs/evolving-baseline-20261019 build-particle-free/runs/evolving-consolidated-20261019 build-particle-free/runs/evolving-continued-20261019 --protected build-particle-free/evolving-phase/protected-bp3.json --output benchmarks/reconstructed_fault/particle_free/evidence/evolving_phase_consolidation/verification.json
+```
+
+Raw runs/records/build logs remain local at those labels. Existing MPI,
+cutback and full-interval work evidence is reused within its documented scope;
+this pass does not rerun a convergence/MPI matrix. Preserve the original Gauss6
+failure, spatial/endpoint temporal limitations and mirror-branch discrepancies,
+including **strict_reference_match_passed=false**. No field alignment or
+reference replacement enters the new comparisons.
+
+## Next bounded task: constrained phase variations on a fixed local mesh
+
+The current guard in `solve_reconstructed_fault_endpoint_phase` is necessary:
+its phase search treats all physical nodal coordinates as independent. Frozen
+64→67-cell remap/restart success in PF6_LOCAL_REPORT does not qualify this solve.
+No more immediate functional blocker appeared in the renewed short control;
+this constrained solver is the next prerequisite **for a locally refined
+evolving-phase experiment**, not for uniform-grid continuation. The mirror/tie
+reference question remains a separate scientific accuracy question.
+
+1. Start with the existing small 64→67-cell geometry, fixed before physical
+   evolution, fixed surface, homogeneous coefficients, Gauss12/source3,
+   unlimited DG and the same physical seed/loading. Require the existing convex
+   homogeneous Q1 hanging relations; retain unsupported periodic/moving paths.
+   Record initialization representation separately and keep the current guard
+   until the constrained route is verified.
+2. Use the closed native AffineConstraints to define independent masters psi
+   and physical phase phi=C*psi+c, with fixed admissible lifting c where needed.
+   Supply C*dpsi to every normalization, energy and mechanical-response action.
+   Return g_psi=C^T*g_phi and H_psi*dpsi=C^T*H_phi*(C*dpsi), including fracture,
+   normalization second derivatives and mechanical response. The current DG
+   cell-fracture/normalization gradients are physical-node derivatives; apply
+   the reduction exactly once, not again to an already condensed legacy block.
+   Use existing sparse/distributed infrastructure, not a dense global C.
+3. Prove obstacle equivalence for the admitted constraints. Masters are physical
+   nodes; with nonnegative closed rows and a consistent accepted anchor,
+   psi>=psi_n implies C*(psi-psi_n)>=0 at dependent nodes. Conversely physical
+   nodal bounds include the masters. Convex rows preserve the upper bound.
+   Verify these hypotheses and the actual physical phase after distribution;
+   reject unsupported rows/anchors. Do not clip constrained nodes independently.
+   Define the reduced active set, KKT, search metric and positive arithmetic
+   scales in master coordinates; e.g. pull back positive scales with |C|^T.
+   Keep the physical energy, entry accuracy criteria and irreversibility law.
+4. Independently verify C expansion/adjoint, constrained FD gradients and full
+   reduced actions, including phase-dependent normalization. Require C=Id to
+   reproduce the uniform control. Compare a mechanically equilibrated short
+   growing case with an independently reduced functional on the same mesh.
+   Check physical feasibility, mechanical/fault residuals, true energy/KKT,
+   history/stress/loads and all modes. Coordinate-dependent residual norms must
+   be derived explicitly, not tuned to pass.
+5. Exercise repeated trials, actual rejection/retry, once-only outer publication
+   and filesystem restart versus uninterrupted steps on that fixed mesh.
+   Separate constrained-solver correctness from branch/accuracy conclusions;
+   retain all unregistered mirror differences and the original reference flag.
+
+That proposed task starts serial and does not change mesh during evolution.
+Retain representable-phase coarsening only. Automatic AMR, lossy obstacle or
+surface transfers, transport, surface birth, geometry motion and physical tip
+propagation remain later tasks. No constrained-solver implementation or guard
+removal is included in this consolidation.
+
+---
+
 Storage maintenance, 19 October 2026: runtime/source/equation bytes and live
 build/checkpoint files verified unchanged. Only duplicate immutable executable
 storage, lossless historical-field archiving and redundant expanded package

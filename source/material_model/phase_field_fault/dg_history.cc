@@ -120,7 +120,8 @@ namespace aspect
           component=0.;
         }
       state.dg_history=std::move(history);
-      this->get_pcout()<<"   Accepted DGQ2 trial stress: independent native source; fixed phase/geometry; "
+      this->get_pcout()<<"   Accepted DGQ2 trial stress: independent native source; "
+                       <<(consistent_endpoint_phase ? "cohesive endpoint phase trials; fixed geometry; " : "fixed phase/geometry; ")
                        <<(dg_accepted_history ? "accepted-history lifecycle/restart." : "no transport/restart.")<<std::endl;
     }
 

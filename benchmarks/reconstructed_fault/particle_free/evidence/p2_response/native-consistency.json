@@ -1,0 +1,33 @@
+{
+  "identical_initial_fields": {
+    "nodes.csv": true,
+    "tensor.csv": true,
+    "surface.csv": true,
+    "profiles.csv": true,
+    "cells.csv": true,
+    "constants.csv": true,
+    "rule.csv": true,
+    "gradient.csv": true,
+    "accepted-surface.csv": true
+  },
+  "publication": {
+    "unloaded": {
+      "records": 2,
+      "maximum_error_over_allowance": 5.82482004356027e-16,
+      "negative_translation_probes": 0,
+      "negative_CG_probes": 0
+    },
+    "primary": {
+      "records": 76,
+      "maximum_error_over_allowance": 0.005971506397903303,
+      "negative_translation_probes": 1,
+      "negative_CG_probes": 1
+    },
+    "half": {
+      "records": 152,
+      "maximum_error_over_allowance": 0.00597127353882171,
+      "negative_translation_probes": 1,
+      "negative_CG_probes": 1
+    }
+  }
+}

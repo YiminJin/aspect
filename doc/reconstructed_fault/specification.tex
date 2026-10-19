@@ -3555,8 +3555,8 @@ same-count restart and deterministic serial-to-four fixed-population redistribut
 are separate checks. Changed-count native RNG replay is unavailable; population
 changes remain guarded by the existing replay-compatibility rule.
 
-Coupled hanging-node phase evolution is explicitly rejected. It requires a
-selected independent-master formulation $\phi=C\psi$, reduced gradient $C^Tg$,
+At the frozen-transfer stage coupled hanging-node phase evolution was explicitly
+rejected. It required a selected independent-master formulation $\phi=C\psi$, reduced gradient $C^Tg$,
 tangent $C^THC$, and physical obstacle/KKT acceptance, rather than treating slave
 coordinates independently. Frozen evaluation is not that qualification.
 See \texttt{particle\_free/PF6\_LOCAL\_REPORT.md}. Automatic AMR, adaptive
@@ -3586,8 +3586,50 @@ same-count and continued restart pass without adding particles or relaxing any
 coverage test. Legacy CPDI retains its domains, checks and deep coverage failure.
 See \texttt{particle\_free/PF6\_DOMAIN\_FREE\_REPORT.md}. Unlimited DG/default
 settings, old Gauss6 and strict-reference failures, representable-phase coarsening
-and the hanging-node phase-evolution guard remain. This does not qualify
+and the unsupported hanging-node phase-evolution guards remain (the separately
+selected serial homogeneous cohesive extension follows below). This does not qualify
 heterogeneous material transfer, automatic AMR, lossy obstacle transfer, transport,
 moving geometry or propagation.
+
+
+\subsection{Serial fixed-local-mesh cohesive master variations (2026-10-19)}
+
+For the selected two-dimensional serial homogeneous domain-free accepted-DG
+cohesive endpoint route, closed native homogeneous convex Q1 hanging relations
+supply $\phi=C\psi$, with independent physical nodes as masters. Expand primal
+states and variations with native \texttt{AffineConstraints::distribute}.
+Reduce raw physical-node gradients and complete actions exactly once:
+\[
+ g_\psi=C^T(g_{\rm elastic}+g_{\rm fracture}),\qquad
+ H_\psi d\psi=C^T\{H_{\rm endpoint}(Cd\psi)+H_{\rm fracture}Cd\psi\}.
+\]
+Retain the consistent endpoint mechanical/slip response and both derivatives of
+the original normalization. Do not reduce already condensed mechanical loads
+again. Obtain the local fracture pullback from raw cell derivatives, excluding
+artificial physical constrained-row diagonals. For $C=\mathrm{Id}$ retain the
+previous assembly and arithmetic order, including the legacy fracture route.
+
+Require the accepted physical anchor to satisfy exactly the same closed rows.
+Then $\psi\geq\psi_n$ is equivalent to physical nodal irreversibility: all masters
+are physical nodes, and the dependent increments are convex combinations of
+master increments. Convex rows preserve the physical upper bound. Check the
+final physical field explicitly; do not clip dependent values independently.
+Use master coordinates for KKT, active sets, linear accuracy and admissible
+stability variations. Pull back positive roundoff scales by $|C|^T=C^T$ without
+an empirical multiplier. The search metric pulls back the raw fracture Hessian
+and the existing physical nodal mass lump, $C^T\operatorname{diag}(m_h)C$.
+Physical Rayleigh denominators evaluate $Cd\psi$.
+
+Every trial retains the same accepted histories and physical lower obstacle;
+the existing outer transaction stages, rejects or publishes once. Native
+checkpoint ownership/format are reused. The bounded 67-cell fixture verifies
+independent constrained derivatives/actions, uniform identity, growing/active
+interfaces, master KKT and the complete strictly free Hessian, actual rejection
+and cutback, publication and same-count serial restart. See
+\texttt{particle\_free/PF6\_HANGING\_REPORT.md} for measured scope and errors.
+Nonhomogeneous lifting, periodicity, MPI local-phase evolution, runtime AMR,
+lossy obstacle transfer, transport, moving geometry, birth and propagation
+remain unqualified. Previous spatial/temporal and mirror-branch failures are
+not resolved by this coordinate qualification.
 
 \end{document}

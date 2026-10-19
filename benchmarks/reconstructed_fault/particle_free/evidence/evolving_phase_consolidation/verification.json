@@ -1,0 +1,875 @@
+{
+  "scope": "Serial fixed-reference cohesive domain-free DG endpoint consolidation; two dt=.125 s accepted steps",
+  "base_revision": "612b75d3570d81763407875f3a12c12999b9fa8e",
+  "source_changes": {
+    "source/material_model/phase_field_fault/dg_history.cc": [
+      "71848d18a360ba017b01c7ae690b56ca80e38cffe106a93f3873f872a647745e",
+      "447c5e7fedc2183bd2ed12821a9c2471ddbd20a6f05c936e10b755a11cd14573"
+    ],
+    "source/simulator/solver/reconstructed_fault_endpoint_phase.cc": [
+      "23d1af4b25ece0e4303b980940b30ec185300c60c2c0f84566dc60ed3038b520",
+      "7314c918c37f542c6ef47ba0b4938f05a0b3c20bc832ad294cbe24c6a2e1b653"
+    ]
+  },
+  "normalized_inputs_identical": true,
+  "normalized_input_sha256": "d5b12487bcebdc487a0de03093efe8020d0c76ba6635deafe6634d1354d00e83",
+  "cases": [
+    {
+      "path": "build-particle-free/runs/evolving-baseline-20261019",
+      "record_sha256": "9e773486ba9136ef7559c43b33f2d9c2057de89b8c987e74f7f56ea177e59f56",
+      "executable_sha256": "8075c81cd21c9e013686f31940edc241adb32022e7b93940f65624a8e7ef27fb",
+      "plugin_sha256": "4fd39189b51ff017480b0067936a5f221df75fd3e6662a358a3bf7ac4cfa9ade",
+      "input_sha256": "c15ef9bc334d7c3694babc3933747e5d544536c41dea95d1019d8e1de513ab52",
+      "seconds": 14.491141905999939,
+      "ranks": 1,
+      "native_gates": 100
+    },
+    {
+      "path": "build-particle-free/runs/evolving-consolidated-20261019",
+      "record_sha256": "22fd04ba96ee5417422a55a98f9e535c0d122e4d7fd3c5721e55ff1f2219dcf3",
+      "executable_sha256": "4b36efad2177deea24bd1aeae81b113644a2e730cca6bd623b04e8600cec6e5b",
+      "plugin_sha256": "4fd39189b51ff017480b0067936a5f221df75fd3e6662a358a3bf7ac4cfa9ade",
+      "input_sha256": "222bc0e95fc34c308a051c1382274f70dd31979ba8b78e59bc93a2fb7f9559d4",
+      "seconds": 14.241524178999498,
+      "ranks": 1,
+      "native_gates": 100
+    },
+    {
+      "path": "build-particle-free/runs/evolving-continued-20261019",
+      "record_sha256": "a88d23c776b596069a16b1a0afbaea063efe0646736b45720c58c19e88727a64",
+      "executable_sha256": "4b36efad2177deea24bd1aeae81b113644a2e730cca6bd623b04e8600cec6e5b",
+      "plugin_sha256": "4fd39189b51ff017480b0067936a5f221df75fd3e6662a358a3bf7ac4cfa9ade",
+      "input_sha256": "5733db350a3211b5b6afe262d1416ea2c2d1a8848c5655b96c4a9cffc18109de",
+      "seconds": 5.825089766000019,
+      "ranks": 1,
+      "native_gates": 19
+    }
+  ],
+  "entry_exports": {
+    "files": 162,
+    "names": [
+      "accepted-step-1-before-cells.csv",
+      "accepted-step-1-before-energy.csv",
+      "accepted-step-1-before-fracture-operator.csv",
+      "accepted-step-1-before-native-fields.csv",
+      "accepted-step-1-before-phase.csv",
+      "accepted-step-1-before-physical.csv",
+      "accepted-step-1-before-surface.csv",
+      "accepted-step-1-before-tensor.csv",
+      "accepted-step-1-before-weak-loads.csv",
+      "accepted-step-1-coarsened-cells.csv",
+      "accepted-step-1-coarsened-domain-free.csv",
+      "accepted-step-1-coarsened-energy.csv",
+      "accepted-step-1-coarsened-fracture-operator.csv",
+      "accepted-step-1-coarsened-native-fields.csv",
+      "accepted-step-1-coarsened-particles.csv",
+      "accepted-step-1-coarsened-phase.csv",
+      "accepted-step-1-coarsened-physical.csv",
+      "accepted-step-1-coarsened-surface.csv",
+      "accepted-step-1-coarsened-tensor.csv",
+      "accepted-step-1-coarsened-weak-loads.csv",
+      "accepted-step-1-refined-cells.csv",
+      "accepted-step-1-refined-domain-free.csv",
+      "accepted-step-1-refined-energy.csv",
+      "accepted-step-1-refined-fracture-operator.csv",
+      "accepted-step-1-refined-native-fields.csv",
+      "accepted-step-1-refined-particles.csv",
+      "accepted-step-1-refined-phase.csv",
+      "accepted-step-1-refined-physical.csv",
+      "accepted-step-1-refined-surface.csv",
+      "accepted-step-1-refined-tensor.csv",
+      "accepted-step-1-refined-weak-loads.csv",
+      "before-step-1-cells.csv",
+      "before-step-1-domain-free.csv",
+      "before-step-1-energy.csv",
+      "before-step-1-fracture-operator.csv",
+      "before-step-1-native-fields.csv",
+      "before-step-1-particles.csv",
+      "before-step-1-phase.csv",
+      "before-step-1-physical.csv",
+      "before-step-1-surface.csv",
+      "before-step-1-tensor.csv",
+      "before-step-1-weak-loads.csv",
+      "before-step-2-cells.csv",
+      "before-step-2-domain-free.csv",
+      "before-step-2-energy.csv",
+      "before-step-2-fracture-operator.csv",
+      "before-step-2-native-fields.csv",
+      "before-step-2-particles.csv",
+      "before-step-2-phase.csv",
+      "before-step-2-physical.csv",
+      "before-step-2-surface.csv",
+      "before-step-2-tensor.csv",
+      "before-step-2-weak-loads.csv",
+      "dg-support.csv",
+      "global-complete-Q2-before-cells.csv",
+      "global-complete-Q2-before-energy.csv",
+      "global-complete-Q2-before-fracture-operator.csv",
+      "global-complete-Q2-before-native-fields.csv",
+      "global-complete-Q2-before-phase.csv",
+      "global-complete-Q2-before-physical.csv",
+      "global-complete-Q2-before-surface.csv",
+      "global-complete-Q2-before-tensor.csv",
+      "global-complete-Q2-before-weak-loads.csv",
+      "global-complete-Q2-coarsened-cells.csv",
+      "global-complete-Q2-coarsened-domain-free.csv",
+      "global-complete-Q2-coarsened-energy.csv",
+      "global-complete-Q2-coarsened-fracture-operator.csv",
+      "global-complete-Q2-coarsened-native-fields.csv",
+      "global-complete-Q2-coarsened-particles.csv",
+      "global-complete-Q2-coarsened-phase.csv",
+      "global-complete-Q2-coarsened-physical.csv",
+      "global-complete-Q2-coarsened-surface.csv",
+      "global-complete-Q2-coarsened-tensor.csv",
+      "global-complete-Q2-coarsened-weak-loads.csv",
+      "global-complete-Q2-refined-cells.csv",
+      "global-complete-Q2-refined-domain-free.csv",
+      "global-complete-Q2-refined-energy.csv",
+      "global-complete-Q2-refined-fracture-operator.csv",
+      "global-complete-Q2-refined-native-fields.csv",
+      "global-complete-Q2-refined-particles.csv",
+      "global-complete-Q2-refined-phase.csv",
+      "global-complete-Q2-refined-physical.csv",
+      "global-complete-Q2-refined-surface.csv",
+      "global-complete-Q2-refined-tensor.csv",
+      "global-complete-Q2-refined-weak-loads.csv",
+      "initial-domain-free.csv",
+      "initial-particles.csv",
+      "lossy-coarse-cells.csv",
+      "lossy-coarse-energy.csv",
+      "lossy-coarse-fracture-operator.csv",
+      "lossy-coarse-native-fields.csv",
+      "lossy-coarse-phase.csv",
+      "lossy-coarse-physical.csv",
+      "lossy-coarse-surface.csv",
+      "lossy-coarse-tensor.csv",
+      "lossy-coarse-weak-loads.csv",
+      "lossy-fine-cells.csv",
+      "lossy-fine-energy.csv",
+      "lossy-fine-fracture-operator.csv",
+      "lossy-fine-native-fields.csv",
+      "lossy-fine-phase.csv",
+      "lossy-fine-physical.csv",
+      "lossy-fine-surface.csv",
+      "lossy-fine-tensor.csv",
+      "lossy-fine-weak-loads.csv",
+      "matching-cell-trace.csv",
+      "mesh-checkpoint-cells.csv",
+      "mesh-checkpoint-domain-free.csv",
+      "mesh-checkpoint-energy.csv",
+      "mesh-checkpoint-fracture-operator.csv",
+      "mesh-checkpoint-native-fields.csv",
+      "mesh-checkpoint-particles.csv",
+      "mesh-checkpoint-phase.csv",
+      "mesh-checkpoint-physical.csv",
+      "mesh-checkpoint-surface.csv",
+      "mesh-checkpoint-tensor.csv",
+      "mesh-checkpoint-weak-loads.csv",
+      "normalization-operator.csv",
+      "prescribed-initial-cells.csv",
+      "prescribed-initial-energy.csv",
+      "prescribed-initial-fracture-operator.csv",
+      "prescribed-initial-native-fields.csv",
+      "prescribed-initial-phase.csv",
+      "prescribed-initial-physical.csv",
+      "prescribed-initial-surface.csv",
+      "prescribed-initial-tensor.csv",
+      "prescribed-initial-weak-loads.csv",
+      "state-0-cells.csv",
+      "state-0-domain-free.csv",
+      "state-0-energy.csv",
+      "state-0-fracture-operator.csv",
+      "state-0-native-fields.csv",
+      "state-0-particles.csv",
+      "state-0-phase.csv",
+      "state-0-physical.csv",
+      "state-0-surface.csv",
+      "state-0-tensor.csv",
+      "state-0-weak-loads.csv",
+      "state-1-cells.csv",
+      "state-1-domain-free.csv",
+      "state-1-energy.csv",
+      "state-1-fracture-operator.csv",
+      "state-1-native-fields.csv",
+      "state-1-particles.csv",
+      "state-1-phase.csv",
+      "state-1-physical.csv",
+      "state-1-surface.csv",
+      "state-1-tensor.csv",
+      "state-1-weak-loads.csv",
+      "state-2-cells.csv",
+      "state-2-domain-free.csv",
+      "state-2-energy.csv",
+      "state-2-fracture-operator.csv",
+      "state-2-native-fields.csv",
+      "state-2-particles.csv",
+      "state-2-phase.csv",
+      "state-2-physical.csv",
+      "state-2-surface.csv",
+      "state-2-tensor.csv",
+      "state-2-weak-loads.csv",
+      "transfer-errors.csv",
+      "transfer-gates.csv"
+    ],
+    "byte_identical": true
+  },
+  "restart_exports": {
+    "files": 24,
+    "names": [
+      "before-step-2-cells.csv",
+      "before-step-2-domain-free.csv",
+      "before-step-2-energy.csv",
+      "before-step-2-fracture-operator.csv",
+      "before-step-2-native-fields.csv",
+      "before-step-2-particles.csv",
+      "before-step-2-phase.csv",
+      "before-step-2-physical.csv",
+      "before-step-2-rng-rank-0.txt",
+      "before-step-2-surface.csv",
+      "before-step-2-tensor.csv",
+      "before-step-2-weak-loads.csv",
+      "state-2-cells.csv",
+      "state-2-domain-free.csv",
+      "state-2-energy.csv",
+      "state-2-fracture-operator.csv",
+      "state-2-native-fields.csv",
+      "state-2-particles.csv",
+      "state-2-phase.csv",
+      "state-2-physical.csv",
+      "state-2-rng-rank-0.txt",
+      "state-2-surface.csv",
+      "state-2-tensor.csv",
+      "state-2-weak-loads.csv"
+    ],
+    "byte_identical": true
+  },
+  "entry_comparisons": {
+    "state-0": {
+      "tensor_relative_L2": 0.0,
+      "stress_L2_Pa": 0.0,
+      "stress_relative_L2": 0.0,
+      "localized_stress_L2": 0.0,
+      "phase_Linf": 0.0,
+      "gradient_Linf": 0.0,
+      "maximum_moment_defect": 0.0,
+      "energy_before": [
+        0.0,
+        0.0,
+        14.129037401616646
+      ],
+      "energy_after": [
+        0.0,
+        0.0,
+        14.129037401616646
+      ],
+      "energy_defect": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "quadratic_norm_change": 0.0,
+      "weak_shear_defect": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "tensor_max_error": 0.0,
+      "tensor_relative_max_error": 0.0,
+      "surface_max_error": 0.0,
+      "surface_relative_max_error": 0.0,
+      "native-fields_max_error": 0.0,
+      "native-fields_relative_max_error": 0.0,
+      "particles_max_error": 0.0,
+      "particles_relative_max_error": 0.0,
+      "particle_CellId_mismatches": 0,
+      "weak-loads_max_error": 0.0,
+      "weak-loads_relative_max_error": 0.0,
+      "fracture-operator_max_error": 0.0,
+      "fracture-operator_relative_max_error": 0.0,
+      "rng_rank_counts": [
+        1,
+        1
+      ],
+      "rng_equal_per_rank": true
+    },
+    "state-1": {
+      "tensor_relative_L2": 0.0,
+      "stress_L2_Pa": 0.0,
+      "stress_relative_L2": 0.0,
+      "localized_stress_L2": 0.0,
+      "phase_Linf": 0.0,
+      "gradient_Linf": 0.0,
+      "maximum_moment_defect": 0.0,
+      "energy_before": [
+        0.5208657845304688,
+        0.005240972416247402,
+        14.096059627391401
+      ],
+      "energy_after": [
+        0.5208657845304688,
+        0.005240972416247402,
+        14.096059627391401
+      ],
+      "energy_defect": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "quadratic_norm_change": 0.0,
+      "weak_shear_defect": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "tensor_max_error": 0.0,
+      "tensor_relative_max_error": 0.0,
+      "surface_max_error": 0.0,
+      "surface_relative_max_error": 0.0,
+      "native-fields_max_error": 0.0,
+      "native-fields_relative_max_error": 0.0,
+      "particles_max_error": 0.0,
+      "particles_relative_max_error": 0.0,
+      "particle_CellId_mismatches": 0,
+      "weak-loads_max_error": 0.0,
+      "weak-loads_relative_max_error": 0.0,
+      "fracture-operator_max_error": 0.0,
+      "fracture-operator_relative_max_error": 0.0,
+      "rng_rank_counts": [
+        1,
+        1
+      ],
+      "rng_equal_per_rank": true
+    },
+    "state-2": {
+      "tensor_relative_L2": 0.0,
+      "stress_L2_Pa": 0.0,
+      "stress_relative_L2": 0.0,
+      "localized_stress_L2": 0.0,
+      "phase_Linf": 0.0,
+      "gradient_Linf": 0.0,
+      "maximum_moment_defect": 0.0,
+      "energy_before": [
+        0.791110974827377,
+        0.2568525445849136,
+        14.096118461784904
+      ],
+      "energy_after": [
+        0.791110974827377,
+        0.2568525445849136,
+        14.096118461784904
+      ],
+      "energy_defect": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "quadratic_norm_change": 0.0,
+      "weak_shear_defect": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "tensor_max_error": 0.0,
+      "tensor_relative_max_error": 0.0,
+      "surface_max_error": 0.0,
+      "surface_relative_max_error": 0.0,
+      "native-fields_max_error": 0.0,
+      "native-fields_relative_max_error": 0.0,
+      "particles_max_error": 0.0,
+      "particles_relative_max_error": 0.0,
+      "particle_CellId_mismatches": 0,
+      "weak-loads_max_error": 0.0,
+      "weak-loads_relative_max_error": 0.0,
+      "fracture-operator_max_error": 0.0,
+      "fracture-operator_relative_max_error": 0.0,
+      "rng_rank_counts": [
+        1,
+        1
+      ],
+      "rng_equal_per_rank": true
+    },
+    "before-step-2": {
+      "tensor_relative_L2": 0.0,
+      "stress_L2_Pa": 0.0,
+      "stress_relative_L2": 0.0,
+      "localized_stress_L2": 0.0,
+      "phase_Linf": 0.0,
+      "gradient_Linf": 0.0,
+      "maximum_moment_defect": 0.0,
+      "energy_before": [
+        0.5208657845304688,
+        0.005240972416247402,
+        14.096059627391401
+      ],
+      "energy_after": [
+        0.5208657845304688,
+        0.005240972416247402,
+        14.096059627391401
+      ],
+      "energy_defect": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "quadratic_norm_change": 0.0,
+      "weak_shear_defect": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "tensor_max_error": 0.0,
+      "tensor_relative_max_error": 0.0,
+      "surface_max_error": 0.0,
+      "surface_relative_max_error": 0.0,
+      "native-fields_max_error": 0.0,
+      "native-fields_relative_max_error": 0.0,
+      "particles_max_error": 0.0,
+      "particles_relative_max_error": 0.0,
+      "particle_CellId_mismatches": 0,
+      "weak-loads_max_error": 0.0,
+      "weak-loads_relative_max_error": 0.0,
+      "fracture-operator_max_error": 0.0,
+      "fracture-operator_relative_max_error": 0.0,
+      "rng_rank_counts": [
+        1,
+        1
+      ],
+      "rng_equal_per_rank": true
+    }
+  },
+  "restart_comparisons": {
+    "state-2": {
+      "tensor_relative_L2": 0.0,
+      "stress_L2_Pa": 0.0,
+      "stress_relative_L2": 0.0,
+      "localized_stress_L2": 0.0,
+      "phase_Linf": 0.0,
+      "gradient_Linf": 0.0,
+      "maximum_moment_defect": 0.0,
+      "energy_before": [
+        0.791110974827377,
+        0.2568525445849136,
+        14.096118461784904
+      ],
+      "energy_after": [
+        0.791110974827377,
+        0.2568525445849136,
+        14.096118461784904
+      ],
+      "energy_defect": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "quadratic_norm_change": 0.0,
+      "weak_shear_defect": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "tensor_max_error": 0.0,
+      "tensor_relative_max_error": 0.0,
+      "surface_max_error": 0.0,
+      "surface_relative_max_error": 0.0,
+      "native-fields_max_error": 0.0,
+      "native-fields_relative_max_error": 0.0,
+      "particles_max_error": 0.0,
+      "particles_relative_max_error": 0.0,
+      "particle_CellId_mismatches": 0,
+      "weak-loads_max_error": 0.0,
+      "weak-loads_relative_max_error": 0.0,
+      "fracture-operator_max_error": 0.0,
+      "fracture-operator_relative_max_error": 0.0,
+      "rng_rank_counts": [
+        1,
+        1
+      ],
+      "rng_equal_per_rank": true
+    },
+    "before-step-2": {
+      "tensor_relative_L2": 0.0,
+      "stress_L2_Pa": 0.0,
+      "stress_relative_L2": 0.0,
+      "localized_stress_L2": 0.0,
+      "phase_Linf": 0.0,
+      "gradient_Linf": 0.0,
+      "maximum_moment_defect": 0.0,
+      "energy_before": [
+        0.5208657845304688,
+        0.005240972416247402,
+        14.096059627391401
+      ],
+      "energy_after": [
+        0.5208657845304688,
+        0.005240972416247402,
+        14.096059627391401
+      ],
+      "energy_defect": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "quadratic_norm_change": 0.0,
+      "weak_shear_defect": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "tensor_max_error": 0.0,
+      "tensor_relative_max_error": 0.0,
+      "surface_max_error": 0.0,
+      "surface_relative_max_error": 0.0,
+      "native-fields_max_error": 0.0,
+      "native-fields_relative_max_error": 0.0,
+      "particles_max_error": 0.0,
+      "particles_relative_max_error": 0.0,
+      "particle_CellId_mismatches": 0,
+      "weak-loads_max_error": 0.0,
+      "weak-loads_relative_max_error": 0.0,
+      "fracture-operator_max_error": 0.0,
+      "fracture-operator_relative_max_error": 0.0,
+      "rng_rank_counts": [
+        1,
+        1
+      ],
+      "rng_equal_per_rank": true
+    }
+  },
+  "physical_progress": {
+    "total_phase_growth_Linf": 0.018926985288503034,
+    "healing_Linf": 0.0,
+    "initial_phase_max": 0.6000019377630632,
+    "final_phase_max": 0.6000019377630632,
+    "states": [
+      {
+        "bulk": "0",
+        "cohesive": "0",
+        "fracture": "14.129037401616651",
+        "step": "0",
+        "publications": "0"
+      },
+      {
+        "bulk": "0.52086578453046894",
+        "cohesive": "0.0052409724162474029",
+        "fracture": "14.096059627391407",
+        "step": "1",
+        "publications": "1"
+      },
+      {
+        "bulk": "0.79111097482737736",
+        "cohesive": "0.25685254458491358",
+        "fracture": "14.096118461784908",
+        "step": "2",
+        "publications": "2"
+      }
+    ],
+    "final_Z_max_Pa_m": 6870.634045612339
+  },
+  "phase_solve_trace": [
+    {
+      "target": 7.099521971687581e-15,
+      "iterations": 3,
+      "last_scaled_KKT": 1.556253633990326e-17,
+      "reassembly_gradient_difference": 3.122502256758253e-17
+    },
+    {
+      "target": 7.099521971687581e-15,
+      "iterations": 3,
+      "last_scaled_KKT": 1.556253633990326e-17,
+      "reassembly_gradient_difference": 3.122502256758253e-17
+    },
+    {
+      "target": 7.099521971687581e-15,
+      "iterations": 3,
+      "last_scaled_KKT": 1.556253633990326e-17,
+      "reassembly_gradient_difference": 3.122502256758253e-17
+    },
+    {
+      "target": 6.038773540700711e-14,
+      "iterations": 3,
+      "last_scaled_KKT": 9.27534958561349e-17,
+      "reassembly_gradient_difference": 2.949029909160572e-17
+    }
+  ],
+  "mechanical_residual_trace_identical": true,
+  "mechanical_residual_records": 62,
+  "domain_absence": [
+    {
+      "snapshots": 11,
+      "domain_objects_present": 0,
+      "fixed_particles": 144,
+      "point_associations_have_no_integration_measure": true,
+      "successful_domain_reads_impossible_without_object": true
+    },
+    {
+      "snapshots": 11,
+      "domain_objects_present": 0,
+      "fixed_particles": 144,
+      "point_associations_have_no_integration_measure": true,
+      "successful_domain_reads_impossible_without_object": true
+    },
+    {
+      "snapshots": 4,
+      "domain_objects_present": 0,
+      "fixed_particles": 144,
+      "point_associations_have_no_integration_measure": true,
+      "successful_domain_reads_impossible_without_object": true
+    }
+  ],
+  "initialization": {
+    "seed_nodal_Linf": 0.0,
+    "initial_T_max": 0.0,
+    "initial_Z_max": 0.0,
+    "seed_representation_relative_L2": 0.08019663796661218,
+    "seed_representation_Linf_at_reference_points": 0.04702055838618624
+  },
+  "normalization_derivatives": {
+    "native_reference_max_error": [
+      5.684341886080802e-14,
+      1.1368683772161603e-13,
+      3.410605131648481e-13
+    ],
+    "native_reference_scaled_error": [
+      6.187057492337568e-16,
+      6.468193668016553e-16,
+      9.618807995357094e-16
+    ],
+    "Gauss24_32_uncertainty": [
+      0.0,
+      5.684341886080802e-14,
+      1.1368683772161603e-13
+    ]
+  },
+  "quadrature": {
+    "prescribed-initial": {
+      "native_minus_reference_energy": [
+        0.0,
+        0.0,
+        5.329070518200751e-15
+      ],
+      "native_minus_reference_load": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "energy_scaled_error": 3.7717152037484155e-16,
+      "load_scaled_error": 0.0,
+      "q24_q32_energy_uncertainty": 0.0,
+      "q24_q32_load_uncertainty": 0.0,
+      "native_I_error": 5.684341886080802e-14,
+      "native_I_scaled_error": 6.215037619535451e-16,
+      "q24_q32_I_uncertainty": 0.0,
+      "normalization_only_energy_change": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "normalization_only_load_change": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "surface_projection_RMS": 1.5747678588458887e-14,
+      "surface_projection_Linf": 4.263256414560601e-14,
+      "native_I_vs_unprojected_ray_Linf": 5.684341886080802e-14,
+      "physical_rule_passed": true,
+      "normalization_passed": true
+    },
+    "state-0": {
+      "native_minus_reference_energy": [
+        0.0,
+        0.0,
+        5.329070518200751e-15
+      ],
+      "native_minus_reference_load": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "energy_scaled_error": 3.7717152037484155e-16,
+      "load_scaled_error": 0.0,
+      "q24_q32_energy_uncertainty": 0.0,
+      "q24_q32_load_uncertainty": 0.0,
+      "native_I_error": 4.263256414560601e-14,
+      "native_I_scaled_error": 4.66127821465159e-16,
+      "q24_q32_I_uncertainty": 0.0,
+      "normalization_only_energy_change": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "normalization_only_load_change": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "surface_projection_RMS": 1.1767213747458746e-14,
+      "surface_projection_Linf": 2.842170943040401e-14,
+      "native_I_vs_unprojected_ray_Linf": 4.263256414560601e-14,
+      "physical_rule_passed": true,
+      "normalization_passed": true
+    },
+    "state-1": {
+      "native_minus_reference_energy": [
+        2.220446049250313e-16,
+        8.673617379884035e-19,
+        5.329070518200751e-15
+      ],
+      "native_minus_reference_load": [
+        2.1316282072803006e-14,
+        3.268496584496461e-13,
+        2.984279490192421e-13,
+        3.268496584496461e-13,
+        3.979039320256561e-13,
+        3.410605131648481e-13,
+        3.552713678800501e-13,
+        3.694822225952521e-13,
+        4.973799150320701e-14
+      ],
+      "energy_scaled_error": 3.780539142900137e-16,
+      "load_scaled_error": 3.1495898350832232e-15,
+      "q24_q32_energy_uncertainty": 1.1102230246251565e-16,
+      "q24_q32_load_uncertainty": 5.684341886080802e-14,
+      "native_I_error": 5.684341886080802e-14,
+      "native_I_scaled_error": 6.187057492337568e-16,
+      "q24_q32_I_uncertainty": 0.0,
+      "normalization_only_energy_change": [
+        2.220446049250313e-16,
+        -8.673617379884035e-19,
+        0.0
+      ],
+      "normalization_only_load_change": [
+        7.815970093361102e-14,
+        1.8474111129762605e-13,
+        4.263256414560601e-14,
+        -2.842170943040401e-14,
+        -8.526512829121202e-14,
+        7.105427357601002e-14,
+        1.4210854715202004e-13,
+        1.7053025658242404e-13,
+        4.973799150320701e-14
+      ],
+      "surface_projection_RMS": 1.432840343443287e-14,
+      "surface_projection_Linf": 4.263256414560601e-14,
+      "native_I_vs_unprojected_ray_Linf": 7.105427357601002e-14,
+      "physical_rule_passed": true,
+      "normalization_passed": true
+    },
+    "state-2": {
+      "native_minus_reference_energy": [
+        6.661338147750939e-16,
+        0.0,
+        7.105427357601002e-15
+      ],
+      "native_minus_reference_load": [
+        -1.1368683772161603e-13,
+        3.694822225952521e-13,
+        1.4210854715202004e-13,
+        -2.842170943040401e-14,
+        3.410605131648481e-13,
+        1.7053025658242404e-13,
+        3.979039320256561e-13,
+        2.8421709430404007e-13,
+        8.526512829121202e-14
+      ],
+      "energy_scaled_error": 6.661338147750939e-16,
+      "load_scaled_error": 2.961784124330181e-15,
+      "q24_q32_energy_uncertainty": 3.552713678800501e-15,
+      "q24_q32_load_uncertainty": 2.8421709430404007e-13,
+      "native_I_error": 4.263256414560601e-14,
+      "native_I_scaled_error": 4.639398611842761e-16,
+      "q24_q32_I_uncertainty": 0.0,
+      "normalization_only_energy_change": [
+        5.551115123125783e-16,
+        0.0,
+        0.0
+      ],
+      "normalization_only_load_change": [
+        5.684341886080802e-14,
+        3.694822225952521e-13,
+        1.1368683772161603e-13,
+        8.526512829121202e-14,
+        -9.379164112033322e-13,
+        -2.842170943040401e-14,
+        1.1084466677857563e-12,
+        7.389644451905042e-13,
+        4.405364961712621e-13
+      ],
+      "surface_projection_RMS": 1.4957149392117332e-14,
+      "surface_projection_Linf": 4.263256414560601e-14,
+      "native_I_vs_unprojected_ray_Linf": 4.263256414560601e-14,
+      "physical_rule_passed": true,
+      "normalization_passed": true
+    }
+  },
+  "strict_reference_match_passed": false,
+  "prior_accuracy_failures_reassessed": false,
+  "hanging_phase_evolution_guard_retained": true,
+  "limitations": "Equivalence and bounded functional checks only; original mirror-branch, spatial/temporal and Gauss6 failures remain.",
+  "protected_BP3": {
+    "files": 34,
+    "unchanged": true,
+    "manifest": "build-particle-free/evolving-phase/protected-bp3.json",
+    "manifest_sha256": "fec5df6c7a5269c02fb793903ae21deae879c180b77d6e3c71d4d8aad68eee98"
+  }
+}

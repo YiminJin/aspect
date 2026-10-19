@@ -1,3 +1,11 @@
+Current evolving-phase continuation (19 October 2026): see
+[particle-free STATUS](particle_free/STATUS.md) for the selected domain-free
+DG cohesive endpoint implementation, completed bounded hanging-node and P2
+physical-response qualifications, and retained limitations. The resolved P2 seed
+has zero unloaded drift and passes the selected early-growth temporal/spatial/work
+screens; strict mirror matching remains false. P3 is recommended, not begun.
+The dated entries below remain historical evidence.
+
 # Worktree checkpoint — scientific task remains open, 2026-10-15
 
 The user requests a clean committed branch for a new worktree, not scientific

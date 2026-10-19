@@ -26,6 +26,7 @@
 #include <aspect/plugins.h>
 #include <aspect/phase_field.h>
 #include <aspect/reconstructed_fault/manager.h>
+#include <aspect/reconstructed_fault/endpoint_phase_constraints.h>
 #include <aspect/reconstructed_fault/surface_system.h>
 #include <aspect/simulator/solver/block_stokes_preconditioner.h>
 #include <aspect/simulator/solver/stokes_matrix_free_local_smoothing.h>
@@ -516,7 +517,10 @@ namespace aspect
       endpoint=material.make_fe_endpoint_trial(bulk,slip);
     else
       {endpoint.strain.reinit(endpoint_strain);endpoint.strain=endpoint_strain;endpoint.Z=endpoint_Z;}
-    return [this,&material,owner,linearization,restricted,active,bulk,endpoint](const Vector<double> &direction)
+    const auto phase_block=introspection.variable("phase_field").block_index;
+    const auto phase_coordinates=std::make_shared<internal::EndpointPhaseConstraints>(
+      current_constraints,bulk.get_block_indices().block_start(phase_block),bulk.block(phase_block).size());
+    return [this,&material,owner,linearization,restricted,active,bulk,endpoint,phase_coordinates](const Vector<double> &direction)
     {
       TimerOutput::Scope timer(computing_timer,"Fault: endpoint linear tangent");
       const auto started=std::chrono::steady_clock::now();
@@ -580,8 +584,8 @@ namespace aspect
                   correction+=delta;
                   for(unsigned int f=0;f<dv.size();++f)for(unsigned int i=0;i<dv[f].size();++i)dv[f][i]+=deltaV[f][i];
                   Vector<double>updated=gradient(),change(updated);change-=result;
-                  uncertainty=change.l2_norm();result=updated;
-                  if(uncertainty<=phase_field_handler->solver_parameters.linear_solver_tolerance*result.l2_norm())
+                  uncertainty=phase_coordinates->transpose(change).l2_norm();result=updated;
+                  if(uncertainty<=phase_field_handler->solver_parameters.linear_solver_tolerance*phase_coordinates->transpose(result).l2_norm())
                     {accurate=true;break;}
                 }
               AssertThrow(accurate,ExcMessage("Mechanical residual corrections did not resolve the endpoint tangent at the configured phase linear accuracy."));
@@ -591,9 +595,9 @@ namespace aspect
           pcout<<std::setprecision(17)<<"   Endpoint linear tangent: seconds="
                <<std::chrono::duration<double>(std::chrono::steady_clock::now()-started).count()
                <<", Krylov="<<iterations<<", rhs="<<norm<<", inner target="
-               <<parameters.linear_stokes_solver_tolerance*norm<<", action norm="<<result.l2_norm()
+               <<parameters.linear_stokes_solver_tolerance*norm<<", action norm="<<phase_coordinates->transpose(result).l2_norm()
                <<", linear calls="<<linear_calls<<", action correction="<<uncertainty
-               <<", action target="<<phase_field_handler->solver_parameters.linear_solver_tolerance*result.l2_norm()<<std::endl;
+               <<", action target="<<phase_field_handler->solver_parameters.linear_solver_tolerance*phase_coordinates->transpose(result).l2_norm()<<std::endl;
           pcout<<"   Endpoint tangent uncondensed check: bulk="<<bulk_error.l2_norm()
                <<", free contact="<<contact_error<<std::endl;
           current_constraints.copy_from(saved_constraints);
