@@ -93,6 +93,10 @@ namespace aspect
       // Derived point samples of the immutable FE anchor. This cache never
       // transfers samples back into d_R and is invalidated at publication.
       mutable std::map<std::pair<CellId,std::array<double,dim>>,SymmetricTensor<2,dim>> stress_samples;
+      struct ParticleSamples;
+      mutable std::shared_ptr<ParticleSamples> particle_samples;
+      struct MechanicalSamples;
+      mutable std::shared_ptr<MechanicalSamples> mechanical_samples;
       std::uint64_t geometry_version;
       types::global_dof_index n_dofs;
       double m=0.,G=0.,eta=0.,initial_fracture=0.;

@@ -1,0 +1,60 @@
+{
+  "samples": [
+    {
+      "step": "0",
+      "source_coefficient_error": "0",
+      "source_allowance_error": "0",
+      "QP_stress_error_Pa": "0",
+      "QP_operand_scale_Pa": "0",
+      "hanging_relations": "3060",
+      "restricted_rows": "3",
+      "pressure_scaling": "6407624059906406",
+      "mu_min": "0.5308113179631313",
+      "mu_max": "0.53106897213319282"
+    },
+    {
+      "step": "1",
+      "source_coefficient_error": "0",
+      "source_allowance_error": "0",
+      "QP_stress_error_Pa": "2.166860390519916e-11",
+      "QP_operand_scale_Pa": "450048.93278784811",
+      "hanging_relations": "3060",
+      "restricted_rows": "3",
+      "pressure_scaling": "6407624059906406",
+      "mu_min": "0.53083058055054655",
+      "mu_max": "0.53103428786121198"
+    },
+    {
+      "step": "2",
+      "source_coefficient_error": "0",
+      "source_allowance_error": "0",
+      "QP_stress_error_Pa": "1.0758211343360923e-10",
+      "QP_operand_scale_Pa": "1306013.2927220475",
+      "hanging_relations": "3060",
+      "restricted_rows": "3",
+      "pressure_scaling": "12238561947270796",
+      "mu_min": "0.5307456173987769",
+      "mu_max": "0.53102854327113791"
+    }
+  ],
+  "counters": {
+    "step": 2.0,
+    "projection_queries": 331898.0,
+    "segment_tests": 119267.0,
+    "dg_fevalues": 11930.0,
+    "native_fevalues": 12914.0,
+    "history_misses": 110264.0,
+    "mass_inverse": 6209.0,
+    "roundoff_geometry": 6209.0,
+    "lookup_builds": 2.0,
+    "B_builds": 10.0,
+    "G_builds": 2.0,
+    "bulk_builds": 3.0,
+    "B_reference_checks": 231.0,
+    "G_reference_checks": 228.0,
+    "C_reference_checks": 212.0,
+    "B_relative_error_max": 1.008372192725265e-15,
+    "G_relative_error_max": 4.169308945584959e-15,
+    "C_relative_error_max": 1.708662035507144e-15
+  }
+}

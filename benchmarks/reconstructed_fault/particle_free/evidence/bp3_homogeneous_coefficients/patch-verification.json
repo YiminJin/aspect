@@ -1,0 +1,13 @@
+{
+  "basis": "bp3-dg-stationary-optimized-20261017-r3 full source snapshot",
+  "files": [
+    "include/aspect/material_model/phase_field_fault.h",
+    "source/material_model/phase_field_fault.cc",
+    "source/material_model/phase_field_fault/constitutive.cc",
+    "source/material_model/phase_field_fault/history.cc",
+    "tests/phase_field_fault_test_access.h",
+    "unit_tests/phase_field_fault_maxwell.cc"
+  ],
+  "patch_sha256": "74658a45b2de711cd3af2e800c0784c9b47f67577c801d6533acb2bb915984bf",
+  "applies_and_matches_current_sources": true
+}

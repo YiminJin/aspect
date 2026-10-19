@@ -1,0 +1,2282 @@
+set Additional shared libraries                = ./plugin/libbp3_restore_150x50.release.so, ./plugin/libbp3_coupled_checks.release.so
+set Adiabatic surface temperature              = 0.
+set CFL number                                 = 0.5
+set Dimension                                  = 2
+set End time                                   = 47336400000
+set Max nonlinear iterations                   = 30
+set Max nonlinear iterations in pre-refinement = 2147483647
+set Maximum first time step                    = 4e6
+set Maximum relative increase in time step     = 91
+set Maximum time step                          = 4e7
+set Nonlinear solver failure strategy          = cut timestep size
+set Nonlinear solver scheme                    = single Advection, iterated Newton Stokes
+set Nonlinear solver tolerance                 = 1e-8
+set Output directory                           = ./output
+set Output directory LFS stripe count          = 0
+set Pressure normalization                     = no
+set Resume computation                         = false
+set Start time                                 = 0.
+set Surface pressure                           = 0
+set Timing output frequency                    = 100
+set Use conduction timestep                    = false
+set Use operator splitting                     = false
+set Use years instead of seconds               = false
+set World builder file                         =
+subsection Adiabatic conditions model
+  set Model name = compute profile
+  subsection Ascii data model
+    set Data directory = $ASPECT_SOURCE_DIR/tests/adiabatic-conditions/ascii-data/test/
+    set Data file name =
+    set Scale factor   = 1.
+  end
+  subsection Compute entropy profile
+    set Number of points = 1000
+    set Surface entropy  = 0
+  end
+  subsection Compute profile
+    set Composition reference profile  = initial composition
+    set Function constants             =
+    set Function expression            = 0
+    set Number of points               = 1000
+    set Use surface condition function = false
+    set Variable names                 = x,t
+    subsection Surface condition function
+      set Function constants  =
+      set Function expression = 0; 0
+      set Variable names      = x,t
+    end
+  end
+  subsection Function
+    set Function constants  =
+    set Function expression = 0.0; 0.0; 1.0
+    set Variable names      = depth
+  end
+end
+subsection Boundary composition model
+  set Allow fixed composition on outflow boundaries = false for models without melt
+  set Fixed composition boundary indicators         =
+  set List of model names                           =
+  set List of model operators                       = add
+  set Model name                                    = unspecified
+  subsection Ascii data model
+    set Data directory             = $ASPECT_SOURCE_DIR/data/boundary-composition/ascii-data/test/
+    set Data file name             = box_2d_%s.%d.txt
+    set Data file time step        = 1e6
+    set Decreasing file order      = false
+    set First data file model time = 0
+    set First data file number     = 0
+    set Scale factor               = 1.
+  end
+  subsection Box
+    set Bottom composition =
+    set Left composition   =
+    set Right composition  =
+    set Top composition    =
+  end
+  subsection Box with lithosphere boundary indicators
+    set Bottom composition            =
+    set Left composition              =
+    set Left composition lithosphere  =
+    set Right composition             =
+    set Right composition lithosphere =
+    set Top composition               =
+  end
+  subsection Function
+    set Coordinate system   = cartesian
+    set Function constants  =
+    set Function expression = 0
+    set Variable names      = x,y,t
+  end
+  subsection Initial composition
+    set Maximal composition = 1.
+    set Minimal composition = 0.
+  end
+  subsection Spherical constant
+    set Inner composition = 1.
+    set Outer composition = 0.
+  end
+end
+subsection Boundary convective heating model
+  set Convective heating boundary indicators        =
+  set List of boundary heat flux model names        =
+  set List of boundary temperature model names      =
+  set List of heat transfer coefficient model names =
+  subsection Function
+    set Coordinate system   = cartesian
+    set Function constants  =
+    set Function expression = 0
+    set Variable names      = x,y,t
+  end
+end
+subsection Boundary fluid pressure model
+  set Plugin name = density
+  subsection Density
+    set Density formulation = solid density
+  end
+end
+subsection Boundary heat flux model
+  set Fixed heat flux boundary indicators =
+  set Model name                          = function
+  subsection Function
+    set Coordinate system   = cartesian
+    set Function constants  =
+    set Function expression = 0
+    set Variable names      = x,y,t
+  end
+end
+subsection Boundary temperature model
+  set Allow fixed temperature on outflow boundaries = true
+  set Fixed temperature boundary indicators         =
+  set List of model names                           =
+  set List of model operators                       = add
+  set Model name                                    = unspecified
+  subsection Ascii data model
+    set Data directory             = $ASPECT_SOURCE_DIR/data/boundary-temperature/ascii-data/test/
+    set Data file name             = box_2d_%s.%d.txt
+    set Data file time step        = 1e6
+    set Decreasing file order      = false
+    set First data file model time = 0
+    set First data file number     = 0
+    set Scale factor               = 1.
+  end
+  subsection Box
+    set Bottom temperature = 0.
+    set Left temperature   = 1.
+    set Right temperature  = 0.
+    set Top temperature    = 0.
+  end
+  subsection Box with lithosphere boundary indicators
+    set Bottom temperature            = 0.
+    set Left temperature              = 1.
+    set Left temperature lithosphere  = 0.
+    set Right temperature             = 0.
+    set Right temperature lithosphere = 0.
+    set Top temperature               = 0.
+  end
+  subsection Constant
+    set Boundary indicator to temperature mappings =
+  end
+  subsection Dynamic core
+    set Alpha                     = 1.35e-5
+    set Beta composition          = 1.1
+    set CMB pressure              = 0.14e12
+    set Core conductivity         = 60.
+    set Core density              = 12.5e3
+    set Core heat capacity        = 840.
+    set Delta                     = 0.5
+    set Gravity acceleration      = 9.8
+    set Initial light composition = 0.01
+    set Inner temperature         = 6000.
+    set K0                        = 4.111e11
+    set Lh                        = 750e3
+    set Max iteration             = 30000
+    set Outer temperature         = 0.
+    set Rh                        = -27.7e6
+    set Rho0                      = 7.019e3
+    set dR over dt                = 0.
+    set dT over dt                = 0.
+    set dX over dt                = 0.
+    subsection Geotherm parameters
+      set Composition dependency = true
+      set Theta                  = 0.11
+      set Tm0                    = 1695.
+      set Tm1                    = 10.9
+      set Tm2                    = -8.0
+      set Use BW11               = false
+    end
+    subsection Other energy source
+      set File name =
+    end
+    subsection Radioactive heat source
+      set Half life times                        =
+      set Heating rates                          =
+      set Initial concentrations                 =
+      set Number of radioactive heating elements = 0
+    end
+  end
+  subsection Function
+    set Coordinate system   = cartesian
+    set Function constants  =
+    set Function expression = 0
+    set Maximal temperature = 3773.
+    set Minimal temperature = 273.
+    set Variable names      = x,y,t
+  end
+  subsection Initial temperature
+    set Maximal temperature = 3773.
+    set Minimal temperature = 0.
+  end
+  subsection Spherical constant
+    set Inner temperature = 6000.
+    set Outer temperature = 0.
+  end
+end
+subsection Boundary traction model
+  set Prescribed traction boundary indicators =
+  subsection Ascii data model
+    set Data directory                              = $ASPECT_SOURCE_DIR/data/boundary-traction/ascii-data/test/
+    set Data file name                              = box_2d_%s.%d.txt
+    set Data file time step                         = 1e6
+    set Decreasing file order                       = false
+    set First data file model time                  = 0
+    set First data file number                      = 0
+    set Prescribe pressure instead of full traction = true
+    set Scale factor                                = 1.
+    set Use spherical unit vectors                  = false
+  end
+  subsection Function
+    set Coordinate system          = cartesian
+    set Function constants         =
+    set Function expression        = 0; 0
+    set Use spherical unit vectors = false
+    set Variable names             = x,y,t
+  end
+  subsection Initial lithostatic pressure
+    set Number of integration points = 1000
+    set Representative point         =
+  end
+end
+subsection Boundary velocity model
+  set Prescribed velocity boundary indicators = left:reconstructed fault BP3, right:reconstructed fault BP3, bottom:reconstructed fault BP3
+  set Tangential velocity boundary indicators =
+  set Zero velocity boundary indicators       =
+  subsection Ascii data model
+    set Data directory             = $ASPECT_SOURCE_DIR/data/boundary-velocity/ascii-data/test/
+    set Data file name             = box_2d_%s.%d.txt
+    set Data file time step        = 1e6
+    set Decreasing file order      = false
+    set First data file model time = 0
+    set First data file number     = 0
+    set Scale factor               = 1.
+    set Use spherical unit vectors = false
+  end
+  subsection Function
+    set Coordinate system          = cartesian
+    set Function constants         =
+    set Function expression        = 0; 0
+    set Use spherical unit vectors = false
+    set Variable names             = x,y,t
+  end
+  subsection GPlates model
+    set Data directory             = $ASPECT_SOURCE_DIR/data/boundary-velocity/gplates/
+    set Data file time step        = 1e6
+    set Decreasing file order      = false
+    set First data file model time = 0.
+    set First data file number     = 0
+    set Lithosphere thickness      = 100000.
+    set Point one                  = 1.570796,0.0
+    set Point two                  = 1.570796,1.570796
+    set Scale factor               = 1.
+    set Velocity file name         = phi.%d
+  end
+end
+subsection Checkpointing
+  set Steps between checkpoint = 10
+  set Time between checkpoint  = 0
+end
+subsection Compositional fields
+  set Compositional field methods = static, static, static, static, static
+  set List of normalized fields   =
+  set Mapped particle properties  =
+  set Names of fields             = tau_xx, tau_yy, tau_xy, theta_initial, strengthening
+  set Number of fields            = 5
+  set Types of fields             = stress, stress, stress, generic, chemical composition
+end
+subsection Discretization
+  set Composition polynomial degree                = 2
+  set Stokes velocity polynomial degree            = 2
+  set Temperature polynomial degree                = 2
+  set Use discontinuous composition discretization = false
+  set Use discontinuous temperature discretization = false
+  set Use equal order interpolation for Stokes     = false
+  set Use locally conservative discretization      = false
+  subsection Stabilization parameters
+    set Discontinuous penalty                                                 = 10.
+    set Global composition maximum                                            = 1.7976931348623157e+308
+    set Global composition minimum                                            = -1.7976931348623157e+308
+    set Global temperature maximum                                            = 1.7976931348623157e+308
+    set Global temperature minimum                                            = -1.7976931348623157e+308
+    set List of compositional fields with disabled boundary entropy viscosity =
+    set Stabilization method                                                  = entropy viscosity
+    set Use artificial viscosity smoothing                                    = false
+    set Use limiter for discontinuous composition solution                    = false
+    set Use limiter for discontinuous temperature solution                    = false
+    set alpha                                                                 = 2
+    set beta                                                                  = 0.052
+    set cR                                                                    = 0.11
+    set gamma                                                                 = 0.0
+  end
+end
+subsection Fault reconstruction
+  set Association support                    = stationary profile
+  set Boundary completion                    = automatic prescribed
+  set Fit prescribed geometry to phase field = false
+  set Prescribed faults file                 = ./fault.txt
+  set Ridge coefficient                      = 1
+  set Structural point spacing               = 10
+end
+subsection Formulation
+  set Enable additional Stokes RHS        = false
+  set Enable elasticity                   = false
+  set Enable phase field                  = true
+  set Enable prescribed dilation          = false
+  set Formulation                         = custom
+  set Mass conservation                   = ask material model
+  set Reconstruct faults from phase field = true
+  set Temperature equation                = real density
+  set Use implicit constitutive model     = false
+end
+subsection Geometry model
+  set Model name = box
+  subsection Box
+    set Box origin X coordinate = -60000
+    set Box origin Y coordinate = 0.
+    set Box origin Z coordinate = 0.
+    set X extent                = 150000
+    set X periodic              = false
+    set X repetitions           = 75
+    set Y extent                = 50000
+    set Y periodic              = false
+    set Y repetitions           = 25
+    set Z extent                = 1.
+    set Z periodic              = false
+    set Z repetitions           = 1
+  end
+  subsection Box with lithosphere boundary indicators
+    set Box origin X coordinate   = 0.
+    set Box origin Y coordinate   = 0.
+    set Box origin Z coordinate   = 0.
+    set Lithospheric thickness    = 0.2
+    set Use merged grids          = true
+    set X extent                  = 1.
+    set X periodic                = false
+    set X periodic lithosphere    = false
+    set X repetitions             = 1
+    set Y extent                  = 1.
+    set Y periodic                = false
+    set Y periodic lithosphere    = false
+    set Y repetitions             = 1
+    set Y repetitions lithosphere = 1
+    set Z extent                  = 1.
+    set Z periodic                = false
+    set Z repetitions             = 1
+    set Z repetitions lithosphere = 1
+  end
+  subsection Chunk
+    set Chunk inner radius      = 0.
+    set Chunk maximum latitude  = 1.
+    set Chunk maximum longitude = 1.
+    set Chunk minimum latitude  = 0.
+    set Chunk minimum longitude = 0.
+    set Chunk outer radius      = 1.
+    set Latitude repetitions    = 1
+    set Longitude repetitions   = 1
+    set Radius repetitions      = 1
+  end
+  subsection Chunk with lithosphere boundary indicators
+    set Chunk inner radius             = 0.
+    set Chunk maximum latitude         = 1.
+    set Chunk maximum longitude        = 1.
+    set Chunk middle boundary radius   = 1
+    set Chunk minimum latitude         = 0.
+    set Chunk minimum longitude        = 0.
+    set Chunk outer radius             = 1.
+    set Inner chunk radius repetitions = 1
+    set Latitude repetitions           = 1
+    set Longitude repetitions          = 1
+    set Outer chunk radius repetitions = 1
+    set Use merged grids               = true
+  end
+  subsection Ellipsoidal chunk
+    set Depth                    = 500000.0
+    set Depth subdivisions       = 1
+    set East-West subdivisions   = 1
+    set Eccentricity             = 8.1819190842622e-2
+    set NE corner                =
+    set NW corner                =
+    set North-South subdivisions = 1
+    set SE corner                =
+    set SW corner                =
+    set Semi-major axis          = 6378137.0
+  end
+  subsection Initial topography model
+    set Model name = zero topography
+    subsection Ascii data model
+      set Data directory = $ASPECT_SOURCE_DIR/data/geometry-model/initial-topography-model/ascii-data/test/
+      set Data file name = box_2d_%s.0.txt
+      set Scale factor   = 1.
+    end
+    subsection Function
+      set Coordinate system        = cartesian
+      set Function constants       =
+      set Function expression      = 0
+      set Maximum topography value = 2000.
+      set Variable names           = x,y,t
+    end
+    subsection Prm polygon
+      set Topography parameters =
+    end
+  end
+  subsection Sphere
+    set Radius = 6371000.
+  end
+  subsection Spherical shell
+    set Cells along circumference  = 0
+    set Custom mesh subdivision    = none
+    set Initial lateral refinement = 0
+    set Inner radius               = 3481000.
+    set List of radial values      =
+    set Number of slices           = 1
+    set Opening angle              = 360.
+    set Outer radius               = 6336000.
+    set Phi periodic               = false
+  end
+end
+subsection Gravity model
+  set Model name = vertical
+  subsection Ascii data model
+    set Data directory = $ASPECT_SOURCE_DIR/data/gravity-model/
+    set Data file name = prem.txt
+    set Scale factor   = 1.
+  end
+  subsection Function
+    set Coordinate system   = cartesian
+    set Function constants  =
+    set Function expression = 0; 0
+    set Variable names      = x,y,t
+  end
+  subsection Radial constant
+    set Magnitude = 9.81
+  end
+  subsection Radial linear
+    set Magnitude at bottom  = 10.7
+    set Magnitude at surface = 9.8
+  end
+  subsection Vertical
+    set Magnitude = 0
+  end
+end
+subsection Heating model
+  set List of model names =
+  subsection Adiabatic heating
+    set Use simplified adiabatic heating = false
+  end
+  subsection Adiabatic heating of melt
+    set Use simplified adiabatic heating = false
+  end
+  subsection Compositional heating
+    set Compositional heating values                          = 0.
+    set Use compositional field for heat production averaging = 1
+  end
+  subsection Constant heating
+    set Radiogenic heating rate = 0.
+  end
+  subsection Function
+    set Coordinate system   = cartesian
+    set Function constants  =
+    set Function expression = 0
+    set Variable names      = x,y,t
+  end
+  subsection Latent heat melt
+    set Melting entropy change                      = -300.
+    set Retrieve entropy change from material model = false
+  end
+  subsection Radioactive decay
+    set Crust composition number      = 0
+    set Crust defined by composition  = false
+    set Crust depth                   = 0.
+    set Half decay times              =
+    set Heating rates                 =
+    set Initial concentrations crust  =
+    set Initial concentrations mantle =
+    set Number of elements            = 0
+  end
+  subsection Shear heating
+    set Cohesion for maximum shear stress          = 2e7
+    set Friction angle for maximum shear stress    = 0
+    set Limit stress contribution to shear heating = false
+  end
+  subsection Tidal heating
+    set Constant tidal strain rate               = 2e-10
+    set Custom distribution of tidal strain rate = constant
+    set Elastic shear modulus                    = 3.3e9
+    set Maximum tidal strain rate                = 2.81e-10
+    set Minimum tidal strain rate                = 1.67e-10
+    set Tidal frequency                          = 2.048e-5
+  end
+end
+subsection Initial composition model
+  set List of model names                 =
+  set List of model operators             = add
+  set Model name                          = reconstructed fault BP3
+  set Volume of fluid initialization type =
+  subsection Ascii data model
+    set Data directory            = $ASPECT_SOURCE_DIR/data/initial-composition/ascii-data/test/
+    set Data file name            = initial_composition_top_mantle_box_3d.txt
+    set Data file names           = initial_composition_top_mantle_box_3d.txt
+    set First point on slice      = 0.0,1.0,0.0
+    set Interpolation scheme      = linear
+    set Scale factor              = 1.
+    set Second point on slice     = 1.0,0.0,0.0
+    set Slice dataset in 2D plane = false
+  end
+  subsection BP3
+    set Fixed phase reference file =
+  end
+  subsection Entropy table lookup
+    set Data directory     = $ASPECT_SOURCE_DIR/data/material-model/entropy-table/pyrtable/
+    set Material file name = material_table_temperature_pressure.txt
+  end
+  subsection Function
+    set Coordinate system   = cartesian
+    set Function constants  =
+    set Function expression = 0
+    set Variable names      = x,y,t
+  end
+  subsection Slab model
+    set Data directory = $ASPECT_SOURCE_DIR/data/initial-composition/slab-model/
+    set Data file name = shell_3d.txt
+    set Scale factor   = 1.
+  end
+  subsection World builder
+    set List of relevant compositions =
+  end
+end
+subsection Initial temperature model
+  set List of model names     =
+  set List of model operators = add
+  set Model name              = function
+  subsection Adiabatic
+    set Age bottom boundary layer    = 0.
+    set Age top boundary layer       = 0.
+    set Amplitude                    = 0.
+    set Cooling model                = half-space cooling
+    set Data directory               = $ASPECT_SOURCE_DIR/data/initial-temperature/adiabatic/
+    set Data file name               = adiabatic.txt
+    set Lithosphere thickness        = 125e3
+    set Position                     = center
+    set Radius                       = 0.
+    set Scale factor                 = 1.
+    set Subadiabaticity              = 0.
+    set Top boundary layer age model = constant
+    subsection Age function
+      set Coordinate system   = cartesian
+      set Function constants  =
+      set Function expression = 0
+      set Variable names      = x,y,t
+    end
+    subsection Function
+      set Function constants  =
+      set Function expression = 0
+      set Variable names      = x,t
+    end
+  end
+  subsection Adiabatic boundary
+    set Adiabatic temperature gradient = 0.0005
+    set Data directory                 = $ASPECT_SOURCE_DIR/data/initial-temperature/adiabatic-boundary/
+    set Data file name                 = adiabatic_boundary.txt
+    set Isotherm temperature           = 1673.15
+    set Scale factor                   = 1.
+    set Surface temperature            = 273.15
+  end
+  subsection Ascii data model
+    set Data directory            = $ASPECT_SOURCE_DIR/data/initial-temperature/ascii-data/test/
+    set Data file name            = initial_isotherm_500K_box_3d.txt
+    set Data file names           = initial_isotherm_500K_box_3d.txt
+    set First point on slice      = 0.0,1.0,0.0
+    set Interpolation scheme      = linear
+    set Scale factor              = 1.
+    set Second point on slice     = 1.0,0.0,0.0
+    set Slice dataset in 2D plane = false
+  end
+  subsection Ascii profile
+    set Data directory = $ASPECT_SOURCE_DIR/data/initial-temperature/ascii-profile/tests/
+    set Data file name = simple_test.txt
+    set Scale factor   = 1.
+  end
+  subsection Continental geotherm
+    set Layer thicknesses                           = 30000.
+    set Lithosphere-Asthenosphere boundary isotherm = 1673.15
+    set Surface temperature                         = 273.15
+  end
+  subsection Function
+    set Coordinate system   = cartesian
+    set Function constants  =
+    set Function expression = 293
+    set Variable names      = x,y,t
+  end
+  subsection Harmonic perturbation
+    set Lateral wave number one = 3
+    set Lateral wave number two = 2
+    set Magnitude               = 1.0
+    set Reference temperature   = 1600.0
+    set Vertical wave number    = 1
+  end
+  subsection Inclusion shape perturbation
+    set Ambient temperature   = 1.0
+    set Center X              = 0.5
+    set Center Y              = 0.5
+    set Center Z              = 0.5
+    set Inclusion gradient    = constant
+    set Inclusion shape       = circle
+    set Inclusion temperature = 0.0
+    set Shape radius          = 1.0
+  end
+  subsection Lithosphere Mask
+    set Data directory             = $ASPECT_SOURCE_DIR/data/initial-temperature/lithosphere-mask/
+    set Depth specification method = Value
+    set LAB depth filename         = LAB_CAM2016.txt
+    set Lithosphere temperature    = 1600.
+    set Maximum lithosphere depth  = 200000.0
+  end
+  subsection Patch on S40RTS
+    set Maximum grid depth                                       = 700000.0
+    set Remove temperature heterogeneity down to specified depth = -1.7976931348623157e+308
+    set Smoothing length scale                                   = 200000.0
+    subsection Ascii data model
+      set Data directory = $ASPECT_SOURCE_DIR/data/initial-temperature/patch-on-S40RTS/test/
+      set Data file name = upper_shell_3d.txt
+      set Scale factor   = 1.
+    end
+  end
+  subsection Random Gaussian perturbation
+    set Maximum magnitude       = 25.0
+    set Number of perturbations = 100
+    set Width                   = 1000.0
+  end
+  subsection S40RTS perturbation
+    set Data directory                                               = $ASPECT_SOURCE_DIR/data/initial-temperature/S40RTS/
+    set Initial condition file name                                  = S40RTS.sph
+    set Maximum degree                                               = 20
+    set Reference temperature                                        = 1600.0
+    set Remove degree 0 from perturbation                            = true
+    set Remove temperature heterogeneity down to specified depth     = -1.7976931348623157e+308
+    set Specify a lower maximum degree                               = false
+    set Spline knots depth file name                                 = Spline_knots.txt
+    set Thermal expansion coefficient in initial temperature scaling = 2e-5
+    set Use thermal expansion coefficient from material model        = false
+    set Vs to density scaling                                        = 0.25
+    set Vs to density scaling method                                 = constant
+    subsection Ascii data vs to density model
+      set Data directory = $ASPECT_SOURCE_DIR/data/initial-temperature/S40RTS/
+      set Data file name = vs_to_density_Steinberger.txt
+      set Scale factor   = 1.
+    end
+  end
+  subsection SAVANI perturbation
+    set Data directory                                               = $ASPECT_SOURCE_DIR/data/initial-temperature/SAVANI/
+    set Initial condition file name                                  = savani.dlnvs.60.m.ab
+    set Maximum degree                                               = 20
+    set Reference temperature                                        = 1600.0
+    set Remove degree 0 from perturbation                            = true
+    set Remove temperature heterogeneity down to specified depth     = -1.7976931348623157e+308
+    set Specify a lower maximum degree                               = false
+    set Spline knots depth file name                                 = Spline_knots.txt
+    set Thermal expansion coefficient in initial temperature scaling = 2e-5
+    set Use thermal expansion coefficient from material model        = false
+    set Vs to density scaling                                        = 0.25
+    set Vs to density scaling method                                 = constant
+    subsection Ascii data vs to density model
+      set Data directory = $ASPECT_SOURCE_DIR/data/initial-temperature/S40RTS/
+      set Data file name = vs_to_density_Steinberger.txt
+      set Scale factor   = 1.
+    end
+  end
+  subsection Spherical gaussian perturbation
+    set Amplitude                           = 0.01
+    set Angle                               = 0.
+    set Filename for initial geotherm table = initial-geotherm-table
+    set Non-dimensional depth               = 0.7
+    set Sigma                               = 0.2
+    set Sign                                = 1.
+  end
+  subsection Spherical hexagonal perturbation
+    set Angular mode    = 6
+    set Rotation offset = -45.
+  end
+end
+subsection Material model
+  set Material averaging = default averaging
+  set Model name         = phase field fault
+  subsection Ascii reference profile
+    set Thermal conductivity       = 4.0
+    set Thermal viscosity exponent = 0.
+    set Transition depths          = 1.5e5, 4.1e5, 6.6e5
+    set Use TALA                   = false
+    set Viscosity                  = 1e21
+    set Viscosity prefactors       = 10., 0.1, 1., 10.
+    subsection Ascii data model
+      set Data directory = $ASPECT_SOURCE_DIR/data/adiabatic-conditions/ascii-data/
+      set Data file name =
+      set Scale factor   = 1.
+    end
+  end
+  subsection Averaging
+    set Averaging operation = none
+    set Base model          = simple
+    set Bell shape limit    = 1.
+  end
+  subsection Compositing
+    set Compressibility                = unspecified
+    set Density                        = unspecified
+    set Entropy derivative pressure    = unspecified
+    set Entropy derivative temperature = unspecified
+    set Reaction terms                 = unspecified
+    set Specific heat                  = unspecified
+    set Thermal conductivity           = unspecified
+    set Thermal expansion coefficient  = unspecified
+    set Viscosity                      = unspecified
+  end
+  subsection Composition reaction model
+    set Composition viscosity prefactor 1              = 1.0
+    set Composition viscosity prefactor 2              = 1.0
+    set Density differential for compositional field 1 = 0.
+    set Density differential for compositional field 2 = 0.
+    set Reaction depth                                 = 0.
+    set Reference density                              = 3300.
+    set Reference specific heat                        = 1250.
+    set Reference temperature                          = 293.
+    set Thermal conductivity                           = 4.7
+    set Thermal expansion coefficient                  = 2e-5
+    set Thermal viscosity exponent                     = 0.0
+    set Viscosity                                      = 5e24
+  end
+  subsection Depth dependent model
+    set Base model              = simple
+    set Data directory          = $ASPECT_SOURCE_DIR/data/material-model/rheology/
+    set Data file name          = ascii_depth_profile.txt
+    set Depth dependence method = None
+    set Depth list              =
+    set Reference viscosity     = 1.7976931348623157e+308
+    set Scale factor            = 1.
+    set Viscosity list          =
+    subsection Viscosity depth function
+      set Function constants  =
+      set Function expression = 1.0e21
+      set Variable names      = x,t
+    end
+  end
+  subsection Depth dependent viscosity
+    set Data directory = $ASPECT_SOURCE_DIR/data/material-model/rheology/
+    set Data file name = ascii_depth_profile.txt
+    set Scale factor   = 1.
+  end
+  subsection Diffusion dislocation
+    set Activation energies for diffusion creep   = 375e3
+    set Activation energies for dislocation creep = 530e3
+    set Activation volumes for diffusion creep    = 6e-6
+    set Activation volumes for dislocation creep  = 1.4e-5
+    set Densities                                 = 3300.
+    set Effective viscosity coefficient           = 1.0
+    set Grain size                                = 1e-3
+    set Grain size exponents for diffusion creep  = 3.
+    set Heat capacity                             = 1.25e3
+    set Maximum strain rate ratio iterations      = 40
+    set Maximum viscosity                         = 1e28
+    set Minimum strain rate                       = 1.4e-20
+    set Minimum viscosity                         = 1e17
+    set Prefactors for diffusion creep            = 1.5e-15
+    set Prefactors for dislocation creep          = 1.1e-16
+    set Reference temperature                     = 293.
+    set Strain rate residual tolerance            = 1e-10
+    set Stress exponents for diffusion creep      = 1.
+    set Stress exponents for dislocation creep    = 3.5
+    set Thermal diffusivity                       = 0.8e-6
+    set Thermal expansivities                     = 3.5e-5
+    set Viscosity averaging scheme                = harmonic
+  end
+  subsection Drucker Prager
+    set Reference density             = 3300.
+    set Reference specific heat       = 1250.
+    set Reference temperature         = 293.
+    set Thermal conductivity          = 4.7
+    set Thermal expansion coefficient = 2e-5
+    subsection Viscosity
+      set Angle of internal friction = 0.
+      set Cohesion                   = 2e7
+      set Maximum viscosity          = 1e24
+      set Minimum viscosity          = 1e19
+      set Reference strain rate      = 1e-15
+    end
+  end
+  subsection Entropy model
+    set Angle of internal friction                         = 0.
+    set Cohesion                                           = 1e20
+    set Data directory                                     = $ASPECT_SOURCE_DIR/data/material-model/entropy-table/opxtable/
+    set Lateral viscosity file name                        = constant_lateral_vis_prefactor.txt
+    set Material file name                                 = material_table.txt
+    set Maximum iteration for multicomponent equilibration = 50
+    set Maximum lateral viscosity variation                = 1e2
+    set Maximum thermal conductivity                       = 1000
+    set Maximum viscosity                                  = 1e23
+    set Minimum viscosity                                  = 1e19
+    set Multicomponent equilibration tolerance             = 1e-7
+    set Pressure dependencies of thermal conductivity      = 3.3e-10, 3.4e-10, 3.6e-10, 1.05e-10
+    set Reference temperatures for thermal conductivity    = 300, 300, 300, 1200
+    set Reference thermal conductivities                   = 2.47, 3.81, 3.52, 4.9
+    set Reference viscosity                                = 1e22
+    set Saturation prefactors                              = 0, 0, 0, 1
+    set Thermal conductivity                               = 4.7
+    set Thermal conductivity exponents                     = 0.48, 0.56, 0.61, 1.0
+    set Thermal conductivity formulation                   = constant
+    set Thermal conductivity transition depths             = 410000, 520000, 660000
+  end
+  subsection Grain size model
+    set ARKode initial step size                       = 1e-3
+    set ARKode minimum step size                       = 1e-6
+    set Advect logarithm of grain size                 = false
+    set Angles of dilation                             = 0.
+    set Angles of internal friction                    = 0.
+    set Average specific grain boundary energy         = 1.0
+    set Bilinear interpolation                         = true
+    set Cohesions                                      = 1e20
+    set Data directory                                 = $ASPECT_SOURCE_DIR/data/material-model/steinberger/
+    set Define transition by depth instead of pressure = true
+    set Derivatives file names                         =
+    set Diffusion activation energy                    = 3.35e5
+    set Diffusion activation volume                    = 4e-6
+    set Diffusion creep exponent                       = 1.
+    set Diffusion creep grain size exponent            = 3.
+    set Diffusion creep prefactor                      = 7.4e-15
+    set Dislocation activation energy                  = 4.8e5
+    set Dislocation activation volume                  = 1.1e-5
+    set Dislocation creep exponent                     = 3.5
+    set Dislocation creep prefactor                    = 4.5e-15
+    set Dislocation viscosity iteration number         = 100
+    set Dislocation viscosity iteration threshold      = 1e-3
+    set Geometric constant                             = 3.
+    set Grain growth activation energy                 = 3.5e5
+    set Grain growth activation volume                 = 8e-6
+    set Grain growth exponent                          = 3.
+    set Grain growth rate constant                     = 1.5e-5
+    set Grain size evolution formulation               = paleowattmeter
+    set Lower mantle grain size scaling                = 1.0
+    set Material file format                           = perplex
+    set Material file names                            = pyr-ringwood88.txt
+    set Maximum latent heat substeps                   = 1
+    set Maximum specific heat                          = 6000.
+    set Maximum temperature dependence of viscosity    = 100.
+    set Maximum thermal expansivity                    = 1e-3
+    set Maximum viscosity                              = 1e26
+    set Maximum yield stress                           = 1e12
+    set Minimum grain size                             = 1e-5
+    set Minimum specific heat                          = 500.
+    set Minimum thermal expansivity                    = 1e-5
+    set Minimum viscosity                              = 1e18
+    set Phase transition Clapeyron slopes              =
+    set Phase transition depths                        =
+    set Phase transition pressure widths               =
+    set Phase transition pressures                     =
+    set Phase transition temperature lower limits      = -1.7976931348623157e+308
+    set Phase transition temperature upper limits      = 1.7976931348623157e+308
+    set Phase transition temperatures                  =
+    set Phase transition widths                        =
+    set Phase volume fraction                          = 0.4
+    set Plastic damper viscosity                       = 0.0
+    set Prefactors for yield stress                    = 1.0
+    set Reciprocal required strain                     = 10.
+    set Recrystallized grain size                      =
+    set Reference compressibility                      = 4e-12
+    set Reference density                              = 3300
+    set Reference specific heat                        = 1250.
+    set Reference temperature                          = 293.
+    set Thermal conductivity                           = 4.7
+    set Thermal expansion coefficient                  = 2e-5
+    set Use Drucker-Prager rheology                    = false
+    set Use adiabatic pressure for yield stress        = false
+    set Use enthalpy for material properties           = true
+    set Use paleowattmeter                             = default
+    set Use plastic damper                             = false
+    set Use table properties                           = false
+    set Viscosity                                      = 5e24
+    set Work fraction for boundary area change         = 0.1
+    subsection Grain damage partitioning
+      set Grain size reduction work fraction exponent       = 10
+      set Maximum grain size reduction work fraction        = 1e-1
+      set Minimum grain size reduction work fraction        = 1e-12
+      set Temperature for maximum grain damage partitioning = 283
+      set Temperature for minimum grain damage partitioning = 1600
+    end
+  end
+  subsection Latent heat
+    set Composition viscosity prefactor                = 1.0
+    set Compressibility                                = 5.124e-12
+    set Corresponding phase for density jump           =
+    set Define transition by depth instead of pressure = true
+    set Density differential for compositional field 1 = 0.
+    set Maximum viscosity                              = 1e24
+    set Minimum viscosity                              = 1e19
+    set Phase transition Clapeyron slopes              =
+    set Phase transition density jumps                 =
+    set Phase transition depths                        =
+    set Phase transition pressure widths               =
+    set Phase transition pressures                     =
+    set Phase transition temperature lower limits      = -1.7976931348623157e+308
+    set Phase transition temperature upper limits      = 1.7976931348623157e+308
+    set Phase transition temperatures                  =
+    set Phase transition widths                        =
+    set Reference density                              = 3300.
+    set Reference specific heat                        = 1250.
+    set Reference temperature                          = 293.
+    set Thermal conductivity                           = 2.38
+    set Thermal expansion coefficient                  = 4e-5
+    set Thermal viscosity exponent                     = 0.0
+    set Viscosity                                      = 5e24
+    set Viscosity prefactors                           = all:1
+  end
+  subsection Latent heat melt
+    set A1                                             = 1085.7
+    set A2                                             = 1.329e-7
+    set A3                                             = -5.1e-18
+    set B1                                             = 1475.0
+    set B2                                             = 8.0e-8
+    set B3                                             = -3.2e-18
+    set C1                                             = 1780.0
+    set C2                                             = 4.50e-8
+    set C3                                             = -2.0e-18
+    set Composition viscosity prefactor                = 1.0
+    set Compressibility                                = 5.124e-12
+    set D1                                             = 976.0
+    set D2                                             = 1.329e-7
+    set D3                                             = -5.1e-18
+    set Density differential for compositional field 1 = 0.
+    set E1                                             = 663.8
+    set E2                                             = -611.4
+    set Mass fraction cpx                              = 0.15
+    set Maximum pyroxenite melt fraction               = 0.5429
+    set Peridotite melting entropy change              = -300.
+    set Pyroxenite melting entropy change              = -400.
+    set Reference density                              = 3300.
+    set Reference specific heat                        = 1250.
+    set Reference temperature                          = 293.
+    set Relative density of melt                       = 0.9
+    set Thermal conductivity                           = 2.38
+    set Thermal expansion coefficient                  = 4e-5
+    set Thermal expansion coefficient of melt          = 6.8e-5
+    set Thermal viscosity exponent                     = 0.0
+    set Viscosity                                      = 5e24
+    set beta                                           = 1.5
+    set r1                                             = 0.5
+    set r2                                             = 8e-11
+  end
+  subsection Melt boukare
+    set Einstein temperatures                            = 418.1, 561.0, 297.6, 540.2, 505.75, 558.1, 558.1
+    set Endmember names                                  = FeSiO3_bridgmanite, MgSiO3_bridgmanite, FeO_periclase, MgO_periclase, FeO_melt, MgO_melt, SiO2_melt
+    set Endmember states                                 = solid, solid, solid, solid, melt, melt, melt
+    set Exponential melt weakening factor                = 27
+    set Fe mantle melting temperature                    = 3424.5
+    set Fe number of moles                               = 0.48
+    set First derivatives of the bulk modulus            = 4.14, 4.14, 4.9, 3.95, 5.0802472229003905, 4.25, 4.25
+    set Include melting and freezing                     = true
+    set Linear coefficients for specific heat polynomial = 6.36191292e-03, -3.31714290e-03, 3.36163516e-03, -6.35318887e-03, -2.41909947e-03, -2.41909947e-03, -2.41909947e-03
+    set Melting time scale for operator splitting        = 1e3
+    set Mg mantle melting temperature                    = 4821.2
+    set Mg number of moles                               = 0.62
+    set Molar masses                                     = 0.1319287, 0.1003887, 0.0718444, 0.0403044, 0.0707624708, 0.048592178, 0.048592178
+    set Number of atoms                                  = 5.0, 5.0, 2.0, 2.0, 2.092, 2.419, 2.419
+    set Reference bulk moduli                            = 2.81e11, 2.51e+11, 1.52e11, 1.616e11, 166652774642.11273, 2.317e11, 2.317e11
+    set Reference bulk viscosity                         = 1e22
+    set Reference enthalpies                             = -1082910.0, -1442310.0, -262240.0, -601570.0, -195245.49100022088, -538009.8, -538009.8
+    set Reference entropies                              = 95.0, 62.6, 58.6, 26.5, 95.0299295525918, 64.9, 64.9
+    set Reference melt viscosity                         = 10
+    set Reference permeability                           = 1e-8
+    set Reference pressure                               = 1e11
+    set Reference shear viscosity                        = 5e20
+    set Reference specific heat capacities               = 139.546209, 161.546581, 52.0016403, 73.1147154, 79.5326013, 79.5326013, 79.5326013
+    set Reference temperature                            = 298.15
+    set Reference thermal expansivities                  = 1.87e-05, 1.87e-05, 3.22e-05, 3.11e-05, 2.9614332469401705e-05, 2.06e-05, 2.06e-05
+    set Reference volumes                                = 2.534e-05, 2.445e-05, 1.206e-05, 1.125e-05, 1.2325484447664221e-05, 1.218e-05, 1.218e-05
+    set Second coefficients for specific heat polynomial = -4.13886524e+06, -3.57533814e+06, -1.19540964e+06, -7.33679285e+05, -1.61692272e+06, -1.61692272e+06, -1.61692272e+06
+    set Second derivatives of the bulk modulus           = -1.6e-11, -1.6e-11, -3.2e-11, -2.4e-11, -3.9742163085937504e-11, -2.14e-11, -2.14e-11
+    set Thermal bulk viscosity exponent                  = 0.0
+    set Thermal conductivity                             = 4.7
+    set Thermal viscosity exponent                       = 0.0
+    set Third coefficients for specific heat polynomial  = -464.775577, -1112.54791, 25.5067110, -592.994207, -562.222634, -562.222634, -562.222634
+  end
+  subsection Melt global
+    set Depletion density change                   = 0.0
+    set Depletion solidus change                   = 200.0
+    set Exponential depletion strengthening factor = 0.0
+    set Exponential melt weakening factor          = 27.
+    set Include melting and freezing               = true
+    set Maximum Depletion viscosity change         = 1.0e3
+    set Melt bulk modulus derivative               = 0.0
+    set Melt compressibility                       = 0.0
+    set Melting time scale for operator splitting  = 1e3
+    set Pressure solidus change                    = 6e-8
+    set Reference bulk viscosity                   = 1e22
+    set Reference melt density                     = 2500.
+    set Reference melt viscosity                   = 10.
+    set Reference permeability                     = 1e-8
+    set Reference shear viscosity                  = 5e20
+    set Reference solid density                    = 3000.
+    set Reference specific heat                    = 1250.
+    set Reference temperature                      = 293.
+    set Solid compressibility                      = 0.0
+    set Surface solidus                            = 1300.
+    set Thermal bulk viscosity exponent            = 0.0
+    set Thermal conductivity                       = 4.7
+    set Thermal expansion coefficient              = 2e-5
+    set Thermal viscosity exponent                 = 0.0
+  end
+  subsection Melt simple
+    set A1                                        = 1085.7
+    set A2                                        = 1.329e-7
+    set A3                                        = -5.1e-18
+    set B1                                        = 1475.0
+    set B2                                        = 8.0e-8
+    set B3                                        = -3.2e-18
+    set C1                                        = 1780.0
+    set C2                                        = 4.50e-8
+    set C3                                        = -2.0e-18
+    set Depletion density change                  = 0.0
+    set Depletion solidus change                  = 200.0
+    set Exponential melt weakening factor         = 27.
+    set Freezing rate                             = 0.0
+    set Mass fraction cpx                         = 0.15
+    set Melt bulk modulus derivative              = 0.0
+    set Melt compressibility                      = 0.0
+    set Melt extraction depth                     = 1000.0
+    set Melting time scale for operator splitting = 1e3
+    set Peridotite melting entropy change         = -300.
+    set Reference bulk viscosity                  = 1e22
+    set Reference melt density                    = 2500.
+    set Reference melt viscosity                  = 10.
+    set Reference permeability                    = 1e-8
+    set Reference shear viscosity                 = 5e20
+    set Reference solid density                   = 3000.
+    set Reference specific heat                   = 1250.
+    set Reference temperature                     = 293.
+    set Solid compressibility                     = 0.0
+    set Thermal bulk viscosity exponent           = 0.0
+    set Thermal conductivity                      = 4.7
+    set Thermal expansion coefficient             = 2e-5
+    set Thermal viscosity exponent                = 0.0
+    set Use fractional melting                    = false
+    set Use full compressibility                  = false
+    set beta                                      = 1.5
+    set r1                                        = 0.5
+    set r2                                        = 8e-11
+  end
+  subsection Modified Tait model
+    set Einstein temperature              = 600.
+    set Reference bulk modulus derivative = 4.
+    set Reference density                 = 3300.
+    set Reference isothermal bulk modulus = 125e9
+    set Reference pressure                = 1e5
+    set Reference temperature             = 298.15
+    set Reference thermal expansivity     = 2e-5
+    set Thermal conductivity              = 4.7
+    set Viscosity                         = 1e21
+    subsection Reference heat capacity function
+      set Function constants  =
+      set Function expression = 1.25e3
+      set Variable names      = x,t
+    end
+  end
+  subsection Multicomponent
+    set Densities                  = 3300.
+    set Heat capacities            = 1250.
+    set Reference temperature      = 293.
+    set Thermal conductivities     = 4.7
+    set Thermal expansivities      = 0.000040
+    set Viscosities                = 1.e21
+    set Viscosity averaging scheme = harmonic
+  end
+  subsection Multicomponent compressible
+    set Define transition by depth instead of pressure = true
+    set Enable phase transitions                       = false
+    set Isochoric specific heats                       = 1250.
+    set Isothermal bulk modulus pressure derivatives   = 4.
+    set Phase transition Clapeyron slopes              =
+    set Phase transition depths                        =
+    set Phase transition pressure widths               =
+    set Phase transition pressures                     =
+    set Phase transition temperature lower limits      = -1.7976931348623157e+308
+    set Phase transition temperature upper limits      = 1.7976931348623157e+308
+    set Phase transition temperatures                  =
+    set Phase transition widths                        =
+    set Reference densities                            = 3300.
+    set Reference isothermal compressibilities         = 4e-12
+    set Reference temperatures                         = 298.15
+    set Reference thermal expansivities                = 4.e-5
+    set Thermal conductivities                         = 4.7
+    set Viscosities                                    = 1.e21
+    set Viscosity averaging scheme                     = harmonic
+  end
+  subsection Nondimensional model
+    set Di                              = 0.0
+    set Ra                              = 1e4
+    set Reference density               = 1.0
+    set Reference specific heat         = 1.0
+    set Use TALA                        = false
+    set Viscosity depth prefactor       = 0.0
+    set Viscosity temperature prefactor = 0.0
+    set gamma                           = 1.0
+  end
+  subsection PerpleX lookup model
+    set Maximum material pressure    = 1.e12
+    set Maximum material temperature = 6000.
+    set Minimum material pressure    = 1.e5
+    set Minimum material temperature = 0.
+    set PerpleX input file name      = rock.dat
+    set Thermal conductivity         = 4.7
+    set Viscosity                    = 5e24
+  end
+  subsection Phase field fault
+    set Bulk history representation              = DG trial stress
+    set Characteristic slip distance             = 0.008
+    set Characteristic weakening slip rates      = 1.e-6
+    set Cohesions                                = 1e6
+    set Cohesive history representation          = particle projection
+    set Consistent endpoint phase solve          = false
+    set Critical energy release rates            = 1e5
+    set Densities                                = 3300.
+    set Direct effect parameters                 = 0.010, 0.025
+    set Dynamic friction coefficients            = 0.4
+    set Elastic shear moduli                     = 32038120320
+    set Enable prescribed DG accepted history    = true
+    set Evolution effect parameters              = 0.015
+    set Evolve phase field                       = false
+    set FE bulk normal quadrature points         = 6
+    set FE initial phase profile file            =
+    set Fault constitutive mode                  = mature frictional
+    set Fault mechanical work measure            = particle volume
+    set Friction law                             = rate state
+    set Heat capacities                          = 1250.
+    set I h integration backend                  = cell intervals
+    set I h projection                           = consistent
+    set I h quadrature tolerance                 = 1e-10
+    set I h surface quadrature subdivisions      = 8
+    set I h tail tolerance                       = 1e-10
+    set Initial cohesive state                   = seeded energy
+    set Initial friction coefficients            = 0.6
+    set Initial time step                        = 4e6
+    set Maximum viscosity                        = 1e30
+    set Minimum slip rate                        = 1e-20
+    set Minimum viscosity                        = 1e6
+    set Optimize stationary mature DG            = true
+    set Particle stress strain convention        = three dimensional deviator
+    set Phase driving history                    = incremental work
+    set Phase field activation threshold         = 0.1
+    set Phase field normal lock threshold        = 0.5
+    set Radiation damping coefficients           = 4624440
+    set Reference friction coefficients          = 0.6
+    set Reference slip rate                      = 1e-6
+    set Reference temperature                    = 293
+    set Reference viscosities                    = 1e26
+    set Thermal conductivities                   = 3.0
+    set Thermal expansivities                    = 0.000035
+    set Thermal viscosity exponents              = 0.0
+    set Use adiabatic pressure in fault friction = false
+    set Use homogeneous mesh data                = true
+    set Use regularized formulation              = true
+    set Viscosity averaging scheme               = harmonic
+  end
+  subsection Prescribed viscosity
+    set Base model = simple
+    subsection Indicator function
+      set Function constants  =
+      set Function expression = 0; 0; 0
+      set Variable names      = x,y,t
+    end
+    subsection Viscosity function
+      set Function constants  =
+      set Function expression = 0; 0; 0
+      set Variable names      = x,y,t
+    end
+  end
+  subsection Reactive Fluid Transport Model
+    set Base model                                       = visco plastic
+    set Exponential fluid weakening factor               = 27
+    set Fluid compressibility                            = 0.0
+    set Fluid reaction time scale for operator splitting = 1e3
+    set Fluid-solid reaction scheme                      = no reaction
+    set Maximum compaction viscosity                     = 1.7976931348623157e+308
+    set Minimum compaction viscosity                     = 0
+    set Reference fluid density                          = 2500
+    set Reference fluid viscosity                        = 10
+    set Reference permeability                           = 1e-8
+    set Reference temperature                            = 293.
+    set Shear to bulk viscosity ratio                    = 0.1
+    subsection Katz 2003 model
+      set A1                                        = 1085.7
+      set A2                                        = 1.329e-7
+      set A3                                        = -5.1e-18
+      set B1                                        = 1475.0
+      set B2                                        = 8.0e-8
+      set B3                                        = -3.2e-18
+      set C1                                        = 1780.0
+      set C2                                        = 4.50e-8
+      set C3                                        = -2.0e-18
+      set Depletion solidus change                  = 200.0
+      set Exponential melt weakening factor         = 27.
+      set Freezing rate                             = 0.0
+      set Mass fraction cpx                         = 0.15
+      set Melt bulk modulus derivative              = 0.0
+      set Melt compressibility                      = 0.0
+      set Melt extraction depth                     = 1000.0
+      set Melting time scale for operator splitting = 1e3
+      set Peridotite melting entropy change         = -300.
+      set Reference bulk viscosity                  = 1e22
+      set Reference melt density                    = 2500.
+      set Reference melt viscosity                  = 10.
+      set Reference permeability                    = 1e-8
+      set Thermal bulk viscosity exponent           = 0.0
+      set Use fractional melting                    = false
+      set beta                                      = 1.5
+      set r1                                        = 0.5
+      set r2                                        = 8e-11
+    end
+    subsection Tian 2019 model
+      set Maximum weight percent water in MORB       = 2
+      set Maximum weight percent water in gabbro     = 1
+      set Maximum weight percent water in peridotite = 8
+      set Maximum weight percent water in sediment   = 3
+      set Use adiabatic pressure for reactions       = false
+    end
+  end
+  subsection Replace lithosphere viscosity
+    set Base model                 = simple
+    set Data directory             = $ASPECT_SOURCE_DIR/data/initial-temperature/lithosphere-mask/
+    set Depth specification method = Value
+    set LAB depth filename         = LAB_CAM2016.txt
+    set Lithosphere viscosity      = 1e23
+    set Maximum lithosphere depth  = 200000.0
+  end
+  subsection Simple compressible model
+    set Reference compressibility     = 4e-12
+    set Reference density             = 3300.
+    set Reference specific heat       = 1250.
+    set Thermal conductivity          = 4.7
+    set Thermal expansion coefficient = 2e-5
+    set Viscosity                     = 1000000000000000000000.000000
+  end
+  subsection Simple model
+    set Composition viscosity prefactor                = 1.0
+    set Density differential for compositional field 1 = 0.
+    set Maximum thermal prefactor                      = 1.0e2
+    set Minimum thermal prefactor                      = 1.0e-2
+    set Reference density                              = 3300.
+    set Reference specific heat                        = 1250.
+    set Reference temperature                          = 293.
+    set Thermal conductivity                           = 4.7
+    set Thermal expansion coefficient                  = 2e-5
+    set Thermal viscosity exponent                     = 0.0
+    set Viscosity                                      = 5e24
+  end
+  subsection Simpler model
+    set Reference density             = 3300.
+    set Reference specific heat       = 1250.
+    set Reference temperature         = 293.
+    set Thermal conductivity          = 4.7
+    set Thermal expansion coefficient = 2e-5
+    set Viscosity                     = 5000000000000000452984832.000000
+  end
+  subsection Steinberger model
+    set Angles of dilation                              = 0.
+    set Angles of internal friction                     = 0.
+    set Bilinear interpolation                          = true
+    set Cohesions                                       = 1e20
+    set Composition viscosity prefactors                = 1
+    set Data directory                                  = $ASPECT_SOURCE_DIR/data/material-model/steinberger/
+    set Derivatives file names                          =
+    set Latent heat                                     = false
+    set Lateral viscosity file name                     = temp-viscosity-prefactor.txt
+    set Material file format                            = perplex
+    set Material file names                             = pyr-ringwood88.txt
+    set Maximum latent heat substeps                    = 1
+    set Maximum lateral viscosity variation             = 1e2
+    set Maximum thermal conductivity                    = 1000
+    set Maximum viscosity                               = 1e23
+    set Maximum yield stress                            = 1e12
+    set Minimum viscosity                               = 1e19
+    set Number lateral average bands                    = 10
+    set Plastic damper viscosity                        = 0.0
+    set Prefactors for yield stress                     = 1.0
+    set Pressure dependencies of thermal conductivity   = 3.3e-10, 3.4e-10, 3.6e-10, 1.05e-10
+    set Radial viscosity file name                      = radial-visc.txt
+    set Reference temperatures for thermal conductivity = 300, 300, 300, 1200
+    set Reference thermal conductivities                = 2.47, 3.81, 3.52, 4.9
+    set Saturation prefactors                           = 0, 0, 0, 1
+    set Thermal conductivity                            = 4.7
+    set Thermal conductivity exponents                  = 0.48, 0.56, 0.61, 1.0
+    set Thermal conductivity formulation                = constant
+    set Thermal conductivity transition depths          = 410000, 520000, 660000
+    set Use Drucker-Prager rheology                     = false
+    set Use lateral average temperature for viscosity   = true
+    set Use plastic damper                              = false
+    set Viscosity averaging scheme                      = harmonic
+  end
+  subsection Visco Plastic
+    set Activation energies for Peierls creep                  = 320e3
+    set Activation energies for diffusion creep                = 375e3
+    set Activation energies for dislocation creep              = 530e3
+    set Activation volumes for Peierls creep                   = 1.4e-5
+    set Activation volumes for diffusion creep                 = 6e-6
+    set Activation volumes for dislocation creep               = 1.4e-5
+    set Adiabat temperature gradient for viscosity             = 0.0
+    set Allow negative pressures in plasticity                 = false
+    set Angles of dilation                                     = 0.
+    set Angles of internal friction                            = 0.
+    set Apply strict stress cutoff for Peierls creep           = false
+    set Cohesion strain weakening factors                      = 1.
+    set Cohesions                                              = 1e20
+    set Constant viscosity prefactors                          = 1.0
+    set Cutoff stresses for Peierls creep                      = 0.0
+    set Data directory                                         = $ASPECT_SOURCE_DIR/data/material-model/entropy-table/pyrtable
+    set Define thermal conductivities                          = false
+    set Define transition by depth instead of pressure         = true
+    set Densities                                              = 3300.
+    set Dynamic angles of internal friction                    = 2
+    set Dynamic characteristic strain rate                     = 1e-12
+    set Dynamic friction smoothness exponent                   = 1
+    set Elastic damper viscosity                               = 0.0
+    set Elastic shear moduli                                   = 75.0e9
+    set End plasticity strain weakening intervals              = 1.
+    set End prefactor strain weakening intervals               = 1.
+    set Fixed elastic time step                                = 1.e3
+    set Friction mechanism                                     = none
+    set Friction strain weakening factors                      = 1.
+    set Grain size                                             = 1e-3
+    set Grain size exponents for diffusion creep               = 3.
+    set Heat capacities                                        = 1250.
+    set Include Grain Boundary Sliding                         = false
+    set Include Peierls creep                                  = false
+    set Lower temperature for maximum strain weakening         = 923.
+    set Lower temperature for onset of strain weakening        = 823.
+    set Material file names                                    = material_table_temperature_pressure_small.txt
+    set Maximum Peierls strain rate iterations                 = 40
+    set Maximum viscosity                                      = 1e28
+    set Maximum yield stress                                   = 1e12
+    set Minimum mass fraction bound water content for fugacity = 6.15e-6
+    set Minimum strain rate                                    = 1.0e-20
+    set Minimum viscosity                                      = 1e17
+    set Peierls creep flow law                                 = viscosity approximation
+    set Peierls fitting parameters                             = 0.17
+    set Peierls glide parameters p                             = 0.5
+    set Peierls glide parameters q                             = 1.0
+    set Peierls strain rate residual tolerance                 = 1e-10
+    set Peierls stresses                                       = 5.e9
+    set Phase transition Clapeyron slopes                      =
+    set Phase transition depths                                =
+    set Phase transition indicators                            =
+    set Phase transition pressure widths                       =
+    set Phase transition pressures                             =
+    set Phase transition temperature lower limits              = -1.7976931348623157e+308
+    set Phase transition temperature upper limits              = 1.7976931348623157e+308
+    set Phase transition temperatures                          =
+    set Phase transition widths                                =
+    set Plastic damper viscosity                               = 0.0
+    set Prefactor strain weakening factors                     = 1.
+    set Prefactors for Frank Kamenetskii                       = 1.e21
+    set Prefactors for Peierls creep                           = 1.4e-19
+    set Prefactors for diffusion creep                         = 1.5e-15
+    set Prefactors for dislocation creep                       = 1.1e-16
+    set Prefactors for yield stress                            = 1.0
+    set Pressure prefactors for Frank Kamenetskii              = 0.0
+    set Reference pressures for Frank Kamenetskii              = 1.7976931348623157e+308
+    set Reference strain rate                                  = 1.0e-15
+    set Reference temperature                                  = 293.
+    set Reference temperatures for Frank Kamenetskii           = 1.7976931348623157e+308
+    set Stabilization time scale factor                        = 1.
+    set Start plasticity strain weakening intervals            = 0.
+    set Start prefactor strain weakening intervals             = 0.
+    set Strain healing mechanism                               = no healing
+    set Strain healing temperature dependent prefactor         = 15.
+    set Strain healing temperature dependent recovery rate     = 1.e-15
+    set Strain weakening mechanism                             = default
+    set Stress exponents for Peierls creep                     = 2.0
+    set Stress exponents for diffusion creep                   = 1.
+    set Stress exponents for dislocation creep                 = 3.5
+    set Stress limiter exponents                               = 1.0
+    set Thermal conductivities                                 = 3.0
+    set Thermal diffusivities                                  = 0.8e-6
+    set Thermal expansivities                                  = 0.000035
+    set Upper temperature for maximum strain weakening         = 1023.
+    set Upper temperature for onset of strain weakening        = 1123.
+    set Use adiabatic pressure in creep viscosity              = false
+    set Use adiabatic pressure in plasticity                   = false
+    set Use dominant phase for viscosity                       = false
+    set Use fixed elastic time step                            = unspecified
+    set Use plastic damper                                     = false
+    set Use temperature activated strain softening             = false
+    set Viscosity averaging scheme                             = harmonic
+    set Viscosity prefactor scheme                             = none
+    set Viscosity ratios for Frank Kamenetskii                 = 15.
+    set Viscous flow law                                       = composite
+    set Water fugacity exponents for diffusion creep           = 0.0
+    set Water fugacity exponents for dislocation creep         = 0.0
+    set Yield mechanism                                        = drucker
+    subsection Friction function
+      set Coordinate system   = cartesian
+      set Function constants  =
+      set Function expression = 0
+      set Variable names      = x,y,t
+    end
+    subsection Grain boundary sliding
+      set Activation energies for grain boundary sliding  = 49
+      set Activation volumes for grain boundary sliding   = 13e-6
+      set Grain size                                      = 26e-6
+      set Grain size exponents for grain boundary sliding = 1.4.
+      set Prefactors for grain boundary sliding           = 3.9e-19.2
+      set Stress exponents for grain boundary sliding     = 1.8
+    end
+  end
+  subsection Viscoelastic
+    set Densities                       = 3300.
+    set Elastic damper viscosity        = 0.0
+    set Elastic shear moduli            = 75.0e9
+    set Fixed elastic time step         = 1.e3
+    set Heat capacities                 = 1250.
+    set Reference temperature           = 293.
+    set Stabilization time scale factor = 1.
+    set Thermal conductivities          = 4.7
+    set Thermal expansivities           = 0.000035
+    set Use fixed elastic time step     = unspecified
+    set Viscosities                     = 1.e21
+    set Viscosity averaging scheme      = harmonic
+  end
+end
+subsection Melt settings
+  set Average melt velocity                 = true
+  set Heat advection by melt                = false
+  set Include melt transport                = false
+  set Melt scaling factor threshold         = 1e-7
+  set Use discontinuous compaction pressure = true
+end
+subsection Mesh deformation
+  set Additional tangential mesh velocity boundary indicators =
+  set Mesh deformation boundary indicators                    =
+  subsection Ascii data model
+    set Data directory = $ASPECT_SOURCE_DIR/data/geometry-model/initial-topography-model/ascii-data/test/
+    set Data file name = box_3d_%s.0.txt
+    set Scale factor   = 1.
+  end
+  subsection Boundary function
+    set Function constants  =
+    set Function expression = 0; 0
+    set Variable names      = x,y,t
+  end
+  subsection Diffusion
+    set Hillslope transport coefficient = 1e-6
+    set Time steps between diffusion    = 1
+  end
+  subsection Free surface
+    set Free surface stabilization theta = 0.5
+    set Surface velocity projection      = normal
+  end
+end
+subsection Mesh refinement
+  set Adapt by fraction of cells                          = false
+  set Additional refinement times                         =
+  set Coarsening fraction                                 = 0.05
+  set Initial adaptive refinement                         = 0
+  set Initial global refinement                           = 9
+  set Minimum refinement level                            = 1
+  set Normalize individual refinement criteria            = true
+  set Refinement criteria merge operation                 = max
+  set Refinement criteria scaling factors                 =
+  set Refinement fraction                                 = 0.3
+  set Run postprocessors on initial refinement            = false
+  set Skip setup initial conditions on initial refinement = false
+  set Skip solvers on initial refinement                  = true
+  set Strategy                                            = BP3 fault support
+  set Time steps between mesh refinement                  = 0
+  subsection Artificial viscosity
+    set Compositional field scaling factors =
+    set Temperature scaling factor          = 0.0
+  end
+  subsection Boundary
+    set Boundary refinement indicators =
+  end
+  subsection Compaction length
+    set Mesh cells per compaction length = 1.0
+  end
+  subsection Composition
+    set Compositional field scaling factors =
+  end
+  subsection Composition approximate gradient
+    set Compositional field scaling factors =
+  end
+  subsection Composition gradient
+    set Compositional field scaling factors =
+  end
+  subsection Composition threshold
+    set Compositional field thresholds =
+  end
+  subsection Isosurfaces
+    set Isosurfaces =
+  end
+  subsection Maximum refinement function
+    set Coordinate system   = depth
+    set Function constants  =
+    set Function expression = 0
+    set Variable names      = x,y,t
+  end
+  subsection Minimum refinement function
+    set Coordinate system   = depth
+    set Function constants  =
+    set Function expression = 0
+    set Variable names      = x,y,t
+  end
+  subsection Nonadiabatic temperature threshold
+    set Temperature anomaly type = absolute value
+    set Threshold                = 100
+  end
+  subsection Volume of fluid interface
+    set Strict coarsening = false
+  end
+end
+subsection Nullspace removal
+  set Remove nullspace =
+end
+subsection Particles
+  set Addition histogram granularity              = 3
+  set Addition point density function granularity = 6
+  set Allow cells without particles               = false
+  set Bandwidth                                   = 0.3
+  set Generate CPDI data for particle domains     = false
+  set Generate face data for particle domains     = false
+  set Generate particle domains                   = false
+  set Integration scheme                          = BP3 stationary samples
+  set Interpolation scheme                        = BP3 history linear least squares
+  set List of particle properties                 = BP3 frozen crack driving force, initial composition, maxwell stress
+  set Load balancing strategy                     = none
+  set Maximum particles per cell                  = 24
+  set Minimum particles per cell                  = 12
+  set Number of particle systems                  = 1
+  set Particle addition algorithm                 = point density function
+  set Particle generator name                     = reference cell
+  set Particle removal algorithm                  = point density function
+  set Particle weight                             = 10
+  set Point density kernel function               = cutoff c1 dealii
+  set Update ghost particles                      = true
+  subsection CPO Bingham Average
+    set Number of samples   = 0
+    set Random number seed  = 1
+    set Use rotation matrix = true
+  end
+  subsection Composition reaction
+    set List of products       =
+    set List of reactants      =
+    set List of reaction times =
+    subsection Reaction area function
+      set Coordinate system   = cartesian
+      set Function constants  =
+      set Function expression = 0
+      set Variable names      = x,y,t
+    end
+    subsection Reaction rate function
+      set Function constants  =
+      set Function expression = 1.
+      set Variable names      = reactant,product,t
+    end
+  end
+  subsection Crust and lithosphere formation
+    set Crustal thickness     = 7000
+    set Lithosphere thickness = 63000
+  end
+  subsection Crystal Preferred Orientation
+    set CPO derivatives algorithm         = Spin tensor
+    set Number of grains per particle     = 50
+    set Property advection max iterations = 100
+    set Property advection method         = Backward Euler
+    set Property advection tolerance      = 1e-10
+    set Random number seed                = 1
+    subsection D-Rex 2004
+      set Exponents p               = 1.5
+      set Mobility                  = 50
+      set Nucleation efficiency     = 5
+      set Stress exponents          = 3.5
+      set Threshold GBS             = 0.3
+      set Volume fractions minerals = 0.5, 0.5
+    end
+    subsection Initial grains
+      set CPX RRSS                  = 1,5,5,1.5
+      set Minerals                  = Olivine: Karato 2008, Enstatite
+      set Model name                = Uniform grains and random uniform rotations
+      set OlivineD RRSS             = 3.,5.,1.e60,1.
+      set Volume fractions minerals = 0.7, 0.3
+    end
+  end
+  subsection Elastic stress
+    set Particle stress value weight = 1.0
+  end
+  subsection Function
+    set Function constants   =
+    set Function expression  = 0
+    set Number of components = 1
+    set Variable names       = x,y,t
+  end
+  subsection Generator
+    subsection Ascii file
+      set Data directory = $ASPECT_SOURCE_DIR/data/particle/generator/ascii/
+      set Data file name = particle.dat
+    end
+    subsection Probability density function
+      set Function constants    =
+      set Function expression   = 1.0
+      set Number of particles   = 1000
+      set Random cell selection = true
+      set Random number seed    = 5432
+      set Variable names        = x,y,t
+    end
+    subsection Random uniform
+      set Number of particles   = 1000
+      set Random cell selection = true
+      set Random number seed    = 5432
+    end
+    subsection Reference cell
+      set Number of particles per cell per direction = 4
+    end
+    subsection Uniform box
+      set Maximum x           = 1.
+      set Maximum y           = 1.
+      set Maximum z           = 1.
+      set Minimum x           = 0.
+      set Minimum y           = 0.
+      set Minimum z           = 0.
+      set Number of particles = 1000
+    end
+    subsection Uniform radial
+      set Center x            = 0.
+      set Center y            = 0.
+      set Center z            = 0.
+      set Maximum latitude    = 180.
+      set Maximum longitude   = 360.
+      set Maximum radius      = 1.
+      set Minimum latitude    = 0.
+      set Minimum longitude   = 0.
+      set Minimum radius      = 0.
+      set Number of particles = 1000
+      set Radial layers       = 1
+    end
+  end
+  subsection Initial composition
+    set List of field names             = theta_initial, strengthening
+    set Spatially refreshed field names = strengthening
+  end
+  subsection Integrator
+    subsection RK2
+      set Higher order accurate in time = true
+    end
+  end
+  subsection Interpolator
+    subsection Distance weighted average
+      set Distance regularization factor = 0.1
+      set Weight type                    = linear
+    end
+    subsection Linear least squares
+      set Use boundary extrapolation       = false
+      set Use linear least squares limiter = true,false,false,true,true,true
+    end
+    subsection Quadratic least squares
+      set Use boundary extrapolation          = false
+      set Use quadratic least squares limiter = true
+    end
+  end
+  subsection Melt particle
+    set Threshold for melt presence = 1e-3
+  end
+end
+subsection Particles 2
+  set Addition histogram granularity              = 3
+  set Addition point density function granularity = 6
+  set Allow cells without particles               = false
+  set Bandwidth                                   = 0.3
+  set Generate CPDI data for particle domains     = false
+  set Generate face data for particle domains     = false
+  set Generate particle domains                   = false
+  set Integration scheme                          = rk2
+  set Interpolation scheme                        = cell average
+  set List of particle properties                 =
+  set Load balancing strategy                     = repartition
+  set Maximum particles per cell                  = 100
+  set Minimum particles per cell                  = 0
+  set Particle addition algorithm                 = random
+  set Particle generator name                     = random uniform
+  set Particle removal algorithm                  = random
+  set Particle weight                             = 10
+  set Point density kernel function               = cutoff c1 dealii
+  set Update ghost particles                      = true
+  subsection CPO Bingham Average
+    set Number of samples   = 0
+    set Random number seed  = 1
+    set Use rotation matrix = true
+  end
+  subsection Composition reaction
+    set List of products       =
+    set List of reactants      =
+    set List of reaction times =
+    subsection Reaction area function
+      set Coordinate system   = cartesian
+      set Function constants  =
+      set Function expression = 0
+      set Variable names      = x,y,t
+    end
+    subsection Reaction rate function
+      set Function constants  =
+      set Function expression = 1.
+      set Variable names      = reactant,product,t
+    end
+  end
+  subsection Crust and lithosphere formation
+    set Crustal thickness     = 7000
+    set Lithosphere thickness = 63000
+  end
+  subsection Crystal Preferred Orientation
+    set CPO derivatives algorithm         = Spin tensor
+    set Number of grains per particle     = 50
+    set Property advection max iterations = 100
+    set Property advection method         = Backward Euler
+    set Property advection tolerance      = 1e-10
+    set Random number seed                = 1
+    subsection D-Rex 2004
+      set Exponents p               = 1.5
+      set Mobility                  = 50
+      set Nucleation efficiency     = 5
+      set Stress exponents          = 3.5
+      set Threshold GBS             = 0.3
+      set Volume fractions minerals = 0.5, 0.5
+    end
+    subsection Initial grains
+      set CPX RRSS                  = 1,5,5,1.5
+      set Minerals                  = Olivine: Karato 2008, Enstatite
+      set Model name                = Uniform grains and random uniform rotations
+      set OlivineD RRSS             = 3.,5.,1.e60,1.
+      set Volume fractions minerals = 0.7, 0.3
+    end
+  end
+  subsection Elastic stress
+    set Particle stress value weight = 1.0
+  end
+  subsection Function
+    set Function constants   =
+    set Function expression  = 0
+    set Number of components = 1
+    set Variable names       = x,y,t
+  end
+  subsection Generator
+    subsection Ascii file
+      set Data directory = $ASPECT_SOURCE_DIR/data/particle/generator/ascii/
+      set Data file name = particle.dat
+    end
+    subsection Probability density function
+      set Function constants    =
+      set Function expression   = 1.0
+      set Number of particles   = 1000
+      set Random cell selection = true
+      set Random number seed    = 5432
+      set Variable names        = x,y,t
+    end
+    subsection Random uniform
+      set Number of particles   = 1000
+      set Random cell selection = true
+      set Random number seed    = 5432
+    end
+    subsection Reference cell
+      set Number of particles per cell per direction = 2
+    end
+    subsection Uniform box
+      set Maximum x           = 1.
+      set Maximum y           = 1.
+      set Maximum z           = 1.
+      set Minimum x           = 0.
+      set Minimum y           = 0.
+      set Minimum z           = 0.
+      set Number of particles = 1000
+    end
+    subsection Uniform radial
+      set Center x            = 0.
+      set Center y            = 0.
+      set Center z            = 0.
+      set Maximum latitude    = 180.
+      set Maximum longitude   = 360.
+      set Maximum radius      = 1.
+      set Minimum latitude    = 0.
+      set Minimum longitude   = 0.
+      set Minimum radius      = 0.
+      set Number of particles = 1000
+      set Radial layers       = 1
+    end
+  end
+  subsection Initial composition
+    set List of field names             =
+    set Spatially refreshed field names =
+  end
+  subsection Integrator
+    subsection RK2
+      set Higher order accurate in time = true
+    end
+  end
+  subsection Interpolator
+    subsection Distance weighted average
+      set Distance regularization factor = 0.1
+      set Weight type                    = linear
+    end
+    subsection Linear least squares
+      set Use boundary extrapolation       = false
+      set Use linear least squares limiter = true
+    end
+    subsection Quadratic least squares
+      set Use boundary extrapolation          = false
+      set Use quadratic least squares limiter = true
+    end
+  end
+  subsection Melt particle
+    set Threshold for melt presence = 1e-3
+  end
+end
+subsection Phase field model
+  set Degradation curvature parameter = 1
+  set Geometric function type         = AT1
+  set Length scale                    = 20
+end
+subsection Postprocess
+  set List of postprocessors                     = memory statistics, reconstructed fault BP3, particles, BP3 output complete, BP3 restored monitor, BP3 serial coupled checks
+  set Run postprocessors on nonlinear iterations = false
+  subsection BP3
+    set Allow truncated transition            = false
+    set Audit full state every step           = false
+    set Graceful wall seconds                 = 172800
+    set Heavy output slip interval            = 1
+    set Heavy output time interval            = 3155760000
+    set Last accepted step                    = 2147483647
+    set Profile slip interval                 = 0.1
+    set Profile time interval                 = 31557600
+    set Stop after first event                = true
+    set Weakening region length               = 15000
+    set Write bulk and particle visualization = false
+  end
+  subsection BP3 coupled checks
+    set Common stress points file    =
+    set Inject candidate failure     = false
+    set Inject nonlinear failure     = false
+    set Mature lifecycle checks      = true
+    set Moving particle check        = false
+    set Population event audit       = false
+    set Prescribed schedule check    = false
+    set Profile initialization check = false
+    set Scheduled field output       = true
+    set Transition material check    = false
+    set Write FE coefficients        = true
+    set Write authoritative stress   = true
+  end
+  subsection BP3 restored monitor
+    set Bottom velocity constraint = full
+    set Friction normal input      = helmholtz
+    set Normal filter length       = 20
+    set Write detailed diagnostics = false
+  end
+  subsection Boundary strain rate residual statistics
+    set Data directory = $ASPECT_SOURCE_DIR/data/postprocess/boundary-strain-rate-residual/
+    set Data file name = box_3d_boundary_strain_rate.txt
+    set Scale factor   = 1.
+  end
+  subsection Boundary velocity residual statistics
+    set Data directory             = $ASPECT_SOURCE_DIR/data/boundary-velocity/gplates/
+    set Data file name             = current_day.gpml
+    set Scale factor               = 1.
+    set Use ascii data             = false
+    set Use spherical unit vectors = false
+  end
+  subsection Command
+    set Command              =
+    set Run on all processes = false
+    set Terminate on failure = false
+  end
+  subsection Composition velocity statistics
+    set Names of selected compositional fields =
+  end
+  subsection Crystal Preferred Orientation
+    set Compress cpo data files                 = true
+    set Random number seed                      = 1
+    set Temporary output location               =
+    set Time between data output                = 1e8
+    set Write in background thread              = false
+    set Write out draw volume weighted cpo data = olivine Euler angles,enstatite Euler angles
+    set Write out raw cpo data                  = olivine volume fraction,olivine Euler angles,enstatite volume fraction,enstatite Euler angles
+  end
+  subsection Depth average
+    set Depth boundaries of zones     =
+    set List of output variables      = all
+    set Number of zones               = 10
+    set Output format                 = gnuplot, txt
+    set Time between graphical output = 1e8
+  end
+  subsection Dynamic core statistics
+    set Excess entropy only = false
+  end
+  subsection Dynamic topography
+    set Density above  = 0.
+    set Density below  = 9900.
+    set Output bottom  = true
+    set Output surface = true
+  end
+  subsection Geoid
+    set Density above                                       = 0.
+    set Density below                                       = 9900.
+    set Include CMB topography contribution                 = true
+    set Include surface topography contribution             = true
+    set Maximum degree                                      = 20
+    set Minimum degree                                      = 2
+    set Output CMB topography contribution coefficients     = false
+    set Output data in geographical coordinates             = false
+    set Output density anomaly contribution coefficients    = false
+    set Output geoid anomaly coefficients                   = false
+    set Output gravity anomaly                              = false
+    set Output surface topography contribution coefficients = false
+  end
+  subsection Global statistics
+    set Write statistics for each nonlinear iteration = false
+  end
+  subsection Gravity calculation
+    set List of latitude                  =
+    set List of longitude                 =
+    set List of radius                    =
+    set Maximum latitude                  = 90
+    set Maximum longitude                 = 180.
+    set Maximum radius                    = 0.
+    set Minimum latitude                  = -90.
+    set Minimum longitude                 = -180.
+    set Minimum radius                    = 0.
+    set Number points fibonacci spiral    = 200
+    set Number points latitude            = 1
+    set Number points longitude           = 1
+    set Number points radius              = 1
+    set Precision in gravity output       = 12
+    set Quadrature degree increase        = 0
+    set Reference density                 = 3300.
+    set Sampling scheme                   = map
+    set Time between gravity output       = 1e8
+    set Time steps between gravity output = 2147483647
+  end
+  subsection Memory statistics
+    set Output peak virtual memory (VmPeak) = true
+  end
+  subsection Particle distribution score
+    set Granularity = 2
+  end
+  subsection Particle distribution statistics
+    set KDE granularity      = 2
+    set Kernel bandwidth     = 0.3
+    set Kernel function      = Uniform
+    set Use KDE per particle = false
+  end
+  subsection Particles
+    set Data output format         = none
+    set Exclude output properties  =
+    set Number of grouped files    = 4
+    set Temporary output location  =
+    set Time between data output   = 0
+    set Write in background thread = false
+  end
+  subsection Point values
+    set Evaluation points                =
+    set Time between point values output = 0.
+    set Use natural coordinates          = false
+  end
+  subsection Reconstructed faults
+    set Excluded properties = BP3 fixed shear correction, mature fault reference geometry
+  end
+  subsection Rotation statistics
+    set Output full moment of inertia tensor = false
+    set Use constant density of one          = false
+  end
+  subsection Sea level
+    set Data directory ice height = $ASPECT_SOURCE_DIR/data/postprocess/sea-level/
+    set Data directory topography = $ASPECT_SOURCE_DIR/data/postprocess/sea-level/
+    set Data file name ice height = shell_3d_ice_top.0.txt
+    set Data file name topography = shell_3d_topo_top.0.txt
+    set Ice density               = 931
+    set Output to file            = false
+    set Time between text output  = 0.
+    set Water density             = 1000
+  end
+  subsection Topography
+    set Output to file           = false
+    set Time between text output = 0.
+  end
+  subsection Visualization
+    set Filter output                         = false
+    set Interpolate output                    = true
+    set List of output variables              =
+    set Number of grouped files               = 4
+    set Output base variables on mesh surface = false
+    set Output format                         = vtu
+    set Output mesh displacement              = false
+    set Output mesh velocity                  = false
+    set Output undeformed mesh                = false
+    set Point-wise stress and strain          = false
+    set Temporary output location             =
+    set Time between graphical output         = 0
+    set Time steps between graphical output   = 2147483647
+    set Write higher order output             = true
+    set Write in background thread            = false
+    subsection Artificial viscosity composition
+      set Name of compositional field =
+    end
+    subsection Compositional fields as vectors
+      set Names of fields  =
+      set Names of vectors =
+    end
+    subsection Density anomaly
+      set Average density scheme = reference profile
+      set Number of depth slices = 20
+    end
+    subsection Heat flux map
+      set Output point wise heat flux = false
+    end
+    subsection Material properties
+      set List of material properties = density,thermal expansivity,specific heat,viscosity
+    end
+    subsection Melt fraction
+      set A1                = 1085.7
+      set A2                = 1.329e-7
+      set A3                = -5.1e-18
+      set B1                = 1475.0
+      set B2                = 8.0e-8
+      set B3                = -3.2e-18
+      set C1                = 1780.0
+      set C2                = 4.50e-8
+      set C3                = -2.0e-18
+      set D1                = 976.0
+      set D2                = 1.329e-7
+      set D3                = -5.1e-18
+      set E1                = 663.8
+      set E2                = -611.4
+      set Mass fraction cpx = 0.15
+      set beta              = 1.5
+      set r1                = 0.5
+      set r2                = 8e-11
+    end
+    subsection Melt material properties
+      set List of properties = compaction viscosity,permeability
+    end
+    subsection Principal stress
+      set Use deviatoric stress = false
+    end
+    subsection Temperature anomaly
+      set Number of depth slices              = 20
+      set Use maximal temperature for bottom  = true
+      set Use minimal temperature for surface = true
+    end
+    subsection Volume of Fluid
+      set Output interface normals                = false
+      set Output interface reconstruction contour = false
+    end
+    subsection Vp anomaly
+      set Average velocity scheme = reference profile
+      set Number of depth slices  = 50
+    end
+    subsection Vs anomaly
+      set Average velocity scheme = reference profile
+      set Number of depth slices  = 50
+    end
+  end
+end
+subsection Prescribed Stokes solution
+  set Model name = unspecified
+  subsection Ascii data model
+    set Data directory            = $ASPECT_SOURCE_DIR/data/prescribed-stokes-solution/
+    set Data file name            = box_2d.txt
+    set First point on slice      = 0.0,1.0,0.0
+    set Scale factor              = 1.
+    set Second point on slice     = 1.0,0.0,0.0
+    set Slice dataset in 2D plane = false
+  end
+  subsection Compaction pressure function
+    set Function constants  =
+    set Function expression = 0
+    set Variable names      = x,y,t
+  end
+  subsection Fluid pressure function
+    set Function constants  =
+    set Function expression = 0
+    set Variable names      = x,y,t
+  end
+  subsection Fluid velocity function
+    set Function constants  =
+    set Function expression = 0; 0
+    set Variable names      = x,y,t
+  end
+  subsection Pressure function
+    set Function constants  =
+    set Function expression = 0
+    set Variable names      = x,y,t
+  end
+  subsection Velocity function
+    set Function constants  =
+    set Function expression = 0; 0
+    set Variable names      = x,y,t
+  end
+end
+subsection Prescribed solution
+  set List of model names =
+  subsection Temperature function
+    set Coordinate system = cartesian
+    subsection Function
+      set Function constants  =
+      set Function expression = 0
+      set Variable names      = x,y,t
+    end
+    subsection Indicator function
+      set Function constants  =
+      set Function expression = 0
+      set Variable names      = x,y,t
+    end
+  end
+  subsection Velocity function
+    set Coordinate system          = cartesian
+    set Use spherical unit vectors = false
+    subsection Function
+      set Function constants  =
+      set Function expression = 0; 0
+      set Variable names      = x,y,t
+    end
+    subsection Indicator function
+      set Function constants  =
+      set Function expression = 0; 0
+      set Variable names      = x,y,t
+    end
+  end
+end
+subsection Solver parameters
+  set Composition solver tolerance = 1e-12
+  set Temperature solver tolerance = 1e-12
+  subsection AMG parameters
+    set AMG aggregation threshold = 0.001
+    set AMG output details        = false
+    set AMG smoother sweeps       = 2
+    set AMG smoother type         = Chebyshev
+  end
+  subsection Advection solver parameters
+    set GMRES solver restart length = 50
+  end
+  subsection Diffusion solver parameters
+    set Diffusion length scale = 1.e4
+  end
+  subsection Matrix Free
+    set Execute solver timings = false
+    set Output details         = false
+  end
+  subsection Newton solver parameters
+    set Max Newton line search iterations                 = 5
+    set Max pre-Newton nonlinear iterations               = 10
+    set Maximum linear Stokes solver tolerance            = 1e-2
+    set Nonlinear Newton solver switch tolerance          = 1e-5
+    set SPD safety factor                                 = 0.9
+    set Stabilization preconditioner                      = SPD
+    set Stabilization velocity block                      = SPD
+    set Use Eisenstat Walker method for Picard iterations = false
+    set Use Newton failsafe                               = false
+    set Use Newton residual scaling method                = false
+  end
+  subsection Operator splitting parameters
+    set Reaction solver relative tolerance     = 1e-6
+    set Reaction solver type                   = ARKode
+    set Reaction time step                     = 1000.0
+    set Reaction time steps per advection step = 0
+  end
+  subsection Phase field solver parameters
+    set Adaptive endpoint linear accuracy   = false
+    set Endpoint direct mechanics           = false
+    set Endpoint quasi-Newton search        = false
+    set Endpoint translation preconditioner = false
+    set Enforce phase irreversibility       = false
+    set Linear solver tolerance             = 2e-7
+    set Max Newton line search iterations   = 3
+    set Max linear solver iterations        = 1000
+    set Max nonlinear iterations            = 50
+    set Nonlinear solver tolerance          = 1e-8
+    set Use bound constraints               = false
+  end
+  subsection Stokes solver parameters
+    set Force nonsymmetric A block solver               = false
+    set GMRES solver restart length                     = 100
+    set IDR(s) parameter                                = 2
+    set Krylov method for cheap solver steps            = GMRES
+    set Linear solver A block tolerance                 = 1e-2
+    set Linear solver S block tolerance                 = 1e-6
+    set Linear solver tolerance                         = 1e-9
+    set Maximum number of expensive Stokes solver steps = 1000
+    set Number of cheap Stokes solver steps             = 1000
+    set Stokes GMG type                                 = local smoothing
+    set Stokes solver type                              = block AMG
+    set Use direct solver for Stokes system             = false
+    set Use full A block as preconditioner              = false
+    set Use weighted BFBT for Schur complement          = false
+  end
+end
+subsection Temperature field
+  set Temperature method = static
+end
+subsection Termination criteria
+  set Checkpoint on termination = true
+  set End step                  = 100
+  set Termination criteria      = end time, BP3 long run complete
+  set Wall time                 = 24.
+  subsection Steady state heat flux
+    set Boundary indicators        =
+    set Maximum relative deviation = 0.05
+    set Time in steady state       = 1e7
+  end
+  subsection Steady state temperature
+    set Maximum relative deviation = 0.05
+    set Time in steady state       = 1e7
+  end
+  subsection Steady state velocity
+    set Maximum relative deviation = 0.05
+    set Time in steady state       = 1e7
+  end
+  subsection User request
+    set File name = terminate-aspect
+  end
+end
+subsection Time stepping
+  set List of model names    = convection time step, reconstructed fault time step, repeat on nonlinear solver failure
+  set Minimum time step size = 0.
+  subsection Function
+    set Function constants  =
+    set Function expression = 1.0
+    set Variable names      = time
+  end
+  subsection Reconstructed fault time step
+    set Maximum logarithmic state change = 0.2
+  end
+  subsection Repeat on cutback
+    set Cut back amount           = 0.5
+    set Relative repeat threshold = 0.2
+  end
+  subsection Repeat on nonlinear solver failure
+    set Cut back factor = 0.5
+  end
+end
+subsection Volume of Fluid
+  set Number initialization samples    = 3
+  set Volume fraction threshold        = 1e-6
+  set Volume of Fluid solver tolerance = 1e-12
+end
+
+# Bounded diagnostic replay; original resolved parameters above, comments omitted.
+# All physics, mesh and adaptive controls remain unchanged.
+set Resume computation = true
+set Output directory = ./work_replay_3610007/
+subsection Checkpointing
+  set Steps between checkpoint = 1
+end
+subsection Postprocess
+  subsection BP3
+    set Last accepted step = 816
+    set Graceful wall seconds = 7200
+  end
+end
+
+# Repair verification: branch from accepted 815; three positive accepted steps.
+set Output directory = ./work_repair_3613912/
+subsection Postprocess
+ subsection BP3
+  set Last accepted step = 818
+ end
+end

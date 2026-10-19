@@ -177,12 +177,14 @@ namespace aspect
     ReconstructedFaultStokes<dim>::linearize_B(
       const LinearAlgebra::BlockVector &bulk_linearization_point)
     {
+      aspect::internal::FaultSamplingCounters::add(aspect::internal::FaultSamplingCounters::B_builds);
       TimerOutput::Scope timer(*performance_timer, "Fault: B linearization");
       // The restricted endpoint minimizer applies this frozen map many times.
       // Reuse its existing sparse assembly with identical quadrature and
       // constraints; rebuild at every new phase/mechanical linearization.
       const bool assemble_matrix = std::getenv("ASPECT_FAULT_EXPLICIT_B")
-                                   || phase_field_fault.uses_consistent_endpoint_phase();
+                                   || phase_field_fault.uses_consistent_endpoint_phase()
+                                   || phase_field_fault.uses_stationary_mature_dg_optimizations();
       aspect::internal::FaultLinearSection setup_timing(
         aspect::internal::FaultLinearTiming::B_setup,assemble_matrix);
       AssertThrow(bulk_linearization_point.size()
@@ -407,6 +409,15 @@ namespace aspect
         result=0.;
         B_linearization->matrix->add(source,result);
         result.compress(VectorOperation::add);
+        if(std::getenv("ASPECT_FAULT_COMPARE_COUPLING"))
+          {
+            LinearAlgebra::BlockVector reference(result);apply_B_reference(fault_direction,reference);
+            const double scale=std::max(result.l2_norm(),reference.l2_norm());reference-=result;
+            const double error=reference.l2_norm();
+            AssertThrow(error<=2.e-11*scale,ExcMessage("Sparse B disagrees with the independent quadrature action."));
+            aspect::internal::FaultSamplingCounters::add(aspect::internal::FaultSamplingCounters::B_reference_checks);
+            aspect::internal::FaultSamplingCounters::observe(0,scale>0. ? error/scale : 0.);
+          }
       }
     }
 
@@ -528,6 +539,8 @@ namespace aspect
       // positive RHS counterpart of -2*eta_ve*(chi*V+history)*S in the strip.
       // Neither frozen term belongs to B or to the current-strain-rate matrix.
       const FiniteElement<dim> &fe = this->get_fe();
+      const auto *history=phase_field_fault.uses_stationary_mature_dg_optimizations()
+        ? &phase_field_fault.retained_dg_qp_stress(scratch.cell->id(),quadrature,scratch.finite_element_values.get_quadrature_points()) : nullptr;
       for (unsigned int q = 0; q < quadrature.size(); ++q)
         {
           SymmetricTensor<2,dim> old_stress;
@@ -537,7 +550,7 @@ namespace aspect
             for (unsigned int c=0; c<stress_composition_indices.size(); ++c)
               old_stress[SymmetricTensor<2,dim>::unrolled_to_component_indices(c)] =
                 compositions[stress_composition_indices[c]][q];
-          old_stress = phase_field_fault.retained_history_stress(
+          old_stress = history ? (*history)[q] : phase_field_fault.retained_history_stress(
               scratch.cell->id(), scratch.finite_element_values.quadrature_point(q), old_stress);
           std::vector<double> composition(compositions.size());
           for (unsigned int c=0; c<composition.size(); ++c)

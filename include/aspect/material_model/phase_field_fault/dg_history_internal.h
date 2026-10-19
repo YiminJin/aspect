@@ -27,6 +27,23 @@ namespace aspect
               cells.emplace(cell->id(),cell);
         }
 
+        struct PointSample
+        {
+          Point<dim> point;
+          std::array<double,9> shape;
+          double phase;
+          ReconstructedFaultUtilities::NormalProfileProjection source;
+        };
+        mutable unsigned int point_geometry_generation=numbers::invalid_unsigned_int;
+        mutable std::map<CellId,std::vector<PointSample>> point_samples;
+        struct SourceGeometry
+        {
+          FullMatrix<double> inverse;
+          std::vector<long double> projection_factor;
+        };
+        // Exact JxW operands and affine cell widths identify reusable Gauss3
+        // mass/inverse and inverse-defect analysis, not a stress/dt cache.
+        mutable std::map<std::array<long double,9+dim>,SourceGeometry> source_geometry;
         FE_DGQ<dim> element;
         DoFHandler<dim> dofs;
         IndexSet relevant;

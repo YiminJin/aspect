@@ -1,0 +1,121 @@
+{
+  "scope": "Local storage recovery sidecars; payload archives and detailed inventories are intentionally uncommitted.",
+  "manifests": {
+    "before.json.gz": {
+      "bytes": 6570439,
+      "sha256": "ca59a7b3f7532f0f352f3fab2b951783f951db8ac3cf428319ed5daf6e656a6c"
+    },
+    "incoming.diff.gz": {
+      "bytes": 42939,
+      "sha256": "0318e087e23d99c962398a8b724a087f825152b0b4a8aa7c92d752a0356cf9eb"
+    },
+    "incoming-status.txt.gz": {
+      "bytes": 6305,
+      "sha256": "7c3d907173652cecafd9c2fd7ae455114d6030b366e0cadb90301482a5bba29b"
+    },
+    "field-archives.json": {
+      "bytes": 771635,
+      "sha256": "b180a7e676efbe60474891d0fbecb2145f31049e25f0bd8981cd1bb55e8c9526"
+    },
+    "package-copies.json": {
+      "bytes": 13465956,
+      "sha256": "c10a911f0d9573748ddf31bf43e2bc182edd886fea7a4aadd77d669a166ecb32"
+    },
+    "shared-executables.json": {
+      "bytes": 41185,
+      "sha256": "bfa29013f23872a7a96400bbcc7da201d4c6bf2e43abbcf9c9241ed54780a0a6"
+    }
+  },
+  "field_archives": [
+    {
+      "group": "mature-dg",
+      "path": "build-particle-free/archive/disk-cleanup-20261019/mature-dg-dense-fields.tar.zst",
+      "sha256": "81b72e22e33f83cec3a9bfc0c7113337928b56ec9c1c66fc3bfbbfeb92f0750b",
+      "bytes": 389346583,
+      "original_bytes": 1153891872,
+      "files": 207
+    },
+    {
+      "group": "mature-pilot",
+      "path": "build-particle-free/archive/disk-cleanup-20261019/mature-pilot-dense-fields.tar.zst",
+      "sha256": "28786a0542ca80bc8cd28250295ff6f3a877f67b12caf693506aef7295be8f7b",
+      "bytes": 1626339583,
+      "original_bytes": 4325462174,
+      "files": 557
+    },
+    {
+      "group": "mature-resolution",
+      "path": "build-particle-free/archive/disk-cleanup-20261019/mature-resolution-dense-fields.tar.zst",
+      "sha256": "b9729e3b11d703d14b29f7fa00e8046823d57081c0a9416b678554763deeac82",
+      "bytes": 712722024,
+      "original_bytes": 2170643438,
+      "files": 146
+    },
+    {
+      "group": "pf4",
+      "path": "build-particle-free/archive/disk-cleanup-20261019/pf4-dense-fields.tar.zst",
+      "sha256": "c99538c30011ef84f648d99b6a50cbf0392372258d36f89f896b76999fce0e5b",
+      "bytes": 58406212,
+      "original_bytes": 288302868,
+      "files": 241
+    },
+    {
+      "group": "pf6a",
+      "path": "build-particle-free/archive/disk-cleanup-20261019/pf6a-dense-fields.tar.zst",
+      "sha256": "b31c59377610f45a97c9bbbd52f0f2f23ad3aa1dfbd8d923a1ca1a23c8183eaa",
+      "bytes": 153504626,
+      "original_bytes": 629889088,
+      "files": 269
+    },
+    {
+      "group": "pf6a-publication",
+      "path": "build-particle-free/archive/disk-cleanup-20261019/pf6a-publication-dense-fields.tar.zst",
+      "sha256": "a2792379528e80bb519bd27c002fd59bea9a8ebe908e475507d2918e596fd342",
+      "bytes": 1461257834,
+      "original_bytes": 6202437500,
+      "files": 452
+    },
+    {
+      "group": "publication-replay",
+      "path": "build-particle-free/archive/disk-cleanup-20261019/publication-replay-dense-fields.tar.zst",
+      "sha256": "66a5d7d77eda7e70d11cae2d5b2ed167291244cc2ef66980d2072092767e00ec",
+      "bytes": 21286772,
+      "original_bytes": 85123612,
+      "files": 10
+    },
+    {
+      "group": "weno",
+      "path": "build-particle-free/archive/disk-cleanup-20261019/weno-dense-fields.tar.zst",
+      "sha256": "80d4e51390f39b6c9f1714cb45f9a639517b14eb1a83c11ee010b78fe83d8841",
+      "bytes": 134711121,
+      "original_bytes": 591039142,
+      "files": 246
+    }
+  ],
+  "package_archives": [
+    {
+      "folder": "build-particle-free/bp3-startup-review/package/distribution",
+      "archive": "build-particle-free/bp3-startup-review/package/bp3-dg-server-startup-20261017-r2.tar.gz",
+      "archive_sha256": "2ee3dbc9b3444faf39c6b0bdd3887236ab4a224b9d9e8b8201f9e8cfef79be9b",
+      "files": 8049
+    },
+    {
+      "folder": "build-particle-free/bp3-optimization/package/distribution",
+      "archive": "build-particle-free/bp3-optimization/package/bp3-dg-stationary-optimized-20261017-r3.tar.gz",
+      "archive_sha256": "2dcf1a5482ca2f22f60c965feed97d685e9596b91b58b9ab34dfe4ab0c9beb5b",
+      "files": 8369
+    },
+    {
+      "folder": "build-particle-free/bp3-optimization/package-before-final-report-check/distribution",
+      "archive": "build-particle-free/bp3-optimization/package-before-final-report-check/bp3-dg-stationary-optimized-20261017-r3.tar.gz",
+      "archive_sha256": "60e943a6f0127976a92a741284e99d8033fba903ae453da76327cb74dba75c8d",
+      "files": 8369
+    },
+    {
+      "folder": "build-particle-free/bp3-homogeneous-coefficients/package/distribution",
+      "archive": "build-particle-free/bp3-homogeneous-coefficients/package/bp3-dg-homogeneous-coefficients-20261017-r4.tar.gz",
+      "archive_sha256": "51a8c6210a2d4015616b3aeef7270bb680b7eb477264a8791000aae85f3527fb",
+      "files": 8478
+    }
+  ]
+}

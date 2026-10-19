@@ -26,7 +26,7 @@ def select_sources():
     paths=set(subprocess.check_output(['git','ls-files','-c','-o','--exclude-standard','-z',*roots],cwd=ROOT).decode().split('\0'))
     paths.update(p.name for p in ROOT.iterdir() if p.is_file() and not p.name.startswith('.'))
     # Include the focused regression's local helper imports recursively.
-    helpers=ROOT/'benchmarks/reconstructed_fault/particle_free'; pending=['run_pf6_mature','analyze_pf6_mature_pilot']
+    helpers=ROOT/'benchmarks/reconstructed_fault/particle_free'; pending=['run_pf6_mature','analyze_pf6_mature_pilot','run_bp3_optimization','analyze_bp3_optimization']
     seen=set()
     while pending:
         name=pending.pop()
@@ -37,10 +37,14 @@ def select_sources():
         for node in ast.walk(ast.parse(p.read_text())):
             if isinstance(node,ast.ImportFrom) and node.module and (helpers/(node.module+'.py')).is_file():pending.append(node.module)
     paths.add(str(Path(__file__).resolve().relative_to(ROOT)))
+    # Default native unit tests read the retained completion-profile fixture.
+    paths.add('benchmarks/reconstructed_fault/bp3/fixtures/bp3_150x50/profile.txt')
     selected=[];omitted=[]
     for name in sorted(paths-{''}):
         p=ROOT/name
         skip=p.is_symlink() or not p.is_file() or any(x in p.parts for x in ('__pycache__','evidence','results'))
+        # A copied server log is evidence, not an input in the runtime template.
+        if p==TEMPLATE/'log.txt':skip=True
         # Preserve legitimate compressed standard data and bundled CMake input.
         if name.startswith('benchmarks/') and (p.suffix in ('.so','.gz','.xz','.pdf','.png') or 'build' in p.parts):skip=True
         if skip:omitted.append(name);continue
@@ -54,12 +58,13 @@ def main():
     a.add_argument('--output',type=Path,required=True)
     a.add_argument('--qualification',type=Path,required=True,help='Prepared compact review evidence; copied without launching anything')
     a.add_argument('--name',default='bp3-dg-server-startup-20261017-r2')
+    a.add_argument('--scope',default='Collective-stop repair and prepared bounded server startup; no server launch.')
     args=a.parse_args();out=args.output.resolve();out.mkdir(parents=True,exist_ok=True)
     dest=out/'distribution';dest.mkdir(exist_ok=False)
     selected,omitted=select_sources();source=dest/'aspect-source'
     for name in selected:
         target=source/name;target.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(ROOT/name,target)
-    shutil.copytree(TEMPLATE,dest/'bp3_dg',ignore=shutil.ignore_patterns('build','*.so','aspect-release','__pycache__'))
+    shutil.copytree(TEMPLATE,dest/'bp3_dg',ignore=shutil.ignore_patterns('build','*.so','aspect-release','__pycache__','log.txt'))
     shutil.copytree(args.qualification,dest/'qualification')
     for name in ['README.md','ENVIRONMENT.md','VERIFICATION.md','RESOURCES.md']:shutil.copy2(TEMPLATE/name,dest/name)
     head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
@@ -67,7 +72,7 @@ def main():
     dump(dest/'source-selection.json',dict(head=head,branch=branch,source_files=len(selected),source_bytes=sum((ROOT/p).stat().st_size for p in selected),selected=selected,omitted=omitted))
     (dest/'source.patch').write_bytes(subprocess.check_output(['git','diff','HEAD'],cwd=ROOT))
     dump(dest/'PROVENANCE.json',dict(base_head=head,branch=branch,source_state='Actual full current snapshot plus preserved incoming work; not HEAD alone.',
-        user_selected='Collective-stop repair and prepared bounded server startup; no server launch.',
+        user_selected=args.scope,
         verification=json.loads((dest/'qualification/verification.json').read_text()),strict_reference_match_passed=False))
     (dest/'PROVENANCE.md').write_text('Full current source snapshot. source.patch is an informational diff against base HEAD, already applied. Do not apply it again.\nNo workstation binary, build cache, old output/checkpoint or runtime Python controller is shipped.\nLocal qualification, prepared full-grid startup and the unqualified first-event experiment are distinct.\nSee VERIFICATION.md, RESOURCES.md, qualification/ and per-file checksums.\n')
     manifest={}

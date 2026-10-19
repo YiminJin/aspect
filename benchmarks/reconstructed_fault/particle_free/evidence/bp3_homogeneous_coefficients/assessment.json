@@ -1,0 +1,2609 @@
+{
+  "base": "b2dfdebe43437d6028b06d4f9f862cc80a00cc71",
+  "strict_reference_match_passed": false,
+  "runs": {
+    "coefficients-optimized": {
+      "seconds": 41.2014187169998,
+      "timers": {
+        "Assemble Stokes system Picard": {
+          "calls": 3,
+          "seconds": 0.991
+        },
+        "Assemble Stokes system rhs": {
+          "calls": 14,
+          "seconds": 3.17
+        },
+        "BP3 dense coefficient output": {
+          "calls": 2,
+          "seconds": 0.0784
+        },
+        "BP3 dense stress output": {
+          "calls": 2,
+          "seconds": 0.424
+        },
+        "Build Stokes preconditioner": {
+          "calls": 3,
+          "seconds": 0.625
+        },
+        "Create snapshot": {
+          "calls": 1,
+          "seconds": 0.475
+        },
+        "DG independent history sampling": {
+          "calls": 2,
+          "seconds": 0.141
+        },
+        "DG native source/update": {
+          "calls": 8,
+          "seconds": 0.185
+        },
+        "Fault: Cache build": {
+          "calls": 1,
+          "seconds": 0.00522
+        },
+        "Fault: I_h": {
+          "calls": 7,
+          "seconds": 0.264
+        },
+        "Fault: Property preparation": {
+          "calls": 7,
+          "seconds": 0.317
+        },
+        "Fault: Stokes QP cache build": {
+          "calls": 1,
+          "seconds": 0.0125
+        },
+        "Fault: Surface-property projection": {
+          "calls": 7,
+          "seconds": 5.47e-05
+        },
+        "Fault: condensed linear solve": {
+          "calls": 4,
+          "seconds": 24.0
+        },
+        "Initialization": {
+          "calls": 1,
+          "seconds": 0.141
+        },
+        "Native history candidate/check": {
+          "calls": 2,
+          "seconds": 0.376
+        },
+        "Particles: Advect": {
+          "calls": 3,
+          "seconds": 0.00175
+        },
+        "Particles: Copy": {
+          "calls": 3,
+          "seconds": 0.00417
+        },
+        "Particles: Exchange ghosts": {
+          "calls": 4,
+          "seconds": 0.00249
+        },
+        "Particles: Generate": {
+          "calls": 1,
+          "seconds": 0.00152
+        },
+        "Particles: Initialization": {
+          "calls": 1,
+          "seconds": 0.000117
+        },
+        "Particles: Initialize properties": {
+          "calls": 1,
+          "seconds": 0.0147
+        },
+        "Particles: Sort": {
+          "calls": 3,
+          "seconds": 0.00443
+        },
+        "Particles: Update properties": {
+          "calls": 3,
+          "seconds": 0.0152
+        },
+        "Postprocessing": {
+          "calls": 3,
+          "seconds": 4.15
+        },
+        "Setup dof systems": {
+          "calls": 1,
+          "seconds": 0.0434
+        },
+        "Setup initial conditions": {
+          "calls": 1,
+          "seconds": 0.196
+        },
+        "Setup matrices": {
+          "calls": 1,
+          "seconds": 0.257
+        },
+        "Fault: History commit": {
+          "calls": 3,
+          "seconds": 0.376
+        },
+        "Fault: I_h final projection": {
+          "calls": 1,
+          "seconds": 4.06e-05
+        },
+        "Fault: I_h preparation": {
+          "calls": 7,
+          "seconds": 0.264
+        },
+        "Fault: I_h projection MPI": {
+          "calls": 1,
+          "seconds": 2.06e-05
+        },
+        "Fault: B action": {
+          "calls": 443,
+          "seconds": 11.7
+        },
+        "Fault: B linearization": {
+          "calls": 10,
+          "seconds": 0.624
+        },
+        "Fault: G FE sampling": {
+          "calls": 440,
+          "seconds": 1.59
+        },
+        "Fault: G integrate/reduce": {
+          "calls": 440,
+          "seconds": 0.274
+        },
+        "Fault: G lookup build": {
+          "calls": 1,
+          "seconds": 0.0257
+        },
+        "Fault: G normal filter": {
+          "calls": 440,
+          "seconds": 0.142
+        },
+        "Fault: G total": {
+          "calls": 440,
+          "seconds": 1.87
+        },
+        "Fault: Linearization total": {
+          "calls": 10,
+          "seconds": 0.941
+        },
+        "Fault: bulk work R/K": {
+          "calls": 20,
+          "seconds": 1.01
+        },
+        "Fault: normal filter": {
+          "calls": 20,
+          "seconds": 0.00607
+        }
+      },
+      "linear_profile": {
+        "elapsed": 25.937038386999998,
+        "G_sparse_s": 0.13249264,
+        "interface_apply_calls": 0.0,
+        "A_s": 0.359502864,
+        "B_setup_calls": 7.0,
+        "G_s": 1.773427111,
+        "factor_s": 4.3671e-05,
+        "A_calls": 412.0,
+        "B_sparse_s": 0.31478911000000004,
+        "preconditioner_calls": 202.0,
+        "G_calls": 416.0,
+        "B_setup_s": 0.432000886,
+        "inverse_s": 0.0013128370000000005,
+        "B_s": 11.110096786000002,
+        "preconditioner_s": 4.103005872000001,
+        "FGMRES_vectors_calls": 4.0,
+        "interface_setup_calls": 0.0,
+        "other_s": 6.818704860999996,
+        "B_sparse_calls": 213.0,
+        "G_setup_calls": 7.0,
+        "G_sparse_calls": 210.0,
+        "G_setup_s": 0.347621409,
+        "B_calls": 419.0,
+        "other_calls": 404.0,
+        "factor_calls": 7.0,
+        "interface_setup_s": 0.0,
+        "inverse_calls": 423.0,
+        "FGMRES_vectors_s": 0.54404034,
+        "interface_apply_s": 0.0,
+        "B_application_s": 11.424885896000001,
+        "G_application_s": 1.9059197509999999
+      },
+      "rank0_cumulative_counts": {
+        "step": 2.0,
+        "projection_queries": 331898.0,
+        "segment_tests": 119267.0,
+        "dg_fevalues": 11930.0,
+        "native_fevalues": 12914.0,
+        "history_misses": 110264.0,
+        "mass_inverse": 6209.0,
+        "roundoff_geometry": 6209.0,
+        "lookup_builds": 2.0,
+        "B_builds": 10.0,
+        "G_builds": 2.0,
+        "bulk_builds": 3.0,
+        "B_reference_checks": 231.0,
+        "G_reference_checks": 228.0,
+        "C_reference_checks": 212.0,
+        "B_relative_error_max": 1.008372192725265e-15,
+        "G_relative_error_max": 4.169308945584959e-15,
+        "C_relative_error_max": 1.708662035507144e-15
+      },
+      "peak_RSS_MiB_per_rank": [
+        435.59375,
+        443.21484375
+      ],
+      "native_header_to_next_header_or_termination": [
+        {
+          "step": 0,
+          "seconds": 17.800857576999988
+        },
+        {
+          "step": 1,
+          "seconds": 2.863979556999766
+        },
+        {
+          "step": 2,
+          "seconds": 16.085673175999545
+        }
+      ],
+      "accepted_step_sequence": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          4000000.0,
+          4000000.0
+        ],
+        [
+          2.0,
+          11640000.0,
+          7640000.0
+        ]
+      ],
+      "krylov_iterations": [
+        99.0,
+        0.0,
+        103.0
+      ],
+      "newton_updates": [
+        2.0,
+        0.0,
+        2.0
+      ],
+      "max_normalized_nonlinear_residual": 1.198926105714726e-09,
+      "max_surface_RMS_Pa": 0.0011707744970447154,
+      "max_publication_allowance_fraction": 0.0026897212931103823,
+      "once_only_publication": true
+    },
+    "coefficients-reference": {
+      "seconds": 35.985688075000326,
+      "timers": {
+        "Assemble Stokes system Picard": {
+          "calls": 7,
+          "seconds": 2.56
+        },
+        "Assemble Stokes system rhs": {
+          "calls": 10,
+          "seconds": 3.91
+        },
+        "BP3 dense coefficient output": {
+          "calls": 2,
+          "seconds": 0.0828
+        },
+        "BP3 dense stress output": {
+          "calls": 2,
+          "seconds": 0.845
+        },
+        "Build Stokes preconditioner": {
+          "calls": 7,
+          "seconds": 1.51
+        },
+        "Create snapshot": {
+          "calls": 1,
+          "seconds": 0.447
+        },
+        "DG independent history sampling": {
+          "calls": 2,
+          "seconds": 0.656
+        },
+        "DG native source/update": {
+          "calls": 2,
+          "seconds": 0.0615
+        },
+        "Fault: Cache build": {
+          "calls": 1,
+          "seconds": 0.0199
+        },
+        "Fault: I_h": {
+          "calls": 7,
+          "seconds": 0.282
+        },
+        "Fault: Property preparation": {
+          "calls": 7,
+          "seconds": 0.351
+        },
+        "Fault: Stokes QP cache build": {
+          "calls": 1,
+          "seconds": 0.0437
+        },
+        "Fault: Surface-property projection": {
+          "calls": 7,
+          "seconds": 5.89e-05
+        },
+        "Fault: condensed linear solve": {
+          "calls": 4,
+          "seconds": 15.5
+        },
+        "Initialization": {
+          "calls": 1,
+          "seconds": 0.146
+        },
+        "Native history candidate/check": {
+          "calls": 2,
+          "seconds": 2.95
+        },
+        "Particles: Advect": {
+          "calls": 3,
+          "seconds": 0.00212
+        },
+        "Particles: Copy": {
+          "calls": 3,
+          "seconds": 0.00388
+        },
+        "Particles: Exchange ghosts": {
+          "calls": 4,
+          "seconds": 0.00274
+        },
+        "Particles: Generate": {
+          "calls": 1,
+          "seconds": 0.00182
+        },
+        "Particles: Initialization": {
+          "calls": 1,
+          "seconds": 0.00011
+        },
+        "Particles: Initialize properties": {
+          "calls": 1,
+          "seconds": 0.0157
+        },
+        "Particles: Sort": {
+          "calls": 3,
+          "seconds": 0.00504
+        },
+        "Particles: Update properties": {
+          "calls": 3,
+          "seconds": 0.0173
+        },
+        "Postprocessing": {
+          "calls": 3,
+          "seconds": 3.73
+        },
+        "Setup dof systems": {
+          "calls": 1,
+          "seconds": 0.0436
+        },
+        "Setup initial conditions": {
+          "calls": 1,
+          "seconds": 0.207
+        },
+        "Setup matrices": {
+          "calls": 1,
+          "seconds": 0.277
+        },
+        "Fault: History commit": {
+          "calls": 3,
+          "seconds": 2.95
+        },
+        "Fault: I_h final projection": {
+          "calls": 1,
+          "seconds": 4.38e-05
+        },
+        "Fault: I_h preparation": {
+          "calls": 7,
+          "seconds": 0.282
+        },
+        "Fault: I_h projection MPI": {
+          "calls": 1,
+          "seconds": 2.41e-05
+        },
+        "Fault: B action": {
+          "calls": 213,
+          "seconds": 5.85
+        },
+        "Fault: B linearization": {
+          "calls": 7,
+          "seconds": 0.127
+        },
+        "Fault: G FE sampling": {
+          "calls": 210,
+          "seconds": 0.781
+        },
+        "Fault: G integrate/reduce": {
+          "calls": 210,
+          "seconds": 0.134
+        },
+        "Fault: G lookup build": {
+          "calls": 7,
+          "seconds": 0.164
+        },
+        "Fault: G normal filter": {
+          "calls": 210,
+          "seconds": 0.0693
+        },
+        "Fault: G total": {
+          "calls": 210,
+          "seconds": 0.917
+        },
+        "Fault: Linearization total": {
+          "calls": 7,
+          "seconds": 0.636
+        },
+        "Fault: bulk work R/K": {
+          "calls": 17,
+          "seconds": 1.01
+        },
+        "Fault: normal filter": {
+          "calls": 17,
+          "seconds": 0.00566
+        }
+      },
+      "linear_profile": {
+        "elapsed": 17.015290383,
+        "G_sparse_s": 0.0,
+        "interface_apply_calls": 0.0,
+        "A_s": 0.16483556099999996,
+        "B_setup_calls": 0.0,
+        "G_s": 0.916930613,
+        "factor_s": 4.7121e-05,
+        "A_calls": 206.0,
+        "B_sparse_s": 0.0,
+        "preconditioner_calls": 202.0,
+        "G_calls": 210.0,
+        "B_setup_s": 0.0,
+        "inverse_s": 0.000728461,
+        "B_s": 5.854056097999999,
+        "preconditioner_s": 4.195965512,
+        "FGMRES_vectors_calls": 4.0,
+        "interface_setup_calls": 0.0,
+        "other_s": 5.315352298000002,
+        "B_sparse_calls": 0.0,
+        "G_setup_calls": 0.0,
+        "G_sparse_calls": 0.0,
+        "G_setup_s": 0.0,
+        "B_calls": 213.0,
+        "other_calls": 404.0,
+        "factor_calls": 7.0,
+        "interface_setup_s": 0.0,
+        "inverse_calls": 217.0,
+        "FGMRES_vectors_s": 0.567374719,
+        "interface_apply_s": 0.0,
+        "B_application_s": 5.854056097999999,
+        "G_application_s": 0.916930613
+      },
+      "rank0_cumulative_counts": {
+        "step": 2.0,
+        "projection_queries": 701073.0,
+        "segment_tests": 81324468.0,
+        "dg_fevalues": 422823.0,
+        "native_fevalues": 491075.0,
+        "history_misses": 287701.0,
+        "mass_inverse": 4136.0,
+        "roundoff_geometry": 4136.0,
+        "lookup_builds": 9.0,
+        "B_builds": 7.0,
+        "G_builds": 0.0,
+        "bulk_builds": 7.0,
+        "B_reference_checks": 0.0,
+        "G_reference_checks": 0.0,
+        "C_reference_checks": 0.0,
+        "B_relative_error_max": 0.0,
+        "G_relative_error_max": 0.0,
+        "C_relative_error_max": 0.0
+      },
+      "peak_RSS_MiB_per_rank": [
+        417.48046875,
+        428.59375
+      ],
+      "native_header_to_next_header_or_termination": [
+        {
+          "step": 0,
+          "seconds": 14.980003945000135
+        },
+        {
+          "step": 1,
+          "seconds": 4.288962657000411
+        },
+        {
+          "step": 2,
+          "seconds": 14.127403481999863
+        }
+      ],
+      "accepted_step_sequence": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          4000000.0,
+          4000000.0
+        ],
+        [
+          2.0,
+          11640000.0,
+          7640000.0
+        ]
+      ],
+      "krylov_iterations": [
+        99.0,
+        0.0,
+        103.0
+      ],
+      "newton_updates": [
+        2.0,
+        0.0,
+        2.0
+      ],
+      "max_normalized_nonlinear_residual": 1.1988234278203888e-09,
+      "max_surface_RMS_Pa": 0.0011707738490950067,
+      "max_publication_allowance_fraction": 0.0033398327401430858,
+      "once_only_publication": true
+    },
+    "coefficients-split": {
+      "seconds": 15.796026252999582,
+      "timers": {
+        "Assemble Stokes system Picard": {
+          "calls": 2,
+          "seconds": 0.996
+        },
+        "Assemble Stokes system rhs": {
+          "calls": 8,
+          "seconds": 2.76
+        },
+        "BP3 dense coefficient output": {
+          "calls": 2,
+          "seconds": 0.127
+        },
+        "BP3 dense stress output": {
+          "calls": 2,
+          "seconds": 0.677
+        },
+        "Build Stokes preconditioner": {
+          "calls": 2,
+          "seconds": 0.563
+        },
+        "Create snapshot": {
+          "calls": 1,
+          "seconds": 0.381
+        },
+        "DG independent history sampling": {
+          "calls": 1,
+          "seconds": 0.158
+        },
+        "DG native source/update": {
+          "calls": 1,
+          "seconds": 0.0257
+        },
+        "Fault: Cache build": {
+          "calls": 1,
+          "seconds": 0.00815
+        },
+        "Fault: I_h": {
+          "calls": 5,
+          "seconds": 0.405
+        },
+        "Fault: Property preparation": {
+          "calls": 5,
+          "seconds": 0.459
+        },
+        "Fault: Stokes QP cache build": {
+          "calls": 1,
+          "seconds": 0.0201
+        },
+        "Fault: Surface-property projection": {
+          "calls": 5,
+          "seconds": 4.73e-05
+        },
+        "Fault: condensed linear solve": {
+          "calls": 2,
+          "seconds": 3.2
+        },
+        "Initialization": {
+          "calls": 1,
+          "seconds": 0.126
+        },
+        "Native history candidate/check": {
+          "calls": 1,
+          "seconds": 0.348
+        },
+        "Particles: Advect": {
+          "calls": 2,
+          "seconds": 0.00167
+        },
+        "Particles: Copy": {
+          "calls": 2,
+          "seconds": 0.00229
+        },
+        "Particles: Generate": {
+          "calls": 1,
+          "seconds": 0.00304
+        },
+        "Particles: Initialization": {
+          "calls": 1,
+          "seconds": 0.000116
+        },
+        "Particles: Initialize properties": {
+          "calls": 1,
+          "seconds": 0.0192
+        },
+        "Particles: Sort": {
+          "calls": 2,
+          "seconds": 0.00523
+        },
+        "Particles: Update properties": {
+          "calls": 2,
+          "seconds": 0.0153
+        },
+        "Postprocessing": {
+          "calls": 2,
+          "seconds": 2.71
+        },
+        "Setup dof systems": {
+          "calls": 1,
+          "seconds": 0.0222
+        },
+        "Setup initial conditions": {
+          "calls": 1,
+          "seconds": 0.23
+        },
+        "Setup matrices": {
+          "calls": 1,
+          "seconds": 0.15
+        },
+        "Fault: History commit": {
+          "calls": 2,
+          "seconds": 0.348
+        },
+        "Fault: I_h final projection": {
+          "calls": 1,
+          "seconds": 4.53e-05
+        },
+        "Fault: I_h preparation": {
+          "calls": 5,
+          "seconds": 0.405
+        },
+        "Fault: I_h projection MPI": {
+          "calls": 1,
+          "seconds": 7.63e-06
+        },
+        "Fault: B linearization": {
+          "calls": 4,
+          "seconds": 0.439
+        },
+        "Fault: G lookup build": {
+          "calls": 1,
+          "seconds": 0.0281
+        },
+        "Fault: Linearization total": {
+          "calls": 4,
+          "seconds": 0.634
+        },
+        "Fault: bulk work R/K": {
+          "calls": 10,
+          "seconds": 0.721
+        },
+        "Fault: normal filter": {
+          "calls": 10,
+          "seconds": 0.00416
+        }
+      },
+      "linear_profile": {
+        "elapsed": 4.681811018000002,
+        "G_sparse_s": 0.065767934,
+        "interface_apply_calls": 0.0,
+        "A_s": 0.117226131,
+        "B_setup_calls": 4.0,
+        "G_s": 0.0,
+        "factor_s": 2.4215e-05,
+        "A_calls": 99.0,
+        "B_sparse_s": 0.019658213999999993,
+        "preconditioner_calls": 97.0,
+        "G_calls": 0.0,
+        "B_setup_s": 0.438855335,
+        "inverse_s": 0.0002699519999999999,
+        "B_s": 0.0,
+        "preconditioner_s": 2.6410953710000014,
+        "FGMRES_vectors_calls": 2.0,
+        "interface_setup_calls": 0.0,
+        "other_s": 0.9385624580000004,
+        "B_sparse_calls": 103.0,
+        "G_setup_calls": 4.0,
+        "G_sparse_calls": 101.0,
+        "G_setup_s": 0.273132058,
+        "B_calls": 0.0,
+        "other_calls": 194.0,
+        "factor_calls": 4.0,
+        "interface_setup_s": 0.0,
+        "inverse_calls": 105.0,
+        "FGMRES_vectors_s": 0.18721934999999998,
+        "interface_apply_s": 0.0,
+        "B_application_s": 0.019658213999999993,
+        "G_application_s": 0.065767934
+      },
+      "rank0_cumulative_counts": {
+        "step": 1.0,
+        "projection_queries": 594686.0,
+        "segment_tests": 213370.0,
+        "dg_fevalues": 17321.0,
+        "native_fevalues": 18627.0,
+        "history_misses": 149556.0,
+        "mass_inverse": 5.0,
+        "roundoff_geometry": 5.0,
+        "lookup_builds": 2.0,
+        "B_builds": 4.0,
+        "G_builds": 1.0,
+        "bulk_builds": 2.0,
+        "B_reference_checks": 0.0,
+        "G_reference_checks": 0.0,
+        "C_reference_checks": 0.0,
+        "B_relative_error_max": 0.0,
+        "G_relative_error_max": 0.0,
+        "C_relative_error_max": 0.0
+      },
+      "peak_RSS_MiB_per_rank": [
+        565.88671875
+      ],
+      "native_header_to_next_header_or_termination": [
+        {
+          "step": 0,
+          "seconds": 9.449688736999633
+        },
+        {
+          "step": 1,
+          "seconds": 3.88528142999985
+        }
+      ],
+      "accepted_step_sequence": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          4000000.0,
+          4000000.0
+        ]
+      ],
+      "krylov_iterations": [
+        97.0,
+        0.0
+      ],
+      "newton_updates": [
+        2.0,
+        0.0
+      ],
+      "max_normalized_nonlinear_residual": 1.5636459831022873e-09,
+      "max_surface_RMS_Pa": 0.0011708063123610473,
+      "max_publication_allowance_fraction": 0.0026965353184306043,
+      "once_only_publication": true
+    },
+    "coefficients-resume": {
+      "seconds": 8.633974463999948,
+      "timers": {
+        "Assemble Stokes system Picard": {
+          "calls": 1,
+          "seconds": 0.199
+        },
+        "Assemble Stokes system rhs": {
+          "calls": 6,
+          "seconds": 0.868
+        },
+        "BP3 dense coefficient output": {
+          "calls": 1,
+          "seconds": 0.0293
+        },
+        "BP3 dense stress output": {
+          "calls": 1,
+          "seconds": 0.187
+        },
+        "Build Stokes preconditioner": {
+          "calls": 1,
+          "seconds": 0.131
+        },
+        "Create snapshot": {
+          "calls": 1,
+          "seconds": 0.366
+        },
+        "DG independent history sampling": {
+          "calls": 1,
+          "seconds": 0.0692
+        },
+        "DG native source/update": {
+          "calls": 1,
+          "seconds": 0.0124
+        },
+        "Fault: Cache build": {
+          "calls": 1,
+          "seconds": 0.00254
+        },
+        "Fault: I_h": {
+          "calls": 2,
+          "seconds": 0.145
+        },
+        "Fault: Property preparation": {
+          "calls": 2,
+          "seconds": 0.15
+        },
+        "Fault: Stokes QP cache build": {
+          "calls": 1,
+          "seconds": 0.00958
+        },
+        "Fault: Surface-property projection": {
+          "calls": 2,
+          "seconds": 2.87e-06
+        },
+        "Fault: condensed linear solve": {
+          "calls": 2,
+          "seconds": 3.06
+        },
+        "Initialization": {
+          "calls": 1,
+          "seconds": 0.149
+        },
+        "Native history candidate/check": {
+          "calls": 1,
+          "seconds": 0.142
+        },
+        "Particles: Advect": {
+          "calls": 1,
+          "seconds": 0.000388
+        },
+        "Particles: Copy": {
+          "calls": 1,
+          "seconds": 0.000374
+        },
+        "Particles: Exchange ghosts": {
+          "calls": 1,
+          "seconds": 0.000719
+        },
+        "Particles: Initialization": {
+          "calls": 1,
+          "seconds": 0.000131
+        },
+        "Particles: Sort": {
+          "calls": 1,
+          "seconds": 0.00156
+        },
+        "Particles: Update properties": {
+          "calls": 1,
+          "seconds": 0.00282
+        },
+        "Postprocessing": {
+          "calls": 1,
+          "seconds": 0.7
+        },
+        "Resume snapshot": {
+          "calls": 1,
+          "seconds": 0.128
+        },
+        "Setup dof systems": {
+          "calls": 1,
+          "seconds": 0.0294
+        },
+        "Setup matrices": {
+          "calls": 1,
+          "seconds": 0.262
+        },
+        "Fault: History commit": {
+          "calls": 1,
+          "seconds": 0.142
+        },
+        "Fault: I_h final projection": {
+          "calls": 1,
+          "seconds": 4.18e-05
+        },
+        "Fault: I_h preparation": {
+          "calls": 2,
+          "seconds": 0.145
+        },
+        "Fault: I_h projection MPI": {
+          "calls": 1,
+          "seconds": 2.77e-05
+        },
+        "Fault: B linearization": {
+          "calls": 3,
+          "seconds": 0.0798
+        },
+        "Fault: G lookup build": {
+          "calls": 1,
+          "seconds": 0.0189
+        },
+        "Fault: Linearization total": {
+          "calls": 3,
+          "seconds": 0.22
+        },
+        "Fault: bulk work R/K": {
+          "calls": 7,
+          "seconds": 0.219
+        },
+        "Fault: normal filter": {
+          "calls": 7,
+          "seconds": 0.00174
+        }
+      },
+      "linear_profile": {
+        "elapsed": 3.5480910640000007,
+        "G_sparse_s": 0.04417818600000001,
+        "interface_apply_calls": 0.0,
+        "A_s": 0.055552278000000004,
+        "B_setup_calls": 3.0,
+        "G_s": 0.0,
+        "factor_s": 2.4359e-05,
+        "A_calls": 106.0,
+        "B_sparse_s": 0.10279925800000002,
+        "preconditioner_calls": 104.0,
+        "G_calls": 0.0,
+        "B_setup_s": 0.07983478,
+        "inverse_s": 0.0003401930000000001,
+        "B_s": 0.0,
+        "preconditioner_s": 1.4601363850000002,
+        "FGMRES_vectors_calls": 2.0,
+        "interface_setup_calls": 0.0,
+        "other_s": 1.413879075,
+        "B_sparse_calls": 109.0,
+        "G_setup_calls": 3.0,
+        "G_sparse_calls": 108.0,
+        "G_setup_s": 0.092660296,
+        "B_calls": 0.0,
+        "other_calls": 208.0,
+        "factor_calls": 3.0,
+        "interface_setup_s": 0.0,
+        "inverse_calls": 111.0,
+        "FGMRES_vectors_s": 0.298686254,
+        "interface_apply_s": 0.0,
+        "B_application_s": 0.10279925800000002,
+        "G_application_s": 0.04417818600000001
+      },
+      "rank0_cumulative_counts": {
+        "step": 2.0,
+        "projection_queries": 105764.0,
+        "segment_tests": 38381.0,
+        "dg_fevalues": 4379.0,
+        "native_fevalues": 4536.0,
+        "history_misses": 28111.0,
+        "mass_inverse": 5.0,
+        "roundoff_geometry": 5.0,
+        "lookup_builds": 2.0,
+        "B_builds": 3.0,
+        "G_builds": 1.0,
+        "bulk_builds": 1.0,
+        "B_reference_checks": 0.0,
+        "G_reference_checks": 0.0,
+        "C_reference_checks": 0.0,
+        "B_relative_error_max": 0.0,
+        "G_relative_error_max": 0.0,
+        "C_relative_error_max": 0.0
+      },
+      "peak_RSS_MiB_per_rank": [
+        335.1953125,
+        335.23828125,
+        343.109375,
+        356.82421875
+      ],
+      "native_header_to_next_header_or_termination": [
+        {
+          "step": 2,
+          "seconds": 6.259737391999806
+        }
+      ],
+      "accepted_step_sequence": [
+        [
+          2.0,
+          11640000.0,
+          7640000.0
+        ]
+      ],
+      "krylov_iterations": [
+        104.0
+      ],
+      "newton_updates": [
+        2.0
+      ],
+      "max_normalized_nonlinear_residual": 1.1288996735998595e-11,
+      "max_surface_RMS_Pa": 0.0001050263857405799,
+      "max_publication_allowance_fraction": 1.888678514197873e-05,
+      "once_only_publication": true
+    },
+    "coefficients-rejection": {
+      "seconds": 28.62176423300025,
+      "timers": {
+        "Assemble Stokes system Picard": {
+          "calls": 4,
+          "seconds": 1.45
+        },
+        "Assemble Stokes system rhs": {
+          "calls": 20,
+          "seconds": 4.9
+        },
+        "BP3 dense coefficient output": {
+          "calls": 2,
+          "seconds": 0.0847
+        },
+        "BP3 dense stress output": {
+          "calls": 2,
+          "seconds": 0.452
+        },
+        "Build Stokes preconditioner": {
+          "calls": 4,
+          "seconds": 0.89
+        },
+        "Create snapshot": {
+          "calls": 1,
+          "seconds": 0.454
+        },
+        "DG independent history sampling": {
+          "calls": 3,
+          "seconds": 0.203
+        },
+        "DG native source/update": {
+          "calls": 2,
+          "seconds": 0.0424
+        },
+        "Fault: Cache build": {
+          "calls": 1,
+          "seconds": 0.00588
+        },
+        "Fault: I_h": {
+          "calls": 8,
+          "seconds": 0.284
+        },
+        "Fault: Property preparation": {
+          "calls": 8,
+          "seconds": 0.342
+        },
+        "Fault: Stokes QP cache build": {
+          "calls": 1,
+          "seconds": 0.0148
+        },
+        "Fault: Surface-property projection": {
+          "calls": 8,
+          "seconds": 5.94e-05
+        },
+        "Fault: condensed linear solve": {
+          "calls": 6,
+          "seconds": 11.2
+        },
+        "Initialization": {
+          "calls": 1,
+          "seconds": 0.154
+        },
+        "Native history candidate/check": {
+          "calls": 3,
+          "seconds": 0.492
+        },
+        "Particles: Advect": {
+          "calls": 3,
+          "seconds": 0.00191
+        },
+        "Particles: Copy": {
+          "calls": 3,
+          "seconds": 0.00376
+        },
+        "Particles: Exchange ghosts": {
+          "calls": 4,
+          "seconds": 0.00262
+        },
+        "Particles: Generate": {
+          "calls": 1,
+          "seconds": 0.00161
+        },
+        "Particles: Initialization": {
+          "calls": 1,
+          "seconds": 0.000174
+        },
+        "Particles: Initialize properties": {
+          "calls": 1,
+          "seconds": 0.0175
+        },
+        "Particles: Sort": {
+          "calls": 3,
+          "seconds": 0.00452
+        },
+        "Particles: Update properties": {
+          "calls": 3,
+          "seconds": 0.0156
+        },
+        "Postprocessing": {
+          "calls": 3,
+          "seconds": 2.67
+        },
+        "Setup dof systems": {
+          "calls": 1,
+          "seconds": 0.0496
+        },
+        "Setup initial conditions": {
+          "calls": 1,
+          "seconds": 0.209
+        },
+        "Setup matrices": {
+          "calls": 1,
+          "seconds": 0.275
+        },
+        "Fault: History commit": {
+          "calls": 4,
+          "seconds": 0.492
+        },
+        "Fault: I_h final projection": {
+          "calls": 1,
+          "seconds": 4.31e-05
+        },
+        "Fault: I_h preparation": {
+          "calls": 8,
+          "seconds": 0.284
+        },
+        "Fault: I_h projection MPI": {
+          "calls": 1,
+          "seconds": 2.42e-05
+        },
+        "Fault: B linearization": {
+          "calls": 10,
+          "seconds": 0.612
+        },
+        "Fault: G lookup build": {
+          "calls": 1,
+          "seconds": 0.0307
+        },
+        "Fault: Linearization total": {
+          "calls": 10,
+          "seconds": 1.03
+        },
+        "Fault: bulk work R/K": {
+          "calls": 24,
+          "seconds": 1.29
+        },
+        "Fault: normal filter": {
+          "calls": 24,
+          "seconds": 0.00794
+        }
+      },
+      "linear_profile": {
+        "elapsed": 13.694847212,
+        "G_sparse_s": 0.21448437599999998,
+        "interface_apply_calls": 0.0,
+        "A_s": 0.24634318600000002,
+        "B_setup_calls": 10.0,
+        "G_s": 0.0,
+        "factor_s": 7.6501e-05,
+        "A_calls": 311.0,
+        "B_sparse_s": 0.251027638,
+        "preconditioner_calls": 305.0,
+        "G_calls": 0.0,
+        "B_setup_s": 0.611685885,
+        "inverse_s": 0.000915055,
+        "B_s": 0.0,
+        "preconditioner_s": 6.326311925000001,
+        "FGMRES_vectors_calls": 6.0,
+        "interface_setup_calls": 0.0,
+        "other_s": 4.773493582000001,
+        "B_sparse_calls": 321.0,
+        "G_setup_calls": 10.0,
+        "G_sparse_calls": 317.0,
+        "G_setup_s": 0.37644765799999996,
+        "B_calls": 0.0,
+        "other_calls": 610.0,
+        "factor_calls": 10.0,
+        "interface_setup_s": 0.0,
+        "inverse_calls": 327.0,
+        "FGMRES_vectors_s": 0.894061406,
+        "interface_apply_s": 0.0,
+        "B_application_s": 0.251027638,
+        "G_application_s": 0.21448437599999998
+      },
+      "rank0_cumulative_counts": {
+        "step": 2.0,
+        "projection_queries": 331034.0,
+        "segment_tests": 118883.0,
+        "dg_fevalues": 11060.0,
+        "native_fevalues": 14112.0,
+        "history_misses": 110264.0,
+        "mass_inverse": 5.0,
+        "roundoff_geometry": 5.0,
+        "lookup_builds": 2.0,
+        "B_builds": 10.0,
+        "G_builds": 2.0,
+        "bulk_builds": 4.0,
+        "B_reference_checks": 0.0,
+        "G_reference_checks": 0.0,
+        "C_reference_checks": 0.0,
+        "B_relative_error_max": 0.0,
+        "G_relative_error_max": 0.0,
+        "C_relative_error_max": 0.0
+      },
+      "peak_RSS_MiB_per_rank": [
+        441.609375,
+        451.01171875
+      ],
+      "native_header_to_next_header_or_termination": [
+        {
+          "step": 0,
+          "seconds": 8.70558220699968
+        },
+        {
+          "step": 1,
+          "seconds": 2.6850436160002573
+        },
+        {
+          "step": 2,
+          "seconds": 14.625695231000464
+        }
+      ],
+      "accepted_step_sequence": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          4000000.0,
+          4000000.0
+        ],
+        [
+          2.0,
+          11640000.0,
+          7640000.0
+        ]
+      ],
+      "krylov_iterations": [
+        99.0,
+        0.0,
+        103.0
+      ],
+      "newton_updates": [
+        2.0,
+        0.0,
+        2.0
+      ],
+      "max_normalized_nonlinear_residual": 1.198926105714726e-09,
+      "max_surface_RMS_Pa": 0.0011707744970447154,
+      "max_publication_allowance_fraction": 0.0026897212931103823,
+      "once_only_publication": true
+    }
+  },
+  "comparisons": {
+    "coefficients-optimized__coefficients-reference": {
+      "persistent": {
+        "dg-coefficients-{}.csv": {
+          "xx": 7.83620635047555e-08,
+          "yy": 8.158804121194407e-08,
+          "xy": 8.369534043595195e-08
+        },
+        "physical-fe-{}.csv": {
+          "accepted": 1.83936208486557e-08,
+          "history": 0.0
+        },
+        "coupled-profile": {
+          "node": 0.0,
+          "s_m": 0.0,
+          "time_s": 0.0,
+          "V_m_s": 3.1019272970738538e-24,
+          "theta_s": 1.6763806343078613e-08,
+          "Omega": 1.4432899320127035e-15,
+          "slip_m": 2.7755575615628914e-17,
+          "shear_Pa": 1.862645149230957e-08,
+          "raw_normal_Pa": 2.9802322387695312e-08,
+          "filtered_normal_Pa": 2.9802322387695312e-08,
+          "pressure_Pa": 6.868503987789154e-09,
+          "deviatoric_Pa": 2.8558133635669947e-09,
+          "background_Pa": 0.0,
+          "I_h_m": 0.0,
+          "Z_Pa_m": 9.5367431640625e-07
+        },
+        "surface-weak": {
+          "node": 0.0,
+          "s_m": 0.0,
+          "mass_diagonal": 0.0,
+          "mass_edge": 0.0,
+          "shear": 1.1920928955078125e-07,
+          "raw_normal": 1.1920928955078125e-07,
+          "filtered_normal": 2.384185791015625e-07,
+          "friction": 1.1920928955078125e-07,
+          "residual": 8.579809218645096e-08,
+          "pressure": 3.92028596252203e-08,
+          "deviatoric": 2.3923348635435104e-08,
+          "background": 0.0
+        }
+      },
+      "stress": {
+        "whole_RMS_Pa": 4.313205701221997e-09,
+        "whole_relative_L2": 6.111430216404253e-14,
+        "localized_RMS_Pa": 1.1527036298006552e-08,
+        "localized_relative_L2": 2.023405335269904e-14,
+        "max_full_tensor_Pa": 5.3337770879535187e-08,
+        "p_max_Pa": 1.5133991837501526e-08
+      },
+      "surface": {
+        "all": {
+          "V_m_s": 3.1019272970738538e-24,
+          "theta_s": 1.6763806343078613e-08,
+          "slip_m": 2.7755575615628914e-17,
+          "shear_Pa": 1.862645149230957e-08,
+          "raw_normal_Pa": 2.9802322387695312e-08,
+          "filtered_normal_Pa": 2.9802322387695312e-08,
+          "I_h_m": 0.0,
+          "V_difference_over_Vp": 3.1019272970738538e-15,
+          "theta_difference_over_theta0": 2.0954757928848267e-15,
+          "slip_difference_over_Dc": 3.469446951953614e-15,
+          "native_mass_diagonal_difference_m": 0.0,
+          "native_mass_one_relative_difference": 0.0,
+          "shear_native_total_weak_difference_Pa_m": 1.1920928955078125e-07,
+          "shear_background_measure_difference_Pa_m": 0.0,
+          "shear_common_geometric_weak_difference_Pa_m": 1.1744123185053468e-07,
+          "shear_common_geometric_relative_perturbation": 6.680809865704676e-13,
+          "shear_weak_max_Pa_m": 1.1920928955078125e-07,
+          "shear_weak_perturbation_scale_Pa_m": 162205.38064152002,
+          "shear_weak_relative_perturbation": 7.349280836388422e-13,
+          "shear_weak_RMS_Pa_m": 3.430228307837621e-08,
+          "raw_normal_native_total_weak_difference_Pa_m": 1.1920928955078125e-07,
+          "raw_normal_background_measure_difference_Pa_m": 0.0,
+          "raw_normal_common_geometric_weak_difference_Pa_m": 1.730513758957386e-07,
+          "raw_normal_common_geometric_relative_perturbation": 2.1996357149782252e-13,
+          "raw_normal_weak_max_Pa_m": 1.1920928955078125e-07,
+          "raw_normal_weak_perturbation_scale_Pa_m": 1161461.684439361,
+          "raw_normal_weak_relative_perturbation": 1.0263729845580203e-13,
+          "raw_normal_weak_RMS_Pa_m": 4.476711846582954e-08,
+          "filtered_normal_native_total_weak_difference_Pa_m": 2.384185791015625e-07,
+          "filtered_normal_background_measure_difference_Pa_m": 0.0,
+          "filtered_normal_common_geometric_weak_difference_Pa_m": 2.7194255380891263e-07,
+          "filtered_normal_common_geometric_relative_perturbation": 2.315780480483015e-12,
+          "filtered_normal_weak_max_Pa_m": 2.384185791015625e-07,
+          "filtered_normal_weak_perturbation_scale_Pa_m": 117223.06409752369,
+          "filtered_normal_weak_relative_perturbation": 2.033887963406333e-12,
+          "filtered_normal_weak_RMS_Pa_m": 7.734287047312806e-08
+        },
+        "interior": {
+          "V_m_s": 3.1019272970738538e-24,
+          "theta_s": 1.6763806343078613e-08,
+          "slip_m": 2.7755575615628914e-17,
+          "shear_Pa": 1.862645149230957e-08,
+          "raw_normal_Pa": 2.2351741790771484e-08,
+          "filtered_normal_Pa": 2.9802322387695312e-08,
+          "I_h_m": 0.0,
+          "V_difference_over_Vp": 3.1019272970738538e-15,
+          "theta_difference_over_theta0": 2.0954757928848267e-15,
+          "slip_difference_over_Dc": 3.469446951953614e-15,
+          "native_mass_diagonal_difference_m": 0.0,
+          "native_mass_one_relative_difference": 0.0,
+          "shear_native_total_weak_difference_Pa_m": 1.1920928955078125e-07,
+          "shear_background_measure_difference_Pa_m": 0.0,
+          "shear_common_geometric_weak_difference_Pa_m": 1.1744123185053468e-07,
+          "shear_common_geometric_relative_perturbation": 1.2588784627191113e-12,
+          "shear_weak_max_Pa_m": 1.1920928955078125e-07,
+          "shear_weak_perturbation_scale_Pa_m": 93280.32899421453,
+          "shear_weak_relative_perturbation": 1.2779681508003138e-12,
+          "shear_weak_RMS_Pa_m": 3.506829770890189e-08,
+          "raw_normal_native_total_weak_difference_Pa_m": 1.1920928955078125e-07,
+          "raw_normal_background_measure_difference_Pa_m": 0.0,
+          "raw_normal_common_geometric_weak_difference_Pa_m": 1.3597309589385986e-07,
+          "raw_normal_common_geometric_relative_perturbation": 1.2280189425316856e-12,
+          "raw_normal_weak_max_Pa_m": 1.1920928955078125e-07,
+          "raw_normal_weak_perturbation_scale_Pa_m": 110676.20713174343,
+          "raw_normal_weak_relative_perturbation": 1.0770995197629104e-12,
+          "raw_normal_weak_RMS_Pa_m": 3.951749468635296e-08,
+          "filtered_normal_native_total_weak_difference_Pa_m": 2.384185791015625e-07,
+          "filtered_normal_background_measure_difference_Pa_m": 0.0,
+          "filtered_normal_common_geometric_weak_difference_Pa_m": 2.7194255380891263e-07,
+          "filtered_normal_common_geometric_relative_perturbation": 3.861470360682663e-12,
+          "filtered_normal_weak_max_Pa_m": 2.384185791015625e-07,
+          "filtered_normal_weak_perturbation_scale_Pa_m": 70418.06409412622,
+          "filtered_normal_weak_relative_perturbation": 3.385758784604953e-12,
+          "filtered_normal_weak_RMS_Pa_m": 7.549806759079109e-08
+        },
+        "endpoints": {
+          "V_m_s": 2.68833699079734e-24,
+          "theta_s": 1.1175870895385742e-08,
+          "slip_m": 1.734723475976807e-17,
+          "shear_Pa": 1.4901161193847656e-08,
+          "raw_normal_Pa": 2.9802322387695312e-08,
+          "filtered_normal_Pa": 2.9802322387695312e-08,
+          "I_h_m": 0.0,
+          "V_difference_over_Vp": 2.68833699079734e-15,
+          "theta_difference_over_theta0": 1.3969838619232178e-15,
+          "slip_difference_over_Dc": 2.168404344971009e-15,
+          "native_mass_diagonal_difference_m": 0.0,
+          "native_mass_one_relative_difference": 0.0,
+          "shear_native_total_weak_difference_Pa_m": 8.940696716308594e-08,
+          "shear_background_measure_difference_Pa_m": 0.0,
+          "shear_common_geometric_weak_difference_Pa_m": 8.65256879478693e-08,
+          "shear_common_geometric_relative_perturbation": 4.922135612598971e-13,
+          "shear_weak_max_Pa_m": 8.940696716308594e-08,
+          "shear_weak_perturbation_scale_Pa_m": 162205.38064152002,
+          "shear_weak_relative_perturbation": 5.511960627291316e-13,
+          "shear_weak_RMS_Pa_m": 3.1474760444682337e-08,
+          "raw_normal_native_total_weak_difference_Pa_m": 1.1920928955078125e-07,
+          "raw_normal_background_measure_difference_Pa_m": 0.0,
+          "raw_normal_common_geometric_weak_difference_Pa_m": 1.730513758957386e-07,
+          "raw_normal_common_geometric_relative_perturbation": 2.1996357149782252e-13,
+          "raw_normal_weak_max_Pa_m": 1.1920928955078125e-07,
+          "raw_normal_weak_perturbation_scale_Pa_m": 1161461.684439361,
+          "raw_normal_weak_relative_perturbation": 1.0263729845580203e-13,
+          "raw_normal_weak_RMS_Pa_m": 5.960464477539063e-08,
+          "filtered_normal_native_total_weak_difference_Pa_m": 1.7881393432617188e-07,
+          "filtered_normal_background_measure_difference_Pa_m": 0.0,
+          "filtered_normal_common_geometric_weak_difference_Pa_m": 1.8541413737693802e-07,
+          "filtered_normal_common_geometric_relative_perturbation": 1.5789306753544093e-12,
+          "filtered_normal_weak_max_Pa_m": 1.7881393432617188e-07,
+          "filtered_normal_weak_perturbation_scale_Pa_m": 117223.06409752369,
+          "filtered_normal_weak_relative_perturbation": 1.5254159725547498e-12,
+          "filtered_normal_weak_RMS_Pa_m": 8.347924606631868e-08
+        }
+      },
+      "stepwise_surface": {
+        "0": {
+          "all": {
+            "V_m_s": 2.68833699079734e-24,
+            "theta_s": 0.0,
+            "slip_m": 0.0,
+            "shear_Pa": 1.4901161193847656e-08,
+            "raw_normal_Pa": 2.2351741790771484e-08,
+            "filtered_normal_Pa": 2.9802322387695312e-08,
+            "I_h_m": 0.0,
+            "V_difference_over_Vp": 2.68833699079734e-15,
+            "theta_difference_over_theta0": 0.0,
+            "slip_difference_over_Dc": 0.0,
+            "native_mass_diagonal_difference_m": 0.0,
+            "native_mass_one_relative_difference": 0.0,
+            "shear_native_total_weak_difference_Pa_m": 8.940696716308594e-08,
+            "shear_background_measure_difference_Pa_m": 0.0,
+            "shear_common_geometric_weak_difference_Pa_m": 9.270297596231103e-08,
+            "shear_common_geometric_relative_perturbation": 5.718882209132551e-13,
+            "shear_weak_max_Pa_m": 8.940696716308594e-08,
+            "shear_weak_perturbation_scale_Pa_m": 151422.01988613605,
+            "shear_weak_relative_perturbation": 5.904489137730218e-13,
+            "shear_weak_RMS_Pa_m": 2.4177007215995626e-08,
+            "raw_normal_native_total_weak_difference_Pa_m": 1.1920928955078125e-07,
+            "raw_normal_background_measure_difference_Pa_m": 0.0,
+            "raw_normal_common_geometric_weak_difference_Pa_m": 1.359148882329464e-07,
+            "raw_normal_common_geometric_relative_perturbation": 4.871867215854338e-13,
+            "raw_normal_weak_max_Pa_m": 1.1920928955078125e-07,
+            "raw_normal_weak_perturbation_scale_Pa_m": 417485.05143105984,
+            "raw_normal_weak_relative_perturbation": 2.855414562561087e-13,
+            "raw_normal_weak_RMS_Pa_m": 3.117182018569057e-08,
+            "filtered_normal_native_total_weak_difference_Pa_m": 1.7881393432617188e-07,
+            "filtered_normal_background_measure_difference_Pa_m": 0.0,
+            "filtered_normal_common_geometric_weak_difference_Pa_m": 1.977741703740321e-07,
+            "filtered_normal_common_geometric_relative_perturbation": 5.514972793116071e-12,
+            "filtered_normal_weak_max_Pa_m": 1.7881393432617188e-07,
+            "filtered_normal_weak_perturbation_scale_Pa_m": 40885.99235320091,
+            "filtered_normal_weak_relative_perturbation": 4.373476685644705e-12,
+            "filtered_normal_weak_RMS_Pa_m": 4.7402694956678066e-08
+          },
+          "interior": {
+            "V_m_s": 2.68833699079734e-24,
+            "theta_s": 0.0,
+            "slip_m": 0.0,
+            "shear_Pa": 1.4901161193847656e-08,
+            "raw_normal_Pa": 1.4901161193847656e-08,
+            "filtered_normal_Pa": 2.9802322387695312e-08,
+            "I_h_m": 0.0,
+            "V_difference_over_Vp": 2.68833699079734e-15,
+            "theta_difference_over_theta0": 0.0,
+            "slip_difference_over_Dc": 0.0,
+            "native_mass_diagonal_difference_m": 0.0,
+            "native_mass_one_relative_difference": 0.0,
+            "shear_native_total_weak_difference_Pa_m": 8.940696716308594e-08,
+            "shear_background_measure_difference_Pa_m": 0.0,
+            "shear_common_geometric_weak_difference_Pa_m": 9.270297596231103e-08,
+            "shear_common_geometric_relative_perturbation": 2.018916723632691e-12,
+            "shear_weak_max_Pa_m": 8.940696716308594e-08,
+            "shear_weak_perturbation_scale_Pa_m": 45911.4067581296,
+            "shear_weak_relative_perturbation": 1.9473802585509867e-12,
+            "shear_weak_RMS_Pa_m": 2.419942447367758e-08,
+            "raw_normal_native_total_weak_difference_Pa_m": 5.960464477539063e-08,
+            "raw_normal_background_measure_difference_Pa_m": 0.0,
+            "raw_normal_common_geometric_weak_difference_Pa_m": 1.1124848242616281e-07,
+            "raw_normal_common_geometric_relative_perturbation": 3.0612776939739637e-12,
+            "raw_normal_weak_max_Pa_m": 5.960464477539063e-08,
+            "raw_normal_weak_perturbation_scale_Pa_m": 36323.59972882271,
+            "raw_normal_weak_relative_perturbation": 1.6409344123483017e-12,
+            "raw_normal_weak_RMS_Pa_m": 2.9306958430674172e-08,
+            "filtered_normal_native_total_weak_difference_Pa_m": 1.7881393432617188e-07,
+            "filtered_normal_background_measure_difference_Pa_m": 0.0,
+            "filtered_normal_common_geometric_weak_difference_Pa_m": 1.977741703740321e-07,
+            "filtered_normal_common_geometric_relative_perturbation": 8.958359322832948e-12,
+            "filtered_normal_weak_max_Pa_m": 1.7881393432617188e-07,
+            "filtered_normal_weak_perturbation_scale_Pa_m": 22075.008643507957,
+            "filtered_normal_weak_relative_perturbation": 8.100288304021085e-12,
+            "filtered_normal_weak_RMS_Pa_m": 4.998611625299064e-08
+          },
+          "endpoints": {
+            "V_m_s": 2.0679515313825692e-24,
+            "theta_s": 0.0,
+            "slip_m": 0.0,
+            "shear_Pa": 7.450580596923828e-09,
+            "raw_normal_Pa": 2.2351741790771484e-08,
+            "filtered_normal_Pa": 1.4901161193847656e-08,
+            "I_h_m": 0.0,
+            "V_difference_over_Vp": 2.067951531382569e-15,
+            "theta_difference_over_theta0": 0.0,
+            "slip_difference_over_Dc": 0.0,
+            "native_mass_diagonal_difference_m": 0.0,
+            "native_mass_one_relative_difference": 0.0,
+            "shear_native_total_weak_difference_Pa_m": 5.960464477539063e-08,
+            "shear_background_measure_difference_Pa_m": 0.0,
+            "shear_common_geometric_weak_difference_Pa_m": 6.18092599324882e-08,
+            "shear_common_geometric_relative_perturbation": 3.813036996042777e-13,
+            "shear_weak_max_Pa_m": 5.960464477539063e-08,
+            "shear_weak_perturbation_scale_Pa_m": 151422.01988613605,
+            "shear_weak_relative_perturbation": 3.9363260918201453e-13,
+            "shear_weak_RMS_Pa_m": 2.4098382594068048e-08,
+            "raw_normal_native_total_weak_difference_Pa_m": 1.1920928955078125e-07,
+            "raw_normal_background_measure_difference_Pa_m": 0.0,
+            "raw_normal_common_geometric_weak_difference_Pa_m": 1.359148882329464e-07,
+            "raw_normal_common_geometric_relative_perturbation": 4.871867215854338e-13,
+            "raw_normal_weak_max_Pa_m": 1.1920928955078125e-07,
+            "raw_normal_weak_perturbation_scale_Pa_m": 417485.05143105984,
+            "raw_normal_weak_relative_perturbation": 2.855414562561087e-13,
+            "raw_normal_weak_RMS_Pa_m": 3.6965231474998135e-08,
+            "filtered_normal_native_total_weak_difference_Pa_m": 1.1920928955078125e-07,
+            "filtered_normal_background_measure_difference_Pa_m": 0.0,
+            "filtered_normal_common_geometric_weak_difference_Pa_m": 1.2360942491795868e-07,
+            "filtered_normal_common_geometric_relative_perturbation": 3.4468738466000102e-12,
+            "filtered_normal_weak_max_Pa_m": 1.1920928955078125e-07,
+            "filtered_normal_weak_perturbation_scale_Pa_m": 40885.99235320091,
+            "filtered_normal_weak_relative_perturbation": 2.9156511237631366e-12,
+            "filtered_normal_weak_RMS_Pa_m": 3.6965231474998135e-08
+          }
+        },
+        "2": {
+          "all": {
+            "V_m_s": 3.1019272970738538e-24,
+            "theta_s": 1.6763806343078613e-08,
+            "slip_m": 2.7755575615628914e-17,
+            "shear_Pa": 1.862645149230957e-08,
+            "raw_normal_Pa": 2.9802322387695312e-08,
+            "filtered_normal_Pa": 2.9802322387695312e-08,
+            "I_h_m": 0.0,
+            "V_difference_over_Vp": 3.1019272970738538e-15,
+            "theta_difference_over_theta0": 2.0954757928848267e-15,
+            "slip_difference_over_Dc": 3.469446951953614e-15,
+            "native_mass_diagonal_difference_m": 0.0,
+            "native_mass_one_relative_difference": 0.0,
+            "shear_native_total_weak_difference_Pa_m": 1.1920928955078125e-07,
+            "shear_background_measure_difference_Pa_m": 0.0,
+            "shear_common_geometric_weak_difference_Pa_m": 1.1744123185053468e-07,
+            "shear_common_geometric_relative_perturbation": 6.680809865704676e-13,
+            "shear_weak_max_Pa_m": 1.1920928955078125e-07,
+            "shear_weak_perturbation_scale_Pa_m": 162205.38064152002,
+            "shear_weak_relative_perturbation": 7.349280836388422e-13,
+            "shear_weak_RMS_Pa_m": 3.430228307837621e-08,
+            "raw_normal_native_total_weak_difference_Pa_m": 1.1920928955078125e-07,
+            "raw_normal_background_measure_difference_Pa_m": 0.0,
+            "raw_normal_common_geometric_weak_difference_Pa_m": 1.730513758957386e-07,
+            "raw_normal_common_geometric_relative_perturbation": 2.1996357149782252e-13,
+            "raw_normal_weak_max_Pa_m": 1.1920928955078125e-07,
+            "raw_normal_weak_perturbation_scale_Pa_m": 1161461.684439361,
+            "raw_normal_weak_relative_perturbation": 1.0263729845580203e-13,
+            "raw_normal_weak_RMS_Pa_m": 4.476711846582954e-08,
+            "filtered_normal_native_total_weak_difference_Pa_m": 2.384185791015625e-07,
+            "filtered_normal_background_measure_difference_Pa_m": 0.0,
+            "filtered_normal_common_geometric_weak_difference_Pa_m": 2.7194255380891263e-07,
+            "filtered_normal_common_geometric_relative_perturbation": 2.315780480483015e-12,
+            "filtered_normal_weak_max_Pa_m": 2.384185791015625e-07,
+            "filtered_normal_weak_perturbation_scale_Pa_m": 117223.06409752369,
+            "filtered_normal_weak_relative_perturbation": 2.033887963406333e-12,
+            "filtered_normal_weak_RMS_Pa_m": 7.734287047312806e-08
+          },
+          "interior": {
+            "V_m_s": 3.1019272970738538e-24,
+            "theta_s": 1.6763806343078613e-08,
+            "slip_m": 2.7755575615628914e-17,
+            "shear_Pa": 1.862645149230957e-08,
+            "raw_normal_Pa": 2.2351741790771484e-08,
+            "filtered_normal_Pa": 2.9802322387695312e-08,
+            "I_h_m": 0.0,
+            "V_difference_over_Vp": 3.1019272970738538e-15,
+            "theta_difference_over_theta0": 2.0954757928848267e-15,
+            "slip_difference_over_Dc": 3.469446951953614e-15,
+            "native_mass_diagonal_difference_m": 0.0,
+            "native_mass_one_relative_difference": 0.0,
+            "shear_native_total_weak_difference_Pa_m": 1.1920928955078125e-07,
+            "shear_background_measure_difference_Pa_m": 0.0,
+            "shear_common_geometric_weak_difference_Pa_m": 1.1744123185053468e-07,
+            "shear_common_geometric_relative_perturbation": 1.2588784627191113e-12,
+            "shear_weak_max_Pa_m": 1.1920928955078125e-07,
+            "shear_weak_perturbation_scale_Pa_m": 93280.32899421453,
+            "shear_weak_relative_perturbation": 1.2779681508003138e-12,
+            "shear_weak_RMS_Pa_m": 3.506829770890189e-08,
+            "raw_normal_native_total_weak_difference_Pa_m": 1.1920928955078125e-07,
+            "raw_normal_background_measure_difference_Pa_m": 0.0,
+            "raw_normal_common_geometric_weak_difference_Pa_m": 1.3597309589385986e-07,
+            "raw_normal_common_geometric_relative_perturbation": 1.2280189425316856e-12,
+            "raw_normal_weak_max_Pa_m": 1.1920928955078125e-07,
+            "raw_normal_weak_perturbation_scale_Pa_m": 110676.20713174343,
+            "raw_normal_weak_relative_perturbation": 1.0770995197629104e-12,
+            "raw_normal_weak_RMS_Pa_m": 3.951749468635296e-08,
+            "filtered_normal_native_total_weak_difference_Pa_m": 2.384185791015625e-07,
+            "filtered_normal_background_measure_difference_Pa_m": 0.0,
+            "filtered_normal_common_geometric_weak_difference_Pa_m": 2.7194255380891263e-07,
+            "filtered_normal_common_geometric_relative_perturbation": 3.861470360682663e-12,
+            "filtered_normal_weak_max_Pa_m": 2.384185791015625e-07,
+            "filtered_normal_weak_perturbation_scale_Pa_m": 70418.06409412622,
+            "filtered_normal_weak_relative_perturbation": 3.385758784604953e-12,
+            "filtered_normal_weak_RMS_Pa_m": 7.549806759079109e-08
+          },
+          "endpoints": {
+            "V_m_s": 2.68833699079734e-24,
+            "theta_s": 1.1175870895385742e-08,
+            "slip_m": 1.734723475976807e-17,
+            "shear_Pa": 1.4901161193847656e-08,
+            "raw_normal_Pa": 2.9802322387695312e-08,
+            "filtered_normal_Pa": 2.9802322387695312e-08,
+            "I_h_m": 0.0,
+            "V_difference_over_Vp": 2.68833699079734e-15,
+            "theta_difference_over_theta0": 1.3969838619232178e-15,
+            "slip_difference_over_Dc": 2.168404344971009e-15,
+            "native_mass_diagonal_difference_m": 0.0,
+            "native_mass_one_relative_difference": 0.0,
+            "shear_native_total_weak_difference_Pa_m": 8.940696716308594e-08,
+            "shear_background_measure_difference_Pa_m": 0.0,
+            "shear_common_geometric_weak_difference_Pa_m": 8.65256879478693e-08,
+            "shear_common_geometric_relative_perturbation": 4.922135612598971e-13,
+            "shear_weak_max_Pa_m": 8.940696716308594e-08,
+            "shear_weak_perturbation_scale_Pa_m": 162205.38064152002,
+            "shear_weak_relative_perturbation": 5.511960627291316e-13,
+            "shear_weak_RMS_Pa_m": 3.1474760444682337e-08,
+            "raw_normal_native_total_weak_difference_Pa_m": 1.1920928955078125e-07,
+            "raw_normal_background_measure_difference_Pa_m": 0.0,
+            "raw_normal_common_geometric_weak_difference_Pa_m": 1.730513758957386e-07,
+            "raw_normal_common_geometric_relative_perturbation": 2.1996357149782252e-13,
+            "raw_normal_weak_max_Pa_m": 1.1920928955078125e-07,
+            "raw_normal_weak_perturbation_scale_Pa_m": 1161461.684439361,
+            "raw_normal_weak_relative_perturbation": 1.0263729845580203e-13,
+            "raw_normal_weak_RMS_Pa_m": 5.960464477539063e-08,
+            "filtered_normal_native_total_weak_difference_Pa_m": 1.7881393432617188e-07,
+            "filtered_normal_background_measure_difference_Pa_m": 0.0,
+            "filtered_normal_common_geometric_weak_difference_Pa_m": 1.8541413737693802e-07,
+            "filtered_normal_common_geometric_relative_perturbation": 1.5789306753544093e-12,
+            "filtered_normal_weak_max_Pa_m": 1.7881393432617188e-07,
+            "filtered_normal_weak_perturbation_scale_Pa_m": 117223.06409752369,
+            "filtered_normal_weak_relative_perturbation": 1.5254159725547498e-12,
+            "filtered_normal_weak_RMS_Pa_m": 8.347924606631868e-08
+          }
+        },
+        "1": {
+          "all": {
+            "V_m_s": 2.68833699079734e-24,
+            "theta_s": 8.381903171539307e-09,
+            "slip_m": 1.1275702593849246e-17,
+            "shear_Pa": 1.4901161193847656e-08,
+            "raw_normal_Pa": 2.2351741790771484e-08,
+            "filtered_normal_Pa": 2.9802322387695312e-08,
+            "I_h_m": 0.0,
+            "V_difference_over_Vp": 2.68833699079734e-15,
+            "theta_difference_over_theta0": 1.0477378964424134e-15,
+            "slip_difference_over_Dc": 1.4094628242311558e-15,
+            "native_mass_diagonal_difference_m": 0.0,
+            "native_mass_one_relative_difference": 0.0,
+            "shear_native_total_weak_difference_Pa_m": 8.940696716308594e-08,
+            "shear_background_measure_difference_Pa_m": 0.0,
+            "shear_common_geometric_weak_difference_Pa_m": 9.270297596231103e-08,
+            "shear_common_geometric_relative_perturbation": 5.718882209132551e-13,
+            "shear_weak_max_Pa_m": 8.940696716308594e-08,
+            "shear_weak_perturbation_scale_Pa_m": 151422.01988613605,
+            "shear_weak_relative_perturbation": 5.904489137730218e-13,
+            "shear_weak_RMS_Pa_m": 2.4177007215995626e-08,
+            "raw_normal_native_total_weak_difference_Pa_m": 1.1920928955078125e-07,
+            "raw_normal_background_measure_difference_Pa_m": 0.0,
+            "raw_normal_common_geometric_weak_difference_Pa_m": 1.359148882329464e-07,
+            "raw_normal_common_geometric_relative_perturbation": 4.871867215854338e-13,
+            "raw_normal_weak_max_Pa_m": 1.1920928955078125e-07,
+            "raw_normal_weak_perturbation_scale_Pa_m": 417485.05143105984,
+            "raw_normal_weak_relative_perturbation": 2.855414562561087e-13,
+            "raw_normal_weak_RMS_Pa_m": 3.117182018569057e-08,
+            "filtered_normal_native_total_weak_difference_Pa_m": 1.7881393432617188e-07,
+            "filtered_normal_background_measure_difference_Pa_m": 0.0,
+            "filtered_normal_common_geometric_weak_difference_Pa_m": 1.977741703740321e-07,
+            "filtered_normal_common_geometric_relative_perturbation": 5.514972793116071e-12,
+            "filtered_normal_weak_max_Pa_m": 1.7881393432617188e-07,
+            "filtered_normal_weak_perturbation_scale_Pa_m": 40885.99235320091,
+            "filtered_normal_weak_relative_perturbation": 4.373476685644705e-12,
+            "filtered_normal_weak_RMS_Pa_m": 4.7402694956678066e-08
+          },
+          "interior": {
+            "V_m_s": 2.68833699079734e-24,
+            "theta_s": 8.381903171539307e-09,
+            "slip_m": 1.1275702593849246e-17,
+            "shear_Pa": 1.4901161193847656e-08,
+            "raw_normal_Pa": 1.4901161193847656e-08,
+            "filtered_normal_Pa": 2.9802322387695312e-08,
+            "I_h_m": 0.0,
+            "V_difference_over_Vp": 2.68833699079734e-15,
+            "theta_difference_over_theta0": 1.0477378964424134e-15,
+            "slip_difference_over_Dc": 1.4094628242311558e-15,
+            "native_mass_diagonal_difference_m": 0.0,
+            "native_mass_one_relative_difference": 0.0,
+            "shear_native_total_weak_difference_Pa_m": 8.940696716308594e-08,
+            "shear_background_measure_difference_Pa_m": 0.0,
+            "shear_common_geometric_weak_difference_Pa_m": 9.270297596231103e-08,
+            "shear_common_geometric_relative_perturbation": 2.018916723632691e-12,
+            "shear_weak_max_Pa_m": 8.940696716308594e-08,
+            "shear_weak_perturbation_scale_Pa_m": 45911.4067581296,
+            "shear_weak_relative_perturbation": 1.9473802585509867e-12,
+            "shear_weak_RMS_Pa_m": 2.419942447367758e-08,
+            "raw_normal_native_total_weak_difference_Pa_m": 5.960464477539063e-08,
+            "raw_normal_background_measure_difference_Pa_m": 0.0,
+            "raw_normal_common_geometric_weak_difference_Pa_m": 1.1124848242616281e-07,
+            "raw_normal_common_geometric_relative_perturbation": 3.0612776939739637e-12,
+            "raw_normal_weak_max_Pa_m": 5.960464477539063e-08,
+            "raw_normal_weak_perturbation_scale_Pa_m": 36323.59972882271,
+            "raw_normal_weak_relative_perturbation": 1.6409344123483017e-12,
+            "raw_normal_weak_RMS_Pa_m": 2.9306958430674172e-08,
+            "filtered_normal_native_total_weak_difference_Pa_m": 1.7881393432617188e-07,
+            "filtered_normal_background_measure_difference_Pa_m": 0.0,
+            "filtered_normal_common_geometric_weak_difference_Pa_m": 1.977741703740321e-07,
+            "filtered_normal_common_geometric_relative_perturbation": 8.958359322832948e-12,
+            "filtered_normal_weak_max_Pa_m": 1.7881393432617188e-07,
+            "filtered_normal_weak_perturbation_scale_Pa_m": 22075.008643507957,
+            "filtered_normal_weak_relative_perturbation": 8.100288304021085e-12,
+            "filtered_normal_weak_RMS_Pa_m": 4.998611625299064e-08
+          },
+          "endpoints": {
+            "V_m_s": 2.0679515313825692e-24,
+            "theta_s": 6.51925802230835e-09,
+            "slip_m": 7.806255641895632e-18,
+            "shear_Pa": 7.450580596923828e-09,
+            "raw_normal_Pa": 2.2351741790771484e-08,
+            "filtered_normal_Pa": 1.4901161193847656e-08,
+            "I_h_m": 0.0,
+            "V_difference_over_Vp": 2.067951531382569e-15,
+            "theta_difference_over_theta0": 8.149072527885437e-16,
+            "slip_difference_over_Dc": 9.75781955236954e-16,
+            "native_mass_diagonal_difference_m": 0.0,
+            "native_mass_one_relative_difference": 0.0,
+            "shear_native_total_weak_difference_Pa_m": 5.960464477539063e-08,
+            "shear_background_measure_difference_Pa_m": 0.0,
+            "shear_common_geometric_weak_difference_Pa_m": 6.18092599324882e-08,
+            "shear_common_geometric_relative_perturbation": 3.813036996042777e-13,
+            "shear_weak_max_Pa_m": 5.960464477539063e-08,
+            "shear_weak_perturbation_scale_Pa_m": 151422.01988613605,
+            "shear_weak_relative_perturbation": 3.9363260918201453e-13,
+            "shear_weak_RMS_Pa_m": 2.4098382594068048e-08,
+            "raw_normal_native_total_weak_difference_Pa_m": 1.1920928955078125e-07,
+            "raw_normal_background_measure_difference_Pa_m": 0.0,
+            "raw_normal_common_geometric_weak_difference_Pa_m": 1.359148882329464e-07,
+            "raw_normal_common_geometric_relative_perturbation": 4.871867215854338e-13,
+            "raw_normal_weak_max_Pa_m": 1.1920928955078125e-07,
+            "raw_normal_weak_perturbation_scale_Pa_m": 417485.05143105984,
+            "raw_normal_weak_relative_perturbation": 2.855414562561087e-13,
+            "raw_normal_weak_RMS_Pa_m": 3.6965231474998135e-08,
+            "filtered_normal_native_total_weak_difference_Pa_m": 1.1920928955078125e-07,
+            "filtered_normal_background_measure_difference_Pa_m": 0.0,
+            "filtered_normal_common_geometric_weak_difference_Pa_m": 1.2360942491795868e-07,
+            "filtered_normal_common_geometric_relative_perturbation": 3.4468738466000102e-12,
+            "filtered_normal_weak_max_Pa_m": 1.1920928955078125e-07,
+            "filtered_normal_weak_perturbation_scale_Pa_m": 40885.99235320091,
+            "filtered_normal_weak_relative_perturbation": 2.9156511237631366e-12,
+            "filtered_normal_weak_RMS_Pa_m": 3.6965231474998135e-08
+          }
+        }
+      }
+    },
+    "coefficients-resume__coefficients-optimized": {
+      "persistent": {
+        "dg-coefficients-{}.csv": {
+          "xx": 3.9444603316951543e-07,
+          "yy": 3.129243850708008e-07,
+          "xy": 2.2213787520541928e-07
+        },
+        "physical-fe-{}.csv": {
+          "accepted": 2.9619513952638954e-07,
+          "history": 0.0
+        },
+        "coupled-profile": {
+          "node": 0.0,
+          "s_m": 0.0,
+          "time_s": 0.0,
+          "V_m_s": 3.8463898483715787e-23,
+          "theta_s": 1.8440186977386475e-07,
+          "Omega": 2.020605904817785e-14,
+          "slip_m": 2.8275992658421956e-16,
+          "shear_Pa": 1.7136335372924805e-07,
+          "raw_normal_Pa": 4.470348358154297e-08,
+          "filtered_normal_Pa": 3.129243850708008e-07,
+          "pressure_Pa": 1.798616722226143e-08,
+          "deviatoric_Pa": 1.2310920283198357e-08,
+          "background_Pa": 1.1175870895385742e-07,
+          "I_h_m": 0.0,
+          "Z_Pa_m": 9.059906005859375e-06
+        },
+        "surface-weak": {
+          "node": 0.0,
+          "s_m": 0.0,
+          "mass_diagonal": 6.217248937900877e-15,
+          "mass_edge": 1.3322676295501878e-15,
+          "shear": 1.2814998626708984e-06,
+          "raw_normal": 4.76837158203125e-07,
+          "filtered_normal": 2.7418136596679688e-06,
+          "friction": 1.5497207641601562e-06,
+          "residual": 2.5820736482273787e-07,
+          "pressure": 1.3725366443395615e-07,
+          "deviatoric": 8.632196113467216e-08,
+          "background": 9.5367431640625e-07
+        }
+      },
+      "stress": {
+        "whole_RMS_Pa": 1.100944025347244e-08,
+        "whole_relative_L2": 1.5599401116368355e-13,
+        "localized_RMS_Pa": 5.050255955655737e-08,
+        "localized_relative_L2": 8.864997542273398e-14,
+        "max_full_tensor_Pa": 5.179462638114343e-07,
+        "p_max_Pa": 2.2136464394861832e-07
+      },
+      "surface": {
+        "all": {
+          "V_m_s": 3.8463898483715787e-23,
+          "theta_s": 1.8440186977386475e-07,
+          "slip_m": 2.8275992658421956e-16,
+          "shear_Pa": 1.7136335372924805e-07,
+          "raw_normal_Pa": 4.470348358154297e-08,
+          "filtered_normal_Pa": 3.129243850708008e-07,
+          "I_h_m": 0.0,
+          "V_difference_over_Vp": 3.846389848371579e-14,
+          "theta_difference_over_theta0": 2.3050233721733092e-14,
+          "slip_difference_over_Dc": 3.5344990823027445e-14,
+          "native_mass_diagonal_difference_m": 6.217248937900877e-15,
+          "native_mass_one_relative_difference": 5.352491426404827e-16,
+          "shear_native_total_weak_difference_Pa_m": 1.2814998626708984e-06,
+          "shear_background_measure_difference_Pa_m": 1.4146615806822016e-07,
+          "shear_common_geometric_weak_difference_Pa_m": 1.421507477061823e-06,
+          "shear_common_geometric_relative_perturbation": 8.08644547343675e-12,
+          "shear_weak_max_Pa_m": 1.430511474609375e-06,
+          "shear_weak_perturbation_scale_Pa_m": 162205.38064154983,
+          "shear_weak_relative_perturbation": 8.819137003664485e-12,
+          "shear_weak_RMS_Pa_m": 3.0442438534156693e-07,
+          "raw_normal_native_total_weak_difference_Pa_m": 4.76837158203125e-07,
+          "raw_normal_background_measure_difference_Pa_m": 2.6645352591003757e-07,
+          "raw_normal_common_geometric_weak_difference_Pa_m": 2.595770638436079e-07,
+          "raw_normal_common_geometric_relative_perturbation": 3.2994535724675967e-13,
+          "raw_normal_weak_max_Pa_m": 3.5762786865234375e-07,
+          "raw_normal_weak_perturbation_scale_Pa_m": 1161461.684439361,
+          "raw_normal_weak_relative_perturbation": 3.0791189536740606e-13,
+          "raw_normal_weak_RMS_Pa_m": 8.625220677499564e-08,
+          "filtered_normal_native_total_weak_difference_Pa_m": 2.7418136596679688e-06,
+          "filtered_normal_background_measure_difference_Pa_m": 2.6645352591003757e-07,
+          "filtered_normal_common_geometric_weak_difference_Pa_m": 2.8059239411959425e-06,
+          "filtered_normal_common_geometric_relative_perturbation": 2.389439902556823e-11,
+          "filtered_normal_weak_max_Pa_m": 2.7418136596679688e-06,
+          "filtered_normal_weak_perturbation_scale_Pa_m": 117223.06409752369,
+          "filtered_normal_weak_relative_perturbation": 2.338971157917283e-11,
+          "filtered_normal_weak_RMS_Pa_m": 6.718006382137299e-07
+        },
+        "interior": {
+          "V_m_s": 3.8463898483715787e-23,
+          "theta_s": 1.8440186977386475e-07,
+          "slip_m": 2.8275992658421956e-16,
+          "shear_Pa": 1.7136335372924805e-07,
+          "raw_normal_Pa": 4.470348358154297e-08,
+          "filtered_normal_Pa": 3.129243850708008e-07,
+          "I_h_m": 0.0,
+          "V_difference_over_Vp": 3.846389848371579e-14,
+          "theta_difference_over_theta0": 2.3050233721733092e-14,
+          "slip_difference_over_Dc": 3.5344990823027445e-14,
+          "native_mass_diagonal_difference_m": 6.217248937900877e-15,
+          "native_mass_one_relative_difference": 5.352491426404827e-16,
+          "shear_native_total_weak_difference_Pa_m": 1.2814998626708984e-06,
+          "shear_background_measure_difference_Pa_m": 1.4146615806822016e-07,
+          "shear_common_geometric_weak_difference_Pa_m": 1.421507477061823e-06,
+          "shear_common_geometric_relative_perturbation": 1.523745212194043e-11,
+          "shear_weak_max_Pa_m": 1.430511474609375e-06,
+          "shear_weak_perturbation_scale_Pa_m": 93280.32899439335,
+          "shear_weak_relative_perturbation": 1.533561780957437e-11,
+          "shear_weak_RMS_Pa_m": 3.4055907753130514e-07,
+          "raw_normal_native_total_weak_difference_Pa_m": 4.76837158203125e-07,
+          "raw_normal_background_measure_difference_Pa_m": 2.6645352591003757e-07,
+          "raw_normal_common_geometric_weak_difference_Pa_m": 2.595770638436079e-07,
+          "raw_normal_common_geometric_relative_perturbation": 2.3443281139622317e-12,
+          "raw_normal_weak_max_Pa_m": 3.5762786865234375e-07,
+          "raw_normal_weak_perturbation_scale_Pa_m": 110676.20713186264,
+          "raw_normal_weak_relative_perturbation": 3.2312985592852508e-12,
+          "raw_normal_weak_RMS_Pa_m": 8.92430679103888e-08,
+          "filtered_normal_native_total_weak_difference_Pa_m": 2.7418136596679688e-06,
+          "filtered_normal_background_measure_difference_Pa_m": 2.6645352591003757e-07,
+          "filtered_normal_common_geometric_weak_difference_Pa_m": 2.8059239411959425e-06,
+          "filtered_normal_common_geometric_relative_perturbation": 3.984294470098193e-11,
+          "filtered_normal_weak_max_Pa_m": 2.7418136596679688e-06,
+          "filtered_normal_weak_perturbation_scale_Pa_m": 70418.06409418583,
+          "filtered_normal_weak_relative_perturbation": 3.8936226022924e-11,
+          "filtered_normal_weak_RMS_Pa_m": 7.600057755553638e-07
+        },
+        "endpoints": {
+          "V_m_s": 1.550963648536927e-23,
+          "theta_s": 6.798654794692993e-08,
+          "slip_m": 8.673617379884035e-17,
+          "shear_Pa": 4.0978193283081055e-08,
+          "raw_normal_Pa": 2.9802322387695312e-08,
+          "filtered_normal_Pa": 2.9802322387695312e-08,
+          "I_h_m": 0.0,
+          "V_difference_over_Vp": 1.550963648536927e-14,
+          "theta_difference_over_theta0": 8.498318493366241e-15,
+          "slip_difference_over_Dc": 1.0842021724855044e-14,
+          "native_mass_diagonal_difference_m": 0.0,
+          "native_mass_one_relative_difference": 0.0,
+          "shear_native_total_weak_difference_Pa_m": 2.384185791015625e-07,
+          "shear_background_measure_difference_Pa_m": 0.0,
+          "shear_common_geometric_weak_difference_Pa_m": 2.657616278156638e-07,
+          "shear_common_geometric_relative_perturbation": 1.5118224469034513e-12,
+          "shear_weak_max_Pa_m": 2.384185791015625e-07,
+          "shear_weak_perturbation_scale_Pa_m": 162205.38064154983,
+          "shear_weak_relative_perturbation": 1.4698561672774141e-12,
+          "shear_weak_RMS_Pa_m": 1.0536712127723508e-07,
+          "raw_normal_native_total_weak_difference_Pa_m": 1.7881393432617188e-07,
+          "raw_normal_background_measure_difference_Pa_m": 0.0,
+          "raw_normal_common_geometric_weak_difference_Pa_m": 1.730513758957386e-07,
+          "raw_normal_common_geometric_relative_perturbation": 2.199635714978398e-13,
+          "raw_normal_weak_max_Pa_m": 1.7881393432617188e-07,
+          "raw_normal_weak_perturbation_scale_Pa_m": 1161461.684439361,
+          "raw_normal_weak_relative_perturbation": 1.5395594768370303e-13,
+          "raw_normal_weak_RMS_Pa_m": 7.484888900846017e-08,
+          "filtered_normal_native_total_weak_difference_Pa_m": 1.7881393432617188e-07,
+          "filtered_normal_background_measure_difference_Pa_m": 0.0,
+          "filtered_normal_common_geometric_weak_difference_Pa_m": 1.8541322788223624e-07,
+          "filtered_normal_common_geometric_relative_perturbation": 1.5789229303729684e-12,
+          "filtered_normal_weak_max_Pa_m": 1.7881393432617188e-07,
+          "filtered_normal_weak_perturbation_scale_Pa_m": 117223.06409752369,
+          "filtered_normal_weak_relative_perturbation": 1.5254159725547498e-12,
+          "filtered_normal_weak_RMS_Pa_m": 9.639353037627219e-08
+        }
+      },
+      "stepwise_surface": {
+        "2": {
+          "all": {
+            "V_m_s": 3.8463898483715787e-23,
+            "theta_s": 1.8440186977386475e-07,
+            "slip_m": 2.8275992658421956e-16,
+            "shear_Pa": 1.7136335372924805e-07,
+            "raw_normal_Pa": 4.470348358154297e-08,
+            "filtered_normal_Pa": 3.129243850708008e-07,
+            "I_h_m": 0.0,
+            "V_difference_over_Vp": 3.846389848371579e-14,
+            "theta_difference_over_theta0": 2.3050233721733092e-14,
+            "slip_difference_over_Dc": 3.5344990823027445e-14,
+            "native_mass_diagonal_difference_m": 6.217248937900877e-15,
+            "native_mass_one_relative_difference": 5.352491426404827e-16,
+            "shear_native_total_weak_difference_Pa_m": 1.2814998626708984e-06,
+            "shear_background_measure_difference_Pa_m": 1.4146615806822016e-07,
+            "shear_common_geometric_weak_difference_Pa_m": 1.421507477061823e-06,
+            "shear_common_geometric_relative_perturbation": 8.08644547343675e-12,
+            "shear_weak_max_Pa_m": 1.430511474609375e-06,
+            "shear_weak_perturbation_scale_Pa_m": 162205.38064154983,
+            "shear_weak_relative_perturbation": 8.819137003664485e-12,
+            "shear_weak_RMS_Pa_m": 3.0442438534156693e-07,
+            "raw_normal_native_total_weak_difference_Pa_m": 4.76837158203125e-07,
+            "raw_normal_background_measure_difference_Pa_m": 2.6645352591003757e-07,
+            "raw_normal_common_geometric_weak_difference_Pa_m": 2.595770638436079e-07,
+            "raw_normal_common_geometric_relative_perturbation": 3.2994535724675967e-13,
+            "raw_normal_weak_max_Pa_m": 3.5762786865234375e-07,
+            "raw_normal_weak_perturbation_scale_Pa_m": 1161461.684439361,
+            "raw_normal_weak_relative_perturbation": 3.0791189536740606e-13,
+            "raw_normal_weak_RMS_Pa_m": 8.625220677499564e-08,
+            "filtered_normal_native_total_weak_difference_Pa_m": 2.7418136596679688e-06,
+            "filtered_normal_background_measure_difference_Pa_m": 2.6645352591003757e-07,
+            "filtered_normal_common_geometric_weak_difference_Pa_m": 2.8059239411959425e-06,
+            "filtered_normal_common_geometric_relative_perturbation": 2.389439902556823e-11,
+            "filtered_normal_weak_max_Pa_m": 2.7418136596679688e-06,
+            "filtered_normal_weak_perturbation_scale_Pa_m": 117223.06409752369,
+            "filtered_normal_weak_relative_perturbation": 2.338971157917283e-11,
+            "filtered_normal_weak_RMS_Pa_m": 6.718006382137299e-07
+          },
+          "interior": {
+            "V_m_s": 3.8463898483715787e-23,
+            "theta_s": 1.8440186977386475e-07,
+            "slip_m": 2.8275992658421956e-16,
+            "shear_Pa": 1.7136335372924805e-07,
+            "raw_normal_Pa": 4.470348358154297e-08,
+            "filtered_normal_Pa": 3.129243850708008e-07,
+            "I_h_m": 0.0,
+            "V_difference_over_Vp": 3.846389848371579e-14,
+            "theta_difference_over_theta0": 2.3050233721733092e-14,
+            "slip_difference_over_Dc": 3.5344990823027445e-14,
+            "native_mass_diagonal_difference_m": 6.217248937900877e-15,
+            "native_mass_one_relative_difference": 5.352491426404827e-16,
+            "shear_native_total_weak_difference_Pa_m": 1.2814998626708984e-06,
+            "shear_background_measure_difference_Pa_m": 1.4146615806822016e-07,
+            "shear_common_geometric_weak_difference_Pa_m": 1.421507477061823e-06,
+            "shear_common_geometric_relative_perturbation": 1.523745212194043e-11,
+            "shear_weak_max_Pa_m": 1.430511474609375e-06,
+            "shear_weak_perturbation_scale_Pa_m": 93280.32899439335,
+            "shear_weak_relative_perturbation": 1.533561780957437e-11,
+            "shear_weak_RMS_Pa_m": 3.4055907753130514e-07,
+            "raw_normal_native_total_weak_difference_Pa_m": 4.76837158203125e-07,
+            "raw_normal_background_measure_difference_Pa_m": 2.6645352591003757e-07,
+            "raw_normal_common_geometric_weak_difference_Pa_m": 2.595770638436079e-07,
+            "raw_normal_common_geometric_relative_perturbation": 2.3443281139622317e-12,
+            "raw_normal_weak_max_Pa_m": 3.5762786865234375e-07,
+            "raw_normal_weak_perturbation_scale_Pa_m": 110676.20713186264,
+            "raw_normal_weak_relative_perturbation": 3.2312985592852508e-12,
+            "raw_normal_weak_RMS_Pa_m": 8.92430679103888e-08,
+            "filtered_normal_native_total_weak_difference_Pa_m": 2.7418136596679688e-06,
+            "filtered_normal_background_measure_difference_Pa_m": 2.6645352591003757e-07,
+            "filtered_normal_common_geometric_weak_difference_Pa_m": 2.8059239411959425e-06,
+            "filtered_normal_common_geometric_relative_perturbation": 3.984294470098193e-11,
+            "filtered_normal_weak_max_Pa_m": 2.7418136596679688e-06,
+            "filtered_normal_weak_perturbation_scale_Pa_m": 70418.06409418583,
+            "filtered_normal_weak_relative_perturbation": 3.8936226022924e-11,
+            "filtered_normal_weak_RMS_Pa_m": 7.600057755553638e-07
+          },
+          "endpoints": {
+            "V_m_s": 1.550963648536927e-23,
+            "theta_s": 6.798654794692993e-08,
+            "slip_m": 8.673617379884035e-17,
+            "shear_Pa": 4.0978193283081055e-08,
+            "raw_normal_Pa": 2.9802322387695312e-08,
+            "filtered_normal_Pa": 2.9802322387695312e-08,
+            "I_h_m": 0.0,
+            "V_difference_over_Vp": 1.550963648536927e-14,
+            "theta_difference_over_theta0": 8.498318493366241e-15,
+            "slip_difference_over_Dc": 1.0842021724855044e-14,
+            "native_mass_diagonal_difference_m": 0.0,
+            "native_mass_one_relative_difference": 0.0,
+            "shear_native_total_weak_difference_Pa_m": 2.384185791015625e-07,
+            "shear_background_measure_difference_Pa_m": 0.0,
+            "shear_common_geometric_weak_difference_Pa_m": 2.657616278156638e-07,
+            "shear_common_geometric_relative_perturbation": 1.5118224469034513e-12,
+            "shear_weak_max_Pa_m": 2.384185791015625e-07,
+            "shear_weak_perturbation_scale_Pa_m": 162205.38064154983,
+            "shear_weak_relative_perturbation": 1.4698561672774141e-12,
+            "shear_weak_RMS_Pa_m": 1.0536712127723508e-07,
+            "raw_normal_native_total_weak_difference_Pa_m": 1.7881393432617188e-07,
+            "raw_normal_background_measure_difference_Pa_m": 0.0,
+            "raw_normal_common_geometric_weak_difference_Pa_m": 1.730513758957386e-07,
+            "raw_normal_common_geometric_relative_perturbation": 2.199635714978398e-13,
+            "raw_normal_weak_max_Pa_m": 1.7881393432617188e-07,
+            "raw_normal_weak_perturbation_scale_Pa_m": 1161461.684439361,
+            "raw_normal_weak_relative_perturbation": 1.5395594768370303e-13,
+            "raw_normal_weak_RMS_Pa_m": 7.484888900846017e-08,
+            "filtered_normal_native_total_weak_difference_Pa_m": 1.7881393432617188e-07,
+            "filtered_normal_background_measure_difference_Pa_m": 0.0,
+            "filtered_normal_common_geometric_weak_difference_Pa_m": 1.8541322788223624e-07,
+            "filtered_normal_common_geometric_relative_perturbation": 1.5789229303729684e-12,
+            "filtered_normal_weak_max_Pa_m": 1.7881393432617188e-07,
+            "filtered_normal_weak_perturbation_scale_Pa_m": 117223.06409752369,
+            "filtered_normal_weak_relative_perturbation": 1.5254159725547498e-12,
+            "filtered_normal_weak_RMS_Pa_m": 9.639353037627219e-08
+          }
+        }
+      }
+    },
+    "coefficients-rejection__coefficients-optimized": {
+      "persistent": {
+        "dg-coefficients-{}.csv": {
+          "xx": 0.0,
+          "yy": 0.0,
+          "xy": 0.0
+        },
+        "physical-fe-{}.csv": {
+          "accepted": 0.0,
+          "history": 0.0
+        },
+        "coupled-profile": {
+          "node": 0.0,
+          "s_m": 0.0,
+          "time_s": 0.0,
+          "V_m_s": 0.0,
+          "theta_s": 0.0,
+          "Omega": 0.0,
+          "slip_m": 0.0,
+          "shear_Pa": 0.0,
+          "raw_normal_Pa": 0.0,
+          "filtered_normal_Pa": 0.0,
+          "pressure_Pa": 0.0,
+          "deviatoric_Pa": 0.0,
+          "background_Pa": 0.0,
+          "I_h_m": 0.0,
+          "Z_Pa_m": 0.0
+        },
+        "surface-weak": {
+          "node": 0.0,
+          "s_m": 0.0,
+          "mass_diagonal": 0.0,
+          "mass_edge": 0.0,
+          "shear": 0.0,
+          "raw_normal": 0.0,
+          "filtered_normal": 0.0,
+          "friction": 0.0,
+          "residual": 0.0,
+          "pressure": 0.0,
+          "deviatoric": 0.0,
+          "background": 0.0
+        }
+      },
+      "stress": {
+        "whole_RMS_Pa": 0.0,
+        "whole_relative_L2": 0.0,
+        "localized_RMS_Pa": 0.0,
+        "localized_relative_L2": 0.0,
+        "max_full_tensor_Pa": 0.0,
+        "p_max_Pa": 0.0
+      },
+      "surface": {
+        "all": {
+          "V_m_s": 0.0,
+          "theta_s": 0.0,
+          "slip_m": 0.0,
+          "shear_Pa": 0.0,
+          "raw_normal_Pa": 0.0,
+          "filtered_normal_Pa": 0.0,
+          "I_h_m": 0.0,
+          "V_difference_over_Vp": 0.0,
+          "theta_difference_over_theta0": 0.0,
+          "slip_difference_over_Dc": 0.0,
+          "native_mass_diagonal_difference_m": 0.0,
+          "native_mass_one_relative_difference": 0.0,
+          "shear_native_total_weak_difference_Pa_m": 0.0,
+          "shear_background_measure_difference_Pa_m": 0.0,
+          "shear_common_geometric_weak_difference_Pa_m": 0.0,
+          "shear_common_geometric_relative_perturbation": 0.0,
+          "shear_weak_max_Pa_m": 0.0,
+          "shear_weak_perturbation_scale_Pa_m": 162205.38064152002,
+          "shear_weak_relative_perturbation": 0.0,
+          "shear_weak_RMS_Pa_m": 0.0,
+          "raw_normal_native_total_weak_difference_Pa_m": 0.0,
+          "raw_normal_background_measure_difference_Pa_m": 0.0,
+          "raw_normal_common_geometric_weak_difference_Pa_m": 0.0,
+          "raw_normal_common_geometric_relative_perturbation": 0.0,
+          "raw_normal_weak_max_Pa_m": 0.0,
+          "raw_normal_weak_perturbation_scale_Pa_m": 1161461.684439361,
+          "raw_normal_weak_relative_perturbation": 0.0,
+          "raw_normal_weak_RMS_Pa_m": 0.0,
+          "filtered_normal_native_total_weak_difference_Pa_m": 0.0,
+          "filtered_normal_background_measure_difference_Pa_m": 0.0,
+          "filtered_normal_common_geometric_weak_difference_Pa_m": 0.0,
+          "filtered_normal_common_geometric_relative_perturbation": 0.0,
+          "filtered_normal_weak_max_Pa_m": 0.0,
+          "filtered_normal_weak_perturbation_scale_Pa_m": 117223.06409752369,
+          "filtered_normal_weak_relative_perturbation": 0.0,
+          "filtered_normal_weak_RMS_Pa_m": 0.0
+        },
+        "interior": {
+          "V_m_s": 0.0,
+          "theta_s": 0.0,
+          "slip_m": 0.0,
+          "shear_Pa": 0.0,
+          "raw_normal_Pa": 0.0,
+          "filtered_normal_Pa": 0.0,
+          "I_h_m": 0.0,
+          "V_difference_over_Vp": 0.0,
+          "theta_difference_over_theta0": 0.0,
+          "slip_difference_over_Dc": 0.0,
+          "native_mass_diagonal_difference_m": 0.0,
+          "native_mass_one_relative_difference": 0.0,
+          "shear_native_total_weak_difference_Pa_m": 0.0,
+          "shear_background_measure_difference_Pa_m": 0.0,
+          "shear_common_geometric_weak_difference_Pa_m": 0.0,
+          "shear_common_geometric_relative_perturbation": 0.0,
+          "shear_weak_max_Pa_m": 0.0,
+          "shear_weak_perturbation_scale_Pa_m": 93280.32899421453,
+          "shear_weak_relative_perturbation": 0.0,
+          "shear_weak_RMS_Pa_m": 0.0,
+          "raw_normal_native_total_weak_difference_Pa_m": 0.0,
+          "raw_normal_background_measure_difference_Pa_m": 0.0,
+          "raw_normal_common_geometric_weak_difference_Pa_m": 0.0,
+          "raw_normal_common_geometric_relative_perturbation": 0.0,
+          "raw_normal_weak_max_Pa_m": 0.0,
+          "raw_normal_weak_perturbation_scale_Pa_m": 110676.20713174343,
+          "raw_normal_weak_relative_perturbation": 0.0,
+          "raw_normal_weak_RMS_Pa_m": 0.0,
+          "filtered_normal_native_total_weak_difference_Pa_m": 0.0,
+          "filtered_normal_background_measure_difference_Pa_m": 0.0,
+          "filtered_normal_common_geometric_weak_difference_Pa_m": 0.0,
+          "filtered_normal_common_geometric_relative_perturbation": 0.0,
+          "filtered_normal_weak_max_Pa_m": 0.0,
+          "filtered_normal_weak_perturbation_scale_Pa_m": 70418.06409412622,
+          "filtered_normal_weak_relative_perturbation": 0.0,
+          "filtered_normal_weak_RMS_Pa_m": 0.0
+        },
+        "endpoints": {
+          "V_m_s": 0.0,
+          "theta_s": 0.0,
+          "slip_m": 0.0,
+          "shear_Pa": 0.0,
+          "raw_normal_Pa": 0.0,
+          "filtered_normal_Pa": 0.0,
+          "I_h_m": 0.0,
+          "V_difference_over_Vp": 0.0,
+          "theta_difference_over_theta0": 0.0,
+          "slip_difference_over_Dc": 0.0,
+          "native_mass_diagonal_difference_m": 0.0,
+          "native_mass_one_relative_difference": 0.0,
+          "shear_native_total_weak_difference_Pa_m": 0.0,
+          "shear_background_measure_difference_Pa_m": 0.0,
+          "shear_common_geometric_weak_difference_Pa_m": 0.0,
+          "shear_common_geometric_relative_perturbation": 0.0,
+          "shear_weak_max_Pa_m": 0.0,
+          "shear_weak_perturbation_scale_Pa_m": 162205.38064152002,
+          "shear_weak_relative_perturbation": 0.0,
+          "shear_weak_RMS_Pa_m": 0.0,
+          "raw_normal_native_total_weak_difference_Pa_m": 0.0,
+          "raw_normal_background_measure_difference_Pa_m": 0.0,
+          "raw_normal_common_geometric_weak_difference_Pa_m": 0.0,
+          "raw_normal_common_geometric_relative_perturbation": 0.0,
+          "raw_normal_weak_max_Pa_m": 0.0,
+          "raw_normal_weak_perturbation_scale_Pa_m": 1161461.684439361,
+          "raw_normal_weak_relative_perturbation": 0.0,
+          "raw_normal_weak_RMS_Pa_m": 0.0,
+          "filtered_normal_native_total_weak_difference_Pa_m": 0.0,
+          "filtered_normal_background_measure_difference_Pa_m": 0.0,
+          "filtered_normal_common_geometric_weak_difference_Pa_m": 0.0,
+          "filtered_normal_common_geometric_relative_perturbation": 0.0,
+          "filtered_normal_weak_max_Pa_m": 0.0,
+          "filtered_normal_weak_perturbation_scale_Pa_m": 117223.06409752369,
+          "filtered_normal_weak_relative_perturbation": 0.0,
+          "filtered_normal_weak_RMS_Pa_m": 0.0
+        }
+      },
+      "stepwise_surface": {
+        "0": {
+          "all": {
+            "V_m_s": 0.0,
+            "theta_s": 0.0,
+            "slip_m": 0.0,
+            "shear_Pa": 0.0,
+            "raw_normal_Pa": 0.0,
+            "filtered_normal_Pa": 0.0,
+            "I_h_m": 0.0,
+            "V_difference_over_Vp": 0.0,
+            "theta_difference_over_theta0": 0.0,
+            "slip_difference_over_Dc": 0.0,
+            "native_mass_diagonal_difference_m": 0.0,
+            "native_mass_one_relative_difference": 0.0,
+            "shear_native_total_weak_difference_Pa_m": 0.0,
+            "shear_background_measure_difference_Pa_m": 0.0,
+            "shear_common_geometric_weak_difference_Pa_m": 0.0,
+            "shear_common_geometric_relative_perturbation": 0.0,
+            "shear_weak_max_Pa_m": 0.0,
+            "shear_weak_perturbation_scale_Pa_m": 151422.01988613605,
+            "shear_weak_relative_perturbation": 0.0,
+            "shear_weak_RMS_Pa_m": 0.0,
+            "raw_normal_native_total_weak_difference_Pa_m": 0.0,
+            "raw_normal_background_measure_difference_Pa_m": 0.0,
+            "raw_normal_common_geometric_weak_difference_Pa_m": 0.0,
+            "raw_normal_common_geometric_relative_perturbation": 0.0,
+            "raw_normal_weak_max_Pa_m": 0.0,
+            "raw_normal_weak_perturbation_scale_Pa_m": 417485.05143105984,
+            "raw_normal_weak_relative_perturbation": 0.0,
+            "raw_normal_weak_RMS_Pa_m": 0.0,
+            "filtered_normal_native_total_weak_difference_Pa_m": 0.0,
+            "filtered_normal_background_measure_difference_Pa_m": 0.0,
+            "filtered_normal_common_geometric_weak_difference_Pa_m": 0.0,
+            "filtered_normal_common_geometric_relative_perturbation": 0.0,
+            "filtered_normal_weak_max_Pa_m": 0.0,
+            "filtered_normal_weak_perturbation_scale_Pa_m": 40885.99235320091,
+            "filtered_normal_weak_relative_perturbation": 0.0,
+            "filtered_normal_weak_RMS_Pa_m": 0.0
+          },
+          "interior": {
+            "V_m_s": 0.0,
+            "theta_s": 0.0,
+            "slip_m": 0.0,
+            "shear_Pa": 0.0,
+            "raw_normal_Pa": 0.0,
+            "filtered_normal_Pa": 0.0,
+            "I_h_m": 0.0,
+            "V_difference_over_Vp": 0.0,
+            "theta_difference_over_theta0": 0.0,
+            "slip_difference_over_Dc": 0.0,
+            "native_mass_diagonal_difference_m": 0.0,
+            "native_mass_one_relative_difference": 0.0,
+            "shear_native_total_weak_difference_Pa_m": 0.0,
+            "shear_background_measure_difference_Pa_m": 0.0,
+            "shear_common_geometric_weak_difference_Pa_m": 0.0,
+            "shear_common_geometric_relative_perturbation": 0.0,
+            "shear_weak_max_Pa_m": 0.0,
+            "shear_weak_perturbation_scale_Pa_m": 45911.40675804019,
+            "shear_weak_relative_perturbation": 0.0,
+            "shear_weak_RMS_Pa_m": 0.0,
+            "raw_normal_native_total_weak_difference_Pa_m": 0.0,
+            "raw_normal_background_measure_difference_Pa_m": 0.0,
+            "raw_normal_common_geometric_weak_difference_Pa_m": 0.0,
+            "raw_normal_common_geometric_relative_perturbation": 0.0,
+            "raw_normal_weak_max_Pa_m": 0.0,
+            "raw_normal_weak_perturbation_scale_Pa_m": 36323.59972882271,
+            "raw_normal_weak_relative_perturbation": 0.0,
+            "raw_normal_weak_RMS_Pa_m": 0.0,
+            "filtered_normal_native_total_weak_difference_Pa_m": 0.0,
+            "filtered_normal_background_measure_difference_Pa_m": 0.0,
+            "filtered_normal_common_geometric_weak_difference_Pa_m": 0.0,
+            "filtered_normal_common_geometric_relative_perturbation": 0.0,
+            "filtered_normal_weak_max_Pa_m": 0.0,
+            "filtered_normal_weak_perturbation_scale_Pa_m": 22075.008643507957,
+            "filtered_normal_weak_relative_perturbation": 0.0,
+            "filtered_normal_weak_RMS_Pa_m": 0.0
+          },
+          "endpoints": {
+            "V_m_s": 0.0,
+            "theta_s": 0.0,
+            "slip_m": 0.0,
+            "shear_Pa": 0.0,
+            "raw_normal_Pa": 0.0,
+            "filtered_normal_Pa": 0.0,
+            "I_h_m": 0.0,
+            "V_difference_over_Vp": 0.0,
+            "theta_difference_over_theta0": 0.0,
+            "slip_difference_over_Dc": 0.0,
+            "native_mass_diagonal_difference_m": 0.0,
+            "native_mass_one_relative_difference": 0.0,
+            "shear_native_total_weak_difference_Pa_m": 0.0,
+            "shear_background_measure_difference_Pa_m": 0.0,
+            "shear_common_geometric_weak_difference_Pa_m": 0.0,
+            "shear_common_geometric_relative_perturbation": 0.0,
+            "shear_weak_max_Pa_m": 0.0,
+            "shear_weak_perturbation_scale_Pa_m": 151422.01988613605,
+            "shear_weak_relative_perturbation": 0.0,
+            "shear_weak_RMS_Pa_m": 0.0,
+            "raw_normal_native_total_weak_difference_Pa_m": 0.0,
+            "raw_normal_background_measure_difference_Pa_m": 0.0,
+            "raw_normal_common_geometric_weak_difference_Pa_m": 0.0,
+            "raw_normal_common_geometric_relative_perturbation": 0.0,
+            "raw_normal_weak_max_Pa_m": 0.0,
+            "raw_normal_weak_perturbation_scale_Pa_m": 417485.05143105984,
+            "raw_normal_weak_relative_perturbation": 0.0,
+            "raw_normal_weak_RMS_Pa_m": 0.0,
+            "filtered_normal_native_total_weak_difference_Pa_m": 0.0,
+            "filtered_normal_background_measure_difference_Pa_m": 0.0,
+            "filtered_normal_common_geometric_weak_difference_Pa_m": 0.0,
+            "filtered_normal_common_geometric_relative_perturbation": 0.0,
+            "filtered_normal_weak_max_Pa_m": 0.0,
+            "filtered_normal_weak_perturbation_scale_Pa_m": 40885.99235320091,
+            "filtered_normal_weak_relative_perturbation": 0.0,
+            "filtered_normal_weak_RMS_Pa_m": 0.0
+          }
+        },
+        "2": {
+          "all": {
+            "V_m_s": 0.0,
+            "theta_s": 0.0,
+            "slip_m": 0.0,
+            "shear_Pa": 0.0,
+            "raw_normal_Pa": 0.0,
+            "filtered_normal_Pa": 0.0,
+            "I_h_m": 0.0,
+            "V_difference_over_Vp": 0.0,
+            "theta_difference_over_theta0": 0.0,
+            "slip_difference_over_Dc": 0.0,
+            "native_mass_diagonal_difference_m": 0.0,
+            "native_mass_one_relative_difference": 0.0,
+            "shear_native_total_weak_difference_Pa_m": 0.0,
+            "shear_background_measure_difference_Pa_m": 0.0,
+            "shear_common_geometric_weak_difference_Pa_m": 0.0,
+            "shear_common_geometric_relative_perturbation": 0.0,
+            "shear_weak_max_Pa_m": 0.0,
+            "shear_weak_perturbation_scale_Pa_m": 162205.38064152002,
+            "shear_weak_relative_perturbation": 0.0,
+            "shear_weak_RMS_Pa_m": 0.0,
+            "raw_normal_native_total_weak_difference_Pa_m": 0.0,
+            "raw_normal_background_measure_difference_Pa_m": 0.0,
+            "raw_normal_common_geometric_weak_difference_Pa_m": 0.0,
+            "raw_normal_common_geometric_relative_perturbation": 0.0,
+            "raw_normal_weak_max_Pa_m": 0.0,
+            "raw_normal_weak_perturbation_scale_Pa_m": 1161461.684439361,
+            "raw_normal_weak_relative_perturbation": 0.0,
+            "raw_normal_weak_RMS_Pa_m": 0.0,
+            "filtered_normal_native_total_weak_difference_Pa_m": 0.0,
+            "filtered_normal_background_measure_difference_Pa_m": 0.0,
+            "filtered_normal_common_geometric_weak_difference_Pa_m": 0.0,
+            "filtered_normal_common_geometric_relative_perturbation": 0.0,
+            "filtered_normal_weak_max_Pa_m": 0.0,
+            "filtered_normal_weak_perturbation_scale_Pa_m": 117223.06409752369,
+            "filtered_normal_weak_relative_perturbation": 0.0,
+            "filtered_normal_weak_RMS_Pa_m": 0.0
+          },
+          "interior": {
+            "V_m_s": 0.0,
+            "theta_s": 0.0,
+            "slip_m": 0.0,
+            "shear_Pa": 0.0,
+            "raw_normal_Pa": 0.0,
+            "filtered_normal_Pa": 0.0,
+            "I_h_m": 0.0,
+            "V_difference_over_Vp": 0.0,
+            "theta_difference_over_theta0": 0.0,
+            "slip_difference_over_Dc": 0.0,
+            "native_mass_diagonal_difference_m": 0.0,
+            "native_mass_one_relative_difference": 0.0,
+            "shear_native_total_weak_difference_Pa_m": 0.0,
+            "shear_background_measure_difference_Pa_m": 0.0,
+            "shear_common_geometric_weak_difference_Pa_m": 0.0,
+            "shear_common_geometric_relative_perturbation": 0.0,
+            "shear_weak_max_Pa_m": 0.0,
+            "shear_weak_perturbation_scale_Pa_m": 93280.32899421453,
+            "shear_weak_relative_perturbation": 0.0,
+            "shear_weak_RMS_Pa_m": 0.0,
+            "raw_normal_native_total_weak_difference_Pa_m": 0.0,
+            "raw_normal_background_measure_difference_Pa_m": 0.0,
+            "raw_normal_common_geometric_weak_difference_Pa_m": 0.0,
+            "raw_normal_common_geometric_relative_perturbation": 0.0,
+            "raw_normal_weak_max_Pa_m": 0.0,
+            "raw_normal_weak_perturbation_scale_Pa_m": 110676.20713174343,
+            "raw_normal_weak_relative_perturbation": 0.0,
+            "raw_normal_weak_RMS_Pa_m": 0.0,
+            "filtered_normal_native_total_weak_difference_Pa_m": 0.0,
+            "filtered_normal_background_measure_difference_Pa_m": 0.0,
+            "filtered_normal_common_geometric_weak_difference_Pa_m": 0.0,
+            "filtered_normal_common_geometric_relative_perturbation": 0.0,
+            "filtered_normal_weak_max_Pa_m": 0.0,
+            "filtered_normal_weak_perturbation_scale_Pa_m": 70418.06409412622,
+            "filtered_normal_weak_relative_perturbation": 0.0,
+            "filtered_normal_weak_RMS_Pa_m": 0.0
+          },
+          "endpoints": {
+            "V_m_s": 0.0,
+            "theta_s": 0.0,
+            "slip_m": 0.0,
+            "shear_Pa": 0.0,
+            "raw_normal_Pa": 0.0,
+            "filtered_normal_Pa": 0.0,
+            "I_h_m": 0.0,
+            "V_difference_over_Vp": 0.0,
+            "theta_difference_over_theta0": 0.0,
+            "slip_difference_over_Dc": 0.0,
+            "native_mass_diagonal_difference_m": 0.0,
+            "native_mass_one_relative_difference": 0.0,
+            "shear_native_total_weak_difference_Pa_m": 0.0,
+            "shear_background_measure_difference_Pa_m": 0.0,
+            "shear_common_geometric_weak_difference_Pa_m": 0.0,
+            "shear_common_geometric_relative_perturbation": 0.0,
+            "shear_weak_max_Pa_m": 0.0,
+            "shear_weak_perturbation_scale_Pa_m": 162205.38064152002,
+            "shear_weak_relative_perturbation": 0.0,
+            "shear_weak_RMS_Pa_m": 0.0,
+            "raw_normal_native_total_weak_difference_Pa_m": 0.0,
+            "raw_normal_background_measure_difference_Pa_m": 0.0,
+            "raw_normal_common_geometric_weak_difference_Pa_m": 0.0,
+            "raw_normal_common_geometric_relative_perturbation": 0.0,
+            "raw_normal_weak_max_Pa_m": 0.0,
+            "raw_normal_weak_perturbation_scale_Pa_m": 1161461.684439361,
+            "raw_normal_weak_relative_perturbation": 0.0,
+            "raw_normal_weak_RMS_Pa_m": 0.0,
+            "filtered_normal_native_total_weak_difference_Pa_m": 0.0,
+            "filtered_normal_background_measure_difference_Pa_m": 0.0,
+            "filtered_normal_common_geometric_weak_difference_Pa_m": 0.0,
+            "filtered_normal_common_geometric_relative_perturbation": 0.0,
+            "filtered_normal_weak_max_Pa_m": 0.0,
+            "filtered_normal_weak_perturbation_scale_Pa_m": 117223.06409752369,
+            "filtered_normal_weak_relative_perturbation": 0.0,
+            "filtered_normal_weak_RMS_Pa_m": 0.0
+          }
+        },
+        "1": {
+          "all": {
+            "V_m_s": 0.0,
+            "theta_s": 0.0,
+            "slip_m": 0.0,
+            "shear_Pa": 0.0,
+            "raw_normal_Pa": 0.0,
+            "filtered_normal_Pa": 0.0,
+            "I_h_m": 0.0,
+            "V_difference_over_Vp": 0.0,
+            "theta_difference_over_theta0": 0.0,
+            "slip_difference_over_Dc": 0.0,
+            "native_mass_diagonal_difference_m": 0.0,
+            "native_mass_one_relative_difference": 0.0,
+            "shear_native_total_weak_difference_Pa_m": 0.0,
+            "shear_background_measure_difference_Pa_m": 0.0,
+            "shear_common_geometric_weak_difference_Pa_m": 0.0,
+            "shear_common_geometric_relative_perturbation": 0.0,
+            "shear_weak_max_Pa_m": 0.0,
+            "shear_weak_perturbation_scale_Pa_m": 151422.01988613605,
+            "shear_weak_relative_perturbation": 0.0,
+            "shear_weak_RMS_Pa_m": 0.0,
+            "raw_normal_native_total_weak_difference_Pa_m": 0.0,
+            "raw_normal_background_measure_difference_Pa_m": 0.0,
+            "raw_normal_common_geometric_weak_difference_Pa_m": 0.0,
+            "raw_normal_common_geometric_relative_perturbation": 0.0,
+            "raw_normal_weak_max_Pa_m": 0.0,
+            "raw_normal_weak_perturbation_scale_Pa_m": 417485.05143105984,
+            "raw_normal_weak_relative_perturbation": 0.0,
+            "raw_normal_weak_RMS_Pa_m": 0.0,
+            "filtered_normal_native_total_weak_difference_Pa_m": 0.0,
+            "filtered_normal_background_measure_difference_Pa_m": 0.0,
+            "filtered_normal_common_geometric_weak_difference_Pa_m": 0.0,
+            "filtered_normal_common_geometric_relative_perturbation": 0.0,
+            "filtered_normal_weak_max_Pa_m": 0.0,
+            "filtered_normal_weak_perturbation_scale_Pa_m": 40885.99235320091,
+            "filtered_normal_weak_relative_perturbation": 0.0,
+            "filtered_normal_weak_RMS_Pa_m": 0.0
+          },
+          "interior": {
+            "V_m_s": 0.0,
+            "theta_s": 0.0,
+            "slip_m": 0.0,
+            "shear_Pa": 0.0,
+            "raw_normal_Pa": 0.0,
+            "filtered_normal_Pa": 0.0,
+            "I_h_m": 0.0,
+            "V_difference_over_Vp": 0.0,
+            "theta_difference_over_theta0": 0.0,
+            "slip_difference_over_Dc": 0.0,
+            "native_mass_diagonal_difference_m": 0.0,
+            "native_mass_one_relative_difference": 0.0,
+            "shear_native_total_weak_difference_Pa_m": 0.0,
+            "shear_background_measure_difference_Pa_m": 0.0,
+            "shear_common_geometric_weak_difference_Pa_m": 0.0,
+            "shear_common_geometric_relative_perturbation": 0.0,
+            "shear_weak_max_Pa_m": 0.0,
+            "shear_weak_perturbation_scale_Pa_m": 45911.40675804019,
+            "shear_weak_relative_perturbation": 0.0,
+            "shear_weak_RMS_Pa_m": 0.0,
+            "raw_normal_native_total_weak_difference_Pa_m": 0.0,
+            "raw_normal_background_measure_difference_Pa_m": 0.0,
+            "raw_normal_common_geometric_weak_difference_Pa_m": 0.0,
+            "raw_normal_common_geometric_relative_perturbation": 0.0,
+            "raw_normal_weak_max_Pa_m": 0.0,
+            "raw_normal_weak_perturbation_scale_Pa_m": 36323.59972882271,
+            "raw_normal_weak_relative_perturbation": 0.0,
+            "raw_normal_weak_RMS_Pa_m": 0.0,
+            "filtered_normal_native_total_weak_difference_Pa_m": 0.0,
+            "filtered_normal_background_measure_difference_Pa_m": 0.0,
+            "filtered_normal_common_geometric_weak_difference_Pa_m": 0.0,
+            "filtered_normal_common_geometric_relative_perturbation": 0.0,
+            "filtered_normal_weak_max_Pa_m": 0.0,
+            "filtered_normal_weak_perturbation_scale_Pa_m": 22075.008643507957,
+            "filtered_normal_weak_relative_perturbation": 0.0,
+            "filtered_normal_weak_RMS_Pa_m": 0.0
+          },
+          "endpoints": {
+            "V_m_s": 0.0,
+            "theta_s": 0.0,
+            "slip_m": 0.0,
+            "shear_Pa": 0.0,
+            "raw_normal_Pa": 0.0,
+            "filtered_normal_Pa": 0.0,
+            "I_h_m": 0.0,
+            "V_difference_over_Vp": 0.0,
+            "theta_difference_over_theta0": 0.0,
+            "slip_difference_over_Dc": 0.0,
+            "native_mass_diagonal_difference_m": 0.0,
+            "native_mass_one_relative_difference": 0.0,
+            "shear_native_total_weak_difference_Pa_m": 0.0,
+            "shear_background_measure_difference_Pa_m": 0.0,
+            "shear_common_geometric_weak_difference_Pa_m": 0.0,
+            "shear_common_geometric_relative_perturbation": 0.0,
+            "shear_weak_max_Pa_m": 0.0,
+            "shear_weak_perturbation_scale_Pa_m": 151422.01988613605,
+            "shear_weak_relative_perturbation": 0.0,
+            "shear_weak_RMS_Pa_m": 0.0,
+            "raw_normal_native_total_weak_difference_Pa_m": 0.0,
+            "raw_normal_background_measure_difference_Pa_m": 0.0,
+            "raw_normal_common_geometric_weak_difference_Pa_m": 0.0,
+            "raw_normal_common_geometric_relative_perturbation": 0.0,
+            "raw_normal_weak_max_Pa_m": 0.0,
+            "raw_normal_weak_perturbation_scale_Pa_m": 417485.05143105984,
+            "raw_normal_weak_relative_perturbation": 0.0,
+            "raw_normal_weak_RMS_Pa_m": 0.0,
+            "filtered_normal_native_total_weak_difference_Pa_m": 0.0,
+            "filtered_normal_background_measure_difference_Pa_m": 0.0,
+            "filtered_normal_common_geometric_weak_difference_Pa_m": 0.0,
+            "filtered_normal_common_geometric_relative_perturbation": 0.0,
+            "filtered_normal_weak_max_Pa_m": 0.0,
+            "filtered_normal_weak_perturbation_scale_Pa_m": 40885.99235320091,
+            "filtered_normal_weak_relative_perturbation": 0.0,
+            "filtered_normal_weak_RMS_Pa_m": 0.0
+          }
+        }
+      }
+    }
+  },
+  "original_assertion_reproduced": true,
+  "native_tests": {
+    "cases": 127,
+    "assertions": 165094,
+    "passed": true
+  },
+  "independent_coefficient_control": "Homogeneous coefficient regression: harmonic old kappa range=1.2815248119788469e+17:1.2815248119788472e+17, configured kappa=1.2815248119788472e+17",
+  "units_coefficient_spread_removed": true
+}

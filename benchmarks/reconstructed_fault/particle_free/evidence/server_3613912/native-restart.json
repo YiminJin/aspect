@@ -1,0 +1,21 @@
+{
+  "all_fourteen_final_outputs_bitwise_equal": true,
+  "accepted_records_equal": true,
+  "once_only_publication_both_ranks": true,
+  "files": {
+    "rank-0-dg-coefficients-3.csv": true,
+    "rank-0-authoritative-stress-3.csv": true,
+    "rank-0-physical-fe-3.csv": true,
+    "audit_particles_3_rank0.csv": true,
+    "mature_history_3_rank0.csv": true,
+    "rank-1-dg-coefficients-3.csv": true,
+    "rank-1-authoritative-stress-3.csv": true,
+    "rank-1-physical-fe-3.csv": true,
+    "audit_particles_3_rank1.csv": true,
+    "mature_history_3_rank1.csv": true,
+    "coupled-profile-3.csv": true,
+    "rank-0-surface-weak-3.csv": true,
+    "work_weak_3.csv": true,
+    "common_fe_weak_3.csv": true
+  }
+}

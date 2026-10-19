@@ -4,6 +4,7 @@
 #define _aspect_reconstructed_fault_linear_performance_h
 
 #include <array>
+#include <atomic>
 #include <chrono>
 #include <cstdlib>
 #include <iomanip>
@@ -14,6 +15,23 @@ namespace aspect
 {
   namespace internal
   {
+    /** Counts are rank-local, relaxed atomics; no search or sampling semantics
+     * depend on them. They distinguish allocation/layout work from value work. */
+    struct FaultSamplingCounters
+    {
+      enum Part { projection_queries, segment_tests, dg_fevalues, native_fevalues,
+                  history_cache_misses, mass_inverse, roundoff_geometry,
+                  lookup_builds, B_builds, G_builds, bulk_builds,
+                  B_reference_checks,G_reference_checks,C_reference_checks,count };
+      std::array<std::atomic<unsigned long long>,count> values{};
+      static FaultSamplingCounters &get();
+      static void add(Part part,unsigned long long n=1)
+      { get().values[part].fetch_add(n,std::memory_order_relaxed); }
+      std::array<std::atomic<double>,3> maximum_relative_error{};
+      static void observe(unsigned int,double);
+      static std::string report();
+    };
+
     /** Opt-in, rank-local exclusive wall times for one coupled linearization.
      * Nested actions suspend their caller's clock; no MPI timing collectives. */
     struct FaultLinearTiming

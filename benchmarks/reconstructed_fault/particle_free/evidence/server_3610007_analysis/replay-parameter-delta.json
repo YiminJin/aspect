@@ -1,0 +1,22 @@
+{
+  "Output directory": {
+    "original": "./output",
+    "replay": "./work_replay_3610007/"
+  },
+  "Resume computation": {
+    "original": "false",
+    "replay": "true"
+  },
+  "Checkpointing/Steps between checkpoint": {
+    "original": "10",
+    "replay": "1"
+  },
+  "Postprocess/BP3/Graceful wall seconds": {
+    "original": "172800",
+    "replay": "7200"
+  },
+  "Postprocess/BP3/Last accepted step": {
+    "original": "2147483647",
+    "replay": "816"
+  }
+}

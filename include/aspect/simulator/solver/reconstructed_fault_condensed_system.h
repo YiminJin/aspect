@@ -144,6 +144,11 @@ namespace aspect
             const std::shared_ptr<const AffineConstraints<double>> homogeneous_stokes_constraints;
             mutable std::shared_ptr<internal::EndpointSurfaceSchur<dim>> direct_surface;
             mutable std::shared_ptr<internal::EndpointBulkDirect> direct_bulk;
+            struct Work
+            {
+              LinearAlgebra::BlockVector constrained,owned,physical,correction;
+            };
+            mutable std::shared_ptr<Work> work;
         };
 
         explicit ReconstructedFaultCondensedSystem(const Simulator<dim> &simulator);

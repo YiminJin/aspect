@@ -1,0 +1,47 @@
+{
+  "scope": "/home/ein/repository/aspect-pf-rsf-particle-free",
+  "historical_archives": {
+    "mature-dg": {
+      "files": 207,
+      "bytes": 1153891872
+    },
+    "mature-pilot": {
+      "files": 557,
+      "bytes": 4325462174
+    },
+    "mature-resolution": {
+      "files": 146,
+      "bytes": 2170643438
+    },
+    "pf4": {
+      "files": 241,
+      "bytes": 288302868
+    },
+    "pf6a": {
+      "files": 269,
+      "bytes": 629889088
+    },
+    "pf6a-publication": {
+      "files": 452,
+      "bytes": 6202437500
+    },
+    "publication-replay": {
+      "files": 10,
+      "bytes": 85123612
+    },
+    "weno": {
+      "files": 246,
+      "bytes": 591039142
+    }
+  },
+  "frozen_executables": "Byte-identical historical copies only, readonly hard links; never a CMake build target.",
+  "packages": "Remove expanded copies only after checking every member against retained archives.",
+  "preserved_extracted": [
+    "all source/docs/benchmarks",
+    "all checkpoints",
+    "native and current plugin builds",
+    "bp3-optimization and bp3-work-* runs",
+    "compact summaries and surface/weak/profile data"
+  ],
+  "free_bytes_before": 4637429760
+}

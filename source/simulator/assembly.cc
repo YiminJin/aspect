@@ -875,8 +875,13 @@ namespace aspect
     if (!stokes_matrix_free)
       Assert(rebuild_stokes_matrix || boundary_velocity_manager.get_prescribed_boundary_velocity_indicators().empty()
              || (assemble_reconstructed_fault_stokes_terms && assemble_newton_stokes_system
-                 && Plugins::get_plugin_as_type<MaterialModel::PhaseFieldFault<dim>>(*material_model)
-                    .uses_consistent_endpoint_phase() && !current_constraints.has_inhomogeneities()),
+                 && ((Plugins::get_plugin_as_type<MaterialModel::PhaseFieldFault<dim>>(*material_model)
+                        .uses_consistent_endpoint_phase() && !current_constraints.has_inhomogeneities())
+                     || (Plugins::get_plugin_as_type<MaterialModel::PhaseFieldFault<dim>>(*material_model)
+                           .uses_stationary_mature_dg_optimizations()
+                         && std::none_of(current_constraints.get_lines().begin(),current_constraints.get_lines().end(),
+                           [&](const auto &line)
+                           {return line.index<system_rhs.block(0).size()+system_rhs.block(1).size() && line.inhomogeneity!=0.;})))),
              ExcInternalError("If we have inhomogeneous constraints, we must re-assemble the system matrix."));
 
     system_rhs = 0;

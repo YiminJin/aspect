@@ -10,6 +10,7 @@
 */
 
 #include <aspect/reconstructed_fault/utilities.h>
+#include <aspect/reconstructed_fault/linear_performance.h>
 #include <aspect/utilities.h>
 
 #include <deal.II/lac/full_matrix.h>
@@ -23,6 +24,26 @@
 
 namespace aspect
 {
+  namespace internal
+  {
+    FaultSamplingCounters &FaultSamplingCounters::get()
+    { static FaultSamplingCounters counters;return counters; }
+    void FaultSamplingCounters::observe(unsigned int part,double value)
+    {
+      auto &entry=get().maximum_relative_error[part];double old=entry.load(std::memory_order_relaxed);
+      while(old<value && !entry.compare_exchange_weak(old,value,std::memory_order_relaxed)){}
+    }
+    std::string FaultSamplingCounters::report()
+    {
+      const char *names[]={"projection_queries","segment_tests","dg_fevalues","native_fevalues",
+        "history_misses","mass_inverse","roundoff_geometry","lookup_builds","B_builds","G_builds","bulk_builds","B_reference_checks","G_reference_checks","C_reference_checks"};
+      std::ostringstream out;
+      for(unsigned int i=0;i<count;++i)out<<", "<<names[i]<<'='<<get().values[i].load(std::memory_order_relaxed);
+      for(unsigned int i=0;i<3;++i)out<<", "<<"BGC"[i]<<"_relative_error_max="<<std::setprecision(17)<<get().maximum_relative_error[i].load(std::memory_order_relaxed);
+      return out.str();
+    }
+  }
+
   namespace
   {
     // -----------------------------------------------------------------------------
@@ -367,6 +388,7 @@ namespace aspect
         const std::vector<std::vector<double>> &half_widths,
         const Point<dim> &position)
       {
+        aspect::internal::FaultSamplingCounters::add(aspect::internal::FaultSamplingCounters::projection_queries);
         ReconstructedFaultUtilities::NormalProfileProjection result;
         unsigned int admitted_faults = 0;
 
@@ -376,6 +398,7 @@ namespace aspect
             bool admitted_to_fault = false;
             double smallest_distance = std::numeric_limits<double>::infinity();
             ReconstructedFaultUtilities::NormalProfileProjection candidate;
+            aspect::internal::FaultSamplingCounters::add(aspect::internal::FaultSamplingCounters::segment_tests,fault.n_cells());
             for (unsigned int segment = 0; segment < fault.n_cells(); ++segment)
               {
                 const Tensor<1,dim> segment_vector = fault.vertex(segment+1) - fault.vertex(segment);
@@ -433,6 +456,119 @@ namespace aspect
                faults, half_widths, position);
     }
 
+
+    template<int dim>
+    NormalProfileIndex<dim>::NormalProfileIndex(const std::vector<ReconstructedFault<dim>> &f,
+                                               const std::vector<std::vector<double>> &w)
+      :faults(f),widths(w)
+    {
+      internal::validate_normal_profile_projection_geometry(f,w);
+      for(unsigned int d=0;d<dim;++d)frame[d][d]=1.;
+      for(unsigned int k=0;k<f.size();++k)
+        for(unsigned int j=0;j<f[k].n_vertices();++j)
+          query_limit=std::max(query_limit,8*(f[k].vertex(j).norm()+w[k][j]+1.));
+      if(!std::isfinite(query_limit)){query_limit=-1.;return;}
+      if(!f.empty())
+        {
+          origin=f[0].vertex(0);frame[0]=f[0].vertex(1)-origin;
+          const double length=frame[0].norm();
+          if(!(length>0.) || !std::isfinite(length)){query_limit=-1.;return;}
+          frame[0]/=length;frame[1][0]=-frame[0][1];frame[1][1]=frame[0][0];
+        }
+      for(unsigned int k=0;k<f.size();++k)
+        for(unsigned int j=0;j<f[k].n_cells();++j)
+          {
+            const auto a=f[k].vertex(j),b=f[k].vertex(j+1);
+            const auto edge=b-a;const double length=edge.norm();
+            if(!(length>0.) || !std::isfinite(length)){query_limit=-1.;boxes.clear();return;}
+            const auto tangent=edge/length;
+            const Tensor<1,dim> normal({-tangent[1],tangent[0]});
+            const double width=std::max(w[k][j],w[k][j+1]);
+            // Outward bound on subtraction, projection, normal formation and
+            // comparison arithmetic for |x|<=query_limit. Larger/ill-scaled
+            // queries use the original reference search below.
+            const double padding=128*std::numeric_limits<double>::epsilon()
+              *(query_limit+a.norm()+b.norm()+width+1.)*(1.+(a.norm()+b.norm())/length);
+            if(!std::isfinite(padding)){query_limit=-1.;boxes.clear();return;}
+            Box box;box.fault=k;box.segment=j;
+            for(unsigned int d=0;d<dim;++d)
+              {
+                box.lower[d]=std::nextafter(std::min((a-origin)*frame[d],(b-origin)*frame[d])-width*std::abs(normal*frame[d])-padding,
+                                            -std::numeric_limits<double>::infinity());
+                box.upper[d]=std::nextafter(std::max((a-origin)*frame[d],(b-origin)*frame[d])+width*std::abs(normal*frame[d])+padding,
+                                             std::numeric_limits<double>::infinity());
+              }
+            boxes.push_back(box);
+          }
+      if(!boxes.empty())build(0,boxes.size());
+    }
+
+    template<int dim> unsigned int NormalProfileIndex<dim>::build(unsigned int begin,unsigned int end)
+    {
+      Node n;n.begin=begin;n.end=end;n.left=n.right=numbers::invalid_unsigned_int;
+      for(unsigned int d=0;d<dim;++d)
+        {
+          n.lower[d]=std::numeric_limits<double>::infinity();n.upper[d]=-n.lower[d];
+          for(unsigned int j=begin;j<end;++j)
+            {n.lower[d]=std::min(n.lower[d],boxes[j].lower[d]);n.upper[d]=std::max(n.upper[d],boxes[j].upper[d]);}
+        }
+      const unsigned int index=nodes.size();nodes.push_back(n);
+      if(end-begin>8)
+        {
+          unsigned int axis=0;
+          for(unsigned int d=1;d<dim;++d)if(n.upper[d]-n.lower[d]>n.upper[axis]-n.lower[axis])axis=d;
+          const unsigned int middle=(begin+end)/2;
+          std::nth_element(boxes.begin()+begin,boxes.begin()+middle,boxes.begin()+end,[axis](const auto &a,const auto &b)
+            {return a.lower[axis]+a.upper[axis]<b.lower[axis]+b.upper[axis];});
+          const auto left=build(begin,middle),right=build(middle,end);
+          nodes[index].left=left;nodes[index].right=right;
+        }
+      return index;
+    }
+
+    template<int dim> NormalProfileProjection NormalProfileIndex<dim>::project(const Point<dim> &x) const
+    {
+      internal::validate_normal_profile_projection_position(x);
+      if(query_limit<0. || x.norm()>query_limit)
+        return internal::project_to_normal_profiles_unchecked(faults,widths,x);
+      aspect::internal::FaultSamplingCounters::add(aspect::internal::FaultSamplingCounters::projection_queries);
+      Point<dim> location;for(unsigned int d=0;d<dim;++d)location[d]=(x-origin)*frame[d];
+      std::vector<unsigned int> stack,candidates;
+      if(!nodes.empty())stack.push_back(0);
+      const auto contains=[&](const auto &box)
+        {for(unsigned int d=0;d<dim;++d)if(location[d]<box.lower[d] || location[d]>box.upper[d])return false;return true;};
+      while(!stack.empty())
+        {
+          const auto &n=nodes[stack.back()];stack.pop_back();if(!contains(n))continue;
+          if(n.left!=numbers::invalid_unsigned_int){stack.push_back(n.left);stack.push_back(n.right);}
+          else for(unsigned int j=n.begin;j<n.end;++j)if(contains(boxes[j]))candidates.push_back(j);
+        }
+      std::sort(candidates.begin(),candidates.end(),[&](unsigned int a,unsigned int b)
+        {return std::make_pair(boxes[a].fault,boxes[a].segment)<std::make_pair(boxes[b].fault,boxes[b].segment);});
+      aspect::internal::FaultSamplingCounters::add(aspect::internal::FaultSamplingCounters::segment_tests,candidates.size());
+      std::vector<NormalProfileProjection> best(faults.size());
+      std::vector<double> distance(faults.size(),std::numeric_limits<double>::infinity());
+      for(const auto k:candidates)
+        {
+          const auto f=boxes[k].fault,j=boxes[k].segment;const auto &fault=faults[f];
+          const auto edge=fault.vertex(j+1)-fault.vertex(j);const double length_squared=edge.norm_square();
+          const double xi=((x-fault.vertex(j))*edge)/length_squared;
+          if(xi<0. || xi>1.)continue;
+          const double width=(1.-xi)*widths[f][j]+xi*widths[f][j+1];
+          const auto tangent=edge/std::sqrt(length_squared);const Tensor<1,dim> normal({-tangent[1],tangent[0]});
+          const Point<dim> projected=fault.vertex(j)+xi*edge;
+          const double signed_distance=(x-projected)*normal;
+          if(std::abs(signed_distance)<=width && std::abs(signed_distance)<distance[f])
+            {distance[f]=std::abs(signed_distance);best[f]={true,f,j,xi,signed_distance};}
+        }
+      NormalProfileProjection result;unsigned int admitted=0;
+      for(const auto &b:best)if(b.active){++admitted;result=b;}
+      AssertThrow(admitted<=1,ExcMessage("A particle lies in the influence regions of multiple reconstructed faults. Overlapping fault influence regions are unsupported."));
+      return result;
+    }
+
+    template class NormalProfileIndex<2>;
+    template class NormalProfileIndex<3>;
 
     // -----------------------------------------------------------------------------
     // Projection linear algebra

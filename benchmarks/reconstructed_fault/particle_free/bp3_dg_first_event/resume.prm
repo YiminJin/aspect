@@ -123,6 +123,7 @@ subsection Material model
     set Fault constitutive mode = mature frictional
     set I h surface quadrature subdivisions = 8
     set Bulk history representation = DG trial stress
+    set Optimize stationary mature DG = true
     set Consistent endpoint phase solve = false
     set Use homogeneous mesh data = true
     set Enable prescribed DG accepted history = true

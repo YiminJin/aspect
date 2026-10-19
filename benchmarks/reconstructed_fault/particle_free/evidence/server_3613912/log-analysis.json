@@ -1,0 +1,182 @@
+{
+  "strict_reference_match_passed": false,
+  "job": 3613912,
+  "ranks": 160,
+  "input_log_sha256": {
+    "BP3.o3610007": "4803b06f217383c15652d97e475f80ecc4e3e0f413e29d608c14118cc232f012",
+    "BP3.o3613912": "2c89b6764e8bee5f567385a9fb74adc20faba1e23e63f4d874412f889020a118",
+    "BP3.e3613912": "c0625a382ef411f9adcfc9f8a36a988f26b9bd0a071bdf72ee27ccf698c418ae"
+  },
+  "trace_rows": [
+    {
+      "step": 810,
+      "time_s": 5172072493.859255,
+      "dt_s": 0.008201348645871546,
+      "original_shear_Pa": 1.6570723745979872e-06,
+      "original_shear_Pa_node": 5713,
+      "original_raw_normal_Pa": 9.64402751233678e-06,
+      "original_raw_normal_Pa_node": 4918,
+      "matching_shear_Pa": 5.366001221821934e-07,
+      "matching_shear_Pa_node": 209,
+      "matching_raw_normal_Pa": 1.7889244724998665e-07,
+      "matching_raw_normal_Pa_node": 2215,
+      "direct_frame_shear_Pa": 1.5898427441678907e-06,
+      "direct_frame_shear_Pa_node": 5713,
+      "direct_frame_raw_normal_Pa": 9.665834737740255e-06,
+      "direct_frame_raw_normal_Pa_node": 4918,
+      "bound_Pa": 1e-05
+    },
+    {
+      "step": 811,
+      "time_s": 5172072493.867313,
+      "dt_s": 0.008058344110276302,
+      "original_shear_Pa": 1.555740610683722e-06,
+      "original_shear_Pa_node": 5713,
+      "original_raw_normal_Pa": 9.745355366298292e-06,
+      "original_raw_normal_Pa_node": 4918,
+      "matching_shear_Pa": 5.425660506631479e-07,
+      "matching_shear_Pa_node": 180,
+      "matching_raw_normal_Pa": 1.9674883631425203e-07,
+      "matching_raw_normal_Pa_node": 1104,
+      "direct_frame_shear_Pa": 1.58997182035021e-06,
+      "direct_frame_shear_Pa_node": 5713,
+      "direct_frame_raw_normal_Pa": 9.720088232627818e-06,
+      "direct_frame_raw_normal_Pa_node": 4918,
+      "bound_Pa": 1e-05
+    },
+    {
+      "step": 812,
+      "time_s": 5172072493.875238,
+      "dt_s": 0.007924615638961378,
+      "original_shear_Pa": 1.5855654533907643e-06,
+      "original_shear_Pa_node": 5707,
+      "original_raw_normal_Pa": 9.691711208318669e-06,
+      "original_raw_normal_Pa_node": 4918,
+      "matching_shear_Pa": 5.037987770129589e-07,
+      "matching_shear_Pa_node": 1321,
+      "matching_raw_normal_Pa": 1.9082746067826883e-07,
+      "matching_raw_normal_Pa_node": 2090,
+      "direct_frame_shear_Pa": 1.590099117682113e-06,
+      "direct_frame_shear_Pa_node": 5713,
+      "direct_frame_raw_normal_Pa": 9.770826406943228e-06,
+      "direct_frame_raw_normal_Pa_node": 4918,
+      "bound_Pa": 1e-05
+    },
+    {
+      "step": 813,
+      "time_s": 5172072493.883035,
+      "dt_s": 0.007796338684004367,
+      "original_shear_Pa": 1.579604681009596e-06,
+      "original_shear_Pa_node": 5707,
+      "original_raw_normal_Pa": 9.787078600282444e-06,
+      "original_raw_normal_Pa_node": 4918,
+      "matching_shear_Pa": 5.485185744150909e-07,
+      "matching_shear_Pa_node": 139,
+      "matching_raw_normal_Pa": 1.7886833030886645e-07,
+      "matching_raw_normal_Pa_node": 342,
+      "direct_frame_shear_Pa": 1.5902246889826703e-06,
+      "direct_frame_shear_Pa_node": 5713,
+      "direct_frame_raw_normal_Pa": 9.81759361541071e-06,
+      "direct_frame_raw_normal_Pa_node": 4918,
+      "bound_Pa": 1e-05
+    },
+    {
+      "step": 814,
+      "time_s": 5172072493.89071,
+      "dt_s": 0.0076751204414975405,
+      "original_shear_Pa": 1.6153475306332898e-06,
+      "original_shear_Pa_node": 5713,
+      "original_raw_normal_Pa": 9.739394904300556e-06,
+      "original_raw_normal_Pa_node": 4918,
+      "matching_shear_Pa": 5.544885752077997e-07,
+      "matching_shear_Pa_node": 142,
+      "matching_raw_normal_Pa": 2.0271389724658423e-07,
+      "matching_raw_normal_Pa_node": 1361,
+      "direct_frame_shear_Pa": 1.590348617647754e-06,
+      "direct_frame_shear_Pa_node": 5713,
+      "direct_frame_raw_normal_Pa": 9.860080418569016e-06,
+      "direct_frame_raw_normal_Pa_node": 4918,
+      "bound_Pa": 1e-05
+    },
+    {
+      "step": 815,
+      "time_s": 5172072493.898271,
+      "dt_s": 0.007560933195688986,
+      "original_shear_Pa": 1.5676831362472594e-06,
+      "original_shear_Pa_node": 5707,
+      "original_raw_normal_Pa": 9.995694770203202e-06,
+      "original_raw_normal_Pa_node": 4918,
+      "matching_shear_Pa": 5.664205202309299e-07,
+      "matching_shear_Pa_node": 120,
+      "matching_raw_normal_Pa": 1.9675167034439413e-07,
+      "matching_raw_normal_Pa_node": 31,
+      "direct_frame_shear_Pa": 1.5904709912921213e-06,
+      "direct_frame_shear_Pa_node": 5713,
+      "direct_frame_raw_normal_Pa": 9.898110082181374e-06,
+      "direct_frame_raw_normal_Pa_node": 4918,
+      "bound_Pa": 1e-05
+    },
+    {
+      "step": 816,
+      "time_s": 5172072493.905725,
+      "dt_s": 0.0074540672088498705,
+      "original_shear_Pa": 1.6570723745979872e-06,
+      "original_shear_Pa_node": 5713,
+      "original_raw_normal_Pa": 1.001357615619641e-05,
+      "original_raw_normal_Pa_node": 4918,
+      "matching_shear_Pa": 5.067868297252547e-07,
+      "matching_shear_Pa_node": 104,
+      "matching_raw_normal_Pa": 2.0867824647698363e-07,
+      "matching_raw_normal_Pa_node": 111,
+      "direct_frame_shear_Pa": 1.590591906180808e-06,
+      "direct_frame_shear_Pa_node": 5713,
+      "direct_frame_raw_normal_Pa": 9.931623371162834e-06,
+      "direct_frame_raw_normal_Pa_node": 4918,
+      "bound_Pa": 1e-05
+    }
+  ],
+  "frozen_frame_mechanism_reproduced": true,
+  "existing_threshold_Pa": 1e-05,
+  "matching_frame_all_reported_steps_pass": true,
+  "mechanical_and_publication_log_comparison": {
+    "810": {
+      "mechanical_and_publication_log_lines_identical": true,
+      "compared_lines": 8
+    },
+    "811": {
+      "mechanical_and_publication_log_lines_identical": true,
+      "compared_lines": 8
+    },
+    "812": {
+      "mechanical_and_publication_log_lines_identical": true,
+      "compared_lines": 8
+    },
+    "813": {
+      "mechanical_and_publication_log_lines_identical": true,
+      "compared_lines": 8
+    },
+    "814": {
+      "mechanical_and_publication_log_lines_identical": true,
+      "compared_lines": 8
+    },
+    "815": {
+      "mechanical_and_publication_log_lines_identical": true,
+      "compared_lines": 8
+    },
+    "816": {
+      "mechanical_and_publication_log_lines_identical": true,
+      "compared_lines": 8
+    }
+  },
+  "steps_810_to_815_time_and_dt_match_original_accepted_csv": true,
+  "latest_completed_checkpoint_in_stdout": {
+    "step": 815,
+    "slot": "03",
+    "metadata_verification_pending": true
+  },
+  "native_cells": 552081,
+  "native_DoFs": 19498460,
+  "nodal_failure_csv_available": false,
+  "runtime_source_changed_for_this_analysis": false,
+  "limitation": "Root maxima establish that matching the mechanical frames removes the reported guard violation. Signed nodal load reconciliation and verification of a repaired observer still require the failure CSV and implementation/tests; no first-event accuracy claim."
+}

@@ -1,0 +1,25 @@
+{
+  "scope": "Observer-frame repair; actual server frozen-state evidence plus bounded local MPI tests. Server advancement pending.",
+  "strict_reference_match_passed": false,
+  "ordinary_plugin_built": true,
+  "core_unchanged": true,
+  "physical_output_files_bitwise_unchanged": 9,
+  "rejection_retry_output_files_bitwise_equal": 11,
+  "restart_final_output_files_bitwise_equal": 14,
+  "negative_guard_test": {
+    "original_first_segment_max_shear_error_Pa": 1.4972029913117776e-08,
+    "corrected_max_shear_error_Pa": 2.0001508222976958e-05,
+    "exit_code": 1,
+    "seconds": 23.367276761000085,
+    "timeout_seconds": 180,
+    "unchanged_guard_rejected_inconsistent_corrected_load": true,
+    "rows": 117
+  },
+  "verification_input_parser_passed": true,
+  "continuation_input_parser_passed": true,
+  "server_checkpoint": {
+    "step": 815,
+    "slot": "03"
+  },
+  "native_steps_after_repair_on_full_server_mesh": 0
+}

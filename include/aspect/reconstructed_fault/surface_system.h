@@ -221,6 +221,7 @@ namespace aspect
     private:
       struct SurfaceAssembly;
       struct SurfaceLinearization;
+      struct StationaryCouplingCache;
       struct ParticleDiagnosticData;
       void write_particle_diagnostics(const FaultVector &,const ParticleDiagnosticData &) const;
       std::vector<SymmetricTensor<2,dim>> sample_normal_diagnostic_particles(
@@ -259,6 +260,7 @@ namespace aspect
       const MaterialModel::PhaseFieldFault<dim> &phase_field_fault;
       GridTools::Cache<dim> grid_cache;
       std::unique_ptr<SurfaceLinearization> surface_linearization;
+      std::unique_ptr<StationaryCouplingCache> stationary_coupling_cache;
       /** Rank-local timings; surface failures must not enter timer collectives. */
       std::unique_ptr<TimerOutput> performance_timer;
       unsigned int linearization_generation = 0;

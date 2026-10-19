@@ -390,6 +390,8 @@ namespace aspect
 
     private:
       friend class boost::serialization::access;
+      mutable std::unique_ptr<ReconstructedFaultUtilities::NormalProfileIndex<dim>> normal_profile_index;
+      bool simulator_attached=false;
 
       /**
        * @name Serialization and restart

@@ -28,6 +28,7 @@
 #include <aspect/utilities.h>
 #include <aspect/adiabatic_conditions/interface.h>
 #include <aspect/reconstructed_fault/utilities.h>
+#include <aspect/reconstructed_fault/linear_performance.h>
 #include <aspect/gravity_model/interface.h>
 #include <deal.II/base/quadrature_lib.h>
 #include <deal.II/fe/fe_values.h>
@@ -452,6 +453,7 @@ namespace aspect
       const auto cached=s.stress_samples.find(key);
       if (cached!=s.stress_samples.end())
         return cached->second;
+      aspect::internal::FaultSamplingCounters::add(aspect::internal::FaultSamplingCounters::history_cache_misses);
       const auto stress=dg_trial_stress_history
                         ? evaluate_dg_history_stress(*s.dg_history,s.Z,s.I,id,x)
                         : evaluate_fe_strain_stress(s.displacement_history,s.Z,s.I,id,x);
@@ -598,8 +600,12 @@ namespace aspect
       const std::shared_ptr<FEStrainUpdate> &update,const CellId &id,const Point<dim> &x,double *evaluation_scale) const
     {
       double current_scale=0.;
+      // prepare_fe_strain_commit copies this phase block verbatim in the
+      // stationary mature route. Use the shared fixed-phase point layout;
+      // evolving endpoint trials still evaluate their supplied phase vector.
+      const auto *phase=uses_stationary_mature_dg_optimizations() ? nullptr : &update->displacement_history;
       const auto stress=dg_trial_stress_history
-                        ? evaluate_dg_history_stress(*update->dg_history,update->Z,update->I,id,x,&current_scale,&update->displacement_history)
+                        ? evaluate_dg_history_stress(*update->dg_history,update->Z,update->I,id,x,&current_scale,phase)
                         : evaluate_fe_strain_stress(update->displacement_history,update->Z,update->I,id,x,&current_scale);
       if (evaluation_scale)
         {

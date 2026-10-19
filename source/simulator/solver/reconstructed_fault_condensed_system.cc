@@ -408,6 +408,58 @@ namespace aspect
     {
       assert_is_current();
 
+      const auto &material=Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(owner.get_material_model());
+      if (material.uses_stationary_mature_dg_optimizations())
+        {
+          // Same owned/ghosted layouts and pressure/constraint operations as
+          // the reference helpers, with scratch owned by this linearization.
+          if (!work)
+            {
+              work=std::make_shared<Work>();
+              work->constrained.reinit(owner.introspection().index_sets.stokes_partitioning,owner.get_mpi_communicator());
+              work->owned.reinit(owner.introspection().index_sets.system_partitioning,owner.get_mpi_communicator());
+              work->physical.reinit(owner.introspection().index_sets.system_partitioning,
+                                    owner.introspection().index_sets.system_relevant_partitioning,owner.get_mpi_communicator());
+              work->correction.reinit(owner.introspection().index_sets.system_partitioning,owner.get_mpi_communicator());
+            }
+          auto &w=*work;
+          w.constrained=direction;
+          homogeneous_stokes_constraints->set_zero(w.constrained);
+          w.constrained.compress(VectorOperation::insert);
+          apply_stokes_matrix<dim>(bulk_matrix,w.constrained,result);
+          w.owned=0.;w.owned.block(0)=w.constrained.block(0);w.owned.block(1)=w.constrained.block(1);
+          w.owned.block(1)*=owner.get_pressure_scaling();
+          homogeneous_system_constraints->distribute(w.owned);
+          w.owned.compress(VectorOperation::insert);w.physical=w.owned;
+          FaultVector rhs,solution;
+          owner.surface_system.apply_G(w.physical,rhs);surface_solve.solve(rhs,solution);
+          owner.stokes_coupling.apply_B(solution,w.correction);
+          result.block(0).add(-1.,w.correction.block(0));result.block(1).add(-1.,w.correction.block(1));
+          homogeneous_stokes_constraints->set_zero(result);result.compress(VectorOperation::insert);
+          if(std::getenv("ASPECT_FAULT_COMPARE_COUPLING"))
+            {
+              // Same actual K_V inverse, including its current active set.
+              // Verify the complete constrained/scaled C, not a replacement.
+              auto constrained_reference=make_constrained_solver_direction(direction);
+              LinearAlgebra::BlockVector reference(constrained_reference);
+              apply_stokes_matrix<dim>(bulk_matrix,constrained_reference,reference);
+              const double A_scale=reference.l2_norm();
+              FaultVector G,rate;
+              owner.surface_system.apply_G_reference(make_physical_bulk_direction(w.constrained),G);
+              surface_solve.solve(G,rate);
+              LinearAlgebra::BlockVector correction(owner.introspection().index_sets.system_partitioning,owner.get_mpi_communicator());
+              owner.stokes_coupling.apply_B_reference(rate,correction);
+              const double scale=A_scale+correction.l2_norm();
+              reference.block(0).add(-1.,correction.block(0));reference.block(1).add(-1.,correction.block(1));
+              homogeneous_stokes_constraints->set_zero(reference);reference.compress(VectorOperation::insert);
+              reference-=result;const double error=reference.l2_norm();
+              AssertThrow(error<=2.e-11*scale,ExcMessage("Complete stationary condensed action disagrees with sampled B/G reference."));
+              internal::FaultSamplingCounters::add(internal::FaultSamplingCounters::C_reference_checks);
+              internal::FaultSamplingCounters::observe(2,scale>0. ? error/scale : 0.);
+            }
+          return;
+        }
+
       // Apply the condensed Jacobian A-B*K_V^{-1}*G. The signs follow the
       // uncondensed fault row G*dx-K_V*dV=-R_Gamma.
       const LinearAlgebra::BlockVector constrained =

@@ -106,8 +106,7 @@ namespace aspect
       const auto fractions = MaterialUtilities::compute_only_composition_fractions(
                                composition, this->introspection().chemical_composition_field_indices());
       const double eta = compute_creep_viscosity(fractions, temperature);
-      const double G = MaterialUtilities::average_value(
-                         fractions, elastic_shear_moduli, viscosity_averaging);
+      const double G = compute_elastic_shear_modulus(fractions);
       const double dt = this->get_timestep_number() > 0
                         ? this->get_timestep() : initial_time_step;
       return compute_maxwell_coefficients(eta, G, dt).beta * old_stress;
@@ -138,8 +137,7 @@ namespace aspect
 
       const double eta = compute_creep_viscosity(inputs.bulk_material_fractions,
                                                  inputs.temperature);
-      const double G = MaterialUtilities::average_value(
-                         inputs.bulk_material_fractions, elastic_shear_moduli, viscosity_averaging);
+      const double G = compute_elastic_shear_modulus(inputs.bulk_material_fractions);
       const double time_step = (this->get_timestep_number() > 0
                                 ? this->get_timestep()
                                 : initial_time_step);
@@ -148,9 +146,7 @@ namespace aspect
       const double surface_eta = compute_creep_viscosity(
                                    localization.surface_material_fractions,
                                    localization.surface_temperature);
-      const double surface_G = MaterialUtilities::average_value(
-                                 localization.surface_material_fractions, elastic_shear_moduli,
-                                 viscosity_averaging);
+      const double surface_G = compute_elastic_shear_modulus(localization.surface_material_fractions);
       const MaxwellCoefficients surface_coefficients =
         compute_maxwell_coefficients(surface_eta, surface_G, time_step);
       const CohesiveResponse cohesive = compute_cohesive_response(
@@ -291,8 +287,7 @@ namespace aspect
 
       const double eta = compute_creep_viscosity(inputs.bulk_material_fractions,
                                                  inputs.temperature);
-      const double G = MaterialUtilities::average_value(
-                         inputs.bulk_material_fractions, elastic_shear_moduli, viscosity_averaging);
+      const double G = compute_elastic_shear_modulus(inputs.bulk_material_fractions);
       const double time_step = (this->get_timestep_number() > 0
                                 ? this->get_timestep()
                                 : initial_time_step);
@@ -301,9 +296,7 @@ namespace aspect
       const double surface_eta = compute_creep_viscosity(
                                    localization.surface_material_fractions,
                                    localization.surface_temperature);
-      const double surface_G = MaterialUtilities::average_value(
-                                 localization.surface_material_fractions, elastic_shear_moduli,
-                                 viscosity_averaging);
+      const double surface_G = compute_elastic_shear_modulus(localization.surface_material_fractions);
       const MaxwellCoefficients surface_coefficients =
         compute_maxwell_coefficients(surface_eta, surface_G, time_step);
       const CohesiveResponse cohesive = compute_cohesive_response(
@@ -492,8 +485,7 @@ namespace aspect
                                f, segment, j-segment, 0., 0., "surface history");
               const auto c = compute_maxwell_coefficients(
                                compute_creep_viscosity(l.surface_material_fractions,l.surface_temperature),
-                               MaterialUtilities::average_value(l.surface_material_fractions,
-                                                                elastic_shear_moduli,viscosity_averaging),time_step);
+                               compute_elastic_shear_modulus(l.surface_material_fractions),time_step);
               result[f][j] = compute_cohesive_response(c,l.current_I_h,l.previous_I_h,
                                                        l.previous_cohesive_traction,rates[f][j],0.,0.,mature_frictional_fault).cohesive_traction;
             }
@@ -556,6 +548,18 @@ namespace aspect
 
     template <int dim>
     double
+    PhaseFieldFault<dim>::compute_elastic_shear_modulus(
+      const std::vector<double> &volume_fractions) const
+    {
+      if (homogeneous_mesh_data)
+        return elastic_shear_moduli[0];
+      return MaterialUtilities::average_value(volume_fractions, elastic_shear_moduli,
+                                              viscosity_averaging);
+    }
+
+
+    template <int dim>
+    double
     PhaseFieldFault<dim>::
     compute_creep_viscosity(const std::vector<double> &volume_fractions,
                             const double               temperature) const
@@ -593,6 +597,7 @@ namespace aspect
   template PhaseFieldFault<dim>::LocalizationResponse PhaseFieldFault<dim>::evaluate_reconstructed_fault_localization(const unsigned int, const unsigned int, const double, const double, const double, const std::string &) const; \
   template std::vector<std::vector<double>> PhaseFieldFault<dim>::compute_surface_cohesive_candidates(const double, const std::vector<std::vector<double>> &) const; \
   template PhaseFieldFault<dim>::CohesiveResponse PhaseFieldFault<dim>::compute_cohesive_response(const MaxwellCoefficients &, const double, const double, const double, const double, const double, const double, const bool); \
+  template double PhaseFieldFault<dim>::compute_elastic_shear_modulus(const std::vector<double> &) const; \
   template double PhaseFieldFault<dim>::compute_creep_viscosity(const std::vector<double> &, const double) const;
 
     ASPECT_INSTANTIATE(INSTANTIATE)

@@ -1,0 +1,17 @@
+{
+  "all_selected_outputs_bitwise_equal": true,
+  "once_only_publication_both_ranks": true,
+  "files": {
+    "accepted_steps.csv": true,
+    "rank-0-coupled-checks.csv": true,
+    "rank-1-coupled-checks.csv": true,
+    "rank-0-dg-coefficients-2.csv": true,
+    "rank-1-dg-coefficients-2.csv": true,
+    "rank-0-authoritative-stress-2.csv": true,
+    "rank-1-authoritative-stress-2.csv": true,
+    "coupled-profile-2.csv": true,
+    "rank-0-surface-weak-2.csv": true,
+    "work_weak_2.csv": true,
+    "common_fe_weak_2.csv": true
+  }
+}

@@ -171,7 +171,7 @@ namespace aspect
   template <int dim>
   ReconstructedFaultManager<dim>::ReconstructedFaultManager(const Simulator<dim> &simulator)
   {
-    this->initialize_simulator(simulator);
+    this->initialize_simulator(simulator);simulator_attached=true;
     performance_timer = std::make_unique<TimerOutput>(
       std::cout,
       std::getenv("ASPECT_FAULT_PERFORMANCE") && this->get_pcout().is_active()
@@ -973,6 +973,13 @@ namespace aspect
   {
     ReconstructedFaultUtilities::internal::
     validate_normal_profile_projection_position(position);
+    const auto *material=simulator_attached ? dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(&this->get_material_model()) : nullptr;
+    if(material && material->uses_stationary_mature_dg_optimizations())
+      {
+        if(!normal_profile_index)
+          normal_profile_index=std::make_unique<ReconstructedFaultUtilities::NormalProfileIndex<dim>>(reconstructed_faults,projection_half_widths);
+        return normal_profile_index->project(position);
+      }
     return ReconstructedFaultUtilities::internal::project_to_normal_profiles_unchecked(
              reconstructed_faults, projection_half_widths, position);
   }
@@ -1022,8 +1029,13 @@ namespace aspect
   {
     ReconstructedFaultUtilities::NormalProfileProjection result;
     if (!normal_profiles_checked)
-      result=ReconstructedFaultUtilities::internal::project_to_normal_profiles_unchecked(
-        reconstructed_faults, projection_half_widths, position);
+      {
+        const auto *material=simulator_attached ? dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(&this->get_material_model()) : nullptr;
+        result=material && material->uses_stationary_mature_dg_optimizations()
+          ? project_to_normal_profiles(position)
+          : ReconstructedFaultUtilities::internal::project_to_normal_profiles_unchecked(
+              reconstructed_faults,projection_half_widths,position);
+      }
     if (automatic_boundary_completion)
       {
         AssertThrow(automatic_source_ready, ExcMessage("Automatic boundary completion must be qualified before assembly."));
@@ -1222,6 +1234,7 @@ namespace aspect
   void
   ReconstructedFaultManager<dim>::invalidate_stokes_qp_projection_cache()
   {
+    normal_profile_index.reset();
     stokes_qp_projection_cache_valid = false;
     stokes_qp_projection_cache.clear();
     cached_stokes_qp_fault_geometry_versions.clear();

@@ -1,0 +1,29 @@
+{
+  "base": "b2dfdebe43437d6028b06d4f9f862cc80a00cc71",
+  "basis": "r3 actual source snapshot plus preserved incoming work",
+  "scope": "Homogeneous modulus arithmetic repair for stationary mature DG server startup.",
+  "original_assertion_reproduced": true,
+  "native_tests": {
+    "cases": 127,
+    "assertions": 165094,
+    "passed": true
+  },
+  "coefficient_guard_unchanged": true,
+  "all_four_inputs_unchanged_and_valid": true,
+  "normalization_and_tolerances_unchanged": true,
+  "mixed_label_adaptive_optimized_and_reference": true,
+  "MPI_ranks": [
+    1,
+    2,
+    4
+  ],
+  "serial_to_four_rank_restart": true,
+  "rejection_retry_exact": true,
+  "once_only_publication": true,
+  "heterogeneous_material_rejected": true,
+  "patch_applies_to_r3": true,
+  "user_server_attempt": "48 ranks; failed in step-zero mechanics before positive accepted steps",
+  "local_server_job_launched": false,
+  "full_first_event_qualified": false,
+  "strict_reference_match_passed": false
+}

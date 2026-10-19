@@ -18,6 +18,7 @@
 #include <deal.II/base/point.h>
 #include <deal.II/base/signaling_nan.h>
 
+#include <array>
 #include <string>
 #include <utility>
 #include <vector>
@@ -90,6 +91,36 @@ namespace aspect
       unsigned int segment_index = numbers::invalid_unsigned_int;
       double xi = numbers::signaling_nan<double>();
       double signed_distance = numbers::signaling_nan<double>();
+    };
+
+    /** Conservative segment-box hierarchy. Candidate evaluation and ordering
+     * are identical to the reference search, including knot ties and overlaps.
+     * References must remain valid; owners rebuild after geometry/width changes. */
+    template <int dim> class NormalProfileIndex
+    {
+      public:
+        NormalProfileIndex(const std::vector<ReconstructedFault<dim>> &,
+                           const std::vector<std::vector<double>> &);
+        NormalProfileProjection project(const Point<dim> &) const;
+      private:
+        struct Box
+        {
+          std::array<double,dim> lower,upper;
+          unsigned int fault,segment;
+        };
+        struct Node
+        {
+          std::array<double,dim> lower,upper;
+          unsigned int begin,end,left,right;
+        };
+        unsigned int build(unsigned int,unsigned int);
+        const std::vector<ReconstructedFault<dim>> &faults;
+        const std::vector<std::vector<double>> &widths;
+        std::vector<Box> boxes;
+        std::vector<Node> nodes;
+        Point<dim> origin;
+        std::array<Tensor<1,dim>,dim> frame;
+        double query_limit=1.;
     };
 
     /** Associate a point with at most one open 2-D fault normal profile. */

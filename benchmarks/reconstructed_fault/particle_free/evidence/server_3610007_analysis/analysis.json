@@ -1,0 +1,176 @@
+{
+  "strict_reference_match_passed": false,
+  "input_sha256": {
+    "last_good_checkpoint.txt": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+    "bp3_accepted_state.txt": "d565daae315d94229778137d71efda0bff977f19b846105eae4dfcaf543d27f8",
+    "coupled-profile-815.csv": "2687b8d4c312b584196f671f87cadf1a5cb7498721b6e67b21a8e5e065e9de6e",
+    "rank-0-surface-weak-815.csv": "372436847b5bfb62561157a7e3332c6f4c7d18b89ad5ba980c4540ccf2982034",
+    "accepted_steps.csv": "ad8c21d0cbed34b84ed0bbcf1e0f4aa0b3d757bace928787a660edc2f2eb85cb",
+    "rank-0-coupled-checks.csv": "e880b5602483a504bf7f2a7e49c5674091c0af8721e009f63156e6cfe0b30627",
+    "parameters.prm": "3bf3cf39422aa54c964762b7ccc9527e66c2b98a32d0fe794dd8ebae266eb25e"
+  },
+  "checkpoint": {
+    "slot": "3",
+    "accepted_label": "809 5172072493.8510532"
+  },
+  "last_accepted": {
+    "step": 815.0,
+    "time": 5172072493.898271,
+    "dt": 0.007560933195688986,
+    "max_V": 0.22930392553250095,
+    "xd_at_max_V": 9000.0,
+    "min_sigma_n": 49460574.155429386,
+    "max_sigma_n": 72681680.77734074,
+    "min_free_V": 3.8521355517134216e-18,
+    "max_free_V": 0.22930392553250095,
+    "free": 5776.0,
+    "lower_active": 0.0,
+    "newton_updates": 3.0,
+    "krylov_iterations": 110.0,
+    "min_alpha": 1.0,
+    "normalized_nonlinear_residual": 1.0443484568709202e-10,
+    "surface_RMS_Pa": 0.00013281788136121887,
+    "Theta_relative_error": 2.220446049250313e-16,
+    "max_committed_stress_Pa": 175052553.801507,
+    "max_step_slip_over_Dc": 0.21671895780756023,
+    "fresh_linear_checks_passed": 1.0
+  },
+  "last_checks": {
+    "step": 815.0,
+    "time_s": 5172072493.898271,
+    "dt_s": 0.007560933195688986,
+    "mechanical_qps": 36.0,
+    "qp_controls": 0.0,
+    "particle_controls": 215.0,
+    "particles": 55216.0,
+    "min_I_m": 12818.61092546592,
+    "min_theta_s": 0.04821791224292959,
+    "Z_max_Pa_m": 166104747866.67148,
+    "Z_error_Pa_m": 0.0,
+    "stress_error_Pa": 2.9451005721170265e-09,
+    "error_fraction_of_allowance": 0.002207087909678441,
+    "stress_scale_Pa": 14576696.724445121,
+    "normal_split_error_Pa": 7.37607479095459e-07,
+    "max_divergence_per_s": 0.0,
+    "instant_tensor_normal_difference_Pa": 0.0,
+    "publications": 1.0
+  },
+  "trajectory": {
+    "all_finite": true,
+    "all_publications_one": true,
+    "all_fresh_linear_checks_passed": true,
+    "max_publication_fraction": 0.0034946437507311786,
+    "max_normalized_nonlinear_residual": 9.940653190488443e-09,
+    "min_theta": 0.04821791224292959,
+    "min_normal": 49455199.91787005,
+    "first_event_threshold_step": 774
+  },
+  "profile_ranges": {
+    "s_m": {
+      "min": 0.0,
+      "max": 57735.02691896258
+    },
+    "V_m_s": {
+      "min": 3.8521355517134216e-18,
+      "max": 0.22930392553250095
+    },
+    "theta_s": {
+      "min": 0.04821791224292959,
+      "max": 5172063535.424144
+    },
+    "Omega": {
+      "min": 2.490436227565994e-06,
+      "max": 34166273.79124363
+    },
+    "slip_m": {
+      "min": 1.8240238597934753e-05,
+      "max": 5.184601462989954
+    },
+    "shear_Pa": {
+      "min": 26183010.16268716,
+      "max": 41651832.05641869
+    },
+    "raw_normal_Pa": {
+      "min": 40729413.06087197,
+      "max": 133024225.3815
+    },
+    "filtered_normal_Pa": {
+      "min": 49460573.97921739,
+      "max": 72681680.77734077
+    },
+    "pressure_Pa": {
+      "min": -10629937.761373315,
+      "max": 93395071.61994304
+    },
+    "deviatoric_Pa": {
+      "min": -10370846.238442967,
+      "max": 2835887.263488236
+    },
+    "background_Pa": {
+      "min": 49999999.99999938,
+      "max": 50000000.000000566
+    },
+    "I_h_m": {
+      "min": 12818.61092546592,
+      "max": 12818.692426225993
+    },
+    "Z_Pa_m": {
+      "min": 584381.9919151079,
+      "max": 166104747866.67148
+    }
+  },
+  "weak_internal_checks": {
+    "shear_Pa": {
+      "max_weak_reprojection_difference_Pa_m": 1.1920928955078125e-07
+    },
+    "raw_normal_Pa": {
+      "max_weak_reprojection_difference_Pa_m": 1.7881393432617188e-07
+    },
+    "filtered_normal_Pa": {
+      "max_weak_reprojection_difference_Pa_m": 1.1920928955078125e-07
+    },
+    "pressure_Pa": {
+      "max_weak_reprojection_difference_Pa_m": 5.960464477539063e-08
+    },
+    "deviatoric_Pa": {
+      "max_weak_reprojection_difference_Pa_m": 3.725290298461914e-09
+    },
+    "background_Pa": {
+      "max_weak_reprojection_difference_Pa_m": 1.1920928955078125e-07
+    },
+    "normal_load_split_max_Pa_m": 4.172325134277344e-06,
+    "residual_assembly_max_Pa_m": 3.3139903834249856e-06
+  },
+  "frame_audit": {
+    "nodes": 5776,
+    "max_slip_tensor_difference": 8.388767776942747e-13,
+    "max_normal_tensor_difference": 8.388767776942747e-13,
+    "worst_segment": 5285,
+    "manufactured_tensor_Pa": [
+      [
+        -12990381.056759913,
+        7500000.0000115475
+      ],
+      [
+        7500000.0000115475,
+        12990381.056759913
+      ]
+    ],
+    "manufactured_global_normal_Pa": 1.7795711755752563e-05,
+    "manufactured_matching_normal_Pa": 0.0,
+    "manufactured_guard_violation_Pa": 1.7795711755752563e-05,
+    "surrogate_only": true,
+    "surrogate_max_Pa": 9.910082772025511e-06,
+    "surrogate_node": 4918,
+    "surrogate_s_m": 8569.999999999998,
+    "caveat": "Q1/equal-adjacent-weight surrogate, not actual failing QP/element stress integrals; does not prove which node or component failed at step 816."
+  },
+  "cancellation_scale": {
+    "Z_max_Pa_m": 166104747866.67148,
+    "continuum_peak_h": 720.8577071999999,
+    "peak_correction_norm_scale_Pa": 13210085375.315899,
+    "caveat": "Scale estimate from peak phase and nodal Z/I, not measured cell coefficients or a derived floating-point allowance."
+  },
+  "failing_step_available": false,
+  "underlying_failure_confirmed": false
+}

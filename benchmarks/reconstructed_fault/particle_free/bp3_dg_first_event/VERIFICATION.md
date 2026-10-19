@@ -1,3 +1,89 @@
+# Post-r3 homogeneous-coefficient repair
+
+The user's full-grid 48-rank attempt failed during step-zero mechanics because
+fault-point harmonic averages of equal moduli were not bitwise constant across
+chemical labels. The same assertion is reproduced in a bounded two-rank fixture.
+The material now uses configured G directly throughout homogeneous bulk/fault/
+history coefficient evaluation; legacy averaging remains. The exact assertion,
+normalization, laws, solver/publication tolerances and four parameter files stay.
+
+Fresh local qualification is in `qualification/assessment.json` and
+`verification.json`; the source report is
+`doc/reconstructed_fault/particle_free/BP3_DG_HOMOGENEOUS_COEFFICIENT_FIX.md`.
+Native tests: **127 cases / 165094 assertions pass**, including 1001 mixtures,
+four averaging selections and three constitutive intervals. Old harmonic kappa
+spans 1.2815248119788469e17 to 1.2815248119788472e17 Pa s; the repaired homogeneous
+coefficient equals the configured value exactly. Earlier optimization/startup
+evidence remains under `qualification/inherited-optimization/`.
+
+Fresh mixed-label 1/2/4-rank checks pass: two-rank optimized/reference advancement,
+serial-to-four-rank restart, complete one-owner rejection and once-only publication.
+Accepted adaptive steps are 4e6/7.64e6 s; source/allowance arrays match bitwise,
+frozen B/G/C relative differences <=1.01e-15/4.17e-15/1.71e-15. Rejection/retry
+fields match exactly; MPI restart differences are reported rather than called exact.
+All four unchanged parameter files validate using the rebuilt ordinary plugins.
+
+The r4 snapshot already contains the fix; the small six-file patch is for r3
+source only. Rebuild core/plugins, preserve failed output and rerun bounded
+startup in a fresh output directory. The supplied server log has no completed
+positive accepted step. All earlier accuracy failures and strict reference
+matching=false remain; local repair checks do not qualify 48-rank full-event
+performance, physics or the server compiler stack.
+
+---
+
+# Stationary mature DG optimization qualification
+
+17 October 2026; reviewed base `b2dfdebe43437d6028b06d4f9f862cc80a00cc71` plus
+preserved incoming work. The full snapshot/manifest identifies this revision.
+See `qualification/verification.json`, `assessment.json`, `operator-checks.json`,
+`parameter-validation.json`, `regression.json` and the source report
+`doc/reconstructed_fault/particle_free/BP3_DG_OPTIMIZATION_REPORT.md`.
+Earlier startup evidence is retained under `qualification/inherited-startup/`.
+
+The selected homogeneous fixed-phase mature DG route enables independent exact
+cached/sparse evaluation. It keeps unlimited DGQ2, mesh/10 m spacing, Gauss6/source3,
+Helmholtz20, pressure scaling, native adaptive controls and all existing numerical
+acceptance tolerances. Consistent endpoint phase stays off; the false optimization
+selector retains the old algorithms and legacy/default backend behavior is unchanged.
+
+- Final nonoverlapping two-rank comparisons, two positive steps of 200000 s:
+  4136 cells, **30.888 → 18.305 s (1.69×)**; 11528 cells,
+  **80.940 → 46.709 s (1.73×)**. Krylov counts/timestep sequences match. Peak
+  native RSS increases **13.5–36.0 MiB/rank**. Initialization/terminal checkpoint
+  are included. These short local strengthening cases do not measure full-grid
+  weakening/event performance or simultaneous node memory peaks.
+- Rebuilt native suite: **126 cases / 149074 assertions pass**. Actual 5776-node
+  search kernel passes, reference .2642 s versus indexed .002393 s plus .001300 s
+  setup. Manufactured filtered surface algebra differs by 2.15e-16 relative;
+  native frozen operator probes independently verify the actual work measure.
+- Source coefficients and allowance arrays match bitwise for all nine DG modes;
+  independent native-QP reconstruction difference <=3.09e-12 Pa. Frozen B/G/C
+  relative differences <=1.88e-15/1.77e-14/9.46e-16 with hanging constraints,
+  physical pressure scaling, variable friction and endpoint/restricted traces.
+  Full timing-pair tensor RMS differences <=2.10e-10 Pa; phase/I/mass identical.
+- 1/2/4-rank ownership, serial-to-four-rank restart, complete candidate rejection,
+  actual outer/nonlinear rejection/cutback and single publication pass. MPI solver
+  roundoff differences are documented; they are not claimed bitwise equal.
+  A short native adaptive control accepts 4e6 and 7.64e6 s timesteps with the
+  unchanged first/max caps, log-state bound and growth/cutback settings.
+- The non-root-only collective wall-stop and existing scheduled-output restart
+  controls pass again within bounded timeouts. Both continuations match the
+  uninterrupted control exactly in all compared fields and particle/bulk audits.
+- All four standalone inputs validate with ordinary matching plugins and no
+  local test macros. Physical/adaptive equivalence is checked independently.
+  The full mesh is not constructed by parser validation.
+
+Full-grid startup through step 5/resume through 8 is **prepared, unexecuted**;
+first-event evolution remains an **unqualified experiment**. Checkpoint all_gather
+memory and full diagnostic costs remain server measurements. Fixed diagnostic
+particles and their independent matching-cell publication check remain. All
+original spatial/endpoint temporal failures, surface-state imbalance and
+**strict_reference_match_passed=false** are preserved. No server/full event was
+launched. Prior package evidence follows without alteration.
+
+---
+
 # Revised server-package qualification
 
 17 October 2026; base `a8707307008401ac9cff702a369e2e2a611fa0f7` plus preserved

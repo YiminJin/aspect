@@ -1,0 +1,38 @@
+{
+  "accepted_steps.csv": {
+    "bitwise_equal": true,
+    "sha256": "4ea5f945bd1efd58af144dd0db3ac0267dd1347a8913ed993210543ff448656e"
+  },
+  "rank-0-coupled-checks.csv": {
+    "bitwise_equal": true,
+    "sha256": "adf818d0646f798aeb2ff3adcddcaa5dc02db38f65f33ec310f4562b7cf2bb0f"
+  },
+  "rank-1-coupled-checks.csv": {
+    "bitwise_equal": true,
+    "sha256": "daf13f4aecacc490c28e143c51dd63c25f1347f1b5b8185cd5189411e6897412"
+  },
+  "rank-0-dg-coefficients-2.csv": {
+    "bitwise_equal": true,
+    "sha256": "ffda9b63e15603ee0e8697c96c109d3df38eb137b3790d89d5018ece685a0d14"
+  },
+  "rank-1-dg-coefficients-2.csv": {
+    "bitwise_equal": true,
+    "sha256": "c01c061880613e632f58623ed0e868a851a6afc82fb370953ca8798bfe69b441"
+  },
+  "rank-0-authoritative-stress-2.csv": {
+    "bitwise_equal": true,
+    "sha256": "15fc4d12d2830a0ca107f478623adb117b867093e85133dccadd3cd2036676b0"
+  },
+  "rank-1-authoritative-stress-2.csv": {
+    "bitwise_equal": true,
+    "sha256": "ec4b945093ffcfa6560f658d5a72d08bf21494ac493d716d126ba8743d883f97"
+  },
+  "coupled-profile-2.csv": {
+    "bitwise_equal": true,
+    "sha256": "57d91266f79b46887d62715e0ec9be45e85503d9c16066019548ff5451e91cc1"
+  },
+  "rank-0-surface-weak-2.csv": {
+    "bitwise_equal": true,
+    "sha256": "a973395f4a9752b705a41dc7495c0b78e09cfa7f3f9b194334292797119b685a"
+  }
+}

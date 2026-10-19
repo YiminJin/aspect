@@ -1,0 +1,9 @@
+{
+  "original_first_segment_max_shear_error_Pa": 1.4972029913117776e-08,
+  "corrected_max_shear_error_Pa": 2.0001508222976958e-05,
+  "exit_code": 1,
+  "seconds": 23.367276761000085,
+  "timeout_seconds": 180,
+  "unchanged_guard_rejected_inconsistent_corrected_load": true,
+  "rows": 117
+}

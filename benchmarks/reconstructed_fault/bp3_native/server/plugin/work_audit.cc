@@ -15,6 +15,7 @@
 
 #include <fstream>
 #include <iomanip>
+#include <sstream>
 // Accepted-state observations. Never refresh FE histories or update stress here.
 namespace aspect
 {
@@ -68,13 +69,22 @@ namespace aspect
       for (const auto &m:sim.get_parameters().mapped_particle_properties)
         if (m.second.first=="maxwell stress") fields[m.second.second]=m.first;
       const auto I=manager.get_property_information()[manager.get_property_index("phase field fault previous I h")].position;
-      Tensor<1,dim> t=fault.vertex(1)-fault.vertex(0);
-      t/=t.norm();
-      Tensor<1,dim> normal;
-      normal[0]=-t[1];
-      normal[1]=t[0];
-      const auto S=manager.get_shear_sense(0)*symmetrize(outer_product(t,normal)),
-                 N=symmetrize(outer_product(normal,normal));
+      // Point/domain diagnostics own a segment index rather than a cached
+      // Stokes association. Use that segment's native frame, as in DG stress
+      // reconstruction. Mechanical QPs below use the actual cached frame.
+      const auto segment_frame=[&](const unsigned int segment)
+      {
+        auto tangent=fault.vertex(segment+1)-fault.vertex(segment);
+        tangent/=tangent.norm();
+        Tensor<1,dim> normal;
+        normal[0]=-tangent[1];
+        normal[1]=tangent[0];
+        return std::make_pair(manager.get_shear_sense(0)*symmetrize(outer_product(tangent,normal)),
+                              symmetrize(outer_product(normal,normal)));
+      };
+      // Retain the old first-segment projection only as a counterfactual trace.
+      // It must not determine the accepted-work guard or exported work loads.
+      const auto first_frame=segment_frame(0);
 
       // Particle baselines follow native births/migration/rollback. Geometry
       // and completed profile retain the original timestep-zero baseline.
@@ -97,12 +107,13 @@ namespace aspect
       struct Sample
       {
         SymmetricTensor<2,dim> tau;
-        double chi,eta_ve,rate,bg,q,sigma,Ih;
+        double chi,eta_ve,rate,bg,bg_normal,q,sigma,Ih;
       };
       const auto evaluate=[&](const unsigned int segment,const double xi,const bool active,
                               const double phi,const double temp,const double pressure,
                               const SymmetricTensor<2,dim> &eps,const std::vector<double> &all,
-                              const SymmetricTensor<2,dim> &published_fe_stress)
+                              const SymmetricTensor<2,dim> &published_fe_stress,
+                              const SymmetricTensor<2,dim> &S,const SymmetricTensor<2,dim> &N)
       {
         std::vector<double> chemical;
         for (const auto c:intro.chemical_composition_field_indices()) chemical.push_back(all[c]);
@@ -131,6 +142,7 @@ namespace aspect
                    : 2*r.eta_ve*(strain-result.chi*result.rate*S)+model.evaluate_frozen_maxwell_stress(temp,all,old);
         const auto bg=model.reconstructed_fault_background_tractions(0,segment,xi);
         result.bg=bg.first;
+        result.bg_normal=bg.second;
         result.q=bg.first+result.tau*S;
         result.sigma=bg.second+pressure-result.tau*N;
         result.Ih=(1-xi)*fault.get_properties(segment)[I]+xi*fault.get_properties(segment+1)[I];
@@ -147,6 +159,10 @@ namespace aspect
       std::vector<SymmetricTensor<2,dim>> eps(nq);
       std::vector<std::vector<double>> composition(intro.n_compositional_fields,std::vector<double>(nq));
       std::vector<double> native(6*n),common(write_files ? 6*n : 0);
+      // The authoritative native array now uses the mechanical QP frames.
+      // Retain the old first-segment projections and direct frame differences
+      // separately so the repaired guard remains independently diagnosable.
+      std::vector<double> reference_frame(4*n);
       std::ofstream raw;
       if (write_files)
         {
@@ -164,6 +180,8 @@ namespace aspect
           {
             fe.reinit(cell);
             const auto &a=manager.get_stokes_qp_fault_associations(cell->id(),quad,fe.get_quadrature_points());
+            const auto *retained=model.uses_stationary_mature_dg_optimizations()
+              ? &model.retained_dg_qp_stress(cell->id(),quad,fe.get_quadrature_points()) : nullptr;
             fe[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)].get_function_values(working,phi);
             fe[intro.extractors.temperature].get_function_values(working,temp);
             fe[intro.extractors.pressure].get_function_values(working,pressure);
@@ -180,10 +198,23 @@ namespace aspect
                 for (unsigned int c=0; c<all.size(); ++c) all[c]=composition[c][q];
                 const auto j=a[q].active ? a[q].segment_index : 0u;
                 const auto xi=a[q].active ? a[q].xi : 0.;
-                const auto published=model.uses_independent_bulk_history()
-                                     ? model.retained_history_stress(cell->id(),p, {}) : SymmetricTensor<2,dim>();
-                const auto s=evaluate(j,xi,a[q].active,phi[q],temp[q],pressure[q],eps[q],all,published);
-                if (a[q].active && s.chi>0.) accumulate(native,j,a[q].shape_1,fe.JxW(q)*s.chi,pressure[q],s,s.tau*N);
+                const auto published=retained ? (*retained)[q] : (model.uses_independent_bulk_history()
+                                     ? model.retained_history_stress(cell->id(),p, {}) : SymmetricTensor<2,dim>());
+                const auto S=a[q].active ? manager.get_shear_sense(a[q].fault_index)
+                                          *symmetrize(outer_product(a[q].tangent,a[q].normal)) : first_frame.first;
+                const auto N=a[q].active ? symmetrize(outer_product(a[q].normal,a[q].normal)) : first_frame.second;
+                const auto s=evaluate(j,xi,a[q].active,phi[q],temp[q],pressure[q],eps[q],all,published,S,N);
+                if (a[q].active && s.chi>0.)
+                  {
+                    accumulate(native,j,a[q].shape_1,fe.JxW(q)*s.chi,pressure[q],s,s.tau*N);
+                    const double values[]={s.bg+s.tau*first_frame.first,
+                                           s.bg_normal+pressure[q]-s.tau*first_frame.second,
+                                           s.tau*(first_frame.first-S),-s.tau*(first_frame.second-N)};
+                    for (unsigned int end=0; end<2; ++end)
+                      for (unsigned int c=0; c<4; ++c)
+                        reference_frame[4*(j+end)+c]+=fe.JxW(q)*s.chi
+                                                   *(end ? a[q].shape_1 : 1-a[q].shape_1)*values[c];
+                  }
                 if (write_files && window && phi[q]>0.)
                   {
                     raw<<cell->id().to_string()<<','<<q<<','<<p[0]<<','<<p[1]<<','<<xd<<','
@@ -231,19 +262,22 @@ namespace aspect
                     const auto published=model.uses_independent_bulk_history()
                                          ? model.retained_history_stress(particle.get_surrounding_cell()->id(),particle.get_location(), {})
                                          : SymmetricTensor<2,dim>();
-                    const auto s=evaluate(q.segment_index,q.xi,true,ph[k],T[k],p[k],symmetrize(gradients[k]),all,published);
-                    accumulate(common,q.segment_index,q.xi,q.weight,p[k],s,s.tau*N);
+                    const auto frame=segment_frame(q.segment_index);
+                    const auto s=evaluate(q.segment_index,q.xi,true,ph[k],T[k],p[k],symmetrize(gradients[k]),all,published,
+                                          frame.first,frame.second);
+                    accumulate(common,q.segment_index,q.xi,q.weight,p[k],s,s.tau*frame.second);
                   }
               if (step==1)
                 {
                   const auto a=manager.project_to_bulk_source(particle.get_location());
+                  const auto frame=segment_frame(a.active ? a.segment_index : 0u);
                   const auto s=evaluate(a.active ? a.segment_index : 0u,a.active ? a.xi : 0.,a.active,
-                                        ph[k],T[k],p[k],symmetrize(gradients[k]),all, {});
+                                        ph[k],T[k],p[k],symmetrize(gradients[k]),all, {},frame.first,frame.second);
                   // Timestep zero retained zero particle stress. This independent
                   // first finite-step formula must match the newly committed array.
                   const auto strain=model.uses_deviatoric_strain_rate()
                                     ? Utilities::Tensors::consistent_deviator(symmetrize(gradients[k])) : symmetrize(gradients[k]);
-                  const auto expected=2*s.eta_ve*(strain-s.chi*s.rate*S);
+                  const auto expected=2*s.eta_ve*(strain-s.chi*s.rate*frame.first);
                   for (unsigned int c=0; c<3; ++c)
                     {
                       first_old=std::max(first_old,std::abs(all[fields[c]]));
@@ -280,6 +314,14 @@ namespace aspect
 
       const auto local_native=native;
       Utilities::MPI::sum(local_native,comm,native);
+      const auto local_reference_frame=reference_frame;
+      Utilities::MPI::sum(local_reference_frame,comm,reference_frame);
+#ifdef ASPECT_BP3_TEST_WORK_CONSISTENCY_FAILURE
+      // Negative diagnostic-only fixture: never alters mechanics or history.
+      // Every rank owns the same reduced arrays, so the original guard and
+      // collective failure export must reject this inconsistent observation.
+      if (step==2) native[3]+=2e-5*native[0];
+#endif
       double consistency=0.;
       for (unsigned int j=0; j<n; ++j)
         {
@@ -290,6 +332,56 @@ namespace aspect
           const auto &raw_normal=weak.raw_normal_traction.empty() ? weak.normal_traction : weak.raw_normal_traction;
           consistency=std::max(consistency,std::abs(native[6*j+4]-raw_normal[0][j])/native[6*j]);
         }
+      const auto &raw_normal=weak.raw_normal_traction.empty() ? weak.normal_traction : weak.raw_normal_traction;
+      std::array<double,6> maxima{};
+      std::array<unsigned int,6> worst{};
+      for (unsigned int j=0; j<n; ++j)
+        {
+          const double errors[]={std::abs(reference_frame[4*j]-weak.shear_traction[0][j]),
+                                 std::abs(reference_frame[4*j+1]-raw_normal[0][j]),
+                                 std::abs(native[6*j+3]-weak.shear_traction[0][j]),
+                                 std::abs(native[6*j+4]-raw_normal[0][j]),
+                                 std::abs(reference_frame[4*j+2]),std::abs(reference_frame[4*j+3])};
+          for (unsigned int c=0; c<maxima.size(); ++c)
+            if (errors[c]/native[6*j]>maxima[c])
+              {
+                maxima[c]=errors[c]/native[6*j];
+                worst[c]=j;
+              }
+        }
+      std::ostringstream trace;
+      trace<<std::setprecision(17)<<"Work consistency trace: step="<<step
+           <<", time_s="<<sim.get_time()<<", dt_s="<<sim.get_timestep()
+           <<", original_shear_Pa="<<maxima[0]<<", node="<<worst[0]
+           <<", original_raw_normal_Pa="<<maxima[1]<<", node="<<worst[1]
+           <<", matching_shear_Pa="<<maxima[2]<<", node="<<worst[2]
+           <<", matching_raw_normal_Pa="<<maxima[3]<<", node="<<worst[3]
+           <<", direct_frame_shear_Pa="<<maxima[4]<<", node="<<worst[4]
+           <<", direct_frame_raw_normal_Pa="<<maxima[5]<<", node="<<worst[5]
+           <<", bound_Pa=1e-5, guard_uses_matching_frame=1";
+      sim.get_pcout()<<trace.str()<<std::endl;
+      // All ranks must take the same branch before collective_root_write.
+      if (Utilities::MPI::max(static_cast<unsigned int>(!(consistency<1e-5)),comm))
+        BP3::collective_root_write(comm,[&]()
+        {
+          std::ofstream out(sim.get_output_directory()+"work_consistency_failure_"+std::to_string(step)+".csv");
+          out.exceptions(std::ios::failbit|std::ios::badbit);
+          out<<std::setprecision(17)
+             <<"step,time_s,dt_s,node,xd_m,mass_row_m,mechanical_shear_Pa_m,mechanical_raw_normal_Pa_m,"
+             <<"original_shear_Pa_m,original_raw_normal_Pa_m,matching_shear_Pa_m,matching_raw_normal_Pa_m,"
+             <<"direct_frame_shear_Pa_m,direct_frame_raw_normal_Pa_m,original_shear_error_Pa,"
+             <<"original_raw_normal_error_Pa,matching_shear_error_Pa,matching_raw_normal_error_Pa\n";
+          for (unsigned int j=0; j<n; ++j)
+            out<<step<<','<<sim.get_time()<<','<<sim.get_timestep()<<','<<j<<','
+               <<BP3::down_dip(fault.vertex(j)[0],fault.vertex(j)[1])<<','<<native[6*j]<<','
+               <<weak.shear_traction[0][j]<<','<<raw_normal[0][j]<<','<<reference_frame[4*j]<<','<<reference_frame[4*j+1]<<','
+               <<native[6*j+3]<<','<<native[6*j+4]<<','<<reference_frame[4*j+2]<<','<<reference_frame[4*j+3]<<','
+               <<(reference_frame[4*j]-weak.shear_traction[0][j])/native[6*j]<<','
+               <<(reference_frame[4*j+1]-raw_normal[0][j])/native[6*j]<<','
+               <<(native[6*j+3]-weak.shear_traction[0][j])/native[6*j]<<','
+               <<(native[6*j+4]-raw_normal[0][j])/native[6*j]<<'\n';
+          out.close();
+        });
       AssertThrow(consistency<1e-5,ExcMessage("Accepted work observer does not reproduce frozen mechanical traction."));
       if (write_files)
         BP3::collective_root_write(comm,[&]()

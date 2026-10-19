@@ -27,6 +27,7 @@
 #include <aspect/particle/manager.h>
 #include <aspect/reconstructed_fault/manager.h>
 #include <aspect/reconstructed_fault/utilities.h>
+#include <aspect/reconstructed_fault/linear_performance.h>
 #include <aspect/newton.h>
 #include <aspect/simulator.h>
 #include <aspect/postprocess/visualization.h>
@@ -571,12 +572,26 @@ namespace aspect
     }
 
     // Per-call scratch storage, never a second owner of committed history.
+    template<int dim> struct PhaseFieldFault<dim>::FEStrainState::ParticleSamples
+    {
+      struct Cell
+      {
+        CellId id;
+        std::vector<unsigned int> indices;
+        std::vector<Point<dim>> units;
+      };
+      std::vector<Point<dim>> points;
+      std::vector<Cell> cells;
+      std::shared_ptr<Utilities::MPI::RemotePointEvaluation<dim>> lookup;
+      unsigned int geometry;
+    };
+
     // Keep the sampling cache and audit streams alive through publication.
     template <int dim>
     struct PhaseFieldFault<dim>::HistorySamples
     {
       std::vector<Point<dim>> points;
-      Utilities::MPI::RemotePointEvaluation<dim> point_cache;
+      std::shared_ptr<Utilities::MPI::RemotePointEvaluation<dim>> point_cache;
       std::vector<Tensor<2,dim>> velocity_gradients;
       std::vector<double> temperatures;
       std::vector<double> phase_fields;
@@ -653,6 +668,7 @@ namespace aspect
             + property->second.second);
         }
 
+      TimerOutput::Scope commit_timer(this->get_computing_timer(),"Native history candidate/check");
       HistorySamples samples;
       sample_accepted_history(accepted_bulk_state, samples);
 
@@ -885,8 +901,25 @@ namespace aspect
 
       // Bulk samples use the accepted solution, whereas the surface state is
       // interpolated from the frozen reconstructed-fault Q1 fields.
-      auto &point_cache = samples.point_cache;
-      point_cache.reinit(this->get_phase_field_handler().get_grid_cache(), points);
+      TimerOutput::Scope timer(this->get_computing_timer(),"DG independent history sampling");
+      const bool stationary=uses_stationary_mature_dg_optimizations();
+      auto *cache=stationary ? &fe_strain_state->particle_samples : nullptr;
+      const auto generation=fault_manager.get_stokes_qp_cache_diagnostics().rebuild_count;
+      const bool reuse=stationary && Utilities::MPI::min(static_cast<unsigned int>(
+        bool(*cache) && (*cache)->geometry==generation && (*cache)->points==points),this->get_mpi_communicator());
+      if(reuse)samples.point_cache=(*cache)->lookup;
+      else
+        {
+          samples.point_cache=std::make_shared<Utilities::MPI::RemotePointEvaluation<dim>>();
+          samples.point_cache->reinit(this->get_phase_field_handler().get_grid_cache(),points);
+          aspect::internal::FaultSamplingCounters::add(aspect::internal::FaultSamplingCounters::lookup_builds);
+          if(stationary)
+            {
+              *cache=std::make_shared<typename FEStrainState::ParticleSamples>();
+              (*cache)->points=points;(*cache)->geometry=generation;(*cache)->lookup=samples.point_cache;
+            }
+        }
+      auto &point_cache=*samples.point_cache;
       if (!dg_trial_stress_history)
         samples.velocity_gradients = VectorTools::point_gradients<dim>(
                                        point_cache, this->get_dof_handler(), accepted_bulk_state,
@@ -904,6 +937,37 @@ namespace aspect
               const auto &particles=this->get_phase_field_handler()
                                     .get_associated_particle_manager().get_particle_handler();
               unsigned int i=0;
+              if(stationary)
+                {
+                  std::map<CellId,typename FEStrainState::ParticleSamples::Cell> cells;
+                  for(const auto &particle:particles)
+                    {
+                      AssertThrow(i<associations.size() && particle.get_id()==associations[i].particle_id && particle.get_location()==points[i],
+                                  ExcMessage("DG publication requires matching particle/association ownership."));
+                      const auto id=particle.get_surrounding_cell()->id();
+                      if(!reuse)
+                        {
+                          auto &cell=cells[id];cell.id=id;cell.indices.push_back(i);
+                          cell.units.push_back(this->get_mapping().transform_real_to_unit_cell(fe_strain_state->evaluation_cells.at(id),points[i]));
+                        }
+                      ++i;
+                    }
+                  if(!reuse)for(auto &cell:cells)(*cache)->cells.push_back(std::move(cell.second));
+                  for(const auto &group:(*cache)->cells)
+                    {
+                      FEValues<dim> fe(this->get_mapping(),this->get_fe(),Quadrature<dim>(group.units),update_gradients);
+                      aspect::internal::FaultSamplingCounters::add(aspect::internal::FaultSamplingCounters::native_fevalues);
+                      fe.reinit(fe_strain_state->evaluation_cells.at(group.id));
+                      std::vector<Tensor<2,dim>> gradient(group.units.size());
+                      fe[this->introspection().extractors.velocities].get_function_gradients(accepted_bulk_state,gradient);
+                      std::vector<Point<dim>> physical;
+                      for(unsigned int q=0;q<group.indices.size();++q)
+                        {samples.velocity_gradients[group.indices[q]]=gradient[q];physical.push_back(points[group.indices[q]]);}
+                      prepare_dg_point_samples(group.id,physical);
+                    }
+                }
+              else
+                {
               for (const auto &particle:particles)
                 {
                   AssertThrow(i<associations.size() && particle.get_id()==associations[i].particle_id
@@ -911,11 +975,14 @@ namespace aspect
                               ExcMessage("DG publication requires matching particle/association ownership."));
                   const auto cell=fe_strain_state->evaluation_cells.at(particle.get_surrounding_cell()->id());
                   const auto unit=this->get_mapping().transform_real_to_unit_cell(cell,points[i]);
+                  aspect::internal::FaultSamplingCounters::add(aspect::internal::FaultSamplingCounters::native_fevalues);
                   FEValues<dim> fe(this->get_mapping(),this->get_fe(),Quadrature<dim>({unit}),update_gradients);
                   fe.reinit(cell);
                   std::vector<Tensor<2,dim>> gradient(1);
                   fe[this->introspection().extractors.velocities].get_function_gradients(accepted_bulk_state,gradient);
                   samples.velocity_gradients[i++]=gradient[0];
+                }
+
                 }
               AssertThrow(i==associations.size(),ExcMessage("DG particle sample count mismatch."));
             }
@@ -1011,9 +1078,7 @@ namespace aspect
                       compute_creep_viscosity(
                         localization.surface_material_fractions,
                         localization.surface_temperature),
-                      MaterialUtilities::average_value(
-                        localization.surface_material_fractions,
-                        elastic_shear_moduli, viscosity_averaging),
+                      compute_elastic_shear_modulus(localization.surface_material_fractions),
                       time_step);
                   const double slip_rate = fault_manager.interpolate_slip_rate(
                                              association.fault_index, association.segment_index,
@@ -1129,9 +1194,7 @@ namespace aspect
                 compute_maxwell_coefficients(
                   compute_creep_viscosity(bulk_fractions,
                                           temperatures[particle_index]),
-                  homogeneous_mesh_data ? elastic_shear_moduli[0]
-                  : MaterialUtilities::average_value(
-                      bulk_fractions, elastic_shear_moduli, viscosity_averaging),
+                  compute_elastic_shear_modulus(bulk_fractions),
                   time_step);
 
               SymmetricTensor<2,dim> effective_strain_rate =
@@ -1166,9 +1229,7 @@ namespace aspect
                       compute_creep_viscosity(
                         localization.surface_material_fractions,
                         localization.surface_temperature),
-                      MaterialUtilities::average_value(
-                        localization.surface_material_fractions,
-                        elastic_shear_moduli, viscosity_averaging),
+                      compute_elastic_shear_modulus(localization.surface_material_fractions),
                       time_step);
                   const double slip_rate = fault_manager.interpolate_slip_rate(
                                              association.fault_index, association.segment_index,
@@ -1202,9 +1263,7 @@ namespace aspect
                       const double H_candidate =
                         recoverable_phase_history
                         ? compute_recoverable_phase_driving_force(
-                          MaterialUtilities::average_value(
-                            localization.surface_material_fractions,
-                            elastic_shear_moduli, viscosity_averaging),
+                          compute_elastic_shear_modulus(localization.surface_material_fractions),
                           localization.current_degradation, projected_traction)
                         : compute_crack_driving_force_candidate(
                           time_step, surface_coefficients,
@@ -1595,8 +1654,7 @@ namespace aspect
             : surface_composition->second;
           const std::vector<double> material_fractions =
             MaterialUtilities::compute_composition_fractions(chemical_compositions);
-          const double G = MaterialUtilities::average_value(
-                             material_fractions, elastic_shear_moduli, viscosity_averaging);
+          const double G = compute_elastic_shear_modulus(material_fractions);
           const double H = particle.get_properties()[H_position];
           const double phi = std::max(phase_field_values[particle_index++], 0.0);
 

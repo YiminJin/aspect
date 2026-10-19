@@ -128,11 +128,23 @@ namespace aspect
     std::vector<std::vector<double>> mass_off_diagonal;
     std::vector<std::unique_ptr<FaultFactorization>> factorizations;
     std::vector<CouplingPoint> coupling_points;
-    std::unique_ptr<Utilities::MPI::RemotePointEvaluation<dim>> point_cache;
-    std::unique_ptr<internal::FaultSparseCoupling> matrix;
+    std::shared_ptr<Utilities::MPI::RemotePointEvaluation<dim>> point_cache;
+    std::shared_ptr<internal::FaultSparseCoupling> matrix, normal_matrix;
+    FaultVector friction_mass, friction_edge;
     std::vector<std::shared_ptr<const internal::FaultNormalFilter>> normal_filters;
   };
 
+
+  template <int dim>
+  struct ReconstructedFaultSurfaceSystem<dim>::StationaryCouplingCache
+  {
+    unsigned int geometry= numbers::invalid_unsigned_int;
+    types::global_dof_index dofs=0;
+    double eta= numbers::signaling_nan<double>();
+    std::vector<Point<dim>> points;
+    std::shared_ptr<Utilities::MPI::RemotePointEvaluation<dim>> lookup;
+    std::shared_ptr<internal::FaultSparseCoupling> shear,normal;
+  };
 
   template <int dim>
   ReconstructedFaultSurfaceSystem<dim>::ReconstructedFaultSurfaceSystem(
@@ -305,17 +317,153 @@ namespace aspect
     for (const auto &point : candidate->coupling_points)
       if (point.parent_index == points.size())
         points.push_back(point.position);
-    candidate->point_cache =
-      std::make_unique<Utilities::MPI::RemotePointEvaluation<dim>>();
-    TimerOutput::Scope lookup_timer(*performance_timer, "Fault: G lookup build");
-    candidate->point_cache->reinit(grid_cache, points);
-    lookup_timer.stop();
+    const bool stationary=phase_field_fault.uses_stationary_mature_dg_optimizations();
+    const auto geometry=this->get_reconstructed_fault_manager().get_stokes_qp_cache_diagnostics().rebuild_count;
+    if (stationary && (!stationary_coupling_cache || stationary_coupling_cache->geometry!=geometry
+                       || stationary_coupling_cache->dofs!=this->get_dof_handler().n_dofs()))
+      {
+        stationary_coupling_cache=std::make_unique<StationaryCouplingCache>();
+        stationary_coupling_cache->geometry=geometry;
+        stationary_coupling_cache->dofs=this->get_dof_handler().n_dofs();
+      }
+    const bool reuse_lookup=stationary && Utilities::MPI::min(static_cast<unsigned int>(
+      bool(stationary_coupling_cache->lookup) && stationary_coupling_cache->points==points),this->get_mpi_communicator());
+    if (reuse_lookup)
+      candidate->point_cache=stationary_coupling_cache->lookup;
+    else
+      {
+        candidate->point_cache=std::make_shared<Utilities::MPI::RemotePointEvaluation<dim>>();
+        TimerOutput::Scope lookup_timer(*performance_timer, "Fault: G lookup build");
+        candidate->point_cache->reinit(grid_cache,points);
+        internal::FaultSamplingCounters::add(internal::FaultSamplingCounters::lookup_builds);
+        if (stationary)
+          {
+            stationary_coupling_cache->points=points;
+            stationary_coupling_cache->lookup=candidate->point_cache;
+            stationary_coupling_cache->shear.reset();stationary_coupling_cache->normal.reset();
+          }
+      }
+    const bool filtered=stationary && !candidate->normal_filters.empty();
+    if (filtered)
+      {
+        internal::FaultLinearSection timing(internal::FaultLinearTiming::G_setup);
+        auto &cache=*stationary_coupling_cache;
+        const double eta=candidate->coupling_points.empty() ? 0. : candidate->coupling_points.front().eta_ve;
+        // Fixed homogeneous eta is the only time-dependent factor in these
+        // physical derivative maps. Friction is deliberately absent here.
+        for (const auto &p:candidate->coupling_points)
+          AssertThrow(p.eta_ve==eta,ExcMessage("Stationary DG coupling requires homogeneous Maxwell coefficients."));
+        const bool rebuild=Utilities::MPI::max(static_cast<unsigned int>(!cache.shear || cache.eta!=eta),this->get_mpi_communicator());
+        if (rebuild)
+          {
+            internal::FaultSamplingCounters::add(internal::FaultSamplingCounters::G_builds);
+            const auto build=[&](const bool normal)
+              {
+        using Coefficient=std::pair<SymmetricTensor<2,dim>,double>;
+        using Row=std::pair<unsigned int,Coefficient>;
+        using Rows=std::vector<Row>;
+        std::vector<std::map<unsigned int,Coefficient>> parent_coefficients(points.size());
+        std::vector<unsigned int> offsets(1,0);
+        for (const auto &fault : assembled.diagonal)
+          offsets.push_back(offsets.back()+fault.size());
+        const auto &point_ptrs=candidate->point_cache->get_point_ptrs();
+
+        // Integrate domain test functions first, holding each parent's bulk
+        // sample P0 exactly as in G. Shared-face samples are averaged, not
+        // assigned to an arbitrary incident cell: divide before RPE duplicates.
+        for (const auto &point : candidate->coupling_points)
+          {
+            const auto multiplicity=point_ptrs[point.parent_index+1]-point_ptrs[point.parent_index];
+            // VectorTools' avg evaluation returns zero for a missing request.
+            // Preserve that existing action convention instead of dividing by zero.
+            if (multiplicity==0) continue;
+            const auto stress=normal ? -2.*point.eta_ve*point.normal_tensor : 2.*point.eta_ve*point.slip_tensor;
+            for (unsigned int end=0; end<2; ++end)
+              {
+                const double weight=point.particle_domain_volume*(end==0 ? 1.-point.xi : point.xi)/multiplicity;
+                auto &c=parent_coefficients[point.parent_index][offsets[point.fault_index]+point.segment_index+end];
+                c.first+=weight*stress;
+                if (normal) c.second+=weight;
+              }
+          }
+        std::vector<Rows> input(points.size());
+        for (unsigned int p=0; p<points.size(); ++p)
+          for (const auto &row : parent_coefficients[p]) input[p].push_back(row);
+        internal::FaultSparseCoupling::Entries entries;
+        using Cache=Utilities::MPI::RemotePointEvaluation<dim>;
+        candidate->point_cache->template process_and_evaluate<Rows>(input,
+          [&](const ArrayView<const Rows> &values, const typename Cache::CellData &cells)
+          {
+            // RPE routes each coefficient to the original FE-cell owner.
+            // Store physical, unconstrained columns; the solver continues to
+            // distribute homogeneous constraints and pressure scaling before G.
+            const auto &fe=this->get_fe();
+            std::vector<types::global_dof_index> indices(fe.dofs_per_cell);
+            for (const auto c : cells.cell_indices())
+              {
+                const auto tria_cell=cells.get_active_cell_iterator(c);
+                const typename DoFHandler<dim>::active_cell_iterator cell(
+                  &this->get_triangulation(),tria_cell->level(),tria_cell->index(),&this->get_dof_handler());
+                const auto unit_points=cells.get_unit_points(c);
+                FEValues<dim> fe_values(this->get_mapping(),fe,
+                  Quadrature<dim>(std::vector<Point<dim>>(unit_points.begin(),unit_points.end())),
+                  update_values | update_gradients);
+                fe_values.reinit(cell);
+                cell->get_dof_indices(indices);
+                const auto data=cells.get_data_view(c,values);
+                for (unsigned int p=0; p<data.size(); ++p)
+                  for (unsigned int i=0; i<indices.size(); ++i)
+                    {
+                      const auto component=fe.system_to_component_index(i).first;
+                      const bool velocity=this->introspection().component_masks.velocities[component];
+                      const bool pressure=component==this->introspection().component_indices.pressure;
+                      if (!velocity && !pressure) continue;
+                      for (const auto &row : data[p])
+                        if (velocity)
+                          {
+                            auto strain = fe_values[this->introspection().extractors.velocities].symmetric_gradient(i,p);
+                            if (phase_field_fault.uses_deviatoric_strain_rate())
+                              strain = Utilities::Tensors::consistent_deviator(strain);
+                            entries[{row.first,indices[i]}] += row.second.first*strain;
+                          }
+                        else
+                          entries[{row.first,indices[i]}] += row.second.second*fe_values[this->introspection().extractors.pressure].value(i,p);
+                    }
+              }
+          });
+        auto matrix=std::make_shared<internal::FaultSparseCoupling>();
+        matrix->build(entries);
+        return matrix;
+              };
+            cache.shear=build(false);cache.normal=build(true);cache.eta=eta;
+          }
+        candidate->matrix=cache.shear;candidate->normal_matrix=cache.normal;
+        // Consistent friction-weighted multiplication, refreshed at EVERY
+        // Newton linearization. It cannot commute with the Helmholtz inverse.
+        candidate->friction_mass=candidate->mass_diagonal;
+        candidate->friction_edge=candidate->mass_off_diagonal;
+        for (auto &f:candidate->friction_mass)std::fill(f.begin(),f.end(),0.);
+        for (auto &f:candidate->friction_edge)std::fill(f.begin(),f.end(),0.);
+        for (const auto &p:candidate->coupling_points)
+          {
+            const double a=1.-p.xi,b=p.xi,w=p.particle_domain_volume*p.friction_coefficient;
+            candidate->friction_mass[p.fault_index][p.segment_index]+=w*a*a;
+            candidate->friction_mass[p.fault_index][p.segment_index+1]+=w*b*b;
+            candidate->friction_edge[p.fault_index][p.segment_index]+=w*a*b;
+          }
+        for (unsigned int f=0;f<candidate->friction_mass.size();++f)
+          {
+            const auto diagonal=candidate->friction_mass[f],edge=candidate->friction_edge[f];
+            Utilities::MPI::sum(diagonal,this->get_mpi_communicator(),candidate->friction_mass[f]);
+            Utilities::MPI::sum(edge,this->get_mpi_communicator(),candidate->friction_edge[f]);
+          }
+      }
     // The restricted endpoint phase solver repeatedly applies this frozen map.
     // Reuse the existing exact assembly (including remote-point averaging),
     // rebuilding with every surface linearization. Keep the normal-filter
     // restriction and all legacy activation defaults unchanged.
     if ((std::getenv("ASPECT_FAULT_EXPLICIT_G")
-         || phase_field_fault.uses_consistent_endpoint_phase())
+         || phase_field_fault.uses_consistent_endpoint_phase() || stationary)
         && candidate->normal_filters.empty())
       {
         internal::FaultLinearSection timing(internal::FaultLinearTiming::G_setup);
@@ -571,6 +719,37 @@ namespace aspect
       result=surface_linearization->diagonal;
       unsigned int i=0;
       for (auto &fault : result) for (auto &value : fault) value=global[i++];
+      if (surface_linearization->normal_matrix)
+        {
+          std::fill(local.begin(),local.end(),0.);
+          surface_linearization->normal_matrix->add(physical_bulk_direction,local);
+          Utilities::MPI::sum(local,this->get_mpi_communicator(),global);
+          unsigned int offset=0;
+          for (unsigned int f=0;f<result.size();++f)
+            {
+              std::vector<double> rhs(global.begin()+offset,global.begin()+offset+result[f].size());
+              const auto filtered=surface_linearization->normal_filters[f]->solve(rhs);
+              const auto &d=surface_linearization->friction_mass[f];
+              const auto &e=surface_linearization->friction_edge[f];
+              for (unsigned int j=0;j<result[f].size();++j)
+                {
+                  result[f][j]-=d[j]*filtered[j];
+                  if(j>0)result[f][j]-=e[j-1]*filtered[j-1];
+                  if(j+1<result[f].size())result[f][j]-=e[j]*filtered[j+1];
+                }
+              offset+=result[f].size();
+            }
+        }
+      if(std::getenv("ASPECT_FAULT_COMPARE_COUPLING"))
+        {
+          FaultVector reference;apply_G_reference(physical_bulk_direction,reference);
+          double error=0.,scale=0.;
+          for(unsigned int f=0;f<result.size();++f)for(unsigned int j=0;j<result[f].size();++j)
+            {error+=Utilities::fixed_power<2>(reference[f][j]-result[f][j]);scale+=Utilities::fixed_power<2>(reference[f][j]);}
+          AssertThrow(std::sqrt(error)<=2.e-11*std::sqrt(scale),ExcMessage("Factored filtered G disagrees with the independent sampled action."));
+          internal::FaultSamplingCounters::add(internal::FaultSamplingCounters::G_reference_checks);
+          internal::FaultSamplingCounters::observe(1,scale>0. ? std::sqrt(error/scale) : 0.);
+        }
     }
   }
 

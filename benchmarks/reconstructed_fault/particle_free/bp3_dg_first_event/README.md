@@ -8,6 +8,26 @@ reference. The prior spatial differences, endpoint temporal screen failure,
 49.704 Pa surface-state interpolation imbalance and
 `strict_reference_match_passed=false` remain documented in `qualification/`.
 
+The stationary mature DG inputs explicitly enable exact cached/sparse evaluation
+through `Optimize stationary mature DG = true`. The consistent-endpoint phase
+solver remains off. The same constitutive laws, Gauss6/source3, Helmholtz20,
+10 m surface spacing, adaptive controls and acceptance tolerances are retained.
+The false setting preserves a bounded reference path. Local performance evidence
+is in the supplied source
+`doc/reconstructed_fault/particle_free/BP3_DG_OPTIMIZATION_REPORT.md`; see
+`RESOURCES.md` for optional startup counters. Full-grid speed and memory remain
+unmeasured.
+
+## Homogeneous-coefficient repair after r3
+
+The r4 source snapshot repairs the step-zero `p.eta_ve==eta` failure: all
+homogeneous bulk/fault coefficient evaluations now use configured G directly.
+The exact guard and all four inputs remain unchanged. The supplied source report
+`doc/reconstructed_fault/particle_free/BP3_DG_HOMOGENEOUS_COEFFICIENT_FIX.md`
+contains the six-file patch/rebuild procedure for an existing r3 installation.
+Do not apply that patch again to r4. Preserve failed outputs; the reported
+step-zero failure needs a fresh bounded startup, not resume from a partial state.
+
 ## Install
 
 Extract the archive in a staging directory, enter its top-level directory and

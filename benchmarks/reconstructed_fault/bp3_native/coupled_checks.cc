@@ -13,6 +13,9 @@
 #include <aspect/reconstructed_fault/manager.h>
 #include <aspect/reconstructed_fault/surface_system.h>
 #include <aspect/reconstructed_fault/utilities.h>
+#include <aspect/reconstructed_fault/linear_performance.h>
+#include <aspect/simulator/assemblers/reconstructed_fault_stokes.h>
+#include <aspect/simulator/solver/reconstructed_fault_condensed_system.h>
 #include <aspect/utilities.h>
 #include "../../../tests/phase_field_fault_test_access.h"
 #include "../bp3/plugin/bp3_model.h"
@@ -1073,6 +1076,127 @@ namespace aspect
                             << ", sampled particles=" << anchors.size() << ", fixed population=" << fixed_particles.size() << std::endl;
         }
 
+        void verify_stationary_operators()
+        {
+          auto &model=const_cast<Model &>(Plugins::get_plugin_as_type<const Model>(this->get_material_model()));
+          if(!model.uses_stationary_mature_dg_optimizations())return;
+          const auto original=model.dg_history_values();
+          const auto publications=model.fe_strain_state->accepted_publications;
+          const auto Z=model.fe_strain_state->Z;
+          auto &manager=this->get_reconstructed_fault_manager();
+          auto &surface=this->get_reconstructed_fault_surface_system();
+          auto &B=this->get_reconstructed_fault_stokes_coupling();
+          std::vector<std::vector<double>> rates;
+          for(unsigned int f=0;f<manager.get_faults().size();++f)rates.push_back(manager.get_timestep_committed_slip_rate(f));
+          // Freeze a common (accepted history, physical trial, dt) tuple. These
+          // noncommitting kernels are not an additional physical time step.
+          StokesSolver::ReconstructedFaultCondensedSystem<dim> system(this->get_simulator());
+          auto free=system.linearize(this->get_system_matrix(),this->get_solution(),rates);
+          BV direction(this->introspection().index_sets.stokes_partitioning,this->get_mpi_communicator());
+          for(unsigned int b=0;b<2;++b)
+            for(const auto i:direction.block(b).locally_owned_elements())
+              direction.block(b)[i]=(b==0 ? 1e-9 : 1000./this->get_pressure_scaling())*std::sin(.017*(i+3));
+          direction.compress(VectorOperation::insert);
+          BV action(direction);free.vmult(action,direction); // Audited against sampled B/G and actual free K_V.
+          for(unsigned int sample=0;sample<4;++sample)
+            {
+              auto probe=rates;
+              for(auto &fault:probe)for(unsigned int j=0;j<fault.size();++j)
+                fault[j]=sample<3 ? (j==sample*(fault.size()-1)/2 ? 1. : 0.) : std::sin(.19*(j+1));
+              BV load(this->introspection().index_sets.system_partitioning,this->get_mpi_communicator());
+              B.apply_B(probe,load); // The existing diagnostic switch verifies the reference action.
+              BV owned(this->introspection().index_sets.system_partitioning,this->get_mpi_communicator());
+              owned.block(0)=direction.block(0);owned.block(1)=direction.block(1);
+              owned.block(1)*=this->get_pressure_scaling();
+              AffineConstraints<double> constraints(this->get_current_constraints());
+              for(const auto &line:constraints.get_lines())constraints.set_inhomogeneity(line.index,0.);
+              constraints.distribute(owned);owned.compress(VectorOperation::insert);
+              BV physical(this->introspection().index_sets.system_partitioning,this->introspection().index_sets.system_relevant_partitioning,this->get_mpi_communicator());physical=owned;
+              surface.apply_G(physical,probe);
+            }
+          auto mask=manager.prescribed_slip_rate_mask();unsigned int restricted_rows=0;
+          for(auto &fault:mask)
+            for(const unsigned int j:{0u,static_cast<unsigned int>(fault.size()/2),static_cast<unsigned int>(fault.size()-1)})
+              {fault[j]=true;++restricted_rows;}
+          auto solve=surface.create_restricted_linear_solve(mask);
+          auto restricted=free.with_surface_solve(*solve);
+          restricted.vmult(action,direction); // Audits the actual new scratch path with nonempty active constraints.
+
+          // All nine incoming modes/components survive a source update. Compare
+          // mass/inverse and roundoff caching against the unchanged reference
+          // arithmetic on the SAME manufactured native Q2 velocity and history.
+          auto incoming=*model.fe_strain_state->dg_history;
+          for(unsigned int c=0;c<incoming.trial_stress.size();++c)
+            {
+              LinearAlgebra::Vector owned(incoming.space->dofs.locally_owned_dofs(),this->get_mpi_communicator());
+              for(const auto i:owned.locally_owned_elements())owned[i]=100.*std::sin(.13*(i+1+17*c));
+              owned.compress(VectorOperation::insert);incoming.trial_stress[c]=owned;
+            }
+          BV bulk(this->introspection().index_sets.system_partitioning,this->get_mpi_communicator());bulk=this->get_solution();
+          for(const auto i:bulk.block(0).locally_owned_elements())bulk.block(0)[i]=1e-9*(std::cos(.07*i)+.2*std::sin(.3*i));
+          bulk.compress(VectorOperation::insert);
+          BV ghost(this->introspection().index_sets.system_partitioning,this->introspection().index_sets.system_relevant_partitioning,this->get_mpi_communicator());ghost=bulk;
+          const auto coefficients=Model::compute_maxwell_coefficients(model.reference_viscosities[0],model.elastic_shear_moduli[0],
+            this->get_timestep_number() ? this->get_timestep() : model.initial_time_step);
+          const auto reference=model.make_dg_history_trial(incoming,ghost,coefficients,true,true);
+          const auto optimized=model.make_dg_history_trial(incoming,ghost,coefficients,true,false);
+          double source_error=0.,bound_error=0.;
+          for(unsigned int c=0;c<incoming.trial_stress.size();++c)
+            {
+              LinearAlgebra::Vector difference(incoming.space->dofs.locally_owned_dofs(),this->get_mpi_communicator());
+              for(const auto i:difference.locally_owned_elements())difference[i]=reference->trial_stress[c][i]-optimized->trial_stress[c][i];
+              difference.compress(VectorOperation::insert);source_error=std::max(source_error,difference.linfty_norm());
+            }
+          for(const auto &entry:reference->source_roundoff)
+            {
+              const auto &other=optimized->source_roundoff.at(entry.first);
+              bound_error=std::max({bound_error,(entry.second.projection-other.projection).norm(),(entry.second.gradient_scale-other.gradient_scale).norm()});
+            }
+          bound_error=Utilities::MPI::max(bound_error,this->get_mpi_communicator());
+          AssertThrow(source_error==0. && bound_error==0.,ExcMessage("Stationary source cache changed coefficients or operand-derived allowance."));
+
+          double stress_error=0.,stress_scale=0.;std::array<unsigned int,3> checked{};
+          const auto quadrature=fault_mechanical_quadrature(*this);
+          FEValues<dim> fe(this->get_mapping(),this->get_fe(),quadrature,update_quadrature_points|update_values);
+          for(const auto &entry:model.fe_strain_state->cells)
+            {
+              fe.reinit(entry.second);std::vector<double> phase(quadrature.size());
+              fe[FEValuesExtractors::Scalar(this->introspection().variable("phase_field").first_component_index)].get_function_values(model.fe_strain_state->displacement_history,phase);
+              if(*std::max_element(phase.begin(),phase.end())==0.)continue;
+              const auto center=entry.second->center();const double s=BP3::down_dip(center[0],center[1])/BP3::geometry().length;
+              const unsigned int bin=s<.2 ? 0 : (s>.8 ? 2 : 1);
+              if((bin==1 && (s<.4 || s>.6)) || checked[bin]>=4)continue;
+              ++checked[bin];
+              const auto &fast=model.retained_dg_qp_stress(entry.first,quadrature,fe.get_quadrature_points());
+              for(unsigned int q=0;q<quadrature.size();++q)
+                {
+                  double scale=0.;const auto old=model.evaluate_dg_history_stress(*model.fe_strain_state->dg_history,Z,model.fe_strain_state->I,entry.first,fe.quadrature_point(q),&scale,&model.fe_strain_state->displacement_history);
+                  const auto d=old-fast[q];stress_error=std::max(stress_error,std::sqrt((d*d)+trace(d)*trace(d)));stress_scale=std::max(stress_scale,scale);
+                }
+            }
+          stress_error=Utilities::MPI::max(stress_error,this->get_mpi_communicator());stress_scale=Utilities::MPI::max(stress_scale,this->get_mpi_communicator());
+          AssertThrow(stress_error<=2e-11*std::max(stress_scale,1e-30),ExcMessage("Batched mechanical history changed native point evaluation."));
+          const auto n_stokes=direction.block(0).size()+direction.block(1).size();
+          unsigned int hanging=0;
+          for(const auto &line:this->get_current_constraints().get_lines())hanging+=line.index<n_stokes && !line.entries.empty();
+          hanging=Utilities::MPI::sum(hanging,this->get_mpi_communicator());
+          double mu_min=std::numeric_limits<double>::infinity(),mu_max=-mu_min;
+          for(const auto &sample:surface.get_normal_traction_diagnostic().samples)
+            {mu_min=std::min(mu_min,sample.friction_coefficient);mu_max=std::max(mu_max,sample.friction_coefficient);}
+          mu_min=Utilities::MPI::min(mu_min,this->get_mpi_communicator());mu_max=Utilities::MPI::max(mu_max,this->get_mpi_communicator());
+          AssertThrow(hanging>0 && restricted_rows>0 && this->get_pressure_scaling()!=1. && mu_max>mu_min,
+                      ExcMessage("Frozen operator fixture lacks required constraints, scaling or varying friction."));
+          AssertThrow(model.dg_history_values()==original && model.fe_strain_state->accepted_publications==publications && model.fe_strain_state->Z==Z,
+                      ExcMessage("Stationary frozen operator checks published history."));
+          BP3::collective_root_write(this->get_mpi_communicator(),[&]()
+            {
+              const auto path=this->get_output_directory()+"stationary-operator-checks.csv";const bool header=BP3::needs_header(path);
+              std::ofstream out(path,std::ios::app);out.exceptions(std::ios::failbit|std::ios::badbit);
+              if(header)out<<"step,source_coefficient_error,source_allowance_error,QP_stress_error_Pa,QP_operand_scale_Pa,hanging_relations,restricted_rows,pressure_scaling,mu_min,mu_max\n";
+              out<<std::setprecision(17)<<this->get_timestep_number()<<','<<source_error<<','<<bound_error<<','<<stress_error<<','<<stress_scale<<','<<hanging<<','<<restricted_rows<<','<<this->get_pressure_scaling()<<','<<mu_min<<','<<mu_max<<'\n';
+            });
+        }
+
       public:
         static void declare_parameters(ParameterHandler &prm)
         {
@@ -1420,6 +1544,7 @@ namespace aspect
             const auto cell = this->get_triangulation().create_cell_iterator(id);
             const typename DoFHandler<dim>::active_cell_iterator dof_cell(&this->get_triangulation(),cell->level(),cell->index(),&this->get_dof_handler());
             FEValues<dim> fe(this->get_mapping(),this->get_fe(),Quadrature<dim>({unit}),update_gradients);
+            aspect::internal::FaultSamplingCounters::add(aspect::internal::FaultSamplingCounters::native_fevalues);
             fe.reinit(dof_cell);
             Vector<double> values(this->get_fe().dofs_per_cell);
             dof_cell->get_dof_values(this->get_solution(),values);
@@ -1429,8 +1554,30 @@ namespace aspect
                 sum += std::abs(values[i])*fe[intro.extractors.velocities].symmetric_gradient(i,0).norm();
             return sum;
           };
+          std::vector<double> batched_operand;
+          if(model.uses_stationary_mature_dg_optimizations())
+            {
+              batched_operand.resize(diagnostic.samples.size());
+              std::map<CellId,std::vector<unsigned int>> groups;
+              for(unsigned int q=0;q<diagnostic.samples.size();++q)groups[CellId(diagnostic.samples[q].cell)].push_back(q);
+              for(const auto &group:groups)
+                {
+                  std::vector<Point<dim>> units,physical;
+                  for(const auto i:group.second){units.push_back(diagnostic.samples[i].reference_position);physical.push_back(diagnostic.samples[i].position);}
+                  model.prepare_dg_point_samples(group.first,physical);
+                  const auto cell=model.fe_strain_state->evaluation_cells.at(group.first);
+                  FEValues<dim> fe(this->get_mapping(),this->get_fe(),Quadrature<dim>(units),update_gradients);
+                  aspect::internal::FaultSamplingCounters::add(aspect::internal::FaultSamplingCounters::native_fevalues);
+                  fe.reinit(cell);Vector<double> values(this->get_fe().dofs_per_cell);cell->get_dof_values(this->get_solution(),values);
+                  for(unsigned int q=0;q<units.size();++q)
+                    for(unsigned int i=0;i<values.size();++i)
+                      if(this->get_fe().system_to_component_index(i).first<dim)
+                        batched_operand[group.second[q]]+=std::abs(values[i])*fe[intro.extractors.velocities].symmetric_gradient(i,q).norm();
+                }
+            }
           // Incoming QP snapshots use exactly the mechanical measure/time level.
           // At step zero their trial stress is kinematic; published history is zero.
+          unsigned int diagnostic_index=0;
           for (const auto &q : diagnostic.samples)
             {
               if (weak.raw_normal_traction.empty())
@@ -1447,7 +1594,8 @@ namespace aspect
               SymmetricTensor<2,dim> actual = q.stress;
               double scale = coefficients.beta*q.incoming_stress.norm()+2*coefficients.eta_ve*(strain.norm()+std::abs(q.chi*rate)*S.norm());
               scale = std::max(scale,coefficients.beta*q.incoming_stress.norm()
-                               +2*coefficients.eta_ve*(gradient_operand(CellId(q.cell),q.reference_position)+std::abs(q.chi*rate)*S.norm()));
+                               +2*coefficients.eta_ve*((batched_operand.empty() ? gradient_operand(CellId(q.cell),q.reference_position)
+                                                      : batched_operand[diagnostic_index])+std::abs(q.chi*rate)*S.norm()));
               if (step && model.uses_independent_bulk_history())
                 {
                   const auto &s = *model.fe_strain_state;
@@ -1464,6 +1612,7 @@ namespace aspect
                     }
                   scale = std::max(scale,2*(new_scale+coefficients.beta*old_scale));
                 }
+              ++diagnostic_index;
               const double error = (actual-expected).norm();
               const double bound = 128*std::numeric_limits<double>::epsilon()*std::max(1.,scale)
                                    +(step && model.uses_dg_trial_stress_history()
@@ -1742,6 +1891,8 @@ namespace aspect
                     fe[intro.extractors.pressure].get_function_values(working,pressure);
                     fe[intro.extractors.velocities].get_function_symmetric_gradients(working,strain);
                     fe[FEValuesExtractors::Scalar(intro.variable("phase_field").first_component_index)].get_function_values(working,phase);
+                    if(model.uses_stationary_mature_dg_optimizations())
+                      model.prepare_dg_point_samples(cell->id(),common ? physical->physical : fe.get_quadrature_points());
                     if (!model.uses_independent_bulk_history())
                       for (unsigned int c=0;c<old.size();++c)
                         {
@@ -1867,6 +2018,9 @@ namespace aspect
               AssertThrow(bool(face_probe), ExcMessage("The retained near-face event was not reproduced."));
               audit_near_face(*face_probe);
             }
+          if(std::getenv("ASPECT_FAULT_COMPARE_COUPLING"))verify_stationary_operators();
+          if(std::getenv("ASPECT_FAULT_PERFORMANCE"))
+            this->get_pcout()<<"Fault sampling counters: step="<<step<<aspect::internal::FaultSamplingCounters::report()<<std::endl;
           return {"BP3 serial paired history",std::to_string(step)};
         }
     };

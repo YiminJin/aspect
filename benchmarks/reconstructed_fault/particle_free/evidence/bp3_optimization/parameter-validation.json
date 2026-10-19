@@ -1,0 +1,53 @@
+{
+  "all_four_inputs_valid": true,
+  "only_allowed_parameter_differences": {
+    "parameters": {},
+    "resume": {
+      "Resume computation": [
+        "false",
+        "true"
+      ]
+    },
+    "startup": {
+      "Postprocess/BP3/Graceful wall seconds": [
+        "82800",
+        "7200"
+      ],
+      "Postprocess/BP3/Last accepted step": [
+        "2147483647",
+        "5"
+      ],
+      "Checkpointing/Steps between checkpoint": [
+        "10",
+        "1"
+      ]
+    },
+    "startup-resume": {
+      "Resume computation": [
+        "false",
+        "true"
+      ],
+      "Postprocess/BP3/Graceful wall seconds": [
+        "82800",
+        "7200"
+      ],
+      "Postprocess/BP3/Last accepted step": [
+        "2147483647",
+        "8"
+      ],
+      "Checkpointing/Steps between checkpoint": [
+        "10",
+        "1"
+      ]
+    }
+  },
+  "native_adaptive_controls_unchanged": true,
+  "ordinary_plugins_without_test_macros": true,
+  "full_mesh_constructed": false,
+  "sha256": {
+    "parameters.prm": "476c746a2b40b7597cf9cb8ca966ecb7e1c75ba3a4b91c34d70f0e9598bf681d",
+    "resume.prm": "d63df9f684f5d9b99f5c265c2a316ac37ab1fc7c82b5b082eafa99617d5c0628",
+    "startup.prm": "89dbec9fd0d20b93ffd32b994f261fe2a4d116b5ce826174be431791784835ca",
+    "startup-resume.prm": "68617736f0b2be3e89475b01bef3cbdc4ee00e04a7679431d59e99d4092082e7"
+  }
+}

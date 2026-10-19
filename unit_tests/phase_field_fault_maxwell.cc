@@ -20,6 +20,43 @@
 #include "../tests/phase_field_fault_test_access.h"
 
 #include <sstream>
+#include <iomanip>
+
+TEST_CASE("Homogeneous Maxwell coefficients are independent of chemical labels",
+          "[homogeneous_maxwell]")
+{
+  using Access=aspect::MaterialModel::internal::PhaseFieldFaultTestAccess<2>;
+  namespace Material=aspect::MaterialModel::MaterialUtilities;
+  const double G=32038120320.,eta=1e26;
+  double old_min=std::numeric_limits<double>::max(),old_max=0.;
+  for (const auto averaging : {Material::arithmetic,Material::harmonic,
+                               Material::geometric,Material::maximum_composition})
+    for (unsigned int i=0; i<=1000; ++i)
+      {
+        const double f=i/1000.;
+        const std::vector<double> fractions{1.-f,f};
+        const double modulus=Access::material_shear_modulus(true,{G,G},fractions,averaging);
+        REQUIRE(modulus==G);
+        for (const double dt : {200000.,4e6,4e7})
+          REQUIRE(Access::maxwell_coefficients(eta,modulus,dt)
+                  ==Access::maxwell_coefficients(eta,G,dt));
+        if (averaging==Material::harmonic)
+          {
+            const double mixed=Access::material_shear_modulus(false,{G,G},fractions,averaging);
+            const auto c=Access::maxwell_coefficients(eta,mixed,4e6);
+            old_min=std::min(old_min,c.second);old_max=std::max(old_max,c.second);
+          }
+      }
+  // Independent heterogeneous-mixture values retain the legacy rules. The
+  // homogeneous shortcut is selected by its validated configuration only.
+  CHECK(Access::material_shear_modulus(false,{2.,8.},{.25,.75},Material::arithmetic)==6.5);
+  CHECK(Access::material_shear_modulus(false,{2.,8.},{.25,.75},Material::harmonic)==Approx(32./7.));
+  CHECK(Access::material_shear_modulus(false,{2.,8.},{.25,.75},Material::geometric)==Approx(4.*std::sqrt(2.)));
+  CHECK(Access::material_shear_modulus(false,{2.,8.},{.25,.75},Material::maximum_composition)==8.);
+  std::cout<<std::setprecision(17)<<"Homogeneous coefficient regression: harmonic old kappa range="
+           <<old_min<<":"<<old_max<<", configured kappa="
+           <<Access::maxwell_coefficients(eta,G,4e6).second<<std::endl;
+}
 
 namespace
 {

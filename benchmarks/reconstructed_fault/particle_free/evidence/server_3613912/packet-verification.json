@@ -1,0 +1,68 @@
+{
+  "strict_reference_match_passed": false,
+  "rows": 5776,
+  "errors": {
+    "original_shear": {
+      "max_abs_Pa": 1.6570723745979872e-06,
+      "signed_Pa": 1.6570723745979872e-06,
+      "node": 5713,
+      "down_dip_m": 620.0000000000022
+    },
+    "matching_shear": {
+      "max_abs_Pa": 5.067868297252547e-07,
+      "signed_Pa": 5.067868297252547e-07,
+      "node": 104,
+      "down_dip_m": 56695.318463735915
+    },
+    "original_raw_normal": {
+      "max_abs_Pa": 1.001357615619641e-05,
+      "signed_Pa": -1.001357615619641e-05,
+      "node": 4918,
+      "down_dip_m": 8569.999999999998
+    },
+    "matching_raw_normal": {
+      "max_abs_Pa": 2.0867824647698363e-07,
+      "signed_Pa": -2.0867824647698363e-07,
+      "node": 111,
+      "down_dip_m": 56625.33808694181
+    }
+  },
+  "shear_frame_closure_max_Pa": 1.5588991673270048e-07,
+  "raw_normal_frame_closure_max_Pa": 2.6726421815224356e-07,
+  "offending_node": {
+    "step": 816.0,
+    "time_s": 5172072493.905725,
+    "dt_s": 0.0074540672088498705,
+    "node": 4918.0,
+    "xd_m": 8569.999999999998,
+    "mass_row_m": 10.000004160420962,
+    "mechanical_shear_Pa_m": 414965593.39206636,
+    "mechanical_raw_normal_Pa_m": 512360082.0618272,
+    "original_shear_Pa_m": 414965593.3920628,
+    "original_raw_normal_Pa_m": 512360082.06172705,
+    "matching_shear_Pa_m": 414965593.3920661,
+    "matching_raw_normal_Pa_m": 512360082.06182724,
+    "direct_frame_shear_Pa_m": -2.343467791735709e-06,
+    "direct_frame_raw_normal_Pa_m": -9.93162750313624e-05,
+    "original_shear_error_Pa": -3.576277198641575e-07,
+    "original_raw_normal_error_Pa": -1.001357615619641e-05,
+    "matching_shear_error_Pa": -2.3841847990943832e-08,
+    "matching_raw_normal_error_Pa": 5.960461997735958e-09
+  },
+  "normal_direct_frame_at_offending_node_Pa": -9.931623371162834e-06,
+  "deliberately_inconsistent_matching_error_Pa": 2.0003310464401876e-05,
+  "six_replayed_accepted_records_all_columns_bitwise_equal": true,
+  "verified_checkpoint": {
+    "slot": "03",
+    "step": 815,
+    "time_s": "5172072493.8982706"
+  },
+  "effective_parameters_match_after_source_directory_expansion": true,
+  "supplied_sha256": {
+    "accepted_steps.csv": "9942d5123e6f3d70888e64fcffde1380846f7e3afcb789be6cf09b455dd5d3ac",
+    "parameters.prm": "99633bf5ca47afade467d3484b9fe183c1b33d679b5965b387904bcfe9f6ad6b",
+    "work_consistency_failure_816.csv": "5cc1c4a58a48fb8756b270075dc4d1626e5e45e5e2e46d56e8db6466bfecb751",
+    "last_good_checkpoint.txt": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+    "bp3_accepted_state.txt": "72b42eda01aea806e5e4fc29073b1c44f8a2c685213c5286307b3d93b1237663"
+  }
+}

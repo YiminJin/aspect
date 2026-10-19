@@ -179,6 +179,8 @@ namespace aspect
               if (!associations[q].active && phase[q]>0.
                   && normal_diagnostic_window(fe.quadrature_point(q)))
                 ++local.normal_diagnostic->unassociated_phase_points;
+          const auto *history=phase_field_fault.uses_stationary_mature_dg_optimizations()
+            ? &phase_field_fault.retained_dg_qp_stress(cell->id(),quadrature,fe.get_quadrature_points()) : nullptr;
           for (unsigned int q=0; q<nq; ++q)
             if (associations[q].active)
               {
@@ -204,7 +206,7 @@ namespace aspect
                       input.old_maxwell_stress[SymmetricTensor<2,dim>::unrolled_to_component_indices(c)]
                         =composition[stress_fields[c]][q];
                     }
-                input.old_maxwell_stress = phase_field_fault.retained_history_stress(
+                input.old_maxwell_stress = history ? (*history)[q] : phase_field_fault.retained_history_stress(
                                              cell->id(), fe.quadrature_point(q), input.old_maxwell_stress);
                 std::vector<double> chemical;
                 for (const auto c:intro.chemical_composition_field_indices())

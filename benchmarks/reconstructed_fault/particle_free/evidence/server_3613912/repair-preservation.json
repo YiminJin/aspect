@@ -1,0 +1,14 @@
+{
+  "incoming_modified_files_changed_only_as_intended": [
+    "benchmarks/reconstructed_fault/bp3_native/server/plugin/work_audit.cc",
+    "doc/reconstructed_fault/particle_free/SOURCE_AUDIT.md",
+    "doc/reconstructed_fault/particle_free/STATUS.md"
+  ],
+  "all_other_incoming_source_bytes_preserved": true,
+  "supplied_data_bytes_preserved": true,
+  "archive_sha256_at_entry": "f9717b6c5f9edfcd9c494a74b6c2fabe82211c3e3e70a769ad747cf53b2363bd",
+  "archive_currently_present": false,
+  "patch_matches_built_source": true,
+  "core_binary_unchanged": true,
+  "core_sha256": "d62541e3fc2a191965f31d26bf85260dc8922ac47c3b648b8256c96df143b23a"
+}

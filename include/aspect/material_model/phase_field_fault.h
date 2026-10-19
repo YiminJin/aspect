@@ -321,6 +321,15 @@ namespace aspect
         {
           return homogeneous_mesh_data;
         }
+        /** Acceleration eligibility is separate from endpoint phase evolution.
+         * The reference switch changes algorithms only in this qualified scope. */
+        bool uses_stationary_mature_dg_optimizations() const
+        {
+          return dim==2 && stationary_mature_dg_optimizations && dg_accepted_history
+                 && dg_trial_stress_history && homogeneous_mesh_data
+                 && mature_frictional_fault && !consistent_endpoint_phase
+                 && !use_adiabatic_pressure_in_fault_friction;
+        }
         bool initialize_fe_shared_phase(LinearAlgebra::BlockVector &) const;
 
         /** Same quadrature in bulk energy, Stokes and the slip adjoint. */
@@ -330,6 +339,11 @@ namespace aspect
         SymmetricTensor<2,dim> retained_history_stress(
           const CellId &, const Point<dim> &,
           const SymmetricTensor<2,dim> &particle_representation) const;
+
+        /** Accepted DG stress at the known mechanical QP layout. Geometry and
+         * phase are fixed; values refresh when the accepted history changes. */
+        const std::vector<SymmetricTensor<2,dim>> &retained_dg_qp_stress(
+          const CellId &,const Quadrature<dim> &,const std::vector<Point<dim>> &) const;
 
         struct FEPhaseEnergy
         {
@@ -408,6 +422,7 @@ namespace aspect
         bool fe_strain_history = false;
         bool dg_trial_stress_history = false;
         bool dg_accepted_history = false;
+        bool stationary_mature_dg_optimizations = true;
         std::shared_ptr<DGCheckpoint> dg_checkpoint;
         std::shared_ptr<DGTransfer> dg_transfer;
         bool consistent_particle_strain = false;
@@ -422,7 +437,7 @@ namespace aspect
           const LinearAlgebra::BlockVector &, const MaxwellCoefficients &) const;
         std::shared_ptr<DGHistory> make_dg_history_trial(
           const DGHistory &,const LinearAlgebra::BlockVector &,const MaxwellCoefficients &,
-          bool estimate_source_roundoff = false) const;
+          bool estimate_source_roundoff = false,bool reference = false) const;
         /** Prescribed PF5 Strang candidate; closed boundaries and uniform V/Z. */
         std::shared_ptr<FEStrainUpdate> prepare_dg_accepted_step(
           const DGTransport &,const LinearAlgebra::BlockVector &,double time) const;
@@ -430,6 +445,7 @@ namespace aspect
         /** Independent tensor values, before any phase/localization correction. */
         std::vector<SymmetricTensor<2,dim>> evaluate_dg_trial_tensor(
                                            const DGHistory &, const CellId &, const Quadrature<dim> &) const;
+        void prepare_dg_point_samples(const CellId &,const std::vector<Point<dim>> &) const;
         SymmetricTensor<2,dim> evaluate_dg_history_stress(
           const DGHistory &, const std::vector<double> &, const std::vector<double> &,
           const CellId &, const Point<dim> &, double *evaluation_scale = nullptr,
@@ -837,6 +853,12 @@ namespace aspect
         double
         compute_creep_viscosity(const std::vector<double> &volume_fractions,
                                 const double               temperature) const;
+
+        /** Homogeneous mesh data uses the configured value directly, as do
+         * native bulk assembly and accepted history. Chemical labels can still
+         * vary for friction; averaging equal moduli need not be bitwise constant. */
+        double
+        compute_elastic_shear_modulus(const std::vector<double> &volume_fractions) const;
 
         EquationOfState::MulticomponentIncompressible<dim> equation_of_state;
 

@@ -130,11 +130,21 @@ namespace aspect
         current_linearization_point = bulk_state;
         assemble_newton_stokes_matrix = false;
         rebuild_stokes_preconditioner = false;
+        const auto &material=Plugins::get_plugin_as_type<MaterialModel::PhaseFieldFault<dim>>(*material_model);
+        const auto n_stokes=bulk_state.block(0).size()+bulk_state.block(1).size();
+        const bool homogeneous_stokes=std::none_of(current_constraints.get_lines().begin(),current_constraints.get_lines().end(),
+          [&](const auto &line){return line.index<n_stokes && line.inhomogeneity!=0.;});
         rebuild_stokes_matrix =
           !boundary_velocity_manager.get_prescribed_boundary_velocity_indicators().empty()
-          && !(Plugins::get_plugin_as_type<MaterialModel::PhaseFieldFault<dim>>(*material_model)
-                 .uses_consistent_endpoint_phase() && !current_constraints.has_inhomogeneities());
+          && !(material.uses_consistent_endpoint_phase() && !current_constraints.has_inhomogeneities())
+          && !(material.uses_stationary_mature_dg_optimizations() && homogeneous_stokes);
+        if(std::getenv("ASPECT_FAULT_COMPARE_COUPLING"))
+          pcout<<"Stationary residual assembly: rebuild="<<rebuild_stokes_matrix
+               <<", homogeneous_Stokes="<<homogeneous_stokes
+               <<", A_before="<<system_matrix.block(0,0).frobenius_norm()<<std::endl;
         assemble_stokes_system();
+        if(std::getenv("ASPECT_FAULT_COMPARE_COUPLING"))
+          pcout<<"Stationary residual assembly: A_after="<<system_matrix.block(0,0).frobenius_norm()<<std::endl;
 
         const double velocity_residual =
           system_rhs.block(introspection.block_indices.velocities).l2_norm();
@@ -750,6 +760,21 @@ namespace aspect
         double fault_preconditioner_setup_seconds = 0.;
 
 
+        // Dependency identity for within-attempt reuse. A retry enters this
+        // function afresh and rebuilds at iteration zero. Preserve exact closed
+        // constraints, rather than a hash or a presumed fixed active set.
+        using ConstraintRecord=std::tuple<types::global_dof_index,double,
+          std::vector<std::pair<types::global_dof_index,double>>>;
+        const auto constraint_records=[&]()
+          {
+            std::vector<ConstraintRecord> result;
+            for(const auto &line:current_constraints.get_lines())result.emplace_back(line.index,line.inhomogeneity,line.entries);
+            return result;
+          };
+        auto bulk_constraints=phase_field_fault.uses_stationary_mature_dg_optimizations()
+          ? constraint_records() : std::vector<ConstraintRecord>();
+        double bulk_dt=time_step,bulk_pressure_scaling=pressure_scaling;
+        auto bulk_dofs=dof_handler.n_dofs();auto bulk_cells=triangulation.n_global_active_cells();
         for (nonlinear_iteration = 0;
              nonlinear_iteration < max_nonlinear_iterations;
              ++nonlinear_iteration)
@@ -757,9 +782,24 @@ namespace aspect
             // Assemble mutually consistent A, R_bulk, frozen B, G, K_V, and
             // R_Gamma at the current accepted pair (working_x,current V).
             current_linearization_point = working_x;
+            const bool stationary_bulk=phase_field_fault.uses_stationary_mature_dg_optimizations()
+              && std::none_of(current_constraints.get_lines().begin(),current_constraints.get_lines().end(),
+                 [&](const auto &line){return line.index<n_stokes_dofs && line.inhomogeneity!=0.;});
+            const auto constraints_now=stationary_bulk ? constraint_records() : bulk_constraints;
+            const bool changed=bulk_dt!=time_step || bulk_pressure_scaling!=pressure_scaling
+              || bulk_dofs!=dof_handler.n_dofs() || bulk_cells!=triangulation.n_global_active_cells()
+              || bulk_constraints!=constraints_now;
             const bool rebuild_homogeneous_bulk =
-              !phase_field_fault.uses_consistent_endpoint_phase()
-              || (!reuse_endpoint_bulk_preconditioner && nonlinear_iteration == 0);
+              stationary_bulk
+              ? (nonlinear_iteration == 0 || changed)
+              : (!phase_field_fault.uses_consistent_endpoint_phase()
+                 || (!reuse_endpoint_bulk_preconditioner && nonlinear_iteration == 0));
+            if(rebuild_homogeneous_bulk)
+              {
+                aspect::internal::FaultSamplingCounters::add(aspect::internal::FaultSamplingCounters::bulk_builds);
+                bulk_constraints=constraints_now;bulk_dt=time_step;bulk_pressure_scaling=pressure_scaling;
+                bulk_dofs=dof_handler.n_dofs();bulk_cells=triangulation.n_global_active_cells();
+              }
             assemble_newton_stokes_matrix = rebuild_homogeneous_bulk;
             rebuild_stokes_matrix = rebuild_homogeneous_bulk;
             // In the restricted homogeneous FE endpoint option, A and the
@@ -790,6 +830,10 @@ namespace aspect
               }
             const auto preconditioner_start=internal::FaultLinearTiming::Clock::now();
             build_stokes_preconditioner();
+            if(std::getenv("ASPECT_FAULT_COMPARE_COUPLING"))
+              pcout<<"Stationary Newton bulk: iteration="<<nonlinear_iteration<<", build="<<rebuild_homogeneous_bulk
+                   <<", A="<<system_matrix.block(0,0).frobenius_norm()
+                   <<", P="<<system_preconditioner_matrix.block(0,0).frobenius_norm()<<std::endl;
             fault_preconditioner_setup_seconds=std::chrono::duration<double>(
               internal::FaultLinearTiming::Clock::now()-preconditioner_start).count();
 

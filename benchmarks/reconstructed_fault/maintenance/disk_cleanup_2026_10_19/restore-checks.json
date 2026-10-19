@@ -1,0 +1,22 @@
+[
+  {
+    "prefix": "build-particle-free/mature-pilot/current/runs/dg-life-r4-owned/run/rank-3-authoritative-stress-0.csv",
+    "sha256": "cf2f79b79a0a84044605dedc7aa8c6d48c66d8ae672aa69a9758a157ae6fc886",
+    "restored_bytes": 1098019,
+    "mode_mtime_preserved": true,
+    "output": "1 files, 1.05 MiB; destination root: /tmp/pf-disk-cleanup-ibonhsc7\nRestored 1 new files; all 1 selected payloads verified."
+  },
+  {
+    "prefix": "build-particle-free/bp3-startup-review/package/distribution/aspect-source/source/reconstructed_fault/surface_system.cc",
+    "sha256": "a46f4d9544856421beb6f4a4ba7a694aa9bceb36fc6f8adddfe30aedbd4914ec",
+    "restored_bytes": 32264,
+    "mode_mtime_preserved": true,
+    "output": "1 files, 0.03 MiB; destination root: /tmp/pf-disk-cleanup-ibonhsc7\nRestored 1 new files; all 1 selected payloads verified."
+  },
+  {
+    "existing_identical_file_verified_without_rewrite": true
+  },
+  {
+    "different_existing_file_rejected_without_overwrite": true
+  }
+]

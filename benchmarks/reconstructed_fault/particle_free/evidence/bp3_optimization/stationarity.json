@@ -1,0 +1,18 @@
+{
+  "small": {
+    "particles": 66176,
+    "identical_ID_coordinate_maps": true,
+    "max_coordinate_displacement": 0.0,
+    "births": 0,
+    "deletions": 0,
+    "effective_integration_scheme": "BP3 stationary samples"
+  },
+  "larger": {
+    "particles": 184448,
+    "identical_ID_coordinate_maps": true,
+    "max_coordinate_displacement": 0.0,
+    "births": 0,
+    "deletions": 0,
+    "effective_integration_scheme": "BP3 stationary samples"
+  }
+}

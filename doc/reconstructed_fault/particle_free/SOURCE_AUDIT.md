@@ -1,3 +1,189 @@
+Storage maintenance, 19 October 2026: runtime/source/equation bytes and live
+build/checkpoint files verified unchanged. Only duplicate immutable executable
+storage, lossless historical-field archiving and redundant expanded package
+copies changed; original errors and data remain recoverable.
+[Measured cleanup and restoration](DISK_CLEANUP_20261019.md).
+
+# BP3 work-observer repair audit — 19 October 2026
+
+[Source/verification report](BP3_DG_WORK_OBSERVER_FIX.md).
+The supplied signed weak loads establish the failed projection at node 4918;
+high-precision reevaluation confirms the normalized errors from their actual
+binary operands. Matching the native frame makes the step-816 normal error
+at that node 5.960462e-9 Pa, without changing the 1e-5 Pa bound. Direct frame
+differences and separately rounded integrated-load differences are reported
+separately. Archive/raw input hashes and the original failures remain.
+
+The sole runtime edit is `bp3_native/server/plugin/work_audit.cc`. Its evaluator
+now receives explicit S/N tensors; QPs use the actual cached Stokes association
+frames. Point/domain diagnostic frames use their owned segment, matching native
+DG stress reconstruction. Detailed exports, first Maxwell diagnostic, and the
+guarded native work loads all use those frames. The first-segment contraction
+is retained separately as `original_*` trace data; `matching_*` are checked and
+`guard_uses_matching_frame=1` identifies the repair. Failure CSV field meaning
+and collective failure decision are retained. The literal assertion/message,
+raw-normal rule, weights, pressure/background signs and independent publication
+checks are unchanged. Core source, constitutive equations, histories, checkpoint
+format, physical settings and defaults remain unchanged.
+
+Two-rank fresh/rejection/restart controls and an intentionally inconsistent
+corrected-load negative test verify the actual changed plugin. Physical output
+comparisons are byte-for-byte: nine against the prior build, eleven for retry,
+fourteen after restart. Once-only publication passes. Ordinary plugins compile
+and both new native server inputs validate. The negative compile macro remains
+absent in ordinary builds. Full-grid repaired advancement is still a server
+confirmation; no job was launched. Strict matching remains false.
+
+---
+
+# Server replay 3613912 log audit — 19 October 2026
+
+The supplied native replay measures the original normal-load guard violation
+at 816/node 4918 (1.0013576e-5 Pa), the direct frame contribution at the same
+node (9.9316234e-6 Pa), and passing matching-frame maxima (normal 2.0868e-7 Pa,
+shear 5.0679e-7 Pa). The unchanged-threshold shadow passes all seven steps.
+Mechanical/publication log records match the original run, as do accepted
+810–815 time/dt. [Reduction and hashes](../../../benchmarks/reconstructed_fault/particle_free/evidence/server_3613912/log-analysis.json).
+
+This confirms that replacing the observer's first-segment projection frame by
+the actual mechanical QP association frame removes this observed violation.
+Signed nodal loads are still requested before completing repair verification.
+No runtime/core source edits in this follow-up; independent publication,
+constitutive laws, numerical settings and original guards remain unchanged.
+The prior report/evidence and strict-match=false are preserved. The next source
+change should correct observer frames rather than enlarge an allowance.
+
+---
+
+# Server 3610007 observer diagnosis audit
+
+[Report](BP3_SERVER_3610007_DIAGNOSIS.md). The newly supplied state/load exports
+end at 815. Original logs identify the unchanged accepted-work guard at 816,
+after converged mechanics and passing independent publication. Checkpoint
+metadata identifies 809/slot 03. Original raw data and errors are preserved.
+
+`surface_system_bulk_work.cc` projects stress with each cached association's
+tangent/normal. `server/plugin/work_audit.cc` projects with the first segment's
+frame. Independent per-anchor native resampling reproduces 5776 nodes and
+demonstrates a 1.7796e-5 Pa point-traction mismatch from this choice at 15 MPa
+shear. This does not reproduce the unavailable failing native weak integral.
+The 9.9101e-6 Pa estimate from step-815 exports is explicitly a surrogate.
+
+Only `work_audit.cc` is edited for this diagnosis. Original load arithmetic and
+the literal `consistency<1e-5` assertion/message remain. Separate arrays sample
+the same accepted physical stress with native QP frames and directly integrate
+the frame-difference contractions. A root trace precedes the assertion; an MPI
+maximum of failure flags precedes collective root failure export. This observer
+does not alter accepted history, velocity, phase, coefficients or source cache.
+A compile-only local negative-test macro perturbs a diagnostic load, never
+mechanics/history, and is absent in ordinary builds. No new production parameter.
+
+Two-rank adaptive control: twelve output files are byte-identical to the earlier
+control. A deliberate 2e-5 Pa diagnostic inconsistency still fails the original
+guard, writes 117 finite rows and aborts within its timeout. Ordinary plugin
+rebuild/replay parser check passes. All five changed replay parameters concern
+output/restart/termination; no physical or adaptive-control changes. The first
+failed parser attempt (resolved-print inline comments in library names) remains
+in evidence; removing comments preserves the parsed parameter dictionary.
+
+The actual server failure mechanism remains unconfirmed pending a bounded
+809→816 replay. No threshold relaxation, observer-frame repair adoption or
+full-event claim is made. Source/artifact hashes and original input hashes are
+in the linked evidence. Existing scientific failures and strict-match=false stay.
+
+---
+
+# Homogeneous-coefficient startup repair audit
+
+[Report](BP3_DG_HOMOGENEOUS_COEFFICIENT_FIX.md). The original server log and a
+fresh bounded mixed-label run identify the failure at the unchanged exact
+Maxwell-coefficient guard. The source defect is inconsistent material arithmetic:
+ordinary bulk assembly and independent history use configured homogeneous G,
+whereas constitutive bulk/fault responses still average equal G values using
+spatially varying chemical fractions. Harmonic rounding makes kappa nonconstant.
+
+`compute_elastic_shear_modulus()` in the material returns configured G when
+homogeneous mesh data is selected, and the original compositional average otherwise.
+`phase_field_fault.cc`, `constitutive.cc` and `history.cc` share this selection
+for native viscosity, frozen and current point stress, surface candidates and
+history/initialization coefficients. Test-only surface coefficient accessors use
+the same production accessor. Native constitutive inputs, recurrence, rate/spin,
+full plane-strain convention and Maxwell exp/expm1 expressions are unchanged.
+
+`surface_system.cc` is byte unchanged from task entry: the exact homogeneity
+assertion, filtered factorization, cache dependencies and collective decisions
+are preserved. Normalization/degradation, derivatives, quadrature, tolerances,
+publication and checkpoint formats are untouched. No parameter change is needed.
+The regression covers 1001 mixture fractions/four averaging selections plus
+independent heterogeneous-mixture controls. 127 native cases / 165094 assertions
+pass. Bounded native operator/MPI/restart/rejection evidence is linked in the report.
+
+The local runner adds an explicit mixed-label fixture option; server inputs
+remain unchanged. The packager excludes the copied `log.txt` from runtime inputs
+while retaining it as qualification evidence. Earlier source archives and
+all incoming manual work/scientific failures remain. Strict reference matching
+remains false; no further propagation or server job is launched locally.
+
+---
+
+# Stationary mature DG optimization audit — 17 October 2026
+
+Reviewed base `b2dfdebe43437d6028b06d4f9f862cc80a00cc71`; no tracked subsequent
+changes at entry. [Measured report](BP3_DG_OPTIMIZATION_REPORT.md) and
+[exact factorization/cache dependencies](BP3_DG_OPTIMIZATION_FORMULATION.md).
+No physical law, rate/spin convention, quadrature, limiter, native adaptive
+control, pressure scale, acceptance or publication allowance changes.
+
+- `phase_field_fault.{h,cc}` adds an independent optimization eligibility predicate
+  and reference selector for the homogeneous fixed-phase mature accepted-DG route.
+  It does not enable consistent endpoint phase or change the default history backend.
+- `utilities.{h,cc}` adds conservative indexed segment admission with exact native
+  leaf arithmetic/order and reference fallback. `manager.cc` owns/invalidate its
+  geometry lifetime; knot ownership, overlap rejection and endpoint completion stay.
+- `dg_history.cc`, `fe_strain.cc`, `history.cc` separate geometry/QP/basis/fixed-phase
+  layouts from accepted stress values and current Maxwell/source operands. Reuse
+  Stokes associations; batch cell DG/native FE values and independent publication
+  gradients. Cache Gauss3 mass inverse/invariant roundoff geometry, retaining nine
+  modes and the original operand-derived two-path allowance. Changed trial phase
+  still bypasses the fixed-phase cache outside the selected mature route.
+- `reconstructed_fault_stokes.cc` assembler and `surface_system_bulk_work.cc`
+  consume the same batched authoritative reconstruction at actual physical QPs.
+  Sparse B expands closed constraints using the retained native implementation.
+- `surface_system.cc` factors the actual filtered derivative as
+  `S_Gamma-W_mu H^-1 N_Gamma`. S/N retain native work weights and RPE trace average;
+  consistent W_mu, frictional tangent and active-set solve refresh per required
+  linearization. No commutation of variable friction, nodal product or dense map.
+- Simulator solver/assembly extend homogeneous **Stokes-direction** eligibility
+  for within-attempt A/preconditioner reuse and residual-only line searches.
+  Nonzero thermal constraints previously triggered an A overwrite; the observed
+  failure and correction are retained. Every new attempt/retry rebuilds bulk
+  operators. Condensed wrappers preserve constraints/pressure scaling and reuse
+  owned/ghosted work vectors without changing `C=A-B K_V^-1 G`.
+- `bp3_native/coupled_checks.cc` adds opt-in source/QP/operator probes and batches
+  native operand sums/dense-layout preparation; `server/plugin/work_audit.cc`
+  batches its independent accepted-stress QPs. Coverage/weak integration unchanged.
+  Rank-local relaxed counters and existing timers distinguish searches, misses,
+  FEValues constructions, setup/application and history/diagnostic costs.
+- New native units cover indexed search, exact admission/fallback/overlap and a
+  5776-node varying-friction kernel. Native fixture probes cover full operators,
+  hanging constraints, pressure scaling, restricted K and non-proportional history.
+  `ASPECT_FAULT_COMPARE_COUPLING` is an expensive verification-only selector; its
+  2e-11 relative action guard does not alter production tolerances.
+- Server template retains physical/adaptive inputs with an explicit optimization
+  selection. Packager includes the bounded verification helper closure and native
+  unit profile fixture; output control/checkpoint formats remain unchanged.
+
+126 cases / 149074 assertions pass; B/G/C relative differences <=1.88e-15,
+1.77e-14, 9.46e-16. Source/allowance arrays match bitwise; independent stress
+sampling <=3.09e-12 Pa. Full timing-pair stress RMS <=2.10e-10 Pa. Rejection,
+cutback, 1/2/4-rank ownership, restart, publication and collective stop pass.
+Measured time/memory tradeoffs and retained engineering failures are in the report.
+Stationary diagnostic point identity/trace validation remains an acceptance
+particle dependency; domains/particle stresses do not feed selected mechanics.
+Legacy CPDI and all previous evidence remain. `strict_reference_match_passed=false`.
+
+---
+
 # BP3 server startup review audit — 17 October 2026
 
 [Report](BP3_DG_STARTUP_REVIEW.md). Task entry: base

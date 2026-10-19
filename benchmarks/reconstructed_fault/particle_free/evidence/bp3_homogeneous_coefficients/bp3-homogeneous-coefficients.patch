@@ -1,0 +1,255 @@
+--- a/include/aspect/material_model/phase_field_fault.h
++++ b/include/aspect/material_model/phase_field_fault.h
+@@ -854,6 +854,12 @@
+         compute_creep_viscosity(const std::vector<double> &volume_fractions,
+                                 const double               temperature) const;
+ 
++        /** Homogeneous mesh data uses the configured value directly, as do
++         * native bulk assembly and accepted history. Chemical labels can still
++         * vary for friction; averaging equal moduli need not be bitwise constant. */
++        double
++        compute_elastic_shear_modulus(const std::vector<double> &volume_fractions) const;
++
+         EquationOfState::MulticomponentIncompressible<dim> equation_of_state;
+ 
+         Rheology::FaultFriction<dim> fault_friction;
+--- a/source/material_model/phase_field_fault.cc
++++ b/source/material_model/phase_field_fault.cc
+@@ -111,9 +111,7 @@
+             {
+               // The ordinary Stokes assembler uses eta_ve for the current strain
+               // rate; the reconstructed-fault assembler supplies the frozen stress.
+-              const double G = homogeneous_mesh_data ? elastic_shear_moduli[0]
+-                               : MaterialUtilities::average_value(
+-                                   volume_fractions, elastic_shear_moduli, viscosity_averaging);
++              const double G = compute_elastic_shear_modulus(volume_fractions);
+               const double eta = compute_creep_viscosity(volume_fractions, in.temperature[i]);
+               const double time_step = (this->get_timestep_number() > 0
+                                         ? this->get_timestep()
+--- a/source/material_model/phase_field_fault/constitutive.cc
++++ b/source/material_model/phase_field_fault/constitutive.cc
+@@ -106,8 +106,7 @@
+       const auto fractions = MaterialUtilities::compute_only_composition_fractions(
+                                composition, this->introspection().chemical_composition_field_indices());
+       const double eta = compute_creep_viscosity(fractions, temperature);
+-      const double G = MaterialUtilities::average_value(
+-                         fractions, elastic_shear_moduli, viscosity_averaging);
++      const double G = compute_elastic_shear_modulus(fractions);
+       const double dt = this->get_timestep_number() > 0
+                         ? this->get_timestep() : initial_time_step;
+       return compute_maxwell_coefficients(eta, G, dt).beta * old_stress;
+@@ -138,8 +137,7 @@
+ 
+       const double eta = compute_creep_viscosity(inputs.bulk_material_fractions,
+                                                  inputs.temperature);
+-      const double G = MaterialUtilities::average_value(
+-                         inputs.bulk_material_fractions, elastic_shear_moduli, viscosity_averaging);
++      const double G = compute_elastic_shear_modulus(inputs.bulk_material_fractions);
+       const double time_step = (this->get_timestep_number() > 0
+                                 ? this->get_timestep()
+                                 : initial_time_step);
+@@ -148,9 +146,7 @@
+       const double surface_eta = compute_creep_viscosity(
+                                    localization.surface_material_fractions,
+                                    localization.surface_temperature);
+-      const double surface_G = MaterialUtilities::average_value(
+-                                 localization.surface_material_fractions, elastic_shear_moduli,
+-                                 viscosity_averaging);
++      const double surface_G = compute_elastic_shear_modulus(localization.surface_material_fractions);
+       const MaxwellCoefficients surface_coefficients =
+         compute_maxwell_coefficients(surface_eta, surface_G, time_step);
+       const CohesiveResponse cohesive = compute_cohesive_response(
+@@ -291,8 +287,7 @@
+ 
+       const double eta = compute_creep_viscosity(inputs.bulk_material_fractions,
+                                                  inputs.temperature);
+-      const double G = MaterialUtilities::average_value(
+-                         inputs.bulk_material_fractions, elastic_shear_moduli, viscosity_averaging);
++      const double G = compute_elastic_shear_modulus(inputs.bulk_material_fractions);
+       const double time_step = (this->get_timestep_number() > 0
+                                 ? this->get_timestep()
+                                 : initial_time_step);
+@@ -301,9 +296,7 @@
+       const double surface_eta = compute_creep_viscosity(
+                                    localization.surface_material_fractions,
+                                    localization.surface_temperature);
+-      const double surface_G = MaterialUtilities::average_value(
+-                                 localization.surface_material_fractions, elastic_shear_moduli,
+-                                 viscosity_averaging);
++      const double surface_G = compute_elastic_shear_modulus(localization.surface_material_fractions);
+       const MaxwellCoefficients surface_coefficients =
+         compute_maxwell_coefficients(surface_eta, surface_G, time_step);
+       const CohesiveResponse cohesive = compute_cohesive_response(
+@@ -492,8 +485,7 @@
+                                f, segment, j-segment, 0., 0., "surface history");
+               const auto c = compute_maxwell_coefficients(
+                                compute_creep_viscosity(l.surface_material_fractions,l.surface_temperature),
+-                               MaterialUtilities::average_value(l.surface_material_fractions,
+-                                                                elastic_shear_moduli,viscosity_averaging),time_step);
++                               compute_elastic_shear_modulus(l.surface_material_fractions),time_step);
+               result[f][j] = compute_cohesive_response(c,l.current_I_h,l.previous_I_h,
+                                                        l.previous_cohesive_traction,rates[f][j],0.,0.,mature_frictional_fault).cohesive_traction;
+             }
+@@ -556,6 +548,18 @@
+ 
+     template <int dim>
+     double
++    PhaseFieldFault<dim>::compute_elastic_shear_modulus(
++      const std::vector<double> &volume_fractions) const
++    {
++      if (homogeneous_mesh_data)
++        return elastic_shear_moduli[0];
++      return MaterialUtilities::average_value(volume_fractions, elastic_shear_moduli,
++                                              viscosity_averaging);
++    }
++
++
++    template <int dim>
++    double
+     PhaseFieldFault<dim>::
+     compute_creep_viscosity(const std::vector<double> &volume_fractions,
+                             const double               temperature) const
+@@ -593,6 +597,7 @@
+   template PhaseFieldFault<dim>::LocalizationResponse PhaseFieldFault<dim>::evaluate_reconstructed_fault_localization(const unsigned int, const unsigned int, const double, const double, const double, const std::string &) const; \
+   template std::vector<std::vector<double>> PhaseFieldFault<dim>::compute_surface_cohesive_candidates(const double, const std::vector<std::vector<double>> &) const; \
+   template PhaseFieldFault<dim>::CohesiveResponse PhaseFieldFault<dim>::compute_cohesive_response(const MaxwellCoefficients &, const double, const double, const double, const double, const double, const double, const bool); \
++  template double PhaseFieldFault<dim>::compute_elastic_shear_modulus(const std::vector<double> &) const; \
+   template double PhaseFieldFault<dim>::compute_creep_viscosity(const std::vector<double> &, const double) const;
+ 
+     ASPECT_INSTANTIATE(INSTANTIATE)
+--- a/source/material_model/phase_field_fault/history.cc
++++ b/source/material_model/phase_field_fault/history.cc
+@@ -1078,9 +1078,7 @@
+                       compute_creep_viscosity(
+                         localization.surface_material_fractions,
+                         localization.surface_temperature),
+-                      MaterialUtilities::average_value(
+-                        localization.surface_material_fractions,
+-                        elastic_shear_moduli, viscosity_averaging),
++                      compute_elastic_shear_modulus(localization.surface_material_fractions),
+                       time_step);
+                   const double slip_rate = fault_manager.interpolate_slip_rate(
+                                              association.fault_index, association.segment_index,
+@@ -1196,9 +1194,7 @@
+                 compute_maxwell_coefficients(
+                   compute_creep_viscosity(bulk_fractions,
+                                           temperatures[particle_index]),
+-                  homogeneous_mesh_data ? elastic_shear_moduli[0]
+-                  : MaterialUtilities::average_value(
+-                      bulk_fractions, elastic_shear_moduli, viscosity_averaging),
++                  compute_elastic_shear_modulus(bulk_fractions),
+                   time_step);
+ 
+               SymmetricTensor<2,dim> effective_strain_rate =
+@@ -1233,9 +1229,7 @@
+                       compute_creep_viscosity(
+                         localization.surface_material_fractions,
+                         localization.surface_temperature),
+-                      MaterialUtilities::average_value(
+-                        localization.surface_material_fractions,
+-                        elastic_shear_moduli, viscosity_averaging),
++                      compute_elastic_shear_modulus(localization.surface_material_fractions),
+                       time_step);
+                   const double slip_rate = fault_manager.interpolate_slip_rate(
+                                              association.fault_index, association.segment_index,
+@@ -1269,9 +1263,7 @@
+                       const double H_candidate =
+                         recoverable_phase_history
+                         ? compute_recoverable_phase_driving_force(
+-                          MaterialUtilities::average_value(
+-                            localization.surface_material_fractions,
+-                            elastic_shear_moduli, viscosity_averaging),
++                          compute_elastic_shear_modulus(localization.surface_material_fractions),
+                           localization.current_degradation, projected_traction)
+                         : compute_crack_driving_force_candidate(
+                           time_step, surface_coefficients,
+@@ -1662,8 +1654,7 @@
+             : surface_composition->second;
+           const std::vector<double> material_fractions =
+             MaterialUtilities::compute_composition_fractions(chemical_compositions);
+-          const double G = MaterialUtilities::average_value(
+-                             material_fractions, elastic_shear_moduli, viscosity_averaging);
++          const double G = compute_elastic_shear_modulus(material_fractions);
+           const double H = particle.get_properties()[H_position];
+           const double phi = std::max(phase_field_values[particle_index++], 0.0);
+ 
+--- a/tests/phase_field_fault_test_access.h
++++ b/tests/phase_field_fault_test_access.h
+@@ -359,8 +359,19 @@
+                                               const double xi)
+           {
+             const auto state=surface_material_state_at_projection(model,fault,segment,xi);
+-            return MaterialUtilities::average_value(state.first,model.elastic_shear_moduli,
+-                                                    model.viscosity_averaging);
++            return model.compute_elastic_shear_modulus(state.first);
++          }
++
++          static double material_shear_modulus(
++            const bool homogeneous, const std::vector<double> &moduli,
++            const std::vector<double> &fractions,
++            const MaterialUtilities::CompositionalAveragingOperation averaging)
++          {
++            PhaseFieldFault<dim> model;
++            model.homogeneous_mesh_data=homogeneous;
++            model.elastic_shear_moduli=moduli;
++            model.viscosity_averaging=averaging;
++            return model.compute_elastic_shear_modulus(fractions);
+           }
+ 
+           static std::pair<double,double>
+@@ -393,8 +404,7 @@
+             const auto state = surface_material_state_at_projection(model, fault, segment, xi);
+             const auto coefficients = model.compute_maxwell_coefficients(
+                                         model.compute_creep_viscosity(state.first, state.second),
+-                                        MaterialUtilities::average_value(state.first, model.elastic_shear_moduli,
+-                                                                         model.viscosity_averaging), dt);
++                                        model.compute_elastic_shear_modulus(state.first), dt);
+             return {coefficients.beta, coefficients.eta_ve};
+           }
+ 
+--- a/unit_tests/phase_field_fault_maxwell.cc
++++ b/unit_tests/phase_field_fault_maxwell.cc
+@@ -20,6 +20,43 @@
+ #include "../tests/phase_field_fault_test_access.h"
+ 
+ #include <sstream>
++#include <iomanip>
++
++TEST_CASE("Homogeneous Maxwell coefficients are independent of chemical labels",
++          "[homogeneous_maxwell]")
++{
++  using Access=aspect::MaterialModel::internal::PhaseFieldFaultTestAccess<2>;
++  namespace Material=aspect::MaterialModel::MaterialUtilities;
++  const double G=32038120320.,eta=1e26;
++  double old_min=std::numeric_limits<double>::max(),old_max=0.;
++  for (const auto averaging : {Material::arithmetic,Material::harmonic,
++                               Material::geometric,Material::maximum_composition})
++    for (unsigned int i=0; i<=1000; ++i)
++      {
++        const double f=i/1000.;
++        const std::vector<double> fractions{1.-f,f};
++        const double modulus=Access::material_shear_modulus(true,{G,G},fractions,averaging);
++        REQUIRE(modulus==G);
++        for (const double dt : {200000.,4e6,4e7})
++          REQUIRE(Access::maxwell_coefficients(eta,modulus,dt)
++                  ==Access::maxwell_coefficients(eta,G,dt));
++        if (averaging==Material::harmonic)
++          {
++            const double mixed=Access::material_shear_modulus(false,{G,G},fractions,averaging);
++            const auto c=Access::maxwell_coefficients(eta,mixed,4e6);
++            old_min=std::min(old_min,c.second);old_max=std::max(old_max,c.second);
++          }
++      }
++  // Independent heterogeneous-mixture values retain the legacy rules. The
++  // homogeneous shortcut is selected by its validated configuration only.
++  CHECK(Access::material_shear_modulus(false,{2.,8.},{.25,.75},Material::arithmetic)==6.5);
++  CHECK(Access::material_shear_modulus(false,{2.,8.},{.25,.75},Material::harmonic)==Approx(32./7.));
++  CHECK(Access::material_shear_modulus(false,{2.,8.},{.25,.75},Material::geometric)==Approx(4.*std::sqrt(2.)));
++  CHECK(Access::material_shear_modulus(false,{2.,8.},{.25,.75},Material::maximum_composition)==8.);
++  std::cout<<std::setprecision(17)<<"Homogeneous coefficient regression: harmonic old kappa range="
++           <<old_min<<":"<<old_max<<", configured kappa="
++           <<Access::maxwell_coefficients(eta,G,4e6).second<<std::endl;
++}
+ 
+ namespace
+ {

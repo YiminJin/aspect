@@ -111,9 +111,7 @@ namespace aspect
             {
               // The ordinary Stokes assembler uses eta_ve for the current strain
               // rate; the reconstructed-fault assembler supplies the frozen stress.
-              const double G = homogeneous_mesh_data ? elastic_shear_moduli[0]
-                               : MaterialUtilities::average_value(
-                                   volume_fractions, elastic_shear_moduli, viscosity_averaging);
+              const double G = compute_elastic_shear_modulus(volume_fractions);
               const double eta = compute_creep_viscosity(volume_fractions, in.temperature[i]);
               const double time_step = (this->get_timestep_number() > 0
                                         ? this->get_timestep()
@@ -485,6 +483,10 @@ namespace aspect
                             "pre-existing damage, not a stress/history checkpoint. Empty "
                             "retains the existing seeded-H initial relaxation. Particle H "
                             "is initialized natively and is never regenerated from this field.");
+          prm.declare_entry("Optimize stationary mature DG", "true", Patterns::Bool(),
+                            "Reuse exact fixed-geometry coupling and sampling operators only in the "
+                            "homogeneous stationary mature accepted-DG configuration. False retains "
+                            "the reference algorithms for verification. Does not enable phase evolution.");
           prm.declare_entry("Use homogeneous mesh data", "false", Patterns::Bool(),
                             "Experimental fixed-geometry accepted-DG endpoint configuration, or frozen mature independent FE/DG history (MPI/restart only with accepted DG). "
                             "Use the prescribed physical phase seed and homogeneous configured materials "
@@ -590,6 +592,7 @@ namespace aspect
           consistent_endpoint_phase = prm.get_bool("Consistent endpoint phase solve");
           fe_initial_phase_profile = prm.get("FE initial phase profile file");
           homogeneous_mesh_data = prm.get_bool("Use homogeneous mesh data");
+          stationary_mature_dg_optimizations = prm.get_bool("Optimize stationary mature DG");
           recoverable_phase_history = prm.get("Phase driving history") == "recoverable energy";
           unloaded_cohesive_initialization = prm.get("Initial cohesive state") == "unloaded";
           surface_cohesive_history = prm.get("Cohesive history representation") == "surface elastic slip";

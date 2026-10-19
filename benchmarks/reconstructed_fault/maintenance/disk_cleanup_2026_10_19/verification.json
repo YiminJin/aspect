@@ -1,0 +1,17 @@
+{
+  "retained_regular_files_hash_verified": 81983,
+  "retained_symlinks_verified": 149,
+  "shared_executable_groups": 43,
+  "shared_executable_paths": 358,
+  "shared_executable_allocated_bytes_reclaimed": 14473986048,
+  "historical_csv_files_archived": 2128,
+  "archived_csv_original_bytes": 15446789694,
+  "compressed_csv_archive_bytes": 4557574755,
+  "verified_expanded_packages_removed": 4,
+  "expanded_package_allocated_bytes_reclaimed": 1126440960,
+  "free_bytes_before": 4637429760,
+  "free_bytes_after": 31145791488,
+  "no_unique_scientific_data_deleted": true,
+  "live_build_and_current_bp3_runs_unchanged": true,
+  "checkpoint_files_unchanged": true
+}

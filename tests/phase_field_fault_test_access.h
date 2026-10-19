@@ -359,8 +359,19 @@ namespace aspect
                                               const double xi)
           {
             const auto state=surface_material_state_at_projection(model,fault,segment,xi);
-            return MaterialUtilities::average_value(state.first,model.elastic_shear_moduli,
-                                                    model.viscosity_averaging);
+            return model.compute_elastic_shear_modulus(state.first);
+          }
+
+          static double material_shear_modulus(
+            const bool homogeneous, const std::vector<double> &moduli,
+            const std::vector<double> &fractions,
+            const MaterialUtilities::CompositionalAveragingOperation averaging)
+          {
+            PhaseFieldFault<dim> model;
+            model.homogeneous_mesh_data=homogeneous;
+            model.elastic_shear_moduli=moduli;
+            model.viscosity_averaging=averaging;
+            return model.compute_elastic_shear_modulus(fractions);
           }
 
           static std::pair<double,double>
@@ -393,8 +404,7 @@ namespace aspect
             const auto state = surface_material_state_at_projection(model, fault, segment, xi);
             const auto coefficients = model.compute_maxwell_coefficients(
                                         model.compute_creep_viscosity(state.first, state.second),
-                                        MaterialUtilities::average_value(state.first, model.elastic_shear_moduli,
-                                                                         model.viscosity_averaging), dt);
+                                        model.compute_elastic_shear_modulus(state.first), dt);
             return {coefficients.beta, coefficients.eta_ve};
           }
 

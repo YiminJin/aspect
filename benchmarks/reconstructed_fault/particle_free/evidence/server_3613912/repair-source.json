@@ -1,0 +1,13 @@
+{
+  "base": "b2dfdebe43437d6028b06d4f9f862cc80a00cc71 plus preserved local work",
+  "file": "benchmarks/reconstructed_fault/bp3_native/server/plugin/work_audit.cc",
+  "before_diagnostic_sha256": "0427b2677c7816fb68991cbec6af5f95cc0c12f1e085de15ea51204dea3ed508",
+  "after_repair_sha256": "dbf790e01a1940c5759cab96514d90bc0d53e6ee552ab1421afd3741a6dbc5a0",
+  "only_runtime_file_changed": "benchmarks/reconstructed_fault/bp3_native/server/plugin/work_audit.cc",
+  "core_changes": false,
+  "constitutive_changes": false,
+  "threshold_changed": false,
+  "guard": "consistency<1e-5",
+  "server_run_performed": false,
+  "strict_reference_match_passed": false
+}

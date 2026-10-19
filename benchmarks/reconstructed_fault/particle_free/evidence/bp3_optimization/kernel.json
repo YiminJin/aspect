@@ -1,0 +1,14 @@
+{
+  "nodes": 5776.0,
+  "queries": 8664.0,
+  "projection_setup_s": 0.001299915,
+  "reference_s": 0.264188371,
+  "indexed_s": 0.002392714,
+  "coupling_setup_s": 0.001599923,
+  "sampled_product_s": 9.1897e-05,
+  "factored_product_s": 3.8991e-05,
+  "filtered_relative_error": 2.149841337750627e-16,
+  "projection_speedup": 110.41368546345278,
+  "manufactured_surface_work": true,
+  "normal_action_and_filter_solve_excluded_from_product_times": true
+}

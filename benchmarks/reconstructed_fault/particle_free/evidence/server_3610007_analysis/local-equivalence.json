@@ -1,0 +1,62 @@
+{
+  "accepted_steps.csv": {
+    "bitwise_equal": true,
+    "before_sha256": "4ea5f945bd1efd58af144dd0db3ac0267dd1347a8913ed993210543ff448656e",
+    "after_sha256": "4ea5f945bd1efd58af144dd0db3ac0267dd1347a8913ed993210543ff448656e"
+  },
+  "rank-0-coupled-checks.csv": {
+    "bitwise_equal": true,
+    "before_sha256": "adf818d0646f798aeb2ff3adcddcaa5dc02db38f65f33ec310f4562b7cf2bb0f",
+    "after_sha256": "adf818d0646f798aeb2ff3adcddcaa5dc02db38f65f33ec310f4562b7cf2bb0f"
+  },
+  "rank-1-coupled-checks.csv": {
+    "bitwise_equal": true,
+    "before_sha256": "daf13f4aecacc490c28e143c51dd63c25f1347f1b5b8185cd5189411e6897412",
+    "after_sha256": "daf13f4aecacc490c28e143c51dd63c25f1347f1b5b8185cd5189411e6897412"
+  },
+  "rank-0-dg-coefficients-2.csv": {
+    "bitwise_equal": true,
+    "before_sha256": "ffda9b63e15603ee0e8697c96c109d3df38eb137b3790d89d5018ece685a0d14",
+    "after_sha256": "ffda9b63e15603ee0e8697c96c109d3df38eb137b3790d89d5018ece685a0d14"
+  },
+  "rank-1-dg-coefficients-2.csv": {
+    "bitwise_equal": true,
+    "before_sha256": "c01c061880613e632f58623ed0e868a851a6afc82fb370953ca8798bfe69b441",
+    "after_sha256": "c01c061880613e632f58623ed0e868a851a6afc82fb370953ca8798bfe69b441"
+  },
+  "rank-0-authoritative-stress-2.csv": {
+    "bitwise_equal": true,
+    "before_sha256": "15fc4d12d2830a0ca107f478623adb117b867093e85133dccadd3cd2036676b0",
+    "after_sha256": "15fc4d12d2830a0ca107f478623adb117b867093e85133dccadd3cd2036676b0"
+  },
+  "rank-1-authoritative-stress-2.csv": {
+    "bitwise_equal": true,
+    "before_sha256": "ec4b945093ffcfa6560f658d5a72d08bf21494ac493d716d126ba8743d883f97",
+    "after_sha256": "ec4b945093ffcfa6560f658d5a72d08bf21494ac493d716d126ba8743d883f97"
+  },
+  "coupled-profile-2.csv": {
+    "bitwise_equal": true,
+    "before_sha256": "57d91266f79b46887d62715e0ec9be45e85503d9c16066019548ff5451e91cc1",
+    "after_sha256": "57d91266f79b46887d62715e0ec9be45e85503d9c16066019548ff5451e91cc1"
+  },
+  "rank-0-surface-weak-2.csv": {
+    "bitwise_equal": true,
+    "before_sha256": "a973395f4a9752b705a41dc7495c0b78e09cfa7f3f9b194334292797119b685a",
+    "after_sha256": "a973395f4a9752b705a41dc7495c0b78e09cfa7f3f9b194334292797119b685a"
+  },
+  "work_weak_2.csv": {
+    "bitwise_equal": true,
+    "before_sha256": "aad410b17dfdf6ae89d2ff29c421c05e73a0bc6f055bac1d4a65b6c97c513c49",
+    "after_sha256": "aad410b17dfdf6ae89d2ff29c421c05e73a0bc6f055bac1d4a65b6c97c513c49"
+  },
+  "common_fe_weak_2.csv": {
+    "bitwise_equal": true,
+    "before_sha256": "613abe42fbee93bfc20e5238e8a61513c47622f5e4982e3226f48974789b88fe",
+    "after_sha256": "613abe42fbee93bfc20e5238e8a61513c47622f5e4982e3226f48974789b88fe"
+  },
+  "first_update_maxwell.csv": {
+    "bitwise_equal": true,
+    "before_sha256": "8f084277e5cc0ebd9c6ec5d7734e59b9db6901665698fe6d4e17e97520f91de1",
+    "after_sha256": "8f084277e5cc0ebd9c6ec5d7734e59b9db6901665698fe6d4e17e97520f91de1"
+  }
+}

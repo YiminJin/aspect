@@ -1,0 +1,11 @@
+{
+  "base": "b2dfdebe43437d6028b06d4f9f862cc80a00cc71 plus preserved optimization/Maxwell repair",
+  "source_file": "benchmarks/reconstructed_fault/bp3_native/server/plugin/work_audit.cc",
+  "before_sha256": "21b41d0bed7b71c9ce5774d65aed009bfea191dc1ec8bfb4dbf724204f596c0d",
+  "after_sha256": "0427b2677c7816fb68991cbec6af5f95cc0c12f1e085de15ea51204dea3ed508",
+  "core_changed": false,
+  "guard_changed": false,
+  "physics_changed": false,
+  "test_macro": "ASPECT_BP3_TEST_WORK_CONSISTENCY_FAILURE",
+  "test_macro_absent_in_ordinary_build": true
+}

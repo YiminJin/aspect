@@ -1,3 +1,174 @@
+Storage maintenance, 19 October 2026: **24.7 GiB reclaimed**, with current
+source/builds, BP3 repair runs and all checkpoints retained. Historical dense
+fields are losslessly archived; frozen executable copies share read-only
+storage. [Archive index and restoration](DISK_CLEANUP_20261019.md).
+Scientific scope, prior failures and the next bounded server verification below
+are unchanged.
+
+# BP3 observer frame repaired and verified locally
+
+19 October 2026. The supplied signed packet confirms the observer defect at
+816/node 4918: old normal error -1.0013576e-5 Pa, versus +5.960462e-9 Pa at the
+same node using the actual mechanical frame. All 5776 matching-frame errors
+pass the existing 1e-5 Pa bound. The archive/raw data are preserved; effective
+parameters, all six replayed accepted records and checkpoint 815/slot 03 verify.
+[Repair report](BP3_DG_WORK_OBSERVER_FIX.md),
+[one-file patch, measured evidence and direct server procedure](../../../benchmarks/reconstructed_fault/particle_free/evidence/server_3613912/README.md).
+
+Only the BP3 `work_audit.cc` runtime source changes: cached native QP frames
+enter the actual observer, its stress/work exports and first-update diagnostic;
+the old first-frame projection remains a counterfactual trace. The literal
+consistency guard and independent accepted-history publication are unchanged.
+No core, constitutive, mesh/quadrature, limiter/filter, adaptive-control or
+default changes. Strict reference matching remains false.
+
+Bounded two-rank native controls pass. Nine physical outputs are byte-identical
+to the pre-repair control; rejection/retry matches eleven outputs and checkpoint
+restart matches fourteen final outputs exactly. Publication remains once on both
+ranks. A deliberate corrected-load error still fails the original guard, writes
+its diagnostic collectively and terminates within the test timeout. Ordinary
+plugins build; both prepared server inputs validate. No full-grid advancement
+or server job was run locally. Existing accuracy failures remain.
+
+Next: replace the one plugin source, rebuild plugins, then use the prepared
+815→818 bounded verification input on a fresh branch of the replay checkpoint.
+The separate continuation input resumes that same branch only after inspected
+verification. Full-event accuracy is unqualified. Earlier diagnosis stages below
+remain dated evidence.
+
+---
+
+# Server replay 3613912: native frame diagnosis reproduced
+
+19 October 2026. The user-supplied replay logs reproduce step 816 and identify
+the normal-load failure at node 4918: 1.0013576156e-5 Pa against 1e-5 Pa.
+The direct frame contribution is 9.9316233712e-6 Pa. Using the mechanical QP
+frames in the separate shadow check gives maximum normal/shear errors of
+2.0868e-7 / 5.0679e-7 Pa; all seven replayed shadow checks pass unchanged bounds.
+Logged mechanical/publication results and accepted 810–815 time/dt match the
+original trajectory. [Follow-up](BP3_SERVER_3610007_DIAGNOSIS.md),
+[log reduction and requested data](../../../benchmarks/reconstructed_fault/particle_free/evidence/server_3613912/README.md).
+
+Next: obtain the signed nodal failure CSV, effective parameters, accepted-step
+records and small checkpoint labels; reconcile the frame contribution and
+verify a repair using the native QP frame throughout the observer. Stdout shows
+a completed step-815 checkpoint in replay slot 03; verify its marker/label before
+continuing. No runtime source change, tolerance relaxation or server launch in
+this follow-up. Earlier failures, accuracy limits and strict-match=false remain.
+The earlier candidate-only diagnosis below records the pre-replay evidence.
+
+---
+
+# Server 3610007: accepted-work observer diagnosis
+
+18 October 2026. The new 160-rank server evidence reaches accepted step 815,
+then aborts during step-816 postprocessing at the original work-observer
+`consistency<1e-5 Pa` guard. Mechanics and independent DG publication passed.
+The valid checkpoint is step 809 in slot 03; step-815 CSVs are not a checkpoint.
+[Diagnosis and measured checks](BP3_SERVER_3610007_DIAGNOSIS.md),
+[diagnostic patch/replay input](../../../benchmarks/reconstructed_fault/particle_free/evidence/server_3610007_analysis/README.md).
+
+The observer uses the first-segment frame while mechanics uses local QP frames.
+An independent native-geometry counterexample produces 1.7796e-5 Pa disagreement
+from frame choice alone. A step-815 surrogate approaches 9.9101e-6 Pa, but the
+actual step-816 component/node/error are absent. This is a demonstrated source
+inconsistency and a candidate explanation, not yet the confirmed full cause.
+Publication/reconstruction arithmetic remains a possible additional contribution.
+
+Only the work-audit plugin gains separate matching-frame/direct-frame traces
+and collective failure export; its original integration and guard stay intact.
+Two-rank bounded advancement leaves twelve accepted outputs byte-identical.
+A diagnostic-only inconsistent-load test still aborts at the original guard
+and writes the finite failure CSV without hanging. Ordinary replay input
+validation passes. No core/physical/default/tolerance changes, server job,
+full event or automatic repair. All original supplied files and errors remain.
+
+Next: replay from the preserved 809 checkpoint into a fresh output branch,
+stopping by 816 with the supplied input, to measure the actual original and
+matching-frame errors before choosing a repair. Existing spatial/endpoint
+accuracy limitations and `strict_reference_match_passed=false` remain.
+Earlier startup/optimization sections below retain their historical scope.
+
+---
+
+# Server homogeneous-Maxwell coefficient repair
+
+The user-reported 48-rank full-mesh startup failed at step zero on the exact
+`p.eta_ve==eta` guard. A bounded two-rank mixed-composition control reproduces
+the same assertion. Bulk assembly/history already used configured homogeneous G;
+fault-point responses still harmonically averaged equal moduli, producing a
+composition-dependent 32 Pa s (two-ULP) spread in kappa at dt=4e6 s.
+
+The material accessor now returns configured G directly in homogeneous mesh-data
+mode, retaining legacy averaging otherwise. All bulk/fault/history coefficient
+consumers use it. The exact guard/cache source, normalization and derivatives,
+physical laws, numerical tolerances and all four server inputs are unchanged.
+The rebuilt native suite passes 127 cases / 165094 assertions.
+Mixed-label two-rank optimized/reference adaptive controls pass through two positive
+steps; serial-to-four-rank restart and exact rejection/retry comparison pass.
+All four unchanged server inputs validate again with matching ordinary plugins.
+[Repair and fresh bounded verification](BP3_DG_HOMOGENEOUS_COEFFICIENT_FIX.md)
+provides the r3 repair patch, regenerated r4 source package and direct rebuild/
+startup procedure. Prior optimization evidence and the supplied failure log remain.
+
+The user's server attempt did not complete initialization; the full event is
+still unqualified. Preserve failed outputs and use a fresh bounded startup after
+rebuilding. Valid same-mode checkpoints retain their original format. Existing
+spatial/endpoint failures and `strict_reference_match_passed=false` remain;
+this repair is not new 48-rank/server-compiler or first-event qualification.
+
+---
+
+# Stationary mature DG optimization qualified locally
+
+17 October 2026; reviewed base `b2dfdebe43437d6028b06d4f9f862cc80a00cc71`,
+preserved incoming work. [Measured report](BP3_DG_OPTIMIZATION_REPORT.md),
+[operator/cache formulation](BP3_DG_OPTIMIZATION_FORMULATION.md),
+[evidence/replay](../../../benchmarks/reconstructed_fault/particle_free/evidence/bp3_optimization/README.md).
+The user selected implementation and bounded local verification, with no server
+job or full event. The actual source snapshot/manifest identifies this revision.
+
+The selected homogeneous stationary mature DG route now batches history and
+independent native-gradient sampling, indexes first-time segment searches,
+reuses geometry/source inverses, applies sparse B and exact filtered
+`G=S_Gamma-W_mu H^-1 N_Gamma`, and reuses bulk A/preconditioner within each
+attempt. All residuals/friction/active-set factors update. Consistent endpoint
+phase stays off. `Optimize stationary mature DG=false` retains the old algorithms;
+legacy/default backend behavior and numerical tolerances remain unchanged.
+Unlimited DGQ2, mesh/10 m spacing, Gauss6/source3, Helmholtz20 and native adaptive
+controls are fixed. Independent once-only publication remains an acceptance gate.
+
+Final sequential two-rank pairs (two positive 200000 s steps):
+
+- 4136 cells: 30.888 → 18.305 s (**1.69×**); 11528 cells: 80.940 → 46.709 s
+  (**1.73×**). Krylov counts/timestep sequences are identical. Peak RSS rises
+  13.5–36.0 MiB/rank; full-grid cost/memory is unmeasured.
+- 126 native unit cases / 149074 assertions pass. Actual 5776-node projection
+  kernel: .2642 → .002393 s, plus .001300 s setup; exact native admission.
+- Frozen source coefficients/allowances match bitwise. Worst B/G/C relative
+  differences <=1.88e-15/1.77e-14/9.46e-16 with hanging constraints, pressure
+  scaling, endpoints and variable friction. Timing-pair stress RMS <=2.10e-10 Pa.
+- 1/2/4-rank ownership, serial→four-rank restart, candidate rejection,
+  actual outer/nonlinear cutback, once-only publication and native adaptive
+  controls pass. Collective non-root wall-stop/restart and scheduled-output
+  restart remain exact against their uninterrupted controls.
+- All four server inputs validate with ordinary matching plugins. The regenerated
+  r3 source package retains startup step 5/resume step 8, checkpoint every accepted
+  step, 7200 s accepted-state graceful budget and the unchanged physical end cap.
+  Direct manual launches and resource collection remain in the server README.
+
+Fixed particle IDs/coordinates show no motion/birth/deletion. No domains/CPDI feed
+this route; stationary points and matching-cell independent publication checks,
+bookkeeping/checkpoint properties remain. No particle removal/checkpoint redesign.
+
+**strict_reference_match_passed=false**, all original errors and spatial/endpoint
+accuracy failures remain. Exact operator optimization does not qualify the full
+first event. Next action is the user's bounded server build/startup and resource
+assessment. No server run, limiter change or further scientific stage follows
+automatically. Prior status and evidence follow unchanged.
+
+---
+
 # BP3 DG server startup review
 
 17 October 2026. The current task selects a stopping/output repair and a

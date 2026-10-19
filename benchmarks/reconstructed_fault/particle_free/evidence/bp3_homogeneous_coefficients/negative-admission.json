@@ -1,0 +1,6 @@
+{
+  "expected_rejection": true,
+  "exit_code": 1,
+  "message": "Accepted FE strain requires homogeneous G, eta and zero temperature dependence",
+  "exact_coupling_guard_unchanged": true
+}

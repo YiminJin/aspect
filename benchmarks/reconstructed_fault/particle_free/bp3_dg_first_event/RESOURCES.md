@@ -84,3 +84,35 @@ actual peak includes multiple copies and ASPECT/particle/solver allocations.
 More MPI ranks do not divide this replicated term. Dense output is distributed
 but full-grid CSV volume can be several GB per snapshot. No checkpoint layout
 redesign or removal of diagnostic particles is part of this revision.
+
+## Stationary DG performance counters
+
+The selected inputs explicitly enable `Material model/Phase field fault/Optimize
+stationary mature DG`. This selects exact cached/sparse evaluation of the same
+operators, independently of the consistent-endpoint phase option (which stays
+off). Setting it false provides the retained reference algorithms for bounded
+verification. It does not select a different constitutive law, limiter or solver
+tolerance. See `doc/reconstructed_fault/particle_free/BP3_DG_OPTIMIZATION_REPORT.md`
+in the supplied source for local measurements and limits.
+
+For the bounded server startup, after sourcing `environment.sh`, the existing
+opt-in timing selectors can additionally be enabled:
+
+```sh
+export ASPECT_FAULT_PERFORMANCE=1
+export ASPECT_FAULT_LINEAR_PERFORMANCE=1
+ibrun ./plugin/aspect-release startup.prm
+```
+
+These print native coupling timers, exclusive per-linearization timings and
+rank-zero cumulative sampling/setup counts. Counts cover the instrumented fault
+projection/history/diagnostic paths, not every FEValues object in ASPECT; they
+are local to rank zero and reset on a new process/restart. Bulk builds should
+occur at the first Newton iteration of each attempt, including retries. Sparse
+B still rebuilds per mechanical linearization; the fixed S/N maps rebuild when
+the effective Maxwell coefficient or geometry/layout changes. Friction-weighted
+multiplication and K_V continue to refresh. Keep full logs and accepted-step
+iteration data; nested native timers must not be summed as disjoint costs.
+`ASPECT_FAULT_COMPARE_COUPLING` is an expensive local verification selector and
+must remain unset for server timing/first-event runs. No full-grid performance
+or checkpoint-memory qualification is inferred from the local speedups.
