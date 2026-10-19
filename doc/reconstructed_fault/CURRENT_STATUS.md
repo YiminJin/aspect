@@ -3,7 +3,11 @@ Current evolving-phase continuation (19 October 2026): see
 DG cohesive endpoint implementation, completed bounded hanging-node and P2
 physical-response qualifications, and retained limitations. The resolved P2 seed
 has zero unloaded drift and passes the selected early-growth temporal/spatial/work
-screens; strict mirror matching remains false. P3 is recommended, not begun.
+screens; strict mirror matching remains false. The subsequently selected
+[P3 synthetic append](particle_free/P3_SYNTHETIC_EXTENSION_REPORT.md) verifies
+the joint stress/history map and component transaction on fixed geometry;
+native finite-tip owner/solver integration and physical activation remain
+guarded/unqualified. No propagation task is automatically selected.
 The dated entries below remain historical evidence.
 
 # Worktree checkpoint — scientific task remains open, 2026-10-15

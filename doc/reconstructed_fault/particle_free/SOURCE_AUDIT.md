@@ -1,3 +1,51 @@
+# P3 imposed geometry-transfer audit — 19 October 2026
+
+Entry reusable P2/hanging-node work is committed as `2d0d40183` (parent
+`612b75d3570d81763407875f3a12c12999b9fa8e`). The selected original propagation
+PLAN P3 diagnostic and its precise qualification boundary are recorded in
+[P3_SYNTHETIC_EXTENSION_REPORT.md](P3_SYNTHETIC_EXTENSION_REPORT.md).
+
+- `fault.cc::append_vertices` already preserves old vertex/property indices and
+  advances geometry version once per append. Directly calling it on a managed
+  fault leaves support widths and committed/current/trial rates inconsistent.
+  The new, currently test-only-called manager `append_reconstructed_fault`
+  validates/stages all those records together, requires explicit finite birth
+  properties/rates, and swaps only after validation. Active nonlinear solves
+  and trials reject geometry changes. Existing archive fields/schema persist.
+- That manager operation invalidates both particle projection systems and
+  Stokes-QP caches, including the indexed normal-profile search. The synthetic
+  candidate rebuilds normalization, point associations, quadrature split at
+  surface knots and fixed-grid constraints. Candidate associations are scratch
+  owned with candidate geometry; rejection cannot expose them to accepted data.
+  Configured boundary-completion routes reject append until their endpoint
+  metadata/support can be rebuilt jointly; the bounded horizontal fixture has
+  no nonzero completion wedge and does not exercise those routes.
+- The actual cohesive native backend still assumes unit through-going geometry
+  in `fe_strain.cc` (initialization, bulk point segment map, FE stress),
+  `dg_history.cc` (cohesive reconstruction), and full-normal initialization in
+  `manager.cc`. `validate_fe_strain_restrictions` freezes its accepted geometry.
+  These guards are **not removed**. The P3 fixture exercises native containers,
+  DG basis/mass integration, MPI vectors and archives, not a simulator outer-loop
+  finite-tip geometry transaction. There is no live Stokes/preconditioner object
+  to invalidate in that fixture; native material/solver integration is unqualified.
+- The compact cap uses the existing `PhaseFieldProfile` with actual p=1 Lorentz
+  degradation. Its material obstacle is sampled directly and frozen. It is not
+  a new propagation seed or a long-tail/normalization-floor workaround. Boundary
+  contact qualification identifies only the original left box contact with zero
+  completion wedge; both right endpoints are physical interior tips.
+- At frozen phase/time the required coordinate map is
+  `T+ = T- + Pi_Q2[2 (Z+ chi+ - Z- chi-) S]`, retaining all nine modes, with
+  `zz=-(xx+yy)`. Surface overlap Z/slip/rate rows are copied exactly; prescribed
+  new surface rows are zero and old tip rows are zero. Independent Legendre
+  projection and dense normalization/weak-functional calculations verify the
+  native nodal projection; changes in cohesive storage and weak integration
+  measure are separated from bulk stress transfer defects.
+- No Maxwell update, source projection, physical phase solve, particle movement,
+  production history owner, acceptance tolerance, limiter/default, BP3 source,
+  package or job changes. Only a neutral manager API and bounded native-component
+  tests are added. In particular this is not historical PF3 or completion of
+  coupled native geometry acceptance/restart or genuine phase activation.
+
 # P2 physical-response audit — 19 October 2026
 
 The selected bounded experiment is in [P2_PHYSICAL_RESPONSE_REPORT.md](P2_PHYSICAL_RESPONSE_REPORT.md).

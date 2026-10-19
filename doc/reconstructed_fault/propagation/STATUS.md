@@ -5,8 +5,11 @@ domain-free PF6a independent-DG/ordinary-FE-fracture endpoint route in
 their historical launch instructions do not select new runs or propagation.
 The bounded matched-initialization P2 physical response now passes on the DG/FE
 route; see [its report](../particle_free/P2_PHYSICAL_RESPONSE_REPORT.md). Original
-errors and strict mirror-branch failure remain. The next synthetic P3 extension
-is recommended and has not begun.
+errors and strict mirror-branch failure remain. The subsequently selected
+[synthetic P3 diagnostic](../particle_free/P3_SYNTHETIC_EXTENSION_REPORT.md)
+tests a prescribed append and joint DG/cohesive/obstacle transfer. Its component
+transaction is distinct from a simulator finite-tip geometry transaction;
+native owner/solver integration and physical activation remain unqualified.
 
 # Completed bounded P2 cleanup — recovery note, 2026-10-13
 

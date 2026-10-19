@@ -1,0 +1,20 @@
+{
+  "command": [
+    "env",
+    "ASPECT_P3_OUTPUT=/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/p3-extension/qualified-serial",
+    "OPENBLAS_NUM_THREADS=1",
+    "OMP_PROC_BIND=false",
+    "build-particle-free/evolving-phase/native/aspect-release",
+    "--test",
+    "[p3_extension],[p3_extension_storage]"
+  ],
+  "cwd": "/home/ein/repository/aspect-pf-rsf-particle-free",
+  "exit_code": 0,
+  "seconds": 5.425307771998632,
+  "environment": {
+    "OMP_PROC_BIND": "spread",
+    "OMP_NUM_THREADS": "1",
+    "DEAL_II_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1"
+  }
+}

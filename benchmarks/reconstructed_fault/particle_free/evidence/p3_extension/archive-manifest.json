@@ -1,0 +1,131 @@
+{
+  "path": "benchmarks/reconstructed_fault/particle_free/evidence/p3_extension/reference.tar.xz",
+  "sha256": "b900063801f383021e7fdf4ccb2e947fc0f68ffb73bd9be248a14e1837c69692",
+  "bytes": 416572,
+  "members": {
+    "serial/after.archive": {
+      "sha256": "d241f0fb9780f1e1264c041ae7e673fe3c33b4b01966e4c09d7c970f003e0f79",
+      "bytes": 557765
+    },
+    "serial/basis-0.csv": {
+      "sha256": "077df99d60ab25bee7a282640bf1ff4cf331adad0c37b39bd5f6c4b16d1b037e",
+      "bytes": 72
+    },
+    "serial/before.archive": {
+      "sha256": "051d9c55d0f1c28461c524382358105780886c83111f33a7244b6012181b3c39",
+      "bytes": 556869
+    },
+    "serial/gauss12-cells-0.csv": {
+      "sha256": "49561fe3a268a55bf18de2a9ee864d5b73fd489b884f7c19978b679f5757d264",
+      "bytes": 1133284
+    },
+    "serial/gauss12-surface.csv": {
+      "sha256": "64b1abe2bd3b872a1cfb90b337a4b131147428c5a48632042f6398696fc96a6a",
+      "bytes": 3751
+    },
+    "serial/native-loads.csv": {
+      "sha256": "8398fe7cfb5376bca01240b79965957eb421e91ae48749f0c0b7cd299e542ef3",
+      "bytes": 2729
+    },
+    "serial/native-metrics.csv": {
+      "sha256": "2be0dc43475ada4e4c9c936b662a582683bb3faf207b94ba042cde6324755f82",
+      "bytes": 303
+    },
+    "serial/new-cells-0.csv": {
+      "sha256": "b73ca10d238a92c2a1702ef97a60585d187e204e1e5576ce2db880bc71fd60a5",
+      "bytes": 1133255
+    },
+    "serial/new-surface.csv": {
+      "sha256": "da2e6b5c0c748c4ff949ea63f295db5743a408380741861dc3bd791ae2ef2934",
+      "bytes": 3754
+    },
+    "serial/old-cells-0.csv": {
+      "sha256": "d67ea6b3d238cac3a5eb548ef3629e06c428cce25caceb899f7b70a144a63dd0",
+      "bytes": 1132745
+    },
+    "serial/old-surface.csv": {
+      "sha256": "425e78e9143360f7d6f81d01c06530ab9d630c2ba46fce178f973519286537fa",
+      "bytes": 3118
+    },
+    "serial/restart-cells-0.csv": {
+      "sha256": "b73ca10d238a92c2a1702ef97a60585d187e204e1e5576ce2db880bc71fd60a5",
+      "bytes": 1133255
+    },
+    "serial/restart-surface.csv": {
+      "sha256": "da2e6b5c0c748c4ff949ea63f295db5743a408380741861dc3bd791ae2ef2934",
+      "bytes": 3754
+    },
+    "mpi2/after.archive": {
+      "sha256": "d241f0fb9780f1e1264c041ae7e673fe3c33b4b01966e4c09d7c970f003e0f79",
+      "bytes": 557765
+    },
+    "mpi2/basis-0.csv": {
+      "sha256": "077df99d60ab25bee7a282640bf1ff4cf331adad0c37b39bd5f6c4b16d1b037e",
+      "bytes": 72
+    },
+    "mpi2/basis-1.csv": {
+      "sha256": "077df99d60ab25bee7a282640bf1ff4cf331adad0c37b39bd5f6c4b16d1b037e",
+      "bytes": 72
+    },
+    "mpi2/before.archive": {
+      "sha256": "051d9c55d0f1c28461c524382358105780886c83111f33a7244b6012181b3c39",
+      "bytes": 556869
+    },
+    "mpi2/gauss12-cells-0.csv": {
+      "sha256": "f6eb96480dc432ce821f5fed6d6b80c255db9f91296cb2384bfad9acc52d630a",
+      "bytes": 566181
+    },
+    "mpi2/gauss12-cells-1.csv": {
+      "sha256": "d5266893ce9740625d5e2345419e07078687d9e9268993309f98628a0e45d8c9",
+      "bytes": 567255
+    },
+    "mpi2/gauss12-surface.csv": {
+      "sha256": "64b1abe2bd3b872a1cfb90b337a4b131147428c5a48632042f6398696fc96a6a",
+      "bytes": 3751
+    },
+    "mpi2/native-loads.csv": {
+      "sha256": "04ef17a12399be3b02ed3f57f73fb75faa6726b4f2ec7c501c50fb83b63965fb",
+      "bytes": 2729
+    },
+    "mpi2/native-metrics.csv": {
+      "sha256": "cceb390aa65f081df0cdedb66f8f84c7f23975320dbecd56740226e9f3e9febb",
+      "bytes": 303
+    },
+    "mpi2/new-cells-0.csv": {
+      "sha256": "204f0fcf83437691780a2c5c0c2868c886450307c233e1542b1b43c1ac1cb4a1",
+      "bytes": 566184
+    },
+    "mpi2/new-cells-1.csv": {
+      "sha256": "d4feb95dff6d9a2017d0794e7f789df421f70a1701dc42fe4558a6f7cc97fc86",
+      "bytes": 567223
+    },
+    "mpi2/new-surface.csv": {
+      "sha256": "da2e6b5c0c748c4ff949ea63f295db5743a408380741861dc3bd791ae2ef2934",
+      "bytes": 3754
+    },
+    "mpi2/old-cells-0.csv": {
+      "sha256": "61d77a1830a658a942960aad62ff7ad28531b04235a2ace5bf86c58381c1994e",
+      "bytes": 565917
+    },
+    "mpi2/old-cells-1.csv": {
+      "sha256": "7ffe42cf46d46709497c8d21c2419dfa4cf709d70fb370eff18cfcdfe3bc7762",
+      "bytes": 566980
+    },
+    "mpi2/old-surface.csv": {
+      "sha256": "425e78e9143360f7d6f81d01c06530ab9d630c2ba46fce178f973519286537fa",
+      "bytes": 3118
+    },
+    "mpi2/restart-cells-0.csv": {
+      "sha256": "204f0fcf83437691780a2c5c0c2868c886450307c233e1542b1b43c1ac1cb4a1",
+      "bytes": 566184
+    },
+    "mpi2/restart-cells-1.csv": {
+      "sha256": "d4feb95dff6d9a2017d0794e7f789df421f70a1701dc42fe4558a6f7cc97fc86",
+      "bytes": 567223
+    },
+    "mpi2/restart-surface.csv": {
+      "sha256": "da2e6b5c0c748c4ff949ea63f295db5743a408380741861dc3bd791ae2ef2934",
+      "bytes": 3754
+    }
+  }
+}

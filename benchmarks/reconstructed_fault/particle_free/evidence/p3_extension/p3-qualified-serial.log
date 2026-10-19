@@ -1,0 +1,5 @@
+Filters: [p3_extension],[p3_extension_storage]
+P3 stress relative L2=2.1104853014540553e-07, unchanged-T negative control=3.7270592478604048e-07, bulk energy change=3.1225355634489915e-11, mean defect=1.0005945459206804e-16, weak load defect=3.1114033056474483e-08
+P3 candidate Gauss8/12 coefficient relative difference=5.7364918116411761e-15, cells=2048, DG scalar DoFs=18432, publications=1
+===============================================================================
+All tests passed (292 assertions in 2 test cases)

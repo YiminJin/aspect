@@ -7,8 +7,50 @@ approved **bounded serial fixed-mesh hanging-node phase task are complete**.
 Continue from **cohesive, domain-free PF6a: independent DGQ2 history, ordinary
 FE fracture, consistent-endpoint reduced Newton, fixed reference fault**.
 Phase growth on that fixed fault is distinct from geometric extension or
-physical tip propagation. The user has now selected the bounded P2 physical
-response below; geometric extension/P3 is not authorized.
+physical tip propagation. The subsequently selected bounded P2 response and
+original P3 synthetic geometry-transfer diagnostic are recorded below. No
+physical propagation task is selected.
+
+## Bounded P3 synthetic straight append
+
+[P3 report](P3_SYNTHETIC_EXTENSION_REPORT.md) defines the transfer contract and
+qualification boundary. The imposed finite seed has an interior tip at x=.5;
+one collinear append reaches x=.75 on a fixed 32×64 mesh. The existing compact
+stationary cap is sampled directly; phase and its physical obstacle stay fixed.
+Old material/vertex identities, Z=G s_elas, accumulated slip and rates survive
+exactly; prescribed new surface rows are zero and the old tip histories are
+zero. No bulk material is born. This is new surface representation within
+already initialized cap damage, not demonstrated virgin-material activation.
+
+The joint stress-coordinate map is `T+=T-+Pi_Q2[2(Z+chi+-Z-chi-)S]`. Measured
+full-tensor stress transfer error is 2.11e-7 relative L2 (localized 3.10e-7),
+maximum .01544 Pa; retaining T unchanged gives 3.73e-7. Bulk energy transfer
+defect is 3.12e-11 J/m; the separately predicted cohesive storage change is
+4.96e-14 J/m. Weak-load transfer defect is 3.11e-8 relative. The imposed new
+surface contributes 203.732 Pa m shear and 250 Pa m friction load, distinguished
+from overlap-normalization changes and transfer error. Native Gauss8/12
+coefficients agree to 5.74e-15 relative; independent Legendre projection,
+normalization and weak loads pass their predeclared 1e-11 screens. All nine
+DGQ2 modes, the full plane-strain metric and unlimited history are retained.
+
+Native-component tests cover identity, rejected candidates, deterministic
+retry, single geometry publication and archives on both sides of the append.
+Serial/two-rank owned and ghost DG data are checked; a separate two-rank process
+continues the serial pre-append archive to the uninterrupted accepted record.
+The final native suite passes 131 cases /165436 assertions; portable replay
+verifies all 31 archived files and the independent mathematical checks.
+The neutral manager append stages properties/widths/rates together and
+invalidates projection/search caches. Configured boundary-completion paths
+remain guarded; this horizontal boundary contact needs no completion wedge.
+
+**Scope limit:** this is a synthetic component transaction using native
+manager/archive, FEValues and MPI vectors. It is not a simulator outer-loop
+finite-tip geometry transaction or a native material checkpoint conversion.
+Existing finite-tip mechanical/evolution guards remain; no live Stokes cache
+is exercised by this fixture. Coupled owner/cache integration, a general
+nonzero-tip birth rule and phase activation remain unqualified. The next
+native extension task must close those integration gaps before physical
+propagation. P2's strict branch failure and all BP3 evidence remain preserved.
 
 ## Completed bounded P2 physical response
 
@@ -48,12 +90,11 @@ counted as convergence. Original Gauss6, spatial and endpoint temporal/BP3
 findings remain. This passes the selected early physical-response interval,
 not general propagation or full PF5/temporal/spatial qualification.
 
-Recommend the original **bounded P3 synthetic straight geometry extension**
-next: first specify joint DG T/cohesive Z/physical-obstacle overlap/birth transfer,
-measure stress/storage/load remapping defects, rebuild normalization/geometry/
-profile caches, and define atomic rejection, single publication and restart.
-Do not assume unchanged T preserves tau when localization changes. P3 has not
-begun; no next implementation is automatically selected.
+This P2 result motivated the original **bounded P3 synthetic straight geometry
+extension**, subsequently selected and tested above. Unchanged T does not in
+general preserve tau when localization changes. Native finite-tip integration
+and physical activation are not inferred from the synthetic transfer result;
+no next implementation is automatically selected.
 
 `../current_design.md` and `../specification.tex` retain scientific authority.
 The derivation is at `../particle_free_history.tex`; local PLAN/PROMPTS files

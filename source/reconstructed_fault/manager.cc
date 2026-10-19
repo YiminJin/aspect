@@ -793,6 +793,70 @@ namespace aspect
   }
 
 
+  template <int dim>
+  void
+  ReconstructedFaultManager<dim>::append_reconstructed_fault(
+    const unsigned int index,
+    const std::vector<Point<dim>> &vertices,
+    const std::vector<double> &half_widths,
+    const std::vector<std::vector<double>> &properties,
+    const std::vector<double> &rates)
+  {
+    AssertThrow(!slip_rate_nonlinear_solve_active && !slip_rate_trial_active,
+                ExcMessage("A fault append requires an inactive nonlinear solve."));
+    AssertThrow(index<reconstructed_faults.size(),ExcMessage("Invalid fault append index."));
+    AssertThrow(vertices.size()==half_widths.size()
+                && vertices.size()==properties.size() && vertices.size()==rates.size(),
+                ExcMessage("Fault append requires explicit birth data for every new vertex."));
+    if (vertices.empty()) return;
+    // Attached completion owns endpoint frames/support beyond the normal
+    // strip. A caller needs a qualified joint rebuild before changing those
+    // endpoints; this bounded container operation must not retain stale data.
+    AssertThrow(!automatic_boundary_completion && boundary_contacts.empty()
+                && bottom_source_fault==numbers::invalid_unsigned_int && !top_source_continuation,
+                ExcMessage("Prescribed append does not yet rebuild configured boundary completion."));
+    AssertThrow(slip_rate_initialized[index],
+                ExcMessage("Initialize the old slip history before appending geometry."));
+    // All allocation and validation precede the nonthrowing publication swaps.
+    // This also leaves a cached segment index valid after a rejected append.
+    auto fault=reconstructed_faults[index];
+    auto widths=projection_half_widths[index];
+    auto committed=timestep_committed_slip_rates[index];
+    auto current=current_newton_slip_rates[index];
+    auto trial=current_newton_slip_rates[index];
+    const auto first=fault.n_vertices();
+    fault.append_vertices(vertices);
+    for (unsigned int i=0;i<vertices.size();++i)
+      {
+        AssertThrow(std::isfinite(half_widths[i]) && half_widths[i]>0.
+                    && std::isfinite(rates[i]) && rates[i]>=0.
+                    && properties[i].size()==n_property_components,
+                    ExcMessage("Invalid fault append support, rate or property layout."));
+        for (unsigned int c=0;c<n_property_components;++c)
+          {
+            AssertThrow(std::isfinite(properties[i][c]),
+                        ExcMessage("Fault append property birth values must be finite."));
+            fault.get_properties(first+i)[c]=properties[i][c];
+          }
+      }
+    AssertThrow(fault.vertex(0)!=fault.vertex(fault.n_vertices()-1),
+                ExcMessage("A fault append cannot close the fault."));
+    widths.insert(widths.end(),half_widths.begin(),half_widths.end());
+    committed.insert(committed.end(),rates.begin(),rates.end());
+    current.insert(current.end(),rates.begin(),rates.end());
+    trial.insert(trial.end(),rates.begin(),rates.end());
+    using std::swap;
+    swap(reconstructed_faults[index],fault);
+    projection_half_widths[index].swap(widths);
+    timestep_committed_slip_rates[index].swap(committed);
+    current_newton_slip_rates[index].swap(current);
+    trial_slip_rates[index].swap(trial);
+    ++projection_metadata_version;
+    invalidate_particle_projection_cache();
+    invalidate_stokes_qp_projection_cache();
+  }
+
+
   // -----------------------------------------------------------------------------
   // Property registration
   // -----------------------------------------------------------------------------
@@ -1314,6 +1378,9 @@ namespace aspect
   template int ReconstructedFaultManager<dim>::get_shear_sense(const unsigned int) const; \
   template unsigned int ReconstructedFaultManager<dim>::add_reconstructed_fault( \
     const std::vector<Point<dim>> &, const std::vector<double> &); \
+  template void ReconstructedFaultManager<dim>::append_reconstructed_fault( \
+    const unsigned int, const std::vector<Point<dim>> &, const std::vector<double> &, \
+    const std::vector<std::vector<double>> &, const std::vector<double> &); \
   template unsigned int ReconstructedFaultManager<dim>::register_property(const std::string &, const unsigned int); \
   template bool ReconstructedFaultManager<dim>::has_property(const std::string &) const; \
   template unsigned int ReconstructedFaultManager<dim>::get_property_index(const std::string &) const; \

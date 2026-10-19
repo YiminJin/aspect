@@ -21,3 +21,11 @@ add_test(NAME phase_field_fault_ih_accuracy_mpi
          WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
       )
 set_tests_properties(phase_field_fault_ih_accuracy_mpi PROPERTIES PROCESSORS 2)
+
+# One prescribed append, without advancing physical time. Exercise native DG
+# ownership/ghosts and the synthetic atomic geometry/history transition only.
+add_test(NAME reconstructed_fault_extension_mpi
+         COMMAND mpirun -np 2 ${ASPECT_BINARY} --test [p3_extension]
+         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+set_tests_properties(reconstructed_fault_extension_mpi PROPERTIES
+                    PROCESSORS 2 TIMEOUT 300)

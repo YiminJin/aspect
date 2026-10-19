@@ -1,0 +1,27 @@
+{
+  "baseline_commit": "2d0d4018310e6d95545da2d13e8d45dcb55af7d0",
+  "source_sha256": {
+    "include/aspect/reconstructed_fault/manager.h": "d1c9fe7c137ce7ff152ba283a6e9491b05bf0591c6c14f63c492f5d301a1a673",
+    "source/reconstructed_fault/manager.cc": "74b03cec1791787630cbc0ad5dce9aa8a844052ad4847e8a39fdb7a5a44b7f0a",
+    "unit_tests/reconstructed_fault_extension.cc": "0ce6527b7de911e87db65f234b203b2d0e488dd3849bc91d924e781a63c6cc93",
+    "unit_tests/CMakeLists.txt": "f7ffa05a759c36fe7e494fcfa2d6af159d0de46cac0279a64814191dc71faf9c",
+    "benchmarks/reconstructed_fault/particle_free/assess_p3_extension.py": "d29cbda56b95531a93fc8a1aa73c2a1622f63a7e627d8d669275685e28bd2994",
+    "benchmarks/reconstructed_fault/particle_free/evidence/p3_extension/selection.json": "44d7af333dec18b9b7c99b502740f5d3c4338cc85c306e542049890b772517df",
+    "benchmarks/reconstructed_fault/particle_free/evidence/p3_extension/verify.py": "e713ec184f9653d471bd1598b46d3d5c32585af595cce47609444ffb10f1a68b",
+    "source/simulator/phase_field.cc": "ebf5ae52009ce083f8365805254ca92ae53035fb178d629a901cc2fb89c91539",
+    "source/material_model/phase_field_fault/fe_strain.cc": "97ee9e165471396a7357bd6c47df5a336766ca5765a224398ef8bfb0fc09afb2",
+    "source/material_model/phase_field_fault/dg_history.cc": "447c5e7fedc2183bd2ed12821a9c2471ddbd20a6f05c936e10b755a11cd14573",
+    "source/material_model/phase_field_fault/dg_accepted.cc": "f6646ff027563ffe62b12bc0745abd421f8254562734e2b92fb293c332ccd5be"
+  },
+  "native_binary_sha256": "a1ee3080a14ef02778d2631c5e114720de6c5789cfbec803b424d140c3a88019",
+  "archive_sha256": "b900063801f383021e7fdf4ccb2e947fc0f68ffb73bd9be248a14e1837c69692",
+  "archive_path": "benchmarks/reconstructed_fault/particle_free/evidence/p3_extension/reference.tar.xz",
+  "selected_scope": "P3 imposed geometry transfer; synthetic component transaction; not a native finite-tip evolution or simulator geometry checkpoint qualification",
+  "strict_reference_match_passed": false,
+  "limits": [
+    "birth is prescribed zero surface history in pre-existing cap damage",
+    "no virgin phase activation",
+    "native finite-tip material/solver integration remains guarded"
+  ],
+  "initial_metadata_correction": "Physical-zero-phase endpoint now distinguishes continuum x=0.808821594 from represented Q1 support x=0.8125; raw data and numerical gates unchanged."
+}

@@ -1,0 +1,29 @@
+{
+  "command": [
+    "env",
+    "ASPECT_P3_RESTART=/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/p3-extension/qualified-serial",
+    "OPENBLAS_NUM_THREADS=1",
+    "OMP_PROC_BIND=false",
+    "/opt/openmpi/5.0.6/bin/mpirun",
+    "--map-by",
+    "core",
+    "--bind-to",
+    "core",
+    "--rank-by",
+    "slot",
+    "-n",
+    "2",
+    "build-particle-free/evolving-phase/native/aspect-release",
+    "--test",
+    "[p3_extension_restart]"
+  ],
+  "cwd": "/home/ein/repository/aspect-pf-rsf-particle-free",
+  "exit_code": 0,
+  "seconds": 1.7172747990007338,
+  "environment": {
+    "OMP_PROC_BIND": "spread",
+    "OMP_NUM_THREADS": "1",
+    "DEAL_II_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1"
+  }
+}

@@ -1,0 +1,16 @@
+P3 stress relative L2=2.1104853014540553e-07, unchanged-T negative control=3.7270592478604048e-07, bulk energy change=3.1225355634489915e-11, mean defect=1.0005945459206804e-16, weak load defect=3.1114033056474483e-08
+P3 candidate Gauss8/12 coefficient relative difference=5.7364918116411761e-15, cells=2048, DG scalar DoFs=18432, publications=1
+Stationary DG kernel: nodes=5776, queries=8664, projection_setup_s=0.00036581100000000001, reference_s=0.16497018899999999, indexed_s=0.001331114, coupling_setup_s=0.00067336700000000002, sampled_product_s=5.3273000000000003e-05, factored_product_s=2.955e-05, filtered_relative_error=2.1498413377506269e-16
+domain moments nx=8 rho=0.10000000000000001 even point/domain=0.0012989630730625482/0.00073367758051863649 odd point/domain=0.010090384889084396/2.6980280848625947e-05
+domain moments nx=16 rho=0.20000000000000001 even point/domain=0.0024011426529774883/0.00019128721756903828 odd point/domain=0.020729332281071596/1.4490378244662625e-05
+domain moments nx=32 rho=0.40000000000000002 even point/domain=0.0089061746584012391/5.5648799708429408e-05 odd point/domain=0.041496730467368535/8.7345755107276154e-06
+native coordinate invariance: area=1.1766587704187259e-11 vertex/h=1.4705867680282101e-11 CPDI=5.3679283240626319e-12
+Boundary reproducer: integral=0.3305959528345101, exact=0.33059595283452059, relative error=-3.173543866085769e-14
+Homogeneous coefficient regression: harmonic old kappa range=1.2815248119788469e+17:1.2815248119788472e+17, configured kappa=1.2815248119788472e+17
+Normal filter constant=1 max absolute error=1.3322676295501878e-15
+Normal filter constant=50000000 max absolute error=7.4505805969238281e-08
+Normal filter mode=1 attenuation=0.61545372003741106 mode error Pa=6.9464315672141009e-08 dense error Pa=2.9802322387695312e-08 mean integral error Pa m=-4.6253204345703125e-05
+Normal filter mode=4 attenuation=0.076923076923076927 mode error Pa=6.7055230082494446e-08 dense error Pa=2.9802322387695312e-08 mean integral error Pa m=-4.1961669921875e-05
+Normal filter mode=8 attenuation=0.020408163265306124 mode error Pa=6.6142906263166878e-08 dense error Pa=2.9802322387695312e-08 mean integral error Pa m=-4.3392181396484375e-05
+===============================================================================
+All tests passed (165436 assertions in 131 test cases)

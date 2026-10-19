@@ -1,0 +1,44 @@
+{
+  "baseline_commit": "2d0d4018310e6d95545da2d13e8d45dcb55af7d0",
+  "native_binary": {
+    "path": "build-particle-free/p3-extension/aspect-release-p3",
+    "sha256": "a1ee3080a14ef02778d2631c5e114720de6c5789cfbec803b424d140c3a88019"
+  },
+  "numpy": "2.5.2",
+  "protected_BP3_files_checked": 34,
+  "protected_BP3_mismatches": [],
+  "baseline_production_files_checked": 858,
+  "production_files_changed": [
+    "include/aspect/reconstructed_fault/manager.h",
+    "source/reconstructed_fault/manager.cc"
+  ],
+  "old_P2_binary_preserved": true,
+  "archive_members_verified": 31,
+  "archive_sha256": "b900063801f383021e7fdf4ccb2e947fc0f68ffb73bd9be248a14e1837c69692",
+  "serial_assertions": 292,
+  "mpi2_assertions_per_rank": 295,
+  "process_restart_assertions_per_rank": 12,
+  "full_native_cases": 131,
+  "full_native_assertions": 165436,
+  "all_qualification_commands_passed": true,
+  "component_transaction_qualified": true,
+  "native_simulator_geometry_transaction_qualified": false,
+  "strict_reference_match_passed": false,
+  "timing_seconds": {
+    "p3-qualified-serial": 5.425307771998632,
+    "p3-qualified-mpi2": 2.718804440002714,
+    "p3-qualified-restart": 1.7172747990007338,
+    "p3-qualified-suite": 5.974601976999111,
+    "p3-qualified-reference-serial": 1.5681134130027203,
+    "p3-qualified-reference-mpi2": 1.617136599998048,
+    "p3-rank-record-comparison": 1.866567834997113,
+    "p3-completion-guard-build": 15.045531673000369,
+    "p3-final-reference-serial": 1.8674483929971757,
+    "p3-final-reference-mpi2": 1.5675781789977918,
+    "p3-portable-final": 3.2709044529983657
+  },
+  "note": "Timings include setup/tests/output; no full-event or scalability prediction.",
+  "portable_replay_passed": true,
+  "manual_AGENTS_edit_preserved": true,
+  "P2_physical_report_unchanged": true
+}

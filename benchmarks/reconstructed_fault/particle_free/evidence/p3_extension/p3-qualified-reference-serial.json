@@ -1,0 +1,20 @@
+{
+  "command": [
+    "env",
+    "OPENBLAS_NUM_THREADS=1",
+    "python3",
+    "benchmarks/reconstructed_fault/particle_free/assess_p3_extension.py",
+    "build-particle-free/p3-extension/qualified-serial",
+    "--output",
+    "benchmarks/reconstructed_fault/particle_free/evidence/p3_extension/serial.json"
+  ],
+  "cwd": "/home/ein/repository/aspect-pf-rsf-particle-free",
+  "exit_code": 0,
+  "seconds": 1.5681134130027203,
+  "environment": {
+    "OMP_PROC_BIND": "spread",
+    "OMP_NUM_THREADS": "1",
+    "DEAL_II_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1"
+  }
+}

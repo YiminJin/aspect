@@ -1,0 +1,29 @@
+{
+  "scope": "one synthetic append; fixed mesh, physical time and physical phase/obstacle; no evolving finite-tip solve",
+  "baseline_revision": "2d0d40183",
+  "bulk_cells": [32, 64],
+  "old_interval": [0.0, 0.5],
+  "new_interval": [0.5, 0.75],
+  "surface_spacing": 0.015625,
+  "ell": 0.15625,
+  "G": 1000000.0,
+  "eta": 100000000.0,
+  "m": 128.0,
+  "phase": "Q1 interpolation of native compact stationary PhaseFieldProfile at distance to old segment; core 0.6, p=1, m=128, ell=0.15625, 5000 profile points; unchanged during append",
+  "cap_distinction": "append is prescribed new surface representation within already initialized diffuse-cap bulk damage; it is not evidence of virgin-material phase activation; no invented tail or continuation",
+  "birth": {"Z": 0.0, "cumulative_slip": 0.0, "slip_rate": 0.0},
+  "old_tip_histories": "exact zero, permitting a continuous Q1 zero-history join",
+  "projection_quadrature": 8,
+  "check_quadrature": 12,
+  "tolerances": {
+    "independent_projection_and_load_relative": 1e-11,
+    "reconstructed_full_tensor_stress_relative_L2": 0.005,
+    "bulk_storage_defect_relative": 0.005,
+    "weak_load_transfer_relative_defect": 0.005,
+    "identity_rollback_retry_restart": "exact stored-state equality",
+    "old_surface_histories_obstacle_and_material_identity": "exact equality",
+    "normalization": "strictly positive; no floor"
+  },
+  "constitutive_choice": "none: imposed zero birth data are fixture inputs, not a physical birth law",
+  "preserved_findings": {"strict_reference_match_passed": false}
+}

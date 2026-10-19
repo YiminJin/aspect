@@ -106,6 +106,20 @@ namespace aspect
         const std::vector<Point<dim>> &vertices,
         const std::vector<double> &projection_half_widths);
 
+      /** Append caller-prescribed geometry outside a nonlinear solve. Every
+       * new vertex requires explicit generic property and slip-rate birth
+       * data; existing rows and material indices are retained. This neutral
+       * container operation does not transfer a material model's bulk history
+       * or authorize physical fault birth. Stage it together with those
+       * histories before publishing a geometry change. Empty input is identity.
+       */
+      void append_reconstructed_fault(
+        const unsigned int fault_index,
+        const std::vector<Point<dim>> &vertices,
+        const std::vector<double> &projection_half_widths,
+        const std::vector<std::vector<double>> &properties,
+        const std::vector<double> &slip_rates);
+
       /** Configure once, before mechanics; +1 retains the geometric convention.
        * The sign multiplies S, not V or the geometric normal. Restart preserves
        * the choice and rejects a conflicting reattachment by the model.
