@@ -1,0 +1,75 @@
+-----------------------------------------------------------------------------
+--                             This is ASPECT                              --
+-- The Advanced Solver for Planetary Evolution, Convection, and Tectonics. --
+-----------------------------------------------------------------------------
+--     . version 3.1.0-pre (pf-rsf-particle-free, c8e4ae65d)
+--     . using deal.II 9.6.2 (dealii-9.6, 6890ca740b)
+--     .       with 32 bit indices
+--     .       with vectorization level 2 (AVX, 4 doubles, 256 bits)
+--     . using Trilinos 14.2.0
+--     . using p4est 2.8.7
+--     . using Geodynamic World Builder 1.0.0
+--     . running in OPTIMIZED mode
+--     . running with 1 MPI process
+-----------------------------------------------------------------------------
+
+Loading shared library </home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/evolving-phase/plugin/libp3_native_checks.release.so>
+
+
+-----------------------------------------------------------------------------
+The output directory </home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/p3-native-completion/runs/sensitive/> provided in the input file appears not to exist.
+ASPECT will create it for you.
+-----------------------------------------------------------------------------
+
+
+-----------------------------------------------------------------------------
+-- For information on how to cite ASPECT, see:
+--   https://aspect.geodynamics.org/citing.html?ver=3.1.0-pre&particles=1&sha=c8e4ae65d&src=code
+-----------------------------------------------------------------------------
+Number of active cells: 2,048 (on 1 levels)
+Number of degrees of freedom: 62,985 (16,770+2,145+8,385+8,385+8,385+8,385+8,385+2,145)
+
+   Postprocessing:
+   Accepted supplied continuum phase seed; native particle H retained as diagnostic, unloaded independent histories constructed afterward.
+   Reconstruction initial faults... fixed normal association half-width=0.50000000000001421 ... done.
+
+   Initial cohesive traction set directly to zero; normalization and associations prepared.
+   Accepted DGQ2 trial stress: independent native source; cohesive endpoint phase trials; fixed geometry; accepted-history lifecycle/restart.
+   Accepted FE strain: G=1000000 eta=100000000 lambda=100 m=128.00000000016001 bulk QPs=393216 phase DoFs=2145
+   FE energy summation: bulk old-new=1.9317880628477724e-14, cohesive old-new=9.8912272415620922e-19
+*** Snapshot /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/p3-native-completion/runs/sensitive/restart/01/ created!
+
+   Accepted DGQ2 trial stress: independent native source; cohesive endpoint phase trials; fixed geometry; accepted-history lifecycle/restart.
+   Accepted FE strain: G=1000000 eta=100000000 lambda=100 m=128.00000000016001 bulk QPs=393216 phase DoFs=2145
+   Accepted DGQ2 trial stress: independent native source; cohesive endpoint phase trials; fixed geometry; accepted-history lifecycle/restart.
+   Accepted FE strain: G=1000000 eta=100000000 lambda=100 m=128.00000000016001 bulk QPs=393216 phase DoFs=2145
+   FE energy summation: bulk old-new=2.4424906541753444e-14, cohesive old-new=-2.2171087394381311e-19
+*** Snapshot /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/p3-native-completion/runs/sensitive/restart/02/ created!
+
+     Number of advected particles: 18432
+     P3 native frozen geometry     complete
+
+
+
++------------------------------------------------+------------+------------+
+| Total wallclock time elapsed since start       |      21.7s |            |
+|                                                |            |            |
+| Section                            | no. calls |  wall time | % of total |
++------------------------------------+-----------+------------+------------+
+| Create snapshot                    |         2 |     0.504s |       2.3% |
+| Fault: Cache build                 |         1 |   0.00348s |         0% |
+| Fault: FE normalization            |         5 |    0.0601s |      0.28% |
+| Fault: FE phase energy             |         2 |     0.151s |       0.7% |
+| Fault: I_h                         |         4 |      14.4s |        66% |
+| Fault: Stokes QP cache build       |         2 |     0.159s |      0.73% |
+| Fault: Surface-property projection |         4 |  6.16e-06s |         0% |
+| Fault: endpoint phase solve        |         1 |  2.42e-05s |         0% |
+| Initialization                     |         1 |    0.0925s |      0.43% |
+| Particles: Generate                |         1 |   0.00107s |         0% |
+| Particles: Initialization          |         1 |  2.84e-05s |         0% |
+| Particles: Initialize properties   |         1 |   0.00178s |         0% |
+| Postprocessing                     |         1 |      21.5s |        99% |
+| Setup dof systems                  |         1 |   0.00924s |         0% |
+| Setup initial conditions           |         1 |    0.0722s |      0.33% |
++------------------------------------+-----------+------------+------------+
+

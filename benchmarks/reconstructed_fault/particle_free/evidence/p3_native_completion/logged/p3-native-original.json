@@ -1,0 +1,22 @@
+{
+  "command": [
+    "env",
+    "ASPECT_P3_CASE=original",
+    "ASPECT_DIAGNOSTIC_FREEZE_PARTICLE_ADVECTION=1",
+    "OPENBLAS_NUM_THREADS=1",
+    "OMP_NUM_THREADS=1",
+    "DEAL_II_NUM_THREADS=1",
+    "OMP_PROC_BIND=false",
+    "build-particle-free/evolving-phase/native/aspect-release",
+    "benchmarks/reconstructed_fault/particle_free/p3_native.prm"
+  ],
+  "cwd": "/home/ein/repository/aspect-pf-rsf-particle-free",
+  "exit_code": 1,
+  "seconds": 1.5166372460007551,
+  "environment": {
+    "OMP_PROC_BIND": "spread",
+    "OMP_NUM_THREADS": "1",
+    "DEAL_II_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1"
+  }
+}

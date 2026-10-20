@@ -350,6 +350,7 @@ namespace aspect
     void
     PhaseFieldFault<dim>::prepare_reconstructed_fault_mechanical_solve()
     {
+      AssertThrow(!uses_prescribed_dg_geometry(),ExcMessage("Finite-tip prescribed DG geometry admits transfer and frozen sampling only; mechanical/phase evolution remains unqualified."));
       TimerOutput::Scope coarse_timer(this->get_computing_timer(), "Fault: Property preparation");
       TimerOutput::Scope timer(*performance_timer, "Fault: Property preparation");
       AssertThrow(dim == 2, ExcNotImplemented());

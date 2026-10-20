@@ -1,0 +1,79 @@
+-----------------------------------------------------------------------------
+--                             This is ASPECT                              --
+-- The Advanced Solver for Planetary Evolution, Convection, and Tectonics. --
+-----------------------------------------------------------------------------
+--     . version 3.1.0-pre (pf-rsf-particle-free, c8e4ae65d)
+--     . using deal.II 9.6.2 (dealii-9.6, 6890ca740b)
+--     .       with 32 bit indices
+--     .       with vectorization level 2 (AVX, 4 doubles, 256 bits)
+--     . using Trilinos 14.2.0
+--     . using p4est 2.8.7
+--     . using Geodynamic World Builder 1.0.0
+--     . running in OPTIMIZED mode
+--     . running with 1 MPI process
+-----------------------------------------------------------------------------
+
+Loading shared library </home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/evolving-phase/plugin/libp3_native_checks.release.so>
+
+
+-----------------------------------------------------------------------------
+The output directory </home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/p3-native-completion/runs/original/> provided in the input file appears not to exist.
+ASPECT will create it for you.
+-----------------------------------------------------------------------------
+
+
+-----------------------------------------------------------------------------
+-- For information on how to cite ASPECT, see:
+--   https://aspect.geodynamics.org/citing.html?ver=3.1.0-pre&particles=1&sha=c8e4ae65d&src=code
+-----------------------------------------------------------------------------
+Number of active cells: 2,048 (on 1 levels)
+Number of degrees of freedom: 62,985 (16,770+2,145+8,385+8,385+8,385+8,385+8,385+2,145)
+
+   Postprocessing:
+   Accepted supplied continuum phase seed; native particle H retained as diagnostic, unloaded independent histories constructed afterward.
+   Reconstruction initial faults... fixed normal association half-width=0.50000000000001421 ... done.
+
+   Initial cohesive traction set directly to zero; normalization and associations prepared.
+   Accepted DGQ2 trial stress: independent native source; cohesive endpoint phase trials; fixed geometry; accepted-history lifecycle/restart.
+   Accepted FE strain: G=1000000 eta=100000000 lambda=100 m=128.00000000016001 bulk QPs=393216 phase DoFs=2145
+   FE energy summation: bulk old-new=-7.7715611723760958e-16, cohesive old-new=1.5077186461126546e-19
+*** Snapshot /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/p3-native-completion/runs/original/restart/01/ created!
+
+
+
+----------------------------------------------------
+Exception on MPI process <0> while running postprocessor <N6aspect11Postprocess11MomentCycleILi2EEE>: 
+
+--------------------------------------------------------
+An error occurred in line <446> of file </home/ein/repository/aspect-pf-rsf-particle-free/source/material_model/phase_field_fault/fe_strain.cc> in function
+    void aspect::MaterialModel::PhaseFieldFault<dim>::prepare_fe_strain_history(bool, bool) [with int dim = 2]
+The violated condition was: 
+    std::abs(initial.values[j]-state->I[j]) <=1.e-12*std::max(1.,std::abs(state->I[j]))
+Additional information: 
+    PF5 restored I_h disagrees with the fixed native profile.
+
+Stacktrace:
+-----------
+#0  build-particle-free/evolving-phase/native/aspect-release: aspect::MaterialModel::PhaseFieldFault<2>::prepare_fe_strain_history(bool, bool)
+#1  build-particle-free/evolving-phase/native/aspect-release: aspect::MaterialModel::PhaseFieldFault<2>::prepare_dg_geometry_append(std::vector<dealii::Point<2, double>, std::allocator<dealii::Point<2, double> > > const&, std::vector<double, std::allocator<double> > const&, std::vector<std::vector<double, std::allocator<double> >, std::allocator<std::vector<double, std::allocator<double> > > > const&, std::vector<double, std::allocator<double> > const&)
+#2  /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/evolving-phase/plugin/libp3_native_checks.release.so: aspect::Postprocess::MomentCycle<2>::append()::{lambda()#2}::operator()() const
+#3  /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/evolving-phase/plugin/libp3_native_checks.release.so: aspect::Postprocess::MomentCycle<2>::append()
+#4  /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/evolving-phase/plugin/libp3_native_checks.release.so: aspect::Postprocess::MomentCycle<2>::execute[abi:cxx11](dealii::TableHandler&)
+#5  build-particle-free/evolving-phase/native/aspect-release: aspect::Postprocess::Manager<2>::execute[abi:cxx11](dealii::TableHandler&)
+#6  build-particle-free/evolving-phase/native/aspect-release: aspect::Simulator<2>::postprocess()
+#7  build-particle-free/evolving-phase/native/aspect-release: aspect::Simulator<2>::run()
+#8  build-particle-free/evolving-phase/native/aspect-release: ) [0x21613fc]
+#9  build-particle-free/evolving-phase/native/aspect-release: main
+--------------------------------------------------------
+
+Aborting!
+----------------------------------------------------
+--------------------------------------------------------------------------
+MPI_ABORT was invoked on rank 0 in communicator MPI_COMM_WORLD
+  Proc: [[24944,0],0]
+  Errorcode: 1
+
+NOTE: invoking MPI_ABORT causes Open MPI to kill all MPI processes.
+You may or may not see output from other processes, depending on
+exactly when Open MPI kills them.
+--------------------------------------------------------------------------

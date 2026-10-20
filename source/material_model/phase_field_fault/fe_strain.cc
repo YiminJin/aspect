@@ -43,22 +43,22 @@ namespace aspect
   {
     template<int dim> bool PhaseFieldFault<dim>::initialize_fe_shared_phase(LinearAlgebra::BlockVector &trial) const
     {
-      if (fe_initial_phase_profile.empty())
+      if (fe_initial_phase_profile.empty() && !uses_prescribed_dg_geometry())
         return false;
       AssertThrow(consistent_endpoint_phase && this->get_timestep_number()==0
                   && !this->get_parameters().resume_computation && !fe_strain_state,
                   ExcMessage("Shared profile is fresh pre-existing damage; history conversion is prohibited."));
       std::ifstream input(fe_initial_phase_profile);
-      AssertThrow(bool(input),ExcMessage("Cannot open FE initial phase profile."));
+      AssertThrow(uses_prescribed_dg_geometry() || bool(input),ExcMessage("Cannot open FE initial phase profile."));
       std::vector<std::pair<double,double>> data;
       double y,value;
-      while (input>>y>>value)
+      while (!uses_prescribed_dg_geometry() && input>>y>>value)
         {
           AssertThrow(std::isfinite(y) && value>=0. && value<1.
                       && (data.empty() || y>data.back().first),ExcMessage("Invalid shared phase data."));
           data.emplace_back(y,value);
         }
-      AssertThrow(input.eof() && data.size()>=2,ExcMessage("Malformed shared phase data."));
+      AssertThrow(uses_prescribed_dg_geometry() || (input.eof() && data.size()>=2),ExcMessage("Malformed shared phase data."));
       LinearAlgebra::BlockVector owned(this->introspection().index_sets.system_partitioning,this->get_mpi_communicator());
       owned=trial;
       const auto component=this->introspection().variable("phase_field").first_component_index;
@@ -72,6 +72,13 @@ namespace aspect
                 const auto i=indices[this->get_fe().component_to_system_index(component,v)];
                 if (!owned.locally_owned_elements().is_element(i))
                   continue;
+                if(uses_prescribed_dg_geometry())
+                  {
+                    const double phi=prescribed_geometry_phase(cell->vertex(v));
+                    AssertThrow(std::isfinite(phi) && phi>=0. && phi<1.,ExcMessage("Inadmissible prescribed physical phase."));
+                    owned[i]=phi;
+                    continue;
+                  }
                 const double yy=cell->vertex(v)[1];
                 AssertThrow(yy>=data.front().first && yy<=data.back().first,
                             ExcMessage("Shared phase profile does not cover the domain."));
@@ -152,6 +159,16 @@ namespace aspect
                   ExcMessage("FE strain quadrature requires a uniform Cartesian grid and one fault."));
       if(local)n=repetitions[0];
       const unsigned int ns=faults[0].n_cells();
+      if(uses_prescribed_dg_geometry())
+        {
+          const double ds=faults[0].vertex(1)[0]-faults[0].vertex(0)[0];
+          const unsigned int panels=std::lround(dx/ds);
+          AssertThrow(panels>0 && std::abs(panels*ds-dx)<1e-13,
+                      ExcMessage("Prescribed append quadrature requires fixed aligned uniform surface knots."));
+          if constexpr(dim==2)
+            return QAnisotropic<2>(QIterated<1>(QGauss<1>(8),panels),QGauss<1>(fe_bulk_normal_quadrature_points));
+          else AssertThrow(false,ExcNotImplemented());
+        }
       const unsigned int panels=std::lcm(n,ns)/n;
       // One rule supplies mechanics, the slip map and its adjoint, and the
       // bulk part of the phase functional. Normalization/CPDI stay separate.
@@ -198,7 +215,7 @@ namespace aspect
         {
           AssertThrow(this->get_reconstructed_fault_manager().get_shear_sense(0)==s.shear_sense,
                       ExcMessage("Fixed-profile native history rejects slip orientation changes."));
-          if (!consistent_endpoint_phase)
+          if (!consistent_endpoint_phase || uses_prescribed_dg_geometry())
             {
               const unsigned int phase_block=this->introspection().variable("phase_field").block_index;
               AssertThrow(s.displacement_history.block(phase_block)==this->get_solution().block(phase_block),
@@ -268,7 +285,7 @@ namespace aspect
       const unsigned int ns=fault.n_cells();
       for (unsigned int i=0; i<fault.n_vertices(); ++i)
         {
-          if (!mature_frictional_fault)
+          if (!mature_frictional_fault && !uses_prescribed_dg_geometry())
             AssertThrow(std::abs(fault.vertex(i)[0]-double(i)/ns)<1.e-13
                         && fault.vertex(i)[1]==.5,ExcMessage("P2 FE strain requires a unit horizontal through-going fault."));
           state->vertices.push_back(fault.vertex(i));
@@ -374,7 +391,7 @@ namespace aspect
             {
               const unsigned int panels=quad.size()/fe_bulk_normal_quadrature_points/std::max(3u,this->get_fe().degree+1);
               for(unsigned int j=1;j<ns;++j)
-                if(double(j)/ns>cell->vertex(0)[0] && double(j)/ns<cell->vertex(1)[0])
+                if(!uses_prescribed_dg_geometry() && double(j)/ns>cell->vertex(0)[0] && double(j)/ns<cell->vertex(1)[0])
                   {
                     const double t=panels*(double(j)/ns-cell->vertex(0)[0])/(cell->vertex(1)[0]-cell->vertex(0)[0]);
                     AssertThrow(std::abs(t-std::round(t))<1.e-12,ExcMessage("Physical quadrature must split fixed-surface knots."));
@@ -391,6 +408,12 @@ namespace aspect
                             ExcMessage("Endpoint reduced potential requires the unloaded verification fixture without body forces."));
               p.segment=std::min(ns-1,static_cast<unsigned int>(p.x[0]*ns));
               p.xi=p.x[0]*ns-p.segment;
+              if(uses_prescribed_dg_geometry())
+                {
+                  const auto source=this->get_reconstructed_fault_manager().project_to_normal_profiles(p.x);
+                  p.segment=source.active ? source.segment_index:numbers::invalid_unsigned_int;
+                  p.xi=source.active ? source.xi:0.;
+                }
               for (unsigned int v=0; v<p.dofs.size(); ++v)
                 {
                   const auto j=this->get_fe().component_to_system_index(pc,v);
@@ -411,12 +434,26 @@ namespace aspect
       validate_fe_strain_restrictions();
       const auto initial=evaluate_fe_normalization(this->get_solution(),false);
       AssertThrow(initial.admissible,ExcMessage("Initial FE strain normalization is undefined."));
-      if (!restoring && !transferring)
+      if (uses_prescribed_dg_geometry() && transferring)
+        {
+          // Geometry rebuilding is fresh normalization construction, not an
+          // assertion that the generic bootstrap integrator was the accepted
+          // FE operator. Retain both results for the bounded comparison.
+          std::ofstream comparison(this->get_output_directory()+"geometry-normalization-bootstrap.csv",std::ios::app);
+          if(comparison.tellp()==0)comparison<<"tip,vertex,bootstrap,canonical_FE\n";
+          comparison<<std::setprecision(17);
+          for(unsigned int j=0;j<state->I.size();++j)
+            comparison<<state->vertices.back()[0]<<','<<j<<','<<state->I[j]<<','<<initial.values[j]<<'\n';
+        }
+      if (!restoring && (!transferring || uses_prescribed_dg_geometry()))
         {
           current_normalization_integrals[0]=initial.values;
           state->I=initial.values;
-          validate_cohesive_state_commit({state->Z});
-          commit_cohesive_state({state->Z});
+          if(!transferring)
+            {
+              validate_cohesive_state_commit({state->Z});
+              commit_cohesive_state({state->Z});
+            }
         }
       else
         for (unsigned int j=0; j<state->I.size(); ++j)

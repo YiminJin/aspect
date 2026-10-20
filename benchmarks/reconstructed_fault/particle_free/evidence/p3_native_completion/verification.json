@@ -1,0 +1,101 @@
+{
+  "scope": "bounded serial native zero-time P3 append; no physical evolution",
+  "native_runs": {
+    "original": {
+      "command": [
+        "env",
+        "ASPECT_DIAGNOSTIC_FREEZE_PARTICLE_ADVECTION=1",
+        "OMP_PROC_BIND=false",
+        "ASPECT_P3_CASE=original",
+        "build-particle-free/evolving-phase/native/aspect-release",
+        "benchmarks/reconstructed_fault/particle_free/p3_native.prm"
+      ],
+      "seconds": 24.010083433000545,
+      "exit_code": 0,
+      "gates_passed": 15
+    },
+    "original-before": {
+      "command": [
+        "env",
+        "ASPECT_DIAGNOSTIC_FREEZE_PARTICLE_ADVECTION=1",
+        "OMP_PROC_BIND=false",
+        "build-particle-free/evolving-phase/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/p3-native-completion/runs/original-before/input.prm"
+      ],
+      "seconds": 19.649011159999645,
+      "exit_code": 0,
+      "gates_passed": 16
+    },
+    "original-after": {
+      "command": [
+        "env",
+        "ASPECT_DIAGNOSTIC_FREEZE_PARTICLE_ADVECTION=1",
+        "OMP_PROC_BIND=false",
+        "build-particle-free/evolving-phase/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/p3-native-completion/runs/original-after/input.prm"
+      ],
+      "seconds": 4.872475542000757,
+      "exit_code": 0,
+      "gates_passed": 2
+    },
+    "sensitive": {
+      "command": [
+        "env",
+        "ASPECT_DIAGNOSTIC_FREEZE_PARTICLE_ADVECTION=1",
+        "OMP_PROC_BIND=false",
+        "ASPECT_P3_CASE=sensitive",
+        "build-particle-free/evolving-phase/native/aspect-release",
+        "build-particle-free/p3-native-completion/sensitive.prm"
+      ],
+      "seconds": 22.054187083002034,
+      "exit_code": 0,
+      "gates_passed": 15
+    },
+    "sensitive-before": {
+      "command": [
+        "env",
+        "ASPECT_DIAGNOSTIC_FREEZE_PARTICLE_ADVECTION=1",
+        "OMP_PROC_BIND=false",
+        "build-particle-free/evolving-phase/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/p3-native-completion/runs/sensitive-before/input.prm"
+      ],
+      "seconds": 20.754554379000183,
+      "exit_code": 0,
+      "gates_passed": 16
+    },
+    "sensitive-after": {
+      "command": [
+        "env",
+        "ASPECT_DIAGNOSTIC_FREEZE_PARTICLE_ADVECTION=1",
+        "OMP_PROC_BIND=false",
+        "build-particle-free/evolving-phase/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/p3-native-completion/runs/sensitive-after/input.prm"
+      ],
+      "seconds": 5.073059517999354,
+      "exit_code": 0,
+      "gates_passed": 2
+    }
+  },
+  "native_units": {
+    "cases": 131,
+    "assertions": 165436,
+    "passed": true
+  },
+  "portable_native_files": 204,
+  "portable_independent_checks_passed": true,
+  "full_constraint_rows": 768,
+  "persistent_and_stress_load_constraint_ledger_restart_exact": true,
+  "geometry_publications_per_case": 1,
+  "physical_publications_per_case": 0,
+  "protected_BP3_files": 34,
+  "manual_work_preserved": true,
+  "strict_reference_match_passed": false,
+  "remaining": [
+    "finite-tip mechanical and phase evolution",
+    "nonzero-tip joins and general birth",
+    "MPI",
+    "RSF",
+    "AMR",
+    "transport"
+  ]
+}

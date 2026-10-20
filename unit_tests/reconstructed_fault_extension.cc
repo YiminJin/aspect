@@ -428,6 +428,10 @@ namespace
       if(!directory)return;
       if(dealii::Utilities::MPI::this_mpi_process(comm)==0)
         {
+          std::ofstream phase(std::string(directory)+"/"+prefix+"-phase.csv");
+          phase<<std::setprecision(17)<<"x,y,phi,obstacle\n";
+          for(unsigned int j=0;j<=ny;++j)for(unsigned int i=0;i<=nx;++i)
+              phase<<double(i)/nx<<','<<double(j)/ny<<','<<state.obstacle[j*(nx+1)+i]<<','<<state.obstacle[j*(nx+1)+i]<<'\n';
           std::ofstream f(std::string(directory)+"/"+prefix+"-surface.csv");
           f<<std::setprecision(17)<<"vertex,x,y,Z,cumulative_slip,rate,I\n";
           for(unsigned int i=0;i<state.manager.get_fault(0).n_vertices();++i)
@@ -610,6 +614,8 @@ TEST_CASE("P3 process restart of prescribed geometry transition", "[.][p3_extens
   ExtensionFixture::publish(state,candidate);
   REQUIRE(checkpoint(*state)==after);
   auto terminal=restore(after);
+  fixture.export_state(*restore(before),"old");
+  fixture.export_state(*terminal,"new");
   REQUIRE(fixture.normalization(terminal->manager,8)==terminal->I);
   REQUIRE(checkpoint(*fixture.trial(*terminal,false))==after);
   fixture.boundary_check(terminal->manager);

@@ -35,3 +35,6 @@ target_compile_options(pf6a_spatial_checks PRIVATE -fno-finite-math-only -ffp-co
 add_library(pf6_transfer_checks SHARED pf6_transfer_checks.cc)
 ASPECT_SETUP_PLUGIN(pf6_transfer_checks)
 target_compile_options(pf6_transfer_checks PRIVATE -fno-finite-math-only -ffp-contract=off)
+add_library(p3_native_checks SHARED p3_native_checks.cc)
+ASPECT_SETUP_PLUGIN(p3_native_checks)
+target_compile_options(p3_native_checks PRIVATE -fno-finite-math-only -ffp-contract=off)

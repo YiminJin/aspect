@@ -44,6 +44,7 @@ namespace aspect
   }
   namespace MaterialModel
   {
+    template<int dim> struct DGGeometryUpdate;
     namespace internal
     {
       template <int dim>
@@ -171,6 +172,10 @@ namespace aspect
         ReconstructedFaultPointResponse
         evaluate_reconstructed_fault_point(
           const ReconstructedFaultPointInputs &inputs) const;
+        /** Read-only zero-interval observation, restricted to the prescribed
+         * frozen-geometry diagnostic. No source, relaxation or publication. */
+        ReconstructedFaultPointResponse evaluate_reconstructed_fault_point(
+          const ReconstructedFaultPointInputs &inputs,bool accepted_snapshot) const;
 
         /** Select a manager-owned two-component Q1 field (shear, compressive
          * normal) of fixed background tractions. Invalid index disables it.
@@ -198,6 +203,8 @@ namespace aspect
          * is used by the caller. Shares the native cohesive/friction law. */
         ReconstructedFaultPointResponse evaluate_cohesive_surface_resistance(
           unsigned int fault, unsigned int segment, double xi, double rate) const;
+        ReconstructedFaultPointResponse evaluate_cohesive_surface_resistance(
+          unsigned int fault,unsigned int segment,double xi,double rate,bool accepted_snapshot) const;
 
         /** Select immutable, geometry-checked outside-profile integrals for a
          * frozen mature through-boundary benchmark. Applied before the existing
@@ -405,9 +412,20 @@ namespace aspect
         void prepare_dg_history_transfer();
         void finish_dg_history_transfer();
 
+        /** Bounded prescribed geometry diagnostic: no physical time stepping.
+         * Explicit setup only, before initialization; no production parameter. */
+        void enable_prescribed_dg_geometry(const std::function<double(const Point<dim> &)> &);
+        bool uses_prescribed_dg_geometry() const {return bool(prescribed_geometry_phase);}
+        void initialize_prescribed_dg_geometry();
+        std::shared_ptr<DGGeometryUpdate<dim>> prepare_dg_geometry_append(
+          const std::vector<Point<dim>> &,const std::vector<double> &,
+          const std::vector<std::vector<double>> &,const std::vector<double> &);
+
       private:
         friend class internal::PhaseFieldFaultTestAccess<dim>;
         friend class Postprocess::MomentCycle<dim>;
+        friend class aspect::Simulator<dim>;
+        friend struct DGGeometryUpdate<dim>;
 
         struct FEStrainState;
         struct FEStrainUpdate;
@@ -425,6 +443,9 @@ namespace aspect
         bool stationary_mature_dg_optimizations = true;
         std::shared_ptr<DGCheckpoint> dg_checkpoint;
         std::shared_ptr<DGTransfer> dg_transfer;
+        std::function<double(const Point<dim> &)> prescribed_geometry_phase;
+        void validate_dg_geometry_commit(const std::shared_ptr<DGGeometryUpdate<dim>> &) const;
+        void publish_dg_geometry_commit(const std::shared_ptr<DGGeometryUpdate<dim>> &) noexcept;
         bool consistent_particle_strain = false;
         bool consistent_endpoint_phase = false;
         std::string fe_initial_phase_profile;

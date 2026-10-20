@@ -117,6 +117,16 @@ namespace aspect
     PhaseFieldFault<dim>::evaluate_reconstructed_fault_point(
       const ReconstructedFaultPointInputs &inputs) const
     {
+      return evaluate_reconstructed_fault_point(inputs,false);
+    }
+
+    template <int dim>
+    typename PhaseFieldFault<dim>::ReconstructedFaultPointResponse
+    PhaseFieldFault<dim>::evaluate_reconstructed_fault_point(
+      const ReconstructedFaultPointInputs &inputs,const bool accepted_snapshot) const
+    {
+      AssertThrow(!accepted_snapshot || uses_prescribed_dg_geometry(),
+                  ExcMessage("Zero-interval observation is restricted to prescribed frozen geometry."));
       AssertThrow(dim == 2, ExcNotImplemented());
       AssertThrow(std::isfinite(inputs.slip_rate)
                   && inputs.slip_rate >= fault_friction.get_minimum_slip_rate(),
@@ -138,7 +148,7 @@ namespace aspect
       const double eta = compute_creep_viscosity(inputs.bulk_material_fractions,
                                                  inputs.temperature);
       const double G = compute_elastic_shear_modulus(inputs.bulk_material_fractions);
-      const double time_step = (this->get_timestep_number() > 0
+      const double time_step = accepted_snapshot ? 0. : (this->get_timestep_number() > 0
                                 ? this->get_timestep()
                                 : initial_time_step);
       const MaxwellCoefficients bulk_coefficients =
@@ -149,10 +159,25 @@ namespace aspect
       const double surface_G = compute_elastic_shear_modulus(localization.surface_material_fractions);
       const MaxwellCoefficients surface_coefficients =
         compute_maxwell_coefficients(surface_eta, surface_G, time_step);
-      const CohesiveResponse cohesive = compute_cohesive_response(
-                                          surface_coefficients, localization.current_I_h, localization.previous_I_h,
-                                          localization.previous_cohesive_traction, inputs.slip_rate,
-                                          localization.current_h, localization.previous_h, mature_frictional_fault);
+      // Observation of an accepted state is the zero-interval limit, not a
+      // Maxwell update with the initialization interval. The rate/history
+      // correction is unused here and its 1/eta_ve form has no dt=0 meaning.
+      CohesiveResponse cohesive;
+      if (accepted_snapshot)
+        {
+          AssertThrow(localization.current_I_h==localization.previous_I_h
+                      && localization.current_h==localization.previous_h,
+                      ExcMessage("Accepted observation requires unchanged phase and normalization."));
+          cohesive.cohesive_traction=localization.previous_cohesive_traction;
+          cohesive.localization_factor=localization.current_h/localization.current_I_h;
+          cohesive.history_correction=0.;
+          cohesive.crack_strain_rate=0.;
+        }
+      else
+        cohesive=compute_cohesive_response(
+          surface_coefficients,localization.current_I_h,localization.previous_I_h,
+          localization.previous_cohesive_traction,inputs.slip_rate,
+          localization.current_h,localization.previous_h,mature_frictional_fault);
 
       // Inputs carry raw FE symmetric gradients; accepted old stress already
       // is a 3D deviatoric block and must not be deviated a second time.
@@ -255,6 +280,15 @@ namespace aspect
     PhaseFieldFault<dim>::evaluate_cohesive_surface_resistance(
       const unsigned int f, const unsigned int s, const double xi, const double rate) const
     {
+      return evaluate_cohesive_surface_resistance(f,s,xi,rate,false);
+    }
+
+    template <int dim>
+    typename PhaseFieldFault<dim>::ReconstructedFaultPointResponse
+    PhaseFieldFault<dim>::evaluate_cohesive_surface_resistance(
+      const unsigned int f, const unsigned int s, const double xi, const double rate,
+      const bool accepted_snapshot) const
+    {
       AssertThrow(cohesive_work_measure && use_adiabatic_pressure_in_fault_friction,
                   ExcMessage("Surface resistance requires prescribed normal pressure."));
       const auto &fault = this->get_reconstructed_fault_manager().get_fault(f);
@@ -271,7 +305,7 @@ namespace aspect
       in.dynamic_pressure=0.;
       // With h=0 and zero bulk tensors the returned derivative contains only
       // q, friction and damping. These quantities do not depend on local phi.
-      return evaluate_reconstructed_fault_point(in);
+      return evaluate_reconstructed_fault_point(in,accepted_snapshot);
     }
 
     template <int dim>
@@ -591,6 +625,8 @@ namespace aspect
   template SymmetricTensor<2,dim> PhaseFieldFault<dim>::evaluate_frozen_maxwell_stress(const double, const std::vector<double> &, const SymmetricTensor<2,dim> &) const; \
   template PhaseFieldFault<dim>::ReconstructedFaultPointResponse PhaseFieldFault<dim>::evaluate_reconstructed_fault_point(const ReconstructedFaultPointInputs &) const; \
   template PhaseFieldFault<dim>::ReconstructedFaultPointResponse PhaseFieldFault<dim>::evaluate_cohesive_surface_resistance(unsigned int, unsigned int, double, double) const; \
+  template PhaseFieldFault<dim>::ReconstructedFaultPointResponse PhaseFieldFault<dim>::evaluate_cohesive_surface_resistance(unsigned int, unsigned int, double, double, bool) const; \
+  template PhaseFieldFault<dim>::ReconstructedFaultPointResponse PhaseFieldFault<dim>::evaluate_reconstructed_fault_point(const ReconstructedFaultPointInputs &, bool) const; \
   template PhaseFieldFault<dim>::ReconstructedFaultBulkPointResponse PhaseFieldFault<dim>::evaluate_reconstructed_fault_bulk_point(const ReconstructedFaultBulkPointInputs &) const; \
   template double PhaseFieldFault<dim>::compute_crack_driving_force_candidate(const double, const MaxwellCoefficients &, const double, const double, const double, const double); \
   template double PhaseFieldFault<dim>::compute_recoverable_phase_driving_force(const double, const double, const double); \

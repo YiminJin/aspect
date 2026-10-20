@@ -3,11 +3,13 @@
 
 Reconstructs the native compact seed, Q1 physical field, consistent surface
 projection and full tensor stress. Uses orthogonal Legendre projection rather
-than the native nodal mass inverse. This is a synthetic geometry test, not a
-mechanically equilibrated propagation trajectory.
+than the native nodal mass inverse. Optional native-owner/checkpoint checks
+use the actual simulator exports. No mechanically equilibrated propagation
+trajectory is claimed.
 """
 import argparse
 import json
+import re
 from pathlib import Path
 import numpy as np
 
@@ -110,10 +112,30 @@ def storage(s):
     return np.sum(np.diff(s['x'])[:, None]*w*Z**2/I)/(2*G)
 
 
-def assess(path):
+def assess(path, native_after=None, native_before=None):
+    global M
+    M=128.
+    if native_after:
+        # Use the actual configured constitutive coefficient, independently of
+        # the nominal seed label. Rounded Gc gives m=128.00000000016001.
+        values=re.findall(r'Accepted FE strain: G=1000000 eta=100000000 lambda=100 m=([^ ]+)',(path/'log.txt').read_text())
+        assert values and len(set(values))==1
+        M=float(values[0])
     old, cells, a = load_state(path, 'old')
     new, other, b = load_state(path, 'new')
-    restarted, rcells, rb = load_state(path, 'restart')
+    restarted, rcells, rb = load_state(native_after, 'restored') if native_after else load_state(path, 'restart')
+    if native_before:
+        restored_old, old_cells, restored_a = load_state(native_before, 'restored')
+        assert np.array_equal(restored_old, old) and np.array_equal(restored_a, a)
+        for initial, restored in [('old', native_before), ('new', native_after)]:
+            assert (path/f'{initial}-persistent.bin').read_bytes()==(restored/'restored-persistent.bin').read_bytes()
+            assert np.array_equal(csv(path/f'{initial}-phase.csv'), csv(restored/'restored-phase.csv'))
+            for suffix in ['stress.csv','native-loads.csv','ledger.csv','constraints.txt']:
+                assert (path/f'{initial}-{suffix}').read_bytes()==(restored/f'restored-{suffix}').read_bytes()
+        assert (path/'old-constraints.txt').read_bytes()==(path/'new-constraints.txt').read_bytes()
+        _, _, retried_b = load_state(native_before, 'new')
+        assert np.array_equal(retried_b, b)
+        assert (path/'new-persistent.bin').read_bytes()==(native_before/'new-persistent.bin').read_bytes()
     assert np.array_equal(cells[['x0', 'y0']], other[['x0', 'y0']])
     assert np.array_equal(restarted, new) and np.array_equal(rb, b)
     assert np.array_equal(a[..., :2], b[..., :2])
@@ -181,19 +203,31 @@ def assess(path):
     ideal = load(new_profile, tau0[..., 2])
     overlap = load(evaluate_profile(new, x, y), tau0[..., 2], x < .5)
     activation = load(evaluate_profile(new, x, y), tau0[..., 2], x > .5)
-    native = csv(path/'native-loads.csv')
-    load_error = max(np.max(np.abs(value-native[f]))/max(1., np.max(np.abs(value))) for value, f in [(L0, 'old'), (L1, 'new'), (ideal, 'ideal')])
+    if native_after:
+        native0=csv(path/'old-native-loads.csv');native1=csv(path/'new-native-loads.csv')
+        load_error=max(np.max(np.abs(L0[:len(old)]-native0['shear']))/max(1.,np.max(np.abs(L0))),
+                       np.max(np.abs(L1-native1['shear']))/max(1.,np.max(np.abs(L1))))
+    else:
+        native = csv(path/'native-loads.csv')
+        load_error = max(np.max(np.abs(value-native[f]))/max(1., np.max(np.abs(value))) for value, f in [(L0, 'old'), (L1, 'new'), (ideal, 'ideal')])
     assert load_error < 1e-11
     assert np.max(np.abs(L1-ideal))/np.max(np.abs(ideal)) < .005
     assert np.max(np.abs(L1-L0-((overlap-L0)+activation+(L1-ideal)))) < 1e-10
-    native_metrics = csv(path/'native-metrics.csv')[0]
-    assert abs(E0-native_metrics['bulk_old']) < 1e-11*E0
-    assert abs(E1-native_metrics['bulk_new']) < 1e-11*E1
+    if native_after:
+        ledger0=csv(path/'old-ledger.csv')[0];ledger1=csv(path/'new-ledger.csv')[0]
+        assert abs(E0-ledger0['bulk'])<1e-11*E0 and abs(E1-ledger1['bulk'])<1e-11*E1
+        assert abs(storage(old)-ledger0['cohesive'])<1e-11 and abs(storage(new)-ledger1['cohesive'])<1e-11
+        assert ledger0['fracture']==ledger1['fracture']
+        assert np.array_equal(csv(path/'old-phase.csv'), csv(path/'new-phase.csv'))
+    else:
+        native_metrics = csv(path/'native-metrics.csv')[0]
+        assert abs(E0-native_metrics['bulk_old']) < 1e-11*E0
+        assert abs(E1-native_metrics['bulk_new']) < 1e-11*E1
     assert error < .005 and abs(E1-E0)/E0 < .005
     # Initial continuum-vs-Q1 representation is separate from remap error.
     init_error = np.sqrt(np.sum(volume*(phase(x,y)-continuum(x,y))**2)/np.sum(volume*continuum(x,y)**2))
     result = dict(scope='synthetic native-component geometry transfer; no physical time/phase evolution or finite-tip mechanics',
-                  ranks=len(list(path.glob('old-cells-*.csv'))), cells=len(cells), tensor_DoFs=3*9*len(cells),
+                  constitutive_m=M, ranks=len(list(path.glob('old-cells-*.csv'))), cells=len(cells), tensor_DoFs=3*9*len(cells),
                   seed_compact_radius=float(R[-1]), initial_relative_phase_L2=float(init_error),
                   initial_tip=.5, appended_tip=.75,
                   continuum_zero_phase_region_beyond=float(.5+R[-1]),
@@ -203,6 +237,9 @@ def assess(path):
                   independent_projection_relative_error=float(projection_error),
                   complete_Q2_reproduction_relative_error=float(reproduction_error),
                   maximum_cell_moment_defect=float(np.max(np.abs(moments))),
+                  unchanged_T_maximum_cell_mean_defect=float(np.max(np.abs(np.sum(volume*delta,axis=1)))),
+                  unchanged_T_maximum_full_tensor_difference=float(np.sqrt(2)*np.max(np.abs(delta))),
+                  maximum_T_coefficient_change=float(np.max(np.abs(b-a))),
                   reconstructed_full_tensor_relative_L2=float(error), unchanged_T_negative_control_relative_L2=float(naive),
                   localized_full_tensor_relative_L2=float(localized_error),
                   reconstructed_full_tensor_maximum_difference=float(np.sqrt(np.max(inner(difference)))),
@@ -219,6 +256,33 @@ def assess(path):
                   old_material_and_histories_preserved=True, birth_histories_zero=True, restart_records_exact=True,
                   physical_steps_advanced=0, geometry_publications=1, strict_reference_match_passed=False,
                   finite_tip_evolution_qualified=False, virgin_phase_activation_qualified=False)
+    if native_after:
+        result['scope']='native material DG / manager histories / physical obstacle / simulator checkpoint, zero-time prescribed append'
+        result['native_restart_before_append_and_after_commit_exact']=True
+        for state,loads in [(old,native0),(new,native1)]:
+            z,w=gauss(16)
+            Z=(1-z)*state['Z'][:-1,None]+z*state['Z'][1:,None]
+            I=(1-z)*state['I'][:-1,None]+z*state['I'][1:,None]
+            reference=np.sum(np.diff(state['x'])[:,None]*w*Z/I)
+            assert abs(np.sum(loads['cohesive'])-reference)<1e-11*max(1.,abs(reference))
+            assert abs(np.sum(loads['friction'])-1000*(state['x'][-1]-state['x'][0]))<1e-11
+        result['native_cohesive_weak_change']=float(np.sum(native1['cohesive'])-np.sum(native0['cohesive']))
+        result['native_residual_weak_change']=float(np.sum(native1['residual'])-np.sum(native0['residual']))
+        result['native_fracture_storage']=float(ledger0['fracture'])
+        result['native_physical_stress_maximum_disagreement']=0.
+        for name,coefs in [('old',a),('new',b)]:
+            points=csv(path/f'{name}-stress.csv')
+            lookup={row['cell']:i for i,row in enumerate(cells)}
+            ci=np.array([lookup[row['cell']] for row in points])
+            u=(points['x']-cells['x0'][ci])/cells['hx'][ci];v=(points['y']-cells['y0'][ci])/cells['hy'][ci]
+            sh=lagrange(u)[:,np.rint(nodes['u']*2).astype(int)]*lagrange(v)[:,np.rint(nodes['v']*2).astype(int)]
+            ref=np.einsum('qi,qik->qk',sh,coefs[ci])
+            state=old if name=='old' else new
+            ref[:,2]-=evaluate_profile(state,points['x'],points['y'])[3]
+            observed=np.stack([points[f] for f in ['tauxx','tauyy','tauxy']],axis=-1)
+            mismatch=float(np.max(np.abs(ref-observed)))
+            assert mismatch<1e-11*np.max(np.abs(ref))
+            result['native_physical_stress_maximum_disagreement']=max(result['native_physical_stress_maximum_disagreement'],mismatch)
     return result
 
 
@@ -227,8 +291,10 @@ def main():
     parser.add_argument('directory', type=Path)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--compare', type=Path, help='Compare persistent fields with another rank layout')
+    parser.add_argument('--native-after-restart',type=Path)
+    parser.add_argument('--native-before-restart',type=Path)
     args = parser.parse_args()
-    result = assess(args.directory)
+    result = assess(args.directory,args.native_after_restart,args.native_before_restart)
     if args.compare:
         for name in ['old', 'new', 'gauss12', 'restart']:
             a, cells, T = load_state(args.directory, name)

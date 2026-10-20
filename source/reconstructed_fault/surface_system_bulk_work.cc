@@ -35,8 +35,10 @@ namespace aspect
   typename ReconstructedFaultSurfaceSystem<dim>::SurfaceAssembly
   ReconstructedFaultSurfaceSystem<dim>::assemble_bulk_work_system(
     const LinearAlgebra::BlockVector &bulk_state, const FaultVector &slip_rate,
-    const bool assemble_jacobian) const
+    const bool assemble_jacobian,const bool accepted_snapshot) const
   {
+    AssertThrow(!accepted_snapshot || (!assemble_jacobian && phase_field_fault.uses_prescribed_dg_geometry()),
+                ExcMessage("Accepted loads require the frozen prescribed geometry diagnostic."));
     TimerOutput::Scope timer(*performance_timer,"Fault: bulk work R/K");
     phase_field_fault.validate_reconstructed_fault_constitutive_state();
     const bool cohesive_work = phase_field_fault.uses_cohesive_work_measure();
@@ -216,7 +218,7 @@ namespace aspect
                 input.slip_rate=ReconstructedFaultUtilities::interpolate_slip_rate(
                                   V[a.segment_index],V[a.segment_index+1],a.shape_1);
                 input.capture_stress_components = static_cast<bool>(local.normal_diagnostic);
-                auto response=phase_field_fault.evaluate_reconstructed_fault_point(input);
+                auto response=phase_field_fault.evaluate_reconstructed_fault_point(input,accepted_snapshot);
                 if (cohesive_work)
                   {
                     // L* tau: resistance belongs to ds below, not JxW*chi.
@@ -383,7 +385,7 @@ namespace aspect
                 const double x=surface_quadrature.point(q)[0],N[2]= {1.-x,x};
                 const double w=surface_quadrature.weight(q)*faults[f].vertex(j).distance(faults[f].vertex(j+1));
                 const double rate=ReconstructedFaultUtilities::interpolate_slip_rate(slip_rate[f][j],slip_rate[f][j+1],x);
-                const auto r=phase_field_fault.evaluate_cohesive_surface_resistance(f,j,x,rate);
+                const auto r=phase_field_fault.evaluate_cohesive_surface_resistance(f,j,x,rate,accepted_snapshot);
                 for (unsigned int i=0; i<2; ++i)
                   {
                     local.residual.values[f][j+i]-=w*N[i]*(r.cohesive_traction+r.friction_traction+r.damping_traction);
@@ -523,9 +525,18 @@ namespace aspect
   }
 
 
+  template<int dim> ReconstructedFaultSurfaceResidual
+  ReconstructedFaultSurfaceSystem<dim>::evaluate_accepted_cohesive_loads(
+    const LinearAlgebra::BlockVector &bulk,const FaultVector &rates) const
+  {
+    AssertThrow(phase_field_fault.uses_prescribed_dg_geometry(),ExcMessage("Frozen prescribed geometry only."));
+    return assemble_bulk_work_system(bulk,rates,false,true).residual;
+  }
+
 #define INSTANTIATE(dim) \
   template ReconstructedFaultSurfaceSystem<dim>::SurfaceAssembly \
-  ReconstructedFaultSurfaceSystem<dim>::assemble_bulk_work_system(const LinearAlgebra::BlockVector &, const FaultVector &, const bool) const;
+  ReconstructedFaultSurfaceSystem<dim>::assemble_bulk_work_system(const LinearAlgebra::BlockVector &, const FaultVector &, const bool,const bool) const; \
+  template ReconstructedFaultSurfaceResidual ReconstructedFaultSurfaceSystem<dim>::evaluate_accepted_cohesive_loads(const LinearAlgebra::BlockVector &,const FaultVector &) const;
 
   ASPECT_INSTANTIATE(INSTANTIATE)
 #undef INSTANTIATE

@@ -25,6 +25,7 @@ namespace aspect
   {
     TimerOutput::Scope timer(computing_timer,"Fault: endpoint phase solve");
     auto &material=Plugins::get_plugin_as_type<MaterialModel::PhaseFieldFault<dim>>(*material_model);
+    AssertThrow(!material.uses_prescribed_dg_geometry(),ExcMessage("Finite-tip phase evolution remains unqualified."));
     auto &phase=*phase_field_handler;
     auto &manager=*reconstructed_fault_manager;
     AssertThrow(material.uses_consistent_endpoint_phase() && material.has_fe_strain_history()

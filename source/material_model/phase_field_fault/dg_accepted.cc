@@ -17,7 +17,7 @@ namespace aspect
     {
       unsigned int version=1,step=0,quadrature=0,clock_step=0;
       double clock_time=0.,clock_dt=0.;
-      std::uint64_t publications=0,geometry=0;
+      std::uint64_t publications=0,geometry=0,geometry_publications=0;
       double G=0.,eta=0.,m=0.,sense=0.;
       std::vector<double> Z,I,phase,coefficients;
       std::vector<std::string> cells;
@@ -78,7 +78,9 @@ namespace aspect
           // Native outer checkpoints follow advance_time: their clock is one
           // step ahead of the accepted constitutive endpoint. PF5 manual
           // prescribed snapshots retain their existing at-endpoint contract.
-          AssertThrow((consistent_endpoint_phase || mature_frictional_fault)
+          AssertThrow(uses_prescribed_dg_geometry()
+                      ? (s.committed_step==0 && this->get_timestep_number()==0 && this->get_timestep()==0.)
+                      : (consistent_endpoint_phase || mature_frictional_fault)
                       ? s.committed_step+1==this->get_timestep_number()
                       : s.committed_step==this->get_timestep_number(),
                       ExcMessage("PF5 checkpoints require an accepted history endpoint."));
@@ -92,7 +94,8 @@ namespace aspect
             }
           dg_checkpoint=std::make_shared<DGCheckpoint>();
           auto &p=*dg_checkpoint;
-          p.version=mature_frictional_fault ? 4 : (consistent_endpoint_phase ? 3 : 1);
+          p.version=uses_prescribed_dg_geometry() ? 5 : (mature_frictional_fault ? 4 : (consistent_endpoint_phase ? 3 : 1));
+          p.geometry_publications=s.geometry_publications;
           p.step=s.committed_step;
           p.clock_step=this->get_timestep_number();
           p.clock_time=this->get_time();
@@ -165,7 +168,8 @@ namespace aspect
       archive &p.version &p.step &p.publications &p.geometry &p.G &p.eta &p.m &p.sense
       &p.quadrature &p.Z &p.I &p.phase &p.mesh &p.fault &p.cells &p.coefficients;
       if (p.version>=2) archive &p.clock_step &p.clock_time &p.clock_dt;
-      AssertThrow((mature_frictional_fault ? p.version==4 : (consistent_endpoint_phase ? (p.version==2 || p.version==3) : p.version==1)) && p.G==elastic_shear_moduli[0] && p.eta==reference_viscosities[0]
+      if(p.version==5) archive &p.geometry_publications;
+      AssertThrow((uses_prescribed_dg_geometry() ? p.version==5 : (mature_frictional_fault ? p.version==4 : (consistent_endpoint_phase ? (p.version==2 || p.version==3) : p.version==1))) && p.G==elastic_shear_moduli[0] && p.eta==reference_viscosities[0]
                   && p.quadrature==fe_bulk_normal_quadrature_points,
                   ExcMessage("PF5 checkpoint version/material/quadrature mismatch."));
     }
@@ -181,7 +185,10 @@ namespace aspect
                                       && p.mesh==this->get_triangulation().get_vertices()))
                   && p.cells.size()==this->get_triangulation().n_global_active_cells()
                   && std::set<std::string>(p.cells.begin(),p.cells.end()).size()==p.cells.size()
-                  && ((consistent_endpoint_phase || mature_frictional_fault)
+                  && (uses_prescribed_dg_geometry()
+                      ? (p.step==0 && p.publications==0 && this->get_timestep_number()==0
+                         && p.clock_step==0 && p.clock_time==this->get_time() && p.clock_dt==0. && this->get_timestep()==0.)
+                      : (consistent_endpoint_phase || mature_frictional_fault)
                       ? (p.step+1==this->get_timestep_number() && p.clock_step==this->get_timestep_number()
                          && p.clock_time==this->get_time() && p.clock_dt==this->get_timestep())
                       : p.step==this->get_timestep_number())
@@ -246,6 +253,7 @@ namespace aspect
       s.I=p.I;
       s.committed_step=p.step;
       s.accepted_publications=p.publications;
+      s.geometry_publications=p.geometry_publications;
       s.stress_samples.clear();
       // This transient constitutive cache is not history and is normally built
       // by mechanical-solve preparation. A prescribed restart bypasses that

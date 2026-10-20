@@ -120,6 +120,14 @@ namespace aspect
         const std::vector<std::vector<double>> &properties,
         const std::vector<double> &slip_rates);
 
+      /** Stage a copy of accepted geometry/properties/rates using the native
+       * archive schema. Only inactive, uncompleted normal strips are admitted.
+       * Simulator attachment is retained by the live owner, never copied. */
+      std::shared_ptr<ReconstructedFaultManager<dim>> clone_prescribed_geometry() const;
+      /** Nonthrowing publication/rollback of a validated staged geometry.
+       * Derived associations are invalidated on both sides. */
+      void swap_prescribed_geometry(ReconstructedFaultManager<dim> &) noexcept;
+
       /** Configure once, before mechanics; +1 retains the geometric convention.
        * The sign multiplies S, not V or the geometric normal. Restart preserves
        * the choice and rejects a conflicting reattachment by the model.

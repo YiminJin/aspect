@@ -166,6 +166,11 @@ namespace aspect
       evaluate_surface_residual(const LinearAlgebra::BlockVector &bulk_state,
                                 const FaultVector &slip_rate) const;
 
+      /** Native weak loads of a frozen prescribed accepted state, without
+       * advancing Maxwell/cohesive history or assembling a tangent. */
+      ReconstructedFaultSurfaceResidual evaluate_accepted_cohesive_loads(
+        const LinearAlgebra::BlockVector &bulk_state,const FaultVector &rates) const;
+
       /** Assemble and replace the current residual, K_V, and its factors. */
       const ReconstructedFaultSurfaceResidual &
       linearize_surface_system(const LinearAlgebra::BlockVector &bulk_state,
@@ -245,7 +250,7 @@ namespace aspect
       SurfaceAssembly
       assemble_bulk_work_system(const LinearAlgebra::BlockVector &bulk_state,
                                 const FaultVector &slip_rate,
-                                bool assemble_jacobian) const;
+                                bool assemble_jacobian,bool accepted_snapshot=false) const;
 
 #ifdef DEAL_II_WITH_UMFPACK
       /**

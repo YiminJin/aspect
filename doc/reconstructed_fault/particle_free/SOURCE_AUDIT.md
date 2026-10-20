@@ -1,3 +1,71 @@
+# P3 native frozen-append completion audit — 19 October 2026
+
+Entry c8e4ae65d5d6750889a11e5a1956efd303e10a37. See
+[P3_NATIVE_COMPLETION_REPORT.md](P3_NATIVE_COMPLETION_REPORT.md) and its actual
+native checkpoints/exports. The preceding synthetic result is preserved below.
+
+- The material's existing FEStrainState/DGHistory owns T, Z, I and the accepted
+  physical phase anchor. The manager owns q=Z/I, previous I and every rate
+  representation. The fixture registers accumulated slip in the manager's
+  existing property registry/checkpoint; it is not a second persistent owner.
+  A zero-time append must retain Z and update q and previous I together.
+- `dg_geometry.cc` stages the joint candidate with actual native owners and the
+  existing manager archive. T+ = T- + Pi_Q2[2(Z+chi+-Z-chi-)S]. All nine modes
+  survive, normal coefficients are copied exactly, and source projection,
+  constitutive update and physical publication are not called. Old endpoint
+  histories are zero; new surface records have explicit zero Z/slip/rate. No
+  new bulk material or general nonzero-tip birth rule is selected.
+- Candidate manager binding is restricted to nonconcurrent serial preparation;
+  success/exception restores accepted owners and invalidates scratch caches.
+  The unsupported zero-phase append exercises a real preparation exception.
+  M5 validates parent/native clock/phase/publication state before dropping the
+  canonical surface/coupling/inverse objects and publishing prepared owners.
+  Affected search/QP, DG basis, normal rays and surface assemblies are rebuilt
+  and used. The fixed bulk mesh and native AffineConstraints do not change.
+- A fresh geometry initially computes generic bootstrap I. Its existing
+  quadrature/stop criteria differ from the native analytic FE operator:
+  max difference 4.12813e-8 m, scaled 8.62568e-9. The initial implementation
+  incorrectly treated bootstrap values as a saved canonical I and hit the
+  unchanged 1e-12 restore guard. The corrected fresh-geometry branch constructs
+  I through the same canonical FE projection as fresh native initialization.
+  Both values remain in `geometry-normalization-bootstrap.csv`; independent
+  Gauss16 verifies canonical values to 3.03e-15 relative. No restore tolerance,
+  normalization floor/derivative, generic backend or default is changed.
+- Point reconstruction and native bulk-work assembly now admit a **read-only
+  zero-interval observation** only under the explicit frozen diagnostic API.
+  It uses beta=1, eta_ve=0, retained physical stress and q; it does not call the
+  positive-interval 1/eta_ve history-correction formula at zero. All original
+  entry points delegate with this option false, preserving physical laws.
+  The stateless law's Vmin guard remains. For this constant mu_s=mu_d=.1,
+  damping=0, zero-interval fixture, temporary admissible observation rates give
+  exactly the same native load as the zero-rate rational limit. Persistent
+  birth rates remain exactly zero. This does not qualify RSF/nonconstant
+  friction or a physical birth evolution rule.
+- An explicit setup call (no new production parameter) requires homogeneous
+  cohesive accepted DG/consistent-endpoint ownership, no solvers, no RSF,
+  serial execution and fixed Cartesian geometry. The simulator performs only
+  initialization/postprocessing, never a physical step. Finite-tip mechanical
+  and phase solves remain explicitly forbidden, also after restart. The
+  special quadrature is fixed tangential8/normal12; source/default rules stay.
+- Native checkpoint version 5 carries the restricted zero-time clock and a
+  geometry-publication counter separate from accepted physical publications.
+  Manager, mesh, native solutions, particles and material histories use the
+  real Simulator create_snapshot/resume path. The zero-time observer bypasses
+  ordinary start_timestep(): it therefore explicitly rebuilds current native
+  constraints on resume. The first frozen shortcut had 0 versus 768 rows;
+  stronger ledger comparison caught this derived-cache omission despite exact
+  history/stress/load agreement. Constraint rows are now exported and compared
+  exactly before/after/restart, without changing their construction. Versions 1–4 keep their existing
+  format/eligibility. Pre-append restart/retry and post-commit restore match all
+  persistent bytes and physical loads for both inputs. It is not conversion
+  of a frozen geometry checkpoint into an evolving finite-tip model.
+- Native MPI/finite-tip Stokes reassembly are not qualified here. Existing
+  component-only two-rank evidence remains separate. All 34 protected BP3
+  identities and incoming manual AGENTS work are preserved. P2 branch and
+  accuracy limitations, including strict_reference_match_passed=false, remain.
+
+---
+
 # P3 imposed geometry-transfer audit — 19 October 2026
 
 Entry reusable P2/hanging-node work is committed as `2d0d40183` (parent

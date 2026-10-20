@@ -1,0 +1,17 @@
+{
+  "command": [
+    "env",
+    "OMP_PROC_BIND=false",
+    "build-particle-free/evolving-phase/native/aspect-release",
+    "--test"
+  ],
+  "cwd": "/home/ein/repository/aspect-pf-rsf-particle-free",
+  "exit_code": 0,
+  "seconds": 8.282615890999296,
+  "environment": {
+    "OMP_PROC_BIND": "spread",
+    "OMP_NUM_THREADS": "1",
+    "DEAL_II_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1"
+  }
+}

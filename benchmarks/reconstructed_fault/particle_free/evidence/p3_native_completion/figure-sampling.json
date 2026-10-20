@@ -1,0 +1,13 @@
+{
+  "grid": [
+    701,
+    701
+  ],
+  "tensor_trace": "right cell at grid interfaces; final cell at physical boundary",
+  "physical_shear_range_before_Pa": [
+    -6286.421604664081,
+    870.883107342513
+  ],
+  "dense_grid_maximum_full_tensor_transfer_difference_Pa": 1.1873037677278377,
+  "dense_grid_maximum_full_tensor_unchanged_T_difference_Pa": 0.6287945528869883
+}

@@ -11,6 +11,40 @@ physical tip propagation. The subsequently selected bounded P2 response and
 original P3 synthetic geometry-transfer diagnostic are recorded below. No
 physical propagation task is selected.
 
+## Closed bounded P3 native completion
+
+User acceptance closes P3 within its reported scope.
+[Report and two figures](P3_NATIVE_COMPLETION_REPORT.md) close the selected
+serial, fixed-mesh, zero-time, zero-tip-history native integration task. Actual
+material DG T/Z/I, manager q=Z/I/slip/rates, physical phase obstacle and Simulator
+checkpoint owners are used. No physical tip/birth law was added. The finite-tip
+mechanical/phase evolution guard remains, including after restart.
+
+The original loaded result is reproduced: full-tensor stress error 2.11e-7
+relative L2, versus 3.73e-7 with unchanged T. One stronger plateau/taper control
+gives 6.43e-6 versus 1.00e-5. Physical cell integral defect is 1.68e-16 Pa m²
+versus 1.63e-5 unchanged-T, but sampled pointwise maxima worsen; the report
+retains that limitation. Added shear/friction loads (+203.732/+250 Pa m) are
+separated from projection error. Phase/obstacle and fracture storage are exact.
+Native normalization, full stress and weak loads pass independent references.
+
+An unsupported append exercises preparation rollback; a fully prepared invalid
+commit rejects. Retry is deterministic and one geometry publication occurs,
+with zero physical publications. Native separate-process checkpoints before
+and after append match persistent histories/fields/particles byte for byte in
+both cases. The zero-time resume path rebuilds native boundary constraints;
+every row matches fresh state, alongside exact stresses, loads and ledgers. Search/QP/ray/basis and native surface assembly rebuilds are used;
+full Stokes objects are invalidated, not solved under this frozen guard.
+
+The generic bootstrap I/analytic FE mismatch was diagnosed and fresh geometry
+now constructs the existing canonical FE I; strict restart checks are unchanged.
+Constant-friction zero-time observation leaves birth rates zero and Vmin intact.
+The existing native suite passes; 34 BP3 identities and manual work are unchanged.
+The older component-only evidence below keeps its original scope. P2's strict
+branch failure remains false. A future selected task must specify finite-tip
+mechanics/birth and physical advancement before propagation; no automatic
+continuation, MPI expansion, AMR, RSF, transport or physical growth is selected.
+
 ## Bounded P3 synthetic straight append
 
 [P3 report](P3_SYNTHETIC_EXTENSION_REPORT.md) defines the transfer contract and
@@ -43,7 +77,8 @@ The neutral manager append stages properties/widths/rates together and
 invalidates projection/search caches. Configured boundary-completion paths
 remain guarded; this horizontal boundary contact needs no completion wedge.
 
-**Scope limit:** this is a synthetic component transaction using native
+**Historical scope limit (native frozen integration is now qualified above):**
+this original result is a synthetic component transaction using native
 manager/archive, FEValues and MPI vectors. It is not a simulator outer-loop
 finite-tip geometry transaction or a native material checkpoint conversion.
 Existing finite-tip mechanical/evolution guards remain; no live Stokes cache

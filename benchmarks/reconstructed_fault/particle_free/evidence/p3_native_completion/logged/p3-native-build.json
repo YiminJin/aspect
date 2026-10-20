@@ -1,0 +1,18 @@
+{
+  "command": [
+    "cmake",
+    "--build",
+    "build-particle-free/evolving-phase/native",
+    "--parallel",
+    "2"
+  ],
+  "cwd": "/home/ein/repository/aspect-pf-rsf-particle-free",
+  "exit_code": 2,
+  "seconds": 148.2189011570008,
+  "environment": {
+    "OMP_PROC_BIND": "spread",
+    "OMP_NUM_THREADS": "1",
+    "DEAL_II_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1"
+  }
+}

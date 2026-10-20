@@ -521,6 +521,19 @@ namespace aspect
             *evaluation_scale=scale+correction.norm();
           return trial-correction;
         }
+      if(uses_prescribed_dg_geometry())
+        {
+          const auto source=this->get_reconstructed_fault_manager().project_to_normal_profiles(point);
+          if(!source.active){if(evaluation_scale)*evaluation_scale=scale;return trial;}
+          const auto j=source.segment_index;const double t=source.xi;
+          const double z=(1-t)*Z[j]+t*Z[j+1],normalization=(1-t)*I[j]+t*I[j+1];
+          AssertThrow(normalization>0. && std::isfinite(normalization) && phi[0]>=0. && phi[0]<1.,
+                      ExcMessage("Undefined prescribed finite DG localization."));
+          const double correction=z*state.m*phi[0]*(1+phi[0])/std::pow(1-phi[0],2)/normalization;
+          trial[0][1]-=state.shear_sense*correction;
+          if(evaluation_scale)*evaluation_scale=scale+std::abs(correction);
+          return trial;
+        }
       const unsigned int segment=std::min<unsigned int>(Z.size()-2,point[0]*(Z.size()-1));
       const double xi=point[0]*(Z.size()-1)-segment;
       const double z=(1-xi)*Z[segment]+xi*Z[segment+1];

@@ -1,0 +1,159 @@
+# P3 native zero-time append: final P2 physical inputs, no physical solvers.
+# Standalone settings expanded from fixed_profile_common.prm to avoid loading
+# its historical observer DSOs (which declare different postprocessors).
+set Dimension = 2
+set End time = 0
+set Use years instead of seconds = false
+set Nonlinear solver scheme = no Advection, no Stokes
+set Max nonlinear iterations = 30
+set Nonlinear solver tolerance = 1e-8
+subsection Formulation
+  set Enable phase field = true
+  set Reconstruct faults from phase field = true
+end
+subsection Geometry model
+  set Model name = box
+  subsection Box
+    set Y repetitions = 64
+    set X repetitions = 32
+  end
+end
+subsection Gravity model
+  set Model name = vertical
+  subsection Vertical
+    set Magnitude = 0
+  end
+end
+subsection Initial temperature model
+  set Model name = function
+  subsection Function
+    set Function expression = 293
+  end
+end
+subsection Compositional fields
+  set Number of fields = 4
+  set Names of fields = tau_xx, tau_yy, tau_xy, rock
+  set Types of fields = stress, stress, stress, chemical composition
+  set Compositional field methods = static, static, static, static
+  set Mapped particle properties = 
+end
+subsection Initial composition model
+  set Model name = function
+  subsection Function
+    set Variable names = x,y
+    set Function expression = 0; 0; 0; 0.5
+  end
+end
+subsection Material model
+  set Model name = phase field fault
+  subsection Phase field fault
+    set Evolve phase field = true
+    set Phase field activation threshold = 1e-6
+    set Viscosity averaging scheme = arithmetic
+    set Reference viscosities = 1e8, 1e8
+    set Elastic shear moduli = 1e6, 1e6
+    set Cohesions = 1000, 1000
+    set Critical energy release rates = 26.6666666667, 26.6666666667
+    set Friction law = rate dependent
+    set Reference friction coefficients = 0.1, 0.1
+    set Dynamic friction coefficients = 0.1, 0.1
+    set Characteristic weakening slip rates = 2e-6, 2e-6
+    set Radiation damping coefficients = 0, 0
+    set Use adiabatic pressure in fault friction = true
+    set Fault constitutive mode = cohesive
+    set Initial time step = 1
+    set Minimum viscosity = 1e6
+    set Maximum viscosity = 1e10
+    set I h projection = consistent
+    set Phase driving history = recoverable energy
+    set Initial cohesive state = unloaded
+    set Bulk history representation = DG trial stress
+    set Cohesive history representation = surface elastic slip
+    set Fault mechanical work measure = bulk conjugate
+    set FE bulk normal quadrature points = 12
+    set Use homogeneous mesh data = true
+    set Enable prescribed DG accepted history = true
+    set Consistent endpoint phase solve = true
+    set FE initial phase profile file = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_free/pf6a-initial-phase.txt
+  end
+end
+subsection Phase field model
+  set Length scale = 0.15625
+  set Geometric function type = AT1
+  set Degradation curvature parameter = 1
+end
+subsection Fault reconstruction
+  set Structural point spacing = 0.015625
+  set Ridge coefficient = 1
+  set Prescribed faults file = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_free/p3-finite-seed.txt
+  set Fit prescribed geometry to phase field = false
+  set Association support = full normal cross-section
+  set Boundary completion = legacy
+end
+subsection Mesh refinement
+  set Initial global refinement = 0
+  set Initial adaptive refinement = 0
+  set Time steps between mesh refinement = 0
+end
+subsection Solver parameters
+  subsection Stokes solver parameters
+    set Stokes solver type = block AMG
+    set Linear solver tolerance = 1e-9
+  end
+  subsection Phase field solver parameters
+    set Linear solver tolerance = 2e-7
+    set Max nonlinear iterations = 100
+    set Use bound constraints = true
+    set Nonlinear solver tolerance = 1e-12
+    set Max Newton line search iterations = 35
+    set Enforce phase irreversibility = true
+  end
+end
+subsection Boundary velocity model
+  set Prescribed velocity boundary indicators = left:function, right:function, bottom:function, top:function
+  subsection Function
+    set Function expression = 0; 0
+    set Variable names = x,y,t
+  end
+end
+subsection Particles
+  set Particle generator name = reference cell
+  set List of particle properties = crack driving force, maxwell stress
+  set Generate particle domains = false
+  set Generate CPDI data for particle domains = false
+  set Load balancing strategy = none
+  subsection Generator
+    subsection Reference cell
+      set Number of particles per cell per direction = 3
+    end
+  end
+  subsection Initial composition
+    set List of field names = rock
+  end
+  set Integration scheme = rk2
+  set Generate face data for particle domains = false
+end
+subsection Postprocess
+  set List of postprocessors = particles, P3 native geometry
+  subsection Particles
+    set Data output format = none
+  end
+end
+set Maximum time step = 0.125
+set Nonlinear solver failure strategy = abort program
+set Surface pressure = 10000
+subsection Temperature field
+  set Temperature method = static
+end
+set Additional shared libraries = $ASPECT_SOURCE_DIR/build-particle-free/evolving-phase/plugin/libp3_native_checks.release.so
+set Output directory = $ASPECT_SOURCE_DIR/build-particle-free/p3-native-completion/runs/original
+set Resume computation = false
+set Maximum first time step = 0.125
+set Pressure normalization = no
+subsection Checkpointing
+  set Steps between checkpoint = 0
+  set Time between checkpoint = 0
+end
+subsection Termination criteria
+  set Checkpoint on termination = false
+end

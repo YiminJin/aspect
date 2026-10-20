@@ -52,6 +52,24 @@
 
 namespace aspect
 {
+  template<int dim> void Simulator<dim>::commit_reconstructed_fault_geometry(
+    const std::shared_ptr<MaterialModel::DGGeometryUpdate<dim>> &update)
+  {
+    auto &model=Plugins::get_plugin_as_type<MaterialModel::PhaseFieldFault<dim>>(*material_model);
+    AssertThrow(!pending_dg_endpoint_publication,
+                ExcMessage("Geometry cannot commit over a pending physical endpoint."));
+    model.validate_dg_geometry_commit(update);
+    // No fallible preparation follows this point. The bulk mesh/constraints
+    // stay fixed; all geometry-dependent coupling and inverse caches expire.
+    reconstructed_fault_surface_system.reset();
+    reconstructed_fault_stokes_coupling.reset();
+    endpoint_velocity_inverse={};
+    endpoint_bulk_direct.reset();
+    rebuild_stokes_matrix=true;
+    rebuild_stokes_preconditioner=true;
+    model.publish_dg_geometry_commit(update);
+  }
+
   namespace
   {
     using FaultVector = ReconstructedFaultVector;
@@ -1503,6 +1521,7 @@ namespace aspect
 namespace aspect
 {
 #define INSTANTIATE(dim) \
+  template void Simulator<dim>::commit_reconstructed_fault_geometry(const std::shared_ptr<MaterialModel::DGGeometryUpdate<dim>> &); \
   template std::pair<double,double> Simulator<dim>::endpoint_mechanical_defects(const LinearAlgebra::BlockVector &,const ReconstructedFaultVector &); \
   template std::function<Vector<double>(const Vector<double> &)> Simulator<dim>::make_reconstructed_fault_endpoint_tangent(const LinearAlgebra::BlockVector &,const ReconstructedFaultVector &,const LinearAlgebra::BlockVector &,const std::vector<double> &); \
   template void Simulator<dim>::solve_reconstructed_fault_stokes (bool,ReconstructedFaultVector *,bool); \

@@ -1648,7 +1648,7 @@ namespace aspect
 
       // Resolve tangential variation of the bulk FE column integral without
       // changing the Q1 field or its consistent (exact) mass matrix.
-      const QIterated<1> surface_quadrature(QGauss<1>(3),
+      const QIterated<1> surface_quadrature(QGauss<1>(uses_prescribed_dg_geometry() ? 8:3),
                                             normalization_surface_subdivisions);
 
       unsigned int n_profiles = 0;

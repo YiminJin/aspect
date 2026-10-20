@@ -506,8 +506,9 @@ namespace aspect
                 local_max = std::max(local_max, offset * tangent);
               }
         const auto comm = this->get_mpi_communicator();
-        AssertThrow(std::abs(Utilities::MPI::min(local_min, comm)) <= tolerance
-                    && std::abs(Utilities::MPI::max(local_max, comm) - length) <= tolerance,
+        AssertThrow((material && material->uses_prescribed_dg_geometry())
+                    || (std::abs(Utilities::MPI::min(local_min, comm)) <= tolerance
+                    && std::abs(Utilities::MPI::max(local_max, comm) - length) <= tolerance),
                     ExcMessage("The prescribed fault must span the full tangential extent of the Box; "
                                "full normal support does not extend finite sharp endpoints."));
         const double width = Utilities::MPI::max(local_width, comm) + tolerance;
@@ -856,6 +857,46 @@ namespace aspect
     invalidate_stokes_qp_projection_cache();
   }
 
+
+  template<int dim>
+  std::shared_ptr<ReconstructedFaultManager<dim>>
+  ReconstructedFaultManager<dim>::clone_prescribed_geometry() const
+  {
+    AssertThrow(!slip_rate_nonlinear_solve_active && !slip_rate_trial_active
+                && !automatic_boundary_completion && boundary_contacts.empty()
+                && bottom_source_fault==numbers::invalid_unsigned_int && !top_source_continuation,
+                ExcMessage("Prescribed geometry staging requires inactive normal strips without boundary completion."));
+    std::ostringstream storage;
+    {aspect::oarchive archive(storage);archive<<*this;}
+    auto candidate=std::make_shared<ReconstructedFaultManager<dim>>();
+    std::istringstream input(storage.str());
+    {aspect::iarchive archive(input);archive>>*candidate;}
+    candidate->current_newton_slip_rates=current_newton_slip_rates;
+    candidate->trial_slip_rates=trial_slip_rates;
+    candidate->prescribed_slip_rates=prescribed_slip_rates;
+    return candidate;
+  }
+
+  template<int dim> void ReconstructedFaultManager<dim>::swap_prescribed_geometry(
+    ReconstructedFaultManager<dim> &other) noexcept
+  {
+    using std::swap;
+    swap(initial_reconstruction_complete,other.initial_reconstruction_complete);
+    reconstructed_faults.swap(other.reconstructed_faults);
+    projection_half_widths.swap(other.projection_half_widths);
+    property_information.swap(other.property_information);
+    property_indices.swap(other.property_indices);
+    swap(n_property_components,other.n_property_components);
+    shear_senses.swap(other.shear_senses);
+    timestep_committed_slip_rates.swap(other.timestep_committed_slip_rates);
+    current_newton_slip_rates.swap(other.current_newton_slip_rates);
+    trial_slip_rates.swap(other.trial_slip_rates);
+    slip_rate_initialized.swap(other.slip_rate_initialized);
+    prescribed_slip_rates.swap(other.prescribed_slip_rates);
+    ++projection_metadata_version;++other.projection_metadata_version;
+    invalidate_particle_projection_cache();invalidate_stokes_qp_projection_cache();
+    other.invalidate_particle_projection_cache();other.invalidate_stokes_qp_projection_cache();
+  }
 
   // -----------------------------------------------------------------------------
   // Property registration
@@ -1381,6 +1422,8 @@ namespace aspect
   template void ReconstructedFaultManager<dim>::append_reconstructed_fault( \
     const unsigned int, const std::vector<Point<dim>> &, const std::vector<double> &, \
     const std::vector<std::vector<double>> &, const std::vector<double> &); \
+  template std::shared_ptr<ReconstructedFaultManager<dim>> ReconstructedFaultManager<dim>::clone_prescribed_geometry() const; \
+  template void ReconstructedFaultManager<dim>::swap_prescribed_geometry(ReconstructedFaultManager<dim> &) noexcept; \
   template unsigned int ReconstructedFaultManager<dim>::register_property(const std::string &, const unsigned int); \
   template bool ReconstructedFaultManager<dim>::has_property(const std::string &) const; \
   template unsigned int ReconstructedFaultManager<dim>::get_property_index(const std::string &) const; \

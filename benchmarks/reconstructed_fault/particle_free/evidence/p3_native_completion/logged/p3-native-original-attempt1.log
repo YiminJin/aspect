@@ -1,0 +1,75 @@
+-----------------------------------------------------------------------------
+--                             This is ASPECT                              --
+-- The Advanced Solver for Planetary Evolution, Convection, and Tectonics. --
+-----------------------------------------------------------------------------
+--     . version 3.1.0-pre (pf-rsf-particle-free, c8e4ae65d)
+--     . using deal.II 9.6.2 (dealii-9.6, 6890ca740b)
+--     .       with 32 bit indices
+--     .       with vectorization level 2 (AVX, 4 doubles, 256 bits)
+--     . using Trilinos 14.2.0
+--     . using p4est 2.8.7
+--     . using Geodynamic World Builder 1.0.0
+--     . running in OPTIMIZED mode
+--     . running with 1 MPI process
+-----------------------------------------------------------------------------
+
+Loading shared library </home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/evolving-phase/plugin/libp3_native_checks.release.so>
+
+
+
+----------------------------------------------------
+Exception 'ExcInvalidEntryForPattern( current_line_n, input_filename, entry_value, entry_name, patterns[pattern_index]->description())' on rank 0 on processing: 
+
+--------------------------------------------------------
+An error occurred in line <1992> of file </home/ein/repository/dealii/source/base/parameter_handler.cc> in function
+    void dealii::ParameterHandler::scan_line(std::string, const std::string&, unsigned int, bool)
+The violated condition was: 
+    patterns[pattern_index]->match(entry_value)
+Additional information: 
+    Line <143> of file <input string>:
+    The entry value
+    particles, verify phase field fault stage i
+    for the entry named
+    List of postprocessors
+    does not match the given pattern:
+    [MultipleSelection ODE statistics|P3 native geometry|Stokes
+    residual|basic statistics|boundary densities|boundary
+    pressures|boundary strain rate residual statistics|boundary velocity
+    residual statistics|command|composition statistics|composition
+    velocity statistics|core statistics|crystal preferred
+    orientation|current surface|depth average|domain volume
+    statistics|dynamic topography|entropy statistics|entropy viscosity
+    statistics|fluid velocity statistics|geoid|global statistics|gravity
+    calculation|heat flux densities|heat flux map|heat flux
+    statistics|heating statistics|load balance statistics|mass flux
+    statistics|material statistics|matrix statistics|maximum depth of
+    field|melt statistics|memory statistics|mobility statistics|particle
+    count statistics|particle distribution score|particle distribution
+    statistics|particles|point values|pressure statistics|reconstructed
+    faults|rotation statistics|sea level|spherical velocity
+    statistics|temperature statistics|timing
+    statistics|topography|velocity boundary statistics|velocity
+    statistics|viscous dissipation statistics|visualization|volume of
+    fluid statistics ]
+
+Stacktrace:
+-----------
+#0  /opt/dealii/9.6-local/lib/libdeal_II.so.9.6.2: dealii::ParameterHandler::scan_line(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, unsigned int, bool)
+#1  /opt/dealii/9.6-local/lib/libdeal_II.so.9.6.2: dealii::ParameterHandler::parse_input(std::istream&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, bool)
+#2  /opt/dealii/9.6-local/lib/libdeal_II.so.9.6.2: dealii::ParameterHandler::parse_input_from_string(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, bool)
+#3  build-particle-free/evolving-phase/native/aspect-release: ) [0x20ffeb8]
+#4  build-particle-free/evolving-phase/native/aspect-release: ) [0x21611a2]
+#5  build-particle-free/evolving-phase/native/aspect-release: main
+--------------------------------------------------------
+
+Aborting!
+----------------------------------------------------
+--------------------------------------------------------------------------
+MPI_ABORT was invoked on rank 0 in communicator MPI_COMM_WORLD
+  Proc: [[49834,0],0]
+  Errorcode: 1
+
+NOTE: invoking MPI_ABORT causes Open MPI to kill all MPI processes.
+You may or may not see output from other processes, depending on
+exactly when Open MPI kills them.
+--------------------------------------------------------------------------

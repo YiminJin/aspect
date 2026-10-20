@@ -117,6 +117,8 @@ namespace aspect
       const unsigned int n=trial.block(pb).size(),ns=Z_reference.size();
       AssertDimension(ns,s.Z.size());
       const auto normalization=evaluate_fe_normalization(trial,true,phase_direction);
+      AssertThrow(!uses_prescribed_dg_geometry() || (!tangent && !phase_direction),
+                  ExcMessage("Finite-tip phase variations remain unqualified; frozen energy values only."));
       const auto &phase_values=normalization.phase_values;
       AssertThrow(!tangent || Utilities::MPI::n_mpi_processes(this->get_mpi_communicator())==1,
                   ExcMessage("Dense FE Hessians are serial diagnostics; MPI endpoint solves use the full matrix-free action."));
@@ -158,6 +160,14 @@ namespace aspect
             {
               const auto &p=s.bulk[point];
               AssertThrow(p.cell==entry.first,ExcInternalError());
+              if(p.segment==numbers::invalid_unsigned_int)
+                {
+                  AssertThrow(uses_prescribed_dg_geometry() && dg_trial_stress_history,ExcInternalError());
+                  const auto &tau=R[q];
+                  const double energy=p.weight*((tau*tau)+std::pow(trace(tau),2))/(4*s.G);
+                  result.bulk+=energy;bulk_energy+=energy;
+                  continue;
+                }
               double phi=0.;
               for (unsigned int v=0; v<p.dofs.size(); ++v)
                 phi+=p.shape[v]*phase_values[p.dofs[v]];
@@ -253,6 +263,7 @@ namespace aspect
       const LinearAlgebra::BlockVector *velocity_direction,
       const std::vector<std::vector<double>> *slip_direction, bool assemble_rhs) const
     {
+      AssertThrow(!uses_prescribed_dg_geometry(),ExcMessage("Finite-tip geometry observation does not qualify phase actions/evolution."));
       TimerOutput::Scope timer(this->get_computing_timer(),"Fault: FE tangent pullback");
       AssertThrow(!dg_trial_stress_history || endpoint.dg_history,
                   ExcMessage("A DG tangent requires its explicit endpoint tensor."));

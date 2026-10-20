@@ -1,0 +1,12 @@
+{"label": "p3-native-original-constraints", "exit_code": 0, "seconds": 24.010083433000545, "log": "/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/refactoring_boundary/evidence/p3-native-original-constraints.log"}
+/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/p3-native-completion/runs/original-before/input.prm
+{"label": "p3-native-original-before-constraints", "exit_code": 0, "seconds": 19.649011159999645, "log": "/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/refactoring_boundary/evidence/p3-native-original-before-constraints.log"}
+/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/p3-native-completion/runs/original-after/input.prm
+{"label": "p3-native-original-after-constraints", "exit_code": 0, "seconds": 4.872475542000757, "log": "/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/refactoring_boundary/evidence/p3-native-original-after-constraints.log"}
+{"label": "p3-native-sensitive-constraints", "exit_code": 0, "seconds": 22.054187083002034, "log": "/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/refactoring_boundary/evidence/p3-native-sensitive-constraints.log"}
+/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/p3-native-completion/runs/sensitive-before/input.prm
+{"label": "p3-native-sensitive-before-constraints", "exit_code": 0, "seconds": 20.754554379000183, "log": "/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/refactoring_boundary/evidence/p3-native-sensitive-before-constraints.log"}
+/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/p3-native-completion/runs/sensitive-after/input.prm
+{"label": "p3-native-sensitive-after-constraints", "exit_code": 0, "seconds": 5.073059517999354, "log": "/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/refactoring_boundary/evidence/p3-native-sensitive-after-constraints.log"}
+{"label": "p3-native-units-complete", "exit_code": 0, "seconds": 6.1242253110031015, "log": "/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/refactoring_boundary/evidence/p3-native-units-complete.log"}
+{"label": "p3-native-input-complete", "exit_code": 0, "seconds": 1.5663170010011527, "log": "/home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/refactoring_boundary/evidence/p3-native-input-complete.log"}

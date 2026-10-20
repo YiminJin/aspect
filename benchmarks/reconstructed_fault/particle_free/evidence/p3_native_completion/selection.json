@@ -1,0 +1,24 @@
+{
+  "baseline": "c8e4ae65d5d6750889a11e5a1956efd303e10a37",
+  "scope": "serial frozen-geometry append using native DG/material, manager and simulator checkpoint owners; no physical step",
+  "geometry": {"old_tip": 0.5, "new_tip": 0.75, "y": 0.5, "surface_spacing": 0.015625},
+  "bulk_cells": [32, 64],
+  "native_phase": "same compact radial cap, sampled directly at Q1 nodes; frozen physical obstacle",
+  "sensitive_Z": "1000 min(1,x/(2/64),(0.5-x)/(2/64)), zero outside [0,0.5]",
+  "sensitive_slip": "2*Z/1e6; old rows preserved, new rows zero",
+  "sensitive_rate": "Z*1e-8; old rows preserved, new rows zero",
+  "tensor": "same nonproportional complete-Q2 polynomial as original P3",
+  "birth": "Z=elastic slip=accumulated slip=rate=0 at new records, old endpoint zero; no new physical birth law",
+  "publication": "one native geometry commit; physical accepted-history publications stay zero",
+  "gates": {
+    "phase_obstacle_old_Z_slip_and_material_ids": "exact",
+    "retry_and_restart_persistent_fields": "exact",
+    "independent_normalization_projection_weak_load_scaled": 1e-11,
+    "physical_stress_relative_L2": 0.005,
+    "bulk_storage_relative_defect": 0.005,
+    "weak_load_relative_defect": 0.005,
+    "physical_evolution": "must reject, including after restart"
+  },
+  "remaining": ["nonzero-tip joins", "virgin-material phase activation", "RSF", "AMR", "transport", "physical phase growth"],
+  "strict_reference_match_passed": false
+}

@@ -2373,6 +2373,20 @@ namespace aspect
     // Start the principal loop over time steps. At this point, everything
     // is completely initialized, so set that status as well
     simulator_is_past_initialization = true;
+    if (const auto *fault=dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(material_model.get()))
+      if (fault->uses_prescribed_dg_geometry())
+        {
+          AssertThrow(parameters.nonlinear_solver==Parameters<dim>::NonlinearSolver::no_Advection_no_Stokes
+                      && timestep_number==0 && time_step==0.,
+                      ExcMessage("Prescribed finite-tip geometry is a zero-time diagnostic; evolution remains forbidden."));
+          // Ordinary restart builds these at start_timestep(), which this
+          // zero-time observer deliberately never enters. Rebuild native
+          // boundary constraints before observing/restaging the restored state.
+          if(parameters.resume_computation)compute_current_constraints();
+          postprocess();
+          computing_timer.print_summary();
+          return;
+        }
     if (parameters.resume_computation)
       if (const auto *fault=dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(material_model.get()))
         if (fault->uses_dg_trial_stress_history() && fault->uses_consistent_endpoint_phase()

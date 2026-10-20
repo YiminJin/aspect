@@ -102,6 +102,8 @@ namespace aspect
       double m=0.,G=0.,eta=0.,initial_fracture=0.;
       unsigned int committed_step=0;
       std::uint64_t accepted_publications=0;
+      // Prescribed geometry commits are not physical Maxwell publications.
+      std::uint64_t geometry_publications=0;
     };
 
     template<int dim> struct PhaseFieldFault<dim>::FEStrainUpdate
@@ -114,6 +116,15 @@ namespace aspect
       std::vector<double> dg_cohesive,dg_rates;
       unsigned int dg_step=0;
       double dg_time=0.,dg_dt=0.;
+    };
+
+    template<int dim> struct DGGeometryUpdate
+    {
+      std::shared_ptr<typename PhaseFieldFault<dim>::FEStrainState> incoming,next;
+      std::shared_ptr<ReconstructedFaultManager<dim>> manager;
+      std::vector<std::vector<double>> normalization,surface_temperatures;
+      std::string parent_surface;
+      bool published=false,identity=false;
     };
 
   }

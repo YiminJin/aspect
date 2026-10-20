@@ -76,6 +76,8 @@ DEAL_II_ENABLE_EXTRA_DIAGNOSTICS
 #include <memory>
 #include <thread>
 
+namespace aspect { namespace MaterialModel { template<int dim> struct DGGeometryUpdate; } }
+
 namespace WorldBuilder
 {
   class World;
@@ -607,6 +609,10 @@ namespace aspect
       std::function<void()> benchmark_endpoint_precommit;
       /** PF6a publishes only after the native timestep manager accepts. */
       std::function<void(bool)> pending_dg_endpoint_publication;
+      /** Publish a prevalidated, frozen prescribed DG geometry transaction.
+       * Physical endpoint publication is a separate operation. */
+      void commit_reconstructed_fault_geometry(
+        const std::shared_ptr<MaterialModel::DGGeometryUpdate<dim>> &);
       /** Fixed-step serial velocity inverse used only as an endpoint
        * mechanical preconditioner. Rebuilt with the homogeneous A block. */
       std::function<void(LinearAlgebra::Vector &,const LinearAlgebra::Vector &)>
