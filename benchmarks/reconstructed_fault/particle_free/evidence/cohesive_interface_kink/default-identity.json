@@ -1,0 +1,12 @@
+{
+  "bitwise": true,
+  "files": [
+    "stiffness.csv",
+    "response.csv",
+    "Q.csv",
+    "normal-minus.csv",
+    "normal-plus.csv",
+    "field-response.csv",
+    "energy-gauss6.csv"
+  ]
+}

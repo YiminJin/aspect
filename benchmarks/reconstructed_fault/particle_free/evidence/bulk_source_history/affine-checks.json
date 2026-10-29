@@ -1,0 +1,62 @@
+{
+  "errors": {
+    "point_tensor": 2.4057111711297378e-14,
+    "DG_source": 1.3066108058039378e-14,
+    "native_projection": 4.19597964922497e-14,
+    "physical_stress": 0.0,
+    "FE_recurrence": 1.0842021724855044e-19,
+    "FE_roundoff_ratio": 1.1792910881511574,
+    "bulk_energy": 4.0967229608668276e-14,
+    "cohesive_energy": 1.5178830414797062e-18,
+    "fracture_energy": 1.7763568394002505e-15,
+    "cohesive_relation": 1.1368683772161603e-16,
+    "friction_interval": 3.751665644813329e-15,
+    "driving": 4.1633363423391324e-17
+  },
+  "peaks": {
+    "remainder": 3.219420002288346e-12,
+    "mixed_Q2_coefficient": 4.774847184307873e-10,
+    "normal_stress": 232.1624041226863,
+    "initial_hold_phase_increment": 0.0
+  },
+  "maximum_native_source_error": 3.666996729876398e-15,
+  "maximum_mechanical_residual": 3.1497047384354427e-10,
+  "maximum_phase_KKT": 0.0,
+  "maximum_tangent_FD_error": 2.1443742083156663e-09,
+  "accepted_publications": 48,
+  "deliberate_inconsistency": {
+    "step": 1.0,
+    "time": 0.0025,
+    "cell": "0_0:",
+    "q": 5.0,
+    "u": 0.0,
+    "v": 0.0,
+    "x": 0.0,
+    "y": 0.0,
+    "error": 1.4142135623730951e-05,
+    "bound": 1e-12,
+    "ratio": 14142135.623730952,
+    "Txx": 0.01,
+    "Tyy": -6.058451752097371e-28,
+    "Tzz": -0.01,
+    "Txy": 2.271919407036514e-28,
+    "expected_xx": -1.7670484276950664e-28,
+    "expected_yy": -6.058451752097371e-28,
+    "expected_zz": 7.825500179792437e-28,
+    "expected_xy": 2.271919407036514e-28,
+    "DGxx": 0.01,
+    "DGyy": -2.524354896707238e-28,
+    "DGxy": -2.524354896707238e-29,
+    "projection_xx": 1.262177448353619e-28,
+    "projection_yy": 3.534096855390133e-28,
+    "projection_xy": -2.524354896707238e-28
+  },
+  "recovery_gates": [
+    "converged trial does not publish",
+    "outer rejection restores native solution and all bulk histories",
+    "identical retry native solution",
+    "repeated rejection leaves accepted histories unchanged"
+  ],
+  "recovery_run": "build-particle-free/bulk-source-history/runs/affine-centered",
+  "strict_reference_match_passed": false
+}

@@ -1,0 +1,68 @@
+{
+  "errors": {
+    "point_tensor": 2.9381496343056384e-14,
+    "DG_source": 1.32298865715276e-14,
+    "native_projection": 5.125308824477291e-14,
+    "physical_stress": 0.0,
+    "FE_recurrence": 1.0842021724855044e-19,
+    "FE_roundoff_ratio": 0.9997551962848535,
+    "bulk_energy": 1.0658141036401503e-14,
+    "cohesive_energy": 1.3010426069826053e-18,
+    "fracture_energy": 1.7763568394002505e-15,
+    "cohesive_relation": 1.1368683772161603e-16,
+    "friction_interval": 4.092726157978177e-15,
+    "driving": 4.1633363423391324e-17
+  },
+  "peaks": {
+    "remainder": 0.03947109047967692,
+    "mixed_Q2_coefficient": 0.6277545542247083,
+    "normal_stress": 233.37144726382922,
+    "initial_hold_phase_increment": 0.0
+  },
+  "maximum_native_source_error": 3.604993065725983e-15,
+  "maximum_mechanical_residual": 5.313353740441984e-10,
+  "maximum_phase_KKT": 0.0,
+  "maximum_tangent_FD_error": 2.8002459999094184e-09,
+  "accepted_publications": 48,
+  "deliberate_inconsistency": {
+    "step": 1.0,
+    "time": 0.0025,
+    "cell": "0_0:",
+    "q": 5.0,
+    "u": 0.0,
+    "v": 0.0,
+    "x": 0.0,
+    "y": 0.0,
+    "error": 1.4142135623730951e-05,
+    "bound": 1e-12,
+    "ratio": 14142135.623730952,
+    "Txx": 0.01,
+    "Tyy": -1.6408306828597046e-28,
+    "Tzz": -0.01,
+    "Txy": 1.4136387421560532e-27,
+    "expected_xx": 1.5146129380243427e-28,
+    "expected_yy": -1.6408306828597046e-28,
+    "expected_zz": 1.262177448353619e-29,
+    "expected_xy": 1.4136387421560532e-27,
+    "DGxx": 0.009999999999998071,
+    "DGyy": 1.0763230323143802e-15,
+    "DGxy": -4.415113133662103e-15,
+    "projection_xx": -1.9281577700880303e-15,
+    "projection_yy": 1.0763230323145443e-15,
+    "projection_xy": -4.415113133663517e-15
+  },
+  "recovery_gates": [
+    "converged trial does not publish",
+    "outer rejection restores native solution and all bulk histories",
+    "identical retry native solution",
+    "repeated rejection leaves accepted histories unchanged"
+  ],
+  "recovery_run": "build-particle-free/bulk-source-history/runs/after-centered",
+  "strict_reference_match_passed": false,
+  "restart": {
+    "ledgers_bitwise_equal": true,
+    "number_of_binary_and_field_files_bitwise_equal": 404,
+    "prefix_steps": 44,
+    "resumed_steps": 4
+  }
+}

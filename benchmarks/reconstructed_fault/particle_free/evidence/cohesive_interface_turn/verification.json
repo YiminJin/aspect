@@ -1,0 +1,730 @@
+{
+  "primary_selection": {
+    "angle_deg": 30,
+    "runner_deg": 20,
+    "half_step_score_gap": 0.03955777641891539,
+    "twice_observed_combined_uncertainty": 0.02360296801499151,
+    "distinguished_in_sampled_primary_family": true,
+    "unique_geometry_independent_direction": false,
+    "scope": "Finite preview score on a declared candidate family, width and loading horizon; not a global potential or universal path law.",
+    "wide_best_sampled_deg": 60,
+    "wide_sector_boundary": true,
+    "width_changes_ranking": true
+  },
+  "reflection": {
+    "jump": 5.561957144850638e-17,
+    "damage": 8.337774914934926e-14,
+    "theta": 3.219646771412954e-14,
+    "reference": 0.0,
+    "relaxed_jump": 5.561957144850638e-17,
+    "absolute_slip": 5.561957144850638e-17,
+    "sided_normal_swap_Pa": 3.483364707790315e-10,
+    "coefficient_sign_error": 5.5402731014009277e-17,
+    "score_error": 2.55351295663786e-14,
+    "bulk_cell_mean_full_tensor_Pa": 2.80920210932116e-10,
+    "bulk_cell_mean_pressure_Pa": 4.852296342505724e-10
+  },
+  "runs": {
+    "mature64": {
+      "weak_Pa": 5.324333566629017e-12,
+      "contact_Pa": 7180.604710381662,
+      "max_normal_gap_m": 3.2742905609062234e-17,
+      "max_normal_work_J_m": 1.9869203827047094e-16,
+      "max_ledger_J_m": 1.185547262439043e-12,
+      "absolute_physical_remainder_J_m": 0.0022185055074932687,
+      "signed_physical_remainder_J_m": -0.0002614382476656303,
+      "work_relative_sliding": 0.00011720390245484201,
+      "work_relative_fracture": null,
+      "birth": {
+        "weak_Pa": 0.0,
+        "peak_tied_Pa": 0.0,
+        "stress_error_Pa": 0.0,
+        "bulk_transfer_error_J_m": 0.0,
+        "old_history_bitwise": true,
+        "physical_clock_change_s": 0.0,
+        "geometry_publications": 1,
+        "new_fracture_J_m": 0.0,
+        "new_bond_J_m": 0.0
+      },
+      "lifecycle": [
+        {
+          "time_s": 0.00025,
+          "derivative_relative": 1.8210211752183075e-12,
+          "retry_restart_bitwise": true,
+          "rejection_accepted_unchanged": true
+        }
+      ],
+      "physical_publications": 2300,
+      "steps": 2300,
+      "extent": null
+    },
+    "mature128": {
+      "weak_Pa": 1.1832905026191535e-11,
+      "contact_Pa": 7053.0362357519,
+      "max_normal_gap_m": 2.4530074152484538e-17,
+      "max_normal_work_J_m": 1.6692608870537623e-16,
+      "max_ledger_J_m": 1.3114146948283237e-12,
+      "absolute_physical_remainder_J_m": 0.002237496381351753,
+      "signed_physical_remainder_J_m": -0.0002600479559863203,
+      "work_relative_sliding": 0.0001171507311425861,
+      "work_relative_fracture": null,
+      "birth": {
+        "weak_Pa": 0.0,
+        "peak_tied_Pa": 0.0,
+        "stress_error_Pa": 0.0,
+        "bulk_transfer_error_J_m": 0.0,
+        "old_history_bitwise": true,
+        "physical_clock_change_s": 0.0,
+        "geometry_publications": 1,
+        "new_fracture_J_m": 0.0,
+        "new_bond_J_m": 0.0
+      },
+      "lifecycle": [
+        {
+          "time_s": 0.00025,
+          "derivative_relative": 2.18601617417535e-12,
+          "retry_restart_bitwise": true,
+          "rejection_accepted_unchanged": true
+        }
+      ],
+      "physical_publications": 2300,
+      "steps": 2300,
+      "extent": null
+    },
+    "maturewide128": {
+      "weak_Pa": 1.3069763639360731e-11,
+      "contact_Pa": 7024.458529542649,
+      "max_normal_gap_m": 3.7730235602495554e-17,
+      "max_normal_work_J_m": 1.6226917477013093e-16,
+      "max_ledger_J_m": 1.973605777909988e-12,
+      "absolute_physical_remainder_J_m": 0.0024767144993053246,
+      "signed_physical_remainder_J_m": 0.00012274291155272296,
+      "work_relative_sliding": 0.00011924168900114789,
+      "work_relative_fracture": null,
+      "birth": {
+        "weak_Pa": 0.0,
+        "peak_tied_Pa": 0.0,
+        "stress_error_Pa": 0.0,
+        "bulk_transfer_error_J_m": 0.0,
+        "old_history_bitwise": true,
+        "physical_clock_change_s": 0.0,
+        "geometry_publications": 1,
+        "new_fracture_J_m": 0.0,
+        "new_bond_J_m": 0.0
+      },
+      "lifecycle": [
+        {
+          "time_s": 0.00025,
+          "derivative_relative": 2.5845116326396778e-12,
+          "retry_restart_bitwise": true,
+          "rejection_accepted_unchanged": true
+        }
+      ],
+      "physical_publications": 2300,
+      "steps": 2300,
+      "extent": null
+    },
+    "maturehalf128": {
+      "weak_Pa": 1.2418239536624873e-11,
+      "contact_Pa": 7052.948795673638,
+      "max_normal_gap_m": 2.4557179206796675e-17,
+      "max_normal_work_J_m": 8.348535113268912e-17,
+      "max_ledger_J_m": 1.5890067039947553e-12,
+      "absolute_physical_remainder_J_m": 0.0011194128065567064,
+      "signed_physical_remainder_J_m": -0.00012849699200343325,
+      "work_relative_sliding": 5.8600596343926376e-05,
+      "work_relative_fracture": null,
+      "birth": {
+        "weak_Pa": 0.0,
+        "peak_tied_Pa": 0.0,
+        "stress_error_Pa": 0.0,
+        "bulk_transfer_error_J_m": 0.0,
+        "old_history_bitwise": true,
+        "physical_clock_change_s": 0.0,
+        "geometry_publications": 1,
+        "new_fracture_J_m": 0.0,
+        "new_bond_J_m": 0.0
+      },
+      "lifecycle": [
+        {
+          "time_s": 0.000125,
+          "derivative_relative": 1.6176064507371463e-12,
+          "retry_restart_bitwise": true,
+          "rejection_accepted_unchanged": true
+        }
+      ],
+      "physical_publications": 4600,
+      "steps": 4600,
+      "extent": null
+    },
+    "fine-p30": {
+      "weak_Pa": 9.994005623070734e-09,
+      "contact_Pa": 7581.139822822597,
+      "max_normal_gap_m": 4.607859233063394e-18,
+      "max_normal_work_J_m": 3.009647532093531e-16,
+      "max_ledger_J_m": 6.724620860154573e-13,
+      "absolute_physical_remainder_J_m": 0.010355970505631154,
+      "signed_physical_remainder_J_m": -0.010355669477921617,
+      "work_relative_sliding": 0.0022904100729805484,
+      "work_relative_fracture": 0.005868786509530769,
+      "birth": {
+        "weak_Pa": 6.290671687262754e-12,
+        "peak_tied_Pa": 391.038258901832,
+        "stress_error_Pa": 8.411773212844944e-12,
+        "bulk_transfer_error_J_m": 4.04298816647497e-12,
+        "old_history_bitwise": true,
+        "physical_clock_change_s": 0.0,
+        "geometry_publications": 1,
+        "new_fracture_J_m": 0.0,
+        "new_bond_J_m": 0.0
+      },
+      "lifecycle": [
+        {
+          "time_s": 0.307,
+          "derivative_relative": 2.906206960679842e-09,
+          "retry_restart_bitwise": true,
+          "rejection_accepted_unchanged": true
+        }
+      ],
+      "physical_publications": 1800,
+      "steps": 1800,
+      "extent": {
+        "a0.05": {
+          "connected_cells": 18,
+          "arc_lower_m": 1.8044432806329287,
+          "arc_upper_m": 1.9126964561059836,
+          "projected_x_lower_m": 1.6875,
+          "detached_cells": 0
+        },
+        "a0.5": {
+          "connected_cells": 12,
+          "arc_lower_m": 1.1606265117834946,
+          "arc_upper_m": 1.2657088566899635,
+          "projected_x_lower_m": 1.125,
+          "detached_cells": 0
+        },
+        "a0.999": {
+          "connected_cells": 4,
+          "arc_lower_m": 0.37532572908728334,
+          "arc_upper_m": 0.46966470447242054,
+          "projected_x_lower_m": 0.375,
+          "detached_cells": 0
+        },
+        "fully_decohered": {
+          "whole_cells": 4,
+          "arc_length_m": 0.37532572908728334,
+          "projected_x_advance_m": 0.375,
+          "definition": "All three owned Gauss histories equal a=1 in every counted cell."
+        }
+      }
+    },
+    "half-p30": {
+      "weak_Pa": 9.990341887089471e-09,
+      "contact_Pa": 7581.267154213588,
+      "max_normal_gap_m": 4.607859233063394e-18,
+      "max_normal_work_J_m": 1.5111305220222687e-16,
+      "max_ledger_J_m": 1.1898260154907803e-12,
+      "absolute_physical_remainder_J_m": 0.005152838367098775,
+      "signed_physical_remainder_J_m": -0.005152670054054162,
+      "work_relative_sliding": 0.0011428311533577987,
+      "work_relative_fracture": 0.0029283535189729916,
+      "birth": {
+        "weak_Pa": 6.290671687262754e-12,
+        "peak_tied_Pa": 391.038258901832,
+        "stress_error_Pa": 8.411773212844944e-12,
+        "bulk_transfer_error_J_m": 4.04298816647497e-12,
+        "old_history_bitwise": true,
+        "physical_clock_change_s": 0.0,
+        "geometry_publications": 1,
+        "new_fracture_J_m": 0.0,
+        "new_bond_J_m": 0.0
+      },
+      "lifecycle": [
+        {
+          "time_s": 0.306875,
+          "derivative_relative": 3.0640492453559017e-09,
+          "retry_restart_bitwise": true,
+          "rejection_accepted_unchanged": true
+        }
+      ],
+      "physical_publications": 3600,
+      "steps": 3600,
+      "extent": {
+        "a0.05": {
+          "connected_cells": 18,
+          "arc_lower_m": 1.8044432806329287,
+          "arc_upper_m": 1.9126964561059836,
+          "projected_x_lower_m": 1.6875,
+          "detached_cells": 0
+        },
+        "a0.5": {
+          "connected_cells": 12,
+          "arc_lower_m": 1.1606265117834946,
+          "arc_upper_m": 1.2657088566899635,
+          "projected_x_lower_m": 1.125,
+          "detached_cells": 0
+        },
+        "a0.999": {
+          "connected_cells": 4,
+          "arc_lower_m": 0.37532572908728334,
+          "arc_upper_m": 0.46966470447242054,
+          "projected_x_lower_m": 0.375,
+          "detached_cells": 0
+        },
+        "fully_decohered": {
+          "whole_cells": 4,
+          "arc_length_m": 0.37532572908728334,
+          "projected_x_advance_m": 0.375,
+          "definition": "All three owned Gauss histories equal a=1 in every counted cell."
+        }
+      }
+    },
+    "fine-p20": {
+      "weak_Pa": 9.981349080590007e-09,
+      "contact_Pa": 7583.184524858474,
+      "max_normal_gap_m": 2.1751806085490433e-18,
+      "max_normal_work_J_m": 2.0282912405234087e-16,
+      "max_ledger_J_m": 6.623590564913684e-13,
+      "absolute_physical_remainder_J_m": 0.008858292630702633,
+      "signed_physical_remainder_J_m": -0.008857312535992687,
+      "work_relative_sliding": 0.002136433555906444,
+      "work_relative_fracture": 0.005609138872761799,
+      "birth": {
+        "weak_Pa": 6.290671687262754e-12,
+        "peak_tied_Pa": 391.6221867996906,
+        "stress_error_Pa": 8.968762407493228e-12,
+        "bulk_transfer_error_J_m": 5.872635711057228e-12,
+        "old_history_bitwise": true,
+        "physical_clock_change_s": 0.0,
+        "geometry_publications": 1,
+        "new_fracture_J_m": 0.0,
+        "new_bond_J_m": 0.0
+      },
+      "lifecycle": [
+        {
+          "time_s": 0.307,
+          "derivative_relative": 2.8912874879844347e-09,
+          "retry_restart_bitwise": true,
+          "rejection_accepted_unchanged": true
+        }
+      ],
+      "physical_publications": 1800,
+      "steps": 1800,
+      "extent": {
+        "a0.05": {
+          "connected_cells": 20,
+          "arc_lower_m": 1.9351356833936928,
+          "arc_upper_m": 2.0349023495633096,
+          "projected_x_lower_m": 1.875,
+          "detached_cells": 0
+        },
+        "a0.5": {
+          "connected_cells": 9,
+          "arc_lower_m": 0.8485061163943703,
+          "arc_upper_m": 0.9447606038079257,
+          "projected_x_lower_m": 0.84375,
+          "detached_cells": 0
+        },
+        "a0.999": {
+          "connected_cells": 1,
+          "arc_lower_m": 0.0937501589219292,
+          "arc_upper_m": 0.18750472665976328,
+          "projected_x_lower_m": 0.09375,
+          "detached_cells": 0
+        },
+        "fully_decohered": {
+          "whole_cells": 1,
+          "arc_length_m": 0.0937501589219292,
+          "projected_x_advance_m": 0.09375,
+          "definition": "All three owned Gauss histories equal a=1 in every counted cell."
+        }
+      }
+    },
+    "half-p20": {
+      "weak_Pa": 9.98584548383974e-09,
+      "contact_Pa": 7583.298020862896,
+      "max_normal_gap_m": 2.1751806085490433e-18,
+      "max_normal_work_J_m": 1.0120366398149396e-16,
+      "max_ledger_J_m": 9.696132785563805e-13,
+      "absolute_physical_remainder_J_m": 0.0043801437187002135,
+      "signed_physical_remainder_J_m": -0.004379582218956957,
+      "work_relative_sliding": 0.0010592211077013395,
+      "work_relative_fracture": 0.002787129797396149,
+      "birth": {
+        "weak_Pa": 6.290671687262754e-12,
+        "peak_tied_Pa": 391.6221867996906,
+        "stress_error_Pa": 8.968762407493228e-12,
+        "bulk_transfer_error_J_m": 5.872635711057228e-12,
+        "old_history_bitwise": true,
+        "physical_clock_change_s": 0.0,
+        "geometry_publications": 1,
+        "new_fracture_J_m": 0.0,
+        "new_bond_J_m": 0.0
+      },
+      "lifecycle": [
+        {
+          "time_s": 0.306875,
+          "derivative_relative": 3.065435874599597e-09,
+          "retry_restart_bitwise": true,
+          "rejection_accepted_unchanged": true
+        }
+      ],
+      "physical_publications": 3600,
+      "steps": 3600,
+      "extent": {
+        "a0.05": {
+          "connected_cells": 20,
+          "arc_lower_m": 1.9351356833936928,
+          "arc_upper_m": 2.0349023495633096,
+          "projected_x_lower_m": 1.875,
+          "detached_cells": 0
+        },
+        "a0.5": {
+          "connected_cells": 9,
+          "arc_lower_m": 0.8485061163943703,
+          "arc_upper_m": 0.9447606038079257,
+          "projected_x_lower_m": 0.84375,
+          "detached_cells": 0
+        },
+        "a0.999": {
+          "connected_cells": 1,
+          "arc_lower_m": 0.0937501589219292,
+          "arc_upper_m": 0.18750472665976328,
+          "projected_x_lower_m": 0.09375,
+          "detached_cells": 0
+        },
+        "fully_decohered": {
+          "whole_cells": 1,
+          "arc_length_m": 0.0937501589219292,
+          "projected_x_advance_m": 0.09375,
+          "definition": "All three owned Gauss histories equal a=1 in every counted cell."
+        }
+      }
+    },
+    "reflection": {
+      "weak_Pa": 9.993672556163347e-09,
+      "contact_Pa": 7581.139822822274,
+      "max_normal_gap_m": 2.791820594150174e-18,
+      "max_normal_work_J_m": 3.5281958673046684e-16,
+      "max_ledger_J_m": 8.313350008393172e-13,
+      "absolute_physical_remainder_J_m": 0.010355970505538478,
+      "signed_physical_remainder_J_m": -0.010355669478148463,
+      "work_relative_sliding": 0.002290410072959945,
+      "work_relative_fracture": 0.0058687865094779615,
+      "birth": {
+        "weak_Pa": 5.191698922620465e-12,
+        "peak_tied_Pa": 391.03825890183197,
+        "stress_error_Pa": 9.189878532457538e-12,
+        "bulk_transfer_error_J_m": 2.964739564959018e-12,
+        "old_history_bitwise": true,
+        "physical_clock_change_s": 0.0,
+        "geometry_publications": 1,
+        "new_fracture_J_m": 0.0,
+        "new_bond_J_m": 0.0
+      },
+      "lifecycle": [
+        {
+          "time_s": 0.307,
+          "derivative_relative": 2.90193895928335e-09,
+          "retry_restart_bitwise": true,
+          "rejection_accepted_unchanged": true
+        }
+      ],
+      "physical_publications": 1800,
+      "steps": 1800,
+      "extent": {
+        "a0.05": {
+          "connected_cells": 18,
+          "arc_lower_m": 1.8044432806329287,
+          "arc_upper_m": 1.9126964561059836,
+          "projected_x_lower_m": 1.6875,
+          "detached_cells": 0
+        },
+        "a0.5": {
+          "connected_cells": 12,
+          "arc_lower_m": 1.1606265117834946,
+          "arc_upper_m": 1.2657088566899635,
+          "projected_x_lower_m": 1.125,
+          "detached_cells": 0
+        },
+        "a0.999": {
+          "connected_cells": 4,
+          "arc_lower_m": 0.37532572908728334,
+          "arc_upper_m": 0.46966470447242054,
+          "projected_x_lower_m": 0.375,
+          "detached_cells": 0
+        },
+        "fully_decohered": {
+          "whole_cells": 4,
+          "arc_length_m": 0.37532572908728334,
+          "projected_x_advance_m": 0.375,
+          "definition": "All three owned Gauss histories equal a=1 in every counted cell."
+        }
+      }
+    },
+    "wide-fine-p60": {
+      "weak_Pa": 9.951373058925128e-09,
+      "contact_Pa": 7582.455378607248,
+      "max_normal_gap_m": 6.0647559023407904e-18,
+      "max_normal_work_J_m": 2.0324421036107754e-16,
+      "max_ledger_J_m": 9.119371924271036e-13,
+      "absolute_physical_remainder_J_m": 0.008046566489026089,
+      "signed_physical_remainder_J_m": -0.00804577957835069,
+      "work_relative_sliding": 0.0018725952476377566,
+      "work_relative_fracture": 0.0051740928090052655,
+      "birth": {
+        "weak_Pa": 6.290671687262754e-12,
+        "peak_tied_Pa": 390.6220459084464,
+        "stress_error_Pa": 1.488559300703653e-11,
+        "bulk_transfer_error_J_m": 2.8421709430404007e-12,
+        "old_history_bitwise": true,
+        "physical_clock_change_s": 0.0,
+        "geometry_publications": 1,
+        "new_fracture_J_m": 0.0,
+        "new_bond_J_m": 0.0
+      },
+      "lifecycle": [
+        {
+          "time_s": 0.307,
+          "derivative_relative": 2.9066323707811562e-09,
+          "retry_restart_bitwise": true,
+          "rejection_accepted_unchanged": true
+        }
+      ],
+      "physical_publications": 1800,
+      "steps": 1800,
+      "extent": {
+        "a0.05": {
+          "connected_cells": 14,
+          "arc_lower_m": 1.3825425971931262,
+          "arc_upper_m": 1.4994421704940049,
+          "projected_x_lower_m": 1.3125,
+          "detached_cells": 0
+        },
+        "a0.5": {
+          "connected_cells": 10,
+          "arc_lower_m": 0.9536486514495912,
+          "arc_upper_m": 1.0559829204922726,
+          "projected_x_lower_m": 0.9375,
+          "detached_cells": 0
+        },
+        "a0.999": {
+          "connected_cells": 3,
+          "arc_lower_m": 0.2813026997009539,
+          "arc_upper_m": 0.3752139208300814,
+          "projected_x_lower_m": 0.28125,
+          "detached_cells": 0
+        },
+        "fully_decohered": {
+          "whole_cells": 3,
+          "arc_length_m": 0.2813026997009539,
+          "projected_x_advance_m": 0.28125,
+          "definition": "All three owned Gauss histories equal a=1 in every counted cell."
+        }
+      }
+    }
+  },
+  "native_kernels": [
+    {
+      "kernel": "kernel-m30-n128-w125-mirror-a420",
+      "nx": 128,
+      "bulk_masters": 89345,
+      "seconds": 100.716547607,
+      "gradient_FD_relative": 2.5738270735352113e-11,
+      "independent_energy_relative": 5.33412529271312e-14,
+      "raw_unit_strain_stress_error_Pa": 1.3860663629158045e-07,
+      "normal_jump_operator_error": 5.915390982467321e-14
+    },
+    {
+      "kernel": "kernel-p20-n128-w125-a420",
+      "nx": 128,
+      "bulk_masters": 89345,
+      "seconds": 102.467221981,
+      "gradient_FD_relative": 1.2915898620977777e-11,
+      "independent_energy_relative": 5.842901391345585e-14,
+      "raw_unit_strain_stress_error_Pa": 1.298946409827569e-07,
+      "normal_jump_operator_error": 1.2654768328320364e-13
+    },
+    {
+      "kernel": "kernel-p30-n128-w125-a420",
+      "nx": 128,
+      "bulk_masters": 89345,
+      "seconds": 102.623710513,
+      "gradient_FD_relative": 9.11193398660721e-12,
+      "independent_energy_relative": 9.851687345623168e-14,
+      "raw_unit_strain_stress_error_Pa": 1.3513612344725687e-07,
+      "normal_jump_operator_error": 1.2076547951523975e-13
+    },
+    {
+      "kernel": "kernel-p40-n128-w125-a420",
+      "nx": 128,
+      "bulk_masters": 89345,
+      "seconds": 99.910082215,
+      "gradient_FD_relative": 1.923747352865585e-11,
+      "independent_energy_relative": 3.9498122589525757e-14,
+      "raw_unit_strain_stress_error_Pa": 1.4443034899918748e-07,
+      "normal_jump_operator_error": 1.19981624551492e-13
+    },
+    {
+      "kernel": "kernel-p40-n128-w250-a420",
+      "nx": 128,
+      "bulk_masters": 89345,
+      "seconds": 100.589690506,
+      "gradient_FD_relative": 3.150161914352995e-11,
+      "independent_energy_relative": 4.702992161180197e-14,
+      "raw_unit_strain_stress_error_Pa": 1.289883348137892e-07,
+      "normal_jump_operator_error": 1.2534345912192764e-13
+    },
+    {
+      "kernel": "kernel-p40-n64-w125-a420",
+      "nx": 64,
+      "bulk_masters": 22145,
+      "seconds": 8.398191759,
+      "gradient_FD_relative": 1.2730871854472958e-10,
+      "independent_energy_relative": 4.360013065961055e-14,
+      "raw_unit_strain_stress_error_Pa": 6.550478055462881e-08,
+      "normal_jump_operator_error": 6.354358222441735e-14
+    },
+    {
+      "kernel": "kernel-p60-n128-w250-a420",
+      "nx": 128,
+      "bulk_masters": 89345,
+      "seconds": 103.655462306,
+      "gradient_FD_relative": 2.4919229282620587e-11,
+      "independent_energy_relative": 6.465486898728921e-14,
+      "raw_unit_strain_stress_error_Pa": 1.746226818616132e-07,
+      "normal_jump_operator_error": 1.1529286828325809e-13
+    }
+  ],
+  "independent_point_errors": {
+    "kernel-m30-n128-w125-mirror-a420": {
+      "resistance": 0.0,
+      "derivative": 0.0,
+      "pressure_derivative": 0.0,
+      "new_damage": 0.0,
+      "new_theta": 0.0,
+      "storage": 0.0,
+      "friction": 0.0,
+      "radiation": 6.776263578034403e-21
+    },
+    "kernel-p20-n128-w125-a420": {
+      "resistance": 0.0,
+      "derivative": 0.0,
+      "pressure_derivative": 0.0,
+      "new_damage": 0.0,
+      "new_theta": 0.0,
+      "storage": 0.0,
+      "friction": 0.0,
+      "radiation": 6.776263578034403e-21
+    },
+    "kernel-p30-n128-w125-a420": {
+      "resistance": 0.0,
+      "derivative": 0.0,
+      "pressure_derivative": 0.0,
+      "new_damage": 0.0,
+      "new_theta": 0.0,
+      "storage": 0.0,
+      "friction": 0.0,
+      "radiation": 6.776263578034403e-21
+    },
+    "kernel-p40-n128-w125-a420": {
+      "resistance": 0.0,
+      "derivative": 0.0,
+      "pressure_derivative": 0.0,
+      "new_damage": 0.0,
+      "new_theta": 0.0,
+      "storage": 0.0,
+      "friction": 0.0,
+      "radiation": 6.776263578034403e-21
+    },
+    "kernel-p40-n128-w250-a420": {
+      "resistance": 0.0,
+      "derivative": 0.0,
+      "pressure_derivative": 0.0,
+      "new_damage": 0.0,
+      "new_theta": 0.0,
+      "storage": 0.0,
+      "friction": 0.0,
+      "radiation": 6.776263578034403e-21
+    },
+    "kernel-p40-n64-w125-a420": {
+      "resistance": 0.0,
+      "derivative": 0.0,
+      "pressure_derivative": 0.0,
+      "new_damage": 0.0,
+      "new_theta": 0.0,
+      "storage": 0.0,
+      "friction": 0.0,
+      "radiation": 6.776263578034403e-21
+    },
+    "kernel-p60-n128-w250-a420": {
+      "resistance": 0.0,
+      "derivative": 0.0,
+      "pressure_derivative": 0.0,
+      "new_damage": 0.0,
+      "new_theta": 0.0,
+      "storage": 0.0,
+      "friction": 0.0,
+      "radiation": 6.776263578034403e-21
+    }
+  },
+  "surface_quadrature": [
+    {
+      "nx": 64,
+      "angle_deg": 30,
+      "width_m": 1.5,
+      "length_relative": 1.7594947008012947e-10,
+      "mass_relative": 9.044983217719443e-08,
+      "uniform_stress_normal_weak_relative": 4.599616290220633e-09,
+      "uniform_stress_shear_weak_relative": 1.1577408914630173e-08,
+      "scope": "Independent geometric and uniform-physical-stress patch integrals, not re-quadrature of evolved local histories."
+    },
+    {
+      "nx": 128,
+      "angle_deg": 30,
+      "width_m": 1.5,
+      "length_relative": 2.771065832352892e-12,
+      "mass_relative": 5.873831102873699e-09,
+      "uniform_stress_normal_weak_relative": 1.0128724932557886e-10,
+      "uniform_stress_shear_weak_relative": 2.6222134636560043e-10,
+      "scope": "Independent geometric and uniform-physical-stress patch integrals, not re-quadrature of evolved local histories."
+    },
+    {
+      "nx": 128,
+      "angle_deg": 60,
+      "width_m": 3.0,
+      "length_relative": 4.656175140633877e-13,
+      "mass_relative": 3.335321675900766e-09,
+      "uniform_stress_normal_weak_relative": 2.34036281785645e-11,
+      "uniform_stress_shear_weak_relative": 1.1031236566486927e-10,
+      "scope": "Independent geometric and uniform-physical-stress patch integrals, not re-quadrature of evolved local histories."
+    }
+  ],
+  "profile_comparison": {
+    "30": {
+      "damage": {
+        "weighted_L2": 0.022391869208557152,
+        "relative_L2": 0.011379503911752029,
+        "append_relative_L2": 0.007509126992525644
+      },
+      "jump": {
+        "weighted_L2": 3.2441130732842435e-05,
+        "relative_L2": 0.013552004459815047,
+        "append_relative_L2": 0.008881292595065919
+      }
+    },
+    "20": {
+      "damage": {
+        "weighted_L2": 0.024053605479479268,
+        "relative_L2": 0.012719401699600959,
+        "append_relative_L2": 0.014870104194956092
+      },
+      "jump": {
+        "weighted_L2": 3.277583623191747e-05,
+        "relative_L2": 0.014053750510642001,
+        "append_relative_L2": 0.014882811120235807
+      }
+    }
+  },
+  "scope": "Experimental native FE operators and native C++ signed evolution with independent JSON ownership, not production simulator integration."
+}

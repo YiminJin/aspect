@@ -1,0 +1,1071 @@
+{
+  "outer_cutback": {
+    "reference": "general-cutback-control",
+    "candidate": "general-rejection",
+    "common_states": [
+      {
+        "time_s": 0.0,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_records_bitwise": true,
+        "DG_coefficient_max_abs_Pa": 0.0,
+        "native_coefficient_max_abs_m": 0.0,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          0,
+          0
+        ]
+      },
+      {
+        "time_s": 0.000125,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_records_bitwise": true,
+        "DG_coefficient_max_abs_Pa": 0.0,
+        "native_coefficient_max_abs_m": 0.0,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          1,
+          1
+        ]
+      },
+      {
+        "time_s": 0.0001875,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_records_bitwise": true,
+        "DG_coefficient_max_abs_Pa": 0.0,
+        "native_coefficient_max_abs_m": 0.0,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          2,
+          2
+        ]
+      },
+      {
+        "time_s": 0.000306875,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_records_bitwise": true,
+        "DG_coefficient_max_abs_Pa": 0.0,
+        "native_coefficient_max_abs_m": 0.0,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          3,
+          3
+        ]
+      },
+      {
+        "time_s": 0.000431875,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_records_bitwise": true,
+        "DG_coefficient_max_abs_Pa": 0.0,
+        "native_coefficient_max_abs_m": 0.0,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          4,
+          4
+        ]
+      },
+      {
+        "time_s": 0.0005,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_records_bitwise": true,
+        "DG_coefficient_max_abs_Pa": 0.0,
+        "native_coefficient_max_abs_m": 0.0,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          5,
+          5
+        ]
+      }
+    ]
+  },
+  "outer_restart": {
+    "reference": "general-cutback-control",
+    "candidate": "general-restarted",
+    "common_states": [
+      {
+        "time_s": 0.000306875,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_records_bitwise": true,
+        "DG_coefficient_max_abs_Pa": 0.0,
+        "native_coefficient_max_abs_m": 0.0,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          3,
+          3
+        ]
+      },
+      {
+        "time_s": 0.000431875,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_records_bitwise": true,
+        "DG_coefficient_max_abs_Pa": 0.0,
+        "native_coefficient_max_abs_m": 0.0,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          4,
+          4
+        ]
+      },
+      {
+        "time_s": 0.0005,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_records_bitwise": true,
+        "DG_coefficient_max_abs_Pa": 0.0,
+        "native_coefficient_max_abs_m": 0.0,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          5,
+          5
+        ]
+      }
+    ]
+  },
+  "admission_cutback": {
+    "reference": "admission-cutback-control",
+    "candidate": "admission-rejection",
+    "common_states": [
+      {
+        "time_s": 0.44,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_records_bitwise": true,
+        "DG_coefficient_max_abs_Pa": 0.0,
+        "native_coefficient_max_abs_m": 0.0,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          0,
+          0
+        ]
+      },
+      {
+        "time_s": 0.440125,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_records_bitwise": true,
+        "DG_coefficient_max_abs_Pa": 0.0,
+        "native_coefficient_max_abs_m": 0.0,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          1,
+          1
+        ]
+      },
+      {
+        "time_s": 0.44025,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_records_bitwise": true,
+        "DG_coefficient_max_abs_Pa": 0.0,
+        "native_coefficient_max_abs_m": 0.0,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          2,
+          2
+        ]
+      },
+      {
+        "time_s": 0.440375,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_records_bitwise": true,
+        "DG_coefficient_max_abs_Pa": 0.0,
+        "native_coefficient_max_abs_m": 0.0,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          3,
+          3
+        ]
+      },
+      {
+        "time_s": 0.4404375,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_records_bitwise": true,
+        "DG_coefficient_max_abs_Pa": 0.0,
+        "native_coefficient_max_abs_m": 0.0,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          4,
+          4
+        ]
+      },
+      {
+        "time_s": 0.4405,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_records_bitwise": true,
+        "DG_coefficient_max_abs_Pa": 0.0,
+        "native_coefficient_max_abs_m": 0.0,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          5,
+          5
+        ]
+      }
+    ]
+  },
+  "formed_restart": {
+    "reference": "native-main-initial",
+    "candidate": "formed-restarted",
+    "common_states": [
+      {
+        "time_s": 0.441,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_records_bitwise": true,
+        "DG_coefficient_max_abs_Pa": 0.0,
+        "native_coefficient_max_abs_m": 0.0,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          8,
+          8
+        ]
+      }
+    ]
+  },
+  "initialization_correction": {
+    "reference": "native-main-initial",
+    "candidate": "native-prefix-owned-check",
+    "common_states": [
+      {
+        "time_s": 0.44,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": false,
+        "bulk_records_bitwise": true,
+        "DG_coefficient_max_abs_Pa": 0.0,
+        "native_coefficient_max_abs_m": 0.0,
+        "bulk_center_files_bitwise": false,
+        "publications": [
+          0,
+          0
+        ],
+        "documented_initial_pressure_correction_only": true
+      },
+      {
+        "time_s": 0.440125,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_records_bitwise": true,
+        "DG_coefficient_max_abs_Pa": 0.0,
+        "native_coefficient_max_abs_m": 0.0,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          1,
+          1
+        ]
+      },
+      {
+        "time_s": 0.44025,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_records_bitwise": true,
+        "DG_coefficient_max_abs_Pa": 0.0,
+        "native_coefficient_max_abs_m": 0.0,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          2,
+          2
+        ]
+      },
+      {
+        "time_s": 0.440375,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_records_bitwise": true,
+        "DG_coefficient_max_abs_Pa": 0.0,
+        "native_coefficient_max_abs_m": 0.0,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          3,
+          3
+        ]
+      },
+      {
+        "time_s": 0.4405,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_records_bitwise": true,
+        "DG_coefficient_max_abs_Pa": 0.0,
+        "native_coefficient_max_abs_m": 0.0,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          4,
+          4
+        ]
+      },
+      {
+        "time_s": 0.440625,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_records_bitwise": true,
+        "DG_coefficient_max_abs_Pa": 0.0,
+        "native_coefficient_max_abs_m": 0.0,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          5,
+          5
+        ]
+      },
+      {
+        "time_s": 0.44075,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_records_bitwise": true,
+        "DG_coefficient_max_abs_Pa": 0.0,
+        "native_coefficient_max_abs_m": 0.0,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          6,
+          6
+        ]
+      },
+      {
+        "time_s": 0.440875,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_records_bitwise": true,
+        "DG_coefficient_max_abs_Pa": 0.0,
+        "native_coefficient_max_abs_m": 0.0,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          7,
+          7
+        ]
+      },
+      {
+        "time_s": 0.441,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_records_bitwise": true,
+        "DG_coefficient_max_abs_Pa": 0.0,
+        "native_coefficient_max_abs_m": 0.0,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          8,
+          8
+        ]
+      }
+    ]
+  },
+  "final_source_cutback": {
+    "reference": "general-cutback-control",
+    "candidate": "final-rejection",
+    "common_states": [
+      {
+        "time_s": 0.0,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_records_bitwise": true,
+        "DG_coefficient_max_abs_Pa": 0.0,
+        "native_coefficient_max_abs_m": 0.0,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          0,
+          0
+        ]
+      },
+      {
+        "time_s": 0.000125,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_records_bitwise": true,
+        "DG_coefficient_max_abs_Pa": 0.0,
+        "native_coefficient_max_abs_m": 0.0,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          1,
+          1
+        ]
+      },
+      {
+        "time_s": 0.0001875,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_records_bitwise": true,
+        "DG_coefficient_max_abs_Pa": 0.0,
+        "native_coefficient_max_abs_m": 0.0,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          2,
+          2
+        ]
+      },
+      {
+        "time_s": 0.000306875,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_records_bitwise": true,
+        "DG_coefficient_max_abs_Pa": 0.0,
+        "native_coefficient_max_abs_m": 0.0,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          3,
+          3
+        ]
+      },
+      {
+        "time_s": 0.000431875,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_records_bitwise": true,
+        "DG_coefficient_max_abs_Pa": 0.0,
+        "native_coefficient_max_abs_m": 0.0,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          4,
+          4
+        ]
+      },
+      {
+        "time_s": 0.0005,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_records_bitwise": true,
+        "DG_coefficient_max_abs_Pa": 0.0,
+        "native_coefficient_max_abs_m": 0.0,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          5,
+          5
+        ]
+      }
+    ]
+  },
+  "final_source_completed_restart": {
+    "reference": "final-rejection",
+    "candidate": "final-completed-restart",
+    "common_states": [
+      {
+        "time_s": 0.0005,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_records_bitwise": true,
+        "DG_coefficient_max_abs_Pa": 0.0,
+        "native_coefficient_max_abs_m": 0.0,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          5,
+          5
+        ]
+      }
+    ]
+  },
+  "late_current_restart": {
+    "reference": "pilot-final-current",
+    "candidate": "final-current-restarted",
+    "common_states": [
+      {
+        "time_s": 0.461875,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          175,
+          175
+        ]
+      },
+      {
+        "time_s": 0.462,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          176,
+          176
+        ]
+      },
+      {
+        "time_s": 0.462125,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          177,
+          177
+        ]
+      },
+      {
+        "time_s": 0.46225,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          178,
+          178
+        ]
+      },
+      {
+        "time_s": 0.462375,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          179,
+          179
+        ]
+      }
+    ]
+  },
+  "late_current_all_records": {
+    "reference": "final-current-completed",
+    "candidate": "final-current-restarted",
+    "common_states": [
+      {
+        "time_s": 0.462375,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_records_bitwise": true,
+        "DG_coefficient_max_abs_Pa": 0.0,
+        "native_coefficient_max_abs_m": 0.0,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          179,
+          179
+        ]
+      }
+    ]
+  },
+  "packaged_anchor": {
+    "reference": "native-prefix-owned-check",
+    "candidate": "packaged-native-restart",
+    "common_states": [
+      {
+        "time_s": 0.441,
+        "surface_history_max_abs": 0.0,
+        "identities_exact": true,
+        "geometry_bitwise": true,
+        "surface_bitwise": true,
+        "bulk_records_bitwise": true,
+        "DG_coefficient_max_abs_Pa": 0.0,
+        "native_coefficient_max_abs_m": 0.0,
+        "bulk_center_files_bitwise": true,
+        "publications": [
+          8,
+          8
+        ]
+      }
+    ]
+  },
+  "executions": {
+    "admission-cutback-control": {
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "--bind-to",
+        "none",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/admission-cutback-control/parameters.prm"
+      ],
+      "cwd": "/home/ein/repository/aspect-pf-rsf-particle-free",
+      "timeout_s": 600,
+      "start_unix_s": 1793261947.8676956,
+      "ranks": 2,
+      "binary_sha256": "2e0416195de6bcf73523be40a1a3d7907bc356f83b1a417252b1eb8eceb8e594",
+      "input": "include /home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/short.prm\nset Output directory = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/admission-cutback-control/output\nsubsection Time stepping\n subsection Function\n  set Function expression = if(abs(time-0.44037500000000002)<1e-12,0.0000625,0.000125)\n end\nend\n",
+      "source_checkpoint": null,
+      "test_environment": {
+        "ASPECT_COHESIVE_WRITE_HISTORY_RECORDS": "1"
+      },
+      "elapsed_s": 51.40085828100018,
+      "returncode": 0
+    },
+    "admission-rejection": {
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "--bind-to",
+        "none",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/admission-rejection/parameters.prm"
+      ],
+      "cwd": "/home/ein/repository/aspect-pf-rsf-particle-free",
+      "timeout_s": 600,
+      "start_unix_s": 1793262527.8073833,
+      "ranks": 2,
+      "binary_sha256": "2e0416195de6bcf73523be40a1a3d7907bc356f83b1a417252b1eb8eceb8e594",
+      "input": "include /home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/short.prm\nset Output directory = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/admission-rejection/output\n",
+      "source_checkpoint": null,
+      "test_environment": {
+        "ASPECT_COHESIVE_FORCE_REJECT_STEP": "4",
+        "ASPECT_COHESIVE_WRITE_HISTORY_RECORDS": "1"
+      },
+      "elapsed_s": 59.60593344900008,
+      "returncode": 0
+    },
+    "final-affine-history": {
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "--bind-to",
+        "none",
+        "-n",
+        "1",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/final-affine-history/parameters.prm"
+      ],
+      "cwd": "/home/ein/repository/aspect-pf-rsf-particle-free",
+      "timeout_s": 120,
+      "start_unix_s": 1793303729.5169804,
+      "ranks": 1,
+      "binary_sha256": "364c0bacdb66311e3e97b968cb40f843f47d759d0850da50d27ffb4a37a8e7ac",
+      "input": "include /home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/history.prm\nset Output directory = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/final-affine-history/output\nset Additional shared libraries = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/checks-native/libcohesive_rsf_native_checks.release.so\n",
+      "source_checkpoint": null,
+      "test_environment": {
+        "ASPECT_COHESIVE_HISTORY_AFFINE": "1"
+      },
+      "elapsed_s": 3.570388138999988,
+      "returncode": 0
+    },
+    "final-completed-restart": {
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "--bind-to",
+        "none",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/final-completed-restart/parameters.prm"
+      ],
+      "cwd": "/home/ein/repository/aspect-pf-rsf-particle-free",
+      "timeout_s": 300,
+      "start_unix_s": 1793303712.9743629,
+      "ranks": 2,
+      "binary_sha256": "364c0bacdb66311e3e97b968cb40f843f47d759d0850da50d27ffb4a37a8e7ac",
+      "input": "include /home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/general.prm\nset Output directory = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/final-completed-restart/output\nset End time = 0.00050000000000000001\nset Resume computation = true\n",
+      "source_checkpoint": "build-particle-free/cohesive-rsf-native/runs/final-rejection/output",
+      "test_environment": {
+        "ASPECT_COHESIVE_WRITE_HISTORY_RECORDS": "1"
+      },
+      "elapsed_s": 1.7171457290000944,
+      "returncode": 0
+    },
+    "final-current-completed": {
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "--bind-to",
+        "none",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/final-current-completed/parameters.prm"
+      ],
+      "cwd": "/home/ein/repository/aspect-pf-rsf-particle-free",
+      "timeout_s": 300,
+      "start_unix_s": 1793306968.104966,
+      "ranks": 2,
+      "binary_sha256": "364c0bacdb66311e3e97b968cb40f843f47d759d0850da50d27ffb4a37a8e7ac",
+      "input": "include /home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/pilot.prm\nset Output directory = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/final-current-completed/output\nset End time = 0.46237499999999998\nset Resume computation = true\nsubsection Cohesive RSF pilot\n set Initial state file = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/final-current-completed/deliberately-absent-prototype.json\nend\n",
+      "source_checkpoint": "build-particle-free/cohesive-rsf-native/runs/pilot-final-current/output",
+      "test_environment": {
+        "ASPECT_COHESIVE_WRITE_HISTORY_RECORDS": "1"
+      },
+      "elapsed_s": 4.021116525999787,
+      "returncode": 0
+    },
+    "final-current-restarted": {
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "--bind-to",
+        "none",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/final-current-restarted/parameters.prm"
+      ],
+      "cwd": "/home/ein/repository/aspect-pf-rsf-particle-free",
+      "timeout_s": 600,
+      "start_unix_s": 1793306799.2365923,
+      "ranks": 2,
+      "binary_sha256": "364c0bacdb66311e3e97b968cb40f843f47d759d0850da50d27ffb4a37a8e7ac",
+      "input": "include /home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/pilot.prm\nset Output directory = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/final-current-restarted/output\nset End time = 0.46237499999999998\nset Resume computation = true\nsubsection Cohesive RSF pilot\n set Initial state file = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/final-current-restarted/deliberately-absent-prototype.json\nend\n",
+      "source_checkpoint": "build-particle-free/cohesive-rsf-native/runs/pilot-final-current/output",
+      "test_environment": {
+        "ASPECT_COHESIVE_WRITE_HISTORY_RECORDS": "1"
+      },
+      "elapsed_s": 61.65531740499955,
+      "returncode": 0
+    },
+    "final-rejection": {
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "--bind-to",
+        "none",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/final-rejection/parameters.prm"
+      ],
+      "cwd": "/home/ein/repository/aspect-pf-rsf-particle-free",
+      "timeout_s": 300,
+      "start_unix_s": 1793303700.53028,
+      "ranks": 2,
+      "binary_sha256": "364c0bacdb66311e3e97b968cb40f843f47d759d0850da50d27ffb4a37a8e7ac",
+      "input": "include /home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/general.prm\nset Output directory = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/final-rejection/output\n",
+      "source_checkpoint": null,
+      "test_environment": {
+        "ASPECT_COHESIVE_FORCE_REJECT_STEP": "2",
+        "ASPECT_COHESIVE_WRITE_HISTORY_RECORDS": "1"
+      },
+      "elapsed_s": 9.881999563999898,
+      "returncode": 0
+    },
+    "formed-restarted": {
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "--bind-to",
+        "none",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/formed-restarted/parameters.prm"
+      ],
+      "cwd": "/home/ein/repository/aspect-pf-rsf-particle-free",
+      "timeout_s": 600,
+      "start_unix_s": 1793261385.7307777,
+      "ranks": 2,
+      "binary_sha256": "2e0416195de6bcf73523be40a1a3d7907bc356f83b1a417252b1eb8eceb8e594",
+      "input": "include /home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/pilot.prm\nset Output directory = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/formed-restarted/output\nset End time = 0.441\nset Resume computation = true\n",
+      "source_checkpoint": "build-particle-free/cohesive-rsf-native/runs/native-main-initial/output",
+      "test_environment": {
+        "ASPECT_COHESIVE_WRITE_HISTORY_RECORDS": "1"
+      },
+      "elapsed_s": 34.63748920999933,
+      "returncode": 0
+    },
+    "general-cutback-control": {
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "--bind-to",
+        "none",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/general-cutback-control/parameters.prm"
+      ],
+      "cwd": "/home/ein/repository/aspect-pf-rsf-particle-free",
+      "timeout_s": 300,
+      "start_unix_s": 1793257443.2923434,
+      "ranks": 2,
+      "binary_sha256": "2e0416195de6bcf73523be40a1a3d7907bc356f83b1a417252b1eb8eceb8e594",
+      "input": "include /home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/general.prm\nset Output directory = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/general-cutback-control/output\nsubsection Time stepping\n subsection Function\n  set Function expression = if(abs(time-0.000125)<1e-12,0.0000625,0.000125)\n end\nend\n",
+      "source_checkpoint": null,
+      "test_environment": {
+        "ASPECT_COHESIVE_WRITE_HISTORY_RECORDS": "1"
+      },
+      "elapsed_s": 9.638443731000052,
+      "returncode": 0
+    },
+    "general-r1": {
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "--bind-to",
+        "none",
+        "-n",
+        "1",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/general-r1/parameters.prm"
+      ],
+      "cwd": "/home/ein/repository/aspect-pf-rsf-particle-free",
+      "timeout_s": 300,
+      "start_unix_s": 1793257387.158156,
+      "ranks": 1,
+      "binary_sha256": "2e0416195de6bcf73523be40a1a3d7907bc356f83b1a417252b1eb8eceb8e594",
+      "input": "include /home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/general.prm\nset Output directory = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/general-r1/output\n",
+      "source_checkpoint": null,
+      "test_environment": {
+        "ASPECT_COHESIVE_WRITE_HISTORY_RECORDS": "1"
+      },
+      "elapsed_s": 4.375416277999989,
+      "returncode": 0
+    },
+    "general-r2": {
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "--bind-to",
+        "none",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/general-r2/parameters.prm"
+      ],
+      "cwd": "/home/ein/repository/aspect-pf-rsf-particle-free",
+      "timeout_s": 300,
+      "start_unix_s": 1793257116.808955,
+      "ranks": 2,
+      "binary_sha256": "2e0416195de6bcf73523be40a1a3d7907bc356f83b1a417252b1eb8eceb8e594",
+      "input": "include /home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/general.prm\nset Output directory = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/general-r2/output\n",
+      "source_checkpoint": null,
+      "test_environment": {
+        "ASPECT_COHESIVE_WRITE_HISTORY_RECORDS": "1"
+      },
+      "elapsed_s": 10.611691980999979,
+      "returncode": 0
+    },
+    "general-r4": {
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "--bind-to",
+        "none",
+        "-n",
+        "4",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/general-r4/parameters.prm"
+      ],
+      "cwd": "/home/ein/repository/aspect-pf-rsf-particle-free",
+      "timeout_s": 300,
+      "start_unix_s": 1793257393.6495354,
+      "ranks": 4,
+      "binary_sha256": "2e0416195de6bcf73523be40a1a3d7907bc356f83b1a417252b1eb8eceb8e594",
+      "input": "include /home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/general.prm\nset Output directory = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/general-r4/output\n",
+      "source_checkpoint": null,
+      "test_environment": {
+        "ASPECT_COHESIVE_WRITE_HISTORY_RECORDS": "1"
+      },
+      "elapsed_s": 17.206171093999956,
+      "returncode": 0
+    },
+    "general-rejection": {
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "--bind-to",
+        "none",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/general-rejection/parameters.prm"
+      ],
+      "cwd": "/home/ein/repository/aspect-pf-rsf-particle-free",
+      "timeout_s": 300,
+      "start_unix_s": 1793257509.8529258,
+      "ranks": 2,
+      "binary_sha256": "2e0416195de6bcf73523be40a1a3d7907bc356f83b1a417252b1eb8eceb8e594",
+      "input": "include /home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/general.prm\nset Output directory = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/general-rejection/output\n",
+      "source_checkpoint": null,
+      "test_environment": {
+        "ASPECT_COHESIVE_FORCE_REJECT_STEP": "2",
+        "ASPECT_COHESIVE_WRITE_HISTORY_RECORDS": "1"
+      },
+      "elapsed_s": 9.988808431000052,
+      "returncode": 0
+    },
+    "general-restarted": {
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "--bind-to",
+        "none",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/general-restarted/parameters.prm"
+      ],
+      "cwd": "/home/ein/repository/aspect-pf-rsf-particle-free",
+      "timeout_s": 300,
+      "start_unix_s": 1793259455.6351566,
+      "ranks": 2,
+      "binary_sha256": "2e0416195de6bcf73523be40a1a3d7907bc356f83b1a417252b1eb8eceb8e594",
+      "input": "include /home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/general.prm\nset Output directory = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/general-restarted/output\nset End time = 0.00050000000000000001\nset Resume computation = true\n",
+      "source_checkpoint": "build-particle-free/cohesive-rsf-native/runs/general-split/output",
+      "test_environment": {
+        "ASPECT_COHESIVE_WRITE_HISTORY_RECORDS": "1"
+      },
+      "elapsed_s": 7.133305844000006,
+      "returncode": 0
+    },
+    "native-halfstep-mature": {
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "--bind-to",
+        "none",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/native-halfstep-mature/parameters.prm"
+      ],
+      "cwd": "/home/ein/repository/aspect-pf-rsf-particle-free",
+      "timeout_s": 1200,
+      "start_unix_s": 1793303365.0987537,
+      "ranks": 2,
+      "binary_sha256": "364c0bacdb66311e3e97b968cb40f843f47d759d0850da50d27ffb4a37a8e7ac",
+      "input": "include /home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/pilot.prm\nset Output directory = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/native-halfstep-mature/output\nset End time = 0.46237499999999998\nset Resume computation = true\nset Maximum time step = 6.2500000000000001e-05\nset Maximum first time step = 6.2500000000000001e-05\nsubsection Time stepping\n subsection Function\n  set Function expression = 6.2500000000000001e-05\n end\nend\n",
+      "source_checkpoint": "build-particle-free/cohesive-rsf-native/runs/native-main-loading-hold/output",
+      "test_environment": {},
+      "elapsed_s": 173.67077664900012,
+      "returncode": 0
+    },
+    "native-main-initial": {
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "--bind-to",
+        "none",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/native-main-initial/parameters.prm"
+      ],
+      "cwd": "/home/ein/repository/aspect-pf-rsf-particle-free",
+      "timeout_s": 900,
+      "start_unix_s": 1793261123.5205333,
+      "ranks": 2,
+      "binary_sha256": "2e0416195de6bcf73523be40a1a3d7907bc356f83b1a417252b1eb8eceb8e594",
+      "input": "include /home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/pilot.prm\nset Output directory = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/native-main-initial/output\nset End time = 0.441\n",
+      "source_checkpoint": null,
+      "test_environment": {
+        "ASPECT_COHESIVE_WRITE_HISTORY_RECORDS": "1"
+      },
+      "elapsed_s": 58.89385194600072,
+      "returncode": 0
+    },
+    "native-prefix-owned-check": {
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "--bind-to",
+        "none",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/native-prefix-owned-check/parameters.prm"
+      ],
+      "cwd": "/home/ein/repository/aspect-pf-rsf-particle-free",
+      "timeout_s": 900,
+      "start_unix_s": 1793264798.4978004,
+      "ranks": 2,
+      "binary_sha256": "05f973fcb758b6f439acf1531277e148e5cb2748ff0cd560020ba8f5ea5d51ad",
+      "input": "include /home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/pilot.prm\nset Output directory = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/native-prefix-owned-check/output\nset End time = 0.441\n",
+      "source_checkpoint": null,
+      "test_environment": {
+        "ASPECT_COHESIVE_WRITE_HISTORY_RECORDS": "1"
+      },
+      "elapsed_s": 58.73932323400004,
+      "returncode": 0
+    },
+    "packaged-native-restart": {
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "--bind-to",
+        "none",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/packaged-native-restart/parameters.prm"
+      ],
+      "cwd": "/home/ein/repository/aspect-pf-rsf-particle-free",
+      "timeout_s": 120,
+      "start_unix_s": 1793305303.430813,
+      "ranks": 2,
+      "binary_sha256": "364c0bacdb66311e3e97b968cb40f843f47d759d0850da50d27ffb4a37a8e7ac",
+      "input": "include /home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/pilot.prm\nset Output directory = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/packaged-native-restart/output\nset End time = 0.441\nset Resume computation = true\nsubsection Cohesive RSF pilot\n set Initial state file = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/packaged-native-restart/deliberately-absent-prototype.json\nend\n",
+      "source_checkpoint": "build-particle-free/cohesive-rsf-native/packaged-anchor",
+      "test_environment": {
+        "ASPECT_COHESIVE_WRITE_HISTORY_RECORDS": "1"
+      },
+      "elapsed_s": 3.9716435219997948,
+      "returncode": 0
+    },
+    "pilot-final-current": {
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "--bind-to",
+        "none",
+        "-n",
+        "2",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/pilot-final-current/parameters.prm"
+      ],
+      "cwd": "/home/ein/repository/aspect-pf-rsf-particle-free",
+      "timeout_s": 1800,
+      "start_unix_s": 1793304328.7048173,
+      "ranks": 2,
+      "binary_sha256": "364c0bacdb66311e3e97b968cb40f843f47d759d0850da50d27ffb4a37a8e7ac",
+      "input": "include /home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/pilot.prm\nset Output directory = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/runs/pilot-final-current/output\nset End time = 0.46237499999999998\n",
+      "source_checkpoint": null,
+      "test_environment": {},
+      "elapsed_s": 700.4960828010003,
+      "returncode": 0
+    }
+  }
+}

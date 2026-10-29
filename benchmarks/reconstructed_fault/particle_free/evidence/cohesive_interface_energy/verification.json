@@ -1,0 +1,92 @@
+{
+  "gates": {
+    "full_raw_sliding": true,
+    "full_raw_fracture": true,
+    "replay_raw_sliding": true,
+    "replay_raw_fracture": true,
+    "sliding_difference": true,
+    "response_difference": true
+  },
+  "all_pass": true,
+  "sliding_window_relative_difference": 0.00010244195947486885,
+  "selected_window_sliding_J_m": 6.18467631193315e-05,
+  "half_window_sliding_J_m": 6.184042806470578e-05,
+  "selected_window_absolute_remainder_J_m": 6.737939175503678e-08,
+  "profile_errors": [
+    {
+      "time_s": 0.585,
+      "quantity": "damage",
+      "weighted_L2_relative": 7.475662908038004e-09
+    },
+    {
+      "time_s": 0.585,
+      "quantity": "jump",
+      "weighted_L2_relative": 7.475662932410012e-09
+    },
+    {
+      "time_s": 0.585,
+      "quantity": "theta",
+      "weighted_L2_relative": 5.617533842983205e-10
+    },
+    {
+      "time_s": 0.6,
+      "quantity": "damage",
+      "weighted_L2_relative": 8.338031091743487e-09
+    },
+    {
+      "time_s": 0.6,
+      "quantity": "jump",
+      "weighted_L2_relative": 8.33803107020546e-09
+    },
+    {
+      "time_s": 0.6,
+      "quantity": "theta",
+      "weighted_L2_relative": 2.8821353898322652e-09
+    },
+    {
+      "time_s": 0.625,
+      "quantity": "damage",
+      "weighted_L2_relative": 1.0344832031714155e-08
+    },
+    {
+      "time_s": 0.625,
+      "quantity": "jump",
+      "weighted_L2_relative": 1.0344832040578753e-08
+    },
+    {
+      "time_s": 0.625,
+      "quantity": "theta",
+      "weighted_L2_relative": 6.721929974864591e-09
+    },
+    {
+      "time_s": 0.65,
+      "quantity": "damage",
+      "weighted_L2_relative": 1.077844690397846e-08
+    },
+    {
+      "time_s": 0.65,
+      "quantity": "jump",
+      "weighted_L2_relative": 1.077844693795887e-08
+    },
+    {
+      "time_s": 0.65,
+      "quantity": "theta",
+      "weighted_L2_relative": 1.0527320361200136e-08
+    },
+    {
+      "time_s": 0.66,
+      "quantity": "damage",
+      "weighted_L2_relative": 1.549589737612022e-05
+    },
+    {
+      "time_s": 0.66,
+      "quantity": "jump",
+      "weighted_L2_relative": 1.5495897376133417e-05
+    },
+    {
+      "time_s": 0.66,
+      "quantity": "theta",
+      "weighted_L2_relative": 1.6910672440350417e-07
+    }
+  ]
+}

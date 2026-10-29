@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "full_common_trajectory_bitwise": true,
+  "run": {
+    "name": "final-kernel-control",
+    "nx": 64,
+    "ny": 40,
+    "dt_s": 0.005,
+    "seconds": 18.249773508000544,
+    "exit_code": 0
+  }
+}

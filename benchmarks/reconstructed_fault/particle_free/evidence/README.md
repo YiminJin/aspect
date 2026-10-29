@@ -27,3 +27,26 @@ filenames and raw replay paths can refer to the original local package.
 For fresh verification, build the observer sources and use the bounded runner
 and independent assessments in the [benchmark README](../README.md). No build,
 transport campaign, threshold tuning or coupled experiment runs automatically.
+
+## Bulk and native cohesive–RSF development
+
+The subsequent source commits also preserve the experimental bulk scalar/tensor,
+Coulomb and gradient controls, the exact-jump cohesive–RSF implementation, reusable
+benchmark sources/inputs, and their formulation/selection/report documents.
+Selected compact JSON/CSV summaries retain successful controls and unresolved
+localization, spatial, branch, boundary and point-traction findings. Retired
+constitutive experiments are references, not enabled propagation defaults.
+
+The native pilot's [input/build instructions](../cohesive_rsf_native/README.md),
+[report](../../../../doc/reconstructed_fault/particle_free/COHESIVE_RSF_NATIVE_REPORT.md)
+and compact results are committed. Full source/evidence ZIP packages, native
+restart anchors, solver archives, dense field histories and rendered figures
+remain local. Historical report/index links to those files require the separately
+retained evidence package. Binary/source hashes and execution paths describe the
+measured pre-commit builds; committing them does not create a new qualification.
+
+The native general-history fixture can start freshly from the committed inputs.
+The loaded curved pilot requires its qualified prototype initialization or native
+restart anchor. `verify.py` compares the existing named raw lifecycle runs; it is
+not a test that can run without those outputs. No archived history is silently
+recreated or converted by a fresh checkout.

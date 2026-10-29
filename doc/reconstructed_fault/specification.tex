@@ -3632,4 +3632,51 @@ lossy obstacle transfer, transport, moving geometry, birth and propagation
 remain unqualified. Previous spatial/temporal and mirror-branch failures are
 not resolved by this coordinate qualification.
 
+
+\subsection{Selected default-off native exact-jump pilot (2026-10-28)}
+
+The separate experimental cohesive--RSF pilot uses the native fixed Cartesian
+Q2/P1-discontinuous mixed displacement--pressure solve and exact signed tangential
+interface lifting $L_j$. Normal jump is zero; friction uses the current variational
+normal reaction with its native bulk virtual-work measure. Mean-zero perturbation
+pressure and prescribed physical confinement remain distinct. Sided raw tractions
+are diagnostics with the retained unresolved spatial limitations.
+
+The independent complete DGQ2 tensor and the retained native FE remainder give
+\[
+ T_b=T_{\rm DG}+2G\operatorname{dev}_3\operatorname{sym}\nabla d_R
+ -\Pi_3[2G\operatorname{dev}_3\operatorname{sym}\nabla d_R],\qquad
+ T=T_b+2G\sum_jm_j\operatorname{dev}_3\operatorname{sym}\nabla L_j.
+\]
+All nine coefficients per independent plane-strain component are retained.
+For $\beta=(1+G\Delta t/\eta)^{-1}$, advance the DG tensor with the Gauss3 projected
+native source, $d_R^+=\beta(d_R+\Delta u)$, and $m_j^+=\beta(m_j+\Delta j_j)$.
+The full native gradient remainder survives; response-span closure is prohibited.
+
+Native manager left-vertex Gauss3 rows own signed slip, irreversible surface damage,
+RSF age, cohesive reference, relaxed jump and absolute slip. The exact graph owns
+quadrature; manager topology contains formed material only. Zero-history temporary
+candidates have no material identity. Admission preserves formed geometry and all
+accepted histories, with zero metadata work; cohesive storage and
+$G_c\int_\Gamma a\,ds$ are the sole fracture inventory. Geometric phase is provisional.
+
+The complete candidate remains immutable with respect to its accepted anchor until
+the actual Simulator outer decision. Rejection publishes nothing; acceptance swaps
+one owner once. Conditional native checkpoint payloads preserve physical CellId
+bulk records, formed Gauss histories, identities, geometry and clocks. Rebuild
+only derived operator/association caches on restart. Production checkpoints,
+transport, AMR and moving geometry are not converted. Implementation and measured
+qualification are distinguished in the selected native stages/report. The bounded
+native pilot completes 179 two-rank steps from the checked loaded state, including
+new admission, full decohesion and subsequent sliding. General tensor history,
+outer rejection and same-rank restart are exercised. Point-traction, general
+topology and quantitative propagation accuracy remain unqualified.
+
+At changed cut partitions, record the same-field storage integration difference
+separately from physical fracture and work. Clock closure alone uses an
+operation-count roundoff bound: for $n$ accepted additions and $r$ outer retries,
+$u=\epsilon/2$, $k=n+2r+3$, $\gamma=ku/(1-ku)$, use the outward-rounded
+$\gamma(1-\gamma)^{-1}\max(|t|,|t_{\rm end}|)$. Persist the retry count; preserve
+all physical acceptance tolerances.
+
 \end{document}

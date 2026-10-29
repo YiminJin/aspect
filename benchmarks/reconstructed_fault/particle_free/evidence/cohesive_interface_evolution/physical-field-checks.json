@@ -1,0 +1,41 @@
+[
+  {
+    "time_s": 2.3,
+    "points": 368640,
+    "volume_m2": 8.000000000036955,
+    "bulk_energy_J_m": 16.269430653423512,
+    "energy_vs_accepted_J_m": -2.1316282072803006e-13,
+    "pressure_perturbation_mean_Pa": -8.770673803071706e-15,
+    "max_remote_inplane_shear_Pa": 2460.1196607035727,
+    "remote_max_x_m": 0.4978896723188485,
+    "remote_max_y_m": 0.00042206553623029986,
+    "min_bulk_horizontal_normal_pressure_Pa": 8818.15649559762,
+    "max_bulk_inplane_shear_Pa": 3058.379812571128
+  },
+  {
+    "time_s": 2.45,
+    "points": 368640,
+    "volume_m2": 8.000000000036955,
+    "bulk_energy_J_m": 16.261563293140533,
+    "energy_vs_accepted_J_m": 8.526512829121202e-14,
+    "pressure_perturbation_mean_Pa": 1.1387402522616962e-14,
+    "max_remote_inplane_shear_Pa": 2706.720631139261,
+    "remote_max_x_m": 0.0021103276811514993,
+    "remote_max_y_m": 0.00042206553623029986,
+    "min_bulk_horizontal_normal_pressure_Pa": 8696.079406529841,
+    "max_bulk_inplane_shear_Pa": 3067.1826401963085
+  },
+  {
+    "time_s": 2.47,
+    "points": 368640,
+    "volume_m2": 8.000000000036955,
+    "bulk_energy_J_m": 15.601894051694995,
+    "energy_vs_accepted_J_m": -1.438849039914203e-13,
+    "pressure_perturbation_mean_Pa": -3.479210192500774e-14,
+    "max_remote_inplane_shear_Pa": 2733.8108487327486,
+    "remote_max_x_m": 7.622889672318848,
+    "remote_max_y_m": 0.00042206553623029986,
+    "min_bulk_horizontal_normal_pressure_Pa": 8682.08500513612,
+    "max_bulk_inplane_shear_Pa": 3063.3364822109015
+  }
+]

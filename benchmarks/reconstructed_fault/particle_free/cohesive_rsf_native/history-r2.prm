@@ -1,0 +1,2 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/history.prm
+set Output directory = $ASPECT_SOURCE_DIR/build-particle-free/cohesive-rsf-native/history-r2

@@ -1,0 +1,15 @@
+{
+  "command": [
+    "python3",
+    "benchmarks/reconstructed_fault/particle_free/bulk_cohesive/assess_energy.py",
+    "result"
+  ],
+  "cwd": "/tmp/bulk-energy-portable-replay",
+  "exit_code": 0,
+  "seconds": 60.76903819200379,
+  "archive_member_count": 1868,
+  "assessment_JSON_and_per_case_JSON_CSV_exact": true,
+  "all_phase_and_arc_arrays_bitwise_equal": true,
+  "native_simulations_run": 0,
+  "scope": "Replay from freshly extracted archive, without original data paths."
+}

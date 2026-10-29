@@ -1,0 +1,18 @@
+{
+  "fine_quadrature_phase_Linf": 8.404210573992321e-11,
+  "flank_peak": [
+    2.6718071449469832e-05,
+    0.0010107698206233045,
+    0.0012989324883198982,
+    0.0012989325031530906,
+    0.0016712048379571062
+  ],
+  "right_distance_flank_increase_percent": 28.659867537408147,
+  "right_distance_boundary_phase_increment": 0.0,
+  "centerline_tip_advance": 0.0,
+  "physical_energy_qualified": false,
+  "spatial_phase_amplitude_qualified": false,
+  "domain_independence_qualified": false,
+  "recommended_physical_change": "right extent 1.5 m at matched fine spacing/Gauss8; same law/seed/loading",
+  "strict_reference_match_passed": false
+}

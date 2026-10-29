@@ -1,0 +1,10 @@
+{
+  "stiffness": true,
+  "Q": true,
+  "normal-work": true,
+  "normal-minus": true,
+  "normal-plus": true,
+  "shear": true,
+  "columns": true,
+  "probe": true
+}

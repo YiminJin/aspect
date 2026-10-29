@@ -1,0 +1,41 @@
+{
+  "G_Pa": 1000000.0,
+  "eta_Pa_s": 100000000.0,
+  "Gc_J_m2": 1.0,
+  "peak_Pa": 3000,
+  "p0_Pa": 10000,
+  "C0_m_Pa": 2.2222222222222222e-07,
+  "complete_decohesion_jump_m": 0.0006666666666666666,
+  "mu0": 0.1,
+  "RSF_a": 0.005,
+  "RSF_b": 0.01,
+  "V0_m_s": 5e-06,
+  "Dc_m": 0.001,
+  "radiation_Pa_s_m": 25836.021365527624,
+  "physical_R_m": 0.75,
+  "numerical_lifting_half_width_m": 0.75,
+  "bulk_cells": [
+    64,
+    64
+  ],
+  "bulk_degree": 2,
+  "pressure": "discontinuous P1, mean pprime=0",
+  "bulk_Gauss_order": 6,
+  "surface_Gauss_order": 3,
+  "selection_Gauss_order": 8,
+  "main_future_spacing_m": 0.09375,
+  "reference_future_spacing_m": 0.046875,
+  "dt_s": 0.000125,
+  "loading_stops_s": 0.455,
+  "end_s": 0.46,
+  "domain_m": [
+    0,
+    12,
+    -6,
+    6
+  ],
+  "bulk": "quasi-static, homogeneous plane-strain Maxwell, fixed background mesh",
+  "friction": "full current variational normal pressure; regularized RSF and existing radiation",
+  "theta": "normalized age; age_s=theta*Dc/V0",
+  "phase_phi": "provisional geometry only; no duplicate bulk fracture inventory"
+}

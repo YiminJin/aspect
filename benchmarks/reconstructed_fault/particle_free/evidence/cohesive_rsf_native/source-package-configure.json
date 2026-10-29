@@ -1,0 +1,19 @@
+{
+  "scope": "Configure the extracted source package, not a rebuilt scientific run",
+  "command": [
+    "cmake",
+    "-S",
+    "/tmp/aspect-cohesive-native-source-r3jor6f7/source",
+    "-B",
+    "/tmp/aspect-cohesive-native-source-r3jor6f7/build",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DDEAL_II_DIR=/opt/dealii/9.6-local",
+    "-DCMAKE_CXX_COMPILER=/opt/gcc/12.4.0/bin/g++",
+    "-DASPECT_UNITY_BUILD=ON",
+    "-DASPECT_PRECOMPILE_HEADERS=ON",
+    "-DASPECT_WITH_PYTHON=OFF"
+  ],
+  "returncode": 0,
+  "elapsed_s": 5.225397352999607,
+  "temporary_directory": "/tmp/aspect-cohesive-native-source-r3jor6f7"
+}

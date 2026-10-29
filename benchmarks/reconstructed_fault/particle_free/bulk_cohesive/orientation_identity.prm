@@ -1,0 +1,4 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_free/bulk_cohesive/orientation.prm
+# Run with ASPECT_BULK_ORIENTATION_IDENTITY=1: same mesh generation, zero angle.
+set Output directory = $ASPECT_SOURCE_DIR/build-particle-free/bulk-orientation/runs/identity
+set End time = 0.0025

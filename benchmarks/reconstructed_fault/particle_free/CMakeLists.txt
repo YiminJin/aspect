@@ -38,3 +38,79 @@ target_compile_options(pf6_transfer_checks PRIVATE -fno-finite-math-only -ffp-co
 add_library(p3_native_checks SHARED p3_native_checks.cc)
 ASPECT_SETUP_PLUGIN(p3_native_checks)
 target_compile_options(p3_native_checks PRIVATE -fno-finite-math-only -ffp-contract=off)
+add_library(bulk_cohesive_checks SHARED bulk_cohesive/native.cc)
+ASPECT_SETUP_PLUGIN(bulk_cohesive_checks)
+target_compile_options(bulk_cohesive_checks PRIVATE -fno-finite-math-only -ffp-contract=off)
+add_library(bulk_orientation_checks SHARED bulk_cohesive/orientation.cc)
+ASPECT_SETUP_PLUGIN(bulk_orientation_checks)
+target_compile_options(bulk_orientation_checks PRIVATE -fno-finite-math-only -ffp-contract=off)
+add_library(bulk_source_history_checks SHARED bulk_cohesive/source_history_checks.cc)
+ASPECT_SETUP_PLUGIN(bulk_source_history_checks)
+target_compile_options(bulk_source_history_checks PRIVATE -fno-finite-math-only -ffp-contract=off)
+add_library(bulk_energy_checks SHARED bulk_cohesive/energy.cc)
+ASPECT_SETUP_PLUGIN(bulk_energy_checks)
+target_compile_options(bulk_energy_checks PRIVATE -fno-finite-math-only -ffp-contract=off)
+add_library(bulk_spatial_checks SHARED bulk_cohesive/spatial.cc)
+ASPECT_SETUP_PLUGIN(bulk_spatial_checks)
+target_compile_options(bulk_spatial_checks PRIVATE -fno-finite-math-only -ffp-contract=off)
+add_library(bulk_continued_checks SHARED bulk_cohesive/continued.cc)
+ASPECT_SETUP_PLUGIN(bulk_continued_checks)
+target_compile_options(bulk_continued_checks PRIVATE -fno-finite-math-only -ffp-contract=off)
+
+add_library(bulk_parallel_checks SHARED bulk_cohesive/parallel.cc)
+ASPECT_SETUP_PLUGIN(bulk_parallel_checks)
+target_compile_options(bulk_parallel_checks PRIVATE -fno-finite-math-only -ffp-contract=off)
+add_library(bulk_propagation_checks SHARED bulk_cohesive/propagation.cc)
+ASPECT_SETUP_PLUGIN(bulk_propagation_checks)
+target_compile_options(bulk_propagation_checks PRIVATE -fno-finite-math-only -ffp-contract=off)
+add_executable(bulk_stability_checks bulk_cohesive/stability_checks.cc)
+target_include_directories(bulk_stability_checks PRIVATE ${Aspect_INCLUDE_DIRS})
+deal_ii_setup_target(bulk_stability_checks)
+
+add_library(bulk_tensor_checks SHARED bulk_cohesive/tensor_native.cc)
+ASPECT_SETUP_PLUGIN(bulk_tensor_checks)
+target_compile_options(bulk_tensor_checks PRIVATE -fno-finite-math-only -ffp-contract=off)
+
+add_library(bulk_p5c_checks SHARED bulk_cohesive/p5c_native.cc)
+ASPECT_SETUP_PLUGIN(bulk_p5c_checks)
+target_compile_options(bulk_p5c_checks PRIVATE -fno-finite-math-only -ffp-contract=off)
+
+add_library(bulk_p5c_campaign_checks SHARED bulk_cohesive/p5c_campaign.cc)
+ASPECT_SETUP_PLUGIN(bulk_p5c_campaign_checks)
+target_compile_options(bulk_p5c_campaign_checks PRIVATE -fno-finite-math-only -ffp-contract=off)
+add_library(coulomb_archive_checks SHARED bulk_cohesive/coulomb_archive.cc)
+ASPECT_SETUP_PLUGIN(coulomb_archive_checks)
+target_compile_options(coulomb_archive_checks PRIVATE -fno-finite-math-only -ffp-contract=off)
+add_library(coulomb_native_checks SHARED bulk_cohesive/coulomb_native.cc)
+ASPECT_SETUP_PLUGIN(coulomb_native_checks)
+target_compile_options(coulomb_native_checks PRIVATE -fno-finite-math-only -ffp-contract=off)
+
+# Isolated geometric-interface experiment; no production selector/default changes.
+add_library(cohesive_interface_native SHARED cohesive_interface_native.cc
+  ../../../source/reconstructed_fault/cohesive_interface.cc)
+ASPECT_SETUP_PLUGIN(cohesive_interface_native)
+target_compile_options(cohesive_interface_native PRIVATE -fno-finite-math-only -ffp-contract=off)
+
+# Small fitted-kink mixed mechanics reference; does not alter production targets.
+add_executable(cohesive_interface_kink cohesive_interface_kink.cc
+  ../../../source/reconstructed_fault/cohesive_interface.cc)
+target_include_directories(cohesive_interface_kink PRIVATE ${Aspect_INCLUDE_DIRS})
+deal_ii_setup_target(cohesive_interface_kink)
+target_compile_options(cohesive_interface_kink PRIVATE -fno-finite-math-only -ffp-contract=off)
+add_library(cohesive_interface_kink_owner SHARED cohesive_interface_kink_owner.cc
+  ../../../source/reconstructed_fault/cohesive_interface.cc)
+ASPECT_SETUP_PLUGIN(cohesive_interface_kink_owner)
+target_compile_options(cohesive_interface_kink_owner PRIVATE -fno-finite-math-only -ffp-contract=off)
+
+# Isolated curved-vector mechanics experiment, using the same native point/solve.
+add_library(cohesive_interface_turn_solver SHARED cohesive_interface_turn_solver.cc
+  ../../../source/reconstructed_fault/cohesive_interface.cc)
+target_include_directories(cohesive_interface_turn_solver PRIVATE ${Aspect_INCLUDE_DIRS})
+deal_ii_setup_target(cohesive_interface_turn_solver)
+target_compile_options(cohesive_interface_turn_solver PRIVATE -fno-finite-math-only -ffp-contract=off)
+
+# Fixed-background nested enrichment for causal path-admission experiments.
+add_executable(cohesive_interface_path cohesive_interface_path.cc)
+target_include_directories(cohesive_interface_path PRIVATE ${Aspect_INCLUDE_DIRS})
+deal_ii_setup_target(cohesive_interface_path)
+target_compile_options(cohesive_interface_path PRIVATE -fno-finite-math-only -ffp-contract=off)

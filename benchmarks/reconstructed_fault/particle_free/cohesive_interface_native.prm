@@ -1,0 +1,43 @@
+# Experimental native Gamma kernel/owner qualification; production solver disabled.
+set Dimension = 2
+set Use years instead of seconds = false
+set End time = 0.004
+set Maximum time step = 0.002
+set Maximum first time step = 0.002
+set Nonlinear solver scheme = no Advection, no Stokes
+set Additional shared libraries = $ASPECT_SOURCE_DIR/build-particle-free/cohesive-interface-native/plugin/libcohesive_interface_native.release.so
+set Output directory = $ASPECT_SOURCE_DIR/build-particle-free/cohesive-interface-native/smoke/output
+subsection Geometry model
+ set Model name = box
+ subsection Box
+  set X extent = 1
+  set Y extent = 0.125
+  set X repetitions = 4
+  set Y repetitions = 40
+  set X periodic = true
+ end
+end
+subsection Gravity model
+ set Model name = vertical
+ subsection Vertical
+  set Magnitude = 0
+ end
+end
+subsection Material model
+ set Model name = simple
+end
+subsection Boundary velocity model
+ set Zero velocity boundary indicators = bottom, top
+end
+subsection Mesh refinement
+ set Initial global refinement = 0
+ set Initial adaptive refinement = 0
+ set Time steps between mesh refinement = 0
+end
+subsection Postprocess
+ set List of postprocessors = cohesive interface native checks
+end
+subsection Checkpointing
+ set Steps between checkpoint = 1
+ set Time between checkpoint = 0
+end

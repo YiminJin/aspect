@@ -28,8 +28,8 @@ Paths below are relative to `doc/reconstructed_fault/`:
 |---|---|
 | Existing implementation and P2 baseline | `CURRENT_STATUS.md`, `propagation/STATUS.md`, `propagation/P2_CLOSEOUT.md` |
 | Inherited cleanup | `propagation/P2_cleanup.md`; verify what is actually present |
-| Particle-free task | `particle_free/STATUS.md`, requested phase in `particle_free/PLAN.md` |
-| Equations and checks | Relevant sections of `particle_free/particle_free_history.tex` and `particle_free/VERIFICATION.md` |
+| Particle-free task | `particle_free/STATUS.md` and the current user-selected instructions; local plans are proposals, not required tracked entry points |
+| Equations and checks | Relevant sections of `particle_free_history.tex` and `particle_free/VERIFICATION.md` |
 
 The historical cleanup reference `41272d263` is not an assumed current base.
 Inspect callers, headers, and tests before changing interfaces.

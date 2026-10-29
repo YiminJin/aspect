@@ -1,0 +1,31 @@
+{
+  "geometry_rejection_unchanged": true,
+  "geometry_duplicate_rejected": true,
+  "stale_birth_rejected": true,
+  "physical_rejection_unchanged": true,
+  "native_context_JSON_restart_bitwise": true,
+  "physical_duplicate_rejected": true,
+  "geometry_increment": 1,
+  "physical_increment": 1,
+  "actual_native_contact_rejection_unchanged": true,
+  "native_rejection_message": "\n--------------------------------------------------------\nAn error occurred in line <214> of file </home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/cohesive_interface_evolution.h> in function\n    aspect::CohesiveEvolution::solve(const Operators&, const Incoming&, double, double, const Vector*, const std::vector<bool>*)::<lambda(const aspect::CohesiveEvolution::Vector&, bool, aspect::CohesiveEvolution::Vector&, aspect::CohesiveEvolution::Matrix&)>\nThe violated condition was: \n    out.contact > 0\nAdditional information: \n    Native signed solve lost contact\n\nStacktrace:\n-----------\n#0  /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-interface-path/build/libcohesive_interface_turn_solver.so: aspect::CohesiveEvolution::solve(aspect::CohesiveEvolution::Operators const&, aspect::CohesiveEvolution::Incoming const&, double, double, dealii::Vector<double> const*, std::vector<bool, std::allocator<bool> > const*)::{lambda(dealii::Vector<double> const&, bool, dealii::Vector<double>&, dealii::FullMatrix<double>&)#1}::operator()(dealii::Vector<double> const&, bool, dealii::Vector<double>&, dealii::FullMatrix<double>&) const\n#1  /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-interface-path/build/libcohesive_interface_turn_solver.so: aspect::CohesiveEvolution::solve(aspect::CohesiveEvolution::Operators const&, aspect::CohesiveEvolution::Incoming const&, double, double, dealii::Vector<double> const*, std::vector<bool, std::allocator<bool> > const*)\n#2  /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-interface-path/build/libcohesive_interface_turn_solver.so: cohesive_turn_solve\n#3  /usr/lib/libffi.so.8: \n#4  /usr/lib/libffi.so.8: \n#5  /usr/lib/libffi.so.8: ffi_call\n#6  /usr/lib/python3.14/lib-dynload/_ctypes.cpython-314-x86_64-linux-gnu.so: \n#7  /usr/lib/python3.14/lib-dynload/_ctypes.cpython-314-x86_64-linux-gnu.so: \n#8  /usr/lib/libpython3.14.so.1.0: \n#9  /usr/lib/libpython3.14.so.1.0: \n#10  /usr/lib/libpython3.14.so.1.0: \n#11  /usr/lib/libpython3.14.so.1.0: PyEval_EvalCode\n#12  /usr/lib/libpython3.14.so.1.0: \n#13  /usr/lib/libpython3.14.so.1.0: \n#14  /usr/lib/libpython3.14.so.1.0: \n#15  /usr/lib/libpython3.14.so.1.0: \n#16  /usr/lib/libpython3.14.so.1.0: Py_RunMain\n#17  /usr/lib/libpython3.14.so.1.0: Py_BytesMain\n#18  /usr/lib/libc.so.6: \n#19  /usr/lib/libc.so.6: __libc_start_main\n#20  python3: _start\n--------------------------------------------------------\n",
+  "correct_retry_after_failed_trial_bitwise": true,
+  "pressure_mode": "variational normal contact reaction",
+  "transfer": {
+    "old_K_bitwise": true,
+    "old_Q_bitwise": true,
+    "old_native_response_hashes_equal": true,
+    "old_stress_pressure_columns_bitwise": true,
+    "physical_tensor_pressure_error_Pa": 0.0,
+    "energy_change_J_m": 0.0,
+    "old_sided_pressure_error_Pa": 0.0,
+    "nonuniform_incoming_Maxwell_m": 0.0010064812787489563,
+    "weak_Pa": 1.828240731412734e-12,
+    "new_tied_peak_Pa": 2941.880847144686,
+    "old_clock_unchanged": true,
+    "old_histories_bitwise": true,
+    "new_fracture_J_m": 0.0,
+    "new_bond_J_m": 0.0
+  },
+  "scope": "Isolated benchmark owners and native C++ solves; production Simulator/Manager/checkpoints remain unchanged."
+}

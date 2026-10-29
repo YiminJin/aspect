@@ -1,0 +1,7 @@
+# Frozen P4a functional observation: run with ASPECT_P4A_TIP=0.515625.
+# Endpoint is inside a bulk cell; uniform surface knots resolve the support cut.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_free/p3_native.prm
+set Output directory = $ASPECT_SOURCE_DIR/build-particle-free/p4a-tip/cut/output
+subsection Fault reconstruction
+  set Prescribed faults file = $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_free/p4a-cut-seed.txt
+end

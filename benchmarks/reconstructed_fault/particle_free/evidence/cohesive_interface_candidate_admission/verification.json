@@ -1,0 +1,65 @@
+{
+  "engineering_qualification_passed": true,
+  "coarse_physical_energy_failure_preserved": true,
+  "earlier_point_traction_and_normal_failures_preserved": true,
+  "protected_files_unchanged": 1214,
+  "publication_accounting": [
+    {
+      "label": "candidates2",
+      "physical_steps": 60,
+      "physical_publication_increment": 60,
+      "registry_commits": 8,
+      "cells_formed": 8,
+      "persistent_records": 132,
+      "temporary_cells": 2,
+      "retained_initial_registry_unchanged": true
+    },
+    {
+      "label": "candidates8",
+      "physical_steps": 60,
+      "physical_publication_increment": 60,
+      "registry_commits": 8,
+      "cells_formed": 8,
+      "persistent_records": 132,
+      "temporary_cells": 8,
+      "retained_initial_registry_unchanged": true
+    },
+    {
+      "label": "half-step",
+      "physical_steps": 120,
+      "physical_publication_increment": 120,
+      "registry_commits": 8,
+      "cells_formed": 8,
+      "persistent_records": 132,
+      "temporary_cells": 2,
+      "retained_initial_registry_unchanged": true
+    },
+    {
+      "label": "cadence-half",
+      "physical_steps": 20,
+      "physical_publication_increment": 20,
+      "registry_commits": 4,
+      "cells_formed": 4,
+      "persistent_records": 132,
+      "temporary_cells": 2,
+      "retained_initial_registry_unchanged": true
+    },
+    {
+      "label": "cadence-onset",
+      "physical_steps": 27,
+      "physical_publication_increment": 27,
+      "registry_commits": 2,
+      "cells_formed": 2,
+      "persistent_records": 114,
+      "temporary_cells": 1,
+      "retained_initial_registry_unchanged": true
+    }
+  ],
+  "native_kernels": 71,
+  "native_seconds": 1198.912164335,
+  "work_bytes": 971085542,
+  "gif_frames": 22,
+  "legacy_checkpoint_conversion": false,
+  "production_changed": false,
+  "scope": "Serial fixed bulk mesh, homogeneous law, experimental native/JSON ownership; no quantitative mature propagation qualification"
+}

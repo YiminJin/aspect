@@ -1,0 +1,37 @@
+parameter,fixed,radial,units
+G,1000000.0,1000000.0,Pa
+eta,100000000.0,100000000.0,Pa s
+cohesion_strength_drop,2000,2000,Pa
+residual_resistance,1000,1000,Pa
+Gc,1,1,J/m^2
+ell,0.046875,0.046875,m
+cw,2.6666666666666665,2.6666666666666665,1
+Kf,8,8,Pa
+m,4,4,1
+seed_peak,0.6,0.6,1
+domain_width,1.5,1.5,m
+domain_height,1,1,m
+tip_x,1,1,m
+tip_y,0.5,0.5,m
+Nx,192,192,cells
+Ny,128,128,cells
+dx,.0078125,.0078125,m
+dy,0.0078125,0.0078125,m
+mechanics_Gauss,8,8,per coordinate
+source_Gauss,3,3,per coordinate
+dt_prefix,0.00125,0.00125,s
+friction_normal_pressure,10000,10000,Pa
+friction_coefficient,0.1,0.1,1
+cohesive_peak_intact_shear,3000,3000,Pa
+seed_support_radius,0.09264647817212118,0.09264647817212118,m
+loading_rate,0.018,0.018,1/s
+loading_start,0.05,0.05,s
+dt_switch_time,0.11875,0.11875,s
+dt_active,0.000625,0.000625,s
+campaign_loading_end,0.16937499999999914,0.16999999999999912,s
+campaign_hold_end,0.17437499999999903,0.17499999999999902,s
+campaign_dt,0.000625,0.000625,s
+local_replay_dt,0.0003125,0.0003125,s
+ranks,4,4,ranks
+initial_represented_support_front,1.09375,1.09375,m
+target_phi0.05_front,1.140625,1.140625,m

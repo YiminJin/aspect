@@ -1,0 +1,11 @@
+# One uniformly refined aligned-wide control; fresh continuum initialization.
+# Delta t is identical to the retained 48 x 64 energy_half.prm trajectory.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_free/bulk_cohesive/energy_half.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/build-particle-free/bulk-spatial/plugin/libbulk_spatial_checks.release.so
+set Output directory = $ASPECT_SOURCE_DIR/build-particle-free/bulk-spatial/runs/refined-qualified
+subsection Geometry model
+  subsection Box
+    set X repetitions = 96
+    set Y repetitions = 128
+  end
+end

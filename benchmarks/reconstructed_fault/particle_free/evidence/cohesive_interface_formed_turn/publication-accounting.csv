@@ -1,0 +1,4 @@
+label,physical_steps,physical_publications,formed_transactions,new_cells,old_records_preserved,minimum_contact_Pa,max_weak_Pa
+coarse,120,120,6,6,True,9066.821789209704,9.984346682756495e-09
+fine,120,120,12,12,True,9066.821789209704,9.951539592378822e-09
+temporal-half,40,40,2,2,True,9862.022223266302,9.957368263258104e-09

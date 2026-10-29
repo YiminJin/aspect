@@ -1,0 +1,8 @@
+{
+  "minimum_point_dissipation_W_m3": 0.0,
+  "minimum_physical_contact_Pa": 7543.1015452596575,
+  "protected_hashes": 61,
+  "protected_errors": [
+    "include/aspect/material_model/phase_field_fault/bulk_cohesive_internal.h"
+  ]
+}

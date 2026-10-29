@@ -1,0 +1,9 @@
+{
+  "direction_covariance_max": 2.220446049250313e-16,
+  "unresolved_tie_without_preference": true,
+  "unaccounted_switch_rejected": true,
+  "required_switch_work_J_m2": -0.006578916116316825,
+  "residual_Maxwell_ledger_error": 6.68075730450903e-19,
+  "maximum_symbol_growth_s_inv": -1.0000000990000175,
+  "scope": "Fixed material plane, mature homogeneous steady sliding; not arbitrary direction-changing or phase-active continuum stability"
+}

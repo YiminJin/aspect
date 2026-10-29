@@ -1,0 +1,80 @@
+{
+  "homogeneous": {
+    "compression_deg": -24.99999999999997,
+    "max_shear_1_deg": 20.00000000000003,
+    "max_shear_2_deg": -69.99999999999997,
+    "selected_preference_deg": 20.00000000000003,
+    "old_tangent_deg": 0.0,
+    "shear_amplitude_Pa": 1305.4072893322784,
+    "both_planes_work_equivalent": true,
+    "sampling_deg": 0.0
+  },
+  "forward_deg": 20.00000000000003,
+  "diagnostic_Coulomb_deg": [
+    17.14470343125018,
+    -67.14470343125018
+  ],
+  "diagnostic_mu": 0.1,
+  "reversal_deg": -20.000000000000004,
+  "rotated_basis_error_rad": 6.661338147750939e-16,
+  "symmetric_preference_unresolved": true,
+  "zero_direction_unresolved": true,
+  "cohesive_energy_max_error_J_m2": 1.734723475976807e-18,
+  "semigroup": [
+    {
+      "extension_m": 0.75,
+      "terminal_deg": 19.00425863264275,
+      "exact_terminal_deg": 19.00425863264272,
+      "end_x_m": 8.17742151571182,
+      "end_y_m": 0.530052062123308
+    },
+    {
+      "extension_m": 0.375,
+      "terminal_deg": 19.00425863264275,
+      "exact_terminal_deg": 19.00425863264272,
+      "end_x_m": 8.177477249079786,
+      "end_y_m": 0.5297127484500856
+    },
+    {
+      "extension_m": 0.1875,
+      "terminal_deg": 19.004258632642745,
+      "exact_terminal_deg": 19.00425863264272,
+      "end_x_m": 8.177480459597996,
+      "end_y_m": 0.5296883070312404
+    }
+  ],
+  "angular_sampling": [
+    {
+      "step_deg": 15.0,
+      "selected_deg": 14.999999999999996,
+      "error_deg": -5.0000000000000036,
+      "conjugates_retained": true
+    },
+    {
+      "step_deg": 7.0,
+      "selected_deg": 22.000000000000007,
+      "error_deg": 2.000000000000007,
+      "conjugates_retained": true
+    },
+    {
+      "step_deg": 3.5,
+      "selected_deg": 18.499999999999993,
+      "error_deg": -1.500000000000007,
+      "conjugates_retained": true
+    },
+    {
+      "step_deg": 1.0,
+      "selected_deg": 20.000000000000004,
+      "error_deg": 3.552713678800501e-15,
+      "conjugates_retained": true
+    },
+    {
+      "step_deg": 0.25,
+      "selected_deg": 20.000000000000004,
+      "error_deg": 3.552713678800501e-15,
+      "conjugates_retained": true
+    }
+  ],
+  "physical_R_m": 0.75,
+  "scope": "Formation-work/persistence hypothesis, not Coulomb intact admission or a global incremental potential."
+}

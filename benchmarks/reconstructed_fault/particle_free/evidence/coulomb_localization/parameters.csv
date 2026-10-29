@@ -1,0 +1,15 @@
+quantity,value,units,meaning
+G,1000000.0,Pa,shear modulus
+eta,100000000.0,Pa s,Maxwell viscosity
+Gc,1,J/m^2,retained fracture parameter
+ell,0.046875,m,phase length
+Kf,8,Pa,3 Gc/(8 ell)
+strength_drop,2000,Pa,distinct from residual cohesion
+m,4,1,2 G Kf/strength_drop^2
+mu,0.1,1,friction coefficient
+residual_cohesion,0,Pa,c_r
+p0,10000,Pa,background confinement
+side,0.25,m,fixed square block
+source_quadrature,3,points/axis,unchanged
+mechanics_quadrature,6,points/axis,unchanged
+Maxwell_time,100,s,eta/G

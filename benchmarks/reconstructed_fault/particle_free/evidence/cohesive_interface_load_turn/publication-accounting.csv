@@ -1,0 +1,8 @@
+label,physical_steps,physical_publication_increment,new_geometry_commits,final_s,failed
+turn-small64-reproduced,1785,1785,5,0.44625,True
+turn-large64,1840,1840,7,0.46,False
+constant-small64,1751,1751,4,0.43775,True
+constant-large64,1820,1820,11,0.455,True
+turn-small96,1784,1784,5,0.446,True
+turn-small-half64,291,291,4,0.446375,True
+turn-small-quantum64,137,137,8,0.44425,True

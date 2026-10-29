@@ -1,0 +1,19 @@
+{
+  "audited_files": 1456,
+  "changed": [
+    "source/simulator/core.cc",
+    "source/simulator/checkpoint_restart.cc",
+    "source/simulator/parameters.cc",
+    "source/simulator/solver_schemes.cc",
+    "include/aspect/simulator.h",
+    "include/aspect/parameters.h",
+    "include/aspect/reconstructed_fault/cohesive_interface.h",
+    "doc/reconstructed_fault/specification.tex",
+    "doc/reconstructed_fault/current_design.md",
+    "doc/reconstructed_fault/particle_free/COHESIVE_RSF_NATIVE_STAGES.md",
+    "doc/reconstructed_fault/particle_free/SOURCE_AUDIT.md",
+    "doc/reconstructed_fault/particle_free/STATUS.md"
+  ],
+  "missing": [],
+  "bp3_changes": []
+}

@@ -1,0 +1,32 @@
+{
+  "engineering_checks_passed": true,
+  "protected_files_unchanged": 1693,
+  "late_turn_mature_records": 15,
+  "cohesive_resistance_exactly_zero_on_mature_records": true,
+  "parallel_qualification": {
+    "passed": true,
+    "binary_sha256": "bb220526f7d7c37a0654c720ba743962ac6f033eecfe828ff172c731e441cb9d",
+    "rank_counts": [
+      1,
+      2,
+      4
+    ],
+    "operator_and_basis_bitwise": true,
+    "short_advanced_histories_bitwise": true,
+    "nonroot_failure_rejected": true,
+    "accepted_state_unchanged": true,
+    "retry_matches_control": true,
+    "same_rank_restart": true,
+    "single_publication": true,
+    "speedup_1_to_4": 0.7440783755802817,
+    "scope": "Parallel native response columns; replicated bulk matrix/mesh, coordinated reduced solve and publication"
+  },
+  "numerical_response_gates_passed": true,
+  "normal_uncertainty_material_response_supported": true,
+  "physical_energy_screens_passed": true,
+  "selection_angle_screen_passed": true,
+  "original_point_traction_accuracy_failure_open": true,
+  "production_BP3_defaults_unchanged": true,
+  "original_status_audit_retained": true,
+  "scope": "Homogeneous fixed-mesh finite specimen; parallel native operators, root-owned experimental JSON history; not production Simulator integration"
+}

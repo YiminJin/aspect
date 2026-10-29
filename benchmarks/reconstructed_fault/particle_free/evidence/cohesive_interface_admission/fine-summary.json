@@ -1,0 +1,22 @@
+{
+  "dt_s": 0.0025,
+  "seconds": 0.8405061249995924,
+  "events": [
+    {
+      "lower_s": 0.5814419651031495,
+      "upper_s": 0.5814419746398927,
+      "incoming_time_s": 0.58,
+      "target_s": 0.5825
+    }
+  ],
+  "birth": {
+    "time_s": 0.25,
+    "required_multiplier_Pa": 2478.779318791706,
+    "weak_error_Pa": 1.3642420526593924e-12,
+    "storage_change_J_m": 0.0,
+    "geometry_publications": 1
+  },
+  "accepted_steps": 185,
+  "final_damage": 0.026945286219524998,
+  "rejection_retry_restart": true
+}

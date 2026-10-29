@@ -1,0 +1,98 @@
+{
+  "PNGs": [
+    {
+      "name": "activation-x-time.png",
+      "width": 2040,
+      "height": 1394
+    },
+    {
+      "name": "early-physical-profiles.png",
+      "width": 2380,
+      "height": 1292
+    },
+    {
+      "name": "first-activation-locations.png",
+      "width": 2040,
+      "height": 680
+    },
+    {
+      "name": "physical-mechanism.png",
+      "width": 2295,
+      "height": 1326
+    },
+    {
+      "name": "response-and-work.png",
+      "width": 2295,
+      "height": 1360
+    },
+    {
+      "name": "strip-scales.png",
+      "width": 1870,
+      "height": 1275
+    }
+  ],
+  "GIF": {
+    "frames": 53,
+    "width": 1000,
+    "height": 720,
+    "durations_ms": [
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160,
+      160
+    ],
+    "physical_start_s": 0.12,
+    "physical_end_s": 0.185,
+    "physical_stride_s": 0.00125
+  },
+  "PDF_SVG_MP4_count": 0
+}

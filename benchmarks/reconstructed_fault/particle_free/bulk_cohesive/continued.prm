@@ -1,0 +1,8 @@
+# One exploratory continuation: same seed and loading through .15 s, then
+# rate .018/s through .175 s, fixed displacement through .185 s.
+# Retained rolling checkpoints are already in the old hold: initialize fresh.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_free/bulk_cohesive/spatial_refined.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/build-particle-free/bulk-continued/plugin/libbulk_continued_checks.release.so
+set Output directory = $ASPECT_SOURCE_DIR/build-particle-free/bulk-continued/runs/continued
+set End time = 0.185
+set Resume computation = false

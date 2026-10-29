@@ -1,0 +1,9 @@
+{
+  "case": "p02-n4-full",
+  "stem": "localization-0010-converged",
+  "unknowns": 122,
+  "Riesz_sigma_min": 0.19271306157625548,
+  "Riesz_sigma_max": 1.4221605552605077,
+  "Riesz_condition_2": 7.379679112709061,
+  "seconds": 0.011913176000234671
+}

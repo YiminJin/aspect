@@ -1,0 +1,26 @@
+{
+  "recovery_gates": [
+    "converged trial does not publish",
+    "outer rejection restores native solution and all bulk histories",
+    "identical retry native solution",
+    "repeated rejection leaves accepted histories unchanged"
+  ],
+  "rejection_retry_passed": true,
+  "single_publication_passed": true,
+  "restart_accepted_ledgers_bitwise_equal": true,
+  "restart_binary_and_field_files_bitwise_equal": 344,
+  "prefix_accepted_steps": 48,
+  "resumed_accepted_steps": 16,
+  "hold_steps": 4,
+  "hold_phase_signed_absolute_shear_bitwise_unchanged": true,
+  "hold_beta_decay_errors": {
+    "T": 6.8212102632969615e-15,
+    "a": 0.0,
+    "q_on_positive_h": 4.547473508864641e-16,
+    "cohesive_energy_decay": 1.6653345369377348e-16,
+    "bulk_energy_decay": 1.4654943925052066e-14
+  },
+  "automatic_cutback_qualified": false,
+  "observer_scope": "pure straight-column raw-weight moments; no native M3 ridge evolution",
+  "strict_reference_match_passed": false
+}

@@ -1,0 +1,98 @@
+{
+  "checks_passed": true,
+  "failed_scientific_targets_retained": true,
+  "csv_rows": {
+    "short-fitted64-history.csv": 99,
+    "offset96-loads.csv": 4,
+    "short-comparison.csv": 12,
+    "fitted-Q3-loads.csv": 4,
+    "fixed96-loads.csv": 4,
+    "narrow64-profiles.csv": 192,
+    "short-fitted-Q3-history.csv": 99,
+    "narrow-Q3-profiles.csv": 192,
+    "wide64-profiles.csv": 192,
+    "frozen-summary.csv": 8,
+    "fitted96-loads.csv": 4,
+    "short-wide96-history.csv": 99,
+    "frozen-loads.csv": 44,
+    "own-time-fitted96-history.csv": 198,
+    "wide96-profiles.csv": 192,
+    "fresh-profiles.csv": 768,
+    "offset96-profiles.csv": 192,
+    "native-cost.csv": 11,
+    "narrow96-profiles.csv": 192,
+    "frozen-errors.csv": 44,
+    "fitted64-loads.csv": 4,
+    "wide96-loads.csv": 4,
+    "frozen-profiles.csv": 2112,
+    "short-narrow64-history.csv": 99,
+    "short-wide64-history.csv": 99,
+    "short-fitted96-half-history.csv": 198,
+    "fitted64-profiles.csv": 192,
+    "wide-Q3-loads.csv": 4,
+    "causal-wide64-history.csv": 1780,
+    "short-profiles.csv": 2304,
+    "wide64-loads.csv": 4,
+    "short-offset96-history.csv": 99,
+    "short-wide-Q3-history.csv": 99,
+    "own-time-wide96-history.csv": 198,
+    "short-errors.csv": 11,
+    "short-narrow-Q3-history.csv": 99,
+    "causal-wide96-history.csv": 1780,
+    "fresh-errors.csv": 3,
+    "fresh-comparison.csv": 4,
+    "narrow96-loads.csv": 4,
+    "lifting-reference-profiles.csv": 3096,
+    "short-narrow96-history.csv": 99,
+    "fitted96-profiles.csv": 192,
+    "wide-Q3-profiles.csv": 192,
+    "fixed96-profiles.csv": 192,
+    "narrow64-loads.csv": 4,
+    "short-wide96-half-history.csv": 198,
+    "short-fitted96-history.csv": 99,
+    "fresh-wide96-history.csv": 1780,
+    "fresh-wide64-history.csv": 1780,
+    "narrow-Q3-loads.csv": 4,
+    "fresh-fitted64-history.csv": 1780,
+    "fitted-Q3-profiles.csv": 192,
+    "causal-comparison.csv": 4,
+    "fresh-fitted96-history.csv": 1780,
+    "lifting-reference.csv": 6,
+    "own-time-errors.csv": 2,
+    "incompressibility.csv": 33
+  },
+  "images": {
+    "causal-fronts.png": {
+      "width": 1820,
+      "height": 980
+    },
+    "lifting-mechanism.png": {
+      "width": 1680,
+      "height": 560
+    },
+    "bulk-storage-incompressibility.png": {
+      "width": 1960,
+      "height": 700
+    },
+    "fresh-fixed-path.png": {
+      "width": 1820,
+      "height": 1120
+    },
+    "frozen-shear-contact.png": {
+      "width": 1820,
+      "height": 1120
+    },
+    "short-growth-fronts.png": {
+      "width": 1820,
+      "height": 1120
+    }
+  },
+  "native_executable_sha256": "38779522f68a46f62aebb7efa36f5f7e00c3a7032c0c3506e115e0759300029a",
+  "native_C_API_sha256": "dabd0ab8d3d45b1eca9c5005c63bbdd6b90149df4189498a2a38922cb93dcd5d",
+  "packages": {
+    "numpy": "2.5.2",
+    "scipy": "1.18.1",
+    "matplotlib": "3.11.1",
+    "Pillow": "12.3.0"
+  }
+}

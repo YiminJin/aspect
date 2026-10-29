@@ -1,0 +1,7 @@
+{
+  "actual_native_cutback": true,
+  "unchanged_before_retry": true,
+  "same_accepted_timestep_sequence": true,
+  "accepted_archive_bitwise": true,
+  "forced_rejections": 1
+}

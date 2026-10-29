@@ -1,0 +1,24 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_free/bulk_cohesive/fracture.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/build-particle-free/p5c-native/plugin/libbulk_p5c_checks.release.so
+set Output directory = $ASPECT_SOURCE_DIR/build-particle-free/p5c-native/runs/seed-radial
+set End time = 0.2
+set Maximum time step = 0.00125
+set Maximum first time step = 0.00125
+subsection Material model
+ subsection Phase field fault
+ set Bulk cohesive flow rule = in-plane radial tensor
+ end
+end
+subsection Boundary velocity model
+ set Prescribed velocity boundary indicators = left y:p5c specimen loading, right y:p5c specimen loading, bottom:p5c specimen loading, top:p5c specimen loading
+end
+subsection Postprocess
+ set List of postprocessors = particles, p5c checks
+end
+subsection Checkpointing
+ set Steps between checkpoint = 16
+end
+subsection Termination criteria
+ set Termination criteria = end step
+ set End step = 116
+end

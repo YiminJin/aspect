@@ -1,0 +1,25 @@
+{
+  "source_clock_s": 0.4165,
+  "target_s": 0.41675,
+  "active_coupled_FD_relative": 5.523982346572213e-10,
+  "stale_predictor_native_weak_Pa": 2.8705926524708043e-12,
+  "rejected_before_publication": true,
+  "original_accepted_unchanged": true,
+  "successful_retry_bitwise": true,
+  "actual_direction_refresh_retry": 1,
+  "single_atomic_physical_publication": true,
+  "reference_accepted_endpoint_bitwise": true,
+  "formed_history_JSON_restart_bitwise": true,
+  "changed_zero_cache_physical_errors": {
+    "jump": 4.743384504624082e-20,
+    "damage": 7.112366251504909e-17,
+    "theta": 1.1102230246251565e-16,
+    "reference": 0.0,
+    "relaxed_jump": 4.743384504624082e-20,
+    "absolute_slip": 4.743384504624082e-20
+  },
+  "candidate_cache_replacement_physical_publications": 0,
+  "candidate_cache_version_changed": true,
+  "matched_restart_refresh_explicit": true,
+  "scope": "Cache cadence is numerical state; arbitrary stale-cache removal is not assumed path independent."
+}

@@ -1,0 +1,44 @@
+{
+  "scalar": {
+    "once_only_affine_mean_T_source": 9.745961251822086e-14,
+    "A_Maxwell_plus_flow": 7.154342853588297e-14,
+    "accumulated_tensor_K": 5.692061405548898e-14,
+    "accumulated_magnitude_L": 6.142367832954842e-14,
+    "A_Q_compliance_identity": 8.983429408435255e-14,
+    "physical_stress": 1.0465618608010664e-13,
+    "physical_driving": 1.6431300764452317e-13,
+    "recoverable_storage": 1.544619910542035e-13,
+    "bulk_viscosity": 1.0625181290357943e-17,
+    "cohesive_viscosity": 2.2429432443293873e-18,
+    "friction_dissipation": 4.49293380277993e-16,
+    "uniform_AT1_storage": 3.4833247397614286e-15
+  },
+  "fixed": {
+    "once_only_affine_mean_T_source": 9.705521570151443e-14,
+    "A_Maxwell_plus_flow": 7.154342853588297e-14,
+    "accumulated_tensor_K": 5.605325231750058e-14,
+    "accumulated_magnitude_L": 6.0604695951821e-14,
+    "A_Q_compliance_identity": 9.004369803326711e-14,
+    "physical_stress": 1.0310484010628535e-13,
+    "physical_driving": 1.6420198534206065e-13,
+    "recoverable_storage": 1.55559690483015e-13,
+    "bulk_viscosity": 1.0516761073109393e-17,
+    "cohesive_viscosity": 2.2293907171733185e-18,
+    "friction_dissipation": 4.3194614551822497e-16,
+    "uniform_AT1_storage": 3.497202527569243e-15
+  },
+  "radial": {
+    "once_only_affine_mean_T_source": 9.705521571686444e-14,
+    "A_Maxwell_plus_flow": 3.664603343001005e-14,
+    "accumulated_tensor_K": 5.876375774871434e-14,
+    "accumulated_magnitude_L": 6.329563805006797e-14,
+    "A_Q_compliance_identity": 9.088131382892547e-14,
+    "physical_stress": 8.36930336167695e-14,
+    "physical_driving": 5.88418203016062e-14,
+    "recoverable_storage": 1.5461880525831942e-13,
+    "bulk_viscosity": 6.051203375184722e-18,
+    "cohesive_viscosity": 1.0672615135404184e-18,
+    "friction_dissipation": 4.527628272299467e-16,
+    "uniform_AT1_storage": 3.4833247397614286e-15
+  }
+}

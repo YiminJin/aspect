@@ -1,0 +1,430 @@
+{
+  "radial": {
+    "onset_bracket_s": [
+      0.129375,
+      0.12999999999999998
+    ],
+    "first_growing_nodes": [
+      [
+        1.0859375,
+        0.5,
+        2.4644533392333655e-05
+      ]
+    ],
+    "initial_fronts": {
+      "connected_x_phi0.01": 1.078125,
+      "centerline_x_phi0.01": 1.0834492791958827,
+      "connected_x_phi0.05": 1.0703125,
+      "centerline_x_phi0.05": 1.0705191131247798,
+      "connected_x_phi0.1": 1.0546875,
+      "centerline_x_phi0.1": 1.0613156590615413,
+      "connected_x_phi0.2": 1.046875,
+      "centerline_x_phi0.2": 1.0478762933490149,
+      "connected_x_phi0.4": 1.0234375,
+      "centerline_x_phi0.4": 1.0274710767201651,
+      "connected_x_phi0.6": 1.0,
+      "centerline_x_phi0.6": 1.0
+    },
+    "final": {
+      "step": 185,
+      "time_s": 0.17499999999999902,
+      "min_phi": 0.0,
+      "max_phi": 0.6,
+      "min_increment": 0.0,
+      "max_phase_change_per_step": 0.0,
+      "peak_increment": 0.14323953370448683,
+      "integral_growth_m2": 0.000985026920173295,
+      "cap_growth_m2": 0.00097438216819953,
+      "peak_initially_intact_growth": 0.13071315634234043,
+      "growth_L2_m": 0.00838037632279238,
+      "imposed_relative_displacement_m": 0.002159999999999984,
+      "connected_x_phi0.01": 1.1796875,
+      "disconnected_area_phi0.01_m2": 0.0,
+      "centerline_x_phi0.01": 1.1835643899931112,
+      "connected_x_phi0.05": 1.140625,
+      "disconnected_area_phi0.05_m2": 0.0,
+      "centerline_x_phi0.05": 1.1433676891622697,
+      "connected_x_phi0.1": 1.109375,
+      "disconnected_area_phi0.1_m2": 0.0,
+      "centerline_x_phi0.1": 1.1104084876746547,
+      "connected_x_phi0.2": 1.0625,
+      "disconnected_area_phi0.2_m2": 0.0,
+      "centerline_x_phi0.2": 1.0652135868912542,
+      "connected_x_phi0.4": 1.0234375,
+      "disconnected_area_phi0.4_m2": 0.0,
+      "centerline_x_phi0.4": 1.027872835943145,
+      "connected_x_phi0.6": 1.0,
+      "disconnected_area_phi0.6_m2": 0.0,
+      "centerline_x_phi0.6": 1.0,
+      "top_horizontal_reaction_N_per_m": 2749.5506680630874,
+      "endpoint_reaction_work_J_m": 3.247462265478269,
+      "trapezoidal_reaction_work_J_m": 3.2220984330855083,
+      "dt": 0.000625,
+      "publications": 185.0,
+      "bulk": 2.6012447093868647,
+      "cohesive": 0.12169927173803982,
+      "fracture": 0.5763648383307992,
+      "Wext": 0.0,
+      "Db": 3.2515558867335706e-05,
+      "Dc": 1.5212408967254817e-06,
+      "Df": 0.0,
+      "stress_loss": 1.0161112145822256e-10,
+      "traction_loss": 4.7538778021648034e-12,
+      "phase_remainder": 0.0,
+      "fracture_loss": 0.0,
+      "phase_work": 0.0,
+      "mechanical_work": 0.0,
+      "pressure_work": 0.0,
+      "mechanical_residual": 1.2006302420177099e-13,
+      "phase_KKT": 0.0,
+      "projection_error": 3.1051202831349465e-15,
+      "energy_change": -3.403690612868715e-05,
+      "ledger_error": -3.7329794590921066e-16,
+      "cumulative_dissipation_J_m": 0.4924157333228423,
+      "storage_change_J_m": 2.7297221030469885,
+      "endpoint_physical_remainder_J_m": 0.025324429108438462,
+      "trapezoid_physical_remainder_J_m": -3.9403284322503396e-05,
+      "absolute_step_trapezoid_remainders_J_m": 3.940498627541533e-05,
+      "cumulative_signed_BE_remainder_J_m": 0.025324428948568366,
+      "cumulative_mechanical_residual_work_J_m": -1.6014184130250936e-10,
+      "cumulative_phase_residual_work_J_m": 1.3837407622649562e-13,
+      "growth_outside_initial_nodal_support_m2": 0.0004415857027386727
+    },
+    "initialization": {
+      "L2_relative_representation": 0.005000050984876139,
+      "L2_absolute_m": 0.0007123218395169545,
+      "min": 0.0,
+      "max": 0.6,
+      "nodal_continuum_defect": 1.1102230246251565e-16,
+      "unloaded_first_step_max_change": 0.0,
+      "unloaded_KKT": 0.0,
+      "seed_support_radius_m": 0.09264647817212118
+    },
+    "accepted_steps": 185,
+    "loading_endpoint_s": 0.16999999999999912,
+    "initial_fracture_J_m": 0.5695867164087153,
+    "added_fracture_J_m": 0.006778121922083935,
+    "final_event": {
+      "step": 185,
+      "time_s": 0.17499999999999902,
+      "loading_displacement_m": 0.002159999999999984,
+      "peak_increment": 0.14323953370448683,
+      "max_step_increment": 0.0,
+      "integrated_increment_m2": 0.000985026920173295,
+      "initially_zero_cell_peak": 0.13071315634234043,
+      "initially_zero_cell_integral_m2": 0.0003923564884003533,
+      "initially_zero_nodal_peak": 0.13071315634234043,
+      "represented_support_front_m": 1.09375,
+      "target_front_m": 1.140625,
+      "connected_front_phi0.01_m": 1.1835643899931112,
+      "axial_front_phi0.01_m": 1.1835643899931112,
+      "centerline_front_phi0.01_m": 1.1835643899931112,
+      "disconnected_area_phi0.01_m2": 0.0,
+      "largest_remote_initially_zero_area_m2": 0.0,
+      "remote_initially_zero_peak_increment": 0.0,
+      "new_growth_boundary_distance_m": 0.3203125,
+      "connected_front_phi0.05_m": 1.1433676891622697,
+      "axial_front_phi0.05_m": 1.1433676891622697,
+      "centerline_front_phi0.05_m": 1.1433676891622697,
+      "disconnected_area_phi0.05_m2": 0.0,
+      "connected_front_phi0.1_m": 1.1104084876746547,
+      "axial_front_phi0.1_m": 1.1104084876746547,
+      "centerline_front_phi0.1_m": 1.1104084876746547,
+      "disconnected_area_phi0.1_m2": 0.0,
+      "step_front_advance_phi0.05_m": 0.0,
+      "intact_activation": true,
+      "rapid_growth": false,
+      "target_reached": true,
+      "significant_remote_nucleation": false,
+      "boundary_approach": false,
+      "stop_reason": "target"
+    },
+    "first_intact_bracket_s": [
+      0.1424999999999997,
+      0.1431249999999997
+    ],
+    "first_rapid_bracket_s": [
+      0.16937499999999914,
+      0.16999999999999912
+    ],
+    "initial_axial_fronts_m": {
+      "0.01": 1.0834492791958827,
+      "0.05": 1.0705191131247798,
+      "0.1": 1.0613156590615413
+    },
+    "final_growth_regions": {
+      "1e-08": {
+        "nodes": 621,
+        "x_range_m": [
+          0.859375,
+          1.203125
+        ],
+        "y_range_m": [
+          0.40625,
+          0.59375
+        ]
+      },
+      "0.01": {
+        "nodes": 295,
+        "x_range_m": [
+          0.96875,
+          1.1796875
+        ],
+        "y_range_m": [
+          0.421875,
+          0.578125
+        ]
+      },
+      "0.05": {
+        "nodes": 123,
+        "x_range_m": [
+          1.046875,
+          1.140625
+        ],
+        "y_range_m": [
+          0.453125,
+          0.546875
+        ]
+      },
+      "0.1": {
+        "nodes": 39,
+        "x_range_m": [
+          1.0625,
+          1.109375
+        ],
+        "y_range_m": [
+          0.4765625,
+          0.5234375
+        ]
+      }
+    },
+    "higher_damage_fronts_m": {
+      "0.2": {
+        "initial": 1.0478762933490149,
+        "final": 1.0652135868912542
+      },
+      "0.4": {
+        "initial": 1.0274710767201651,
+        "final": 1.027872835943145
+      },
+      "0.6": {
+        "initial": 1.0,
+        "final": 1.0
+      }
+    }
+  },
+  "fixed": {
+    "onset_bracket_s": [
+      0.12812500000000002,
+      0.12875
+    ],
+    "first_growing_nodes": [
+      [
+        1.0859375,
+        0.5,
+        3.189054167809964e-05
+      ]
+    ],
+    "initial_fronts": {
+      "connected_x_phi0.01": 1.078125,
+      "centerline_x_phi0.01": 1.0834492791958827,
+      "connected_x_phi0.05": 1.0703125,
+      "centerline_x_phi0.05": 1.0705191131247798,
+      "connected_x_phi0.1": 1.0546875,
+      "centerline_x_phi0.1": 1.0613156590615413,
+      "connected_x_phi0.2": 1.046875,
+      "centerline_x_phi0.2": 1.0478762933490149,
+      "connected_x_phi0.4": 1.0234375,
+      "centerline_x_phi0.4": 1.0274710767201651,
+      "connected_x_phi0.6": 1.0,
+      "centerline_x_phi0.6": 1.0
+    },
+    "final": {
+      "step": 184,
+      "time_s": 0.17437499999999903,
+      "min_phi": 0.0,
+      "max_phi": 0.6,
+      "min_increment": 0.0,
+      "max_phase_change_per_step": 0.0,
+      "peak_increment": 0.1568841057516442,
+      "integral_growth_m2": 0.0009321806855980535,
+      "cap_growth_m2": 0.0009296626071853608,
+      "peak_initially_intact_growth": 0.14552747219966283,
+      "growth_L2_m": 0.008655535093053196,
+      "imposed_relative_displacement_m": 0.0021487499999999844,
+      "connected_x_phi0.01": 1.1875,
+      "disconnected_area_phi0.01_m2": 0.0,
+      "centerline_x_phi0.01": 1.1945668565085328,
+      "connected_x_phi0.05": 1.1484375,
+      "disconnected_area_phi0.05_m2": 0.0,
+      "centerline_x_phi0.05": 1.1540493203359095,
+      "connected_x_phi0.1": 1.1171875,
+      "disconnected_area_phi0.1_m2": 0.0,
+      "centerline_x_phi0.1": 1.1197476935853055,
+      "connected_x_phi0.2": 1.0625,
+      "disconnected_area_phi0.2_m2": 0.0,
+      "centerline_x_phi0.2": 1.0695166406432117,
+      "connected_x_phi0.4": 1.0234375,
+      "disconnected_area_phi0.4_m2": 0.0,
+      "centerline_x_phi0.4": 1.0281367080317168,
+      "connected_x_phi0.6": 1.0,
+      "disconnected_area_phi0.6_m2": 0.0,
+      "centerline_x_phi0.6": 1.0,
+      "top_horizontal_reaction_N_per_m": 2744.6201048167018,
+      "endpoint_reaction_work_J_m": 3.2201977077715567,
+      "trapezoidal_reaction_work_J_m": 3.194857333986294,
+      "dt": 0.000625,
+      "publications": 184.0,
+      "bulk": 2.5928848876939377,
+      "cohesive": 0.11575465226452217,
+      "fracture": 0.576626644265688,
+      "Wext": 0.0,
+      "Db": 3.241106109617418e-05,
+      "Dc": 1.4469331533065217e-06,
+      "Df": 0.0,
+      "stress_loss": 1.0128456592335322e-10,
+      "traction_loss": 4.521666103985462e-12,
+      "phase_remainder": 0.0,
+      "fracture_loss": 0.0,
+      "phase_work": 0.0,
+      "mechanical_work": 0.0,
+      "pressure_work": 0.0,
+      "mechanical_residual": 2.963130503803773e-17,
+      "phase_KKT": 0.0,
+      "projection_error": 3.4809933254966755e-15,
+      "energy_change": -3.3858100055295104e-05,
+      "ledger_error": -4.1762718758692434e-16,
+      "cumulative_dissipation_J_m": 0.47921669555764973,
+      "storage_change_J_m": 2.715679467815433,
+      "endpoint_physical_remainder_J_m": 0.02530154439847415,
+      "trapezoid_physical_remainder_J_m": -3.8829386788508113e-05,
+      "absolute_step_trapezoid_remainders_J_m": 3.883107979668621e-05,
+      "cumulative_signed_BE_remainder_J_m": 0.025301544397120866,
+      "cumulative_mechanical_residual_work_J_m": -4.952861580066746e-12,
+      "cumulative_phase_residual_work_J_m": 3.4596528254686436e-12,
+      "growth_outside_initial_nodal_support_m2": 0.0004697239528831835
+    },
+    "initialization": {
+      "L2_relative_representation": 0.005000050984876139,
+      "L2_absolute_m": 0.0007123218395169545,
+      "min": 0.0,
+      "max": 0.6,
+      "nodal_continuum_defect": 1.1102230246251565e-16,
+      "unloaded_first_step_max_change": 0.0,
+      "unloaded_KKT": 0.0,
+      "seed_support_radius_m": 0.09264647817212118
+    },
+    "accepted_steps": 184,
+    "loading_endpoint_s": 0.16937499999999914,
+    "initial_fracture_J_m": 0.5695867164087153,
+    "added_fracture_J_m": 0.007039927856972716,
+    "final_event": {
+      "step": 184,
+      "time_s": 0.17437499999999903,
+      "loading_displacement_m": 0.0021487499999999844,
+      "peak_increment": 0.1568841057516442,
+      "max_step_increment": 0.0,
+      "integrated_increment_m2": 0.0009321806855980535,
+      "initially_zero_cell_peak": 0.14552747219966283,
+      "initially_zero_cell_integral_m2": 0.0004249132653646907,
+      "initially_zero_nodal_peak": 0.14552747219966283,
+      "represented_support_front_m": 1.09375,
+      "target_front_m": 1.140625,
+      "connected_front_phi0.01_m": 1.1945668565085328,
+      "axial_front_phi0.01_m": 1.1945668565085328,
+      "centerline_front_phi0.01_m": 1.1945668565085328,
+      "disconnected_area_phi0.01_m2": 0.0,
+      "largest_remote_initially_zero_area_m2": 0.0,
+      "remote_initially_zero_peak_increment": 0.0,
+      "new_growth_boundary_distance_m": 0.3125,
+      "connected_front_phi0.05_m": 1.1540493203359095,
+      "axial_front_phi0.05_m": 1.1540493203359095,
+      "centerline_front_phi0.05_m": 1.1540493203359095,
+      "disconnected_area_phi0.05_m2": 0.0,
+      "connected_front_phi0.1_m": 1.1197476935853055,
+      "axial_front_phi0.1_m": 1.1197476935853055,
+      "centerline_front_phi0.1_m": 1.1197476935853055,
+      "disconnected_area_phi0.1_m2": 0.0,
+      "step_front_advance_phi0.05_m": 0.0,
+      "intact_activation": true,
+      "rapid_growth": false,
+      "target_reached": true,
+      "significant_remote_nucleation": false,
+      "boundary_approach": false,
+      "stop_reason": "target"
+    },
+    "first_intact_bracket_s": [
+      0.14062499999999975,
+      0.14124999999999974
+    ],
+    "first_rapid_bracket_s": [
+      0.16874999999999915,
+      0.16937499999999914
+    ],
+    "initial_axial_fronts_m": {
+      "0.01": 1.0834492791958827,
+      "0.05": 1.0705191131247798,
+      "0.1": 1.0613156590615413
+    },
+    "final_growth_regions": {
+      "1e-08": {
+        "nodes": 527,
+        "x_range_m": [
+          0.8828125,
+          1.21875
+        ],
+        "y_range_m": [
+          0.4140625,
+          0.5859375
+        ]
+      },
+      "0.01": {
+        "nodes": 251,
+        "x_range_m": [
+          1.03125,
+          1.1875
+        ],
+        "y_range_m": [
+          0.4375,
+          0.5625
+        ]
+      },
+      "0.05": {
+        "nodes": 120,
+        "x_range_m": [
+          1.046875,
+          1.1484375
+        ],
+        "y_range_m": [
+          0.4609375,
+          0.5390625
+        ]
+      },
+      "0.1": {
+        "nodes": 43,
+        "x_range_m": [
+          1.0546875,
+          1.1171875
+        ],
+        "y_range_m": [
+          0.4765625,
+          0.5234375
+        ]
+      }
+    },
+    "higher_damage_fronts_m": {
+      "0.2": {
+        "initial": 1.0478762933490149,
+        "final": 1.0695166406432117
+      },
+      "0.4": {
+        "initial": 1.0274710767201651,
+        "final": 1.0281367080317168
+      },
+      "0.6": {
+        "initial": 1.0,
+        "final": 1.0
+      }
+    }
+  }
+}

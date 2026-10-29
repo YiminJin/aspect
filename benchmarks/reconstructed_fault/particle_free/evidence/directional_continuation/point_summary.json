@@ -1,0 +1,75 @@
+{
+  "passed": true,
+  "seconds": 1.09645758699844,
+  "formation": {
+    "reason": "continuity among equal maximizers",
+    "V": 4.1352336325370474e-05,
+    "mu": 0.11056345504328807,
+    "global_error_Pa": -3.752553823233029e-14,
+    "candidates": [
+      [
+        0.9984846853502647,
+        0.055030292757560904,
+        0.0
+      ],
+      [
+        0.05503029275756089,
+        0.9984846853502647,
+        0.0
+      ]
+    ]
+  },
+  "other_preference": {
+    "reason": "continuity among equal maximizers",
+    "V": 4.1352336325370474e-05,
+    "mu": 0.11056345504328807,
+    "global_error_Pa": -3.752553823233029e-14,
+    "candidates": [
+      [
+        0.9984846853502647,
+        0.055030292757560904,
+        0.0
+      ],
+      [
+        0.05503029275756089,
+        0.9984846853502647,
+        0.0
+      ]
+    ]
+  },
+  "unresolved_symmetry": {
+    "reason": "unresolved conjugate symmetry",
+    "V": 4.1352336325370474e-05,
+    "mu": 0.11056345504328807,
+    "global_error_Pa": -3.752553823233029e-14,
+    "candidates": [
+      [
+        0.9984846853502647,
+        0.055030292757560904,
+        0.0
+      ],
+      [
+        0.05503029275756089,
+        0.9984846853502647,
+        0.0
+      ]
+    ]
+  },
+  "tangent_relative_error": 6.794017460146348e-11,
+  "covariance": 1.017008775874382e-15,
+  "loaded_formation_fine_stress_error": 0.00033092811969392684,
+  "independent_formation_error_Pa": 1.8984813721090177e-13,
+  "pressure_tangent_norm": 0.10315337848613196,
+  "symmetric_shear_error_over_G": 0.0,
+  "perpendicular_memory_error": 3.8780097120672905e-20,
+  "max_rate_error_Pa": 9.991953930921227e-10,
+  "max_energy_defect_J_m3": 1.2653766923165222e-13,
+  "maximum_other_plane_excess_Pa": 598.0775765846779,
+  "max_fine_stress_error": 0.00863228175767928,
+  "max_fine_slip_error": 0.006614371439301013,
+  "retry_bitwise": true,
+  "restart_bitwise": true,
+  "duplicate_rejected": true,
+  "opening_rejected": true,
+  "unassigned_memory_rejected": true
+}

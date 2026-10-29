@@ -1,0 +1,6 @@
+label,physical_steps,physical_publication_increment,registry_commits,cells_formed,persistent_records,temporary_cells,retained_initial_registry_unchanged
+candidates2,60,60,8,8,132,2,True
+candidates8,60,60,8,8,132,8,True
+half-step,120,120,8,8,132,2,True
+cadence-half,20,20,4,4,132,2,True
+cadence-onset,27,27,2,2,114,1,True

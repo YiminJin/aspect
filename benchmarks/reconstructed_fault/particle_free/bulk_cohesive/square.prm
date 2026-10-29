@@ -1,0 +1,8 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_free/bulk_cohesive/native.prm
+set Output directory = $ASPECT_SOURCE_DIR/build-particle-free/bulk-sensitivity/runs/square
+subsection Geometry model
+  subsection Box
+    set X repetitions = 32
+    set Y repetitions = 32
+  end
+end

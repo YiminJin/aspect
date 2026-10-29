@@ -1,0 +1,15 @@
+parameter,value,unit
+G,1000000.0,Pa
+eta,100000000.0,Pa s
+Gc,1,J/m^2
+peak,3000,Pa
+p0,10000,Pa
+RSF_direct,0.005,1
+RSF_evolution,0.01,1
+mu0,0.1,1
+V0,5e-06,m/s
+Dc,0.001,m
+density_for_radiation,2670,kg/m^3
+radiation,25836.021365527624,Pa s/m
+c0,2.2222222222222222e-07,m/Pa
+delta_f,0.0006666666666666666,m

@@ -1,0 +1,116 @@
+{
+  "common_loading_time_s": 0.16937499999999914,
+  "common_state": {
+    "time_s": "0.169375",
+    "same_loading_history": "True",
+    "radial_integrated_increment_m2": "0.0008743673573474994",
+    "fixed_integrated_increment_m2": "0.0009321806855980535",
+    "radial_peak_increment": "0.13414432313918623",
+    "fixed_peak_increment": "0.1568841057516442",
+    "integrated_radial_reduction": "0.062019444452942274",
+    "radial_top_reaction_N_m": "2739.1391386948626",
+    "fixed_top_reaction_N_m": "2744.7573388239066"
+  },
+  "own_endpoints": {
+    "radial": {
+      "load_end_s": 0.16999999999999912,
+      "hold_end_s": 0.17499999999999902,
+      "target_bracket_s": [
+        0.16937499999999914,
+        0.16999999999999912
+      ],
+      "grip_displacement_m": 0.002159999999999984,
+      "phase_integral_m2": 0.000985026920173295,
+      "peak_increment": 0.14323953370448683,
+      "new_cell_integral_m2": 0.0003923564884003533,
+      "new_cell_peak": 0.13071315634234043,
+      "fronts_m": {
+        "0.01": 1.1835643899931112,
+        "0.05": 1.1433676891622697,
+        "0.1": 1.1104084876746547
+      },
+      "higher_damage_fronts_m": {
+        "0.2": {
+          "initial": 1.0478762933490149,
+          "final": 1.0652135868912542
+        },
+        "0.4": {
+          "initial": 1.0274710767201651,
+          "final": 1.027872835943145
+        },
+        "0.6": {
+          "initial": 1.0,
+          "final": 1.0
+        }
+      },
+      "continuation_energy": {
+        "trapezoid_work_J_m": 1.3811830695257499,
+        "endpoint_work_J_m": 1.3845467507717257,
+        "storage_change_J_m": 1.133628210799139,
+        "physical_dissipation_J_m": 0.24756026535379094,
+        "signed_trapezoid_remainder_J_m": -5.406627179960211e-06
+      }
+    },
+    "fixed": {
+      "load_end_s": 0.16937499999999914,
+      "hold_end_s": 0.17437499999999903,
+      "target_bracket_s": [
+        0.16812499999999916,
+        0.16874999999999915
+      ],
+      "grip_displacement_m": 0.0021487499999999844,
+      "phase_integral_m2": 0.0009321806855980535,
+      "peak_increment": 0.1568841057516442,
+      "new_cell_integral_m2": 0.0004249132653646907,
+      "new_cell_peak": 0.14552747219966283,
+      "fronts_m": {
+        "0.01": 1.1945668565085328,
+        "0.05": 1.1540493203359095,
+        "0.1": 1.1197476935853055
+      },
+      "higher_damage_fronts_m": {
+        "0.2": {
+          "initial": 1.0478762933490149,
+          "final": 1.0695166406432117
+        },
+        "0.4": {
+          "initial": 1.0274710767201651,
+          "final": 1.0281367080317168
+        },
+        "0.6": {
+          "initial": 1.0,
+          "final": 1.0
+        }
+      },
+      "continuation_energy": {
+        "trapezoid_work_J_m": 1.3531746960419635,
+        "endpoint_work_J_m": 1.3564921146314497,
+        "storage_change_J_m": 1.1152364783222333,
+        "physical_dissipation_J_m": 0.23794340804319888,
+        "signed_trapezoid_remainder_J_m": -5.190323469100866e-06
+      }
+    }
+  },
+  "holds": {
+    "radial": {
+      "phase_change": 0.0,
+      "max_mean_slip_rate_per_s": 0.0,
+      "expected_Maxwell_factor": 0.9999500014062208,
+      "relative_mean_full_tensor_Maxwell_defect": 6.438921566167313e-16,
+      "maximum_K_L_mean_change": 0.0,
+      "external_work_J_m": 0.0,
+      "physical_dissipation_J_m": 0.00027230631132746467,
+      "frictional_dissipation_J_m": 0.0
+    },
+    "fixed": {
+      "phase_change": 0.0,
+      "max_mean_slip_rate_per_s": 0.0,
+      "expected_Maxwell_factor": 0.9999500014062208,
+      "relative_mean_full_tensor_Maxwell_defect": 6.383435070263363e-16,
+      "maximum_K_L_mean_change": 0.0,
+      "external_work_J_m": 0.0,
+      "physical_dissipation_J_m": 0.0002708758046271301,
+      "frictional_dissipation_J_m": 0.0
+    }
+  }
+}

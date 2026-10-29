@@ -1,0 +1,8 @@
+{
+  "evolution_seconds": 116.17985938299967,
+  "evolution_peak_RSS_MiB": 136.6328125,
+  "sequential": true,
+  "BLAS_threads": 1,
+  "native_runs_launched": 0,
+  "note": "Includes preserved fine predictor stop/completion. Excludes native archive reading/qualification, plotting and packaging."
+}

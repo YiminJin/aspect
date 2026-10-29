@@ -1,0 +1,76 @@
+{
+  "runs": [
+    "pilot-final-current"
+  ],
+  "superseded_index_rows": [],
+  "start_s": 0.44,
+  "end_s": 0.46237499999999754,
+  "positive_steps": 179,
+  "growth_m": 2.100124336667556,
+  "full_front_advance_m": 1.4425941493750303,
+  "new_native_mature_cells": 2,
+  "maturity_events": [
+    {
+      "first_full_s": 0.46124999999999766,
+      "cell": 50,
+      "admitted_s": 0.44049999999999995,
+      "post_full_slip_Dc": 0.04749330817721536,
+      "normalized_age_change": -0.023574796171834462,
+      "final_mean_velocity_m_s": 0.041920455462442344,
+      "final_mean_normal_Pa": 10590.93059290959,
+      "final_mean_q_Pa": 0.0
+    },
+    {
+      "first_full_s": 0.4619999999999976,
+      "cell": 51,
+      "admitted_s": 0.44149999999999984,
+      "post_full_slip_Dc": 0.016061143620181635,
+      "normalized_age_change": -0.00806692795133404,
+      "final_mean_velocity_m_s": 0.042751162533185366,
+      "final_mean_normal_Pa": 10520.999967426775,
+      "final_mean_q_Pa": 0.0
+    }
+  ],
+  "energy_windows": [
+    {
+      "window": "loading",
+      "absolute_physical_remainder_J_m": 0.005454105477565557,
+      "sliding_J_m": 3.172958113071267,
+      "fracture_J_m": 1.1253410345975234,
+      "relative_sliding": 0.0017189339673590119,
+      "relative_fracture": 0.004846624543035712,
+      "maximum_BE_ledger_J_m": 1.2288059458853695e-11
+    },
+    {
+      "window": "reference hold",
+      "absolute_physical_remainder_J_m": 0.00363411101684961,
+      "sliding_J_m": 1.5340992237320459,
+      "fracture_J_m": 0.6476886082230743,
+      "relative_sliding": 0.002368889156992601,
+      "relative_fracture": 0.00561089228791556,
+      "maximum_BE_ledger_J_m": 1.5733082046366642e-11
+    },
+    {
+      "window": "extended hold",
+      "absolute_physical_remainder_J_m": 0.001869651197008558,
+      "sliding_J_m": 0.8371815190864643,
+      "fracture_J_m": 0.3270946938469609,
+      "relative_sliding": 0.0022332685975303525,
+      "relative_fracture": 0.005715932517949433,
+      "maximum_BE_ledger_J_m": 1.1342414800354778e-11
+    }
+  ],
+  "max_mechanical_weak_Pa": 1.1288410726747818e-10,
+  "max_surface_weak_Pa": 9.976519610432888e-09,
+  "max_source_scaled": 1.9227101326316292e-13,
+  "max_quadrature_repartition_J_m": 2.5011104298755527e-12,
+  "absolute_quadrature_repartition_J_m": 4.8487436288269237e-11,
+  "maximum_rank_memory_bytes": 385036288.0,
+  "comparison_maxima": {
+    "growth_abs_m": 2.1938006966593093e-13,
+    "slip_abs_m2": 6.158268339717665e-17,
+    "bulk_abs_J_m": 4.553157850750722e-10,
+    "full_front_abs_m": 5.812487066769734e-06,
+    "full_front_abs_x_m": 0.0
+  }
+}

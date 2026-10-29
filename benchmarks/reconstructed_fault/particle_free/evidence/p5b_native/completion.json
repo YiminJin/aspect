@@ -1,0 +1,47 @@
+{
+  "P5b_selected_checks_passed": true,
+  "scope": "Bounded serial homogeneous bulk fixed mesh/Gauss8 only",
+  "qualified_runs": [
+    "p5b-scalar-native-small-step",
+    "p5b-fixed-native-small-step",
+    "p5b-radial-action-fixed",
+    "p5b-radial-split",
+    "p5b-radial-resume-recovery",
+    "p5b-radial-uniform",
+    "p5b-fixed-restart-previous",
+    "p5b-relaxed-curvature-kernel",
+    "p5b-p5a-point-regression",
+    "p5b-scalar-point-regression",
+    "p5b-validate-native",
+    "p5b-validate-fixed",
+    "p5b-validate-radial",
+    "p5b-validate-radial-large-step"
+  ],
+  "expected_negative_restarts": [
+    "wrong-mode",
+    "wrong-layout"
+  ],
+  "protected_hashes_verified": 41,
+  "cleanup": {
+    "retained_regular_files_hash_and_metadata_verified": 108619,
+    "retained_symlinks_verified": 173,
+    "losslessly_archived_files": 9,
+    "archive_count": 8,
+    "original_bytes": 2669563692,
+    "archive_bytes": 616477233,
+    "filesystem_free_before": 1593389056,
+    "filesystem_free_after": 3637649408,
+    "filesystem_free_increase": 2044260352,
+    "tmpfs_untouched": true
+  },
+  "completed_P5b_exports": {
+    "files": 1815,
+    "original_bytes": 1150605091,
+    "archive_bytes": 171919943
+  },
+  "native_publications_per_main_run": 64,
+  "radial_restart_states_bitwise": 24,
+  "fixed_restart_states_bitwise": 1,
+  "strict_reference_match_passed": false,
+  "next_specimen_started": false
+}

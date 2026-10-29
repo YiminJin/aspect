@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "principal_timestep_sequence_identical": true,
+  "maximum_component_differences": {
+    "damage": 0.0,
+    "jump_m": 0.0,
+    "Theta": 0.0,
+    "reference_m": 0.0,
+    "relaxed_jump_m": 0.0,
+    "absolute_slip_m": 0.0,
+    "shear_Pa": 0.0,
+    "pn_Pa": 0.0,
+    "nodal_jump_m": 0.0,
+    "nodal_relaxed_jump_m": 0.0,
+    "wall_memory_m": 0.0
+  },
+  "fresh_steps": 1057,
+  "archived_steps": 1057,
+  "snapshot_diagnostics_nonpublication_verified": true
+}

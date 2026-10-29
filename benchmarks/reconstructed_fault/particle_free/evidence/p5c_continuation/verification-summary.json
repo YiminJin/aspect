@@ -1,0 +1,26 @@
+{
+  "maximum_checks": {
+    "mechanical_residual": 2.773778752514612e-12,
+    "phase_KKT": 9.66837492843986e-08,
+    "projection_error": 4.436334175257409e-15,
+    "ledger_error": 3.0511205422890997e-15
+  },
+  "accepted_intervals_all_qualified_forks": 163,
+  "maximum_critical_masters": 621,
+  "minimum_nonempty_relaxed_curvature": 2.8321299568560865,
+  "stability_retries": 0,
+  "maximum_rank_RSS_GiB": 4.859470367431641,
+  "all_publications_once": true,
+  "all_physical_dissipations_nonnegative": true,
+  "all_particle_counts_ID_coordinate_fingerprints_fixed": true,
+  "stage_totals_seconds": {
+    "wall_s": 18490.993081278,
+    "assembly": 3196.980004155,
+    "communication": 195.700313877,
+    "linear": 3309.030779273,
+    "history": 92.338671707,
+    "stability": 7828.31156979,
+    "total": 14817.238584673001,
+    "checkpoint_s": 3482.0
+  }
+}

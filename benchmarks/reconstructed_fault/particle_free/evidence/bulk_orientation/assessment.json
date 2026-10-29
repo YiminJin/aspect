@@ -1,0 +1,116 @@
+{
+  "last_common_step": 42,
+  "last_common_time": 0.10500000000000005,
+  "cases": {
+    "reference": {
+      "initial_representation": {
+        "whole_L2": 0.0033972110113998323,
+        "cap_L2": 0.007498536626466757
+      },
+      "independent_geometry_error": 4.440892098500626e-16,
+      "independent_weak_gradient_error": 9.159339953157541e-16,
+      "independent_weak_gradient_normalized_error": 2.930988785006749e-14,
+      "initial_kernel_8_16_check": {
+        "phase_max_error": 8.97978420372203e-08,
+        "fracture_max_error": 0.006979220329178304
+      },
+      "max_cap_increment": 0.0,
+      "max_increment": 0.0,
+      "growing_cap_nodes": []
+    },
+    "rotated": {
+      "initial_representation": {
+        "whole_L2": 0.00565613762567065,
+        "cap_L2": 0.007360975824813127
+      },
+      "independent_geometry_error": 4.440892098500626e-16,
+      "independent_weak_gradient_error": 5.054984208996416e-15,
+      "independent_weak_gradient_normalized_error": 5.240998182605826e-13,
+      "initial_kernel_8_16_check": {
+        "phase_max_error": 8.979784199558694e-08,
+        "fracture_max_error": 0.007013786134375977
+      },
+      "max_cap_increment": 0.0,
+      "max_increment": 0.0,
+      "growing_cap_nodes": []
+    }
+  },
+  "native_checks": {
+    "affine_control_step": 40,
+    "analytic_Txy": 899.763793306275,
+    "max_full_tensor_error": 4.424450218330892e-08,
+    "analytic_bulk_energy": 0.6071811628086728,
+    "native_bulk_energy": 0.607181162808693,
+    "all_accepted_phase_bitwise_unchanged": true,
+    "min_phase": 0.0,
+    "max_phase": 0.6,
+    "all_diagnostic_gates_passed": true,
+    "accepted_steps": 42,
+    "publications": 42,
+    "maximum_accepted_projection_error": 5.413225216404836e-14,
+    "maximum_accepted_mechanical_residual": 3.6821995254508315e-15,
+    "maximum_accepted_phase_KKT": 0.0,
+    "failed_step_not_published": true,
+    "native_KKT_mass_diagnostic": {
+      "minimum_integral_N_to_native_lumped_mass": 0.9476079385013064,
+      "maximum_integral_N_to_native_lumped_mass": 1.0282055308670788
+    }
+  },
+  "independent_worst_source": {
+    "cell": "2873_0:",
+    "native_source3_error": 88.77133758199912,
+    "source3_error": 88.77133758199747,
+    "source8_error": 88.77133758200827,
+    "coefficient3_8_difference": 7.185008144006133e-11,
+    "gradient_max": 1481.2790268162962,
+    "relative_error": 0.05992884255763288
+  },
+  "independent_affine_source": {
+    "source3_error": 2.5579538487363607e-12,
+    "source8_error": 7.673861546209082e-13,
+    "coefficient3_8_difference": 2.1032064978498966e-12,
+    "gradient_max": 186.60270621834053,
+    "relative_error": 1.3708021178124523e-14
+  },
+  "common_kernel_initial_comparison": [
+    {
+      "radius": 0.225,
+      "reference_F_min": 20.313713259065715,
+      "reference_F_max": 31.393316422588093,
+      "rotated_F_min": 19.844390561383953,
+      "rotated_F_max": 31.39331642258819,
+      "maximum_F_difference": 0.8725465225620503,
+      "maximum_phase_difference": 0.001028096304489065
+    },
+    {
+      "radius": 0.2881107642904027,
+      "reference_F_min": 19.147324708119708,
+      "reference_F_max": 23.830062448865576,
+      "rotated_F_min": 19.8634831011732,
+      "rotated_F_max": 23.830042492180095,
+      "maximum_F_difference": 1.4793383716360857,
+      "maximum_phase_difference": 0.0006969293842917276
+    },
+    {
+      "radius": 0.29851520585223124,
+      "reference_F_min": 26.961435589590327,
+      "reference_F_max": 30.57747359061627,
+      "rotated_F_min": 27.24125612566377,
+      "rotated_F_max": 30.577523142548387,
+      "maximum_F_difference": 1.337670693433143,
+      "maximum_phase_difference": 0.0005677800208450153
+    },
+    {
+      "radius": 0.325,
+      "reference_F_min": 50.295915868767814,
+      "reference_F_max": 51.941998256723785,
+      "rotated_F_min": 50.295913066342855,
+      "rotated_F_max": 52.01894917549304,
+      "maximum_F_difference": 1.3729802411491931,
+      "maximum_phase_difference": 0.0002302063381882644
+    }
+  ],
+  "native_source_guard_failed": true,
+  "strict_reference_match_passed": false,
+  "orientation_onset_qualified": false
+}

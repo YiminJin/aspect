@@ -1,0 +1,43 @@
+{
+  "engineering_checks_passed": true,
+  "protected_files": 1639,
+  "production_BP3_defaults_unchanged": true,
+  "old_evidence_unchanged": true,
+  "raw_bytes": 552697015,
+  "native_kernels": 53,
+  "native_setup_seconds": 1145.145921225,
+  "publication_accounting": [
+    {
+      "label": "coarse",
+      "physical_steps": 120,
+      "physical_publications": 120,
+      "formed_transactions": 6,
+      "new_cells": 6,
+      "old_records_preserved": true,
+      "minimum_contact_Pa": 9066.821789209704,
+      "max_weak_Pa": 9.984346682756495e-09
+    },
+    {
+      "label": "fine",
+      "physical_steps": 120,
+      "physical_publications": 120,
+      "formed_transactions": 12,
+      "new_cells": 12,
+      "old_records_preserved": true,
+      "minimum_contact_Pa": 9066.821789209704,
+      "max_weak_Pa": 9.951539592378822e-09
+    },
+    {
+      "label": "temporal-half",
+      "physical_steps": 40,
+      "physical_publications": 40,
+      "formed_transactions": 2,
+      "new_cells": 2,
+      "old_records_preserved": true,
+      "minimum_contact_Pa": 9862.022223266302,
+      "max_weak_Pa": 9.957368263258104e-09
+    }
+  ],
+  "scientific_accuracy_separate": "accuracy-gates.json",
+  "scope": "Serial experimental fixed-grid native/JSON owner, not production/MPI qualification"
+}

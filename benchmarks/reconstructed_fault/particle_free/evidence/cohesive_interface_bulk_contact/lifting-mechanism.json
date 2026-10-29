@@ -1,0 +1,13 @@
+{
+  "formula": "Delta E=G*m^2/(8*w^2)*||(Id-Pi_{k-1,h})1_{|y|<w}||^2",
+  "meaning": "Continuous counter-lifting has gradient kinks at arbitrary support edges. An unresolved kink adds numerical resistance, even in divergence-free pure shear.",
+  "pressure_free_control": true,
+  "old_region": [
+    3.75,
+    5.5
+  ],
+  "predicted_load_change_Pa": -126.81099614603137,
+  "actual_2D_load_change_Pa": -126.85776577966317,
+  "prediction_error_Pa": -0.04676963363179709,
+  "relative_error": 0.0003686777340303342
+}

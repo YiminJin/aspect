@@ -1,0 +1,13 @@
+{
+  "proceed": false,
+  "prototype_run": false,
+  "phase_run": false,
+  "retired_total_K_candidate": true,
+  "critical_reversal_wave_normals_deg": [
+    30.04149247729337,
+    59.958507522706626
+  ],
+  "structural_failure": "Common equivalent-rate/state kinetics leaves a conjugate-redistribution direction uncontrolled. Exact mature mixed pencil is singular; finite-h reversed memory has an oblique constraint pole.",
+  "operator": "M_ex(q)=q+ell_r\u00b2 Laplacian q, STATE evolution only; no Helmholtz substitution.",
+  "seconds": 6.004528217999905
+}

@@ -1,0 +1,8 @@
+{
+  "maximum_scalar_reference_error_Pa": 2.2737367544323206e-13,
+  "covariance_max": 2.830524433501838e-16,
+  "no_history_symmetry_unresolved": true,
+  "equal_distance_symmetry_unresolved": true,
+  "history_transport": "Identity in retained fixed small-strain material coordinates; rotate director and every tensor together under passive basis changes. No finite-rotation constitutive claim.",
+  "legacy_literal_issue": "2-D rotation_axis sets only NaN-initialized t[2]; is_finite(w[0]) fails, so sign=+1 fallback always executes."
+}

@@ -1,0 +1,7 @@
+{
+  "coupled_current_previous_FD_max": 2.6496258434251564e-12,
+  "full_mixed_QZ_error": 2.665246495725526e-13,
+  "full_block_timestep_error": 3.185978015498106e-16,
+  "zero_direct_effect_and_radiation_rank": 1,
+  "meaning": "Finite kinetic slope regularizes each smooth selected branch; no spatial cutoff or global switching uniqueness is established."
+}

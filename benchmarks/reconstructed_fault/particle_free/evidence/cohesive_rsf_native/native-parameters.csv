@@ -1,0 +1,20 @@
+parameter,value,unit,source
+Background confinement,10000,Pa,native resolved parameters.prm
+Candidate extent,0.1875,m,native resolved parameters.prm
+Candidate refresh interval,0.0025,s,native resolved parameters.prm
+Fracture energy,1,J/m^2,native resolved parameters.prm
+Future surface spacing,0.09375,m,native resolved parameters.prm
+Initial state,checked prototype snapshot,dimensionless/text,native resolved parameters.prm
+Initial state file,build-particle-free/cohesive-interface-formed-turn/coarse/final.json,dimensionless/text,native resolved parameters.prm
+Intact strength,3000,Pa,native resolved parameters.prm
+Maximum formed length,7.5,m,native resolved parameters.prm
+Maxwell viscosity,1e8,Pa s,native resolved parameters.prm
+Numerical lifting half width,0.75,m,native resolved parameters.prm
+Physical persistence length,0.75,m,native resolved parameters.prm
+RSF direct coefficient,0.005,dimensionless/text,native resolved parameters.prm
+RSF evolution coefficient,0.01,dimensionless/text,native resolved parameters.prm
+Radiation impedance,25836.021365527624,Pa s/m,native resolved parameters.prm
+Reference friction coefficient,0.1,dimensionless/text,native resolved parameters.prm
+Reference velocity,5e-6,m/s,native resolved parameters.prm
+Shear modulus,1e6,Pa,native resolved parameters.prm
+State slip distance,0.001,m,native resolved parameters.prm

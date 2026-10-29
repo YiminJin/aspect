@@ -1,0 +1,219 @@
+{
+  "scope": "Standalone stateless C++ point law/fixture only; no ASPECT native solver run.",
+  "cpp_point_checks": {
+    "passed": true,
+    "defects": {
+      "complete_return_FD": 7.169341704506282e-09,
+      "continuous_power": 1.20321973051211e-15,
+      "fixed_direction_sign": 0,
+      "fixed_identity": 1.9051668459808936e-15,
+      "fixed_path_identity": 4.87007553626095e-14,
+      "fixed_tangent_A": 1.5332934166833741e-16,
+      "fixed_tangent_Q": 2.6476544e-16,
+      "fixed_tangent_driving": 8.881784197001252e-16,
+      "fixed_tangent_stress": 3.215549355384372e-16,
+      "friction_complementarity": 4.163336342344337e-17,
+      "hold_Maxwell_memory": 0,
+      "intact_limit": 3.3306690738754696e-16,
+      "memory_recurrence": 4.003329948506965e-16,
+      "passive_basis_covariance": 1.9968166761095517e-14,
+      "path_BE_ledger": 7.993217796150058e-16,
+      "pure_shear_threshold": 2.220446049250313e-16,
+      "tangent_basis_covariance": 1.7763568394002505e-15,
+      "tensor_BE_ledger": 5.904336130817049e-16,
+      "tiny_flow_magnitude": 0,
+      "tiny_flow_tangent": 0,
+      "yield_admissibility": 7.958078640513122e-16,
+      "yield_inward_derivative": 0,
+      "yield_outward_derivative": 8.187786845089218e-13
+    },
+    "counts": {
+      "discarded_trials": 4,
+      "duplicate_publication_rejected": 2,
+      "fixed_publications": 800,
+      "fixed_restart_states_compared": 320,
+      "fully_populated_records_checked": 1,
+      "radial_publications": 800,
+      "radial_restart_states_compared": 320,
+      "stale_publication_rejected": 1
+    },
+    "seconds": 0.060498304
+  },
+  "independent_point_potential": {
+    "maximum_defects": {
+      "A": 1.1278446175503853e-16,
+      "Q": 3.442526112126926e-16,
+      "stress": 3.672425119847725e-16,
+      "driving": 5.791243086016858e-16,
+      "potential_gradient_original": 1.1221967339274739e-07,
+      "potential_gradient": 2.8051889737850695e-08,
+      "potential_gradient_extrapolated": 4.0381970264640235e-12
+    },
+    "precision_digits": 60,
+    "solved_cases": 10,
+    "potential_gradient_bound": 1e-07,
+    "original_probe_passed": false,
+    "perturbation_sizes": [
+      0.001,
+      0.0005
+    ],
+    "coarse_fine_error_ratio": 4.000431858297527,
+    "frozen_direction_negative_control_defect": 0.06712540598199179,
+    "seconds": 0.09322572700148157
+  },
+  "histories": {
+    "radial": {
+      "maximum_independent_history_defects": {
+        "T": 0.0,
+        "memory": 3.0059850633955515e-16,
+        "K": 1.0745822393984386e-16,
+        "L": 1.0745822393984386e-16,
+        "stress": 0.0,
+        "storage": 6.89543455818334e-16,
+        "dissipation": 6.438610574186099e-16,
+        "kkt": 3.3615352543057606e-14,
+        "energy_ledger": 1.1671273871462359e-14
+      },
+      "active_steps": 366,
+      "flow_angle_range_deg": [
+        0.0,
+        89.76259152654013
+      ],
+      "final": {
+        "time_s": 200.0,
+        "Axx": 0.00063867147949722,
+        "Axy": 0.0002628698045392266,
+        "Kxx": 0.0013378527852061688,
+        "Kxy": 0.0012294498773432116,
+        "L": 0.004859045490785867,
+        "tauxx_Pa": 1458.4659914803829,
+        "tauxy_Pa": 353.0078300444119,
+        "Y_Pa": 5.300019920685102,
+        "Eb_J_m3": 1.1258687881887601,
+        "Ec_J_m3": 0.6360023904822122,
+        "work_J_m3": 16.18482359564393,
+        "cumulative_Db_J_m3": 6.5373340320949005,
+        "cumulative_Dc_J_m3": 2.971704503839424,
+        "cumulative_Df_J_m3": 4.859045490785866,
+        "numerical_J_m3": 0.05486839025295403
+      }
+    },
+    "fixed": {
+      "maximum_independent_history_defects": {
+        "T": 0.0,
+        "memory": 2.1921304316645118e-16,
+        "K": 1.0745822393984386e-16,
+        "L": 1.0745822393984386e-16,
+        "stress": 0.0,
+        "storage": 6.494484872897102e-16,
+        "dissipation": 5.997453297589493e-16,
+        "kkt": 4.547473508864641e-16,
+        "energy_ledger": 1.3510046663335754e-14
+      },
+      "active_steps": 158,
+      "flow_angle_range_deg": [
+        0.0,
+        0.0
+      ],
+      "final": {
+        "time_s": 200.0,
+        "Axx": 0.0,
+        "Axy": 0.00019655976442198902,
+        "Kxx": 0.0,
+        "Kxy": 0.0010651724960048792,
+        "L": 0.0021303449920097584,
+        "tauxx_Pa": 2735.8089504748227,
+        "tauxy_Pa": 485.62791027888693,
+        "Y_Pa": 0.4292860109958649,
+        "Eb_J_m3": 3.860242540369995,
+        "Ec_J_m3": 0.05151432131950377,
+        "work_J_m3": 21.895190630713053,
+        "cumulative_Db_J_m3": 14.495480732440285,
+        "cumulative_Dc_J_m3": 1.2791181483267753,
+        "cumulative_Df_J_m3": 2.1303449920097544,
+        "numerical_J_m3": 0.07848989624703333
+      }
+    }
+  },
+  "high_precision_sample_defects": {
+    "A": 2.466135134460967e-16,
+    "Q": 4.598587026471133e-16,
+    "stress": 3.121323415786362e-16,
+    "driving": 8.13647779210851e-16
+  },
+  "memory_decomposition": {
+    "start_time_s": 90.0,
+    "end_time_s": 150.0,
+    "initial": [
+      0.0,
+      0.0005896881377611483
+    ],
+    "relaxed_old": [
+      0.0,
+      0.0003238701194163989
+    ],
+    "accumulated_new": [
+      0.0010523344334527162,
+      0.00010925857931519757
+    ],
+    "actual": [
+      0.0010523344334527134,
+      0.00043312869873159387
+    ],
+    "scaled_defect": 3.3630688096338426e-15
+  },
+  "identical_loaded_prefix_through_90_s": true,
+  "first_new_direction_flow_bracket_s": [
+    98.0,
+    98.25
+  ],
+  "incoming_Axy_at_first_new_flow": 0.0005444051064709744,
+  "protected_native_P4_BP3_and_scalar_files_unchanged": {
+    "source/material_model/phase_field_fault/bulk_cohesive.cc": "5189084af5d877c6aa67c2568dc08122e96191af75a81d0b661e706bbc025bc3",
+    "include/aspect/material_model/phase_field_fault/bulk_cohesive.h": "d65a020b96c32388ddd8727d37b8f046ffc416e750c77418f1e8d5b8b89f1aee",
+    "source/material_model/phase_field_fault/bulk_cohesive_history.cc": "d342d70c4f80fbdb5a31c65580fe8cd4c6378500481d2a4685b9ef19aef8a466",
+    "source/simulator/solver/bulk_cohesive_phase.cc": "df1131898d91bd5ead58e5b9ebf2824f4cb79164ff6b75d712e2c91d5f93b036",
+    "source/simulator/checkpoint_restart.cc": "9ab57c41afa410cefed5d5f1cff362ee2f0996ec37d014b6ea9140621a21cf41",
+    "benchmarks/reconstructed_fault/particle_free/evidence/bulk_continuation.zip": "a13abdcc6a480f94bd48c59fabb76711ce60553c35db827d7ea90b15d9860dc1",
+    "benchmarks/reconstructed_fault/particle_free/evidence/bulk_stability.zip": "154662012d030e631566e684073611747f0041177750f81c9b92cd2a15a85b35",
+    "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/BP3.e3610007": "59b1e0f34063a5e54598e6b7851af5773218bff647449ec2794bbf4ab8ec83cc",
+    "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/BP3.e3613912": "c0625a382ef411f9adcfc9f8a36a988f26b9bd0a071bdf72ee27ccf698c418ae",
+    "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/BP3.o3610007": "4803b06f217383c15652d97e475f80ecc4e3e0f413e29d608c14118cc232f012",
+    "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/BP3.o3613912": "2c89b6764e8bee5f567385a9fb74adc20faba1e23e63f4d874412f889020a118",
+    "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/ENVIRONMENT.md": "d72c635b09218f8b0ef0c1fe8db22300f00248df524de44e0d7f9ae87eca07e8",
+    "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/README.md": "220fe0e91381300713357fb7408a672ff4de27c610d531fa64a0a34a84b170c4",
+    "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/RESOURCES.md": "1233969802e2f38195bd36127738778c52d87468ef511014a3d78bc1aafa0fb1",
+    "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/VERIFICATION.md": "b5f0f4ac20c300b10857a308e430e8e391619d71229596642de007db3e630939",
+    "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/environment.sh": "438966abdd4e6977c26abaa77de5fe756fe8bb7799c6c7c613cdf364a9816fbf",
+    "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/fault.txt": "5460e34da479ef16e7dcc95f62669250a891ee8c969df5064dd3e4320bea4a24",
+    "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/log.txt": "d583baf568dbe6e08d2b1d941e1072dc2eb88d285e5b2f4d9f46f1e02e80f0a1",
+    "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/parameters.prm": "476c746a2b40b7597cf9cb8ca966ecb7e1c75ba3a4b91c34d70f0e9598bf681d",
+    "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/plugin/CMakeLists.txt": "35322afa0b4da36feb09861ba49bd5f88a7305100a85c6a26a5967f2e574934d",
+    "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/resume.prm": "d63df9f684f5d9b99f5c265c2a316ac37ab1fc7c82b5b082eafa99617d5c0628",
+    "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/startup-resume.prm": "68617736f0b2be3e89475b01bef3cbdc4ee00e04a7679431d59e99d4092082e7",
+    "benchmarks/reconstructed_fault/particle_free/bp3_dg_first_event/startup.prm": "89dbec9fd0d20b93ffd32b994f261fe2a4d116b5ce826174be431791784835ca",
+    "build-particle-free/bp3-optimization/baseline/aspect-release": "8bc5b99ad5bfcd725d6b9e9405434a0b2cbfae19e5701b458b81e38fb5b08398",
+    "build-particle-free/bp3-optimization/plugins/aspect-release": "d62541e3fc2a191965f31d26bf85260dc8922ac47c3b648b8256c96df143b23a",
+    "build-particle-free/bp3-optimization/plugins/libbp3_coupled_checks.release.so": "a22008421eb44d3a43bb61b3e123e68f5d0431023f900c2e761298e833ecd6e7",
+    "build-particle-free/first-event-package/check-observer/aspect-release": "d62541e3fc2a191965f31d26bf85260dc8922ac47c3b648b8256c96df143b23a",
+    "build-particle-free/first-event-package/check-observer/libbp3_coupled_checks.release.so": "0699e213d0895dc8110308b16d9f5b1cb927bb6adce43a6470f952b18c32f53a",
+    "build-particle-free/native/aspect-release": "d62541e3fc2a191965f31d26bf85260dc8922ac47c3b648b8256c96df143b23a",
+    "build-particle-free/plugin/aspect-release": "d62541e3fc2a191965f31d26bf85260dc8922ac47c3b648b8256c96df143b23a",
+    "build-particle-free/plugin/libfixed_profile_checks.release.so": "101808e7d7ff23cbd95422e88a11e87de295765a839736c2339b831c35692e9f",
+    "build-particle-free/plugin/liblimiter_checks.release.so": "e7ee7f41cced85765081f91fd333f9151cc3bb308bcb23256caf08598fe09278",
+    "build-particle-free/plugin/libnative_method_checks.release.so": "df05537908a94686fd00cf9da1cf130ed863d09e262279ffd42b133259a1e52b",
+    "build-particle-free/plugin/libpf5_checks.release.so": "98e67931797ba07a84814193189455ce6a300df28e8e932a4e06500fc2d08ec1",
+    "build-particle-free/plugin/libpf6_transfer_checks.release.so": "7130520fd891123809b72006dc83fb82cf06d22228d30fe86647ac5d1c0af2f0",
+    "build-particle-free/plugin/libpf6a_checks.release.so": "b23602972c69111cedbcb4c715ddd23af678457ad8199ac9ce5ed12f6a319505",
+    "build-particle-free/plugin/libpf6a_spatial_checks.release.so": "d45b894498f56dc11812a2df6d08c77d6e31d7198409065a14bb1bb025ff0269",
+    "build-particle-free/plugin/libphase_energy_checks.release.so": "906872a0a25443f870f104d84fcd8c239110bbb64a593a82903107d0c782eb26",
+    "build-particle-free/plugin/libscalar_method_checks.release.so": "5757b987847b42c634d9e37226aa590eb0e516920f05d50d898528df57b2fb28",
+    "build-particle-free/plugin/libstabilization_checks.release.so": "cba0563d1638192b2a0b183765897544da0a38fd50d8f720c86917b000517b2e",
+    "build-particle-free/plugin/libtransport_checks.release.so": "e29116b060657d85db8cbc8b35a5cc1cc155b3ee2ea730c1d70553508df6dcf6"
+  },
+  "native_solver_integrated": false,
+  "production_checkpoint_changed": false,
+  "finite_rotation_or_objective_rate_qualified": false,
+  "phase_evolution_qualified": false,
+  "strict_reference_match_passed": false
+}

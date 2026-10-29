@@ -1,0 +1,3 @@
+include benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/pilot.prm
+set End time = 0.44
+set Output directory = $ASPECT_SOURCE_DIR/build-particle-free/cohesive-rsf-native/conversion-r2

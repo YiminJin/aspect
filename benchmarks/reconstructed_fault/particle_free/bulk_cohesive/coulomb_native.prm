@@ -1,0 +1,39 @@
+# Fresh fully confined block; Surface pressure is the prescribed p0 for this mode.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_free/bulk_cohesive/native.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/build-particle-free/coulomb-native/plugin/libcoulomb_native_checks.release.so
+set Output directory = $ASPECT_SOURCE_DIR/build-particle-free/coulomb-native/runs/homogeneous
+set Maximum time step = .0125
+set Maximum first time step = .0125
+set End time = 1
+set Surface pressure = 10000
+set Pressure normalization = no
+subsection Geometry model
+  subsection Box
+    set X extent = .25
+    set Y extent = .25
+    set X repetitions = 4
+    set Y repetitions = 4
+  end
+end
+subsection Material model
+  subsection Phase field fault
+    set Bulk cohesive flow rule = closed Coulomb fixed phase
+    set Evolve phase field = false
+    set Cohesions = 2000, 2000
+    set Critical energy release rates = 1, 1
+    set FE bulk normal quadrature points = 6
+  end
+end
+subsection Phase field model
+  set Length scale = .046875
+end
+subsection Boundary velocity model
+  set Prescribed velocity boundary indicators = left:confined Coulomb block, right:confined Coulomb block, bottom:confined Coulomb block, top:confined Coulomb block
+end
+subsection Checkpointing
+  set Steps between checkpoint = 1
+end
+subsection Termination criteria
+  set Termination criteria = end step
+  set End step = 24
+end

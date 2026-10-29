@@ -1,0 +1,28 @@
+{
+  "decision": {
+    "proceed": false,
+    "prototype_run": false,
+    "phase_run": false,
+    "retired_total_K_candidate": true,
+    "critical_reversal_wave_normals_deg": [
+      30.04149247729337,
+      59.958507522706626
+    ],
+    "structural_failure": "Common equivalent-rate/state kinetics leaves a conjugate-redistribution direction uncontrolled. Exact mature mixed pencil is singular; finite-h reversed memory has an oblique constraint pole.",
+    "operator": "M_ex(q)=q+ell_r\u00b2 Laplacian q, STATE evolution only; no Helmholtz substitution.",
+    "seconds": 6.004528217999905
+  },
+  "FD_max": 1.370644571693093e-09,
+  "QZ_max": 3.3426239554046333e-09,
+  "analytic_denominator_max": 5.990396997483704e-16,
+  "mixed_null_max": 0.0,
+  "states": 6,
+  "symbol_rows": 25992,
+  "mechanical_audit_wall_s": 6.476991060000273,
+  "plot_wall_s": 4.926344264000363,
+  "native_runs": 0,
+  "MPI_runs": 0,
+  "conditional_transect_run": false,
+  "conditional_velocity_steps_run": false,
+  "reason": "Mechanical prerequisite failed before the conditional prototype."
+}

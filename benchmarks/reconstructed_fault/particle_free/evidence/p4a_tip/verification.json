@@ -1,0 +1,18 @@
+{
+  "portable_replay_passed": true,
+  "archived_native_files": 46,
+  "finite_tip_observation_cases": 2,
+  "independent_quadrature_orders": [
+    24,
+    32
+  ],
+  "predeclared_screens_passed": true,
+  "native_observation_gates_passed": true,
+  "P3_default_exports_bitwise_equal": 16,
+  "physical_steps_advanced": 0,
+  "native_mechanical_equilibration_qualified": false,
+  "phase_active_evolution_qualified": false,
+  "intact_material_activation_rule_selected": false,
+  "strict_reference_match_passed": false,
+  "P3_closed_commit": "f1f9f29cf40c32d1ddcea000b724375b64853532"
+}

@@ -1,0 +1,281 @@
+{
+  "label": "alternative-q3",
+  "n": 64,
+  "degree": 3,
+  "extension_m": 0.75,
+  "sampling_deg": 0.0,
+  "dt_s": 0.00025,
+  "surface_h_m": 0.09375,
+  "seconds": 208.7080921099987,
+  "steps": 1780,
+  "geometry_publications": 4,
+  "physical_publications": 1780,
+  "peak_RSS_MiB": 226.3515625,
+  "events": [
+    {
+      "time_s": 0.15,
+      "stage": 1,
+      "arc": {
+        "x": 6.0,
+        "y": 0.0,
+        "end": 6.743118087776822,
+        "a": 0.0,
+        "b": 0.22430377559010511,
+        "cells": 8
+      },
+      "decision": {
+        "compression_deg": -25.000003010610847,
+        "max_shear_1_deg": 19.999996989389153,
+        "max_shear_2_deg": -70.00000301061085,
+        "selected_preference_deg": 19.999996989389153,
+        "old_tangent_deg": 0.0,
+        "shear_amplitude_Pa": 1173.6915979418159,
+        "both_planes_work_equivalent": true,
+        "sampling_deg": 0.0
+      },
+      "physical_tensor_Pa": [
+        -754.4343222636498,
+        754.4343222636498,
+        2.600064299247775e-18,
+        899.1000058223782,
+        -4.488042567540946e-13
+      ],
+      "transfer": {
+        "old_K_bitwise": true,
+        "old_Q_bitwise": true,
+        "old_native_response_hashes_equal": true,
+        "old_stress_pressure_columns_bitwise": true,
+        "physical_tensor_pressure_error_Pa": 0.0,
+        "energy_change_J_m": 0.0,
+        "old_sided_pressure_error_Pa": 0.0,
+        "nonuniform_incoming_Maxwell_m": 2.31283679943535e-09,
+        "weak_Pa": 1.5158245029548805e-12,
+        "new_tied_peak_Pa": 1128.5985410191995,
+        "old_clock_unchanged": true,
+        "old_histories_bitwise": true,
+        "new_fracture_J_m": 0.0,
+        "new_bond_J_m": 0.0
+      },
+      "endpoint_x_m": 6.743118087776822,
+      "endpoint_y_m": 0.08334209639882018,
+      "terminal_angle_deg": 12.64240927350214,
+      "reserve_before_m": -2.6645352591003757e-15
+    },
+    {
+      "time_s": 0.15,
+      "stage": 2,
+      "arc": {
+        "x": 6.743118087776822,
+        "y": 0.08334209639882018,
+        "end": 7.467295892909943,
+        "a": 0.22430377559010511,
+        "b": 0.3113369146205404,
+        "cells": 8
+      },
+      "decision": {
+        "compression_deg": -25.000000243827554,
+        "max_shear_1_deg": 19.999999756172446,
+        "max_shear_2_deg": -70.00000024382756,
+        "selected_preference_deg": 19.999999756172446,
+        "old_tangent_deg": 12.64240927350214,
+        "shear_amplitude_Pa": 1173.691547642478,
+        "both_planes_work_equivalent": true,
+        "sampling_deg": 0.0
+      },
+      "physical_tensor_Pa": [
+        -754.4343767659948,
+        754.4343767659963,
+        -1.7008251625475897e-12,
+        899.0998944283663,
+        3.3420405538403926e-05
+      ],
+      "transfer": {
+        "old_K_bitwise": true,
+        "old_Q_bitwise": true,
+        "old_native_response_hashes_equal": true,
+        "old_stress_pressure_columns_bitwise": true,
+        "physical_tensor_pressure_error_Pa": 0.0,
+        "energy_change_J_m": 0.0,
+        "old_sided_pressure_error_Pa": 0.0,
+        "nonuniform_incoming_Maxwell_m": 2.31283679943535e-09,
+        "weak_Pa": 1.5158245029548805e-12,
+        "new_tied_peak_Pa": 1167.546009797521,
+        "old_clock_unchanged": true,
+        "old_histories_bitwise": true,
+        "new_fracture_J_m": 0.0,
+        "new_bond_J_m": 0.0
+      },
+      "endpoint_x_m": 7.467295892909943,
+      "endpoint_y_m": 0.27729164608718787,
+      "terminal_angle_deg": 17.293293481039374,
+      "reserve_before_m": 0.7499999999019789
+    },
+    {
+      "time_s": 0.43325,
+      "stage": 3,
+      "arc": {
+        "x": 7.467295892909943,
+        "y": 0.27729164608718787,
+        "end": 8.179747438250413,
+        "a": 0.3113369146205404,
+        "b": 0.3460872307606996,
+        "cells": 8
+      },
+      "decision": {
+        "compression_deg": -24.864226482696804,
+        "max_shear_1_deg": 20.135773517303196,
+        "max_shear_2_deg": -69.86422648269681,
+        "selected_preference_deg": 20.135773517303196,
+        "old_tangent_deg": 17.293293481039374,
+        "shear_amplitude_Pa": 2704.0848113889574,
+        "both_planes_work_equivalent": true,
+        "sampling_deg": 0.0
+      },
+      "physical_tensor_Pa": [
+        -1747.950059382284,
+        1747.95005973434,
+        -3.520566079297052e-07,
+        2063.188129200667,
+        28.93547910292281
+      ],
+      "transfer": {
+        "old_K_bitwise": true,
+        "old_Q_bitwise": true,
+        "old_native_response_hashes_equal": true,
+        "old_stress_pressure_columns_bitwise": true,
+        "physical_tensor_pressure_error_Pa": 0.0,
+        "energy_change_J_m": 0.0,
+        "old_sided_pressure_error_Pa": 0.0,
+        "nonuniform_incoming_Maxwell_m": 0.0010263569459428444,
+        "weak_Pa": 2.1221543041368327e-12,
+        "new_tied_peak_Pa": 2883.6253342117016,
+        "old_clock_unchanged": true,
+        "old_histories_bitwise": true,
+        "new_fracture_J_m": 0.0,
+        "new_bond_J_m": 0.0
+      },
+      "endpoint_x_m": 8.179747438250413,
+      "endpoint_y_m": 0.5114830702476888,
+      "terminal_angle_deg": 19.09008355002148,
+      "reserve_before_m": 0.7410954678444166
+    },
+    {
+      "time_s": 0.44375,
+      "stage": 4,
+      "arc": {
+        "x": 8.179747438250413,
+        "y": 0.5114830702476888,
+        "end": 8.886925674709035,
+        "a": 0.3460872307606996,
+        "b": 0.3603143905804842,
+        "cells": 8
+      },
+      "decision": {
+        "compression_deg": -24.763398157923586,
+        "max_shear_1_deg": 20.236601842076414,
+        "max_shear_2_deg": -69.76339815792359,
+        "selected_preference_deg": 20.236601842076414,
+        "old_tangent_deg": 19.09008355002148,
+        "shear_amplitude_Pa": 2736.0476128456016,
+        "both_planes_work_equivalent": true,
+        "sampling_deg": 0.0
+      },
+      "physical_tensor_Pa": [
+        -1775.9475693460633,
+        1775.9475673149595,
+        2.031103714408484e-06,
+        2081.3377367210396,
+        33.91431068324564
+      ],
+      "transfer": {
+        "old_K_bitwise": true,
+        "old_Q_bitwise": true,
+        "old_native_response_hashes_equal": true,
+        "old_stress_pressure_columns_bitwise": true,
+        "physical_tensor_pressure_error_Pa": 0.0,
+        "energy_change_J_m": 0.0,
+        "old_sided_pressure_error_Pa": 0.0,
+        "nonuniform_incoming_Maxwell_m": 0.0011393958043998053,
+        "weak_Pa": 3.637978807091713e-12,
+        "new_tied_peak_Pa": 2987.298237696278,
+        "old_clock_unchanged": true,
+        "old_histories_bitwise": true,
+        "new_fracture_J_m": 0.0,
+        "new_bond_J_m": 0.0
+      },
+      "endpoint_x_m": 8.886925674709035,
+      "endpoint_y_m": 0.7612589966534737,
+      "terminal_angle_deg": 19.814821333502408,
+      "reserve_before_m": 0.7452224852956855
+    }
+  ],
+  "checks": [
+    {
+      "time_s": 0.31625,
+      "FD_relative": 2.9369740655783513e-09,
+      "retry_restart_bitwise": true,
+      "rejection_unchanged": true
+    }
+  ],
+  "final": {
+    "time_s": 0.445,
+    "dt_s": 0.000250000000000028,
+    "gamma": 0.002059999999999994,
+    "geometry_generation": 4,
+    "bulk_J_m": 511.76527780108853,
+    "bond_J_m": 0.27062023681263997,
+    "fracture_increment_J_m": 0.017351442368795225,
+    "total_fracture_J_m": 3.7921385598220896,
+    "friction_J_m": 0.016462357155433913,
+    "radiation_J_m": 0.0074699528381627,
+    "sliding_loss_J_m": 0.023932309993596614,
+    "maxwell_loss_J_m": 0.002558826389005729,
+    "endpoint_work_J_m": 0.0,
+    "trapezoid_work_J_m": 0.0,
+    "physical_remainder_J_m": -0.00014229957029886654,
+    "ledger_error_J_m": -4.0371850827669586e-13,
+    "weak_error_Pa": 9.520551014219336e-09,
+    "minimum_symmetric_tangent_Pa_m": 5306348.4582389435,
+    "minimum_normal_Pa": 7531.814694886503,
+    "iterations": 0,
+    "normal_gap_m": 2.710505431213761e-20,
+    "integrated_slip_m2": 0.004235778322893939,
+    "peak_velocity_m_s": 0.03313901931906905,
+    "max_damage_increment": 0.012427132244652306,
+    "process_front_x_m": 7.559619003659641,
+    "process_front_y_m": 0.3060856219206771,
+    "process_front_arc_m": 4.596709108207331,
+    "process_front_tangent_deg": 17.376795516241263,
+    "process_detached_cells": 0,
+    "half_front_x_m": 6.7608660045449795,
+    "half_front_y_m": 0.08732393753170141,
+    "half_front_arc_m": 3.7681891068789155,
+    "half_front_tangent_deg": 12.650824113487909,
+    "half_detached_cells": 0,
+    "full_front_x_m": 6.125867126928008,
+    "full_front_y_m": 0.0007413559722017552,
+    "full_front_arc_m": 3.125870977489476,
+    "full_front_tangent_deg": 0.9810943073413286,
+    "full_detached_cells": 0,
+    "new_damage_integral_m": 0.8147349117176821,
+    "new_fully_decohered_cells": 1,
+    "geometry_length_m": 5.999999999886198,
+    "new_geometry_length_m": 2.9999999998861995,
+    "new_full_front_available": true,
+    "new_damage_trace_identity": 8.881784197001252e-16
+  },
+  "energy": {
+    "absolute_J_m": 0.006756228858241177,
+    "sliding_J_m": 3.9439459129338488,
+    "fracture_J_m": 1.4421385598220924,
+    "relative_sliding": 0.0017130632638963624,
+    "relative_fracture": 0.004684868046988946
+  },
+  "kernels": [
+    "kernel-29dd8235980273e9",
+    "kernel-5ede272ab96dd1a0",
+    "kernel-725702c234cfcb25",
+    "kernel-acc1f7c2e3e6ef57",
+    "kernel-c1cbf8ae24c48c16"
+  ]
+}

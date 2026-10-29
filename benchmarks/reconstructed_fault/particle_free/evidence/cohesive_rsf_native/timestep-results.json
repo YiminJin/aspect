@@ -1,0 +1,18 @@
+{
+  "final": {
+    "time_s": 0.462375,
+    "growth_coarse_m": 0.327094693846961,
+    "growth_half_m": 0.3266782288990395,
+    "growth_absolute_m": -0.0004164649479214688,
+    "growth_relative": -0.0012732244079640186,
+    "slip_coarse_m2": 0.0004887503408195059,
+    "slip_half_m2": 0.0004885371737451544,
+    "slip_absolute_m2": -2.1316707435152515e-07,
+    "slip_relative": -0.0004361471625658613,
+    "full_front_coarse_x_m": 7.914053453718456,
+    "full_front_half_x_m": 7.914053453718456,
+    "full_front_difference_m": 0.0
+  },
+  "max_front_difference_m": 0.0,
+  "common_times": 20
+}

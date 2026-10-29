@@ -1,0 +1,73 @@
+{
+  "csv_rows": {
+    "analytical-L16-symbols.csv": 256,
+    "animation-profiles.csv": 31488,
+    "boundary-low-modes.csv": 50,
+    "event-half-history.csv": 1476,
+    "front-secants.csv": 6,
+    "fronts-versus-loading.csv": 8,
+    "frozen-boundaries.csv": 2176,
+    "frozen-mechanical-errors.csv": 4,
+    "frozen-mechanical-profiles.csv": 1536,
+    "longer-history.csv": 1249,
+    "longer-physical-cells.csv": 81920,
+    "native-analytical-modes.csv": 20,
+    "operator-evolution-decomposition.csv": 1152,
+    "operator-evolution-regions.csv": 9,
+    "same-memory-period-profiles.csv": 333,
+    "same-memory-period.csv": 3,
+    "selected-profiles.csv": 6144,
+    "summary.csv": 8,
+    "temporal-comparison.csv": 4,
+    "temporal-fields.csv": 2
+  },
+  "images": {
+    "boundary-mechanism.png": {
+      "width": 2022,
+      "height": 1340,
+      "frames": 1
+    },
+    "longer-energy-work.png": {
+      "width": 1936,
+      "height": 1257,
+      "frames": 1
+    },
+    "longer-evolution.gif": {
+      "width": 1000,
+      "height": 860,
+      "frames": 41
+    },
+    "longer-histories.png": {
+      "width": 2190,
+      "height": 1174,
+      "frames": 1
+    },
+    "longer-pressure.png": {
+      "width": 1543,
+      "height": 681,
+      "frames": 1
+    },
+    "longer-profiles.png": {
+      "width": 2362,
+      "height": 1340,
+      "frames": 1
+    },
+    "longer-space-time.png": {
+      "width": 1700,
+      "height": 1007,
+      "frames": 1
+    },
+    "native-reflection.png": {
+      "width": 1682,
+      "height": 1240,
+      "frames": 1
+    },
+    "specimen.png": {
+      "width": 1997,
+      "height": 1007,
+      "frames": 1
+    }
+  },
+  "declared_gates_passed": true,
+  "previous_evidence_preserved": true
+}

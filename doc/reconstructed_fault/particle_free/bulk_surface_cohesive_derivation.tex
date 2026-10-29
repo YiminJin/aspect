@@ -1,0 +1,940 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[margin=24mm]{geometry}
+\usepackage{amsmath,amssymb,bm,mathtools}
+\usepackage{booktabs,longtable,array}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage[colorlinks=true,linkcolor=blue!45!black,citecolor=blue!45!black,urlcolor=blue!45!black]{hyperref}
+\usepackage{enumitem}
+\setlist{itemsep=3pt,topsep=5pt}
+\setlength{\parskip}{4pt}
+\setlength{\parindent}{0pt}
+\allowdisplaybreaks[2]
+\numberwithin{equation}{section}
+\newcommand{\dd}{\,\mathrm d}
+\newcommand{\dev}{\operatorname{dev}}
+\newcommand{\sym}{\operatorname{sym}}
+\newcommand{\tr}{\operatorname{tr}}
+\newcommand{\sgn}{\operatorname{sgn}}
+\newcommand{\Div}{\operatorname{div}}
+\newcommand{\E}{\bm E}
+\newcommand{\Ev}{\bm E^{v}}
+\newcommand{\D}{\bm D}
+\newcommand{\Sg}{\bm S}
+\newcommand{\T}{\bm T}
+\newcommand{\ta}{\bm\tau}
+\newcommand{\eps}{\bm\varepsilon}
+\newcommand{\R}{\mathcal R}
+\newcommand{\calE}{\mathcal E}
+\newcommand{\F}{\mathcal F}
+\newcommand{\ind}{\mathcal I}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\avg}[1]{\left\langle#1\right\rangle}
+\title{\textbf{Bulk cohesive shear damage and its surface reduction}\\[5pt]
+\large Constitutive potential, dissipation, intact activation,\\
+and the connection to the reconstructed-fault model}
+\author{Technical derivation for the phase-field fault project}
+\date{20 October 2026}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+The finite-tip obstruction in P4a is caused by restricting the mechanical
+damage mechanism to normal profiles attached to an already reconstructed
+surface. This note constructs a bulk-defined, small-strain constitutive model
+with recoverable cohesive shear, bulk and cohesive Maxwell relaxation,
+constant Coulomb friction, and irreversible phase evolution. Its energy
+balance and intact limit are derived explicitly. The existing surface storage
+$Z^2/(2GI)$ is recovered by a normal-profile reduction. An exact residual
+decomposition identifies the energy, dissipation, and history lost if that
+reduction is imposed where it is not valid. In particular, equality of
+instantaneous energies does not establish equivalence of evolving-profile
+constitutive laws. A bulk-authoritative connection is proposed that permits
+damage ahead of the surface without adding duplicate cohesive energy.
+\end{abstract}
+
+\textbf{Status.} This is a constitutive proposal and analytical derivation,
+not a claim that the production implementation already solves these equations.
+It completes the requested derivation for a fixed-direction P4 setting.
+The new bulk model is not uniquely implied by the old surface equations.
+Its explicitly selected assumptions are listed below.
+
+\tableofcontents
+\newpage
+
+\section{Scope, conventions, and the specific defect}
+
+We select infinitesimal strain, isothermal incompressible mechanics, a fixed
+material domain $\Omega$, and one prescribed shear direction. There is no
+advection, spin, moving material mesh, opening, branching, or RSF state in
+this derivation. Time derivatives are material derivatives in this fixed
+small-strain description. The surface may be reconstructed later as a
+description of the bulk state; no physical motion or creation of that surface
+is required to evaluate the bulk constitutive law.
+
+Let $\bm u$ denote displacement, $\bm v=\dot{\bm u}$ velocity, and
+\begin{equation}
+ \E=\dev\sym\nabla\bm u,\qquad
+ \D=\dot\E=\dev\sym\nabla\bm v,\qquad
+ \Div\bm v=0.
+\end{equation}
+The constant unit vectors $\bm m,\bm n$ are perpendicular, and
+\begin{equation}
+ \Sg=\tfrac12(\bm m\otimes\bm n+\bm n\otimes\bm m),\qquad
+ \Sg:\Sg=\tfrac12,\qquad \tr\Sg=0.
+\end{equation}
+For the horizontal example $S_{xy}=S_{yx}=1/2$. The engineering shear is
+$\gamma=2\E:\Sg$ and the resolved shear stress is $t=\ta:\Sg$.
+All tensor contractions are three-dimensional. For a trace-free plane-strain
+stress,
+\begin{equation}
+ \norm{\ta}_3^2=\tau_{xx}^2+\tau_{yy}^2+
+                 (\tau_{xx}+\tau_{yy})^2+2\tau_{xy}^2.
+\end{equation}
+Pressure $p$ is a Lagrange multiplier: $\bm\sigma=-p\bm 1+\ta$.
+The prescribed frictional normal compression $p_N\geq0$ is distinct from $p$.
+We take constant residual resistance $\tau_r=\mu p_N\geq0$.
+
+For $0\leq\phi<1$, choose
+\begin{equation}
+ h(\phi)=g(\phi)^{-1}-1,\qquad h(0)=0,\qquad h'\geq0,
+ \qquad
+ h(\phi)=\frac{m_g\phi(1+p_g\phi)}{(1-\phi)^2}
+ \label{eq:h}
+\end{equation}
+for the retained Lorentz-type choice. Subscripts distinguish the parameters
+$m_g,p_g$ from direction and pressure. The fracture functional is
+\begin{equation}
+ \F[\phi]=K_f\int_\Omega
+       \bigl(\phi+\ell^2|\nabla\phi|^2\bigr)\dd x,\qquad
+ K_f=\frac{G_c}{c_0\ell},\qquad c_0=\frac83.
+ \label{eq:fracture}
+\end{equation}
+It is counted once. The fully damaged endpoint $g=0$ requires its own limiting
+treatment and is not regularized by an undocumented floor.
+
+P4a uses a strip indicator in
+$\ta=\T-2Z\mathbf1_{A_\Gamma}(h/I)\Sg$.
+A phase perturbation supported wholly outside $A_\Gamma$ changes neither
+this stress nor the existing surface integral $I$.
+Thus $\delta(E_b+E_c)=0$ there, regardless of load magnitude. This is a
+support restriction of the constitutive model, not an integration error.
+The model below removes that restriction by defining its mechanical variables
+throughout $\Omega$, including where $\phi=0$ and where $\Gamma$ does not exist.
+
+\section{Bulk state and free energy}
+
+\subsection{State variables and kinematics}
+
+Introduce the bulk viscous deviatoric strain $\Ev$, the signed additional
+shear deformation $k$, and its viscous part $b$. All are bulk fields.
+The recoverable cohesive shear is
+\begin{equation}
+ a=k-b,\qquad
+ \bm e=\E-\Ev-k\Sg.
+ \label{eq:kinematics}
+\end{equation}
+Here $a,b,k$ are dimensionless engineering shear measures, not slips in metres.
+The local slip-deformation rate is $w=\dot k$, with units $\mathrm{s}^{-1}$.
+The signed surface slip rate introduced later has units $\mathrm{m\,s}^{-1}$.
+
+The stored mechanical energy density is selected as
+\begin{equation}
+ \boxed{\psi(\E,\Ev,k,b,\phi)
+       =G\,\bm e:\bm e+\frac{G(k-b)^2}{2h(\phi)}.}
+ \label{eq:bulkenergy}
+\end{equation}
+The first term is bulk elastic storage; the second is recoverable cohesive
+storage. There is no additional surface storage in the bulk formulation.
+The total energy is
+$\calE=\int_\Omega\psi\dd x+\F[\phi]$.
+For now $G>0$ is constant and the same modulus appears in both terms.
+
+The zero-compliance limit is an extended-valued energy:
+\begin{equation}
+ \frac{Ga^2}{2h}:=
+ \begin{cases}
+  Ga^2/(2h),&h>0,\\
+  0,&h=0,\ a=0,\\
+  +\infty,&h=0,\ a\ne0.
+ \end{cases}
+ \label{eq:closedperspective}
+\end{equation}
+Consequently intact material admits no finite cohesive elastic deformation.
+This definition does not require a fictitious initial damage or a positive
+normalization floor.
+
+\subsection{Conjugate forces}
+
+For $h>0$, differentiation gives
+\begin{align}
+ \ta&=2G\bm e,&
+ q&=\frac{Ga}{h},&
+ t&=\ta:\Sg,&
+ r&=t-q, \label{eq:forces}\\
+ \partial_{\Ev}\psi&=-\ta,&
+ \partial_k\psi&=-t+q,&
+ \partial_b\psi&=-q,&
+ \partial_\phi\psi&=-\frac{h'q^2}{2G}.
+ \label{eq:partials}
+\end{align}
+The symbol $q$ is a \emph{bulk} cohesive traction. It is not defined by
+division by a surface normalization. A surface traction $q_\Gamma$ will be
+introduced by reduction.
+
+For fixed incoming mechanical state, the mechanical phase driving is
+\begin{equation}
+ Y_{\rm mech}=-\partial_\phi\psi
+       =\frac{h'q^2}{2G}
+       =-g'\frac{q^2}{2Gg^2}.
+ \label{eq:driving}
+\end{equation}
+This identity does not introduce a maximum-history variable $H$.
+Irreversibility is imposed directly on the physical phase field.
+The intact value of \eqref{eq:driving} is a one-sided relaxed limit,
+derived in Section~\ref{sec:intact}; arbitrary evaluation of $0/0$ is excluded.
+
+\section{Dissipation potential and constitutive laws}
+
+\subsection{A selected generalized-standard-material structure}
+
+Choose equal bulk and cohesive relaxation times by using the same
+viscosity $\eta>0$, and put $\lambda=\eta/G$. With state held fixed, define
+the dissipation-potential density
+\begin{equation}
+ \boxed{\R=
+  \eta\,\dot\Ev:\dot\Ev
+  +\frac{\eta}{2h}\dot b^2
+  +\tau_r|w|
+  +\frac{\beta_\phi}{2}\dot\phi^2
+  +\ind_{[0,\infty)}(\dot\phi),\qquad \beta_\phi\geq0.}
+ \label{eq:rayleigh}
+\end{equation}
+The viscous perspective at $h=0$ is zero for $\dot b=0$ and infinite otherwise.
+The indicator is zero on its stated set and infinite outside it.
+For the retained rate-independent phase model, set $\beta_\phi=0$.
+It is displayed to identify optional phase viscosity, not to recommend adding it.
+
+Normality with respect to the \emph{rates} gives
+\begin{align}
+ \dot\Ev&=\frac{\ta}{2\eta},&
+ \dot b&=\frac{h q}{\eta}=\frac a\lambda,&
+ r&\in\tau_r\partial|w|.
+ \label{eq:flow}
+\end{align}
+Thus
+\begin{equation}
+ |r|\leq\tau_r \quad (w=0),\qquad
+ r=\tau_r\sgn w \quad (w\ne0),\qquad rw=\tau_r|w|.
+ \label{eq:coulomb}
+\end{equation}
+This is a two-sided Coulomb inclusion. Restricting to positive slip gives the
+usual complementarity $w\geq0$, $\tau_r-r\geq0$,
+$w(\tau_r-r)=0$.
+No accumulated frictional work is added to stored energy.
+
+The state dependence of $\R$ matters: constitutive normality differentiates
+$\R$ with respect to rates while holding the current state fixed.
+Differentiating $\R$ with respect to $\phi$ as though it were free energy
+would define a different model. A time-discrete minimization with a
+phase-dependent viscous metric must be derived consistently; this note does
+not assert equivalence to the existing endpoint algorithm at finite time step.
+
+\subsection{Phase inequality and the global power balance}
+
+For homogeneous natural phase boundary conditions,
+\begin{equation}
+ \mathcal Y=\frac{h'q^2}{2G}-K_f(1-2\ell^2\Delta\phi).
+ \label{eq:Ytotal}
+\end{equation}
+Away from the upper endpoint, phase normality is
+\begin{equation}
+ \dot\phi\geq0,\qquad
+ \beta_\phi\dot\phi-\mathcal Y\geq0,\qquad
+ \dot\phi(\beta_\phi\dot\phi-\mathcal Y)=0.
+ \label{eq:phaseVI}
+\end{equation}
+Equivalently, use a weak variational inequality and the accepted lower obstacle
+$\phi_{n+1}\geq\phi_n$ in this nonadvecting material configuration.
+The gradient term can make the driving nonlocal even though the constitutive
+traction is defined at every bulk point.
+
+Differentiating \eqref{eq:bulkenergy}, without first imposing flow laws,
+\begin{equation}
+ \dot\psi=\ta:\D-\ta:\dot\Ev-(t-q)w-q\dot b
+                   -\frac{h'q^2}{2G}\dot\phi.
+ \label{eq:localpower}
+\end{equation}
+For quasistatic equilibrium
+$\Div(\ta-p\bm1)+\bm f=0$ and incompressibility,
+$\int_\Omega\ta:\D\dd x=P_{\rm ext}$, with prescribed-boundary reactions
+included in $P_{\rm ext}$. Combining \eqref{eq:flow}--\eqref{eq:phaseVI}
+and integrating the phase-gradient term by parts gives
+\begin{equation}
+ \boxed{\dot{\calE}=P_{\rm ext}
+ -\int_\Omega\left[
+   \frac{\norm{\ta}_3^2}{2\eta}
+   +\frac{h q^2}{\eta}
+   +\tau_r|w|
+   +\beta_\phi\dot\phi^2
+ \right]\dd x.}
+ \label{eq:balance}
+\end{equation}
+Every displayed dissipative term is nonnegative. Nonzero prescribed phase
+flux contributes the corresponding boundary microtraction power.
+Equation~\eqref{eq:balance} is a smooth-path identity. Nonconvex
+rate-independent jumps require an energetic solution/selection and an energy
+inequality; stationarity alone does not prove global stability or determine
+unresolved jump dissipation.
+
+\section{Independent bulk history and compatibility with Maxwell mechanics}
+
+Introduce
+\begin{equation}
+ \bm A=\Ev+b\Sg,\qquad
+ \T=2G(\E-\bm A),\qquad
+ \boxed{\ta=\T-2Ga\Sg.}
+ \label{eq:T}
+\end{equation}
+For constant $G,\eta,\Sg$, \eqref{eq:flow} implies
+\begin{equation}
+ \dot{\bm A}=\frac{\ta}{2\eta}+\frac a\lambda\Sg
+             =\frac{\T}{2\eta},
+ \qquad
+ \boxed{\dot\T+\lambda^{-1}\T=2G\D,\quad
+        \dot a+\lambda^{-1}a=w.}
+ \label{eq:Ta}
+\end{equation}
+Hence the actual bulk stress satisfies
+\begin{equation}
+ \boxed{\dot\ta+\lambda^{-1}\ta=2G(\D-w\Sg).}
+ \label{eq:maxwellbulk}
+\end{equation}
+The independent history $\T$ has the same simple Maxwell form used in P2.
+The additional mechanical variable is now the \emph{bulk} cohesive elastic
+shear $a$, not only a surface moment.
+
+The mechanical storage may equivalently be evaluated as
+\begin{equation}
+ \psi(\T,a,\phi)=
+       \frac{\norm{\T-2Ga\Sg}_3^2}{4G}
+       +\frac{Ga^2}{2h}.
+ \label{eq:Taenergy}
+\end{equation}
+At fixed $\T,a$, only the second term has explicit phase dependence.
+This agrees with varying \eqref{eq:bulkenergy} at fixed
+$\E,\Ev,k,b$. It differs from fixing a surface moment while changing its
+bulk profile, as shown in Section~\ref{sec:evolving}.
+
+The convenient cancellation in \eqref{eq:Ta} uses equal relaxation times.
+For distinct $\lambda_b=\eta_b/G$, $\lambda_c=\eta_c/G$,
+\begin{equation}
+ \dot\T+\lambda_b^{-1}\T
+  =2G\D+2Ga(\lambda_b^{-1}-\lambda_c^{-1})\Sg.
+\end{equation}
+Neither variable coefficients nor objective transport can be appended without
+their product-rule terms.
+
+\section{The intact limit and a definite activation criterion}
+\label{sec:intact}
+
+\subsection{Mixed traction form}
+
+The cohesive perspective admits the exact dual representation
+\begin{equation}
+ \frac{Ga^2}{2h}
+   =\sup_q\left(qa-\frac{h q^2}{2G}\right),\qquad h\geq0,
+ \label{eq:dual}
+\end{equation}
+including the extended values in \eqref{eq:closedperspective}.
+Thus a mixed density is
+\begin{equation}
+ \psi_{\rm mix}=G\bm e:\bm e+q(k-b)-\frac{h q^2}{2G}.
+ \label{eq:mixed}
+\end{equation}
+The saddle variable $q$ enforces $k-b=hq/G$.
+At $h=0$, $k=b$, while $q$ can be finite. It acts as a constraint traction,
+not as a quotient of two prescribed zeros.
+The energy is the supremum value, not the mixed expression evaluated at an
+arbitrary $q$.
+
+With friction, intact sticking alone does not uniquely select $q$:
+$|t-q|\leq\tau_r$ is an interval.
+Consequently the saddle equations alone are not a complete numerical birth
+rule. We select the one-sided relaxed onset below, which fixes the relevant
+virgin limit from the same energy and frictional dissipation.
+
+\subsection{A virgin elastic shear calculation}
+
+Freeze the viscous histories during an infinitesimal damage event, take one
+shear mode, and let $\gamma$ be its available elastic trial shear.
+Write $t_0=G\gamma$ for its intact trial stress. Starting with zero cohesive
+history, the work required to reach $a$ is
+\begin{equation}
+ J(a,\phi;\gamma)
+   =\frac G2(\gamma-a)^2+\frac{Ga^2}{2h(\phi)}
+       +\tau_r|a|.
+ \label{eq:Jvirgin}
+\end{equation}
+The last term is dissipated frictional work for a monotonic virgin change;
+it is not stored energy and is not a formula for arbitrary cyclic loading.
+Minimization gives, with
+$z=\sgn(t_0)(|t_0|-\tau_r)_+$,
+\begin{align}
+ a_*&=\frac{h}{G(1+h)}z
+       =\frac{1-g}{G}z,&
+ q_*&=g z, \label{eq:soft}\\
+ J_{\rm red}(\gamma,\phi)
+     &=\frac12G\gamma^2-\frac{1-g(\phi)}{2G}z^2,&
+ \partial_\phi J_{\rm red}&=\frac{g'}{2G}z^2.
+ \label{eq:Jred}
+\end{align}
+For positive sliding this yields
+$t=\tau_r+g(t_0-\tau_r)$.
+For $|t_0|\leq\tau_r$, $a_*=q_*=0$ and the response sticks.
+In the virgin limit,
+\begin{equation}
+ a_*\to0,\qquad q_*\to z,\qquad
+ -\partial_{\phi+}J_{\rm red}(0)=\frac{h'(0)}{2G}z^2.
+ \label{eq:intactforce}
+\end{equation}
+Finite traction with zero cohesive deformation is therefore consistent.
+The selected multiplier is the minimum-magnitude member of the intact
+friction interval, obtained by the $h\downarrow0$ relaxed limit.
+Holding $a=0$ for every positive trial $\phi$ instead would remove this
+relaxation and give a zero derivative.
+
+For homogeneous virgin material, the AT1 onset condition is
+\begin{equation}
+ \frac{m_g}{2G}(|t_0|-\tau_r)_+^2>K_f.
+ \label{eq:onset}
+\end{equation}
+Equivalently,
+\begin{equation}
+ H_t=\frac{K_f}{m_g},\qquad
+ \boxed{\tau_p=\tau_r+\sqrt{2G H_t}.}
+ \label{eq:strength}
+\end{equation}
+The equality is onset neutrality; below it the lower obstacle is stable.
+This is a local homogeneous calibration, not the solution of a spatial
+crack-tip boundary-value problem.
+
+For the P2 constants $G=10^6$ Pa, $\ell=0.15625$ m,
+$G_c=26.6666666667$ J/m$^2$, $m_g=128$, and $\tau_r=1000$ Pa:
+$K_f\simeq64$ Pa, $H_t\simeq0.5$ Pa and $\tau_p\simeq2000$ Pa.
+The pre-damaged P2 band has a different onset problem.
+Also, P4a's reported trial shear of roughly $0.806$--$0.827$ kPa in its tip
+window is below this example's residual resistance: a repaired law need not
+produce growth in that prescribed snapshot. The demonstrated defect is the
+structural absence of driving for \emph{any} load outside the old strip.
+
+\subsection{Relationship to established frictional phase-field laws}
+
+The positive-slip specialization above has the stress interpolation and
+peak/residual strength structure used by Fei and Choo~\cite{fei2020}.
+Their construction accounts for friction in fracture driving; it is not
+obtained by degrading all compressive elastic energy.
+The later in-plane formulation~\cite{fei2026} explicitly evaluates strength
+and activation in initially intact material.
+These precedents support defining a bulk activation law independent of an
+existing reconstructed surface. They do not prove that the present Maxwell
+extension, its unloading law, or its normalized surface reduction is identical
+to those published models.
+
+\section{Reduction to a flat reconstructed surface}
+\label{sec:reduction}
+
+\subsection{Assumptions needed for an exact energy identity}
+
+Take a fixed straight surface parameterized by arclength $s$ and Cartesian
+normal coordinate $n$, so $\dd x=\dd s\,\dd n$.
+Profiles do not overlap, $\Sg$ is constant on each profile, and $G,\eta,\tau_r$
+are constant across it. The integration interval is fixed and includes the
+represented normal support. Define
+\begin{equation}
+ I(s)=\int h(\phi(s,n))\dd n>0,\qquad
+ \chi(s,n)=\frac{h(\phi(s,n))}{I(s)},\qquad
+ \int\chi\dd n=1.
+ \label{eq:I}
+\end{equation}
+The surface elastic slip and moment are
+\begin{equation}
+ s_e(s)=\int a(s,n)\dd n,\qquad Z(s)=G s_e(s).
+ \label{eq:moment}
+\end{equation}
+The profile ansatz is
+\begin{equation}
+ a(s,n)=\chi(s,n)s_e(s).
+ \label{eq:ansatz}
+\end{equation}
+It implies constant cohesive traction on a profile,
+$q(s,n)=q_\Gamma(s)=Z(s)/I(s)$.
+It does not imply that the actual shear stress $t(s,n)$ is constant.
+
+Substitution into the \emph{bulk} energy gives
+\begin{align}
+ \ta&=\T-2Z\chi\Sg,\\
+ \int\frac{Ga^2}{2h}\dd n
+    &=\frac{G s_e^2}{2I^2}\int h\dd n
+      =\boxed{\frac{G s_e^2}{2I}=\frac{Z^2}{2GI}}.
+ \label{eq:surfaceenergy}
+\end{align}
+Thus the current cohesive surface term is a reduced representation of the
+bulk cohesive storage. Adding it to that same unreduced bulk storage would
+count the energy twice.
+
+The ansatz also minimizes \emph{cohesive storage alone} for a given moment:
+varying $\int Ga^2/(2h)\dd n$ subject to $\int a\dd n=s_e$ gives $Ga/h$
+constant. It does not generally minimize the full bulk-plus-cohesive energy,
+whose $a$ derivative also contains $-t$.
+
+\subsection{The weak traction and fixed-profile dissipation}
+
+At fixed $\phi,\T$, variation with respect to $s_e$ gives
+\begin{equation}
+ \partial_{s_e}E_{\rm mech}
+     =q_\Gamma-t_\Gamma,\qquad
+ t_\Gamma=\int\chi\,(\ta:\Sg)\dd n.
+ \label{eq:weaktraction}
+\end{equation}
+This is the work-adjoint traction; it is not in general centerline sampling.
+For a fixed profile and restricted rate $w=\chi V$,
+\begin{equation}
+ \dot s_e+\lambda^{-1}s_e=V,\qquad
+ \dot Z+\lambda^{-1}Z=GV.
+ \label{eq:Zlaw}
+\end{equation}
+The cohesive viscous dissipation and friction reduce to
+\begin{align}
+ \int\frac{h q^2}{\eta}\dd n
+   &=\frac{Z^2}{\eta I},&
+ \int\tau_r|w|\dd n&=\tau_r|V|.
+ \label{eq:reducedD}
+\end{align}
+The corresponding restricted surface law is
+\begin{equation}
+ t_\Gamma-q_\Gamma\in\tau_r\partial|V|.
+ \label{eq:surfflow}
+\end{equation}
+These equations reproduce the current straight-band energy and Maxwell
+moment structure.
+
+There are two different statements here. Restricting the fields and virtual
+rates to the profile ansatz yields a consistent \emph{reduced model}.
+An unrestricted bulk solution is represented exactly by it only if that
+solution satisfies the ansatz and its local flow conditions. In particular,
+a constant $q$ and a common slip sign require constant $t-q$ under local
+Coulomb sliding. A surface weak balance alone does not impose that pointwise
+condition.
+
+\section{Evolving profiles: what changes and what does not}
+\label{sec:evolving}
+
+\subsection{The missing rate in a direct identification}
+
+If \eqref{eq:ansatz} is maintained as phase evolves,
+\begin{equation}
+ \dot a=\chi\dot s_e+s_e\dot\chi.
+\end{equation}
+Combining this with the bulk law \eqref{eq:Ta} and the moment law
+\eqref{eq:Zlaw} requires
+\begin{equation}
+ \boxed{w=\chi V+s_e\dot\chi.}
+ \label{eq:wredistribute}
+\end{equation}
+Since $\int\dot\chi\dd n=0$, its normal integral remains $V$.
+The additional local shear rate redistributes recoverable deformation; it is
+not generally zero pointwise.
+With \eqref{eq:wredistribute}, the physical stress equation becomes
+\begin{equation}
+ \dot\ta+\lambda^{-1}\ta
+   =2G(\D-\chi V\Sg)-2G s_e\dot\chi\Sg,
+ \label{eq:currentredistribution}
+\end{equation}
+which is the fixed-direction redistribution term of the current surface
+model. Its algebraic agreement does not by itself establish agreement of
+frictional dissipation.
+
+Indeed, bulk Coulomb friction requires
+\begin{equation}
+ \mathcal D_{f,\mathrm{profile}}
+  =\tau_r\int|\chi V+s_e\dot\chi|\dd n
+  \ \geq\ \tau_r|V|.
+ \label{eq:redistribfriction}
+\end{equation}
+Equality holds if the local rate has a common sign almost everywhere.
+For $V=0$, nonzero $s_e\dot\chi$ can dissipate energy in this bulk law while
+the current surface friction law dissipates zero.
+This is a constitutive difference, not a quadrature defect.
+The current model may instead define friction only on the collective
+surface slip and treat profile redistribution as a separate recoverable
+mechanism. That is a distinct constrained constitutive choice; it must not
+be called an exact reduction of arbitrary local Coulomb friction.
+
+\subsection{Why the two phase derivatives differ}
+
+Let $\delta\phi$ change $\chi$, holding $\T,s_e$ fixed on the ansatz.
+Then $\delta a=s_e\delta\chi$ and
+\begin{align}
+ \delta E_{\rm mech}^{\mathrm{red}}
+  &= -\int_{A_\Gamma}\frac{h'q_\Gamma^2}{2G}\delta\phi\dd x
+     +\int_\Gamma s_e\int
+        (q_\Gamma-t)\delta\chi\dd n\dd s
+       \label{eq:chain}\\
+  &=-\int_\Gamma s_e\int t\,\delta\chi\dd n\dd s
+    -\int_\Gamma\frac{Z^2}{2GI^2}\delta I\dd s.
+       \label{eq:currentphase}
+\end{align}
+We used $\int\delta\chi\dd n=0$ and
+$\delta I=\int h'\delta\phi\dd n$.
+Equation~\eqref{eq:currentphase} is the continuum phase variation retained
+by the current bulk-plus-surface energy.
+
+The first term of \eqref{eq:chain} is the bulk constitutive phase derivative
+at fixed $a$. The second is work caused by moving the ansatz as phase changes.
+It vanishes for profile-constant $q_\Gamma-t$, including an isostress,
+common-sign sliding specialization. It need not vanish near a tip.
+This proves both the validity of the current chain rule and the absence of
+a general equivalence to the unrestricted local phase derivative.
+
+The reduced surface model is not thereby thermodynamically inconsistent:
+its own phase force includes the constraint-motion work and its own chosen
+surface friction can close its energy balance. Its limitation is that this
+mechanism is still defined only on profiles attached to $\Gamma$.
+
+\section{An exact bulk--surface connection with a retained residual}
+\label{sec:residual}
+
+\subsection{Moment plus unresolved normal variation}
+
+For any finite-energy bulk field on a positive-$I$ profile, define
+\begin{equation}
+ \boxed{a=\chi s_e+\rho,\qquad
+       s_e=\int a\dd n,\qquad \int\rho\dd n=0.}
+ \label{eq:rho}
+\end{equation}
+Here $\rho$ is a cohesive shear residual, not a new damage variable.
+Where $h=0$, finite energy requires $a=\rho=0$.
+The local traction and physical stress are exactly
+\begin{equation}
+ q=q_\Gamma+\frac{G\rho}{h},\qquad
+ q_\Gamma=\frac{G s_e}{I}
+          =\frac{\int hq\dd n}{I},\qquad
+ \ta=\T-2\chi Z\Sg-2G\rho\Sg.
+ \label{eq:rhostress}
+\end{equation}
+Quotients in the first formula are used only where $h>0$; mixed limits apply
+on intact material.
+
+Expanding the cohesive energy and using $\int\rho\dd n=0$ gives the exact identity
+\begin{equation}
+ \boxed{\int\frac{Ga^2}{2h}\dd n
+   =\frac{Z^2}{2GI}+\frac G2\int\frac{\rho^2}{h}\dd n.}
+ \label{eq:variance}
+\end{equation}
+The cross term is $(G s_e/I)\int\rho\dd n=0$.
+Dropping $\rho$ therefore discards a known nonnegative stored energy.
+Preserving physical stress by changing $\T$ does not preserve that discarded
+cohesive storage.
+
+Likewise,
+\begin{equation}
+ \int\frac{h q^2}{\eta}\dd n
+ =\frac{Z^2}{\eta I}+\frac{G^2}{\eta}\int\frac{\rho^2}{h}\dd n.
+ \label{eq:rhodiss}
+\end{equation}
+For $V=\int w\dd n$, the frictional dissipation satisfies the exact split
+\begin{equation}
+ \int\tau_r|w|\dd n
+ =\tau_r|V|+
+   \tau_r\left(\int|w|\dd n-\left|\int w\dd n\right|\right).
+ \label{eq:frictionexcess}
+\end{equation}
+The last term is nonnegative and measures cancellation of oppositely signed
+local rates. It is already present in the bulk law; it is not an added
+numerical damping term.
+
+\subsection{Residual evolution and phase-coordinate changes}
+
+For a fixed normal-coordinate geometry and homogeneous $\lambda$,
+integration of \eqref{eq:Ta} gives
+$\dot s_e+\lambda^{-1}s_e=V$ exactly, with no profile ansatz.
+Then
+\begin{equation}
+ \boxed{\dot\rho+\lambda^{-1}\rho
+       =w-\chi V-s_e\dot\chi.}
+ \label{eq:rhoevolution}
+\end{equation}
+Thus $\rho=0$ is preserved only when the right-hand side vanishes.
+With $w=\chi V$ and an evolving profile, a nonzero
+$-s_e\dot\chi$ generates residual history. This is the precise obstruction to
+using only a surface moment as a universally closed bulk history.
+
+Changing variables does not change the physical phase force if derivatives
+are transformed correctly. At fixed physical $a$ and fixed profile geometry,
+$s_e$ is fixed but
+\begin{equation}
+ \delta\rho=-s_e\delta\chi.
+ \label{eq:coordinatephase}
+\end{equation}
+Holding $\rho=0$ while varying $\phi$ instead moves the physical field $a$.
+The two derivatives answer different constitutive questions.
+This remains important even at an instant when the residual itself is zero.
+
+\subsection{A connection that counts each energy once}
+
+Let $A_\Gamma$ be a union of nonoverlapping flat-profile patches.
+Keep the bulk variables authoritative throughout $\Omega$.
+On $A_\Gamma$, replace cohesive bulk storage by its exact representation
+\eqref{eq:variance}; outside it retain the original bulk storage:
+\begin{align}
+ \calE={}&\int_\Omega\frac{\norm{\ta}_3^2}{4G}\dd x+\F[\phi]\notag\\
+ &+\int_\Gamma\left[
+       \frac{Z^2}{2GI}+\frac G2\int\frac{\rho^2}{h}\dd n
+      \right]\dd s
+   +\int_{\Omega\setminus A_\Gamma}\frac{Ga^2}{2h}\dd x .
+ \label{eq:hybridexact}
+\end{align}
+The dissipation is partitioned analogously using \eqref{eq:rhodiss}
+and \eqref{eq:frictionexcess}. This is an exact representation change under
+the stated geometric assumptions. There is no overlapping extra cohesive
+energy and no second frictional mechanism.
+
+Newly reconstructed surface records inherit $s_e=\int a\dd n$ and the
+corresponding rate/history moments. They are not assigned zero histories
+merely because their indices are new.
+If an intact profile has $I=0$, it has no normalized surface row:
+activation is handled by the bulk mixed law and its one-sided limit.
+When $I>0$, the surface variables can be extracted from the existing bulk
+state. Phase irreversibility remains attached to the bulk material phase,
+not to the lifetime of a surface vertex.
+
+The accumulated signed slip and accumulated absolute slip must be
+distinguished: their rates are $\int w\dd n$ and $\int|w|\dd n$.
+They agree in magnitude only under common-sign local motion.
+No RSF-state transfer law follows from this derivation.
+
+\section{What can be carried into the current discretization}
+
+\subsection{One coherent P4 choice}
+
+For the first fixed-direction growing-tip experiment, select the
+\emph{bulk-authoritative} law \eqref{eq:bulkenergy}--\eqref{eq:phaseVI}.
+The orientation $\Sg$ is prescribed in intact material as well as damaged
+material. It is a candidate shear direction, not a pre-existing slipping
+surface. The bulk equations then apply ahead of any reconstructed endpoint.
+
+Retain independent DG $\T$ and a bulk representation of $a$ (or an equivalent
+mixed local update); retain whatever physical slip history is needed for the
+chosen frictional law. The surface can initially be an observer.
+If surface reduction is later used mechanically, retain $\rho$ or explicitly
+accept and measure the approximation of setting it to zero.
+This is a governing-model change for the cohesive propagation route, not
+an automatic modification of the frozen mature BP3 branch.
+
+Alternatively, one may keep the current collective surface law as the
+primary physical model and derive a crack-front/configurational force for
+surface advance. That is a distinct choice. Appending surface records
+inside old damage, as in P3, does not derive that force.
+
+\subsection{Consistent discrete normalization}
+
+The continuum identity $\int\chi\dd n=1$ must not be silently substituted
+for a projected discrete identity. If the implemented nodal normalization is
+\begin{equation}
+ I_h=P\,i(\phi_h),\qquad P=M_\Gamma^{-1}B_\Gamma,
+\end{equation}
+its first and second derivatives and transpose actions are part of the
+discrete energy. In general a projected $I_h(s)$ differs from the raw
+column integral $i(s)$, so
+$\int h(\phi_h)/I_h\dd n=i(s)/I_h(s)$ need not equal one pointwise.
+The continuous profile energy and moment formulas are therefore not exact
+proofs of an arbitrary projected scheme.
+
+An exact finite-dimensional cohesive decomposition is available.
+At one profile, let $W$ be positive quadrature weights, $H=\operatorname{diag}(h_i)$,
+$\bm a$ its cohesive shear samples and $\bm1$ the vector of ones.
+On positive-$h$ entries put
+\begin{equation}
+ I_d=\bm1^TWH\bm1,\qquad
+ s_d=\bm1^TW\bm a,\qquad
+ \bm\chi_d=H\bm1/I_d.
+\end{equation}
+Then, with $\bm\rho=\bm a-\bm\chi_d s_d$,
+\begin{equation}
+ \frac G2\bm a^TWH^{-1}\bm a
+ =\frac{G s_d^2}{2I_d}
+    +\frac G2\bm\rho^TWH^{-1}\bm\rho,\qquad
+ \bm1^TW\bm\rho=0.
+ \label{eq:discretevariance}
+\end{equation}
+At intact entries enforce $a_i=0$ or use the mixed form.
+For multiple coupled surface degrees of freedom, derive the constrained
+minimum with the actual interpolation and mass matrices.
+Changing normalization merely to enforce \eqref{eq:discretevariance} would
+change the existing discrete model; it requires a deliberate derivation,
+not an unexplained numerical repair.
+
+Whichever discrete energy is chosen, mechanics, phase residual, tangent and
+work diagnostics must differentiate that same energy. A local driving
+source cannot simply be added to the old surface phase row while retaining
+unmodified mechanics and storage.
+
+\section{Limits of the flat-profile identities}
+
+\subsection{Curvature and normal heterogeneity}
+
+For a curved tube $\bm X(s,n)$ with Jacobian $J(s,n)>0$,
+$\dd x=J\dd s\,\dd n$.
+If physical slip is defined by the unweighted normal integral
+$s_e=\int a\dd n$ and the old $\chi=h/I$ is retained, then
+\begin{equation}
+ E_{c,\mathrm{profile}}
+ =\frac{G s_e^2}{2I^2}\int J h\dd n ,
+\end{equation}
+which is not generally $G s_e^2/(2I)$.
+For a symmetric profile and the usual planar-curve Jacobian
+$J=1-\kappa n$, the odd contribution can cancel, but that is an additional
+symmetry assumption and can fail at boundaries.
+
+More generally, minimizing $\int JG(n)a^2/(2h)\dd n$ subject to
+$\int a\dd n=s_e$ yields
+\begin{equation}
+ C_\Gamma=\int\frac{h}{J G(n)}\dd n,\qquad
+ a=\frac{h}{J G(n)}\frac{s_e}{C_\Gamma},\qquad
+ E_c=\frac{s_e^2}{2C_\Gamma}.
+ \label{eq:curved}
+\end{equation}
+The multiplier is conjugate to the specified physical slip, and $Jq$,
+not necessarily $q$, is constant in this constrained minimum.
+For $J=1$ and constant $G$, $C_\Gamma=I/G$ and the earlier result follows.
+One must also transform the weak traction, kinematics and dissipative
+operators with the same measure. This note does not claim a general curved,
+moving-surface reduction from the flat formula.
+
+\subsection{Moving geometry, saturation, and RSF}
+
+If geometry or orientation moves, differentiating the extension produces
+transport, orientation and metric terms. The fixed-geometry source
+$-s_e\dot\chi$ in \eqref{eq:rhoevolution} is only one part of that product rule.
+Rigid rotations require a consistent objective tensor rate and rotated
+kinematics; none is implicitly included here.
+
+At $\phi\uparrow1$, $h$ diverges for \eqref{eq:h}; a fully failed limit must
+be derived rather than capped. RSF introduces rate and state dependence and
+an additional history law. Positivity of $\mu p_N|V|$ alone does not derive
+the state-dependent energy, activation, or radiation terms of such an
+extension. These issues remain outside the present constant-friction P4
+derivation.
+
+\section{Conclusions and analytical verification}
+
+The derivation establishes the following concrete results:
+\begin{enumerate}
+ \item A bulk-defined free energy and dissipation potential yield explicit
+       Maxwell, Coulomb and irreversible phase equations with the power
+       balance \eqref{eq:balance}.
+ \item Intact material has zero cohesive deformation but a finite limiting
+       traction. The virgin activation condition follows from relaxed energy
+       and friction, with no existing surface association or $I$ floor.
+ \item The current surface storage is the normal-profile reduction of bulk
+       cohesive storage. Its use requires explicit assumptions on
+       representation, geometry and material coefficients.
+ \item A surface moment is not generally a closed history when the normal
+       profile evolves. Equations \eqref{eq:variance},
+       \eqref{eq:rhodiss}, \eqref{eq:rhoevolution} and
+       \eqref{eq:frictionexcess} quantify exactly what is retained or omitted.
+ \item Keeping bulk fields authoritative and using
+       \eqref{eq:hybridexact} connects the descriptions without duplicate
+       energy or dissipation. An existing finite surface need not gate
+       mechanical damage ahead of its endpoint.
+\end{enumerate}
+
+Four scalar identities were checked by symbolic algebra: the mechanical
+power identity in transformed variables; the virgin minimized potential;
+its compliance derivative; and the frictional stress interpolation.
+One hundred deterministic random positive-weight profiles checked the
+cohesive energy decomposition, cohesive viscous dissipation decomposition,
+and the phase chain rule. Maximum absolute differences in nondimensional
+test values were respectively $6.94\times10^{-18}$,
+$2.78\times10^{-17}$ and $1.74\times10^{-18}$.
+Centered finite differences of the reduced profile energy, with step
+$10^{-5}$, differed from its analytic directional derivative by at most
+$1.59\times10^{-11}$.
+These checks verify algebra and differentiation, not a finite-element
+propagation solution, mesh convergence, or constitutive calibration.
+
+\appendix
+\section{A compact derivation of the transformed power identity}
+
+In scalar shear let $\tau=T-Ga$, $q=Ga/h$ and
+$\psi=\tau^2/(2G)+Ga^2/(2h)$. Then
+\begin{align}
+ \dot\psi
+ &=\frac{\tau}{G}\dot T+(q-\tau)\dot a
+      -\frac{q^2}{2G}\dot h\\
+ &=\frac{\tau}{G}(G\dot\gamma-T/\lambda)
+   +(q-\tau)(w-a/\lambda)-\frac{q^2}{2G}\dot h\\
+ &=\tau\dot\gamma-\frac{\tau^2}{\eta}
+      -\frac{h q^2}{\eta}-(\tau-q)w
+      -\frac{q^2}{2G}\dot h .
+\end{align}
+The scalar bulk dissipation is $\tau^2/\eta$ because the full tensor
+contains two equal shear components. This confirms the factors of two in
+\eqref{eq:balance} and avoids confusing engineering shear with
+$\varepsilon_{xy}$.
+
+\section{Practical comparison with the supplied reports}
+
+The P4a report establishes zero mechanical variation for perturbations
+wholly outside the represented strip, while its full normalization pullback
+and independent high-order integration agree. Nothing here reinterprets
+that result as an integration failure.
+
+P3's zero-time map preserves physical stress approximately after a prescribed
+geometry change and separately accounts for storage/load differences.
+It does not supply virgin activation or justify resetting histories on a
+newly reconstructed segment. The exact residual energy in
+\eqref{eq:variance} gives an additional diagnostic for any proposed
+bulk-to-surface reduction.
+
+P2's evolving-profile energy and phase derivative are recovered on their
+selected profile manifold, but equivalence to arbitrary bulk local evolution
+is not established by that recovery. Existing P2 accuracy and branch
+limitations, and all protected mature BP3 results, remain separate evidence.
+
+\begin{thebibliography}{9}
+\bibitem{fei2020}
+F. Fei and J. Choo,
+\emph{A phase-field model of frictional shear fracture in geologic materials},
+Computer Methods in Applied Mechanics and Engineering 369 (2020), 113265.
+\href{https://doi.org/10.1016/j.cma.2020.113265}{doi:10.1016/j.cma.2020.113265}.
+Author manuscript:
+\url{https://arxiv.org/abs/2003.04779}.
+
+\bibitem{fei2026}
+F. Fei, M. S. Mia, A. E. Elbanna and J. Choo,
+\emph{A Phase-Field Model for Quasi-Dynamic Rupture Nucleation and
+Propagation of In-Plane Faults},
+International Journal for Numerical and Analytical Methods in Geomechanics
+(2026).
+\href{https://doi.org/10.1002/nag.70416}{doi:10.1002/nag.70416}.
+
+\bibitem{project}
+\raggedright
+Project inputs reviewed for this derivation:
+\texttt{P4A\_TIP\_REPORT.md} (19 October 2026);
+\texttt{P3\_NATIVE\_COMPLETION\_REPORT.md};
+\texttt{particle\_free\_history.tex}, particularly the evolving-profile
+product rule and cohesive energy;
+\texttt{PF6A\_FORMULATION.md}; and
+\texttt{P2\_coupled\_branch\_equations.md}.
+The inspected repository baseline was commit
+\texttt{612b75d3570d81763407875f3a12c12999b9fa8e};
+the supplied later reports describe newer work.
+This note changes no repository source or production assumption by itself.
+\end{thebibliography}
+\end{document}

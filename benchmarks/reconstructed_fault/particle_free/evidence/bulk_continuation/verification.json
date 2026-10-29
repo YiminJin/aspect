@@ -1,0 +1,536 @@
+{
+  "cases": {
+    "reference-load-final": {
+      "accepted_step_range": [
+        128,
+        140
+      ],
+      "accepted_time_range_s": [
+        0.16000000000000011,
+        0.17500000000000013
+      ],
+      "maxima": {
+        "mechanical_residual": 1.7989434425312426e-13,
+        "phase_KKT": 7.045564465180121e-09,
+        "projection_error": 3.900390886026801e-15,
+        "ledger_error": 1.461203155378066e-15
+      },
+      "bounds": {
+        "mechanical_residual": 1e-09,
+        "phase_KKT": 1e-07,
+        "projection_error": 1e-12,
+        "ledger_error": 1e-10
+      },
+      "all_native_gates_passed": true,
+      "frozen_particle_count": 110592,
+      "unchanged_ID_coordinate_fingerprint": "11428280267573531170",
+      "maximum_positive_step_free_side_scaled_residual": 1.2179859989112652e-19,
+      "peak_rank_KiB": 1309116,
+      "sum_of_rank_peaks_KiB": 3834128
+    },
+    "reference-hold-critical": {
+      "accepted_step_range": [
+        141,
+        143
+      ],
+      "accepted_time_range_s": [
+        0.17625000000000013,
+        0.17875000000000013
+      ],
+      "maxima": {
+        "mechanical_residual": 8.091667878472236e-10,
+        "phase_KKT": 5.128420776934206e-08,
+        "projection_error": 3.2121889646490074e-15,
+        "ledger_error": 1.12865638120755e-15
+      },
+      "bounds": {
+        "mechanical_residual": 1e-09,
+        "phase_KKT": 1e-07,
+        "projection_error": 1e-12,
+        "ledger_error": 1e-10
+      },
+      "all_native_gates_passed": true,
+      "frozen_particle_count": 110592,
+      "unchanged_ID_coordinate_fingerprint": "11428280267573531170",
+      "maximum_positive_step_free_side_scaled_residual": 1.0503913339962373e-19,
+      "peak_rank_KiB": 1261960,
+      "sum_of_rank_peaks_KiB": 3806784
+    },
+    "reference-relax": {
+      "accepted_step_range": [
+        141,
+        143
+      ],
+      "accepted_time_range_s": [
+        0.17625000000000013,
+        0.17875000000000013
+      ],
+      "maxima": {
+        "mechanical_residual": 7.638902076775766e-10,
+        "phase_KKT": 0.0,
+        "projection_error": 3.593798932249239e-15,
+        "ledger_error": 6.870306357091137e-17
+      },
+      "bounds": {
+        "mechanical_residual": 1e-09,
+        "phase_KKT": 1e-07,
+        "projection_error": 1e-12,
+        "ledger_error": 1e-10
+      },
+      "all_native_gates_passed": true,
+      "frozen_particle_count": 110592,
+      "unchanged_ID_coordinate_fingerprint": "11428280267573531170",
+      "maximum_positive_step_free_side_scaled_residual": 7.367661421569605e-12,
+      "peak_rank_KiB": 763748,
+      "sum_of_rank_peaks_KiB": 3038536
+    },
+    "half-last-critical": {
+      "accepted_step_range": [
+        153,
+        153
+      ],
+      "accepted_time_range_s": [
+        0.17499999999999977,
+        0.17499999999999977
+      ],
+      "maxima": {
+        "mechanical_residual": 1.5380044313415236e-15,
+        "phase_KKT": 1.425490836481913e-10,
+        "projection_error": 3.545828103212416e-15,
+        "ledger_error": 1.1672825660249976e-15
+      },
+      "bounds": {
+        "mechanical_residual": 1e-09,
+        "phase_KKT": 1e-07,
+        "projection_error": 1e-12,
+        "ledger_error": 1e-10
+      },
+      "all_native_gates_passed": true,
+      "frozen_particle_count": 110592,
+      "unchanged_ID_coordinate_fingerprint": "11428280267573531170",
+      "maximum_positive_step_free_side_scaled_residual": 9.627017133145973e-20,
+      "peak_rank_KiB": 1275936,
+      "sum_of_rank_peaks_KiB": 3789072
+    },
+    "half-hold": {
+      "accepted_step_range": [
+        154,
+        159
+      ],
+      "accepted_time_range_s": [
+        0.17562499999999975,
+        0.1787499999999997
+      ],
+      "maxima": {
+        "mechanical_residual": 8.066285803898958e-10,
+        "phase_KKT": 3.152792574234731e-08,
+        "projection_error": 3.498033403306822e-15,
+        "ledger_error": 1.0244037957532615e-15
+      },
+      "bounds": {
+        "mechanical_residual": 1e-09,
+        "phase_KKT": 1e-07,
+        "projection_error": 1e-12,
+        "ledger_error": 1e-10
+      },
+      "all_native_gates_passed": true,
+      "frozen_particle_count": 110592,
+      "unchanged_ID_coordinate_fingerprint": "11428280267573531170",
+      "maximum_positive_step_free_side_scaled_residual": 2.1581503475322765e-12,
+      "peak_rank_KiB": 1280032,
+      "sum_of_rank_peaks_KiB": 3786544
+    },
+    "half-relax": {
+      "accepted_step_range": [
+        154,
+        159
+      ],
+      "accepted_time_range_s": [
+        0.17562499999999975,
+        0.1787499999999997
+      ],
+      "maxima": {
+        "mechanical_residual": 9.548618952479648e-10,
+        "phase_KKT": 0.0,
+        "projection_error": 3.5102189603686022e-15,
+        "ledger_error": 4.3508078353045056e-16
+      },
+      "bounds": {
+        "mechanical_residual": 1e-09,
+        "phase_KKT": 1e-07,
+        "projection_error": 1e-12,
+        "ledger_error": 1e-10
+      },
+      "all_native_gates_passed": true,
+      "frozen_particle_count": 110592,
+      "unchanged_ID_coordinate_fingerprint": "11428280267573531170",
+      "maximum_positive_step_free_side_scaled_residual": 9.209986831918619e-12,
+      "peak_rank_KiB": 764924,
+      "sum_of_rank_peaks_KiB": 3053680
+    },
+    "quarter-load": {
+      "accepted_step_range": [
+        128,
+        179
+      ],
+      "accepted_time_range_s": [
+        0.1590625000000001,
+        0.17499999999999977
+      ],
+      "maxima": {
+        "mechanical_residual": 1.4437931758283378e-11,
+        "phase_KKT": 9.760827213156631e-08,
+        "projection_error": 3.755752394621691e-15,
+        "ledger_error": 1.9522446153815794e-15
+      },
+      "bounds": {
+        "mechanical_residual": 1e-09,
+        "phase_KKT": 1e-07,
+        "projection_error": 1e-12,
+        "ledger_error": 1e-10
+      },
+      "all_native_gates_passed": true,
+      "frozen_particle_count": 110592,
+      "unchanged_ID_coordinate_fingerprint": "11428280267573531170",
+      "maximum_positive_step_free_side_scaled_residual": 1.1898820796514574e-19,
+      "peak_rank_KiB": 1276620,
+      "sum_of_rank_peaks_KiB": 3844420
+    },
+    "quarter-hold": {
+      "accepted_step_range": [
+        180,
+        191
+      ],
+      "accepted_time_range_s": [
+        0.17531249999999976,
+        0.1787499999999997
+      ],
+      "maxima": {
+        "mechanical_residual": 8.325633169412339e-10,
+        "phase_KKT": 6.610812777751995e-08,
+        "projection_error": 3.571048857441981e-15,
+        "ledger_error": 2.00261196748769e-15
+      },
+      "bounds": {
+        "mechanical_residual": 1e-09,
+        "phase_KKT": 1e-07,
+        "projection_error": 1e-12,
+        "ledger_error": 1e-10
+      },
+      "all_native_gates_passed": true,
+      "frozen_particle_count": 110592,
+      "unchanged_ID_coordinate_fingerprint": "11428280267573531170",
+      "maximum_positive_step_free_side_scaled_residual": 3.2328918499706717e-12,
+      "peak_rank_KiB": 1239804,
+      "sum_of_rank_peaks_KiB": 3825264
+    },
+    "quarter-relax": {
+      "accepted_step_range": [
+        180,
+        191
+      ],
+      "accepted_time_range_s": [
+        0.17531249999999976,
+        0.1787499999999997
+      ],
+      "maxima": {
+        "mechanical_residual": 9.548613543602454e-10,
+        "phase_KKT": 0.0,
+        "projection_error": 3.554307115435897e-15,
+        "ledger_error": 4.2715427545041105e-16
+      },
+      "bounds": {
+        "mechanical_residual": 1e-09,
+        "phase_KKT": 1e-07,
+        "projection_error": 1e-12,
+        "ledger_error": 1e-10
+      },
+      "all_native_gates_passed": true,
+      "frozen_particle_count": 110592,
+      "unchanged_ID_coordinate_fingerprint": "11428280267573531170",
+      "maximum_positive_step_free_side_scaled_residual": 9.210296881653045e-12,
+      "peak_rank_KiB": 1146296,
+      "sum_of_rank_peaks_KiB": 3452604
+    },
+    "spatial-load": {
+      "accepted_step_range": [
+        1,
+        140
+      ],
+      "accepted_time_range_s": [
+        0.00125,
+        0.17500000000000013
+      ],
+      "maxima": {
+        "mechanical_residual": 1.9017079697151096e-12,
+        "phase_KKT": 5.254902263329697e-08,
+        "projection_error": 1.1174132169353295e-14,
+        "ledger_error": 1.973741265912099e-14
+      },
+      "bounds": {
+        "mechanical_residual": 1e-09,
+        "phase_KKT": 1e-07,
+        "projection_error": 1e-12,
+        "ledger_error": 1e-10
+      },
+      "all_native_gates_passed": true,
+      "frozen_particle_count": 221184,
+      "unchanged_ID_coordinate_fingerprint": "13847991597444700578",
+      "maximum_positive_step_free_side_scaled_residual": 4.0883802387412486e-16,
+      "peak_rank_KiB": 2365556,
+      "sum_of_rank_peaks_KiB": 6679912
+    },
+    "spatial-hold": {
+      "accepted_step_range": [
+        141,
+        143
+      ],
+      "accepted_time_range_s": [
+        0.17625000000000013,
+        0.17875000000000013
+      ],
+      "maxima": {
+        "mechanical_residual": 5.409896133987388e-10,
+        "phase_KKT": 0.0,
+        "projection_error": 3.5310797188155327e-15,
+        "ledger_error": 7.100096185170542e-17
+      },
+      "bounds": {
+        "mechanical_residual": 1e-09,
+        "phase_KKT": 1e-07,
+        "projection_error": 1e-12,
+        "ledger_error": 1e-10
+      },
+      "all_native_gates_passed": true,
+      "frozen_particle_count": 221184,
+      "unchanged_ID_coordinate_fingerprint": "13847991597444700578",
+      "maximum_positive_step_free_side_scaled_residual": 3.7063024373780275e-12,
+      "peak_rank_KiB": 1232096,
+      "sum_of_rank_peaks_KiB": 4867544
+    },
+    "boundary-reference": {
+      "accepted_step_range": [
+        140,
+        140
+      ],
+      "accepted_time_range_s": [
+        0.17500000000000013,
+        0.17500000000000013
+      ],
+      "maxima": {
+        "mechanical_residual": 1.5198855515681556e-15,
+        "phase_KKT": 1.4084045041329318e-10,
+        "projection_error": 3.900390886026801e-15,
+        "ledger_error": 8.631178891663453e-16
+      },
+      "bounds": {
+        "mechanical_residual": 1e-09,
+        "phase_KKT": 1e-07,
+        "projection_error": 1e-12,
+        "ledger_error": 1e-10
+      },
+      "all_native_gates_passed": true,
+      "frozen_particle_count": 110592,
+      "unchanged_ID_coordinate_fingerprint": "11428280267573531170",
+      "maximum_positive_step_free_side_scaled_residual": 1.0322160288423114e-19,
+      "peak_rank_KiB": 1277880,
+      "sum_of_rank_peaks_KiB": 3754648
+    },
+    "domain-corrected-load": {
+      "accepted_step_range": [
+        1,
+        140
+      ],
+      "accepted_time_range_s": [
+        0.00125,
+        0.17500000000000013
+      ],
+      "maxima": {
+        "mechanical_residual": 4.067597022312967e-12,
+        "phase_KKT": 9.934515399212529e-08,
+        "projection_error": 6.9282875342681864e-15,
+        "ledger_error": 5.2542605682992516e-15
+      },
+      "bounds": {
+        "mechanical_residual": 1e-09,
+        "phase_KKT": 1e-07,
+        "projection_error": 1e-12,
+        "ledger_error": 1e-10
+      },
+      "all_native_gates_passed": true,
+      "frozen_particle_count": 129024,
+      "unchanged_ID_coordinate_fingerprint": "7265562812509503842",
+      "maximum_positive_step_free_side_scaled_residual": 4.2705038981989875e-16,
+      "peak_rank_KiB": 1449488,
+      "sum_of_rank_peaks_KiB": 4209956
+    },
+    "domain-hold": {
+      "accepted_step_range": [
+        141,
+        143
+      ],
+      "accepted_time_range_s": [
+        0.17625000000000013,
+        0.17875000000000013
+      ],
+      "maxima": {
+        "mechanical_residual": 8.271881974218286e-10,
+        "phase_KKT": 0.0,
+        "projection_error": 3.0728701386784053e-15,
+        "ledger_error": 2.4031348349612535e-17
+      },
+      "bounds": {
+        "mechanical_residual": 1e-09,
+        "phase_KKT": 1e-07,
+        "projection_error": 1e-12,
+        "ledger_error": 1e-10
+      },
+      "all_native_gates_passed": true,
+      "frozen_particle_count": 129024,
+      "unchanged_ID_coordinate_fingerprint": "7265562812509503842",
+      "maximum_positive_step_free_side_scaled_residual": 1.5456578531558718e-12,
+      "peak_rank_KiB": 809484,
+      "sum_of_rank_peaks_KiB": 3209680
+    }
+  },
+  "hold_parents": [
+    {
+      "candidates": [
+        "reference-hold-critical",
+        "reference-relax"
+      ],
+      "identical_parent": true,
+      "source": "build-particle-free/bulk-continuation/runs/reference-load-final/restart/03"
+    },
+    {
+      "candidates": [
+        "half-hold",
+        "half-relax"
+      ],
+      "identical_parent": true,
+      "source": "build-particle-free/bulk-continuation/runs/half-last-critical/restart/01"
+    },
+    {
+      "candidates": [
+        "quarter-hold",
+        "quarter-relax"
+      ],
+      "identical_parent": true,
+      "source": "build-particle-free/bulk-continuation/runs/quarter-load/restart/03"
+    }
+  ],
+  "immutable_input_manifests": 19,
+  "constitutive_history_sources_unchanged": {
+    "source/material_model/phase_field_fault/bulk_cohesive.cc": "5189084af5d877c6aa67c2568dc08122e96191af75a81d0b661e706bbc025bc3",
+    "source/material_model/phase_field_fault/bulk_cohesive_history.cc": "d342d70c4f80fbdb5a31c65580fe8cd4c6378500481d2a4685b9ef19aef8a466"
+  },
+  "native_v6": {
+    "source_sha256": "97f033e23fa222cf1cfac044ec54a21592408b404116b58d411794b14f3821aa",
+    "binary_sha256": "386fb2ea47dfeb0445903e20c8fc2236850d5e34a9ac6e42a8e865e7f96500cf"
+  },
+  "observers": {
+    "plugin": {
+      "parallel.cc": "7d2bd77dfef69a59c564b1e1d060e2108975e3d5c20f8f6cc9cad435b17e4eb6",
+      "propagation.cc": "623523a2da33c3aae4956aceff75b5ea995210799531562ed9d8374c3ed1b00d",
+      "library_sha256": "0943e0464c33d182a55ce88bc554d22c2bc2df9f5b4a3058ea634a44985c0a51"
+    },
+    "plugin-boundary": {
+      "parallel.cc": "e96d29e8460d4a3482ad03e45bac13055bcd04cb3dd832ee4319a51f3ac8e09a",
+      "propagation.cc": "623523a2da33c3aae4956aceff75b5ea995210799531562ed9d8374c3ed1b00d",
+      "libbulk_propagation_checks.release.so": "80f55a3d6017c978a18db344f25df98b2fe5334707d86995410e467be821956e"
+    }
+  },
+  "preserved_baseline_binaries": {
+    "build-particle-free/bulk-parallel/native/aspect-release": "c83a771935ed0135abc5339eb529aa4fa51dbb7af48514fb7e0832006bae9744",
+    "build-particle-free/bulk-fracture/plugin/libbulk_propagation_checks.release.so": "8a12be65345b9bbd69bd5854b0f05599ddbf0f1eaf4d547d302f16c6c032bda3"
+  },
+  "protected_BP3_files": 34,
+  "preserved_prior_evidence_files": 53,
+  "media": {
+    "first-hold-branches.png": {
+      "size": [
+        1920,
+        1440
+      ],
+      "frames": 1
+    },
+    "response-and-energy.png": {
+      "size": [
+        1817,
+        1667
+      ],
+      "frames": 1
+    },
+    "spatial-domain-profiles.png": {
+      "size": [
+        2267,
+        1217
+      ],
+      "frames": 1
+    },
+    "temporal-sampling.png": {
+      "size": [
+        1800,
+        1200
+      ],
+      "frames": 1
+    },
+    "front-continuation.png": {
+      "size": [
+        1817,
+        1667
+      ],
+      "frames": 1
+    },
+    "spatial-domain-response.png": {
+      "size": [
+        2267,
+        1217
+      ],
+      "frames": 1
+    },
+    "common-scale-fields.png": {
+      "size": [
+        3017,
+        1034
+      ],
+      "frames": 1
+    },
+    "unstable-mode.png": {
+      "size": [
+        1600,
+        480
+      ],
+      "frames": 1
+    },
+    "stability-and-branch.png": {
+      "size": [
+        2100,
+        600
+      ],
+      "frames": 1
+    },
+    "physical-energy-work.png": {
+      "size": [
+        2250,
+        1200
+      ],
+      "frames": 1
+    },
+    "spatial-domain-fields.png": {
+      "size": [
+        2266,
+        1470
+      ],
+      "frames": 1
+    },
+    "continuation.gif": {
+      "size": [
+        500,
+        900
+      ],
+      "frames": 65
+    }
+  },
+  "strict_reference_match_passed": false
+}

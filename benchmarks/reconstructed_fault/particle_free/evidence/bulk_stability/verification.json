@@ -1,0 +1,391 @@
+{
+  "cases": {
+    "supported-records": {
+      "steps": [
+        141,
+        142,
+        143
+      ],
+      "maxima": {
+        "mechanical_residual": 1.5198588652299652e-15,
+        "phase_KKT": 0.0,
+        "projection_error": 3.593798932249239e-15,
+        "ledger_error": 6.870306357091137e-17
+      },
+      "solver_seconds": 11.226655109,
+      "stability_seconds": 0.002583179,
+      "linear_solves": 0,
+      "wall_seconds": 25.73096683799986,
+      "peak_rank_MiB": 879.16015625,
+      "additional_outer_rejected_trials": 0,
+      "publications": [
+        141,
+        142,
+        143
+      ]
+    },
+    "predictor-curvature": {
+      "steps": [
+        141
+      ],
+      "maxima": {
+        "mechanical_residual": 1.5198588652299652e-15,
+        "phase_KKT": 0.0,
+        "projection_error": 3.234573307937392e-15,
+        "ledger_error": 1.380882369219438e-17
+      },
+      "solver_seconds": 156.535200519,
+      "stability_seconds": 87.931943391,
+      "linear_solves": 9,
+      "wall_seconds": 164.88494865400025,
+      "peak_rank_MiB": 1240.8515625,
+      "additional_outer_rejected_trials": 0,
+      "publications": [
+        141
+      ]
+    },
+    "split-first": {
+      "steps": [
+        141
+      ],
+      "maxima": {
+        "mechanical_residual": 1.5198588652299652e-15,
+        "phase_KKT": 0.0,
+        "projection_error": 3.234573307937392e-15,
+        "ledger_error": 1.380882369219438e-17
+      },
+      "solver_seconds": 10.848269415,
+      "stability_seconds": 0.002650879,
+      "linear_solves": 0,
+      "wall_seconds": 18.80417476399998,
+      "peak_rank_MiB": 708.2421875,
+      "additional_outer_rejected_trials": 2,
+      "publications": [
+        141
+      ]
+    },
+    "restart": {
+      "steps": [
+        142,
+        143
+      ],
+      "maxima": {
+        "mechanical_residual": 1.5198378749801837e-15,
+        "phase_KKT": 0.0,
+        "projection_error": 3.593798932249239e-15,
+        "ledger_error": 6.870306357091137e-17
+      },
+      "solver_seconds": 7.3478139,
+      "stability_seconds": 0.001740815,
+      "linear_solves": 0,
+      "wall_seconds": 18.319172299,
+      "peak_rank_MiB": 820.87109375,
+      "additional_outer_rejected_trials": 0,
+      "publications": [
+        142,
+        143
+      ]
+    },
+    "loaded-growth": {
+      "steps": [
+        140
+      ],
+      "maxima": {
+        "mechanical_residual": 1.5198855515681556e-15,
+        "phase_KKT": 1.4084045041329318e-10,
+        "projection_error": 3.900390886026801e-15,
+        "ledger_error": 8.631178891663453e-16
+      },
+      "solver_seconds": 165.065994666,
+      "stability_seconds": 85.254960143,
+      "linear_solves": 10,
+      "wall_seconds": 171.00284150000016,
+      "peak_rank_MiB": 1247.15625,
+      "additional_outer_rejected_trials": 0,
+      "publications": [
+        140
+      ]
+    }
+  },
+  "comparisons": [
+    {
+      "cases": [
+        "supported-records",
+        "predictor-curvature"
+      ],
+      "step": 141,
+      "bitwise_phase_all_persistent_histories_stress_means_weak_forces_reactions": true,
+      "hashes": {
+        "phase-0141.csv": "8d8c89ca5064490417c5d17559c77e5faa01140667ac628b806c9d009dc29931",
+        "record-0141.bin": "e226038643baacf29ba1d6905d803bc5a35548323181b657a2d527b164b47a75",
+        "means-0141.csv": "ef7c36bd5bb995dbe3e88c9e5b0cd1b0189662a26f7092ed350f8106dcdf4471",
+        "phase-forces-0141.csv": "02dfc412cc11447894fdd71c456a4311b5a1de77c33018cd66c43cb49a7c1279",
+        "boundary-reactions-0141.csv": "86137bc43182fa77853e715e84dbda3379485ed451b6d49fc75ec56d833834a0"
+      }
+    },
+    {
+      "cases": [
+        "supported-records",
+        "split-first"
+      ],
+      "step": 141,
+      "bitwise_phase_all_persistent_histories_stress_means_weak_forces_reactions": true,
+      "hashes": {
+        "phase-0141.csv": "8d8c89ca5064490417c5d17559c77e5faa01140667ac628b806c9d009dc29931",
+        "record-0141.bin": "e226038643baacf29ba1d6905d803bc5a35548323181b657a2d527b164b47a75",
+        "means-0141.csv": "ef7c36bd5bb995dbe3e88c9e5b0cd1b0189662a26f7092ed350f8106dcdf4471",
+        "phase-forces-0141.csv": "02dfc412cc11447894fdd71c456a4311b5a1de77c33018cd66c43cb49a7c1279",
+        "boundary-reactions-0141.csv": "86137bc43182fa77853e715e84dbda3379485ed451b6d49fc75ec56d833834a0"
+      }
+    },
+    {
+      "cases": [
+        "supported-records",
+        "restart"
+      ],
+      "step": 142,
+      "bitwise_phase_all_persistent_histories_stress_means_weak_forces_reactions": true,
+      "hashes": {
+        "phase-0142.csv": "8d8c89ca5064490417c5d17559c77e5faa01140667ac628b806c9d009dc29931",
+        "record-0142.bin": "ce3774a2e746119dc46b6dd9c5d6f19499f85919be0e317ed3d2539370566fb0",
+        "means-0142.csv": "25cf60265477605166fea5fd1c9ce9b1036b028aa604e1b4e3e1af9420942e8b",
+        "phase-forces-0142.csv": "4b2e9ed09cd757db06e90a181eded61ad035cf4ebcf5ab1fc7a9b3d1c9250ac9",
+        "boundary-reactions-0142.csv": "99a1db54bc1aafd43691753cd2a249fdc7daeaa138dc19f121105a08be390ea2"
+      }
+    },
+    {
+      "cases": [
+        "supported-records",
+        "restart"
+      ],
+      "step": 143,
+      "bitwise_phase_all_persistent_histories_stress_means_weak_forces_reactions": true,
+      "hashes": {
+        "phase-0143.csv": "8d8c89ca5064490417c5d17559c77e5faa01140667ac628b806c9d009dc29931",
+        "record-0143.bin": "58bb0a5323c0f67944eac51e86887f7b75ca2fd4487a3f0cbe8569cd11d1b122",
+        "means-0143.csv": "de82992edd32e078507fc2d4ef093d965f227c8e4fd864a19aa3e9b8f998381c",
+        "phase-forces-0143.csv": "95203165166363aba737798e155daa42dfd68a884c6c163745c5c8e19ee3e1e7",
+        "boundary-reactions-0143.csv": "2f9859091d6532ea64dd1ef71a423bf5c93f6636e2150be69969b2eb1f6599b9"
+      }
+    }
+  ],
+  "negative_curvature_rejected_before_publication": {
+    "step": 141.0,
+    "time": 0.17625000000000013,
+    "attempt": 0.0,
+    "accepted_parent_publications": 140.0,
+    "continuation_guess": 0.0,
+    "critical_masters": 574.0,
+    "minimum_curvature": -0.20855848252504222,
+    "uncertainty": 5.071190259017232e-09,
+    "eigen_residual": 2.1610811700036273e-13,
+    "linear_residual": 3.9901459328374604e-15,
+    "asymmetry": 9.780186463441569e-14,
+    "cross_symmetry_relative": 2.029323439011024e-15,
+    "feasible_plus": 0.00018896691314796826,
+    "feasible_minus": 0.9283966971657805,
+    "max_phase_increment": 0.01583691082410646,
+    "stable": 0.0,
+    "seconds": 87.930930118
+  },
+  "genuine_loading_growth_retained": {
+    "step": 140.0,
+    "time": 0.17500000000000013,
+    "attempt": 0.0,
+    "accepted_parent_publications": 139.0,
+    "continuation_guess": 0.0,
+    "critical_masters": 544.0,
+    "minimum_curvature": 0.13990731454666874,
+    "uncertainty": 4.798191432746751e-09,
+    "eigen_residual": 2.745509783277462e-13,
+    "linear_residual": 3.827694244288613e-15,
+    "asymmetry": 8.837596293848546e-14,
+    "cross_symmetry_relative": 2.5221478614557404e-15,
+    "feasible_plus": 0.0014465300595895038,
+    "feasible_minus": 0.03194250249327746,
+    "max_phase_increment": 0.0856080902268879,
+    "stable": 1.0,
+    "seconds": 85.254832119
+  },
+  "immutable_checkpoint_inputs": {
+    "split-first-input.json": {
+      "source": "build-particle-free/bulk-continuation/runs/reference-load-final/restart/03",
+      "accepted_step": 140,
+      "accepted_time": 0.17500000000000013,
+      "publications": 140,
+      "quadrature": 8,
+      "dt": 0.00125,
+      "end": 0.17625,
+      "clock": {
+        "offset": 202,
+        "pending_time": 0.17625000000000013,
+        "pending_dt": 0.00125,
+        "old_dt": 0.00125,
+        "pending_step": 141
+      },
+      "files": {
+        "mesh_fixed.data": "56e621c0f9bf4d340332600d42059cda4d0f65ce1e67ebffd21490b6b6b74439",
+        "mesh_variable.data": "bc3587cf5ff307448d40fec6b2091c31fc9e986d4d05c2c17c0d13a53d6cbe6f",
+        "mesh": "ef374a6511134930e9e9736cd93529c1b27a12571dfe554b3235c4a97fb8ec02",
+        "resume.z": "9c7816fc84bd308404a667143123c53416a74a535606072fa2d496afaaf2d72a",
+        "mesh.info": "4d4537f709990606d06ecc88589c4e27a1313fcc296dc4c385b9bb8843c8f25a"
+      }
+    },
+    "predictor-curvature-input.json": {
+      "source": "build-particle-free/bulk-continuation/runs/reference-load-final/restart/03",
+      "accepted_step": 140,
+      "accepted_time": 0.17500000000000013,
+      "publications": 140,
+      "quadrature": 8,
+      "dt": 0.00125,
+      "end": 0.17625,
+      "clock": {
+        "offset": 202,
+        "pending_time": 0.17625000000000013,
+        "pending_dt": 0.00125,
+        "old_dt": 0.00125,
+        "pending_step": 141
+      },
+      "files": {
+        "mesh_fixed.data": "56e621c0f9bf4d340332600d42059cda4d0f65ce1e67ebffd21490b6b6b74439",
+        "mesh_variable.data": "bc3587cf5ff307448d40fec6b2091c31fc9e986d4d05c2c17c0d13a53d6cbe6f",
+        "mesh": "ef374a6511134930e9e9736cd93529c1b27a12571dfe554b3235c4a97fb8ec02",
+        "resume.z": "9c7816fc84bd308404a667143123c53416a74a535606072fa2d496afaaf2d72a",
+        "mesh.info": "4d4537f709990606d06ecc88589c4e27a1313fcc296dc4c385b9bb8843c8f25a"
+      }
+    },
+    "supported-records-input.json": {
+      "source": "build-particle-free/bulk-continuation/runs/reference-load-final/restart/03",
+      "accepted_step": 140,
+      "accepted_time": 0.17500000000000013,
+      "publications": 140,
+      "quadrature": 8,
+      "dt": 0.00125,
+      "end": 0.17875,
+      "clock": {
+        "offset": 202,
+        "pending_time": 0.17625000000000013,
+        "pending_dt": 0.00125,
+        "old_dt": 0.00125,
+        "pending_step": 141
+      },
+      "files": {
+        "mesh_fixed.data": "56e621c0f9bf4d340332600d42059cda4d0f65ce1e67ebffd21490b6b6b74439",
+        "mesh_variable.data": "bc3587cf5ff307448d40fec6b2091c31fc9e986d4d05c2c17c0d13a53d6cbe6f",
+        "mesh": "ef374a6511134930e9e9736cd93529c1b27a12571dfe554b3235c4a97fb8ec02",
+        "resume.z": "9c7816fc84bd308404a667143123c53416a74a535606072fa2d496afaaf2d72a",
+        "mesh.info": "4d4537f709990606d06ecc88589c4e27a1313fcc296dc4c385b9bb8843c8f25a"
+      }
+    },
+    "loaded-growth-input.json": {
+      "source": "build-particle-free/bulk-continuation/runs/reference-load-final/restart/02",
+      "accepted_step": 139,
+      "accepted_time": 0.17375000000000013,
+      "publications": 139,
+      "quadrature": 8,
+      "dt": 0.00125,
+      "end": 0.175,
+      "clock": {
+        "offset": 202,
+        "pending_time": 0.17500000000000013,
+        "pending_dt": 0.00125,
+        "old_dt": 0.00125,
+        "pending_step": 140
+      },
+      "files": {
+        "mesh_fixed.data": "5b2f9de5b1b6cee9d1412d6371665ea4630c080d0b61034bfa8dee20041d44aa",
+        "mesh_variable.data": "bc3587cf5ff307448d40fec6b2091c31fc9e986d4d05c2c17c0d13a53d6cbe6f",
+        "mesh": "ef374a6511134930e9e9736cd93529c1b27a12571dfe554b3235c4a97fb8ec02",
+        "resume.z": "da2364fd01e734a29d4c6809e888a98e9425faa6c464d8965f6c37774e62c7cd",
+        "mesh.info": "4d4537f709990606d06ecc88589c4e27a1313fcc296dc4c385b9bb8843c8f25a"
+      }
+    },
+    "predictor-recovery-input.json": {
+      "source": "build-particle-free/bulk-continuation/runs/reference-load-final/restart/03",
+      "accepted_step": 140,
+      "accepted_time": 0.17500000000000013,
+      "publications": 140,
+      "quadrature": 8,
+      "dt": 0.00125,
+      "end": 0.17625,
+      "clock": {
+        "offset": 202,
+        "pending_time": 0.17625000000000013,
+        "pending_dt": 0.00125,
+        "old_dt": 0.00125,
+        "pending_step": 141
+      },
+      "files": {
+        "mesh_fixed.data": "56e621c0f9bf4d340332600d42059cda4d0f65ce1e67ebffd21490b6b6b74439",
+        "mesh_variable.data": "bc3587cf5ff307448d40fec6b2091c31fc9e986d4d05c2c17c0d13a53d6cbe6f",
+        "mesh": "ef374a6511134930e9e9736cd93529c1b27a12571dfe554b3235c4a97fb8ec02",
+        "resume.z": "9c7816fc84bd308404a667143123c53416a74a535606072fa2d496afaaf2d72a",
+        "mesh.info": "4d4537f709990606d06ecc88589c4e27a1313fcc296dc4c385b9bb8843c8f25a"
+      }
+    },
+    "restart-input.json": {
+      "source": "build-particle-free/bulk-stability/runs/split-first/restart/01",
+      "accepted_step": 141,
+      "accepted_time": 0.17625000000000013,
+      "publications": 141,
+      "quadrature": 8,
+      "dt": 0.00125,
+      "end": 0.17875,
+      "clock": {
+        "offset": 202,
+        "pending_time": 0.17750000000000013,
+        "pending_dt": 0.00125,
+        "old_dt": 0.00125,
+        "pending_step": 142
+      },
+      "files": {
+        "mesh_fixed.data": "f9aaa39308fb69f1a822c0c99eb10b1c51daa9d0f11482a67ef5dc9e70ae9b58",
+        "mesh_variable.data": "bc3587cf5ff307448d40fec6b2091c31fc9e986d4d05c2c17c0d13a53d6cbe6f",
+        "mesh": "ef374a6511134930e9e9736cd93529c1b27a12571dfe554b3235c4a97fb8ec02",
+        "resume.z": "68deaaa2160debbafc18d2e4f0bb52aaeee33417d8b052fedd908b3f53a429eb",
+        "mesh.info": "4d4537f709990606d06ecc88589c4e27a1313fcc296dc4c385b9bb8843c8f25a"
+      }
+    },
+    "supported-hold-input.json": {
+      "source": "build-particle-free/bulk-continuation/runs/reference-load-final/restart/03",
+      "accepted_step": 140,
+      "accepted_time": 0.17500000000000013,
+      "publications": 140,
+      "quadrature": 8,
+      "dt": 0.00125,
+      "end": 0.17875,
+      "clock": {
+        "offset": 202,
+        "pending_time": 0.17625000000000013,
+        "pending_dt": 0.00125,
+        "old_dt": 0.00125,
+        "pending_step": 141
+      },
+      "files": {
+        "mesh_fixed.data": "56e621c0f9bf4d340332600d42059cda4d0f65ce1e67ebffd21490b6b6b74439",
+        "mesh_variable.data": "bc3587cf5ff307448d40fec6b2091c31fc9e986d4d05c2c17c0d13a53d6cbe6f",
+        "mesh": "ef374a6511134930e9e9736cd93529c1b27a12571dfe554b3235c4a97fb8ec02",
+        "resume.z": "9c7816fc84bd308404a667143123c53416a74a535606072fa2d496afaaf2d72a",
+        "mesh.info": "4d4537f709990606d06ecc88589c4e27a1313fcc296dc4c385b9bb8843c8f25a"
+      }
+    }
+  },
+  "original_law_history_P4_package_and_BP3_preserved": true,
+  "independent_mixed_matrix_checks": {
+    "negative": -0.25,
+    "positive": 0.5,
+    "zero": 0,
+    "passed": true
+  },
+  "hold_instability_resolved_in_tested_bulk_setting": true,
+  "quantitative_propagation_qualified": false,
+  "P5_free_direction_implemented": false,
+  "strict_reference_match_passed": false,
+  "inherited_P4_limits": {
+    "maximum_temporal_growth_L2_percent": 8.302,
+    "maximum_spatial_interval_growth_L2_percent": 7.442,
+    "declared_growth_error_target_percent": 5.0,
+    "boundary_induced_growth_reduction_percent": 57.26,
+    "source": "Preserved BULK_CONTINUATION_REPORT.md and original evidence archive; no repeated study."
+  }
+}

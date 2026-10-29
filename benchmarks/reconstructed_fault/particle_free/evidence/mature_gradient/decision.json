@@ -1,0 +1,13 @@
+{
+  "selected_length_m": 0.006,
+  "selected_gradient_compatibility": false,
+  "coupled_phase_task_started": false,
+  "reason": "Accumulated-gradient hardening in the intended fixed-width mature limit; 3/6 mm also fail the declared finite-slip screen.",
+  "scope": "1 mm may approximate a short friction window; this does not establish a non-hardening mature/RSF limit or select a new calibrated length.",
+  "threshold_gradient_fraction": 0.05,
+  "slip_window_m": [
+    0.00025,
+    0.001
+  ],
+  "all_candidate_lengths_uncalibrated": true
+}

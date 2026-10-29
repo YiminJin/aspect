@@ -1,0 +1,33 @@
+{
+  "seconds": 1.3281467529996007,
+  "mixed_QZ_relative_error": 3.4850421160026457e-13,
+  "pressure_flow_FD_error": 7.099288410771562e-13,
+  "tested_oblique_growth_s_inv": 1.3205601001050384,
+  "temporal_endpoint_errors": [
+    0.0008738593981875367,
+    0.00043644915742100694,
+    0.00021810465516555722
+  ],
+  "spatial": [
+    {
+      "cells": 32,
+      "physical_kx_inv_m": 6.283185307179586,
+      "physical_ky_inv_m": 12.566370614359172,
+      "relative_error": 0.011766403888002529
+    },
+    {
+      "cells": 64,
+      "physical_kx_inv_m": 6.283185307179586,
+      "physical_ky_inv_m": 12.566370614359172,
+      "relative_error": 0.0029643722601322693
+    },
+    {
+      "cells": 128,
+      "physical_kx_inv_m": 6.283185307179586,
+      "physical_ky_inv_m": 12.566370614359172,
+      "relative_error": 0.000742507276782447
+    }
+  ],
+  "maximum_growth_s_inv": 12.593503548799992,
+  "positive_no_state_growth_s_inv": 11.228853263172967
+}

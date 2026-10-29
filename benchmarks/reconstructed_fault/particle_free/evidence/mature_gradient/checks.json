@@ -1,0 +1,93 @@
+[
+  {
+    "case": "local",
+    "N": 257,
+    "length_m": 0.0,
+    "dt_s": 0.01,
+    "seconds": 6.953606192000734,
+    "steps": 200,
+    "I_m": 388367.78119257744,
+    "initial_phase_relative_L2": 0.0005430887114173826,
+    "fixed_fracture_storage_J_m2": 2.640932557205492,
+    "local_analytic_max_scaled_error": 3.2207481126533823e-13
+  },
+  {
+    "case": "ls1",
+    "N": 257,
+    "length_m": 0.001,
+    "dt_s": 0.01,
+    "seconds": 8.95003478799481,
+    "steps": 200,
+    "I_m": 388367.78119257744,
+    "initial_phase_relative_L2": 0.0005430887114173826,
+    "fixed_fracture_storage_J_m2": 2.640932557205492,
+    "local_analytic_max_scaled_error": 0.0
+  },
+  {
+    "case": "ls3",
+    "N": 257,
+    "length_m": 0.003,
+    "dt_s": 0.01,
+    "seconds": 8.868119307000597,
+    "steps": 200,
+    "I_m": 388367.78119257744,
+    "initial_phase_relative_L2": 0.0005430887114173826,
+    "fixed_fracture_storage_J_m2": 2.640932557205492,
+    "local_analytic_max_scaled_error": 0.0
+  },
+  {
+    "case": "ls6",
+    "N": 257,
+    "length_m": 0.006,
+    "dt_s": 0.01,
+    "seconds": 8.735087218999979,
+    "steps": 200,
+    "I_m": 388367.78119257744,
+    "initial_phase_relative_L2": 0.0005430887114173826,
+    "fixed_fracture_storage_J_m2": 2.640932557205492,
+    "local_analytic_max_scaled_error": 0.0,
+    "complete_joint_action": {
+      "relative_action_error": 9.986554330627329e-09,
+      "epsilon": 1e-05,
+      "branch_reductions": 0,
+      "includes": "Both K components, mechanical shear and solved pressure reference, physical pressure and changing conjugate directions."
+    },
+    "immutable_trial_and_retry": "Bitwise on T,A,K,Q,L from the same accepted parent; benchmark only."
+  },
+  {
+    "case": "ls6-n129",
+    "N": 129,
+    "length_m": 0.006,
+    "dt_s": 0.01,
+    "seconds": 4.463279338000575,
+    "steps": 200,
+    "I_m": 390931.49833746516,
+    "initial_phase_relative_L2": 0.0021626147753381173,
+    "fixed_fracture_storage_J_m2": 2.6303579330382822,
+    "local_analytic_max_scaled_error": 0.0
+  },
+  {
+    "case": "ls6-n513",
+    "N": 513,
+    "length_m": 0.006,
+    "dt_s": 0.01,
+    "seconds": 17.11157701299817,
+    "steps": 200,
+    "I_m": 388879.5301634794,
+    "initial_phase_relative_L2": 0.00013593098774004783,
+    "fixed_fracture_storage_J_m2": 2.6435987754004233,
+    "local_analytic_max_scaled_error": 0.0
+  },
+  {
+    "case": "ls6-half",
+    "N": 257,
+    "length_m": 0.006,
+    "dt_s": 0.005,
+    "seconds": 17.278123081996455,
+    "steps": 400,
+    "I_m": 388367.78119257744,
+    "initial_phase_relative_L2": 0.0005430887114173826,
+    "fixed_fracture_storage_J_m2": 2.640932557205492,
+    "local_analytic_max_scaled_error": 0.0
+  }
+]

@@ -1,0 +1,23 @@
+{
+  "single_plane_closed_formula_max_defect": 5.568462357885551e-16,
+  "single_plane_cases": 450,
+  "constant_R_cases": 96,
+  "minimum_constant_R_algorithmic_symbol": 1.2687964159809184e-05,
+  "coupled_high_k_defect": 3.926546587873503e-14,
+  "phase_obstacle_residual_at_selected_state_Pa": 7.9504656535879095,
+  "cutbacks": {
+    "p02-n16-cutback": {
+      "unchanged_parent_checkpoint": true,
+      "accepted_from_s": 0.1,
+      "accepted_to_s": 0.125,
+      "pending_dt_s": 0.00625
+    },
+    "p08-n16-cutback": {
+      "unchanged_parent_checkpoint": true,
+      "accepted_from_s": 0.1,
+      "accepted_to_s": 0.125,
+      "pending_dt_s": 0.00625
+    }
+  },
+  "decision": "Mechanical prerequisite fails. No phase-active progression or tolerance change."
+}

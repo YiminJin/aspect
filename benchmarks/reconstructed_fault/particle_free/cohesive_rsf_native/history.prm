@@ -1,0 +1,43 @@
+set Dimension = 2
+set Use years instead of seconds = false
+set End time = 0
+set Nonlinear solver scheme = no Advection, no Stokes
+set Additional shared libraries = $ASPECT_SOURCE_DIR/build-particle-free/cohesive-rsf-native/checks-native/libcohesive_rsf_native_checks.release.so
+set Output directory = $ASPECT_SOURCE_DIR/build-particle-free/cohesive-rsf-native/history-r1
+subsection Geometry model
+  set Model name = cohesive history block
+  subsection Box
+    set X repetitions = 4
+    set Y repetitions = 4
+  end
+subsection Initial topography model
+  set Model name = function
+  subsection Function
+    set Function expression = 0
+  end
+end
+end
+subsection Gravity model
+  set Model name = vertical
+  subsection Vertical
+    set Magnitude = 0
+  end
+end
+subsection Material model
+  set Model name = simple
+end
+subsection Boundary velocity model
+  set Zero velocity boundary indicators = left, right, bottom, top
+end
+subsection Mesh refinement
+  set Initial global refinement = 0
+  set Initial adaptive refinement = 0
+  set Time steps between mesh refinement = 0
+end
+subsection Discretization
+  set Stokes velocity polynomial degree = 2
+  set Use locally conservative discretization = true
+end
+subsection Postprocess
+  set List of postprocessors = cohesive native history checks
+end

@@ -1,0 +1,20 @@
+{
+  "G_Pa": 1000000.0,
+  "eta_Maxwell_Pa_s": 100000000.0,
+  "Gc_J_m2": 1,
+  "ell_m": 0.046875,
+  "m": 4,
+  "Kf_Pa": 8,
+  "p0_Pa": 10000,
+  "residual_cohesion_Pa": 0,
+  "mu0": 0.1,
+  "a": 0.005,
+  "b": 0.01,
+  "V0_m_s": 5e-06,
+  "Dc_m": 0.001,
+  "rho_kg_m3": 2670,
+  "cs_m_s": 19.35282499290459,
+  "eta_radiation_Pa_s_m": 25836.021365527624,
+  "source": "Current bulk elastic/cohesive inputs retained; exploratory kinetics and Fei density are not calibrated production replacements.",
+  "mapping": "AT1 density normalized over prescribed coherent physical profile; no arbitrary reference width."
+}

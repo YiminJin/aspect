@@ -1,0 +1,22 @@
+{
+  "relaxation_matrix_norm": 0.030639066524810882,
+  "normalized_relaxation_matrix_norm": 5.215740191876181,
+  "nonuniform_direction_curvature_reduction": 0.39223692523132875,
+  "physical_time_s": 0.4000000000000002,
+  "raw_dofs": 2665,
+  "independent_dofs": 707,
+  "hanging_constraint_rows": 64,
+  "native_constraint_rows_with_entries": 184,
+  "CTg_defect": 5.415383113076098e-21,
+  "CTHC_defect": 1.1757552116287667e-16,
+  "critical_masters": 89,
+  "independent_relaxed_minimum": 5.940868186672286,
+  "native_relaxed_minimum": 5.9408681866722945,
+  "relaxed_defect": 1.4950313519708454e-15,
+  "frozen_mechanics_minimum": 5.940868186672282,
+  "native_uncertainty": 2.466351589101279e-10,
+  "cross_symmetry": 1.4452562066117511e-15,
+  "pressure_eliminated": true,
+  "artificial_constrained_rows_excluded": true,
+  "second_condensation": false
+}

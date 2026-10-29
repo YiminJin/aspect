@@ -1,0 +1,29 @@
+{
+  "times_s": [
+    0.4,
+    0.4025,
+    0.405,
+    0.4075,
+    0.41,
+    0.4125,
+    0.415,
+    0.4175,
+    0.42,
+    0.4225,
+    0.425,
+    0.4275,
+    0.43,
+    0.4325,
+    0.435,
+    0.4375,
+    0.44,
+    0.4425,
+    0.445,
+    0.44625
+  ],
+  "maximum_damage_integral_replay_error_m": 0.0,
+  "native_replayed_steps": 751,
+  "geometry_changes_in_replayed_windows": 0,
+  "interpolated_histories": false,
+  "common_physical_times": true
+}

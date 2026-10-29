@@ -1,0 +1,6 @@
+{
+  "enlarged_combined_wall_s": 2299.0170554359975,
+  "enlarged_observed_peak_RSS_MiB": 2121.08203125,
+  "includes_failed_attempt_and_rebuild": true,
+  "replayed_pre_failure_steps": 17
+}

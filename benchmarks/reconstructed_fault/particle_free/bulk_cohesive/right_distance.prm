@@ -1,0 +1,8 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_free/bulk_cohesive/fine_gauss8.prm
+set Output directory = $ASPECT_SOURCE_DIR/build-particle-free/bulk-sensitivity/runs/right-distance
+subsection Geometry model
+  subsection Box
+    set X extent = 1.5
+    set X repetitions = 48
+  end
+end

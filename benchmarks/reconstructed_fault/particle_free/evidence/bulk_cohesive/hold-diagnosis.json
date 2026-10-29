@@ -1,0 +1,10 @@
+{
+  "time": 0.15250000000000008,
+  "iteration": 0,
+  "infeasible_free_master_directions": 27,
+  "minimum_direction": -0.0007223702834927281,
+  "reason": "Every positive unprojected Newton line violates the physical lower obstacle. A feasible master-space projected search is required.",
+  "constitutive_change": false,
+  "tolerance_change": false,
+  "checkpoint_replay_step60_five_exports_bitwise_equal": true
+}

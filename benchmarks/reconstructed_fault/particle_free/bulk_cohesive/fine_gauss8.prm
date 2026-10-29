@@ -1,0 +1,13 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_free/bulk_cohesive/native.prm
+set Output directory = $ASPECT_SOURCE_DIR/build-particle-free/bulk-sensitivity/runs/fine-gauss8
+subsection Geometry model
+  subsection Box
+    set X repetitions = 32
+    set Y repetitions = 64
+  end
+end
+subsection Material model
+  subsection Phase field fault
+    set FE bulk normal quadrature points = 8
+  end
+end

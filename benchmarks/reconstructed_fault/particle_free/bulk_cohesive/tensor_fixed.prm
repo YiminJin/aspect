@@ -1,0 +1,7 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_free/bulk_cohesive/tensor_native.prm
+set Output directory = $ASPECT_SOURCE_DIR/build-particle-free/p5b-native/runs/fixed-current
+subsection Material model
+ subsection Phase field fault
+  set Bulk cohesive flow rule = fixed tensor
+ end
+end

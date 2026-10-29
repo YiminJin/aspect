@@ -1,0 +1,15 @@
+{
+  "stage": "native bulk state component, not integrated propagation",
+  "MPI_rank_counts": [
+    1,
+    2,
+    4
+  ],
+  "distorted_cell_source_bound": 1e-12,
+  "maximum_source_error_Pa": 2.7047329795485495e-13,
+  "non_DG_remainder_Pa": 0.005297709103444806,
+  "two_four_rank_physical_records_bitwise": true,
+  "discarded_trial_accepted_state_unchanged": true,
+  "retry_and_physical_CellId_pack_restore_exact": true,
+  "native_Simulator_checkpoint_not_yet_qualified": true
+}

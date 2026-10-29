@@ -1,0 +1,22 @@
+parameter,value,unit
+G,1000000.0,Pa
+eta,100000000.0,Pa s
+Gc,1,J/m2
+ell,0.046875,m
+m,4,1
+Kf,8,Pa
+p0,10000,Pa
+residual_cohesion,0,Pa
+mu0,0.1,1
+a,0.005,1
+b,0.01,1
+V0,5e-06,m/s
+Dc,0.001,m
+rho,2670,kg/m3
+eta_rad,25836.02136552763,Pa s/m
+band_height,0.25,m
+peak_phi,0.8,1
+boundary_velocity,0.001,m/s
+load_end,0.25,s
+test_end,0.3,s
+selected_dt,0.000390625,s

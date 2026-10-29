@@ -1,0 +1,22 @@
+[
+  {
+    "time_s": 2.0,
+    "Gauss_points": 368640,
+    "max_inplane_shear_all_Pa": 3308.9625759297223,
+    "max_inplane_shear_remote_Pa": 2098.758106973362,
+    "remote_x_m": 0.9978896723188485,
+    "remote_y_m": 0.00042206553623029986,
+    "min_physical_pn_Pa": 9076.751445012815,
+    "remote_below_strength": true
+  },
+  {
+    "time_s": 2.42,
+    "Gauss_points": 368640,
+    "max_inplane_shear_all_Pa": 3075.452127333785,
+    "max_inplane_shear_remote_Pa": 2643.236004647355,
+    "remote_x_m": 7.23941279332707,
+    "remote_y_m": 0.00042206553623029986,
+    "min_physical_pn_Pa": 8721.973305504815,
+    "remote_below_strength": true
+  }
+]

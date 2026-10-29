@@ -1,0 +1,57 @@
+{
+  "dispersion": 8.348165823348615e-10,
+  "homogeneous": 0.0,
+  "completed": [
+    {
+      "case": "local-n33",
+      "seconds": 0.15304364399707993,
+      "max_energy_defect": 3.994565472213497e-17,
+      "coupled_pressure_K_tangent_FD": 2.47550389076423e-11,
+      "prototype_lifecycle": []
+    },
+    {
+      "case": "grad-n33",
+      "seconds": 0.23514227000123356,
+      "max_energy_defect": 4.329048443326563e-17,
+      "coupled_pressure_K_tangent_FD": 5.5365148909913843e-11,
+      "prototype_lifecycle": []
+    },
+    {
+      "case": "grad-n65",
+      "seconds": 0.49898754799869494,
+      "max_energy_defect": 5.334274688628682e-17,
+      "coupled_pressure_K_tangent_FD": 8.678551921548206e-11,
+      "prototype_lifecycle": [
+        "Discard/retry and same-layout NPZ parent fork bitwise on all five tensor/scalar arrays"
+      ]
+    },
+    {
+      "case": "grad-n129",
+      "seconds": 1.0941049739994924,
+      "max_energy_defect": 3.756760527662273e-17,
+      "coupled_pressure_K_tangent_FD": 3.3164226920234796e-10,
+      "prototype_lifecycle": []
+    },
+    {
+      "case": "grad3-n65",
+      "seconds": 0.42493849899983616,
+      "max_energy_defect": 3.7407856331016155e-17,
+      "coupled_pressure_K_tangent_FD": 4.424778410339059e-11,
+      "prototype_lifecycle": []
+    },
+    {
+      "case": "grad-n65-half",
+      "seconds": 0.9007402759998513,
+      "max_energy_defect": 3.198396408832238e-17,
+      "coupled_pressure_K_tangent_FD": 8.090961500784033e-11,
+      "prototype_lifecycle": []
+    },
+    {
+      "case": "deep-grad-n65",
+      "seconds": 0.4752967130007164,
+      "max_energy_defect": 3.892285799222961e-17,
+      "coupled_pressure_K_tangent_FD": 1.0016249341049388e-10,
+      "prototype_lifecycle": []
+    }
+  ]
+}

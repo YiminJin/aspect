@@ -1,0 +1,25 @@
+{
+  "engineering_checks_passed": true,
+  "scientific_comparison_failures_retained": true,
+  "protected_files_unchanged": 1060,
+  "prior_bulk_contact_artifacts_unchanged": 113,
+  "reproduced_failed_last_state_bitwise": true,
+  "rejected_tied_birth_archives": 5,
+  "experimental_native_source_changes": [
+    "benchmarks/reconstructed_fault/particle_free/cohesive_interface_evolution.h",
+    "benchmarks/reconstructed_fault/particle_free/cohesive_interface_path.cc",
+    "benchmarks/reconstructed_fault/particle_free/cohesive_interface_turn_solver.cc"
+  ],
+  "png_bytes": {
+    "energy.png": 122621,
+    "response.png": 302738,
+    "loads.png": 143819,
+    "specimen.png": 68824,
+    "reserve.png": 237068,
+    "geometry.png": 237883
+  },
+  "gif_frames": 20,
+  "work_bytes": 893679301,
+  "kernel_count": 48,
+  "scope": "serial experimental native two-affine causal evolution; no production qualification"
+}

@@ -1,3 +1,12 @@
+Current bounded result (22 October 2026): [P5c finite-seed tensor comparison](../particle_free/P5C_REPORT.md) is complete. Native exact-intact activation, uniform tensor MPI/restart and the early fresh-specimen/dt-halving controls pass. Radial flow reduces growth within the original cap; no developed extension or branching is qualified. P4 accuracy/boundary failures and strict_reference_match_passed=false remain. A single axial refinement control is recommended only; no further run has begun. Entries below retain earlier stage evidence.
+
+Current bounded bulk follow-up (21 October 2026): the
+[P4 continuation report](../particle_free/BULK_CONTINUATION_REPORT.md) records
+stable native hold continuation, unstable predictor roots and failed temporal/
+spatial/domain targets. The P5 direction/history specification remains a proposed
+constitutive extension. No automatic new roadmap task is selected. Retain the
+older surface/FE/CPDI evidence below separately from the selected bulk model.
+
 Current evolving-phase continuation (19 October 2026): use the cohesive,
 domain-free PF6a independent-DG/ordinary-FE-fracture endpoint route in
 [particle-free STATUS](../particle_free/STATUS.md). This file and

@@ -1,0 +1,62 @@
+[
+  {
+    "cells": 32,
+    "dt_s": 0.002,
+    "seconds": 0.11908550100270077,
+    "max_force_residual_Pa": 3.5864644587491057e-12,
+    "max_equilibrium_error_Pa": 2.9558577807620168e-12,
+    "max_ledger_error_J_m3": 2.463307335887066e-16,
+    "final_state_amplitude": 0.0183581272248445,
+    "final_linear_amplitude": 0.01833604702788932,
+    "pressure_range_Pa": 37.960422244344954,
+    "pn_range_Pa": 75.79943590947369
+  },
+  {
+    "cells": 64,
+    "dt_s": 0.002,
+    "seconds": 0.11727934299779008,
+    "max_force_residual_Pa": 3.5136338283336954e-12,
+    "max_equilibrium_error_Pa": 4.092726157978177e-12,
+    "max_ledger_error_J_m3": 2.5500435096859064e-16,
+    "final_state_amplitude": 0.01835812722484687,
+    "final_linear_amplitude": 0.01833604702788932,
+    "pressure_range_Pa": 37.96042224433768,
+    "pn_range_Pa": 75.79943590946095
+  },
+  {
+    "cells": 128,
+    "dt_s": 0.002,
+    "seconds": 0.13328518000344047,
+    "max_force_residual_Pa": 3.68594044175552e-12,
+    "max_equilibrium_error_Pa": 4.888534022029489e-12,
+    "max_ledger_error_J_m3": 2.8449465006019636e-16,
+    "final_state_amplitude": 0.018358127224847004,
+    "final_linear_amplitude": 0.01833604702788932,
+    "pressure_range_Pa": 37.96042224433768,
+    "pn_range_Pa": 75.79943590945913
+  },
+  {
+    "cells": 128,
+    "dt_s": 0.001,
+    "seconds": 0.2610373190000246,
+    "max_force_residual_Pa": 4.4142467459096224e-12,
+    "max_equilibrium_error_Pa": 7.389644451905042e-12,
+    "max_ledger_error_J_m3": 1.717376241217039e-16,
+    "final_state_amplitude": 0.01834608585942002,
+    "final_linear_amplitude": 0.01833604702788932,
+    "pressure_range_Pa": 37.919313398475424,
+    "pn_range_Pa": 75.71734969590034
+  },
+  {
+    "cells": 128,
+    "dt_s": 0.0005,
+    "seconds": 0.5226740159996552,
+    "max_force_residual_Pa": 5.17452747317293e-12,
+    "max_equilibrium_error_Pa": 1.1823431123048067e-11,
+    "max_ledger_error_J_m3": 2.0946785972419946e-16,
+    "final_state_amplitude": 0.018340076849447842,
+    "final_linear_amplitude": 0.01833604702788932,
+    "pressure_range_Pa": 37.89880008231739,
+    "pn_range_Pa": 75.6763886711924
+  }
+]

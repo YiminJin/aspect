@@ -1,0 +1,17 @@
+{
+  "unique_native_kernels": 23,
+  "unique_native_seconds": 996.0768909199999,
+  "raw_kernel_bytes": 592006111,
+  "short_control_seconds": 43.70273747799365,
+  "fresh_fixed_seconds": 110.00508555799752,
+  "own_accepted_time_control_seconds": 8.485455527999875,
+  "causal_controller_seconds": [
+    102.93881778299692,
+    238.13449567699718
+  ],
+  "causal_owner_peak_RSS_MiB": 322.109375,
+  "native_peak_RSS_measured": false,
+  "sequential_timing_runs": true,
+  "BLAS_threads": 1,
+  "timing_note": "Causal controller clocks include on-demand kernels but exclude initial kernel. Unique native and controller times overlap; do not add. Existing kernels are reused, so these are not cold-start speedup measurements."
+}

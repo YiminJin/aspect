@@ -1,0 +1,69 @@
+{
+  "commands": [
+    {
+      "command": "event-half",
+      "wall_seconds": 2077.5695860859996,
+      "setup_seconds": 740.202970707,
+      "observed_RSS_MiB": 2119.8203125,
+      "exit_code": 0,
+      "stop": null,
+      "timeout_seconds": 2100,
+      "RSS_note": "Process VmHWM sampled every 5 s; short failed jobs under-sampled."
+    },
+    {
+      "command": "longer-completion",
+      "wall_seconds": 848.7501448079997,
+      "setup_seconds": 755.922716343,
+      "observed_RSS_MiB": 2120.04296875,
+      "exit_code": 0,
+      "stop": null,
+      "timeout_seconds": 1100,
+      "RSS_note": "Process VmHWM sampled every 5 s; short failed jobs under-sampled."
+    },
+    {
+      "command": "longer-config-mismatch",
+      "wall_seconds": 2.3231566959998418,
+      "setup_seconds": null,
+      "observed_RSS_MiB": 2.06640625,
+      "exit_code": 1,
+      "stop": null,
+      "timeout_seconds": 1500,
+      "RSS_note": "Process VmHWM sampled every 5 s; short failed jobs under-sampled."
+    },
+    {
+      "command": "longer",
+      "wall_seconds": 1500.678858792,
+      "setup_seconds": 745.896834381,
+      "observed_RSS_MiB": 2119.6328125,
+      "exit_code": -15,
+      "stop": "wall budget",
+      "timeout_seconds": 1500,
+      "RSS_note": "Process VmHWM sampled every 5 s; short failed jobs under-sampled."
+    },
+    {
+      "command": "post-hold-extension-rejected",
+      "wall_seconds": 3.1223133240000607,
+      "setup_seconds": null,
+      "observed_RSS_MiB": 1.52734375,
+      "exit_code": 1,
+      "stop": null,
+      "timeout_seconds": 30,
+      "RSS_note": "Process VmHWM sampled every 5 s; short failed jobs under-sampled."
+    },
+    {
+      "command": "reflected",
+      "wall_seconds": 283.8318705500001,
+      "setup_seconds": 131.066221241,
+      "observed_RSS_MiB": 925.02734375,
+      "exit_code": 0,
+      "stop": null,
+      "timeout_seconds": 900,
+      "RSS_note": "Process VmHWM sampled every 5 s; short failed jobs under-sampled."
+    }
+  ],
+  "total_native_seconds": 4716.275930255999,
+  "runs_overlapped": false,
+  "rank_count": 1,
+  "thread_count": 1,
+  "compilation_analysis_excluded": true
+}

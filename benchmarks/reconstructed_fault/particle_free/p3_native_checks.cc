@@ -23,6 +23,12 @@ namespace aspect { namespace Postprocess
     using BV=LinearAlgebra::BlockVector;
     unsigned int slip_property=0;
     bool sensitive=false;
+    bool tip_diagnostic=false;
+    static double seed_tip()
+    {
+      const auto *value=std::getenv("ASPECT_P4A_TIP");
+      return value ? std::stod(value) : .5;
+    }
     Model &model()const{return const_cast<Model &>(Plugins::get_plugin_as_type<const Model>(this->get_material_model()));}
     Simulator<dim> &sim()const{return const_cast<Simulator<dim>&>(this->get_simulator());}
     std::ofstream output(const std::string &name)const
@@ -51,7 +57,7 @@ namespace aspect { namespace Postprocess
       static const PhaseField::GeometricFunction a(.15625,1.,8./3.);
       static const PhaseField::DegradationFunction g(1.,128.);
       static const PhaseField::PhaseFieldProfile profile(a,g,.6);
-      return profile.value(std::hypot(std::max(0.,x[0]-.5),x[1]-.5));
+      return profile.value(std::hypot(std::max(0.,x[0]-seed_tip()),x[1]-.5));
     }
     static std::array<double,3> tensor(const Point<dim> &p)
     {
@@ -167,7 +173,7 @@ namespace aspect { namespace Postprocess
       std::vector<double> rates(s.Z.size());
       for(unsigned int j=0;j<s.Z.size();++j)
         {
-          const double x=s.vertices[j][0];double z=sensitive?1000*std::min({1.,x/(2./64),(.5-x)/(2./64)}):1000*std::pow(std::sin(2*numbers::PI*x),2);
+          const double x=s.vertices[j][0];double z=sensitive?1000*std::min({1.,x/(2./64),(.5-x)/(2./64)}):1000*std::pow(std::sin(tip_diagnostic ? numbers::PI*x/seed_tip() : 2*numbers::PI*x),2);
           if(j==0 || j+1==s.Z.size())z=0.;
           s.Z[j]=z;
           manager.get_fault(0).get_properties(j)[cp]=z/s.I[j];
@@ -175,6 +181,80 @@ namespace aspect { namespace Postprocess
         }
       manager.initialize_slip_rate(0,rates);
       m.validate_fe_strain_restrictions();
+    }
+    // P4a observes the retained native functional. It does not enable a finite-
+    // tip physical solve, change any owner, or supply an intact activation law.
+    void export_tip_diagnostic()
+    {
+      auto &m=model();const auto &s=*m.fe_strain_state;
+      const auto before=persistent();
+      gate("P4a physical seed and geometry endpoints match",s.vertices.back()[0]==seed_tip());
+      export_state("old");
+      const auto energy=m.evaluate_fe_phase_energy(sim().solution,false,false);
+      const auto fracture=this->get_phase_field_handler().evaluate_cell_fracture(sim().solution,false);
+      const unsigned int pb=this->introspection().variable("phase_field").block_index;
+      const unsigned int pc=this->introspection().variable("phase_field").first_component_index;
+      const auto offset=sim().solution.get_block_indices().block_start(pb);
+      std::map<types::global_dof_index,Point<dim>> nodes;
+      for(const auto &entry:s.cells)for(auto v:entry.second->vertex_indices())
+        nodes[entry.second->vertex_dof_index(v,pc)-offset]=entry.second->vertex(v);
+      auto gradient=output("phase-gradient.csv");gradient<<"dof,x,y,phi,mechanical,fracture\n";
+      for(const auto &node:nodes)
+        gradient<<node.first<<','<<node.second[0]<<','<<node.second[1]<<','<<sim().solution.block(pb)[node.first]<<','<<energy.gradient[node.first]<<','<<fracture.gradient[node.first]<<'\n';
+      const double tip=seed_tip();
+      auto points=output("bulk-quadrature.csv");
+      points<<"cell,x,y,JxW,active,segment,xi,phi,I,Z,chi,Txy,tauxy,local_mechanical_derivative\n";
+      unsigned long long count=0,active_count=0;double measure=0.,active_measure=0.;
+      for(const auto &p:s.bulk)
+        {
+          ++count;measure+=p.weight;
+          const bool active=p.segment!=numbers::invalid_unsigned_int;
+          if(active){++active_count;active_measure+=p.weight;}
+          if(p.x[0]<tip-.125 || p.x[0]>tip+.15625 || std::abs(p.x[1]-.5)>.15625)continue;
+          double phi=0.;for(unsigned int v=0;v<p.dofs.size();++v)phi+=p.shape[v]*sim().solution.block(pb)[p.dofs[v]];
+          const double I=active ? (1-p.xi)*s.I[p.segment]+p.xi*s.I[p.segment+1] : 0.;
+          const double Z=active ? (1-p.xi)*s.Z[p.segment]+p.xi*s.Z[p.segment+1] : 0.;
+          const double h=s.m*phi*(1+phi)/std::pow(1-phi,2);
+          const double hp=s.m*(1+3*phi)/std::pow(1-phi,3);
+          const auto tau=m.evaluate_dg_history_stress(*s.dg_history,s.Z,s.I,p.cell,p.x);
+          const double chi=active ? h/I : 0.;
+          const double local=active ? -Z/s.G*s.shear_sense*tau[0][1]*hp/I : 0.;
+          points<<p.cell.to_string()<<','<<p.x[0]<<','<<p.x[1]<<','<<p.weight<<','<<active<<','<<p.segment<<','<<p.xi<<','<<phi<<','<<I<<','<<Z<<','<<chi<<','<<tau[0][1]+s.shear_sense*Z*chi<<','<<tau[0][1]<<','<<local<<'\n';
+        }
+      auto rays=output("normalization-rays.csv");rays<<"profile,segment,x,xi,surface_weight,lower,upper\n";
+      for(unsigned int i=0;i<s.profiles.size();++i)
+        {
+          const auto &p=s.profiles[i];const double x=(1-p.xi)*s.vertices[p.segment][0]+p.xi*s.vertices[p.segment+1][0];
+          if(x<tip-.125)continue;
+          for(const auto &r:p.rays)rays<<i<<','<<p.segment<<','<<x<<','<<p.xi<<','<<p.weight<<','<<.5+r.lower<<','<<.5+r.lower+r.length<<'\n';
+        }
+      auto measures=output("quadrature-measures.csv");measures<<"count,active_count,JxW_sum,active_JxW_sum\n";
+      measures<<count<<','<<active_count<<','<<measure<<','<<active_measure<<'\n';
+      auto fd=output("directional-checks.csv");fd<<"direction,epsilon,mechanical_derivative,fracture_derivative,mechanical_FD,fracture_FD\n";
+      auto directions=output("phase-directions.csv");directions<<"direction,dof,x,y,value\n";
+      for(unsigned int k=0;k<3;++k)
+        {
+          const double center=tip+(k==0 ? -.078125 : k==1 ? 0. : .09375);
+          const double width=k==1 ? .0625 : .03125;
+          std::vector<double> d(energy.gradient.size(),0.);double dm=0.,df=0.;
+          for(const auto &node:nodes)
+            {
+              const auto i=node.first;const auto &x=node.second;
+              d[i]=std::max(0.,1.-std::abs(x[0]-center)/width)*std::max(0.,1.-std::abs(x[1]-.5)/.09375);
+              dm+=d[i]*energy.gradient[i];df+=d[i]*fracture.gradient[i];
+              if(d[i]!=0.)directions<<k<<','<<i<<','<<x[0]<<','<<x[1]<<','<<d[i]<<'\n';
+            }
+          for(const double epsilon:{1.e-5,1.e-6})
+            {
+              BV plus(sim().solution),minus(sim().solution);
+              for(unsigned int i=0;i<d.size();++i){plus.block(pb)[i]+=epsilon*d[i];minus.block(pb)[i]-=epsilon*d[i];}
+              const auto ep=m.evaluate_fe_phase_energy(plus,false,false),em=m.evaluate_fe_phase_energy(minus,false,false);
+              const auto fp=this->get_phase_field_handler().evaluate_cell_fracture(plus,false),fm=this->get_phase_field_handler().evaluate_cell_fracture(minus,false);
+              fd<<k<<','<<epsilon<<','<<dm<<','<<df<<','<<(ep.energy-em.energy)/(2*epsilon)<<','<<(fp.energy-fm.energy)/(2*epsilon)<<'\n';
+            }
+        }
+      gate("P4a observations preserve every accepted owner",same(before,persistent()));
+      gate("P4a finite-tip physical evolution remains guarded",rejects([&](){sim().solve_reconstructed_fault_endpoint_phase();},"Finite-tip"));
     }
     void append()
     {
@@ -222,6 +302,7 @@ namespace aspect { namespace Postprocess
     {
       AssertThrow(dim==2,ExcNotImplemented());
       if(const auto *name=std::getenv("ASPECT_P3_CASE"))sensitive=std::string(name)=="sensitive";
+      tip_diagnostic=std::getenv("ASPECT_P4A_TIP")!=nullptr;
       model().enable_prescribed_dg_geometry(phase);
       slip_property=this->get_reconstructed_fault_manager().register_property("P3 accumulated slip",1);
     }
@@ -233,6 +314,7 @@ namespace aspect { namespace Postprocess
           gate("native restart finite-tip evolution rejected",rejects([&](){sim().solve_reconstructed_fault_endpoint_phase();},"Finite-tip"));
           export_state("restored");
         }
+      if(tip_diagnostic){export_tip_diagnostic();return {"P4a native finite-tip observation","complete; evolution guarded"};}
       if(model().fe_strain_state->geometry_publications==0)append();
       else gate("restored single geometry publication",model().fe_strain_state->geometry_publications==1 && model().fe_strain_state->accepted_publications==0);
       return {"P3 native frozen geometry","complete"};

@@ -1,0 +1,125 @@
+{
+  "baseline_serial": {
+    "maxima": {
+      "phase": 2.953337113398929e-17,
+      "growth": 7.979194743910877e-15,
+      "DG": 3.580935263252221e-15,
+      "native_projection": 8.59879719954879e-15,
+      "native_memory": 2.033354507908224e-16,
+      "a": 1.2588054994912323e-14,
+      "signed_shear": 1.2586450179129765e-14,
+      "absolute_shear": 1.2586450179129765e-14,
+      "q": 1.8114185411282675e-15,
+      "rate": 2.639857771197536e-13,
+      "physical_stress": 1.018506834235514e-15,
+      "Y": 3.449647523933769e-15,
+      "storage": 1.7763568394002505e-15
+    },
+    "compared_states": 65,
+    "bitwise_physical_owners": false
+  },
+  "r1": {
+    "steps": 64,
+    "phase_growth": 0.005490530208521097,
+    "maximum_mechanics": 3.149704738426407e-10,
+    "maximum_KKT": 8.177564625455602e-09,
+    "maximum_source": 3.865089019842023e-15,
+    "maximum_ledger_J_m": 2.1097273233960934e-14,
+    "particle_fingerprint": 16848346580430441186,
+    "particles": 6912,
+    "max_rank_MiB": 339.9140625,
+    "sum_rank_peaks_MiB": 339.9140625,
+    "loaded_profile": {
+      "assembly": 33.64988929,
+      "communication": 0.00038114500000000005,
+      "linear": 2.788304977,
+      "history": 0.772031438,
+      "total": 43.342189737
+    },
+    "loaded_evaluations": 97,
+    "loaded_linear_solves": 38,
+    "output_seconds": 15.366355246000001
+  },
+  "r2": {
+    "steps": 64,
+    "phase_growth": 0.005490530208521105,
+    "maximum_mechanics": 3.149704738370313e-10,
+    "maximum_KKT": 8.177565513634022e-09,
+    "maximum_source": 3.657171121687999e-15,
+    "maximum_ledger_J_m": 1.0114305226682774e-14,
+    "particle_fingerprint": 16848346580430441186,
+    "particles": 6912,
+    "max_rank_MiB": 289.15234375,
+    "sum_rank_peaks_MiB": 547.02734375,
+    "loaded_profile": {
+      "assembly": 19.252754595,
+      "communication": 0.358645135,
+      "linear": 3.1918488600000003,
+      "history": 0.557819736,
+      "total": 24.371983088
+    },
+    "loaded_evaluations": 97,
+    "loaded_linear_solves": 38,
+    "output_seconds": 12.815082156
+  },
+  "comparison_1_2": {
+    "maxima": {
+      "phase": 3.792981546277467e-17,
+      "growth": 5.3800307882176464e-14,
+      "DG": 2.313473608118756e-13,
+      "native_projection": 2.315999655110501e-13,
+      "native_memory": 3.531679100560508e-14,
+      "a": 2.1427739069905827e-13,
+      "signed_shear": 2.142768561328578e-13,
+      "absolute_shear": 2.142768561328578e-13,
+      "q": 1.3008763673520759e-13,
+      "rate": 3.359264600316448e-13,
+      "physical_stress": 2.6169816366140584e-13,
+      "Y": 1.080205755186192e-13,
+      "storage": 2.4358293160275934e-13
+    },
+    "compared_states": 65,
+    "bitwise_physical_owners": false
+  },
+  "r4": {
+    "steps": 64,
+    "phase_growth": 0.0054905302085210845,
+    "maximum_mechanics": 3.1497047384884763e-10,
+    "maximum_KKT": 8.177564847500207e-09,
+    "maximum_source": 4.232200462752303e-15,
+    "maximum_ledger_J_m": 8.169807551083254e-15,
+    "particle_fingerprint": 3300737251674273314,
+    "particles": 6912,
+    "max_rank_MiB": 276.55078125,
+    "sum_rank_peaks_MiB": 1017.55859375,
+    "loaded_profile": {
+      "assembly": 10.804335283,
+      "communication": 0.5751585910000001,
+      "linear": 3.5884725920000005,
+      "history": 0.405879594,
+      "total": 16.194784901
+    },
+    "loaded_evaluations": 97,
+    "loaded_linear_solves": 38,
+    "output_seconds": 11.336757654
+  },
+  "comparison_1_4": {
+    "maxima": {
+      "phase": 3.135566202860896e-17,
+      "growth": 3.6256317343499114e-14,
+      "DG": 3.156915061990369e-13,
+      "native_projection": 3.157210499776067e-13,
+      "native_memory": 9.886197922271324e-14,
+      "a": 3.0988093366808473e-13,
+      "signed_shear": 3.0988004066158973e-13,
+      "absolute_shear": 3.0988004066158973e-13,
+      "q": 9.687241884186457e-14,
+      "rate": 4.088747931241437e-13,
+      "physical_stress": 4.0660513534066984e-13,
+      "Y": 7.59537716644713e-14,
+      "storage": 1.9984014443252818e-13
+    },
+    "compared_states": 65,
+    "bitwise_physical_owners": false
+  }
+}

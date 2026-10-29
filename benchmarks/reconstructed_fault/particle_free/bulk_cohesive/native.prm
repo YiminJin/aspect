@@ -1,0 +1,145 @@
+# Default-off bulk cohesive native experiment; physical target time .16 s.
+# ASPECT checkpoints store the next pending clock; compare accepted times.
+set Dimension = 2
+set End time = 0.16
+set Use years instead of seconds = false
+set Nonlinear solver scheme = single Advection, iterated Newton Stokes
+set Max nonlinear iterations = 80
+set Nonlinear solver tolerance = 1e-9
+subsection Formulation
+  set Enable phase field = true
+  set Reconstruct faults from phase field = false
+end
+subsection Geometry model
+  set Model name = box
+  subsection Box
+    set Y repetitions = 32
+    set X repetitions = 16
+  end
+end
+subsection Gravity model
+  set Model name = vertical
+  subsection Vertical
+    set Magnitude = 0
+  end
+end
+subsection Initial temperature model
+  set Model name = function
+  subsection Function
+    set Function expression = 293
+  end
+end
+subsection Compositional fields
+  set Number of fields = 4
+  set Names of fields = tau_xx, tau_yy, tau_xy, rock
+  set Types of fields = stress, stress, stress, chemical composition
+  set Compositional field methods = static, static, static, static
+  set Mapped particle properties =
+end
+subsection Initial composition model
+  set Model name = function
+  subsection Function
+    set Variable names = x,y
+    set Function expression = 0; 0; 0; 0.5
+  end
+end
+subsection Material model
+  set Model name = phase field fault
+  subsection Phase field fault
+    set Evolve phase field = true
+    set Phase field activation threshold = 1e-6
+    set Viscosity averaging scheme = arithmetic
+    set Reference viscosities = 1e8, 1e8
+    set Elastic shear moduli = 1e6, 1e6
+    set Cohesions = 1000, 1000
+    set Critical energy release rates = 26.6666666667, 26.6666666667
+    set Friction law = rate dependent
+    set Reference friction coefficients = 0.1, 0.1
+    set Dynamic friction coefficients = 0.1, 0.1
+    set Characteristic weakening slip rates = 2e-6, 2e-6
+    set Radiation damping coefficients = 0, 0
+    set Use adiabatic pressure in fault friction = true
+    set Fault constitutive mode = bulk cohesive
+    set Initial time step = 1
+    set Minimum viscosity = 1e6
+    set Maximum viscosity = 1e10
+    set Bulk history representation = DG trial stress
+    set FE bulk normal quadrature points = 6
+    set Use homogeneous mesh data = true
+  end
+end
+subsection Phase field model
+  set Length scale = 0.15625
+  set Geometric function type = AT1
+  set Degradation curvature parameter = 1
+end
+subsection Mesh refinement
+  set Initial global refinement = 0
+  set Initial adaptive refinement = 0
+  set Time steps between mesh refinement = 0
+end
+subsection Solver parameters
+  subsection Stokes solver parameters
+    set Stokes solver type = block AMG
+    set Linear solver tolerance = 1e-9
+  end
+  subsection Phase field solver parameters
+    set Linear solver tolerance = 2e-7
+    set Max nonlinear iterations = 80
+    set Use bound constraints = true
+    set Nonlinear solver tolerance = 1e-7
+    set Max Newton line search iterations = 30
+    set Enforce phase irreversibility = true
+  end
+end
+subsection Boundary velocity model
+  set Prescribed velocity boundary indicators = left:bulk cohesive loading, right:bulk cohesive loading, bottom:bulk cohesive loading, top:bulk cohesive loading
+  subsection Function
+    set Function expression = 0; 0
+    set Variable names = x,y,t
+  end
+end
+subsection Particles
+  set Particle generator name = reference cell
+  set List of particle properties = crack driving force, maxwell stress
+  set Generate particle domains = false
+  set Generate CPDI data for particle domains = false
+  set Load balancing strategy = none
+  subsection Generator
+    subsection Reference cell
+      set Number of particles per cell per direction = 3
+    end
+  end
+  subsection Initial composition
+    set List of field names = rock
+  end
+  set Integration scheme = rk2
+  set Generate face data for particle domains = false
+end
+subsection Postprocess
+  set List of postprocessors = particles, bulk cohesive checks
+  subsection Particles
+    set Data output format = none
+  end
+end
+set Maximum time step = 0.0025
+set Nonlinear solver failure strategy = abort program
+set Surface pressure = 10000
+subsection Temperature field
+  set Temperature method = static
+end
+set Additional shared libraries = $ASPECT_SOURCE_DIR/build-particle-free/evolving-phase/plugin/libbulk_cohesive_checks.release.so
+set Output directory = $ASPECT_SOURCE_DIR/build-particle-free/bulk-cohesive/runs/primary
+set Resume computation = false
+set Maximum first time step = 0.0025
+set Pressure normalization = no
+subsection Checkpointing
+  set Steps between checkpoint = 4
+  set Time between checkpoint = 0
+end
+subsection Termination criteria
+  set Checkpoint on termination = true
+end
+subsection Time stepping
+  set List of model names = bulk cohesive steps
+end

@@ -1,0 +1,33 @@
+{
+  "serialization": [
+    {
+      "n": 256,
+      "incoming_s": 2.4237499999999814,
+      "target_s": 2.4243749999999813,
+      "serialization_npz": true,
+      "all_state_arrays_bitwise": true,
+      "rejection_accepted_unchanged": true,
+      "counter_increment": 1
+    },
+    {
+      "n": 512,
+      "incoming_s": 2.4237499999999814,
+      "target_s": 2.4243749999999813,
+      "serialization_npz": true,
+      "all_state_arrays_bitwise": true,
+      "rejection_accepted_unchanged": true,
+      "counter_increment": 1
+    }
+  ],
+  "hold_predictor_recovery": {
+    "incoming_s": 2.550000000000028,
+    "target_s": 2.550312500000028,
+    "original_error": "('positive linesearch', 0, np.float64(10.710325029597925))",
+    "accepted_history_sha256": "f971dbcccbe552e8a96934f302101a3ed4457f693e9b22e94b3186c0c95ed941",
+    "accepted_state_unchanged": true,
+    "only_initial_guess_changed": true,
+    "weak_error_Pa": 1.0459189070388675e-11,
+    "curvature_Pa_m": 9780544.941465214,
+    "maximum_damage_increment": 0.010557902720608858
+  }
+}

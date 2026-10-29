@@ -1,0 +1,43 @@
+# Small native integration control, not a directional specimen.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_free/bulk_cohesive/native.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/build-particle-free/p5b-native/plugin/libbulk_tensor_checks.release.so
+set Output directory = $ASPECT_SOURCE_DIR/build-particle-free/p5b-native/runs/scalar-current
+set End time = 0.8
+set Maximum time step = 0.0125
+set Maximum first time step = 0.0125
+subsection Geometry model
+  set Model name = bulk tensor box
+  subsection Box
+    set X extent = 0.25
+    set Y extent = 0.25
+    set X repetitions = 8
+    set Y repetitions = 8
+  end
+end
+subsection Material model
+  subsection Phase field fault
+    set Critical energy release rates = 1, 1
+    # Native m=Kf/(Cohesion^2/(2G)); this reproduces P5a's m=4.
+    set Cohesions = 2000, 2000
+    set FE bulk normal quadrature points = 8
+  end
+end
+subsection Phase field model
+  set Length scale = 0.046875
+end
+subsection Boundary velocity model
+  set Prescribed velocity boundary indicators = left:bulk cohesive loading, right:bulk cohesive loading, bottom:bulk cohesive loading, top:bulk cohesive loading
+end
+subsection Time stepping
+  set List of model names = bulk cohesive steps
+end
+subsection Postprocess
+  set List of postprocessors = particles, bulk cohesive checks
+end
+subsection Checkpointing
+  set Steps between checkpoint = 1
+end
+subsection Termination criteria
+  set Termination criteria = end step
+  set End step = 64
+end

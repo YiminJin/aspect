@@ -1,0 +1,23 @@
+parameter,value,unit
+G,1000000.0,Pa
+eta,100000000.0,Pa s
+Gc,1,J/m^2
+peak,3000,Pa
+p0,10000,Pa
+RSF_a,0.005,1
+RSF_b,0.01,1
+mu0,0.1,1
+V0,5e-06,m/s
+Dc,0.001,m
+rho,2670,kg/m^3
+candidate_slope,0.5,1
+initial_gamma,0.0015,1
+initial_time,0.2,s
+initial_Theta,1.001,1
+insert_time,0.25,s
+gamma_rate,0.001,1/s
+hold_start,0.65,s
+end,0.66,s
+coarse_dt,0.005,s
+fine_dt,0.0025,s
+event_bracket_width,1e-08,s

@@ -1,0 +1,9 @@
+{
+  "propagation_run": false,
+  "production_edits": false,
+  "BP3_edits": false,
+  "redistribution_mode_removed": true,
+  "mechanical_localization_resolved": false,
+  "reason": "Single maximizing direction removes the old redistribution mode, but pressure-coupled localization remains; finite-step global-max and symmetry issues are explicit.",
+  "seconds": 3.0191405919995304
+}

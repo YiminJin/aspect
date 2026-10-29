@@ -1,0 +1,6 @@
+# Same aligned wide specimen through loading and fixed-displacement hold.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_free/bulk_cohesive/right_distance.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/build-particle-free/bulk-energy/plugin/libbulk_energy_checks.release.so
+set Output directory = $ASPECT_SOURCE_DIR/build-particle-free/bulk-energy/runs/half
+set Maximum first time step = 0.00125
+set Maximum time step = 0.00125

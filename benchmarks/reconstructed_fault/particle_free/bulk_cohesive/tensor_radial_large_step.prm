@@ -1,0 +1,9 @@
+# Preserved failure control: expected Newton nonconvergence before publication.
+# Not the qualified timestep; do not use as the ordinary radial preset.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_free/bulk_cohesive/tensor_radial.prm
+set Output directory = $ASPECT_SOURCE_DIR/build-particle-free/p5b-native/runs/radial-large-step-control
+set Maximum time step = 0.1
+set Maximum first time step = 0.1
+subsection Termination criteria
+ set End step = 8
+end

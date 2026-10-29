@@ -1,0 +1,33 @@
+{
+  "samples": 3600,
+  "independent_maximum_defects": {
+    "return_a": 1.734723475976807e-18,
+    "return_q": 4.547473508864641e-16,
+    "yield_error": 9.094947017729283e-16,
+    "ledger_error": 1.0834432309647646e-14
+  },
+  "fixed_profile_temporal_errors": {
+    "0:0.01": {
+      "stress_Pa": 25.624019296382357,
+      "a": 0.0
+    },
+    "0:0.005": {
+      "stress_Pa": 12.839833845271642,
+      "a": 0.0
+    },
+    "1:0.01": {
+      "stress_Pa": 25.624019296382357,
+      "a": 1.87337437525803e-05
+    },
+    "1:0.005": {
+      "stress_Pa": 12.839833845271642,
+      "a": 9.387214172016517e-06
+    }
+  },
+  "stress_halving_ratios": {
+    "0": 1.995665956831566,
+    "1": 1.995665956831566
+  },
+  "virgin_above_threshold_positive_driving": true,
+  "maximum_virgin_driving_Pa": 2349.7896668579615
+}

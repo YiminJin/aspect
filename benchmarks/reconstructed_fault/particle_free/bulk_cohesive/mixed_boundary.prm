@@ -1,0 +1,16 @@
+# One fresh boundary-loading control, conditional on 1/2/4-rank qualification.
+# Free lateral ux has zero natural total horizontal traction. Vertical uy=0.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_free/bulk_cohesive/parallel.prm
+set Output directory = $ASPECT_SOURCE_DIR/build-particle-free/bulk-parallel/runs/mixed
+set End time = 0.185
+set Maximum first time step = 0.00125
+set Maximum time step = 0.00125
+subsection Geometry model
+  subsection Box
+    set X repetitions = 96
+    set Y repetitions = 128
+  end
+end
+subsection Boundary velocity model
+  set Prescribed velocity boundary indicators = left y:bulk cohesive loading, right y:bulk cohesive loading, bottom:bulk cohesive loading, top:bulk cohesive loading
+end

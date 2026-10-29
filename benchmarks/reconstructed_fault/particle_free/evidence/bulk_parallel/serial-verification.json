@@ -1,0 +1,43 @@
+{
+  "serial_reference": {
+    "maxima": {
+      "phase": 2.953337113398929e-17,
+      "growth": 7.979194743910877e-15,
+      "DG": 3.678227467404912e-15,
+      "native_projection": 8.59879719954879e-15,
+      "native_memory": 2.033354507908224e-16,
+      "a": 1.2588054994912323e-14,
+      "signed_shear": 1.2586450179129765e-14,
+      "absolute_shear": 1.2586450179129765e-14,
+      "q": 1.8114185411282675e-15,
+      "rate": 2.639857771197536e-13,
+      "physical_stress": 1.018506834235514e-15,
+      "Y": 3.449647523933769e-15,
+      "storage": 1.7763568394002505e-15
+    },
+    "compared_states": 65,
+    "bitwise_physical_owners": false
+  },
+  "native": {
+    "steps": 64,
+    "phase_growth": 0.005490530208521097,
+    "maximum_mechanics": 3.149704738426407e-10,
+    "maximum_KKT": 8.177564625455602e-09,
+    "maximum_source": 3.865089019842023e-15,
+    "maximum_ledger_J_m": 2.1097273233960934e-14,
+    "particle_fingerprint": 16848346580430440448,
+    "particles": 6912,
+    "max_rank_MiB": 367.2265625,
+    "sum_rank_peaks_MiB": 367.2265625,
+    "loaded_profile": {
+      "assembly": 35.281116037,
+      "communication": 0.000565472,
+      "linear": 2.8350214510000002,
+      "history": 0.8658284279999999,
+      "total": 45.58467211600001
+    },
+    "loaded_evaluations": 100,
+    "loaded_linear_solves": 39,
+    "output_seconds": 15.369319737
+  }
+}

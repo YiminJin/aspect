@@ -1,0 +1,3 @@
+# Frozen P4a functional observation: run with ASPECT_P4A_TIP=0.5.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_free/p3_native.prm
+set Output directory = $ASPECT_SOURCE_DIR/build-particle-free/p4a-tip/aligned/output

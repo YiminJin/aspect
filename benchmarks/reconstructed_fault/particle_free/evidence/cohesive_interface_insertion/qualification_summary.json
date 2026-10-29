@@ -1,0 +1,182 @@
+{
+  "insert-early": {
+    "errors": {
+      "jump_m": 0.0,
+      "damage": 0.0,
+      "Theta": 0.0,
+      "reference_m": 0.0,
+      "relaxed_jump_m": 0.0,
+      "absolute_slip_m": 0.0,
+      "shear_Pa": 0.0,
+      "pn_Pa": 0.0,
+      "V_m_s": 0.0
+    },
+    "insertion_time_s": 0.10000000000000007,
+    "incoming_peak_slip_m": 8.728248555874843e-10,
+    "incoming_peak_shear_Pa": 799.6032466481487,
+    "field_bitwise": true,
+    "independent_checks": [
+      {
+        "time_s": 0.002,
+        "weak_error_Pa": 1.5997105862197714e-09
+      },
+      {
+        "time_s": 0.10000000000000007,
+        "weak_error_Pa": 9.426571523363236e-09
+      },
+      {
+        "time_s": 0.18000000000000013,
+        "weak_error_Pa": 9.690893421065994e-09
+      },
+      {
+        "time_s": 0.24000000000000019,
+        "weak_error_Pa": 4.684352461481467e-09
+      },
+      {
+        "time_s": 0.32,
+        "weak_error_Pa": 2.5775079848244786e-09
+      }
+    ]
+  },
+  "insert-late": {
+    "errors": {
+      "jump_m": 0.0,
+      "damage": 0.0,
+      "Theta": 0.0,
+      "reference_m": 0.0,
+      "relaxed_jump_m": 0.0,
+      "absolute_slip_m": 0.0,
+      "shear_Pa": 0.0,
+      "pn_Pa": 0.0,
+      "V_m_s": 0.0
+    },
+    "insertion_time_s": 0.18000000000000013,
+    "incoming_peak_slip_m": 1.6056491454504296e-05,
+    "incoming_peak_shear_Pa": 1633.4427671176866,
+    "field_bitwise": true,
+    "independent_checks": [
+      {
+        "time_s": 0.002,
+        "weak_error_Pa": 1.5997105862197714e-09
+      },
+      {
+        "time_s": 0.10000000000000007,
+        "weak_error_Pa": 9.426571523363236e-09
+      },
+      {
+        "time_s": 0.18000000000000013,
+        "weak_error_Pa": 7.541984814452007e-09
+      },
+      {
+        "time_s": 0.24000000000000019,
+        "weak_error_Pa": 4.684352461481467e-09
+      },
+      {
+        "time_s": 0.32,
+        "weak_error_Pa": 2.5775079848244786e-09
+      }
+    ]
+  },
+  "insert-short": {
+    "errors": {
+      "jump_m": 0.0,
+      "damage": 0.0,
+      "Theta": 0.0,
+      "reference_m": 0.0,
+      "relaxed_jump_m": 0.0,
+      "absolute_slip_m": 0.0,
+      "shear_Pa": 0.0,
+      "pn_Pa": 0.0,
+      "V_m_s": 0.0
+    },
+    "insertion_time_s": 0.10000000000000007,
+    "incoming_peak_slip_m": 8.728248555874843e-10,
+    "incoming_peak_shear_Pa": 799.6032466481487,
+    "field_bitwise": true,
+    "independent_checks": [
+      {
+        "time_s": 0.002,
+        "weak_error_Pa": 9.219331076337767e-09
+      },
+      {
+        "time_s": 0.10000000000000007,
+        "weak_error_Pa": 2.040565050265286e-09
+      },
+      {
+        "time_s": 0.18000000000000013,
+        "weak_error_Pa": 9.690893421065994e-09
+      },
+      {
+        "time_s": 0.24000000000000019,
+        "weak_error_Pa": 4.684352461481467e-09
+      },
+      {
+        "time_s": 0.32,
+        "weak_error_Pa": 2.5775079848244786e-09
+      }
+    ]
+  },
+  "insert-loaded": {
+    "errors": {
+      "jump_m": 0.0,
+      "damage": 0.0,
+      "Theta": 0.0,
+      "reference_m": 0.0,
+      "relaxed_jump_m": 0.0,
+      "absolute_slip_m": 0.0,
+      "shear_Pa": 0.0,
+      "pn_Pa": 0.0,
+      "V_m_s": 0.0
+    },
+    "insertion_time_s": 0.2800000000000002,
+    "incoming_peak_slip_m": 8.490969023924812e-05,
+    "incoming_peak_shear_Pa": 2995.5953794499947,
+    "field_bitwise": true
+  },
+  "no-extension": {
+    "errors": {
+      "jump_m": 0.0,
+      "damage": 0.0,
+      "Theta": 0.0,
+      "reference_m": 0.0,
+      "relaxed_jump_m": 0.0,
+      "absolute_slip_m": 0.0,
+      "shear_Pa": 0.0,
+      "pn_Pa": 0.0,
+      "V_m_s": 0.0
+    },
+    "insertion_time_s": 0.10000000000000007,
+    "incoming_peak_slip_m": 8.728248555874843e-10,
+    "incoming_peak_shear_Pa": 799.6032466481487,
+    "field_bitwise": true
+  },
+  "restart_bitwise": true,
+  "cached_contraction_bitwise": true,
+  "final_restart_bitwise": true,
+  "tied_buffer_comparison_bitwise": true,
+  "installed": {
+    "independent_checks": [
+      {
+        "time_s": 0.002,
+        "weak_error_Pa": 4.607743520068652e-09
+      },
+      {
+        "time_s": 0.10000000000000007,
+        "weak_error_Pa": 6.849745659565087e-09
+      },
+      {
+        "time_s": 0.18000000000000013,
+        "weak_error_Pa": 9.690893421065994e-09
+      },
+      {
+        "time_s": 0.24000000000000019,
+        "weak_error_Pa": 4.684352461481467e-09
+      },
+      {
+        "time_s": 0.32,
+        "weak_error_Pa": 2.5775079848244786e-09
+      }
+    ]
+  },
+  "passed": true
+}

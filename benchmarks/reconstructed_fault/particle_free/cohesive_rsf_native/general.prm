@@ -1,0 +1,20 @@
+include benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/pilot.prm
+set Start time = 0
+set End time = 0.0005
+set Output directory = $ASPECT_SOURCE_DIR/build-particle-free/cohesive-rsf-native/general-r2
+subsection Cohesive RSF pilot
+ set Initial state = physical seed
+ set Initial state file =
+ subsection Initial independent tensor
+  set Function expression = 20*(x-6)^2/36;20*y^2/36;-40*(x-6)*y/36
+ end
+end
+subsection Geometry model
+ subsection Box
+  set X repetitions = 16
+  set Y repetitions = 16
+ end
+end
+subsection Checkpointing
+ set Steps between checkpoint = 1
+end

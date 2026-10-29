@@ -1,0 +1,37 @@
+{
+  "case": "domain-complete",
+  "dt_values_s": [
+    0.00125
+  ],
+  "window": [
+    0.16000000000000011,
+    0.17875000000000013
+  ],
+  "maximum_loaded_step_phase_increment": 0.026699683264629848,
+  "first_hold_increment": 0.0,
+  "max_abs_w_s_inv": 0.2725187927508896,
+  "max_hold_abs_w_s_inv": 0.0,
+  "endpoint_work_J_m": 0.9484256681956604,
+  "trapezoidal_work_J_m": 0.9442856785688762,
+  "energy_change_J_m": 0.7996449433943562,
+  "physical_dissipation_J_m": {
+    "Db_J_m": 0.0012630514355595225,
+    "Dc_J_m": 4.538380745487478e-05,
+    "friction_J_m": 0.14334901890394322
+  },
+  "physical_remainder_J_m": -1.6718972437674203e-05,
+  "sum_absolute_step_remainders_J_m": 1.672231543199698e-05,
+  "C_E_absolute": 1.7708958010822202e-05,
+  "maximum_step_remainder_J_m": 2.6624877466421837e-06,
+  "BE_terms_J_m": {
+    "stress_loss_J_m": 0.0036913596253064234,
+    "traction_loss_J_m": 0.0006366304946984159,
+    "phase_remainder_J_m": -0.0005328036839030435,
+    "fracture_loss_J_m": 0.00032808421683207283
+  },
+  "phase_residual_work_J_m": 1.004213066340737e-12,
+  "mechanical_residual_work_J_m": -2.4203417048340725e-12,
+  "maximum_native_ledger_error_J_m": 1.3775868250405902e-15,
+  "hold_work_exactly_zero": true,
+  "maximum_reaction_work_difference_J_m": 8.326672684688674e-17
+}

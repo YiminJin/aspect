@@ -1,0 +1,7 @@
+{
+  "atomic_state_ledger_checkpoint": true,
+  "interrupted_resume_matches_uninterrupted": true,
+  "physical_publications": 4,
+  "material_identities_exact": true,
+  "ranks": 2
+}

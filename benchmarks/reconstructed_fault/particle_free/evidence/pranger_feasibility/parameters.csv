@@ -1,0 +1,20 @@
+name,value,unit,status
+G,1000000.0,Pa,retained
+eta,100000000.0,Pa s,retained
+Maxwell_rate,0.01,1/s,G/eta
+Gc,1,J/m^2,retained
+phase_ell,0.046875,m,retained
+m,4,1,retained
+Kf,8,Pa,retained
+strength_drop,2000,Pa,retained; not residual cohesion
+p0,10000,Pa,retained
+residual_cohesion,0,Pa,retained
+mu0,0.1,1,retained reference friction
+a,0.005,1,uncalibrated candidate
+b,0.01,1,uncalibrated candidate
+gamma_ref,0.0001,1/s,uncalibrated candidate
+reference_width,0.05,m,uniform reference only
+V0,5e-06,m/s,gamma_ref times reference width
+Dc,0.001,m,uncalibrated candidate
+r0,0.005,1/s,V0/Dc
+state_length,0.003,m,uncalibrated candidate; not phase or mesh length

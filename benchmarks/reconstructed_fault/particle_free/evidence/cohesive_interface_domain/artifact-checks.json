@@ -1,0 +1,42 @@
+{
+  "image_checks": {
+    "profiles.png": {
+      "width": 2192,
+      "height": 1457,
+      "frames": 1
+    },
+    "histories.png": {
+      "width": 2196,
+      "height": 1174,
+      "frames": 1
+    },
+    "physical-stress.png": {
+      "width": 1908,
+      "height": 943,
+      "frames": 1
+    },
+    "specimen.png": {
+      "width": 2215,
+      "height": 698,
+      "frames": 1
+    },
+    "derivative-reference.png": {
+      "width": 1166,
+      "height": 661,
+      "frames": 1
+    },
+    "tip-fields.png": {
+      "width": 2011,
+      "height": 925,
+      "frames": 1
+    },
+    "evolution.gif": {
+      "width": 1000,
+      "height": 580,
+      "frames": 36
+    }
+  },
+  "old_status_audit_preserved": true,
+  "CMake_unchanged": true,
+  "accepted_sequence_bitwise": true
+}

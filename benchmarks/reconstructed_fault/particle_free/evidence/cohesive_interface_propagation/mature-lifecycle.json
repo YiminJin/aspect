@@ -1,0 +1,10 @@
+{
+  "source_time_s": 0.456125,
+  "target_s": 0.45625,
+  "original_accepted_unchanged": true,
+  "deterministic_retry": true,
+  "same_rank_rebuilt_context_restart": true,
+  "duplicate_rejected": true,
+  "single_publication": true,
+  "coupled_FD_relative": 7.955126313193383e-10
+}

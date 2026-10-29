@@ -1,0 +1,35 @@
+{
+  "meta": {
+    "time": 0.17625000000000013,
+    "dt": 0.00125,
+    "parent_time": 0.17500000000000013,
+    "parent_publications": 140,
+    "beta": 0.999987500156248,
+    "Kf": 8,
+    "relaxation_guess": true
+  },
+  "size": 143394,
+  "nnz": 6414396,
+  "mechanical_dofs": 128817,
+  "phase_dofs": 14577,
+  "symmetry_relative_max": 5.466184702095169e-21,
+  "cross_symmetry_relative_max": 1.5132867383068974e-15,
+  "mechanical_engineering_shear_coercivity_lower_bound_Pa": 39999.0000187497,
+  "min_phase_gap_density": 2.838323511986096e-06,
+  "min_increment": 0.0,
+  "max_increment": 0.0,
+  "interior": {
+    "dofs": 0,
+    "reason": "Strict positive obstacle multipliers exclude all phase directions. Mechanics is positive on the incompressible velocity space."
+  },
+  "critical_superset_1e-07": {
+    "dofs": 0,
+    "reason": "Strict positive obstacle multipliers exclude all phase directions. Mechanics is positive on the incompressible velocity space."
+  },
+  "critical_superset_1e-06": {
+    "dofs": 0,
+    "reason": "Strict positive obstacle multipliers exclude all phase directions. Mechanics is positive on the incompressible velocity space."
+  },
+  "incremental_potential": "E_bulk+E_cohesive+E_fracture+beta*dt*D_friction; incompressibility constrained",
+  "seconds": 1.899351760999707
+}

@@ -1,0 +1,18 @@
+parameter,value,unit,role
+G,1000000.0,Pa,unchanged bulk law
+eta,100000000.0,Pa s,unchanged Maxwell law
+Gc,1.0,J/m2,single surface fracture inventory
+peak,3000.0,Pa,pressure-independent intact strength
+delta_f,0.0006666666666666666,m,unchanged cohesive calibration
+p0,10000.0,Pa,physical background confinement
+mu_reference,0.1,1,RSF reference; not intact Coulomb formation
+V0,5e-06,m/s,unchanged RSF
+Dc,0.001,m,unchanged RSF
+RSF_direct,0.005,1,unchanged RSF
+RSF_evolution,0.01,1,unchanged RSF
+radiation,25836.021365527624,Pa s/m,unchanged radiation damping
+direction_R,0.75,m,additional uncalibrated physical formation hypothesis
+domain_width,12.0,m,finite confined specimen
+domain_height,12.0,m,finite confined specimen
+loading_rate,0.004,1/s,fixed across comparisons
+loading_end,0.44,s,followed by .005 s displacement hold

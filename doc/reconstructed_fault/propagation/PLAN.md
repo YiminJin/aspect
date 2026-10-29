@@ -1,3 +1,72 @@
+# Completed single aligned-wide refinement — 21 October 2026
+
+The user-selected [48x64/96x128 spatial comparison](../particle_free/BULK_SPATIAL_REPORT.md)
+is complete with fresh continuum sampling and identical Delta t=.00125 s.
+Initial representation improves and no unloaded relaxation occurs. Quantitative
+cap onset/growth remains sensitive: onset advances seven steps and final
+growth-relative L2 differences are 35.86% per flank. Broad driving-lobe directions
+persist. All native numerical/history checks pass; physical law, integration,
+defaults and BP3 remain unchanged. Two meshes establish no order or propagation
+readiness. Stop after this comparison; no further mesh, timestep, seed change
+or historical roadmap stage is selected automatically.
+
+# Completed bounded work/temporal control — 20 October 2026
+
+The user-selected [aligned-wide energy/work control](../particle_free/BULK_ENERGY_REPORT.md)
+reuses h and runs only h/2,h/4. Exact BE accounting, endpoint work and physical
+force-displacement quadrature are separate. The historical 1% endpoint result
+is preserved; the documented practical work/temporal criterion passes, with
+convergent growth-relative fields and bracketed onset. No constitutive or
+integrator change is made. Spatial/orientation findings and strict reference
+mismatch remain; propagation, mesh changes and another test stage require new
+selection. The following entries describe retained preceding tasks.
+
+# Current selection completed: non-affine bulk source history — 20 October 2026
+
+The selected [source-history qualification](../particle_free/BULK_SOURCE_HISTORY_REPORT.md)
+is complete: DGQ2 plus native FE complement retains the non-affine native source,
+with independent small-fixture and serial rejection/restart evidence. Both
+orientation runs now complete through activation. Broad driving lobes remain
+near the physical directions; discrete onset timing/ordering/amplitude remain
+sensitive. Physical-energy failure and all original BP3/branch findings remain.
+Keep the law, seed, loading and defaults. No propagation/AMR/transport task starts
+automatically; separate energy/work qualification remains a prerequisite.
+
+The [first orientation attempt](../particle_free/BULK_ORIENTATION_REPORT.md)
+failed on the old pure-DG source representation before activation; that failure
+and the subsequent complement's diagnosed roundoff failure remain evidence.
+
+The later [angular saved-state diagnosis](../particle_free/BULK_ANGULAR_REPORT.md)
+is complete with no new trajectory. Combined generated driving and initial
+weak-force structure explain discrete flank onset. The recommended next task is
+one mesh-orientation control, contingent on preserving source/coverage checks;
+the later selected attempt is recorded above. No cap reshaping or loading increase is made.
+
+The subsequent user-selected [cap-flank/boundary diagnosis](../particle_free/BULK_SENSITIVITY_REPORT.md)
+is complete: three fresh controls, no constitutive/default changes, no
+centerline propagation or physical-energy qualification. Recommend the tested
+1.5 m right extent/G8 as the smallest physical specimen revision. Do not
+implement a new event or expand the campaign without a new user selection.
+
+The user-selected [implementation brief](../particle_free/codex_bulk_phase_implementation_brief.md)
+and its accompanying bulk/surface derivation authorize a distinct default-off
+bulk model and its ordered bounded P4 tests. Follow the
+[discrete formulation](../particle_free/BULK_COHESIVE_FORMULATION.md),
+[native pre-run selection](../particle_free/BULK_COHESIVE_NATIVE_SELECTION.md)
+and [current STATUS](../particle_free/STATUS.md). P2/P3/P4a and BP3 evidence
+retain their original scope. The missing intact activation choice is now
+specified; historical “await selection” notes do not block this task. No
+RSF, transport, AMR, moving mesh, MPI expansion or server run is selected.
+Stop at a concrete failed prerequisite; do not tune the model for a picture.
+
+Bounded implementation/testing is complete; see
+[bulk-model result](../particle_free/BULK_COHESIVE_REPORT.md). Bulk activation,
+numerical identities and serial lifecycle pass; connected centerline tip advance
+is absent, spatial growth-area sensitivity and physical endpoint-work screens
+fail. No further propagation or parameter search is selected automatically.
+
+---
+
 # Completed bounded P2 cleanup
 
 Execute only [P2_cleanup.md](P2_cleanup.md): requested FE layout, direct

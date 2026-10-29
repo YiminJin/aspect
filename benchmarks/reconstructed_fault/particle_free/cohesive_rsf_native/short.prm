@@ -1,0 +1,6 @@
+include benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/pilot.prm
+set End time = 0.4405
+set Output directory = $ASPECT_SOURCE_DIR/build-particle-free/cohesive-rsf-native/short-r2
+subsection Checkpointing
+ set Steps between checkpoint = 1
+end

@@ -1,0 +1,104 @@
+{
+  "baseline_m": 4.0,
+  "comparison_tolerance": 1e-12,
+  "MPI": {
+    "fixed": {
+      "all_tensor_records_maximum_scaled_defect": 5.652111951763601e-14,
+      "states": 65,
+      "cell_owners": 64,
+      "nonuniform_peak_to_peak": {
+        "Axx": 0.0,
+        "Axy": 0.00010800579358779031,
+        "Kxx": 0.0,
+        "Kxy": 0.00010810737867640021,
+        "Wxx": 0.0,
+        "Wxy": 0.00485630230683609,
+        "L": 0.00021621475735280043
+      }
+    },
+    "radial": {
+      "all_tensor_records_maximum_scaled_defect": 6.406229566544751e-14,
+      "states": 65,
+      "cell_owners": 64,
+      "nonuniform_peak_to_peak": {
+        "Axx": 2.1089818002789386e-06,
+        "Axy": 0.00010804762239467183,
+        "Kxx": 2.1088235281261887e-06,
+        "Kxy": 0.00010814923905697602,
+        "Wxx": 0.00015463972444847797,
+        "Wxy": 0.0048482738206133595,
+        "L": 0.00021629845876834598
+      }
+    }
+  },
+  "intact": {
+    "fixed": {
+      "initial_phi_exactly_zero": true,
+      "onset_bracket_s": [
+        0.2,
+        0.21250000000000002
+      ],
+      "intact_driving_relative_defect": 2.9976021664879227e-15,
+      "threshold_stress_Pa": 3000.0,
+      "fracture_resistance_Pa": 8.0,
+      "last_phase": 0.29252177520290823
+    },
+    "radial": {
+      "initial_phi_exactly_zero": true,
+      "onset_bracket_s": [
+        0.2,
+        0.21250000000000002
+      ],
+      "intact_driving_relative_defect": 2.9976021664879227e-15,
+      "threshold_stress_Pa": 3000.0,
+      "fracture_resistance_Pa": 8.0,
+      "last_phase": 0.29252177520290834
+    }
+  },
+  "restart": {
+    "fixed-r1": {
+      "parent_publications": 63,
+      "accepted_publications": 64,
+      "bitwise_files": [
+        "record-0064.bin",
+        "phase-0064.csv",
+        "means-0064.csv",
+        "boundary-reactions-0064.csv",
+        "phase-forces-0064.csv"
+      ]
+    },
+    "fixed-r4": {
+      "parent_publications": 63,
+      "accepted_publications": 64,
+      "bitwise_files": [
+        "record-0064.bin",
+        "phase-0064.csv",
+        "means-0064.csv",
+        "boundary-reactions-0064.csv",
+        "phase-forces-0064.csv"
+      ]
+    },
+    "radial-r1": {
+      "parent_publications": 63,
+      "accepted_publications": 64,
+      "bitwise_files": [
+        "record-0064.bin",
+        "phase-0064.csv",
+        "means-0064.csv",
+        "boundary-reactions-0064.csv",
+        "phase-forces-0064.csv"
+      ]
+    },
+    "radial-r4": {
+      "parent_publications": 63,
+      "accepted_publications": 64,
+      "bitwise_files": [
+        "record-0064.bin",
+        "phase-0064.csv",
+        "means-0064.csv",
+        "boundary-reactions-0064.csv",
+        "phase-forces-0064.csv"
+      ]
+    }
+  }
+}

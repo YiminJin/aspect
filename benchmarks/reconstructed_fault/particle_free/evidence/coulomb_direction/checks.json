@@ -1,0 +1,8 @@
+{
+"defects":{"analytical_Coulomb_angle":1.2246467991473532e-16,"basis_covariance":1.7079488766334015e-14,"complete_FD":8.7567675040454118e-09,"constant_radial_identity":0,"effective_shear_FD":1.3386190858000191e-09,"energy_ledger":4.8805426347819535e-16,"independent_plane_dissipation":2.0588041125125495e-15,"intact_right_FD":1.5000186648350677e-09,"known_active_plane":2.2204460492503131e-16,"known_return_endpoint_Q":6.9415334234121318e-16,"known_tensor_increment":5.8184394216732963e-15,"mu_zero_normal_FD":1.8888614476963993e-09,"mu_zero_plane_FD":1.4364701428348781e-08,"normal_traction_FD":2.1229088247309848e-09,"plane_direction_FD":2.1163427010861824e-08,"restart_responses":0,"reversed_shear_covariance":0,"slip_multiplier_FD":1.9988665300729736e-10,"system_speed_FD":1.9023487212582735e-09,"virgin_equal_conjugate_slip":0,"virgin_net_flow_remains_radial":0,"yield_margin_FD":1.3771392559647211e-09},
+"counts":{"active_0":32,"active_1":5,"active_2":4,"active_3":43},
+"tangent_major_asymmetry_over_G":0.35757335247936195,
+"point_publications":60,
+"closed_contact_rejection_passed":true,
+"returned_contact_rejection_passed":true
+}

@@ -1,0 +1,9 @@
+{
+  "case": "p02-n16-cutback",
+  "stem": "localization-0012-converged",
+  "unknowns": 2210,
+  "Riesz_sigma_min": 0.16898074954666842,
+  "Riesz_sigma_max": 1.4992437417364044,
+  "Riesz_condition_2": 8.872275367214828,
+  "seconds": 16.67776432699975
+}

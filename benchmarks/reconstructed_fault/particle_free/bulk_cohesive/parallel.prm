@@ -1,0 +1,29 @@
+# Bounded distributed-history control; fresh physical initialization.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_free/bulk_cohesive/native.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/build-particle-free/bulk-parallel/plugin/libbulk_parallel_checks.release.so
+set Output directory = $ASPECT_SOURCE_DIR/build-particle-free/bulk-parallel/runs/r1
+set End time = 0.16
+subsection Geometry model
+  subsection Box
+    set X extent = 1.5
+    set X repetitions = 24
+    set Y repetitions = 32
+  end
+end
+subsection Material model
+  subsection Phase field fault
+    set FE bulk normal quadrature points = 8
+  end
+end
+subsection Boundary velocity model
+  set Prescribed velocity boundary indicators = left:bulk cohesive loading, right:bulk cohesive loading, bottom:bulk cohesive loading, top:bulk cohesive loading
+end
+subsection Postprocess
+  set List of postprocessors = particles, bulk cohesive checks
+end
+subsection Time stepping
+  set List of model names = bulk cohesive steps
+end
+subsection Checkpointing
+  set Steps between checkpoint = 16
+end

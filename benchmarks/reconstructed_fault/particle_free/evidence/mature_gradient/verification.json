@@ -1,0 +1,79 @@
+[
+  {
+    "case": "local",
+    "accepted_steps": 200,
+    "max_force_error": 3.2687974397739123e-13,
+    "max_source_error": 0.0,
+    "min_contact_Pa": 9004.958396105108,
+    "max_ledger_error_J_m2": 1.6376602764850423e-15,
+    "max_gradient_BE_error_J_m2": 0.0,
+    "max_traction_partition_error_Pa": 7.73070496506989e-12,
+    "max_compatibility_error_m": 1.5534584252643868e-18
+  },
+  {
+    "case": "ls1",
+    "accepted_steps": 200,
+    "max_force_error": 3.116933437682841e-13,
+    "max_source_error": 1.110307603751163e-16,
+    "min_contact_Pa": 8950.979751737586,
+    "max_ledger_error_J_m2": 1.6376602764850423e-15,
+    "max_gradient_BE_error_J_m2": 1.732866356239952e-16,
+    "max_traction_partition_error_Pa": 1.1254996934439987e-11,
+    "max_compatibility_error_m": 1.5534584252643868e-18
+  },
+  {
+    "case": "ls3",
+    "accepted_steps": 200,
+    "max_force_error": 2.4119774296285357e-13,
+    "max_source_error": 1.1102896645133997e-16,
+    "min_contact_Pa": 8662.78863308158,
+    "max_ledger_error_J_m2": 1.7110421288374714e-15,
+    "max_gradient_BE_error_J_m2": 4.3434155469306013e-16,
+    "max_traction_partition_error_Pa": 6.0254023992456496e-12,
+    "max_compatibility_error_m": 1.5534584252643868e-18
+  },
+  {
+    "case": "ls6",
+    "accepted_steps": 200,
+    "max_force_error": 1.2720392516553795e-13,
+    "max_source_error": 0.0,
+    "min_contact_Pa": 8001.235222494525,
+    "max_ledger_error_J_m2": 3.374481006039251e-15,
+    "max_gradient_BE_error_J_m2": 1.5291451915463994e-15,
+    "max_traction_partition_error_Pa": 4.661160346586257e-12,
+    "max_compatibility_error_m": 1.5534584252643868e-18
+  },
+  {
+    "case": "ls6-n129",
+    "accepted_steps": 200,
+    "max_force_error": 1.2709149198244554e-13,
+    "max_source_error": 1.1102531509264775e-16,
+    "min_contact_Pa": 8002.431925500615,
+    "max_ledger_error_J_m2": 1.9794211300432074e-15,
+    "max_gradient_BE_error_J_m2": 9.27938146244242e-16,
+    "max_traction_partition_error_Pa": 2.2737367544323206e-12,
+    "max_compatibility_error_m": 5.47183283926278e-19
+  },
+  {
+    "case": "ls6-n513",
+    "accepted_steps": 200,
+    "max_force_error": 1.2686324517792819e-13,
+    "max_source_error": 1.110284220992941e-16,
+    "min_contact_Pa": 8000.936621432657,
+    "max_ledger_error_J_m2": 9.648958877988417e-15,
+    "max_gradient_BE_error_J_m2": 4.1212862387108445e-15,
+    "max_traction_partition_error_Pa": 9.549694368615746e-12,
+    "max_compatibility_error_m": 3.0154372922253092e-18
+  },
+  {
+    "case": "ls6-half",
+    "accepted_steps": 400,
+    "max_force_error": 2.5328498330607197e-14,
+    "max_source_error": 0.0,
+    "min_contact_Pa": 8001.224927281455,
+    "max_ledger_error_J_m2": 4.449950268838564e-15,
+    "max_gradient_BE_error_J_m2": 2.199767433908994e-15,
+    "max_traction_partition_error_Pa": 5.4569682106375694e-12,
+    "max_compatibility_error_m": 1.3967573300223413e-18
+  }
+]

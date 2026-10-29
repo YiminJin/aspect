@@ -1,0 +1,9 @@
+{
+  "definition": "Numerators are half minus coarse, over common .460..462375 s window. Original summary used the fine increment as denominator; final CSV explicitly uses coarse. No physical data changed.",
+  "absolute_growth_m": -0.0004164649479214688,
+  "absolute_slip_m2": -2.1316707435152515e-07,
+  "earlier_fine_denominator_growth": -0.0012748475750129589,
+  "earlier_fine_denominator_slip": -0.000436337469915286,
+  "reported_coarse_denominator_growth": -0.0012732244079640186,
+  "reported_coarse_denominator_slip": -0.0004361471625658613
+}

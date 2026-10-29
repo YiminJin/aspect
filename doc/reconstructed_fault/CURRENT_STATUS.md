@@ -1,4 +1,358 @@
-Current evolving-phase continuation (19 October 2026): see
+# Latest bounded component result
+
+Event-resolved damage admission on the prescribed oblique append and native
+history/checkpoint checks pass. Temporal response changes are small, but the
+sliding-normalized physical-energy screen remains failed; no longer propagation
+or free-path task has been started. See
+[the admission report](particle_free/COHESIVE_INTERFACE_ADMISSION_REPORT.md).
+Production/BP3 and the earlier 65.4% spatial failure are preserved.
+
+---
+
+# Latest bounded component result
+
+Prescribed non-collinear tied insertion and native owner/restart checks pass in
+the isolated fitted exact-jump control. Overloaded new-plane admission rejects
+without publication. This does not qualify free-path evolution or remove the
+65.4% early straight-growth spatial failure. See
+[the kink report](particle_free/COHESIVE_INTERFACE_KINK_REPORT.md) and
+[particle-free status](particle_free/STATUS.md). Production/BP3 are unchanged.
+
+---
+
+# Latest experimental component milestone
+
+Finite exact-jump tied insertion and bounded localized straight-interface growth
+are complete within the documented serial component scope. See
+[the report](particle_free/COHESIVE_INTERFACE_INSERTION_REPORT.md) and
+[particle-free status](particle_free/STATUS.md). Production/BP3 and established
+algorithms are unchanged. First-admission spatial sensitivity, finite boundaries,
+free-path/topology and broader integration remain limitations. Previous status:
+
+---
+
+# Weak-admission and native fixed-surface growth qualification completed
+
+[Report](particle_free/COHESIVE_INTERFACE_FRONT_REPORT.md): bounded Gauss
+multipliers now implement intact admission; activation rejection/retry and real
+restart pass. The fresh seeded cases show broad cohesive-zone expansion followed
+by full decohesion, with positive tested incremental curvature and controlled
+physical-work/timestep error. Early spatial onset remains underresolved; this is
+not isolated free-path propagation or production solver adoption.
+
+[Architecture proposal](particle_free/COHESIVE_INTERFACE_ARCHITECTURE_PROPOSAL.md)
+separates bulk memory, geometric Gamma, jump and surface damage, initially keeping
+phi geometric and counting Gc only once. Maximum-shear admission/contact activation
+remain explicit. Production/BP3 and all earlier evidence remain unchanged.
+
+---
+
+# Exact-jump native fixed-surface qualification completed
+
+[Result](particle_free/COHESIVE_INTERFACE_EXACT_REPORT.md): full jump enrichment,
+pressure work and two pressure traces remove the previous width bias. The resolved
+1 m shear/normal symbols match the sharp reference to 0.001535%/0.00002027%.
+Uniform initiation, mature reversal, current-pressure tangent and real restart
+pass within the isolated native fixture; production/BP3 remain unchanged.
+Shorter modes and a partially tied front remain unqualified. Next recommended:
+one fixed-surface intact-to-damaged front/admission test before native tip growth.
+No propagation, moving geometry, MPI or production solver adoption is implied.
+
+---
+
+# Native interface components qualified; sharp realization remains open
+
+[Native component report](particle_free/COHESIVE_INTERFACE_NATIVE_REPORT.md):
+intact admission, mature reversal, current-pressure coupling and real ASPECT
+checkpoint/restart pass within the isolated fixed-geometry FE/Γ fixture.
+A nodal-integration instability was corrected using consistent surface Gauss3
+and is preserved as failed evidence. Production/BP3 remain unchanged.
+
+This is not full production Stokes integration. Nonuniform finite-width stiffness
+retains a measured 7.42% sharp-interface discrepancy (3.99% at half width).
+Next: one exact-jump fixed-surface test, including pressure work and signed-rate
+ownership; do not proceed automatically to native propagation. Earlier evidence
+and unresolved accuracy findings follow.
+
+---
+
+# Intact fracture compliance and geometric RSF: independent references completed
+
+[Result](particle_free/COHESIVE_INTERFACE_REPORT.md): the selected physical
+separation now has timestep-convergent intact initiation, mature sliding through
+7.261 Dc and a small seed-connected cohesive-zone extension. It uses surface
+fracture damage and one geometric slip/state; it is not the unchanged bulk law.
+Full pressure coupling, energy-accounted history mapping and independent-owner
+lifecycle checks are included. Integral refinement criteria pass after one focused
+refinement; first-cell onset, peak damage and fully developed advance remain
+unqualified. Production/BP3, native checkpoints and original evidence are unchanged.
+The next bounded task is native interface/trace realization, not a full event.
+
+---
+
+# Structural-plane substantial sliding completed; phase admission unresolved
+
+[Independent result](particle_free/STRUCTURAL_SLIDING_REPORT.md): sliding of
+several Dc, focused mesh/time controls, energy measured against sliding loss,
+and full mixed oblique pressure checks are complete. The intact phase return
+has a demonstrated admission/normalization gap; no tip-growth demonstration
+was enabled. Production/BP3, native checkpoints and original evidence remain
+unchanged. This is not a claim of general native or propagation qualification.
+
+---
+
+# Independent structural-plane RSF continuation qualification
+
+[Bounded result](particle_free/DIRECTIONAL_CONTINUATION_REPORT.md): finite-damage
+point continuation passes under an explicitly changed recorded-plane closure.
+Three fixed-phase band meshes and a separate temporal control give small
+spatial errors; the literal monotone work-trend gate remains unresolved below
+algebraic-check scale. This weak-sliding 1-D reference is not propagation,
+native integration, sustained RSF or general mixed mechanical stability
+qualification. Production/BP3 and earlier failed evidence are unchanged.
+
+---
+
+# Bounded kinetic reconciliation completed; global continuation still blocked
+
+[Report](particle_free/CONSTITUTIVE_RECONCILIATION_REPORT.md) separates two
+results. Exact Feng formulas and loading refinement explain the stationary/
+global endpoint discrepancy, including branch/sign shortcuts, but do not
+establish admissible single-direction continuation from a symmetric activation.
+A new independent RSF/radiation candidate has regular full mixed dynamics on
+tested smooth branches. This is not a global well-posedness certificate.
+
+Fei's published in-plane previous-pressure update converges to the coupled
+pressure generator when old-state perturbations are retained. Its extension
+to freely changing maximizing directions fails early nonlinear endpoint checks;
+80-digit verification preserves the failure. A mature coupled-pressure point
+and a separate coherent fixed-plane control provide bounded timestep evidence.
+No propagation follows. Native/BP3/defaults and all prior energy, spatial,
+branch and constitutive failures remain preserved. The report links three
+PNGs, compact CSVs, complete equations and a reproducible reference package.
+Earlier entries follow unchanged.
+
+# Single-direction closure removes redistribution, not localization
+
+[Report](particle_free/FENG_DIRECTION_REPORT.md) completes the bounded
+independent Feng direction/dissipation comparison. The actual increment must
+maximize the published force; history selects only genuine tied maxima. Old
+total-spin selection is recovered and rejected as a constitutive requirement.
+Its literal 2-D NaN guard is separately documented, without production edits.
+
+The mature two-system redistribution mode disappears, but full mixed
+displacement-pressure localization remains for a unique single direction.
+Finite-step global-max and multiple-endpoint controls also expose unresolved
+branch issues. Propagation remains blocked pending a constitutive decision;
+no native/specimen run or new remedy is added. Production/BP3/defaults and
+previous energy, accuracy and branch failures are preserved. The report links
+the equations, two PNGs, compact CSVs and runnable reference package.
+Earlier status entries follow unchanged.
+
+# Scalar spatial rate/state feasibility stops at the mechanical prerequisite
+
+[Report](particle_free/PRANGER_FEASIBILITY_REPORT.md) closes the selected
+Pranger-inspired adaptation. A common equivalent rate/state with the explicit
+gradient operator in state evolution leaves a two-conjugate directional mode
+uncontrolled. Exact mature oblique evolution has a singular mixed pencil;
+finite-h reversed history has an independently confirmed angular pole, also
+without state feedback. Pressure, changing directions and Maxwell histories
+are included. This is not a verdict on the paper's different flow law.
+
+The conditional transect/velocity-step and phase tasks are not begun. Review a
+directional constitutive closure before another candidate is selected; no new
+remedy is added automatically. Energetic total-K remains a qualified hardening
+experiment and is retired as the mature-RSF candidate. Production/BP3/defaults,
+prior evidence and unresolved P4/P5c accuracy/branch findings are preserved.
+PNG/CSV/JSON/formulation/code evidence is in particle_free/evidence links from
+the report. Earlier status entries follow unchanged.
+
+# Mature-friction prerequisite blocks K-gradient phase progression
+
+[Report](particle_free/MATURE_GRADIENT_REPORT.md) closes the cheap equilibrated
+cross-band test. Constant non-relaxing total-K gradient energy adds accumulated
+slip hardening even in the Q→0 mature limit. At 1 mm plastic slip, the selected
+6 mm option adds 58.30% of initial friction as gradient resistance; 3 mm adds
+17.97%. One mm approximates a narrow low-penalty window, not a mature/RSF limit.
+Resolution/dt controls are far smaller than this effect. Physical friction,
+cohesive shoulder response and gradient storage are separately measured.
+No coupled phase implementation is begun. Review a normalized spatial rate/state
+alternative, including thermodynamics and fresh mixed-symbol checks, before
+propagation. Production/BP3 source and defaults, previous fixed-phase evidence
+and unresolved P4/P5c findings remain untouched. Earlier status entries follow.
+
+# Experimental slip-gradient fixed-phase controls complete
+
+[Report](particle_free/COULOMB_GRADIENT_REPORT.md) completes the bounded tensor
+K-gradient option after its published formulation/assumptions were documented.
+The joint native u/p/K solve retains physical pressure-dependent friction,
+zero dilation and all histories. Three small serial fixed-phase meshes pass;
+8→16 peak/width changes are .10%/.18%, mixed conditions 7.02/8.37/8.89.
+One timestep halving still changes slip rate 4.03%; lengths are uncalibrated.
+Rollback/publication/restart and retained defaults pass unchanged allowances.
+The new energy introduces recoverable backstress. It is not a filter and does
+not qualify phase-active propagation or a general stability theorem. The local
+law's original mechanical defect and earlier energy/accuracy/BP3 findings stay
+visible. Next requires a selected nonsymmetric coupled phase/microforce and
+stability/selection qualification; no specimen or MPI expansion is begun.
+Earlier status entries follow unchanged.
+
+# Coulomb mechanical localization blocks phase-active progression
+
+[Report](particle_free/COULOMB_LOCALIZATION_REPORT.md) completes the full
+mixed displacement–pressure audit and bounded four-rank 4/8/16 refinement and
+timestep controls. The zero-dilation pressure-dependent law loses ellipticity
+at developed damage; fixed-pressure stiffness can miss it. Phase gradients
+and local Maxwell relaxation do not control its admissible fixed-phase mode.
+Native conditioning deteriorates; a collapsing band is not demonstrated in
+the short runs. Fine full-step initial-contact failures are preserved and
+separated from that continuum diagnosis; explicit same-parent cutbacks pass.
+The phase-active guard remains. Review a physically specified slip-gradient
+regularization versus consistently derived dilation before further evolution.
+No remedy, tolerance, default, checkpoint-layout or BP3 change is adopted;
+earlier P4/P5c and physical-energy limitations remain. Earlier entries below
+retain their historical scope.
+
+# Confined native Coulomb block complete; phase evolution remains disabled
+
+[Report](particle_free/COULOMB_NATIVE_REPORT.md): the selected fresh 4×4 block integrates explicit background confinement, solved pressure perturbation and the qualified two-system return into native mixed mechanics/history/checkpoint owners. Fixed-phase controls, full nonsymmetric pressure derivatives, physical contact/work, 1/4-rank ownership, rejection/retry and restart pass within documented norms. The retained-law native control is bitwise unchanged. The pointwise homogeneous strict identity failure and BE numerical work remainder are explicit. No new phase-active certificate, specimen or propagation accuracy is claimed. A nonsymmetric critical-cone reduced-VI screen is proposed only. Production defaults, BP3 and prior failed evidence remain; earlier status below retains its scope.
+
+# Bounded Coulomb point qualification complete
+
+[Report](particle_free/COULOMB_DIRECTION_REPORT.md): archived stress/pressure/direction diagnostics and the experimental zero-dilation Coulomb material-point return pass their bounded checks. No native Coulomb mode is enabled. Pressure/confinement and strength-calibration semantics, plus a non-associated stability formulation, are prerequisites for native adoption. The current bulk radial law, mature BP3, production defaults and earlier evidence remain unchanged; no new evolving specimen or mesh campaign ran. Earlier status below retains its original scope.
+
+# Selected bulk P5c continuation complete
+
+[Report and compact evidence](particle_free/P5C_CONTINUATION_REPORT.md): the bounded fine-grid radial/fixed continuation, holds and focused half-step checks are complete. Seed-connected weak process-zone extension reaches the predeclared radial target at.170 s. The matched fixed control stops slightly earlier; unequal loading endpoints are explicit. Local growth/energy Cauchy targets pass, while earlier temporal/spatial failures, boundary sensitivity and strict_reference_match_passed=false remain. Native sources/defaults and BP3 are unchanged; all native jobs ended. No new campaign is begun. Earlier status below retains its historical scope.
+
+Current bounded result (22 October 2026): [P5c finite-seed tensor comparison](particle_free/P5C_REPORT.md) is complete. Native exact-intact activation, uniform tensor MPI/restart and the early fresh-specimen/dt-halving controls pass. Radial flow reduces growth within the original cap; no developed extension or branching is qualified. P4 accuracy/boundary failures and strict_reference_match_passed=false remain. A single axial refinement control is recommended only; no further run has begun. Entries below retain earlier stage evidence.
+
+Bounded follow-up (22 October 2026): [P5b native tensor integration](particle_free/P5B_NATIVE_REPORT.md)
+is qualified on one small serial fixed mesh with a hanging patch and uniform
+identity control. Native owners/checkpoint modes, complete coupled actions,
+mechanically relaxed stability and rejection/restart publication pass at retained
+bounds. Scalar defaults and protected P4/P5a/BP3 evidence remain; the radial
+large-step failure and P4 accuracy/branch/boundary limitations remain. This is a
+uniform material-block integration control, not a directional specimen or
+propagation qualification. The next physical specimen/material review is proposed
+only; no subsequent run has begun.
+
+Current bounded follow-up (22 October 2026): [P5a tensor point qualification](particle_free/P5A_POINT_REPORT.md)
+is complete after the user selected changing flow with physical tensor memory.
+The standalone point return, fixed-direction identity, complete tangent, passive
+basis covariance, energy and point rejection/restart checks pass. Native solver,
+production checkpoints and BP3 remain unchanged. P5b native integration is only
+proposed; no directional specimen or broader P4 accuracy claim is made.
+
+Current bounded follow-up (21 October 2026): the
+[P4 continuation check](particle_free/BULK_CONTINUATION_REPORT.md) is complete.
+Native first-hold predictor roots are coupled saddles; accepted-state continuation
+is locally stable with zero hold growth/slip at three timesteps. Work defects
+are small, but time-sampling/spatial targets fail and moving the right boundary
+reduces growth by 57.26%. A benchmark boundary diagnostic is corrected without
+changing physical exports on the retained control. The P5 tensor-memory/free-flow
+specification is prepared, not implemented. No quantitative propagation or
+directional adoption is qualified; original failures and BP3 remain protected.
+
+Current bounded follow-up (21 October 2026):
+[fixed-mesh bulk MPI and one horizontal-side-release control](particle_free/BULK_PARALLEL_REPORT.md)
+are complete. Growing 1/2/4-rank controls give measured 1.76x/2.44x wall
+improvement; physical stress/history, rejection, once-only publication and
+same-rank restart checks pass at unchanged tolerances. One fresh 96x128
+four-rank case reaches .185 s. Releasing lateral ux redirects weak damage toward
+the centerline but triggers earlier remote nucleation and domain-spanning low
+contours through merging. High-phase seed contours remain nearly fixed; this
+is not isolated tip propagation. Original accuracy/energy/branch limitations,
+strict_reference_match_passed=false and BP3/default behavior remain. The next
+question is the flagged growth interval and spatial accuracy, not an automatic
+propagation stage.
+
+Current bounded follow-up (21 October 2026): one
+[exploratory continued-loading trajectory](particle_free/BULK_CONTINUED_REPORT.md)
+on the existing 96x128 specimen completed .185 s, extending the same shear ramp
+to .175 s and then holding. The .15 prefix is byte-identical to the prior fine
+case. Low-phase cap widening/advance accompanies interior and right-boundary
+nucleation; the eventual lowest-level domain connection is not tip propagation.
+High-phase fronts remain fixed and the hold freezes phase/slip memory while
+stress relaxes. Native/history/work checks pass at unchanged settings; prior
+failed spatial targets, temporal/branch limits and BP3 remain. Saved activation
+and contour-joining intervals await a selected timestep check; none is begun.
+
+Previous bounded follow-up (21 October 2026): the
+[one aligned-wide spatial comparison](particle_free/BULK_SPATIAL_REPORT.md)
+is complete at identical Delta t=.00125 s on fresh 48x64/96x128 representations.
+Initialization error decreases and both unloaded holds are stationary, but
+refined cap onset is seven timesteps earlier and final growth L2 differs by
+35.86% on each flank. Peak, integrated growth and fracture increments also
+fail the practical 5% quantitative target. Broad physical driving directions
+remain similar. No spatial order, resolved onset/amplitude or propagation
+claim follows from these two meshes. Native energy/history/publication checks
+pass at unchanged tolerances; the historical energy/branch/orientation findings
+and BP3/defaults remain. Only a read-only area-sum diagnostic is corrected after
+an initialization-only failure. No subsequent case is automatically selected.
+
+Current bounded follow-up (20 October 2026):
+[aligned-wide work/temporal qualification](particle_free/BULK_ENERGY_REPORT.md)
+is complete using the existing h result plus only h/2 and h/4. Endpoint work and
+physical force-displacement quadrature are now distinguished. The original
+2.23279% endpoint-screen failure remains; refined results support a .0027709%
+work/temporal accuracy budget and growth-relative differences <=.05662% at
+selected positive-growth times. Exact BE accounting and all original tolerances
+are unchanged. This qualifies the bounded fixed-mesh work/temporal question under
+the documented practical criterion, not spatial/angular accuracy or propagation.
+BP3, model, integrator and all prior findings remain protected. No subsequent
+stage is automatically selected. Earlier entries retain their historical scope.
+
+Current bounded follow-up (20 October 2026): the
+[native source-history extension and repeated orientation](particle_free/BULK_SOURCE_HISTORY_REPORT.md)
+are complete for the serial, fixed-mesh homogeneous bulk experiment. Independent
+DGQ2 plus native FE complement passes unchanged consistency, tangent, energy
+identity, actual rejection/retry, once-only publication and bitwise restart
+checks. Both meshes now reach cap activation. Broad driving remains physically
+oriented, while onset timing/ordering/growth remain discretization-sensitive.
+Physical-energy screens still fail (~2.35%); strict reference matching remains
+false. BP3 and all original failures are preserved. No propagation or further
+campaign is automatically selected. The dated entries below retain earlier scope.
+
+Retained first orientation attempt (20 October 2026): the selected
+[45° mesh-orientation control](particle_free/BULK_ORIENTATION_REPORT.md) has a
+valid fixed rotated core/annulus, but stops at .1075 s on the unchanged DG
+source projection check before first cap growth. Native Q2 physical gradients
+generally lie outside DGQ2 on non-affine transition cells; source8 does not
+repair that representation error. Forty-two accepted states through .105 s
+retain the initial phase exactly. Both lobe and first-node orientation remain
+undecided. Explicit gradient-remainder/history qualification is the next
+prerequisite, not an adopted change. Keep the seed, prior energy failure and
+BP3 unchanged; no further task is automatically started.
+
+Retained read-only follow-up (20 October 2026): the
+[angular flank diagnosis](particle_free/BULK_ANGULAR_REPORT.md) is complete.
+It separates the exact compact seed's smooth force from Q1 weak averages and
+recovers the pre-onset q histories without a native run. Oblique generated
+driving and pre-existing weak-resistance variation jointly select first nodes;
+mesh-independent physical onset angles remain unqualified. One guarded mesh-
+orientation control was recommended and is assessed above. No cap/load/law/default changes;
+energy and previous qualification failures remain.
+
+Retained bounded follow-up (20 October 2026): the
+[cap-flank/right-boundary diagnosis](particle_free/BULK_SENSITIVITY_REPORT.md)
+is complete. Fine-grid quadrature agrees; both mesh directions matter. Moving
+the right side to 1.5 m suppresses its damage island and increases flank growth,
+while centerline contours stay fixed. Recommend that tested wider specimen,
+without a domain-independence or propagation claim. Energy failures remain;
+no physical law, production default or C++ implementation changed in this follow-up.
+
+Retained bulk-model result (20 October 2026): the distinct default-off
+[bulk cohesive implementation](particle_free/BULK_COHESIVE_REPORT.md) supplies
+intact driving and passes bounded material/profile/native numerical and serial
+history lifecycle checks. The selected response is boundary activation and minor
+fine-mesh cap-flank thickening, with no tracked connected centerline tip advance.
+Spatial phase-growth and physical endpoint-work screens fail; do not claim
+propagation qualification. Defaults and protected BP3 artifacts remain unchanged.
+No additional task starts automatically. The historical surface-model activation
+dependency below is resolved only for this newly selected constitutive model.
+
+Retained evolving-phase continuation (19 October 2026): see
 [particle-free STATUS](particle_free/STATUS.md) for the selected domain-free
 DG cohesive endpoint implementation, completed bounded hanging-node and P2
 physical-response qualifications, and retained limitations. The resolved P2 seed
@@ -8,8 +362,13 @@ screens; strict mirror matching remains false. The subsequently selected
 the joint stress/history map and component transaction on fixed geometry;
 [native frozen-append completion](particle_free/P3_NATIVE_COMPLETION_REPORT.md)
 now verifies serial native history/obstacle owners, rollback, one geometry commit
-and real simulator restart. Finite-tip mechanics/evolution, general birth and
-physical activation remain guarded/unqualified. No propagation task is automatically selected.
+and real simulator restart. P3 is closed/committed as `f1f9f29cf`. The selected
+[P4a finite-tip diagnostic](particle_free/P4A_TIP_REPORT.md) passes independent
+integration at an endpoint inside a bulk cell, but confirms zero direct
+mechanical phase driving ahead of the current surface. Intact-material
+activation and its I=0 birth limit need a scientific rule before physical
+advancement. Finite-tip mechanics/evolution and general birth remain guarded;
+no general propagation task is automatically selected.
 The dated entries below remain historical evidence.
 
 # Worktree checkpoint — scientific task remains open, 2026-10-15

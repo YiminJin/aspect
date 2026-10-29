@@ -1,0 +1,133 @@
+{
+  "name": "candidate",
+  "steps": 148,
+  "dt_s": 0.00125,
+  "end_time_s": 0.185,
+  "ell_m": 0.046875,
+  "Gc_J_m2": 1.0,
+  "m": 4.0,
+  "tip_x_m": 1.0,
+  "initial_representation": {
+    "relative_L2": 0.005919559391317386,
+    "cap_relative_L2": 0.020575535146158733
+  },
+  "initial_fracture_J_m": 0.5694136997489245,
+  "initial_phase_min": 0.0,
+  "initial_phase_max": 0.6,
+  "unloaded_phase_drift": 0.0,
+  "onset": {
+    "whole_1e-12": [
+      0.1337500000000001,
+      0.1350000000000001
+    ],
+    "cap_1e-12": [
+      0.1337500000000001,
+      0.1350000000000001
+    ],
+    "virgin_1e-12": [
+      0.1437500000000001,
+      0.1450000000000001
+    ],
+    "remote_1e-12": [
+      0.17375000000000013,
+      0.17500000000000013
+    ],
+    "whole_1e-05": [
+      0.1337500000000001,
+      0.1350000000000001
+    ],
+    "cap_1e-05": [
+      0.1337500000000001,
+      0.1350000000000001
+    ],
+    "virgin_1e-05": [
+      0.1437500000000001,
+      0.1450000000000001
+    ],
+    "remote_1e-05": [
+      0.17375000000000013,
+      0.17500000000000013
+    ]
+  },
+  "final": {
+    "step": 148.0,
+    "time_s": 0.185,
+    "max_phase_increment": 0.29262666116533115,
+    "cap_peak_increment": 0.29262666116533115,
+    "initial_zero_peak_increment": 0.29262666116533115,
+    "remote_peak_increment": 0.013904157337845486,
+    "whole_growth_m2": 0.004462732806831522,
+    "cap_growth_m2": 0.0012523279258823666,
+    "outside_seed_growth_m2": 0.0034860921660167816,
+    "fracture_J_m": 0.6094865379904325,
+    "added_fracture_J_m": 0.04007283824150798,
+    "bulk_J_m": 2.6906718163329773,
+    "cohesive_J_m": 0.16917257512770584,
+    "reaction_N_m": 2798.994528811989,
+    "prescribed_strain": 0.0022499999999999964,
+    "endpoint_work_J_m": 0.0,
+    "trapezoidal_work_J_m": 0.0,
+    "Db_J_m": 6.726679540831643e-05,
+    "Dc_J_m": 4.229314378192181e-06,
+    "Df_J_m": 0.0,
+    "endpoint_remainder_J_m": 4.4723536867994056e-10,
+    "trapezoidal_remainder_J_m": 4.4723536867994056e-10,
+    "stress_loss_J_m": 4.208180260350583e-10,
+    "traction_loss_J_m": 2.6433214863720696e-11,
+    "phase_remainder_J_m": 0.0,
+    "fracture_loss_J_m": 0.0,
+    "phase_residual_work_J_m": 0.0,
+    "mechanical_residual_work_J_m": -9.198248411589668e-22,
+    "pressure_work_J_m": -3.122329054462951e-23
+  },
+  "mechanical_residual": 8.784485512581436e-10,
+  "phase_KKT": 6.520603507143008e-08,
+  "source_error": 6.595858321181488e-15,
+  "ledger_error_J_m": 3.480993705090585e-15,
+  "cumulative": {
+    "endpoint_work_J_m": 3.508356916336088,
+    "trapezoidal_work_J_m": 3.476803230743351,
+    "Db_J_m": 0.0031695069806477612,
+    "Dc_J_m": 9.764910103629909e-05,
+    "Df_J_m": 0.5737764704254666,
+    "endpoint_remainder_J_m": 0.03139606012674627,
+    "trapezoidal_remainder_J_m": -0.0001576254659911961,
+    "stress_loss_J_m": 0.030647486090495335,
+    "traction_loss_J_m": 0.002788683114396241,
+    "phase_remainder_J_m": -0.003533950717187021,
+    "fracture_loss_J_m": 0.0014938416405093102,
+    "phase_residual_work_J_m": 1.7314580943413165e-12,
+    "mechanical_residual_work_J_m": -2.8220841371480163e-13,
+    "pressure_work_J_m": -1.0513657251610406e-18
+  },
+  "energy_total_variation_relative": 4.533936930246149e-05,
+  "selected_profile_steps": [
+    124,
+    135,
+    139,
+    140,
+    143,
+    148
+  ],
+  "remote_reporting_window_x_gt_m": 1.4,
+  "contour_raster_subdivisions": 4,
+  "activation_increment_thresholds": [
+    1e-12,
+    1e-05
+  ],
+  "unloaded_min_weak_fracture_over_mass_Kf": 0.11244611202144392,
+  "stationary_particles": {
+    "count": 110592,
+    "fingerprint": "11428280267573531170",
+    "maximum_rank_peak_MiB": 1255.20703125,
+    "sum_rank_peaks_MiB": 3710.73046875
+  },
+  "detached_contour_components_max": {
+    "0.001": 0,
+    "0.01": 0,
+    "0.05": 0,
+    "0.1": 0,
+    "0.3": 0,
+    "0.5": 0
+  }
+}

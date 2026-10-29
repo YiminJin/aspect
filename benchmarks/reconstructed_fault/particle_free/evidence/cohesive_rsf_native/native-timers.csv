@@ -1,0 +1,5 @@
+scope,calls,wall_s,overlap
+Cohesive RSF: native mixed solve,180,681,includes Stokes/history/surface
+Solve Stokes system,392,241,inside coupled route
+Create snapshot,23,5.68,native timer
+Build Stokes preconditioner,1,0.0916,inside coupled route

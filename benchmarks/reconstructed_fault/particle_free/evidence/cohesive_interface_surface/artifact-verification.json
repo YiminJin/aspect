@@ -1,0 +1,50 @@
+{
+  "csv_rows": {
+    "comparisons.csv": 9,
+    "onset-brackets.csv": 8,
+    "surface-512-half-history.csv": 914,
+    "representation.csv": 5,
+    "surface-256-history.csv": 1476,
+    "native-mechanics-differences.csv": 5,
+    "profiles.csv": 19200,
+    "surface-512-history.csv": 1476,
+    "summary.csv": 15,
+    "energy.csv": 6
+  },
+  "images": {
+    "comparison.png": {
+      "width": 1938,
+      "height": 1298,
+      "frames": 1
+    },
+    "early-response.png": {
+      "width": 1938,
+      "height": 658,
+      "frames": 1
+    },
+    "space-time-errors.png": {
+      "width": 1938,
+      "height": 1298,
+      "frames": 1
+    },
+    "surface-evolution.gif": {
+      "width": 1200,
+      "height": 700,
+      "frames": 34
+    },
+    "surface-profiles.png": {
+      "width": 1938,
+      "height": 1298,
+      "frames": 1
+    }
+  },
+  "checks_passed": true,
+  "python": "3.14.7 (main, Aug 10 2026, 07:46:56) [GCC 16.1.1 20260728]",
+  "packages": {
+    "numpy": "2.5.2",
+    "scipy": "1.18.1",
+    "mpmath": "1.4.1",
+    "matplotlib": "3.11.1",
+    "Pillow": "12.3.0"
+  }
+}

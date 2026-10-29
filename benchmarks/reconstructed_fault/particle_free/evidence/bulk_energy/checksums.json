@@ -1,0 +1,181 @@
+{
+  "artifacts": {
+    "README.md": {
+      "bytes": 5767,
+      "sha256": "8b717685beb6b1d23b8faee0415735415c7397508fecd846eebef75871167dc2"
+    },
+    "archive-manifest.json": {
+      "bytes": 353108,
+      "sha256": "6a2486b978c0069adac60126981a6153274cef117051e3ec5f419367dc10b831"
+    },
+    "archive.json": {
+      "bytes": 230,
+      "sha256": "c5bafc46df78101cef3695d218e79d474476788834ec0fae734d5017b9138b7c"
+    },
+    "assessment.json": {
+      "bytes": 28681,
+      "sha256": "810f18425431b354f403595dbbe548b3b850f46c00f9527dbe179fb35023bb5d"
+    },
+    "entry.json": {
+      "bytes": 9157,
+      "sha256": "e5f9010671d4124497bccded7a33c78cecad3a48ceaf77f285eeecb0a8942b9b"
+    },
+    "geometry.npz": {
+      "bytes": 46001,
+      "sha256": "2cb929c0ad8b0488da06c7826825ecf1555025104f623b2f072d11bf81d02309"
+    },
+    "h-energy.csv": {
+      "bytes": 43824,
+      "sha256": "6b1ae81d948387d2ec0d3beb7f83022dda83fdd6a09219af0ab8bc78401ad197"
+    },
+    "h-fields.npz": {
+      "bytes": 101963,
+      "sha256": "eb75f94e18eb795235c851378c39aa228640c8725de09d439e263fdf30768233"
+    },
+    "h.json": {
+      "bytes": 4651,
+      "sha256": "2660821e33c0e3b01c66453ac35ca401df62b5143510bf58a0446693291229e5"
+    },
+    "half-energy.csv": {
+      "bytes": 87292,
+      "sha256": "0c1ec7b706e78186dc7fb90eb34090132d2e133d98e89d472c946231e9889886"
+    },
+    "half-fields.npz": {
+      "bytes": 112630,
+      "sha256": "1c2263e86cf4cfabe521b2a05616e86b97dc075ad6389868d9f3c61c10d585e4"
+    },
+    "half.json": {
+      "bytes": 4638,
+      "sha256": "84753e5c5bf38cb326b6f02ac0ad80dc74162b11eff61ae4db8335f62d3ddbbb"
+    },
+    "logged/assessment-final.log": {
+      "bytes": 27920,
+      "sha256": "125be4668c5df834da1e7fff33fdf0f2fc7d0573628ad0d3f3324ec899624580"
+    },
+    "logged/assessment.log": {
+      "bytes": 1189,
+      "sha256": "7d1d6a976cee0e3f592ef0a6c9d4cedd384d3fb0dbcb737e9152b0ac8e609d24"
+    },
+    "logged/baseline-analysis-final.log": {
+      "bytes": 3015,
+      "sha256": "e4882d1fa295b752d947f8a982b7026ea7a12b3340e1992aca0b74293eb021f7"
+    },
+    "logged/baseline-analysis.log": {
+      "bytes": 316,
+      "sha256": "77960800cb3deb95ecee847a4eb9549888eb62f2c7c0c36d6f9a71768315d769"
+    },
+    "logged/bulk-energy-half.json": {
+      "bytes": 523,
+      "sha256": "edbd08d0ee7d32f9e7aef3cdabae2d3a8b138f6c153b98c5abc09eb45a3adcd4"
+    },
+    "logged/bulk-energy-half.log": {
+      "bytes": 43002,
+      "sha256": "f9a20a444ad3c9aace09f4878be28b19a884dd72c71bdeeeae6eec7973280a4c"
+    },
+    "logged/bulk-energy-quarter.json": {
+      "bytes": 526,
+      "sha256": "336b46003fa4d44f07162413f86eb2f447d950670dfcb5b6c3872c98ec3df493"
+    },
+    "logged/bulk-energy-quarter.log": {
+      "bytes": 81968,
+      "sha256": "177b071d2bab809accf8561593f2dac54c3c3fc6c78f82a0f34ba191a2fe70ea"
+    },
+    "logged/bulk-energy-validate-half.json": {
+      "bytes": 449,
+      "sha256": "dada2a72a05f70c7ed11043258716b53908e35c61c2606a5bff7f896f647e129"
+    },
+    "logged/bulk-energy-validate-half.log": {
+      "bytes": 828,
+      "sha256": "a0bd2ef6aaab5850b829e01a5236a2eb841f56ae0959d44ba63712f5cd893dfe"
+    },
+    "logged/bulk-energy-validate-quarter.json": {
+      "bytes": 453,
+      "sha256": "9b589f598ddc5a11d45cc419267addb7144351b6da70f495ce1239deacea9a4c"
+    },
+    "logged/bulk-energy-validate-quarter.log": {
+      "bytes": 828,
+      "sha256": "a0bd2ef6aaab5850b829e01a5236a2eb841f56ae0959d44ba63712f5cd893dfe"
+    },
+    "logged/half-analysis.log": {
+      "bytes": 3418,
+      "sha256": "c095ee57777c155e997495e2c2ec52870ae91f4405af37b7e67733c9adf74160"
+    },
+    "logged/plots-final.log": {
+      "bytes": 381,
+      "sha256": "86776869e4566feddc2c4fca320b19bfaf9d732a00a1e72db3f803b2f2e836de"
+    },
+    "logged/plots.log": {
+      "bytes": 381,
+      "sha256": "a7ec2ea3c3479547b8a4d190eafb04cb04bd770b44bc9d39577820cd58d46597"
+    },
+    "logged/plugin-build.log": {
+      "bytes": 193,
+      "sha256": "26fa2e4c9f8540f6507685bbf511ce26892264d333e92e5d2c70871b59afba7b"
+    },
+    "logged/plugin-configure.log": {
+      "bytes": 3871,
+      "sha256": "db9d1334f54eb68746192784ef8ff44c29a2ba2bce2368e7e98fe03165c9751d"
+    },
+    "parameter-comparison.json": {
+      "bytes": 1457,
+      "sha256": "8565fa1f047f81a02ab013a8a44f6619a3df418714a91ec6cf59affa2a6e0b68"
+    },
+    "portable-replay.log": {
+      "bytes": 28726,
+      "sha256": "70ebd037adb8c23ac0dee308c6c02aaaed6a45cba14fdc46fe516fbb84b93463"
+    },
+    "preservation.json": {
+      "bytes": 20390,
+      "sha256": "b023d7d1b9ce043cec1543234eecdae0dd46d75f202f647fec9da9d667028ff1"
+    },
+    "quarter-energy.csv": {
+      "bytes": 174726,
+      "sha256": "5e3b0e8b34024ec2f41814f01924a48e0523d243d6555d6cb936291889d8c80c"
+    },
+    "quarter-fields.npz": {
+      "bytes": 133935,
+      "sha256": "5c362f512c35ce5039a072034cd1c35b3145317defea1e7a027420d17054e366"
+    },
+    "quarter.json": {
+      "bytes": 4303,
+      "sha256": "359ff2898946bce3a3e1cfbe14c827167e6f47e9e6b23f03a4a0a3dc42aad610"
+    },
+    "reference.tar.xz": {
+      "bytes": 385715760,
+      "sha256": "86f8fc949e337eb51d025068b0bc7b89218f73ec9da49b3e0015939d68078084"
+    },
+    "replay-verification.json": {
+      "bytes": 479,
+      "sha256": "0e5e4ac9bdc0c6e62d79fb39b0e3a99875cdbde35c8c582f6487110a506b37b7"
+    },
+    "run-provenance.json": {
+      "bytes": 1802,
+      "sha256": "7d2754a6c0c6f504e3310a4aa23d1fdfdfe1ae150bea52c5e86cf96d562d9bb2"
+    },
+    "source-delta.patch": {
+      "bytes": 14752,
+      "sha256": "6ca610e73ea87c9075d7d91a4b70fc0b4c6fdeb3909ba093a0007d3e29b08589"
+    },
+    "source-state.json": {
+      "bytes": 7791,
+      "sha256": "b71a1ebfb9dfbf55257d709828b1afff3e755b278c005e97533f0ec2d993d1e1"
+    },
+    "temporal-response.pdf": {
+      "bytes": 160606,
+      "sha256": "f014ab0bdc8f73b5c62d4b8a48c018f94af8d6f0b2801ea03ca48004dd53d73b"
+    },
+    "temporal-response.png": {
+      "bytes": 568211,
+      "sha256": "ecd799c19c6f599cff9510e2a57de28d75fab09a3be75753852e506427e0c20f"
+    },
+    "work-ledger.pdf": {
+      "bytes": 37485,
+      "sha256": "d43b94a324056624a10a760094fdf80a70fa1dec4666244a0e76bff287c27e11"
+    },
+    "work-ledger.png": {
+      "bytes": 509725,
+      "sha256": "9b89b09d17b61c739e2cce030848b9c8492e836890c1c42437140940f07291dd"
+    }
+  },
+  "note": "Archive members are separately hashed in archive-manifest.json; replay/provenance records accompany the archive."
+}

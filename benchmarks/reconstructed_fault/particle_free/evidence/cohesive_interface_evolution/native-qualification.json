@@ -1,0 +1,9 @@
+{
+  "comparison": {
+    "maximum_history_error": 1.1102230246251565e-15,
+    "maximum_weak_Pa": 9.901746089724384e-09,
+    "maximum_ledger_J_m": 1.115427195053087e-14
+  },
+  "restart_bitwise": true,
+  "own_solutions": true
+}

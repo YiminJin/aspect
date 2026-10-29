@@ -1,0 +1,17 @@
+# One fresh propagation-focused scale control; selection documented before run.
+# Same released sides and physical shear-strain schedule through .185 s.
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_free/bulk_cohesive/mixed_boundary.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/build-particle-free/bulk-fracture/plugin/libbulk_propagation_checks.release.so
+set Output directory = $ASPECT_SOURCE_DIR/build-particle-free/bulk-fracture/runs/candidate
+subsection Material model
+  subsection Phase field fault
+    set Cohesions = 2000, 2000
+    set Critical energy release rates = 1, 1
+  end
+end
+subsection Phase field model
+  set Length scale = 0.046875
+end
+subsection Postprocess
+  set List of postprocessors = particles, bulk propagation checks
+end

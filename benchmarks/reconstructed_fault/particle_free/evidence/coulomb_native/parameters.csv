@@ -1,0 +1,18 @@
+parameter,value,unit,meaning
+G,1000000.0,Pa,Shear modulus
+eta,100000000.0,Pa s,Maxwell viscosity
+Gc,1.0,J/m²,Retained fracture parameter
+ell,0.046875,m,Retained phase length
+m,4.0,1,Retained degradation parameter
+strength_drop,2000.0,Pa,Native Cohesions input; distinct from c_r
+mu,0.1,1,Constant friction coefficient
+c_r,0.0,Pa,Residual cohesion
+p0,10000.0,Pa,Prescribed mean confinement
+phi,0.2,1,Exactly fixed phase
+dt,0.0125,s,Constant accepted timestep
+cells,16,1,Fixed uniform mesh
+native_DoFs,617,1,"Includes 162 velocity, 25 pressure, 25 phase and static fields"
+DG_coefficients,432,1,3 components × 9 modes × 16 cells
+quadrature_points,576,1,36 Gauss6 points per cell
+reference_residual_strength,995.0371902099893,Pa,"Pure shear at p′=0, Q=0"
+reference_intact_peak,2955.3324556233765,Pa,Intact threshold; not exercised by fixed phi=.2

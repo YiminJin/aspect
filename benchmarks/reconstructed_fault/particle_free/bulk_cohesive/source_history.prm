@@ -1,0 +1,11 @@
+include $ASPECT_SOURCE_DIR/benchmarks/reconstructed_fault/particle_free/bulk_cohesive/orientation.prm
+set Additional shared libraries = $ASPECT_SOURCE_DIR/build-particle-free/bulk-source-history/plugin/libbulk_source_history_checks.release.so
+set Output directory = $ASPECT_SOURCE_DIR/build-particle-free/bulk-source-history/runs/distorted
+set End time = 0.12
+subsection Geometry model
+  set Model name = bulk source distortion
+  subsection Box
+    set X repetitions = 24
+    set Y repetitions = 32
+  end
+end

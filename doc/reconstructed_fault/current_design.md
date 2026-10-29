@@ -3085,3 +3085,75 @@ and same-count serial restart are reported in
 solve, runtime mesh change, lossy obstacle transfer, transport, moving geometry,
 birth, propagation or general accuracy qualification is added. Prior spatial,
 temporal, quadrature and mirror-branch failures remain evidence.
+
+
+### Selected default-off native exact-jump cohesive–RSF pilot (2026-10-28)
+
+This user-selected implementation is a separate experimental route, enabled by
+`Formulation/Enable cohesive RSF propagation pilot = true`. It does not reinterpret
+P2/PF6, BP3, production checkpoints, or the diffuse-phase fracture inventory.
+The accepted interface calibration and causal candidate/admission hypothesis are
+retained. Bounded native qualification is recorded in
+`particle_free/COHESIVE_RSF_NATIVE_REPORT.md`: 179 accepted two-rank steps from
+the checked .440 s loaded state, new admission/full decohesion/mature sliding,
+general tensor history, outer rejection and same-rank restart. This does not
+qualify general topology, point stresses or quantitative propagation accuracy.
+
+The two-dimensional nonperiodic Cartesian fixed mesh uses ASPECT's actual Q2/P1-discontinuous
+mixed DoFHandler, homogeneous native AffineConstraints, pressure scaling and distributed
+Stokes inverse. The bulk pressure perturbation has zero volume mean; background
+confinement p0 is physical and is never adjusted to improve friction. A fixed compact
+lifting of the signed tangential Q1 interface jump represents the discontinuity,
+with zero normal jump. The closed-contact pressure is the variational reaction to
+normal bubble tests, divided by the **bulk** virtual-work measure. Raw sided
+tractions are retained separately and are not thereby qualified point stresses.
+
+The native bulk owner retains all nine DGQ2 coefficients of each independent
+plane-strain tensor component and the complete native FE projection remainder:
+T_bulk = T_DG + 2G dev3(sym grad d_R) - Pi3[2G dev3(sym grad d_R)]. The physical
+stress also includes 2G sum_j m_j dev3(sym grad L_j). For an accepted displacement
+increment du and signed jump increment dj, beta=(1+G dt/eta)^(-1),
+T_DG_new=beta(T_DG_old+Pi3[2G dev3(sym grad du)]),
+d_R_new=beta(d_R_old+du), and m_new=beta(m_old+dj).
+Thus arbitrary supported DG tensor history and native FE gradients survive;
+the history is not confined to affine/lifting response coefficients. Bulk
+CellId ownership/ghosts and physical checkpoint records follow the accepted-DG
+infrastructure. No transport, AMR or receiving-space information loss is admitted.
+
+Surface physical Gauss3 histories (signed jump, irreversible damage a, normalized
+RSF age, cohesive reference, relaxed jump and absolute slip) have one owner:
+registered left-vertex rows of the native reconstructed-fault manager. The exact
+smooth graph supplies the physical quadrature, not its endpoint polyline. The
+manager holds formed topology only. Temporary zero-history geometry has no
+material identity; age there is the common virgin clock. A new record is admitted
+from the accepted stress field, preserving the formed prefix and bulk history.
+Cohesive storage and Gc integral(a dGamma) count fracture once; topology metadata
+has zero independent fracture/work charge. No geometric phi energy is added.
+
+Every nonlinear trial anchors the same immutable accepted state. Candidate view,
+Gauss histories, DG/native memory and native solution are checked before the
+Simulator's actual outer accept/repeat decision. A successful acceptance swaps
+one complete owner; rejection publishes nothing. Native checkpoints are allowed
+only after that decision/advance_time and restore physical histories, topology,
+identities and clocks before derived geometry/operator caches are rebuilt.
+The new payload is conditional on the default-off option. Explicit prototype
+initialization is a separate checked conversion: common-point physical tensor
+error below 1e-7 Pa and relative bulk-storage error below 1e-10 are required;
+no production checkpoint conversion is supported.
+
+Integration gates are declared before coupled runs: source recurrence scaled
+error <=1e-12; signed weak residual <=1e-8 Pa; BE physical ledger error
+<=1e-10 max(1 J/m, |endpoint work|); same physical trajectory comparisons target
+1% for integrated growth/slip/state with front brackets reported separately.
+Physical trapezoidal-work error is reported against sliding and fracture (1%
+window screen), separately from exact algebraic closure. Restart/rejection must
+preserve accepted physical records and once-only publication. Previous failed
+point/ahead normal-reaction targets remain visible, not an automatic 2% gate.
+
+Changing cut partitions at admission is checked on the unchanged incoming
+physical stress: the energy integration difference is recorded separately from
+fracture/work, not hidden as history transfer. The endpoint clock allowance is
+an operation-count floating-point bound: with n accepted additions, r outer
+retries, u=epsilon/2 and k=n+2r+3, use the outward-rounded
+gamma/(1-gamma) max(|t|,|end|), gamma=ku/(1-ku). The retry count is persisted.
+Only microscopic clock closure is affected; physical tolerances are unchanged.

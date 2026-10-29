@@ -1,0 +1,14 @@
+{
+  "inverse_manufactured_only": true,
+  "forward_field_solve": false,
+  "native_run": false,
+  "max_storage_microforce_work_ledger_defect_J_m-2": 5.016732624614885e-17,
+  "force_scaled_defect": 6.821210263296962e-16,
+  "Maxwell_scaled_defect": 2.952444912789971e-16,
+  "minimum_all_plane_normal_pressure_Pa": 8981.43198782876,
+  "affine_nonzero_microtraction_BE_identity_defect_J_m-2": 0.0,
+  "hold_slip_rate_exactly_zero_and_yield_admissible": true,
+  "initial_history": "Fresh zero T/A/K/Q; phase=.8 fixed. The known K target determines a different loading for each length.",
+  "constant_initial_fracture_storage_J_m-2": 1.6,
+  "whole_candidate_qualified": false
+}

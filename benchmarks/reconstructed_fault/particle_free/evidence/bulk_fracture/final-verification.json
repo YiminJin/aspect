@@ -1,0 +1,104 @@
+{
+  "old_evidence_and_BP3_hash_checks": {
+    "bulk_parallel": 130,
+    "bulk_continued": 40,
+    "protected_BP3": 34
+  },
+  "finite_rectangular_CSVs": {
+    "fracture-scales.csv": {
+      "rows": 2,
+      "columns": 25
+    },
+    "released-map-cells.csv": {
+      "rows": 12288,
+      "columns": 8
+    },
+    "released-contours.csv": {
+      "rows": 894,
+      "columns": 9
+    },
+    "retained-strip-history.csv": {
+      "rows": 148,
+      "columns": 23
+    },
+    "candidate-strip-envelope.csv": {
+      "rows": 2401,
+      "columns": 8
+    },
+    "candidate-map-cells.csv": {
+      "rows": 12288,
+      "columns": 8
+    },
+    "candidate-history.csv": {
+      "rows": 149,
+      "columns": 29
+    },
+    "costs.csv": {
+      "rows": 9,
+      "columns": 3
+    },
+    "candidate-contours.csv": {
+      "rows": 894,
+      "columns": 9
+    },
+    "released-activation-nodes.csv": {
+      "rows": 2533,
+      "columns": 6
+    },
+    "retained-strip-envelope.csv": {
+      "rows": 2401,
+      "columns": 8
+    },
+    "candidate-strip-calibration.csv": {
+      "rows": 141,
+      "columns": 23
+    },
+    "released-centerline.csv": {
+      "rows": 14304,
+      "columns": 7
+    },
+    "candidate-strip-history.csv": {
+      "rows": 148,
+      "columns": 23
+    },
+    "candidate-activation-nodes.csv": {
+      "rows": 578,
+      "columns": 6
+    },
+    "strip-softening-stop.csv": {
+      "rows": 257,
+      "columns": 4
+    },
+    "candidate-early-profiles.csv": {
+      "rows": 1158,
+      "columns": 10
+    },
+    "released-early-profiles.csv": {
+      "rows": 1158,
+      "columns": 10
+    },
+    "retained-strip-calibration.csv": {
+      "rows": 308,
+      "columns": 18
+    },
+    "topology-check.csv": {
+      "rows": 60,
+      "columns": 9
+    },
+    "candidate-increment-history.csv": {
+      "rows": 148,
+      "columns": 6
+    },
+    "candidate-centerline.csv": {
+      "rows": 14304,
+      "columns": 7
+    },
+    "released-history.csv": {
+      "rows": 149,
+      "columns": 29
+    }
+  },
+  "git_diff_check_passed": true,
+  "no_server_jobs": true,
+  "physical_qualification": "mechanism experiment only; original failures and hold nonuniqueness retained"
+}

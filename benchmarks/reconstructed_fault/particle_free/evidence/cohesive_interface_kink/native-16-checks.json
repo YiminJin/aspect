@@ -1,0 +1,88 @@
+{
+  "native": {
+    "nx": 16,
+    "ny": 8,
+    "quadrature": 3,
+    "cells": 128,
+    "bulk_masters": 1313,
+    "jump_modes": 14,
+    "mixed_residual": 1.5543122344752192e-15,
+    "seconds": 9.72118637
+  },
+  "certificate": {
+    "peak_required_Pa": 811.5247674504119,
+    "residual_Pa": 1.5252689837551246e-13,
+    "min_normal_Pa": 9639.38615796123,
+    "feasible": true
+  },
+  "unloaded_certificate": {
+    "peak_required_Pa": 0.0,
+    "residual_Pa": 0.0,
+    "min_normal_Pa": 10000.0,
+    "feasible": true
+  },
+  "overloaded_certificate": {
+    "peak_required_Pa": 4000.000000000001,
+    "residual_Pa": 6.101075935020498e-13,
+    "min_normal_Pa": 12999.999999999998,
+    "feasible": false,
+    "old_tied_weak_shear_Pa": 3.271731008565084e-13,
+    "affine_loading": "u=(gamma*x,-gamma*y), gamma=.0025; tau_xx=5000 Pa, tau_yy=-5000 Pa"
+  },
+  "geometry_publications": 1,
+  "physical_publications_after_trial": 1,
+  "rollback": true,
+  "retry_identity": true,
+  "restart_identity": true,
+  "preinstalled_identity": true,
+  "duplicate_rejected": true,
+  "physical_transfer_error": 0.0,
+  "storage_before": {
+    "bulk_J_m": 0.4905056001790797,
+    "bond_J_m": 0.0016777196424159746,
+    "fracture_J_m": 0.11591549620171684
+  },
+  "storage_after": {
+    "bulk_J_m": 0.4905056001790797,
+    "bond_J_m": 0.0016777196424159746,
+    "fracture_J_m": 0.11591549620171684
+  },
+  "old_history_bitwise": true,
+  "point_errors": {
+    "resistance": 0.0,
+    "derivative": 0.0,
+    "pressure_derivative": 0.0,
+    "new_damage": 0.0,
+    "new_theta": 0.0,
+    "storage": 0.0,
+    "friction": 0.0,
+    "radiation": 6.776263578034403e-21
+  },
+  "physical_step": {
+    "post_tied_certificate": {
+      "peak_required_Pa": 1174.1253720486097,
+      "residual_Pa": 3.050537967510249e-13,
+      "min_normal_Pa": 9628.103556729991,
+      "feasible": true
+    },
+    "minimum_symmetric_tangent_Pa_m": 49673430.01779809,
+    "fixed_pressure_fd_relative": 1.9251950953997394e-05,
+    "work_J_m": 0.9508913969730506,
+    "bulk_change_J_m": 0.7708093693080023,
+    "bond_change_J_m": 5.3354583979126806e-05,
+    "fracture_increment_J_m": 0.0,
+    "maxwell_loss_J_m": 5.045259875166066e-05,
+    "bulk_BE_J_m": 0.1798634134336808,
+    "surface_remainder_J_m": 5.568708768184807e-07,
+    "ledger_error_J_m": 1.1102230246251565e-16,
+    "pressure_tangent_relative": 3.031792876066013e-05,
+    "residual_Pa": 2.2527046894538214e-10,
+    "tangent_relative": 3.6489170273514367e-10,
+    "iterations": 15,
+    "peak_increment_m": 1.5269764374496817e-06,
+    "sliding_loss_J_m": 0.00011425017775972687
+  },
+  "peak_old_jump_m": 7.859671949208896e-05,
+  "quadrature_energy_relative": 1.4180590408822082e-09,
+  "mixed_symmetry_relative": 1.2266260547640467e-16
+}

@@ -1,0 +1,802 @@
+{
+  "cases": {
+    "h": {
+      "dt": 0.0025,
+      "nominal_steps": 64,
+      "accepted_steps": 64,
+      "terminal_roundoff_steps": [],
+      "first_cap": {
+        "step": 55,
+        "time": 0.13750000000000007,
+        "previous_time": 0.13500000000000006
+      },
+      "first_nodes": [
+        {
+          "dof": 852,
+          "x": 0.6875,
+          "y": 0.28125,
+          "angle": -49.398705354995535
+        },
+        {
+          "dof": 861,
+          "x": 0.71875,
+          "y": 0.296875,
+          "angle": -42.87890360333855
+        },
+        {
+          "dof": 863,
+          "x": 0.71875,
+          "y": 0.3125,
+          "angle": -40.60129464500447
+        },
+        {
+          "dof": 2047,
+          "x": 0.71875,
+          "y": 0.6875,
+          "angle": 40.60129464500447
+        },
+        {
+          "dof": 2068,
+          "x": 0.6875,
+          "y": 0.71875,
+          "angle": 49.398705354995535
+        },
+        {
+          "dof": 2069,
+          "x": 0.71875,
+          "y": 0.703125,
+          "angle": 42.87890360333855
+        }
+      ],
+      "final_cap_increment": 0.00167120483795711,
+      "final_cap_growth_L2": 0.00010728972516439168,
+      "initial_fields_bitwise_equal": true,
+      "endpoint_work": 2.3286706178141543,
+      "trapezoidal_work": 2.2765641647041086,
+      "work_scale": 2.2765641647041086,
+      "storage_change": 1.8919823047733928,
+      "physical_dissipation": 0.3846940139665846,
+      "final_endpoint_remainder": 0.05199429907417695,
+      "historical_endpoint_relative": 0.022327889000885094,
+      "final_trapezoidal_remainder": -0.00011215403586886677,
+      "trapezoidal_total_variation": 0.00011216349370093097,
+      "maximum_cumulative_trapezoidal_remainder": 0.00011215876478489887,
+      "trapezoidal_variation_relative": 4.9268760107848384e-05,
+      "cancellation_fraction": 8.432183905948687e-05,
+      "stages": {
+        "initial_hold": {
+          "endpoint_work": 0.0,
+          "trapezoidal_work": 0.0,
+          "storage_change": 0.0,
+          "physical_dissipation": 4.4930179903140217e-32,
+          "trapezoidal_signed_remainder": -4.4930179903140217e-32,
+          "trapezoidal_absolute_remainder": 4.4930179903140217e-32
+        },
+        "loading": {
+          "endpoint_work": 2.3286706178141543,
+          "trapezoidal_work": 2.2765641647041086,
+          "storage_change": 1.8923606228371703,
+          "physical_dissipation": 0.38431570063172316,
+          "trapezoidal_signed_remainder": -0.00011215876478489887,
+          "trapezoidal_absolute_remainder": 0.00011215876478489887
+        },
+        "final_hold": {
+          "endpoint_work": 0.0,
+          "trapezoidal_work": 0.0,
+          "storage_change": -0.0003783180637775274,
+          "physical_dissipation": 0.0003783133348614953,
+          "trapezoidal_signed_remainder": 4.728916032102127e-09,
+          "trapezoidal_absolute_remainder": 4.728916032102127e-09
+        }
+      },
+      "independent_errors": {
+        "fracture": 8.881784197001252e-15,
+        "cohesive": 1.9949319973733282e-16,
+        "bulk": 9.215961327413424e-13,
+        "bulk_dissipation": 2.5939536976715694e-17,
+        "cohesive_dissipation": 1.3023131564034868e-20,
+        "friction_dissipation": 2.636779683484747e-16,
+        "traction_loss": 8.199278929421627e-19,
+        "phase_remainder": 3.381514344116777e-21,
+        "fracture_loss": 1.1858461261560205e-20,
+        "stress_loss": 2.2659825404947043e-15,
+        "stored_change": 1.3322676295501878e-13,
+        "DG_decode": 5.144896141472601e-12,
+        "reaction_moment": 9.632276487536728e-08
+      },
+      "boundary_checks": {
+        "endpoint_work": 0.0,
+        "generalized_work": 0.0,
+        "affine_increment": 0.0
+      },
+      "reaction_origin": "loading generalized reactions recovered from saved W_BE/dgamma; independent stress check",
+      "dense_stress_checks": 4,
+      "mechanical_residual_max": 1.4582505724778497e-12,
+      "phase_KKT_max": 4.789424309567171e-08,
+      "source_max": 6.365009989160956e-15,
+      "numerical_terms_J_per_m": {
+        "stress_loss": 0.05122012679901005,
+        "traction_loss": 0.000748441375788145,
+        "phase_remainder": -4.221701332706802e-07,
+        "fracture_loss": 2.6153075229813432e-05,
+        "phase_work": -1.8597537611330257e-12,
+        "mechanical_work": 7.672946479577315e-12,
+        "pressure_work": 1.1027625086887174e-18
+      },
+      "velocity_residual_work_J_per_m": 7.672945376814806e-12,
+      "hold_reaction_start_end": [
+        2315.8423604464792,
+        2315.610790683734
+      ],
+      "endpoint_trapezoidal_difference": 0.052106453110045824,
+      "constant_increment_telescoping_prediction": 0.052106453110045775,
+      "work_telescoping_defect": 4.85722573273506e-17,
+      "initial_fracture_storage": 9.435349953117555,
+      "final_storage_changes": {
+        "bulk": 1.8773779048518633,
+        "cohesive": 0.014046906092849098,
+        "fracture": 0.0005574938286336817
+      },
+      "physical_dissipation_components": {
+        "Db": 0.0018228506241800898,
+        "Dc": 7.229687677406615e-06,
+        "Df": 0.3828639336547271
+      },
+      "historical_endpoint_screen_passed": false,
+      "bulk_independent_scope": "every saved baseline state"
+    },
+    "half": {
+      "dt": 0.00125,
+      "nominal_steps": 128,
+      "accepted_steps": 128,
+      "terminal_roundoff_steps": [],
+      "first_cap": {
+        "step": 110,
+        "time": 0.1375000000000001,
+        "previous_time": 0.1362500000000001
+      },
+      "first_nodes": [
+        {
+          "dof": 852,
+          "x": 0.6875,
+          "y": 0.28125,
+          "angle": -49.398705354995535
+        },
+        {
+          "dof": 861,
+          "x": 0.71875,
+          "y": 0.296875,
+          "angle": -42.87890360333855
+        },
+        {
+          "dof": 863,
+          "x": 0.71875,
+          "y": 0.3125,
+          "angle": -40.60129464500447
+        },
+        {
+          "dof": 2047,
+          "x": 0.71875,
+          "y": 0.6875,
+          "angle": 40.60129464500447
+        },
+        {
+          "dof": 2068,
+          "x": 0.6875,
+          "y": 0.71875,
+          "angle": 49.398705354995535
+        },
+        {
+          "dof": 2069,
+          "x": 0.71875,
+          "y": 0.703125,
+          "angle": 42.87890360333855
+        }
+      ],
+      "final_cap_increment": 0.0016713254589928947,
+      "final_cap_growth_L2": 0.00010730009331433988,
+      "initial_fields_bitwise_equal": true,
+      "endpoint_work": 2.3026867957078605,
+      "trapezoidal_work": 2.276633441798712,
+      "work_scale": 2.276633441798712,
+      "storage_change": 1.8920027875781873,
+      "physical_dissipation": 0.38467324492924715,
+      "final_endpoint_remainder": 0.026010763200426827,
+      "historical_endpoint_relative": 0.011295832003253814,
+      "final_trapezoidal_remainder": -4.259070872174917e-05,
+      "trapezoidal_total_variation": 4.25954376492446e-05,
+      "maximum_cumulative_trapezoidal_remainder": 4.2593073185496885e-05,
+      "trapezoidal_variation_relative": 1.8709835701785612e-05,
+      "cancellation_fraction": 0.00011101957759807046,
+      "stages": {
+        "initial_hold": {
+          "endpoint_work": 0.0,
+          "trapezoidal_work": 0.0,
+          "storage_change": 0.0,
+          "physical_dissipation": 1.800693553973847e-31,
+          "trapezoidal_signed_remainder": -1.800693553973847e-31,
+          "trapezoidal_absolute_remainder": 1.800693553973847e-31
+        },
+        "loading": {
+          "endpoint_work": 2.3026867957078605,
+          "trapezoidal_work": 2.276633441798712,
+          "storage_change": 1.8923811120912575,
+          "physical_dissipation": 0.3842949227806407,
+          "trapezoidal_signed_remainder": -4.2593073185496885e-05,
+          "trapezoidal_absolute_remainder": 4.2593073185496885e-05
+        },
+        "final_hold": {
+          "endpoint_work": 0.0,
+          "trapezoidal_work": 0.0,
+          "storage_change": -0.0003783245130701829,
+          "physical_dissipation": 0.00037832214860643516,
+          "trapezoidal_signed_remainder": 2.3644637477129534e-09,
+          "trapezoidal_absolute_remainder": 2.3644637477129534e-09
+        }
+      },
+      "independent_errors": {
+        "fracture": 7.105427357601002e-15,
+        "cohesive": 1.491862189340054e-16,
+        "bulk": 4.085620730620576e-14,
+        "bulk_dissipation": 2.1291020162184093e-17,
+        "cohesive_dissipation": 5.61159327555974e-21,
+        "friction_dissipation": 1.717376241217039e-16,
+        "traction_loss": 1.7787691892340307e-19,
+        "phase_remainder": 1.064416012233236e-20,
+        "fracture_loss": 4.658681209898652e-21,
+        "stress_loss": null,
+        "stored_change": 8.384404281969182e-13,
+        "DG_decode": null,
+        "reaction_moment": null
+      },
+      "boundary_checks": {
+        "endpoint_work": 1.3877787807814457e-17,
+        "generalized_work": 9.020562075079397e-17,
+        "affine_increment": 1.6940658945086007e-21
+      },
+      "reaction_origin": "direct accepted unconstrained nodal reactions and increments",
+      "dense_stress_checks": 3,
+      "mechanical_residual_max": 9.48072324110753e-10,
+      "phase_KKT_max": 9.597099891941915e-08,
+      "source_max": 4.214427087844898e-15,
+      "numerical_terms_J_per_m": {
+        "stress_loss": 0.025621892862791297,
+        "traction_loss": 0.0003755195465798383,
+        "phase_remainder": -2.1030731139622083e-07,
+        "fracture_loss": 1.3561111059336713e-05,
+        "phase_work": -1.107589243948967e-11,
+        "mechanical_work": 2.3663594073214014e-11,
+        "pressure_work": 1.0346080781203703e-19
+      },
+      "velocity_residual_work_J_per_m": 2.366359396975321e-11,
+      "hold_reaction_start_end": [
+        2315.85368081318,
+        2315.6195817309103
+      ],
+      "endpoint_trapezoidal_difference": 0.02605335390914858,
+      "constant_increment_telescoping_prediction": 0.026053353909148296,
+      "work_telescoping_defect": 2.8449465006019636e-16,
+      "initial_fracture_storage": 9.435349953117555,
+      "final_storage_changes": {
+        "bulk": 1.8773978890751262,
+        "cohesive": 0.01404734318946993,
+        "fracture": 0.0005575553135397371
+      },
+      "physical_dissipation_components": {
+        "Db": 0.0017991473730849486,
+        "Dc": 7.048811411945683e-06,
+        "Df": 0.3828670487447502
+      },
+      "historical_endpoint_screen_passed": false,
+      "bulk_independent_scope": "initial, loading stop and final snapshots"
+    },
+    "quarter": {
+      "dt": 0.000625,
+      "nominal_steps": 256,
+      "accepted_steps": 257,
+      "terminal_roundoff_steps": [
+        {
+          "step": 257,
+          "time": 0.16,
+          "dt": 6.661338147750939e-16
+        }
+      ],
+      "first_cap": {
+        "step": 219,
+        "time": 0.13687499999999983,
+        "previous_time": 0.13624999999999984
+      },
+      "first_nodes": [
+        {
+          "dof": 861,
+          "x": 0.71875,
+          "y": 0.296875,
+          "angle": -42.87890360333855
+        },
+        {
+          "dof": 2069,
+          "x": 0.71875,
+          "y": 0.703125,
+          "angle": 42.87890360333855
+        }
+      ],
+      "final_cap_increment": 0.001671385770285374,
+      "final_cap_growth_L2": 0.00010730527749801879,
+      "initial_fields_bitwise_equal": true,
+      "endpoint_work": 2.289694187573233,
+      "trapezoidal_work": 2.276667478779736,
+      "work_scale": 2.276667478779736,
+      "storage_change": 1.892013029154933,
+      "physical_dissipation": 0.3846629408776883,
+      "final_endpoint_remainder": 0.013018217540611849,
+      "historical_endpoint_relative": 0.005685570418645909,
+      "final_trapezoidal_remainder": -8.491252884612775e-06,
+      "trapezoidal_total_variation": 8.493617418766246e-06,
+      "maximum_cumulative_trapezoidal_remainder": 8.492435151664311e-06,
+      "trapezoidal_variation_relative": 3.73072374333678e-06,
+      "cancellation_fraction": 0.0002783895290888738,
+      "stages": {
+        "initial_hold": {
+          "endpoint_work": 0.0,
+          "trapezoidal_work": 0.0,
+          "storage_change": 0.0,
+          "physical_dissipation": 6.715933378320055e-31,
+          "trapezoidal_signed_remainder": -6.715933378320055e-31,
+          "trapezoidal_absolute_remainder": 6.715933378320055e-31
+        },
+        "loading": {
+          "endpoint_work": 2.289694187573233,
+          "trapezoidal_work": 2.276667478779736,
+          "storage_change": 1.892391356892789,
+          "physical_dissipation": 0.38428461432209937,
+          "trapezoidal_signed_remainder": -8.492435151664311e-06,
+          "trapezoidal_absolute_remainder": 8.492435151664311e-06
+        },
+        "final_hold": {
+          "endpoint_work": 0.0,
+          "trapezoidal_work": 0.0,
+          "storage_change": -0.00037832773785595464,
+          "physical_dissipation": 0.00037832655558890307,
+          "trapezoidal_signed_remainder": 1.1822670515362514e-09,
+          "trapezoidal_absolute_remainder": 1.1822671019347486e-09
+        }
+      },
+      "independent_errors": {
+        "fracture": 1.4210854715202004e-14,
+        "cohesive": 1.4137996329210978e-16,
+        "bulk": 3.175237850427948e-14,
+        "bulk_dissipation": 4.73322010925703e-18,
+        "cohesive_dissipation": 3.520480687025686e-21,
+        "friction_dissipation": 9.194034422677078e-17,
+        "traction_loss": 5.548065804515667e-20,
+        "phase_remainder": 6.180693536996223e-21,
+        "fracture_loss": 1.641126335305207e-21,
+        "stress_loss": null,
+        "stored_change": 3.161915174132446e-13,
+        "DG_decode": null,
+        "reaction_moment": null
+      },
+      "boundary_checks": {
+        "endpoint_work": 1.734723475976807e-17,
+        "generalized_work": 4.5102810375396984e-17,
+        "affine_increment": 8.470329472543003e-22
+      },
+      "reaction_origin": "direct accepted unconstrained nodal reactions and increments",
+      "dense_stress_checks": 4,
+      "mechanical_residual_max": 8.634763404755352e-10,
+      "phase_KKT_max": 8.701062890671779e-08,
+      "source_max": 3.866240450727846e-15,
+      "numerical_terms_J_per_m": {
+        "stress_loss": 0.012822488703458791,
+        "traction_loss": 0.0001889261884986632,
+        "phase_remainder": -1.0462217249623535e-07,
+        "fracture_loss": 6.907284396021702e-06,
+        "phase_work": -4.596045428491714e-12,
+        "mechanical_work": 1.8133680928549817e-11,
+        "pressure_work": -8.547344679796713e-20
+      },
+      "velocity_residual_work_J_per_m": 1.8133681014023266e-11,
+      "hold_reaction_start_end": [
+        2315.8593410660487,
+        2315.627767434484
+      ],
+      "endpoint_trapezoidal_difference": 0.013026708793496464,
+      "constant_increment_telescoping_prediction": 0.013026708793496508,
+      "work_telescoping_defect": 4.336808689942018e-17,
+      "initial_fracture_storage": 9.435349953117555,
+      "final_storage_changes": {
+        "bulk": 1.8774078813548627,
+        "cohesive": 0.014047561743192124,
+        "fracture": 0.0005575860568587387
+      },
+      "physical_dissipation_components": {
+        "Db": 0.0017873745029262922,
+        "Dc": 6.959767236214027e-06,
+        "Df": 0.3828686066075257
+      },
+      "historical_endpoint_screen_passed": true,
+      "bulk_independent_scope": "initial, loading stop and final snapshots"
+    }
+  },
+  "comparisons": {
+    "growth_normalization": "delta_phi relative to identical initial phase; physical cap Q1 L2 / peak",
+    "pairs": {
+      "h_half": [
+        {
+          "time": 0.05,
+          "growth_L2_relative": null,
+          "growth_Linf_relative": null,
+          "peak_relative": null,
+          "phase_difference_Linf": 0.0,
+          "Y_relative_L2": null
+        },
+        {
+          "time": 0.1,
+          "growth_L2_relative": null,
+          "growth_Linf_relative": null,
+          "peak_relative": null,
+          "phase_difference_Linf": 0.0,
+          "Y_relative_L2": null
+        },
+        {
+          "time": 0.1275,
+          "growth_L2_relative": null,
+          "growth_Linf_relative": null,
+          "peak_relative": null,
+          "phase_difference_Linf": 0.0,
+          "Y_relative_L2": 4.417595268578771e-05
+        },
+        {
+          "time": 0.13,
+          "growth_L2_relative": null,
+          "growth_Linf_relative": null,
+          "peak_relative": null,
+          "phase_difference_Linf": 0.0,
+          "Y_relative_L2": 4.093637844984196e-05
+        },
+        {
+          "time": 0.135,
+          "growth_L2_relative": null,
+          "growth_Linf_relative": null,
+          "peak_relative": null,
+          "phase_difference_Linf": 0.0,
+          "Y_relative_L2": 3.611071476906274e-05
+        },
+        {
+          "time": 0.1375,
+          "growth_L2_relative": 0.0011330098633514265,
+          "growth_Linf_relative": 0.000975088313996538,
+          "peak_relative": 0.000975088313996538,
+          "phase_difference_Linf": 4.636437790812853e-08,
+          "Y_relative_L2": 3.36802529576093e-05
+        },
+        {
+          "time": 0.14,
+          "growth_L2_relative": 0.00022962164355552916,
+          "growth_Linf_relative": 0.00019167377183095693,
+          "peak_relative": 0.00019167377183095693,
+          "phase_difference_Linf": 5.194043532492747e-08,
+          "Y_relative_L2": 3.1569025289773675e-05
+        },
+        {
+          "time": 0.145,
+          "growth_L2_relative": 0.0001310801924184738,
+          "growth_Linf_relative": 0.00011282759928458965,
+          "peak_relative": 0.00011282759928432538,
+          "phase_difference_Linf": 9.257670636054864e-08,
+          "Y_relative_L2": 2.6906545842590433e-05
+        },
+        {
+          "time": 0.15,
+          "growth_L2_relative": 0.00010141417193994419,
+          "growth_Linf_relative": 7.217088397682385e-05,
+          "peak_relative": 7.21708839744885e-05,
+          "phase_difference_Linf": 1.2062103578848807e-07,
+          "Y_relative_L2": 2.2461449893743076e-05
+        },
+        {
+          "time": 0.1525,
+          "growth_L2_relative": 0.00010141417193994419,
+          "growth_Linf_relative": 7.217088397682385e-05,
+          "peak_relative": 7.21708839744885e-05,
+          "phase_difference_Linf": 1.2062103578848807e-07,
+          "Y_relative_L2": 2.24612921577113e-05
+        },
+        {
+          "time": 0.16,
+          "growth_L2_relative": 0.00010141417193994419,
+          "growth_Linf_relative": 7.217088397682385e-05,
+          "peak_relative": 7.21708839744885e-05,
+          "phase_difference_Linf": 1.2062103578848807e-07,
+          "Y_relative_L2": 2.2460099472208704e-05
+        }
+      ],
+      "half_quarter": [
+        {
+          "time": 0.05,
+          "growth_L2_relative": null,
+          "growth_Linf_relative": null,
+          "peak_relative": null,
+          "phase_difference_Linf": 0.0,
+          "Y_relative_L2": null
+        },
+        {
+          "time": 0.1,
+          "growth_L2_relative": null,
+          "growth_Linf_relative": null,
+          "peak_relative": null,
+          "phase_difference_Linf": 0.0,
+          "Y_relative_L2": null
+        },
+        {
+          "time": 0.1275,
+          "growth_L2_relative": null,
+          "growth_Linf_relative": null,
+          "peak_relative": null,
+          "phase_difference_Linf": 0.0,
+          "Y_relative_L2": 2.2088130539197713e-05
+        },
+        {
+          "time": 0.13,
+          "growth_L2_relative": null,
+          "growth_Linf_relative": null,
+          "peak_relative": null,
+          "phase_difference_Linf": 0.0,
+          "Y_relative_L2": 2.046834034953681e-05
+        },
+        {
+          "time": 0.135,
+          "growth_L2_relative": null,
+          "growth_Linf_relative": null,
+          "peak_relative": null,
+          "phase_difference_Linf": 0.0,
+          "Y_relative_L2": 1.8055511756906833e-05
+        },
+        {
+          "time": 0.1375,
+          "growth_L2_relative": 0.0005662055339048397,
+          "growth_Linf_relative": 0.0004873175026936992,
+          "peak_relative": 0.00048731750268914104,
+          "phase_difference_Linf": 2.3182709130847856e-08,
+          "Y_relative_L2": 1.6840254856008504e-05
+        },
+        {
+          "time": 0.14,
+          "growth_L2_relative": 0.00011479657314153586,
+          "growth_Linf_relative": 9.58230837769331e-05,
+          "peak_relative": 9.582308377133226e-05,
+          "phase_difference_Linf": 2.596896593663571e-08,
+          "Y_relative_L2": 1.5784663607116595e-05
+        },
+        {
+          "time": 0.145,
+          "growth_L2_relative": 6.553519038761528e-05,
+          "growth_Linf_relative": 5.640907171909006e-05,
+          "peak_relative": 5.6409071718561545e-05,
+          "phase_difference_Linf": 4.628708486116573e-08,
+          "Y_relative_L2": 1.3453439383076919e-05
+        },
+        {
+          "time": 0.15,
+          "growth_L2_relative": 5.0705331176887966e-05,
+          "growth_Linf_relative": 3.608460329836758e-05,
+          "peak_relative": 3.608460329836758e-05,
+          "phase_difference_Linf": 6.031129247928424e-08,
+          "Y_relative_L2": 1.1230796470899602e-05
+        },
+        {
+          "time": 0.1525,
+          "growth_L2_relative": 5.0705331176887966e-05,
+          "growth_Linf_relative": 3.608460329836758e-05,
+          "peak_relative": 3.608460329836758e-05,
+          "phase_difference_Linf": 6.031129247928424e-08,
+          "Y_relative_L2": 1.1230257722206617e-05
+        },
+        {
+          "time": 0.16,
+          "growth_L2_relative": 5.0705331176887966e-05,
+          "growth_Linf_relative": 3.608460329836758e-05,
+          "peak_relative": 3.608460329836758e-05,
+          "phase_difference_Linf": 6.031129247928424e-08,
+          "Y_relative_L2": 1.1230337226595162e-05
+        }
+      ],
+      "h_quarter": [
+        {
+          "time": 0.05,
+          "growth_L2_relative": null,
+          "growth_Linf_relative": null,
+          "peak_relative": null,
+          "phase_difference_Linf": 0.0,
+          "Y_relative_L2": null
+        },
+        {
+          "time": 0.1,
+          "growth_L2_relative": null,
+          "growth_Linf_relative": null,
+          "peak_relative": null,
+          "phase_difference_Linf": 0.0,
+          "Y_relative_L2": null
+        },
+        {
+          "time": 0.1275,
+          "growth_L2_relative": null,
+          "growth_Linf_relative": null,
+          "peak_relative": null,
+          "phase_difference_Linf": 0.0,
+          "Y_relative_L2": 6.626310746077606e-05
+        },
+        {
+          "time": 0.13,
+          "growth_L2_relative": null,
+          "growth_Linf_relative": null,
+          "peak_relative": null,
+          "phase_difference_Linf": 0.0,
+          "Y_relative_L2": 6.140388089965256e-05
+        },
+        {
+          "time": 0.135,
+          "growth_L2_relative": null,
+          "growth_Linf_relative": null,
+          "peak_relative": null,
+          "phase_difference_Linf": 0.0,
+          "Y_relative_L2": 5.4165574528536305e-05
+        },
+        {
+          "time": 0.1375,
+          "growth_L2_relative": 0.0016985910738316892,
+          "growth_Linf_relative": 0.0014619306390836009,
+          "peak_relative": 0.0014619306390836009,
+          "phase_difference_Linf": 6.954708703875954e-08,
+          "Y_relative_L2": 5.051994065805571e-05
+        },
+        {
+          "time": 0.14,
+          "growth_L2_relative": 0.0003443925314515994,
+          "growth_Linf_relative": 0.0002874784888335947,
+          "peak_relative": 0.00028747848883039427,
+          "phase_difference_Linf": 7.790940126091266e-08,
+          "Y_relative_L2": 4.7353190671956365e-05
+        },
+        {
+          "time": 0.145,
+          "growth_L2_relative": 0.00019660708900564672,
+          "growth_Linf_relative": 0.00016923030650274707,
+          "peak_relative": 0.00016923030650274707,
+          "phase_difference_Linf": 1.3886379122106385e-07,
+          "Y_relative_L2": 4.035962371810067e-05
+        },
+        {
+          "time": 0.15,
+          "growth_L2_relative": 0.0001521146035470419,
+          "growth_Linf_relative": 0.00010825288301747344,
+          "peak_relative": 0.00010825288301513816,
+          "phase_difference_Linf": 1.809323282677723e-07,
+          "Y_relative_L2": 3.369199549624981e-05
+        },
+        {
+          "time": 0.1525,
+          "growth_L2_relative": 0.0001521146035470419,
+          "growth_Linf_relative": 0.00010825288301747344,
+          "peak_relative": 0.00010825288301513816,
+          "phase_difference_Linf": 1.809323282677723e-07,
+          "Y_relative_L2": 3.369129864820388e-05
+        },
+        {
+          "time": 0.16,
+          "growth_L2_relative": 0.0001521146035470419,
+          "growth_Linf_relative": 0.00010825288301747344,
+          "peak_relative": 0.00010825288301513816,
+          "phase_difference_Linf": 1.809323282677723e-07,
+          "Y_relative_L2": 3.369018531357811e-05
+        }
+      ]
+    },
+    "orders": {
+      "endpoint_work": {
+        "values": [
+          2.3286706178141543,
+          2.3026867957078605,
+          2.289694187573233
+        ],
+        "first_difference": 0.025983822106293797,
+        "second_difference": 0.012992608134627659,
+        "observed_order": 0.9999225942193993,
+        "extrapolated_finest_uncertainty": 0.012994002447204943
+      },
+      "trapezoidal_work": {
+        "values": [
+          2.2765641647041086,
+          2.276633441798712,
+          2.276667478779736
+        ],
+        "first_difference": -6.927709460358145e-05,
+        "second_difference": -3.40369810238883e-05,
+        "observed_order": 1.0252753464110147,
+        "extrapolated_finest_uncertainty": 3.28749246111431e-05
+      },
+      "storage_change": {
+        "values": [
+          1.8919823047733928,
+          1.8920027875781873,
+          1.892013029154933
+        ],
+        "first_difference": -2.0482804794497156e-05,
+        "second_difference": -1.0241576745784187e-05,
+        "observed_order": 0.9999754399234645,
+        "extrapolated_finest_uncertainty": 1.0241925454727968e-05
+      },
+      "physical_dissipation": {
+        "values": [
+          0.3846940139665846,
+          0.38467324492924715,
+          0.3846629408776883
+        ],
+        "first_difference": 2.076903733744251e-05,
+        "second_difference": 1.0304051558829297e-05,
+        "observed_order": 1.0112226301302862,
+        "extrapolated_finest_uncertainty": 1.0145592241892398e-05
+      },
+      "final_cap_increment": {
+        "values": [
+          0.00167120483795711,
+          0.0016713254589928947,
+          0.001671385770285374
+        ],
+        "first_difference": -1.2062103578458494e-07,
+        "second_difference": -6.031129247928424e-08,
+        "observed_order": 0.9999814711318237,
+        "extrapolated_finest_uncertainty": 6.031284169306135e-08
+      },
+      "final_cap_growth_L2": {
+        "values": [
+          0.00010728972516439168,
+          0.00010730009331433988,
+          0.00010730527749801879
+        ],
+        "first_difference": -1.0368149948197813e-08,
+        "second_difference": -5.184183678912449e-09,
+        "observed_order": 0.9999697484600505,
+        "extrapolated_finest_uncertainty": 5.184401097657446e-09
+      }
+    },
+    "temporal_budgets": {
+      "h_half": {
+        "maximum_component_differences": {
+          "trapezoidal_work": 6.927709460358145e-05,
+          "storage_change": 2.048925408715263e-05,
+          "physical_dissipation": 2.0777851082454113e-05
+        },
+        "maximum_sum_component_difference_relative": 4.855599401449973e-05
+      },
+      "half_quarter": {
+        "maximum_component_differences": {
+          "trapezoidal_work": 3.40369810238883e-05,
+          "storage_change": 1.0244801531555936e-05,
+          "physical_dissipation": 1.0308458541330445e-05
+        },
+        "maximum_sum_component_difference_relative": 2.3978135413097012e-05
+      }
+    },
+    "strict_reference_match_passed": false,
+    "physical_energy_criterion_is_postprocessing": true
+  },
+  "recommended_criterion": {
+    "work_normalization": "sum absolute trapezoidal work over this event; initial storage excluded",
+    "balance_total_variation": 3.73072374333678e-06,
+    "temporal_component_Cauchy_budget": 2.3978135413097012e-05,
+    "combined_energy_budget": 2.770885915643379e-05,
+    "recommended_energy_tolerance": 0.01,
+    "growth_L2_maximum": 0.0005662055339048397,
+    "growth_Linf_maximum": 0.0004873175026936992,
+    "recommended_growth_tolerance": 0.05,
+    "energy_budget_passed": true,
+    "growth_budget_passed": true,
+    "native_acceptance_rules_changed": false,
+    "onset_common_bracket": [
+      0.1362500000000001,
+      0.13687499999999983
+    ],
+    "qualification": "bounded practical work/temporal accuracy on this fixed mesh; no spatial or propagation claim"
+  }
+}

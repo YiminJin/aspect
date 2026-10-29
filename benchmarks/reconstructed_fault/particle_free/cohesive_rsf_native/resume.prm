@@ -1,0 +1,6 @@
+include benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/pilot.prm
+# Copy the valid two-rank native restart anchor into this new output directory.
+# Native resume never reads the prototype input or an external mechanical kernel.
+set Resume computation = true
+set Output directory = $ASPECT_SOURCE_DIR/build-particle-free/cohesive-rsf-native/reproduced-pilot
+set End time = 0.462375

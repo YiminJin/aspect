@@ -1,0 +1,119 @@
+{
+  "common_path": [
+    {
+      "comparison": "original lifting mesh spread",
+      "left": "short-narrow64",
+      "right": "short-narrow96",
+      "growth_difference_m": 0.08135642797915188,
+      "growth_relative": 0.09827160104900273,
+      "slip_relative": 0.054802923764015195,
+      "full_front_difference_m": 0.0747687982627038,
+      "process_front_difference_m": 0.08621154582466388
+    },
+    {
+      "comparison": "fixed lifting mesh spread",
+      "left": "short-wide64",
+      "right": "short-wide96",
+      "growth_difference_m": -0.016682528185330225,
+      "growth_relative": 0.015268199221042951,
+      "slip_relative": 0.005589383841777614,
+      "full_front_difference_m": 0.009130571322922956,
+      "process_front_difference_m": 0.03863798193112585
+    },
+    {
+      "comparison": "fixed lifting similar-DoF alternative",
+      "left": "short-wide-Q3",
+      "right": "short-wide96",
+      "growth_difference_m": 0.00750077308412056,
+      "growth_relative": 0.006864864634899612,
+      "slip_relative": 0.005102389559216189,
+      "full_front_difference_m": 0.01141261952636038,
+      "process_front_difference_m": 0.013679521987976182
+    },
+    {
+      "comparison": "fixed lifting degree spread",
+      "left": "short-wide-Q3",
+      "right": "short-wide64",
+      "growth_difference_m": 0.024183301269450785,
+      "growth_relative": 0.02247623549725371,
+      "slip_relative": 0.010751869727919935,
+      "full_front_difference_m": 0.0022820502055874298,
+      "process_front_difference_m": 0.0523174998723379
+    },
+    {
+      "comparison": "fitted resolution",
+      "left": "short-fitted64",
+      "right": "short-fitted96",
+      "growth_difference_m": 0.0006717380873175749,
+      "growth_relative": 0.0005900152090726345,
+      "slip_relative": 0.0024088318655600223,
+      "full_front_difference_m": 0.0007218754748909437,
+      "process_front_difference_m": 0.0007109009690365013
+    },
+    {
+      "comparison": "fitted alternative",
+      "left": "short-fitted-Q3",
+      "right": "short-fitted96",
+      "growth_difference_m": -0.00017232987201487582,
+      "growth_relative": 0.0001513644192371777,
+      "slip_relative": 0.0014149948872881248,
+      "full_front_difference_m": 0.00020890033293509216,
+      "process_front_difference_m": 0.00014501419026476085
+    },
+    {
+      "comparison": "fixed lifting vs fitted",
+      "left": "short-wide96",
+      "right": "short-fitted96",
+      "growth_difference_m": -0.0458774461826863,
+      "growth_relative": 0.040296049177868304,
+      "slip_relative": 0.019184991120657434,
+      "full_front_difference_m": 0.014700270423246608,
+      "process_front_difference_m": 0.07826656978033818
+    },
+    {
+      "comparison": "off-grid support",
+      "left": "short-offset96",
+      "right": "short-wide96",
+      "growth_difference_m": -0.009797602038305042,
+      "growth_relative": 0.008966970602266467,
+      "slip_relative": 0.014499302305657541,
+      "full_front_difference_m": 0.00869103233867583,
+      "process_front_difference_m": 0.010606075097564123
+    },
+    {
+      "comparison": "fitted time",
+      "left": "short-fitted96",
+      "right": "short-fitted96-half",
+      "growth_difference_m": 0.004787082763207051,
+      "growth_relative": 0.004222445898429823,
+      "slip_relative": 0.0027106121362468986,
+      "full_front_difference_m": 0.0033598916715203496,
+      "process_front_difference_m": 0.006492334727623597
+    },
+    {
+      "comparison": "fixed lifting time",
+      "left": "short-wide96",
+      "right": "short-wide96-half",
+      "growth_difference_m": 0.004282583592628786,
+      "growth_relative": 0.003934933216223404,
+      "slip_relative": 0.0024661809043842,
+      "full_front_difference_m": 0.002670068597497346,
+      "process_front_difference_m": 0.0052830045233598615
+    },
+    {
+      "comparison": "original lifting degree spread",
+      "left": "short-narrow-Q3",
+      "right": "short-narrow64",
+      "growth_difference_m": 0.07606871664698844,
+      "growth_relative": 0.08366281918757643,
+      "slip_relative": 0.04249730110557172,
+      "full_front_difference_m": 0.031067784718525816,
+      "process_front_difference_m": 0.09648027124912342
+    }
+  ],
+  "short_scope": "Separately initialized diagnostic responses from common saved surface/memory data; initial reconstruction differences are measured, not charged as physical work.",
+  "initial_tied_reaction_note": "Raw nodal force without newly tied reactions is not a free residual; least-squares elimination of tied reactions reports the irreducible free part.",
+  "all_native_rejection_retry_restart": true,
+  "all_once_only": true,
+  "maximum_FD_relative": 4.3728255245357296e-07
+}

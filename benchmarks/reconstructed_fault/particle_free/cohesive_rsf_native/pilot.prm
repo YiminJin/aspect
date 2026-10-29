@@ -1,0 +1,90 @@
+# Native fixed-mesh finite-wall propagation pilot. Seconds, metres, pascals.
+set Dimension = 2
+set Use years instead of seconds = false
+set Start time = 0.440
+set End time = 0.462375
+set Maximum first time step = 0.000125
+set Maximum time step = 0.000125
+set Nonlinear solver scheme = single Advection, iterated Newton Stokes
+set Nonlinear solver failure strategy = abort program
+set Pressure normalization = volume
+set Surface pressure = 0
+set Additional shared libraries = $ASPECT_SOURCE_DIR/build-particle-free/cohesive-rsf-native/checks-native/libcohesive_rsf_native_checks.release.so
+set Output directory = $ASPECT_SOURCE_DIR/build-particle-free/cohesive-rsf-native/pilot-r2
+subsection Formulation
+  set Enable cohesive RSF propagation pilot = true
+end
+subsection Cohesive RSF pilot
+  set Initial state = checked prototype snapshot
+  set Initial state file = build-particle-free/cohesive-interface-formed-turn/coarse/final.json
+end
+subsection Geometry model
+  set Model name = cohesive pilot box
+  subsection Box
+    set X extent = 12
+    set Y extent = 12
+    set X repetitions = 64
+    set Y repetitions = 64
+  end
+end
+subsection Gravity model
+  set Model name = vertical
+  subsection Vertical
+    set Magnitude = 0
+  end
+end
+subsection Material model
+  set Model name = simple
+  subsection Simple model
+    # Numerical viscosity for the G-reference Stokes preconditioner only.
+    # Physical G and eta are independently declared in Cohesive RSF pilot.
+    set Viscosity = 1e6
+    set Thermal expansion coefficient = 0
+  end
+end
+subsection Boundary velocity model
+  set Prescribed velocity boundary indicators = left:cohesive pilot loading, right:cohesive pilot loading, bottom:cohesive pilot loading, top:cohesive pilot loading
+end
+subsection Boundary temperature model
+  set Fixed temperature boundary indicators =
+end
+subsection Initial temperature model
+  set Model name = function
+  subsection Function
+    set Function expression = 0
+  end
+end
+subsection Mesh refinement
+  set Initial global refinement = 0
+  set Initial adaptive refinement = 0
+  set Time steps between mesh refinement = 0
+end
+subsection Discretization
+  set Stokes velocity polynomial degree = 2
+  set Use locally conservative discretization = true
+end
+subsection Solver parameters
+  subsection Stokes solver parameters
+    set Stokes solver type = block AMG
+    set Linear solver tolerance = 1e-13
+    set Number of cheap Stokes solver steps = 0
+    set GMRES solver restart length = 100
+  end
+end
+subsection Time stepping
+  set List of model names = function, cohesive pilot rejection control
+  subsection Function
+    set Function expression = 0.000125
+  end
+end
+subsection Checkpointing
+  set Steps between checkpoint = 8
+  set Time between checkpoint = 0
+end
+subsection Termination criteria
+  set Termination criteria = end time
+  set Checkpoint on termination = true
+end
+subsection Postprocess
+  set List of postprocessors =
+end
