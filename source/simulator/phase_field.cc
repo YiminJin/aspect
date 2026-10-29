@@ -1166,10 +1166,22 @@ namespace aspect
   PhaseFieldHandler<dim>::evaluate_cell_fracture(
     const LinearAlgebra::BlockVector &trial,const bool tangent) const
   {
+    return evaluate_cell_fracture(trial,tangent,nullptr);
+  }
+
+  template <int dim>
+  typename PhaseFieldHandler<dim>::CellFractureEnergy
+  PhaseFieldHandler<dim>::evaluate_cell_fracture(
+    const LinearAlgebra::BlockVector &trial,const bool tangent,
+    std::map<std::pair<unsigned int,unsigned int>,double> *sparse_hessian) const
+  {
+    const bool sparse=sparse_hessian!=nullptr;
+    if(sparse)sparse_hessian->clear();
     const auto &material=Plugins::get_plugin_as_type<const MaterialModel::PhaseFieldFault<dim>>(this->get_material_model());
-    AssertThrow(material.uses_dg_trial_stress_history() && material.has_fe_strain_history()
+    AssertThrow(((material.uses_dg_trial_stress_history() && material.has_fe_strain_history())
+                 || material.uses_bulk_cohesive_phase())
                 && (Utilities::MPI::n_mpi_processes(this->get_mpi_communicator())==1
-                    || material.uses_consistent_endpoint_phase()),
+                    || material.uses_consistent_endpoint_phase() || material.uses_bulk_cohesive_phase()),
                 ExcMessage("Cell fracture integration requires DG history; MPI requires the native endpoint."));
     for (const double coefficient:critical_energy_densities)
       AssertThrow(coefficient==critical_energy_densities[0],ExcMessage("PF3 requires homogeneous fracture coefficients."));
@@ -1180,7 +1192,7 @@ namespace aspect
     CellFractureEnergy result;
     result.gradient.assign(n,0.);
     result.roundoff_scale.assign(n,0.);
-    if (tangent)
+    if (tangent && !sparse)
       result.hessian.reinit(n,n);
     const double A=critical_energy_densities[0];
     const double ell=geometric_function->get_length_scale();
@@ -1230,9 +1242,11 @@ namespace aspect
                     for (const auto u:cell->vertex_indices())
                       {
                         const unsigned int j=this->get_fe().component_to_system_index(component,u);
-                        result.hessian(row,indices[j]-offset)+=fe.JxW(q)*A*
+                        const double value=fe.JxW(q)*A*
                                                               (geometric_function->second_derivative(phi[q])*shape*fe.shape_value_component(j,q,component)
                                                                +2*ell*ell*(gradient*fe.shape_grad_component(j,q,component)));
+                        if(sparse)(*sparse_hessian)[{row,indices[j]-offset}]+=value;
+                        else result.hessian(row,indices[j]-offset)+=value;
                       }
                 }
             }
@@ -1245,7 +1259,13 @@ namespace aspect
         aspect::internal::endpoint_sum(result.gradient,this->get_mpi_communicator());
         aspect::internal::endpoint_sum(result.roundoff_scale,this->get_mpi_communicator());
         energy=aspect::internal::endpoint_energy_sum(energy,this->get_mpi_communicator());
-        if (tangent)
+        if(tangent && sparse)
+          {
+            const auto local=*sparse_hessian;sparse_hessian->clear();
+            for(const auto &part:Utilities::MPI::all_gather(this->get_mpi_communicator(),local))
+              for(const auto &entry:part)(*sparse_hessian)[entry.first]+=entry.second;
+          }
+        else if (tangent)
           {
             std::vector<double> entries(n*n);
             for(unsigned int i=0;i<n;++i)for(unsigned int j=0;j<n;++j)entries[i*n+j]=result.hessian(i,j);
@@ -1905,7 +1925,7 @@ namespace aspect
   {
     const auto *fault = dynamic_cast<const MaterialModel::PhaseFieldFault<dim>*>(&this->get_material_model());
     if (fault && fault->uses_independent_bulk_history() && !fault->is_mature_frictional_fault()
-        && !fault->uses_consistent_endpoint_phase())
+        && !fault->uses_consistent_endpoint_phase() && !fault->uses_bulk_cohesive_phase())
       {
         // The exact normalization adjoint couples normal columns. This
         // restricted serial verification uses a complete phase block. PF2 DG

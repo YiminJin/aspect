@@ -118,7 +118,8 @@ namespace aspect
                                         : initial_time_step);
               const MaxwellCoefficients coefficients =
                 compute_maxwell_coefficients(eta, G, time_step);
-              out.viscosities[i] = coefficients.eta_ve;
+              out.viscosities[i] = bulk_cohesive_phase ? G*time_step/(1.+time_step*G/eta)
+                                                       : coefficients.eta_ve;
             }
         }
     }
@@ -423,11 +424,23 @@ namespace aspect
                             "frozen after initialization. This is useful when conducting benchmarks "
                             "with pre-existing faults.");
 
+          prm.declare_entry("Bulk cohesive flow rule", "fixed scalar",
+                            Patterns::Selection("fixed scalar|fixed tensor|in-plane radial tensor|closed Coulomb fixed phase"),
+                            "Experimental bulk-only point return. Fixed scalar preserves the "
+                            "existing law/default. Tensor modes retain physical cohesive memory "
+                            "and use distinct checkpoint tags; conversion is unsupported. Closed Coulomb "
+                            "is restricted to fixed phase, zero residual cohesion and a prescribed "
+                            "background Surface pressure plus solved zero-mean perturbation pressure.");
+
           prm.declare_entry("Fault constitutive mode", "cohesive",
-                            Patterns::Selection("cohesive|mature frictional"),
+                            Patterns::Selection("cohesive|mature frictional|bulk cohesive"),
                             "Mature frictional removes cohesive force/storage for a permanently "
                             "prescribed phase profile. Requires Evolve phase field=false, fixed "
-                            "reconstructed geometry and a fresh compatible initialization.");
+                            "reconstructed geometry and a fresh compatible initialization. "
+                            "Bulk cohesive selects the default-off fixed-mesh bulk experiment "
+                            "with independent DGQ2/native-FE history and bulk recoverable shear. "
+                            "Bounded parallel assembly uses a rank-zero direct solve; "
+                            "no reconstructed-surface mechanics, RSF, transport or AMR.");
 
           prm.declare_entry("Phase driving history", "incremental work",
                             Patterns::Selection("incremental work|recoverable energy"),
@@ -584,6 +597,13 @@ namespace aspect
             initial_time_step *= year_in_seconds;
 
           evolve_phase_field = prm.get_bool("Evolve phase field");
+          bulk_cohesive_phase = prm.get("Fault constitutive mode")=="bulk cohesive";
+          const auto bulk_rule = prm.get("Bulk cohesive flow rule");
+          bulk_flow_rule = bulk_rule=="fixed scalar" ? BulkFlowRule::scalar
+            : (bulk_rule=="fixed tensor" ? BulkFlowRule::fixed_tensor
+               : (bulk_rule=="in-plane radial tensor" ? BulkFlowRule::radial_tensor : BulkFlowRule::coulomb_fixed_phase));
+          AssertThrow(bulk_cohesive_phase || bulk_flow_rule==BulkFlowRule::scalar,
+                      ExcMessage("Tensor flow is confined to the experimental bulk cohesive model."));
           fe_strain_history = prm.get("Bulk history representation") == "accepted FE strain";
           dg_trial_stress_history = prm.get("Bulk history representation") == "DG trial stress";
           dg_accepted_history = prm.get_bool("Enable prescribed DG accepted history");
@@ -694,6 +714,63 @@ namespace aspect
         prm.leave_subsection();
       }
       prm.leave_subsection();
+      if(bulk_cohesive_phase)
+        {
+          // Tensor histories use the same unique CellId ownership and native
+          // checkpoint exchange as scalar histories. Distributed phase solves
+          // retain the uniform-mesh constraint guard in the bulk solver.
+          AssertThrow(dim==2
+                      && this->get_parameters().enable_phase_field
+                      && !this->get_parameters().reconstruct_faults
+                      && !this->get_parameters().mesh_deformation_enabled
+                      && this->get_parameters().adaptive_refinement_interval==0
+                      && this->get_parameters().initial_adaptive_refinement==0
+                      && this->get_parameters().additional_refinement_times.empty()
+                      && this->get_parameters().stokes_velocity_degree==2
+                      && this->get_parameters().nonlinear_solver==Parameters<dim>::NonlinearSolver::single_Advection_iterated_Newton_Stokes
+                      && (bulk_flow_rule==BulkFlowRule::coulomb_fixed_phase ? !evolve_phase_field : evolve_phase_field)
+                      && homogeneous_mesh_data && !mature_frictional_fault
+                      && dg_trial_stress_history && !fe_strain_history && !consistent_endpoint_phase
+                      && !dg_accepted_history && !fault_friction.has_state_variable(),
+                      ExcMessage("Bulk cohesive experiment requires fixed-mesh 2-D Q2 mechanics, "
+                                 "homogeneous mesh data and physical phase evolution (or explicitly fixed "
+                                 "phase for closed Coulomb); disable the old "
+                                 "surface/DG-endpoint path. No RSF, transport or moving mesh is supported."));
+          for(unsigned int j=0;j<elastic_shear_moduli.size();++j)
+            AssertThrow(elastic_shear_moduli[j]==elastic_shear_moduli[0]
+                        && reference_viscosities[j]==reference_viscosities[0]
+                        && thermal_viscosity_exponents[j]==0.
+                        && critical_energy_release_rates[j]==critical_energy_release_rates[0]
+                        && cohesions[j]==cohesions[0]
+                        && cohesions[j]>0. && critical_energy_release_rates[j]>0.
+                        && radiation_damping_coefficients[j]==0.,
+                        ExcMessage("Bulk experiment requires matched homogeneous G/eta/Gc/cohesion and constant friction."));
+          AssertThrow(minimum_viscosity<=reference_viscosities[0] && maximum_viscosity>=reference_viscosities[0],
+                      ExcMessage("Bulk experiment requires the configured homogeneous viscosity without clipping."));
+          double mu=-1.;
+          for(unsigned int j=0;j<elastic_shear_moduli.size();++j)
+            {
+              std::vector<double> fractions(elastic_shear_moduli.size(),0.);fractions[j]=1.;
+              const double rate=fault_friction.get_minimum_slip_rate();
+              const double value=fault_friction.friction_coefficient(fractions,rate);
+              AssertThrow(value>=0. && (j==0 || value==mu)
+                          && fault_friction.friction_coefficient_derivative_wrt_slip_rate(fractions,rate)==0.,
+                          ExcMessage("Bulk experiment requires a homogeneous constant stateless friction coefficient."));
+              mu=value;
+            }
+          AssertThrow(this->get_parameters().surface_pressure>=0.
+                      && this->get_parameters().temperature_method==Parameters<dim>::AdvectionFieldMethod::static_field
+                      && std::all_of(this->get_parameters().compositional_field_methods.begin(),
+                                     this->get_parameters().compositional_field_methods.end(),
+                                     [](const auto method){return method==Parameters<dim>::AdvectionFieldMethod::static_field;}),
+                      ExcMessage("Bulk experiment requires prescribed compression and static bulk fields."));
+          prm.enter_subsection("Phase field model");
+          AssertThrow(prm.get("Geometric function type")=="AT1"
+                      && prm.get_double("Degradation curvature parameter")==1.,
+                      ExcMessage("Bulk experiment currently uses AT1 and Lorentz p=1."));
+          prm.leave_subsection();
+          return;
+        }
       AssertThrow(!consistent_particle_strain || (dim == 2 && mature_frictional_fault && !evolve_phase_field
                                                   && (!this->get_parameters().resume_computation || (dg_trial_stress_history && dg_accepted_history))),
                   ExcMessage("Deviatoric particle stress requires frozen mature 2-D mechanics; restart is restricted to accepted DG samples."));

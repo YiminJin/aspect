@@ -24,6 +24,7 @@
 #include <aspect/mesh_deformation/interface.h>
 #include <aspect/melt.h>
 #include <aspect/reconstructed_fault/manager.h>
+#include <aspect/reconstructed_fault/cohesive_system.h>
 #include <aspect/material_model/phase_field_fault.h>
 
 #include <deal.II/base/mpi.h>
@@ -594,11 +595,14 @@ namespace aspect
       }
 
     signals.post_resume_load_user_data(triangulation);
+    if(parameters.cohesive_rsf_propagation)cohesive_rsf_system->restore();
     // Material slots are connected before particle deserialization slots.
     // Rebuild the restricted native owner only after all mesh/particle data.
     if (parameters.reconstruct_faults)
       if (auto *fault=dynamic_cast<MaterialModel::PhaseFieldFault<dim>*>(material_model.get()))
         fault->restore_dg_accepted_history();
+    if(auto *fault=dynamic_cast<MaterialModel::PhaseFieldFault<dim>*>(material_model.get()))
+      if(fault->uses_bulk_cohesive_phase())fault->restore_bulk_cohesive_history();
 
     // Only the pending interval may be reduced. In particular, old_time_step
     // describes the last committed history update and must not be changed.
@@ -677,6 +681,14 @@ namespace aspect
     ar &prescribed_solution_manager;
     ar &boundary_velocity_manager;
     ar &boundary_traction_manager;
+    if(parameters.cohesive_rsf_propagation)
+      {
+        AssertThrow(!pending_dg_endpoint_publication,ExcMessage("A pending native cohesive endpoint cannot be checkpointed."));
+        std::string record;
+        if constexpr(Archive::is_saving::value)record=cohesive_rsf_system->checkpoint();
+        ar &record;
+        if constexpr(Archive::is_loading::value)cohesive_rsf_system->load_checkpoint(record);
+      }
 
     if (parameters.reconstruct_faults)
       {
@@ -684,6 +696,9 @@ namespace aspect
         if (auto *fault=dynamic_cast<MaterialModel::PhaseFieldFault<dim>*>(material_model.get()))
           fault->serialize_dg_accepted_history(ar);
       }
+
+    if(auto *fault=dynamic_cast<MaterialModel::PhaseFieldFault<dim>*>(material_model.get()))
+      if(fault->uses_bulk_cohesive_phase())fault->serialize_bulk_cohesive_history(ar);
 
 // The following are not manager classes but straight up plugins and so don't
 // currently have the ability to serialize themselves. We should add those later.

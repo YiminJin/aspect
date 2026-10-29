@@ -86,6 +86,7 @@ namespace WorldBuilder
 
 namespace aspect
 {
+  namespace CohesiveInterface { class System; }
   namespace Postprocess
   {
     template <int dim> class MomentCycle;
@@ -605,6 +606,11 @@ namespace aspect
       void solve_reconstructed_fault_endpoint_phase (bool publish_history = true,
                                                      const LinearAlgebra::BlockVector *initial_trial = nullptr,
                                                      ReconstructedFaultVector *trial_slip_rate = nullptr);
+      /** Default-off, serial fixed-direction bulk cohesive model. Reuses the
+       * native FE, AffineConstraints, direct factorization and outer lifecycle. */
+      void solve_bulk_cohesive_phase();
+      /** Default-off fixed-mesh exact-jump cohesive--RSF native system. */
+      void solve_cohesive_rsf_propagation();
       /** Test-access-only, noncommitting complete-step failure injection. */
       std::function<void()> benchmark_endpoint_precommit;
       /** PF6a publishes only after the native timestep manager accepts. */
@@ -1863,6 +1869,7 @@ namespace aspect
       /** Canonical non-checkpointed reconstructed-fault coupling components. */
       std::unique_ptr<ReconstructedFaultSurfaceSystem<dim>> reconstructed_fault_surface_system;
       std::unique_ptr<Assemblers::ReconstructedFaultStokes<dim>> reconstructed_fault_stokes_coupling;
+      std::unique_ptr<CohesiveInterface::System> cohesive_rsf_system;
 
 
       MPI_Comm                            mpi_communicator;

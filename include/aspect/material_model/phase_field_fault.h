@@ -299,6 +299,9 @@ namespace aspect
         {
           return fe_strain_history;
         }
+        /** Selected serial fixed-direction bulk cohesive experiment. The
+         * reconstructed surface is not a constitutive support restriction. */
+        bool uses_bulk_cohesive_phase() const { return bulk_cohesive_phase; }
         /** Restricted PF2 tensor history; fixed localization and no transport. */
         bool uses_dg_trial_stress_history() const
         {
@@ -428,6 +431,14 @@ namespace aspect
         friend struct DGGeometryUpdate<dim>;
 
         struct FEStrainState;
+        struct BulkCohesiveState;
+        struct BulkCohesiveArchive;
+        bool bulk_cohesive_phase=false;
+        std::shared_ptr<BulkCohesiveState> bulk_cohesive_state;
+        std::shared_ptr<BulkCohesiveArchive> bulk_cohesive_archive;
+        void initialize_bulk_cohesive_history(const LinearAlgebra::BlockVector &);
+        template<class Archive> void serialize_bulk_cohesive_history(Archive &);
+        void restore_bulk_cohesive_history();
         struct FEStrainUpdate;
         struct DGTransport;
         struct DGCheckpoint;
@@ -1036,6 +1047,11 @@ namespace aspect
 
         /** Rank-local timings: no synchronization, including during exceptions. */
         std::unique_ptr<TimerOutput> performance_timer;
+
+        /** Default-preserving experimental bulk point law. This is separate
+         * from mature/surface constitutive modes and cannot convert histories. */
+        enum class BulkFlowRule { scalar, fixed_tensor, radial_tensor, coulomb_fixed_phase };
+        BulkFlowRule bulk_flow_rule = BulkFlowRule::scalar;
         /**
          * @}
          */

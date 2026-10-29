@@ -29,6 +29,7 @@
 #include <aspect/mesh_deformation/free_surface.h>
 #include <aspect/phase_field.h>
 #include <aspect/reconstructed_fault/manager.h>
+#include <aspect/reconstructed_fault/cohesive_system.h>
 
 #include <deal.II/base/parameter_handler.h>
 
@@ -761,6 +762,11 @@ namespace aspect
                          "Whether to reconstruct initial sharp faults from the converged Q1 "
                          "phase-field solution. This parameter requires `Enable phase field' to "
                          "be set to `true'.");
+      prm.declare_entry ("Enable cohesive RSF propagation pilot", "false",
+                         Patterns::Bool (),
+                         "Experimental fixed-mesh 2D exact-jump cohesive--RSF system. "
+                         "Uses native bulk mechanics and accepted histories with one "
+                         "surface fracture inventory; incompatible with bulk phase fracture.");
       prm.declare_entry ("Enable prescribed dilation", "false",
                          Patterns::Bool (),
                          "Whether to include additional terms on the right-hand side of "
@@ -1866,6 +1872,11 @@ namespace aspect
       enable_elasticity = prm.get_bool("Enable elasticity");
       enable_phase_field = prm.get_bool("Enable phase field");
       reconstruct_faults = prm.get_bool("Reconstruct faults from phase field");
+      cohesive_rsf_propagation = prm.get_bool("Enable cohesive RSF propagation pilot");
+      AssertThrow(!cohesive_rsf_propagation || (dim==2 && !enable_phase_field && !reconstruct_faults
+                  && !enable_elasticity),
+                  ExcMessage("The exact-jump cohesive--RSF pilot is 2D with one fracture inventory, "
+                             "no diffuse fracture, legacy elasticity, melt or moving mesh."));
       AssertThrow(!reconstruct_faults || enable_phase_field,
                   ExcMessage("`Reconstruct faults from phase field' requires `Enable phase field'."));
       enable_prescribed_dilation = prm.get_bool("Enable prescribed dilation");
@@ -2483,6 +2494,7 @@ namespace aspect
     Melt::Parameters<dim>::declare_parameters (prm);
     PhaseFieldHandler<dim>::declare_parameters (prm);
     ReconstructedFaultManager<dim>::declare_parameters(prm);
+    CohesiveInterface::System::declare_parameters(prm);
     Newton::Parameters::declare_parameters (prm);
     StokesMatrixFreeHandler<dim>::declare_parameters (prm);
     MeshDeformation::MeshDeformationHandler<dim>::declare_parameters (prm);

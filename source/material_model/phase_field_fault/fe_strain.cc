@@ -122,6 +122,8 @@ namespace aspect
 
     template<int dim> Quadrature<dim> PhaseFieldFault<dim>::mechanical_quadrature() const
     {
+      if(bulk_cohesive_phase)
+        return QGauss<dim>(fe_bulk_normal_quadrature_points);
       // Explicit higher-order mature particle controls share the same rule.
       // The default (three) retains the native particle quadrature exactly.
       if (!uses_independent_bulk_history()

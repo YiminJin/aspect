@@ -1116,6 +1116,11 @@ namespace aspect
   template <int dim>
   void Simulator<dim>::solve_single_advection_iterated_newton_stokes (const bool use_newton_iterations)
   {
+    if(parameters.cohesive_rsf_propagation)
+      { solve_cohesive_rsf_propagation(); return; }
+    if(const auto *fault=dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(material_model.get()))
+      if(fault->uses_bulk_cohesive_phase())
+        { solve_bulk_cohesive_phase(); return; }
     if (parameters.reconstruct_faults && timestep_number>0)
       {
         auto &fault=Plugins::get_plugin_as_type<MaterialModel::PhaseFieldFault<dim>>(*material_model);

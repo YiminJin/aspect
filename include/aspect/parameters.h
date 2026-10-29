@@ -666,6 +666,9 @@ namespace aspect
 
     /** Whether sharp faults are reconstructed from the solved phase field. */
     bool                           reconstruct_faults;
+    /** Default-off fixed-mesh exact-jump cohesive–RSF pilot. This selects its
+     * own fracture inventory and never combines with bulk phase fracture. */
+    bool                           cohesive_rsf_propagation;
 
     /**
      * Determines whether to use a fully-implicit constitutive model, i.e.

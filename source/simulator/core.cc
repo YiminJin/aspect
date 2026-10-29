@@ -28,6 +28,7 @@
 #include <aspect/material_model/phase_field_fault.h>
 #include <aspect/reconstructed_fault/manager.h>
 #include <aspect/reconstructed_fault/surface_system.h>
+#include <aspect/reconstructed_fault/cohesive_system.h>
 #include <aspect/simulator/assemblers/reconstructed_fault_stokes.h>
 #include <aspect/advection_field.h>
 #include <aspect/volume_of_fluid/handler.h>
@@ -533,6 +534,14 @@ namespace aspect
           }
       }
 
+    if(parameters.cohesive_rsf_propagation)
+      {
+        if constexpr(dim==2)
+          {
+            cohesive_rsf_system=std::make_unique<CohesiveInterface::System>(*this);
+            cohesive_rsf_system->parse_parameters(prm);
+          }
+      }
     mesh_refinement_manager.initialize_simulator (*this);
     mesh_refinement_manager.parse_parameters (prm);
 
@@ -1755,6 +1764,8 @@ namespace aspect
   void
   Simulator<dim>::refine_mesh (const unsigned int max_grid_level)
   {
+    AssertThrow(!parameters.cohesive_rsf_propagation,
+                ExcMessage("Native cohesive RSF pilot uses a fixed mesh; history transfer is not selected."));
     const auto *dg_model=dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(material_model.get());
     const bool transfer_older=dg_model && dg_model->uses_dg_trial_stress_history() && dg_model->has_fe_strain_history();
     const bool native_dg_transfer=transfer_older && dg_model->uses_consistent_endpoint_phase();
@@ -2029,11 +2040,11 @@ namespace aspect
     // Restricted accepted histories publish only after complete outer acceptance.
     // Restore outer-step scratch/bookkeeping too if an exception escapes after
     // advection or predictor setup. Legacy failure policies are unchanged.
-    const auto *endpoint_model=parameters.reconstruct_faults
-      ? dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(material_model.get()) : nullptr;
-    const bool endpoint_step=endpoint_model && timestep_number>0
-      && (endpoint_model->uses_consistent_endpoint_phase()
-          || (endpoint_model->is_mature_frictional_fault() && endpoint_model->uses_dg_trial_stress_history()));
+    const auto *endpoint_model=dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(material_model.get());
+    const bool endpoint_step=timestep_number>0 && (parameters.cohesive_rsf_propagation || (endpoint_model
+      && (endpoint_model->uses_bulk_cohesive_phase()
+          || (parameters.reconstruct_faults && (endpoint_model->uses_consistent_endpoint_phase()
+              || (endpoint_model->is_mature_frictional_fault() && endpoint_model->uses_dg_trial_stress_history()))))));
     std::unique_ptr<LinearAlgebra::BlockVector> entry_solution,entry_linearization;
     std::unique_ptr<TableHandler> entry_statistics;
     const double entry_pressure=last_pressure_normalization_adjustment;
@@ -2243,8 +2254,11 @@ namespace aspect
             last_pressure_normalization_adjustment=entry_pressure;
             nonlinear_iteration=entry_iteration;
             rebuild_stokes_matrix=rebuild_stokes_preconditioner=true;
-            auto &model=Plugins::get_plugin_as_type<MaterialModel::PhaseFieldFault<dim>>(*material_model);
-            model.prepare_reconstructed_fault_mechanical_solve();
+            if(!parameters.cohesive_rsf_propagation)
+              {
+                auto &model=Plugins::get_plugin_as_type<MaterialModel::PhaseFieldFault<dim>>(*material_model);
+                if(!model.uses_bulk_cohesive_phase())model.prepare_reconstructed_fault_mechanical_solve();
+              }
           }
         throw;
       }
@@ -2261,8 +2275,11 @@ namespace aspect
               last_pressure_normalization_adjustment=entry_pressure;
               nonlinear_iteration=entry_iteration;
               rebuild_stokes_matrix=rebuild_stokes_preconditioner=true;
-              auto &model=Plugins::get_plugin_as_type<MaterialModel::PhaseFieldFault<dim>>(*material_model);
-              model.prepare_reconstructed_fault_mechanical_solve();
+              if(!parameters.cohesive_rsf_propagation)
+                {
+                  auto &model=Plugins::get_plugin_as_type<MaterialModel::PhaseFieldFault<dim>>(*material_model);
+                  if(!model.uses_bulk_cohesive_phase())model.prepare_reconstructed_fault_mechanical_solve();
+                }
             };
           if(!accept){restore_entry();return;}
           try {candidate(true);}
@@ -2388,8 +2405,16 @@ namespace aspect
           return;
         }
     if (parameters.resume_computation)
+      if(parameters.cohesive_rsf_propagation && cohesive_rsf_system->at_end_time())
+        {
+          pcout<<"Restored native cohesive endpoint already satisfies termination criteria."<<std::endl;
+          computing_timer.print_summary();
+          return;
+        }
+    if (parameters.resume_computation)
       if (const auto *fault=dynamic_cast<const MaterialModel::PhaseFieldFault<dim> *>(material_model.get()))
-        if (fault->uses_dg_trial_stress_history() && fault->uses_consistent_endpoint_phase()
+        if ((fault->uses_bulk_cohesive_phase()
+             || (fault->uses_dg_trial_stress_history() && fault->uses_consistent_endpoint_phase()))
             && time_stepping_manager.should_simulation_terminate_now())
           {
             // A completed native endpoint checkpoint stores the next-step
@@ -2457,7 +2482,10 @@ namespace aspect
         // solve_timestep () in the individual solver schemes
         if (!time_stepping_manager.should_repeat_time_step()
             && !parameters.run_postprocessors_on_nonlinear_iterations)
-          postprocess ();
+          {
+            if(parameters.cohesive_rsf_propagation)cohesive_rsf_system->write_output();
+            postprocess ();
+          }
 
         // if the time stepping manager tells us to refine the mesh,
         // we need to do this before going to the next time step
@@ -2494,10 +2522,14 @@ namespace aspect
         maybe_write_timing_output();
 
         // update values for timestep, increment time step by one.
-        advance_time(new_time_step_size);
+        const bool cohesive_final=parameters.cohesive_rsf_propagation && cohesive_rsf_system->at_end_time();
+        const double checkpoint_next_step=cohesive_final && time_step>0.
+          && new_time_step_size<time_step*std::sqrt(std::numeric_limits<double>::epsilon())
+          ? time_step : new_time_step_size;
+        advance_time(checkpoint_next_step);
 
         // Check whether to terminate the simulation:
-        const bool should_terminate = time_stepping_manager.should_simulation_terminate_now();
+        const bool should_terminate = cohesive_final || time_stepping_manager.should_simulation_terminate_now();
 
         const bool write_checkpoint_due_to_termination
           = should_terminate && time_stepping_manager.need_checkpoint_on_terminate();

@@ -335,6 +335,9 @@ namespace aspect
       };
       CellFractureEnergy evaluate_cell_fracture(
         const LinearAlgebra::BlockVector &, bool tangent) const;
+      CellFractureEnergy evaluate_cell_fracture(
+        const LinearAlgebra::BlockVector &, bool tangent,
+        std::map<std::pair<unsigned int,unsigned int>,double> *sparse_hessian) const;
       const PhaseField::SolverParameters &get_solver_parameters() const { return solver_parameters; }
 
       double crack_surface_density(const double          phase_field_value,
