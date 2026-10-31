@@ -1,0 +1,11 @@
+# Four actual accepted steps from the retained failed incoming state.
+include benchmarks/reconstructed_fault/particle_free/cohesive_rsf_instability/half-event.prm
+subsection Time stepping
+ subsection Cohesive RSF
+  set Use residual resolved estimator = true
+  set Maximum continuous history error = .0005
+ end
+end
+subsection Termination criteria
+ set End step = 664
+end

@@ -1,0 +1,67 @@
+{
+  "incoming_step": 660,
+  "first_accepted_step": 661,
+  "original_failed_candidate_matches": {
+    "new_damage": true,
+    "new_jump_m": true,
+    "new_rate_m_s": true
+  },
+  "error_estimates": [
+    {
+      "step": "661",
+      "time_s": "374.57851954399456",
+      "dt_s": "3.1783919794706729e-10",
+      "raw_log_speed": "0.33053339833198608",
+      "resolved_log_speed": "0.32573594561609198",
+      "displacement_resolution_m": "8.1650709633252097e-19",
+      "continuous_error": "1.0776316631555639e-12",
+      "numerical_resolution": "1.3608451605542015e-14",
+      "increment_ratio": "4.767010626333745e-06",
+      "defect_ratio": "2.1552633263111277e-09",
+      "reject": "0",
+      "next_dt_s": "3.9729899743383413e-10"
+    },
+    {
+      "step": "662",
+      "time_s": "374.57851954439184",
+      "dt_s": "3.9729899743383413e-10",
+      "raw_log_speed": "0.30170053341504316",
+      "resolved_log_speed": "0.29865128727549717",
+      "displacement_resolution_m": "1.0220355845704385e-18",
+      "continuous_error": "1.6923083443287164e-12",
+      "numerical_resolution": "1.7033926409507308e-14",
+      "increment_ratio": "5.9587633014544571e-06",
+      "defect_ratio": "3.3846166886574327e-09",
+      "reject": "0",
+      "next_dt_s": "4.9662374679229268e-10"
+    },
+    {
+      "step": "663",
+      "time_s": "374.57851954488848",
+      "dt_s": "4.9662374679229268e-10",
+      "raw_log_speed": "0.28211582080674813",
+      "resolved_log_speed": "0.27983813517957046",
+      "displacement_resolution_m": "1.2797316827881861e-18",
+      "continuous_error": "2.6526495889245744e-12",
+      "numerical_resolution": "2.1328861379803099e-14",
+      "increment_ratio": "7.4484541365821543e-06",
+      "defect_ratio": "5.3052991778491484e-09",
+      "reject": "0",
+      "next_dt_s": "6.2077968349036586e-10"
+    },
+    {
+      "step": "664",
+      "time_s": "374.57851954550927",
+      "dt_s": "6.2077968349036586e-10",
+      "raw_log_speed": "0.26828162820871637",
+      "resolved_log_speed": "0.26655018072340653",
+      "displacement_resolution_m": "1.6030762657890258e-18",
+      "continuous_error": "4.1574689492068649e-12",
+      "numerical_resolution": "2.671793776315043e-14",
+      "increment_ratio": "9.3105676808999318e-06",
+      "defect_ratio": "8.3149378984137294e-09",
+      "reject": "0",
+      "next_dt_s": "7.7597460436295729e-10"
+    }
+  ]
+}

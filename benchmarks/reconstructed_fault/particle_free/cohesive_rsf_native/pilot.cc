@@ -5,6 +5,8 @@
 #include <deal.II/grid/grid_tools.h>
 #include <fstream>
 #include <iomanip>
+#include <deal.II/base/parsed_function.h>
+#include <sstream>
 namespace aspect
 {
   namespace GeometryModel
@@ -30,9 +32,19 @@ namespace aspect
     template <int dim>
     class CohesivePilotLoading : public Interface<dim>, public SimulatorAccess<dim>
     {
-      static std::array<double, 2>
-      imposed (double t)
+      double axial=.41954981558863996;
+      std::string schedule="retained pilot", signature;
+      bool legacy=true;
+      Functions::ParsedFunction<1> strain{2};
+      std::array<double, 2>
+      imposed (double t) const
       {
+        if(schedule=="function")
+          {
+            const Point<1> clock(t);
+            const double gamma=strain.value(clock,0),angle=strain.value(clock,1)*numbers::PI/180.;
+            return {gamma*std::cos(2*angle),gamma*std::sin(2*angle)};
+          }
         const double z = std::clamp ((t - .410) / .030, 0., 1.);
         const double angle = -20 * numbers::PI / 180 * (z * z * z * (10 + z * (-15 + 6 * z)));
         const double gamma = .0003 + .004 * std::min (t, .455);
@@ -40,6 +52,37 @@ namespace aspect
       }
 
     public:
+      static void declare_parameters(ParameterHandler &prm)
+      {
+        prm.enter_subsection("Boundary velocity model");prm.enter_subsection("Cohesive pilot loading");
+        prm.declare_entry("Schedule","retained pilot",Patterns::Selection("retained pilot|function"));
+        prm.declare_entry("Axial strain ratio",".41954981558863996",Patterns::Double());
+        prm.enter_subsection("Strain history");Functions::ParsedFunction<1>::declare_parameters(prm,2);prm.leave_subsection();
+        prm.leave_subsection();prm.leave_subsection();
+      }
+      void parse_parameters(ParameterHandler &prm) override
+      {
+        prm.enter_subsection("Boundary velocity model");prm.enter_subsection("Cohesive pilot loading");
+        schedule=prm.get("Schedule");axial=prm.get_double("Axial strain ratio");
+        std::ostringstream out;out<<std::setprecision(17)<<schedule<<';'<<axial<<';';
+        prm.enter_subsection("Strain history");
+        if(schedule=="function")
+          {
+            strain.parse_parameters(prm);
+            for(const auto &key:{"Variable names","Function constants","Function expression"})
+              out<<prm.get(key).size()<<':'<<prm.get(key)<<';';
+          }
+        prm.leave_subsection();prm.leave_subsection();prm.leave_subsection();
+        signature=out.str();legacy=schedule=="retained pilot" && axial==.41954981558863996;
+      }
+      void save(std::map<std::string,std::string> &status) const override
+      { status["cohesive pilot loading v1"]=signature; }
+      void load(const std::map<std::string,std::string> &status) override
+      {
+        const auto it=status.find("cohesive pilot loading v1");
+        AssertThrow(it==status.end()?legacy:it->second==signature,
+                    ExcMessage("Cohesive loading schedule/axial ratio changed across restart."));
+      }
       Tensor<1, dim>
       boundary_velocity (types::boundary_id, const Point<dim> &x) const override
       {
@@ -51,8 +94,7 @@ namespace aspect
         if (t == 0.)
           return v;
         const auto now = imposed (t), old = imposed (t - dt);
-        const double a = (now[0] - old[0]) / dt, b = (now[1] - old[1]) / dt,
-                     axial = .41954981558863996;
+        const double a = (now[0] - old[0]) / dt, b = (now[1] - old[1]) / dt;
         v[0] = a * (-axial * x[0] + .5 * x[1]) + b * (-.5 * x[0] - axial * x[1]);
         v[1] = a * (.5 * x[0] + axial * x[1]) + b * (-axial * x[0] + .5 * x[1]);
         return v;

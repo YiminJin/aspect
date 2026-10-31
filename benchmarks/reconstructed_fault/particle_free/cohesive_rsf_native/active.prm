@@ -1,0 +1,125 @@
+# Active portable fresh-history smoke experiment. Seconds, metres, pascals.
+set Dimension = 2
+set Use years instead of seconds = false
+set Start time = 0
+set End time = .0005
+set Maximum first time step = 0.000125
+set Maximum time step = 0.000125
+set Nonlinear solver scheme = single Advection, iterated Newton Stokes
+set Nonlinear solver failure strategy = abort program
+set Pressure normalization = volume
+set Surface pressure = 0
+set Additional shared libraries = ./libcohesive_rsf_native_checks.release.so
+set Output directory = ./native-active-output
+subsection Formulation
+  set Enable cohesive RSF propagation pilot = true
+end
+subsection Cohesive RSF pilot
+  set Initial state = prescribed fields
+  set Initial state file =
+  set Seed x = 3
+  set Seed y = 0
+  set Seed x length = 3
+  set Seed angle = 0
+  set Seed cells = 32
+  set Candidate epoch origin = 0
+  set Maximum candidate extent = 1.5
+  set Maximum completion retries = 4
+  set Maximum formed length = 7.5
+  set Boundary warning distance = .75
+  set Virgin normalized age = 1
+  subsection Initial independent tensor
+    # Full initial T_DG, not an addition to the legacy hardcoded strain.
+    set Function expression = -251.729889353184+20*(x-6)^2/36;251.729889353184+20*y^2/36;300-40*(x-6)*y/36
+  end
+  subsection Initial surface histories
+    # z is normalized seed x coordinate. Order: j,a,theta,reference,m,absolute slip.
+    set Variable names = z,t
+    set Function constants = C0=2.2222222222222222e-7,q=300
+    set Function expression = .0004*4*z*(1-z); .75+.05*4*z*(1-z); 1.2+.1*4*z*(1-z); .0004*4*z*(1-z)-C0*(.75+.05*4*z*(1-z))/(1-(.75+.05*4*z*(1-z)))*q; 0; .0004*4*z*(1-z)
+  end
+  subsection Initial native displacement memory
+    set Function expression = 0;0
+  end
+end
+subsection Geometry model
+  set Model name = box
+  subsection Box
+    set Box origin X coordinate = 0
+    set Box origin Y coordinate = -6
+    set X extent = 12
+    set Y extent = 12
+    set X repetitions = 16
+    set Y repetitions = 16
+  end
+end
+subsection Gravity model
+  set Model name = vertical
+  subsection Vertical
+    set Magnitude = 0
+  end
+end
+subsection Material model
+  set Model name = simple
+  subsection Simple model
+    # Numerical viscosity for the G-reference Stokes preconditioner only.
+    # Physical G and eta are independently declared in Cohesive RSF pilot.
+    set Viscosity = 1e6
+    set Thermal expansion coefficient = 0
+  end
+end
+subsection Boundary velocity model
+  subsection Cohesive pilot loading
+    set Schedule = function
+    set Axial strain ratio = .41954981558863996
+    subsection Strain history
+      set Variable names = time,t
+      # gamma, angle(degrees). Continuous displacement; hold after .000375 s.
+      set Function expression = .0003+.004*min(time,.000375);0
+    end
+  end
+  set Prescribed velocity boundary indicators = left:cohesive pilot loading, right:cohesive pilot loading, bottom:cohesive pilot loading, top:cohesive pilot loading
+end
+subsection Boundary temperature model
+  set Fixed temperature boundary indicators =
+end
+subsection Initial temperature model
+  set Model name = function
+  subsection Function
+    set Function expression = 0
+  end
+end
+subsection Mesh refinement
+  set Initial global refinement = 0
+  set Initial adaptive refinement = 0
+  set Time steps between mesh refinement = 0
+end
+subsection Discretization
+  set Stokes velocity polynomial degree = 2
+  set Use locally conservative discretization = true
+end
+subsection Solver parameters
+  subsection Stokes solver parameters
+    set Stokes solver type = block AMG
+    set Linear solver tolerance = 1e-13
+    set Number of cheap Stokes solver steps = 0
+    set GMRES solver restart length = 100
+  end
+end
+subsection Time stepping
+  set List of model names = function, cohesive pilot rejection control
+  subsection Function
+    set Function expression = 0.000125
+  end
+end
+subsection Checkpointing
+  set Steps between checkpoint = 1
+  set Time between checkpoint = 0
+end
+subsection Termination criteria
+  set Termination criteria = end time
+  set Checkpoint on termination = true
+end
+subsection Postprocess
+  set List of postprocessors =
+end

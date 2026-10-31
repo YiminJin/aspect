@@ -1,0 +1,17 @@
+[
+  {
+    "width_m": 0.4,
+    "energy_relative": 0.005409876552333301,
+    "weak_load_mass_norm_relative": 0.1905803609156765
+  },
+  {
+    "width_m": 0.8,
+    "energy_relative": 0.009160143007599195,
+    "weak_load_mass_norm_relative": 0.12062723974056083
+  },
+  {
+    "width_m": 1.2,
+    "energy_relative": 0.013615800435931543,
+    "weak_load_mass_norm_relative": 0.35271547894669214
+  }
+]

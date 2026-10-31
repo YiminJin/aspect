@@ -1,0 +1,20 @@
+{
+  "states": 369,
+  "time_s": 374.56704168613635,
+  "peak_speed_m_s": 0.035555066809329815,
+  "growth_m": 1.410698461338714e-10,
+  "new_intact_damage_m": 1.410698461338714e-10,
+  "bulk_change_J_m": 6.8315114392880005,
+  "friction_J_m": 1.8174318415052035,
+  "radiation_J_m": 0.9588433595699424,
+  "maxwell_J_m": 0.13380714866254345,
+  "fracture_J_m": 4.232095384016142e-10,
+  "boundary_trapezoid_work_J_m": 9.804272491550691,
+  "physical_remainder_abs_J_m": 0.004629816516569617,
+  "physical_remainder_signed_J_m": 0.004476641684588724,
+  "BE_bulk_J_m": 0.009552783086550803,
+  "surface_remainder_J_m": 2.2970984529019974e-05,
+  "max_ledger_J_m": 6.61915984783155e-14,
+  "max_source_scaled": 1.234566510773883e-14,
+  "remainder_over_sliding": 0.0016676360163346432
+}

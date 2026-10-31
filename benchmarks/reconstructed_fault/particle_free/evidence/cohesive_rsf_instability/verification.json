@@ -1,0 +1,87 @@
+{
+  "retained_active": [
+    {
+      "step": 0,
+      "surface_history_max_abs": 0.0,
+      "identities_exact": true,
+      "geometry_bitwise": true,
+      "surface_bitwise": true,
+      "bulk_center_files_bitwise": true,
+      "publications": [
+        0,
+        0
+      ]
+    },
+    {
+      "step": 1,
+      "surface_history_max_abs": 0.0,
+      "identities_exact": true,
+      "geometry_bitwise": true,
+      "surface_bitwise": true,
+      "bulk_center_files_bitwise": true,
+      "publications": [
+        1,
+        1
+      ]
+    },
+    {
+      "step": 2,
+      "surface_history_max_abs": 0.0,
+      "identities_exact": true,
+      "geometry_bitwise": true,
+      "surface_bitwise": true,
+      "bulk_center_files_bitwise": true,
+      "publications": [
+        2,
+        2
+      ]
+    },
+    {
+      "step": 3,
+      "surface_history_max_abs": 0.0,
+      "identities_exact": true,
+      "geometry_bitwise": true,
+      "surface_bitwise": true,
+      "bulk_center_files_bitwise": true,
+      "publications": [
+        3,
+        3
+      ]
+    },
+    {
+      "step": 4,
+      "surface_history_max_abs": 0.0,
+      "identities_exact": true,
+      "geometry_bitwise": true,
+      "surface_bitwise": true,
+      "bulk_center_files_bitwise": true,
+      "publications": [
+        4,
+        4
+      ]
+    }
+  ],
+  "failed_trial_checkpoint_files_bitwise": {
+    "last_good_checkpoint.txt": true,
+    "01/mesh_fixed.data": true,
+    "01/mesh": true,
+    "01/resume.z": true,
+    "01/mesh.info": true,
+    "02/mesh_fixed.data": true,
+    "02/mesh": true,
+    "02/resume.z": true,
+    "02/mesh.info": true,
+    "03/mesh_fixed.data": true,
+    "03/mesh": true,
+    "03/resume.z": true,
+    "03/mesh.info": true
+  },
+  "small_rejection_and_restart_evidence": [
+    "retry.json",
+    "restart.json",
+    "resume-hook.json"
+  ],
+  "native_build_passed": true,
+  "original_floor_reproduced": true,
+  "no_tolerance_or_floor_relaxation": true
+}

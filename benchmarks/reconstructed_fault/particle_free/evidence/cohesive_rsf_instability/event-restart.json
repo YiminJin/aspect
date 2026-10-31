@@ -1,0 +1,10 @@
+{
+  "accepted_step": 368,
+  "files_bitwise": {
+    "-surface.csv": true,
+    "-geometry.csv": true,
+    "-bulk-r0.csv": true,
+    "-bulk-r1.csv": true
+  },
+  "publication_count": 368
+}

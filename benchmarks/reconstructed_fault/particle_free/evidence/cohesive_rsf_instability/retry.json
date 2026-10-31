@@ -1,0 +1,92 @@
+[
+  {
+    "t": 0.041035156249999996,
+    "surface_history_max_abs": 0.0,
+    "identities_exact": true,
+    "geometry_bitwise": true,
+    "surface_bitwise": true,
+    "bulk_records_bitwise": true,
+    "DG_coefficient_max_abs_Pa": 0.0,
+    "native_coefficient_max_abs_m": 0.0,
+    "bulk_center_files_bitwise": true,
+    "publications": [
+      5,
+      5
+    ]
+  },
+  {
+    "t": 0.05,
+    "surface_history_max_abs": 0.0,
+    "identities_exact": true,
+    "geometry_bitwise": true,
+    "surface_bitwise": true,
+    "bulk_records_bitwise": true,
+    "DG_coefficient_max_abs_Pa": 0.0,
+    "native_coefficient_max_abs_m": 0.0,
+    "bulk_center_files_bitwise": true,
+    "publications": [
+      6,
+      6
+    ]
+  },
+  {
+    "t": 0.0190625,
+    "surface_history_max_abs": 0.0,
+    "identities_exact": true,
+    "geometry_bitwise": true,
+    "surface_bitwise": true,
+    "bulk_records_bitwise": true,
+    "DG_coefficient_max_abs_Pa": 0.0,
+    "native_coefficient_max_abs_m": 0.0,
+    "bulk_center_files_bitwise": true,
+    "publications": [
+      3,
+      3
+    ]
+  },
+  {
+    "t": 0.01125,
+    "surface_history_max_abs": 0.0,
+    "identities_exact": true,
+    "geometry_bitwise": true,
+    "surface_bitwise": true,
+    "bulk_records_bitwise": true,
+    "DG_coefficient_max_abs_Pa": 0.0,
+    "native_coefficient_max_abs_m": 0.0,
+    "bulk_center_files_bitwise": true,
+    "publications": [
+      2,
+      2
+    ]
+  },
+  {
+    "t": 0.028828125,
+    "surface_history_max_abs": 0.0,
+    "identities_exact": true,
+    "geometry_bitwise": true,
+    "surface_bitwise": true,
+    "bulk_records_bitwise": true,
+    "DG_coefficient_max_abs_Pa": 0.0,
+    "native_coefficient_max_abs_m": 0.0,
+    "bulk_center_files_bitwise": true,
+    "publications": [
+      4,
+      4
+    ]
+  },
+  {
+    "t": 0.005,
+    "surface_history_max_abs": 0.0,
+    "identities_exact": true,
+    "geometry_bitwise": true,
+    "surface_bitwise": true,
+    "bulk_records_bitwise": true,
+    "DG_coefficient_max_abs_Pa": 0.0,
+    "native_coefficient_max_abs_m": 0.0,
+    "bulk_center_files_bitwise": true,
+    "publications": [
+      1,
+      1
+    ]
+  }
+]

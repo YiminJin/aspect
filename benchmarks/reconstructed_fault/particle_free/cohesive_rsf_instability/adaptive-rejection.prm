@@ -1,0 +1,7 @@
+include benchmarks/reconstructed_fault/particle_free/cohesive_rsf_instability/smoke.prm
+set End time = .015
+subsection Time stepping
+ subsection Cohesive RSF
+  set Maximum slip increment in Dc = .00001
+ end
+end

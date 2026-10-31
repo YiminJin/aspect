@@ -1,0 +1,2 @@
+include benchmarks/reconstructed_fault/particle_free/cohesive_rsf_instability/smoke.prm
+set Maximum first time step = .005

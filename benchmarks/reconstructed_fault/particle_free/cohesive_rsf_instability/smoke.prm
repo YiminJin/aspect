@@ -1,0 +1,11 @@
+include benchmarks/reconstructed_fault/particle_free/cohesive_rsf_instability/nucleation.prm
+set End time = .05
+subsection Geometry model
+ subsection Box
+ set X repetitions = 16
+ set Y repetitions = 12
+ end
+end
+subsection Cohesive RSF pilot
+ set Seed cells = 24
+end

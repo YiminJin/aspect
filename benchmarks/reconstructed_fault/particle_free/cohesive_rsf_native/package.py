@@ -6,6 +6,8 @@ import csv
 import difflib
 import hashlib
 import json
+import os
+import shlex
 import platform
 import subprocess
 import zipfile
@@ -53,12 +55,11 @@ def metadata():
                 line.startswith(('ASPECT_', 'CMAKE_BUILD_TYPE:', 'CMAKE_CXX_COMPILER:', 'DEAL_II_DIR:'))]
     binary = WORK/'native/aspect-release'
     plugin = WORK/'checks-native/libcohesive_rsf_native_checks.release.so'
-    env = dict(baseline='f1f9f29cf40c32d1ddcea000b724375b64853532',
+    env = dict(baseline=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
                branch='pf-rsf-particle-free', system=platform.platform(),
                build_cache=selected, binary_sha256=digest(binary), plugin_sha256=digest(plugin),
-               deal_II='9.6.2', Trilinos='14.2',
-               compiler=subprocess.check_output(['/opt/gcc/12.4.0/bin/g++', '--version'], text=True),
-               MPI=subprocess.check_output(['/opt/openmpi/5.0.6/bin/mpiexec', '--version'], text=True),
+               compiler=subprocess.check_output(shlex.split(COMPILER)+['--version'], text=True),
+               MPI=subprocess.check_output(shlex.split(MPIEXEC)+['--version'], text=True),
                linked_libraries=subprocess.check_output(['ldd', str(binary)], text=True),
                run_environment=dict(OMP_NUM_THREADS='1', OPENBLAS_NUM_THREADS='1', DEAL_II_NUM_THREADS='1'),
                dependencies='deal.II MPI, Trilinos, p4est, zlib, SUNDIALS; native build also enables NetCDF/WorldBuilder',
@@ -134,7 +135,17 @@ def evidence():
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument('stage', choices=['source', 'evidence'])
+    parser.add_argument('--work-dir', type=Path, default=Path(os.environ.get('ASPECT_COHESIVE_WORK_DIR',WORK)))
+    parser.add_argument('--compiler', default=os.environ.get('CXX'))
+    parser.add_argument('--mpiexec', default=os.environ.get('MPIEXEC','mpiexec'))
     args = parser.parse_args()
+    WORK=args.work_dir.expanduser().resolve()
+    MPIEXEC=args.mpiexec
+    if args.compiler:
+        COMPILER=args.compiler
+    else:
+        cache=(WORK/'native/CMakeCache.txt').read_text().splitlines()
+        COMPILER=next(line.split('=',1)[1] for line in cache if line.startswith('CMAKE_CXX_COMPILER:'))
     if args.stage == 'source':
         source()
     else:

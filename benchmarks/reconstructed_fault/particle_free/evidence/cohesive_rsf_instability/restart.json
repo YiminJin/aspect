@@ -1,0 +1,32 @@
+[
+  {
+    "step": 5,
+    "surface_history_max_abs": 0.0,
+    "identities_exact": true,
+    "geometry_bitwise": true,
+    "surface_bitwise": true,
+    "bulk_records_bitwise": true,
+    "DG_coefficient_max_abs_Pa": 0.0,
+    "native_coefficient_max_abs_m": 0.0,
+    "bulk_center_files_bitwise": true,
+    "publications": [
+      5,
+      5
+    ]
+  },
+  {
+    "step": 6,
+    "surface_history_max_abs": 0.0,
+    "identities_exact": true,
+    "geometry_bitwise": true,
+    "surface_bitwise": true,
+    "bulk_records_bitwise": true,
+    "DG_coefficient_max_abs_Pa": 0.0,
+    "native_coefficient_max_abs_m": 0.0,
+    "bulk_center_files_bitwise": true,
+    "publications": [
+      6,
+      6
+    ]
+  }
+]

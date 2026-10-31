@@ -1,0 +1,45 @@
+[
+  {
+    "input": "control.prm",
+    "returncode": 0
+  },
+  {
+    "input": "fresh-coarse.prm",
+    "returncode": 0
+  },
+  {
+    "input": "fresh-fine.prm",
+    "returncode": 0
+  },
+  {
+    "input": "parameters.prm",
+    "returncode": 0
+  },
+  {
+    "input": "physics.prm",
+    "returncode": 0
+  },
+  {
+    "input": "resume.prm",
+    "returncode": 0
+  },
+  {
+    "input": "startup-resume.prm",
+    "returncode": 0
+  },
+  {
+    "input": "startup.prm",
+    "returncode": 0
+  },
+  {
+    "input": "temporal.prm",
+    "returncode": 0
+  },
+  {
+    "input": "zero.prm",
+    "returncode": 0
+  },
+  {
+    "source_archive_configure_returncode": 0
+  }
+]

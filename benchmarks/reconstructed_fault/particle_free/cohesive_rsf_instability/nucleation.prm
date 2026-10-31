@@ -1,0 +1,146 @@
+# Slow-loaded RSF nucleation / cohesive-growth specimen. Units: s, m, Pa.
+set Dimension = 2
+set Use years instead of seconds = false
+set Start time = 0
+set End time = 2000
+set Maximum first time step = .01
+set Maximum time step = 20
+set Nonlinear solver scheme = single Advection, iterated Newton Stokes
+set Nonlinear solver failure strategy = cut timestep size
+set Pressure normalization = volume
+set Surface pressure = 0
+set Additional shared libraries = ./libcohesive_rsf_native_checks.release.so
+set Output directory = ./native-active-output
+subsection Formulation
+  set Enable cohesive RSF propagation pilot = true
+end
+subsection Cohesive RSF pilot
+  set Shear modulus = 1e6
+  set Maxwell viscosity = 1e12
+  set Fracture energy = 3
+  set Intact strength = 2000
+  set Background confinement = 10000
+  set Reference friction coefficient = .1
+  set RSF direct coefficient = .005
+  set RSF evolution coefficient = .02
+  set Reference velocity = 1e-6
+  set State slip distance = .00006
+  set Radiation impedance = 25836.021365527624
+  set Future surface spacing = .0625
+  set Candidate extent = .125
+  set Candidate refresh interval = 20
+  set Initial state = prescribed fields
+  set Initial state file =
+  set Seed x = 4
+  set Seed y = 0
+  set Seed x length = 6
+  set Seed angle = 0
+  set Seed cells = 96
+  set Candidate epoch origin = 0
+  set Maximum candidate extent = .5
+  set Maximum completion retries = 4
+  set Maximum formed length = 7.5
+  set Boundary warning distance = .75
+  set Virgin normalized age = 10
+  subsection Initial independent tensor
+    # Uniform physical shear preload, equilibrated with affine walls.
+    set Function expression = 0;0;1345.3903475512434
+  end
+  subsection Initial surface histories
+    # z is normalized seed x coordinate. Order: j,a,theta,reference,m,absolute slip.
+    set Variable names = z,t
+    set Function constants = C0=1.5e-6,tau=1345.3903475512434
+    set Function expression = 0;min(1,min(6*z,max(0,5-6*z)));10;-C0*tau*min(1,min(6*z,max(0,5-6*z)));0;0
+  end
+  subsection Initial native displacement memory
+    set Function expression = 0;0
+  end
+end
+subsection Geometry model
+  set Model name = box
+  subsection Box
+    set Box origin X coordinate = 0
+    set Box origin Y coordinate = -6
+    set X extent = 16
+    set Y extent = 12
+    set X repetitions = 96
+    set Y repetitions = 72
+  end
+end
+subsection Gravity model
+  set Model name = vertical
+  subsection Vertical
+    set Magnitude = 0
+  end
+end
+subsection Material model
+  set Model name = simple
+  subsection Simple model
+    # Numerical viscosity for the G-reference Stokes preconditioner only.
+    # Physical G and eta are independently declared in Cohesive RSF pilot.
+    set Viscosity = 1e6
+    set Thermal expansion coefficient = 0
+  end
+end
+subsection Boundary velocity model
+  subsection Cohesive pilot loading
+    set Schedule = function
+    set Axial strain ratio = 0
+    subsection Strain history
+      set Variable names = time,t
+      # Constant slow engineering shear rate; no loading acceleration.
+      set Function expression = 0.0013453903475512433+1e-7*time;0
+    end
+  end
+  set Prescribed velocity boundary indicators = left:cohesive pilot loading, right:cohesive pilot loading, bottom:cohesive pilot loading, top:cohesive pilot loading
+end
+subsection Boundary temperature model
+  set Fixed temperature boundary indicators =
+end
+subsection Initial temperature model
+  set Model name = function
+  subsection Function
+    set Function expression = 0
+  end
+end
+subsection Mesh refinement
+  set Initial global refinement = 0
+  set Initial adaptive refinement = 0
+  set Time steps between mesh refinement = 0
+end
+subsection Discretization
+  set Stokes velocity polynomial degree = 2
+  set Use locally conservative discretization = true
+end
+subsection Solver parameters
+  subsection Stokes solver parameters
+    set Stokes solver type = block AMG
+    set Linear solver tolerance = 1e-13
+    set Number of cheap Stokes solver steps = 0
+    set GMRES solver restart length = 100
+  end
+end
+subsection Time stepping
+  set List of model names = cohesive RSF, cohesive pilot rejection control
+  subsection Cohesive RSF
+    set Maximum slip increment in Dc = .1
+    set Maximum logarithmic state change = .1
+    set Maximum regularized logarithmic speed change = .2
+    set Maximum damage increment = .02
+    set Safety factor = .8
+    set Growth factor = 1.25
+    set Minimum timestep = 1e-10
+  end
+end
+subsection Checkpointing
+  set Steps between checkpoint = 1
+  set Time between checkpoint = 0
+end
+subsection Termination criteria
+  set Termination criteria = end time, end step, user request
+  set End step = 600
+  set Checkpoint on termination = true
+end
+subsection Postprocess
+  set List of postprocessors =
+end

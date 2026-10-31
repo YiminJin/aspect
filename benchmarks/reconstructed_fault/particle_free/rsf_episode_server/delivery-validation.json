@@ -1,0 +1,14 @@
+{
+  "source_files": 1979,
+  "source_archive_members_verified": true,
+  "checkpoint_files_verified": true,
+  "python_compile": true,
+  "gif_frames": 31,
+  "gif_size": [
+    1000,
+    660
+  ],
+  "prepared_server_only": true,
+  "first_episode_complete": false,
+  "refreshed_utc": "2026-10-30T20:44:57.929348+00:00"
+}

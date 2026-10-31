@@ -1,0 +1,62 @@
+{
+  "G_Pa": 1000000.0,
+  "eta_Pa_s": 1000000000000.0,
+  "Gc_J_m2": 3,
+  "peak_Pa": 2000,
+  "p0_Pa": 10000.0,
+  "a": 0.005,
+  "b": 0.02,
+  "V0_m_s": 1e-06,
+  "Dc_m": 6e-05,
+  "radiation_Pa_s_m": 25836.021365527624,
+  "initial_speed_reference_m_s": 1e-07,
+  "initial_normalized_age": 10.0,
+  "initial_mu": 0.1345387763949107,
+  "initial_shear_Pa": 1345.3903475512434,
+  "engineering_shear_rate_s_inv": 1e-07,
+  "bulk_cells": [
+    128,
+    96
+  ],
+  "domain_m": [
+    0,
+    16,
+    -6,
+    6
+  ],
+  "surface_spacing_m": 0.0625,
+  "seed_x_m": [
+    4,
+    10
+  ],
+  "mature_x_m": [
+    5,
+    8
+  ],
+  "loading_end_s": 2000,
+  "accepted_step_budget": 600,
+  "probed_bulk_cells": [
+    [
+      96,
+      72
+    ],
+    [
+      128,
+      96
+    ]
+  ],
+  "selected_bulk_cells": [
+    128,
+    96
+  ],
+  "bulk_cell_sizes_m": [
+    0.125,
+    0.125
+  ],
+  "maximum_timestep_s": 20,
+  "initial_timestep_s": 0.01,
+  "slip_increment_Dc_limit": 0.1,
+  "log_state_limit": 0.1,
+  "regularized_log_speed_limit": 0.2,
+  "damage_increment_limit": 0.02
+}

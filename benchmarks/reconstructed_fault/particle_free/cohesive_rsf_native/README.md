@@ -1,5 +1,10 @@
 # Default-off native ASPECT cohesive–RSF pilot
 
+For new experiments use [the concise active workflow](ACTIVE_WORKFLOW.md) and
+`active.prm`: configurable fresh seed/histories/loading, portable build/launcher
+paths and geometry-aware domain protection. The material below documents the
+**retained qualified-pilot regression**, including its optional external archives.
+
 Native evolution uses ASPECT's distributed mixed solver, general tensor history,
 actual acceptance/cutback and native checkpoints. Python is used only for bounded
 test orchestration and reading accepted CSVs. Production/BP3 is not selected.
@@ -9,8 +14,8 @@ deal.II9.6.2 (MPI/Trilinos/p4est/zlib/SUNDIALS), Trilinos14.2, OpenMPI5.0.6, ASP
 
 ```sh
 cmake -S . -B build-particle-free/cohesive-rsf-native/native \
-  -DCMAKE_BUILD_TYPE=Release -DDEAL_II_DIR=/opt/dealii/9.6-local \
-  -DCMAKE_CXX_COMPILER=/opt/gcc/12.4.0/bin/g++ \
+  -DCMAKE_BUILD_TYPE=Release -DDEAL_II_DIR="$DEAL_II_DIR" \
+  -DCMAKE_CXX_COMPILER="${CXX:-c++}" \
   -DASPECT_UNITY_BUILD=ON -DASPECT_PRECOMPILE_HEADERS=ON \
   -DASPECT_WITH_PYTHON=OFF
 cmake --build build-particle-free/cohesive-rsf-native/native -j2

@@ -1,0 +1,5 @@
+include benchmarks/reconstructed_fault/particle_free/cohesive_rsf_instability/episode.prm
+subsection Termination criteria
+ set Termination criteria = end time, end step, user request, wall time
+ set Wall time = .25
+end

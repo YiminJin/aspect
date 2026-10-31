@@ -1,0 +1,2 @@
+include benchmarks/reconstructed_fault/particle_free/cohesive_rsf_instability/nucleation.prm
+set End time = .01

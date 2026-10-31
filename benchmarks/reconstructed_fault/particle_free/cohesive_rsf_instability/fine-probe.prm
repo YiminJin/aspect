@@ -1,0 +1,7 @@
+include benchmarks/reconstructed_fault/particle_free/cohesive_rsf_instability/probe.prm
+subsection Geometry model
+ subsection Box
+  set X repetitions = 128
+  set Y repetitions = 96
+ end
+end

@@ -1,0 +1,228 @@
+{
+  "resolved-reject": [
+    {
+      "step": "0",
+      "surface_history_max_abs": 0.0,
+      "identities_exact": true,
+      "geometry_bitwise": true,
+      "surface_bitwise": true,
+      "bulk_records_bitwise": true,
+      "DG_coefficient_max_abs_Pa": 0.0,
+      "native_coefficient_max_abs_m": 0.0,
+      "bulk_center_files_bitwise": true,
+      "publications": [
+        0,
+        0
+      ]
+    },
+    {
+      "step": "1",
+      "surface_history_max_abs": 0.0,
+      "identities_exact": true,
+      "geometry_bitwise": true,
+      "surface_bitwise": true,
+      "bulk_records_bitwise": true,
+      "DG_coefficient_max_abs_Pa": 0.0,
+      "native_coefficient_max_abs_m": 0.0,
+      "bulk_center_files_bitwise": true,
+      "publications": [
+        1,
+        1
+      ]
+    },
+    {
+      "step": "2",
+      "surface_history_max_abs": 0.0,
+      "identities_exact": true,
+      "geometry_bitwise": true,
+      "surface_bitwise": true,
+      "bulk_records_bitwise": true,
+      "DG_coefficient_max_abs_Pa": 0.0,
+      "native_coefficient_max_abs_m": 0.0,
+      "bulk_center_files_bitwise": true,
+      "publications": [
+        2,
+        2
+      ]
+    },
+    {
+      "step": "3",
+      "surface_history_max_abs": 0.0,
+      "identities_exact": true,
+      "geometry_bitwise": true,
+      "surface_bitwise": true,
+      "bulk_records_bitwise": true,
+      "DG_coefficient_max_abs_Pa": 0.0,
+      "native_coefficient_max_abs_m": 0.0,
+      "bulk_center_files_bitwise": true,
+      "publications": [
+        3,
+        3
+      ]
+    },
+    {
+      "step": "4",
+      "surface_history_max_abs": 0.0,
+      "identities_exact": true,
+      "geometry_bitwise": true,
+      "surface_bitwise": true,
+      "bulk_records_bitwise": true,
+      "DG_coefficient_max_abs_Pa": 0.0,
+      "native_coefficient_max_abs_m": 0.0,
+      "bulk_center_files_bitwise": true,
+      "publications": [
+        4,
+        4
+      ]
+    },
+    {
+      "step": "5",
+      "surface_history_max_abs": 0.0,
+      "identities_exact": true,
+      "geometry_bitwise": true,
+      "surface_bitwise": true,
+      "bulk_records_bitwise": true,
+      "DG_coefficient_max_abs_Pa": 0.0,
+      "native_coefficient_max_abs_m": 0.0,
+      "bulk_center_files_bitwise": true,
+      "publications": [
+        5,
+        5
+      ]
+    },
+    {
+      "step": "6",
+      "surface_history_max_abs": 0.0,
+      "identities_exact": true,
+      "geometry_bitwise": true,
+      "surface_bitwise": true,
+      "bulk_records_bitwise": true,
+      "DG_coefficient_max_abs_Pa": 0.0,
+      "native_coefficient_max_abs_m": 0.0,
+      "bulk_center_files_bitwise": true,
+      "publications": [
+        6,
+        6
+      ]
+    }
+  ],
+  "resolved-restart": [
+    {
+      "step": "5",
+      "surface_history_max_abs": 0.0,
+      "identities_exact": true,
+      "geometry_bitwise": true,
+      "surface_bitwise": true,
+      "bulk_records_bitwise": true,
+      "DG_coefficient_max_abs_Pa": 0.0,
+      "native_coefficient_max_abs_m": 0.0,
+      "bulk_center_files_bitwise": true,
+      "publications": [
+        5,
+        5
+      ]
+    },
+    {
+      "step": "6",
+      "surface_history_max_abs": 0.0,
+      "identities_exact": true,
+      "geometry_bitwise": true,
+      "surface_bitwise": true,
+      "bulk_records_bitwise": true,
+      "DG_coefficient_max_abs_Pa": 0.0,
+      "native_coefficient_max_abs_m": 0.0,
+      "bulk_center_files_bitwise": true,
+      "publications": [
+        6,
+        6
+      ]
+    }
+  ],
+  "retained": [
+    {
+      "step": "0",
+      "surface_history_max_abs": 0.0,
+      "identities_exact": true,
+      "geometry_bitwise": true,
+      "surface_bitwise": true,
+      "bulk_records_bitwise": true,
+      "DG_coefficient_max_abs_Pa": 0.0,
+      "native_coefficient_max_abs_m": 0.0,
+      "bulk_center_files_bitwise": true,
+      "publications": [
+        0,
+        0
+      ]
+    },
+    {
+      "step": "1",
+      "surface_history_max_abs": 0.0,
+      "identities_exact": true,
+      "geometry_bitwise": true,
+      "surface_bitwise": true,
+      "bulk_records_bitwise": true,
+      "DG_coefficient_max_abs_Pa": 0.0,
+      "native_coefficient_max_abs_m": 0.0,
+      "bulk_center_files_bitwise": true,
+      "publications": [
+        1,
+        1
+      ]
+    },
+    {
+      "step": "2",
+      "surface_history_max_abs": 0.0,
+      "identities_exact": true,
+      "geometry_bitwise": true,
+      "surface_bitwise": true,
+      "bulk_records_bitwise": true,
+      "DG_coefficient_max_abs_Pa": 0.0,
+      "native_coefficient_max_abs_m": 0.0,
+      "bulk_center_files_bitwise": true,
+      "publications": [
+        2,
+        2
+      ]
+    },
+    {
+      "step": "3",
+      "surface_history_max_abs": 0.0,
+      "identities_exact": true,
+      "geometry_bitwise": true,
+      "surface_bitwise": true,
+      "bulk_records_bitwise": true,
+      "DG_coefficient_max_abs_Pa": 0.0,
+      "native_coefficient_max_abs_m": 0.0,
+      "bulk_center_files_bitwise": true,
+      "publications": [
+        3,
+        3
+      ]
+    },
+    {
+      "step": "4",
+      "surface_history_max_abs": 0.0,
+      "identities_exact": true,
+      "geometry_bitwise": true,
+      "surface_bitwise": true,
+      "bulk_records_bitwise": true,
+      "DG_coefficient_max_abs_Pa": 0.0,
+      "native_coefficient_max_abs_m": 0.0,
+      "bulk_center_files_bitwise": true,
+      "publications": [
+        4,
+        4
+      ]
+    }
+  ],
+  "MPI4": {
+    "5": {
+      "bulk_coefficient_max_abs": 0.0,
+      "surface_history_max_abs": 0.0
+    },
+    "6": {
+      "bulk_coefficient_max_abs": 2.2737367544323206e-13,
+      "surface_history_max_abs": 8.271806125530277e-24
+    }
+  }
+}

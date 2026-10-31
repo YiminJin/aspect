@@ -14,6 +14,7 @@ ROOT=Path(__file__).resolve().parents[4]
 WORK=ROOT/'build-particle-free/cohesive-rsf-native/runs'
 OUT=ROOT/'benchmarks/reconstructed_fault/particle_free/evidence/cohesive_rsf_native'
 REF=ROOT/'benchmarks/reconstructed_fault/particle_free/evidence/cohesive_interface_propagation'
+OUTPUT_DIRECTORY=None
 G,GC,DC,V0,RAD=1e6,1.,.001,5e-6,25836.021365527624
 
 
@@ -27,8 +28,11 @@ def load(labels):
     records={}
     superseded=[]
     for label in labels:
-        for row in csv.DictReader((WORK/label/'output/cohesive-index.csv').open()):
-            stem=Path(row['stem']);time=float(row['time_s'])
+        directory=OUTPUT_DIRECTORY or WORK/label/'output'
+        for row in csv.DictReader((directory/'cohesive-index.csv').open()):
+            # Index paths describe the producer's original directory. Always
+            # read the selected output, even if an old copy still exists.
+            stem=directory/Path(row['stem']).name;time=float(row['time_s'])
             d={r['quantity']:float(r['value']) for r in csv.DictReader(Path(str(stem)+'-diagnostics.csv').open())}
             surface=np.genfromtxt(str(stem)+'-surface.csv',delimiter=',',names=True,dtype=None,encoding='utf8')
             geometry=np.genfromtxt(str(stem)+'-geometry.csv',delimiter=',',names=True,dtype=None,encoding='utf8')
@@ -249,8 +253,62 @@ def compare_half_step(hist, path, out, start):
     axs[0].legend(fontsize=8);fig.savefig(out/'native-timestep.png',dpi=160);plt.close(fig)
 
 
+def active_analysis(labels, out):
+    """Only native accepted outputs; no archived trajectory or fixed specimen."""
+    records=load(labels);rows=[]
+    for r in records:
+        s=r['s'];row=dict(r['d'],time_s=r['time'])
+        row['integrated_damage_m']=float(s['weight_m']@s['damage'])
+        row['integrated_absolute_jump_m2']=float(s['weight_m']@abs(s['jump_m']))
+        row['fully_decohered_measure_m']=float(s['weight_m']@(s['damage']==1.))
+        rows.append(row)
+    initial=rows[0]['integrated_damage_m']
+    for row in rows:row['growth_m']=row['integrated_damage_m']-initial
+    table(out/'active-history.csv',rows)
+    positive=[r for r in rows if r.get('dt_s',0.)>0.]
+    loss=sum(r['friction_J_m']+r['radiation_J_m'] for r in positive)
+    fracture=sum(r['fracture_increment_J_m'] for r in positive)
+    remainder=sum(abs(r['physical_remainder_with_quadrature_J_m']) for r in positive)
+    result=dict(runs=labels,start_s=rows[0]['time_s'],end_s=rows[-1]['time_s'],
+        growth_m=rows[-1]['growth_m'],positive_steps=len(positive),
+        absolute_physical_remainder_J_m=remainder,
+        sliding_dissipation_J_m=loss,added_fracture_J_m=fracture,
+        relative_sliding=remainder/loss if loss else None,
+        relative_fracture=remainder/fracture if fracture else None,
+        maximum_source_scaled=max(r.get('source_scaled',0.) for r in rows),
+        maximum_weak_Pa=max(r.get('weak_error_Pa',0.) for r in rows),
+        minimum_sampling_clearance_m=min(r['sampling_clearance_m'] for r in rows),
+        minimum_lifting_clearance_m=min(r['lifting_clearance_m'] for r in rows),
+        maximum_rank_memory_bytes=max(r['peak_rank_memory_bytes'] for r in rows))
+    (out/'active-results.json').write_text(json.dumps(result,indent=2)+'\n')
+    fig,axs=plt.subplots(2,2,figsize=(9,6),layout='constrained')
+    t=[r['time_s'] for r in rows]
+    axs[0,0].plot(t,[r['growth_m'] for r in rows]);axs[0,0].set(xlabel='Time (s)',ylabel='Added damage integral (m)')
+    axs[0,1].plot(t,[r['integrated_absolute_jump_m2'] for r in rows]);axs[0,1].set(xlabel='Time (s)',ylabel='Integral |jump| (m²)')
+    for r in [records[0],records[-1]]:
+        axs[1,0].plot(r['s']['x_m'],r['s']['damage'],label=f"{r['time']:.6g} s")
+        axs[1,1].plot(r['s']['x_m'],r['s']['pn_work_Pa'],label=f"{r['time']:.6g} s")
+    axs[1,0].set(xlabel='Physical x (m)',ylabel='Surface damage a');axs[1,0].legend()
+    axs[1,1].set(xlabel='Physical x (m)',ylabel='Variational normal reaction (Pa)')
+    fig.savefig(out/'active-summary.png',dpi=150);plt.close(fig)
+    print(json.dumps(result,indent=2))
+
+
 def main():
-    ap=argparse.ArgumentParser(__doc__);ap.add_argument('runs',nargs='+');ap.add_argument('--gif',action='store_true');ap.add_argument('--no-plots',action='store_true');ap.add_argument('--half-history',type=Path);ap.add_argument('--comparison-start',type=float,default=.460);ap.add_argument('--out',type=Path,default=OUT);args=ap.parse_args();out=args.out;out.mkdir(parents=True,exist_ok=True)
+    global WORK, OUTPUT_DIRECTORY
+    ap=argparse.ArgumentParser(__doc__);ap.add_argument('runs',nargs='+');ap.add_argument('--gif',action='store_true');ap.add_argument('--no-plots',action='store_true');ap.add_argument('--half-history',type=Path);ap.add_argument('--comparison-start',type=float,default=.460)
+    ap.add_argument('--active',action='store_true',help='Analyze native outputs without retained-reference files.')
+    ap.add_argument('--work-dir',type=Path,default=Path(os.environ.get('ASPECT_COHESIVE_WORK_DIR',WORK.parent)))
+    ap.add_argument('--out',type=Path)
+    ap.add_argument('--output-directory',type=Path,help='Analyze one directly launched native output directory.')
+    args=ap.parse_args();WORK=args.work_dir.expanduser().resolve()/'runs'
+    if args.output_directory:
+        assert args.active and len(args.runs)==1, '--output-directory requires one --active label'
+        OUTPUT_DIRECTORY=args.output_directory.expanduser().resolve()
+    out=args.out or (WORK.parent/'analysis'/args.runs[-1] if args.active else OUT)
+    out.mkdir(parents=True,exist_ok=True)
+    if args.active:
+        active_analysis(args.runs,out);return
     records=load(args.runs);hist,profiles,tracked,events=summarize(records)
     table(out/'native-history.csv',hist);table(out/'native-profiles.csv',profiles)
     if tracked:table(out/'native-material.csv',tracked)

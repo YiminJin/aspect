@@ -45,6 +45,15 @@ namespace aspect
         double weight = 0., xi = 0.;
         unsigned int cell = 0, left = 0, right = 0;
       };
+      struct Bounds
+      {
+        dealii::Point<2> lower, upper;
+      };
+      struct Clearance
+      {
+        double sampling = 0., lifting = 0.;
+        unsigned int sampling_wall = 0, lifting_wall = 0;
+      };
 
       Geometry () = default;
       explicit Geometry (std::vector<Piece> pieces, double width);
@@ -56,6 +65,12 @@ namespace aspect
       Quadrature<2> quadrature (const dealii::Point<2> &lo, const dealii::Point<2> &hi,
                                 unsigned int order) const;
       std::vector<Point> surface_points () const;
+      /** Complete regions, not a test of quadrature-point coverage. Lifting
+       * uses the actual vertical graph strip, not a Euclidean normal tube.
+       * Polynomial interval bounds are conservative and outward rounded. */
+      Bounds lifting_bounds () const;
+      Bounds sampling_bounds (unsigned int formed_pieces, double radius) const;
+      Clearance clearance (const Bounds &domain, unsigned int formed_pieces, double radius) const;
       std::string mode_signature (unsigned int index) const;
       void append (double preferred, double arclength, double R, unsigned int cells = 1);
       unsigned int

@@ -45,6 +45,7 @@ namespace aspect
     std::shared_ptr<System::Implementation::Prepared>
     System::Implementation::prepare (const State &s, Geometry geometry, const BulkSolve &inverse)
     {
+      protect_domain(geometry,s.formed,"candidate mechanical support");
       const auto begin = std::chrono::steady_clock::now ();
       auto p = std::make_shared<Prepared> ();
       p->geometry = std::move (geometry);
@@ -255,6 +256,22 @@ namespace aspect
         cached_columns[keys[j]] = p->columns[j];
       for (unsigned int j = 0; j < nc; ++j)
         cached_normals[normal_keys[j]] = p->normals[j];
+      // Optional small-operator export for independent finite-domain stability
+      // analysis. No bulk field or accepted history is replaced by this data.
+      if(std::getenv("ASPECT_COHESIVE_EXPORT_OPERATORS") &&
+         Utilities::MPI::this_mpi_process(system.get_mpi_communicator())==0)
+        {
+          const std::string stem=system.get_output_directory()+"cohesive-operator-"+std::to_string(s.step);
+          for(const auto &entry:std::vector<std::pair<std::string,const FullMatrix<double>*>>
+              {{"K",&op.K},{"Q",&op.Q},{"N",&op.Nm}})
+            {
+              std::ofstream f(stem+"-"+entry.first+".csv");f<<std::setprecision(17);
+              for(unsigned i=0;i<entry.second->m();++i){for(unsigned j=0;j<entry.second->n();++j)
+                f<<(j?",":"")<<(*entry.second)(i,j);f<<'\n';}
+            }
+          std::ofstream f(stem+"-points.csv");f<<std::setprecision(17)<<"x_m,y_m,weight_m\n";
+          for(const auto &q:p->points)f<<q.position[0]<<','<<q.position[1]<<','<<q.weight<<'\n';
+        }
       cached_prepared = p;
       prepared_signature = key.str ();
       setup_seconds

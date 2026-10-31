@@ -1,0 +1,18 @@
+case,stage,time_s,accepted_step,sampling_clearance_m,sampling_wall,lifting_clearance_m,lifting_wall,inside
+sampling-outside,initial seed,0,0,-0.10000000000000143,right,1.4000000000000001,right,0
+lifting-outside,initial seed,0,0,1.1984258102928569,top,-0.15000000000000216,top,0
+candidate-outside,initial seed,0,0,0.099999999999997854,right,1.5999999999999994,right,1
+candidate-outside,initial publication,0,0,0.099999999999997854,right,1.5999999999999994,right,1
+candidate-outside,accepted direction sampling,0.000125,0,0.099999999999997854,right,1.5999999999999994,right,1
+candidate-outside,candidate mechanical support,0.000125,0,0.099999999999997854,right,-0.22446176483181549,right,0
+candidate-recovery,checkpoint restore,0.000125,0,0.099999999999997854,right,1.5999999999999994,right,1
+boundary-approach,initial seed,0,0,0.19999999999999749,right,1.6999999999999991,right,1
+boundary-approach,initial publication,0,0,0.19999999999999749,right,1.6999999999999991,right,1
+boundary-approach,accepted direction sampling,0.000125,0,0.19999999999999749,right,1.6999999999999991,right,1
+boundary-approach,candidate mechanical support,0.000125,0,0.19999999999999749,right,1.5126902019898905,right,1
+boundary-approach,trial publication,0.000125,0,0.19999999999999749,right,1.5126902019898905,right,1
+retained-step,checkpoint restore,0.46199999999999758,0,0.027777231808176591,right,1.4340237961254283,right,1
+retained-step,accepted direction sampling,0.46199999999999758,175,0.027777231808176591,right,1.4340237961254283,right,1
+retained-step,candidate mechanical support,0.46199999999999758,175,0.027777231808176591,right,1.3402740899735297,right,1
+retained-step,trial publication,0.46199999999999758,175,0.027777231808176591,right,1.3402740899735297,right,1
+retained-completed,checkpoint restore,0.46249999999999752,0,0.027777231808176591,right,1.3402740899735297,right,1

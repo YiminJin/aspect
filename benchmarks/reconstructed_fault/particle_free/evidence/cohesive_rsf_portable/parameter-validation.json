@@ -1,0 +1,155 @@
+{
+  "binary_sha256": "487d72a0d51adb850d2f98d2c6dca2ce2075edae25fe74e13e8dee87235715ef",
+  "parameter_validation": [
+    {
+      "input": "benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/active.prm",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "--bind-to",
+        "none",
+        "-n",
+        "1",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+        "--validate",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native-portable/runs/portable-parameter-validation/active.prm"
+      ],
+      "returncode": 0,
+      "elapsed_s": 3.470951588000389
+    },
+    {
+      "input": "benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/conversion.prm",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "--bind-to",
+        "none",
+        "-n",
+        "1",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+        "--validate",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native-portable/runs/portable-parameter-validation/conversion.prm"
+      ],
+      "returncode": 0,
+      "elapsed_s": 1.5169067930000892
+    },
+    {
+      "input": "benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/general.prm",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "--bind-to",
+        "none",
+        "-n",
+        "1",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+        "--validate",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native-portable/runs/portable-parameter-validation/general.prm"
+      ],
+      "returncode": 0,
+      "elapsed_s": 1.5166878050004016
+    },
+    {
+      "input": "benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/history-affine.prm",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "--bind-to",
+        "none",
+        "-n",
+        "1",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+        "--validate",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native-portable/runs/portable-parameter-validation/history-affine.prm"
+      ],
+      "returncode": 0,
+      "elapsed_s": 1.5166631689990027
+    },
+    {
+      "input": "benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/history-r2.prm",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "--bind-to",
+        "none",
+        "-n",
+        "1",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+        "--validate",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native-portable/runs/portable-parameter-validation/history-r2.prm"
+      ],
+      "returncode": 0,
+      "elapsed_s": 1.5165909999996074
+    },
+    {
+      "input": "benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/history-r4.prm",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "--bind-to",
+        "none",
+        "-n",
+        "1",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+        "--validate",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native-portable/runs/portable-parameter-validation/history-r4.prm"
+      ],
+      "returncode": 0,
+      "elapsed_s": 1.51657657099895
+    },
+    {
+      "input": "benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/history.prm",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "--bind-to",
+        "none",
+        "-n",
+        "1",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+        "--validate",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native-portable/runs/portable-parameter-validation/history.prm"
+      ],
+      "returncode": 0,
+      "elapsed_s": 1.5170299889996386
+    },
+    {
+      "input": "benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/pilot.prm",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "--bind-to",
+        "none",
+        "-n",
+        "1",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+        "--validate",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native-portable/runs/portable-parameter-validation/pilot.prm"
+      ],
+      "returncode": 0,
+      "elapsed_s": 1.6173019229991041
+    },
+    {
+      "input": "benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/resume.prm",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "--bind-to",
+        "none",
+        "-n",
+        "1",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+        "--validate",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native-portable/runs/portable-parameter-validation/resume.prm"
+      ],
+      "returncode": 0,
+      "elapsed_s": 1.5666533359999448
+    },
+    {
+      "input": "benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/short.prm",
+      "command": [
+        "/opt/openmpi/5.0.6/bin/mpiexec",
+        "--bind-to",
+        "none",
+        "-n",
+        "1",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+        "--validate",
+        "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native-portable/runs/portable-parameter-validation/short.prm"
+      ],
+      "returncode": 0,
+      "elapsed_s": 1.617213397001251
+    }
+  ]
+}

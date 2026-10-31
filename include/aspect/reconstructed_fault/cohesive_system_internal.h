@@ -85,17 +85,29 @@ namespace aspect
       void write (const State &) const;
       std::vector<std::array<double, 6>> traces (const State &, const Field &) const;
       std::string configuration () const;
+      void find_domain ();
+      Geometry::Clearance protect_domain (const Geometry &, unsigned int formed,
+                                          const std::string &stage) const;
 
       System &system;
       Parameters law;
       double R = .75, support = .75, spacing = .09375, candidate_extent = .1875, cadence = .0025,
              max_length = 7.5;
+      double epoch_origin=.410, max_candidate_extent=1.5, boundary_warning=.75;
+      unsigned int max_completion_retries=4, seed_cells=32;
+      double seed_x=3.,seed_y=0.,seed_length=3.,seed_angle=0.;
+      double virgin_age=1.;
+      Geometry::Bounds domain;
+      bool domain_ready=false;
+      std::string setup_signature;
       unsigned int bulk_order = 6, selection_order = 8;
       double end_time = std::numeric_limits<double>::max ();
       double pressure_scaling = 1.;
       bool matrix_ready = false;
       std::string initial_mode = "physical seed", initial_file, initial_expression;
       Functions::ParsedFunction<2> independent_tensor;
+      Functions::ParsedFunction<1> initial_surface;
+      Functions::ParsedFunction<2> initial_native;
       std::shared_ptr<State> accepted;
       std::weak_ptr<Trial> active_trial;
       bool solving = false;

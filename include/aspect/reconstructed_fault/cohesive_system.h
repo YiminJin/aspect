@@ -22,6 +22,19 @@ namespace aspect
       using Field = LinearAlgebra::BlockVector;
       using BulkSolve = std::function<std::shared_ptr<Field> (const Field &)>;
       struct Trial;
+      struct StepMetrics
+      {
+        bool pending = false;
+        double dt = 0., speed = 0., slip_Dc = 0., log_state = 0., log_speed = 0.;
+        double damage_increment = 0.;
+        double resolved_log_speed=0.,continuous_error=0.,numerical_resolution=0.;
+        double displacement_resolution=0.,resolution_slip_Dc=0.,resolution_damage=0.;
+        unsigned int rate_point = 0;
+        double rate_x = 0., rate_y = 0., old_damage = 0., new_damage = 0.;
+        double old_rate = 0., new_rate = 0., old_jump = 0., new_jump = 0.;
+      };
+      /** Candidate metrics are read-only and never mutate accepted histories. */
+      StepMetrics step_metrics () const;
 
       explicit System (const Simulator<2> &);
       ~System () override;

@@ -1,0 +1,8 @@
+{
+  "physical_initial_exports_bitwise": {
+    "-surface.csv": true,
+    "-geometry.csv": true,
+    "-bulk-r0.csv": true,
+    "-bulk-r1.csv": true
+  }
+}

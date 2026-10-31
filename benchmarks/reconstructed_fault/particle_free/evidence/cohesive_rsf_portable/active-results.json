@@ -1,0 +1,19 @@
+{
+  "runs": [
+    "portable-suite-fresh"
+  ],
+  "start_s": 0.0,
+  "end_s": 0.0005,
+  "growth_m": 0.0,
+  "positive_steps": 4,
+  "absolute_physical_remainder_J_m": 6.921066115261727e-08,
+  "sliding_dissipation_J_m": 7.113602065305657e-19,
+  "added_fracture_J_m": 0.0,
+  "relative_sliding": 97293411294.63843,
+  "relative_fracture": null,
+  "maximum_source_scaled": 4.3203101863469615e-16,
+  "maximum_weak_Pa": 2.3593882673274316e-12,
+  "minimum_sampling_clearance_m": 4.499999999999998,
+  "minimum_lifting_clearance_m": 2.9999999999999996,
+  "maximum_rank_memory_bytes": 231579648.0
+}

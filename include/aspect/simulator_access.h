@@ -42,6 +42,7 @@ namespace WorldBuilder
 
 namespace aspect
 {
+  namespace CohesiveInterface { class System; }
   // forward declarations:
   template <int dim> class Simulator;
   template <int dim> struct SimulatorSignals;
@@ -238,6 +239,9 @@ namespace aspect
        */
       const Simulator<dim> &
       get_simulator () const;
+
+      /** Read-only experimental cohesive owner; null outside the selected 2D pilot. */
+      const CohesiveInterface::System *get_cohesive_rsf_system () const;
 
       /**
        * Return a reference to the parameters object that describes all run-time

@@ -1,0 +1,7 @@
+include benchmarks/reconstructed_fault/particle_free/cohesive_rsf_instability/smoke.prm
+set End time = 500
+set Maximum first time step = 500
+set Maximum time step = 500
+subsection Termination criteria
+ set End step = 1
+end

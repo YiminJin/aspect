@@ -1,0 +1,39 @@
+{
+  "point": {
+    "step": "661",
+    "time_s": "374.57851954399456",
+    "dt_s": "3.1783919794706729e-10",
+    "ratio": "3.3053339833198607",
+    "next_dt_s": "7.692758421412683e-11",
+    "minimum_dt_s": "1e-10",
+    "rate_point": "243",
+    "x_m": "9.0695438540862039",
+    "y_m": "0",
+    "old_damage": "4.5285604849287306e-15",
+    "new_damage": "5.3906907939561601e-14",
+    "old_rate_m_s": "5.3429853612048589e-08",
+    "new_rate_m_s": "4.6606914226032277e-07",
+    "old_jump_m": "1.3585681454786191e-17",
+    "new_jump_m": "1.617207238186848e-16"
+  },
+  "material_id": "seed:243",
+  "surface_cell": 81,
+  "incoming_exports_bitwise": {
+    "-surface.csv": true,
+    "-geometry.csv": true,
+    "-bulk-r0.csv": true,
+    "-bulk-r1.csv": true
+  },
+  "independent_increment_m": "1.48135042363898609E-16",
+  "independent_rate_m_s": "4.66069142260322818166733519886374861339238319769986688681715E-7",
+  "rate_absolute_discrepancy_m_s": 4.816673351988638e-23,
+  "independent_log_rate_change": "0.330533398331986145751875558752047309912208485463916116154870",
+  "rate_limit": 0.1,
+  "rejected_before_publication": true,
+  "last_accepted_step": 660,
+  "attempted_step": 661,
+  "desired_end_s": 374.5785589771154,
+  "last_accepted_s": 374.57851954367675,
+  "remaining_physical_time_s": 3.943343864420967e-05,
+  "interpretation": "Rate criterion at incipient near-zero damage demands subfloor dt; finite rate jump versus algebraic admission noise not independently separated. Not evidence of physical instability or contact loss."
+}

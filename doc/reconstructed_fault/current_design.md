@@ -3157,3 +3157,55 @@ an operation-count floating-point bound: with n accepted additions, r outer
 retries, u=epsilon/2 and k=n+2r+3, use the outward-rounded
 gamma/(1-gamma) max(|t|,|end|), gamma=ku/(1-ku). The retry count is persisted.
 Only microscopic clock closure is affected; physical tolerances are unchanged.
+
+The portable `prescribed fields` initialization is a separate explicit fresh
+input mode: configurable straight seed, Gauss physical histories, complete DG
+tensor and native FE remainder. It never reads a prototype/kernel. It retains
+the existing jump offset/Q1 relaxed-trace identity rather than silently
+projecting histories. Prescribed setup/Box geometry and boundary strain schedule
+are checked on restart; the old retained-pilot signature/arithmetic remain
+readable. See `particle_free/COHESIVE_RSF_PORTABLE_REPORT.md`.
+
+Before sampling or mechanics, certify the entire radius-R disk centered R ahead
+of the formed tip and the complete vertical lifting strip of all formed and
+temporary graph pieces. Conservative outward polynomial interval bounds include
+interior extrema; they do not change quadrature. Positive certified rectangular
+domain clearance is required. Export both clearances, warn on approach and reject
+missing support before publication. The 7.5 m formed-length budget remains a
+separate guard; neither it nor truncated-support normalization can replace this
+test. Containment is not boundary-independence qualification.
+
+The optional `Time stepping/Cohesive RSF` plugin reads immutable-parent pending
+Gauss metrics and bounds slip/Dc, log age, regularized log speed and damage
+increments before actual acceptance. It is an accuracy controller, not a
+constitutive modification. Only typed local surface-solve failures request
+native nonlinear cutback; contact, source, energy and geometry guards remain.
+The same accepted state anchors retry. The controller has no independent
+persistent history and derives restart proposals from the native owner.
+
+For slow loading, evaluate bulk storage increments as the factored tensor
+product `(tau_new+tau_old):(tau_new−tau_old)/(4G)`, with extended local
+accumulation. Independently export the former subtraction of separately summed
+storages. This algebraic correction changes neither the quadrature nor the
+existing work tolerance; see the preserved failure in the RSF instability report.
+
+The bounded RSF comparison demonstrates state-feedback acceleration but does not
+qualify developed coupled growth. A half-limit replay reaches the unchanged
+computational dt floor at incipient near-zero Gauss damage; no failed trial is
+published. Point coordinates and both rate/slip/damage operands are exported
+before that assertion. No birth exemption or floor change is adopted. An
+admission/event-aware estimator and algebraic rate uncertainty remain numerical
+work; see `particle_free/COHESIVE_RSF_INSTABILITY_REPORT.md`.
+
+The selected episode-continuation experiment may enable `Use residual resolved
+estimator` (default false). It replaces independent raw log-speed rejection by
+BE/trapezoidal defects in continuous jump, age and damage, retaining uncertainty-
+strengthened increment checks and all native acceptance guards. Rate intervals
+are derived from the current admissible tangent, complete weak-residual resolution
+and counted assembled-force arithmetic. Overlapping intervals label rates as
+unresolved; continuous-history numerical uncertainty must itself fit the error
+budget. No test depends on a damage cutoff. Raw/resolved rate changes remain
+reported. This is a linearized assembled-system resolution estimate, not a global
+nonlinear stability certificate. Numerical diagnostic metadata uses the existing
+accepted/checkpoint owner; physical histories are unchanged. See
+`particle_free/RSF_EPISODE_ESTIMATOR.md` for formulas and limitations.

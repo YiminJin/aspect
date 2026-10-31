@@ -1,0 +1,236 @@
+{
+  "fine-probe": {
+    "command": [
+      "/opt/openmpi/5.0.6/bin/mpiexec",
+      "--bind-to",
+      "none",
+      "-n",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+      "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-instability/runs/fine-probe/parameters.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-particle-free",
+    "timeout_s": 900,
+    "start_unix_s": 1793322200.0359004,
+    "ranks": 2,
+    "binary_sha256": "2168df4627ebb6139fdbc1fd334a24014da103f880abdf3f840750701c307a4b",
+    "input": "include /home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/cohesive_rsf_instability/fine-probe.prm\nset Output directory = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-instability/runs/fine-probe/output\nset Additional shared libraries = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/checks-native/libcohesive_rsf_native_checks.release.so\n",
+    "source_checkpoint": null,
+    "test_environment": {
+      "ASPECT_COHESIVE_EXPORT_OPERATORS": "1"
+    },
+    "run_environment": {
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OMPI_MCA_mpi_yield_when_idle": "1"
+    },
+    "actual_ranks": 2,
+    "elapsed_s": 186.76716497499729,
+    "returncode": 0,
+    "final_accepted_step": 1,
+    "final_accepted_time_s": 0.01,
+    "peak_rank_memory_MiB": 639.31640625,
+    "cells": 12288,
+    "native_reported_DoFs": 185667
+  },
+  "event": {
+    "command": [
+      "/opt/openmpi/5.0.6/bin/mpiexec",
+      "--bind-to",
+      "none",
+      "-n",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+      "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-instability/runs/event/parameters.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-particle-free",
+    "timeout_s": 3600,
+    "start_unix_s": 1793322515.0188863,
+    "ranks": 2,
+    "binary_sha256": "2168df4627ebb6139fdbc1fd334a24014da103f880abdf3f840750701c307a4b",
+    "input": "include /home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/cohesive_rsf_instability/event.prm\nset Output directory = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-instability/runs/event/output\nset Additional shared libraries = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/checks-native/libcohesive_rsf_native_checks.release.so\nset Resume computation = true\n",
+    "source_checkpoint": "build-particle-free/cohesive-rsf-instability/runs/fine-probe/output",
+    "test_environment": {},
+    "run_environment": {
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OMPI_MCA_mpi_yield_when_idle": "1"
+    },
+    "actual_ranks": 2,
+    "elapsed_s": 3050.483192937001,
+    "returncode": 0,
+    "final_accepted_step": 368,
+    "final_accepted_time_s": 374.56704168613635,
+    "peak_rank_memory_MiB": 691.17578125,
+    "cells": 12288,
+    "native_reported_DoFs": 185667
+  },
+  "event-growth": {
+    "command": [
+      "/opt/openmpi/5.0.6/bin/mpiexec",
+      "--bind-to",
+      "none",
+      "-n",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+      "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-instability/runs/event-growth/parameters.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-particle-free",
+    "timeout_s": 2400,
+    "start_unix_s": 1793326782.8814251,
+    "ranks": 2,
+    "binary_sha256": "665cbf8b56bada459c1764c2ea4c7c7d3f900e1cc6d7c9ca15a4f35e9b07746b",
+    "input": "include /home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/cohesive_rsf_instability/event.prm\nset Output directory = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-instability/runs/event-growth/output\nset Additional shared libraries = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/checks-native/libcohesive_rsf_native_checks.release.so\nset Resume computation = true\n",
+    "source_checkpoint": "build-particle-free/cohesive-rsf-instability/runs/event/output",
+    "test_environment": {},
+    "run_environment": {
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OMPI_MCA_mpi_yield_when_idle": "1"
+    },
+    "actual_ranks": 2,
+    "elapsed_s": 1985.6871490119993,
+    "returncode": 0,
+    "final_accepted_step": 600,
+    "final_accepted_time_s": 374.5785589771154,
+    "peak_rank_memory_MiB": 690.74609375,
+    "cells": 12288,
+    "native_reported_DoFs": 185667
+  },
+  "neutral-final": {
+    "command": [
+      "/opt/openmpi/5.0.6/bin/mpiexec",
+      "--bind-to",
+      "none",
+      "-n",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+      "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-instability/runs/neutral-final/parameters.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-particle-free",
+    "timeout_s": 1200,
+    "start_unix_s": 1793335619.101398,
+    "ranks": 2,
+    "binary_sha256": "665cbf8b56bada459c1764c2ea4c7c7d3f900e1cc6d7c9ca15a4f35e9b07746b",
+    "input": "include /home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/cohesive_rsf_instability/event-neutral.prm\nset Output directory = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-instability/runs/neutral-final/output\nset Additional shared libraries = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/checks-native/libcohesive_rsf_native_checks.release.so\nset End time = 374.57855897711539\n",
+    "source_checkpoint": null,
+    "test_environment": {},
+    "run_environment": {
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OMPI_MCA_mpi_yield_when_idle": "1"
+    },
+    "actual_ranks": 2,
+    "elapsed_s": 675.339506155,
+    "returncode": 0,
+    "final_accepted_step": 49,
+    "final_accepted_time_s": 374.5785589771154,
+    "peak_rank_memory_MiB": 684.0859375,
+    "cells": 12288,
+    "native_reported_DoFs": 185667
+  },
+  "half-final": {
+    "command": [
+      "/opt/openmpi/5.0.6/bin/mpiexec",
+      "--bind-to",
+      "none",
+      "-n",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+      "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-instability/runs/half-final/parameters.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-particle-free",
+    "timeout_s": 4200,
+    "graceful_stop_after_s": 3900.0,
+    "start_unix_s": 1793336503.094908,
+    "ranks": 2,
+    "binary_sha256": "665cbf8b56bada459c1764c2ea4c7c7d3f900e1cc6d7c9ca15a4f35e9b07746b",
+    "input": "include /home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/cohesive_rsf_instability/half-event.prm\nset Output directory = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-instability/runs/half-final/output\nset Additional shared libraries = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/checks-native/libcohesive_rsf_native_checks.release.so\nset End time = 374.57855897711539\nset Resume computation = true\n",
+    "source_checkpoint": "build-particle-free/cohesive-rsf-instability/runs/event/output",
+    "test_environment": {},
+    "run_environment": {
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OMPI_MCA_mpi_yield_when_idle": "1"
+    },
+    "elapsed_s": 2302.121594305,
+    "returncode": 1,
+    "final_accepted_step": 660,
+    "final_accepted_time_s": 374.57851954367675,
+    "peak_rank_memory_MiB": 696.9140625,
+    "cells": 12288,
+    "native_reported_DoFs": 185667
+  },
+  "rate-floor-reproduction": {
+    "command": [
+      "/opt/openmpi/5.0.6/bin/mpiexec",
+      "--bind-to",
+      "none",
+      "-n",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+      "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-instability/runs/rate-floor-reproduction/parameters.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-particle-free",
+    "timeout_s": 480,
+    "graceful_stop_after_s": 420.0,
+    "start_unix_s": 1793339271.0622458,
+    "ranks": 2,
+    "binary_sha256": "f642ca3183f076934185cdbd3df41970580996181067813429fd6b6a1e2c0dbb",
+    "input": "include /home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/cohesive_rsf_instability/half-event.prm\nset Output directory = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-instability/runs/rate-floor-reproduction/output\nset Additional shared libraries = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/checks-native/libcohesive_rsf_native_checks.release.so\nset End time = 374.57855897711539\nset Resume computation = true\n",
+    "source_checkpoint": "build-particle-free/cohesive-rsf-instability/runs/half-final/output",
+    "test_environment": {},
+    "run_environment": {
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OMPI_MCA_mpi_yield_when_idle": "1"
+    },
+    "elapsed_s": 206.68330592700022,
+    "returncode": 1,
+    "final_accepted_step": 660,
+    "final_accepted_time_s": 374.57851954367675,
+    "peak_rank_memory_MiB": 278.640625,
+    "cells": 12288,
+    "native_reported_DoFs": 185667
+  },
+  "retained-active": {
+    "command": [
+      "/opt/openmpi/5.0.6/bin/mpiexec",
+      "--bind-to",
+      "none",
+      "-n",
+      "2",
+      "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/native/aspect-release",
+      "/home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-instability/runs/retained-active/parameters.prm"
+    ],
+    "cwd": "/home/ein/repository/aspect-pf-rsf-particle-free",
+    "timeout_s": 120,
+    "graceful_stop_after_s": null,
+    "start_unix_s": 1793339600.9014995,
+    "ranks": 2,
+    "binary_sha256": "f642ca3183f076934185cdbd3df41970580996181067813429fd6b6a1e2c0dbb",
+    "input": "include /home/ein/repository/aspect-pf-rsf-particle-free/benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/active.prm\nset Output directory = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-instability/runs/retained-active/output\nset Additional shared libraries = /home/ein/repository/aspect-pf-rsf-particle-free/build-particle-free/cohesive-rsf-native/checks-native/libcohesive_rsf_native_checks.release.so\n",
+    "source_checkpoint": null,
+    "test_environment": {},
+    "run_environment": {
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "DEAL_II_NUM_THREADS": "1",
+      "OMPI_MCA_mpi_yield_when_idle": "1"
+    },
+    "actual_ranks": 2,
+    "elapsed_s": 9.717750746999627,
+    "returncode": 0,
+    "final_accepted_step": 4,
+    "final_accepted_time_s": 0.0005,
+    "peak_rank_memory_MiB": 220.67578125,
+    "cells": 256,
+    "native_reported_DoFs": 4035
+  }
+}

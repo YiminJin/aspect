@@ -9,6 +9,79 @@ namespace aspect
 {
   namespace CohesiveInterface
   {
+    namespace
+    {
+      struct Interval
+      {
+        double lo, hi;
+        Interval (double x) : lo (x), hi (x) {}
+        Interval (double lo, double hi) : lo (lo), hi (hi) {}
+      };
+      double down (double x) { return std::nextafter (x, -std::numeric_limits<double>::infinity ()); }
+      double up (double x) { return std::nextafter (x, std::numeric_limits<double>::infinity ()); }
+      Interval operator+ (Interval a, Interval b) { return { down (a.lo+b.lo), up (a.hi+b.hi) }; }
+      Interval operator* (Interval a, Interval b)
+      {
+        const std::array<double,4> v = {a.lo*b.lo,a.lo*b.hi,a.hi*b.lo,a.hi*b.hi};
+        return {down (*std::min_element(v.begin(),v.end())),up (*std::max_element(v.begin(),v.end()))};
+      }
+      Interval divided (Interval a, double b) { return {down(a.lo/b),up(a.hi/b)}; }
+    }
+
+    Geometry::Bounds
+    Geometry::lifting_bounds () const
+    {
+      Bounds b;
+      b.lower = dealii::Point<2> (nodes.front (), std::numeric_limits<double>::infinity ());
+      b.upper = dealii::Point<2> (nodes.back (), -std::numeric_limits<double>::infinity ());
+      for (const auto &p : curve)
+        {
+          const Interval h (down(p.end-p.x),up(p.end-p.x));
+          // Horner encloses every point of the quartic graph, including extrema
+          // between Gauss points. Fixed subdivisions tighten a conservative
+          // bound; they do not change any mechanics/source quadrature.
+          const Interval delta (down(p.b-p.a),up(p.b-p.a));
+          const Interval c2 = p.hermite ? divided(Interval(p.c1),2) : Interval(0.);
+          const Interval c3 = p.hermite ? divided(Interval(p.c2),3) : delta;
+          const Interval c4 = p.hermite ? divided(Interval(p.c3),4) : delta*Interval(-.5);
+          for (unsigned i=0;i<32;++i)
+            {
+              const Interval z (double(i)/32,double(i+1)/32);
+              const Interval y = Interval(p.y)+h*z*(Interval(p.a)+z*(c2+z*(c3+z*c4)));
+              b.lower[1]=std::min(b.lower[1],down(y.lo-support));
+              b.upper[1]=std::max(b.upper[1],up(y.hi+support));
+            }
+        }
+      return b;
+    }
+
+    Geometry::Bounds
+    Geometry::sampling_bounds (unsigned formed, double radius) const
+    {
+      AssertThrow(formed>0 && formed<=curve.size() && radius>0.,ExcMessage("Invalid path-sampling region."));
+      const auto &p=curve[formed-1];
+      const auto tip=sample(p.end);
+      dealii::Point<2> centre(p.end,tip.y);
+      centre+=radius*tip.tangent;
+      Bounds b;
+      for(unsigned d=0;d<2;++d)
+        { b.lower[d]=down(centre[d]-radius);b.upper[d]=up(centre[d]+radius); }
+      return b;
+    }
+
+    Geometry::Clearance
+    Geometry::clearance (const Bounds &domain, unsigned formed, double radius) const
+    {
+      const auto distance=[&](const Bounds &b)
+        {
+          const std::array<double,4> values={down(b.lower[0]-domain.lower[0]),down(domain.upper[0]-b.upper[0]),
+                                             down(b.lower[1]-domain.lower[1]),down(domain.upper[1]-b.upper[1])};
+          const auto it=std::min_element(values.begin(),values.end());
+          return std::make_pair(*it,static_cast<unsigned>(it-values.begin()));
+        };
+      const auto s=distance(sampling_bounds(formed,radius)),l=distance(lifting_bounds());
+      return {s.first,l.first,s.second,l.second};
+    }
     Geometry::Geometry (std::vector<Piece> pieces, const double width)
         : curve (std::move (pieces)), support (width)
     {

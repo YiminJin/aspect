@@ -1,0 +1,10 @@
+[
+  {
+    "step": 748,
+    "surface_history_max_abs": 0.0,
+    "geometry_exact": true,
+    "bulk_history_max_abs": 0.0,
+    "persistent_records_exact": true,
+    "reconstructed_stress_max_abs_Pa": 0.0
+  }
+]

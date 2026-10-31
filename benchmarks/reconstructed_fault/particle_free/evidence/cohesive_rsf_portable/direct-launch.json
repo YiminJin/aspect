@@ -1,0 +1,8 @@
+{
+  "accepted_states": 5,
+  "positive_steps": 4,
+  "surface_geometry_bulk_fields_bitwise": true,
+  "launcher_idle_yield": 1,
+  "source_input": "benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/active.prm",
+  "native_timer_total_s": 6
+}

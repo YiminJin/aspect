@@ -69,6 +69,14 @@ namespace aspect
 
 
   template <int dim>
+  const CohesiveInterface::System *
+  SimulatorAccess<dim>::get_cohesive_rsf_system () const
+  {
+    if constexpr (dim == 2) return simulator->cohesive_rsf_system.get ();
+    else return nullptr;
+  }
+
+  template <int dim>
   const Parameters<dim> &
   SimulatorAccess<dim>::get_parameters() const
   {

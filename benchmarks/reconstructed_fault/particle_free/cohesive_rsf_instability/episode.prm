@@ -1,0 +1,6 @@
+# Observation horizon, not a scientific event endpoint. Resume by checkpoint.
+include benchmarks/reconstructed_fault/particle_free/cohesive_rsf_instability/resolved-probe.prm
+set End time = 376
+subsection Termination criteria
+ set End step = 20000
+end

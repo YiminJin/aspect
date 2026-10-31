@@ -1,0 +1,32 @@
+{
+  "terminal_reference": {
+    "surface_history_max_abs": 0.0,
+    "identities_exact": true,
+    "geometry_bitwise": true,
+    "surface_bitwise": true,
+    "bulk_center_files_bitwise": true,
+    "publications": [
+      748,
+      748
+    ]
+  },
+  "accepted_start_step": 664,
+  "accepted_end_step": 748,
+  "last_time_s": 374.58003334330067,
+  "warm_wall_s": 283.8061134815216,
+  "warm_physical_s": 0.0013398213718005536,
+  "warm_steps": 35,
+  "warm_s_per_step": 8.108746099472047,
+  "estimated_wall_s_for_point1_physical_second": 21182.384417418376,
+  "radiative_mode_relaxation_s": 0.031839331835075944,
+  "max_mechanical_weak_Pa": 8.058470933440293e-11,
+  "max_surface_weak_Pa": 9.787393118187993e-09,
+  "max_source_scaled": 1.2939315476761475e-14,
+  "max_ledger_J_m": 8.403123347996917e-14,
+  "max_continuous_error": 0.00040044036490612296,
+  "peak_RSS_MiB": 497.91796875,
+  "added_fracture_J_m": 0.0004208812333590039,
+  "friction_J_m": 0.03535932400791067,
+  "radiation_J_m": 0.11781264702836064,
+  "physical_remainder_absolute_J_m": 8.772072799992711e-05
+}

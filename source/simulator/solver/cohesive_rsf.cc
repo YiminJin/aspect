@@ -1,6 +1,7 @@
 /* Copyright (C) 2026 by the authors of ASPECT. GNU GPL v2 or later. */
 #include <aspect/simulator.h>
 #include <aspect/reconstructed_fault/cohesive_system.h>
+#include <aspect/reconstructed_fault/cohesive_evolution.h>
 
 namespace aspect
 {
@@ -98,6 +99,17 @@ namespace aspect
             // This owner publishes a volume-mean-zero physical perturbation;
             // a reference inverse's pressure-guess adjustment is not history.
             last_pressure_normalization_adjustment = 0.;
+          }
+        catch (const CohesiveEvolution::ExcStepFailure &error)
+          {
+            restore ();
+            pcout << "Cohesive candidate rejected before publication: " << error.what() << std::endl;
+            // Only these three local solve failures are recoverable. Contact,
+            // source, energy, geometry and history errors retain their guards.
+            AssertThrow(parameters.nonlinear_solver_failure_strategy !=
+                          Parameters<dim>::NonlinearSolverFailureStrategy::continue_with_next_timestep,
+                        ExcMessage("A failed cohesive candidate may never be accepted."));
+            throw ExcNonlinearSolverNoConvergence();
           }
         catch (...)
           {

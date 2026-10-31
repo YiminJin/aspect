@@ -17,6 +17,8 @@ namespace aspect
 {
   namespace CohesiveEvolution
   {
+    DeclException1(ExcStepFailure, std::string, << arg1);
+    constexpr double weak_tolerance = 1e-8;
     using Matrix = dealii::FullMatrix<double>;
     using Vector = dealii::Vector<double>;
     using namespace dealii;
@@ -230,7 +232,7 @@ namespace aspect
       double err = error (x), acc = 1.;
       const double lipschitz = maxrow * maxcol;
       if (lipschitz > 0)
-        for (iterations = 0; err > 1e-8 && iterations < limit; ++iterations)
+        for (iterations = 0; err > weak_tolerance && iterations < limit; ++iterations)
           {
             error (y);
             L.Tvmult (gradient, res);
@@ -444,7 +446,7 @@ namespace aspect
             comp = std::max (comp, std::abs (R[n + k]));
           if (weak <= 2e-9 && comp < 2e-13)
             break;
-          AssertThrow (it < 99, ExcMessage ("Native signed semismooth iteration limit"));
+          AssertThrow (it < 99, ExcStepFailure ("Native signed semismooth iteration limit"));
           R *= -1.;
           auto step = equilibrated_step (A, R);
           const double norm = R.l2_norm ();
@@ -467,7 +469,7 @@ namespace aspect
                 }
               scale *= .5;
             }
-          AssertThrow (found, ExcMessage ("Native signed line search failed"));
+          AssertThrow (found, ExcStepFailure ("Native signed line search failed"));
         }
       if (!supplied_root)
         {
@@ -535,7 +537,7 @@ namespace aspect
       evaluate (out.increment, true, force, J);
       out.tangent = J;
       out.weak = certificate (op, force, out.tied, out.lambda, out.certificate_iterations);
-      if (out.weak > 1e-8)
+      if (out.weak > weak_tolerance)
         {
           const char *path = std::getenv ("CI_EVOLUTION_FAILURE");
           if (path)
@@ -552,7 +554,7 @@ namespace aspect
                   << '\n';
             }
         }
-      AssertThrow (out.weak <= 1e-8, ExcMessage ("Native signed complete weak certificate failed: "
+      AssertThrow (out.weak <= weak_tolerance, ExcMessage ("Native signed complete weak certificate failed: "
                                                  + std::to_string (out.weak)));
       for (unsigned q = 0; q < nq; ++q)
         if (out.tied[q])
@@ -595,7 +597,7 @@ namespace aspect
             out.curvature = std::min (out.curvature, symmetric.eigenvalue (i).real ());
           AssertThrow (
               out.curvature > 0.,
-              ExcMessage ("Native signed candidate has negative admissible symmetric tangent"));
+              ExcStepFailure ("Native signed candidate has negative admissible symmetric tangent"));
         }
       return out;
     }

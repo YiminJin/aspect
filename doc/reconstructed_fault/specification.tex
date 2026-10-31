@@ -3679,4 +3679,65 @@ $u=\epsilon/2$, $k=n+2r+3$, $\gamma=ku/(1-ku)$, use the outward-rounded
 $\gamma(1-\gamma)^{-1}\max(|t|,|t_{\rm end}|)$. Persist the retry count; preserve
 all physical acceptance tolerances.
 
+An explicit fresh prescribed-fields mode configures the straight seed, Gauss
+histories, complete independent tensor and native FE remainder without prototype
+inputs. It preserves the Gauss-offset/Q1-memory identities and one fracture
+inventory. Prescribed setup, rectangular geometry and the interval-averaged
+boundary strain schedule are checked on restart; retained-pilot native anchors
+remain supported with unchanged defaults.
+
+Protect the complete direction disk
+$D_R=B_R(\boldsymbol{x}_{\rm tip}+R\boldsymbol{t}_{\rm tip})$ and the actual
+vertical lifting strip
+$S_w=\{(x,y):x_0\le x\le x_{\rm end},\ |y-g(x)|\le w\}$, including temporary
+pieces. Require positive certified clearance of both regions inside the fixed
+rectangular bulk domain before sampling, assembly and publication. Outward
+polynomial interval envelopes include extrema between quadrature points; the
+integration rules are unchanged. Record approach to the limiting wall. Reject
+missing support without renormalizing a truncated disk or relaxing the separate
+formed-length budget. This certificate does not establish physical boundary
+independence.
+
+\paragraph{Optional native cohesive adaptive intervals.}
+The default-off cohesive RSF timestep plugin bounds Gauss-point
+$|\Delta j|/D_c$, $|\Delta\log\theta|$,
+$|\Delta\log(|V|+V_0)|$, and $\Delta a$ before publication.
+The velocity regularization here belongs only to the numerical indicator.
+Oversized trials repeat from the unchanged accepted owner. Typed local surface
+Newton/line-search or endpoint-tangent failures use native cutback; contact,
+source, physical-work, geometry and history checks are not bypassed.
+The controller derives its state from the owner on restart.
+For cancellation-resistant storage bookkeeping use
+$(\tau^++\tau):(\tau^+-\tau)/(4G)$ integrated on the retained rule, with
+extended local accumulation. The previous sum/subtract result is retained as an
+independent diagnostic; the work tolerance is unchanged.
+
+
+\paragraph{Bounded RSF qualification limit.}
+State-feedback acceleration is demonstrated, but developed coupled growth remains
+unqualified. Halving adaptive increment limits reaches the unchanged computational
+timestep floor at incipient near-zero Gauss damage. The failed trial is not
+published. Export the offending point and incoming/candidate rate, slip and damage
+before this assertion. No birth exemption or floor change is adopted; event-aware
+estimation and algebraic rate uncertainty require separate numerical qualification.
+See \texttt{COHESIVE\_RSF\_INSTABILITY\_REPORT.md}.
+
+
+\paragraph{Selected residual-resolved episode estimator (default off).}
+For the admissible tangent with positive mass-normalized symmetric-part lower
+bound $\alpha$, use the unchanged weak certificate and counted assembled-force
+arithmetic to bound linearized force resolution by $\eta_F$. Point displacement
+resolution is $U_q=\sqrt{\sum_i Q_{qi}^2/M_i}\,\eta_F/\alpha$.
+Rate intervals use $U_q/\Delta t$; overlapping intervals indicate unresolved
+instantaneous rates. This is not a nonlinear or spatial-error certificate.
+When explicitly selected, independent raw log-rate rejection is replaced by
+BE/trapezoidal defects in continuous jump, aging and irreversible damage.
+Their algebraic uncertainty is removed only while the continuous numerical
+resolution is itself bounded by the error budget. Retain the continuous increment
+limits and every native mechanical, state, damage, source, contact and energy
+check. No damage cutoff, history reset or minimum-interval reduction is used.
+Persist only numerical diagnostics through the existing owner; physical histories
+and once-only acceptance remain unchanged. The original estimator stays available.
+See \texttt{RSF\_EPISODE\_ESTIMATOR.md} for the explicit defects and scope.
+
 \end{document}

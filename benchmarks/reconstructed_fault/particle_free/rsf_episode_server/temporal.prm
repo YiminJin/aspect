@@ -1,0 +1,16 @@
+include physics.prm
+set Output directory = ./temporal-output
+set Resume computation = true
+subsection Termination criteria
+ set Termination criteria = end time, end step, user request, wall time
+ set Wall time = 1.5
+end
+subsection Time stepping
+ subsection Cohesive RSF
+  set Maximum continuous history error = .000125
+  set Maximum slip increment in Dc = .025
+  set Maximum logarithmic state change = .025
+  set Maximum damage increment = .005
+ end
+end
+set Maximum time step = 5

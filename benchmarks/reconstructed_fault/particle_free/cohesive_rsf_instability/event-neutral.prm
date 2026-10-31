@@ -1,0 +1,5 @@
+include benchmarks/reconstructed_fault/particle_free/cohesive_rsf_instability/event.prm
+subsection Cohesive RSF pilot
+ set RSF evolution coefficient = .005
+ set Reference friction coefficient = .13453877639491068
+end

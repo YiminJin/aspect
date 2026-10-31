@@ -1,0 +1,10 @@
+{
+  "accepted_step": 368,
+  "accepted_time_s": 374.56704168613635,
+  "physical_exports_bitwise": {
+    "-surface.csv": true,
+    "-geometry.csv": true,
+    "-bulk-r0.csv": true,
+    "-bulk-r1.csv": true
+  }
+}

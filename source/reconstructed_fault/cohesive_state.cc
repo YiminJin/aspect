@@ -143,6 +143,7 @@ namespace aspect
     std::pair<System::Implementation::Tensor, double>
     System::Implementation::sample (const State &s) const
     {
+      protect_domain(s.geometry,s.formed,"accepted direction sampling");
       const auto &piece = s.geometry.pieces ().at (s.formed - 1);
       const auto end = s.geometry.sample (piece.end);
       dealii::Point<2> centre (piece.end, end.y);
@@ -235,6 +236,7 @@ namespace aspect
     System::restore ()
     {
       auto &d = *data;
+      d.find_domain();
       AssertThrow (!d.pending_checkpoint.empty () && !d.accepted,
                    ExcMessage ("Missing native cohesive restart record."));
       auto s = std::make_shared<Implementation::State> ();
@@ -256,6 +258,7 @@ namespace aspect
       }
       s->bulk = std::make_shared<BulkHistory<2>> (get_simulator (), d.law.G, d.law.eta);
       s->bulk->restore (records);
+      d.protect_domain(s->geometry,s->formed,"checkpoint restore");
       AssertThrow (
           s->bulk->pack () == records,
           ExcMessage (

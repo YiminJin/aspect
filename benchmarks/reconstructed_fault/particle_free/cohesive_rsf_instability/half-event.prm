@@ -1,0 +1,14 @@
+# Focused temporal check: same accepted physical state and law, half accuracy increments.
+include benchmarks/reconstructed_fault/particle_free/cohesive_rsf_instability/event.prm
+set Maximum time step = 10
+subsection Time stepping
+ subsection Cohesive RSF
+  set Maximum slip increment in Dc = .05
+  set Maximum logarithmic state change = .05
+  set Maximum regularized logarithmic speed change = .1
+  set Maximum damage increment = .01
+ end
+end
+subsection Termination criteria
+ set End step = 1400
+end

@@ -1,5 +1,6 @@
 /* Copyright (C) 2026 by the authors of ASPECT. GNU GPL v2 or later. */
 #include <aspect/reconstructed_fault/cohesive_system_internal.h>
+#include <aspect/reconstructed_fault/cohesive_timestep.h>
 #include <deal.II/fe/fe_values.h>
 #include <chrono>
 #include <numeric>
@@ -141,6 +142,9 @@ namespace aspect
       // Independent native physical work and full-tensor storage ledger. No
       // reduced-response-span energy is substituted for the general history.
       double eold = 0., enew = 0., be = 0., work = 0., trap = 0., div2 = 0.;
+      // Preserve the former sum/subtract diagnostic independently. For slow
+      // loading its cancellation grows with the number of quadrature points.
+      long double precise_old=0., precise_new=0., precise_increment=0.;
       const auto &intro = system.introspection ();
       const auto &fe = system.get_fe ();
       auto residual = owned (), measure = owned ();
@@ -180,6 +184,9 @@ namespace aspect
                 eold += w * (before[q] * before[q]) / (4 * law.G);
                 enew += w * (after[q] * after[q]) / (4 * law.G);
                 const auto change = after[q] - before[q];
+                precise_old += static_cast<long double>(w)*(before[q]*before[q])/(4*law.G);
+                precise_new += static_cast<long double>(w)*(after[q]*after[q])/(4*law.G);
+                precise_increment += static_cast<long double>(w)*((after[q]+before[q])*change)/(4*law.G);
                 be += w * (change * change) / (4 * law.G);
                 work += w * (after[q] * dev3 (ep[q]) - (law.p0 + pn[q]) * dp[q]);
                 trap += .5 * w
@@ -229,6 +236,10 @@ namespace aspect
               + std::to_string (mechanical_weak) + " Pa."));
       for (double *value : { &eold, &enew, &be, &work, &trap, &div2 })
         *value = Utilities::MPI::sum (*value, system.get_mpi_communicator ());
+      const double legacy_increment=enew-eold;
+      eold=Utilities::MPI::sum(static_cast<double>(precise_old),system.get_mpi_communicator());
+      enew=Utilities::MPI::sum(static_cast<double>(precise_new),system.get_mpi_communicator());
+      const double bulk_increment=Utilities::MPI::sum(static_cast<double>(precise_increment),system.get_mpi_communicator());
       AssertThrow (
           std::isfinite (eold) && std::isfinite (enew) && std::isfinite (be) && std::isfinite (work)
               && std::isfinite (trap) && std::isfinite (div2),
@@ -256,10 +267,18 @@ namespace aspect
         }
       const double maxwell = 2 * law.G * dt / law.eta * enew;
       const double ledger = work
-                            - (enew - eold + bnew - bold + fracture + friction + radiation + maxwell
+                            - (bulk_increment + bnew - bold + fracture + friction + radiation + maxwell
                                + be + surface_rem);
+      const double legacy_ledger=ledger+bulk_increment-legacy_increment;
+      if(std::abs(ledger)>=1e-10*std::max(1.,std::abs(work)) || std::abs(legacy_ledger)>=1e-10*std::max(1.,std::abs(work)))
+        if(Utilities::MPI::this_mpi_process(system.get_mpi_communicator())==0)
+          {
+            std::ofstream f(system.get_output_directory()+"cohesive-energy-arithmetic-"+std::to_string(s->step)+".csv");
+            f<<std::setprecision(17)<<"old_J_m,new_J_m,factored_increment_J_m,legacy_increment_J_m,work_J_m,ledger_J_m,legacy_ledger_J_m,bound_J_m\n"
+             <<eold<<','<<enew<<','<<bulk_increment<<','<<legacy_increment<<','<<work<<','<<ledger<<','<<legacy_ledger<<','<<1e-10*std::max(1.,std::abs(work))<<'\n';
+          }
       AssertThrow (std::abs (ledger) < 1e-10 * std::max (1., std::abs (work)),
-                   ExcMessage ("Native physical BE work ledger failed: " + std::to_string (ledger)
+                   ExcMessage ("Native physical BE work ledger failed: " + Utilities::to_string (ledger,17)
                                + " J/m."));
       auto &d = s->diagnostics;
       d.clear ();
@@ -272,7 +291,9 @@ namespace aspect
       d["dt_s"] = dt;
       d["bulk_J_m"] = enew;
       d["bond_J_m"] = bnew;
-      d["bulk_increment_J_m"] = enew - eold;
+      d["bulk_increment_J_m"] = bulk_increment;
+      d["bulk_increment_subtraction_defect_J_m"] = legacy_increment-bulk_increment;
+      d["legacy_ledger_error_J_m"] = legacy_ledger;
       const auto previous_energy = old.diagnostics.find ("bulk_J_m");
       const double integration_change
           = previous_energy == old.diagnostics.end () ? 0. : eold - previous_energy->second;
@@ -291,7 +312,7 @@ namespace aspect
       d["surface_remainder_J_m"] = surface_rem;
       d["ledger_error_J_m"] = ledger;
       d["physical_remainder_J_m"]
-          = trap - (enew - eold + bnew - bold + fracture + friction + radiation + maxwell);
+          = trap - (bulk_increment + bnew - bold + fracture + friction + radiation + maxwell);
       d["physical_remainder_with_quadrature_J_m"]
           = d["physical_remainder_J_m"] - integration_change;
       d["weak_error_Pa"] = r.weak;
@@ -309,8 +330,101 @@ namespace aspect
       d["maximum_damage_increment"] = peak_increment;
       d["surface_iterations"] = r.iterations;
       d["free_dimensions"] = r.free;
+      const auto resolution=CohesiveEvolution::linearized_resolution(p->surface,r);
+      const auto old_resolution=old.diagnostics.find("displacement_resolution_m");
+      const auto old_interval=old.diagnostics.find("dt_s");
+      // Legacy fixed-geometry checkpoints lack the force-resolution metadata.
+      // Bootstrap using the current force budget and the smaller of the saved
+      // accepted/current coercivities. This remains a linearized estimate.
+      double old_U=old_resolution==old.diagnostics.end()?resolution.maximum:old_resolution->second;
+      const auto old_curvature=old.diagnostics.find("minimum_symmetric_tangent_Pa_m");
+      if(old_resolution==old.diagnostics.end() && old_curvature!=old.diagnostics.end()
+          && old_curvature->second>0.)
+        old_U*=std::max(1.,r.curvature/old_curvature->second);
+      const double old_rate_U=old_interval==old.diagnostics.end() || old_interval->second==0.?0.:old_U/old_interval->second;
+      double resolved_speed=0.,continuous_error=0.,slip_error=0.,state_error=0.,damage_error=0.,numerical_error=0.;
+      double speed=0., slip=0., log_state=0., log_speed=0.;
+      for(unsigned q=0;q<nq;++q)
+        {
+          double previous_rate=0.;
+          for(unsigned j=0;j<n;++j) previous_rate+=p->surface.Q(q,j)*rate[j];
+          const double v=std::abs(r.point[q].velocity);
+          if(old.step>0)
+            resolved_speed=std::max(resolved_speed,CohesiveEvolution::resolved_log_change(
+                previous_rate,r.point[q].velocity,old_rate_U,resolution.displacement[q]/dt,law.V0));
+          const auto defect=CohesiveEvolution::history_defect(law,anchor.history[q],history[q],dt,
+              r.point[q].velocity*dt,previous_rate,r.point[q].velocity,resolution.displacement[q],old_rate_U);
+          continuous_error=std::max(continuous_error,defect.maximum());
+          numerical_error=std::max(numerical_error,defect.resolution);
+          slip_error=std::max(slip_error,defect.slip);state_error=std::max(state_error,defect.state);
+          damage_error=std::max(damage_error,defect.damage);
+
+          speed=std::max(speed,v);
+          slip=std::max(slip,std::abs(history[q].jump-anchor.history[q].jump)/law.Dc);
+          log_state=std::max(log_state,std::abs(std::log(history[q].theta/anchor.history[q].theta)));
+          // V0 regularizes only this numerical change indicator, never friction.
+          if(old.step>0)
+            {
+              const double change=std::abs(std::log((v+law.V0)/(std::abs(previous_rate)+law.V0)));
+              if(change>log_speed)
+                {
+                  log_speed=change;
+                  d["rate_indicator_point"]=q;
+                  d["rate_indicator_x_m"]=p->points[q].position[0];
+                  d["rate_indicator_y_m"]=p->points[q].position[1];
+                  d["rate_indicator_old_damage"]=anchor.history[q].damage;
+                  d["rate_indicator_new_damage"]=history[q].damage;
+                  d["rate_indicator_old_rate_m_s"]=previous_rate;
+                  d["rate_indicator_new_rate_m_s"]=r.point[q].velocity;
+                  d["rate_indicator_old_jump_m"]=anchor.history[q].jump;
+                  d["rate_indicator_new_jump_m"]=history[q].jump;
+                }
+            }
+        }
+      d["displacement_resolution_m"]=resolution.maximum;
+      d["resolution_force_dual_norm"]=resolution.force_dual_norm;
+      d["resolved_log_speed_change"]=resolved_speed;
+      d["continuous_history_error"]=continuous_error;
+      d["continuous_slip_error_Dc"]=slip_error;
+      d["continuous_state_error"]=state_error;
+      d["continuous_damage_error"]=damage_error;
+      d["continuous_numerical_resolution"]=numerical_error;
+      d["maximum_speed_m_s"]=speed;
+      d["maximum_slip_increment_Dc"]=slip;
+      d["maximum_log_state_change"]=log_state;
+      d["maximum_regularized_log_speed_change"]=log_speed;
       result->state = std::move (s);
       return result;
+    }
+
+    System::StepMetrics
+    System::step_metrics () const
+    {
+      StepMetrics m;
+      const auto trial=data->active_trial.lock();
+      const auto state=trial?trial->state:data->accepted;
+      m.pending=bool(trial);
+      if(!state)return m;
+      const auto value=[&](const char *key) { const auto it=state->diagnostics.find(key);
+        return it==state->diagnostics.end()?0.:it->second; };
+      m.dt=value("dt_s");m.speed=value("maximum_speed_m_s");
+      m.slip_Dc=value("maximum_slip_increment_Dc");
+      m.log_state=value("maximum_log_state_change");
+      m.log_speed=value("maximum_regularized_log_speed_change");
+      m.damage_increment=value("maximum_damage_increment");
+      m.resolved_log_speed=value("resolved_log_speed_change");
+      m.continuous_error=value("continuous_history_error");
+      m.numerical_resolution=value("continuous_numerical_resolution");
+      m.displacement_resolution=value("displacement_resolution_m");
+      m.resolution_slip_Dc=m.displacement_resolution/data->law.Dc;
+      m.resolution_damage=m.displacement_resolution/(2*data->law.Gc/data->law.peak);
+
+      m.rate_point=static_cast<unsigned int>(value("rate_indicator_point"));
+      m.rate_x=value("rate_indicator_x_m");m.rate_y=value("rate_indicator_y_m");
+      m.old_damage=value("rate_indicator_old_damage");m.new_damage=value("rate_indicator_new_damage");
+      m.old_rate=value("rate_indicator_old_rate_m_s");m.new_rate=value("rate_indicator_new_rate_m_s");
+      m.old_jump=value("rate_indicator_old_jump_m");m.new_jump=value("rate_indicator_new_jump_m");
+      return m;
     }
 
     std::shared_ptr<System::Trial>
@@ -329,7 +443,7 @@ namespace aspect
                        ExcMessage ("Native cohesive publication clock differs from Simulator."));
           const auto sampled = d.sample (s);
           const double direction = sampled.second;
-          const int epoch = static_cast<int> (std::floor ((s.time - .410 + 1e-12) / d.cadence));
+          const int epoch = static_cast<int> (std::floor ((s.time - d.epoch_origin + 1e-12) / d.cadence));
           bool refresh = s.candidate_epoch != epoch || s.candidate_anchor != s.formed;
           unsigned number
               = std::max (static_cast<unsigned> (std::ceil (d.candidate_extent / d.spacing)),
@@ -366,7 +480,7 @@ namespace aspect
                 }
               if (result->state->formed == prepared->geometry.pieces ().size ())
                 {
-                  AssertThrow (++retries <= 4 && 2 * number * d.spacing <= 1.5,
+                  AssertThrow (++retries <= d.max_completion_retries && 2 * number * d.spacing <= d.max_candidate_extent,
                                ExcMessage ("Native candidate completion budget exhausted; accepted "
                                            "histories remain unchanged."));
                   number *= 2;
@@ -374,6 +488,7 @@ namespace aspect
                   continue;
                 }
               auto &next = *result->state;
+              const auto clearance=d.protect_domain(next.geometry,next.formed,"trial publication");
               next.metadata = std::move (metadata);
               for (unsigned i = s.formed; i < next.formed; ++i)
                 next.metadata[i].admitted_time = next.time;
@@ -390,6 +505,9 @@ namespace aspect
                               + std::to_string (next.time)
                               + " s. Accepted histories remain unchanged."));
               auto &diag = next.diagnostics;
+              diag["sampling_clearance_m"]=clearance.sampling;
+              diag["lifting_clearance_m"]=clearance.lifting;
+              diag["boundary_approach"]=std::min(clearance.sampling,clearance.lifting)<=d.boundary_warning;
               diag["persistent_length_m"] = length;
               diag["formed_pieces"] = next.formed;
               diag["newly_formed_pieces"] = next.formed - s.formed;

@@ -1,6 +1,7 @@
 /* Copyright (C) 2026 by the authors of ASPECT. GNU GPL v2 or later. */
 #include <aspect/reconstructed_fault/cohesive_system_internal.h>
 #include <aspect/utilities.h>
+#include <aspect/reconstructed_fault/endpoint_mpi.h>
 #include <deal.II/numerics/vector_tools.h>
 #include <deal.II/fe/fe_values.h>
 #include <boost/property_tree/ptree.hpp>
@@ -82,6 +83,15 @@ namespace aspect
         const Function<2> &extra;
         double G;
       };
+      class NativeMemory : public Function<2>
+      {
+      public:
+        NativeMemory(unsigned n,const Function<2> &f):Function<2>(n),f(f){}
+        double value(const dealii::Point<2> &x,unsigned c=0)const override
+        {return c<2?f.value(x,c):0.;}
+      private:
+        const Function<2> &f;
+      };
     }
 
     std::shared_ptr<System::Field>
@@ -146,11 +156,14 @@ namespace aspect
     {
       auto s = std::make_shared<State> ();
       Geometry::Piece seed;
-      seed.x = 3.;
-      seed.end = 6.;
-      seed.cells = 32;
+      seed.x = seed_x;seed.y=seed_y;
+      seed.end = seed_x+seed_length;
+      seed.a=seed.b=std::tan(seed_angle*numbers::PI/180);
+      seed.cells = seed_cells;
       s->geometry = Geometry ({ seed }, support);
+      protect_domain(s->geometry,1,"initial seed");
       s->formed = 1;
+      s->virgin_theta=virgin_age;
       s->time = system.get_time ();
       AssertThrow (s->time == 0.,
                    ExcMessage ("Fresh physical seed initializes at t=0; use an explicit checked "
@@ -163,26 +176,84 @@ namespace aspect
       s->memory.assign (n, 0.);
       s->rate.assign (n, 0.);
       s->offset.resize (qp.size ());
+      const bool prescribed=initial_mode=="prescribed fields";
+      if(prescribed)
+        {
+          for(const double z:{0.,1.})
+            AssertThrow(initial_surface.value(dealii::Point<1>(z),4)==0.,
+                        ExcMessage("Initial relaxed jump must vanish at the tied seed endpoints."));
+          for(unsigned j=0;j<n;++j)
+            s->memory[j]=initial_surface.value(dealii::Point<1>(double(j+1)/seed_cells),4);
+        }
       std::vector<PointState> history (qp.size ());
       std::vector<std::array<double, 3>> diagnostics (qp.size ());
       const double C0 = 2 * law.Gc / (law.peak * law.peak), q = law.G * .0003;
       for (unsigned int i = 0; i < qp.size (); ++i)
         {
-          const double z = (qp[i].position[0] - 3.) / 3., shape = 4 * z * (1 - z);
+          const double z = (qp[i].position[0] - seed_x) / seed_length, shape = 4 * z * (1 - z);
           auto &h = history[i];
           h.damage = .75 + .05 * shape;
           h.jump = .0004 * shape;
           h.theta = 1.2 + .1 * shape;
           h.reference = h.jump - C0 * h.damage / (1 - h.damage) * q;
           h.absolute_slip = std::abs (h.jump);
+          if(prescribed)
+            {
+              const dealii::Point<1> material(z);
+              h={initial_surface.value(material,0),initial_surface.value(material,1),
+                 initial_surface.value(material,2),initial_surface.value(material,3),
+                 initial_surface.value(material,4),initial_surface.value(material,5)};
+              AssertThrow(h.damage!=0. || h.jump==h.reference,
+                          ExcMessage("An intact initial record requires zero cohesive elastic jump."));
+            }
           s->offset[i] = h.jump;
           s->ids.push_back ("seed:" + std::to_string (i));
-          diagnostics[i] = { q, q, law.p0 - 2 * law.G * .0003 * .41954981558863996 };
+          const double traction=prescribed?(h.damage>0. && h.damage<1. ? (1-h.damage)*(h.jump-h.reference)/(C0*h.damage):0.):q;
+          diagnostics[i] = { traction, traction, law.p0 - 2 * law.G * .0003 * .41954981558863996 };
         }
       s->manager = manager (*s, history, diagnostics);
       s->bulk = std::make_shared<BulkHistory<2>> (system.get_simulator (), law.G, law.eta);
-      s->bulk->initialize (SeedTensor (independent_tensor, law.G));
+      if(prescribed)
+        {
+          auto native=owned();*native=0.;
+          VectorTools::interpolate(system.get_mapping(),system.get_dof_handler(),
+                                  NativeMemory(system.get_fe().n_components(),initial_native),*native,
+                                  system.introspection().component_masks.velocities);
+          auto field=ghosted();*field=*native;
+          s->bulk->initialize(independent_tensor,field.get());
+        }
+      else s->bulk->initialize (SeedTensor (independent_tensor, law.G));
       initial_pressure = ghosted ();
+      if(prescribed)
+        {
+          // The initial normal diagnostic is the same bulk-work functional,
+          // evaluated on the prescribed incoming stress and p'=0. It must not
+          // inherit the old specimen's hardcoded affine normal stress.
+          std::vector<double> normal(seed_cells),mass(seed_cells);
+          for(const auto &cell:system.get_dof_handler().active_cell_iterators())
+            if(cell->is_locally_owned())
+              {
+                const auto rule=s->geometry.quadrature(cell->vertex(0),cell->vertex(3),bulk_order);
+                FEValues<2> fe(system.get_mapping(),system.get_fe(),rule,update_quadrature_points|update_JxW_values);
+                fe.reinit(cell);
+                const auto stress=physical_stress(*s,cell,rule);
+                for(unsigned k=0;k<rule.size();++k)
+                  if(s->geometry.normal_active(fe.quadrature_point(k)))
+                    {
+                      const auto m=s->geometry.normal_test(fe.quadrature_point(k));
+                      normal[m.index]+=fe.JxW(k)*(stress[k]*dev3(m.gradient));
+                      mass[m.index]-=fe.JxW(k)*trace(m.gradient);
+                    }
+              }
+          internal::endpoint_sum(normal,system.get_mpi_communicator());
+          internal::endpoint_sum(mass,system.get_mpi_communicator());
+          for(unsigned i=0;i<qp.size();++i)
+            {
+              AssertThrow(mass[qp[i].cell]>0.,ExcMessage("Invalid initial normal work measure."));
+              diagnostics[i][2]=law.p0+normal[qp[i].cell]/mass[qp[i].cell];
+            }
+          s->manager=manager(*s,history,diagnostics);
+        }
       validate (*s);
       return s;
     }
@@ -220,6 +291,7 @@ namespace aspect
         }
       s->geometry = Geometry (pieces, support);
       s->formed = tree.get<unsigned int> ("formed_arcs");
+      protect_domain(s->geometry,s->formed,"checked import");
       s->time = tree.get<double> ("clock_s");
       s->virgin_theta = tree.get<double> ("virgin_theta");
       s->identity_clock = tree.get<std::uint64_t> ("physical_publications");
@@ -412,6 +484,7 @@ namespace aspect
     System::initialize (const Field &particular_velocity, const BulkSolve &inverse)
     {
       AssertThrow (!data->accepted, ExcMessage ("Native cohesive state initializes once."));
+      data->find_domain();
       auto state = data->initial_mode == "checked prototype snapshot" ? data->import (inverse)
                                                                       : data->initialize_seed ();
       auto &s = *state;
@@ -442,6 +515,12 @@ namespace aspect
           s.diagnostics["bulk_J_m"] = Utilities::MPI::sum (energy, get_mpi_communicator ());
         }
       s.diagnostics["clock_outer_rejections"] = 0.;
+      const auto clearance=data->protect_domain(s.geometry,s.formed,"initial publication");
+      s.diagnostics["sampling_clearance_m"]=clearance.sampling;
+      s.diagnostics["lifting_clearance_m"]=clearance.lifting;
+      for(unsigned d=0;d<2;++d)
+        {s.diagnostics[std::string("domain_min_")+char('x'+d)+"_m"]=data->domain.lower[d];
+         s.diagnostics[std::string("domain_max_")+char('x'+d)+"_m"]=data->domain.upper[d];}
       data->validate (s);
       data->accepted = std::move (state);
       return result;
