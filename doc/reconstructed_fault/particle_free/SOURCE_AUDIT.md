@@ -1,3 +1,120 @@
+# Cleanup and research handoff — 30 October 2026
+
+[Cleanup report](CLEANUP_REPORT.md) · [Research handoff](RESEARCH_HANDOFF.md).
+Generated artifacts were reduced; unique source, original BP3 data, native runtimes,
+current RSF step748 and complete server package are preserved. No scientific
+evolution or conclusion changed. The next research-review work is BP3 inspection
+and variable/timestep/energy maps, then the controlled-crust/propagation paper
+sequence. No realistic subduction application or new run is selected.
+The RSF episode remains incomplete and all recorded accuracy failures remain.
+Some historical bulk-animation frames were pruned in error; the cleanup report
+records the missing frames, exact recoveries and limits on re-rendering. Current
+RSF surface/event data and original BP3 server results are unaffected.
+
+---
+
+# RSF episode estimator repair and server handoff (2026-10-30)
+
+`cohesive_timestep.h` uses the complete assembled residual, unchanged certificate
+resolution and current admissible symmetric tangent bound to estimate linearized
+displacement resolution. Rate intervals are diagnostics; the new selected mode
+controls continuous jump/aging/damage defects and numerical history resolution.
+It never tests damage against an exemption threshold. `weak_tolerance` names the
+existing1e-8 Pa value without changing it. `cohesive_advance.cc` computes diagnostics
+from immutable parent and candidate; only the ordinary accepted owner persists them.
+`time_stepping/cohesive_rsf.cc` preserves legacy default behavior and all native
+acceptance checks. See `RSF_EPISODE_ESTIMATOR.md` before interpreting estimates as
+nonlinear or spatial error bounds. The independent unit tests, real failed-state retry, rejection/restart and
+MPI ownership checks pass. The actual four-rank continuation advances normally;
+its native wall stop preserves a complete checkpoint for server continuation.
+The episode itself remains incomplete. See `RSF_EPISODE_REPORT.md` for scope,
+measured errors/cost and retained failures. Packaging is read-only: no native
+history conversion or checkpoint reset. Server startup remains prepared,
+not remotely qualified.
+
+---
+
+# RSF instability / adaptive native stepping audit (2026-10-29)
+
+Current work: `COHESIVE_RSF_INSTABILITY_REPORT.md`. Physical law unchanged;
+new specimen parameters explicitly supplied in separate inputs.
+
+- `cohesive_advance.cc`: immutable-parent Gauss maxima of |dj|/Dc,
+  |log(theta+/theta)|, |log((|V+|+V0)/(|Vold|+V0))| and damage increment.
+  First physical step omits speed-change indicator because initialization has
+  no accepted physical rate; slip/state/damage checks still apply.
+- `time_stepping/cohesive_rsf.cc`: optional native plugin reads the pending
+  metrics, proposes safety*dt/max(normalized indicators), capped by growth;
+  rejects ratio>1 through the actual native repeat lifecycle. Rejection does
+  not publish a trial. Read-only SimulatorAccess accessor exposes the owner.
+  The indicator's V0 is not a change to the friction law. No persistent plugin
+  clock/history is needed: controller state derives from checkpointed owner.
+- `cohesive_evolution.h` / simulator adapter: typed recoverable exceptions only
+  for semismooth iteration/line-search failure and negative endpoint symmetric
+  tangent. Native failure strategy cuts timestep; continue-after-failure is
+  prohibited. All contact/source/physical-work/geometry/history guards remain
+  fatal. A positive step tangent does not certify continuous-time RSF stability.
+- `cohesive_mechanics.cc`: opt-in small K/Q/N export, with actual physical
+  quadrature weights, for independent current-pressure/state/radiation spectral
+  analysis. No dense global bulk operator or response-span history replaces
+  the general native owner.
+- Slow loading exposed cancellation in separately summed O(174 J/m) storages.
+  Use (tau+ + tau):(tau+ − tau)/(4G) for the increment, with extended local sums
+  and ordinary MPI reduction. Export legacy subtraction/ledger independently.
+  Same operands, tensor metric, quadrature, law and1e−10 J/m bound. The old
+  first-step residual−2.519e−10 becomes−2.895e−14 J/m; source/weak checks unchanged.
+
+The bounded comparisons are closed; see the report and `rate-floor.json`.
+The tighter replay reproduces a pre-publication computational floor at a nearly
+zero-damage Gauss point. `StepMetrics` now carries its index/coordinates and
+incoming/candidate slip, rate and damage. `cohesive-rate-failure.csv` is written
+before the unchanged floor assertion; the existing adaptation CSV schema stays
+unchanged. This instrumentation does not alter the solve or controller formula.
+The failure is not classified as a physical instability; exact onset-rate jumps
+and algebraic active-set noise have not been independently separated.
+
+The launch helper requests accepted-state termination before its hard wall limit.
+Independent analysis matches physical points across temporary-reserve layouts,
+uses common physical times, includes the full 3D stress norm and reports mature-
+patch state separately to avoid dilution by unchanged intact history. All five
+retained portable states reproduce physical exports bitwise after instrumentation.
+No new constitutive law, tolerance change, damage floor or birth exemption.
+
+Preserve prior audits and all failed evidence below.
+
+---
+
+# Portable setup and complete-support source audit
+
+[Measured report](COHESIVE_RSF_PORTABLE_REPORT.md); baseline f2f730529 plus local
+cleanup. Constitutive source and all prior qualification evidence remain intact.
+
+- `cohesive_system*` declares explicit seed/prescribed-history/native-memory and
+  completion settings; fingerprints new setup/Box parameters while retaining
+  the unchanged old v2 signature. Actual owned-cell Box bounds are reduced once.
+- `cohesive_initialization.cc` samples fresh physical inputs, retaining Gauss jump
+  offsets and the native FE remainder. Relaxed jump must match the Q1 trace within
+  the existing identity allowance. No imported kernel or history reset is used.
+- `cohesive_geometry.{h,cc}` encloses the full radius-R disk centered R ahead and
+  the vertical graph strip. Outward interval polynomial envelopes, not sampled
+  quadrature points, protect interior extrema. No integration rule changes.
+- `cohesive_state/advance/mechanics` check initial/accepted/trial/restarted support
+  before sampling, assembly or publication; log clearance/approach and preserve
+  accepted histories on failure. Formed-length and domain guards are independent.
+- Benchmark `pilot.cc` keeps the old loading arithmetic and adds explicit strain
+  functions, interval-average velocities and restart schedule validation. Fresh
+  inputs reuse ASPECT's standard Box origin/extents instead of new geometry knobs.
+- `qualify.py` supports binary/plugin/work/MPI overrides, actual-rank checks and
+  a fixed portable verification suite. Active analysis reads only local native
+  outputs, including relocated/direct launches. Archived replay remains separate.
+
+Loaded pilot surfaces, geometry and physical bulk exports are bitwise preserved.
+Custom history restart is exact; incompatible configuration/history and missing
+support fail before publication. Point/normal accuracy and broader physical
+propagation remain outside this cleanup. Earlier audit content follows unchanged.
+
+---
+
 # Default-off native ASPECT cohesive–RSF source audit
 
 Entry f1f9f29cf40c32d1ddcea000b724375b64853532 plus preserved local work.

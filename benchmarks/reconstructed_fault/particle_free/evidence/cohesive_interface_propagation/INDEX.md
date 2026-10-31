@@ -1,3 +1,5 @@
+> Artifact availability after 2026-10-30 cleanup: compact scientific evidence and selected complete restart dependencies remain. Some historical full exports/caches are pruned or compressed. See [CLEANUP_REPORT](../../../../../doc/reconstructed_fault/particle_free/CLEANUP_REPORT.md) and its recovery index; original scientific results below are unchanged.
+
 # Integrated propagation evidence
 
 See [the concise scientific report](REPORT.md). Reproduce with the maintained

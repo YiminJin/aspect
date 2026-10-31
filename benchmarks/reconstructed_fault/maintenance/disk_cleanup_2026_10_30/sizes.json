@@ -1,0 +1,11 @@
+{
+  "before_worktree_bytes": 87040413696,
+  "after_worktree_bytes": 45995069440,
+  "before_build_bytes": 79622770688,
+  "after_build_bytes": 38513397760,
+  "filesystem_free_before_bytes": 1046294528,
+  "filesystem_free_after_bytes": 42089435136,
+  "filesystem_recovered_bytes": 41043140608,
+  "worktree_reduction_bytes": 41045344256,
+  "free_vs_du_difference_bytes": -2203648
+}

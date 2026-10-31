@@ -1,3 +1,14 @@
+# Research-review entry after cleanup — 30 October 2026
+
+Use [RESEARCH_HANDOFF](particle_free/RESEARCH_HANDOFF.md),
+[particle-free STATUS](particle_free/STATUS.md) and the authoritative design/specification.
+The native RSF episode remains incomplete at accepted step748; remote BP3 completion
+is unknown. Earlier milestone entries below retain their historical scope and do
+not authorize another experiment. Cleanup availability/losses are explicit in
+[CLEANUP_REPORT](particle_free/CLEANUP_REPORT.md).
+
+---
+
 # Latest bounded component result
 
 Event-resolved damage admission on the prescribed oblique append and native

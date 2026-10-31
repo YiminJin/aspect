@@ -1,0 +1,28 @@
+{
+  "source_and_document_files_checked": 40681,
+  "source_or_metadata_duplicates_exactly_recoverable": 4157,
+  "unique_source_missing": 0,
+  "source_changed_by_cleanup": 0,
+  "critical_files_checked": 328,
+  "critical_files_unchanged": true,
+  "server_package_checksums": "pass",
+  "runtime": [
+    {
+      "path": "build-particle-free/native/aspect-release",
+      "sha256": "d62541e3fc2a191965f31d26bf85260dc8922ac47c3b648b8256c96df143b23a",
+      "missing_libraries": false
+    },
+    {
+      "path": "build-particle-free/cohesive-rsf-native/native/aspect-release",
+      "sha256": "7277eebc663659e64830780553adbaaf7288de3894f89952579e5f06e4c83b1d",
+      "missing_libraries": false
+    },
+    {
+      "path": "build-particle-free/cohesive-rsf-native/checks-native/libcohesive_rsf_native_checks.release.so",
+      "sha256": "7bfbeaa35e7a6feb75ecaa6b1609a0e2d1b3d48bef866ad02f07c2df77922f5d",
+      "missing_libraries": false
+    }
+  ],
+  "entry_tracked_diff_unchanged": true,
+  "scientific_simulations_launched": 0
+}

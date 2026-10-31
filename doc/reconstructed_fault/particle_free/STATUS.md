@@ -1,3 +1,109 @@
+# Cleanup and research handoff — 30 October 2026
+
+[Cleanup report](CLEANUP_REPORT.md) · [Research handoff](RESEARCH_HANDOFF.md).
+Generated artifacts were reduced; unique source, original BP3 data, native runtimes,
+current RSF step748 and complete server package are preserved. No scientific
+evolution or conclusion changed. The next research-review work is BP3 inspection
+and variable/timestep/energy maps, then the controlled-crust/propagation paper
+sequence. No realistic subduction application or new run is selected.
+The RSF episode remains incomplete and all recorded accuracy failures remain.
+Some historical bulk-animation frames were pruned in error; the cleanup report
+records the missing frames, exact recoveries and limits on re-rendering. Current
+RSF surface/event data and original BP3 server results are unaffected.
+
+---
+
+# First RSF episode: repair verified; server continuation handoff
+
+[Report](RSF_EPISODE_REPORT.md) · [Estimator](RSF_EPISODE_ESTIMATOR.md) ·
+[Event PNG/GIF/data](../../../benchmarks/reconstructed_fault/particle_free/evidence/rsf_episode/INDEX.md) ·
+[Server instructions](../../../benchmarks/reconstructed_fault/particle_free/rsf_episode_server/README.md).
+
+The selected default-off estimator now controls continuous jump/age/damage
+defects and algebraic resolution from the actual residual/tangent. No low-damage
+exemption, state reset, tolerance change or smaller dt floor.1343 independent
+assertions pass. The original failed step661 advances with identical j/a/V;
+rejection/retry/restart and retained defaults are verified, including2→4 ownership.
+
+A healthy4-rank continuation reaches accepted748, t=374.58003334330067s.
+Largest observed rate .0450089m/s, final .0444673: only shallow decline, not a
+completed episode. Added damage2.76832e−4m, max Δa=.00433, fully decohered length
+still3m, no new persistent geometry. Native guards hold. The current window's
+physical remainder is .0573% of sliding but20.8% of fracture: fracture screen
+still fails; previous global state/spatial errors remain visible.
+
+The native wall-limited segment writes a valid checkpoint; it is not physical
+arrest. Warm steps8.11s imply roughly5.9h locally for another .1 physical seconds.
+Per latest steering, server materials include this complete accepted4-rank state,
+source/plugins/environment, strict zero-advance reference, startup/control/resume
+inputs and direct launches. Local parameter/source-config/restart checks pass;
+server build/startup and completion of the physical episode remain unqualified.
+No server job or finer trajectory was launched. Fresh matched coarse/fine inputs
+are prepared only. Next: continue this checkpoint through real peak/decay, then
+separate event timing from progress-aligned growth comparisons. Preserve BP3,
+all earlier failures and physical parameters; no new propagation law or calibration.
+
+---
+
+# Bounded native RSF comparison closed; numerical continuation limit retained
+
+[Concise report](COHESIVE_RSF_INSTABILITY_REPORT.md) · [GIF/PNG/CSV index](../../../benchmarks/reconstructed_fault/particle_free/evidence/cohesive_rsf_instability/INDEX.md).
+
+Native RSF feedback is demonstrated: maximum observed rate .0446 m/s versus
+1.63e−7 in the initially matched b=a control, with acceleration before any
+cohesive growth. Small adjacent activation occurs, max Δa=.00291; fully decohered
+length remains3 m. The600-step primary ends during acceleration, not at arrest.
+
+The half-limit replay stops before publication at step661 when the rate-change
+indicator at a near-zero-damage point requests dt<1e−10 s. The failure reproduces
+exactly; accepted checkpoint files and all incoming physical exports remain
+bitwise unchanged. Long replay38.37 min; control11.26 min; two MPI ranks.
+
+Common-time growth/slip differences .58%/.039%; mean mature state7.47% (up to9.04%
+in the window), mature-state L2 14%. The1% history target fails. Physical work
+remainder .157% of sliding dissipation but14.9 times new fracture work: fracture
+screen fails. Frozen bulk weak-load spread25.2%, prior point/ahead-normal failures
+and absolute-onset uncertainty remain. No developed coupled propagation claim.
+
+Next numerical action: qualify an admission/event-aware rate error estimate with
+algebraic uncertainty, retaining continuous-history checks, physical equations,
+strict guards and accepted state. No floor reduction or newborn exemption was
+adopted. Production/BP3/defaults and prior evidence remain protected; no further
+trajectory or parameter campaign is launched automatically.
+
+---
+
+# Portable native workflow and geometry-aware domain protection
+
+[Report](COHESIVE_RSF_PORTABLE_REPORT.md) · [active inputs/direct commands](../../../benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/ACTIVE_WORKFLOW.md) · [compact verification](../../../benchmarks/reconstructed_fault/particle_free/evidence/cohesive_rsf_portable/README.md).
+Baseline f2f730529 plus bounded local cleanup. Original qualified data and failures
+are preserved below; no longer propagation experiment was run.
+
+`active.prm` starts from explicit seed/Gauss/tensor/native-memory functions without
+untracked prototypes, kernels or checkpoints. Loading, geometric/computational
+limits and build/MPI paths are configurable. A direct MPI launch and the bounded
+runner reproduce identical physical exports; relocated active analysis needs no
+historical reference. Changed loading/domain and inconsistent Q1 memory are
+rejected. Custom initialization/restart preserves all physical records exactly.
+
+The complete ahead-R sampling disk and all formed/temporary lifting support now
+require positive certified clearance inside the actual rectangular bulk mesh.
+Approach is logged with limiting wall; missing support rejects before publication.
+The formed-length default remains 7.5 m. Negative sampling/strip/reserve controls
+fail for their intended reasons; recovery preserves the accepted checkpoint.
+The retained final pilot disk has only **.0277772 m right-wall clearance** and is
+reported explicitly. Its actual next-step and final checkpoint fields reproduce
+bitwise; this does not establish wall independence or point-stress accuracy.
+
+Three geometric unit controls, twelve fixed native controls, two optional retained
+pilot checks and ten parameter validations pass. The fresh four-step smoke case
+has scaled source <=4.321e−16 and weak <=2.360e−12 Pa; no measurable growth or
+new physical-energy/propagation qualification is claimed. Original normal/point,
+spatial, branch and path/R findings remain. Production/BP3/defaults and all
+acceptance tolerances stay unchanged. No new scientific campaign is launched.
+
+---
+
 # Default-off native ASPECT cohesive–RSF pilot complete
 
 [Report](COHESIVE_RSF_NATIVE_REPORT.md) · [equations/ownership](COHESIVE_RSF_NATIVE_FORMULATION.md) · [direct run inputs](../../../benchmarks/reconstructed_fault/particle_free/cohesive_rsf_native/README.md) · [PNG/GIF/indexed evidence](../../../benchmarks/reconstructed_fault/particle_free/evidence/cohesive_rsf_native/INDEX.md).

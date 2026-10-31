@@ -1,0 +1,46 @@
+[
+  {
+    "original": "build-particle-free/archive/executables/01221b863c67935b87c91efd40b3cf92a41630918955678d158aca41d45771e4/aspect-555",
+    "returncode": 0,
+    "location": {
+      "compressed": "build-particle-free/archive/executables/01221b863c67935b87c91efd40b3cf92a41630918955678d158aca41d45771e4/aspect-555.zst",
+      "mode": 365,
+      "sha256": "01221b863c67935b87c91efd40b3cf92a41630918955678d158aca41d45771e4"
+    }
+  },
+  {
+    "original": "build-particle-free/bulk-cohesive/runs/half/bulk-0004.csv",
+    "returncode": 0,
+    "location": {
+      "archive": "build-particle-free/archive/disk-cleanup-20261021/bulk-cohesive-000.unique.tar.zst",
+      "member": "build-particle-free/bulk-cohesive/runs/half/bulk-0004.csv",
+      "sha256": "9e62c7406de4db804c084ea6631b6d047b92da581849b83324bfc299a8c09f75"
+    }
+  },
+  {
+    "original": "build-particle-free/bp3-optimization/runs/adaptive-control/run/audit_particles_0_rank0.csv",
+    "returncode": 0,
+    "location": {
+      "archive": "benchmarks/reconstructed_fault/particle_free/evidence/pf6_mature_pilot/reference.tar.xz",
+      "member": "snapshot/build-particle-free/mature-pilot/current/runs/dg-cutback-matching-time/run/audit_particles_0_rank0.csv",
+      "sha256": "8fab49b2c9f44c86d68b4b4736562b0e757e1c5da4333d1bbfd6e7abf277f18d"
+    }
+  },
+  {
+    "original": "build-particle-free/first-event-package/distribution/ENVIRONMENT.md",
+    "returncode": 0,
+    "location": {
+      "archive": "build-particle-free/first-event-package/bp3-dg-first-event-20261017.tar.gz",
+      "member": "bp3-dg-first-event-20261017/ENVIRONMENT.md",
+      "sha256": "b1b539b4b74e7ee2ab9964b6a05f00667d3980c032c9422e91b6a545e120ffce"
+    }
+  },
+  {
+    "original": "build-particle-free/bp3-optimization/runs/coefficients-resume/run/restart/01/bp3_accepted_state.txt",
+    "returncode": 0,
+    "location": {
+      "sha256": "aa90d7c7f16f76d29489b04cbba1789e799720436019d91dd9351b5f95e421de",
+      "text": "1 4000000\n"
+    }
+  }
+]

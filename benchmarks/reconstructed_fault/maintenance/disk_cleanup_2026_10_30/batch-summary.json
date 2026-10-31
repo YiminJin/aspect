@@ -1,0 +1,114 @@
+[
+  {
+    "batch": "batch01-compiler.result.json",
+    "files": 2195,
+    "logical_allocated_bytes": 1725669376,
+    "filesystem_free_change_bytes": 1725661184,
+    "completed_utc": "2026-10-31T00:19:01.583681+00:00"
+  },
+  {
+    "batch": "batch02-old-generations.result.json",
+    "files": 2998,
+    "logical_allocated_bytes": 6969831424,
+    "filesystem_free_change_bytes": 6969831424,
+    "completed_utc": "2026-10-31T00:20:43.391280+00:00"
+  },
+  {
+    "batch": "batch03-duplicate-control-archive.result.json",
+    "files": 1,
+    "logical_allocated_bytes": 2612121600,
+    "filesystem_free_change_bytes": 2612121600,
+    "completed_utc": "2026-10-31T00:21:02.336481+00:00"
+  },
+  {
+    "batch": "batch04-p5c-redundant-fields.result.json",
+    "files": 3518,
+    "logical_allocated_bytes": 8795860992,
+    "filesystem_free_change_bytes": 3146674176,
+    "completed_utc": "2026-10-31T00:21:40.523091+00:00"
+  },
+  {
+    "batch": "batch05-bp3-local-audits.result.json",
+    "files": 873,
+    "logical_allocated_bytes": 5519499264,
+    "filesystem_free_change_bytes": 5519499264,
+    "completed_utc": "2026-10-31T00:22:33.306851+00:00"
+  },
+  {
+    "batch": "batch06-duplicate-fracture-archive.result.json",
+    "files": 1,
+    "logical_allocated_bytes": 763121664,
+    "filesystem_free_change_bytes": 763121664,
+    "completed_utc": "2026-10-31T00:22:54.726698+00:00"
+  },
+  {
+    "batch": "batch07-field-response-caches.result.json",
+    "files": 748,
+    "logical_allocated_bytes": 7255474176,
+    "filesystem_free_change_bytes": 7255474176,
+    "completed_utc": "2026-10-31T00:24:44.633961+00:00"
+  },
+  {
+    "batch": "batch08-duplicate-field-archives.result.json",
+    "files": 38,
+    "logical_allocated_bytes": 7115923456,
+    "filesystem_free_change_bytes": 7115751424,
+    "completed_utc": "2026-10-31T00:30:00.711974+00:00"
+  },
+  {
+    "batch": "batch09-native-bulk-exports.result.json",
+    "files": 2606,
+    "logical_allocated_bytes": 2265858048,
+    "filesystem_free_change_bytes": 2265858048,
+    "completed_utc": "2026-10-31T00:26:08.695380+00:00"
+  },
+  {
+    "batch": "batch10-exact-archived-csv-copies.result.json",
+    "files": 131,
+    "logical_allocated_bytes": 343437312,
+    "filesystem_free_change_bytes": 343437312,
+    "completed_utc": "2026-10-31T00:29:02.089815+00:00"
+  },
+  {
+    "batch": "batch11-historical-executable-aliases.result.json",
+    "files": 401,
+    "logical_allocated_bytes": 18428289024,
+    "filesystem_free_change_bytes": 1977122816,
+    "completed_utc": "2026-10-31T00:30:11.383327+00:00"
+  },
+  {
+    "batch": "batch12-operational-p5c-checkpoints.result.json",
+    "files": 50,
+    "logical_allocated_bytes": 1046851584,
+    "filesystem_free_change_bytes": 1046851584,
+    "completed_utc": "2026-10-31T00:31:36.641410+00:00"
+  },
+  {
+    "batch": "batch13-inactive-runtime.result.json",
+    "files": 256,
+    "logical_allocated_bytes": 3212845056,
+    "filesystem_free_change_bytes": 3212845056,
+    "completed_utc": "2026-10-31T00:32:41.072487+00:00"
+  },
+  {
+    "batch": "batch14-compress-retained-bp3-fields.result.json",
+    "files": 386,
+    "logical_allocated_bytes": 2208206848,
+    "filesystem_free_change_bytes": 2208206848,
+    "completed_utc": "2026-10-31T00:33:16.709516+00:00"
+  },
+  {
+    "batch": "batch15-verified-expanded-package.result.json",
+    "files": 7944,
+    "logical_allocated_bytes": 277569536,
+    "filesystem_free_change_bytes": 277569536,
+    "completed_utc": "2026-10-31T00:33:47.968295+00:00"
+  },
+  {
+    "batch": "batch16-old-labelled-generations.result.json",
+    "files": 112,
+    "logical_allocated_bytes": 254095360,
+    "filesystem_free_change_bytes": 254095360,
+    "completed_utc": "2026-10-31T00:37:31.032911+00:00"
+  }
+]
