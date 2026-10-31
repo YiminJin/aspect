@@ -98,3 +98,60 @@ Inspect callers, headers, and tests before changing interfaces.
   evidence. Reconcile status with actual files after resuming.
 - Follow existing commit/push policy. Report completed scope and concrete next
   steps; do not automatically resume historical experiments.
+
+## Research review and objective stress update (2026-10-30)
+
+- Read `doc/reconstructed_fault/particle_free/RESEARCH_HANDOFF.md` and
+  `REVIEW_PLAN.md` in that directory at entry. Verify current source, dirty work,
+  binary identity, and data availability; handoff revisions are references, not
+  reset targets. Preserve the two qualified binaries before a rebuild overwrites
+  them. Keep their required runtime libraries available.
+- The paper roadmap contains BP3, a controlled viscoelastic-crust experiment,
+  and fault propagation. This thread actively covers BP3 review, the shared
+  mathematical/implementation maps, and an opt-in stress-spin implementation
+  with bounded local qualification. The other two physical campaigns remain
+  deferred. No realistic subduction application is planned.
+- The user's request selects addition of objective stress rotation. It is a
+  scientific feature task, not refactoring. The earlier rule to preserve the
+  spin convention permits this selected change. Preserve the legacy/default
+  path and existing production inputs as comparison controls. Do not silently
+  resume an old trajectory under a changed constitutive law.
+- Begin with evidence review and variable/timestep/energy maps. Trace both
+  production BP3 and the newer cohesive-interface route far enough to identify
+  shared code and different constitutive assumptions. Do not merge their
+  histories, fracture inventories, validation claims, or pressure conventions.
+  Use one current formulation table rather than duplicate specifications.
+- Follow `OBJECTIVE_STRESS_SPEC.md` for the spin audit and local qualification.
+  Establish the stress measure, material derivative, velocity-gradient index
+  convention, constitutive spin, tensor frame, and treatment of localized slip
+  before editing. A corotational symbol does not by itself select Jaumann spin.
+  Do not subtract a slip spin or substitute a different objective rate without
+  deriving that choice from the selected kinematics and stored energy.
+- Add the selected terms to every stress/history path needed for the declared
+  enabled configuration, including reconstruction, residual, tangent/outer
+  iteration, observers, rejection, and restart. A spin-enabled label must not
+  hide an unrotated auxiliary tensor or an unqualified formulation. Leave
+  unsupported combinations explicitly disabled with a useful diagnostic.
+- Use finite-rotation integration of the selected spin where compatible with
+  existing time integration. Derive forcing and transport ordering; rotating
+  the old tensor alone is not a complete constitutive update. Preserve accepted
+  histories through trials and commit once. Retain the full 3D plane-strain
+  tensor convention. Do not claim finite-strain hyperelasticity from objectivity.
+- Independent rotation/relaxation, superposed-motion, transport, shear, energy,
+  tangent, and lifecycle tests are required where applicable. Use measured
+  timestep convergence, not a universal total-strain threshold. Document the
+  finite-rotation and constitutive limits separately.
+- Bounded local tests, source builds (normally at most four local workers),
+  and analysis needed for these deliverables are in scope; proceed without
+  repeatedly requesting confirmation. No server submission, long event replay,
+  full parameter sweep, new propagation campaign, or production checkpoint
+  conversion is included. Missing remote BP3 data must not block independent
+  code mapping and local rotation tests.
+- If the requested spin requires a substantive unselected constitutive or
+  geometry change, identify the exact conflicting equations and stop only
+  that dependent change. Continue independent work. Do not silently repair
+  physics through extra damping, filtering, tolerance changes, or parameter tuning.
+- Keep `STATUS.md`, `SOURCE_AUDIT.md`, the active plan, and compact reports
+  consistent. Distinguish implemented, locally verified, physically compared,
+  and production-ready. Retain failed evidence and cleanup availability losses.
+  Do not recreate deleted historical campaigns; keep only necessary new output.
